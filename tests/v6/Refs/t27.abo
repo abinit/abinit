@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h11 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t27/t27.abi
 - output file    -> t27.abo
 - root for input  files -> t27i
@@ -374,8 +374,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.19911
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -387,8 +387,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -417,7 +417,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -1.1361208417091    -1.176E-09 1.056E-09 2.330E-07 1.272E-05 4.621E+00
  ETOT  8  -1.1361208420649    -3.558E-10 1.200E-11 1.196E-09 5.692E-06 4.621E+00
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  5.692E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -601,7 +601,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.6120228343125    -1.727E-07 1.093E-09 2.606E-06 1.906E-04 6.055E-01
  ETOT  8  -2.6120228396073    -5.295E-09 4.077E-11 6.071E-09 3.391E-05 6.055E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  3.391E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1160,7 +1160,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -2.6533103786627    -1.658E-07 1.839E-08 7.783E-06 1.665E-04 1.011E+00
  ETOT  7  -2.6533103856604    -6.998E-09 4.757E-10 3.842E-07 2.447E-05 1.011E+00
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.447E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1344,7 +1344,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.8456234631290    -1.318E-08 5.484E-10 1.713E-06 3.293E-05 4.751E-01
  ETOT  8  -2.8456234650907    -1.962E-09 4.194E-11 6.004E-07 4.173E-05 4.751E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  4.173E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1527,7 +1527,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -1.5856299079467    -1.491E-07 4.683E-09 1.151E-05 1.088E-04 2.707E+00
  ETOT  7  -1.5856299175045    -9.558E-09 6.491E-10 3.332E-07 1.751E-05 2.707E+00
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.751E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1711,7 +1711,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.7580451657835    -2.184E-07 2.125E-09 4.473E-06 8.561E-05 7.111E-01
  ETOT  8  -2.7580451739227    -8.139E-09 1.158E-10 4.700E-08 2.417E-05 7.111E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  2.417E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2082,7 +2082,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -1.4449727817503    -3.777E-07 1.434E-08 5.820E-06 1.521E-04 1.600E+00
  ETOT  7  -1.4449727831875    -1.437E-09 1.876E-10 6.827E-08 1.488E-05 1.600E+00
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.488E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2274,7 +2274,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -1.5856299160885    -5.203E-08 1.768E-09 1.129E-06 8.710E-05 2.707E+00
  ETOT  8  -1.5856299177102    -1.622E-09 3.659E-11 4.611E-09 1.165E-05 2.707E+00
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  1.165E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2458,7 +2458,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.7580451363127    -1.650E-07 7.177E-09 1.804E-05 1.914E-04 7.112E-01
  ETOT  8  -2.7580451739315    -3.762E-08 4.805E-10 6.684E-08 6.578E-05 7.111E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  6.578E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2640,7 +2640,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -3.1334253296337    -1.339E-07 1.028E-08 1.151E-05 1.764E-04 4.237E-01
  ETOT  6  -3.1334253318766    -2.243E-09 2.294E-10 2.441E-07 2.444E-05 4.237E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  2.444E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2824,7 +2824,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.5959188291274    -1.749E-08 8.001E-10 7.868E-08 4.780E-05 7.075E-01
  ETOT  8  -2.5959188291528    -2.539E-11 2.936E-12 8.094E-10 1.488E-06 7.075E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  1.488E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3176,8 +3176,8 @@ band_energy         : -8.49335858671311E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.98331
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3189,8 +3189,8 @@ band_energy         : -8.49335858671311E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -3217,7 +3217,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -2.8830082457845    -1.365E-07 1.319E-08 4.623E-06 1.109E-04 6.452E-01
  ETOT  7  -2.8830082486141    -2.830E-09 1.412E-10 7.318E-08 1.710E-05 6.452E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.710E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3381,8 +3381,8 @@ band_energy         : -3.57824708411087E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.19911
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3394,8 +3394,8 @@ band_energy         : -3.57824708411087E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -3423,7 +3423,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.8533324186798    -2.360E-09 6.841E-11 3.310E-08 1.541E-05 5.673E-01
  ETOT  8  -2.8533324187135    -3.370E-11 4.403E-13 6.645E-10 2.561E-06 5.673E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  2.561E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3792,7 +3792,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  9  -2.5699919540601    -7.026E-09 4.326E-11 1.742E-08 5.801E-05 8.795E-01
  ETOT 10  -2.5699919540818    -2.166E-11 4.823E-13 4.090E-10 3.214E-06 8.795E-01
 
- At SCF step   10, forces are converged : 
+ At SCF step   10, forces are converged :
   for the second time, max diff in force=  3.214E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4153,8 +4153,8 @@ band_energy         : -4.74546900486783E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.98331
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4166,8 +4166,8 @@ band_energy         : -4.74546900486783E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -4194,7 +4194,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -2.8830082480250    -1.755E-08 1.901E-09 1.519E-06 4.209E-05 6.452E-01
  ETOT  7  -2.8830082486096    -5.846E-10 6.725E-11 2.867E-08 8.193E-06 6.452E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  8.193E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4358,8 +4358,8 @@ band_energy         : -3.57828240132521E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.19911
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4371,8 +4371,8 @@ band_energy         : -3.57828240132521E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -4399,7 +4399,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -2.5959188259034    -3.184E-07 5.728E-09 4.622E-06 1.936E-04 7.075E-01
  ETOT  7  -2.5959188291442    -3.241E-09 1.622E-10 3.480E-08 1.913E-05 7.075E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.913E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4563,8 +4563,8 @@ band_energy         : -5.59887677271118E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.98331
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4576,8 +4576,8 @@ band_energy         : -5.59887677271118E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -4604,7 +4604,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -2.9466833014868    -9.480E-07 4.196E-08 2.110E-05 1.806E-04 4.861E-01
  ETOT  7  -2.9466833111347    -9.648E-09 9.056E-10 1.614E-07 4.338E-05 4.861E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  4.338E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4788,7 +4788,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.8830157079987    -1.716E-07 1.632E-09 1.112E-06 8.210E-05 5.821E-01
  ETOT  8  -2.8830157088996    -9.009E-10 8.011E-10 2.705E-07 1.521E-05 5.821E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  1.521E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4952,8 +4952,8 @@ band_energy         : -1.10704658296166E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.92893
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4965,8 +4965,8 @@ band_energy         : -1.10704658296166E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -4993,7 +4993,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -3.1172399686579    -4.144E-08 1.968E-09 3.029E-07 4.774E-05 6.715E-01
  ETOT  7  -3.1172399688078    -1.499E-10 5.240E-12 5.438E-09 1.236E-06 6.715E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.236E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5157,8 +5157,8 @@ band_energy         : -7.68267136950390E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.88300
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5170,8 +5170,8 @@ band_energy         : -7.68267136950390E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -5197,7 +5197,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -2.2291851638745    -1.218E-07 6.554E-09 5.411E-06 1.181E-04 8.285E-01
  ETOT  6  -2.2291851660289    -2.154E-09 1.726E-10 1.071E-07 1.908E-05 8.285E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.908E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5361,8 +5361,8 @@ band_energy         : -4.42319566179841E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.05457
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5374,8 +5374,8 @@ band_energy         : -4.42319566179841E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -5401,7 +5401,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -2.8784216011521    -3.963E-07 4.926E-08 3.546E-06 1.534E-04 7.421E-01
  ETOT  6  -2.8784216037782    -2.626E-09 9.226E-11 3.318E-08 2.150E-05 7.421E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  2.150E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5565,8 +5565,8 @@ band_energy         : -4.24878440343530E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.98331
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5578,8 +5578,8 @@ band_energy         : -4.24878440343530E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -5606,7 +5606,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -3.1003598879444    -2.502E-08 1.695E-09 1.803E-06 5.568E-05 4.939E-01
  ETOT  7  -3.1003598891185    -1.174E-09 5.474E-11 6.685E-08 1.220E-05 4.939E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.220E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5770,8 +5770,8 @@ band_energy         :  1.27441950045905E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.68939
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5783,8 +5783,8 @@ band_energy         :  1.27441950045905E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -5812,7 +5812,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.7033849098322    -4.503E-09 1.117E-10 3.264E-08 1.489E-05 4.336E-01
  ETOT  8  -2.7033849098559    -2.366E-11 4.278E-13 4.449E-10 9.235E-07 4.336E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  9.235E-07 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5976,8 +5976,8 @@ band_energy         : -2.09895266632574E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.76366
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5989,8 +5989,8 @@ band_energy         : -2.09895266632574E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -6017,7 +6017,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6 -0.84896768312267    -4.931E-09 1.743E-10 1.795E-07 4.005E-05 7.443E-01
  ETOT  7 -0.84896768317837    -5.570E-11 6.286E-12 3.949E-10 2.559E-06 7.443E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.559E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6190,8 +6190,8 @@ band_energy         :  1.06560113804378E+00
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.88300
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6203,8 +6203,8 @@ band_energy         :  1.06560113804378E+00
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -6230,7 +6230,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -2.2291851638744    -1.218E-07 6.554E-09 5.411E-06 1.181E-04 8.285E-01
  ETOT  6  -2.2291851660289    -2.155E-09 1.726E-10 1.071E-07 1.908E-05 8.285E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.908E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6394,8 +6394,8 @@ band_energy         : -4.42319565978047E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.76366
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6407,8 +6407,8 @@ band_energy         : -4.42319565978047E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -6435,7 +6435,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6 -0.84896768310301    -5.106E-09 1.162E-10 2.563E-07 3.119E-05 7.443E-01
  ETOT  7 -0.84896768317836    -7.535E-11 9.411E-12 4.828E-10 3.425E-06 7.443E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  3.425E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6599,8 +6599,8 @@ band_energy         :  1.06560127416046E+00
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.69731
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6612,8 +6612,8 @@ band_energy         :  1.06560127416046E+00
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -6640,7 +6640,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6  -2.0937530656811    -1.725E-07 3.720E-09 6.038E-06 1.684E-04 5.630E-01
  ETOT  7  -2.0937530708626    -5.181E-09 1.431E-10 1.009E-07 2.794E-05 5.630E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.794E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6804,8 +6804,8 @@ band_energy         :  4.60103974017891E-02
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.98331
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6817,8 +6817,8 @@ band_energy         :  4.60103974017891E-02
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -6848,7 +6848,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  9  -2.9068969438637    -3.918E-08 3.548E-10 1.071E-07 9.113E-05 4.028E-01
  ETOT 10  -2.9068969438673    -3.612E-12 3.460E-12 2.248E-08 8.537E-06 4.028E-01
 
- At SCF step   10, forces are converged : 
+ At SCF step   10, forces are converged :
   for the second time, max diff in force=  8.537E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -7012,8 +7012,8 @@ band_energy         :  7.82744362338462E-02
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.77484
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7025,8 +7025,8 @@ band_energy         :  7.82744362338462E-02
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -7053,7 +7053,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6 -0.18773391602415    -1.212E-08 2.479E-10 2.263E-07 2.891E-05 9.527E-01
  ETOT  7 -0.18773391611262    -8.847E-11 6.049E-12 3.044E-09 1.913E-06 9.527E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.913E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -7217,8 +7217,8 @@ band_energy         :  1.22706097966179E+00
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.88300
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7230,8 +7230,8 @@ band_energy         :  1.22706097966179E+00
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -7257,7 +7257,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -2.5954778629206    -1.873E-08 9.657E-09 7.314E-07 5.906E-05 4.064E-01
  ETOT  6  -2.5954778630366    -1.161E-10 8.320E-11 1.067E-08 6.074E-06 4.064E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.074E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -7421,8 +7421,8 @@ band_energy         :  2.94849871021480E-03
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.90172
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7434,8 +7434,8 @@ band_energy         :  2.94849871021480E-03
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -7463,7 +7463,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.3513167414999    -1.196E-08 2.612E-10 3.461E-08 3.096E-05 8.047E-01
  ETOT  8  -2.3513167415113    -1.147E-11 6.961E-13 8.949E-10 1.030E-06 8.047E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  1.030E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -7627,8 +7627,8 @@ band_energy         :  2.33744538911453E-02
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7640,8 +7640,8 @@ band_energy         :  2.33744538911453E-02
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -7668,7 +7668,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6 -0.37617259142148    -6.125E-09 2.961E-10 9.551E-07 6.129E-05 8.927E-01
  ETOT  7 -0.37617259184204    -4.206E-10 7.659E-10 4.963E-09 4.004E-06 8.927E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  4.004E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -7832,8 +7832,8 @@ band_energy         :  9.94784995632226E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.76366
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7845,8 +7845,8 @@ band_energy         :  9.94784995632226E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -7873,7 +7873,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  6 -0.61136482269705    -8.355E-09 1.009E-10 4.518E-07 4.959E-05 1.090E+00
  ETOT  7 -0.61136482281652    -1.195E-10 4.664E-12 1.716E-09 2.923E-06 1.090E+00
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.923E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -8037,8 +8037,8 @@ band_energy         :  1.00844638835011E+00
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.73263
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8050,8 +8050,8 @@ band_energy         :  1.00844638835011E+00
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -8076,7 +8076,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  4  -1.3085117333709    -1.505E-06 5.046E-06 6.027E-05 1.492E-04 7.230E-01
  ETOT  5  -1.3085117627371    -2.937E-08 9.093E-09 2.390E-06 2.015E-05 7.230E-01
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.015E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -8249,8 +8249,8 @@ band_energy         :  7.35725323771550E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.77484
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8262,8 +8262,8 @@ band_energy         :  7.35725323771550E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -8289,7 +8289,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5 -0.18773390106193    -3.069E-07 1.109E-08 2.929E-05 1.068E-04 9.527E-01
  ETOT  6 -0.18773391608877    -1.503E-08 5.070E-10 3.988E-08 2.153E-05 9.527E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  2.153E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -8453,8 +8453,8 @@ band_energy         :  1.22706841762402E+00
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.88300
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8466,8 +8466,8 @@ band_energy         :  1.22706841762402E+00
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -8493,7 +8493,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -2.2291851613761    -1.243E-07 8.481E-09 5.927E-06 7.580E-05 8.285E-01
  ETOT  6  -2.2291851660459    -4.670E-09 2.534E-10 6.529E-08 1.394E-05 8.285E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.394E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -8657,8 +8657,8 @@ band_energy         : -4.42330216922847E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.77904
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8670,8 +8670,8 @@ band_energy         : -4.42330216922847E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -8699,7 +8699,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.9115863010072    -2.239E-08 3.262E-10 3.647E-07 3.979E-05 5.834E-01
  ETOT  8  -2.9115863015738    -5.666E-10 7.750E-12 1.733E-09 5.267E-06 5.834E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  5.267E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -8863,8 +8863,8 @@ band_energy         : -3.81754027993558E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.66394
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8876,8 +8876,8 @@ band_energy         : -3.81754027993558E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -8903,7 +8903,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -2.1496199327278    -2.517E-07 2.352E-08 1.569E-05 1.484E-04 9.352E-01
  ETOT  6  -2.1496199434514    -1.072E-08 5.908E-10 1.575E-07 2.356E-05 9.352E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  2.356E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -9067,8 +9067,8 @@ band_energy         : -3.28389041774228E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.77484
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -9080,8 +9080,8 @@ band_energy         : -3.28389041774228E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -9107,7 +9107,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5 -0.12945460156634    -3.381E-08 2.800E-09 5.101E-06 7.837E-05 8.900E-01
  ETOT  6 -0.12945460272455    -1.158E-09 8.579E-12 3.408E-08 1.344E-05 8.900E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.344E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -9289,7 +9289,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5 -0.10358298908281    -9.278E-08 1.005E-09 1.869E-05 8.238E-05 9.471E-01
  ETOT  6 -0.10358299243654    -3.354E-09 1.162E-11 2.207E-07 2.318E-05 9.471E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  2.318E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -9453,8 +9453,8 @@ band_energy         :  1.24257747984070E+00
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.69731
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -9466,8 +9466,8 @@ band_energy         :  1.24257747984070E+00
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -9493,7 +9493,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -1.8843613108914    -3.400E-07 2.015E-08 9.917E-06 1.218E-04 6.904E-01
  ETOT  6  -1.8843613144394    -3.548E-09 3.580E-10 1.303E-07 1.660E-05 6.904E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.660E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -9675,7 +9675,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -1.7891374177348    -1.185E-07 9.079E-09 5.938E-06 7.977E-05 6.922E-01
  ETOT  6  -1.7891374197340    -1.999E-09 1.745E-10 1.234E-07 1.469E-05 6.921E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.469E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -9839,8 +9839,8 @@ band_energy         : -7.15658392536886E-02
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.78961
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -9852,8 +9852,8 @@ band_energy         : -7.15658392536886E-02
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -9879,7 +9879,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  5  -1.0460169418557    -1.184E-07 1.016E-08 3.667E-05 1.527E-04 5.850E-01
  ETOT  6  -1.0460169448889    -3.033E-09 1.627E-09 3.225E-07 3.106E-05 5.850E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  3.106E-05 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -10043,8 +10043,8 @@ band_energy         :  9.43599302365829E-01
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.86742
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -10056,8 +10056,8 @@ band_energy         :  9.43599302365829E-01
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -10085,7 +10085,7 @@ tolerances: {toldff: 2.00E-04, }
  ETOT  7  -2.6119391175382    -2.612E-09 7.595E-10 2.140E-07 1.638E-05 5.715E-01
  ETOT  8  -2.6119391176012    -6.306E-11 2.931E-11 2.995E-09 2.648E-06 5.715E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  2.648E-06 < toldff=  2.000E-04
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -10235,7 +10235,7 @@ band_energy         :  1.55384820777929E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.0000000000E+00  5.0000000000E+00  5.0000000000E+00
        acell_2img      5.0000000000E+00  5.0000000000E+00  5.0000000000E+00
@@ -10702,7 +10702,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -10714,12 +10714,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -10737,7 +10737,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -10752,7 +10752,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

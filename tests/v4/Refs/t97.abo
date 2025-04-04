@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h10 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t97/t97.abi
 - output file    -> t97.abo
 - root for input  files -> t97i
@@ -242,8 +242,8 @@ meta: {optdriver: 0, ionmov: 12, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/05b.soft_tm
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/05b.soft_tm
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/05b.soft_tm
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/05b.soft_tm
 -  Troullier-Martins-Fermi psp for element  B         dim jui 18 17:59:39 CEST 2004
 -  5.00000   5.00000     40425                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -262,7 +262,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2553.000    2553.000
 
 ================================================================================
 
-=== [ionmov=12] Isokinetic ensemble molecular dynamics                      
+=== [ionmov=12] Isokinetic ensemble molecular dynamics
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -290,7 +290,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT 11  -573.08096652786     2.616E-07 0.000E+00 8.118E-11
  ETOT 12  -573.08096653095    -3.090E-09 0.000E+00 3.296E-13
 
- At SCF step   12, etot is converged : 
+ At SCF step   12, etot is converged :
   for the second time, diff in etot=  3.090E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -489,7 +489,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -572.89808261751    -2.008E-07 0.000E+00 1.657E-06
  ETOT  8  -572.89808230377     3.137E-07 0.000E+00 2.595E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.137E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -692,7 +692,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -572.55138513940    -2.547E-07 0.000E+00 1.606E-06
  ETOT  8  -572.55138483426     3.051E-07 0.000E+00 3.421E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.051E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -895,7 +895,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -572.30851843992    -3.102E-07 0.000E+00 1.607E-06
  ETOT  8  -572.30851813893     3.010E-07 0.000E+00 4.579E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.010E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1098,7 +1098,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -572.14545342479    -3.739E-07 0.000E+00 1.641E-06
  ETOT  8  -572.14545312608     2.987E-07 0.000E+00 5.784E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  2.987E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1301,7 +1301,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -571.97122001297    -4.522E-07 0.000E+00 1.704E-06
  ETOT  8  -571.97121971326     2.997E-07 0.000E+00 6.831E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  2.997E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1504,7 +1504,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -571.85351488490    -5.438E-07 0.000E+00 1.812E-06
  ETOT  8  -571.85351457950     3.054E-07 0.000E+00 7.580E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.054E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1707,7 +1707,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -571.80787201181    -6.377E-07 0.000E+00 1.968E-06
  ETOT  8  -571.80787170173     3.101E-07 0.000E+00 7.986E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.101E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1910,7 +1910,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -571.71877446991    -7.163E-07 0.000E+00 2.146E-06
  ETOT  8  -571.71877416436     3.055E-07 0.000E+00 8.133E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.055E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2113,7 +2113,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  7  -571.51828103395    -7.791E-07 0.000E+00 2.355E-06
  ETOT  8  -571.51828074573     2.882E-07 0.000E+00 8.117E-08
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  2.882E-07 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2533,7 +2533,7 @@ band_energy         :  0.00000000000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  1.2000000000E+01  1.2000000000E+01 Bohr
               amu      1.08110000E+01
@@ -2734,8 +2734,8 @@ P           mkmem           1
 
 ================================================================================
 
- Test the timer : 
-  a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
+ Test the timer :
+  a combined call timab(*,1,tsec) + timab(*,2,tsec) is
 - CPU time =    1.3771E-06 sec,    Wall time =    1.3772E-06 sec
 
 - Total cpu        time (s,m,h):         11.7        0.19      0.003
@@ -2771,7 +2771,7 @@ P           mkmem           1
 - subtotal                                 13.708 117.3        13.736 117.0                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =          11.7, wall_time =          11.7
@@ -2801,7 +2801,7 @@ P           mkmem           1
 
  Partitioning of abinit
 - abinit                                   11.684 100.0        11.743 100.0              1                   0.99       0.99
- 
+
 - abinit(init,iofn1,herald)                 0.009   0.1         0.009   0.1              1                   0.94       0.94
 - get_dtsets_pspheads                       0.169   1.4         0.169   1.4              1                   1.00       1.00
 - abinit(outvars)                           0.022   0.2         0.022   0.2              1                   1.00       1.00
@@ -2815,14 +2815,14 @@ P           mkmem           1
 
  Partitioning of driver
 - driver                                   11.310  96.8        11.369  96.8              1                   0.99       0.99
- 
+
 - (other)                                  11.309  96.8        11.368  96.8             -1                   0.99       0.99
 
 - subtotal                                 11.310  96.8        11.369  96.8                                  0.99       0.99
 
  Partitioning of gstateimg+gstate
 - gstateimg                                11.309  96.8        11.368  96.8              1                   0.99       0.99
- 
+
 - gstate(pspini)                            0.014   0.1         0.014   0.1              1                   1.00       1.00
 - gstate(init rhor rhog)                    0.036   0.3         0.058   0.5              1                   0.61       0.61
 - gstate(...scfcv)                         11.256  96.3        11.292  96.2              1                   1.00       1.00
@@ -2831,7 +2831,7 @@ P           mkmem           1
 
  Partitioning of scfcv_core
 - scfcv_core                               11.244  96.2        11.280  96.1             10                   1.00       1.00
- 
+
 - scfcv_core(ini moved atm inside)          0.049   0.4         0.049   0.4             84                   0.99       0.99
 - scfcv_core(setvtr)                        6.694  57.3         6.696  57.0             84                   1.00       1.00
 - scfcv_core(vtorho(f))                     0.384   3.3         0.384   3.3             84                   1.00       1.00
@@ -2845,7 +2845,7 @@ P           mkmem           1
 
  Partitioning of rhotov
 - rhotov                                    0.082   0.7         0.082   0.7             84                   1.00       1.00
- 
+
 - rhotov(rhotoxc)                           0.008   0.1         0.008   0.1             84                   1.00       1.00
 - rhotov(dotprod_vn)                        0.005   0.0         0.005   0.0             84                   0.99       0.99
 - rhotov(other)                             0.029   0.2         0.029   0.2             84                   1.00       1.00
@@ -2855,19 +2855,19 @@ P           mkmem           1
 
  Partitioning of inwffil
 - inwffil                                   0.000   0.0        -1.000  -8.5              1                  -0.00      -0.00
- 
+
 
 - subtotal                                  0.000   0.0         0.000   0.0                                  1.02       1.02
 
  Partitioning of newkpt
 - newkpt                                    0.000   0.0        -1.000  -8.5              1                  -0.00      -0.00
- 
+
 
 - subtotal                                  0.000   0.0         0.000   0.0                                  0.94       0.94
 
  Partitioning of newvtr
 - newvtr                                    0.126   1.1         0.126   1.1             74                   1.00       1.00
- 
+
 - newvtr(before selection)                  0.004   0.0         0.004   0.0             74                   0.99       0.99
 - newvtr(call prcref_PMA)                   0.050   0.4         0.050   0.4             74                   1.00       1.00
 - newvtr(aft. prcref_PMA)                   0.064   0.6         0.064   0.5             74                   1.00       1.00
@@ -2877,21 +2877,21 @@ P           mkmem           1
 
  Partitioning of fourdp (upwards partitioning)
 - fourdp                                    0.109   0.9         0.132   1.1            346                   0.82       0.82
- 
+
 - fourdp%(other)                            0.109   0.9         0.132   1.1            346                   0.82       0.82
 
 - subtotal                                  0.109   0.9         0.132   1.1                                  0.82       0.82
 
  Partitioning of afterscfloop
 - afterscfloop                              3.543  30.3         3.544  30.2             10                   1.00       1.00
- 
+
 - afterscfloop(forstr)                      3.543  30.3         3.544  30.2             10                   1.00       1.00
 
 - subtotal                                  3.543  30.3         3.544  30.2                                  1.00       1.00
 
  Partitioning of forstr
 - forstr                                    3.543  30.3         3.544  30.2             10                   1.00       1.00
- 
+
 - forstr(forces)                            0.080   0.7         0.080   0.7             10                   1.00       1.00
 - forstr(stress)                            3.462  29.6         3.463  29.5             10                   1.00       1.00
 
@@ -2899,7 +2899,7 @@ P           mkmem           1
 
  Partitioning of outscfcv
 - outscfcv                                  0.356   3.1         0.389   3.3             10                   0.92       0.92
- 
+
 - outscfcv(preparation)                     0.004   0.0         0.004   0.0             10                   0.99       0.99
 - outscfcv([PAW]prtden)                     0.008   0.1         0.008   0.1             10                   1.00       1.00
 - outscfcv(output GSR)                      0.339   2.9         0.372   3.2             10                   0.91       0.91
@@ -2907,7 +2907,7 @@ P           mkmem           1
 
 - subtotal                                  0.356   3.0         0.388   3.3                                  0.92       0.92
 -
--Synchronisation (=leave_test) and MPI calls 
+-Synchronisation (=leave_test) and MPI calls
 - communic.MPI                              0.000   0.0         0.000   0.0             87                   1.57       1.57
 -
 - subtotal                                  0.000   0.0         0.000   0.0                                  0.00       0.00
@@ -2918,7 +2918,7 @@ P           mkmem           1
 - mklocl(2)                                 0.040   0.3         0.040   0.3             10                   1.00       1.00
 
 
- Detailed analysis of some time consuming routines 
+ Detailed analysis of some time consuming routines
                                   tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
                                  (sec)                (msec)              (microsec)
 - fourwf%(pot)                   0.000         0
@@ -2958,7 +2958,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2970,12 +2970,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2993,7 +2993,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -3008,7 +3008,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

@@ -7,8 +7,7 @@
 !!  to store atomic orbitals on a radial mesh as well
 !!  as methods to operate on it.
 !!
-!! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2024 ABINIT group (MT)
+!!  Copyright (C) 2000-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,13 +20,13 @@
 
 module m_nvtx_data
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
   use m_nvtx, only : nvtxStartRange, nvtxEndRange, nvtxProfilerStart, nvtxProfilerStop
 #endif
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 65
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 117
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -95,6 +95,58 @@ module m_nvtx_data
   integer, parameter :: NVTX_FORSTRNPS = 63
   integer, parameter :: NVTX_FORSTR_NONLOP = 64
   integer, parameter :: NVTX_VTOWFK_NONLOP = 65
+  integer, parameter :: NVTX_DFPT_SCF = 66
+  integer, parameter :: NVTX_DFPT_VTORHO = 67
+  integer, parameter :: NVTX_DFPT_VTOWFK = 68
+  integer, parameter :: NVTX_DFPT_CGWF = 69
+  integer, parameter :: NVTX_DFPT_CGWF_CORE = 70
+  integer, parameter :: NVTX_DFPT_LOOP = 71
+  integer, parameter :: NVTX_DFPT_NSTPAW = 72
+  integer, parameter :: NVTX_DFPT_NSTDY = 73
+  integer, parameter :: NVTX_DFPT_NSTWF = 74
+  integer, parameter :: NVTX_DFPT_NSTWF_BAND = 75
+  integer, parameter :: NVTX_GETGH1C = 76
+  integer, parameter :: NVTX_GETGH2C = 77
+  integer, parameter :: NVTX_DFPT_LOOP_DDK = 78
+  integer, parameter :: NVTX_DFPT_LOOP_EFELD = 79
+  integer, parameter :: NVTX_DFPT_LOOP_STRAIN = 80
+  integer, parameter :: NVTX_DFPT_LOOP_PHONON = 81
+  integer, parameter :: NVTX_FOURWF = 82
+  integer, parameter :: NVTX_NONLOP = 83
+  integer, parameter :: NVTX_DFPT_NSELT = 84
+  integer, parameter :: NVTX_RESPFN = 85
+  integer, parameter :: NVTX_DFPT_ELT = 86
+  integer, parameter :: NVTX_DFPT_ATM2FFT = 87
+  integer, parameter :: NVTX_DFPT_DYXC = 88
+  integer, parameter :: NVTX_D2FRNL = 89
+  integer, parameter :: NVTX_D2FRNL_KPT = 90
+  integer, parameter :: NVTX_DFPT_RHOFERMI = 91
+  integer, parameter :: NVTX_DFPT_WFKFERMI = 92
+  integer, parameter :: NVTX_GETGSC = 93
+  integer, parameter :: NVTX_DFPT_ACCRHO = 94
+  integer, parameter :: NVTX_DFPT_MKRHO = 95
+  integer, parameter :: NVTX_MAKE_INVOVL = 96
+  integer, parameter :: NVTX_FORSTR = 97
+  integer, parameter :: NVTX_FORCES = 98
+  integer, parameter :: NVTX_STRESS = 99
+  integer, parameter :: NVTX_DMFT_SOLVE = 100
+  integer, parameter :: NVTX_DMFT_SOLVE_LOOP = 101
+  integer, parameter :: NVTX_DMFT_IMPURITY_SOLVE = 102
+  integer, parameter :: NVTX_DMFT_HUBBARD_ONE = 103
+  integer, parameter :: NVTX_DMFT_DOWNFOLD_OPER = 104
+  integer, parameter :: NVTX_DMFT_UPFOLD_OPER = 105
+  integer, parameter :: NVTX_DMFT_INVERSE_OPER = 106
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN = 107
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN_BATCHED = 108
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN_LOOP = 109
+  integer, parameter :: NVTX_DMFT_INTEGRATE_GREEN = 110
+  integer, parameter :: NVTX_DMFT_FERMI_GREEN = 111
+  integer, parameter :: NVTX_DMFT_COMPUTE_NB_ELEC = 112
+  integer, parameter :: NVTX_DMFT_ADD_INT_FCT = 113
+  integer, parameter :: NVTX_DMFT_SYM_MATLU = 114
+  integer, parameter :: NVTX_DMFT_RW_SELF = 115
+  integer, parameter :: NVTX_DMFT_SAVEOCC = 116
+  integer, parameter :: NVTX_TRANSPOSER_MPI_ALL2ALL = 117
 
 contains
 
@@ -169,8 +221,60 @@ contains
          & "RR_HEEV", &
          & "FORSTRNPS", &
          & "FORSTR_NONLOP", &
-         & "VTOWFK_NONLOP" &
-         ]
+         & "VTOWFK_NONLOP", &
+         & "DFPT_SCF", &
+         & "DFPT_VTORHO", &
+         & "DFPT_VTOWFK", &
+         & "DFPT_CGWF", &
+         & "DFPT_CGWF_CORE", &
+         & "DFPT_LOOP", &
+         & "DFPT_NSTPAW", &
+         & "DFPT_NSTDY", &
+         & "DFPT_NSTWF", &
+         & "DFPT_NSTWF_BAND", &
+         & "GETGH1C", &
+         & "GETGH2C", &
+         & "DFPT_LOOP_DDK", &
+         & "DFPT_LOOP_EFELD", &
+         & "DFPT_LOOP_STRAIN", &
+         & "DFPT_LOOP_PHONON", &
+         & "FOURWF", &
+         & "NONLOP", &
+         & "DFPT_NSELT", &
+         & "RESPFN", &
+         & "DFPT_ELT", &
+         & "DFPT_ATM2FFT", &
+         & "DFPT_DYXC", &
+         & "D2FRNL", &
+         & "D2FRNL_KPT", &
+         & "DFPT_RHOFERMI", &
+         & "DFPT_WFKFERMI", &
+         & "GETGSC", &
+         & "DFPT_ACCRHO", &
+         & "DFPT_MKRHO", &
+         & "MAKE_INVOVL", &
+         & "FORSTR", &
+         & "FORCES", &
+         & "STRESS", &
+         & "DMFT_SOLVE", &
+         & "DMFT_SOLVE_LOOP", &
+         & "DMFT_IMPURITY_SOLVE", &
+         & "DMFT_HUBBARD_ONE", &
+         & "DMFT_DOWNFOLD_OPER", &
+         & "DMFT_UPFOLD_OPER", &
+         & "DMFT_INVERSE_OPER", &
+         & "DMFT_COMPUTE_GREEN", &
+         & "DMFT_COMPUTE_GREEN_BATCHED", &
+         & "DMFT_COMPUTE_GREEN_LOOP", &
+         & "DMFT_INTEGRATE_GREEN", &
+         & "DMFT_FERMI_GREEN", &
+         & "DMFT_COMPUTE_NB_ELEC", &
+         & "DMFT_ADD_INT_FCT", &
+         & "DMFT_SYM_MATLU", &
+         & "DMFT_RW_SELF", &
+         & "DMFT_SAVEOCC", &
+         & "TRANSPOSER_MPI_ALL2ALL" &
+         & ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
     nvtx_ids(2) = NVTX_SCF
@@ -237,10 +341,62 @@ contains
     nvtx_ids(63)= NVTX_FORSTRNPS
     nvtx_ids(64)= NVTX_FORSTR_NONLOP
     nvtx_ids(65)= NVTX_VTOWFK_NONLOP
+    nvtx_ids(66)= NVTX_DFPT_SCF
+    nvtx_ids(67)= NVTX_DFPT_VTORHO
+    nvtx_ids(68)= NVTX_DFPT_VTOWFK
+    nvtx_ids(69)= NVTX_DFPT_CGWF
+    nvtx_ids(70)= NVTX_DFPT_CGWF_CORE
+    nvtx_ids(71)= NVTX_DFPT_LOOP
+    nvtx_ids(72)= NVTX_DFPT_NSTPAW
+    nvtx_ids(73)= NVTX_DFPT_NSTDY
+    nvtx_ids(74)= NVTX_DFPT_NSTWF
+    nvtx_ids(75)= NVTX_DFPT_NSTWF_BAND
+    nvtx_ids(76)= NVTX_GETGH1C
+    nvtx_ids(77)= NVTX_GETGH2C
+    nvtx_ids(78)= NVTX_DFPT_LOOP_DDK
+    nvtx_ids(79)= NVTX_DFPT_LOOP_EFELD
+    nvtx_ids(80)= NVTX_DFPT_LOOP_STRAIN
+    nvtx_ids(81)= NVTX_DFPT_LOOP_PHONON
+    nvtx_ids(82)= NVTX_FOURWF
+    nvtx_ids(83)= NVTX_NONLOP
+    nvtx_ids(84)= NVTX_DFPT_NSELT
+    nvtx_ids(85)= NVTX_RESPFN
+    nvtx_ids(86)= NVTX_DFPT_ELT
+    nvtx_ids(87)= NVTX_DFPT_ATM2FFT
+    nvtx_ids(88)= NVTX_DFPT_DYXC
+    nvtx_ids(89)= NVTX_D2FRNL
+    nvtx_ids(90)= NVTX_D2FRNL_KPT
+    nvtx_ids(91)= NVTX_DFPT_RHOFERMI
+    nvtx_ids(92)= NVTX_DFPT_WFKFERMI
+    nvtx_ids(93)= NVTX_GETGSC
+    nvtx_ids(94)= NVTX_DFPT_ACCRHO
+    nvtx_ids(95)= NVTX_DFPT_MKRHO
+    nvtx_ids(96)= NVTX_MAKE_INVOVL
+    nvtx_ids(97)= NVTX_FORSTR
+    nvtx_ids(98)= NVTX_FORCES
+    nvtx_ids(99)= NVTX_STRESS
+    nvtx_ids(100)=NVTX_DMFT_SOLVE
+    nvtx_ids(101)=NVTX_DMFT_SOLVE_LOOP
+    nvtx_ids(102)=NVTX_DMFT_IMPURITY_SOLVE
+    nvtx_ids(103)=NVTX_DMFT_HUBBARD_ONE
+    nvtx_ids(104)=NVTX_DMFT_DOWNFOLD_OPER
+    nvtx_ids(105)=NVTX_DMFT_UPFOLD_OPER
+    nvtx_ids(106)=NVTX_DMFT_INVERSE_OPER
+    nvtx_ids(107)=NVTX_DMFT_COMPUTE_GREEN
+    nvtx_ids(108)=NVTX_DMFT_COMPUTE_GREEN_BATCHED
+    nvtx_ids(109)=NVTX_DMFT_COMPUTE_GREEN_LOOP
+    nvtx_ids(110)=NVTX_DMFT_INTEGRATE_GREEN
+    nvtx_ids(111)=NVTX_DMFT_FERMI_GREEN
+    nvtx_ids(112)=NVTX_DMFT_COMPUTE_NB_ELEC
+    nvtx_ids(113)=NVTX_DMFT_ADD_INT_FCT
+    nvtx_ids(114)=NVTX_DMFT_SYM_MATLU
+    nvtx_ids(115)=NVTX_DMFT_RW_SELF
+    nvtx_ids(116)=NVTX_DMFT_SAVEOCC
+    nvtx_ids(117)=NVTX_TRANSPOSER_MPI_ALL2ALL
 
   end subroutine nvtx_init
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine abi_nvtx_start_range(id)

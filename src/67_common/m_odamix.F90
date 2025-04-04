@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,6 +48,7 @@ module m_odamix
  use m_rhotoxc,    only : rhotoxc
  use m_fft,        only : fourdp
  use m_xc_tb09,    only : xc_tb09_update_c
+ use m_dft_energy, only : entropy
 
  implicit none
 
@@ -153,10 +154,9 @@ contains
 !!   |                  on the electric field:  enefield = -ucvol*E*P
 !!   | e_magfield(OUT)=the term of the energy functional that depends explicitely
 !!   |                  on the magnetic field:  enmagfield = -ucvol*B*M
-!!   | e_entropy(OUT)=entropy energy due to the occupation number smearing (if metal)
-!!   |                this value is %entropy * dtset%tsmear (hartree).
+!!  entropy=entropy due to the occupation number smearing (if metal)
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if nkxc>0
-!!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
+!!  [vxctau(nfftf,dtset%nspden,4*usevxctau)]=derivative of XC energy density with respect to
 !!      kinetic energy density (metaGGA cases) (optional output)
 !!  ===== if psps%usepaw==1
 !!   pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
@@ -206,7 +206,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  real(dp),intent(inout) :: vtrial(nfft,dtset%nspden),vxc(nfft,dtset%nspden)
  real(dp),intent(inout) :: xccc3d(n3xccc)
  real(dp),intent(out) :: strsxc(6)
- real(dp),intent(inout),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout),optional :: vxctau(:,:,:) !vxctau(nfft,dtset%nspden,4*dtset%usekden)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -220,7 +220,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nzlmopt,nk3xc,option,optxc
  logical :: nmxc,with_vxctau
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
- real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local
+ real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local,el_temp
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -235,9 +235,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !ENDDEBUG
 
  call timab(80,1,tsec)
-
-!Check that usekden is not 0 if want to use vxctau
- with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
 !To be adjusted for the call to rhotoxc
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
@@ -267,6 +264,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%qphase==2)then
      message = ' complex dij not allowed in odamix! '
      ABI_ERROR(message)
+   end if
+ end if
+
+!Test size of kinetic energy potential Vxctau
+ with_vxctau = (present(vxctau).and.present(taur))
+ if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
+ if (with_vxctau) then
+   if (size(vxctau)/=nfft*dtset%nspden*4) then
+     ABI_BUG("Wrong size for vxctau!")
    end if
  end if
 
@@ -360,9 +366,10 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
- call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+ call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,&
+& vxctau=vxctau,add_tfw=add_tfw_,strsxc=strsxc)
 
 !------Compute parts of total energy depending on potentials--------
 
@@ -373,6 +380,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 & mpi_comm_sphgrid=mpi_enreg%comm_fft)
  energies%e_hartree=half*energies%e_hartree
 
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
 !Compute local psp energy energies%e_localpsp
  call dotprod_vn(1,rhor,energies%e_localpsp,doti,nfft,nfftot,1,1,vpsp,ucvol_local,&
@@ -394,25 +403,18 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
-   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
+   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
 &   dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,epaw_xc=energies%e_pawxc)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
  end if
 
-!When the finite-temperature VG broadening scheme is used,
-!the total entropy contribution "tsmear*entropy" has a meaning,
-!and gather the two last terms of Eq.8 of the VG paper
-!Warning : might have to be changed for fixed moment calculations
- if(dtset%occopt>=3 .and. dtset%occopt<=8) then
-   energies%e_entropy = - dtset%tsmear * energies%entropy
- else
-   energies%e_entropy = zero
- end if
+ call entropy(dtset,energies)
+
 !Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]]
 ! the missing volume is added here
  energies%e_elecfield = zero
@@ -504,7 +506,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 & energies%e_nucdip
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
-!& energies%e_entropy + energies%e_elecfield
+!& e_entropy + energies%e_elecfield
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
    etotal = etotal + energies%e_paw
@@ -611,9 +613,10 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
- call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+ call rhotoxc(energies%e_xc,energies%entropy_xc,kxc,mpi_enreg,nfft,ngfft,&
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,&
+& vxctau=vxctau,add_tfw=add_tfw_,strsxc=strsxc)
 
  if (nhatgrdim>0)  then
    ABI_FREE(nhatgr)
@@ -632,26 +635,32 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  call dotprod_vn(1,rhor,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol_local,&
 & mpi_comm_sphgrid=mpi_enreg%comm_fft)
 
- etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
-& energies%e_entropy + energies%e_elecfield + energies%e_magfield
- etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==1) then
    do iatom=1,my_natom
      itypat=paw_ij(iatom)%itypat
      ABI_MALLOC(paw_ij(iatom)%dijhartree,(pawtab(itypat)%lmn2_size))
      paw_ij(iatom)%has_dijhartree=1
    end do
-   call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom, &
+   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,0,dtset%ixc,my_natom,dtset%natom, &
 &   dtset%nspden,ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang, &
 &   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
 &   dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,epaw_xc=energies%e_pawxc)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)
      paw_ij(iatom)%has_dijhartree=0
    end do
-   etotal=etotal+energies%e_paw
  end if
+
+ call entropy(dtset,energies)
+
+ etotal=energies%h0+energies%e_hartree+energies%e_xc+energies%e_corepsp + &
+ & energies%e_entropy + energies%e_elecfield + energies%e_magfield
+ etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+ if (usepaw==1) then
+   etotal = etotal + energies%e_paw
+ end if
+
 !Compute energy residual
  deltae=etotal-elast
  elast=etotal

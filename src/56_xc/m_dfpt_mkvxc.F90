@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2024 ABINIT group (XG, DRH, FR, EB, SPr)
+!!  Copyright (C) 2001-2025 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_dfpt_mkvxc
 
  use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
- use m_symtk,    only : matr3inv
+ use m_matrix,   only : matr3inv
  use m_xctk,     only : xcden, xcpot, xcpotdq
 
  implicit none

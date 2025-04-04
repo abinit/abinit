@@ -3,6 +3,6 @@ tdfpt_04.out
 tdfpt_04.i
 tdfpt_04.o
 tdfpt_04.tmp
-../../Psps_for_tests/ba_ps.abinit.paw
-../../Psps_for_tests/Ti-LDA-uspp.paw
-../../Psps_for_tests/8o.paw
+../../Pspdir/ba_ps.abinit.paw
+../../Pspdir/Ti-LDA-uspp.paw
+../../Pspdir/8o.paw

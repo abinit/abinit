@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.4.3 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h29 )
+.Starting date : Tue 17 Dec 2024.
+- ( at 14h41 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI4/mpiio_t24_MPI4/t24.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_chebfi-oracle/tests/TestBot_MPI4/mpiio_t24_MPI4/t24.abi
 - output file    -> t24_MPI4.abo
 - root for input  files -> t24_MPI4i
 - root for output files -> t24_MPI4o
@@ -251,8 +251,8 @@ meta: {optdriver: 0, ionmov: 3, optcell: 1, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     60.500   => boxcut(ratio)=   2.07719
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_chebfi-oracle/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_chebfi-oracle/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -280,7 +280,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.641     159.632
 
 ================================================================================
 
-=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy) 
+=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy)
 ================================================================================
 
 --- Iteration: (1/3) Internal Cycle: (1/1)
@@ -295,11 +295,11 @@ tolerances: {toldff: 1.20E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -11.494304453796    -1.149E+01 6.969E-05 1.617E+01 7.670E-02 7.670E-02
- ETOT  2  -11.475207363295     1.910E-02 1.727E-08 1.205E+00 5.511E-03 8.221E-02
- ETOT  3  -11.473684300773     1.523E-03 8.070E-07 1.295E-02 1.264E-03 8.347E-02
- ETOT  4  -11.473678373965     5.927E-06 1.289E-08 1.353E-04 1.267E-04 8.334E-02
- ETOT  5  -11.473678379952    -5.987E-09 1.069E-10 4.259E-06 4.054E-06 8.335E-02
+ ETOT  1  -11.494304453796    -1.149E+01 3.218E-03 1.617E+01 7.670E-02 7.670E-02
+ ETOT  2  -11.475207363295     1.910E-02 8.291E-07 1.205E+00 5.511E-03 8.221E-02
+ ETOT  3  -11.473684300773     1.523E-03 3.145E-05 1.295E-02 1.264E-03 8.347E-02
+ ETOT  4  -11.473678373965     5.927E-06 2.391E-07 1.353E-04 1.267E-04 8.334E-02
+ ETOT  5  -11.473678379952    -5.987E-09 5.311E-09 4.259E-06 4.054E-06 8.335E-02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.20688402E-03  sigma(3 2)= -1.31966365E-04
@@ -322,7 +322,7 @@ lattice_vectors:
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   8.5750000E+01
-convergence: {deltae: -5.987E-09, res2:  4.259E-06, residm:  1.069E-10, diffor:  4.054E-06, }
+convergence: {deltae: -5.987E-09, res2:  4.259E-06, residm:  5.311E-09, diffor:  4.054E-06, }
 etotal    :  -1.14736784E+01
 entropy   :   0.00000000E+00
 fermie    :   4.52709258E-01
@@ -459,11 +459,11 @@ tolerances: {toldff: 1.20E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -11.508669056216    -1.151E+01 1.608E-07 2.161E+00 6.284E-02 2.050E-02
- ETOT  2  -11.506424324843     2.245E-03 3.006E-10 1.731E-01 2.605E-03 1.790E-02
- ETOT  3  -11.506268116390     1.562E-04 2.494E-07 2.445E-03 8.745E-04 1.702E-02
- ETOT  4  -11.506268610322    -4.939E-07 6.087E-10 1.597E-05 1.004E-04 1.692E-02
- ETOT  5  -11.506268615149    -4.828E-09 5.707E-11 1.747E-07 8.466E-06 1.693E-02
+ ETOT  1  -11.508669056216    -1.151E+01 1.446E-04 2.161E+00 6.284E-02 2.050E-02
+ ETOT  2  -11.506424324843     2.245E-03 1.422E-08 1.731E-01 2.605E-03 1.790E-02
+ ETOT  3  -11.506268116390     1.562E-04 5.464E-06 2.445E-03 8.745E-04 1.702E-02
+ ETOT  4  -11.506268610322    -4.939E-07 2.365E-08 1.597E-05 1.004E-04 1.692E-02
+ ETOT  5  -11.506268615149    -4.828E-09 4.071E-09 1.747E-07 8.466E-06 1.693E-02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.19320965E-04  sigma(3 2)= -4.50399911E-05
@@ -486,7 +486,7 @@ lattice_vectors:
 lattice_lengths: [   4.77053,    4.77053,    4.77053, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6769035E+01
-convergence: {deltae: -4.828E-09, res2:  1.747E-07, residm:  5.707E-11, diffor:  8.466E-06, }
+convergence: {deltae: -4.828E-09, res2:  1.747E-07, residm:  4.071E-09, diffor:  8.466E-06, }
 etotal    :  -1.15062686E+01
 entropy   :   0.00000000E+00
 fermie    :   5.09428259E-01
@@ -627,11 +627,11 @@ tolerances: {toldff: 1.20E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
- ETOT  1  -11.507577476158    -1.151E+01 1.268E-08 3.908E-03 1.483E-02 2.104E-03
- ETOT  2  -11.507575791600     1.685E-06 9.716E-13 4.075E-04 8.181E-05 2.022E-03
- ETOT  3  -11.507575737531     5.407E-08 4.015E-09 4.096E-06 2.742E-05 1.995E-03
- ETOT  4  -11.507575738620    -1.089E-09 1.522E-11 3.015E-08 3.222E-06 1.992E-03
- ETOT  5  -11.507575738646    -2.666E-11 1.267E-14 2.576E-10 1.206E-07 1.992E-03
+ ETOT  1  -11.507577476158    -1.151E+01 5.303E-06 3.908E-03 1.483E-02 2.104E-03
+ ETOT  2  -11.507575791600     1.685E-06 2.426E-10 4.075E-04 8.181E-05 2.022E-03
+ ETOT  3  -11.507575737531     5.407E-08 1.541E-07 4.096E-06 2.742E-05 1.995E-03
+ ETOT  4  -11.507575738620    -1.089E-09 5.159E-10 3.015E-08 3.222E-06 1.992E-03
+ ETOT  5  -11.507575738646    -2.666E-11 5.515E-13 2.576E-10 1.206E-07 1.992E-03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.00614359E-05  sigma(3 2)= -6.22375647E-06
@@ -654,7 +654,7 @@ lattice_vectors:
 lattice_lengths: [   4.73035,    4.73035,    4.73035, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.4845225E+01
-convergence: {deltae: -2.666E-11, res2:  2.576E-10, residm:  1.267E-14, diffor:  1.206E-07, }
+convergence: {deltae: -2.666E-11, res2:  2.576E-10, residm:  5.515E-13, diffor:  1.206E-07, }
 etotal    :  -1.15075757E+01
 entropy   :   0.00000000E+00
 fermie    :   5.22995826E-01
@@ -784,14 +784,14 @@ force_length_stats: {min:   3.44975706E-03, max:   3.44975706E-03, mean:   3.449
            Relative     =-1.13595E-04
 
  fconv : WARNING -
-  ntime=    3 was not enough Broyd/MD steps to converge gradients: 
+  ntime=    3 was not enough Broyd/MD steps to converge gradients:
   max grad (force/stress) = 5.0061E-03 > tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   41.125E-17; max=  12.674E-15
+ Mean square residual over all n,k,spin=   87.475E-16; max=  55.152E-14
  reduced coordinates (array xred) for    2 atoms
       -0.014630063855     -0.014630063855     -0.014630063855
        0.234630063855      0.234630063855      0.234630063855
@@ -880,7 +880,7 @@ total_energy_dc_eV  : -3.13137060722326E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
 -          iomode           1
             acell      6.6897213787E+00  6.6897213787E+00  6.6897213787E+00 Bohr
@@ -1092,7 +1092,7 @@ P           mkmem          15
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1104,12 +1104,12 @@ P           mkmem          15
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1127,15 +1127,15 @@ P           mkmem          15
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.1  wall=         20.4
++Overall time at end (sec) : cpu=         13.7  wall=         13.7

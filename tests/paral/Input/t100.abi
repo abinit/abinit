@@ -9,13 +9,13 @@ getwfk -1      # Second one takes the density of first
 
  pawprtvol 3  # Printing additional information
  prtvol 4     #
- prtden -1    #  
+ prtden -1    #
 
 ############################
 # Structural Parameters
 ############################
 #Definition of unit cell
- acell 3*5.44761       # lattice parameter  
+ acell 3*5.44761       # lattice parameter
  rprim -0.5  0.5  0.5  # Primitive cell
         0.5 -0.5  0.5
         0.5  0.5 -0.5
@@ -25,9 +25,9 @@ getwfk -1      # Second one takes the density of first
  znucl 26   # z number of atom
 
 #Definition of the atoms
- natom 1           # number of atom     
- typat 1           # type of atom 
- xred 0.0 0.0 0.0  # reduced coordinates for primitive cell 
+ natom 1           # number of atom
+ typat 1           # type of atom
+ xred 0.0 0.0 0.0  # reduced coordinates for primitive cell
 
 #Definition pseudopotentials
  pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
@@ -38,7 +38,7 @@ getwfk -1      # Second one takes the density of first
  ngkpt 4 4 4              # Reciprocal space vectors are built from
                           # the rprim parameters. This is the size of the
                           # reciprocal k-points.
- nshiftk 2                # Convergence of the density with regular shifts. 
+ nshiftk 2                # Convergence of the density with regular shifts.
  shiftk 0.25  0.25  0.25
        -0.25 -0.25 -0.25
 
@@ -100,7 +100,7 @@ dmftctqmc_config 2      # Activate Histogram and spin susceptibility
 #Definition of DFT+U
 usepawu1    4           #
 usepawu2    14          #
-dmatpuopt   2           # 
+dmatpuopt   2           #
 lpawu       2           # Angular momentum for the projected Hamiltonian
 upawu1      0.00 eV
 upawu2      5.5  eV  # Values of U for each angular momentum
@@ -117,7 +117,7 @@ jpawu2      0.84 eV  # Values of J
 #%% max_nprocs = 10
 #%% [NCPU_10]
 #%% files_to_test =
-#%%   t100_MPI10o_DS2_LocalSpinSuscept_atom_01.dat, tolnlines =0, tolabs =0.01, tolrel = 0.01, fld_options=-medium
+#%%   t100_MPI10o_DS2_LocalSpinSuscept_atom_01.dat, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, CTQMC

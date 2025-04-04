@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h11 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t58-t59/t58.abi
 - output file    -> t58.abo
 - root for input  files -> t58i
@@ -179,8 +179,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.11434
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -192,8 +192,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    3.14159265
          --- l  ekb(1:nproj) -->
@@ -407,7 +407,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1743,7 +1743,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    2.5168088222E-02    0.0000000000E+00
    3   1   2   1    2.6204210741E-02    0.0000000000E+00
    3   1   3   1   -4.5805369531E-02    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    6.5864555856E-01    0.0000000000E+00
@@ -1761,12 +1761,12 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         6.8265470366         0.0000000000
    1    1   2    1        -2.2755148312         0.0000000000
    1    1   3    1        -2.2755156154         0.0000000000
@@ -1791,7 +1791,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   1    8         0.2167309585         0.0000000000
    1    1   2    8        -0.6065201942         0.0000000000
    1    1   3    8        -0.6065204329         0.0000000000
-  
+
    2    1   1    1        -2.2755152972         0.0000000000
    2    1   2    1         6.8265469868         0.0000000000
    2    1   3    1        -2.2755162252         0.0000000000
@@ -1816,7 +1816,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    1   1    8        -0.6065205973         0.0000000000
    2    1   2    8         0.2167327076         0.0000000000
    2    1   3    8        -0.6065214645         0.0000000000
-  
+
    3    1   1    1        -2.2755155098         0.0000000000
    3    1   2    1        -2.2755167819         0.0000000000
    3    1   3    1         6.8265469974         0.0000000000
@@ -1841,7 +1841,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    1   1    8        -0.6065207365         0.0000000000
    3    1   2    8        -0.6065206425         0.0000000000
    3    1   3    8         0.2167317042         0.0000000000
-  
+
    1    2   1    1        -2.9889285879         0.0000000000
    1    2   2    1         0.9963086651         0.0000000000
    1    2   3    1         0.9963094538         0.0000000000
@@ -1866,7 +1866,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    2   1    8        -1.4959373207         0.0000000000
    1    2   2    8         0.6077715737         0.0000000000
    1    2   3    8         0.6077718082         0.0000000000
-  
+
    2    2   1    1         0.9963099484         0.0000000000
    2    2   2    1         0.2167324416         0.0000000000
    2    2   3    1        -0.6065205940         0.0000000000
@@ -1891,7 +1891,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    2   1    8         0.6077716927         0.0000000000
    2    2   2    8        -1.4959375787         0.0000000000
    2    2   3    8         0.2803944407         0.0000000000
-  
+
    3    2   1    1         0.9963099000         0.0000000000
    3    2   2    1        -0.6065209293         0.0000000000
    3    2   3    1         0.2167314579         0.0000000000
@@ -1916,7 +1916,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    2   1    8         0.6077716573         0.0000000000
    3    2   2    8         0.2803945657         0.0000000000
    3    2   3    8        -1.4959378096         0.0000000000
-  
+
    1    3   1    1         0.2167316686         0.0000000000
    1    3   2    1         0.9963096286         0.0000000000
    1    3   3    1        -0.6065212472         0.0000000000
@@ -1941,7 +1941,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    3   1    8        -1.4959384876         0.0000000000
    1    3   2    8         0.6077727021         0.0000000000
    1    3   3    8         0.2803932730         0.0000000000
-  
+
    2    3   1    1         0.9963091231         0.0000000000
    2    3   2    1        -2.9889285260         0.0000000000
    2    3   3    1         0.9963100804         0.0000000000
@@ -1966,7 +1966,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    3   1    8         0.6077719416         0.0000000000
    2    3   2    8        -1.4959390877         0.0000000000
    2    3   3    8         0.6077728619         0.0000000000
-  
+
    3    3   1    1        -0.6065203832         0.0000000000
    3    3   2    1         0.9963093010         0.0000000000
    3    3   3    1         0.2167321697         0.0000000000
@@ -1991,7 +1991,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    3   1    8         0.2803942092         0.0000000000
    3    3   2    8         0.6077728057         0.0000000000
    3    3   3    8        -1.4959387759         0.0000000000
-  
+
    1    4   1    1         0.2167315150         0.0000000000
    1    4   2    1        -0.6065206895         0.0000000000
    1    4   3    1         0.9963100097         0.0000000000
@@ -2016,7 +2016,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    4   1    8        -1.4959386596         0.0000000000
    1    4   2    8         0.2803941418         0.0000000000
    1    4   3    8         0.6077717981         0.0000000000
-  
+
    2    4   1    1        -0.6065203449         0.0000000000
    2    4   2    1         0.2167310058         0.0000000000
    2    4   3    1         0.9963086011         0.0000000000
@@ -2041,7 +2041,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    4   1    8         0.2803940518         0.0000000000
    2    4   2    8        -1.4959379814         0.0000000000
    2    4   3    8         0.6077717735         0.0000000000
-  
+
    3    4   1    1         0.9963093247         0.0000000000
    3    4   2    1         0.9963106290         0.0000000000
    3    4   3    1        -2.9889285784         0.0000000000
@@ -2066,7 +2066,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    4   1    8         0.6077720882         0.0000000000
    3    4   2    8         0.6077720366         0.0000000000
    3    4   3    8        -1.4959381004         0.0000000000
-  
+
    1    5   1    1        -1.4959383550         0.0000000000
    1    5   2    1         0.6077714864         0.0000000000
    1    5   3    1         0.6077717875         0.0000000000
@@ -2091,7 +2091,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    5   1    8        -2.9889287606         0.0000000000
    1    5   2    8         0.9963099029         0.0000000000
    1    5   3    8         0.9963081924         0.0000000000
-  
+
    2    5   1    1         0.6077716765         0.0000000000
    2    5   2    1        -1.4959373715         0.0000000000
    2    5   3    1         0.2803950531         0.0000000000
@@ -2116,7 +2116,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    5   1    8         0.9963096125         0.0000000000
    2    5   2    8         0.2167315931         0.0000000000
    2    5   3    8        -0.6065203768         0.0000000000
-  
+
    3    5   1    1         0.6077717103         0.0000000000
    3    5   2    1         0.2803943474         0.0000000000
    3    5   3    1        -1.4959385368         0.0000000000
@@ -2141,7 +2141,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    5   1    8         0.9963094652         0.0000000000
    3    5   2    8        -0.6065214294         0.0000000000
    3    5   3    8         0.2167323833         0.0000000000
-  
+
    1    6   1    1        -1.4959378131         0.0000000000
    1    6   2    1         0.6077720547         0.0000000000
    1    6   3    1         0.2803936382         0.0000000000
@@ -2166,7 +2166,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    6   1    8         0.2167322649         0.0000000000
    1    6   2    8         0.9963095070         0.0000000000
    1    6   3    8        -0.6065204360         0.0000000000
-  
+
    2    6   1    1         0.6077723038         0.0000000000
    2    6   2    1        -1.4959383724         0.0000000000
    2    6   3    1         0.6077717919         0.0000000000
@@ -2191,7 +2191,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    6   1    8         0.9963089870         0.0000000000
    2    6   2    8        -2.9889286873         0.0000000000
    2    6   3    8         0.9963102876         0.0000000000
-  
+
    3    6   1    1         0.2803937702         0.0000000000
    3    6   2    1         0.6077722753         0.0000000000
    3    6   3    1        -1.4959377920         0.0000000000
@@ -2216,7 +2216,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    6   1    8        -0.6065203013         0.0000000000
    3    6   2    8         0.9963090764         0.0000000000
    3    6   3    8         0.2167314389         0.0000000000
-  
+
    1    7   1    1        -1.4959379709         0.0000000000
    1    7   2    1         0.2803939857         0.0000000000
    1    7   3    1         0.6077725969         0.0000000000
@@ -2241,7 +2241,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    7   1    8         0.2167321132         0.0000000000
    1    7   2    8        -0.6065213514         0.0000000000
    1    7   3    8         0.9963103756         0.0000000000
-  
+
    2    7   1    1         0.2803937151         0.0000000000
    2    7   2    1        -1.4959387584         0.0000000000
    2    7   3    1         0.6077719334         0.0000000000
@@ -2266,7 +2266,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    7   1    8        -0.6065203356         0.0000000000
    2    7   2    8         0.2167311882         0.0000000000
    2    7   3    8         0.9963091874         0.0000000000
-  
+
    3    7   1    1         0.6077724257         0.0000000000
    3    7   2    1         0.6077724728         0.0000000000
    3    7   3    1        -1.4959381938         0.0000000000
@@ -2291,7 +2291,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    7   1    8         0.9963093475         0.0000000000
    3    7   2    8         0.9963106050         0.0000000000
    3    7   3    8        -2.9889286892         0.0000000000
-  
+
    1    8   1    1         0.2167319620         0.0000000000
    1    8   2    1        -0.6065201100         0.0000000000
    1    8   3    1        -0.6065204219         0.0000000000
@@ -2316,7 +2316,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    8   1    8         6.8265471574         0.0000000000
    1    8   2    8        -2.2755160263         0.0000000000
    1    8   3    8        -2.2755142922         0.0000000000
-  
+
    2    8   1    1        -0.6065209513         0.0000000000
    2    8   2    1         0.2167320281         0.0000000000
    2    8   3    1        -0.6065204563         0.0000000000
@@ -2341,7 +2341,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    8   1    8        -2.2755151240         0.0000000000
    2    8   2    8         6.8265470301         0.0000000000
    2    8   3    8        -2.2755164127         0.0000000000
-  
+
    3    8   1    1        -0.6065210731         0.0000000000
    3    8   2    1        -0.6065211215         0.0000000000
    3    8   3    1         0.2167318833         0.0000000000
@@ -2366,13 +2366,13 @@ tolerances: {tolvrs: 1.00E-08, }
    3    8   1    8        -2.2755155214         0.0000000000
    3    8   2    8        -2.2755167221         0.0000000000
    3    8   3    8         6.8265470353         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1230673931         0.0000000000
    1    1   2    1         0.0000000537         0.0000000000
    1    1   3    1        -0.0000000099         0.0000000000
@@ -2397,7 +2397,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   1    8        -0.0105405313         0.0000000000
    1    1   2    8        -0.0216715940         0.0000000000
    1    1   3    8        -0.0216715693         0.0000000000
-  
+
    2    1   1    1        -0.0000000083         0.0000000000
    2    1   2    1         0.1230674213         0.0000000000
    2    1   3    1        -0.0000000100         0.0000000000
@@ -2422,7 +2422,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    1   1    8        -0.0216715734         0.0000000000
    2    1   2    8        -0.0105405423         0.0000000000
    2    1   3    8        -0.0216715875         0.0000000000
-  
+
    3    1   1    1         0.0000000545         0.0000000000
    3    1   2    1         0.0000000133         0.0000000000
    3    1   3    1         0.1230674383         0.0000000000
@@ -2447,7 +2447,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    1   1    8        -0.0216715709         0.0000000000
    3    1   2    8        -0.0216716000         0.0000000000
    3    1   3    8        -0.0105405236         0.0000000000
-  
+
    1    2   1    1        -0.0105405303         0.0000000000
    1    2   2    1         0.0216715889         0.0000000000
    1    2   3    1         0.0216715976         0.0000000000
@@ -2472,7 +2472,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    2   1    8        -0.0328702864         0.0000000000
    1    2   2    8        -0.0000000003         0.0000000000
    1    2   3    8         0.0000000046         0.0000000000
-  
+
    2    2   1    1         0.0216715609         0.0000000000
    2    2   2    1        -0.0105405324         0.0000000000
    2    2   3    1        -0.0216715921         0.0000000000
@@ -2497,7 +2497,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    2   1    8         0.0000000019         0.0000000000
    2    2   2    8        -0.0240174644         0.0000000000
    2    2   3    8         0.0000000064         0.0000000000
-  
+
    3    2   1    1         0.0216715788         0.0000000000
    3    2   2    1        -0.0216715763         0.0000000000
    3    2   3    1        -0.0105405291         0.0000000000
@@ -2522,7 +2522,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    2   1    8         0.0000000033         0.0000000000
    3    2   2    8         0.0000000084         0.0000000000
    3    2   3    8        -0.0240174639         0.0000000000
-  
+
    1    3   1    1        -0.0105405216         0.0000000000
    1    3   2    1         0.0216715926         0.0000000000
    1    3   3    1        -0.0216715858         0.0000000000
@@ -2547,7 +2547,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    3   1    8        -0.0240174716         0.0000000000
    1    3   2    8         0.0000000032         0.0000000000
    1    3   3    8        -0.0000000018         0.0000000000
-  
+
    2    3   1    1         0.0216715772         0.0000000000
    2    3   2    1        -0.0105405326         0.0000000000
    2    3   3    1         0.0216715821         0.0000000000
@@ -2572,7 +2572,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    3   1    8         0.0000000001         0.0000000000
    2    3   2    8        -0.0328703324         0.0000000000
    2    3   3    8         0.0000000166         0.0000000000
-  
+
    3    3   1    1        -0.0216715801         0.0000000000
    3    3   2    1         0.0216715742         0.0000000000
    3    3   3    1        -0.0105405369         0.0000000000
@@ -2597,7 +2597,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    3   1    8        -0.0000000034         0.0000000000
    3    3   2    8        -0.0000000056         0.0000000000
    3    3   3    8        -0.0240174815         0.0000000000
-  
+
    1    4   1    1        -0.0105405401         0.0000000000
    1    4   2    1        -0.0216715927         0.0000000000
    1    4   3    1         0.0216715875         0.0000000000
@@ -2622,7 +2622,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    4   1    8        -0.0240174726         0.0000000000
    1    4   2    8        -0.0000000025         0.0000000000
    1    4   3    8         0.0000000026         0.0000000000
-  
+
    2    4   1    1        -0.0216715607         0.0000000000
    2    4   2    1        -0.0105405318         0.0000000000
    2    4   3    1         0.0216715898         0.0000000000
@@ -2647,7 +2647,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    4   1    8        -0.0000000017         0.0000000000
    2    4   2    8        -0.0240174807         0.0000000000
    2    4   3    8        -0.0000000053         0.0000000000
-  
+
    3    4   1    1         0.0216715647         0.0000000000
    3    4   2    1         0.0216715763         0.0000000000
    3    4   3    1        -0.0105405424         0.0000000000
@@ -2672,7 +2672,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    4   1    8        -0.0000000036         0.0000000000
    3    4   2    8        -0.0000000140         0.0000000000
    3    4   3    8        -0.0328703143         0.0000000000
-  
+
    1    5   1    1        -0.0328702881         0.0000000000
    1    5   2    1        -0.0000000013         0.0000000000
    1    5   3    1         0.0000000049         0.0000000000
@@ -2697,7 +2697,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    5   1    8        -0.0105405331         0.0000000000
    1    5   2    8         0.0216715939         0.0000000000
    1    5   3    8         0.0216715690         0.0000000000
-  
+
    2    5   1    1        -0.0000000124         0.0000000000
    2    5   2    1        -0.0240174878         0.0000000000
    2    5   3    1        -0.0000000110         0.0000000000
@@ -2722,7 +2722,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    5   1    8         0.0216715664         0.0000000000
    2    5   2    8        -0.0105405452         0.0000000000
    2    5   3    8        -0.0216715903         0.0000000000
-  
+
    3    5   1    1         0.0000000129         0.0000000000
    3    5   2    1         0.0000000022         0.0000000000
    3    5   3    1        -0.0240174765         0.0000000000
@@ -2747,7 +2747,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    5   1    8         0.0216715699         0.0000000000
    3    5   2    8        -0.0216715972         0.0000000000
    3    5   3    8        -0.0105405307         0.0000000000
-  
+
    1    6   1    1        -0.0240174702         0.0000000000
    1    6   2    1         0.0000000010         0.0000000000
    1    6   3    1        -0.0000000003         0.0000000000
@@ -2772,7 +2772,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    6   1    8        -0.0105405339         0.0000000000
    1    6   2    8         0.0216715848         0.0000000000
    1    6   3    8        -0.0216715917         0.0000000000
-  
+
    2    6   1    1         0.0000000024         0.0000000000
    2    6   2    1        -0.0328703109         0.0000000000
    2    6   3    1         0.0000000039         0.0000000000
@@ -2797,7 +2797,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    6   1    8         0.0216715736         0.0000000000
    2    6   2    8        -0.0105405224         0.0000000000
    2    6   3    8         0.0216715866         0.0000000000
-  
+
    3    6   1    1        -0.0000000120         0.0000000000
    3    6   2    1        -0.0000000011         0.0000000000
    3    6   3    1        -0.0240174666         0.0000000000
@@ -2822,7 +2822,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    6   1    8        -0.0216715702         0.0000000000
    3    6   2    8         0.0216715942         0.0000000000
    3    6   3    8        -0.0105405345         0.0000000000
-  
+
    1    7   1    1        -0.0240174763         0.0000000000
    1    7   2    1        -0.0000000016         0.0000000000
    1    7   3    1        -0.0000000020         0.0000000000
@@ -2847,7 +2847,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    7   1    8        -0.0105405315         0.0000000000
    1    7   2    8        -0.0216715859         0.0000000000
    1    7   3    8         0.0216715901         0.0000000000
-  
+
    2    7   1    1         0.0000000116         0.0000000000
    2    7   2    1        -0.0240174573         0.0000000000
    2    7   3    1         0.0000000123         0.0000000000
@@ -2872,7 +2872,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    7   1    8        -0.0216715665         0.0000000000
    2    7   2    8        -0.0105405199         0.0000000000
    2    7   3    8         0.0216715889         0.0000000000
-  
+
    3    7   1    1        -0.0000000033         0.0000000000
    3    7   2    1         0.0000000037         0.0000000000
    3    7   3    1        -0.0328703222         0.0000000000
@@ -2897,7 +2897,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    7   1    8         0.0216715711         0.0000000000
    3    7   2    8         0.0216715974         0.0000000000
    3    7   3    8        -0.0105405406         0.0000000000
-  
+
    1    8   1    1        -0.0105405309         0.0000000000
    1    8   2    1        -0.0216715873         0.0000000000
    1    8   3    1        -0.0216715943         0.0000000000
@@ -2922,7 +2922,7 @@ tolerances: {tolvrs: 1.00E-08, }
    1    8   1    8         0.1230673242         0.0000000000
    1    8   2    8        -0.0000000357         0.0000000000
    1    8   3    8        -0.0000000317         0.0000000000
-  
+
    2    8   1    1        -0.0216715761         0.0000000000
    2    8   2    1        -0.0105405307         0.0000000000
    2    8   3    1        -0.0216715839         0.0000000000
@@ -2947,7 +2947,7 @@ tolerances: {tolvrs: 1.00E-08, }
    2    8   1    8        -0.0000000311         0.0000000000
    2    8   2    8         0.1230673778         0.0000000000
    2    8   3    8        -0.0000000291         0.0000000000
-  
+
    3    8   1    1        -0.0216715652         0.0000000000
    3    8   2    1        -0.0216715774         0.0000000000
    3    8   3    1        -0.0105405229         0.0000000000
@@ -2988,9 +2988,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  1.265610E+03  1.265610E+03  1.265610E+03  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
  Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.
 
@@ -3030,7 +3030,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      8.6000000000E+00  8.6000000000E+00  8.6000000000E+00 Bohr
               amu      4.00260200E+00
@@ -3166,7 +3166,7 @@ P          mk1mem           1
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#ponce2014
 -
-- [2] Temperature dependence of the electronic structure of semiconductors and insulators 
+- [2] Temperature dependence of the electronic structure of semiconductors and insulators
 - S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)
 - Comment: the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
 - Strong suggestion to cite this paper in your publications.
@@ -3184,7 +3184,7 @@ P          mk1mem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3207,12 +3207,12 @@ P          mk1mem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3230,7 +3230,7 @@ P          mk1mem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

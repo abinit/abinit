@@ -39,7 +39,7 @@ symsigma  1
 tmesh 0 300 2
 eph_frohl_ntheta 0  # Disable spherical integration of FM integrand in the microzone around Gamma.
 
-# This just to test the restart code when SIGEPH is not present.
+# This just to test the restart when SIGEPH is not present.
 eph_restart 1
 
 ############
@@ -206,9 +206,9 @@ occopt12 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
-#%% exclude_builders = eos_nvhpc_*
 #%% [files]
 #%% files_to_test =
 #%%   t60.abo, tolnlines = 80, tolabs = 0.42, tolrel = 0.42

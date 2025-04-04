@@ -46,7 +46,7 @@ nband       5
 ixc         -208012  # TB09 xc functional
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_paw_pbe_standard/Si.xml"
+pseudos "Psdj_paw_pbe_std/Si.xml"
 
 #---- Miscellaneous
 enunit      1
@@ -57,10 +57,10 @@ enunit      1
 #%% executable = abinit
 #%% test_chain = t23.abi, t24.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t23.abo, tolnlines = 10, tolabs = 0.02, tolrel = 1.1, fld_options = -easy
 #%% [shell]
-#%% post_commands = 
+#%% post_commands =
 #%%   ww_cp t23o_WFK t24i_DS1_WFK;
 #%%   ww_cp t23o_DEN t24i_DS1_DEN;
 #%%   ww_cp t23o_KDEN t24i_DS1_KDEN

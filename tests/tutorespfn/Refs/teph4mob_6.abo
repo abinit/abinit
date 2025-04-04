@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.3.3.2 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Sep 2024.
-- ( at 17h24 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.abi
+.Starting date : Sun 24 Nov 2024.
+- ( at 07h23 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.abi
 - output file    -> teph4mob_6.abo
 - root for input  files -> teph4mob_6i
 - root for output files -> teph4mob_6o
@@ -420,11 +420,11 @@ meta: {optdriver: 7, eph_task: -4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -440,7 +440,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -532,8 +532,8 @@ meta: {optdriver: 7, eph_task: -4, }
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -545,8 +545,8 @@ meta: {optdriver: 7, eph_task: -4, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -631,11 +631,11 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36717.3    0.000
+   5   3.573    0.000  36716.2    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -643,7 +643,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   2822.5    0.000
+   5   3.573    0.000   2822.6    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -663,7 +663,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    412.0    0.000
+   5   3.608    0.001    411.9    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -718,7 +718,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
  Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ === Computation of DOS, VV_DOS and VVTAU_DOS ===
  Linear tetrahedron method.
  Mesh step:  27.2 (meV) with npts: 47
  From emin:   2.4 to emax:   3.6 (eV)
@@ -765,7 +765,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
  Cartesian component of MRTA mobility tensor: yy
@@ -775,7 +775,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
  Cartesian component of MRTA mobility tensor: zz
@@ -785,7 +785,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
 
@@ -845,11 +845,11 @@ meta: {optdriver: 7, eph_task: -4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -865,7 +865,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -1025,11 +1025,11 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36717.3    0.000
+   5   3.573    0.000  36716.2    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1037,7 +1037,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   2822.5    0.000
+   5   3.573    0.000   2822.6    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1057,7 +1057,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    412.0    0.000
+   5   3.608    0.001    411.9    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1112,7 +1112,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
  Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ === Computation of DOS, VV_DOS and VVTAU_DOS ===
  Linear tetrahedron method.
  Mesh step:  27.2 (meV) with npts: 48
  From emin:   2.4 to emax:   3.6 (eV)
@@ -1159,7 +1159,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
  Cartesian component of MRTA mobility tensor: yy
@@ -1169,7 +1169,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
  Cartesian component of MRTA mobility tensor: zz
@@ -1179,7 +1179,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
 
@@ -1239,11 +1239,11 @@ meta: {optdriver: 7, eph_task: -4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -1259,7 +1259,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -1419,11 +1419,11 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36717.3    0.000
+   5   3.573    0.000  36716.2    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1431,7 +1431,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   2822.5    0.000
+   5   3.573    0.000   2822.6    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1451,7 +1451,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    412.0    0.000
+   5   3.608    0.001    411.9    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1506,7 +1506,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
  Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ === Computation of DOS, VV_DOS and VVTAU_DOS ===
  Linear tetrahedron method.
  Mesh step:  27.2 (meV) with npts: 48
  From emin:   2.4 to emax:   3.6 (eV)
@@ -1553,7 +1553,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
  Cartesian component of MRTA mobility tensor: yy
@@ -1563,7 +1563,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
  Cartesian component of MRTA mobility tensor: zz
@@ -1573,7 +1573,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.40            0.00
+          300.00        0.10E+16        0.25E+05          411.39            0.00
 
 
 
@@ -1633,11 +1633,11 @@ meta: {optdriver: 7, eph_task: -4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -1653,7 +1653,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -1815,8 +1815,8 @@ P Number of k-point in Sigma_nk treated by this proc: 5 of 5
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.673    0.004     90.8    0.000
@@ -1843,7 +1843,7 @@ K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36203.2    0.000
+   5   3.573    0.000  36201.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1950,7 +1950,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
  Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ === Computation of DOS, VV_DOS and VVTAU_DOS ===
  Linear tetrahedron method.
  Mesh step:  27.2 (meV) with npts: 49
  From emin:   2.4 to emax:   3.7 (eV)
@@ -1996,7 +1996,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
            64.00        0.10E+16        0.00E+00           39.26            0.00
           123.00        0.10E+16        0.00E+00          371.04            0.00
           182.00        0.10E+16        0.00E+00          467.08            0.00
-          241.00        0.10E+16        0.00E+00          469.72            0.00
+          241.00        0.10E+16        0.00E+00          469.71            0.00
           300.00        0.10E+16        0.25E+05          417.54            0.00
 
 
@@ -2006,7 +2006,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
            64.00        0.10E+16        0.00E+00           39.26            0.00
           123.00        0.10E+16        0.00E+00          371.04            0.00
           182.00        0.10E+16        0.00E+00          467.08            0.00
-          241.00        0.10E+16        0.00E+00          469.72            0.00
+          241.00        0.10E+16        0.00E+00          469.71            0.00
           300.00        0.10E+16        0.25E+05          417.54            0.00
 
 
@@ -2016,7 +2016,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
            64.00        0.10E+16        0.00E+00           39.26            0.00
           123.00        0.10E+16        0.00E+00          371.04            0.00
           182.00        0.10E+16        0.00E+00          467.08            0.00
-          241.00        0.10E+16        0.00E+00          469.72            0.00
+          241.00        0.10E+16        0.00E+00          469.71            0.00
           300.00        0.10E+16        0.25E+05          417.54            0.00
 
 
@@ -2077,11 +2077,11 @@ meta: {optdriver: 7, eph_task: -4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -2097,7 +2097,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -2260,8 +2260,8 @@ P Number of k-point in Sigma_nk treated by this proc: 6 of 6
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.673    0.004     89.8    0.000
@@ -2304,7 +2304,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.677    0.007     48.0    0.000
+   5   3.677    0.007     47.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2312,7 +2312,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36203.2    0.000
+   5   3.573    0.000  36201.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2419,7 +2419,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
  Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ === Computation of DOS, VV_DOS and VVTAU_DOS ===
  Linear tetrahedron method.
  Mesh step:  27.2 (meV) with npts: 50
  From emin:   2.4 to emax:   3.7 (eV)
@@ -2546,11 +2546,11 @@ meta: {optdriver: 7, eph_task: -4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -2566,7 +2566,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -2729,8 +2729,8 @@ P Number of k-point in Sigma_nk treated by this proc: 6 of 6
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.673    0.004     89.8    0.000
@@ -2773,7 +2773,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.677    0.007     48.0    0.000
+   5   3.677    0.007     47.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2781,7 +2781,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36203.2    0.000
+   5   3.573    0.000  36201.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2888,7 +2888,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
  Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ === Computation of DOS, VV_DOS and VVTAU_DOS ===
  Linear tetrahedron method.
  Mesh step:  27.2 (meV) with npts: 51
  From emin:   2.4 to emax:   3.7 (eV)
@@ -2963,7 +2963,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
@@ -3185,12 +3185,12 @@ P           mkmem         413
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -3203,12 +3203,12 @@ P           mkmem         413
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3226,7 +3226,7 @@ P           mkmem         413
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -3241,15 +3241,15 @@ P           mkmem         413
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         62.2  wall=         62.3
+- Proc.   0 individual time (sec): cpu=         62.0  wall=         62.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         62.2  wall=         62.3
++Overall time at end (sec) : cpu=         62.0  wall=         62.1

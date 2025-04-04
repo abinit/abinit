@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -758,6 +758,11 @@ subroutine outvar_i_n (dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%mbpt_sciss
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'mbpt_sciss','ENE',0)
+
+ if (any(mod(dtsets(:)%wfoptalg,10)==1)) then
+   intarr(1,:)=dtsets(:)%mdeg_filter
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'mdeg_filter','INT',0)
+ end if
 
  dprarr(1,:)=dtsets(:)%mdf_epsinf
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'mdf_epsinf','DPR',0)

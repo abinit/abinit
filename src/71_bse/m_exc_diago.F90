@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2025 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ MODULE m_exc_diago
  use m_sort
  use m_slk
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use m_io_tools,        only : open_file
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
@@ -40,7 +40,7 @@ MODULE m_exc_diago
  use m_crystal,         only : crystal_t
  use m_kpts,            only : listkk
  use m_bz_mesh,         only : kmesh_t
- use m_ebands,          only : ebands_report_gap
+ use m_ebands,          only : ebands_t
  use m_eprenorms,       only : eprenorms_t
  use m_wfd,             only : wfdgw_t
  use m_paw_hr,          only : pawhur_t
@@ -160,7 +160,7 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
    end select
    !
    if (my_rank==master) then
-     call ebands_report_gap(QP_BSt,header="QP bands",unit=std_out,gaps=gaps)
+     call QP_BSt%report_gap(header="QP bands",unit=std_out,gaps=gaps)
      gw_gap = MINVAL(gaps(2,:))
      call exc_print_eig(BSp,BS_files%out_eig,gw_gap,exc_gap)
    end if

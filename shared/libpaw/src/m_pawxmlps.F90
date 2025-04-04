@@ -7,7 +7,7 @@
 !! Can use either FoX or pure Fortran routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (MT, FJ)
+!! Copyright (C) 2005-2025 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -378,7 +378,7 @@ select case(name)
          end if
          paw_setuploc%atom%symbol = trim(value)
 
-         value = getValue(attributes,"Z") 
+         value = getValue(attributes,"Z")
          if (value == "" ) then
            msg="Cannot determine znucl"
            LIBPAW_ERROR(msg)
@@ -446,12 +446,12 @@ select case(name)
          ival=ival+1
 
          value = getValue(attributes,"n")
-         if (value == "" ) then 
-           valstate(ival)%nn=-1    
+         if (value == "" ) then
+           valstate(ival)%nn=-1
          else
            read(unit=value,fmt=*) valstate(ival)%nn
          end if
- 
+
          value = getValue(attributes,"l")
          if (value == "" ) then
            msg="Cannot determine l"
@@ -461,7 +461,7 @@ select case(name)
          if(valstate(ival)%ll>lmax) lmax=valstate(ival)%ll
 
          value = getValue(attributes,"f")
-         if (value == "" ) then 
+         if (value == "" ) then
            valstate(ival)%ff=-1.d0
          else
            read(unit=value,fmt=*) valstate(ival)%ff
@@ -549,7 +549,7 @@ select case(name)
          value = getValue(attributes,"grid")
          paw_setuploc%shape_function%grid=trim(value)
          if (value /= "" ) then
-           paw_setuploc%shape_function%gtype ="num" 
+           paw_setuploc%shape_function%gtype ="num"
            do ii=1,igrid
              if(trim(paw_setuploc%shape_function%grid)==trim(grids(ii)%id)) then
                mesh_size=grids(ii)%iend-grids(ii)%istart+1
@@ -916,10 +916,10 @@ subroutine paw_end_element1(namespaceURI,localName,name)
 character(len=*),intent(in) :: namespaceURI,localName,name
 character(len=100) :: msg,value
 
-!Just to fool abirules 
+!Just to fool abirules
  value=localName
  value=namespaceURI
- 
+
 select case(name)
 
       case ("generator")
@@ -1083,7 +1083,7 @@ if (in_data) then
     end if
   end do
 
-  if ((ndata+ntokens)>size(x)) then 
+  if ((ndata+ntokens)>size(x)) then
     msg="data array full"
     LIBPAW_ERROR(msg)
   end if
@@ -1131,7 +1131,7 @@ subroutine paw_setup_free(paw_setupin)
  integer :: ii
 
 ! *********************************************************************
- 
+
  paw_setupin%tread=.false.
  paw_setupin%atom%tread=.false.
  paw_setupin%xc_functional%tread=.false.
@@ -1233,7 +1233,7 @@ end subroutine paw_setup_free
 !!  Copy a paw_setup datastructure into another
 !!
 !! INPUTS
-!!  
+!!
 !!  paw_setupin<paw_setup_type>=input paw_setup datastructure
 !!
 !! OUTPUT
@@ -1410,7 +1410,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
        paw_setupout%ae_partial_wave(ii)%data=paw_setupin%ae_partial_wave(ii)%data
      end if
    end do
- end if 
+ end if
  if (allocated( paw_setupin%pseudo_partial_wave)) then
    sz1=size(paw_setupin%pseudo_partial_wave,1)
    LIBPAW_DATATYPE_ALLOCATE(paw_setupout%pseudo_partial_wave,(sz1))
@@ -1424,7 +1424,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
        paw_setupout%pseudo_partial_wave(ii)%data=paw_setupin%pseudo_partial_wave(ii)%data
      end if
    end do
- end if 
+ end if
   if (allocated( paw_setupin%projector_function)) then
    sz1=size(paw_setupin%projector_function,1)
    LIBPAW_DATATYPE_ALLOCATE(paw_setupout%projector_function,(sz1))
@@ -1438,7 +1438,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
        paw_setupout%projector_function(ii)%data=paw_setupin%projector_function(ii)%data
      end if
    end do
- end if 
+ end if
   if (allocated( paw_setupin%projector_fit)) then
    sz1=size(paw_setupin%projector_fit,1)
    LIBPAW_DATATYPE_ALLOCATE(paw_setupout%projector_fit,(sz1))
@@ -1449,7 +1449,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
      paw_setupout%projector_fit(ii)%factors=paw_setupin%projector_fit(ii)%factors
      paw_setupout%projector_fit(ii)%expos=paw_setupin%projector_fit(ii)%expos
    end do
- end if 
+ end if
 
 end subroutine paw_setup_copy
 !!***
@@ -1521,7 +1521,7 @@ end subroutine paw_setup_copy
  subroutine rdpawpsxml_header(ecut_tmp,filename,paw_setup)
 
 !Arguments ---------------------------------------------
- 
+
  character (len=fnlen),intent(in) :: filename
  real(dp), intent(inout) :: ecut_tmp(3,2)
  type(paw_setup_t),intent(inout) :: paw_setup
@@ -1678,8 +1678,8 @@ end subroutine paw_setup_copy
            LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
-         if (strg == "" ) then 
-           valstate(ival)%nn=-1    
+         if (strg == "" ) then
+           valstate(ival)%nn=-1
          else
            if (len(trim(strg))<=30) then
              strg1=trim(strg)
@@ -1697,7 +1697,7 @@ end subroutine paw_setup_copy
          end if
          if(valstate(ival)%ll>lmax) lmax=valstate(ival)%ll
          call paw_rdfromline(" f",line,strg,ierr)
-         if (strg == "" ) then 
+         if (strg == "" ) then
            valstate(ival)%ff=-1.d0
          else
            if (len(trim(strg))<=30) then
@@ -1830,7 +1830,7 @@ end subroutine paw_setup_copy
      call paw_rdfromline("grid",line,strg,ierr)
      paw_setup%shape_function%grid=trim(strg)
      if (strg /= "" ) then
-       paw_setup%shape_function%gtype ="num" 
+       paw_setup%shape_function%gtype ="num"
        do ii=1,igrid
          if(trim(paw_setup%shape_function%grid)==trim(grids(ii)%id)) then
            mesh_size=grids(ii)%iend-grids(ii)%istart+1
@@ -2032,8 +2032,8 @@ end subroutine paw_setup_copy
            LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
-         if (strg == "" ) then 
-           valstate(ival)%nn=-1    
+         if (strg == "" ) then
+           valstate(ival)%nn=-1
          else
            if (len(trim(strg))<=30) then
              strg1=trim(strg)
@@ -2051,7 +2051,7 @@ end subroutine paw_setup_copy
          end if
          if(valstate(ival)%ll>lmax) lmax=valstate(ival)%ll
          call paw_rdfromline(" f",line,strg,ierr)
-         if (strg == "" ) then 
+         if (strg == "" ) then
            valstate(ival)%ff=-1.d0
          else
            if (len(trim(strg))<=30) then
@@ -2184,7 +2184,7 @@ end subroutine paw_setup_copy
      call paw_rdfromline("grid",line,strg,ierr)
      paw_setup%shape_function%grid=trim(strg)
      if (strg /= "" ) then
-       paw_setup%shape_function%gtype ="num" 
+       paw_setup%shape_function%gtype ="num"
        do ii=1,igrid
          if(trim(paw_setup%shape_function%grid)==trim(grids(ii)%id)) then
            mesh_size=grids(ii)%iend-grids(ii)%istart+1
@@ -2286,9 +2286,9 @@ end subroutine paw_setup_copy
      end if
      LIBPAW_ALLOCATE(paw_setup%ae_core_density%data,(mesh_size))
      !MGNAG v7[62]
-     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657: 
-     ! Record too long for input bufferProgram terminated by I/O error on unit 9 
-     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Psps_for_tests/Al.LDA",Formatted,Sequential)
+     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657:
+     ! Record too long for input bufferProgram terminated by I/O error on unit 9
+     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Pspdir/Al.LDA",Formatted,Sequential)
      read(funit,*) (paw_setup%ae_core_density%data(ir),ir=1,mesh_size)
      cycle
    end if
@@ -2342,9 +2342,9 @@ end subroutine paw_setup_copy
      end if
      LIBPAW_ALLOCATE(paw_setup%ae_core_kinetic_energy_density%data,(mesh_size))
      !MGNAG v7[62]
-     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657: 
-     ! Record too long for input bufferProgram terminated by I/O error on unit 9 
-     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Psps_for_tests/Al.LDA",Formatted,Sequential)
+     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657:
+     ! Record too long for input bufferProgram terminated by I/O error on unit 9
+     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Pspdir/Al.LDA",Formatted,Sequential)
      read(funit,*) (paw_setup%ae_core_kinetic_energy_density%data(ir),ir=1,mesh_size)
      cycle
    end if
@@ -2661,9 +2661,9 @@ end subroutine paw_setup_copy
      do while ((msg(1:9)/=' Program:').and.(msg(1:8)/='Program:'))
        read(funit,'(a)') msg
        write(ab_out,'(a)') trim(msg)
-     end do   
+     end do
      cycle
-   end if 
+   end if
 
 !  End of reading loop
  end do
@@ -2696,7 +2696,7 @@ end subroutine paw_setup_copy
    msg="Aborting now"
    LIBPAW_ERROR(msg)
  end if
- 
+
  end subroutine rdpawpsxml
 !!***
 

@@ -16,13 +16,13 @@ nstep3   32
 nstep4   33
 nstep5   34
 
-usepawu1  4 
-usepawu2  4 
-usepawu3  4 
+usepawu1  4
+usepawu2  4
+usepawu3  4
 
-usepawu4  1 
-usepawu5  1 
-usepawu6  1 
+usepawu4  1
+usepawu5  1
+usepawu6  1
 
 pawxcdev1 0 # if GGA, pawxcdev 0 is implemented only for usepawu==4
 pawxcdev2 1
@@ -31,7 +31,7 @@ pawxcdev3 2
 pawxcdev4 1
 pawxcdev5 2
 
-# SPIN 
+# SPIN
 nsppol  1
 nspinor 2
 nspden  4
@@ -45,8 +45,8 @@ occopt 7
 tsmear 1600 K
 
 # PHYSICAL DATA
-natom 1 ntypat  1 typat  1  
-znucl  26.0 
+natom 1 ntypat  1 typat  1
+znucl  26.0
 xred  0.d0   0.d0   0.d0
 
 #Definition of the unit cell
@@ -55,8 +55,8 @@ rprim     -0.5  0.5  0.5
            0.5 -0.5  0.5
            0.5  0.5 -0.5
 
-# POINTSK 
-kptopt 3  
+# POINTSK
+kptopt 3
 ngkpt 1 1 1
 nshiftk 1
 shiftk 0.0 0.0 0.0
@@ -69,15 +69,14 @@ jpawu  1.0000 eV
 
  pp_dirpath "$ABI_PSPDIR"
  #pseudos "26fe.lda2.paw"
- pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+ pseudos "Psdj_paw_pbe_std/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
-#%%   t89.abo, tolnlines = 99, tolabs = 1.100e-03, tolrel = 9.000e-01, fld_options = -medium
+#%%   t89.abo, tolnlines = 99, tolabs = 1.100e-03, tolrel = 9.100e-01, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

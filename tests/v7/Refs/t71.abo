@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,14 +16,14 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h13 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t71/t71.abi
 - output file    -> t71.abo
 - root for input  files -> t71i
 - root for output files -> t71o
 
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -224,9 +224,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.51316612
@@ -469,9 +469,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.51316612
@@ -507,91 +507,91 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT  2  -10.788280396354    -1.971E-02 7.082E-08 3.672E-01
  ETOT  3  -10.780446601742     7.834E-03 1.738E-06 5.041E-04
  ETOT  4  -10.784682285211    -4.236E-03 5.257E-09 3.117E-07
- Outer loop step  2 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  2 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  4.236E-03 > toldfe=  1.000E-12
  ETOT  5  -10.800906552664    -1.622E-02 2.040E-06 1.639E-01
  ETOT  6  -10.800980670864    -7.412E-05 1.006E-06 1.102E-02
  ETOT  7  -10.795557164862     5.424E-03 4.456E-08 4.717E-05
  ETOT  8  -10.796414547213    -8.574E-04 8.272E-11 1.423E-08
- Outer loop step  3 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  3 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  8.574E-04 > toldfe=  1.000E-12
  ETOT  9  -10.792571221218     3.843E-03 3.504E-06 4.809E-03
  ETOT 10  -10.793268313100    -6.971E-04 3.422E-08 4.957E-04
  ETOT 11  -10.794052887602    -7.846E-04 1.519E-09 9.472E-08
  ETOT 12  -10.793909866502     1.430E-04 2.072E-12 3.142E-10
- Outer loop step  4 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  4 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  1.430E-04 > toldfe=  1.000E-12
  ETOT 13  -10.793795997241     1.139E-04 1.893E-08 9.254E-05
  ETOT 14  -10.793296564999     4.994E-04 3.693E-10 7.995E-06
  ETOT 15  -10.793368473730    -7.191E-05 2.224E-11 1.835E-08
  ETOT 16  -10.793350756755     1.772E-05 1.055E-13 2.050E-12
- Outer loop step  5 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  5 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  1.772E-05 > toldfe=  1.000E-12
  ETOT 17  -10.793123391064     2.274E-04 6.215E-10 7.393E-06
  ETOT 18  -10.793135636083    -1.225E-05 4.021E-11 8.082E-07
  ETOT 19  -10.793166993036    -3.136E-05 2.338E-12 1.039E-10
  ETOT 20  -10.793161361430     5.632E-06 3.469E-15 1.678E-13
- Outer loop step  6 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  6 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  5.632E-06 > toldfe=  1.000E-12
  ETOT 21  -10.793163707596    -2.346E-06 6.589E-11 2.004E-07
  ETOT 22  -10.793142369216     2.134E-05 8.425E-13 1.878E-08
  ETOT 23  -10.793146215554    -3.846E-06 5.838E-14 2.436E-11
  ETOT 24  -10.793145359144     8.564E-07 1.590E-16 9.011E-15
- Outer loop step  7 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  7 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  8.564E-07 > toldfe=  1.000E-12
  ETOT 25  -10.793133804026     1.156E-05 2.477E-12 9.935E-09
  ETOT 26  -10.793134667859    -8.638E-07 4.801E-14 1.111E-09
  ETOT 27  -10.793135799482    -1.132E-06 3.256E-15 2.103E-13
  ETOT 28  -10.793135594335     2.051E-07 5.347E-18 9.508E-16
- Outer loop step  8 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  8 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  2.051E-07 > toldfe=  1.000E-12
  ETOT 29  -10.793136250203    -6.559E-07 2.762E-13 4.046E-10
  ETOT 30  -10.793135218640     1.032E-06 1.766E-15 3.942E-11
  ETOT 31  -10.793135404967    -1.863E-07 1.144E-16 3.283E-14
  ETOT 32  -10.793135365885     3.908E-08 2.614E-19 1.600E-17
- Outer loop step  9 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step  9 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  3.908E-08 > toldfe=  1.000E-12
  ETOT 33  -10.793134788749     5.771E-07 1.405E-14 1.209E-11
  ETOT 34  -10.793134877386    -8.864E-08 5.872E-17 1.333E-12
  ETOT 35  -10.793134915719    -3.833E-08 3.821E-18 3.543E-16
  ETOT 36  -10.793134908595     7.124E-09 7.000E-21 6.011E-19
- Outer loop step 10 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step 10 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  7.124E-09 > toldfe=  1.000E-12
  ETOT 37  -10.793134960363    -5.177E-08 1.364E-15 7.968E-13
  ETOT 38  -10.793134904103     5.626E-08 3.803E-18 7.780E-14
  ETOT 39  -10.793134912669    -8.566E-09 2.365E-19 5.188E-17
  ETOT 40  -10.793134910918     1.751E-09 4.364E-22 5.344E-20
- Outer loop step 11 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step 11 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  1.751E-09 > toldfe=  1.000E-12
  ETOT 41  -10.793134881184     2.973E-08 8.463E-17 1.438E-14
  ETOT 42  -10.793134889097    -7.913E-09 9.394E-20 1.602E-15
  ETOT 43  -10.793134890379    -1.282E-09 4.177E-21 7.656E-19
  ETOT 44  -10.793134890133     2.453E-10 9.536E-24 1.184E-21
- Outer loop step 12 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step 12 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  2.453E-10 > toldfe=  1.000E-12
  ETOT 45  -10.793134893915    -3.782E-09 7.451E-18 1.683E-15
  ETOT 46  -10.793134890354     3.561E-09 7.981E-21 1.697E-16
  ETOT 47  -10.793134890772    -4.185E-10 5.201E-22 5.820E-20
  ETOT 48  -10.793134890691     8.149E-11 7.202E-25 3.014E-22
- Outer loop step 13 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step 13 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  8.149E-11 > toldfe=  1.000E-12
  ETOT 49  -10.793134889062     1.629E-09 5.250E-19 1.319E-17
  ETOT 50  -10.793134889762    -6.994E-10 1.892E-22 1.253E-18
  ETOT 51  -10.793134889793    -3.123E-11 3.395E-24 2.907E-21
  ETOT 52  -10.793134889786     6.944E-12 1.984E-26 9.192E-24
- Outer loop step 14 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step 14 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  6.944E-12 > toldfe=  1.000E-12
  ETOT 53  -10.793134890052    -2.662E-10 4.978E-20 3.979E-18
  ETOT 54  -10.793134889797     2.552E-10 1.274E-22 4.549E-19
  ETOT 55  -10.793134889820    -2.274E-11 1.536E-24 1.065E-22
  ETOT 56  -10.793134889815     4.135E-12 1.643E-27 3.740E-24
- Outer loop step 15 - inner step  4 - frozen Fock etot NOT converged : 
+ Outer loop step 15 - inner step  4 - frozen Fock etot NOT converged :
   diff in etot=  4.135E-12 > toldfe=  1.000E-12
  ETOT 57  -10.793134889719     9.610E-11 5.011E-21 1.211E-20
  ETOT 58  -10.793134889780    -6.054E-11 1.141E-23 3.262E-22
  ETOT 59  -10.793134889780     3.055E-13 2.587E-27 2.526E-24
  ETOT 60  -10.793134889780     1.421E-14 2.824E-29 1.684E-25
- Outer loop step 16 - inner step  4 - frozen Fock etot converged : 
+ Outer loop step 16 - inner step  4 - frozen Fock etot converged :
   for the second time, diff in etot=  1.421E-14 < toldfe=  1.000E-12
  ETOT 61  -10.793134889798    -1.877E-11 1.585E-21 1.025E-20
 
@@ -765,7 +765,7 @@ total_energy_dc_eV  : -2.93696136537840E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.7406526010E+00  6.7406526010E+00  6.7406526010E+00 Bohr
               amu      1.20110000E+01
@@ -927,7 +927,7 @@ P           mkmem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -939,12 +939,12 @@ P           mkmem           4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -962,7 +962,7 @@ P           mkmem           4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -977,7 +977,7 @@ P           mkmem           4
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

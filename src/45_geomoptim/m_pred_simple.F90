@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,7 +79,7 @@ subroutine pred_simple(ab_mover,hist,iexit)
 
 !Local variables-------------------------------
 !scalars
- integer  :: ihist_next,kk,jj
+ integer  :: ihist_next,kk
 
 !***************************************************************************
 !Beginning of executable session
@@ -93,24 +93,18 @@ subroutine pred_simple(ab_mover,hist,iexit)
 
 !XRED, FCART and VEL
  ihist_next = abihist_findIndex(hist,+1)
- do kk=1,ab_mover%natom
-   do jj=1,3
-     hist%xred(jj,kk, ihist_next)=hist%xred (jj,kk,hist%ihist)
-     hist%fcart(jj,kk,ihist_next)=hist%fcart(jj,kk,hist%ihist)
-     hist%vel(jj,kk,ihist_next)=hist%vel(jj,kk,hist%ihist)
-   end do
+ do kk = 1, ab_mover%natom
+  hist%xred(:, kk, ihist_next) = hist%xred(:, kk, hist%ihist)
+  hist%fcart(:, kk, ihist_next) = hist%fcart(:, kk, hist%ihist)
+  hist%vel(:, kk, ihist_next) = hist%vel(:, kk, hist%ihist)
  end do
 
 !ACELL
- do jj=1,3
-   hist%acell(jj,ihist_next)=hist%acell(jj,hist%ihist)
- end do
+   hist%acell(1:3,ihist_next)=hist%acell(1:3,hist%ihist)
 
 !RPRIMD
  do kk=1,3
-   do jj=1,3
-     hist%rprimd(jj,kk,ihist_next)=hist%rprimd(jj,kk,hist%ihist)
-   end do
+     hist%rprimd(1:3,kk,ihist_next)=hist%rprimd(1:3,kk,hist%ihist)
  end do
 
  hist%ihist=ihist_next

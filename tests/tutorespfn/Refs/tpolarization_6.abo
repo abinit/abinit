@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h04 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_tpolarization_6/tpolarization_6.abi
 - output file    -> tpolarization_6.abo
 - root for input  files -> tpolarization_6i
@@ -365,8 +365,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.513   => boxcut(ratio)=   2.08150
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -380,8 +380,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.024864   -0.802189
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -471,13 +471,13 @@ tolerances: {toldfe: 1.00E-15, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.834480841E-04   0.834480841E-04   0.834480841E-04
-     Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01  
+     Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01
      Total:                        -0.282749185E-01  -0.282749185E-01  -0.282749185E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.477446223E-02   0.477446223E-02   0.477446223E-02
-     Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01  
+     Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01
      Total:                        -0.161774272E+01  -0.161774272E+01  -0.161774272E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -616,7 +616,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     167.843     167.817
   initberry: for direction 2, nkstr =   6, nstr =    144
   initberry: for direction 3, nkstr =   6, nstr =    144
 
- initberry: COMMENT - 
+ initberry: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.17 eV.
@@ -690,13 +690,13 @@ tolerances: {toldfe: 1.00E-15, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.127353384E-03   0.127353384E-03   0.127353383E-03
-     Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01  
+     Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01
      Total:                        -0.282310132E-01  -0.282310132E-01  -0.282310132E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.728649348E-02   0.728649347E-02   0.728649341E-02
-     Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01  
+     Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01
      Total:                        -0.161523068E+01  -0.161523068E+01  -0.161523068E+01
 
  Stress tensor under a constant electric field:
@@ -805,21 +805,21 @@ band_energy         : -4.47154099313023E-02
 
 Constant unreduced E calculation  - final values:
  (a. u.)
-       E:   1.000000000E-04   1.000000000E-04   1.000000000E-04  
+       E:   1.000000000E-04   1.000000000E-04   1.000000000E-04
        P:  -2.823101317E-02  -2.823101317E-02  -2.823101317E-02
 
-    ebar:   1.028537242E-03   1.028537242E-03   1.028537242E-03  
+    ebar:   1.028537242E-03   1.028537242E-03   1.028537242E-03
     pbar:  -3.648852854E+00  -3.648852854E+00  -3.648852854E+00
 
-       e:   2.104603012E-04   2.104603012E-04   2.104603012E-04  
+       e:   2.104603012E-04   2.104603012E-04   2.104603012E-04
        p:  -7.466318569E-01  -7.466318569E-01  -7.466318568E-01
 
  (S.I.), that is V/m for E, and C/m^2 for P
--      E:   5.142206319E+07   5.142206319E+07   5.142206319E+07  
-       P:  -1.615230685E+00  -1.615230685E+00  -1.615230685E+00  
+-      E:   5.142206319E+07   5.142206319E+07   5.142206319E+07
+       P:  -1.615230685E+00  -1.615230685E+00  -1.615230685E+00
 
 
- Please check: COMMENT - 
+ Please check: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.17 eV.
@@ -868,7 +868,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     167.843     167.817
   initberry: for direction 2, nkstr =   6, nstr =    144
   initberry: for direction 3, nkstr =   6, nstr =    144
 
- initberry: COMMENT - 
+ initberry: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.17 eV.
@@ -942,13 +942,13 @@ tolerances: {toldfe: 1.00E-15, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.395932665E-04   0.395932667E-04   0.395932668E-04
-     Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01  
+     Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01
      Total:                        -0.283187733E-01  -0.283187733E-01  -0.283187733E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.226531930E-02   0.226531931E-02   0.226531931E-02
-     Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01  
+     Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01
      Total:                        -0.162025186E+01  -0.162025186E+01  -0.162025186E+01
 
  Stress tensor under a constant electric field:
@@ -1057,21 +1057,21 @@ band_energy         : -4.47086971171811E-02
 
 Constant unreduced E calculation  - final values:
  (a. u.)
-       E:  -1.000000000E-04  -1.000000000E-04  -1.000000000E-04  
+       E:  -1.000000000E-04  -1.000000000E-04  -1.000000000E-04
        P:  -2.831877329E-02  -2.831877329E-02  -2.831877329E-02
 
-    ebar:  -1.028537242E-03  -1.028537242E-03  -1.028537242E-03  
+    ebar:  -1.028537242E-03  -1.028537242E-03  -1.028537242E-03
     pbar:  -3.660195832E+00  -3.660195832E+00  -3.660195832E+00
 
-       e:  -2.104603012E-04  -2.104603012E-04  -2.104603012E-04  
+       e:  -2.104603012E-04  -2.104603012E-04  -2.104603012E-04
        p:  -7.489528681E-01  -7.489528681E-01  -7.489528681E-01
 
  (S.I.), that is V/m for E, and C/m^2 for P
--      E:  -5.142206319E+07  -5.142206319E+07  -5.142206319E+07  
-       P:  -1.620251859E+00  -1.620251859E+00  -1.620251859E+00  
+-      E:  -5.142206319E+07  -5.142206319E+07  -5.142206319E+07
+       P:  -1.620251859E+00  -1.620251859E+00  -1.620251859E+00
 
 
- Please check: COMMENT - 
+ Please check: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.17 eV.
@@ -1090,7 +1090,7 @@ Constant unreduced E calculation  - final values:
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.2728565836E+00  7.2728565836E+00  7.2728565836E+00 Bohr
               amu      3.09737620E+01  2.69815390E+01
@@ -1399,7 +1399,7 @@ P           mkmem31        91
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1416,12 +1416,12 @@ P           mkmem31        91
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1439,7 +1439,7 @@ P           mkmem31        91
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

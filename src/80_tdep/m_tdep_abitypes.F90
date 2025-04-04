@@ -12,10 +12,7 @@ module m_tdep_abitypes
   use m_nctk
   use m_xmpi
   use m_errors
-#ifdef HAVE_NETCDF
   use netcdf
-#endif
-  use m_ddb_hdr,          only : ddb_hdr_type
   use m_geometry,         only : xred2xcart
   use m_dynmat,           only : asrif9, d2cart_to_red
   use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
@@ -25,11 +22,14 @@ module m_tdep_abitypes
   use m_tdep_sym,         only : Symetries_type
   use m_tdep_shell,       only : Shell_type
   use m_ifc,              only : ifc_type
-  use m_crystal,          only : crystal_t, crystal_init
+  use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
-  use m_kpts,             only : smpbz
+  use m_ddb_hdr,          only : ddb_hdr_type
+  use m_dynmat,           only : gtdyn9, d2cart_to_red
+  use m_kpts,             only : smpbz, kpts_ibz_from_kptrlatt
   use m_copy,             only : alloc_copy
   use m_symkpt,           only : symkpt
+  use m_matrix,           only : mat33det
 
   implicit none
 
@@ -51,7 +51,6 @@ module m_tdep_abitypes
   public :: tdep_init_ddb
   public :: tdep_write_ddb
   public :: tdep_destroy_qbz
-  public :: tdep_destroy_ddb
 
 contains
 
@@ -75,10 +74,11 @@ contains
   use_antiferro=.false.
   remove_inv=.false.
   npsp=Invar%ntypat
-  ABI_MALLOC(zion,(Invar%ntypat)) ; zion(:)=zero
-  ABI_MALLOC(znucl,(npsp)) ; znucl(:)=zero
   ABI_MALLOC(title,(Invar%ntypat))
-  call crystal_init(Invar%amu,Crystal,Sym%spgroup,Invar%natom_unitcell,npsp,&
+  ABI_MALLOC(zion,(Invar%ntypat)) ; zion(:)=one
+  ABI_MALLOC(znucl,(Invar%ntypat)) ; znucl(:)=one
+  if (allocated(Invar%znucl)) znucl = Invar%znucl
+  call crystal%init(Invar%amu,Sym%spgroup,Invar%natom_unitcell,npsp,&
 &   Invar%ntypat,Sym%nsym,Lattice%rprimdt,Invar%typat_unitcell,Sym%xred_zero,&
 &  zion,znucl,timrev,use_antiferro,remove_inv,title,&
 !BUG&  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
@@ -154,11 +154,12 @@ contains
   else
     q1shft(:,:)=0.5d0
   end if
+
   call ifc%init(Crystal,DDB,Lattice%brav,asr,symdynmat,dipdip,&
 !LOTO Keep the correct definition of the Lattice
 !LOTO  call ifc_init(Ifc,Crystal,DDB,1,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
-  prtsrlr,enunit,XMPI_WORLD)
+  prtsrlr,enunit,XMPI_WORLD, prtout=.false.)
 
   ABI_FREE(q1shft)
   ABI_FREE(qdrp_cart)
@@ -183,7 +184,7 @@ contains
 !   Write the Phi2.dat file
     if (Invar%debug.and.MPIdata%iam_master) then
       write(Invar%stdout,'(a)') ' See the Phi2.dat file corresponding to the ifc_in.dat file'
-      open(unit=55,file=trim(Invar%output_prefix)//'Phi2.dat')
+      open(unit=55,file=trim(Invar%output_prefix)//'_Phi2.dat')
       do iatom=1,3*Invar%natom
         write(55,'(10000(f10.6,1x))') Phi2%SR(iatom,:)
       end do
@@ -306,8 +307,8 @@ contains
     Qbz%qibz_cart(:,iq_ibz)=matmul(Crystal%gprimd,Qbz%qibz(:,iq_ibz))
   end do
   if (MPIdata%iam_master) then
-    open(unit=40,file=trim(Invar%output_prefix)//'qbz.dat')
-    open(unit=41,file=trim(Invar%output_prefix)//'iqbz.dat')
+    open(unit=40,file=trim(Invar%output_prefix)//'_qbz.dat')
+    open(unit=41,file=trim(Invar%output_prefix)//'_iqbz.dat')
     do iq_ibz=1,Qbz%nqbz
       write(40,'(i4,7(1x,f10.6))') iq_ibz,Qbz%qbz(1:3,iq_ibz),Qbz%wtq(iq_ibz),Qbz%qbz_cart(1:3,iq_ibz)
     end do
@@ -323,199 +324,32 @@ contains
  end subroutine tdep_init_ddb
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! GA: This routine is no longer called in the code.
-!     I updated the DDB io, but it has not been tested for this routine.
- subroutine tdep_write_ddb(Crystal,DDB,Eigen2nd,Invar,Lattice,MPIdata,Qbz,Sym)
+ subroutine tdep_write_ddb(DDB,Crystal,Invar)
 
   implicit none
-  type(crystal_t),intent(in) :: Crystal
+  type(crystal_t),intent(inout) :: Crystal
   type(ddb_type),intent(inout) :: DDB
-  type(Eigen_type),intent(in) :: Eigen2nd
   type(Input_type),intent(in) :: Invar
-  type(Lattice_type),intent(in) :: Lattice
-  type(Qbz_type),intent(in) :: Qbz
-  type(Symetries_type),intent(in) :: Sym
-  type(MPI_enreg_type), intent(in) :: MPIdata
 
-  integer :: choice,mband,mpert,msize,unddb,iq_ibz,iatom
-  integer :: jatom,ii,jj,nblok,counter
+  character (len=fnlen):: filename
   type(ddb_hdr_type) :: ddb_hdr
-  character(len=fnlen) :: filename,filename_bis
-  character(len=500) :: message
 
-! Test !!!!!!!!!!!!!
-  integer :: natom_uc,comm,unitfile
-  integer :: nqshft
-  integer :: ngqpt(3)
-  real(dp) :: dielt(3,3)
-  real(dp),allocatable :: zeff(:,:,:)
-  real(dp),allocatable :: qshft(:,:)
-  real(dp),allocatable :: d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
-  real(dp),allocatable :: qdrp_cart(:,:,:,:)
-  type(ifc_type) :: Ifc_tmp
-  type(crystal_t) :: Crystal_tmp
-
-!FB  nblok=Qbz%nqibz
-
-!GA: I am confused whether nblok should be nqbz or nqibz
-!    In the previous implementation, nblok was set to nqbz
-!    but the number of block written to file was nqibz
-  nblok=Qbz%nqibz
-  choice=2
-  mband=1
-!FB  mpert=Invar%natom_unitcell+6
-  mpert=Invar%natom_unitcell
-  msize=3*mpert*3*mpert
-
-!FB  write(Invar%stdlog,*) 'BEFORE INIT VAL'
-  ABI_MALLOC(d2cart,(2,3,Invar%natom_unitcell,3,Invar%natom_unitcell));d2cart=zero
-  ABI_MALLOC(d2red ,(2,3,Invar%natom_unitcell,3,Invar%natom_unitcell));d2red =zero
-! Fill the DDB%val and DDB%flg datatype
-  ddb%flg(:,:)=zero
-!FB  write(Invar%stdlog,*) ' In cartesian coordinates'
-  do iq_ibz=1,Qbz%nqibz
-!FB  do iq_ibz=1,Qbz%nqbz
-!FB    write(Invar%stdlog,*) 'qpt=',iq_ibz
-    d2cart=zero ; d2red=zero
-    do jatom=1,Invar%natom_unitcell
-      do jj=1,3
-        do iatom=1,Invar%natom_unitcell
-          do ii=1,3
-            counter=counter+1
-            d2cart(1,ii,iatom,jj,iatom) =Eigen2nd%dynmat(1,ii,iatom,jj,jatom,iq_ibz)
-            d2cart(2,ii,iatom,jj,iatom) =Eigen2nd%dynmat(2,ii,iatom,jj,jatom,iq_ibz)
-!FB            write(Invar%stdlog,'(a,4i4,2d22.14)')'In cart :',ii,iatom,jj,jatom,d2cart(1,ii,iatom,jj,iatom),d2cart(2,ii,iatom,jj,iatom)
-          end do
-        end do
-      end do
-    end do
-!FB    write(Invar%stdlog,*) ' '
-    call d2cart_to_red(d2cart,d2red,Crystal%gprimd,Crystal%rprimd,mpert, &
-&                      Invar%natom_unitcell,Invar%ntypat,Crystal%typat,Crystal%ucvol,Crystal%zion)
-    counter=0
-    do jatom=1,Invar%natom_unitcell
-      do jj=1,3
-        do iatom=1,Invar%natom_unitcell
-          do ii=1,3
-            counter=counter+1
-            DDB%val(1,counter,iq_ibz) =d2red(1,ii,iatom,jj,jatom)
-            DDB%val(2,counter,iq_ibz) =d2red(2,ii,iatom,jj,jatom)
-            DDB%flg(counter,iq_ibz)=1
-!FB            write(Invar%stdlog,'(a,4i4,2d22.14)')'In red :',ii,iatom,jj,jatom,DDB%val(1,counter,iq_ibz),DDB%val(2,counter,iq_ibz)
-          end do
-        end do
-      end do
-    end do
-  end do
-  ABI_FREE(d2cart)
-  ABI_FREE(d2red)
-
-!FB  write(Invar%stdlog,*) 'BEFORE ERROR'
-! Print the header of the DDB
-  unddb=16
-  filename = trim(Invar%output_prefix)//'_DDB'
-  filename_bis = 'input.DDB'
+  ! Initialize ddb_hdr manually
+  !write(Invar%stdout,'(a)') ' Writing DDB'
+  call ddb_hdr%init_from_crystal(Crystal)
   ddb_hdr%dscrpt = "DDB from TDEP"
-  ddb_hdr%nblok = nblok
-  ddb_hdr%mblktyp = choice
 
-  ddb_hdr%matom=20
-  if (Invar%natom_unitcell.gt.ddb_hdr%matom) then
-    write(message, '(a,i3,a,i3,a)' )&
-&   ' natom ',Invar%natom_unitcell,' is greater than matom ',ddb_hdr%matom,' !'
-    ABI_ERROR(message)
-  end if
-  ddb_hdr%mband=mband
-  ddb_hdr%mkpt=1
-  ddb_hdr%msym=48
-  if (Sym%nsym.gt.ddb_hdr%msym) then
-    write(message, '(a,i3,a,i3,a)' )&
-&   ' nsym ',Sym%nsym,' is greater than msym ',ddb_hdr%msym,' !'
-    ABI_ERROR(message)
-  end if
-  ddb_hdr%mtypat=5
-  if (Invar%ntypat.gt.ddb_hdr%mtypat) then
-    write(message, '(a,i3,a,i3,a)' )&
-&   ' nsym ',Invar%ntypat,' is greater than mtypat ',ddb_hdr%mtypat,' !'
-    ABI_ERROR(message)
-  end if
-  ddb_hdr%ddb_version=100401
+  ddb_hdr%mpert = DDB%mpert
+  ddb_hdr%nblok = DDB%nblok
+  ABI_MALLOC(ddb_hdr%typ,(ddb_hdr%nblok))
+  ddb_hdr%typ = DDB%typ
 
-!FB  write(Invar%stdlog,*) 'BEFORE CONSTANT'
-  ddb_hdr%dilatmx=0
-  ddb_hdr%ecut=0
-  ddb_hdr%ecutsm=0
-  ddb_hdr%intxc=0
-  ddb_hdr%iscf=0
-  ddb_hdr%ixc=0
-  ddb_hdr%kptnrm=0
-  ddb_hdr%ngfft=1
-  ddb_hdr%nkpt=1
-  ddb_hdr%nspden=0
-  ddb_hdr%nspinor=0
-  ddb_hdr%nsppol=1
-  ddb_hdr%occopt=0
-  ddb_hdr%pawecutdg=0
-  ddb_hdr%dfpt_sciss=0
-  ddb_hdr%tolwfr=0
-  ddb_hdr%tphysel=0
-  ddb_hdr%tsmear=0
-  ddb_hdr%usepaw=0
-
-  ddb_hdr%natom=Invar%natom_unitcell
-  ddb_hdr%nsym=Sym%nsym
-  ddb_hdr%ntypat=Invar%ntypat
-
-!FB  write(Invar%stdlog,*) 'BEFORE MALLOC'
-!FB TO REMOVE  call ddb_hdr_malloc(ddb_hdr)
-  call ddb_hdr%malloc()
-
-!FB  write(Invar%stdlog,*) 'BEFORE TABS'
-  ddb_hdr%acell=Lattice%acell_unitcell
-  ddb_hdr%rprim=Lattice%rprimt
-  ddb_hdr%amu=Invar%amu
-  ddb_hdr%nband=1
-  ddb_hdr%symafm=0
-!BUG  ddb_hdr%symrel=Sym%ptsymrel
-  ddb_hdr%symrel=Sym%symrel
-  ddb_hdr%typat=Invar%typat_unitcell
-  ddb_hdr%kpt=0
-  ddb_hdr%occ=0
-  ddb_hdr%spinat=0
-  ddb_hdr%tnons=Sym%tnons
-  ddb_hdr%wtk=0
-  ddb_hdr%xred=Sym%xred_zero
-  ddb_hdr%zion=0
-  ddb_hdr%znucl=0
-
-  ddb%mpert = mpert
-  ddb%msize = msize
-
-  if (MPIdata%iam_master) then
-
-    call ddb%write(ddb_hdr, filename)
-
-  end if  
-
-!!!!!!!!! Test !!!!!!!!
-  nqshft=1
-!FB  ngqpt=Invar%ngqpt1/2.d0
-  ngqpt=Invar%ngqpt1
-  ABI_MALLOC(qshft,(3,nqshft))
-  qshft(:,:)=0.5d0
-  ABI_MALLOC(qdrp_cart,(3,3,3,Invar%natom_unitcell))
-!FB  qshft(:,:)=0.0d0
-  if (MPIdata%iam_master) then
-    comm=xmpi_world
-    !FB  call ifc_tmp%from_file(dielt,trim(filename_bis),natom_uc,ngqpt,nqshft,qshft,Crystal_tmp,zeff,comm)
-    call ifc_tmp%from_file(dielt,trim(filename),natom_uc,ngqpt,nqshft,qshft,Crystal_tmp,zeff,qdrp_cart,comm)
-    unitfile=2
-    call tdep_write_ifc(Crystal_tmp,Ifc_tmp,Invar,Invar%natom_unitcell,unitfile)
-  end if
-  ABI_FREE(qdrp_cart)
-  ABI_FREE(qshft)
+  filename = trim(Invar%output_prefix)//'_DDB'
+  call DDB%write(ddb_hdr, filename)
+  call ddb_hdr%free()
 
  end subroutine tdep_write_ddb
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_read_ifc(Ifc,Invar,natom_unitcell)
@@ -542,10 +376,10 @@ subroutine tdep_read_ifc(Ifc,Invar,natom_unitcell)
   end if
   if (Invar%readifc==1) then
     write(Invar%stdout,'(a)') ' Read the IFC from ifc_in.dat'
-    open(unit=40,file=trim(Invar%input_prefix)//'ifc_in.dat')
+    open(unit=40,file=trim(Invar%input_prefix)//'_ifc_in.dat')
   else if (Invar%readifc==2) then
     write(Invar%stdout,'(a)') ' Read the IFC from ifc_out.dat'
-    open(unit=40,file=trim(Invar%output_prefix)//'ifc_out.dat')
+    open(unit=40,file=trim(Invar%output_prefix)//'_ifc_out.dat')
   end if
   read(40,*) string
   read(40,*) string
@@ -645,31 +479,29 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
   prt_ifc = 1
   if (unitfile.eq.0) then
     write(Invar%stdout,'(a)') ' Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)'
-    open(unit=77,file=trim(Invar%output_prefix)//'ifc_out.dat')
+    open(unit=77,file=trim(Invar%output_prefix)//'_ifc_out.dat')
   else if (unitfile.eq.1) then
     write(Invar%stdout,'(a)') ' Write in ifc_check.dat (and ifc_check.nc) the IFC read previously'
-    open(unit=77,file=trim(Invar%output_prefix)//'ifc_check.dat')
+    open(unit=77,file=trim(Invar%output_prefix)//'_ifc_check.dat')
   else if (unitfile.eq.2) then
     write(Invar%stdout,'(a)') ' Write in ifc_ddb.dat (and ifc_ddb.nc) the IFC read from DDB file'
-    open(unit=77,file=trim(Invar%output_prefix)//'ifc_ddb.dat')
+    open(unit=77,file=trim(Invar%output_prefix)//'_ifc_ddb.dat')
   else
     write(message, '(a,i3,a)' )&
 &   ' The value of unitfile ',unitfile,' is not allowed.'
     ABI_ERROR(message)
   end if
-#ifdef HAVE_NETCDF
   if (unitfile.eq.0) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_out.nc", xmpi_comm_self), "Creating ifc_out.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"_ifc_out.nc", xmpi_comm_self), "Creating ifc_out.nc")
   else if (unitfile.eq.1) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_check.nc", xmpi_comm_self), "Creating ifc_check.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"_ifc_check.nc", xmpi_comm_self), "Creating ifc_check.nc")
   else if (unitfile.eq.2) then
-    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"ifc_ddb.nc", xmpi_comm_self), "Creating ifc_ddb.nc")
+    NCF_CHECK_MSG(nctk_open_create(ncid, trim(Invar%output_prefix)//"_ifc_ddb.nc", xmpi_comm_self), "Creating ifc_ddb.nc")
   end if
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
   NCF_CHECK(crystal%ncwrite(ncid))
-  call ifc%write(ifcana,atifc,ifcout,prt_ifc,ncid,77)
-#endif
+  call ifc%write(ifcana,atifc,ifcout,prt_ifc,ncid,Invar%output_prefix,77)
   close(77)
   write(Invar%stdout,'(a)') ' ------- achieved'
 
@@ -847,18 +679,4 @@ end subroutine tdep_ifc2phi2
  end subroutine tdep_destroy_qbz
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_destroy_ddb(DDB)
-
-  implicit none
-  type(ddb_type),intent(inout) :: DDB
-
-  ABI_FREE(DDB%flg)
-  ABI_FREE(DDB%nrm)
-  ABI_FREE(DDB%qpt)
-  ABI_FREE(DDB%typ)
-  ABI_FREE(DDB%val)
-  ABI_FREE(DDB%amu)
-
- end subroutine tdep_destroy_ddb
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end module m_tdep_abitypes

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2017-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,7 +107,7 @@ module m_xgScalapack
     integer :: openblas_get_num_threads
 #endif
 #ifdef HAVE_LINALG_NVPL_THREADS
-    integer :: nvpl_get_max_threads
+    integer :: nvpl_blas_get_max_threads
 #endif
     integer :: nthread
 #ifdef HAVE_LINALG_SCALAPACK
@@ -136,7 +136,7 @@ module m_xgScalapack
 #elif HAVE_LINALG_OPENBLAS_THREADS
     nthread =  openblas_get_num_threads()
 #elif HAVE_LINALG_NVPL_THREADS
-    nthread =  nvpl_get_max_threads()
+    nthread =  nvpl_blas_get_max_threads()
 #else
     nthread = xomp_get_num_threads(open_parallel=.true.)
     if ( nthread == 0 ) nthread = 1

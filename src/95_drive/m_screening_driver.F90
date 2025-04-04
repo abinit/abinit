@@ -6,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,7 +38,7 @@ module m_screening_driver
  use m_distribfft
  use m_crystal
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
@@ -48,9 +48,7 @@ module m_screening_driver
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_get_valence_idx, ebands_get_occupied, &
-                             ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init, &
-                             gaps_t, ebands_get_gaps
+ use m_ebands,        only : ebands_t,  gaps_t
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, get_ng0sh, find_qmesh
  use m_kg,            only : getph
  use m_gsphere,       only : gsphere_t, setshells
@@ -184,7 +182,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat, ncerr
  real(dp) :: compch_fft,compch_sph,domegareal,e0,ecore,ecut_eff,ecutdg_eff
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
- real(dp) :: alpha,rhoav,factor,ec_gm
+ real(dp) :: alpha,rhoav,factor,ec_gm,el_temp
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  logical :: found,iscompatibleFFT,is_dfpt=.false.,use_tr,is_first_qcalc
  logical :: add_chi0_intraband,update_energies,call_pawinit
@@ -304,9 +302,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  k0(:)=zero
  call pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
-& gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=gmet,k0=k0)
+                  gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=gmet,k0=k0)
 
- call print_ngfft(ngfftf,'Dense FFT mesh used for densities and potentials')
+ call print_ngfft([std_out], ngfftf,'Dense FFT mesh used for densities and potentials')
  nfftf_tot=PRODUCT(ngfftf(1:3))
 
  ! We can intialize MPI_enreg and fft distrib here, now ngfft are known
@@ -324,7 +322,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ngfft_gw,Hdr_wfk,Hdr_local,Cryst,Kmesh,Qmesh,ks_ebands,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
  call timab(302,2,tsec) ! screening(init)
- call print_ngfft(ngfft_gw,'FFT mesh used for oscillator strengths')
+ call print_ngfft([std_out], ngfft_gw, header='FFT mesh used for oscillator strengths')
 
  nfftgw_tot=PRODUCT(ngfft_gw(1:3))
  mgfftgw   =MAXVAL (ngfft_gw(1:3))
@@ -502,9 +500,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(ks_vbik   ,(ks_ebands%nkpt, ks_ebands%nsppol))
  ABI_MALLOC(qp_vbik   ,(ks_ebands%nkpt, ks_ebands%nsppol))
 
- call ebands_update_occ(ks_ebands, Dtset%spinmagntarget, prtvol=0)
- ks_occ_idx = ebands_get_occupied(ks_ebands,tol8) ! tol8 to be consistent when the density
- ks_vbik    = ebands_get_valence_idx(ks_ebands)
+ call ks_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
+ ks_occ_idx = ks_ebands%get_occupied(tol8) ! tol8 to be consistent when the density
+ ks_vbik    = ks_ebands%get_valence_idx()
 
  ibocc(:)=MAXVAL(ks_occ_idx(:,:),DIM=1) ! Max occupied band index for each spin.
  ABI_FREE(ks_occ_idx)
@@ -624,10 +622,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
 
- call wfd%print(mode_paral='PERS')
-!FIXME: Rewrite the treatment of use_tr branches in cchi0 ...
-!Use a different nbvw for each spin.
-!Now use_tr means that one can use time-reversal symmetry.
+ call wfd%print([std_out])
+ !FIXME: Rewrite the treatment of use_tr branches in cchi0 ...
+ !Use a different nbvw for each spin.
+ !Now use_tr means that one can use time-reversal symmetry.
 
 !==================================================
 !==== Read KS band structure from the KSS file ====
@@ -698,7 +696,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 ! Initialize qp_ebands using KS bands
 ! In case of SCGW, update qp_ebands using the QPS file.
- call ebands_copy(ks_ebands, qp_ebands)
+ call ks_ebands%copy(qp_ebands)
 
  call timab(319,2,tsec) ! screening(1)
 
@@ -737,8 +735,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if
 
    ! Calculate new occ. factors and fermi level.
-   call ebands_update_occ(qp_ebands, Dtset%spinmagntarget)
-   qp_vbik(:,:) = ebands_get_valence_idx(qp_ebands)
+   call qp_ebands%update_occ(Dtset%spinmagntarget)
+   qp_vbik(:,:) = qp_ebands%get_valence_idx()
 
    ! === Update only the wfg treated with GW ===
    ! For PAW update and re-symmetrize cprj in the full BZ, TODO add rotation in spinor space
@@ -761,7 +759,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ' update of the energies in W by a scissor operator',ch10,&
    ' applying a scissor operator of [eV] : ',Ep%mbpt_sciss*Ha_eV,ch10
    call wrtout([ab_out, std_out], msg)
-   call ebands_apply_scissors(qp_ebands,Ep%mbpt_sciss)
+   call qp_ebands%apply_scissors(Ep%mbpt_sciss)
  else if (update_energies) then
    write(msg,'(4a)')&
     ' screening : performing a first self-consistency',ch10,&
@@ -771,7 +769,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call rdgw(qp_ebands,gw_fname,igwene,extrapolate=.FALSE.)
    !call rdgw(qp_ebands,gw_fname,igwene,extrapolate=.TRUE.)
    ABI_FREE(igwene)
-   call ebands_update_occ(qp_ebands, Dtset%spinmagntarget)
+   call qp_ebands%update_occ(Dtset%spinmagntarget)
  end if
 
 !========================
@@ -780,6 +778,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !* Evaluate PW part (complete charge in case of NC pseudos)
 !TODO this part has to be rewritten. If I decrease the tol on the occupations
 !I have to code some MPI stuff also if use_tr==.TRUE.
+
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  ABI_MALLOC(rhor,(nfftf,Dtset%nspden))
  ABI_MALLOC(taur,(nfftf,Dtset%nspden*Dtset%usekden))
@@ -822,10 +823,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,KS_energies%e_paw,KS_energies%e_pawdc,ipert,Dtset%ixc,&
-&   Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,Paw_an,Paw_an,&
-&   Paw_ij,Pawang,Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,&
-&   Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp)
+   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,KS_energies%entropy_paw,&
+&   ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,&
+&   Paw_an,Paw_an,Paw_ij,Pawang,Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
+&   Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
    call timab(320,2,tsec) ! screening(paw
  else
    ABI_MALLOC(Paw_ij,(0))
@@ -915,7 +916,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &   Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
 &   Dtset%nspden,Cryst%ntypat,Paw_an,Paw_ij,Pawang,Pawfgrtab,Dtset%pawprtvol,&
 &   Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,k0,Dtset%spnorbscl,&
-&   Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
+&   Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,Dtset%znucl,&
 &   nucdipmom=Dtset%nucdipmom)
 
 !  Symmetrize KS Dij
@@ -1003,7 +1004,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    if (dtset%userie == 4242) then
        call wrtout(std_out, sjoin("userie == 4242 --> Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
-       gaps = ebands_get_gaps(ks_ebands, gap_err)
+       gaps = ks_ebands%get_gaps(gap_err)
        ABI_CHECK(gap_err == 0, "gap_err")
        ! ================================
        ! Setup tau/omega mesh and weights
@@ -1149,7 +1150,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      ! Add the intraband term if required and metallic occupation scheme is used.
      add_chi0_intraband=.FALSE. !add_chi0_intraband=.TRUE.
-     if (add_chi0_intraband .and. ebands_has_metal_scheme(qp_ebands)) then
+     if (add_chi0_intraband .and. qp_ebands%has_metal_scheme()) then
 
        ABI_MALLOC_OR_DIE(chi0intra,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
 
@@ -1208,11 +1209,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ii = MIN(9, Ep%npwe)
      ABI_MALLOC(arr_99,(ii, ii))
      arr_99 = chi0(1:ii,1:ii,iomega) * ucvol
-     call print_arr(arr_99, max_r=2, unit=ab_out)
-     call print_arr(arr_99, unit=std_out)
+     call print_arr([ab_out],  arr_99, max_r=2)
+     call print_arr([std_out], arr_99)
      ABI_FREE(arr_99)
-     !call print_arr(chi0(:,:,iomega),max_r=2,unit=ab_out)
-     !call print_arr(chi0(:,:,iomega),unit=std_out)
    end do
 
    if (Ep%nomega > NOMEGA_PRINTED) then
@@ -1238,7 +1237,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
          NCF_CHECK(cryst%ncwrite(unt_susc))
-         NCF_CHECK(ebands_ncwrite(qp_ebands, unt_susc))
+         NCF_CHECK(qp_ebands%ncwrite(unt_susc))
        else
          unt_susc=Dtfil%unchi0
          if (open_file(dtfil%fnameabo_sus,msg,unit=unt_susc,status='unknown',form='unformatted') /= 0) then
@@ -1476,8 +1475,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      do iomega=1,Ep%nomega
        write(msg,'(2x,a,i4,a,2f9.4,a)')' Upper and lower wings at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
        call wrtout(ab_out, msg)
-       call print_arr(epsm1(1,:,iomega),max_r=9,unit=ab_out)
-       call print_arr(epsm1(:,1,iomega),max_r=9,unit=ab_out)
+       call print_arr([ab_out], epsm1(1,:,iomega),max_r=9)
+       call print_arr([ab_out], epsm1(:,1,iomega),max_r=9)
        call wrtout(ab_out, ch10)
      end do
    end if
@@ -1506,7 +1505,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
          NCF_CHECK(nctk_open_create(unt_em1, nctk_ncify(dtfil%fnameabo_scr), xmpi_comm_self))
          NCF_CHECK(cryst%ncwrite(unt_em1))
-         NCF_CHECK(ebands_ncwrite(qp_ebands, unt_em1))
+         NCF_CHECK(qp_ebands%ncwrite(unt_em1))
        else
          unt_em1=Dtfil%unscr
          if (open_file(dtfil%fnameabo_scr,msg,unit=unt_em1,status='unknown',form='unformatted') /= 0) then
@@ -1591,8 +1590,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call Ep%free()
  call Hdr_wfk%free()
  call Hdr_local%free()
- call ebands_free(ks_ebands)
- call ebands_free(qp_ebands)
+ call ks_ebands%free()
+ call qp_ebands%free()
  call destroy_mpi_enreg(MPI_enreg_seq)
  call littlegroup_free(ltg_q)
  ABI_FREE(Ltg_q)
@@ -1679,7 +1678,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  character(len=500) :: msg
  type(wvl_internal_type) :: wvl
 !arrays
- integer :: ng0sh_opt(3)
+ integer :: ng0sh_opt(3), units(2)
  integer,allocatable :: npwarr(:)
  integer,pointer :: gvec_kss(:,:)
  integer,pointer :: test_gvec_kss(:,:)
@@ -1691,6 +1690,8 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
 ! *************************************************************************
 
  DBG_ENTER('COLL')
+
+ units = [std_out, ab_out]
 
  ! Check for calculations that are not implemented
  ltest = ALL(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol) == Dtset%nband(1))
@@ -1806,16 +1807,14 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
  Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
 
- call Kmesh%print("K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
 
  ! === Find Q-mesh, and do setup for long wavelength limit ===
  ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  call find_qmesh(Qmesh,Cryst,Kmesh)
 
- call Qmesh%print("Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
- call Qmesh%print("Q-mesh for the screening function",ab_out ,0           ,"COLL")
+ call Qmesh%print(units, "Q-mesh for the screening function", prtvol=dtset%prtvol)
 
  do iqbz=1,Qmesh%nbz
    call qmesh%get_BZ_item(iqbz,qbz,iq_ibz,isym,itim)
@@ -1828,17 +1827,6 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
      ABI_ERROR(msg)
    end if
  end do
-
- ! This section is now performed in invars2
- ! Write the list of qpoints for the screening in netcdf format and exit.
- ! This file is used by abipy to generate multiple input files.
-! if (Dtset%nqptdm == -1) then
-!   if (my_rank==master) then
-!      ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
-!      NCF_CHECK(ncerr)
-!   end if
-!   ABI_ERROR_NODUMP("Aborting now")
-! end if
 
  if (Dtset%gw_nqlwl==0) then
    Ep%nqlwl=1
@@ -2172,11 +2160,11 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ABI_MALLOC(npwarr,(Hdr_wfk%nkpt))
  npwarr(:)=Ep%npwwfn
 
- call ebands_init(bantot,ks_ebands,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
-& doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-& Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-& dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ call ks_ebands%init(bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+                  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
+                  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+                  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+                  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 
  ! TODO modify outkss in order to calculate the eigenvalues also if NSCF calculation.
  ! this fails simply because in case of NSCF occ  are zero
@@ -2185,14 +2173,14 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  !write(std_out,*)MAXVAL(ABS(occfact(:)-ks_ebands%occ(:)))
 
  !TODO call ebands_update_occ here
- !$call ebands_update_occ(ks_ebands,spinmagntarget,Dtset%prtvol)
+ !call ks_ebands%update_occ(spinmagntarget,Dtset%prtvol)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)
  ABI_FREE(npwarr)
 
  ! Initialize abinit header for the screening part
- call hdr_init(ks_ebands,codvsn,Dtset,Hdr_out,Pawtab,pertcase0,Psps,wvl)
+ call Hdr_out%init(ks_ebands,codvsn,Dtset,Pawtab,pertcase0,Psps,wvl)
 
  ! Get Pawrhoij from the header.
  ABI_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))

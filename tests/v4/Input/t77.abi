@@ -19,14 +19,14 @@ targetpol -1.4  -1.4  -1.4
 #%% input_ddb = t76.ddb.out
 #%% test_chain = t75.abi, t76.abi, t77.abi
 #%% [files]
-#%% files_to_test = 
-#%%   t77.abo, tolnlines = 0, tolabs = 6.010e-08, tolrel = 1.000e-02, fld_options =  -easy
+#%% files_to_test =
+#%%   t77.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options =  -easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Veithen
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   AlAs, zinc-blende structure. (Test of Na Sai's technique)
 #%%   To impose a polarization on AlAs:
 #%%   compute new values of the cell parameters and atomic positions.

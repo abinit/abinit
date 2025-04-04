@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Sep 2024.
-- ( at 17h33 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.abi
+.Starting date : Tue 19 Nov 2024.
+- ( at 19h55 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.abi
 - output file    -> t56.abo
 - root for input  files -> t56i
 - root for output files -> t56o
@@ -360,8 +360,8 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -446,8 +446,8 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.266
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.2    0.000
@@ -458,9 +458,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.266
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   15.257
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -472,9 +472,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   15.257
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   15.247
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -486,9 +486,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   15.247
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   15.237
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -500,9 +500,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   15.237
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   15.228
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -514,9 +514,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   15.228
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   15.218
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -528,9 +528,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   15.218
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     51.9    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  180.0 [K], mu_e:   15.208
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -542,9 +542,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  180.0 [K], mu_e:   15.208
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     51.9    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  210.0 [K], mu_e:   15.199
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -556,9 +556,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  210.0 [K], mu_e:   15.199
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     51.8    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  240.0 [K], mu_e:   15.189
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -570,9 +570,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  240.0 [K], mu_e:   15.189
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     51.7    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  270.0 [K], mu_e:   15.179
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -584,9 +584,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  270.0 [K], mu_e:   15.179
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     51.5    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -598,9 +598,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
    6  18.426   -0.316      1.0    0.000
    7  18.426   -0.316      1.0    0.000
    8  26.686   -0.006     51.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 
 ================================================================================
@@ -736,8 +736,8 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.739
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    509.1    0.000
@@ -748,9 +748,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.739
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   15.729
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -762,9 +762,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   15.729
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   15.719
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -776,9 +776,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   15.719
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   15.710
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -790,9 +790,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   15.710
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   15.700
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -804,9 +804,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   15.700
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   15.690
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -818,9 +818,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   15.690
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  180.0 [K], mu_e:   15.681
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -832,9 +832,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  180.0 [K], mu_e:   15.681
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  210.0 [K], mu_e:   15.671
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -846,9 +846,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  210.0 [K], mu_e:   15.671
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  240.0 [K], mu_e:   15.661
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -860,9 +860,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  240.0 [K], mu_e:   15.661
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  270.0 [K], mu_e:   15.652
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -874,9 +874,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  270.0 [K], mu_e:   15.652
    6  18.426   -0.102      3.2    0.000
    7  18.426   -0.102      3.2    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.642
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -887,10 +887,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.642
    5  18.426   -0.103      3.2    5.626
    6  18.426   -0.103      3.2    0.000
    7  18.426   -0.103      3.2    0.000
-   8  26.686   -0.055      6.0    8.260
- 
+   8  26.686   -0.054      6.0    8.260
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 
 ================================================================================
@@ -1028,8 +1028,8 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   17.595
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.1    0.000
@@ -1040,9 +1040,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   17.595
    6  18.426   -0.304      1.1    0.000
    7  18.426   -0.304      1.1    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   17.589
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1054,9 +1054,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   17.589
    6  18.426   -0.313      1.1    0.000
    7  18.426   -0.313      1.1    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   17.582
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1068,9 +1068,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   17.582
    6  18.426   -0.313      1.1    0.000
    7  18.426   -0.313      1.1    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   17.575
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1082,9 +1082,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   17.575
    6  18.426   -0.313      1.1    0.000
    7  18.426   -0.313      1.1    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   17.568
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1096,9 +1096,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   17.568
    6  18.426   -0.313      1.1    0.000
    7  18.426   -0.313      1.1    0.000
    8  26.686   -0.006     52.0    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   17.561
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1110,9 +1110,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   17.561
    6  18.426   -0.313      1.1    0.000
    7  18.426   -0.313      1.1    0.000
    8  26.686   -0.006     51.9    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  180.0 [K], mu_e:   17.554
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1124,9 +1124,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  180.0 [K], mu_e:   17.554
    6  18.426   -0.313      1.1    0.000
    7  18.426   -0.313      1.1    0.000
    8  26.686   -0.006     51.9    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  210.0 [K], mu_e:   17.548
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1138,9 +1138,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  210.0 [K], mu_e:   17.548
    6  18.426   -0.313      1.1    0.000
    7  18.426   -0.313      1.1    0.000
    8  26.686   -0.006     51.8    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  240.0 [K], mu_e:   17.541
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1152,9 +1152,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  240.0 [K], mu_e:   17.541
    6  18.426   -0.313      1.1    0.000
    7  18.426   -0.313      1.1    0.000
    8  26.686   -0.006     51.7    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  270.0 [K], mu_e:   17.534
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1166,9 +1166,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  270.0 [K], mu_e:   17.534
    6  18.426   -0.314      1.0    0.000
    7  18.426   -0.314      1.0    0.000
    8  26.686   -0.006     51.5    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.527
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1180,9 +1180,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.527
    6  18.426   -0.314      1.0    0.000
    7  18.426   -0.314      1.0    0.000
    8  26.686   -0.006     51.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 
 ================================================================================
@@ -1325,21 +1325,21 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   18.045
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    509.1    0.000
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
-   5  18.426   -0.076      4.4    5.626
-   6  18.426   -0.076      4.4    0.000
-   7  18.426   -0.076      4.4    0.000
+   5  18.426   -0.076      4.3    5.626
+   6  18.426   -0.076      4.3    0.000
+   7  18.426   -0.076      4.3    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   18.041
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1351,9 +1351,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   30.0 [K], mu_e:   18.041
    6  18.426   -0.080      4.1    0.000
    7  18.426   -0.080      4.1    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   18.039
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1365,9 +1365,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   60.0 [K], mu_e:   18.039
    6  18.426   -0.082      4.0    0.000
    7  18.426   -0.082      4.0    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   18.037
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1379,9 +1379,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:   90.0 [K], mu_e:   18.037
    6  18.426   -0.083      4.0    0.000
    7  18.426   -0.083      4.0    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   18.035
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1393,9 +1393,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  120.0 [K], mu_e:   18.035
    6  18.426   -0.083      4.0    0.000
    7  18.426   -0.083      4.0    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   18.033
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1407,9 +1407,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  150.0 [K], mu_e:   18.033
    6  18.426   -0.083      4.0    0.000
    7  18.426   -0.083      4.0    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  180.0 [K], mu_e:   18.031
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1421,9 +1421,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  180.0 [K], mu_e:   18.031
    6  18.426   -0.083      4.0    0.000
    7  18.426   -0.083      4.0    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  210.0 [K], mu_e:   18.028
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1435,9 +1435,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  210.0 [K], mu_e:   18.028
    6  18.426   -0.083      3.9    0.000
    7  18.426   -0.083      3.9    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  240.0 [K], mu_e:   18.026
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1449,9 +1449,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  240.0 [K], mu_e:   18.026
    6  18.426   -0.084      3.9    0.000
    7  18.426   -0.084      3.9    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  270.0 [K], mu_e:   18.024
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1463,9 +1463,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  270.0 [K], mu_e:   18.024
    6  18.426   -0.084      3.9    0.000
    7  18.426   -0.084      3.9    0.000
    8  26.686   -0.054      6.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   18.022
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1476,10 +1476,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   18.022
    5  18.426   -0.085      3.9    5.626
    6  18.426   -0.085      3.9    0.000
    7  18.426   -0.085      3.9    0.000
-   8  26.686   -0.055      6.0    8.260
- 
+   8  26.686   -0.054      6.0    8.260
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 
 ================================================================================
@@ -1598,8 +1598,8 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.500
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    552.2    0.000
@@ -1610,14 +1610,14 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.500
    6  18.426   -0.315      1.0    0.000
    7  18.426   -0.315      1.0    0.000
    8  26.686   -0.006     51.1    8.260
- 
+
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
+
 ============================================================================================
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
@@ -1842,7 +1842,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1854,12 +1854,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1877,7 +1877,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1892,15 +1892,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.0
++Overall time at end (sec) : cpu=          0.9  wall=          1.0

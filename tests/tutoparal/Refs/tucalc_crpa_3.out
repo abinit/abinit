@@ -1,8 +1,8 @@
 
-.Version 9.1.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
+.Version 9.1.4 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu9.1 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,15 +16,15 @@
 
 .Starting date : Wed 20 May 2020.
 - ( at 18h37 )
-  
+
 - input  file    -> tucrpa_3.in
 - output file    -> tucrpa_3.out
 - root for input  files -> tucrpa_I
 - root for output files -> tucrpa_O
 
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
 
  DATASET   11 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -341,10 +341,10 @@ _ WF disk file :      1.397 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
@@ -1172,9 +1172,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -1192,9 +1192,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -1212,9 +1212,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -1243,8 +1243,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -1411,7 +1411,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1562,8 +1562,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -1709,7 +1709,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1802,7 +1802,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  12.
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1819,9 +1819,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -1839,9 +1839,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -1859,9 +1859,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -1883,20 +1883,20 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -1909,7 +1909,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -1923,8 +1923,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -1944,9 +1944,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -2094,7 +2094,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   Compensation charge radius (if >rshp, g(r)=0) ...  1.20231231E+00
   Sigma parameter in gaussian shape function ......  1.20231231E+00
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 23
 - Remaining bands to be divided among processors   nbcw = 7
 - Number of bands treated by each node ~1
@@ -2179,7 +2179,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -2239,7 +2239,7 @@ Reading of the Wannier weights from data.plowann
   dielectric constant without local fields =   4.9029
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     13.42  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2394,12 +2394,12 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET  13.
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
 
- cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0) 
+ cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0)
 
 .Using single precision arithmetic ; gwpc =  4
 
@@ -2411,9 +2411,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -2431,9 +2431,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -2451,9 +2451,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -2475,20 +2475,20 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -2501,7 +2501,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -2515,8 +2515,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -2536,9 +2536,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -2765,7 +2765,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -2805,7 +2805,7 @@ Reading of the Wannier weights from data.plowann
  == Value of the angular momenta for atom 1 is :  2
  == Value of the projectors      for atom 1 is : -2
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
- 
+
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
@@ -2813,7 +2813,7 @@ Reading of the Wannier weights from data.plowann
 
 
  ==Calculation of the bare interaction  V m==
- 
+
 ==Definition of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
@@ -2847,7 +2847,7 @@ Reading of the Wannier weights from data.plowann
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667   -0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1 15.853  0.485  0.554  0.473  0.248
@@ -2859,7 +2859,7 @@ Reading of the Wannier weights from data.plowann
 
 
  == Calculation of the screened interaction on the correlated orbital U m ==
- 
+
  = Start loop over frequency
 
  --- For frequency w =   1  -------------
@@ -2894,7 +2894,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6309   -0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.827  0.466  0.535  0.457  0.247
@@ -2902,11 +2902,11 @@ Reading of the Wannier weights from data.plowann
    3  0.535  0.325  4.287  0.394  0.473
    4  0.457  0.461  0.394  3.830  0.463
    5  0.247  0.467  0.473  0.463  4.165
- 
+
 ==Reminder of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
- 
+
   -------------------------------------------------------------
             Average U and J as a function of frequency
    -------------------------------------------------------------
@@ -2945,9 +2945,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -2965,9 +2965,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -2985,9 +2985,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -3015,8 +3015,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -3183,7 +3183,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -3334,8 +3334,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -3481,7 +3481,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -3574,7 +3574,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  22.
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -3591,9 +3591,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -3611,9 +3611,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -3631,9 +3631,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -3655,20 +3655,20 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -3681,7 +3681,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -3695,8 +3695,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -3716,9 +3716,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -3866,7 +3866,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   Compensation charge radius (if >rshp, g(r)=0) ...  1.20231231E+00
   Sigma parameter in gaussian shape function ......  1.20231231E+00
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 23
 - Remaining bands to be divided among processors   nbcw = 7
 - Number of bands treated by each node ~1
@@ -3951,7 +3951,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -4011,7 +4011,7 @@ Reading of the Wannier weights from data.plowann
   dielectric constant without local fields =   4.9029
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     12.85  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -4166,12 +4166,12 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET  23.
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
 
- cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0) 
+ cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0)
 
 .Using single precision arithmetic ; gwpc =  4
 
@@ -4183,9 +4183,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -4203,9 +4203,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -4223,9 +4223,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -4247,20 +4247,20 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -4273,7 +4273,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -4287,8 +4287,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -4308,9 +4308,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -4537,7 +4537,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -4577,7 +4577,7 @@ Reading of the Wannier weights from data.plowann
  == Value of the angular momenta for atom 1 is :  2
  == Value of the projectors      for atom 1 is : -2
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
- 
+
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
@@ -4585,7 +4585,7 @@ Reading of the Wannier weights from data.plowann
 
 
  ==Calculation of the bare interaction  V m==
- 
+
 ==Definition of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
@@ -4619,7 +4619,7 @@ Reading of the Wannier weights from data.plowann
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667    0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1 15.853  0.485  0.554  0.473  0.248
@@ -4631,7 +4631,7 @@ Reading of the Wannier weights from data.plowann
 
 
  == Calculation of the screened interaction on the correlated orbital U m ==
- 
+
  = Start loop over frequency
 
  --- For frequency w =   1  -------------
@@ -4666,7 +4666,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6096    0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.622  0.450  0.515  0.440  0.247
@@ -4674,11 +4674,11 @@ Reading of the Wannier weights from data.plowann
    3  0.515  0.319  4.014  0.385  0.453
    4  0.440  0.445  0.385  3.627  0.447
    5  0.247  0.452  0.453  0.447  3.886
- 
+
 ==Reminder of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
- 
+
   -------------------------------------------------------------
             Average U and J as a function of frequency
    -------------------------------------------------------------
@@ -4717,9 +4717,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -4737,9 +4737,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -4757,9 +4757,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -4787,8 +4787,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -4955,7 +4955,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -5106,8 +5106,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -5253,7 +5253,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -5346,7 +5346,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  32.
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -5363,9 +5363,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -5383,9 +5383,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -5403,9 +5403,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -5427,20 +5427,20 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -5453,7 +5453,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -5467,8 +5467,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -5488,9 +5488,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -5638,7 +5638,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   Compensation charge radius (if >rshp, g(r)=0) ...  1.20231231E+00
   Sigma parameter in gaussian shape function ......  1.20231231E+00
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 23
 - Remaining bands to be divided among processors   nbcw = 7
 - Number of bands treated by each node ~1
@@ -5723,7 +5723,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -5783,7 +5783,7 @@ Reading of the Wannier weights from data.plowann
   dielectric constant without local fields =   4.9029
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     12.66  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -5938,12 +5938,12 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET  33.
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
 
- cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0) 
+ cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0)
 
 .Using single precision arithmetic ; gwpc =  4
 
@@ -5955,9 +5955,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -5975,9 +5975,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -5995,9 +5995,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -6019,20 +6019,20 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -6045,7 +6045,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -6059,8 +6059,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -6080,9 +6080,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -6309,7 +6309,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -6349,7 +6349,7 @@ Reading of the Wannier weights from data.plowann
  == Value of the angular momenta for atom 1 is :  2
  == Value of the projectors      for atom 1 is : -2
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
- 
+
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
@@ -6357,7 +6357,7 @@ Reading of the Wannier weights from data.plowann
 
 
  ==Calculation of the bare interaction  V m==
- 
+
 ==Definition of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
@@ -6391,7 +6391,7 @@ Reading of the Wannier weights from data.plowann
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667    0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1 15.853  0.485  0.554  0.473  0.248
@@ -6403,7 +6403,7 @@ Reading of the Wannier weights from data.plowann
 
 
  == Calculation of the screened interaction on the correlated orbital U m ==
- 
+
  = Start loop over frequency
 
  --- For frequency w =   1  -------------
@@ -6438,7 +6438,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5929   -0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.582  0.438  0.496  0.427  0.246
@@ -6446,11 +6446,11 @@ Reading of the Wannier weights from data.plowann
    3  0.496  0.314  3.956  0.375  0.438
    4  0.427  0.433  0.375  3.586  0.433
    5  0.246  0.437  0.438  0.433  3.827
- 
+
 ==Reminder of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
- 
+
   -------------------------------------------------------------
             Average U and J as a function of frequency
    -------------------------------------------------------------
@@ -6489,9 +6489,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -6509,9 +6509,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -6529,9 +6529,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -6559,8 +6559,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -6727,7 +6727,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -6878,8 +6878,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -7025,7 +7025,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -7118,7 +7118,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  42.
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -7135,9 +7135,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -7155,9 +7155,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -7175,9 +7175,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -7199,20 +7199,20 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -7225,7 +7225,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -7239,8 +7239,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -7260,9 +7260,9 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -7410,7 +7410,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   Compensation charge radius (if >rshp, g(r)=0) ...  1.20231231E+00
   Sigma parameter in gaussian shape function ......  1.20231231E+00
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 23
 - Remaining bands to be divided among processors   nbcw = 7
 - Number of bands treated by each node ~1
@@ -7495,7 +7495,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -7555,7 +7555,7 @@ Reading of the Wannier weights from data.plowann
   dielectric constant without local fields =   4.9029
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     12.59  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -7710,12 +7710,12 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET  43.
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
 
- cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0) 
+ cRPA Calculation: Calculation of the screened Coulomb interaction (ucrpa/=0)
 
 .Using single precision arithmetic ; gwpc =  4
 
@@ -7727,9 +7727,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -7747,9 +7747,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -7767,9 +7767,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -7791,20 +7791,20 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     4
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     1.25000000E-01  1.25000000E-01  1.25000000E-01       0.12500
      2)     3.75000000E-01  1.25000000E-01  1.25000000E-01       0.37500
      3)     3.75000000E-01  3.75000000E-01  1.25000000E-01       0.37500
      4)     3.75000000E-01  3.75000000E-01  3.75000000E-01       0.12500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :    10
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)    -2.50000000E-01 -2.50000000E-01 -2.50000000E-01       0.12500
@@ -7817,7 +7817,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      9)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
     10)     5.00000000E-01  5.00000000E-01  5.00000000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
@@ -7831,8 +7831,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  ******************************************
 
  =======================================================================
-  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
-     (it is assumed that the wavefunction for the first reference 
+  == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals
+     (it is assumed that the wavefunction for the first reference
              energy in PAW atomic data is an atomic eigenvalue)
 
  Max value of the radius in atomic data file   =    201.3994
@@ -7852,9 +7852,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
      The bare interaction (for a renorm. wfn ) =     22.5848 eV
  =======================================================================
 
- ==================================== 
- ==== Info on PAW TABulated data ==== 
- ==================================== 
+ ====================================
+ ==== Info on PAW TABulated data ====
+ ====================================
 
 
   ******************************
@@ -8081,7 +8081,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -8121,7 +8121,7 @@ Reading of the Wannier weights from data.plowann
  == Value of the angular momenta for atom 1 is :  2
  == Value of the projectors      for atom 1 is : -2
  Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
- 
+
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
@@ -8129,7 +8129,7 @@ Reading of the Wannier weights from data.plowann
 
 
  ==Calculation of the bare interaction  V m==
- 
+
 ==Definition of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
@@ -8163,7 +8163,7 @@ Reading of the Wannier weights from data.plowann
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667   -0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1 15.853  0.485  0.554  0.473  0.248
@@ -8175,7 +8175,7 @@ Reading of the Wannier weights from data.plowann
 
 
  == Calculation of the screened interaction on the correlated orbital U m ==
- 
+
  = Start loop over frequency
 
  --- For frequency w =   1  -------------
@@ -8210,7 +8210,7 @@ Reading of the Wannier weights from data.plowann
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5814    0.0000
 
- 
+
  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.571  0.429  0.481  0.417  0.245
@@ -8218,11 +8218,11 @@ Reading of the Wannier weights from data.plowann
    3  0.481  0.309  3.944  0.366  0.429
    4  0.417  0.424  0.366  3.575  0.421
    5  0.245  0.425  0.429  0.421  3.814
- 
+
 ==Reminder of the orbitals==
   Only one orbital
   Orbital with l=           2 on atom           1 with spin's orientations Up-Up
- 
+
   -------------------------------------------------------------
             Average U and J as a function of frequency
    -------------------------------------------------------------
@@ -8232,7 +8232,7 @@ Reading of the Wannier weights from data.plowann
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
@@ -9331,7 +9331,7 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Screened Coulomb interaction calculations: cRPA implementation and applications 
+- [1] Screened Coulomb interaction calculations: cRPA implementation and applications
 - to dynamical screening and self-consistency in uranium dioxide and cerium
 - B. Amadon, T. Applencourt and F. Bruneval  Phys. Rev. B 89, 125110 (2014).
 - Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
@@ -9365,7 +9365,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -9383,7 +9383,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -9396,7 +9396,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

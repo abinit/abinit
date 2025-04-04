@@ -22,7 +22,7 @@
  diemac 1.0d0   diemix 0.5d0
  ecut 13   pawecutdg 35
  ionmov 2
- ntime 15 
+ ntime 15
  tolrff 0.02
  tolmxf 5.0d-5
 
@@ -39,24 +39,24 @@
  nstep 6
  ntypat  2
  typat  1 2
- xcart -0.562   0 0  0.562  0 0 Angstrom   
+ xcart -0.562   0 0  0.562  0 0 Angstrom
  znucl  6 1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/C.xml, H4.GGA_X_PBE+GGA_C_PBE-paw.xml"
+ pseudos "Psdj_paw_pbe_std/C.xml, H4.GGA_X_PBE+GGA_C_PBE-paw.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t71.abo, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   CH molecule NON-spin-polarized, in a big box, without tetragonal symmetry, in order to avoid
 #%%   spurious degeneracy effects coupled to occupation numbers rapidly changing.
 #%%   PAW : first PBE, then PBE0, then HSE06. Interatomic distance optimization.
