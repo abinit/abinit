@@ -176,10 +176,10 @@ contains
 
   ! Check for small pivot elements
   do icoeff=1,nconcoef
-    if (abs(A_inv(icoeff, icoeff)) < tol14) then
+    if (abs(A_inv(icoeff, icoeff)) < tol12) then
       write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
 !      A_inv(icoeff, icoeff) = tol14 ! Regularization to avoid numerical issues
-      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol14)
+      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol12)
     end if
   end do
 
@@ -192,10 +192,10 @@ contains
 
   ! Check for small pivot elements
   do icoeff=1,nconcoef
-    if (abs(A_inv(icoeff, icoeff)) < tol14) then
+    if (abs(A_inv(icoeff, icoeff)) < tol12) then
       write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
 !      A_inv(icoeff, icoeff) = tol14 ! Regularization to avoid numerical issues
-      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol14)
+      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol12)
     end if
   end do
 
