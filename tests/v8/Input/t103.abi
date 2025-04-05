@@ -30,7 +30,7 @@ prt_GF_csv = 1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF , !HAVE_GPU
+#%% need_cpp_vars = HAVE_NETCDF , !HAVE_GPU, !CC_INTEL_ONEAPI
 #%% input_ddb = t103_ddb.in
 #%% md_hist = t103_HIST
 #%% [files]
