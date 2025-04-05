@@ -4120,11 +4120,14 @@ subroutine slice_expand(X0)
     call xgBlock_permuteCols(X0,spacedim,nband,pband_ptr)
     ABI_NVTX_END_RANGE()
 
+    ! Assumes that nband_expand is known .. this is overlap between slices has been 
+    ! computed
+
     ! Ici il faut faire allouer expand puis le remplir
     ! Il n'y a pas besoin d'avoir cet espace sur GPU
     ! On va le deplacer sur GPU en partie plus tard quand il sera en représentation ColsRows
-    call xg_init(X0_expand_WS,space,spacedim,nband,spacecom,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
-    slice%X0_expand = X0_expand_WS%self
+    call xg_init(slice%Expanded_WS,space,spacedim,nband_expand,spacecom,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
+    slice%X_expand_linalg = slice%Expanded_WS%self
 
     ! Remplir expand, sequential copy
     j1 = 1
@@ -4136,10 +4139,14 @@ subroutine slice_expand(X0)
         j2 = j1 + nband_slice - 1
         idx_ovlp(islice,1) = j1   ! start write range to buffer
         idx_ovlp(islice,2) = j2   ! end
-        call slice_blockCopy(X0,slice%X0_expand,i1,j1,i2,j2)
+        call slice_blockCopy(X0,slice%X_expand_linalg,i1,j1,i2,j2)
         j1 = j2 + 1
         ABI_NVTX_END_RANGE()
     end do
+
+    ! Unitary test
+    ABI_CHECK(cols(slice%X_expand_linalg)==nband_expand,'wrong linalg representation')
+    write(*,'(a,i6,i6)') '# proc has # cols of X_expand ', xmpi_comm_rank(spacecom), cols(slice%X_expand_linalg)
 
 end subroutine slice_expand
 
@@ -4159,7 +4166,6 @@ subroutine slice_distribute(slice,balance,nspinor)
 
     ! ***
  
-    chebfi%X = slice%X0_expand
     ! todo also need a space for eigenvalues and residuals
     ! only allocated not filled
 
@@ -4181,20 +4187,27 @@ subroutine slice_distribute(slice,balance,nspinor)
            ncolsColsRows(2) = 40 ! slice 2 degree 100
            ncolsColsRows(3) = 40
            ncolsColsRows(4) = 37 !
+
         end select
 
-    call xgTransposer_constructor(slice%xgTransposerX,slice%X_expand,slice%X_expand_mpi,nspinor,&
-     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
-     gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
-     custom_ncolsColsRows=.true.,ncolsColsRows_sub=ncolsColsRows_ptr)
+        ! Allocate slice%X_expand according to the target MPI distribution for slices
+        call xgTransposer_constructor(slice%xgTransposerX,slice%X_expand_linalg,slice%X_expand,nspinor,&
+            STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+            gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
+            custom_ncolsColsRows=.true.,ncolsColsRows_sub=ncolsColsRows_ptr)
    
-   chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+        slice%xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
    
-   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-   call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
-   ABI_NVTX_END_RANGE()
- 
-   if (allocated(custom_cols)) ABI_FREE(custom_cols)
+        ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE_XEXPAND)
+        call xgTransposer_transpose(slice%xgTransposerX,STATE_COLSROWS)
+        ABI_NVTX_END_RANGE()
+
+        ! Unitary test
+        ABI_CHECK(cols(slice%X_expand)==ncolsColsRows(xmpi_comm_rank(spacecom)),'wrong colsrows representation')
+        write(*,'(a,i6,i6)') '# proc has # cols of X_expand ', xmpi_comm_rank(spacecom), cols(slice%X_expand)
+        ! cols(slice%X_expand) should be equal to ncolsColsRows(i) where i is the rank of MPI process
+
+        if (allocated(custom_cols)) ABI_FREE(custom_cols)
 
     else
         call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)   !use xXColsRows instead of X notion
@@ -4214,25 +4227,25 @@ end subroutine slice_distribute
 ! bandpp corresponding to the slice so that no additional communication
 ! has to be performed in order to bring band slices to MPIs.
 
-subroutine slice_constructor(slice,Xexpanded_colsrows,spacecom,nrowsLinalg,ncolsColsRows)
+subroutine slice_run(slice,spacecom,nrowsLinalg,ncolsColsRows)
 
     ! Arguments
     type(slice_t), intent(inout) :: slice
-    type(xgBlock_t), intent(inout) :: Xexpanded_colsrows
     integer, pointer, intent(in) :: nrowsLinalg(:)
     integer, pointer, intent(in) :: ncolsColsRows(:)
 
     ! Local variables
-    integer :: nrows,ncols,spacecom
+    integer :: nrows,ncols_slice,spacecom
     integer :: slice_color,my_rank,slice_comm,ierr
     integer, target, allocatable :: custom_rows(:)
     integer, target, allocatable :: custom_rows_sub(:)
     integer, pointer :: custom_rows_ptr(:) => null()
     integer, pointer :: custom_rows_sub_ptr(:) => null()
+    type(xgBlock_t) :: X0
 
     ! *******
 
-    call xgBlock_getSize(Xexpanded_colsrows,nrows,ncols)
+    call xgBlock_getSize(slice%X_expand,nrows,ncols_slice)
     spacecom = comm(xgBlock_colsrows)
     my_rank = xmpi_comm_rank(spacecom)
 
@@ -4243,14 +4256,16 @@ subroutine slice_constructor(slice,Xexpanded_colsrows,spacecom,nrowsLinalg,ncols
     if (my_rank==2) slice_color=1
     if (my_rank==3) slice_color=1
 
-    ! slice colsrows workspace points to *existing* column range of expanded X
-    call xgBlock_setBlock(Xexpanded_ColsRows,slice%xXColsRows,rows=nrows,cols=ncols)
-   
+    ! slice colsrows workspace points to column range of distributed X_expand
+    call xgBlock_setBlock(slice%X_expand,X0,rows=nrows,cols=ncols_slice)
+    slice%X = X0
+
     ! Split global communicator so that only procs with the same color communicate
     call xmpi_comm_split(spacecom,slice_color,my_rank,slice_comm,ierr)
 
-    call xgBlock_setComm(slice%xXColsRows,slice_comm) ! colsrows representation
-    call xgBlock_setComm(slice%X,slice_comm) ! linalg representation
+    ! Restrict all communications to slice subcommunicator
+    call xgBlock_setComm(slice%X,slice_comm) ! colsrows representation
+    call xgBlock_setComm(slice%X_linalg,slice_comm) ! linalg representation
 
     ! compute distribution of plane waves in the subcommunicator
     ABI_MALLOC(custom_rows_sub,(xmpi_comm_size(slice_comm)))
@@ -4267,30 +4282,40 @@ subroutine slice_constructor(slice,Xexpanded_colsrows,spacecom,nrowsLinalg,ncols
         ! this is observed in the default distribution
     end if
 
-    ! Create slice transposer using subcommunicator
-    call xgTransposer_constructor(slice%xgTransposerX,slice%X,slice%xXsubColsRows,nspinor,&
+    ! Create slice transposer using subcommunicator and allocate slice%X_linalg
+    call xgTransposer_constructor(slice%xgTransposerX,slice%X_linalg,slice%X,nspinor,&
         STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,slice_comm,0,0,chebfi%me_g0_fft,&
         gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
         custom_ncolsColsRows=.true.,nrowsLinalg_sub=custom_rows_sub_ptr)
         ! true to allow different bandpp (avoid pad)
 
+    ncols_slice = cols(slice%X)
+
     ! TODO add same for AX and BX ..
 
-    ! This body should not be in the construction but in slice_run
+    ! Body of computation
     ! ===============
     ! 1) perform polynomial filtering (requires colsrows state)
+    call slice_filter(slice)
     ! 2) prepare linalg state for Rayleigh-Ritz
     call xgTransposer_transpose(slice%xgTransposerX,STATE_LINALG)
+    ! Unitary test
+    ABI_CHECK(rows(slice%X_linalg)==custom_rows_sub(xmpi_comm_rank(spacecom)),'wrong linalg representation')
+    write(*,'(a,i6,i6)') '# proc has # rows of slice X ', xmpi_comm_rank(spacecom), rows(slice%X_linalg) 
     ! 3) perform Rayleigh-Ritz (requires linalg state)
-    !    after that we DON'T NEED to do xgBlock_copy(slice%X,X0)
+    call slice_RayleighRitz(slice)
     ! 4) prepare colsrows state 
     call xgTransposer_transpose(slice%xgTransposerX,STATE_COLSROWS)
-    ! 5) [copy slice result to Xexpanded (assumes colsrows distribution)]
+    ! Unitary test
+    ABI_CHECK(cols(slice%X)==ncols_slice,'wrong colsrows representation')
+    write(*,'(a,i6,i6)') '# proc has # cols of slice X ', xmpi_comm_rank(spacecom), cols(slice%X)
+    ! 5) [copy slice result to X_expand (assumes colsrows distribution)]
     !    Attention I don't think that this is needed because we used the
     !    pointer as a workspace in order to avoid allocating new memory.
-    !    Notice that this is possible due to the fact that Xexpanded
+    !    Notice that this is possible due to the fact that X_expand
     !    has repeating columns that are safe to be processed independently
     !    by different MPIs in parallel.
+    call xgBlock_copy(slice%X,X0)
     ! ===============
 
     ! Free memory
@@ -4298,7 +4323,7 @@ subroutine slice_constructor(slice,Xexpanded_colsrows,spacecom,nrowsLinalg,ncols
     if (allocated(custom_rows_sub)) ABI_FREE(custom_rows_sub)
     call xgTransposer_free(slice%xgTransposerX)
 
-end subroutine slice_constructor
+end subroutine slice_run
 
 
 subroutine divide_run(divide,X0)
