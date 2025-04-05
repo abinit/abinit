@@ -1645,9 +1645,11 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
          ABI_BUG('Error on nrank !')
        end if
 !      Sort images by increasing index (this step is MANDATORY !!)
-       ABI_MALLOC(ranks,(nrank))
-       call sort_int(nrank,mpi_enreg%my_imgtab,ranks)
-       ABI_FREE(ranks)
+       if (nrank>0) then
+         ABI_MALLOC(ranks,(nrank))
+         call sort_int(nrank,mpi_enreg%my_imgtab,ranks)
+         ABI_FREE(ranks)
+       end if
      else
        ABI_MALLOC(mpi_enreg%my_imgtab,(0))
      end if

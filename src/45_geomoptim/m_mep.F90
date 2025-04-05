@@ -66,12 +66,14 @@ MODULE m_mep
 
  type,public :: mep_type
 ! Scalars
-  integer  :: cineb_start  ! Starting iteration for the CI-NEB
-  integer  :: mep_solver   ! Selection of a solver for the ODE
-  integer  :: neb_algo     ! Selection of the variant of the NEB method
-  integer  :: string_algo  ! Selection of the variant of the String Method
-  real(dp) :: fxcartfactor ! Time step for steepest descent or RK4
-  real(dp) :: mep_mxstep   ! Selection of a max. step size for the ODE
+  integer  :: cineb_start   ! Starting iteration for the CI-NEB
+  integer  :: mep_solver    ! Selection of a solver for the ODE
+  integer  :: neb_algo      ! Selection of the variant of the NEB method
+  integer  :: neb_cell_algo ! Selection of the cell modification algorithm
+  integer  :: string_algo   ! Selection of the variant of the String Method
+  real(dp) :: fxcartfactor  ! Time step for steepest descent or RK4
+  real(dp) :: mep_mxstep    ! Selection of a max. step size for the ODE
+  integer  :: optcell       ! Selection of the variant of cell modification
 ! Arrays
   integer,pointer      :: iatfix(:,:)=>null() ! Atoms to fix (this pointer is associated with dtset%iatfix)
   real(dp)             :: neb_spring(2)       ! Spring constants for the NEB method
@@ -84,7 +86,13 @@ MODULE m_mep
   real(dp),allocatable :: rk4_fcart1(:,:,:)   ! 4th-order Runge-Kutta storage
   real(dp),allocatable :: rk4_fcart2(:,:,:)   ! 4th-order Runge-Kutta storage
   real(dp),allocatable :: rk4_fcart3(:,:,:)   ! 4th-order Runge-Kutta storage
+  real(dp),pointer     :: rprimd_start(:,:)   ! real space primitive translations at start
  end type mep_type
+
+!Public constants
+ integer, public :: CELL_ALGO_NONE   =-1
+ integer, public :: CELL_ALGO_GSSNEB = 1
+ integer, public :: CELL_ALGO_VCNEB  = 2
 !!***
 
 CONTAINS
@@ -120,23 +128,31 @@ subroutine mep_init(dtset,mep_param)
 !************************************************************************
 
  if((dtset%imgmov==1).or.(dtset%imgmov==2).or.(dtset%imgmov==5))then
-   mep_param%cineb_start  = dtset%cineb_start
-   mep_param%mep_solver   = dtset%mep_solver
-   mep_param%neb_algo     = dtset%neb_algo
-   mep_param%string_algo  = dtset%string_algo
-   mep_param%fxcartfactor = dtset%fxcartfactor
-   mep_param%mep_mxstep   = dtset%mep_mxstep
-   mep_param%neb_spring   = dtset%neb_spring
-   mep_param%iatfix       =>dtset%iatfix
+   mep_param%cineb_start   = dtset%cineb_start
+   mep_param%mep_solver    = dtset%mep_solver
+   mep_param%neb_algo      = dtset%neb_algo
+   mep_param%neb_cell_algo = CELL_ALGO_NONE
+   if (dtset%optcell==2.and.dtset%useria==1001) mep_param%neb_cell_algo = CELL_ALGO_VCNEB
+   if (dtset%optcell==2.and.dtset%useria==1002) mep_param%neb_cell_algo = CELL_ALGO_GSSNEB
+   mep_param%string_algo   = dtset%string_algo
+   mep_param%fxcartfactor  = dtset%fxcartfactor
+   mep_param%mep_mxstep    = dtset%mep_mxstep
+   mep_param%neb_spring    = dtset%neb_spring
+   mep_param%optcell       = dtset%optcell
+   mep_param%iatfix        =>dtset%iatfix
+   mep_param%rprimd_start  =>dtset%rprimd_orig(:,:,1)
  else
-   mep_param%cineb_start  = -1
-   mep_param%mep_solver   = -1
-   mep_param%neb_algo     = -1
-   mep_param%string_algo  = -1
-   mep_param%fxcartfactor = zero
-   mep_param%mep_mxstep   = 100._dp
-   mep_param%neb_spring   = zero
+   mep_param%cineb_start   = -1
+   mep_param%mep_solver    = -1
+   mep_param%neb_algo      = -1
+   mep_param%neb_cell_algo = CELL_ALGO_NONE
+   mep_param%string_algo   = -1
+   mep_param%fxcartfactor  = zero
+   mep_param%mep_mxstep    = 100._dp
+   mep_param%neb_spring    = zero
+   mep_param%optcell       = -1
    nullify(mep_param%iatfix)
+   nullify(mep_param%rprimd_start)
  end if
 
 end subroutine mep_init
@@ -180,6 +196,7 @@ subroutine mep_destroy(mep_param)
  ABI_SFREE(mep_param%rk4_fcart3)
 
  nullify(mep_param%iatfix)
+ nullify(mep_param%rprimd_start)
 
 end subroutine mep_destroy
 !!***
@@ -199,12 +216,18 @@ end subroutine mep_destroy
 !!  mep_param=datastructure of type mep_type.
 !!            several parameters for Minimal Energy Path (MEP) search.
 !!  natom=number of atoms
+!!  natom_eff="effective" number of atoms, including possibly the unit cell vectors
 !!  ndynimage=number of dynamical images along the path
 !!  nimage=number of images (including static ones)
 !!  results_img(nimage)=datastructure that hold data for each image
 !!                      (positions, forces, energy, ...)
 !!  rprimd(3,3,nimage)=dimensional primitive translations for each image along the path
-!!
+!!  [use_reduced_coord]=force the use of reduced coordinates instead of cartesian ones
+!!  [strain_fact(nimage)]=only for variable cell algorithms. Factor applied to strains
+!!                        to align their dimension to atomic positions.
+!!                        Only valid when use_reduced_coordinates=.false.
+!!                        (essentially used for the GSS-NEB method)
+!!!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
@@ -215,25 +238,34 @@ end subroutine mep_destroy
 !!
 !! SOURCE
 
-subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
+subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,nimage,rprimd,xcart,xred, &
+&                       use_reduced_coord,strain_fact) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,ndynimage,nimage
+ integer,intent(in) :: natom,natom_eff,ndynimage,nimage
+ logical,optional :: use_reduced_coord
  type(mep_type),intent(in) :: mep_param
 !arrays
  integer,intent(in) :: list_dynimage(ndynimage)
- real(dp),intent(in) :: fcart(3,natom,nimage),rprimd(3,3,nimage)
- real(dp),intent(inout) :: xcart(3,natom,nimage),xred(3,natom,nimage)
+ real(dp),intent(in) :: fcart(3,natom,nimage)
+ real(dp),intent(inout) :: rprimd(3,3,nimage),xcart(3,natom,nimage),xred(3,natom,nimage)
+ real(dp),optional :: strain_fact(nimage)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idynimage,iimage
+ logical :: use_reduced_coord_
  real(dp) :: stepsize
  character(len=500) :: msg
 !arrays
+ real(dp), parameter :: identity_real(3,3)=reshape([one,zero,zero,zero,one,zero,zero,zero,one],[3,3])
+ real(dp) :: mat3(3,3)
  real(dp),allocatable :: xred_old(:,:),xstep(:,:)
 
 !************************************************************************
+
+ use_reduced_coord_=.false.
+ if (present(use_reduced_coord)) use_reduced_coord_=use_reduced_coord
 
  ABI_MALLOC(xred_old,(3,natom))
  ABI_MALLOC(xstep,(3,natom))
@@ -253,19 +285,37 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rpr
      call wrtout(ab_out ,msg,'COLL')
    end if
 
-!  Update positions
-   xcart(:,:,iimage)=xcart(:,:,iimage)+xstep(:,:)
-   call xcart2xred(natom,rprimd(:,:,iimage),xcart(:,:,iimage),xred(:,:,iimage))
-
-!  In case atom is fixed, we restore its previous value
-   do iatom=1,natom
-     if (any(mep_param%iatfix(:,iatom)==1)) then
-       where(mep_param%iatfix(:,iatom)==1)
-         xred(:,iatom,iimage)=xred_old(:,iatom)
-       end where
-       call xred2xcart(1,rprimd(:,:,iimage),xcart(:,iatom,iimage),xred(:,iatom,iimage))
+!  Update unit cell vectors if they are included in the list of "atoms"
+   if (natom_eff>=natom+3) then
+     if (use_reduced_coord_) then
+       mat3(1:3,1:3)=identity_real(1:3,1:3)+xred(:,natom+1:natom+3,iimage)
+       rprimd(:,:,iimage)=matmul(mat3(:,:),mep_param%rprimd_start(:,:))
+     else
+       mat3(1:3,1:3)=xcart(1:3,natom+1:natom+3,iimage)/strain_fact(iimage)
+       rprimd(:,:,iimage)=matmul(mep_param%rprimd_start(:,:),mat3(:,:))+mep_param%rprimd_start(:,:)
      end if
-   end do
+   end if
+
+!  Update positions
+   if (use_reduced_coord_) then
+     xred(:,:,iimage)=xred(:,:,iimage)+xstep(:,:)
+     call xred2xcart(natom,rprimd(:,:,iimage),xcart(:,:,iimage),xred(:,:,iimage))
+   else
+     xcart(:,:,iimage)=xcart(:,:,iimage)+xstep(:,:)
+     call xcart2xred(natom,rprimd(:,:,iimage),xcart(:,:,iimage),xred(:,:,iimage))
+   end if
+
+!  In case atom is fixed, we restore its previous value ; forbidden if optcell=2
+   if (mep_param%optcell/=2) then
+     do iatom=1,natom
+       if (any(mep_param%iatfix(:,iatom)==1)) then
+         where(mep_param%iatfix(:,iatom)==1)
+           xred(:,iatom,iimage)=xred_old(:,iatom)
+         end where
+         call xred2xcart(1,rprimd(:,:,iimage),xcart(:,iatom,iimage),xred(:,iatom,iimage))
+       end if
+     end do
+   end if
 
  end do
 

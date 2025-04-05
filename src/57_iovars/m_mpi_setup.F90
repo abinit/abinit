@@ -96,7 +96,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !scalars
  integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo, prtvol
  integer :: isppol,jdtset,marr,mband_lower,mband_upper
- integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,optdriver
+ integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,max_mpw,optdriver
  integer :: mband_mem
  integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
  integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
@@ -1012,7 +1012,19 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      kpt_with_shift(3,:)=kpt_with_shift(3,:)+qphon(3)
    end if
    if (dtsets(idtset)%usewvl == 0) then
-     call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+     if (dtsets(idtset)%nimage==1) then
+       call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+     else
+       max_mpw=0
+       do ii=1,dtsets(idtset)%nimage
+         call mkrdim(dtsets(idtset)%acell_orig(1:3,ii),dtsets(idtset)%rprim_orig(1:3,1:3,ii),rprimd)
+         call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+         call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+         if (mpw>max_mpw) max_mpw=mpw
+       end do
+       mpw=max_mpw
+     end if
+
      ! Allocate tables for parallel IO of the wavefunctions.
      if( xmpi_mpiio==1 .and. mpi_enregs(idtset)%paral_kgb == 1 .and. &
 &     any(dtsets(idtset)%iomode == [IO_MODE_MPI, IO_MODE_ETSF])) then
