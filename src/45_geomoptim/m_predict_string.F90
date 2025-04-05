@@ -111,7 +111,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
  real(dp),allocatable :: darc(:),dimage(:),fcart(:,:,:),rprimd(:,:,:),vect(:,:),wimage(:)
  real(dp),allocatable :: x(:),y(:),z(:),x2(:),y2(:),z2(:)
  real(dp),allocatable :: xout(:),yout(:),zout(:)
- real(dp),allocatable,target :: etotal(:),xcart(:,:,:),xred(:,:,:)
+ real(dp),allocatable,target :: etotal(:),xcart(:,:,:),xred(:,:,:),strten(:,:)
  real(dp),pointer :: etotal_all(:),xcart_all(:,:,:),xred_all(:,:,:)
 
 ! *************************************************************************
@@ -126,15 +126,16 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
    ABI_MALLOC(xcart,(3,natom,nimage))
    ABI_MALLOC(fcart,(3,natom,nimage))
    ABI_MALLOC(rprimd,(3,3,nimage))
-   call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage_eff),&
-&   fcart,rprimd,xcart,xred)
+   ABI_MALLOC(strten,(6,nimage))
+   call get_geometry_img(results_img(:,itimimage_eff),etotal,natom,nimage,&
+&                        fcart,strten,rprimd,xcart,xred)
 
 !  EVOLUTION STEP
 !  ===============================================
 
 !  Compute new atomic positions in each cell
    if      (mep_param%mep_solver==0) then ! Steepest-descent
-     call mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
+     call mep_steepest(fcart,list_dynimage,mep_param,natom,natom,ndynimage,nimage,rprimd,xcart,xred)
    else if (mep_param%mep_solver==4) then ! 4th-order Runge-Kutta
      call mep_rk4(fcart,itimimage,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
    else
@@ -272,6 +273,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
    ABI_FREE(xcart)
    ABI_FREE(fcart)
    ABI_FREE(rprimd)
+   ABI_FREE(strten)
  end if ! mpi_enreg%me_cell==0
 
 !Store acell, rprim, xred and vel for the new iteration

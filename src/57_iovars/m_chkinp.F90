@@ -1618,7 +1618,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! imgmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'imgmov',dt%imgmov,9,(/0,1,2,4,5,6,9,10,13/),iout)
-   if (dt%imgmov>0 .and. dt%imgmov/=6) then ! when imgmov>0, except imgmov==6, allow only ionmov0 and optcell 0 (temporary)
+   if (dt%imgmov>0 .and. dt%imgmov/=6) then ! when imgmov>0, except imgmov==6, allow only ionmov0 and optcell 0 or 2 (temporary)
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
      call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)
      if (dt%imgmov==9.or.dt%imgmov==10.or.dt%imgmov==13) then
@@ -1627,7 +1627,16 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
      else
        cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,2,(/0,2/),iout)
+       ! Forbid fixed atoms if optcell=2
+       if (dt%optcell==2) then
+         if (any(dt%iatfix(:,:)==1)) then
+           write(msg,'(3a)') &
+&            'Having fixed atoms is forbidden when performing variable-cell',ch10,&
+&            'mimimum energy path searching (NEB) (imgmov=2 or 5)!'
+           ABI_ERROR_NOSTOP(msg, ierr)
+         end if
+       end if
      end if
    end if
 
