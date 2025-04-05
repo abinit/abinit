@@ -998,8 +998,9 @@ in order to monitor the convergence of the QP corrections.
 
     Please, avoid using the Sternheimer method with only occupied bands because EPH needs
     to compute the chemical potential as a function of temperature.
-    It is recommended to include enough conduction bands to obtain a decent description of the electronic DOS
-    around the VBM and prevent inaccuracies in the calculation of $\mu(T)$.
+    It is recommended to include enough conduction bands (including degenerate states at the VBM)
+    to obtain a decent description of the electronic DOS around the VBM and prevent
+    inaccuracies in the calculation of $\mu(T)$.
 
 
 To analyze the convergence behavior, we can extract the results from the main output file

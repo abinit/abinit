@@ -71,6 +71,8 @@ _ WF disk file :      0.204 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
              ecut      1.50000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     4.00000000E+00 Hartree
+         ecutsigx1     0.00000000E+00 Hartree
+         ecutsigx2     1.50000000E+01 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     1.50000000E+01 Hartree
 -          fftalg         312
@@ -401,6 +403,8 @@ meta: {optdriver: 6, }
              ecut      1.50000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     4.00000000E+00 Hartree
+         ecutsigx1     0.00000000E+00 Hartree
+         ecutsigx2     1.50000000E+01 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     1.50000000E+01 Hartree
            etotal1    -3.0891370726E+01

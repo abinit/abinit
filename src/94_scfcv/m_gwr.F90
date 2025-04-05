@@ -2150,7 +2150,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  integer,parameter :: formeig0 = 0, master = 0
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz, ierr, bcast_comm, color
  integer :: npw_k, mpw_disk, istwf_k, il_b, ib, band, iloc, cg_spad, gw_spad
- integer :: nbsum, npwsp, npw_k_disk, npwsp_disk, bstart, bstop, band_step, nb, nmiss, ig, igw, spinor, icg, ipw
+ integer :: nbsum, npwsp, npw_k_disk, npwsp_disk, bstart, bstop, band_step, nb, nmiss, ig, igw, spinor, icg
  logical :: print_time
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  complex(gwpc) :: cdum
@@ -3871,7 +3871,7 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r)
 !Local variables-------------------------------
  integer :: ii
  real(dp) :: loss, min_loss, w0, wn, b2 ! my_beta_r,
- complex(dp) :: b2_cplx, my_alpha_c, cfit(ntau), f0, fn ! zz,
+ complex(dp) :: my_alpha_c, cfit(ntau), f0, fn ! zz, b2_cplx,
 ! *************************************************************************
 
  min_loss = huge(one); w0 = iw_mesh(1); f0 = cvals(1); alpha_c = czero; beta_r = zero
@@ -7404,18 +7404,18 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
-#define _DEV_USE_DDK 1
+!#define _DEV_USE_DDK 1
 
-#if _DEV_USE_DDK
-     ! In principle we should pass npw_kf ...
-     call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_bz, istwf_ki, npw_ki, kg_ki)
-
-     !call wfd%copy_cg(ib_v, ik, spin, cg_v)
-     !call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
-
-     !call wfd%copy_cg(ib_c, ik, spin, cg_c)
-     !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
-#endif
+!#if _DEV_USE_DDK
+!     ! In principle we should pass npw_kf ...
+!     call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_bz, istwf_ki, npw_ki, kg_ki)
+!
+!     !call wfd%copy_cg(ib_v, ik, spin, cg_v)
+!     !call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
+!
+!     !call wfd%copy_cg(ib_c, ik, spin, cg_c)
+!     !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
+!#endif
 
      ! HM: 24/07/2018
      ! Transform dipoles to be consistent with results from DFPT
@@ -7468,12 +7468,12 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
          band1 = ugb_kibz%loc2gcol(il_b1)
          eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
 
-#if _DEV_USE_DDK
-         ! FIXME: This is wrong if spc
-         !call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
-         !call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
-         !gh1c_block(:,:,:,il_b1) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
-#endif
+!#if _DEV_USE_DDK
+!         ! FIXME: This is wrong if spc
+!         !call c_f_pointer(c_loc(ugb_kibz%buffer_cplx(:,il_b1)), cwave, shape=[2, npw_ki*nspinor])
+!         !call ddkop%apply(eig_nk, npw_ki, nspinor, cwave, cwaveprj)
+!         !gh1c_block(:,:,:,il_b1) = ddkop%gh1c(:, 1:npw_ki*nspinor,:)
+!#endif
        end do
 
        ! Loop over "conduction" states.

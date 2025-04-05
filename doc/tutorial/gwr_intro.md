@@ -324,7 +324,7 @@ TODO: Additional trick to be tested/documented in more detail:
 [[gwr_rpa_ncut]]
 [[gwr_boxcutmin]]
 [[gwr_max_hwtene]]
-[[gwr_regterm]]
+gwr_regterm
 -->
 
 ### Requirements

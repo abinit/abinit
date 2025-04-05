@@ -98,7 +98,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_pot_only,xc_need_kden
- real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
+ real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom,zval
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
@@ -140,6 +140,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! Will test directly on the dataset "dt"
    dt = dtsets(idtset)%copy()
+
+   ! count nominal valence electrons according to ziontypat
+   zval=zero
+   do iatom=1,dt%natom
+     zval=zval+dt%ziontypat(dt%typat(iatom))
+   end do
 
    ! Copy or initialize locally a few input dataset values
    fftalg   =dt%ngfft(7)
@@ -1140,6 +1146,15 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
+     end if
+
+     ! TODO: Activate this check and update the two EPH tests that started to faiild
+     ! We need "enough" valence states to compute the mu(T) in semiconductors
+     if ((dt%nsppol == 1 .and. dt%nspinor == 1 .and. dt%nband(1) <= zval/two) .or. &
+         (dt%nsppol == 2 .and. dt%nband(1) <= zval) .or. &   ! Magnetic semiconductors are not easy to predict!
+         (dt%nspinor == 2 .and. dt%nband(1) <= zval)) then
+       !ABI_ERROR_NOSTOP("Please add enough conduction bands (including degenerate states) to compute the Fermi level.", ierr)
+       ABI_WARNING("Please add enough conduction bands (including degenerate states) to compute the Fermi level.")
      end if
 
      if (dt%eph_task == 1 .and. dt%ph_nqpath <= 0) then
@@ -3766,11 +3781,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  If nsppol==2 and spinmagntarget==0.0 , suggest to use anti-ferromagnetic capability of ABINIT.
    if(nsppol==2.and.abs(dt%spinmagntarget)<tol8)then
      write(msg,'(a,i3,2a,f7.2,6a)' )&
-     ' This is a calculation with spin-up and spin-down wavefunctions, ... nsppol=',nsppol,ch10,&
-     ' in which the target spin-polarization is zero. ... spinmagntarget=',dt%spinmagntarget,ch10,&
-     ' Tip: It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
+     ' This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=',nsppol,ch10,&
+     ' in which the target spin-polarization is zero.                  ... spinmagntarget=',dt%spinmagntarget,ch10,&
+     ' Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.',ch10,&
      ' In the former case, it is advantageous to use nsppol=1 and nspden=1,',ch10,&
-     ' while in the latter case, it is advantageous to use nsppol=1 and nspden=2.'
+     ' while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.'
      call wrtout(iout,msg)
    end if
 

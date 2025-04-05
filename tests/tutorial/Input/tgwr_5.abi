@@ -32,7 +32,7 @@ gwr_sigma_algo 1     # Use supercell for Sigma
 nband      250      # Bands to be used in the screening calculation
 ecuteps    6        # Cut-off energy of the planewave set to represent the dielectric matrix.
                     # It is important to adjust this parameter.
-ecutsigx    20.0    # Dimension of the G sum in Sigma_x.
+#ecutsigx  16.0     # Dimension of the G sum in Sigma_x.
                     # ecutsigx = ecut is usually a wise choice
                     # (the dimension in Sigma_c is controlled by ecuteps)
 gw_qprange  4
@@ -45,6 +45,7 @@ gw_qprange  4
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi, tgwr_5.abi
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% [files]
 #%% files_to_test =
 #%%   tgwr_5.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
