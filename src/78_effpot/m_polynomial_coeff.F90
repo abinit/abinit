@@ -4039,6 +4039,7 @@ integer,intent(in) :: comm
 real(dp) :: cutoff,coeff_ini
 integer :: ncoeff,ncoeff_out,power_strph,option
 integer :: icoeff1,icoeff2
+integer:: nbody, npower
 type(polynomial_coeff_type),allocatable :: strain_terms_tmp(:)
 integer :: sc_size(3)
 logical :: is_duplicate
@@ -4069,13 +4070,9 @@ end if
 !Build unique list of terms by direct comparison and append
 do icoeff1=1,ncoeff_out
    !block
-      !integer:: nbody, npower
       !Get nbody and power for current term
-      !nbody=strain_terms_tmp(icoeff1)%terms(1)%get_nbody()
-      !npower=strain_terms_tmp(icoeff1)%terms(1)%get_total_power()
-
-      !Skip if nbody exceeds max allowed
-      !if(nbody > max_nbody(npower)) cycle
+    nbody=strain_terms_tmp(icoeff1)%terms(1)%get_nbody()
+    npower=strain_terms_tmp(icoeff1)%terms(1)%get_total_power()
 
       !Check if term is duplicate of any previously added term
       is_duplicate = .false.
@@ -4090,7 +4087,12 @@ do icoeff1=1,ncoeff_out
       endif
 
       !Append if unique
-      if(.not. is_duplicate) then
+      !print *, nbody , npower, is_duplicate
+      !print *, "nbody:", nbody, "npower:", npower, "max_nbody(npower):", max_nbody(npower)
+      !print *,  "is_duplicate:", is_duplicate
+
+
+      if((.not. is_duplicate) .and. nbody<=max_nbody(npower) ) then
          irred_ncoeff = irred_ncoeff + 1
          call coeffs_list_append(strain_terms, strain_terms_tmp(icoeff1), .TRUE.)
          !DMSG(strain_terms(irred_ncoeff)%debug_str)

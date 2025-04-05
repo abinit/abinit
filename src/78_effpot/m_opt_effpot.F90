@@ -1995,9 +1995,11 @@ function opt_boundcoeff(yvalues,cvalues,penalty_in) result (coeff)
   b = ( (yvalues(2) - 1)/cvalues(2) ) - ( (yvalues(1) -1)*cvalues(2) - (yvalues(2) - 1)*cvalues(1) )&
     &    / (cvalues(1)**2 - cvalues(1)*cvalues(2))
 
-  !write(*,*) "a", a
-  !write(*,*) "b", b
   penalty = penalty_in - 1
+  if (a/=a .or. b/=b .or. a==0) then
+    coeff = 0.0_dp
+    return
+  end if
   coeff_tmp = -b/(2*a)
   !write(*,*) "coeff_tmp", coeff_tmp
   if(coeff_tmp > 0)then
@@ -2229,14 +2231,6 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
 
   ! truncate my_coeffs.
   call coeffs_list_truncate(my_coeffs, nterm_start+temp_cntr)
-  !ABI_MALLOC(my_coeffs_tmp,(nterm_start+temp_cntr))
-  !my_coeffs_tmp=my_coeffs(1:nterm_start+temp_cntr)
-
-  !call polynomial_coeff_list_free(my_coeffs)
-  !ABI_MALLOC(my_coeffs,(size(my_coeffs_tmp)))
-  !my_coeffs=my_coeffs_tmp
-  !call polynomial_coeff_list_free(my_coeffs_tmp)
-
 end subroutine generate_bounding_term_and_add_to_list
 
 
