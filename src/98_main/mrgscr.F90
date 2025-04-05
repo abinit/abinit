@@ -110,7 +110,7 @@ program mrgscr
  integer :: ngfft(18)
  integer,allocatable :: foundq(:),freq_indx(:,:)
  real(dp),parameter :: k0(3) = [zero,zero,zero]
- real(dp) :: gmet(3,3),gprimd(3,3),qdiff(3),rmet(3,3),qtmp(3),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),qdiff(3),rmet(3,3),mat(3,3),qtmp(3),tsec(2)
  real(dp),allocatable :: qlwl(:,:),real_omega(:),rhor(:,:),rhog(:,:),nhat(:,:)
  real(dp),allocatable :: work(:),ftab(:),ysp(:,:),eint(:),qratio(:,:)
  complex(gwpc),pointer :: vc_sqrt(:)
@@ -856,13 +856,14 @@ program mrgscr
                ! Generate the PPM representation of epsilon^-1
                call PPM%getem1_one_ggp(iqibz,Er%Hscr%zcut,nfreq_tot,omega,Vcp,em1_ppm,ig1,ig2)
 
+               mat = two_pi*Cryst%gmet
                write(unt_dump,'(a,I1)') '# epsilon^-1_GG''(omega) from ppmodel = ',ppmodel
                write(unt_dump,'(2(a,i8),/,a,3f12.6,/,a,3i6,a,3i6,/,a,3F9.4,a,3F9.4,a,/a,f9.4,a,f9.4,a,/,a,/)')&
                  '# ig1= ',ig1,'    ig2= ',ig2,&
                  '# q = ',Er%qibz(:,iqibz),&
                  '# G = ',Er%gvec(:,ig1),'  G''= ',Er%gvec(:,ig2),&
-                 '# G = (',MATMUL(two_pi*Cryst%gmet,Er%gvec(:,ig1)),&
-                 ')  G''= (',MATMUL(two_pi*Cryst%gmet,Er%gvec(:,ig2)),')',&
+                 '# G = (',MATMUL(mat,Er%gvec(:,ig1)),&
+                 ')  G''= (',MATMUL(mat,Er%gvec(:,ig2)),')',&
                  '# 1/2|G|^2 =',half*normv(Er%gvec(:,ig1),Cryst%gmet,'G')**2,&
                  ' Ha 1/2|G''|^2 =',half*normv(Er%gvec(:,ig2),Cryst%gmet,'G')**2,' Ha',&
                  '#   omega [eV]           Re             Im '
@@ -871,8 +872,8 @@ program mrgscr
                  '# ig1= ',ig1,'    ig2= ',ig2,&
                  '# q = ',Er%qibz(:,iqibz),&
                  '# G = ',Er%gvec(:,ig1),'  G''= ',Er%gvec(:,ig2),&
-                 '# G = (',MATMUL(two_pi*Cryst%gmet,Er%gvec(:,ig1)),&
-                 ')  G''= (',MATMUL(two_pi*Cryst%gmet,Er%gvec(:,ig2)),')',&
+                 '# G = (',MATMUL(mat,Er%gvec(:,ig1)),&
+                 ')  G''= (',MATMUL(mat,Er%gvec(:,ig2)),')',&
                  '# 1/2|G|^2 =',half*normv(Er%gvec(:,ig1),Cryst%gmet,'G')**2,&
                  ' Ha 1/2|G''|^2 =',half*normv(Er%gvec(:,ig2),Cryst%gmet,'G')**2,' Ha',&
                  '#   iomega [eV]           Re             Im '

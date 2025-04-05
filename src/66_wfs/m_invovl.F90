@@ -48,7 +48,7 @@ MODULE m_invovl
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -608,7 +608,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
      !! build atom_projs, from opernlb
      !! P = 4pi/sqrt(ucvol)* conj(diag(ph3d)) * ffnl * diag(parity), with parity = (-i)^l
-     atom_projs(:,:,:) = 0
+     atom_projs(:,:,:) = zero
 
      ! start from 4pi/sqrt(ucvol)*ffnl
      ! atom_projs(1, :, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ffnl(:, 1, 1:nlmn)
@@ -1178,12 +1178,13 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
   implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx
-  real(dp), intent(inout) :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
+  real(dp), intent(inout), target :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
   type(gs_hamiltonian_type),intent(in) :: ham
   real(dp), intent(in) :: mat(cplx, ham%lmnmax, ham%lmnmax, ham%ntypat)
   integer, intent(in) :: block_sliced
 
   integer :: nlmn, shift, itypat, idat
+  real(dp),pointer :: work_x(:,:),work_y(:,:)
 
 ! *************************************************************************
 
@@ -1196,16 +1197,18 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
            !! apply mat to all atoms at once
            ! perform natom multiplications of size nlmn
            ! compute y = mat*x
+           work_x => x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)
+           work_y => y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)
            if(cplx == 2) then
               call ZHEMM('L','U', nlmn, ham%nattyp(itypat), cone, &
                    &  mat(:, :, :, itypat), ham%lmnmax, &
-                   &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, czero, &
-                   &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn)
+                   &  work_x, nlmn, czero, &
+                   &  work_y, nlmn)
            else
               call DSYMM('L','U', nlmn, ham%nattyp(itypat), one, &
                    &  mat(:, :, :, itypat), ham%lmnmax, &
-                   &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, zero, &
-                   &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn)
+                   &  work_x, nlmn, zero, &
+                   &  work_y, nlmn)
            end if
            shift = shift + nlmn*ham%nattyp(itypat)
         end do
