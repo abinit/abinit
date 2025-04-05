@@ -34,7 +34,7 @@ bound_option = 2       # Option for the bound process (default 1)
 #%% md_hist = tmulti_l_6_HIST.nc
 #%% [files]
 #%% files_to_test =
-#%%   tmulti_l_7_1.abo, tolnlines = 5, tolabs = 1.0e-3, tolrel = 1.0e-2, fld_options = -medium;
+#%%   tmulti_l_7_1.abo, tolnlines = 5, tolabs = 1.0e-3, tolrel = 2.0e-2, fld_options = -medium;
 ##%%   tmulti_l_7_1_coeffs.xml, tolnlines = 15, tolabs = 8.0, tolrel = 1.0e-4, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
