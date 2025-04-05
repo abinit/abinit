@@ -9,6 +9,7 @@ add_library(80_rttddft STATIC
   m_rttddft_propagators.F90
   m_rttddft_properties.F90
   m_rttddft_tdks.F90
+  m_rttddft_tdef.F90
   )
 
 set_target_properties(80_rttddft

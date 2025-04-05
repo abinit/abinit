@@ -49,7 +49,6 @@ module m_rttddft
 
  public :: rttddft_setup_ele_step
  public :: rttddft_init_hamiltonian
-!!***
 
 contains
 !!***
@@ -142,23 +141,6 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
                 & mpi_atmtab=mpi_enreg%my_atmtab,comm_fft=mpi_enreg%comm_fft,      &
                 & distribfft=mpi_enreg%distribfft)
  endif
-
-!!FB: @MT Needed? If yes, then don't forget to put it back in tdks_init/second_setup as well
-!!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
-!!atomic position so should be done for nstep = 1 and for updated ion positions
-!if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
-!   with_vectornd = 1
-!else
-!   with_vectornd = 0
-!end if
-!if(allocated(vectornd)) then
-!   ABI_FREE(vectornd)
-!end if
-!ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
-!vectornd=zero
-!if(with_vectornd .EQ. 1) then
-!   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
-!        & rprimd,vectornd,xred)
 
 end subroutine rttddft_setup_ele_step
 !!***
@@ -349,11 +331,11 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
  !** Allocate all arrays and initialize quantities that do not depend on k and spin.
  !FB: Should recompute cprj if ions have moved right?
  usecprj_local=0; if (psps%usepaw==1 .and. dtset%ionmov==0) usecprj_local=1
- call gs_hamk%init(psps,tdks%pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,dtset%typat,    &
-                     & tdks%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,tdks%rprimd,dtset%nloalg,paw_ij=tdks%paw_ij,    &
-                     & ph1d=tdks%ph1d,usecprj=usecprj_local,comm_atom=mpi_enreg%comm_atom,                          &
-                     & mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,nucdipmom=dtset%nucdipmom, &
-                     & gpu_option=dtset%gpu_option)
+ call gs_hamk%init(psps,tdks%pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%natom,dtset%typat,            &
+                 & tdks%xred,dtset%nfft,dtset%mgfft,dtset%ngfft,tdks%rprimd,dtset%nloalg,paw_ij=tdks%paw_ij,    &
+                 & ph1d=tdks%ph1d,usecprj=usecprj_local,comm_atom=mpi_enreg%comm_atom,                          &
+                 & mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,nucdipmom=dtset%nucdipmom, &
+                 & gpu_option=dtset%gpu_option)
 
 end subroutine rttddft_init_hamiltonian
 !!***
