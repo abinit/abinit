@@ -4109,6 +4109,99 @@ subroutine divide_init(divide,X0,rrquo)
 
 end subroutine divide_init
 
+subroutine slice_expand(X0)
+
+    type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(inout) :: X0
+
+    ! In Linalg representation
+    ! permute columns on n'a pas trop besoin d'être sur GPU
+    ABI_NVTX_START_RANGE(NVTX_SLICEALL_PERMUTE_COLS)
+    call xgBlock_permuteCols(X0,spacedim,nband,pband_ptr)
+    ABI_NVTX_END_RANGE()
+
+    ! Ici il faut faire allouer expand puis le remplir
+    ! Il n'y a pas besoin d'avoir cet espace sur GPU
+    ! On va le deplacer sur GPU en partie plus tard quand il sera en représentation ColsRows
+    call xg_init(X0_expand_WS,space,spacedim,nband,spacecom,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
+    slice%X0_expand = X0_expand_WS%self
+
+    ! Remplir expand, sequential copy
+    j1 = 1
+    do islice=1,nslice
+        ABI_NVTX_START_RANGE(NVTX_SLICE_COPY)
+        i1 = idx(islice,1)        ! start read range from cg
+        i2 = idx(islice,2)        ! end
+        nband_slice = i2 - i1 + 1
+        j2 = j1 + nband_slice - 1
+        idx_ovlp(islice,1) = j1   ! start write range to buffer
+        idx_ovlp(islice,2) = j2   ! end
+        call slice_blockCopy(X0,slice%X0_expand,i1,j1,i2,j2)
+        j1 = j2 + 1
+        ABI_NVTX_END_RANGE()
+    end do
+
+end subroutine slice_expand
+
+!! FUNCTION
+!! Distribute X_expand across MPI processes 
+
+subroutine slice_distribute(slice,balance,nspinor)
+
+    ! Arguments
+    type(slice_t), intent(inout) :: slice
+    integer, intent(in) :: balance
+    integer, intent(in) :: nspinor
+    ! Variables
+    integer :: bandpp,nprocs
+    integer, allocatable, target :: ncolsColsRows(:)
+    integer, pointer :: ncolsColsRows_ptr(:) => null()
+
+    ! ***
+ 
+    chebfi%X = slice%X0_expand
+    ! todo also need a space for eigenvalues and residuals
+    ! only allocated not filled
+
+    if (chebfi%paral_kgb == 1) then
+
+        nprocs = xmpi_comm_size(comm(X0))
+
+       ABI_MALLOC(ncolsColsRows, (nprocs))
+       ncolsColsRows_ptr => ncolsColsRows
+
+       select case(balance)
+       case(0) ! same bandpp for all slices
+           ABI_CHECK(cols(X0)%nprocs==0,'nprocs should divide cols')
+           bandpp = cols(X0)/nprocs
+           ncolsColsRows(:) = bandpp
+       case(1) ! optimal bandpp per slice
+
+           ncolsColsRows(1) = 75 ! slice 1 degree 2
+           ncolsColsRows(2) = 40 ! slice 2 degree 100
+           ncolsColsRows(3) = 40
+           ncolsColsRows(4) = 37 !
+        end select
+
+    call xgTransposer_constructor(slice%xgTransposerX,slice%X_expand,slice%X_expand_mpi,nspinor,&
+     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+     gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
+     custom_ncolsColsRows=.true.,ncolsColsRows_sub=ncolsColsRows_ptr)
+   
+   chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+   
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+   call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
+   ABI_NVTX_END_RANGE()
+ 
+   if (allocated(custom_cols)) ABI_FREE(custom_cols)
+
+    else
+        call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)   !use xXColsRows instead of X notion
+    end if
+    
+end subroutine slice_distribute
+
 
 ! IML 04/04/2025
 ! [under construction]
@@ -4178,7 +4271,8 @@ subroutine slice_constructor(slice,Xexpanded_colsrows,spacecom,nrowsLinalg,ncols
     call xgTransposer_constructor(slice%xgTransposerX,slice%X,slice%xXsubColsRows,nspinor,&
         STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,slice_comm,0,0,chebfi%me_g0_fft,&
         gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
-        nrowsLinalg_sub=custom_rows_sub_ptr)
+        custom_ncolsColsRows=.true.,nrowsLinalg_sub=custom_rows_sub_ptr)
+        ! true to allow different bandpp (avoid pad)
 
     ! TODO add same for AX and BX ..
 
