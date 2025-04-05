@@ -54,7 +54,7 @@ _ WF disk file :      1.993 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
              bdgw           4       5       4       5
              ecut      1.60000000E+01 Hartree
           ecuteps      6.00000000E+00 Hartree
-         ecutsigx      2.00000000E+01 Hartree
+         ecutsigx      1.60000000E+01 Hartree
           ecutwfn      1.00000000E+01 Hartree
 -          fftalg         312
          gwr_ntau           6
@@ -429,7 +429,7 @@ data: !Tabular |
              bdgw           4       5       4       5
              ecut      1.60000000E+01 Hartree
           ecuteps      6.00000000E+00 Hartree
-         ecutsigx      2.00000000E+01 Hartree
+         ecutsigx      1.60000000E+01 Hartree
           ecutwfn      1.00000000E+01 Hartree
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

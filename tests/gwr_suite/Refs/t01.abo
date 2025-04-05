@@ -112,9 +112,9 @@ _ WF disk file :      0.157 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
           ecuteps3     4.00000000E+00 Hartree
           ecuteps4     4.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
-         ecutsigx2     0.00000000E+00 Hartree
+         ecutsigx2     4.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
-         ecutsigx4     0.00000000E+00 Hartree
+         ecutsigx4     4.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     4.00000000E+00 Hartree
           ecutwfn3     4.00000000E+00 Hartree
@@ -484,6 +484,9 @@ meta: {optdriver: 6, }
 )     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
 )     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
    Integrated=    8.0000E+00
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
 
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
@@ -968,9 +971,9 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
           ecuteps3     4.00000000E+00 Hartree
           ecuteps4     4.00000000E+00 Hartree
          ecutsigx1     0.00000000E+00 Hartree
-         ecutsigx2     0.00000000E+00 Hartree
+         ecutsigx2     4.00000000E+00 Hartree
          ecutsigx3     4.00000000E+00 Hartree
-         ecutsigx4     0.00000000E+00 Hartree
+         ecutsigx4     4.00000000E+00 Hartree
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     4.00000000E+00 Hartree
           ecutwfn3     4.00000000E+00 Hartree
