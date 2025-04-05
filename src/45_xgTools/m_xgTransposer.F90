@@ -2,13 +2,17 @@
 !! NAME
 !!  m_xgTransposer
 !!
+!! TODO IML 04/04/2025 clean versions to always pass from my array version
+!! for ncolsColsRows or create wrappers so that if we give an array then we 
+!! turn it into scalar
+!!
 !! FUNCTION
 !! This module is to be user to go to "KGB" representation and to "linear
 !! algebra representation" It will replace most of prep_* subroutine
 !! This should really help to do the transposition operataion
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2025 ABINIT group (J. Bieder, L. Baguet)
+!!  Copyright (C) 2017-2025 ABINIT group (J. Bieder, L. Baguet, I. Lygatsika)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +41,7 @@ module m_xgTransposer
   use m_errors
   use m_xg
   use m_time
+!  use m_io_tools, only : flush_unit
 
 #if defined HAVE_YAKL
   use gator_mod
@@ -101,15 +106,18 @@ module m_xgTransposer
     type(mpiData_t), private :: mpiData(4)
     integer, allocatable, private :: lookup(:)
     integer, pointer, private :: nrowsLinalg(:) => null()
+    integer, pointer, private :: ncolsColsRows_sub(:) => null() ! allows different bandpp per MPI process
     integer :: nspinor
     integer :: nrowsColsRows
     integer :: ncolsColsRows
+    integer :: ncolsLinalg
     integer :: mpiAlgo
     integer :: type
     integer :: me_g0_fft
     integer :: gpu_option = ABI_GPU_DISABLED
     integer :: gpu_kokkos_nthrd = 1
     integer :: gpu_thread_limit = 1
+    logical :: custom_ncolsColsRows = .false. ! use ncolsColsRows_sub instead of ncolsColsRows
     real(dp), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
   end type xgTransposer_t
 
@@ -118,6 +126,7 @@ module m_xgTransposer
   public :: xgTransposer_transpose
   public :: xgTransposer_getRank
   public :: xgTransposer_getComm
+  public :: xgTransposer_getNrowsDistribution
   public :: xgTransposer_free
 
   contains
@@ -129,7 +138,8 @@ module m_xgTransposer
 !! xgTransposer_constructor
 
   subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,nspinor,&
-      state,algo,comm_rows,comm_cols,ncpu_cols,ncpu_rows,me_g0_fft,gpu_option,gpu_thread_limit)
+      state,algo,comm_rows,comm_cols,ncpu_cols,ncpu_rows,me_g0_fft,gpu_option,gpu_thread_limit,&
+      custom_ncolsColsRows,ncolsColsRows_sub,nrowsLinalg_sub)
 
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
@@ -140,14 +150,19 @@ module m_xgTransposer
     integer                , intent(in   ) :: state
     integer                , intent(in   ) :: algo
     integer                , intent(in   ) :: me_g0_fft
-    integer , optional     , intent(in   ) :: gpu_option,gpu_thread_limit
+    integer, optional      , intent(in   ) :: gpu_option,gpu_thread_limit
+    logical, optional      , intent(in   ) :: custom_ncolsColsRows ! query for pointer
+    integer, optional, target, intent(in) :: ncolsColsRows_sub(:)
+    integer, optional, target, intent(in) :: nrowsLinalg_sub(:)
     integer :: commLinalg
     integer :: ncols
     integer :: nrows
     integer :: ierr
+    integer :: irow
     integer :: icol
     integer :: ncpuRows
     integer :: ncpuCols
+    logical :: custom_ncolsColsRows_
 #if defined HAVE_MPI
     integer :: comm_rows_,comm_cols_
 #endif
@@ -168,12 +183,14 @@ module m_xgTransposer
     xgTransposer%gpu_thread_limit = 1
     if(present(gpu_thread_limit)) xgTransposer%gpu_thread_limit = gpu_thread_limit
     commLinalg = comm(xgBlock_linalg)
+    if (state==STATE_COLSROWS) commLinalg = comm(xgBlock_colsrows)
     xgTransposer%mpiData(MPI_LINALG)%comm = commLinalg
     xgTransposer%mpiData(MPI_LINALG)%rank = xmpi_comm_rank(commLinalg)
     xgTransposer%mpiData(MPI_LINALG)%size = xmpi_comm_size(commLinalg)
 
 #if defined HAVE_MPI
     if (comm_rows==xmpi_comm_null.and.comm_cols==xmpi_comm_null) then
+      if (state==STATE_COLSROWS) ABI_ERROR('Transposer from ColsRows with null comms not implemented')
       xgTransposer%type = TRANS_TYPE_CONSTRUCTED_NULL_COMM
       ncpuCols = ncpu_cols
       ncpuRows = ncpu_rows
@@ -191,7 +208,7 @@ module m_xgTransposer
     ncpuCols = 1
 #endif
     if ( xgTransposer%mpiData(MPI_LINALG)%size < ncpuCols*ncpuRows ) then
-      write(message,'(a,i6,a,i6,a)') "There is not enough MPI processes in the communcation (", &
+      write(message,'(a,i6,a,i6,a)') "There is not enough MPI processes in the communication (", &
         xgTransposer%mpiData(MPI_LINALG)%size, "). Need at least ", ncpuCols*ncpuRows, " processes"
       ABI_ERROR(message)
     end if
@@ -208,26 +225,54 @@ module m_xgTransposer
     !else
     !  ABI_COMMENT("Using mpi_gatherv for transposition")
     !end if
+    
+    ! Nullify pointers in order to be able to query them
+    xgTransposer%nrowsLinalg => null()
+    xgTransposer%buffer => null()
+    xgTransposer%ncolsColsRows_sub => null()
 
+    ! Attention: Do not check condition present() on the pointer because in Fortran
+    ! "An unallocated variable passed as an argument is not PRESENT"
+    ! in other words declared pointers with undefined status cannot be queried
+    custom_ncolsColsRows_ = .false.
+    if (present(custom_ncolsColsRows)) custom_ncolsColsRows_ = custom_ncolsColsRows
+    xgTransposer%custom_ncolsColsRows = custom_ncolsColsRows_
+    if (custom_ncolsColsRows_) then
+      if ( ncpuRows > 1 ) then
+        write(message,'(a,i6)') "Custom ncolsColsRows not implemented for number of row MPI processes=", ncpuRows
+        ABI_ERROR(message)
+      end if
+      xgTransposer%custom_ncolsColsRows = .true.
+      if (state==STATE_LINALG) xgTransposer%ncolsColsRows_sub => ncolsColsRows_sub
+      ! if state colsrows in will be constructed later in readDistribution
+    end if
+
+    ! The following allocates memory buffer associated either to xgBlock_linalg or to xgBlock_colsrows
+    !! Assumes that only one of them is already allocated
     select case (state)
     case (STATE_LINALG)
+
       ! We are in the linalg representation.
       ! We need to construct the colsrows parallelization
       call xgBlock_getSize(xgBlock_linalg,nrows,ncols)
+      
+      ! Get total number of rows in ColsRows representation
       call xmpi_sum(nrows,commLinalg,ierr)
 
+      ! Check that ncols can be uniformly distributed across ncolsCols MPI processes
+      ! Load balance is uniform, each MPI process has the same ncolsColsRows
       if ( MOD(ncols,ncpuCols) /=0 ) then
         if ( ncols > ncpuCols ) then
           write(message,'(a,i6,a,i6,a)') "Unbalanced parallelization : ", ncols, " columns for ", ncpuCols, " MPI"
           ABI_ERROR(message)
         else
-          write(message,'(i6,a)') (ncpuCols-ncols)*ncpuRows, " MPI will not be used  because of the number of columns!!"
+          write(message,'(i6,a)') (ncpuCols-ncols)*ncpuRows, " MPI will not be used because of the number of columns!!"
           ABI_ERROR(message)
           !ncpuCols = ncols
         end if
       end if
 
-      ! Build the lookup table
+      ! Build the lookup table that maps each column to an MPI process
       ABI_MALLOC(xgTransposer%lookup,(1:ncols))
       !ABI_MALLOC(xgTransposer%me_g0_lookup,())
       do icol = 0, ncols-1
@@ -252,12 +297,38 @@ module m_xgTransposer
       call xgTransposer_makeXgBlock(xgTransposer)
 
     case (STATE_COLSROWS)
-      ABI_BUG("Not yet implemented")
+      
+      !write(std_out,'(a,i2,i2)') 'db @xgTransposer constructor enter case for # procs', ncpuRows,ncpuCols
+      !call flush_unit(std_out)
+
+      ! We are in the colsrows representation.
+      ! We need to construct the linalg parallelization
+
+      ! Load balance
+      ! nrows are distributed uniformly across ncpuCols MPI processes for 1,...,ncpuCols-1
+      ! The last MPI process uses remaining nrows. Read distribution from nrowsLinalg_sub
+      call xgBlock_getSize(xgBlock_colsrows,nrows,ncols)
+      ABI_MALLOC(xgTransposer%lookup,(1:ncols))
+
+#if defined HAVE_MPI
+      xgTransposer%mpiData(MPI_ROWS)%comm = comm_rows
+      xgTransposer%mpiData(MPI_COLS)%comm = comm_cols
+#else
+      xgTransposer%mpiData(MPI_ROWS)%comm = xmpi_comm_null
+      xgTransposer%mpiData(MPI_COLS)%comm = xmpi_comm_null
+#endif
+
+      call xgTransposer_setComm(xgTransposer)
+      call xgTransposer_readDistribution(xgTransposer,nrowsLinalg_sub)      
+      call xgTransposer_makeXgBlock(xgTransposer)
+
     case default
       ABI_ERROR("State is undefined")
     end select
 
     call timab(tim_init,2,tsec)
+
+    !write(*,*) 'transposer construction done'
 
   end subroutine xgTransposer_constructor
 !!***
@@ -290,6 +361,7 @@ module m_xgTransposer
     xgTransposer%xgBlock_colsrows => xgBlock_colsrows
     xgTransposer%state = state
     commLinalg = comm(xgBlock_linalg)
+    if (state==STATE_COLSROWS) commLinalg = comm(xgBlock_colsrows)
 
     if ( commLinalg /= xgTransposerInitialized%mpiData(MPI_LINALG)%comm ) then
       ABI_ERROR("Linalg communicators are different for the two transposers, this is not allowed.")
@@ -308,14 +380,30 @@ module m_xgTransposer
     xgTransposer%me_g0_fft = xgTransposerInitialized%me_g0_fft
     xgTransposer%gpu_option = xgTransposerInitialized%gpu_option
 
+    ! Nullify pointers in order to be able to query them
+    xgTransposer%nrowsLinalg => null()
+    xgTransposer%buffer => null()
+    xgTransposer%ncolsColsRows_sub => null()
+    !write(std_out,*) '@nrowsLinalg', associated(xgTransposer%nrowsLinalg)
+
+    xgTransposer%custom_ncolsColsRows = xgTransposerInitialized%custom_ncolsColsRows
+    if(xgTransposer%custom_ncolsColsRows .and. state==STATE_LINALG) then
+        xgTransposer%ncolsColsRows_sub => xgTransposerInitialized%ncolsColsRows_sub
+        ! if state colsrows in will be constructed later in readDistribution
+    end if
+        
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
     ncpuRows = xgTransposer%mpiData(MPI_ROWS)%size
 
     select case (state)
     case (STATE_LINALG)
+      
       call xgBlock_getSize(xgBlock_linalg,nrows,ncols)
+      
+      ! Get total number of rows in ColsRows representation
       call xmpi_sum(nrows,commLinalg,ierr)
 
+      ! Check that ncols can be uniformly distributed across ncolsCols MPI processes
       if ( MOD(ncols,ncpuCols) /=0 ) then
         if ( ncols > ncpuCols ) then
           write(message,'(a,i6,a,i6,a)') "Unbalanced parallelization : ", ncols, " columns for ", ncpuCols, " MPI"
@@ -326,21 +414,35 @@ module m_xgTransposer
         end if
       end if
 
-      ! Build the lookup table
+      ! Build the lookup table that maps each column to an MPI process
+      ! Assures load balance so that each MPI process has the same charge
       ABI_MALLOC(xgTransposer%lookup,(1:ncols))
       if ( cols(xgTransposerInitialized%xgBlock_linalg) /= ncols ) then
         do icol = 0, ncols-1
-        xgTransposer%lookup(icol+1) = MOD(icol,ncpuCols)
+            xgTransposer%lookup(icol+1) = MOD(icol,ncpuCols)
         end do
       else
         xgTransposer%lookup(:) = xgTransposerInitialized%lookup(:)
-      endif
+      end if
 
       call xgTransposer_computeDistribution(xgTransposer)
       call xgTransposer_makeXgBlock(xgTransposer)
 
     case (STATE_COLSROWS)
-      ABI_BUG("Not yet implemented")
+      
+      !write(std_out,*) 'db @xgTransposer copyConstructor enter case'
+      !call flush_unit(std_out)
+
+      nrows = rows(xgBlock_colsrows)
+      if ( MOD(nrows,ncpuCols) /=0 .and. nrows > ncpuCols) then
+        write(message,'(a,i6,a,i6,a)') "Unbalanced parallelization : ", nrows, " rows for ", ncpuCols, " MPI"
+        ABI_COMMENT(message)
+      end if
+      ABI_MALLOC(xgTransposer%lookup,(1:ncols))
+
+      call xgTransposer_readDistribution(xgTransposer,xgTransposerInitialized%nrowsLinalg)      
+      call xgTransposer_makeXgBlock(xgTransposer)
+
     case default
       ABI_ERROR("State is undefined")
     end select
@@ -364,7 +466,14 @@ module m_xgTransposer
     xgTransposer%mpiData(MPI_COLS)%rank = xmpi_comm_rank(xgTransposer%mpiData(MPI_COLS)%comm)
     xgTransposer%mpiData(MPI_COLS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_COLS)%comm)
 
-    call xgBlock_setComm(xgTransposer%xgBlock_colsrows,xgTransposer%mpiData(MPI_ROWS)%comm)
+    select case(xgTransposer%state)
+    case (STATE_LINALG)
+        call xgBlock_setComm(xgTransposer%xgBlock_colsrows,xgTransposer%mpiData(MPI_ROWS)%comm)
+    case (STATE_COLSROWS)
+        call xgBlock_setComm(xgTransposer%xgBlock_linalg,xgTransposer%mpiData(MPI_ROWS)%comm)
+    case default
+      ABI_ERROR("State is undefined")
+    end select
 
   end subroutine xgTransposer_setComm
 !!***
@@ -434,16 +543,17 @@ module m_xgTransposer
     integer :: ierr
     integer :: icpu_cols,icpu_rows
     integer :: ncpuCols,ncpuRows
-
+    integer :: ncolsColsRowsMe
+    
     ABI_MALLOC(xgTransposer%nrowsLinalg,(xgTransposer%mpiData(MPI_LINALG)%size))
     nRealPairs = rows(xgTransposer%xgBlock_linalg)
     if (MOD(nRealPairs,xgTransposer%nspinor)/=0) then
-      ABI_ERROR('nspinor should divide nRealPairs!')
+        ABI_ERROR('nspinor should divide nRealPairs!')
     end if
 
     call xmpi_allgather(nRealPairs,xgTransposer%nrowsLinalg,xgTransposer%mpiData(MPI_LINALG)%comm,ierr)
     if ( ierr /= xmpi_success ) then
-      ABI_ERROR("Error while gathering number of rows in linalg")
+        ABI_ERROR("Error while gathering number of rows in linalg")
     end if
 
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
@@ -451,15 +561,77 @@ module m_xgTransposer
     icpu_rows = xgTransposer%mpiData(MPI_ROWS)%rank
     xgTransposer%nrowsColsRows = 0
     do icpu_cols=0,ncpuCols-1
-      xgTransposer%nrowsColsRows = xgTransposer%nrowsColsRows + xgTransposer%nrowsLinalg(1+icpu_rows+icpu_cols*ncpuRows)
+        xgTransposer%nrowsColsRows = xgTransposer%nrowsColsRows + xgTransposer%nrowsLinalg(1+icpu_rows+icpu_cols*ncpuRows)
     end do
     xgTransposer%ncolsColsRows = cols(xgTransposer%xgBlock_linalg)/ncpuCols
+    if (xgTransposer%custom_ncolsColsRows) then
+      ncolsColsRowsMe = xgTransposer%ncolsColsRows_sub(xgTransposer%mpiData(MPI_LINALG)%rank+1)
+      xgTransposer%ncolsColsRows = ncolsColsRowsMe ! overwrite
+    end if
 
     !write(*,*) "In linalg, # of real pairs:", xgTransposer%nrowsLinalg
     !write(*,*) "In rows, # of real pairs for proc ", xgTransposer%mpiData(MPI_ROWS)%rank, ":", xgTransposer%nrowsColsRows
     !write(*,*) "In cols, # of cols for proc ", xgTransposer%mpiData(MPI_COLS)%rank, ":", xgTransposer%ncolsColsRows
 
   end subroutine xgTransposer_computeDistribution
+!!***
+
+!!****f* m_xgTransposer/xgTransposer_readDistribution
+!!
+!! NAME
+!! xgTransposer_readDistribution
+
+  subroutine xgTransposer_readDistribution(xgTransposer,nrowsLinalg_sub)
+
+      ! Arguments
+      type(xgTransposer_t), intent(inout) :: xgTransposer
+      integer, pointer, intent(in) :: nrowsLinalg_sub(:)
+      ! Variables
+      integer :: iproc,nRealPairs,tot_ncols,ncols,ierr
+      integer :: nprocs,commLinalg
+
+      ! ***
+
+      nprocs = xgTransposer%mpiData(MPI_LINALG)%size
+      xgTransposer%nrowsColsRows = rows(xgTransposer%xgBlock_colsrows)
+      ncols = cols(xgTransposer%xgBlock_colsrows)
+      xgTransposer%ncolsColsRows = ncols ! for current MPI process
+
+      if(xgTransposer%custom_ncolsColsRows) then
+          ABI_MALLOC(xgTransposer%ncolsColsRows_sub,(nprocs))
+
+          commLinalg = xgTransposer%mpiData(MPI_LINALG)%comm
+          ncols = cols(xgTransposer%xgBlock_colsrows)
+          call xmpi_allgather(ncols,xgTransposer%ncolsColsRows_sub,commLinalg,ierr)
+          if ( ierr /= xmpi_success ) then
+              ABI_ERROR("Error while gathering number of columns in colsrows")
+          end if
+          call xmpi_sum(ncols,commLinalg,ierr)        
+          if ( ierr /= xmpi_success ) then
+              ABI_ERROR("Error while summing number of columns in colsrows")
+          end if
+          tot_ncols = ncols ! update sum
+      else
+          tot_ncols = ncols*xgTransposer%mpiData(MPI_COLS)%size
+      end if
+
+      do iproc=1,size(nrowsLinalg_sub)    
+        nRealPairs = nrowsLinalg_sub(iproc)
+        if (MOD(nRealPairs,xgTransposer%nspinor)/=0) then
+            ABI_ERROR('nspinor should divide nRealPairs!')
+        end if
+      end do
+        
+      ABI_MALLOC(xgTransposer%nrowsLinalg,(nprocs))
+      xgTransposer%nrowsLinalg(:) = nrowsLinalg_sub(:)
+      xgTransposer%ncolsLinalg = tot_ncols
+
+      !write(*,*) "In linalg, # of real pairs:", xgTransposer%nrowsLinalg
+      !write(*,*) "In linalg, # of cols:", xgTransposer%ncolsLinalg
+      !write(*,*) "In rows, # of real pairs for proc ", xgTransposer%mpiData(MPI_ROWS)%rank, ":", xgTransposer%nrowsColsRows
+      !write(*,*) "In cols, # of cols for proc ", xgTransposer%mpiData(MPI_COLS)%rank, ":", xgTransposer%ncolsColsRows
+
+  end subroutine xgTransposer_readDistribution
 !!***
 
 !!****f* m_xgTransposer/xgTransposer_makeXgBlock
@@ -473,10 +645,17 @@ module m_xgTransposer
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     real(dp), ABI_CONTIGUOUS pointer :: xgTransposer__buffer(:,:)
 #endif
+    integer :: me_rows,me_cols,ncpu_rows,ncolsColsRows
+    integer :: nrowsLinalgMe 
     !integer :: cols, rows
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
+
+      ncolsColsRows = xgTransposer%ncolsColsRows
+      !write(std_out,*) '@makeXgBlock dims', ncolsColsRows, xgTransposer%nrowsColsRows
+      !call flush_unit(std_out)
+
       ! Assume xgBlock_colsrows is empty and not constructed because user cannot
       ! predict the size
       if ( associated(xgTransposer%buffer) ) then
@@ -504,10 +683,10 @@ module m_xgTransposer
       else
         if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-          ABI_MALLOC_MANAGED(xgTransposer%buffer,(/2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows/))
+          ABI_MALLOC_MANAGED(xgTransposer%buffer,(/2,ncolsColsRows*xgTransposer%nrowsColsRows/))
 #endif
         else
-          ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
+          ABI_MALLOC(xgTransposer%buffer,(2,ncolsColsRows*xgTransposer%nrowsColsRows))          
         end if
         if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
@@ -520,15 +699,72 @@ module m_xgTransposer
 #endif
         end if
         call xgBlock_map(xgTransposer%xgBlock_colsrows,xgTransposer%buffer,space(xgTransposer%xgBlock_linalg),&
-          xgTransposer%nrowsColsRows,&
-          xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm,&
+          xgTransposer%nrowsColsRows,ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm,&
           me_g0=xgTransposer%me_g0_fft,gpu_option=xgTransposer%gpu_option)
       end if
     case (STATE_COLSROWS)
-      ABI_ERROR("Not yet implemented")
+
+      ! Assume xgBlock_linalg is empty and not constructed 
+
+      !write(std_out,*) 'db using @makeXgBlock not empty'
+      !call flush_unit(std_out)
+   
+      nrowsLinalgMe = xgTransposer%nrowsLinalg(xgTransposer%mpiData(MPI_LINALG)%rank+1)
+
+      if ( associated(xgTransposer%buffer) ) then
+        if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+          ABI_FREE_MANAGED(xgTransposer%buffer)
+#endif
+        else
+          if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+            !$OMP TARGET EXIT DATA MAP(delete:xgTransposer%buffer)
+#else
+            xgTransposer__buffer => xgTransposer%buffer
+            !$OMP TARGET EXIT DATA MAP(delete:xgTransposer__buffer)
+#endif
+#endif
+          end if
+          ABI_FREE(xgTransposer%buffer)          
+        end if
+      end if
+
+      if ( xgTransposer%mpiData(MPI_COLS)%size == 1 ) then
+        xgTransposer%xgBlock_linalg = xgTransposer%xgBlock_colsrows
+      else
+        if(xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+          ABI_MALLOC_MANAGED(xgTransposer%buffer,(/2,xgTransposer%ncolsLinalg*nrowsLinalgMe/))
+#endif
+        else
+          ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsLinalg*nrowsLinalgMe))          
+        end if
+        if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+          !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer%buffer)
+#else
+          xgTransposer__buffer => xgTransposer%buffer
+          !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer__buffer)
+#endif
+#endif
+        end if
+        call xgBlock_map(xgTransposer%xgBlock_linalg,xgTransposer%buffer,space(xgTransposer%xgBlock_colsrows),&
+          nrowsLinalgMe,xgTransposer%ncolsLinalg,xgTransposer%mpiData(MPI_ROWS)%comm,&
+          me_g0=xgTransposer%me_g0_fft,gpu_option=xgTransposer%gpu_option)
+      end if
+
     case default
       ABI_ERROR("State unknown")
     end select
+   
+    !if (associated(xgTransposer%buffer)) then
+    !    write(std_out,*) '@makeXgBlock alloc buffer size', size(xgTransposer%buffer,1), size(xgTransposer%buffer,2)
+    !    call flush_unit(std_out)
+    !end if
+
   end subroutine xgTransposer_makeXgBlock
 !!***
 
@@ -600,6 +836,7 @@ module m_xgTransposer
    !integer, allocatable :: request(:), status(:)
    type(ptr_t), allocatable :: sendptrbuf(:)
    integer, pointer :: nrowsLinalg(:)
+   integer, pointer :: ncolsColsRows_sub(:)
    double precision :: tsec(2)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
@@ -615,11 +852,18 @@ module m_xgTransposer
 !   me = xgTransposer%mpiData(MPI_ROWS)%rank*ncpu
    me_rows = xgTransposer%mpiData(MPI_ROWS)%rank
 
+   !write(std_out,'(a,i4,i4,i4)') '@xgTransposer_toLinalg for MPI proc in comm=', &
+   !    xgTransposer%mpiData(MPI_LINALG)%rank, xgTransposer%mpiData(MPI_LINALG)%comm, comm
+   
    nrowsColsRows = xgTransposer%nrowsColsRows
    ncolsColsRows = xgTransposer%ncolsColsRows
 
    nrowsLinalg => xgTransposer%nrowsLinalg
+   if (xgTransposer%custom_ncolsColsRows) ncolsColsRows_sub => xgTransposer%ncolsColsRows_sub
    nrowsLinalgMe = nrowsLinalg(xgTransposer%mpiData(MPI_LINALG)%rank+1)
+
+   !write(std_out,*) '@toLinalg nrowsColsRows, ncolsColsRows=', nrowsColsRows, ncolsColsRows
+   !call flush_unit(std_out)
 
    ABI_MALLOC(sendbuf,(2,nrowsColsRows*ncolsColsRows))
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
@@ -629,7 +873,11 @@ module m_xgTransposer
 
    ABI_MALLOC(recvcounts,(ncpu_cols))
    ABI_MALLOC(rdispls,(ncpu_cols))
-   recvcounts(:) = 2*nrowsLinalgMe*ncolsColsRows !! Thank you fortran for not starting at 0 !
+   if (xgTransposer%custom_ncolsColsRows) then ! non uniform sendcounts
+     recvcounts(:) = 2*nrowsLinalgMe*ncolsColsRows_sub(:)
+   else
+     recvcounts(:) = 2*nrowsLinalgMe*ncolsColsRows !! Thank you fortran for not starting at 0 !
+   end if
    rdispls(1) = 0
    do icpu = 2, ncpu_cols
      rdispls(icpu) = rdispls(icpu-1)+recvcounts(icpu-1)
@@ -656,10 +904,11 @@ module m_xgTransposer
    !sendcounts(:) = 2*nrowsLinalg(me+1:me+ncpu)*ncolsColsRows
    do icpu=0,ncpu_cols-1
      sendcounts(icpu+1) = 2*nrowsLinalg(me_rows+1+icpu*ncpu_rows)*ncolsColsRows
+     !write(*,*) "nrowsLinalg ", icpu, ncpu_rows, nrowsLinalg(me_rows+1+icpu*ncpu_rows)
    end do
    sdispls(1) = 0
    do icpu = 2, ncpu_cols
-   sdispls(icpu) = sdispls(icpu-1)+sendcounts(icpu-1)
+     sdispls(icpu) = sdispls(icpu-1)+sendcounts(icpu-1)
    end do
 
    select case(xgTransposer%mpiAlgo)
@@ -688,6 +937,9 @@ module m_xgTransposer
 #endif
 
      else
+
+       !write(*,*) "sendcounts for proc ", me_rows, xmpi_comm_rank(comm), ":", sendcounts(:)
+       !write(*,*) "recvcounts for proc ", me_rows, xmpi_comm_rank(comm), ":", recvcounts(:)
 
        call timab(tim_all2allv,1,tsec)
        call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
@@ -788,14 +1040,15 @@ module m_xgTransposer
    integer, allocatable :: sdispls(:), rdispls(:)
    integer :: ncpu_rows, ncpu_cols, comm, me_rows, me_cols
    integer :: nrowsColsRows
-   integer :: ncolsColsRows
    integer :: nrowsLinalgMe
+   integer :: ncolsColsRows
    integer :: icpu,ierr
    !integer :: myrequest
    !integer, allocatable :: request(:), status(:)
    type(xgBlock_t) :: xgBlock_toTransposed
    type(ptr_t), allocatable :: sendptrbuf(:)
    integer, pointer :: nrowsLinalg(:)
+   integer, pointer :: ncolsColsRows_sub(:)
    double precision :: tsec(2)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
@@ -814,6 +1067,7 @@ module m_xgTransposer
    ncolsColsRows = xgTransposer%ncolsColsRows
 
    nrowsLinalg => xgTransposer%nrowsLinalg
+   if (xgTransposer%custom_ncolsColsRows) ncolsColsRows_sub => xgTransposer%ncolsColsRows_sub
    nrowsLinalgMe = nrowsLinalg(xgTransposer%mpiData(MPI_LINALG)%rank+1)
 
    ABI_MALLOC(recvbuf,(2,nrowsColsRows*ncolsColsRows))
@@ -823,6 +1077,7 @@ module m_xgTransposer
    ABI_MALLOC(recvcounts,(ncpu_cols))
    ABI_MALLOC(rdispls,(ncpu_cols))
 
+   ! 2 * ncolsColsRows * nrowsLinalg_sub(:)
    recvcounts(:) = 2*ncolsColsRows*nrowsLinalg(1+me_rows:1+me_rows+(ncpu_cols-1)*ncpu_rows:ncpu_rows)
    rdispls(1) = 0
    do icpu = 2, ncpu_cols
@@ -841,7 +1096,12 @@ module m_xgTransposer
      !ABI_MALLOC(request,(1))
      !myrequest = 1
 
-     sendcounts(:) = 2*nrowsLinalgMe*ncolsColsRows !! Thank you fortran for not starting at 0 !
+     ! 2 * ncolsColsRows_sub(:) * nrowsLinalgMe
+     if (xgTransposer%custom_ncolsColsRows) then ! non uniform sendcounts
+        sendcounts(:) = 2*nrowsLinalgMe*ncolsColsRows_sub(:)
+     else
+        sendcounts(:) = 2*nrowsLinalgMe*ncolsColsRows !! Thank you fortran for not starting at 0 !
+     end if
      sdispls(1) = 0
      do icpu = 2, ncpu_cols
        sdispls(icpu) = sdispls(icpu-1)+sendcounts(icpu-1)
@@ -879,6 +1139,23 @@ module m_xgTransposer
       ABI_FREE(sendbuf_mpi)
 #endif
     else
+
+      !write(std_out,'(a,i4,i4,i4)') '@xgTransposer_toColsRows for MPI proc in comm=', &
+      !    xgTransposer%mpiData(MPI_LINALG)%rank, xgTransposer%mpiData(MPI_LINALG)%comm, comm
+      !if (xgTransposer%custom_ncolsColsRows) then
+      !    write(std_out,*) 'db ncolsColsRows_sub', ncolsColsRows_sub(:)
+      !end if
+      !write(std_out,*) 'db ncolsColsMe', ncolsColsRows
+      !write(std_out,*) 'db nrowsLinalg', nrowsLinalg(1+me_rows:1+me_rows+(ncpu_cols-1)*ncpu_rows:ncpu_rows)
+      !write(std_out,*) 'db nrowsLinalgMe', nrowsLinalgMe
+      !write(std_out,*) 'db sendbuf', cols(xgTransposer%xgBlock_linalg), nrowsLinalgMe
+      !write(std_out,*) 'db recvbuf', nrowsColsRows, ncolsColsRows
+      !write(std_out,*) 'db sendcounts', sendcounts(:)
+      !write(std_out,*) 'db recvcounts', recvcounts(:)
+      !write(std_out,*) 'db sdispls', sdispls(:)
+      !write(std_out,*) 'db rdispls', rdispls(:)      
+      !call flush_unit(std_out)
+
       call timab(tim_all2allv,1,tsec)
       call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
                           recvbuf, recvcounts, rdispls, &
@@ -988,9 +1265,10 @@ module m_xgTransposer
     integer :: tos,toe,froms,frome
     integer :: col, icpu
     integer :: me_rows,ncpu_cols,ncpu_rows
+    integer :: me_cols
     integer :: nPair,ispinor,nspinor
     integer :: nrowsLinalgMe,nrowsLinalgMeSum
-    integer,pointer :: nrowsLinalg(:)
+    integer, pointer :: nrowsLinalg(:)
     double precision :: tsec(2)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
     integer(c_size_t) :: buffer_size
@@ -1002,14 +1280,24 @@ module m_xgTransposer
     ncpu_rows = xgTransposer%mpiData(MPI_ROWS)%size
     ncpu_cols = xgTransposer%mpiData(MPI_COLS)%size
 
-    nrowsColsRows = xgTransposer%nrowsColsRows
-    ncolsColsRows = xgTransposer%ncolsColsRows
-    nPair = nrowsColsRows*ncolsColsRows
-
-    call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,bufferOrdered,rows=1,cols=nPair)
-
+    ! These arrays are stored as
+    ! 1 2 3
+    ! 4 5 6
+    ! 7 8 9
+    ! 
+    ! stored as
+    ! 
+    ! column-major, one-base indexing  : 1 4 7 2 5 8 3 6 9    | y + N_y*(x-1)
+    ! row-major   , zero-based indexing: 1 2 3 4 5 6 7 8 9    | x + N_x*y
     nspinor = xgTransposer%nspinor
     nrowsLinalg => xgTransposer%nrowsLinalg
+
+    nrowsColsRows = xgTransposer%nrowsColsRows
+    ncolsColsRows = xgTransposer%ncolsColsRows
+
+    ! number of pairs depends on current MPI process
+    nPair = nrowsColsRows*ncolsColsRows
+    call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,bufferOrdered,rows=1,cols=nPair)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
     ! if gpu is enabled, data are located in GPU memory, so we prefetch them on host
@@ -1133,6 +1421,21 @@ module m_xgTransposer
     end if
     communicator = xgTransposer%mpiData(comm1)%comm
   end function xgTransposer_getComm
+!!***
+
+!!****f* m_xgTransposer/xgTransposer_getNrowsDistribution
+!!
+!! NAME
+!! xgTransposer_getNrowsDistribution
+
+  subroutine xgTransposer_getNrowsDistribution(xgTransposer,nrows_distrb)
+    
+      type(xgTransposer_t), intent(in) :: xgTransposer
+      integer, pointer, intent(inout) :: nrows_distrb(:)
+
+      nrows_distrb(:) = xgTransposer%nrowsLinalg(:)
+
+  end subroutine xgTransposer_getNrowsDistribution
 !!***
 
 !!****f* m_xgTransposer/xgTransposer_free
