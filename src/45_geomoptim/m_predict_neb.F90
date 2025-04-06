@@ -154,6 +154,11 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    ABI_MALLOC(rprimd,(3,3,nimage))
    ABI_MALLOC(strainfact_jj,(nimage))
    strainfact_jj(:)=one
+   ABI_MALLOC(rprimd_start,(3,3,nimage))
+   do iimage=1,nimage
+     ii=mpi_enreg%my_imgtab(iimage)
+     rprimd_start(:,:,iimage)=mep_param%rprimd_start(:,:,ii)
+   end do
    ABI_MALLOC(fcart,(3,natom,nimage))
    ABI_MALLOC(strten,(6,nimage))
    call get_geometry_img(results_img(:,itimimage_eff),etotal,natom,nimage,&
@@ -167,7 +172,6 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      ABI_MALLOC(ucvol,(nimage))
      ABI_MALLOC(pressure,(nimage))
      ABI_MALLOC(strten_mat,(3,3,nimage))
-     ABI_MALLOC(rprimd_start,(3,3,nimage))
      ABI_MALLOC(rprimd_start_inv,(3,3,nimage))
      pressure(1:nimage)=-(strten(1,1:nimage)+strten(2,1:nimage)+strten(3,1:nimage))*third
      do iimage=1,nimage
@@ -177,8 +181,6 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
        do jj=1,3; do ii=1,3
          strten_mat(ii,jj,iimage)=strten(voigt(ii,jj),iimage)
        end do; end do
-       ii=mpi_enreg%my_imgtab(iimage)
-       rprimd_start(:,:,iimage)=mep_param%rprimd_start(:,:,ii)
        call matr3inv(rprimd_start(:,:,iimage),mat3_1(:,:))
        rprimd_start_inv(:,:,iimage) = transpose(mat3_1(:,:))
      end do
@@ -216,7 +218,6 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      ABI_FREE(ucvol)
      ABI_FREE(pressure)
      ABI_FREE(strten_mat)
-     ABI_FREE(rprimd_start)
      ABI_FREE(rprimd_start_inv)
    end if
 
@@ -256,9 +257,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      fcart_eff_all     => fcart_eff
      neb_forces_all    => neb_forces
    end if
-if (mpi_enreg%me==0) then
- write(77,*) "fcart_eff ",fcart_eff_all(1:3,natom+1:natom+3,:); flush(77)
-end if
+
 !  coordif is the vector between two images
 !  dimage is the distance between two images
 !  tangent is the tangent at image i
@@ -389,8 +388,8 @@ end if
    if (mep_param%mep_solver==MEP_SOLVER_STEEPEST) then ! Steepest-descent
      call mep_steepest(neb_forces,list_dynimage,mep_param,natom,natom_eff,&
 &                      ndynimage,nimage,rprimd,xcart,xred,&
-&                      use_reduced_coord=use_reduced_coord,&
-&                      strainfact=strainfact_jj)
+&                      strainfact=strainfact_jj,rprimd_start=rprimd_start,&
+&                      use_reduced_coord=use_reduced_coord)
    else if (mep_param%mep_solver==MEP_SOLVER_QUICKMIN) then ! Quick-min
      call mep_qmin(neb_forces,itimimage,list_dynimage,mep_param,natom,ndynimage, &
 &     nimage,rprimd,xcart,xred)
@@ -432,6 +431,7 @@ end if
    ABI_FREE(fcart)
    ABI_FREE(fcart_eff)
    ABI_FREE(strainfact_jj)
+   ABI_FREE(rprimd_start)
    ABI_FREE(strten)
 
  end if ! mpi_enreg%me_cell==0

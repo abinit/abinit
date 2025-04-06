@@ -5,7 +5,6 @@
 #                                                      MT 2025  #
 #################################################################
 
-
 #Definition of the PATH to explore
 xred_img1    0.0 0.0 0.0          # Starting point
              1/2 1/2 1/2
@@ -17,7 +16,7 @@ imgmov 5                          # Select NEB method
 neb_algo 1                        # Improved-tangent NEB
 neb_cell_algo 1                   # Generalized Solid-State NEB
 mep_solver 0                      # Use steepest-descent as diff. equation solver
-fxcartfactor 0.3                  # Scaling factor for the steepest-descent algo
+fxcartfactor 0.8                  # Scaling factor for the steepest-descent algo
 nsym 1                            # For NEB to work properly
 nimage 7                          # 7 images along the PATH
 dynimage 0 5*1 0                  # First and last images are fixed
