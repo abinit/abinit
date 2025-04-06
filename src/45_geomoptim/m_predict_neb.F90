@@ -126,7 +126,8 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 ! *************************************************************************
 
 !Check options
- if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE.and.mep_param%mep_solver/=0) then
+ if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE.and.&
+&    mep_param%mep_solver/=MEP_SOLVER_STEEPEST) then
    msg='Variable cell NEB only allowed with steepest descent algo!'
    ABI_ERROR(msg)
  end if
@@ -270,7 +271,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    tangent(:,:,1)=zero
    tangent(:,:,nimage_tot)=zero
 !  === Original definition of tangent
-   if (mep_param%neb_algo==0) then
+   if (mep_param%neb_algo==NEB_ALGO_STANDARD) then
      do iimage=2,nimage_tot-1
        tangent(:,:,iimage)=coordif(:,:,iimage  )/dimage(iimage) &
 &                         +coordif(:,:,iimage+1)/dimage(iimage+1)
@@ -327,7 +328,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 
 !  CI-NEB: determine image(s) with maximal energy
    iimage_min=-1;iimage_max=-1
-   if (mep_param%neb_algo==2.and.itimimage>=mep_param%cineb_start) then
+   if (mep_param%neb_algo==NEB_ALGO_CINEB.and.itimimage>=mep_param%cineb_start) then
      emin=min(etotal_all(1),etotal_all(nimage_tot))
      emax=max(etotal_all(1),etotal_all(nimage_tot))
      do iimage=2,nimage_tot-1
@@ -348,7 +349,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      if (iimage/=iimage_max) then
 !    if (iimage/=iimage_min.and.iimage/=iimage_max) then
        f_para1=mep_img_dotp(forces_eff_all(:,:,iimage),tangent(:,:,iimage))
-       if (mep_param%neb_algo==0) then   ! Original NEB algo
+       if (mep_param%neb_algo==NEB_ALGO_STANDARD) then   ! Original NEB algo
          ABI_MALLOC(vect,(3,natom_eff))
          vect(:,:)=spring(iimage+1)*coordif(:,:,iimage+1)-spring(iimage)*coordif(:,:,iimage)
          f_para2=mep_img_dotp(vect(:,:),tangent(:,:,iimage))
@@ -375,18 +376,18 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    end if
 
 !  Compute new atomic positions in each cell
-   if (mep_param%mep_solver==0) then ! Steepest-descent
+   if (mep_param%mep_solver==MEP_SOLVER_STEEPEST) then ! Steepest-descent
      call mep_steepest(neb_forces,list_dynimage,mep_param,natom,natom_eff,&
 &                      ndynimage,nimage,rprimd,xcart,xred,&
 &                      use_reduced_coord=use_reduced_coord,&
 &                      strain_fact=strain_fact_jj)
-   else if (mep_param%mep_solver==1) then ! Quick-min
+   else if (mep_param%mep_solver==MEP_SOLVER_QUICKMIN) then ! Quick-min
      call mep_qmin(neb_forces,itimimage,list_dynimage,mep_param,natom,ndynimage, &
 &     nimage,rprimd,xcart,xred)
-   else if (mep_param%mep_solver==2) then ! Local BFGS
+   else if (mep_param%mep_solver==MEP_SOLVER_LBFGS) then ! Local BFGS
      call mep_lbfgs(neb_forces,itimimage,list_dynimage,mep_param,natom,ndynimage,&
 &     nimage,rprimd,xcart,xred)
-   else if (mep_param%mep_solver==3) then ! Global BFGS
+   else if (mep_param%mep_solver==MEP_SOLVER_GBFGS) then ! Global BFGS
      call mep_gbfgs(neb_forces,itimimage,list_dynimage,mep_param,mpi_enreg,natom,ndynimage,&
 &     nimage,nimage_tot,rprimd,xcart,xred)
    else
