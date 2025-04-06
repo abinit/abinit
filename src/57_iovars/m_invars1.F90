@@ -2615,6 +2615,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ncout = 1
    dtsets(idtset)%ndtset = -1
    dtsets(idtset)%neb_algo=1
+   dtsets(idtset)%neb_cell_algo=0
    dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)
    dtsets(idtset)%nfft = -1
    dtsets(idtset)%nfftdg = -1
