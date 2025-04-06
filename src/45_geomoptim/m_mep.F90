@@ -85,7 +85,7 @@ MODULE m_mep
   real(dp),allocatable :: rk4_fcart1(:,:,:)   ! 4th-order Runge-Kutta storage
   real(dp),allocatable :: rk4_fcart2(:,:,:)   ! 4th-order Runge-Kutta storage
   real(dp),allocatable :: rk4_fcart3(:,:,:)   ! 4th-order Runge-Kutta storage
-  real(dp),pointer     :: rprimd_start(:,:,:) ! real space primitive translations at start
+  real(dp),pointer     :: rprimd_start(:,:,:) ! real space primitive translations at start of the MEP search
  end type mep_type
 
 !Public constants
@@ -225,7 +225,7 @@ end subroutine mep_destroy
 !!  Make a path (string of images) evolve according to a steepest descent algorithm
 !!
 !! INPUTS
-!!  fcart(3,natom,nimage)=cartesian forces in each image along the path
+!!  fcart(3,natom_eff,nimage)=cartesian forces in each image along the path
 !!  list_dynimage(nimage)=list of dynamical images.
 !!  mep_param=datastructure of type mep_type.
 !!            several parameters for Minimal Energy Path (MEP) search.
@@ -237,6 +237,8 @@ end subroutine mep_destroy
 !!                      (positions, forces, energy, ...)
 !!  rprimd(3,3,nimage)=dimensional primitive translations for each image along the path
 !!  [use_reduced_coord]=force the use of reduced coordinates instead of cartesian ones
+!!  [rprimd_start(3,3,nimage)]=real space primitive translations at start of the MEP search
+!!                             Mandatory if natom_eff=natom+3
 !!  [strainfact(nimage)]=only for variable cell algorithms. Factor applied to strains
 !!                        to align their dimension to atomic positions.
 !!                        Only valid when use_reduced_coordinates=.false.
@@ -245,15 +247,17 @@ end subroutine mep_destroy
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  xcart(3,natom,nimage)=cartesian coordinates of atoms in each image along the path
-!!                        before and after time evolution
-!!  xred(3,natom,nimage)=reduced coordinates of atoms in each image along the path
-!!                       before and after time evolution
+!!  xcart(3,natom_eff,nimage)=cartesian coordinates of atoms in each image along the path
+!!          before and after time evolution. If natom_eff=natom+3, then the 3 last "atoms"
+!!          are the primitive vectors of the cell
+!!  xred(3,natom_eff,nimage)=reduced coordinates of atoms in each image along the path
+!!          before and after time evolution. If natom_eff=natom+3, then the 3 last "atoms"
+!!          are the primitive vectors of the cell
 !!
 !! SOURCE
 
 subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,nimage,rprimd,xcart,xred, &
-&                       use_reduced_coord,strainfact) ! optional arguments
+&                       use_reduced_coord,rprimd_start,strainfact) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -262,9 +266,9 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
  type(mep_type),intent(in) :: mep_param
 !arrays
  integer,intent(in) :: list_dynimage(ndynimage)
- real(dp),intent(in) :: fcart(3,natom,nimage)
- real(dp),intent(inout) :: rprimd(3,3,nimage),xcart(3,natom,nimage),xred(3,natom,nimage)
- real(dp),intent(in),optional :: strainfact(nimage)
+ real(dp),intent(in) :: fcart(3,natom_eff,nimage)
+ real(dp),intent(inout) :: rprimd(3,3,nimage),xcart(3,natom_eff,nimage),xred(3,natom_eff,nimage)
+ real(dp),intent(in),optional :: rprimd_start(3,3,nimage),strainfact(nimage)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idynimage,iimage
@@ -281,8 +285,12 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
  use_reduced_coord_=.false.
  if (present(use_reduced_coord)) use_reduced_coord_=use_reduced_coord
 
- ABI_MALLOC(xred_old,(3,natom))
- ABI_MALLOC(xstep,(3,natom))
+ if (natom_eff>=natom+3.and.(.not.present(rprimd_start))) then
+   ABI_BUG("Mandatory arg missing (rprimd_start)!")
+ end if
+
+ ABI_MALLOC(xred_old,(3,natom_eff))
+ ABI_MALLOC(xstep,(3,natom_eff))
 
  do idynimage=1,ndynimage
    iimage=list_dynimage(idynimage)
@@ -299,26 +307,26 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
      call wrtout(ab_out ,msg,'COLL')
    end if
 
+!  Update positions
+   if (use_reduced_coord_) then
+     xred(:,:,iimage)=xred(:,:,iimage)+xstep(:,:)
+     call xred2xcart(natom,rprimd(:,:,iimage),xcart(:,1:natom,iimage),xred(:,1:natom,iimage))
+   else
+     xcart(:,:,iimage)=xcart(:,:,iimage)+xstep(:,:)
+     call xcart2xred(natom,rprimd(:,:,iimage),xcart(:,1:natom,iimage),xred(:,1:natom,iimage))
+   end if
+
 !  Update unit cell vectors if they are included in the list of "atoms"
    if (natom_eff>=natom+3) then
      if (use_reduced_coord_) then
        mat3(1:3,1:3)=identity_real(1:3,1:3)+xred(:,natom+1:natom+3,iimage)
-       rprimd(:,:,iimage)=matmul(mat3(:,:),mep_param%rprimd_start(:,:,iimage))
+       rprimd(:,:,iimage)=matmul(mat3(:,:),rprimd_start(:,:,iimage))
      else
        mat3(1:3,1:3)=xcart(1:3,natom+1:natom+3,iimage)
        if (present(strainfact)) mat3(1:3,1:3)=mat3(1:3,1:3)/strainfact(iimage)
-       rprimd(:,:,iimage)=matmul(mep_param%rprimd_start(:,:,iimage),mat3(:,:)) &
-&                        +mep_param%rprimd_start(:,:,iimage)
+       rprimd(:,:,iimage)=matmul(rprimd_start(:,:,iimage),mat3(:,:)) &
+&                        +rprimd_start(:,:,iimage)
      end if
-   end if
-
-!  Update positions
-   if (use_reduced_coord_) then
-     xred(:,:,iimage)=xred(:,:,iimage)+xstep(:,:)
-     call xred2xcart(natom,rprimd(:,:,iimage),xcart(:,:,iimage),xred(:,:,iimage))
-   else
-     xcart(:,:,iimage)=xcart(:,:,iimage)+xstep(:,:)
-     call xcart2xred(natom,rprimd(:,:,iimage),xcart(:,:,iimage),xred(:,:,iimage))
    end if
 
 !  In case atom is fixed, we restore its previous value ; forbidden if variable cell
