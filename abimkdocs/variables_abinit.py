@@ -7911,6 +7911,7 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
   * = 5 --> **Nudged Elastic Band (NEB)** for finding Minimal Energy Path (MEP) connecting two minima;
     the algorithm variant can be selected with the [[neb_algo]] keyword (NEB+improved tangent by default).
     The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default).
+    It is possible (optionally) to vary the vectors of the primitive cell along the path (variable-cell NEB) by using the variable [[neb_cell_algo]].
     The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.
   * = 6 --> **Linear Combination of Constrained DFT Energies**. The images can have different electronic structure ([[occ]] can differ),
     and their total energies are combined linearly using the factors in [[mixesimgf]], giving the actual total energy of the ensemble
@@ -7924,6 +7925,12 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     (no use of [[dynimage]]); possible transformations of coordinates are defined by [[pitransform]];
     Fictitious masses of the atoms (possibly different from the true masses given by [[amu]]) can be specified by [[pimass]].
     At present, it is only possible to perform calculations in the (N,V,T) ensemble ([[optcell]] = 0).
+  * = 10 --> **Path-Integral Quantum Thermal Bath (PI-QTB)** (see [[cite:Brieuc2016]],[[cite:Dammak2009]]).
+    QTB-MD is an efficient but approximate method when dealing with strongly anharmonic systems,
+    while path integral molecular dynamics (PIMD) gives exact results but in a huge amount of computation time.
+    The QTB and PIMD methods have been combined in order to improve the PIMD convergence
+    or correct the failures of the QTB-MD technique. Warning: this option need a previoulsy generated file
+    containing Gaussian random forces for each time step. Very experimental !!!
 
 No meaning for RF calculations.
 """,
@@ -11720,9 +11727,40 @@ See [[cite:Henkelman2000a]]
 
 Note that, in all cases, it is possible to define the value of the spring
 constant connecting images with [[neb_spring]], keeping it constant or
-allowing it to vary between 2 values (to have higher resolution close to the saddle point).
+allowing it to vary between 2 values (to have higher resolution close to the saddle point).  
+All these methods are also compatible with the variable cell NEB (evolution of lattice vectors along the path), which can be applied using [[neb_cell_algo]].
 """,
 ),
+
+Variable(
+    abivarname="neb_cell_algo",
+    varset="rlx",
+    vartype="integer",
+    topics=['TransPath_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Nudged Elastic Band variable CELL ALGOrithm",
+    requires="[[imgmov]] == 5",
+    added_in_version="v10",
+    text=r"""
+This variable must be enabled to perform Variable Cell Nudged Elastic Band (NEB) calculations,
+i.e. to allow the primitive cell vectors evolve along the path.  
+The possible values are:
+
+  * 0 --> **No cell evolution** (default value)
+
+  * 1 --> **Generalized Solid-State NEB (GSS-NEB)**  
+  Implements the method described in [[cite:Sheppard2012]].
+
+  * 2 --> **Variable-Cell NEB (VC-NEB)**  
+  Implements the method described in [[cite:Qian2013]].  
+    WARNING: Not yet usable! (to be fixed)
+
+> Note: variable-cell NEB is only compatible with the steepest-descent
+Minimum Energy Path search algorithm ([[mep_solver]]=0).
+""",
+),
+
 
 Variable(
     abivarname="neb_spring",
