@@ -1,0 +1,379 @@
+  
+.Version    4.0 of ATDEP
+.Copyright (C) 1998-2025 ABINIT group (FB,JB).
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+  
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see
+ ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date :  6 Apr 2025.
+  
+ #############################################################################
+ ######################### ECHO OF INPUT FILE ################################
+ #############################################################################
+ ======================= Define the unitcell =================================
+ brav                    7   -3
+ natom_unitcell          1
+ xred_unitcell       
+                         0.0000000000    0.0000000000    0.0000000000
+ typat_unitcell          1
+ ntypat                  1
+ amu                    24.3050000000
+ ======================= Define the supercell ================================
+ rprimd              
+                        -6.9979151123    9.8965464602   12.1207445216
+                         6.9979151123   -9.8965464602   12.1207445216
+                        13.9958302246    9.8965464602    0.0000000000
+ multiplicity        
+                        -2.0000000000    2.0000000000    2.0000000000
+                         2.0000000000   -2.0000000000    2.0000000000
+                         2.0000000000    2.0000000000   -2.0000000000
+ natom                  32
+ typat               
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1
+ ======================= Define computational details ========================
+ nstep_max               20
+ nstep_min                1
+ rcut                    8.0000000000
+ temperature           300.0000000000
+ ======================= Optional input variables ============================
+ USE AVERAGE POSITIONS TO COMPUTE SPECTRUM
+-Number of processors    1    1
+ 
+ All quantities are computed from nstep_min=    1
+                               to nstep_max=   20
+ So, the real number of time steps is nstep=   20
+ 
+ The positions, forces and energies are extracted from the NetCDF file: HIST.nc
+  
+ #############################################################################
+ ########################## Computed quantities ##############################
+ #############################################################################
+ acell_unitcell=     8.5706606442     8.5706606442     8.5706606442
+ rprimd_md=    17.1413212884     0.0000000000     0.0000000000
+ rprimd_md=     0.0000000000    17.1413212884     0.0000000000
+ rprimd_md=     0.0000000000     0.0000000000    17.1413212884
+ bravais=    7   -3    1   -1    0    1    0    1    0   -1    1
+ See the sym.dat file
+  
+ #############################################################################
+ ########################## Q points generation  #############################
+ #############################################################################
+ Generate the BZ path using the Q points defined by default
+ See the qpt.dat file
+  
+ #############################################################################
+ ###### Find the matching between ideal and average positions  ###############
+ #############################################################################
+  Determine ideal positions and distances...
+  Compute average positions...
+  Search the unitcell basis of atoms in the MD trajectory...
+  Compare ideal and average positions using PBC...
+  Write the xred_average.xyz file with ideal and average positions...
+  Compute cartesian coordinates and forces...
+  
+ #############################################################################
+ ###################### Find the symetry operations ##########################
+ #################### (connecting the atoms together) ########################
+ #############################################################################
+ Search the matrix transformation going from (k) to (i)...
+ Search the matrix transformation going from (k,l) to (i,j)...
+ See the Indsym*.dat files (if debug)
+  
+ #############################################################################
+ ####### FIRST ORDER : find the number of coefficients #######################
+ #############################################################################
+  Build the ref1at and Isym1at tables...
+  Build the Shell1at datatype...
+  Number of shells=           1
+ ============================================================================
+ Shell number:           1
+  For atom    1:
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           0
+ ============================================================================
+   >>>>>> Total number of coefficients at the first order=           0
+  
+ #############################################################################
+ ###### SECOND ORDER : find the number of coefficients #######################
+ #############################################################################
+  Build the ref2at and Isym2at tables...
+  Build the Shell2at datatype...
+  Number of shells=           2
+ ============================================================================
+ Shell number:           1
+  Between atom    1 and     1 the distance is=    0.0000000000
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           1
+ ============================================================================
+ Shell number:           2
+  Between atom    1 and     2 the distance is=    6.0603722608
+   Number of independant coefficients in this shell=           3
+   Number of interactions in this shell=          12
+ ============================================================================
+   >>>>>> Total number of coefficients at the second order=           3
+  
+ #############################################################################
+ ############## Fill the matrices used in the pseudo-inverse #################
+ #############################################################################
+  Compute the coefficients (at the 1st order) used in the Moore-Penrose...
+  ------- achieved
+  Compute the coefficients (at the 2nd order) used in the Moore-Penrose...
+  ------- achieved
+  
+ #############################################################################
+ ###################### Compute the constraints ##############################
+ ########################## At the 1st order #################################
+ ########################## At the 2nd order #################################
+ ################## Reduce the number of constraints #########################
+ ############### (Solve simultaneously all the orders) #######################
+ ################### And compute the pseudo-inverse ##########################
+ #############################################################################
+  The problem is solved
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ############# List of (first order) IFC for the reference atom=   1
+   0.000000  0.000000  0.000000
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ############# List of (second order) IFC for the reference atom=   1
+ ======== NEW SHELL (ishell=   1): There are   1 atoms on this shell at distance= 0.000000
+  For jatom=   1 ,with type=   1
+   0.026129  0.000000  0.000000
+   0.000000  0.026129  0.000000
+   0.000000  0.000000  0.026129
+  The components of the vector are:    0.000000    0.000000    0.000000
+  Trace=  0.078388
+  
+ ======== NEW SHELL (ishell=   2): There are  12 atoms on this shell at distance= 6.060372
+  For jatom=   2 ,with type=   1
+  -0.003222 -0.003436  0.000000
+  -0.003436 -0.003222  0.000000
+   0.000000  0.000000 -0.000089
+  The components of the vector are:    4.285330    4.285330    0.000000
+  Trace= -0.006532
+  
+  For jatom=   3 ,with type=   1
+  -0.003222  0.000000 -0.003436
+   0.000000 -0.000089  0.000000
+  -0.003436  0.000000 -0.003222
+  The components of the vector are:    4.285330    0.000000    4.285330
+  Trace= -0.006532
+  
+  For jatom=   5 ,with type=   1
+  -0.003222  0.003436  0.000000
+   0.003436 -0.003222  0.000000
+   0.000000  0.000000 -0.000089
+  The components of the vector are:   -4.285330    4.285330    0.000000
+  Trace= -0.006532
+  
+  For jatom=   7 ,with type=   1
+  -0.003222  0.003436  0.000000
+   0.003436 -0.003222  0.000000
+   0.000000  0.000000 -0.000089
+  The components of the vector are:    4.285330   -4.285330    0.000000
+  Trace= -0.006532
+  
+  For jatom=   8 ,with type=   1
+  -0.003222  0.000000  0.003436
+   0.000000 -0.000089  0.000000
+   0.003436  0.000000 -0.003222
+  The components of the vector are:   -4.285330    0.000000    4.285330
+  Trace= -0.006532
+  
+  For jatom=   9 ,with type=   1
+  -0.000089  0.000000  0.000000
+   0.000000 -0.003222 -0.003436
+   0.000000 -0.003436 -0.003222
+  The components of the vector are:    0.000000    4.285330    4.285330
+  Trace= -0.006532
+  
+  For jatom=  13 ,with type=   1
+  -0.003222  0.000000  0.003436
+   0.000000 -0.000089  0.000000
+   0.003436  0.000000 -0.003222
+  The components of the vector are:    4.285330    0.000000   -4.285330
+  Trace= -0.006532
+  
+  For jatom=  15 ,with type=   1
+  -0.003222 -0.003436  0.000000
+  -0.003436 -0.003222  0.000000
+   0.000000  0.000000 -0.000089
+  The components of the vector are:   -4.285330   -4.285330    0.000000
+  Trace= -0.006532
+  
+  For jatom=  18 ,with type=   1
+  -0.000089  0.000000  0.000000
+   0.000000 -0.003222  0.003436
+   0.000000  0.003436 -0.003222
+  The components of the vector are:    0.000000   -4.285330    4.285330
+  Trace= -0.006532
+  
+  For jatom=  23 ,with type=   1
+  -0.003222  0.000000 -0.003436
+   0.000000 -0.000089  0.000000
+  -0.003436  0.000000 -0.003222
+  The components of the vector are:   -4.285330    0.000000   -4.285330
+  Trace= -0.006532
+  
+  For jatom=  24 ,with type=   1
+  -0.000089  0.000000  0.000000
+   0.000000 -0.003222  0.003436
+   0.000000  0.003436 -0.003222
+  The components of the vector are:    0.000000    4.285330   -4.285330
+  Trace= -0.006532
+  
+  For jatom=  31 ,with type=   1
+  -0.000089  0.000000  0.000000
+   0.000000 -0.003222 -0.003436
+   0.000000 -0.003436 -0.003222
+  The components of the vector are:    0.000000   -4.285330   -4.285330
+  Trace= -0.006532
+  
+  
+ #############################################################################
+ ############## Compute the phonon spectrum, the DOS, ########################
+ ##############  the dynamical matrix and write them  ########################
+ #############################################################################
+ 
+ #############################################################################
+ ################### vibrational Density OF States (vDOS) ####################
+ #############################################################################
+ See the vdos.dat and TDEP_PHDOS* files
+ Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)
+ ------- achieved
+ Compute the vDOS
+ ------- achieved
+ (Please, pay attention to convergency wrt the BZ mesh : the ngqpt2 input variable)
+ See the dij.dat, omega.dat and eigenvectors files
+ See also the DDB file
+ 
+ #############################################################################
+ ######################### Elastic constants #################################
+ ################ Bulk and Shear modulus--Sound velocities ###################
+ #############################################################################
+ 
+ ========== Using the formulation proposed by Wallace (using the IFC) =========
+ Cijkl [in GPa]=
+ | C11 C12 C13 C14 C15 C16 |     44.236   24.454   24.454    0.000    0.000    0.000
+ | C21 C22 C23 C24 C25 C26 |     24.454   44.236   24.454    0.000    0.000    0.000
+ | C31 C32 C33 C34 C35 C36 |     24.454   24.454   44.236    0.000    0.000    0.000
+ | C41 C42 C43 C44 C45 C46 | =    0.000    0.000    0.000   22.730    0.000    0.000
+ | C51 C52 C53 C54 C55 C56 |      0.000    0.000    0.000    0.000   22.730    0.000
+ | C61 C62 C63 C64 C65 C66 |      0.000    0.000    0.000    0.000    0.000   22.730
+ 
+ ========== For an Anisotropic Material =======================================
+ Sijkl [in GPa-1]=
+ | S11 S12 S13 S14 S15 S16 |      0.037   -0.013   -0.013    0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.013    0.037   -0.013    0.000    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.013   -0.013    0.037    0.000    0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.044    0.000   -0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.044   -0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.044
+ 
+ ========== For an Orthotropic Material (see B. M. Lempriere (1968)) ==========
+ Young modulus E1, E2 and E3 [in GPa]=  26.825   26.825   26.825
+ Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=   0.356    0.356    0.356    0.356    0.356    0.356
+ Shear modulus G23, G13 and G12 [in GPa]=  22.730   22.730   22.730
+ Sijkl [in GPa-1]=
+ | S11 S12 S13 S14 S15 S16 |      0.037   -0.013   -0.013    0.000    0.000    0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.013    0.037   -0.013    0.000    0.000    0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.013   -0.013    0.037    0.000    0.000    0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.044    0.000    0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.044    0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.044
+ For density rho [in kg.m-3]= 1730.488
+ 
+ ========================= Voigt average (constant strain) ===================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=   31.048 and Shear G=   17.594
+ Average of Young modulus E [in GPa]=   44.397 Lame modulus Lambda [in GPa]=   19.318 and Poisson ratio Nu=    0.262
+ Velocities [in m.s-1]: compressional Vp= 5612.318  shear Vs= 3188.619  and bulk Vphi= 4235.767
+ Debye velocity [in m.s-1]= 3544.861  and temperature [in K]=  369.385
+ 
+ ========================= Reuss average (constant stress) ===================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=   31.048 and Shear G=   14.962
+ Average of Young modulus E [in GPa]=   38.673 Lame modulus Lambda [in GPa]=   21.073 and Poisson ratio Nu=    0.292
+ Velocities [in m.s-1]: compressional Vp= 5428.600  shear Vs= 2940.405  and bulk Vphi= 4235.767
+ Debye velocity [in m.s-1]= 3281.225  and temperature [in K]=  341.914
+ 
+ ============================== Hill average =================================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=   31.048 and Shear G=   16.278
+ Average of Young modulus E [in GPa]=   41.569 Lame modulus Lambda [in GPa]=   20.196 and Poisson ratio Nu=    0.277
+ Velocities [in m.s-1]: compressional Vp= 5521.223  shear Vs= 3067.024  and bulk Vphi= 4235.767
+ Debye velocity [in m.s-1]= 3415.940  and temperature [in K]=  355.951
+ 
+ ========================= Elastic anisotropy =================================
+ Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.880
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =   -0.000
+ Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.081
+  
+ #############################################################################
+ ######################### Energies, errors,...  #############################
+ #############################################################################
+ Thermodynamic quantities and convergence parameters of THE MODEL,
+      as a function of the step number (energies in eV/atom and forces in Ha/bohr) :
+ <U_TDEP> = U_0 + U_1 + U_2
+       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj >
+        and U_1 = <      sum_i    Phi1 ui >
+        and U_2 = < 1/2  sum_ij   Phi2 ui uj >
+  Delta_U =   < U_MD - U_TDEP > 
+  Delta_U2= (< (U_MD - U_TDEP)^2 >)**0.5 
+  Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
+  Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
+     <U_MD>            U_0              U_1              U_2            Delta_U          Delta_U2          Delta_F2          Sigma
+ -1616.27747      -1616.28222          0.00000          0.00475          0.00000          0.02726          0.00350          0.88156
+ NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.03878
+ 
+ See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
+ 
+ #############################################################################
+ ################# Thermodynamic quantities: Free energy,...##################
+ #############################################################################
+ See the thermo.dat file
+  
+ #############################################################################
+ ######################### CALCULATION COMPLETED #############################
+ #############################################################################
+ Suggested references for the acknowledgment of ABINIT usage.
+ 
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+ 
+ [1] a-TDEP: Temperature Dependent Effective Potential for Abinit 
+ -- Lattice dynamic properties including anharmonicity
+ F. Bottin, J. Bieder and J. Bouchet, Comput. Phys. Comm. 254, 107301 (2020).
+ Strong suggestion to cite this paper in your publications.
+ 
+ [2] Thermal evolution of vibrational properties of alpha-U
+ J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).
+ Strong suggestion to cite this paper in your publications.
+ 
+ [3] Lattice dynamics of anharmonic solids from first principles
+ O. Hellman, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).
+ 
+ [4] Temperature dependent effective potential method for accurate free energy calculations of solids
+ O. Hellman, P. Steneteg, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).

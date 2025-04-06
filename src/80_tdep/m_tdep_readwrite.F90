@@ -18,6 +18,8 @@ module m_tdep_readwrite
 
  implicit none
 
+  character(len=6),public,parameter :: version_string = '   4.0'
+
   type Input_type
 
     integer :: natom
@@ -75,9 +77,9 @@ module m_tdep_readwrite
     double precision, allocatable :: etot(:)
     double precision, allocatable :: weights(:)
     character (len=2), allocatable :: special_qpt(:)
-    character (len=200) :: output_prefix
-    character (len=200) :: input_prefix
-    character (len=200) :: output_file
+    character (len=fnlen) :: output_prefix
+    character (len=fnlen) :: input_prefix
+    character (len=fnlen) :: output_file
     
   end type Input_type
 
@@ -176,7 +178,7 @@ contains
   integer :: ii,jj,shift,iatom,itypat,sum_alloy1,sum_alloy2
   integer:: lenstr, marr, jdtset, tread
   logical :: has_nimage
-  double precision :: version_value,dtion,amu_average,born_average
+  double precision :: dtion,amu_average,born_average
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
@@ -219,7 +221,6 @@ contains
   Invar%netcdf=.false.
   Invar%use_ideal_positions=0
   Invar%use_weights=0
-  version_value=4.d0
 ! In order to have an accuracy better than 1meV  
   Invar%ngqpt1(:)=8
   Invar%ngqpt2(:)=32
@@ -557,9 +558,9 @@ contains
   write(Invar%stdout,*) ' '
 
   if (Invar%debug) then
-    write(Invar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of ATDEP (Debug)'
+    write(Invar%stdout,'(a,a,a)') '.Version ', version_string,' of ATDEP (Debug)'
   else
-    write(Invar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of ATDEP'
+    write(Invar%stdout,'(a,a,a)') '.Version ', version_string,' of ATDEP'
   end if
 
   write(Invar%stdout,'(a)') '.Copyright (C) 1998-2025 ABINIT group (FB,JB).'
