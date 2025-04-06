@@ -120,7 +120,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
  real(dp),allocatable :: strain_fact_jj(:),tangent(:,:,:),vect(:,:)
  real(dp),allocatable,target :: etotal(:),fcart(:,:,:),forces_eff(:,:,:),neb_forces(:,:,:)
  real(dp),allocatable,target :: rprimd(:,:,:),xcart(:,:,:),xred(:,:,:)
- real(dp),pointer :: coord_(:,:,:),etotal_all(:),fcart_all(:,:,:),forces_eff_all(:,:,:)
+ real(dp),pointer :: coord_(:,:,:),etotal_all(:),forces_eff_all(:,:,:)
  real(dp),pointer :: neb_forces_all(:,:,:),rprimd_all(:,:,:),xcart_all(:,:,:),xred_all(:,:,:)
 
 ! *************************************************************************
