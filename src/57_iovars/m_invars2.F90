@@ -1643,6 +1643,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (dtset%imgmov==5) then
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'neb_algo',tread,'INT')
      if(tread==1) dtset%neb_algo=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'neb_cell_algo',tread,'INT')
+     if(tread==1) dtset%neb_cell_algo=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'neb_spring',tread,'DPR')
      if(tread==1) then
        dtset%neb_spring(1:2)=dprarr(1:2)

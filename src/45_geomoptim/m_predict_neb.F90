@@ -113,9 +113,9 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 !arrays
  integer,parameter :: voigt(3,3)=reshape([1,6,3,6,2,4,3,4,3],[3,3])
  real(dp),parameter :: identity_real(3,3)=reshape([one,zero,zero,zero,one,zero,zero,zero,one],[3,3])
- real(dp) :: mat3_1(3,3),mat3_2(3,3),rprimd_start_inv(3,3)
+ real(dp) :: mat3_1(3,3),mat3_2(3,3)
  real(dp),allocatable :: acell(:,:),buffer(:,:),buffer_all(:,:)
- real(dp),allocatable :: coordif(:,:,:),dimage(:),rprim(:,:,:),spring(:)
+ real(dp),allocatable :: coordif(:,:,:),dimage(:),rprim(:,:,:),rprimd_start_inv(:,:,:),spring(:)
  real(dp),allocatable :: strten(:,:),strten_mat(:,:,:),rmet(:,:,:),ucvol(:),pressure(:)
  real(dp),allocatable :: strain_fact_jj(:),tangent(:,:,:),vect(:,:)
  real(dp),allocatable,target :: etotal(:),fcart(:,:,:),forces_eff(:,:,:),neb_forces(:,:,:)
@@ -126,17 +126,17 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 ! *************************************************************************
 
 !Check options
- if (mep_param%neb_cell_algo/=-1.and.mep_param%mep_solver/=0) then
+ if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE.and.mep_param%mep_solver/=0) then
    msg='Variable cell NEB only allowed with steepest descent algo!'
    ABI_ERROR(msg)
  end if
 
 !In  case of variable-cell, 3 additional "fake" atoms are added to unit cell vectors
- natom_eff=natom ; if (mep_param%neb_cell_algo/=CELL_ALGO_NONE) natom_eff=natom_eff+3
+ natom_eff=natom ; if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE) natom_eff=natom_eff+3
 
 !VC-NEB uses reduced coordinates
  use_reduced_coord=.false.
- if (mep_param%neb_cell_algo/=CELL_ALGO_VCNEB) use_reduced_coord=.true.
+ if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_VCNEB) use_reduced_coord=.true.
 
  ABI_MALLOC(acell,(3,nimage))
  ABI_MALLOC(rprim,(3,3,nimage))
@@ -160,11 +160,12 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 
 !  Retrieve unit cell vectors and derivatives (forces) in case of variable-cell NEB
 !   => Retrieve pressure, volume, rmet, strten, ...
-   if (mep_param%neb_cell_algo/=CELL_ALGO_NONE) then
+   if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE) then
      ABI_MALLOC(rmet,(3,3,nimage))
      ABI_MALLOC(ucvol,(nimage))
      ABI_MALLOC(pressure,(nimage))
      ABI_MALLOC(strten_mat,(3,3,nimage))
+     ABI_MALLOC(rprimd_start_inv,(3,3,nimage))
      pressure(1:nimage)=-(strten(1,1:nimage)+strten(2,1:nimage)+strten(3,1:nimage))*third
      do iimage=1,nimage
        xcart(1:3,natom+1:natom+3,iimage)=zero
@@ -173,16 +174,16 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
        do jj=1,3; do ii=1,3
          strten_mat(ii,jj,iimage)=strten(voigt(ii,jj),iimage)
        end do; end do
+       call matr3inv(mep_param%rprimd_start(:,:,iimage),mat3_1(:,:))
+       rprimd_start_inv(:,:,iimage) = transpose(mat3_1(:,:))
      end do
-     call matr3inv(mep_param%rprimd_start,rprimd_start_inv)
-     rprimd_start_inv = transpose(rprimd_start_inv)
 
 !    ==== Generalized Solid-State NEB (GSS-NEB)
-     if (mep_param%neb_cell_algo==CELL_ALGO_GSSNEB) then
+     if (mep_param%neb_cell_algo==NEB_CELL_ALGO_GSSNEB) then
        strain_fact_jj(1:nimage)=(ucvol(1:nimage)**third)*(natom**sixth)
        do iimage=1,nimage
-        mat3_1(1:3,1:3)=rprimd(1:3,1:3,iimage)-mep_param%rprimd_start(1:3,1:3)
-        xcart(1:3,natom+1:natom+3,iimage)=strain_fact_jj(iimage)*matmul(rprimd_start_inv,mat3_1)       
+        mat3_1(1:3,1:3)=rprimd(1:3,1:3,iimage)-mep_param%rprimd_start(1:3,1:3,iimage)
+        xcart(1:3,natom+1:natom+3,iimage)=strain_fact_jj(iimage)*matmul(rprimd_start_inv(:,:,iimage),mat3_1)       
         strten_mat(1:3,1:3,iimage)=strten_mat(1:3,1:3,iimage)+pressure(iimage)*identity_real(1:3,1:3)
         forces_eff(1:3,natom+1:natom+3,iimage)= &
 &                -(ucvol(iimage)/strain_fact_jj(iimage))*strten_mat(1:3,1:3,iimage)
@@ -190,9 +191,9 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      end if
 
 !    ==== Variable-cell NEB (VC-NEB, in reduced coordinates) - At present, doesnt work
-     if (mep_param%neb_cell_algo==CELL_ALGO_VCNEB) then
+     if (mep_param%neb_cell_algo==NEB_CELL_ALGO_VCNEB) then
        do iimage=1,nimage
-         xred(1:3,natom+1:natom+3,iimage)=matmul(rprimd(1:3,1:3,iimage),rprimd_start_inv) &
+         xred(1:3,natom+1:natom+3,iimage)=matmul(rprimd(1:3,1:3,iimage),rprimd_start_inv(1:3,1:3,iimage)) &
 &                                        -identity_real(1:3,1:3)
          call fcart2gred(fcart(1:3,1:natom,iimage),forces_eff(1:3,1:natom,iimage),rprimd(1:3,1:3,iimage),natom)
          forces_eff(1:3,1:natom,iimage)=matmul(rmet(1:3,1:3,iimage),forces_eff(1:3,1:natom,iimage))
@@ -393,7 +394,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    end if
 
 !  Compute new acell and rprim from new rprimd
-   if (mep_param%neb_cell_algo/=CELL_ALGO_NONE) then
+   if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE) then
      do iimage=1,nimage
        call mkradim(acell(:,iimage),rprim(:,:,iimage),rprimd(:,:,iimage))
      end do

@@ -73,7 +73,6 @@ MODULE m_mep
   integer  :: string_algo   ! Selection of the variant of the String Method
   real(dp) :: fxcartfactor  ! Time step for steepest descent or RK4
   real(dp) :: mep_mxstep    ! Selection of a max. step size for the ODE
-  integer  :: optcell       ! Selection of the variant of cell modification
 ! Arrays
   integer,pointer      :: iatfix(:,:)=>null() ! Atoms to fix (this pointer is associated with dtset%iatfix)
   real(dp)             :: neb_spring(2)       ! Spring constants for the NEB method
@@ -86,13 +85,13 @@ MODULE m_mep
   real(dp),allocatable :: rk4_fcart1(:,:,:)   ! 4th-order Runge-Kutta storage
   real(dp),allocatable :: rk4_fcart2(:,:,:)   ! 4th-order Runge-Kutta storage
   real(dp),allocatable :: rk4_fcart3(:,:,:)   ! 4th-order Runge-Kutta storage
-  real(dp),pointer     :: rprimd_start(:,:)   ! real space primitive translations at start
+  real(dp),pointer     :: rprimd_start(:,:,:) ! real space primitive translations at start
  end type mep_type
 
 !Public constants
- integer, public :: CELL_ALGO_NONE   =-1
- integer, public :: CELL_ALGO_GSSNEB = 1
- integer, public :: CELL_ALGO_VCNEB  = 2
+ integer, public :: NEB_CELL_ALGO_NONE   = 0
+ integer, public :: NEB_CELL_ALGO_GSSNEB = 1
+ integer, public :: NEB_CELL_ALGO_VCNEB  = 2
 !!***
 
 CONTAINS
@@ -131,26 +130,26 @@ subroutine mep_init(dtset,mep_param)
    mep_param%cineb_start   = dtset%cineb_start
    mep_param%mep_solver    = dtset%mep_solver
    mep_param%neb_algo      = dtset%neb_algo
-   mep_param%neb_cell_algo = CELL_ALGO_NONE
-   if (dtset%optcell==2.and.dtset%useria==1001) mep_param%neb_cell_algo = CELL_ALGO_VCNEB
-   if (dtset%optcell==2.and.dtset%useria==1002) mep_param%neb_cell_algo = CELL_ALGO_GSSNEB
+   mep_param%neb_cell_algo = dtset%neb_cell_algo
    mep_param%string_algo   = dtset%string_algo
    mep_param%fxcartfactor  = dtset%fxcartfactor
    mep_param%mep_mxstep    = dtset%mep_mxstep
    mep_param%neb_spring    = dtset%neb_spring
-   mep_param%optcell       = dtset%optcell
    mep_param%iatfix        =>dtset%iatfix
-   mep_param%rprimd_start  =>dtset%rprimd_orig(:,:,1)
+   mep_param%rprimd_start  =>dtset%rprimd_orig
+   !TODO: Q. DELACROIX DID PUT THIS - TO BE CHECKED
+   ! do ii=1,dtset%nimage
+   !   mep_param%rprimd_start(:,:,iimage)=dtset%rprimd_orig(:,:,1)
+   ! end do
  else
    mep_param%cineb_start   = -1
    mep_param%mep_solver    = -1
    mep_param%neb_algo      = -1
-   mep_param%neb_cell_algo = CELL_ALGO_NONE
+   mep_param%neb_cell_algo = -1
    mep_param%string_algo   = -1
    mep_param%fxcartfactor  = zero
    mep_param%mep_mxstep    = 100._dp
    mep_param%neb_spring    = zero
-   mep_param%optcell       = -1
    nullify(mep_param%iatfix)
    nullify(mep_param%rprimd_start)
  end if
@@ -289,10 +288,11 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
    if (natom_eff>=natom+3) then
      if (use_reduced_coord_) then
        mat3(1:3,1:3)=identity_real(1:3,1:3)+xred(:,natom+1:natom+3,iimage)
-       rprimd(:,:,iimage)=matmul(mat3(:,:),mep_param%rprimd_start(:,:))
+       rprimd(:,:,iimage)=matmul(mat3(:,:),mep_param%rprimd_start(:,:,iimage))
      else
        mat3(1:3,1:3)=xcart(1:3,natom+1:natom+3,iimage)/strain_fact(iimage)
-       rprimd(:,:,iimage)=matmul(mep_param%rprimd_start(:,:),mat3(:,:))+mep_param%rprimd_start(:,:)
+       rprimd(:,:,iimage)=matmul(mep_param%rprimd_start(:,:,iimage),mat3(:,:)) &
+&                        +mep_param%rprimd_start(:,:,iimage)
      end if
    end if
 
@@ -305,8 +305,8 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
      call xcart2xred(natom,rprimd(:,:,iimage),xcart(:,:,iimage),xred(:,:,iimage))
    end if
 
-!  In case atom is fixed, we restore its previous value ; forbidden if optcell=2
-   if (mep_param%optcell/=2) then
+!  In case atom is fixed, we restore its previous value ; forbidden if variable cell
+   if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE) then
      do iatom=1,natom
        if (any(mep_param%iatfix(:,iatom)==1)) then
          where(mep_param%iatfix(:,iatom)==1)
