@@ -128,7 +128,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
    ABI_MALLOC(rprimd,(3,3,nimage))
    ABI_MALLOC(strten,(6,nimage))
    call get_geometry_img(results_img(:,itimimage_eff),etotal,natom,nimage,&
-&                        fcart,strten,rprimd,xcart,xred)
+&                        fcart,rprimd,strten,xcart,xred)
 
 !  EVOLUTION STEP
 !  ===============================================

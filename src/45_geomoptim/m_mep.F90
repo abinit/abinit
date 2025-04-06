@@ -258,13 +258,13 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,natom_eff,ndynimage,nimage
- logical,optional :: use_reduced_coord
+ logical,intent(in),optional :: use_reduced_coord
  type(mep_type),intent(in) :: mep_param
 !arrays
  integer,intent(in) :: list_dynimage(ndynimage)
  real(dp),intent(in) :: fcart(3,natom,nimage)
  real(dp),intent(inout) :: rprimd(3,3,nimage),xcart(3,natom,nimage),xred(3,natom,nimage)
- real(dp),optional :: strain_fact(nimage)
+ real(dp),intent(in),optional :: strain_fact(nimage)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idynimage,iimage
