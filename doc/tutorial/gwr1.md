@@ -122,7 +122,7 @@ at the KS band structure to find the position of the band edges.
     ```
 
 Silicon is an indirect band gap semiconductor:
-the CBM is located at the $\Gamma$ point while the VMB is located at ~[+0.429, +0.000, +0.429],
+the CBM is located at the $\Gamma$ point while the VMB is located at ~[+0.429, +0.000, +0.429].
 At the PBE level, the direct gap is 2.556 eV while the fundamental band gap is ~0.570 eV.
 Both values strongly underestimate the experimental results that are ~3.4 eV and ~1.12 eV, respectively.
 
@@ -204,7 +204,6 @@ to ensure an efficient workload distribution.
     The direct diagonalization is MPI-parallelized across three different levels:
     collinear spin $\sigma$ (not used here), $\kk$-points in the IBZ and
     Scalapack distribution of the $H^\sigma_\kk(\bg,\bg')$ matrix.
-
     ABINIT will try to find an "optimal" distribution of the workload at runtime, yet there are a couple
     of things worth keeping in mind when choosing the number of MPI processes for this step.
     Ideally the total number of cores should be a multiple of [[nkpt]] * [[nsppol]] to avoid load imbalance.
@@ -268,7 +267,7 @@ while [[getwfk_filepath]] specifies the WFK file with empty states used to build
     To solve the problem, simply set [[ngfft]] explicitly in the GWR input files using the value used in the GS part.
 
 To accelerate the computation and reduce the memory requirements, we truncate the PW basis
-set using [[ecutwfn]] = 10 < [[ecut] = 16, and [[gwr_boxcutmin]] is set to 1.0.
+set using [[ecutwfn]] = 10 < [[ecut]] = 16, and [[gwr_boxcutmin]] is set to 1.0.
 These parameters should be subject to carefully convergence studies as systems with localized electrons
 such as 3d or 4f electrons may require larger values (more PWs and denser FFT meshes).
 Please take some time to read the variable description of [[ecutwfn]] and [[gwr_boxcutmin]] before proceeding.
@@ -341,12 +340,12 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 Some of the entries in this dictionary have a direct correspondence with ABINIT variables and
 won't be discussed here. The meaning of the other variables is reported below:
 
-`nkibz`: Number of $\kk$-points in the IBZ
-`qkibz`: Number of $\qq$-points in the IBZ
-`green_mpw`: maximum number of PWs for the Green's function.
-`tchi_mpw`: maximum number of PWs for the polarizability.
-`g_ngfft`: FFT mesh in the unit cell used for the different MBPT quantities.
-`min_transition_energy_eV`, `max_transition_energy_eV`: min/max transition energies
+- `nkibz`: Number of $\kk$-points in the IBZ
+- `qkibz`: Number of $\qq$-points in the IBZ
+- `green_mpw`: maximum number of PWs for the Green's function.
+- `tchi_mpw`: maximum number of PWs for the polarizability.
+- `g_ngfft`: FFT mesh in the unit cell used for the different MBPT quantities.
+- `min_transition_energy_eV`, `max_transition_energy_eV`: min/max transition energies
 leading to the energy ratio `eratio` used to select the minimax mesh.
 
 `green_mpw` is computed from [[ecut]], while `tchi_mpw` is defined by [[ecuteps]]
@@ -463,7 +462,7 @@ abiopen.py tgwr_3o_GWR.nc -e
 ```
 
 If you need more control, you can use the following
-[AbiPy example][https://abinit.github.io/abipy/gallery/plot_gwr.html].
+[AbiPy example](https://abinit.github.io/abipy/gallery/plot_gwr.html).
 and customize according to your needs.
 Please take some time to read the script and understand how this post-processing tool
 works before proceeding to the next section.
@@ -472,6 +471,7 @@ works before proceeding to the next section.
 
 This section discusses some shell commands that are useful to understand
 the resources required by your GWR calculation.
+
 To extract the memory allocated for the most memory demanding arrays, use:
 
 ```
@@ -482,6 +482,8 @@ grep "<<< MEM" log
 - Local memory for Chi(g,g',qibz,itau): 17.8  [Mb] <<< MEM
 - Local memory for Wc(g,g,qibz,itau): 17.8  [Mb] <<< MEM
 ```
+
+To have a measure of how much RAM the process is actually using, use:
 
 ```
 grep vmrss_mb log
@@ -516,7 +518,7 @@ in the different parts of the code at the end of the calculation.
 ### Convergence study HOWTO
 
 As discussed in [[cite:Setten2017]], the convergence studies for
-the $\kk$-mesh, [[nband], and the cutoff energies can be decoupled.
+the $\kk$-mesh, [[nband]], and the cutoff energies can be decoupled.
 This means that one can start with a relatively coarse $\kk$-mesh to determine
 the converged values of [[ecutsigx]], [[ecutwfn]], [[nband]], [[ecuteps]], and [[gwr_boxcutmin]],
 then fix these values, and refine the BZ sampling only at the end.
@@ -525,26 +527,32 @@ The recommended procedure for converging GWR gaps is therefore as follows:
 1) Initial step:
 
 - Select the $\kk$-points where QP gaps are wanted.
-  Usually the VBM and the CBM so that one can use [[gwr_sigma_algo]] 2
+  Usually the VBM and the CBM so that one can use [[gwr_sigma_algo]] 2.
 - Fix the [[ngkpt]] $\kk$-mesh in the WFK file to a resonable value and produce "enough" [[nband]] states
+  with the direct diagonalization.
 - Set an initial value for [[gwr_ntau]] in the GWR run.
+
+<!--
   Be aware that [[gwr_ntau]] = 6 may be too small, potentially leading to unphysical results
   such as renormalization factors $Z$ below 0.6.
   If this occurs, increase [[gwr_ntau]] in order to fix the problem.
+, and [[ecutsigx]].
+-->
 
-- Perform convergence studies on [[nband]], [[ecuteps]], and [[ecutsigx]].
+2) Convergence the QP gaps wrt [[ecutwfn]]
 
-2) Convergence wrt [[ecutwfn]]:
+3) Convergen wrt [[nband]], [[ecuteps]]
 
 If the number of [[nband]] states in the WFK file is not large enough,
 go back to point 1) and generate a new WFK with more bands else proceeed with the next step.
 
-3) Convergence wrt [[gwr_ntau]]:
+4) Convergence wrt [[gwr_ntau]]:
 
-Once the results are converged with respect to [[nband]] and [[ecuteps], you may start to increase [[gwr_ntau]]
-while adjusting the number of MPI processes accordingly (you are not using multidatasets, right?)
+Once the results are converged with respect to [[ecutwfn]], [[nband]] and [[ecuteps]],
+you may start to increase [[gwr_ntau]]while adjusting the number of MPI processes accordingly
+(you are not using multidatasets, right?)
 
-4) Convergence wrt [[ngkpt]]:
+5) Convergence wrt [[ngkpt]]:
 
 Finally, refine the BZ sampling to ensure full convergence.
 Make sure that all these $kk$-meshes containg the points you are trying to converge.
@@ -557,10 +565,6 @@ Once a good setup have been found, one can use the same parameters to compute th
 using [[gwr_sigma_algo]] 2 and [[gw_qprange]] = `-NUM` to have a `GWR.nc` file that can be used to
 perform an interpolation of the GW band structure as discussed in the last part of this tutorial.
 
-In the next sections, we explain how to perform these convergence studies and how to use AbiPy to analyze the results.
-Note that we will not provide ready-to-use input files.
-Your task is therefore to modify `tgwr_3.abi`, run the calculations (possibly in parallel), and then analyze the results.
-
 Note that, due to cancellations of errors, QP gaps that are differences between QP energies
 are usually much easier to convergence than QP values.
 Fortunately, absolute values are important only in rather specialized studies such as work function
@@ -568,7 +572,11 @@ or band alignment in heterostructures.
 In this tutorial, we only focus on gaps, and we aim to achieve an overall convergence of the QP gaps 0.01 eV (10 meV).
 As a consequence we will try to reach a convergence of 2 meV.
 
-## Convergence wrt ecutwfn
+In the next sections, we explain how to perform these convergence studies and how to use AbiPy to analyze the results.
+Note that we will not provide ready-to-use input files.
+Your task is therefore to modify `tgwr_3.abi`, run the calculations (possibly in parallel), and then analyze the results.
+
+### Convergence wrt ecutwfn
 
 The first parameter we check for convergence is the cutoff energy [[ecutwfn]] used to build the Green's function.
 This value has a big impact on the computational cost and, most importantly, on the memory footprint
@@ -578,10 +586,10 @@ as the number of PWs scales as:
 N_{\text{PW}} \propto \Omega \cdot E_{\text{cutwfn}}^{3/2}
 \end{equation}
 
-hence the memory required for $G_\kk(\gg,\gg')$ scales with the cube of [[ecutwfn]] and
+hence the memory required for $G_\kk(\bg,\bg')$ scales with the cube of [[ecutwfn]] and
 quadratically with the unit cell volume $\Omega$.
 To monitor the convergence of the QP direct gaps, we define a multidataset by adding
-the following section to `tgwr_3.abi`
+the following section to `tgwr_3.abi`:
 
 ```sh
 ndtset 5
@@ -589,7 +597,7 @@ ecutwfn: 8
 ecutwfn+ 2
 ```
 
-Once the calculation is finished, we can use the GwrRobot to load the list of GWR.nc files
+Once the calculation is finished, we can use the `GwrRobot` to load the list of GWR.nc files
 and plot the convergence of the direct QP gaps with the following python script:
 
 ```python
@@ -636,7 +644,7 @@ mv conv_ecutwfn.py conv_ecutwfn
 mv tgwr_3o_* log conv_ecutwfn
 ```
 
-## Convergence wrt nband and ecuteps
+### Convergence wrt nband and ecuteps
 
 To perform a double convergence study in [[nband]] and [[ecuteps]],
 define a double loop with [[udtset]], and add this section to `tgwr_3.abi`:
@@ -660,14 +668,15 @@ the values of [[nband]] and [[ecuteps]] have little impact of the computational 
 grep "dataset:" log | grep "<< TIME"
 ```
 
+<!--
 As concerns [[nband]] this is expected, as this parameter enters into play
 only during the computation of the Green's function.
 For [[ecuteps]] this is due to the FFT algorithm.
 Of course, we are not saying that the wall-time does not depend on these two parameters.
 Increasing [[ecuteps]] definitely has a greater effect in terms of wall-time.
+-->
 
-Once the calculation is completed, we can use the `GwrRobot` to load the list of GWR.nc files
-and plot the convergence of the direct QP gaps with the following script:
+Once the calculation is completed, plot the convergence of the direct QP gaps with the following script:
 
 ```python
 #!/usr/bin/env python
@@ -694,7 +703,7 @@ robot.plot_qpgaps_convergence(x="ecuteps",
                               )
 ```
 
-gain, Save the script in a file, let’s say `conv_nband_ecuteps.py`, in the same
+Again, save the script in a file, let’s say `conv_nband_ecuteps.py`, in the same
 directory where we have launched the calculation, make the file executable and run it with:
 
 ```
@@ -729,7 +738,7 @@ mv conv_nband_ecuteps.py conv_nband_ecuteps
 mv tgwr_3o_* log conv_nband_ecuteps
 ```
 
-## Convergence wrt gwr_ntau
+### Convergence wrt gwr_ntau
 
 Now edit `tgwr_3.abi`, replace the values of [[nband]] and [[ecuteps]] found earlier,
 and define a new one-dimensional multi-dataset to increase [[gwr_ntau]]:
@@ -775,7 +784,7 @@ mv conv_ntau.py conv_ntau
 mv tgwr_3o_* log conv_ntau
 ```
 
-## Convergence wrt gwr_boxcutmin
+### Convergence wrt gwr_boxcutmin
 
 Now edit `tgwr_3.abi`, replace the values of [[nband]] and [[ecuteps]] found earlier,
 and define a one-dimensional multidataset to increase [[gwr_boxcutmin]]:
@@ -825,6 +834,8 @@ g_ngfft: [18, 18, 18, 18, 18, 18, ]
 g_ngfft: [20, 20, 20, 20, 20, 20, ]
 ```
 
+Note how the wall-time quickly increases with [[gwr_boxcutmin]]:
+
 ```
 grep "dataset:" log | grep "<< TIME"
 
@@ -834,6 +845,9 @@ grep "dataset:" log | grep "<< TIME"
  dataset: 4 , wall: 01:27 [minutes] , cpu: 01:27 [minutes] <<< TIME
  dataset: 5 , wall: 02:19 [minutes] , cpu: 02:19 [minutes] <<< TIME
 ```
+
+
+Finally, let's save the results in a different directory by executing:
 
 ```
 mkdir conv_boxcutmin
@@ -885,7 +899,8 @@ You should get the following figure:
 
 ![](gwr_assets/conv_kmesh.png)
 
-To conclude, our best values for the direct QP gaps are ...
+To conclude, our best values for the direct QP gaps are 3.247 eV at the $\Gamma$-point
+and 3.413 eV at the $L$-point.
 
 ```
 mkdir conv_kmesh
@@ -907,7 +922,7 @@ This is done in the following input:
 {% dialog tests/tutorial/Input/tgwr_5.abi %}
 
 Note the usage of [[gw_qprange]] = `-NUM` and [[gwr_sigma_algo]] 1 to activate
-the supercell algorithm for $\Sigma_\nk$, the most efficient algorithm when all the $\k$$ in $\Sigma_\nk$ are wanted.
+the supercell algorithm for $\Sigma_\nk$, the most efficient algorithm when all the $\kk$-points in $\Sigma_\nk$ are wanted.
 To keep the wall-time at a reasonable level, we use a WFK file with 2x2x2 $\kk$-mesh,
 but it is clear that a more accurate intepolation would require denser $\kk$-meshes.
 

@@ -71,10 +71,10 @@ The price to pay is that in GWR the accuracy of the results now depends on the s
 ## Input variables
 
 To enter the GWR driver of ABINIT, one has to use [[optdriver]] = 6,
-and select the computation to be performed via [[gwr_task]].
+and then select the computation to be performed via [[gwr_task]].
 
 In the first step, you will very likely use [[gwr_task]] = "HDIAGO" or "HDIAGO_FULL"
-to perform a direct diagonalization with ScaLAPACK in order to generate a WFK with empty states and cutoff [[ecut]].
+to perform a **direct diagonalization** with ScaLAPACK or ELPA in order to generate a WFK with empty states and cutoff [[ecut]].
 This feature can also be used if you want to use other many-body codes that are able to read ABINIT’s WFK file
 Please take some time to read the documentation of [[gwr_task]] to see which calculations are supported.
 
@@ -118,7 +118,7 @@ with $\Theta$ the Heaviside step-function, and
 \qquad (\tau < 0).
 \end{equation}
 
-In these notes, we use $\rr$ to indicate points in the unit cell, and $\RR$ to denote points in the supercell.
+
 
 In Fourier space, one obtains:
 
@@ -128,8 +128,9 @@ In Fourier space, one obtains:
 \qquad (\tau > 0)
 \end{equation}
 
+where the number of PWs is controlled by [[ecutwfn]] that by default is equal to [[ecut]].
 These matrices are stored in memory for the entire duration of the calculation.
-The $\gg, \gg'$ components are distributed inside the `g` level of [[gwr_np_kgts]].
+The $\bg, \bg'$ components are distributed inside the `g` level of [[gwr_np_kgts]].
 Only the $\kk$-points in the IBZ are stored in memory and distributed inside the $\kk$-level
 as the code can use symmetries to reconstruct the Green's function in the full on-the-fly.
 Finally, the $\tau$ points are distributed inside the `t` level and collinear spins are distributed inside the `s` level.
@@ -167,6 +168,8 @@ The irreducible polarizability is computed in the real-space supercell using
 \end{equation}
 
 and then immediately transformed to Fourier space to obtain $\chi_\qq(\bg, \bg', i\tau)$.
+Here, we use $\rr$ to indicate points in the unit cell, and $\RR$ to denote points in the supercell.
+
 The cutoff energy for the polarizability is given by [[ecuteps]].
 This is an important parameter that should be subject to convergence studies.
 Only the $\qq$-points in the IBZ are stored in memory and distributed inside the k-level of [[gwr_np_kgts]].
@@ -192,12 +195,22 @@ The input variable [[inclvkb]] can be used to deactivate it, if needed.
 The exchange part of $\Sigma$ is computed using the standard sum over occupied states
 similarly to what is done in the conventional code:
 
-![](mbt_assets/self_x_mel.svg)
 
+<!--
 \begin{equation}\label{eq:Sigma_x}
 \Sigma_x(\rr_1,\rr_2)= -\sum_\kk^\BZ
 \sum_\nu^\text{occ} \Psi_{n\kk}(\rr_1){\Psi^\*_{n\kk}}(\rr_2)\,v(\rr_1,\rr_2)
 \end{equation}
+-->
+
+\begin{equation}
+\label{eq:diag_mat_el_Sigma_x}
+ \langle b_1\kk|\Sigma_x|b_1\kk\rangle =
+ -\dfrac{4\pi}{V} \sum_{\nu}^{\text{occ}} \sum_\qq^\BZ \sum_{\GG}
+  \dfrac{|M_\GG^{b_1b_1}(\kk,\qq)|^2}{|\qpG|^2}.
+\end{equation}
+
+
 
 The number of $\bg$-vectors in the sum is defined by [[ecutsigx]].
 Note that computing $\Sigma_x$ is much cheaper than $\Sigma_c(i \tau)$.
@@ -218,13 +231,22 @@ In this case, it is more advantageous to use an alternative formulation in which
 is expressed in terms of convolutions in the BZ according to:
 
 \begin{equation}
+\Sigma_\kk(\rr, \rr',i\tau) =
+\sum_\qq
+{G}_{\kq}(\rr,\rr',i\tau)
+{W}_\qq(\rr',\rr, i\tau)
+\end{equation}
+
+where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now quantities defined in the unit cell.
+
+<!--
+\begin{equation}
 \tilde \chi_\qq(\rr, \rr',i\tau) =
 \sum_\kk
 {\tilde G}_{\kq}(\rr,\rr',i\tau)
 {\tilde G}_\kk(\rr',\rr,-i\tau)
 \end{equation}
 
-where $G_\qq(\rr,\rr')$ and $W_\qq(\rr,\rr')$ are now quantities defined in the unit cell.
 Let us compute the RPA polarizabilty in real space using the mixed-space approach (the time dependence is not shown for the sake of simplicity)
 
 \begin{equation}
@@ -252,10 +274,12 @@ hence
 \end{equation}
 
 The advantage is that FFTs are performed in the unit cell and symmetries are easier to exploit.
-The disadvantage is that products in real space become convolutions in $\kk$-space, hence the computation of $\chi$ is quadratic in
-the number of $\kk$-points with a prefactor that depends on the symmetries of the system.
+The disadvantage is that products in real space become convolutions in $\kk$-space, hence the computation is quadratic in
+the number of $\qq$-points with a prefactor that depends on the symmetries of the system.
+-->
 
-The advantage of this formulation is that one can take advantage of the symmetries of the system
+The advantage of this formulation is that FFTs are performed in the unit cell
+and one can take advantage of the symmetries of the system
 to reduce the BZ integration to the irreducible wedge defined by the little group of the $\kk$ point in $\Sigma_\nk$.
 In the best case scenario of a direct band gap semiconductor, both the CBM and the VBM are located at the $\Gamma$ point;
 hence the BZ integral can be replaced by a much faster symmetrized integral over the wavevectors of the IBZ.
@@ -357,13 +381,26 @@ To run computations in double-precision, one has to configure the package with  
 when the command line interface is used or `enable_gw_dpc="yes"` when `--with-config-file=FILE` is used
 to pass the configuration options to `configure` via an external FILE.
 
-To configure with ELPA + MKL, use:
+To configure with ELPA + MKL, set the ELPAROOT env variable with :
+
 ```
-ELPAROOT="PATH_TO_ELPA_INSTALLATION_DIR"
+export ELPAROOT="PATH_TO_ELPA_INSTALLATION_DIR"
+```
+
+and then
 
 with_linalg_flavor="mkl+elpa"
-LINALG_FCFLAGS="-I${MKLROOT}/include -I{ELPAROOT}/modules"
-LINALG_LIBS="-L{ELPAROOT}/lib/ -lelpa -L${MKLROOT}/lib -lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl"
+LINALG_FCFLAGS="-I${MKLROOT}/include -I${ELPAROOT}/modules"
+LINALG_LIBS="-L${ELPAROOT}/lib -lelpa -L${MKLROOT}/lib -lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl"
+```
+
+At the end of configure, you should obtain:
+
+```
+  * FFT flavor        : dfti (libs: user-defined)
+  * LINALG flavor     : mkl+elpa (libs: user-defined)
+  * SCALAPACK enabled : yes
+  * ELPA enabled      : yes
 ```
 
 !!! tip
