@@ -3649,18 +3649,18 @@ Variable(
     topics=['RTTDDFT_basic'],
     dimensions="scalar",
     requires="[[optdriver]] is 9",
-    defaultval=0.1, 
+    defaultval=0.1,
     mnemonics="Delta Time for ELEctrons",
     added_in_version="10",
     text=r"""
 Defines the electron time step in atomic units of time, used to integrate the time-dependent
 Kohn-Sham equations in real-time TDDFT [[topic:RTTDDFT]] if [optdriver]] is 9.
 (One atomic time unit is 2.418884e-17 seconds).
-One should also set the number of time steps to be performed using the 
+One should also set the number of time steps to be performed using the
 parameter [[ntime]].
 
-A good value for [[dtele]] is usually less than or equal to 0.1. 
-The user should try several values in order to find the one allowing for 
+A good value for [[dtele]] is usually less than or equal to 0.1.
+The user should try several values in order to find the one allowing for
 a stable and efficient integration.
 """,
 ),
@@ -13331,9 +13331,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the maximum number of molecular dynamics or electron dynamics time steps or structural
-optimization steps to be done if [[geoopt]] or [[moldyn]] are not "none" or [[optdriver]] is 9 
+optimization steps to be done if [[geoopt]] or [[moldyn]] are not "none" or [[optdriver]] is 9
 (real-time TDDFT).
-Starting with Abinit9, ntime is automatically set to 1000, if [[geoopt]] or [[moldyn]] are not "none", 
+Starting with Abinit9, ntime is automatically set to 1000, if [[geoopt]] or [[moldyn]] are not "none",
 [[ntimimage]] is zero and [[ntime]] is not specified in the input file.
 Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
 
@@ -16398,7 +16398,7 @@ Variable(
     mnemonics="PRinT EVK - Elements of the Velocity matrix at wavevector K",
     added_in_version="9.11.0",
     text=r"""
-If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.  
+If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.
 Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesnt support MPI-IO.
 """,
 ),
@@ -20489,6 +20489,15 @@ If set to 1, enable the use of DFT+DMFT, see in particular the important
 variables [[dmft_solv]], [[dmftbandi]], [[dmftbandf]], [[dmft_nwli]],
 [[dmft_nwlo]], [[dmft_tollc]], [[dmft_tolfreq]], and [[dmft_iter]].
 
+If set to 10, enable the use of DFT+DMFT using the Wannier90 interface
+and the python invocation for calling an external many-body code to
+perform the DMFT step. Typically, we use the TRIQS library.
+The relevant keywords in that case are only [[dmftbandi]] and [[dmftbandf]]
+to specify the bands used for the projection, and [[w90iniprj]] with other
+Wannier90 specific keywords for the Wannier90 part. More information
+will be provided in the future. The rest of the discussion related to this
+keyword is in the case where [[usedmft]] is set to 1.
+
 The current implementation uses Wannier functions obtained from
 [[ cite:Amadon2008 | projected local orbitals ]] as
 correlated orbitals (see [[dmftbandi]] and [[dmftbandf]] input variables to define them).
@@ -22619,9 +22628,9 @@ Variable(
     text=r"""
 This variable controls the type of external electric field to apply in RT-TDDFT.
 As of now, only impulse electric field are implemented, [[td_ef_type]] is 1.
-Moreover, the response to such impulse electric field can only be performed 
+Moreover, the response to such impulse electric field can only be performed
 within the PAW approach (see [[topic:PAW]]).
-The intensity of the Dirac pulse as well as the time at which it is 
+The intensity of the Dirac pulse as well as the time at which it is
 applied are controlled by the parameters [[td_ef_ezero]] and [[td_ef_tzero]].
 If [[td_ef_type]] is 0, no electric field is applied.
 """,
@@ -22638,7 +22647,7 @@ Variable(
     mnemonics="Time-Dependent Electric Field TZERO",
     added_in_version="10",
     text=r"""
-This variable controls the time (in atomic units) at which the external 
+This variable controls the time (in atomic units) at which the external
 electric field is applied (see [[td_ef_type]]).
 """,
 ),
@@ -22654,8 +22663,8 @@ Variable(
     mnemonics="Time-Dependent Electric Field EZERO",
     added_in_version="10",
     text=r"""
-This variable is the intensity (in atomic units) of the external 
-electric field applied (see [[td_ef_type]]). 
+This variable is the intensity (in atomic units) of the external
+electric field applied (see [[td_ef_type]]).
 """,
 ),
 
@@ -22670,8 +22679,8 @@ Variable(
     mnemonics="Time-Dependent Electric Field POLarization",
     added_in_version="10",
     text=r"""
-This variable is the polarization vector (direction) of the external 
-electric field applied (see [[td_ef_type]]). 
+This variable is the polarization vector (direction) of the external
+electric field applied (see [[td_ef_type]]).
 """,
 ),
 
@@ -22686,9 +22695,9 @@ Variable(
     mnemonics="Time-Dependent Electric Field INDUCED VECtor POTential",
     added_in_version="10",
     text=r"""
-This variable controls wether we include the induced vector potential in the 
+This variable controls wether we include the induced vector potential in the
 Hamiltonian so that the total vector potential applied is the sum of the vector
-potential associated with the external electric field and the vector potential 
+potential associated with the external electric field and the vector potential
 induced by the current density.
 """,
 ),
@@ -22704,8 +22713,8 @@ Variable(
     mnemonics="Time-Dependent EXPonential ORDER",
     added_in_version="10",
     text=r"""
-This variable controls the order of the Taylor expansion used to approximate the exponential 
-of an operator in the propagator for RT-TDDFT. The default value of 4 is usually a good choice 
+This variable controls the order of the Taylor expansion used to approximate the exponential
+of an operator in the propagator for RT-TDDFT. The default value of 4 is usually a good choice
 that ensures good stability and acceptable computation time.
 """,
 ),
@@ -22722,12 +22731,12 @@ Variable(
     added_in_version="10",
     text=r"""
 This variable controls the propagation algorithm used to integrate the time-dependent
-Kohn-Sham equations in real-time TDDFT. At present only the exponential rule, 
-[[td_propagator]] is 0, and the exponential mid-point rule, [[td_propagator]] is 1, 
+Kohn-Sham equations in real-time TDDFT. At present only the exponential rule,
+[[td_propagator]] is 0, and the exponential mid-point rule, [[td_propagator]] is 1,
 propagators are implemented.
 Both are based on a Taylor expansion of the exponential of an operator which order is
 controlled by the [[td_exp_order]] parameter. In case of [[td_propagator]] equal to 1
-the code uses a predictor-corrector scheme associated with two parameters [[td_scnmax]] 
+the code uses a predictor-corrector scheme associated with two parameters [[td_scnmax]]
 and [[td_scthr]].
 """,
 ),
@@ -22743,7 +22752,7 @@ Variable(
     mnemonics="Time-Dependent PRinT STRide",
     added_in_version="10",
     text=r"""
-This variable controls how often the code outputs various physical 
+This variable controls how often the code outputs various physical
 properties (DOS, occupations, current density etc.).
 The code will write these properties in files every [[td_prtstr]] time step.
 """,
@@ -22761,8 +22770,8 @@ Variable(
     added_in_version="10",
     text=r"""
 This variable controls wether we are restarting a RTTDDFT run.
-If [[td_restart]] is 0 the calculation starts from scratch, if it is 
-set to 1 than ABINIT will read the file called TD_RESTART that contains 
+If [[td_restart]] is 0 the calculation starts from scratch, if it is
+set to 1 than ABINIT will read the file called TD_RESTART that contains
 some information in order to continue the previous RTTDDFT calculation.
 """,
 ),
@@ -22794,7 +22803,7 @@ Variable(
     mnemonics="Time-Dependent propagation Self-Consistent THReshold",
     added_in_version="10",
     text=r"""
-This variable controls the threshold used to define the convergence of the 
+This variable controls the threshold used to define the convergence of the
 self-consistent predictor-corrector scheme ([[td_propagator]] equal to 1).
 """,
 ),
