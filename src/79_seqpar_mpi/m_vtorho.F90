@@ -1699,9 +1699,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
                 read(101, *) occnd_tmp
                 ! Works in the presence of spin-symmetry, at this point
                 do iband1=1,paw_dmft%dmftbandf+1-paw_dmft%dmftbandi
-                  if (ikpt < 5) then
-                    write(std_out,*) "isppol, iband, iband1, occnd, occnd_tmp_re, occnd_tmp_im", isppol, iband, iband1, occ(bdtot_index), occnd_tmp(2*(iband1-1)+1), occnd_tmp(2*(iband1-1)+2)
-                  endif
                   paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) + occnd_tmp(2*(iband1-1)+1)
                   ! if (paw_dmft%dmftbandi-1+iband1==iband) then
                   !   paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) + occ(bdtot_index)
