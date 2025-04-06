@@ -42,6 +42,7 @@ module m_mpi_setup
  use m_dtset,        only : dataset_type
  use m_kg,           only : getmpw
  use m_dtfil,        only : mkfilename
+ use m_mep,          only : NEB_CELL_ALGO_NONE
 
  implicit none
 
@@ -1012,7 +1013,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      kpt_with_shift(3,:)=kpt_with_shift(3,:)+qphon(3)
    end if
    if (dtsets(idtset)%usewvl == 0) then
-     if (dtsets(idtset)%nimage==1) then
+     if (dtsets(idtset)%neb_cell_algo==NEB_CELL_ALGO_NONE) then
        call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
      else
        max_mpw=0

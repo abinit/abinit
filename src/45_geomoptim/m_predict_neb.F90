@@ -156,7 +156,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    ABI_MALLOC(strain_fact_jj,(nimage))
    strain_fact_jj(:)=one
    call get_geometry_img(results_img(:,itimimage_eff),etotal,natom,nimage,&
-&                        fcart,strten,rprimd,xcart(1:3,1:natom,:),xred(1:,1:natom,:))
+&                        fcart,rprimd,strten,xcart(1:3,1:natom,:),xred(1:,1:natom,:))
    forces_eff(1:3,1:natom,1:nimage)=fcart(1:3,1:natom,1:nimage)
 
 !  Retrieve unit cell vectors and derivatives (forces) in case of variable-cell NEB
