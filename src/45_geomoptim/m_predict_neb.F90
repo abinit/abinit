@@ -115,12 +115,13 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
  real(dp),parameter :: identity_real(3,3)=reshape([one,zero,zero,zero,one,zero,zero,zero,one],[3,3])
  real(dp) :: mat3_1(3,3),mat3_2(3,3)
  real(dp),allocatable :: acell(:,:),buffer(:,:),buffer_all(:,:)
- real(dp),allocatable :: coordif(:,:,:),dimage(:),rprim(:,:,:),rprimd_start_inv(:,:,:),spring(:)
+ real(dp),allocatable :: coordif(:,:,:),dimage(:),spring(:)
+ real(dp),allocatable :: rprim(:,:,:),rprimd_start(:,:,:),rprimd_start_inv(:,:,:)
  real(dp),allocatable :: strten(:,:),strten_mat(:,:,:),rmet(:,:,:),ucvol(:),pressure(:)
- real(dp),allocatable :: strain_fact_jj(:),tangent(:,:,:),vect(:,:)
- real(dp),allocatable,target :: etotal(:),fcart(:,:,:),forces_eff(:,:,:),neb_forces(:,:,:)
- real(dp),allocatable,target :: rprimd(:,:,:),xcart(:,:,:),xred(:,:,:)
- real(dp),pointer :: coord_(:,:,:),etotal_all(:),forces_eff_all(:,:,:)
+ real(dp),allocatable :: tangent(:,:,:),vect(:,:)
+ real(dp),allocatable,target :: etotal(:),fcart(:,:,:),fcart_eff(:,:,:),neb_forces(:,:,:)
+ real(dp),allocatable,target :: rprimd(:,:,:),xcart(:,:,:),xred(:,:,:),strainfact_jj(:)
+ real(dp),pointer :: coord_(:,:,:),etotal_all(:),fcart_eff_all(:,:,:)
  real(dp),pointer :: neb_forces_all(:,:,:),rprimd_all(:,:,:),xcart_all(:,:,:),xred_all(:,:,:)
 
 ! *************************************************************************
@@ -149,15 +150,15 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 !  Retrieve positions and forces
    ABI_MALLOC(etotal,(nimage))
    ABI_MALLOC(xcart,(3,natom_eff,nimage))
-   ABI_MALLOC(fcart,(3,natom,nimage))
-   ABI_MALLOC(forces_eff,(3,natom_eff,nimage))
+   ABI_MALLOC(fcart_eff,(3,natom_eff,nimage))
    ABI_MALLOC(rprimd,(3,3,nimage))
+   ABI_MALLOC(strainfact_jj,(nimage))
+   strainfact_jj(:)=one
+   ABI_MALLOC(fcart,(3,natom,nimage))
    ABI_MALLOC(strten,(6,nimage))
-   ABI_MALLOC(strain_fact_jj,(nimage))
-   strain_fact_jj(:)=one
    call get_geometry_img(results_img(:,itimimage_eff),etotal,natom,nimage,&
 &                        fcart,rprimd,strten,xcart(1:3,1:natom,:),xred(1:,1:natom,:))
-   forces_eff(1:3,1:natom,1:nimage)=fcart(1:3,1:natom,1:nimage)
+   fcart_eff(1:3,1:natom,1:nimage)=fcart(1:3,1:natom,1:nimage)
 
 !  Retrieve unit cell vectors and derivatives (forces) in case of variable-cell NEB
 !   => Retrieve pressure, volume, rmet, strten, ...
@@ -166,6 +167,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      ABI_MALLOC(ucvol,(nimage))
      ABI_MALLOC(pressure,(nimage))
      ABI_MALLOC(strten_mat,(3,3,nimage))
+     ABI_MALLOC(rprimd_start,(3,3,nimage))
      ABI_MALLOC(rprimd_start_inv,(3,3,nimage))
      pressure(1:nimage)=-(strten(1,1:nimage)+strten(2,1:nimage)+strten(3,1:nimage))*third
      do iimage=1,nimage
@@ -175,20 +177,22 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
        do jj=1,3; do ii=1,3
          strten_mat(ii,jj,iimage)=strten(voigt(ii,jj),iimage)
        end do; end do
-       call matr3inv(mep_param%rprimd_start(:,:,iimage),mat3_1(:,:))
+       ii=mpi_enreg%my_imgtab(iimage)
+       rprimd_start(:,:,iimage)=mep_param%rprimd_start(:,:,ii)
+       call matr3inv(rprimd_start(:,:,iimage),mat3_1(:,:))
        rprimd_start_inv(:,:,iimage) = transpose(mat3_1(:,:))
      end do
 
 !    ==== Generalized Solid-State NEB (GSS-NEB)
 !         See: Sheppard, Xiao, Chemelewski, Johnson, Henkelman, J. Chem. Phys. 136, 074103 (2012)
      if (mep_param%neb_cell_algo==NEB_CELL_ALGO_GSSNEB) then
-       strain_fact_jj(1:nimage)=(ucvol(1:nimage)**third)*(natom**sixth)
+       strainfact_jj(1:nimage)=(ucvol(1:nimage)**third)*(natom**sixth)
        do iimage=1,nimage
-        mat3_1(1:3,1:3)=rprimd(1:3,1:3,iimage)-mep_param%rprimd_start(1:3,1:3,iimage)
-        xcart(1:3,natom+1:natom+3,iimage)=strain_fact_jj(iimage)*matmul(rprimd_start_inv(:,:,iimage),mat3_1)       
-        strten_mat(1:3,1:3,iimage)=strten_mat(1:3,1:3,iimage)+pressure(iimage)*identity_real(1:3,1:3)
-        forces_eff(1:3,natom+1:natom+3,iimage)= &
-&                -(ucvol(iimage)/strain_fact_jj(iimage))*strten_mat(1:3,1:3,iimage)
+         mat3_1(1:3,1:3)=rprimd(1:3,1:3,iimage)-rprimd_start(1:3,1:3,iimage)
+         xcart(1:3,natom+1:natom+3,iimage)=strainfact_jj(iimage)*matmul(rprimd_start_inv(:,:,iimage),mat3_1)       
+         strten_mat(1:3,1:3,iimage)=strten_mat(1:3,1:3,iimage)+pressure(iimage)*identity_real(1:3,1:3)
+         fcart_eff(1:3,natom+1:natom+3,iimage)= &
+&                 -(ucvol(iimage)/strainfact_jj(iimage))*strten_mat(1:3,1:3,iimage)
        end do
      end if
 
@@ -198,13 +202,13 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
        do iimage=1,nimage
          xred(1:3,natom+1:natom+3,iimage)=matmul(rprimd(1:3,1:3,iimage),rprimd_start_inv(1:3,1:3,iimage)) &
 &                                        -identity_real(1:3,1:3)
-         call fcart2gred(fcart(1:3,1:natom,iimage),forces_eff(1:3,1:natom,iimage),rprimd(1:3,1:3,iimage),natom)
-         forces_eff(1:3,1:natom,iimage)=matmul(rmet(1:3,1:3,iimage),forces_eff(1:3,1:natom,iimage))
+         call fcart2gred(fcart(1:3,1:natom,iimage),fcart_eff(1:3,1:natom,iimage),rprimd(1:3,1:3,iimage),natom)
+         fcart_eff(1:3,1:natom,iimage)=matmul(rmet(1:3,1:3,iimage),fcart_eff(1:3,1:natom,iimage))
          mat3_1(1:3,1:3)=identity_real(1:3,1:3)+transpose(xred(1:3,natom+1:natom+3,iimage))
          call matr3inv(mat3_1,mat3_2)
          mat3_1=transpose(mat3_2)
          mat3_2(1:3,1:3)=(strten_mat(1:3,1:3,iimage)+pressure(iimage))*identity_real(1:3,1:3)*ucvol(iimage)
-         forces_eff(1:3,natom+1:natom+3,iimage)=-matmul(mat3_2,mat3_1)
+         fcart_eff(1:3,natom+1:natom+3,iimage)=-matmul(mat3_2,mat3_1)
        end do
      end if
 
@@ -212,6 +216,8 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      ABI_FREE(ucvol)
      ABI_FREE(pressure)
      ABI_FREE(strten_mat)
+     ABI_FREE(rprimd_start)
+     ABI_FREE(rprimd_start_inv)
    end if
 
 !  Array containing effective NEB forces (F_ortho+F_spring)
@@ -221,36 +227,38 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    if (mpi_enreg%paral_img==1) then
      ABI_MALLOC(buffer,(9*natom_eff+10,nimage))
      ABI_MALLOC(buffer_all,(9*natom_eff+10,nimage_tot))
+     ABI_MALLOC(etotal_all,(nimage_tot))
      ABI_MALLOC(xcart_all,(3,natom_eff,nimage_tot))
+     ABI_MALLOC(fcart_eff_all,(3,natom_eff,nimage_tot))
      ABI_MALLOC(xred_all,(3,natom_eff,nimage_tot))
      ABI_MALLOC(rprimd_all,(3,3,nimage_tot))
-     ABI_MALLOC(etotal_all,(nimage_tot))
-     ABI_MALLOC(forces_eff_all,(3,natom_eff,nimage_tot))
      ABI_MALLOC(neb_forces_all,(3,natom_eff,nimage_tot))
      buffer=zero;ii=0
      buffer(ii+1               ,1:nimage)=etotal(1:nimage);ii=ii+1
+     buffer(ii+1:ii+9          ,1:nimage)=reshape(rprimd,(/9,nimage/));ii=ii+9
      buffer(ii+1:ii+3*natom_eff,1:nimage)=reshape(xcart,(/3*natom_eff,nimage/));ii=ii+3*natom_eff
      buffer(ii+1:ii+3*natom_eff,1:nimage)=reshape(xred,(/3*natom_eff,nimage/));ii=ii+3*natom_eff
-     buffer(ii+1:ii+9          ,1:nimage)=reshape(rprimd,(/9,nimage/));ii=ii+9
-     buffer(ii+1:ii+3*natom_eff,1:nimage)=reshape(forces_eff,(/3*natom_eff,nimage/));ii=ii+3*natom_eff
+     buffer(ii+1:ii+3*natom_eff,1:nimage)=reshape(fcart_eff,(/3*natom_eff,nimage/));ii=ii+3*natom_eff
      call gather_array_img(buffer,buffer_all,mpi_enreg,allgather=.true.)
      ii=0
      etotal_all(:)=buffer_all(ii+1,1:nimage_tot);ii=ii+1
+     rprimd_all(:,:,:)=reshape(buffer_all(ii+1:ii+9,1:nimage_tot),(/3,3,nimage_tot/));ii=ii+9
      xcart_all(:,:,:)=reshape(buffer_all(ii+1:ii+3*natom_eff,1:nimage_tot),(/3,natom_eff,nimage_tot/));ii=ii+3*natom_eff
      xred_all(:,:,:)=reshape(buffer_all(ii+1:ii+3*natom_eff,1:nimage_tot),(/3,natom_eff,nimage_tot/));ii=ii+3*natom_eff
-     rprimd_all(:,:,:)=reshape(buffer_all(ii+1:ii+9,1:nimage_tot),(/3,3,nimage_tot/));ii=ii+9
-     forces_eff_all(:,:,:)=reshape(buffer_all(ii+1:ii+3*natom_eff,1:nimage_tot),(/3,natom_eff,nimage_tot/));ii=ii+3*natom_eff
+     fcart_eff_all(:,:,:)=reshape(buffer_all(ii+1:ii+3*natom_eff,1:nimage_tot),(/3,natom_eff,nimage_tot/));ii=ii+3*natom_eff
      ABI_FREE(buffer)
      ABI_FREE(buffer_all)
    else
-     etotal_all     => etotal
-     xcart_all      => xcart
-     xred_all       => xred
-     rprimd_all     => rprimd
-     forces_eff_all  => forces_eff
-     neb_forces_all => neb_forces
+     etotal_all        => etotal
+     rprimd_all        => rprimd
+     xcart_all         => xcart
+     xred_all          => xred
+     fcart_eff_all     => fcart_eff
+     neb_forces_all    => neb_forces
    end if
-
+if (mpi_enreg%me==0) then
+ write(77,*) "fcart_eff ",fcart_eff_all(1:3,natom+1:natom+3,:); flush(77)
+end if
 !  coordif is the vector between two images
 !  dimage is the distance between two images
 !  tangent is the tangent at image i
@@ -344,13 +352,13 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    end if
 
 !  Compute NEB forces
-   neb_forces_all(:,:,1)=forces_eff_all(:,:,1)
-   neb_forces_all(:,:,nimage_tot)=forces_eff_all(:,:,nimage_tot)
+   neb_forces_all(:,:,1)=fcart_eff_all(:,:,1)
+   neb_forces_all(:,:,nimage_tot)=fcart_eff_all(:,:,nimage_tot)
    do iimage=2,nimage_tot-1
 !    === Standard NEB
      if (iimage/=iimage_max) then
 !    if (iimage/=iimage_min.and.iimage/=iimage_max) then
-       f_para1=mep_img_dotp(forces_eff_all(:,:,iimage),tangent(:,:,iimage))
+       f_para1=mep_img_dotp(fcart_eff_all(:,:,iimage),tangent(:,:,iimage))
        if (mep_param%neb_algo==NEB_ALGO_STANDARD) then   ! Original NEB algo
          ABI_MALLOC(vect,(3,natom_eff))
          vect(:,:)=spring(iimage+1)*coordif(:,:,iimage+1)-spring(iimage)*coordif(:,:,iimage)
@@ -359,13 +367,13 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
        else       ! Modification from J. Chem. Phys. 113, 9978 (2000) [[cite:Henkelman2000]]
          f_para2=spring(iimage+1)*dimage(iimage+1)-spring(iimage)*dimage(iimage)
        end if
-       neb_forces_all(:,:,iimage)=forces_eff_all(:,:,iimage) &       ! F_ortho
+       neb_forces_all(:,:,iimage)=fcart_eff_all(:,:,iimage) &       ! F_ortho
 &      -f_para1*tangent(:,:,iimage) &  ! F_ortho
 &      +f_para2*tangent(:,:,iimage)    ! F_spring
 !      === CI-NEB for the image(s) with maximal energy
      else
-       f_para1=mep_img_dotp(forces_eff_all(:,:,iimage),tangent(:,:,iimage))
-       neb_forces_all(:,:,iimage)=forces_eff_all(:,:,iimage)-two*f_para1*tangent(:,:,iimage)
+       f_para1=mep_img_dotp(fcart_eff_all(:,:,iimage),tangent(:,:,iimage))
+       neb_forces_all(:,:,iimage)=fcart_eff_all(:,:,iimage)-two*f_para1*tangent(:,:,iimage)
      end if
    end do
 
@@ -382,7 +390,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      call mep_steepest(neb_forces,list_dynimage,mep_param,natom,natom_eff,&
 &                      ndynimage,nimage,rprimd,xcart,xred,&
 &                      use_reduced_coord=use_reduced_coord,&
-&                      strain_fact=strain_fact_jj)
+&                      strainfact=strainfact_jj)
    else if (mep_param%mep_solver==MEP_SOLVER_QUICKMIN) then ! Quick-min
      call mep_qmin(neb_forces,itimimage,list_dynimage,mep_param,natom,ndynimage, &
 &     nimage,rprimd,xcart,xred)
@@ -409,22 +417,22 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    ABI_FREE(tangent)
    ABI_FREE(dimage)
    if (mpi_enreg%paral_img==1)  then
+     ABI_FREE(etotal_all)
+     ABI_FREE(rprimd_all)
      ABI_FREE(xcart_all)
      ABI_FREE(xred_all)
-     ABI_FREE(rprimd_all)
-     ABI_FREE(etotal_all)
-     ABI_FREE(forces_eff_all)
+     ABI_FREE(fcart_eff_all)
      ABI_FREE(neb_forces_all)
    end if
 
    ABI_FREE(neb_forces)
    ABI_FREE(etotal)
+   ABI_FREE(rprimd)
    ABI_FREE(xcart)
    ABI_FREE(fcart)
-   ABI_FREE(forces_eff)
-   ABI_FREE(rprimd)
+   ABI_FREE(fcart_eff)
+   ABI_FREE(strainfact_jj)
    ABI_FREE(strten)
-   ABI_FREE(strain_fact_jj)
 
  end if ! mpi_enreg%me_cell==0
 
@@ -437,11 +445,11 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
  do iimage=1,nimage
    results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:natom,iimage)
    if (mep_param%neb_cell_algo==NEB_CELL_ALGO_NONE) then
-     results_img(iimage,next_itimimage)%rprim(:,:) =results_img(iimage,itimimage_eff)%rprim(:,:)
      results_img(iimage,next_itimimage)%acell(:)   =results_img(iimage,itimimage_eff)%acell(:)
+     results_img(iimage,next_itimimage)%rprim(:,:) =results_img(iimage,itimimage_eff)%rprim(:,:)
    else
-     results_img(iimage,next_itimimage)%rprim(:,:) =rprim(:,:,iimage)
      results_img(iimage,next_itimimage)%acell(:)   =acell(:,iimage)
+     results_img(iimage,next_itimimage)%rprim(:,:) =rprim(:,:,iimage)
    end if
    results_img(iimage,next_itimimage)%vel(:,:)     =results_img(iimage,itimimage_eff)%vel(:,:)
    results_img(iimage,next_itimimage)%vel_cell(:,:)=results_img(iimage,itimimage_eff)%vel_cell(:,:)

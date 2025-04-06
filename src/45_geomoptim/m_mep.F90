@@ -237,7 +237,7 @@ end subroutine mep_destroy
 !!                      (positions, forces, energy, ...)
 !!  rprimd(3,3,nimage)=dimensional primitive translations for each image along the path
 !!  [use_reduced_coord]=force the use of reduced coordinates instead of cartesian ones
-!!  [strain_fact(nimage)]=only for variable cell algorithms. Factor applied to strains
+!!  [strainfact(nimage)]=only for variable cell algorithms. Factor applied to strains
 !!                        to align their dimension to atomic positions.
 !!                        Only valid when use_reduced_coordinates=.false.
 !!                        (essentially used for the GSS-NEB method)
@@ -253,7 +253,7 @@ end subroutine mep_destroy
 !! SOURCE
 
 subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,nimage,rprimd,xcart,xred, &
-&                       use_reduced_coord,strain_fact) ! optional arguments
+&                       use_reduced_coord,strainfact) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -264,7 +264,7 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
  integer,intent(in) :: list_dynimage(ndynimage)
  real(dp),intent(in) :: fcart(3,natom,nimage)
  real(dp),intent(inout) :: rprimd(3,3,nimage),xcart(3,natom,nimage),xred(3,natom,nimage)
- real(dp),intent(in),optional :: strain_fact(nimage)
+ real(dp),intent(in),optional :: strainfact(nimage)
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idynimage,iimage
@@ -305,7 +305,8 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
        mat3(1:3,1:3)=identity_real(1:3,1:3)+xred(:,natom+1:natom+3,iimage)
        rprimd(:,:,iimage)=matmul(mat3(:,:),mep_param%rprimd_start(:,:,iimage))
      else
-       mat3(1:3,1:3)=xcart(1:3,natom+1:natom+3,iimage)/strain_fact(iimage)
+       mat3(1:3,1:3)=xcart(1:3,natom+1:natom+3,iimage)
+       if (present(strainfact)) mat3(1:3,1:3)=mat3(1:3,1:3)/strainfact(iimage)
        rprimd(:,:,iimage)=matmul(mep_param%rprimd_start(:,:,iimage),mat3(:,:)) &
 &                        +mep_param%rprimd_start(:,:,iimage)
      end if
