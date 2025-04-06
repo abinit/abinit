@@ -180,6 +180,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      end do
 
 !    ==== Generalized Solid-State NEB (GSS-NEB)
+!         See: Sheppard, Xiao, Chemelewski, Johnson, Henkelman, J. Chem. Phys. 136, 074103 (2012)
      if (mep_param%neb_cell_algo==NEB_CELL_ALGO_GSSNEB) then
        strain_fact_jj(1:nimage)=(ucvol(1:nimage)**third)*(natom**sixth)
        do iimage=1,nimage
@@ -192,6 +193,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
      end if
 
 !    ==== Variable-cell NEB (VC-NEB, in reduced coordinates) - At present, doesnt work
+!         See: Qian, Dong, Zhou, Tian, Oganov, Wang, Comp. Phys. Comm. 184, 2111 (2013)
      if (mep_param%neb_cell_algo==NEB_CELL_ALGO_VCNEB) then
        do iimage=1,nimage
          xred(1:3,natom+1:natom+3,iimage)=matmul(rprimd(1:3,1:3,iimage),rprimd_start_inv(1:3,1:3,iimage)) &
