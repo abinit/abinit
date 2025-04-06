@@ -397,11 +397,11 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
    end if
 
 !  Compute new acell and rprim from new rprimd
-   if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE) then
+   !if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE) then
      do iimage=1,nimage
        call mkradim(acell(:,iimage),rprim(:,:,iimage),rprimd(:,:,iimage))
      end do
-   end if
+   !end if
 
 !  Free memory
    ABI_FREE(spring)
@@ -436,8 +436,13 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
  if (next_itimimage>ntimimage_stored) next_itimimage=1
  do iimage=1,nimage
    results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:natom,iimage)
-   results_img(iimage,next_itimimage)%acell(:)     =acell(:,iimage)
-   results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:,iimage)
+   if (mep_param%neb_cell_algo==NEB_CELL_ALGO_NONE) then
+     results_img(iimage,next_itimimage)%rprim(:,:) =results_img(iimage,itimimage_eff)%rprim(:,:)
+     results_img(iimage,next_itimimage)%acell(:)   =results_img(iimage,itimimage_eff)%acell(:)
+   else
+     results_img(iimage,next_itimimage)%rprim(:,:) =rprim(:,:,iimage)
+     results_img(iimage,next_itimimage)%acell(:)   =acell(:,iimage)
+   end if
    results_img(iimage,next_itimimage)%vel(:,:)     =results_img(iimage,itimimage_eff)%vel(:,:)
    results_img(iimage,next_itimimage)%vel_cell(:,:)=results_img(iimage,itimimage_eff)%vel_cell(:,:)
  end do
