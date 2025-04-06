@@ -921,6 +921,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield_lambda',tread,'TIM')
  if(tread==1) multibinit_dtset%efield_lambda(1:3)= dprarr(1:3)
+
  multibinit_dtset%efield_lambda2= (/0.0,0.0,0.0/)
  if(3>marr)then
    marr=3
@@ -929,6 +930,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    ABI_MALLOC(intarr,(marr))
    ABI_MALLOC(dprarr,(marr))
  end if
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'efield_lambda2',tread,'TIM')
  if(tread==1) multibinit_dtset%efield_lambda2(1:3)= dprarr(1:3)
  multibinit_dtset%efield_gmean= (/0.0,0.0,0.0/)
@@ -1211,15 +1213,15 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
  multibinit_dtset%fit_ncoeff_per_cycle=1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncoeff_per_cycle',tread,'INT')
- if(tread==1) multibinit_dtset%fit_ncoeff_per_cycle=intarr(1)
- if(multibinit_dtset%fit_ncoeff_per_cycle<0)then
-   write(message, '(a,i8,a,a,a,a,a)' )&
-     &   'fit_ncoeff_per_cycle is',multibinit_dtset%fit_ncoeff_per_cycle,', but the only allowed values',ch10,&
-     &   'are positives for multibinit.',ch10,&
-     &   'Action: correct fit_ncoeff_per_cycle in your input file.'
-   ABI_ERROR(message)
- end if
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncoeff_per_cycle',tread,'INT')
+ !if(tread==1) multibinit_dtset%fit_ncoeff_per_cycle=intarr(1)
+ !if(multibinit_dtset%fit_ncoeff_per_cycle<0)then
+ !  write(message, '(a,i8,a,a,a,a,a)' )&
+ !    &   'fit_ncoeff_per_cycle is',multibinit_dtset%fit_ncoeff_per_cycle,', but the only allowed values',ch10,&
+ !    &   'are positives for multibinit.',ch10,&
+ !    &   'Action: correct fit_ncoeff_per_cycle in your input file.'
+ !  ABI_ERROR(message)
+ !end if
 
  multibinit_dtset%fit_ncoeff_per_iatom=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_ncoeff_per_iatom',tread,'INT')
@@ -2941,16 +2943,16 @@ multibinit_dtset%dipdip_range(:)=[0,0,0]
    ABI_ERROR(message)
  end if
 
- multibinit_dtset%fit_drop_rate=0.0_dp
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_drop_rate',tread,'DPR')
- if(tread==1) multibinit_dtset%fit_drop_rate=dprarr(1)
- if(multibinit_dtset%fit_drop_rate<0.or.multibinit_dtset%fit_drop_rate>1.0)then
-   write(message, '(a,i0,a,a,a,a)' )&
-     &     'fit_drop_rate is ',multibinit_dtset%fit_drop_rate,', which is lower',&
-     &     ' than 0 of superior than 1.',&
-     &     ch10,'Action: correct fit_drop_rate in your input file.'
-   ABI_ERROR(message)
- end if
+ !multibinit_dtset%fit_drop_rate=0.0_dp
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_drop_rate',tread,'DPR')
+ !if(tread==1) multibinit_dtset%fit_drop_rate=dprarr(1)
+ !if(multibinit_dtset%fit_drop_rate<0.or.multibinit_dtset%fit_drop_rate>1.0)then
+ !  write(message, '(a,i0,a,a,a,a)' )&
+ !    &     'fit_drop_rate is ',multibinit_dtset%fit_drop_rate,', which is lower',&
+ !    &     ' than 0 of superior than 1.',&
+ !    &     ch10,'Action: correct fit_drop_rate in your input file.'
+ !  ABI_ERROR(message)
+ !end if
 
 
 
