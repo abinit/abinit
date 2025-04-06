@@ -137,7 +137,7 @@ subroutine predict_neb(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg
 
 !VC-NEB uses reduced coordinates
  use_reduced_coord=.false.
- if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_VCNEB) use_reduced_coord=.true.
+ if (mep_param%neb_cell_algo==NEB_CELL_ALGO_VCNEB) use_reduced_coord=.true.
 
  ABI_MALLOC(acell,(3,nimage))
  ABI_MALLOC(rprim,(3,3,nimage))

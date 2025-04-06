@@ -272,7 +272,7 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
  real(dp) :: stepsize
  character(len=500) :: msg
 !arrays
- real(dp), parameter :: identity_real(3,3)=reshape([one,zero,zero,zero,one,zero,zero,zero,one],[3,3])
+ real(dp),parameter :: identity_real(3,3)=reshape([one,zero,zero,zero,one,zero,zero,zero,one],[3,3])
  real(dp) :: mat3(3,3)
  real(dp),allocatable :: xred_old(:,:),xstep(:,:)
 
@@ -321,7 +321,7 @@ subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,natom_eff,ndynimage,
    end if
 
 !  In case atom is fixed, we restore its previous value ; forbidden if variable cell
-   if (mep_param%neb_cell_algo/=NEB_CELL_ALGO_NONE) then
+   if (mep_param%neb_cell_algo==NEB_CELL_ALGO_NONE) then
      do iatom=1,natom
        if (any(mep_param%iatfix(:,iatom)==1)) then
          where(mep_param%iatfix(:,iatom)==1)
