@@ -134,9 +134,9 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
 !  ===============================================
 
 !  Compute new atomic positions in each cell
-   if      (mep_param%mep_solver==0) then ! Steepest-descent
+   if      (mep_param%mep_solver==MEP_SOLVER_STEEPEST) then ! Steepest-descent
      call mep_steepest(fcart,list_dynimage,mep_param,natom,natom,ndynimage,nimage,rprimd,xcart,xred)
-   else if (mep_param%mep_solver==4) then ! 4th-order Runge-Kutta
+   else if (mep_param%mep_solver==MEP_SOLVER_RK4) then ! 4th-order Runge-Kutta
      call mep_rk4(fcart,itimimage,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
    else
      ABI_BUG("Inconsistent solver !")
@@ -146,7 +146,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
 !  ===============================================
 
 !  No reparametrization step in case of Runge-Kutta and mod(istep,4)>0
-   if (mep_param%mep_solver/=4.or.mod(itimimage,4)==0) then
+   if (mep_param%mep_solver/=MEP_SOLVER_RK4.or.mod(itimimage,4)==0) then
 
 !    Parallelism: gather data of all images
      if (mpi_enreg%paral_img==1) then
@@ -179,7 +179,7 @@ subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_en
      ABI_MALLOC(wimage,(nimage_tot))
 
 !    === Weights for equal arc length
-     if (mep_param%string_algo/=2) then
+     if (mep_param%string_algo/=STRING_ALGO_SIMPLIFIED_ENERGY) then
        wimage(:)=one
 
 !      === Weights for energy-weight arc length

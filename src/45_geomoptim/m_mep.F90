@@ -89,9 +89,24 @@ MODULE m_mep
  end type mep_type
 
 !Public constants
- integer, public :: NEB_CELL_ALGO_NONE   = 0
- integer, public :: NEB_CELL_ALGO_GSSNEB = 1
- integer, public :: NEB_CELL_ALGO_VCNEB  = 2
+ !NEB algorithms
+ integer, public :: NEB_ALGO_STANDARD     = 0
+ integer, public :: NEB_ALGO_IMPROVED_TAN = 1
+ integer, public :: NEB_ALGO_CINEB        = 2
+ !Variable-cell NEB algorithms
+ integer, public :: NEB_CELL_ALGO_NONE    = 0
+ integer, public :: NEB_CELL_ALGO_GSSNEB  = 1
+ integer, public :: NEB_CELL_ALGO_VCNEB   = 2
+ !String method algorithms
+ integer, public :: STRING_ALGO_ORIGINAL          = 0
+ integer, public :: STRING_ALGO_SIMPLIFIED_EQUAL  = 1
+ integer, public :: STRING_ALGO_SIMPLIFIED_ENERGY = 2
+ !MEP solvers
+ integer, public :: MEP_SOLVER_STEEPEST = 0
+ integer, public :: MEP_SOLVER_QUICKMIN = 1
+ integer, public :: MEP_SOLVER_LBFGS    = 2
+ integer, public :: MEP_SOLVER_GBFGS    = 3
+ integer, public :: MEP_SOLVER_RK4      = 4
 !!***
 
 CONTAINS
