@@ -722,6 +722,12 @@ AC_DEFUN([ABI_GPU_DETECT],[
   # Transmit the possible use of NVTX/ROCTX
   if test "${abi_gpu_nvtx_v3}" = "yes" -o "${abi_gpu_roctx}" = "yes"; then
     AC_DEFINE([HAVE_GPU_MARKERS],1,[Define to 1 if you have library for GPU range markers.])
+    if test "${abi_gpu_nvtx_v3}" = "yes"; then
+        AC_DEFINE([HAVE_GPU_MARKERS_NVTX],1,[Define to 1 if you have CUDA library for GPU range markers.])
+    fi
+    if test "${abi_gpu_roctx}" = "yes"; then
+        AC_DEFINE([HAVE_GPU_MARKERS_ROCTX],1,[Define to 1 if you have ROCTX library for GPU range markers.])
+    fi
   fi
 
   # Output final flavor
@@ -734,7 +740,7 @@ AC_DEFUN([ABI_GPU_DETECT],[
   sd_gpu_libs="${sd_gpu_libs} ${abi_gpu_libs}"
 
   # Inform Automake
-  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none"])
+  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none" -o "${abi_gpu_markers_enable}" = "yes";])
   AM_CONDITIONAL(DO_BUILD_46_MANAGE_CUDA,[test "${abi_gpu_flavor}" = "cuda-double" -o "${abi_gpu_flavor}" = "cuda-single"])
   AM_CONDITIONAL(DO_BUILD_NVTX,[test "${abi_gpu_nvtx_v3}" = "yes"])
 
