@@ -3434,7 +3434,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  prtevk
-!  Not compatible with parallelization over perturbation if netcdf doesnt have MPI
+!  Not compatible with parallelization over perturbations if netcdf doesnt have MPI
    if (dt%prtevk==1.and.dt%paral_rf==1) then
 #ifndef HAVE_NETCDF_MPI
      write(msg,'(8a)')ch10,&
