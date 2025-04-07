@@ -38,7 +38,7 @@ module m_longwave
 
  use m_pspini,      only : pspini
  use m_common,      only : setup1
- use m_pawfgr,      only : pawfgr_type, pawfgr_init
+ use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_pawrhoij,    only : pawrhoij_type
  use m_paw_dmft,    only : paw_dmft_type
  use m_pawrad,      only : pawrad_type
@@ -801,7 +801,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_SFREE(ylmgr)
  ABI_SFREE(blkflg_car)
  ABI_SFREE(d3etot_car)
- ABI_SFREE(ncorespl)
+ ABI_FREE(ncorespl)
+ call pawfgr_destroy(pawfgr)
 
  ! Clean the header
  call hdr%free()
