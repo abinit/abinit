@@ -774,6 +774,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(doccde)
  ABI_FREE(eigen0)
  ABI_FREE(cg)
+ ABI_FREE(ph1d)
  ABI_SFREE(ffnl)
  ABI_FREE(indsym)
  ABI_FREE(irrzon)
