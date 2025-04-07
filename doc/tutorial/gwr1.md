@@ -158,6 +158,8 @@ ngkpt2   4 4 4
 ngkpt3   6 6 6
 ```
 
+<!-- Since we need to fix k-points at first step of convergency test, I think there is no need to calculate multi k-points here.-->
+
 This allows us to perform convergence studies with respect to the BZ sampling.
 Let us recall that shifted $\kk$-meshes **are not supported** by GWR.
 In another words, [[nshiftk]] must be set to 1 with [[shiftk]] = 0 0 0 when producing the WFK file.
@@ -542,6 +544,7 @@ The recommended procedure for converging GWR gaps is therefore as follows:
 2) Convergence the QP gaps wrt [[ecutwfn]]
 
 3) Convergen wrt [[nband]], [[ecuteps]]
+<!-- How about ecutsigx? -->
 
 If the number of [[nband]] states in the WFK file is not large enough,
 go back to point 1) and generate a new WFK with more bands else proceeed with the next step.
@@ -555,7 +558,8 @@ you may start to increase [[gwr_ntau]]while adjusting the number of MPI processe
 5) Convergence wrt [[ngkpt]]:
 
 Finally, refine the BZ sampling to ensure full convergence.
-Make sure that all these $kk$-meshes containg the points you are trying to converge.
+Make sure that all these $\kk$-meshes containg the points you are trying to converge.
+<!-- Which will need restart HDIAGO.-->
 
 5) Convergence wrt [[gwr_boxcutmin]]:
 
@@ -921,6 +925,7 @@ This is done in the following input:
 
 {% dialog tests/tutorial/Input/tgwr_5.abi %}
 
+<!-- gw_qprange is positive in tgwr_5.abi -->
 Note the usage of [[gw_qprange]] = `-NUM` and [[gwr_sigma_algo]] 1 to activate
 the supercell algorithm for $\Sigma_\nk$, the most efficient algorithm when all the $\kk$-points in $\Sigma_\nk$ are wanted.
 To keep the wall-time at a reasonable level, we use a WFK file with 2x2x2 $\kk$-mesh,
