@@ -90,7 +90,7 @@ module m_dfpt_loopert
  use m_cgprj,      only : ctocprj
  use m_symkpt,     only : symkpt
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 

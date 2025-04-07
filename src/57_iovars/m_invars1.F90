@@ -2736,9 +2736,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%postoldff=zero
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
+   dtsets(idtset)%prtcurrent=0
    dtsets(idtset)%prtden=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
    dtsets(idtset)%prtebands=1 ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtevk=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
    dtsets(idtset)%prtocc=0
@@ -2805,11 +2807,18 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_exp_order=4
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
-   dtsets(idtset)%td_scnmax=3
-   dtsets(idtset)%td_prtstr=10
+   dtsets(idtset)%td_scnmax=6
+   dtsets(idtset)%td_prtstr=1
    dtsets(idtset)%td_restart=0
-   dtsets(idtset)%td_propagator=1
+   dtsets(idtset)%td_propagator=0
    dtsets(idtset)%td_scthr=1e-7_dp
+   dtsets(idtset)%td_ef_type=0
+   dtsets(idtset)%td_ef_induced_vecpot=0
+   dtsets(idtset)%td_ef_tzero=zero
+   dtsets(idtset)%td_ef_tau=1000.0_dp
+   dtsets(idtset)%td_ef_pol=[1.0_dp,0.0_dp,0.0_dp]
+   dtsets(idtset)%td_ef_lambda=10000.0_dp
+   dtsets(idtset)%td_ef_ezero=0.1_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
    dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
