@@ -47,7 +47,7 @@ module m_dfpt_vtowfk
  use m_getghc,       only : getgsc, getghc_nucdip, getghc_mGGA
  use m_getgh1c,      only : getgh1ndc, getgh1c_mGGA
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
