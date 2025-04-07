@@ -740,7 +740,7 @@ AC_DEFUN([ABI_GPU_DETECT],[
   sd_gpu_libs="${sd_gpu_libs} ${abi_gpu_libs}"
 
   # Inform Automake
-  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none" -o "${abi_gpu_markers_enable}" = "yes";])
+  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none" -o "${abi_gpu_markers_enable}" = "yes"])
   AM_CONDITIONAL(DO_BUILD_46_MANAGE_CUDA,[test "${abi_gpu_flavor}" = "cuda-double" -o "${abi_gpu_flavor}" = "cuda-single"])
   AM_CONDITIONAL(DO_BUILD_NVTX,[test "${abi_gpu_nvtx_v3}" = "yes"])
 
