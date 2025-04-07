@@ -68,6 +68,8 @@ if(ABINIT_ENABLE_LIBTETRA)
   set(HAVE_LIBTETRA_ABINIT 1)
 endif()
 
+option(ABINIT_ENABLE_TRIQS "Enable support for TRIQS (default OFF)" OFF)
+
 option(ABINIT_ENABLE_PYTHON_INVOCATION "Enable python invocation (default OFF)" OFF)
 if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(HAVE_PYTHON_INVOCATION 1)
