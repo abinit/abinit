@@ -122,7 +122,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
  integer,intent(in) :: ln_size,lmn_size
  integer,intent(in) :: orbitals(ln_size)
 !scalars
- integer,allocatable,intent(out) :: indlmn(:,:)
+ integer,allocatable,intent(inout) :: indlmn(:,:)
  integer, intent(in), optional :: kappa(ln_size)
 
 !Local variables ------------------------------
@@ -136,6 +136,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
  if(.not.present(kappa)) then 
    LIBPAW_ALLOCATE(nprj,(0:MAXVAL(orbitals)))
    LIBPAW_ALLOCATE(indlmn,(6,lmn_size))
+   indlmn=0
    ilmn=0; iln=0; nprj=0
    do ib=1,ln_size
      il=orbitals(ib)

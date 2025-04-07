@@ -3109,7 +3109,7 @@ end subroutine paw_setup_copy
            call bound_deriv(phitmp(1:mesh_size,iln),radmesh(imeshae),mesh_size,yp1,ypn)
            call paw_spline(radmesh(imeshae)%rad(1:mesh_size),phitmp(1:mesh_size,iln),mesh_size,yp1,ypn,work(1:mesh_size))
            call paw_splint(mesh_size,radmesh(imeshae)%rad(1:mesh_size),phitmp(1:mesh_size,iln),work(1:mesh_size),&
-&                          ms,pawrad%rad(1:ir),Atm%phi(1:ms,iln,isppol))
+&                          ms,pawrad%rad(1:ms),Atm%phi(1:ms,iln,isppol))
            LIBPAW_DEALLOCATE(work)
            Atm%phi(1:ms,iln,isppol)=Atm%phi(1:ms,iln,isppol)*pawrad%rad(1:ms)
          else
