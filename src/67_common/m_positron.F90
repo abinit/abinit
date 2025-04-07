@@ -2100,10 +2100,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
        call pawpsp_init_core(atm,psp_filename=trim(filpsp(itypat)),radmesh=pawrad(itypat))
        indlmncor(itypat)%value=atm%indlmn
        lmncmax(itypat)=atm%lmn_size
+       write(*,*) 'TEST 1', atm%lmn_size,size(indlmncor(itypat)%value(1,:))
        nphicor(itypat)=atm%ln_size
        phicor(itypat)%value=atm%phi(:,:,1)
+       call destroy_atomorb(atm)
      end do
-     call destroy_atomorb(atm)
      ABI_FREE(atm)
    end if
    if (mpi_enreg%nproc_cell>1) then
@@ -2120,8 +2121,9 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      lmn_size = pawtab(itypat)%lmn_size
      lmn2_size = pawtab(itypat)%lmn2_size
      basis_size = pawtab(itypat)%basis_size
-
      lmn_size_c=lmncmax(itypat)
+     write(*,*) 'TEST',lmn_size_c
+     write(*,*) indlmncor(itypat)%value
      llmax=maxval(indlmncor(itypat)%value(1,1:lmn_size_c))
      l_size_max=max(l_size,2*llmax+1)
 
