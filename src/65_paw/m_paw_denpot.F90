@@ -700,9 +700,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
    end if ! valence-only XC potentials
 
    ABI_FREE(vxc_tmp)
-   if (usekden==1) then
-     ABI_FREE(vxctau_tmp)
-   end if
+   ABI_FREE(vxctau_tmp)
    ABI_FREE(kxc_tmp)
    ABI_FREE(k3xc_tmp)
 

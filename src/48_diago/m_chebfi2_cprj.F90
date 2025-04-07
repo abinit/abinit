@@ -718,7 +718,7 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xXColsRows,Results2%self,comm_loc=xmpi_comm_null)
  if (chebfi%xg_nonlop%paw) then
    call xg_init(Results_work, space_res, chebfi%bandpp, 1)
-   call xg_nonlop_colwiseXAX(chebfi%xg_nonlop,chebfi%xg_nonlop%Sij,chebfi%cprjX,chebfi%cprj_work%self,Results_work%self)
+   call xg_nonlop_colwiseXAX(chebfi%xg_nonlop,chebfi%xg_nonlop%Sij%self,chebfi%cprjX,chebfi%cprj_work%self,Results_work%self)
    call xgBlock_add(Results2%self,Results_work%self)
    call xg_free(Results_work)
  end if
@@ -1075,9 +1075,9 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
 
  occ_reshaped = occ
  shift=xmpi_comm_rank(chebfi%spacecom)*bandpp
- call xgBlock_reshape(occ_reshaped,(/ 1, chebfi%neigenpairs /))
+ call xgBlock_reshape(occ_reshaped,1,chebfi%neigenpairs)
  call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+shift)
- call xgBlock_reshape(occBlock,(/ bandpp, 1 /))
+ call xgBlock_reshape(occBlock,bandpp,1)
  if (chebfi%nbdbuf==-101) then
    call xgBlock_apply_diag(residu%self,occBlock,1)
  end if
