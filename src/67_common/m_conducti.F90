@@ -979,7 +979,7 @@ end subroutine conducti_paw
  real(dp) :: del_sig,del_emis,deltae,diff_occ,ecut,fermie
  real(dp) :: omin,omax,omin_sig,omax_sig,omin_emis,omax_emis
  real(dp) :: oml,dom,dom_ctr,dom_max,dom_tan1,dom_tan2,docc_deig
- real(dp) :: Tatm,tsmear,ucvol,dirac,diff_eig,ohmtosec=9.d11
+ real(dp) :: Tatm,tsmear,ucvol,dirac,diff_eig
  character(len=fnlen) :: filnam2,filnam_gen
  character(len=500) :: msg
  character(len=20) :: str_atm
@@ -2500,7 +2500,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
 !Local variables-------------------------------
 !scalars
  integer :: ii,ip,eps_unt,abs_unt
- real(dp),parameter :: del=0.001_dp,ohmtosec=9.d11
+ real(dp),parameter :: del=0.001_dp
  real(dp) :: dx,eps1,eps2,komega,pole,refl_s,refl_p,sigma2,xsum,ff,ffp,ffpp,abso,sigma1
  character(len=500) :: msg
 !arrays
