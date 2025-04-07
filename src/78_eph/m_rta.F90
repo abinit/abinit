@@ -1794,7 +1794,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  real(dp),target,allocatable :: ibte_sigma(:,:,:,:,:), ibte_mob(:,:,:,:,:), ibte_rho(:,:,:)
  real(dp),target,allocatable :: ibte_seebeck(:,:,:,:), ibte_kappa(:,:,:,:), ibte_pi(:,:,:,:)
  real(dp),allocatable :: grp_srate(:,:,:,:), fkn_in(:,:,:,:), fkn_out(:,:,:,:), fkn_efield(:,:,:,:), fkn_serta(:,:,:,:), taukn_serta(:,:,:,:)
- real(dp) :: fact_sigma, fact_sbk
+ real(dp) :: fact_sbk
  character(len=2) :: components(3)
  real(dp), allocatable :: sig_gen(:,:,:,:), mob_gen(:,:,:,:), sig_l21(:,:,:,:), sig_l22(:,:,:,:), mob_21(:,:,:,:), mob_22(:,:,:,:)
  type :: scatk_t
