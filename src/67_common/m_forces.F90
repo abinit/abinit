@@ -51,7 +51,7 @@ module m_forces
  use m_mkcore,           only : mkcore, mkcore_alt
  use m_mkcore_wvl,       only : mkcore_wvl
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 

@@ -29,6 +29,7 @@ module m_rttddft_properties
  use m_bandfft_kpt,      only: bandfft_kpt_type
  use m_cgprj,            only: ctocprj
  use m_cgtools,          only: dotprod_g
+ use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
  use m_energies,         only: energies_type
  use m_fourier_interpol, only: transgrid
@@ -37,6 +38,7 @@ module m_rttddft_properties
  use m_nonlop,           only: nonlop
  use m_pawcprj,          only: pawcprj_type, pawcprj_alloc, pawcprj_get, &
                              & pawcprj_free, pawcprj_mpi_allgather
+ use m_paw_optics,       only: optics_paw
  use m_paw_mkrho,        only: pawmkrho
  use m_paw_occupancies,  only: pawmkrhoij
  use m_pawrhoij,         only: pawrhoij_type, pawrhoij_free, &
@@ -58,6 +60,7 @@ module m_rttddft_properties
  public :: rttddft_calc_enl
  public :: rttddft_calc_kin
  public :: rttddft_calc_occ
+ public :: rttddft_calc_current
 !!***
 
 contains
@@ -87,9 +90,9 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  !Arguments ------------------------------------
  !scalars
  type(tdks_type),            intent(inout) :: tdks
- type(dataset_type),         intent(inout) :: dtset
+ type(dataset_type),         intent(in)    :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
- type(pseudopotential_type), intent(inout) :: psps
+ type(pseudopotential_type), intent(in)    :: psps
 
  !Local variables-------------------------------
  !scalars
@@ -123,7 +126,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
    ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,           &
-              & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
+              & dtset%istwfk,tdks%kg,tdks%tdef%kpa,tdks%mcg,tdks%mcprj,dtset%mgfft,    &
               & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
               & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
               & tdks%npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,psps%ntypat,       &
@@ -143,7 +146,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    end if
 
    ! 3-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
-   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,       &
+   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj_srt,dtset%istwfk,   &
                  & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem,    &
                  & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspden,          &
                  & dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft, &
@@ -162,9 +165,9 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
                & dtset%typat,tdks%ucvol,dtset%usewvl,tdks%xred,pawnhat=tdks%nhat, &
                & rhog=tdks%rhog)
 
-   ! 6-Take care of kinetic energy density
+   ! 5-Take care of kinetic energy density
    if(dtset%usekden==1)then
-     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
+     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,  &
               & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
 
@@ -186,12 +189,12 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  else
 
    ! 1-Compute density from WFs
-   call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &
+   call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,    &
             & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,tdks%rhog,tdks%rhor, &
             & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs)
    ! 2-Take care of kinetic energy density
    if(dtset%usekden==1)then
-     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &
+     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,    &
               & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,tdks%taug,tdks%taur, &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
    end if
@@ -201,7 +204,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 end subroutine rttddft_calc_density
 !!***
 
-!!****f* m_rttddft_properties/rttddft_calc_energy
+!!****f* m_rttddft_properties/rttddft_calc_etot
 !!
 !! NAME
 !!  rttddft_calc_energy
@@ -224,7 +227,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
 
  !Arguments ------------------------------------
  !scalars
- type(dataset_type),  intent(inout) :: dtset
+ type(dataset_type),  intent(in)    :: dtset
  type(energies_type), intent(inout) :: energies
  real(dp),            intent(out)   :: etotal
  !arrays
@@ -242,11 +245,11 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
       & + energies%e_xc          &
       & + energies%e_localpsp    &   
       & + energies%e_corepsp     &
-      & + energies%e_entropy     &
       & + energies%e_ewald       &
       & + energies%e_vdw_dftd    &
       & + energies%e_nlpsp_vfock &
       & + energies%e_paw         
+!     & + energies%e_entropy
 !FB: @MT Should one add the last e_paw contribution or not?
 !FB: Seeems like all the other contributions are not relevant here @MT?
 !     & + energies%e_chempot     &
@@ -367,18 +370,18 @@ subroutine rttddft_calc_kin(kin,cg,dtset,ham_k,nband,npw,nspinor,occ0,wk,mpi_enr
 
  !Arguments ------------------------------------
  !scalars
- integer,                   intent(in)    :: nband
- integer,                   intent(in)    :: npw
- integer,                   intent(in)    :: nspinor
- real(dp),                  intent(in)    :: wk
- type(dataset_type),        intent(inout) :: dtset
- type(gs_hamiltonian_type), intent(in)    :: ham_k
- type(MPI_type),            intent(in)    :: mpi_enreg
- type(bandfft_kpt_type),    intent(in)    :: bandfft
+ integer,                         intent(in)    :: nband
+ integer,                         intent(in)    :: npw
+ integer,                         intent(in)    :: nspinor
+ real(dp),                        intent(in)    :: wk
+ type(dataset_type),              intent(in)    :: dtset
+ type(gs_hamiltonian_type),       intent(in)    :: ham_k
+ type(MPI_type),                  intent(in)    :: mpi_enreg
+ type(bandfft_kpt_type), pointer, intent(in)    :: bandfft
  !arrays
- real(dp),                  intent(in)    :: cg(2,npw*nspinor*nband)
- real(dp),                  intent(inout) :: kin
- real(dp),                  intent(in)    :: occ0(nband)
+ real(dp),                        intent(in)    :: cg(2,npw*nspinor*nband)
+ real(dp),                        intent(inout) :: kin
+ real(dp),                        intent(in)    :: occ0(nband)
 
  !Local variables-------------------------------
  !scalars
@@ -498,11 +501,11 @@ end subroutine rttddft_calc_enl
 !! FUNCTION
 !!  Computes occupations at time t from cg(t), cg0 and occ0
 !!  In NC:
-!!    f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\phi_m(0)|\phi_n(t)>
+!!    f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\psi_m(0)|\psi_n(t)>
 !!  In PAW:
-!!    f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\phi_m(0)|S|\phi_n(t)>
-!!               = \sum_{m} f_{m,k}(0) [ <\phi_m(0)|\phi_n(t)> +
-!!                 \sum_{i} <\phi_m(0)|p_{i}>\sum_jS_{i,j}<p_{j}|\phi_n(t)> ]
+!!    f_{n,k}(t) = \sum_{m} f_{m,k}(0) <\psi_m(0)|S|\psi_n(t)>
+!!               = \sum_{m} f_{m,k}(0) [ <\psi_m(0)|\psi_n(t)> +
+!!                 \sum_{i} <\psi_m(0)|p_{i}>\sum_jS_{i,j}<p_{j}|\psi_n(t)> ]
 !!
 !! INPUTS
 !!  cg <real(2,npw*nspinor*nband)> = the wavefunction coefficients
@@ -535,13 +538,13 @@ subroutine rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg,nband_k
  integer,                   intent(in)    :: nband_k
  integer,                   intent(in)    :: npw_k
  integer,                   intent(in)    :: nspinor
- type(dataset_type),        intent(inout) :: dtset
- type(gs_hamiltonian_type), intent(inout) :: ham_k
- type(MPI_type),            intent(inout) :: mpi_enreg
- type(tdks_type), target,   intent(inout) :: tdks
+ type(dataset_type),        intent(in)    :: dtset
+ type(gs_hamiltonian_type), intent(in)    :: ham_k
+ type(MPI_type),            intent(in)    :: mpi_enreg
+ type(tdks_type), target,   intent(in)    :: tdks
  !arrays
  real(dp),                  intent(inout) :: cg(2,npw_k*nspinor*nband_k)
- real(dp),                  intent(inout) :: cg0(2,npw_k*nspinor*nband_k)
+ real(dp),                  intent(in)    :: cg0(2,npw_k*nspinor*nband_k)
  real(dp),                  intent(out)   :: occ(nband_k)
  real(dp),                  intent(in)    :: occ0(nband_k)
 
@@ -691,10 +694,10 @@ subroutine rttddft_calc_ent(entropy,dtset,occ)
 
  !Arguments ------------------------------------
  !scalars
- real(dp),           intent(out)   :: entropy
- type(dataset_type), intent(inout) :: dtset
+ real(dp),           intent(out) :: entropy
+ type(dataset_type), intent(in)  :: dtset
  !arrays
- real(dp),           intent(in)    :: occ(:)
+ real(dp),           intent(in)  :: occ(:)
 
  !Local variables-------------------------------
  !scalars
@@ -722,6 +725,92 @@ subroutine rttddft_calc_ent(entropy,dtset,occ)
  end do
 
 end subroutine rttddft_calc_ent
+!!***
+
+!!****f* m_rttddft_properties/rttddft_calc_current
+!!
+!! NAME
+!!  rttddft_calc_current
+!!
+!! FUNCTION
+!!  Computes macroscopic current density
+!!  In NC:
+!!    J(t) = -1/Omega Im[\sum_{n,k} f_{nk}(0) <\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]  - A N_v/Omega
+!!           + Gauge-dependent terms? 
+!!  In PAW:
+!!    J(t) = -1/Omega Im[ \sum_{n,k} f_{nk}(0) <\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}> +
+!!                        \sum_{aij} \rho_{aij} <\phi_{aij}|\nabla|\phi_{aij}> - 
+!!                        \sum_{aij} \rho_{aij} <\tilde{\phi}_{aij}|\nabla|\tilde{\phi}_{aij}> ]  
+!!           - A/Omega \int \tilde{n}(r,t)dr
+!! INPUTS
+!!  tdks <type(tdks_type)> = Main RT-TDDFT object
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  mpi_enreg <MPI_type> = MPI-parallelisation information
+!!
+!! OUTPUT
+!!  current = the macroscopic current
+!!
+!! NOTES
+!!  Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>] = <\tilde{psi}_{nk}|-i\nabla|\tilde{psi}_{nk}> 
+!!
+!! SOURCE
+subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
+
+ implicit none
+
+ !Arguments ------------------------------------
+ !scalars
+ type(tdks_type), target,    intent(inout) :: tdks
+ type(dataset_type),         intent(in)    :: dtset
+ type(datafiles_type),       intent(in)    :: dtfil
+ type(pseudopotential_type), intent(in)    :: psps
+ type(MPI_type),             intent(in)    :: mpi_enreg
+
+ !Local variables-------------------------------
+ !scalars
+ integer  :: iband, ikpt, isppol, bdtot_index, nband_k
+ real(dp) :: current_k(3)
+ !arrays
+ real(dp), target :: psinablapsi(2,3,dtset%mband,dtset%nkpt)
+
+! ***********************************************************************
+
+ if (psps%usepaw==1) then
+   ! 1 - Computes <\psi_{nk}|v|\psi_{nk}> = <\psi_{nk}|-i\nabla|\psi_{nk}> = Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]
+   call optics_paw(tdks%atindx1,tdks%cg,tdks%cprj,tdks%dimcprj,dtfil,dtset,tdks%eigen,tdks%gprimd,tdks%hdr, &
+                 & tdks%kg,dtset%mband,tdks%mcg,tdks%mcprj,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,     &
+                 & dtset%natom,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%pawang,tdks%pawrad,tdks%pawrhoij,   &
+                 & tdks%pawtab,dtset%znucl,psinablapsi)
+ 
+   ! 2 - Sum over bands and k-points
+   tdks%current = 0.0_dp
+   bdtot_index=0
+   !Loop over spins
+   do isppol=1, dtset%nsppol
+      !Loop over kpoints
+      do ikpt = 1, dtset%nkpt
+         current_k = 0.0_dp
+         nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+         do iband = 1, nband_k
+            current_k(1) = current_k(1) + tdks%occ0(bdtot_index+iband)*psinablapsi(1,1,iband,ikpt)
+            current_k(2) = current_k(2) + tdks%occ0(bdtot_index+iband)*psinablapsi(1,2,iband,ikpt)
+            current_k(3) = current_k(3) + tdks%occ0(bdtot_index+iband)*psinablapsi(1,3,iband,ikpt)
+         end do
+         tdks%current(:,isppol) = tdks%current(:,isppol) + dtset%wtk(ikpt)*current_k(:)
+         bdtot_index = bdtot_index + nband_k
+      end do !nkpt
+
+      ! 3 - Add last contribution from vector potential times integral of the density
+      tdks%current(:,isppol) = tdks%current(:,isppol) + & 
+                             & tdks%tdef%vecpot(:)*sum(tdks%rhor(:,isppol)-tdks%nhat(:,isppol))*tdks%ucvol/tdks%nfftf
+
+      tdks%current(:,isppol) = -tdks%current(:,isppol)/tdks%ucvol
+
+   end do !nsspol
+
+ end if
+
+end subroutine rttddft_calc_current
 !!***
 
 end module m_rttddft_properties

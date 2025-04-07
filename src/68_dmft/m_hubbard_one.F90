@@ -25,10 +25,17 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 MODULE m_hubbard_one
 
 
  use defs_basis
+
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -98,9 +105,9 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
 !Local variables ------------------------------
  type  :: level2_type
   integer, pointer :: repart(:,:) => null()
-  integer, pointer :: ocp(:,:) => null()
-  integer, pointer :: transition(:,:) => null()
-  integer, pointer :: transition_m(:,:) => null()
+  integer, ABI_CONTIGUOUS pointer :: ocp(:,:) => null()
+  integer, ABI_CONTIGUOUS pointer :: transition(:,:) => null()
+  integer, ABI_CONTIGUOUS pointer :: transition_m(:,:) => null()
  end type level2_type
  type  :: level1_type
   real(dp), pointer :: config(:) => null()
@@ -405,9 +412,11 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !Local variables ------------------------------
 ! scalars
  integer :: cnk,iacc,iatom,iconfig,ielec,ifreq,ilevel,im,im1,isppol,ispinor,itrans,jconfig,jelec
- integer :: lpawu,m_temp,nconfig,ndim,nelec,nlevels,nspinor,nsppol,occupied_level,sum_test
+ integer :: lpawu,m_temp,nconfig,ndim,nelec,nlevels,nspinor,nsppol,occupied_level,sum_test,gpu_option
+ integer :: nconfig_next
  integer, allocatable :: occup(:,:),nconfig_nelec(:)
  character(len=500) :: message
+ integer, ABI_CONTIGUOUS pointer :: ocp(:,:),ocp_next(:,:),transition(:,:),transition_m(:,:)
 ! arrays
  type(green_type) :: green_hubbard_realw
  type(level2_type), allocatable :: occ_level(:)
@@ -419,6 +428,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  real(dp), allocatable :: elevels(:)
  real(dp) :: emax,emin,eshift,prtopt, Ej_np1, Ei_n,beta,maxarg_exp,tmp
 !************************************************************************
+   ABI_NVTX_START_RANGE(NVTX_DMFT_HUBBARD_ONE)
    maxarg_exp=300
 
 !  hu is not used anymore.
@@ -432,6 +442,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
    prtopt=1
    beta=one/paw_dmft%temp
    call init_green(green_hubbard_realw,paw_dmft,opt_oper_ksloc=2,wtype=green_hubbard%w_type) ! initialize only matlu
+   gpu_option=paw_dmft%gpu_option
 
    do iatom=1,cryst_struc%natom
      lpawu=paw_dmft%lpawu(iatom)
@@ -623,36 +634,84 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      Built transitions between configurations
 !      ===================================
        do nelec=0,nlevels-1
-         do iconfig=1,nconfig_nelec(nelec)
-           itrans=0 ! transition from iconfig
-           do jconfig=1, nconfig_nelec(nelec+1)
-             sum_test=0
-             do ilevel=1,nlevels
-!              test if their is one electron added to the starting configuration
-               sum_test=sum_test + &
-&               (occ_level(nelec+1)%ocp(jconfig,ilevel)- occ_level(nelec)%ocp(iconfig,ilevel))**2
-!              save the level for the electron added
-               if(occ_level(nelec+1)%ocp(jconfig,ilevel)==1.and.occ_level(nelec)%ocp(iconfig,ilevel)==0) then
-                 m_temp=ilevel
+
+
+
+         nconfig      = nconfig_nelec(nelec)
+         nconfig_next = nconfig_nelec(nelec+1)
+         transition   => occ_level(nelec)%transition
+         transition_m => occ_level(nelec)%transition_m
+         ocp          => occ_level(nelec)%ocp
+         ocp_next     => occ_level(nelec+1)%ocp
+
+         if(gpu_option==ABI_GPU_DISABLED) then
+           !$OMP PARALLEL DO PRIVATE(iconfig,jconfig,itrans,sum_test,m_temp)
+           do iconfig=1,nconfig
+             itrans=0 ! transition from iconfig
+             do jconfig=1, nconfig_next
+               sum_test=0
+               do ilevel=1,nlevels
+  !              test if their is one electron added to the starting configuration
+                 sum_test=sum_test + &
+  &               (ocp_next(jconfig,ilevel)-ocp(iconfig,ilevel))**2
+  !              save the level for the electron added
+                 if(ocp_next(jconfig,ilevel)==1.and.ocp(iconfig,ilevel)==0) then
+                   m_temp=ilevel
+                 end if
+               end do ! ilevel
+               if(sum_test==1) then
+                 itrans=itrans+1
+                 !if(itrans>nlevels-nelec) then
+                 !  write(message,'(a,4i4)') "BUG: itrans is to big in hubbard_one",itrans,iconfig,jconfig,ilevel
+                 !  call wrtout(std_out,message,'COLL')
+                 !end if
+                 transition(iconfig,itrans)=jconfig  ! jconfig=config(n+1) obtained after transition
+                 transition_m(iconfig,itrans)=m_temp  !  level to fill to do the transition
                end if
-             end do ! ilevel
-             if(sum_test==1) then
-               itrans=itrans+1
-               if(itrans>nlevels-nelec) then
-                 write(message,'(a,4i4)') "BUG: itrans is to big in hubbard_one",itrans,iconfig,jconfig,ilevel
-                 call wrtout(std_out,message,'COLL')
+             end do ! jconfig
+           end do ! iconfig
+         else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET PARALLEL DO PRIVATE(iconfig,jconfig,itrans,sum_test,m_temp) &
+           !$OMP MAP(tofrom:transition,transition_m) MAP(to:ocp,ocp_next)
+           do iconfig=1,nconfig
+             itrans=0 ! transition from iconfig
+             do jconfig=1, nconfig_next
+               sum_test=0
+               do ilevel=1,nlevels
+  !              test if their is one electron added to the starting configuration
+                 sum_test=sum_test + &
+  &               (ocp_next(jconfig,ilevel)-ocp(iconfig,ilevel))**2
+  !              save the level for the electron added
+                 if(ocp_next(jconfig,ilevel)==1.and.ocp(iconfig,ilevel)==0) then
+                   m_temp=ilevel
+                 end if
+               end do ! ilevel
+               if(sum_test==1) then
+                 itrans=itrans+1
+                 !if(itrans>nlevels-nelec) then
+                 !  write(message,'(a,4i4)') "BUG: itrans is to big in hubbard_one",itrans,iconfig,jconfig,ilevel
+                 !  call wrtout(std_out,message,'COLL')
+                 !end if
+                 transition(iconfig,itrans)=jconfig  ! jconfig=config(n+1) obtained after transition
+                 transition_m(iconfig,itrans)=m_temp  !  level to fill to do the transition
                end if
-               occ_level(nelec)%transition(iconfig,itrans)=jconfig  ! jconfig=config(n+1) obtained after transition
-               occ_level(nelec)%transition_m(iconfig,itrans)=m_temp  !  level to fill to do the transition
-             end if
-           end do ! jconfig
-           if(prtopt>3) then
+             end do ! jconfig
+           end do ! iconfig
+#endif
+         end if
+
+
+
+         if(prtopt>3) then
+           do iconfig=1,nconfig
              write(std_out,'(a,2i5,a,18i5)') "occ_level", nelec,&
-&             iconfig,"  :",(occ_level(nelec)%transition(iconfig,itrans),itrans=1,nlevels-nelec)
+&             iconfig,"  :",(transition(iconfig,itrans),itrans=1,nlevels-nelec)
              write(std_out,'(a,2i5,a,18i5)') "electron added", nelec,iconfig,&
-&             "  :",(occ_level(nelec)%transition_m(iconfig,itrans),itrans=1,nlevels-nelec)
-           end if
-         end do ! iconfig
+&             "  :",(transition_m(iconfig,itrans),itrans=1,nlevels-nelec)
+           end do
+         end if
+
        end do ! nelec
 
 !      ===================================
@@ -751,6 +810,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
      end if
    end do
    call destroy_green(green_hubbard_realw)
+
+   ABI_NVTX_END_RANGE()
 
  end subroutine green_atomic_hubbard
 !!***

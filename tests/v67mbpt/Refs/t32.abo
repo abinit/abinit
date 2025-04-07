@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.6.2 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h12 )
+.Starting date : Fri 28 Mar 2025.
+- ( at 11h46 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t32.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_intel-debug/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t32.abi
 - output file    -> t32.abo
 - root for input  files -> t32i
 - root for output files -> t32o
@@ -198,8 +198,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_intel-debug/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_intel-debug/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -376,11 +376,11 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Writing KS-RPA macroscopic dielectric function without local fields to file: t32o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t32o_DS1_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 170 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 172 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 178 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 172 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 170 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 174 iterations.
  Writing EXC Macroscopic dielectric function to file: t32o_DS1_EXC_MDF
 
  Macroscopic dielectric function:
@@ -611,10 +611,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.7
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.6  wall=          2.7
+.Delivered   5 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.8  wall=          2.9
