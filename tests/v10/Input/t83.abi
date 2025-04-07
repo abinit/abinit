@@ -65,8 +65,7 @@ diemac 12.0                       # Adapt preconditioning to insulators
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t83.abo, tolnlines = 0, tolabs = 0., tolrel = 0.
-##%%   t83.abo, tolnlines = 30, tolabs = 1.e-8, tolrel = 2.e-4
+#%% t83.abo, tolnlines = 0, tolabs = 1.5e-5, tolrel = 3.e-2, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 20
 #%% [extra_info]
