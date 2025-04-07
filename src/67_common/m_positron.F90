@@ -2099,6 +2099,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      do itypat=1,dtset%ntypat
        call pawpsp_init_core(atm,psp_filename=trim(filpsp(itypat)),radmesh=pawrad(itypat))
        ABI_MALLOC(indlmncor(itypat)%value,(size(atm%indlmn(:,1)),atm%lmn_size)) 
+       ABI_MALLOC(phicor(itypat)%value,(atm%mesh_size,atm%ln_size))
        indlmncor(itypat)%value=atm%indlmn
        lmncmax(itypat)=atm%lmn_size
        nphicor(itypat)=atm%ln_size

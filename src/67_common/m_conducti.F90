@@ -200,6 +200,11 @@ contains
  call xmpi_bcast(omin,master,comm,mpierr)
  call xmpi_bcast(omax,master,comm,mpierr)
  call xmpi_bcast(mom,master,comm,mpierr)
+ call xmpi_bcast(broad_mode,master,comm,mpierr)
+ call xmpi_bcast(au_units,master,comm,mpierr)
+ call xmpi_bcast(phi,master,comm,mpierr)
+ call xmpi_bcast(add_drude,master,comm,mpierr)
+
 
 ! ---------------------------------------------------------------------------------
 ! Read OPT file
@@ -594,20 +599,30 @@ contains
              kin_fact=(eig0_k(iband)+eig0_k(jband))*half-(fermie+entropy)
              omega0=dabs(diff_occ)<tol12
              fact_omega0=merge(two,one,omega0)
+             !Evaluate sumrule
              if (.not.omega0) then
                docc_deig=dabs(diff_occ/diff_eig)
-             else
+             else if(add_drude==1) then
                docc_deig=dabs(doccde_k(iband))
+             else
+               docc_deig=zero
              endif
-             !Evaluate sumrule
-             if(add_drude==0.and.omega0) docc_deig=zero
              np_sum_k1=np_sum_k1 + two*dhdk2_g*docc_deig/fact_omega0
+             !
              do iom=1,mom
                oml=oml1(iom)
-               if(broad_mode==0) then
-                 dirac=dexp(-((abs(diff_eig)-oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(pi*two)) ! Take into account (n,m) and (m,n)
+               if (.not.omega0) then
+                 docc_deig=dabs(diff_occ/oml)
+               else if(add_drude==1) then
+                 docc_deig=dabs(doccde_k(iband))
                else
-                 dirac=dom/((abs(diff_eig)-oml)**2+dom**2)/pi
+                 docc_deig=zero
+               endif
+               if(broad_mode==0) then
+                 dirac=dexp(-((abs(diff_eig)-oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(pi*two))-& ! Take into account (n,m) and (m,n)
+&                      dexp(-((abs(diff_eig)+oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(pi*two))
+               else
+                 dirac=dom/((abs(diff_eig)-oml)**2+dom**2)/pi-dom/((abs(diff_eig)+oml)**2+dom**2)/pi
                endif
                sig=dhdk2_g*docc_deig*dirac*pi/(ucvol)
                kin11_k(iom)=kin11_k(iom)+sig
@@ -616,7 +631,7 @@ contains
                kin22_k(iom)=kin22_k(iom)+sig*kin_fact**2
                do l2=1,3
                  do l1=1,3
-                   cond_nd_k(l1,l2,iom)=cond_nd_k(l1,l2,iom)+dhdk2_r(l1,l2)*diff_occ*dirac*pi/(oml*ucvol)
+                   cond_nd_k(l1,l2,iom)=cond_nd_k(l1,l2,iom)+dhdk2_r(l1,l2)*docc_deig*dirac*pi/ucvol
                  end do
                end do
              end do
@@ -764,7 +779,7 @@ contains
    if(au_units>0) then
      write(ocond_unt,'(a)')'# omega(ua)       cond(ua)             thermal cond(ua)       thermopower(ua)'
    else
-     write(ocond_unt,'(a)')'# hbar*omega(eV) cond(ohm.cm)-1 thermal cond(W/m/K)   thermopower(microohm/K) '
+     write(ocond_unt,'(a)')'# hbar*omega(eV) cond(ohm.cm)-1 thermal cond(W/m/K)   thermopower(microvolt/K) '
    endif   
 
  end if ! me==master?
@@ -818,7 +833,7 @@ contains
  if(au_units==0) sig_abs=sig_abs*Ohmcm
  if(au_units==0) kin11=kin11*Ohmcm
  if(au_units==0) Kth=Kth*3.4057d9/Ha_K
- if(au_units==0) Stp=Stp*3.6753d-2
+ if(au_units==0) Stp=Stp*Ha_J/(Ha_K*e_CB)*10.0_dp**6
 
 
  if (me==master) then
@@ -1037,6 +1052,9 @@ end subroutine conducti_paw
  call xmpi_bcast(input_atm,master,comm,mpierr)
  call xmpi_bcast(dom_max,master,comm,mpierr)
  call xmpi_bcast(dom_ctr,master,comm,mpierr)
+ call xmpi_bcast(broad_mode,master,comm,mpierr)
+ call xmpi_bcast(au_units,master,comm,mpierr)
+
 
 ! ---------------------------------------------------------------------------------
 ! Read OPT2 file
@@ -1422,7 +1440,7 @@ end subroutine conducti_paw
                    diff_eig=eig0_k(iband)-energy_cor(icor,itypat_atnbr)
                    oml=oml_edge(icor,iom)
                    if(need_absorption) then
-                     docc_deig=abs(diff_occ/diff_eig)
+                     docc_deig=abs(diff_occ/oml)
                      if(broad_mode==1) then
                        dirac=dom_var1(icor,iom)/((diff_eig-oml)**2+(dom_var1(icor,iom))**2)/pi 
                      else
@@ -1432,7 +1450,7 @@ end subroutine conducti_paw
                      sigx1_k(icor,iom,iatom_atnbr)=sigx1_k(icor,iom,iatom_atnbr)+dhdk2_g(icor)*docc_deig*dirac*pi/ucvol
                    endif      
                    if (need_emissivity) then
-                     docc_deig=abs(occ_k(iband)/diff_eig)
+                     docc_deig=abs(occ_k(iband)/oml)
                      if(broad_mode==1) then
                        dirac=dom/((diff_eig-oml)**2+dom**2)/pi
                      else
@@ -1698,12 +1716,12 @@ end subroutine conducti_paw
        do iom=1,mom
          if(nsppol==1) then
            write(absx_unt,'(100(1x,e15.8))') &
-&          (oml_edge(icor,iom),sigx1_av(icor,iom,1)*ohmtosec*four_pi/(Sp_Lt_SI*100._dp),&
-&          sigx1(icor,iom,atnbr,1)*ohmtosec*four_pi/(Sp_Lt_SI*100._dp),icor=1,nphicor)
+&          (oml_edge(icor,iom),sigx1_av(icor,iom,1)/(Sp_Lt_SI*eps0),&
+&          sigx1(icor,iom,atnbr,1)/(Sp_Lt_SI*eps0),icor=1,nphicor)
          else
            write(absx_unt,'(100(1x,e15.8))') &
-&          (oml_edge(icor,iom),sum_spin_sigx1_av(icor,iom)*ohmtosec*four_pi/(Sp_Lt_SI*100._dp),&
-&          sum_spin_sigx1(icor,iom,atnbr)*ohmtosec*four_pi/(Sp_Lt_SI*100._dp),icor=1,nphicor)
+&          (oml_edge(icor,iom),sum_spin_sigx1_av(icor,iom)/(Sp_Lt_SI*eps0),&
+&          sum_spin_sigx1(icor,iom,atnbr)/(Sp_Lt_SI*eps0),icor=1,nphicor)
          endif
        end do
        close(absx_unt)
@@ -2499,9 +2517,9 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
    ABI_ERROR(msg)
  end if
  if(au_units==0) then
-   write(eps_unt,'(a)')'#energy (eV),sigma_1(Ohm-1cm-1),sigma_2(Ohm-1cm-1),epsilon_1,epsilon_2'
+   write(eps_unt,'(a)')'#energy (eV),sigma_1(Ohm-1cm-1),sigma_2(Ohm-1cm-1),epsilon_1(cgs),epsilon_2(cgs)'
  else
-   write(eps_unt,'(a)')'#energy (Ha),sigma_1(au),sigma_2(au),epsilon_1,epsilon_2'
+   write(eps_unt,'(a)')'#energy (Ha),sigma_1(au),sigma_2(au),epsilon_1(au),epsilon_2(au)'
  endif
 
  if (open_file(trim(filnam_out_sig)//'_abs',msg,newunit=abs_unt,status='replace',action="write")/=0) then
@@ -2542,6 +2560,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
      xsum=xsum+ff*log(abs((xx2-pole)/(xx1-pole)))+ffp*(xx2-xx1+(pole-xx)*log(abs((xx2-pole)/(xx1-pole))))+&
 & half*ffpp*((xx-pole)**2*log(abs((xx2-pole)/(xx1-pole)))+(xx2**2-xx1**2+(two*pole-four*xx)*(xx2-xx1))/two)
    enddo
+   if(pole<tol3) xsum=zero
 
 !  Calculate the derivated optical quantities and output the value
    sigma2=(-two/pi)*xsum
@@ -2552,15 +2571,15 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
    if(eps2**2 > eps1**2 * tol12)then
      nomega=sqrt(half*(eps1 + sqrt(eps1**2 + eps2**2)))
      komega=sqrt(half*(-eps1 + sqrt(eps1**2 + eps2**2)))
-     abso=four_pi*fcti(ip)/nomega
+     abso=four_pi*fcti(ip)/(nomega*Sp_Lt)
    else if(eps1>zero)then
      nomega=sqrt(half*(eps1 + sqrt(eps1**2 + eps2**2)))
      komega=half*abs(eps2/sqrt(eps1))
-     abso=four_pi*fcti(ip)/nomega
+     abso=four_pi*fcti(ip)/(nomega*Sp_Lt)
    else if(eps1<zero)then
      nomega=half*abs(eps2/sqrt(-eps1))
      komega=sqrt(half*(-eps1 + sqrt(eps1**2 + eps2**2)))
-     abso=two*sqrt(-eps1)*pole
+     abso=two*sqrt(-eps1)*pole/(Sp_Lt)
    end if
 
    epsc=cmplx(eps1,eps2,kind=dp)
@@ -2578,7 +2597,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
      pole=pole*Ha_eV
      sigma1=sigma1*Ohmcm
      sigma2=sigma2*Ohmcm
-     abso=abso*ohmtosec*Ohmcm/(Sp_Lt_SI*100._dp)
+     abso=abso*Ohmcm*Sp_Lt/(Sp_Lt_SI*four_pi*eps0)
    endif
    write(eps_unt,'(5e18.10)') pole,sigma1,sigma2,eps1,eps2
    write(abs_unt,'(6e18.10)') pole,nomega,komega,refl_s,refl_p,abso
