@@ -120,11 +120,10 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
          ])
      fi
   fi
-
   # Make sure configuration is correct
-  #if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
-  #  _SD_NETCDF_FORTRAN_CHECK_CONFIG
-  #fi
+  if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
+    _SD_NETCDF_FORTRAN_CHECK_CONFIG
+  fi
 
   # Adjust configuration depending on init type
   if test "${sd_netcdf_fortran_enable}" = "yes" -o "${sd_netcdf_fortran_enable}" = "auto"; then
@@ -167,15 +166,15 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
         ;;
 
       pkg)
-	NETCDF_FORTRAN_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf-fortran`
-        NETCDF_FORTRAN_FFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf-fortran`
-        NETCDF_FORTRAN_LIBS=`$PKG_CONFIG --libs netcdf-fortran`
-        sd_netcdf_fortran_cppflags="${NETCDF_FORTRAN_CPPFLAGS}"
-        sd_netcdf_fortran_cflags="${NETCDF_FORTRAN_CPPFLAGS}"
-        sd_netcdf_fortran_cxxflags="${NETCDF_FORTRAN_CPPFLAGS}"
-        sd_netcdf_fortran_fcflags="${NETCDF_FORTRAN_FFLAGS}"
-        sd_netcdf_fortran_ldflags="${NETCDF_FORTRAN_LIBS}"
-        sd_netcdf_fortran_libs="${NETCDF_FORTRAN_LIBS}"
+	TMP_NETCDF_FORTRAN_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf-fortran`
+        TMP_NETCDF_FORTRAN_FFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf-fortran`
+        TMP_NETCDF_FORTRAN_LIBS=`$PKG_CONFIG --libs netcdf-fortran`
+        sd_netcdf_fortran_cppflags="${TMP_NETCDF_FORTRAN_CPPFLAGS}"
+        sd_netcdf_fortran_cflags="${TMP_NETCDF_FORTRAN_CPPFLAGS}"
+        sd_netcdf_fortran_cxxflags="${TMP_NETCDF_FORTRAN_CPPFLAGS}"
+        sd_netcdf_fortran_fcflags="${TMP_NETCDF_FORTRAN_FFLAGS}"
+        sd_netcdf_fortran_ldflags="${TMP_NETCDF_FORTRAN_LIBS}"
+        sd_netcdf_fortran_libs="${TMP_NETCDF_FORTRAN_LIBS}"
         ;;
       *)
         AC_MSG_ERROR([invalid init type for the NetCDF Fortran interface: '${sd_netcdf_fortran_init}'])
@@ -466,7 +465,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_netcdf_fortran_vars}" -a ! "${sd_netcdf_fortran_init}" = "dir" ; then
+  if test -n "${tmp_netcdf_fortran_vars}" -a ! "${sd_netcdf_fortran_init}" = "dir" -a ! "${sd_netcdf_fortran_init}" = "pkg" ; then
     sd_netcdf_fortran_enable="yes"
     sd_netcdf_fortran_init="env"
     if test "${tmp_netcdf_fortran_invalid}" = "yes"; then
