@@ -875,7 +875,9 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
    ABI_ERROR(message)
  end if
 
- l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
+ l_gpu_option = ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option = gpu_option
+ paral        = 0; if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
+ opt          = 1; if (present(option)) opt = option
 
  if(l_gpu_option==ABI_GPU_OPENMP) then
    ABI_CHECK(opt==1 .or. opt==3, "Incompatible codepath with OpenMP GPU")
@@ -884,7 +886,6 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
  mbandc   = oper%mbandc
  nspinor  = oper%nspinor
  ndim_max = nspinor * (2*paw_dmft%maxlpawu+1)
- paral    = 0
  shift    = oper%shiftk
  ndat     = oper%ndat
  if(l_gpu_option==ABI_GPU_OPENMP) then
@@ -899,11 +900,6 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
    end if
 #endif
  end if
-
- if (present(procb) .and. present(iproc) .and. oper%paral == 0) paral = 1
-
- opt = 1
- if (present(option)) opt = option
 
  do iatom=1,oper%natom
    lpawu = oper%matlu(iatom)%lpawu
