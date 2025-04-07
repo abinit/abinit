@@ -1775,10 +1775,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  integer,parameter :: master = 0
  integer :: iet, max_et
  integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr, bsize
- integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum, btype, nsp
+ integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum, nsp
  integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
  integer :: ncid, grp_ncid, ncerr
- real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops, btype_fact, abs_tol, rtmp
+ real(dp) :: kT, mu_e, e_nk, dfde_nk, tau_nk, lw_nk, max_adiff, cpu, wall, gflops, abs_tol, rtmp
  logical :: send_data
  character(len=500) :: msg
  character(len=fnlen) :: path
@@ -1794,7 +1794,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  real(dp),target,allocatable :: ibte_sigma(:,:,:,:,:), ibte_mob(:,:,:,:,:), ibte_rho(:,:,:)
  real(dp),target,allocatable :: ibte_seebeck(:,:,:,:), ibte_kappa(:,:,:,:), ibte_pi(:,:,:,:)
  real(dp),allocatable :: grp_srate(:,:,:,:), fkn_in(:,:,:,:), fkn_out(:,:,:,:), fkn_efield(:,:,:,:), fkn_serta(:,:,:,:), taukn_serta(:,:,:,:)
- real(dp) :: fact_sigma, fact_mob, max_occ, fact_sbk
+ real(dp) :: fact_sigma, fact_sbk
  character(len=2) :: components(3)
  real(dp), allocatable :: sig_gen(:,:,:,:), mob_gen(:,:,:,:), sig_l21(:,:,:,:), sig_l22(:,:,:,:), mob_21(:,:,:,:), mob_22(:,:,:,:)
  type :: scatk_t
@@ -2579,7 +2579,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 !scalars
  integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, ieh, cnt, nprocs, ia, time_opt
  real(dp) :: eig_nk, max_occ, wtk, emu_alpha, fact, fact0
- real(dp) :: fact_sigma, fact_mob
+ !real(dp) :: fact_sigma, fact_mob
  !arrays
  real(dp) :: vr(3), vv_tens(3,3)
 
