@@ -3,8 +3,8 @@
 #--------------------------------------------------------------
 dynamics = 13     #  13 = NPT simulation.
 ncell =  4 4 4   # Size of the supercell for the simulation
-ntime  = 1000     # Number of step in the simulation.
-temperature = 50  # Temperature of the simulation (default = 325K).
+ntime  = 100     # Number of step in the simulation.
+temperature = 10  # Temperature of the simulation (default = 325K).
 
 
 optcell =  2  # Relaxation of the cell
