@@ -279,3 +279,5 @@ If you see parts of the code which are not well tested, please contribute to imp
 {% include doc/developers/debug_make_parents %}
 
 {% include doc/developers/debug_make_abiauty %}
+
+{% include doc/developers/mpi_devtools.md %}
