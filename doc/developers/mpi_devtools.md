@@ -24,7 +24,7 @@ Remember to compile the code with the -g option in order to produce debugging in
 
 ## How to profile MPI jobs using NVTX/Nsight
 
-Among tools that analyze MPI usage and performance, it is possible to annotate source code using [NVTX](https://nvidia.github.io/NVTX/) (NVIDIA Tools Extension Library) and trace the execution of an MPI job as a timeline of events per process using the profiler [NVIDIA Nsight Systems](https://developer.nvidia.com/nsight-systems). Code annotation is activated by default in ABINIT when compiled on GPUs, using NVIDIA (includes NVTX) or AMD (ROCTX) annotation libraries. As of ABINIT version 10.3.5, NVTX annotation is also supported for CPUs (see *with_gpu_markers* input variable). A guide for minimal installation of selected NVIDIA developer tools for CPUs is provided here.
+Among tools that analyze MPI usage and performance, it is possible to annotate source code using [NVTX](https://nvidia.github.io/NVTX/) (NVIDIA Tools Extension Library) and trace an MPI job execution as a timeline of API events per process using the profiler [NVIDIA Nsight Systems](https://developer.nvidia.com/nsight-systems). Code annotation libraries are activated by default in ABINIT when compiled on GPU, as NVIDIA CUDA Toolkit already includes NVTX (and AMD includes ROCTX). As of ABINIT version 10.3.5, NVTX annotation is also supported on CPU (see *with_gpu_markers* input variable). A guide for minimal installation of selected NVIDIA developer tools required to use NVTX on CPUs is provided here. Note that we don't need to install the entire NVIDIA CUDA Toolkit to profile code on CPU.
 
 The NVIDIA Tools Extensions (NVTX) API can be installed on Linux with:
 
