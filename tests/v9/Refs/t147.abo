@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.6.3 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h17 )
+.Starting date : Thu  3 Apr 2025.
+- ( at 16h53 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t147/t147.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/TestBot_MPI1/v9_t147/t147.abi
 - output file    -> t147.abo
 - root for input  files -> t147i
 - root for output files -> t147o
@@ -325,8 +325,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/h.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/h.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/h.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/h.fhi
 -    N  standard fhi98 ini: Troullier-Martins scheme, llocal= 2
 -  1.00000   1.00000  20191111                znucl, zion, pspdat
     6    7    0    0       387   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -337,8 +337,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/f.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/f.fhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/f.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/f.fhi
 -    F  standard fhi98 ini: Troullier-Martins scheme, llocal= 2
 -  9.00000   7.00000  20201102                znucl, zion, pspdat
     6    7    2    2       477   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2039,7 +2039,7 @@ LONGWAVE :  perts :  4.2 /  2.2 / 10.1
     3       2       3       3            0.0000000000        -0.0000000000
 
  Electronic (clamped-ion) contribution to the piezoelectric tensor,
- in cartesian coordinates, (from sum rule of dynamic quadrupoles or P^1 tensor)
+ in cartesian coordinates, (from sum rule of P^1 tensor)
  efidir   atdir    qgrdir        real part           imaginary part
     1       1       1            0.0001314826        -0.0000000000
     1       2       1           -0.0000000000        -0.0000000000
@@ -2064,6 +2064,39 @@ LONGWAVE :  perts :  4.2 /  2.2 / 10.1
     1       1       3           -0.0000000000        -0.0000000000
     1       2       3           -0.0000000000        -0.0000000000
     1       3       3            0.0000692367        -0.0000000000
+    2       1       3           -0.0000000000        -0.0000000000
+    2       2       3           -0.0000000000        -0.0000000000
+    2       3       3           -0.0000000000        -0.0000000000
+    3       1       3            0.0000307269        -0.0000000000
+    3       2       3           -0.0000000000        -0.0000000000
+    3       3       3           -0.0000000000        -0.0000000000
+
+ Electronic (clamped-ion) contribution to the piezoelectric tensor,
+ in cartesian coordinates, (from sum rule of dynamic quadrupoles)
+ efidir   atdir    qgrdir        real part           imaginary part
+    1       1       1            0.0001314826        -0.0000000000
+    1       2       1           -0.0000000000        -0.0000000000
+    1       3       1           -0.0000000000        -0.0000000000
+    2       1       1           -0.0000000000        -0.0000000000
+    2       2       1            0.0000307269        -0.0000000000
+    2       3       1           -0.0000000000        -0.0000000000
+    3       1       1           -0.0000000000        -0.0000000000
+    3       2       1           -0.0000000000        -0.0000000000
+    3       3       1            0.0000307269        -0.0000000000
+
+    1       1       2           -0.0000000000        -0.0000000000
+    1       2       2            0.0000566721        -0.0000000000
+    1       3       2           -0.0000000000        -0.0000000000
+    2       1       2            0.0000307269        -0.0000000000
+    2       2       2           -0.0000000000        -0.0000000000
+    2       3       2           -0.0000000000        -0.0000000000
+    3       1       2           -0.0000000000        -0.0000000000
+    3       2       2           -0.0000000000        -0.0000000000
+    3       3       2           -0.0000000000        -0.0000000000
+
+    1       1       3           -0.0000000000        -0.0000000000
+    1       2       3           -0.0000000000        -0.0000000000
+    1       3       3            0.0000566721        -0.0000000000
     2       1       3           -0.0000000000        -0.0000000000
     2       2       3           -0.0000000000        -0.0000000000
     2       3       3           -0.0000000000        -0.0000000000
