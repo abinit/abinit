@@ -1208,7 +1208,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
          &    c_loc(chipsi(:,:,ik,isppol,iatom)),ndim_max,0,czero,c_loc(mat_temp2(:,:)),mbandc,mbandc*mbandc,ndat)
          !$OMP END TARGET DATA
          !$OMP TARGET DATA USE_DEVICE_PTR(ks,mat_temp2)
-         call abi_gpu_xaxpy(2, mbandc*mbandc*ndat, cone, &
+         call abi_gpu_xaxpy(1, 2*mbandc*mbandc*ndat, cone, &
          &    c_loc(mat_temp2), 1, c_loc(ks(:,:,ikpt,isppol)), 1)
          !$OMP END TARGET DATA
 #endif
