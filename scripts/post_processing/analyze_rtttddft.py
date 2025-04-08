@@ -15,12 +15,22 @@ import numpy as np
 import argparse
 from scipy.fftpack import fft, fftfreq
 
-# -------------------- Units --------------------------
-au2as = 2.41888432650478 
-au2fs = 0.0241888432650478 
-au2Vpm = 514220624373.482
-au2ev = 27.2113838565563
-au2Ohmcm = 45934.859262851380
+# ------------------ Constants ----------------------
+hb = 1.054571817e-34   # J.s
+me = 9.1093837139e-31  # kg
+a0 = 5.29177210544e-11 # m
+qe = 1.602176634e-19   # C
+Eh = hb**2/(me*a0**2)  # J
+
+# ------------------ Conversions ----------------------
+ev2j   = 1.602176634e-19 # J -> eV
+au2s   = hb/Eh           # au -> second
+au2as  = au2s * 1e17     # au -> attosecond
+au2fs  = au2s * 1e15     # au -> femtosecond
+au2Vpm = Eh/(qe*a0)      # au -> Volt/meter 
+au2ev  = Eh / ev2j       # au -> eV
+au2Ohm = me*a0**2/(qe**2*au2s) # au -> Ohm
+au2Ohmcm1 = 1/(au2Ohm*a0*1e2)  # au -> 1/(Ohm*cm)
 
 # ------------------- Functions -----------------------
 def fourier_direct(time,signal,wcut,nfft):
@@ -226,16 +236,17 @@ if calc_conducti:
     sigma_z = np.divide(current_ft_z, np.real(efield_ft), where=np.real(efield_ft)!=0)
 
     # write out conductivity
-    header = "Optical conductivity\n w [Ha], w [eV], \
-Re[sigma_x] [au], Im[sigma_x] [au], Re[sigma_y] [au], Im[sigma_y] [au], Re[sigma_z] [au], Im[sigma_z(w)] [au], \
-Re[sigma_x] [Ohm.cm], Im[sigma_x] [Ohm.cm], Re[sigma_y] [Ohm.cm], Im[sigma_y] [Ohm.cm], Re[sigma_z] [Ohm.cm], Im[sigma_z(w)] [Ohm.cm]" 
+    header = "Optical conductivity sigma(w)\n w [Ha], w [eV], \
+Re[sigma_x] [au], Im[sigma_x] [au], Re[sigma_y] [au], Im[sigma_y] [au], Re[sigma_z] [au], Im[sigma_z] [au], \
+Re[sigma_x] [(Ohm.cm)^-1], Im[sigma_x] [(Ohm.cm)^-1], Re[sigma_y] [(Ohm.cm)^-1], Im[sigma_y] [(Ohm.cm)^-1], \
+Re[sigma_z] [(Ohm.cm)^-1], Im[sigma_z(w)] [(Ohm.cm)^-1]" 
     np.savetxt("conductivity.dat",np.vstack([w[int(nw/2)+1:nw],w[int(nw/2)+1:nw]*au2ev,\
                                   np.real(sigma_x[int(nw/2)+1:nw]), np.imag(sigma_x[int(nw/2)+1:nw]),\
                                   np.real(sigma_y[int(nw/2)+1:nw]), np.imag(sigma_y[int(nw/2)+1:nw]),\
                                   np.real(sigma_z[int(nw/2)+1:nw]), np.imag(sigma_z[int(nw/2)+1:nw]),\
-                                  np.real(sigma_x[int(nw/2)+1:nw])*au2Ohmcm, np.imag(sigma_x[int(nw/2)+1:nw])*au2Ohmcm,\
-                                  np.real(sigma_y[int(nw/2)+1:nw])*au2Ohmcm, np.imag(sigma_y[int(nw/2)+1:nw])*au2Ohmcm,\
-                                  np.real(sigma_z[int(nw/2)+1:nw])*au2Ohmcm, np.imag(sigma_z[int(nw/2)+1:nw])*au2Ohmcm]).T,
+                                  np.real(sigma_x[int(nw/2)+1:nw])*au2Ohmcm1, np.imag(sigma_x[int(nw/2)+1:nw])*au2Ohmcm1,\
+                                  np.real(sigma_y[int(nw/2)+1:nw])*au2Ohmcm1, np.imag(sigma_y[int(nw/2)+1:nw])*au2Ohmcm1,\
+                                  np.real(sigma_z[int(nw/2)+1:nw])*au2Ohmcm1, np.imag(sigma_z[int(nw/2)+1:nw])*au2Ohmcm1]).T,
                                   header=header)
 
     # Compute dielectric tensor
@@ -250,8 +261,8 @@ Re[sigma_x] [Ohm.cm], Im[sigma_x] [Ohm.cm], Re[sigma_y] [Ohm.cm], Im[sigma_y] [O
         eps_z = 1.0 + eps_z
 
     # write out dielectric tensor
-    header = "Dielectric function\n w [Ha], w [eV], \
-Re[eps_x] [au], Im[eps_x] [au], Re[eps_y] [au], Im[eps_y] [au], Re[eps_z] [au], Im[eps_z(w)] [au]" 
+    header = "Dielectric function epsilon (unitless ie epsilon/epsilon_0)\n 
+w [Ha], w [eV], Re[eps_x], Im[eps_x], Re[eps_y], Im[eps_y], Re[eps_z], Im[eps_z]" 
     np.savetxt("dielectric.dat",np.vstack([w[int(nw/2)+1:nw],w[int(nw/2)+1:nw]*au2ev,\
                                 np.real(eps_x), np.imag(eps_x), np.real(eps_y), np.imag(eps_y),\
                                 np.real(eps_z), np.imag(eps_z)]).T, header=header)
