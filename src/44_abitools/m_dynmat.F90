@@ -2051,6 +2051,9 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
  real(dp) :: symcart(3,3,nsym)
 
 ! *********************************************************************
+!FIXME Disabling optimization with NVHPC in this routine
+!      because of significant numerical divergence
+!nvf$r opt=0
 
  ! 0) initializations
  call matr3inv(rprimd,gprimd)

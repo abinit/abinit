@@ -102,7 +102,7 @@ contains
 !! This routine compute the non-stationary expression for the
 !! second derivative of the total energy, for a whole row of
 !! mixed derivatives (including diagonal terms contributing
-!! to non-stationnary 2nd-order total energy).
+!! to non-stationary 2nd-order total energy).
 !! Compared with NC-pseudopotentials, PAW contributions include:
 !!  - changes of the overlap between 0-order wave-functions,
 !!  - on-site contributions.
@@ -878,7 +878,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
        vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
        call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
-     end if   
+     end if
      !! add vxctau for mGGA to GS hamiltonian and RF hamiltonian
      if (with_vxctau) then
        call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &

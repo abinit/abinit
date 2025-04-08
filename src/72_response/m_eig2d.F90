@@ -29,7 +29,7 @@ MODULE m_eig2d
  use m_nctk
  use netcdf
  use m_xmpi
- use m_ebands
+ !use m_ebands
  use m_cgtools
  use m_hdr
  use m_dtset
@@ -304,13 +304,10 @@ subroutine eigr2d_free(eigr2d)
 !scalars
  type(eigr2d_t),intent(inout) :: eigr2d
 ! *************************************************************************
-DBG_ENTER("COLL")
+ DBG_ENTER("COLL")
 
 !Deallocate all components of bstruct
-
- if (allocated(eigr2d%eigr2d)) then
-   ABI_FREE(eigr2d%eigr2d)
- end if
+ ABI_SFREE(eigr2d%eigr2d)
 
  DBG_EXIT("COLL")
 
@@ -583,9 +580,7 @@ DBG_ENTER("COLL")
 
 !Deallocate all components of bstruct
 
- if (allocated(fan2d%fan2d)) then
-   ABI_FREE(fan2d%fan2d)
- end if
+ ABI_SFREE(fan2d%fan2d)
 
  DBG_EXIT("COLL")
 
@@ -620,9 +615,7 @@ DBG_ENTER("COLL")
 
 !Deallocate all components of bstruct
 
- if (allocated(gkk2d%gkk2d)) then
-   ABI_FREE(gkk2d%gkk2d)
- end if
+ ABI_SFREE(gkk2d%gkk2d)
 
  DBG_EXIT("COLL")
 
@@ -822,9 +815,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
  if(xmpi_paral==1) then
    ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt_rbz,mband,nsppol))
    ABI_MALLOC(nband_rbz,(nkpt_rbz*nsppol))
-   if (allocated(mpi_enreg%my_kpttab)) then
-     ABI_FREE(mpi_enreg%my_kpttab)
-   end if
+   ABI_SFREE(mpi_enreg%my_kpttab)
    ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt_rbz))
 !  Assume the number of bands is the same for all k points.
    nband_rbz(:)=mband
@@ -1439,9 +1430,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  if(xmpi_paral==1) then
    ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt_rbz,mband,nsppol))
    ABI_MALLOC(nband_rbz,(nkpt_rbz*nsppol))
-   if (allocated(mpi_enreg%my_kpttab)) then
-     ABI_FREE(mpi_enreg%my_kpttab)
-   end if
+   ABI_SFREE(mpi_enreg%my_kpttab)
    ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt_rbz))
 !  Assume the number of bands is the same for all k points.
    nband_rbz(:)=mband
