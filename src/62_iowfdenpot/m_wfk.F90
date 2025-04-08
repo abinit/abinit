@@ -45,6 +45,8 @@
 
 #include "abi_common.h"
 
+#define DEBUG_MODE
+
 module m_wfk
 
  use defs_basis
@@ -345,7 +347,6 @@ subroutine wfk_open_read(Wfk, fname, formeig, iomode, funt, comm, Hdr_out)
  integer(XMPI_OFFSET_KIND) :: offset
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -498,7 +499,6 @@ subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hd
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
  integer :: ncerr
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -1014,7 +1014,6 @@ integer function wfk_compare(wfk1, wfk2) result(ierr)
 !scalars
  integer :: restart,restartpaw
  !character(len=500) :: msg
-
 !************************************************************************
 
  ierr = 0
@@ -1130,7 +1129,6 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 #endif
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr,h1_varid,idx,ib1,ib2
  real(dp),allocatable :: h1mat(:,:,:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -1535,7 +1533,6 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
  character(len=500) :: errmsg
 !arrays
  real(dp),allocatable :: all_eigk(:)
-
 !************************************************************************
 
  if (wfk_validate_ks(wfk, ik_ibz, spin, band=band) /= 0) then
@@ -1780,7 +1777,6 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
  !integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr,h1_varid
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -2224,7 +2220,6 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
  real(dp),allocatable :: buffer(:,:)
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  integer,allocatable :: blocks(:,:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -2789,7 +2784,6 @@ subroutine wfk_read_eigk(Wfk,ik_ibz,spin,sc_mode,eig_k,occ_k)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: band_block00(2) = [0, 0]
-
 !************************************************************************
 
  if (present(occ_k)) then
@@ -2840,7 +2834,6 @@ subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
  integer :: ik_ibz,spin,my_rank,ierr,iomode,funt,sc_mode,mband
  real(dp) :: cpu, wall, gflops, cpu_io, wall_io, gflops_io
  type(wfk_t) :: Wfk
-
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -3545,7 +3538,6 @@ subroutine wfk_write_h1mat(Wfk,sc_mode,eigen)
  integer :: spin,ik_ibz,nband_k,ptr
 !arrays
  integer,parameter :: band_block00(2)=[0,0]
-
 !************************************************************************
 
  ptr=1
@@ -3598,7 +3590,6 @@ subroutine wfk_read_h1mat(fname, eigen, hdr_out, comm)
  type(wfk_t) :: wfk
 !arrays
  integer,parameter :: band_block00(2)=[0,0]
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -4018,7 +4009,6 @@ subroutine mpio_read_kg_k(fh,offset,npw_disk,sc_mode,kg_k,mpierr)
 !scalars
  integer :: kg_k_type,ncount,myfh
  integer(XMPI_OFFSET_KIND) :: my_offset
-
 !************************************************************************
 
  ! Workarounds for XLF
@@ -4089,7 +4079,6 @@ subroutine mpio_write_kg_k(fh,offset,npw_disk,sc_mode,kg_k,mpierr)
 !scalars
  integer :: myfh,kg_k_type,ncount
  integer(XMPI_OFFSET_KIND) :: my_offset
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -4169,7 +4158,6 @@ subroutine mpio_read_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad !,fmarker
 !arrays
  integer :: sizes(2),subsizes(2),starts(2)
-
 !************************************************************************
 
  ! Workaround for XLF
@@ -4289,7 +4277,6 @@ subroutine mpio_write_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpier
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
 !arrays
  integer :: sizes(2),subsizes(2),starts(2)
-
 !************************************************************************
 
  ! Workaround for XLF
@@ -4962,7 +4949,6 @@ subroutine wfk_create_wfkfile(wfk_fname, Hdr, iomode, formeig, Kvars, cwtimes, c
  integer,pointer :: kg_k(:,:)
  real(dp) :: kpoint(3),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: cg_k(:,:),eig_k(:),occ_k(:)
-
 !************************************************************************
 
  cwtimes = zero
@@ -5063,7 +5049,6 @@ subroutine wfk_check_wfkfile(wfk_fname,Hdr,iomode,method,formeig,Kvars,cwtimes,c
  integer,allocatable :: kg_k(:,:)
  real(dp),allocatable :: cg_k(:,:),eig_k(:),occ_k(:)
  logical,allocatable :: bmask(:)
-
 !************************************************************************
 
  !write(msg,"(3a,i2)")"Checking file: ",TRIM(wfk_fname),", with iomode = ",iomode

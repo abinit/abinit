@@ -686,7 +686,7 @@ You can now open the input file :
 
 {% dialog tests/tutoatdep/Input/tatdep1_5.abi %}
 
-As can be seen in the first lines, U-$\gamma$ is a cubic ([[atdep:brav]](1)=7) body-centered ([[atdep:brav]](2)=-1) phase with one atom in the unitcell. Three optional input parameters are set : [[atdep:enunit]]=1 (the frequency unit is cm$^{-1}$), [[atdep:bzpath]]=5 G H P G N (the BZ path is $\Gamma-H-P-\Gamma-N$) and [[atdep:use_ideal_positions]]=1 (the atomic displacements are computed wrt the bcc ideal positions). Now you can execute `atdep` :
+As can be seen in the first lines, U-$\gamma$ is a cubic ([[atdep:brav]](1)=7) body-centered ([[atdep:brav]](2)=-1) phase with one atom in the unitcell. Four optional input parameters are set : [[atdep:enunit]]=1 (the frequency unit is cm$^{-1}$), [[atdep:bzpath]]=5 G H P G N (five special points define the following BZ path $\Gamma-H-P-\Gamma-N$), [[atdep:bzlength]]=4 100 88 88 71 (the length of the 4 elementary paths $\Gamma-H$, $H-P$, $H-\Gamma$ and $\Gamma-N$ are 100, 88, 88 and 71, respectively), and [[atdep:use_ideal_positions]]=1 (the atomic displacements are computed wrt the bcc ideal positions). Now you can execute `atdep` :
 
 ```sh
 atdep < tatdep1_5.files > log 2> err &
