@@ -1,8 +1,8 @@
 
 .Version 10.3.4.4 of ABINIT, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_nvhpc24.11-0 computer) 
+.(MPI version, prepared for a x86_64_linux_nvhpc24.11-0 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,12 +16,12 @@
 
 .Starting date : Wed 29 Jan 2025.
 - ( at 20h01 )
-  
+
 - input  file    -> /home/marc/work/abinit/abinit-git/tests/val1/gpu_omp_t46/t46.abi
 - output file    -> t46.abo
 - root for input  files -> t46i
 - root for output files -> t46o
- 
+
  DATASET    1 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -39,7 +39,7 @@ P This job should need less than                      13.521 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.244 Mbytes ; DEN or POT disk file :      0.424 Mbytes.
 ================================================================================
- 
+
  DATASET    2 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -57,7 +57,7 @@ P This job should need less than                      13.521 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.244 Mbytes ; DEN or POT disk file :      0.424 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -169,17 +169,17 @@ P           mkmem           1
                        5.0000000000E-01  5.0000000000E-01  2.5000000000E-01
                        5.0000000000E-01  5.0000000000E-01  7.5000000000E-01
             znucl       28.00000    8.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -193,31 +193,31 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.9635000  3.9635000  G(1)= -0.1261511  0.1261511  0.1261511
  R(2)=  3.9635000  0.0000000  3.9635000  G(2)=  0.1261511 -0.1261511  0.1261511
  R(3)=  7.9270000  7.9270000  0.0000000  G(3)=  0.0630756  0.0630756 -0.0630756
  Unit cell volume ucvol=  2.4905575E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  32
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.24190
- 
+
  getcut : COMMENT -
   Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
   is sufficient for exact treatment of convolution.
   Such a large boxcut is a waste : you could raise ecut
   e.g. ecut=   10.052220 Hartrees makes boxcut=2
- 
- 
+
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  48
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12685
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/marc/work/abinit/abinit-git/tests/Pspdir/28ni.paw
 - pspatm: opening atomic psp file    /home/marc/work/abinit/abinit-git/tests/Pspdir/28ni.paw
@@ -239,7 +239,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Radial grid used for Vloc is grid 3
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
 - pspini: atom type   2  psp file is /home/marc/work/abinit/abinit-git/tests/Pspdir/8o.2.paw
 - pspatm: opening atomic psp file    /home/marc/work/abinit/abinit-git/tests/Pspdir/8o.2.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Oxygen
@@ -261,19 +261,19 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Radial grid used for Vloc is grid 4
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
    5.32753584E+03                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 P newkpt: treating     30 bands with npw=     264 for ikpt=   1 by node    0
 P newkpt: treating     30 bands with npw=     264 for ikpt=   1 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     264.000     264.000
- 
- 
+
+
  ******************************************
  DFT+U Method used: FLL
  ******************************************
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -281,7 +281,7 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 100, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-08, }
 ...
- 
+
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
  ETOT  1  -403.69227901704    -4.04E+02 2.17E+00 7.73E+02 0.082
  ETOT  2  -389.82701793943     1.39E+01 1.74E-01 1.32E+03 0.000
@@ -308,14 +308,14 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT 23  -370.62439357190     1.79E-09 8.61E-10 1.13E-07 0.000
  ETOT 24  -370.62439357207    -1.68E-10 4.83E-11 1.51E-08 0.000
  ETOT 25  -370.62439357210    -3.06E-11 8.48E-12 1.91E-09 0.000
- 
+
  At SCF step   25       nres2   =  1.91E-09 < tolvrs=  1.00E-08 =>converged.
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.64346380E-02  sigma(3 2)=  5.02995390E-04
   sigma(2 2)=  2.64346380E-02  sigma(3 1)=  5.02995390E-04
   sigma(3 3)=  2.64346380E-02  sigma(2 1)= -5.02995390E-04
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -361,15 +361,15 @@ force_length_stats: {min:   9.16940063E-23, max:   1.69554130E-06, mean:   8.477
   Sum:             20.544953    20.544956     41.089909    -0.000003
  Total magnetization (from the atomic spheres):            -0.000003
  Total magnetization (exact up - dn):                      -0.000002
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     21.819316441926180
  Compensation charge over fine fft grid    =     21.819491076408063
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Spin component 1
   -2.96121  -0.98976   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00021  -0.00021   0.00000  -0.00021   0.00000
@@ -511,8 +511,8 @@ force_length_stats: {min:   9.16940063E-23, max:   1.69554130E-06, mean:   8.477
    0.00004   0.00006   0.00000   0.00021  -0.00021   0.00000   0.00031  -0.00031  -0.00001   0.00001  -0.00001  -0.01741  -0.00001  -0.00001   0.00001  -0.00001  -0.01589  -0.00001
    0.00000   0.00000  -0.00018   0.00000   0.00018  -0.00026   0.00000   0.00026   0.00000   0.00001   0.00000  -0.00001  -0.01744   0.00000   0.00001   0.00000  -0.00001  -0.01592
    max. value=  1.85E+00, min. value=  0.00E+00
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Spin component 1
    1.00054  -0.02924   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00293   0.00293   0.00000   0.00293   0.00000
@@ -654,7 +654,7 @@ force_length_stats: {min:   9.16940063E-23, max:   1.69554130E-06, mean:   8.477
    0.03182  -0.03073  -0.00126   0.03269  -0.03269   0.00018  -0.00711   0.00711   0.06985  -0.06985   0.02352  -0.19252   0.04074  -0.06890   0.06890  -0.02376   0.19148  -0.04115
    0.00000   0.00000  -0.09414   0.00000   0.09414   0.02264   0.00000  -0.02264   0.00000  -0.04227   0.00000   0.04227  -0.33646   0.00000   0.04115   0.00000  -0.04115   0.35568
    max. value=  2.17E+00, min. value=  0.00E+00
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  1 - L=2 ONLY - Spin component 1
    0.93261  -0.00266   0.00112  -0.00266   0.00000
@@ -680,62 +680,62 @@ force_length_stats: {min:   9.16940063E-23, max:   1.69554130E-06, mean:   8.477
    0.00112   0.00056   0.95607   0.00056   0.00000
   -0.00266   0.00266   0.00056   0.93261   0.00097
    0.00000  -0.00097   0.00000   0.00097   0.95607
- 
- ---------- DFT+U DATA --------------------------------------------------- 
- 
+
+ ---------- DFT+U DATA ---------------------------------------------------
+
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
- 
+
  Atom   1. Occ. for lpawu and for spin  1 =   4.34716
  Atom   1. Occ. for lpawu and for spin  2 =   3.18669
  => On atom   1,  local Mag. for lpawu is       -1.160463
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.86077   -0.00245    0.00104   -0.00245    0.00000
     -0.00245    0.86077    0.00052    0.00245   -0.00090
      0.00104    0.00052    0.88243    0.00052    0.00000
     -0.00245    0.00245    0.00052    0.86077    0.00090
      0.00000   -0.00090    0.00000    0.00090    0.88243
- 
- 
+
+
  Occupation matrix for spin  2
      0.84702    0.00008   -0.00291    0.00008    0.00000
      0.00008    0.84702   -0.00145   -0.00008    0.00252
     -0.00291   -0.00145    0.32282   -0.00145    0.00000
      0.00008   -0.00008   -0.00145    0.84702   -0.00252
      0.00000    0.00252    0.00000   -0.00252    0.32282
- 
- 
+
+
  ====== For Atom     2, occupations for correlated orbitals. lpawu =   2
- 
+
  Atom   2. Occ. for lpawu and for spin  1 =   3.18669
  Atom   2. Occ. for lpawu and for spin  2 =   4.34716
  => On atom   2,  local Mag. for lpawu is        1.160464
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.84702    0.00008   -0.00291    0.00008    0.00000
      0.00008    0.84702   -0.00145   -0.00008    0.00252
     -0.00291   -0.00145    0.32282   -0.00145    0.00000
      0.00008   -0.00008   -0.00145    0.84702   -0.00252
      0.00000    0.00252    0.00000   -0.00252    0.32282
- 
- 
+
+
  Occupation matrix for spin  2
      0.86077   -0.00245    0.00104   -0.00245    0.00000
     -0.00245    0.86077    0.00052    0.00245   -0.00090
      0.00104    0.00052    0.88243    0.00052    0.00000
     -0.00245    0.00245    0.00052    0.86077    0.00090
      0.00000   -0.00090    0.00000    0.00090    0.88243
- 
- 
- 
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   15.747E-13; max=  84.839E-13
    0.5000  0.5000  0.5000    1  8.48391E-12 kpt; spin; max resid(k); each band:
   2.00E-13 1.06E-14 3.58E-14 8.11E-14 1.03E-13 3.89E-16 1.29E-15 2.02E-15
@@ -757,20 +757,20 @@ force_length_stats: {min:   9.16940063E-23, max:   1.69554130E-06, mean:   8.477
     2       0.000000000000      0.000000000000      0.000000000000
     3       0.000000000000      0.000000000000      0.000015519817
     4       0.000000000000      0.000000000000     -0.000015519817
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      2.09739386624646     2.09739386624646    -0.00000000000000
     3      2.09739386624646     2.09739386624646     2.09739386624646
     4      4.19478773249293     4.19478773249293     2.09739386624647
- 
+
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000    -0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
     3     -0.00000097892122    -0.00000097892122     0.00000097892122
     4      0.00000097892122     0.00000097892122    -0.00000097892122
  frms,max,avg= 6.9220184E-07 9.7892122E-07   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000    -0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
@@ -866,21 +866,21 @@ total_energy_dc     : -3.70624393572103E+02
 total_energy_dc_eV  : -1.00852026413702E+04
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.64346380E-02  sigma(3 2)=  5.02995390E-04
   sigma(2 2)=  2.64346380E-02  sigma(3 1)=  5.02995390E-04
   sigma(3 3)=  2.64346380E-02  sigma(2 1)= -5.02995390E-04
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.7773E+02 GPa]
 - sigma(1 1)=  7.77733771E+02  sigma(3 2)=  1.47986328E+01
 - sigma(2 2)=  7.77733771E+02  sigma(3 1)=  1.47986328E+01
 - sigma(3 3)=  7.77733771E+02  sigma(2 1)= -1.47986328E+01
- 
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -891,57 +891,57 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.9635000  3.9635000  G(1)= -0.1261511  0.1261511  0.1261511
  R(2)=  3.9635000  0.0000000  3.9635000  G(2)=  0.1261511 -0.1261511  0.1261511
  R(3)=  7.9270000  7.9270000  0.0000000  G(3)=  0.0630756  0.0630756 -0.0630756
  Unit cell volume ucvol=  2.4905575E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  32
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.24190
- 
+
  getcut : COMMENT -
   Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
   is sufficient for exact treatment of convolution.
   Such a large boxcut is a waste : you could raise ecut
   e.g. ecut=   10.052220 Hartrees makes boxcut=2
- 
- 
+
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  48
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12685
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file t46o_DS1_WFK
 P newkpt: treating     30 bands with npw=     264 for ikpt=   1 by node    0
 P newkpt: treating     30 bands with npw=     264 for ikpt=   1 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     264.000     264.000
- 
+
 -       ( number of procs used in dmft ) =    1
- 
- 
+
+
  ******************************************
  DFT+DMFT Method is used
  ******************************************
- 
+
  DMFT uses the Hubbard one solver
- 
+
  Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
- 
+
  Entropy is not computed, only the internal energy is printed
- 
+
  The imaginary part of the Green's function is neglected
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -949,95 +949,95 @@ iteration_state: {dtset: 2, }
 solver: {iscf: 17, nstep: 2, nline: 10, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-08, }
 ...
- 
+
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
  (Edmft  1   0.01080862700)
  (Edmft  2   0.01098314685)
- 
+
   == The DFT+DMFT occupation matrix for correlated electrons is ==
- 
+
    -------> For Correlated Atom 1
- 
+
           -- polarization spin component 1
         0.98640   0.00165   0.01295   0.00165  -0.00000
         0.00165   0.98640   0.00648  -0.00165  -0.01122
         0.01295   0.00648   0.90477   0.00648   0.00000
         0.00165  -0.00165   0.00648   0.98640   0.01122
         0.00000  -0.01122   0.00000   0.01122   0.90477
- 
+
           -- polarization spin component 2
         0.97904   0.00179  -0.01194   0.00179   0.00000
         0.00179   0.97904  -0.00597  -0.00179   0.01034
        -0.01194  -0.00597   0.57789  -0.00597  -0.00000
         0.00179  -0.00179  -0.00597   0.97904  -0.01034
         0.00000   0.01034  -0.00000  -0.01034   0.57789
- 
+
    -------> For Correlated Atom 2
- 
+
           -- polarization spin component 1
         0.97904   0.00179  -0.01194   0.00179  -0.00000
         0.00179   0.97904  -0.00597  -0.00179   0.01034
        -0.01194  -0.00597   0.57790  -0.00597   0.00000
         0.00179  -0.00179  -0.00597   0.97904  -0.01034
        -0.00000   0.01034   0.00000  -0.01034   0.57790
- 
+
           -- polarization spin component 2
         0.98640   0.00165   0.01295   0.00165   0.00000
         0.00165   0.98640   0.00648  -0.00165  -0.01122
         0.01295   0.00648   0.90477   0.00648   0.00000
         0.00165  -0.00165   0.00648   0.98640   0.01122
         0.00000  -0.01122   0.00000   0.01122   0.90477
- 
+
  ETOT  1  -370.50720210545    -3.71E+02 1.49E-25 4.01E+00 0.000
  (Edmft  3   0.00957910285)
  (Edmft  4   0.00990745093)
- 
+
   == The DFT+DMFT occupation matrix for correlated electrons is ==
- 
+
    -------> For Correlated Atom 1
- 
+
           -- polarization spin component 1
         0.98187   0.00425   0.00225   0.00425   0.00000
         0.00425   0.98187   0.00113  -0.00425  -0.00195
         0.00225   0.00113   0.82802   0.00113  -0.00000
         0.00425  -0.00425   0.00113   0.98187   0.00195
         0.00000  -0.00195   0.00000   0.00195   0.82802
- 
+
           -- polarization spin component 2
         0.96878   0.00534  -0.03835   0.00534   0.00000
         0.00534   0.96878  -0.01917  -0.00534   0.03321
        -0.03835  -0.01917   0.48349  -0.01917   0.00000
         0.00534  -0.00534  -0.01917   0.96878  -0.03321
         0.00000   0.03321  -0.00000  -0.03321   0.48349
- 
+
    -------> For Correlated Atom 2
- 
+
           -- polarization spin component 1
         0.96878   0.00534  -0.03834   0.00534   0.00000
         0.00534   0.96878  -0.01917  -0.00534   0.03321
        -0.03834  -0.01917   0.48347  -0.01917   0.00000
         0.00534  -0.00534  -0.01917   0.96878  -0.03321
         0.00000   0.03321   0.00000  -0.03321   0.48347
- 
+
           -- polarization spin component 2
         0.98187   0.00425   0.00225   0.00425   0.00000
         0.00425   0.98187   0.00113  -0.00425  -0.00195
         0.00225   0.00113   0.82793   0.00113   0.00000
         0.00425  -0.00425   0.00113   0.98187   0.00195
         0.00000  -0.00195   0.00000   0.00195   0.82793
- 
+
  ETOT  2  -370.57350498769    -6.63E-02 3.48E-17 6.47E+00 0.000
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.98392794E-02  sigma(3 2)=  2.73726922E-04
   sigma(2 2)=  1.98392794E-02  sigma(3 1)=  2.73726922E-04
   sigma(3 3)=  1.98392794E-02  sigma(2 1)= -2.73726922E-04
- 
- 
+
+
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   density residual=  6.475E+00 exceeds tolvrs=  1.000E-08
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 2, }
@@ -1079,15 +1079,15 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:             20.517702    20.517501     41.035203     0.000200
  Total magnetization (from the atomic spheres):             0.000200
  Total magnetization (exact up - dn):                       0.000255
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     21.987878912114748
  Compensation charge over fine fft grid    =     21.669085989780459
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Spin component 1
   -2.89518  -0.96521   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00068  -0.00068   0.00000  -0.00068   0.00000
@@ -1229,8 +1229,8 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00029   0.00042   0.00001   0.00013  -0.00013   0.00001   0.00019  -0.00019  -0.00011   0.00011  -0.00006  -0.01824  -0.00011  -0.00011   0.00011  -0.00007  -0.01678  -0.00011
    0.00000   0.00000  -0.00012   0.00000   0.00012  -0.00018   0.00000   0.00018   0.00000   0.00011   0.00000  -0.00011  -0.01827   0.00000   0.00011   0.00000  -0.00011  -0.01681
    max. value=  1.86E+00, min. value=  0.00E+00
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Spin component 1
    0.99182  -0.01466   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00381   0.00381   0.00000   0.00381   0.00000
@@ -1372,7 +1372,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.01376  -0.02832  -0.00402  -0.00641   0.00641   0.00012   0.00363  -0.00363   0.06520  -0.06520   0.02249  -0.18440   0.03896  -0.06390   0.06390  -0.02283   0.18299  -0.03954
    0.00000   0.00000   0.00577   0.00000  -0.00577  -0.00400   0.00000   0.00400   0.00000  -0.04030   0.00000   0.04030  -0.31590   0.00000   0.03954   0.00000  -0.03954   0.33588
    max. value=  2.21E+00, min. value=  0.00E+00
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  1 - L=2 ONLY - Spin component 1
    0.91372  -0.00313   0.00128  -0.00313   0.00000
@@ -1398,66 +1398,66 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00128   0.00064   0.79202   0.00064   0.00000
   -0.00313   0.00313   0.00064   0.91372   0.00111
    0.00000  -0.00111   0.00000   0.00111   0.79202
- 
- ---------- DFT+U DATA --------------------------------------------------- 
- 
+
+ ---------- DFT+U DATA ---------------------------------------------------
+
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
- 
+
   (This is PAW atomic orbital occupations)
   (For Wannier orbital occupations, refer to DFT+DMFT occupations above)
  Atom   1. Occ. for lpawu and for spin  1 =   3.99219
  Atom   1. Occ. for lpawu and for spin  2 =   3.33377
  => On atom   1,  local Mag. for lpawu is       -0.658418
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.84334   -0.00289    0.00118   -0.00289    0.00000
     -0.00289    0.84334    0.00059    0.00289   -0.00102
      0.00118    0.00059    0.73109    0.00059    0.00000
     -0.00289    0.00289    0.00059    0.84334    0.00102
      0.00000   -0.00102    0.00000    0.00102    0.73109
- 
- 
+
+
  Occupation matrix for spin  2
      0.82803   -0.00233   -0.03370   -0.00233    0.00000
     -0.00233    0.82803   -0.01685    0.00233    0.02919
     -0.03370   -0.01685    0.42484   -0.01685    0.00000
     -0.00233    0.00233   -0.01685    0.82803   -0.02919
      0.00000    0.02919    0.00000   -0.02919    0.42484
- 
- 
+
+
  ====== For Atom     2, occupations for correlated orbitals. lpawu =   2
- 
+
   (This is PAW atomic orbital occupations)
   (For Wannier orbital occupations, refer to DFT+DMFT occupations above)
  Atom   2. Occ. for lpawu and for spin  1 =   3.33372
  Atom   2. Occ. for lpawu and for spin  2 =   3.99203
  => On atom   2,  local Mag. for lpawu is        0.658311
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.82803   -0.00233   -0.03370   -0.00233    0.00000
     -0.00233    0.82803   -0.01685    0.00233    0.02918
     -0.03370   -0.01685    0.42481   -0.01685    0.00000
     -0.00233    0.00233   -0.01685    0.82803   -0.02918
      0.00000    0.02918    0.00000   -0.02918    0.42481
- 
- 
+
+
  Occupation matrix for spin  2
      0.84334   -0.00289    0.00118   -0.00289    0.00000
     -0.00289    0.84334    0.00059    0.00289   -0.00102
      0.00118    0.00059    0.73101    0.00059    0.00000
     -0.00289    0.00289    0.00059    0.84334    0.00102
      0.00000   -0.00102    0.00000    0.00102    0.73101
- 
- 
- 
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   23.559E-19; max=  34.816E-18
    0.5000  0.5000  0.5000    1  3.47326E-17 kpt; spin; max resid(k); each band:
   9.26E-20 7.57E-20 9.98E-22 1.69E-21 6.05E-21 4.58E-22 1.70E-21 4.38E-21
@@ -1479,7 +1479,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     2       0.000000000000      0.000000000000      0.000000000000
     3       0.000000000000      0.000000000000      0.000000000000
     4       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      2.09739386624646     2.09739386624646    -0.00000000000000
@@ -1576,20 +1576,20 @@ total_energy_dc     : -3.70573504987687E+02
 total_energy_dc_eV  : -1.00838178925656E+04
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.98392794E-02  sigma(3 2)=  2.73726922E-04
   sigma(2 2)=  1.98392794E-02  sigma(3 1)=  2.73726922E-04
   sigma(3 3)=  1.98392794E-02  sigma(2 1)= -2.73726922E-04
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.8369E+02 GPa]
 - sigma(1 1)=  5.83691655E+02  sigma(3 2)=  8.05332272E+00
 - sigma(2 2)=  5.83691655E+02  sigma(3 1)=  8.05332272E+00
 - sigma(3 3)=  5.83691655E+02  sigma(2 1)= -8.05332272E+00
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.9270000000E+00  7.9270000000E+00  7.9270000000E+00 Bohr
               amu      5.86900000E+01  1.59994000E+01
@@ -1715,7 +1715,7 @@ P           mkmem           1
                        5.0000000000E-01  5.0000000000E-01  2.5000000000E-01
                        5.0000000000E-01  5.0000000000E-01  7.5000000000E-01
             znucl       28.00000    8.00000
- 
+
 ================================================================================
 
 
@@ -1738,7 +1738,7 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] A self-consistent DFT + DMFT scheme in the projector augmented wave method: 
+- [1] A self-consistent DFT + DMFT scheme in the projector augmented wave method:
 - applications to cerium, Ce2O3 and Pu2O3 with the Hubbard I solver and comparison to DFT + U,
 - B. Amadon,  J. Phys.: Condens. Matter 24 075604 (2012).
 - Comment : Describes the self-consistent implementation of DFT+DMFT in PAW
@@ -1774,7 +1774,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1786,12 +1786,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1809,15 +1809,15 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - Proc.   0 individual time (sec): cpu=          2.9  wall=          2.9
- 
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered  15 WARNINGs and   5 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          2.9  wall=          2.9

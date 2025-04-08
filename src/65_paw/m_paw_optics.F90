@@ -120,8 +120,8 @@ CONTAINS  !=====================================================================
 !!  znucl(ntypat)=atomic number of atom type
 !!
 !! OUTPUT
-!!  psinablapsi_out=contains the matrix elements 
-!!   (The size of the psinablapsi_out decide wehter we compute the full matrix or 
+!!  psinablapsi_out=contains the matrix elements
+!!   (The size of the psinablapsi_out decide wehter we compute the full matrix or
 !!    only the diagonal part)
 !!   (if not present only writing in a file)
 !!
@@ -165,7 +165,7 @@ CONTAINS  !=====================================================================
  integer :: my_nspinor,nband_k,nband_cprj_k,npw_k,sender,me,master_spfftband,pnp_size
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
- integer, parameter :: NO_FILE_OUT=-1 
+ integer, parameter :: NO_FILE_OUT=-1
  logical :: already_has_nabla,cprj_paral_band,myband,mykpt,iomode_etsf_mpiio
  logical :: i_am_master,i_am_master_kpt,i_am_master_band,i_am_master_spfft,nc_unlimited,store_half_dipoles
  logical :: diag_only
@@ -322,7 +322,7 @@ CONTAINS  !=====================================================================
 
 !Get electronic temperature from dtset
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
- 
+
 !Compute spin-orbit contributions if necessary
  if (dtset%pawspnorb==1) then
    option_core=0
@@ -357,7 +357,7 @@ CONTAINS  !=====================================================================
      NCF_CHECK(nctk_set_datamode(ncid))
    end if
  end if
- if (iomode /= NO_FILE_OUT) then 
+ if (iomode /= NO_FILE_OUT) then
    if (iomode_etsf_mpiio) then
      !If MPI-IO, store only ib elements for each jb
      ABI_MALLOC(psinablapsi,(2,3,mband))
@@ -381,7 +381,7 @@ CONTAINS  !=====================================================================
       bsize = mband
    else if (store_half_dipoles) then
       bsize=(mband*(mband+1))/2
-   else 
+   else
       bsize=mband**2
    end if
    ABI_MALLOC(psinablapsi_paw,(2,3,bsize))
@@ -390,7 +390,7 @@ CONTAINS  !=====================================================================
    end if
    pnp_size=size(psinablapsi_paw)
  end if
- 
+
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
  cprj_paral_band=(mband_cprj<mband)
@@ -483,7 +483,7 @@ CONTAINS  !=====================================================================
             psinablapsi_paw(:,:,jbshift+1:jbshift+bsize)=zero
             if (dtset%pawspnorb==1) psinablapsi_soc(:,:,jbshift+1:jbshift+bsize)=zero
          end if
-           
+
 !        2-A Computation of <psi_tild_n|-i.nabla|psi_tild_m>
 !        ----------------------------------------------------------------------------------
 !        Note: <psi_nk|-i.nabla|psi_mk> => Sum_g[ <G|Psi_nk>^* <G|Psi_mk> G ]
@@ -554,7 +554,7 @@ CONTAINS  !=====================================================================
          end if
          if (myband) then
 
-           do ib=ibmin,ibmax          
+           do ib=ibmin,ibmax
 
              ibsp=(ib-1)*my_nspinor ; jbsp=(jb-1)*my_nspinor
              do ispinor=1,my_nspinor
@@ -725,19 +725,19 @@ CONTAINS  !=====================================================================
            end if
          end if
 
-!        >>> This my kpt and I am the master node: I write the data    
+!        >>> This my kpt and I am the master node: I write the data
          if (.not.iomode_etsf_mpiio) then
            if (i_am_master) then
              if (iomode==IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
                if (nc_unlimited) then
-                 nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+                 nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
                  NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
                else if (.not.store_half_dipoles) then
-                 nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+                 nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
                  NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
                else
-                 nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+                 nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
                  NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
                end if
 #endif
@@ -748,14 +748,14 @@ CONTAINS  !=====================================================================
                write(ount)(psinablapsi(1:2,3,ib),ib=1,bsize)
              end if
 
-!          >>> This my kpt and I am not the master node: I send the data    
+!          >>> This my kpt and I am not the master node: I send the data
            else if (i_am_master_band.and.i_am_master_spfft) then
              if (mpi_enreg%me_kpt/=master_spfftband) then
                ABI_BUG('Problem with band communicator!')
              end if
              call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
            end if
-         end if  
+         end if
        else
 !        >>> Reduction in case of parallelism
          call timab(48,1,tsec)
@@ -769,7 +769,7 @@ CONTAINS  !=====================================================================
          end if
        end if ! no_file_out
 
-!    >>> This is not my kpt and I am the master node: I receive the data and I write    
+!    >>> This is not my kpt and I am the master node: I receive the data and I write
      elseif ((.not.iomode_etsf_mpiio).and.i_am_master.and.(iomode/=NO_FILE_OUT)) then ! mykpt
        sender=master_spfftband
        call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)

@@ -10,7 +10,7 @@ getwfk_filepath "trttddft_1o_WFK"
 #Definition of the unit cell
 acell 3*3.53 angstrom  # Lengths of the primitive vectors (equilibrium volume)
 rprim                  # 3 orthogonal primitive vectors (FCC lattice)
-  0.0 1/2 1/2 
+  0.0 1/2 1/2
   1/2 0.0 1/2
   1/2 1/2 0.0
 nsym 0                 # Automatic detection of symetries
@@ -21,7 +21,7 @@ znucl 6           # Atomic number of the possible type(s) of atom. Here carbon.
 pp_dirpath "$ABI_PSPDIR"        # Path to the directory where
                                 # pseudopotentials for tests are stored
 pseudos "Psdj_paw_pw_std/C.xml" # PAW atomic data for Carbon
-                         
+
 #Definition of the atoms
 natom 2           # There are two atoms
 typat 1 1         # They both are of type 1, that is, Carbon
@@ -49,8 +49,8 @@ istwfk *1         # Wavefunctions are complex for all k-points
 
 #Parameters for the SCF procedure
 nstep 20          # Maximum number of SCF cycles
-tolvrs 1.0d-10    # Will stop when, twice in a row, the difference 
-                  # between two consecutive evaluations of potential residual 
+tolvrs 1.0d-10    # Will stop when, twice in a row, the difference
+                  # between two consecutive evaluations of potential residual
                   # differ by less than tolvrs
 
 #Miscelaneous parameters
@@ -67,7 +67,7 @@ prtebands 0       # Do not print ebands
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   trttddft_2.abo, tolnlines=  0, tolabs=  0.0, tolrel=  0.0
 #%%   trttddft_2o_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0
 #%% [paral_info]
@@ -75,7 +75,7 @@ prtebands 0       # Do not print ebands
 #%% [extra_info]
 #%% authors = F. Brieuc
 #%% keywords = RTTDDFT, PAW
-#%% description = 
+#%% description =
 #%%   Input for RT-TDDFT tutorial
 #%%   Diamond at equilibrium volume
 #%%   RT-TDDFT calculation with default values for all parameters
