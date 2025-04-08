@@ -748,7 +748,6 @@ end interface xmpi_lor
 !END SUBROUTINE
 !END INTERFACE MPI_WIN_ALLOCATE_SHARED
 
-
 !----------------------------------------------------------------------
 
 CONTAINS  !===========================================================
@@ -5429,22 +5428,24 @@ end subroutine xcomm_allocate_shared_master
 !! INPUTS
 !!  n1, n2: dimensions of the problem
 !!  input_comm: Initial MPI communicator
+!!  with_pools: Set it to False to use just one pool.
 !!  [rectangular]: If True, change the number of procs in each pool so that it's possible to
 !!      create a rectangular grid. Useful for Scalapack algorithms in which 1d grid are not efficient.
 !!      Default: False.
 !!
 !! SOURCE
 
-subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
+subroutine pool2d_from_dims(pool, n1, n2, input_comm, with_pools, rectangular)
 
 !Arguments-------------------------
  class(xmpi_pool2d_t),intent(out) :: pool
  integer,intent(in) :: n1, n2, input_comm
+ logical,intent(in) :: with_pools
  logical,optional,intent(in) :: rectangular
 
 !Local variables-------------------
  integer :: itask, ntasks, my_rank, nprocs, color, mpierr, jj, i1, i2, my_ntasks, new_comm
- integer :: grid_dims(2) ! , check(n1, n2)
+ integer :: grid_dims(2) !, check(n1, n2)
  integer,allocatable :: my_inds(:)
 !----------------------------------------------------------------------
 
@@ -5456,7 +5457,10 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
 
  ntasks = n1 * n2; color = ntasks + 1
 
- if (nprocs <= ntasks) then
+ if (.not. with_pools) then
+   pool%treats = .True.; color = 1
+
+ else if (nprocs <= ntasks) then
     color = my_rank
     call xmpi_split_block(ntasks, input_comm, my_ntasks, my_inds)
     do jj=1,size(my_inds)

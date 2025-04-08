@@ -3906,8 +3906,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
    min_norm2=greatest_real; max_norm2=-greatest_real
    my_cinf=greatest_real;  my_csup=-greatest_real
    do ik_ibz=1,Wfd%nkibz
-     istwf_k = Wfd%istwfk(ik_ibz)
-     npw_k   = Wfd%npwarr(ik_ibz)
+     npw_k = Wfd%npwarr(ik_ibz); istwf_k = Wfd%istwfk(ik_ibz)
 
      ! Select my band indices.
      call wfd%mybands(ik_ibz,spin,how_manyb,my_bandlist, how="Stored")
@@ -3919,9 +3918,9 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
        ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave1, msg) == 0, msg)
        ug1 => wave1%ug
        cdum = xdotc(npw_k*Wfd%nspinor,ug1,1,ug1,1)
-       if (istwf_k>1) then
+       if (istwf_k > 1) then
          cdum=two*DBLE(cdum)
-         if (istwf_k==2) cdum=cdum-CONJG(ug1(1))*ug1(1)
+         if (istwf_k == 2) cdum=cdum-CONJG(ug1(1))*ug1(1)
        end if
        if (Wfd%usepaw==1) then
          call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
@@ -4740,7 +4739,6 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       mcg = npw_disk*Wfd%nspinor*nband_wfd
 
       ABI_MALLOC(eig_k,((2*Wfk%mband)**formeig0*Wfk%mband))
-
       ABI_MALLOC(kg_k,(3,optkg1*npw_disk))
       ABI_MALLOC_OR_DIE(cg_k,(2,mcg), ierr)
 
@@ -4756,7 +4754,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
       ! Table with the correspondence btw the k-centered sphere of the WFK file
       ! and the one used in Wfd (possibly smaller due to ecutwfn).
-      ABI_MALLOC(gf2wfd,(npw_disk))
+      ABI_MALLOC(gf2wfd, (npw_disk))
       if (any(my_readmask(:,ik_ibz,spin))) then
         call kg_map(wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, npw_disk, kg_k, gf2wfd, nmiss)
       end if

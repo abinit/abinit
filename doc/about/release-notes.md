@@ -77,7 +77,7 @@ can be produced using [[optdriver]]=6 and [[gwr_task]]="CC4S".
 This functionality was available in v10.0. Now it can be considered in production, as it has been tested reasonably and debugged.
 Moreover, there is a new option [[gwr_task]] = "CC4S_FROM_WFK" to read orbitals from file instead of using direct diagonalization.
 The support for [[istwfk]]=2 has been added.
-See tests: [[test:gwr_07]], [[test:gwr_08]], [[test:gwr_09]], [[test:gwr_10]] and [[test:gwr_11]].
+See tests: [[test:gwr_suite_07]], [[test:gwr_suite_08]], [[test:gwr_suite_09]], [[test:gwr_suite_10]] and [[test:gwr_suite_11]].
 
 By M. Giantomassi (MR 1006) and F. Bruneval (MR1024).
 
@@ -529,7 +529,7 @@ New input variables: [[gwr_task]], [[gwr_chi_algo]], [[gwr_sigma_algo]],
 [[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwr_rpa_ncut]], [[gwr_nstep]]. Also, [[gwr_tolqpe]] replaces the obsolete gw_toldfeig input variable.
 
 A introductory tutorial (work in progress) is available, see [[tutorial:gwr_intro]].
-Tests are provided in the newly created subdirectory tests/gwr, see test:gwr_01 to test:gwr_08
+Tests are provided in the newly created subdirectory tests/gwr_suite, see test:gwr_suite__01 to test:gwr_suite_08
 See also test:paral_78 and test:paral_79
 
 By M. Giantomassi (MR875, MR907, MR964)

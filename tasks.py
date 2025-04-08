@@ -7,20 +7,19 @@ Example:
     invoke --list
 
 Can be executed everywhere inside the Abinit directory, including build directories.
-
-Use: `pip install invoke --user` to install invoke package.
 """
 from __future__ import annotations
 
 import os
 import sys
 import webbrowser
+import subprocess
 
 from contextlib import contextmanager
 try:
     from invoke import task
 except ImportError:
-    raise ImportError("Cannot import invoke package. Use `pip install invoke --user`")
+    raise ImportError("Cannot import invoke package. Use `pip install invoke`")
 
 from tests.pymods.testsuite import find_top_build_tree
 from tests.pymods.devtools import number_of_cpus
@@ -62,7 +61,7 @@ import platform
 SYSTEM = platform.system()
 
 
-def which_vim():
+def which_vim() -> str:
     """
     Find vim in $PATH
     """
@@ -72,7 +71,7 @@ def which_vim():
     raise RuntimeError("Cannot find vim in $PATH!")
 
 
-def which_differ():
+def which_differ() -> str:
     """
     Find differ in $PATH
     """
@@ -127,7 +126,7 @@ def cd(path):
         os.chdir(cwd)
 
 
-def list_from_string(string, type=int):
+def list_from_string(string, type=int) -> list[str]:
     if "," in string:
         return [type(s) for s in string.split(",")]
     return [type(s) for s in string.split(" ")]
@@ -252,6 +251,7 @@ def abichecks(ctx):
 
 @task
 def robodoc(ctx):
+    """Build robodoc documentation."""
     with cd(ABINIT_ROOTDIR):
         result = ctx.run("./mkrobodoc.sh", pty=True)
 
@@ -711,3 +711,97 @@ def which(cmd):
             if is_exe(exe_file):
                 return exe_file
     return None
+
+
+def get_current_branch() -> str:
+    """Run git command to get the current branch"""
+    try:
+        return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip().decode("utf-8")
+    except subprocess.CalledProcessError:
+        raise RuntimeError("Not inside a git repository or an error occurred")
+
+
+def get_git_tags() -> list[str]:
+    """Run git command to list tags"""
+    try:
+        tags = subprocess.check_output(["git", "tag"]).decode("utf-8").split("\n")
+        # Remove empty strings from the list
+        return [tag for tag in tags if tag]
+    except subprocess.CalledProcessError:
+        raise RuntimeError("Not inside a git repository or an error occurred")
+
+
+@task
+def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> None:
+    """
+    Build new officiale release ...
+
+    Example usage:
+
+        invoke official-release 10.2.4
+    """
+    # Set variables
+    github_user = "gonzex"
+    github_repo = "abinit"
+    github_url = f"git@github.com:{github_user}/{github_repo}.git"
+
+    _run_kwargs = dict(pty=True, echo=True)
+    def _run(command: str):
+        return ctx.run(command, **_run_kwargs)
+
+    current_branch = get_current_branch()
+    if current_branch != "develop":
+        raise RuntimeError(f"You are on the '{current_branch}' branch, not 'develop'.")
+
+    old_tags = get_git_tags()
+    if new_version in old_tags and not dry_run:
+        raise RuntimeError(f"{new_version=} is already in {old_tags=}")
+
+    # List of files that should be added to master and then removed in develop
+    configure_paths = [
+        "configure",
+        'config/gnu/compile',
+        'config/gnu/config.guess',
+        'config/gnu/config.sub',
+        'config/gnu/install-sh',
+        'config/gnu/missing',
+        'config/gnu/depcomp',
+    ]
+
+    with cd(ABINIT_ROOTDIR):
+        # The version in .current_version is updated manually.
+        # Here we check that the value stored in the file is equal to the command line argument.
+        with open(".current_version", "rt") as fh:
+            old_version = fh.read().strip()
+
+        if old_version != new_version:
+            raise ValueError(f"{old_version=} != {new_version=}")
+
+        # Step 1: Checkout master, merge changes and run makemake
+        _run("git checkout master")
+        _run("git merge develop")
+        _run("./config/scripts/makemake")
+
+        # Add files required by configure.
+        for path in configure_paths:
+            _run(f"git add -f {path}")
+
+        if not dry_run:
+            _run(f"git commit -a -m 'v{version}'")
+            _run(f"git tag -a {version} -m 'v{version}'")
+            _run("git push origin master")
+
+        # Step 2: Push to GitHub
+        _run(f"git remote add abinit {github_url} || echo 'Remote already exists but this is not critical'")
+        if not dry_run:
+            _run("git push -u abinit master --tags")
+
+        _run("git checkout develop")
+        _run("git merge master")
+        _run("git push --tags")
+
+        # Step 3: Ensure 'configure_paths' are ignored in develop branch and commit changes.
+        for path in configure_paths:
+            _run(f"git rm --cached {path}")
+        _run("git commit -a -m 'Remove configure files from tracking in develop'")
+        _run("git push origin develop")

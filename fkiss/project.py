@@ -19,55 +19,65 @@ from .parser import FortranKissParser, fort2html
 from .tools import lazy_property, NotebookWriter
 from .termcolor import cprint
 
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 
-EXTERNAL_MODS = {
+
+# Dictionary mapping the name of the Fortran external module to the list
+# of external dependencies as used in config/specs/corelibs.conf.
+# None means that the Fortran module does not rely on external libs e.g. intrinsic modules.
+EXTERNAL_MODS_DEPS = {
     # Intrinsics
-    "iso_fortran_env",
-    "iso_c_binding",
-    "ieee_arithmetic",
-    "ieee_exceptions",
-    "ieee_features",
+    "iso_fortran_env": None,
+    "iso_c_binding": None,
+    "ieee_arithmetic": None,
+    "ieee_exceptions": None,
+    "ieee_features": None,
     # Modules provided by compilers.
-    "f90_unix_proc",
-    "f90_unix_dir",
-    "ifcore",
+    "f90_unix_proc": None,
+    "f90_unix_dir": None,
+    "ifcore": None,
     # MPI modules.
-    "mpi",
-    "mpi_f08",
+    "mpi": ["mpi"],
+    "mpi_f08": ["mpi"],
     # External libraries.
-    "openacc",
-    "omp_lib",
-    "mkl_dfti",
-    "netcdf",
-    "etsf_io_low_level",
-    "etsf_io",
-    "plasma",
-    "elpa",
-    "elpa1",
-    "fox_sax",
-    "m_libpaw_libxc_funcs",
-    "m_psml",
-    "m_psml_api",
+    "openacc": ["gpu"],
+    "omp_lib": None,
+    "mkl_dfti": ["fft"],
+    "netcdf": ["hdf5", "netcdf", "netcdf_fortran"],
+    "etsf_io_low_level": ["hdf5", "netcdf", "netcdf_fortran"],
+    "etsf_io": ["hdf5", "netcdf", "netcdf_fortran"],
+    "plasma": ["linalg"],
+    "elpa": ["linalg"],
+    "elpa1": ["linalg"],
+    "fox_sax": None,
+    "m_libpaw_libxc_funcs": None,
+    "m_psml": ["libpsml"],
+    "m_psml_api": ["libpsml"],
     # Bigdft modules.
-    "yaml_output",
-    "bigdft_api",
-    "module_base",
-    "module_types",
-    "module_xc",
-    "poisson_solver",
-    "dynamic_memory",
+    "yaml_output": ["bigdft"],
+    "bigdft_api": ["bigdft"],
+    "module_base": ["bigdft"],
+    "module_types": ["bigdft"],
+    "module_xc": ["bigdft"],
+    "poisson_solver" : ["bigdft"],
+    "dynamic_memory": ["bigdft"],
     # Abinit-specific modules.
     #"m_build_info",
     #"m_optim_dumper",
-    "libxc_functionals",
+    "libxc_functionals": ["libxc"],
     # Scale-UP for effective models
-    "scup_global",
+    "scup_global": None,
     # GreenX library (temporary version)
-    "gx_minimax",
-    "mp2_grids",
+    #"gx_minimax",
+    #"mp2_grids",
     # YAKL module
-    "gator_mod",
+    "gator_mod": ["gpu"],
 }
+
+EXTERNAL_MODS = EXTERNAL_MODS_DEPS.keys()
 
 
 def load_mod(filepath):
@@ -981,6 +991,10 @@ class AbinitProject(NotebookWriter):
     def write_binaries_conf(self, dryrun=False, verbose=0):
         """
         Write new binaries.conf file
+
+        Args:
+            dryrun: True to operate in dryrun mode.
+            verbose: Verbosity level.
         """
         # Read binaries.conf and add new list of libraries.
         # NB: To treat `dependencies` in an automatic way, I would need either an
@@ -988,12 +1002,8 @@ class AbinitProject(NotebookWriter):
         # that I can map these names to external libraries.
         # This means that I **cannot generate** the entire file in a programmatic way
         # but only the library entries.
-        try:
-            from ConfigParser import ConfigParser
-        except ImportError:
-            from configparser import ConfigParser
-
         binconf_path = os.path.join(self.top, "config", "specs", "binaries.conf")
+        print("Writing", binconf_path, " ...")
 
         # Read INI file.
         config = ConfigParser()
@@ -1051,9 +1061,10 @@ class AbinitProject(NotebookWriter):
             abinit.amf --> File with EXTRA_DIST
 
         Args:
-            dryrun: True to operate in dryrun mode
+            dryrun: True to operate in dryrun mode.
             verbose: Verbosity level.
         """
+        print("Writing buildsys_files ...")
         # Group Fortfiles by dirname
         dir2files = self.groupby_dirname()
 
@@ -1183,6 +1194,96 @@ class AbinitProject(NotebookWriter):
                     errors.append("Cannot find `%s` in %s" % (magic, path))
             if errors:
                 raise RuntimeError("\n".join(errors))
+
+    def update_corelibs(self, dryrun=False, verbose=0):
+        """
+        Update corelibs.conf file taking into account the external dependecies.
+
+        Args:
+            dryrun: True to operate in dryrun mode.
+            verbose: Verbosity level.
+        """
+        # Read INI file.
+        config = ConfigParser()
+        corelibs_path = os.path.join(self.top, "config", "specs", "corelibs.conf")
+        print("Update dependencies", corelibs_path, " ...")
+        config.read(corelibs_path)
+
+        for dirname, fortfile in self.iter_dirname_fortfile():
+            dirname = os.path.basename(dirname)
+            if dirname == "98_main": continue
+            section = config[dirname]
+            if "dependencies" not in section:
+                # Section is optional
+                old_dependencies = None
+            else:
+                old_dependencies = set(section["dependencies"].split())
+
+            new_dependencies = []
+            for use_name in fortfile.all_uses:
+                deps = EXTERNAL_MODS_DEPS.get(use_name, None)
+                if deps is None: continue
+                if verbose:
+                    print("use_name:", use_name, "deps", deps)
+                new_dependencies.extend(deps)
+            new_dependencies = set(new_dependencies)
+            if verbose:
+                print("For dirname", dirname, "\nnew_dependencies:", new_dependencies, "\nold_dependencies:", old_dependencies)
+
+            if old_dependencies is None:
+                # dependencies is not specified for this directory.
+                if new_dependencies:
+                    if verbose:
+                        print("dirname", dirname, "does not have a dependencies section but uses:", new_dependencies)
+                    config[dirname]["dependencies"] = " ".join(d for d in sorted(new_dependencies))
+            else:
+                for new_dep in new_dependencies:
+                    if verbose and new_dep not in old_dependencies:
+                        print("dirname", dirname, "uses:", new_dep, " that is not listed in", old_dependencies)
+                config[dirname]["dependencies"] = " ".join(d for d in sorted(old_dependencies.union(old_dependencies)))
+
+        header = """\
+# -*- INI -*-
+#
+# Copyright (C) 2009-2025 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Config file for the core libraries of Abinit
+#
+# Note: The following statements are in the Python "INI" format, with
+#       case-sensitivity activated.
+#
+# Available options:
+#
+#   * abirules     : whether to check conformance to the abirules (mandatory);
+#
+#   * dependencies : external dependencies, when relevant (optional);
+#
+#   * optional     : whether the build of the library is optional (mandatory);
+#
+#   * parent       : code block the subdirectory belongs to, selected between
+#                    "common", "core", or "libpaw" (mandatory).
+#
+
+# WARNING: Make sure all comments start at column 1 of the text, because some
+#          versions of ConfigParser shipped with RedHat-based systems will
+#          mess-up indented comments with the fields defined before.
+
+# WARNING: modify the defaults with *extreme* care!
+
+# The shared part of ABINIT has Valid indices: 00..39
+# Note: please keep LibPAW last in this section
+#
+"""
+        if not dryrun:
+            with io.open(corelibs_path, "wt", encoding="utf8") as fh:
+                fh.write(header)
+                config.write(fh)
 
     def touch_alldeps(self, verbose=0):
         """

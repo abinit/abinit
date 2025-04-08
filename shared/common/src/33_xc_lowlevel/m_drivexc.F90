@@ -1497,7 +1497,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 
 !>>>>> Karasiev-Dufty-Trickey, TGGA (no spin-pol) (KDT16)
  else if(ixc==60) then
-   if(nvxcgrho /= 3 )then 
+   if(nvxcgrho /= 3 )then
      write(message, '(3a,i0,a,i0)')&
 &     'Wrong value of nvxcgrho:',ch10,&
 &     'ixc=',ixc,'ndvxcdgr=',nvxcgrho

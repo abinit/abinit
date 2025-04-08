@@ -173,6 +173,7 @@ occopt11 3
 ############
 # DATASET 12
 ############
+# Cumulant calculation
 eph_task12 9
 getsigeph_filepath12 "t60o_DS11_SIGEPH.nc"
 tolcum12 1e-3
