@@ -49,7 +49,7 @@ achieved by adding the following lines to your ac9 configuration file when compi
 
 Note that these lines are not needed when GPU is enabled because markers are configured automatically 
 from the CUDA library root. The serial profiler can be attached to individual MPI processes for 
-generating a timeline of selected API events during a parallel ABINIT calculation using the following command, for example here tracing MPI and NVTX events: 
+generating a timeline of selected API events using the following command, for example here tracing MPI and NVTX events of a parallel ABINIT calculation: 
  
     mpirun -n 4 nsys profile --trace=mpi,nvtx path_to_abinit_exe path_to_input_abi
 
