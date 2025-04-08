@@ -47,7 +47,7 @@ achieved by adding the following lines to your ac9 configuration file when compi
     abi_gpu_nvtx_v3="yes"
     GPU_LIBS="-L/usr/local/cuda-12.8/lib64 -lnvToolsExt"
 
-Note that these lines are not needed when GPU is enabled because markers are configured automatically 
+Note that these lines are not needed when GPU is enabled because marker libraries are configured automatically 
 from the CUDA library root. The serial profiler can be attached to individual MPI processes for 
 generating a timeline of selected API events using the following command, for example here tracing MPI and NVTX events of a parallel ABINIT calculation: 
  
