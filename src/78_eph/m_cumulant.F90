@@ -414,8 +414,8 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
 
  ! Free memory
 !100
-call cumulant%free()
-call sigmaph%free()
+ call cumulant%free()
+ call sigmaph%free()
 
 end subroutine cumulant_driver
 !!***

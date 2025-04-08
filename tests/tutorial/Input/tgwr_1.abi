@@ -1,0 +1,85 @@
+# Crystalline silicon. Preparatory run for GWR code
+# Dataset 1: ground state calculation to compute the density.
+# Dataset 2: KS band structure calculation along a k-path.
+
+# Include geometry and pseudos
+include "gwr_include.abi"
+
+ndtset 2
+prtwf -1       # Don't need wavefunctions.
+
+#paral_kgb 1   # Activate spin/k-point/band/FFT
+#autoparal 1   # Automatic selection of np* variables.
+#npfft 1       # Disable MPI-FFT
+
+####################
+# Dataset 1: SCF run
+####################
+nband1  6
+
+# Definition of the k-point grid
+ngkpt1   4 4 4
+nshiftk1 4
+shiftk1  0.0 0.0 0.0
+         0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+tolvrs1 1.e-12
+
+#######################################
+# Dataset 2: Band structure calculation
+#######################################
+getden2    -1
+nband2      12
+nbdbuf2     4
+tolwfr2     1e-20
+iscf2      -2   # NSCF run
+
+# K-path in reduced coordinates:
+# Generate using `abistruct.py kpath gwr_include.abi`
+ndivsm2 5
+kptopt2 -11
+kptbounds2
+   +0.000000000  +0.000000000  +0.000000000  # $\Gamma$
+   +0.500000000  +0.000000000  +0.500000000  # X
+   +0.500000000  +0.250000000  +0.750000000  # W
+   +0.375000000  +0.375000000  +0.750000000  # K
+   +0.000000000  +0.000000000  +0.000000000  # $\Gamma$
+   +0.500000000  +0.500000000  +0.500000000  # L
+   +0.625000000  +0.250000000  +0.625000000  # U
+   +0.500000000  +0.250000000  +0.750000000  # W
+   +0.500000000  +0.500000000  +0.500000000  # L
+   +0.375000000  +0.375000000  +0.750000000  # K
+   +0.625000000  +0.250000000  +0.625000000  # U
+   +0.500000000  +0.000000000  +0.500000000  # X
+
+
+# Definition of the SCF procedure
+nstep   100       # Maximal number of SCF cycles
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi, tgwr_5.abi
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
+#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% [shell]
+#%% pre_commands = iw_cp gwr_include.abi gwr_include.abi
+#%% [files]
+#%% files_to_test =
+#%%   tgwr_1.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GWR
+#%% description =
+#%%     Crystalline silicon. Preparatory run for GWR code
+#%%     Dataset 1: ground state calculation to compute the density.
+#%%     Dataset 2: KS band structure calculation along a k-path.
+#%%<END TEST_INFO>

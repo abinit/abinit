@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Script to compute the optical conductivity and the dielectric 
-function from the time-dependent current density obtained 
+Script to compute the optical conductivity and the dielectric
+function from the time-dependent current density obtained
 after a RT-TDDFT run with ABINIT
 ----------------
-Partially based on the script in the tutorials of the 
+Partially based on the script in the tutorials of the
 exciting code
 ----------------
 F. Brieuc
@@ -16,8 +16,8 @@ import argparse
 from scipy.fftpack import fft, fftfreq
 
 # -------------------- Units --------------------------
-au2as = 2.41888432650478 
-au2fs = 0.0241888432650478 
+au2as = 2.41888432650478
+au2fs = 0.0241888432650478
 au2Vpm = 514220624373.482
 au2ev = 27.2113838565563
 au2Ohmcm = 45934.859262851380
@@ -32,14 +32,14 @@ def fourier_direct(time,signal,wcut,nfft):
      - wcut: cut-off frequency (in Ha) for the exponential window
      - nfft: number of points to use in the FFT
              if greater than the length of signal then zero-padding is used
-    Output: 
+    Output:
       -w, F: Tuple containing angular frequencies (in Ha) and the
         fourier transform of signal*filter
     ------
     If wcut > 0 then the signal is multiplied in time by exp(-wcut*t)
     which leads to a convolution with a Lorentzian function in frequency space.
     Indeed the Fourier transform of exp(-wcut*t) is w_cut/(w_cut^2+w^2).
-    Thus this window function generates a Lorentzian broadening in frequency 
+    Thus this window function generates a Lorentzian broadening in frequency
     with a FWHM given by 2*w_cut.
     """
     ntime =len(time)
@@ -76,19 +76,19 @@ parser.add_argument('-c', '--current', help='Name of the TDCURRENT file', requir
 parser.add_argument('-e', '--efield',  help='Name of the TDEFIELD file\
                                              or dirac if you used an impulse electric field (Dirac pulse)\
                                              see also the ezero parameter in that case', required=False)
-parser.add_argument('-ez', '--ezero',  help='Amplitude of the electric field - Only used if -e dirac', required=False, 
+parser.add_argument('-ez', '--ezero',  help='Amplitude of the electric field - Only used if -e dirac', required=False,
                                        type=float, default=1.0)
-parser.add_argument('-d', '--dir',     help='Direction (x, y or z) of electric field to consider (divide by E_dir)', required=False, 
+parser.add_argument('-d', '--dir',     help='Direction (x, y or z) of electric field to consider (divide by E_dir)', required=False,
                                        type=str, default='x')
-parser.add_argument('-wc', '--wcut',   help='Cutoff angular frequency exponential window [exp(-wcut*t)] (in Ha)', required=False, 
+parser.add_argument('-wc', '--wcut',   help='Cutoff angular frequency exponential window [exp(-wcut*t)] (in Ha)', required=False,
                                        type=float, default=0.04)
-parser.add_argument('-ts', '--tshift', help='Remove the first tshift time of current density', required=False, 
+parser.add_argument('-ts', '--tshift', help='Remove the first tshift time of current density', required=False,
                                        type=float, default=0.0)
 parser.add_argument('-s', '--stride',  help='Stride time step (Default: 1)', required=False, type=int, default=1)
 parser.add_argument('-p', '--padding', help='If p>1 then zero-padding is used.\n\
-The signal is considered to be of length p*ntime (Default: 1)', 
+The signal is considered to be of length p*ntime (Default: 1)',
                                        required=False, type=int, default=1)
-parser.add_argument('-v', '--verbose',  help='More output mostly for testing', required=False, 
+parser.add_argument('-v', '--verbose',  help='More output mostly for testing', required=False,
                                         action='store_true', default=False)
 args = parser.parse_args()
 
@@ -158,8 +158,8 @@ if calc_conducti and not dirac_pulse:
     efield = efield[time>=tshift]
 time = time[time>=tshift]
 
-# Apply time stride 
-current = current[::stride] 
+# Apply time stride
+current = current[::stride]
 dt = stride*dt0
 n = len(current)
 time = np.arange(0,n)*dt
@@ -190,7 +190,7 @@ w, current_ft_x = fourier_direct(time,current[:,0],wcut,nfft)
 w, current_ft_y = fourier_direct(time,current[:,1],wcut,nfft)
 w, current_ft_z = fourier_direct(time,current[:,2],wcut,nfft)
 
-# write out Fourier transform of current density 
+# write out Fourier transform of current density
 nw = len(w)
 if (args.verbose):
     header = "Input current density\nall quantities are in Hartree atomic units.\ntime, J_x(t), J_y(t), J_z(t)"
@@ -228,7 +228,7 @@ if calc_conducti:
     # write out conductivity
     header = "Optical conductivity\n w [Ha], w [eV], \
 Re[sigma_x] [au], Im[sigma_x] [au], Re[sigma_y] [au], Im[sigma_y] [au], Re[sigma_z] [au], Im[sigma_z(w)] [au], \
-Re[sigma_x] [Ohm.cm], Im[sigma_x] [Ohm.cm], Re[sigma_y] [Ohm.cm], Im[sigma_y] [Ohm.cm], Re[sigma_z] [Ohm.cm], Im[sigma_z(w)] [Ohm.cm]" 
+Re[sigma_x] [Ohm.cm], Im[sigma_x] [Ohm.cm], Re[sigma_y] [Ohm.cm], Im[sigma_y] [Ohm.cm], Re[sigma_z] [Ohm.cm], Im[sigma_z(w)] [Ohm.cm]"
     np.savetxt("conductivity.dat",np.vstack([w[int(nw/2)+1:nw],w[int(nw/2)+1:nw]*au2ev,\
                                   np.real(sigma_x[int(nw/2)+1:nw]), np.imag(sigma_x[int(nw/2)+1:nw]),\
                                   np.real(sigma_y[int(nw/2)+1:nw]), np.imag(sigma_y[int(nw/2)+1:nw]),\
@@ -242,16 +242,16 @@ Re[sigma_x] [Ohm.cm], Im[sigma_x] [Ohm.cm], Re[sigma_y] [Ohm.cm], Im[sigma_y] [O
     eps_x = 4.0*np.pi*1j*np.divide(sigma_x[int(nw/2)+1:nw], w[int(nw/2)+1:nw])
     eps_y = 4.0*np.pi*1j*np.divide(sigma_y[int(nw/2)+1:nw], w[int(nw/2)+1:nw])
     eps_z = 4.0*np.pi*1j*np.divide(sigma_z[int(nw/2)+1:nw], w[int(nw/2)+1:nw])
-    if dir==0: 
+    if dir==0:
         eps_x = 1.0 + eps_x
-    if dir==1: 
+    if dir==1:
         eps_y = 1.0 + eps_y
-    if dir==2: 
+    if dir==2:
         eps_z = 1.0 + eps_z
 
     # write out dielectric tensor
     header = "Dielectric function\n w [Ha], w [eV], \
-Re[eps_x] [au], Im[eps_x] [au], Re[eps_y] [au], Im[eps_y] [au], Re[eps_z] [au], Im[eps_z(w)] [au]" 
+Re[eps_x] [au], Im[eps_x] [au], Re[eps_y] [au], Im[eps_y] [au], Re[eps_z] [au], Im[eps_z(w)] [au]"
     np.savetxt("dielectric.dat",np.vstack([w[int(nw/2)+1:nw],w[int(nw/2)+1:nw]*au2ev,\
                                 np.real(eps_x), np.imag(eps_x), np.real(eps_y), np.imag(eps_y),\
                                 np.real(eps_z), np.imag(eps_z)]).T, header=header)
