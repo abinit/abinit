@@ -1899,6 +1899,10 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 
 ! *************************************************************************
 
+!FIXME Decreasing optimization with NVHPC in this routine
+!      because of significant numerical divergence (spotted in 24.9)
+!nvf$r opt=1
+
 !DEBUG
 !write(std_out,*)' scfopt : enter ; istep,iscf ',istep,iscf
 !ENDDEBUG

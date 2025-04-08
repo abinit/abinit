@@ -61,6 +61,8 @@
  bzpath                  5
  Special q-points:  G -H -P -G -N -
  enunit                  1 (Phonon frequencies in cm-1)
+ bzlength                4
+ Length of BZ :  100- 88- 88- 71-
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
 -Number of processors    1    1
  

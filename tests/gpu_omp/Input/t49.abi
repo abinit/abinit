@@ -1,7 +1,7 @@
 # Testing CTQMC options
 #
 # == Convergency and starting
-# DATASET 1: LDA 
+# DATASET 1: LDA
 # DATASET 2: DMFT
 ndtset 2
 jdtset 1 2
@@ -24,8 +24,8 @@ nband     20
 occopt 3 tsmear 0.00173918086
 
 ##### PHYSICAL PARAMETERS
-natom 1 ntypat  1 typat  1  
-znucl  58.0 
+natom 1 ntypat  1 typat  1
+znucl  58.0
 xred  0.d0   0.d0   0.d0
 acell   3*9.75
 rprim 0.0 1/2 1/2
@@ -34,7 +34,7 @@ rprim 0.0 1/2 1/2
 
 # == Points k and symetries
 kptopt 4
-kptrlatt 4 0 0 0 4 0 0 0 4 
+kptrlatt 4 0 0 0 4 0 0 0 4
 nshiftk 4
 shiftk 1/2 1/2 1/2
        1/2 0.0 0.0
@@ -44,7 +44,7 @@ shiftk 1/2 1/2 1/2
 # == LDA+DMFT
 usedmft1 0
 usedmft2 1
-dmftbandi 5 
+dmftbandi 5
 dmftbandf 20
 dmft_nwlo 100
 dmft_nwli 10000
@@ -56,11 +56,11 @@ dmft_occnd_imag 0
 # == CTQMC
 dmft_solv 5 # CTQMC
 dmftqmc_seed 2
-dmftqmc_l 50 
+dmftqmc_l 50
 dmftqmc_n 1.d6
 dmftqmc_therm 10000
 # In general the correct value for dmftctqmc_basis is 1 (the default)
-dmftctqmc_basis   2   # to preserve the test: 
+dmftctqmc_basis   2   # to preserve the test:
 dmftctqmc_check   0   # check calculations
 dmftctqmc_correl  1   # correlations
 dmftctqmc_gmove   10000  # perturbation
@@ -98,8 +98,8 @@ jpawu  0.0000  # values in Hartree
 #%% files_to_test =
 ###%%                  t49.abo,      tolnlines =7, tolabs =2.0e-6 , tolrel = 1.4e-05, fld_options=-medium ;
 #%%                  t49.abo,      tolnlines =7, tolabs =1.1e-4 , tolrel = 0.0001198, fld_options=-easy ;
-#%% [shell] 
-#%% post_commands = 
+#%% [shell]
+#%% post_commands =
 #%%    ww_cp t49o_DS1_WFK t50i_DS2_WFK;
 #%% [paral_info]
 #%% max_nprocs = 1

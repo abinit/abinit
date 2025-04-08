@@ -56,7 +56,7 @@ module m_rttddft_tdef
    real(dp) :: ef_tau        !time width of the pulse
    real(dp) :: ef_sin_a      !useful constant for sin^2 pulse
    real(dp) :: ef_sin_b      !useful constant for sin^2 pulse
-   real(dp), allocatable :: kpa(:,:) ! contains kpts + A 
+   real(dp), allocatable :: kpa(:,:) ! contains kpts + A
                                      ! (in reduced coordinates in reciprocal space)
    logical  :: induced_vecpot ! Add the vector potential induced by the current density
                               ! in the Hamiltonian
@@ -84,7 +84,7 @@ contains
 !! INPUTS
 !!  [tdef = tdef structure to update]
 !!  td_ef_type = type of electric field (Dirac or sin^2 pulse)
-!!  td_ef_pol = polarization 
+!!  td_ef_pol = polarization
 !!  td_ef_ezero = Amplitude (E_0 = |E_0|*polarization)
 !!  td_ef_tzero = time at which the pulse is switched on
 !!  td_ef_lambda = wavelength (for sin^2 pulse)
@@ -132,13 +132,13 @@ subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lam
  else
     ABI_ERROR("Wrong value of td_ef_induced_vecpot")
  end if
- 
+
  tdef%efield = zero
  tdef%vecpot = zero
  tdef%vecpot_ext = zero
  tdef%vecpot_ind = zero
  tdef%vecpot_red = zero
- 
+
  ABI_MALLOC(tdef%kpa,(3,nkpt))
  tdef%kpa = kpts
 
@@ -157,7 +157,7 @@ end subroutine tdef_init
 !!  [tdef = tdef structure to update]
 !!  dtset = dataset structure
 !!  mpi_enreg = MPI communicators structure
-!!  time = propagation time 
+!!  time = propagation time
 !!  rprimd = cell vectors (direct space)
 !!  gprimd = cell vectors (reciprocal space)
 !!  kg = kpoints in reciprocal space
@@ -180,7 +180,7 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
  class(tdef_type),   intent(inout) :: tdef
  type(dataset_type), intent(inout) :: dtset
  type(MPI_type),     intent(inout) :: mpi_enreg
- real(dp),           intent(in)    :: time 
+ real(dp),           intent(in)    :: time
  real(dp),           intent(in)    :: rprimd(3,3)
  real(dp),           intent(in)    :: gprimd(3,3)
  integer,            intent(in)    :: kg(:,:)

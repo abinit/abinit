@@ -160,7 +160,7 @@ contains
        endif
     end if
     if(params%spin_dynamics==3) then ! Monte carlo
-       call self%spin_mc%initialize(nspin=nspin, angle=1.0_dp, temperature=params%spin_temperature)
+       call self%spin_mc%initialize(nspin=nspin, angle=0.2_dp, temperature=params%spin_temperature)
     end if
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%dt, master, comm, ierr)
@@ -360,7 +360,7 @@ contains
            call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
 
-           ABI_SFREE(SPrim)
+           ABI_FREE(SPrim)
 
          case (4)
           ! read from last step of hist file
@@ -956,17 +956,22 @@ contains
           self%params%spin_temperature=T
        endif
        call self%set_temperature(temperature=T)
+
        if(iam_master) then
           call self%hist%set_params(spin_nctime=self%params%spin_nctime, &
                &     spin_temperature=T)
           call self%spin_ob%reset(self%params)
+       endif
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
-          if(i==1) then
-             call self%set_initial_state(mode=self%params%spin_init_state)
-          else
-             call self%hist%inc1()
-          endif
+       if(i==1) then
+          call self%set_initial_state(mode=self%params%spin_init_state)
+       else   
+          if(iam_master) then
+            call self%hist%inc1()
+           endif
+       endif
 
+       if(iam_master) then
           write(post_fname, "(I4.4)") i
           call self%prepare_ncfile( self%params, &
                & trim(ncfile_prefix)//'_T'//post_fname//'_spinhist.nc')

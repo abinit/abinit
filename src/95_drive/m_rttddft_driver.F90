@@ -176,7 +176,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
       ABI_WARNING(msg)
    end if
 
-   !TODO: *** Perform nuclear step *** 
+   !TODO: *** Perform nuclear step ***
    ! For Ehrenfest dynamics
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 

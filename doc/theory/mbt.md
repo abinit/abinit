@@ -249,14 +249,13 @@ expand the self-energy operator around $\ee^\KS$ obtaining a closed expression f
 
 where
 
-\begin{equation} \label{eq:Z_factor} Z \equiv \left[ 1- \langle \Psi^\KS|
+\begin{equation} \label{eq:Z_factor}
+Z \equiv \left[ 1- \langle \Psi^\KS|
 \PDER{\Sigma}{\ee^\KS}|\Psi^\KS\rangle \right]^{-1}
 \end{equation}
 
-is the so-called renormalization factor where the derivative of the self-energy is
-computed at the KS energy.
-This corresponds to making a Taylor
-expansion of the self-energy matrix element around the KS energy, as depicted below.
+is the so-called renormalization factor where the derivative of the self-energy is computed at the KS energy.
+This corresponds to making a Taylor expansion of the self-energy matrix element around the KS energy, as depicted below.
 
 ![](mbt_assets/self_energy_taylor.png)
 
@@ -322,8 +321,7 @@ related to the inverse of the microscopic dielectric matrix by means of:
 \ee_M^{\text{LF}}(\ww) = \lim_{\qq \rightarrow 0} \dfrac{1}{\ee^{-1}_{0 0}(\qq,\ww)}
 \end{equation}
 
-The optical absorption spectrum -- the quantity one can compare with experiments -- is
-given by the imaginary part.
+The optical absorption spectrum -- the quantity one can compare with experiments -- is given by the imaginary part.
 
 Note that the equation above differs from
 
