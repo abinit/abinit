@@ -5,11 +5,12 @@
  eph_task 18  # Activate computation of g(k,q) along high-symmetry path.
 
  eph_path_brange 6 8  # Compute g(k,q) only for this band  range
+
  # Options governing the NSCF computation of wavefunctions
  nband 20       # Will compute 20 bands
  nbdbuf 8       # Exclude last 8 states when checking for convergence IMPORTANT!
- tolwfr 1e-20   # Stopping criterio for NSCF computation
- nstep 100      # Max number if NSCF iterations.
+ tolwfr 1e-20   # Stopping criterion for NSCF computation
+ nstep 100      # Max number of NSCF iterations.
 
  # Need GS potential to start NSCF.
  getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
@@ -94,5 +95,5 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = Convergence of ZPR wrt q-sampling with Sternheimer method.
+#%% description = Computation of e-ph matrix g(k,q) along high-symmetry path.
 #%%<END TEST_INFO>
