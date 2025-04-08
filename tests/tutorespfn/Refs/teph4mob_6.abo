@@ -1726,7 +1726,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           300.00        0.10E+16        0.25E+05          379.23            0.00
 
 
-  Seebeck [Volts / Kelvin] using SERTA approximation                                                                  
+ Seebeck [Volts / Kelvin] using SERTA approximation                                                                  
  Temperature (K)              xx              yy              zz
             5.00   -0.792017E-03   -0.792017E-03   -0.792017E-03
  Temperature (K)              xx              yy              zz
@@ -1771,7 +1771,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           300.00   -0.322673E+00   -0.322673E+00   -0.322673E+00
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.10E+16        0.00E+00            0.00            0.00
            64.00        0.10E+16        0.00E+00           39.78            0.00
