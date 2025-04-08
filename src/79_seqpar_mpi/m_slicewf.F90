@@ -235,9 +235,17 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 &                   l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
 &                   gpu_thread_limit=dtset%gpu_thread_limit)
 
+ ! IML 8/4/2025
+ ! Hide the following procedures into a general interface of the structure
+ ! init-run-free. Does not need to show more information at this level.
+ ! stucture: 
+ ! - DOS is included in the run. It is part of the work balance preparation
+ ! - sinon ajouter avant le run une fonction divideSlices tq avant et après
+ !   cette fonction il y a un transfer explicite sur GPU ici.
+
  ! Switch to workspace common to all slices
  spsl%on_slice = .false.
- 
+
  write(std_out,'(a)') 'Compute workload on-the-fly'
  ABI_NVTX_START_RANGE(NVTX_SPSL_WORK)
  call spsl_computeWorkload(spsl,dtset%tolfilter,dtset%balfilter)
