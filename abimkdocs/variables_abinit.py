@@ -16403,7 +16403,7 @@ Variable(
     mnemonics="PRinT EVK - Elements of the Velocity matrix at wavevector K",
     added_in_version="9.11.0",
     text=r"""
-If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.  
+If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.
 Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesnt support MPI-IO.
 """,
 ),
@@ -20493,6 +20493,15 @@ Variable(
 If set to 1, enable the use of DFT+DMFT, see in particular the important
 variables [[dmft_solv]], [[dmftbandi]], [[dmftbandf]], [[dmft_nwli]],
 [[dmft_nwlo]], [[dmft_tollc]], [[dmft_tolfreq]], and [[dmft_iter]].
+
+If set to 10, enable the use of DFT+DMFT using the Wannier90 interface
+and the python invocation for calling an external many-body code to
+perform the DMFT step. Typically, we use the TRIQS library.
+The relevant keywords in that case are only [[dmftbandi]] and [[dmftbandf]]
+to specify the bands used for the projection, and [[w90iniprj]] with other
+Wannier90 specific keywords for the Wannier90 part. More information
+will be provided in the future. The rest of the discussion related to this
+keyword is in the case where [[usedmft]] is set to 1.
 
 The current implementation uses Wannier functions obtained from
 [[ cite:Amadon2008 | projected local orbitals ]] as
