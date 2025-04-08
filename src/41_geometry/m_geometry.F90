@@ -763,7 +763,7 @@ end subroutine phdispl_cart2red
 !!
 !! FUNCTION
 !! From the symmetry matrix symrel expressed in the coordinate system rprimd,
-!! compute the components of the spinor rotation matrix
+!! compute the components of the spinor rotation matrix.
 !!
 !! INPUTS
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
@@ -782,6 +782,7 @@ end subroutine phdispl_cart2red
 !! NOTES
 !! Only the proper part of the symmetry operation is taken into account:
 !! pure rotations, while the inversion part is taken away, if present.
+!! as inversion acts on spinors without affecting the spin index.
 !!
 !! The whole collection of symmetry matrices is call symrel(3,3,nsym)
 !! symrel1 contains just one of those matrices symrel1(3,3)
@@ -805,7 +806,6 @@ subroutine getspinrot(rprimd, spinrot, symrel)
  integer :: identity(3,3),symrel1(3,3)
  real(dp) :: axis(3),coord(3,3),coordinvt(3,3),matr1(3,3),matr2(3,3)
  real(dp) :: rprimd_invt(3,3),vecta(3),vectb(3),vectc(3)
-
 !**************************************************************************
 
  symrel1(:,:) = symrel(:,:)
@@ -915,14 +915,12 @@ subroutine getspinrot(rprimd, spinrot, symrel)
 
  end if ! the case of the identity matrix
 
-!DEBUG
-!write(std_out,*)' getspinrot :'; write(std_out,*)' symre =',symrel(:,:)
-!write(std_out,*)' symrel1 =',symrel1(:,:); write(std_out,*)' rprimd =',rprimd(:,:)
-!write(std_out,*)' matr2 =',matr2(:,:); write(std_out,*)' matr1 =',matr1(:,:)
-!write(std_out,*)' phi (degree)=',phi*180._dp/pi; write(std_out,'(a,3d16.6)' )' axis=',axis(:)
-!write(std_out,*)' vecta=',vecta(:)
-!stop
-!ENDDEBUG
+ !write(std_out,*)' getspinrot :'; write(std_out,*)' symre =',symrel(:,:)
+ !write(std_out,*)' symrel1 =',symrel1(:,:); write(std_out,*)' rprimd =',rprimd(:,:)
+ !write(std_out,*)' matr2 =',matr2(:,:); write(std_out,*)' matr1 =',matr1(:,:)
+ !write(std_out,*)' phi (degree)=',phi*180._dp/pi; write(std_out,'(a,3d16.6)' )' axis=',axis(:)
+ !write(std_out,*)' vecta=',vecta(:)
+ !stop
 
 end subroutine getspinrot
 !!***
@@ -2811,14 +2809,12 @@ subroutine reduce2primitive(ntranslat, rprimd, rprimd_primitive, tolsym, transla
  real(dp),intent(in) :: rprimd(3,3),translations(3,ntranslat)
  real(dp),intent(out) :: rprimd_primitive(3,3)
 
-
 !Local variables-------------------------------
 !scalars
  integer :: idir,itentative,itrans,replace
  character(len=500) :: msg
 !arrays
  real(dp) :: trans_cart(3,ntranslat),trans_red(3,ntranslat)
-
 !**************************************************************************
 
 !These translations should form the primitive lattice when combined with the non-primitive vectors.
@@ -2977,7 +2973,6 @@ subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
 !arrays
  integer :: symrel_it(3,3)
  real(dp) :: rprimd0_inv(3,3),strain(3,3),strain_symm(3,3),tmp_mat(3,3),symrel_db(3,3)
-
 !**************************************************************************
 
 !copy initial rprimd input and construct inverse
