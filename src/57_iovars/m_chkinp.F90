@@ -648,7 +648,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 
 !  dmftbandi, dmftbandf
-   if (dt%usedmft>0) then
+   if (dt%usedmft>0.and.dt%usedmft/=10) then
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftcheck',dt%dmftcheck,4,(/-1,0,1,2/),iout)
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -831,6 +831,35 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end do
      end if
    end if
+
+   ! Use of Wannier90 and TRIQS. Could use a new variable name instead. w90dmft?
+#if !defined HAVE_WANNIER90
+   if(dt%usedmft==10) then
+    write(msg, '(5a)') &
+    ' usedmft == 10 is only relevant with Wannier90. This ABINIT was not',ch10,&
+    ' compiled with Wannier90.',ch10,&
+    ' Action: check compilation options to link Wannier90.'
+    ABI_ERROR(msg)
+   endif
+#else
+   if(dt%usedmft==10) then
+    if(dt%prtwant /=2) then
+      write(msg, '(4a,i0,a)' )&
+       ' In DMFT with Wannier90 orbital, you have to use the Wannier90 interface,',ch10,&
+       ' which requires that you use the prtwant = 2 keyword. It was instead found to be ',ch10,&
+       dt%prtwant, '. Please look at the tutorial on Wannier90.'
+      ABI_ERROR(msg)
+    end if
+    if(dt%w90iniprj /=2) then
+      write(msg, '(5a,i0,2a)' )&
+       ' In DMFT with Wannier90 orbital, the only valid value for w90iniprj is 2,',ch10,&
+       ' meaning that the Wannier90 initial projection are defined in a .win file.',ch10,&
+       ' For this calculation, it was found to be ', dt%w90iniprj,ch10,&
+       ' Action: check the values of w90iniprj and the .win file.'
+      ABI_ERROR(msg)
+    end if
+   endif
+#endif
 
 #ifndef HAVE_TRIQS_v3_4
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
@@ -2964,7 +2993,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,1,cond_string,cond_values,ierr,'optforces',dt%optforces,2,(/0,2/),iout)
    end if
 !  When usedmft=1, optforces must be 0
-   if(dt%usedmft==1)then
+   if(dt%usedmft==1.or.dt%usedmft==10)then
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
      call chkint_eq(1,1,cond_string,cond_values,ierr,'optforces',dt%optforces,1,(/0/),iout)
    end if
@@ -3024,7 +3053,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
        call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
      end if
-     if (dt%usedmft==1) then
+     if (dt%usedmft==1.or.dt%usedmft==10) then
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
      end if
@@ -3951,7 +3980,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  usedmft
    if (dt%usedmft>0) then
      cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'usedmft',dt%usedmft,2,(/0,1/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'usedmft',dt%usedmft,3,(/0,1,10/),iout)
      if (dt%paral_kgb>0) then
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkint_eq(1,1,cond_string,cond_values,ierr,'npspinor',dt%npspinor,1,(/1/),iout)
@@ -4070,7 +4099,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  usedmft/usepawu and lpawu
 !  Restriction when use together
-   if(dt%usedmft>0.or.dt%usepawu/=0)then
+   if((dt%usedmft>0.and.dt%usedmft/=10).or.dt%usepawu/=0)then
      nlpawu=0
      do itypat=1,dt%ntypat
        if (dt%lpawu(itypat)/=-1) then
