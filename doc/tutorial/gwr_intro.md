@@ -389,10 +389,9 @@ export ELPAROOT="PATH_TO_ELPA_INSTALLATION_DIR"
 
 and then
 
+```
 with_linalg_flavor="mkl+elpa"
-<!-- LINALG_FCFLAGS="-I${MKLROOT}/include -I${ELPAROOT}/modules" -->
 LINALG_FCFLAGS="-I\${MKLROOT}/include -I\${ELPAROOT}/modules"
-<!-- LINALG_LIBS="-L${ELPAROOT}/lib -lelpa -L${MKLROOT}/lib -lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl" -->
 LINALG_LIBS="-L\${ELPAROOT}/lib -lelpa -L${MKLROOT}/lib -lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl"
 ```
 
