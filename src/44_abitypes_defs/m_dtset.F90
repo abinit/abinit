@@ -32,7 +32,7 @@ module m_dtset
  use m_matrix,       only : mati3inv
  use m_symtk,        only : littlegroup_q, symatm
  use m_symkpt,       only : symkpt
- use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
+ use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert, sylwtens
  use m_parser,       only : intagm, chkvars_in_string
  use m_crystal,      only : crystal_t
 
@@ -2721,6 +2721,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 !Local variables-------------------------------
 !scalars
  integer :: icase,idir,ikpt,ikpt1,ipert,isppol,isym,maxidir,mpert,nband_k,nsym1,timrev,timrev_pert
+ integer :: i1dir,i2dir,i3dir,i1pert,i2pert,i3pert
  integer :: to_compute_this_pert
  real(dp) :: tolsym8,ucvol
  character(len=500) :: msg
@@ -2729,6 +2730,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  integer,allocatable :: indkpt1(:,:),indsym(:,:,:),pertsy(:,:),rfpert(:),symq(:,:,:),symrec(:,:,:)
  integer, allocatable :: pert_tmp(:,:), pert_calc(:,:)
  integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:), bz2ibz_smap(:,:)
+ integer,allocatable :: rfpert_lw(:,:,:,:,:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: tnons1_tmp(:,:),wtk_folded(:)
 
@@ -2777,6 +2779,46 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
+
+!For longwave calculation:
+ if (dtset%prepalw/=0) then
+   ABI_MALLOC(rfpert_lw,(3,dtset%natom+8,3,dtset%natom+8,3,dtset%natom+8))
+   rfpert_lw=0
+   if (dtset%prepalw==1) then
+     rfpert_lw(:,1:dtset%natom+2,:,1:dtset%natom,:,dtset%natom+8)=1
+     rfpert_lw(:,1:dtset%natom+2,:,dtset%natom+3:dtset%natom+4,:,dtset%natom+8)=1
+   else if (dtset%prepalw==2) then
+     rfpert_lw(:,dtset%natom+2,:,1:dtset%natom,:,dtset%natom+8)=1
+   else if (dtset%prepalw==3) then
+     rfpert_lw(:,1:dtset%natom+2,:,1:dtset%natom,:,dtset%natom+8)=1
+   else if (dtset%prepalw==4) then
+     rfpert_lw(:,dtset%natom+2,:,dtset%natom+2,:,dtset%natom+8)=1
+   end if
+
+   call sylwtens(indsym,dtset%natom+8,dtset%natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel)
+
+   do i3pert = 1,dtset%natom+8
+     do i3dir = 1, 3
+       do i2pert = 1, dtset%natom+8
+         do i2dir = 1,3
+           do i1pert = 1,dtset%natom+8
+             do i1dir = 1, 3
+               if (rfpert_lw(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+                 if (pertsy(i1dir,i1pert)==-1) then
+                   pertsy(i1dir,i1pert)=1
+                 end if
+                 if (pertsy(i2dir,i2pert)==-1) then
+                   pertsy(i2dir,i2pert)=1
+                 end if
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+   ABI_FREE(rfpert_lw)
+ end if
 
  npert=0
 ! ABI_MALLOC(pert_tmp,(3*mpert))
