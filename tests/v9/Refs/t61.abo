@@ -778,7 +778,7 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
  edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
- Transport (RTA) calculation results:
+ Transport (RTA) calculation results, chemical potential adjusted with T:
 
  Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -798,6 +798,27 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
           300.00        0.31E+02        0.00E+00            0.00            0.00
 
 
+ Seebeck [Volts / Kelvin] using SERTA approximation
+ Temperature (K)              xx              yy              zz			
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00			
+ Temperature (K)              xx              yy              zz			
+          300.00   -0.374563E-02   -0.374563E-02   -0.374563E-02				 			
+
+
+ Kappa [W/m*K] using SERTA approximation			
+ Temperature (K)              xx              yy              zz			
+            1.00    0.000000E+00    0.000000E+00    0.000000E+00			
+ Temperature (K)              xx              yy              zz			
+          300.00    0.111384E-38    0.111384E-38    0.111384E-38			
+
+
+ Peltier [Volts] using SERTA approximation			
+ Temperature (K)              xx              yy              zz			
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00			
+ Temperature (K)              xx              yy              zz			
+          300.00   -0.112369E+01   -0.112369E+01   -0.112369E+01 
+
+
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
@@ -814,6 +835,27 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
+
+
+ Seebeck [Volts / Kelvin] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.374563E-02   -0.374563E-02   -0.374563E-02
+
+
+ Kappa [W/m*K] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00    0.111384E-38    0.111384E-38    0.111384E-38
+
+
+ Peltier [Volts] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.112369E+01   -0.112369E+01   -0.112369E+01
 
 
 
