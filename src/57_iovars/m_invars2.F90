@@ -2366,7 +2366,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcpxocc',tread,'INT')
  if(tread==1) then
    dtset%pawcpxocc=intarr(1)
- else if (dtset%nspinor==2.and.(dtset%usepawu/=0.or.dtset%usedmft>0)) then
+ else if(dtset%nspinor==2.and.(dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10))) then
    dtset%pawcpxocc=2
  else if (dtset%pawspnorb>0.and.(dtset%kptopt<=0.or.dtset%kptopt>=3)) then
    if (dtset%optdriver/=RUNL_GSTATE.or.dtset%ionmov<6.or.dtset%iscf<10) dtset%pawcpxocc=2
@@ -2466,7 +2466,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spnorbscl',tread,'DPR')
  if(tread==1) dtset%spnorbscl=dprarr(1)
 
- if (dtset%usedmft>0) then
+ if (dtset%usedmft>0.and.dtset%usedmft/=10) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_solv',tread,'INT')
    if(tread==1) dtset%dmft_solv=intarr(1)
    if (dtset%dmft_solv==6.or.dtset%dmft_solv==7) then ! change some default values for TRIQS
@@ -2666,15 +2666,20 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmft_triqs_wmax=dprarr(1)
      end if
    end if
+ elseif (dtset%usedmft==10) then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandi',tread,'INT')
+   if(tread==1) dtset%dmftbandi=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandf',tread,'INT')
+   if(tread==1) dtset%dmftbandf=intarr(1)
  end if
 
- if (dtset%usepawu/=0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'f4of2_sla',tread,'ENE')
    if(tread==1) dtset%f4of2_sla(1:ntypat)=dprarr(1:ntypat)
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'f6of2_sla',tread,'ENE')
    if(tread==1) dtset%f6of2_sla(1:ntypat)=dprarr(1:ntypat)
  end if
- if (dtset%usepawu>0.or.dtset%usedmft>0) then
+ if (dtset%usepawu>0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmatpuopt',tread,'INT')
    if(tread==1) dtset%dmatpuopt=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmatudiag',tread,'INT')
@@ -4022,7 +4027,7 @@ if (dtset%usekden==1) then
      end if
    end if
 
-   if (dtset%usepawu/=0.or.dtset%usedmft>0) then
+   if (dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
 
      dprarr(1:ntypat)=dtset%upawu(1:ntypat,iimage)
      call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'upawu',tread,'ENE')
