@@ -11,9 +11,10 @@ F. Brieuc
 """
 
 import sys
-import numpy as np
 import argparse
+import numpy as np
 from scipy.fftpack import fft, fftfreq
+from scipy.integrate import trapz
 
 # ------------------ Constants ----------------------
 hb = 1.054571817e-34   # J.s
@@ -73,10 +74,33 @@ def fourier_direct(time,signal,wcut,nfft):
     w = 2*np.pi*fftfreq(nfft,dt)
     # Fourier transform
     ft = np.conj(np.multiply(fft(ff),dt))
-    # Sort to get the righot order in frequency
+    # Sort to get the right order in frequency
     w,ft = zip(*sorted(zip(w,ft)))
 
     return np.array(w), np.array(ft)
+
+def search_keyword(lines, keyword):
+    for line in lines:
+        if keyword in line:
+            splitted_line = line.split()
+            for il, ls in enumerate(splitted_line):
+                if keyword in ls:
+                    return splitted_line[il+1]
+
+def parse_output(file):
+    """ 
+    Extract required infos from abinit output file 
+    """
+    # read file
+    with open(file) as f:
+        lines = f.readlines()
+    
+    tmp = search_keyword(lines,'nelect')
+    nele = float(tmp[:-1])
+    tmp = search_keyword(lines,'ucvol') 
+    vol = float(tmp)
+
+    return nele, vol
 
 # -------------------- Main ------------------------
 
@@ -86,6 +110,7 @@ parser.add_argument('-c', '--current', help='Name of the TDCURRENT file', requir
 parser.add_argument('-e', '--efield',  help='Name of the TDEFIELD file\
                                              or dirac if you used an impulse electric field (Dirac pulse)\
                                              see also the ezero parameter in that case', required=False)
+parser.add_argument('-o', '--outfile', help='Name of the Abinit output file (often *.abo)', required=False)
 parser.add_argument('-ez', '--ezero',  help='Amplitude of the electric field - Only used if -e dirac', required=False,
                                        type=float, default=1.0)
 parser.add_argument('-d', '--dir',     help='Direction (x, y or z) of electric field to consider (divide by E_dir)', required=False,
@@ -121,7 +146,12 @@ else:
 if args.tshift < 0:
     sys.exit("Wrong value of tshift! It should be larger than zero!")
 else:
-    tshift=int(args.tshift)
+    tshift=float(args.tshift)
+
+if args.outfile is None:
+    outfile = False
+else:
+    outfile = True
 
 if args.dir == 'x':
     dir=0
@@ -153,7 +183,7 @@ elif args.efield.strip().lower() == 'dirac':
     elif args.ezero > 0:
         ezero = args.ezero
     else:
-         sys.exit("Wrong value of ezero! It should be larger than zero!")
+        sys.exit("Wrong value of ezero! It should be larger than zero!")
 else:
     data = np.loadtxt(args.efield.strip())
     efield = data[:,2+dir]
@@ -193,7 +223,7 @@ print("")
 print("# Fourier transform")
 print("Number of frequency point used for FFT nfft =", nfft)
 print("Minimum angular frequency wmin = dw = ", 2*np.pi/(nfft*dt), "au", "=", 2*np.pi*au2ev/(nfft*dt), "eV")
-print("Maximum angular frequency wax = nfft*dw = ", np.pi/dt, "au", "=", np.pi*au2ev/dt, "eV")
+print("Maximum angular frequency wmax = nfft*dw = ", np.pi/dt, "au", "=", np.pi*au2ev/dt, "eV")
 
 # Perform Fourier transform of current density
 w, current_ft_x = fourier_direct(time,current[:,0],wcut,nfft)
@@ -201,19 +231,19 @@ w, current_ft_y = fourier_direct(time,current[:,1],wcut,nfft)
 w, current_ft_z = fourier_direct(time,current[:,2],wcut,nfft)
 
 # write out Fourier transform of current density
-nw = len(w)
 if (args.verbose):
     header = "Input current density\nall quantities are in Hartree atomic units.\ntime, J_x(t), J_y(t), J_z(t)"
     np.savetxt("current.dat",np.vstack([time,current[:,0],current[:,1],current[:,2]]).T,header=header)
 header = "FFT of current density\nall quantities are in Hartree atomic units.\n\
 w(ang. freq.), Re[J_x(w)], Im[J_x(w)], Re[J_y(w)], Im[J_y(w)], Re[J_z(w)], Im[J_z(w)]"
-np.savetxt("current_ft.dat", np.vstack([w,np.real(current_ft_x[0:nw]),np.imag(current_ft_x[0:nw]),
-                                          np.real(current_ft_y[0:nw]),np.imag(current_ft_y[0:nw]),
-                                          np.real(current_ft_z[0:nw]),np.imag(current_ft_z[0:nw])]).T, header=header)
+np.savetxt("current_ft.dat", np.vstack([w,np.real(current_ft_x),np.imag(current_ft_x),
+                                          np.real(current_ft_y),np.imag(current_ft_y),
+                                          np.real(current_ft_z),np.imag(current_ft_z)]).T, header=header)
 
 # Perform Fourier transform of electric field
 if calc_conducti:
     if dirac_pulse:
+        nw = len(w)
         efield_ft = ezero*np.ones(nw)+1j*np.zeros(nw)
     else:
         w, efield_ft = fourier_direct(time,efield,wcut,nfft)
@@ -231,28 +261,61 @@ if calc_conducti:
         np.savetxt("efield_ft.dat",np.vstack([w,np.real(efield_ft),np.imag(efield_ft)]).T,header=header)
 
     # Compute optical conductivity
-    sigma_x = np.divide(current_ft_x, np.real(efield_ft), where=np.real(efield_ft)!=0)
-    sigma_y = np.divide(current_ft_y, np.real(efield_ft), where=np.real(efield_ft)!=0)
-    sigma_z = np.divide(current_ft_z, np.real(efield_ft), where=np.real(efield_ft)!=0)
+    nmin = int(nw/2)+1; nmax = len(w)
+    w = w[nmin:nmax]
+    sigma_x = np.divide(current_ft_x[nmin:nmax], np.real(efield_ft[nmin:nmax]), where=np.real(efield_ft[nmin:nmax])!=0)
+    sigma_y = np.divide(current_ft_y[nmin:nmax], np.real(efield_ft[nmin:nmax]), where=np.real(efield_ft[nmin:nmax])!=0)
+    sigma_z = np.divide(current_ft_z[nmin:nmax], np.real(efield_ft[nmin:nmax]), where=np.real(efield_ft[nmin:nmax])!=0)
+
+    # f-sum rule test
+    if outfile:
+        nele, vol = parse_output(args.outfile)
+        print('')
+        print("# f-sum rule (Thomas-Reiche-Kuhn) for conductivity:")
+        wp2 = 4*np.pi*nele/vol 
+        # x-direction
+        I_sigma = trapz(np.real(sigma_x),x=w)
+        if (I_sigma > 1e-6):
+            print("x-direction:")
+            print("Without high freq. correction", I_sigma*8/wp2)
+            I_sigma = trapz(np.real(sigma_x)-np.real(sigma_x)[-1],x=w)
+            print("With high freq. correction", I_sigma*8/wp2)
+        # y-direction
+        I_sigma = trapz(np.real(sigma_y),x=w)
+        if (I_sigma > 1e-6):
+            print("y-direction:")
+            print("Without high freq. correction", I_sigma*8/wp2)
+            I_sigma = trapz(np.real(sigma_y)-np.real(sigma_y)[-1],x=w)
+            print("With high freq. correction", I_sigma*8/wp2)
+        # y-direction
+        I_sigma = trapz(np.real(sigma_z),x=w)
+        if (I_sigma > 1e-6):
+            print("z-direction:")
+            print("Without high freq. correction", I_sigma*8/wp2)
+            I_sigma = trapz(np.real(sigma_z)-np.real(sigma_z)[-1],x=w)
+            print("With high freq. correction", I_sigma*8/wp2)
+    else:
+        print('')
+        print("Note that the f-sum rule (Thomas-Reiche-Kuhn) for conductivity cannot be checked if you don't provide the abinit output file.")
 
     # write out conductivity
     header = "Optical conductivity sigma(w)\n w [Ha], w [eV], \
 Re[sigma_x] [au], Im[sigma_x] [au], Re[sigma_y] [au], Im[sigma_y] [au], Re[sigma_z] [au], Im[sigma_z] [au], \
 Re[sigma_x] [(Ohm.cm)^-1], Im[sigma_x] [(Ohm.cm)^-1], Re[sigma_y] [(Ohm.cm)^-1], Im[sigma_y] [(Ohm.cm)^-1], \
 Re[sigma_z] [(Ohm.cm)^-1], Im[sigma_z(w)] [(Ohm.cm)^-1]" 
-    np.savetxt("conductivity.dat",np.vstack([w[int(nw/2)+1:nw],w[int(nw/2)+1:nw]*au2ev,\
-                                  np.real(sigma_x[int(nw/2)+1:nw]), np.imag(sigma_x[int(nw/2)+1:nw]),\
-                                  np.real(sigma_y[int(nw/2)+1:nw]), np.imag(sigma_y[int(nw/2)+1:nw]),\
-                                  np.real(sigma_z[int(nw/2)+1:nw]), np.imag(sigma_z[int(nw/2)+1:nw]),\
-                                  np.real(sigma_x[int(nw/2)+1:nw])*au2Ohmcm1, np.imag(sigma_x[int(nw/2)+1:nw])*au2Ohmcm1,\
-                                  np.real(sigma_y[int(nw/2)+1:nw])*au2Ohmcm1, np.imag(sigma_y[int(nw/2)+1:nw])*au2Ohmcm1,\
-                                  np.real(sigma_z[int(nw/2)+1:nw])*au2Ohmcm1, np.imag(sigma_z[int(nw/2)+1:nw])*au2Ohmcm1]).T,
+    np.savetxt("conductivity.dat",np.vstack([w,w*au2ev,\
+                                  np.real(sigma_x), np.imag(sigma_x),\
+                                  np.real(sigma_y), np.imag(sigma_y),\
+                                  np.real(sigma_z), np.imag(sigma_z),\
+                                  np.real(sigma_x)*au2Ohmcm1, np.imag(sigma_x)*au2Ohmcm1,\
+                                  np.real(sigma_y)*au2Ohmcm1, np.imag(sigma_y)*au2Ohmcm1,\
+                                  np.real(sigma_z)*au2Ohmcm1, np.imag(sigma_z)*au2Ohmcm1]).T,
                                   header=header)
 
     # Compute dielectric tensor
-    eps_x = 4.0*np.pi*1j*np.divide(sigma_x[int(nw/2)+1:nw], w[int(nw/2)+1:nw])
-    eps_y = 4.0*np.pi*1j*np.divide(sigma_y[int(nw/2)+1:nw], w[int(nw/2)+1:nw])
-    eps_z = 4.0*np.pi*1j*np.divide(sigma_z[int(nw/2)+1:nw], w[int(nw/2)+1:nw])
+    eps_x = 4.0*np.pi*1j*np.divide(sigma_x, w)
+    eps_y = 4.0*np.pi*1j*np.divide(sigma_y, w)
+    eps_z = 4.0*np.pi*1j*np.divide(sigma_z, w)
     if dir==0:
         eps_x = 1.0 + eps_x
     if dir==1:
@@ -261,8 +324,8 @@ Re[sigma_z] [(Ohm.cm)^-1], Im[sigma_z(w)] [(Ohm.cm)^-1]"
         eps_z = 1.0 + eps_z
 
     # write out dielectric tensor
-    header = "Dielectric function epsilon(w) (unitless ie epsilon/epsilon_0)\n 
-w [Ha], w [eV], Re[eps_x], Im[eps_x], Re[eps_y], Im[eps_y], Re[eps_z], Im[eps_z]" 
-    np.savetxt("dielectric.dat",np.vstack([w[int(nw/2)+1:nw],w[int(nw/2)+1:nw]*au2ev,\
+    header = "Dielectric function epsilon(w) (unitless ie epsilon/epsilon_0)\n w [Ha], w [eV], \
+Re[eps_x], Im[eps_x], Re[eps_y], Im[eps_y], Re[eps_z], Im[eps_z]" 
+    np.savetxt("dielectric.dat",np.vstack([w,w*au2ev,\
                                 np.real(eps_x), np.imag(eps_x), np.real(eps_y), np.imag(eps_y),\
                                 np.real(eps_z), np.imag(eps_z)]).T, header=header)
