@@ -85,7 +85,6 @@ type, public :: dataset_type
  integer :: auxc_ixc
  integer :: awtr = 1
 !B
- integer :: balfilter
  integer :: bandpp
  integer :: bdeigrf
  integer :: berryopt
@@ -644,6 +643,7 @@ type, public :: dataset_type
  integer :: signperm
  integer :: slk_rankpp
  integer :: smdelta
+ integer :: spectral_cut
  integer :: spgaxor
  integer :: spgorig
  integer :: spgroup
@@ -1504,7 +1504,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%auxc_scal          = dtin%auxc_scal
  dtout%awtr               = dtin%awtr
  dtout%bandpp             = dtin%bandpp
- dtout%balfilter          = dtin%balfilter
  dtout%bdeigrf            = dtin%bdeigrf
  dtout%berryopt           = dtin%berryopt
  dtout%berrysav           = dtin%berrysav
@@ -2117,6 +2116,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%slabzend           = dtin%slabzend
  dtout%slk_rankpp         = dtin%slk_rankpp
  dtout%smdelta            = dtin%smdelta
+ dtout%spectral_cut       = dtin%spectral_cut
  dtout%spgaxor            = dtin%spgaxor
  dtout%spgorig            = dtin%spgorig
  dtout%spgroup            = dtin%spgroup
@@ -3461,7 +3461,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atvshift autoparal'
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
- list_vars=trim(list_vars)//' balfilter bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
+ list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brav brvltt builtintest'
  list_vars=trim(list_vars)//' bound_SPCoupling bound_anhaStrain bound_cell bound_cutoff bound_EFS bound_factors'
  list_vars=trim(list_vars)//' bound_maxCoeff bound_model bound_option  bound_penalty'
@@ -3693,7 +3693,7 @@ subroutine chkvars(string)
 !End SCALE-UP variables
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' slc_coupling slc_pot_fname'
- list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
+ list_vars=trim(list_vars)//' spbroad spectral_cut spgaxor spgorig spgroup spgroupma'
  !list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
  list_vars=trim(list_vars)//' spin_calc_thermo_obs'
  list_vars=trim(list_vars)//' spin_damping'

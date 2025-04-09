@@ -227,8 +227,8 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
- write(std_out,'(a)') 'Initialize spsl object'
- call spsl_init(spsl,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
+ write(std_out,'(a)') 'Initialize slice object'
+ call slice_init(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
 &                   dtset%paral_kgb,l_mpi_enreg%bandpp,&
 &                   dtset%mdeg_filter,space,1,spacecom,me_g0,me_g0_fft,l_paw,&
 &                   l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
@@ -237,7 +237,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  ! à l'intérieur de permute effectuer un transfer vers cpu
 
- call slice_divide(slice,dtset%balfilter)
+ call slice_split(slice,dtset%spectral_cut)
 
  ! après ça on peut supprimer cg de la mémoire GPU COMPLETEMENT
  ! pour revenir plus tard
@@ -273,7 +273,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  write(std_out,'(a)') 'Compute workload on-the-fly'
  ABI_NVTX_START_RANGE(NVTX_SPSL_WORK)
- call spsl_computeWorkload(spsl,dtset%tolfilter,dtset%balfilter)
+ call spsl_computeWorkload(spsl,dtset%tolfilter,dtset%spectral_cut)
  ABI_NVTX_END_RANGE()
  
  write(std_out,'(a)') 'Load balance (static)'

@@ -984,6 +984,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'pimass',tread,'DPR')
  if(tread==1) dtset%pimass(1:ntypat)=dprarr(1:ntypat)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spectral_cut',tread,'INT')
+ if(tread==1) dtset%spectral_cut=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spinmagntarget',tread,'DPR')
  if(tread==1) dtset%spinmagntarget=dprarr(1)
 
@@ -2862,9 +2865,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep_mixed',tread,'INT')
  if(tread==1) dtset%nstep_mixed=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'balfilter',tread,'INT')
- if(tread==1) dtset%balfilter=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
  if(tread==1) dtset%ntime=intarr(1)

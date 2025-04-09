@@ -267,7 +267,7 @@ module m_slice
         ! General slicing params
         integer :: nband_ovlp                        ! number of columns in overlap-free space
         integer :: npband                            ! number of MPI processes
-        integer :: balfilter                         ! spectral partition technique
+        integer :: spectral_cut                         ! spectral partition technique
         real(dp) :: glb                              ! global lower spectral bound
         real(dp) :: gub                              ! global upper spectral bound
         real(dp) :: ramp                             ! amplification factor for slices
@@ -345,7 +345,7 @@ module m_slice
     public :: sliceAll_allocBuffer              ! allocate parallel-safe memory buffer (overlapping slices)
     public :: sliceAll_freeBuffer               ! free     parallel-safe memory buffer (overlapping slices)
     public :: sliceAll_dos                      ! compute Density Of States (DOS)
-    public :: sliceAll_split                    ! define spectrum partition into overlapping slices
+    public :: slice_cut                    ! define spectrum partition into overlapping slices
     public :: sliceAll_merge                    ! merge converged slices by removing duplicates
     public :: slice_blockCopy                   ! copy column range of xgBlock to column range of xgBlock
     public :: sliceAll_default_paral            ! each MPI process contains a fixed 'bandpp' number of bands
@@ -435,7 +435,7 @@ subroutine sliceAll_init(sliceAll,neigenpairs,spacedim,tolerance,ecut,paral_kgb,
  sliceAll%nslice       = nslice
  sliceAll%npband       = xmpi_comm_size(comm_cols)
  sliceAll%ramp         = ramp
- sliceAll%balfilter    = balance
+ sliceAll%spectral_cut = balance
  sliceAll%nband_ovlp   = neigenpairs ! see initOverlapFree
  sliceAll%nbdbuf       = nbdbuf
  sliceAll%oracle       = oracle
@@ -888,12 +888,12 @@ end subroutine sliceAll_dos
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/sliceAll_split
+!!****f* m_slice/slice_cut
 !! NAME
-!! sliceAll_split
+!! slice_cut
 !! 
 !! FUNCTION
-!! Split spectrum to slices. Always performed on CPU
+!! Split spectrum into slices. Stores data into  
 !!
 !! INPUT
 !! sliceAll=         parameters common to all slices, such as
@@ -907,17 +907,19 @@ end subroutine sliceAll_dos
 !!
 !! SOURCE
 
-subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
+subroutine slice_cut(sliceAll,nband,idxAll,ndegAll,sboundAll,pband,npbandSlice,plot_filter)
 
     implicit none
 
     !Arguments ------------------------------------
     type(sliceAll_t), intent(inout) :: sliceAll
+    integer, intent(in) :: nband
     integer, pointer, intent(inout) :: idxAll(:,:)
     integer, pointer, intent(inout) :: ndegAll(:)
     integer, pointer, intent(inout) :: pband(:)
     integer, pointer, intent(inout) :: npbandSlice(:)
     real(dp), pointer, intent(inout) :: sboundAll(:,:)
+    logical, optional, intent(in) :: plot_filter
     
     !Local variables-------------------------------
     integer :: j,k,jmax,spos,nvec_ovlp,nvec,k1,k2
@@ -927,29 +929,30 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
     integer :: ndeg_max = 200
     integer :: balance_option
     integer :: ipt,npt,iptL,iptR
+    logical :: plot_filter_
     real(dp) :: ramp
     real(dp) :: tol12 = 1.0e-12
     real(dp) :: ecut,low,upp,glb,gub,c,r
     real(dp) :: lj,uj,wj,finL,finR,foutL,foutR
     real(dp) :: wlj,wuj
-    real(dp) :: fptL,fptR,ptL,ptR,fptIn
+    real(dp) :: fun_pt,pt
     real(dp) :: a_,b_ ! target interval scaled in -1,1
     type(xgBlock_t) :: Eig0_all, Res0_all
     ! arrays
+    integer :: jperm(nband-1)
+    real(dp) :: consdiff(nband-1)
     real(dp), allocatable :: slice_cut(:)
     real(dp), allocatable :: resid_cut(:)
     real(dp), pointer :: resid_(:,:)
     real(dp), pointer :: theta_(:,:)
     real(dp), allocatable, target :: resid(:)
     real(dp), allocatable, target :: theta(:)
-    !real(dp), pointer :: resid_ptr(:) => NULL()
-    !real(dp), pointer :: theta_ptr(:) => NULL()
-    real(dp) :: tsec(2)
 
 ! *********************************************************************
 
-    call timab(tim_sliceAll_split,1,tsec)
-   
+    plot_filter_ = .false.
+    if (present(plot_filter)) plot_filter_ = plot_filter
+
     ! Interval slicing parameters
     npband         = sliceAll%npband ! number of MPI processes
     bandpp         = sliceAll%bandpp ! fixed number of bands per MPI process
@@ -959,7 +962,7 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
     ecut           = sliceAll%ecut
     nline          = sliceAll%mdeg_filter
     paral_slice    = sliceAll%paral_slice
-    balance_option = sliceAll%balfilter
+    balance_option = sliceAll%spectral_cut
     ramp           = sliceAll%ramp
 
     ! Set pointers to eigenvalue and residual memory
@@ -1019,24 +1022,28 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
     slice_cut(1) = low
     slice_cut(nslice+1) = upp
     
-    ABI_MALLOC(resid_cut,(nslice+1))
-    resid_cut(:) = 0.d0
-    resid_cut(1) = sqrt(resid(pband(1)))
-    resid_cut(nslice+1) = sqrt(resid(pband(neigenpairs)))
-
     ! Compute spectral cuts on interior slices
     select case(balance_option)
     case(1)
         ! Balance interval widths
         slice_cut(2:nslice) = (/ (low+(upp-low)/nslice*j, j=1,nslice-1) /)
-        ! resid cut not implemented in that case
     case(2)
         ! Balance number of vectors
         slice_cut(2:nslice) = (/ (theta(neigenpairs/nslice*j), j=1,nslice-1) /)
-        resid_cut(2:nslice) = (/ (sqrt(resid(pband(neigenpairs/nslice*j))), j=1,nslice-1) /)
+    case(3)
+        ! Cut on spectral gaps=where eigenvalues are less concentrated
+        ! Sort consecutive differences by increasing order
+        jperm = (/ (k, k=1,nband-1) /)
+        consdiff = (/ (theta(k+1) - theta(k), k=1,nband-1) /)
+        call sort_dp(nband-1,consdiff,jperm,tol12)
+        ! Take median of largest gaps
+        do i=1,nslice
+            jmax = jperm(nband-i)
+            slice_cut(i+1) = (theta(jmax) + theta(jmax+1)) / 2.d0
+        end do
     end select
 
-    ! Operation count estimation for each slice
+    ! Define spectral subintervals and optimize degrees for individual slices
     do j=1,nslice
             
         ! Slice position, first (1), interior (2), last (3)
@@ -1064,12 +1071,6 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
         wj = (uj - lj) / 10.d0
         ! ndeg is ok (30)
 
-        ! Uncomment following two lines to use overlap width that depends on residuals
-        !wlj = resid_cut(j)
-        !wuj = resid_cut(j+1)
-        ! IML 28/01/2025 this does not guarantee a posteriori ratio < ramp. 
-        ! Also results in very high ndeg (like 139). 
-
         write(std_out,*) '------------ /Divide/ Slice ',j
         
         ! Uncomment following two lines to use wj fixed overlap width
@@ -1079,45 +1080,30 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
         ! *******************************************************************
         
         ndeg = nline
-
-        ! Filter support [l-w,u+w) scaled to [-1,1)
-        a_ = (lj-wlj-c)/r
-        b_ = (uj+wuj-c)/r
        
         ! Count eigenvalues in slice cut plus overlap 
         call count_values(lj-wlj,uj+wuj,theta,spos,neigenpairs,k1,k2,nvec)
         nvec_ovlp = nvec
         write(std_out,*) '    after overlap', k1,k2
 
-        ! FIXME Deactivate this part
-        ! Add padding for MPI efficiency
-        if (paral_slice==0) then
-            ! Nvec divides npband
-            if (npband > 1) then
-                nv_pad = pad_size(nvec,npband)
-                call shift_indices(spos,neigenpairs,nv_pad,k1,k2,nvec)
-            end if
-        else if (paral_slice==1) then
-            ! pad nvec (nv_pad=nvec+pad) to obtain multiple of bandpp
-            ! nv_pad = bandpp*nproc
-            nv_pad = (bandpp - modulo(nvec,bandpp)) + nvec
-            call shift_indices(spos,neigenpairs,nv_pad,k1,k2,nvec)
-        else if (paral_slice==2) then
-            ABI_BUG('Not implemented')
-        end if
-        write(std_out,*) '    after     pad', k1,k2
+        ! How to compute optimal degree in slice with overlap:
+        ! ********* control amplification ratio ********
+        ! The convergence ratio r0/rN depends on the amplification
+        ! ratios f(l)/f(l-w) and f(u)/f(u+w). Increasing w should
+        ! improve the convergence ratio.
 
-        ! Oscillations **********************************************
-        !                                         IML 29/01/2025
-        ! The convergence ratio r0/rN depends on the ratio
-        ! [min f(lambda_in)]/[max f(lambda_out)] approximated as
-        ! f(l)/f(l-w) and f(u)/f(u+w). However this approximation
-        ! might not be accurate, due to oscillations.
-        ! ***********************************************************
+        ! Filter support [l-w,u+w) scaled to [-1,1)
+        a_ = (lj-wlj-c)/r
+        b_ = (uj+wuj-c)/r
 
-        ! Compute optimal degree in slice with overlap
-        ! For Chebyshev, must compute the ratio of convergence
-        if (j > 1) then
+        if (j==1) then
+            ! uj,gub is the interval mapped to -1,1
+            ! in this interval Chebyshev poly is bounded by 1
+            ! remember uj,gub is the interval to ignore
+            ndeg = 4
+            do while
+            !write(std_out,*) 'first slice apriori=', 1.d0/cheb_poly1(lj,12,uj+wuj,ecut)
+        else
             ndeg = 4
             finL = 0.d0; finR = 0.d0; foutL = 1.d0; foutR = 1.d0
             do while ( (finL/foutL < ramp) .and. (finR/foutR < ramp) .and. (ndeg<ndeg_max) )
@@ -1127,87 +1113,37 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
                 foutR = bandpassIndicator_sca(b_      ,a_,b_,ndeg)
                 ndeg = ndeg + 1
             end do
-        else
-            !write(std_out,*) 'first slice apriori=', 1.d0/cheb_poly1(lj,12,uj+wuj,ecut)
         end if
-        ! FIXME impose fixed ndeg to test speed
-        !ndeg = 62
-
-        ! TODO IL 17/03/2025 clean this part and remove
-        ! Compare max f(lambda_out) (oscillations) vs. f(l-w),f(u+w) (approximation)
-        ! For first slice situation is quite different, ndeg not tuned for the moment
-        !write(std_out,*) ' '
-        if (j>1) then
-            !write(std_out,*) 'Filter oscillations for slice=', lj,uj
-            !write(std_out,*) '                        width=', uj-lj
-            !write(std_out,*) '                    scaled to=', (lj-c)/r,(uj-c)/r
-            npt = 1000 ! number of points to test for oscillations
-            ! Maximum value in [glb,l) and [u,ulb), outside slice [u,l)
-            foutL = bandpassIndicator_sca(a_,a_,b_,ndeg)
-            foutR = bandpassIndicator_sca(b_,a_,b_,ndeg)
-            iptL = maxloc((/ (bandpassIndicator_sca((glb+(ipt-1)*(lj-glb)/npt-c)/r,a_,b_,ndeg),ipt=1,npt) /),dim=1)
-            iptR = maxloc((/ (bandpassIndicator_sca((uj+(ipt-1)*(gub-uj)/npt-c)/r,a_,b_,ndeg),ipt=1,npt) /),dim=1)
-            ptL = (glb+(iptL-1)*(lj-glb)/npt-c)/r
-            ptR = (uj+(iptR-1)*(gub-uj)/npt-c)/r
-            fptL = bandpassIndicator_sca(ptL,a_,b_,ndeg)
-            fptR = bandpassIndicator_sca(ptR,a_,b_,ndeg)
-            !write(std_out,*) '***** Outer: max   f(t)=', fptL,fptR 
-            !write(std_out,*) '             argmax   t=', ptL,ptR
-            !write(std_out,*) '                  estim=', foutL,foutR
-            ! Maximum value inside slice [u,l)
-            finL = bandpassIndicator_sca((lj-c)/r,a_,b_,ndeg)
-            finR = bandpassIndicator_sca((uj-c)/r,a_,b_,ndeg)
-            iptL = minloc((/ (bandpassIndicator_sca((lj+(ipt-1)*(uj-lj)/npt-c)/r,a_,b_,ndeg),ipt=1,npt) /),dim=1)
-            ptL = (lj+(iptL-1)*(uj-lj)/npt-c)/r
-            fptIn = bandpassIndicator_sca(ptL,a_,b_,ndeg)
-            !write(std_out,*) '***** Inner: min   f(t)=', fptIn
-            !write(std_out,*) '             argmin   t=', ptL
-            !write(std_out,*) '                  estim=', finL,finR
-            !write(std_out,*) '======= Convergence rate inner/outer=',fptIn/max(fptL,fptR)
-            ! This convergence rate should be compared to the a posteriori convergence rate
-        else
-            !write(std_out,*) 'First slice=', lj,uj
-            !write(std_out,*) '      width=', uj-lj
-            !write(std_out,*) '  scaled to=', (lj-c)/r,(uj-c)/r
-        end if
-        !write(std_out,*) ' '
 
         ! Plot filter
-        npt = 100
-        if (j>1) then
-            !write(std_out,*) ' '
-            !write(std_out,*) 'Plot filter ==== x | f(x)'
-            
-            ! This is for convergence rate
-            !fptR = max(bandpassIndicator_sca((lj-wlj-c)/r,a_,b_,ndeg),bandpassIndicator_sca((uj+wuj-c)/r,a_,b_,ndeg))
-            do ipt=1,npt
-                ptL = (lj + (ipt-1)*(uj-lj)/npt - c)/r
-                fptL = bandpassIndicator_sca(ptL,a_,b_,ndeg)
-                !write(std_out,*) ptL, fptL
-                !write(std_out,*) ptL, fptL, 'conv rate approx=', fptL/fptR ! current inn
-            end do
-
-            !write(std_out,*) ' '
-        else
-            !write(std_out,*) ' '
-            fptR = cheb_poly1(uj+wuj,12,uj+wuj,gub) ! max out
-            do ipt=1,npt
-                ! uj,gub is the interval mapped to -1,1
-                ! in this interval Chebyshev poly is bounded by 1
-                ! so uj,gub is the interval to ignore
-                ptL = lj + (ipt-1)*(uj-lj)/npt
-                fptL = cheb_poly1(ptL,12,uj+wuj,gub)
-                ! FIXME need to take absolute value: T_n<0 for n odd
-                !write(std_out,*) ptL, fptL, 'conv rate approx=', fptL/fptR ! current inn
-            end do
-            !write(std_out,*) ' '
+        if (plot_filter_) then
+            write(std_out,*) ' '
+            write(std_out,*) 'Plot filter ==== x | f(x)'
+            npt = 100
+            if (j==1) then
+                do ipt=1,npt
+                    pt = lj + (ipt-1)*(uj-lj)/npt
+                    fun_pt = cheb_poly1(pt,ndeg,uj+wuj,gub)
+                    write(std_out,*) pt, fun_pt
+                end do
+            else
+                do ipt=1,npt
+                    pt = (lj + (ipt-1)*(uj-lj)/npt - c)/r
+                    fun_pt = bandpassIndicator_sca(pt,a_,b_,ndeg)
+                    write(std_out,*) pt, fun_pt
+                end do
+            end if
+            write(std_out,*) ' '
         end if
 
         ! Print slice interval info
         write(std_out,*) 'Without overlap=', lj, uj
         write(std_out,*) '          width=', uj-lj
+        write(std_out,*) '      scaled to=', (lj-c)/r,(uj-c)/r
         write(std_out,*) 'With    overlap=', lj-wlj, uj+wuj
         write(std_out,*) '          width=', uj+wuj-lj+wlj
+        write(std_out,*) '      scaled to=', (lj-wlj-c)/r,(uj+wuj-c)/r
+        write(std_out,*) 'With    overlap=', lj-wlj, uj+wuj
         write(std_out,*) '  nvec(balance)=', neigenpairs/nslice
         write(std_out,*) '      nvec_ovlp=', nvec_ovlp
         write(std_out,*) '           nvec=', nvec
@@ -1217,6 +1153,8 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
 
         ! Store slice parameters
         idxAll(j,1:2) = (/k1,k2/)
+        ! FIXME add nband (nband per slice with overlap)
+        nbandAll(j) = k2 - k1 + 1
         ndegAll(j) = ndeg
         sboundAll(j,1:4) = (/lj,uj,lj-wlj,uj+wuj/) 
            
@@ -1227,7 +1165,10 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
     sliceAll%idx => idxAll 
     sliceAll%ndeg => ndegAll
     sliceAll%sbound => sboundAll
-    sliceAll%npbandSlice => npbandSlice ! TODO distribute
+    sliceAll%npbandSlice => npbandSlice
+
+    mpi_slice%rule_nband => nbandAll
+    mpi_slice%rule_ndeg => ndegAll
 
     ! Free workspace not needed
     if (allocated(slice_cut)) ABI_FREE(slice_cut)
@@ -1235,9 +1176,7 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
     if (allocated(theta)) ABI_FREE(theta)
     if (allocated(resid)) ABI_FREE(resid)
    
-    call timab(tim_sliceAll_split,2,tsec)
-
-end subroutine sliceAll_split
+end subroutine slice_cut
 !!***
 
 !----------------------------------------------------------------------
@@ -1983,7 +1922,7 @@ subroutine spsli_run()
 &                   dtset%paral_kgb,dtset%paral_slice,l_mpi_enreg%bandpp,dtset%mdeg_filter,&
 &                   space,1,l_mpi_enreg%comm_bandspinorfft,me_g0,me_g0_fft,l_paw,&
 &                   l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
-&                   nslice,npband,dtset%tolfilter,dtset%balfilter,&
+&                   nslice,npband,dtset%tolfilter,dtset%spectral_cut,&
 &                   dtset%nbdbuf,0,dtset%oracle_factor,dtset%oracle_min_occ,& ! oracle=0
 &                   l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
 &                   gpu_thread_limit=dtset%gpu_thread_limit)
@@ -2531,6 +2470,9 @@ subroutine slice_init(sliceAll,slice,islice)
     call xgBlock_reshape(slice%EW%self, (/nband_slice,1/))
     call xgBlock_reshape(slice%RW%self, (/nband_slice,1/))
 
+    ! Attention T_n<0 for n odd
+    ! TODO add a warning for fist slice
+
     ! Set pointers to slice memory
     slice%xgx0 = slice%XW%self
     slice%xgeigen = slice%EW%self
@@ -2669,141 +2611,6 @@ subroutine slice_free(slice)
     call timab(tim_slice_free,2,tsec)
 
 end subroutine slice_free
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_split
-!! NAME
-!! slice_split
-!! 
-!! FUNCTION
-!! Split spectrum to slices. 
-!!
-!! SOURCE
-
-! IML 24/01/2025 not used for the moment
-subroutine slice_split(slices,nslice,nband,npband,theta,resid,iperm,ecut,ramp,balance,nline)
-
-    implicit none
-
-    !Arguments ------------------------------------
-    type(slice_t), pointer, intent(inout) :: slices(:)
-    integer, pointer, intent(inout) :: iperm(:)
-    integer, intent(in) :: nband,balance,nline,npband,nslice
-    real(dp), intent(in) :: ecut,ramp
-    real(dp), target, intent(inout) :: theta(nband)
-    real(dp), target, intent(in) :: resid(nband)
-    
-    !Local variables-------------------------------
-    integer :: i,j,k,jmax,spos,nvec_ovlp,nvec,k1,k2
-    integer :: nv_offset,nv_extra,nv_pad,ndeg
-    integer :: jperm(nband-1)
-    real(dp) :: tol12 = 1.0e-12
-    real(dp) :: low,upp,glb,gub,gam,center,radius
-    real(dp) :: lj,uj,lopj,uopj,wj
-    real(dp) :: consdiff(nband-1)
-    real(dp) :: slice_cut(nslice+1)
-    real(dp) :: tsec(2)
-
-! *********************************************************************
-
-    call timab(tim_sliceAll_split,1,tsec)
-   
-    ! Sort thetas in increasing order
-    call sort_dp(nband,theta,iperm,tol12)
-    
-    ! Spectrum bounds
-    low = theta(1)
-    upp = theta(nband)
-    ! Bounds that contain entire spectrum (guaranteed)
-    glb = low - sqrt(resid(1))
-    gub = ecut
-   
-    ! Initialize spectral cuts
-    slice_cut(:) = 0.d0
-    slice_cut(1) = low
-    slice_cut(nslice+1) = upp
-
-    ! Compute spectral cuts on interior slices
-    select case(balance)
-    case(0) ! Balance spectral gaps = where eigenvalues are less concentrated
-
-        ! Sort consecutive differences by increasing order
-        jperm = (/ (k, k=1,nband-1) /)
-        consdiff = (/ (theta(k+1) - theta(k), k=1,nband-1) /)
-        call sort_dp(nband-1,consdiff,jperm,tol12)
-
-        ! Take median of largest gaps
-        do i=1,nslice
-            jmax = jperm(nband-i)
-            slice_cut(i+1) = (theta(jmax) + theta(jmax+1)) / 2.d0
-        end do
-
-    case(1)
-
-        ! Balance interval widths
-        slice_cut(2:nslice) = (/ (low+(upp-low)/nslice*j, j=1,nslice-1) /)
-
-    case(2)
-
-        ! Balance number of vectors
-        slice_cut(2:nslice) = (/ (theta(nband/nslice*j), j=1,nslice-1) /)
-
-    end select
-
-    ! Operation count estimation for each slice
-    do j=1,nslice
-            
-        ! Slice position, first (1), interior (2), last (3)
-        spos = 2
-        if (j==1) spos = 1
-        if (j==nslice) spos = 3
-
-        ! Count eigenvalues in slice cut plus overlap 
-        lj = slice_cut(j)
-        uj = slice_cut(j+1)
-        wj = (uj - lj) / 10.d0
-        call count_values(lj-wj,uj+wj,theta,spos,nband,k1,k2,nvec)
-        nvec_ovlp = nvec
-
-        ! Add extra fraction of eigenvalues
-        ! This prevents eigenvalues from moving between slices
-        write(std_out,*) 'before', k1,k2
-        nv_offset = 15 ! add this as ABINIT input var
-        nv_extra = ceiling(nv_offset * nvec / 100.d0)
-        call shift_indices(spos,nband,nv_extra,k1,k2,nvec)
-        write(std_out,*) 'after +15%', k1,k2
-         
-        ! Add padding for MPI efficiency
-        if (npband > 1) then
-            nv_pad = pad_size(nvec,npband)
-            call shift_indices(spos,nband,nv_pad,k1,k2,nvec)
-        end if
-        write(std_out,*) 'after pad', k1,k2
-
-        ! Compute optimal degree in enlarged slice (Overlap+Pad)
-        ndeg = nline
-        lopj = theta(k1)
-        uopj = theta(k2)
-        center = (glb + gub) / 2.d0
-        radius = (gub - glb) / 2.d0
-        if (j > 1) then
-            if (uopj - lopj < 0.d1) then
-                write(std_out,*) 'Slice ',j,' of ',i,'is too thin.'
-                continue
-            end if
-            call slice_optimize_bandpass(lopj,uopj,center,radius,ramp,gam,ndeg)
-        end if
-
-        write(std_out,*) 'slice ',j,' of ',i,':nvec_ovlp=',nvec_ovlp,',nvec=',nvec,',ndeg=',ndeg
-            
-    
-    end do
-    
-    call timab(tim_sliceAll_split,2,tsec)
-
-end subroutine slice_split
 !!***
 
 !----------------------------------------------------------------------
@@ -3104,7 +2911,7 @@ end subroutine slice_merge
 !! FUNCTION
 !! Return number of consecutive theta values in interval [a,b)
 !! and their index range (first and last indices).
-!! Slice position (spos) takes into account limiting indices.
+!! Slice position (spos) takes into account extremal indices.
 !! 
 !! SOURCE
 
@@ -3129,76 +2936,6 @@ subroutine count_values(low,upp,theta,spos,nband,i1,i2,nvec)
     nvec = i2 - i1 + 1
 
 end subroutine count_values
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/shift_indices
-!! NAME
-!! shift_indices
-!! 
-!! FUNCTION
-!! Shift first and last slice indices by some number
-!! 
-!! SOURCE
-
-subroutine shift_indices(spos,nband,nv_extra,i1,i2,nvec)
-
-    implicit none
-
-    !Arguments ------------------------------------
-    integer, intent(in) :: spos,nband,nv_extra
-    integer, intent(inout) :: i1,i2,nvec
-    !Local variables-------------------------------
-    integer :: nv_extra_half
-
-! *********************************************************************
-
-    nv_extra_half = Int(ceiling(nv_extra / 2.d0))
-    select case(spos)
-    case(1) ! first slice 
-        i1 = 1
-        i2 = i2 + nv_extra
-    case(3) ! last slice
-        i1 = i1 - nv_extra
-        i2 = nband
-    case(2) ! interior slice
-        i1 = i1 - nv_extra_half
-        i2 = i2 + nv_extra - nv_extra_half
-    end select
-    nvec = i2 - i1 + 1
-
-end subroutine shift_indices
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/pad_size
-!! NAME
-!! pad_size
-!! 
-!! FUNCTION
-!! Insert padding to size for efficient parallelisation over nproc 
-!! processes. Result is minimum increment of size_a divisible by nproc.
-!!
-!! SOURCE
-
-function pad_size(size_a, nproc) result(incr_a)
-
-    implicit none
-
-    !Arguments ------------------------------------
-    integer, intent(in) :: size_a
-    integer, intent(in) :: nproc
-    
-    !Local variables-------------------------------
-    integer :: incr_a
-
-! *********************************************************************
-
-    incr_a = nproc - modulo(size_a, nproc)
-
-end function pad_size
 !!***
 
 !----------------------------------------------------------------------
@@ -4754,11 +4491,13 @@ subroutine mpiSlice_init(mpi_slice,distribution)
     slice_color = lookup(my_rank)
 
     !rule_nband(islice)= number of bands contained in slice
+    !rule_ndeg(islice)= computational load for slice (eg degree)
     !rule_nproc(islice)= number of processes working for slice
     !lookup_bandpp_me(iproc)= number of bands contained in proc
     !lookup_slice_me(iproc)= slice index contained in proc
 
     ABI_MALLOC(mpiSlice%rule_nband, (nslice)) 
+    ABI_MALLOC(mpiSlice%rule_ndeg, (nslice))
     ABI_MALLOC(mpiSlice%rule_nproc, (nslice))
     ABI_MALLOC(mpiSlice%lookup_bandpp_me, (nproc))
     ABI_MALLOC(mpiSlice%lookup_slice_me, (nproc))
@@ -4773,6 +4512,13 @@ subroutine mpiSlice_init(mpi_slice,distribution)
 
     ABI_MALLOC(mpiSlice%nrowsLinalg, (nproc))
 
+    ! Load balance with charge=bandpp or with charge=ndeg*bandpp
+    select case(load_balance)
+    case(BANDPP)
+        call compute_uniform_distribution(mpi_slice%rule_nproc,nproc,nband)
+    case(BANDPPXNDEG)
+        call compute_weighted_distribution(mpi_slice%rule_nproc,nproc,nband)
+    end select
 
     map_slice_to_proc
 
