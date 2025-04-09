@@ -105,10 +105,7 @@ module m_slice
 
     ! Several (private) parameters
     !-------------------------------------------------
-    integer, parameter :: tim_sliceAll_dos          = 2161
-    integer, parameter :: tim_sliceAll_init         = 2162
     integer, parameter :: tim_sliceAll_split        = 2163
-    integer, parameter :: tim_sliceAll_merge        = 2165
     integer, parameter :: tim_sliceAll_free         = 2166
     integer, parameter :: tim_slice2_RR             = 2169
     integer, parameter :: tim_slice2_invovl         = 2170
@@ -340,13 +337,14 @@ module m_slice
     public :: spsl_run         ! Run Spectrum slicing
     public :: spsl_free        ! Free parameters
 
-    public :: sliceAll_init                     ! initiate sliceAll data type object
+    public :: slice_init                     ! initiate sliceAll data type object
     public :: sliceAll_free                     ! free     sliceAll data type object
     public :: sliceAll_allocBuffer              ! allocate parallel-safe memory buffer (overlapping slices)
     public :: sliceAll_freeBuffer               ! free     parallel-safe memory buffer (overlapping slices)
-    public :: sliceAll_dos                      ! compute Density Of States (DOS)
-    public :: slice_cut                    ! define spectrum partition into overlapping slices
-    public :: sliceAll_merge                    ! merge converged slices by removing duplicates
+    public :: slice_getSpectrum         ! compute spectrum as Rayleigh quotients
+    public :: slice_distributeSpectrum  ! distribute spectral slices to processes
+    public :: slice_cutSpectrum         ! split spectrum into overlapping slices
+    public :: slice_mergeConverged      ! merge converged slices by removing duplicates
     public :: slice_blockCopy                   ! copy column range of xgBlock to column range of xgBlock
     public :: sliceAll_default_paral            ! each MPI process contains a fixed 'bandpp' number of bands
     public :: sliceAll_balanced_paral           ! each MPI process contains its own cost-optimal number of bands
@@ -729,12 +727,12 @@ end subroutine spsl_loadBalance
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/sliceAll_dos
+!!****f* m_slice/slice_computeDos
 !! NAME
-!! sliceAll_dos
+!! slice_computeDos
 !! 
 !! FUNCTION
-!! Compute Density Of States (DOS) for all bands.
+!! Compute density of states (DOS) for all bands.
 !! 
 !! SOURCE
 
@@ -886,11 +884,21 @@ subroutine sliceAll_dos(sliceAll,X0,getAX_BX,nspinor)
 end subroutine sliceAll_dos
 !!***
 
+subroutine slice_distributeSpectrum(slice,spectral_cut)
+
+    pband_ptr => slice%pband
+    Xrowb = slice%Xrowb ! assumes X is a row block
+    call slice_cutSpectrum(slice,spectral_cut)
+    call xgBlock_permuteCols(Xrowb,spacedim,nband,pband_ptr)
+    call slice_distributeSpectrum
+
+end subroutine slice_distributeSpectrum
+
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_cut
+!!****f* m_slice/slice_cutSpectrum
 !! NAME
-!! slice_cut
+!! slice_cutSpectrum
 !! 
 !! FUNCTION
 !! Split spectrum into slices. Stores data into  
@@ -907,7 +915,7 @@ end subroutine sliceAll_dos
 !!
 !! SOURCE
 
-subroutine slice_cut(sliceAll,nband,idxAll,ndegAll,sboundAll,pband,npbandSlice,plot_filter)
+subroutine slice_cutSpectrum(sliceAll,nband,idxAll,ndegAll,sboundAll,pband,npbandSlice,plot_filter)
 
     implicit none
 
@@ -969,7 +977,7 @@ subroutine slice_cut(sliceAll,nband,idxAll,ndegAll,sboundAll,pband,npbandSlice,p
     Eig0_all = sliceAll%Eig0%self
     Res0_all = sliceAll%Res0%self
 
-    ! Results could be complex (with null imaginary part), so neigenpairs has to be in cols, not rows
+    ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(Eig0_all,theta_,rows=1,cols=neigenpairs)
     call xgBlock_reverseMap(Res0_all,resid_,rows=1,cols=neigenpairs)
 
@@ -978,14 +986,10 @@ subroutine slice_cut(sliceAll,nband,idxAll,ndegAll,sboundAll,pband,npbandSlice,p
     ABI_MALLOC(resid,(neigenpairs))
     theta(1:neigenpairs) = theta_(1,1:neigenpairs)
     resid(1:neigenpairs) = resid_(1,1:neigenpairs)
-    !theta_ptr => theta
-    !resid_ptr => resid
 
     ! Sort thetas in increasing order and store permutation
     call sort_dp(neigenpairs,theta,pband,tol12)
     
-    ! TODO sort resid wrt pband as well
-
     !write(std_out,*) 'Rayleigh Values after sort:'
     !write(std_out,*) theta(:)
 
@@ -1176,7 +1180,7 @@ subroutine slice_cut(sliceAll,nband,idxAll,ndegAll,sboundAll,pband,npbandSlice,p
     if (allocated(theta)) ABI_FREE(theta)
     if (allocated(resid)) ABI_FREE(resid)
    
-end subroutine slice_cut
+end subroutine slice_cutSpectrum
 !!***
 
 !----------------------------------------------------------------------
@@ -1424,18 +1428,19 @@ end subroutine sliceAll_run
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/sliceAll_merge
+!!****f* m_slice/slice_mergeConverged
 !! NAME
-!! sliceAll_merge
+!! slice_mergeConverged
 !! 
 !! FUNCTION
 !! Find converged eigenvalues in each slice using a criterion.
+!! [^Not true. For the moment we brutally merge using interval limits]
 !! Return range of first and last index to merge per slice, both 
 !! computed from a residual criterion on eigenvalues.
 !! 
 !! SOURCE
 
-subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
+subroutine slice_mergeConverged(sliceAll,idx_ovlp,idx_merge,merge_option)
 
     implicit none
 
@@ -1452,7 +1457,6 @@ subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
     real(dp) :: ramp,slow,supp,flow,fupp
     real(dp) :: glb,gub
     real(dp) :: c,r ! center, radius
-    real(dp) :: convr_L,convr_R ! convergence rates
     type(xgBlock_t) :: Eig0_all, Res0_all
     ! arrays
     integer, pointer :: pband(:)
@@ -1460,16 +1464,11 @@ subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
     real(dp), pointer :: thetaN(:,:), residN(:,:)
     !real(dp), pointer :: theta0_(:), resid0_(:)
     !real(dp), pointer :: thetaN_(:), residN_(:)
-    real(dp), allocatable :: convr_slice(:)
     real(dp), allocatable :: resid0_slice(:)
     real(dp), allocatable :: residN_slice(:)
-    real(dp), allocatable :: residNapprox_slice(:)
     real(dp), allocatable :: theta_slice(:)
-    real(dp) :: tsec(2)
  
     ! *********************************************************************
-
-    call timab(tim_sliceAll_merge,1,tsec)
 
     ! Various variables
     nslice = sliceAll%nslice
@@ -1492,12 +1491,6 @@ subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
     call xgBlock_reverseMap(sliceAll%xgeigen_ovlp,thetaN,rows=1,cols=nband_ovlp)
     call xgBlock_reverseMap(sliceAll%xgresidu_ovlp,residN,rows=1,cols=nband_ovlp)
 
-    ! Workaround for dimensions 
-    !theta0_ => theta0(1,1:neigenpairs)
-    !resid0_ => resid0(1,1:neigenpairs)
-    !thetaN_ => thetaN(1,1:nband_ovlp)
-    !residN_ => residN(1,1:nband_ovlp)
-
     ! Use index maps to recover bands associated to a slice
     nband_conv = 0
     do islice=1,nslice
@@ -1517,19 +1510,14 @@ subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
         j2 = idx_ovlp(islice,2)
 
         ABI_MALLOC(theta_slice,(nband_slice))
-        ABI_MALLOC(convr_slice,(nband_slice))
         
         ABI_MALLOC(residN_slice,(nband_slice))
         ABI_MALLOC(resid0_slice,(nband_slice))
-        ABI_MALLOC(residNapprox_slice,(nband_slice))
 
-        !theta_slice(1:nband_slice) = 1.d0/thetaN(1,j1:j2)+(supp-slow)/2.d0 ! after slicing
+        ! Assumes row distribution (process has all nbands_slice in memory)
         theta_slice(1:nband_slice) = thetaN(1, j1:j2) ! after slicing
-        !write(std_out,*) 'debug', i1,i2,j1,j2
         residN_slice(1:nband_slice) = sqrt(residN(1,j1:j2))
         resid0_slice(1:nband_slice) = sqrt(resid0(1,pband(i1:i2)))
-
-        convr_slice(1:nband_slice) = sqrt(resid0(1,pband(i1:i2)))/sqrt(residN(1,j1:j2))
 
         ! Slice position, first (1), interior (2), last (3)
         spos = 2
@@ -1546,23 +1534,11 @@ subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
         call count_values(slow,supp,theta_slice,spos,nband_slice,k1,k2,nvec_count)
         write(std_out,*) 'Partition:', slow, supp
         write(std_out,*) 'number of eigenvalues in Partition =', nvec_count
-        write(std_out,*) 'max residual rN       in Partition =', maxval(sqrt(residN(1,j1:j2)))
-        write(std_out,*) 'min rate r0/rN        in Partition =', minval(convr_slice(k1:k2))
+        write(std_out,*) 'max residual rN       in Partition =', maxval(sqrt(residN_slice(k1:k2)))
         ! Print boundaries of this kept range
         write(std_out,*) 'min eigenvalue in Partition (kept) =', minval(theta_slice(k1:k2))
         write(std_out,*) 'max eigenvalue in Partition (kept) =', maxval(theta_slice(k1:k2))
  
-        ! Compute a posteriori estimation r0/rN ~ min(f(lambda_in))/max(f(lambda_out))
-        !k_out = max(k1-1,1)
-        !convr_L = bandpassIndicator_sca((theta_slice(k1)-c)/r,(flow-c)/r,(fupp-c)/r,ndeg) / &
-        !&          bandpassIndicator_sca((theta_slice(k_out)-c)/r,(flow-c)/r,(fupp-c)/r,ndeg)
-        !k_out = min(k2+1,nband_slice)
-        !convr_R = bandpassIndicator_sca((theta_slice(k2)-c)/r,(flow-c)/r,(fupp-c)/r,ndeg) / &
-        !          bandpassIndicator_sca((theta_slice(k_out)-c)/r,(flow-c)/r,(fupp-c)/r,ndeg)
-        !write(std_out,*) '        L and R approximation in slice=', convr_L, convr_R
-
-        !if (nvec_count < nband_slice) write(std_out,*) 'slice is not full' 
-
         ! Store limited indices in overlap-free memory, attention shift k1,k2 by j1
         if (nband_conv+k2-k1+1>neigenpairs) then
             ! excess of eigenvalues, ignore last ones
@@ -1583,56 +1559,23 @@ subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
         call count_values(flow,fupp,theta_slice,spos,nband_slice,k1,k2,nvec_count)
         write(std_out,*) 'Support:', flow, fupp
         write(std_out,*) 'number of eigenvalues in Support      =', nvec_count
-        write(std_out,*) 'worst convergence rate Support        =', minval(convr_slice(k1:k2))
+        write(std_out,*) 'max residual rN       in Support      =', maxval(sqrt(residN_slice(k1:k2)))
         ! Print boundaries of this kept range
         write(std_out,*) 'min eigenvalue in Support (converged) =', minval(theta_slice(k1:k2))
         write(std_out,*) 'max eigenvalue in Support (converged) =', maxval(theta_slice(k1:k2))
 
-        ! Number of eigenvalues with convergence ratio smaller than target
-        ! normally this number should be larger than number of kept vals in slice
-        !call count_values(1.1d0,10000000.d0,convr_slice,spos,nband_slice,k1,k2,nvec_count)
-        !write(std_out,*) 'converged eigvals nb=', nvec_count, minval(convr_slice)
-
-        ! Compute approximation rn approx r0*max(fout)/fin for every filter support eigenvalue [flow,fupp)
-!        if (islice==1) then
-!            residNapprox_slice(k1:k2) = (/(resid0_slice(k)/cheb_poly1(theta_slice(k),12,fupp,gub), k=k1,k2)/)
-!        else
-!            ! convr_L=max f(outer eigenvalues)
-!            convr_L = max(bandpassIndicator_sca((flow-c)/r,(flow-c)/r,(fupp-c)/r,ndeg),&
-!&                         bandpassIndicator_sca((fupp-c)/r,(flow-c)/r,(fupp-c)/r,ndeg))
-!            residNapprox_slice(k1:k2) = (/(resid0_slice(k)*convr_L/&
-!&                         bandpassIndicator_sca((theta_slice(k)-c)/r,(flow-c)/r,(fupp-c)/r,ndeg),k=k1,k2)/) 
-!        end if 
-        
-        ! Print results eigenvalue, residualN and residual0 (useful to get convergence rate)
-        !write(std_out,*) ''
-        !write(std_out,*) 'min computed eigenvalue in slice=', minval(theta_slice(1:nband_slice))
-        !write(std_out,*) 'max computed eigenvalue in slice=', maxval(theta_slice(1:nband_slice))
-        !write(std_out,*) ''
-        !write(std_out,*) 'eig=          | resN=         | res0=        ' 
-        !do k=k1,k2
-!            write(std_out,*) 'eig=', theta_slice(k), 'res_ex=', residN_slice(k), 'res_app=', residNapprox_slice(k)!, 
-!            write(std_out,*) theta_slice(k), residN_slice(k), resid0_slice(k) !, 
-!&            'rerr=', abs(residN_slice(k) - residNapprox_slice(k))
-!        end do
-!        write(std_out,*) ''
-
-
         if (allocated(theta_slice)) ABI_FREE(theta_slice)
-        if (allocated(convr_slice)) ABI_FREE(convr_slice)
         if (allocated(residN_slice)) ABI_FREE(residN_slice)
         if (allocated(resid0_slice)) ABI_FREE(resid0_slice)
-        if (allocated(residNapprox_slice)) ABI_FREE(residNapprox_slice)
 
     end do
-    if (nband_conv<neigenpairs) ABI_ERROR("not enough eigenvalues converged")
-    if (nband_conv>neigenpairs) ABI_ERROR("too many eigenvalues converged")
-   
-    !write(std_out,*) 'theta0=', theta0(1,pband(:))
-    !write(std_out,*) 'thetaN=', thetaN(1,:)
-
-    !write(std_out,*) 'resid0=', resid0(1,pband(:))
-    !write(std_out,*) 'residN=', residN(1,:)
+    
+    ! Report missing or extra eigenvalues
+    if (nband_conv<neigenpairs) then
+        ABI_ERROR("Not enough converged eigenvalues")
+    else if (nband_conv>neigenpairs) then
+        ABI_ERROR("Too many converged eigenvalues")
+    end if
 
     ! TODO 
     ! * count how many thetaN_ are in low,upp for every slice
@@ -1640,6 +1583,7 @@ subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
     ! * count how many are in overlap region
     ! This will help diagnostic convergence "slice full"
 
+    ! Assumes
     !if (merge_option==0) then
     !    ! Present loop can be parallelized
     !    slow = theta0(1,1)
@@ -1665,10 +1609,12 @@ subroutine sliceAll_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
     !    ! Present loop is not parallel
     !end if
  
-    call timab(tim_sliceAll_merge,2,tsec)
-
-end subroutine sliceAll_merge
+end subroutine slice_mergeConverged
 !!***
+
+! slice_mergeConverged is done locally on slice
+! while on linalg representation
+! so it is after Rayleigh-Ritz and before the last transposition
 
 !----------------------------------------------------------------------
 
@@ -2875,31 +2821,6 @@ function bandpassIndicator_sca(t,a,b,deg) result(f_t)
     end do
 
 end function bandpassIndicator_sca
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_merge
-!! NAME
-!! slice_merge
-!! 
-!! FUNCTION
-!! Returns indices of eigenpairs whose eigenvalues lie in [a,b]
-!! 
-!! SOURCE
-
-subroutine slice_merge(slice,eig,lowb,uppb,imin,imax)
-
-    implicit none
-
-    type(slice_t), intent(inout) :: slice
-    real(dp), intent(in) :: lowb, uppb, eig
-    integer, intent(inout) :: imin, imax
-
-    !imin = slice%idx(i), eig < lowb   + 1 
-    !imax = slice%idx(i), eig < uppb
-
-end subroutine slice_merge
 !!***
 
 !----------------------------------------------------------------------

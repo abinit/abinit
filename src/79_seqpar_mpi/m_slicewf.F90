@@ -157,7 +157,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  integer :: spacedim,spacecom,gpu_option
  integer :: me_g0,me_g0_fft
  integer(kind=c_size_t) :: localMem
- type(spsl_t) :: spsl
+ type(slice_t) :: slice
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
  ! arrays
  real(dp) :: tsec(2)
@@ -227,72 +227,30 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
- write(std_out,'(a)') 'Initialize slice object'
  call slice_init(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
-&                   dtset%paral_kgb,l_mpi_enreg%bandpp,&
-&                   dtset%mdeg_filter,space,1,spacecom,me_g0,me_g0_fft,l_paw,&
-&                   l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
-&                   l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
-&                   gpu_thread_limit=dtset%gpu_thread_limit)
+     dtset%paral_kgb,l_mpi_enreg%bandpp,dtset%mdeg_filter,space,1,spacecom,&
+     me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+     l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
+     gpu_thread_limit=dtset%gpu_thread_limit)
 
- ! à l'intérieur de permute effectuer un transfer vers cpu
-
- call slice_split(slice,dtset%spectral_cut)
-
- ! après ça on peut supprimer cg de la mémoire GPU COMPLETEMENT
- ! pour revenir plus tard
+ call slice_getSpectrum(slice,xgx0,xgeigen,xgresidu)
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
+    ! TODO revenir plus tard
 
- ! Do that or not?
- ! It helps to inform other parts of the code
- ! also helps readability
- slice%cg_gpu = .false.
- slice%cg_cpu = .true.
- slice%use_cg = .false.
- slice%use_cg_extend = .true.
- slice%cg_row_distr = .true.
- slice%cg_col_distr = .false.
-
- call slice_run(slice)
-
-
- ! IML 8/4/2025
- ! Hide the following procedures into a general interface of the structure
- ! init-run-free. Does not need to show more information at this level.
- ! stucture: 
- ! - DOS is included in the run. It is part of the work balance preparation
- ! - sinon ajouter avant le run une fonction divideSlices tq avant et après
- !   cette fonction il y a un transfer explicite sur GPU ici.
-
- ! Switch to workspace common to all slices
- spsl%on_slice = .false.
-
- write(std_out,'(a)') 'Compute workload on-the-fly'
- ABI_NVTX_START_RANGE(NVTX_SPSL_WORK)
- call spsl_computeWorkload(spsl,dtset%tolfilter,dtset%spectral_cut)
- ABI_NVTX_END_RANGE()
+ call slice_distributeSpectrum(slice,dtset%spectral_cut)
  
- write(std_out,'(a)') 'Load balance (static)'
- ABI_NVTX_START_RANGE(NVTX_SPSL_LB)
- call spsl_loadBalance(spsl,dtset%paral_slice)
- ABI_NVTX_END_RANGE()
-
- write(std_out,'(a)') 'Allocate required memory resources'
- ABI_NVTX_START_RANGE(NVTX_SPSL_ALLOC)
- call spsl_allocateAll(spsl,dtset%paral_slice)
- ABI_NVTX_END_RANGE()
-
- ! Switch to a single slice workspace
- spsl%on_slice = .true.
-
 !################    RUUUUUUUN    #####################################
 !######################################################################
  
- call spsl_run(spsl,xgx0,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+ call slice_run(slice,xgx0,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
 
  if ( .not. l_paw ) then
    call timab(tim_nonlop,1,tsec)
@@ -331,8 +289,8 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
    call timab(tim_nonlop,2,tsec)
  end if
 
-!Free spsli
- call spsli_free(spsli)
+!Free slice
+ call slice_free(slice)
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
