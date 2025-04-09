@@ -240,6 +240,12 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
+ ! FIXME find out if this is enough or if we have to redo the mapping to CPU as
+ !call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
+ !call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=ABI_GPU_DISABLED)
+ !call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=ABI_GPU_DISABLED)
+
+
  ! Update xgBlock on gpu state
  if (gpu_option==ABI_GPU_OPENMP) then
     call xgBlock_set_gpu_option(xgx0,ABI_GPU_DISABLED)
