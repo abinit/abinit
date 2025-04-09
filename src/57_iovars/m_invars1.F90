@@ -39,6 +39,7 @@ module m_invars1
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
  use m_matrix,   only : mati3det
+ use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
 
 #if defined HAVE_GPU
  use m_gpu_toolbox
@@ -2584,7 +2585,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mdeg_filter = 6
    dtsets(idtset)%mdwall=10000_dp
    dtsets(idtset)%mep_mxstep=100._dp
-   dtsets(idtset)%mep_solver=0
+   dtsets(idtset)%mep_solver=MEP_SOLVER_STEEPEST
    dtsets(idtset)%mffmem=1
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
@@ -2605,11 +2606,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    else
      dtsets(idtset)%nc_xccc_gspace = 1
    end if
-   dtsets(idtset)%nctime=0
+   dtsets(idtset)%nctime = 0
    dtsets(idtset)%ncout = 1
    dtsets(idtset)%ndtset = -1
-   dtsets(idtset)%neb_algo=1
-   dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)
+   dtsets(idtset)%neb_algo = NEB_ALGO_IMPROVED_TAN
+   dtsets(idtset)%neb_cell_algo = NEB_CELL_ALGO_NONE
+   dtsets(idtset)%neb_spring(1:2) = (/0.05_dp,0.05_dp/)
    dtsets(idtset)%nfft = -1
    dtsets(idtset)%nfftdg = -1
 
@@ -2794,7 +2796,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%spnorbscl=one
    dtsets(idtset)%stmbias=zero
    dtsets(idtset)%strfact=100.0_dp
-   dtsets(idtset)%string_algo=1
+   dtsets(idtset)%string_algo=STRING_ALGO_SIMPLIFIED_EQUAL
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
 !  T
