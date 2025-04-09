@@ -47,6 +47,7 @@ module m_invars2
  use m_crystal,   only : crystal_t
  use m_bz_mesh,   only : kmesh_t, find_qmesh
  use m_drivexc,   only : has_kxc
+ use m_mep,       only : MEP_SOLVER_STEEPEST,NEB_ALGO_CINEB
 
  implicit none
 
@@ -1633,9 +1634,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) then
      dtset%mep_solver=intarr(1)
    else if(dtset%imgmov==2) then
-     dtset%mep_solver=0
+     dtset%mep_solver=MEP_SOLVER_STEEPEST
    else if(dtset%imgmov==5) then
-     dtset%mep_solver=0
+     dtset%mep_solver=MEP_SOLVER_STEEPEST
    end if
    if (dtset%imgmov==2) then
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'string_algo',tread,'INT')
@@ -1644,10 +1645,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (dtset%imgmov==5) then
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'neb_algo',tread,'INT')
      if(tread==1) dtset%neb_algo=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'neb_cell_algo',tread,'INT')
+     if(tread==1) dtset%neb_cell_algo=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'neb_spring',tread,'DPR')
      if(tread==1) then
        dtset%neb_spring(1:2)=dprarr(1:2)
-     else if (dtset%neb_algo==2) then
+     else if (dtset%neb_algo==NEB_ALGO_CINEB) then
        dtset%neb_spring(1:2)=(/0.02_dp,0.15_dp/)
      end if
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cineb_start',tread,'INT')
