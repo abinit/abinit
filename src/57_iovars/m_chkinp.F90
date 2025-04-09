@@ -40,6 +40,7 @@ module m_chkinp
  use m_fftcore,        only : fftalg_has_mpi
  use m_exit,           only : get_timelimit
  use m_parser,         only : chkdpr, chkint, chkint_eq, chkint_ge, chkint_le, chkint_ne
+ use m_mep
 
  implicit none
 
@@ -1661,17 +1662,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! imgmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'imgmov',dt%imgmov,9,(/0,1,2,4,5,6,9,10,13/),iout)
-   if (dt%imgmov>0 .and. dt%imgmov/=6) then ! when imgmov>0, except imgmov==6, allow only ionmov0 and optcell 0 (temporary)
+   if (dt%imgmov>0 .and. dt%imgmov/=6) then ! when imgmov>0, except imgmov==6, allow only ionmov=0 and optcell=0
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
      call chkint_eq(1,1,cond_string,cond_values,ierr,'ionmov',dt%ionmov,1,(/0/),iout)
-     if (dt%imgmov==9.or.dt%imgmov==10.or.dt%imgmov==13) then
-       cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
-       !Temporarily deactivate NPT algorithms (not yet usable)
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
-     else
-       cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
-     end if
+     cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
    end if
 
    ! imgwfstor
@@ -1789,7 +1784,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  istatimg
    call chkint_eq(0,0,cond_string,cond_values,ierr,'istatimg',dt%istatimg,2,(/0,1/),iout)
-   if (dt%string_algo==2) then
+   if (dt%string_algo==STRING_ALGO_SIMPLIFIED_ENERGY) then
      cond_string(1)='string_algo' ; cond_values(1)=dt%string_algo
      call chkint_eq(1,1,cond_string,cond_values,ierr,'istatimg',dt%istatimg,1,(/1/),iout)
    end if
@@ -2074,25 +2069,38 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  mep_solver
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,5,(/0,1,2,3,4/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,&
+&    5,(/MEP_SOLVER_STEEPEST,MEP_SOLVER_QUICKMIN,MEP_SOLVER_LBFGS,MEP_SOLVER_GBFGS,MEP_SOLVER_RK4/),iout)
 !  String method
    if(dt%imgmov==2) then
      cond_string(1)='imgmov'      ; cond_values(1)=dt%imgmov
 !    Some restriction for the solver
-     if(dt%string_algo==0)then
+     if(dt%string_algo==STRING_ALGO_ORIGINAL)then
        cond_string(2)='string_algo' ; cond_values(2)=dt%string_algo
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,1,(/0/),iout)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,&
+&        1,(/MEP_SOLVER_STEEPEST/),iout)
      end if
-     if(dt%string_algo==1.or.dt%string_algo==2)then
+     if(dt%string_algo==STRING_ALGO_SIMPLIFIED_EQUAL.or.&
+&       dt%string_algo==STRING_ALGO_SIMPLIFIED_ENERGY)then
        cond_string(2)='string_algo' ; cond_values(2)=dt%string_algo
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,2,(/0,4/),iout)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,&
+&        2,(/MEP_SOLVER_STEEPEST,MEP_SOLVER_RK4/),iout)
      end if
    end if
 !  NEB
    if(dt%imgmov==5)then
      cond_string(1)='imgmov' ; cond_values(1)=dt%imgmov
 !    Some restriction for the solver
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,4,(/0,1,2,3/),iout)
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'mep_solver',dt%mep_solver,&
+&    4,(/MEP_SOLVER_STEEPEST,MEP_SOLVER_QUICKMIN,MEP_SOLVER_LBFGS,MEP_SOLVER_GBFGS/),iout)
+!    Only steepest descent for variable-cell NEB
+     if (dt%neb_cell_algo/=NEB_CELL_ALGO_NONE.and.dt%mep_solver/=MEP_SOLVER_STEEPEST) then
+       write(msg, '(5a)' )&
+        'When using NEB with variable cell, you can only use',ch10,&
+        ' steepest-descent algorithm (i.e. mep_solver=steepest-descent)!',ch10,&
+        'Action: change mep_solver to 0.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
 !    Static image energy is needed if spring constant is variable
      if (abs(dt%neb_spring(1)-dt%neb_spring(2))>=tol8.and.dt%istatimg==0) then
        write(msg, '(7a)' )&
@@ -2103,7 +2111,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
 !    Static image energy is needed for CI-NEB or improved tangent
-     if ((dt%neb_algo==1.or.dt%neb_algo==2).and.dt%istatimg==0) then
+     if ((dt%neb_algo==NEB_ALGO_IMPROVED_TAN.or.dt%neb_algo==NEB_ALGO_CINEB).and.dt%istatimg==0) then
        write(msg, '(7a)' )&
         'When using Improved-tangent-NEB or CI-NEB,',ch10,&
         'all the energies of the cell images are needed (including static images!).',ch10,&
@@ -2296,7 +2304,21 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_ge(0,0,cond_string,cond_values,ierr,'ndynimage',dt%ndynimage,1,iout)
 
 !  neb_algo
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'neb_algo',dt%neb_algo,4,(/0,1,2,3/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'neb_algo',dt%neb_algo,&
+&    3,(/NEB_ALGO_STANDARD,NEB_ALGO_IMPROVED_TAN,NEB_ALGO_CINEB/),iout)
+
+!  neb_cell_algo
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'neb_cell_algo',dt%neb_cell_algo,&
+&    3,(/NEB_CELL_ALGO_NONE,NEB_CELL_ALGO_GSSNEB,NEB_CELL_ALGO_VCNEB/),iout)
+   !Forbid fixed atoms for variable-cell NEB
+   if (dt%neb_cell_algo/=NEB_CELL_ALGO_NONE) then
+     if (any(dt%iatfix(:,:)==1)) then
+       write(msg,'(3a)') &
+&        'Having fixed atoms is forbidden when performing variable-cell',ch10,&
+&        'mimimum energy path searching (NEB) (imgmov=5)!'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+   end if
 
 !  nfft and nfftdg
 !  Must have nfft<=nfftdg
@@ -3831,7 +3853,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  string_algo
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'string_algo',dt%string_algo,2,(/1,2/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'string_algo',dt%string_algo,&
+&    2,(/STRING_ALGO_SIMPLIFIED_EQUAL,STRING_ALGO_SIMPLIFIED_ENERGY/),iout)
 
 !  symafm
    if(nsppol==1 .and. nspden==2)then
