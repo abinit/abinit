@@ -51,7 +51,7 @@ module m_xgTransposer
 #endif
 
 #if defined(HAVE_GPU_MARKERS)
-  use m_nvtx
+  use m_nvtx_data
 #endif
 
   implicit none

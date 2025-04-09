@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 16 Feb 2025.
+.Starting date : 30 Mar 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -308,6 +308,21 @@
   The components of the vector are:    0.000000   -4.627053    4.170461
   Trace= -0.002432
   
+ ======== NEW SHELL (ishell=   3): There are   2 atoms on this shell at distance= 8.014291
+  For jatom=   9 ,with type=   1
+  -0.001400 -0.000301 -0.000174
+   0.000301  0.000826  0.000672
+   0.000174  0.000672  0.000985
+  The components of the vector are:    8.014291    0.000000    0.000000
+  Trace=  0.000411
+  
+  For jatom= 429 ,with type=   1
+  -0.001400  0.000301  0.000174
+  -0.000301  0.000826  0.000672
+  -0.000174  0.000672  0.000985
+  The components of the vector are:   -8.014291    0.000000    0.000000
+  Trace=  0.000411
+  
  ======== NEW SHELL (ishell=   2): There are   4 atoms on this shell at distance= 8.014291
   For jatom=   5 ,with type=   1
    0.000324  0.001306 -0.000722
@@ -336,21 +351,6 @@
   -0.000722 -0.000195  0.000934
   The components of the vector are:   -4.007145    6.940579    0.000000
   Trace=  0.000417
-  
- ======== NEW SHELL (ishell=   3): There are   2 atoms on this shell at distance= 8.014291
-  For jatom=   9 ,with type=   1
-  -0.001400 -0.000301 -0.000174
-   0.000301  0.000826  0.000672
-   0.000174  0.000672  0.000985
-  The components of the vector are:    8.014291    0.000000    0.000000
-  Trace=  0.000411
-  
-  For jatom= 429 ,with type=   1
-  -0.001400  0.000301  0.000174
-  -0.000301  0.000826  0.000672
-  -0.000174  0.000672  0.000985
-  The components of the vector are:   -8.014291    0.000000    0.000000
-  Trace=  0.000411
   
  ############# List of (second order) IFC for the reference atom=   2
  ======== NEW SHELL (ishell=   8): There are   1 atoms on this shell at distance= 0.000000
@@ -407,6 +407,21 @@
   The components of the vector are:    0.000000    4.627053   -4.170461
   Trace= -0.002432
   
+ ======== NEW SHELL (ishell=  10): There are   2 atoms on this shell at distance= 8.014291
+  For jatom=  10 ,with type=   2
+  -0.002531  0.000239 -0.000168
+  -0.000239 -0.000016  0.000172
+   0.000168  0.000172  0.000244
+  The components of the vector are:    8.014291    0.000000    0.000000
+  Trace= -0.002303
+  
+  For jatom= 430 ,with type=   2
+  -0.002531 -0.000239  0.000168
+   0.000239 -0.000016  0.000172
+  -0.000168  0.000172  0.000244
+  The components of the vector are:   -8.014291    0.000000    0.000000
+  Trace= -0.002303
+  
  ======== NEW SHELL (ishell=   9): There are   4 atoms on this shell at distance= 8.014291
   For jatom=   6 ,with type=   2
   -0.000695  0.000839 -0.000217
@@ -435,21 +450,6 @@
   -0.000217  0.000034  0.000308
   The components of the vector are:   -4.007145    6.940579    0.000000
   Trace= -0.002367
-  
- ======== NEW SHELL (ishell=  10): There are   2 atoms on this shell at distance= 8.014291
-  For jatom=  10 ,with type=   2
-  -0.002531  0.000239 -0.000168
-  -0.000239 -0.000016  0.000172
-   0.000168  0.000172  0.000244
-  The components of the vector are:    8.014291    0.000000    0.000000
-  Trace= -0.002303
-  
-  For jatom= 430 ,with type=   2
-  -0.002531 -0.000239  0.000168
-   0.000239 -0.000016  0.000172
-  -0.000168  0.000172  0.000244
-  The components of the vector are:   -8.014291    0.000000    0.000000
-  Trace= -0.002303
   
   
  #############################################################################
@@ -485,10 +485,10 @@
  
  ========== For an Anisotropic Material =======================================
  Sijkl [in GPa-1]=
- | S11 S12 S13 S14 S15 S16 |      0.036   -0.010   -0.010   -0.014   -0.000   -0.000
- | S21 S22 S23 S24 S25 S26 |     -0.010    0.035   -0.008    0.013   -0.000   -0.000
- | S31 S32 S33 S34 S35 S36 |     -0.010   -0.008    0.070    0.001   -0.000   -0.000
- | S41 S42 S43 S44 S45 S46 | =   -0.014    0.013    0.001    0.124   -0.000   -0.000
+ | S11 S12 S13 S14 S15 S16 |      0.036   -0.010   -0.010   -0.014    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.010    0.035   -0.008    0.013    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.010   -0.008    0.070    0.001    0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =   -0.014    0.013    0.001    0.124    0.000   -0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.122   -0.026
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000   -0.026    0.095
  

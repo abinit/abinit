@@ -16403,7 +16403,7 @@ Variable(
     mnemonics="PRinT EVK - Elements of the Velocity matrix at wavevector K",
     added_in_version="9.11.0",
     text=r"""
-If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.  
+If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.
 Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesnt support MPI-IO.
 """,
 ),
@@ -24622,6 +24622,9 @@ Variable(
 This variable defines the 4D Cartesian grid of MPI processors used for GWR calculations.
 If not specified in the input, the code will generate this grid automatically using
 the total number of MPI processors and the basic dimensions of the job computed at runtime.
+
+If the code runs out of memory, it is recommended to explicitly set this variable and to use
+as many processors as possible for g-vector parallelism.
 
 !!! important
 

@@ -2304,7 +2304,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
        endif
 
        ! Table with the correspondence btw the k-centered sphere of the WFK file
-       ! and the one used in Wfd (possibly smaller due to ecutwfn).
+       ! and the one used in wfd (possibly smaller due to ecutwfn).
        if (cut_ug .and. bstart == 1) then
          ABI_MALLOC(gf2wfd, (npw_k_disk))
          call kg_map(npw_k, gwr%green_desc_kibz(ik_ibz)%gvec, npw_k_disk, kg_k_disk, gf2wfd, nmiss)
@@ -5407,7 +5407,7 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp
  integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf,
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
- integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates
+ integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates !, nb1, nb2
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir, cpu_ikf, wall_ikf, gflops_ikf
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, wtqm, wtqp
@@ -5421,9 +5421,10 @@ subroutine gwr_build_sigmac(gwr)
  integer :: sc_ngfft(18), need_qibz(gwr%nqibz), got_qibz(gwr%nqibz), units(2), dat_units(3), g0_q(3) ! gg(3),
  integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2)  !, qq_ibz(3)
+ !real(dp),allocatable :: beta_r(:,:,:)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
  complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau), avg_2ntau(2,gwr%ntau)
- complex(dp),target,allocatable :: sigc_it_mat(:,:,:,:,:,:)
+ complex(dp),target,allocatable :: sigc_it_mat(:,:,:,:,:,:) !, alpha_c(:,:,:)
  complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc),allocatable :: uc_psir_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
@@ -5913,7 +5914,9 @@ end if
  ! Collect results and average
  call xmpi_sum(sigc_it_mat, gwr%comm%value, ierr)
 
+ ! Average degenerate states.
  if (gwr%dtset%symsigma == +1 .and. .not. gwr%use_supercell_for_sigma) then
+ !if (gwr%dtset%symsigma == +1) then
    call wrtout(std_out, " Symsigma 1 --> Averaging Sig_c matrix elements within degenerate subspaces.")
    ABI_CHECK(gwr%sig_diago, "symsigma = 1 requires diagonal Sigma_c")
    do spin=1,gwr%nsppol
@@ -5952,6 +5955,7 @@ end if
    ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
    do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
      ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
+     !nb1 = gwr%bstop_ks(ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1
 
      ! FT Sigma(itau) --> Sigma(iw)
      band2_start = 1; band2_stop = 1
@@ -5961,13 +5965,20 @@ end if
 
      do band2=band2_start, band2_stop
        associate (cvals_pmt => sigc_it_mat(:,:, band, band2 ,ikcalc, spin))
+       !nb2 = band2_stopt - band2_start + 1
        !if (gwr%dtset%gwr_fit /= 0) then
+       !  ABI_MALLOC(alpha_c, (2, nb1, nb2))
+       !  ABI_MALLOC(beta_r, (2, nb1, nb2))
        !  cvals = cvals_pmt(1,:)
        !  !call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r)
+       !  alpha_c(1,ibc,band2) = alpha_c; beta_r(1,ibc,band2)) = beta_r
        !  cvals_pmt(1,:) = cvals_pmt(1,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
        !  cvals = cvals_pmt(2,:)
-       !  !call fit_tau_exp(gwr%ntau, -gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r)
+       !  call fit_tau_exp(gwr%ntau, -gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r)
+       !  alpha_c(2,ibc,band2) = alpha_c; beta_r(2,ibc,band2)) = beta_r
        !  cvals_pmt(2,:) = cvals_pmt(2,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
+       !  ABI_SFREE(alpha_c)
+       !  ABI_SFREE(beta_r)
        !end if ! gwr_fit
        ! f(t) = E(t) + O(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
        even_t = (cvals_pmt(1,:) + cvals_pmt(2,:)) / two; odd_t = (cvals_pmt(1,:) - cvals_pmt(2,:)) / two
@@ -5987,10 +5998,10 @@ end if
 
      band2 = merge(1, band, gwr%sig_diago)
      pade_npts = gwr%ntau
-     if (gwr%dtset%userie > 0 .and. pade_npts > gwr%dtset%userie) then
-        pade_npts = min(gwr%ntau, gwr%dtset%userie)
-        call wrtout(std_out, sjoin("Limiting the number of points for pade to:", itoa(pade_npts)))
-     end if
+     !if (gwr%dtset%userie > 0 .and. pade_npts > gwr%dtset%userie) then
+     !   pade_npts = min(gwr%ntau, gwr%dtset%userie)
+     !   call wrtout(std_out, sjoin("Limiting the number of points for pade to:", itoa(pade_npts)))
+     !end if
      call spade%init(pade_npts, imag_zmesh, gwr%sigc_iw_mat(:, band, band2, ikcalc, spin), branch_cut=">")
      !call spade%set_itau_decay()
 
