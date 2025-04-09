@@ -148,10 +148,10 @@ module m_chebfi2
  public :: chebfi_free
  public :: chebfi_memInfo
  public :: chebfi_run
- public :: chebfi_RayleighValues      ! IL used in m_slice
- public :: chebfi_swapInnerBuffers    ! IL used in m_slice
- public :: chebfi_mpiTranspose        ! IL used in m_slice
- public :: chebfi_getAX_BX            ! IL used in m_slice
+ public :: chebfi_RayleighValues                ! IL used in m_slice
+ public :: chebfi_swapInnerBuffers              ! IL used in m_slice
+ public :: chebfi_getAX_BX                      ! IL used in m_slice
+ public :: chebfi_computeNextOrderChebfiPolynom ! IL for m_slice
 
  CONTAINS  !========================================================================================
 !!***
@@ -583,7 +583,7 @@ subroutine chebfi_getAX_BX(chebfi, getAX_BX)
  ABI_NVTX_END_RANGE()
  call timab(tim_getAX_BX,2,tsec)
 
-end subroutine chebfi_free
+end subroutine chebfi_getAX_BX
 !!***
 
 !----------------------------------------------------------------------
@@ -725,13 +725,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
    call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
  end if
 
- call timab(tim_getAX_BX,1,tsec)
- ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
- call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
- call xgBlock_zero_im_g0(chebfi%xAXColsRows)
- call xgBlock_zero_im_g0(chebfi%xBXColsRows)
- ABI_NVTX_END_RANGE()
- call timab(tim_getAX_BX,2,tsec)
+ call chebfi_getAX_BX(chebfi, getAX_BX)
 
  if (chebfi%paral_kgb == 1) then
    call timab(tim_barrier,1,tsec)
@@ -795,24 +789,14 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
    call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
    ABI_NVTX_END_RANGE()
 
-   call timab(tim_swap,1,tsec)
-   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
    if (chebfi%paral_kgb == 0) then
      call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
    else
      call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, bandpp)
    end if
-   ABI_NVTX_END_RANGE()
-   call timab(tim_swap,2,tsec)
 
    !A * Psi
-   call timab(tim_getAX_BX,1,tsec)
-   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
-   call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
-   call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-   call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-   ABI_NVTX_END_RANGE()
-   call timab(tim_getAX_BX,2,tsec)
+   call chebfi_getAX_BX(chebfi, getAX_BX)
 
  end do ! ideg
  ABI_NVTX_END_RANGE()
@@ -1151,13 +1135,21 @@ subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
   integer        , intent(in   ) :: spacedim
   integer        , intent(in   ) :: neigenpairs
   type(chebfi_t) , intent(inout) :: chebfi
+  ! Variables ------------------------------------
+  integer :: tsec(2)
 
   ! *********************************************************************
 
+  call timab(tim_swap,1,tsec)
+  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
+  
   call xgBlock_setBlock(chebfi%X_prev,     chebfi%X_swap,     spacedim, neigenpairs) !X_swap = X_prev
   call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X_prev,     spacedim, neigenpairs) !X_prev = xXColsRows
   call xgBlock_setBlock(chebfi%X_next,     chebfi%xXColsRows, spacedim, neigenpairs) !xXColsRows = X_next
   call xgBlock_setBlock(chebfi%X_swap,     chebfi%X_next,     spacedim, neigenpairs) !X_next = X_swap
+
+  ABI_NVTX_END_RANGE()
+  call timab(tim_swap,2,tsec)
 
 end subroutine chebfi_swapInnerBuffers
 !!***

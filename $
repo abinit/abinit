@@ -1089,7 +1089,6 @@ subroutine sliceAll_split(sliceAll,idxAll,ndegAll,sboundAll,pband,npbandSlice)
         nvec_ovlp = nvec
         write(std_out,*) '    after overlap', k1,k2
 
-        ! FIXME Deactivate this part
         ! Add padding for MPI efficiency
         if (paral_slice==0) then
             ! Nvec divides npband
@@ -4153,57 +4152,65 @@ subroutine slice_run(slice,spacecom,nrowsLinalg,ncolsColsRows)
     integer, pointer, intent(in) :: ncolsColsRows(:)
 
     ! Local variables
-    integer :: tot_nrows,ncols_slice,spacecom
-    integer :: color,my_rank,slice_comm,ierr
-    integer, target, allocatable :: nrowsLinalg(:)
-    integer, pointer :: nrowsLinalg_ptr(:) => null()
+    integer :: nrows,ncols_slice,spacecom
+    integer :: slice_color,my_rank,slice_comm,ierr
+    integer, target, allocatable :: custom_rows(:)
+    integer, target, allocatable :: custom_rows_sub(:)
+    integer, pointer :: custom_rows_ptr(:) => null()
+    integer, pointer :: custom_rows_sub_ptr(:) => null()
     type(xgBlock_t) :: X0
 
     ! *******
 
-    call xgBlock_getSize(slice%X_expand,tot_nrows,ncols_slice)
-    spacecom = comm(xgBlock_colsrows) ! global communicator
-    ! spacedim is smaller than tot_nrows
+    call xgBlock_getSize(slice%X_expand,nrows,ncols_slice)
+    spacecom = comm(xgBlock_colsrows)
+    my_rank = xmpi_comm_rank(spacecom)
+
+    ! color MPI processes with the slice TODO automatize for arbitrary number of slices
+    slice_color = -1
+    if (my_rank==0) slice_color=0
+    if (my_rank==1) slice_color=1
+    if (my_rank==2) slice_color=1
+    if (my_rank==3) slice_color=1
 
     ! slice colsrows workspace points to column range of distributed X_expand
-    call xgBlock_setBlock(slice%X_expand,X0,rows=tot_nrows,cols=ncols_slice)
+    call xgBlock_setBlock(slice%X_expand,X0,rows=nrows,cols=ncols_slice)
     slice%X = X0
 
     ! Split global communicator so that only procs with the same color communicate
-    my_rank = xmpi_comm_rank(spacecom)
-    color = mpiSlice_getSliceMe(mpi_slice,my_rank)
-    call xmpi_comm_split(spacecom,color,my_rank,slice_comm,ierr)
+    call xmpi_comm_split(spacecom,slice_color,my_rank,slice_comm,ierr)
 
     ! Restrict all communications to slice subcommunicator
     call xgBlock_setComm(slice%X,slice_comm) ! colsrows representation
     call xgBlock_setComm(slice%X_linalg,slice_comm) ! linalg representation
 
-    ! Compute distribution of rows (plane waves) in the subcommunicator
-    call mpiSlice_distributeRows(mpi_slice,slice_comm)
-    nrowsLinalg_ptr => mpi_slice%lookup
-    nproc = xmpi_comm_size(slice_comm)
-    ABI_MALLOC(nrowsLinalg, (nproc)) ! FIXME size known before slice construction. Move out
-    nrowsLinalg_ptr => nrowsLinalg
-    call compute_uniform_distribution(nrowsLinalg_ptr,nproc,tot_nrows)
+    ! compute distribution of plane waves in the subcommunicator
+    ABI_MALLOC(custom_rows_sub,(xmpi_comm_size(slice_comm)))
+    custom_rows_sub_ptr => custom_rows_sub
+
+    ! FIXME automatize, need a rule to divide 192 to three parts
+    ! target for maximal charge balance
+    if (my_rank==0) then
+        custom_rows_sub(1) = sum(custom_rows)
+    else
+        custom_rows_sub(1) = 1296 
+        custom_rows_sub(2) = 1296 
+        custom_rows_sub(3) = 1295 ! last has less than other two
+        ! this is observed in the default distribution
+    end if
+    total_spacedim = xmpi_sum(spacedim,comm,ierr)
+    call mpiSlice_set_rowpp(my_rank,total_spacedim)
 
     ! Create slice transposer using subcommunicator and allocate slice%X_linalg
     call xgTransposer_constructor(slice%xgTransposerX,slice%X_linalg,slice%X,nspinor,&
         STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,slice_comm,0,0,chebfi%me_g0_fft,&
         gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
-        custom_ncolsColsRows=.true.,nrowsLinalg_sub=nrowsLinalg_ptr)
+        custom_ncolsColsRows=.true.,nrowsLinalg_sub=custom_rows_sub_ptr)
         ! true to allow different bandpp (avoid pad)
 
     ncols_slice = cols(slice%X)
 
-    ! Do the same for AX and BX ..
-    call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,&
-        chebfi%AX%self,chebfi%xAXColsRows,STATE_COLSROWS)
-    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,&
-        chebfi%BX%self,chebfi%xBXColsRows,STATE_COLSROWS)
-
-    chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
-    chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-    chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+    ! TODO add same for AX and BX ..
 
     ! Body of computation
     ! ===============
@@ -4244,7 +4251,7 @@ subroutine slice_run(slice,spacecom,nrowsLinalg,ncolsColsRows)
     call timab(tim_transpose,2,tsec)
 
     ! Unitary test
-    ABI_CHECK(rows(slice%X_linalg)==nrowsLinalg(xmpi_comm_rank(spacecom)),'wrong linalg representation')
+    ABI_CHECK(rows(slice%X_linalg)==custom_rows_sub(xmpi_comm_rank(spacecom)),'wrong linalg representation')
     write(*,'(a,i6,i6)') '# proc has # rows of slice X ', xmpi_comm_rank(spacecom), rows(slice%X_linalg)
 
     ! Perform Rayleigh-Ritz and compute residuals (requires linalg state)
@@ -4254,12 +4261,9 @@ subroutine slice_run(slice,spacecom,nrowsLinalg,ncolsColsRows)
     call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
     if (chebfi%paral_kgb == 1) then
-
         ! All MPI rows wait to finish
         call xmpi_barrier(chebfi%spacecom)
-
         call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
-
         !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
         if (xmpi_comm_size(chebfi%spacecom) == 1) then 
             call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
@@ -4276,10 +4280,10 @@ subroutine slice_run(slice,spacecom,nrowsLinalg,ncolsColsRows)
 
     ! Copy slice solution to the extended buffer (requires colsrows state)
     call xgBlock_copy(slice%X,X0)
-    ! FIXME same for eigen, residu?
 
     ! Free memory
-    if (allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
+    if (allocated(custom_rows)) ABI_FREE(custom_rows)
+    if (allocated(custom_rows_sub)) ABI_FREE(custom_rows_sub)
     call xgTransposer_free(slice%xgTransposerX)
 
 end subroutine slice_run
@@ -4725,118 +4729,12 @@ subroutine slice_RayleighRitz(slice,eigen,residu)
 end subroutine slice_RayleighRitz
 !!***
 
-!----------------------------------------------------------------------
-
-!!****f* m_slice/mpiSlice_getSliceMe
-!! NAME
-!! mpiSlice_getSliceMe
+!! set_uniform_mpi
 !! 
-!! SOURCE
-
-integer function mpiSlice_getSliceMe(mpi_slice,my_rank) result(slice_me)
-
-    type(mpiSlice_t), intent(in) :: mpi_slice
-    integer, intent(in) :: my_rank
-
-    slice_me = mpi_slice%lookup_slice_me(my_rank+1)
-
-end function mpiSlice_getSliceMe
-!!***
-
-subroutine mpiSlice_init(mpi_slice,distribution)
-
-    ! color MPI processes with the slice TODO automatize for arbitrary number of slices
-    slice_color = -1
-    if (my_rank==0) slice_color=0
-    if (my_rank==1) slice_color=1
-    if (my_rank==2) slice_color=1
-    if (my_rank==3) slice_color=1
-    slice_color = lookup(my_rank)
-
-    !rule_nband(islice)= number of bands contained in slice
-    !rule_nproc(islice)= number of processes working for slice
-    !lookup_bandpp_me(iproc)= number of bands contained in proc
-    !lookup_slice_me(iproc)= slice index contained in proc
-
-    ABI_MALLOC(mpiSlice%rule_nband, (nslice)) 
-    ABI_MALLOC(mpiSlice%rule_nproc, (nslice))
-    ABI_MALLOC(mpiSlice%lookup_bandpp_me, (nproc))
-    ABI_MALLOC(mpiSlice%lookup_slice_me, (nproc))
-
-    ! rule_nband: defined by the spectral splitter based on DOS
-    ! rule_nproc: defined by the load balance strategy
-    ! lookups: deduced
-
-    !comm_slice(islice)=comm id working for slice
-    ! Attention this must be constructed at the same time for all processes
-    ! before doing any communication
-
-    ABI_MALLOC(mpiSlice%nrowsLinalg, (nproc))
-
-
-    map_slice_to_proc
-
-    map_proc_to_slice
-
-    ! lookup: my_rank+1 -> color
-    lookup(1) = 0
-    lookup(2) = 1
-    lookup(3) = 1
-    lookup(4) = 1
-    ABI_MALLOC(lookup,(nproc))
-    nband_prev = 0
-    do i=1,nproc
-        lookup(i) = nband_prev + mod((i-1) ! NO
-        nband_prev = nband_prev + nband(i)
-    end do
-
-
-
-end subroutine mpiSlice_init
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/compute_uniform_distribution
-!! NAME
-!! compute_uniform_distribution
-!!
-!! FUNCTION
-!  Divide m_tot into nproc parts as uniformly as possible.
-!! If mod(m_tot,nproc) =/= 0 give less charge to the last process.
-!! Return nproc values of m_distr.
-!! 
-!! SOURCE
-
-subroutine compute_uniform_distribution(m_distr,nproc,m_tot)
-
-    ! Arguments
-    pointer, integer, intent(inout) :: m_distr
-    integer, intent(in) :: nproc
-    integer, intent(in) :: m_tot
-    ! Local variables
-    integer :: m_uni
-    integer :: m_rem
-
-    if (nproc > 1) then
-        if (mod(m_tot,nproc) == 0) then
-            m_distr(1:nproc) = m_tot / nproc
-        else
-            m_uni = ceiling(real(m_tot) / real(nproc))
-            m_rem = m_tot - (nproc-1)*m_uni
-            m_distr(1:nproc-1) = m_uni
-            m_distr(nproc) = m_rem
-        end if
-    else
-        m_distr(1) = m_tot
-    end if
-
-end subroutine compute_uniform_distribution
-!!***
-
-! other without optimization
 !! pad number of vectors in each slice so that each slice has a multiple
 !! of bandpp. Then bandpp is already fixed and we simply compute the number
 !! of processes attached to i-th slice such that nproc_i*bandpp_i=nband_i.
+
 
 !----------------------------------------------------------------------
 

@@ -235,6 +235,31 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 &                   l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
 &                   gpu_thread_limit=dtset%gpu_thread_limit)
 
+ ! à l'intérieur de permute effectuer un transfer vers cpu
+
+ call slice_divide(slice,dtset%balfilter)
+
+ ! après ça on peut supprimer cg de la mémoire GPU COMPLETEMENT
+ ! pour revenir plus tard
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+
+ ! Do that or not?
+ ! It helps to inform other parts of the code
+ ! also helps readability
+ slice%cg_gpu = .false.
+ slice%cg_cpu = .true.
+ slice%use_cg = .false.
+ slice%use_cg_extend = .true.
+ slice%cg_row_distr = .true.
+ slice%cg_col_distr = .false.
+
+ call slice_run(slice)
+
+
  ! IML 8/4/2025
  ! Hide the following procedures into a general interface of the structure
  ! init-run-free. Does not need to show more information at this level.
