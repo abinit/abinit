@@ -956,6 +956,9 @@ contains
  dprarr(1,:)=dtsets(:)%spbroad
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'spbroad','ENE',0)
 
+ intarr(1,:)=dtsets(:)%spectral_cut
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'spectral_cut','INT',0)
+
  intarr(1,:)=dtsets(:)%spgroup
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'spgroup','INT',0)
 

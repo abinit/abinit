@@ -263,9 +263,6 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%bandpp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'bandpp','INT',0)
 
- intarr(1,:)=dtsets(:)%balfilter
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'balfilter','INT',0)
-
  intarr(1,:)=dtsets(:)%bdberry(1)
  intarr(2,:)=dtsets(:)%bdberry(2)
  intarr(3,:)=dtsets(:)%bdberry(3)
