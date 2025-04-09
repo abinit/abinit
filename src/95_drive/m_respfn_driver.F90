@@ -49,8 +49,8 @@ module m_respfn_driver
  use m_symtk,       only : littlegroup_q, symmetrize_xred
  use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
- use m_geometry,    only : irreducible_set_pert, symredcart
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, sylwtens, dfpt_prtph, &
+ use m_geometry,    only : irreducible_set_pert, symredcart, sylwtens
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
                            asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
  use m_ddb,         only : ddb_type
  use m_ddb_hdr,     only : ddb_hdr_type
@@ -1318,7 +1318,7 @@ ABI_NVTX_END_RANGE()
    end where
  end do
 
-  if (dtset%prepalw/=0) then
+ if (dtset%prepalw/=0) then
    ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
    rfpert_lw=0
    if (dtset%prepalw==1) then
