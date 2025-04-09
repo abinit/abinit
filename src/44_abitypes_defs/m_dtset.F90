@@ -442,6 +442,7 @@ type, public :: dataset_type
  integer :: ndtset
  integer :: ndynimage
  integer :: neb_algo
+ integer :: neb_cell_algo
  integer :: nfft
  integer :: nfftdg
  integer :: nfreqim = -1
@@ -1916,6 +1917,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ndtset             = dtin%ndtset
  dtout%ndynimage          = dtin%ndynimage
  dtout%neb_algo           = dtin%neb_algo
+ dtout%neb_cell_algo      = dtin%neb_cell_algo
  dtout%nfft               = dtin%nfft
  dtout%nfftdg             = dtin%nfftdg
  dtout%nfreqim            = dtin%nfreqim
@@ -3656,7 +3658,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
  list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq ncout nc_xccc_gspace'
- list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
+ list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nblock_lobpcg nloc_alg nloc_mem nnos nnsclo nnsclohf'
