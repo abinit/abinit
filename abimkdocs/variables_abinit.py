@@ -24670,6 +24670,9 @@ This variable defines the 4D Cartesian grid of MPI processors used for GWR calcu
 If not specified in the input, the code will generate this grid automatically using
 the total number of MPI processors and the basic dimensions of the job computed at runtime.
 
+If the code runs out of memory, it is recommended to explicitly set this variable and to use
+as many processors as possible for g-vector parallelism.
+
 !!! important
 
     The total number of MPI processes must be equal to the product of the different entries.

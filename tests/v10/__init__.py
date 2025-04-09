@@ -38,6 +38,7 @@ inp_files = [
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole
     "t41.abi" ,  # test orbmag calculation using R2SCAN mGGA
     "t42.abi" ,  # test orbmag calculation using R2SCAN mGGA, nspinor 2, zora
+    "t43.abi" ,  # test quadrupoles calculation with xcnlcc
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
     "t83.abi" ,  # Test variable cell nudged elastic band method
