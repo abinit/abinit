@@ -1,6 +1,6 @@
 
 .Version 10.3.6 of ABINIT, released Feb 2025.
-.(sequential version, prepared for a x86_64_linux_intel16.0 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  8 Apr 2025.
-- ( at 21h24 )
+.Starting date : Wed  9 Apr 2025.
+- ( at 00h52 )
   
-- input  file    -> /opt/home/buildbot/ABINIT3/ubu_intel_16.0_openmp/gallemand_develop/tests/TestBot_MPI1_OMP2/v9_t62-t63-t64-t65/t65.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t65.abi
 - output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
- 
+
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -37,7 +37,7 @@ P This job should need less than                       3.971 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.064 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
- 
+
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -53,7 +53,7 @@ P This job should need less than                      20.726 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     15.932 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ _ WF disk file :     15.932 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    2
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
@@ -428,17 +428,17 @@ P           mkmem2        145
                          0.00586    0.00586
                        outvars : Printing only first  50 k-points.
             znucl       29.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 2 (-1 if OMP is not activated)
- 
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -449,27 +449,27 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
- 
+
  mkfilename : getden/=0, take file _DEN from output of DATASET  20.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  4.1905838  0.0000000  2.4194347  G(1)=  0.2386302 -0.0843685  0.0000000
  R(2)=  1.3968613  3.9509203  2.4194347  G(2)=  0.0000000  0.2531056  0.0000000
  R(3)=  0.0000000  0.0000000  4.8388693  G(3)= -0.1193151 -0.0843685  0.2066598
  Unit cell volume ucvol=  8.0115525E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  20  20  20
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05308
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /opt/home/buildbot/ABINIT3/ubu_intel_16.0_openmp/gallemand_develop/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT3/ubu_intel_16.0_openmp/gallemand_develop/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -481,7 +481,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  rrd =   1.2916020; h11d=  -0.0652920; h22d=   0.0000000; h33d=   0.0000000
                     k11d=  -0.0007300; k22d=   0.0000000; k33d=   0.0000000
 -  Local part computed in reciprocal space.
- 
+
  pspatm : COMMENT -
   the projectors are not normalized,
   so that the KB energies are not consistent with 
@@ -493,11 +493,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
              1   -3.100131    0.657149
              2   -5.551698
  pspatm: atomic psp has been read  and splines computed
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file t65o_DS20_WFK
- 
+
 ================================================================================
  prteigrs : about to open file t65o_DS1_EIG
  Non-SCF case, kpt    1 ( -0.43750  0.06250  0.00000), residuals and eigenvalues=
@@ -575,12 +575,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  Non-SCF case, kpt   10 (  0.43750  0.37500  0.06250), residuals and eigenvalues=
   7.37E-11  3.55E-12  3.91E-13  7.45E-12  1.16E-13  2.06E-11  9.11E-11  5.32E-13
   3.39E-12  2.60E-12  5.48E-11  6.39E-11  7.62E-12  8.23E-11  4.41E-11  5.35E-11
-  3.91E-12  4.62E-11  2.41E-08  1.27E-03
+  3.91E-12  4.62E-11  2.41E-08  1.26E-03
  -1.6854E-01  3.4500E-01  4.1942E-01  5.5525E-01  6.7920E-01  8.6525E-01
   1.4707E+00  1.6425E+00  1.7070E+00  1.7719E+00  1.7911E+00  1.8560E+00
   1.9305E+00  1.9885E+00  1.9985E+00  2.0712E+00  2.1366E+00  2.3002E+00
   2.5912E+00  2.7277E+00
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -609,13 +609,13 @@ force_length_stats: {min: null, max: null, mean: null, }
  Atom  Sphere_radius  Integrated_density
     1        2.00000          0.33744640
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   28.328E-12; max=  94.274E-12
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
@@ -661,12 +661,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#  10, nband= 20, wtk=  0.00586, kpt=  0.4375  0.3750  0.0625 (reduced coord)
   -0.16854    0.34500    0.41942    0.55525    0.67920    0.86525    1.47075    1.64254
    1.70697    1.77193    1.79108    1.85596    1.93050    1.98848    1.99853    2.07124
-   2.13660    2.30019    2.59122    2.72772
- 
+   2.13660    2.30019    2.59122    2.72770
+
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 2 (-1 if OMP is not activated)
- 
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -677,23 +677,23 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
- 
+
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
- 
+
 - Reading GS states from WFK file: t65o_DS1_WFK
 - Reading DDB from file: t65o_DS20_DDB
 - Reading DVDB from file: t65o_DS20_DVDB
- 
- 
- 
- 
+
+
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  4.1905838  0.0000000  2.4194347  G(1)=  0.2386302 -0.0843685  0.0000000
@@ -704,7 +704,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Time-reversal symmetry is present
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000  Cu
- 
+
  DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t65o_DS20_DDB
  Values initialized with zeros.
@@ -720,19 +720,19 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
- 
+
  The interatomic forces have been obtained
  Average speed of sound partial sums:    -0.4714031653E-03 (at units)
 -                                   =          -1.0313 [km/s]
- 
+
  Debye frequency from partial sums:    -0.4262233754E-03 (Ha)
 -                                 =    -0.2804415090E+01 (THz)
 -Debye temperature from partial sums:    -0.1345905372E+03 (K)
- 
+
 - Writing phonon DOS to netcdf file: t65o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
- 
- 
+
+
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
  Fundamental gap:    -4.950 (eV)
@@ -746,8 +746,8 @@ meta: {optdriver: 7, eph_task: -4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    0.0     0.000    -4.048    -7.703     2.753
  300.0     0.026    -4.054    -7.709     2.759
- 
- 
+
+
 
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 1 to bsum_stop: 1
@@ -849,7 +849,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -4.048    0.000 999999.0    0.000
 ============================================================================================
- 
+
  Entering IBTE driver.
 - Reading SERTA lifetimes and e-ph scattering operator from: t65o_DS2_SIGEPH.nc
 
@@ -863,7 +863,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
  Total electron DOS at Fermi level in states/eV:   2.11107940E-01
  Total number of electrons at eF:    1.0
 
- 
+
  Transport (RTA) calculation results, chemical potential adjusted with T:
 
  Conductivity [Siemens cm^-1] using SERTA approximation
@@ -871,73 +871,501 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00    0.135174E+05    0.135174E+05    0.135174E+05
- 
- 
+
+
  Resistivity [micro-Ohm cm] using SERTA approximation
  Temperature (K)              xx              yy              zz
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00    0.369894E+02    0.369894E+02    0.369894E+02
- 
- 
+
+
  Seebeck [Volts / Kelvin] using SERTA approximation
  Temperature (K)              xx              yy              zz
-            1.00    0.000000E+00    0.000000E+00    0.000000E+00
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00   -0.667757E-03   -0.667757E-03   -0.667757E-03
- 
- 
+
+
  Kappa [W/m*K] using SERTA approximation
  Temperature (K)              xx              yy              zz
             1.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.307289E-13    0.000000E+00    0.614578E-13
- 
- 
+          300.00   -0.307289E-13    0.307289E-13   -0.307289E-13
+
+
  Peltier [Volts] using SERTA approximation
  Temperature (K)              xx              yy              zz
-            1.00    0.000000E+00    0.000000E+00    0.000000E+00
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00   -0.200327E+00   -0.200327E+00   -0.200327E+00
- 
- 
+
+
  Conductivity [Siemens cm^-1] using MRTA approximation
  Temperature (K)              xx              yy              zz
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00    0.109943E+05    0.109943E+05    0.109943E+05
- 
- 
+
+
  Resistivity [micro-Ohm cm] using MRTA approximation
  Temperature (K)              xx              yy              zz
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00    0.454780E+02    0.454780E+02    0.454780E+02
- 
- 
+
+
  Seebeck [Volts / Kelvin] using MRTA approximation
  Temperature (K)              xx              yy              zz
-            1.00    0.000000E+00    0.000000E+00    0.000000E+00
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00   -0.667757E-03   -0.667757E-03   -0.667757E-03
- 
- 
+
+
  Kappa [W/m*K] using MRTA approximation
  Temperature (K)              xx              yy              zz
             1.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.000000E+00   -0.307289E-13    0.307289E-13
- 
- 
+          300.00    0.000000E+00    0.000000E+00    0.000000E+00
+
+
  Peltier [Volts] using MRTA approximation
  Temperature (K)              xx              yy              zz
-            1.00    0.000000E+00    0.000000E+00    0.000000E+00
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
  Temperature (K)              xx              yy              zz
           300.00   -0.200327E+00   -0.200327E+00   -0.200327E+00
- 
- 
- 
+
+
+
 - Writing RTA transport results to: t65o_DS2_RTA.nc
- 
+
 - Writing IBTE transport results to: t65o_DS2_RTA.nc
+ Conductivity [Siemens cm^-1] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00             yes
+          300.00    0.119153E+05    0.119153E+05    0.119153E+05             yes
+
+
+ Resistivity [micro-Ohm cm] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00             yes
+          300.00    0.839254E+02    0.839254E+02    0.839254E+02             yes
+
+
+ Seebeck [Volts / Kelvin] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00   -0.000000E+00   -0.000000E+00   -0.000000E+00             yes
+          300.00   -0.667757E-03   -0.667757E-03   -0.667757E-03             yes
+
+
+ Kappa [W/m*K] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00             yes
+          300.00   -0.614578E-13    0.614578E-13    0.614578E-13             yes
+
+
+ Peltier [Volts] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00   -0.000000E+00   -0.000000E+00   -0.000000E+00             yes
+          300.00   -0.200327E+00   -0.200327E+00   -0.200327E+00             yes
+
+
+Carrier density:
+ Temperature [K] chem pot [eV]               e/h density [cm^-3]
+            0.00       -0.55E-02        0.00E+00        0.00E+00
+          300.00       -0.55E-02        0.87E+21        0.93E+20
+
+
+
+- Writing IBTE transport results to: t65o_DS2_RTA.nc
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
+              amu      6.35460000E+01
+        ddb_ngqpt        2    2    2
+             ecut      2.00000000E+01 Hartree
+   eph_ngqpt_fine1       0    0    0
+   eph_ngqpt_fine2      16   16   16
+         eph_task1          1
+         eph_task2         -4
+           etotal2     0.0000000000E+00
+            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         512
+           getddb1          0
+           getddb2         20
+           getden1         20
+           getden2          0
+          getdvdb1          0
+          getdvdb2         20
+           getwfk1         20
+           getwfk2          1
+     ibte_abs_tol1    -1.0000000000E+00
+     ibte_abs_tol2     1.0000000000E-03
+   ibte_alpha_mix1     7.0000000000E-01
+   ibte_alpha_mix2     6.0000000000E-01
+       ibte_niter1        100
+       ibte_niter2         50
+        ibte_prep1          0
+        ibte_prep2          1
+             iscf1         -2
+             iscf2          7
+           jdtset        1    2
+           kptopt1          0
+           kptopt2          1
+         kptrlatt       16    0    0      0   16    0      0    0   16
+          kptrlen1     3.00000000E+01
+          kptrlen2     7.74219091E+01
+P           mkmem1         10
+P           mkmem2        145
+            natom           1
+            nband1         20
+            nband2         20
+           nbdbuf1          2
+           nbdbuf2          0
+           ndtset           2
+            ngfft          20      20      20
+             nkpt1         10
+             nkpt2        145
+             nsym          48
+           ntypat           1
+              occ2     1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       1.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       prtocc : prtvol=0, do not print more k-points.
+           occopt           3
+        optdriver1          0
+        optdriver2          7
+            rprim      4.1905837556E+00  0.0000000000E+00  2.4194346594E+00
+                       1.3968612519E+00  3.9509202543E+00  2.4194346594E+00
+                       0.0000000000E+00  0.0000000000E+00  4.8388693187E+00
+     sigma_erange1     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange2    -7.34986508E-03 -7.34986508E-03 Hartree
+          spgroup         225
+           strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+           tolwfr      1.00000000E-10
+            tmesh      0.00000000E+00  3.00000000E+02  2.00000000E+00
+            typat      1
+            znucl       29.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Comment: the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
+-
+- Proc.   0 individual time (sec): cpu=          8.5  wall=          8.6
+
+================================================================================
+
+ Calculation completed.
+.Delivered   3 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.5  wall=          8.6
 
