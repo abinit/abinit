@@ -224,6 +224,7 @@ module m_xg
   public :: xgBlock_pack
   public :: xgBlock_getSize
   public :: xgBlock_get_gpu_option
+  public :: xgBlock_set_gpu_option
   public :: xgBlock_get_communicator
 
   public :: xgBlock_check
@@ -5536,6 +5537,24 @@ contains
     gpu_option = xgBlock%gpu_option
 
   end subroutine xgBlock_get_gpu_option
+  !!***
+
+  !!****f* m_xg/xgBlock_set_gpu_option
+  !!
+  !! NAME
+  !! xgBlock_set_gpu_option
+  !! 
+  !! FUNCTION
+  !! Setter routine for private variable of xgBlock type
+
+  subroutine xgBlock_set_gpu_option(xgBlock, gpu_option)
+
+    type(xgBlock_t)  , intent(inout) :: xgBlock
+    integer          , intent(in   ) :: gpu_option
+
+    xgBlock%gpu_option = gpu_option
+
+  end subroutine xgBlock_set_gpu_option
   !!***
 
   !!****f* m_xg/xgBlock_get_communicator
