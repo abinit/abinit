@@ -535,12 +535,23 @@ endif()
 # LEVMAR : use LevMar with cmake build-system
 # see : https://github.com/pkestene/levmar-cmake
 #
-find_package(levmar)
-if(levmar_FOUND)
-  add_library(abinit::levmar ALIAS levmar::levmar)
+
+find_library(LEVMAR_LIBRARY
+  NAMES levmar
+  PATHS ${LEVMAR_ROOT}/lib ${LEVMAR_ROOT}/lib64 /opt/levmar/lib
+  DOC "Location of the levmar library"
+)
+check_include_file("levmar.h" LEVMAR_HEADER_FOUND)
+if(LEVMAR_LIBRARY AND LEVMAR_HEADER_FOUND)
+  target_link_libraries(abinit ${LEVMAR_LIBRARY})
+  try_compile(LEVMAR_FOUND
+    ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_levmar.c)
+endif()
+if (LEVMAR_FOUND)
+  message(STATUS "levmar found: ${LEVMAR_LIBRARY}")
   set(HAVE_LEVMAR 1)
 else()
-  message(STATUS "levmar NOT FOUND")
+  message(STATUS "levmar not found")
 endif()
 
 #
@@ -658,41 +669,38 @@ endif()
 # - set env var or cmake var TRIQS_ROOT to the root path of triqs install directory
 # - set env var CMAKE_PREFIX_PATH (usually by a modulefile on a supercomputer)
 #
-find_package(TRIQS)
+if (ABINIT_ENABLE_TRIQS)
+  find_package(TRIQS)
 
-if(TRIQS_FOUND)
-  add_library(abinit::triqs ALIAS triqs)
+  if(TRIQS_FOUND)
+    add_library(abinit::triqs ALIAS triqs)
+    set(HAVE_TRIQS 1)
 
-  set(HAVE_TRIQS 1)
-
-  # NOT sure about this, is TRIQS 3.x compatible with 2.0 ?
-  # (TODO : check with someone who knows triqs)
-  # Besides, it looks like currently abiniti is not compatible with triqs 3.x,
-  # some porting is needed
-  # if (TRIQS_VERSION_MAJOR VERSION_EQUAL "3")
-  #   set(DO_BUILD_67_TRIQS_EXT ON)
-  #   set(HAVE_TRIQS_v3 1)
-  #   set(HAVE_TRIQS_v2_0 1)
-  # endif()
-
-
-  if (TRIQS_VERSION_MAJOR VERSION_EQUAL "2" AND TRIQS_VERSION_MINOR VERSION_EQUAL "0")
-    set(DO_BUILD_67_TRIQS_EXT ON)
-    set(HAVE_TRIQS_v2_0 1)
+    # NOT sure about this, is TRIQS 3.x compatible with 2.0 ?
+    # (TODO : check with someone who knows triqs)
+    # Besides, it looks like currently abiniti is not compatible with triqs 3.x,
+    # some porting is needed
+    # if (TRIQS_VERSION_MAJOR VERSION_EQUAL "3")
+    #   set(DO_BUILD_67_TRIQS_EXT ON)
+    #   set(HAVE_TRIQS_v3 1)
+    #   set(HAVE_TRIQS_v2_0 1)
+    # endif()
+    if (TRIQS_VERSION_MAJOR VERSION_EQUAL "2" AND TRIQS_VERSION_MINOR VERSION_EQUAL "0")
+      set(DO_BUILD_67_TRIQS_EXT ON)
+      set(HAVE_TRIQS_v2_0 1)
+    endif()
+    if (TRIQS_VERSION_MAJOR VERSION_EQUAL "1" AND TRIQS_VERSION_MINOR VERSION_EQUAL "4")
+      set(DO_BUILD_67_TRIQS_EXT ON)
+      set(HAVE_TRIQS_v1_4 1)
+    endif()
+    #get_property(TRIQS_COMPILE_DEFINITIONS TARGET triqs PROPERTY INTERFACE_COMPILE_DEFINITIONS)
+    #get_property(TRIQS_COMPILE_FEATURES TARGET triqs PROPERTY INTERFACE_COMPILE_FEATURES)
+    #get_property(TRIQS_COMPILE_OPTIONS TARGET triqs PROPERTY INTERFACE_COMPILE_OPTIONS)
+    get_property(TRIQS_INCLUDE_DIRECTORIES TARGET triqs PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+    get_property(TRIQS_LINK_LIBRARIES TARGET triqs PROPERTY INTERFACE_LINK_LIBRARIES)
+  else()
+    message(SEND_ERROR "ABINIT_ENABLE_TRIQS activated but TRIQS has not been found!")
   endif()
-
-  if (TRIQS_VERSION_MAJOR VERSION_EQUAL "1" AND TRIQS_VERSION_MINOR VERSION_EQUAL "4")
-    set(DO_BUILD_67_TRIQS_EXT ON)
-    set(HAVE_TRIQS_v1_4 1)
-  endif()
-
-  #get_property(TRIQS_COMPILE_DEFINITIONS TARGET triqs PROPERTY INTERFACE_COMPILE_DEFINITIONS)
-  #get_property(TRIQS_COMPILE_FEATURES TARGET triqs PROPERTY INTERFACE_COMPILE_FEATURES)
-  #get_property(TRIQS_COMPILE_OPTIONS TARGET triqs PROPERTY INTERFACE_COMPILE_OPTIONS)
-  get_property(TRIQS_INCLUDE_DIRECTORIES TARGET triqs PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-  get_property(TRIQS_LINK_LIBRARIES TARGET triqs PROPERTY INTERFACE_LINK_LIBRARIES)
-else()
-  message(STATUS "triqs NOT FOUND")
 endif()
 
 #
@@ -834,7 +842,6 @@ if (LAPACK_FOUND)
 else()
   message(STATUS "    LAPACK not found ! Please recheck your environment variables.")
 endif()
-message(STATUS "")
 
 if (ABINIT_SCALAPACK_ENABLED)
   message(STATUS "Scalapack enabled:")
@@ -987,6 +994,13 @@ if (ABINIT_BIGDFT_FOUND)
   message(STATUS "  > BigDFT ldflags : ${ABINIT_BIGDFT_LDFLAGS}")
 else()
   message(STATUS "BigDFT not found!")
+endif()
+
+if (LEVMAR_FOUND)
+  message(STATUS "levmar found:")
+  message(STATUS "  > levmar path : ${LEVMAR_LIBRARY}")
+else()
+  message(STATUS "levmar not found!")
 endif()
 
 if (TRIQS_FOUND)
