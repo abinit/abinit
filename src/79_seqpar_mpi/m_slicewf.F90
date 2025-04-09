@@ -239,9 +239,15 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
-    ! TODO revenir plus tard
 
- call slice_distributeSpectrum(slice,dtset%spectral_cut)
+ ! Update xgBlock on gpu state
+ if (gpu_option==ABI_GPU_OPENMP) then
+    call xgBlock_set_gpu_option(xgx0,ABI_GPU_DISABLED)
+    call xgBlock_set_gpu_option(xgeigen,ABI_GPU_DISABLED)
+    call xgBlock_set_gpu_option(xgresidu,ABI_GPU_DISABLED)
+ end if
+
+ call slice_distributeSpectrum(slice,dtset%spectral_cut,dtset%paral_slice)
  
 !################    RUUUUUUUN    #####################################
 !######################################################################
@@ -251,6 +257,13 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
+
+ ! Update xgBlock on gpu state
+ if (gpu_option==ABI_GPU_OPENMP) then
+   call xgBlock_set_gpu_option(xgx0,ABI_GPU_OPENMP)
+   call xgBlock_set_gpu_option(xgeigen,ABI_GPU_OPENMP)
+   call xgBlock_set_gpu_option(xgresidu,ABI_GPU_OPENMP)
+ end if
 
  if ( .not. l_paw ) then
    call timab(tim_nonlop,1,tsec)
