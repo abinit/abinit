@@ -105,7 +105,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, ubu_intel_16.0_openmp
 #%% test_chain = t62.abi, t63.abi, t64.abi, t65.abi
 #%% [files]
 #%% files_to_test =
