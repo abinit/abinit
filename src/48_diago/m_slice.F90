@@ -2311,24 +2311,31 @@ subroutine mpiSlice_init(mpi_slice,distribution)
     ! Used in mpi_enreg...
     bandpp = slice%bandpp
 
-    ! Fair division (load balance) of work across processes
-    select case(allocate_resources)
-    case(BALANCE_BANDPP)
-        ! use the same bandpp per process
-        do islice=1,nslice
-            nband_slice = slice%nband_sub(islice)
-            nproc_slice = floor(real(nband_slice)/real(bandpp))
-            slice%mpiData(islice)%rule_nproc(islice) = nproc_slice
-        end do
-        ! todo due to floor some procs are free
-        ! give them to which slice?
-    case(BALANCE_FILTER)
-        ! balance filter work per process (=ndeg*bandpp)
-        nband_ptr => slice%nband_sub
+    ! Solve allocation problem to find the amount of resource allocated to each slice
+    !In the first case, we are minimizing the maximum of mini/ximi​ni​/xi​ 
+    !with xixi​ summing to pp, which aims to ensure none of the ratios is excessively large. 
+    !In the second, the goal is to distribute resources so that the ratios mi/ximi​/xi​ 
+    !are as equal as possible across all tasks. So it's about choice in balancing extremes versus uniformity.
+
+    !Goal: We need to allocate pp resources to nn groups, where each group ii 
+    !has a weight wiwi​ and size mimi​. The allocation xixi​ should be 
+    !proportional to the weighted size wi×miwi​×mi​ for each group.
+
+    nband_ptr => slice%nband_sub
+    ones(:) = 1
+    ones_ptr => ones
+    select case(resource_allocation)
+    case(FAIR_ALLOCATION)
+        ! fair share, equal division. Uses the same bandpp per process regardless ndeg
+        nproc_ptr = optimize_allocation(nband_ptr, ones_ptr, nproc) 
+    case(WEIGHTED_FAIR_ALLOCATION)
+        ! applies load balancing per process (=ndeg*bandpp)
+        ! This ensures that each slice receives resources in proportion to its degree 
+        ! and the number of vectors it has.
         ndeg_ptr => slice%ndeg_sub
         nproc_ptr = optimize_allocation(nband_ptr, ndeg_ptr, nproc) 
-        nproc_ptr => slice%mpiData%rule_nproc
     end select
+    slice%mpiData%rule_nproc(:) = nproc_ptr(:)
     
     ! 'bandpp_slice'= uniformly distribute 'nband_slice' across 'nproc_slice' processes
     do islice=1,nslice
@@ -2409,6 +2416,56 @@ end subroutine uniform_distribution
 
 !----------------------------------------------------------------------
 
+!!****f* m_slice/fair_allocation
+!! NAME
+!! fair_allocation
+!! 
+!! FUNCTION
+!! Allocate resources so that m(i)/x(i) is approximately equal across i
+!! 
+!! SOURCE
+
+function fair_charge_allocation(m, p) result(x)
+    
+    ! Arguments
+    real(dp), intent(in) :: m(:)
+    integer, intent(in) :: p
+    ! Local variables
+    integer :: x(size(m))
+    integer :: s, i, remaining, max_i
+    real(dp), allocatable :: ideal_x(:), frac_part(:)
+    real(dp) :: total_m
+
+    s = size(m)
+    ABI_MALLOC(ideal_x,(s))
+    ABI_MALLOC(frac_part,(s))
+
+    total_m = sum(m)
+    ideal_x = (m * real(p, dp)) / total_m
+
+    do i = 1, s
+        x(i) = floor(ideal_x(i))
+        frac_part(i) = ideal_x(i) - real(x(i), dp)
+    end do
+
+    remaining = p - sum(x)
+
+    ! Distribute remaining units to highest fractional parts
+    do while (remaining > 0)
+        max_i = maxloc(frac_part, 1)
+        x(max_i) = x(max_i) + 1
+        frac_part(max_i) = 0.0_dp  ! mark as used
+        remaining = remaining - 1
+    end do
+
+    if (allocated(ideal_x)) ABI_FREE(ideal_x)
+    if (allocated(frac_part)) ABI_FREE(frac_part)
+
+end function fair_allocation
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slice/optimize_allocation
 !! NAME
 !! optimize_allocation
@@ -2417,13 +2474,17 @@ end subroutine uniform_distribution
 !! Solve integer optimization problem under constraint: 
 !! 
 !!     min_{x_1,..,x_s} max_{1,..,s} f_i(x_i)
-!!                                   x_1 + .. + x_s = p
-!!                                   x_i integers
+!!     subject to:   x_1 + .. + x_s = p
+!!                   x_i integers
 !! 
-!! with objective function f_i(x)=m_i*n_i/x.
+!! with objective cost function f_i(x)=m_i*n_i/x.
+!! The solution x_i is the amount of resource allocated to the i-th task.
+!! The algorithm uses binary search to deal with integer rounding.
 !! 
 !! INPUTS
 !! arrays m and n (length s), and integer p
+!! m can be the group size, n can be another measure or need ..
+!! p in the number of total resources
 !! 
 !! OUTPUT
 !! integer array x of size s such that sum(x) = p and max(m_i*n_i/x_i) is minimized
@@ -2497,6 +2558,43 @@ function optimize_allocation(m, n, p) result(x)
 
 end function optimize_allocation
 !!***
+
+! This is the same as before but uses greedy to deal with integer rounding
+! I think this is not optimal
+
+    ! Subroutine to perform weighted fair allocation with integer results
+    subroutine greedy_allocation(w, m, p, n, x)
+        real, dimension(n), intent(in) :: w  ! Weights of the groups
+        integer, dimension(n), intent(in) :: m  ! Sizes of the groups (number of vectors)
+        real, intent(in) :: p  ! Total resources available
+        integer, intent(in) :: n  ! Number of groups
+        integer, dimension(n), intent(out) :: x  ! Allocated resources for each group (integers)
+        
+        real :: total_weighted_size  ! Total weighted size (sum of w_i * m_i)
+        real :: allocated_real(n)  ! Real-valued proportional allocation before rounding
+        integer :: i, total_allocated, leftover
+
+        ! Calculate the total weighted size (sum of w_i * m_i)
+        total_weighted_size = 0.0
+        do i = 1, n
+            total_weighted_size = total_weighted_size + w(i) * m(i)
+        end do
+
+        ! Perform the proportional allocation: x_i = (w_i * m_i) / (sum(w_j * m_j)) * p
+        total_allocated = 0
+        do i = 1, n
+            allocated_real(i) = (w(i) * m(i) / total_weighted_size) * p
+            x(i) = nint(allocated_real(i))  ! Round to the nearest integer
+            total_allocated = total_allocated + x(i)
+        end do
+
+        ! If the total allocation doesn't sum to p, adjust the allocations
+        leftover = p - total_allocated
+        do i = 1, leftover
+            x(i) = x(i) + 1  ! Distribute the leftover resources
+        end do
+
+    end subroutine greedy_allocation
 
 !----------------------------------------------------------------------
 
