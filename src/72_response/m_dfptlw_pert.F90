@@ -566,7 +566,7 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
 
  DBG_ENTER("COLL")
 
-!If GGA xc first calculate the Cartesian q gradient of the xc kernel
+!If GGA xc first calculate the Cartesian q gradient of the xc potential
  if (nkxc == 7) then
    ABI_MALLOC(vxc1dq,(2*nfft,nspden))
    ABI_MALLOC(vxc1dq_car,(2*nfft,nspden,3))

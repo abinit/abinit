@@ -56,7 +56,7 @@ _ WF disk file :      4.980 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
          ecutsigx      1.60000000E+01 Hartree
           ecutwfn      1.00000000E+01 Hartree
 -          fftalg         312
-       gw_qprange           4
+       gw_qprange          -4
            istwfk        2    3    7
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -500,7 +500,7 @@ data: !Tabular |
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-       gw_qprange           4
+       gw_qprange          -4
            istwfk        2    3    7
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
