@@ -17,7 +17,7 @@ Nsight Systems installer can be directly downloaded from NVIDIA
 [website](https://developer.nvidia.com/nsight-systems/get-started). We recommend to download the Full Version for 
 profiling from the GUI. A minimal installation for profiling from the CLI only is also available but not used here. 
 To use NVTX API you need to link ABINIT with `nvToolsExt` .so library and activate the NVTX markers macros. This can be
-achieved by adding the following lines to your ac9 configuration file when compiling ABINIT on CPU with autotools:
+achieved by adding the following lines to your `autoconf` configuration file when compiling ABINIT on CPU with autotools:
 
     with_gpu_markers="yes"
     abi_gpu_nvtx_v3="yes"

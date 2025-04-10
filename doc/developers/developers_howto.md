@@ -127,10 +127,9 @@ Wait for the error e.g. SIGSEGV, then print the **backtrace** with:
 
     (gdb) bt
 
-Display additional information of a selected stack frame (the first one here), such as function arguments before the
+Display additional information of a selected **stack frame** (the first one here), such as function arguments before the
 error, with the commands:
 
-    (gdb) bt
     (gdb) select-frame 1
     (gdb) info args
 
@@ -143,9 +142,10 @@ error, with the commands:
 
 !!! tip
 
-    For debugging MPI jobs, serial debuggers attached to individual processes in an MPI job are useful.
-    Run an MPI job (4 processes in this example) that opens one `xterm` terminal window for each process and then 
-    loads the ABINIT executable in the GNU debugger for that process using the command:
+    For debugging MPI jobs, serial debuggers attached to individual processes are useful.
+    Run an MPI job (4 processes in this example) that opens separate instances of `xterm` terminal windows 
+    for individual processes and then loads the ABINIT executable in the GNU debugger on each one of them, using 
+    the command:
 
         mpirun -n 4 xterm -e gdb path_to_abinit_executable
 
@@ -154,7 +154,7 @@ error, with the commands:
 
         (gdb) run path_to_input_abi
 
-    Next, gdb can be used as in the serial case. 
+    Within each process, gdb can be used as in the serial case. 
 
 For a more complete introduction to *gdb*, we suggest this youtube tutorial:
 
