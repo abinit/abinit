@@ -2322,17 +2322,19 @@ subroutine mpiSlice_init(mpi_slice,distribution)
     !proportional to the weighted size wi×miwi​×mi​ for each group.
 
     nband_ptr => slice%nband_sub
-    ones(:) = 1
-    ones_ptr => ones
     select case(resource_allocation)
     case(FAIR_ALLOCATION)
         ! fair share, equal division. Uses the same bandpp per process regardless ndeg
-        nproc_ptr = optimize_allocation(nband_ptr, ones_ptr, nproc) 
+        ABI_MALLOC(ones, (nslice))
+        ones(:) = 1 ! weight is 1
+        ones_ptr => ones
+        nproc_ptr = optimize_allocation(nband_ptr, ones_ptr, nproc)
+        ABI_FREE(ones)
     case(WEIGHTED_FAIR_ALLOCATION)
         ! applies load balancing per process (=ndeg*bandpp)
         ! This ensures that each slice receives resources in proportion to its degree 
         ! and the number of vectors it has.
-        ndeg_ptr => slice%ndeg_sub
+        ndeg_ptr => slice%ndeg_sub ! weight is degree
         nproc_ptr = optimize_allocation(nband_ptr, ndeg_ptr, nproc) 
     end select
     slice%mpiData%rule_nproc(:) = nproc_ptr(:)
