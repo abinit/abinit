@@ -2277,6 +2277,7 @@ end function mpiSlice_getSliceMe
 
 subroutine mpiSlice_init(mpi_slice,distribution)
 
+
     ! color MPI processes with the slice TODO automatize for arbitrary number of slices
     slice_color = -1
     if (my_rank==0) slice_color=0
@@ -2293,7 +2294,9 @@ subroutine mpiSlice_init(mpi_slice,distribution)
 
     ABI_MALLOC(mpiSlice%rule_nband, (nslice)) 
     ABI_MALLOC(mpiSlice%rule_ndeg, (nslice))
-    ABI_MALLOC(mpiSlice%rule_nproc, (nslice))
+    do islice=1,nslice
+        ABI_MALLOC(slice%mpiData(islice)%rule_nproc, (nslice))
+    end do
     ABI_MALLOC(mpiSlice%lookup_bandpp_me, (nproc))
     ABI_MALLOC(mpiSlice%lookup_slice_me, (nproc))
 
@@ -2305,28 +2308,39 @@ subroutine mpiSlice_init(mpi_slice,distribution)
     ! Attention this must be constructed at the same time for all processes
     ! before doing any communication
 
-    ! For ncolsColsRows
-    ABI_MALLOC(ncolsColsRows, (nprocs))
-    ncolsColsRows_ptr => ncolsColsRows
+    ! Used in mpi_enreg...
+    bandpp = slice%bandpp
 
-    select case(balance)
-    case(0) ! same bandpp for all slices
-        ABI_CHECK(cols(X0)%nprocs==0,'nprocs should divide cols')
-        bandpp = cols(X0)/nprocs
-        ncolsColsRows(:) = bandpp
-    case(1) ! optimal bandpp per slice
-
-        ncolsColsRows(1) = 75 ! slice 1 degree 2
-        ncolsColsRows(2) = 40 ! slice 2 degree 100
-        ncolsColsRows(3) = 40
-        ncolsColsRows(4) = 37 !
-
+    ! Fair division (load balance) of work across processes
+    select case(allocate_resources)
+    case(BALANCE_BANDPP)
+        ! use the same bandpp per process
+        do islice=1,nslice
+            nband_slice = slice%nband_sub(islice)
+            nproc_slice = floor(real(nband_slice)/real(bandpp))
+            slice%mpiData(islice)%rule_nproc(islice) = nproc_slice
+        end do
+        ! todo due to floor some procs are free
+        ! give them to which slice?
+    case(BALANCE_FILTER)
+        ! balance filter work per process (=ndeg*bandpp)
+        nband_ptr => slice%nband_sub
+        ndeg_ptr => slice%ndeg_sub
+        nproc_ptr = optimize_allocation(nband_ptr, ndeg_ptr, nproc) 
+        nproc_ptr => slice%mpiData%rule_nproc
     end select
+    
+    ! 'bandpp_slice'= uniformly distribute 'nband_slice' across 'nproc_slice' processes
+    do islice=1,nslice
+        bandpp_ptr => slice%mpiData(islice)%rule_nband
+        nband_slice = slice%nband_sub(islice)
+        nproc_slice = slice%mpiData(islice)%rule_nproc
+        call uniform_distribution(bandpp_ptr,nproc_slice,nband_slice)
+    end do
 
     ! Assumes every process has fixed capacity of bandpp
     !my_rank = 0
     !do i=1,nslice
-    !    ABI_CHECK(modulo(nband_slice(i),bandpp)==0, 'not a multiple of bandpp')
     !    my_rank = my_rank + nband_slice(i) / bandpp
     !    proc_id = my_rank + 1 ! fortran indices start from 1!
     !    my_slice(proc_id) = i
@@ -2334,14 +2348,6 @@ subroutine mpiSlice_init(mpi_slice,distribution)
 
     ! For nrows linalg
     ABI_MALLOC(mpiSlice%nrowsLinalg, (nproc))
-
-    ! Load balance with charge=bandpp or with charge=ndeg*bandpp
-    select case(load_balance)
-    case(BANDPP)
-        call compute_uniform_distribution(mpi_slice%rule_nproc,nproc,nband)
-    case(BANDPPXNDEG)
-        call compute_weighted_distribution(mpi_slice%rule_nproc,nproc,nband)
-    end select
 
     map_slice_to_proc
 
@@ -2363,18 +2369,19 @@ end subroutine mpiSlice_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/compute_uniform_distribution
+!!****f* m_slice/uniform_distribution
 !! NAME
-!! compute_uniform_distribution
+!! uniform_distribution
 !!
 !! FUNCTION
-!  Divide m_tot into nproc parts as uniformly as possible.
-!! If mod(m_tot,nproc) =/= 0 give less charge to the last process.
-!! Return nproc values of m_distr.
+!  Distribute 'm_tot' into 'nproc' processes as uniformly as possible.
+!! If 'mod(m_tot,nproc) =/= 0' give less charge to the last process.
+!! Return 'm_distr' array with 'nproc' values. Note what we *do not* do:
+!! pad m so that each process has a multiple of m_uni.
 !! 
 !! SOURCE
 
-subroutine compute_uniform_distribution(m_distr,nproc,m_tot)
+subroutine uniform_distribution(m_distr,nproc,m_tot)
 
     ! Arguments
     pointer, integer, intent(inout) :: m_distr
@@ -2385,7 +2392,7 @@ subroutine compute_uniform_distribution(m_distr,nproc,m_tot)
     integer :: m_rem
 
     if (nproc > 1) then
-        if (mod(m_tot,nproc) == 0) then
+        if (modulo(m_tot,nproc) == 0) then
             m_distr(1:nproc) = m_tot / nproc
         else
             m_uni = ceiling(real(m_tot) / real(nproc))
@@ -2397,83 +2404,98 @@ subroutine compute_uniform_distribution(m_distr,nproc,m_tot)
         m_distr(1) = m_tot
     end if
 
-end subroutine compute_uniform_distribution
+end subroutine uniform_distribution
 !!***
-
-! other without optimization
-!! pad number of vectors in each slice so that each slice has a multiple
-!! of bandpp. Then bandpp is already fixed and we simply compute the number
-!! of processes attached to i-th slice such that nproc_i*bandpp_i=nband_i.
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/set_optimal_mpi
+!!****f* m_slice/optimize_allocation
 !! NAME
-!! set_optimal_mpi
+!! optimize_allocation
 !! 
 !! FUNCTION
-!! Distribute 'nvec_i' vectors across 'nproc' processes using the filter degree
-!! 'ndeg_i' as a load balance criterion for all slices 'i=1,..,s'. Obtained by
-!! computing integer solutions to the discrete optimisation under constraint:
+!! Solve integer optimization problem under constraint: 
 !! 
-!!     min_{x_1,..,x_s} max_{i\in\{1,..,s\}} nvec_i * ndeg_i / x_i
-!!                                           x_1 + .. + x_s = nproc
-!!                                           x_i \in \mathbb{Z}^+
+!!     min_{x_1,..,x_s} max_{1,..,s} f_i(x_i)
+!!                                   x_1 + .. + x_s = p
+!!                                   x_i integers
 !! 
-!! where x_i is the unknown number of MPI processes attached to the i-th slice.
-!! The cost function to be minimised represents the operation count of 
-!! the polynomial filtering, which is 'ndeg_i' Hamiltonian applications 
-!! applied to 'bandpp_i=nvec_i/x_i' vectors using the MPI band distribution.
-!! The solution of this problem admits a closed-form expression coded here.
-!! Return 'bandpp_i'.
+!! with objective function f_i(x)=m_i*n_i/x.
+!! 
+!! INPUTS
+!! arrays m and n (length s), and integer p
+!! 
+!! OUTPUT
+!! integer array x of size s such that sum(x) = p and max(m_i*n_i/x_i) is minimized
 !!
 !! SOURCE
 
-type(mpiSlice_t) function optimize_bandpp(nproc,nslice,nvec,ndeg) result(mpi_slice)
+function optimize_allocation(m, n, p) result(x)
 
-    implicit none
+    ! Arguments
+    real(dp), intent(in) :: m(:), n(:)
+    integer, intent(in) :: p
+    ! Local variables
+    integer :: x(size(m))
+    integer :: s, i, total
+    real(dp) :: t_low, t_high, t_mid, eps
+    integer :: max_iter, iter
+    real(dp), allocatable :: temp(:)
+        
+    s = size(m)
+    ABI_MALLOC(temp,(s))    
 
-    !Arguments ------------------------------------
-    integer,          intent(in   ) :: nproc
-    integer,          intent(in   ) :: nslice
-    integer, pointer, intent(in   ) :: idx(:,:)
-    integer, pointer, intent(in   ) :: ndeg(:)
-    integer, pointer, intent(inout) :: nproc_opt(:)
-    
-    !Local variables-------------------------------
-    integer :: i
-    integer :: i_most_charged
-    real(dp) :: sum_tot
-    integer, allocatable :: nvec(:)
+    ! Binary search parameters
+    t_low = 1.0e-6_dp
+    t_high = maxval(m * n)
+    eps = 1.0e-6_dp
+    max_iter = 100
 
-! *********************************************************************
+    do iter = 1, max_iter
+        t_mid = (t_low + t_high) / 2.0_dp
+        total = 0
+        do i = 1, s
+            x(i) = ceiling(m(i) * n(i) / t_mid)
+            total = total + x(i)
+        end do
 
-    ABI_MALLOC(nvec, (nslice))
-    nvec(:) = (/ (idx(i,2) - idx(i,1) + 1, i=1,nslice) /)
-    sum_tot = dot_product(nvec,ndeg)
+        if (total > p) then
+            t_low = t_mid
+        else
+            t_high = t_mid
+        end if
 
-    call mpiSlice_init(nproc)
+        if (abs(t_high - t_low) < eps) exit
+    end do
 
-    ! TODO add bandpp this changes also
+    ! Final rounding and optional adjustment
+    total = 0
+    do i = 1, s
+        x(i) = ceiling(m(i) * n(i) / t_high)
+        total = total + x(i)
+    end do
 
-    ! How many processes each slice must use
-    nproc_opt(1:nslice) = (/ (max(floor(nproc*nvec(i)*ndeg(i)/sum_tot),1), i=1,nslice) /)
-    ! do a print here. Is it really a float? If it is an integer no need to round
-    ! nvec is actually any number. We don't need to round anything. Just use different bandpp
-    ! per MPI process (slightly different in the last process).
+    ! Distribute leftover units
+    do while (total < p)
+        real(dp) :: min_increase, current, next
+        integer :: best_i
+        min_increase = 1.0e9_dp
+        best_i = -1
+        do i = 1, s
+            current = m(i) * n(i) / real(x(i), dp)
+            next = m(i) * n(i) / real(x(i) + 1, dp)
+            if (next - current < min_increase) then
+                min_increase = next - current
+                best_i = i
+            end if
+        end do
+        x(best_i) = x(best_i) + 1
+        total = total + 1
+    end do
 
-    ! find max charged slice
-    i_most_charged = maxloc( (/ (nvec(i)*ndeg(i), i=1,nslice) /), dim=1)
-    write(std_out,*) 'most charged slice is', i_most_charged
-    ! add remainder in max charge slice to sum to nproc
-    nproc_opt(i_most_charged) = nproc - sum(nproc_opt(1:nslice)) + nproc_opt(i_most_charged)
+    if (allocated(temp)) ABI_FREE(temp)
 
-    if (allocated(nvec)) ABI_FREE(nvec)
-   
-    ! must also assure that nvec divides nproc_opt!
-    ! possibly add pad ?
- 
-end function distribution_from_optimization
+end function optimize_allocation
 !!***
 
 !----------------------------------------------------------------------
