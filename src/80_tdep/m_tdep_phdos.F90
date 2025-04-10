@@ -61,7 +61,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   integer :: prtdos,iqpt,iq_ibz,iomega,iatom
   integer :: dos_ngqpt(3)
   integer :: count_wminmax(2)
-  character (len=25):: phdos_fname
+  character (len=fnlen):: phdos_fname
   double precision :: dossmear,integ,domega
   double precision :: dos_qshift(3)
   double precision, allocatable :: displ(:,:)
