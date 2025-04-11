@@ -3035,7 +3035,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
  type(vcoul_t) :: Vcp_ks
-
 ! *************************************************************************
 
  DBG_ENTER('COLL')
@@ -3963,7 +3962,6 @@ subroutine sigma_tables(Sigp, Kmesh, esymm)
  logical :: sigc_is_herm, only_diago
 !arrays
  integer,allocatable :: kcalc2ibz(:)
-
 ! *************************************************************************
 
  only_diago = sigp%gwcalctyp < 20
@@ -4032,7 +4030,6 @@ subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_
  logical :: store_ur
 !arrays
  integer :: tmp_spins(Sigp%nsppol),nprocs_spin(Sigp%nsppol)
-
 ! *************************************************************************
 
  ierr=0; nsppol=Sigp%nsppol
@@ -4247,7 +4244,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
    write(msg,'(a,f6.3)')' sigma: mixing on-site QP rho_ij densities using rhoqpmix= ',Dtset%rhoqpmix
    call wrtout(std_out, msg)
    ! qp_rhor = prev_rhor + Dtset%rhoqpmix*(qp_rhor-prev_rhor)
-  
+
    call pawrhoij_unpack(QP_Pawrhoij)   ! Unpack new QP %rhoijp
    call pawrhoij_unpack(prev_Pawrhoij) ! Unpack previous QP %rhoijp
 
@@ -4280,7 +4277,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
 
  ! Get electronic temperature from dtset
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
- 
+
  call pawdenpot(qp_compch_sph,el_temp,QP_energies%e_paw,QP_energies%e_pawdc,&
    QP_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
    Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,&
@@ -4330,7 +4327,6 @@ subroutine setup_vcp(Vcp_ks,Vcp_full,Dtset,Gsph_x,Gsph_c,Cryst,Qmesh,Kmesh,coef_
  real(dp) :: rcut
 !arrays
  real(dp),allocatable :: qlwl(:,:)
-
 !************************************************************************
 
  ! Build Vcp_ks and Vcp_full

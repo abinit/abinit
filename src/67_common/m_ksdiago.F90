@@ -41,7 +41,7 @@ module m_ksdiago
  use m_gwdefs,            only : GW_TOLQ0, GW_Q0_DEFAULT !, cone_gw, czero_gw, j_gw
  use m_dtset,             only : dataset_type
  use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa, ltoa
- use m_io_tools,          only : iomode_from_fname, get_unit ! file_exists, open_file,
+ use m_io_tools,          only : iomode_from_fname, get_unit
  use m_yaml,              only : yamldoc_t, yamldoc_open
  use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report, timab
@@ -298,6 +298,34 @@ module m_ksdiago
   ! The name of the file storing the eigenvectors and eigenvalues (only if jobz="V")
 
  end type ddiago_ctl_type
+!!***
+
+
+!!****t* m_ksdiago/psbands_t
+!! NAME
+!!  psbands_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type, private :: psbands_t
+
+   integer :: nb_tot = -1
+   integer :: nb_protected
+   integer :: num_spaces = -1
+   integer :: nb_per_space = -1
+
+   type(dataset_type),pointer :: dtset
+
+ contains
+   procedure :: init => psbands_init
+   procedure :: band2space => psbands_band2space
+   procedure :: free => psbands_free
+    ! Free memory.
+
+ end type psbands_t
+!!***
 
  public :: ksdiago
  public :: init_ddiago_ctl
@@ -433,7 +461,6 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gsg_mat(:,:,:)
  real(dp),pointer :: cwavef(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 ! *********************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -919,10 +946,12 @@ end subroutine init_ddiago_ctl
 !!  for a given k-point and spin using Scalapack/ELPA.
 !!
 !! INPUTS
-!!  spin: spin index.
-!!  kpoint(3)
+!!  spin= spin index.
+!!  istwf_k= Storage mode for wavefunctions.
+!!  kpoint(3)= k-point in reduced coordinates
+!!  ecut= Cutoff energy
+!!  nband_k=Number of bands
 !!  prtvol=Verbosity level
-!!  mgfftc=maximum size of 1D FFTs (coarse mesh).
 !!  nfftf=(effective) number of FFT grid points in the dense FFT mesh (for this processor)
 !!         (nfftf=nfft for norm-conserving potential runs)
 !!  pawtab(psps%ntypat*psps%usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -969,12 +998,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !scalars
  integer,parameter :: mkmem1 = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ncomp1 = 1
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
- integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
- integer :: type_calc,sij_opt,igsp2_start,ig, my_ib,ibs1
+ integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder, ib_glob, ib_loc
+ integer :: type_calc,sij_opt,igsp2_start,ig, my_ib, ibs1, ipwsp, ispace, igsp_loc, my_npwsp
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g1, il_g2, ig1, ig2, ierr, min_my_nband, band_sum
  integer :: idat, ndat, batch_size, h_size !, mene_found
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3), g0(3)
- integer :: iq_bz !, isym_q, trev_q !, g0_q(3) iq_ibz,
+ integer :: iq_bz !, isym_q, trev_q !, g0_q(3) iq_ibz
  real(dp),parameter :: lambda0 = zero
  real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin, tol_empty_in, tol_empty, gsq_max, inv_sqrt_ucvol, rcut
  logical :: do_full_diago, haveit, isirr_k, q_is_gamma ! isirr_q,
@@ -988,12 +1017,14 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type(uplan_t) :: uplan_k
  type(fftbox_plan3_t) :: box_plan
  type(pstat_t) :: pstat
+ type(psbands_t) :: psbands
 !arrays
  integer,allocatable :: gfft(:,:)
  real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3), my_gw_qlwl(3) ! q0(3),
- real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
+ real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:), thetas(:)
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vcg_qbz(:,:)
  real(dp),target,allocatable :: bras(:,:)
+ complex(dp),allocatable :: ps_ug(:,:,:)
  complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 ! *********************************************************************
@@ -1429,6 +1460,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! NB: global H shape is (h_size, h_size) even for partial diago.
  ! then one extracts the (hsize, nband_k) sub-matrix before returning.
  call ghg_4diag%copy(eigvec)
+ if (my_rank == master) call pstat%print([std_out], header="Before diago")
 
 #ifndef HAVE_LINALG_ELPA
  call wrtout([std_out, ab_out], &
@@ -1469,7 +1501,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  if (my_rank == master) then
    call pstat%print([std_out], header="After diago")
-
    ! Write eigenvalues.
    frmt1 = '(8x,*(1x,f7.3))'
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
@@ -1484,9 +1515,43 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end if
  end if
 
+ ! Free memory
  call ghg_4diag%free(); call gsg_4diag%free(); call proc_1d%free()
 
- ! Now transfer eigvec to the ugb datastructure using 1d grid (block column distribution)
+ ! ================
+ ! Stochastic bands
+ ! ================
+ if (dtset%useria == 123) then
+   call wrtout(std_out, "Building Stochastic bands...")
+   ! Build energy grid.
+   !call psbands%init(dtset, fermie)
+   my_npwsp = eigvec%sizeb_local(1)
+   !ABI_CALLOC(ps_ug, (my_npwsp, psbands%max_nsto, psbands%ns))
+   ABI_MALLOC(thetas, (my_npwsp))
+
+   ! Loop over global bands
+   do ib_glob=1, eigvec%sizeb_global(2)
+     ! Get space index from ib_glob.
+     !ispace = psbands%band_to_space(ib_glob); if (ispace == -1) cycle
+     !psbands%eig(psbands%max_nsto, psbands%ns))
+     call random_number(thetas)
+     ! Loop over global PW index
+     do ipwsp=1,npwsp
+       call eigvec%glob2loc(ipwsp, ib_glob, igsp_loc, ib_loc, haveit); if (.not. haveit) cycle
+       ps_ug(igsp_loc, ib_glob, ispace) = ps_ug(igsp_loc, ib_glob, ispace) + &
+         eigvec%buffer_cplx(igsp_loc, ib_loc) * exp(j_dpc * two * thetas(igsp_loc))
+     end do
+   end do ! ib_glob
+   ABI_FREE(thetas)
+   call psbands%free()
+   ! Normalize
+   ! TODO: Need communicator over columns here
+   !call xmpi_sum(ps_ug, comm_band, ierr)
+   !ps_ug = ps_ug / fact
+   ABI_FREE(ps_ug)
+ end if
+
+ ! Now transfer eigvec to the ugb datastructure using 1d grid (block column distribution).
  call wrtout(std_out, " Moving to PBLAS block column distribution...")
  call cwtime(cpu, wall, gflops, "start")
 
@@ -1607,7 +1672,6 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  integer :: units(2)
  real(dp),target,allocatable :: cg_work(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
-
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1903,7 +1967,6 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  integer,allocatable :: nband(:,:), wfd_istwfk(:), qtab(:), qtabi(:), qtabo(:)
  real(dp),allocatable :: qbz(:,:), wtk(:), wtq(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
-
 !************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -2103,6 +2166,75 @@ subroutine hyb_free(hyb)
  call hyb%wfd%free(); call hyb%vcgen%free(); call hyb%ebands%free()
 
 end subroutine hyb_free
+!!***
+
+!!****f* m_ksdiago/psbands_init
+!! NAME
+!! psbands_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine psbands_init(psbands, dtset, nband_k, efermi)
+
+!Arguments ------------------------------------
+ class(psbands_t),intent(out) :: psbands
+ class(dataset_type),intent(in) :: dtset
+ real(dp),intent(in) :: efermi
+
+!Local variables-------------------------------
+!scalars
+! *********************************************************************
+ psbands%dtset => dtset
+
+end subroutine psbands_init
+!!***
+
+!!****f* m_ksdiago/psbands_band2space
+!! NAME
+!! psbands_band2space
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+integer function psbands_band2space(psbands, band) result(ispace)
+
+!Arguments ------------------------------------
+ class(psbands_t),intent(in) :: psbands
+ integer,intent(in) :: band
+
+!Local variables-------------------------------
+!scalars
+
+end function psbands_band2space
+!!***
+
+!!****f* m_ksdiago/psbands_free
+!! NAME
+!! psbands_free
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine psbands_free(psbands)
+
+!Arguments ------------------------------------
+ class(psbands_t),intent(inout) :: psbands
+
+!Local variables-------------------------------
+
+end subroutine psbands_free
 !!***
 
 end module m_ksdiago
