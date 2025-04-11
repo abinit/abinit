@@ -69,14 +69,21 @@ module m_slice
     integer, parameter :: FAIR_BANDPP      = 0 ! bandpp (unweigted)
     integer, parameter :: FAIR_BANDPP_WDEG = 1 ! bandpp weighted by degree 
 
-    ! Private 'parallelEnv' datatype
-    ! Parameters of slice parallelisation environment
-    !------------------------------------------------
-    type, private :: parallelEnv_t
+    ! Private 'sliceTasks' datatype
+    ! Parameters of individual slice tasks executed in parallel (scheduler)
+    !-------------------------------------------------
+    type, private :: sliceTasks_t
 
         ! MPI-related
-        integer :: size
-        integer :: comm_global
+        integer :: ntasks        ! number of tasks (=slices)
+        integer :: nprocs_tot    ! total number of available resources (process)
+        integer :: task_me       ! which task current process serves
+        integer :: ncols_me      ! number of columns of current task
+        integer :: nprocs_me     ! number of resources used by current task
+        integer :: comm_global   ! global communicator (inter-task)
+
+        ! Data buffer
+        integer :: nrows_tot  ! total number of rows (planewaves)
 
         ! Flags
         logical :: on_host = .false.
@@ -84,12 +91,17 @@ module m_slice
         logical :: is_row = .false.
         logical :: is_col = .false.
 
-        ! Arrays
-        integer, allocatable :: ncolsColsRows(:)
-        integer, allocatable :: nrowsLinalg(:)
-        integer, allocatable :: group(:)
+        ! Options
+        integer :: resource_allocation
 
-    end type parallelEnv_t
+        ! Arrays
+        integer, allocatable :: tasks_ncols(:)   ! number of columns per task
+        integer, allocatable :: tasks_nprocs(:)  ! number of processes per task
+        integer, allocatable :: assigned_task(:) ! which task each process serves
+        integer, allocatable :: blockcols_me(:)  ! ncol of colsrows-blocks in my task
+        integer, allocatable :: blockrows_me(:)  ! nrow of linalg-blocks in my task
+
+    end type sliceTasks_t
 
     ! Public 'slice' datatype
     ! [IML 9/4 work in progress] I don't think this is necessary
@@ -569,10 +581,13 @@ subroutine slice_distributeSpectrum(slice,spectral_cut,paral_slice)
     ! Compute nband per slice
     call slice_cutSpectrum(slice,pband_ptr,spectral_cut)
  
+    ! Read nrowsLinalg from transposer used in slice
+    nrows_total = slice%total_spacedim
+
     ! Compute target mpi distribution
     ! in here assume that mpiData contains the rule_nband
     ! FIXME workinprogress
-    call parallelEnv_init(env,slice%mpi_slice,paral_slice)
+    call sliceTasks_init(schedule,slice%mpi_slice,nrows_total,paral_slice)
 
     ! Create the extended workspaces on CPU
     call slice_initExtended(slice,pband_ptr)
@@ -800,7 +815,7 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
             ! remember uj,gub is the interval to ignore
             ndeg = 4
             do while
-            !write(std_out,*) 'first slice apriori=', 1.d0/cheb_poly1(lj,12,uj+wuj,ecut)
+            !write(std_out,*) 'first slice apriori=', 1.d0/cheb_poly(lj,12,uj+wuj,ecut)
         else
             ndeg = 4
             finL = 0.d0; finR = 0.d0; foutL = 1.d0; foutR = 1.d0
@@ -821,7 +836,7 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
             if (j==1) then
                 do ipt=1,npt
                     pt = lj + (ipt-1)*(uj-lj)/npt
-                    fun_pt = cheb_poly1(pt,ndeg,uj+wuj,gub)
+                    fun_pt = cheb_poly(pt,ndeg,uj+wuj,gub)
                     write(std_out,*) pt, fun_pt
                 end do
             else
@@ -1764,12 +1779,12 @@ subroutine slice_run(slice,getAX_BX,getBm1X,nspinor)
     ! call xgBlock_set_gpu_option(slice%X)
     
     ! Synchronize before creating a subcomm
-    call xmpi_barrier(env%comm_global)
+    call xmpi_barrier(schedule%comm_global)
     
     ! Split global communicator so that only procs with the same color communicate
-    key = parallelEnv_getRank(env)
-    color = parallelEnv_getGroup(env)
-    call xmpi_comm_split(env%comm_global,color,key,slice_comm,ierr)
+    key = sliceTasks_queryRank(env)
+    color = sliceTasks_queryTask(env)
+    call xmpi_comm_split(schedule%comm_global,color,key,slice_comm,ierr)
 
     ! Restrict all communications to slice subcommunicator
     call xgBlock_setComm(slice%X,slice_comm) ! colsrows representation
@@ -2259,303 +2274,269 @@ end subroutine slice_RayleighRitz
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/parallelEnv_init
+!!****f* m_slice/sliceTasks_init
 !! NAME
-!! parallelEnv_init
+!! sliceTasks_init
 !! 
 !! FUNCTION
 !! Set parameters of slice parallelisation environment.
 !! Assumes that spectral slices have already been splitted
-!! (uses degree).
+!! (uses degree). Note that schedule is target to allow pointers
+!! targeting its member variables (smart!).
 !! 
 !! SOURCE
 
-subroutine parallelEnv_init(env,distribution)
+subroutine sliceTasks_init(schedule,slice_sizes,slice_degrees,nrows_tot,spacecom,&
+    resource_allocation)
 
     implicit none
 
-    type(parallelEnv_t), intent(inout) :: env
+    ! Arguments
+    type(sliceTasks_t), target, intent(inout) :: schedule
+    integer, pointer, intent(in) :: slice_sizes(:)
+    integer, pointer, intent(in) :: slice_degrees(:)
+    integer, intent(in) :: nrows_tot
+    integer, intent(in) :: spacecom
+    integer, intent(in) :: resource_allocation
+
+    ! Local variables
+    integer :: ntasks, nprocs, iproc, task_me
+    ! Arrays
+    integer, allocatable, target :: weights(:)
+    integer, pointer :: weights_ptr(:) => null()
+    integer, pointer :: task_ncols_ptr(:) => null()
+    integer, pointer :: taks_nprocs_ptr(:) => null() 
+    integer, pointer :: assigned_task_ptr(:) => null()
+    integer, pointer :: blockcols_me_ptr(:) => null()
+    integer, pointer :: blocrows_me_ptr(:) => null()
     
+! *********************************************************************
 
-    if (.not. allocated(env%data_buffer)) then
-        ABI_ALLOC(env%data_buffer(100))
-    end if
+    call sliceTasks_free(env)
 
-    !rule_nband(islice)= number of bands contained in slice
-    !rule_ndeg(islice)= computational load for slice (eg degree)
-    !rule_nproc(islice)= number of processes working for slice
-    !lookup_bandpp_me(iproc)= number of bands contained in proc
-    !lookup_slice_me(iproc)= slice index contained in proc
+    ntasks = size(slice_sizes)
+    nprocs = xmpi_comm_size(spacecom)
 
-    ABI_MALLOC(mpiSlice%rule_nband, (nslice)) 
-    ABI_MALLOC(mpiSlice%rule_ndeg, (nslice))
-    do islice=1,nslice
-        ABI_MALLOC(slice%mpiData(islice)%rule_nproc, (nslice))
-    end do
-    ABI_MALLOC(mpiSlice%lookup_bandpp_me, (nproc))
-    ABI_MALLOC(mpiSlice%lookup_slice_me, (nproc))
+    schedule%ntasks = ntasks
+    schedule%nprocs = nprocs
+    schedule%comm_global = spacecom
+    schedule%nrows_tot = nrows_tot
+    schedule%resource_allocation = resource_allocation
 
-    ! rule_nband: defined by the spectral splitter based on DOS
-    ! rule_nproc: defined by the load balance strategy
-    ! lookups: deduced
+    ! Set CPU/GPU flags
+    call sliceTasks_queryTarget(env)
+   
+    ! Query colsrows/linalg representation (TODO)
+    call sliceTasks_queryTranspose(env)
 
-    !comm_slice(islice)=comm id working for slice
-    ! Attention this must be constructed at the same time for all processes
-    ! before doing any communication
+    if(.not.allocated(schedule%task_ncols)) ABI_MALLOC(schedule%task_ncols, (ntasks))
+    if(.not.allocated(schedule%task_nprocs)) ABI_MALLOC(schedule%task_nprocs, (ntasks))
+    if(.not.allocated(schedule%assigned_task)) ABI_MALLOC(schedule%assigned_task, (nprocs))
+    if(.not.allocated(weights)) ABI_MALLOC(weights, (ntasks))
 
-    ! Used in mpi_enreg...
-    bandpp = slice%bandpp
-
-    ! Compute bandpp which is the capacity of each process
-    if (.not.allocated(env%slice_sizes)) then
-        ABI_MALLOC(env%slice_sizes,(nslice))
-    end if
-    env%slice_sizes(:) = slice%nband_sub(:)
-    slice_sizes_ptr => env%slice_sizes
-
-    if (.not.allocated(env%slice_nproc)) then
-        ABI_MALLOC(env%slice_nproc,(nslice))
-    end if
-    slice_nproc_ptr => env%slice_nproc
-    
-    ! Apply weighted fair allocation with various balance criteria for load balance
-    ABI_MALLOC(weights, (nslice))
+    schedule%task_ncols(:) = slice_sizes(:)
+    task_ncols_ptr => schedule%task_ncols
+    task_nprocs_ptr => schedule%task_nprocs
+    assigned_task_ptr => schedule%assigned_task
     weights_ptr => weights
+
+    ! Apply weighted fair allocation with various balance criteria for load balance
     select case(resource_allocation)
     case(FAIR_BANDPP)
         weights(:) = 1 
     case(FAIR_BANDPP_WDEG)
-        weights(:) = slice%ndeg_sub(:)
+        weights(:) = slice_degrees(:)
     end select
     
     ! Solve allocation problem to find the amount of resource allocated to each slice
-    call fair_allocation(nslice, slice_sizes_ptr, weight_ptr, nproc, slice_nproc_ptr)
+    call fair_allocation(ntasks, slice_sizes_ptr, weights_ptr, nprocs, task_nprocs_ptr)
     
-    ABI_FREE(weights)
-   
-    ! Assign slices to processes
-    if (.not.allocated(env%group)) then
-        ABI_MALLOC(env%group, (nproc))
-    end if
-    nproc = 6 ! number of processes
-    nslice = 3 ! number of slices
-    proc_caps = [5, 3, 4, 6, 2, 4] ! this is bandpp TODO
-    slice_vecs = [6, 8, 10] ! this is slice_size
-    ! should be read from slice%slice_sizes
-    call assign_slices_to_processes(proc_caps, nproc, slice_vecs, nslice, env%group)
-    do i = 1, nproc
-        write(*,'(a,i5,a,i5)') "Process ", i, " is in group ", env%group(i)
+    ! Call the subroutine to assign tasks (=slices) to processes
+    call assign_tasks_to_processes(task_nprocs_ptr, assigned_task_ptr)
+    do iproc = 1, ntasks
+        write(*,'(a,i5,a,i5)') "Process ", itask, " is in task ", schedule%assigned_task(i)
     end do
 
-    ! Deduce band capacity per process (=bandpp) per slice
-    ! FIXME this should be in parallel
-    ! every rank only has the slice that corresponds to it
+    ! Deduce band capacity per process (=bandpp) on individual slice
+    ! a process only has the slice that corresponds to it
+    task_me = sliceTasks_queryTask(env)
+    ncols_me = schedule%task_ncols(task_me)
+    nprocs_me = schedule%task_nprocs(task_me)
 
-    my_rank = env%my_rank
-    slice_me = env%group(my_rank)
+    schedule%task_me = task_me
+    schedule%ncols_me = ncols_me
+    schedule%nprocs_me = nprocs_me
 
-    ! TODO replace loop on slices by my_rank
-    do islice=1,nslice
-        nband_slice = env%slice_sizes(islice)
-        nproc_slice = env%slice_nproc(islice)
-        if (.not.allocated(env%slice_bandpp)) then
-            ABI_MALLOC(env%slice_bandpp,(nproc_slice))
-        end if
-        bandpp_ptr => env%slice_bandpp
-        call uniform_distribution(bandpp_ptr,nproc_slice,nband_slice)
-        ABI_FREE(env%slice_bandpp)
-    end do
+    ! Series of allocations corresponding to _me
+    if (.not.allocated(schedule%blockcols_me)) ABI_MALLOC(schedule%blockcols_me,(nprocs_me))
+    if (.not.allocated(schedule%blockrows_me)) ABI_MALLOC(schedule%blockrows_me,(nprocs_me))
 
-    ! Assumes every process has fixed capacity of bandpp
-    !my_rank = 0
-    !do i=1,nslice
-    !    my_rank = my_rank + nband_slice(i) / bandpp
-    !    proc_id = my_rank + 1 ! fortran indices start from 1!
-    !    my_slice(proc_id) = i
-    !end do
+    blockcols_me_ptr => schedule%blockcols_me
+    blockrows_me_ptr => schedule%blockrows_me
 
-    ! For nrows linalg
-    ABI_MALLOC(mpiSlice%nrowsLinalg, (nproc))
+    ! Compute size of column-blocks in MPI col distribution
+    call distribute_vectors(nprocme,ncols_me,blockcols_me_ptr)
+    
+    ! Compute size of row-blocks in MPI row distribution 
+    call distribute_vectors(nprocs_me,nrows_tot,blockrows_me_ptr)
 
-    map_slice_to_proc
+    ! Free temporary memory
+    if (allocated(weights)) ABI_FREE(weights) 
 
-    map_proc_to_slice
-
-
-    ! color MPI processes with the slice TODO automatize for arbitrary number of slices
-    slice_color = -1
-    if (my_rank==0) slice_color=0
-    if (my_rank==1) slice_color=1
-    if (my_rank==2) slice_color=1
-    if (my_rank==3) slice_color=1
-    slice_color = lookup(my_rank)
-
-    ! Set global communicator info
-    env%size = xmpi_comm_size(slice%spacecom)
-    env%comm_global = slice%spacecom
-
-
-    ! Set GPU/CPU flags
-    device_id = xomp_get_device_num()
-    env%use_host = (device_id < 1) ! outside target (-1), inside target host (0)
-    env%use_device = (device_id > 0) ! inside target not host (device number)
-
-end subroutine parallelEnv_init
+end subroutine sliceTasks_init
 !***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/parallelEnv_free
+!!****f* m_slice/sliceTasks_free
 !! NAME
-!! parallelEnv_free
+!! sliceTasks_free
 
-subroutine parallelEnv_free(env)
+subroutine sliceTasks_free(env)
 
     implicit none 
 
-    type(parallelEnv_t), intent(inout) :: env
+    type(sliceTasks_t), intent(inout) :: schedule
 
-    if (allocated(env%group_lookup)) then
-        ABI_FREE(env%group_lookup)
-    end if
+    if(allocated(schedule%task_ncols)) ABI_FREE(schedule%task_ncols)
+    if(allocated(schedule%task_nprocs)) ABI_FREE(schedule%task_nprocs)
+    if(allocated(schedule%assigned_task)) ABI_FREE(schedule%assigned_task)
+    if(allocated(schedule%blockcols_me)) ABI_FREE(schedule%blockcols_me)   
+    if(allocated(schedule%blocrows_me)) ABI_FREE(schedule%blockrows_me)
 
-end subroutine parallelEnv_free
+end subroutine sliceTasks_free
 !***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/parallelEnv_getRank
+!!****f* m_slice/sliceTasks_queryRank
 !! NAME
-!! parallelEnv_getRank
+!! sliceTasks_queryRank
 
-integer function parallelEnv_getRank(env) result(rank)
+integer function sliceTasks_queryRank(env) result(rank_me)
 
-    type(parallelEnv_t), intent(in) :: env
-    rank = xmpi_comm_rank(env%comm_global)
+    implicit none
+    type(sliceTasks_t), intent(in) :: schedule
 
-end function parallelEnv_getRank
+    rank_me = xmpi_comm_rank(schedule%comm_global)
+
+end function sliceTasks_queryRank
 !***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/parallelEnv_getGroup
+!!****f* m_slice/sliceTasks_queryTask
 !! NAME
-!! parallelEnv_getGroup
+!! sliceTasks_queryTask
 
-integer function parallelEnv_getGroup(env) result(group)
+integer function sliceTasks_queryTask(env) result(task_me)
 
-    type(parallelEnv_t), intent(in) :: env
-    group = env%group(my_rank+1)
+    type(sliceTasks_t), intent(in) :: schedule
+    integer :: rank_me
+    
+    rank_me = xmpi_comm_rank(schedule%comm_global)
+    task_me = schedule%assigned_task(rank_me+1)
 
-end function parallelEnv_getGroup
+end function sliceTasks_queryTask
 !***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/assign_slices_to_processes
+!!****f* m_slice/sliceTasks_queryTarget
 !! NAME
-!! assign_slices_to_processes
+!! sliceTasks_queryTarget
 !! 
 !! FUNCTION
-!! Assign each slice's vectors to processes, filling each process in order, 
-!! and then moving to the next one. 
-!! 
-!! INPUTS
-!! n processes — each process has a capacity: how many vectors it can store.
-!! m slices — each slice has a total number of vectors it needs to store.
-!! 
-!! OUTPUT
-!! For each process, record which slice it ends up serving
+!! Query OpenMP offloading API to set/get GPU/CPU flags
 !! 
 !! SOURCE
 
-subroutine assign_slices_to_processes(process_capacities, n, slice_vectors, m, group)
-  
+subroutine sliceTasks_queryTarget(schedule,use_host,use_device)
+
     implicit none
-  
-    ! Arguments
-    integer, intent(in) :: n                      ! Number of processes
-    integer, intent(in) :: m                      ! Number of slices
-    integer, intent(in) :: process_capacities(n)  ! Capacity per process
-    integer, intent(in) :: slice_vectors(m)       ! Total vectors needed per slice
-    integer, intent(out) :: group(n)              ! Output: slice assigned to each process
+    type(sliceTasks_t), intent(inout) :: schedule
+    logical, optional, intent(inout) :: use_host
+    logical, optional, intent(inout) :: use_device
+    logical :: use_host_
+    logical :: use_device_
+    integer :: device_id
 
-    ! Local variables
-    integer :: i_proc, i_slice
-    integer :: remaining_proc, remaining_slice
+    device_id = xomp_get_device_num()
+    use_host_ = (device_id < 1) ! outside target (-1), inside target host (0)
+    use_device_ = (device_id > 0) ! inside target not host (device number)
 
-    i_proc = 1
-    i_slice = 1
-    remaining_proc = process_capacities(1)
-    remaining_slice = slice_vectors(1)
-    group = -1
+    schedule%use_host = use_host_
+    schedule%use_device = use_device_
 
-    do while (i_proc <= n .and. i_slice <= m)
-        if (remaining_proc >= remaining_slice) then
-            ! This process can fully handle the remaining slice
-            group(i_proc) = i_slice
-            remaining_proc = remaining_proc - remaining_slice
+    if (present(use_host)) use_host = use_host_
+    if (present(use_device)) use_device = use_device_
 
-            ! Move to next slice
-            i_slice = i_slice + 1
-            if (i_slice <= m) remaining_slice = slice_vectors(i_slice)
+end subroutine sliceTasks_queryTarget
+!***
 
-        else
-            ! This process gets fully filled by part of the current slice
-            group(i_proc) = i_slice
-            remaining_slice = remaining_slice - remaining_proc
+!----------------------------------------------------------------------
 
-            ! Move to next process
-            i_proc = i_proc + 1
-            if (i_proc <= n) remaining_proc = process_capacities(i_proc)
-        end if
+!!****f* m_slice/assign_tasks_to_processes
+!! NAME
+!! assign_tasks_to_processes
+!! 
+!! FUNCTION
+!! Perform the inverse of the allocation operation, assigning 
+!! processes to slices based on the allocation array.
+!! 
+!! SOURCE
+
+subroutine assign_tasks_to_processes(allocations, processes)
+
+    implicit none
+    integer, intent(in) :: allocations(:)
+    integer, intent(out) :: processes(:)
+    integer :: i, j
+
+    j = 1
+    do i = 1, size(allocations)
+        processes(j:j + allocations(i) - 1) = i - 1  
+        j = j + allocations(i)
     end do
 
-    if (i_proc <= n) then
-        ABI_ERROR("Processes are left unassigned")
-    end if
-
-end subroutine assign_slices_to_processes
+end subroutine assign_tasks_to_processes
 !***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/uniform_distribution
+!!****f* m_slice/distribute_vectors
 !! NAME
-!! uniform_distribution
+!! distribute_vectors
 !!
 !! FUNCTION
-!  Distribute 'm_tot' into 'nproc' processes as uniformly as possible.
-!! If 'mod(m_tot,nproc) =/= 0' give less charge to the last process.
-!! Return 'm_distr' array with 'nproc' values. Note what we *do not* do:
-!! pad m so that each process has a multiple of m_uni.
+!! Distribute m vectors as uniformly as possible across n processes.
+!! Assumptions:
+!! -The remainder should be distributed evenly to the first n-1 processes.
+!! -The last process should always get fewer vectors.
+!! -The sum of the allocations should be exactly m.
 !! 
 !! SOURCE
 
-subroutine uniform_distribution(m_distr,nproc,m_tot)
+subroutine distribute_vectors(m, n, allocation)
 
-    ! Arguments
-    pointer, integer, intent(inout) :: m_distr
-    integer, intent(in) :: nproc
-    integer, intent(in) :: m_tot
-    ! Local variables
-    integer :: m_uni
-    integer :: m_rem
+    implicit none
+    integer, intent(in) :: m, n
+    integer, intent(out) :: allocation(n)
+    integer :: i, base, remainder
 
-    if (nproc > 1) then
-        if (modulo(m_tot,nproc) == 0) then
-            m_distr(1:nproc) = m_tot / nproc
-        else
-            m_uni = ceiling(real(m_tot) / real(nproc))
-            m_rem = m_tot - (nproc-1)*m_uni
-            m_distr(1:nproc-1) = m_uni
-            m_distr(nproc) = m_rem
-        end if
-    else
-        m_distr(1) = m_tot
+    base = m / n
+    remainder = m - base * n
+    allocation = base
+    if (remainder /= 0) then
+        do i = 1, n-1
+            if (remainder > 0) then
+                allocation(i) = allocation(i) + 1
+                remainder = remainder - 1
+            end if
+        end do
     end if
 
-end subroutine uniform_distribution
+end subroutine distribute_vectors
 !!***
 
 !----------------------------------------------------------------------
@@ -2829,12 +2810,12 @@ end function slice_unitTest
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/chebfi_poly1
+!!****f* m_slice/cheb_poly
 !! NAME
-!! chebfi_poly1
+!! cheb_poly
 !!
 !! FUNCTION
-!! Compute Chebyshev polynomial???
+!! Compute Chebyshev polynomial
 !!
 !! INPUTS
 !!  xx= input variable
@@ -2848,7 +2829,7 @@ end function slice_unitTest
 !!
 !! SOURCE
 
-function cheb_poly1(xx,nn,aa,bb) result(yy)
+function cheb_poly(xx,nn,aa,bb) result(yy)
 
   implicit none
 
@@ -2872,7 +2853,7 @@ function cheb_poly1(xx,nn,aa,bb) result(yy)
     yim1 = temp
   end do
 
-end function cheb_poly1
+end function cheb_poly
 !!***
 
 end module m_slice
