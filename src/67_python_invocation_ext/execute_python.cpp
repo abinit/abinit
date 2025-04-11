@@ -24,9 +24,9 @@
 
 #if defined HAVE_MPI
 using namespace std;
-// #include <mpi.h>
+#include <mpi.h>
 
-#include "invoke_python.hpp"
+#include "execute_python.hpp"
 
 //--------------------
 // The function to run Python
@@ -48,6 +48,7 @@ static void* libpython_handle = NULL;
 
 //--------------------
 
+extern "C" {
 int init_python_interpreter(const char* python_so) {
  char* error;
  libpython_handle = dlopen(python_so, RTLD_GLOBAL | RTLD_LAZY);
@@ -60,20 +61,22 @@ int init_python_interpreter(const char* python_so) {
  (*Py_Initialize)();            // initialize the interpreter
  return 0;
 }
-
-//--------------------
-
-int init_python_interpreter_from_env(const char* env_var) {
- char *python_so = getenv(env_var);
- if (!python_so) {
-  fprintf(stderr, "Can not find the environment variable %s\n", env_var);
-  return 1;
- }
- return init_python_interpreter(python_so);
 }
 
+// //--------------------
+//
+// // int init_python_interpreter_from_env(const char* env_var) {
+// //  char *python_so = getenv(env_var);
+// //  if (!python_so) {
+// //   fprintf(stderr, "Can not find the environment variable %s\n", env_var);
+// //   return 1;
+// //  }
+// //  return init_python_interpreter(python_so);
+// // }
+
 //--------------------
 
+extern "C" {
 int execute_python_file(const char* filename) {
  char* error;
  if (!libpython_handle) {
@@ -94,17 +97,24 @@ int execute_python_file(const char* filename) {
   fprintf(stderr, "file %s not found \n", filename);
   return 1;
  }
- 
+
  // LOAD(PyRun_SimpleString, int, const char *);
  LOAD(PyRun_SimpleFile, int, FILE*, const char*);
- (*PyRun_SimpleFile)(file, filename);
+ int result = PyRun_SimpleFile(file, filename);
+ if (result == -1) {
+  fprintf(stderr, "return of PyRun_SimpleFile %d \n", result);
+  return 1;
+ }
 
  return 0;
+}
 }
 
 //--------------------
 
+extern "C" {
 int close_python_interpreter() {
+ fprintf(stdout, "In close_python_interpreter.");
  char* error;
 
  // close the interpreter
@@ -116,65 +126,6 @@ int close_python_interpreter() {
 
  return 0;
 }
-
-
-
-/******************
- * ****************/
-
-// Function to invoke python and run the script
-// void invoke_python_triqs(int rank, char* filapp_in, MPI_Fint *MPI_world_ptr) {
-void invoke_python_triqs(int rank, char* filapp_in) {
-	// MPI_Comm comm;
-	// comm = MPI_Comm_f2c(*MPI_world_ptr );
-
-	// int ierr, rank;
-	// ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	// MPI_Barrier(MPI_COMM_WORLD);
-
-	if (rank == 0) fprintf(stdout, "invoke_python_triqs: beginning\n");
-
-	// Path to the python interpreter path and impurity solver script
-	string triqs_filename = string(filapp_in) += "_PY_INVOCATION_script.py";
-	string triqs_python_path = string(filapp_in) += "_PY_INVOCATION_python_lib";
-	triqs_python_path = "./" + triqs_python_path;
-
-	// Check whether python_lib exists
-	if (!ifstream(triqs_python_path.c_str())) {
-		throw invalid_argument("The _PY_INVOCATION_python_lib file does not exist! Python cannot be called.");
-		exit(0);
-	}
-
-	// Launch python
-	init_python_interpreter(triqs_python_path.c_str());
-	if (rank == 0) fprintf(stdout, "invoke_python_triqs: interpreter initialized\n");
-
-	// Execute script
-    if (rank == 0) fprintf(stdout, "Reading python script: %s\n", triqs_filename.c_str());
-
-	// Check whether the file exists
-	if (!ifstream(triqs_filename.c_str())) {
-		throw invalid_argument("The _PY_INVOCATION_script.py file does not exist! Python cannot be called.");
-		exit(0);
-	}
-
-	execute_python_file(triqs_filename.c_str());
-	if (rank == 0) fprintf(stdout, "invoke_python_triqs: script runned\n");
-
-	// int final;
-	// MPI_Finalized(&final);
-	// if (final) {
-	// 	fprintf(stderr, "MPI is finalized on node %i\n", rank);
-	// }
-
-	// Close python
-	// close_python_interpreter();
-	// MPI_Barrier(MPI_COMM_WORLD);
 }
-#else
-void invoke_python_triqs(int rank, char* filapp_in) {
-	// Should never get here
-	fprintf(stdout, "SHOULD NOT BE HERE!\n");
-}
+
 #endif

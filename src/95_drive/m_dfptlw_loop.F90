@@ -41,7 +41,6 @@ module m_dfptlw_loop
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists,iomode_from_fname,get_unit
- use m_kg,          only : getcut,getph
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
@@ -61,7 +60,7 @@ module m_dfptlw_loop
  use m_rf2,         only : rf2_getidir
  use m_initylmg,    only : initylmg
  use m_atm2fft,     only : dfpt_atm2fft
- use m_dfpt_mkvxc,  only : dfpt_mkvxc
+ use m_dfpt_mkvxc,  only : dfpt_mkvxc, dfpt_mkvxcccdq
  use m_dfpt_rhotov, only : dfpt_rhotov
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vlocaldqdq,dfpt_vmetdqdq
@@ -110,6 +109,7 @@ contains
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
 !!  natom = number of atoms in unit cell
 !!  nattyp(ntypat)= # atoms of each type.
+!!  ncorespl(mqgrid_vl,2,ntypat)= spl interpolation of the pseudo core density for all atom types
 !!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid (see NOTES in respfn.F90)
 !!  nkpt  = number of k points
@@ -153,11 +153,11 @@ contains
 
 
 subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
-& ffnl,gmet,gprimd,&
+& ffnl,gmet,gprimd,gsqcut,&
 & hdr,kg,kxc,mband,mgfft,mkmem,mk1mem,&
-& mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
+& mpert,mpi_enreg,mpw,natom,nattyp,ncorespl,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,nylmgr,occ,&
-& pawfgr,pawtab,&
+& pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
 
  implicit none
@@ -166,7 +166,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !scalars
  integer,intent(in) :: dimffnl,mband,mgfft,mk1mem,mkmem,mpert,mpw,natom,nfftf
  integer,intent(in) :: nkpt,nkxc,nspinor,nsppol,nylmgr,useylmgr
- real(dp),intent(in) :: ucvol
+ real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -183,6 +183,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
  real(dp),intent(in) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: gprimd(3,3),kxc(nfftf,nkxc)
+ real(dp),intent(in) :: ncorespl(psps%mqgrid_vl,2,psps%ntypat)
+ real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
@@ -196,10 +198,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  integer :: alpha,ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk
  integer :: idq,ierr,ii,ireadwf,istr,itypat,mcg,me,mpsang
- integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
+ integer :: n1,n2,n3,ndir,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat
- real(dp) :: boxcut,delad,delag,delbd,delbg,ecut,ecut_eff,gsqcut
+ real(dp) :: delad,delag,delbd,delbg,ecut,ecut_eff
  logical :: samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwfddk,fiwfdkdk
@@ -212,7 +214,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  real(dp),allocatable :: cg1(:,:),cg2(:,:)
  real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:),eigen1(:),eigen2(:)
- real(dp),allocatable :: nhat1(:,:),ph1d(:,:)
+ real(dp),allocatable :: nhat1(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
  real(dp),allocatable :: t4_typeI(:,:,:,:,:,:),t4_typeII(:,:,:,:,:,:,:)
@@ -220,8 +222,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: tgeom_typeI(:,:,:,:,:,:),tgeom_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: vhart1dqdq(:),vpsp1dqdq(:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
+ real(dp),allocatable :: vxccc1_i2pertdq(:,:,:)
  real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:), vpsp1_i1pertdqdq(:,:,:)
  real(dp),allocatable :: vxc1dqdq(:),work(:)
+ real(dp),allocatable :: xccc3d2(:),xccc3d2dq(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
 
 
@@ -277,12 +281,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
    tgeom_typeI(:,:,:,:,:,:)=zero
  end if
 
-!Compute large sphere cut-off gsqcut
- call getcut(boxcut,ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,dtset%ngfft)
-
-!Generate the 1-dimensional phases
- ABI_MALLOC(ph1d,(2,3*(2*mgfft+1)*dtset%natom))
- call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
 
 !==== Initialize most of the Hamiltonian (and derivative) ====
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -294,15 +292,20 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
 !Specific allocations for strain-gradient perturbation
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
-  ABI_MALLOC(vhart1dqdq,(2*nfftf))
-  ABI_MALLOC(vpsp1dqdq,(2*nfftf))
-  ABI_MALLOC(vxc1dqdq,(2*nfftf))
+   ABI_MALLOC(vhart1dqdq,(2*nfftf))
+   ABI_MALLOC(vpsp1dqdq,(2*nfftf))
+   ABI_MALLOC(vxc1dqdq,(2*nfftf))
+ end if
+
+!Allocate xccc (only for quadrupoles yet)
+ if (dtset%lw_qdrpl==1.and.psps%n1xccc/=0) then
+   ABI_MALLOC(xccc3d2,(cplex*nfftf))
  end if
 
 !This is necessary to deactivate paw options in the dfpt_rhotov routine
  ABI_MALLOC(pawrhoij_read,(0))
  usexcnhat=0
- n3xccc=0
+ n3xccc=0;if(psps%n1xccc/=0)n3xccc=nfftf
  pawread=0
  nhat1grdim=0
  ABI_MALLOC(nhat1,(cplex*dtset%nfft,nspden))
@@ -411,6 +414,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              if (i2pert <= natom+3) then
                n2dq=1
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
+               ABI_MALLOC(vxccc1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
+               ABI_MALLOC(xccc3d2dq,(2*nfftf))
              else if (i2pert == natom+4) then
                n2dq=2
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
@@ -434,6 +439,20 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
              !Allocate the second-gradient array
              ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
+
+             !Calculate first-order pseudocore charge (still, only for quadrupoles)
+             if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0.and.nkxc == 7) then
+               if (psps%nc_xccc_gspace==1) then
+                 ndir=1
+                 call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
+                 & mgfft,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
+                 & ph1d,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+                 & atmrhor1=xccc3d2,optn_in=n3xccc/nfftf,optn2_in=1)
+               else if (psps%nc_xccc_gspace==0) then
+                 call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
+                 & n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+               end if
+             end if
 
              do i3pert = 1, mpert
                do i3dir = 1, 3
@@ -513,11 +532,25 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                          !permutation of the strain indexes.
                          istr=6+i2dir
                          call dfpt_vmetdqdq(2,gmet,gprimd,gsqcut,istr,i2pert,kxc,mpi_enreg, &
-                         & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3,&
-                         & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl,&
+                         & psps%mqgrid_vl,natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                         & nkxc,nspden,opthartdqdq,ph1d,i3dir,psps%qgrid_vl, &
                          & dtset%qptn,rhog,rhor,ucvol,psps%vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
                          vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                        end if
+                     end if
+
+                     if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0) then
+                       !Get the q-gradient of the pseudocore density
+                       call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
+                       & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                       & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,ncorespl,xccc3d2dq,optnc=1)
+
+                       !Get the q-gradient of the first-order XC potential due to the pseudocore charge
+                       call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
+                     & nkxc,nspden,dtset%qptn,rprimd,vxccc1_i2pertdq,xccc3d2,xccc3d2dq)
+
+                       !Add this contribution to the gradient of the local PSP
+                       vpsp1_i2pertdq= vpsp1_i2pertdq + vxccc1_i2pertdq
                      end if
                    end if !samepert
 
@@ -683,6 +716,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end do     ! ir3pert
 
              ABI_SFREE(vpsp1_i2pertdq)
+             ABI_SFREE(xccc3d2dq)
+             ABI_SFREE(vxccc1_i2pertdq)
              ABI_FREE(vpsp1_i1pertdq_geom)
              ABI_FREE(vpsp1_i1pertdqdq)
              ABI_FREE(d3etot_t4)
@@ -712,7 +747,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  ABI_FREE(rho2g1)
  ABI_FREE(nhat1)
  ABI_FREE(pawrhoij_read)
- ABI_FREE(ph1d)
+ ABI_SFREE(xccc3d2)
 
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
   ABI_FREE(vhart1dqdq)
@@ -842,6 +877,7 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
+ real(dp) :: rprimd_t(3,3),gprimd_t(3,3)
 
 ! *************************************************************************
 
@@ -913,6 +949,8 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
 
  fac=two_pi ** 2
  i3pert= natom+8
+ rprimd_t=transpose(rprimd)
+ gprimd_t=transpose(gprimd)
  do i1pert = 1, mpert
    do i1dir = 1, 3
      if ((maxval(rfpert(i1dir,i1pert,:,:,:,:))==1)) then
@@ -936,7 +974,7 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
                vec1(i3dir)=t_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
                flg1(i3dir)=blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
              end do
-             call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+             call cart39(flg1,flg2,rprimd_t,natom+2,natom,gprimd_t,vec1,vec2)
              do i3dir=1,3
                t_typeII(ii,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=vec2(i3dir)*fac
              end do

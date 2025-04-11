@@ -46,4 +46,6 @@ inp_files = [
 "t36.abi",
 "t37.abi",
 "t38.abi",
+"t39.abi",
+"t40.abi",
 ]
