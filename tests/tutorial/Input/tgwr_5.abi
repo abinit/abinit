@@ -35,7 +35,8 @@ ecuteps    6        # Cut-off energy of the planewave set to represent the diele
 #ecutsigx  16.0     # Dimension of the G sum in Sigma_x.
                     # ecutsigx = ecut is usually a wise choice
                     # (the dimension in Sigma_c is controlled by ecuteps)
-gw_qprange  4
+gw_qprange  -4      # Compute the QP corrections for all the k-points in the irreducible zone.
+                    # Include all occupied states and -num empty states
 
 # Spectral function (very coarse grid to reduce txt file size)
 #nfreqsp3 50
