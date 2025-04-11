@@ -582,16 +582,44 @@ end subroutine slice_dos
 
 subroutine slice_distributeSpectrum(slice,spectral_cut,paral_slice)
 
+    implicit none
+
+    ! Arguments
+    type(slice_t), target, intent(inout) :: slice
+    type(sliceTasks_t), intent(inout) :: schedule
+    integer, intent(in) :: paral_slice
+
+    ! Local variables
+    integer :: resource_allocation
+    integer :: nrows_total
+    integer :: spacecom
+    ! Arrays
+    integer, pointer :: slice_ncols(:) => null()
+    integer, pointer :: slice_degrees(:) => null()
+    
+    ! *********************************************************************
+
     ! Compute nband per slice
     call slice_cutSpectrum(slice,pband_ptr,spectral_cut)
  
-    ! Read nrowsLinalg from transposer used in slice
     nrows_total = slice%total_spacedim
+    spacecom = slice%spacecom
 
-    ! Compute target mpi distribution
-    ! in here assume that mpiData contains the rule_nband
-    ! FIXME workinprogress
-    call sliceTasks_init(schedule,slice%mpi_slice,nrows_total,paral_slice)
+    if (paral_slice==0) then
+        ABI_ERROR("Sequential slices not implemented")
+    else if (paral_slice==1) then
+        resource_allocation = FAIR_BANDPP
+    else if (paral_slice==2) then
+        resource_allocation = FAIR_BANDPP_WDEG
+    end if
+
+    ! Compute parameters of slice tasks
+    ! TODO associate schedule into slice in some way?
+    ! TODO free scheduler at some point
+    slice_ncols => slice%slice_ncols
+    slice_degrees => slice%slice_degrees
+    call sliceTasks_init(schedule,slice_ncols,slice_degrees,nrows_total,&
+        spacecom,resource_allocation)
 
     ! Create the extended workspaces on CPU
     call slice_initExtended(slice,pband_ptr)
