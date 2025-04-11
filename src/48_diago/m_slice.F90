@@ -64,10 +64,10 @@ module m_slice
 
     private
 
-    ! Load balance criterion for slice distribution
-    !-------------------------------------------------
-    integer, parameter :: BALANCE_BANDPP      = 0 ! balanced bandpp        across processes
-    integer, parameter :: BALANCE_BANDPP_NDEG = 1 ! balanced bandpp x ndeg across processes
+    ! Load balance criteria for fair resource allocation
+    !---------------------------------------------------
+    integer, parameter :: FAIR_BANDPP      = 0 ! bandpp (unweigted)
+    integer, parameter :: FAIR_BANDPP_WDEG = 1 ! bandpp weighted by degree 
 
     ! Private 'parallelEnv' datatype
     ! Parameters of slice parallelisation environment
@@ -75,13 +75,8 @@ module m_slice
     type, private :: parallelEnv_t
 
         ! MPI-related
-        integer :: rank
         integer :: size
-        integer :: ierr
-        integer :: comm
-        integer :: comm_sub
-        integer :: group
-        integer :: status(MPI_STATUS_SIZE)
+        integer :: comm_global
 
         ! Flags
         logical :: on_host = .false.
@@ -92,7 +87,7 @@ module m_slice
         ! Arrays
         integer, allocatable :: ncolsColsRows(:)
         integer, allocatable :: nrowsLinalg(:)
-        integer, allocatable :: group_lookup(:)
+        integer, allocatable :: group(:)
 
     end type parallelEnv_t
 
@@ -1749,7 +1744,7 @@ subroutine slice_run(slice,getAX_BX,getBm1X,nspinor)
 
     !Local variables-------------------------------
     integer :: tot_nrows,ncols_slice,spacecom
-    integer :: color,my_rank,slice_comm,ierr
+    integer :: color,key,slice_comm,ierr
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
     type(xgBlock_t) :: X0
@@ -1769,12 +1764,12 @@ subroutine slice_run(slice,getAX_BX,getBm1X,nspinor)
     ! call xgBlock_set_gpu_option(slice%X)
     
     ! Synchronize before creating a subcomm
-    call xmpi_barrier(spacecom)
+    call xmpi_barrier(env%comm_global)
     
     ! Split global communicator so that only procs with the same color communicate
-    my_rank = xmpi_comm_rank(spacecom)
-    color = mpiSlice_getSliceMe(mpi_slice,my_rank)
-    call xmpi_comm_split(spacecom,color,my_rank,slice_comm,ierr)
+    key = parallelEnv_getRank(env)
+    color = parallelEnv_getGroup(env)
+    call xmpi_comm_split(env%comm_global,color,key,slice_comm,ierr)
 
     ! Restrict all communications to slice subcommunicator
     call xgBlock_setComm(slice%X,slice_comm) ! colsrows representation
@@ -2264,24 +2259,6 @@ end subroutine slice_RayleighRitz
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/mpiSlice_getSliceMe
-!! NAME
-!! mpiSlice_getSliceMe
-!! 
-!! SOURCE
-
-integer function mpiSlice_getSliceMe(mpi_slice,my_rank) result(slice_me)
-
-    type(mpiSlice_t), intent(in) :: mpi_slice
-    integer, intent(in) :: my_rank
-
-    slice_me = mpi_slice%lookup_slice_me(my_rank+1)
-
-end function mpiSlice_getSliceMe
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_slice/parallelEnv_init
 !! NAME
 !! parallelEnv_init
@@ -2303,15 +2280,6 @@ subroutine parallelEnv_init(env,distribution)
     if (.not. allocated(env%data_buffer)) then
         ABI_ALLOC(env%data_buffer(100))
     end if
-
-
-    ! color MPI processes with the slice TODO automatize for arbitrary number of slices
-    slice_color = -1
-    if (my_rank==0) slice_color=0
-    if (my_rank==1) slice_color=1
-    if (my_rank==2) slice_color=1
-    if (my_rank==3) slice_color=1
-    slice_color = lookup(my_rank)
 
     !rule_nband(islice)= number of bands contained in slice
     !rule_ndeg(islice)= computational load for slice (eg degree)
@@ -2338,40 +2306,64 @@ subroutine parallelEnv_init(env,distribution)
     ! Used in mpi_enreg...
     bandpp = slice%bandpp
 
-    ! Solve allocation problem to find the amount of resource allocated to each slice
-    !In the first case, we are minimizing the maximum of mini/ximi​ni​/xi​ 
-    !with xixi​ summing to pp, which aims to ensure none of the ratios is excessively large. 
-    !In the second, the goal is to distribute resources so that the ratios mi/ximi​/xi​ 
-    !are as equal as possible across all tasks. So it's about choice in balancing extremes versus uniformity.
+    ! Compute bandpp which is the capacity of each process
+    if (.not.allocated(env%slice_sizes)) then
+        ABI_MALLOC(env%slice_sizes,(nslice))
+    end if
+    env%slice_sizes(:) = slice%nband_sub(:)
+    slice_sizes_ptr => env%slice_sizes
 
-    !Goal: We need to allocate pp resources to nn groups, where each group ii 
-    !has a weight wiwi​ and size mimi​. The allocation xixi​ should be 
-    !proportional to the weighted size wi×miwi​×mi​ for each group.
-
-    nband_ptr => slice%nband_sub
-    select case(resource_allocation)
-    case(FAIR_ALLOCATION)
-        ! fair share, equal division. Uses the same bandpp per process regardless ndeg
-        ABI_MALLOC(ones, (nslice))
-        ones(:) = 1 ! weight is 1
-        ones_ptr => ones
-        nproc_ptr = optimize_allocation(nband_ptr, ones_ptr, nproc)
-        ABI_FREE(ones)
-    case(WEIGHTED_FAIR_ALLOCATION)
-        ! applies load balancing per process (=ndeg*bandpp)
-        ! This ensures that each slice receives resources in proportion to its degree 
-        ! and the number of vectors it has.
-        ndeg_ptr => slice%ndeg_sub ! weight is degree
-        nproc_ptr = optimize_allocation(nband_ptr, ndeg_ptr, nproc) 
-    end select
-    slice%mpiData%rule_nproc(:) = nproc_ptr(:)
+    if (.not.allocated(env%slice_nproc)) then
+        ABI_MALLOC(env%slice_nproc,(nslice))
+    end if
+    slice_nproc_ptr => env%slice_nproc
     
-    ! 'bandpp_slice'= uniformly distribute 'nband_slice' across 'nproc_slice' processes
+    ! Apply weighted fair allocation with various balance criteria for load balance
+    ABI_MALLOC(weights, (nslice))
+    weights_ptr => weights
+    select case(resource_allocation)
+    case(FAIR_BANDPP)
+        weights(:) = 1 
+    case(FAIR_BANDPP_WDEG)
+        weights(:) = slice%ndeg_sub(:)
+    end select
+    
+    ! Solve allocation problem to find the amount of resource allocated to each slice
+    call fair_allocation(nslice, slice_sizes_ptr, weight_ptr, nproc, slice_nproc_ptr)
+    
+    ABI_FREE(weights)
+   
+    ! Assign slices to processes
+    if (.not.allocated(env%group)) then
+        ABI_MALLOC(env%group, (nproc))
+    end if
+    nproc = 6 ! number of processes
+    nslice = 3 ! number of slices
+    proc_caps = [5, 3, 4, 6, 2, 4] ! this is bandpp TODO
+    slice_vecs = [6, 8, 10] ! this is slice_size
+    ! should be read from slice%slice_sizes
+    call assign_slices_to_processes(proc_caps, nproc, slice_vecs, nslice, env%group)
+    do i = 1, nproc
+        write(*,'(a,i5,a,i5)') "Process ", i, " is in group ", env%group(i)
+    end do
+
+    ! Deduce band capacity per process (=bandpp) per slice
+    ! FIXME this should be in parallel
+    ! every rank only has the slice that corresponds to it
+
+    my_rank = env%my_rank
+    slice_me = env%group(my_rank)
+
+    ! TODO replace loop on slices by my_rank
     do islice=1,nslice
-        bandpp_ptr => slice%mpiData(islice)%rule_nband
-        nband_slice = slice%nband_sub(islice)
-        nproc_slice = slice%mpiData(islice)%rule_nproc
+        nband_slice = env%slice_sizes(islice)
+        nproc_slice = env%slice_nproc(islice)
+        if (.not.allocated(env%slice_bandpp)) then
+            ABI_MALLOC(env%slice_bandpp,(nproc_slice))
+        end if
+        bandpp_ptr => env%slice_bandpp
         call uniform_distribution(bandpp_ptr,nproc_slice,nband_slice)
+        ABI_FREE(env%slice_bandpp)
     end do
 
     ! Assumes every process has fixed capacity of bandpp
@@ -2389,61 +2381,33 @@ subroutine parallelEnv_init(env,distribution)
 
     map_proc_to_slice
 
-    ! lookup: my_rank+1 -> color
-    ! example of number of vectors per process
-    vectors = [3, 2, 5, 7, 1, 4, 8, 3, 6, 5]
 
-    if (.not.allocated(env%group_lookup)) then
-        ABI_MALLOC(env%group_lookup, (nproc))
-    end if
+    ! color MPI processes with the slice TODO automatize for arbitrary number of slices
+    slice_color = -1
+    if (my_rank==0) slice_color=0
+    if (my_rank==1) slice_color=1
+    if (my_rank==2) slice_color=1
+    if (my_rank==3) slice_color=1
+    slice_color = lookup(my_rank)
 
-    ! Initialization with invalid values
-    env%group_lookup = -1
-  
-    total_vectors = 0
-    current_slice = 1
-    vectors_in_current_slice = 0
-
-    ! Distribution of processes at groups/slices
-    do i = 1, n
-    
-        ! Include vectors of current process
-        vectors_in_current_slice = vectors_in_current_slice + vectors(i)
-    
-        ! If vectors of current process exceed limits of current slice
-        ! TODO rename slice%nband number of bands per slice to slice_size
-        if (vectors_in_current_slice > slice_size) then
-            ! Update moving to next slice
-            current_slice = current_slice + 1
-        vectors_in_current_slice = vectors(i) ! initialize new slice with vectors of current process
-        end if
-    
-        ! Assign process to the group/slice
-        env%group_lookup(i) = current_slice
-    end do
+    ! Set global communicator info
+    env%size = xmpi_comm_size(slice%spacecom)
+    env%comm_global = slice%spacecom
 
 
+    ! Set GPU/CPU flags
     device_id = xomp_get_device_num()
     env%use_host = (device_id < 1) ! outside target (-1), inside target host (0)
     env%use_device = (device_id > 0) ! inside target not host (device number)
 
-    do i = 1, n
-        write(*,'(a,i5,a,i5)') "Process ", i, " is in group ", group_assignment(i)
-    end do
-
-    lookup(1) = 0
-    lookup(2) = 1
-    lookup(3) = 1
-    lookup(4) = 1
-    ABI_MALLOC(lookup,(nproc))
-    nband_prev = 0
-    do i=1,nproc
-        lookup(i) = nband_prev + mod((i-1) ! NO
-        nband_prev = nband_prev + nband(i)
-    end do
-
 end subroutine parallelEnv_init
 !***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/parallelEnv_free
+!! NAME
+!! parallelEnv_free
 
 subroutine parallelEnv_free(env)
 
@@ -2456,6 +2420,103 @@ subroutine parallelEnv_free(env)
     end if
 
 end subroutine parallelEnv_free
+!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/parallelEnv_getRank
+!! NAME
+!! parallelEnv_getRank
+
+integer function parallelEnv_getRank(env) result(rank)
+
+    type(parallelEnv_t), intent(in) :: env
+    rank = xmpi_comm_rank(env%comm_global)
+
+end function parallelEnv_getRank
+!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/parallelEnv_getGroup
+!! NAME
+!! parallelEnv_getGroup
+
+integer function parallelEnv_getGroup(env) result(group)
+
+    type(parallelEnv_t), intent(in) :: env
+    group = env%group(my_rank+1)
+
+end function parallelEnv_getGroup
+!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/assign_slices_to_processes
+!! NAME
+!! assign_slices_to_processes
+!! 
+!! FUNCTION
+!! Assign each slice's vectors to processes, filling each process in order, 
+!! and then moving to the next one. 
+!! 
+!! INPUTS
+!! n processes — each process has a capacity: how many vectors it can store.
+!! m slices — each slice has a total number of vectors it needs to store.
+!! 
+!! OUTPUT
+!! For each process, record which slice it ends up serving
+!! 
+!! SOURCE
+
+subroutine assign_slices_to_processes(process_capacities, n, slice_vectors, m, group)
+  
+    implicit none
+  
+    ! Arguments
+    integer, intent(in) :: n                      ! Number of processes
+    integer, intent(in) :: m                      ! Number of slices
+    integer, intent(in) :: process_capacities(n)  ! Capacity per process
+    integer, intent(in) :: slice_vectors(m)       ! Total vectors needed per slice
+    integer, intent(out) :: group(n)              ! Output: slice assigned to each process
+
+    ! Local variables
+    integer :: i_proc, i_slice
+    integer :: remaining_proc, remaining_slice
+
+    i_proc = 1
+    i_slice = 1
+    remaining_proc = process_capacities(1)
+    remaining_slice = slice_vectors(1)
+    group = -1
+
+    do while (i_proc <= n .and. i_slice <= m)
+        if (remaining_proc >= remaining_slice) then
+            ! This process can fully handle the remaining slice
+            group(i_proc) = i_slice
+            remaining_proc = remaining_proc - remaining_slice
+
+            ! Move to next slice
+            i_slice = i_slice + 1
+            if (i_slice <= m) remaining_slice = slice_vectors(i_slice)
+
+        else
+            ! This process gets fully filled by part of the current slice
+            group(i_proc) = i_slice
+            remaining_slice = remaining_slice - remaining_proc
+
+            ! Move to next process
+            i_proc = i_proc + 1
+            if (i_proc <= n) remaining_proc = process_capacities(i_proc)
+        end if
+    end do
+
+    if (i_proc <= n) then
+        ABI_ERROR("Processes are left unassigned")
+    end if
+
+end subroutine assign_slices_to_processes
+!***
 
 !----------------------------------------------------------------------
 
@@ -2504,69 +2565,23 @@ end subroutine uniform_distribution
 !! fair_allocation
 !! 
 !! FUNCTION
-!! Allocate resources so that m(i)/x(i) is approximately equal across i
-!! 
-!! SOURCE
-
-function fair_charge_allocation(m, p) result(x)
-    
-    ! Arguments
-    real(dp), intent(in) :: m(:)
-    integer, intent(in) :: p
-    ! Local variables
-    integer :: x(size(m))
-    integer :: s, i, remaining, max_i
-    real(dp), allocatable :: ideal_x(:), frac_part(:)
-    real(dp) :: total_m
-
-    s = size(m)
-    ABI_MALLOC(ideal_x,(s))
-    ABI_MALLOC(frac_part,(s))
-
-    total_m = sum(m)
-    ideal_x = (m * real(p, dp)) / total_m
-
-    do i = 1, s
-        x(i) = floor(ideal_x(i))
-        frac_part(i) = ideal_x(i) - real(x(i), dp)
-    end do
-
-    remaining = p - sum(x)
-
-    ! Distribute remaining units to highest fractional parts
-    do while (remaining > 0)
-        max_i = maxloc(frac_part, 1)
-        x(max_i) = x(max_i) + 1
-        frac_part(max_i) = 0.0_dp  ! mark as used
-        remaining = remaining - 1
-    end do
-
-    if (allocated(ideal_x)) ABI_FREE(ideal_x)
-    if (allocated(frac_part)) ABI_FREE(frac_part)
-
-end function fair_allocation
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/optimize_allocation
-!! NAME
-!! optimize_allocation
-!! 
-!! FUNCTION
 !! Solve integer optimization problem under constraint: 
 !! 
 !!     min_{x_1,..,x_s} max_{1,..,s} f_i(x_i)
 !!     subject to:   x_1 + .. + x_s = p
 !!                   x_i integers
 !! 
-!! with objective cost function f_i(x)=m_i*n_i/x.
+!! with objective cost function f_i(x)=m_i*w_i/x.
 !! The solution x_i is the amount of resource allocated to the i-th task.
-!! The algorithm uses binary search to deal with integer rounding.
+!! The algorithm uses binary search for integer rounding. 
+!! Note that this is better than greedy but not optimal. 
+!! Exhaustive search is too expensive (=(p+1)^n combinations).
+!! Feature: ensures the total allocation is exactly equal to p while 
+!! minimizing the allocation imbalance.
 !! 
 !! INPUTS
-!! arrays m and n (length s), and integer p
-!! m can be the group size, n can be another measure or need ..
+!! arrays m and w (length n), and integer p
+!! m can be the group size, w can be another measure or need (weight)
 !! p in the number of total resources
 !! 
 !! OUTPUT
@@ -2574,110 +2589,161 @@ end function fair_allocation
 !!
 !! SOURCE
 
-function optimize_allocation(m, n, p) result(x)
+subroutine fair_allocation(n, m, w, p, x)
+
+    implicit none
 
     ! Arguments
-    real(dp), intent(in) :: m(:), n(:)
-    integer, intent(in) :: p
+    integer, intent(in) :: n            ! Number of groups (slices)
+    integer, intent(in) :: m(n)         ! Array: size of each group
+    integer, intent(in) :: p            ! Total resources to allocate
+    integer, intent(in) :: w(n)         ! Weight of each group
+    integer, intent(out) :: x(n)        ! Array: allocated resources per group
+
     ! Local variables
-    integer :: x(size(m))
-    integer :: s, i, total
-    real(dp) :: t_low, t_high, t_mid, eps
-    integer :: max_iter, iter
-    real(dp), allocatable :: temp(:)
-        
-    s = size(m)
-    ABI_MALLOC(temp,(s))    
+    integer :: i
+    real(dp) :: total_weight, lower, upper, mid, total_allocated, multiplier
+    integer :: allocation(n)
 
-    ! Binary search parameters
-    t_low = 1.0e-6_dp
-    t_high = maxval(m * n)
-    eps = 1.0e-6_dp
-    max_iter = 100
+! *********************************************************************
 
-    do iter = 1, max_iter
-        t_mid = (t_low + t_high) / 2.0_dp
-        total = 0
-        do i = 1, s
-            x(i) = ceiling(m(i) * n(i) / t_mid)
-            total = total + x(i)
+    ! Calculate total weight
+    total_weight = real(sum(w))
+
+    ! Binary search for the optimal multiplier
+    lower = 0.0
+    upper = real(p)
+    do while (upper - lower > 1.0)
+        mid = (lower + upper) / 2.0
+        total_allocated = 0.0
+        do i = 1, n
+            allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * mid + 0.5)
+            total_allocated = total_allocated + allocation(i)
         end do
 
-        if (total > p) then
-            t_low = t_mid
+        ! Adjust binary search bounds
+        if (total_allocated > real(p)) then
+            upper = mid
         else
-            t_high = t_mid
+            lower = mid
         end if
-
-        if (abs(t_high - t_low) < eps) exit
     end do
 
-    ! Final rounding and optional adjustment
-    total = 0
-    do i = 1, s
-        x(i) = ceiling(m(i) * n(i) / t_high)
-        total = total + x(i)
+    ! Final allocation after binary search converges
+    multiplier = (lower + upper) / 2.0
+    do i = 1, n
+        allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * multiplier + 0.5)
     end do
 
-    ! Distribute leftover units
-    do while (total < p)
-        real(dp) :: min_increase, current, next
-        integer :: best_i
-        min_increase = 1.0e9_dp
-        best_i = -1
-        do i = 1, s
-            current = m(i) * n(i) / real(x(i), dp)
-            next = m(i) * n(i) / real(x(i) + 1, dp)
-            if (next - current < min_increase) then
-                min_increase = next - current
-                best_i = i
-            end if
+    ! Adjust total allocation to exactly match p
+    total_allocated = 0
+    do i = 1, n
+        total_allocated = total_allocated + allocation(i)
+    end do
+
+    if (total_allocated < p) then
+        do while (total_allocated < p)
+            ! Add one resource to the group closest to its ideal allocation
+            call adjust_allocation(n, m, w, allocation, total_weight, p, total_allocated)
+            total_allocated = 0
+            do i = 1, n
+                total_allocated = total_allocated + allocation(i)
+            end do
         end do
-        x(best_i) = x(best_i) + 1
-        total = total + 1
-    end do
+    else if (total_allocated > p) then
+        do while (total_allocated > p)
+            ! Remove one resource from the over-allocated group
+            call reduce_allocation(n, m, w, allocation, total_weight, p, total_allocated)
+            total_allocated = 0
+            do i = 1, n
+                total_allocated = total_allocated + allocation(i)
+            end do
+        end do
+    end if
 
-    if (allocated(temp)) ABI_FREE(temp)
+    ! Assign the final allocation to the output variable
+    x = allocation
 
-end function optimize_allocation
+end subroutine fair_allocation
 !!***
 
-! This is the same as before but uses greedy to deal with integer rounding
-! I think this is not optimal
+!----------------------------------------------------------------------
 
-    ! Subroutine to perform weighted fair allocation with integer results
-    subroutine greedy_allocation(w, m, p, n, x)
-        real, dimension(n), intent(in) :: w  ! Weights of the groups
-        integer, dimension(n), intent(in) :: m  ! Sizes of the groups (number of vectors)
-        real, intent(in) :: p  ! Total resources available
-        integer, intent(in) :: n  ! Number of groups
-        integer, dimension(n), intent(out) :: x  ! Allocated resources for each group (integers)
-        
-        real :: total_weighted_size  ! Total weighted size (sum of w_i * m_i)
-        real :: allocated_real(n)  ! Real-valued proportional allocation before rounding
-        integer :: i, total_allocated, leftover
+!!****f* m_slice/adjust_allocation
+!! NAME
+!! adjust_allocation
+!! 
+!! FUNCTION
+!! Adjust allocation by adding resources to the group closest to its ideal allocation
 
-        ! Calculate the total weighted size (sum of w_i * m_i)
-        total_weighted_size = 0.0
-        do i = 1, n
-            total_weighted_size = total_weighted_size + w(i) * m(i)
-        end do
+subroutine adjust_allocation(n, m, w, allocation, total_weight, p, total_allocated)
 
-        ! Perform the proportional allocation: x_i = (w_i * m_i) / (sum(w_j * m_j)) * p
-        total_allocated = 0
-        do i = 1, n
-            allocated_real(i) = (w(i) * m(i) / total_weighted_size) * p
-            x(i) = nint(allocated_real(i))  ! Round to the nearest integer
-            total_allocated = total_allocated + x(i)
-        end do
+    implicit none
 
-        ! If the total allocation doesn't sum to p, adjust the allocations
-        leftover = p - total_allocated
-        do i = 1, leftover
-            x(i) = x(i) + 1  ! Distribute the leftover resources
-        end do
+    integer, intent(in) :: n, m(n)
+    integer, intent(in) :: w(n), total_weight, p
+    integer, intent(inout) :: allocation(n)
+    integer, intent(inout) :: total_allocated
 
-    end subroutine greedy_allocation
+    integer :: i, closest_group
+    real(dp) :: max_diff, diff
+
+    ! Find the group with the largest difference between allocation and ideal allocation
+    max_diff = -1.0
+    closest_group = 1
+    do i = 1, n
+        diff = abs(real(allocation(i)) - (real(w(i)) * real(m(i)) * real(p)) / real(total_weight))
+        if (diff > max_diff) then
+            max_diff = diff
+            closest_group = i
+        end if
+    end do
+
+    ! Add one resource to the group with the largest difference
+    allocation(closest_group) = allocation(closest_group) + 1
+    total_allocated = total_allocated + 1
+
+end subroutine adjust_allocation
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/reduce_allocation
+!! NAME
+!! reduce_allocation
+!! 
+!! FUNCTION
+!! Reduce allocation by removing resources from the over-allocated group
+
+subroutine reduce_allocation(n, m, w, allocation, total_weight, p, total_allocated)
+  
+    implicit none
+
+    integer, intent(in) :: n, m(n)
+    integer, intent(in) :: w(n), total_weight, p
+    integer, intent(inout) :: allocation(n)
+    integer, intent(inout) :: total_allocated
+
+    integer :: i, closest_group
+    real(dp) :: max_diff, diff
+
+    ! Find the group with the smallest over-allocation
+    max_diff = -1.0
+    closest_group = 1
+    do i = 1, n
+        diff = abs(real(allocation(i)) - (real(w(i)) * real(m(i)) * real(p)) / real(total_weight))
+        if (diff < max_diff) then
+            max_diff = diff
+            closest_group = i
+        end if
+    end do
+
+    ! Remove one resource from the group with the smallest over-allocation
+    allocation(closest_group) = allocation(closest_group) - 1
+    total_allocated = total_allocated - 1
+
+end subroutine reduce_allocation
+!!***
 
 !----------------------------------------------------------------------
 
