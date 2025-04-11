@@ -634,7 +634,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      if(choice > 0 .and. (hamk%gpu_option==ABI_GPU_LEGACY .or. hamk%gpu_option==ABI_GPU_KOKKOS)) use_gemm_nonlop=.false.
    end if
  end if
- if(gemm_nonlop_gpu_option/=hamk%gpu_option) use_gemm_nonlop=.false.
+ if(gemm_nonlop_gpu_option/=hamk%gpu_option .or. force_recompute_ph3d) use_gemm_nonlop=.false.
 
 
 !In the case of a derivative with respect to an atomic displacement,
