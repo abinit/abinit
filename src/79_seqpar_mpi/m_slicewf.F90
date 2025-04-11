@@ -37,9 +37,8 @@ module m_slicewf
  use m_time
 
  use m_slice
- use m_cgslice ! TODO
- use m_chebfi
- use m_chebfi2
+ !use m_chebfi
+ !use m_chebfi2
  use m_invovl
 
  use m_cgtools,     only : dotprod_g
