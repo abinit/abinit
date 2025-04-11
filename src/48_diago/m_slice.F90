@@ -216,14 +216,16 @@ module m_slice
         ! Transposer
         type(xgBlock_t) :: Transposer_Xext
 
-        ! Pointers to all slice parameters
-        integer, pointer :: pband(:) => NULL()        ! Eigenvector column permutation
-        integer, pointer :: idx(:,:) => NULL()        ! start and end indices per slice
-        integer, pointer :: idx_merge(:,:) => NULL()  ! start and end converged indices per slice
-        integer, pointer :: ndeg(:) => NULL()         ! filter degree per slice 
-        integer, pointer :: npbandSlice(:) => NULL()
-        real(dp), pointer :: sbound(:,:) => NULL()    ! (slice low bound,slice upp bound,
-                                                      !  filter low support,filter upp support)
+        integer, allocatable :: permute_cols(:)        ! eigenvector permutation (TODO move out)
+        integer, allocatable :: slice_fcol(:)          ! first col of slice in spectrum memory
+        integer, allocatable :: slice_ncols(:)         ! number of cols per slice
+        integer, allocatable :: slice_fcol_ext(:)      ! first col of slice in extended memory
+        integer, allocatable :: conv_fcol_slice(:)     ! first converged in slice memory
+        integer, allocatable :: poly_degrees()         ! polynomial filter degrees
+        real(dp), allocatable :: part_low_bounds(:)    ! lower bounds in spectral partition
+        real(dp), allocatable :: part_upp_bounds(:)    ! upper bounds in spectral partition
+        real(dp), allocatable :: poly_low_bounds(:)    ! lower bounds used to define polynomials
+        real(dp), allocatable :: poly_upp_bounds(:)    ! upper bounds used to define polynomials
 
     end type slice_t
 
@@ -357,18 +359,19 @@ subroutine slice_allocateAll(slice)
     ! Every MPI process contains this array
     ! IML 9/4 FIXME this is useful if we compute convergence rates aposteriori
     ! otherwise, I am not sure how to use this information
+    ! IML 11/4 TODO maybe we don't need to store this information as member. 
+    ! Try to localize as much as possible to use in required routines only
     call xg_init(slice%Eig0,space_res,rows=1,cols=neigenpairs,comm=comm_cols,gpu_option=gpu_option)
     call xg_init(slice%Res0,SPACE_R,rows=1,cols=neigenpairs,comm=comm_cols,gpu_option=gpu_option)
 
-    ! FIXME incorporate? Add to mpiData? Add to slice?
-    ! Memory allocations of size depending on fixed nslice
-    ABI_MALLOC(pband, (nband)); pband_ptr => pband                     ! band permutation
-    ABI_MALLOC(idx, (nslice,2)); idx_ptr => idx                        ! idx in overlapping mem
-    ABI_MALLOC(idx_ovlp, (nslice,2)); idx_ovlp_ptr => idx_ovlp         ! idx in overlap-free mem
-    ABI_MALLOC(idx_merge, (nslice,2)); idx_merge_ptr => idx_merge      ! converged idx in overlap-free mem
-    ABI_MALLOC(ndeg, (nslice)); ndeg_ptr => ndeg                       ! filter degree per slice
-    ABI_MALLOC(sbound, (nslice,4)); sbound_ptr => sbound               ! eigenvalue bounds per slice
-    ABI_MALLOC(npbandSlice, (nslice)); npbandSlice_ptr => npbandSlice  ! number of mpi processes per slice
+    if(.not.allocated(slice%slice_fcol)) ABI_MALLOC(slice%slice_fcol,(nslice))
+    if(.not.allocated(slice%slice_ncols)) ABI_MALLOC(slice%slice_ncols,(nslice))
+    if(.not.allocated(slice%slice_fcol_ext)) ABI_MALLOC(slice%slice_fcol_ext,(nslice))
+    if(.not.allocated(slice%poly_degrees)) ABI_MALLOC(slice%poly_degrees,(nslice))
+    if(.not.allocated(slice%part_low_bounds)) ABI_MALLOC(slice%part_low_bounds,(nslice))
+    if(.not.allocated(slice%part_upp_bounds)) ABI_MALLOC(slice%part_upp_bounds,(nslice))
+    if(.not.allocated(slice%poly_low_bounds)) ABI_MALLOC(slice%poly_low_bounds,(nslice))
+    if(.not.allocated(slice%poly_upp_bounds)) ABI_MALLOC(slice%poly_upp_bounds,(nslice))
 
 end subroutine slice_allocateAll
 !!***
@@ -391,13 +394,14 @@ subroutine slice_free(slice)
     call xg_free(slice%Res0)
  
     ! Free slice parameters
-    if (allocated(pband)) ABI_FREE(pband)
-    if (allocated(idx)) ABI_FREE(idx)
-    if (allocated(idx_ovlp)) ABI_FREE(idx_ovlp)
-    if (allocated(idx_merge)) ABI_FREE(idx_merge)
-    if (allocated(ndeg)) ABI_FREE(ndeg)
-    if (allocated(sbound)) ABI_FREE(sbound)
-    if (allocated(npbandSlice)) ABI_FREE(npbandSlice)
+    if(allocated(slice%slice_fcol)) ABI_FREE(slice%slice_fcol)
+    if(allocated(slice%slice_ncols)) ABI_FREE(slice%slice_ncols)
+    if(allocated(slice%slice_fcol_ext)) ABI_FREE(slice%slice_fcol_ext)
+    if(allocated(slice%poly_degrees)) ABI_FREE(slice%poly_degrees)
+    if(allocated(slice%part_low_bounds)) ABI_FREE(slice%part_low_bounds)
+    if(allocated(slice%part_upp_bounds)) ABI_FREE(slice%part_upp_bounds)
+    if(allocated(slice%poly_low_bounds)) ABI_FREE(slice%poly_low_bounds)
+    if(allocated(slice%poly_upp_bounds)) ABI_FREE(slice%poly_upp_bounds)
     
 end subroutine slice_free
 !!***
@@ -751,51 +755,28 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
         end do
     end select
 
-    ! FIXME function starts becoming too big.
-    ! Split into two parts 
-    ! * slice_cutSpectrum. * slice_setFilters
-
     ! Define spectral subintervals and optimize degrees for individual slices
-    j1 = 1 ! band index ! declare and change
-    do j=1,nslice
+    j1 = 1 ! band index
+    do islice=1,nslice
             
         ! Slice position, first (1), interior (2), last (3)
         spos = 2
-        if (j==1) spos = 1
-        if (j==nslice) spos = 3
+        if (islice==1) spos = 1
+        if (islice==nslice) spos = 3
 
         ! Spectral slice of interest is [l,u)
-        lj = slice_cut(j)
-        uj = slice_cut(j+1)
+        low = slice_cut(islice)
+        upp = slice_cut(islice+1)
         
-        ! Overlap width *****************************************************
-        ! TODO investigate if we also need to add residual
-        !                                                    (IML 28/01/2025)
-        ! for (u-l)/10: faster because less vectors, but ratio > ramp sometimes
-        !               SCF cycle errors are quite large (deltaE,res2)
-        ! for (u-l)/8 : slower because more vectors, but ratio < ramp always
-        !               also improves all three errors in SCF cycles
-        ! Conclusion: there is a critical w above which convergence ramp is achieved
-        ! Idea: use residual intervals to find critical w
-
-        ! This is critical w fixed empirical
-        ! Heuristic rule: if nvec and nvec_ovlp is very close, update wj
-        !wj = (uj - lj) / 8.d0
-        wj = (uj - lj) / 10.d0
-        ! ndeg is ok (30)
-
-        write(std_out,*) '------------ /Divide/ Slice ',j
-        
-        ! Uncomment following two lines to use wj fixed overlap width
-        wlj = wj
-        wuj = wj
-        write(std_out,*) '       overlap widths=', wlj, wuj
-        ! *******************************************************************
-        
-        ndeg = nline
+        ! Try different tuning???
+        !wovlp = (upp - low) / 8.d0
+        wovlp = (upp - low) / 10.d0
        
-        ! Count eigenvalues in slice cut plus overlap 
-        call count_values(lj-wlj,uj+wuj,theta,spos,neigenpairs,k1,k2,nvec)
+        poly_low = low - wovlp
+        poly_upp = upp + wovlp
+       
+        ! Count theta eigenvalues in slice cut plus overlap 
+        call count_values(poly_low,poly_upp,theta,spos,neigenpairs,k1,k2,nvec)
         nvec_ovlp = nvec
         write(std_out,*) '    after overlap', k1,k2
 
@@ -806,24 +787,26 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
         ! improve the convergence ratio.
 
         ! Filter support [l-w,u+w) scaled to [-1,1)
-        a_ = (lj-wlj-c)/r
-        b_ = (uj+wuj-c)/r
+        a = (poly_low-c)/r
+        b = (poly_upp-c)/r
 
-        if (j==1) then
+        if (islice==1) then
             ! uj,gub is the interval mapped to -1,1
             ! in this interval Chebyshev poly is bounded by 1
             ! remember uj,gub is the interval to ignore
             ndeg = 4
-            do while
-            !write(std_out,*) 'first slice apriori=', 1.d0/cheb_poly(lj,12,uj+wuj,ecut)
+            ! FIXME is the scaling in [-1,1] OK?
+            do while(1.d0/cheb_poly(low,ndeg,poly_upp,ecut)<ramp) 
+                ndeg = ndeg + 1
+            end do
         else
             ndeg = 4
             finL = 0.d0; finR = 0.d0; foutL = 1.d0; foutR = 1.d0
             do while ( (finL/foutL < ramp) .and. (finR/foutR < ramp) .and. (ndeg<ndeg_max) )
-                finL  = bandpassIndicator_sca((lj-c)/r,a_,b_,ndeg)
-                foutL = bandpassIndicator_sca(a_      ,a_,b_,ndeg)
-                finR  = bandpassIndicator_sca((uj-c)/r,a_,b_,ndeg)
-                foutR = bandpassIndicator_sca(b_      ,a_,b_,ndeg)
+                finL  = bandpassIndicator_sca((low-c)/r,a,b,ndeg)
+                foutL = bandpassIndicator_sca(a      ,a,b,ndeg)
+                finR  = bandpassIndicator_sca((upp-c)/r,a,b,ndeg)
+                foutR = bandpassIndicator_sca(b      ,a,b,ndeg)
                 ndeg = ndeg + 1
             end do
         end if
@@ -833,16 +816,16 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
             write(std_out,*) ' '
             write(std_out,*) 'Plot filter ==== x | f(x)'
             npt = 100
-            if (j==1) then
+            if (islice==1) then
                 do ipt=1,npt
-                    pt = lj + (ipt-1)*(uj-lj)/npt
-                    fun_pt = cheb_poly(pt,ndeg,uj+wuj,gub)
+                    pt = low + (ipt-1)*(upp-low)/npt
+                    fun_pt = cheb_poly(pt,ndeg,poly_upp,gub)
                     write(std_out,*) pt, fun_pt
                 end do
             else
                 do ipt=1,npt
-                    pt = (lj + (ipt-1)*(uj-lj)/npt - c)/r
-                    fun_pt = bandpassIndicator_sca(pt,a_,b_,ndeg)
+                    pt = (low + (ipt-1)*(upp-low)/npt - c)/r
+                    fun_pt = bandpassIndicator_sca(pt,a,b,ndeg)
                     write(std_out,*) pt, fun_pt
                 end do
             end if
@@ -850,14 +833,12 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
         end if
 
         ! Print slice interval info
-        write(std_out,*) 'Without overlap=', lj, uj
-        write(std_out,*) '          width=', uj-lj
-        write(std_out,*) '      scaled to=', (lj-c)/r,(uj-c)/r
-        write(std_out,*) 'With    overlap=', lj-wlj, uj+wuj
-        write(std_out,*) '          width=', uj+wuj-lj+wlj
-        write(std_out,*) '      scaled to=', (lj-wlj-c)/r,(uj+wuj-c)/r
-        write(std_out,*) 'With    overlap=', lj-wlj, uj+wuj
-        write(std_out,*) '  nvec(balance)=', neigenpairs/nslice
+        write(std_out,*) 'Without overlap=', low, upp
+        write(std_out,*) '          width=', upp-low
+        write(std_out,*) '      scaled to=', (low-c)/r,(upp-c)/r
+        write(std_out,*) 'With    overlap=', poly_low, poly_upp
+        write(std_out,*) '          width=', poly_upp-poly_low
+        write(std_out,*) '      scaled to=', a,b
         write(std_out,*) '      nvec_ovlp=', nvec_ovlp
         write(std_out,*) '           nvec=', nvec
         write(std_out,*) '           ndeg=', ndeg
@@ -867,38 +848,22 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
         ! Compute last index in extended memory (without ovlp)
         j2 = j1 + nvec_ovlp - 1
 
-        ! Store slice parameters
-        idxAll(j,1:2) = (/k1,k2/)
-        idx_extAll(j,1:2) = (/j1,j2/)
-        ! FIXME add nband (nband per slice with overlap)
-        nbandAll(j) = k2 - k1 + 1
-        ndegAll(j) = ndeg
-        sboundAll(j,1:4) = (/lj,uj,lj-wlj,uj+wuj/) 
-
-        slice%fcol(islice) = k1 
-        slice%lcol(islice) = k2
-        
-        slice%fcol_ext(islice) = j1 ! FIXME declare this 
-        slice%lcol_ext(islice) = j2 ! FIXME declare this 
-       
-        slice%nband(islice) = nvec_ovlp
-        
-        ! Update first index in next extended
+        ! TODO fix notation according to this
+        slice%slice_fcol(islice) = k1
+        slice%slice_ncols(islice) = k2-k1+1 ! nvec_ovlp
+        slice%slice_fcol_ext(islice) = j1
+        slice%poly_degrees(islice) = ndeg
+        slice%part_low_bounds(islice) = low
+        slice%part_upp_bounds(islice) = upp
+        slice%poly_low_bounds(islice) = poly_low
+        slice%poly_upp_bounds(islice) = poly_upp
+ 
+        ! Update starting index of next slice in extended
         j1 = j2 + 1
            
     end do
 
-    ! Update pointers for all slices
-    ! TODO rename idx to icol
-    slice%pband => pband
-    slice%ndeg => ndegAll
-    slice%sbound => sboundAll
-    !slice%npbandSlice => npbandSlice
-
-    mpi_slice%rule_nband => nbandAll
-    mpi_slice%rule_ndeg => ndegAll
-
-    ! Free workspace not needed
+    ! Free temporary memory space
     if (allocated(slice_cut)) ABI_FREE(slice_cut)
     if (allocated(resid_cut)) ABI_FREE(resid_cut)
     if (allocated(theta)) ABI_FREE(theta)
@@ -1577,7 +1542,7 @@ subroutine slice_initExtended(slice,pband_ptr)
     
     ! Local variables-------------------------------    
     integer :: me_g0,nband,comm
-    integer :: nrow,ncol
+    integer :: nrows,ncols
     integer :: islice,nslice
     integer :: fcol,fcol_ext
     type(xgBlock_t) :: xgcols_in, xgcols_out 
@@ -1585,7 +1550,7 @@ subroutine slice_initExtended(slice,pband_ptr)
     ! *********************************************************************
 
     nslice = slice%nslice
-    nrow = slice%spacedim
+    nrows = slice%spacedim
     comm = slice%spacecom
     nband = slice%nband
     me_g0 = slice%me_g0
@@ -1612,11 +1577,11 @@ subroutine slice_initExtended(slice,pband_ptr)
         ! Copy X to extended by blocks
         ! Reminder: xgBlock_copy is always on CPU expect if both blocks are on GPU
         do islice=1,nslice
-            ncol = slice%nband_slice(islice)
-            fcol = slice%fcol(islice)
-            fcol_ext = slice%fcol_ext(islice)
-            call xgBlock_setBlock(slice%X,xgcols_in,nrow,ncol,fcol=fcol)
-            call xgBlock_setBlock(slice%Xext_linalg,xgcols_out,nrow,ncol,fcol=fcol_ext)
+            ncols = slice%slice_ncols(islice)
+            fcol = slice%slice_fcol(islice)
+            fcol_ext = slice%slice_fcol_ext(islice)
+            call xgBlock_setBlock(slice%X,xgcols_in,nrows,ncols,fcol=fcol)
+            call xgBlock_setBlock(slice%Xext_linalg,xgcols_out,nrows,ncols,fcol=fcol_ext)
             call xgBlock_copy(xgcols_in,xgcols_out)
         end do
     end if
