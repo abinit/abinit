@@ -69,19 +69,32 @@ module m_slice
     integer, parameter :: BALANCE_BANDPP      = 0 ! balanced bandpp        across processes
     integer, parameter :: BALANCE_BANDPP_NDEG = 1 ! balanced bandpp x ndeg across processes
 
-    ! Private 'mpiSlice' datatype
-    ! Parameters of MPI distribution for individual slices
-    ! [IML 9/4 work in progress]
-    !-----------------------------------------------------
-    type, private :: mpiSlice_t
-        integer :: slice_me              ! slice index
-        integer :: nproc                 ! processes used
-        integer, allocatable :: colpp(:) ! columns per process
-        integer, allocatable :: rowpp(:) ! rows per process
-        integer :: comm                  ! global communicator
-        integer :: comm_sub              ! slice sub-communicator
-    end type mpiSlice_t
+    ! Private 'parallelEnv' datatype
+    ! Parameters of slice parallelisation environment
+    !------------------------------------------------
+    type, private :: parallelEnv_t
 
+        ! MPI-related
+        integer :: rank
+        integer :: size
+        integer :: ierr
+        integer :: comm
+        integer :: comm_sub
+        integer :: group
+        integer :: status(MPI_STATUS_SIZE)
+
+        ! Flags
+        logical :: on_host = .false.
+        logical :: on_device = .false.
+        logical :: is_row = .false.
+        logical :: is_col = .false.
+
+        ! Arrays
+        integer, allocatable :: ncolsColsRows(:)
+        integer, allocatable :: nrowsLinalg(:)
+        integer, allocatable :: group_lookup(:)
+
+    end type parallelEnv_t
 
     ! Public 'slice' datatype
     ! [IML 9/4 work in progress] I don't think this is necessary
@@ -564,7 +577,7 @@ subroutine slice_distributeSpectrum(slice,spectral_cut,paral_slice)
     ! Compute target mpi distribution
     ! in here assume that mpiData contains the rule_nband
     ! FIXME workinprogress
-    call mpiSlice_init(slice%mpi_slice,paral_slice)
+    call parallelEnv_init(env,slice%mpi_slice,paral_slice)
 
     ! Create the extended workspaces on CPU
     call slice_initExtended(slice,pband_ptr)
@@ -1755,6 +1768,9 @@ subroutine slice_run(slice,getAX_BX,getBm1X,nspinor)
     ! call xgBlock_copy_to_gpu(slice%X)
     ! call xgBlock_set_gpu_option(slice%X)
     
+    ! Synchronize before creating a subcomm
+    call xmpi_barrier(spacecom)
+    
     ! Split global communicator so that only procs with the same color communicate
     my_rank = xmpi_comm_rank(spacecom)
     color = mpiSlice_getSliceMe(mpi_slice,my_rank)
@@ -2266,16 +2282,27 @@ end function mpiSlice_getSliceMe
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/mpiSlice_init
+!!****f* m_slice/parallelEnv_init
 !! NAME
-!! mpiSlice_init
+!! parallelEnv_init
 !! 
 !! FUNCTION
-!! IML 9/4 ongoing howtoset efficiently
+!! Set parameters of slice parallelisation environment.
+!! Assumes that spectral slices have already been splitted
+!! (uses degree).
 !! 
 !! SOURCE
 
-subroutine mpiSlice_init(mpi_slice,distribution)
+subroutine parallelEnv_init(env,distribution)
+
+    implicit none
+
+    type(parallelEnv_t), intent(inout) :: env
+    
+
+    if (.not. allocated(env%data_buffer)) then
+        ABI_ALLOC(env%data_buffer(100))
+    end if
 
 
     ! color MPI processes with the slice TODO automatize for arbitrary number of slices
@@ -2363,6 +2390,47 @@ subroutine mpiSlice_init(mpi_slice,distribution)
     map_proc_to_slice
 
     ! lookup: my_rank+1 -> color
+    ! example of number of vectors per process
+    vectors = [3, 2, 5, 7, 1, 4, 8, 3, 6, 5]
+
+    if (.not.allocated(env%group_lookup)) then
+        ABI_MALLOC(env%group_lookup, (nproc))
+    end if
+
+    ! Initialization with invalid values
+    env%group_lookup = -1
+  
+    total_vectors = 0
+    current_slice = 1
+    vectors_in_current_slice = 0
+
+    ! Distribution of processes at groups/slices
+    do i = 1, n
+    
+        ! Include vectors of current process
+        vectors_in_current_slice = vectors_in_current_slice + vectors(i)
+    
+        ! If vectors of current process exceed limits of current slice
+        ! TODO rename slice%nband number of bands per slice to slice_size
+        if (vectors_in_current_slice > slice_size) then
+            ! Update moving to next slice
+            current_slice = current_slice + 1
+        vectors_in_current_slice = vectors(i) ! initialize new slice with vectors of current process
+        end if
+    
+        ! Assign process to the group/slice
+        env%group_lookup(i) = current_slice
+    end do
+
+
+    device_id = xomp_get_device_num()
+    env%use_host = (device_id < 1) ! outside target (-1), inside target host (0)
+    env%use_device = (device_id > 0) ! inside target not host (device number)
+
+    do i = 1, n
+        write(*,'(a,i5,a,i5)') "Process ", i, " is in group ", group_assignment(i)
+    end do
+
     lookup(1) = 0
     lookup(2) = 1
     lookup(3) = 1
@@ -2374,7 +2442,20 @@ subroutine mpiSlice_init(mpi_slice,distribution)
         nband_prev = nband_prev + nband(i)
     end do
 
-end subroutine mpiSlice_init
+end subroutine parallelEnv_init
+!***
+
+subroutine parallelEnv_free(env)
+
+    implicit none 
+
+    type(parallelEnv_t), intent(inout) :: env
+
+    if (allocated(env%group_lookup)) then
+        ABI_FREE(env%group_lookup)
+    end if
+
+end subroutine parallelEnv_free
 
 !----------------------------------------------------------------------
 
