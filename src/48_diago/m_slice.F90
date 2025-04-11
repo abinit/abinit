@@ -345,6 +345,21 @@ subroutine cgSliced_init(cgSliced,neigenpairs,spacedim,tolerance,ecut,&
         slice%space_res = SPACE_R
     end if
 
+    ! Dimensions of linalg representation
+    cgslice%nrows_blockrows = spacedim
+    cgslice%ncols_blockrows = neigenpairs
+    ! Dimensions of colsrows representation
+    if (paral_kgb == 0) then
+        ! No distribution
+        cgslice%nrows_blockcols = spacedim
+        cgslice%ncols_blockcols = neigenpairs
+    else if (paral_kgb == 1) then
+        total_spacedim = spacedim
+        call xmpi_sum(total_spacedim,cgslice%spacecom,ierr)
+        cgslice%nrows_blockcols = total_spacedim
+        cgslice%ncols_blockcols = bandpp
+    end if
+
 end subroutine cgSliced_init
 !!***
 
@@ -381,14 +396,36 @@ subroutine cgSlice_divide(cgslice,X,getAX_BX,nspinor)
     integer :: resource_allocation
     integer :: nrows_total
     integer :: spacecom
+    type(xg_t) :: eigen0
+    type(xg_t) :: resid0
     ! Arrays
     integer, pointer :: slice_ncols(:) => null()
     integer, pointer :: slice_degrees(:) => null()
     
     ! *********************************************************************
 
-    ! Compute ordered Rayleigh quotients and residuals
-    call cgslice_computeSpectrum(cgslice,X,getAX_BX,nspinor)
+    space_res = cgslice%space_res
+    ncols_tot = cgslice%ncols_blockrows
+    gpu_option = cgslice%gpu_option
+
+    ! There are the ENTIRE values used for later. Every process contains entire array
+    call xg_init(eigen0, space_res, rows=1, cols=ncols_tot, gpu_option=gpu_option)
+    call xg_init(resid0, space_res, rows=1, cols=ncols_tot, gpu_option=gpu_option)
+    call xgBlock_zero(eigen0%self)
+    call xgBlock_zero(resid0%self)
+
+    ! Compute Rayleigh quotients and residuals
+    call cgslice_computeSpectrum(cgslice,X,getAX_BX,eigen0,resid0,nspinor)
+    ! now eigen0%self holds thetas
+    ! en vrai pour cutSpectrum on n'a pas besoin de theta.
+    ! juste du maxeig, mineig et mineig_pos pour faire resid(mineig_pos)
+    ! après il faut aussi faire la permutation du X SUR CPU en LINALG!!!!
+
+    ! Map to fortran arrays
+    call xgBlock_reshape(eigen0%self, (/ncols_tot,1/))     
+    call xgBlock_reshape(resid0%self, (/ncols_tot,1/))
+
+    ! normally here we should move some data to CPU
 
     ! Compute nband per slice
     call slice_cutSpectrum(slice,pband_ptr,spectral_cut)
@@ -430,184 +467,145 @@ end subroutine cgslice_divide
 !! TODO IL 11/4 restore chebfi from develop
 !! this is a new version without chebfi
 
-subroutine cgslice_computeSpectrum(cgslice,DivResults)
+subroutine cgslice_computeSpectrum(cgslice,X0,getAX_BX,eigen,resid,nspinor)
 
- implicit none
+    implicit none
 
-!Arguments ------------------------------------
- real(dp), intent(inout) :: maxeig
- real(dp), intent(inout) :: mineig
- type(chebfi_t), intent(inout) :: chebfi
- type(xgBlock_t), intent(inout) :: DivResults
+    ! Arguments
+    type(cgSlice_t), intent(inout) :: cgslice
+    type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: resid
+    integer, intent(in) :: nspinor
+    interface
+        subroutine getAX_BX(X,AX,BX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+            type(xgBlock_t), intent(inout) :: BX
+        end subroutine getAX_BX
+    end interface
 
-!Local variables-------------------------------
-!scalars
- type(xg_t) :: DivResults ! TODO move out, this should be stored in cgslice_divide
- type(xg_t)::Results1
- type(xg_t)::Results2
- type(xgBlock_t) :: xXColsRows
- type(xgBlock_t) :: xAXColsRows
- type(xgBlock_t) :: xBXColsRows
- type(xgTransposer_t) :: xgTransposerX
- type(xgTransposer_t) :: xgTransposerAX
- type(xgTransposer_t) :: xgTransposerBX
-!arrays
- integer :: maxeig_pos(2)
- integer :: mineig_pos(2)
- integer :: space_res
+    ! Local variables
+    ! Scalars
+    integer :: space, space_res
+    integer :: nrows_blockcols, ncols_blockcols
+    integer :: paral_kgb, comm
+    integer :: me_g0, gpu_option
+    integer :: my_rank, shift, bandpp
+    real(dp) :: mineig, maxeig
+    ! Derived types
+    type(xg_t) :: Results1
+    type(xg_t) :: Results2
+    type(xg_t) :: Results3
+    type(xg_t) :: eigen_mpi
+    type(xg_t) :: resid_mpi
+    type(xg_t) :: X_NAB ! vector memory for X_next, AX, BX
+    type(xgBlock_t) :: xXColsRows
+    type(xgBlock_t) :: xAXColsRows
+    type(xgBlock_t) :: xBXColsRows
+    type(xgBlock_t) :: X_next
+    type(xgTransposer_t) :: xgTransposerX
+    ! Arrays
+    integer :: maxeig_pos(2)
+    integer :: mineig_pos(2)
 
 ! *********************************************************************
 
- if (chebfi%space==SPACE_C) then
-   space_res = SPACE_C
- else if (chebfi%space==SPACE_CR) then
-   space_res = SPACE_R
- else
-   ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
- end if
+    ! Priority IL 11/4
+    ! TODO rename cgslice to xgXslice or something. The structure is xg not cg!!
 
- ! DivResults will hold eig
- if (chebfi%paral_kgb == 0) then
-   call xg_init(DivResults, space_res, neigenpairs, 1, gpu_option=chebfi%gpu_option)
- else
-   call xg_init(DivResults, space_res, bandpp, 1, gpu_option=chebfi%gpu_option)
- end if
+    space = cgslice%space
+    space_res = cgslice%space_res
+    paral_kgb = cgslice%paral_kgb
+    nrows_blockcols = cgslice%nrows_blockcols
+    ncols_blockcols = cgslice%ncols_blockcols
+    comm = cgslice%comm
+    me_g0 = cgslice%me_g0
+    gpu_option = cgslice%gpu_option
 
- ! X_next is another temporary space
- if (chebfi%paral_kgb == 0) then
-   chebfi%total_spacedim = spacedim
-   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option) !regular arrays
-   call xg_setBlock(chebfi%X_NP, chebfi%X_next,spacedim, neigenpairs)
-   call xg_setBlock(chebfi%X_NP, chebfi%X_prev,spacedim, neigenpairs, fcol=neigenpairs+1)
- else
-   total_spacedim = spacedim
-   call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
-   chebfi%total_spacedim = total_spacedim
-   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,me_g0=chebfi%me_g0_fft,&
-     & gpu_option=chebfi%gpu_option) !transposed arrays
-   call xg_setBlock(chebfi%X_NP, chebfi%X_next, total_spacedim, chebfi%bandpp)
-   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, total_spacedim, chebfi%bandpp, fcol=chebfi%bandpp+1)
- end if
+    ! Allocate temporary memory space
+    call xg_init(X_NAB, space, nrows_blockcols, 3*ncols_blockcols, comm, me_g0=me_g0, gpu_option=gpu_option)
+    call xg_setBlock(X_NAB, X_next, nrows_blockcols, ncols_blockcols)
+    call xg_setBlock(X_NAB, xAXColsRows, nrows_blockcols, ncols_blockcols, fcol=ncols_blockcols + 1)
+    call xg_setBlock(X_NAB, xBXColsRows, nrows_blockcols, ncols_blockcols, fcol=2*ncols_blockcols + 1)
+    
+    ! one-dimensional memory spaces
+    call xg_init(eigen_mpi, space_res, rows=ncols_blockcols, cols=1, comm=comm, gpu_option=gpu_option)
+    call xg_init(resid_mpi, SPACE_R, rows=ncols_blockcols, cols=1, comm=comm, gpu_option=gpu_option)
+    call xg_init(Results1, space_res, rows=ncols_blockcols, cols=1, gpu_option=gpu_option)
+    call xg_init(Results2, space_res, rows=ncols_blockcols, cols=1, gpu_option=gpu_option)
+    call xg_init(Results3, SPACE_R, rows=ncols_blockcols, cols=1, gpu_option=gpu_option)
 
- ! First transpose existing cg
- if (chebfi%paral_kgb == 1) then
-
-   call timab(tim_transpose,1,tsec)
-   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
-     gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit)
-
-   call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
-   call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
-
-   chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
-   chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-   chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-
-   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-   call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
-   chebfi%xgTransposerAX%state = STATE_COLSROWS
-   chebfi%xgTransposerBX%state = STATE_COLSROWS
-   ABI_NVTX_END_RANGE()
-   call timab(tim_transpose,2,tsec)
- else
-   call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)   !use xXColsRows instead of X notion
-   call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
-   call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
- end if
+    ! First transpose existing cg
+    if (paral_kgb == 1) then
+        call xmpi_barrier(comm)
+        call xgTransposer_constructor(xgTransposerX,X0,xXColsRows,nspinor,&
+            STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_self,comm,0,0,cgslice%me_g0_fft,&
+            gpu_option=gpu_option,gpu_thread_limit=cgslice%gpu_thread_limit)
+        xgTransposerX%gpu_kokkos_nthrd  = cgslice%gpu_kokkos_nthrd
+        call xgTransposer_transpose(xgTransposerX,STATE_COLSROWS)
+    end if
 
     ! Now apply AX BX (colsrows representation)
- call timab(tim_getAX_BX,1,tsec)
- ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
- call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
- call xgBlock_zero_im_g0(chebfi%xAXColsRows)
- call xgBlock_zero_im_g0(chebfi%xBXColsRows)
- ABI_NVTX_END_RANGE()
- call timab(tim_getAX_BX,2,tsec)
+    ! Remember that this function will copy X to BX if paw
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
+    call getAX_BX(xXColsRows,xAXColsRows,xBXColsRows)
+    call xgBlock_zero_im_g0(xAXColsRows)
+    call xgBlock_zero_im_g0(xBXColsRows)
+    ABI_NVTX_END_RANGE()
 
- ! Now we are in linalg
-!Doesnt work with npfft (ncols=1 in the formula below) ???
- if (chebfi%paral_kgb == 0) then
-   call xg_init(Results1, space_res, chebfi%neigenpairs, 1, gpu_option=chebfi%gpu_option)
-   call xg_init(Results2, space_res, chebfi%neigenpairs, 1, gpu_option=chebfi%gpu_option)
- else
-   call xg_init(Results1, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
-   call xg_init(Results2, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
- end if
+    ! Compute Rayleigh quotients
+    ! <Psi|H|Psi>
+    call xgBlock_colwiseDotProduct(xXColsRows, xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
+    ! <Psi|S|Psi>
+    call xgBlock_colwiseDotProduct(xXColsRows, xBXColsRows, Results2%self, comm_loc=xmpi_comm_null)
+    ! eigen = <Psi|H|Psi> / <Psi|S|Psi>
+    call xgBlock_colwiseDivision(Results1%self, Results2%self, eigen_mpi, maxeig, maxeig_pos, mineig, mineig_pos)
 
- ! <Psi|H|Psi>
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
-
- ! <Psi|S|Psi>
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self, comm_loc=xmpi_comm_null)
-
- ! eig = <Psi|H|Psi> / <Psi|S|Psi>
- call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
-   & maxeig, maxeig_pos, mineig, mineig_pos)
-
-! Restore cg to linalg representation
- ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
- if (chebfi%paral_kgb == 1) then
-   call xmpi_barrier(chebfi%spacecom)
-   call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
- end if
- ABI_NVTX_END_RANGE()
-
-   ! In order to avoid transposing AX,BX, 
-   ! we compute residuals in colsrows representation
-    if (chebfi%paw) then
-        call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)     ! X_next = S|Psi>
-    else
-        call xgBlock_copy(chebfi%xXColsRows,chebfi%X_next)      ! X_next = |Psi>
-    end if
+    ! In order to avoid transposing AX,BX, we compute residuals in colsrows representation
     ! TODO IL 20/01/2025 ymax has not been tested on GPU
-    call xgBlock_ymax(chebfi%X_next,DivResults,0,1)             ! X_next = - eig * S|Psi>
-    call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)          ! X_next = H|Psi> - eig * S|Psi>
-    call xgBlock_colwiseNorm2(chebfi%X_next,residu,comm_loc=xmpi_comm_null) ! resid = |X_next|^2
+    call xgBlock_copy(xBXColsRows,X_next)                             ! X_next = S|Psi>
+    call xgBlock_ymax(X_next,eigen_mpi,0,1)                           ! X_next = - eig * S|Psi>
+    call xgBlock_add(X_next,xAXColsRows)                              ! X_next = H|Psi> - eig * S|Psi>
+    call xgBlock_colwiseNorm2(%X_next,residu,comm_loc=xmpi_comm_null) ! resid = |X_next|^2
+   
+    ! MPI communication for gathering all thetas (using summation strategy)
+    if (xmpi_comm_size(comm)>1) then
+        my_rank = xmpi_comm_rank(comm)
+        bandpp = ncols_blockcols
+        shift = my_rank * bandpp
 
-   ! This requires communicating for gathering all thetas
-    if (xmpi_comm_size(comm_cols)>1) then
+        call xgBlock_setBlock(eigen%self, Results1%self, nrows=1, ncols=bandpp, fcol=1+shift)
+        call xgBlock_reshape(eigen_mpi, (/1,bandpp/)) 
+        call xgBlock_copy(eigen_mpi, Results1%self)
+        call xgBlock_mpi_sum(eigen%self,comm=comm)
 
-        ! Initialize entire array with zeros, every MPI contains this array
-        call xgBlock_zero(slice%Eig0%self)
-        call xgBlock_zero(slice%Res0%self)
-
-        ! Recover rank of current MPI process
-        my_rank = xmpi_comm_rank(comm_cols)
-        shift_row = my_rank * bandpp
-
-        ! Reshape in order to use blockCopy on columns (requires same number of rows)
-        call xgBlock_reshape(Eig0_paral,(/1,bandpp/))     
-        call xgBlock_reshape(Res0_paral,(/1,bandpp/))     
- 
-        ! Fill entire array with entry=(current MPI part | zero otherwise)
-        ! FIXME replace blockCopy by a simple xgBlock_copy
-        call slice_blockCopy(Eig0_paral,slice%Eig0%self,1,shift_row+1,bandpp,shift_row+bandpp)
-        call slice_blockCopy(Res0_paral,slice%Res0%self,1,shift_row+1,bandpp,shift_row+bandpp)
-        
-        ! Sum entire object across MPI, every MPI contains the same entire array
-        call xgBlock_mpi_sum(slice%Eig0%self,comm=comm_cols)
-        call xgBlock_mpi_sum(slice%Res0%self,comm=comm_cols)
-
-        ! Undo reshape
-        call xgBlock_reshape(slice%Eig0%self,(/neigenpairs,1/))     
-        call xgBlock_reshape(slice%Res0%self,(/neigenpairs,1/))
-
+        call xgBlock_setBlock(resid%self, Results3%self, nrows=1, ncols=bandpp, fcol=1+shift)
+        call xgBlock_reshape(resid_mpi, (/1,bandpp/))     
+        call xgBlock_copy(resid_mpi, Results3%self)
+        call xgBlock_mpi_sum(resid%self,comm=comm)
     else
-        call xgBlock_copy(Eig0_paral,slice%Eig0%self)
-        call xgBlock_copy(Res0_paral,slice%Res0%self)
+        call xgBlock_copy(eigen_mpi,eigen%self)
+        call xgBlock_copy(resid_mpi,resid%self)
+    end if
+
+    ! Restore cg to linalg representation
+    if (paral_kgb == 1) then
+        call xmpi_barrier(comm)
+        call xgTransposer_transpose(xgTransposerX, STATE_LINALG)
     end if
 
     ! Free memory
     call xg_free(Results1)
-    call xg_free(Results2)    
-    call chebfi_free(chebfi)
-    call xg_free(Eig0_XW)
-    call xg_free(Res0_XW)
-
-end subroutine chebfi_rayleighRitzQuotients
+    call xg_free(Results2)
+    call xg_free(Results3)
+    call xg_free(eigen_mpi)
+    call xg_free(resid_mpi)
+    call xg_free(X_NAB)
 
 end subroutine cgslice_computeSpectrum
+!!***
 
 !----------------------------------------------------------------------
 
@@ -771,168 +769,6 @@ subroutine slice_free(slice)
     if(allocated(slice%poly_upp_bounds)) ABI_FREE(slice%poly_upp_bounds)
     
 end subroutine slice_free
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_computeDos
-!! NAME
-!! slice_computeDos
-!! 
-!! FUNCTION
-!! Compute density of states (DOS) for all bands.
-!! 
-!! SOURCE
-
-subroutine slice_dos(slice,X0,getAX_BX,nspinor)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(slice_t), intent(inout) :: slice
-    type(xgBlock_t), intent(inout) :: X0
-    integer, intent(in) :: nspinor
-    interface
-        subroutine getAX_BX(X,AX,BX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-            type(xgBlock_t), intent(inout) :: BX
-        end subroutine getAX_BX
-    end interface
-    ! Local variables-------------------------------    
-    integer :: neigenpairs,spacedim,paral_kgb,space_res
-    integer :: bandpp,mdeg_filter,space,eigenProblem,spacecom
-    integer :: me_g0,me_g0_fft,comm_rows,comm_cols
-    integer :: gpu_option,gpu_kokkos_nthrd,gpu_thread_limit
-    integer :: nrows
-    integer :: nbdbuf,oracle
-    integer :: my_rank,shift_row ! for MPI all to all
-    logical :: paw
-    real(dp) :: tolerance,ecut
-    real(dp) :: oracle_factor,oracle_min_occ
-    type(chebfi_t) :: chebfi
-    type(xg_t) :: Eig0_XW, Res0_XW
-    type(xgBlock_t) :: Eig0_paral, Res0_paral
- 
-    ! *********************************************************************
-
-    ! TODO examine if this short alternative is sufficient
-    !if (chebfi%paral_kgb == 0) then
-    !    call xg_init(DivResults, space_res, neigenpairs, 1, gpu_option=chebfi%gpu_option)
-    !else
-    !   call xg_init(DivResults, space_res, bandpp, 1, gpu_option=chebfi%gpu_option)
-    !end if
-    !call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self)
-
-    space          = slice%space
-    spacedim       = slice%spacedim
-    neigenpairs    = slice%neigenpairs
-    space_res      = slice%space_res
-    bandpp         = slice%bandpp
-    mdeg_filter    = slice%mdeg_filter
-    tolerance      = slice%tolerance
-    ecut           = slice%ecut
-    paral_kgb      = slice%paral_kgb
-    spacecom       = slice%spacecom
-    me_g0          = slice%me_g0
-    me_g0_fft      = slice%me_g0_fft
-    eigenproblem   = slice%eigenproblem
-    paw            = slice%paw
-    comm_rows      = slice%comm_rows
-    comm_cols      = slice%comm_cols
-    nbdbuf         = slice%nbdbuf
-    oracle         = slice%oracle
-    oracle_factor  = slice%oracle_factor
-    oracle_min_occ = slice%oracle_min_occ
-
-    !gpu_option       = slice%gpu_option
-    ! FIXME forced CPU, to be done in GPU
-    gpu_option = ABI_GPU_DISABLED
-    gpu_kokkos_nthrd = slice%gpu_kokkos_nthrd
-    gpu_thread_limit = slice%gpu_thread_limit
-
-    ! ==================== INITIALIZATION ===========================
-    
-    ! Initialize DOS workspace
-    write(std_out,'(a,i0)') '-----> allocate chebfi for DOS, bandpp=', bandpp
-    call chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp,&
-&                    mdeg_filter,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,&
-&                    comm_cols,oracle,oracle_factor,oracle_min_occ,gpu_option,&
-&                    gpu_kokkos_nthrd=gpu_kokkos_nthrd,gpu_thread_limit=gpu_thread_limit)
-
-    ! Number of vectors per MPI process
-    nrows = neigenpairs
-    if (paral_kgb == 1) nrows = bandpp
-
-    ! Initialize result space eigenvalues and residuals before slicing, MPI distributed
-    call xg_init(Eig0_XW,space_res,rows=nrows,cols=1,comm=comm_cols,gpu_option=gpu_option)
-    call xg_init(Res0_XW,SPACE_R,rows=nrows,cols=1,comm=comm_cols,gpu_option=gpu_option)
-    Eig0_paral = Eig0_XW%self
-    Res0_paral = Res0_XW%self
-
-    ! ======================== RUN ===============================
-
-    ! Compute Rayleigh values and residuals of all bands (using MPI)
-    call chebfi_RayleighValues(chebfi,X0,Eig0_paral,Res0_paral,getAX_BX,nspinor)
-    
-    ! Debug; problem is -7 is too low
-    !write(std_out,*) 'Rayleigh values (before MPI row coms)'
-    !call xgBlock_print(Eig0_paral, std_out)
-
-    ! ===================== MPI ROW COMS =========================
-
-    ! Store to slice object without distribution across MPI processes
-    ! All processors have all eigenvalues and residuals
-    ! FIXME remove if condition after partialcopy is debugged on GPU
-    !if (gpu_option==ABI_GPU_OPENMP) then
-    !    write(std_out,'(a)') 'Copy (Eig0,Res0) from gpu'
-    !    call xgBlock_copy_from_gpu(Eig0_paral)
-    !    call xgBlock_copy_from_gpu(Res0_paral)
-    !end if
-    if (xmpi_comm_size(comm_cols)>1) then
-
-        ! Initialize entire array with zeros, every MPI contains this array
-        call xgBlock_zero(slice%Eig0%self)
-        call xgBlock_zero(slice%Res0%self)
-
-        ! Recover rank of current MPI process
-        my_rank = xmpi_comm_rank(comm_cols)
-        shift_row = my_rank * bandpp
-
-        ! Reshape in order to use blockCopy on columns (requires same number of rows)
-        call xgBlock_reshape(Eig0_paral,(/1,bandpp/))     
-        call xgBlock_reshape(Res0_paral,(/1,bandpp/))     
- 
-        ! Fill entire array with entry=(current MPI part | zero otherwise)
-        ! FIXME replace blockCopy by a simple xgBlock_copy
-        call slice_blockCopy(Eig0_paral,slice%Eig0%self,1,shift_row+1,bandpp,shift_row+bandpp)
-        call slice_blockCopy(Res0_paral,slice%Res0%self,1,shift_row+1,bandpp,shift_row+bandpp)
-        
-        ! Sum entire object across MPI, every MPI contains the same entire array
-        call xgBlock_mpi_sum(slice%Eig0%self,comm=comm_cols)
-        call xgBlock_mpi_sum(slice%Res0%self,comm=comm_cols)
-
-        ! Undo reshape
-        call xgBlock_reshape(slice%Eig0%self,(/neigenpairs,1/))     
-        call xgBlock_reshape(slice%Res0%self,(/neigenpairs,1/))
-
-    else
-        call xgBlock_copy(Eig0_paral,slice%Eig0%self)
-        call xgBlock_copy(Res0_paral,slice%Res0%self)
-    end if
-    
-    ! Debug; problem is -7 is too low
-    !write(std_out,*) 'Rayleigh values (after MPI row coms)'
-    !call xgBlock_print(slice%Eig0%self, std_out)
-
-    ! Free workspace
-    write(std_out,'(a)') 'free chebfi for DOS <-----'
-    call chebfi_free(chebfi)
-    call xg_free(Eig0_XW)
-    call xg_free(Res0_XW)
- 
-end subroutine slice_dos
 !!***
 
 !----------------------------------------------------------------------
