@@ -811,7 +811,7 @@ contains
  dimlmn=0  ! Type-sorted cprj
  if (one_atom) then
    itypat=typat(iatom)
-   dimlmn(ia+1:ia+nattyp(itypat))=count(indlmn_atm(3,:,itypat)>0)
+   dimlmn(1:nattyp(itypat))=count(indlmn_atm(3,:,itypat)>0)
  else
    ia=0
    do itypat=1,ntypat0
