@@ -154,7 +154,7 @@ module m_gwr
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv, vdotw
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa, string_in, yesno
- use m_sort,          only : sort_dp, sort_rvals
+ use m_sort,          only : sort_dp, sort_rvals, sort_gvecs
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
@@ -213,7 +213,7 @@ module m_gwr
    ! Index of g=0 in gvec.
 
    logical :: kin_sorted
-   ! True if gvec are sorted by |q+g|^2/2
+   ! True if gvec are sorted by |k+g|^2/2
 
    integer,allocatable :: gvec(:,:)
    ! (3, npw)
@@ -245,7 +245,9 @@ module m_gwr
    ! Copy object.
 
    procedure :: to_scbox => desc_to_scbox
-   ! Copy object.
+   ! Insert cg_k array defined on the k-centered g-sphere with npw vectors inside the FFT box.
+
+   !procedure :: get_npw_from_nband => desc_get_npw_from_nband
 
    procedure :: get_vc_sqrt => desc_get_vc_sqrt
    ! Compute square root of vc(q,g).
@@ -721,8 +723,10 @@ module m_gwr
    ! Reconstruct the Green's functions in the BZ from the IBZ.
 
    procedure :: gk_to_scbox => gwr_gk_to_scbox
+   !  Insert G_k(g',r) in the FFT box of the supercell: k+g' index.
 
    procedure :: wcq_to_scbox => gwr_wcq_to_scbox
+   !  Insert W_q(g',r) in the FFT box of the supercell: q+g' index.
 
    procedure :: get_myk_green_gpr => gwr_get_myk_green_gpr
     ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by this MPI proc for given spin and tau.
@@ -1558,7 +1562,7 @@ end block
 
  do my_iki=1,gwr%my_nkibz
    ik_ibz = gwr%my_kibz_inds(my_iki); kk_ibz = gwr%kibz(:, ik_ibz)
-   call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, dtset%ecutwfn, gwr)
+   call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, dtset%ecutwfn, gwr, kin_sorted=.False.)
  end do
 
  ABI_MALLOC(gwr%tchi_desc_qibz, (gwr%nqibz))
@@ -2401,21 +2405,23 @@ subroutine gwr_build_green(gwr, free_ugb)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nb_occ
- real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k
- logical :: print_time
+ integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nb_occ, ig_glob, ig_loc, jg_loc, nbsum
+ real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k, kg2, k0_s, rfact, delta_ene, k0_2, ekin_nband
+ logical :: print_time, have_item
  character(len=500) :: msg
  real(dp) :: gt_rfact
  type(__slkmat_t), target :: work_gb, green
 !arrays
  integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
- real(dp) :: tsec(2)
+ real(dp) :: tsec(2) , kk_ibz(3), kg(3)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:)
+ real(dp),allocatable :: weights_gvec(:)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
  call timab(1922, 1, tsec)
  units = [std_out, ab_out]
+ nbsum = gwr%dtset%nband(1)
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 1) then
@@ -2446,6 +2452,7 @@ subroutine gwr_build_green(gwr, free_ugb)
      print_time = gwr%comm%me == 0 .and. (my_iki < LOG_MODK .or. mod(my_iki, LOG_MODK) == 0)
      if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
      ik_ibz = gwr%my_kibz_inds(my_iki)
+     kk_ibz = gwr%kibz(:, ik_ibz)
      associate (ugb_ks => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
      npwsp = desc_k%npw * gwr%nspinor
 
@@ -2491,6 +2498,23 @@ subroutine gwr_build_green(gwr, free_ugb)
          !end if
          call slk_pgemm("N", "C", work_gb, isgn * cone_gw, work_gb, czero_gw, green, ija=ija, ijb=ijb)
 
+         if (ipm == 1 .and. gwr%dtset%userie == 1) then
+           call wrtout(std_out, "Entering PLANE WAVE SUBSTITUTION")
+           call get_weights(desc_k, kk_ibz, gwr%cryst, gwr%dtset%nband(1), ekin_nband, weights_gvec)
+           rfact = one / (gwr%nkbz * gwr%cryst%ucvol)
+           delta_ene = ekin_nband - qp_eig(nbsum, ik_ibz, spin) + qp_eig(1, ik_ibz, spin)
+           k0_2 = two * delta_ene
+           do ig_glob=1, desc_k%npw
+             call green%glob2loc(ig_glob, ig_glob, ig_loc, jg_loc, have_item); if (.not. have_item) cycle
+             kg = kk_ibz + desc_k%gvec(:, ig_glob)
+             kg2 = two_pi**2 * dot_product(kg, matmul(gwr%cryst%gmet, kg))
+             ! Add diagonal term. Eqs 4.2, 4.3
+             green%buffer_cplx(ig_loc, jg_loc) = green%buffer_cplx(ig_loc, jg_loc) + rfact * &
+                weights_gvec(ig_glob) * exp(-half * gwr%tau_mesh(itau) * k0_2) * exp(-half * gwr%tau_mesh(itau) * kg2)
+           end do
+           ABI_SFREE(weights_gvec)
+         end if
+
          ! Redistribute data.
          call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green)
        end do ! ipm
@@ -2513,6 +2537,62 @@ subroutine gwr_build_green(gwr, free_ugb)
 
  call cwtime_report(" gwr_build_green:", cpu, wall, gflops)
  call timab(1922, 2, tsec)
+
+contains
+
+subroutine get_weights(desc, kpoint, cryst, nband, ekin_nband, weights)
+ type(desc_t),intent(in) :: desc
+ real(dp),intent(in) :: kpoint(3)
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nband
+ real(dp),intent(out) :: ekin_nband
+ real(dp),allocatable,intent(out) :: weights(:)
+
+!Local variables-------------------------------
+ integer :: ig, n1, n2
+ integer,allocatable :: out_gvec(:,:), iperm(:)
+ real(dp),allocatable :: ekin(:)
+! *************************************************************************
+
+ ABI_CHECK_ILEQ(nband, desc%npw, "nband > desc%npw")
+ ABI_CHECK(.not. desc%kin_sorted, "G-vectors should not be stored by kinetic energy!")
+
+ ! Sort gvec by |k+g|
+ call sort_gvecs(desc%npw, kpoint, cryst%gmet, desc%gvec, out_gvec=out_gvec, iperm=iperm)
+
+ ABI_MALLOC(ekin, (desc%npw))
+ do ig=1,desc%npw
+   ekin(ig) = two_pi**2 * dot_product(kpoint + out_gvec(:,ig), matmul(cryst%gmet, kpoint + out_gvec(:,ig)))
+ end do
+ ekin_nband = ekin(nband)
+
+ do ig=nband, desc%npw
+   if (abs(ekin(ig) - ekin_nband) > tol6) exit
+ end do
+ n1 = ig -1
+
+ do ig=nband, 1, -1
+   if (abs(ekin(ig) - ekin_nband) > tol6) exit
+ end do
+ n2 = ig + 1
+ ABI_FREE(ekin)
+
+ ! Eq 4.3
+ ABI_MALLOC(weights, (desc%npw))
+ do ig=1, desc%npw
+   if (ig <= n1) then
+     weights(ig) = zero
+   else if (ig >  n2) then
+     weights(ig) = one
+   else
+     weights(ig) = one - ((nband - n1) * one / (n2 - n1))
+   end if
+ end do
+
+ ABI_FREE(out_gvec)
+ ABI_FREE(iperm)
+
+end subroutine get_weights
 
 end subroutine gwr_build_green
 !!***
@@ -5195,7 +5275,6 @@ subroutine gwr_build_wc(gwr)
  integer :: units(2)
  real(dp) :: qq_ibz(3), tsec(2)
  complex(dpc) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
-
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -5449,8 +5528,8 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: sigxc_rw_diag(gwr%nwr, gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  type(sigma_pade_t) :: spade
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
-
 ! *************************************************************************
+
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1925, 1, tsec)
 
@@ -6373,7 +6452,6 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, sigm_pm)
 !Local variables-------------------------------
  integer :: ipm, ir1, il_r1 !, ierr
  complex(gwpc),allocatable :: loc_cwork(:)
-
 ! *************************************************************************
 
  ! (r',r) with r' local and r-index PBLAS-distributed.
@@ -7087,7 +7165,6 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
  complex(gwpc),contiguous,pointer :: cfft_ptr(:,:,:,:)
  !real(dp) :: tsec(2) !, cpu, wall, gflops
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  !call timab(1931, 1, tsec)
