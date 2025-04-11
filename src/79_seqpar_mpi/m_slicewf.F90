@@ -37,6 +37,7 @@ module m_slicewf
  use m_time
 
  use m_slice
+ use m_cgslice ! TODO
  use m_chebfi
  use m_chebfi2
  use m_invovl
@@ -221,8 +222,12 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
+    ! TODO the xgBlocks we transpose distribute etc should
+    ! point to cgSliced, eigSliced, residSliced
+
  call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
 
+ ! notice this is not distributed with comm. So every process has this entire
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=gpu_option)
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
@@ -232,8 +237,6 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
      me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
      l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
      gpu_thread_limit=dtset%gpu_thread_limit)
-
- call slice_getSpectrum(slice,xgx0,xgeigen,xgresidu)
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
@@ -254,12 +257,22 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
     call xgBlock_set_gpu_option(xgresidu,ABI_GPU_DISABLED)
  end if
 
- call slice_distributeSpectrum(slice,dtset%spectral_cut,dtset%paral_slice)
- 
+ call cgSliced_init(cgSliced,)
+
+ call cgSliced_buildFrom(cgSliced,xgx0,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+
 !################    RUUUUUUUN    #####################################
 !######################################################################
  
- call slice_run(slice,xgx0,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+ call slice_init(slice)
+
+ call slice_run(slice,cgSliced%X,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+
+ call slice_free(slice)
+
+
+ call cgSliced_mergeTo(cgSliced,xgx0,xgeigen,xgresidu)
+
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)

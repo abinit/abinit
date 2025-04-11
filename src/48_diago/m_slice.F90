@@ -74,6 +74,9 @@ module m_slice
     !-------------------------------------------------
     type, private :: sliceTasks_t
 
+        ! Slice parameter object
+        type(slice_t), allocatable :: slice
+
         ! MPI-related
         integer :: ntasks        ! number of tasks (=slices)
         integer :: nprocs_tot    ! total number of available resources (process)
@@ -88,8 +91,8 @@ module m_slice
         ! Flags
         logical :: on_host = .false.
         logical :: on_device = .false.
-        logical :: is_row = .false.
-        logical :: is_col = .false.
+        logical :: use_blockrows = .false.
+        logical :: use_blockcols = .false.
 
         ! Options
         integer :: resource_allocation
@@ -102,6 +105,28 @@ module m_slice
         integer, allocatable :: blockrows_me(:)  ! nrow of linalg-blocks in my task
 
     end type sliceTasks_t
+
+    ! Public 'cgSliced' datatype
+    ! cg does not have a distribution/structure suitable for parallel spectrum slicing
+    ! cgSliced is a version of cg, distributed correctly and free of data overlap
+    !-------------------------------------------------
+    type, public :: cgSliced_t
+
+        ! MPI-related
+        integer :: spacecom
+        type(sliceTasks_t), private :: schedule
+
+        ! Pointers to existing memory
+        type(xgBlock_t) :: Xblockcols     ! if use_blockcols=.true.
+        type(xgBlock_t) :: Xblockrows     ! if use_blockrows=.true.
+        
+        ! Proper memory (extension of cg)
+        type(xg_t) :: xgXblockrows
+        
+        ! Transposer
+        type(xgTransposer_t) :: xgTransposerX
+    
+    end type cgSliced_t
 
     ! Public 'slice' datatype
     ! [IML 9/4 work in progress] I don't think this is necessary
@@ -152,11 +177,6 @@ module m_slice
         real(dp) :: tolerance                    ! Tolerance on the residu to stop the minimization
         real(dp) :: ecut                         ! Ecut used for Polynomial filtering
        
-        ! Switches that allow to follow the state
-        logical :: buffer_mem = .false.
-        logical :: buffer_rows = .false.
-        logical :: buffer_cols = .false.
-
         ! Variables deactivated for chebfi
         integer :: oracle = 0                        
         integer :: nbdbuf = 0                       
@@ -231,11 +251,13 @@ module m_slice
 
     ! Public methods associated to 'slice' datatype
     !-------------------------------------------------
+    public :: cgSliced_init                     ! initialize cgSliced data type object
+    public :: cgSliced_buildFrom                ! build cgSliced from cg
+    public :: cgSliced_mergeTo                  ! merge cgSliced to cg
+    public :: cgSliced_free                     ! free cgSliced data type object
     public :: slice_init                        ! initiate slice data type object
     public :: slice_run                         ! diagonalize individual slices
-    public :: slice_free                        ! free     slice data type object
-    public :: slice_getSpectrum                 ! compute spectrum as Rayleigh quotients
-    public :: slice_distributeSpectrum          ! distribute spectral slices to processes
+    public :: slice_free                        ! free slice data type object
     public :: slice_mergeConverged              ! merge converged slices by removing duplicates
     public :: slice_unitTest                    ! used for debugging
 
@@ -243,13 +265,358 @@ module m_slice
 !=====================================================================
 !!***
 
+!!****f* m_slice/cgSliced_init
+!! NAME
+!! cgSliced_init
+!!
+!! FUNCTION
+!! Initialize a 'cgSliced' datastructure. See chebfi_init().
+!!
+!! SOURCE
+
+subroutine cgSliced_init(cgSliced,neigenpairs,spacedim,tolerance,ecut,&
+        paral_kgb,paral_slice,bandpp,space,spacecom,me_g0,me_g0_fft,paw,&
+        comm_rows,comm_cols,nslice,ramp,spectral_cut,gpu_option,&
+        gpu_kokkos_nthrd,gpu_thread_limit)
+
+    implicit none
+
+    ! Arguments ------------------------------------
+    integer      , intent(in   ) :: bandpp
+    integer      , intent(in   ) :: npband
+    integer      , intent(in   ) :: nslice
+    integer      , intent(in   ) :: eigenProblem
+    integer      , intent(in   ) :: me_g0
+    integer      , intent(in   ) :: me_g0_fft
+    integer      , intent(in   ) :: neigenpairs
+    integer      , intent(in   ) :: mdeg_filter
+    integer      , intent(in   ) :: comm_cols
+    integer      , intent(in   ) :: comm_rows
+    integer      , intent(in   ) :: paral_kgb
+    integer      , intent(in   ) :: paral_slice
+    integer      , intent(in   ) :: space
+    integer      , intent(in   ) :: spacecom
+    integer      , intent(in   ) :: spacedim
+    integer      , intent(in   ) :: spectral_cut
+    integer      , intent(in   ) :: gpu_option
+    logical      , intent(in   ) :: paw
+    real(dp)     , intent(in   ) :: ramp
+    real(dp)     , intent(in   ) :: ecut
+    real(dp)     , intent(in   ) :: tolerance
+    type(slice_t), intent(inout) :: slice
+    integer      , intent(in   ), optional :: gpu_kokkos_nthrd
+    integer      , intent(in   ), optional :: gpu_thread_limit
+
+    ! *********************************************************************
+
+    slice%space        = space
+    slice%neigenpairs  = neigenpairs
+    slice%spacedim     = spacedim
+    slice%tolerance    = tolerance
+    slice%ecut         = ecut
+    slice%paral_kgb    = paral_kgb
+    slice%paral_slice  = paral_slice
+    slice%comm_cols    = comm_cols
+    slice%bandpp       = bandpp
+    slice%comm_rows    = comm_rows
+    slice%mdeg_filter  = mdeg_filter
+    slice%spacecom     = spacecom
+    slice%eigenProblem = eigenProblem
+    slice%me_g0        = me_g0
+    slice%me_g0_fft    = me_g0_fft
+    slice%paw          = paw
+    slice%gpu_option   = gpu_option
+    slice%nslice       = nslice
+    slice%npband       = xmpi_comm_size(comm_cols)
+    slice%ramp         = ramp
+    slice%spectral_cut = spectral_cut
+    slice%nband_ovlp   = neigenpairs ! see initExtended
+    slice%nbdbuf       = nbdbuf
+
+    slice%gpu_kokkos_nthrd = 1
+    if (present(gpu_kokkos_nthrd)) slice%gpu_kokkos_nthrd = gpu_kokkos_nthrd
+    slice%gpu_thread_limit = 0
+    if (present(gpu_thread_limit)) slice%gpu_thread_limit = gpu_thread_limit
+
+    ! Space of eigenvalues
+    if (space==SPACE_C) then
+        slice%space_res = SPACE_C
+    else if (space==SPACE_CR) then
+        slice%space_res = SPACE_R
+    end if
+
+end subroutine cgSliced_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/cgSliced_buildFrom
+!! NAME
+!! cgslice_buildFrom
+!! 
+!! FUNCTION
+!! Split then distribute vectors X across processes.
+!! Then create extended memory buffers and distribute them.
+!! 
+!! SOURCE
+
+subroutine cgSlice_divide(cgslice,X,getAX_BX,nspinor)
+
+    implicit none
+
+    ! Arguments    
+    type(cgSlice_t), intent(inout) :: cgslice
+    type(xgBlock_t), intent(inout) :: X0
+    integer, intent(in) :: nspinor
+    interface
+        subroutine getAX_BX(X,AX,BX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+            type(xgBlock_t), intent(inout) :: BX
+        end subroutine getAX_BX
+    end interface
+
+    ! Local variables
+    integer :: resource_allocation
+    integer :: nrows_total
+    integer :: spacecom
+    ! Arrays
+    integer, pointer :: slice_ncols(:) => null()
+    integer, pointer :: slice_degrees(:) => null()
+    
+    ! *********************************************************************
+
+    ! Compute ordered Rayleigh quotients and residuals
+    call cgslice_computeSpectrum(cgslice,X,getAX_BX,nspinor)
+
+    ! Compute nband per slice
+    call slice_cutSpectrum(slice,pband_ptr,spectral_cut)
+
+    ! TODO actually store these parameters into the sliceTasks object
+
+    nrows_total = slice%total_spacedim
+    spacecom = slice%spacecom
+
+    if (paral_slice==0) then
+        ABI_ERROR("Sequential slices not implemented")
+    else if (paral_slice==1) then
+        resource_allocation = FAIR_BANDPP
+    else if (paral_slice==2) then
+        resource_allocation = FAIR_BANDPP_WDEG
+    end if
+
+    ! Compute parameters of slice tasks
+    ! TODO associate schedule into slice in some way?
+    ! TODO free scheduler at some point
+    slice_ncols => slice%slice_ncols
+    slice_degrees => slice%slice_degrees
+    call sliceTasks_init(schedule,slice_ncols,slice_degrees,nrows_total,&
+        spacecom,resource_allocation)
+
+    ! Create the extended workspaces on CPU
+    call slice_initExtended(slice,pband_ptr)
+
+    ! Distribute extended space across MPI processes
+    call slice_distributeExtended(slice)
+
+
+
+end subroutine cgslice_divide
+!!***
+
+!! FUNCTION
+!! Compute ordered Rayleigh quotients and residuals
+!! TODO IL 11/4 restore chebfi from develop
+!! this is a new version without chebfi
+
+subroutine cgslice_computeSpectrum(cgslice,DivResults)
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp), intent(inout) :: maxeig
+ real(dp), intent(inout) :: mineig
+ type(chebfi_t), intent(inout) :: chebfi
+ type(xgBlock_t), intent(inout) :: DivResults
+
+!Local variables-------------------------------
+!scalars
+ type(xg_t) :: DivResults ! TODO move out, this should be stored in cgslice_divide
+ type(xg_t)::Results1
+ type(xg_t)::Results2
+ type(xgBlock_t) :: xXColsRows
+ type(xgBlock_t) :: xAXColsRows
+ type(xgBlock_t) :: xBXColsRows
+ type(xgTransposer_t) :: xgTransposerX
+ type(xgTransposer_t) :: xgTransposerAX
+ type(xgTransposer_t) :: xgTransposerBX
+!arrays
+ integer :: maxeig_pos(2)
+ integer :: mineig_pos(2)
+ integer :: space_res
+
+! *********************************************************************
+
+ if (chebfi%space==SPACE_C) then
+   space_res = SPACE_C
+ else if (chebfi%space==SPACE_CR) then
+   space_res = SPACE_R
+ else
+   ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
+ end if
+
+ ! DivResults will hold eig
+ if (chebfi%paral_kgb == 0) then
+   call xg_init(DivResults, space_res, neigenpairs, 1, gpu_option=chebfi%gpu_option)
+ else
+   call xg_init(DivResults, space_res, bandpp, 1, gpu_option=chebfi%gpu_option)
+ end if
+
+ ! X_next is another temporary space
+ if (chebfi%paral_kgb == 0) then
+   chebfi%total_spacedim = spacedim
+   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option) !regular arrays
+   call xg_setBlock(chebfi%X_NP, chebfi%X_next,spacedim, neigenpairs)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_prev,spacedim, neigenpairs, fcol=neigenpairs+1)
+ else
+   total_spacedim = spacedim
+   call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
+   chebfi%total_spacedim = total_spacedim
+   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,me_g0=chebfi%me_g0_fft,&
+     & gpu_option=chebfi%gpu_option) !transposed arrays
+   call xg_setBlock(chebfi%X_NP, chebfi%X_next, total_spacedim, chebfi%bandpp)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, total_spacedim, chebfi%bandpp, fcol=chebfi%bandpp+1)
+ end if
+
+ ! First transpose existing cg
+ if (chebfi%paral_kgb == 1) then
+
+   call timab(tim_transpose,1,tsec)
+   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
+     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+     gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit)
+
+   call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
+   call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
+
+   chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+   chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+   chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+   call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
+   chebfi%xgTransposerAX%state = STATE_COLSROWS
+   chebfi%xgTransposerBX%state = STATE_COLSROWS
+   ABI_NVTX_END_RANGE()
+   call timab(tim_transpose,2,tsec)
+ else
+   call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)   !use xXColsRows instead of X notion
+   call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
+   call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
+ end if
+
+    ! Now apply AX BX (colsrows representation)
+ call timab(tim_getAX_BX,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
+ call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
+ call xgBlock_zero_im_g0(chebfi%xAXColsRows)
+ call xgBlock_zero_im_g0(chebfi%xBXColsRows)
+ ABI_NVTX_END_RANGE()
+ call timab(tim_getAX_BX,2,tsec)
+
+ ! Now we are in linalg
+!Doesnt work with npfft (ncols=1 in the formula below) ???
+ if (chebfi%paral_kgb == 0) then
+   call xg_init(Results1, space_res, chebfi%neigenpairs, 1, gpu_option=chebfi%gpu_option)
+   call xg_init(Results2, space_res, chebfi%neigenpairs, 1, gpu_option=chebfi%gpu_option)
+ else
+   call xg_init(Results1, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
+   call xg_init(Results2, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
+ end if
+
+ ! <Psi|H|Psi>
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
+
+ ! <Psi|S|Psi>
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self, comm_loc=xmpi_comm_null)
+
+ ! eig = <Psi|H|Psi> / <Psi|S|Psi>
+ call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
+   & maxeig, maxeig_pos, mineig, mineig_pos)
+
+! Restore cg to linalg representation
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+ if (chebfi%paral_kgb == 1) then
+   call xmpi_barrier(chebfi%spacecom)
+   call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
+ end if
+ ABI_NVTX_END_RANGE()
+
+   ! In order to avoid transposing AX,BX, 
+   ! we compute residuals in colsrows representation
+    if (chebfi%paw) then
+        call xgBlock_copy(chebfi%xBXColsRows,chebfi%X_next)     ! X_next = S|Psi>
+    else
+        call xgBlock_copy(chebfi%xXColsRows,chebfi%X_next)      ! X_next = |Psi>
+    end if
+    ! TODO IL 20/01/2025 ymax has not been tested on GPU
+    call xgBlock_ymax(chebfi%X_next,DivResults,0,1)             ! X_next = - eig * S|Psi>
+    call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)          ! X_next = H|Psi> - eig * S|Psi>
+    call xgBlock_colwiseNorm2(chebfi%X_next,residu,comm_loc=xmpi_comm_null) ! resid = |X_next|^2
+
+   ! This requires communicating for gathering all thetas
+    if (xmpi_comm_size(comm_cols)>1) then
+
+        ! Initialize entire array with zeros, every MPI contains this array
+        call xgBlock_zero(slice%Eig0%self)
+        call xgBlock_zero(slice%Res0%self)
+
+        ! Recover rank of current MPI process
+        my_rank = xmpi_comm_rank(comm_cols)
+        shift_row = my_rank * bandpp
+
+        ! Reshape in order to use blockCopy on columns (requires same number of rows)
+        call xgBlock_reshape(Eig0_paral,(/1,bandpp/))     
+        call xgBlock_reshape(Res0_paral,(/1,bandpp/))     
+ 
+        ! Fill entire array with entry=(current MPI part | zero otherwise)
+        ! FIXME replace blockCopy by a simple xgBlock_copy
+        call slice_blockCopy(Eig0_paral,slice%Eig0%self,1,shift_row+1,bandpp,shift_row+bandpp)
+        call slice_blockCopy(Res0_paral,slice%Res0%self,1,shift_row+1,bandpp,shift_row+bandpp)
+        
+        ! Sum entire object across MPI, every MPI contains the same entire array
+        call xgBlock_mpi_sum(slice%Eig0%self,comm=comm_cols)
+        call xgBlock_mpi_sum(slice%Res0%self,comm=comm_cols)
+
+        ! Undo reshape
+        call xgBlock_reshape(slice%Eig0%self,(/neigenpairs,1/))     
+        call xgBlock_reshape(slice%Res0%self,(/neigenpairs,1/))
+
+    else
+        call xgBlock_copy(Eig0_paral,slice%Eig0%self)
+        call xgBlock_copy(Res0_paral,slice%Res0%self)
+    end if
+
+    ! Free memory
+    call xg_free(Results1)
+    call xg_free(Results2)    
+    call chebfi_free(chebfi)
+    call xg_free(Eig0_XW)
+    call xg_free(Res0_XW)
+
+end subroutine chebfi_rayleighRitzQuotients
+
+end subroutine cgslice_computeSpectrum
+
+!----------------------------------------------------------------------
+
 !!****f* m_slice/slice_init
 !! NAME
 !! slice_init
 !!
 !! FUNCTION
-!! Initialize a 'slice' datastructure.
-!! See chebfi_init.
+!! Initialize a 'slice' datastructure. See chebfi_init().
 !!
 !! SOURCE
 
@@ -566,68 +933,6 @@ subroutine slice_dos(slice,X0,getAX_BX,nspinor)
     call xg_free(Res0_XW)
  
 end subroutine slice_dos
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_distributeSpectrum
-!! NAME
-!! slice_distributeSpectrum
-!! 
-!! FUNCTION
-!! Split then distribute spectrum across processes.
-!! Then create extended memory buffers and distribute them.
-!! 
-!! SOURCE
-
-subroutine slice_distributeSpectrum(slice,spectral_cut,paral_slice)
-
-    implicit none
-
-    ! Arguments
-    type(slice_t), target, intent(inout) :: slice
-    type(sliceTasks_t), intent(inout) :: schedule
-    integer, intent(in) :: paral_slice
-
-    ! Local variables
-    integer :: resource_allocation
-    integer :: nrows_total
-    integer :: spacecom
-    ! Arrays
-    integer, pointer :: slice_ncols(:) => null()
-    integer, pointer :: slice_degrees(:) => null()
-    
-    ! *********************************************************************
-
-    ! Compute nband per slice
-    call slice_cutSpectrum(slice,pband_ptr,spectral_cut)
- 
-    nrows_total = slice%total_spacedim
-    spacecom = slice%spacecom
-
-    if (paral_slice==0) then
-        ABI_ERROR("Sequential slices not implemented")
-    else if (paral_slice==1) then
-        resource_allocation = FAIR_BANDPP
-    else if (paral_slice==2) then
-        resource_allocation = FAIR_BANDPP_WDEG
-    end if
-
-    ! Compute parameters of slice tasks
-    ! TODO associate schedule into slice in some way?
-    ! TODO free scheduler at some point
-    slice_ncols => slice%slice_ncols
-    slice_degrees => slice%slice_degrees
-    call sliceTasks_init(schedule,slice_ncols,slice_degrees,nrows_total,&
-        spacecom,resource_allocation)
-
-    ! Create the extended workspaces on CPU
-    call slice_initExtended(slice,pband_ptr)
-
-    ! Distribute extended space across MPI processes
-    call slice_distributeExtended(slice)
-
-end subroutine slice_distributeSpectrum
 !!***
 
 !----------------------------------------------------------------------
@@ -2316,11 +2621,12 @@ subroutine sliceTasks_init(schedule,slice_sizes,slice_degrees,nrows_tot,spacecom
     schedule%nrows_tot = nrows_tot
     schedule%resource_allocation = resource_allocation
 
+    ! Initialize MPI distribution flags to linalg (no transpose yet)
+    schedule%use_blockrows = .true.
+    schedule%use_blockcols = .false.
+
     ! Set CPU/GPU flags
-    call sliceTasks_queryTarget(env)
-   
-    ! Query colsrows/linalg representation (TODO)
-    call sliceTasks_queryTranspose(env)
+    call sliceTasks_queryTarget(schedule)
 
     if(.not.allocated(schedule%task_ncols)) ABI_MALLOC(schedule%task_ncols, (ntasks))
     if(.not.allocated(schedule%task_nprocs)) ABI_MALLOC(schedule%task_nprocs, (ntasks))
@@ -2352,7 +2658,7 @@ subroutine sliceTasks_init(schedule,slice_sizes,slice_degrees,nrows_tot,spacecom
 
     ! Deduce band capacity per process (=bandpp) on individual slice
     ! a process only has the slice that corresponds to it
-    task_me = sliceTasks_queryTask(env)
+    task_me = sliceTasks_queryTask(schedule)
     ncols_me = schedule%task_ncols(task_me)
     nprocs_me = schedule%task_nprocs(task_me)
 
@@ -2385,7 +2691,7 @@ end subroutine sliceTasks_init
 !! NAME
 !! sliceTasks_free
 
-subroutine sliceTasks_free(env)
+subroutine sliceTasks_free(schedule)
 
     implicit none 
 
@@ -2406,7 +2712,7 @@ end subroutine sliceTasks_free
 !! NAME
 !! sliceTasks_queryRank
 
-integer function sliceTasks_queryRank(env) result(rank_me)
+integer function sliceTasks_queryRank(schedule) result(rank_me)
 
     implicit none
     type(sliceTasks_t), intent(in) :: schedule
@@ -2422,7 +2728,7 @@ end function sliceTasks_queryRank
 !! NAME
 !! sliceTasks_queryTask
 
-integer function sliceTasks_queryTask(env) result(task_me)
+integer function sliceTasks_queryTask(schedule) result(task_me)
 
     type(sliceTasks_t), intent(in) :: schedule
     integer :: rank_me
@@ -2444,25 +2750,25 @@ end function sliceTasks_queryTask
 !! 
 !! SOURCE
 
-subroutine sliceTasks_queryTarget(schedule,use_host,use_device)
+subroutine sliceTasks_queryTarget(schedule,on_host,on_device)
 
     implicit none
     type(sliceTasks_t), intent(inout) :: schedule
-    logical, optional, intent(inout) :: use_host
-    logical, optional, intent(inout) :: use_device
-    logical :: use_host_
-    logical :: use_device_
+    logical, optional, intent(inout) :: on_host
+    logical, optional, intent(inout) :: on_device
+    logical :: on_host_
+    logical :: on_device_
     integer :: device_id
 
     device_id = xomp_get_device_num()
-    use_host_ = (device_id < 1) ! outside target (-1), inside target host (0)
-    use_device_ = (device_id > 0) ! inside target not host (device number)
+    on_host_ = (device_id < 1) ! outside target (-1), inside target host (0)
+    on_device_ = (device_id > 0) ! inside target not host (device number)
 
-    schedule%use_host = use_host_
-    schedule%use_device = use_device_
+    schedule%on_host = on_host_
+    schedule%on_device = on_device_
 
-    if (present(use_host)) use_host = use_host_
-    if (present(use_device)) use_device = use_device_
+    if (present(on_host)) on_host = on_host_
+    if (present(on_device)) on_device = on_device_
 
 end subroutine sliceTasks_queryTarget
 !***
