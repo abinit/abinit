@@ -107,6 +107,8 @@ module m_slice
     end type sliceTasks_t
 
     ! Public 'cgSliced' datatype
+    ! Priority IL 11/4 
+    ! TODO rename cgslice to xgXslice or something. The structure is xg not cg!!
     ! cg does not have a distribution/structure suitable for parallel spectrum slicing
     ! cgSliced is a version of cg, distributed correctly and free of data overlap
     !-------------------------------------------------
@@ -399,6 +401,10 @@ subroutine cgSlice_divide(cgslice,X,getAX_BX,nspinor)
     type(xg_t) :: eigen0
     type(xg_t) :: resid0
     ! Arrays
+    real(dp), pointer :: theta_(:,:)
+    real(dp), pointer :: resid_(:,:)
+    real(dp), allocatable, target :: theta(:)
+    real(dp), allocatable, target :: resid(:)
     integer, pointer :: slice_ncols(:) => null()
     integer, pointer :: slice_degrees(:) => null()
     
@@ -421,14 +427,34 @@ subroutine cgSlice_divide(cgslice,X,getAX_BX,nspinor)
     ! juste du maxeig, mineig et mineig_pos pour faire resid(mineig_pos)
     ! après il faut aussi faire la permutation du X SUR CPU en LINALG!!!!
 
-    ! Map to fortran arrays
+    ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reshape(eigen0%self, (/ncols_tot,1/))     
     call xgBlock_reshape(resid0%self, (/ncols_tot,1/))
 
-    ! normally here we should move some data to CPU
+    call xgBlock_reverseMap(eigen0%self,theta_,rows=1,cols=ncols_tot)
+    call xgBlock_reverseMap(resid0%self,resid_,rows=1,cols=ncols_tot)
 
+    ABI_MALLOC(theta, (ncols_tot))
+    ABI_MALLOC(resid, (ncols_tot))
+    theta(1:ncols_tot) = theta_(1,1:ncols_tot)
+    resid(1:ncols_tot) = resid_(1,1:ncols_tot)
+
+    ! Sort thetas in increasing order and store permutation
+    call sort_dp(neigenpairs,theta,pband,tol12)
+
+    !write(std_out,*) 'Rayleigh Values after sort:'
+    !write(std_out,*) theta(:)
+ 
+    ! Spectrum bounds
+    low = theta(1)
+    upp = theta(neigenpairs)
+    ! Bounds that contain entire spectrum (guaranteed)
+    glb = low - sqrt(resid(pband(1)))
+    gub = ecut 
+
+    ! TODO adjust slice_cutSpectrum without slice arg and new args bounds
     ! Compute nband per slice
-    call slice_cutSpectrum(slice,pband_ptr,spectral_cut)
+    call slice_cutSpectrum(slice,low,upp,glb,gub,pband_ptr,spectral_cut)
 
     ! TODO actually store these parameters into the sliceTasks object
 
@@ -451,21 +477,31 @@ subroutine cgSlice_divide(cgslice,X,getAX_BX,nspinor)
     call sliceTasks_init(schedule,slice_ncols,slice_degrees,nrows_total,&
         spacecom,resource_allocation)
 
+    ! Priority IL 11/4
+    ! FIXME normally here we should move some data to CPU
+    ! then permute columns of cg in linalg representation
+
     ! Create the extended workspaces on CPU
+    ! TODO this function is called on cgslice
     call slice_initExtended(slice,pband_ptr)
 
     ! Distribute extended space across MPI processes
+    ! TODO this function is called on cgslice
     call slice_distributeExtended(slice)
-
-
 
 end subroutine cgslice_divide
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_slice/cgslice_computeSpectrum
+!! NAME
+!! cglisce_computeSpectrum
+!!
 !! FUNCTION
-!! Compute ordered Rayleigh quotients and residuals
-!! TODO IL 11/4 restore chebfi from develop
-!! this is a new version without chebfi
+!! Compute Rayleigh quotients and residuals
+!! 
+!! SOURCE
 
 subroutine cgslice_computeSpectrum(cgslice,X0,getAX_BX,eigen,resid,nspinor)
 
@@ -511,9 +547,6 @@ subroutine cgslice_computeSpectrum(cgslice,X0,getAX_BX,eigen,resid,nspinor)
     integer :: mineig_pos(2)
 
 ! *********************************************************************
-
-    ! Priority IL 11/4
-    ! TODO rename cgslice to xgXslice or something. The structure is xg not cg!!
 
     space = cgslice%space
     space_res = cgslice%space_res
@@ -849,36 +882,6 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
     paral_slice    = slice%paral_slice
     balance_option = slice%spectral_cut
     ramp           = slice%ramp
-
-    ! Set pointers to eigenvalue and residual memory
-    Eig0_all = slice%Eig0%self
-    Res0_all = slice%Res0%self
-
-    ! Results could be complex, so neigenpairs has to be in cols, not rows
-    call xgBlock_reverseMap(Eig0_all,theta_,rows=1,cols=neigenpairs)
-    call xgBlock_reverseMap(Res0_all,resid_,rows=1,cols=neigenpairs)
-
-    ! Save theta_,resid_ first row in theta,resid
-    ABI_MALLOC(theta,(neigenpairs))
-    ABI_MALLOC(resid,(neigenpairs))
-    theta(1:neigenpairs) = theta_(1,1:neigenpairs)
-    resid(1:neigenpairs) = resid_(1,1:neigenpairs)
-
-    ! Sort thetas in increasing order and store permutation
-    call sort_dp(neigenpairs,theta,pband,tol12)
-    
-    !write(std_out,*) 'Rayleigh Values after sort:'
-    !write(std_out,*) theta(:)
-
-    ! Spectrum bounds
-    low = theta(1)
-    upp = theta(neigenpairs)
-    ! Bounds that contain entire spectrum (guaranteed)
-    glb = low - sqrt(resid(pband(1)))
-    gub = ecut 
-    ! ecut too large resulting in fine slices, narrow down:
-    !gub = upp + sqrt(resid(pband(neigenpairs))) + 2.d0
-    ! this results in eigenvalues between gub and ecut
 
     ! Center and radius of the entire spectrum mapped to -1,1
     c = (glb + gub) / 2.d0
