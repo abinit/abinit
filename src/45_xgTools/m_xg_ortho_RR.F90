@@ -127,6 +127,7 @@ module m_xg_ortho_RR
     if ( info /= 0 ) then
       ABI_COMMENT("Cholesky decomposition did not work. Orthonormalization not done")
       call xg_free(buffer)
+      ABI_NVTX_END_RANGE()
       return
     end if
 

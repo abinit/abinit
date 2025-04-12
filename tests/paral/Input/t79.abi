@@ -90,7 +90,6 @@ gw_qprange3 0        # Compute Fundamental and direct gap only
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
-#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8

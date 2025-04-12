@@ -11,7 +11,7 @@ wfoptalg 111
 nline  8
 tolwfr_diago 1e-15
 
-nbdbuf 4
+nbdbuf 8
 
 oracle_min_occ 0.001
 

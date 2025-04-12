@@ -311,7 +311,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: nband_me, iband_me, jband_me, iband_
  integer :: do_scprod, do_bcast
  integer :: startband, endband
- integer :: ndat,idat
+ integer :: ndat,idat,ispinor
  integer :: gpu_option
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file,has_vectornd
@@ -1372,10 +1372,16 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 #ifdef HAVE_OPENMP_OFFLOAD
                !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idat) MAP(to:gs1,gh1,eig_k)
 #endif
-               do idat=1,ndat*nspinor
-                 do ipw=1,npw1_k
-                   gh1(:,(idat-1)*npw1_k*nspinor + ipw) = &
-&                      gh1(:,(idat-1)*npw1_k*nspinor + ipw) - eig_k(iband+idat-1) * gs1(:,(idat-1)*npw1_k*nspinor + ipw)
+               do idat=1,ndat
+                 do ispinor=1,nspinor
+                   do ipw=1,npw1_k
+                     gh1(1,(idat-1)*nspinor*npw1_k+(ispinor-1)*npw1_k+ipw) = &
+                     &    gh1(1,(idat-1)*nspinor*npw1_k+(ispinor-1)*npw1_k+ipw) &
+                     &    - eig_k(iband+idat-1) * gs1(1,(idat-1)*nspinor*npw1_k+(ispinor-1)*npw1_k+ipw)
+                     gh1(2,(idat-1)*nspinor*npw1_k+(ispinor-1)*npw1_k+ipw) = &
+                     &    gh1(2,(idat-1)*nspinor*npw1_k+(ispinor-1)*npw1_k+ipw) &
+                     &    - eig_k(iband+idat-1) * gs1(2,(idat-1)*nspinor*npw1_k+(ispinor-1)*npw1_k+ipw)
+                   end do
                  end do
                end do
              end if
