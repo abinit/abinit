@@ -222,7 +222,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 #endif
 
     ! TODO the xgBlocks we transpose distribute etc should
-    ! point to cgSliced, eigSliced, residSliced
+    ! point to xgx0slice, eigSliced, residSliced
 
  call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
 
@@ -231,7 +231,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
- call slice_init(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
+ call slice_initSchedule(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
      dtset%paral_kgb,l_mpi_enreg%bandpp,dtset%mdeg_filter,space,1,spacecom,&
      me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
      l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
@@ -247,30 +247,36 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  !call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
  !call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=ABI_GPU_DISABLED)
  !call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=ABI_GPU_DISABLED)
-
-
  ! Update xgBlock on gpu state
  if (gpu_option==ABI_GPU_OPENMP) then
     call xgBlock_set_gpu_option(xgx0,ABI_GPU_DISABLED)
     call xgBlock_set_gpu_option(xgeigen,ABI_GPU_DISABLED)
     call xgBlock_set_gpu_option(xgresidu,ABI_GPU_DISABLED)
  end if
+ 
+ ! xgx0      =not suitable for parallel Rayleigh-Ritz calculations
+ ! xgx0slice =version of xgx0 distributed correctly and free of data overlap
+ ! schedule  =manager of all slice tasks
+ ! .. add type(xgBlock_t) :: xgx0slice
+ call slice_runSchedule(slice,xgx0,xgx0slice,getghc_gsc1,nspinor)
 
- call cgSliced_init(cgSliced,)
+ ! I think that xgeigenslice and xgresiduslice can be allocated without
+ ! the need of dedicated function
 
- call cgSliced_buildFrom(cgSliced,xgx0,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+ ! here now I think that you can copy the data from CPU to GPU
+ ! every MPI process will do this on its own
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
  
- call slice_init(slice)
+ call sliceTask_init(task,slice)
 
- call slice_run(slice,cgSliced%X,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+ call sliceTask_run(task,xgx0slice,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
 
- call slice_free(slice)
+ call sliceTask_free(sliceTask,scliceSchedule)
 
 
- call cgSliced_mergeTo(cgSliced,xgx0,xgeigen,xgresidu)
+ call slice_finalizeSchedule(schedule,xgx0,xgx0slice,xgeigen,xgresidu)
 
 
 #ifdef HAVE_OPENMP_OFFLOAD
