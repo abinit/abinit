@@ -68,6 +68,8 @@ if(ABINIT_ENABLE_LIBTETRA)
   set(HAVE_LIBTETRA_ABINIT 1)
 endif()
 
+option(ABINIT_ENABLE_TRIQS "Enable support for TRIQS (default OFF)" OFF)
+
 option(ABINIT_ENABLE_PYTHON_INVOCATION "Enable python invocation (default OFF)" OFF)
 if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(HAVE_PYTHON_INVOCATION 1)
@@ -126,32 +128,56 @@ if(ABINIT_ENABLE_GPU_HIP)
 
 endif()
 
-option(ABINIT_ENABLE_GPU_MARKERS "Enable GPU markers for profiling (requires CUDA or ROCM/HIP, default OFF)" OFF)
+option(ABINIT_ENABLE_GPU_MARKERS "Enable GPU markers for profiling (requires NVTX3 or ROCM/HIP, default OFF)" OFF)
 if(ABINIT_ENABLE_GPU_MARKERS)
 
+  # check NVtx library is available
   if(ABINIT_ENABLE_GPU_CUDA)
     # check nvtx library is available
     if (TARGET CUDA::nvToolsExt)
       set(HAVE_GPU_CUDA10 1)
       set(HAVE_GPU_MARKERS 1)
+      set(HAVE_GPU_MARKERS_NVTX 1)
     endif()
-  endif()
-
-  if(ABINIT_ENABLE_GPU_HIP)
-    # ROCTX: ROC tracer library similar in use to NVTX for CUDA
-    find_library(ROCTX
-      NAMES libroctx64.so
-      HINTS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
-      REQUIRED)
-
-    # check roctx library is available
-    if (EXISTS ${ROCTX})
+  else()
+    find_library(NVTX_LIBRARY
+      NAMES nvToolsExt
+      PATHS ${CUDA_ROOT}/lib64 ${CUDA_ROOT}/lib ${CUDA_HOME}/lib64 ${CUDA_HOME}/lib /opt/cuda/lib64 /usr/lib /usr/local/lib
+      DOC "Location of the NVTX library"
+    )
+    if(NVTX_LIBRARY)
+      message(STATUS "NVTX found: ${NVTX_LIBRARY}")
+      target_link_libraries(abinit ${NVTX_LIBRARY})
       set(HAVE_GPU_MARKERS 1)
+      set(HAVE_GPU_MARKERS_NVTX 1)
+    else()
+      message(STATUS "NVTX not found")
     endif()
   endif()
+
+  # check ROCtx library is available
+  # ROCTX: ROC tracer library similar in use to NVTX for CUDA
+  find_library(ROCTX_LIBRARY
+    NAMES libroctx64.so
+    PATHS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
+    DOC "Location of the ROCTX library"
+  )
+  if (ROCTX_LIBRARY)
+    message(STATUS "ROCTX found: ${ROCTX_LIBRARY}")
+    target_link_libraries(abinit ${ROCTX_LIBRARY})
+    set(HAVE_GPU_MARKERS 1)
+    set(HAVE_GPU_MARKERS_ROCTX 1)
+  else()
+      message(STATUS "ROCTX not found")
+  endif()
+  
+  if (NOT(NVTX_LIBRARY OR ROCTX_LIBRARY))
+    message(SEND_ERROR "ABINIT_ENABLE_GPU_MARKERS activated but Neither NVTX or ROCTX have been found!")
+  endif()
+
 endif()
 
-if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
+if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP OR ABINIT_ENABLE_GPU_MARKERS)
   set(DO_BUILD_17_GPU_TOOLBOX TRUE)
 else()
   set(DO_BUILD_17_GPU_TOOLBOX FALSE)

@@ -962,12 +962,14 @@ subroutine incomprs(string,length)
      ! Continue with parsing
      ! l1 is set to last nonblank, nontab character position
      l1=length
+
+     ! find first non blank character
      do ii=1,l1
        if (string(ii:ii)/=blank) exit
      end do
-
      ! f1 is set to first nonblank, nontab character position
      f1=ii
+
      ! lbef is number of characters in string starting at
      ! first nonblank, nontab and going to last
      lbef=l1-f1+1
@@ -1013,7 +1015,10 @@ subroutine incomprs(string,length)
        length=lcut+1
        string(length:length)=blank
      end if
+     ! remove trailing characters left from the recursive string shifts
+     string(length:stringlen)=blank
    end if
+
  end if
 
 end subroutine incomprs
@@ -2125,7 +2130,13 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        else if(typevarphys=='BFI' .and. b2>=2)then
          if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE') factor=BField_Tesla
        else if (typevarphys=='TIM' .and. b2>=2) then
-         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') factor=one/Time_Sec
+         if(string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
+            factor=one/Time_Sec
+         else if(string(b1+1:b1+2)=='FS') then
+            factor=tol15/Time_Sec
+         else if(string(b1+1:b1+2)=='AS') then
+            factor=tol17/Time_Sec
+         endif
        endif
 
        dprarr(1:narr)=dprarr(1:narr)*factor
@@ -2230,6 +2241,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
      ABI_ERROR(msg)
    end if
 
+   ! this chops off the space or the quote?
    index_xyz_fname_end=index_xyz_fname_end+index_xyz_fname-1
 
    index_already_done=index_xyz_fname_end
@@ -2247,6 +2259,8 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    ! erase the file name from string_upper
    string_upper(index_xyz_fname:index_xyz_fname_end-1) = blank
  end do
+
+
 
  if (index_already_done > 1) then
    ! Initialize xyz_fname to a blank line
@@ -3330,7 +3344,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if (print_out) write(iout,full_format) token,trim(appen),intarr(1:narr_eff,idtset)
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),&
-&             dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
+               dprarr(1:narr_eff,idtset),marr,narr_eff,abs(ncid),typevarphys,token//appen)
            end if
          end if
 

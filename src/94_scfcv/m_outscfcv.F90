@@ -256,7 +256,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer, allocatable :: isort(:)
  integer, pointer :: my_atmtab(:)
  real(dp) :: tsec(2),nt_ntone_norm(nspden),rhomag(2,nspden)
- real(dp),allocatable :: eigen2(:)
+ real(dp),allocatable :: efg(:,:,:),eigen2(:)
  real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:),intgden(:,:)
  real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vpaw(:,:),vwork(:,:)
  real(dp),allocatable :: rhor_n_one(:,:),rhor_nt_one(:,:),ps_norms(:,:,:)
@@ -330,6 +330,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Crystalline structure.
  remove_inv=.false.
+ ! What about Wannier90 DMFT?
  if (dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
 
  timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
@@ -366,7 +367,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !wannier interface
  call timab(1152,1,tsec)
 
- if (dtset%prtwant==2) then
+ if (dtset%prtwant==2 .and. ( dtset%usedmft /= 10 ) ) then
        call wfd_run_wannier(cryst=crystal, ebands=ebands, hdr=hdr, mpi_enreg=mpi_enreg, &
          & ngfftc=ngfft, ngfftf=ngfft, dtset=dtset, dtfil=dtfil,  &
          & pawang=pawang,  pawrad=pawrad, pawtab=pawtab, psps=psps, &
@@ -1261,8 +1262,14 @@ if (dtset%prt_lorbmag==1) then
 
 !Optionally provide output for electric field gradient calculation
  if (dtset%nucefg > 0) then
+
+   if(allocated(efg)) then
+     ABI_FREE(efg)
+   end if
+   ABI_MALLOC(efg,(3,3,natom))
+   efg=zero
    call timab(1176,1,tsec)
-   call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,dtset%nucefg,&
+   call calc_efg(efg,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,dtset%nucefg,&
 &   ntypat,paw_an,pawang,pawrad,pawrhoij,pawtab,&
 &   dtset%ptcharge,dtset%quadmom,rhor,rprimd,dtset%symrel,&
 &   dtset%tnons,dtset%typat,ucvol,psps%usepaw,xred,psps%zionpsp,&
@@ -1359,10 +1366,31 @@ if (dtset%prt_lorbmag==1) then
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "intgden"), intgden))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ratsph"), dtset%ratsph))
    end if
+
+   if(allocated(efg)) then
+     ! write EFG tensors to GSR if available
+     ncerr = nctk_def_dims(ncid, [ &
+       nctkdim_t("ndir",3),&
+       nctkdim_t("natom",dtset%natom),&
+       nctkdim_t("ntypat",dtset%ntypat)],defmode=.True.)
+     NCF_CHECK(ncerr) 
+     ncerr = nctk_def_arrays(ncid, [&
+       nctkarr_t("quadmom", "dp", "ntypat"),&
+       nctkarr_t("efg", "dp", "ndir, ndir, natom")])
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "quadmom"), dtset%quadmom))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "efg"), efg))
+   end if
+
    NCF_CHECK(nf90_close(ncid))
  end if
 
  call timab(1154,2,tsec)
+
+ if(allocated(efg)) then
+   ABI_FREE(efg)
+ end if
 
  ABI_SFREE_PTR(elfr)
  ABI_SFREE_PTR(grhor)

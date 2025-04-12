@@ -37,8 +37,9 @@ module m_lobpcg2
   use omp_lib
 #endif
   use m_xmpi
+ use, intrinsic :: iso_c_binding, only: c_size_t
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -92,6 +93,7 @@ module m_lobpcg2
     integer :: me_g0                         ! =1 if the processor have G=0 (linalg representation)
     integer :: me_g0_fft                     ! =1 if the processor have G=0 (fft_representation)
     integer :: gpu_option                    ! Which GPU version is used (0=none)
+    integer :: gpu_thread_limit              ! When GPU is enabled, how many CPU threads to use in sensitive areas
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
     integer :: prtvol
     type(xgBlock_t) :: AllX0 ! Block of initial and final solution.
@@ -173,7 +175,8 @@ module m_lobpcg2
 
 
   subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, &
-&      space, spacecom, paral_kgb, comm_rows, comm_cols, me_g0, me_g0_fft, gpu_option)
+&      space, spacecom, paral_kgb, comm_rows, comm_cols, me_g0, me_g0_fft, gpu_option, &
+&      gpu_thread_limit)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: neigenpairs
@@ -188,6 +191,7 @@ module m_lobpcg2
     integer         , intent(in   ) :: me_g0
     integer         , intent(in   ) :: me_g0_fft
     integer         , intent(in   ) :: gpu_option
+    integer,optional, intent(in   ) :: gpu_thread_limit
     double precision :: tsec(2)
 
     call timab(tim_init,1,tsec)
@@ -208,6 +212,8 @@ module m_lobpcg2
     lobpcg%me_g0       = me_g0
     lobpcg%me_g0_fft   = me_g0_fft
     lobpcg%gpu_option  = gpu_option
+    lobpcg%gpu_thread_limit  = 0
+    if(present(gpu_thread_limit)) lobpcg%gpu_thread_limit  = gpu_thread_limit
 
     call lobpcg_allocateAll(lobpcg,space,me_g0)
     call timab(tim_init,2,tsec)
@@ -262,41 +268,50 @@ module m_lobpcg2
   end subroutine lobpcg_allocateAll
 
 
-  function lobpcg_memInfo(neigenpairs, spacedim, blockdim, space) result(arraymem)
+  function lobpcg_memInfo(neigenpairs, spacedim, space, paral_kgb, blockdim) result(arraymem)
 
     integer         , intent(in   ) :: neigenpairs
     integer         , intent(in   ) :: spacedim
     integer         , intent(in   ) :: blockdim
     integer         , intent(in   ) :: space
-    double precision :: memXWP
-    double precision :: memAXWP
-    double precision :: memBXWP
-    double precision :: memAllBX0
-    double precision :: memAllAX0
-    double precision :: memeigenvalues3N
-    double precision :: membufferOrtho
-    double precision :: membufferBOrtho
-    double precision :: memsubA
-    double precision :: memsubB
-    double precision :: memsubBtmp
-    double precision :: memvec
-    double precision :: memRR
-    double precision :: maxmemTmp
-    double precision :: cplx
+    integer         , intent(in   ) :: paral_kgb
+    integer(kind=c_size_t) :: memXWP
+    integer(kind=c_size_t) :: memAXWP
+    integer(kind=c_size_t) :: memBXWP
+    integer(kind=c_size_t) :: mem_xgTransposer
+    integer(kind=c_size_t) :: memAllBX0
+    integer(kind=c_size_t) :: memAllAX0
+    integer(kind=c_size_t) :: memeigenvalues3N
+    integer(kind=c_size_t) :: membufferOrtho
+    integer(kind=c_size_t) :: membufferBOrtho
+    integer(kind=c_size_t) :: memsubA
+    integer(kind=c_size_t) :: memsubB
+    integer(kind=c_size_t) :: memsubBtmp
+    integer(kind=c_size_t) :: memvec
+    integer(kind=c_size_t) :: memRR
+    integer(kind=c_size_t) :: maxmemTmp
+    integer(kind=c_size_t) :: cplx
     integer :: nblock
-    double precision :: arraymem(2)
+    integer(kind=c_size_t) :: arraymem(2)
 
     cplx = 1 ; if ( space == SPACE_C ) cplx = 2
     nblock = neigenpairs/blockdim
 
     ! Permanent in lobpcg
-    memXWP  = cplx* kind(1.d0) * spacedim * 3*blockdim
-    memAXWP = cplx* kind(1.d0) * spacedim * 3*blockdim
-    memBXWP = cplx* kind(1.d0) * spacedim * 3*blockdim
+    memXWP  = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
+    memAXWP = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
+    memBXWP = int(cplx,c_size_t)* kind(1.d0) * spacedim * 3*blockdim
+    if(paral_kgb > 1) then
+      ! xgtransposer *_ColRows buffers for X, AX, BX, W, AW, BW + internal send/recvbuf
+      mem_xgTransposer = int(cplx,c_size_t)* kind(1.d0) * spacedim * 7*blockdim
+    else
+      mem_xgTransposer = 0
+    end if
     if ( nblock > 1 ) then
-      memAllAX0 = cplx * kind(1.d0) * spacedim * 3*blockdim
-      memAllBX0 = cplx * kind(1.d0) * spacedim * 3*blockdim
-      membufferOrtho = cplx * kind(1.d0) * blockdim * (nblock-1) * blockdim
+      memAllAX0 = int(cplx,c_size_t) * kind(1.d0) * spacedim * 3*blockdim
+      memAllBX0 = int(cplx,c_size_t) * kind(1.d0) * spacedim * 3*blockdim
+      membufferOrtho = int(cplx,c_size_t) * kind(1.d0) * blockdim * (nblock-1) * blockdim
+      mem_xgTransposer = mem_xgTransposer + int(cplx,c_size_t) * kind(1.d0) * spacedim * 3*blockdim
     else
       memAllAX0 = 0
       memAllBX0 = 0
@@ -305,16 +320,18 @@ module m_lobpcg2
     memeigenvalues3N = kind(1.d0) * 3*blockdim
 
     ! Temporary arrays
-    membufferBOrtho = cplx * kind(1.d0) * 2*blockdim * 2*blockdim ! For the moment being, only Bortho with X or WP at the same time
-    memsubA = cplx * kind(1.d0) * 3*blockdim * 3*blockdim
-    memsubB = cplx * kind(1.d0) * 3*blockdim * 3*blockdim
-    memsubBtmp = cplx * kind(1.d0) * spacedim * blockdim
-    memvec = cplx * kind(1.d0) * 3*blockdim * blockdim
+
+    ! For the moment being, only Bortho with X or WP at the same time
+    membufferBOrtho = int(cplx,c_size_t) * kind(1.d0) * 2*blockdim * 2*blockdim
+    memsubA = int(cplx,c_size_t) * kind(1.d0) * 3*blockdim * 3*blockdim
+    memsubB = int(cplx,c_size_t) * kind(1.d0) * 3*blockdim * 3*blockdim
+    memsubBtmp = int(cplx,c_size_t) * kind(1.d0) * spacedim * blockdim
+    memvec = int(cplx,c_size_t) * kind(1.d0) * 3*blockdim * blockdim
     memRR = max(memsubA+memsubB+memvec,memsubBtmp+memvec)
 
     maxmemTmp = max( membufferBOrtho,memRR,membufferOrtho )
 
-    arraymem(1) = memXWP+memAXWP+memBXWP+memAllAX0+memAllBX0+memeigenvalues3N
+    arraymem(1) = memXWP+memAXWP+memBXWP+memAllAX0+memAllBX0+memeigenvalues3N+mem_xgTransposer
     arraymem(2) = maxmemTmp
 
   end function lobpcg_memInfo
@@ -401,9 +418,9 @@ module m_lobpcg2
     call xg_setBlock(eigenvalues3N,eigenvaluesN,blockdim,1)
     call xg_setBlock(eigenvalues3N,eigenvalues2N,blockdim2,1)
 
-    call xgBlock_reshape(eigen,(/ blockdim, nblock /))
-    call xgBlock_reshape(residu,(/ blockdim, nblock /))
-    call xgBlock_reshape(occ,(/ blockdim, nblock /))
+    call xgBlock_reshape(eigen,blockdim,nblock)
+    call xgBlock_reshape(residu,blockdim,nblock)
+    call xgBlock_reshape(occ,blockdim,nblock)
 
     lobpcg%AllX0 = X0
 
@@ -413,7 +430,7 @@ module m_lobpcg2
       call timab(tim_transpose,1,tsec)
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
         STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,lobpcg%me_g0_fft,&
-        gpu_option=lobpcg%gpu_option)
+        gpu_option=lobpcg%gpu_option,gpu_thread_limit=lobpcg%gpu_thread_limit)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
         lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBX,lobpcg%xgTransposerX,&
@@ -677,9 +694,9 @@ module m_lobpcg2
       ABI_NVTX_END_RANGE()
     end do !! End iblock loop
 
-    call xgBlock_reshape(eigen,(/ blockdim*nblock, 1 /))
-    call xgBlock_reshape(residu,(/ blockdim*nblock, 1 /))
-    call xgBlock_reshape(occ,(/ blockdim*nblock, 1 /))
+    call xgBlock_reshape(eigen,blockdim*nblock,1)
+    call xgBlock_reshape(residu,blockdim*nblock,1)
+    call xgBlock_reshape(occ,blockdim*nblock,1)
 
     call xg_free(eigenvalues3N)
     call xg_free(residu_eff)

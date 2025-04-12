@@ -48,7 +48,7 @@ MODULE m_invovl
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -507,6 +507,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  integer :: array_nprojs_pp(mpi_enreg%nproc_fft)
  integer :: iproc, slice_size
  real(dp), allocatable :: gramwork(:,:,:)
+#ifdef HAVE_OPENMP_OFFLOAD
+ real(dp), ABI_CONTIGUOUS pointer :: invovl_gram_projs(:,:,:)
+#endif
 
  integer, parameter :: timer_mkinvovl = 1620, timer_mkinvovl_build_d = 1621, timer_mkinvovl_build_ptp = 1622
 
@@ -515,6 +518,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  !! S = 1 + PDP', so
  !! S^-1 = 1 + P inv_s_projs P', with
  !! inv_s_projs = - (D^-1 + P'*P)^-1
+
+ ABI_NVTX_START_RANGE(NVTX_MAKE_INVOVL)
 
  if(ham%istwf_k == 1) then
    cplx = 2
@@ -603,7 +608,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
      !! build atom_projs, from opernlb
      !! P = 4pi/sqrt(ucvol)* conj(diag(ph3d)) * ffnl * diag(parity), with parity = (-i)^l
-     atom_projs(:,:,:) = 0
+     atom_projs(:,:,:) = zero
 
      ! start from 4pi/sqrt(ucvol)*ffnl
      ! atom_projs(1, :, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ffnl(:, 1, 1:nlmn)
@@ -705,17 +710,17 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #ifdef HAVE_OPENMP_OFFLOAD
    ! compute gram_projs in one GEMM, only one FFT proc expected in GPU mode
    slice_size = array_nprojs_pp(1)
-   current_gram_projs   => invovl%gram_projs
-   !$OMP TARGET ENTER DATA MAP(alloc:current_gram_projs)
+   invovl_gram_projs   => invovl%gram_projs
+   !$OMP TARGET ENTER DATA MAP(alloc:invovl_gram_projs)
    !$OMP TARGET ENTER DATA MAP(to:projs)
 
-   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs,projs)
+   !$OMP TARGET DATA USE_DEVICE_PTR(invovl_gram_projs,projs)
    call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
-   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
+   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
    call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr,use_omp_map=.true.)
-   !$OMP TARGET EXIT DATA MAP(from:current_gram_projs)
+   !$OMP TARGET EXIT DATA MAP(from:invovl_gram_projs)
    !$OMP TARGET EXIT DATA MAP(delete:projs)
 #endif
  else
@@ -772,6 +777,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 ! LB-10/06/24: This message is too verbose on some cases (for example many k-points)
 ! write(message,*) 'Invovl built'
 ! call wrtout(std_out,message,'COLL')
+
+ ABI_NVTX_END_RANGE()
 
 end subroutine make_invovl
 !!***
@@ -1171,12 +1178,13 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
   implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx
-  real(dp), intent(inout) :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
+  real(dp), intent(inout), target :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
   type(gs_hamiltonian_type),intent(in) :: ham
   real(dp), intent(in) :: mat(cplx, ham%lmnmax, ham%lmnmax, ham%ntypat)
   integer, intent(in) :: block_sliced
 
   integer :: nlmn, shift, itypat, idat
+  real(dp),pointer :: work_x(:,:),work_y(:,:)
 
 ! *************************************************************************
 
@@ -1189,16 +1197,18 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
            !! apply mat to all atoms at once
            ! perform natom multiplications of size nlmn
            ! compute y = mat*x
+           work_x => x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)
+           work_y => y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)
            if(cplx == 2) then
               call ZHEMM('L','U', nlmn, ham%nattyp(itypat), cone, &
                    &  mat(:, :, :, itypat), ham%lmnmax, &
-                   &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, czero, &
-                   &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn)
+                   &  work_x, nlmn, czero, &
+                   &  work_y, nlmn)
            else
               call DSYMM('L','U', nlmn, ham%nattyp(itypat), one, &
                    &  mat(:, :, :, itypat), ham%lmnmax, &
-                   &  x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn, zero, &
-                   &  y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat), nlmn)
+                   &  work_x, nlmn, zero, &
+                   &  work_y, nlmn)
            end if
            shift = shift + nlmn*ham%nattyp(itypat)
         end do
@@ -1531,6 +1541,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  ! TODO use a more efficient iterative algorithm than iterative refinement, use locking
  additional_steps_to_take = -1
  do i=1, 30
+#ifdef FC_NVHPC
+   ! Silly fix for NVHPC 25.1
+   if(ndat == -42) write(100,*) ndat
+#endif
    ! compute resid = proj - (D^-1 + PtP)sm1proj
    call apply_block_ompgpu(ham, cplx, invovl%inv_sij, nprojs, ndat, sm1proj, resid, block_sliced)
 

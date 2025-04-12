@@ -40,6 +40,8 @@ module m_vtorho
  use m_extfpmd
  use m_ompgpu_utils
  use m_xg_nonlop
+ use m_ebands
+ use m_crystal
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -48,6 +50,7 @@ module m_vtorho
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
  use m_pawang,             only : pawang_type
+ use m_pawrad,             only : pawrad_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
  use m_pawfgrtab,          only : pawfgrtab_type
@@ -63,7 +66,7 @@ module m_vtorho
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,    only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
- use m_crystal,            only : crystal_t
+ use m_results_gs,         only : results_gs_type, results_gs_ncwrite
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
@@ -78,7 +81,7 @@ module m_vtorho
  use m_mkrho,              only : mkrho, prtrhomxmn
  use m_mkffnl,             only : mkffnl
  use m_mpinfo,             only : proc_distrb_cycle
- use m_common,             only : prteigrs
+ use m_common,             only : prteigrs,get_gemm_nonlop_ompgpu_blocksize
  use m_dmft,               only : dmft_solve
  use m_datafordmft,        only : datafordmft
  use m_fourier_interpol,   only : transgrid
@@ -86,9 +89,15 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
- use m_chebfiwf,           only : chebfiwf2_blocksize
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
-                                      gemm_nonlop_nblocks, gemm_nonlop_is_distributed
+                                      gemm_nonlop_block_size, gemm_nonlop_is_distributed
+
+ use m_abstract_wf,        only : abstract_wf, init_mywfc
+ use m_mlwfovlp,           only : mlwfovlp
+#if defined HAVE_PYTHON_INVOCATION
+ use m_invoke_python
+#endif
+ use ISO_C_BINDING
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -102,7 +111,7 @@ module m_vtorho
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -198,6 +207,8 @@ contains
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!  pawfgrtab(my_natom*usepaw) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and
+!!     related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  phnons(2,nfft**(1-1/nsym),(nspden/nsppol)-3*(nspden/4))=nonsymmorphic translation phases
 !!                                    nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
@@ -213,6 +224,9 @@ contains
 !!  pwind_alloc = first dimension of pwind
 !!  pwnsfac(2,pwind_alloc) = phase factors for non-symmorphic translations
 !!                           (see initberry.f)
+!!  results_gs <type(results_gs_type)>=results (energy and its components,
+!!     forces and its components, the stress tensor) of a ground-state
+!!     computation (should be made a pure output quantity)
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive vectors
 !!  symrec(3,3,nsym)=symmetry operations in reciprocal space
@@ -300,9 +314,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           istep,istep_mix,itimes,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &           my_natom,natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &           npwarr,npwdiel,nres2,ntypat,nvresid,occ,optforces,&
-&           optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
+&           optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
-&           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
+&           pwind,pwind_alloc,pwnsfac,results_gs,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,usevxctau,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,&
 &           xg_nonlop,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
@@ -326,6 +340,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
+ type(results_gs_type),intent(inout) :: results_gs
  type(fock_type),pointer, intent(inout) :: fock
  type(wffile_type), intent(inout) :: wffnew
  type(wvl_data), intent(inout) :: wvl
@@ -364,12 +379,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(pawcprj_type),pointer,intent(inout) :: cprj(:,:)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
+ type(pawrad_type), intent(in)  :: pawrad(psps%ntypat*psps%usepaw)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: level=111,tim_mkrho=2
+! integer,parameter :: level=111
+ integer,parameter :: tim_mkrho=2
  !integer,save :: nwarning=0
  integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
  integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
@@ -378,12 +395,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
  integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff,nbdbuf_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnsclo_now
- integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop
+ integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,quit,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
+#if defined HAVE_GPU_CUDA
+ integer(c_int64_t)   :: ph3d_size
+#endif
+
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
- real(dp) :: dmft_dftocc
+ integer :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
  character(len=500) :: msg
@@ -436,6 +457,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
+#endif
+
+#if defined(HAVE_PYTHON_INVOCATION)
+ integer :: bantot
+ logical :: exists
+ character(len=500) :: filename
+ class(abstract_wf), pointer :: mywfc
+ integer :: exclude_bands(hdr%mband, hdr%nsppol)
+ logical :: exclude_bands_ind(hdr%mband, hdr%nsppol)
+ type(ebands_t) :: ebands
+ real(dp), allocatable :: occnd_tmp(:)
 #endif
 
 ! *********************************************************************
@@ -982,52 +1014,53 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 !      If OpenMP GPU, load "hamiltonian" on GPU device
-       if (dtset%gpu_option == ABI_GPU_OPENMP) then
+       if (gs_hamk%gpu_option == ABI_GPU_OPENMP) then
          if(dtset%paral_kgb==0) then
            call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k)
          else if(istwf_k==1) then
-           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,&
+             kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
          else
-           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,gs_hamk%ffnl_k,gs_hamk%ph3d_k,&
+             kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
          end if
        end if
 
-       if(gemm_nonlop_use_gemm .and. dtset%wfoptalg == 111 .and. istep <= 1) then
-         gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
-         ! Only compute CHEBFI number of blocks if user didn't set it themselves
-         if(gemm_nonlop_nblocks==1) then
-           call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb,&
-           &                        dtset%gpu_option,nblk_gemm_nonlop)
-           gemm_nonlop_nblocks = nblk_gemm_nonlop
-         end if
-         gemm_nonlop_is_distributed = .false.
-         if(gemm_nonlop_nblocks > 0 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
+       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. isppol < 2 .and. dtset%gpu_option==ABI_GPU_OPENMP) then
+         gemm_nonlop_block_size = dtset%gpu_nl_splitsize
+         call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
+         &                        dtset%nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+         &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
+         gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
        end if
 
 !      Build inverse of overlap matrix for chebfi
        if (dtset%cprj_in_memory==0) then
          if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
-            ABI_NVTX_START_RANGE(NVTX_INVOVL)
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
-            ABI_NVTX_END_RANGE()
          end if
        end if
 
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
-         call set_gemm_nonlop_ikpt(my_ikpt)
+         call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
+         &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
          if(istep<=1) call reset_gemm_nonlop()
        end if
 
 #if defined HAVE_GPU_CUDA
-       if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+       if (gs_hamk%gpu_option==ABI_GPU_LEGACY .or. gs_hamk%gpu_option==ABI_GPU_KOKKOS) then
          if (mpi_enreg%paral_kgb==1) then
+           ph3d_size=INT(size(my_bandfft_kpt%ph3d_gather,dim=1),c_int64_t) &
+             &       * size(my_bandfft_kpt%ph3d_gather,dim=2) * size(my_bandfft_kpt%ph3d_gather,dim=3)
            call gpu_update_ffnl_ph3d( &
-             & my_bandfft_kpt%ph3d_gather, INT(size(my_bandfft_kpt%ph3d_gather),c_int64_t), &
+             & my_bandfft_kpt%ph3d_gather, ph3d_size, &
              & my_bandfft_kpt%ffnl_gather, INT(size(my_bandfft_kpt%ffnl_gather),c_int64_t) )
          else
+           ph3d_size=INT(size(ph3d,dim=1),c_int64_t)*size(ph3d,dim=2)*size(ph3d,dim=3)
            call gpu_update_ffnl_ph3d( &
-             & ph3d, INT(size(ph3d),c_int64_t), &
+             & ph3d, ph3d_size, &
              & ffnl, INT(size(ffnl),c_int64_t) )
          end if
        end if
@@ -1078,7 +1111,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #endif
 
 #if defined HAVE_GPU_CUDA
-       if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
+       if(gs_hamk%gpu_option==ABI_GPU_LEGACY .or. gs_hamk%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
 #endif
        ABI_FREE(ffnl)
 
@@ -1151,7 +1184,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if ( dtset%gpu_option == ABI_GPU_OPENMP) then
+       if ( gs_hamk%gpu_option == ABI_GPU_OPENMP) then
          call ompgpu_free_hamilt_buffers()
        end if
 ! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
@@ -1337,6 +1370,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(990,2,tsec)
 
 !    !=========  DMFT call begin ============================================
+!    ! Also not sure what to do for Wannier90 DMFT
      dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
        call timab(991,1,tsec)
@@ -1476,7 +1510,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        end if
 
          if(paw_dmft%myproc==0) then
+           ABI_NVTX_START_RANGE(NVTX_DMFT_SAVEOCC)
+           call timab(628,1,tsec)
            call saveocc_dmft(paw_dmft)
+           call timab(628,2,tsec)
+           ABI_NVTX_END_RANGE()
          end if
          call destroy_dmft(paw_dmft)
 
@@ -1485,6 +1523,206 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call destroy_oper(dft_occup)
        end if ! dmft_dftocc
        call timab(991,2,tsec)
+
+     else if (dtset%usedmft == 10) then
+        write(std_out, *) "pawrad%int_meshsz: ", pawrad%int_meshsz
+        write(std_out, *) "dtfil%fnameabo_w90: ", dtfil%fnameabo_w90
+        write(std_out, *) "results_gs%energies%e_fermie: ", results_gs%energies%e_fermie
+#if defined HAVE_PYTHON_INVOCATION
+        ! xcryst_struct
+        remove_inv=.false.
+        call cryst_struc%init(dtset%amu_orig(:,1),dtset%spgroup,natom,dtset%npsp,ntypat,&
+          & dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+          & dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
+          & dtset%symrel,dtset%tnons,dtset%symafm)
+
+        ! ebands
+        bantot = dtset%mband*dtset%nkpt*dtset%nsppol
+        call ebands%init(bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+          & doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+          & hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+          & hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+          & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+        ebands%fermie = results_gs%energies%e_fermie
+        ebands%fermih = results_gs%energies%e_fermih
+        ebands%entropy = results_gs%energies%entropy
+
+        ! hdr       : OK, in func args
+        ! atindx1   : OK, in func args
+        ! cg        : OK, in func args
+        ! cprj      : OK, in func args
+        ! dtset     : OK, in func args
+        ! dtfil     : OK, in func args
+        ! eigen     : OK, in func args
+        ! gprimd    : OK, in func args
+        ! kg        : OK, in func args
+        ! mband     : OK, from dtset
+        ! mcg       : OK, in func args
+        ! mcprj     : OK, in func args
+        ! mgfftc    : OK, from dtset called mgfft
+        ! mkmem     : OK, from dtset
+        ! mpi_enreg : OK, in func args
+        ! mpw       : OK, from dtset
+        ! natom     : OK, from dtset
+        ! nattyp    : OK, in func args
+        ! nfft      : OK, from dtset
+        ! ngfft     : OK, from dtset
+        ! nkpt      : OK, from dtset
+        ! npwarr    : OK, was added to vtorho func
+        ! nsppol    : OK, from dtset
+        ! ntypat    : OK, from dtset
+        ! occ       : OK, in func args
+        ! pawang    : OK, in func args
+        ! pawrad    : OK, was added to func's args
+        ! pawtab    : OK, in func args
+        ! prtvol    : OK, from dtset
+        ! psps      : OK, in func args
+        ! rprimd    : OK, in func args
+        ! ucvol     : OK, in func args
+        ! xred      : OK, in func args
+
+        ! Call Wannier90 and print the _hr.dat file with the Hamiltonian
+        write(msg,'(6a)') &
+        & ch10, ' ======================================================'&
+        & ,ch10,' =====  Calling Wannier90                      ========'&
+        & ,ch10,' ======================================================'
+        call wrtout(std_out,msg,'COLL')
+
+        call init_mywfc(mywfc=mywfc, ebands=ebands, cg=cg, cprj=cprj, &
+         cryst=cryst_struc, dtset=dtset, dtfil=dtfil, hdr=hdr, &
+         MPI_enreg=mpi_enreg, nprocs=mpi_enreg%nproc, psps=psps, pawtab=pawtab, &
+         rank=mpi_enreg%me, comm=mpi_enreg%comm_world)
+
+        call mlwfovlp(mywfc=mywfc, crystal=cryst_struc, ebands=mywfc%ebands, hdr=mywfc%hdr, &
+         atindx1=cryst_struc%atindx1, dtset=mywfc%dtset, dtfil=dtfil, eigen=mywfc%ebands%eig, &
+         gprimd=cryst_struc%gprimd, kg=kg, mband=dtset%mband, mcg=mcg, mcprj=mcprj, &
+         mgfftc=dtset%mgfft, mkmem=dtset%mkmem, mpi_enreg=mpi_enreg, &
+         mpw=dtset%mpw, natom=dtset%natom, nattyp=nattyp, nfft=dtset%nfft, ngfft=dtset%ngfft, &
+         nkpt=dtset%nkpt, &
+         npwarr=npwarr, nsppol=dtset%nsppol, ntypat=dtset%ntypat, occ=occ, pawang=pawang, &
+         pawrad=pawrad, pawtab=pawtab, prtvol=dtset%prtvol, &
+         psps=psps, rprimd=rprimd, ucvol=ucvol, xred=xred, exclude_bands=exclude_bands)
+        call xmpi_barrier(spaceComm_distrb)
+
+        ! Need to know if a band is in or not for the calculation, for correcting occupations and density
+        do iband=1, hdr%mband
+          do isppol=1, hdr%nsppol
+            exclude_bands_ind(iband,isppol) = .true.
+          enddo
+        enddo
+        do iband=1, hdr%mband
+          do isppol=1, hdr%nsppol
+            if (exclude_bands(iband,isppol) /= 0) then
+              exclude_bands_ind(exclude_bands(iband,isppol),isppol) = .false.
+            endif
+          enddo
+        enddo
+
+        do isppol=1, hdr%nsppol
+          do iband=1, paw_dmft%dmftbandi-1
+            if (exclude_bands_ind(iband,isppol) .eqv. .true.) then
+              write(msg, '(a)') "ERROR: Inconsistency between the excluded bands for Wannier90 and the dmftbandi/dmftbandf ABINIT keywords. TODO: remove this duplication of information."
+              ABI_ERROR(msg)
+            endif
+          enddo
+          do iband=paw_dmft%dmftbandi, paw_dmft%dmftbandf
+            if (exclude_bands_ind(iband,isppol) .eqv. .false.) then
+              write(msg, '(a)') "ERROR: Inconsistency between the excluded bands for Wannier90 and the dmftbandi/dmftbandf ABINIT keywords. TODO: remove this duplication of information."
+              ABI_ERROR(msg)
+            endif
+          enddo
+          do iband=paw_dmft%dmftbandf+1, hdr%mband
+            if (exclude_bands_ind(iband,isppol) .eqv. .true.) then
+              write(msg, '(a)') "ERROR: Inconsistency between the excluded bands for Wannier90 and the dmftbandi/dmftbandf ABINIT keywords. TODO: remove this duplication of information."
+              ABI_ERROR(msg)
+            endif
+          enddo
+        enddo
+
+        ! Print data needed for full charge self-consistency
+        write(filename, '(a, a)') trim(dtfil%filnam_ds(4)), "_w90.abinit"
+        write(msg,'(3a)') " ===== Printing data needed for full charge self-consistency in DFT+DMFT in ", trim(filename), " file"
+        call wrtout(std_out, msg, 'COLL')
+        open(unit=100, file=filename)
+         write(100, "(a, f12.6)") "Fermie", energies%e_fermie
+         write(100, "(a, i5)")  "Nkpt", dtset%nkpt
+         write(100, "(a, i5)")  "Nband", dtset%mband
+         do ikpt=1,dtset%nkpt
+           write(100,'(a,3f10.4,a,i4,a)' ) ' k-point ', dtset%kptns(1:3,ikpt), ' number ',ikpt,' :'
+           do ii=0,(dtset%mband-1)/12
+             write(100,'(12f10.4)') occ(1+ii*12+(ikpt-1)*dtset%mband:min(12+ii*12,dtset%mband)+(ikpt-1)*dtset%mband)
+           end do
+         end do
+        close(100)
+
+        call xmpi_barrier(spaceComm_distrb)
+
+        ! Perform DMFT. No need for most of the pipeline in dmft_solve.
+        ! We directly call the python_invocation.
+        write(msg,'(6a)') &
+        & ch10, ' ======================================================'&
+        & ,ch10,' =====  DMFT starts here                       ========'&
+        & ,ch10,' ======================================================'
+        call wrtout(std_out,msg,'COLL')
+        call flush_unit(std_out)
+
+        ! Invoking python to execute the script
+        write(msg, '(a)') trim(dtfil%filnam_ds(3))
+        call invoke_python_run_script (istep, paw_dmft%myproc, msg, mpi_enreg%comm_world)
+        call xmpi_barrier(paw_dmft%spacecomm)
+        call flush_unit(std_out)
+
+        ! Need new DMFT occupations
+        ! They can be found in the file dtfil%filenam_ds(4)_w90.deltaN
+        ! Check if file exists
+        write(filename, '(a, i4.4, 3a)') "dft", istep, "_", trim(dtfil%filnam_ds(4)), '_w90.deltaN'
+        inquire(file=filename, exist=exists)
+        if (.not.exists) then
+            write(msg, '(3a)') "    ERROR: The file ", trim(filename), " does not exist. It means there was a problem with the DMFT. Abort."
+            ABI_ERROR(msg)
+        endif
+
+        ABI_MALLOC(occnd_tmp, (2*(paw_dmft%dmftbandf+1-paw_dmft%dmftbandi)))
+
+        ! Read the new occupations obtained from the DMFT calculation.
+        do isppol=1,dtset%nsppol
+          open(unit=101, file=filename, status='old')
+          rewind(unit=101)
+          read(101, *) msg
+          do ikpt=1,dtset%nkpt
+            read(101, *) msg
+            nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+            do iband=1,nband_k
+              bdtot_index = iband+dtset%mband*(ikpt-1)+dtset%mband*dtset%nkpt*(isppol-1)
+              paw_dmft%occnd(1,iband,iband,ikpt,isppol) = occ(bdtot_index)
+              if (paw_dmft%band_in(iband)) then
+                read(101, *) occnd_tmp
+                ! Works in the presence of spin-symmetry, at this point
+                do iband1=1,paw_dmft%dmftbandf+1-paw_dmft%dmftbandi
+                  paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) + occnd_tmp(2*(iband1-1)+1)
+                  ! if (paw_dmft%dmftbandi-1+iband1==iband) then
+                  !   paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = paw_dmft%occnd(1,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) + occ(bdtot_index)
+                  ! end if
+                  paw_dmft%occnd(2,iband,paw_dmft%dmftbandi-1+iband1,ikpt,isppol) = + occnd_tmp(2*(iband1-1)+2)
+                enddo
+              endif
+            end do
+          end do
+          close(101)
+        end do
+
+        ABI_FREE(occnd_tmp)
+
+        write(msg, '(6a)') &
+        & ch10, '  ================================================== ',&
+        & ch10, '  =====  DMFT  :  END                       ======== ',&
+        & ch10, '  ================================================== '
+        call wrtout(std_out,msg,'COLL')
+        call flush_unit(std_out)
+
+#else
+        ABI_ERROR('Cannot use use_dmft == 10 with #HAVE_PYTHON_INVOCATION set to false.')
+#endif
 
      end if ! usedmft
 
@@ -1519,6 +1757,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
 !    Compute new energy terms due to non diagonal occupations and DMFT.
+!    It uses the new occupations stored in paw_dmft%occnd.
      bdtot_index=1
      do isppol=1,dtset%nsppol
        do ikpt=1,dtset%nkpt
@@ -1539,7 +1778,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
            if (locc_test) then
 !            dmft
-             if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
+             if((paw_dmft%use_dmft==1.or.paw_dmft%use_dmft==10).and.dtset%nbandkss==0) then
                ebandldatot=ebandldatot+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
                if(paw_dmft%band_in(iband).or.paw_dmft%dmft_use_all_bands) then
                  ebandlda=ebandlda+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
@@ -1564,7 +1803,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ(bdtot_index)*grnlnk(:,bdtot_index)
            end if
            bdtot_index=bdtot_index+1
-           if(paw_dmft%use_dmft==1.and.dtset%nbandkss==0) then
+           if((paw_dmft%use_dmft==1.or.paw_dmft%use_dmft==10).and.dtset%nbandkss==0) then
              do iband1=1,nband_k
                if((paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)).or. &
                 & (paw_dmft%dmft_use_all_bands.and.iband==iband1)) then
@@ -1585,11 +1824,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
+&       dtset%nspinor,dtset%nsppol,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%nkpt,dtset%nspinor,&
 &       dtset%nsppol,dtset%nband,dtset%wtk)
-       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
-&       dtset%wtk,dtset%nband)
+       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
+&       dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
      end if
 
      if(paw_dmft%use_dmft==1) then
@@ -1724,11 +1963,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
+&       dtset%nspinor,dtset%nsppol,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%nkpt,dtset%nspinor,&
 &       dtset%nsppol,dtset%nband,dtset%wtk)
-       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
-&       dtset%wtk,dtset%nband)
+       call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
+&       dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
        ! CHECK number of electrons integrating rhor.
        ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
      end if
@@ -1864,12 +2103,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  if(iscf>=0)then
    bdtot_index=1
+   quit=0
    do isppol=1,dtset%nsppol
      do ikpt=1,dtset%nkpt
        min_occ=two
        nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
        do iband=1,nband_k
-         if(occ(bdtot_index)<min_occ)min_occ=occ(bdtot_index)
+         ! if ndbbuf_eff<=0, compute min_occ as usual
+         ! if nbdbuf_eff>0, compute min_occ only for bands not in the buffer
+         if (nbdbuf_eff<=0.or.iband<=nband_k-nbdbuf_eff) then
+           if(occ(bdtot_index)<min_occ)min_occ=occ(bdtot_index)
+         end if
          bdtot_index=bdtot_index+1
        end do
        if(min_occ>0.01_dp .and. .not. associated(extfpmd))then
@@ -1878,18 +2122,20 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              'For k-point number: ',ikpt,',',ch10,&
              'The minimal occupation factor is: ',min_occ,'.',ch10,&
              'An adequate monitoring of convergence requires it to be  at most 0.01_dp.',ch10,&
-             'Action: increase slightly the number of bands.'
+             'Action: increase slightly the number of bands (or decrease nbdbuf).'
          else
            write(msg, '(a,i0,3a,i0,a,f7.3,5a)' )&
              'For k-point number: ',ikpt,', and',ch10,&
              'for spin polarization: ',isppol, ' the minimal occupation factor is: ',min_occ,'.',ch10,&
              'An adequate monitoring of convergence requires it to be at most 0.01_dp.',ch10,&
-             'Action: increase slightly the number of bands.'
+             'Action: increase slightly the number of bands (or decrease nbdbuf).'
          end if
          ABI_WARNING(msg)
+         quit=1
          exit ! It is enough if one lack of adequate occupation is identified, so exit.
        end if
      end do
+     if (quit==1) exit
    end do
  end if
 

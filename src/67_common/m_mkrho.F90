@@ -211,11 +211,14 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    ioption=option
  end if
 
- if(ioption/=0.and.paw_dmft%use_sc_dmft==1) then
-   ABI_ERROR('option argument value of this routines should be 0 if usedmft=1.')
+! Not sure what to do for Wannier90 DMFT
+ if(ioption/=0.and.(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10)) then
+   ABI_ERROR('option argument value of this routines should be 0 if usedmft=1 or 10.')
  end if
- if(paw_dmft%use_sc_dmft/=0) then
+ if(paw_dmft%use_sc_dmft/=0.and.paw_dmft%use_sc_dmft/=10) then
    nbandc1=(paw_dmft%mbandc-1)*paw_dmft%use_sc_dmft+1
+ else if(paw_dmft%use_sc_dmft==10) then
+   nbandc1=paw_dmft%mbandc
  else
    nbandc1=1
  end if
@@ -402,7 +405,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            !$OMP TARGET ENTER DATA MAP(to:kg_k) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
-           if (gpu_option /= ABI_GPU_DISABLED) then
+           if (gpu_option /= ABI_GPU_DISABLED .and. paw_dmft%use_sc_dmft/=1) then
              !On GPU, treat all bands at once
              ABI_MALLOC(weight_t,(nband_k))
              nband_occ = 0
@@ -525,7 +528,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                iband_me = iband_me + 1
                do ibandc1=1,nbandc1 ! in case of DMFT
                  ! Check if DMFT and only treat occupied states (check on occ.)
-                 if(paw_dmft%use_sc_dmft == 1) then
+                 if(paw_dmft%use_sc_dmft == 1 .or. paw_dmft%use_sc_dmft == 10) then
                    iband1 = paw_dmft%include_bands(ibandc1)
                    if(paw_dmft%band_in(iband)) then
                      if(.not. paw_dmft%band_in(iband1))  stop
@@ -664,6 +667,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
            end if ! gpu_option
 
+
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET EXIT DATA MAP(delete:kg_k) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -700,7 +704,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              ABI_FREE(occ_diag)
              ! ABI_FREE(occ_nd)
            end if
-           if(paw_dmft%use_sc_dmft==1) then
+           if(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10) then
              ! Allocation of DMFT temporaries arrays
              ABI_MALLOC(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
              ABI_MALLOC(occ_diag,(blocksize))
@@ -751,7 +755,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              end if
 
 ! ---------- DMFT
-             if(paw_dmft%use_sc_dmft==1) then
+             if(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10) then
                ! initialisation of DMFT arrays
                cwavef_rot(:,:,:,:) = zero
                occ_diag(:) = zero
@@ -1220,9 +1224,9 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
        ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
-       ii=0
-       jtemp=0
 
+       !$OMP PARALLEL DO &
+       !$OMP& PRIVATE(i3,i2,i1,ig3,ig2,ig1,ii,jj,gsquar,fact,sfr,sfi,fact0,rhoat,aa,bb,cc,dd,gmag,diff)
        do i3=1,n3
          ig3=i3-(i3/id3)*n3-1
          do i2=1,n2
@@ -1231,7 +1235,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
              do i1=1,n1
 
                ig1=i1-(i1/id1)*n1-1
-               ii=ii+1
+               ii=i1+n1*(ffti2_local(i2)-1+(n2/nproc_fft)*(i3-1))
                gsquar=dble(ig1*ig1)*gmet(1,1)+dble(ig2*ig2)*gmet(2,2)+&
                       dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
                       dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
@@ -1290,8 +1294,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                    rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                  end if
 
-               else
-                 jtemp=jtemp+1
                end if
 
              end do ! i1
@@ -1332,7 +1334,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
        ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
        ii=0
-       jtemp=0
        do i3=1,n3
          ig3=i3-(i3/id3)*n3-1
          do i2=1,n2
@@ -1396,8 +1397,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                  rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                  rhog(im,ii)=rhog(im,ii)+sfi*rhoat
-               else
-                 jtemp=jtemp+1
                end if
 
              end do ! i1
