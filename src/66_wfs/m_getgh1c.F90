@@ -51,7 +51,7 @@ module m_getgh1c
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -281,6 +281,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    !$OMP TARGET ENTER DATA MAP(to:cwave)   IF(map_cwave)
 #endif
  end if
+ has_mGGA1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vxctaulocal) )
 !======================================================================
 !== Apply the 1st-order local potential to the wavefunction
 !======================================================================
@@ -985,16 +986,21 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  has_mGGA1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vxctaulocal) )
 
  if (has_mGGA1) then
-   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) then
-     ABI_BUG("Not implemented for OpenMP GPU (gpu_option==2")
-   end if
-   ABI_MALLOC(gh1c_mGGA,(2,npw*my_nspinor))
-   ! this is hard coded for ndat = 1
+   ABI_MALLOC(gh1c_mGGA,(2,npw*my_nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM(cwave) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
    call getgh1c_mGGA(cwave,gs_hamkq%gbound_k,gh1c_mGGA,gs_hamkq%gmet,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
         & gs_hamkq%kg_k,gs_hamkq%kpt_k,gs_hamkq%mgfft,mpi_enreg,my_nspinor,gs_hamkq%n4,gs_hamkq%n5,&
-        & gs_hamkq%n6,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,&
-        & gs_hamkq%gpu_option)
-   do ispinor=1,my_nspinor
+        & gs_hamkq%n6,ndat,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,&
+        & gpu_option=gs_hamkq%gpu_option)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& MAP(to:gvnlx1_,gh1c_mGGA) PRIVATE(ispinor) &
+   !$OMP& IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
+   do ispinor=1,my_nspinor*ndat
+     !$OMP PARALLEL DO PRIVATE(ipw,ipws)
      do ipw=1,npw
        ipws=ipw+npw*(ispinor-1)
        gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+gh1c_mGGA(1,ipws)

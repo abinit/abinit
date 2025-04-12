@@ -263,7 +263,7 @@ Using anaddb is indeed the recommended approach if you want to analyze the break
 Running different DFPT calculations from scratch just to change [[asr]] is indeed a waste of time as
 you can compute the DDB only once and then use anaddb.
 
-Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
+Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB:
 [[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
 [[optdriver]]=10 (longwave calculations).
 For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
@@ -1533,17 +1533,17 @@ Variable(
     text=r"""
 For the Chebyshev Filtering algorithm, it is possible to estimate the degree of the polynom needed to reach a given precision on the wave-functions.
 Indeed, as explained in [[cite:Levitt2015]], after the application of the Chebyshev polynomial of order $n$ (noted $T_n(x)$) followed by a Rayleigh-Ritz procedure,
-the residual $r_i^n$ of the band $i$ can be estimated as :
+the residual $r_i^n$ of the band $i$ can be estimated as:
 
   $\|r_i^n\| \approx \|r_i\| \ / \ T_n(\lambda_i^{eff})$
 
 where $r_i$ is the residual before applying the Chebyshev polynomial, and $\lambda_i^{eff}=(\lambda_i - c)/r$ where $\lambda_i$ is the Rayleigh quotient of the band $i$, $r$ the filter radius and $c$ filter center.
-There are two possible scenarii :
+There are two possible scenarii:
 
-  * [[chebfi_oracle]] = 0 : the default value. The order of the polynom, or degree, is equal to [[mdeg_filter]] (or [[nline]],
+  * [[chebfi_oracle]] = 0: the default value. The order of the polynom, or degree, is equal to [[mdeg_filter]] (or [[nline]],
   depending on which one is used in the input) for every SCF step.
 
-  * [[chebfi_oracle]] > 0 : the square residuals $\|r_i\|^2$ are computed at the beginning of the algorithm, which adds a small time overhead (which could be negligible).
+  * [[chebfi_oracle]] > 0: the square residuals $\|r_i\|^2$ are computed at the beginning of the algorithm, which adds a small time overhead (which could be negligible).
   The degree of the polynom $n_i$ is estimated individually for every band, as explained below.
   Then the maximum value over all bands is taken.
   Indeed, for an efficient parallelism it is necessary to apply the same degree to every bands.
@@ -1692,7 +1692,7 @@ driven by workflows developed for earlier versions of ABINIT.
 The default value of [[chkparal]], will enforce some basic relevance of the input variables related to parallelism,
 thus hopefully preventing some users to loose computing power.
 
-The following relevances and adequacies are checked at present if [[chkparal]]=1 :
+The following relevances and adequacies are checked at present if [[chkparal]]=1:
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
 the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW).
 
@@ -1837,7 +1837,7 @@ Using anaddb is indeed the recommended approach if you want to analyze the break
 Running different DFPT calculations from scratch just to change [[chneut]] is indeed a waste of time as
 you can compute the DDB only once and then use anaddb.
 
-Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
+Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB:
 [[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
 [[optdriver]]=10 (longwave calculations).
 For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
@@ -1900,9 +1900,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 If [[constraint_kind]] is non-zero for at least one type of atom,
-the constrained DFT algorithm is activated.
+the constrained DFT algorithm [[cite:Gonze2022]] is activated.
 [[constraint_kind]] defines, for each type of atom, the kind of constraint(s) imposed by constrained DFT.
-When [[constraint_kind]] is zero for an atom type, there is not constraint applied to this atom type.
+When [[constraint_kind]] is zero for an atom type, there is no constraint applied to this atom type.
 Otherwise, different constraints can be imposed on the total charge (ion+electronic) and/or magnetization, computed
 inside a sphere of radius [[ratsph]], possibly smeared within a width [[ratsm]].
 Such integrated ion+electronic charge might be imposed to be equal to [[chrgat]], while the magnetization might be compared to [[spinat]].
@@ -1916,7 +1916,7 @@ When [[constraint_kind]]=2 or 12, only the magnetization axis is constrained (on
 When [[constraint_kind]]=3 or 13, only the magnetization magnitude is constrained.
 When [[constraint_kind]]=4 or 14, only the magnetization direction is constrained (only meaningful in the non-collinear case, not allowed in the collinear case);
 
-For the algorithm, see [[topic:ConstrainedDFT]]. It makes important use of the potential residual,
+For the algorithm, see [[cite:Gonze2022]]. It makes important use of the potential residual,
 so the algorithm works only with [[iscf]] between 2 and 9.
 The balance between the potential residual, and the density/magnetization constraint is governed by [[magcon_lambda]]. The spherical integral is governed by [[ratsph]] and [[ratsm]].
 
@@ -1986,17 +1986,17 @@ If [[cprj_in_memory]] = 2, "cprj" coefficients are stored in memory during the w
 
 For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
 
-* [[optdriver]] = 0 : ground-state computation. If optdriver/=0, [[cprj_in_memory]] is set to 0 automatically.
+* [[optdriver]] = 0: ground-state computation. If optdriver/=0, [[cprj_in_memory]] is set to 0 automatically.
 
-* [[wfoptalg]] = 10,114 or 111 : using Congugate Gradient algorithm (PAW only), LOBPCG (PAW or NC) or Chebyshev filtering (PAW or NC)
+* [[wfoptalg]] = 10,114 or 111: using Congugate Gradient algorithm (PAW only), LOBPCG (PAW or NC) or Chebyshev filtering (PAW or NC)
 
-* [[rmm_diis]] = 0 : without the use of rmm_diis algorithm
+* [[rmm_diis]] = 0: without the use of rmm_diis algorithm
 
-* [[berryopt]] = 0 : without finite electric-field
+* [[berryopt]] = 0: without finite electric-field
 
-* [[usefock]] = 0 : without Fock exchange term in the functional
+* [[usefock]] = 0: without Fock exchange term in the functional
 
-* [[nucdipmom]] = 0 : without nuclear dipolar moments
+* [[nucdipmom]] = 0: without nuclear dipolar moments
 
 For [[cprj_in_memory]] = 2, see [[cprj_update_lvl]] for a fine tuning of "cprj" updates (i.e. when they are computed directly from wavefunctions).
 
@@ -2025,15 +2025,15 @@ In principle, there is no need to compute "cprj" coefficients directly from the 
 However, numerical errors can accumulate and lead to a significant difference between "cprj" coefficients and wave-functions.
 One can update the "cprj" coefficients from time to time, computing them directly from the wave-functions, in different places in the code:
 
-* A : at the beginning of the run, or after the move of atoms
+* A: at the beginning of the run, or after the move of atoms
 
-* B : after wave-functions orthogonalization
+* B: after wave-functions orthogonalization
 
-* C : before the subspace diagonalization
+* C: before the subspace diagonalization
 
-* D : at the end of an iteration in the conjugate gradient algorithm
+* D: at the end of an iteration in the conjugate gradient algorithm
 
-* E : at the beginning of the conjugate gradient algorithm
+* E: at the beginning of the conjugate gradient algorithm
 
 The update is done depending on the [[cprj_update_lvl]] value according to the following table:
 
@@ -2985,10 +2985,10 @@ Variable(
 
 Value of double counting used for DMFT (so, only relevant for [[usedmft]]=1)..
 
-   * 1 : corresponds to the "Full Localized Limit" double counting (to be used with [[usepawu]]=10).
-   * 2 : corresponds to the "Around Mean Field" double counting (this is not yet in production).
-   * 5 : the calculation is done without magnetism in the J term (cf [[cite:Park2015]] and [[cite:Chen2016a]]), to be used with [[usepawu]]=14.
-   * 6 : this option is in development.
+   * 1: corresponds to the "Full Localized Limit" double counting (to be used with [[usepawu]]=10).
+   * 2: corresponds to the "Around Mean Field" double counting (this is not yet in production).
+   * 5: the calculation is done without magnetism in the J term (cf [[cite:Park2015]] and [[cite:Chen2016a]]), to be used with [[usepawu]]=14.
+   * 6: this option is in development.
 """,
 ),
 
@@ -3643,6 +3643,29 @@ from the tetrahedron method is rapidly varying.
 ),
 
 Variable(
+    abivarname="dtele",
+    varset="rttddft",
+    vartype="real",
+    topics=['RTTDDFT_basic'],
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    defaultval=0.1,
+    mnemonics="Delta Time for ELEctrons",
+    added_in_version="10",
+    text=r"""
+Defines the electron time step in atomic units of time, used to integrate the time-dependent
+Kohn-Sham equations in real-time TDDFT [[topic:RTTDDFT]] if [optdriver]] is 9.
+(One atomic time unit is 2.418884e-17 seconds).
+One should also set the number of time steps to be performed using the
+parameter [[ntime]].
+
+A good value for [[dtele]] is usually less than or equal to 0.1.
+The user should try several values in order to find the one allowing for
+a stable and efficient integration.
+""",
+),
+
+Variable(
     abivarname="dtion",
     varset="rlx",
     vartype="real",
@@ -3777,8 +3800,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[ecutsigx]] determines the cut-off energy of the planewave set used to
-generate the exchange part of the self-energy operator. For norm-conserving
-calculations, it is pointless to have [[ecutsigx]] bigger than 4*[[ecut]],
+generate the exchange part of the self-energy operator.
+Theoretically, we need [[ecutsigx]] = 4 [[ecut]] to have an exact treatment of $\Sigma_x$.
+
+For norm-conserving calculations, it is pointless to have [[ecutsigx]] bigger than 4 * [[ecut]],
 while for PAW calculations, the maximal useful value is [[pawecutdg]]. Thus,
 if you do not care about CPU time, please use these values. If you want to
 spare some CPU time, you might try to use a value between [[ecut]] and these upper limits.
@@ -3839,22 +3864,23 @@ Variable(
     defaultval=ValueWithConditions({'[[optdriver]] in [3, 4]': '[[ecut]]', 'defaultval': 0.0}),
     mnemonics="Energy CUT-off for WaveFunctioNs",
     characteristics=['[[ENERGY]]'],
-    requires=" [[optdriver]] in [3, 4]",
+    requires=" [[optdriver]] in [3, 4, 6]",
     added_in_version="before_v9",
     text=r"""
 [[ecutwfn]] determines the cut-off energy of the planewave set used to
 represent the wavefunctions in the formula that generates the independent-
 particle susceptibility $\chi^{0}_{KS}$ (for [[optdriver]] = 3), or the self-
-energy (for [[optdriver]] = 4).
+energy (for [[optdriver]] = 4) or the Green's functions,
+and all the derived quantities when the GWR code is used ([[optdriver]] 6)
 
 Although this is not recommended, one is allowed to set [[ecutwfn]] smaller than [[ecut]], so that the wavefunctions are
-filtered, and some components are ignored. As a side effect, the wavefunctions
-are no more normalized, and also, no more orthogonal. This also means
-that the q=0, Q=0 or q=0, Q'=0 matrix elements of the susceptibility are not zero
+filtered, and some components are ignored.
+As a side effect, the wavefunctions are no more normalized, and also, no more orthogonal.
+This also means that the q=0, Q=0 or q=0, Q'=0 matrix elements of the susceptibility are not zero
 as they should, which might be a problem in some cases depending on the intended usage of the
 susceptibility matrix beyond standard GW and BSE calculations.
 
-Anyhow, the set of plane waves can be much smaller for [[optdriver]] = 3, than for [[optdriver]] = 4,
+Anyhow, the set of plane waves can be much smaller
 although a convergence study is needed to choose correctly both values.
 
 The size of this set of planewaves is [[npwwfn]].
@@ -4303,7 +4329,7 @@ Variable(
     requires="[[eph_intmeth]] == 1",
     added_in_version="before_v9",
     text=r"""
-This variable defines the gaussian broadening used for the integration over the double delta
+This variable defines the gaussian broadening used for the integration of the double delta
 over the Fermi surface when [[eph_intmeth]] == 1.
 A negative value, activates the adaptive gaussian broadening proposed in [[cite:Li2015]]
 in which the broadening is automatically computed from the group velocities.
@@ -4447,7 +4473,8 @@ The choice is among:
 !!! important
 
     At the time of writing ( |today| ), PAW is not supported by the EPH code.
-    Also [[useylm]] must be set to 0 (default for NC pseudos).
+    Also, calculations with [[nspinor]] = 2 require [[nspden]] 1 in all the EPH tasks
+    in which the interpolation of the DFPT potentials is needed.
 """,
 ),
 
@@ -4789,9 +4816,9 @@ Also, one can count several datasets separately in one run.
 
 For now, this feature is available only in the following context:
 
-* [[optdriver]] = 0 : ground-state computation
+* [[optdriver]] = 0: ground-state computation
 
-* [[paral_kgb]] = 0 : simple parallelization over k-points
+* [[paral_kgb]] = 0: simple parallelization over k-points
 
 If the counting is activated, a little report is written in abinit output.
 Here an example:
@@ -5082,10 +5109,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[freqspmax]] sets the maximum real frequency used to calculate the spectral
-function from the GW Green's function. [[freqspmin]], [[freqspmax]] and
-[[nfreqsp]] define the spacing of an equidistant frequency mesh along the real
-axis. Alternatively, the variables [[gw_customnfreqsp]] and [[gw_freqsp]] can
-be used to make a user-defined grid.
+function $A_\nk(\ww)$ from the GW Green's function.
+[[freqspmin]], [[freqspmax]] and [[nfreqsp]] define the spacing of an equidistant frequency mesh along the real axis.
+Alternatively, the variables [[gw_customnfreqsp]] and [[gw_freqsp]] can be used to make a user-defined grid.
 """,
 ),
 
@@ -5102,8 +5128,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[freqspmin]] sets the minimum real frequency used to calculate the spectral
-function from the GW Green's function. [[freqspmin]] is set to -[[freqspmax]]
-if left undefined. [[freqspmin]], [[freqspmax]], and [[nfreqsp]] define the
+function from the GW Green's function.
+[[freqspmin]] is set to -[[freqspmax]] if left undefined. [[freqspmin]], [[freqspmax]], and [[nfreqsp]] define the
 spacing of an equidistant frequency mesh along the real axis. Alternatively,
 the variables [[gw_customnfreqsp]] and [[gw_freqsp]] can be used to make a user-defined grid.
 """,
@@ -6355,18 +6381,21 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GPU: Non-Local operator, DISTRIBute projections",
-    requires="[[use_gemm_nonlop]] == 1 and [[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
+    requires="[[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
     added_in_version="9.12",
     text=r"""
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
 in the non-local operator) are all stored on all GPU devices.
-[[gpu_nl_distrib]] forces the distribution of these projections on several GPU devices. This
-uses less memory per GPU but requires communications beween GPU devices. These communication
-penalize the execution time.
-[[gpu_nl_splitsize]] defines the number of blocks used to split the projections.
+[[gpu_nl_distrib]] enable the distribution of these projections in slices on several GPU devices.
+This uses less memory per GPU but requires communications beween GPU devices. These communications
+may penalize the execution time, especially if splitting size is higher than the amount of GPU per node
+or if GPU-aware MPI wasn't enabled at compile time.
+By default, the projections splitting size is automatically set by ABINIT after assessing GPU memory
+consumption. One may force a specific splitting size by setting [[gpu_nl_splitsize]].
 In standard executions, the distribution is only needed on large use cases to address
-the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
-when needed.
+the high memory needs.
+It is recommended to use it with a GPU-aware MPI and enable its use when compiling ABINIT
+(`--enable-mpi-gpu-aware`).
 """,
 ),
 
@@ -6378,17 +6407,21 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="GPU: Non-Local operator SPLITing SIZE",
-    requires="[[use_gemm_nonlop]] == 1 and [[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
+    requires="[[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
     added_in_version="9.12",
     text=r"""
-Only relevant when [[gpu_nl_distrib]] = 1.
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
 in the non-local operator) are all stored on all GPU devices.
-[[gpu_nl_splitsize]] defines the number of blocks used to split these projections
-on several GPU devices.
+[[gpu_nl_splitsize]] defines the number of slices used to split these projections to
+save GPU memory usage.
+By default, each task recomputes all projection slices when computing non-local operator.
+When [[gpu_nl_distrib]] is set to 1, projections slices are distributed among MPI tasks and
+computed only once per tasks, to be shared between MPI tasks when computing non-local operator.
 In standard executions, the distribution is only needed on large use cases to address
-the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
-when needed.
+the high memory needs. ABINIT automatically assess memory consumption and enable splitting
+to fit in memory if needed.
+As its heuristic to assess memory may be error-prone, user may to use this parameter to force a
+specific splitting size.
 """,
 ),
 
@@ -6436,6 +6469,26 @@ GPU programming models available in ABINIT:
   on CPU (see [[gpu_kokkos_nthrd]]).
 
 For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
+""",
+),
+
+Variable(
+    abivarname="gpu_thread_limit",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval="Minimum between 4 and number of [[OPENMP]] threads, if GPU is enabled, 0 otherwise.",
+    mnemonics="GPU: Thread Limit",
+    requires="[[gpu_option]] /= 0 ",
+    added_in_version="10.4",
+    text=r"""
+When using GPU acceleration, some parts still runs on CPU and are parallelised using MPI distribution or OpenMP threads.
+Usually, GPU runs with one MPI task per GPU, which limits MPI-based parallelism, but with more OpenMP threads per tasks,
+which favors OpenMP parallelism.
+However, some OpenMP regions tend to be significantly slower with a high number of threads (OMP_NUM_THREADS env variable),
+hence ABINIT limit the number of threads in those select regions, to 4 threads by default, if GPU is enabled.
+This parameter allows to change this limit, for tuning purposes.
 """,
 ),
 
@@ -6673,21 +6726,23 @@ until the quasi-particle energies are converged within [[gwr_tolqpe]].
 """,
 ),
 
-Variable(
-    abivarname="gwr_fit",
-    varset="gwr",
-    vartype="integer",
-    topics=['GWR_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="GWR FIT",
-    requires="[[optdriver]] == 6",
-    added_in_version="10.3.4",
-    text=r"""
-A non-zero value activates the fit of the polarizabily and of the inverse dielectric matrix
-in order to accelerate the convergence of the GWR results wrt the number of points in the minimax mesh.
-""",
-),
+#Variable(
+#    abivarname="gwr_fit",
+#    varset="gwr",
+#    vartype="integer",
+#    topics=['GWR_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="GWR FIT",
+#    requires="[[optdriver]] == 6",
+#    added_in_version="10.3.4",
+#    text=r"""
+#A non-zero value activates the fit of the polarizabily and of the inverse dielectric matrix
+#in order to accelerate the convergence of the GWR results wrt the number of points in the minimax mesh.
+#
+#NOTE: This feature is still under development
+#""",
+#),
 
 Variable(
     abivarname="gw_qlwl",
@@ -6701,9 +6756,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 When [[optdriver]] = 3, [[gw_qlwl]] defines the set of q-points around Gamma
+in reduced coordinates of the reciprocal lattice
 that are considered during the evaluation of the non-analytical behaviour of
-the dielectric matrix. Optical spectra (with and without non-local field
-effects) are evaluated for each direction specified by [[gw_qlwl]].
+the dielectric matrix. Optical spectra (with and without non-local field effects)
+are evaluated for each direction specified by [[gw_qlwl]].
 """,
 ),
 
@@ -6718,29 +6774,30 @@ Variable(
     requires="[[optdriver]] == 4",
     added_in_version="before_v9",
     text=r"""
-[[gw_qprange]] is active only when [[nkptgw]] is equal to zero (default
-value). This variable simplifies the specification of the list of kpoints and
-of the bands to be used for the computation of the quasi-particle corrections.
+[[gw_qprange]] is active only when [[nkptgw]] is equal to zero (default value).
+This variable simplifies the specification of the list of $\kk$-points and
+of the band range to be used for the computation of the QP corrections.
 The possible values are:
 
-  * 0 --> Compute the QP corrections only for the fundamental and the direct gap
-  * +num --> Compute the QP corrections for all the k-points in the irreducible zone,
-     and include `num` bands above and below the Fermi level.
-  * -num --> Compute the QP corrections for all the k-points in the irreducible zone.
-     Include all occupied states and `num` empty states.
+  * 0 --> Compute QP corrections only for the fundamental and the direct gap
+  * +NUM --> Compute the QP corrections for all the $\kk$-points in the IBZ,
+     and include `NUM` bands above and below the Fermi level.
+  * -NUM --> Compute QP corrections for all the $\kk$-points in the IBZ.
+     Include all occupied states and `NUM` empty states.
 
-The default value is 0 and is very handy for one-shot calculations. It is
-important to stress, however, that the position of the direct/fundamental
-gaps is deduced from the energies computed on the k-mesh used for the WFK
-file. Therefore the computed gaps might differ from the correct ones that can
-only be obtained with an appropriate sampling of the irreducible zone.
+The default value is 0 and is very handy for one-shot calculations.
+It is important to stress, however, that the position of the direct/fundamental
+gaps is deduced from the energies computed on the $\kk$-mesh associated to the WFK file.
+Therefore the computed gaps might differ from the **True** ones that can
+only be obtained with an appropriate sampling of the IBZ.
+
 Positive values are useful if we do not know the position of the GW HOMO, LOMO
-and we want to investigate the effect of the GW corrections on the states
-close to the gap Negative values are usually used for self-consistent
-calculations Note that, in the case of self-consistency or [[symsigma]] == 1, the
-code might change the bands range so that all the degenerate states are
-included. Note also that [[kptgw]], and [[bdgw]] are ignored when this options
-is used. If you want to select manually the list of k-points and bands, you
+and we want to investigate the effect of the GW corrections on the states close to the gap.
+Negative values are usually used for self-consistent calculations Note that,
+in the case of self-consistency or [[symsigma]] == 1, the code might change the bands range
+so that all the degenerate states are included.
+Note also that [[kptgw]], and [[bdgw]] are ignored when this options is used.
+If you want to select manually the list of $\kk$-points and bands, you
 have to provide the three variables [[nkptgw]], [[kptgw]], and [[bdgw]].
 """,
 ),
@@ -6756,8 +6813,7 @@ Variable(
     requires="[[optdriver]] == 4 and [[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
-Only available for PAW and relevant if [[optdriver]] = 4 that is, sigma
-calculations.
+Only available for PAW and relevant if [[optdriver]] = 4 that is, sigma calculations.
 
 Theoretical introduction: GW calculations performed on top of electronic
 calculations relying when the frozen-core approximation is used to separate
@@ -6774,11 +6830,10 @@ the core electrons in the reference atomic configuration that are calculated
 during the generation of the PAW setup. This is a good approximation provided
 that the core wave functions are strictly localized inside the PAW spheres.
 
-[[gw_sigxcore]] defines the approximation used to evaluate the core
-contribution to sigma.
+[[gw_sigxcore]] defines the approximation used to evaluate the core contribution to sigma.
 
-  * [[gw_sigxcore]] = 0, standard approach, the core contribution is approximated with vxc.
-  * [[gw_sigxcore]] = 1, the core term is approximated with the Fock operator inside the PAW spheres.
+  * 0, standard approach, the core contribution is approximated with vxc.
+  * 1, the core term is approximated with the Fock operator inside the PAW spheres.
 """,
 ),
 
@@ -6794,10 +6849,10 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-Sets a tolerance for absolute differences of QP energies between to consecutive iterations
+Sets a tolerance for absolute differences of QP energies between two consecutive iterations
 that will cause the self-consistent GWR cycle to stop.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **gwr_tolqpe** has
-the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
+It can be specified in Ha (the default), Ry, eV or Kelvin, since **gwr_tolqpe** has
+the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
 """,
 ),
 
@@ -7861,6 +7916,7 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
   * = 5 --> **Nudged Elastic Band (NEB)** for finding Minimal Energy Path (MEP) connecting two minima;
     the algorithm variant can be selected with the [[neb_algo]] keyword (NEB+improved tangent by default).
     The solver for the Ordinary Differential Equation (ODE) can be selected with [[mep_solver]] (steepest-descent by default).
+    It is possible (optionally) to vary the vectors of the primitive cell along the path (variable-cell NEB) by using the variable [[neb_cell_algo]].
     The spring constant connecting images along the path is defined by [[neb_spring]]. See also [[mep_mxstep]] keyword.
   * = 6 --> **Linear Combination of Constrained DFT Energies**. The images can have different electronic structure ([[occ]] can differ),
     and their total energies are combined linearly using the factors in [[mixesimgf]], giving the actual total energy of the ensemble
@@ -7874,6 +7930,12 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     (no use of [[dynimage]]); possible transformations of coordinates are defined by [[pitransform]];
     Fictitious masses of the atoms (possibly different from the true masses given by [[amu]]) can be specified by [[pimass]].
     At present, it is only possible to perform calculations in the (N,V,T) ensemble ([[optcell]] = 0).
+  * = 10 --> **Path-Integral Quantum Thermal Bath (PI-QTB)** (see [[cite:Brieuc2016]],[[cite:Dammak2009]]).
+    QTB-MD is an efficient but approximate method when dealing with strongly anharmonic systems,
+    while path integral molecular dynamics (PIMD) gives exact results but in a huge amount of computation time.
+    The QTB and PIMD methods have been combined in order to improve the PIMD convergence
+    or correct the failures of the QTB-MD technique. Warning: this option need a previoulsy generated file
+    containing Gaussian random forces for each time step. Very experimental !!!
 
 No meaning for RF calculations.
 """,
@@ -9135,11 +9197,11 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
 
-  * 50 --> IIT temperature-dependent free energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter).
-  * 51 --> corrected KSDT, LDA temperature-dependent free energy functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]].
-  * 60 --> KDT16, GGA temperature-dependant free energy functional (PBE parametrization) : Karasiev, Dufty, Trickey [[cite:Karasiev2018]].
+  * 50 --> IIT, LDA temperature-dependent free energy functional: Ichimaru, Iyetomy & Tanaka [[cite:Ichimaru1987]].
+  * 51 --> corrected KSDT, LDA temperature-dependent free energy functional: Karasiev, Sjostrom, Dufty & Trickey [[cite:Karasiev2014]].
+  * 60 --> KDT16, GGA temperature-dependant free energy functional (PBE parametrization) : Karasiev, Dufty & Trickey [[cite:Karasiev2018]].
 
-**ETSF Lib XC functionals**
+**ETSF LibXC functionals**
 
 Note that you must compile ABINIT with the LibXC plug-in in order to be able
 to access these functionals.
@@ -11358,7 +11420,7 @@ irrespective of the value of [[nbdbuf]].
 
 With [[nbdbuf]] = -101, the bands in the buffer are automatically defined through their occupancies.
 The convergence criteria is normally $resid < tolwfr$, which means that the squared band residual should be lower than [[tolwfr]].
-With [[nbdbuf]] = -101, the convergence criteria becomes : $resid * occ < tolwfr$, where $occ$ is the band occupancy.
+With [[nbdbuf]] = -101, the convergence criteria becomes: $resid * occ < tolwfr$, where $occ$ is the band occupancy.
 In that case, bands with null occupation numbers are completely ignored and bands with partial band occupancies are converged according to a modified criteria, equal to $tolwfr/occ$.
 This functionality is still experimental and has not been tested on many systems yet.
 
@@ -11670,9 +11732,40 @@ See [[cite:Henkelman2000a]]
 
 Note that, in all cases, it is possible to define the value of the spring
 constant connecting images with [[neb_spring]], keeping it constant or
-allowing it to vary between 2 values (to have higher resolution close to the saddle point).
+allowing it to vary between 2 values (to have higher resolution close to the saddle point).  
+All these methods are also compatible with the variable cell NEB (evolution of lattice vectors along the path), which can be applied using [[neb_cell_algo]].
 """,
 ),
+
+Variable(
+    abivarname="neb_cell_algo",
+    varset="rlx",
+    vartype="integer",
+    topics=['TransPath_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Nudged Elastic Band variable CELL ALGOrithm",
+    requires="[[imgmov]] == 5",
+    added_in_version="v10",
+    text=r"""
+This variable must be enabled to perform Variable Cell Nudged Elastic Band (NEB) calculations,
+i.e. to allow the primitive cell vectors evolve along the path.  
+The possible values are:
+
+  * 0 --> **No cell evolution** (default value)
+
+  * 1 --> **Generalized Solid-State NEB (GSS-NEB)**  
+  Implements the method described in [[cite:Sheppard2012]].
+
+  * 2 --> **Variable-Cell NEB (VC-NEB)**  
+  Implements the method described in [[cite:Qian2013]].  
+    WARNING: Not yet usable! (to be fixed)
+
+> Note: variable-cell NEB is only compatible with the steepest-descent
+Minimum Energy Path search algorithm ([[mep_solver]]=0).
+""",
+),
+
 
 Variable(
     abivarname="neb_spring",
@@ -11838,7 +11931,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[nfreqsp]] defines the number of real frequencies used to calculate the
-spectral function of the GW Green's function.
+spectral function $A_nk(\ww)$ of the GW Green's function.
 """,
 ),
 
@@ -11959,7 +12052,7 @@ Variable(
     requires="[[nqpt]] == 1 and [[kptopt]] >= 0",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done,
 and the default value of [[ngqpt]] is kept.
 
 Similar to [[ngkpt]], but for the q-wavevector. At variance with [[ngkpt]], note that only one q point is selected per dataset
@@ -12184,7 +12277,7 @@ Variable(
 Allows to choose the algorithm for non-local operator application.
 The default value is [[nloc_alg]] = 4, and the meaning of this variable depends on [[useylm]].
 
-For [[useylm]] = 0 :
+For [[useylm]] = 0:
 
   On super-scalar architectures, [[nloc_alg]] = 4 is the best.
   More detailed explanations:
@@ -12197,7 +12290,7 @@ For [[useylm]] = 0 :
      been coded. This should be especially efficient on scalar and super-scalar
      machines. This has been confirmed by tests.
 
-For [[useylm]] = 1 :
+For [[useylm]] = 1:
 
 With spherical harmonics, the computation of the scalar product between a wave function $\psi$ and the projector $p_{a,nlm}$ writes:
 
@@ -12323,7 +12416,7 @@ $$ H_{non-local}|\psi> = \sum_a\sum_{ij} |p_{a,i}> D_{a,ij} <p_{a,i}|\psi> $$
 The index "a" stands for atoms ([[natom]]), while "i" and "j" indices run over the set of available projectors of the pseudo-potential.
 $e_{a,ij}$ and $D_{a,ij}$ are scalars.
 In the PAW formalism ([[usepaw]] = 1), the overlap operator has the same structure than $H_{non-local}$.
-The most time-consuming parts of the computation of non-local terms are :
+The most time-consuming parts of the computation of non-local terms are:
 
 * the computation of $<p_{a,i}|\psi>$ for every "a" and "i"
 
@@ -12342,11 +12435,11 @@ Also, one can count several datasets separately in one run.
 
 For now, this feature is available only in the following context:
 
-* [[useylm]] = 1 : use of spherical harmonics
+* [[useylm]] = 1: use of spherical harmonics
 
-* [[optdriver]] = 0 : ground-state computation
+* [[optdriver]] = 0: ground-state computation
 
-* [[paral_kgb]] = 0 : simple parallelization over k-points
+* [[paral_kgb]] = 0: simple parallelization over k-points
 
 If the counting is activated, a little report is written in abinit output.
 Here an example:
@@ -13085,7 +13178,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done,
 and the default value of [[nshiftq]] is kept.
 
 This parameter gives the number of shifted grids to be used concurrently to
@@ -13274,15 +13367,16 @@ Variable(
     abivarname="ntime",
     varset="rlx",
     vartype="integer",
-    topics=['MolecularDynamics_basic', 'GeoOpt_basic'],
+    topics=['MolecularDynamics_basic', 'GeoOpt_basic', 'RTTDDFT_basic'],
     dimensions="scalar",
     defaultval="0 if ionmvov == 0, set to 1000 if ionvmov != 0 and imgmov != 0 and the variable is not specified.",
     mnemonics="Number of TIME steps",
     added_in_version="before_v9",
     text=r"""
-Gives the maximum number of molecular dynamics time steps or structural
-optimization steps to be done if [[geoopt]] or [[moldyn]] are not "none".
-Starting with Abinit9, ntime is automatically set to 1000,
+Gives the maximum number of molecular dynamics or electron dynamics time steps or structural
+optimization steps to be done if [[geoopt]] or [[moldyn]] are not "none" or [[optdriver]] is 9
+(real-time TDDFT).
+Starting with Abinit9, ntime is automatically set to 1000, if [[geoopt]] or [[moldyn]] are not "none",
 [[ntimimage]] is zero and [[ntime]] is not specified in the input file.
 Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
 
@@ -13865,7 +13959,7 @@ each k point, and possibly for each spin -- the total number of elements is
 the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 [[wtk]] ([[nkpt]]) are NOT automatically normalized under this option.
 
-  * [[occopt]] = 3 to 8 :
+  * [[occopt]] = 3 to 8:
 Metallic occupation of levels, using different occupation schemes (see below).
 See the review of the different possibilities in [[cite:Santos2023]], that
 delivers a nice pedagogical explanation of these.
@@ -14022,7 +14116,8 @@ Variable(
  'BSE_compulsory',
  'DFPT_compulsory',
  'Susceptibility_compulsory',
- 'SelfEnergy_compulsory'],
+ 'SelfEnergy_compulsory',
+ 'RTTDDFT_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="OPTions for the DRIVER",
@@ -14041,6 +14136,7 @@ The choice is among:
   * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see [[gwr_task]].
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 9 --> Real-time TDDDFT calculation (RTTDDFT), routine *rttddft_driver*
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
@@ -16342,10 +16438,11 @@ Variable(
     topics=['printing_prgs'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="PRinT EVK",
+    mnemonics="PRinT EVK - Elements of the Velocity matrix at wavevector K",
     added_in_version="9.11.0",
     text=r"""
-   If set to 1, ABINIT will produce a netCDF EVK file.
+If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.
+Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesnt support MPI-IO.
 """,
 ),
 
@@ -17417,7 +17514,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done,
 and the default value of [[qpt]], namely the null vector, is kept.
 
 Combined with [[qptnrm]], define the q vector [[qptn]](1:3) in the case
@@ -17508,7 +17605,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done,
 and the default value of [[qptopt]] is kept.
 
 Controls the set up to generate the Q point [[qptn]](1:3) to be used for the
@@ -17560,7 +17657,7 @@ Variable(
     excludes="[[ngqpt]]",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done,
 and the default value of [[qptrlatt]] is kept.
 
 This input variable is used only when [[qptopt]] is positive. It partially
@@ -17658,7 +17755,7 @@ In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
 considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
 In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
 
-When [[prtdos]] = 3 or 4 :
+When [[prtdos]] = 3 or 4:
 
 Provides the radius of the spheres around the [[natsph]] atoms of indices
 [[iatsph]], in which the local DOS and its angular-momentum projections will
@@ -18577,7 +18674,7 @@ However, this default can also break symmetry, if the 111 direction
 is not an axis of rotation. This happens e.g. in tetragonal or hexagonal systems.
 Abinit will complain about this breaking, and
 you should adapt [[shiftk]].
-Easy back-up : use [[nshiftk]] = 1 and [[shiftk]] 0.0 0.0 0.0,
+Easy back-up: use [[nshiftk]] = 1 and [[shiftk]] 0.0 0.0 0.0,
 to get a non-shifted Monkhorst-Pack grid, which will be compatible with all
 symmetries, and is necessary for some features such as k-point interpolation.
 
@@ -18631,7 +18728,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done,
+WARNING: Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done,
 and the default value of [[shiftq]] is kept.
 
 It is used only when [[qptopt]] >= 0, and must be defined if [[nshiftq]] is larger than 1.
@@ -19303,7 +19400,7 @@ in the following cases:
 Also in the case [[nsppol]] = 2, [[nspinor]] = 1, [[nspden]] = 2  they might simply yield better accuracy (or faster convergence),
 but there is no automatic gain of CPU time or memory, although it is not as clear cut as in the above cases.
 
-IMPORTANT : The meaning of [[symafm]] is different in the [[nspden]] = 2 case (collinear magnetism),
+IMPORTANT: The meaning of [[symafm]] is different in the [[nspden]] = 2 case (collinear magnetism),
 and in the [[nspden]] = 4 case (non-collinear magnetism, with explicit treatment of magnetization as a vector).
 Indeed in the first case, it is supposed that the magnetization vector is not affected by the real space symmetry operations
 (so-called black and white symmetry groups).
@@ -20434,6 +20531,15 @@ Variable(
 If set to 1, enable the use of DFT+DMFT, see in particular the important
 variables [[dmft_solv]], [[dmftbandi]], [[dmftbandf]], [[dmft_nwli]],
 [[dmft_nwlo]], [[dmft_tollc]], [[dmft_tolfreq]], and [[dmft_iter]].
+
+If set to 10, enable the use of DFT+DMFT using the Wannier90 interface
+and the python invocation for calling an external many-body code to
+perform the DMFT step. Typically, we use the TRIQS library.
+The relevant keywords in that case are only [[dmftbandi]] and [[dmftbandf]]
+to specify the bands used for the projection, and [[w90iniprj]] with other
+Wannier90 specific keywords for the Wannier90 part. More information
+will be provided in the future. The rest of the discussion related to this
+keyword is in the case where [[usedmft]] is set to 1.
 
 The current implementation uses Wannier functions obtained from
 [[ cite:Amadon2008 | projected local orbitals ]] as
@@ -22170,7 +22276,7 @@ or other quantities that are density-dependent is performed before this replacem
 
 It has been observed that the SCF cycle of the Tran-Blaha mGGA can be quite
 hard to make converge, for systems for which there is some vacuum. In this
-case, setting first [[xc_taupos]] to 1.0e-7 ... 1.0e-6 , and increasing if necessary [[xc_denpos]]
+case, setting first [[xc_taupos]] to 1.0e-7 ... 1.0e-6, and increasing if necessary [[xc_denpos]]
 has been seen to allow good convergence. Of course, this will affect the numerical results somehow,
 and one should play a bit with this value to avoid incorrect calculations.
 """,
@@ -22553,6 +22659,199 @@ See also [[sigma_nshiftk]].
 ),
 
 Variable(
+    abivarname="td_ef_type",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent Electric Field TYPE",
+    added_in_version="10",
+    text=r"""
+This variable controls the type of external electric field to apply in RT-TDDFT.
+As of now, only impulse electric field are implemented, [[td_ef_type]] is 1.
+Moreover, the response to such impulse electric field can only be performed
+within the PAW approach (see [[topic:PAW]]).
+The intensity of the Dirac pulse as well as the time at which it is
+applied are controlled by the parameters [[td_ef_ezero]] and [[td_ef_tzero]].
+If [[td_ef_type]] is 0, no electric field is applied.
+""",
+),
+
+Variable(
+    abivarname="td_ef_tzero",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0.0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field TZERO",
+    added_in_version="10",
+    text=r"""
+This variable controls the time (in atomic units) at which the external
+electric field is applied (see [[td_ef_type]]).
+""",
+),
+
+Variable(
+    abivarname="td_ef_ezero",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0.1,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field EZERO",
+    added_in_version="10",
+    text=r"""
+This variable is the intensity (in atomic units) of the external
+electric field applied (see [[td_ef_type]]).
+""",
+),
+
+Variable(
+    abivarname="td_ef_pol",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=[1.0, 0.0, 0.0],
+    dimensions=[3],
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field POLarization",
+    added_in_version="10",
+    text=r"""
+This variable is the polarization vector (direction) of the external
+electric field applied (see [[td_ef_type]]).
+""",
+),
+
+Variable(
+    abivarname="td_ef_induced_vecpot",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_ef_type]] is not 0",
+    mnemonics="Time-Dependent Electric Field INDUCED VECtor POTential",
+    added_in_version="10",
+    text=r"""
+This variable controls wether we include the induced vector potential in the
+Hamiltonian so that the total vector potential applied is the sum of the vector
+potential associated with the external electric field and the vector potential
+induced by the current density.
+""",
+),
+
+Variable(
+    abivarname="td_exp_order",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=4,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent EXPonential ORDER",
+    added_in_version="10",
+    text=r"""
+This variable controls the order of the Taylor expansion used to approximate the exponential
+of an operator in the propagator for RT-TDDFT. The default value of 4 is usually a good choice
+that ensures good stability and acceptable computation time.
+""",
+),
+
+Variable(
+    abivarname="td_propagator",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent PROPAGATOR",
+    added_in_version="10",
+    text=r"""
+This variable controls the propagation algorithm used to integrate the time-dependent
+Kohn-Sham equations in real-time TDDFT. At present only the exponential rule,
+[[td_propagator]] is 0, and the exponential mid-point rule, [[td_propagator]] is 1,
+propagators are implemented.
+Both are based on a Taylor expansion of the exponential of an operator which order is
+controlled by the [[td_exp_order]] parameter. In case of [[td_propagator]] equal to 1
+the code uses a predictor-corrector scheme associated with two parameters [[td_scnmax]]
+and [[td_scthr]].
+""",
+),
+
+Variable(
+    abivarname="td_prtstr",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=1,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent PRinT STRide",
+    added_in_version="10",
+    text=r"""
+This variable controls how often the code outputs various physical
+properties (DOS, occupations, current density etc.).
+The code will write these properties in files every [[td_prtstr]] time step.
+""",
+),
+
+Variable(
+    abivarname="td_restart",
+    varset="rttddft",
+    topics=['RTTDDFT_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9",
+    mnemonics="Time-Dependent calculation RESTART",
+    added_in_version="10",
+    text=r"""
+This variable controls wether we are restarting a RTTDDFT run.
+If [[td_restart]] is 0 the calculation starts from scratch, if it is
+set to 1 than ABINIT will read the file called TD_RESTART that contains
+some information in order to continue the previous RTTDDFT calculation.
+""",
+),
+
+Variable(
+    abivarname="td_scnmax",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=6,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_propagator]] is 1",
+    mnemonics="Time-Dependent Self-Consistent NMAX",
+    added_in_version="10",
+    text=r"""
+This variable controls the maximum number of self-consistent corrector step
+in the predictor-corrector scheme ([[td_propagator]] equal to 1).
+""",
+),
+
+Variable(
+    abivarname="td_scthr",
+    varset="rttddft",
+    topics=['RTTDDFT_expert'],
+    vartype="integer",
+    defaultval=1e-7,
+    dimensions="scalar",
+    requires="[[optdriver]] is 9 and [[td_propagator]] is 1",
+    mnemonics="Time-Dependent propagation Self-Consistent THReshold",
+    added_in_version="10",
+    text=r"""
+This variable controls the threshold used to define the convergence of the
+self-consistent predictor-corrector scheme ([[td_propagator]] equal to 1).
+""",
+),
+
+Variable(
     abivarname="wfk_task",
     varset="gstate",
     topics=['ElecBandStructure_useful'],
@@ -22563,7 +22862,6 @@ Variable(
     mnemonics="WaveFunction at K TASK",
     added_in_version="9.0.0",
     text=r"""
-
 This variable defines the quantity that should be computed starting from a previously generated WFK file.
 Possible values are:
 
@@ -24368,9 +24666,12 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines the Cartesian grid of MPI processors used for GWR calculations.
-If not specified in the input, the code will generate this grid automatically using the total number of processors
-and the basic dimensions of the job computed at runtime.
+This variable defines the 4D Cartesian grid of MPI processors used for GWR calculations.
+If not specified in the input, the code will generate this grid automatically using
+the total number of MPI processors and the basic dimensions of the job computed at runtime.
+
+If the code runs out of memory, it is recommended to explicitly set this variable and to use
+as many processors as possible for g-vector parallelism.
 
 !!! important
 
@@ -24394,7 +24695,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines the maximum number of FFTs performed in the unit cell/super cell.
+This variable defines the maximum number of FFTs performed in the unit cell/supercell.
 If not specified in the input, the code will automatically define these values in order
 to find a good compromise betweeen memory and performance.
 """,
@@ -24414,21 +24715,28 @@ Variable(
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 The choice is among:
 
-* HDIAGO --> direct diagonalization of the KS Hamiltonian to produce [[nband]] eigenvectors
-* HDIAGO_FULL --> direct diagonalization of the KS Hamiltonian for maximum number of eigenvectors defined by [[ecut]]
-* G0W0 -->  one-shot GW
-* G0V -->
-* EGEW -->
-* EGW0 -->
-* G0EW -->
+* HDIAGO --> direct diagonalization of the KS Hamiltonian to produce [[nband]] eigenvectors.
+* HDIAGO_FULL --> direct diagonalization of the KS Hamiltonian for maximum number of eigenvectors defined by [[ecut]].
+* G0W0 -->  one-shot GW.
+* G0V --> one-shot Hartree-Fock with KS eigenstates.
+* EGEW --> energy-only self-consistent GW (update energies both in G and in W).
+* EGW0 --> energy-only self-consistent GW (update energies in G only).
+* G0EW --> energy-only self-consistent GW (update energies in W only).
+* CHI0 --> Compute irreducibile polarizability G0G0.
 * RPA_ENERGY --> Compute RPA correlation energy within the ACFDT framework.
 * CC4S --> Read density from file, diagonalize the KS Hamiltonian and produce output files required by CC4S.
-* CC4S_FULL --> Same as CC4S but compute maximum number of eigenvectors according to [[ecut]]
+* CC4S_FULL --> Same as CC4S but compute maximum number of eigenvectors according to [[ecut]].
 * CC4S_FROM_WFK --> Same as CC4S but read single particle orbitals from an external WFK file.
 
 !!! important
 
-    At the time of writing, PAW is not supported by the GWR code.
+    At the time of writing, the following features are **not yet supported** in GWR:
+
+    * Calculations with [[nspinor]] == 2.
+    * Metallic systems as the our minimax meshes assume systems with an energy gap.
+    * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
+    * Only $\Gamma$-centered $\kk$-meshes are supported in GWR.
+    * PAW method.
 """,
 ),
 
@@ -24443,7 +24751,13 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines the number of imaginary-time points in the minimax mesh.
+This variable defines the number of points in the minimax mesh.
+Possible values are: [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34].
+
+The other piece of information required for the selection of the minimax mesh
+is the ratio between the **fundamental** gap and the maximum transition energy i.e.
+the differerence between the highest KS eigenvalue for the empty states that, in turns, depends
+on the value of [[nband]] used and the energy of the lowest occupied state.
 """,
 ),
 
@@ -24458,12 +24772,21 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This input variable selects the algorithm used to compute the polarizability in the GWR code.
-Possible values are
+This variable is similar in spirit to [[gwr_sigma_algo]].
+It selects the algorithm used to compute the polarizability in the GWR code.
+Possible values are:
 
-* 0 --> Automatic selection.
-* 1 --> Use supercell.
-* 2 --> Use convolutions in the BZ.
+* 1 --> Compute $\chi$ in the real-space supercell.
+* 2 --> Compute $\chi$ using convolutions in the BZ.
+
+Note that [[gwr_chi_algo]] 2 has quadratic scaling with the number of $\qq$-points
+but it is more memory-efficient than the real-space method, as it operates on two-point functions confined to the unit cell.
+Also, [[gwr_chi_algo]] 2 can take advantage of symmetries to reduce the number of points in the BZ,
+and can benefit from the parallelism over $\kk$-points in [[gwr_np_kgts]] more than the supercell method.
+If encountering out-of-memory issues with the supercell method, it is advisable to switch to the BZ convolution approach
+To optimize performance, utilize all available cores, prioritizing g-parallelism followed by k-parallelism.
+
+The two algorithms are equivalent in the case of $\Gamma$-only sampling.
 """,
 ),
 
@@ -24488,7 +24811,7 @@ Variable(
     vartype="integer",
     topics=['GWR_basic'],
     dimensions=[1],
-    defaultval=12,
+    defaultval=1,
     mnemonics="GWR SIGMA ALGOrithm.",
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
@@ -24496,9 +24819,23 @@ Variable(
 This input variable selects the algorithm used to compute the self-energy in the GWR code.
 Possible values are
 
-* 0 --> Automatic selection.
-* 1 --> Use supercell.
-* 2 --> Use convolutions in the BZ.
+* 1 --> Compute $\Sigma$ in the real-space supercell.
+* 2 --> Compute $\Sigma$ using convolutions in the BZ.
+
+[[gwr_sigma_algo]] 1 is the most efficient approach when one needs to compute QP corrections for all the $\kk$-points, e.g.
+when performing self-consistent calculations or if one needs to interpolate the QP corrections to obtain QP band structure
+along an arbitrary $\kk$-path.
+
+[[gwr_sigma_algo]] 2 is faster than 1 if we only need to compute QP corrections at the band edges that are ideally located
+at high-symmetry $\kk$-points as the code can exploit symmetries.
+In the best case scenario, both the CBM and the VBM are located at the $\Gamma$ point; hence the BZ summation
+can be replaced by a much faster symmetrized sum over the wavevectors of the IBZ.
+If encountering out-of-memory issues with the supercell method, it is advisable to switch to the BZ convolution approach
+To optimize performance, utilize all available cores, prioritizing g-parallelism followed by k-parallelism.
+
+The two algorithms are equivalent in the case of $\Gamma$-only sampling.
+
+See also [[gwr_chi_algo]]
 """,
 ),
 
@@ -24513,7 +24850,14 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-See the corresponding input variable for the usual GS grid [[boxcutmin]].
+This variable defines the FFT mesh used to represent the polarizability, the screened interaction $W$
+and the self-energy $\Sigma$ in the GWR code.
+The role is very similar to that of [[boxcutmin]], which is has a meaning only in the case of GS/DFPT calculations.
+
+In principle, setting [[gwr_boxcutmin]] = 2 ensures an exact treatment of products such as $G G$ or $G W$.
+However, this choice significantly increase computational cost and memory requirements.
+In practice, it is recommended to start with a smaller value, such as 1.1, and then gradually
+increase it (1.2, 1.3, etc.) in order to monitor the stability of the results.
 """,
 ),
 
@@ -24528,28 +24872,35 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.8.0",
     text=r"""
-Energy window in Hartree for the empty states used in the computation of the head/wings of the polarizability.
+This variable defines the transition energy window (in Hartree) for the empty states used
+in computing the head and wings of the polarizability.
+As discussed in [[cite:baroni1986]], the head and wings converge rapidly with respect to the number of bands, unlike the body of the matrix.
+Since the GWR code computes the body of the polarizability using the Green’s function in real space,
+fewer states are needed to achieve convergence for the head and wings compared to conventional GW calculations.
+The default value (-1.0) instructs the code to use all available [nband]] states.
+
+See also [[inclvkb]] for the inclusion of the contribution given by the non-local part of pseudopotential.
 """,
 ),
 
 
-Variable(
-    abivarname="gwr_regterm",
-    varset="gwr",
-    vartype="real",
-    topics=['GWR_expert'],
-    dimensions=[1],
-    defaultval=-1.0,
-    mnemonics="GWR REGularization TERM",
-    requires="[[optdriver]] == 6",
-    added_in_version="9.8.0",
-    text=r"""
-TODO: To be described.
-Negative value means automatic regularization.
-Zero to deactivate it.
-Positive to use specific value.
-""",
-),
+#Variable(
+#    abivarname="gwr_regterm",
+#    varset="gwr",
+#    vartype="real",
+#    topics=['GWR_expert'],
+#    dimensions=[1],
+#    defaultval=-1.0,
+#    mnemonics="GWR REGularization TERM",
+#    requires="[[optdriver]] == 6",
+#    added_in_version="9.8.0",
+#    text=r"""
+#TODO: To be described.
+#Negative value means automatic regularization.
+#Zero to deactivate it.
+#Positive to use specific value.
+#""",
+#),
 
 
 Variable(
@@ -24789,8 +25140,7 @@ Possible values:
 !!! note
 
     If the "hole" option is chosen, valence states are flipped, so one always
-    deals with the minimization problem, regardless of the polaron kind.
-
+    deals with a minimization problem, regardless of the polaron kind.
 """,
 ),
 
@@ -24813,7 +25163,7 @@ elements at $\mathbf{q} = \Gamma$:
 
 $$ g^\mathrm{corr}_{nn\nu}(\mathbf{k}, 0) = g_{nn\nu}(\mathbf{k}, 0) + g^\mathrm{avg}_\nu(0). $$
 
-These correction terms are computed from spherical integration of the long-range
+These correction terms are computed from a pherical integration of the long-range
 electron-phonon contribution to the polaron energy around the $\Gamma$-point.
 The spherical mesh for the integration is controlled by the [[eph_frohl_ntheta]] variable.
 
@@ -24949,13 +25299,13 @@ Variable(
     text=r"""
 This variable can used to reduce the density of the real-space mesh used to represent the
 polaron wavefunction and generate the XSF file when [[eph_task]] == -13.
-This is especially useful when computing the variational polaron equations on extra-dense k-meshes in conjunction with the
+This is especially useful when computing the variational polaron equations on extra-dense $\kk$-meshes in conjunction with the
 the KERANGE trick.
 The size of the array with polaron wavefunction is indeed proportional to nkbz * nfft where
-nkbz is the number of points in the full BZ and nfft is the number of FFT points in the unit.
+nkbz is the number of points in the full BZ and nfft is the number of FFT points in the unit cell.
 This is the default behaviour when [[vpq_mesh_fact]] is 1.
-If [[vpq_mesh_fact]] is greater the one, the mesh in real space will be downsampled by this value along the three reduced
-direction with a significant decrease in the memory requirements.
+If [[vpq_mesh_fact]] is greater than one, the mesh in real space will be downsampled by this value along the three reduced
+direction with a significant decrease in memory requirements.
 """,
 ),
 
@@ -25065,7 +25415,7 @@ This variable defines the number of optimization steps up to which the orthogona
 to previous polaronic solutions is enforced.
 After [[vpq_nstep_ort]], the orthogonalization constraint is lifted, allowing the
 polaron to fully relax while maintaining a distance from the previously obtained states.
-See also [[vpq_nstates]]
+See also [[vpq_nstates]].
 """,
 ),
 
@@ -25086,7 +25436,6 @@ $B_{\mathbf{q}\nu}$ during the optimization process, i.e., for the $n$-th step:
 $$ B^{(n)}_{\mathbf{q}\nu} \leftarrow (1 - \alpha) B^{(n)}_{\mathbf{q}\nu} + \alpha B^{(n-1)}_{\mathbf{q}\nu}. $$
 
 In certain cases, mixing may be useful to facilitate the convergence of optimization.
-
 """,
 ),
 
@@ -25101,8 +25450,8 @@ Variable(
     requires="[[eph_task]] == 18",
     added_in_version="10.1.4",
     text=r"""
-This variable defines whether one should fix the k-point or the q-point when computing the e-ph matrix elements
-g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+This variable defines whether one should fix the $\kk$-point or the $\qq$-point when computing the e-ph matrix elements
+g(k,q) along either a $\qq$-path or a $\kk$-path ([[eph_task]] == 18].
 Use "k" to fix the k-point or "q" to fix the q-point.
 
 The other piece of information is given by [[eph_fix_wavevec]] that specifies the reduced coordinates of the wavevector.
@@ -25121,10 +25470,10 @@ Variable(
     added_in_version="10.1.4",
     text=r"""
 This variable defines the wavevector in reduced coordinates of the reciprocal lattice
-that should be fixed when computing the e-ph matrix elements g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
-The other piece of information is given by [[eph_fix_korq]] that specifies whether one should fix the k-point or the q-point.
+that should be fixed when computing the e-ph matrix elements g(k,q) along either a $\qq$-path or $\kk$-path ([[eph_task]] == 18].
+The other piece of information is given by [[eph_fix_korq]] that specifies whether one should fix the $\kk$-point or the $\qq$-point.
 
-To compute e-ph matrix as a function of the q-point:
+To compute e-ph matrix as a function of the $\qq$-point, start from this template:
 
 ```
    optdriver 7
@@ -25152,7 +25501,7 @@ To compute e-ph matrix as a function of the q-point:
       0.5    0.25   0.75
 ```
 
-To compute e-ph matrix as a function of the k-point:
+To compute e-ph matrix as a function of the $\kk$-point, start from this template:
 
 ```
    optdriver 7
@@ -25185,11 +25534,10 @@ Variable(
     requires="[[eph_task]] == 18",
     added_in_version="10.1.4",
     text=r"""
-
 This variable defines the first and the last band that should be included when computing the e-ph matrix elements
-g(k,q) along either a q-path or k-path ([[eph_task]] == 18].
+g(k,q) along either a $\qq$-path or $\kk$-path when [[eph_task]] == 18.
 One can use these two variables to select the band range of interest and skip, for instance, low-energy states.
-If not specied all bands from 1 up to [[nband]] are included,
+If not specified, all bands from 1 up to [[nband]] are included.
 If specified in input, eph_path_brange(2) must be <= [[nband]].
 """,
 ),
@@ -25201,7 +25549,7 @@ Variable(
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval="0.1",
-    mnemonics="ORACLE in chebyshev filtering algorithm : FACTOR",
+    mnemonics="ORACLE in chebyshev filtering algorithm: FACTOR",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.3.4",
     requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] == 2",
@@ -25217,7 +25565,7 @@ Variable(
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval="0.0001",
-    mnemonics="ORACLE in chebyshev filtering algorithm : MINimal OCCupancy",
+    mnemonics="ORACLE in chebyshev filtering algorithm: MINimal OCCupancy",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.3.4",
     requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] > 0 and [[nbdbuf]] = -101",

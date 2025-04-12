@@ -22,6 +22,7 @@
 
 #include "abi_common.h"
 
+
 module m_effective_potential_file
 
  use defs_basis
@@ -295,7 +296,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
         call effective_potential_print(eff_pot,-1)
       end if
     end if
-    if (filetype==2 .or.filetype==23) then
+    if (filetype==2 .or.filetype==23) then ! xml file
 
 !     Free the effective potential before
       call effective_potential_free(eff_pot)
@@ -317,7 +318,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
 
 !     Generate long rage interation for the effective potential for both type and generate supercell
-      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
+      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm,1)
 
 !     If needed, print the effective potential
       call effective_potential_print(eff_pot,inp%prt_model)
@@ -1949,7 +1950,7 @@ end subroutine system_getDimFromXML
 ! Case 1: only local in the xml
    if (irpt1>0 .and. irpt2==0) then
      ifcs%cell(:,:) = int(cell_local(:,:))
-     ifcs%atmfrc(:,:,:,:,:)  = local_atmfrc(:,:,:,:,:)
+     ifcs%atmfrc(:,:,:,:,:)  = zero !local_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:)
      ifcs%ewald_atmfrc(:,:,:,:,:) = zero
 
@@ -1958,7 +1959,7 @@ end subroutine system_getDimFromXML
      ifcs%cell(:,:) = int(cell_total(:,:))
      ifcs%atmfrc(:,:,:,:,:)  = total_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = zero
-     ifcs%ewald_atmfrc(:,:,:,:,:) = total_atmfrc(:,:,:,:,:)
+     ifcs%ewald_atmfrc(:,:,:,:,:) = zero !total_atmfrc(:,:,:,:,:)
 
 ! Case 3: local + total in the xml
    else if (irpt1>0 .and. irpt2>0)then
@@ -1984,6 +1985,7 @@ end subroutine system_getDimFromXML
 &     ' The number of total IFC  (',irpt2,') is inferior to  ',ch10,&
 &     ' the number of short range IFC (',irpt1,') in ',filename,ch10,&
 &     ' This is not possible',ch10
+
        ABI_BUG(message)
      end if
    end if
@@ -2223,8 +2225,13 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
   ABI_MALLOC(blkval,(2,3,mpert,3,mpert,nblok))
+
   blkval = 0
+  if(size(ddb%val) /= 2*3*mpert*3*mpert*nblok ) then
+    ABI_BUG("Size of ddb%val is not consistent.")
+  endif
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
+
 
 !**********************************************************************
 ! Transfert crystal values
@@ -2965,7 +2972,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      end do
 !    Initialisation of the polynomial_coefficent structure with the values
      call polynomial_coeff_init(coefficient(icoeff),nterm_max,coeffs(icoeff),&
-&                               terms(icoeff,:),check=.true.)
+&                               terms(icoeff,:), check=.true., debug_str="init from xml")
+!    Set the name of the coefficient
 
 !    Get the name of this coefficient  and set it
 !    Try to find the index of the term corresponding to the interation in the
@@ -3166,7 +3174,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          Initialisation of the polynomial_coefficent structure with the values from the
 !          previous step
            icoeff = icoeff + 1
-           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:))
+           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:), debug_str="init from xml fortran", check=.true.)
            call polynomial_coeff_getName(name,coeffs(icoeff),symbols,recompute=.true.)
            call polynomial_coeff_setName(name,coeffs(icoeff))
 !          Deallocation of the terms array for this coefficient
@@ -3238,6 +3246,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    call polynomial_coeff_free(coeffs(ii))
  end do
  ABI_FREE(coeffs)
+
 
 end subroutine coeffs_xml2effpot
 !!***
@@ -3402,12 +3411,14 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  if (present(verbose)) need_verbose = verbose
  if (present(iatfix)) need_fixmap = .TRUE.
 
+
  natom_hist = size(hist%xred,2)
  nstep_hist = size(hist%xred,3)
 
 ! Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
+
 
  if(present(sc_size))then
     ncell(:) = sc_size

@@ -60,7 +60,7 @@ module m_dfpt_vtorho
  use m_fourier_interpol, only : transgrid
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -650,7 +650,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
      ! Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       call set_gemm_nonlop_ikpt(ikpt)
+       call set_gemm_nonlop_ikpt(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%istwf_k,gs_hamkq%indlmn,&
+       &    gs_hamkq%ntypat,gs_hamkq%nattyp,gs_hamkq%gpu_option)
      end if ! gemm_nonlop_use_gemm
 
      ! Free some memory before calling dfpt_vtowfk

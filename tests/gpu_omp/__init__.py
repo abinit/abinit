@@ -61,4 +61,15 @@ inp_files = [
 "t39.abi", # NC,  GS+DFPT, CGWF, phon+elfd+effmas (CaO, nspinor==1)
 "t40.abi", # NC,  GS+DFPT, CGWF, phon+elfd+strs   (AlAs, nspinor==1)
 "t41.abi", # PAW, GS, LOBPCG2,    (NiO, nspinor==2, nspden==4, paral_kgb==1, npband==2)
+#GS with distributed/sliced GEMM nonlop
+"t42.abi", # test CHEBFI (istwfk==1, npband==2, paral_kgb==1, gpu_nl_splitsize=2, gpu_nl_distrib=1)
+"t43.abi", # test CHEBFI (istwfk==2, npband==2, paral_kgb==1, gpu_nl_splitsize=2, gpu_nl_distrib=1)
+"t44.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1, gpu_nl_splitsize=4)
+"t45.abi", # test CHEBFI (istwfk==2, npband==1, paral_kgb==1, gpu_nl_splitsize=4)
+#DMFT
+"t46.abi", # Ni+O, nsppol==2, nspden==2
+"t47.abi", # Gd, nsppol==2, nspden==2
+"t48.abi", # Gd, nsppol==1, nspden==4, nspinor==2
+"t49.abi", # Ce, GS LDA, dtset#1
+"t50.abi", # Ce, DMFT CTQMC, dtset#2
 ]

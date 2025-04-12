@@ -1384,15 +1384,16 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 
  ! Second step : Multiplication by hmat
  do ineighbour = 1,interpolator%nvert
+   tmp_array2 = factor*hmat(:,interpolator%corresp(:,ineighbour,1)) ! 1 is for spin
    if(use_blas) then
      !call xgemv('N',hsize_coarse,hsize_coarse,cone,factor*(hmat(:,:,ineighbour)),hsize_coarse,allp(:,ineighbour),1,czero,tmp_array,1)
      !tmp_array2 = hmat(:,:,ineighbour)
-     tmp_array2 = hmat(:,interpolator%corresp(:,ineighbour,1)) ! 1 is for spin
-     tmp_array2 = factor*tmp_array2
+     !tmp_array2 = factor*tmp_array2
      call xgemv('N',hsize_coarse,hsize_coarse,cone,tmp_array2,hsize_coarse,allp(:,ineighbour),1,czero,tmp_array,1)
      test = test + tmp_array
    else
-     test = test+MATMUL(factor*(hmat(:,interpolator%corresp(:,ineighbour,1))),allp(:,ineighbour))
+     !test = test+MATMUL(factor*(hmat(:,interpolator%corresp(:,ineighbour,1))),allp(:,ineighbour))
+     test = test+MATMUL(tmp_array2,allp(:,ineighbour))
    end if
  end do
 

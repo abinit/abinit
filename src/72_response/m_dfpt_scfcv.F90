@@ -88,7 +88,7 @@ module m_dfpt_scfcv
  use m_mkcore,         only : dfpt_mkcore
  use m_spacepar,   only : hartrestr, make_vectornd, symrhg
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -1272,7 +1272,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !endif
 
 
-!Eventually close the dot file, before calling dfpt_nstdy
+!Eventually close the DDK file, before calling dfpt_nstdy
  if ((ipert==dtset%natom+2.and.sum((dtset%qptn(1:3))**2)<=1.0d-7.and.&
 & (dtset%berryopt/=4 .and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 & dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17)).or.&
