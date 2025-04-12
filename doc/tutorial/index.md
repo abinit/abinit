@@ -34,7 +34,7 @@ inkspace. -->
    viewBox="0 0 1122.5197 793.70081"
    version="1.1"
    id="svg5"
-   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
    sodipodi:docname="drawing.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -51,15 +51,17 @@ inkspace. -->
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.035279"
-     inkscape:cx="504.21189"
-     inkscape:cy="551.05916"
-     inkscape:window-width="1850"
-     inkscape:window-height="1016"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="a19330-5" />
+     inkscape:zoom="0.75750542"
+     inkscape:cx="447.52155"
+     inkscape:cy="442.90112"
+     inkscape:window-width="1920"
+     inkscape:window-height="1044"
+     inkscape:window-x="1516"
+     inkscape:window-y="4"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1" />
   <defs
      id="defs2">
     <rect
@@ -101,7 +103,7 @@ inkspace. -->
        xlink:href="#linearGradient75010"
        id="linearGradient186931"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.3800092,0,0,1.3541563,430.30578,49.878812)"
+       gradientTransform="matrix(1.3800092,0,0,1.4322337,430.30578,31.689128)"
        x1="166.63228"
        y1="259.96524"
        x2="166.72348"
@@ -888,13 +890,13 @@ inkspace. -->
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
          id="tspan211999-3">excitation</tspan></text>
     <rect
-       style="fill:url(#linearGradient186931);fill-opacity:1;stroke-width:3.03973;stroke-miterlimit:4;stroke-dasharray:none"
+       style="fill:url(#linearGradient186931);fill-opacity:1;stroke-width:3.12613;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect31-0-8-4-6"
        width="206.87245"
-       height="402.06561"
+       height="425.24777"
        x="554.29395"
        y="365.35617"
-       ry="67.462669" />
+       ry="71.352409" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -906,21 +908,21 @@ inkspace. -->
          x="680.69873"
          y="398.77707"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
-         id="tspan169998-9">9 advanced </tspan><tspan
+         id="tspan169998-9">10 advanced </tspan><tspan
          sodipodi:role="line"
          x="680.69873"
-         y="422.40891"
+         y="422.32654"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
          id="tspan189714">tutorials on DFPT </tspan><tspan
          sodipodi:role="line"
          x="680.69873"
-         y="446.04074"
+         y="445.87598"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
          id="tspan189716">and Electron-Phonon</tspan></text>
     <a
        id="a19330"
        xlink:href="elastic/"
-       transform="translate(-0.26475795,-3.6564178)">
+       transform="translate(-0.26495188,-6.9658692)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -937,7 +939,7 @@ inkspace. -->
     <a
        id="a19330-5"
        xlink:href="lw_quad/"
-       transform="translate(-2.3463708,91.768514)">
+       transform="translate(-2.3463708,83.742794)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -954,7 +956,7 @@ inkspace. -->
     <a
        id="a19334"
        xlink:href="nlo/"
-       transform="translate(-0.26475795,-3.6564178)">
+       transform="translate(-0.26475795,-6.9813711)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -971,7 +973,7 @@ inkspace. -->
     <a
        id="a19338"
        xlink:href="lattice_wannier/"
-       transform="translate(-0.26475795,-3.6564178)">
+       transform="translate(-0.26475795,-8.5417669)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -988,7 +990,7 @@ inkspace. -->
     <a
        id="a19342"
        xlink:href="eph_intro/"
-       transform="translate(-0.26475795,32.343582)">
+       transform="translate(-0.26475795,21.788977)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1005,7 +1007,7 @@ inkspace. -->
     <a
        id="a19346"
        xlink:href="eph4mob/"
-       transform="translate(-0.26475795,36.343582)">
+       transform="translate(-0.26475795,25.615786)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1022,7 +1024,7 @@ inkspace. -->
     <a
        id="a19350"
        xlink:href="eph4zpr/"
-       transform="translate(-0.26475795,32.343582)">
+       transform="translate(-0.26475795,25.478909)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1035,6 +1037,23 @@ inkspace. -->
            y="627.13184"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
            id="tspan189716-9-2-0-3-0-2">eph4zpr</tspan></text>
+    </a>
+    <a
+       id="a19350-9"
+       xlink:href="eph4vpq/"
+       transform="translate(-0.26450557,55.71513)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
+         x="683.26849"
+         y="627.13184"
+         id="text11092-9-5-3-2-5-1-7-9-6-6-0"
+         transform="scale(0.96801691,1.0330398)"><tspan
+           sodipodi:role="line"
+           x="683.26849"
+           y="627.13184"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:Arial;text-align:center;text-anchor:middle;fill:#fffefe;fill-opacity:1;stroke-width:0.968017"
+           id="tspan189716-9-2-0-3-0-2-5">eph4vpq</tspan></text>
     </a>
     <rect
        style="fill:url(#linearGradient228449);fill-opacity:1;stroke-width:2.6212;stroke-miterlimit:4;stroke-dasharray:none"
@@ -1166,7 +1185,7 @@ inkspace. -->
     <a
        id="a19354"
        xlink:href="eph_legacy/"
-       transform="translate(-0.26475795,32.343582)">
+       transform="translate(-0.26475795,56.948557)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1183,7 +1202,7 @@ inkspace. -->
     <a
        id="a19358"
        xlink:href="eph_tdep_legacy/"
-       transform="translate(-0.26475795,26.343582)">
+       transform="translate(-0.26475795,55.671894)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:18.6667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.968017"
@@ -1216,7 +1235,6 @@ inkspace. -->
     </a>
   </g>
 </svg>
-
 
 The four basic tutorials are presented at the top, in one orange block. There is also an orange block for the ABINIT_build tutorial.
 Each block in brown represents one intermediate-level tutorial. The blocks in red
@@ -1409,7 +1427,7 @@ interaction, elastic response, Raman coefficients, piezoelectricity ...)**
 
   * [The tutorial on quadrupoles](lw_quad) describes how to compute dynamical quadrupoles from DFPT.
 
-**Electron-phonon interaction has been the subject of major efforts in the last years. Three tutorials are already available to present the new implementations.**
+**Electron-phonon interaction has been the subject of major efforts in the last years. Four tutorials are already available to present the new implementations.**
 
   * [The introductive tutorial on the electron-phonon interaction](eph_intro) presents the electron-phonon driver
     integrated with the ABINIT executable, discuss important technical details related to the implementation and the associated input variables.
@@ -1422,6 +1440,8 @@ interaction, elastic response, Raman coefficients, piezoelectricity ...)**
     explains how to obtain the electron self-energy due to phonons, compute the zero-point renormalization (ZPR) of the band gap
     as well as temperature-dependent band gaps (or the whole electronic structure).
 
+  * [The tutorial on self-trapped polarons](eph4vpq)
+    explains how to use Variational Polaron Equations framework to compute self-trapped polarons in semiconductors and insulators.
 
 **Two legacy tutorials on electron-phonon interaction are still present.
 The implementations are still available at time of writing,
