@@ -195,7 +195,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  real(dp) :: ucvol,drude_plsmf,ecore,ecut_eff,ecutdg_eff,norm
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp
  real(dp) :: compch_fft,compch_sph,gsq_osc
- real(dp) :: vxcavg
+ real(dp) :: vxcavg,el_temp
  logical :: iscompatibleFFT,is_dfpt=.false.,paw_add_onsite,call_pawinit
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,w_fname
@@ -460,6 +460,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ABI_MALLOC(ks_nhat,(nfftf,0))
  end if
 
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
 !==================================================
 !==== Read KS band structure from the KSS file ====
 !==================================================
@@ -595,12 +598,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Calculate onsite vxc with and without core charge ===
    nzlmopt=-1; option=0; compch_sph=greatest_real
 
-   call pawdenpot(compch_sph,KS_energies%e_paw,KS_energies%e_pawdc,ipert0,&
-     Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
+     KS_energies%entropy_paw,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%ucvol,Psps%znuclpsp)
+     Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
  end if !PAW
 
  if (.not.allocated(ks_nhatgr))  then

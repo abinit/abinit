@@ -48,4 +48,17 @@ inp_files = [
 "t27.abi", # Silicium, PAW
 "t28.abi", # Methane, PAW
 "t29.abi", # Helium, single-band, istwfk==2
+#nspinor==2 (and nspden==4 sometimes)
+"t30.abi", # PAW, GS, using CHEBFI and LOBPCG (AlP, nspinor==2, nspden==1)
+"t31.abi", # PAW, GS+DFPT, only DDK           (AlP, nspinor==2, nspden==1)
+"t32.abi", # PAW, GS, old LOBPCG, (NiO, nspinor==1, paral_kgb==0)
+"t33.abi", # PAW, GS, old LOBPCG, (NiO, nspinor==2, nspden==4, paral_kgb==0)
+"t34.abi", # PAW, GS, LOBPCG2,    (NiO, nspinor==2, nspden==4, paral_kgb==1)
+"t35.abi", # PAW, GS, CGWF,       (Fe,  nspinor==2, nspden==4, paral_kgb==0), with fixed_occ
+"t36.abi", # NC,  GS, CGWF, mGGA  (Si,  nspinor==2, nspden==4)
+"t37.abi", # NC,  GS, CGWF,       (H,   nspinor==2, nspden==4)
+"t38.abi", # PAW, GS, CGWF,       (Fe, nspinor==2, nspden==4, paral_kgb==0)
+"t39.abi", # NC,  GS+DFPT, CGWF, phon+elfd+effmas (CaO, nspinor==1)
+"t40.abi", # NC,  GS+DFPT, CGWF, phon+elfd+strs   (AlAs, nspinor==1)
+"t41.abi", # PAW, GS, LOBPCG2,    (NiO, nspinor==2, nspden==4, paral_kgb==1, npband==2)
 ]

@@ -683,7 +683,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  Exchange-correlation
 
    call echo_xc_name(dtset%ixc)
-
    if (dtset%ixc<0) then
      el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
      call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)

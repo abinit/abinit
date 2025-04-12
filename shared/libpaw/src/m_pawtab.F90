@@ -336,6 +336,9 @@ MODULE m_pawtab
   real(dp) :: exccore
    ! Exchange-correlation energy for the core density
 
+  real(dp) :: sxccore=zero
+   ! Exchange-correlation entropy for the core density
+
   real(dp) :: exchmix
    ! mixing of exact exchange; default is 0.25 (PBE0)
 
@@ -1314,6 +1317,10 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   end if
   write(msg,'(a,es16.8)')'  XC energy for the core density ..................',Pawtab(ityp)%exccore
   call wrtout(my_unt,msg,my_mode)
+  if(abs(Pawtab(ityp)%sxccore)>tiny(zero)) then
+    write(msg,'(a,es16.8)')'  XC entropy for the core density .................',Pawtab(ityp)%sxccore
+  call wrtout(my_unt,msg,my_mode)
+  end if
   write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..............',Pawtab(ityp)%lamb_shielding
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Radius of the PAW sphere ........................',Pawtab(ityp)%rpaw
@@ -1510,8 +1517,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,eps,ex_cc,exccore,lamb_shielding,lambda,rpaw,rshp,rcore,rcoretau,shape_sigma
-   nn_dpr=nn_dpr+15
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,eps,ex_cc,exccore,sxccore,lamb_shielding,lambda,rpaw,rshp,rcore,rcoretau,shape_sigma
+   nn_dpr=nn_dpr+16
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -2277,6 +2284,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%eps  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
+   list_dpr(ii)=pawtab%sxccore  ;ii=ii+1
    list_dpr(ii)=pawtab%lamb_shielding  ;ii=ii+1
    list_dpr(ii)=pawtab%lambda  ;ii=ii+1
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
@@ -2536,6 +2544,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%eps=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
+   pawtab%sxccore=list_dpr(ii)  ;ii=ii+1
    pawtab%lamb_shielding=list_dpr(ii)  ;ii=ii+1
    pawtab%lambda=list_dpr(ii)  ;ii=ii+1
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1
