@@ -312,18 +312,38 @@ module m_ksdiago
  type, private :: psbands_t
 
    integer :: nb_tot = -1
-   integer :: nb_protected
-   integer :: num_spaces = -1
-   integer :: nb_per_space = -1
+
+   integer :: nb_protected = -1
+   ! Number of protected bands
+
+   integer :: nslices = -1
+   ! Number of slices
+
+   integer :: nb_per_slice = -1
+   ! Number of pseudoands per slice
+
+   !integer :: max_nb = -1
+
+   real(dp) :: efrac = 0.02
 
    type(dataset_type),pointer :: dtset
 
+   real(dp),contiguous,pointer :: eig_k(:)
+
+   integer,allocatable :: subspace(:,:)
+
+   real(dp),allocatable :: ps_eig(:)
+   ! eigenvalues (KS + pseudo energies)
+   ! (nb_tot)
+
  contains
    procedure :: init => psbands_init
-   procedure :: band2space => psbands_band2space
+    ! Initialize the object
+
+   procedure :: band2slice => psbands_band2slice
+
    procedure :: free => psbands_free
     ! Free memory.
-
  end type psbands_t
 !!***
 
@@ -950,6 +970,7 @@ end subroutine init_ddiago_ctl
 !!  istwf_k= Storage mode for wavefunctions.
 !!  kpoint(3)= k-point in reduced coordinates
 !!  ecut= Cutoff energy
+!!  gs_fermie=Fermi level as computed from the previous GS run.
 !!  nband_k=Number of bands
 !!  prtvol=Verbosity level
 !!  nfftf=(effective) number of FFT grid points in the dense FFT mesh (for this processor)
@@ -969,7 +990,7 @@ end subroutine init_ddiago_ctl
 !!
 !! SOURCE
 
-subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nfftf, &
+subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, ngfftc, nfftf, &
                           dtset, pawtab, pawfgr, paw_ij, cryst, psps, vtrial, eig_k, hyb, comm, &
                           electronpositron) ! Optional arguments
 
@@ -977,7 +998,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !scalars
  class(ugb_t),target,intent(out) :: ugb
  integer,intent(in) :: spin, istwf_k
- real(dp),intent(in) :: kpoint(3), ecut
+ real(dp),intent(in) :: kpoint(3), ecut, gs_fermie
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm,nfftf
  integer,intent(inout) :: nband_k
@@ -998,8 +1019,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !scalars
  integer,parameter :: mkmem1 = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ncomp1 = 1
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
- integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder, ib_glob, ib_loc
- integer :: type_calc,sij_opt,igsp2_start,ig, my_ib, ibs1, ipwsp, ispace, igsp_loc, my_npwsp
+ integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder, ib_glob, nb_glob, ib_loc
+ integer :: type_calc,sij_opt,igsp2_start,ig, my_ib, ibs1, ipwsp, islice, igsp_loc, my_npwsp
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g1, il_g2, ig1, ig2, ierr, min_my_nband, band_sum
  integer :: idat, ndat, batch_size, h_size !, mene_found
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3), g0(3)
@@ -1017,11 +1038,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type(uplan_t) :: uplan_k
  type(fftbox_plan3_t) :: box_plan
  type(pstat_t) :: pstat
- type(psbands_t) :: psbands
+ type(psbands_t) :: psb
 !arrays
  integer,allocatable :: gfft(:,:)
  real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3), my_gw_qlwl(3) ! q0(3),
- real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:), thetas(:)
+ real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:), thetas(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vcg_qbz(:,:)
  real(dp),target,allocatable :: bras(:,:)
  complex(dp),allocatable :: ps_ug(:,:,:)
@@ -1522,32 +1543,38 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Stochastic bands
  ! ================
  if (dtset%useria == 123) then
-   call wrtout(std_out, "Building Stochastic bands...")
-   ! Build energy grid.
-   !call psbands%init(dtset, fermie)
+   call wrtout(std_out, "Generating stochastic bands...")
+   ! Initial setup.
+   !call psb%init(dtset, h_size, eig_k, gs_fermie) !, nband_k)
    my_npwsp = eigvec%sizeb_local(1)
-   !ABI_CALLOC(ps_ug, (my_npwsp, psbands%max_nsto, psbands%ns))
-   ABI_MALLOC(thetas, (my_npwsp))
+   nb_glob = eigvec%sizeb_global(2)
+   ABI_CALLOC(ps_ug, (my_npwsp, psb%nb_per_slice, psb%nslices))
+   ABI_MALLOC(thetas, (nb_glob, psb%nb_per_slice))
 
-   ! Loop over global bands
-   do ib_glob=1, eigvec%sizeb_global(2)
-     ! Get space index from ib_glob.
-     !ispace = psbands%band_to_space(ib_glob); if (ispace == -1) cycle
-     !psbands%eig(psbands%max_nsto, psbands%ns))
-     call random_number(thetas)
-     ! Loop over global PW index
+   ! Loop over global bands.
+   do ib_glob=1, nb_glob
+    ! Need the same random phases on all MPI procs.
+    if (eigvec%processor%myproc == master) call random_number(thetas)
+    call xmpi_bcast(thetas, master, eigvec%processor%comm, ierr)
+
+     ! Get slice index from ib_glob.
+     islice = psb%band2slice(ib_glob); if (islice == -1) cycle
+     ! Loop over global PW index.
      do ipwsp=1,npwsp
        call eigvec%glob2loc(ipwsp, ib_glob, igsp_loc, ib_loc, haveit); if (.not. haveit) cycle
-       ps_ug(igsp_loc, ib_glob, ispace) = ps_ug(igsp_loc, ib_glob, ispace) + &
-         eigvec%buffer_cplx(igsp_loc, ib_loc) * exp(j_dpc * two * thetas(igsp_loc))
+       do ib=1,psb%nb_per_slice
+         ps_ug(igsp_loc, ib, islice) = ps_ug(igsp_loc, ib, islice) + &
+           eigvec%buffer_cplx(igsp_loc, ib_loc) * exp(j_dpc*two_pi*thetas(ib_glob,ib))
+         end do
      end do
    end do ! ib_glob
-   ABI_FREE(thetas)
-   call psbands%free()
+
    ! Normalize
-   ! TODO: Need communicator over columns here
-   !call xmpi_sum(ps_ug, comm_band, ierr)
-   !ps_ug = ps_ug / fact
+   ! TODO: Need MPI communicator over columns here
+   !call xmpi_sum(ps_ug, eigvec%column_comm, ierr)
+   ps_ug = ps_ug / sqrt(one * psb%nb_per_slice)
+   call psb%free()
+   ABI_FREE(thetas)
    ABI_FREE(ps_ug)
  end if
 
@@ -1807,8 +1834,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
 
  call ugb%print(units, dtset%prtvol)
 
- call wfk_hdr%free()
- call wfk_ebands%free()
+ call wfk_hdr%free(); call wfk_ebands%free()
 
 end subroutine ugb_from_wfk_file
 !!***
@@ -2180,24 +2206,100 @@ end subroutine hyb_free
 !!
 !! SOURCE
 
-subroutine psbands_init(psbands, dtset, nband_k, efermi)
+subroutine psbands_init(psb, dtset, hsize, eig_k, gs_fermie) !nband_k
 
 !Arguments ------------------------------------
- class(psbands_t),intent(out) :: psbands
- class(dataset_type),intent(in) :: dtset
- real(dp),intent(in) :: efermi
+ class(psbands_t),intent(out) :: psb
+ class(dataset_type),target,intent(in) :: dtset
+ integer,intent(in) :: hsize !, nband_k
+ real(dp),intent(in) :: gs_fermie
+!arrays
+ real(dp),target,intent(inout) :: eig_k(hsize)
 
 !Local variables-------------------------------
 !scalars
+ integer :: islice, ib, cnt, start_idx, stop_idx, units(2), first_band, last_band
+ real(dp) :: first_eig, last_eig, rwork(hsize), e_min, e_max
 ! *********************************************************************
- psbands%dtset => dtset
+
+ units = [std_out, ab_out]
+
+ psb%dtset => dtset; psb%eig_k => eig_k
+ ! Shift energies wrt Fermi level.
+ eig_k = eig_k - gs_fermie
+
+ psb%nb_protected = 20 ! dtset%nb_protected
+ psb%nb_per_slice = 2  ! dtset%nb_per_slice
+ !psb%efrac = 0.02_dp  ! dtset%efrac
+
+ ! Compute nslices and slice_estop
+ ! TODO: Add possibility of treating occupied states as well.
+ ABI_MALLOC(psb%subspace, (2, hsize))
+ psb%nslices = 0
+ first_band = psb%nb_protected + 1
+
+ do while (first_band > 0)
+   first_eig = eig_k(first_band)
+   last_eig = first_eig + (first_eig * psb%efrac)
+   last_band = get_band_with_energy_small_than(first_band+1, hsize, last_eig)
+   psb%nslices = psb%nslices + 1
+   psb%subspace(1, psb%nslices) = first_band
+   if (last_band == -1) then
+     psb%subspace(2, psb%nslices) = hsize
+   else
+     psb%subspace(2, psb%nslices) = last_band
+   endif
+   first_band = last_band + 1
+   write(std_out,'(1x,i0,1x,i0)') psb%subspace(1, psb%nslices), psb%subspace(2, psb%nslices)
+ enddo
+
+ ! Revert changes in eig_k
+ eig_k = eig_k + gs_fermie
+
+ ! Copy eigenvales of the protected states.
+ psb%nb_tot = psb%nb_protected + psb%nslices * psb%nb_per_slice
+ ABI_MALLOC(psb%ps_eig, (psb%nb_tot))
+ psb%ps_eig(1:psb%nb_protected) = eig_k(1:psb%nb_protected)
+
+ cnt = 0
+ do islice=1,psb%nslices
+   e_min = eig_k(psb%subspace(1, islice))
+   e_max = eig_k(psb%subspace(2, islice))
+   do ib=1,psb%nb_per_slice
+     ! Take average inside slice.
+     cnt = cnt + 1
+     psb%ps_eig(psb%nb_protected + cnt) = e_min + (e_max - e_min) * half
+   end do
+ end do
+
+ call wrtout(units, ' Stochastic pseudobands setup:')
+ call wrtout(units, sjoin(' Original number of bands: ', itoa(hsize)))
+ call wrtout(units, sjoin(' Number of bands in the protection window: ', itoa(psb%nb_protected)))
+ call wrtout(units, sjoin(' Number of stochastic subspaces: ', itoa(psb%nslices)))
+ call wrtout(units, sjoin(' Number of stochastic pseudobands per subspace: ', itoa(psb%nb_per_slice)))
+ call wrtout(units, sjoin(' Final number of bands: ', itoa(psb%nb_tot)))
+
+contains
+
+integer function get_band_with_energy_small_than(idx_start, idx_end, energy) result(band)
+  integer, intent(in) :: idx_start, idx_end
+  real(dp), intent(in) :: energy
+  integer :: ib
+
+  band = -1
+  do ib=idx_start,idx_end
+    if (eig_k(ib) > energy) then
+      band = ib - 1; return
+    end if
+  end do
+end function get_band_with_energy_small_than
 
 end subroutine psbands_init
 !!***
 
-!!****f* m_ksdiago/psbands_band2space
+!!****f* m_ksdiago/psbands_band2slice
 !! NAME
-!! psbands_band2space
+!! psbands_band2slice
 !!
 !! FUNCTION
 !!
@@ -2207,16 +2309,20 @@ end subroutine psbands_init
 !!
 !! SOURCE
 
-integer function psbands_band2space(psbands, band) result(ispace)
+integer function psbands_band2slice(psb, band) result(islice)
 
 !Arguments ------------------------------------
- class(psbands_t),intent(in) :: psbands
+ class(psbands_t),intent(in) :: psb
  integer,intent(in) :: band
+! *********************************************************************
 
-!Local variables-------------------------------
-!scalars
+ do islice=1,psb%nslices
+   if (band >= psb%subspace(1,islice) .and. &
+       band <= psb%subspace(2,islice)) return
+ end do
+ islice = -1
 
-end function psbands_band2space
+end function psbands_band2slice
 !!***
 
 !!****f* m_ksdiago/psbands_free
@@ -2227,12 +2333,14 @@ end function psbands_band2space
 !!
 !! SOURCE
 
-subroutine psbands_free(psbands)
+subroutine psbands_free(psb)
 
 !Arguments ------------------------------------
- class(psbands_t),intent(inout) :: psbands
+ class(psbands_t),intent(inout) :: psb
+! *********************************************************************
 
-!Local variables-------------------------------
+ ABI_SFREE(psb%ps_eig)
+ ABI_SFREE(psb%subspace)
 
 end subroutine psbands_free
 !!***
