@@ -190,8 +190,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  integer :: rhoxsp_method, usexcnhat !, use_umklp
  real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  !real(dp) :: drude_plsmf !,my_plsmf,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
- real(dp) :: vxcavg, gw_gsq
+ real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp, vxcavg, gw_gsq, gs_fermie
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
@@ -217,7 +216,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  !type(pawcprj_type),allocatable :: cprj_k(:,:)
-
 !************************************************************************
 
  ! This part performs the initialization of the basic objects used to perform e-ph calculations:
@@ -469,6 +467,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
    ABI_ERROR("Crystal structure from input and from DEN file do not agree! Check messages above!")
  end if
+ ! Get fermie from the GS calculation.
+ ! NB: It might understimate the real fermi level, especially if the den was computed on a shifted k-mesh
+ ! but it's only used to implement pseudobands
+ gs_fermie = den_hdr%fermie
  call den_cryst%free(); call den_hdr%free()
 
  ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
@@ -728,7 +730,7 @@ if (dtset%usefock == 1 .and. .not. cc4s_from_wfk) then
 
 else
        call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
-       call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
+       call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, gs_fermie, nband_k, ngfftc, nfftf, &
                            dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, hyb, diago_pool%comm%value)
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
 

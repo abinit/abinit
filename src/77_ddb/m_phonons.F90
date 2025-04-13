@@ -1966,6 +1966,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
                    ddb%mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
                    crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
+
    ! Calculation of the phonon angular momentum
    ! maybe add it in dpft_phfrq directly ?
    call phangmom_from_eigvec(natom, eigvec, phangmom)

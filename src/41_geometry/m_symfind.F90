@@ -935,9 +935,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 !ENDDEBUG
 
  verbose_=.false.
- if(present(verbose))then
-   verbose_=verbose
- endif
+ if (present(verbose)) verbose_=verbose
 
 !This routine finds the Bravais characteristics, without actually
 !looking at the symmetry operations.
@@ -1061,9 +1059,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
  end if
 
-!DEBUG
 !write(std_out,'(a)') ' symanal : exit '
-!ENDDEBUG
 
 end subroutine symanal
 !!***

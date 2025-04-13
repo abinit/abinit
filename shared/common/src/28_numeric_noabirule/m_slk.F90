@@ -101,7 +101,7 @@ module m_slk
  type,public :: processor_scalapack
 
    integer :: myproc = -1
-   ! rank the processor
+   ! rank of the processor in comm
 
    integer :: comm = xmpi_comm_null
    ! MPI communicator underlying the BLACS grid.
