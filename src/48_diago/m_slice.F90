@@ -81,9 +81,11 @@ module m_slice
         integer :: ntasks        ! number of tasks (=slices)
         integer :: nprocs_tot    ! total number of available resources (process)
         integer :: task_me       ! which task current process serves
-        integer :: ncols_me      ! number of columns of current task
+        integer :: ncols_me      ! number of columns of current task (todo of current process=me)
+        integer :: tot_ncols_me  ! warning this is number of columns of current task
         integer :: nprocs_me     ! number of resources used by current task
         integer :: comm_global   ! global communicator (inter-task)
+        integer :: comm_slice    ! slice sub-communicator (intra-slice)
 
         ! Data buffers
         integer :: nrows_tot                      ! total number of rows (planewaves)
@@ -277,10 +279,9 @@ subroutine sliceScheduler_init(xgx0slice,neigenpairs,spacedim,tolerance,ecut,&
     slice%paw          = paw
     slice%gpu_option   = gpu_option
     slice%nslice       = nslice
-    slice%npband       = xmpi_comm_size(comm_cols)
     slice%ramp         = ramp
     slice%spectral_cut = spectral_cut
-    slice%nband_ovlp   = neigenpairs ! see initExtended
+    slice%nband_ovlp   = neigenpairs
     slice%nbdbuf       = nbdbuf
 
     slice%gpu_kokkos_nthrd = 1
@@ -310,6 +311,7 @@ subroutine sliceScheduler_init(xgx0slice,neigenpairs,spacedim,tolerance,ecut,&
         xgx0slice%ncols_blockcols = bandpp
     end if
 
+    ! Arrays
     if(.not.allocated(slice%slice_fcol)) ABI_MALLOC(slice%slice_fcol,(nslice))
     if(.not.allocated(slice%slice_ncols)) ABI_MALLOC(slice%slice_ncols,(nslice))
     if(.not.allocated(slice%slice_fcol_ext)) ABI_MALLOC(slice%slice_fcol_ext,(nslice))
@@ -322,7 +324,7 @@ subroutine sliceScheduler_init(xgx0slice,neigenpairs,spacedim,tolerance,ecut,&
 end subroutine sliceScheduler_init
 !!***
 
-subroutine sliceScheduler_free
+subroutine sliceScheduler_free(slice)
 
     ! Free slice parameters
     if(allocated(slice%slice_fcol)) ABI_FREE(slice%slice_fcol)
@@ -1358,13 +1360,6 @@ subroutine slice_allocateAll(sliceAll,slice)
     spacecom = subcomm
     ! keep chebfi
 
-    ! Every slice MPI proc has a part (bandpp) of this space
-    write(std_out,'(a,i0)') '-----> Allocating slice working memory bandpp=', bandpp
-    call chebfi_init(slice%chebfi,nband,spacedim,tolerance,ecut,paral_kgb,bandpp,&
-&                    ndeg,nbdbuf,space,1,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
-&                    oracle,oracle_factor,oracle_min_occ,gpu_option,&
-&                    gpu_kokkos_nthrd=gpu_kokkos_nthrd,gpu_thread_limit=gpu_thread_limit)
-
 end subroutine slice_allocateAll
 !!***
 
@@ -1813,26 +1808,72 @@ subroutine slice_distributeExtended(slice,nspinor)
 end subroutine slice_distributeExtended
 !!***
 
+
+subroutine chebfi_initSlice(chebfi,slice)
+
+    integer :: my_rank, my_slice
+
+    call xgBlock_getSize(slice%X,tot_nrows,ncols_slice)
+    spacecom = comm(xgBlock_colsrows) ! global communicator
+    ! spacedim is smaller than tot_nrows 
+
+    ! Deduce parameters from slice
+    my_rank = xmpi_comm_rank(slice%global_comm)
+    my_slice = slice_querySlice(slice)
+    ndeg = slice%poly_degrees(my_slice)
+    slice_comm = slice%slice_comm(my_slice)
+    nband = slice%slice_ncols(my_slice)
+    bandpp = slice%ncols_blockcols(my_rank)
+
+    ! Set parameters to chebfi
+    ! TODO pas très propre
+    ! add option to chebfi
+    chebfi%nband = 
+    chebfi%spacecom = slice_comm
+    chebfi%comm_rows = xmpi_comm_self
+    chebfi%comm_cols = slice_comm
+
+    call chebfi_init(slice%chebfi,nband,spacedim,tolerance,ecut,paral_kgb,bandpp,&
+&                    ndeg,nbdbuf,space,1,comm,me_g0,me_g0_fft,paw,comm_rows,comm,&
+&                    oracle,oracle_factor,oracle_min_occ,gpu_option,&
+&                    gpu_kokkos_nthrd=gpu_kokkos_nthrd,gpu_thread_limit=gpu_thread_limit)
+
+
+    call chebfi_allocateAllSlice(chebfi)
+
+end subroutine chebfi_initSlice
+
+subroutine chebfi_allocateAllSlice(chebfi)
+
+    ! init X_next
+    ! init X_prev
+
+
+
+end subroutine chebfi_allocateAllSlice
+
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_run
+!!****f* m_slice/chebfi_runSlice
 !! NAME
-!! slice_run
+!! chebfi_runSlice
 !! 
 !! FUNCTION
-!! Diagonalize slices in parallel. Input/output is the 
-!! extended buffer in colsrows representation.
-!! Notice that initial objects xgx0,eigen,residu are not input
+!! Diagonalize individual slice in parallel. Remember this is in distributed 
+!! parallel region and there is no inter-slice communication.
 !!
-!! IML TODO add count
+!! INPUT
+!! X0  =eigenvector guess distributed for slice in colsrows representation
+!! 
+!! IML TODO: add count
 !! In early SCF iterations, count the number of Ritz values that fall within the
 !! perturbed spectral interval of each slice, where the size of the perturbation
 !! is related to the residual norm of each Ritz pair. We could therefore terminate
-!! the subspace iterations when the counts no longer change.
+!! the inner subspace iterations when the counts no longer change.
 !!
 !! SOURCE
 
-subroutine slice_run(slice,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
+subroutine chebfi_runSlice(chebfi,X,getAX_BX,getBm1X,eigen,residu,nspinor)
 
     implicit none
 
@@ -1857,43 +1898,33 @@ subroutine slice_run(slice,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
 
     !Local variables-------------------------------
     integer :: tot_nrows,ncols_slice,spacecom
-    integer :: color,key,slice_comm,ierr
+    integer :: color,my_rank,ierr
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
     type(xgBlock_t) :: X0
+    type(chebfi_t) :: chebfi
 
     ! *********************************************************************
  
     ! X0 is the input in colsrows and slice%X is the working data on slice
     ! important to create a new xgBlock and not simply equal to X0? 
     ! I think each process has its independent X0 so this is ok
-    slice%X = X0
+    chebfi = slice%chebfi
+    chebfi%xXColsrows = X0 ! colsrows representation
 
     ! if gpu: This is important! Because X0 is on CPU
-    ! call xgBlock_copy_from_gpu(slice%X)
-    ! call xgBlock_set_gpu_option(slice%X,ABI_GPU_OFFLOAD)
-
-    call xgBlock_getSize(slice%X,tot_nrows,ncols_slice)
-    spacecom = comm(xgBlock_colsrows) ! global communicator
-    ! spacedim is smaller than tot_nrows
-    
-    ! Synchronize before creating a subcomm
-    call xmpi_barrier(schedule%comm_global)
-    
-    ! Split global communicator so that only procs with the same color communicate
-    key = sliceScheduler_queryRank(env)
-    color = sliceScheduler_queryTask(env)
-    call xmpi_comm_split(schedule%comm_global,color,key,slice_comm,ierr)
+    ! call xgBlock_copy_from_gpu(chebfi%X)
+    ! call xgBlock_set_gpu_option(chebfi%X,ABI_GPU_OFFLOAD)
 
     ! Restrict all communications to slice subcommunicator
-    call xgBlock_setComm(slice%X,slice_comm) ! colsrows representation
-    call xgBlock_setComm(slice%X_linalg,slice_comm) ! linalg representation
+    call xgBlock_setComm(chebfi%X,slice_comm) ! colsrows representation
+    call xgBlock_setComm(chebfi%X_linalg,slice_comm) ! linalg representation
 
     ! Get distribution of rows (plane waves) from scheduler
     nrowsLinalg_ptr = schedule%nrowsLinalg
 
     ! Create slice transposer using subcommunicator and allocate slice%X_linalg
-    call xgTransposer_constructor(slice%xgTransposerX,slice%X_linalg,slice%X,nspinor,&
+    call xgTransposer_constructor(chebfi%xgTransposerX,slice%X_linalg,slice%X,nspinor,&
         STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,slice_comm,0,0,chebfi%me_g0_fft,&
         gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
         custom_ncolsColsRows=.true.,nrowsLinalg_sub=nrowsLinalg_ptr)
@@ -1902,6 +1933,12 @@ subroutine slice_run(slice,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     ncols_slice = cols(slice%X)
 
     ! Do the same for AX and BX ..
+    ! TODO Major problem
+    ! Solution: réecrire chebfi_allocateAll
+    ! chebfi%AX,BX have been allocated in chebfi_allocateAll
+    ! call xg_free(chebfi%AX)
+    ! call xg_free(chebfi%BX)
+    ! call xg_init(chebfi%xAXColsRows,...)
     call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,&
         chebfi%AX%self,chebfi%xAXColsRows,STATE_COLSROWS)
     call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,&
@@ -1912,6 +1949,7 @@ subroutine slice_run(slice,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
 
     ! Do not transpose!
+    slice%chebfi%X = slice%X
 
     ! Body of computation
     ! ===============
@@ -1919,10 +1957,10 @@ subroutine slice_run(slice,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     ! Apply polynomial filtering (requires colsrows state)
     if (islice==0) then
         !call slice_applyLowpassFilter(slice,getAX_BX,getBm1X,nspinor)
-        call slice_applyLowpassFilter(chebfi,getAX_BX,getBm1X,nspinor)
+        call slice_applyLowpassFilter(slice%chebfi,getAX_BX,getBm1X,nspinor)
     else
         !call slice_applyBandpassFilter(slice,getAX_BX,getBm1X,nspinor)
-        call slice_applyBandpassFilter(chebfi,getAX_BX,getBm1X,nspinor)
+        call slice_applyBandpassFilter(slice%chebfi,getAX_BX,getBm1X,nspinor)
     end if
 
     ! Transpose to linalg state
@@ -2404,6 +2442,7 @@ subroutine sliceScheduler_run(schedule,slice_sizes,slice_degrees,nrows_tot,space
 
     ! Local variables
     integer :: ntasks, nprocs, iproc, task_me
+    integer :: color, my_rank, ierr
     ! Arrays
     integer, allocatable, target :: weights(:)
     integer, pointer :: weights_ptr(:) => null()
@@ -2483,6 +2522,15 @@ subroutine sliceScheduler_run(schedule,slice_sizes,slice_degrees,nrows_tot,space
     
     ! Compute size of row-blocks in MPI row distribution 
     call distribute_vectors(nprocs_me,nrows_tot,blockrows_me_ptr)
+
+    ! Create sub-communicators 
+    ! Split global communicator so that only procs with the same color communicate
+    my_rank = sliceScheduler_queryRank(schedule)
+    color = sliceScheduler_queryTask(schedule)
+    call xmpi_comm_split(schedule%comm_global,color,my_rank,schedule%slice_comm,ierr)
+
+    ! All processes wait to define subcommunicator
+    call xmpi_barrier(schedule%comm_global)
 
     ! Free temporary memory
     if (allocated(weights)) ABI_FREE(weights) 
