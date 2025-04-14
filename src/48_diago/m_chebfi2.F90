@@ -122,6 +122,8 @@ module m_chebfi2
 
    type(xg_t) :: AX
    type(xg_t) :: BX
+   type(xg_t) :: xAXColsRows_W ! only used if from_linalg is false
+   type(xg_t) :: xBXColsRows_W ! only used if from linalg is false
 
    type(xgBlock_t) :: xXColsRows
    type(xgBlock_t) :: xAXColsRows
@@ -146,9 +148,8 @@ module m_chebfi2
  public :: chebfi_free
  public :: chebfi_memInfo
  public :: chebfi_run
- public :: chebfi_swapInnerBuffers              ! IL used in m_slice
- public :: chebfi_getAX_BX                      ! IL used in m_slice
- public :: chebfi_computeNextOrderChebfiPolynom ! IL for m_slice
+ public :: chebfi_swapInnerBuffers              ! IL used in m_polyfi
+ public :: chebfi_computeNextOrderChebfiPolynom ! IL for m_polyfi
 
  CONTAINS  !========================================================================================
 !!***
@@ -321,10 +322,12 @@ subroutine chebfi_allocateAll(chebfi)
     call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
     call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
  else
-    call xg_init(chebfi%xAXColsRows,space,chebfi%total_spacedim,chebfi%bandpp,chebfi%spacecom,&
+    call xg_init(chebfi%xAXColsRows_W,space,chebfi%total_spacedim,chebfi%bandpp,chebfi%spacecom,&
         me_g0=chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
-    call xg_init(chebfi%xBXColsRows,space,chebfi%total_spacedim,chebfi%bandpp,chebfi%spacecom,&
+    call xg_init(chebfi%xBXColsRows_W,space,chebfi%total_spacedim,chebfi%bandpp,chebfi%spacecom,&
         me_g0=chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+    chebfi%xAXColsRows = chebfi%xAXColsRows_W%self
+    chebfi%xBXColsRows = chebfi%xBXColsRows_W%self
  end if
 
 end subroutine chebfi_allocateAll
@@ -364,8 +367,8 @@ subroutine chebfi_free(chebfi)
     call xg_free(chebfi%AX)
     call xg_free(chebfi%BX)
  else 
-    call xg_free(chebfi%xAXColsRows)
-    call xg_free(chebfi%xBXColsRows)
+    call xg_free(chebfi%xAXColsRows_W)
+    call xg_free(chebfi%xBXColsRows_W)
  end if
 
 end subroutine chebfi_free
@@ -574,7 +577,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  tolerance = chebfi%tolerance
  lambda_plus = chebfi%ecut
  chebfi%X = X0
-    type(x
 
  ! Transpose
  if (chebfi%paral_kgb == 1) then

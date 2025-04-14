@@ -626,11 +626,11 @@ subroutine polyfi_bandpass(polyfi,getAX_BX,getBm1X,nspinor)
     !Xsum = mu(0)*damp(0)*X_next + Xsum
     call xgBlock_saxpy(PolySum%self, mu*damp, chebfi%xXColsRows)
 
-    ABI_NVTX_START_RANGE(NVTX_BANDPASS_CORE)
+    ABI_NVTX_START_RANGE(NVTX_POLYFI_CORE)
     do n = 0, ndeg - 1  
 
         ! X_next=2/r*(AX_next-c*X_next)-X_prev
-        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
+        ABI_NVTX_START_RANGE(NVTX_POLYFI_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, n, center, one_over_r, two_over_r, getBm1X)
         ABI_NVTX_END_RANGE()
 
@@ -665,4 +665,5 @@ subroutine polyfi_bandpass(polyfi,getAX_BX,getBm1X,nspinor)
 end subroutine polyfi_bandpass
 !!***
 
-
+end module m_polyfi
+!!***

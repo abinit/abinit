@@ -261,7 +261,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  ! xgx0slice =version of xgx0 distributed correctly and free of data overlap
  ! schedule  =manager of all slice tasks
  ! .. add type(xgBlock_t) :: xgx0slice
- call slice_compute(slice,xgx0,xgx0slice,getghc_gsc1,nspinor)
+ call slice_schedule(slice,xgx0,xgx0slice,getghc_gsc1,nspinor)
 
  ! I think that xgeigenslice and xgresiduslice can be allocated without
  ! the need of dedicated function
@@ -272,20 +272,22 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 !################    RUUUUUUUN    #####################################
 !######################################################################
  
- call chebfi_initSlice(chebfi,slice,nband,dtset%tolwfr_diago,dtset%ecut,&
-     dtset%paral_kgb,space,1,spacecom,&
+ ! ==== encapsulate that in slice_run
+ call slice_get_task(slice,nband_sub,spacecom_sub,mineig_global,maxeig_global,&
+     lambda_minus,lambda_plus,nrowsLinalg_ptr)
+
+ call polyfi_init(polyfi,nband_sub,dtset%tolwfr_diago,dtset%ecut,&
+     dtset%paral_kgb,space,1,spacecom_sub,&
      me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+     mineig_global,maxeig_global,lambda_minus,lambda_plus,nrowsLinalg,
      l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
      gpu_thread_limit=dtset%gpu_thread_limit)
 
- my_rank = xmpi_comm_rank(spacecom)
- call slice_getSliceBounds(slice,mineig_globa,maxeig_global,lambda_minus,lambda_plus,my_rank)
+ call polyfi_run(polyfi,xgx0slice,getghc_gsc1,getBm1X,xgeigenslice,xgresiduslice,nspinor)
 
- call chebfi_runSlice(chebfi,xgx0slice,getghc_gsc1,getBm1X,xgeigen,xgresidu,&
-     mineig_global,maxeig_global,lambda_minus,lambda_plus,nspinor)
+ call polyfi_free(polyfi)
 
- call chebfi_free(chebfi)
-
+ ! =======
 
  call slice_merge(slice,xgx0,xgx0slice,xgeigen,xgresidu)
 
