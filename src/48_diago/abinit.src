@@ -22,6 +22,7 @@ sources = [
   "m_chebfi2_cprj.F90",
   "m_lobpcg2.F90",
   "m_lobpcg2_cprj.F90",
+  "m_polyfi.F90",
   "m_slice.F90"
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
