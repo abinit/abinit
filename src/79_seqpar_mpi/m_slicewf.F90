@@ -273,7 +273,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 !######################################################################
  
  ! ==== encapsulate that in slice_run
- call slice_get_task(slice,nband_sub,spacecom_sub,mineig_global,maxeig_global,&
+ call slice_initTaskMe(slice,nband_sub,spacecom_sub,mineig_global,maxeig_global,&
      lambda_minus,lambda_plus,nrowsLinalg_ptr)
 
  call polyfi_init(polyfi,nband_sub,dtset%tolwfr_diago,dtset%ecut,&

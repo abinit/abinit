@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 126
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 127
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -156,6 +156,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_POLYFI_CORE = 124
   integer, parameter :: NVTX_POLYFI_NEXT_ORDER = 125
   integer, parameter :: NVTX_POLYFI_SWAP_BUF = 126
+  integer, parameter :: NVTX_SLICE_SCHEDULE = 127
 
 contains
 
@@ -291,7 +292,8 @@ contains
          & "POLYFI_GET_AX_BX", &
          & "POLYFI_CORE", &
          & "POLYFI_NEXT_ORDER", &
-         & "POLYFI_SWAP_BUF" &
+         & "POLYFI_SWAP_BUF", &
+         & "SLICE_SCHEDULE" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -420,6 +422,7 @@ contains
     nvtx_ids(124)=NVTX_POLYFI_CORE
     nvtx_ids(125)=NVTX_POLYFI_NEXT_ORDER
     nvtx_ids(126)=NVTX_POLYFI_SWAP_BUF
+    nvtx_ids(127)=NVTX_SLICE_SCHEDULE
 
   end subroutine nvtx_init
 
