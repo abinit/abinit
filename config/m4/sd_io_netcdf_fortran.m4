@@ -113,11 +113,12 @@ AC_DEFUN([SD_NETCDF_FORTRAN_INIT], [
      #check if PKG_CONFIG exists (if not keep default mode)
      AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
      if test "$PKG_CONFIG" != "no"; then
-         PKG_CHECK_MODULES([NETCDF_FORTRAN], [netcdf-fortran], [
+         AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+         if $PKG_CONFIG  netcdf-fortran; then
 	    sd_netcdf_fortran_init="pkg"
-         ], [
+        else
             sd_netcdf_fortran_init="def"
-         ])
+        fi
      fi
   fi
   # Make sure configuration is correct
