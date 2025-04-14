@@ -197,17 +197,18 @@ module m_slice
 
     end type slice_t
 
-    ! Public methods associated to 'sliceScheduler' datatype
-    ! IL 12/4 create a new module for this? They are independent anyway
+    ! Public methods associated to 'slice' datatype
     !-------------------------------------------------
-    public :: sliceScheduler_init               ! initialize xgx0slice data type object
-    public :: sliceScheduler_run                ! build xgx0slice from cg
-    public :: sliceScheduler_finalize           ! merge xgx0slice to cg
-    public :: sliceScheduler_free               ! free xgx0slice data type object
+    public :: slice_init                ! initialize xgx0slice data type object
+    public :: slice_schedule            ! build xgx0slice from cg
+    public :: slice_getTask             ! merge xgx0slice to cg
+    public :: slice_merge
+    public :: slice_free
 
-    ! Public methods assosicated to 'slice' datatype
+    ! Public methods assosicated to 'chebfi' datatype
+    ! TODO move this in chebfi?
     !-------------------------------------------------
-    public :: slice_init                        ! initiate slice data type object
+    public :: chebfi_runSlice                        ! initiate slice data type object
     public :: slice_run                         ! diagonalize individual slices
     public :: slice_free                        ! free slice data type object
     public :: slice_mergeConverged              ! merge converged slices by removing duplicates
@@ -217,9 +218,9 @@ module m_slice
 !=====================================================================
 !!***
 
-!!****f* m_slice/sliceScheduler_init
+!!****f* m_slice/slice_init
 !! NAME
-!! sliceScheduler_init
+!! slice_init
 !!
 !! FUNCTION
 !! Initialize a 'sliceScheduler' datastructure. See chebfi_init().
@@ -340,10 +341,9 @@ end subroutine sliceScheduler_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/sliceScheduler_run
+!!****f* m_slice/slice_schedule
 !! NAME
-!! sliceScheduler_run
-!! slice_run_schedule
+!! slice_schedule
 !! 
 !! FUNCTION
 !! Split then distribute vectors X across processes.
@@ -351,7 +351,7 @@ end subroutine sliceScheduler_free
 !! 
 !! SOURCE
 
-subroutine sliceScheduler_run(xgx0slice,X,getAX_BX,nspinor)
+subroutine slice_schedule(xgx0slice,X,getAX_BX,nspinor)
 
     implicit none
 
@@ -927,10 +927,19 @@ subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSl
         
         ! Try different tuning???
         !wovlp = (upp - low) / 8.d0
-        wovlp = (upp - low) / 10.d0
-       
-        poly_low = low - wovlp
-        poly_upp = upp + wovlp
+        wovlp = (upp - low) / 10.d0 
+
+        if (islice==1) then
+            ! Spectral interval to amplify is [-oo, lambda_minus)
+            lambda_minus = maxeig_global
+            lambda_plus = slice%%ecut
+        else 
+            !poly_low = low - wovlp
+            lambda_minus = low - wovlp
+            !poly_upp = upp + wovlp
+            lambda_plus = upp + wovlp
+        end if
+
        
         ! Count theta eigenvalues in slice cut plus overlap 
         call count_values(poly_low,poly_upp,theta,spos,neigenpairs,k1,k2,nvec)
@@ -1854,561 +1863,26 @@ subroutine chebfi_initSlice(chebfi,slice)
 
 end subroutine chebfi_initSlice
 
-!----------------------------------------------------------------------
-
-!!****f* m_slice/chebfi_runSlice
-!! NAME
-!! chebfi_runSlice
 !! 
 !! FUNCTION
-!! Diagonalize individual slice in parallel. Remember this is in distributed 
-!! parallel region and there is no inter-slice communication.
-!!
-!! INPUT
-!! X0  =eigenvector guess distributed for slice in colsrows representation
+!! Compute global spectral bounds (lb:lower bound, ub:upper bound)
+!! as well as slice bounds.
 !! 
-!! IML TODO: add count
-!! In early SCF iterations, count the number of Ritz values that fall within the
-!! perturbed spectral interval of each slice, where the size of the perturbation
-!! is related to the residual norm of each Ritz pair. We could therefore terminate
-!! the inner subspace iterations when the counts no longer change.
-!!
-!! SOURCE
 
-subroutine chebfi_runSlice(chebfi,X,getAX_BX,getBm1X,eigen,residu,nspinor)
+subroutine slice_getBounds(slice,glb,gub,lb,ub)
 
-    implicit none
-
-    !Arguments ------------------------------------    
-    type(slice_t), intent(inout) :: slice
-    integer      , intent(in   ) :: nspinor
-    interface
-        subroutine getAX_BX(X,AX,BX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-            type(xgBlock_t), intent(inout) :: BX
-        end subroutine getAX_BX
-    end interface
-    interface
-        subroutine getBm1X(X,Bm1X)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: Bm1X
-        end subroutine getBm1X
-    end interface
-
-    !Local variables-------------------------------
-    integer :: tot_nrows,ncols_slice,spacecom
-    integer :: color,my_rank,ierr
-    integer, target, allocatable :: nrowsLinalg(:)
-    integer, pointer :: nrowsLinalg_ptr(:) => null()
-    type(xgBlock_t) :: X0
-    type(chebfi_t) :: chebfi
-
-    ! *********************************************************************
- 
-    ! X0 is the input in colsrows and slice%X is the working data on slice
-    ! important to create a new xgBlock and not simply equal to X0? 
-    ! I think each process has its independent X0 so this is ok
-    chebfi = slice%chebfi
-    chebfi%xXColsrows = X0 ! colsrows representation
-
-    ! if gpu: This is important! Because X0 is on CPU
-    ! call xgBlock_copy_from_gpu(chebfi%X)
-    ! call xgBlock_set_gpu_option(chebfi%X,ABI_GPU_OFFLOAD)
-
-    ! Restrict all communications to slice subcommunicator
-    call xgBlock_setComm(chebfi%X,slice_comm) ! colsrows representation
-    call xgBlock_setComm(chebfi%X_linalg,slice_comm) ! linalg representation
-
-    ! Get distribution of rows (plane waves) from scheduler
-    nrowsLinalg_ptr = schedule%nrowsLinalg
-
-    ! Create slice transposer using subcommunicator and allocate slice%X_linalg
-    call xgTransposer_constructor(chebfi%xgTransposerX,slice%X_linalg,slice%X,nspinor,&
-        STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,slice_comm,0,0,chebfi%me_g0_fft,&
-        gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
-        custom_ncolsColsRows=.true.,nrowsLinalg_sub=nrowsLinalg_ptr)
-        ! true to allow different bandpp (avoid pad)
-
-    ncols_slice = cols(slice%X)
-
-    call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,&
-        chebfi%AX%self,chebfi%xAXColsRows,STATE_COLSROWS)
-    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,&
-        chebfi%BX%self,chebfi%xBXColsRows,STATE_COLSROWS)
-
-    chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
-    chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-    chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
-
-    ! Do not transpose!
-    slice%chebfi%X = slice%X
-
-    ! Body of computation
-    ! ===============
-    
-    ! Apply polynomial filtering (requires colsrows state)
-    if (islice==0) then
-        !call slice_applyLowpassFilter(slice,getAX_BX,getBm1X,nspinor)
-        lambda_minus = slice%maxeig_global ! computed during compute_spectrum
-        call chebfi_applyLowpassFilter(chebfi,getAX_BX,getBm1X,lambda_minus,nspinor)
-    else
-        !call slice_applyBandpassFilter(slice,getAX_BX,getBm1X,nspinor)
-
-        call chebfi_applyBandpassFilter(chebfi,getAX_BX,getBm1X,glb,gub,lb,ub,nspinor)
+    if (slice%paral_slice==0) then
+        ABI_ERROR("Sequential slices not implemented.")
     end if
 
-    ! Transpose to linalg state
-    call timab(tim_transpose,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-    if (chebfi%paral_kgb == 1) then
+    islice = slice%task_me
 
-        ! All MPI columns wait to finish
-        call xmpi_barrier(chebfi%spacecom)
+    glb = slice%mineig_global
+    gub = slice%maxeig_global
+    lb = slice%poly_low_bounds(islice)
+    ub = slice%poly_upp_bounds(islice)
 
-        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
-        call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
-        call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
-
-        !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-        if (xmpi_comm_size(chebfi%spacecom) == 1) then 
-            call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
-            call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
-            call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
-        end if
-    else
-        call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
-        call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
-        call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
-    end if
-    ABI_NVTX_END_RANGE()
-    call timab(tim_transpose,2,tsec)
-
-    ! Unitary test
-    ABI_CHECK(rows(slice%X_linalg)==nrowsLinalg(xmpi_comm_rank(spacecom)),'wrong linalg representation')
-    write(*,'(a,i6,i6)') '# proc has # rows of slice X ', xmpi_comm_rank(spacecom), rows(slice%X_linalg)
-
-    ! Perform Rayleigh-Ritz and compute residuals (requires linalg state)
-    call slice_RayleighRitz(slice,eigen,residu)
-    
-    ! Transpose to colsrows state (X only)
-    call timab(tim_transpose,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-    if (chebfi%paral_kgb == 1) then
-
-        ! All MPI rows wait to finish
-        call xmpi_barrier(chebfi%spacecom)
-
-        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
-
-        !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-        if (xmpi_comm_size(chebfi%spacecom) == 1) then 
-            call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
-        end if
-    else
-        call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
-    end if
-    ABI_NVTX_END_RANGE()
-    call timab(tim_transpose,2,tsec)
-
-    ! TODO Deal with xgeigen and xgresidu
-    !call xgBlock_reshape(slice%xgeigen, (/1,nband_slice/))
-    !call xgBlock_reshape(slice%xgresidu, (/1,nband_slice/))
-    !call xgBlock_copy_from_gpu(slice%xgeigen)
-    !call xgBlock_copy_from_gpu(slice%xgresidu)
-    !call slice_blockCopy(slice%xgeigen,sliceAll%xgeigen_ovlp,1,j1,nband_slice,j2)
-    !call slice_blockCopy(slice%xgresidu,sliceAll%xgresidu_ovlp,1,j1,nband_slice,j2)
-
-    ! Unitary test
-    ABI_CHECK(cols(slice%X)==ncols_slice,'wrong colsrows representation')
-    write(*,'(a,i6,i6)') '# proc has # cols of slice X ', xmpi_comm_rank(spacecom), cols(slice%X)
-
-    ! if gpu: This is important! Because X0 is on CPU
-    ! call xgBlock_copy_from_gpu(slice%X)
-    ! call xgBlock_set_gpu_option(slice%X,ABI_GPU_DISABLED)
-
-    ! Copy slice solution to the extended buffer (requires colsrows state)
-    call xgBlock_copy(slice%X,X0)
-    ! FIXME same for eigen, residu?
-
-    ! TODO we can also compute the merge on individual slices
-    ! otherwise we do it outside?
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-    if (gpu_option==ABI_GPU_KOKKOS) then
-        call gpu_device_synchronize()
-    end if
-#endif
-
-    ! Free transposer objects
-    if (chebfi%paral_kgb == 1) then
-        call xgTransposer_free(chebfi%xgTransposerX)
-        call xgTransposer_free(chebfi%xgTransposerAX)
-        call xgTransposer_free(chebfi%xgTransposerBX)
-    end if
-    
-    ! Free memory
-    if (allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
-    call xgTransposer_free(slice%xgTransposerX)
-
-end subroutine slice_run
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_applyLowpassFilter
-!! NAME
-!! slice_applyLowpassFilter
-!!
-!! FUNCTION
-!! Apply Lowpass filter using Chebyshev polynomial on a set of vectors.
-!!
-!! INPUTS
-!!  slice   = spectral slice parameters
-!!  getAX_BX= pointer to the function giving A|X> and B|X>
-!!            A is typically the Hamiltonian H, and B the overlap operator S
-!!  getBm1X = pointer to the function giving B^-1|X>
-!!            B is typically the overlap operator S
-!!
-!! SIDE EFFECTS
-!!  slice <type(slice_t)>=all data used to apply Spectrum Slicing algorithm 
-!!  on a single spectral slice
-!!  eigen= Full eigenvalues (initial values on entry)
-!!  residu= residuals, i.e. norm of (A-lambdaB)|X>
-!!  X0= Full set of vectors (initial values on entry)
-!!
-!! SOURCE
-
-subroutine slice_applyLowpassFilter(slice,getAX_BX,getBm1X,nspinors)
-
-    ! Arguments ------------------------------------
-    type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: nspinor
-    interface
-        subroutine getAX_BX(X,AX,BX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-            type(xgBlock_t), intent(inout) :: BX
-        end subroutine getAX_BX
-    end interface
-    interface
-        subroutine getBm1X(X,Bm1X)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: Bm1X
-        end subroutine getBm1X
-    end interface
-    !Local variables-------------------------------
-    type(chebfi_t) :: chebfi
-
-    ! *********************************************************************
-
-    chebfi = slice%chebfi
-
-    ! When entering DivResult%self should contain all eigenvalues in slice
-    ! in the form (bandpp,1) as a ROW vector
-    comm_slice = slice%mpiData%comm_sub
-
-    ! This is the maximum and the minimum eigenvalue in the slice
-    if (slice%paral_kgb == 1) then
-        call xmpi_max(slice%maxeig,maxeig_global,comm_slice,ierr)
-        call xmpi_min(slice%mineig,mineig_global,comm_slice,ierr)
-    else
-        call xmpi_max(slice%maxeig,maxeig_global,comm,ierr)
-        call xmpi_min(slice%mineig,mineig_global,comm,ierr)
-    end if
-
-    eigenvalues = DivResults%self !! ....
-    ! DivResults%self is already constructed from previous routines
-    ! this routine should also set the maxeig_global, mineig_global then
-
-    if (chebfi%paral_kgb == 0) then
-        ABI_MALLOC(ndeg_filter_bands,(neigenpairs))
-    else
-        ABI_MALLOC(ndeg_filter_bands,(bandpp))
-    end if
-    ndeg_filter_bands(:) = ndeg_filter
-    
-    ! Spectral interval to amplify is [-oo, lambda_minus)
-    lambda_minus = maxeig_global
-    lambda_plus = slice%%ecut
-
-    center = (lambda_plus + lambda_minus)*0.5
-    radius = (lambda_plus - lambda_minus)*0.5
-
-    one_over_r = 1/radius
-    two_over_r = 2/radius
-
-    !A * Psi
-    call timab(tim_getAX_BX,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
-    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-    ABI_NVTX_END_RANGE()
-    call timab(tim_getAX_BX,2,tsec)
-
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
-    do ideg = 0, ndeg_filter - 1
-
-        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
-        call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
-        ABI_NVTX_END_RANGE()
-
-        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
-        if (chebfi%paral_kgb == 0) then
-            call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
-        else
-            call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, bandpp)
-        end if
-        ABI_NVTX_END_RANGE()
-
-        !A * Psi
-        call timab(tim_getAX_BX,1,tsec)
-        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
-        call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
-        call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-        call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-        ABI_NVTX_END_RANGE()
-        call timab(tim_getAX_BX,2,tsec)
-
-    end do ! ideg
-    ABI_NVTX_END_RANGE()
-
-    ! Scale X,AX,BX by amplification factor to reduce large values
-    call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
-
-    call xg_free(DivResults) ! en fait ne pas faire ça ici
-    ! car on garde DivResults à l'extérieur des slices aussi pour
-    ! comparer les convergences
-    ABI_FREE(ndeg_filter_bands)
-
-end subroutine slice_applyLowpassFilter
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_applyBandpassFilter
-!! NAME
-!! slice_applyBandpassFilter
-!!
-!! FUNCTION
-!! Apply Bandpass filter using Chebyshev-Jackson polynomial on a set of vectors.
-!!
-!! INPUTS
-!!  slice   = spectral slice parameters
-!!  getAX_BX= pointer to the function giving A|X> and B|X>
-!!            A is typically the Hamiltonian H, and B the overlap operator S
-!!  getBm1X = pointer to the function giving B^-1|X>
-!!            B is typically the overlap operator S
-!!
-!! SIDE EFFECTS
-!!  slice <type(slice_t)>=all data used to apply Spectrum Slicing algorithm 
-!!  on a single spectral slice
-!!  eigen= Full eigenvalues (initial values on entry)
-!!  residu= residuals, i.e. norm of (A-lambdaB)|X>
-!!  X0= Full set of vectors (initial values on entry)
-!!
-!! SOURCE
-
-subroutine slice_applyBandpassFilter(slice,getAX_BX,getBm1X,nspinor)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: nspinor
-    interface
-        subroutine getAX_BX(X,AX,BX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-            type(xgBlock_t), intent(inout) :: BX
-        end subroutine getAX_BX
-    end interface
-    interface
-        subroutine getBm1X(X,Bm1X)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: Bm1X
-        end subroutine getBm1X
-    end interface
-
-    ! Local variables-------------------------------
-    type(chebfi_t) :: chebfi
-    integer :: space
-    integer :: spacedim
-    integer :: neigenpairs
-    integer :: nline
-    integer :: gpu_option
-    integer :: nrows, ncols
-    integer :: iline, ilinep1, iband, ierr
-    real(dp) :: tolerance
-    real(dp) :: one_over_r
-    real(dp) :: two_over_r
-    real(dp) :: center, radius
-    real(dp) :: ck, mu, damp, tau  ! bandpass filter parameters
-    real(dp) :: alow,bupp,low,upp  ! slice interval 
-    type(xg_t) :: ChebyExpansion   ! Chebyshev expansion for vectors
-
-    ! *********************************************************************
-
-    chebfi = slice%chebfi
-
-    ! Initialize solutions for slice using chebfi 
-    space = chebfi%space
-    spacedim = chebfi%spacedim
-    neigenpairs = chebfi%neigenpairs 
-    tolerance = chebfi%tolerance
-    gpu_option = chebfi%gpu_option
-    chebfi%eigenvalues = eigen
-    chebfi%X = X0
-    nrows = spacedim
-    ncols = neigenpairs
-    if (chebfi%paral_kgb==1) then
-        nrows = chebfi%total_spacedim
-        ncols = chebfi%bandpp
-    end if
-    
-    ! Global spectral interval
-    radius = (slice%gub - slice%glb)/2.d0   ! entire spectrum radius
-    center = (slice%gub + slice%glb)/2.d0   ! entire spectrum center
-    one_over_r = 1/radius
-    two_over_r = 2/radius
-    ! Target local to amplify scaled to [-1,1)
-    nline = slice%degree                    ! polynomial filter degree
-    low = slice%low                         ! filter support low bound
-    upp = slice%upp                         ! filter support upper bound
-    alow = (low - center) / radius          ! scaled filter support low
-    bupp = (upp - center) / radius          ! scaled filter support upp
-
-    ! AX_next=A*X -> 1 Hamiltonian application
-    call chebfi_getAX_BX(chebfi, getAX_BX)
-
-    ! B-orthonormalize X, BX and AX
-    !call xg_Borthonormalize(chebfi%xXColsRows,chebfi%xBxColsRows,ierr,1,gpu_option,AX=chebfi%xAXColsRows)
-    ! IL TODO Deflate vectors 10/03/2025
-
-    ! Why do this here?
-    if (chebfi%paral_kgb == 1) then
-        call xmpi_barrier(chebfi%spacecom)
-    end if
-
-    write(std_out,*) 'TRACE initialize Chebyshev expansion (hopefuly on GPU)'
-    ! Compute Chebyshev polynomial expansion on X iteratively on iline=0,nline
-    ! Initialize Xsum = 0 (bands are distributed)
-    ABI_NVTX_START_RANGE(NVTX_SLICE_EXPANSION)
-    call xg_init(ChebyExpansion, chebfi%space, nrows, ncols, chebfi%spacecom, gpu_option=gpu_option)
-    call xgBlock_zero(ChebyExpansion%self)
-    ! X_next=X -> iline=0 Hamiltonian applications
-    ck = Pi/(nline+2)
-    mu = 1/Pi*(ACOS(alow)-ACOS(bupp))
-    damp = 1.d0
-    !Xsum = mu(0)*damp(0)*X_next + Xsum
-    call xgBlock_saxpy(ChebyExpansion%self, mu*damp, chebfi%xXColsRows)
-    ABI_NVTX_END_RANGE()
-
-    write(std_out,*) 'TRACE start Slice core'
-    ABI_NVTX_START_RANGE(NVTX_BANDPASS_CORE)
-    do iline = 0, nline - 1  
-
-        ! X_next=2/r*(AX_next-c*X_next)-X_prev, -> iline+1 Hamiltonian applications
-        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
-        call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
-        ABI_NVTX_END_RANGE()
-
-        ! xXColsRows=X_next
-        call chebfi_swapInnerBuffers(chebfi, nrows, ncols)
-
-        ! Add new term to the Chebyshev expansion
-        !Xsum = damp(i+1)*mu(i+1)*X_next + Xsum
-        ABI_NVTX_START_RANGE(NVTX_CHEBFI_EXPANSION)
-        ilinep1 = iline + 1
-        mu = 2/Pi * (SIN(ilinep1*ACOS(alow)) - SIN(ilinep1*ACOS(bupp)))/ilinep1
-        damp = ((1 - ilinep1/(nline+2))*SIN(ck)*COS(ilinep1*ck) + 1/(nline+2)*COS(ck)*SIN(ilinep1*ck))/SIN(ck)
-        call xgBlock_saxpy(ChebyExpansion%self, mu*damp, chebfi%xXColsRows)
-   
-        ! Store term before exit
-        ! AX_next=A*X_next -> iline+2 Hamiltonian applications
-        if (iline==nline-1) then
-            ! X_next=Xsum (copy Xsum to X_next)
-            call xgBlock_copy(ChebyExpansion%self, chebfi%xXColsRows)
-        end if
-        ABI_NVTX_END_RANGE()
-
-        ! Apply A and B to X
-        call chebfi_getAX_BX(chebfi, getAX_BX)
-    
-    end do ! end iline
-    ABI_NVTX_END_RANGE()
-
-    ! All slice processes wait for filter done
-    ! FIXME Is this necessary? No communication happens actually
-    if (chebfi%paral_kgb == 1) then
-        call xmpi_barrier(chebfi%spacecom)
-    end if
-
-    ! Free Chebyshev expansion workspace
-    call xg_free(ChebyExpansion)
-
-end subroutine slice_applyBandpassFilter
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_RayleighRitz
-!! NAME
-!! slice_RayleighRitz
-!!
-!! FUNCTION
-!! Wrapper for xg_RayleighRitz + compute residual.
-!! Assumes (X,AX,BX) have MPI row distribution.
-!!
-!! SOURCE
-
-subroutine slice_RayleighRitz(slice,eigen,residu)
-
-    ! Arguments ***
-    type(slice_t), intent(inout) :: slice
-    type(xgBlock_t), intent(inout) :: eigen
-    type(xgBlock_t), intent(inout) :: residu
-    ! Local variables ***
-    type(chebfi_t) :: chebfi
-    integer :: ierr
-
-    chebfi = slice%chebfi
-    chebfi%eigenvalues = eigen
-
-    ! Apply Rayleigh-Ritz for each MPI row
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
-    call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,&
-        chebfi%gpu_option,solve_ax_bx=.true.)
-    ABI_NVTX_END_RANGE()
-    
-    if ( ierr /= 0 ) then
-        ABI_WARNING("RayleighRitz did not work, but continue anyway.")
-    end if
-
-    ! Compute residual for each MPI row and store it to AX
-    if (chebfi%paw) then
-        call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
-    else
-        call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
-    end if
-
-    ! Wait until all MPI rows have computed their residual
-    if (chebfi%paral_kgb == 1) then
-        call xmpi_barrier(chebfi%spacecom)
-    end if
-
-    ! Communicate MPI rows to compute residual norm squared
-    call xgBlock_colwiseNorm2(chebfi%AX%self,residu)
-
-end subroutine slice_RayleighRitz
-!!***
+end subroutine slice_getBounds
 
 !----------------------------------------------------------------------
 
@@ -2502,6 +1976,8 @@ subroutine sliceScheduler_run(schedule,slice_sizes,slice_degrees,nrows_tot,space
     task_me = sliceScheduler_queryTask(schedule)
     ncols_me = schedule%task_ncols(task_me)
     nprocs_me = schedule%task_nprocs(task_me)
+    ! normally these variables should be set in the _run
+    ! do not query after!!!
 
     schedule%task_me = task_me
     schedule%ncols_me = ncols_me
