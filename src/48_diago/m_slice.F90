@@ -316,6 +316,9 @@ subroutine slice_free(slice)
     implicit none
     type(slice_t), intent(inout) :: slice
 
+    call xg_free(slice%Xext_)
+    call xgTransposer_free(slice%xgTransposerX)
+
     call xg_free(slice%Eig0)
     call xg_free(slice%Res0)
 
@@ -394,8 +397,12 @@ subroutine slice_schedule(slice,X,Xext,getAX_BX,nspinor)
     call xgBlock_zero(eigen0%self)
     call xgBlock_zero(resid0%self)
 
+    ! ======== Compute spectrum ====================
+
     ! Compute Rayleigh quotients and residuals
+    ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
     call slice_computeSpectrum(slice,X,getAX_BX,eigen0,resid0,nspinor)
+    ABI_NVTX_END_RANGE()
     ! now eigen0%self holds thetas
     ! en vrai pour cutSpectrum on n'a pas besoin de theta.
     ! juste du maxeig, mineig et mineig_pos pour faire resid(mineig_pos)
@@ -460,7 +467,7 @@ subroutine slice_schedule(slice,X,Xext,getAX_BX,nspinor)
     ! TODO associate schedule into slice in some way?
     slice_ncols => slice%slice_ncols
     slice_degrees => slice%slice_degrees
-    call sliceScheduler_computeResources(schedule,slice_ncols,slice_degrees,nrows_total,&
+    call slice_splitResources(slice,slice_ncols,slice_degrees,nrows_total,&
         spacecom,resource_allocation)
 
     ! Priority IL 11/4
@@ -469,13 +476,68 @@ subroutine slice_schedule(slice,X,Xext,getAX_BX,nspinor)
     ! Permute columns of X in linalg representation
     call xgBlock_permuteCols(slice%X,nrow,nband,permute_cols_ptr)
 
-    ! Create the extended workspaces on CPU
-    ! TODO this function is called on xgx0slice
-    call sliceScheduler_allocate(slice,pband_ptr)
+    ! ======== Allocate and fill extended memory buffer ====================
+
+    ncol = sum(slice%nband_slice)
+    if (nslice==1) then
+        slice%Xext_linalg = slice%X
+    else
+        ! Allocate extended spaces in linalg representation (on CPU)
+        call xg_init(slice%Xext_,space,nrow,ncol,comm,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
+    
+        ! Define pointers
+        slice%Xext_linalg = slice%Xext_%self
+
+        ! Copy X to extended by blocks
+        ! Reminder: xgBlock_copy is always on CPU expect if both blocks are on GPU
+        do islice=1,nslice
+            ncols = slice%slice_ncols(islice)
+            fcol = slice%slice_fcol(islice)
+            fcol_ext = slice%slice_fcol_ext(islice)
+            call xgBlock_setBlock(slice%X,xgcols_in,nrows,ncols,fcol=fcol)
+            call xgBlock_setBlock(slice%Xext_linalg,xgcols_out,nrows,ncols,fcol=fcol_ext)
+            call xgBlock_copy(xgcols_in,xgcols_out)
+        end do
+    end if
+
+    ! Unitary test
+    ABI_CHECK(cols(slice%Xext_linalg)==ncol,'wrong linalg representation')
+    write(*,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(comm), cols(slice%Xext_linalg)
 
     ! Distribute extended space across MPI processes
-    ! TODO this function is called on xgx0slice
-    call sliceScheduler_distribute(slice)
+    ! Distribute Xext_linalg across *all* MPI processes and allocate 
+    ! its distributed version Xext on individual processes.
+    ! This routine applied transposition across *all* MPI processes.
+    ! After the transposition each process contains the correct
+    ! bandpp corresponding to the slice so that no additional communication
+    ! has to be performed in order to bring band slices to processes.
+    if (chebfi%paral_kgb == 1) then
+
+        nprocs = xmpi_comm_size(comm(X0))
+
+        ! Rule for number of bands per process
+        ncolsColsRows_ptr => slice%mpiData%ncolsColsRows
+
+        ! Allocate slice%Xext according to the target MPI distribution for slices
+        call xgTransposer_constructor(slice%xgTransposerX,slice%Xext_linalg,slice%Xext,nspinor,&
+            STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+            gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
+            custom_ncolsColsRows=.true.,ncolsColsRows_sub=ncolsColsRows_ptr)
+   
+        slice%xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
+   
+        ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
+        call xgTransposer_transpose(slice%xgTransposerX,STATE_COLSROWS)
+        ABI_NVTX_END_RANGE()
+
+    else
+        call xgBlock_setBlock(slice%Xext, slice%Xext_linalg, spacedim, neigenpairs)
+    end if
+
+    ! Unitary test
+    ABI_CHECK(cols(slice%Xext)==ncolsColsRows(xmpi_comm_rank(spacecom)),'wrong colsrows representation')
+    write(*,'(a,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(spacecom), cols(slice%Xext)
+    ! cols(slice%X_expand) should be equal to ncolsColsRows(i) where i is the rank of MPI process
 
     ! Free memory
     call xg_free(eigen0)
@@ -577,12 +639,15 @@ subroutine slice_computeSpectrum(slice,X0,getAX_BX,eigen,resid,nspinor)
             STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_self,comm,0,0,xgx0slice%me_g0_fft,&
             gpu_option=gpu_option,gpu_thread_limit=xgx0slice%gpu_thread_limit)
         xgTransposerX%gpu_kokkos_nthrd  = xgx0slice%gpu_kokkos_nthrd
+        
+        ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
         call xgTransposer_transpose(xgTransposerX,STATE_COLSROWS)
+        ABI_NVTX_END_RANGE()
     end if
 
     ! Now apply AX BX (colsrows representation)
     ! Remember that this function will copy X to BX if paw
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
+    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
     call getAX_BX(xXColsRows,xAXColsRows,xBXColsRows)
     call xgBlock_zero_im_g0(xAXColsRows)
     call xgBlock_zero_im_g0(xBXColsRows)
@@ -891,6 +956,133 @@ end subroutine slice_cutSpectrum
 
 !----------------------------------------------------------------------
 
+!!****f* m_slice/slice_splitResources
+!! NAME
+!! slice_splitResources
+!! 
+!! FUNCTION
+!! Set parameters of slice parallelisation environment.
+!! Assumes that spectral slices have already been splitted
+!! (uses degree). Note that schedule is target to allow pointers
+!! targeting its member variables (smart!).
+!! 
+!! SOURCE
+
+subroutine slice_splitResources(schedule,slice_sizes,slice_degrees,nrows_tot,spacecom,&
+    resource_allocation)
+
+    implicit none
+
+    ! Arguments
+    type(sliceScheduler_t), target, intent(inout) :: schedule
+    integer, pointer, intent(in) :: slice_sizes(:)
+    integer, pointer, intent(in) :: slice_degrees(:)
+    integer, intent(in) :: nrows_tot
+    integer, intent(in) :: spacecom
+    integer, intent(in) :: resource_allocation
+
+    ! Local variables
+    integer :: ntasks, nprocs, iproc, task_me
+    integer :: color, my_rank, ierr
+    ! Arrays
+    integer, allocatable, target :: weights(:)
+    integer, pointer :: weights_ptr(:) => null()
+    integer, pointer :: task_ncols_ptr(:) => null()
+    integer, pointer :: taks_nprocs_ptr(:) => null() 
+    integer, pointer :: assigned_task_ptr(:) => null()
+    integer, pointer :: blockcols_me_ptr(:) => null()
+    integer, pointer :: blocrows_me_ptr(:) => null()
+    
+! *********************************************************************
+
+    call sliceScheduler_free(env)
+
+    ntasks = size(slice_sizes)
+    nprocs = xmpi_comm_size(spacecom)
+
+    schedule%ntasks = ntasks
+    schedule%nprocs = nprocs
+    schedule%comm_global = spacecom
+    schedule%nrows_tot = nrows_tot
+    schedule%resource_allocation = resource_allocation
+
+    ! Initialize MPI distribution flags to linalg (no transpose yet)
+    schedule%use_blockrows = .true.
+    schedule%use_blockcols = .false.
+
+    ! Set CPU/GPU flags
+    call sliceScheduler_queryTarget(schedule)
+
+    if(.not.allocated(schedule%task_ncols)) ABI_MALLOC(schedule%task_ncols, (ntasks))
+    if(.not.allocated(schedule%task_nprocs)) ABI_MALLOC(schedule%task_nprocs, (ntasks))
+    if(.not.allocated(schedule%assigned_task)) ABI_MALLOC(schedule%assigned_task, (nprocs))
+    if(.not.allocated(weights)) ABI_MALLOC(weights, (ntasks))
+
+    schedule%task_ncols(:) = slice_sizes(:)
+    task_ncols_ptr => schedule%task_ncols
+    task_nprocs_ptr => schedule%task_nprocs
+    assigned_task_ptr => schedule%assigned_task
+    weights_ptr => weights
+
+    ! Apply weighted fair allocation with various balance criteria for load balance
+    select case(resource_allocation)
+    case(FAIR_BANDPP)
+        weights(:) = 1 
+    case(FAIR_BANDPP_WDEG)
+        weights(:) = slice_degrees(:)
+    end select
+    
+    ! Solve allocation problem to find the amount of resource allocated to each slice
+    call fair_allocation(ntasks, slice_sizes_ptr, weights_ptr, nprocs, task_nprocs_ptr)
+    
+    ! Call the subroutine to assign tasks (=slices) to processes
+    call assign_tasks_to_processes(task_nprocs_ptr, assigned_task_ptr)
+    do iproc = 1, ntasks
+        write(*,'(a,i5,a,i5)') "Process ", itask, " is in task ", schedule%assigned_task(i)
+    end do
+
+    ! Deduce band capacity per process (=bandpp) on individual slice
+    ! a process only has the slice that corresponds to it
+    task_me = sliceScheduler_queryTask(schedule)
+    ncols_me = schedule%task_ncols(task_me)
+    nprocs_me = schedule%task_nprocs(task_me)
+    ! normally these variables should be set in the _run
+    ! do not query after!!!
+
+    schedule%task_me = task_me
+    schedule%ncols_me = ncols_me
+    schedule%nprocs_me = nprocs_me
+
+    ! Series of allocations corresponding to _me
+    if (.not.allocated(schedule%blockcols_me)) ABI_MALLOC(schedule%blockcols_me,(nprocs_me))
+    if (.not.allocated(schedule%blockrows_me)) ABI_MALLOC(schedule%blockrows_me,(nprocs_me))
+
+    blockcols_me_ptr => schedule%blockcols_me
+    blockrows_me_ptr => schedule%blockrows_me
+
+    ! Compute size of column-blocks in MPI col distribution
+    call distribute_vectors(nprocme,ncols_me,blockcols_me_ptr)
+    
+    ! Compute size of row-blocks in MPI row distribution 
+    call distribute_vectors(nprocs_me,nrows_tot,blockrows_me_ptr)
+
+    ! Create sub-communicators 
+    ! Split global communicator so that only procs with the same color communicate
+    my_rank = sliceScheduler_queryRank(schedule)
+    color = sliceScheduler_queryTask(schedule)
+    call xmpi_comm_split(schedule%comm_global,color,my_rank,schedule%slice_comm,ierr)
+
+    ! All processes wait to define subcommunicator
+    call xmpi_barrier(schedule%comm_global)
+
+    ! Free temporary memory
+    if (allocated(weights)) ABI_FREE(weights) 
+
+end subroutine slice_splitResources
+!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slice/slice_merge
 !! NAME
 !! slice_merge
@@ -1087,141 +1279,34 @@ end subroutine slice_merge
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/bandpass_sca
+!!****f* m_slice/slice_getSlice
 !! NAME
-!! bandpass_sca
+!! slice_getSlice
 !!
+!! 
 !! FUNCTION
-!! Computes delta-Dirac polynomial filter f(x) approximated by a Chebyshev
-!! expansion of order deg centered at gamma, evaluated at point x=t
-!!
-!! INPUTS
-!!  t=      scalar to evaluate filter on
-!!  deg=    order of Chebyshev expansion
-!!  gam=    center of Chebyshev expansion
-!!
-!! OUTPUT
-!!  res
-!!
-!! SOURCE
+!! Compute global spectral bounds (lb:lower bound, ub:upper bound)
+!! as well as slice bounds.
+!! 
 
-function bandpass_sca(t, deg, gam) result(f_t)
+subroutine slice_getBounds(slice,glb,gub,lb,ub)
 
-    implicit none
+    if (slice%paral_slice==0) then
+        ABI_ERROR("Sequential slices not implemented.")
+    end if
 
-    !Arguments ------------------------------------
-    real(dp), intent(in ) :: t, gam
-    integer , intent(in ) :: deg
+    islice = slice%task_me
 
-    real(dp) :: f_t
-    
-    !Local variables-------------------------------
-    real(dp) :: yt0, yt, yg0, yg, yt_swap, yg_swap
-    real(dp) :: mu, damp, rho, rhog, theta
-    integer  :: i
-    
-! *********************************************************************
+    chebfi%nband = 
+    chebfi%spacecom = slice_comm
+    chebfi%comm_rows = xmpi_comm_self
+    chebfi%comm_cols = slice_comm
+    glb = slice%mineig_global
+    gub = slice%maxeig_global
+    lb = slice%poly_low_bounds(islice)
+    ub = slice%poly_upp_bounds(islice)
 
-    ! init cheby of deg=0,1 eval at t,gamma
-    yt0 = 1.d0
-    yt = t
-    
-    yg0 = 1.d0
-    yg = gam
-
-    ! init delta-Dirac filters of deg=0
-    theta = Pi/(deg + 1)
-    damp = SIN(theta) / theta
-    rho = 0.5d0 + gam * damp * yt
-    rhog = 0.5d0 + gam * damp * yg
-
-    do i=2,deg 
-
-        ! Update Chebyshev polynomials
-        yt_swap = yt
-        yt = 2 * t * yt - yt0
-        yt0 = yt_swap
-        
-        yg_swap = yg
-        yg = 2 * gam * yg - yg0
-        yg0 = yg_swap
-
-        ! Update delta-Dirac filters
-        mu = COS(i * ACOS(gam))
-        damp = SIN(i * theta) / (i * theta)
-        rho = rho + mu * damp * yt
-        rhog = rhog + mu * damp * yg
-        
-    end do
-
-    f_t = rho / rhog
-
-end function bandpass_sca
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/bandpassIndicator_sca
-!! NAME
-!! bandpassIndicator_sca
-!!
-!! FUNCTION
-!! Scalar Chebyshev-Jackson polynomial filter f(x) approximating an 
-!! indicator function, using degree deg evaluated at point x=t
-!!
-!! INPUTS
-!!  a,b=    interval to amplify included in -1,1
-!!  t=      scalar to evaluate filter on
-!!  deg=    order of Chebyshev expansion
-!!
-!! OUTPUT
-!!  res
-!!
-!! SOURCE
-
-function bandpassIndicator_sca(t,a,b,deg) result(f_t)
-
-    implicit none
-
-    !Arguments ------------------------------------
-    real(dp), intent(in ) :: t,a,b
-    integer , intent(in ) :: deg
-
-    real(dp) :: f_t
-    
-    !Local variables-------------------------------
-    real(dp) :: yt0,yt,yt_swap,ck,mu,damp
-    integer  :: i
-    
-! *********************************************************************
-
-    ! init cheby of deg=0,1 eval at t
-    yt0 = 1.d0
-    yt = t
-
-    ! init filter for deg=0
-    ck = Pi/(deg+2)
-    mu = 1/Pi*(ACOS(a)-ACOS(b))
-    damp = 1.d0
-    f_t = mu * damp * yt0
-
-    do i=1,deg 
-        
-        ! Update damping and expansion coefficient
-        mu = 2/Pi * (SIN(i*ACOS(a)) - SIN(i*ACOS(b)))/i
-        damp = ((1 - i/(deg+2))*SIN(ck)*COS(i*ck) + 1/(deg+2)*COS(ck)*SIN(i*ck))/SIN(ck)
-
-        ! Sum terms
-        f_t = f_t + mu * damp * yt
-
-        ! Update Chebyshev polynomial
-        yt_swap = yt
-        yt = 2 * t * yt - yt0
-        yt0 = yt_swap
-        
-    end do
-
-end function bandpassIndicator_sca
+end subroutine slice_getBounds
 !!***
 
 !----------------------------------------------------------------------
@@ -1259,325 +1344,6 @@ subroutine count_values(low,upp,theta,spos,nband,i1,i2,nvec)
 
 end subroutine count_values
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_initExtended
-!! NAME
-!! slice_initExtended
-!! 
-!! FUNCTION
-!! Allocate extended buffer by replicating overlapping slice data.
-!! This creates a buffer without data overlap on which we can safely
-!! read and write data avoiding concurrent memory access. The 
-!! overlapping data has two independent copies for adjacent slices.
-!! The extended memory space is bigger than original one.
-!! 
-!! SOURCE
-
-subroutine slice_initExtended(slice,pband_ptr)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(slice_t), intent(inout) :: slice
-    integer, pointer, intent(in) :: pband_ptr
-    
-    ! Local variables-------------------------------    
-    integer :: me_g0,nband,comm
-    integer :: nrows,ncols
-    integer :: islice,nslice
-    integer :: fcol,fcol_ext
-    type(xgBlock_t) :: xgcols_in, xgcols_out 
-    
-    ! *********************************************************************
-
-    nslice = slice%nslice
-    nrows = slice%spacedim
-    comm = slice%spacecom
-    nband = slice%nband
-    me_g0 = slice%me_g0
-    ncol = sum(slice%nband_slice)
-
-    if (nslice==1) then
-        slice%Xext_linalg = slice%X
-        slice%Eext_linalg = slice%eigen
-        slice%Rext_linalg = slice%residu
-    else
-        ! Allocate extended spaces in linalg representation (on CPU)
-        call xg_init(slice%Xext_,space,nrow,ncol,comm,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
-        call xg_init(slice%Eext_,SPACE_R,1,ncol,comm,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
-        call xg_init(slice%Rext_,SPACE_R,1,ncol,comm,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
-    
-        ! Define pointers
-        slice%Xext_linalg = slice%Xext_%self
-        slice%Eext_linalg = slice%Eext_%self
-        slice%Rext_linalg = slice%Rext_%self
-
-        ! Copy X to extended by blocks
-        ! Reminder: xgBlock_copy is always on CPU expect if both blocks are on GPU
-        do islice=1,nslice
-            ncols = slice%slice_ncols(islice)
-            fcol = slice%slice_fcol(islice)
-            fcol_ext = slice%slice_fcol_ext(islice)
-            call xgBlock_setBlock(slice%X,xgcols_in,nrows,ncols,fcol=fcol)
-            call xgBlock_setBlock(slice%Xext_linalg,xgcols_out,nrows,ncols,fcol=fcol_ext)
-            call xgBlock_copy(xgcols_in,xgcols_out)
-        end do
-    end if
-
-    ! Unitary test
-    ABI_CHECK(cols(slice%Xext_linalg)==ncol,'wrong linalg representation')
-    write(*,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(comm), cols(slice%Xext_linalg)
-
-end subroutine slice_initExtended
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_freeExtended
-!! NAME
-!! slice_freeExtended
-!! 
-!! SOURCE
-
-subroutine slice_freeExtended(slice)
-
-    implicit none
-
-    type(slice_t), intent(inout) :: slice
-   
-    if (slice%nslice>1) then
-        call xg_free(slice%Xext_)
-        call xg_free(slice%Eext_)
-        call xg_free(slice%Rext_)
-    end if
-
-end subroutine slice_freeExtended
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_distributeExtended
-!! NAME
-!! slice_distributeExtended
-!!
-!! FUNCTION
-!! Distribute Xext_linalg across *all* MPI processes and allocate 
-!! its distributed version Xext on individual processes.
-!! This routine applied transposition across *all* MPI processes.
-!! After the transposition each process contains the correct
-!! bandpp corresponding to the slice so that no additional communication
-!! has to be performed in order to bring band slices to processes.
-!!
-!! SOURCE
-
-subroutine slice_distributeExtended(slice,nspinor)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: nspinor
-
-    ! Local variables -------------------------------
-    integer :: specedim,neigenpairs
-    integer, pointer :: ncolsColsRows_ptr(:) => null()
-
-    ! *********************************************************************
- 
-    spacedim = slice%spacedim
-    neigenpairs = slice%neigenpairs
-
-    if (chebfi%paral_kgb == 1) then
-
-        nprocs = xmpi_comm_size(comm(X0))
-
-        ! Rule for number of bands per process
-        ncolsColsRows_ptr => slice%mpiData%ncolsColsRows
-
-        ! Allocate slice%Xext according to the target MPI distribution for slices
-        call xgTransposer_constructor(slice%xgTransposerX,slice%Xext_linalg,slice%Xext,nspinor,&
-            STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
-            gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
-            custom_ncolsColsRows=.true.,ncolsColsRows_sub=ncolsColsRows_ptr)
-   
-        slice%xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
-   
-        ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE_XEXPAND)
-        call xgTransposer_transpose(slice%xgTransposerX,STATE_COLSROWS)
-        ABI_NVTX_END_RANGE()
-
-    else
-        call xgBlock_setBlock(slice%Xext, slice%Xext_linalg, spacedim, neigenpairs)
-    end if
-
-    ! Unitary test
-    ABI_CHECK(cols(slice%Xext)==ncolsColsRows(xmpi_comm_rank(spacecom)),'wrong colsrows representation')
-    write(*,'(a,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(spacecom), cols(slice%Xext)
-    ! cols(slice%X_expand) should be equal to ncolsColsRows(i) where i is the rank of MPI process
-    
-end subroutine slice_distributeExtended
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_getSlice
-!! NAME
-!! slice_getSlice
-!!
-!! 
-!! FUNCTION
-!! Compute global spectral bounds (lb:lower bound, ub:upper bound)
-!! as well as slice bounds.
-!! 
-
-subroutine slice_getBounds(slice,glb,gub,lb,ub)
-
-    if (slice%paral_slice==0) then
-        ABI_ERROR("Sequential slices not implemented.")
-    end if
-
-    islice = slice%task_me
-
-    chebfi%nband = 
-    chebfi%spacecom = slice_comm
-    chebfi%comm_rows = xmpi_comm_self
-    chebfi%comm_cols = slice_comm
-    glb = slice%mineig_global
-    gub = slice%maxeig_global
-    lb = slice%poly_low_bounds(islice)
-    ub = slice%poly_upp_bounds(islice)
-
-end subroutine slice_getBounds
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/sliceScheduler_run
-!! NAME
-!! sliceScheduler_run
-!! 
-!! FUNCTION
-!! Set parameters of slice parallelisation environment.
-!! Assumes that spectral slices have already been splitted
-!! (uses degree). Note that schedule is target to allow pointers
-!! targeting its member variables (smart!).
-!! 
-!! SOURCE
-
-subroutine sliceScheduler_run(schedule,slice_sizes,slice_degrees,nrows_tot,spacecom,&
-    resource_allocation)
-
-    implicit none
-
-    ! Arguments
-    type(sliceScheduler_t), target, intent(inout) :: schedule
-    integer, pointer, intent(in) :: slice_sizes(:)
-    integer, pointer, intent(in) :: slice_degrees(:)
-    integer, intent(in) :: nrows_tot
-    integer, intent(in) :: spacecom
-    integer, intent(in) :: resource_allocation
-
-    ! Local variables
-    integer :: ntasks, nprocs, iproc, task_me
-    integer :: color, my_rank, ierr
-    ! Arrays
-    integer, allocatable, target :: weights(:)
-    integer, pointer :: weights_ptr(:) => null()
-    integer, pointer :: task_ncols_ptr(:) => null()
-    integer, pointer :: taks_nprocs_ptr(:) => null() 
-    integer, pointer :: assigned_task_ptr(:) => null()
-    integer, pointer :: blockcols_me_ptr(:) => null()
-    integer, pointer :: blocrows_me_ptr(:) => null()
-    
-! *********************************************************************
-
-    call sliceScheduler_free(env)
-
-    ntasks = size(slice_sizes)
-    nprocs = xmpi_comm_size(spacecom)
-
-    schedule%ntasks = ntasks
-    schedule%nprocs = nprocs
-    schedule%comm_global = spacecom
-    schedule%nrows_tot = nrows_tot
-    schedule%resource_allocation = resource_allocation
-
-    ! Initialize MPI distribution flags to linalg (no transpose yet)
-    schedule%use_blockrows = .true.
-    schedule%use_blockcols = .false.
-
-    ! Set CPU/GPU flags
-    call sliceScheduler_queryTarget(schedule)
-
-    if(.not.allocated(schedule%task_ncols)) ABI_MALLOC(schedule%task_ncols, (ntasks))
-    if(.not.allocated(schedule%task_nprocs)) ABI_MALLOC(schedule%task_nprocs, (ntasks))
-    if(.not.allocated(schedule%assigned_task)) ABI_MALLOC(schedule%assigned_task, (nprocs))
-    if(.not.allocated(weights)) ABI_MALLOC(weights, (ntasks))
-
-    schedule%task_ncols(:) = slice_sizes(:)
-    task_ncols_ptr => schedule%task_ncols
-    task_nprocs_ptr => schedule%task_nprocs
-    assigned_task_ptr => schedule%assigned_task
-    weights_ptr => weights
-
-    ! Apply weighted fair allocation with various balance criteria for load balance
-    select case(resource_allocation)
-    case(FAIR_BANDPP)
-        weights(:) = 1 
-    case(FAIR_BANDPP_WDEG)
-        weights(:) = slice_degrees(:)
-    end select
-    
-    ! Solve allocation problem to find the amount of resource allocated to each slice
-    call fair_allocation(ntasks, slice_sizes_ptr, weights_ptr, nprocs, task_nprocs_ptr)
-    
-    ! Call the subroutine to assign tasks (=slices) to processes
-    call assign_tasks_to_processes(task_nprocs_ptr, assigned_task_ptr)
-    do iproc = 1, ntasks
-        write(*,'(a,i5,a,i5)') "Process ", itask, " is in task ", schedule%assigned_task(i)
-    end do
-
-    ! Deduce band capacity per process (=bandpp) on individual slice
-    ! a process only has the slice that corresponds to it
-    task_me = sliceScheduler_queryTask(schedule)
-    ncols_me = schedule%task_ncols(task_me)
-    nprocs_me = schedule%task_nprocs(task_me)
-    ! normally these variables should be set in the _run
-    ! do not query after!!!
-
-    schedule%task_me = task_me
-    schedule%ncols_me = ncols_me
-    schedule%nprocs_me = nprocs_me
-
-    ! Series of allocations corresponding to _me
-    if (.not.allocated(schedule%blockcols_me)) ABI_MALLOC(schedule%blockcols_me,(nprocs_me))
-    if (.not.allocated(schedule%blockrows_me)) ABI_MALLOC(schedule%blockrows_me,(nprocs_me))
-
-    blockcols_me_ptr => schedule%blockcols_me
-    blockrows_me_ptr => schedule%blockrows_me
-
-    ! Compute size of column-blocks in MPI col distribution
-    call distribute_vectors(nprocme,ncols_me,blockcols_me_ptr)
-    
-    ! Compute size of row-blocks in MPI row distribution 
-    call distribute_vectors(nprocs_me,nrows_tot,blockrows_me_ptr)
-
-    ! Create sub-communicators 
-    ! Split global communicator so that only procs with the same color communicate
-    my_rank = sliceScheduler_queryRank(schedule)
-    color = sliceScheduler_queryTask(schedule)
-    call xmpi_comm_split(schedule%comm_global,color,my_rank,schedule%slice_comm,ierr)
-
-    ! All processes wait to define subcommunicator
-    call xmpi_barrier(schedule%comm_global)
-
-    ! Free temporary memory
-    if (allocated(weights)) ABI_FREE(weights) 
-
-end subroutine sliceScheduler_run
-!***
 
 !----------------------------------------------------------------------
 
@@ -2028,7 +1794,144 @@ function cheb_poly(xx,nn,aa,bb) result(yy)
 end function cheb_poly
 !!***
 
-end module m_slice
+!----------------------------------------------------------------------
+
+!!****f* m_slice/bandpass_sca
+!! NAME
+!! bandpass_sca
+!!
+!! FUNCTION
+!! Computes delta-Dirac polynomial filter f(x) approximated by a Chebyshev
+!! expansion of order deg centered at gamma, evaluated at point x=t
+!!
+!! INPUTS
+!!  t=      scalar to evaluate filter on
+!!  deg=    order of Chebyshev expansion
+!!  gam=    center of Chebyshev expansion
+!!
+!! OUTPUT
+!!  res
+!!
+!! SOURCE
+
+function bandpass_sca(t, deg, gam) result(f_t)
+
+    implicit none
+
+    !Arguments ------------------------------------
+    real(dp), intent(in ) :: t, gam
+    integer , intent(in ) :: deg
+
+    real(dp) :: f_t
+    
+    !Local variables-------------------------------
+    real(dp) :: yt0, yt, yg0, yg, yt_swap, yg_swap
+    real(dp) :: mu, damp, rho, rhog, theta
+    integer  :: i
+    
+! *********************************************************************
+
+    ! init cheby of deg=0,1 eval at t,gamma
+    yt0 = 1.d0
+    yt = t
+    
+    yg0 = 1.d0
+    yg = gam
+
+    ! init delta-Dirac filters of deg=0
+    theta = Pi/(deg + 1)
+    damp = SIN(theta) / theta
+    rho = 0.5d0 + gam * damp * yt
+    rhog = 0.5d0 + gam * damp * yg
+
+    do i=2,deg 
+
+        ! Update Chebyshev polynomials
+        yt_swap = yt
+        yt = 2 * t * yt - yt0
+        yt0 = yt_swap
+        
+        yg_swap = yg
+        yg = 2 * gam * yg - yg0
+        yg0 = yg_swap
+
+        ! Update delta-Dirac filters
+        mu = COS(i * ACOS(gam))
+        damp = SIN(i * theta) / (i * theta)
+        rho = rho + mu * damp * yt
+        rhog = rhog + mu * damp * yg
+        
+    end do
+
+    f_t = rho / rhog
+
+end function bandpass_sca
 !!***
 
+!----------------------------------------------------------------------
 
+!!****f* m_slice/bandpassIndicator_sca
+!! NAME
+!! bandpassIndicator_sca
+!!
+!! FUNCTION
+!! Scalar Chebyshev-Jackson polynomial filter f(x) approximating an 
+!! indicator function, using degree deg evaluated at point x=t
+!!
+!! INPUTS
+!!  a,b=    interval to amplify included in -1,1
+!!  t=      scalar to evaluate filter on
+!!  deg=    order of Chebyshev expansion
+!!
+!! OUTPUT
+!!  res
+!!
+!! SOURCE
+
+function bandpassIndicator_sca(t,a,b,deg) result(f_t)
+
+    implicit none
+
+    !Arguments ------------------------------------
+    real(dp), intent(in ) :: t,a,b
+    integer , intent(in ) :: deg
+
+    real(dp) :: f_t
+    
+    !Local variables-------------------------------
+    real(dp) :: yt0,yt,yt_swap,ck,mu,damp
+    integer  :: i
+    
+! *********************************************************************
+
+    ! init cheby of deg=0,1 eval at t
+    yt0 = 1.d0
+    yt = t
+
+    ! init filter for deg=0
+    ck = Pi/(deg+2)
+    mu = 1/Pi*(ACOS(a)-ACOS(b))
+    damp = 1.d0
+    f_t = mu * damp * yt0
+
+    do i=1,deg 
+        
+        ! Update damping and expansion coefficient
+        mu = 2/Pi * (SIN(i*ACOS(a)) - SIN(i*ACOS(b)))/i
+        damp = ((1 - i/(deg+2))*SIN(ck)*COS(i*ck) + 1/(deg+2)*COS(ck)*SIN(i*ck))/SIN(ck)
+
+        ! Sum terms
+        f_t = f_t + mu * damp * yt
+
+        ! Update Chebyshev polynomial
+        yt_swap = yt
+        yt = 2 * t * yt - yt0
+        yt0 = yt_swap
+        
+    end do
+
+end function bandpassIndicator_sca
+!!***
+
+end module m_slice
+!!***

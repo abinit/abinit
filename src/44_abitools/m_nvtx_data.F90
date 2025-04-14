@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 139
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 126
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -147,28 +147,15 @@ module m_nvtx_data
   integer, parameter :: NVTX_DMFT_RW_SELF = 115
   integer, parameter :: NVTX_DMFT_SAVEOCC = 116
   integer, parameter :: NVTX_TRANSPOSER_MPI_ALL2ALL = 117
-  integer, parameter :: NVTX_SLICEALL_MERGE = 118
-  integer, parameter :: NVTX_SLICEALL_PERMUTE_COLS = 119
-  integer, parameter :: NVTX_SLICEALL_INIT_ASYNC_BUFFER = 120
-  integer, parameter :: NVTX_SLICEALL_FREE_ASYNC_BUFFER = 121
-  integer, parameter :: NVTX_SLICEALL_GET_AX_BX = 122
-  integer, parameter :: NVTX_SPSL_NONLOP = 123
-  integer, parameter :: NVTX_SLICE_GET_AX_BX = 124
-  integer, parameter :: NVTX_SLICE_GET_BM1X = 125
-  integer, parameter :: NVTX_SLICE_CORE = 126
-  integer, parameter :: NVTX_SLICE_NEXT_ORDER = 127
-  integer, parameter :: NVTX_SLICE_RR = 128
-  integer, parameter :: NVTX_SLICE_RRQ = 129
-  integer, parameter :: NVTX_SLICE_TRANSPOSE = 130
-  integer, parameter :: NVTX_SLICE_SWAP_BUF = 131
-  integer, parameter :: NVTX_SLICE_EXPANSION = 132
-  integer, parameter :: NVTX_SLICE_INIT = 133
-  integer, parameter :: NVTX_SLICE_RUN = 134
-  integer, parameter :: NVTX_SLICE_COPY = 135
-  integer, parameter :: NVTX_SLICE_FREE = 136
-  integer, parameter :: NVTX_SPSLICE_INIT = 137
-  integer, parameter :: NVTX_SLICEALL_SPLIT = 138
-  integer, parameter :: NVTX_SLICEALL_DOS = 139
+  integer, parameter :: NVTX_SLICE_GET_AX_BX = 118
+  integer, parameter :: NVTX_SLICE_TRANSPOSE = 119 
+  integer, parameter :: NVTX_SLICE_RRQ = 120
+  integer, parameter :: NVTX_POLYFI_TRANSPOSE = 121
+  integer, parameter :: NVTX_POLYFI_RR = 122
+  integer, parameter :: NVTX_POLYFI_GET_AX_BX = 123
+  integer, parameter :: NVTX_POLYFI_CORE = 124
+  integer, parameter :: NVTX_POLYFI_NEXT_ORDER = 125
+  integer, parameter :: NVTX_POLYFI_SWAP_BUF = 126
 
 contains
 
@@ -296,28 +283,15 @@ contains
          & "DMFT_RW_SELF", &
          & "DMFT_SAVEOCC", &
          & "TRANSPOSER_MPI_ALL2ALL", &
-         & "SLICES_DOS", &
-         & "SLICES_MERGE", &
-         & "SLICES_PERMUTE_COLS", &
-         & "SLICES_AINIT", &
-         & "SLICES_AFREE", &
-         & "GET_AX_BX", &
-         & "SPSL_NONLOP", &
-         & "GET_AX_BX", &
-         & "GET_BM1X", &
-         & "SLICE_CORE", &
-         & "NEXT_ORDER", &
-         & "RAYLRITZ", &
-         & "RAYLRITZ_Q", &
-         & "TRANSPOSE", &
-         & "SWAP_BUF", &
-         & "CHEBY_EXPANSION", &
-         & "SLICE_INIT", &
-         & "SLICE_RUN", &
-         & "SLICE_COPY", &
-         & "SLICE_FREE", &
-         & "SPSLICE_INIT", &
-         & "SLICEALL_SPLIT" &
+         & "SLICE_GET_AX_BX", &
+         & "SLICE_TRANSPOSE", & 
+         & "SLICE_RRQ", &
+         & "POLYFI_TRANSPOSE", &
+         & "POLYFI_RR", &
+         & "POLYFI_GET_AX_BX", &
+         & "POLYFI_CORE", &
+         & "POLYFI_NEXT_ORDER", &
+         & "POLYFI_SWAP_BUF" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -437,28 +411,15 @@ contains
     nvtx_ids(115)=NVTX_DMFT_RW_SELF
     nvtx_ids(116)=NVTX_DMFT_SAVEOCC
     nvtx_ids(117)=NVTX_TRANSPOSER_MPI_ALL2ALL
-    nvtx_ids(118)= NVTX_SLICEALL_MERGE
-    nvtx_ids(119)= NVTX_SLICEALL_PERMUTE_COLS
-    nvtx_ids(120)= NVTX_SLICEALL_INIT_ASYNC_BUFFER
-    nvtx_ids(121)= NVTX_SLICEALL_FREE_ASYNC_BUFFER
-    nvtx_ids(122)= NVTX_SLICEALL_GET_AX_BX
-    nvtx_ids(123)= NVTX_SLICES_NONLOP
-    nvtx_ids(124)= NVTX_SLICE_GET_AX_BX
-    nvtx_ids(125)= NVTX_SLICE_GET_BM1X
-    nvtx_ids(126)= NVTX_SLICE_CORE
-    nvtx_ids(127)= NVTX_SLICE_NEXT_ORDER
-    nvtx_ids(128)= NVTX_SLICE_RR
-    nvtx_ids(129)= NVTX_SLICE_RRQ
-    nvtx_ids(130)= NVTX_SLICE_TRANSPOSE
-    nvtx_ids(131)= NVTX_SLICE_SWAP_BUF
-    nvtx_ids(132)= NVTX_SLICE_EXPANSION
-    nvtx_ids(133)= NVTX_SLICE_INIT
-    nvtx_ids(134)= NVTX_SLICE_RUN
-    nvtx_ids(135)= NVTX_SLICE_COPY
-    nvtx_ids(136)= NVTX_SLICE_FREE
-    nvtx_ids(137)= NVTX_SPSLI_INIT
-    nvtx_ids(138)= NVTX_SLICEALL_SPLIT
-    nvtx_ids(139)= NVTX_SLICEALL_DOS
+    nvtx_ids(118)=NVTX_SLICE_GET_AX_BX
+    nvtx_ids(119)=NVTX_SLICE_TRANSPOSE
+    nvtx_ids(120)=NVTX_SLICE_RRQ
+    nvtx_ids(121)=NVTX_POLYFI_TRANSPOSE
+    nvtx_ids(122)=NVTX_POLYFI_RR
+    nvtx_ids(123)=NVTX_POLYFI_GET_AX_BX
+    nvtx_ids(124)=NVTX_POLYFI_CORE
+    nvtx_ids(125)=NVTX_POLYFI_NEXT_ORDER
+    nvtx_ids(126)=NVTX_POLYFI_SWAP_BUF
 
   end subroutine nvtx_init
 

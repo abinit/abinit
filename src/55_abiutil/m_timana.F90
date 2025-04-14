@@ -1295,31 +1295,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  ! spectrum slicing routines
  names(2160) = 'slicewf                       '
- names(2161) = 'sliceAll_dos                  '
- names(2162) = 'sliceAll_init                 '
- names(2163) = 'sliceAll_split                '
- names(2164) = 'sliceAll_permute              '
- names(2165) = 'sliceAll_merge                '
- names(2166) = 'sliceAll_free                 '
- names(2167) = 'slice2_RR                     '
- names(2168) = 'slice2_invovl                 '
- names(2169) = 'slice2_barrier                '
- names(2170) = 'slice2_getAX_BX               '
- names(2171) = 'slice2_copy                    '
- names(2172) = 'slice2_swap                   '
- names(2173) = 'slice2_RR_q                   '
- names(2174) = 'slice2_transpose              '
- names(2175) = 'slice2_residu                 '
- names(2176) = 'slice2_postinvovl             '
- names(2177) = 'slice1_init                   '
- names(2178) = 'slice2_init                   '
- names(2179) = 'slice1_free                   '
- names(2180) = 'slice2_free                   '
- names(2181) = 'slice2_expansion              '
- names(2182) = 'sliceAll_transpose            '
- names(2183) = 'sliceAll_getAX_BX             '
- names(2184) = 'sliceAll_RR_q                 '
- names(2185) = 'slice_Acopy                   '
 
  ! TIMER_SIZE is 2199. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
@@ -2014,7 +1989,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(90)
          list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
        case(91)
-         list(:41)=(/ 2160, (ii,ii=1751,1765,1),(ii,ii=2161,2185,1) /); msg='slicewf core engine '
+         list(:41)=(/ 2160 /); msg='slicewf core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
