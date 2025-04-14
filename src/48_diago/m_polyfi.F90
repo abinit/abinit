@@ -58,11 +58,20 @@ module m_polyfi
 
     implicit none
 
+    private
+
+    !Several (private) parameters
+    !-------------------------------------------------
+
+    integer, parameter :: tim_getAX_BX     = 1754
+    integer, parameter :: tim_transpose    = 1758
+
     ! Public 'polyfi' datatype
     !-------------------------------------------------
     type, public :: polyfi_t 
 
         type(chebfi_t) :: chebfi
+        type(xg_t) :: DivResults
         real(dp) :: mineig_global
         real(dp) :: maxeig_global
         real(dp) :: lambda_minus
@@ -130,8 +139,8 @@ module m_polyfi
 
     polyfi%mineig_global = mineig_global
     polyfi%maxeig_global = maxeig_global
-    polyfi%lambda_minus = polyfi%lambda_minus
-    polyfi%lambda_plus = polyfi%lambda_plus
+    polyfi%lambda_minus = lambda_minus
+    polyfi%lambda_plus = lambda_plus
     polyfi%is_lowpass = is_lowpass
     polyfi%is_bandpass = is_bandpass
     
@@ -148,9 +157,36 @@ module m_polyfi
         gpu_kokkos_nthrd=gpu_kokkos_nthrd,gpu_thread_limit=gpu_thread_limit,&
         from_linalg=.false.)
 
+    call polyfi_allocateAll(polyfi)
+
  end subroutine polyfi_init
  !!***
  
+ !----------------------------------------------------------------------
+
+!!****f* m_polyfi/polyfi_allocateAll
+!! NAME
+!! polyfi_allocateAll
+
+ subroutine polyfi_allocateAll(polyfi)
+
+    implicit none
+
+    type(polyfi_t), intent(inout) :: polyfi
+    integer :: space_res
+   
+    if (polyfi%chebfi%space==SPACE_C) then
+        space_res = SPACE_C
+    else if (polyfi%chebfi%space==SPACE_CR) then
+        space_res = SPACE_R
+    else
+        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
+    end if
+    call xg_init(polyfi%DivResults, space_res, polyfi%chebfi%bandpp, 1, gpu_option=polyfi%chebfi%gpu_option)
+
+ end subroutine
+ !!***   
+
  !----------------------------------------------------------------------
 
 !!****f* m_polyfi/polyfi_free
@@ -166,6 +202,7 @@ subroutine polyfi_free(polyfi)
     type(polyfi_t), intent(inout) :: polyfi
 
     call chebfi_free(polyfi%chebfi)
+    call xg_free(polyfi%DivResults)
 
 end subroutine polyfi_free
 !!***
@@ -273,7 +310,7 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     ! Apply polynomial filtering (requires colsrows state)
     if (polyfi%is_lowpass) then
 
-        call polyfit_lowpass(polyfi,getAX_BX,getBm1X,nspinor)
+        call polyfi_lowpass(polyfi,getAX_BX,getBm1X,nspinor)
 
     else if (polyfi%is_bandpass) then
 
@@ -287,6 +324,7 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     end if
 
     ! Transpose to linalg state
+    call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_POLYFI_TRANSPOSE)
     if (chebfi%paral_kgb == 1) then
 
@@ -306,10 +344,11 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
         call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
     end if
     ABI_NVTX_END_RANGE()
+    call timab(tim_transpose,2,tsec)
 
     ! Unitary test
-    ABI_CHECK(rows(slice%X_linalg)==nrowsLinalg(xmpi_comm_rank(spacecom)),'wrong linalg representation')
-    write(*,'(a,i6,i6)') '# proc has # rows of slice X ', xmpi_comm_rank(spacecom), rows(slice%X_linalg)
+    ABI_CHECK(rows(chebfi%X)==nrowsLinalg(xmpi_comm_rank(spacecom)),'wrong linalg representation')
+    write(*,'(a,i6,i6)') '# proc has # rows of slice X ', xmpi_comm_rank(spacecom), rows(chebfi%X)
 
     ! Apply Rayleigh-Ritz for each MPI row
     ABI_NVTX_START_RANGE(NVTX_POLYFI_RR)
@@ -359,24 +398,24 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
 
     if (polyfi%gpu_option==ABI_GPU_OFFLOAD) then
         ! TODO Deal with xgeigen and xgresidu
-        !call xgBlock_reshape(slice%xgeigen, (/1,nband_slice/))
-        !call xgBlock_reshape(slice%xgresidu, (/1,nband_slice/))
-        !call xgBlock_copy_from_gpu(slice%xgeigen)
-        !call xgBlock_copy_from_gpu(slice%xgresidu)
-        !call slice_blockCopy(slice%xgeigen,sliceAll%xgeigen_ovlp,1,j1,nband_slice,j2)
-        !call slice_blockCopy(slice%xgresidu,sliceAll%xgresidu_ovlp,1,j1,nband_slice,j2)
+        !call xgBlock_reshape(chebfi%xgeigen, (/1,nband_slice/))
+        !call xgBlock_reshape(chebfi%xgresidu, (/1,nband_slice/))
+        !call xgBlock_copy_from_gpu(chebfi%xgeigen)
+        !call xgBlock_copy_from_gpu(chebfi%xgresidu)
+        !call slice_blockCopy(chebfi%xgeigen,sliceAll%xgeigen_ovlp,1,j1,nband_slice,j2)
+        !call slice_blockCopy(chebfi%xgresidu,sliceAll%xgresidu_ovlp,1,j1,nband_slice,j2)
     end if
 
     ! Unitary test
-    ABI_CHECK(cols(slice%X)==ncols_slice,'wrong colsrows representation')
-    write(*,'(a,i6,i6)') '# proc has # cols of slice X ', xmpi_comm_rank(spacecom), cols(slice%X)
+    ABI_CHECK(cols(chebfi%xXColsRows)==ncols_slice,'wrong colsrows representation')
+    write(*,'(a,i6,i6)') '# proc has # cols of slice X ', xmpi_comm_rank(spacecom), cols(chebfi%xXColsRows)
 
     ! if gpu: This is important! Because X0 is on CPU
-    ! call xgBlock_copy_from_gpu(slice%X)
-    ! call xgBlock_set_gpu_option(slice%X,ABI_GPU_DISABLED)
+    ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
+    ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_DISABLED)
 
     ! Copy slice solution to the extended buffer (requires colsrows state)
-    call xgBlock_copy(slice%X,X0)
+    call xgBlock_copy(chebfi%xXColsRows,X0)
     ! FIXME same for eigen, residu?
 
     ! TODO we can also compute the merge on individual slices
@@ -397,7 +436,6 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     
     ! Free memory
     if (allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
-    call xgTransposer_free(slice%xgTransposerX)
 
 end subroutine polyfi_run
 !!***
@@ -412,25 +450,24 @@ end subroutine polyfi_run
 !! Apply Lowpass filter using Chebyshev polynomial on a set of vectors.
 !!
 !! INPUTS
-!!  slice   = spectral slice parameters
+!!  polyfi  = polynomial filtering datastructure
 !!  getAX_BX= pointer to the function giving A|X> and B|X>
 !!            A is typically the Hamiltonian H, and B the overlap operator S
 !!  getBm1X = pointer to the function giving B^-1|X>
 !!            B is typically the overlap operator S
 !!
 !! SIDE EFFECTS
-!!  slice <type(slice_t)>=all data used to apply Spectrum Slicing algorithm 
-!!  on a single spectral slice
-!!  eigen= Full eigenvalues (initial values on entry)
-!!  residu= residuals, i.e. norm of (A-lambdaB)|X>
-!!  X0= Full set of vectors (initial values on entry)
+!!  polyfi <type(polyfi_t)>=all data used to apply Polynomial Filtering algorithm 
+!!  polyfi%chebfi%xXColsRows= Filtered vectors
 !!
 !! SOURCE
 
-subroutine polyfi_lowpass(slice,getAX_BX,getBm1X,nspinors)
+subroutine polyfi_lowpass(polyfi,getAX_BX,getBm1X,nspinors)
+
+    implicit none
 
     ! Arguments ------------------------------------
-    type(slice_t), intent(inout) :: slice
+    type(polyfi_t), intent(inout) :: polyfi
     integer, intent(in) :: nspinor
     interface
         subroutine getAX_BX(X,AX,BX)
@@ -447,43 +484,28 @@ subroutine polyfi_lowpass(slice,getAX_BX,getBm1X,nspinors)
             type(xgBlock_t), intent(inout) :: Bm1X
         end subroutine getBm1X
     end interface
+    
     !Local variables-------------------------------
     type(chebfi_t) :: chebfi
+    integer :: ndeg_filter, ideg, ierr
+    integer, allocatable :: ndeg_filter_bands(:)
+    real(dp) :: center, radius, one_over_r, two_over_r
 
     ! *********************************************************************
 
-    chebfi = slice%chebfi
-
-    ! When entering DivResult%self should contain all eigenvalues in slice
-    ! in the form (bandpp,1) as a ROW vector
-    comm_slice = slice%mpiData%comm_sub
-
-    ! This is the maximum and the minimum eigenvalue in the slice
-    if (slice%paral_kgb == 1) then
-        call xmpi_max(slice%maxeig,maxeig_global,comm_slice,ierr)
-        call xmpi_min(slice%mineig,mineig_global,comm_slice,ierr)
-    else
-        call xmpi_max(slice%maxeig,maxeig_global,comm,ierr)
-        call xmpi_min(slice%mineig,mineig_global,comm,ierr)
-    end if
-
-    eigenvalues = DivResults%self !! ....
-    ! DivResults%self is already constructed from previous routines
-    ! this routine should also set the maxeig_global, mineig_global then
+    chebfi = polyfi%chebfi
+    ndeg_filter = chebfi%ndeg_filter 
 
     if (chebfi%paral_kgb == 0) then
-        ABI_MALLOC(ndeg_filter_bands,(neigenpairs))
+        ABI_MALLOC(ndeg_filter_bands,(chebfi%neigenpairs))
     else
-        ABI_MALLOC(ndeg_filter_bands,(bandpp))
+        ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
     end if
     ndeg_filter_bands(:) = ndeg_filter
     
-    ! Spectral interval to amplify is [-oo, lambda_minus)
-    lambda_minus = maxeig_global
-    lambda_plus = slice%%ecut
-
-    center = (lambda_plus + lambda_minus)*0.5
-    radius = (lambda_plus - lambda_minus)*0.5
+    ! Filter parameters
+    center = (polyfi%lambda_plus + polyfi%lambda_minus)*0.5
+    radius = (polyfi%lambda_plus - polyfi%lambda_minus)*0.5
 
     one_over_r = 1/radius
     two_over_r = 2/radius
@@ -506,9 +528,9 @@ subroutine polyfi_lowpass(slice,getAX_BX,getBm1X,nspinors)
 
         ABI_NVTX_START_RANGE(NVTX_POLYFI_SWAP_BUF)
         if (chebfi%paral_kgb == 0) then
-            call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
+            call chebfi_swapInnerBuffers(chebfi, chebfi%spacedim, chebfi%neigenpairs)
         else
-            call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, bandpp)
+            call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
         end if
         ABI_NVTX_END_RANGE()
 
@@ -525,12 +547,15 @@ subroutine polyfi_lowpass(slice,getAX_BX,getBm1X,nspinors)
     ABI_NVTX_END_RANGE()
 
     ! Scale X,AX,BX by amplification factor to reduce large values
-    call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
+    ! FIXME DivResults obscure
+    ! il est juste utilisé pour multiplier le chebfi%xX,xAX,xBX par les valeurs de DivResults
+    ! ce serait mieux de renommer DivResults à RRQ
+    call chebfi_ampfactor(chebfi, polyfi%DivResults%self, polyfi%lambda_minus, &
+        polyfi%lambda_plus, ndeg_filter_bands)
 
-    call xg_free(DivResults) ! en fait ne pas faire ça ici
-    ! car on garde DivResults à l'extérieur des slices aussi pour
-    ! comparer les convergences
-    ABI_FREE(ndeg_filter_bands)
+    if (allocated(ndeg_filter_bands)) then
+        ABI_FREE(ndeg_filter_bands)
+    end if
 
 end subroutine polyfi_lowpass
 !!***
@@ -583,7 +608,7 @@ subroutine polyfi_bandpass(polyfi,getAX_BX,getBm1X,nspinor)
     ! Local variables-------------------------------
     type(chebfi_t) :: chebfi
     integer :: ndeg, n, ierr
-    real(dp) :: one_over_r, two_over_r, center, radius
+    real(dp) :: center, radius, one_over_r, two_over_r
     real(dp) :: ls, us, cdeg, mu, damp
     type(xg_t) :: PolySum
 
@@ -608,11 +633,14 @@ subroutine polyfi_bandpass(polyfi,getAX_BX,getBm1X,nspinor)
     ls = (polyfi%lambda_minus - center) / radius
     us = (polyfi%lambda_plus - center) / radius
     
+    ! A*Psi
+    call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
     call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
     call xgBlock_zero_im_g0(chebfi%xAXColsRows)
     call xgBlock_zero_im_g0(chebfi%xBXColsRows)
     ABI_NVTX_END_RANGE()
+    call timab(tim_getAX_BX,2,tsec)
 
     ! TODO IL 10/3/2025 
     ! Deflate vectors ==========
@@ -650,11 +678,13 @@ subroutine polyfi_bandpass(polyfi,getAX_BX,getBm1X,nspinor)
         end if
 
         ! Apply A and B to X
+        call timab(tim_getAX_BX,1,tsec)
         ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
         call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
         call xgBlock_zero_im_g0(chebfi%xAXColsRows)
         call xgBlock_zero_im_g0(chebfi%xBXColsRows)
         ABI_NVTX_END_RANGE()
+        call timab(tim_getAX_BX,2,tsec)
     
     end do ! end iline
     ABI_NVTX_END_RANGE()

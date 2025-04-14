@@ -511,7 +511,7 @@ subroutine slice_schedule(slice,X,Xext,getAX_BX,nspinor)
     ! After the transposition each process contains the correct
     ! bandpp corresponding to the slice so that no additional communication
     ! has to be performed in order to bring band slices to processes.
-    if (chebfi%paral_kgb == 1) then
+    if (slice%paral_kgb == 1) then
 
         nprocs = xmpi_comm_size(comm(X0))
 
@@ -520,8 +520,8 @@ subroutine slice_schedule(slice,X,Xext,getAX_BX,nspinor)
 
         ! Allocate slice%Xext according to the target MPI distribution for slices
         call xgTransposer_constructor(slice%xgTransposerX,slice%Xext_linalg,slice%Xext,nspinor,&
-            STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
-            gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
+            STATE_LINALG,TRANS_ALL2ALL,slice%comm_rows,slice%comm_cols,0,0,slice%me_g0_fft,&
+            gpu_option=slice%gpu_option,gpu_thread_limit=slice%gpu_thread_limit,&
             custom_ncolsColsRows=.true.,ncolsColsRows_sub=ncolsColsRows_ptr)
    
         slice%xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
@@ -1297,10 +1297,8 @@ subroutine slice_getBounds(slice,glb,gub,lb,ub)
 
     islice = slice%task_me
 
-    chebfi%nband = 
-    chebfi%spacecom = slice_comm
-    chebfi%comm_rows = xmpi_comm_self
-    chebfi%comm_cols = slice_comm
+    bandpp = slice%bandpp_me(islice) !!! important!!!
+
     glb = slice%mineig_global
     gub = slice%maxeig_global
     lb = slice%poly_low_bounds(islice)
