@@ -100,6 +100,7 @@ module m_chebfi2
    integer :: me_g0
    integer :: me_g0_fft
 
+   logical :: from_linalg    ! allocate colsrows if true or linalg if false
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
 
@@ -184,7 +185,7 @@ module m_chebfi2
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
                        ndeg_filter,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols, &
-                       oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
+                       oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit,from_linalg)
 
  implicit none
 
@@ -212,6 +213,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  type(chebfi_t), intent(inout) :: chebfi
  integer       , intent(in   ), optional :: gpu_kokkos_nthrd
  integer       , intent(in   ), optional :: gpu_thread_limit
+ logical       , intent(in   ), optional :: from_linalg
 
  ! Local variables-------------------------------
  real(dp)                      :: tsec(2)
@@ -249,6 +251,8 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  if (present(gpu_kokkos_nthrd)) chebfi%gpu_kokkos_nthrd = gpu_kokkos_nthrd
  chebfi%gpu_thread_limit = 0
  if (present(gpu_thread_limit)) chebfi%gpu_thread_limit = gpu_thread_limit
+ chebfi%from_linalg = .true.
+ if (present(from_linalg)) chebfi%from_linalg = from_linalg
 
  call chebfi_allocateAll(chebfi)
 
@@ -313,8 +317,15 @@ subroutine chebfi_allocateAll(chebfi)
  end if
 
  !transposer will handle these arrays automatically
- call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
- call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
+ if (chebfi%from_linalg) then
+    call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
+    call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
+ else
+    call xg_init(chebfi%xAXColsRows,space,chebfi%total_spacedim,chebfi%bandpp,chebfi%spacecom,&
+        me_g0=chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+    call xg_init(chebfi%xBXColsRows,space,chebfi%total_spacedim,chebfi%bandpp,chebfi%spacecom,&
+        me_g0=chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
+ end if
 
 end subroutine chebfi_allocateAll
 !!***
@@ -349,8 +360,13 @@ subroutine chebfi_free(chebfi)
 
  call xg_free(chebfi%X_NP)
 
- call xg_free(chebfi%AX)
- call xg_free(chebfi%BX)
+ if (chebfi%from_linalg) then
+    call xg_free(chebfi%AX)
+    call xg_free(chebfi%BX)
+ else 
+    call xg_free(chebfi%xAXColsRows)
+    call xg_free(chebfi%xBXColsRows)
+ end if
 
 end subroutine chebfi_free
 !!***
@@ -558,6 +574,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  tolerance = chebfi%tolerance
  lambda_plus = chebfi%ecut
  chebfi%X = X0
+    type(x
 
  ! Transpose
  if (chebfi%paral_kgb == 1) then

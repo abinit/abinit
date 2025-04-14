@@ -159,6 +159,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  integer(kind=c_size_t) :: localMem
  type(slice_t) :: slice
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
+ type(xgBlock_t) :: xgx0slice
  ! arrays
  real(dp) :: tsec(2)
  integer(kind=c_size_t) :: sliceMem(2) 
@@ -223,6 +224,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
     ! TODO the xgBlocks we transpose distribute etc should
     ! point to xgx0slice, eigSliced, residSliced
+    ! mieux de renommer xgx0 à xgx0slice comme ça on sait que c'est deux objects différents
 
  call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
 
@@ -231,7 +233,8 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
- call slice_initSchedule(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
+ ! TODO include variables spectral_cut, paral_slice
+ call slice_init(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
      dtset%paral_kgb,l_mpi_enreg%bandpp,dtset%mdeg_filter,space,1,spacecom,&
      me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
      l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
@@ -258,7 +261,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  ! xgx0slice =version of xgx0 distributed correctly and free of data overlap
  ! schedule  =manager of all slice tasks
  ! .. add type(xgBlock_t) :: xgx0slice
- call slice_runSchedule(slice,xgx0,xgx0slice,getghc_gsc1,nspinor)
+ call slice_compute(slice,xgx0,xgx0slice,getghc_gsc1,nspinor)
 
  ! I think that xgeigenslice and xgresiduslice can be allocated without
  ! the need of dedicated function
@@ -269,15 +272,20 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 !################    RUUUUUUUN    #####################################
 !######################################################################
  
- call sliceTask_init(task,slice)
+ call chebfi_initSlice(chebfi,slice,nband,dtset%tolwfr_diago,dtset%ecut,&
+     dtset%paral_kgb,space,1,spacecom,&
+     me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+     l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
+     gpu_thread_limit=dtset%gpu_thread_limit)
 
- call sliceTask_run(task,xgx0slice,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+ call chebfi_runSlice(chebfi,xgx0slice,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
 
- call sliceTask_free(sliceTask,scliceSchedule)
+ call chebfi_free(chebfi)
 
 
- call slice_finalizeSchedule(schedule,xgx0,xgx0slice,xgeigen,xgresidu)
+ call slice_merge(slice,xgx0,xgx0slice,xgeigen,xgresidu)
 
+ call slice_free(slice)
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
