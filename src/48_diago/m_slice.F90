@@ -91,6 +91,8 @@ module m_slice
         type(xgBlock_t) :: Xext_blockrows         ! data in linalg representation
         type(xgBlock_t) :: Xext_blockcols         ! data in colsrows representation
         type(xgTransposer_t) :: xgTransposerXext  ! transposer to switch representation
+        type(xg_t) :: Eig0 ! this is DivResults
+        type(xg_t) :: Res0
 
         ! Flags
         logical :: on_host = .false.        ! on CPU
@@ -245,8 +247,25 @@ subroutine slice_init(slice,neigenpairs,spacedim,&
         xgx0slice%ncols_blockcols = bandpp
     end if
 
-    ! Arrays
+    if (paral_kgb==0) then
+        slice%total_spacedim = spacedim
+    else
+        total_spacedim = spacedim
+        call xmpi_sum(total_spacedim,slice%spacecom,ierr)
+        slice%total_spacedim = total_spacedim
+    end if
+    slice%nrows_tot = total_spacedim ! TODO
+    
+    slice%ntasks = nslice
+    slice%nprocs = xmpi_comm_size(spacecom)
+    slice%comm_global = spacecom
+    slice%resource_allocation = resource_allocation
 
+    ! Initialize MPI distribution flags to linalg (no transpose yet)
+    slice%use_blockrows = .true.
+    slice%use_blockcols = .false.
+
+    ! Arrays
     call slice_allocateAll(slice)
 
 end subroutine slice_init
@@ -276,6 +295,7 @@ subroutine slice_allocateAll(slice)
 
     call slice_free(slice)
 
+    ! TODO this is DivResults
     ! Space for computed eigenvalues and residuals (not distributed)
     call xg_init(slice%eigenN_,space_res,1,nband,me_g0=me_g0,gpu_option=gpu_option)
     call xg_init(slice%residN_,SPACE_R,1,nband,me_g0=me_g0,gpu_option=gpu_option)
@@ -292,6 +312,10 @@ subroutine slice_allocateAll(slice)
     ! Make dimension compatible with xgeigen,xgresidu of slicewf
     call xgBlock_reshape(slice%EW%self, (/nband_slice,1/))
     call xgBlock_reshape(slice%RW%self, (/nband_slice,1/))
+
+    if(.not.allocated(slice%task_ncols)) ABI_MALLOC(slice%task_ncols, (ntasks))
+    if(.not.allocated(slice%task_nprocs)) ABI_MALLOC(slice%task_nprocs, (ntasks))
+    if(.not.allocated(slice%assigned_task)) ABI_MALLOC(slice%assigned_task, (nprocs))
 
     if(.not.allocated(slice%slice_fcol)) ABI_MALLOC(slice%slice_fcol,(nslice))
     if(.not.allocated(slice%slice_ncols)) ABI_MALLOC(slice%slice_ncols,(nslice))
@@ -470,11 +494,14 @@ subroutine slice_schedule(slice,X,Xext,getAX_BX,nspinor)
     call slice_splitResources(slice,slice_ncols,slice_degrees,nrows_total,&
         spacecom,resource_allocation)
 
+    ! TODO move out this is only for current process in polyfi_init
+    call slice_setResourcesMe(slice)
+
     ! Priority IL 11/4
     ! FIXME normally here we should move some data to CPU
     ! then permute columns of cg in linalg representation
     ! Permute columns of X in linalg representation
-    call xgBlock_permuteCols(slice%X,nrow,nband,permute_cols_ptr)
+    call xgBlock_permuteCols(X,nrow,nband,permute_cols_ptr)
 
     ! ======== Allocate and fill extended memory buffer ====================
 
@@ -713,31 +740,16 @@ end subroutine slice_computeSpectrum
 !! 
 !! FUNCTION
 !! Split spectrum into overlapping slices. 
-!!
-!! INPUT
-!! sliceAll=         parameters common to all slices, such as
-!!                   balance_option=balance number of vectors(1)
-!!                                  balance filter degrees(2)
-!!                   ramp=filter convergence threshold, greater than 1
-!! idxAll=           start and end index per slice
-!! ndegAll=          filter degree per slice
-!! sboundAll=        various spectral bounds
-!! pband=            eigenvector permutation
-!!
+!! Store parameters into arrays of size nslice.
+!! 
 !! SOURCE
 
-subroutine slice_cutSpectrum(slice,nband,idxAll,ndegAll,sboundAll,pband,npbandSlice,plot_filter)
+subroutine slice_cutSpectrum(slice,plot_filter)
 
     implicit none
 
     !Arguments ------------------------------------
     type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: nband
-    integer, pointer, intent(inout) :: idxAll(:,:)
-    integer, pointer, intent(inout) :: ndegAll(:)
-    integer, pointer, intent(inout) :: pband(:)
-    integer, pointer, intent(inout) :: npbandSlice(:)
-    real(dp), pointer, intent(inout) :: sboundAll(:,:)
     logical, optional, intent(in) :: plot_filter
     
     !Local variables-------------------------------
@@ -968,13 +980,13 @@ end subroutine slice_cutSpectrum
 !! 
 !! SOURCE
 
-subroutine slice_splitResources(schedule,slice_sizes,slice_degrees,nrows_tot,spacecom,&
+subroutine slice_splitResources(slice,slice_sizes,slice_degrees,nrows_tot,spacecom,&
     resource_allocation)
 
     implicit none
 
     ! Arguments
-    type(sliceScheduler_t), target, intent(inout) :: schedule
+    type(slice_t), target, intent(inout) :: slice
     integer, pointer, intent(in) :: slice_sizes(:)
     integer, pointer, intent(in) :: slice_degrees(:)
     integer, intent(in) :: nrows_tot
@@ -982,46 +994,30 @@ subroutine slice_splitResources(schedule,slice_sizes,slice_degrees,nrows_tot,spa
     integer, intent(in) :: resource_allocation
 
     ! Local variables
-    integer :: ntasks, nprocs, iproc, task_me
-    integer :: color, my_rank, ierr
+    integer :: ntasks, nprocs, iproc
     ! Arrays
     integer, allocatable, target :: weights(:)
     integer, pointer :: weights_ptr(:) => null()
     integer, pointer :: task_ncols_ptr(:) => null()
     integer, pointer :: taks_nprocs_ptr(:) => null() 
     integer, pointer :: assigned_task_ptr(:) => null()
-    integer, pointer :: blockcols_me_ptr(:) => null()
-    integer, pointer :: blocrows_me_ptr(:) => null()
     
 ! *********************************************************************
 
-    call sliceScheduler_free(env)
+    !call sliceScheduler_free(env)
 
     ntasks = size(slice_sizes)
     nprocs = xmpi_comm_size(spacecom)
 
-    schedule%ntasks = ntasks
-    schedule%nprocs = nprocs
-    schedule%comm_global = spacecom
-    schedule%nrows_tot = nrows_tot
-    schedule%resource_allocation = resource_allocation
-
-    ! Initialize MPI distribution flags to linalg (no transpose yet)
-    schedule%use_blockrows = .true.
-    schedule%use_blockcols = .false.
-
     ! Set CPU/GPU flags
-    call sliceScheduler_queryTarget(schedule)
-
-    if(.not.allocated(schedule%task_ncols)) ABI_MALLOC(schedule%task_ncols, (ntasks))
-    if(.not.allocated(schedule%task_nprocs)) ABI_MALLOC(schedule%task_nprocs, (ntasks))
-    if(.not.allocated(schedule%assigned_task)) ABI_MALLOC(schedule%assigned_task, (nprocs))
+    call slice_queryHostDevice(slice)
+ 
     if(.not.allocated(weights)) ABI_MALLOC(weights, (ntasks))
 
-    schedule%task_ncols(:) = slice_sizes(:)
-    task_ncols_ptr => schedule%task_ncols
-    task_nprocs_ptr => schedule%task_nprocs
-    assigned_task_ptr => schedule%assigned_task
+    slice%task_ncols(:) = slice_sizes(:)
+    task_ncols_ptr => slice%task_ncols
+    task_nprocs_ptr => slice%task_nprocs
+    assigned_task_ptr => slice%assigned_task
     weights_ptr => weights
 
     ! Apply weighted fair allocation with various balance criteria for load balance
@@ -1038,27 +1034,55 @@ subroutine slice_splitResources(schedule,slice_sizes,slice_degrees,nrows_tot,spa
     ! Call the subroutine to assign tasks (=slices) to processes
     call assign_tasks_to_processes(task_nprocs_ptr, assigned_task_ptr)
     do iproc = 1, ntasks
-        write(*,'(a,i5,a,i5)') "Process ", itask, " is in task ", schedule%assigned_task(i)
+        write(*,'(a,i5,a,i5)') "Process ", itask, " is in task ", slice%assigned_task(i)
     end do
 
+    ! Free temporary memory
+    if (allocated(weights)) ABI_FREE(weights) 
+
+end subroutine slice_splitResources
+!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/slice_setResourcesMe
+!! NAME
+!! slice_setTaskResourcesMe
+!!
+
+subroutine slice_setResourcesMe(slice)
+
+    implicit none
+
+    ! Arguments
+    type(slice_t), intent(inout) :: slice
+
+    ! Local variables
+    integer :: task_me, ncols_me, nprocs_me
+    integer :: color, my_rank, ierr
+    integer, pointer :: blockcols_me_ptr(:) => null()
+    integer, pointer :: blocrows_me_ptr(:) => null()
+
+! *********************************************************************
+ 
     ! Deduce band capacity per process (=bandpp) on individual slice
     ! a process only has the slice that corresponds to it
-    task_me = sliceScheduler_queryTask(schedule)
-    ncols_me = schedule%task_ncols(task_me)
-    nprocs_me = schedule%task_nprocs(task_me)
+    task_me = slice_queryTask(slice)
+    ncols_me = slice%task_ncols(task_me)
+    nprocs_me = slice%task_nprocs(task_me)
     ! normally these variables should be set in the _run
     ! do not query after!!!
 
-    schedule%task_me = task_me
-    schedule%ncols_me = ncols_me
-    schedule%nprocs_me = nprocs_me
+    slice%task_me = task_me
+    slice%ncols_me = ncols_me
+    slice%nprocs_me = nprocs_me
 
     ! Series of allocations corresponding to _me
-    if (.not.allocated(schedule%blockcols_me)) ABI_MALLOC(schedule%blockcols_me,(nprocs_me))
-    if (.not.allocated(schedule%blockrows_me)) ABI_MALLOC(schedule%blockrows_me,(nprocs_me))
+    if (.not.allocated(slice%blockcols_me)) ABI_MALLOC(slice%blockcols_me,(nprocs_me))
+    if (.not.allocated(slice%blockrows_me)) ABI_MALLOC(slice%blockrows_me,(nprocs_me))
 
-    blockcols_me_ptr => schedule%blockcols_me
-    blockrows_me_ptr => schedule%blockrows_me
+    blockcols_me_ptr => slice%blockcols_me
+    blockrows_me_ptr => slice%blockrows_me
 
     ! Compute size of column-blocks in MPI col distribution
     call distribute_vectors(nprocme,ncols_me,blockcols_me_ptr)
@@ -1068,17 +1092,14 @@ subroutine slice_splitResources(schedule,slice_sizes,slice_degrees,nrows_tot,spa
 
     ! Create sub-communicators 
     ! Split global communicator so that only procs with the same color communicate
-    my_rank = sliceScheduler_queryRank(schedule)
-    color = sliceScheduler_queryTask(schedule)
-    call xmpi_comm_split(schedule%comm_global,color,my_rank,schedule%slice_comm,ierr)
+    my_rank = xmpi_comm_rank(slice%comm_global)
+    color = slice_queryTask(slice)
+    call xmpi_comm_split(slice%comm_global,color,my_rank,slice%slice_comm,ierr)
 
     ! All processes wait to define subcommunicator
-    call xmpi_barrier(schedule%comm_global)
+    call xmpi_barrier(slice%comm_global)
 
-    ! Free temporary memory
-    if (allocated(weights)) ABI_FREE(weights) 
-
-end subroutine slice_splitResources
+end subroutine slice_setTaskResources
 !***
 
 !----------------------------------------------------------------------
@@ -1345,52 +1366,36 @@ end subroutine count_values
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/sliceScheduler_queryRank
+!!****f* m_slice/slice_queryTask
 !! NAME
-!! sliceScheduler_queryRank
+!! slice_queryTask
 
-integer function sliceScheduler_queryRank(schedule) result(rank_me)
+integer function slice_queryTask(slice) result(task_me)
 
-    implicit none
-    type(sliceScheduler_t), intent(in) :: schedule
-
-    rank_me = xmpi_comm_rank(schedule%comm_global)
-
-end function sliceScheduler_queryRank
-!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/sliceScheduler_queryTask
-!! NAME
-!! sliceScheduler_queryTask
-
-integer function sliceScheduler_queryTask(schedule) result(task_me)
-
-    type(sliceScheduler_t), intent(in) :: schedule
+    type(slice_t), intent(in) :: slice
     integer :: rank_me
     
-    rank_me = xmpi_comm_rank(schedule%comm_global)
-    task_me = schedule%assigned_task(rank_me+1)
+    rank_me = xmpi_comm_rank(slice%comm_global)
+    task_me = slice%assigned_task(rank_me+1)
 
-end function sliceScheduler_queryTask
+end function slice_queryTask
 !***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/sliceScheduler_queryTarget
+!!****f* m_slice/slice_queryHostDevice
 !! NAME
-!! sliceScheduler_queryTarget
+!! slice_queryHostDevice
 !! 
 !! FUNCTION
 !! Query OpenMP offloading API to set/get GPU/CPU flags
 !! 
 !! SOURCE
 
-subroutine sliceScheduler_queryTarget(schedule,on_host,on_device)
+subroutine slice_queryHostDevice(slice,on_host,on_device)
 
     implicit none
-    type(sliceScheduler_t), intent(inout) :: schedule
+    type(slice_t), intent(inout) :: slice
     logical, optional, intent(inout) :: on_host
     logical, optional, intent(inout) :: on_device
     logical :: on_host_
@@ -1401,13 +1406,13 @@ subroutine sliceScheduler_queryTarget(schedule,on_host,on_device)
     on_host_ = (device_id < 1) ! outside target (-1), inside target host (0)
     on_device_ = (device_id > 0) ! inside target not host (device number)
 
-    schedule%on_host = on_host_
-    schedule%on_device = on_device_
+    slice%on_host = on_host_
+    slice%on_device = on_device_
 
     if (present(on_host)) on_host = on_host_
     if (present(on_device)) on_device = on_device_
 
-end subroutine sliceScheduler_queryTarget
+end subroutine slice_queryHostDevice
 !***
 
 !----------------------------------------------------------------------

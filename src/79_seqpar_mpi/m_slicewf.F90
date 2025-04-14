@@ -283,7 +283,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
      l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
      gpu_thread_limit=dtset%gpu_thread_limit)
 
- call polyfi_run(polyfi,xgx0slice,getghc_gsc1,getBm1X,xgeigenslice,xgresiduslice,nspinor)
+ call polyfi_run(polyfi,slice%Xext,getghc_gsc1,getBm1X,xgeigenslice,xgresiduslice,nspinor)
 
  call polyfi_free(polyfi)
 
