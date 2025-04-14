@@ -430,6 +430,17 @@ subroutine sliceScheduler_run(xgx0slice,X,getAX_BX,nspinor)
     glb = low - sqrt(resid(permute_cols(1)))
     gub = ecut
 
+    slice%mineig_global = minval(theta)
+    slice%maxeig_global = maxval(theta)
+    ! This is the maximum and the minimum eigenvalue in the slice
+    if (slice%paral_kgb == 1) then
+        call xmpi_max(slice%maxeig,maxeig_global,comm_slice,ierr)
+        call xmpi_min(slice%mineig,mineig_global,comm_slice,ierr)
+    else
+        call xmpi_max(slice%maxeig,maxeig_global,comm,ierr)
+        call xmpi_min(slice%mineig,mineig_global,comm,ierr)
+    end if
+
     ! TODO adjust slice_cutSpectrum without slice arg and new args bounds
     ! Compute nband per slice
     call slice_cutSpectrum(slice,low,upp,glb,gub,spectral_cut)
@@ -1833,24 +1844,15 @@ subroutine chebfi_initSlice(chebfi,slice)
     chebfi%comm_rows = xmpi_comm_self
     chebfi%comm_cols = slice_comm
 
+    ! Define chebfi object from Colsrows representation
     call chebfi_init(slice%chebfi,nband,spacedim,tolerance,ecut,paral_kgb,bandpp,&
 &                    ndeg,nbdbuf,space,1,comm,me_g0,me_g0_fft,paw,comm_rows,comm,&
 &                    oracle,oracle_factor,oracle_min_occ,gpu_option,&
-&                    gpu_kokkos_nthrd=gpu_kokkos_nthrd,gpu_thread_limit=gpu_thread_limit)
+&                    gpu_kokkos_nthrd=gpu_kokkos_nthrd,gpu_thread_limit=gpu_thread_limit,&
+&                    from_linalg=.false.)
 
-
-    call chebfi_allocateAllSlice(chebfi)
 
 end subroutine chebfi_initSlice
-
-subroutine chebfi_allocateAllSlice(chebfi)
-
-    ! init X_next
-    ! init X_prev
-
-
-
-end subroutine chebfi_allocateAllSlice
 
 !----------------------------------------------------------------------
 
@@ -1932,13 +1934,6 @@ subroutine chebfi_runSlice(chebfi,X,getAX_BX,getBm1X,eigen,residu,nspinor)
 
     ncols_slice = cols(slice%X)
 
-    ! Do the same for AX and BX ..
-    ! TODO Major problem
-    ! Solution: réecrire chebfi_allocateAll
-    ! chebfi%AX,BX have been allocated in chebfi_allocateAll
-    ! call xg_free(chebfi%AX)
-    ! call xg_free(chebfi%BX)
-    ! call xg_init(chebfi%xAXColsRows,...)
     call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,&
         chebfi%AX%self,chebfi%xAXColsRows,STATE_COLSROWS)
     call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,&
@@ -1957,10 +1952,12 @@ subroutine chebfi_runSlice(chebfi,X,getAX_BX,getBm1X,eigen,residu,nspinor)
     ! Apply polynomial filtering (requires colsrows state)
     if (islice==0) then
         !call slice_applyLowpassFilter(slice,getAX_BX,getBm1X,nspinor)
-        call slice_applyLowpassFilter(slice%chebfi,getAX_BX,getBm1X,nspinor)
+        lambda_minus = slice%maxeig_global ! computed during compute_spectrum
+        call chebfi_applyLowpassFilter(chebfi,getAX_BX,getBm1X,lambda_minus,nspinor)
     else
         !call slice_applyBandpassFilter(slice,getAX_BX,getBm1X,nspinor)
-        call slice_applyBandpassFilter(slice%chebfi,getAX_BX,getBm1X,nspinor)
+
+        call chebfi_applyBandpassFilter(chebfi,getAX_BX,getBm1X,glb,gub,lb,ub,nspinor)
     end if
 
     ! Transpose to linalg state
