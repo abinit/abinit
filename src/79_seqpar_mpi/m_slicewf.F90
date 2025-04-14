@@ -278,7 +278,11 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
      l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
      gpu_thread_limit=dtset%gpu_thread_limit)
 
- call chebfi_runSlice(chebfi,xgx0slice,getghc_gsc1,getBm1X,xgeigen,xgresidu,nspinor)
+ my_rank = xmpi_comm_rank(spacecom)
+ call slice_getSliceBounds(slice,mineig_globa,maxeig_global,lambda_minus,lambda_plus,my_rank)
+
+ call chebfi_runSlice(chebfi,xgx0slice,getghc_gsc1,getBm1X,xgeigen,xgresidu,&
+     mineig_global,maxeig_global,lambda_minus,lambda_plus,nspinor)
 
  call chebfi_free(chebfi)
 

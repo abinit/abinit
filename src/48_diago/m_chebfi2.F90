@@ -100,7 +100,7 @@ module m_chebfi2
    integer :: me_g0
    integer :: me_g0_fft
 
-   logical :: from_linalg    ! allocate colsrows if true or linalg if false
+   logical :: from_linalg    ! allocate colsrows if true or allocate linalg if false
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
 
