@@ -71,11 +71,9 @@ module m_slice
     integer, parameter :: FAIR_BANDPP      = 0 ! bandpp (unweigted)
     integer, parameter :: FAIR_BANDPP_WDEG = 1 ! bandpp weighted by degree 
 
-    ! Public 'sliceScheduler' datatype
-    ! Parameters of slice tasks *before* and *after* executing in parallel
-    ! FIXME maybe sliceAll?
+    ! Public 'slice' datatype
     !-------------------------------------------------
-    type, public :: sliceScheduler_t
+    type, public :: slice_t
 
         ! MPI-related
         integer :: ntasks        ! number of tasks (=slices)
@@ -138,63 +136,6 @@ module m_slice
         real(dp), allocatable :: poly_low_bounds(:)    ! lower bounds used to define polynomials
         real(dp), allocatable :: poly_upp_bounds(:)    ! upper bounds used to define polynomials
 
-    end type sliceScheduler_t
-
-    ! Public 'slice' datatype
-    ! Parameters specific to individual slices executed in parallel
-    !-------------------------------------------------
-    type, public :: slice_t
-
-        integer :: islice                       ! slice index
-        integer :: nband                        ! number of bands in slice
-        integer :: i1                           ! first band index in global
-        integer :: i2                           ! last band index in global
-        integer :: degree                       ! filter degree
-        integer :: bandpp                       ! number of slice bands per process
-        real(dp) :: ramp                        ! filter amplification factor
-        real(dp) :: low                         ! filter support lower bound
-        real(dp) :: upp                         ! filter support upper bound
-        real(dp) :: glb                         ! spectrum lower bound
-        real(dp) :: gub                         ! spectrum upper bound
-
-        integer :: nslice                        ! Total number of slices
-
-        ! Parameters common to slice AND sliceScheduler
-        integer :: space
-        integer :: space_res
-        integer :: spacedim                      ! Space dimension for one vector
-        integer :: total_spacedim                ! Maybe not needed
-        integer :: neigenpairs                   ! Number of eigen values/vectors we want
-        integer :: mdeg_filter                   ! Degree of the polynomial filter
-        integer :: eigenProblem                  ! 1 (A*x = E*B*x), 2 (A*B*x = E*x), 3 (B*A*x = E*x) 
-        logical :: paw                           ! use PAW overlap on not
-        real(dp) :: tolerance                    ! Tolerance on the residu to stop the minimization
-        real(dp) :: ecut                         ! Ecut used for Polynomial filtering
-      
-        ! MPI-related
-        integer :: paral_kgb                     ! allow MPI distribution of k-points, bands or PW
-        integer :: bandpp                        ! nbands per MPI process
-        integer :: spacecom                      ! Communicator for MPI (=comm_cols)
-        integer :: comm_cols                     ! MPI column communicator (=spacecom)
-        integer :: comm_rows                     ! MPI row communicator (=xmpi_comm_self...) 
-        integer :: me_g0                         ! if set to 1 current proc contains G(0,0,0)
-        integer :: me_g0_fft                     ! same as me_g0, but in the FFT representation
-
-        ! GPU-related
-        integer :: gpu_option
-        integer :: gpu_kokkos_nthrd = 1 ! on GPU, number of OpenMP threads used
-        integer :: gpu_thread_limit = 1 ! on GPU, max number of OpenMP threads used in sensitive areas
-
-        ! Memory
-        type(xg_t) :: eigenN_          ! computed eigenvalues                 
-        type(xg_t) :: residN_          ! computed residuals
-        type(chebfi_t) :: chebfi       ! workspace for slice diago
-   
-        ! Pointers
-        type(xgBlock_t) :: X0
-        type(xgBlock_t) :: eigen
-        type(xgBlock_t) :: residu
-
     end type slice_t
 
     ! Public methods associated to 'slice' datatype
@@ -204,15 +145,7 @@ module m_slice
     public :: slice_getTask             ! merge xgx0slice to cg
     public :: slice_merge
     public :: slice_free
-
-    ! Public methods assosicated to 'chebfi' datatype
-    ! TODO move this in chebfi?
-    !-------------------------------------------------
-    public :: chebfi_runSlice                        ! initiate slice data type object
-    public :: slice_run                         ! diagonalize individual slices
-    public :: slice_free                        ! free slice data type object
-    public :: slice_mergeConverged              ! merge converged slices by removing duplicates
-    public :: slice_unitTest                    ! used for debugging
+    public :: slice_unitTest            ! used for debugging
 
     CONTAINS  
 !=====================================================================
@@ -223,11 +156,11 @@ module m_slice
 !! slice_init
 !!
 !! FUNCTION
-!! Initialize a 'sliceScheduler' datastructure. See chebfi_init().
+!! Initialize a 'slice' datastructure. See chebfi_init().
 !!
 !! SOURCE
 
-subroutine sliceScheduler_init(xgx0slice,neigenpairs,spacedim,tolerance,ecut,&
+subroutine slice_init(slice,neigenpairs,spacedim,&
         paral_kgb,paral_slice,bandpp,space,spacecom,me_g0,me_g0_fft,paw,&
         comm_rows,comm_cols,nslice,ramp,spectral_cut,gpu_option,&
         gpu_kokkos_nthrd,gpu_thread_limit)
@@ -313,6 +246,53 @@ subroutine sliceScheduler_init(xgx0slice,neigenpairs,spacedim,tolerance,ecut,&
     end if
 
     ! Arrays
+
+    call slice_allocateAll(slice)
+
+end subroutine slice_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/slice_allocateAll
+!! name
+!! slice_allocateAll
+
+subroutine slice_allocateAll(slice)
+
+    implicit none
+    type(slice_t), intent(inout) :: slice    
+    integer :: space_res
+    integer :: neigenpairs
+    integer :: comm_cols
+    integer :: gpu_option
+
+    space_res = slice%space_res
+    neigenpairs = slice%neigenpairs
+    comm_cols = slice%comm_cols
+    !gpu_option = slice%gpu_option
+    ! FIXME forced CPU
+    gpu_option = ABI_GPU_DISABLED
+
+    call slice_free(slice)
+
+    ! Space for computed eigenvalues and residuals (not distributed)
+    call xg_init(slice%eigenN_,space_res,1,nband,me_g0=me_g0,gpu_option=gpu_option)
+    call xg_init(slice%residN_,SPACE_R,1,nband,me_g0=me_g0,gpu_option=gpu_option)
+
+    ! Eigenvalues and residuals before slicing
+    ! Every MPI process contains this array
+    ! IML 9/4 FIXME this is useful if we compute convergence rates aposteriori
+    ! otherwise, I am not sure how to use this information
+    ! IML 11/4 TODO maybe we don't need to store this information as member. 
+    ! Try to localize as much as possible to use in required routines only
+    call xg_init(slice%Eig0,space_res,rows=1,cols=neigenpairs,comm=comm_cols,gpu_option=gpu_option)
+    call xg_init(slice%Res0,SPACE_R,rows=1,cols=neigenpairs,comm=comm_cols,gpu_option=gpu_option)
+
+    ! Make dimension compatible with xgeigen,xgresidu of slicewf
+    call xgBlock_reshape(slice%EW%self, (/nband_slice,1/))
+    call xgBlock_reshape(slice%RW%self, (/nband_slice,1/))
+
     if(.not.allocated(slice%slice_fcol)) ABI_MALLOC(slice%slice_fcol,(nslice))
     if(.not.allocated(slice%slice_ncols)) ABI_MALLOC(slice%slice_ncols,(nslice))
     if(.not.allocated(slice%slice_fcol_ext)) ABI_MALLOC(slice%slice_fcol_ext,(nslice))
@@ -322,22 +302,40 @@ subroutine sliceScheduler_init(xgx0slice,neigenpairs,spacedim,tolerance,ecut,&
     if(.not.allocated(slice%poly_low_bounds)) ABI_MALLOC(slice%poly_low_bounds,(nslice))
     if(.not.allocated(slice%poly_upp_bounds)) ABI_MALLOC(slice%poly_upp_bounds,(nslice))
 
-end subroutine sliceScheduler_init
+end subroutine slice_allocateAll
 !!***
 
-subroutine sliceScheduler_free(slice)
+!----------------------------------------------------------------------
 
-    ! Free slice parameters
-    if(allocated(slice%slice_fcol)) ABI_FREE(slice%slice_fcol)
-    if(allocated(slice%slice_ncols)) ABI_FREE(slice%slice_ncols)
-    if(allocated(slice%slice_fcol_ext)) ABI_FREE(slice%slice_fcol_ext)
-    if(allocated(slice%poly_degrees)) ABI_FREE(slice%poly_degrees)
-    if(allocated(slice%part_low_bounds)) ABI_FREE(slice%part_low_bounds)
-    if(allocated(slice%part_upp_bounds)) ABI_FREE(slice%part_upp_bounds)
-    if(allocated(slice%poly_low_bounds)) ABI_FREE(slice%poly_low_bounds)
-    if(allocated(slice%poly_upp_bounds)) ABI_FREE(slice%poly_upp_bounds)
+!!****f* m_slice/slice_free
+!! name
+!! slice_free
 
-end subroutine sliceScheduler_free
+subroutine slice_free(slice)
+
+    implicit none
+    type(slice_t), intent(inout) :: slice
+
+    call xg_free(slice%Eig0)
+    call xg_free(slice%Res0)
+
+    if(allocated(slice%task_ncols)) ABI_FREE(slice%task_ncols)
+    if(allocated(slice%task_nprocs)) ABI_FREE(slice%task_nprocs)
+    if(allocated(slice%assigned_task)) ABI_FREE(slice%assigned_task)
+    if(allocated(slice%blockcols_me)) ABI_FREE(slice%blockcols_me)   
+    if(allocated(slice%blocrows_me)) ABI_FREE(slice%blockrows_me)
+
+    if(allocated(slice%slice_fcol)) abi_free(slice%slice_fcol)
+    if(allocated(slice%slice_ncols)) abi_free(slice%slice_ncols)
+    if(allocated(slice%slice_fcol_ext)) abi_free(slice%slice_fcol_ext)
+    if(allocated(slice%poly_degrees)) abi_free(slice%poly_degrees)
+    if(allocated(slice%part_low_bounds)) abi_free(slice%part_low_bounds)
+    if(allocated(slice%part_upp_bounds)) abi_free(slice%part_upp_bounds)
+    if(allocated(slice%poly_low_bounds)) abi_free(slice%poly_low_bounds)
+    if(allocated(slice%poly_upp_bounds)) abi_free(slice%poly_upp_bounds)
+
+end subroutine slice_free
+!!***
 
 !----------------------------------------------------------------------
 
@@ -351,7 +349,7 @@ end subroutine sliceScheduler_free
 !! 
 !! SOURCE
 
-subroutine slice_schedule(xgx0slice,X,getAX_BX,nspinor)
+subroutine slice_schedule(slice,X,Xext,getAX_BX,nspinor)
 
     implicit none
 
@@ -483,12 +481,12 @@ subroutine slice_schedule(xgx0slice,X,getAX_BX,nspinor)
     call xg_free(eigen0)
     call xg_free(resid0)
 
-end subroutine sliceScheduler_run
+end subroutine slice_schedule
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/compute_spectrum
+!!****f* m_slice/slice_computeSpectrum
 !! NAME
 !! slice_computeSpectrum
 !!
@@ -505,7 +503,7 @@ end subroutine sliceScheduler_run
 !! 
 !! SOURCE
 
-subroutine compute_spectrum(slice,X0,getAX_BX,eigen,resid,nspinor)
+subroutine slice_computeSpectrum(slice,X0,getAX_BX,eigen,resid,nspinor)
 
     implicit none
 
@@ -639,154 +637,7 @@ subroutine compute_spectrum(slice,X0,getAX_BX,eigen,resid,nspinor)
     call xg_free(resid_mpi)
     call xg_free(X_NAB)
 
-end subroutine compute_spectrum
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_init
-!! NAME
-!! slice_init
-!!
-!! FUNCTION
-!! Initialize a 'slice' datastructure. See chebfi_init().
-!!
-!! SOURCE
-
-subroutine slice_init(slice,neigenpairs,spacedim,tolerance,ecut,paral_kgb,paral_slice,&
-        bandpp,mdeg_filter,space,eigenProblem,spacecom,me_g0,me_g0_fft,&
-        paw,comm_rows,comm_cols,nslice,ramp,balance,gpu_option,&
-        gpu_kokkos_nthrd,gpu_thread_limit)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    integer      , intent(in   ) :: bandpp
-    integer      , intent(in   ) :: npband
-    integer      , intent(in   ) :: nslice
-    integer      , intent(in   ) :: eigenProblem
-    integer      , intent(in   ) :: me_g0
-    integer      , intent(in   ) :: me_g0_fft
-    integer      , intent(in   ) :: neigenpairs
-    integer      , intent(in   ) :: mdeg_filter
-    integer      , intent(in   ) :: comm_cols
-    integer      , intent(in   ) :: comm_rows
-    integer      , intent(in   ) :: paral_kgb
-    integer      , intent(in   ) :: paral_slice
-    integer      , intent(in   ) :: space
-    integer      , intent(in   ) :: spacecom
-    integer      , intent(in   ) :: spacedim
-    integer      , intent(in   ) :: balance
-    integer      , intent(in   ) :: gpu_option
-    logical      , intent(in   ) :: paw
-    real(dp)     , intent(in   ) :: ramp
-    real(dp)     , intent(in   ) :: ecut
-    real(dp)     , intent(in   ) :: tolerance
-    type(slice_t), intent(inout) :: slice
-    integer      , intent(in   ), optional :: gpu_kokkos_nthrd
-    integer      , intent(in   ), optional :: gpu_thread_limit
-
-    ! *********************************************************************
-
-    slice%space        = space
-    slice%neigenpairs  = neigenpairs
-    slice%spacedim     = spacedim
-    slice%tolerance    = tolerance
-    slice%ecut         = ecut
-    slice%paral_kgb    = paral_kgb
-    slice%paral_slice  = paral_slice
-    slice%comm_cols    = comm_cols
-    slice%bandpp       = bandpp
-    slice%comm_rows    = comm_rows
-    slice%mdeg_filter  = mdeg_filter
-    slice%spacecom     = spacecom
-    slice%eigenProblem = eigenProblem
-    slice%me_g0        = me_g0
-    slice%me_g0_fft    = me_g0_fft
-    slice%paw          = paw
-    slice%gpu_option   = gpu_option
-    slice%nslice       = nslice
-    slice%npband       = xmpi_comm_size(comm_cols)
-    slice%ramp         = ramp
-    slice%spectral_cut = balance
-    slice%nband_ovlp   = neigenpairs ! see initExtended
-    slice%nbdbuf       = nbdbuf
-
-    slice%gpu_kokkos_nthrd = 1
-    if (present(gpu_kokkos_nthrd)) slice%gpu_kokkos_nthrd = gpu_kokkos_nthrd
-    slice%gpu_thread_limit = 0
-    if (present(gpu_thread_limit)) slice%gpu_thread_limit = gpu_thread_limit
-
-    ! Space of eigenvalues
-    if (space==SPACE_C) then
-        slice%space_res = SPACE_C
-    else if (space==SPACE_CR) then
-        slice%space_res = SPACE_R
-    end if
-
-    call slice_allocateAll(slice)
-    
-end subroutine slice_init
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_allocateAll
-!! NAME
-!! slice_allocateAll
-!! 
- 
-subroutine slice_allocateAll(slice)
-
-    implicit none
-    
-    type(slice_t), intent(inout) :: slice
-    integer :: space_res
-    integer :: neigenpairs
-    integer :: comm_cols
-    integer :: gpu_option
-
-    call slice_free(slice)
-
-    space_res = slice%space_res
-    neigenpairs = slice%neigenpairs
-    comm_cols = slice%comm_cols
-    !gpu_option = slice%gpu_option
-    ! FIXME forced CPU
-    gpu_option = ABI_GPU_DISABLED
-
-    ! Eigenvalues and residuals before slicing
-    ! Every MPI process contains this array
-    ! IML 9/4 FIXME this is useful if we compute convergence rates aposteriori
-    ! otherwise, I am not sure how to use this information
-    ! IML 11/4 TODO maybe we don't need to store this information as member. 
-    ! Try to localize as much as possible to use in required routines only
-    call xg_init(slice%Eig0,space_res,rows=1,cols=neigenpairs,comm=comm_cols,gpu_option=gpu_option)
-    call xg_init(slice%Res0,SPACE_R,rows=1,cols=neigenpairs,comm=comm_cols,gpu_option=gpu_option)
-
-
-end subroutine slice_allocateAll
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_free
-!! NAME
-!! slice_free
-!! 
- 
-subroutine slice_free(slice)
-
-    implicit none
-    
-    type(slice_t), intent(inout) :: slice
-
-    call slice_freeOverlapFree(slice)
-    call xg_free(slice%Eig0)
-    call xg_free(slice%Res0)
- 
-    
-end subroutine slice_free
+end subroutine slice_computeSpectrum
 !!***
 
 !----------------------------------------------------------------------
@@ -1040,22 +891,22 @@ end subroutine slice_cutSpectrum
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_mergeConverged
+!!****f* m_slice/slice_merge
 !! NAME
-!! slice_mergeConverged
+!! slice_merge
 !! 
 !! FUNCTION
 !! Find converged eigenvalues in each slice using a criterion.
 !! [^Not true. For the moment we brutally merge using interval limits]
 !! Return range of first and last index to merge per slice, both 
 !! computed from a residual criterion on eigenvalues.
-!! slice_mergeConverged is done locally on slice
+!! slice_merge is done locally on slice
 !! while on linalg representation
 !! so it is after Rayleigh-Ritz and before the last transposition
 !! 
 !! SOURCE
 
-subroutine slice_mergeConverged(sliceAll,idx_ovlp,idx_merge,merge_option)
+subroutine slice_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
 
     implicit none
 
@@ -1212,6 +1063,11 @@ subroutine slice_mergeConverged(sliceAll,idx_ovlp,idx_merge,merge_option)
         call slice_blockCopy(sliceAll%xgx0_ovlp,xgx0,i1,j1,i2,j2)
         call slice_blockCopy(sliceAll%xgeigen_ovlp,xgeigen,i1,j1,i2,j2)
         call slice_blockCopy(sliceAll%xgresidu_ovlp,xgresidu,i1,j1,i2,j2)
+        !call xgBlock_setBlock(A_in ,A_block,rows=nrowsA,cols=ncolsA_block,fcol=a1)
+        !call xgBlock_setBlock(B_out,B_block,rows=nrowsB,cols=ncolsB_block,fcol=b1)
+        ! if A CPU and B GPU then: copy from B GPU to B CPU, copy from A CPU to B CPU
+        ! so the copy is performed on CPU if one of A and B is on CPU.
+        !call xgBlock_copy(A_block,B_block)
         j1 = j2 + 1
     end do
     ! Write clean as this:
@@ -1226,191 +1082,7 @@ subroutine slice_mergeConverged(sliceAll,idx_ovlp,idx_merge,merge_option)
     call xgBlock_reshape(xgeigen, (/nband,1/))
     call xgBlock_reshape(xgresidu, (/nband,1/))
  
-end subroutine slice_mergeConverged
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_init
-!! NAME
-!! slice_init
-!! 
-!! SOURCE
-
-subroutine slice_init(sliceAll,slice,islice)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(sliceAll_t), intent(in   ) :: sliceAll
-    type(slice_t   ), intent(inout) :: slice
-    integer         , intent(in   ) :: islice
-
-    ! Local variables-------------------------------    
-    integer :: bandpp_slice,i1,i2,npband_slice,nband_slice
-    integer :: tim_slice_init
-    real(dp) :: tsec(2)
-
-    ! *********************************************************************
-
-    tim_slice_init = tim_slice2_init + islice - 1
-    call timab(tim_slice_init,1,tsec)
-    
-    ! Input variables
-    slice%islice = islice
-    
-    ! Variables inherited from sliceAll
-    slice%glb = sliceAll%glb
-    slice%gub = sliceAll%gub
-    slice%low = sliceAll%sbound(islice,3)
-    slice%upp = sliceAll%sbound(islice,4)
-    slice%degree = sliceAll%ndeg(islice)
-    npband_slice = sliceAll%npbandSlice(islice)
-    i1 = sliceAll%idx(islice,1)
-    i2 = sliceAll%idx(islice,2)
-
-    ! Number of bands in slice
-    nband_slice = i2 - i1 + 1
-    slice%nband = nband_slice
-
-    ! Number of bands per MPI process
-    bandpp_slice = nband_slice
-    if (sliceAll%paral_kgb==1) bandpp_slice=nband_slice/npband_slice
-    slice%bandpp = bandpp_slice
-
-    call slice_allocateAll(sliceAll,slice)
-
-    ! Make dimension compatible with xgeigen,xgresidu of slicewf
-    call xgBlock_reshape(slice%EW%self, (/nband_slice,1/))
-    call xgBlock_reshape(slice%RW%self, (/nband_slice,1/))
-
-    ! Attention T_n<0 for n odd
-    ! TODO add a warning for fist slice
-
-    ! Set pointers to slice memory
-    slice%xgx0 = slice%XW%self
-    slice%xgeigen = slice%EW%self
-    slice%xgresidu = slice%RW%self
-    slice%xgocc = slice%OCCW%self
-    
-    call timab(tim_slice_init,2,tsec)
-
-end subroutine slice_init
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_allocateAll
-!! NAME
-!! slice_allocateAll
-!! 
-!! FUNCTION
-!! Allocate slice memory spaces on CPU/GPU
-!! 
-!! SOURCE
-
-subroutine slice_allocateAll(sliceAll,slice)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(sliceAll_t), intent(in   ) :: sliceAll
-    type(slice_t)   , intent(inout) :: slice
-
-    ! Local variables-------------------------------    
-    integer :: spacedim,paral_kgb,nband,bandpp
-    integer :: ndeg,space,eigenProblem,spacecom
-    integer :: me_g0,me_g0_fft,comm_rows,comm_cols
-    integer :: gpu_option,gpu_kokkos_nthrd,gpu_thread_limit
-    integer :: nbdbuf, oracle
-    integer  :: total_spacedim, ierr
-    logical :: paw
-    real(dp) :: tolerance,ecut
-    real(dp) :: oracle_factor, oracle_min_occ
-
-    ! *********************************************************************
-    
-    ! Various parameters common to all slices
-    space            = sliceAll%space
-    spacedim         = sliceAll%spacedim
-    spacecom         = sliceAll%spacecom
-    me_g0            = sliceAll%me_g0
-    me_g0_fft        = sliceAll%me_g0_fft
-    tolerance        = sliceAll%tolerance
-    ecut             = sliceAll%ecut
-    paral_kgb        = sliceAll%paral_kgb
-    comm_rows        = sliceAll%comm_rows
-    comm_cols        = sliceAll%comm_cols
-    paw              = sliceAll%paw
-    gpu_option       = sliceAll%gpu_option
-    gpu_kokkos_nthrd = sliceAll%gpu_kokkos_nthrd
-    gpu_thread_limit = sliceAll%gpu_thread_limit
-
-    ! not used but passed to chebfi with deactivated values
-    oracle           = 0
-    nbdbuf           = 0
-    oracle_factor    = 1.d0
-    oracle_min_occ   = 0.d0
-
-    ! Various parameters of current slice
-    nband  = slice%nband
-    bandpp = slice%bandpp
-    ndeg   = slice%degree
-  
-    call slice_free(slice)
-
-    ! Space for computed eigenvalues and residuals (not distributed)
-    call xg_init(slice%eigenN_,space_res,1,nband,me_g0=me_g0,gpu_option=gpu_option)
-    call xg_init(slice%residN_,SPACE_R,1,nband,me_g0=me_g0,gpu_option=gpu_option)
-
-    ! FIXME This is already done in slice scheduler ....
-    ! Get total number of rows that are distributed along MPI processes
-    total_spacedim = spacedim
-    if (paral_kgb == 1) then
-        call xmpi_sum(total_spacedim,spacecom,ierr)
-    end if
-
-    ! We allocate the Transposer?
-    ! move here the transposer
-
-    ! we also allocate X_next, X_prev etc
-    ! this is equivalent of allocating chebfi_init
-    comm_rows = xmpi_comm_self
-    comm_cols = subcomm
-    spacecom = subcomm
-    ! keep chebfi
-
-end subroutine slice_allocateAll
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_free
-!! NAME
-!! slice_free
-!! 
-!! SOURCE
-
-subroutine slice_free(slice)
-
-    implicit none
-
-    type(slice_t), intent(inout) :: slice
-    integer :: tim_slice_free
-    real(dp) :: tsec(2)
-
-    tim_slice_free = tim_slice2_free + slice%islice - 1
-    call timab(tim_slice_free,1,tsec)
-    
-    call xg_free(slice%XW)
-    call xg_free(slice%EW)
-    call xg_free(slice%RW)
-    call xg_free(slice%OCCW)
-    call chebfi_free(slice%chebfi)
-    
-    call timab(tim_slice_free,2,tsec)
-
-end subroutine slice_free
+end subroutine slice_merge
 !!***
 
 !----------------------------------------------------------------------
@@ -1590,86 +1262,6 @@ end subroutine count_values
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_blockCopy
-!! NAME
-!! slice_blockCopy
-!! 
-!! FUNCTION
-!! Read from A deep copy to B, given column ranges.
-!! Handles GPU / CPU data location by calling xgBlock_copy as well as
-!! enter data map OpenMP ranges for execution on CPU or GPU.
-!! 
-!! SOURCE
-
-subroutine slice_blockCopy(A_in,B_out,a1,b1,a2,b2)
-
-    implicit none
-
-    !Arguments ------------------------------------
-    type(xgBlock_t)  , intent(in   ) :: A_in
-    type(xgBlock_t)  , intent(inout) :: B_out
-    integer          , intent(in   ) :: a1,b1 ! first columns
-    integer, optional, intent(in   ) :: a2,b2 ! last columns
-    
-    !Local variables-------------------------------
-    integer :: nrowsA,ncolsA
-    integer :: nrowsB,ncolsB
-    integer :: a2_,b2_
-    logical :: on_host 
-    integer :: gpua,gpub ! gpu_options
-    integer :: ncolsA_block, ncolsB_block
-    type(xgBlock_t) :: A_block, B_block
-    real(dp) :: tsec(2)
-
-! *********************************************************************
-
-    call timab(tim_slice_Acopy,1,tsec)
-    
-    call xgBlock_getSize(A_in ,nrowsA,ncolsA)
-    call xgBlock_getSize(B_out,nrowsB,ncolsB)
-
-    if (nrowsA/=nrowsB) ABI_ERROR("A and B should have the same number of rows")
-
-    ! DEBUG print gpu_option of in/out objects
-    ! OMP query: are we on CPU or not?
-    call xgBlock_get_gpu_option(A_in ,gpua)
-    call xgBlock_get_gpu_option(B_out,gpub)
-    write(std_out,'(a,i0,a,i0,a,i0)') 'Memcopy: gpu_optionA ',gpua,' gpu_optionB ',gpub
-    if (gpua==ABI_GPU_OPENMP .or. gpub==ABI_GPU_OPENMP) then 
-        on_host = xomp_is_initial_device()
-        write(std_out,*) 'Memcopy: on_host', on_host
-    end if
-    !! IML 14/03 TODO decide whether we perform actions of copy from to gpu in here ..
-    ! first detect cases of incompatiblity
-    ! print on_host has no point because only the CPU prints anyway .. always true
-    ! ..
-
-    ! Get last index in block
-    a2_ = ncolsA
-    b2_ = ncolsB
-    if (present(a2)) a2_ = a2
-    if (present(b2)) b2_ = b2
-    
-    ! Number of block columns in range
-    ncolsA_block = a2 - a1 + 1
-    ncolsB_block = b2 - b1 + 1
-
-    ! Deep copy from X to Y
-    ! ============================
-    ! xgBlock_copy will do FIXME also depends on on_host!! 
-    ! if A CPU and B GPU then: copy from B GPU to B CPU, copy from A CPU to B CPU
-    ! so the copy is performed on CPU if one of A and B is on CPU.
-    call xgBlock_setBlock(A_in ,A_block,rows=nrowsA,cols=ncolsA_block,fcol=a1)
-    call xgBlock_setBlock(B_out,B_block,rows=nrowsB,cols=ncolsB_block,fcol=b1)
-    call xgBlock_copy(A_block,B_block)
-    
-    call timab(tim_slice_Acopy,2,tsec)
-
-end subroutine slice_blockCopy
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_slice/slice_initExtended
 !! NAME
 !! slice_initExtended
@@ -1828,41 +1420,12 @@ subroutine slice_distributeExtended(slice,nspinor)
 end subroutine slice_distributeExtended
 !!***
 
+!----------------------------------------------------------------------
 
-subroutine chebfi_initSlice(chebfi,slice)
-
-    integer :: my_rank, my_slice
-
-    call xgBlock_getSize(slice%X,tot_nrows,ncols_slice)
-    spacecom = comm(xgBlock_colsrows) ! global communicator
-    ! spacedim is smaller than tot_nrows 
-
-    ! Deduce parameters from slice
-    my_rank = xmpi_comm_rank(slice%global_comm)
-    my_slice = slice_querySlice(slice)
-    ndeg = slice%poly_degrees(my_slice)
-    slice_comm = slice%slice_comm(my_slice)
-    nband = slice%slice_ncols(my_slice)
-    bandpp = slice%ncols_blockcols(my_rank)
-
-    ! Set parameters to chebfi
-    ! TODO pas très propre
-    ! add option to chebfi
-    chebfi%nband = 
-    chebfi%spacecom = slice_comm
-    chebfi%comm_rows = xmpi_comm_self
-    chebfi%comm_cols = slice_comm
-
-    ! Define chebfi object from Colsrows representation
-    call chebfi_init(slice%chebfi,nband,spacedim,tolerance,ecut,paral_kgb,bandpp,&
-&                    ndeg,nbdbuf,space,1,comm,me_g0,me_g0_fft,paw,comm_rows,comm,&
-&                    oracle,oracle_factor,oracle_min_occ,gpu_option,&
-&                    gpu_kokkos_nthrd=gpu_kokkos_nthrd,gpu_thread_limit=gpu_thread_limit,&
-&                    from_linalg=.false.)
-
-
-end subroutine chebfi_initSlice
-
+!!****f* m_slice/slice_getSlice
+!! NAME
+!! slice_getSlice
+!!
 !! 
 !! FUNCTION
 !! Compute global spectral bounds (lb:lower bound, ub:upper bound)
@@ -1877,12 +1440,17 @@ subroutine slice_getBounds(slice,glb,gub,lb,ub)
 
     islice = slice%task_me
 
+    chebfi%nband = 
+    chebfi%spacecom = slice_comm
+    chebfi%comm_rows = xmpi_comm_self
+    chebfi%comm_cols = slice_comm
     glb = slice%mineig_global
     gub = slice%maxeig_global
     lb = slice%poly_low_bounds(islice)
     ub = slice%poly_upp_bounds(islice)
 
 end subroutine slice_getBounds
+!!***
 
 !----------------------------------------------------------------------
 
@@ -2009,27 +1577,6 @@ subroutine sliceScheduler_run(schedule,slice_sizes,slice_degrees,nrows_tot,space
     if (allocated(weights)) ABI_FREE(weights) 
 
 end subroutine sliceScheduler_run
-!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/sliceScheduler_free
-!! NAME
-!! sliceScheduler_free
-
-subroutine sliceScheduler_free(schedule)
-
-    implicit none 
-
-    type(sliceScheduler_t), intent(inout) :: schedule
-
-    if(allocated(schedule%task_ncols)) ABI_FREE(schedule%task_ncols)
-    if(allocated(schedule%task_nprocs)) ABI_FREE(schedule%task_nprocs)
-    if(allocated(schedule%assigned_task)) ABI_FREE(schedule%assigned_task)
-    if(allocated(schedule%blockcols_me)) ABI_FREE(schedule%blockcols_me)   
-    if(allocated(schedule%blocrows_me)) ABI_FREE(schedule%blockrows_me)
-
-end subroutine sliceScheduler_free
 !***
 
 !----------------------------------------------------------------------
