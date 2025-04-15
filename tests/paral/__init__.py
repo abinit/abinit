@@ -96,6 +96,6 @@ inp_files = [
 "t99.abi",
 "t100.abi",
 "t101.abi",
-"t102.abi", # RT-TDDFT
-"t103.abi", # RT-TDDFT
+"t102.abi", # RT-TDDFT (PAW, TDEF, paral_kgb 1)
+"t103.abi", # RT-TDDFT (NC, paral_kgb 1)
 ]

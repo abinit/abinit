@@ -12,7 +12,7 @@ ndtset 3
 
 # Parallelism
 paral_kgb 1
-npkpt 2
+npkpt 4
 npband 2
 
 optdriver1 0     # GS
@@ -76,12 +76,12 @@ prtgsr 0
 #%% executable = abinit
 #%% [files]
 #%% [paral_info]
-#%% nprocs_to_test = 4
-#%% max_nprocs = 4
-#%% [NCPU_4]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
 #%% files_to_test =
-#%%   t103.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t103o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t103_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t103_MPI8o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%% [extra_info]
 #%% authors = F. Brieuc
 #%% keywords = RTTDDFT, NC, GGA

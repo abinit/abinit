@@ -49,7 +49,7 @@ xred              # Location of the atoms: Diamond structure
   1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
 
 #Definition of bands and occupation numbers
-nband 4           # Compute 8 bands (4 occupied, 4 empty)
+nband 8           # Compute 8 bands (4 occupied, 4 empty)
 nbdbuf 2          # No need to converge the last two empty bands
 occopt 1          # Automatic generation of occupation numbers, as a semiconductor
 
@@ -94,10 +94,10 @@ prtcurrent 1      # Print current
 #%% max_nprocs = 8
 #%% [NCPU_8]
 #%% files_to_test =
-#%%   t102.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t102o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t102o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t102o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t102_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t102_MPI8o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t102_MPI8o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t102_MPI8o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%% [extra_info]
 #%% authors = F. Brieuc
 #%% keywords = RTTDDFT
