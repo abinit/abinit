@@ -2244,7 +2244,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie) !nband_k
 
 !Local variables-------------------------------
 !scalars
- integer :: islice, ib, cnt, start_idx, stop_idx, units(2), first_band, last_band, nb
+ integer :: islice, ib, cnt, units(2), first_band, last_band, nb
  real(dp) :: first_eig, last_eig
  real(dp),allocatable :: tmp_eig_k(:)
 ! *********************************************************************

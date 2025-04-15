@@ -136,7 +136,6 @@ contains
  real(dp),allocatable :: chrgatcl(:)
  real(dp),allocatable :: local_nucdipmom(:,:,:),nucdipmomcl(:,:),nucdipmomred(:,:,:)
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
-
 !**************************************************************************
 
 !DEBUG
@@ -736,9 +735,9 @@ end subroutine symfind
 !!
 !! SOURCE
 
- subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
-&  pawspnorb,prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,usepaw,xred,&
-&  chrgat,nucdipmom,invardir_red,invar_z)  ! Optional - although for the time being all are required ...
+subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
+  pawspnorb,prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,usepaw,xred,&
+  chrgat,nucdipmom,invardir_red,invar_z)  ! Optional - although for the time being all are required ...
 
 !Arguments ------------------------------------
 !scalars
@@ -765,31 +764,23 @@ end subroutine symfind
 !arrays
  integer,allocatable :: indsym(:,:,:),symrec(:,:,:)
  real(dp),allocatable :: tnons_new(:,:)
-
-
 !**************************************************************************
 
-!DEBUG
 ! write(std_out,*)' m_symfind%symfind_expert : enter '
-!ENDDEBUG
 
-  use_inversion=1
-  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
-    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
-    use_inversion=0
-  end if
+ use_inversion=1
+ if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+   ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+   use_inversion=0
+ end if
 
-!DEBUG
-! write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
-!ENDDEBUG
+ ! write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
 
-  call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
-    prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-    chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
+ call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
+   prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+   chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
 
-!DEBUG
-! write(std_out,*)' m_symfind%symfind_expert : after call symfind (1) '
-!ENDDEBUG
+  ! write(std_out,*)' m_symfind%symfind_expert : after call symfind (1) '
 
   !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
   if(ierr/=0)then
@@ -818,44 +809,38 @@ end subroutine symfind
 
     if(print_comment_tolsym==1)then
       write(msg,'(a,es12.3,18a)')&
-&      'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-&      'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
-&      'symmetrized before storing them in the dataset internal variable.',ch10,&
-&      'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
-&      'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-&      'This is not a problem per se.',ch10,&
-&      'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
-&      ' decrease tolsym to 1.0e-8 or lower,',ch10,&
-&      'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
-&      'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
+        'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+        'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
+        'symmetrized before storing them in the dataset internal variable.',ch10,&
+        'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
+        'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+        'This is not a problem per se.',ch10,&
+        'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
+        ' decrease tolsym to 1.0e-8 or lower,',ch10,&
+        'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
+        'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
       ABI_COMMENT(msg)
       print_comment_tolsym=0
     endif
 
-!DEBUG
 !write(std_out,*)' m_symfind%symfind_expert : before call symfind (3) '
-!ENDDEBUG
 
     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
       prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
       chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=invardir_red,invar_z=invar_z)
 
-!DEBUG
 ! write(std_out,*)' m_symfind%symfind_expert : after call symfind (3) '
-!ENDDEBUG
 
     !Needs one more resymmetrization, for the tnons
     ABI_MALLOC(tnons_new,(3,nsym))
 
     call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
-&     fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
+      fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
     tnons(:,1:nsym)=tnons_new(:,:)
     ABI_FREE(tnons_new)
   end if ! tolsym >1.00001e-8
 
-!DEBUG
 ! write(std_out,*)' m_symfind%symfind_expert : exit '
-!ENDDEBUG
 
 end subroutine symfind_expert
 !!***
@@ -880,7 +865,7 @@ end subroutine symfind_expert
 !!  of primitive translations
 !! tnons(3,1:msym)=nonsymmorphic translations for symmetry operations
 !! tolsym=tolerance for the symmetry operations
-!! verbose= if true, will list the symmetry operation labels
+!! [verbose]= if true, will list the symmetry operation labels
 !!
 !! OUTPUT
 !! bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
@@ -890,7 +875,8 @@ end subroutine symfind_expert
 !!
 !! SOURCE
 
-subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym,verbose)
+subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym, &
+                   verbose) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -901,8 +887,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 !arrays
  integer,intent(out) :: bravais(11)
  integer,intent(in) :: symafm(msym),symrel(3,3,msym)
- real(dp),intent(in) :: rprimd(3,3)
- real(dp),intent(in) :: tnons(3,msym)
+ real(dp),intent(in) :: rprimd(3,3), tnons(3,msym)
  real(dp),intent(out) :: genafm(3)
 
 !Local variables-------------------------------
@@ -912,8 +897,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 ! so, it might be up to 192 = 4*48 for FCC, and also to define the maximum number of symmetry operation labels,
 ! but only in case the cell is primitive, which gives the same upper bound. Thus in this routine, msym might
 ! be equal to nsym.
- integer :: iholohedry_nomagn,isym,isym_nomagn,multi
- integer :: nptsym,nsym_nomagn,shubnikov
+ integer :: iholohedry_nomagn,isym,isym_nomagn,multi, nptsym,nsym_nomagn,shubnikov
  logical :: verbose_
  character(len=5) :: ptgroup,ptgroupha
  character(len=500) :: msg
@@ -922,40 +906,36 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
  integer,allocatable :: ptsymrel(:,:,:),symrel_nomagn(:,:,:)
  real(dp),allocatable :: tnons_nomagn(:,:)
  character(len=128) :: labels(maxsym)
-
 ! *************************************************************************
 
-!DEBUG
 !write(std_out,*)' symanal : enter'
 !write(std_out,*)' symanal : chkprim =',chkprim
 !write(std_out,*)' symanal : nsym=',nsym
 !do isym=1,nsym
 !  write(std_out,*)' symanal : symrel=',symrel(1:3,1:3,isym)
 !enddo
-!ENDDEBUG
 
  verbose_=.false.
  if (present(verbose)) verbose_=verbose
 
-!This routine finds the Bravais characteristics, without actually
-!looking at the symmetry operations.
+!This routine finds the Bravais characteristics, without actually looking at the symmetry operations.
  ABI_MALLOC(ptsymrel,(3,3,maxsym))
  call symlatt(bravais,dev_null,maxsym,nptsym,ptsymrel,rprimd,tolsym)
  ABI_FREE(ptsymrel)
 
-!Check whether the cell is primitive or not.
+ ! Check whether the cell is primitive or not.
  call chkprimit(chkprim,multi,nsym,symafm,symrel)
 
  spgroup=0 ; ptgroupma=0 ; genafm(:)=zero
 
- if(multi>1)then !  Modify bravais if the cell is not primitive ; no determination of the space group
+ if (multi>1) then ! Modify bravais if the cell is not primitive ; no determination of the space group
    bravais(1)=-bravais(1)
  else
 
-!  The cell is primitive, so that the space group can be
-!  determined. Need to distinguish Fedorov and Shubnikov groups.
-!  Do not distinguish Shubnikov types I and II.
-!  Also identify genafm, in case of Shubnikov type IV
+   ! The cell is primitive, so that the space group can be
+   ! determined. Need to distinguish Fedorov and Shubnikov groups.
+   ! Do not distinguish Shubnikov types I and II.
+   ! Also identify genafm, in case of Shubnikov type IV
    identity(:,:)=reshape((/1,0,0,0,1,0,0,0,1/),(/3,3/))
    shubnikov=1
    do isym=1,nsym
@@ -964,12 +944,10 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
        if(sum(abs(symrel(:,:,isym)-identity(:,:)))==0)then
          shubnikov=4
          genafm(:)=tnons(:,isym)
-!        DEBUG
-!        write(std_out,*)' isym=',isym
-!        write(std_out,*)' symrel(:,:,isym)',symrel(:,:,isym)
-!        write(std_out,*)' tnons(:,isym)',tnons(:,isym)
-!        write(std_out,*)' symafm(isym)',symafm(isym)
-!        ENDDEBUG
+         !write(std_out,*)' isym=',isym
+         !write(std_out,*)' symrel(:,:,isym)',symrel(:,:,isym)
+         !write(std_out,*)' tnons(:,isym)',tnons(:,isym)
+         !write(std_out,*)' symafm(isym)',symafm(isym)
          exit
        end if
      end if
@@ -982,14 +960,14 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
    end if
 
    if(shubnikov==1 .or. shubnikov==3)then
-!    Find the correct Bravais characteristics and point group
-!    Should also be used for Shubnikov groups of type IV ...
+     ! Find the correct Bravais characteristics and point group
+     ! Should also be used for Shubnikov groups of type IV ...
      call symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym)
 
-!    Find the space group
+     ! Find the space group
      call symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 
-     if(verbose_)then
+     if (verbose_) then
        do isym=1,nsym
          write(msg,'(a,i3,2a)')' symanal : the symmetry operation no. ',isym,' is ',trim(labels(isym))
          call wrtout(std_out,msg)
@@ -998,9 +976,9 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
    end if
 
-   if(shubnikov/=1)then
+   if (shubnikov/=1) then
 
-!    Determine nonmagnetic symmetry operations
+     ! Determine nonmagnetic symmetry operations
      nsym_nomagn=nsym/2
      ABI_MALLOC(symrel_nomagn,(3,3,nsym_nomagn))
      ABI_MALLOC(tnons_nomagn,(3,nsym_nomagn))
@@ -1013,32 +991,28 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
        end if
      end do
 
-     if(shubnikov==3)then
+     if (shubnikov==3) then
 
-!      DEBUG
-!      write(std_out,*)' symanal : will enter symbrav with halved symmetry set'
-!      write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
-!      do isym=1,nsym_nomagn
-!      write(std_out,'(i3,2x,9i3,3es12.2,i3)')isym,symrel_nomagn(:,:,isym),tnons_nomagn(:,isym)
-!      end do
-!      ENDDEBUG
+       ! write(std_out,*)' symanal : will enter symbrav with halved symmetry set'
+       ! write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
+       ! do isym=1,nsym_nomagn
+       ! write(std_out,'(i3,2x,9i3,3es12.2,i3)')isym,symrel_nomagn(:,:,isym),tnons_nomagn(:,isym)
+       ! end do
 
-!      Find the point group of the halved symmetry set
+       ! Find the point group of the halved symmetry set
        call symptgroup(iholohedry_nomagn,nsym_nomagn,ptgroupha,symrel_nomagn)
 
-!      Deduce the magnetic point group (ptgroupma) from ptgroup and ptgroupha
+       ! Deduce the magnetic point group (ptgroupma) from ptgroup and ptgroupha
        call getptgroupma(ptgroup,ptgroupha,ptgroupma)
 
      else if(shubnikov==4)then
 
-!      Find the Fedorov space group of the halved symmetry set
+       ! Find the Fedorov space group of the halved symmetry set
        call symspgr(bravais,labels,nsym_nomagn,spgroup,symrel_nomagn,tnons_nomagn,tolsym)
 
-!      The magnetic translation generator genafm has already been determined
-!      write(std_out,*)' genafm =',genafm, ' spgroup=',spgroup
-
-       if(verbose_)then
-
+       ! The magnetic translation generator genafm has already been determined
+       ! write(std_out,*)' genafm =',genafm, ' spgroup=',spgroup
+       if (verbose_) then
          write(msg, '(a)' )' Select only the non-magnetic symmetry operations '
          call wrtout(std_out,msg)
 
@@ -1058,8 +1032,6 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
    end if ! Shubnikov groups
 
  end if
-
-!write(std_out,'(a)') ' symanal : exit '
 
 end subroutine symanal
 !!***
@@ -1119,7 +1091,6 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  real(dp) :: axes(3,3),axis_cart(3),axis_red(3)
  real(dp) :: rprimdconv(3,3),rprimdtry(3,3),rprimdnow(3,3)
  real(dp) :: rprimdconv_invt(3,3)
-
 !**************************************************************************
 
 !DEBUG
@@ -1526,7 +1497,6 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  integer,allocatable :: determinant(:),symrelconv(:,:,:),t_axes(:)
  real(dp) :: axes(3,3),rprimdconv(3,3),vect(3,3)
  real(dp),allocatable :: shift(:,:),tnonsconv(:,:)
-
 !**************************************************************************
 
  DBG_ENTER("COLL")
@@ -1564,13 +1534,11 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  call symrelrot(nsym,rprimdconv,axes,symrelconv,tolsym)
 
  call xred2xcart(nsym,rprimdconv,tnonsconv,tnons)
-!Gives the associated translation, with components in the
-!interval ]-0.5,0.5] .
+!Gives the associated translation, with components in the interval ]-0.5,0.5] .
  tnonsconv(:,1:nsym)=tnonsconv(:,1:nsym)-nint(tnonsconv(:,1:nsym)-tol6)
 
 !If the Bravais lattice is centered, duplicate or quadruplicate
-!the number of symmetry operations, using the Bravais
-!lattice shifts
+!the number of symmetry operations, using the Bravais lattice shifts
  nshift=1
  if(center/=0)nshift=2
  if(center==-3)nshift=4
@@ -1607,8 +1575,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  call symdet(determinant,nsymconv,symrelconv)
 
 !Get the order of each the symmetry operation, as well as the maximal order
-!Also, examine whether each symmetry operation is the inversion, or a root
-!of the inversion (like -3)
+!Also, examine whether each symmetry operation is the inversion, or a root of the inversion (like -3)
 !Decide which kind of point symmetry operation it is
 !Finally assign tnonsconv order and decide the space symmetry operation
 
@@ -1628,8 +1595,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
      '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
      '  tnonsconv(:,isym)=',tnonsconv(:,isym)
      call wrtout(std_out,msg)
-     write(msg, '(a,i4,2a)' )&
-       'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
+     write(msg, '(a,i0,2a)' )'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
      ABI_BUG(msg)
    else if (t_axes(isym) == -2) then
      write(msg, '(a,i0,a)' )'The symmetry operation number ',isym,' is not a root of unity'
@@ -1637,24 +1603,21 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
    end if
 
    n_axes(t_axes(isym))=n_axes(t_axes(isym))+1
-
  end do ! isym=1,nsymconv
 
  if (sum(n_axes)-nsymconv/=0) then
    write(msg, '(7a)' )&
-&   'Not all the symmetries have been recognized. ',ch10,&
-&   'This might be due either to an error in the input file',ch10,&
-&   'or to a BUG in ABINIT',ch10,&
-&   'Please contact the ABINIT group.'
+   'Not all the symmetries have been recognized. ',ch10,&
+   'This might be due either to an error in the input file',ch10,&
+   'or to a BUG in ABINIT',ch10,&
+   'Please contact the ABINIT group.'
    ABI_WARNING(msg)
  end if
 
-!DEBUG
-!write(std_out,*)' symspgr : brvltt,nsymconv=',brvltt,nsymconv
-!write(std_out,*)' n_axes(1:10)=',n_axes(1:10)
-!write(std_out,*)' n_axes(11:20)=',n_axes(11:20)
-!write(std_out,*)' n_axes(21:31)=',n_axes(21:31)
-!ENDDEBUG
+ !write(std_out,*)' symspgr : brvltt,nsymconv=',brvltt,nsymconv
+ !write(std_out,*)' n_axes(1:10)=',n_axes(1:10)
+ !write(std_out,*)' n_axes(11:20)=',n_axes(11:20)
+ !write(std_out,*)' n_axes(21:31)=',n_axes(21:31)
 
 !Treat cases in which the space group cannot be identified on the
 !basis of n_axes one need additional information
@@ -1784,7 +1747,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  end if
 
  if(spgroup==0) then
-   write(msg, '(a,a,a,a,a)' )&
+   write(msg, '(5a)' )&
    'Could not find the space group.',ch10,&
    'This often happens when the user selects a restricted set of symmetries ',ch10,&
    'in the input file, instead of letting the code automatically find symmetries.'
@@ -1805,30 +1768,31 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  else if(bravais(1)==4 .or. bravais(1)==5 .or. bravais(1)==6)then
    write(msg, '(a)' ) ' symspgr: optical characteristics = uniaxial '
    call wrtout(std_out,msg)
-!  Identify the first symmetry operation that is order 3, 4 or 6
+   ! Identify the first symmetry operation that is order 3, 4 or 6
    found=0
    do isym=1,nsym
-!    Proper rotations
      if( minval( abs( t_axes(isym)-(/10,12,14,22,23,24,25,26,27,28,29,30,31/) ))==0) then
+       ! Proper rotations
        found=1 ; exit
-!   Improper symmetry operations
+
      else if( minval( abs( t_axes(isym)-(/1,2,3/) ))==0) then
+       ! Improper symmetry operations
        found=-1 ; exit
      end if
    end do
    if(found==-1 .or. found==1)then
      symrel_uni=symrel(:,:,isym)
      if(found==-1)symrel_uni=-symrel_uni
-!    Now, symrel_uni is a rotation of order 3, 4, 6, for which the axis must be identified
-!    It is actually the only eigenvector with eigenvalue 1. It can be found by cross products
-!    Subtract the unit matrix.
+     ! Now, symrel_uni is a rotation of order 3, 4, 6, for which the axis must be identified
+     ! It is actually the only eigenvector with eigenvalue 1. It can be found by cross products
+     ! Subtract the unit matrix.
      do ii=1,3
        symrel_uni(ii,ii)=symrel_uni(ii,ii)-1
      end do
      found=0
      do ii=1,3
        jj=ii+1 ; if(jj==4)jj=1
-!      Cross product
+       ! Cross product
        ivec1 = symrel_uni(ii,:); ivec2 = symrel_uni(jj,:)
        uniaxis = ivec1 .x. ivec2
        if(sum(uniaxis**2)/=0)then
@@ -1836,7 +1800,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
        end if
      end do
      if(found==1)then
-!      Try to reduce the length, by an integer factor (try only primes 2, 3, 5, 7, 11)
+       ! Try to reduce the length, by an integer factor (try only primes 2, 3, 5, 7, 11)
        prime=(/2,3,5,7,11/)
        ii=1
        do while (ii<6)
@@ -1949,7 +1913,6 @@ subroutine symlatt(bravais,iout,msym,nptsym,ptsymrel,rprimd,tolsym)
  real(dp) :: axes(3,3),axesinvt(3,3),axes_best(3,3),axes_try(3,3)
  real(dp) :: cell_base(3,3),coord(3,3),metmin(3,3)
  real(dp) :: minim(3,3),scprods(3,3),vecta(3),vectb(3),vectc(3),vin1(3),vin2(3),vext(3)
-
 !**************************************************************************
 
 !DEBUG

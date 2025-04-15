@@ -473,7 +473,7 @@ end subroutine wfk_open_read
 !!  [write_frm]=True if the fortran record markers should be written (default). Only if Fortran binary file.
 !!
 !! OUTPUT
-!!  Wfk<class(wfk_t)> = WFK handler initialized and set in read mode
+!!  Wfk<class(wfk_t)> = WFK handler initialized and set in write mode
 !!
 !! SOURCE
 
