@@ -75,67 +75,67 @@ module m_slice
 
     ! Load balance criteria for fair resource allocation (paral_slice option)
     !---------------------------------------------------
-    integer, parameter :: FAIR_BANDPP      = 1 ! bandpp (unweigted)
-    integer, parameter :: FAIR_BANDPP_WDEG = 2 ! bandpp weighted by degree 
+    integer, parameter :: FAIR_BANDPP      = 1              ! bandpp (unweigted)
+    integer, parameter :: FAIR_BANDPP_WDEG = 2              ! bandpp weighted by degree 
 
     ! Public 'slice' datatype
     !-------------------------------------------------
     type, public :: slice_t
 
         ! MPI-related (me=current MPI process)
-        integer :: nproc                ! number of available processes
-        integer :: comm_rows            ! xmpi_comm_self ...
-        integer :: comm_cols            ! same as spacecom
-        integer :: spacecom             ! same as comm_cols
-        integer :: me_g0                ! process contains G(0,0,0) 
-        integer :: me_g0_fft            ! process contains G(0,0,0) for fft
-        integer :: me_nproc_slice       ! number of processes reserved to slice task in use
-        integer :: me_comm_slice        ! sub-communicator reserved to slice task in use
-        integer :: me_id_slice          ! identifier of slice task in use
-        integer :: me_neigenpairs_slice ! total number of eigenpairs of slice task in use
-        integer :: me_bandpp_slice      ! number of distributed bands per process for task in use
-
-        ! Eigenpair parameters
-        integer :: neigenpairs       ! total number of bands (=number of eigenpairs)
-        integer :: neigenpairs_ext   ! total numner of extended columns
-        integer :: total_spacedim    ! total number of plane-waves
-        integer :: bandpp            ! nb of bands per process in colsrows representation 
-        integer :: spacedim          ! nb of plane-waves per process in linalg representation
-        integer :: nslice            ! number of spectral slices
-        integer :: space             ! real or complex eigenvectors
-        integer :: space_res         ! real or complex eigenvalues
+        integer :: nproc                                    ! number of available processes
+        integer :: comm_rows                                ! xmpi_comm_self ...
+        integer :: comm_cols                                ! same as spacecom
+        integer :: spacecom                                 ! same as comm_cols
+        integer :: me_g0                                    ! process contains G(0,0,0) 
+        integer :: me_g0_fft                                ! process contains G(0,0,0) for fft
+        integer :: me_nproc_slice                           ! number of processes reserved to slice task in use
+        integer :: me_comm_slice                            ! sub-communicator reserved to slice task in use
+        integer :: me_id_slice                              ! identifier of slice task in use
+        integer :: me_neigenpairs_slice                     ! total number of eigenpairs of slice task in use
+        integer :: me_bandpp_slice                          ! number of distributed bands per process for task in use
         
-        ! GPU-related
-        integer :: gpu_kokkos_nthrd
+        ! Eigenpair parameters
+        integer :: neigenpairs                              ! total number of bands (=number of eigenpairs)
+        integer :: neigenpairs_ext                          ! total numner of extended columns
+        integer :: total_spacedim                           ! total number of plane-waves
+        integer :: bandpp                                   ! nb of bands per process in colsrows representation 
+        integer :: spacedim                                 ! nb of plane-waves per process in linalg representation
+        integer :: nslice                                   ! number of spectral slices
+        integer :: space                                    ! real or complex eigenvectors
+        integer :: space_res                                ! real or complex eigenvalues
+        
+        ! GPU-related                               
+        integer :: gpu_kokkos_nthrd                 
         integer :: gpu_thread_limit
-
+        
         ! Flags
-        logical :: on_host = .false.        ! running on CPU
-        logical :: on_device = .false.      ! running on GPU
-        logical :: use_linalg = .false.     ! use linalg representation
-        logical :: use_colsrows = .false.   ! use colsrows representation
-
+        logical :: on_host = .false.                        ! running on CPU
+        logical :: on_device = .false.                      ! running on GPU
+        logical :: use_linalg = .false.                     ! use linalg representation
+        logical :: use_colsrows = .false.                   ! use colsrows representation
+        
         ! Options
-        integer :: gpu_option    ! enable GPU
-        integer :: paral_kgb     ! enable parallel (k-points, G basis, bands)
-        integer :: paral_slice   ! how to allocate resources for parallel slices
-        integer :: spectral_cut  ! how to decompose spectrum into slices
-
+        integer :: gpu_option                               ! enable GPU
+        integer :: paral_kgb                                ! enable parallel (k-points, G basis, bands)
+        integer :: paral_slice                              ! how to allocate resources for parallel slices
+        integer :: spectral_cut                             ! how to decompose spectrum into slices
+        
         ! Various model parameters
-        logical :: paw              ! use PAW or not 
-        integer :: ndeg_filter      ! lowpass degree of polynomial filter
-        real(dp) :: ramp            ! bandpass filter tolerance
-        real(dp) :: ecut            ! Ecut Fermi level
-        real(dp) :: mineig_global   ! guaranteed lower spectral bound
-        real(dp) :: maxeig_global   ! guaranteed upper spectral bound
+        logical :: paw                                      ! use PAW or not 
+        integer :: ndeg_filter                              ! lowpass degree of polynomial filter
+        real(dp) :: ramp                                    ! bandpass filter tolerance
+        real(dp) :: ecut                                    ! Ecut Fermi level
+        real(dp) :: mineig_global                           ! guaranteed lower spectral bound
+        real(dp) :: maxeig_global                           ! guaranteed upper spectral bound
 
         ! Memory buffers
-        type(xg_t) :: DivResults
-        type(xg_t) :: X_ext         ! eigenvector memory used by all slices
-        type(xgTransposer_t) :: xgTransposerXext
+        type(xg_t) :: DivResults                            ! TODO
+        type(xg_t) :: X_ext                                 ! eigenvector memory used by all slices
+        type(xgTransposer_t) :: xgTransposerXext            ! transposer datastructure
         
         ! Pointers
-        type(xgBlock_t) :: me_Xext_active   ! eigenvector memory in use by active slice
+        type(xgBlock_t) :: me_Xext_active                   ! eigenvector memory in use by active slice
         type(xgBlock_t) :: XextLinalg
 
         ! Arrays for my slice only
@@ -143,32 +143,32 @@ module m_slice
         integer, allocatable :: me_nrowsLinalg_slice(:)     ! nrow of linalg representation for my slice
 
         ! Arrays related to MPI (all slices)
-        integer, allocatable :: neigenpairs_per_slice(:)   ! number of total eigenpairs per slice
-        integer, allocatable :: nproc_per_slice(:)         ! number of processes per slice
-        integer, allocatable :: lookup_proc(:)             ! which slice each process serves
-        integer, allocatable :: ncolsColsRows(:)           ! ncol of colsrows representation for global X
+        integer, allocatable :: neigenpairs_per_slice(:)    ! number of total eigenpairs per slice
+        integer, allocatable :: nproc_per_slice(:)          ! number of processes per slice
+        integer, allocatable :: lookup_proc(:)              ! which slice each process serves
+        integer, allocatable :: ncolsColsRows(:)            ! ncol of colsrows representation for global X
 
         ! Arrays related to data distribution (all slices)
-        integer, allocatable :: fcol_in_X(:)           ! first band of slice in spectrum memory
-        integer, allocatable :: fcol_in_Xext(:)        ! first band of slice in extended memory
+        integer, allocatable :: fcol_in_X(:)                ! first band of slice in spectrum memory
+        integer, allocatable :: fcol_in_Xext(:)             ! first band of slice in extended memory
 
         ! Arrays related to polynomial filtering (all slices)
-        integer, allocatable :: poly_degrees()         ! polynomial filter degrees
-        real(dp), allocatable :: part_low_bounds(:)    ! lower bounds in spectral partition (disjoint)
-        real(dp), allocatable :: part_upp_bounds(:)    ! upper bounds in spectral partition (disjoint) 
-        real(dp), allocatable :: poly_low_bounds(:)    ! lower bounds used to define polynomials (overlap)
-        real(dp), allocatable :: poly_upp_bounds(:)    ! upper bounds used to define polynomials (overlap)
+        integer, allocatable :: poly_degrees()              ! polynomial filter degrees
+        real(dp), allocatable :: part_low_bounds(:)         ! lower bounds in spectral partition (disjoint)
+        real(dp), allocatable :: part_upp_bounds(:)         ! upper bounds in spectral partition (disjoint) 
+        real(dp), allocatable :: poly_low_bounds(:)         ! lower bounds used to define polynomials (overlap)
+        real(dp), allocatable :: poly_upp_bounds(:)         ! upper bounds used to define polynomials (overlap)
 
     end type slice_t
 
     ! Public methods associated to 'slice' datatype
     !-------------------------------------------------
-    public :: slice_init                ! initialize slice datatype object
-    public :: slice_free                ! free slice datatype object
-    public :: slice_schedule            ! build slice distributed workspace
-    public :: slice_run                 ! run Spectrum Slicing for active slice task
-    public :: slice_merge               ! merge slice result to distributed workspace
-    public :: slice_unitTest            ! used for debugging GPU device
+    public :: slice_init                                    ! initialize slice datatype object
+    public :: slice_free                                    ! free slice datatype object
+    public :: slice_schedule                                ! build slice distributed workspace
+    public :: slice_run                                     ! run Spectrum Slicing for active slice task
+    public :: slice_merge                                   ! merge slice result to distributed workspace
+    public :: slice_unitTest                                ! used for debugging GPU device
 
     CONTAINS  
 !=====================================================================
@@ -438,13 +438,13 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
     if(.not.allocated(theta_reshaped)) ABI_MALLOC(theta_reshaped, (neigenpairs))
     if(.not.allocated(permute_cols)) ABI_MALLOC(permute_cols, (neigenpairs))
     
-    ! ===================== Compute Rayleigh quotients and residuals =====================
+    ! ===================== Compute Rayleigh quotients and residuals ====================================
     
     ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
     call slice_computeSpectrum(slice, X0, getAX_BX, eigen0%self, resid0%self, nspinor)
     ABI_NVTX_END_RANGE()
 
-    ! ===================== Compute guaranteed spectral bounds ===================== 
+    ! ===================== Compute guaranteed spectral bounds ========================================== 
 
     if (slice%gpu_option==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(eigen0%self)
@@ -472,12 +472,12 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
     slice%mineig_global = lambda_minus - sqrt(resid_(1, min_loc))
     slice%maxeig_global = slice%ecut
 
-    ! ===================== Decompose interval [lambda_minus,lambda_plus) to slices =====================
+    ! ===================== Decompose interval [lambda_minus,lambda_plus) to slices ====================
     
     theta_reshaped_ptr => theta_reshaped
     call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
 
-    ! ======== Resource management system ====================
+    ! ===================== Resource management system =================================================
     
     ! Divide resources into slice tasks
     call slice_allocateResources(slice)
@@ -485,7 +485,7 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
     ! Run on all ranks of spacecom: Mark my slice resources as actively in use
     call slice_markActiveResources(slice)
 
-    ! ======== Allocate and distribute extended memory buffer ====================
+    ! ===================== Allocate and fill extended memory buffer =============================================== 
   
     ! Sanity check
     if ((.not. slice%use_linalg) .or. slice%use_colsrows) then
@@ -542,6 +542,8 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
    
     slice%xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
    
+    ! ===================== Transpose ================================================================== 
+    
     ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
     call xgTransposer_transpose(slice%xgTransposerX, STATE_COLSROWS)
     ABI_NVTX_END_RANGE()
