@@ -2413,7 +2413,7 @@ subroutine gwr_build_green(gwr, free_ugb)
  type(__slkmat_t), target :: work_gb, green
 !arrays
  integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
- real(dp) :: tsec(2) , kk_ibz(3), kg(3)
+ real(dp) :: tsec(2) , kk_ibz(3) !, kg(3)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:)
 ! *************************************************************************
 

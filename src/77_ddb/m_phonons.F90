@@ -3141,12 +3141,16 @@ subroutine dfpt_symph(iout, acell, eigvec, indsym, natom, nsym, phfrq, rprim, sy
    if(sum(integer_characters(:))==3*natom)exit
  end do !itol
 
-!write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
+ !write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
 
  write(msg,'(a,a,es8.2,5a)')ch10,' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)',ch10,&
   ' For each vibration mode, or group of modes if degenerate,',ch10,&
   ' the characters are given for each symmetry operation (see the list in the log file).'
  call wrtout(units, msg)
+
+
+ !use m_ptgroups, only : get_classes
+ !call get_classes(nsym, sym, nclass, nelements, elements_idx)
 
  do imode=1,3*natom
    if(degeneracy(imode)/=0)then

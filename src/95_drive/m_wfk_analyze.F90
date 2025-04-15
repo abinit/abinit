@@ -422,7 +422,8 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
        associate (psb => psb_ks(ik_ibz, spin))
        nband_k = ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
        call psb%init(dtset, nband_k, ebands%eig(:, ik_ibz, spin), gs_fermie)
-       ! Change the number of bands to account pseudo bands.
+       ! Change the number of bands to account for pseudo bands.
+       print *, "nb_tot:", psb%nb_tot
        out_hdr%nband(ik_ibz + (spin-1)*ebands%nkpt) = psb%nb_tot
        end associate
      end do
@@ -446,6 +447,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ABI_MALLOC(occ_k, (wfk0_hdr%mband))
    mpw = maxval(wfk0_hdr%npwarr)
    ABI_MALLOC(kg_k, (3, mpw))
+   print *, "mpw:", mpw
    sc_mode = xmpio_single
 
    do spin=1,ebands%nsppol
