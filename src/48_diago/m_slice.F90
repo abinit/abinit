@@ -88,14 +88,7 @@ module m_slice
         integer :: spacecom     ! same as comm_cols
         integer :: me_g0        ! process contains G(0,0,0) 
         integer :: me_g0_fft    ! process contains G(0,0,0) for fft
-
-        !==================
-        ! MPI-related my process only TODO clean. _me is the process not the task!!!!!
-        integer :: task_me       ! which task current process serves
-        integer :: ncols_me      ! number of columns of current task (todo of current process=me)
-        integer :: tot_ncols_me  ! warning this is number of columns of current task
-        integer :: nprocs_me     ! number of resources used by current task
-        !==================
+        integer :: nproc_slice  ! number of processes for slice assigned to me
 
         ! Eigenpair parameters
         integer :: neigenpairs      ! total number of bands (=number of eigenpairs)
@@ -106,6 +99,7 @@ module m_slice
         integer :: nslice           ! number of spectral slices
         integer :: space            ! real or complex eigenvectors
         integer :: space_res        ! real or complex eigenvalues
+        integer :: neigenpairs_slice ! number of eigenpairs for slice assigned to me
         
         ! GPU-related
         integer :: gpu_kokkos_nthrd
@@ -140,20 +134,19 @@ module m_slice
         type(xgBlock_t) :: xXextColsRows
         type(xgBlock_t) :: XextLinalg
 
-        ! Arrays for my slice only ! TODO homogenize notation
-        integer, allocatable :: ncolsColsRows_myslice(:)        ! ncol of colsrows representation for my slice
-        integer, allocatable :: nrowsLinalg_myslice(:)          ! nrow of linalg representation for my slice
+        ! Arrays for my slice only
+        integer, allocatable :: ncolsColsRows_slice(:)        ! ncol of colsrows representation for my slice
+        integer, allocatable :: nrowsLinalg_slice(:)          ! nrow of linalg representation for my slice
 
         ! Arrays related to MPI (all slices)
         integer, allocatable :: neigenpairs_per_slice(:)   ! number of total eigenpairs per slice
         integer, allocatable :: nproc_per_slice(:)         ! number of processes per slice
         integer, allocatable :: lookup_proc(:)             ! which slice each process serves
-        integer, allocatable :: nrowsLinalg(:)             ! nrow of linalg representation for initial X
+        integer, allocatable :: ncolsColsRows(:)           ! ncol of colsrows representation for global X
 
         ! Arrays related to data distribution (all slices)
         integer, allocatable :: fcol_in_X(:)           ! first band of slice in spectrum memory
         integer, allocatable :: fcol_in_Xext(:)        ! first band of slice in extended memory
-        integer, allocatable :: fcol_in_slice(:)       ! first converged in slice memory
 
         ! Arrays related to polynomial filtering (all slices)
         integer, allocatable :: poly_degrees()         ! polynomial filter degrees
@@ -307,7 +300,6 @@ subroutine slice_allocateAll(slice)
     if(.not.allocated(slice%neigenpairs_per_slice)) ABI_MALLOC(slice%neigenpairs_per_slice, (slice%nslice))
     if(.not.allocated(slice%nproc_per_slice)) ABI_MALLOC(slice%nproc_per_slice, (slice%nslice))
     if(.not.allocated(slice%lookup_proc)) ABI_MALLOC(slice%lookup_proc, (slice%nproc))
-    if(.not.allocated(slice%nrowsLinalg)) ABI_MALLOC(slice%nrowsLinalg, (slice%nproc))
 
     if(.not.allocated(slice%fcol_in_X)) ABI_MALLOC(slice%fcol_in_X, (slice%nslice))
     if(.not.allocated(slice%fcol_in_Xext)) ABI_MALLOC(slice%fcol_in_Xext, (slice%nslice))
@@ -340,13 +332,13 @@ subroutine slice_free(slice)
     call xg_free(slice%X_ext)
     call xgTransposer_free(slice%xgTransposerX)
 
-    if(allocated(slice%ncolsColsRows_me)) ABI_FREE(slice%ncolsColsRows_me)   
-    if(allocated(slice%nrowsLinalg_me)) ABI_FREE(slice%nrowsLinalg_me)
+    if(allocated(slice%ncolsColsRows_slice)) ABI_FREE(slice%ncolsColsRows_slice)   
+    if(allocated(slice%nrowsLinalg_slice)) ABI_FREE(slice%nrowsLinalg_slice)
 
     if(allocated(slice%neigenpairs_per_slice)) ABI_FREE(slice%neigenpairs_per_slice)
     if(allocated(slice%nproc_per_slice)) ABI_FREE(slice%nproc_per_slice)
     if(allocated(slice%lookup_proc)) ABI_FREE(slice%lookup_proc)
-    if(allocated(slice%nrowsLinalg)) ABI_FREE(slice%nrowsLinalg)
+    if(allocated(slice%ncolsColsRows)) ABI_FREE(slice%ncolsColsRows)   
 
     if(allocated(slice%fcol_in_X)) ABI_FREE(slice%fcol_in_X)
     if(allocated(slice%fcol_in_Xext)) ABI_FREE(slice%fcol_in_Xext)
@@ -477,8 +469,7 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
     ! Compute parameters of slice tasks
     call slice_splitResources(slice)
 
-    ! TODO move out this is only for current process in polyfi_init
-    call slice_setResourcesMe(slice)
+    call slice_makeMyTask(slice)
 
     ! ======== Allocate and fill extended memory buffer ====================
     
@@ -535,8 +526,9 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
         ! TODO 
         ! mpi_gather of slice%ncolsColsRows_me
         if (.not.allocated(slice%ncolsColsRows)) ABI_MALLOC(slice%ncolsColsRows, (slice%nproc))
-        ncols = slice%ncolsColsRows....! TODO
-        call xmpi_allgather(ncols, slice%ncolsColsRows, slice%spacecom, ierr)
+        my_rank = xmpi_comm_rank(slice%comm_slice)
+        my_bandpp = slice%ncolsColsRows_slice(my_rank + 1 - slice%nproc_slice + 1)
+        call xmpi_allgather(my_bandpp, slice%ncolsColsRows, slice%spacecom, ierr)
         if ( ierr /= xmpi_success ) then
             ABI_ERROR("Error while gathering number of columns in colsrows for all slices")
         end if
@@ -963,8 +955,8 @@ end subroutine slice_cutSpectrum
 !! FUNCTION
 !! Set parameters of all individual slice tasks.
 !! Assumes that spectral slices have already been splitted
-!! (uses degree). Note that schedule is target to allow pointers
-!! targeting its member variables (smart!).
+!! (uses degree). Note that 'slice' is target to allow pointers 
+!! to target its member variables.
 !! 
 !! SOURCE
 
@@ -1018,24 +1010,32 @@ end subroutine slice_splitResources
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_setResourcesMe
+!!****f* m_slice/slice_makeMyTask
 !! NAME
-!! slice_setTaskResourcesMe
+!! slice_makeMyTask
 !!
+!! FUNCTION
+!! Set parameters for individual process according to their assigned slice.
+!! Note that 'slice' is target to allow pointers to target its member variables.
+!!
+!! SIDE EFFECTS
+!! slice%comm_slice          = sub-communicator for slice assigned to current process
+!! slice%ncolsColsRows_slice = bandpp in colsrows representation for slice distribution
+!! slice%nrowsLinalg_slice   = spacedim in linalg representation for slice distribution
+!! 
+!! SOURCE
 
-subroutine slice_setResourcesMe(slice)
+subroutine slice_makeMyTask(slice)
 
     implicit none
 
     ! Arguments
-    type(slice_t), intent(inout) :: slice
+    type(slice_t), target, intent(inout) :: slice
 
     ! Local variables
-    integer :: nrows_tot
-    integer :: task_me, ncols_me, nprocs_me
     integer :: color, my_rank, ierr
-    integer, pointer :: blockcols_me_ptr(:) => null()
-    integer, pointer :: blocrows_me_ptr(:) => null()
+    integer, pointer :: blockcols_ptr(:) => null()
+    integer, pointer :: blocrows_ptr(:) => null()
 
 ! *********************************************************************
  
@@ -1043,37 +1043,31 @@ subroutine slice_setResourcesMe(slice)
     ! a process only has the slice that corresponds to it
     my_rank = xmpi_comm_rank(slice%spacecom) 
     my_slice = slice%lookup_proc(my_rank + 1)
-    task_me = slice_queryTask(slice) ! =color
-    neigenpairs_me = slice%neigenpairs_per_slice(my_slice)
-    nprocs_me = slice%nproc_per_slice(my_slice)
+    slice%neigenpairs_slice = slice%neigenpairs_per_slice(my_slice)
+    slice%nproc_slice = slice%nproc_per_slice(my_slice)
 
-    nrows_tot = slice%nrows_tot
-    slice%ncols_me = ncols_me
-    slice%nprocs_me = nprocs_me
+    if (.not.allocated(slice%ncolsColsRows_slice)) ABI_MALLOC(slice%ncolsColsRows_slice, (slice%nproc_slice))
+    if (.not.allocated(slice%nrowsLinalg_slice)) ABI_MALLOC(slice%nrowsLinalg_slice, (slice%nproc_slice))
 
-    ! Series of allocations corresponding to _me
-    if (.not.allocated(slice%ncolsColsRows_me)) ABI_MALLOC(slice%ncolsColsRows_me, (nprocs_me))
-    if (.not.allocated(slice%nrowsLinalg_me)) ABI_MALLOC(slice%nrowsLinalg_me, (nprocs_me))
-
-    ncolsColsRows_me_ptr => slice%ncolsColsRows_me
-    nrowsLinalg_me_ptr => slice%nrowsLinalg_me
+    blockcols_ptr => slice%ncolsColsRows_slice
+    blockrows_ptr => slice%nrowsLinalg_slice
 
     ! Compute size of column-blocks in MPI col distribution
-    call distribute_vectors(nprocs_me, neigenpairs_me, blockcols_me_ptr)
+    call distribute_vectors(slice%nproc_slice, slice%neigenpairs_slice, blockcols_ptr)
     
     ! Compute size of row-blocks in MPI row distribution 
-    call distribute_vectors(nprocs_me, slice%total_spacedim, blockrows_me_ptr)
+    call distribute_vectors(slice%nproc_slice, slice%total_spacedim, blockrows_ptr)
 
     ! Create sub-communicators 
     ! Split global communicator so that only procs with the same color communicate
     my_rank = xmpi_comm_rank(slice%spacecom)
     color = my_slice
-    call xmpi_comm_split(slice%spacecom, color, my_rank, slice%slice_comm, ierr)
+    call xmpi_comm_split(slice%spacecom, color, my_rank, slice%comm_slice, ierr)
 
     ! All processes wait to define subcommunicator
     call xmpi_barrier(slice%spacecom)
 
-end subroutine slice_setTaskResources
+end subroutine slice_makeMyTask
 !***
 
 !----------------------------------------------------------------------
@@ -1088,10 +1082,10 @@ end subroutine slice_setTaskResources
 !! Assumes linalg representation, so after all transpositions.
 !!
 !! INPUTS
-!! slice%Xext= converged slice eigenvectors in extended column space
-!!             of size (spacedim, neigenpairs_ext)
-!! eigen     = (1,neigenpairs_per_slice)=slice eigenvalues, (1,neigenpairs_per_slice+1:neigenpairs)=0
-!! resid     = (1,neigenpairs_per_slice)=slice residuals, (1,neigenpairs_per_slice+1:neigenpairs)=0
+!! slice%XextLinalg= converged slice eigenvectors in extended column space
+!!                   of size (spacedim, neigenpairs_ext) in linalg representation (after transpose)
+!! eigen = (1,neigenpairs_per_slice)=slice eigenvalues, (1,neigenpairs_per_slice+1:neigenpairs)=0
+!! resid = (1,neigenpairs_per_slice)=slice residuals, (1,neigenpairs_per_slice+1:neigenpairs)=0
 !! 
 !! OUTPUT
 !! X0     = converged eigenvector array of size (spacedim, neigenpairs)
@@ -1161,7 +1155,7 @@ subroutine slice_merge(slice, X0, eigen, resid)
         
             my_rank = xmpi_comm_rank(slice%spacecom)
             my_slice = slice%lookup_proc(my_rank + 1)
-            neigenpairs_slice = slice%neigenpairs_per_slice(my_slice)
+            neigen_slice = slice%neigenpairs_per_slice(my_slice)
             fcol_ext = slice%fcol_in_Xext(my_slice)
 
             call xgBlock_setBlock(eigen_ext, eigen_ext_slice, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
