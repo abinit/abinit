@@ -289,7 +289,8 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  ! =======
 
- call slice_merge(slice,xgx0,xgx0slice,xgeigen,xgresidu)
+ ! Merge slice results to final solution
+ call slice_merge(slice, xgx0, xgeigen, xgresidu)
 
  call slice_free(slice)
 
