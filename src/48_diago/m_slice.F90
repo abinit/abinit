@@ -1041,6 +1041,7 @@ subroutine slice_setResourcesMe(slice)
  
     ! Deduce band capacity per process (=bandpp) on individual slice
     ! a process only has the slice that corresponds to it
+    my_rank = xmpi_comm_rank(slice%spacecom) 
     my_slice = slice%lookup_proc(my_rank + 1)
     task_me = slice_queryTask(slice) ! =color
     neigenpairs_me = slice%neigenpairs_per_slice(my_slice)
@@ -1082,26 +1083,29 @@ end subroutine slice_setTaskResources
 !! slice_merge
 !! 
 !! FUNCTION
-!! Find converged eigenvalues in each slice using a criterion.
-!! [^Not true. For the moment we brutally merge using interval limits]
-!! Return range of first and last index to merge per slice, both 
-!! computed from a residual criterion on eigenvalues.
-!! slice_merge is done locally on slice
-!! while on linalg representation
-!! so it is after Rayleigh-Ritz and before the last transposition
+!! Filter converged eigenvalues of each slice using a criterion
+!! based on spectral partition interval bounds.
+!! Assumes linalg representation, so after all transpositions.
 !!
 !! INPUTS
-!! X0     = converged eigenvectors in extended column space
-!!          of size (spacedim, neigepairs_ext)
-!! eigen  = converged eigenvalues array of size (1, neigenpairs) 
-!! residu = 
+!! slice%Xext= converged slice eigenvectors in extended column space
+!!             of size (spacedim, neigenpairs_ext)
+!! eigen     = (1,neigenpairs_per_slice)=slice eigenvalues, (1,neigenpairs_per_slice+1:neigenpairs)=0
+!! resid     = (1,neigenpairs_per_slice)=slice residuals, (1,neigenpairs_per_slice+1:neigenpairs)=0
 !! 
 !! OUTPUT
 !! X0     = converged eigenvector array of size (spacedim, neigenpairs)
+!! eigen  = converged eigenvalues array of size (1, neigenpairs) 
+!! resid  = converged residual array of size (1, neigenpairs)
+!! 
+!! SIDE EFFECTS
+!! slice%neigenpairs_per_slice= number of kept eigenpairs after merging
+!! slice%fcol_in_Xext         = first index to copy from extended memory (*,neigenpairs_ext)
+!! slice%fcol_in_X            = first index to copy to regular memory (*,neigenpairs)
 !!
 !! SOURCE
 
-subroutine slice_merge(slice, X0, eigen, residu)
+subroutine slice_merge(slice, X0, eigen, resid)
 
     implicit none
 
@@ -1109,194 +1113,145 @@ subroutine slice_merge(slice, X0, eigen, residu)
     type(slice_t), intent(inout) :: slice
     type(xgBlock_t), intent(inout) :: X0
     type(xgBlock_t), intent(inout) :: eigen
-    type(xgBlock_t), intent(inout) :: residu
+    type(xgBlock_t), intent(inout) :: resid
 
-    ! Local variables-------------------------------    
-    integer :: neigenpairs,nslice,islice,i1,i2,j1_band,j2
-    integer :: iband,nband_slice,nband_ovlp
-    integer :: k,k1_band,k2_band,nvec_count,spos
-    integer :: nband_conv,ndeg,k_out
-    real(dp) :: ramp,slow,supp,flow,fupp
-    real(dp) :: glb,gub
-    real(dp) :: c,r ! center, radius
-    type(xgBlock_t) :: Eig0_all, Res0_all
+    ! Local variables-------------------------------
+    integer :: my_rank, my_slice, neigenpairs_slice
+    integer :: fcol_ext, fcol, tot_ncols_kept, lcol_ext
+    integer :: islice, fcol_in_slice, lcol_in_slice
+    integer :: ncols_kept
+    real(dp) :: part_low_bound, part_upp_bound
+    ! Derived types
+    type(xg_t) :: eigen_ext
+    type(xg_t) :: resid_ext
+    type(xgBlock_t) :: eigen_ext_slice
+    type(xgBlock_t) :: resid_ext_slice
+    type(xgBlock_t) :: X_kept, eigen_kept, resid_kept
+    type(xgBlock_t) :: X0_out, eigen_out, resid_out
     ! arrays
-    integer, pointer :: pband(:)
-    real(dp), pointer :: theta0(:,:), resid0(:,:)
-    real(dp), pointer :: thetaN(:,:), residN(:,:)
-    !real(dp), pointer :: theta0_(:), resid0_(:)
-    !real(dp), pointer :: thetaN_(:), residN_(:)
-    real(dp), allocatable :: resid0_slice(:)
-    real(dp), allocatable :: residN_slice(:)
-    real(dp), allocatable :: theta_slice(:)
+    real(dp), pointer :: theta_ext(:,:)
+    real(dp), allocatable :: theta_reshaped(:)
+    real(dp), allocatable :: theta_ext_reshaped(:)
  
     ! *********************************************************************
 
-    ! Various variables
-    nslice = slice%nslice
-    neigenpairs = slice%neigenpairs
-    neigenpais_ext = slice%neigenpairs_ext
-    glb = slice%mineig_global
-    gub = sliceAll%maxeig_global
-    ramp = sliceAll%ramp
-    radius = (slice%maxeig_global - slice%mineig_global)/2.d0
-    center = (slice%maxeig_global + slice%mineig_global)/2.d0
-    
     ! Sanity check
-    if ( (.not. slice%use_linalg) .and. slice%colsrows) then
-        ABI_ERROR("should be in linalg")
+    if ( (.not. slice%use_linalg) .and. slice%use_colsrows) then
+        ABI_ERROR("should be in linalg representation")
     end if
+    ! TODO also check that we are within a GPU enter data map
+    ! perform necessary host to device transfers
 
-    ! TODO create a DivResults object of size (1,neigenpairs)
-    call xg_init(eigenN, slice%space_res, rows=1, cols=slice%neigenpairs, gpu_option=slice%gpu_option)
-    call xgBlock_zero(eigenN)
+    if (.not.allocated(theta_ext_reshaped)) ABI_MALLOC(theta_ext_reshaped, (slice%neigenpairs_ext))
 
+    ! Allocate extended space for all slice eigenvalues and residuals
+    call xg_init(eigen_ext, slice%space_res, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
+    call xg_init(resid_ext, slice%space_res, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
+
+    call xgBlock_zero(eigen_ext%self)
+    call xgBlock_zero(resid_ext%self)
+
+    ! reshape not sure to verify TODO
+    call xgBlock_reshape(eigen, 1, slice%neigenpairs)
+    call xgBlock_reshape(resid, 1, slice%neigenpairs)
+
+    ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
     if (slice%paral_kgb==1) then
-        call xgBlock_reshape(eigenvalues, 1, bandpp) 
         if (xmpi_comm_size(slice%spacecom) > 1) then
         
             my_rank = xmpi_comm_rank(slice%spacecom)
-            shift = my_rank * slice%bandpp
+            my_slice = slice%lookup_proc(my_rank + 1)
+            neigenpairs_slice = slice%neigenpairs_per_slice(my_slice)
+            fcol_ext = slice%fcol_in_Xext(my_slice)
 
-            call xgBlock_setBlock(eigen, Results1%self, nrows=1, ncols=bandpp, fcol=1+shift)
-            call xgBlock_copy(s%self, Results1%self)
-            call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
+            call xgBlock_setBlock(eigen_ext, eigen_ext_slice, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
+            call xgBlock_setBlock(resid_ext, resid_ext_slice, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
+            call xgBlock_copy(eigen, eigen_ext_slice)
+            call xgBlock_copy(resid, resid_ext_slice)
+
+            ! All processes wait before summing 
+            call xmpi_comm_barier(slice%spacecom)
+
+            call xgBlock_mpi_sum(eigen_ext, comm=slice%spacecom)
+            call xgBlock_mpi_sum(resid_ext, comm=slice%spacecom)
 
         end if
     else
-        call xgBlock_reshape(eigenvalues, 1, slice%neigenpairs) 
-        call xgBlock_copy(slice%DivResults%self, eigen)
-        call xgBlock_copy(resid_mpi%self, resid)
-    end if
+        call xgBlock_copy(eigen, eigen_ext)
+        call xgBlock_copy(resid, resid_ext)
+    end if 
 
     if (slice%gpu_option==1) then
-        call xgBlock_copy_from_gpu(eigenN)
+        call xgBlock_copy_from_gpu(eigen_ext)
+        call xgBlock_copy_from_gpu(resid_ext)
     end if
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
-    call xgBlock_reverseMap(Eig0_all,theta0,rows=1,cols=neigenpairs)
-    call xgBlock_reverseMap(Res0_all,resid0,rows=1,cols=neigenpairs)
-    call xgBlock_reverseMap(sliceAll%xgeigen_ovlp,thetaN,rows=1,cols=nband_ovlp)
-    call xgBlock_reverseMap(sliceAll%xgresidu_ovlp,residN,rows=1,cols=nband_ovlp)
+    call xgBlock_reverseMap(eigen_ext, theta_ext, rows=1, cols=slice%neigenpairs_ext)
 
-    ! Use index maps to recover bands associated to a slice
-    nband_conv = 0
-    do islice=1,nslice
-        slow = slice%part_low_bound(islice) ! slice low
-        supp = slice%part_upp_bound(islice) ! slice upp
-        flow = slice%poly_low_bound(islice) ! filter low
-        fupp = slices%poly_upp_bound(islice) ! filter upp
-        ndeg = slice%poly_degrees(islice)
+    ! Filter eigenvalues in extended space using spectral partition
+    tot_ncols_kept = 0
+    do islice=1,slice%nslice
 
-        ! Indices in overlapping objects theta0,resid0
-        fcol_ext = slice%fcol_in_X(islice)
-        lcol_ext = fcol_ext + slice%neigenpairs_per_slice(islice) - 1
-        nband_slice = i2 - i1 + 1
-
-        ! Indices in overlap-free objects thetaN,residN
+        ! Before merge: get slice eigenvalues to filter
+        neigenpairs_slice = slice%neigenpairs_per_slice(islice)
         fcol_ext = slice%fcol_in_Xext(islice)
-        lcol_ext = fcol_ext + slice%neigenpairs_per_slice(islice) - 1
+        lcol_ext = fcol_ext + neigenpairs_slice - 1
+        if (.not.allocated(theta_reshaped)) ABI_MALLOC(theta_reshaped, (neigenpairs_slice)) 
+        theta_reshaped(1:neigenpairs_slice) = theta_ext(1, fcol_ext:lcol_ext)
 
-        ABI_MALLOC(theta_slice,(nband_slice))
-        ABI_MALLOC(residN_slice,(nband_slice))
-        ABI_MALLOC(resid0_slice,(nband_slice))
+        ! Apply filter criterion to find kept first and last column in slice
+        part_low_bound = slice%part_low_bounds(islice)
+        part_upp_bound = slice%part_upp_bounds(islice)
+        fcol_in_slice = maxloc(theta_reshaped, dim=1, mask=(theta_reshaped < part_low_bound)) + 1
+        lcol_in_slice = maxloc(theta_reshaped, dim=1, mask=(theta_reshaped < part_upp_bound))            
+        if (islice == 1     ) fcol_in_slice = 1
+        if (islice == nslice) lcol_in_slice = neigenpairs_slice
 
-        ! Assumes row distribution (process has all nbands_slice in memory)
-        theta_slice(1:nband_slice) = thetaN(1, j1:j2) ! after slicing
-        residN_slice(1:nband_slice) = sqrt(residN(1,j1:j2))
-        resid0_slice(1:nband_slice) = sqrt(resid0(1,pband(i1:i2)))
+        ! After merge: Update first columns to copy from Xext to X
+        slice%fcol_in_X(islice)= tot_ncols_kept + 1
+        slice%fcol_in_Xext(islice) = fcol_ext + fcol_in_slice - 1
+        slice%neigenpairs_per_slice(islice) = lcol_in_slice - fcol_in_slice + 1
+        tot_ncols_kept = tot_ncols_kept + slice%neigenpairs_per_slice(islice) 
 
-        ! Slice position, first (1), interior (2), last (3)
-        spos = 2
-        if (islice==1) spos = 1
-        if (islice==nslice) spos = 3
-
-        ! Number of eigenvalues in slice interval
-        ! This is the ones we keep
-        call count_values(slow,supp,theta_slice,spos,nband_slice,k1,k2,nvec_count)
-        write(std_out,*) 'Partition:', slow, supp
-        write(std_out,*) 'number of eigenvalues in Partition =', nvec_count
-        write(std_out,*) 'max residual rN       in Partition =', maxval(sqrt(residN_slice(k1:k2)))
-        ! Print boundaries of this kept range
-        write(std_out,*) 'min eigenvalue in Partition (kept) =', minval(theta_slice(k1:k2))
-        write(std_out,*) 'max eigenvalue in Partition (kept) =', maxval(theta_slice(k1:k2))
-        sliec%fcol_in_slice(islice) = k1
-
-        ! Store limited indices in overlap-free memory, attention shift k1,k2 by j1
-        if (nband_conv+k2-k1+1>neigenpairs) then
-            ! excess of eigenvalues, ignore last ones
-            write(std_out,'(a,i0)') 'last one is ', k2
-            k2 = k2 - (nband_conv+k2-k1+1-neigenpairs)
-            write(std_out,'(a,i0)') 'due to excess, shift last one to ', k2
-            idx_merge(islice,1) = j1 + k1 - 1
-            idx_merge(islice,2) = j1 + k2 - 1
-            nband_conv = nband_conv + k2 - k1 + 1
-        else
-            idx_merge(islice,1) = fcol + fcol_ext - 1
-            idx_merge(islice,2) = j1 + k2 - 1
-            nband_conv = nband_conv + k2 - k1 + 1
-        end if 
-        write(std_out,*) ''
-
-        ! Number of eigenvalues in filter support
-        call count_values(flow,fupp,theta_slice,spos,nband_slice,k1,k2,nvec_count)
-        write(std_out,*) 'Support:', flow, fupp
-        write(std_out,*) 'number of eigenvalues in Support      =', nvec_count
-        write(std_out,*) 'max residual rN       in Support      =', maxval(sqrt(residN_slice(k1:k2)))
-        ! Print boundaries of this kept range
-        write(std_out,*) 'min eigenvalue in Support (converged) =', minval(theta_slice(k1:k2))
-        write(std_out,*) 'max eigenvalue in Support (converged) =', maxval(theta_slice(k1:k2))
-
-        if (allocated(theta_slice)) ABI_FREE(theta_slice)
-        if (allocated(residN_slice)) ABI_FREE(residN_slice)
-        if (allocated(resid0_slice)) ABI_FREE(resid0_slice)
+        if (allocated(theta_reshaped)) ABI_FREE(theta_reshaped)
 
     end do
     
-    ! Report missing or extra eigenvalues
-    if (nband_conv<neigenpairs) then
+    ! Detect missing or extra eigenvalues
+    if (tot_ncols_kept < slice%neigenpairs) then
         ABI_ERROR("Not enough converged eigenvalues")
-    else if (nband_conv>neigenpairs) then
+    else if (tot_ncols_kept > slice%neigenpairs) then
         ABI_ERROR("Too many converged eigenvalues")
     end if
 
-    ! TODO 
-    ! * count how many thetaN_ are in low,upp for every slice
-    ! * count how many thetaN_ are outside current slice, and if they converged
-    ! * count how many are in overlap region
-    ! This will help diagnostic convergence "slice full"
-
-    ! FIXME actually do the copy from extended to io
-    ! replace blockCopy by xgBlock_copy
-    call xgBlock_reshape(xgeigen, 1, nband)
-    call xgBlock_reshape(xgresidu, 1, nband)
-    j1 = 1                      ! start copy to overlapping mem (cg,eig,resid)
-    do islice=1,nslice
-        i1 = idx_merge(islice,1) ! start read from overlap-free mem
-        i2 = idx_merge(islice,2)
-        nband_merge = i2 - i1 + 1
-        j2 = j1 + nband_merge - 1
-        call slice_blockCopy(slice%xgx0_ovlp,xgx0,i1,j1,i2,j2)
-        call slice_blockCopy(slice%xgeigen_ovlp,xgeigen,i1,j1,i2,j2)
-        call slice_blockCopy(slice%xgresidu_ovlp,xgresidu,i1,j1,i2,j2)
-        !call xgBlock_setBlock(A_in ,A_block,rows=nrowsA,cols=ncolsA_block,fcol=a1)
-        !call xgBlock_setBlock(B_out,B_block,rows=nrowsB,cols=ncolsB_block,fcol=b1)
-        ! if A CPU and B GPU then: copy from B GPU to B CPU, copy from A CPU to B CPU
-        ! so the copy is performed on CPU if one of A and B is on CPU.
-        !call xgBlock_copy(A_block,B_block)
-        j1 = j2 + 1
+    ! Copy from extended memory to regular memory
+    do islice=1,slice%nslice
+        fcol = slice%fcol_in_X(islice)
+        fcol_ext = slice%fcol_in_Xext(islice)
+        neigenpairs_slice = slice%neigenpairs_per_slice(islice)
+        ! Blocks to copy from
+        call xgBlock_setBlock(slice%XextLinalg, X_kept, nrows=slice%spacedim, ncols=neigenpairs_slice, fcol=fcol_ext)
+        call xgBlock_setBlock(eigen_ext, eigen_kept, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
+        call xgBlock_setBlock(resid_ext, resid_kept, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
+        ! Blocks to copy to
+        call xgBlock_setBlock(X0, X0_out, nrows=slice%spacedim, ncols=neigenpairs_slice, fcol=fcol)
+        call xgBlock_setBlock(eigen, eigen_out, nrows=1, ncols=neigenpairs_slice, fcol=fcol)
+        call xgBlock_setBlock(resid, resid_out, nrows=1, ncols=neigenpairs_slice, fcol=fcol)
+        ! copy
+        call xgBlock_copy(X_kept, X0_out)
+        call xgBlock_copy(eigen_kept, eigen_out)
+        call xgBlock_copy(resid_kept, resid_out)
     end do
-    ! Write clean as this:
-    !do islice=1,nslice
-    !    ncols = spsl%nband_slice(islice)
-    !    fcol = spsl%fcol_slice_merge(islice)
-    !    fcol_buf = spsl%fcol_buf_merge(islice)
-    !    call xgBlock_setBlock(X0,xgcols_out,spacedim,ncols,fcol=fcol)
-    !    call xgBlock_setBlock(spsl%Bufr,xgcols_in,spacedim,ncols,fcol=fcol_buf)
-    !    call xgBlock_copy(xgcols_in,xgcols_out)
-    !end do
-    call xgBlock_reshape(xgeigen, nband, 1)
-    call xgBlock_reshape(xgresidu, nband, 1)
+
+    ! reshape not sure to verify TODO
+    call xgBlock_reshape(eigen, slice%neigenpairs, 1) 
+    call xgBlock_reshape(resid, slice%neigenpairs, 1) 
+
+    ! Free memory
+    call ABI_FREE(eigen_ext)
+    call ABI_FREE(resid_ext)
+    if (allocated(theta_ext_reshaped)) ABI_FREE(theta_ext_reshaped)
  
 end subroutine slice_merge
 !!***
@@ -1329,41 +1284,6 @@ subroutine slice_getBounds(slice,glb,gub,lb,ub)
     ub = slice%poly_upp_bounds(islice)
 
 end subroutine slice_getBounds
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/count_values
-!! NAME
-!! count_values
-!! 
-!! FUNCTION
-!! Return number of consecutive theta values in interval [a,b)
-!! and their index range (first and last indices).
-!! Slice position (spos) takes into account extremal indices.
-!! 
-!! SOURCE
-
-subroutine count_values(low,upp,theta,spos,nband,i1,i2,nvec)
-
-    implicit none
-
-    !Arguments ------------------------------------
-    integer, intent(in) :: spos,nband
-    integer, intent(inout) :: i1,i2,nvec
-    real(dp), intent(in) :: low,upp
-    real(dp), intent(in) :: theta(1:nband)
-    !Local variables-------------------------------
-
-! *********************************************************************
-
-    i1 = maxloc(theta, dim=1, mask=(theta < low)) + 1
-    i2 = maxloc(theta, dim=1, mask=(theta < upp))            
-    if (spos == 1) i1 = 1
-    if (spos == 3) i2 = nband
-    nvec = i2 - i1 + 1
-
-end subroutine count_values
 !!***
 
 !----------------------------------------------------------------------
