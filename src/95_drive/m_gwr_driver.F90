@@ -305,7 +305,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  call energies_init(KS_energies)
 
 !Get electronic temperature from dtset
- el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+ el_temp = merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  den_path = dtfil%fildensin; wfk_path = dtfil%fnamewffk; kden_path = dtfil%filkdensin
  !use_den = f (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
@@ -469,7 +469,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  end if
  ! Get fermie from the GS calculation.
  ! NB: It might understimate the real fermi level, especially if the den was computed on a shifted k-mesh
- ! but it's only used to implement pseudobands
+ ! at present it's only used to implement pseudobands
  gs_fermie = den_hdr%fermie
  call den_cryst%free(); call den_hdr%free()
 
@@ -683,9 +683,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    !print *, "owfk_ebands%npwarr:",  owfk_ebands%npwarr; stop
    call owfk_hdr%init(owfk_ebands, codvsn, dtset, pawtab, 0, psps, wvl%descr)
 
-   ! Change the value of istwfk taken from dtset.
+   ! Change the value of istwfk taken from dtset and set the Fermie level from gs_fermie.
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
+   owfk_hdr%fermie = gs_fermie
 
    ! Build MPI pools to distribute (kpt, spin).
    ! Try to get rectangular grids in each pool to improve efficiency in slk diago.
