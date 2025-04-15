@@ -159,7 +159,6 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  integer(kind=c_size_t) :: localMem
  type(slice_t) :: slice
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
- type(xgBlock_t) :: xgx0slice
  ! arrays
  real(dp) :: tsec(2)
  integer(kind=c_size_t) :: sliceMem(2) 
@@ -257,41 +256,21 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
     call xgBlock_set_gpu_option(xgresidu,ABI_GPU_DISABLED)
  end if
  
- ! xgx0      =not suitable for parallel Rayleigh-Ritz calculations
- ! xgx0slice =version of xgx0 distributed correctly and free of data overlap
- ! schedule  =manager of all slice tasks
- ! .. add type(xgBlock_t) :: xgx0slice
- call slice_schedule(slice,xgx0,xgx0slice,getghc_gsc1,nspinor)
+ call slice_schedule(slice, xgx0, getghc_gsc1, nspinor)
 
- ! I think that xgeigenslice and xgresiduslice can be allocated without
- ! the need of dedicated function
-
- ! here now I think that you can copy the data from CPU to GPU
+ ! TODO here now I think that you can copy the data from CPU to GPU
  ! every MPI process will do this on its own
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
- 
- ! ==== encapsulate that in slice_run
- call slice_initTaskMe(slice,nband_sub,spacecom_sub,mineig_global,maxeig_global,&
-     lambda_minus,lambda_plus,nrowsLinalg_ptr)
 
- call polyfi_init(polyfi,nband_sub,dtset%tolwfr_diago,dtset%ecut,&
-     dtset%paral_kgb,space,1,spacecom_sub,&
-     me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
-     mineig_global,maxeig_global,lambda_minus,lambda_plus,nrowsLinalg,
-     l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
-     gpu_thread_limit=dtset%gpu_thread_limit)
+ call slice_run(slice, getghc_gsc1, getBm1X, xgeigen, xgresidu, nspinor)
 
- call polyfi_run(polyfi,slice%Xext,getghc_gsc1,getBm1X,xgeigenslice,xgresiduslice,nspinor)
-
- call polyfi_free(polyfi)
-
- ! =======
-
- ! Merge slice results to final solution
+ ! FIXME something weird with xgeigen, xgresidu in output
+ ! conflicts with xgeigen, xgresidu used in input
  call slice_merge(slice, xgx0, xgeigen, xgresidu)
 
+ ! Free slice memory
  call slice_free(slice)
 
 #ifdef HAVE_OPENMP_OFFLOAD
