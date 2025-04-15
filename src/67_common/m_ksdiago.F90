@@ -327,10 +327,11 @@ module m_ksdiago
 
    integer,allocatable :: subspace(:,:)
    ! (3, nslices)
+   ! For each slice, the first and last band index and the number of pseudo bands in the slice.
 
    real(dp),allocatable :: ps_eig(:)
-   ! eigenvalues (KS + pseudo energies)
    ! (nb_tot)
+   ! eigenvalues (KS + pseudo energies)
 
  contains
    procedure :: init => psbands_init
@@ -2256,6 +2257,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie) !nband_k
 
  psb%nb_protected = dtset%nb_protected
  psb%maxsto_per_slice = dtset%nb_per_slice
+ ! TODO
  psb%efrac = 0.02_dp   ! dtset%efrac
 
  ! Compute nslices and subspace

@@ -40,7 +40,6 @@ module m_rta
  use m_xmpi
  use m_errors
  use m_copy
- !use m_ebands
  use m_nctk
  use m_wfk
  use m_ephtk
@@ -51,7 +50,7 @@ module m_rta
  use netcdf
 
  use defs_datatypes,   only : pseudopotential_type
- use m_ebands,         only : ebands_t
+ use m_ebands,         only : ebands_t, gaps_t, edos_t, klinterp_t, klinterp_new
  use m_io_tools,       only : flush_unit, open_file
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t

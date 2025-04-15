@@ -684,7 +684,6 @@ subroutine wfk_close(Wfk, delete)
  integer :: mpierr, nfrec
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -769,7 +768,6 @@ subroutine wfk_print(wfk,unit,header,prtvol)
  integer,parameter :: rdwr4=4
  integer :: my_unt,my_prtvol
  character(len=500) :: msg
-
 ! *************************************************************************
 
  my_unt = std_out; if (present(unit)) my_unt = unit
@@ -814,7 +812,6 @@ integer function wfk_validate_ks(wfk, ik_ibz, spin, band) result(ierr)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-
 ! *************************************************************************
  ierr = 0
 
@@ -884,7 +881,6 @@ integer pure function wfk_findk(wfk, kpt, ktol) result(ikpt)
 !scalars
  integer :: ik
  real(dp) :: my_ktol
-
 ! *************************************************************************
 
  my_ktol = 0.0001_dp; if (present(ktol)) my_ktol = ktol
@@ -2991,7 +2987,6 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  integer,allocatable :: rbz2disk(:,:),kg_disk(:,:),iperm(:),rbz2disk_sort(:)
  real(dp) :: kf(3),k_disk(3), ksym(3)
  real(dp),allocatable :: cg_disk(:,:),eig_disk(:),occ_disk(:),work(:,:,:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -3393,7 +3388,6 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
  type(wfk_t),target :: wfk_disk
  real(dp), pointer :: cg(:,:)
  integer, pointer :: kg(:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -3650,7 +3644,6 @@ subroutine wfk_rewind(wfk)
 
 !Local variables-------------------------------
  integer :: ierr
-
 ! *************************************************************************
 
  select case (wfk%iomode)
@@ -3694,7 +3687,6 @@ subroutine wfk_seek(Wfk,ik_ibz,spin)
 !Local variables-------------------------------
  integer :: ierr,ik_fpt,spin_fpt,recn_wanted,recn_fpt,rec_type
  character(len=500) :: msg
-
 ! *************************************************************************
 
  select case (Wfk%iomode)
@@ -3749,7 +3741,6 @@ subroutine wfk_update_f90ptr(wfk, ik_ibz, spin)
 !Arguments ------------------------------------
  class(wfk_t),intent(inout) :: wfk
  integer,intent(in) :: ik_ibz,spin
-
 ! *************************************************************************
 
  if (ik_ibz < wfk%nkpt) then
@@ -3791,7 +3782,6 @@ subroutine wfk_compute_offsets(Wfk)
 ! and avoid integer overflows with large nband npw.
 ! TODO: check if same is needed elsewhere for offsets
  integer(XMPI_OFFSET_KIND) :: increment
-
 ! *************************************************************************
 
  select case (Wfk%iomode)
@@ -3935,7 +3925,6 @@ subroutine wfk_show_offsets(Wfk)
 !Local variables-------------------------------
 !scalars
  integer :: spin,ik_ibz
-
 ! *************************************************************************
 
  select case (Wfk%iomode)
@@ -4417,7 +4406,6 @@ subroutine wfk_to_bz(in_path, dtset, psps, pawtab, out_path, hdr_bz, ebands_bz)
  real(dp) :: kf(3),kibz(3)
  real(dp),allocatable :: cg_ki(:,:),cg_kf(:,:),eig_ki(:),occ_ki(:),work(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: kfull(:,:)
-
 ! *************************************************************************
 
  if (all(dtset%kptrlatt == 0)) then
@@ -4687,7 +4675,6 @@ subroutine wfk_nc2fort(nc_path, fort_path)
  integer,parameter :: formeig0=0
  integer,allocatable :: kg_k(:,:)
  real(dp),allocatable :: cg_k(:,:),eig_k(:),occ_k(:)
-
 ! *************************************************************************
 
  call wrtout(std_out, sjoin("Converting:", nc_path, "to", fort_path))
@@ -4768,7 +4755,6 @@ subroutine wfk_prof(wfk_fname, formeig, nband, comm)
  logical,allocatable :: my_bmask(:)
  integer,allocatable :: kg_k(:,:)
  real(dp),allocatable :: eig_k(:),cg_k(:,:),occ_k(:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -5319,7 +5305,6 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
  integer,allocatable :: kg1_k(:,:),kg2_k(:,:)
  real(dp),allocatable :: eig1_k(:),cg1_k(:,:),occ1_k(:)
  real(dp),allocatable :: eig2_k(:),cg2_k(:,:),occ2_k(:)
-
 ! *************************************************************************
 
  call wrtout(std_out, "wfk_diff: comparing "//TRIM(fname1)//" "//TRIM(fname2))
@@ -5495,7 +5480,6 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
 !arrays
  integer,allocatable :: kf2kin(:), kg_k(:,:) !, kshe_mask(:,:,:)
  real(dp),allocatable :: cg_k(:,:), eig_k(:), occ_k(:), fine_eigen(:,:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -5777,7 +5761,6 @@ subroutine wfk_check_symtab(in_wfkpath, comm)
  real(dp) :: ki(3), kf(3)
  real(dp),allocatable :: kibz(:,:), kbz(:,:), wtk(:), cg_kf(:,:), cg_ki(:,:), cg_symrel(:,:), cg_symrec(:,:)  !, eig_k(:), occ_k(:)
  real(dp),allocatable :: work(:,:,:,:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); if (my_rank /= master) return
