@@ -89,11 +89,12 @@ module m_slice
         integer :: spacecom                                 ! same as comm_cols
         integer :: me_g0                                    ! process contains G(0,0,0) 
         integer :: me_g0_fft                                ! process contains G(0,0,0) for fft
-        integer :: me_nproc_slice                           ! number of processes reserved to slice task in use
-        integer :: me_comm_slice                            ! sub-communicator reserved to slice task in use
+        integer :: me_nproc_slice                           ! number of processes reserved to slice in use
+        integer :: me_comm_slice                            ! sub-communicator reserved to slice in use
         integer :: me_id_slice                              ! identifier of slice task in use
-        integer :: me_neigenpairs_slice                     ! total number of eigenpairs of slice task in use
-        integer :: me_bandpp_slice                          ! number of distributed bands per process for task in use
+        integer :: me_neigenpairs_slice                     ! total number of eigenpairs of slice in use
+        integer :: me_bandpp_slice                          ! number of distributed bands per process for slice in use
+        integer :: me_ndeg_slice                            ! polynomial filter degree for slice in use
         
         ! Eigenpair parameters
         integer :: neigenpairs                              ! total number of bands (=number of eigenpairs)
@@ -105,7 +106,7 @@ module m_slice
         integer :: space                                    ! real or complex eigenvectors
         integer :: space_res                                ! real or complex eigenvalues
         
-        ! GPU-related                               
+        ! GPU-related
         integer :: gpu_kokkos_nthrd                 
         integer :: gpu_thread_limit
         
@@ -124,6 +125,7 @@ module m_slice
         ! Various model parameters
         logical :: paw                                      ! use PAW or not 
         integer :: ndeg_filter                              ! lowpass degree of polynomial filter
+        real(dp) :: tolerance                               ! tolerance on the residu to stop the minimization
         real(dp) :: ramp                                    ! bandpass filter tolerance
         real(dp) :: ecut                                    ! Ecut Fermi level
         real(dp) :: mineig_global                           ! guaranteed lower spectral bound
@@ -184,9 +186,9 @@ module m_slice
 !!
 !! SOURCE
 
-subroutine slice_init(slice,nslice,neigenpairs,spacedim,paral_kgb,paral_slice,ndeg_filter,&
-        ramp,ecut,bandpp,space,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
-        spectral_cut,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
+subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
+        paral_slice,ndeg_filter,ramp,ecut,bandpp,space,spacecom,me_g0,me_g0_fft,&
+        paw,comm_rows,comm_cols,spectral_cut,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
 
     implicit none
 
@@ -208,6 +210,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,paral_kgb,paral_slice,nd
     integer      , intent(in   ) :: gpu_option
     logical      , intent(in   ) :: paw
     real(dp)     , intent(in   ) :: ramp
+    real(dp)     , intent(in   ) :: tolerance
     real(dp)     , intent(in   ) :: ecut
     type(slice_t), intent(inout) :: slice
     integer      , intent(in   ), optional :: gpu_kokkos_nthrd
@@ -239,6 +242,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,paral_kgb,paral_slice,nd
     slice%gpu_option    = gpu_option
     slice%paw           = paw
     slice%ramp          = ramp
+    slice%tolerance     = tolerance
     slice%ecut          = ecut
 
     slice%gpu_kokkos_nthrd = 1
@@ -438,13 +442,13 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
     if(.not.allocated(theta_reshaped)) ABI_MALLOC(theta_reshaped, (neigenpairs))
     if(.not.allocated(permute_cols)) ABI_MALLOC(permute_cols, (neigenpairs))
     
-    ! ===================== Compute Rayleigh quotients and residuals ====================================
+    ! ===================== Compute Rayleigh quotients and residuals ===================================
     
     ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
     call slice_computeSpectrum(slice, X0, getAX_BX, eigen0%self, resid0%self, nspinor)
     ABI_NVTX_END_RANGE()
 
-    ! ===================== Compute guaranteed spectral bounds ========================================== 
+    ! ===================== Compute guaranteed spectral bounds ======================================== 
 
     if (slice%gpu_option==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(eigen0%self)
@@ -485,7 +489,7 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
     ! Run on all ranks of spacecom: Mark my slice resources as actively in use
     call slice_markActiveResources(slice)
 
-    ! ===================== Allocate and fill extended memory buffer =============================================== 
+    ! ===================== Allocate and fill extended memory buffer ================================== 
   
     ! Sanity check
     if ((.not. slice%use_linalg) .or. slice%use_colsrows) then
@@ -542,7 +546,7 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
    
     slice%xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
    
-    ! ===================== Transpose ================================================================== 
+    ! ===================== Transpose ================================================================= 
     
     ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
     call xgTransposer_transpose(slice%xgTransposerX, STATE_COLSROWS)
@@ -592,7 +596,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     implicit none
 
     ! Arguments
-    type(slice_t), intent(inout) :: slice
+    type(slice_t), target, intent(inout) :: slice
     type(xgBlock_t), intent(inout) :: X
     type(xgBlock_t), intent(inout) :: eigen
     type(xgBlock_t), intent(inout) :: residu
@@ -608,20 +612,54 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     ! Variables
     type(polyfi_t) :: polyfi
+    type(xgBlock_t) :: eigen_active
+    type(xgBlock_t) :: residu_active
+    ! Arrays
+    integer, pointer :: me_nrowsLinalg_ptr(:) => null() 
 
     ! *********************************************************************
  
     call slice_getActiveTask(slice,nband_sub,spacecom_sub,mineig_global,maxeig_global,&
          lambda_minus,lambda_plus,nrowsLinalg_ptr)
 
-    call polyfi_init(polyfi,nband_sub,dtset%tolwfr_diago,dtset%ecut,&
-        dtset%paral_kgb,space,1,spacecom_sub,&
-        me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
-        mineig_global,maxeig_global,lambda_minus,lambda_plus,nrowsLinalg,
-        l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
-        gpu_thread_limit=dtset%gpu_thread_limit)
+    ! Missing 
+    ! lambda_minus = ..
+    ! lambda_plus = ..
+    ! mineig_global = ..
+    ! maxeig_global = ..
 
-    call polyfi_run(polyfi,slice%Xext,getghc_gsc1,getBm1X,xgeigenslice,xgresiduslice,nspinor)
+    me_nrowsLinalg_ptr => slice%me_nrowsLinalg_slice
+
+    call polyfi_init(polyfi, slice%me_neigenpairs_slice, slice%tolerance, slice%ecut,&
+        slice%paral_kgb, slice%me_bandpp_slice, slice%space, slice%spacedim, 1, slice%me_comm_slice,&
+        slice%me_g0, slice%me_g0_fft, slice%paw, slice%comm_rows, slice%me_comm_slice,&
+        mineig_global, maxeig_global, lambda_minus, lambda_plus, slice%me_ndeg_slice, &
+        me_nrowsLinalg_ptr, slice%gpu_option, gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
+        gpu_thread_limit=slice%gpu_thread_limit)
+
+    ! Prepare the data on GPU (me_Xext_active is on CPU...)
+    X0 = slice%me_Xext_active
+    ! OR
+    ! Note: we want to use the memory space of X0 but not the
+    ! same pointer because it is common for all slices. For this
+    ! reason we create a new xgBlock independent of X0 for slice.
+    ! Do not do that: chebfi%xXColsRows = X0!!
+    call xgBlock_setBlock(X0, chebfi%xXColsRows, total_spacedim, neigenpairs)
+
+    if (polyfi%gpu_option==ABI_GPU_OFFLOAD) then
+        ! Because X0 is on CPU but chebfi%xXColsRows on GPU
+        ! FIXME either after or before setBlock
+        ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
+        ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_OFFLOAD)
+    end if
+
+    ! TODO verify eigen is on cols. Otherwise reshape...
+    call xgBlock_setBlock(eigen, eigen_active, rows=1, cols=nband)
+    call xgBlock_setBlock(residu, residu_active, rows=1, cols=nband)
+
+    call polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen_active, residu_active, nspinor)
+
+    ! TODO think if we need to recover X0 on CPU ....
 
     call polyfi_free(polyfi)
 
@@ -1113,6 +1151,7 @@ subroutine slice_markActiveResources(slice)
     slice%me_id_slice = slice%lookup_proc(my_rank + 1)
     slice%me_neigenpairs_slice = slice%neigenpairs_per_slice(slice%me_id_slice)
     slice%me_nproc_slice = slice%nproc_per_slice(slice%me_id_slice)
+    slice%me_ndeg_slice = slice%poly_degrees(slice%me_id_slice)
 
     if (.not.allocated(slice%me_ncolsColsRows_slice)) then
         ABI_MALLOC(slice%me_ncolsColsRows_slice, (slice%me_nproc_slice))
