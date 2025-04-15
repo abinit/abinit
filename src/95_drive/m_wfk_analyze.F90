@@ -412,22 +412,21 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  case (WFK_TASK_PSEUDOBANDS)
    if (my_rank /= master) goto 100 ! NO MPI parallelism here
 
+   ! out_hdr is the header the STO_WFK file.
    call wfk0_hdr%copy(out_hdr)
 
-   ! Pre-compute slices for all k-points and spin so that we know nband_ks required to output STO_WFK file.
+   ! Pre-compute slices for all k-points and spin so that we know the new number of bands in STO_WFK file.
    ABI_MALLOC(psb_ks, (ebands%nkpt, ebands%nsppol))
    do spin=1,ebands%nsppol
      do ik_ibz=1,ebands%nkpt
        associate (psb => psb_ks(ik_ibz, spin))
        nband_k = ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
        call psb%init(dtset, nband_k, ebands%eig(:, ik_ibz, spin), gs_fermie)
-       ! Change number of bands taking into account pseudo bands.
+       ! Change the number of bands to account pseudo bands.
        out_hdr%nband(ik_ibz + (spin-1)*ebands%nkpt) = psb%nb_tot
        end associate
      end do
    end do
-
-   call wfk_open_read(in_wfk, wfk0_path, formeig0, iomode_from_fname(wfk0_path), get_unit(), xmpi_comm_self)
 
    ! Compute new bantot
    ! TODO: Have to change all arrays in outhdr_hdr depending on nband_ks
@@ -439,6 +438,10 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    if (dtset%iomode == IO_MODE_ETSF) outwfk_path = nctk_ncify(outwfk_path)
    call out_wfk%open_write(out_hdr, outwfk_path, formeig0, dtset%iomode, get_unit(), xmpi_comm_self)
 
+   call wfk_open_read(in_wfk, wfk0_path, formeig0, iomode_from_fname(wfk0_path), get_unit(), xmpi_comm_self)
+
+   ! The output arrays eig_k and occ_k contain the *full* set of eigenvalues and occupation
+   ! factors stored in the file and are dimensioned with mband.
    ABI_MALLOC(eig_k, (wfk0_hdr%mband))
    ABI_MALLOC(occ_k, (wfk0_hdr%mband))
    mpw = maxval(wfk0_hdr%npwarr)
@@ -449,9 +452,6 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
      do ik_ibz=1,ebands%nkpt
        associate (psb => psb_ks(ik_ibz, spin))
        ! Read and write protected states.
-       ! The output arrays eig_k and occ_k contain the *full* set of eigenvalues and occupation
-       ! factors stored in the file and are dimensioned with mband.
-
        band_block = [1, psb%nb_protected]
        nb = band_block(2) - band_block(1) + 1
        npw_k = wfk0_hdr%npwarr(ik_ibz)
@@ -461,8 +461,9 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
        call in_wfk%read_band_block(band_block, ik_ibz, spin, sc_mode, &
                                    kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
 
-       call wrtout(std_out, sjoin(" About to write islice:", itoa(0), "with band block:", ltoa(band_block)))
-       eig_k(1:psb%nb_tot) = psb%ps_eig(:) ! Change eigenvalues
+       !call wrtout(std_out, sjoin(" About to write islice:", itoa(0), "with band block:", ltoa(band_block)))
+       eig_k(1:psb%nb_tot) = psb%ps_eig(:) ! Change eigenvalues to account for pseudo bands
+       !occ_k = ???
        call out_wfk%write_band_block(band_block, ik_ibz, spin, sc_mode, &
                                      kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
        ABI_FREE(cg_k)
@@ -478,13 +479,15 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
          ABI_MALLOC(cg_k, (2, mcg))
 
          call in_wfk%read_band_block(band_block, ik_ibz, spin, sc_mode, cg_k=cg_k)
-
          call c_f_pointer(c_loc(cg_k), cg_k_cplx, [npw_k*nspinor, nb])
+
+         ! Allocate pseudobands.
          nsto = psb%subspace(3, islice)
          ABI_CALLOC(ps_ug, (npw_k*nspinor, nsto))
          ABI_MALLOC(thetas, (nb))
 
          if (nsto == 1) then
+           ! Use KS states.
            ps_ug = cg_k_cplx
          else
            ! Multiply by random phases.
