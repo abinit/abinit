@@ -98,13 +98,14 @@ module m_slice
         !==================
 
         ! Eigenpair parameters
-        integer :: neigenpairs    ! total number of bands (=number of eigenpairs)
-        integer :: total_spacedim ! total number of plane-waves
-        integer :: bandpp         ! nb of bands per process in colsrows representation 
-        integer :: spacedim       ! nb of plane-waves per process in linalg representation
-        integer :: nslice         ! number of spectral slices
-        integer :: space          ! real or complex eigenvectors
-        integer :: space_res      ! real or complex eigenvalues
+        integer :: neigenpairs      ! total number of bands (=number of eigenpairs)
+        integer :: neigenpairs_ext  ! total numner of extended columns
+        integer :: total_spacedim   ! total number of plane-waves
+        integer :: bandpp           ! nb of bands per process in colsrows representation 
+        integer :: spacedim         ! nb of plane-waves per process in linalg representation
+        integer :: nslice           ! number of spectral slices
+        integer :: space            ! real or complex eigenvectors
+        integer :: space_res        ! real or complex eigenvalues
         
         ! GPU-related
         integer :: gpu_kokkos_nthrd
@@ -497,14 +498,15 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
 
     call xgBlock_permuteCols(X0, slice%total_spacedim, neigenpairs, permute_cols_ptr)
 
-    ncol_ext = sum(slice%neigenpairs_per_slice)
+    slice%neigenpairs_ext = sum(slice%neigenpairs_per_slice)
+    
     if (slice%nslice==1) then
         slice%XextLinalg = X0
     else
         
         ! Allocate extended spaces in linalg representation (on CPU)
-        call xg_init(slice%X_ext, slice%space, slice%spacedim, ncol_ext, slice%spacecom, &
-            me_g0=slice%me_g0, gpu_option=ABI_GPU_DISABLED)
+        call xg_init(slice%X_ext, slice%space, slice%spacedim, slice%neigenpairs_ext, &
+            slice%spacecom, me_g0=slice%me_g0, gpu_option=ABI_GPU_DISABLED)
         
         slice%XextLinalg = slice%X_ext%self
 
@@ -521,7 +523,7 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
     end if
 
     ! Unitary test
-    ABI_CHECK(cols(slice%XextLinalg)==ncol_ext,'wrong linalg representation')
+    ABI_CHECK(cols(slice%XextLinalg)==slice%neigenpairs_ext,'wrong linalg representation')
     write(*,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(slice%spacecom), cols(slice%XextLinalg)
 
     ! Distribute extended columns across **all** MPI processes
@@ -1087,18 +1089,27 @@ end subroutine slice_setTaskResources
 !! slice_merge is done locally on slice
 !! while on linalg representation
 !! so it is after Rayleigh-Ritz and before the last transposition
+!!
+!! INPUTS
+!! X0     = converged eigenvectors in extended column space
+!!          of size (spacedim, neigepairs_ext)
+!! eigen  = converged eigenvalues array of size (1, neigenpairs) 
+!! residu = 
 !! 
+!! OUTPUT
+!! X0     = converged eigenvector array of size (spacedim, neigenpairs)
+!!
 !! SOURCE
 
-subroutine slice_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
+subroutine slice_merge(slice, X0, eigen, residu)
 
     implicit none
 
     ! Arguments ------------------------------------
-    type(sliceAll_t) , intent(inout) :: sliceAll
-    integer          , intent(in   ) :: merge_option
-    integer, pointer , intent(inout) :: idx_merge(:,:)
-    integer, pointer , intent(in   ) :: idx_ovlp(:,:)
+    type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: residu
 
     ! Local variables-------------------------------    
     integer :: neigenpairs,nslice,islice,i1,i2,j1_band,j2
@@ -1122,21 +1133,47 @@ subroutine slice_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
     ! *********************************************************************
 
     ! Various variables
-    nslice = sliceAll%nslice
-    neigenpairs = sliceAll%neigenpairs
-    nband_ovlp = sliceAll%nband_ovlp
-    glb = sliceAll%glb
-    gub = sliceAll%gub
+    nslice = slice%nslice
+    neigenpairs = slice%neigenpairs
+    neigenpais_ext = slice%neigenpairs_ext
+    glb = slice%mineig_global
+    gub = sliceAll%maxeig_global
     ramp = sliceAll%ramp
-    r = (gub - glb)/2.d0
-    c = (gub + glb)/2.d0
+    radius = (slice%maxeig_global - slice%mineig_global)/2.d0
+    center = (slice%maxeig_global + slice%mineig_global)/2.d0
     
-    ! Memory pointers
-    Eig0_all = sliceAll%Eig0%self
-    Res0_all = sliceAll%Res0%self
-    pband => sliceAll%pband ! sorting theta0 in increasing order 
-    
-    ! Results could be complex (with null imaginary part), so neigenpairs has to be in cols, not rows
+    ! Sanity check
+    if ( (.not. slice%use_linalg) .and. slice%colsrows) then
+        ABI_ERROR("should be in linalg")
+    end if
+
+    ! TODO create a DivResults object of size (1,neigenpairs)
+    call xg_init(eigenN, slice%space_res, rows=1, cols=slice%neigenpairs, gpu_option=slice%gpu_option)
+    call xgBlock_zero(eigenN)
+
+    if (slice%paral_kgb==1) then
+        call xgBlock_reshape(eigenvalues, 1, bandpp) 
+        if (xmpi_comm_size(slice%spacecom) > 1) then
+        
+            my_rank = xmpi_comm_rank(slice%spacecom)
+            shift = my_rank * slice%bandpp
+
+            call xgBlock_setBlock(eigen, Results1%self, nrows=1, ncols=bandpp, fcol=1+shift)
+            call xgBlock_copy(s%self, Results1%self)
+            call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
+
+        end if
+    else
+        call xgBlock_reshape(eigenvalues, 1, slice%neigenpairs) 
+        call xgBlock_copy(slice%DivResults%self, eigen)
+        call xgBlock_copy(resid_mpi%self, resid)
+    end if
+
+    if (slice%gpu_option==1) then
+        call xgBlock_copy_from_gpu(eigenN)
+    end if
+
+    ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(Eig0_all,theta0,rows=1,cols=neigenpairs)
     call xgBlock_reverseMap(Res0_all,resid0,rows=1,cols=neigenpairs)
     call xgBlock_reverseMap(sliceAll%xgeigen_ovlp,thetaN,rows=1,cols=nband_ovlp)
@@ -1145,23 +1182,22 @@ subroutine slice_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
     ! Use index maps to recover bands associated to a slice
     nband_conv = 0
     do islice=1,nslice
-        slow = sliceAll%sbound(islice,1) ! slice low
-        supp = sliceAll%sbound(islice,2) ! slice upp
-        flow = sliceAll%sbound(islice,3) ! filter low
-        fupp = sliceAll%sbound(islice,4) ! filter upp
-        ndeg = sliceAll%ndeg(islice)
+        slow = slice%part_low_bound(islice) ! slice low
+        supp = slice%part_upp_bound(islice) ! slice upp
+        flow = slice%poly_low_bound(islice) ! filter low
+        fupp = slices%poly_upp_bound(islice) ! filter upp
+        ndeg = slice%poly_degrees(islice)
 
         ! Indices in overlapping objects theta0,resid0
-        i1 = sliceAll%idx(islice,1)
-        i2 = sliceAll%idx(islice,2)
+        fcol_ext = slice%fcol_in_X(islice)
+        lcol_ext = fcol_ext + slice%neigenpairs_per_slice(islice) - 1
         nband_slice = i2 - i1 + 1
 
         ! Indices in overlap-free objects thetaN,residN
-        j1 = idx_ovlp(islice,1)
-        j2 = idx_ovlp(islice,2)
+        fcol_ext = slice%fcol_in_Xext(islice)
+        lcol_ext = fcol_ext + slice%neigenpairs_per_slice(islice) - 1
 
         ABI_MALLOC(theta_slice,(nband_slice))
-        
         ABI_MALLOC(residN_slice,(nband_slice))
         ABI_MALLOC(resid0_slice,(nband_slice))
 
@@ -1175,11 +1211,6 @@ subroutine slice_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
         if (islice==1) spos = 1
         if (islice==nslice) spos = 3
 
-        write(std_out,*) ''
-        write(std_out,*) '-------------- /Mark/ Slice', islice
-        write(std_out,*) '      nband_slice=', nband_slice
-        write(std_out,*) ''
-
         ! Number of eigenvalues in slice interval
         ! This is the ones we keep
         call count_values(slow,supp,theta_slice,spos,nband_slice,k1,k2,nvec_count)
@@ -1189,7 +1220,8 @@ subroutine slice_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
         ! Print boundaries of this kept range
         write(std_out,*) 'min eigenvalue in Partition (kept) =', minval(theta_slice(k1:k2))
         write(std_out,*) 'max eigenvalue in Partition (kept) =', maxval(theta_slice(k1:k2))
- 
+        sliec%fcol_in_slice(islice) = k1
+
         ! Store limited indices in overlap-free memory, attention shift k1,k2 by j1
         if (nband_conv+k2-k1+1>neigenpairs) then
             ! excess of eigenvalues, ignore last ones
@@ -1200,7 +1232,7 @@ subroutine slice_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
             idx_merge(islice,2) = j1 + k2 - 1
             nband_conv = nband_conv + k2 - k1 + 1
         else
-            idx_merge(islice,1) = j1 + k1 - 1
+            idx_merge(islice,1) = fcol + fcol_ext - 1
             idx_merge(islice,2) = j1 + k2 - 1
             nband_conv = nband_conv + k2 - k1 + 1
         end if 
@@ -1244,9 +1276,9 @@ subroutine slice_merge(sliceAll,idx_ovlp,idx_merge,merge_option)
         i2 = idx_merge(islice,2)
         nband_merge = i2 - i1 + 1
         j2 = j1 + nband_merge - 1
-        call slice_blockCopy(sliceAll%xgx0_ovlp,xgx0,i1,j1,i2,j2)
-        call slice_blockCopy(sliceAll%xgeigen_ovlp,xgeigen,i1,j1,i2,j2)
-        call slice_blockCopy(sliceAll%xgresidu_ovlp,xgresidu,i1,j1,i2,j2)
+        call slice_blockCopy(slice%xgx0_ovlp,xgx0,i1,j1,i2,j2)
+        call slice_blockCopy(slice%xgeigen_ovlp,xgeigen,i1,j1,i2,j2)
+        call slice_blockCopy(slice%xgresidu_ovlp,xgresidu,i1,j1,i2,j2)
         !call xgBlock_setBlock(A_in ,A_block,rows=nrowsA,cols=ncolsA_block,fcol=a1)
         !call xgBlock_setBlock(B_out,B_block,rows=nrowsB,cols=ncolsB_block,fcol=b1)
         ! if A CPU and B GPU then: copy from B GPU to B CPU, copy from A CPU to B CPU
