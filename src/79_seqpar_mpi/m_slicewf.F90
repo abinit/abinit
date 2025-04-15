@@ -232,7 +232,10 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
- ! TODO include variables spectral_cut, paral_slice
+ ! TODO make consistent with slice_init...
+!subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
+!        paral_slice,ndeg_filter,ramp,ecut,bandpp,space,spacecom,me_g0,me_g0_fft,&
+!        paw,comm_rows,comm_cols,spectral_cut,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
  call slice_init(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
      dtset%paral_kgb,l_mpi_enreg%bandpp,dtset%mdeg_filter,space,1,spacecom,&
      me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&

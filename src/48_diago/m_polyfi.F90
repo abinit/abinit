@@ -271,6 +271,7 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg(:) = polyfi%nrows_blockrows
 
+    ! FIXME this part has been moved in slice_run since it can be isolated on input X0 
     ! Note: we want to use the memory space of X0 but not the
     ! same pointer because it is common for all slices. For this
     ! reason we create a new xgBlock independent of X0 for slice.
