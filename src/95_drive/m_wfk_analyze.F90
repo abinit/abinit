@@ -21,6 +21,7 @@
 
 module m_wfk_analyze
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_xmpi
@@ -35,15 +36,16 @@ module m_wfk_analyze
  use m_dtfil
  use m_distribfft
 
- use m_io_tools,        only : iomode_from_fname
+ use m_io_tools,        only : iomode_from_fname, get_unit
  use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
- use m_fstrings,        only : strcat, sjoin, itoa, ftoa
+ use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ltoa
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq, init_mpi_enreg
  use m_esymm,           only : esymm_t, esymm_free
  use m_ddk,             only : ddkstore_t
+ use m_ksdiago,         only : psbands_t
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -142,21 +144,21 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master = 0, formeig0 = 0
  integer :: comm,nprocs,my_rank,mgfftf,nfftf !,nfftf_tot
- integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
+ integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond,ii
  !integer :: option,option_test,option_dij,optrhoij
- integer :: band,ik_ibz,spin,first_band,last_band
- integer :: ierr,usexcnhat
+ integer :: band,ik_ibz,spin,first_band,last_band, nband_k, islice, ib, mpw, mcg, nb, npw_k
+ integer :: ierr,usexcnhat, sc_mode, nspinor, nsto
  integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
- real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
+ real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp, gs_fermie
  !real(dp) :: cpu,wall,gflops
  !real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,nelect,norm,oldefermi
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path,wfkfull_path
+ character(len=fnlen) :: wfk0_path, outwfk_path
  logical :: call_pawinit, use_paw_aeur
- type(hdr_type) :: wfk0_hdr, hdr_bz
+ type(hdr_type) :: wfk0_hdr, hdr_bz, out_hdr
  type(crystal_t) :: cryst, cryst_dtset
  type(ebands_t) :: ebands, ebands_bz
  type(pawfgr_type) :: pawfgr
@@ -164,13 +166,18 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  type(mpi_type) :: mpi_enreg
  type(wfd_t) :: wfd
  type(ddkstore_t) :: ds
+ type(wfk_t) :: in_wfk, out_wfk
  !type(dataset_type) :: my_dtset
 !arrays
- integer :: ngfftc(18),ngfftf(18), units(2)
- integer,allocatable :: l_size_atm(:)
+ integer :: ngfftc(18),ngfftf(18), units(2), band_block(2), bstart
+ integer,allocatable :: l_size_atm(:), kg_k(:,:)
  real(dp),parameter :: k0(3)=zero
  real(dp),pointer :: gs_eigen(:,:,:)
+ real(dp),allocatable :: eig_k(:), occ_k(:), thetas(:) !, out_cg(:,:), work(:,:,:,:), allcg_k(:,:)
+ real(dp),allocatable,target :: cg_k(:,:)
  complex(gwpc),allocatable :: ur_ae(:)
+ complex(dp),pointer :: cg_k_cplx(:,:)
+ complex(dp),allocatable :: ps_ug(:,:)
  logical,allocatable :: keep_ur(:,:,:),bks_mask(:,:,:)
  real(dp) :: tsec(2)
  type(Pawrhoij_type),allocatable :: pawrhoij(:)
@@ -179,7 +186,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !type(paw_an_type),allocatable :: paw_an(:)
  type(esymm_t),allocatable :: esymm(:,:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
-
+ type(psbands_t),allocatable :: psb_ks(:,:)
 !************************************************************************
 
  DBG_ENTER('COLL')
@@ -202,9 +209,15 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  !call cwtime(cpu,wall,gflops,"start")
 
- ! Costruct crystal and ebands from the GS WFK file.
+ ! Construct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm) !,gs_occ)
  call wfk0_hdr%vs_dtset(dtset)
+ nspinor = dtset%nspinor
+
+ ! Get fermie from the GS calculation.
+ ! NB: It might understimate the real fermi level, especially if the den was computed on a shifted k-mesh
+ ! at present it's only used to implement pseudobands
+ gs_fermie = wfk0_hdr%fermie
 
  cryst = wfk0_hdr%get_crystal()
  call cryst%print(header="Crystal structure from WFK file")
@@ -244,12 +257,12 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  if (dtset%usepaw == 1) then
    call chkpawovlp(cryst%natom,cryst%ntypat,dtset%pawovlp,pawtab,cryst%rmet,cryst%typat,cryst%xred)
 
-   cplex_dij=dtset%nspinor; cplex=1; ndij=1
+   cplex_dij=nspinor; cplex=1; ndij=1
 
    ABI_MALLOC(pawrhoij,(cryst%natom))
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
                              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
-   call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
+   call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
 
    ! Initialize values for several basic arrays
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
@@ -331,13 +344,13 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  case (WFK_TASK_FULLBZ, WFK_TASK_OPTICS_FULLBZ)
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
-     wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-     call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
+     outwfk_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) outwfk_path = nctk_ncify(outwfk_path)
+     call wfk_to_bz(wfk0_path, dtset, psps, pawtab, outwfk_path, hdr_bz, ebands_bz)
      call ebands_bz%free()
 
      ! Write KB form factors.
      if (dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
-       call prtkbff(wfkfull_path, hdr_bz, psps, dtset%prtvol)
+       call prtkbff(outwfk_path, hdr_bz, psps, dtset%prtvol)
      end if
      call hdr_bz%free()
    end if
@@ -348,7 +361,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
      ! This is needed fo computing non-linear properties in optics as symmetries are not
      ! implemented correctly.
      ds%only_diago = .False.
-     call ds%compute_ddk(wfkfull_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+     call ds%compute_ddk(outwfk_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
      call ds%free()
    end if
 
@@ -396,14 +409,121 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !  call wfd%plot_ur(Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
  !  ABI_FREE(bks_mask)
 
+ case (WFK_TASK_PSEUDOBANDS)
+   if (my_rank /= master) goto 100 ! NO MPI parallelism here
+
+   call wfk0_hdr%copy(out_hdr)
+
+   ! Pre-compute slices for all k-points and spin so that we know nband_ks required to output STO_WFK file.
+   ABI_MALLOC(psb_ks, (ebands%nkpt, ebands%nsppol))
+   do spin=1,ebands%nsppol
+     do ik_ibz=1,ebands%nkpt
+       associate (psb => psb_ks(ik_ibz, spin))
+       nband_k = ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
+       call psb%init(dtset, nband_k, ebands%eig(:, ik_ibz, spin), gs_fermie)
+       ! Change number of bands taking into account pseudo bands.
+       out_hdr%nband(ik_ibz + (spin-1)*ebands%nkpt) = psb%nb_tot
+       end associate
+     end do
+   end do
+
+   call wfk_open_read(in_wfk, wfk0_path, formeig0, iomode_from_fname(wfk0_path), get_unit(), xmpi_comm_self)
+
+   ! Compute new bantot
+   ! TODO: Have to change all arrays in outhdr_hdr depending on nband_ks
+   out_hdr%bantot = sum(out_hdr%nband)
+   out_hdr%mband = maxval(out_hdr%nband)
+   ABI_RECALLOC(out_hdr%occ, (out_hdr%bantot))
+
+   outwfk_path = strcat(dtfil%filnam_ds(4), "_STO_WFK")
+   if (dtset%iomode == IO_MODE_ETSF) outwfk_path = nctk_ncify(outwfk_path)
+   call out_wfk%open_write(out_hdr, outwfk_path, formeig0, dtset%iomode, get_unit(), xmpi_comm_self)
+
+   ABI_MALLOC(eig_k, (wfk0_hdr%mband))
+   ABI_MALLOC(occ_k, (wfk0_hdr%mband))
+   mpw = maxval(wfk0_hdr%npwarr)
+   ABI_MALLOC(kg_k, (3, mpw))
+   sc_mode = xmpio_single
+
+   do spin=1,ebands%nsppol
+     do ik_ibz=1,ebands%nkpt
+       associate (psb => psb_ks(ik_ibz, spin))
+       ! Read and write protected states.
+       ! The output arrays eig_k and occ_k contain the *full* set of eigenvalues and occupation
+       ! factors stored in the file and are dimensioned with mband.
+
+       band_block = [1, psb%nb_protected]
+       nb = band_block(2) - band_block(1) + 1
+       npw_k = wfk0_hdr%npwarr(ik_ibz)
+       mcg = npw_k * nspinor * nb
+       ABI_MALLOC(cg_k, (2, mcg))
+
+       call in_wfk%read_band_block(band_block, ik_ibz, spin, sc_mode, &
+                                   kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
+
+       call wrtout(std_out, sjoin(" About to write islice:", itoa(0), "with band block:", ltoa(band_block)))
+       eig_k(1:psb%nb_tot) = psb%ps_eig(:) ! Change eigenvalues
+       call out_wfk%write_band_block(band_block, ik_ibz, spin, sc_mode, &
+                                     kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
+       ABI_FREE(cg_k)
+
+       ! ========================================
+       ! Build pseudobands and write them to disk
+       ! ========================================
+       bstart = psb%nb_protected + 1
+       do islice=1,psb%nslices
+         band_block = psb%subspace(1:2, islice)
+         nb = band_block(2) - band_block(1) + 1
+         mcg = npw_k * nspinor * nb
+         ABI_MALLOC(cg_k, (2, mcg))
+
+         call in_wfk%read_band_block(band_block, ik_ibz, spin, sc_mode, cg_k=cg_k)
+
+         call c_f_pointer(c_loc(cg_k), cg_k_cplx, [npw_k*nspinor, nb])
+         nsto = psb%subspace(3, islice)
+         ABI_CALLOC(ps_ug, (npw_k*nspinor, nsto))
+         ABI_MALLOC(thetas, (nb))
+
+         if (nsto == 1) then
+           ps_ug = cg_k_cplx
+         else
+           ! Multiply by random phases.
+           do ii=1,nsto
+             call random_number(thetas)
+             do ib=1,nb
+               ps_ug(:,ii) = ps_ug(:,ii) + cg_k_cplx(:,ib) * exp(j_dpc*two_pi*thetas(ib)) / sqrt(one * nsto)
+             end do
+           end do
+         end if
+
+         band_block = [bstart, bstart + psb%subspace(3, islice) - 1]
+         call wrtout(std_out, sjoin(" About to write islice:", itoa(islice), "with band block:", ltoa(band_block)))
+         call out_wfk%write_band_block(band_block, ik_ibz, spin, sc_mode, cg_k=cg_k)
+         bstart = bstart + psb%subspace(3, islice)
+
+         ABI_FREE(thetas)
+         ABI_FREE(cg_k)
+         ABI_FREE(ps_ug)
+       end do ! islice
+
+       call psb%free()
+       end associate
+     end do ! ik_ibz
+   end do ! spin
+
+   ABI_FREE(eig_k)
+   ABI_FREE(occ_k)
+   ABI_FREE(kg_k)
+   call in_wfk%close(); call out_wfk%close(); call out_hdr%free()
+
  case (WFK_TASK_PAW_AEPSI)
    ! Compute AE PAW wavefunction in real space on the dense FFT mesh.
    call read_wfd()
 
    ABI_CHECK(wfd%usepaw == 1, "Not a PAW run")
    ABI_MALLOC(paw_onsite, (cryst%natom))
-   call paw_pwaves_lmn_init(paw_onsite,cryst%natom,cryst%natom,cryst%ntypat,&
-   cryst%rprimd,cryst%xcart,pawtab,pawrad,pawfgrtab)
+   call paw_pwaves_lmn_init(paw_onsite,cryst%natom,cryst%natom,cryst%ntypat, &
+                            cryst%rprimd,cryst%xcart,pawtab,pawrad,pawfgrtab)
 
    ! Use dense FFT mesh
    call wfd%change_ngfft(cryst,psps,ngfftf)
@@ -423,19 +543,19 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
    !if (wfk0_hdr%kptopt == 1) then
    !  ! Generate WFK in the full BZ (only master works here)
-   !  wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+   !  outwfk_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) outwfk_path = nctk_ncify(outwfk_path)
    !  if (my_rank == master) then
-   !    call wrtout(units, sjoin("- Generating WFK file with kpoints in the full BZ and istwfk == 1", wfkfull_path))
-   !    call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
+   !    call wrtout(units, sjoin("- Generating WFK file with kpoints in the full BZ and istwfk == 1", outwfk_path))
+   !    call wfk_to_bz(wfk0_path, dtset, psps, pawtab, outwfk_path, hdr_bz, ebands_bz)
    !    call ebands_bz%free(); call hdr_bz%free()
    !  end if
    !  call xmpi_barrier(comm)
    !  my_dtset = dtset%copy()
-   !  ebands_bz = wfk_read_ebands(wfkfull_path, comm, hdr_bz)
+   !  ebands_bz = wfk_read_ebands(outwfk_path, comm, hdr_bz)
    !  call hdr_transfer_nkpt_arrays(hdr_bz, my_dtset)
    !  my_dtset%kptopt = hdr_bz%kptopt
    !  call hdr_bz%vs_dtset(my_dtset)
-   !  call wfd_run_wannier__(wfkfull_path, my_dtset, ebands_bz, hdr_bz)
+   !  call wfd_run_wannier__(outwfk_path, my_dtset, ebands_bz, hdr_bz)
    !  call ebands_bz%free(); call hdr_bz%free(); call my_dtset%free()
 
    !else
@@ -447,13 +567,11 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ABI_ERROR(sjoin("Wrong wfk_task:", itoa(dtset%wfk_task)))
  end select
 
+100 continue
+
  ! Free memory
- call cryst%free()
- call ebands%free()
- call wfd%free()
+ call cryst%free(); call ebands%free(); call wfd%free(); call destroy_mpi_enreg(mpi_enreg); call wfk0_hdr%free()
  call pawfgr_destroy(pawfgr)
- call destroy_mpi_enreg(mpi_enreg)
- call wfk0_hdr%free()
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then
@@ -494,7 +612,7 @@ subroutine read_wfd()
  ABI_FREE(keep_ur)
  ABI_FREE(bks_mask)
 
- call wfd%read_wfk(wfk0_path,iomode_from_fname(wfk0_path))
+ call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
 
 end subroutine read_wfd
 

@@ -309,28 +309,24 @@ module m_ksdiago
 !!
 !! SOURCE
 
- type, private :: psbands_t
+ type, public :: psbands_t
 
    integer :: nb_tot = -1
+   ! Total number of states (protected + pseudo bands)
 
    integer :: nb_protected = -1
-   ! Number of protected bands
+   ! Number of protected bands.
 
    integer :: nslices = -1
-   ! Number of slices
+   ! Number of slices.
 
-   integer :: nb_per_slice = -1
-   ! Number of pseudoands per slice
+   integer :: maxsto_per_slice = -1
+   ! Max number of pseudo bands per slice.
 
-   !integer :: max_nb = -1
-
-   real(dp) :: efrac = 0.02
-
-   type(dataset_type),pointer :: dtset
-
-   real(dp),contiguous,pointer :: eig_k(:)
+   real(dp) :: efrac
 
    integer,allocatable :: subspace(:,:)
+   ! (3, nslices)
 
    real(dp),allocatable :: ps_eig(:)
    ! eigenvalues (KS + pseudo energies)
@@ -341,6 +337,7 @@ module m_ksdiago
     ! Initialize the object
 
    procedure :: band2slice => psbands_band2slice
+   ! Return the slice index from the band index.
 
    procedure :: free => psbands_free
     ! Free memory.
@@ -1542,14 +1539,14 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ! ================
  ! Stochastic bands
  ! ================
- if (dtset%useria == 123) then
-   call wrtout(std_out, "Generating stochastic bands...")
+ if (dtset%nb_protected /= 0) then
+   call wrtout(std_out, " Generating stochastic bands...")
    ! Initial setup.
-   !call psb%init(dtset, h_size, eig_k, gs_fermie) !, nband_k)
+   call psb%init(dtset, h_size, eig_ene, gs_fermie) !, nband_k)
    my_npwsp = eigvec%sizeb_local(1)
    nb_glob = eigvec%sizeb_global(2)
-   ABI_CALLOC(ps_ug, (my_npwsp, psb%nb_per_slice, psb%nslices))
-   ABI_MALLOC(thetas, (nb_glob, psb%nb_per_slice))
+   ABI_CALLOC(ps_ug, (my_npwsp, psb%maxsto_per_slice, psb%nslices))
+   ABI_MALLOC(thetas, (nb_glob, psb%maxsto_per_slice))
 
    ! Loop over global bands.
    do ib_glob=1, nb_glob
@@ -1559,23 +1556,54 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
 
      ! Get slice index from ib_glob.
      islice = psb%band2slice(ib_glob); if (islice == -1) cycle
+     !band_block = psb%subspace(1:2, islice)
+     !nb_in_slice  = psb%subspace(3,islice)
+
      ! Loop over global PW index.
      do ipwsp=1,npwsp
        call eigvec%glob2loc(ipwsp, ib_glob, igsp_loc, ib_loc, haveit); if (.not. haveit) cycle
-       do ib=1,psb%nb_per_slice
+       do ib=1,psb%subspace(3,islice)
          ps_ug(igsp_loc, ib, islice) = ps_ug(igsp_loc, ib, islice) + &
            eigvec%buffer_cplx(igsp_loc, ib_loc) * exp(j_dpc*two_pi*thetas(ib_glob,ib))
-         end do
+       end do
      end do
    end do ! ib_glob
+   ABI_FREE(thetas)
 
    ! Normalize
-   ! TODO: Need MPI communicator over columns here
+   ! TODO: Need MPI communicator over columns here.
    !call xmpi_sum(ps_ug, eigvec%column_comm, ierr)
-   ps_ug = ps_ug / sqrt(one * psb%nb_per_slice)
-   call psb%free()
-   ABI_FREE(thetas)
+   do islice=1,psb%nslices
+     do ib=1,psb%subspace(3,islice)
+       if (psb%subspace(3,islice) == 1) cycle
+       ps_ug(:,ib,islice) = ps_ug(:,ib,islice) / sqrt(one * psb%subspace(3,islice))
+     end do
+   end do
+
+   ! Now insert ps_ug in the right position in eigevec
+   do ib_glob=1, nb_glob
+     islice = psb%band2slice(ib_glob); if (islice == -1) cycle
+     !band_start = 1 + (islice - 1) * psb%nb_per_slice
+     ! Loop over global PW index.
+     do ipwsp=1,npwsp
+       call eigvec%glob2loc(ipwsp, ib_glob, igsp_loc, ib_loc, haveit); if (.not. haveit) cycle
+       !do ib=1,psb%nb_per_slice
+       !  eigvec%buffer_cplx(igsp_loc, ib_loc) = ps_ug(igsp_loc, ib, islice)
+       !end do
+     end do
+   end do
+
    ABI_FREE(ps_ug)
+
+   ! here we change the value of nband_k and eig_k.
+   nband_k = psb%nb_tot
+   ABI_MALLOC(eig_k, (nband_k))
+   eig_k = psb%ps_eig
+
+ else
+   ! No pseudo bands.
+   ABI_MALLOC(eig_k, (nband_k))
+   eig_k(:) = eig_ene(1:nband_k)
  end if
 
  ! Now transfer eigvec to the ugb datastructure using 1d grid (block column distribution).
@@ -1586,9 +1614,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ABI_CHECK(block_dist_1d(nband_k, nproc, col_bsize, msg), msg)
  call eigvec%cut(h_size, nband_k, ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor, free=.True.)
  call proc_4diag%free()
-
- ABI_MALLOC(eig_k, (nband_k))
- eig_k(:) = eig_ene(1:nband_k)
 
  ! =================
  ! Build ugb object
@@ -1607,8 +1632,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  if (ugb%my_nband > 0) then
    call c_f_pointer(c_loc(ugb%mat%buffer_cplx), ugb%cg_k, shape=[2, npwsp, ugb%my_nband])
  else
-   ugb%my_nband = 0
-   ugb%cg_k => null()
+   ugb%my_nband = 0; ugb%cg_k => null()
  end if
 
  call xmpi_min(ugb%my_nband, min_my_nband, comm, ierr)
@@ -1636,11 +1660,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  call cwtime_report(" block column distribution completed", cpu, wall, gflops)
 
  ! Free memory.
+
  ABI_FREE(eig_ene)
  ABI_FREE(kpg_k)
  ABI_FREE(ph3d)
  ABI_FREE(ffnl)
- call destroy_mpi_enreg(mpi_enreg_seq); call gs_hamk%free()
+ call destroy_mpi_enreg(mpi_enreg_seq); call gs_hamk%free(); call psb%free()
 
  if (my_rank == master) call pstat%print([std_out], header="end of ugb_from_diago")
 
@@ -2206,89 +2231,104 @@ end subroutine hyb_free
 !!
 !! SOURCE
 
-subroutine psbands_init(psb, dtset, hsize, eig_k, gs_fermie) !nband_k
+subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie) !nband_k
 
 !Arguments ------------------------------------
  class(psbands_t),intent(out) :: psb
  class(dataset_type),target,intent(in) :: dtset
- integer,intent(in) :: hsize !, nband_k
+ integer,intent(in) :: eig_size
  real(dp),intent(in) :: gs_fermie
 !arrays
- real(dp),target,intent(inout) :: eig_k(hsize)
+ real(dp),intent(in) :: eig_k(eig_size)
 
 !Local variables-------------------------------
 !scalars
- integer :: islice, ib, cnt, start_idx, stop_idx, units(2), first_band, last_band
- real(dp) :: first_eig, last_eig, rwork(hsize), e_min, e_max
+ integer :: islice, ib, cnt, start_idx, stop_idx, units(2), first_band, last_band, nb
+ real(dp) :: first_eig, last_eig
+ real(dp),allocatable :: tmp_eig_k(:)
 ! *********************************************************************
 
  units = [std_out, ab_out]
 
- psb%dtset => dtset; psb%eig_k => eig_k
- ! Shift energies wrt Fermi level.
- eig_k = eig_k - gs_fermie
+ ! Shift energies wrt the input Fermi level.
+ ABI_MALLOC(tmp_eig_k, (eig_size))
+ tmp_eig_k = eig_k - gs_fermie
 
- psb%nb_protected = 20 ! dtset%nb_protected
- psb%nb_per_slice = 2  ! dtset%nb_per_slice
- !psb%efrac = 0.02_dp  ! dtset%efrac
+ psb%nb_protected = dtset%nb_protected
+ psb%maxsto_per_slice = dtset%nb_per_slice
+ psb%efrac = 0.02_dp   ! dtset%efrac
 
- ! Compute nslices and slice_estop
- ! TODO: Add possibility of treating occupied states as well.
- ABI_MALLOC(psb%subspace, (2, hsize))
- psb%nslices = 0
+ ! Compute nslices and subspace
+ ! TODO: Add possibility of treating occupied states as well?
+ ABI_MALLOC(psb%subspace, (3, eig_size))
  first_band = psb%nb_protected + 1
+ psb%nslices = 0
 
  do while (first_band > 0)
-   first_eig = eig_k(first_band)
+   first_eig = tmp_eig_k(first_band)
    last_eig = first_eig + (first_eig * psb%efrac)
-   last_band = get_band_with_energy_small_than(first_band+1, hsize, last_eig)
+   last_band = get_band_with_energy_small_than(first_band+1, eig_size, last_eig)
    psb%nslices = psb%nslices + 1
    psb%subspace(1, psb%nslices) = first_band
    if (last_band == -1) then
-     psb%subspace(2, psb%nslices) = hsize
+     psb%subspace(2, psb%nslices) = eig_size
    else
      psb%subspace(2, psb%nslices) = last_band
-   endif
+   end if
+   nb = psb%subspace(2, psb%nslices) - psb%subspace(1, psb%nslices)  + 1
+   if (last_band == first_band) then
+     ! Won't use pseudo bands in this case.
+     psb%subspace(3, psb%nslices) = 1
+   else
+     psb%subspace(3, psb%nslices) = min(dtset%nb_per_slice, nb)
+   end if
    first_band = last_band + 1
-   write(std_out,'(1x,i0,1x,i0)') psb%subspace(1, psb%nslices), psb%subspace(2, psb%nslices)
- enddo
+   !write(std_out,'(a,i0,a,*(1x,i0))')" islice: ", psb%nslices, " subspace:", psb%subspace(:, psb%nslices)
+ end do
 
- ! Revert changes in eig_k
- eig_k = eig_k + gs_fermie
-
- ! Copy eigenvales of the protected states.
- psb%nb_tot = psb%nb_protected + psb%nslices * psb%nb_per_slice
+ ! Copy eigenvalues of the protected states.
+ psb%nb_tot = psb%nb_protected + sum(psb%subspace(3,1:psb%nslices))
  ABI_MALLOC(psb%ps_eig, (psb%nb_tot))
- psb%ps_eig(1:psb%nb_protected) = eig_k(1:psb%nb_protected)
+ psb%ps_eig(1:psb%nb_protected) = tmp_eig_k(1:psb%nb_protected)
 
  cnt = 0
  do islice=1,psb%nslices
-   e_min = eig_k(psb%subspace(1, islice))
-   e_max = eig_k(psb%subspace(2, islice))
-   do ib=1,psb%nb_per_slice
-     ! Take average inside slice.
+   first_band = psb%subspace(1, islice)
+   last_band = psb%subspace(2, islice)
+   ! Take average of eigenvalues inside the slice.
+   do ib=1,psb%subspace(3, islice)
      cnt = cnt + 1
-     psb%ps_eig(psb%nb_protected + cnt) = e_min + (e_max - e_min) * half
+     psb%ps_eig(psb%nb_protected + cnt) = sum(tmp_eig_k(first_band:last_band)) / dble(last_band - first_band + 1)
    end do
  end do
+ ABI_FREE(tmp_eig_k)
 
- call wrtout(units, ' Stochastic pseudobands setup:')
- call wrtout(units, sjoin(' Original number of bands: ', itoa(hsize)))
- call wrtout(units, sjoin(' Number of bands in the protection window: ', itoa(psb%nb_protected)))
- call wrtout(units, sjoin(' Number of stochastic subspaces: ', itoa(psb%nslices)))
- call wrtout(units, sjoin(' Number of stochastic pseudobands per subspace: ', itoa(psb%nb_per_slice)))
- call wrtout(units, sjoin(' Final number of bands: ', itoa(psb%nb_tot)))
+ psb%ps_eig = psb%ps_eig + gs_fermie
+
+ call wrtout(units, ' Stochastic pseudobands setup:', pre_newlines=1)
+ call wrtout(units, sjoin('     Number of stochastic subspaces: ', itoa(psb%nslices)))
+ call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
+ call wrtout(units, sjoin('     Original number of bands: ', itoa(eig_size)))
+ call wrtout(units, sjoin('     Number of bands in the protection window: ', itoa(psb%nb_protected)))
+ call wrtout(units, sjoin('     Final number of bands: ', itoa(psb%nb_tot)), newlines=1)
+
+ !if (dtset%prtvol > 1) then
+ !  do islice=1,psb%nslices
+ !    write(msg,'(a,i0,a,*(1x,i0))')" islice: ", psb%nslices, " subspace:", psb%subspace(:, psb%nslices)
+ !    call wrtout(units, msg)
+ !  end do
+ !end if
 
 contains
 
 integer function get_band_with_energy_small_than(idx_start, idx_end, energy) result(band)
   integer, intent(in) :: idx_start, idx_end
-  real(dp), intent(in) :: energy
   integer :: ib
+  real(dp), intent(in) :: energy
 
   band = -1
   do ib=idx_start,idx_end
-    if (eig_k(ib) > energy) then
+    if (tmp_eig_k(ib) > energy) then
       band = ib - 1; return
     end if
   end do
@@ -2302,10 +2342,7 @@ end subroutine psbands_init
 !! psbands_band2slice
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Return the slice index from the band index. -1 if band is protected.
 !!
 !! SOURCE
 
@@ -2330,6 +2367,7 @@ end function psbands_band2slice
 !! psbands_free
 !!
 !! FUNCTION
+!! Free memory
 !!
 !! SOURCE
 

@@ -2406,8 +2406,8 @@ subroutine gwr_build_green(gwr, free_ugb)
 !Local variables-------------------------------
 !scalars
  integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nb_occ, nbsum ! ig_glob, ig_loc, jg_loc,
- real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k !, kg2, k0_s, rfact, delta_ene, k0_2, ekin_nband
- logical :: print_time ! , have_it
+ real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k
+ logical :: print_time
  character(len=500) :: msg
  real(dp) :: gt_rfact
  type(__slkmat_t), target :: work_gb, green
@@ -2415,7 +2415,6 @@ subroutine gwr_build_green(gwr, free_ugb)
  integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
  real(dp) :: tsec(2) , kk_ibz(3), kg(3)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:)
- !real(dp),allocatable :: weights_gvec(:)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2498,23 +2497,6 @@ subroutine gwr_build_green(gwr, free_ugb)
          !end if
          call slk_pgemm("N", "C", work_gb, isgn * cone_gw, work_gb, czero_gw, green, ija=ija, ijb=ijb)
 
-         !if (ipm == 1 .and. gwr%dtset%userie == 1) then
-         !  call wrtout(std_out, "Entering PLANE WAVE SUBSTITUTION")
-         !  call get_weights(desc_k, kk_ibz, gwr%cryst, gwr%dtset%nband(1), ekin_nband, weights_gvec)
-         !  rfact = one / (gwr%nkbz * gwr%cryst%ucvol)
-         !  delta_ene = ekin_nband - qp_eig(nbsum, ik_ibz, spin) + qp_eig(1, ik_ibz, spin)
-         !  k0_2 = two * delta_ene
-         !  do ig_glob=1, desc_k%npw
-         !    call green%glob2loc(ig_glob, ig_glob, ig_loc, jg_loc, have_it); if (.not. have_it) cycle
-         !    kg = kk_ibz + desc_k%gvec(:, ig_glob)
-         !    kg2 = two_pi**2 * dot_product(kg, matmul(gwr%cryst%gmet, kg))
-         !    ! Add diagonal term. Eqs 4.2, 4.3
-         !    green%buffer_cplx(ig_loc, jg_loc) = green%buffer_cplx(ig_loc, jg_loc) + rfact * &
-         !       weights_gvec(ig_glob) * exp(-half * gwr%tau_mesh(itau) * k0_2) * exp(-half * gwr%tau_mesh(itau) * kg2)
-         !  end do
-         !  ABI_SFREE(weights_gvec)
-         !end if
-
          ! Redistribute data.
          call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green)
        end do ! ipm
@@ -2537,62 +2519,6 @@ subroutine gwr_build_green(gwr, free_ugb)
 
  call cwtime_report(" gwr_build_green:", cpu, wall, gflops)
  call timab(1922, 2, tsec)
-
-!!contains
-
-!! subroutine get_weights(desc, kpoint, cryst, nband, ekin_nband, weights)
-!!  type(desc_t),intent(in) :: desc
-!!  real(dp),intent(in) :: kpoint(3)
-!!  type(crystal_t),intent(in) :: cryst
-!!  integer,intent(in) :: nband
-!!  real(dp),intent(out) :: ekin_nband
-!!  real(dp),allocatable,intent(out) :: weights(:)
-!!
-!! !Local variables-------------------------------
-!!  integer :: ig, n1, n2
-!!  integer,allocatable :: out_gvec(:,:), iperm(:)
-!!  real(dp),allocatable :: ekin(:)
-!! ! *************************************************************************
-!!
-!!  ABI_CHECK_ILEQ(nband, desc%npw, "nband > desc%npw")
-!!  ABI_CHECK(.not. desc%kin_sorted, "G-vectors should not be stored by kinetic energy!")
-!!
-!!  ! Sort gvec by |k+g|
-!!  call sort_gvecs(desc%npw, kpoint, cryst%gmet, desc%gvec, out_gvec=out_gvec, iperm=iperm)
-!!
-!!  ABI_MALLOC(ekin, (desc%npw))
-!!  do ig=1,desc%npw
-!!    ekin(ig) = two_pi**2 * dot_product(kpoint + out_gvec(:,ig), matmul(cryst%gmet, kpoint + out_gvec(:,ig)))
-!!  end do
-!!  ekin_nband = ekin(nband)
-!!
-!!  do ig=nband, desc%npw
-!!    if (abs(ekin(ig) - ekin_nband) > tol6) exit
-!!  end do
-!!  n1 = ig -1
-!!
-!!  do ig=nband, 1, -1
-!!    if (abs(ekin(ig) - ekin_nband) > tol6) exit
-!!  end do
-!!  n2 = ig + 1
-!!  ABI_FREE(ekin)
-!!
-!!  ! Eq 4.3
-!!  ABI_MALLOC(weights, (desc%npw))
-!!  do ig=1, desc%npw
-!!    if (ig <= n1) then
-!!      weights(ig) = zero
-!!    else if (ig >  n2) then
-!!      weights(ig) = one
-!!    else
-!!      weights(ig) = one - ((nband - n1) * one / (n2 - n1))
-!!    end if
-!!  end do
-!!
-!!  ABI_FREE(out_gvec)
-!!  ABI_FREE(iperm)
-!!
-!! end subroutine get_weights
 
 end subroutine gwr_build_green
 !!***

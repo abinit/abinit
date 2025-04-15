@@ -477,15 +477,16 @@ end subroutine wfk_open_read
 !!
 !! SOURCE
 
-subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, write_hdr, write_frm)
+subroutine wfk_open_write(Wfk, Hdr, fname, formeig, iomode, funt, comm, &
+                          write_hdr, write_frm) ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(wfk_t),intent(out) :: Wfk
- integer,intent(in) :: iomode,comm,formeig,funt
- character(len=*),intent(in) :: fname
- logical,optional,intent(in) :: write_hdr,write_frm
  type(hdr_type),intent(in) :: Hdr
+ character(len=*),intent(in) :: fname
+ integer,intent(in) :: iomode,comm,formeig,funt
+ logical,optional,intent(in) :: write_hdr,write_frm
 
 !Local variables-------------------------------
 !scalars
@@ -1100,7 +1101,8 @@ end function wfk_compare
 !!
 !! SOURCE
 
-subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
+subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, &
+                               kg_k, cg_k, eig_k, occ_k) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1153,14 +1155,14 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
  end if
  if (present(eig_k)) then
    if (Wfk%formeig == 0) then
-     nband_disk_keep = min( nband_disk_keep, size(eig_k) )
+     nband_disk_keep = min(nband_disk_keep, size(eig_k))
    else if (Wfk%formeig == 1) then
-     nband_disk_keep = min( nband_disk_keep, int(sqrt(size(eig_k)/two)) )
+     nband_disk_keep = min(nband_disk_keep, int(sqrt(size(eig_k)/two)))
    end if
  end if
 
  nb_block     = (band_block(2) - band_block(1) + 1)
- ABI_CHECK(nb_block >0, "nband <=0")
+ ABI_CHECK(nb_block > 0, "nband <=0")
  npw_tot_disk = npw_disk * nspinor_disk * nb_block
 
  if (present(kg_k)) then
@@ -1748,7 +1750,8 @@ end subroutine wfk_read_bks
 !!
 !! SOURCE
 
-subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, occ_k)
+subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, &
+                                kg_k, cg_k, eig_k, occ_k) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1868,7 +1871,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        end do
 
      else
-       ABI_ERROR("Not coded")
+       ABI_ERROR("cg_k must be present!")
        do band=1,nband_disk
          write(Wfk%fh, err=10, iomsg=errmsg) ! cg_k(1:2,ipw+1:ipw+npwso)
        end do

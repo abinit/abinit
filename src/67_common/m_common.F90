@@ -1078,7 +1078,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
 ! ************************************************************************
 
-!Compute bantot
+ ! Compute bantot
  bantot=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
