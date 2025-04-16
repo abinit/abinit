@@ -100,7 +100,7 @@ module m_chebfi2
    integer :: me_g0
    integer :: me_g0_fft
 
-   logical :: from_linalg    ! allocate colsrows if true or allocate linalg if false
+   logical :: from_linalg    ! Transposer allocates representation ColsRows if true, Linalg if false
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
 
@@ -165,6 +165,7 @@ module m_chebfi2
 !!  bandpp= number of 'bands' handled by a processor
 !!  eigenProblem= type of eigenpb: 1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
 !!  me_g0= 1 if this processors treats G=0, 0 otherwise
+!!  me_g0_fft= 1 if this processors treats G=0 in FFT, 0 otherwise
 !!  neigenpairs= number of requested eigenvectors/eigenvalues
 !!  ndeg_filter= polynomial degree of the Chebyshev filter (.i.e. number of H applications)
 !!  comm_rows= "rows" communicator
@@ -176,6 +177,14 @@ module m_chebfi2
 !!  paw= flag. TRUE if current calculation ses the PAW approach
 !!  ecut= plane-wave cut-off energy
 !!  tolerance= tolerance criterion on the residu to stop the minimization
+!!  nbdbuf= number of bands in the buffer
+!!  oracle= option compute ndeg_filter from residuals
+!!  oracle_factor= factor used to decrease residuals
+!!  oracle_min_occ= threshold on occupancies used for nbdbuf=-101
+!!  gpu_option= flag. Enable GPU if true
+!!  gpu_kokkos_nthrd= number of OpenMP offloaded threads used
+!!  gpu_thread_limit= maximum number of OpenMP offloaded threads
+!!  from_linalg= flag. Transposer allocates representation ColsRows if true, Linalg if false
 !!
 !! OUTPUT
 !!
