@@ -3,40 +3,76 @@
 !! m_slice
 !!
 !! FUNCTION
-!! This module contains the types and routines used to apply 
-!! the Spectrum Slicing method. It mainly defines 'slice' 
-!! datatypes and associated methods. 
+!! This module contains the types and routines used to apply the Spectrum Slicing 
+!! method. It mainly defines 'slice' datatypes and associated methods. 
 
 !! NOTES
 !! Main features:
 !! - uses 'xgTools' implementation for matrix data structure.
 !! - adopts 'chebfi' functionalities for most matrix calculations.
-!! - uses polynomial filtering, Chebyshev for first slice and
-!!   Chebyshev-Jackson expansion of Heaviside otherwise.
+!! - uses polynomial filtering, Chebyshev lowpass, next Chebyshev-Jackson.
 !! - implements scheduler and resource allocator for slice tasks.
 !! - applies Rayleigh-Ritz for individual slices in parallel.
 !! 
-!! Memory and workload are distributed using a 2D cartesian grid.
-!! Matrix X is distributed along plane-waves at input:
+!! Memory and workload are distributed using a 2D cartesian grid. Let's assume 
+!! for simplicity that we have four MPI processes in the spacecom communicator. 
+!! Matrix X is distributed along plane-waves at the beginning:
 !!
-!!                                plane-waves
-!!               |---------------------------------------|
-!!               |         |         |        |          |    
-!!       bands   |   P0    |   P1    |   P2   |    P3    |
-!!               |         |         |        |          |
-!!               |---------------------------------------|
+!!                    bands
+!!            |-------------------|
+!!            |        P0         |
+!!            |                   |
+!!            |-------------------|
+!!            |        P1         |
+!!            |                   |
+!!        pw  |-------------------|
+!!            |        P2         |
+!!            |                   |
+!!            |-------------------|
+!!            |        P3         |
+!!            |                   |
+!!            |-------------------|
 !!
-!! At this point, we use xgTransposer to MPI transpose the matrix X
-!! using a custom layout for bandpp and we end up with:
+!! At the start, we use xgTransposer to MPI transpose the matrix X
+!! achieving a custom layout for bandpp, and we end up with:
+!! 
+!!                    bands
+!!            |-------|---|---|---|
+!!            |       |   |   |   |
+!!            |       |   |   |   |
+!!            |       |   |   |   |
+!!            |       |   |   |   |
+!!            |       |   |   |   |
+!!        pw  |  P0   |P1 |P2 |P3 |
+!!            |       |   |   |   |
+!!            |       |   |   |   |
+!!            |       |   |   |   |
+!!            |       |   |   |   |
+!!            |       |   |   |   |
+!!            |-------|---|---|---|
 !!
-!!                                bandpp
-!!               |---------------------------------------|
-!!               |              |       |       |        |    
-!!  plane-waves  |      P0      |   P1  |  P2   |   P3   |
-!!               |              |       |       |        |
-!!               |---------------------------------------|
+!! From there, we can define slices acting on subgroup of processes.
+!! For example, slice one can have process 0 and slice two the remaining 
+!! 1,2,3 processes. MPI transposing to Linalg representation using
+!! the slice sub-communicators yields:
 !!
-!! From there we can define slices acting on subgroup of processes.
+!!                    bands
+!!            |-------|-----------|
+!!            |       |           |
+!!            |       |    P1     |
+!!            |       |           |
+!!            |       |-----------|
+!!            |       |           |
+!!        pw  |  P0   |    P2     |
+!!            |       |           |
+!!            |       |-----------|
+!!            |       |           |
+!!            |       |    P3     |
+!!            |       |           |
+!!            |-------|-----------|
+!!
+!! At this point, parallel Rayleigh-Ritz is possible.
+!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 2018-2025 ABINIT group (IL)
