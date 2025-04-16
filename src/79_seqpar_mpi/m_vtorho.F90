@@ -119,7 +119,6 @@ module m_vtorho
 ! use, intrinsic :: iso_c_binding, only : c_int64_t
 !#endif
 
-
  implicit none
 
  private

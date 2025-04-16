@@ -3148,7 +3148,6 @@ subroutine dfpt_symph(iout, acell, eigvec, indsym, natom, nsym, phfrq, rprim, sy
   ' the characters are given for each symmetry operation (see the list in the log file).'
  call wrtout(units, msg)
 
-
  !use m_ptgroups, only : get_classes
  !call get_classes(nsym, sym, nclass, nelements, elements_idx)
 
@@ -3379,12 +3378,10 @@ type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, com
 
  new%natom = cryst%natom; natom3 = cryst%natom * 3; new%natom3 = natom3
  new%comm = comm; new%nprocs = xmpi_comm_size(comm); new%my_rank = xmpi_comm_rank(comm)
-
  new%use_ifc_fourq = use_ifc_fourq
 
  ABI_MALLOC(new%displ_cart, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(new%phfrq, (3*cryst%natom))
-
  if (new%use_ifc_fourq) return
 
  ! Split qibz in blocks inside comm

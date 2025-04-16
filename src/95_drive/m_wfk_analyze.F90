@@ -368,8 +368,6 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)
 
- !case (WFK_TASK_LDOS)
-
  case (WFK_TASK_DDK, WFK_TASK_DDK_DIAGO)
    ! Calculate the DDK matrix elements from the WFK file
    ds%only_diago = .False.; if (dtset%wfk_task == WFK_TASK_DDK_DIAGO) ds%only_diago = .True.
@@ -423,7 +421,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
        nband_k = ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
        call psb%init(dtset, nband_k, ebands%eig(:, ik_ibz, spin), gs_fermie)
        ! Change the number of bands to account for pseudo bands.
-       print *, "nb_tot:", psb%nb_tot
+       !print *, "nb_tot:", psb%nb_tot
        out_hdr%nband(ik_ibz + (spin-1)*ebands%nkpt) = psb%nb_tot
        end associate
      end do
@@ -439,7 +437,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    if (dtset%iomode == IO_MODE_ETSF) outwfk_path = nctk_ncify(outwfk_path)
    call out_wfk%open_write(out_hdr, outwfk_path, formeig0, dtset%iomode, get_unit(), xmpi_comm_self)
 
-   call wfk_open_read(in_wfk, wfk0_path, formeig0, iomode_from_fname(wfk0_path), get_unit(), xmpi_comm_self)
+   call in_wfk%open_read(wfk0_path, formeig0, iomode_from_fname(wfk0_path), get_unit(), xmpi_comm_self)
 
    ! The output arrays eig_k and occ_k contain the *full* set of eigenvalues and occupation
    ! factors stored in the file and are dimensioned with mband.
@@ -447,7 +445,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ABI_MALLOC(occ_k, (wfk0_hdr%mband))
    mpw = maxval(wfk0_hdr%npwarr)
    ABI_MALLOC(kg_k, (3, mpw))
-   print *, "mpw:", mpw
+   !print *, "mpw:", mpw
    sc_mode = xmpio_single
 
    do spin=1,ebands%nsppol
@@ -502,8 +500,9 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
          end if
 
          band_block = [bstart, bstart + psb%subspace(3, islice) - 1]
-         call wrtout(std_out, sjoin(" About to write islice:", itoa(islice), "with band block:", ltoa(band_block)))
+         !call wrtout(std_out, sjoin(" About to write islice:", itoa(islice), "with band block:", ltoa(band_block)))
          call out_wfk%write_band_block(band_block, ik_ibz, spin, sc_mode, cg_k=cg_k)
+                                       !kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
          bstart = bstart + psb%subspace(3, islice)
 
          ABI_FREE(thetas)
