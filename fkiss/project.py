@@ -90,7 +90,7 @@ def load_mod(filepath):
         return SourceFileLoader(filepath, filepath).load_module()
 
 
-class FortranFile(object):
+class FortranFile:
     """
     Base class for files containing Fortran source code.
     A FortranFile can have modules, programs, subroutines and functions.
