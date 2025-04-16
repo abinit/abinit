@@ -5,17 +5,41 @@
 !! FUNCTION
 !! This module contains the types and routines used to apply 
 !! the Spectrum Slicing method. It mainly defines 'slice' 
-!! datatypes and associated methods. Features:
-!! 
+!! datatypes and associated methods. 
+
+!! NOTES
+!! Main features:
 !! - uses 'xgTools' implementation for matrix data structure.
 !! - adopts 'chebfi' functionalities for most matrix calculations.
 !! - uses polynomial filtering, Chebyshev for first slice and
 !!   Chebyshev-Jackson expansion of Heaviside otherwise.
 !! - implements scheduler and resource allocator for slice tasks.
 !! - applies Rayleigh-Ritz for individual slices in parallel.
+!! 
+!! Memory and workload are distributed using a 2D cartesian grid.
+!! Matrix X is distributed along plane-waves at input:
+!!
+!!                                plane-waves
+!!               |---------------------------------------|
+!!               |         |         |        |          |    
+!!       bands   |   P0    |   P1    |   P2   |    P3    |
+!!               |         |         |        |          |
+!!               |---------------------------------------|
+!!
+!! At this point, we use xgTransposer to MPI transpose the matrix X
+!! using a custom layout for bandpp and we end up with:
+!!
+!!                                bandpp
+!!               |---------------------------------------|
+!!               |              |       |       |        |    
+!!  plane-waves  |      P0      |   P1  |  P2   |   P3   |
+!!               |              |       |       |        |
+!!               |---------------------------------------|
+!!
+!! From there we can define slices acting on subgroup of processes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (IL, LB)
+!! Copyright (C) 2018-2025 ABINIT group (IL)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -358,6 +382,9 @@ subroutine slice_free(slice)
     if(allocated(slice%poly_low_bounds)) ABI_FREE(slice%poly_low_bounds)
     if(allocated(slice%poly_upp_bounds)) ABI_FREE(slice%poly_upp_bounds)
 
+    
+   call xmpi_comm_free(slice%me_comm_slice) 
+
 end subroutine slice_free
 !!***
 
@@ -637,7 +664,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         me_nrowsLinalg_ptr, slice%gpu_option, gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
         gpu_thread_limit=slice%gpu_thread_limit)
 
-    ! ==== prepare input start
+    ! ========================= prepare input start ===========================================
     !! at the end X0 is exactly the input of polyfi_run
     ! Prepare the data on GPU (me_Xext_active is on CPU...)
     X0 = slice%me_Xext_active
@@ -662,11 +689,37 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! Restrict all communications to current subcommunicator
     call xgBlock_setComm(chebfi%xXColsRows,spacecom)
     call xgBlock_setComm(chebfi%X,spacecom)
-    ! ==== prepare input end
+    ! ========================= prepare input end =============================================
 
     call polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen_active, residu_active, nspinor)
 
+    ! ========================= prepare output start ========================================= 
+ 
+    if (polyfi%gpu_option==ABI_GPU_OFFLOAD) then
+        ! TODO Deal with xgeigen and xgresidu
+        !call xgBlock_reshape(chebfi%xgeigen, (/1,nband_slice/))
+        !call xgBlock_reshape(chebfi%xgresidu, (/1,nband_slice/))
+        !call xgBlock_copy_from_gpu(chebfi%xgeigen)
+        !call xgBlock_copy_from_gpu(chebfi%xgresidu)
+        !call slice_blockCopy(chebfi%xgeigen,sliceAll%xgeigen_ovlp,1,j1,nband_slice,j2)
+        !call slice_blockCopy(chebfi%xgresidu,sliceAll%xgresidu_ovlp,1,j1,nband_slice,j2)
+    end if
+
+    ! Unitary test
+    ABI_CHECK(cols(chebfi%xXColsRows)==ncols_slice,'wrong colsrows representation')
+    write(*,'(a,i6,i6)') '# proc has # cols of slice X ', xmpi_comm_rank(spacecom), cols(chebfi%xXColsRows)
     ! TODO think if we need to recover X0 on CPU ....
+    ! if gpu: This is important! Because X0 is on CPU
+    ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
+    ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_DISABLED)
+
+    ! Copy slice solution to the extended buffer (requires colsrows state)
+    call xgBlock_copy(chebfi%xXColsRows,X0)
+    ! FIXME same for eigen, residu?
+
+    ! TODO we can also compute the merge on individual slices
+    ! otherwise we do it outside?
+    ! ========================= prepare output end ============================================
 
     call polyfi_free(polyfi)
 
@@ -1106,7 +1159,9 @@ subroutine slice_allocateResources(slice)
     case(FAIR_BANDPP_WDEG)
         weights = slice%poly_degrees
     end select
-    
+   
+    ! add m_band_allocation_tools?
+
     ! Solve allocation problem to find the amount of resource allocated to each slice
     call fair_allocation(slice%nslice, task_sizes, weights_ptr, slice%nproc, task_nprocs)
     

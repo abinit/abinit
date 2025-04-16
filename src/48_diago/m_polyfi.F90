@@ -245,6 +245,13 @@ end subroutine polyfi_free
 !! 
 !! SOURCE
 
+
+!! Genralization of chebfi_run() to be able to amplify any given spectral interval
+!! using a lowpass OR a bandpass filter.
+
+subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,mineig_global,maxeig_global,&
+        lambda_minus,lambda_plus,is_lowpass,nspinor)
+
 subroutine polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     implicit none
@@ -304,8 +311,8 @@ subroutine polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     nrowsLinalg(:) = polyfi%nrows_blockrows
 
     ! Compute row distribution across active resources
-    call distribute_vectors(num_proc, chebfi%total_spacedim, nrowsLinalg_ptr)
-
+    ! TODO decide either we do this here OR we read it from polyfi members
+    ! call distribute_vectors(num_proc, chebfi%total_spacedim, nrowsLinalg_ptr)
 
     ! Allocate chebfi%X in Linalg representation
     call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
@@ -347,16 +354,12 @@ subroutine polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     end if
 
-    ! Wait filtering to finish before communication
-    if (chebfi%paral_kgb==1) then
-        call xmpi_barrier(chebfi%spacecom)
-    end if
-
     ! Transpose to linalg state
     call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_POLYFI_TRANSPOSE)
     if (chebfi%paral_kgb == 1) then
 
+        call xmpi_barrier(chebfi%spacecom)
         call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
         call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
         call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
@@ -384,7 +387,6 @@ subroutine polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,&
         chebfi%gpu_option,solve_ax_bx=.true.)
     ABI_NVTX_END_RANGE()
-    
     if ( ierr /= 0 ) then
         ABI_WARNING("RayleighRitz did not work, but continue anyway.")
     end if
@@ -396,26 +398,18 @@ subroutine polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
         call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
     end if
 
-    ! Wait until all MPI rows have computed their residual
-    if (chebfi%paral_kgb == 1) then
-        call xmpi_barrier(chebfi%spacecom)
-    end if
-
     ! Communicate MPI rows to compute residual norm squared
     call xgBlock_colwiseNorm2(chebfi%AX%self,residu)
-
+ 
+    ! Copy in Linalg representation (see chebfi_run, kept for reference)
+    ! call xgBlock_copy(chebfi%X,X0)
     
     ! Transpose to colsrows state (X only)
     call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_POLYFI_TRANSPOSE)
     if (chebfi%paral_kgb == 1) then
-
-        ! All MPI rows wait to finish
         call xmpi_barrier(chebfi%spacecom)
-
         call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
-
-        !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
         if (xmpi_comm_size(chebfi%spacecom) == 1) then 
             call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
         end if
@@ -424,31 +418,9 @@ subroutine polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     end if
     ABI_NVTX_END_RANGE()
     call timab(tim_transpose,2,tsec)
-
-    if (polyfi%gpu_option==ABI_GPU_OFFLOAD) then
-        ! TODO Deal with xgeigen and xgresidu
-        !call xgBlock_reshape(chebfi%xgeigen, (/1,nband_slice/))
-        !call xgBlock_reshape(chebfi%xgresidu, (/1,nband_slice/))
-        !call xgBlock_copy_from_gpu(chebfi%xgeigen)
-        !call xgBlock_copy_from_gpu(chebfi%xgresidu)
-        !call slice_blockCopy(chebfi%xgeigen,sliceAll%xgeigen_ovlp,1,j1,nband_slice,j2)
-        !call slice_blockCopy(chebfi%xgresidu,sliceAll%xgresidu_ovlp,1,j1,nband_slice,j2)
-    end if
-
-    ! Unitary test
-    ABI_CHECK(cols(chebfi%xXColsRows)==ncols_slice,'wrong colsrows representation')
-    write(*,'(a,i6,i6)') '# proc has # cols of slice X ', xmpi_comm_rank(spacecom), cols(chebfi%xXColsRows)
-
-    ! if gpu: This is important! Because X0 is on CPU
-    ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
-    ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_DISABLED)
-
-    ! Copy slice solution to the extended buffer (requires colsrows state)
-    call xgBlock_copy(chebfi%xXColsRows,X0)
-    ! FIXME same for eigen, residu?
-
-    ! TODO we can also compute the merge on individual slices
-    ! otherwise we do it outside?
+ 
+    ! Copy in ColsRows representation
+    call xgBlock_copy(chebfi%xXColsRows, X0)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
     if (gpu_option==ABI_GPU_KOKKOS) then
@@ -463,7 +435,7 @@ subroutine polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
         call xgTransposer_free(chebfi%xgTransposerBX)
     end if
     
-    ! Free memory
+    ! Free temporary memory
     if (allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
 
 end subroutine polyfi_run
