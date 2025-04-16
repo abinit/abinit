@@ -172,7 +172,7 @@ module m_gwr
  use m_ioarr,         only : fftdatar_write
  use m_slk,           only : matrix_scalapack, slkmat_sp_t, processor_scalapack, slk_array_free, slk_array_set, &
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
- use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
+ use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t
  use m_ddk,           only : ddkop_t, ddkop_new
  use m_pawtab,        only : pawtab_type
@@ -2264,7 +2264,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  io_comm => gwr%kpt_comm; io_in_kcomm = .True.
 
  if (io_comm%me == master) then
-   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
+   call wfk%open_read(wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
  end if
 
  ! TODO This to be able to maximize the size of cg_work

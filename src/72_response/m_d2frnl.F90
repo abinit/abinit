@@ -471,7 +471,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      if (ddkfil(ii)/=0) then
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(ii))
        call wrtout([std_out, ab_out], msg)
-       call wfk_open_read(ddkfiles(ii),fiwfddk(ii),formeig1,dtset%iomode,ddkfil(ii), xmpi_comm_self)
+       call ddkfiles(ii)%open_read(fiwfddk(ii),formeig1,dtset%iomode,ddkfil(ii), xmpi_comm_self)
      end if
    end do
  end if

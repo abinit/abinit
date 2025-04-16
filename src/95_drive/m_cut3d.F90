@@ -1794,7 +1794,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !    FIXME
 !    nband depends on (kpt,spin)
      iomode = iomode_from_fname(wfk_fname)
-     call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self)
+     call wfk%open_read(wfk_fname, formeig0, iomode,get_unit(), xmpi_comm_self)
      call wfk%read_band_block([1,nband(ckpt)],ckpt,csppol,xmpio_single,cg_k=cg_k,eig_k=eig_k,occ_k=occ_k)
      call wfk%close()
    end if

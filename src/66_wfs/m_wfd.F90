@@ -4630,7 +4630,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
  if (iread) then
    wfk_unt = get_unit()
-   call wfk_open_read(Wfk, wfk_fname, formeig0, iomode, wfk_unt, io_comm, Hdr_out=Hdr)
+   call wfk%open_read(wfk_fname, formeig0, iomode, wfk_unt, io_comm, Hdr_out=Hdr)
  end if
 
  if (master_only) call hdr%bcast(wfd%master, wfd%my_rank, wfd%comm)
