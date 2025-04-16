@@ -167,9 +167,9 @@ module m_slice
     !-------------------------------------------------
     public :: slice_init                                    ! initialize slice datatype object
     public :: slice_free                                    ! free slice datatype object
-    public :: slice_schedule                                ! build slice distributed workspace
+    public :: slice_allschedule                             ! build slice distributed workspace
     public :: slice_run                                     ! run Spectrum Slicing for active slice task
-    public :: slice_merge                                   ! merge slice result to distributed workspace
+    public :: slice_allmerge                                ! merge slice result to distributed workspace
     public :: slice_unitTest                                ! used for debugging GPU device
 
     CONTAINS  
@@ -363,9 +363,9 @@ end subroutine slice_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_schedule
+!!****f* m_slice/slice_allschedule
 !! NAME
-!! slice_schedule
+!! slice_allschedule
 !! 
 !! FUNCTION
 !! Resource allocation for individual slice tasks.
@@ -383,7 +383,7 @@ end subroutine slice_free
 !! 
 !! SOURCE
 
-subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
+subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
 
     implicit none
 
@@ -566,7 +566,7 @@ subroutine slice_schedule(slice, X0, getAX_BX, nspinor)
 
     ABI_NVTX_END_RANGE()
 
-end subroutine slice_schedule
+end subroutine slice_allschedule
 !!***
 
 !----------------------------------------------------------------------
@@ -637,6 +637,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         me_nrowsLinalg_ptr, slice%gpu_option, gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
         gpu_thread_limit=slice%gpu_thread_limit)
 
+    ! ==== prepare input start
+    !! at the end X0 is exactly the input of polyfi_run
     ! Prepare the data on GPU (me_Xext_active is on CPU...)
     X0 = slice%me_Xext_active
     ! OR
@@ -656,6 +658,11 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! TODO verify eigen is on cols. Otherwise reshape...
     call xgBlock_setBlock(eigen, eigen_active, rows=1, cols=nband)
     call xgBlock_setBlock(residu, residu_active, rows=1, cols=nband)
+
+    ! Restrict all communications to current subcommunicator
+    call xgBlock_setComm(chebfi%xXColsRows,spacecom)
+    call xgBlock_setComm(chebfi%X,spacecom)
+    ! ==== prepare input end
 
     call polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen_active, residu_active, nspinor)
 
@@ -1230,9 +1237,9 @@ end subroutine slice_getActiveTask
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_merge
+!!****f* m_slice/slice_allmerge
 !! NAME
-!! slice_merge
+!! slice_allmerge
 !! 
 !! FUNCTION
 !! Filter converged eigenvalues of each slice using a criterion
@@ -1257,7 +1264,7 @@ end subroutine slice_getActiveTask
 !!
 !! SOURCE
 
-subroutine slice_merge(slice, X0, eigen, resid)
+subroutine slice_allmerge(slice, X0, eigen, resid)
 
     implicit none
 
@@ -1405,7 +1412,7 @@ subroutine slice_merge(slice, X0, eigen, resid)
     call ABI_FREE(resid_ext)
     if (allocated(theta_ext_reshaped)) ABI_FREE(theta_ext_reshaped)
  
-end subroutine slice_merge
+end subroutine slice_allmerge
 !!***
 
 !----------------------------------------------------------------------
