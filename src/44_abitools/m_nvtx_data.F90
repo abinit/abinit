@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 121
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 122
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -151,6 +151,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_SLICE_TRANSPOSE = 119 
   integer, parameter :: NVTX_SLICE_RRQ = 120
   integer, parameter :: NVTX_SLICE_SCHEDULE = 121
+  integer, parameter :: NVTX_SLICE_NONLOP = 122
 
 contains
 
@@ -281,7 +282,8 @@ contains
          & "SLICE_GET_AX_BX", &
          & "SLICE_TRANSPOSE", & 
          & "SLICE_RRQ", &
-         & "SLICE_SCHEDULE" &
+         & "SLICE_SCHEDULE", &
+         & "SLICE_NONLOP" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -405,6 +407,7 @@ contains
     nvtx_ids(119)=NVTX_SLICE_TRANSPOSE
     nvtx_ids(120)=NVTX_SLICE_RRQ
     nvtx_ids(121)=NVTX_SLICE_SCHEDULE
+    nvtx_ids(121)=NVTX_SLICE_NONLOP
 
   end subroutine nvtx_init
 
