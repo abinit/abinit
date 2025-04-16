@@ -1202,7 +1202,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     if (rows(chebfi%X) /= nrowsLinalg(xmpi_comm_rank(chebfi%spacecom))) then
         ABI_ERROR("wrong linalg representation")
     end if
-    write(*,'(a,i6,i6)') '# proc has # rows of slice X ', xmpi_comm_rank(chebfi%spacecom), rows(chebfi%X)
+    write(*,'(a,i6,i6)') 'local # proc has # rows ', xmpi_comm_rank(chebfi%spacecom), rows(chebfi%X)
 
     ! Apply Rayleigh-Ritz to active MPI Linalg row-block
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
@@ -1242,6 +1242,11 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
  
     ! Copy in ColsRows representation
     call xgBlock_copy(chebfi%xXColsRows, X0)
+
+    if (cols(chebfi%xXColsRows) /= chebfi%bandpp) then
+        ABI_ERROR('wrong colsrows representation')
+    end if
+    write(*,'(a,i6,i6)') 'local # proc has # cols ', xmpi_comm_rank(chebfi%spacecom), cols(chebfi%xXColsRows)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
     if (gpu_option==ABI_GPU_KOKKOS) then

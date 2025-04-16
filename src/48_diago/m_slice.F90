@@ -572,8 +572,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
     ! Divide resources into slice tasks
     call slice_allocateResources(slice)
 
-    ! Run on all ranks of spacecom: Mark my slice resources as actively in use
-    call slice_markActiveResources(slice)
+    ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
+    call slice_markActiveTask(slice)
 
     ! ===================== Allocate and fill extended memory buffer ================================== 
   
@@ -582,12 +582,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
         ABI_ERROR("not in linalg representation")
     end if
 
-    ! Permute column vectors in Rayleigh quotient increasing order (on CPU)
-    if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call xgBlock_copy_from_gpu(X0)
-    end if
+    ! Permute column vectors in Rayleigh quotient increasing order
     call xgBlock_permuteCols(X0, slice%total_spacedim, neigenpairs, permute_cols_ptr)
-
 
     slice%neigenpairs_ext = sum(slice%neigenpairs_per_slice)
     
@@ -595,9 +591,9 @@ subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
         slice%XextLinalg = X0
     else
  
-        ! Allocate extended space in linalg representation (on CPU)
+        ! Allocate extended space in linalg representation
         call xg_init(slice%X_ext, slice%space, slice%spacedim, slice%neigenpairs_ext, &
-            slice%spacecom, me_g0=slice%me_g0, gpu_option=ABI_GPU_DISABLED)
+            slice%spacecom, me_g0=slice%me_g0, gpu_option=slice%gpu_option)
         
         slice%XextLinalg = slice%X_ext%self
 
@@ -666,7 +662,8 @@ end subroutine slice_allschedule
 !! Computation uses marked resources for current process **only**.
 !!
 !! INPUTS
-!! slice%me_Xext_active  =eigenvector guess in colsrows representation 
+!! slice%me_Xext_active  =eigenvector guess in colsrows representation
+!! eigen= eigen%rows == AX%cols thus eigen has neigenpairs rows, (neigenpairs,1)
 !!
 !! OUTPUT
 !! eigen                 =converged eigenvalue array of size neigenpairs
@@ -698,107 +695,71 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     ! Variables
     type(chebfi_t) :: chebfi
+    type(xgBlock_t) :: X0_active
     type(xgBlock_t) :: eigen_active
     type(xgBlock_t) :: residu_active
     integer :: nbdbuf
     integer :: oracle
     real(dp) :: oracle_factor
     real(dp) :: oracle_min_occ
+    logical :: on_host,on_device
     ! Arrays
-    integer, pointer :: me_nrowsLinalg_ptr(:) => null() 
+    integer, allocatable, target :: nrowsLinalg(:)
+    integer, pointer :: nrowsLinalg_ptr(:) => null() 
 
     ! *********************************************************************
- 
-    call slice_getActiveTask(slice,nband_sub,spacecom_sub,mineig_global,maxeig_global,&
-         lambda_minus,lambda_plus,nrowsLinalg_ptr)
 
-    ! Set spectral bounds
-    if (islice==1) then   
-        ! Note: mineig_global and maxeig_global are not used more in chebfi
-        lambda_minus = maxeig_global
-        lambda_plus = chebfi%ecut
-    else
-        lambda_minus = slice%lb(islice)
-        lambda_plus = slice%ub(islice)
-        mineig_global = guaranteed_lb
-        maxeig_global = chebfi%ecut
-    end if
-
+    X0 = slice%me_Xext_active
+    if(.not.allocated(nrowsLinalg)) ABI_MALLOC(nrowsLinalg,(num_proc))
+    nrowsLinalg_ptr => nrowsLinalg
     me_nrowsLinalg_ptr => slice%me_nrowsLinalg_slice
 
+    call slice_getActiveTask(slice,neigenpairs,comm,mineig_global,maxeig_global,&
+         lambda_minus,lambda_plus,is_lowpass,nrowsLinalg_ptr)
+
     ! ====
-    !polyfi%mineig_global = mineig_global
-    !polyfi%maxeig_global = maxeig_global
-    !polyfi%lambda_minus = lambda_minus
-    !polyfi%lambda_plus = lambda_plus
-    !polyfi%is_lowpass = is_lowpass
-    !polyfi%is_bandpass = (.not. is_lowpass)
-    
     ! Oracle not used but passed to chebfi with deactivated values
     oracle = 0
     nbdbuf = 0
     oracle_factor = 1.d0
     oracle_min_occ = 0.d0
 
-    ! Define chebfi object from Colsrows representation
-    call chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp,&
-        ndeg_filter,nbdbuf,space,1,comm,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
-        oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd=gpu_kokkos_nthrd,&
-        gpu_thread_limit=gpu_thread_limit,from_linalg=.false.)
+    ! Initialize chebfi object in MPI Colsrows distribution
+    call chebfi_init(chebfi,neigenpairs,slice%spacedim,slice%tolerance,slice%ecut,slice%paral_kgb,bandpp,&
+        ndeg_filter,nbdbuf,slice%space,1,comm,slice%me_g0,slice%me_g0_fft,slice%paw,xmpi_comm_self,comm,&
+        oracle,oracle_factor,oracle_min_occ,slice%gpu_option,gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
+        gpu_thread_limit=slice%gpu_thread_limit,from_linalg=.false.)
     ! ====
 
-    ! thing is
-    !! eigen%rows == AX%cols 
-    ! thus eigen has neigenpairs rows!!!!
-    ! ========================= prepare input start ===========================================
-    !! at the end X0 is exactly the input of chebfi_runSlice
-    ! Prepare the data on GPU (me_Xext_active is on CPU...)
-    X0 = slice%me_Xext_active
-    ! OR
-    ! Note: we want to use the memory space of X0 but not the
-    ! same pointer because it is common for all slices. For this
-    ! reason we create a new xgBlock independent of X0 for slice.
-    ! Do not do that: chebfi%xXColsRows = X0!!
-    call xgBlock_setBlock(X0, chebfi%xXColsRows, total_spacedim, neigenpairs)
-
-    ! create a new block object X0 that has different gpu_option than X0
     if (slice%gpu_option==ABI_GPU_OFFLOAD) then
-        ! Because X0 is on CPU but chebfi%xXColsRows on GPU
-        ! FIXME either after or before setBlock
-        ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
-        ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_OFFLOAD)
-    end if
-    ! Restrict all communications to current subcommunicator
-    call xgBlock_setComm(chebfi%xXColsRows,spacecom)
-    call xgBlock_setComm(chebfi%X,spacecom)
-
-    ! TODO verify eigen is on cols. Otherwise reshape...
-    call xgBlock_setBlock(eigen, eigen_active, rows=nband, cols=1)
-    call xgBlock_setBlock(residu, residu_active, rows=nband, cols=1)
-
-    ! ========================= prepare input end =============================================
-
-    call chebfi_runSlice(chebfi, X0, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
-        mineig_globa, maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg)
-
-    ! ========================= prepare output start ========================================= 
- 
-    ! Recover X0 on CPU
-    if (slice%gpu_option==ABI_GPU_OFFLOAD) then    
-        ! if gpu: This is important! Because X0 is on CPU
-        ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
-        ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_DISABLED)
+        call slice_queryDeviceHost(slice,on_host,on_device)
+        ABI_CHECK(on_device,"GPU not used when it should be!")
     end if
 
-    ! Unitary test
-    ABI_CHECK(cols(chebfi%xXColsRows)==ncols_slice,'wrong colsrows representation')
-    write(*,'(a,i6,i6)') '# proc has # cols of slice X ', xmpi_comm_rank(spacecom), cols(chebfi%xXColsRows)
+    ! Define pointers to actively used arrays
+    X0_active = slice%me_Xext_active
+    call xgBlock_setBlock(eigen, eigen_active, rows=neigenpairs, cols=1)
+    call xgBlock_setBlock(residu, residu_active, rows=neigenpairs, cols=1)
+    
+    ! Restrict to sub-communicator
+    call xgBlock_setComm(X0_active, comm)
+    call xgBlock_setComm(eigen_active, comm)
+    call xgBlock_setComm(residu_active, comm)
+
+    call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
+        mineig_globa, maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
+
+    ! Restore global comm
+    call xgBlock_setComm(slice%me_Xext_active, slice%spacecom)
+    call xgBlock_setComm(eigen, slice%spacecom)
+    call xgBlock_setComm(residu, slice%spacecom)
 
     ! TODO we can also compute the merge on individual slices
     ! otherwise we do it outside?
-    ! ========================= prepare output end ============================================
 
+    ! Free temporary memory
     call chebfi_free(chebfi)
+    if(allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
 
 end subroutine slice_run
 !!***
@@ -943,11 +904,11 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
         my_rank = xmpi_comm_rank(slice%spacecom)
         shift = my_rank * bandpp
 
-        call xgBlock_setBlock(eigen, Results1%self, nrows=1, ncols=bandpp, fcol=1+shift)
+        call xgBlock_setBlock(eigen, Results1%self, rows=1, cols=bandpp, fcol=1+shift)
         call xgBlock_copy(eigen_mpi%self, Results1%self)
         call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
 
-        call xgBlock_setBlock(resid, Results3%self, nrows=1, ncols=bandpp, fcol=1+shift)
+        call xgBlock_setBlock(resid, Results3%self, rows=1, cols=bandpp, fcol=1+shift)
         call xgBlock_copy(resid_mpi%self, Results3%self)
         call xgBlock_mpi_sum(resid, comm=slice%spacecom)
     else
@@ -1256,12 +1217,12 @@ end subroutine slice_allocateResources
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_markActiveResources
+!!****f* m_slice/slice_markActiveTask
 !! NAME
-!! slice_markActiveResources
+!! slice_markActiveTask
 !!
 !! FUNCTION
-!! Mark allocated portion as actively used. 
+!! Mark allocated portion as actively used. Also mark all me_ variables.
 !! My process only marks resources its assigned slice has reserved. 
 !!
 !! SIDE EFFECTS
@@ -1271,7 +1232,7 @@ end subroutine slice_allocateResources
 !! 
 !! SOURCE
 
-subroutine slice_markActiveResources(slice)
+subroutine slice_markActiveTask(slice)
 
     implicit none
 
@@ -1326,7 +1287,7 @@ subroutine slice_markActiveResources(slice)
         ABI_ERROR("Error while gathering number of columns in colsrows for all slices")
     end if
 
-end subroutine slice_markActiveResources
+end subroutine slice_markActiveTask
 !***
 
 !----------------------------------------------------------------------
@@ -1336,11 +1297,17 @@ end subroutine slice_markActiveResources
 !! slice_getActiveTask
 !!
 !! FUNCTION
-!! Get slice parameters for active slice based on actived resources.
+!! Get chebfi parameters based on active slice.
+!! Return all necessary info to call chebfi_init().
+!! 
+!! INPUTS
+!! 
+!! 
 !!
 !! SOURCE
 
-subroutine slice_getActiveTask(slice,glb,gub,lb,ub)
+subroutine slice_getActiveTask(slice,neigenpairs,bandpp,ndeg_filter,comm,&
+        mineig_global,maxeig_global,lambda_minus,lambda_plus,nrowsLinalg)
     
     implicit none
 
@@ -1351,18 +1318,25 @@ subroutine slice_getActiveTask(slice,glb,gub,lb,ub)
 
     ! *********************************************************************
 
-    ! TODO should give comm_slice, mineig_global, maxeig_global,
-    ! lambda_minus, lambda_plus, ndeg_filter
-    ! also bandpp, nband
-    ! all information used to define chebfi on spectral slice
     bandpp = slice%ncolsColsRows_slice(my_rank+1)
     nband = slice%neigenpairs_slice
     is_lowpass = (slice%lookup_proc(my_rank+1) == 1)
 
-    glb = slice%mineig_global
-    gub = slice%maxeig_global
-    lambda_min = slice%poly_low_bounds(islice)
-    ub = slice%poly_upp_bounds(islice)
+    bandpp = slice%me_bandpp_slice
+    neigenpairs = slice%me_neigenpairs_slice
+    is_lowpass = (slice%me_id_slice == 1)
+
+    ! Set spectral bounds
+    if (islice==1) then   
+        ! Note: mineig_global and maxeig_global are not used more in chebfi
+        lambda_minus = slice%maxeig_global
+        lambda_plus = slice%ecut
+    else
+        lambda_minus = slice%poly_low_bounds(slice%me_id_slice)
+        lambda_plus = slice%poly_upp_bounds(slice%me_id_slice)
+        mineig_global = slice%mineig_global
+        maxeig_global = slice%ecut
+    end if
 
 end subroutine slice_getActiveTask
 !!***
@@ -1379,6 +1353,7 @@ end subroutine slice_getActiveTask
 !! Assumes linalg representation, so after all transpositions.
 !!
 !! INPUTS
+!! X0= collective memory (on GPU)
 !! slice%XextLinalg= converged slice eigenvectors in extended column space
 !!                   of size (spacedim, neigenpairs_ext) in linalg representation (after transpose)
 !! eigen = (1,neigenpairs_per_slice)=slice eigenvalues, (1,neigenpairs_per_slice+1:neigenpairs)=0
@@ -1455,8 +1430,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
             neigen_slice = slice%neigenpairs_per_slice(my_slice)
             fcol_ext = slice%fcol_in_Xext(my_slice)
 
-            call xgBlock_setBlock(eigen_ext, eigen_ext_slice, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
-            call xgBlock_setBlock(resid_ext, resid_ext_slice, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
+            call xgBlock_setBlock(eigen_ext, eigen_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
+            call xgBlock_setBlock(resid_ext, resid_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
             call xgBlock_copy(eigen, eigen_ext_slice)
             call xgBlock_copy(resid, resid_ext_slice)
 
@@ -1522,13 +1497,13 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         fcol_ext = slice%fcol_in_Xext(islice)
         neigenpairs_slice = slice%neigenpairs_per_slice(islice)
         ! Blocks to copy from
-        call xgBlock_setBlock(slice%XextLinalg, X_kept, nrows=slice%spacedim, ncols=neigenpairs_slice, fcol=fcol_ext)
-        call xgBlock_setBlock(eigen_ext, eigen_kept, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
-        call xgBlock_setBlock(resid_ext, resid_kept, nrows=1, ncols=neigenpairs_slice, fcol=fcol_ext)
+        call xgBlock_setBlock(slice%XextLinalg, X_kept, rows=slice%spacedim, cols=neigenpairs_slice, fcol=fcol_ext)
+        call xgBlock_setBlock(eigen_ext, eigen_kept, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
+        call xgBlock_setBlock(resid_ext, resid_kept, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
         ! Blocks to copy to
-        call xgBlock_setBlock(X0, X0_out, nrows=slice%spacedim, ncols=neigenpairs_slice, fcol=fcol)
-        call xgBlock_setBlock(eigen, eigen_out, nrows=1, ncols=neigenpairs_slice, fcol=fcol)
-        call xgBlock_setBlock(resid, resid_out, nrows=1, ncols=neigenpairs_slice, fcol=fcol)
+        call xgBlock_setBlock(X0, X0_out, rows=slice%spacedim, cols=neigenpairs_slice, fcol=fcol)
+        call xgBlock_setBlock(eigen, eigen_out, rows=1, cols=neigenpairs_slice, fcol=fcol)
+        call xgBlock_setBlock(resid, resid_out, rows=1, cols=neigenpairs_slice, fcol=fcol)
         ! copy
         call xgBlock_copy(X_kept, X0_out)
         call xgBlock_copy(eigen_kept, eigen_out)
@@ -1540,8 +1515,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xgBlock_reshape(resid, slice%neigenpairs, 1) 
 
     ! Free memory
-    call ABI_FREE(eigen_ext)
-    call ABI_FREE(resid_ext)
+    call xg_free(eigen_ext)
+    call xg_free(resid_ext)
     if (allocated(theta_ext_reshaped)) ABI_FREE(theta_ext_reshaped)
  
 end subroutine slice_allmerge
