@@ -221,71 +221,46 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
-    ! TODO the xgBlocks we transpose distribute etc should
-    ! point to xgx0slice, eigSliced, residSliced
-    ! mieux de renommer xgx0 à xgx0slice comme ça on sait que c'est deux objects différents
-
  call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
 
- ! notice this is not distributed with comm. So every process has this entire
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=gpu_option)
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
  ! TODO make consistent with slice_init...
-!subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
-!        paral_slice,ndeg_filter,ramp,ecut,bandpp,space,spacecom,me_g0,me_g0_fft,&
-!        paw,comm_rows,comm_cols,spectral_cut,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
  call slice_init(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
      dtset%paral_kgb,l_mpi_enreg%bandpp,dtset%mdeg_filter,space,1,spacecom,&
      me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
      l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
      gpu_thread_limit=dtset%gpu_thread_limit)
-
-#ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-#endif
-
- ! FIXME find out if this is enough or if we have to redo the mapping to CPU as
- ! yes actually pointers where to GPU, must rewrite adress if it is on CPU now
- !call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=ABI_GPU_DISABLED)
- !call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=ABI_GPU_DISABLED)
- !call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=ABI_GPU_DISABLED)
- ! Update xgBlock on gpu state
- if (gpu_option==ABI_GPU_OPENMP) then
-    call xgBlock_set_gpu_option(xgx0,ABI_GPU_DISABLED)
-    call xgBlock_set_gpu_option(xgeigen,ABI_GPU_DISABLED)
-    call xgBlock_set_gpu_option(xgresidu,ABI_GPU_DISABLED)
- end if
  
- call slice_schedule(slice, xgx0, getghc_gsc1, nspinor)
+ call slice_allschedule(slice, xgx0, getghc_gsc1, nspinor)
 
- ! TODO here now I think that you can copy the data from CPU to GPU
- ! every MPI process will do this on its own
+ ! Release collective cg memory from GPU, will only use active task memory
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
  call slice_run(slice, getghc_gsc1, getBm1X, xgeigen, xgresidu, nspinor)
 
- ! FIXME something weird with xgeigen, xgresidu in output
- ! conflicts with xgeigen, xgresidu used in input
- call slice_merge(slice, xgx0, xgeigen, xgresidu)
+ ! Retransfer collective cg memory on GPU
+ if ( l_paw ) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if
+ if (gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+    call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
+ end if
+
+ call slice_allmerge(slice, xgx0, xgeigen, xgresidu)
 
  ! Free slice memory
  call slice_free(slice)
-
-#ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-#endif
-
- ! Update xgBlock on gpu state
- if (gpu_option==ABI_GPU_OPENMP) then
-   call xgBlock_set_gpu_option(xgx0,ABI_GPU_OPENMP)
-   call xgBlock_set_gpu_option(xgeigen,ABI_GPU_OPENMP)
-   call xgBlock_set_gpu_option(xgresidu,ABI_GPU_OPENMP)
- end if
 
  if ( .not. l_paw ) then
    call timab(tim_nonlop,1,tsec)

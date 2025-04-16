@@ -224,7 +224,6 @@ module m_xg
   public :: xgBlock_pack
   public :: xgBlock_getSize
   public :: xgBlock_get_gpu_option
-  public :: xgBlock_set_gpu_option
   public :: xgBlock_get_communicator
 
   public :: xgBlock_check
@@ -1592,6 +1591,7 @@ contains
 !! Sequential in-place permute columns of xgBlock according to index permutation pcol.
 !! Performs the swap M(i,j) = M(i,perm(j)) for j=1,m using LAPACK.
 !! Checks memory location before applying LAPACK on CPU /!\
+!! Warning implicit GPU transfer to place on CPU.
 !! 
   subroutine xgBlock_permuteCols(xgBlock, rows, cols, pcol)
 
@@ -1601,28 +1601,14 @@ contains
 
     logical :: forwrd = .true.
 
-    ! OpenMP region query: detect OpenMP target region must be CPU
-#if defined(HAVE_OPENMP_OFFLOAD)
-    ! returns true if the current task is executing on the host device; otherwise, it returns false
-    ABI_CHECK(xomp_is_initial_device(), "Must execute on host (CPU) to use xgBlock_permuteCols")
-    !select case(xgBlock%space)
-    !case (SPACE_R,SPACE_CR)
-    !    ! this checks if target exists in GPU but not useful to know current device
-    !    ABI_CHECK(xomp_target_is_present(c_loc(xgBlock%vecR)), "Cannot use data mapped to device by OpenMP")
-    !case (SPACE_C)
-    !    ABI_CHECK(xomp_target_is_present(c_loc(xgBlock%vecC)), "Cannot use data mapped to device by OpenMP")
-    !end select
-#endif
-
-    ! Operand check: gpu_option of xgBlock should be disabled
-    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
-        ABI_ERROR("Not implemented for xgBlock on GPU")
-        ! Will need to write cuda kernel as in dlapmt
-    end if
-
     ! Size check
     if (size(pcol,dim=1)/=cols) then
         ABI_ERROR("Permutation size must be equal to number of columns")
+    end if
+
+    ! Device to host transfer
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_from_gpu(xgBlock)
     end if
 
     ! LAPACK calls
@@ -1634,6 +1620,11 @@ contains
     case (SPACE_C)
         call zlapmt(forwrd, rows, cols, xgBlock%vecC, xgBlock%LDim, pcol)
     end select
+
+    ! Update GPU with modified CPU memory
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(xgBlock)
+    end if
 
   end subroutine xgBlock_permuteCols
 !!***
@@ -5537,24 +5528,6 @@ contains
     gpu_option = xgBlock%gpu_option
 
   end subroutine xgBlock_get_gpu_option
-  !!***
-
-  !!****f* m_xg/xgBlock_set_gpu_option
-  !!
-  !! NAME
-  !! xgBlock_set_gpu_option
-  !! 
-  !! FUNCTION
-  !! Setter routine for private variable of xgBlock type
-
-  subroutine xgBlock_set_gpu_option(xgBlock, gpu_option)
-
-    type(xgBlock_t)  , intent(inout) :: xgBlock
-    integer          , intent(in   ) :: gpu_option
-
-    xgBlock%gpu_option = gpu_option
-
-  end subroutine xgBlock_set_gpu_option
   !!***
 
   !!****f* m_xg/xgBlock_get_communicator
