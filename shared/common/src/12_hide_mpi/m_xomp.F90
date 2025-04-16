@@ -413,7 +413,11 @@ function xomp_get_device_num()
 
 ! *************************************************************************
 
+#ifdef HAVE_OPENMP_OFFLOAD
  xomp_get_device_num = omp_get_device_num()
+#else
+ xomp_get_device_num = -1
+#endif
 
 end function xomp_get_device_num
 !!***
