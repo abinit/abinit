@@ -1989,7 +1989,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(90)
          list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
        case(91)
-         list(:41)=(/ 2160 /); msg='slicewf core engine '
+         list(:1)=(/ 2160 /); msg='slicewf core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
