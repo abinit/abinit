@@ -663,13 +663,13 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !! dtset <type(dataset_type)>=all input variables for this dataset
+!! mpsang = highest angular momentum + 1
+!! paw_dmft <type(paw_dmft_type)>= paw+dmft related data
 !! gprimd(3,3) = dimensional reciprocal space primitive translations
 !! kg(3,mpw*mkmem) = reduced planewave coordinates.
 !! mpi_enreg = information about MPI parallelization
-!! mpsang = highest angular momentum + 1
 !! npwarr(nkpt) = number of planewaves in basis at this k point
 !! occ = DFT occupations
-!! paw_dmft <type(paw_dmft_type)>= paw+dmft related data
 !! pawang <type(pawang)>=paw angular mesh and related data
 !! pawrad <type(pawrad_type)>=paw radial mesh and related data
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -760,10 +760,17 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
  paw_dmft%dmft_read_occnd = dtset%dmft_read_occnd
 
- ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
- ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
- ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
- ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
+ if(use_dmft == 10) then
+   ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*1))
+   ABI_MALLOC(paw_dmft%band_in,(mband*1))
+   ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*1))
+   ABI_MALLOC(paw_dmft%exclude_bands,(mband*1))
+ else
+   ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
+   ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
+   ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
+   ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
+ endif
 
  if (use_dmft == 0) return
 
@@ -841,20 +848,37 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_nominal => dtset%dmft_nominal(:)
  paw_dmft%npwarr => npwarr(:)
 
+! TODO: Make it work for usedmdft = -1 (interface with Wannier90 needs spinor
+! generalization)
+ if(nspinor==2.and.dtset%nspden==1.and.use_dmft==10) then
+   message = ' nspinor==2 and nspden=1 and usedmft=10 is not implemented yet'
+   ABI_ERROR(message)
+ endif
+
  paw_dmft%band_in(:) = .false.
  paw_dmft%occnd(:,:,:,:,:) = zero
+ paw_dmft%use_dmft    = use_dmft
 
- icb = 0
+ ! if (bandkss/=0) then
+ !   paw_dmft%use_sc_dmft = 0
+ ! else
+ !   paw_dmft%use_sc_dmft = use_sc_dmft
+ ! endif
+ ! paw_dmft%dmft_read_occnd = dmft_read_occnd
+ ! paw_dmft%idmftloop=0
+ ! paw_dmft%mbandc  = 0
+
+ icb=0
  mbandc = 0
- do iband=1,mband
-   if (iband >= dmftbandi .and. iband <= dmftbandf) then
-     paw_dmft%band_in(iband) = .true.
-     mbandc = mbandc + 1
-     paw_dmft%include_bands(mbandc) = iband
-   else
-     icb = icb + 1
-     paw_dmft%exclude_bands(icb) = iband
-   end if ! band>=bandi and band<=bandf
+ do iband=1, mband
+  if (iband >= dmftbandi .and. iband <= dmftbandf) then
+   paw_dmft%band_in(iband)=.true.
+   mbandc = mbandc + 1
+   paw_dmft%include_bands(mbandc) = iband
+  else
+    icb = icb + 1
+    paw_dmft%exclude_bands(icb) = iband
+  end if ! band>=bandi and band<=bandf
  end do ! iband
  paw_dmft%mbandc = mbandc
 
@@ -873,7 +897,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    call init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
  end if
 
- if (mbandc /= dmftbandf-dmftbandi+1) then
+ if (mbandc /= dmftbandf-dmftbandi+1 .and. paw_dmft%use_dmft /= 10) then
    write(message,'(5a)') ' BUG init_sc_dmft',ch10,&
     & '  number of bands in dmft is not correctly computed ',ch10, &
     & '  Action : check the code'
@@ -910,30 +934,36 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
   & ch10," ******************************************"
  call wrtout([std_out,ab_out],message,'COLL')
 
- if (dmft_solv == 0) then
-   write(message,'(2a)') ch10,' DMFT check: no solver and U=J=0'
- else if (dmft_solv == 1) then
-   write(message,'(2a)') ch10,' DMFT check: static solver'
- else if (dmft_solv == -1) then
-   write(message,'(2a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover DFT+U'
- else if (dmft_solv == 2) then
-   write(message,'(2a)') ch10,' DMFT uses the Hubbard one solver'
- else if (dmft_solv == 4) then
-   write(message,'(2a)') ch10,' DMFT uses the Hirsch Fye solver'
- else if (dmft_solv == 5) then
-   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
- else if (dmft_solv == 6) then
-   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
-     &(with density density interactions)'
- else if (dmft_solv == 7) then
-   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
-     &(with rotationally invariant interactions)'
- else if (dmft_solv == 9) then
-   write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
-     & give your personal script'
- end if ! dmft_solv
+ if (use_dmft /= 10) then
+   if (dmft_solv == 0) then
+     write(message,'(2a)') ch10,' DMFT check: no solver and U=J=0'
+   else if (dmft_solv == 1) then
+     write(message,'(2a)') ch10,' DMFT check: static solver'
+   else if (dmft_solv == -1) then
+     write(message,'(2a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover DFT+U'
+   else if (dmft_solv == 2) then
+     write(message,'(2a)') ch10,' DMFT uses the Hubbard one solver'
+   else if (dmft_solv == 4) then
+     write(message,'(2a)') ch10,' DMFT uses the Hirsch Fye solver'
+   else if (dmft_solv == 5) then
+     write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
+   else if (dmft_solv == 6) then
+     write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
+       &(with density density interactions)'
+   else if (dmft_solv == 7) then
+     write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
+       &(with rotationally invariant interactions)'
+   else if (dmft_solv == 9) then
+     write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
+       & give your personal script'
+   end if ! dmft_solv
+ else if(use_dmft == 10) then
+   write(message, '(a,a)') ch10,' DMFT uses the python invocation and orbitals constructed using Wannier90 '
+ endif
  call wrtout([std_out,ab_out],message,'COLL')
 
+ ! OG: What is all that? Something as moved? START
+ if (use_dmft /= 10) then
  if (dmft_dc == 1) then
    dc_string = "Magnetic FLL (Full Localized Limit)"
  else if (dmft_dc == 2) then
@@ -1431,6 +1461,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
  call init_paral_dmft(paw_dmft,paw_dmft%distrib,paw_dmft%dmft_nwlo)
 
+ ! OG: What is all that? Something as moved? START
+ endif
+
 end subroutine init_sc_dmft
 !!***
 
@@ -1605,17 +1638,17 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
 
  paw_dmft%lchipsiortho = 0
 
-!=========================================================
-!== if we use ctqmc impurity solver
-!=========================================================
-! IMPORTANT : paw_dmft%hybrid is corrupted somewhere in DMFT routines on
-! tikal_psc and max2_open64. Use a local hybrid in qmc_prep even if not optimal.
-! Anyway initializing ctqmc here is not good and produce the same result for
-! dmft_iter=1 which speed up the convergence ...
-! FIXME : Move this to init_sc_dmft and find bug
+ !=========================================================
+ !== if we use ctqmc impurity solver
+ !=========================================================
+ ! IMPORTANT : paw_dmft%hybrid is corrupted somewhere in DMFT routines on
+ ! tikal_psc and max2_open64. Use a local hybrid in qmc_prep even if not optimal.
+ ! Anyway initializing ctqmc here is not good and produce the same result for
+ ! dmft_iter=1 which speed up the convergence ...
+ ! FIXME : Move this to init_sc_dmft and find bug
  if (paw_dmft%dmft_solv == 5) then ! CTQMC initialisation
  !  write(message,'(a,2x,a,f13.5)') ch10," == Initializing CTQMC"
-!   call wrtout(std_out,message,'COLL')
+ !   call wrtout(std_out,message,'COLL')
 
    ABI_MALLOC(paw_dmft%hybrid,(paw_dmft%natom))
    do iatom=1,paw_dmft%natom
@@ -1641,8 +1674,8 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
                                 &  opt_spectra  = paw_dmft%dmftctqmc_mrka,  &
                                 &  opt_gmove    = paw_dmft%dmftctqmc_gmove )
    end do ! iatom
-  ! write(message,'(a,2x,a,f13.5)') ch10,&
-!&  " == Initialization CTQMC done"
+   ! write(message,'(a,2x,a,f13.5)') ch10,&
+   !&  " == Initialization CTQMC done"
    !call wrtout(std_out,message,'COLL')
  end if ! dmft_solv=5
 
@@ -1870,9 +1903,9 @@ subroutine construct_nwlo_dmft(paw_dmft)
   omega_lo_tmp(1) = temp * pi
   omega_lo_tmp(nwlo) = temp * pi * dble(2*nwli-1)
 
-!==================================
-!== Construct weight for log. freq.
-!==================================
+  !==================================
+  !== Construct weight for log. freq.
+  !==================================
 
   ABI_MALLOC(tospline_lo,(nwlo))
   ABI_MALLOC(splined_li,(nwli))
@@ -1898,47 +1931,49 @@ subroutine construct_nwlo_dmft(paw_dmft)
   wgt_wlo(1:nwlo) = zero ! very important for xmpi_sum
   ybcbeg = czero
   ybcend = czero
-! ============= END Set up =============
+  ! ============= END Set up =============
 
   tospline_lo(:) = czero
 
   do ifreq=omegaBegin,omegaEnd
-!    do ifreq1=1,paw_dmft%dmft_nwlo
+  ! do ifreq1=1,paw_dmft%dmft_nwlo
     tospline_lo(ifreq) = cone
-!    tospline_lo(ifreq1)=ifreq1**2-ifreq1
-!    enddo
-!    ybcbeg=cmplx(one/tol16**2,zero)
-!    ybcend=cmplx(one/tol16**2,zero)
+    ! tospline_lo(ifreq1)=ifreq1**2-ifreq1
+    ! enddo
+    ! ybcbeg=cmplx(one/tol16**2,zero)
+    ! ybcend=cmplx(one/tol16**2,zero)
 
-!==  spline delta function
+    !==  spline delta function
     call spline_complex(omega_lo_tmp(:),tospline_lo(:),nwlo, &
                       & ybcbeg,ybcend,ysplin2_lo(:))
-!   do ifreq1=1,paw_dmft%dmft_nwlo
-!    write(6588,*) paw_dmft%omega_lo(ifreq1),ysplin2_lo(ifreq1)
-!   enddo
+    ! do ifreq1=1,paw_dmft%dmft_nwlo
+    !  write(6588,*) paw_dmft%omega_lo(ifreq1),ysplin2_lo(ifreq1)
+    ! enddo
 
     call splint_complex(nwlo,omega_lo_tmp(:),tospline_lo(:), &
                       & ysplin2_lo(:),nwli,omega_li(:),splined_li(:))
 
     tospline_lo(ifreq) = czero
 
-!==         accumulate weights
+    !==         accumulate weights
     wgt_wlo(ifreq) = sum(dble(splined_li(:)))
-! do ifreq1=1,paw_dmft%dmft_nwlo
-!  write(6688,*) paw_dmft%omega_lo(ifreq1),tospline_lo(ifreq1)
-! enddo
-! do ifreq1=1,paw_dmft%dmft_nwli
-!  write(6788,*) paw_dmft%omega_li(ifreq1),splined_li(ifreq1)
+    ! do ifreq1=1,paw_dmft%dmft_nwlo
+    !  write(6688,*) paw_dmft%omega_lo(ifreq1),tospline_lo(ifreq1)
+    ! enddo
+
+    ! do ifreq1=1,paw_dmft%dmft_nwli
+    !  write(6788,*) paw_dmft%omega_li(ifreq1),splined_li(ifreq1)
+
   end do ! ifreq
-! ============= Gatherall  =============
+  ! ============= Gatherall  =============
   call xmpi_sum(wgt_wlo(1:nwlo),spacecomm,residu)
-! ============= END Gatherall ==========
+  ! ============= END Gatherall ==========
   ! end parallelisation over frequencies
 
   ABI_FREE(tospline_lo)
   ABI_FREE(splined_li)
   ABI_FREE(ysplin2_lo)
-! if(abs(dtset%pawprtvol)>=3) then
+  ! if(abs(dtset%pawprtvol)>=3) then
   write(message,'(a,18x,2(2x,a21))') ch10,"Log. Freq","weight"
   call wrtout(std_out,message,'COLL')
   do ifreq=1,nwlo
@@ -1963,7 +1998,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
   call wrtout(std_out,message,'COLL')
   write(message,'(3x,a,i6,2(2x,e13.5))') "--ifreq--",nwli,omega_li(nwli)
   call wrtout(std_out,message,'COLL')
-!   endif
+  ! endif
   ABI_FREE(select_log)
   ABI_FREE(omega_li)
   ABI_MALLOC(paw_dmft%omega_lo,(nwlo))

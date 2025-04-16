@@ -1,0 +1,121 @@
+# Linear response function and dynamic quadrupoles calculation for BaTiO3
+# PBE with exchange-correlation nonlinear core corrections
+# (M. Royo, 3.4.2025)
+
+ndtset 5
+
+#Set 1 : ground state self-consistency
+#*************************************
+getwfk1   0
+kptopt1   1
+tolvrs1   1.0d-4
+nqpt1     0
+rfphon1   0
+
+#Set 2: Response function calculation of d/dk wave function
+#**********************************************************
+kptopt2   2
+iscf2    -3
+rfelfd2   2
+tolwfr2   1.0d-4
+rfphon2   0
+
+#Set 3: Response function calculation of d2/dkdk wave function
+#*************************************************************
+kptopt3   2
+getddk3   2
+iscf3    -3
+rf2_dkdk3 3
+tolwfr3   1.0d-4
+rfphon3   0
+
+#Set 4 : Response function calculation of Q=0 phonons and electric field
+#***********************************************************************
+kptopt4   2
+getddk4   2
+rfelfd4   3
+rfphon4   1
+tolvrs4   1.0d-2
+prepalw4  2
+
+#Set 5 : Dynamic Quadrupoles calculation
+#***************************************
+optdriver5 10
+kptopt5   2
+get1wf5   4
+get1den5  4
+getddk5   2
+getdkdk5  3
+lw_qdrpl5 1
+
+#######################################################################
+
+#Common input variables
+#**********************
+getwfk   1
+useylm  1
+nqpt   1
+qpt 0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+
+#Definition of the unit cell
+acell      7.4522921938E+00  7.4522921938E+00  7.4522921938E+00
+
+rprim      9.9999942708E-01  7.5691332813E-04  7.5691332813E-04
+           7.5691332813E-04  9.9999942708E-01  7.5691332813E-04
+           7.5691332813E-04  7.5691332813E-04  9.9999942708E-01
+
+#Definition of the atom types and positions
+#******************************************
+ntypat 3
+znucl   8 22 56
+natom   5
+typat   1 1 1 2 3
+
+xred         5.1039172170E-01  5.1039172170E-01  1.5665798605E-02
+             5.1039172170E-01  1.5665798605E-02  5.1039172170E-01
+             1.5665798605E-02  5.1039172170E-01  5.1039172170E-01
+             4.9104879027E-01  4.9104879027E-01  4.9104879027E-01
+             8.0196771800E-04  8.0196771800E-04  8.0196771800E-04
+
+#Gives the number of band, explicitely (do not take the default)
+#***************************************************************
+nband  20
+
+#Exchange-correlation functional
+#*******************************
+ixc   11
+
+#Definition of the planewave basis set and k-point grid
+#******************************************************
+ecut   5.0
+ngkpt 2 2 2
+nshiftk 1
+shiftk 0.5 0.5 0.5
+
+#Definition of the SCF procedure
+#*******************************
+nstep 30
+diemac 12.0
+
+pp_dirpath="$ABI_PSPDIR"
+pseudos "O-GGA-bis.psp8, Ti-GGA.psp8, Ba-GGA.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t43.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT, LONGWAVE, MINIMAL
+#%% description = Dynamic Quadrupoles Calculation for BaTiO3
+#%% topics = longwave
+#%%<END TEST_INFO>

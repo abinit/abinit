@@ -3,7 +3,6 @@
 #
 add_library(65_paw STATIC
   m_fourier_interpol.F90
-  m_paw_atomorb.F90
   m_paw_correlations.F90
   m_paw_denpot.F90
   m_paw_dfpt.F90
@@ -13,7 +12,6 @@ add_library(65_paw STATIC
   m_paw_exactDC.F90
   m_paw_hr.F90
   m_paw_init.F90
-  m_paw_lmn.F90
   m_paw_mkaewf.F90
   m_paw_mkrho.F90
   m_paw_nhat.F90

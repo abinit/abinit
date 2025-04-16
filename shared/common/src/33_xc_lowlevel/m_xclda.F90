@@ -1339,7 +1339,7 @@ subroutine xctfw(temp,fxci,tsxci,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho
    fxci(ipts)   = fxci(ipts)    + etfw
    if (has_dvxcdgr) dvxcdgr(ipts,1)= dvxcdgr(ipts,1)+two*hperrot*rho_inv
  end do
- 
+
  tsxci=exci-fxci
  ABI_FREE(rho_updnm1_3)
  ABI_FREE(exci)
@@ -1466,7 +1466,7 @@ end subroutine xcksdt
 !!  fxc_ksdt
 !!
 !! FUNCTION
-!!  LDA XC free-energy parameterization from Monte Carlo data (unpol/pol) 
+!!  LDA XC free-energy parameterization from Monte Carlo data (unpol/pol)
 !!
 !! NOTES
 !!  Karasiev-Sjostrom-Dufty-Trickey (KSDT) TLDA xc-functional
@@ -1554,14 +1554,14 @@ subroutine fxc_ksdt(fxc,vxc,exc,tsxc,rs,t,iz)
 !
    dnum=a(2)*2._dp*t+a(3)*3._dp*t**2+a(4)*4._dp*t**3
    dden=a(5)*2._dp*t+a(6)*4._dp*t**3
-! 
+!
    aa=a0*tanht*num/den
    daa=a0*(dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2)
-! 
+!
 ! b(t)
    num=b(iz,1)+b(iz,2)*t**2+b(iz,3)*t**4
    den=1._dp+b(iz,4)*t**2+omega*sqrt(3._dp)*b(iz,3)/sqrt(2._dp*lambda**2)*t**4
-! 
+!
    dnum=b(iz,2)*2._dp*t+b(iz,3)*4._dp*t**3
    dden=b(iz,4)*2._dp*t+omega*sqrt(3._dp)*b(iz,3)/sqrt(2._dp*lambda**2)*4._dp*t**3
 !
@@ -1571,7 +1571,7 @@ subroutine fxc_ksdt(fxc,vxc,exc,tsxc,rs,t,iz)
 ! d(t)
    num=d(iz,1)+d(iz,2)*t**2+d(iz,3)*t**4
    den=1._dp+d(iz,4)*t**2+d(iz,5)*t**4
-! 
+!
    dnum=d(iz,2)*2._dp*t+d(iz,3)*4._dp*t**3
    dden=d(iz,4)*2._dp*t+d(iz,5)*4._dp*t**3
 !
@@ -1581,7 +1581,7 @@ subroutine fxc_ksdt(fxc,vxc,exc,tsxc,rs,t,iz)
 ! e(t)
    num=e(iz,1)+e(iz,2)*t**2+e(iz,3)*t**4
    den=1._dp+e(iz,4)*t**2+e(iz,5)*t**4
-! 
+!
    dnum=e(iz,2)*2._dp*t+e(iz,3)*4._dp*t**3
    dden=e(iz,4)*2._dp*t+e(iz,5)*4._dp*t**3
 !
@@ -1661,20 +1661,20 @@ subroutine fex_ksdt(rs,fx,einx,tsx,vx,degauss)
  rho=3._dp/(4._dp*pi*rs**3)
  tF=(3._dp*pi**2*rho)**twothird/2._dp !tF=Fermi temperature for spin-unpol case
  t = degauss/2.0_dp/tF
- !ef=1.841584276_dp/rs/rs 
+ !ef=1.841584276_dp/rs/rs
  !tred=degauss/2.0_dp/ef
  dtdn = -twothird*t/rho ! (dt/dn)
- 
+
  f_slater=-0.687247939924714d0
  alpha_slater=twothird
  ex0=f_slater*alpha_slater/rs
  vx0=four/three*f_slater*alpha_slater/rs
- 
+
  call tildeAx(t,Ax,dAx,d2Ax)
  fx = ex0*Ax         ! exchange free-energy per electron
  vx = vx0*Ax + rho*ex0*dAx*dtdn ! d(n*ex0*Ax)/dn = d(n*ex0)/dn + n*ex0*(dAx/dtred)*(dtred/dn)
  sx = -ex0*dAx/tF    ! entropy per electron
- einx = fx + t*tF*sx ! internal energy per electron 
+ einx = fx + t*tF*sx ! internal energy per electron
  tsx = t*tF*sx       ! T*entropy per electron
 end subroutine fex_ksdt
 !!***

@@ -254,6 +254,7 @@ ABI_TOPICS = [
     "RandStopPow",
     "Recursion",
     "RPACorrEn",
+    "RTTDDFT",
     "SCFControl",
     "SCFAlgorithms",
     "SelfEnergy",

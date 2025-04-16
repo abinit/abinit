@@ -82,9 +82,7 @@ contains
 
   subroutine finalize(self)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
-    if (allocated(self%nature)) then
-       ABI_FREE(self%nature)
-    end if
+    ABI_SFREE(self%nature)
     !call self%coeff%finalize()
     self%order=0
     call self%abstract_potential_t%finalize()
