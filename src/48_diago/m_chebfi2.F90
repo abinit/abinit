@@ -1239,8 +1239,8 @@ end subroutine chebfi_lowpassFilter
 !! chebfi <type(chebfi_t)>=memory workspace used to apply filter
 !! lambda_minus= lower bound of interval to amplify
 !! lambda_plus= upper bound of interval to amplify
-!! mineig_global= used to scale to [-1,1), will le -1
-!! maxeig_global= used to scale to [-1,1), will be 1
+!! mineig_global= used to rescale to [-1,1), will le -1
+!! maxeig_global= used to rescale to [-1,1), will be 1
 !! getAX_BX= pointer to the function giving A|X> and B|X>
 !!           A is typically the Hamiltonian H, and B the overlap operator S
 !! getBm1X= pointer to the function giving B^-1|X>
