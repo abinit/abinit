@@ -697,12 +697,19 @@ class FortranKissParser(HasRegex):
         # without inspecting local variables so we only handle explicit calls to routines.
         # in principle I may re-read the source and use regex for val = foo() where foo is
         # one of the functions in the project but it's gonna be costly.
+
+        #num_implicit_none = 0
         while self.lines:
             line = self.lines.popleft()
             if not line: continue
             if self.handle_comment(line): continue
             # Convert to lower case here so that we don't have to deal with case.
             line = line.lower()
+
+            #m = self.RE_IMPLICIT_NONE.match(line)
+            #if m:
+            #    print(line)
+            #    num_implicit_none += 1
             if self.handle_use_statement(line): continue
             if self.handle_cpp_line(line): continue
             if self.handle_contains(line): continue
@@ -718,6 +725,9 @@ class FortranKissParser(HasRegex):
 
             #print("Ignored line:", line)
             self.num_f90lines += 1
+
+        #if num_implicit_none != 1:
+        #    print("Found", num_implicit_none, "in path", self.path)
 
         self.all_includes = sorted(set(self.all_includes))
         self.all_uses = sorted(set(self.all_uses))

@@ -1187,27 +1187,27 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !  Warning : might change Bravais lattice hR to hP, if hexagonal axes
    problem=0
    select case (bravais(1))
-   case(7)
+   case (7)
      if(iholohedry<6)problem=1
      if(iholohedry==6)problem=2
-   case(6)
+   case (6)
      if(iholohedry<4)problem=1
      if(iholohedry==7 .or. iholohedry==4)problem=2
 !      Here, change hR into hP
      if(iholohedry==5)iholohedry=6
-   case(5)
+   case (5)
      if(iholohedry<4)problem=1
      if(iholohedry==7 .or. iholohedry==6 .or. iholohedry==4)problem=2
-   case(4)
+   case (4)
      if(iholohedry<4)problem=1
      if(iholohedry>4)problem=2
-   case(3)
+   case (3)
      if(iholohedry<3)problem=1
      if(iholohedry>3)problem=2
-   case(2)
+   case (2)
      if(iholohedry<2)problem=1
      if(iholohedry>2)problem=2
-   case(1)
+   case (1)
      if(iholohedry>1)problem=2
    end select
 
@@ -1462,8 +1462,7 @@ end subroutine symbrav
 !! not (presently) distinguished, and will be attributed equally
 !! to left or right.
 !!
-!! For the detailed description of the labelling of the axes,
-!! see symaxes.f and symplanes.f
+!! For the detailed description of the labelling of the axes, see symaxes.f and symplanes.f
 !!
 !! SOURCE
 
@@ -1637,8 +1636,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
            if(symrelconv(3,3,isym)==1)direction=3
          end if
        end do
-!      Examine the projection of the translation vector of the a, b or c mirror planes
-!      onto the binary axis
+!      Examine the projection of the translation vector of the a, b or c mirror planes onto the binary axis
        do isym=1,nsymconv
          if(t_axes(isym)==16)then
            if(abs(tnonsconv(direction,isym))>tol8)additional_info=1

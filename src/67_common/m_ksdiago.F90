@@ -128,7 +128,7 @@ module m_ksdiago
 
    real(dp), contiguous, pointer :: cg_k(:,:,:)
    ! (2, npwsp * my_nband)
-   ! NB: This is pointer to mat%buffer_cplx
+   ! NB: This is a pointer to mat%buffer_cplx
 
    type(pawcprj_type),allocatable :: cprj_k(:,:)
    ! (natom, nspinor * my_nband))
