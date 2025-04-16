@@ -162,7 +162,6 @@ module m_slice
         integer :: spacedim                                 ! nb of plane-waves per process in linalg representation
         integer :: nslice                                   ! number of spectral slices
         integer :: space                                    ! real or complex eigenvectors
-        integer :: space_res                                ! real or complex eigenvalues
         
         ! GPU-related
         integer :: gpu_kokkos_nthrd                 
@@ -190,7 +189,6 @@ module m_slice
         real(dp) :: maxeig_global                           ! guaranteed upper spectral bound
 
         ! Memory buffers
-        type(xg_t) :: DivResults                            ! TODO
         type(xg_t) :: X_ext                                 ! eigenvector memory used by all slices
         type(xgTransposer_t) :: xgTransposerXext            ! transposer datastructure
         
@@ -333,13 +331,6 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     slice%gpu_thread_limit = 0
     if (present(gpu_thread_limit)) slice%gpu_thread_limit = gpu_thread_limit
 
-    ! Space of eigenvalues
-    if (space==SPACE_C) then
-        slice%space_res = SPACE_C
-    else if (space==SPACE_CR) then
-        slice%space_res = SPACE_R
-    end if
-
     ! Total number of rows (used in colsrows representation)
     if (paral_kgb==0) then
         slice%total_spacedim = spacedim
@@ -380,14 +371,6 @@ subroutine slice_allocateAll(slice)
 
     call slice_free(slice)
 
-    if (slice%paral_kgb == 0) then
-        call xg_init(slice%DivResults, slice%space_res, rows=slice%neigenpairs, cols=1, &
-            gpu_option=slice%gpu_option)
-    else
-        call xg_init(slice%DivResults, slice%space_res, rows=slice%bandpp, cols=1, &
-            gpu_option=slice%gpu_option)
-    end if
-
     if(.not.allocated(slice%neigenpairs_per_slice)) ABI_MALLOC(slice%neigenpairs_per_slice, (slice%nslice))
     if(.not.allocated(slice%nproc_per_slice)) ABI_MALLOC(slice%nproc_per_slice, (slice%nslice))
     if(.not.allocated(slice%lookup_proc)) ABI_MALLOC(slice%lookup_proc, (slice%nproc))
@@ -420,7 +403,6 @@ subroutine slice_free(slice)
     
     ! *********************************************************************
 
-    call xg_free(slice%DivResults)
     call xg_free(slice%X_ext)
     call xgTransposer_free(slice%xgTransposerXext)
 
@@ -463,19 +445,23 @@ end subroutine slice_free
 !! X0                =eigenvector guess used to split spectrum
 !!        not suitable for parallel Rayleigh-Ritz calculations
 !! 
+!! OUTPUT
+!! eigen= Rayleigh quotients associated to X0 of size (1,neigenpairs)
+!! 
 !! SIDE EFFECTS
 !! slice%me_Xext_active  = adapted version distributed correctly
 !!        and free of data overlap. Suitable for parallel RR.
 !! 
 !! SOURCE
 
-subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
+subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
 
     implicit none
 
     ! Arguments ------------------------------------
     type(slice_t), target, intent(inout) :: slice
     type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
     integer, intent(in) :: nspinor
     interface
         subroutine getAX_BX(X,AX,BX)
@@ -490,11 +476,10 @@ subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
     integer :: neigenpairs, iband, min_loc, islice
     integer :: fcol, fcol_ext, ncols, ierr
     logical :: on_host, on_device
-    type(xg_t) :: eigen0
-    type(xg_t) :: resid0
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: tol12 = 1.0e-12
     ! Derived types
+    type(xg_t) :: resid0
     type(xgBlock_t) :: slicecols_in
     type(xgBlock_t) :: slicecols_ext_out
     ! Arrays
@@ -520,32 +505,31 @@ subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
 
     neigenpairs = slice%neigenpairs
     
-    ! Space for computed eigenvalues and residuals (not distributed)
-    call xg_init(eigen0, slice%space_res, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
-    call xg_init(resid0, SPACE_R        , rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
-    call xgBlock_zero(eigen0%self)
-    call xgBlock_zero(resid0%self)
+    ! Space for computed residuals (not distributed)
+    call xg_init(resid0, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
 
     if(.not.allocated(theta_reshaped)) ABI_MALLOC(theta_reshaped, (neigenpairs))
     if(.not.allocated(permute_cols)) ABI_MALLOC(permute_cols, (neigenpairs))
+
+    call xgBlock_reshape(eigen, 1, neigenpairs)
+    call xgBlock_zero(eigen)
+    call xgBlock_zero(resid0%self)
     
     ! ===================== Compute Rayleigh quotients and residuals ===================================
     
     ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
-    call slice_computeSpectrum(slice, X0, getAX_BX, eigen0%self, resid0%self, nspinor)
+    call slice_computeSpectrum(slice, X0, getAX_BX, eigen, resid0%self, nspinor)
     ABI_NVTX_END_RANGE()
 
     ! ===================== Compute guaranteed spectral bounds ======================================== 
 
     if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call xgBlock_copy_from_gpu(eigen0%self)
+        call xgBlock_copy_from_gpu(eigen)
         call xgBlock_copy_from_gpu(resid0%self)
     end if
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
-    call xgBlock_reshape(eigen0%self, neigenpairs, 1)     
-    call xgBlock_reshape(resid0%self, neigenpairs, 1)
-    call xgBlock_reverseMap(eigen0%self, theta_, rows=1, cols=neigenpairs)
+    call xgBlock_reverseMap(eigen, theta_, rows=1, cols=neigenpairs)
     call xgBlock_reverseMap(resid0%self, resid_, rows=1, cols=neigenpairs)
  
     ! Sort thetas in increasing order and store permutation
@@ -563,7 +547,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
     slice%mineig_global = lambda_minus - sqrt(resid_(1, min_loc))
     slice%maxeig_global = slice%ecut
 
-    ! ===================== Decompose interval [lambda_minus,lambda_plus) to slices ====================
+    ! ===================== Split interval [lambda_minus,lambda_plus) into slices ======================
     
     theta_reshaped_ptr => theta_reshaped
     call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
@@ -612,7 +596,9 @@ subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
     end if
 
     ! Unitary test
-    ABI_CHECK(cols(slice%XextLinalg)==slice%neigenpairs_ext,'wrong linalg representation')
+    if (cols(slice%XextLinalg) /= slice%neigenpairs_ext) then
+        ABI_ERROR('wrong linalg representation')
+    end if
     write(*,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(slice%spacecom), cols(slice%XextLinalg)
 
     ! Distribute extended columns across **all** MPI processes
@@ -636,13 +622,15 @@ subroutine slice_allschedule(slice, X0, getAX_BX, nspinor)
     ABI_NVTX_END_RANGE()
 
     ! Unitary test
-    if ( cols(slice%me_Xext_active)==slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)) ) then
+    if ( cols(slice%me_Xext_active) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)) ) then
         ABI_ERROR('wrong colsrows representation')
     end if
     write(*,'(a,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom), cols(slice%me_Xext_active)
+    
+    ! Recover dimensions
+    call xgBlock_reshape(eigen, neigenpairs, 1)
 
-    ! Free memory
-    call xg_free(eigen0)
+    ! Free temporary memory
     call xg_free(resid0) 
     if (allocated(permute_cols)) ABI_FREE(permute_cols)
     if (allocated(theta_reshaped)) ABI_FREE(theta_reshaped)
@@ -805,9 +793,6 @@ end subroutine slice_run
 !! eigen  =Rayleigh Quotients from X
 !! residu =residuals from X
 !! 
-!! SIDE EFFECTS
-!! slice%DivResults= contains eigen_mpi or eigen depending on paral_kgb
-!! 
 !! SOURCE
 
 subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
@@ -831,7 +816,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
 
     ! Local variables
     ! Scalars
-    integer :: my_rank, shift, bandpp
+    integer :: my_rank, shift, bandpp, space_res
     real(dp) :: mineig, maxeig
     ! Derived types
     type(xg_t) :: Results1
@@ -855,6 +840,12 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
         ABI_ERROR("Sequential bands not implemented")
     end if
 
+    ! Space of eigenvalues
+    if (slice%space==SPACE_C) then
+        space_res = SPACE_C
+    else if (slice%space==SPACE_CR) then
+        space_res = SPACE_R
+    end if
     bandpp = slice%bandpp
 
     ! Allocate temporary memory (distributed in colsrows representation)
@@ -867,9 +858,10 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     
     ! Allocate one-dimensional memory (distributed)
     ! for eigenvalues
-    call xg_init(eigen_mpi, slice%space_res, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
-    call xg_init(Results1, slice%space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
-    call xg_init(Results2, slice%space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
+    ! FIXME eigen_mpi is space_res when eigen is SPACE_R ...
+    call xg_init(eigen_mpi, space_res, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
+    call xg_init(Results1, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
+    call xg_init(Results2, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
     ! for residuals
     call xg_init(resid_mpi, SPACE_R, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
     call xg_init(Results3, SPACE_R, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
@@ -939,14 +931,6 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
         call xgBlock_copy(resid_mpi%self, resid)
     end if
 
-    ! Save the eigenvalue result to slice%DivResults depending on the parallelization
-    if (slice%paral_kgb==0) then
-        call xgBlock_reshape(eigen_mpi%self, bandpp, 1) 
-        call xgBlock_copy(eigen_mpi%self, slice%DivResults%self)
-    else if (slice%paral_kgb==1) then
-        call xgBlock_copy(eigen, slice%DivResults%self)
-    end if
-
     ! ============== Transpose ==============
     call xmpi_barrier(slice%spacecom)
     ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
@@ -977,10 +961,12 @@ end subroutine slice_computeSpectrum
 !! FUNCTION
 !! Split spectrum theta \in [lambda_minus, lambda_plus) into overlapping slices. 
 !! Store parameters into arrays of size nslice into the datatype 'slice'.
-!! (Optional) Print filter as {x,f(x)} in std_out 
 !! 
 !! INPUTS
-!! theta =sorted Rayleigh quotients
+!! lambda_minus= lower bound of interval to split
+!! lambda_plus= upper bound of interval to split
+!! theta= sorted Rayleigh quotients of size (neigenpairs)
+!! plot_filter= (option) true if print x,f(x) 
 !! 
 !! SOURCE
 
@@ -990,45 +976,40 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
 
     !Arguments ------------------------------------
     type(slice_t), intent(inout) :: slice
-    real(dp), pointer, intent(in) :: theta
+    real(dp), intent(in) :: lambda_minus
+    real(dp), intent(in) :: lambda_plus
+    real(dp), pointer, intent(in) :: theta(:)
     logical, optional, intent(in) :: plot_filter
     
     !Local variables-------------------------------
-    integer :: j,k,jmax,spos,nvec,nvec,k1,k2
-    integer :: nv_pad,ndeg,npband,comm_cols
-    integer :: nslice,neigenpairs,ndeg_filter, n_frac
+    integer :: iband, islice, jmax, nvec, ndeg, nslice
+    integer :: neigenpairs, n_frac
+    integer :: first_col, first_col_ext, last_col, last_col_ext
     integer :: ndeg_max = 200
-    integer :: ipt,npt,iptL,iptR
-    logical :: plot_filter_
-    real(dp) :: ramp, width
+    real(dp) :: ramp, width, wovlp, center, radius
+    real(dp) :: poly_low, poly_upp, part_low, part_upp
+    real(dp) :: l, u,lw,uw,f_l,f_lw,f_u,f_uw
     real(dp) :: tol12 = 1.0e-12
-    real(dp) :: ecut,low,upp,glb,gub,c,r
-    real(dp) :: lj,uj,wj,finL,finR,foutL,foutR
-    real(dp) :: f_l, f_lw, f_u, f_uw
-    real(dp) :: wlj,wuj
-    real(dp) :: fun_pt,pt
-    real(dp) :: a_,b_ ! target interval scaled in -1,1
+    logical :: plot_filter_
     ! arrays
-    integer :: jperm(nband-1)
-    real(dp) :: consdiff(nband-1)
+    integer, allocatable :: jperm(:)
+    real(dp), allocatable :: consdiff(:)
     real(dp), allocatable :: spectral_partition(:)
 
     ! *********************************************************************
 
     ramp = slice%ramp
     nslice = slice%nslice
-    ndeg_filter = slice%ndeg_filter
+    neigenpairs = slice%neigenpairs
     plot_filter_ = .false.
     if (present(plot_filter)) plot_filter_ = plot_filter
 
     if(.not.allocated(spectral_partition)) ABI_MALLOC(spectral_partition,(nslice+1)) 
    
-    ! Compute spectral partition
-    spectral_partition(:) = 0.d0
-    spectral_partition(1) = theta(1)                  ! lambda_minus
-    spectral_partition(nslice+1) = theta(neigenpairs) ! lambda_plus
-
-    ! Je suis bête on a besoin de theta ici
+    ! Compute spectral partition using spectral cut strategy
+    spectral_partition = 0.d0
+    spectral_partition(1) = lambda_minus
+    spectral_partition(nslice+1) = lambda_plus
     select case(slice%spectral_cut)
     case(DIVIDE_INTERVAL_WIDTH)
 
@@ -1042,6 +1023,9 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
 
     case(DIVIDE_SPECTRAL_GAPS)
 
+        if (.not.allocated(jperm)) ABI_MALLOC(jperm, (neigenpairs-1))
+        if (.not.allocated(consdiff)) ABI_MALLOC(consdiff, (neigenpairs-1))
+        
         jperm = (/ (iband, iband=1,neigenpairs-1) /)
         consdiff = (/ (theta(iband + 1) - theta(iband), iband=1,neigenpairs-1) /)
         
@@ -1050,9 +1034,12 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
 
         ! Take median of largest gaps
         do islice=1,nslice
-            jmax = jperm(neigenpairs -i)
+            jmax = jperm(neigenpairs - islice) ! TODO crosscheck if formula is correct Priority
             spectral_partition(islice + 1) = (theta(jmax) + theta(jmax + 1)) / 2.d0
         end do
+
+        if (allocated(jperm)) ABI_FREE(jperm)
+        if (allocated(consdiff)) ABI_FREE(consdiff)
 
     end select
 
@@ -1066,47 +1053,26 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
 
         part_low = spectral_partition(islice)
         part_upp = spectral_partition(islice+1)
-        wovlp = (part_upp - part_low)/10.d0 ! FIXME allow tuning from abi param
-        l = (part_low - center)/radius
-        u = (part_upp - center)/radius
-
-        ! TODO Priority IL 14/4
-        ! Very much attention to this. It is messed up.
-        ! chebfi_run normally takes lambda_minus = maxeig_global and lambda_plus = ecut.
-        ! So lambda_minus should really be the largest wanted eigenvalue. We must
-        ! thus use the extended interval including overlap in there (poly_upp).
+        wovlp = (part_upp - part_low)/10.d0 ! FIXME add abi parameter to tune this
+        poly_low = part_low - wovlp
+        poly_upp = part_upp + wovlp
 
         if (islice==1) then
-            ! Spectral interval to amplify is [-oo, lambda_minus)
-            poly_low = part_upp + wovlp
-            poly_upp = slice%ecut
-            ndeg_filter = slice%ndeg_filter
-            ! essentially 
-            ! poly_low = maxeig_global = part_low + wovlp
-        else 
-            poly_low = part_low - wovlp
-            poly_upp = part_upp + wovlp
-        end if
-        lw = (poly_low - center)/radius
-        uw = (poly_upp - center)/radius
-
-
-        if (islice==1) then
-            ! uj,gub is the interval mapped to -1,1
-            ! in this interval Chebyshev poly is bounded by 1
-            ! remember uj,gub is the interval to ignore
-            ndeg = 4
-            ! FIXME is the scaling in [-1,1] OK?
-            ! chebfipoly(lowest, a,b) where a,b is diminished, a,b=poly_upp,ecut
-            ! essentially diminishes [poly_upp,ecut) and amplifies poly_low
-            ! should take poly_low or guaranteed lower bound here?
-            do while(1.d0/cheb_poly(poly_low,ndeg,poly_upp,ecut)<ramp) 
-                ndeg = ndeg + 1
-            end do
+            ndeg = slice%ndeg_filter
+            !do while(1.d0/cheb_poly(part_low,ndeg,poly_upp,slice%maxeig_global)<ramp) 
+            !    ndeg = ndeg + 1
+            !end do
+            if (1.d0/cheb_poly(part_low,ndeg,poly_upp,slice%maxeig_global)<ramp) then
+                write(std_out,*) 'Warn: Chebyshev polynomial degree does not amplify enough'
+            end if
         else
             ! ********* optimize amplification ratio ********
             ! The convergence ratio r0/rN is approximated by amplification ratios 
             ! f(l)/f(l-w) and f(u)/f(u+w). 
+            lw = (poly_low - center)/radius ! scaled point outside slice
+            uw = (poly_upp - center)/radius ! scaled point outside slice
+            l = (part_low - center)/radius ! scaled point inside slice
+            u = (part_upp - center)/radius ! scaled point inside slice
             ndeg = 4
             f_l = 0.d0; f_u = 0.d0; f_lw = 1.d0; f_uw = 1.d0
             do while ( (f_l/f_lw < ramp) .and. (f_u/f_uw < ramp) .and. (ndeg < ndeg_max) )
@@ -1118,23 +1084,11 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
             end do
         end if
 
-        ! Plot filter
+        ! Plot filter in interval [glb, ub) (set manually because depends on the case)
         if (plot_filter_) then
-            call print_scalar_filter(low,upp,center,radius,npt,is_lowpass=(islice==1))
+            call print_scalar_filter(slice%mineig_global,poly_upp,poly_low,&
+                poly_upp,slice%mineig_global,slice%maxeig_global,ndeg,(islice==1))
         end if
-
-        ! Print slice interval info
-        write(std_out,*) 'Without overlap=', low, upp
-        write(std_out,*) '          width=', upp-low
-        write(std_out,*) '      scaled to=', (low-c)/r,(upp-c)/r
-        write(std_out,*) 'With    overlap=', poly_low, poly_upp
-        write(std_out,*) '          width=', poly_upp-poly_low
-        write(std_out,*) '      scaled to=', a,b
-        write(std_out,*) '           nvec=', nvec
-        write(std_out,*) '           nvec=', nvec
-        write(std_out,*) '           ndeg=', ndeg
-        write(std_out,*) ' '
-        ! end print
 
         ! Count theta eigenvalues in current spectral partition with overlap 
         if (nslice==1) then
@@ -1147,6 +1101,14 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
             if (islice == nslice) last_col = neigenpairs
         end if
         nvec = last_col - first_col + 1
+
+        ! Print slice interval info
+        write(std_out,'(a,i2)') '======= Slice ', islice
+        write(std_out,*) '   Partition, width=', part_low, part_upp, part_upp - part_low
+        write(std_out,*) 'With overlap, width=', poly_low, poly_upp, poly_upp - poly_low
+        write(std_out,*) '           scaled to=', (poly_low-center)/radius, (poly_upp-center)/radius
+        write(std_out,'(a,i6,a,i6)') 'nvec= ', nvec, 'ndeg= ', ndeg
+        write(std_out,*) ' '
 
         ! Compute last index in extended memory (without ovlp)
         last_col_ext = first_col_ext + nvec - 1
@@ -1408,8 +1370,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     !    This is complicated because we also have to shift parts.
 
     ! Allocate extended space for all slice eigenvalues and residuals
-    call xg_init(eigen_ext, slice%space_res, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
-    call xg_init(resid_ext, slice%space_res, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
+    call xg_init(eigen_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
+    call xg_init(resid_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
 
     call xgBlock_zero(eigen_ext%self)
     call xgBlock_zero(resid_ext%self)
@@ -2085,36 +2047,46 @@ end function bandpassIndicator_sca
 !!****f* m_slice/print_scalar_filter
 !! NAME
 !! print_scalar_filter
-!!
+!! 
+!! FUNCTION
+!! Print x,f(x) for every x in (a,b).
+!! 
+!! INPUTS
+!! lb,ub= interval to amplify/vanish
+!! glb,gub= guaranteed spectral bounds used to scale to [-1,1]
+!! ndeg= polynomial degree of filter
+!! is_lowpass= flag. If true then Chebyshev if false Chebyshev-Jackson
 
-subroutine print_scalar_filter(upp, low, center, radius, npt, is_lowpass)
+subroutine print_scalar_filter(a, b, lb, ub, glb, gub, ndeg, is_lowpass)
 
     implicit none
 
-    real(dp), intent(in) :: upp
-    real(dp), intent(in) :: low
-    real(dp), intent(in) :: center
-    real(dp), intent(in) :: radius
-    integer, intent(in) :: npt
+    real(dp), intent(in) :: a,b,lb,ub,glb,gub
+    integer, intent(in) :: ndeg
     logical, intent(in) :: is_lowpass
 
-            write(std_out,*) ' '
-            write(std_out,*) 'Plot filter ==== x | f(x)'
-            npt = 100
-            if (islice==1) then
-                do ipt=1,npt
-                    pt = low + (ipt-1)*(upp-low)/npt
-                    fun_pt = cheb_poly(pt,ndeg,poly_upp,gub)
-                    write(std_out,*) pt, fun_pt
-                end do
-            else
-                do ipt=1,npt
-                    pt = (low + (ipt-1)*(upp-low)/npt - c)/r
-                    fun_pt = bandpassIndicator_sca(pt,a,b,ndeg)
-                    write(std_out,*) pt, fun_pt
-                end do
-            end if
-            write(std_out,*) ' '
+    integer :: npt, ipt
+    real(dp) :: c, r, pt, fun_pt
+
+    npt = 100
+    c = (gub + glb)/2.d0
+    r = (gub - glb)/2.d0
+    write(std_out,*) ' '
+    write(std_out,*) 'Plot filter ==== x | f(x)'
+    if (is_lowpass) then
+        do ipt=1,npt
+            pt = a + (ipt-1)*(b-a)/npt ! unscaled!
+            fun_pt = cheb_poly(pt,ndeg,ub,gub)
+            write(std_out,*) pt, fun_pt
+        end do
+    else
+        do ipt=1,npt
+            pt = (a + (ipt-1)*(b-a)/npt - c)/r ! scaled!
+            fun_pt = bandpassIndicator_sca(pt,(a-c)/r,(b-c)/r,ndeg)
+            write(std_out,*) pt, fun_pt
+        end do
+    end if
+    write(std_out,*) ' '
 
 end subroutine print_scalar_filter
 !!***

@@ -193,7 +193,6 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  spacecom = l_mpi_enreg%comm_bandspinorfft
  gpu_option = dtset%gpu_option
  blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
- nslice = dtset%nslice
  !for debug
  l_useria=dtset%useria
 
@@ -227,14 +226,13 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
- ! TODO make consistent with slice_init...
- call slice_init(slice,nband,spacedim,nslice,dtset%tolwfr_diago,dtset%ecut,&
-     dtset%paral_kgb,l_mpi_enreg%bandpp,dtset%mdeg_filter,space,1,spacecom,&
-     me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
-     l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
-     gpu_thread_limit=dtset%gpu_thread_limit)
+ call slice_init(slice,dtset%nslice,nband,spacedim,dtset%tolwfr_diago,dtset%paral_kgb,&
+        dtset%paral_slice,dtset%mdeg_filter,dtset%tolfilter,dtset%ecut,l_mpi_enreg%bandpp,&
+        space,spacecom,me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+        dtset%spectral_cut,l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
+        gpu_thread_limit=dtset%gpu_thread_limit)
  
- call slice_allschedule(slice, xgx0, getghc_gsc1, nspinor)
+ call slice_allschedule(slice, xgx0, getghc_gsc1, xgeigen, nspinor)
 
  ! Release collective cg memory from GPU, will only use active task memory
 #ifdef HAVE_OPENMP_OFFLOAD

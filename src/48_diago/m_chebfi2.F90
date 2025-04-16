@@ -1347,6 +1347,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
         ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
         call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
         ! Fill DivResults(bandpp,1) with block of eigen(neigenpairs,1) of size bandpp
+        ! FIXME eigen is SPACE_R when DivResults is space_res.... 
         if (xmpi_comm_size(chebfi%spacecom) > 1) then
             ! reshape to access column blocks
             call xgBlock_reshape(eigen, 1, chebfi%neigenpairs) 
