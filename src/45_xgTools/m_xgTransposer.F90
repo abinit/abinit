@@ -9,7 +9,30 @@
 !! FUNCTION
 !! This module is to be user to go to "KGB" representation and to "linear
 !! algebra representation" It will replace most of prep_* subroutine
-!! This should really help to do the transposition operataion
+!! This should really help to do the transposition operation.
+!! 
+!! NOTES
+!! The transposer switches between two states. Let's assume for simplicity 
+!! that we have four MPI processes in the comm_cols communicator:
+!! 
+!!  STATE_LINALG=                       STATE_COLSROWS=
+!! 
+!!              bands                            bands
+!!      |-------------------|            |----|----|----|----|
+!!      |        P0         |            |    |    |    |    |
+!!      |                   |            |    |    |    |    |
+!!      |-------------------|            |    |    |    |    |
+!!      |        P1         |            |    |    |    |    |
+!!      |                   |            |    |    |    |    |
+!!  pw  |-------------------|        pw  | P0 | P1 | P2 | P3 |
+!!      |        P2         |            |    |    |    |    |
+!!      |                   |            |    |    |    |    |
+!!      |-------------------|            |    |    |    |    |
+!!      |        P3         |            |    |    |    |    |
+!!      |                   |            |    |    |    |    |
+!!      |-------------------|            |----|----|----|----|
+!! 
+!! The user can define the block sizes using ncolsColsRows_sub and nrowsLinalg_sub.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2017-2025 ABINIT group (J. Bieder, L. Baguet, I. Lygatsika)
