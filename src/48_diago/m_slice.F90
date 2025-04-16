@@ -106,7 +106,6 @@ module m_slice
     use m_xgTransposer
     use m_xg_ortho_RR
     use m_chebfi2
-    use m_polyfi
 
     use m_xmpi
     use m_xomp
@@ -698,7 +697,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     end interface
 
     ! Variables
-    type(polyfi_t) :: polyfi
+    type(chebfi_t) :: chebfi
     type(xgBlock_t) :: eigen_active
     type(xgBlock_t) :: residu_active
     integer :: nbdbuf
@@ -719,9 +718,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         lambda_minus = maxeig_global
         lambda_plus = chebfi%ecut
     else
-        lambda_minus = slice%lb(islice)! = polyfi%lambda_minus
-        lambda_plus = slice%ub(islice)! = polyfi%lambda_plus
-        mineig_global = guaranteed_lb! = polyfi%mineig_global
+        lambda_minus = slice%lb(islice)
+        lambda_plus = slice%ub(islice)
+        mineig_global = guaranteed_lb
         maxeig_global = chebfi%ecut
     end if
 
@@ -741,10 +740,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     oracle_factor = 1.d0
     oracle_min_occ = 0.d0
 
-    call chebfi_free(polyfi%chebfi)
-
     ! Define chebfi object from Colsrows representation
-    call chebfi_init(polyfi%chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp,&
+    call chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp,&
         ndeg_filter,nbdbuf,space,1,comm,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
         oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd=gpu_kokkos_nthrd,&
         gpu_thread_limit=gpu_thread_limit,from_linalg=.false.)
@@ -754,7 +751,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     !! eigen%rows == AX%cols 
     ! thus eigen has neigenpairs rows!!!!
     ! ========================= prepare input start ===========================================
-    !! at the end X0 is exactly the input of polyfi_run
+    !! at the end X0 is exactly the input of chebfi_runSlice
     ! Prepare the data on GPU (me_Xext_active is on CPU...)
     X0 = slice%me_Xext_active
     ! OR
