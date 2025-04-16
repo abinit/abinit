@@ -5,7 +5,7 @@
 !! FUNCTION
 !! This module contains the types and routines used to apply the Spectrum Slicing 
 !! method. It mainly defines 'slice' datatypes and associated methods. 
-
+!!
 !! NOTES
 !! Main features:
 !! - uses 'xgTools' implementation for matrix data structure.
@@ -72,7 +72,6 @@
 !!            |-------|-----------|
 !!
 !! At this point, parallel Rayleigh-Ritz is possible.
-!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 2018-2025 ABINIT group (IL)
@@ -241,8 +240,33 @@ module m_slice
 !! slice_init
 !!
 !! FUNCTION
-!! Initialize a 'slice' datastructure. Memory needed to compute
-!! Rayleigh quotients for neigenpairs and create nslice slices.
+!! Initialize a 'slice' datastructure.
+!!
+!! INPUTS TODO these are necessary for chebfi_init later
+!!  nslice= number of spectral slices
+!!  neigenpairs= number of requested eigenvectors/eigenvalues
+!!  spacedim= space dimension for one vector
+!!  tolerance= tolerance criterion on the residu to stop the minimization
+!!  ecut= plane-wave cut-off energy
+!!  paral_kgb= flag controlling (k,g,bands) parallelization
+!!  bandpp= number of 'bands' handled by a processor
+!!  ndeg_filter= polynomial degree of the polynomial filter (.i.e. number of H applications)
+!!  mineig_global= lower spectral bound, to be scaled to -1
+!!  maxeig_global= upper spectral bound, to be scaled to 1
+!!  lambda_minus= lower bound of interval to amplify
+!!  lambda_plus= upper bound of interval to amplify
+!!  is_lowpass= flag. True: use lowpass Chebyshev, false: use bandpass Heaviside expanded on Chebyshev
+!!  space= defines in which space we are (columns, rows, etc.)
+!!  eigenProblem= type of eigenpb: 1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
+!!  spacecom= MPI communicator
+!!  me_g0= 1 if this processors treats G=0, 0 otherwise
+!!  me_g0_ftt= 1 if this processors treats G=0 in FFT, 0 otherwise
+!!  paw= flag. TRUE if current calculation ses the PAW approach
+!!  comm_rows= "rows" communicator
+!!  comm_cols= "cols" communicator
+!!  gpu_option= flag. Enable GPU if true
+!!  gpu_kokkos_nthrd= number of OpenMP offloaded threads used
+!!  gpu_thread_limit= maximum number of OpenMP offloaded threads
 !!
 !! SOURCE
 
@@ -677,6 +701,10 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     type(polyfi_t) :: polyfi
     type(xgBlock_t) :: eigen_active
     type(xgBlock_t) :: residu_active
+    integer :: nbdbuf
+    integer :: oracle
+    real(dp) :: oracle_factor
+    real(dp) :: oracle_min_occ
     ! Arrays
     integer, pointer :: me_nrowsLinalg_ptr(:) => null() 
 
@@ -685,21 +713,46 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     call slice_getActiveTask(slice,nband_sub,spacecom_sub,mineig_global,maxeig_global,&
          lambda_minus,lambda_plus,nrowsLinalg_ptr)
 
-    ! Missing 
-    ! lambda_minus = ..
-    ! lambda_plus = ..
-    ! mineig_global = ..
-    ! maxeig_global = ..
+    ! Set spectral bounds
+    if (islice==1) then   
+        ! Note: mineig_global and maxeig_global are not used more in chebfi
+        lambda_minus = maxeig_global
+        lambda_plus = chebfi%ecut
+    else
+        lambda_minus = slice%lb(islice)! = polyfi%lambda_minus
+        lambda_plus = slice%ub(islice)! = polyfi%lambda_plus
+        mineig_global = guaranteed_lb! = polyfi%mineig_global
+        maxeig_global = chebfi%ecut
+    end if
 
     me_nrowsLinalg_ptr => slice%me_nrowsLinalg_slice
 
-    call polyfi_init(polyfi, slice%me_neigenpairs_slice, slice%tolerance, slice%ecut,&
-        slice%paral_kgb, slice%me_bandpp_slice, slice%space, slice%spacedim, 1, slice%me_comm_slice,&
-        slice%me_g0, slice%me_g0_fft, slice%paw, slice%comm_rows, slice%me_comm_slice,&
-        mineig_global, maxeig_global, lambda_minus, lambda_plus, slice%me_ndeg_slice, &
-        me_nrowsLinalg_ptr, slice%gpu_option, gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
-        gpu_thread_limit=slice%gpu_thread_limit)
+    ! ====
+    !polyfi%mineig_global = mineig_global
+    !polyfi%maxeig_global = maxeig_global
+    !polyfi%lambda_minus = lambda_minus
+    !polyfi%lambda_plus = lambda_plus
+    !polyfi%is_lowpass = is_lowpass
+    !polyfi%is_bandpass = (.not. is_lowpass)
+    
+    ! Oracle not used but passed to chebfi with deactivated values
+    oracle = 0
+    nbdbuf = 0
+    oracle_factor = 1.d0
+    oracle_min_occ = 0.d0
 
+    call chebfi_free(polyfi%chebfi)
+
+    ! Define chebfi object from Colsrows representation
+    call chebfi_init(polyfi%chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp,&
+        ndeg_filter,nbdbuf,space,1,comm,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
+        oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd=gpu_kokkos_nthrd,&
+        gpu_thread_limit=gpu_thread_limit,from_linalg=.false.)
+    ! ====
+
+    ! thing is
+    !! eigen%rows == AX%cols 
+    ! thus eigen has neigenpairs rows!!!!
     ! ========================= prepare input start ===========================================
     !! at the end X0 is exactly the input of polyfi_run
     ! Prepare the data on GPU (me_Xext_active is on CPU...)
@@ -711,53 +764,44 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! Do not do that: chebfi%xXColsRows = X0!!
     call xgBlock_setBlock(X0, chebfi%xXColsRows, total_spacedim, neigenpairs)
 
-    if (polyfi%gpu_option==ABI_GPU_OFFLOAD) then
+    ! create a new block object X0 that has different gpu_option than X0
+    if (slice%gpu_option==ABI_GPU_OFFLOAD) then
         ! Because X0 is on CPU but chebfi%xXColsRows on GPU
         ! FIXME either after or before setBlock
         ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
         ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_OFFLOAD)
     end if
-
-    ! TODO verify eigen is on cols. Otherwise reshape...
-    call xgBlock_setBlock(eigen, eigen_active, rows=1, cols=nband)
-    call xgBlock_setBlock(residu, residu_active, rows=1, cols=nband)
-
     ! Restrict all communications to current subcommunicator
     call xgBlock_setComm(chebfi%xXColsRows,spacecom)
     call xgBlock_setComm(chebfi%X,spacecom)
+
+    ! TODO verify eigen is on cols. Otherwise reshape...
+    call xgBlock_setBlock(eigen, eigen_active, rows=nband, cols=1)
+    call xgBlock_setBlock(residu, residu_active, rows=nband, cols=1)
+
     ! ========================= prepare input end =============================================
 
-    call polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen_active, residu_active, nspinor)
+    call chebfi_runSlice(chebfi, X0, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
+        mineig_globa, maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg)
 
     ! ========================= prepare output start ========================================= 
  
-    if (polyfi%gpu_option==ABI_GPU_OFFLOAD) then
-        ! TODO Deal with xgeigen and xgresidu
-        !call xgBlock_reshape(chebfi%xgeigen, (/1,nband_slice/))
-        !call xgBlock_reshape(chebfi%xgresidu, (/1,nband_slice/))
-        !call xgBlock_copy_from_gpu(chebfi%xgeigen)
-        !call xgBlock_copy_from_gpu(chebfi%xgresidu)
-        !call slice_blockCopy(chebfi%xgeigen,sliceAll%xgeigen_ovlp,1,j1,nband_slice,j2)
-        !call slice_blockCopy(chebfi%xgresidu,sliceAll%xgresidu_ovlp,1,j1,nband_slice,j2)
+    ! Recover X0 on CPU
+    if (slice%gpu_option==ABI_GPU_OFFLOAD) then    
+        ! if gpu: This is important! Because X0 is on CPU
+        ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
+        ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_DISABLED)
     end if
 
     ! Unitary test
     ABI_CHECK(cols(chebfi%xXColsRows)==ncols_slice,'wrong colsrows representation')
     write(*,'(a,i6,i6)') '# proc has # cols of slice X ', xmpi_comm_rank(spacecom), cols(chebfi%xXColsRows)
-    ! TODO think if we need to recover X0 on CPU ....
-    ! if gpu: This is important! Because X0 is on CPU
-    ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
-    ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_DISABLED)
-
-    ! Copy slice solution to the extended buffer (requires colsrows state)
-    call xgBlock_copy(chebfi%xXColsRows,X0)
-    ! FIXME same for eigen, residu?
 
     ! TODO we can also compute the merge on individual slices
     ! otherwise we do it outside?
     ! ========================= prepare output end ============================================
 
-    call polyfi_free(polyfi)
+    call chebfi_free(chebfi)
 
 end subroutine slice_run
 !!***

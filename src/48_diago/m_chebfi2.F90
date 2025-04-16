@@ -148,6 +148,7 @@ module m_chebfi2
  public :: chebfi_free
  public :: chebfi_memInfo
  public :: chebfi_run
+ public :: chebfi_runSlice
  public :: chebfi_lowpassFilter
  public :: chebfi_bandpassFilter
 
@@ -1059,6 +1060,210 @@ end subroutine chebfi_ampfactor
 
 !----------------------------------------------------------------------
 
+!!****f* m_chebfi/chebfi_runSlice
+!! NAME
+!! chebfi_runSlice
+!! 
+!! FUNCTION
+!! Apply Polynomial filtering to set of vectors.
+!! 
+!! NOTES
+!! List of differences with chebfi_run:
+!! - X0 input and output is in ColsRows MPI representation (not Linalg!).
+!! - the filter polynomial can be lowpass or bandpass.
+!! - Rayleigh Quotients are read from eigen.
+!! 
+!! INPUT
+!! chebfi <type(chebfi_t)>= all data used to apply Polynomial Filtering algorithm
+!! X0= eigenvector guess distributed in ColsRows representation
+!! getAX_BX= pointer to the function giving A|X> and B|X>
+!!           A is typically the Hamiltonian H, and B the overlap operator S
+!! getBm1X= pointer to the function giving B^-1|X>
+!!          B is typically the overlap operator S
+!! eigen= Rayleigh quotients associated to X0
+!! residu= empty array
+!! nspinor= number of spinorial components of the wavefunctions
+!! lambda_minus= lower interval to amplify/vanish for bandpass/lowpass
+!! lambda_plus= upper interval to amplify/vanish for bandpass/lowpass
+!! mineig_global= guaranteed lower bound for entire spectrum
+!! maxeig_global= guaranteed upper bound for entire spectrum
+!! is_lowpass= flag. True if Chebyshev otherwise use bandpass Chebyshev-Jackson
+!! nrows_blockrows= number of rows per MPI block in Linalg representation
+!! 
+!! SIDE EFFECTS
+!! chebfi= workspaces used
+!! X0= full set of vectors distributed in ColsRows representation 
+!! eigen= full eigenvalues
+!! residu= residuals, i.e. norm of (A-lambdaB)|X>
+!! 
+!! SOURCE
+
+subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
+        mineig_global,maxeig_global,lambda_minus,lambda_plus,is_lowpass,nrows_blockrows)
+
+    implicit none
+
+    !Arguments ------------------------------------    
+    type(chebfi_t) , intent(inout) :: chebfi
+    type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: residu
+    integer        , intent(in   ) :: nspinor
+    integer, pointer, intent(in  ) :: nrows_blockrows(:)
+    real(dp)       , intent(in   ) :: mineig_global 
+    real(dp)       , intent(in   ) :: maxeig_global
+    real(dp)       , intent(in   ) :: lambda_minus
+    real(dp)       , intent(in   ) :: lambda_plus
+    logical        , intent(in   ) :: is_lowpass
+    interface
+        subroutine getAX_BX(X,AX,BX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+            type(xgBlock_t), intent(inout) :: BX
+        end subroutine getAX_BX
+    end interface
+    interface
+        subroutine getBm1X(X,Bm1X)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: Bm1X
+        end subroutine getBm1X
+    end interface
+
+    !Local variables-------------------------------
+    integer :: spacedim, neigenpairs, num_proc, ierr
+    ! Arrays
+    integer, target, allocatable :: nrowsLinalg(:)
+    integer, pointer :: nrowsLinalg_ptr(:) => null()
+    real(dp) :: tsec(2)
+
+    ! *********************************************************************
+ 
+    if (chebfi%from_linalg) then
+        ABI_ERROR("chebfi should be from colsrows")
+    end if
+
+    spacedim = chebfi%spacedim
+    neigenpairs = chebfi%neigenpairs
+    num_proc = xmpi_comm_size(chebfi%spacecom)
+    chebfi%xXColsRows = X0
+    chebfi%eigenvalues = eigen
+
+    if(.not.allocated(nrowsLinalg)) ABI_MALLOC(nrowsLinalg,(num_proc))
+    nrowsLinalg_ptr => nrowsLinalg
+    nrowsLinalg = nrows_blockrows
+
+    ! Apply polynomial filtering to active MPI ColsRows block-column
+    if (is_lowpass) then
+        call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
+    else
+        call chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
+            maxeig_global,getAX_BX,getBm1X)
+    end if
+
+    ! MPI transpose to linalg state
+    call timab(tim_transpose,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+    if (chebfi%paral_kgb==1) then
+
+        ! Allocate chebfi%X
+        call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
+            STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0,&
+            gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
+            custom_ncolsColsRows=.true.,nrowsLinalg_sub=nrowsLinalg_ptr)
+        ! Note: bandpp is custom because it is created from resource allocator
+
+        call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,&
+            chebfi%AX%self,chebfi%xAXColsRows,STATE_COLSROWS)
+        call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,&
+            chebfi%BX%self,chebfi%xBXColsRows,STATE_COLSROWS)
+        ! Note: at this point chebfi%AX and chebfi%BX are empty. Must transpose
+        !       to fill with correct values.
+
+        chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+        chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+        chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+
+        call xmpi_barrier(chebfi%spacecom)
+    
+        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
+        call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
+        call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
+
+    else
+        call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
+        call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
+        call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
+    end if
+    call timab(tim_transpose,2,tsec)
+    ABI_NVTX_END_RANGE()
+
+    if (rows(chebfi%X) /= nrowsLinalg(xmpi_comm_rank(chebfi%spacecom))) then
+        ABI_ERROR("wrong linalg representation")
+    end if
+    write(*,'(a,i6,i6)') '# proc has # rows of slice X ', xmpi_comm_rank(chebfi%spacecom), rows(chebfi%X)
+
+    ! Apply Rayleigh-Ritz to active MPI Linalg row-block
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
+    call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,&
+        chebfi%gpu_option,solve_ax_bx=.true.)
+    ABI_NVTX_END_RANGE()
+
+    if ( ierr /= 0 ) then
+        ABI_WARNING("RayleighRitz did not work, but continue anyway.")
+    end if
+
+    ! Compute residual norm *squared*
+    if (chebfi%paw) then
+        call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
+    else
+        call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
+    end if
+    call xgBlock_colwiseNorm2(chebfi%AX%self,residu) ! performs MPI comm
+ 
+    ! Copy in Linalg representation (see chebfi_run, kept for reference)
+    ! call xgBlock_copy(chebfi%X,X0)
+    
+    ! MPI Transpose to recover colsrows state (X only)
+    call timab(tim_transpose,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+    if (chebfi%paral_kgb == 1) then
+        call xmpi_barrier(chebfi%spacecom)
+        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
+        if (xmpi_comm_size(chebfi%spacecom) == 1) then 
+            call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)
+        end if
+    else
+        call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)
+    end if
+    ABI_NVTX_END_RANGE()
+    call timab(tim_transpose,2,tsec)
+ 
+    ! Copy in ColsRows representation
+    call xgBlock_copy(chebfi%xXColsRows, X0)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+    if (gpu_option==ABI_GPU_KOKKOS) then
+        call gpu_device_synchronize()
+    end if
+#endif
+
+    ! Free transposer objects
+    if (chebfi%paral_kgb == 1) then
+        call xgTransposer_free(chebfi%xgTransposerX)
+        call xgTransposer_free(chebfi%xgTransposerAX)
+        call xgTransposer_free(chebfi%xgTransposerBX)
+    end if
+    
+    ! Free temporary memory
+    if (allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
+
+end subroutine chebfi_runSlice
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_chebfi/chebfi_lowpassFilter
 !! NAME
 !! chebfi_lowpasFilter
@@ -1176,22 +1381,22 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
 
     !A * Psi
     call timab(tim_getAX_BX,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
     call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
     call xgBlock_zero_im_g0(chebfi%xAXColsRows)
     call xgBlock_zero_im_g0(chebfi%xBXColsRows)
     ABI_NVTX_END_RANGE()
     call timab(tim_getAX_BX,2,tsec)
 
-    ABI_NVTX_START_RANGE(NVTX_POLYFI_CORE)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
     do ideg = 0, chebfi%ndeg_filter - 1
 
         ! X_next=2/r*(AX_next-c*X_next)-X_prev
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_NEXT_ORDER)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
         ABI_NVTX_END_RANGE()
 
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_SWAP_BUF)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
         if (chebfi%paral_kgb == 0) then
             call chebfi_swapInnerBuffers(chebfi, chebfi%spacedim, chebfi%neigenpairs)
         else
@@ -1201,7 +1406,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
 
         !A * Psi (=AX_next=A*X_next)
         call timab(tim_getAX_BX,1,tsec)
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
         call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
         call xgBlock_zero_im_g0(chebfi%xAXColsRows)
         call xgBlock_zero_im_g0(chebfi%xBXColsRows)
@@ -1306,7 +1511,7 @@ subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
     
     ! A * Psi
     call timab(tim_getAX_BX,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
     call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
     call xgBlock_zero_im_g0(chebfi%xAXColsRows)
     call xgBlock_zero_im_g0(chebfi%xBXColsRows)
@@ -1322,15 +1527,15 @@ subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
     damp = 1.d0 ! Jackson damping
     call xgBlock_saxpy(Heaviside%self, mu*damp, chebfi%xXColsRows)
 
-    ABI_NVTX_START_RANGE(NVTX_POLYFI_CORE)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
     do n = 0, ndeg - 1  
 
         ! X_next=2/r*(AX_next-c*X_next)-X_prev
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_NEXT_ORDER)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, n, center, one_over_r, two_over_r, getBm1X)
         ABI_NVTX_END_RANGE()
 
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_SWAP_BUF)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
         if (chebfi%paral_kgb == 0) then
             call chebfi_swapInnerBuffers(chebfi, chebfi%spacedim, chebfi%neigenpairs)
         else
@@ -1350,7 +1555,7 @@ subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
 
         !A * Psi (=AX_next=A*X_next)
         call timab(tim_getAX_BX,1,tsec)
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
         call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
         call xgBlock_zero_im_g0(chebfi%xAXColsRows)
         call xgBlock_zero_im_g0(chebfi%xBXColsRows)

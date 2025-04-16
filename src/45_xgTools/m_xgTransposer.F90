@@ -2,18 +2,15 @@
 !! NAME
 !!  m_xgTransposer
 !!
-!! TODO IML 04/04/2025 clean versions to always pass from my array version
-!! for ncolsColsRows or create wrappers so that if we give an array then we 
-!! turn it into scalar
-!!
 !! FUNCTION
-!! This module is to be user to go to "KGB" representation and to "linear
-!! algebra representation" It will replace most of prep_* subroutine
+!! This module is to be used to go to "KGB" representation and to "linear
+!! algebra representation". It will replace most of prep_* subroutine
 !! This should really help to do the transposition operation.
 !! 
 !! NOTES
 !! The transposer switches between two states. Let's assume for simplicity 
-!! that we have four MPI processes in the comm_cols communicator:
+!! that we have four MPI processes in the comm_cols communicator and
+!! a single process in the comm_rows communicator:
 !! 
 !!  STATE_LINALG=                       STATE_COLSROWS=
 !! 
@@ -32,8 +29,14 @@
 !!      |                   |            |    |    |    |    |
 !!      |-------------------|            |----|----|----|----|
 !! 
-!! The user can define the block sizes using ncolsColsRows_sub and nrowsLinalg_sub.
-!!
+!! The user can define custom block sizes using ncolsColsRows_sub and nrowsLinalg_sub.
+!! 
+!! TODO                                  IML 04/04/2025 
+!! -clean versions to always pass from my array version
+!!  for ncolsColsRows or create wrappers so that if we 
+!!  give an array then we turn it into scalar
+!! -add unitary tests for my custom transposition
+!! 
 !! COPYRIGHT
 !!  Copyright (C) 2017-2025 ABINIT group (J. Bieder, L. Baguet, I. Lygatsika)
 !!  This file is distributed under the terms of the
