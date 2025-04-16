@@ -3,10 +3,9 @@
 !! m_polyfi
 !!
 !! FUNCTION
-!! This module contains the types and routines used to apply 
-!! Polynomial Filtering method. It mainly defines 'polyfi' 
-!! datatypes and associated methods. It generalizes m_chebfi2
-!! for other filtering polynomials and arbitrary spectral bounds.
+!! This module contains the types and routines used to apply the Polynomial Filtering method, 
+!! extending Chebyshev filtering ('chebfi') to arbitrary spectral interval to be amplified and 
+!! new types of bandpass polynomials. It mainly defines 'polyfi' datatypes and associated methods. 
 !!
 !! COPYRIGHT
 !! Copyright (C) 2025- ABINIT group (IL)
@@ -33,7 +32,6 @@ module m_polyfi
     use m_abicore
     use m_errors
     use m_time, only : timab
-    use m_sort, only: sort_dp
     use m_io_tools, only : flush_unit
 
     use m_cgtools
@@ -63,21 +61,25 @@ module m_polyfi
     !Several (private) parameters
     !-------------------------------------------------
 
-    integer, parameter :: tim_getAX_BX     = 1754
     integer, parameter :: tim_transpose    = 1758
+    integer, parameter :: tim_RR           = 1757
 
     ! Public 'polyfi' datatype
     !-------------------------------------------------
     type, public :: polyfi_t 
 
-        type(chebfi_t) :: chebfi
-        type(xg_t) :: DivResults
-        real(dp) :: mineig_global
-        real(dp) :: maxeig_global
-        real(dp) :: lambda_minus
-        real(dp) :: lambda_plus
-        logical :: is_lowpass = .false.
-        logical :: is_bandpass = .true.
+        ! Memory workspace
+        type(chebfi_t) :: chebfi  
+
+        ! Spectral interval bounds
+        real(dp) :: mineig_global        ! lower spectral bound (will be scaled to -1)
+        real(dp) :: maxeig_global        ! upper spectral bound (will be scaled to 1)
+        real(dp) :: lambda_minus         ! lower bound of interval to amplify
+        real(dp) :: lambda_plus          ! upper bound of interval to amplify
+
+        ! Flags
+        logical :: is_lowpass = .true.   ! use lowpass polynomial (Chebyshev polynomial)
+        logical :: is_bandpass = .false. ! use bandpass polynomial (Heaviside expanded on Chebyshev)
 
     end type polyfi_t
 
@@ -94,20 +96,55 @@ module m_polyfi
 !!****f* m_polyfi/polyfi_init
 !! NAME
 !! polyfi_init
+!! 
+!! FUNCTION
+!! Initialize a 'polyfi' datastructure.
+!!
+!! INPUTS
+!!  neigenpairs= number of requested eigenvectors/eigenvalues
+!!  spacedim= space dimension for one vector
+!!  tolerance= tolerance criterion on the residu to stop the minimization
+!!  ecut= plane-wave cut-off energy
+!!  paral_kgb= flag controlling (k,g,bands) parallelization
+!!  bandpp= number of 'bands' handled by a processor
+!!  ndeg_filter= polynomial degree of the polynomial filter (.i.e. number of H applications)
+!!  mineig_global= lower spectral bound, to be scaled to -1
+!!  maxeig_global= upper spectral bound, to be scaled to 1
+!!  lambda_minus= lower bound of interval to amplify
+!!  lambda_plus= upper bound of interval to amplify
+!!  is_lowpass= flag. True: use lowpass Chebyshev, false: use bandpass Heaviside expanded on Chebyshev
+!!  space= defines in which space we are (columns, rows, etc.)
+!!  eigenProblem= type of eigenpb: 1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
+!!  spacecom= MPI communicator
+!!  me_g0= 1 if this processors treats G=0, 0 otherwise
+!!  me_g0_ftt= 1 if this processors treats G=0 in FFT, 0 otherwise
+!!  paw= flag. TRUE if current calculation ses the PAW approach
+!!  comm_rows= "rows" communicator
+!!  comm_cols= "cols" communicator
+!!  gpu_option= flag. Enable GPU if true
+!!  gpu_kokkos_nthrd= number of OpenMP offloaded threads used
+!!  gpu_thread_limit= maximum number of OpenMP offloaded threads
+!! 
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  polyfi <type(polyfi_t)>=all data used to apply Polynomial Filtering algorithm
+!!
+!! SOURCE
 
  subroutine polyfi_init(polyfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp,&
-         mineig_global,maxeig_global,lambda_minus,lambda_plus,ndeg_filter,space,&
-         eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
-         is_lowpass,is_bandpass,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
+         ndeg_filter,mineig_global,maxeig_global,lambda_minus,lambda_plus,is_lowpass,&
+         space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
+         gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
 
      implicit none
 
     ! Arguments ------------------------------------
-    integer       , intent(in   ) :: neigenpairs
     integer       , intent(in   ) :: bandpp
     integer       , intent(in   ) :: eigenProblem
     integer       , intent(in   ) :: me_g0
     integer       , intent(in   ) :: me_g0_fft
+    integer       , intent(in   ) :: neigenpairs
     integer       , intent(in   ) :: ndeg_filter
     integer       , intent(in   ) :: comm_cols
     integer       , intent(in   ) :: comm_rows
@@ -118,7 +155,6 @@ module m_polyfi
     integer       , intent(in   ) :: gpu_option
     logical       , intent(in   ) :: paw
     logical       , intent(in   ) :: is_lowpass
-    logical       , intent(in   ) :: is_bandpass
     real(dp)      , intent(in   ) :: mineig_global
     real(dp)      , intent(in   ) :: maxeig_global
     real(dp)      , intent(in   ) :: lambda_minus
@@ -135,14 +171,14 @@ module m_polyfi
     real(dp) :: oracle_factor
     real(dp) :: oracle_min_occ
 
- ! *********************************************************************
+    ! *********************************************************************
 
     polyfi%mineig_global = mineig_global
     polyfi%maxeig_global = maxeig_global
     polyfi%lambda_minus = lambda_minus
     polyfi%lambda_plus = lambda_plus
     polyfi%is_lowpass = is_lowpass
-    polyfi%is_bandpass = is_bandpass
+    polyfi%is_bandpass = (.not. is_lowpass)
     
     ! Oracle not used but passed to chebfi with deactivated values
     oracle = 0
@@ -150,44 +186,18 @@ module m_polyfi
     oracle_factor = 1.d0
     oracle_min_occ = 0.d0
 
+    call chebfi_free(polyfi%chebfi)
+
     ! Define chebfi object from Colsrows representation
     call chebfi_init(polyfi%chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp,&
-        ndeg_filter,nbdbuf,space,1,comm,me_g0,me_g0_fft,paw,comm_rows,comm,&
-        oracle,oracle_factor,oracle_min_occ,gpu_option,&
-        gpu_kokkos_nthrd=gpu_kokkos_nthrd,gpu_thread_limit=gpu_thread_limit,&
-        from_linalg=.false.)
-
-    call polyfi_allocateAll(polyfi)
+        ndeg_filter,nbdbuf,space,1,comm,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
+        oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd=gpu_kokkos_nthrd,&
+        gpu_thread_limit=gpu_thread_limit,from_linalg=.false.)
 
  end subroutine polyfi_init
  !!***
  
- !----------------------------------------------------------------------
-
-!!****f* m_polyfi/polyfi_allocateAll
-!! NAME
-!! polyfi_allocateAll
-
- subroutine polyfi_allocateAll(polyfi)
-
-    implicit none
-
-    type(polyfi_t), intent(inout) :: polyfi
-    integer :: space_res
-   
-    if (polyfi%chebfi%space==SPACE_C) then
-        space_res = SPACE_C
-    else if (polyfi%chebfi%space==SPACE_CR) then
-        space_res = SPACE_R
-    else
-        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
-    end if
-    call xg_init(polyfi%DivResults, space_res, polyfi%chebfi%bandpp, 1, gpu_option=polyfi%chebfi%gpu_option)
-
- end subroutine
- !!***   
-
- !----------------------------------------------------------------------
+!----------------------------------------------------------------------
 
 !!****f* m_polyfi/polyfi_free
 !! NAME
@@ -202,7 +212,6 @@ subroutine polyfi_free(polyfi)
     type(polyfi_t), intent(inout) :: polyfi
 
     call chebfi_free(polyfi%chebfi)
-    call xg_free(polyfi%DivResults)
 
 end subroutine polyfi_free
 !!***
@@ -214,22 +223,37 @@ end subroutine polyfi_free
 !! polyfi_run
 !! 
 !! FUNCTION
-!! Diagonalize individual slice in parallel. Remember this is in distributed 
-!! parallel region and there is no inter-slice communication.
+!! Apply Polynomial filtering to amplify spectral interval [lambda_minus,lambda_plus)
+!! from a given set of vectors, using computational resources reserved by spacecom only.
 !!
 !! INPUT
-!! X0     =eigenvector guess distributed for slice in colsrows representation
-!! chebfi =data structure used to compute Chebyshev polynomial 
+!! polyfi <type(polyfi_t)>= all data used to apply Polynomial Filtering algorithm
+!! X0= eigenvector guess distributed in ColsRows representation
+!! getAX_BX= pointer to the function giving A|X> and B|X>
+!!           A is typically the Hamiltonian H, and B the overlap operator S
+!! getBm1X= pointer to the function giving B^-1|X>
+!!          B is typically the overlap operator S
+!! eigen= Rayleigh quotients associated to X0
+!! residu= empty array
+!! nspinor= number of spinorial components of the wavefunctions
+!! 
+!! SIDE EFFECTS
+!! polyfi= workspaces used
+!! X0= full set of vectors distributed in ColsRows representation 
+!! eigen= full eigenvalues
+!! residu= residuals, i.e. norm of (A-lambdaB)|X>
 !! 
 !! SOURCE
 
-subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
+subroutine polyfi_run(polyfi, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     implicit none
 
     !Arguments ------------------------------------    
-    type(chebfi_t), intent(inout) :: chebfi
+    type(polyfi_t), intent(inout) :: polyfi
     type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: residu
     integer       , intent(in   ) :: nspinor
     interface
         subroutine getAX_BX(X,AX,BX)
@@ -264,32 +288,26 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     total_spacedim = chebfi%total_spacedim
     neigenpairs = chebfi%neigenpairs
     spacecom = chebfi%spacecom
-    comm_size = xmpi_comm_size(spacecom)
+    num_proc = xmpi_comm_size(spacecom)
+
+    ! 
+    chebfi%xXColsRows = X0
+    chebfi%eigenvalues = eigen
+
+    ! thing is
+    !! eigen%rows == AX%cols 
+    ! this eigen has neigenpairs rows!!!!
 
     ! Arrays
-    if(.not.allocated(nrowsLinalg)) ABI_MALLOC(nrowsLinalg,(comm_size))
+    if(.not.allocated(nrowsLinalg)) ABI_MALLOC(nrowsLinalg,(num_proc))
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg(:) = polyfi%nrows_blockrows
 
-    ! FIXME this part has been moved in slice_run since it can be isolated on input X0 
-    ! Note: we want to use the memory space of X0 but not the
-    ! same pointer because it is common for all slices. For this
-    ! reason we create a new xgBlock independent of X0 for slice.
-    ! Do not do that: chebfi%xXColsRows = X0!!
-    call xgBlock_setBlock(X0, chebfi%xXColsRows, total_spacedim, neigenpairs)
+    ! Compute row distribution across active resources
+    call distribute_vectors(num_proc, chebfi%total_spacedim, nrowsLinalg_ptr)
 
-    if (polyfi%gpu_option==ABI_GPU_OFFLOAD) then
-        ! Because X0 is on CPU but chebfi%xXColsRows on GPU
-        ! FIXME either after or before setBlock
-        ! call xgBlock_copy_from_gpu(chebfi%xXColsRows)
-        ! call xgBlock_set_gpu_option(chebfi%xXColsRows,ABI_GPU_OFFLOAD)
-    end if
 
-    ! Restrict all communications to current subcommunicator
-    call xgBlock_setComm(chebfi%xXColsRows,spacecom)
-    call xgBlock_setComm(chebfi%X,spacecom)
-
-    ! Create slice transposer using subcommunicator and allocate chebfi%X
+    ! Allocate chebfi%X in Linalg representation
     call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
         STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,spacecom,0,0,chebfi%me_g0_fft,&
         gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
@@ -308,14 +326,24 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     ! Body of computation
     ! ===============
     
-    ! Apply polynomial filtering (requires colsrows state)
+    ! Apply polynomial filtering (uses ColsRows representation)
     if (polyfi%is_lowpass) then
 
-        call polyfi_lowpass(polyfi,getAX_BX,getBm1X,nspinor)
+        ! Note: mineig_global and maxeig_global are not used more in chebfi
+        !lambda_minus = maxeig_global
+        !lambda_plus = chebfi%ecut
+
+        call chebfi_lowpassFilter(polyfi%chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
 
     else if (polyfi%is_bandpass) then
 
-        call polyfi_bandpass(polyfi,getAX_BX,getBm1X,nspinor)
+        !lambda_minus = slice%lb(islice) = polyfi%lambda_minus
+        !lambda_plus = slice%ub(islice) = polyfi%lambda_plus
+        !mineig_global = guaranteed_lb = polyfi%mineig_global
+        !maxeig_global = chebfi%ecut
+
+        call chebfi_bandpassFilter(polyfi%chebfi,lambda_minus,lambda_plus,mineig_global,&
+            maxeig_global,getAX_BX,getBm1X)
 
     end if
 
@@ -439,261 +467,6 @@ subroutine polyfi_run(polyfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor)
     if (allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
 
 end subroutine polyfi_run
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_polyfi/polyfi_lowpass
-!! NAME
-!! polyfi_lowpas
-!!
-!! FUNCTION
-!! Apply Lowpass filter using Chebyshev polynomial on a set of vectors.
-!!
-!! INPUTS
-!!  polyfi  = polynomial filtering datastructure
-!!  getAX_BX= pointer to the function giving A|X> and B|X>
-!!            A is typically the Hamiltonian H, and B the overlap operator S
-!!  getBm1X = pointer to the function giving B^-1|X>
-!!            B is typically the overlap operator S
-!!
-!! SIDE EFFECTS
-!!  polyfi <type(polyfi_t)>=all data used to apply Polynomial Filtering algorithm 
-!!  polyfi%chebfi%xXColsRows= Filtered vectors
-!!
-!! SOURCE
-
-subroutine polyfi_lowpass(polyfi,getAX_BX,getBm1X,nspinors)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(polyfi_t), intent(inout) :: polyfi
-    integer, intent(in) :: nspinor
-    interface
-        subroutine getAX_BX(X,AX,BX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-            type(xgBlock_t), intent(inout) :: BX
-        end subroutine getAX_BX
-    end interface
-    interface
-        subroutine getBm1X(X,Bm1X)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: Bm1X
-        end subroutine getBm1X
-    end interface
-    
-    !Local variables-------------------------------
-    type(chebfi_t) :: chebfi
-    integer :: ndeg_filter, ideg, ierr
-    integer, allocatable :: ndeg_filter_bands(:)
-    real(dp) :: center, radius, one_over_r, two_over_r
-
-    ! *********************************************************************
-
-    chebfi = polyfi%chebfi
-    ndeg_filter = chebfi%ndeg_filter 
-
-    if (chebfi%paral_kgb == 0) then
-        ABI_MALLOC(ndeg_filter_bands,(chebfi%neigenpairs))
-    else
-        ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
-    end if
-    ndeg_filter_bands(:) = ndeg_filter
-    
-    ! Filter parameters
-    center = (polyfi%lambda_plus + polyfi%lambda_minus)*0.5
-    radius = (polyfi%lambda_plus - polyfi%lambda_minus)*0.5
-
-    one_over_r = 1/radius
-    two_over_r = 2/radius
-
-    !A * Psi
-    call timab(tim_getAX_BX,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
-    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-    ABI_NVTX_END_RANGE()
-    call timab(tim_getAX_BX,2,tsec)
-
-    ABI_NVTX_START_RANGE(NVTX_POLYFI_CORE)
-    do ideg = 0, ndeg_filter - 1
-
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_NEXT_ORDER)
-        call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
-        ABI_NVTX_END_RANGE()
-
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_SWAP_BUF)
-        if (chebfi%paral_kgb == 0) then
-            call chebfi_swapInnerBuffers(chebfi, chebfi%spacedim, chebfi%neigenpairs)
-        else
-            call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
-        end if
-        ABI_NVTX_END_RANGE()
-
-        !A * Psi
-        call timab(tim_getAX_BX,1,tsec)
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
-        call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
-        call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-        call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-        ABI_NVTX_END_RANGE()
-        call timab(tim_getAX_BX,2,tsec)
-
-    end do ! ideg
-    ABI_NVTX_END_RANGE()
-
-    ! Scale X,AX,BX by amplification factor to reduce large values
-    ! FIXME DivResults obscure
-    ! il est juste utilisé pour multiplier le chebfi%xX,xAX,xBX par les valeurs de DivResults
-    ! ce serait mieux de renommer DivResults à RRQ
-    call chebfi_ampfactor(chebfi, polyfi%DivResults%self, polyfi%lambda_minus, &
-        polyfi%lambda_plus, ndeg_filter_bands)
-
-    if (allocated(ndeg_filter_bands)) then
-        ABI_FREE(ndeg_filter_bands)
-    end if
-
-end subroutine polyfi_lowpass
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_polyfi/polyfi_bandpass
-!! NAME
-!! polyfi_bandpass
-!!
-!! FUNCTION
-!! Apply Bandpass filter using Chebyshev-Jackson polynomial on a set of vectors.
-!!
-!! INPUTS
-!!  polyfi  = polynomial filtering datastructure
-!!  getAX_BX= pointer to the function giving A|X> and B|X>
-!!            A is typically the Hamiltonian H, and B the overlap operator S
-!!  getBm1X = pointer to the function giving B^-1|X>
-!!            B is typically the overlap operator S
-!!
-!! SIDE EFFECTS
-!!  polyfi <type(polyfi_t)>=all data used to apply Polynomial Filtering algorithm 
-!!  polyfi%chebfi%xXColsRows= Filtered vectors
-!!
-!! SOURCE
-
-subroutine polyfi_bandpass(polyfi,getAX_BX,getBm1X,nspinor)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(polyfi_t), intent(inout) :: polyfi
-    integer, intent(in) :: nspinor
-    interface
-        subroutine getAX_BX(X,AX,BX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-            type(xgBlock_t), intent(inout) :: BX
-        end subroutine getAX_BX
-    end interface
-    interface
-        subroutine getBm1X(X,Bm1X)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: Bm1X
-        end subroutine getBm1X
-    end interface
-
-    ! Local variables-------------------------------
-    type(chebfi_t) :: chebfi
-    integer :: ndeg, n, ierr
-    real(dp) :: center, radius, one_over_r, two_over_r
-    real(dp) :: ls, us, cdeg, mu, damp
-    type(xg_t) :: PolySum
-
-    ! *********************************************************************
-
-    chebfi = polyfi%chebfi
-    ndeg = chebfi%ndeg_filter 
-  
-    ! Allocate memory for Chebyshev expansion of Heaviside step function
-    call xg_init(PolySum, chebfi%space, chebfi%total_spacedim, chebfi%bandpp, chebfi%spacecom, &
-        gpu_option=chebfi%gpu_option)
-    call xgBlock_zero(PolySum%self)
-
-    ! Filter parameters
-    radius = (polyfi%maxeig_global - polyfi%mineig_global) / 2.d0
-    center = (polyfi%maxeig_global + polyfi%mineig_global) / 2.d0
-
-    one_over_r = 1/radius
-    two_over_r = 2/radius
-
-    ! Scaled slice bounds
-    ls = (polyfi%lambda_minus - center) / radius
-    us = (polyfi%lambda_plus - center) / radius
-    
-    ! A*Psi
-    call timab(tim_getAX_BX,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
-    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-    ABI_NVTX_END_RANGE()
-    call timab(tim_getAX_BX,2,tsec)
-
-    ! TODO IL 10/3/2025 
-    ! Deflate vectors ==========
-    !call xg_Borthonormalize(chebfi%xXColsRows,chebfi%xBxColsRows,ierr,1,chebfi%gpu_option,AX=chebfi%xAXColsRows)
-
-    ! Compute Chebyshev polynomial expansion on X iteratively on iline=0,nline
-    ! X_next=X -> iline=0 Hamiltonian applications
-    cdeg = Pi/(ndeg+2)
-    mu = 1/Pi*(ACOS(ls)-ACOS(us))
-    damp = 1.d0
-    !Xsum = mu(0)*damp(0)*X_next + Xsum
-    call xgBlock_saxpy(PolySum%self, mu*damp, chebfi%xXColsRows)
-
-    ABI_NVTX_START_RANGE(NVTX_POLYFI_CORE)
-    do n = 0, ndeg - 1  
-
-        ! X_next=2/r*(AX_next-c*X_next)-X_prev
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_NEXT_ORDER)
-        call chebfi_computeNextOrderChebfiPolynom(chebfi, n, center, one_over_r, two_over_r, getBm1X)
-        ABI_NVTX_END_RANGE()
-
-        ! xXColsRows=X_next
-        call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
-
-        !Xsum = damp(i+1)*mu(i+1)*X_next + Xsum
-        mu = 2/Pi * (SIN(*ACOS(ls)) - SIN((n+1)*ACOS(us)))/(n+1)
-        damp = ((1 - (n+1)/(ndeg+2))*SIN(cdeg)*COS((n+1)*cdeg) + 1/(ndeg+2)*COS(cdeg)*SIN((n+1)*cdeg))/SIN(cdeg)
-        call xgBlock_saxpy(PolySum%self, mu*damp, chebfi%xXColsRows)
-   
-        ! Store term before exit
-        ! AX_next=A*X_next -> iline+2 Hamiltonian applications
-        if (n==ndeg-1) then
-            ! X_next=Xsum (copy Xsum to X_next)
-            call xgBlock_copy(PolySum%self, chebfi%xXColsRows)
-        end if
-
-        ! Apply A and B to X
-        call timab(tim_getAX_BX,1,tsec)
-        ABI_NVTX_START_RANGE(NVTX_POLYFI_GET_AX_BX)
-        call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
-        call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-        call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-        ABI_NVTX_END_RANGE()
-        call timab(tim_getAX_BX,2,tsec)
-    
-    end do ! end iline
-    ABI_NVTX_END_RANGE()
-
-    ! Free Chebyshev expansion workspace
-    call xg_free(PolySum)
-
-end subroutine polyfi_bandpass
 !!***
 
 end module m_polyfi
