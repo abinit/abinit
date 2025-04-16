@@ -123,7 +123,7 @@ contains
     real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
     ! *********************************************************************
-    
+
     this%bcut=mband-nbdbuf
     this%nbcut=nbcut
     this%mband=extfpmd_mband
@@ -146,7 +146,7 @@ contains
     this%eshift=extfpmd_eshift
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     this%el_temp=merge(tphysel,tsmear,tphysel>tol8.and.occopt/=3.and.occopt/=9)
-    
+
     if(this%version==5) then
       ! Make a copy of mpi_enreg in order to cycle.
       call copy_mpi_enreg(mpi_enreg,this%mpi_enreg)
@@ -176,11 +176,11 @@ contains
     class(extfpmd_type),intent(inout) :: this
 
     ! *********************************************************************
-    
+
     if(this%version==5) then
       call destroy_mpi_enreg(this%mpi_enreg)
     end if
-    
+
     this%vtrial(:,:)=zero
     ABI_FREE(this%vtrial)
     this%nelectarr(:,:)=zero
@@ -353,7 +353,7 @@ contains
     real(dp),allocatable :: xcut_hybrid_tf(:,:)
 
     ! *********************************************************************
-    
+
     maxocc=two/(nsppol*nspinor)
     factor=dsqrt(two)/(PI*PI)*this%ucvol*this%el_temp**(1.5)
     gamma=(fermie-this%eshift)/this%el_temp
@@ -376,7 +376,7 @@ contains
       if(this%ebcut.lt.this%eshift) xcut=zero
       nelect=nelect+factor*djp12(xcut,gamma)
     end if
-    
+
     ! Computes extfpmd contribution to nelect summing
     ! over accessible states from bcut to mband, with
     ! integer band numbers. Total number of bands
@@ -496,7 +496,7 @@ contains
       end if
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
     end if
-    
+
     ! Computes extfpmd contribution to kinetic energy summing
     ! over accessible states from bcut to mband, with
     ! integer band numbers. Total number of bands
@@ -815,7 +815,7 @@ contains
     extfpmd_i_fg=(two*ekin)**(three/two)*ucvol/(six*PI*PI)
   end function extfpmd_i_fg
   !!***
-  
+
   !!***
   !!****f* ABINIT/m_extfpmd/extfpmd_chkinp
   !! NAME
@@ -839,9 +839,9 @@ contains
     ! Local variables -------------------------
     ! Scalars
     character(len=500) :: msg
-    
+
     ! *********************************************************************
-    
+
     extfpmd_chkinp=.false.
     if(.not.(dtset%occopt>=3.and.dtset%occopt<=9)) then
       write(msg,'(3a)') "ExtFPMD routines need metallic occupation option.",ch10,&

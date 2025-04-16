@@ -108,7 +108,7 @@ module m_gstate
  use m_alloc_hamilt_gpu
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -964,12 +964,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 !### 10. PAW related operations
 
-!Initialize paw_dmft, even if neither dmft not paw are used
+!Initialize paw_dmft, even if neither dmft nor paw are used
 !write(std_out,*) "dtset%usedmft",dtset%usedmft
  use_sc_dmft=dtset%usedmft
 ! if(dtset%paral_kgb>0) use_sc_dmft=0
  !Should be done inside init_sc_dmft
- if ( dtset%usedmft /= 0 .and. dtset%dmft_entropy > 0) then
+ if ( dtset%usedmft /= 0 .and. dtset%dmft_entropy > 0 .and. dtset%usedmft /= 10) then
    call data4entropyDMFT_init(paw_dmft%forentropyDMFT,&
    dtset%natom,&
    dtset%typat,&

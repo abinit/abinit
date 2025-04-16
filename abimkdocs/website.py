@@ -875,7 +875,7 @@ The full bibtex file is available [here](../abiref.bib).
     source ~abinit/set_abienv.sh
     ```
 
-    The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html) 
+    The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
     so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
 
     To execute the tutorials, create a working directory (`Work*`) and

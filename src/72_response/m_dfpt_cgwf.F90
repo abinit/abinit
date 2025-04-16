@@ -45,7 +45,7 @@ module m_dfpt_cgwf
  use m_getgh1c,     only : getgh1c, getdc1
  use m_fft,         only : fft_ug
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 

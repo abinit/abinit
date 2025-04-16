@@ -1,0 +1,62 @@
+# Crystalline silicon
+# Calculation of one-shot GW corrections with GWR code.
+
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
+ngkpt   2 2 2
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+# Include geometry and pseudos
+include "gwr_include.abi"
+
+################################
+# Dataset 3: G0W0 with GWR code
+################################
+optdriver  6                          # Activate GWR code
+ecutwfn    10                         # Truncate basis set when computing G.
+                                      # This parameter should be subject to convergence studies
+gwr_task "G0W0"                       # One-shot calculation
+getden_filepath "tgwr_1o_DS1_DEN"     # Density file
+getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states and 2x2x2 k-mesh
+
+gwr_ntau 6          # Number of minimax points
+gwr_boxcutmin  1.0  # This should be subject to convergence studies
+gwr_sigma_algo 2    # Use convolutions in the BZ for Sigma
+
+nband      100      # Bands to be used in Green's functions.
+ecuteps    6        # Cut-off energy of the planewave set to represent the dielectric matrix.
+                    # It is important to adjust this parameter.
+#ecutsigx    16     # Dimension of the G sum in Sigma_x.
+
+nkptgw      2       # number of k-point where to calculate the GW correction
+kptgw               # k-points in reduced coordinates
+   0.0    0.0    0.0
+   0.5    0.0    0.0
+
+bdgw       # calculate GW corrections for bands from 4 to 5
+   4  5
+   4  5
+
+# Spectral function (very coarse grid to reduce txt file size)
+#nfreqsp3 50
+#freqspmax3 5 eV
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi, tgwr_5.abi
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
+#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% [files]
+#%% files_to_test =
+#%%   tgwr_3.abo, tolnlines = 50, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GWR
+#%% description =
+#%%  Crystalline silicon
+#%%  Calculation of one-shot GW corrections with GWR code.
+#%%<END TEST_INFO>

@@ -37,7 +37,6 @@ MODULE m_ddk
  use m_cgtools
  use m_hamiltonian
  use m_initylmg
- use m_ebands
  use m_pawcprj
  use m_getgh1c
  use netcdf
@@ -782,11 +781,11 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: spin, npw_k, istwf_k
  class(ddkop_t),intent(inout) :: self
- type(crystal_t) :: cryst
  type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: spin, npw_k, istwf_k
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3)
@@ -866,7 +865,7 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SIDE EFFECTS
 !! Stores:
-!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
+!!  gh1c(2,npw1*nspinor)= <G|H^(1)|C> or <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
 !!                        (only kinetic+non-local parts if optlocal=0)
 !!
 !! SOURCE
@@ -910,7 +909,7 @@ subroutine ddkop_apply(self, eig0nk, npw_k, nspinor, cwave, cwaveprj)
    end do
 
  else
-   ! optnl 0 with DDK does not work as expected.
+   ! FIXME: optnl 0 with DDK does not work as expected.
    ! So I treat the kinetic term explicitly without calling getgh1c.
    do idir=1,3
      kinpw1 => self%gs_hamkq(idir)%kinpw_kp

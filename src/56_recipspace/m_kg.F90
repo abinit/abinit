@@ -314,7 +314,7 @@ end subroutine getmpw
 !! This smearing factor is also used to derived a modified kinetic
 !! contribution to stress, in another routine (forstrnps.f)
 !! If a vector potential is given then the expression also includes
-!! its contributions so the kinetic energy operator is given by 
+!! its contributions so the kinetic energy operator is given by
 !! $(1/2) (2 \pi)^2 (k+G)^2 + (2 \pi) A\cdot(k+G) + (1/2) A^2$
 !!
 !! Also, in order to break slightly the symmetry between axes, that causes

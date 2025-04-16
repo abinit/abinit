@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------------------------------------
-# fcc Gd 
+# fcc Gd
 # DFT+DMFT with Hubbard I solver with Self-consistency over Green function and density
 # and Spin Orbit Coupling.
 # ---------------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ occopt  3 tsmear 0.007000  # occopt=3 : fermi dirac
 nband  42 # number of bands nband/= dmftbandf for testing purpose.
 
 #MAGNETISM
-nsppol 1  
+nsppol 1
 nspden 4   # Non Colinear Magnetism
 nspinor 2  # Non Colinear Magnetism
 pawspnorb 1
@@ -47,7 +47,7 @@ shiftk 1/2 1/2 1/2
        1/2 0.0 0.0
        0.0 1/2 0.0
        0.0 0.0 1/2
-istwfk *1 
+istwfk *1
 
 ## == DFT+DMFT
 usedmft1 0
@@ -96,7 +96,7 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t48.abo, tolnlines = 50, tolabs = 2.0e-5, tolrel = 2.0e-3, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2

@@ -85,6 +85,7 @@ pseudos "au.hpc.paw"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% [paral_info]
 #%% nprocs_to_test = 1
 #%% max_nprocs = 1

@@ -120,6 +120,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
  real(dp),allocatable :: dyewdq(:,:,:,:,:,:),dyewdqdq(:,:,:,:,:,:)
  real(dp),allocatable :: dyewdqdq_tII(:,:,:,:,:,:)
  real(dp) :: qphon(3),vec1(3),vec2(3)
+ real(dp) :: rprimd_t(3,3),gprimd_t(3,3)
 
 ! *************************************************************************
 
@@ -247,6 +248,8 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
 
    !Transform back the first q-gradient direction to reduced coordinates
    !(treat it as an electric field)
+   rprimd_t=transpose(rprimd)
+   gprimd_t=transpose(gprimd)
    fac=two_pi**2
    do i1pert=1,natom
      do alpha=1,3
@@ -256,7 +259,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
              do gamma=1,3
                vec1(gamma)=dyewdqdq_tII(ii,alpha,i1pert,gamma,beta,delta)
              end do
-             call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+             call cart39(flg1,flg2,rprimd_t,natom+2,natom,gprimd_t,vec1,vec2)
              do gamma=1,3
                dyewdqdq_tII(ii,alpha,i1pert,gamma,beta,delta)=vec2(gamma)*fac
              end do

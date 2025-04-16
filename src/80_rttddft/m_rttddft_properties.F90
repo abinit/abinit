@@ -241,19 +241,19 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
  call entropy(dtset,energies)
 
  etotal = energies%e_kinetic     &
-      & + energies%e_hartree     &  
+      & + energies%e_hartree     &
       & + energies%e_xc          &
-      & + energies%e_localpsp    &   
+      & + energies%e_localpsp    &
       & + energies%e_corepsp     &
       & + energies%e_ewald       &
       & + energies%e_vdw_dftd    &
       & + energies%e_nlpsp_vfock &
-      & + energies%e_paw         
+      & + energies%e_paw
 !     & + energies%e_entropy
 !FB: @MT Should one add the last e_paw contribution or not?
 !FB: Seeems like all the other contributions are not relevant here @MT?
 !     & + energies%e_chempot     &
-!     & + energies%e_elecfield   &  
+!     & + energies%e_elecfield   &
 !     & + energies%e_magfield    &
 !     & + energies%e_nucdip      &
 !     & + energies%e_hybcomp_E0  &
@@ -273,7 +273,7 @@ end subroutine rttddft_calc_etot
 !!  rttddft_calc_eig
 !!
 !! FUNCTION
-!!  Computes eigenvalues from cg and ghc = <G|H|C> 
+!!  Computes eigenvalues from cg and ghc = <G|H|C>
 !!  and gsc = <G|S|C> if paw
 !!
 !! INPUTS
@@ -395,17 +395,17 @@ subroutine rttddft_calc_kin(kin,cg,dtset,ham_k,nband,npw,nspinor,occ0,wk,mpi_enr
 
 ! ***********************************************************************
 
- if (dtset%paral_kgb /= 1) then 
+ if (dtset%paral_kgb /= 1) then
    displ = 0
  else
-   me_bandfft = xmpi_comm_rank(mpi_enreg%comm_bandspinorfft) 
+   me_bandfft = xmpi_comm_rank(mpi_enreg%comm_bandspinorfft)
    displ = bandfft%rdispls(me_bandfft+1)
  end if
 
  do iband=1, nband
-   if (abs(occ0(iband))>tol8) then 
+   if (abs(occ0(iband))>tol8) then
       shift = npw*nspinor*(iband-1)
-      !FB: meanvalue_g does the mpi_sum over the bands inside, that's not very efficient since 
+      !FB: meanvalue_g does the mpi_sum over the bands inside, that's not very efficient since
       !FB: we could do it only once at the end
       !FB: From Lucas: meanvalue_g seems slow
       !FB: It maybe useful not to use meanvalue_g at all here
@@ -736,11 +736,11 @@ end subroutine rttddft_calc_ent
 !!  Computes macroscopic current density
 !!  In NC:
 !!    J(t) = -1/Omega Im[\sum_{n,k} f_{nk}(0) <\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]  - A N_v/Omega
-!!           + Gauge-dependent terms? 
+!!           + Gauge-dependent terms?
 !!  In PAW:
 !!    J(t) = -1/Omega Im[ \sum_{n,k} f_{nk}(0) <\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}> +
-!!                        \sum_{aij} \rho_{aij} <\phi_{aij}|\nabla|\phi_{aij}> - 
-!!                        \sum_{aij} \rho_{aij} <\tilde{\phi}_{aij}|\nabla|\tilde{\phi}_{aij}> ]  
+!!                        \sum_{aij} \rho_{aij} <\phi_{aij}|\nabla|\phi_{aij}> -
+!!                        \sum_{aij} \rho_{aij} <\tilde{\phi}_{aij}|\nabla|\tilde{\phi}_{aij}> ]
 !!           - A/Omega \int \tilde{n}(r,t)dr
 !! INPUTS
 !!  tdks <type(tdks_type)> = Main RT-TDDFT object
@@ -751,7 +751,7 @@ end subroutine rttddft_calc_ent
 !!  current = the macroscopic current
 !!
 !! NOTES
-!!  Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>] = <\tilde{psi}_{nk}|-i\nabla|\tilde{psi}_{nk}> 
+!!  Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>] = <\tilde{psi}_{nk}|-i\nabla|\tilde{psi}_{nk}>
 !!
 !! SOURCE
 subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
@@ -781,7 +781,7 @@ subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
                  & tdks%kg,dtset%mband,tdks%mcg,tdks%mcprj,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,     &
                  & dtset%natom,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%pawang,tdks%pawrad,tdks%pawrhoij,   &
                  & tdks%pawtab,dtset%znucl,psinablapsi)
- 
+
    ! 2 - Sum over bands and k-points
    tdks%current = 0.0_dp
    bdtot_index=0
@@ -801,7 +801,7 @@ subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
       end do !nkpt
 
       ! 3 - Add last contribution from vector potential times integral of the density
-      tdks%current(:,isppol) = tdks%current(:,isppol) + & 
+      tdks%current(:,isppol) = tdks%current(:,isppol) + &
                              & tdks%tdef%vecpot(:)*sum(tdks%rhor(:,isppol)-tdks%nhat(:,isppol))*tdks%ucvol/tdks%nfftf
 
       tdks%current(:,isppol) = -tdks%current(:,isppol)/tdks%ucvol

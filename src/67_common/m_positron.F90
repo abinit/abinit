@@ -34,11 +34,12 @@ module m_positron
  use m_dtset
  use m_dtfil
  use m_extfpmd
-
+ 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor
+ use m_paw_atomorb,  only : atomorb_type,destroy_atomorb
  use m_pawang,   only : pawang_type
  use m_paw_sphharm,     only : realgaunt
  use m_pawrad,   only : pawrad_type, simp_gen, nderiv_gen
@@ -64,7 +65,7 @@ module m_positron
  use m_drivexc,       only : mkdenpos
 
  use m_paw_sphharm, only : initylmr
- use m_pawpsp,      only : pawpsp_read_corewf
+ use m_pawpsp,      only : pawpsp_init_core
  use m_crystal,     only : crystal_t
  use m_mpinfo,      only : ptabs_fourdp,set_mpi_enreg_fft,unset_mpi_enreg_fft,destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
  use m_io_tools,    only : open_file,close_unit,get_unit
@@ -1887,19 +1888,20 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
  logical,parameter :: include_nhat_in_gamma=.false.,state_dependent=.true.
  logical,parameter :: kgamma_only_positron=.true.,wf_conjugate=.false.
- logical :: cprj_paral_band,ex,mykpt,mykpt_pos,use_timerev,use_zeromag,abinitcorewf,xmlcorewf
+ logical :: cprj_paral_band,mykpt,mykpt_pos,use_timerev,use_zeromag
  real(dp) :: arg,bessarg,cpi,cpr,cp11,cp12,cp21,cp22,gammastate,intg
  real(dp) :: lambda_v1,lambda_v2,lambda_core,lambda_pw,occ_el,occ_pos
  real(dp) :: pnorm,pr,rate,rate_ipm,ratec,ratec_ipm,rate_paw,rate_paw_ipm
  real(dp) :: scale_,units_,weight,weight_pos,wf_fact,wtk_k,wtk_k_pos,vec
- character(len=fnlen) :: filename,filename_dop
+ character(len=fnlen) :: filename_dop
  character(len=500) :: msg
  type(bandfft_kpt_type),pointer :: bandfft_kpt_el,bandfft_kpt_pos
  type(MPI_type) :: mpi_enreg_seq
  type(wffile_type) :: wff
+ type(atomorb_type), pointer :: atm=> null()
 !arrays
  integer,allocatable :: gbound(:,:),gbound_pos(:,:),kg_k(:,:),kg_k_pos(:,:)
- integer,allocatable :: lcor(:),lmncmax(:),my_ffttab(:),my_gridtab(:),ncor(:),nphicor(:)
+ integer,allocatable :: lmncmax(:),my_ffttab(:),my_gridtab(:),nphicor(:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  logical,allocatable :: have_intc(:,:,:),have_rad(:,:)
@@ -1907,7 +1909,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  real(dp) :: radsumnfftc(2),ylmgr(1,1,0),ylmr_nrm(1)
  real(dp),allocatable :: cwaveg(:,:),cwaveg_pos(:,:),cwaver(:),cwaver_pos(:),cwaver_pos_block(:)
  real(dp),allocatable :: cg_k_pos(:,:),cwaveaug(:,:,:,:),cwaveaug_pos(:,:,:,:)
- real(dp),allocatable :: denpot_dum(:,:,:),energycor(:),ff(:),fofgout_dum(:,:)
+ real(dp),allocatable :: denpot_dum(:,:,:),ff(:),fofgout_dum(:,:)
  real(dp),allocatable :: gamma(:,:),intc(:,:,:),j_bessel(:,:),jbes(:),mpibuf(:,:)
  real(dp),allocatable :: occ_k(:),occ_k_pos(:),pcart_k(:,:)
  real(dp),allocatable :: radint1(:,:),radint2(:,:),radint3(:,:)
@@ -2093,33 +2095,18 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
 !  Reading of core wave functions
    if (mpi_enreg%me_cell==0) then
+     ABI_MALLOC(atm,)
      do itypat=1,dtset%ntypat
-       filename=trim(filpsp(itypat)) ; iln=len(trim(filename))
-       abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filename(iln-6:iln)=='.abinit')
-       xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filename(iln-3:iln)=='.xml')
-       if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filename=filename(1:iln)//'.corewf'
-       if (abinitcorewf) filename=filename(1:iln-6)//'corewf.abinit'
-       if (xmlcorewf) filename=filename(1:iln-3)//'corewf.xml'
-       inquire(file=filename,exist=ex)
-       if (.not.ex) then
-         write(unit=filename,fmt='(a,i1)') 'corewf.abinit',itypat
-         inquire(file=filename,exist=ex)
-       end if
-       if (.not.ex) then
-         write(msg,'(3a)') 'Core wave-functions file is missing!',ch10,&
-&                          'Looking for: psp-name.corewf[.xml][.abinit] or corewf.dat'
-         ABI_ERROR(msg)
-       end if
-       call pawpsp_read_corewf(energycor,indlmncor(itypat)%value,lcor,lmncmax(itypat),&
-&       ncor,nphicor(itypat),pawrad(itypat),phicor(itypat)%value,&
-&       filename=filename)
-!      The following arrays are not used anymore
-       if (nphicor(itypat)>0) then
-         ABI_FREE(energycor)
-         ABI_FREE(lcor)
-         ABI_FREE(ncor)
-       end if
+       call pawpsp_init_core(atm,psp_filename=trim(filpsp(itypat)),radmesh=pawrad(itypat))
+       ABI_MALLOC(indlmncor(itypat)%value,(size(atm%indlmn(:,1)),atm%lmn_size)) 
+       ABI_MALLOC(phicor(itypat)%value,(atm%mesh_size,atm%ln_size))
+       indlmncor(itypat)%value=atm%indlmn
+       lmncmax(itypat)=atm%lmn_size
+       nphicor(itypat)=atm%ln_size
+       phicor(itypat)%value=atm%phi(:,:,1)
+       call destroy_atomorb(atm)
      end do
+     ABI_FREE(atm)
    end if
    if (mpi_enreg%nproc_cell>1) then
      call xmpi_bcast(indlmncor,0,mpi_enreg%comm_cell,ierr)
@@ -2135,7 +2122,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      lmn_size = pawtab(itypat)%lmn_size
      lmn2_size = pawtab(itypat)%lmn2_size
      basis_size = pawtab(itypat)%basis_size
-
      lmn_size_c=lmncmax(itypat)
      llmax=maxval(indlmncor(itypat)%value(1,1:lmn_size_c))
      l_size_max=max(l_size,2*llmax+1)
