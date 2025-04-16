@@ -55,7 +55,7 @@ module m_slicewf
  use m_xg
  use m_xgTransposer
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -269,7 +269,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 #endif
    !end if
 
-   ABI_NVTX_START_RANGE(NVTX_SPSL_NONLOP)
+   ABI_NVTX_START_RANGE(NVTX_SLICE_NONLOP)
    !Call nonlop
    if (l_paral_kgb==0) then
 
