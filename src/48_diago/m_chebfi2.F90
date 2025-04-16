@@ -149,8 +149,6 @@ module m_chebfi2
  public :: chebfi_memInfo
  public :: chebfi_run
  public :: chebfi_runSlice
- public :: chebfi_lowpassFilter
- public :: chebfi_bandpassFilter
 
  CONTAINS  !========================================================================================
 !!***
@@ -1083,8 +1081,8 @@ end subroutine chebfi_ampfactor
 !! eigen= Rayleigh quotients associated to X0
 !! residu= empty array
 !! nspinor= number of spinorial components of the wavefunctions
-!! lambda_minus= lower interval to amplify/vanish for bandpass/lowpass
-!! lambda_plus= upper interval to amplify/vanish for bandpass/lowpass
+!! lambda_minus= lower interval to amplify/diminish for bandpass/lowpass
+!! lambda_plus= upper interval to amplify/diminish for bandpass/lowpass
 !! mineig_global= guaranteed lower bound for entire spectrum
 !! maxeig_global= guaranteed upper bound for entire spectrum
 !! is_lowpass= flag. True if Chebyshev otherwise use bandpass Chebyshev-Jackson
@@ -1156,8 +1154,10 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
 
     ! Apply polynomial filtering to active MPI ColsRows block-column
     if (is_lowpass) then
+        ! [lambda_minus,lambda_plus) is diminished using Chebyshev
         call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
     else
+        ! [lambda_minus,lambda_plus) is amplified using Chebyshev-Jackson
         call chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
             maxeig_global,getAX_BX,getBm1X)
     end if
@@ -1275,13 +1275,13 @@ end subroutine chebfi_runSlice
 !!
 !! FUNCTION
 !! Apply Lowpass filter using Chebyshev polynomial on a set of vectors.
-!! Amplifies interval [-oo, lambda_minus).
+!! Amplifies interval [-oo, lambda_minus) and diminishes [lambda_minus,lambda_plus).
 !!
 !! INPUTS
 !! chebfi <type(chebfi_t)>=memory workspace used to apply filter
 !! eigen= Rayleigh quotients to use in amplification of chebfi%xXColsRows
-!! lambda_minus= lower bound of interval to vanish
-!! lambda_plus= upper bound of interval to vanish
+!! lambda_minus= lower bound of interval to diminish
+!! lambda_plus= upper bound of interval to diminish
 !! getAX_BX= pointer to the function giving A|X> and B|X>
 !!           A is typically the Hamiltonian H, and B the overlap operator S
 !! getBm1X= pointer to the function giving B^-1|X>
