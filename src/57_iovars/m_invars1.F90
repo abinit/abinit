@@ -39,6 +39,7 @@ module m_invars1
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
  use m_matrix,   only : mati3det
+ use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
 
 #if defined HAVE_GPU
  use m_gpu_toolbox
@@ -1794,12 +1795,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    endif
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : before inkpts'
-!call flush(std_out)
-!ENDDEBUG
-
-
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
      kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%getkerange_filepath, &
@@ -2068,7 +2063,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ucrpa',tread,'INT')
  if(tread==1) dtset%ucrpa=intarr(1)
 
- if (dtset%ucrpa > 0 .and. dtset%usedmft > 0) then
+ if (dtset%ucrpa > 0 .and. (dtset%usedmft > 0 .and. dtset%usedmft /= 10)) then
    write(msg, '(9a)' )&
    'usedmft and ucrpa are both activated in the input file ',ch10,&
    'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
@@ -2092,7 +2087,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
  dtset%optdcmagpawu=3
- if (dtset%usepawu/=0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
@@ -2590,7 +2585,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mdeg_filter = 6
    dtsets(idtset)%mdwall=10000_dp
    dtsets(idtset)%mep_mxstep=100._dp
-   dtsets(idtset)%mep_solver=0
+   dtsets(idtset)%mep_solver=MEP_SOLVER_STEEPEST
    dtsets(idtset)%mffmem=1
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
@@ -2611,11 +2606,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    else
      dtsets(idtset)%nc_xccc_gspace = 1
    end if
-   dtsets(idtset)%nctime=0
+   dtsets(idtset)%nctime = 0
    dtsets(idtset)%ncout = 1
    dtsets(idtset)%ndtset = -1
-   dtsets(idtset)%neb_algo=1
-   dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)
+   dtsets(idtset)%neb_algo = NEB_ALGO_IMPROVED_TAN
+   dtsets(idtset)%neb_cell_algo = NEB_CELL_ALGO_NONE
+   dtsets(idtset)%neb_spring(1:2) = (/0.05_dp,0.05_dp/)
    dtsets(idtset)%nfft = -1
    dtsets(idtset)%nfftdg = -1
 
@@ -2671,7 +2667,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%occ_orig(:,:)=zero
    dtsets(idtset)%optcell=0
    dtsets(idtset)%optforces=2
-   if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
+   if(dtsets(idtset)%usedmft>0 .and. dtsets(idtset)%usedmft/=0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
    dtsets(idtset)%oracle_factor=0.1_dp
@@ -2740,6 +2736,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prtden=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
    dtsets(idtset)%prtebands=1 ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
+   dtsets(idtset)%prtevk=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
    dtsets(idtset)%prtocc=0
@@ -2799,7 +2796,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%spnorbscl=one
    dtsets(idtset)%stmbias=zero
    dtsets(idtset)%strfact=100.0_dp
-   dtsets(idtset)%string_algo=1
+   dtsets(idtset)%string_algo=STRING_ALGO_SIMPLIFIED_EQUAL
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
 !  T

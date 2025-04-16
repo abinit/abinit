@@ -1,6 +1,5 @@
+*~
 configure
-config.h.in~
-.gitignore~
 .DS_Store
 .deps
 .directory
@@ -77,9 +76,6 @@ CMakeCache.txt
 install_manifest.txt
 cmake_install.cmake
 tests/TestBot_MPI*/*
-/.abilint
-/abilint.log
-/abilint.out
 /aclocal.m4
 /autom4te.cache
 /_build*
@@ -93,7 +89,6 @@ tests/TestBot_MPI*/*
 /config.pc
 /config.sh
 /config.status
-/configure~
 /directories.dot
 /dump_fb_version.py
 /stamp-h1
@@ -191,7 +186,6 @@ mkdocs_plugins/dist
 /doc/*/*.dvi
 /doc/*/*.log
 /doc/*/*.toc
-/doc/*/*/*~
 /doc/*/*.el
 
 # fallbacks
@@ -225,7 +219,6 @@ mkdocs_plugins/dist
 /shared/common/src/*/*.lst
 /shared/libpaw/src/*.lst
 /src/.abilint
-/src/*/*~
 /src/*/*.lst
 /src/abilint.log
 /src/abirules.log
@@ -260,7 +253,6 @@ mkdocs_plugins/dist
 /tests/ListOfTests.html
 /tests/ListOfTests.txt
 /tests/Test_suite
-/tests/*/*/*/*~
 /tests/*/*/*~
 /tests/Tmp
 /tests/test_suite.cpkl
@@ -342,7 +334,6 @@ CheckFB.py
 tests/built-in/Input/abinit
 tests/built-in/Input/fort.98
 tests/built-in/Input/testin_wannier90o_EBANDS.agr
-doc/input-web/*~
 mac-1P0-225.ac
 doc/topics/ConstrainedDFT.md
 doxygen_docs
@@ -355,7 +346,5 @@ venv
 # VSC
 .vscode/
 
-/home/users/lmacenul/abinit/build
 # R language
 .Rhistory
-

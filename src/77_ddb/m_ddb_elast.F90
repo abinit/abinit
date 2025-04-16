@@ -73,9 +73,9 @@ contains
 !! ncid=NC file handle (open in the caller)
 !!
 !! OUTPUT
-!! elast=relaxed-ion elastic tensor(without stress correction) (6*6) in Voigt notation
-!! elast_clamped=clamped-ion elastic tensor(without stress correction) (6*6) in Voigt notation
-!! elast_stress=relaxed-ion elastic tensor(with stress correction) (6*6) in Voigt notation
+!! elast=relaxed-ion elastic tensor (without stress correction) (6*6) in Voigt notation
+!! elast_clamped=clamped-ion elastic tensor (without stress correction) (6*6) in Voigt notation
+!! elast_stress=relaxed-ion elastic tensor (with stress correction) (6*6) in Voigt notation
 !!
 !! NOTES
 !! The elastic (compliance) tensors calculated here are under boundary conditions of
@@ -152,7 +152,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 
 !then consider the volume, because the unit above is in
 !Hartree, in fact the elastic constant should be in
-!the units of presure, the energy/volume
+!the units of pressure, the energy/volume
 !And then transform the unit to si unit using GPa
 !from Hartree/Bohr^3
 
@@ -571,7 +571,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
      end do
    end if
 
-!  then the complinace tensors with stress correction
+!  then the compliance tensors with stress correction
    write(message,'(5a)')ch10,&
 &   ' Compliance Tensor (relaxed ion with stress correction) (unit: 10^-2(GP)^-1):',ch10,&
 &   '  (at fixed electric field boundary condition)',ch10

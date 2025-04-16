@@ -121,6 +121,7 @@ contains
     ! TODO: gather kg from wfd
     ! TODO: mcg
     ! TODO: mcprj
+    integer :: exclude_bands(hdr%mband, hdr%nsppol)
 
     integer :: spaceComm, nprocs, rank, master
 
@@ -192,7 +193,7 @@ contains
                & nattyp=cryst%nattyp,nfft=nfft,ngfft=ngfftf,nkpt=mywfc%hdr%nkpt,npwarr= mywfc%hdr%npwarr , &
                &nsppol=dtset%nsppol,ntypat=cryst%ntypat,occ=mywfc%ebands%occ,&
                &pawang=pawang,pawrad=pawrad,pawtab=pawtab,prtvol=dtset%prtvol,psps=psps, &
-               &rprimd=cryst%rprimd,ucvol=cryst%ucvol, xred=cryst%xred)
+               &rprimd=cryst%rprimd,ucvol=cryst%ucvol, xred=cryst%xred, exclude_bands=exclude_bands)
 
     if (.not. present(kg)) then
        ABI_FREE(ptr_kg)

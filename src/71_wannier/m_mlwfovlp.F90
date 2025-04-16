@@ -282,7 +282,7 @@ contains
      &dtset,dtfil,eigen,gprimd,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred, exclude_bands)
 
 !Arguments ------------------------------------
 !scalars
@@ -310,6 +310,7 @@ class(abstract_wf), pointer :: mywfc
  !type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(:)
  type(pawtab_type),intent(in) :: pawtab(:)
+ integer, intent(inout) :: exclude_bands(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -337,7 +338,7 @@ class(abstract_wf), pointer :: mywfc
  integer,allocatable :: g1(:,:,:)
  integer,allocatable:: ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
- integer,allocatable :: proj_s_loc(:), exclude_bands(:,:)
+ integer,allocatable :: proj_s_loc(:)
  real(dp) :: real_lattice(3,3), recip_lattice(3,3)
  real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:)
  real(dp),allocatable :: eigenvalues_w(:,:,:)
@@ -438,7 +439,7 @@ class(abstract_wf), pointer :: mywfc
  ABI_MALLOC(proj_s_qaxis_loc,(3,mband))
  ABI_MALLOC(proj_z,(3,mband,nsppol))
  ABI_MALLOC(proj_zona,(mband,nsppol))
- ABI_MALLOC(exclude_bands, (mband,nsppol))
+ ! ABI_MALLOC(exclude_bands, (mband,nsppol))
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !2) Call to  Wannier setup
@@ -881,7 +882,7 @@ class(abstract_wf), pointer :: mywfc
  ABI_FREE(eigenvalues_w)
  ABI_FREE(M_matrix)
  ABI_FREE(A_matrix)
- ABI_FREE(exclude_bands)
+ ! ABI_FREE(exclude_bands)
 
  call mywfc%free()
  ABI_FREE_SCALAR(mywfc)
