@@ -26,7 +26,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 127
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 121
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -150,13 +150,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_SLICE_GET_AX_BX = 118
   integer, parameter :: NVTX_SLICE_TRANSPOSE = 119 
   integer, parameter :: NVTX_SLICE_RRQ = 120
-  integer, parameter :: NVTX_POLYFI_TRANSPOSE = 121
-  integer, parameter :: NVTX_POLYFI_RR = 122
-  integer, parameter :: NVTX_POLYFI_GET_AX_BX = 123
-  integer, parameter :: NVTX_POLYFI_CORE = 124
-  integer, parameter :: NVTX_POLYFI_NEXT_ORDER = 125
-  integer, parameter :: NVTX_POLYFI_SWAP_BUF = 126
-  integer, parameter :: NVTX_SLICE_SCHEDULE = 127
+  integer, parameter :: NVTX_SLICE_SCHEDULE = 121
 
 contains
 
@@ -287,12 +281,6 @@ contains
          & "SLICE_GET_AX_BX", &
          & "SLICE_TRANSPOSE", & 
          & "SLICE_RRQ", &
-         & "POLYFI_TRANSPOSE", &
-         & "POLYFI_RR", &
-         & "POLYFI_GET_AX_BX", &
-         & "POLYFI_CORE", &
-         & "POLYFI_NEXT_ORDER", &
-         & "POLYFI_SWAP_BUF", &
          & "SLICE_SCHEDULE" &
          ]
 
@@ -416,13 +404,7 @@ contains
     nvtx_ids(118)=NVTX_SLICE_GET_AX_BX
     nvtx_ids(119)=NVTX_SLICE_TRANSPOSE
     nvtx_ids(120)=NVTX_SLICE_RRQ
-    nvtx_ids(121)=NVTX_POLYFI_TRANSPOSE
-    nvtx_ids(122)=NVTX_POLYFI_RR
-    nvtx_ids(123)=NVTX_POLYFI_GET_AX_BX
-    nvtx_ids(124)=NVTX_POLYFI_CORE
-    nvtx_ids(125)=NVTX_POLYFI_NEXT_ORDER
-    nvtx_ids(126)=NVTX_POLYFI_SWAP_BUF
-    nvtx_ids(127)=NVTX_SLICE_SCHEDULE
+    nvtx_ids(121)=NVTX_SLICE_SCHEDULE
 
   end subroutine nvtx_init
 
