@@ -182,7 +182,7 @@ given by the following file:
 
 {% dialog tests/tutoplugs/Input/z2.py %}
 
-It works as follow:
+It will take a long time to run. It works as follow:
 
 * We define the system using z2pack.fp.System().
 

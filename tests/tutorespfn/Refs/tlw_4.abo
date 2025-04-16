@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.6.3 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h04 )
+.Starting date : Thu  3 Apr 2025.
+- ( at 16h41 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.abi
 - output file    -> tlw_4.abo
 - root for input  files -> tlw_4i
 - root for output files -> tlw_4o
@@ -1292,8 +1292,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/31-Ga.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/31-Ga.LDA.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/31-Ga.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/31-Ga.LDA.fhi
 - gallium, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 0 local
 - 31.00000   3.00000     11001                znucl, zion, pspdat
     6    7    3    0       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1306,8 +1306,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              3   -1.913945
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/15-P.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/15-P.LDA.fhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/15-P.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/15-P.LDA.fhi
 - phosphorus, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 2 local
 - 15.00000   5.00000     21003                znucl, zion, pspdat
     6    7    3    2       499   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2919,7 +2919,7 @@ LONGWAVE :  perts :  4.2 /  2.1 / 10.1
     3       2       3       3           -0.0000036577        -0.0000000000
 
  Electronic (clamped-ion) contribution to the piezoelectric tensor,
- in cartesian coordinates, (from sum rule of dynamic quadrupoles or P^1 tensor)
+ in cartesian coordinates, (from sum rule of P^1 tensor)
  efidir   atdir    qgrdir        real part           imaginary part
     1       1       1            0.0000000089        -0.0000000000
     1       2       1           -0.0000000007        -0.0000000000
@@ -2947,6 +2947,39 @@ LONGWAVE :  perts :  4.2 /  2.1 / 10.1
     2       1       3           -0.0134428578        -0.0000000000
     2       2       3            0.0000000000        -0.0000000000
     2       3       3            0.0000000096        -0.0000000000
+    3       1       3           -0.0000000007        -0.0000000000
+    3       2       3            0.0000000007        -0.0000000000
+    3       3       3            0.0000000089        -0.0000000000
+
+ Electronic (clamped-ion) contribution to the piezoelectric tensor,
+ in cartesian coordinates, (from sum rule of dynamic quadrupoles)
+ efidir   atdir    qgrdir        real part           imaginary part
+    1       1       1            0.0000000089        -0.0000000000
+    1       2       1           -0.0000000007        -0.0000000000
+    1       3       1            0.0000000007        -0.0000000000
+    2       1       1            0.0000000089        -0.0000000000
+    2       2       1           -0.0000000000        -0.0000000000
+    2       3       1           -0.0134428578        -0.0000000000
+    3       1       1            0.0000000076        -0.0000000000
+    3       2       1           -0.0134428578        -0.0000000000
+    3       3       1           -0.0000000007        -0.0000000000
+
+    1       1       2           -0.0000000007        -0.0000000000
+    1       2       2            0.0000000096        -0.0000000000
+    1       3       2           -0.0134428565        -0.0000000000
+    2       1       2           -0.0000000000        -0.0000000000
+    2       2       2            0.0000000096        -0.0000000000
+    2       3       2            0.0000000000        -0.0000000000
+    3       1       2           -0.0134428578        -0.0000000000
+    3       2       2            0.0000000096        -0.0000000000
+    3       3       2            0.0000000007        -0.0000000000
+
+    1       1       3            0.0000000007        -0.0000000000
+    1       2       3           -0.0134428565        -0.0000000000
+    1       3       3            0.0000000102        -0.0000000000
+    2       1       3           -0.0134428578        -0.0000000000
+    2       2       3            0.0000000000        -0.0000000000
+    2       3       3            0.0000000089        -0.0000000000
     3       1       3           -0.0000000007        -0.0000000000
     3       2       3            0.0000000007        -0.0000000000
     3       3       3            0.0000000089        -0.0000000000
@@ -6738,10 +6771,10 @@ P          mk1mem12       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        128.2  wall=        129.6
+- Proc.   0 individual time (sec): cpu=        131.3  wall=        131.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  39 WARNINGs and  82 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        128.2  wall=        129.6
++Overall time at end (sec) : cpu=        131.3  wall=        131.4

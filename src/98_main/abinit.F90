@@ -119,7 +119,7 @@ program abinit
  use m_manage_cuda
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -382,7 +382,7 @@ program abinit
 #endif
 
 !Enable GPU markers (NVTX/ROCTX) if required
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  NVTX_INIT()
 #endif
 

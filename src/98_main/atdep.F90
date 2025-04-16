@@ -46,6 +46,7 @@ program atdep
   use m_io_tools
   use m_argparse
 
+  use m_time,             only : asctime, timein, timab
   use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
@@ -60,7 +61,7 @@ program atdep
   use m_tdep_latt,        only : Lattice_type, tdep_make_latt, tdep_shift_xred
   use m_tdep_sym,         only : tdep_make_sym, Symetries_type, tdep_destroy_sym
   use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_read_input, tdep_distrib_data, tdep_init_MPIdata, &
-&                                tdep_destroy_mpidata, Input_type, MPI_enreg_type, tdep_destroy_invar
+&                                tdep_destroy_mpidata, Input_type, MPI_enreg_type, tdep_destroy_invar, version_string
   use m_tdep_utils,       only : Coeff_Moore_type, tdep_calc_MoorePenrose, tdep_MatchIdeal2Average, tdep_calc_model
   use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type, tdep_destroy_qpt
   use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
@@ -74,6 +75,9 @@ program atdep
   integer :: stdout,stdlog,nshell_max,ii,jj,ishell,istep,iatom
   integer :: print_mem_report
   double precision :: U0
+  real(dp) :: tcpu, tcpui, twall, twalli
+  real(dp) :: tsec(2)
+  character(len = 24):: start_datetime
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
   double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
   double precision, allocatable :: Phi1(:)  ,Phi1_coeff(:,:)
@@ -110,6 +114,11 @@ program atdep
  call abi_io_redirect(new_io_comm=xmpi_world)
 ! Initialize MPI
  call xmpi_init()
+
+ ! Initialisation of the timing
+ call timein(tcpui, twalli)
+ start_datetime = asctime()
+ call timab(1, 0, tsec)
 
 ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
@@ -513,69 +522,73 @@ program atdep
  call PHdos%free()
 
 
- if (Invar%order==2) then
-
-   ABI_FREE(distance)
-   ABI_FREE(Rlatt_cart)
-   call DDB%free()
-   call Ifc%free()
-   call Crystal%free()
-   call tdep_destroy_eigen2nd(Eigen2nd_path)
-   call tdep_destroy_eigen2nd(Eigen2nd_MP)
-   call tdep_destroy_sym(Sym)
-   call tdep_destroy_qbz(Qbz)
-   call tdep_destroy_qpt(Qpt)
-   call tdep_destroy_invar(Invar)
-   call tdep_destroy_mpidata(MPIdata)
-
-   call tdep_print_Aknowledgments(Invar)
-   call flush_unit(stdout)
-   call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
-   call flush_unit(stdlog)
-   close(unit=stdout)
-   call xmpi_end()
-   stop
- end if
-
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=# CALCULATION OF THE 3rd ORDER =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-
- if (MPIdata%iam_master) then
-   call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
- end if
- call tdep_calc_alpha_gamma(distance,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
+!==========================================================================================
+!===================== CALCULATION OF THE 3rd ORDER =======================================
+!==========================================================================================
+ if (Invar%order>2) then
+   if (MPIdata%iam_master) then
+     call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
+   end if
+   call tdep_calc_alpha_gamma(distance,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 
 !FB Begin Lifetime
 !FB call tdep_calc_lifetime1(Crystal,distance,Eigen2nd_MP,Ifc,Invar,Lattice,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 !FB End Lifetime
+ end if
 
- ABI_FREE(Rlatt_cart)
+!==========================================================================================
+!===================== End the calculation ================================================
+!==========================================================================================
+
+!Write acknowledgements
+ call tdep_print_Aknowledgments(Invar)
+ call flush_unit(stdout)
+
+ call timein(tcpu, twall)
+ tsec(1)=tcpu-tcpui; tsec(2)=twall-twalli
+
+!Free memory
  ABI_FREE(distance)
+ ABI_FREE(Rlatt_cart)
  call tdep_destroy_eigen2nd(Eigen2nd_path)
  call tdep_destroy_eigen2nd(Eigen2nd_MP)
- call tdep_destroy_shell(natom,3,Shell3at)
- ABI_FREE(Phi3_ref)
- if (Invar%order.eq.4) then
-   call tdep_destroy_shell(natom,4,Shell4at)
-   ABI_FREE(Phi4_ref)
+
+ if (Invar%order>2) then
+   call tdep_destroy_shell(natom,3,Shell3at)
+   ABI_FREE(Phi3_ref)
+   if (Invar%order.eq.4) then
+     call tdep_destroy_shell(natom,4,Shell4at)
+     ABI_FREE(Phi4_ref)
+   end if
  end if
+
  call Ifc%free()
  call DDB%free()
  call Crystal%free()
  call tdep_destroy_sym(Sym)
  call tdep_destroy_qbz(Qbz)
  call tdep_destroy_qpt(Qpt)
+
+ if (MPIdata%iam_master) then
+   ! Write YAML document with the final summary.
+   ! we use this doc to test whether the calculation is completed.
+   write(stdlog, "(a)")""
+   write(stdlog, "(a)")"--- !FinalSummary"
+   write(stdlog, "(a)")"program: atdep"
+   write(stdlog, "(2a)")"version: ", trim(version_string)
+   write(stdlog, "(2a)")"start_datetime: ", start_datetime
+   write(stdlog, "(2a)")"end_datetime: ", asctime()
+   write(stdlog, "(a, f13.1)")"overall_cpu_time: ", tsec(1)
+   write(stdlog, "(a, f13.1)")"overall_wall_time: ", tsec(2)
+   write(stdlog, "(a, i0)")"mpi_procs: ", MPIdata%nproc
+   write(stdlog, "(a)")"..."
+   call flush_unit(stdlog)
+ end if
+
  call tdep_destroy_invar(Invar)
  call tdep_destroy_mpidata(MPIdata)
 
-!==========================================================================================
-!================= Write the last informations (aknowledgments...)  =======================
-!==========================================================================================
- call tdep_print_Aknowledgments(Invar)
- call flush_unit(stdout)
+!Memory analysis
  call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
  call flush_unit(stdlog)
  close(unit=stdout)

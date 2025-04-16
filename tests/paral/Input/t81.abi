@@ -22,6 +22,7 @@ fit_iatom = 0
 #%% [setup]
 #%% executable = multibinit
 #%% test_chain = t81.abi
+#%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10

@@ -1,0 +1,41 @@
+#  Calculation of WFK files with empty states and direct diagonalization
+
+# Include geometry and pseudos
+include "gwr_include.abi"
+
+# Generate 3 WFK files with increased BZ sampling.
+ndtset 3
+ngkpt1 2 2 2
+ngkpt2 4 4 4
+ngkpt3 6 6 6
+
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+###########################################
+# Direct diago with empty states
+###########################################
+optdriver  6                         # Activate GWR code
+gwr_task "HDIAGO"                    # Direct diagonalization
+nband     400                        # Number of (occ + empty) bands
+getden_filepath "tgwr_1o_DS1_DEN"    # Density file used to build H[n]
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi, tgwr_5.abi
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
+#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% [files]
+#%% files_to_test =
+#%%   tgwr_2.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GWR
+#%% description =
+#%%  Calculation of WFK files with empty states with direct diagonalization
+#%%<END TEST_INFO>
