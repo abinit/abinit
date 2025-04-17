@@ -1371,20 +1371,25 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
             shift = 0
         end if
         ! Fill DivResults(bandpp,1) with block of eigen(neigenpairs,1) of size bandpp
-        ! workaround to copy from SPACE_R to space_res
-        ABI_MALLOC_IFNOT(theta_reshaped,(2,chebfi%bandpp))
-        theta_reshaped_ptr => theta_reshaped
         ! reshape to access column range
         call xgBlock_reshape(DivResults%self, 1, chebfi%bandpp)
         call xgBlock_reshape(eigen, 1, chebfi%neigenpairs)
-        call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
-        call xgBlock_reverseMap(eigen_block, theta, rows=1, cols=chebfi%bandpp)
-        theta_reshaped = 0.d0
-        theta_reshaped(1,1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
-        call xgBlock_map(eigen_block, theta_reshaped_ptr, space_res, rows=1, &
-            cols=chebfi%bandpp, gpu_option=chebfi%gpu_option)
-        call xgBlock_copy(eigen_block, DivResults%self)
-        ABI_SFREE(theta_reshaped)
+        if (space_res==SPACE_R) then
+            call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
+            call xgBlock_copy(eigen_block, DivResults%self)
+        else
+            ! workaround to copy from SPACE_R to SPACE_C
+            ABI_MALLOC_IFNOT(theta_reshaped,(2,chebfi%bandpp))
+            theta_reshaped_ptr => theta_reshaped
+            call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
+            call xgBlock_reverseMap(eigen_block, theta, rows=1, cols=chebfi%bandpp)
+            theta_reshaped = 0.d0
+            theta_reshaped(1,1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
+            call xgBlock_map(eigen_block, theta, space_res, rows=1, &
+                cols=chebfi%bandpp, gpu_option=chebfi%gpu_option)
+            call xgBlock_copy(eigen_block, DivResults%self)
+            ABI_SFREE(theta_reshaped)
+        end if
         ! restore dimensions
         call xgBlock_reshape(eigen, chebfi%neigenpairs, 1) 
         call xgBlock_reshape(DivResults%self, chebfi%bandpp, 1) 
