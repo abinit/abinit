@@ -479,6 +479,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     real(dp) :: tol12 = 1.0e-12
     ! Derived types
     type(xg_t) :: resid0
+    type(xgBlock_t) :: eigen_sorted
     type(xgBlock_t) :: slicecols_in
     type(xgBlock_t) :: slicecols_ext_out
     ! Arrays
@@ -531,11 +532,14 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     call xgBlock_reverseMap(eigen, theta_, rows=1, cols=neigenpairs)
     call xgBlock_reverseMap(resid0%self, resid_, rows=1, cols=neigenpairs)
  
-    ! Sort thetas in increasing order and store permutation
+    ! Sort thetas in increasing order and store result to eigen
     theta_reshaped(1:neigenpairs) = theta_(1,1:neigenpairs)
     permute_cols_ptr => permute_cols
     permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
     call sort_dp(neigenpairs, theta_reshaped, permute_cols_ptr, tol12)
+    theta_(1,1:neigenpairs) = theta_reshaped(1:neigenpairs)
+    call xgBlock_map(eigen_sorted, theta_, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
+    call xgBlock_copy(eigen_sorted, eigen)
 
     ! Minimum and maximum quotients
     lambda_minus = theta_reshaped(1)
