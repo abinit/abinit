@@ -1193,8 +1193,8 @@ subroutine slice_allocateResources(slice)
     
     ! Call the subroutine to assign tasks (=slices) to processes
     call assign_tasks_to_processes(task_nprocs, assigned_task)
-    do iproc = 1, slice%nslice
-        write(*,'(a,i5,a,i5)') "Process ", iproc, " is in task ", slice%lookup_proc(iproc)
+    do iproc = 1, slice%nproc
+        write(*,'(a,i5,a,i5)') "Process ", iproc-1, " is in task ", slice%lookup_proc(iproc)
     end do
 
     ! Free temporary memory
@@ -1525,8 +1525,6 @@ subroutine assign_tasks_to_processes(allocations, processes)
     
     ! *********************************************************************
 
-    write(std_out,*) 'allocations=', allocations
-    write(std_out,*) 'processes=', processes
     j = 1
     do i = 1, size(allocations)
         processes(j:j + allocations(i) - 1) = i - 1  
@@ -1619,18 +1617,12 @@ subroutine fair_allocation(n, m, w, p, x)
 
     ! Local variables
     integer :: i, total_allocated
-    real(dp) :: total_weight, lower, upper, mid, multiplier
+    real(dp) :: total_work, lower, upper, mid, multiplier
     integer :: allocation(n)
 
     ! *********************************************************************
 
-    write(std_out,*) 'n=',n
-    write(std_out,*) 'm=',m
-    write(std_out,*) 'w=',w
-    write(std_out,*) 'p=',p
-
-    ! Calculate total weight
-    total_weight = real(sum(w))
+    total_work = dot_product(m, w)
 
     ! Binary search for the optimal multiplier: divide search interval in half
     lower = 0.d0
@@ -1638,55 +1630,49 @@ subroutine fair_allocation(n, m, w, p, x)
     do while (upper - lower > 1.d0)
         mid = (lower + upper) / 2.d0
         do i = 1, n
-            allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * mid + 0.d5)
+            allocation(i) = int((real(w(i)) * real(m(i)) / total_work) * mid + 0.d5)
         end do
-        write(std_out,*) 'allocation (bs), total_allocated (bs)=', allocation, total_allocated
         total_allocated = sum(allocation(1:n))
 
         ! Adjust binary search bounds
-        if (total_allocated > real(p)) then
+        if (total_allocated > p) then
             upper = mid
         else
             lower = mid
         end if
     end do
-    write(std_out,*) 'allocation (init)=', allocation
-    write(std_out,*) 'total_allocated (init)=', total_allocated
+
+    ! Fair rounding: tasks with heavier workload get extra resource units
 
     ! Final allocation after binary search converges
     multiplier = (lower + upper) / 2.d0
     do i = 1, n
-        allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * multiplier + 0.d5)
+        allocation(i) = int((real(w(i)) * real(m(i)) / total_work) * multiplier + 0.d5)
     end do
-    write(std_out,*) 'allocation (init)=', allocation
 
     ! Adjust total allocation to exactly match p
     total_allocated = sum(allocation(1:n))
-    write(std_out,*) 'total_allocated (init)=', total_allocated
 
-    !if (total_allocated < p) then
-    !    do while (total_allocated < p)
-    !        ! Add one resource to the group closest to its ideal allocation
-    !        call adjust_allocation(n, m, w, allocation, total_weight, p, total_allocated)
-    !        write(std_out,*) 'allocation (adjust)=', allocation
-    !        total_allocated = sum(allocation(1:n))
-    !        write(std_out,*) 'total_allocated (adjust)=', total_allocated
-    !    end do
-    !else if (total_allocated > p) then ! FIXME error infinite loop
-    !    do while (total_allocated > p)
-    !        ! Remove one resource from the over-allocated group
-    !        call reduce_allocation(n, m, w, allocation, total_weight, p, total_allocated)
-    !        write(std_out,*) 'allocation (reduce)=', allocation
-    !        total_allocated = sum(allocation(1:n))
-    !        write(std_out,*) 'total_allocated (reduce)=', total_allocated
-    !    end do
-    !end if
-
-    write(std_out,*) 'allocation (final)=', allocation
-    write(std_out,*) 'total_allocated(final)=', total_allocated
+    if (total_allocated < p) then
+        do while (total_allocated < p)
+            ! Add one resource to the group closest to its ideal allocation
+            call adjust_allocation(n, m, w, allocation, total_work, p, total_allocated)
+            total_allocated = sum(allocation(1:n))
+        end do
+    else if (total_allocated > p) then ! FIXME error infinite loop
+        do while (total_allocated > p)
+            ! Remove one resource from the over-allocated group
+            call reduce_allocation(n, m, w, allocation, total_work, p, total_allocated)
+            total_allocated = sum(allocation(1:n))
+        end do
+    end if
 
     ! Assign the final allocation to the output variable
     x = allocation
+
+    do i=1,n
+        write(std_out,*) '# proc # workload # allocated resources', i, real(w(i)*m(i))/real(x(i)), x(i)
+    end do
 
 end subroutine fair_allocation
 !!***
