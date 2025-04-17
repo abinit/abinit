@@ -10,8 +10,10 @@ add_library(39_libpaw STATIC
   m_paw_numeric.F90
   m_paw_sphharm.F90
   m_paw_io.F90
+  m_paw_lmn.F90
   m_pawang.F90
   m_pawrad.F90
+  m_paw_atomorb.F90
   m_pawtab.F90
   m_paw_an.F90
   m_paw_ij.F90

@@ -42,6 +42,7 @@ module m_mpi_setup
  use m_dtset,        only : dataset_type
  use m_kg,           only : getmpw
  use m_dtfil,        only : mkfilename
+ use m_mep,          only : NEB_CELL_ALGO_NONE
 
  implicit none
 
@@ -96,7 +97,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !scalars
  integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo, prtvol
  integer :: isppol,jdtset,marr,mband_lower,mband_upper
- integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,optdriver
+ integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,max_mpw,optdriver
  integer :: mband_mem
  integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
  integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
@@ -949,6 +950,18 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
    dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
 
+   ! For RT-TDDFT make sure that we use the thread-safe version of FFT
+   ! in case of Goedecker's FFT with more than one thread
+   if (optdriver==RUNL_RTTDDFT) then
+      if (dtsets(idtset)%ngfft(7)/100==FFT_SG .and. xomp_get_num_threads(open_parallel=.True. )>1) then
+         write(msg,'(3a)') 'fftalg=1XX is not thread-safe, so it cannot be used with nthreads>1',ch10,&
+         'thus switching fftalg to a thread-safe version.'
+         ABI_WARNING(msg)
+         dtsets(idtset)%ngfft(7) = 401
+         dtsets(idtset)%ngfftdg(7) = 401
+      end if
+   end if
+
    fftalg_read=.false.
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fftalg',tread0,'INT')
 
@@ -1000,7 +1013,19 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      kpt_with_shift(3,:)=kpt_with_shift(3,:)+qphon(3)
    end if
    if (dtsets(idtset)%usewvl == 0) then
-     call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+     if (dtsets(idtset)%neb_cell_algo==NEB_CELL_ALGO_NONE) then
+       call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+     else
+       max_mpw=0
+       do ii=1,dtsets(idtset)%nimage
+         call mkrdim(dtsets(idtset)%acell_orig(1:3,ii),dtsets(idtset)%rprim_orig(1:3,1:3,ii),rprimd)
+         call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+         call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+         if (mpw>max_mpw) max_mpw=mpw
+       end do
+       mpw=max_mpw
+     end if
+
      ! Allocate tables for parallel IO of the wavefunctions.
      if( xmpi_mpiio==1 .and. mpi_enregs(idtset)%paral_kgb == 1 .and. &
 &     any(dtsets(idtset)%iomode == [IO_MODE_MPI, IO_MODE_ETSF])) then
@@ -1055,6 +1080,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (dtsets(idtset)%usepaw==0) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%usewvl/=0) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%usedmft==1) dtsets(idtset)%paral_atom=0
+   if (dtsets(idtset)%usedmft==10) dtsets(idtset)%paral_atom=0
    if (optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_RESPFN.and.optdriver/=RUNL_GWLS) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%macro_uj/=0) dtsets(idtset)%paral_atom=0
 

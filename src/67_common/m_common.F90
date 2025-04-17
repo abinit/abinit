@@ -65,8 +65,8 @@ module m_common
  use m_chebfi2,            only : chebfi_memInfo
  use m_lobpcg2,            only : lobpcg_memInfo
  use m_invovl,             only : invovl_ompgpu_static_mem,invovl_ompgpu_work_mem
- use m_gemm_nonlop_ompgpu, only : gemm_nonlop_ompgpu_static_mem,gemm_nonlop_ompgpu_work_mem
- use m_getghc_ompgpu,      only : getghc_ompgpu_work_mem
+ use m_gemm_nonlop,        only : gemm_nonlop_ompgpu_static_mem,gemm_nonlop_ompgpu_work_mem
+ use m_getghc,      only : getghc_ompgpu_work_mem
  use, intrinsic :: iso_c_binding, only : c_size_t
 
 #if defined(HAVE_GPU)
@@ -1743,40 +1743,45 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
 !======== In case other sources of entropies than the non-interacting entropy =========
 !============= of the Kohn-Sham states come into play, print the details ==============
- if(abs(energies%entropy)>tiny(zero).and.abs(energies%entropy-energies%entropy_ks)>tiny(zero)) then
-   write_entropy=.true.
-   sdoc = yamldoc_open('EntropyTerms', info='Components of total entropy', &
-   & width=20, real_fmt="(es21.14)") ! in kB units
-   call sdoc%add_real('noninteracting',energies%entropy_ks) ! Noninteracting entropy = Entropy of the Kohn-Sham states
-   if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
-   if(usepaw==1.and.abs(energies%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
-   if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
-   call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
+ if(dtset%occopt>=3.and.dtset%occopt<=8) then
+   if(abs(energies%entropy)>tiny(zero).and.abs(energies%entropy-energies%entropy_ks)>tiny(zero)) then
+     write_entropy=.true.
+     sdoc = yamldoc_open('EntropyTerms', info='Components of total entropy', &
+     & width=20, real_fmt="(es21.14)") ! in kB units
+     call sdoc%add_real('noninteracting',energies%entropy_ks) ! Noninteracting entropy = Entropy of the Kohn-Sham states
+     if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
+     if(usepaw==1.and.abs(energies%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
+     if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
+     call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
+   end if
  end if
 
 !======== In case finite-temperature exchange-correlation functionals are used =========
 !=================== write the total exchange-correlation components ===================
+!=============================== For testing purposes only =============================
  if(abs(energies%entropy_xc)>tiny(zero)) then
-   write_totalxc=.true.
-   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
-   ftxcdoc = yamldoc_open('FTXCEnergyTerms', info='Components of total xc energy in Hartree', &
-   & width=20, real_fmt="(es21.14)")
-   if(usepaw==1) then
-     ! For now, only finite-temperature xc functionals contribute to entropy_paw.
-     ! We may introduce 'energies%entropy_pawxc' in the future.
-     call ftxcdoc%add_real('xc',energies%e_xc)
-     call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
-     call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
-     call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
-     call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
-   else
-     call ftxcdoc%add_real('internal_xc',energies%e_xc)
-     call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
-     call ftxcdoc%add_real('free_xc',energies%e_xc-el_temp*energies%entropy_xc)
+   write_totalxc=.false. ! For testing purposes only, set write_totalxc=.true.
+   if(write_totalxc) then
+     el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+     ftxcdoc = yamldoc_open('FTXCEnergyTerms', info='Components of total xc energy in Hartree', &
+     & width=20, real_fmt="(es21.14)")
+     if(usepaw==1) then
+       ! For now, only finite-temperature xc functionals contribute to entropy_paw.
+       ! We may introduce 'energies%entropy_pawxc' in the future.
+       call ftxcdoc%add_real('xc',energies%e_xc)
+       call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
+       call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
+       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
+       call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
+     else
+       call ftxcdoc%add_real('internal_xc',energies%e_xc)
+       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
+       call ftxcdoc%add_real('free_xc',energies%e_xc-el_temp*energies%entropy_xc)
+     end if
    end if
  end if
 
- ! Write components of total energies in Yaml format.
+!Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
  if(optdc >= 1) call dc_edoc%write_and_free(iout)
  if(write_entropy) call sdoc%write_and_free(iout)

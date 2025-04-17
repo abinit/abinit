@@ -71,7 +71,7 @@ module m_vtowfk
  use gator_mod
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 

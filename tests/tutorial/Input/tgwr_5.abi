@@ -1,0 +1,62 @@
+# Crystalline silicon
+# Calculation of the GW corrections with GWR code and 2x2x2 k-mesh.
+# Compute QP corrections for all k-points in the IBZ
+
+
+# Definition of the k-point grid
+# IMPORTANT: GWR requires Gamma-centered k-meshes
+ngkpt   2 2 2
+#ngkpt   4 4 4
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+# Include geometry and pseudos
+include "gwr_include.abi"
+
+################################
+# Dataset 3: G0W0 with GWR code
+################################
+optdriver  6                          # Activate GWR code
+ecutwfn    10                         # Truncate basis set when computing G.
+                                      # This parameter should be subject to convergence studies
+gwr_task "G0W0"                       # One-shot calculation
+getden_filepath "tgwr_1o_DS1_DEN"     # Density file
+getwfk_filepath "tgwr_2o_DS1_WFK"     # WFK file with empty states. Must be consisten with ngkpt, shiftk
+#getwfk_filepath "tgwr_2o_DS2_WFK"     # WFK file with empty states. Must be consisten with ngkpt, shiftk
+
+#gwr_ntau   6         # Number of imaginary-time points
+gwr_ntau   12         # Number of imaginary-time points
+gwr_boxcutmin  1.0  # This should be subject to convergence studies
+gwr_sigma_algo 1     # Use supercell for Sigma
+
+nband      250      # Bands to be used in the screening calculation
+ecuteps    6        # Cut-off energy of the planewave set to represent the dielectric matrix.
+                    # It is important to adjust this parameter.
+#ecutsigx  16.0     # Dimension of the G sum in Sigma_x.
+                    # ecutsigx = ecut is usually a wise choice
+                    # (the dimension in Sigma_c is controlled by ecuteps)
+gw_qprange  -4      # Compute the QP corrections for all the k-points in the irreducible zone.
+                    # Include all occupied states and -num empty states
+
+# Spectral function (very coarse grid to reduce txt file size)
+#nfreqsp3 50
+#freqspmax3 5 eV
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi, tgwr_5.abi
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
+#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% [files]
+#%% files_to_test =
+#%%   tgwr_5.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GWR
+#%% description =
+#%%  Crystalline silicon
+#%%  Calculation of the GW corrections with GWR code for all k-points in the IBZ.
+#%%<END TEST_INFO>

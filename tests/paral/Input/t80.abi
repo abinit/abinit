@@ -29,6 +29,7 @@ optcell = 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
+#%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
