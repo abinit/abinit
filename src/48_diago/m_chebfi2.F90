@@ -1243,13 +1243,13 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     ! Copy in ColsRows representation
     call xgBlock_copy(chebfi%xXColsRows, X0)
 
-    if (cols(chebfi%xXColsRows) /= chebfi%bandpp) then
+    if (cols(X0) /= chebfi%bandpp) then
         ABI_ERROR('wrong colsrows representation')
     end if
-    write(*,'(a,i6,i6)') 'local # proc has # cols ', xmpi_comm_rank(chebfi%spacecom), cols(chebfi%xXColsRows)
+    write(*,'(a,i6,i6)') 'local # proc has # cols ', xmpi_comm_rank(chebfi%spacecom), cols(X0)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-    if (gpu_option==ABI_GPU_KOKKOS) then
+    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
         call gpu_device_synchronize()
     end if
 #endif

@@ -1188,8 +1188,6 @@ subroutine slice_allocateResources(slice)
         weights = slice%poly_degrees
     end select
    
-    ! add m_band_allocation_tools?
-
     ! Solve allocation problem to find the amount of resource allocated to each slice
     call fair_allocation(slice%nslice, task_sizes, weights_ptr, slice%nproc, task_nprocs)
     
@@ -1626,19 +1624,24 @@ subroutine fair_allocation(n, m, w, p, x)
 
     ! *********************************************************************
 
+    write(std_out,*) 'n=',n
+    write(std_out,*) 'm=',m
+    write(std_out,*) 'w=',w
+    write(std_out,*) 'p=',p
+
     ! Calculate total weight
     total_weight = real(sum(w))
 
-    ! Binary search for the optimal multiplier
-    lower = 0.0
+    ! Binary search for the optimal multiplier: divide search interval in half
+    lower = 0.d0
     upper = real(p)
-    do while (upper - lower > 1.0)
-        mid = (lower + upper) / 2.0
-        total_allocated = 0
+    do while (upper - lower > 1.d0)
+        mid = (lower + upper) / 2.d0
         do i = 1, n
-            allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * mid + 0.5)
-            total_allocated = total_allocated + allocation(i)
+            allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * mid + 0.d5)
         end do
+        write(std_out,*) 'allocation (bs), total_allocated (bs)=', allocation, total_allocated
+        total_allocated = sum(allocation(1:n))
 
         ! Adjust binary search bounds
         if (total_allocated > real(p)) then
@@ -1647,11 +1650,13 @@ subroutine fair_allocation(n, m, w, p, x)
             lower = mid
         end if
     end do
+    write(std_out,*) 'allocation (init)=', allocation
+    write(std_out,*) 'total_allocated (init)=', total_allocated
 
     ! Final allocation after binary search converges
-    multiplier = (lower + upper) / 2.0
+    multiplier = (lower + upper) / 2.d0
     do i = 1, n
-        allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * multiplier + 0.5)
+        allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * multiplier + 0.d5)
     end do
     write(std_out,*) 'allocation (init)=', allocation
 
@@ -1659,23 +1664,23 @@ subroutine fair_allocation(n, m, w, p, x)
     total_allocated = sum(allocation(1:n))
     write(std_out,*) 'total_allocated (init)=', total_allocated
 
-    if (total_allocated < p) then
-        do while (total_allocated < p)
-            ! Add one resource to the group closest to its ideal allocation
-            call adjust_allocation(n, m, w, allocation, total_weight, p, total_allocated)
-            write(std_out,*) 'allocation (adjust)=', allocation
-            total_allocated = sum(allocation(1:n))
-            write(std_out,*) 'total_allocated (adjust)=', total_allocated
-        end do
-    else if (total_allocated > p) then ! FIXME error infinite loop
-        do while (total_allocated > p)
-            ! Remove one resource from the over-allocated group
-            call reduce_allocation(n, m, w, allocation, total_weight, p, total_allocated)
-            write(std_out,*) 'allocation (reduce)=', allocation
-            total_allocated = sum(allocation(1:n))
-            write(std_out,*) 'total_allocated (reduce)=', total_allocated
-        end do
-    end if
+    !if (total_allocated < p) then
+    !    do while (total_allocated < p)
+    !        ! Add one resource to the group closest to its ideal allocation
+    !        call adjust_allocation(n, m, w, allocation, total_weight, p, total_allocated)
+    !        write(std_out,*) 'allocation (adjust)=', allocation
+    !        total_allocated = sum(allocation(1:n))
+    !        write(std_out,*) 'total_allocated (adjust)=', total_allocated
+    !    end do
+    !else if (total_allocated > p) then ! FIXME error infinite loop
+    !    do while (total_allocated > p)
+    !        ! Remove one resource from the over-allocated group
+    !        call reduce_allocation(n, m, w, allocation, total_weight, p, total_allocated)
+    !        write(std_out,*) 'allocation (reduce)=', allocation
+    !        total_allocated = sum(allocation(1:n))
+    !        write(std_out,*) 'total_allocated (reduce)=', total_allocated
+    !    end do
+    !end if
 
     write(std_out,*) 'allocation (final)=', allocation
     write(std_out,*) 'total_allocated(final)=', total_allocated
