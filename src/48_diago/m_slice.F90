@@ -99,7 +99,7 @@ module m_slice
     use m_errors
     use m_time, only : timab
     use m_sort, only: sort_dp
-    !use m_io_tools, only : flush_unit
+    use m_io_tools, only : flush_unit
 
     use m_cgtools
     use m_xg
@@ -1109,6 +1109,8 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         write(std_out,*) 'With overlap, width=', poly_low, poly_upp, poly_upp - poly_low
         write(std_out,'(a,i6,a,i6)') 'nvec= ', nvec, ' ndeg= ', ndeg
         write(std_out,*) ' '
+        call flush_unit(std_out)
+        ! FIXME flush unit has impact on error!
 
         ! Compute last index in extended memory (without ovlp)
         last_col_ext = first_col_ext + nvec - 1
@@ -1127,6 +1129,8 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
            
     end do
 
+    ! to be tested without flush TODO
+    call xmpi_barrier(slice%spacecom) 
     ABI_SFREE(spectral_partition)
    
 end subroutine slice_cutSpectrum
@@ -1236,7 +1240,7 @@ subroutine slice_markActiveTask(slice)
     ! *********************************************************************
  
     my_rank = xmpi_comm_rank(slice%spacecom) 
-    slice%me_id_slice = slice%lookup_proc(my_rank + 1)
+    slice%me_id_slice = slice%lookup_proc(my_rank + 1) + 1
     slice%me_neigenpairs_slice = slice%neigenpairs_per_slice(slice%me_id_slice)
     slice%me_nproc_slice = slice%nproc_per_slice(slice%me_id_slice)
     slice%me_ndeg_slice = slice%poly_degrees(slice%me_id_slice)
@@ -1249,14 +1253,23 @@ subroutine slice_markActiveTask(slice)
     me_linalg_ptr => slice%me_nrowsLinalg_slice
 
     ! Compute column distribution across active resources
-    call distribute_vectors(slice%me_nproc_slice, slice%me_neigenpairs_slice, me_colsrows_ptr)
+    call distribute_vectors(slice%me_neigenpairs_slice, slice%me_nproc_slice, me_colsrows_ptr)
     
     ! Compute row distribution across active resources
-    call distribute_vectors(slice%me_nproc_slice, slice%total_spacedim, me_linalg_ptr)
+    call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, me_linalg_ptr)
+
+    write(std_out,*) me_colsrows_ptr
+    write(std_out,*) me_linalg_ptr
 
     ! Split global comm into disjoint sub-comms, only procs with the same color communicate
+    write(std_out,*) 'whereami', my_rank, slice%spacecom, xmpi_comm_self, xmpi_comm_null
+    call flush_unit(std_out)
+    
+    ! to be tested without flush TODO
+    !call xmpi_barrier(slice%spacecom) 
+    
     call xmpi_comm_split(slice%spacecom, slice%me_id_slice, my_rank, slice%me_comm_slice, ierr)        
-    if ( ierr /= xmpi_success ) then
+    if ( ierr == 0 .or. ierr /= xmpi_success ) then
         ABI_ERROR("Error while creating slice subcommunicators")
     end if
     
