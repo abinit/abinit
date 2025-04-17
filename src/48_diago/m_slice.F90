@@ -790,8 +790,8 @@ end subroutine slice_run
 !! getAX_BX =Hamiltonian application
 !! 
 !! OUTPUT
-!! eigen  =Rayleigh Quotients from X
-!! residu =residuals from X
+!! eigen  =Rayleigh Quotients from X, size (neigenpairs,1)
+!! residu =residuals from X, size (neigenpairs,1)
 !! 
 !! SOURCE
 
@@ -819,12 +819,10 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     integer :: my_rank, shift, bandpp, space_res
     real(dp) :: mineig, maxeig
     ! Derived types
-    type(xg_t) :: Results1
-    type(xg_t) :: Results2
-    type(xg_t) :: Results3
-    type(xg_t) :: eigen_mpi
-    type(xg_t) :: resid_mpi
+    type(xg_t) :: Results1, Results2
+    type(xg_t) :: eigen_mpi, resid_mpi
     type(xg_t) :: X_NAB ! vector memory for X_next, AX, BX
+    type(xgBlock_t) :: eigen_block, resid_block
     type(xgBlock_t) :: xAXColsRows
     type(xgBlock_t) :: xBXColsRows
     type(xgBlock_t) :: X_next
@@ -857,14 +855,12 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xg_setBlock(X_NAB, xBXColsRows, slice%total_spacedim, bandpp, fcol=2*bandpp + 1)   ! xBXColsRows
     
     ! Allocate one-dimensional memory (distributed)
-    ! for eigenvalues
-    ! FIXME eigen_mpi is space_res when eigen is SPACE_R ...
-    call xg_init(eigen_mpi, space_res, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
+    ! using space_res
     call xg_init(Results1, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
     call xg_init(Results2, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
-    ! for residuals
+    call xg_init(eigen_mpi, space_res, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
+    ! using SPACE_R
     call xg_init(resid_mpi, SPACE_R, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
-    call xg_init(Results3, SPACE_R, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
  
     ! Allocate memory for X in colsrows representation
     call xgTransposer_constructor(xgTransposerX, X, xXColsRows, nspinor, STATE_LINALG,&
@@ -909,7 +905,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xgBlock_copy(xBXColsRows, X_next)                             ! X_next = S|Psi>
     call xgBlock_ymax(X_next, eigen_mpi%self, 0, 1)                    ! X_next = - eig * S|Psi>
     call xgBlock_add(X_next, xAXColsRows)                              ! X_next = H|Psi> - eig * S|Psi>
-    call xgBlock_colwiseNorm2(X_next, resid, comm_loc=xmpi_comm_null)  ! resid = |X_next|^2
+    call xgBlock_colwiseNorm2(X_next, resid_mpi%self, comm_loc=xmpi_comm_null)  ! resid = |X_next|^2
    
     ! MPI communication for gathering all thetas (using summation strategy on columns)
     call xgBlock_reshape(eigen_mpi%self, 1, bandpp) 
@@ -919,12 +915,15 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
         my_rank = xmpi_comm_rank(slice%spacecom)
         shift = my_rank * bandpp
 
-        call xgBlock_setBlock(eigen, Results1%self, rows=1, cols=bandpp, fcol=1+shift)
-        call xgBlock_copy(eigen_mpi%self, Results1%self)
+        call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=bandpp, fcol=1+shift)
+        call xgBlock_print(eigen_mpi%self,std_out)
+        write(std_out,*) cols(eigen_mpi%self), rows(eigen_mpi%self), bandpp
+        call flush_unit(std_out)
+        call xgBlock_copy(eigen_mpi%self, eigen_block)
         call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
 
-        call xgBlock_setBlock(resid, Results3%self, rows=1, cols=bandpp, fcol=1+shift)
-        call xgBlock_copy(resid_mpi%self, Results3%self)
+        call xgBlock_setBlock(resid, resid_block, rows=1, cols=bandpp, fcol=1+shift)
+        call xgBlock_copy(resid_mpi%self, resid_block)
         call xgBlock_mpi_sum(resid, comm=slice%spacecom)
     else
         call xgBlock_copy(eigen_mpi%self, eigen)
@@ -943,7 +942,6 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     ! Free temporary memory
     call xg_free(Results1)
     call xg_free(Results2)
-    call xg_free(Results3)
     call xg_free(eigen_mpi)
     call xg_free(resid_mpi)
     call xg_free(X_NAB)
