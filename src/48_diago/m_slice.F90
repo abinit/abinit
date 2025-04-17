@@ -746,7 +746,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     nrowsLinalg = slice%me_nrowsLinalg_slice
 
     ! Initialize chebfi object in MPI Colsrows distribution
-    call chebfi_init(chebfi,neigenpairs,slice%spacedim,slice%tolerance,slice%ecut,slice%paral_kgb,bandpp,&
+    call chebfi_init(chebfi,neigenpairs,slice%total_spacedim,slice%tolerance,slice%ecut,slice%paral_kgb,bandpp,&
         ndeg_filter,nbdbuf,slice%space,1,comm,slice%me_g0,slice%me_g0_fft,slice%paw,xmpi_comm_self,comm,&
         oracle,oracle_factor,oracle_min_occ,slice%gpu_option,gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
         gpu_thread_limit=slice%gpu_thread_limit,from_linalg=.false.)

@@ -316,13 +316,17 @@ subroutine chebfi_allocateAll(chebfi)
    call xg_setBlock(chebfi%X_NP, chebfi%X_next,spacedim, neigenpairs)
    call xg_setBlock(chebfi%X_NP, chebfi%X_prev,spacedim, neigenpairs, fcol=neigenpairs+1)
  else
-   total_spacedim = spacedim
-   call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
-   chebfi%total_spacedim = total_spacedim
-   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,me_g0=chebfi%me_g0_fft,&
+   if (chebfi%from_linalg) then
+    total_spacedim = spacedim
+    call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
+    chebfi%total_spacedim = total_spacedim
+   else
+    chebfi%total_spacedim = chebfi%spacedim
+   end if
+   call xg_init(chebfi%X_NP,space,chebfi%total_spacedim,2*chebfi%bandpp,chebfi%spacecom,me_g0=chebfi%me_g0_fft,&
      & gpu_option=chebfi%gpu_option) !transposed arrays
-   call xg_setBlock(chebfi%X_NP, chebfi%X_next, total_spacedim, chebfi%bandpp)
-   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, total_spacedim, chebfi%bandpp, fcol=chebfi%bandpp+1)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_next, chebfi%total_spacedim, chebfi%bandpp)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, chebfi%total_spacedim, chebfi%bandpp, fcol=chebfi%bandpp+1)
  end if
 
  !transposer will handle these arrays automatically
@@ -1385,7 +1389,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
             call xgBlock_reverseMap(eigen_block, theta, rows=1, cols=chebfi%bandpp)
             theta_reshaped = 0.d0
             theta_reshaped(1,1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
-            call xgBlock_map(eigen_block, theta, space_res, rows=1, &
+            call xgBlock_map(eigen_block, theta_reshaped_ptr, space_res, rows=1, &
                 cols=chebfi%bandpp, gpu_option=chebfi%gpu_option)
             call xgBlock_copy(eigen_block, DivResults%self)
             ABI_SFREE(theta_reshaped)
@@ -1402,6 +1406,9 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     one_over_r = 1/radius
     two_over_r = 2/radius
 
+    write(std_out,*) chebfi%spacedim, chebfi%total_spacedim, chebfi%bandpp
+    write(std_out,*) rows(chebfi%xXColsRows), rows(chebfi%xAXColsRows), rows(chebfi%xBXColsRows)
+    
     !A * Psi
     call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
@@ -1530,10 +1537,12 @@ subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
     ls = (lambda_minus - center) / radius
     us = (lambda_plus - center) / radius
     
+    write(std_out,*) chebfi%spacedim, chebfi%total_spacedim, chebfi%bandpp
+    write(std_out,*) rows(chebfi%xXColsRows), rows(chebfi%xAXColsRows), rows(chebfi%xBXColsRows)
+
     ! A * Psi
     call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
-    write(std_out,*) rows(chebfi%xXColsRows), rows(chebfi%xAXColsRows), rows(chebfi%xXColsRows)
     call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
     call xgBlock_zero_im_g0(chebfi%xAXColsRows)
     call xgBlock_zero_im_g0(chebfi%xBXColsRows)
