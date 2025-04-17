@@ -621,10 +621,11 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     ABI_NVTX_END_RANGE()
 
     ! Unitary test
-    if ( cols(slice%me_Xext_active) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)) ) then
+    if ( cols(slice%me_Xext_active) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)+1) ) then
         ABI_ERROR('wrong colsrows representation')
     end if
-    write(*,'(a,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom), cols(slice%me_Xext_active)
+    write(*,'(a,i6,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom),&
+        cols(slice%me_Xext_active)
     
     ! Recover dimensions
     call xgBlock_reshape(eigen, neigenpairs, 1)
@@ -1109,8 +1110,6 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         write(std_out,*) 'With overlap, width=', poly_low, poly_upp, poly_upp - poly_low
         write(std_out,'(a,i6,a,i6)') 'nvec= ', nvec, ' ndeg= ', ndeg
         write(std_out,*) ' '
-        call flush_unit(std_out)
-        ! FIXME flush unit has impact on error!
 
         ! Compute last index in extended memory (without ovlp)
         last_col_ext = first_col_ext + nvec - 1
@@ -1129,8 +1128,6 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
            
     end do
 
-    ! to be tested without flush TODO
-    call xmpi_barrier(slice%spacecom) 
     ABI_SFREE(spectral_partition)
    
 end subroutine slice_cutSpectrum
@@ -1198,8 +1195,10 @@ subroutine slice_allocateResources(slice)
     ! Call the subroutine to assign tasks (=slices) to processes
     call assign_tasks_to_processes(task_nprocs, assigned_task)
     do iproc = 1, slice%nproc
-        write(*,'(a,i5,a,i5)') "Process ", iproc-1, " is in task ", slice%lookup_proc(iproc)
+        write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
     end do
+
+    call xmpi_barrier(slice%spacecom)
 
     ! Free temporary memory
     ABI_SFREE(weights) 
@@ -1258,18 +1257,9 @@ subroutine slice_markActiveTask(slice)
     ! Compute row distribution across active resources
     call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, me_linalg_ptr)
 
-    write(std_out,*) me_colsrows_ptr
-    write(std_out,*) me_linalg_ptr
-
     ! Split global comm into disjoint sub-comms, only procs with the same color communicate
-    write(std_out,*) 'whereami', my_rank, slice%spacecom, xmpi_comm_self, xmpi_comm_null
-    call flush_unit(std_out)
-    
-    ! to be tested without flush TODO
-    !call xmpi_barrier(slice%spacecom) 
-    
     call xmpi_comm_split(slice%spacecom, slice%me_id_slice, my_rank, slice%me_comm_slice, ierr)        
-    if ( ierr == 0 .or. ierr /= xmpi_success ) then
+    if ( ierr /= xmpi_success ) then
         ABI_ERROR("Error while creating slice subcommunicators")
     end if
     
