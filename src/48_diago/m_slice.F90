@@ -406,24 +406,23 @@ subroutine slice_free(slice)
     call xg_free(slice%X_ext)
     call xgTransposer_free(slice%xgTransposerXext)
 
-    if(allocated(slice%me_ncolsColsRows_slice)) ABI_FREE(slice%me_ncolsColsRows_slice)   
-    if(allocated(slice%me_nrowsLinalg_slice)) ABI_FREE(slice%me_nrowsLinalg_slice)
+    ABI_SFREE(slice%me_ncolsColsRows_slice)   
+    ABI_SFREE(slice%me_nrowsLinalg_slice)
 
-    if(allocated(slice%neigenpairs_per_slice)) ABI_FREE(slice%neigenpairs_per_slice)
-    if(allocated(slice%nproc_per_slice)) ABI_FREE(slice%nproc_per_slice)
-    if(allocated(slice%lookup_proc)) ABI_FREE(slice%lookup_proc)
-    if(allocated(slice%ncolsColsRows)) ABI_FREE(slice%ncolsColsRows)   
+    ABI_SFREE(slice%neigenpairs_per_slice)
+    ABI_SFREE(slice%nproc_per_slice)
+    ABI_SFREE(slice%lookup_proc)
+    ABI_SFREE(slice%ncolsColsRows)   
 
-    if(allocated(slice%fcol_in_X)) ABI_FREE(slice%fcol_in_X)
-    if(allocated(slice%fcol_in_Xext)) ABI_FREE(slice%fcol_in_Xext)
+    ABI_SFREE(slice%fcol_in_X)
+    ABI_SFREE(slice%fcol_in_Xext)
 
-    if(allocated(slice%poly_degrees)) ABI_FREE(slice%poly_degrees)
-    if(allocated(slice%part_low_bounds)) ABI_FREE(slice%part_low_bounds)
-    if(allocated(slice%part_upp_bounds)) ABI_FREE(slice%part_upp_bounds)
-    if(allocated(slice%poly_low_bounds)) ABI_FREE(slice%poly_low_bounds)
-    if(allocated(slice%poly_upp_bounds)) ABI_FREE(slice%poly_upp_bounds)
+    ABI_SFREE(slice%poly_degrees)
+    ABI_SFREE(slice%part_low_bounds)
+    ABI_SFREE(slice%part_upp_bounds)
+    ABI_SFREE(slice%poly_low_bounds)
+    ABI_SFREE(slice%poly_upp_bounds)
 
-    
    call xmpi_comm_free(slice%me_comm_slice) 
 
 end subroutine slice_free
@@ -474,7 +473,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
 
     ! Local variables --------------------------------
     integer :: neigenpairs, iband, min_loc, islice
-    integer :: fcol, fcol_ext, ncols, ierr
+    integer :: fcol, fcol_ext, ncols
     logical :: on_host, on_device
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: tol12 = 1.0e-12
@@ -632,8 +631,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
 
     ! Free temporary memory
     call xg_free(resid0) 
-    if (allocated(permute_cols)) ABI_FREE(permute_cols)
-    if (allocated(theta_reshaped)) ABI_FREE(theta_reshaped)
+    ABI_SFREE(permute_cols)
+    ABI_SFREE(theta_reshaped)
 
     ABI_NVTX_END_RANGE()
 
@@ -771,7 +770,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
-    if(allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
+    ABI_SFREE(nrowsLinalg)
 
 end subroutine slice_run
 !!***
@@ -925,7 +924,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xgBlock_map_1d(eigen_mpi_reshaped, theta_mpi_reshaped_ptr, SPACE_R, bandpp, gpu_option=slice%gpu_option)
     call xgBlock_copy(eigen_mpi_reshaped, eigen_block)
     call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
-    if(allocated(theta_mpi_reshaped)) ABI_FREE(theta_mpi_reshaped)
+    ABI_SFREE(theta_mpi_reshaped)
     ! for resid (SPACE_R)
     call xgBlock_setBlock(resid, resid_block, rows=1, cols=bandpp, fcol=1+shift)
     call xgBlock_reshape(resid_mpi%self, 1, bandpp)     
@@ -1038,8 +1037,8 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
             spectral_partition(islice + 1) = (theta(jmax) + theta(jmax + 1)) / 2.d0
         end do
 
-        if (allocated(jperm)) ABI_FREE(jperm)
-        if (allocated(consdiff)) ABI_FREE(consdiff)
+        ABI_SFREE(jperm)
+        ABI_SFREE(consdiff)
 
     end select
 
@@ -1128,7 +1127,7 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
            
     end do
 
-    if (allocated(spectral_partition)) ABI_FREE(spectral_partition)
+    ABI_SFREE(spectral_partition)
    
 end subroutine slice_cutSpectrum
 !!***
@@ -1201,7 +1200,7 @@ subroutine slice_allocateResources(slice)
     end do
 
     ! Free temporary memory
-    if (allocated(weights)) ABI_FREE(weights) 
+    ABI_SFREE(weights) 
 
 end subroutine slice_allocateResources
 !***
@@ -1231,7 +1230,7 @@ subroutine slice_markActiveTask(slice)
     type(slice_t), target, intent(inout) :: slice
 
     ! Local variables
-    integer :: color, my_rank, my_rank_sub, ierr
+    integer :: my_rank, my_rank_sub, ierr
     integer, pointer :: me_colsrows_ptr(:) => null()
     integer, pointer :: me_linalg_ptr(:) => null()
     integer, pointer :: all_colsrows_ptr(:) => null()
@@ -1324,7 +1323,6 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     integer :: my_rank, my_slice, neigenpairs_slice
     integer :: fcol_ext, fcol, tot_ncols_kept, lcol_ext
     integer :: islice, fcol_in_slice, lcol_in_slice
-    integer :: ncols_kept
     real(dp) :: part_low_bound, part_upp_bound
     logical :: on_host, on_device
     ! Derived types
@@ -1440,7 +1438,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         slice%neigenpairs_per_slice(islice) = lcol_in_slice - fcol_in_slice + 1
         tot_ncols_kept = tot_ncols_kept + slice%neigenpairs_per_slice(islice) 
 
-        if (allocated(theta_reshaped)) ABI_FREE(theta_reshaped)
+        ABI_SFREE(theta_reshaped)
 
     end do
     
@@ -1533,8 +1531,8 @@ subroutine assign_tasks_to_processes(allocations, processes)
     
     ! *********************************************************************
 
-    write(std_out,*) allocations
-    write(std_out,*) processes
+    write(std_out,*) 'allocations=', allocations
+    write(std_out,*) 'processes=', processes
     j = 1
     do i = 1, size(allocations)
         processes(j:j + allocations(i) - 1) = i - 1  
@@ -1659,32 +1657,32 @@ subroutine fair_allocation(n, m, w, p, x)
     do i = 1, n
         allocation(i) = int((real(w(i)) * real(m(i)) / total_weight) * multiplier + 0.5)
     end do
+    write(std_out,*) 'allocation (init)=', allocation
 
     ! Adjust total allocation to exactly match p
-    total_allocated = 0
-    do i = 1, n
-        total_allocated = total_allocated + allocation(i)
-    end do
+    total_allocated = sum(allocation(1:n))
+    write(std_out,*) 'total_allocated (init)=', total_allocated
 
     if (total_allocated < p) then
         do while (total_allocated < p)
             ! Add one resource to the group closest to its ideal allocation
             call adjust_allocation(n, m, w, allocation, total_weight, p, total_allocated)
-            total_allocated = 0
-            do i = 1, n
-                total_allocated = total_allocated + allocation(i)
-            end do
+            write(std_out,*) 'allocation (adjust)=', allocation
+            total_allocated = sum(allocation(1:n))
+            write(std_out,*) 'total_allocated (adjust)=', total_allocated
         end do
-    else if (total_allocated > p) then
+    else if (total_allocated > p) then ! FIXME error infinite loop
         do while (total_allocated > p)
             ! Remove one resource from the over-allocated group
             call reduce_allocation(n, m, w, allocation, total_weight, p, total_allocated)
-            total_allocated = 0
-            do i = 1, n
-                total_allocated = total_allocated + allocation(i)
-            end do
+            write(std_out,*) 'allocation (reduce)=', allocation
+            total_allocated = sum(allocation(1:n))
+            write(std_out,*) 'total_allocated (reduce)=', total_allocated
         end do
     end if
+
+    write(std_out,*) 'allocation (final)=', allocation
+    write(std_out,*) 'total_allocated(final)=', total_allocated
 
     ! Assign the final allocation to the output variable
     x = allocation
@@ -1712,24 +1710,28 @@ subroutine adjust_allocation(n, m, w, allocation, total_weight, p, total_allocat
     integer, intent(inout) :: total_allocated
 
     integer :: i, closest_group
-    real(dp) :: max_diff, diff
-    
+    real(dp) :: max_diff, diff, ideal
+
     ! *********************************************************************
 
-    ! Find the group with the largest difference between allocation and ideal allocation
-    max_diff = -1.0
-    closest_group = 1
+    ! Find the group with the largest difference between current and ideal allocation
+    max_diff = -1.0_dp
+    closest_group = -1
+
     do i = 1, n
-        diff = abs(real(allocation(i)) - (real(w(i)) * real(m(i)) * real(p)) / total_weight)
+        ideal = (real(w(i), dp) * real(m(i), dp) * real(p, dp)) / total_weight
+        diff = abs(real(allocation(i), dp) - ideal)
         if (diff > max_diff) then
             max_diff = diff
             closest_group = i
         end if
     end do
 
-    ! Add one resource to the group with the largest difference
-    allocation(closest_group) = allocation(closest_group) + 1
-    total_allocated = total_allocated + 1
+    ! Only allocate if total does not exceed limit
+    if (total_allocated < p .and. closest_group > 0) then
+        allocation(closest_group) = allocation(closest_group) + 1
+        total_allocated = total_allocated + 1
+    end if
 
 end subroutine adjust_allocation
 !!***
@@ -1753,25 +1755,32 @@ subroutine reduce_allocation(n, m, w, allocation, total_weight, p, total_allocat
     integer, intent(inout) :: allocation(n)
     integer, intent(inout) :: total_allocated
 
-    integer :: i, closest_group
-    real(dp) :: max_diff, diff
-    
+    integer :: i, target_group
+    real(dp) :: max_diff, expected, diff
+    integer :: reduce_by
+
     ! *********************************************************************
 
-    ! Find the group with the smallest over-allocation
-    max_diff = -1.0
-    closest_group = 1
+    ! Find the group with the largest *positive* over-allocation
+    max_diff = -1.0_dp
+    target_group = -1
+
     do i = 1, n
-        diff = abs(real(allocation(i)) - (real(w(i)) * real(m(i)) * real(p)) / total_weight)
-        if (diff < max_diff) then
+        expected = (real(w(i), dp) * real(m(i), dp) * real(p, dp)) / total_weight
+        diff = real(allocation(i), dp) - expected
+        if (diff > max_diff .and. diff > 0.0_dp .and. allocation(i) > 0) then
             max_diff = diff
-            closest_group = i
+            target_group = i
         end if
     end do
 
-    ! Remove one resource from the group with the smallest over-allocation
-    allocation(closest_group) = allocation(closest_group) - 1
-    total_allocated = total_allocated - 1
+    ! If we found an over-allocated group, reduce its allocation
+    if (target_group > 0 .and. max_diff > 0.0_dp) then
+        reduce_by = min(1, allocation(target_group))  ! Only reduce if it's > 0
+        reduce_by = min(1, allocation(target_group))
+        allocation(target_group) = allocation(target_group) - reduce_by
+        total_allocated = total_allocated - reduce_by
+    end if
 
 end subroutine reduce_allocation
 !!***
