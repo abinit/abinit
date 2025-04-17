@@ -919,16 +919,21 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     shift = my_rank * bandpp
     ! for eigen
     call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=bandpp, fcol=1+shift)
-    call xgBlock_reshape(eigen_mpi%self, 1, bandpp) 
-    ! workaround to copy from space_res to SPACE_R
-    ABI_MALLOC_IFNOT(theta_mpi_reshaped,(bandpp))
-    theta_mpi_reshaped_ptr => theta_mpi_reshaped
-    call xgBlock_reverseMap(eigen_mpi%self, theta_mpi, rows=1, cols=bandpp)
-    theta_mpi_reshaped(1:bandpp) = theta_mpi(1,1:bandpp)
-    call xgBlock_map_1d(eigen_mpi_reshaped, theta_mpi_reshaped_ptr, SPACE_R, bandpp, gpu_option=slice%gpu_option)
-    call xgBlock_copy(eigen_mpi_reshaped, eigen_block)
-    call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
-    ABI_SFREE(theta_mpi_reshaped)
+    call xgBlock_reshape(eigen_mpi%self, 1, bandpp)
+    if (space_res==SPACE_R) then     
+        call xgBlock_copy(eigen_mpi%self, eigen_block)
+        call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
+    else
+        ! workaround to copy from SPACE_C to SPACE_R
+        ABI_MALLOC_IFNOT(theta_mpi_reshaped,(bandpp))
+        theta_mpi_reshaped_ptr => theta_mpi_reshaped
+        call xgBlock_reverseMap(eigen_mpi%self, theta_mpi, rows=1, cols=bandpp)
+        theta_mpi_reshaped(1:bandpp) = theta_mpi(1,1:bandpp)
+        call xgBlock_map_1d(eigen_mpi_reshaped, theta_mpi_reshaped_ptr, SPACE_R, bandpp, gpu_option=slice%gpu_option)
+        call xgBlock_copy(eigen_mpi_reshaped, eigen_block)
+        call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
+        ABI_SFREE(theta_mpi_reshaped)
+    end if
     ! for resid (SPACE_R)
     call xgBlock_setBlock(resid, resid_block, rows=1, cols=bandpp, fcol=1+shift)
     call xgBlock_reshape(resid_mpi%self, 1, bandpp)     
