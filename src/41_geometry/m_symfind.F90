@@ -39,8 +39,8 @@ module m_symfind
 
  public :: symfind     ! From the symmetries of the Bravais lattice,
                        ! select those that leave invariant the system, and generate tnons. Not always robust.
- public :: symfind_expert     ! Wrap symfind to provide robust determination of the symmetries,
-                       ! for which resymmetrization of atomic positions and tnons is needed.
+ public :: symfind_expert  ! Wrap symfind to provide robust determination of the symmetries,
+                           ! for which resymmetrization of atomic positions and tnons is needed.
  public :: symanal     ! Find the space group from the list of symmetries and lattice parameters
  public :: symbrav     ! Determine the Bravais information from the list of symmetry operations, and the lattice vectors.
  public :: symlatt     ! Find the Bravais lattice and its symmetry operations (ptsymrel).
@@ -94,8 +94,8 @@ contains
 !! SOURCE
 
  subroutine symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
-&  prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-&  chrgat,ierr,nucdipmom,invardir_red,invar_z)  ! Optional
+                    prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+                    chrgat,ierr,nucdipmom,invardir_red,invar_z)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -138,10 +138,7 @@ contains
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
 !**************************************************************************
 
-!DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : enter '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_symfind%symfind : enter '; call flush(std_out)
 
  ABI_MALLOC(local_nucdipmom,(3,3,natom))
  local_nucdipmom(:,:,:) = zero
@@ -221,10 +218,7 @@ contains
  ! need rprimd later to transform back to cart coords
  call matr3inv(gprimd,rprimd)
 
-!DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '; call flush(std_out)
 
 !Initialise with the first atom
  nclass=1
@@ -260,13 +254,11 @@ contains
          ! note in the following test, m_chkinp/chkinp has already prevented nucdipmom to be
          ! nonzero when spinat is nonzero
          if( test_samechrg .and. test_sameabsspin .and. test_samenucdipmom ) then
-!          DEBUG
 !          write(std_out,*)' symfind : find it belongs to class iclass=',iclass
 !          write(std_out,*)' symfind : spinat(:,iatom)=',spinat(:,iatom)
 !          write(std_out,*)' symfind : spinatcl(:,iclass)=',spinatcl(:,iclass)
 !          write(std_out,*)' symfind : test_sameabsspin=',test_sameabsspin
 !          write(std_out,*)' '
-!          ENDDEBUG
            natomcl(iclass)=natomcl(iclass)+1
            class(natomcl(iclass),iclass)=iatom
            foundcl=1
@@ -287,7 +279,6 @@ contains
    end do
  end if
 
-!DEBUG
 !write(std_out,*)' '
 !write(std_out,*)' symfind : found ',nclass,' nclass of atoms'
 !do iclass=1,nclass
@@ -298,12 +289,8 @@ contains
 !write(std_out,*)'   class   =',(class(iatom,iclass),iatom=1,natomcl(iclass))
 !end do
 !write(std_out,*)' '
-!ENDDEBUG
 
-!DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : before select the class '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_symfind%symfind : before select the class '; call flush(std_out)
 
 !Select the class with the least number of atoms, and non-zero spinat if any
 !It is important to select a magnetic class of atom, if any, otherwise
@@ -322,7 +309,7 @@ contains
 &          .and. .not. (spinatcl20>tolsym .and. spinatcl2<tolsym) &
 &          .and. .not. (nucdipmomcl20>tolsym .and. nucdipmomcl2<tolsym) )  &
 &     .or. (spinatcl20<tolsym .and. spinatcl2>tolsym) &
-&     .or. (nucdipmomcl20<tolsym .and. nucdipmomcl2>tolsym)                        )then
+&     .or. (nucdipmomcl20<tolsym .and. nucdipmomcl2>tolsym)) then
        iclass0=iclass
        natom0=natomcl(iclass)
        spinatcl20=spinatcl2
@@ -343,7 +330,6 @@ contains
    end do
  end if
 
-!DEBUG
 !write(std_out,*)' '
 !write(std_out,*)' symfind : has selected iclass0=',iclass0
 !write(std_out,*)'  # iatom  xred                          spinat       (spinatred if nspden=4) '
@@ -356,8 +342,6 @@ contains
 !endif
 !end do
 !write(std_out,*)' '
-!ENDDEBUG
-
 
  !represent nuclear dipole moments in reduced coords
  ABI_MALLOC(nucdipmomred,(3,3,natom))
@@ -367,19 +351,13 @@ contains
     end do
  end do
 
-!DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : before big loop '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_symfind%symfind : before big loop '; call flush(std_out)
 
 !Big loop over each symmetry operation of the Bravais lattice
  nsym=0
  do isym=1,nptsym
 
-!DEBUG
-!write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym; call flush(std_out)
 
    if(present(invardir_red))then
 !    ji: Check whether symmetry operation leaves invardir_red invariant
@@ -390,10 +368,7 @@ contains
      if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
    endif
 
-!DEBUG
-!write(std_out,'(a,i4)')' m_symfind%symfind : 1'
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 1'; call flush(std_out)
 
    if (use_inversion==0) then
      det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
@@ -405,27 +380,21 @@ contains
      if(det==-1) cycle
    end if
 
-!DEBUG
-!write(std_out,'(a,i4)')' m_symfind%symfind : 2'
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 2'; call flush(std_out)
 
 !  jellium slab and spatially varying chemical potential cases:
 !  (actually, an inversion symmetry/mirror plane perpendicular to z symmetry operation might still be allowed... TO BE DONE !)
    if(present(invar_z))then
      if (invar_z/=0) then
 !      check whether symmetry operation produce a rotation only in the xy plane
-       if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
-&       ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
+       if (ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
+           ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
 !      check whether symmetry operation does not change the z
        if( ptsymrel(3,3,isym)/=1 ) cycle
      end if
    end if
 
-!DEBUG
-!write(std_out,'(a,i4)')' m_symfind%symfind : 3'
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 3'; call flush(std_out)
 
 !  If noncoll_orthorhombic=1, require orthorhombic operations of symmetries, except if spinat=0.
    if (nspden==4 .and. noncoll_orthorhombic==1)then
@@ -436,38 +405,30 @@ contains
      endif
    endif
 
-!DEBUG
-!write(std_out,'(a,i4)')' m_symfind%symfind : 4'
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 4'; call flush(std_out)
 
 !  Select a tentative set of associated translations
 !  First compute the symmetric of the first atom in the smallest class,
 !  using the point symmetry, and also the symmetric of spinat(red).
    iatom0=class(1,iclass0)
    xred0(:)=ptsymrel(:,1,isym)*xred(1,iatom0)+ &
-&   ptsymrel(:,2,isym)*xred(2,iatom0)+ &
-&   ptsymrel(:,3,isym)*xred(3,iatom0)
+            ptsymrel(:,2,isym)*xred(2,iatom0)+ &
+            ptsymrel(:,3,isym)*xred(3,iatom0)
    if (nspden/=4) then
      spinat0(:)=spinat(:,iatom0)
    else
      spinat0(:)=ptsymrel(:,1,isym)*spinatred(1,iatom0)+ &
-&           ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
-&           ptsymrel(:,3,isym)*spinatred(3,iatom0)
+                ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
+                ptsymrel(:,3,isym)*spinatred(3,iatom0)
    endif
 
-!DEBUG
-!write(std_out,'(a,i4)')' m_symfind%symfind : 5'
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 5'; call flush(std_out)
 
 !  From the set of possible images, deduce tentative translations,
 !  and magnetic factor then test whether it send each atom on a symmetric one
    ntrial=0
    do ii=1,natom0
-!DEBUG
-!    write(std_out,'(a,2i4)')' symfind : loop isym,ii=',isym,ii
-!ENDDEBUG
+     !write(std_out,'(a,2i4)')' symfind : loop isym,ii=',isym,ii
      iatom1=class(ii,iclass0)
 
 !    The tentative translation is found
@@ -479,9 +440,7 @@ contains
        symspinat1(:)=spinatred(:,iatom1)
      end if
 
-!DEBUG
-!    write(std_out,'(a,6f10.4)')' symspinat1,spinat0=',symspinat1(:),spinat0(:)
-!ENDDEBUG
+     !write(std_out,'(a,6f10.4)')' symspinat1,spinat0=',symspinat1(:),spinat0(:)
 
      trialafm=1
      if(sum(abs(symspinat1(:)-spinat0(:)))>tolsym)then
@@ -504,9 +463,7 @@ contains
      endif
      trialok=1
 
-!    DEBUG
 !     write(std_out, '(a,i3,a,i3,a,i3,a,3f12.4,i3)') ' Try isym=',isym,' sending iatom0 ',iatom0,' to iatom1 ',iatom1,' with trialnons(:),trialafm =',trialnons(:),trialafm
-!    ENDDEBUG
 
 !    Loop over all classes, then all atoms in the class,
 !    to find whether they have a symmetric
@@ -535,11 +492,9 @@ contains
             symnucdipmom2cart(:,kk)=MATMUL(rprimd,symnucdipmom2red(:,kk))
          end do
 
-!        DEBUG
 !        write(std_out,'(a,i4,a,3f8.4,a,3f8.4,a,3f8.4)')&
-!&          ' Test iatom2=',iatom2,' at xred=',xred(:,iatom2),'. Is sent to',symxred2(:),' with symspinat2=',symspinat2(:)
+!           ' Test iatom2=',iatom2,' at xred=',xred(:,iatom2),'. Is sent to',symxred2(:),' with symspinat2=',symspinat2(:)
 !        write(std_out,'(a,3f8.4)')' and nucdipmom2=',symnucdipmom2cart(:,1)
-!        ENDDEBUG
 
 !        Check whether there exists an atom of the same class at the
 !        same location, with the correct spinat and nuclear dipole moment circulation
@@ -600,10 +555,8 @@ contains
        if(trialok==0)exit
      end do ! End loop over all classes
 
-!DEBUG
-!    write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
-!    write(std_out,*)' '
-!ENDDEBUG
+     !write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
+     !write(std_out,*)' '
 
      if(trialok==1)then
        nsym=nsym+1
@@ -624,10 +577,7 @@ contains
    end do ! End the loop on tentative translations
  end do ! End big loop over each symmetry operation of the Bravais lattice
 
-!DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : after big loop, will call ABI_FREE '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_symfind%symfind : after big loop, will call ABI_FREE '; call flush(std_out)
 
  ABI_FREE(class)
  ABI_FREE(natomcl)
@@ -642,10 +592,7 @@ contains
    ABI_FREE(spinatred)
  end if
 
-!DEBUG
-!write(std_out,'(a,i6)')' m_symfind%symfind : call sg_multable, nsym= ',nsym
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a,i6)')' m_symfind%symfind : call sg_multable, nsym= ',nsym; call flush(std_out)
 
 ! The algorithm in sg_multable is still cubic in nsym, so avoid calling it uselessly when nsym is too large
  if(present(ierr) .or. nsym<=384)then
@@ -654,10 +601,7 @@ contains
    ierr_=0
  endif
 
-!DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : call print_symmetries, ierr_= ',ierr_
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_symfind%symfind : call print_symmetries, ierr_= ',ierr_; call flush(std_out)
 
  if (ierr_/=0) then
    call print_symmetries(nsym,symrel,tnons,symafm)
@@ -669,22 +613,16 @@ contains
    ierr=ierr_
  endif
 
-!DEBUG
-!  write(msg,'(a,I0,es16.6,a)')' symfind : exit, nsym, tolsym=',nsym,tolsym,ch10
-!  write(msg,'(2a)') trim(msg),'   symrel matrices, symafm and tnons are :'
+!write(msg,'(a,I0,es16.6,a)')' symfind : exit, nsym, tolsym=',nsym,tolsym,ch10
+!write(msg,'(2a)') trim(msg),'   symrel matrices, symafm and tnons are :'
+!call wrtout(std_out,msg)
+!do isym=1,nsym
+!  write(msg,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),symafm(isym),tnons(:,isym)
 !  call wrtout(std_out,msg)
-!  do isym=1,nsym
-!    write(msg,'(i4,4x,3i4,2x,3i4,2x,3i4,4x,i4,4x,3f8.4)' ) isym,symrel(:,:,isym),&
-! &   symafm(isym),tnons(:,isym)
-!    call wrtout(std_out,msg)
-!  end do
+!end do
 !stop
-!ENDDEBUG
 
-!DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : exit '
-!call flush(std_out)
-!ENDDEBUG
+!write(std_out,'(a)')' m_symfind%symfind : exit '; call flush(std_out)
 
 end subroutine symfind
 !!***
@@ -715,8 +653,7 @@ end subroutine symfind
 !! nucdipmom(3,natom) (optional) array of nuclear dipole moments
 !  pawspnorb=flag: 1 if spin-orbit coupling is activated
 !! ptsymrel(3,3,1:msym)= nptsym point-symmetry operations
-!!   of the Bravais lattice in real space in terms
-!!   of primitive translations.
+!!   of the Bravais lattice in real space in terms of primitive translations.
 !! spinat(3,natom)=initial spin of each atom, in unit of hbar/2.
 !! tolsym=tolerance for the symmetries
 !! typat(natom)=integer identifying type of atom.
@@ -731,7 +668,6 @@ end subroutine symfind
 !! SIDE EFFECTS
 !! xred(3,natom)=reduced coordinates of atoms in terms of real space
 !!   primitive translations. Might be changed during the resymmetrization.
-
 !!
 !! SOURCE
 

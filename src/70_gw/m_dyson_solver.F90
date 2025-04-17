@@ -50,8 +50,8 @@ MODULE m_dyson_solver
 !! sigma_pade_t
 !!
 !! FUNCTION
-!!  Small object to perform the analytic continuation with Pade' and
-!!  find the QP solution with Newton-Rapson method
+!!  Object to perform the analytic continuation with Pade' and
+!!  find the QP solution with Newton-Rapson method.
 !!
 !! SOURCE
 
@@ -60,12 +60,12 @@ MODULE m_dyson_solver
     integer :: npts
     ! Number of points
 
-    character(len=1) :: branch_cut
+    !logical :: do_sigma_fit
+    !real(dp) :: beta_r_pm(2)
+    !complex(dp) :: alpha_r_pm(2)
 
     complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
     ! pointer to input mesh and values.
-
-    !real(d) :: wmax = -one
 
  contains
 
@@ -73,7 +73,7 @@ MODULE m_dyson_solver
    ! Init object
 
    procedure :: eval => sigma_pade_eval
-   ! Eval self-energy and derivative
+   ! Evaluate self-energy and derivative along the real axis.
 
    procedure :: qp_solve => sigma_pade_qp_solve
    ! Find the QP solution with Newton-Rapson method
@@ -341,8 +341,8 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
         zz = CMPLX(qp_ene(jb,sk_ibz,spin), zero)
       end if
 
-      !call spade%init(sr%nomega_i, sr%omega_i, tmpcdp, branch_cut=">")
-      !call spade%eval(zz, sigc_e0, dzdval=dsigc_de0)
+      !call spade%init(sr%nomega_i, sr%omega_i, tmpcdp)
+      !call spade%eval(zz, sigc_e0, dvdz=dsigc_de0)
 
       ! Diagonal elements of sigcme
       ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
@@ -760,32 +760,20 @@ end subroutine print_sigma_melems
 !!
 !! SOURCE
 
-subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
+subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals) ! alpha_c_pm, beta_r_pm
 
 !Arguments ------------------------------------
  class(sigma_pade_t),intent(out) :: self
  integer,intent(in) :: npts
  complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts)
- character(len=*),intent(in) :: branch_cut
-
-!Local variables-------------------------------
-!scalars
-! integer :: ii
 ! *************************************************************************
 
  self%npts = npts
-
- ! Select first points according to wmax.
- !if (wmax > zero) then
- !  do ii=1,npts
- !    if (real(zmesh(ii)) > wmax) exit
- !  end do
- !  self%npts = ii-1
- !end if
-
- self%branch_cut = branch_cut
  self%zmesh => zmesh(1:self%npts)
  self%sigc_cvals => sigc_cvals(1:self%npts)
+ !self%alpha_c_pm = alpha_c_pm
+ !self%beta_r_pm = beta_r_pm
+ !self%do_sigma_fit = .False.
 
 end subroutine sigma_pade_init
 !!***
@@ -797,28 +785,40 @@ end subroutine sigma_pade_init
 !!  sigma_pade_eval
 !!
 !! FUNCTION
-!!  Evaluate the Pade' at the complex point `zz`. Return result in val and, optional,
-!!  the derivative at zz in `dzdval`
+!!  Evaluate the Pade' at the complex point `zz`.
+!!  Return result in val and, optional, the derivative at zz in `dvdz`
 !!
 !! SOURCE
 
-subroutine sigma_pade_eval(self, zz, val, dzdval)
+subroutine sigma_pade_eval(self, zz, val, &
+                           dvdz) ! optional
 
 !Arguments ------------------------------------
  class(sigma_pade_t),intent(in) :: self
  complex(dp),intent(in) :: zz
  complex(dp),intent(out) :: val
- complex(dp),optional,intent(out) :: dzdval
+ complex(dp),optional,intent(out) :: dvdz
 ! *************************************************************************
 
  ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
  if (real(zz) > zero) then
- !if (real(zz) < zero) then
    val = pade(self%npts, self%zmesh, self%sigc_cvals, zz)
-   if (present(dzdval)) dzdval = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
+   !if (self%do_sigma_fit) then
+   !  val = val + self.alpha_c_pm(1) / (zz - self%beta_r_pm(1)) + self.alpha_c_pm(2) / (zz + self%beta_r_pm(2))
+   !end if
+
+   if (present(dvdz)) then
+     dvdz = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
+     !if (self%do_sigma_fit) then
+     !end if
+   end if
+
  else
    val = pade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
-   if (present(dzdval)) dzdval = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+
+   if (present(dvdz)) then
+     dvdz = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+   end if
  end if
 
 end subroutine sigma_pade_eval
@@ -832,7 +832,7 @@ end subroutine sigma_pade_eval
 !!
 !! FUNCTION
 !!  Use the Pade' approximant and Newton-Rapson method  to solve the QP equation
-!!  in the complex pane starting from the initial guess `z_guess`.
+!!  in the complex plane starting from the initial guess `z_guess`.
 !!
 !! INPUTS
 !!
@@ -864,10 +864,10 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  do while (abs(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
    iter = iter + 1
 
-   call self%eval(zsc, sigc, dzdval=dsigc)
+   call self%eval(zsc, sigc, dvdz=dsigc)
    ctdpc = e0 - v_meanf + sigx + sigc - zsc
 
-   if (Abs(ctdpc) < NR_ABS_ROOT_ERR) then
+   if (abs(ctdpc) < NR_ABS_ROOT_ERR) then
      converged=.TRUE.; EXIT
    end if
    dct = dsigc - one
@@ -877,8 +877,8 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  ierr = 0; msg = ""
  if (.not. converged) then
    write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
-     'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
-     'Absolute Error: ',abs(ctdpc),' > ',NR_ABS_ROOT_ERR
+     'Newton-Raphson method did not converge after: ', NR_MAX_NITER,' iterations.',ch10,&
+     'Absolute error: ',abs(ctdpc), ' > ', NR_ABS_ROOT_ERR
    ierr = 1
  end if
 
