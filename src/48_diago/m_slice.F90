@@ -1063,7 +1063,9 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
             !    ndeg = ndeg + 1
             !end do
             if (1.d0/cheb_poly(part_low,ndeg,poly_upp,slice%maxeig_global)<ramp) then
+                ! FIXME understand why this is always true?
                 write(std_out,*) 'Warn: Chebyshev polynomial degree does not amplify enough'
+                write(std_out,*) 1.d0/cheb_poly(part_low,ndeg,poly_upp,slice%maxeig_global)
             end if
         else
             ! ********* optimize amplification ratio ********
@@ -1531,6 +1533,8 @@ subroutine assign_tasks_to_processes(allocations, processes)
     
     ! *********************************************************************
 
+    write(std_out,*) allocations
+    write(std_out,*) processes
     j = 1
     do i = 1, size(allocations)
         processes(j:j + allocations(i) - 1) = i - 1  
