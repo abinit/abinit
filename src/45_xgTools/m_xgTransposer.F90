@@ -460,7 +460,7 @@ module m_xgTransposer
       !call flush_unit(std_out)
 
       nrows = rows(xgBlock_colsrows)
-      if ( MOD(nrows,ncpuCols) /=0 .and. nrows > ncpuCols) then
+      if ( (.not.xgTransposer%custom_ncolsColsRows) .and. MOD(nrows,ncpuCols) /=0 .and. nrows > ncpuCols) then
         write(message,'(a,i6,a,i6,a)') "Unbalanced parallelization : ", nrows, " rows for ", ncpuCols, " MPI"
         ABI_COMMENT(message)
       end if

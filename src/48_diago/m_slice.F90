@@ -1390,8 +1390,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         
             my_rank = xmpi_comm_rank(slice%spacecom)
             my_slice = slice%lookup_proc(my_rank + 1)
-            neigenpairs_slice = slice%neigenpairs_per_slice(my_slice)
-            fcol_ext = slice%fcol_in_Xext(my_slice)
+            neigenpairs_slice = slice%neigenpairs_per_slice(my_slice + 1)
+            fcol_ext = slice%fcol_in_Xext(my_slice + 1)
 
             call xgBlock_setBlock(eigen_ext%self, eigen_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
             call xgBlock_setBlock(resid_ext%self, resid_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
@@ -1437,6 +1437,10 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         if (islice == 1     ) fcol_in_slice = 1
         if (islice == slice%nslice) lcol_in_slice = neigenpairs_slice
 
+        write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
+        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
+        write(std_out,*) theta_reshaped
+
         ! After merge: Update first columns to copy from Xext to X
         slice%fcol_in_X(islice)= tot_ncols_kept + 1
         slice%fcol_in_Xext(islice) = fcol_ext + fcol_in_slice - 1
@@ -1449,9 +1453,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     
     ! Detect missing or extra eigenvalues
     if (tot_ncols_kept < slice%neigenpairs) then
-        ABI_ERROR("Not enough converged eigenvalues")
+        ABI_ERROR("Too few converged eigenvalues kept")
     else if (tot_ncols_kept > slice%neigenpairs) then
-        ABI_ERROR("Too many converged eigenvalues")
+        ABI_ERROR("Too many converged eigenvalues kept")
     end if
 
     ! Copy from extended memory to regular memory
