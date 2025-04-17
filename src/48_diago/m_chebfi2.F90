@@ -1323,10 +1323,14 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     integer :: space_res
     integer :: ideg, my_rank, num_proc, ierr, shift
     real(dp) :: center, radius, one_over_r, two_over_r
+    ! Arrays
     real(dp) :: tsec(2)
     integer, allocatable :: ndeg_filter_bands(:)
     integer, allocatable, target :: allbandpp(:)
+    real(dp), allocatable, target :: theta_reshaped(:)
     integer, pointer :: allbandpp_ptr(:) => null()
+    real(dp), pointer :: theta_reshaped_ptr(:) => null()
+    real(dp), pointer :: theta(:,:) => null()
 
     ! *********************************************************************
 
@@ -1339,20 +1343,15 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     end if
 
     if (chebfi%paral_kgb == 0) then
-        ABI_MALLOC(ndeg_filter_bands,(chebfi%neigenpairs))
+        if (.not.allocated(ndeg_filter_bands)) ABI_MALLOC(ndeg_filter_bands,(chebfi%neigenpairs))
         call xg_init(DivResults, space_res, rows=chebfi%neigenpairs, cols=1, gpu_option=chebfi%gpu_option)
         ! Fill DivResults with full eigenvalues
+        ! TODO fix for workaround copy between space_res and SPACE_R
         call xgBlock_copy(eigen, DivResults%self) 
     else
-        ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
-        call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
-        ! Fill DivResults(bandpp,1) with block of eigen(neigenpairs,1) of size bandpp
-        ! FIXME eigen is SPACE_R when DivResults is space_res.... 
+        if (.not.allocated(ndeg_filter_bands)) ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
+        call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option) 
         if (xmpi_comm_size(chebfi%spacecom) > 1) then
-            ! reshape to access column blocks
-            call xgBlock_reshape(eigen, 1, chebfi%neigenpairs) 
-            call xgBlock_reshape(DivResults%self, 1, chebfi%bandpp)
-            ! copy column range
             my_rank = xmpi_comm_rank(chebfi%spacecom)
             !shift = my_rank * chebfi%bandpp ! FIXME not working for different bandpp per rank
             num_proc = xmpi_comm_size(chebfi%spacecom)
@@ -1367,15 +1366,26 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
             else
                 shift = sum(allbandpp(1:my_rank)) ! fixed
             end if
-            call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
-            call xgBlock_copy(eigen_block, DivResults%self)
-            ! restore dimensions
-            call xgBlock_reshape(eigen, chebfi%neigenpairs, 1) 
-            call xgBlock_reshape(DivResults%self, chebfi%bandpp, 1) 
             if(allocated(allbandpp)) ABI_FREE(allbandpp)
         else
-            call xgBlock_copy(eigen, DivResults%self)
+            shift = 0
         end if
+        ! Fill DivResults(bandpp,1) with block of eigen(neigenpairs,1) of size bandpp
+        ! workaround to copy from space_res to SPACE_R
+        if(.not.allocated(theta_reshaped)) ABI_MALLOC(theta_reshaped,(chebfi%bandpp))
+        theta_reshaped_ptr => theta_reshaped
+        ! reshape to access column range
+        call xgBlock_reshape(DivResults%self, 1, chebfi%bandpp)
+        call xgBlock_reshape(eigen, 1, chebfi%neigenpairs)
+        call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
+        call xgBlock_reverseMap(eigen_block, theta, rows=1, cols=chebfi%bandpp)
+        theta_reshaped(1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
+        call xgBlock_map_1d(eigen_block, theta_reshaped_ptr, SPACE_R, chebfi%bandpp, gpu_option=chebfi%gpu_option)
+        call xgBlock_copy(eigen_block, DivResults%self)
+        if (allocated(theta_reshaped)) ABI_FREE(theta_reshaped)
+        ! restore dimensions
+        call xgBlock_reshape(eigen, chebfi%neigenpairs, 1) 
+        call xgBlock_reshape(DivResults%self, chebfi%bandpp, 1) 
     end if
    
     ! Filter parameters
@@ -1427,9 +1437,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
 
     ! Free temporary memory
     call xg_free(DivResults)
-    if (allocated(ndeg_filter_bands)) then
-        ABI_FREE(ndeg_filter_bands)
-    end if
+    if (allocated(ndeg_filter_bands)) ABI_FREE(ndeg_filter_bands)
 
 end subroutine chebfi_lowpassFilter
 !!***
