@@ -1250,7 +1250,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     if (cols(X0) /= chebfi%bandpp) then
         ABI_ERROR('wrong colsrows representation')
     end if
-    write(*,'(a,i6,i6)') 'local # proc has # cols ', xmpi_comm_rank(chebfi%spacecom), cols(X0)
+    write(*,'(a,i6,i6)') 'local # proc has # rows cols ', xmpi_comm_rank(chebfi%spacecom), rows(X0), cols(X0)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
     if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
@@ -1406,9 +1406,6 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     one_over_r = 1/radius
     two_over_r = 2/radius
 
-    write(std_out,*) chebfi%spacedim, chebfi%total_spacedim, chebfi%bandpp
-    write(std_out,*) rows(chebfi%xXColsRows), rows(chebfi%xAXColsRows), rows(chebfi%xBXColsRows)
-    
     !A * Psi
     call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
@@ -1537,9 +1534,6 @@ subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
     ls = (lambda_minus - center) / radius
     us = (lambda_plus - center) / radius
     
-    write(std_out,*) chebfi%spacedim, chebfi%total_spacedim, chebfi%bandpp
-    write(std_out,*) rows(chebfi%xXColsRows), rows(chebfi%xAXColsRows), rows(chebfi%xBXColsRows)
-
     ! A * Psi
     call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
