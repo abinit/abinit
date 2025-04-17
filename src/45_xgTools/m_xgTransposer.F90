@@ -345,7 +345,8 @@ module m_xgTransposer
 
       call xgTransposer_setComm(xgTransposer)
       ABI_MALLOC(xgTransposer%nrowsLinalg,(xgTransposer%mpiData(MPI_LINALG)%size))
-      call xgTransposer_readDistribution(xgTransposer,nrowsLinalg_sub)      
+      xgTransposer%nrowsLinalg(:) = nrowsLinalg_sub(:)
+      call xgTransposer_readDistribution(xgTransposer)      
       call xgTransposer_makeXgBlock(xgTransposer)
 
     case default
@@ -466,7 +467,9 @@ module m_xgTransposer
       end if
       ABI_MALLOC(xgTransposer%lookup,(1:ncols))
 
-      call xgTransposer_readDistribution(xgTransposer,xgTransposerInitialized%nrowsLinalg)      
+      ABI_MALLOC(xgTransposer%nrowsLinalg,(xgTransposer%mpiData(MPI_LINALG)%size))
+      xgTransposer%nrowsLinalg(:) = xgTransposerInitialized%nrowsLinalg(:)
+      call xgTransposer_readDistribution(xgTransposer)      
       call xgTransposer_makeXgBlock(xgTransposer)
 
     case default
@@ -606,17 +609,19 @@ module m_xgTransposer
 !!
 !! NAME
 !! xgTransposer_readDistribution
+!! 
+!! FUNCTION
+!! Read custom distribution from xgTransposer%nrowsLinalg(:)
 
-  subroutine xgTransposer_readDistribution(xgTransposer,nrowsLinalg_sub)
+  subroutine xgTransposer_readDistribution(xgTransposer)
 
       ! Arguments
       type(xgTransposer_t), intent(inout) :: xgTransposer
-      integer, pointer, intent(in) :: nrowsLinalg_sub(:)
       ! Variables
       integer :: iproc,nRealPairs,tot_ncols,ncols,ierr
       integer :: nprocs,commLinalg
 
-      ! ***
+      ! ***********************************************************
 
       nprocs = xgTransposer%mpiData(MPI_LINALG)%size
       xgTransposer%nrowsColsRows = rows(xgTransposer%xgBlock_colsrows)
@@ -641,15 +646,13 @@ module m_xgTransposer
           tot_ncols = ncols*xgTransposer%mpiData(MPI_COLS)%size
       end if
 
-      do iproc=1,size(nrowsLinalg_sub)    
-        nRealPairs = nrowsLinalg_sub(iproc)
+      do iproc=1,size(xgTransposer%nrowsLinalg)    
+        nRealPairs = xgTransposer%nrowsLinalg(iproc)
         if (MOD(nRealPairs,xgTransposer%nspinor)/=0) then
             ABI_ERROR('nspinor should divide nRealPairs!')
         end if
       end do
         
-      ABI_MALLOC(xgTransposer%nrowsLinalg,(nprocs))
-      xgTransposer%nrowsLinalg(:) = nrowsLinalg_sub(:)
       xgTransposer%ncolsLinalg = tot_ncols
 
       !write(*,*) "In linalg, # of real pairs:", xgTransposer%nrowsLinalg
