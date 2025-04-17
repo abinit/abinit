@@ -612,7 +612,7 @@ end subroutine efmas_ncread
    integer :: iband, adir
    character(len=22) :: format_eigvec
    character(len=500) :: msg, tmpstr
-   real(dp) :: vec(3)
+   real(dp) :: vec(3),mat(3,3)
 
    if(deg_dim>1) then
      extras = present(efmas_eigval) .and. present(efmas_eigvec)
@@ -707,7 +707,8 @@ end subroutine efmas_ncread
                write(io_unit,'(i3,a)') adir, ' Eigenvalue degenerate => eigenvector undefined'
              else
                vec=zero; vec(1:mdim)=efmas_eigvec(adir,:,iband)
-               vec=matmul(transpose(rprimd)/two_pi,vec); vec=vec/sqrt(sum(vec**2))
+               mat = transpose(rprimd)/two_pi
+               vec=matmul(mat,vec); vec=vec/sqrt(sum(vec**2))
                write(io_unit,format_eigvec) adir, efmas_eigvec(adir,:,iband), ' / ', vec
              end if
            end do
@@ -730,7 +731,8 @@ end subroutine efmas_ncread
      write(io_unit,'(a)') ' Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)'
      do adir=1,ndirs
        vec=dirs(:,adir)
-       vec=matmul(transpose(rprimd)/two_pi,vec); vec=vec/sqrt(sum(vec**2))
+       mat = transpose(rprimd)/two_pi
+       vec=matmul(mat,vec); vec=vec/sqrt(sum(vec**2))
        write(io_unit,'(i5,a,3f10.6,a,3f10.6,a,f14.10)') adir,': ', dirs(:,adir), ' / ', vec, ' -> ', m_cart(adir,iband)
      end do
    end do

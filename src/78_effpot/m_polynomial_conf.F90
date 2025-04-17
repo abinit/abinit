@@ -182,7 +182,7 @@ subroutine polynomial_conf_free(polynomial_conf)
 ! *************************************************************************
 
  if(allocated(polynomial_conf%cutoff_disp))then
-   ABI_FREE(polynomial_conf%cutoff_disp)
+   ABI_SFREE(polynomial_conf%cutoff_disp)
  end if
 
  polynomial_conf%power_disp    = 0

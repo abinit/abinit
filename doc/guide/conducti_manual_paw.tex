@@ -1,0 +1,268 @@
+\documentclass[a4,12pts]{extarticle}
+
+
+\usepackage{geometry}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{physics}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\usepackage{indentfirst}
+\usepackage[colorlinks,citecolor=red,linkcolor=blue,urlcolor=cyan]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{gensymb}
+
+\title{Transport properties in PAW with the \textsc{Conducti} program}
+\author{J. Boust}
+
+
+\begin{document}
+
+\maketitle
+\tolerance 1000%
+\emergencystretch 2em%
+
+ This document explains how to compute various transport properties at the DFT (Density Functional Theory) level in the Kubo-Greenwood approach with \textsc{Conducti}, a (ground-state) post-processing program of \textsc{Abinit}. It was developped, among others, by V. Recoules, S. Mazevet, M. Torrent, N. Brouwer, F. Jollet as well as J. Boust and used in numerous works (see for instance \cite{Mazevet2010,Jourdain2020,Brouwer2021}).
+Although \textsc{Conducti} can work in both norm-conserving and PAW (Projector Augmented-Wave \cite{Bloechl1994}) formalisms, the present manual is dedicated to the PAW possibilities.
+We wil assume that the reader is familiar with DFT and knows how to run a PAW ground-state (GS) calculation with \textsc{Abinit}.
+The first section is an introduction to the Kubo-Greenwood approach for transport properties.
+The second section explains how to use \textsc{Conducti}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Transport properties in the Kubo-Greenwood formalism}
+
+\subsection{Onsager kinetic coefficients} \label{Onsager}
+
+In the Kubo-Greenwood \cite{Kubo1957,Greenwood1958} linear-response theory (assuming homogeneous response, independent particles and dipolar approximation), the Onsager kinetic coefficients $L_{ij}(\omega)$ are expressed as \cite{Holst2011}:
+\begin{align}
+L_{ij}(\omega)=\frac{2\pi\hbar e^{4-i-j}}{3Vm^2}\sum_{nm\boldsymbol{k}\mu}\abs{\bra{n\boldsymbol{k}}\hat{p}_{\mu}\ket{m\boldsymbol{k}}}^{2}
+\Big(\frac{\epsilon_{n\boldsymbol{k}}+\epsilon_{m\boldsymbol{k}}}{2}-h_e\Big)^{i+j-2}\frac{f_{n\boldsymbol{k}}-f_{m\boldsymbol{k}}}{\epsilon_{m\boldsymbol{k}}-\epsilon_{n\boldsymbol{k}}}\delta(\epsilon_{m\boldsymbol{k}}-\epsilon_{n\boldsymbol{k}}-\hbar\omega), \label{Lij}
+\end{align}
+where $e$ is the electronic charge, $m$ is the electronic mass, $V$ is the unit cell volume, $n$ and $m$ are band indices (for valence electrons), $\boldsymbol{k}$ is a vector in the first Brillouin zone, $\mu$ is a spatial direction, $f_{n\boldsymbol{k}}$ and $\epsilon_{n\boldsymbol{k}}$ are respectively the occupation and energy of the state $(n\boldsymbol{k})$, $\omega$ is the frequency, $h_e$ is the enthalpy per electron. In this manual, we will not detail the formulae for spin-polarized and relativistic cases; these cases work in the same way and are implemented in \textsc{Conducti}. Furthermore, in numerical implementations, due to the dirac term $\delta(\epsilon_{m\boldsymbol{k}}-\epsilon_{n\boldsymbol{k}}-\hbar\omega)$, the energy difference $\epsilon_{m\boldsymbol{k}}-\epsilon_{n\boldsymbol{k}}$ is often replaced by $\hbar\omega$.
+
+\newpage
+
+The electronic thermal conductivity $K(\omega)$ and the thermopower $S(\omega)$ are then given by -- with $T_e$ the electronic temperature:
+\begin{align}
+&K(\omega)=\frac{1}{T_e}\Big(L_{22}(\omega)-\frac{L_{12}^2(\omega)}{L_{11}(\omega)}\Big) \label{Kth}\\
+&S(\omega)=\frac{L_{12}(\omega)}{T_eL_{11}(\omega)}. \label{Sth}
+\end{align}
+
+\subsection{Optical properties} \label{Valence}
+
+The real part of the optical conductivity is simply given by:
+\begin{align}
+\sigma_{1}(\omega)=L_{11}(\omega). \label{sigma1}
+\end{align}
+Once $\sigma_{1}(\omega)$ is known, various optical properties can be computed.
+First, the imaginary part of the optical conductivity can be obtained via the Kramers-Kronig relation:
+\begin{align}
+\sigma_{2}(\omega)=-\frac{2}{\pi}\int_{0}^{+\infty}\frac{\omega\sigma_{1}(x)}{x^2-\omega^2}dx. \label{sigma2}
+\end{align}
+Then, one can form the dielectric function by\footnote{In equations \ref{eps1}-\ref{refl_p} and \ref{absX}, we use cgs units.}:
+\begin{align}
+&\epsilon(\omega)=\epsilon_{1}(\omega)+i\epsilon_{2}(\omega) \label{eps}\\
+&\epsilon_{1}(\omega)=1-\frac{4\pi}{\omega}\sigma_{2}(\omega) \label{eps1}\\
+&\epsilon_{2}(\omega)=\frac{4\pi}{\omega}\sigma_1(\omega). \label{eps2}
+\end{align}
+The real $n(\omega)$ and imaginary $k(\omega)$ parts of the refractive index can then be obtained by:
+\begin{align}
+&n(\omega)=\sqrt{\frac{1}{2}(\abs{\epsilon(\omega)}+\epsilon_1(\omega))} \label{nn}\\
+&k(\omega)=\sqrt{\frac{1}{2}(\abs{\epsilon(\omega)}-\epsilon_1(\omega))} \label{kk}.
+\end{align}
+The absorption coefficient is given by:
+\begin{align}
+\alpha(\omega)=\frac{4\pi}{n(\omega)c}\sigma_1(\omega) \label{abso}
+\end{align}
+where $c$ is the speed of light. Finally, the $s$ and $p$ reflectivities at angle $\phi$ are calculated as:
+\begin{align}
+	& r_s(\omega)=\abs{\frac{\cos(\phi)-\sqrt{\epsilon(\omega)-\sin^2(\phi)}}{\cos(\phi)+\sqrt{\epsilon(\omega)-\sin^2(\phi)}}}^2 \label{refl_s}\\
+	& r_p(\omega)=\abs{\frac{\epsilon(\omega)\cos(\phi)-\sqrt{\epsilon(\omega)-\sin^2(\phi)}}{\epsilon(\omega)\cos(\phi)+\sqrt{\epsilon(\omega)-\sin^2(\phi)}}}^2. \label{refl_p}
+\end{align}
+Note that a more general formula for (\ref{sigma1}) gives the full real conductivity tensor
+\begin{align}
+[\sigma_{1}]_{\mu\nu}(\omega)=\frac{2\pi \hbar e^{2}}{m^{2}V}\sum_{nm\boldsymbol{k}}\bra{n\boldsymbol{k}}\hat{p}_{\mu}\ket{m\boldsymbol{k}}\bra{m\boldsymbol{k}}\hat{p}_{\nu}\ket{n\boldsymbol{k}}
+\frac{f_{n\boldsymbol{k}}-f_{m\boldsymbol{k}}}{\epsilon_{m\boldsymbol{k}}-\epsilon_{n\boldsymbol{k}}}\delta(\epsilon_{m\boldsymbol{k}}-\epsilon_{n\boldsymbol{k}}-\hbar\omega). \label{sig_tens}
+\end{align}
+It can also be decomposed into an inter-band term and a Drude like term (which includes degenerate state as well intra-band contributions) via \cite{Calderin2017}:
+\begin{align}
+&\sigma_1(\omega)=\sigma_1^{\text{inter}}+\sigma_1^{\text{Drude}} \label{sig_decompo}\\
+&\sigma_1^{\text{inter}}=\frac{2\pi\hbar e^{2}}{3Vm^2}\sum_{\substack{nm\boldsymbol{k}\mu\\ \epsilon_{n\boldsymbol{k}}\neq \epsilon_{m\boldsymbol{k}}}}\abs{\bra{n\boldsymbol{k}}\hat{p}_{\mu}\ket{m\boldsymbol{k}}}^{2}\frac{f_{n\boldsymbol{k}}-f_{m\boldsymbol{k}}}{\epsilon_{m\boldsymbol{k}}-\epsilon_{n\boldsymbol{k}}}\delta(\epsilon_{m\boldsymbol{k}}-\epsilon_{n\boldsymbol{k}}-\hbar\omega) \label{sig_inter}\\
+&\sigma_1^{\text{Drude}}=-\frac{2\pi\hbar e^{2}}{3Vm^2}\sum_{\substack{nm\boldsymbol{k}\mu\\ \epsilon_{n\boldsymbol{k}}= \epsilon_{m\boldsymbol{k}}}}\abs{\bra{n\boldsymbol{k}}\hat{p}_{\mu}\ket{m\boldsymbol{k}}}^{2}\frac{df}{d\epsilon}\Bigr|_{\epsilon_{n\boldsymbol{k}}}  \delta(\hbar\omega). \label{sig_drude}
+\end{align}
+Here, we assumed a Fermi-Dirac distribution at electronic temperature $T_e$: $f_{n\boldsymbol{k}}=f(\epsilon_{n\boldsymbol{k}},T_e)$. Note also that $\sigma_1(\omega)$ satisfies the f-sum rule:
+\begin{align}\label{sumrule}
+\frac{2mV}{N_e\pi e^2}\int_{0}^{+\infty}\sigma_{1}(\omega)d\omega=1,
+\end{align}
+where $N_e$ is the number of electrons.
+
+\subsection{Optical properties in the X-ray regime} \label{Core}
+
+Within this approach, one can also get the optical properties for $\omega$ in the X-ray regime (absorption or emission). In this case, the optical transitions go from a core state to a valence one (or vice-versa). The formula (\ref{sigma1}) thus needs to be slightly modified and is resolved for a single core orbital $i$ (corresponding to the principal and azimuthal quantum numbers of a single atom in the unit cell):
+\begin{align}
+\sigma^{X}_1(\omega)=\frac{2\pi\hbar e^{2}}{3m^{2}V}\sum_{n\boldsymbol{k}\mu}\abs{\bra{n\boldsymbol{k}}\hat{p}_{\mu}\ket{i}}^2
+\frac{1-f_{n\boldsymbol{k}}}{\epsilon_{n\boldsymbol{k}}-\epsilon_{i}}\delta(\epsilon_{n\boldsymbol{k}}-\epsilon_{i}-\hbar\omega) \label{sigX}
+\end{align}
+for the absorption processes (assuming fully occupied core orbitals), and
+\begin{align}
+\sigma^{X}_1(\omega)=\frac{2\pi\hbar e^{2}}{3m^{2}V}\sum_{n\boldsymbol{k}\mu}\abs{\bra{n\boldsymbol{k}}\hat{p}_{\mu}\ket{i}}^2
+\frac{f_{n\boldsymbol{k}}}{\epsilon_{n\boldsymbol{k}}-\epsilon_{i}}\delta(\epsilon_{n\boldsymbol{k}}-\epsilon_{i}-\hbar\omega) \label{emisX}
+\end{align}
+for the emission processes (assuming empty core orbitals). In this regime, the refractive index is close to one so one can get the absorption by a simple rescaling of equation \ref{sigX}:
+\begin{align}
+\alpha^{X}(\omega)=\frac{4\pi}{c}\sigma^{X}_1(\omega). \label{absX}
+\end{align}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section{Implementation in \textsc{\textmd{Conducti}}}
+
+\subsection{Running \textsc{\textmd{Conducti}}}
+
+The different quantities explained in the previous section are grouped into two batches in \textsc{Conducti}: valence properties (i.e. subsections \ref{Onsager} and \ref{Valence}) and core/X-ray properties (i.e. subsection~\ref{Core}). 
+To compute these properties, the first step is always to perform a well-converged PAW ground-state calculation in \textsc{Abinit} with the keyword 'prtnabla' set to the proper value. This keyword triggers the printing of OPT and/or OPT2 files containing the momentum matrix elements  $\{\bra{n\boldsymbol{k}}\hat{p}_{\mu}\ket{m\boldsymbol{k}}\}_{\mu nm\boldsymbol{k}}$ (for valence properties) and $\{\bra{n\boldsymbol{k}}\hat{p}_{\mu}\ket{i}\}_{\mu in\boldsymbol{k}}$ (for core properties) respectively. Table \ref{table_prtnabla} summarizes the different choices of 'prtnabla' values. Note that to compute the core-valence momentum matrix elements, \textsc{Abinit} needs the core wavefunctions: these must be provided by adding the corewf files  corresponding to each PAW data file used in the calculation in the same directory as the latter ones. These corewf files are automatically generated by the \textsc{Atompaw} \cite{Holzwarth2001} program when generating the corresponding paw data file by adding the keyword 'prtcorewf' to the \textsc{Atompaw} input file.
+
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{l| c c} 
+\hline
+\hline
+ & OPT (valence) & OPT2 (core) \\
+\hline
+prtnabla 1 &\cmark & \xmark\\
+prtnabla 2 &\cmark & \cmark\\
+prtnabla 3 &\xmark & \cmark\\
+\hline
+\hline
+\end{tabular}
+\caption{Possible values of 'prtnabla' in \textsc{Abinit} and their effect on the printing of OPT/OPT2 files.}\label{table_prtnabla}
+\end{table}
+
+One can then run \textsc{Conducti}, which requires: the OPT and/or OPT2 files, an input file detailed in the next subsection and a stdin file. The latter consists of two lines: the first one indicates the path/name of the input file while the second one gives the path/basename for the output files. To run \textsc{Conducti}, one should use the following command:
+\begin{verbatim}
+(mpirun -n N) conducti < stdin (> stdout)
+\end{verbatim}
+where one can optionnally use MPI parallelism with N processors and/or give a stdout file. Note that \textsc{Conducti} does not use OpenMP.\\
+
+The code produces different outputs. For valence properties, it creates out, Lij, Kth, eps, sig\_tensor and abs files. The out file is a summary of the calculation, giving several important informations like the f-sum value (\ref{sumrule}) or the extrapolated DC $\sigma_1$. The Lij file lists the kinetic Onsager coefficients (\ref{Lij}). The Kth file lists the electronic thermal conductivity (\ref{Kth}) and thermopower~(\ref{Sth}).
+The eps file gives the complex optical conductivity (\ref{sigma1}-\ref{sigma2}) and complex dielectric function (\ref{eps1}-\ref{eps2}). The sig\_tensor file gives the full real conductivity tensor (\ref{sig_tens}). The abs file gives the complex refractive index (\ref{nn}-\ref{kk}), the $s$ and $p$ reflectivities (\ref{refl_s}-\ref{refl_p}) as well as the absorption (\ref{abso}). In the case of spin-polarized calculations, an additionnal sig\_up\_dn file gives the spin-resolved real optical conductivity.\\
+
+For core/X-ray properties, it produces a sigX file containing the real (absorption) optical conductivity (\ref{sigX}) for the considered atom. More precisely, it prints, for each orbital (principal and azimuthal quantum numbers) of the atom, three columns: the first one is the frequency mesh around the absorption threshold, the second one is the optical conductivity for the atom times the number of atoms of this type\footnote{This corresponds to the 'typat' value of this atom.} in the unit cell and the third one is the sum of the contributions of all the atoms of the same type in the unit cell. When using the natural units mode (see next subsection), the code also creates an absX file which corresponds to the rescaling of the optical conductivity to obtain the absorption (\ref{absX}). It has the same structure as the sigX file. 
+Furthermore, the code produces an emisX file containing the real (emission) optical conductivity (\ref{emisX}) for the considered atom. This file has the same structure as the sigX file.
+In the spin-polarized case, the code also produces additionnal sigX\_up, sigX\_dn, emisX\_up and emisX\_dn files which give the spin-resolved counterparts of the sigX and emisX files.
+
+\subsection{\textsc{Conducti} input file}
+
+Below is a typical \textsc{Conducti} input file.
+
+\begin{verbatim}
+2                                  ! Conducti mode
+basename                           ! path/basename for the OPT/OPT2 files
+0.001 0.0000001 5.0 1000 1         ! Broadening, om_min, om_max, n_om, iatom
+1 0 0.0 0                          ! Broadening mode, units mode, phi, add_drude
+\end{verbatim}
+The first line contains an integer governing the type of calculation: the different options relevant to this manual are summarized in table \ref{table_conducti_mode}.
+\begin{table}[h!]
+\centering
+	\begin{tabular}{l| c c} 
+\hline
+\hline
+ & Valence (OPT) & Core (OPT2) \\
+\hline
+2 & \cmark & \xmark \\
+4 & \cmark & \cmark \\
+5 & \xmark & \cmark \\
+\hline
+\hline
+\end{tabular}
+\caption{Summary of the different modes (integer on the first line of the input file) for \textsc{Conducti}.} \label{table_conducti_mode}
+\end{table}
+
+The second line gives the path/basename for the OPT and/or OPT2 files used by conducti (the file should be path/basename\_OPT.nc for instance). The third line gives the broadening (in Ha) of the dirac functions used in all the formulas of the first section, the minimal $\omega$ point (in Ha, cannot be exactly 0), the maximal $\omega$ point (in Ha), the number of $\omega$ points and the atom for which core properties are to be calculated -- if needed\footnote{Two additional parameters (broadening maxmimum and center, in Ha) can be added to this line in order to create arctan smearing as was done in \cite{Jourdain2020}.}. Note that for core properties this input frequency mesh is then displaced by the energy of each considered core orbital. The last line gives the broadening mode (0 for gaussian, 1 for lorentzian), the units mode which determines which units are used in most of the output files (0 for natural units, 1 for atomic units), the angle phi (in~$\degree$) for the reflectivity if needed and an integer to add Drude-like contributions like in Eq. \ref{sig_decompo} (0 to ignore, 1 to add the contribution).  This last line can be omitted, in which case it is equivalent to '1 0 0.0 0'.
+
+
+\newpage
+
+\subsection{Some tips}
+We list below some useful tips for the user:
+\begin{itemize}
+\item In the case of core/X-ray properties calculation, the energy thresholds are arbitrary as the core energies are atomic energies which do not have the same reference as the Kohn-Sham energies in the solid. They simply give the correct order of magnitude.
+\item There are several important parameters impacting the results (check their convergence): GS self-consistent field parameters, cut-off energies, k-point mesh, size of the supercell, number of bands, frequency mesh, and broadening value.
+\item For $\sigma_1$ at high frequencies (and for other optical properties relying on Kramers-Kronig relation), you should have a large frequency range (in the \textsc{Conducti} input file) and a large number of bands ('nband' in the GS \textsc{Abinit} input file). One way to check the convergence is to look at the f-sum rule.
+\item Semi-core states should be considered in the valence (see your PAW data file) if you go to high frequencies.
+\item The broadening should be larger than the typical energy difference between states as well as the frequency increment -- it shouldn't be too large however.
+\item Due to finite size effects, DC values can be hard to converge without extrapolation.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{}
+
+\bibitem[Bl\"ochl, 1994]{Bloechl1994}
+Bl\"ochl, P.~E. (1994).
+\newblock Projector augmented-wave method.
+\newblock {\em Phys. Rev. B}, 50:17953--17979.
+
+\bibitem[Brouwer et~al., 2021]{Brouwer2021}
+Brouwer, N., Recoules, V., Holzwarth, N., and Torrent, M. (2021).
+\newblock Calculation of optical properties with spin-orbit coupling for warm
+  dense matter.
+\newblock {\em Computer Physics Communications}, 266:108029.
+
+\bibitem[Calderín et~al., 2017]{Calderin2017}
+Calderín, L., Karasiev, V., and Trickey, S. (2017).
+\newblock Kubo–greenwood electrical conductivity formulation and
+  implementation for projector augmented wave datasets.
+\newblock {\em Computer Physics Communications}, 221:118--142.
+
+\bibitem[Greenwood, 1958]{Greenwood1958}
+Greenwood, D.~A. (1958).
+\newblock The boltzmann equation in the theory of electrical conduction in
+  metals.
+\newblock {\em Proceedings of the Physical Society}, 71(4):585.
+
+\bibitem[Holst et~al., 2011]{Holst2011}
+Holst, B., French, M., and Redmer, R. (2011).
+\newblock Electronic transport coefficients from ab initio simulations and
+  application to dense liquid hydrogen.
+\newblock {\em Phys. Rev. B}, 83:235120.
+
+\bibitem[Holzwarth et~al., 2001]{Holzwarth2001}
+Holzwarth, N., Tackett, A., and Matthews, G. (2001).
+\newblock A projector augmented wave (paw) code for electronic structure
+  calculations, part i: atompaw for generating atom-centered functions.
+\newblock {\em Computer Physics Communications}, 135(3):329--347.
+
+\bibitem[Jourdain et~al., 2020]{Jourdain2020}
+Jourdain, N., Recoules, V., Lecherbourg, L., Renaudin, P., and Dorchies, F.
+  (2020).
+\newblock Understanding xanes spectra of two-temperature warm dense copper
+  using ab initio simulations.
+\newblock {\em Phys. Rev. B}, 101:125127.
+
+\bibitem[Kubo, 1957]{Kubo1957}
+Kubo, R. (1957).
+\newblock Statistical-mechanical theory of irreversible processes. i. general
+  theory and simple applications to magnetic and conduction problems.
+\newblock {\em Journal of the Physical Society of Japan}, 12(6):570--586.
+
+\bibitem[Mazevet et~al., 2010]{Mazevet2010}
+Mazevet, S., Torrent, M., Recoules, V., and Jollet, F. (2010).
+\newblock Calculations of the transport properties within the paw formalism.
+\newblock {\em High Energy Density Physics}, 6(1):84--88.
+
+\end{thebibliography}
+
+
+\end{document}
+

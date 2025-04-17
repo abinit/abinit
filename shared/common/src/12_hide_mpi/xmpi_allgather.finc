@@ -50,13 +50,15 @@ subroutine xmpi_allgather_int(xval,recvbuf,comm,ier)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer, intent(in) :: comm
  integer,intent(out) :: ier
-
 ! *************************************************************************
+ integer :: arr_xval(1)
+
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
 !  allgather xval on all proc. in comm
-   call MPI_ALLGATHER([xval],1,MPI_INTEGER,recvbuf,1,MPI_INTEGER,comm,ier)
+   arr_xval(1) = xval
+   call MPI_ALLGATHER(arr_xval,1,MPI_INTEGER,recvbuf,1,MPI_INTEGER,comm,ier)
  else if (comm == MPI_COMM_SELF) then
    recvbuf(1)=xval
  end if

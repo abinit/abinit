@@ -38,7 +38,7 @@ module m_xg_ortho_RR
  use m_gpu_toolbox
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 

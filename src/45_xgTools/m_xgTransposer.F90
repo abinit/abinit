@@ -23,6 +23,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_xgTransposer
 
   use, intrinsic :: iso_c_binding, only: c_double, c_size_t, c_loc
@@ -47,8 +50,8 @@ module m_xgTransposer
   use mpi
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-  use m_nvtx
+#if defined(HAVE_GPU_MARKERS)
+  use m_nvtx_data
 #endif
 
   implicit none
@@ -664,9 +667,7 @@ module m_xgTransposer
      !ABI_MALLOC(request,(1))
      !myrequest = 1
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
+     ABI_NVTX_START_RANGE(NVTX_TRANSPOSER_MPI_ALL2ALL)
 
      if( xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
 
@@ -699,9 +700,7 @@ module m_xgTransposer
 
      end if
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
+     ABI_NVTX_END_RANGE()
 
    case (TRANS_GATHER)
 
@@ -852,9 +851,8 @@ module m_xgTransposer
 &      rows=1,cols=cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
      !write(*,*) "Before ialltoall"
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
+     ABI_NVTX_START_RANGE(NVTX_TRANSPOSER_MPI_ALL2ALL)
+
     ! if gpu is enabled, data are located in GPU memory, so we copy them on a host buffer
     if( xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
@@ -891,9 +889,8 @@ module m_xgTransposer
       !                    comm, request(myrequest))
       !write(*,*) "After ialltoall"
     end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
+
+    ABI_NVTX_END_RANGE()
 
    case (TRANS_GATHER)
 

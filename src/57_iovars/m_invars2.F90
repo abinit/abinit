@@ -47,6 +47,7 @@ module m_invars2
  use m_crystal,   only : crystal_t
  use m_bz_mesh,   only : kmesh_t, find_qmesh
  use m_drivexc,   only : has_kxc
+ use m_mep,       only : MEP_SOLVER_STEEPEST,NEB_ALGO_CINEB
 
  implicit none
 
@@ -827,7 +828,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtion',tread,'DPR')
  if(tread==1) dtset%dtion=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtele',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtele',tread,'TIM')
  if(tread==1) dtset%dtele=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecut',tread,'ENE')
@@ -997,14 +998,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%ecuteps=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsigx',tread,'ENE')
- if(tread==1) dtset%ecutsigx=dprarr(1)
+ if (any(dtset%optdriver == [RUNL_GWR])) dtset%ecutsigx = dtset%ecut
+ if (tread==1) dtset%ecutsigx=dprarr(1)
+ !ABI_CHECK(dtset%ecutsigx <= four * dtset%ecut, "ecutwfn cannot be greater that 4*ecut")
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutwfn',tread,'ENE')
- if(tread==1) then
-   dtset%ecutwfn=dprarr(1)
- else
-   if(dtset%optdriver==RUNL_SCREENING .or. dtset%optdriver==RUNL_SIGMA) dtset%ecutwfn=dtset%ecut
- end if
+ if (any(dtset%optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_GWR])) dtset%ecutwfn=dtset%ecut
+ if (tread==1) dtset%ecutwfn = dprarr(1)
+ !ABI_CHECK(dtset%ecutwfn <= dtset%ecut, "ecutwfn cannot be greater that ecut")
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'omegasimax',tread,'ENE')
  if(tread==1) dtset%omegasimax=dprarr(1)
 
@@ -1638,9 +1640,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) then
      dtset%mep_solver=intarr(1)
    else if(dtset%imgmov==2) then
-     dtset%mep_solver=0
+     dtset%mep_solver=MEP_SOLVER_STEEPEST
    else if(dtset%imgmov==5) then
-     dtset%mep_solver=0
+     dtset%mep_solver=MEP_SOLVER_STEEPEST
    end if
    if (dtset%imgmov==2) then
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'string_algo',tread,'INT')
@@ -1649,10 +1651,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (dtset%imgmov==5) then
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'neb_algo',tread,'INT')
      if(tread==1) dtset%neb_algo=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'neb_cell_algo',tread,'INT')
+     if(tread==1) dtset%neb_cell_algo=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'neb_spring',tread,'DPR')
      if(tread==1) then
        dtset%neb_spring(1:2)=dprarr(1:2)
-     else if (dtset%neb_algo==2) then
+     else if (dtset%neb_algo==NEB_ALGO_CINEB) then
        dtset%neb_spring(1:2)=(/0.02_dp,0.15_dp/)
      end if
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cineb_start',tread,'INT')
@@ -2218,6 +2222,27 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_scthr',tread,'DPR')
  if(tread==1) dtset%td_scthr=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_type',tread,'INT')
+ if(tread==1) dtset%td_ef_type=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_induced_vecpot',tread,'INT')
+ if(tread==1) dtset%td_ef_induced_vecpot=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_tzero',tread,'TIM')
+ if(tread==1) dtset%td_ef_tzero=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_tau',tread,'TIM')
+ if(tread==1) dtset%td_ef_tau=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'td_ef_pol',tread,'DPR')
+ if(tread==1) dtset%td_ef_pol(1:3)=dprarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_lambda',tread,'LEN')
+ if(tread==1) dtset%td_ef_lambda=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_ef_ezero',tread,'DPR')
+ if(tread==1) dtset%td_ef_ezero=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npvel',tread,'INT')
  if(tread==1) dtset%npvel=intarr(1)
 
@@ -2350,7 +2375,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcpxocc',tread,'INT')
  if(tread==1) then
    dtset%pawcpxocc=intarr(1)
- else if (dtset%nspinor==2.and.(dtset%usepawu/=0.or.dtset%usedmft>0)) then
+ else if(dtset%nspinor==2.and.(dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10))) then
    dtset%pawcpxocc=2
  else if (dtset%pawspnorb>0.and.(dtset%kptopt<=0.or.dtset%kptopt>=3)) then
    if (dtset%optdriver/=RUNL_GSTATE.or.dtset%ionmov<6.or.dtset%iscf<10) dtset%pawcpxocc=2
@@ -2450,7 +2475,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spnorbscl',tread,'DPR')
  if(tread==1) dtset%spnorbscl=dprarr(1)
 
- if (dtset%usedmft>0) then
+ if (dtset%usedmft>0.and.dtset%usedmft/=10) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_solv',tread,'INT')
    if(tread==1) dtset%dmft_solv=intarr(1)
    if (dtset%dmft_solv==6.or.dtset%dmft_solv==7) then ! change some default values for TRIQS
@@ -2667,15 +2692,20 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmft_triqs_wmax=dprarr(1)
      end if
    end if
+ elseif (dtset%usedmft==10) then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandi',tread,'INT')
+   if(tread==1) dtset%dmftbandi=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandf',tread,'INT')
+   if(tread==1) dtset%dmftbandf=intarr(1)
  end if
 
- if (dtset%usepawu/=0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'f4of2_sla',tread,'ENE')
    if(tread==1) dtset%f4of2_sla(1:ntypat)=dprarr(1:ntypat)
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'f6of2_sla',tread,'ENE')
    if(tread==1) dtset%f6of2_sla(1:ntypat)=dprarr(1:ntypat)
  end if
- if (dtset%usepawu>0.or.dtset%usedmft>0) then
+ if (dtset%usepawu>0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmatpuopt',tread,'INT')
    if(tread==1) dtset%dmatpuopt=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmatudiag',tread,'INT')
@@ -2726,6 +2756,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
  if(tread==1) dtset%cprj_in_memory=intarr(1)
+ if (dtset%cprj_in_memory/=0.and.dtset%optdriver/=RUNL_GSTATE) then
+   dtset%cprj_in_memory=0
+   write(msg,'(a)') 'cprj_in_memory/=0 is implemented only for ground state (optdriver=0).&
+     & cprj_in_memory is set to 0 for this dataset.'
+   ABI_WARNING(msg)
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
  if(tread==1) dtset%cprj_update_lvl=intarr(1)
@@ -2907,11 +2943,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtcif',tread,'INT')
  if(tread==1) dtset%prtcif=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtcurrent',tread,'INT')
+ if(tread==1) dtset%prtcurrent=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtden',tread,'INT')
  if(tread==1) dtset%prtden=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtdipole',tread,'INT')
  if(tread==1) dtset%prtdipole=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtevk',tread,'INT')
+ if(tread==1) dtset%prtevk=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtdos',tread,'INT')
  if(tread==1) dtset%prtdos=intarr(1)
@@ -3135,7 +3177,10 @@ if (dtset%usekden==1) then
    dtset%prtebands  = 1 !DEFAULT in all set to xgr
    dtset%prteig     = 1
    dtset%prtelf     = 1 ! TO BE CHECKED FOR CONSISTENCY
-   dtset%prtevk     = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtevk     = 1
+#ifndef HAVE_NETCDF_MPI
+   if (dtset%paral_rf==1) dtset%prtevk = 0
+#endif
    !dtset%prtfsurf   = 1  ! TO BE CHECKED FOR CONSISTENCY
    !dtset%prtgden    = 1  ! TO BE CHECKED FOR CONSISTENCY
    dtset%prtgeo     = 1
@@ -4008,7 +4053,7 @@ if (dtset%usekden==1) then
      end if
    end if
 
-   if (dtset%usepawu/=0.or.dtset%usedmft>0) then
+   if (dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
 
      dprarr(1:ntypat)=dtset%upawu(1:ntypat,iimage)
      call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'upawu',tread,'ENE')

@@ -44,7 +44,7 @@ module m_dfpt_mkrho
  use m_mpinfo,          only : proc_distrb_cycle
  use m_cgprj,           only : getcprj
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
