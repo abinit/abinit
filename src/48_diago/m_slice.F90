@@ -620,6 +620,9 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     call xgTransposer_transpose(slice%xgTransposerXext, STATE_COLSROWS)
     ABI_NVTX_END_RANGE()
 
+    slice%use_colsrows = .true.
+    slice%use_linalg = .false.
+
     ! Unitary test
     if ( cols(slice%me_Xext_active) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)+1) ) then
         ABI_ERROR('wrong colsrows representation')
