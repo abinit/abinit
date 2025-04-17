@@ -371,19 +371,19 @@ subroutine slice_allocateAll(slice)
 
     call slice_free(slice)
 
-    if(.not.allocated(slice%neigenpairs_per_slice)) ABI_MALLOC(slice%neigenpairs_per_slice, (slice%nslice))
-    if(.not.allocated(slice%nproc_per_slice)) ABI_MALLOC(slice%nproc_per_slice, (slice%nslice))
-    if(.not.allocated(slice%lookup_proc)) ABI_MALLOC(slice%lookup_proc, (slice%nproc))
+    ABI_MALLOC_IFNOT(slice%neigenpairs_per_slice, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%nproc_per_slice, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%lookup_proc, (slice%nproc))
 
-    if(.not.allocated(slice%fcol_in_X)) ABI_MALLOC(slice%fcol_in_X, (slice%nslice))
-    if(.not.allocated(slice%fcol_in_Xext)) ABI_MALLOC(slice%fcol_in_Xext, (slice%nslice))
-    if (.not.allocated(slice%ncolsColsRows)) ABI_MALLOC(slice%ncolsColsRows, (slice%nproc))
+    ABI_MALLOC_IFNOT(slice%fcol_in_X, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%fcol_in_Xext, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%ncolsColsRows, (slice%nproc))
 
-    if(.not.allocated(slice%poly_degrees)) ABI_MALLOC(slice%poly_degrees, (slice%nslice))
-    if(.not.allocated(slice%part_low_bounds)) ABI_MALLOC(slice%part_low_bounds, (slice%nslice))
-    if(.not.allocated(slice%part_upp_bounds)) ABI_MALLOC(slice%part_upp_bounds, (slice%nslice))
-    if(.not.allocated(slice%poly_low_bounds)) ABI_MALLOC(slice%poly_low_bounds, (slice%nslice))
-    if(.not.allocated(slice%poly_upp_bounds)) ABI_MALLOC(slice%poly_upp_bounds, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%poly_degrees, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%part_low_bounds, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%part_upp_bounds, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%poly_low_bounds, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%poly_upp_bounds, (slice%nslice))
 
 end subroutine slice_allocateAll
 !!***
@@ -507,8 +507,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     ! Space for computed residuals (not distributed)
     call xg_init(resid0, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
 
-    if(.not.allocated(theta_reshaped)) ABI_MALLOC(theta_reshaped, (neigenpairs))
-    if(.not.allocated(permute_cols)) ABI_MALLOC(permute_cols, (neigenpairs))
+    ABI_MALLOC_IFNOT(theta_reshaped, (neigenpairs))
+    ABI_MALLOC_IFNOT(permute_cols, (neigenpairs))
 
     call xgBlock_reshape(eigen, 1, neigenpairs)
     call xgBlock_zero(eigen)
@@ -737,7 +737,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     oracle_min_occ = 0.d0
 
     num_proc = xmpi_comm_size(comm)
-    if(.not.allocated(nrowsLinalg)) ABI_MALLOC(nrowsLinalg,(num_proc))
+    ABI_MALLOC_IFNOT(nrowsLinalg,(num_proc))
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg = slice%me_nrowsLinalg_slice
 
@@ -917,7 +917,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=bandpp, fcol=1+shift)
     call xgBlock_reshape(eigen_mpi%self, 1, bandpp) 
     ! workaround to copy from space_res to SPACE_R
-    if(.not.allocated(theta_mpi_reshaped)) ABI_MALLOC(theta_mpi_reshaped,(bandpp))
+    ABI_MALLOC_IFNOT(theta_mpi_reshaped,(bandpp))
     theta_mpi_reshaped_ptr => theta_mpi_reshaped
     call xgBlock_reverseMap(eigen_mpi%self, theta_mpi, rows=1, cols=bandpp)
     theta_mpi_reshaped(1:bandpp) = theta_mpi(1,1:bandpp)
@@ -1003,7 +1003,7 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
     plot_filter_ = .false.
     if (present(plot_filter)) plot_filter_ = plot_filter
 
-    if(.not.allocated(spectral_partition)) ABI_MALLOC(spectral_partition,(nslice+1)) 
+    ABI_MALLOC_IFNOT(spectral_partition,(nslice+1)) 
    
     ! Compute spectral partition using spectral cut strategy
     spectral_partition = 0.d0
@@ -1022,8 +1022,8 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
 
     case(DIVIDE_SPECTRAL_GAPS)
 
-        if (.not.allocated(jperm)) ABI_MALLOC(jperm, (neigenpairs-1))
-        if (.not.allocated(consdiff)) ABI_MALLOC(consdiff, (neigenpairs-1))
+        ABI_MALLOC_IFNOT(jperm, (neigenpairs-1))
+        ABI_MALLOC_IFNOT(consdiff, (neigenpairs-1))
         
         jperm = (/ (iband, iband=1,neigenpairs-1) /)
         consdiff = (/ (theta(iband + 1) - theta(iband), iband=1,neigenpairs-1) /)
@@ -1173,7 +1173,7 @@ subroutine slice_allocateResources(slice)
     
     ! *********************************************************************
 
-    if(.not.allocated(weights)) ABI_MALLOC(weights, (slice%nslice))
+    ABI_MALLOC_IFNOT(weights, (slice%nslice))
 
     weights_ptr => weights
     task_sizes => slice%neigenpairs_per_slice
@@ -1243,12 +1243,8 @@ subroutine slice_markActiveTask(slice)
     slice%me_nproc_slice = slice%nproc_per_slice(slice%me_id_slice)
     slice%me_ndeg_slice = slice%poly_degrees(slice%me_id_slice)
 
-    if (.not.allocated(slice%me_ncolsColsRows_slice)) then
-        ABI_MALLOC(slice%me_ncolsColsRows_slice, (slice%me_nproc_slice))
-    end if
-    if (.not.allocated(slice%me_nrowsLinalg_slice)) then
-        ABI_MALLOC(slice%me_nrowsLinalg_slice, (slice%me_nproc_slice))
-    end if
+    ABI_MALLOC_IFNOT(slice%me_ncolsColsRows_slice, (slice%me_nproc_slice))
+    ABI_MALLOC_IFNOT(slice%me_nrowsLinalg_slice, (slice%me_nproc_slice))
 
     all_colsrows_ptr => slice%ncolsColsRows
     me_colsrows_ptr => slice%me_ncolsColsRows_slice
@@ -1419,7 +1415,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
 
         ! Before merge: get slice eigenvalues to filter
         neigenpairs_slice = slice%neigenpairs_per_slice(islice)
-        if (.not.allocated(theta_reshaped)) ABI_MALLOC(theta_reshaped, (neigenpairs_slice)) 
+        ABI_MALLOC_IFNOT(theta_reshaped, (neigenpairs_slice)) 
         fcol_ext = slice%fcol_in_Xext(islice)
         lcol_ext = fcol_ext + neigenpairs_slice - 1
         theta_reshaped(1:neigenpairs_slice) = theta_ext(1, fcol_ext:lcol_ext)

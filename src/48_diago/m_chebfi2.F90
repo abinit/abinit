@@ -1148,7 +1148,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     chebfi%xXColsRows = X0
     chebfi%eigenvalues = eigen
 
-    if(.not.allocated(nrowsLinalg)) ABI_MALLOC(nrowsLinalg,(num_proc))
+    ABI_MALLOC_IFNOT(nrowsLinalg,(num_proc))
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg = nrows_blockrows
 
@@ -1343,19 +1343,19 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     end if
 
     if (chebfi%paral_kgb == 0) then
-        if (.not.allocated(ndeg_filter_bands)) ABI_MALLOC(ndeg_filter_bands,(chebfi%neigenpairs))
+        ABI_MALLOC_IFNOT(ndeg_filter_bands,(chebfi%neigenpairs))
         call xg_init(DivResults, space_res, rows=chebfi%neigenpairs, cols=1, gpu_option=chebfi%gpu_option)
         ! Fill DivResults with full eigenvalues
         ! TODO fix for workaround copy between space_res and SPACE_R
         call xgBlock_copy(eigen, DivResults%self) 
     else
-        if (.not.allocated(ndeg_filter_bands)) ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
+        ABI_MALLOC_IFNOT(ndeg_filter_bands,(chebfi%bandpp))
         call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option) 
         if (xmpi_comm_size(chebfi%spacecom) > 1) then
             my_rank = xmpi_comm_rank(chebfi%spacecom)
             !shift = my_rank * chebfi%bandpp ! FIXME not working for different bandpp per rank
             num_proc = xmpi_comm_size(chebfi%spacecom)
-            if(.not.allocated(allbandpp)) ABI_MALLOC(allbandpp,(num_proc))
+            ABI_MALLOC_IFNOT(allbandpp,(num_proc))
             allbandpp_ptr => allbandpp
             call xmpi_allgather(chebfi%bandpp, allbandpp_ptr, chebfi%spacecom, ierr)
             if ( ierr /= xmpi_success ) then
@@ -1372,7 +1372,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
         end if
         ! Fill DivResults(bandpp,1) with block of eigen(neigenpairs,1) of size bandpp
         ! workaround to copy from space_res to SPACE_R
-        if(.not.allocated(theta_reshaped)) ABI_MALLOC(theta_reshaped,(chebfi%bandpp))
+        ABI_MALLOC_IFNOT(theta_reshaped,(chebfi%bandpp))
         theta_reshaped_ptr => theta_reshaped
         ! reshape to access column range
         call xgBlock_reshape(DivResults%self, 1, chebfi%bandpp)

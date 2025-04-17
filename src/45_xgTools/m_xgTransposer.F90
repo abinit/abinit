@@ -344,6 +344,7 @@ module m_xgTransposer
 #endif
 
       call xgTransposer_setComm(xgTransposer)
+      ABI_MALLOC(xgTransposer%nrowsLinalg,(xgTransposer%mpiData(MPI_LINALG)%size))
       call xgTransposer_readDistribution(xgTransposer,nrowsLinalg_sub)      
       call xgTransposer_makeXgBlock(xgTransposer)
 
