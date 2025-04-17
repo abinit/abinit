@@ -99,7 +99,7 @@ module m_slice
     use m_errors
     use m_time, only : timab
     use m_sort, only: sort_dp
-    use m_io_tools, only : flush_unit
+    !use m_io_tools, only : flush_unit
 
     use m_cgtools
     use m_xg

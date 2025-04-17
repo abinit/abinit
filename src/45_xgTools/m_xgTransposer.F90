@@ -67,7 +67,6 @@ module m_xgTransposer
   use m_errors
   use m_xg
   use m_time
-!  use m_io_tools, only : flush_unit
 
 #if defined HAVE_YAKL
   use gator_mod
