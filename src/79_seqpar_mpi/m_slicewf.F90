@@ -153,15 +153,15 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  ! scalars
  integer, parameter :: tim_slicewf = 2160
  integer, parameter :: tim_nonlop = 1753
- integer :: iband,shift,space,blockdim,total_spacedim,ierr
+ integer :: iband,shift,space,blockdim
  integer :: spacedim,spacecom,gpu_option
  integer :: me_g0,me_g0_fft
- integer(kind=c_size_t) :: localMem
+ !integer(kind=c_size_t) :: localMem
  type(slice_t) :: slice
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
  ! arrays
  real(dp) :: tsec(2)
- integer(kind=c_size_t) :: sliceMem(2) 
+ !integer(kind=c_size_t) :: sliceMem(2) 
  real(dp), allocatable :: l_gvnlxc(:,:)
  
  ! Parameters for nonlop call in NC

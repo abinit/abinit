@@ -716,7 +716,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  call timab(tim_amp_f,2,tsec)
 
  call xg_free(DivResults)
- ABI_FREE(ndeg_filter_bands)
+ ABI_SFREE(ndeg_filter_bands)
 
  call timab(tim_transpose,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
@@ -1262,7 +1262,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     end if
     
     ! Free temporary memory
-    if (allocated(nrowsLinalg)) ABI_FREE(nrowsLinalg)
+    ABI_SFREE(nrowsLinalg)
 
 end subroutine chebfi_runSlice
 !!***
@@ -1366,7 +1366,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
             else
                 shift = sum(allbandpp(1:my_rank)) ! fixed
             end if
-            if(allocated(allbandpp)) ABI_FREE(allbandpp)
+            ABI_SFREE(allbandpp)
         else
             shift = 0
         end if
@@ -1382,7 +1382,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
         theta_reshaped(1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
         call xgBlock_map_1d(eigen_block, theta_reshaped_ptr, SPACE_R, chebfi%bandpp, gpu_option=chebfi%gpu_option)
         call xgBlock_copy(eigen_block, DivResults%self)
-        if (allocated(theta_reshaped)) ABI_FREE(theta_reshaped)
+        ABI_SFREE(theta_reshaped)
         ! restore dimensions
         call xgBlock_reshape(eigen, chebfi%neigenpairs, 1) 
         call xgBlock_reshape(DivResults%self, chebfi%bandpp, 1) 
@@ -1437,7 +1437,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
 
     ! Free temporary memory
     call xg_free(DivResults)
-    if (allocated(ndeg_filter_bands)) ABI_FREE(ndeg_filter_bands)
+    ABI_SFREE(ndeg_filter_bands)
 
 end subroutine chebfi_lowpassFilter
 !!***
@@ -1794,7 +1794,7 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
  ndeg_filter=ndeg_filter_all
 
  call xg_free(residu)
- ABI_FREE(ndeg_filter_bands)
+ ABI_SFREE(ndeg_filter_bands)
 
 end subroutine chebfi_set_ndeg_from_residu
 !!***

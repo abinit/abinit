@@ -184,7 +184,6 @@ module m_xgTransposer
     integer :: ncols
     integer :: nrows
     integer :: ierr
-    integer :: irow
     integer :: icol
     integer :: ncpuRows
     integer :: ncpuCols
@@ -671,9 +670,7 @@ module m_xgTransposer
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     real(dp), ABI_CONTIGUOUS pointer :: xgTransposer__buffer(:,:)
 #endif
-    integer :: me_rows,me_cols,ncpu_rows,ncolsColsRows
-    integer :: nrowsLinalgMe 
-    !integer :: cols, rows
+    integer :: ncolsColsRows, nrowsLinalgMe 
 
     select case (xgTransposer%state)
     case (STATE_LINALG)
@@ -1291,7 +1288,6 @@ module m_xgTransposer
     integer :: tos,toe,froms,frome
     integer :: col, icpu
     integer :: me_rows,ncpu_cols,ncpu_rows
-    integer :: me_cols
     integer :: nPair,ispinor,nspinor
     integer :: nrowsLinalgMe,nrowsLinalgMeSum
     integer, pointer :: nrowsLinalg(:)
