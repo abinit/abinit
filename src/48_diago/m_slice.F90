@@ -484,11 +484,11 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     type(xgBlock_t) :: slicecols_ext_out
     ! Arrays
     integer, allocatable, target :: permute_cols(:)
+    real(dp), allocatable, target :: theta_reshaped(:)
     integer, pointer :: permute_cols_ptr(:) => null()
     integer, pointer :: ncolsColsRows_ptr(:) => null()
-    real(dp), pointer :: theta_(:,:)
-    real(dp), pointer :: resid_(:,:)
-    real(dp), allocatable, target :: theta_reshaped(:)
+    real(dp), pointer :: theta_(:,:) => null()
+    real(dp), pointer :: resid_(:,:) => null()
     real(dp), pointer :: theta_reshaped_ptr(:) => null()
     
     ! *********************************************************************
@@ -826,9 +826,13 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     type(xgBlock_t) :: xAXColsRows
     type(xgBlock_t) :: xBXColsRows
     type(xgBlock_t) :: X_next
-    type(xgTransposer_t) :: xgTransposerX
     type(xgBlock_t) :: xXColsRows
+    type(xgBlock_t) :: eigen_mpi_reshaped
+    type(xgTransposer_t) :: xgTransposerX
     ! Arrays
+    real(dp), allocatable, target :: theta_mpi_reshaped(:)
+    real(dp), pointer :: theta_mpi_reshaped_ptr(:) => null()
+    real(dp), pointer :: theta_mpi(:,:) => null()
     integer :: maxeig_pos(2)
     integer :: mineig_pos(2)
 
@@ -908,27 +912,25 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xgBlock_colwiseNorm2(X_next, resid_mpi%self, comm_loc=xmpi_comm_null)  ! resid = |X_next|^2
    
     ! MPI communication for gathering all thetas (using summation strategy on columns)
+    my_rank = xmpi_comm_rank(slice%spacecom)
+    shift = my_rank * bandpp
+    ! for eigen
+    call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=bandpp, fcol=1+shift)
     call xgBlock_reshape(eigen_mpi%self, 1, bandpp) 
+    ! workaround to copy from space_res to SPACE_R
+    if(.not.allocated(theta_mpi_reshaped)) ABI_MALLOC(theta_mpi_reshaped,(bandpp))
+    theta_mpi_reshaped_ptr => theta_mpi_reshaped
+    call xgBlock_reverseMap(eigen_mpi%self, theta_mpi, rows=1, cols=bandpp)
+    theta_mpi_reshaped(1:bandpp) = theta_mpi(1,1:bandpp)
+    call xgBlock_map_1d(eigen_mpi_reshaped, theta_mpi_reshaped_ptr, SPACE_R, bandpp, gpu_option=slice%gpu_option)
+    call xgBlock_copy(eigen_mpi_reshaped, eigen_block)
+    call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
+    if(allocated(theta_mpi_reshaped)) ABI_FREE(theta_mpi_reshaped)
+    ! for resid (SPACE_R)
+    call xgBlock_setBlock(resid, resid_block, rows=1, cols=bandpp, fcol=1+shift)
     call xgBlock_reshape(resid_mpi%self, 1, bandpp)     
-    if (xmpi_comm_size(slice%spacecom) > 1) then
-        
-        my_rank = xmpi_comm_rank(slice%spacecom)
-        shift = my_rank * bandpp
-
-        call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=bandpp, fcol=1+shift)
-        call xgBlock_print(eigen_mpi%self,std_out)
-        write(std_out,*) cols(eigen_mpi%self), rows(eigen_mpi%self), bandpp
-        call flush_unit(std_out)
-        call xgBlock_copy(eigen_mpi%self, eigen_block)
-        call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
-
-        call xgBlock_setBlock(resid, resid_block, rows=1, cols=bandpp, fcol=1+shift)
-        call xgBlock_copy(resid_mpi%self, resid_block)
-        call xgBlock_mpi_sum(resid, comm=slice%spacecom)
-    else
-        call xgBlock_copy(eigen_mpi%self, eigen)
-        call xgBlock_copy(resid_mpi%self, resid)
-    end if
+    call xgBlock_copy(resid_mpi%self, resid_block)
+    call xgBlock_mpi_sum(resid, comm=slice%spacecom)
 
     ! ============== Transpose ==============
     call xmpi_barrier(slice%spacecom)
@@ -1032,7 +1034,7 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
 
         ! Take median of largest gaps
         do islice=1,nslice
-            jmax = jperm(neigenpairs - islice) ! TODO crosscheck if formula is correct Priority
+            jmax = jperm(neigenpairs - islice)
             spectral_partition(islice + 1) = (theta(jmax) + theta(jmax + 1)) / 2.d0
         end do
 
@@ -1104,8 +1106,7 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         write(std_out,'(a,i2)') '======= Slice ', islice
         write(std_out,*) '   Partition, width=', part_low, part_upp, part_upp - part_low
         write(std_out,*) 'With overlap, width=', poly_low, poly_upp, poly_upp - poly_low
-        write(std_out,*) '           scaled to=', (poly_low-center)/radius, (poly_upp-center)/radius
-        write(std_out,'(a,i6,a,i6)') 'nvec= ', nvec, 'ndeg= ', ndeg
+        write(std_out,'(a,i6,a,i6)') 'nvec= ', nvec, ' ndeg= ', ndeg
         write(std_out,*) ' '
 
         ! Compute last index in extended memory (without ovlp)
@@ -1332,7 +1333,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     type(xgBlock_t) :: X_kept, eigen_kept, resid_kept
     type(xgBlock_t) :: X0_out, eigen_out, resid_out
     ! arrays
-    real(dp), pointer :: theta_ext(:,:)
+    real(dp), pointer :: theta_ext(:,:) => null()
     real(dp), allocatable :: theta_reshaped(:)
  
     ! *********************************************************************
