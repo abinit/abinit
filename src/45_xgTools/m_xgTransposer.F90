@@ -285,7 +285,7 @@ module m_xgTransposer
 
       ! Check that ncols can be uniformly distributed across ncolsCols MPI processes
       ! Load balance is uniform, each MPI process has the same ncolsColsRows
-      if ( MOD(ncols,ncpuCols) /=0 ) then
+      if ( (.not.xgTransposer%custom_ncolsColsRows) .and. MOD(ncols,ncpuCols) /=0 ) then
         if ( ncols > ncpuCols ) then
           write(message,'(a,i6,a,i6,a)') "Unbalanced parallelization : ", ncols, " columns for ", ncpuCols, " MPI"
           ABI_ERROR(message)
@@ -430,7 +430,7 @@ module m_xgTransposer
       call xmpi_sum(nrows,commLinalg,ierr)
 
       ! Check that ncols can be uniformly distributed across ncolsCols MPI processes
-      if ( MOD(ncols,ncpuCols) /=0 ) then
+      if ( (.not.xgTransposer%custom_ncolsColsRows) .and. MOD(ncols,ncpuCols) /=0 ) then
         if ( ncols > ncpuCols ) then
           write(message,'(a,i6,a,i6,a)') "Unbalanced parallelization : ", ncols, " columns for ", ncpuCols, " MPI"
           ABI_ERROR(message)

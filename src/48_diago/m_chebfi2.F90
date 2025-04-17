@@ -1199,7 +1199,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     call timab(tim_transpose,2,tsec)
     ABI_NVTX_END_RANGE()
 
-    if (rows(chebfi%X) /= nrowsLinalg(xmpi_comm_rank(chebfi%spacecom))) then
+    if (rows(chebfi%X) /= nrowsLinalg(xmpi_comm_rank(chebfi%spacecom)+1)) then
         ABI_ERROR("wrong linalg representation")
     end if
     write(*,'(a,i6,i6)') 'local # proc has # rows ', xmpi_comm_rank(chebfi%spacecom), rows(chebfi%X)
