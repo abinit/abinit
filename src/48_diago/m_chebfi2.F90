@@ -1327,9 +1327,9 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     real(dp) :: tsec(2)
     integer, allocatable :: ndeg_filter_bands(:)
     integer, allocatable, target :: allbandpp(:)
-    real(dp), allocatable, target :: theta_reshaped(:)
+    real(dp), allocatable, target :: theta_reshaped(:,:)
     integer, pointer :: allbandpp_ptr(:) => null()
-    real(dp), pointer :: theta_reshaped_ptr(:) => null()
+    real(dp), pointer :: theta_reshaped_ptr(:,:) => null()
     real(dp), pointer :: theta(:,:) => null()
 
     ! *********************************************************************
@@ -1371,16 +1371,18 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
             shift = 0
         end if
         ! Fill DivResults(bandpp,1) with block of eigen(neigenpairs,1) of size bandpp
-        ! workaround to copy from space_res to SPACE_R
-        ABI_MALLOC_IFNOT(theta_reshaped,(chebfi%bandpp))
+        ! workaround to copy from SPACE_R to space_res
+        ABI_MALLOC_IFNOT(theta_reshaped,(2,chebfi%bandpp))
         theta_reshaped_ptr => theta_reshaped
         ! reshape to access column range
         call xgBlock_reshape(DivResults%self, 1, chebfi%bandpp)
         call xgBlock_reshape(eigen, 1, chebfi%neigenpairs)
         call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
         call xgBlock_reverseMap(eigen_block, theta, rows=1, cols=chebfi%bandpp)
-        theta_reshaped(1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
-        call xgBlock_map_1d(eigen_block, theta_reshaped_ptr, SPACE_R, chebfi%bandpp, gpu_option=chebfi%gpu_option)
+        theta_reshaped = 0.d0
+        theta_reshaped(1,1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
+        call xgBlock_map(eigen_block, theta_reshaped_ptr, space_res, rows=1, &
+            cols=chebfi%bandpp, gpu_option=chebfi%gpu_option)
         call xgBlock_copy(eigen_block, DivResults%self)
         ABI_SFREE(theta_reshaped)
         ! restore dimensions
@@ -1526,6 +1528,7 @@ subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
     ! A * Psi
     call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
+    write(std_out,*) rows(chebfi%xXColsRows), rows(chebfi%xAXColsRows), rows(chebfi%xXColsRows)
     call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
     call xgBlock_zero_im_g0(chebfi%xAXColsRows)
     call xgBlock_zero_im_g0(chebfi%xBXColsRows)
