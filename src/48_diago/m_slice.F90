@@ -239,7 +239,7 @@ module m_slice
 !! FUNCTION
 !! Initialize a 'slice' datastructure.
 !!
-!! INPUTS TODO these are necessary for chebfi_init later
+!! INPUTS
 !!  nslice= number of spectral slices
 !!  neigenpairs= number of requested eigenvectors/eigenvalues
 !!  spacedim= space dimension for one vector
@@ -423,7 +423,10 @@ subroutine slice_free(slice)
     ABI_SFREE(slice%poly_low_bounds)
     ABI_SFREE(slice%poly_upp_bounds)
 
-   call xmpi_comm_free(slice%me_comm_slice) 
+
+    if (slice%me_comm_slice /= slice%spacecom) then
+        call xmpi_comm_free(slice%me_comm_slice)
+    end if
 
 end subroutine slice_free
 !!***
@@ -486,7 +489,6 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     integer, allocatable, target :: permute_cols(:)
     real(dp), allocatable, target :: theta_reshaped(:)
     integer, pointer :: permute_cols_ptr(:) => null()
-    integer, pointer :: ncolsColsRows_ptr(:) => null()
     real(dp), pointer :: theta_(:,:) => null()
     real(dp), pointer :: resid_(:,:) => null()
     real(dp), pointer :: theta_reshaped_ptr(:) => null()
@@ -552,13 +554,29 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
 
     ! ===================== Split interval [lambda_minus,lambda_plus) into slices ======================
     
-    theta_reshaped_ptr => theta_reshaped
-    call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
+    if (slice%nslice==1) then
+        slice%neigenpairs_per_slice = slice%neigenpairs
+        slice%fcol_in_X = 1
+        slice%fcol_in_Xext = 1
+        slice%poly_degrees = slice%ndeg_filter
+        slice%part_low_bounds = lambda_plus
+        slice%part_upp_bounds = slice%maxeig_global
+        slice%poly_low_bounds = lambda_plus
+        slice%poly_upp_bounds = slice%maxeig_global
+    else
+        theta_reshaped_ptr => theta_reshaped
+        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
+    end if
 
     ! ===================== Resource management system =================================================
     
     ! Divide resources into slice tasks
-    call slice_allocateResources(slice)
+    if (slice%nslice==1) then
+        slice%nproc_per_slice = xmpi_comm_size(slice%spacecom)
+        slice%lookup_proc = 0
+    else
+        call slice_allocateResources(slice)
+    end if
 
     ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
     call slice_markActiveTask(slice)
@@ -571,14 +589,15 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     end if
 
     ! Permute column vectors in Rayleigh quotient increasing order
-    call xgBlock_permuteCols(X0, slice%total_spacedim, neigenpairs, permute_cols_ptr)
+    if (slice%nslice>1) then
+        call xgBlock_permuteCols(X0, slice%total_spacedim, neigenpairs, permute_cols_ptr)
+    end if
 
     slice%neigenpairs_ext = sum(slice%neigenpairs_per_slice)
-    
+
     if (slice%nslice==1) then
         slice%XextLinalg = X0
-    else
- 
+    else 
         ! Allocate extended space in linalg representation
         call xg_init(slice%X_ext, slice%space, slice%spacedim, slice%neigenpairs_ext, &
             slice%spacecom, me_g0=slice%me_g0, gpu_option=slice%gpu_option)
@@ -595,44 +614,16 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
             call xgBlock_copy(slicecols_in, slicecols_ext_out)
             ! Remember xgBlock_copy is always on CPU expect if both blocks are on GPU
         end do
-
     end if
 
     ! Unitary test
     if (cols(slice%XextLinalg) /= slice%neigenpairs_ext) then
         ABI_ERROR('wrong linalg representation')
     end if
-    write(*,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(slice%spacecom), cols(slice%XextLinalg)
+    write(std_out,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(slice%spacecom), cols(slice%XextLinalg)
 
-    ! Distribute extended columns across **all** MPI processes
-    ! After the transposition each process contains the correct
-    ! bandpp corresponding to the slice so that no additional communication
-    ! has to be performed in order to bring band slices to processes.
-    ncolsColsRows_ptr => slice%ncolsColsRows
-
-    ! Allocate slice%me_Xext_active according to the target MPI distribution for slices
-    call xgTransposer_constructor(slice%xgTransposerXext, slice%XextLinalg, slice%me_Xext_active,&
-        nspinor, STATE_LINALG, TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
-        gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit,&
-        custom_ncolsColsRows=.true., ncolsColsRows_sub=ncolsColsRows_ptr)
-   
-    slice%xgTransposerXext%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
-   
-    ! ===================== Transpose ================================================================= 
-    
-    ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
-    call xgTransposer_transpose(slice%xgTransposerXext, STATE_COLSROWS)
-    ABI_NVTX_END_RANGE()
-
-    slice%use_colsrows = .true.
-    slice%use_linalg = .false.
-
-    ! Unitary test
-    if ( cols(slice%me_Xext_active) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)+1) ) then
-        ABI_ERROR('wrong colsrows representation')
-    end if
-    write(*,'(a,i6,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom),&
-        cols(slice%me_Xext_active)
+    write(std_out,*) 'X0', xgBlock_getid(X0)
+    write(std_out,*) 'slice%XextLinalg', xgBlock_getid(slice%XextLinalg)
     
     ! Recover dimensions
     call xgBlock_reshape(eigen, neigenpairs, 1)
@@ -667,10 +658,10 @@ end subroutine slice_allschedule
 !! OUTPUT
 !! eigen=converged eigenvalue array of size (neigenpairs,1), first rows written only
 !! residu=slice residual array of size (neigenpairs,1), first rows written only
+!! slice%XextLinalg= guess/converged eigenvectors for all slices
 !! 
 !! SIDE EFFECTS
 !! slice <type(slice_t)>= memory workspace used for Spectrum slicing
-!! slice%me_Xext_active= guess/converged eigenvectors on active slice
 !! 
 !! SOURCE
 
@@ -712,17 +703,50 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! Arrays
     integer, allocatable, target :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null() 
+    integer, pointer :: ncolsColsRows_ptr(:) => null()
 
     ! *********************************************************************
     
     ! Sanity check
-    if ( (.not. slice%use_colsrows) .and. slice%use_linalg) then
-        ABI_ERROR("should be in colsrows representation")
+    if ( (.not. slice%use_linalg) .and. slice%use_colsrows) then
+        ABI_ERROR("should be in linalg representation")
     end if
     if (slice%gpu_option==ABI_GPU_OPENMP) then
         call slice_queryHostDevice(slice, on_host, on_device)
         ABI_CHECK(on_device,"GPU not used when it should be!")
     end if
+
+    ! Distribute extended columns across **all** MPI processes
+    ! After the transposition each process contains the correct
+    ! bandpp corresponding to the slice so that no additional communication
+    ! has to be performed in order to bring band slices to processes.
+    ncolsColsRows_ptr => slice%ncolsColsRows
+
+    ! Allocate slice%me_Xext_active according to the target MPI distribution for slices
+    call xgTransposer_constructor(slice%xgTransposerXext, slice%XextLinalg, slice%me_Xext_active,&
+        nspinor, STATE_LINALG, TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
+        gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit,&
+        custom_ncolsColsRows=.true., ncolsColsRows_sub=ncolsColsRows_ptr)
+   
+    slice%xgTransposerXext%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
+    
+    call xmpi_barrier(slice%spacecom)
+    ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
+    call xgTransposer_transpose(slice%xgTransposerXext, STATE_COLSROWS)
+    ABI_NVTX_END_RANGE()
+    
+    write(std_out,*) 'slice%me_Xext_active', xgBlock_getid(slice%me_Xext_active)
+    ! to be compared with chebfi_run
+
+    slice%use_colsrows = .true.
+    slice%use_linalg = .false.
+
+    ! Unitary test
+    if ( cols(slice%me_Xext_active) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)+1) ) then
+        ABI_ERROR('wrong colsrows representation')
+    end if
+    write(std_out,'(a,i6,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom),&
+        cols(slice%me_Xext_active)
 
     ! Get parameters of active task
     neigenpairs = slice%me_neigenpairs_slice
@@ -773,12 +797,30 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     call xgBlock_setComm(eigen, slice%spacecom)
     call xgBlock_setComm(residu, slice%spacecom)
 
-    ! TODO we can also compute the merge on individual slices
-    ! otherwise we do it outside?
-
     ! Free temporary memory
     call chebfi_free(chebfi)
     ABI_SFREE(nrowsLinalg)
+
+    ! Sanity check
+    if ( (.not. slice%use_colsrows) .and. slice%use_linalg) then
+        ABI_ERROR("should be in colsrows representation")
+    end if
+    if (slice%gpu_option==ABI_GPU_OPENMP) then
+        call slice_queryHostDevice(slice, on_host, on_device)
+        ABI_CHECK(on_device,"GPU not used when it should be!")
+    end if
+
+    ! Actually do the transposition to linalg
+    call xmpi_barrier(slice%spacecom)
+    ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
+    call xgTransposer_transpose(slice%xgTransposerXext, STATE_LINALG)
+    ABI_NVTX_END_RANGE()
+    ! Note: At this point slice%me_Xext_active is recovered into slice%XextLinalg
+
+    write(std_out,*) 'slice%XextLinalg', xgBlock_getid(slice%XextLinalg)
+
+    slice%use_colsrows = .false.
+    slice%use_linalg = .true.
 
 end subroutine slice_run
 !!***
@@ -979,6 +1021,16 @@ end subroutine slice_computeSpectrum
 !! lambda_plus= upper bound of interval to split
 !! theta= sorted Rayleigh quotients of size (neigenpairs)
 !! plot_filter= (option) true if print x,f(x) 
+!!
+!! SIDE EFFECTS
+!! slice%neigenpairs_per_slice
+!! slice%fcol_in_X
+!! slice%fcol_in_Xext
+!! slice%poly_degrees
+!! slice%part_low_bounds
+!! slice%part_upp_bounds
+!! slice%poly_low_bounds
+!! slice%poly_upp_bounds
 !! 
 !! SOURCE
 
@@ -1232,6 +1284,9 @@ end subroutine slice_allocateResources
 !! slice%me_comm_slice          = sub-communicator of active slice
 !! slice%me_ncolsColsRows_slice = column capacity per process in colsrows repr
 !! slice%me_nrowsLinalg_slice   = row capacity per process in linalg repr
+!! slice%me_id_slice
+!! slice%me_nproc_slice
+!! slice%me_ndeg_slice
 !! 
 !! SOURCE
 
@@ -1270,9 +1325,13 @@ subroutine slice_markActiveTask(slice)
     call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, me_linalg_ptr)
 
     ! Split global comm into disjoint sub-comms, only procs with the same color communicate
-    call xmpi_comm_split(slice%spacecom, slice%me_id_slice, my_rank, slice%me_comm_slice, ierr)        
-    if ( ierr /= xmpi_success ) then
-        ABI_ERROR("Error while creating slice subcommunicators")
+    if (slice%nslice==1) then
+        slice%me_comm_slice = slice%spacecom
+    else
+        call xmpi_comm_split(slice%spacecom, slice%me_id_slice, my_rank, slice%me_comm_slice, ierr)        
+        if ( ierr /= xmpi_success ) then
+            ABI_ERROR("Error while creating slice subcommunicators")
+        end if
     end if
     
     ! process waits for others to create their subcommunicators before using its own
@@ -1346,24 +1405,6 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     real(dp), allocatable :: theta_reshaped(:)
  
     ! *********************************************************************
-
-    ! Sanity check
-    if ( (.not. slice%use_colsrows) .and. slice%use_linalg) then
-        ABI_ERROR("should be in colsrows representation")
-    end if
-    if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call slice_queryHostDevice(slice, on_host, on_device)
-        ABI_CHECK(on_device,"GPU not used when it should be!")
-    end if
-
-    ! Actually do the transposition to linalg
-    ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
-    call xgTransposer_transpose(slice%xgTransposerXext, STATE_LINALG)
-    ABI_NVTX_END_RANGE()
-    ! Note: At this point slice%me_Xext_active is recovered into slice%XextLinalg
-
-    slice%use_colsrows = .false.
-    slice%use_linalg = .true.
 
     ! Two ways to get slice eigenvalues to filter
     ! 1) (implemented)

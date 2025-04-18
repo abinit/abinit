@@ -234,11 +234,13 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  
  call slice_allschedule(slice, xgx0, getghc_gsc1, xgeigen, nspinor)
 
- ! Release collective cg memory from GPU, will only use active task memory
+ if (dtset%nslice>1) then
+    ! Release collective cg memory from GPU, will only use active task memory
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+    !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+    !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
+ end if
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
@@ -246,13 +248,11 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call slice_run(slice, getghc_gsc1, getBm1X, xgeigen, xgresidu, nspinor)
 
  ! Retransfer collective cg memory on GPU
- if ( l_paw ) then
+ if (dtset%nslice>1) then
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
- end if
- if (gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-    call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
+   call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
  end if
 
  call slice_allmerge(slice, xgx0, xgeigen, xgresidu)
