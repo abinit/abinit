@@ -424,7 +424,7 @@ subroutine slice_free(slice)
     ABI_SFREE(slice%poly_upp_bounds)
 
 
-    if (slice%me_comm_slice /= slice%spacecom) then
+    if (slice%nslice /= 1 .and. slice%me_comm_slice /= slice%spacecom) then
         call xmpi_comm_free(slice%me_comm_slice)
     end if
 
@@ -559,10 +559,10 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
         slice%fcol_in_X = 1
         slice%fcol_in_Xext = 1
         slice%poly_degrees = slice%ndeg_filter
-        slice%part_low_bounds = lambda_plus
+        slice%part_low_bounds = slice%mineig_global
         slice%part_upp_bounds = slice%maxeig_global
-        slice%poly_low_bounds = lambda_plus
-        slice%poly_upp_bounds = slice%maxeig_global
+        slice%poly_low_bounds = lambda_minus
+        slice%poly_upp_bounds = lambda_plus
     else
         theta_reshaped_ptr => theta_reshaped
         call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
@@ -715,12 +715,16 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         call slice_queryHostDevice(slice, on_host, on_device)
         ABI_CHECK(on_device,"GPU not used when it should be!")
     end if
+    
+    write(std_out,*) 'slice%XextLinalg', xgBlock_getid(slice%XextLinalg)
 
     ! Distribute extended columns across **all** MPI processes
     ! After the transposition each process contains the correct
     ! bandpp corresponding to the slice so that no additional communication
     ! has to be performed in order to bring band slices to processes.
     ncolsColsRows_ptr => slice%ncolsColsRows
+
+    write(std_out,*) ncolsColsRows_ptr
 
     ! Allocate slice%me_Xext_active according to the target MPI distribution for slices
     call xgTransposer_constructor(slice%xgTransposerXext, slice%XextLinalg, slice%me_Xext_active,&
@@ -730,11 +734,10 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
    
     slice%xgTransposerXext%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
     
-    call xmpi_barrier(slice%spacecom)
     ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
     call xgTransposer_transpose(slice%xgTransposerXext, STATE_COLSROWS)
     ABI_NVTX_END_RANGE()
-    
+     
     write(std_out,*) 'slice%me_Xext_active', xgBlock_getid(slice%me_Xext_active)
     ! to be compared with chebfi_run
 
@@ -778,24 +781,30 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         ndeg_filter,nbdbuf,slice%space,1,comm,slice%me_g0,slice%me_g0_fft,slice%paw,xmpi_comm_self,comm,&
         oracle,oracle_factor,oracle_min_occ,slice%gpu_option,gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
         gpu_thread_limit=slice%gpu_thread_limit,from_linalg=.false.)
-
+ 
     ! Define pointers to actively used arrays
+    call xmpi_barrier(slice%spacecom)
     X0_active = slice%me_Xext_active
     call xgBlock_setBlock(eigen, eigen_active, rows=neigenpairs, cols=1)
     call xgBlock_setBlock(residu, residu_active, rows=neigenpairs, cols=1)
     
+    write(std_out,*) 'X0_active', xgBlock_getid(X0_active)
+    
     ! Restrict to sub-communicator
     call xgBlock_setComm(X0_active, comm)
-    call xgBlock_setComm(eigen_active, comm)
-    call xgBlock_setComm(residu_active, comm)
+    call xgBlock_setComm(slice%me_Xext_active, comm)
+    !call xgBlock_setComm(eigen_active, comm)
+    !call xgBlock_setComm(residu_active, comm)
+    
+    write(std_out,*) 'X0_active', xgBlock_getid(X0_active)
 
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
 
     ! Restore global comm
-    call xgBlock_setComm(slice%me_Xext_active, slice%spacecom)
-    call xgBlock_setComm(eigen, slice%spacecom)
-    call xgBlock_setComm(residu, slice%spacecom)
+    !call xgBlock_setComm(slice%me_Xext_active, slice%spacecom)
+    !call xgBlock_setComm(eigen, slice%spacecom)
+    !call xgBlock_setComm(residu, slice%spacecom)
 
     ! Free temporary memory
     call chebfi_free(chebfi)

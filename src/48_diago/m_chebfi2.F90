@@ -1175,6 +1175,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     ABI_MALLOC_IFNOT(nrowsLinalg,(num_proc))
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg = nrows_blockrows
+    
+    write(std_out,*) 'chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows)
+    write(std_out,*) 'X0', xgBlock_getid(X0)
 
     !A * Psi
     call timab(tim_getAX_BX,1,tsec)
