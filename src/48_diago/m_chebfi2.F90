@@ -1156,16 +1156,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg = nrows_blockrows
 
-    ! Apply polynomial filtering to active MPI ColsRows block-column
-    if (is_lowpass) then
-        ! [lambda_minus,lambda_plus) is diminished using Chebyshev
-        call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
-    else
-        ! [lambda_minus,lambda_plus) is amplified using Chebyshev-Jackson
-        call chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
-            maxeig_global,getAX_BX,getBm1X)
-    end if
-
     ! MPI transpose to linalg state
     call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
@@ -1191,9 +1181,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
 
         call xmpi_barrier(chebfi%spacecom)
     
-        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
-        call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
-        call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
 
     else
         call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
@@ -1203,6 +1190,36 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     call timab(tim_transpose,2,tsec)
     ABI_NVTX_END_RANGE()
 
+    write(std_out,*) 'id xX', xgBlock_getid(chebfi%xXColsRows,xmpi_comm_null)
+
+    ! Apply polynomial filtering to active MPI ColsRows block-column
+    if (is_lowpass) then
+        ! [lambda_minus,lambda_plus) is diminished using Chebyshev
+        call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
+    else
+        ! [lambda_minus,lambda_plus) is amplified using Chebyshev-Jackson
+        call chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
+            maxeig_global,getAX_BX,getBm1X)
+    end if
+   
+    write(std_out,*) 'Before transpose'
+    write(std_out,*) 'id xX', xgBlock_getid(chebfi%xXColsRows)
+    write(std_out,*) 'id xAX', xgBlock_getid(chebfi%xAXColsRows)
+    write(std_out,*) 'id xBX', xgBlock_getid(chebfi%xBXColsRows)
+    write(std_out,*) nrowsLinalg_ptr
+
+        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
+        call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
+        call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
+
+    write(std_out,*) 'After transpose'
+    write(std_out,*) 'id xX', xgBlock_getid(chebfi%xXColsRows)
+    write(std_out,*) 'id xAX', xgBlock_getid(chebfi%xAXColsRows)
+    write(std_out,*) 'id xBX', xgBlock_getid(chebfi%xBXColsRows)
+    write(std_out,*) 'id  X', xgBlock_getid(chebfi%X)
+    write(std_out,*) 'id AX', xgBlock_getid(chebfi%AX%self)
+    write(std_out,*) 'id BX', xgBlock_getid(chebfi%BX%self)
+    
     if (rows(chebfi%X) /= nrowsLinalg(xmpi_comm_rank(chebfi%spacecom)+1)) then
         ABI_ERROR("wrong linalg representation")
     end if
@@ -1250,7 +1267,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     if (cols(X0) /= chebfi%bandpp) then
         ABI_ERROR('wrong colsrows representation')
     end if
-    write(*,'(a,i6,i6)') 'local # proc has # rows cols ', xmpi_comm_rank(chebfi%spacecom), rows(X0), cols(X0)
+    write(*,'(a,i6,i6,i6)') 'local # proc has # rows cols ', xmpi_comm_rank(chebfi%spacecom), rows(X0), cols(X0)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
     if (chebfi%gpu_option==ABI_GPU_KOKKOS) then

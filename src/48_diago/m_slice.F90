@@ -1065,7 +1065,7 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
 
         part_low = spectral_partition(islice)
         part_upp = spectral_partition(islice+1)
-        wovlp = (part_upp - part_low)/10.d0 ! FIXME add abi parameter to tune this
+        wovlp = (part_upp - part_low)/8.d0 ! FIXME add abi parameter to tune this
         poly_low = part_low - wovlp
         poly_upp = part_upp + wovlp
 
@@ -1441,9 +1441,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         if (islice == 1     ) fcol_in_slice = 1
         if (islice == slice%nslice) lcol_in_slice = neigenpairs_slice
 
-        write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
-        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
-        write(std_out,*) theta_reshaped
+        !write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
+        !write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
+        !write(std_out,*) theta_reshaped
 
         ! After merge: Update first columns to copy from Xext to X
         slice%fcol_in_X(islice)= tot_ncols_kept + 1
