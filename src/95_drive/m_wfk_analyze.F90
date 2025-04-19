@@ -427,7 +427,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
      end do
    end do
 
-   ! Compute new bantot
+   ! Compute new value of bantot
    ! TODO: Have to change all arrays in outhdr_hdr depending on nband_ks
    out_hdr%bantot = sum(out_hdr%nband)
    out_hdr%mband = maxval(out_hdr%nband)
@@ -487,7 +487,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
          ABI_MALLOC(thetas, (nb))
 
          if (nsto == 1) then
-           ! Use KS states.
+           ! Use KS state.
            ps_ug = cg_k_cplx
          else
            ! Multiply by random phases.
@@ -519,6 +519,18 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ABI_FREE(occ_k)
    ABI_FREE(kg_k)
    call in_wfk%close(); call out_wfk%close(); call out_hdr%free()
+
+   ! DEBUG section. Try to read the output WFK file.
+   !call out_wfk%open_read(outwfk_path, formeig0, iomode_from_fname(outwfk_path), get_unit(), xmpi_comm_self)
+   !do spin=1,ebands%nsppol
+   !  do ik_ibz=1,ebands%nkpt
+   !    nband_k = out_wfk%hdr%nband(ik_ibz + (spin-1)*ebands%nkpt)
+   !    band_block = [1, nband_k]
+   !    call out_wfk%read_band_block(band_block, ik_ibz, spin, sc_mode, &
+   !                                 kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
+   !  end do
+   !end do
+   !call out_wfk%close()
 
  case (WFK_TASK_PAW_AEPSI)
    ! Compute AE PAW wavefunction in real space on the dense FFT mesh.

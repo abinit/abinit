@@ -60,9 +60,9 @@ MODULE m_dyson_solver
     integer :: npts
     ! Number of points
 
-    !logical :: do_sigma_fit
-    !real(dp) :: beta_r_pm(2)
-    !complex(dp) :: alpha_r_pm(2)
+    real(dp) :: betar_pm(2), zcut_pm(2)
+    complex(dp) :: alphac_pm(2)
+    logical :: do_sigma_fit
 
     complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
     ! pointer to input mesh and values.
@@ -760,20 +760,22 @@ end subroutine print_sigma_melems
 !!
 !! SOURCE
 
-subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals) ! alpha_c_pm, beta_r_pm
+subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, alphac_pm, betar_pm, zcut_pm)
 
 !Arguments ------------------------------------
  class(sigma_pade_t),intent(out) :: self
  integer,intent(in) :: npts
- complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts)
+ complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts), alphac_pm(2)
+ real(dp),intent(in) :: betar_pm(2), zcut_pm(2)
 ! *************************************************************************
 
  self%npts = npts
  self%zmesh => zmesh(1:self%npts)
  self%sigc_cvals => sigc_cvals(1:self%npts)
- !self%alpha_c_pm = alpha_c_pm
- !self%beta_r_pm = beta_r_pm
- !self%do_sigma_fit = .False.
+ self%alphac_pm = alphac_pm
+ self%betar_pm = betar_pm
+ self%zcut_pm = zcut_pm
+ self%do_sigma_fit = .False.
 
 end subroutine sigma_pade_init
 !!***
@@ -803,14 +805,9 @@ subroutine sigma_pade_eval(self, zz, val, &
  ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
  if (real(zz) > zero) then
    val = pade(self%npts, self%zmesh, self%sigc_cvals, zz)
-   !if (self%do_sigma_fit) then
-   !  val = val + self.alpha_c_pm(1) / (zz - self%beta_r_pm(1)) + self.alpha_c_pm(2) / (zz + self%beta_r_pm(2))
-   !end if
 
    if (present(dvdz)) then
      dvdz = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
-     !if (self%do_sigma_fit) then
-     !end if
    end if
 
  else
@@ -818,6 +815,18 @@ subroutine sigma_pade_eval(self, zz, val, &
 
    if (present(dvdz)) then
      dvdz = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+   end if
+ end if
+
+ if (self%do_sigma_fit) then
+   ! Add analytic expression
+   val = val + self%alphac_pm(1) / (self%betar_pm(1) + zz) &
+             + self%alphac_pm(2) / (self%betar_pm(2) - zz)
+
+   if (present(dvdz)) then
+     ! Add analytic expression
+     dvdz = dvdz - self%alphac_pm(1) / ((self%betar_pm(1) + zz) ** 2)  &
+                 - self%alphac_pm(2) / ((self%betar_pm(2) - zz) ** 2)
    end if
  end if
 
@@ -831,7 +840,7 @@ end subroutine sigma_pade_eval
 !!  sigma_pade_qp_solve
 !!
 !! FUNCTION
-!!  Use the Pade' approximant and Newton-Rapson method  to solve the QP equation
+!!  Use the Pade' approximant and Newton-Rapson method to solve the QP equation
 !!  in the complex plane starting from the initial guess `z_guess`.
 !!
 !! INPUTS
