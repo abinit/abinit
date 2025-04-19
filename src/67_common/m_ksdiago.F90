@@ -334,6 +334,7 @@ module m_ksdiago
    ! eigenvalues (KS + pseudo energies)
 
  contains
+
    procedure :: init => psbands_init
     ! Initialize the object
 
@@ -342,6 +343,7 @@ module m_ksdiago
 
    procedure :: free => psbands_free
     ! Free memory.
+
  end type psbands_t
 !!***
 
@@ -2232,7 +2234,7 @@ end subroutine hyb_free
 !!
 !! SOURCE
 
-subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie) !nband_k
+subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
 
 !Arguments ------------------------------------
  class(psbands_t),intent(out) :: psb
@@ -2248,8 +2250,6 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie) !nband_k
  real(dp) :: first_eig, last_eig
  real(dp),allocatable :: tmp_eig_k(:)
 ! *********************************************************************
-
- units = [std_out, ab_out]
 
  ! Shift energies wrt the input Fermi level.
  ABI_MALLOC(tmp_eig_k, (eig_size))
@@ -2307,6 +2307,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie) !nband_k
 
  psb%ps_eig = psb%ps_eig + gs_fermie
 
+ units = [std_out, ab_out]
  call wrtout(units, ' Stochastic pseudobands setup:', pre_newlines=1)
  call wrtout(units, sjoin('     Number of stochastic subspaces: ', itoa(psb%nslices)))
  call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
@@ -2314,7 +2315,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie) !nband_k
  call wrtout(units, sjoin('     Number of bands in the protection window: ', itoa(psb%nb_protected)))
  call wrtout(units, sjoin('     Final number of bands: ', itoa(psb%nb_tot)), newlines=1)
 
- !if (dtset%prtvol > 1) then
+ !if (dtset%prtvol > 5) then
  !  do islice=1,psb%nslices
  !    write(msg,'(a,i0,a,*(1x,i0))')" islice: ", psb%nslices, " subspace:", psb%subspace(:, psb%nslices)
  !    call wrtout(units, msg)

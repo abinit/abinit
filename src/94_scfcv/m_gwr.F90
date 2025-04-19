@@ -5441,7 +5441,7 @@ subroutine gwr_build_sigmac(gwr)
  integer :: sc_ngfft(18), need_qibz(gwr%nqibz), got_qibz(gwr%nqibz), units(2), dat_units(3), g0_q(3) ! gg(3),
  integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2) !, qq_ibz(3)
- real(dp),allocatable :: betas_r(:,:,:)
+ real(dp),allocatable :: betas_r(:,:,:), zcut_pm(:,:,:)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
  complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau), avg_2ntau(2,gwr%ntau), cvals(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_mat(:,:,:,:,:,:), alphas_c(:,:,:)
@@ -5517,10 +5517,13 @@ subroutine gwr_build_sigmac(gwr)
  ABI_RECALLOC(gwr%sigc_iw_mat, (gwr%ntau, gwr%b1gw:gwr%b2gw, ii:jj, gwr%nkcalc, gwr%nsppol))
 
  do_sigma_fit = (iand(gwr%dtset%gwr_fit, SIGMA_FIT) /= 0)
+ ABI_CALLOC(alphas_c, (2, gwr%b1gw:gwr%b2gw, ii:jj))
+ ABI_CALLOC(betas_r, (2, gwr%b1gw:gwr%b2gw, ii:jj))
+ ABI_CALLOC(zcut_pm, (2, gwr%b1gw:gwr%b2gw, ii:jj))
+ zcut_pm = gwr%dtset%zcut
+
  if (do_sigma_fit) then
    call wrtout(units, " Activating fit of sigma matrix elements in tau space")
-   ABI_MALLOC(alphas_c, (2, gwr%b1gw:gwr%b2gw, ii:jj))
-   ABI_MALLOC(betas_r, (2, gwr%b1gw:gwr%b2gw, ii:jj))
  end if
 
  max_abs_imag_wct = zero; max_abs_re_wct = zero
@@ -5987,13 +5990,17 @@ end if
        associate (cvals_pmt => sigc_it_mat(:,:, band, band2 ,ikcalc, spin))
        ib2 = band2 - band2_start + 1
        nb2 = band2_stop - band2_start + 1
+
        if (do_sigma_fit) then
          cvals = cvals_pmt(1,:)
          call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r, ierr)
          alphas_c(1,band, band2) = alpha_c; betas_r(1,band,band2) = beta_r
-         !cvals_pmt(1,:) = cvals_pmt(1,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
+         zcut_pm(1, band, band2) = gwr%dtset%zcut
+         ! Remove the fit from the ab-initio data.
+         cvals_pmt(1,:) = cvals_pmt(1,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
          if (gwr%comm%value == master) then
            write(100, "(a,2(i0,1x))")"# +tau fit for band, band2: ", band, band2
+           write(100, *)"# alpha_c, beta_r: ", alpha_c, beta_r
            do ii=1,gwr%ntau
              zz = alpha_c * exp(-beta_r * gwr%tau_mesh(ii)); write(100, *) c2r(cvals_pmt(1,ii)), c2r(zz), abs(cvals_pmt(1,ii) - zz)
            end do
@@ -6001,10 +6008,13 @@ end if
          ! TODO: Recheck this part, in particular the order of -tau
          cvals = cvals_pmt(2,:)
          call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r, ierr)
-         alphas_c(2,band,band2) = alpha_c; betas_r(2,band,band2) = beta_r
-         !cvals_pmt(2,:) = cvals_pmt(2,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
+         alphas_c(2, band, band2) = alpha_c; betas_r(2, band, band2) = beta_r
+         zcut_pm(2, band, band2) = gwr%dtset%zcut
+         ! Remove the fit from the ab-initio data.
+         cvals_pmt(2,:) = cvals_pmt(2,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
          if (gwr%comm%value == master) then
            write(101, "(a,2(i0,1x))")"# -tau fit for band, band2: ", band, band2
+           write(101, *)"# alpha_c, beta_r: ", alpha_c, beta_r
            do ii=1,gwr%ntau
              zz = alpha_c * exp(-beta_r * gwr%tau_mesh(ii)); write(101, *) c2r(cvals_pmt(2,ii)), c2r(zz), abs(cvals_pmt(2,ii) - zz)
            end do
@@ -6028,9 +6038,12 @@ end if
      v_meanf = vxc_val + vu
 
      band2 = merge(1, band, gwr%sig_diago)
-     call spade%init(gwr%ntau, imag_zmesh, gwr%sigc_iw_mat(:, band, band2, ikcalc, spin))
 
-     ! Solve the QP equation with Newton-Rapson starting from e0
+     call spade%init(gwr%ntau, imag_zmesh, gwr%sigc_iw_mat(:, band, band2, ikcalc, spin), &
+                     alphas_c(:, band, band2), betas_r(:, band, band2), zcut_pm(:, band, band2))
+     spade%do_sigma_fit = do_sigma_fit
+
+     ! Solve the QP equation with Newton-Rapson starting from e0.
      zz = cmplx(e0, zero)
      call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
      qp_pade(band, ikcalc, spin) = zsc
@@ -6048,7 +6061,7 @@ end if
      sigc_e0(band, ikcalc, spin) = sigc_e0__
      ze0_kcalc(band, ikcalc, spin) = z_e0
 
-     ! IMPORTANT: Here we update qp_ebands%eig with the new ones obtained with the linearized QP equation
+     ! IMPORTANT: Here we update qp_ebands%eig with the new ones obtained with the linearized QP equation.
      gwr%qp_ebands%eig(band, ik_ibz, spin) = real(qp_ene)
 
      ! Compute Spectral function using linear mesh **centered** around KS e0.
@@ -6076,6 +6089,7 @@ end if
 
  ABI_SFREE(alphas_c)
  ABI_SFREE(betas_r)
+ ABI_SFREE(zcut_pm)
 
  if (gwr%nkcalc == gwr%nkibz) then
    ! Shift the bands that are not explicitly included in the SCF calculation.
