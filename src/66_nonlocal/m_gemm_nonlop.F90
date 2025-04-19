@@ -545,6 +545,8 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET ENTER DATA MAP(to:sij_typ) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
+  else
+    ABI_MALLOC(sij_typ,(1,ntypat)) ! Dummy alloc
   end if
 
   ndgxdt = -1

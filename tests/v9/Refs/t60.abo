@@ -3054,11 +3054,11 @@ meta: {optdriver: 7, eph_task: 9, }
  Print first 5 temperatures of diagonal mobility_mu  > 1e-6 (with ieh as electrons or holes) for testing purposes:
  spin: 1
  mobility_mu for itemp:1 ieh: 2 xyz: 1
-  4.78489E-02
+  1.97681E-01
  mobility_mu for itemp:1 ieh: 2 xyz: 2
-  4.78489E-02
+  1.97681E-01
  mobility_mu for itemp:1 ieh: 2 xyz: 3
-  4.78489E-02
+  1.97681E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================

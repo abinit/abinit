@@ -411,11 +411,11 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              nband_occ = 0
              do iband=1,nband_k
                ipwsp = (iband-1)*npw_k*my_nspinor + icg
-               weight_t(iband) = occ(iband+bdtot_index) * dtset%wtk(ikpt)/ucvol
                locc_test = abs(occ(iband+bdtot_index))>tol8
                if (locc_test) then
                  nband_occ = nband_occ +1
                  ipwbd = (nband_occ-1) * npw_k
+                 weight_t(nband_occ) = occ(iband+bdtot_index) * dtset%wtk(ikpt)/ucvol
                  cwavef(:,ipwbd+1:ipwbd+npw_k,1) = cg(:,ipwsp+1:ipwsp+npw_k)
                  if (my_nspinor==2) cwavef(:,ipwbd+1:ipwbd+npw_k,2) = cg(:,ipwsp+npw_k+1:ipwsp+npw_k+npw_k)
                  if (ioption==1) then ! Multiplication by 2pi i (k+G)_alpha
