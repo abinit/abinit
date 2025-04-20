@@ -222,7 +222,7 @@ program optic
    call nctk_fort_or_ncfile(wfkfile, iomode0, msg)
    if (len_trim(msg) /= 0) ABI_ERROR(msg)
    if (iomode0 == IO_MODE_MPI) iomode0 = IO_MODE_FORTRAN
-   call wfk_open_read(wfk0,wfkfile,formeig0,iomode0,get_unit(),xmpi_comm_self)
+   call wfk0%open_read(wfkfile, formeig0, iomode0, get_unit(), xmpi_comm_self)
    ! Get header from the gs file
    call wfk0%hdr%copy(hdr)
 
@@ -240,7 +240,7 @@ program optic
      if (iomode_ddk(ii) == IO_MODE_MPI) iomode_ddk(ii) = IO_MODE_FORTRAN
 
      if (.not. use_ncevk(ii)) then
-       call wfk_open_read(wfks(ii), infiles(ii), formeig1, iomode_ddk(ii), get_unit(), xmpi_comm_self)
+       call wfks(ii)%open_read(infiles(ii), formeig1, iomode_ddk(ii), get_unit(), xmpi_comm_self)
        call wfks(ii)%hdr%copy(hdr_ddk(ii))
      else
 
@@ -465,7 +465,7 @@ program optic
  ABI_FREE(doccde)
  !ks_ebands = ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
 
- !YG : should we use broadening for ebands_init
+ !YG: should we use broadening for ebands_init
  call ks_ebands%update_occ(-99.99d0)
 
   !size of the frequency range

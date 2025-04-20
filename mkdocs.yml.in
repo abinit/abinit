@@ -221,6 +221,7 @@ nav:
         - eph_intro : tutorial/eph_intro.md
         - eph for mobilities : tutorial/eph4mob.md
         - eph for zero-point renormalization : tutorial/eph4zpr.md
+        - eph for variational polaron equations : tutorial/eph4vpq.md
         #- tutorial/eph4isotc.md
         - eph_legacy : tutorial/eph_legacy.md
         - eph_tdep_legacy : tutorial/eph_tdep_legacy.md

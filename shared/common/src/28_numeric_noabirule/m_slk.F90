@@ -101,7 +101,7 @@ module m_slk
  type,public :: processor_scalapack
 
    integer :: myproc = -1
-   ! rank the processor
+   ! rank of the processor in comm
 
    integer :: comm = xmpi_comm_null
    ! MPI communicator underlying the BLACS grid.
@@ -3421,9 +3421,11 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  if ( istwf_k /= 2 ) then
    call matrix_to_complexmatrix(sca_matrix3,z_tmp_evec,istwf_k)
    call MPI_ALLREDUCE(z_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_complex, MPI_SUM,comm,ierr)
+   ABI_FREE(z_tmp_evec)
  else
    call matrix_to_realmatrix(sca_matrix3,r_tmp_evec,istwf_k)
    call MPI_ALLREDUCE(r_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_PRECISION, MPI_SUM,comm,ierr)
+   ABI_FREE(r_tmp_evec)
  endif
 #endif
 

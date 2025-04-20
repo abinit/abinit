@@ -154,7 +154,7 @@ module m_gwr
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv, vdotw
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa, string_in, yesno
- use m_sort,          only : sort_dp, sort_rvals
+ use m_sort,          only : sort_dp, sort_rvals, sort_gvecs
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type
@@ -172,7 +172,7 @@ module m_gwr
  use m_ioarr,         only : fftdatar_write
  use m_slk,           only : matrix_scalapack, slkmat_sp_t, processor_scalapack, slk_array_free, slk_array_set, &
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
- use m_wfk,           only : wfk_read_ebands, wfk_t, wfk_open_read
+ use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t
  use m_ddk,           only : ddkop_t, ddkop_new
  use m_pawtab,        only : pawtab_type
@@ -213,7 +213,7 @@ module m_gwr
    ! Index of g=0 in gvec.
 
    logical :: kin_sorted
-   ! True if gvec are sorted by |q+g|^2/2
+   ! True if gvec are sorted by |k+g|^2/2
 
    integer,allocatable :: gvec(:,:)
    ! (3, npw)
@@ -245,7 +245,9 @@ module m_gwr
    ! Copy object.
 
    procedure :: to_scbox => desc_to_scbox
-   ! Copy object.
+   ! Insert cg_k array defined on the k-centered g-sphere with npw vectors inside the FFT box.
+
+   !procedure :: get_npw_from_nband => desc_get_npw_from_nband
 
    procedure :: get_vc_sqrt => desc_get_vc_sqrt
    ! Compute square root of vc(q,g).
@@ -721,8 +723,10 @@ module m_gwr
    ! Reconstruct the Green's functions in the BZ from the IBZ.
 
    procedure :: gk_to_scbox => gwr_gk_to_scbox
+   !  Insert G_k(g',r) in the FFT box of the supercell: k+g' index.
 
    procedure :: wcq_to_scbox => gwr_wcq_to_scbox
+   !  Insert W_q(g',r) in the FFT box of the supercell: q+g' index.
 
    procedure :: get_myk_green_gpr => gwr_get_myk_green_gpr
     ! G_k(g,g') --> G_k(g',r) for each k in the BZ treated by this MPI proc for given spin and tau.
@@ -818,6 +822,8 @@ module m_gwr
  ! Handy named costants (private stuff)
  integer,private,parameter :: LOG_MODR = 500, LOG_MODK = 5
  integer,private,parameter :: istwfk1 = 1, ndat1 = 1, me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1
+
+ integer,private,parameter :: CHI_FIT = 1, SIGMA_FIT = 2
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
@@ -1558,7 +1564,7 @@ end block
 
  do my_iki=1,gwr%my_nkibz
    ik_ibz = gwr%my_kibz_inds(my_iki); kk_ibz = gwr%kibz(:, ik_ibz)
-   call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, dtset%ecutwfn, gwr)
+   call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, dtset%ecutwfn, gwr, kin_sorted=.False.)
  end do
 
  ABI_MALLOC(gwr%tchi_desc_qibz, (gwr%nqibz))
@@ -2260,7 +2266,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  io_comm => gwr%kpt_comm; io_in_kcomm = .True.
 
  if (io_comm%me == master) then
-   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
+   call wfk%open_read(wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
  end if
 
  ! TODO This to be able to maximize the size of cg_work
@@ -2401,7 +2407,7 @@ subroutine gwr_build_green(gwr, free_ugb)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nb_occ
+ integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nb_occ, nbsum ! ig_glob, ig_loc, jg_loc,
  real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k
  logical :: print_time
  character(len=500) :: msg
@@ -2409,13 +2415,14 @@ subroutine gwr_build_green(gwr, free_ugb)
  type(__slkmat_t), target :: work_gb, green
 !arrays
  integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
- real(dp) :: tsec(2)
+ real(dp) :: tsec(2) , kk_ibz(3) !, kg(3)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
  call timab(1922, 1, tsec)
  units = [std_out, ab_out]
+ nbsum = gwr%dtset%nband(1)
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 1) then
@@ -2446,6 +2453,7 @@ subroutine gwr_build_green(gwr, free_ugb)
      print_time = gwr%comm%me == 0 .and. (my_iki < LOG_MODK .or. mod(my_iki, LOG_MODK) == 0)
      if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
      ik_ibz = gwr%my_kibz_inds(my_iki)
+     kk_ibz = gwr%kibz(:, ik_ibz)
      associate (ugb_ks => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
      npwsp = desc_k%npw * gwr%nspinor
 
@@ -3512,10 +3520,10 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 !scalars
  integer, parameter :: TAU_SPACE = 0, W_SPACE = 1
  integer :: my_iqi, my_is, ig1, ig2, my_it, ierr, iq_ibz, itau, spin, it0, iw, cnt
- integer :: ndat, idat, loc1_size, loc2_size, batch_size, from_space
+ integer :: ndat, idat, loc1_size, loc2_size, batch_size, from_space, units(2)
  real(dp) :: cpu, wall, gflops !, min_abs_err, max_abs_err
  complex(dp) :: cval
- logical :: sum_spins_
+ logical :: sum_spins_, do_chi_fit
 !arrays
  integer :: mask_qibz(gwr%nqibz)
  real(dp), contiguous, pointer :: weights_ptr(:,:)
@@ -3524,6 +3532,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
  complex(dp),allocatable :: cwork_myit(:,:,:), glob_cwork(:,:,:), alpha_c(:,:)
  type(__slkmat_t), pointer :: mats(:)
 ! *************************************************************************
+
+ units = [std_out, ab_out]
 
  call cwtime(cpu, wall, gflops, "start")
  sum_spins_ = .False.; if (present(sum_spins)) sum_spins_ = sum_spins
@@ -3571,8 +3581,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do
  end do
 
- if (gwr%dtset%gwr_fit /= 0) then
-   call wrtout(std_out, " Activating fit of matrix elements in tau/iw space")
+ do_chi_fit = (iand(gwr%dtset%gwr_fit, CHI_FIT) /= 0)
+ if (do_chi_fit) then
+   call wrtout(units, " Activating fit of matrix elements in tau/iw space")
  end if
 
  ! Perform inhomogeneous FT in parallel.
@@ -3601,7 +3612,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ABI_MALLOC(cwork_myit, (gwr%my_ntau, loc1_size, batch_size))
      ABI_MALLOC(glob_cwork, (gwr%ntau, loc1_size, batch_size))
 
-     if (gwr%dtset%gwr_fit /= 0) then
+     if (do_chi_fit) then
        ! Allocate coefficients for the fit.
        ABI_MALLOC(beta_r, (loc1_size, batch_size))
        ABI_MALLOC(alpha_c, (loc1_size, batch_size))
@@ -3614,7 +3625,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        ! When fit mode is activated, collect all tau/omega points for this set of (g1, g2) inside tau_comm
        ! Each MPI rank performs the fit locally using the first point and all the points treated by the rank.
        ! compute loss functions of all the fits and find the one leading to the minimum loss.
-       if (gwr%dtset%gwr_fit /= 0) then
+       if (do_chi_fit) then
          glob_cwork = zero
          do idat=1,ndat
            do my_it=1,gwr%my_ntau
@@ -3633,10 +3644,10 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
               cnt = cnt + 1; if (gwr%tau_comm%skip(cnt)) cycle ! MPI parallelism inside tau_comm
               if (from_space == TAU_SPACE) then
                 call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, glob_cwork(:,ig1,idat), &
-                                 alpha_c(ig1,idat), beta_r(ig1,idat))
+                                 alpha_c(ig1,idat), beta_r(ig1,idat), ierr)
               else if (from_space == W_SPACE) then
                 call fit_iomega(gwr%ntau, gwr%iw_mesh, gwr%iw_wgs, glob_cwork(:,ig1,idat), &
-                                alpha_c(ig1,idat), beta_r(ig1,idat))
+                                alpha_c(ig1,idat), beta_r(ig1,idat), ierr)
               else
                 ABI_ERROR(sjoin("Invalid from_space:", itoa(from_space)))
               end if
@@ -3645,7 +3656,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          end do ! idat
          call xmpi_sum(alpha_c, gwr%tau_comm%value, ierr)
          call xmpi_sum(beta_r, gwr%tau_comm%value, ierr)
-       end if ! gwr_fit
+       end if ! do_chi_fit
 
        ! Extract (g1, g2) matrix elements as a function of tau/omega
        !!$OMP PARALLEL DO PRIVATE(itau, cval) COLLAPSE(2)
@@ -3654,7 +3665,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
            itau = gwr%my_itaus(my_it)
            cval = zero
            do ig1=1,mats(it0)%sizeb_local(1)
-             if (gwr%dtset%gwr_fit /= 0) then
+             if (do_chi_fit) then
                ! Evaluate the fit and remove it from the signal.
                if (from_space == TAU_SPACE) then
                  cval = fit_tau_exp_eval("func", gwr%tau_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
@@ -3687,7 +3698,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
            cval = zero
            do ig1=1,mats(it0)%sizeb_local(1)
 
-             if (gwr%dtset%gwr_fit /= 0) then
+             if (do_chi_fit) then
                ! Add Fourier transform of the fitted model.
                if (from_space == TAU_SPACE) then
                  cval = fit_tau_exp_eval("ft", gwr%iw_mesh(itau), alpha_c(ig1,idat), beta_r(ig1,idat))
@@ -3776,7 +3787,7 @@ end subroutine gwr_cos_transform
 !!
 !! SOURCE
 
-subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_c, beta_r)
+subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_c, beta_r, ierr)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ntau
@@ -3784,6 +3795,7 @@ subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_c, beta_r)
  complex(dp),intent(in) :: cvals(ntau)
  complex(dp),intent(out) :: alpha_c
  real(dp),intent(out) :: beta_r
+ integer,intent(out) :: ierr
 
 !Local variables-------------------------------
  integer :: ii
@@ -3806,8 +3818,9 @@ subroutine fit_tau_exp(ntau, tau_mesh, tau_wgs, cvals, alpha_c, beta_r)
  end do
 
  ! If something goes wrong, disable the fit.
+ ierr = 0
  if (beta_r <= tol12) then
-   alpha_c = zero; beta_r = tol6
+   alpha_c = zero; beta_r = tol6; ierr = 1
  end if
 
 end subroutine fit_tau_exp
@@ -3859,7 +3872,7 @@ end function fit_tau_exp_eval
 !!
 !! SOURCE
 
-subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r)
+subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r, ierr)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ntau
@@ -3867,6 +3880,7 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r)
  complex(dp),intent(in) :: cvals(ntau)
  complex(dp),intent(out) :: alpha_c
  real(dp),intent(out) :: beta_r
+ integer,intent(out) :: ierr
 
 !Local variables-------------------------------
  integer :: ii
@@ -3884,7 +3898,7 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r)
    b2 = (real(f0) * w0**2 - real(fn) * wn**2) / (real(fn) - real(f0))
    !print *, "b2:", b2
 
-   if (b2 < tol12) then
+   if (b2 <= tol12) then
      b2 = tol12; my_alpha_c = zero
    else
      !my_alpha_c = f0*fn * (wn**2 - w0**2) / (f0 - fn)
@@ -3903,6 +3917,8 @@ subroutine fit_iomega(ntau, iw_mesh, iw_wgs, cvals, alpha_c, beta_r)
 
  ! DEBUG: disable the fit
  !beta_r = zero; alpha_c = zero
+
+ ierr = 0; if (b2 <= tol12) ierr = 1
 
  !if (alpha_c /= zero) then
  !  print *, "beta_r, alpha_c", beta_r, alpha_c, min_loss
@@ -5195,7 +5211,6 @@ subroutine gwr_build_wc(gwr)
  integer :: units(2)
  real(dp) :: qq_ibz(3), tsec(2)
  complex(dpc) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
-
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -5402,41 +5417,41 @@ subroutine gwr_build_sigmac(gwr)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow
- integer :: iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, band1
- integer :: band2, band2_start, band2_stop, nbc, ib1, ib2, pade_npts
+ integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1
+ integer :: band2, band2_start, band2_stop, nbc
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp
- integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf,
+ integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf
+ integer :: gt_request, wct_request
+ integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
- integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates !, nb1, nb2
+ integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates, nb1, nb2
+ real(dp) :: e0, ks_gap, qp_gap, qp_pade_gap, sigx, vxc_val, vu, v_meanf, eshift, sigma_fact
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir, cpu_ikf, wall_ikf, gflops_ikf
- real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, wtqm, wtqp
- logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k
+ real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, wtqm, wtqp, beta_r
+ complex(dp) :: zz, zsc, sigc_e0__, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev, alpha_c
+ logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, do_sigma_fit
  logical :: compute_this_kbz, print_time, define, sigc_is_herm, band_inversion
  character(len=500) :: msg
+ type(gaps_t) :: new_gaps
  !type(desc_t), pointer :: desc_q !, desc_k
  type(yamldoc_t) :: ydoc
  type(c_ptr) :: void_ptr
 !arrays
  integer :: sc_ngfft(18), need_qibz(gwr%nqibz), got_qibz(gwr%nqibz), units(2), dat_units(3), g0_q(3) ! gg(3),
  integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
- real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2)  !, qq_ibz(3)
- !real(dp),allocatable :: beta_r(:,:,:)
+ real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2) !, qq_ibz(3)
+ real(dp),allocatable :: betas_r(:,:,:), zcut_pm(:,:,:)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
- complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau), avg_2ntau(2,gwr%ntau)
- complex(dp),target,allocatable :: sigc_it_mat(:,:,:,:,:,:) !, alpha_c(:,:,:)
+ complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau), avg_2ntau(2,gwr%ntau), cvals(gwr%ntau)
+ complex(dp),target,allocatable :: sigc_it_mat(:,:,:,:,:,:), alphas_c(:,:,:)
  complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc),allocatable :: uc_psir_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: green_plan, wt_plan
  type(littlegroup_t) :: ltg_kcalc(gwr%nkcalc)
- type(gaps_t) :: new_gaps
- integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
- real(dp) :: e0, ks_gap, qp_gap, qp_pade_gap, sigx, vxc_val, vu, v_meanf, eshift, sigma_fact
- complex(dp) :: zz, zsc, sigc_e0__, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev
  integer,allocatable :: iperm(:)
- integer :: gt_request, wct_request
  real(dp),allocatable :: sorted_qpe(:)
  real(dp) :: e0_kcalc(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol), rw_mesh(gwr%nwr)
  real(dp) :: spfunc_diag(gwr%nwr, gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
@@ -5449,8 +5464,8 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: sigxc_rw_diag(gwr%nwr, gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  type(sigma_pade_t) :: spade
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
-
 ! *************************************************************************
+
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1925, 1, tsec)
 
@@ -5500,6 +5515,16 @@ subroutine gwr_build_sigmac(gwr)
  end if
  ABI_CALLOC(sigc_it_mat, (2, gwr%ntau, gwr%b1gw:gwr%b2gw, ii:jj, gwr%nkcalc, gwr%nsppol))
  ABI_RECALLOC(gwr%sigc_iw_mat, (gwr%ntau, gwr%b1gw:gwr%b2gw, ii:jj, gwr%nkcalc, gwr%nsppol))
+
+ do_sigma_fit = (iand(gwr%dtset%gwr_fit, SIGMA_FIT) /= 0)
+ ABI_CALLOC(alphas_c, (2, gwr%b1gw:gwr%b2gw, ii:jj))
+ ABI_CALLOC(betas_r, (2, gwr%b1gw:gwr%b2gw, ii:jj))
+ ABI_CALLOC(zcut_pm, (2, gwr%b1gw:gwr%b2gw, ii:jj))
+ zcut_pm = gwr%dtset%zcut
+
+ if (do_sigma_fit) then
+   call wrtout(units, " Activating fit of sigma matrix elements in tau space")
+ end if
 
  max_abs_imag_wct = zero; max_abs_re_wct = zero
  call gwr%print_mem([std_out])
@@ -5883,9 +5908,7 @@ else
      do ikcalc=1,gwr%nkcalc
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          call sig_braket_ur(sigc_rpr(:,:,ikcalc), gwr%g_nfft*gwr%nspinor, uc_psir_bk(:,band,ikcalc), sigc_pm)
-         if (gwr%sig_diago) then
-           sigc_it_mat(:, itau, band, 1, ikcalc, spin) = sigc_pm
-         end if
+         if (gwr%sig_diago) sigc_it_mat(:, itau, band, 1, ikcalc, spin) = sigc_pm
         end do
      end do ! ikcalc
      !ABI_FREE(loc_cwork)
@@ -5955,7 +5978,7 @@ end if
    ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
    do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
      ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
-     !nb1 = gwr%bstop_ks(ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1
+     nb1 = gwr%bstop_ks(ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1
 
      ! FT Sigma(itau) --> Sigma(iw)
      band2_start = 1; band2_stop = 1
@@ -5965,21 +5988,39 @@ end if
 
      do band2=band2_start, band2_stop
        associate (cvals_pmt => sigc_it_mat(:,:, band, band2 ,ikcalc, spin))
-       !nb2 = band2_stopt - band2_start + 1
-       !if (gwr%dtset%gwr_fit /= 0) then
-       !  ABI_MALLOC(alpha_c, (2, nb1, nb2))
-       !  ABI_MALLOC(beta_r, (2, nb1, nb2))
-       !  cvals = cvals_pmt(1,:)
-       !  !call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r)
-       !  alpha_c(1,ibc,band2) = alpha_c; beta_r(1,ibc,band2)) = beta_r
-       !  cvals_pmt(1,:) = cvals_pmt(1,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
-       !  cvals = cvals_pmt(2,:)
-       !  call fit_tau_exp(gwr%ntau, -gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r)
-       !  alpha_c(2,ibc,band2) = alpha_c; beta_r(2,ibc,band2)) = beta_r
-       !  cvals_pmt(2,:) = cvals_pmt(2,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
-       !  ABI_SFREE(alpha_c)
-       !  ABI_SFREE(beta_r)
-       !end if ! gwr_fit
+       ib2 = band2 - band2_start + 1
+       nb2 = band2_stop - band2_start + 1
+
+       if (do_sigma_fit) then
+         cvals = cvals_pmt(1,:)
+         call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r, ierr)
+         alphas_c(1,band, band2) = alpha_c; betas_r(1,band,band2) = beta_r
+         zcut_pm(1, band, band2) = gwr%dtset%zcut
+         ! Remove the fit from the ab-initio data.
+         cvals_pmt(1,:) = cvals_pmt(1,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
+         if (gwr%comm%value == master) then
+           write(100, "(a,2(i0,1x))")"# +tau fit for band, band2: ", band, band2
+           write(100, *)"# alpha_c, beta_r: ", alpha_c, beta_r
+           do ii=1,gwr%ntau
+             zz = alpha_c * exp(-beta_r * gwr%tau_mesh(ii)); write(100, *) c2r(cvals_pmt(1,ii)), c2r(zz), abs(cvals_pmt(1,ii) - zz)
+           end do
+         end if
+         ! TODO: Recheck this part, in particular the order of -tau
+         cvals = cvals_pmt(2,:)
+         call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, cvals, alpha_c, beta_r, ierr)
+         alphas_c(2, band, band2) = alpha_c; betas_r(2, band, band2) = beta_r
+         zcut_pm(2, band, band2) = gwr%dtset%zcut
+         ! Remove the fit from the ab-initio data.
+         cvals_pmt(2,:) = cvals_pmt(2,:) - alpha_c * exp(-beta_r * gwr%tau_mesh)
+         if (gwr%comm%value == master) then
+           write(101, "(a,2(i0,1x))")"# -tau fit for band, band2: ", band, band2
+           write(101, *)"# alpha_c, beta_r: ", alpha_c, beta_r
+           do ii=1,gwr%ntau
+             zz = alpha_c * exp(-beta_r * gwr%tau_mesh(ii)); write(101, *) c2r(cvals_pmt(2,ii)), c2r(zz), abs(cvals_pmt(2,ii) - zz)
+           end do
+         end if
+       end if ! do_sigma_fit
+
        ! f(t) = E(t) + O(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
        even_t = (cvals_pmt(1,:) + cvals_pmt(2,:)) / two; odd_t = (cvals_pmt(1,:) - cvals_pmt(2,:)) / two
        gwr%sigc_iw_mat(:, band, band2, ikcalc, spin) = matmul(gwr%cosft_wt, even_t) + j_dpc * matmul(gwr%sinft_wt, odd_t)
@@ -5997,22 +6038,19 @@ end if
      v_meanf = vxc_val + vu
 
      band2 = merge(1, band, gwr%sig_diago)
-     pade_npts = gwr%ntau
-     !if (gwr%dtset%userie > 0 .and. pade_npts > gwr%dtset%userie) then
-     !   pade_npts = min(gwr%ntau, gwr%dtset%userie)
-     !   call wrtout(std_out, sjoin("Limiting the number of points for pade to:", itoa(pade_npts)))
-     !end if
-     call spade%init(pade_npts, imag_zmesh, gwr%sigc_iw_mat(:, band, band2, ikcalc, spin), branch_cut=">")
-     !call spade%set_itau_decay()
 
-     ! Solve the QP equation with Newton-Rapson starting from e0
+     call spade%init(gwr%ntau, imag_zmesh, gwr%sigc_iw_mat(:, band, band2, ikcalc, spin), &
+                     alphas_c(:, band, band2), betas_r(:, band, band2), zcut_pm(:, band, band2))
+     spade%do_sigma_fit = do_sigma_fit
+
+     ! Solve the QP equation with Newton-Rapson starting from e0.
      zz = cmplx(e0, zero)
      call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
      qp_pade(band, ikcalc, spin) = zsc
      pade_solver_ierr(band, ikcalc, spin) = ierr
      ABI_WARNING_IF(ierr /= 0, msg)
 
-     call spade%eval(zz, sigc_e0__, dzdval=dsigc_de0)
+     call spade%eval(zz, sigc_e0__, dvdz=dsigc_de0)
      ! Z = (1 - dSigma / domega(E0))^{-1}
      z_e0 = one / (one - dsigc_de0)
 
@@ -6023,7 +6061,7 @@ end if
      sigc_e0(band, ikcalc, spin) = sigc_e0__
      ze0_kcalc(band, ikcalc, spin) = z_e0
 
-     ! IMPORTANT: Here we update qp_ebands%eig with the new ones obtained with the linearized QP equation
+     ! IMPORTANT: Here we update qp_ebands%eig with the new ones obtained with the linearized QP equation.
      gwr%qp_ebands%eig(band, ik_ibz, spin) = real(qp_ene)
 
      ! Compute Spectral function using linear mesh **centered** around KS e0.
@@ -6049,6 +6087,10 @@ end if
  end do ! ikcalc
  end do ! spin
 
+ ABI_SFREE(alphas_c)
+ ABI_SFREE(betas_r)
+ ABI_SFREE(zcut_pm)
+
  if (gwr%nkcalc == gwr%nkibz) then
    ! Shift the bands that are not explicitly included in the SCF calculation.
    ! using the correction evaluated at bstop_ks/bstart_ks to accelerate self-consistent calculations.
@@ -6058,13 +6100,13 @@ end if
        band = gwr%bstop_ks(ikcalc, spin)
        if (band + 1 <= size(gwr%qp_ebands%eig, dim=1)) then
          eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
-         call wrtout(std_out, sjoin(" Correcting bands >= ", itoa(band+1), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
+         call wrtout(std_out, sjoin(" Correcting bands >= ", itoa(band+1), " with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
          gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) = gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) + eshift
        end if
        band = gwr%bstart_ks(ikcalc, spin)
        if (band > 1) then ! unlikely
          eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
-         call wrtout(std_out, sjoin(" Correcting bands < ", itoa(band), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
+         call wrtout(std_out, sjoin(" Correcting bands < ", itoa(band), " with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
          gwr%qp_ebands%eig(:band - 1, ik_ibz, spin) = gwr%qp_ebands%eig(:band - 1, ik_ibz, spin) + eshift
        end if
      end do
@@ -6365,19 +6407,17 @@ end subroutine write_notations
 subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, sigm_pm)
 
 !Arguments ------------------------------------
- integer,intent(in) :: nfftsp
  type(__slkmat_t),intent(in) :: sig_rpr(2,2)
+ integer,intent(in) :: nfftsp
  complex(gwpc),intent(in) :: ur_glob(nfftsp)
  complex(gwpc),intent(out) :: sigm_pm(2)
 
 !Local variables-------------------------------
  integer :: ipm, ir1, il_r1 !, ierr
  complex(gwpc),allocatable :: loc_cwork(:)
-
 ! *************************************************************************
 
  ! (r',r) with r' local and r-index PBLAS-distributed.
-
  sigm_pm = czero_gw
  do ipm=1,2
    associate (rp_r => sig_rpr(1,ipm))
@@ -7087,7 +7127,6 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
  complex(gwpc),contiguous,pointer :: cfft_ptr(:,:,:,:)
  !real(dp) :: tsec(2) !, cpu, wall, gflops
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  !call timab(1931, 1, tsec)

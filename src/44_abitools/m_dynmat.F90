@@ -947,6 +947,7 @@ subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
 !arrays
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
+ real(dp) :: gprimdt(3,3),rprimdt(3,3)
 
 ! *********************************************************************
 
@@ -1003,6 +1004,9 @@ subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
 ! Note that rprimd and gprimd are swapped, compared to what cart39 expects
 ! A factor of (2pi) ** 2 is added to transform the electric field perturbations
 
+ rprimdt = transpose(rprimd)
+ gprimdt = transpose(gprimd)
+
 !First step
  do ipert1=1,mpert
    fac = one; if (ipert1==natom+2) fac = two_pi ** 2
@@ -1014,7 +1018,7 @@ subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
            vec1(idir2)=d2red(ii,idir1,ipert1,idir2,ipert2)
          end do
          ! Transform vector from cartesian to reduced coordinates
-         call cart39(flg1,flg2,transpose(rprimd),ipert1,natom,transpose(gprimd),vec1,vec2)
+         call cart39(flg1,flg2,rprimdt,ipert1,natom,gprimdt,vec1,vec2)
          do idir2=1,3
            d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir2) * fac
          end do
@@ -1034,7 +1038,7 @@ subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
            vec1(idir1)=d2red(ii,idir1,ipert1,idir2,ipert2)
          end do
          ! Transform vector from cartesian to reduced coordinates
-         call cart39(flg1,flg2,transpose(rprimd),ipert2,natom,transpose(gprimd),vec1,vec2)
+         call cart39(flg1,flg2,rprimdt,ipert2,natom,gprimdt,vec1,vec2)
          do idir1=1,3
            d2red(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1) * fac
          end do
@@ -5489,7 +5493,6 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 !arrays
  real(dp) :: vecti(3),vectr(3)
  character(len=1) :: metacharacter(3*natom)
-
 ! *********************************************************************
 
 !Check the value of eivec

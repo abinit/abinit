@@ -4416,7 +4416,6 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
 !arrays
  integer :: kg_dum(3, 0)
  integer,allocatable :: iwork(:,:)
-
 ! *********************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
@@ -4432,7 +4431,7 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
 
  if (present(kin_sorted)) then
    if (kin_sorted) then
-     call sort_gvecs(npw_k, kpoint, gmet, kg_k, iwork)
+     call sort_gvecs(npw_k, kpoint, gmet, kg_k, out_gvec=iwork)
      kg_k = iwork
      ABI_FREE(iwork)
    end if

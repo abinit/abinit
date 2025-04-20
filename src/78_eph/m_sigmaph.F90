@@ -1596,7 +1596,7 @@ if (.not. stern%has_band_para) then
            ABI_MALLOC(cgq_buf,(sendcount))
            me=1+xmpi_comm_rank(sigma%bsum_comm%value)
            cgq_buf(1:sendcount)=cgq_ptr(displs(me)+1:displs(me)+sendcount)
-           call c_f_pointer(c_loc(stern%cgq),cgq_ptr,[2*npw_kq*nspinor*nband_me])
+           call c_f_pointer(c_loc(stern%cgq), cgq_ptr, [2*npw_kq*nspinor*nband_me])
            call MPI_IALLGATHERV(cgq_buf, sendcount, MPI_DOUBLE_PRECISION, cgq_ptr, recvcounts, displs, &
                                 MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
            ABI_FREE(cgq_buf)
