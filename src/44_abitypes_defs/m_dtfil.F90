@@ -1339,7 +1339,6 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  character(len=4) :: appen
  character(len=500) :: msg
  character(len=fnlen) :: filnam_appen
-
 ! *************************************************************************
 
  ! Here, defaults if no get variable
@@ -1466,7 +1465,6 @@ subroutine isfile(filnam, status)
  integer :: ii,ios, ioserr
  character(len=500) :: msg
  character(len=fnlen) :: filnam_tmp, trialnam
-
 ! *************************************************************************
 
  filnam_tmp=filnam

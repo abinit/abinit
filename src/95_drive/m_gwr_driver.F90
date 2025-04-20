@@ -190,8 +190,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  integer :: rhoxsp_method, usexcnhat !, use_umklp
  real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  !real(dp) :: drude_plsmf !,my_plsmf,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
- real(dp) :: vxcavg, gw_gsq
+ real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp, vxcavg, gw_gsq, gs_fermie
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
@@ -217,7 +216,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  !type(pawcprj_type),allocatable :: cprj_k(:,:)
-
 !************************************************************************
 
  ! This part performs the initialization of the basic objects used to perform e-ph calculations:
@@ -307,7 +305,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  call energies_init(KS_energies)
 
 !Get electronic temperature from dtset
- el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+ el_temp = merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  den_path = dtfil%fildensin; wfk_path = dtfil%fnamewffk; kden_path = dtfil%filkdensin
  !use_den = f (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
@@ -469,6 +467,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
    ABI_ERROR("Crystal structure from input and from DEN file do not agree! Check messages above!")
  end if
+ ! Get fermie from the GS calculation.
+ ! NB: It might understimate the real fermi level, especially if the den was computed on a shifted k-mesh
+ ! at present it's only used to implement pseudobands
+ gs_fermie = den_hdr%fermie
  call den_cryst%free(); call den_hdr%free()
 
  ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
@@ -681,9 +683,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    !print *, "owfk_ebands%npwarr:",  owfk_ebands%npwarr; stop
    call owfk_hdr%init(owfk_ebands, codvsn, dtset, pawtab, 0, psps, wvl%descr)
 
-   ! Change the value of istwfk taken from dtset.
+   ! Change the value of istwfk taken from dtset and set the Fermie level from gs_fermie.
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
+   owfk_hdr%fermie = gs_fermie
 
    ! Build MPI pools to distribute (kpt, spin).
    ! Try to get rectangular grids in each pool to improve efficiency in slk diago.
@@ -728,7 +731,7 @@ if (dtset%usefock == 1 .and. .not. cc4s_from_wfk) then
 
 else
        call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
-       call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
+       call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, gs_fermie, nband_k, ngfftc, nfftf, &
                            dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, hyb, diago_pool%comm%value)
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
 

@@ -41,4 +41,5 @@ inp_files = [
     "t43.abi" ,  # test quadrupoles calculation with xcnlcc
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
+    "t83.abi" ,  # Test variable cell nudged elastic band method
 ]
