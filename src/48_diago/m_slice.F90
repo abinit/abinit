@@ -1081,7 +1081,9 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         ABI_MALLOC_IFNOT(consdiff, (neigenpairs-1))
         
         jperm = (/ (iband, iband=1,neigenpairs-1) /)
-        consdiff = (/ (theta(iband + 1) - theta(iband), iband=1,neigenpairs-1) /)
+        ! weighted by position in spectrum: extremal has large weight
+        consdiff = (/ ((theta(iband + 1) - theta(iband))*&
+            1.d0/max(theta(iband)-lambda_minus,lambda_plus-theta(iband+1)), iband=1,neigenpairs-1) /)
         
         ! Sort consecutive differences (=gaps) by increasing order
         call sort_dp(neigenpairs-1, consdiff, jperm, tol12)
@@ -1428,9 +1430,6 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     ! Bring to columns to be able to select column range
     call xgBlock_reshape(eigen, 1, slice%neigenpairs)
     call xgBlock_reshape(resid, 1, slice%neigenpairs)
-
-    write(std_out,*) 'converged eigen='
-    call xgBlock_print(eigen, std_out)
 
     ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
     if (slice%paral_kgb==1) then
