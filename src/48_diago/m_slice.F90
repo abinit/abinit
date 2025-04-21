@@ -1112,15 +1112,15 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         poly_upp = part_upp + wovlp
 
         if (islice==1) then
+            ! Amplification for first slice is f(u)/f(u+w)
             ndeg = slice%ndeg_filter
-            !do while(1.d0/cheb_poly(part_low,ndeg,poly_upp,slice%maxeig_global)<ramp) 
-            !    ndeg = ndeg + 1
-            !end do
-            if (1.d0/cheb_poly(part_low,ndeg,poly_upp,slice%maxeig_global)<ramp) then
-                ! FIXME understand why this is always true?
-                write(std_out,*) 'Warn: Chebyshev polynomial degree does not amplify enough'
-                write(std_out,*) 1.d0/cheb_poly(part_low,ndeg,poly_upp,slice%maxeig_global)
-            end if
+            f_u = cheb_poly(part_upp,ndeg,poly_upp,slice%maxeig_global)
+            f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
+            do while( (f_u/f_uw < ramp) .and. (ndeg < ndeg_max) )
+                ndeg = ndeg + 1
+                f_u = cheb_poly(part_upp,ndeg,poly_upp,slice%maxeig_global)
+                f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
+            end do
         else
             ! ********* optimize amplification ratio ********
             ! The convergence ratio r0/rN is approximated by amplification ratios 
@@ -1431,6 +1431,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xgBlock_reshape(eigen, 1, slice%neigenpairs)
     call xgBlock_reshape(resid, 1, slice%neigenpairs)
 
+    write(std_out,*) 'converged eigen='
+    call xgBlock_print(eigen, std_out)
+
     ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
     if (slice%paral_kgb==1) then
         if (xmpi_comm_size(slice%spacecom) > 1) then
@@ -1488,7 +1491,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
 
         write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
         write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
-        write(std_out,*) theta_reshaped
+        write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
 
         ! After merge: Update first columns to copy from Xext to X
         slice%fcol_in_X(islice)= tot_ncols_kept + 1
@@ -1504,7 +1507,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     if (tot_ncols_kept < slice%neigenpairs) then
         ABI_ERROR("Too few converged eigenvalues kept")
     else if (tot_ncols_kept > slice%neigenpairs) then
-        ABI_ERROR("Too many converged eigenvalues kept")
+        ABI_ERROR("Too many converged eigenvalues kept. Increase tolfilter")
     end if
 
     ! Copy from extended memory to regular memory
