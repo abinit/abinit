@@ -149,7 +149,9 @@ module m_slice
         integer :: me_g0_fft                                ! process contains G(0,0,0) for fft
         integer :: me_nproc_slice                           ! number of processes reserved to slice in use
         integer :: me_comm_slice                            ! sub-communicator reserved to slice in use
-        integer :: me_id_slice                              ! identifier of slice task in use
+        integer :: me_comm_rows                             ! sub-communicator for rows in Transposer
+        integer :: me_comm_cols                             ! sub-communicator for cols in Transposer
+        integer :: me_id_slice                              ! identifier in 1,..,nslice of slice task in use
         integer :: me_neigenpairs_slice                     ! total number of eigenpairs of slice in use
         integer :: me_bandpp_slice                          ! number of distributed bands per process for slice in use
         integer :: me_ndeg_slice                            ! polynomial filter degree for slice in use
@@ -400,7 +402,7 @@ subroutine slice_free(slice)
     
     ! Arguments ------------------------------------
     type(slice_t), intent(inout) :: slice
-    
+
     ! *********************************************************************
 
     call xg_free(slice%X_ext)
@@ -423,9 +425,14 @@ subroutine slice_free(slice)
     ABI_SFREE(slice%poly_low_bounds)
     ABI_SFREE(slice%poly_upp_bounds)
 
-
-    if (slice%nslice /= 1 .and. slice%me_comm_slice /= slice%spacecom) then
+    if (slice%me_comm_slice /= slice%spacecom) then
         call xmpi_comm_free(slice%me_comm_slice)
+    end if
+    if (slice%me_comm_rows /= slice%comm_rows) then
+        call xmpi_comm_free(slice%me_comm_rows)
+    end if
+    if (slice%me_comm_cols /= slice%comm_cols) then
+        call xmpi_comm_free(slice%me_comm_cols)
     end if
 
 end subroutine slice_free
@@ -589,9 +596,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     end if
 
     ! Permute column vectors in Rayleigh quotient increasing order
-    if (slice%nslice>1) then
-        call xgBlock_permuteCols(X0, slice%total_spacedim, neigenpairs, permute_cols_ptr)
-    end if
+    call xgBlock_permuteCols(X0, slice%spacedim, neigenpairs, permute_cols_ptr)
 
     slice%neigenpairs_ext = sum(slice%neigenpairs_per_slice)
 
@@ -696,7 +701,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     type(xgBlock_t) :: eigen_active
     type(xgBlock_t) :: residu_active
     integer :: nbdbuf, oracle, num_proc
-    integer :: neigenpairs, bandpp, ndeg_filter, comm
+    integer :: neigenpairs, bandpp, ndeg_filter
+    integer :: comm, comm_rows, comm_cols
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: oracle_factor, oracle_min_occ
     logical :: is_lowpass, on_host, on_device
@@ -724,7 +730,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! has to be performed in order to bring band slices to processes.
     ncolsColsRows_ptr => slice%ncolsColsRows
 
-    write(std_out,*) ncolsColsRows_ptr
+    write(std_out,*) 'ncolsColsRows', ncolsColsRows_ptr
 
     ! Allocate slice%me_Xext_active according to the target MPI distribution for slices
     call xgTransposer_constructor(slice%xgTransposerXext, slice%XextLinalg, slice%me_Xext_active,&
@@ -734,11 +740,21 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
    
     slice%xgTransposerXext%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
     
+    write(std_out,*) 'slice comms id', slice%spacecom, slice%comm_rows, slice%comm_cols
+    write(std_out,*) 'slice comms sizes', xmpi_comm_size(slice%spacecom), &
+        xmpi_comm_size(slice%comm_rows), xmpi_comm_size(slice%comm_cols)
+    write(std_out,*) 'before Transpose slice%me_Xext_active', xgBlock_getid(slice%me_Xext_active, xmpi_comm_null),&
+        xgBlock_getid(slice%me_Xext_active, slice%spacecom), xgBlock_getid(slice%me_Xext_active,&
+        slice%comm_rows), xgBlock_getid(slice%me_Xext_active,slice%comm_cols)
+    ! to be compared with chebfi_run
+
     ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
     call xgTransposer_transpose(slice%xgTransposerXext, STATE_COLSROWS)
     ABI_NVTX_END_RANGE()
-     
-    write(std_out,*) 'slice%me_Xext_active', xgBlock_getid(slice%me_Xext_active)
+
+    write(std_out,*) 'after Transpose slice%me_Xext_active', xgBlock_getid(slice%me_Xext_active, xmpi_comm_null),&
+        xgBlock_getid(slice%me_Xext_active, slice%spacecom), xgBlock_getid(slice%me_Xext_active,&
+        slice%comm_rows), xgBlock_getid(slice%me_Xext_active,slice%comm_cols)
     ! to be compared with chebfi_run
 
     slice%use_colsrows = .true.
@@ -755,7 +771,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     neigenpairs = slice%me_neigenpairs_slice
     bandpp = slice%me_bandpp_slice
     ndeg_filter = slice%me_ndeg_slice
-    comm = slice%me_comm_slice 
+    comm = slice%me_comm_slice
+    comm_rows = slice%me_comm_rows
+    comm_cols = slice%me_comm_cols
     if (slice%me_id_slice==1) then   
         is_lowpass = .true. ! [lambda_minus,lambda_plus) to be diminished
         lambda_minus = slice%poly_upp_bounds(slice%me_id_slice)
@@ -778,7 +796,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     ! Initialize chebfi object in MPI Colsrows distribution
     call chebfi_init(chebfi,neigenpairs,slice%total_spacedim,slice%tolerance,slice%ecut,slice%paral_kgb,bandpp,&
-        ndeg_filter,nbdbuf,slice%space,1,comm,slice%me_g0,slice%me_g0_fft,slice%paw,xmpi_comm_self,comm,&
+        ndeg_filter,nbdbuf,slice%space,1,comm,slice%me_g0,slice%me_g0_fft,slice%paw,comm_rows,comm_cols,&
         oracle,oracle_factor,oracle_min_occ,slice%gpu_option,gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
         gpu_thread_limit=slice%gpu_thread_limit,from_linalg=.false.)
  
@@ -788,23 +806,25 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     call xgBlock_setBlock(eigen, eigen_active, rows=neigenpairs, cols=1)
     call xgBlock_setBlock(residu, residu_active, rows=neigenpairs, cols=1)
     
+    write(std_out,*) 'before run, eigen_active='
+    call xgBlock_print(eigen_active,std_out)
+
     write(std_out,*) 'X0_active', xgBlock_getid(X0_active)
-    
-    ! Restrict to sub-communicator
-    call xgBlock_setComm(X0_active, comm)
-    call xgBlock_setComm(slice%me_Xext_active, comm)
-    !call xgBlock_setComm(eigen_active, comm)
-    !call xgBlock_setComm(residu_active, comm)
-    
+  
+    write(std_out,*) 'slice subcomms id', comm, comm_rows, comm_cols
+    write(std_out,*) 'slice subcomms sizes', xmpi_comm_size(comm), &
+        xmpi_comm_size(comm_rows), xmpi_comm_size(comm_cols)
+
     write(std_out,*) 'X0_active', xgBlock_getid(X0_active)
 
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
 
-    ! Restore global comm
-    !call xgBlock_setComm(slice%me_Xext_active, slice%spacecom)
-    !call xgBlock_setComm(eigen, slice%spacecom)
-    !call xgBlock_setComm(residu, slice%spacecom)
+    write(std_out,*) 'after run, eigen_active='
+    call xgBlock_print(eigen_active,std_out)
+
+    write(std_out,*) 'chebfi%eigenvalues='
+    call xgBlock_print(chebfi%eigenvalues,std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -826,7 +846,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ABI_NVTX_END_RANGE()
     ! Note: At this point slice%me_Xext_active is recovered into slice%XextLinalg
 
-    write(std_out,*) 'slice%XextLinalg', xgBlock_getid(slice%XextLinalg)
+    write(std_out,*) 'after Final Transpose: slice%XextLinalg', xgBlock_getid(slice%XextLinalg)
+    write(std_out,*) 'after Final Transpose: eigen='
+    call xgBlock_print(eigen,std_out)
 
     slice%use_colsrows = .false.
     slice%use_linalg = .true.
@@ -926,7 +948,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
  
     ! Allocate memory for X in colsrows representation
     call xgTransposer_constructor(xgTransposerX, X, xXColsRows, nspinor, STATE_LINALG,&
-        TRANS_ALL2ALL, xmpi_comm_self, slice%spacecom, 0, 0, slice%me_g0_fft,&
+        TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
         gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit)
         
     xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
@@ -1290,12 +1312,14 @@ end subroutine slice_allocateResources
 !! My process only marks resources its assigned slice has reserved. 
 !!
 !! SIDE EFFECTS
-!! slice%me_comm_slice          = sub-communicator of active slice
-!! slice%me_ncolsColsRows_slice = column capacity per process in colsrows repr
-!! slice%me_nrowsLinalg_slice   = row capacity per process in linalg repr
-!! slice%me_id_slice
-!! slice%me_nproc_slice
-!! slice%me_ndeg_slice
+!! slice%me_comm_slice= sub-communicator of active slice
+!! slice%me_comm_rows= used in Transposer
+!! slice%me_comm_cols= used in Transposer
+!! slice%me_ncolsColsRows_slice= column capacity per process in colsrows repr
+!! slice%me_nrowsLinalg_slice= row capacity per process in linalg repr
+!! slice%me_id_slice= slice index starting from 1,..,nslice
+!! slice%me_nproc_slice= number of processes reserved for slice
+!! slice%me_ndeg_slice= polynomial degree of slice filter
 !! 
 !! SOURCE
 
@@ -1336,11 +1360,21 @@ subroutine slice_markActiveTask(slice)
     ! Split global comm into disjoint sub-comms, only procs with the same color communicate
     if (slice%nslice==1) then
         slice%me_comm_slice = slice%spacecom
+        slice%me_comm_rows = slice%comm_rows
+        slice%me_comm_cols = slice%comm_cols
     else
         call xmpi_comm_split(slice%spacecom, slice%me_id_slice, my_rank, slice%me_comm_slice, ierr)        
         if ( ierr /= xmpi_success ) then
-            ABI_ERROR("Error while creating slice subcommunicators")
+            ABI_ERROR("Error while creating slice spacecom subcommunicator")
         end if
+        call xmpi_comm_split(slice%comm_rows, slice%me_id_slice, my_rank, slice%me_comm_rows, ierr)          
+        if ( ierr /= xmpi_success ) then
+            ABI_ERROR("Error while creating slice row subcommunicator")
+        end if      
+        call xmpi_comm_split(slice%comm_cols, slice%me_id_slice, my_rank, slice%me_comm_cols, ierr)         
+        if ( ierr /= xmpi_success ) then
+            ABI_ERROR("Error while creating slice col subcommunicator")
+        end if 
     end if
     
     ! process waits for others to create their subcommunicators before using its own
@@ -1538,6 +1572,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     ! Free memory
     call xg_free(eigen_ext)
     call xg_free(resid_ext)
+
+    write(std_out,*) 'after allmerge, eigen='
+    call xgBlock_print(eigen,std_out)
  
 end subroutine slice_allmerge
 !!***
