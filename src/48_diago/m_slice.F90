@@ -627,9 +627,6 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     end if
     write(std_out,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(slice%spacecom), cols(slice%XextLinalg)
 
-    write(std_out,*) 'X0', xgBlock_getid(X0)
-    write(std_out,*) 'slice%XextLinalg', xgBlock_getid(slice%XextLinalg)
-    
     ! Recover dimensions
     call xgBlock_reshape(eigen, neigenpairs, 1)
 
@@ -722,15 +719,11 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         ABI_CHECK(on_device,"GPU not used when it should be!")
     end if
     
-    write(std_out,*) 'slice%XextLinalg', xgBlock_getid(slice%XextLinalg)
-
     ! Distribute extended columns across **all** MPI processes
     ! After the transposition each process contains the correct
     ! bandpp corresponding to the slice so that no additional communication
     ! has to be performed in order to bring band slices to processes.
     ncolsColsRows_ptr => slice%ncolsColsRows
-
-    write(std_out,*) 'ncolsColsRows', ncolsColsRows_ptr
 
     ! Allocate slice%me_Xext_active according to the target MPI distribution for slices
     call xgTransposer_constructor(slice%xgTransposerXext, slice%XextLinalg, slice%me_Xext_active,&
@@ -740,22 +733,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
    
     slice%xgTransposerXext%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
     
-    write(std_out,*) 'slice comms id', slice%spacecom, slice%comm_rows, slice%comm_cols
-    write(std_out,*) 'slice comms sizes', xmpi_comm_size(slice%spacecom), &
-        xmpi_comm_size(slice%comm_rows), xmpi_comm_size(slice%comm_cols)
-    write(std_out,*) 'before Transpose slice%me_Xext_active', xgBlock_getid(slice%me_Xext_active, xmpi_comm_null),&
-        xgBlock_getid(slice%me_Xext_active, slice%spacecom), xgBlock_getid(slice%me_Xext_active,&
-        slice%comm_rows), xgBlock_getid(slice%me_Xext_active,slice%comm_cols)
-    ! to be compared with chebfi_run
-
     ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
     call xgTransposer_transpose(slice%xgTransposerXext, STATE_COLSROWS)
     ABI_NVTX_END_RANGE()
-
-    write(std_out,*) 'after Transpose slice%me_Xext_active', xgBlock_getid(slice%me_Xext_active, xmpi_comm_null),&
-        xgBlock_getid(slice%me_Xext_active, slice%spacecom), xgBlock_getid(slice%me_Xext_active,&
-        slice%comm_rows), xgBlock_getid(slice%me_Xext_active,slice%comm_cols)
-    ! to be compared with chebfi_run
 
     slice%use_colsrows = .true.
     slice%use_linalg = .false.
@@ -801,30 +781,13 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         gpu_thread_limit=slice%gpu_thread_limit,from_linalg=.false.)
  
     ! Define pointers to actively used arrays
-    call xmpi_barrier(slice%spacecom)
+    !call xmpi_barrier(slice%spacecom)
     X0_active = slice%me_Xext_active
     call xgBlock_setBlock(eigen, eigen_active, rows=neigenpairs, cols=1)
     call xgBlock_setBlock(residu, residu_active, rows=neigenpairs, cols=1)
     
-    write(std_out,*) 'before run, eigen_active='
-    call xgBlock_print(eigen_active,std_out)
-
-    write(std_out,*) 'X0_active', xgBlock_getid(X0_active)
-  
-    write(std_out,*) 'slice subcomms id', comm, comm_rows, comm_cols
-    write(std_out,*) 'slice subcomms sizes', xmpi_comm_size(comm), &
-        xmpi_comm_size(comm_rows), xmpi_comm_size(comm_cols)
-
-    write(std_out,*) 'X0_active', xgBlock_getid(X0_active)
-
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
-
-    write(std_out,*) 'after run, eigen_active='
-    call xgBlock_print(eigen_active,std_out)
-
-    write(std_out,*) 'chebfi%eigenvalues='
-    call xgBlock_print(chebfi%eigenvalues,std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -845,10 +808,6 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     call xgTransposer_transpose(slice%xgTransposerXext, STATE_LINALG)
     ABI_NVTX_END_RANGE()
     ! Note: At this point slice%me_Xext_active is recovered into slice%XextLinalg
-
-    write(std_out,*) 'after Final Transpose: slice%XextLinalg', xgBlock_getid(slice%XextLinalg)
-    write(std_out,*) 'after Final Transpose: eigen='
-    call xgBlock_print(eigen,std_out)
 
     slice%use_colsrows = .false.
     slice%use_linalg = .true.
@@ -1527,9 +1486,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         if (islice == 1     ) fcol_in_slice = 1
         if (islice == slice%nslice) lcol_in_slice = neigenpairs_slice
 
-        !write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
-        !write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
-        !write(std_out,*) theta_reshaped
+        write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
+        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
+        write(std_out,*) theta_reshaped
 
         ! After merge: Update first columns to copy from Xext to X
         slice%fcol_in_X(islice)= tot_ncols_kept + 1
@@ -1575,9 +1534,6 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xg_free(eigen_ext)
     call xg_free(resid_ext)
 
-    write(std_out,*) 'after allmerge, eigen='
-    call xgBlock_print(eigen,std_out)
- 
 end subroutine slice_allmerge
 !!***
 

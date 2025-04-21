@@ -237,8 +237,6 @@ module m_xgTransposer
     ncpuRows = 1
     ncpuCols = 1
 #endif
-    write(std_out,*) 'ncpuCols=', ncpuCols, 'ncpuRows=', ncpuRows, 'MPI_LINALG id, size', &
-        xgTransposer%mpiData(MPI_LINALG)%comm, xgTransposer%mpiData(MPI_LINALG)%size
     if ( xgTransposer%mpiData(MPI_LINALG)%size < ncpuCols*ncpuRows ) then
       write(message,'(a,i6,a,i6,a)') "There is not enough MPI processes in the communication (", &
         xgTransposer%mpiData(MPI_LINALG)%size, "). Need at least ", ncpuCols*ncpuRows, " processes"
