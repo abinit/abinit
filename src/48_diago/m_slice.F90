@@ -1086,6 +1086,8 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         ! Sort consecutive differences (=gaps) by increasing order
         call sort_dp(neigenpairs-1, consdiff, jperm, tol12)
 
+        write(std_out,*) 'consdiff=', consdiff
+
         ! Take median of largest gaps
         do islice=1,nslice
             jmax = jperm(neigenpairs - islice)
@@ -1122,9 +1124,7 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
                 f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
             end do
         else
-            ! ********* optimize amplification ratio ********
-            ! The convergence ratio r0/rN is approximated by amplification ratios 
-            ! f(l)/f(l-w) and f(u)/f(u+w). 
+            ! Amplification ratio is f(l)/f(l-w) and f(u)/f(u+w)
             lw = (poly_low - center)/radius ! scaled point outside slice
             uw = (poly_upp - center)/radius ! scaled point outside slice
             l = (part_low - center)/radius ! scaled point inside slice
@@ -1489,9 +1489,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         if (islice == 1     ) fcol_in_slice = 1
         if (islice == slice%nslice) lcol_in_slice = neigenpairs_slice
 
-        write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
-        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
-        write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
+        !write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
+        !write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
+        !write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
 
         ! After merge: Update first columns to copy from Xext to X
         slice%fcol_in_X(islice)= tot_ncols_kept + 1
@@ -1505,9 +1505,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     
     ! Detect missing or extra eigenvalues
     if (tot_ncols_kept < slice%neigenpairs) then
-        ABI_ERROR("Too few converged eigenvalues kept")
+        ABI_ERROR("Too few converged eigenvalues kept. Increase tolfilter")
     else if (tot_ncols_kept > slice%neigenpairs) then
-        ABI_ERROR("Too many converged eigenvalues kept. Increase tolfilter")
+        ABI_WARNING("Too many converged eigenvalues kept. Increase tolfilter.")
     end if
 
     ! Copy from extended memory to regular memory
