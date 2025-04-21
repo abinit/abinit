@@ -590,8 +590,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  lambda_plus = chebfi%ecut
  chebfi%X = X0
     
- write(std_out,*) 'chebfi%X', xgBlock_getid(chebfi%X)
-
  ! Transpose
  if (chebfi%paral_kgb == 1) then
 
@@ -619,13 +617,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
    call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
  end if
 
- write(std_out,*) 'at init chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows,xmpi_comm_null), &
-     xgBlock_getid(chebfi%xXColsRows)
- write(std_out,*) 'at init chebfi%xAXColsRows', xgBlock_getid(chebfi%xAXColsRows,xmpi_comm_null), &
-     xgBlock_getid(chebfi%xAXColsRows)
- write(std_out,*) 'at init chebfi%xBXColsRows', xgBlock_getid(chebfi%xBXColsRows,xmpi_comm_null), &
-     xgBlock_getid(chebfi%xBXColsRows)
-
  call timab(tim_getAX_BX,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
  call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
@@ -633,10 +624,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  call xgBlock_zero_im_g0(chebfi%xBXColsRows)
  ABI_NVTX_END_RANGE()
  call timab(tim_getAX_BX,2,tsec)
-
- write(std_out,*) 'after init chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows)
- write(std_out,*) 'after init chebfi%xAXColsRows', xgBlock_getid(chebfi%xAXColsRows)
- write(std_out,*) 'after init chebfi%xBXColsRows', xgBlock_getid(chebfi%xBXColsRows)
 
  if (chebfi%paral_kgb == 1) then
    call timab(tim_barrier,1,tsec)
@@ -687,8 +674,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
 
  call timab(tim_oracle,2,tsec)
 
- write(std_out,*) 'lambda_minus=',lambda_minus
- write(std_out,*) 'lambda_plus=',lambda_plus
  center = (lambda_plus + lambda_minus)*0.5
  radius = (lambda_plus - lambda_minus)*0.5
 
@@ -712,13 +697,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
    ABI_NVTX_END_RANGE()
    call timab(tim_swap,2,tsec)
 
-    write(std_out,*) 'during filter chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows,xmpi_comm_null),&
-        xgBlock_getid(chebfi%xXColsRows)
-    write(std_out,*) 'during filter chebfi%xAXColsRows', xgBlock_getid(chebfi%xAXColsRows,xmpi_comm_null),&
-        xgBlock_getid(chebfi%xAXColsRows)
-    write(std_out,*) 'during filter chebfi%xBXColsRows', xgBlock_getid(chebfi%xBXColsRows,xmpi_comm_null),&
-        xgBlock_getid(chebfi%xBXColsRows)
-
    !A * Psi
    call timab(tim_getAX_BX,1,tsec)
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
@@ -737,9 +715,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
    call timab(tim_barrier,2,tsec)
  end if
 
- write(std_out,*) 'amplification factors='
- call xgBlock_print(DivResults%self,std_out)
-
  call timab(tim_amp_f,1,tsec)
  call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  call timab(tim_amp_f,2,tsec)
@@ -747,10 +722,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  call xg_free(DivResults)
  ABI_SFREE(ndeg_filter_bands)
  
- write(std_out,*) 'after Filter chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows)
- write(std_out,*) 'after Filter chebfi%xAXColsRows', xgBlock_getid(chebfi%xAXColsRows)
- write(std_out,*) 'after Filter chebfi%xBXColsRows', xgBlock_getid(chebfi%xBXColsRows)
-
  call timab(tim_transpose,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
  if (chebfi%paral_kgb == 1) then
@@ -774,25 +745,11 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  ABI_NVTX_END_RANGE()
  call timab(tim_transpose,2,tsec)
 
- write(std_out,*) 'after Transpose, before RR chebfi%X', xgBlock_getid(chebfi%X,xmpi_comm_null),&
-     xgBlock_getid(chebfi%X)
- write(std_out,*) 'after Transpose, before RR chebfi%AX%self', xgBlock_getid(chebfi%AX%self,xmpi_comm_null),&
-     xgBlock_getid(chebfi%AX%self)
- write(std_out,*) 'after Transpose, before RR chebfi%BX%self', xgBlock_getid(chebfi%BX%self,xmpi_comm_null),&
-     xgBlock_getid(chebfi%BX%self)
-
  ! Apply Rayleigh-Ritz
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
  call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,&
 &                     chebfi%gpu_option,solve_ax_bx=.true.)
  ABI_NVTX_END_RANGE()
-
- write(std_out,*) 'after RR chebfi%X', xgBlock_getid(chebfi%X,xmpi_comm_null),&
-     xgBlock_getid(chebfi%X)
- write(std_out,*) 'after RR chebfi%AX%self', xgBlock_getid(chebfi%AX%self,xmpi_comm_null),&
-     xgBlock_getid(chebfi%AX%self)
- write(std_out,*) 'after RR chebfi%BX%self', xgBlock_getid(chebfi%BX%self,xmpi_comm_null),&
-     xgBlock_getid(chebfi%BX%self)
 
  ! Compute residual
  call timab(tim_residu, 1, tsec)
@@ -809,8 +766,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  call xgBlock_copy(chebfi%X,X0)
  call timab(tim_copy, 2, tsec)
 
- write(std_out,*) 'X0', xgBlock_getid(X0)
-
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
      call gpu_device_synchronize()
@@ -823,8 +778,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
    call xgTransposer_free(chebfi%xgTransposerBX)
  end if
 
- write(std_out,*) 'after all: eigen='
- call xgBlock_print(eigen,std_out)
 ! call timab(tim_run,2,tsec)
 
 end subroutine chebfi_run
@@ -1203,27 +1156,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg = nrows_blockrows
     
-    !write(std_out,*) 'before chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows), &
-    !    comm(chebfi%xXColsRows), xmpi_comm_size(comm(chebfi%xXColsRows))
-    !write(std_out,*) 'before X0', xgBlock_getid(X0), comm(X0), xmpi_comm_size(comm(X0))
-
-    !write(std_out,*) 'after chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows), &
-    !    comm(chebfi%xXColsRows), xmpi_comm_size(comm(chebfi%xXColsRows))
-    !write(std_out,*) 'after X0', xgBlock_getid(X0), comm(X0), xmpi_comm_size(comm(X0))
-
-    write(std_out,*) 'input chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows), &
-        xgBlock_getid(chebfi%xXColsRows, chebfi%spacecom), &
-        comm(chebfi%xXColsRows), xmpi_comm_size(comm(chebfi%xXColsRows))
-    write(std_out,*) 'input X0', xgBlock_getid(X0), &
-        xgBlock_getid(X0, chebfi%spacecom), comm(X0), xmpi_comm_size(comm(X0))
-    
-    write(std_out,*) 'at init chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows,xmpi_comm_null),&
-        xgBlock_getid(chebfi%xXColsRows)
-    write(std_out,*) 'at init chebfi%xAXColsRows', xgBlock_getid(chebfi%xAXColsRows,xmpi_comm_null),&
-        xgBlock_getid(chebfi%xAXColsRows)
-    write(std_out,*) 'at init chebfi%xBXColsRows', xgBlock_getid(chebfi%xBXColsRows,xmpi_comm_null),&
-        xgBlock_getid(chebfi%xBXColsRows)
-
     !A * Psi
     call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
@@ -1233,15 +1165,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     ABI_NVTX_END_RANGE()
     call timab(tim_getAX_BX,2,tsec)
 
-    write(std_out,*) 'after init chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows)
-    write(std_out,*) 'after init chebfi%xAXColsRows', xgBlock_getid(chebfi%xAXColsRows)
-    write(std_out,*) 'after init chebfi%xBXColsRows', xgBlock_getid(chebfi%xBXColsRows)
-
     ! Apply polynomial filtering to active MPI ColsRows block-column
     if (is_lowpass) then
         ! [lambda_minus,lambda_plus) is diminished using Chebyshev
-        write(std_out,*) 'lambda_minus=',lambda_minus
-        write(std_out,*) 'lambda_plus=',lambda_plus
         call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
     else
         ! [lambda_minus,lambda_plus) is amplified using Chebyshev-Jackson
@@ -1249,17 +1175,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
             maxeig_global,getAX_BX,getBm1X)
     end if
   
-    write(std_out,*) 'after Filter chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows)
-    write(std_out,*) 'after Filter chebfi%xAXColsRows', xgBlock_getid(chebfi%xAXColsRows)
-    write(std_out,*) 'after Filter chebfi%xBXColsRows', xgBlock_getid(chebfi%xBXColsRows)
-   
-    write(std_out,*) 'xX subcomms id', comm(chebfi%xXColsRows), comm(chebfi%xAXColsRows), comm(chebfi%xBXColsRows)
-    write(std_out,*) 'xX subcomms size', xmpi_comm_size(comm(chebfi%xXColsRows)), &
-        xmpi_comm_size(comm(chebfi%xAXColsRows)), xmpi_comm_size(comm(chebfi%xBXColsRows))
-    write(std_out,*) 'chebfi subcomms id', chebfi%spacecom, chebfi%comm_cols, chebfi%comm_rows
-    write(std_out,*) 'chebfi subcomms size', xmpi_comm_size(chebfi%spacecom), &
-        xmpi_comm_size(chebfi%comm_cols), xmpi_comm_size(chebfi%comm_rows)
-
     ! MPI transpose to linalg state
     call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
@@ -1296,13 +1211,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     call timab(tim_transpose,2,tsec)
     ABI_NVTX_END_RANGE()
 
-    write(std_out,*) 'after Transpose, before RR chebfi%X', xgBlock_getid(chebfi%X,xmpi_comm_null),&
-        xgBlock_getid(chebfi%X)
-    write(std_out,*) 'after Transpose, before RR chebfi%AX%self', xgBlock_getid(chebfi%AX%self,xmpi_comm_null),&
-        xgBlock_getid(chebfi%AX%self)
-    write(std_out,*) 'after Transpose, before RR chebfi%BX%self', xgBlock_getid(chebfi%BX%self,xmpi_comm_null),&
-        xgBlock_getid(chebfi%BX%self)
-
     if (rows(chebfi%X) /= nrowsLinalg(xmpi_comm_rank(chebfi%spacecom)+1)) then
         ABI_ERROR("wrong linalg representation")
     end if
@@ -1313,13 +1221,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,&
         chebfi%gpu_option,solve_ax_bx=.true.)
     ABI_NVTX_END_RANGE()
-
-    write(std_out,*) 'after RR chebfi%X', xgBlock_getid(chebfi%X,xmpi_comm_null),&
-        xgBlock_getid(chebfi%X)
-    write(std_out,*) 'after RR chebfi%AX%self', xgBlock_getid(chebfi%AX%self,xmpi_comm_null),&
-        xgBlock_getid(chebfi%AX%self)
-    write(std_out,*) 'after RR chebfi%BX%self', xgBlock_getid(chebfi%BX%self,xmpi_comm_null),&
-        xgBlock_getid(chebfi%BX%self)
 
     if ( ierr /= 0 ) then
         ABI_WARNING("RayleighRitz did not work, but continue anyway.")
@@ -1374,9 +1275,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     
     ! Free temporary memory
     ABI_SFREE(nrowsLinalg)
-
-    write(std_out,*) 'after all: eigen='
-    call xgBlock_print(eigen,std_out)
 
 end subroutine chebfi_runSlice
 !!***
@@ -1533,13 +1431,6 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
         end if
         ABI_NVTX_END_RANGE()
 
-        write(std_out,*) 'during filter chebfi%xXColsRows', xgBlock_getid(chebfi%xXColsRows,xmpi_comm_null),&
-            xgBlock_getid(chebfi%xXColsRows)
-        write(std_out,*) 'during filter chebfi%xAXColsRows', xgBlock_getid(chebfi%xAXColsRows,xmpi_comm_null),&
-            xgBlock_getid(chebfi%xAXColsRows)
-        write(std_out,*) 'during filter chebfi%xBXColsRows', xgBlock_getid(chebfi%xBXColsRows,xmpi_comm_null),&
-            xgBlock_getid(chebfi%xBXColsRows)
-
         !A * Psi (=AX_next=A*X_next)
         call timab(tim_getAX_BX,1,tsec)
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
@@ -1551,9 +1442,6 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
 
     end do ! ideg
     ABI_NVTX_END_RANGE()
-
-    write(std_out,*) 'amplification factors='
-    call xgBlock_print(DivResults%self,std_out)
 
     ! Scale X,AX,BX by amplification factor to reduce large values
     call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
