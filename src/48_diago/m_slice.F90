@@ -1009,7 +1009,7 @@ end subroutine slice_computeSpectrum
 !! INPUTS
 !! lambda_minus= lower bound of interval to split
 !! lambda_plus= upper bound of interval to split
-!! theta= sorted Rayleigh quotients of size (neigenpairs)
+!! theta= array of **sorted** Rayleigh quotients of size (neigenpairs)
 !! plot_filter= (option) true if print x,f(x) 
 !!
 !! SIDE EFFECTS
@@ -1086,10 +1086,8 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         ! Sort consecutive differences (=gaps) by increasing order
         call sort_dp(neigenpairs-1, consdiff, jperm, tol12)
 
-        write(std_out,*) 'consdiff=', consdiff
-
         ! Take median of largest gaps
-        do islice=1,nslice
+        do islice=1,nslice-1
             jmax = jperm(neigenpairs - islice)
             spectral_partition(islice + 1) = (theta(jmax) + theta(jmax + 1)) / 2.d0
         end do
