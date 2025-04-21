@@ -151,7 +151,6 @@ module m_xgTransposer
   public :: xgTransposer_transpose
   public :: xgTransposer_getRank
   public :: xgTransposer_getComm
-  public :: xgTransposer_getNrowsDistribution
   public :: xgTransposer_free
 
   contains
@@ -206,15 +205,22 @@ module m_xgTransposer
     if(present(gpu_option)) xgTransposer%gpu_option = gpu_option
     xgTransposer%gpu_thread_limit = 1
     if(present(gpu_thread_limit)) xgTransposer%gpu_thread_limit = gpu_thread_limit
-    commLinalg = comm(xgBlock_linalg)
-    if (state==STATE_COLSROWS) commLinalg = comm(xgBlock_colsrows)
+    if (state==STATE_COLSROWS) then
+        if (comm_rows==xmpi_comm_null.or.comm_cols==xmpi_comm_null) then
+            ABI_ERROR('STATE_COLSROWS requires input comms')
+        end if
+        commLinalg = comm_cols
+    else if (state==STATE_LINALG) then
+        commLinalg = comm(xgBlock_linalg)
+    else
+        ABI_ERROR("Invalid transposer state")
+    end if
     xgTransposer%mpiData(MPI_LINALG)%comm = commLinalg
     xgTransposer%mpiData(MPI_LINALG)%rank = xmpi_comm_rank(commLinalg)
     xgTransposer%mpiData(MPI_LINALG)%size = xmpi_comm_size(commLinalg)
 
 #if defined HAVE_MPI
     if (comm_rows==xmpi_comm_null.and.comm_cols==xmpi_comm_null) then
-      if (state==STATE_COLSROWS) ABI_ERROR('Transposer from ColsRows with null comms not implemented')
       xgTransposer%type = TRANS_TYPE_CONSTRUCTED_NULL_COMM
       ncpuCols = ncpu_cols
       ncpuRows = ncpu_rows
@@ -231,6 +237,8 @@ module m_xgTransposer
     ncpuRows = 1
     ncpuCols = 1
 #endif
+    write(std_out,*) 'ncpuCols=', ncpuCols, 'ncpuRows=', ncpuRows, 'MPI_LINALG id, size', &
+        xgTransposer%mpiData(MPI_LINALG)%comm, xgTransposer%mpiData(MPI_LINALG)%size
     if ( xgTransposer%mpiData(MPI_LINALG)%size < ncpuCols*ncpuRows ) then
       write(message,'(a,i6,a,i6,a)') "There is not enough MPI processes in the communication (", &
         xgTransposer%mpiData(MPI_LINALG)%size, "). Need at least ", ncpuCols*ncpuRows, " processes"
@@ -386,8 +394,13 @@ module m_xgTransposer
     xgTransposer%xgBlock_linalg => xgBlock_linalg
     xgTransposer%xgBlock_colsrows => xgBlock_colsrows
     xgTransposer%state = state
-    commLinalg = comm(xgBlock_linalg)
-    if (state==STATE_COLSROWS) commLinalg = comm(xgBlock_colsrows)
+    if (state==STATE_COLSROWS) then
+        commLinalg = xgTransposerInitialized%mpiData(MPI_LINALG)%comm
+    else if (state==STATE_LINALG) then
+        commLinalg = comm(xgBlock_linalg)
+    else
+        ABI_ERROR("Invalid transposer state")
+    end if
 
     if ( commLinalg /= xgTransposerInitialized%mpiData(MPI_LINALG)%comm ) then
       ABI_ERROR("Linalg communicators are different for the two transposers, this is not allowed.")
@@ -778,7 +791,7 @@ module m_xgTransposer
 #endif
         end if
         call xgBlock_map(xgTransposer%xgBlock_linalg,xgTransposer%buffer,space(xgTransposer%xgBlock_colsrows),&
-          nrowsLinalgMe,xgTransposer%ncolsLinalg,xgTransposer%mpiData(MPI_ROWS)%comm,&
+          nrowsLinalgMe,xgTransposer%ncolsLinalg,xgTransposer%mpiData(MPI_COLS)%comm,&
           me_g0=xgTransposer%me_g0_fft,gpu_option=xgTransposer%gpu_option)
       end if
 
@@ -1446,21 +1459,6 @@ module m_xgTransposer
     end if
     communicator = xgTransposer%mpiData(comm1)%comm
   end function xgTransposer_getComm
-!!***
-
-!!****f* m_xgTransposer/xgTransposer_getNrowsDistribution
-!!
-!! NAME
-!! xgTransposer_getNrowsDistribution
-
-  subroutine xgTransposer_getNrowsDistribution(xgTransposer,nrows_distrb)
-    
-      type(xgTransposer_t), intent(in) :: xgTransposer
-      integer, pointer, intent(inout) :: nrows_distrb(:)
-
-      nrows_distrb(:) = xgTransposer%nrowsLinalg(:)
-
-  end subroutine xgTransposer_getNrowsDistribution
 !!***
 
 !!****f* m_xgTransposer/xgTransposer_free

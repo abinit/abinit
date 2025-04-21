@@ -355,6 +355,9 @@ subroutine getghc_gsc1(X,AX,BX)
  ABI_NVTX_START_RANGE(NVTX_GETGHC)
 
  call xgBlock_getSize(X,spacedim,blockdim)
+ write(std_out,*) 'getAX_BX size X', rows(X), cols(X)
+ write(std_out,*) 'getAX_BX size AX', rows(AX), cols(AX)
+ write(std_out,*) 'getAX_BX size BX', rows(BX), cols(BX)
  call xgBlock_check(X,AX)
  call xgBlock_check(X,BX)
 
