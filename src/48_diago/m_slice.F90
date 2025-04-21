@@ -1475,16 +1475,18 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
     if (slice%paral_kgb==1) then
         if (xmpi_comm_size(slice%spacecom) > 1) then
-        
-            my_rank = xmpi_comm_rank(slice%spacecom)
-            my_slice = slice%lookup_proc(my_rank + 1)
-            neigenpairs_slice = slice%neigenpairs_per_slice(my_slice + 1)
-            fcol_ext = slice%fcol_in_Xext(my_slice + 1)
+            ! Copy only for first process in slice subcomm 
+            if (xmpi_comm_rank(slice%me_comm_slice)==0) then
+                my_rank = xmpi_comm_rank(slice%spacecom)
+                my_slice = slice%lookup_proc(my_rank + 1)
+                neigenpairs_slice = slice%neigenpairs_per_slice(my_slice + 1)
+                fcol_ext = slice%fcol_in_Xext(my_slice + 1)
 
-            call xgBlock_setBlock(eigen_ext%self, eigen_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
-            call xgBlock_setBlock(resid_ext%self, resid_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
-            call xgBlock_copy(eigen, eigen_ext_slice)
-            call xgBlock_copy(resid, resid_ext_slice)
+                call xgBlock_setBlock(eigen_ext%self, eigen_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
+                call xgBlock_setBlock(resid_ext%self, resid_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
+                call xgBlock_copy(eigen, eigen_ext_slice)
+                call xgBlock_copy(resid, resid_ext_slice)
+            end if
 
             ! All processes wait before summing 
             call xmpi_barrier(slice%spacecom)
