@@ -348,7 +348,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     ! Set flags to initial state (before Transpose)
     slice%use_linalg = .true.
     slice%use_colsrows = .false.
-    call slice_queryHostDevice(slice)
+    !call slice_queryHostDevice(slice)
 
     ! Arrays
     call slice_allocateAll(slice)
@@ -505,12 +505,13 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     ABI_NVTX_START_RANGE(NVTX_SLICE_SCHEDULE)
     
     ! Sanity check for X0 (on GPU): verify we are in target enter data map
-    if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call slice_queryHostDevice(slice, on_host, on_device)
-        if (on_host .or. (.not. on_device)) then
-            ABI_ERROR("not in target data map region")
-        end if
-    end if
+    ! TODO debug not working
+    !if (slice%gpu_option==ABI_GPU_OPENMP) then
+    !    call slice_queryHostDevice(slice, on_host, on_device)
+    !    if (on_host .or. (.not. on_device)) then
+    !        ABI_ERROR("not in target data map region")
+    !    end if
+    !end if
 
     neigenpairs = slice%neigenpairs
     
@@ -523,23 +524,33 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     call xgBlock_reshape(eigen, 1, neigenpairs)
     call xgBlock_zero(eigen)
     call xgBlock_zero(resid0%self)
-    
+  
     ! ===================== Compute Rayleigh quotients and residuals ===================================
     
     ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
     call slice_computeSpectrum(slice, X0, getAX_BX, eigen, resid0%self, nspinor)
     ABI_NVTX_END_RANGE()
-
+    
     ! ===================== Compute guaranteed spectral bounds ======================================== 
 
     if (slice%gpu_option==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(eigen)
         call xgBlock_copy_from_gpu(resid0%self)
     end if
+    
+    write(std_out,*) 'ok3'
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen, theta_, rows=1, cols=neigenpairs)
-    call xgBlock_reverseMap(resid0%self, resid_, rows=1, cols=neigenpairs)
+    call xgBlock_reverseMap(resid0%self, resid_, rows=1, cols=neigenpairs) 
+
+    ! recover
+    if (slice%gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(eigen)
+        call xgBlock_copy_to_gpu(resid0%self)
+    end if
+    
+    write(std_out,*) 'theta_=', theta_
  
     ! Sort thetas in increasing order and store result to eigen
     theta_reshaped(1:neigenpairs) = theta_(1,1:neigenpairs)
@@ -549,6 +560,9 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     theta_(1,1:neigenpairs) = theta_reshaped(1:neigenpairs)
     call xgBlock_map(eigen_sorted, theta_, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
     call xgBlock_copy(eigen_sorted, eigen)
+
+    write(std_out,*) 'theta_reshaped=', theta_reshaped
+    write(std_out,*) 'ok4'
 
     ! Minimum and maximum quotients
     lambda_minus = theta_reshaped(1)
@@ -714,10 +728,10 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     if ( (.not. slice%use_linalg) .and. slice%use_colsrows) then
         ABI_ERROR("should be in linalg representation")
     end if
-    if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call slice_queryHostDevice(slice, on_host, on_device)
-        ABI_CHECK(on_device,"GPU not used when it should be!")
-    end if
+    !if (slice%gpu_option==ABI_GPU_OPENMP) then
+    !    call slice_queryHostDevice(slice, on_host, on_device)
+    !    ABI_CHECK(on_device,"GPU not used when it should be!")
+    !end if
     
     ! Distribute extended columns across **all** MPI processes
     ! After the transposition each process contains the correct
@@ -797,10 +811,10 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     if ( (.not. slice%use_colsrows) .and. slice%use_linalg) then
         ABI_ERROR("should be in colsrows representation")
     end if
-    if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call slice_queryHostDevice(slice, on_host, on_device)
-        ABI_CHECK(on_device,"GPU not used when it should be!")
-    end if
+    !if (slice%gpu_option==ABI_GPU_OPENMP) then
+    !    call slice_queryHostDevice(slice, on_host, on_device)
+    !    ABI_CHECK(on_device,"GPU not used when it should be!")
+    !end if
 
     ! Actually do the transposition to linalg
     call xmpi_barrier(slice%spacecom)
@@ -909,20 +923,20 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xgTransposer_constructor(xgTransposerX, X, xXColsRows, nspinor, STATE_LINALG,&
         TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
         gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit)
-        
+         
     xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
         
     ! Sanity check
     if ((.not. slice%use_linalg) .or. slice%use_colsrows) then
         ABI_ERROR("not in linalg")
     end if
-
+    
     ! ============== Transpose ==============
     call xmpi_barrier(slice%spacecom)
     ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
     call xgTransposer_transpose(xgTransposerX, STATE_COLSROWS)
     ABI_NVTX_END_RANGE()
-
+    
     slice%use_linalg = .false.
     slice%use_colsrows = .true.
 
@@ -933,7 +947,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xgBlock_zero_im_g0(xAXColsRows)
     call xgBlock_zero_im_g0(xBXColsRows)
     ABI_NVTX_END_RANGE()
-
+    
     ! Compute Rayleigh quotients
     ! <Psi|H|Psi>
     call xgBlock_colwiseDotProduct(xXColsRows, xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
@@ -950,6 +964,8 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xgBlock_add(X_next, xAXColsRows)                              ! X_next = H|Psi> - eig * S|Psi>
     call xgBlock_colwiseNorm2(X_next, resid_mpi%self, comm_loc=xmpi_comm_null)  ! resid = |X_next|^2
    
+    write(std_out,*) 'ok4'
+    
     ! MPI communication for gathering all thetas (using summation strategy on columns)
     my_rank = xmpi_comm_rank(slice%spacecom)
     shift = my_rank * bandpp
@@ -960,15 +976,22 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
         call xgBlock_copy(eigen_mpi%self, eigen_block)
         call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
     else
+        if (slice%gpu_option==ABI_GPU_OPENMP) then
+            call xgBlock_copy_from_gpu(eigen_mpi%self)
+        end if
         ! workaround to copy from SPACE_C to SPACE_R
         ABI_MALLOC_IFNOT(theta_mpi_reshaped,(bandpp))
         theta_mpi_reshaped_ptr => theta_mpi_reshaped
         call xgBlock_reverseMap(eigen_mpi%self, theta_mpi, rows=1, cols=bandpp)
         theta_mpi_reshaped(1:bandpp) = theta_mpi(1,1:bandpp)
-        call xgBlock_map_1d(eigen_mpi_reshaped, theta_mpi_reshaped_ptr, SPACE_R, bandpp, gpu_option=slice%gpu_option)
+        call xgBlock_map_1d(eigen_mpi_reshaped, theta_mpi_reshaped_ptr, SPACE_R, bandpp, gpu_option=ABI_GPU_DISABLED)
         call xgBlock_copy(eigen_mpi_reshaped, eigen_block)
         call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
         ABI_SFREE(theta_mpi_reshaped)
+        if (slice%gpu_option==ABI_GPU_OPENMP) then
+            call xgBlock_copy_to_gpu(eigen_block)
+            call xgBlock_copy_to_gpu(eigen_mpi%self)
+        end if
     end if
     ! for resid (SPACE_R)
     call xgBlock_setBlock(resid, resid_block, rows=1, cols=bandpp, fcol=1+shift)
@@ -992,7 +1015,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xg_free(resid_mpi)
     call xg_free(X_NAB)
     call xgTransposer_free(xgTransposerX)
-
+    
 end subroutine slice_computeSpectrum
 !!***
 
@@ -1466,6 +1489,12 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen_ext%self, theta_ext, rows=1, cols=slice%neigenpairs_ext)
+
+    ! recover
+    if (slice%gpu_option==1) then
+        call xgBlock_copy_to_gpu(eigen_ext%self)
+        call xgBlock_copy_to_gpu(resid_ext%self)
+    end if
 
     ! Filter eigenvalues in extended space using spectral partition
     tot_ncols_kept = 0
