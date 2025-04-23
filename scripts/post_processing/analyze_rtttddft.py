@@ -58,8 +58,14 @@ def fourier_direct(time,signal,wcut,nfft):
         sys.exit("!Error - in fourier_direct - signal and time do not have the same length")
     dt = time[1] - time[0]
     # Apply filter if required
+    # Exponential windaow (exp(-wcut*t))
     if wcut > 0:
         filter = np.exp(np.multiply(time,-wcut))
+        f = np.multiply(filter,signal)
+    # Damping function (1-3(t/tmax)^2+2(t/tmax)^3)
+    elif wcut == -1:
+        tmax = time[-1]
+        filter = np.ones(len(time)) - np.multiply(time**2,3.0/tmax**2) + np.multiply(time**3,2.0/tmax**3)
         f = np.multiply(filter,signal)
     else:
         f = signal
@@ -110,21 +116,23 @@ parser.add_argument('-c', '--current', help='Name of the TDCURRENT file', requir
 parser.add_argument('-e', '--efield',  help='Name of the TDEFIELD file\
                                              or dirac if you used an impulse electric field (Dirac pulse)\
                                              see also the ezero parameter in that case', required=False)
-parser.add_argument('-o', '--outfile', help='Name of the Abinit output file (often *.abo)', required=False)
 parser.add_argument('-ez', '--ezero',  help='Amplitude of the electric field - Only used if -e dirac', required=False,
                                        type=float, default=1.0)
+parser.add_argument('-o', '--outfile', help='Name of the Abinit output file (often *.abo)', required=False)
 parser.add_argument('-d', '--dir',     help='Direction (x, y or z) of electric field to consider (divide by E_dir)', required=False,
                                        type=str, default='x')
 parser.add_argument('-wc', '--wcut',   help='Cutoff angular frequency exponential window [exp(-wcut*t)] (in Ha)', required=False,
-                                       type=float, default=0.04)
+                                       type=float, default=0.0)
+parser.add_argument('-damp', '--damp', help='Use a third order polynomial damping function [1-3(t/tmax)^2+2(t/tmax)^3]', required=False,
+                                       action='store_true', default=False)
 parser.add_argument('-ts', '--tshift', help='Remove the first tshift time of current density', required=False,
                                        type=float, default=0.0)
 parser.add_argument('-s', '--stride',  help='Stride time step (Default: 1)', required=False, type=int, default=1)
 parser.add_argument('-p', '--padding', help='If p>1 then zero-padding is used.\n\
 The signal is considered to be of length p*ntime (Default: 1)',
                                        required=False, type=int, default=1)
-parser.add_argument('-v', '--verbose',  help='More output mostly for testing', required=False,
-                                        action='store_true', default=False)
+parser.add_argument('-v', '--verbose', help='More output mostly for testing', required=False,
+                                       action='store_true', default=False)
 args = parser.parse_args()
 
 # Check input parameters
@@ -142,6 +150,12 @@ if args.wcut < 0:
     sys.exit("Wrong value of wcut! It should be larger than zero!")
 else:
     wcut=float(args.wcut)
+
+if (args.damp and wcut > 0):
+    sys.exit("Conflicting arguments: You need to set either wcut to use an exponential window or damp to use a damping function")
+
+if args.damp:
+    wcut = -1
 
 if args.tshift < 0:
     sys.exit("Wrong value of tshift! It should be larger than zero!")
@@ -161,6 +175,26 @@ elif args.dir == 'z':
     dir=2
 else:
     sys.exit("Wrong value of dir! Should be x, y or z!")
+
+# Print summary of parameters
+print("")
+print("# Summary of parameters")
+print("Current filename =", args.current)
+if args.efield == "dirac":
+    print("Dirac pulse electric field with amplitude", args.ezero, "au")
+else:
+    print("Electric field filename", args.efield)
+    print("Electric field direction used :", args.dir)
+print("Abinit output filename =", args.outfile)
+print("Time shift applied to the current ts = ", args.tshift)
+if args.stride > 1:
+    print("Time stride applied to the current. Reading every", args.tstride, "steps")
+if args.padding > 1:
+    print("Use zero-padding for Fourier transform with p=", args.padding)
+if wcut > 0:
+    print("Apply exponential window [exp(-wcut*t)] to the current density before Fourier transform with wcut = ", wcut, "Ha")
+elif wcut == -1:
+    print("Apply damping function [1+3(t/tmax)^2-2(t/tmax)^3] to the current density before Fourier transform")
 
 # Read current
 data = np.loadtxt(args.current.strip())
@@ -234,11 +268,11 @@ w, current_ft_z = fourier_direct(time,current[:,2],wcut,nfft)
 if (args.verbose):
     header = "Input current density\nall quantities are in Hartree atomic units.\ntime, J_x(t), J_y(t), J_z(t)"
     np.savetxt("current.dat",np.vstack([time,current[:,0],current[:,1],current[:,2]]).T,header=header)
-header = "FFT of current density\nall quantities are in Hartree atomic units.\n\
+    header = "FFT of current density\nall quantities are in Hartree atomic units.\n\
 w(ang. freq.), Re[J_x(w)], Im[J_x(w)], Re[J_y(w)], Im[J_y(w)], Re[J_z(w)], Im[J_z(w)]"
-np.savetxt("current_ft.dat", np.vstack([w,np.real(current_ft_x),np.imag(current_ft_x),
-                                          np.real(current_ft_y),np.imag(current_ft_y),
-                                          np.real(current_ft_z),np.imag(current_ft_z)]).T, header=header)
+    np.savetxt("current_ft.dat", np.vstack([w,np.real(current_ft_x),np.imag(current_ft_x),
+                                              np.real(current_ft_y),np.imag(current_ft_y),
+                                              np.real(current_ft_z),np.imag(current_ft_z)]).T, header=header)
 
 # Perform Fourier transform of electric field
 if calc_conducti:
@@ -246,7 +280,7 @@ if calc_conducti:
         nw = len(w)
         efield_ft = ezero*np.ones(nw)+1j*np.zeros(nw)
     else:
-        w, efield_ft = fourier_direct(time,efield,wcut,nfft)
+        w, efield_ft = fourier_direct(time,efield,0.0,nfft)
         # check that we get a real part only
         if np.any(np.abs(np.imag(efield))>1e-10):
             print("Warning: FFT of the electric field seems to have a non zero imaginary part.")
