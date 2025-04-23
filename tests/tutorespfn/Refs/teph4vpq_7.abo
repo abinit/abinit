@@ -281,14 +281,14 @@ meta: {optdriver: 7, eph_task: -13, }
 --------------------------------------------------------------------------------
 
  Computing polaron-induced displacements. Reading phonons from: teph4vpq_3o_DS1_GSTORE.nc
- For spin: 1: pstate: 1: maxval(abs(sc_displ_cart_re)):     4.495130E-02
- For spin: 1: pstate: 1: maxval(abs(sc_displ_cart_im)):     3.500832E-03
+ For spin: 1: pstate: 1: maxval(abs(sc_displ_cart_re)):     1.219627E+00
+ For spin: 1: pstate: 1: maxval(abs(sc_displ_cart_im)):     2.266261E-03
  Writing displacement vectors to: teph4vpq_7o_pstate_1_POLARON_DISPL_VECTORS.xsf
- For spin: 1: pstate: 2: maxval(abs(sc_displ_cart_re)):     3.197227E-02
- For spin: 1: pstate: 2: maxval(abs(sc_displ_cart_im)):     3.037059E-03
+ For spin: 1: pstate: 2: maxval(abs(sc_displ_cart_re)):     7.399309E-01
+ For spin: 1: pstate: 2: maxval(abs(sc_displ_cart_im)):     7.466554E-04
  Writing displacement vectors to: teph4vpq_7o_pstate_2_POLARON_DISPL_VECTORS.xsf
- For spin: 1: pstate: 3: maxval(abs(sc_displ_cart_re)):     3.250124E-02
- For spin: 1: pstate: 3: maxval(abs(sc_displ_cart_im)):     3.273222E-03
+ For spin: 1: pstate: 3: maxval(abs(sc_displ_cart_re)):     8.385414E-01
+ For spin: 1: pstate: 3: maxval(abs(sc_displ_cart_im)):     2.463865E-03
  Writing displacement vectors to: teph4vpq_7o_pstate_3_POLARON_DISPL_VECTORS.xsf
  For spin: 1: pstate: 1: 1/N_k \sum_nk |A_nk|^2 =     1.000000E+00
  Polaron density for spin: 1: pstate: 1 integrates to:     1.000000E+00
