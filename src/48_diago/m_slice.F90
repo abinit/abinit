@@ -803,6 +803,11 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
 
+    write(std_out,*) 'slice eigs active='
+    call xgBlock_print(eigen_active, std_out)
+    write(std_out,*) 'slice eigs='
+    call xgBlock_print(eigen, std_out)
+
     ! Free temporary memory
     call chebfi_free(chebfi)
     ABI_SFREE(nrowsLinalg)
@@ -822,6 +827,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     call xgTransposer_transpose(slice%xgTransposerXext, STATE_LINALG)
     ABI_NVTX_END_RANGE()
     ! Note: At this point slice%me_Xext_active is recovered into slice%XextLinalg
+
+    write(std_out,*) 'slice eigs after transpose='
+    call xgBlock_print(eigen, std_out)
 
     slice%use_colsrows = .false.
     slice%use_linalg = .true.
@@ -1454,10 +1462,15 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xgBlock_reshape(eigen, 1, slice%neigenpairs)
     call xgBlock_reshape(resid, 1, slice%neigenpairs)
 
+    write(std_out,*) 'slice eigs='
+    call xgBlock_print(eigen, std_out)
+
     ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
     if (slice%paral_kgb==1) then
+        write(std_out,*) 'passe par ici 1'
         if (xmpi_comm_size(slice%spacecom) > 1) then
             ! Copy only for first process in slice subcomm 
+            ! IL TODO 24/04 on a l'impression qu'il ne passe pas par ici
             if (xmpi_comm_rank(slice%me_comm_slice)==0) then
                 my_rank = xmpi_comm_rank(slice%spacecom)
                 my_slice = slice%lookup_proc(my_rank + 1)
@@ -1469,6 +1482,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
                 call xgBlock_copy(eigen, eigen_ext_slice)
                 call xgBlock_copy(resid, resid_ext_slice)
             end if
+    
+            write(std_out,*) 'slice after copy eigs='
+            call xgBlock_print(eigen_ext_slice, std_out)
 
             ! All processes wait before summing 
             call xmpi_barrier(slice%spacecom)
@@ -1476,8 +1492,12 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
             call xgBlock_mpi_sum(eigen_ext%self, comm=slice%spacecom)
             call xgBlock_mpi_sum(resid_ext%self, comm=slice%spacecom)
 
+        else
+            ! TODO
+            write(std_out,*) 'slice%spacecom', slice%spacecom, 'slice%paral_kgb', slice%paral_kgb 
         end if
     else
+        write(std_out,*) 'passe par ici 2'
         call xgBlock_copy(eigen, eigen_ext%self)
         call xgBlock_copy(resid, resid_ext%self)
     end if 
@@ -1489,6 +1509,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen_ext%self, theta_ext, rows=1, cols=slice%neigenpairs_ext)
+
+    write(std_out,*) 'theta_ext', theta_ext
 
     ! recover
     if (slice%gpu_option==1) then
@@ -1558,6 +1580,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     ! Recover dimensions
     call xgBlock_reshape(eigen, slice%neigenpairs, 1) 
     call xgBlock_reshape(resid, slice%neigenpairs, 1) 
+
+    write(std_out,*) 'KEPT slice eigs='
+    call xgBlock_print(eigen, std_out)
 
     ! Free memory
     call xg_free(eigen_ext)
