@@ -538,6 +538,7 @@ contains
 
   procedure :: calc_my_phonons => gstore_calc_my_phonons
   ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
+  ! TODO: Remove this method as it breaks the gauge in the phonon eigenvectors.
 
   procedure :: get_lambda_iso_iw => gstore_get_lambda_iso_iw
   ! Compute isotropic lambda(iw) along the imaginary axis.
