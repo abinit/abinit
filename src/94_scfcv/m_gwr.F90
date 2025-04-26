@@ -1630,8 +1630,9 @@ end block
 
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
      "wr_step", "ecuteps", "ecut", "ecutwfn", "ecutsigx", "gwr_boxcutmin", &
-     "min_transition_energy_eV", "max_transition_energy_eV", "eratio", &
-     "ft_max_err_t2w_cos", "ft_max_err_w2t_cos", "ft_max_err_t2w_sin", "cosft_duality_error", "regterm" &
+     "gwr_max_hwtene", "min_transition_energy_eV", "max_transition_energy_eV", &
+     "eratio", "ft_max_err_t2w_cos", "ft_max_err_w2t_cos", "ft_max_err_t2w_sin", &
+     "cosft_duality_error", "regterm" &
    ])
    NCF_CHECK(ncerr)
 
@@ -1664,10 +1665,11 @@ end block
 
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
      "wr_step", "ecuteps", "ecut", "ecutwfn", "ecutsigx", "gwr_boxcutmin", &
-     "min_transition_energy_eV", "max_transition_energy_eV", "eratio", &
-     "ft_max_err_t2w_cos", "ft_max_err_w2t_cos", "ft_max_err_t2w_sin", "cosft_duality_error", "regterm"], &
+     "gwr_max_hwtene", "min_transition_energy_eV", "max_transition_energy_eV", &
+     "eratio", "ft_max_err_t2w_cos", "ft_max_err_w2t_cos", "ft_max_err_t2w_sin", &
+     "cosft_duality_error", "regterm"], &
      [gwr%wr_step, dtset%ecuteps, dtset%ecut, dtset%ecutwfn, dtset%ecutsigx, dtset%gwr_boxcutmin, &
-      gwr%te_min, gwr%te_max, gwr%te_max / gwr%te_min, &
+      dtset%gwr_max_hwtene, gwr%te_min, gwr%te_max, gwr%te_max / gwr%te_min, &
       gwr%ft_max_error(1), gwr%ft_max_error(2), gwr%ft_max_error(3), gwr%cosft_duality_error, regterm &
      ])
    NCF_CHECK(ncerr)
