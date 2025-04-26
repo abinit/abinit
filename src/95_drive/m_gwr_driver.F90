@@ -824,6 +824,10 @@ end if
    ! Construct crystal and ks_ebands from the GS WFK file.
    tmp_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
    ks_ebands = tmp_ebands%chop(1, maxval(dtset%nband))
+
+   ! Make sure that ef is inside the gap if semiconductor.
+   call ks_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
+
    call tmp_ebands%free()
    call wfk_hdr%vs_dtset(dtset)
 
