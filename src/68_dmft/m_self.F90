@@ -598,7 +598,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !   - For the Tentative rotation of the self-energy file (begin init)
  if (optmaxent > 0) then
    if (optrw == 2) then
-     write(message,'(a,2x,a)') ch10," == About to print self-energy for MAXENT code in basis which diagonalizes the atomic levels"
+     write(message,'(a,2x,a)') ch10," == About to print self-energy for MAXENT code in basis that diagonalizes the atomic levels"
    else if (optrw == 1)  then
      write(message,'(a,2x,a)') ch10," == About to read self-energy from MAXENT code"
    end if
@@ -634,7 +634,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end do ! ifreq
    call gather_oper(selfrotmatlu(:),self%distrib,paw_dmft,2,master=master)
    do ifreq=1,3
-     if (ifreq < 3) then
+     if (ifreq < 3 .and. myproc == master) then ! very important to call print_matlu only on master node
        write(message,'(a,2x,a,i4)') ch10," == Print non Rotated Self Energy for freq=",ifreq
        call wrtout(std_out,message,'COLL')
        call print_matlu(self%oper(ifreq)%matlu(:),natom,1,compl=1)
@@ -1317,7 +1317,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 ! call xmpi_barrier(spacecomm)
            !write(std_out,*) "9"
 !   - For the Tentative rotation of the self-energy file (begin destroy)
- if (optmaxent > 0 .and. (optrw == 1 .or. optrw == 2)) then
+ if (optmaxent > 0) then
 
    if (optrw == 2) then
      call destroy_oper(energy_level)
@@ -1438,7 +1438,7 @@ subroutine new_self(self,self_new,paw_dmft)
  type(self_type), intent(in) :: self_new
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables-------------------------------
- integer :: i,iatom,icount,ifreq,lpawu,natom,ndim,nspinor,nsppol
+ integer :: i,iatom,icount,ifreq,im,im1,isppol,lpawu,natom,ndim,nspinor,nsppol
  real(dp) :: alpha,diff_self,sum_self
  character(len=500) :: message
 ! *********************************************************************
@@ -1459,11 +1459,25 @@ subroutine new_self(self,self_new,paw_dmft)
    end do ! iatom
  end do ! ifreq
 
+ diff_self = zero
+ sum_self = zero
+ icount = 0
+
  do iatom=1,natom
    lpawu = paw_dmft%lpawu(iatom)
    if (lpawu == -1) cycle
-   self%hdc%matlu(iatom)%mat(:,:,:) = (one-alpha)*self%hdc%matlu(iatom)%mat(:,:,:) + &
-       & alpha*self_new%hdc%matlu(iatom)%mat(:,:,:)
+   ndim = nspinor * (2*lpawu+1)
+   icount = icount + nsppol*ndim
+   do isppol=1,nsppol
+     do im1=1,ndim
+       do im=1,ndim
+         diff_self = diff_self + abs(self%hdc%matlu(iatom)%mat(im,im1,isppol)-self_new%hdc%matlu(iatom)%mat(im,im1,isppol))
+         sum_self = sum_self + abs(self%hdc%matlu(iatom)%mat(im,im1,isppol))
+         self%hdc%matlu(iatom)%mat(im,im1,isppol) = (one-alpha)*self%hdc%matlu(iatom)%mat(im,im1,isppol) + &
+           & alpha*self_new%hdc%matlu(iatom)%mat(im,im1,isppol)
+       end do ! im
+     end do ! im1
+   end do ! isppol
  end do ! iatom
 
  if (self%has_moments == 1) then
@@ -1479,18 +1493,6 @@ subroutine new_self(self,self_new,paw_dmft)
 
  !if(opt_mix==1) then
  !endif
- diff_self = zero
- sum_self = zero
- icount = 0
-
- do iatom=1,natom
-   lpawu = paw_dmft%lpawu(iatom)
-   if (lpawu == -1) cycle
-   ndim = nspinor * (2*lpawu+1)
-   icount = icount + nsppol*ndim
-   diff_self = diff_self + sum(abs(self%hdc%matlu(iatom)%mat(:,:,:)-self_new%hdc%matlu(iatom)%mat(:,:,:)))
-   sum_self  = sum_self + sum(abs(self%hdc%matlu(iatom)%mat(:,:,:)))
- end do ! iatom
 
  diff_self = diff_self / dble(icount)
 

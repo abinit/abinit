@@ -4044,30 +4044,21 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      end if ! integral and ilam<ntot and entropy
 
      if (integral > 0 .and. ilam == ntot-1 .and. entropy) then
-       write(message,'(a,3(3x,2a),a,12x,a,6x,2a,7x,5a)') ch10,repeat("=",39),ch10,"== Summary of thermodynamic integration", &
-            & ch10,repeat("=",39),ch10,ch10,"Lambda","<dH/dlambda>",ch10,"┌",repeat("─",14),"┬",repeat("─",14),"┐"
+       write(message,'(a,3(3x,2a),a,12x,a,6x,2a,8x,a)') ch10,repeat("=",39),ch10,"== Summary of thermodynamic integration", &
+            & ch10,repeat("=",39),ch10,ch10,"Lambda","<dH/dlambda>",ch10,repeat("-",29)
        call wrtout(std_out,message,'COLL')
-       do i=1,ntot-2
+       do i=1,ntot-1
          write(tag_lambda,'(f14.4)') lam_list(i)
          write(tag_elam,'(f14.4)') elam_list(i)
          tag_lambda = adjustl(tag_lambda)
          tag_elam = adjustl(tag_elam)
          pad_lambda = (14-len_trim(tag_lambda)) / 2
          pad_elam = (14-len_trim(tag_elam)) / 2
-         write(message,'(7x,a,2(4a),a,7x,5a)') "│",repeat(" ",pad_lambda),trim(tag_lambda),repeat(" ",14-pad_lambda-len_trim(tag_lambda)),"│", &
-                                             & repeat(" ",pad_elam),trim(tag_elam),repeat(" ",14-pad_elam-len_trim(tag_elam)),"│",ch10, &
-                                             & "├",repeat("─",14),"┼",repeat("─",14),"┤"
+         write(message,'(8x,2(3a,1x),a,8x,a)') repeat(" ",pad_lambda),trim(tag_lambda),repeat(" ",14-pad_lambda-len_trim(tag_lambda)), &
+                                             & repeat(" ",pad_elam),trim(tag_elam),repeat(" ",14-pad_elam-len_trim(tag_elam)),ch10,repeat("-",29)
          call wrtout(std_out,message,'COLL')
        end do ! i
-       write(tag_lambda,'(f14.4)') lam_list(ntot-1)
-       write(tag_elam,'(f14.4)') elam_list(ntot-1)
-       tag_lambda = adjustl(tag_lambda)
-       tag_elam = adjustl(tag_elam)
-       pad_lambda = (14-len_trim(tag_lambda)) / 2
-       pad_elam = (14-len_trim(tag_elam)) / 2
-       write(message,'(7x,2(4a),2a,7x,7a,3x,a,f10.4,a)') "│",repeat(" ",pad_lambda),trim(tag_lambda),repeat(" ",14-pad_lambda-len_trim(tag_lambda)), &
-                                                       & "│",repeat(" ",pad_elam),trim(tag_elam),repeat(" ",14-pad_elam-len_trim(tag_elam)),"│",ch10, &
-                                                       & "└",repeat("─",14),"┴",repeat("─",14),"┘",ch10,ch10,"--> Integral is: ",green%integral,ch10
+       write(message,'(a,3x,a,f10.4,a)') ch10,"--> Integral is: ",green%integral,ch10
        call wrtout(std_out,message,'COLL')
      end if ! integral and ilam=ntot-1 and entropy
 

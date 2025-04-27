@@ -449,7 +449,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
 !  ==  Mix new and old self_energies and double countings
 !  ---------------------------------------------------------------------
-   write(message,'(3a)') ch10,"  == Linear mixing of self-energy and double counting",ch10
+   write(message,'(3a)') ch10,"  == Linear mixing of old and new self-energy and double counting",ch10
    call wrtout(std_out,message,'COLL')
    call new_self(self,self_new,paw_dmft) ! self,self_new => self
    write(message,'(2a)') ch10,"  == After mixing,"
