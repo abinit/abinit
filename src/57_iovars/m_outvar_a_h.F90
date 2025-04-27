@@ -668,14 +668,6 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dmft_mxsf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_mxsf','DPR',0)
 
- narr=mxvals%natom
- do idtset=0,ndtset_alloc
-   narrm(idtset)=dtsets(idtset)%natom
-   if(idtset==0)narrm(idtset)=mxvals%natom
-   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%dmft_nominal(1:narrm(idtset))
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'dmft_nominal','INT',multivals%natom)
-
  intarr(1,:)=dtsets(:)%dmft_nwli
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_nwli','INT',0)
 
@@ -684,14 +676,6 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%dmft_occnd_imag
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_occnd_imag','INT',0)
-
- narr=mxvals%ntypat
- do idtset=0,ndtset_alloc
-   narrm(idtset)=dtsets(idtset)%ntypat
-   if(idtset==0)narrm(idtset)=mxvals%ntypat
-   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%dmft_orbital(1:narrm(idtset))
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'dmft_orbital','INT',multivals%ntypat)
 
  intarr(1,:)=dtsets(:)%dmft_prt_maxent
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_prt_maxent','INT',0)
@@ -716,14 +700,6 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%dmft_rslf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_rslf','INT',0)
-
- narr=mxvals%natom
- do idtset=0,ndtset_alloc
-   narrm(idtset)=dtsets(idtset)%natom
-   if(idtset==0)narrm(idtset)=mxvals%natom
-   if (narrm(idtset)>0) dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%dmft_shiftself(1:narrm(idtset))
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'dmft_shiftself','DPR',multivals%natom)
 
  intarr(1,:)=dtsets(:)%dmft_solv
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_solv','INT',0)
