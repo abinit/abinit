@@ -1409,7 +1409,7 @@ subroutine print_free_energy(energies_dmft,paw_dmft)
      & "--- E_kinetic_imp             (9) (Ha.) = ",energies_dmft%ekin_imp,ch10
 
  if (integral > 0) then
-   write(message2,'(5x,3a,2x,f18.11,7(a,5x,a,2x,f18.11),a,5x,a)') &
+   write(message2,'(8(5x,a,2x,f18.11,a),5x,a)') &
      & "--- Tr(log(G0))              (10) (Ha.) = ",energies_dmft%fband_weiss,ch10, &
      & "--- Integral                 (11) (Ha.) = ",energies_dmft%integral,ch10, &
      & "--- F_imp               (10)+(11) (Ha.) = ",energies_dmft%fimp,ch10, &
