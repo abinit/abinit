@@ -949,7 +949,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/1/),iout)
      end if
      if (dt%dmft_triqs_measure_density_matrix == 1) then
-       cond_string(1)='dmft_triqs_measure_density_matrix' ; cond_values(1)=dt%dmft_triqs_measure_density_matrix
+       cond_string(1)='dmft_triqs_measure_density' ; cond_values(1)=dt%dmft_triqs_measure_density_matrix
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_use_norm_as_weight',dt%dmft_triqs_use_norm_as_weight,1,(/1/),iout)
      end if
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv

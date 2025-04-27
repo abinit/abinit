@@ -3164,18 +3164,17 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------
  integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ileg,im,im1,integral,isppol,isub
- integer :: itau,itypat,iw,j,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
+ integer :: itau,itypat,iw,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
  integer :: nspinor,nsppol,nsub,ntau,ntot,nwlo,p,pad_elam,pad_lambda,read_data,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,leg_measure,nondiag,off_diag,rot_inv
  real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,tau,tol,xtau,xx
- real(dp), target :: z0
  complex(dpc) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dpc), target :: eu
  type(oper_type), target :: energy_level
  type(self_type) :: hybmwdhyb
  type(c_ptr) :: block_ptr,eu_ptr,flavor_ptr,fname_data_ptr,fname_dataw_ptr,fname_histo_ptr,ftau_ptr,gl_ptr,gtau_ptr
- type(c_ptr) :: inner_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr,z0_ptr
+ type(c_ptr) :: inner_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,ndlr_ptr,occ_ptr,siz_ptr,udens_ptr,vee_ptr,wdlr_ptr
  integer, allocatable :: flavor_list(:,:,:),nblocks(:)
  integer, target, allocatable :: block_list(:,:),flavor_tmp(:,:),inner_list(:,:),siz_block(:,:)
  real(dp), allocatable :: adlr(:,:),bdlr(:),elam_list(:),emig(:),gl_dlr_re(:),gl_dlr_im(:),jbes(:),lam_list(:)
