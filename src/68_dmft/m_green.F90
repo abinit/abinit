@@ -165,9 +165,6 @@
   real(dp) :: trace_log
   ! Tr(log(G)) in KS space
 
-  real(dp) :: z0
-  ! This is -T*log(Z0)
-
   !integer, allocatable :: procb(:,:)
 
   !integer, allocatable :: proct(:,:)

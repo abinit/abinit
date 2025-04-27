@@ -198,17 +198,10 @@ MODULE m_paw_dmft
   integer :: dmft_t2g
   ! Only use t2g orbitals
 
-  integer :: dmft_triqs_broyden_niter
-  ! Number of previous iterations involved in Broyden mixing of hybridization
-
-  integer :: dmft_triqs_broyden_scheme
-  ! =1 : weights are set to 1 (Pulay mixing)
-  ! =2 : weights are set to the inverse square root of the residu
-
   integer :: dmft_triqs_compute_integral
   ! Only relevant when dmft_triqs_entropy=1.
-  ! =1: Compute the thermodynamic integration over the impurity models.
-  ! =0: Do not compute the integral. All the other contributions to the free
+  ! =1: Compute the impurity entropy by thermodynamic integration over the impurity models.
+  ! =0: Do not compute the impurity entropy. All the other contributions to the free
   ! energy are still computed.
 
   integer :: dmft_triqs_det_init_size
@@ -220,7 +213,7 @@ MODULE m_paw_dmft
   ! If it is low, the matrix will be checked too often, which can be slow.
 
   integer :: dmft_triqs_entropy
-  ! TRIQS CTQMC: Compute the DMFT entropy by integrating several impurity models over U.
+  ! TRIQS CTQMC: Compute the DMFT entropy.
 
   integer :: dmft_triqs_gaussorder
   ! Order of the Gauss-Legendre quadrature for each subdivision of the thermodynamic integration.
@@ -231,8 +224,7 @@ MODULE m_paw_dmft
 
   integer :: dmft_triqs_loc_n_max
   ! TRIQS CTQMC: Only configurations with a number of electrons in
-  ! [nlocmin,nlocmax]
-  ! are taken into account.
+  ! [nlocmin,nlocmax] are taken into account.
 
   integer :: dmft_triqs_nleg
   ! TRIQS CTQMC: Nb of Legendre polynomials used for the
@@ -241,9 +233,6 @@ MODULE m_paw_dmft
   integer :: dmft_triqs_nsubdivisions
   ! Number of regular subdivisions of the interval [0,U], each of which
   ! containing dmft_triqs_gaussorder points
-
-  integer :: dmft_triqs_ntau_delta
-  ! TRIQS CTQMC: Nb of imaginary time points for the hybridization.
 
   integer :: dmft_triqs_read_ctqmcdata
   ! TRIQS CTQMC: Read CTQMC data of the previous iteration
@@ -280,6 +269,7 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_basis
   ! Basis in which to perform the CTQMC calculation
   ! 0 : Slm basis, 1 : diagonalize local Hamiltonian, 2: diagonalize the density matrix
+  ! Only for TRIQS: 3: Ylm, 4: JmJ
 
   integer :: dmftctqmc_check
   ! ABINIT CTQMC: perform a check on the impurity and/or bath operator
@@ -321,7 +311,7 @@ MODULE m_paw_dmft
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 
   integer :: dmftqmc_l
-  ! Number of points on the imaginary time grid
+  ! Number of points on the imaginary time grid for G(tau) and Delta(tau)
 
 !  integer :: dmft_mag
 !  ! 0 if non magnetic calculation, 1 if magnetic calculation
@@ -348,6 +338,7 @@ MODULE m_paw_dmft
   ! Internal flag to indicate if an input self file must be read
 
   integer :: lchipsiortho
+  ! Internal flag
   ! =0 <Chi|Psi> is not orthonormalized
   ! =1 <Chi|Psi> is orthonormalized
 
@@ -456,7 +447,8 @@ MODULE m_paw_dmft
   ! used also for self (new_self)  (=> iself_cv).
 
   real(dp) :: dmft_fermi_step
-  ! Step increment to find the upper and lower bounds of the Fermi level
+  ! When dmft_optim = 0, step increment to find the upper and lower bounds of the Fermi level
+  ! When dmft_optim = 1, maximal step size in the Fermi level search
 
   real(dp) :: dmft_lcpr
   ! Required precision on local correlated charge in order to stop SCF
@@ -470,10 +462,10 @@ MODULE m_paw_dmft
   ! frequency mesh), used in m_dmft/dmft_solve
 
   real(dp) :: dmft_triqs_det_precision_error
-  ! TRIQS CTQMC: Error threshold for the deviation of the determinant.
+  ! TRIQS CTQMC: Error threshold for the deviation of the determinant when a check is performed.
 
   real(dp) :: dmft_triqs_det_precision_warning
-  ! TRIQS CTQMC: Warning threshold for the deviation of the determinant.
+  ! TRIQS CTQMC: Warning threshold for the deviation of the determinant when a check is performed.
 
   real(dp) :: dmft_triqs_det_singular_threshold
   ! TRIQS CTQMC: Threshold when checking if the determinant is singular.
@@ -482,13 +474,10 @@ MODULE m_paw_dmft
   ! TRIQS CTQMC: Threshold for singular values of the kernel matrix for the DLR fit
 
   real(dp) :: dmft_triqs_imag_threshold
-  ! TRIQS CTQMC: Threshold for the imaginary part of F(tau)
+  ! TRIQS CTQMC: Threshold for the imaginary part of Delta(tau)
 
   real(dp) :: dmft_triqs_lambda
   ! TRIQS CTQMC: Cutoff for the real frequency grid for the DLR fit
-
-  real(dp) :: dmft_triqs_mxhyb
-  ! TRIQS CTQMC: Mixing parameter for mixing of the hybridization
 
   real(dp) :: dmft_triqs_pauli_prob
   ! TRIQS CTQMC: Probability for proposing Pauli-aware insert and remove
@@ -1155,7 +1144,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_det_singular_threshold        = dtset%dmft_triqs_det_singular_threshold
  paw_dmft%dmft_triqs_epsilon                       = dtset%dmft_triqs_epsilon
  paw_dmft%dmft_triqs_lambda                        = dtset%dmft_triqs_wmax / dtset%tsmear
- paw_dmft%dmft_triqs_ntau_delta                    = dtset%dmft_triqs_ntau_delta
  paw_dmft%dmft_triqs_entropy                       = dtset%dmft_triqs_entropy
  paw_dmft%dmft_triqs_compute_integral              = dtset%dmft_triqs_compute_integral
  paw_dmft%dmft_triqs_gaussorder                    = dtset%dmft_triqs_gaussorder
@@ -1163,9 +1151,6 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_triqs_tol_block                     = dtset%dmft_triqs_tol_block
  paw_dmft%dmft_triqs_read_ctqmcdata                = dtset%dmft_triqs_read_ctqmcdata
  paw_dmft%dmft_triqs_pauli_prob                    = dtset%dmft_triqs_pauli_prob
- paw_dmft%dmft_triqs_broyden_niter                 = dtset%dmft_triqs_broyden_niter
- paw_dmft%dmft_triqs_broyden_scheme                = dtset%dmft_triqs_broyden_scheme
- paw_dmft%dmft_triqs_mxhyb                         = dtset%dmft_triqs_mxhyb
 
 !==============================
 !==  Variables for DMFT itself
@@ -1220,7 +1205,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%slm2ylm(:,:,:) = czero
  do lpawu=0,maxlpawu
    if (lcycle(lpawu+1)) cycle
-   ndim = 2*lpawu +1
+   ndim = 2*lpawu + 1
    do im=1,ndim
      mm = im - lpawu - 1 ; jm = - mm + lpawu + 1
      onem = (-1)**mm
@@ -1271,7 +1256,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
      end do ! jm
    end do ! jj
    ABI_FREE(ind_msml)
- end do ! lpawu
+ end do ! ll
 
  do lpawu=0,maxlpawu
    if (lcycle(lpawu+1)) cycle
@@ -1500,13 +1485,14 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
          do ig=1,npw
            call simp_gen(bes,pawtab(itypat)%proj(1:siz_proj)*dble(paw_dmft%bessel(ig,1:siz_proj,itypat,ik)), &
                        & paw_dmft%radgrid(itypat),r_for_intg=rint)
-           paw_dmft%bessel_int(ig,itypat,ik) = bes * (j_dpc**lpawu1) ! CAREFUL: we multiply by j^l AFTER simp_gen
+           paw_dmft%bessel_int(ig,itypat,ik) = bes * (j_dpc**lpawu1) ! CAREFUL: we multiply by j^l AFTER simp_gen since simp_gen doesn_t handle complex
          end do ! ig
          paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) = paw_dmft%bessel(1:npw,1:siz_wan,itypat,ik) * (j_dpc**lpawu1)
          typcycle(itypat) = .true.
        end if ! not typcycle
 
      end do ! iatom
+
      ikg = ikg + npw
 
    end do ! ikpt

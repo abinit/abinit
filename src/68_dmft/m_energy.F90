@@ -110,8 +110,6 @@ MODULE m_energy
 
   real(dp) :: simp
 
-  real(dp) :: z0
-
   real(dp), allocatable :: e_dc(:)
 
   real(dp), allocatable :: e_hu_dftu(:)
@@ -187,7 +185,6 @@ subroutine init_energy(energies_dmft,natom)
  !energies_dmft%natom         = natom
  energies_dmft%sdmft         = zero
  energies_dmft%simp          = zero
- energies_dmft%z0            = zero
 
 end subroutine init_energy
 !!***
@@ -651,7 +648,6 @@ end subroutine compute_band_energy
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  self  <type(self_type)>= self energy function data
 !!  iatom = if present, only computes the contribution of this atom
-!!  hyb <type(green_type)>= if present, computes 1/2 * Tr(Delta*G)
 !!
 !! OUTPUT
 !!  e_hu_migdal(natom)= Migdal energy for each atom.
@@ -659,7 +655,7 @@ end subroutine compute_band_energy
 !!
 !! SOURCE
 
-subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self,iatom,hyb)
+subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self,iatom)
 
 !#ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
@@ -672,16 +668,14 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  real(dp), intent(inout) :: e_hu_migdal(paw_dmft%natom)
  type(self_type), target, intent(in) :: self
  integer, optional, intent(in) :: iatom
- type(green_type), target, optional, intent(in) :: hyb
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: i,i1,iatom_,ierr,ifreq,j,myproc,natom,nmoments,nspinor,nsppol,nwlo
+ integer :: i,iatom_,ierr,ifreq,j,myproc,natom,nmoments,nspinor,nsppol,nwlo
  real(dp) :: beta,temp
  complex(dpc) :: omega
  complex(dpc), allocatable :: omega_fac(:),trace_moments(:,:),trace(:)
  type(matlu_type), allocatable :: self_nwlo_re(:)
  type(matlu_type), pointer :: matlu_tmp(:) => null()
- type(oper_type), pointer :: moments(:) => null()
  character(len=500) :: message
 ! *********************************************************************
 
@@ -708,9 +702,6 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    iatom_ = iatom
    if (self%has_moments == 0) ABI_BUG("You should not be here")
  end if
- if (present(hyb)) then
-   if (self%has_moments == 0 .or. hyb%has_moments == 0) ABI_BUG("You should not be here")
- end if
 
  if (green%nw /= self%nw) then
    message = 'self and green do not contain the same number of frequencies'
@@ -724,18 +715,11 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  e_hu_migdal(:) = zero
  trace(:) = czero
 
- i1 = 1
-
  if (self%has_moments == 1) then
    trace_moments(:,:) = czero
-   if (present(hyb)) then
-     i1 = 2 ; moments => hyb%moments(:)
-   else
-     moments => self%moments(:)
-   end if ! present(hyb)
    do i=1,nmoments
-     do j=i1,i
-       call trace_prod_matlu(moments(j)%matlu(:),green%moments(i-j+1)%matlu(:),natom,trace(:),iatom=iatom_)
+     do j=1,i
+       call trace_prod_matlu(self%moments(j)%matlu(:),green%moments(i-j+1)%matlu(:),natom,trace(:),iatom=iatom_)
        trace_moments(:,i) = trace_moments(:,i) + trace(:)
      end do ! j
    end do ! i
@@ -754,11 +738,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
    omega = cmplx(zero,paw_dmft%omega_lo(ifreq),kind=dp)
 
    if (self%has_moments == 1) then
-     if (present(hyb)) then
-       matlu_tmp => hyb%oper(ifreq)%matlu(:)
-     else
-       matlu_tmp => self%oper(ifreq)%matlu(:)
-     end if ! present(hyb)
+     matlu_tmp => self%oper(ifreq)%matlu(:)
    else
      call add_matlu(self%oper(ifreq)%matlu(:),self_nwlo_re(:),matlu_tmp(:),natom,-1)
    end if ! moments
@@ -773,7 +753,7 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
 
  ABI_MALLOC(omega_fac,(nmoments))
 
- do i=i1,nmoments
+ do i=1,nmoments
    omega_fac(i) = czero
    do ifreq=nwlo,1,-1 ! NEVER change the summation order and DON'T use the intrinsic SUM
      omega_fac(i) = omega_fac(i) + cone / (paw_dmft%omega_lo(ifreq))**i
@@ -806,8 +786,6 @@ subroutine compute_migdal_energy(e_hu_migdal,e_hu_migdal_tot,green,paw_dmft,self
  e_hu_migdal_tot = sum(e_hu_migdal(:))
 
  ABI_FREE(trace)
-
- moments => null()
 
  !xmig_1=zero
  !xmig_2=zero
@@ -1226,9 +1204,6 @@ subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self,weiss)
      ! Tr(log(G0)) (careful, we set opt_inv to 1 since weiss contains G0^-1 rather than G0 after the dyson call)
      call compute_trace_log_loc(weiss,paw_dmft,energies_dmft%fband_weiss,opt_inv=1)
      energies_dmft%fimp = energies_dmft%fband_weiss + green%integral
-   else if (integral == 2) then
-     energies_dmft%z0 = green%z0
-     energies_dmft%fimp = energies_dmft%z0 + green%integral
    else
      energies_dmft%fimp = energies_dmft%ekin_imp + energies_dmft%e_hu_tot
    end if ! integral
@@ -1412,8 +1387,7 @@ subroutine print_free_energy(energies_dmft,paw_dmft)
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables-------------------------------
  integer :: integral
- real(dp) :: f0,temp
- character(len=11) :: tag
+ real(dp) :: temp
  character(len=10000) :: message,message2
 ! *********************************************************************
 
@@ -1435,10 +1409,8 @@ subroutine print_free_energy(energies_dmft,paw_dmft)
      & "--- E_kinetic_imp             (9) (Ha.) = ",energies_dmft%ekin_imp,ch10
 
  if (integral > 0) then
-   tag = merge("Tr(log(G0))","-T*log(Z0) ",integral==1)
-   f0  = merge(energies_dmft%fband_weiss,energies_dmft%z0,integral==1)
    write(message2,'(5x,3a,2x,f18.11,7(a,5x,a,2x,f18.11),a,5x,a)') &
-     & "--- ",tag,"              (10) (Ha.) = ",f0,ch10, &
+     & "--- Tr(log(G0))              (10) (Ha.) = ",energies_dmft%fband_weiss,ch10, &
      & "--- Integral                 (11) (Ha.) = ",energies_dmft%integral,ch10, &
      & "--- F_imp               (10)+(11) (Ha.) = ",energies_dmft%fimp,ch10, &
      & "--- (-kT)*S_imp (10)+(11)-(9)-(1) (Ha.) = ",-temp*energies_dmft%simp,ch10, &
