@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <iostream>
 #include <mpi.h>
+#include <triqs_cthyb/configuration.hpp>
 #include <triqs_cthyb/solver_core.hpp>
 #include <triqs_cthyb_qmc.hpp>
 
@@ -14,15 +15,15 @@ using namespace mpi;
 using namespace triqs::gfs;
 
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_double, bool measure_density_matrix,
-                     bool time_invariance, bool use_norm_as_weight, bool compute_entropy, bool compute_z0, int loc_n_min,
-                     int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
-                     int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int ntau_delta,
-                     int rank, int nblocks, int read_data, int verbo, double beta, double imag_threshold,
-                     double det_precision_warning, double det_precision_error, double det_singular_threshold, double lam_u,
-                     double lam_delta, double pauli_prob, int *block_list, int *flavor_list, int *inner_list, int *siz_list,
-                     complex<double> *ftau, complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
-                     complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ,
-                     complex<double> *eu, double *z0, char *fname_data, char *fname_dataw, char *fname_histo) {
+                     bool time_invariance, bool use_norm_as_weight, bool compute_entropy, int loc_n_min, int loc_n_max,
+                     int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
+                     int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int rank,
+                     int nblocks, int read_data, int verbo, double beta, double imag_threshold, double det_precision_warning,
+                     double det_precision_error, double det_singular_threshold, double lam_u, double pauli_prob, int *block_list,
+                     int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau, complex<double> *gtau,
+                     complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx, complex<double> *levels_cmplx,
+                     complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu,
+                     char *fname_data, char *fname_dataw, char *fname_histo) {
 
   int ndim = num_orbitals / 2;
   string qmc_data_fname  = string(fname_data);
@@ -73,16 +74,16 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   }
 
   // Construct CTQMC solver with mesh parameters
-  solver_core solver({beta,gf_struct,(n_tau-1)/2,n_tau,n_l,ntau_delta,true});
+  solver_core solver({beta,gf_struct,(n_tau-1)/2,n_tau,n_l,true});
 
   // Fill Hybridization
   for (int iblock : range(nblocks))
-    for (int tau : range(ntau_delta))
+    for (int tau : range(n_tau))
       for (int o : range(siz_list[iblock])) {
         iflavor = flavor_list[o+iblock*num_orbitals];
         for (int oo : range(siz_list[iblock])) {
           iflavor1 = flavor_list[oo+iblock*num_orbitals];
-          solver.Delta_tau()[iblock][tau](o,oo) = lam_delta * ftau[iflavor+iflavor1*num_orbitals+tau*num_orbitals*num_orbitals];
+          solver.Delta_tau()[iblock][tau](o,oo) = ftau[iflavor+iflavor1*num_orbitals+tau*num_orbitals*num_orbitals];
         }
       }
 
@@ -95,13 +96,16 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.random_name = "";
   paramCTQMC.random_seed = seed_a + rank * seed_b;
   paramCTQMC.length_cycle = cycle_length;
+#if defined HAVE_TRIQS_v3_4
   paramCTQMC.time_invariance = time_invariance;
   paramCTQMC.pauli_prob = pauli_prob;
+#endif
 
   int restart = (exists(qmc_data_fname) && read_data == 1 ? 1 : 0);
 
   file qmc_data_hfile;
 
+#if defined HAVE_TRIQS_v3_4
   if (restart == 1 && rank == 0) {
 
     // Check if the configuration file can be read
@@ -186,6 +190,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
     if (rank == 0) qmc_data_hfile.close();
   }
+#endif
 
   paramCTQMC.move_shift = move_shift;
   paramCTQMC.move_double = move_double;
@@ -231,12 +236,15 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     cout << "   Det Precision warning = " << det_precision_warning << endl;
     cout << "   Det Precision error   = " << det_precision_error << endl;
     cout << "   Det sing. threshold   = " << det_singular_threshold << endl;
+#if defined HAVE_TRIQS_v3_4
     cout << "   Time invariance       = " << time_invariance << endl;
-    cout << "   Ntau delta            = " << ntau_delta << endl;
+    cout << "   Pauli prob            = " << pauli_prob << endl;
+#endif
   }
 
   solver.solve(paramCTQMC);
 
+#if defined HAVE_TRIQS_v3_4
   if (rank == 0) cout << endl << "   == Writing CTQMC data on file " << qmc_data_fnamew << endl;
 
   // Write all final configurations
@@ -293,6 +301,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
     qmc_data_hfilew.close();
   }
+#endif
 
   if (!compute_entropy) {
 
@@ -320,12 +329,6 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   }
 
   auto h_loc_diag = solver.h_loc_diagonalization();
-
-  if (compute_z0) {
-    *z0 = partition_function(h_loc_diag, beta);
-    auto shift = h_loc_diag.get_gs_energy();
-    *z0 = - log(*z0) / beta + shift;
-  }
 
   if (measure_density_matrix) {
 

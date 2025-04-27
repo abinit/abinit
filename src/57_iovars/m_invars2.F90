@@ -2479,6 +2479,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_solv',tread,'INT')
    if(tread==1) dtset%dmft_solv=intarr(1)
    if (dtset%dmft_solv==6.or.dtset%dmft_solv==7) then ! change some default values for TRIQS
+     dtset%dmftctqmc_meas=0
      dtset%dmft_optim=1
      dtset%dmft_use_all_bands=1
      dtset%dmft_use_full_chipsi=1
@@ -2619,7 +2620,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
      end if
      if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
-       dtset%dmft_triqs_ntau_delta=dtset%dmftqmc_l
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_off_diag',tread,'INT')
        if(tread==1) dtset%dmft_triqs_off_diag=intarr(1)
        if (dtset%dmft_triqs_off_diag == 1) then
@@ -2627,10 +2627,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
          dtset%dmft_triqs_time_invariance = 0
          dtset%dmft_triqs_move_double = 1
        end if
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_broyden_niter',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_broyden_niter=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_broyden_scheme',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_broyden_scheme=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
        if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
@@ -2659,19 +2655,18 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmft_triqs_loc_n_max=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_measure_density_matrix',tread,'INT')
        if(tread==1) dtset%dmft_triqs_measure_density_matrix=intarr(1)
-       if(dtset%dmft_triqs_measure_density_matrix==0) dtset%dmft_triqs_time_invariance=0
+       if(dtset%dmft_triqs_measure_density_matrix==0) then
+         dtset%dmft_triqs_time_invariance=0
+         dtset%dmft_triqs_use_norm_as_weight=0
+       end if
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_double',tread,'INT')
        if(tread==1) dtset%dmft_triqs_move_double=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_shift',tread,'INT')
        if(tread==1) dtset%dmft_triqs_move_shift=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_mxhyb',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_mxhyb=dprarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_nleg',tread,'INT')
        if(tread==1) dtset%dmft_triqs_nleg=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_nsubdivisions',tread,'INT')
        if(tread==1) dtset%dmft_triqs_nsubdivisions=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_ntau_delta',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_ntau_delta=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_pauli_prob',tread,'DPR')
        if(tread==1) dtset%dmft_triqs_pauli_prob=dprarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_read_ctqmcdata',tread,'INT')

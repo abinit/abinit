@@ -146,8 +146,6 @@ type, public :: dataset_type
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
- integer :: dmft_triqs_broyden_niter
- integer :: dmft_triqs_broyden_scheme
  integer :: dmft_triqs_compute_integral
  integer :: dmft_triqs_det_init_size
  integer :: dmft_triqs_det_n_operations_before_check
@@ -161,7 +159,6 @@ type, public :: dataset_type
  integer :: dmft_triqs_move_shift
  integer :: dmft_triqs_nleg
  integer :: dmft_triqs_nsubdivisions
- integer :: dmft_triqs_ntau_delta
  integer :: dmft_triqs_off_diag
  integer :: dmft_triqs_read_ctqmcdata
  integer :: dmft_triqs_seed_a
@@ -839,7 +836,6 @@ type, public :: dataset_type
  real(dp) :: dmft_triqs_det_singular_threshold
  real(dp) :: dmft_triqs_epsilon
  real(dp) :: dmft_triqs_imag_threshold
- real(dp) :: dmft_triqs_mxhyb
  real(dp) :: dmft_triqs_pauli_prob
  real(dp) :: dmft_triqs_tol_block
  real(dp) :: dmft_triqs_wmax
@@ -1565,8 +1561,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_yukawa_param  = dtin%dmft_yukawa_param
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
- dtout%dmft_triqs_broyden_niter = dtin%dmft_triqs_broyden_niter
- dtout%dmft_triqs_broyden_scheme = dtin%dmft_triqs_broyden_scheme
  dtout%dmft_triqs_compute_integral = dtin%dmft_triqs_compute_integral
  dtout%dmft_triqs_det_init_size = dtin%dmft_triqs_det_init_size
  dtout%dmft_triqs_det_n_operations_before_check = dtin%dmft_triqs_det_n_operations_before_check
@@ -1583,11 +1577,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_measure_density_matrix = dtin%dmft_triqs_measure_density_matrix
  dtout%dmft_triqs_move_double = dtin%dmft_triqs_move_double
  dtout%dmft_triqs_move_shift = dtin%dmft_triqs_move_shift
- dtout%dmft_triqs_mxhyb = dtin%dmft_triqs_mxhyb
  dtout%dmft_triqs_pauli_prob = dtin%dmft_triqs_pauli_prob
  dtout%dmft_triqs_nleg = dtin%dmft_triqs_nleg
  dtout%dmft_triqs_nsubdivisions = dtin%dmft_triqs_nsubdivisions
- dtout%dmft_triqs_ntau_delta = dtin%dmft_triqs_ntau_delta
  dtout%dmft_triqs_off_diag = dtin%dmft_triqs_off_diag
  dtout%dmft_triqs_read_ctqmcdata = dtin%dmft_triqs_read_ctqmcdata
  dtout%dmft_triqs_seed_a = dtin%dmft_triqs_seed_a
@@ -3543,14 +3535,14 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_config dmftctqmc_meas dmftctqmc_mrka'
- list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmft_triqs_broyden_niter dmft_triqs_broyden_scheme dmft_triqs_compute_integral dmft_triqs_det_init_size'
+ list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmft_triqs_compute_integral dmft_triqs_det_init_size'
  list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
  list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold'
  list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_epsilon dmft_triqs_gaussorder dmft_triqs_imag_threshold'
  list_vars=trim(list_vars)//' dmft_triqs_leg_measure dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
  list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_move_double'
- list_vars=trim(list_vars)//' dmft_triqs_move_shift dmft_triqs_mxhyb'
- list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_ntau_delta dmft_triqs_off_diag dmft_triqs_pauli_prob dmft_triqs_read_ctqmcdata'
+ list_vars=trim(list_vars)//' dmft_triqs_move_shift'
+ list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob dmft_triqs_read_ctqmcdata'
  list_vars=trim(list_vars)//' dmft_triqs_seed_a dmft_triqs_seed_b dmft_triqs_therm_restart'
  list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_triqs_wmax dmftcheck'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'

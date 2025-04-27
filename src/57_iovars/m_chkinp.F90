@@ -773,11 +773,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          end if
        end if
 
-       if (minval(dt%dmft_orbital(:))<=0 .and. dt%dmft_orbital_filepath == ABI_NOFILE) then
-         write(msg,'(2a)') "You need to provide a filename for the DMFT orbital", &
-                         & " with dmft_orbital_filepath"
-         ABI_ERROR(msg)
-       end if
+       do itypat=1,dt%ntypat
+         if (dt%lpawu(itypat)==-1) cycle
+         if (dt%dmft_orbital(itypat)<=0.and.dt%dmft_orbital_filepath==ABI_NOFILE) then
+           write(msg,'(2a)') "You need to provide a filename for the DMFT orbital", &
+                            & " with dmft_orbital_filepath"
+           ABI_ERROR(msg)
+         end if
+       end do
 
        if (dt%dmft_prtwan==1) then
          cond_string(1)='dmft_prtwan' ; cond_values(1)=dt%dmft_prtwan
@@ -883,10 +886,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    endif
 #endif
 
-#ifndef HAVE_TRIQS_v3_4
+#if !defined HAVE_TRIQS_v3_4 && !defined HAVE_TRIQS_v3_2
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(msg,'(3a)') &
-      & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.4>= is linked',ch10,&
+      & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.2>= is linked',ch10,&
       & ' Action: check compilation options'
      ABI_ERROR(msg)
    end if
@@ -895,10 +898,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if(dt%dmft_solv==6.or.dt%dmft_solv==7) then
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_broyden_niter',dt%dmft_triqs_broyden_niter,0,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_broyden_scheme',dt%dmft_triqs_broyden_scheme,2,(/1,2/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_compute_integral',dt%dmft_triqs_compute_integral,3,(/0,1,2/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -920,13 +919,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_shift',dt%dmft_triqs_move_shift,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_mxhyb',dt%dmft_triqs_mxhyb,1,zero,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_mxhyb',dt%dmft_triqs_mxhyb,-1,one,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nsubdivisions',dt%dmft_triqs_nsubdivisions,1,iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_ntau_delta',dt%dmft_triqs_ntau_delta,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_off_diag',dt%dmft_triqs_off_diag,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -954,6 +947,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%dmft_triqs_time_invariance == 1) then
        cond_string(1)='dmft_triqs_time_invariance' ; cond_values(1)=dt%dmft_triqs_time_invariance
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_measure_density_matrix',dt%dmft_triqs_measure_density_matrix,1,(/1/),iout)
+     end if
+     if (dt%dmft_triqs_measure_density_matrix == 1) then
+       cond_string(1)='dmft_triqs_measure_density_matrix' ; cond_values(1)=dt%dmft_triqs_measure_density_matrix
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_use_norm_as_weight',dt%dmft_triqs_use_norm_as_weight,1,(/1/),iout)
      end if
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      cond_string(2)='dmft_triqs_leg_measure' ; cond_values(2)=dt%dmft_triqs_leg_measure

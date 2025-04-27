@@ -107,8 +107,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  type(oper_type), intent(in) :: dft_occup
 !Local variables ------------------------------
  integer :: check,dmft_iter,dmft_optim,idmftloop,istep_iter,itypat,myproc,natom
- integer :: ntypat,opt_diff,opt_fill_occnd,opt_maxent,opt_moments
- integer :: opt_renorm,prtopt
+ integer :: ntypat,opt_diff,opt_maxent,opt_moments,opt_renorm,prtopt
  !logical :: etot_var
  logical :: t2g,x2my2d
  real(dp) :: tsec(2)
@@ -450,7 +449,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
 !  ==  Mix new and old self_energies and double countings
 !  ---------------------------------------------------------------------
-   write(message,'(3a)') ch10,"  == Mixing of self-energy and double counting",ch10
+   write(message,'(3a)') ch10,"  == Linear mixing of self-energy and double counting",ch10
    call wrtout(std_out,message,'COLL')
    call new_self(self,self_new,paw_dmft) ! self,self_new => self
    write(message,'(2a)') ch10,"  == After mixing,"
@@ -458,8 +457,6 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    call wrtout(std_out,message,'COLL')
    call print_self(self,"print_dc",paw_dmft,2) ! print self and DC
    call destroy_self(self_new)
-
-   if (idmftloop == dmft_iter) opt_fill_occnd = 1
 
 !  ==  Compute green function self -> G(k)
 !  ---------------------------------------------------------------------

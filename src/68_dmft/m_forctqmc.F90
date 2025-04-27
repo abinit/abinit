@@ -3151,7 +3151,7 @@ end subroutine ctqmc_calltriqs
 
 subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
-#if defined HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
  use TRIQS_CTQMC
 #endif
  use ISO_C_BINDING
@@ -3165,8 +3165,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 !Local variables ------------------------------
  integer :: basis,i,iatom,iblock,iflavor,iflavor1,iflavor2,ifreq,ilam,ileg,im,im1,integral,isppol,isub
  integer :: itau,itypat,iw,j,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
- integer :: nspinor,nsppol,nsub,ntau,ntau_delta,ntau_fit,ntot,nwlo,p,pad_elam,pad_lambda,read_data,rot_type_vee
- integer :: tndim,unt,verbo,wdlr_size
+ integer :: nspinor,nsppol,nsub,ntau,ntot,nwlo,p,pad_elam,pad_lambda,read_data,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
  logical :: density_matrix,entropy,leg_measure,nondiag,off_diag,rot_inv
  real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,tau,tol,xtau,xx
@@ -3191,7 +3190,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  character(len=1) :: tag_block4
  character(len=2) :: tag_block,tag_block3,tag_lam
  character(len=4) :: tag_at
- character(len=13) :: tag,tag2
  character(len=14) :: tag_elam,tag_lambda
  character(len=500) :: stringfile,tag_block2,tag_lam2
  character(len=10000) :: message
@@ -3213,7 +3211,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  nsppol         = paw_dmft%nsppol
  nsub           = paw_dmft%dmft_triqs_nsubdivisions
  ntau           = paw_dmft%dmftqmc_l
- ntau_delta     = paw_dmft%dmft_triqs_ntau_delta
  nwlo           = paw_dmft%dmft_nwlo
  off_diag       = paw_dmft%dmft_triqs_off_diag
  rot_inv        = (paw_dmft%dmft_solv == 7)
@@ -3241,7 +3238,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),dmat_ctqmc(:))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),eigvectmatlu(:))
- call init_matlu(natom,2,ntau_delta,paw_dmft%lpawu(:),ftau(:))
+ call init_matlu(natom,2,ntau,paw_dmft%lpawu(:),ftau(:))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu_tmp(:))
  call init_matlu(natom,2,1,paw_dmft%lpawu(:),udens_rot(:))
 
@@ -3267,15 +3264,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  end do ! ifreq
 
  call zero_matlu(weiss%moments(1)%matlu(:),natom)
-
- write(tag_at,'(i4)') paw_dmft%dmft_triqs_broyden_niter
- write(message,'(a,3x,3a)') ch10,"== Broyden mixing of the hybridization, using ", &
-                         & trim(adjustl(tag_at))," previous iterations"
- call wrtout(std_out,message,"COLL")
-
- ! Do it here such that we mix hybridization functions in the same basis (the
- ! basis is not fixed if we use basis=1 or 2)
- call mix_broyden(weiss,paw_dmft)
 
  write(message,'(a,3x,a)') ch10,"== Print Delta(iw) for first frequency in cubic basis"
  call wrtout(std_out,message,"COLL")
@@ -3474,7 +3462,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    ABI_MALLOC(wdlr_tmp,(wdlr_size))
    ndlr_ptr = C_LOC(ndlr)
    wdlr_ptr = C_LOC(wdlr_tmp)
-#ifdef HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
    call build_dlr(wdlr_size,ndlr_ptr,wdlr_ptr,paw_dmft%dmft_triqs_lambda,paw_dmft%dmft_triqs_epsilon)
 #endif
    if (ndlr > wdlr_size) then
@@ -3511,6 +3499,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    call wrtout(std_out,message,"COLL")
    write(message,'(3x,1000(e10.3,2x))') wdlr_beta(:,1)
    call wrtout(std_out,message,"COLL")
+   call identity_oper(green%moments(1),2)
  end if ! not leg_measure
 
  ! ntot is total number of lambda pts, + 1 is because we add the case lambda = 1 (which has no reason to be included in the
@@ -3522,7 +3511,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  lam_list(ntot) = one
  green%integral = zero
  green%ekin_imp = zero
- green%z0       = zero
 
  ! Prepare Gauss-Legendre quadrature for thermodynamic integration over U
  if (integral > 0 .and. entropy) then
@@ -3537,7 +3525,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    ! Fill the symmetric t-points on [-1,0], and put array in ascending order
    do i=1,ngauss/2  ! valid in both cases ngauss odd and ngauss even
      tpoints(ngauss-i+1)  = tpoints(i)
-     tpoints(i)           = - tpoints(i)
+     tpoints(i)           = -tpoints(i)
      tweights(ngauss-i+1) = tweights(i)
    end do ! i
 
@@ -3563,7 +3551,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  nmoments = weiss%nmoments - 2
 
   ! Inverse Fourier transform of the hybridization
- call fourier_inv(paw_dmft,nmoments,ntau_delta,ftau(:),weiss%oper(:),weiss%moments(2:nmoments+1))
+ call fourier_inv(paw_dmft,nmoments,ntau,ftau(:),weiss%oper(:),weiss%moments(2:nmoments+1))
 
  if (entropy) then
    ABI_MALLOC(emig,(natom))
@@ -3644,8 +3632,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                      & "# Imaginary Time     ((Re(Delta_{ij}) Im(Delta_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
                      & " leftmost index varies first"
 
-     do itau=1,ntau_delta
-       write(unt,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1), &
+     do itau=1,ntau
+       write(unt,'(2x,393(e18.10e3,2x))') beta*dble(itau-1)/dble(ntau-1), &
           & ((dble(ftau(iatom)%mat(im,im1,itau)),aimag(ftau(iatom)%mat(im,im1,itau)),im=1,nflavor),im1=1,nflavor)
      end do ! itau
      close(unt)
@@ -3659,8 +3647,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
                      & "# Columns are ordered this way:",ch10, &
                      & "# Imaginary Time     (Delta_{ii},i=1,2*(2*l+1))"
 
-     do itau=1,ntau_delta
-       write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau_delta-1),(dble(ftau(iatom)%mat(im,im,itau)),im=1,nflavor)
+     do itau=1,ntau
+       write(unt,'(2x,393(e25.17e3,2x))') beta*dble(itau-1)/dble(ntau-1),(dble(ftau(iatom)%mat(im,im,itau)),im=1,nflavor)
      end do ! itau
      close(unt)
 
@@ -3709,19 +3697,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    siz_ptr         = C_LOC(siz_block(:,iatom))
    udens_ptr       = C_LOC(udens_rot(iatom)%mat(:,:,1))
    vee_ptr         = C_LOC(vee_rot(iatom)%mat(:,:,:,:))
-   z0_ptr          = C_LOC(z0)
 
    verbo = 1
 
    do ilam=1,ntot
 
      if (ilam /= ntot) then
-       if (integral == 1) then
-         tag = "interaction"
-       else if (integral == 2) then
-         tag = "hybridization"
-       end if ! integral
-       write(message,'(a,3x,a,f6.4,a)') ch10,"== Thermodynamic integration over " // trim(tag) // " for lambda= ",lam_list(ilam),ch10
+       write(message,'(a,3x,a,f6.4,a)') ch10,"== Thermodynamic integration over interaction for lambda= ",lam_list(ilam),ch10
        call wrtout(std_out,message,'COLL')
      end if ! ilam/=ntot
 
@@ -3757,24 +3739,24 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      call flush_unit(std_out)
 
-#ifdef HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
      call Ctqmc_triqs_run(rot_inv,leg_measure,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
                         & density_matrix,paw_dmft%dmft_triqs_time_invariance,paw_dmft%dmft_triqs_use_norm_as_weight, &
-                        & (ilam/=ntot.and.integral==1),(ilam==ntot.and.integral==2.and.entropy),paw_dmft%dmft_triqs_loc_n_min, &
-                        & paw_dmft%dmft_triqs_loc_n_max,paw_dmft%dmft_triqs_seed_a,paw_dmft%dmft_triqs_seed_b,nflavor, &
-                        & ntau,nleg,int(paw_dmft%dmftqmc_n/paw_dmft%nproc),paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
+                        & (ilam/=ntot.and.integral==1),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max, &
+                        & paw_dmft%dmft_triqs_seed_a,paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg, &
+                        & int(paw_dmft%dmftqmc_n/paw_dmft%nproc),paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
                         & paw_dmft%dmft_triqs_therm_restart,paw_dmft%dmft_triqs_det_init_size, &
-                        & paw_dmft%dmft_triqs_det_n_operations_before_check,ntau_delta,myproc,nblocks(iatom),read_data,verbo, &
+                        & paw_dmft%dmft_triqs_det_n_operations_before_check,myproc,nblocks(iatom),read_data,verbo, &
                         & beta,paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
-                        & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,merge(lam_list(ilam),one,integral==1), &
-                        & merge(lam_list(ilam)**2,one,integral==2),paw_dmft%dmft_triqs_pauli_prob,block_ptr,flavor_ptr,inner_ptr,siz_ptr, &
-                        & ftau_ptr,gtau_ptr,gl_ptr,udens_ptr,vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,z0_ptr, &
-                        & fname_data_ptr,fname_dataw_ptr,fname_histo_ptr)
+                        & paw_dmft%dmft_triqs_det_precision_error,paw_dmft%dmft_triqs_det_singular_threshold,lam_list(ilam), &
+                        & paw_dmft%dmft_triqs_pauli_prob,block_ptr,flavor_ptr,inner_ptr,siz_ptr,ftau_ptr,gtau_ptr,gl_ptr, &
+                        & udens_ptr,vee_ptr,levels_ptr,mself_1_ptr,mself_2_ptr,occ_ptr,eu_ptr,fname_data_ptr,fname_dataw_ptr, fname_histo_ptr)
 #endif
 
      call flush_unit(std_out)
 
      if (ilam == ntot) then
+
        do isppol=1,nsppol
          if (nsppol == 1 .and. nspinor == 1) then
            green%oper_tau(1)%matlu(iatom)%mat(:,:,isppol) = (gtau(1,1:ndim,1:ndim)+gtau(1,ndim+1:2*ndim,ndim+1:2*ndim)) * half
@@ -3782,64 +3764,57 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
            green%oper_tau(1)%matlu(iatom)%mat(:,:,isppol) = gtau(1,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim,1+(isppol-1)*ndim:tndim+(isppol-1)*ndim)
          end if
        end do ! isppol
-     end if ! ilam=ntot
 
-     if ((.not. leg_measure) .and. ((entropy .and. integral == 2) .or. ilam == ntot)) then
-       call identity_oper(green%moments(1),2)
-     end if
+       if ((.not. leg_measure) .and. density_matrix) then
 
-     if ((.not. leg_measure) .and. density_matrix .and. ((entropy .and. integral == 2) .or. ilam == ntot)) then
+         ! Constrain the occupations and high-frequency moments with the
+         ! more accurate values sampled from the CTQMC
 
-       ! Constrain the occupations and high-frequency moments with the
-       ! more accurate values sampled from the CTQMC
+         do isppol=1,nsppol
+           do im=1,tndim
+             iflavor = im + (isppol-1)*ndim
 
-       do isppol=1,nsppol
-         do im=1,tndim
-           iflavor = im + (isppol-1)*ndim
+             if (nsppol == 1 .and. nspinor == 1) then
+               mself_1 = (moments_self_1(iflavor)+moments_self_1(iflavor+ndim)) * half
+               mself_2 = (moments_self_2(iflavor)+moments_self_2(iflavor+ndim)) * half
+             else
+               mself_1 = moments_self_1(iflavor)
+               mself_2 = moments_self_2(iflavor)
+             end if
 
-           if (nsppol == 1 .and. nspinor == 1) then
-             mself_1 = (moments_self_1(iflavor)+moments_self_1(iflavor+ndim)) * half
-             mself_2 = (moments_self_2(iflavor)+moments_self_2(iflavor+ndim)) * half
-           else
-             mself_1 = moments_self_1(iflavor)
-             mself_2 = moments_self_2(iflavor)
-           end if
+             green%moments(2)%matlu(iatom)%mat(im,im,isppol) = energy_level%matlu(iatom)%mat(im,im,isppol) + mself_1
+             green%moments(3)%matlu(iatom)%mat(im,im,isppol) = weiss%moments(2)%matlu(iatom)%mat(im,im,isppol) + mself_2
 
-           green%moments(2)%matlu(iatom)%mat(im,im,isppol) = energy_level%matlu(iatom)%mat(im,im,isppol) + mself_1
-           green%moments(3)%matlu(iatom)%mat(im,im,isppol) = weiss%moments(2)%matlu(iatom)%mat(im,im,isppol) + mself_2
+           end do ! im
 
-         end do ! im
+           ! Use matmul in prevision of the day where the off-diagonal density matrix will be available
+           green%moments(3)%matlu(iatom)%mat(:,:,isppol) = green%moments(3)%matlu(iatom)%mat(:,:,isppol) + &
+             & matmul(green%moments(2)%matlu(iatom)%mat(:,:,isppol),green%moments(2)%matlu(iatom)%mat(:,:,isppol))
 
-         ! Use matmul in prevision of the day where the off-diagonal density matrix will be available
-         green%moments(3)%matlu(iatom)%mat(:,:,isppol) = green%moments(3)%matlu(iatom)%mat(:,:,isppol) + &
-           & matmul(green%moments(2)%matlu(iatom)%mat(:,:,isppol),green%moments(2)%matlu(iatom)%mat(:,:,isppol))
+         end do ! isppol
 
-       end do ! isppol
+       end if ! not leg and density_matrix
 
-     end if ! not leg and ((entropy and integral=2) or ilam=ntot)
+       if (density_matrix) then
 
-     if (density_matrix .and. ((entropy .and. integral == 2 .and. (.not. leg_measure)) .or. ilam == ntot)) then
+         green%ecorr_qmc(iatom) = dble(eu)
 
-       green%ecorr_qmc(iatom) = dble(eu)
+         do isppol=1,nsppol
+           do im=1,tndim
+             iflavor = im + (isppol-1)*ndim
 
-       do isppol=1,nsppol
-         do im=1,tndim
-           iflavor = im + (isppol-1)*ndim
+             if (nsppol == 1 .and. nspinor == 1) then
+               occ_tmp = (occ(iflavor)+occ(iflavor+ndim)) * half
+             else
+               occ_tmp = occ(iflavor)
+             end if
 
-           if (nsppol == 1 .and. nspinor == 1) then
-             occ_tmp = (occ(iflavor)+occ(iflavor+ndim)) * half
-           else
-             occ_tmp = occ(iflavor)
-           end if
+             green%oper_tau(1)%matlu(iatom)%mat(im,im,isppol) = occ_tmp - cone
 
-           green%oper_tau(1)%matlu(iatom)%mat(im,im,isppol) = occ_tmp - cone
+           end do ! im
+         end do ! isppol
 
-         end do ! im
-       end do ! isppol
-
-     end if ! density_matrix and ((entropy and integral=2) or ilam=ntot)
-
-     if ((entropy .and. integral == 2) .or. ilam == ntot) then
+       end if ! density_matrix
 
        if (leg_measure) then
 
@@ -4055,21 +4030,15 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        if (entropy) then
 
-         if (ilam < ntot) then
-           call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,self,iatom=iatom,hyb=weiss)
-           elam = four * emig_tot
-         else
-           call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,hybmwdhyb,iatom=iatom)
-           green%ekin_imp = green%ekin_imp + two*emig_tot
-           if (integral == 2) green%z0 = green%z0 + z0
-         end if ! ilam=ntot
+         call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,hybmwdhyb,iatom=iatom)
+         green%ekin_imp = green%ekin_imp + two*emig_tot
 
        end if ! entropy
 
-     end if ! (entropy and integral=2) or ilam=ntot
+     end if ! ilam=ntot
 
      if (integral > 0 .and. ilam < ntot .and. entropy) then
-       if (integral == 1) elam = dble(eu)
+       elam = dble(eu)
        i = mod(ilam-1,ngauss) + 1
        green%integral = green%integral + tweights(i)*elam*dx*half
        elam_list(ilam) = elam
@@ -4106,7 +4075,9 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    end do ! ilam
 
    ABI_FREE(flavor_tmp)
+   ABI_FREE(gtau)
    ABI_FREE(levels_ctqmc)
+   ABI_SFREE(gl)
    ABI_SFREE(moments_self_1)
    ABI_SFREE(moments_self_2)
    ABI_SFREE(occ)
@@ -4149,19 +4120,10 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    do i=2,weiss%nmoments-1
      if (basis == 1 .or. basis == 2) then
        call rotate_matlu(weiss%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
-       if (entropy) then
-         call rotate_matlu(hybmwdhyb%moments(i)%matlu(:),eigvectmatlu(:),natom,0)
-       end if
      else if (basis == 4) then
        call ylm2jmj_matlu(weiss%moments(i)%matlu(:),natom,2,paw_dmft)
-       if (entropy) then
-         call ylm2jmj_matlu(hybmwdhyb%moments(i)%matlu(:),natom,2,paw_dmft)
-       end if
      end if
      call slm2ylm_matlu(weiss%moments(i)%matlu(:),natom,paw_dmft,2,0)
-     if (entropy) then
-       call slm2ylm_matlu(hybmwdhyb%moments(i)%matlu(:),natom,paw_dmft,2,0)
-     end if
    end do ! i
    do i=1,green%nmoments
      if (basis == 1 .or. basis == 2) then
@@ -4176,21 +4138,12 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (basis == 1 .or. basis == 2) then
        call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
        call rotate_matlu(green%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
-       if (entropy) then
-         call rotate_matlu(hybmwdhyb%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
-       end if
      else if (basis == 4) then
        call ylm2jmj_matlu(weiss%oper(ifreq)%matlu(:),natom,2,paw_dmft)
        call ylm2jmj_matlu(green%oper(ifreq)%matlu(:),natom,2,paw_dmft)
-       if (entropy) then
-         call ylm2jmj_matlu(hybmwdhyb%oper(ifreq)%matlu(:),natom,2,paw_dmft)
-       end if
      end if
      call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
      call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
-     if (entropy) then
-       call slm2ylm_matlu(hybmwdhyb%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
-     end if
    end do ! ifreq
    if (basis == 1 .or. basis == 2) then
      call rotate_matlu(green%occup_tau%matlu(:),eigvectmatlu(:),natom,0)
@@ -4213,9 +4166,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    if (green%distrib%procf(ifreq) /= myproc) cycle
    call sym_matlu(weiss%oper(ifreq)%matlu(:),paw_dmft)
    call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
-   if (entropy) then
-     call sym_matlu(hybmwdhyb%oper(ifreq)%matlu(:),paw_dmft)
-   end if
  end do ! ifreq
  call copy_matlu(green%occup_tau%matlu(:),dmat_ctqmc(:),natom)
  call sym_matlu(green%occup_tau%matlu(:),paw_dmft)
@@ -4224,9 +4174,6 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
  call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
- if (entropy) then
-   call gather_oper(hybmwdhyb%oper(:),hybmwdhyb%distrib,paw_dmft,opt_ksloc=2)
- end if
 
  call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=paw_dmft%dmft_triqs_entropy)
 
@@ -5052,269 +4999,6 @@ subroutine find_block_structure_mat(mat)
  end subroutine apply_block_structure_mat
 
  end subroutine find_block_structure
-!!***
-
-!!****f* m_forctqmc/mix_broyden
-!! NAME
-!! mix_broyden
-!!
-!! FUNCTION
-!!  Apply Broyden mixing on hybridization
-!!
-!! INPUTS
-!!  weiss <type(green_type)>= hybridization function
-!!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine mix_broyden(weiss,paw_dmft)
-
-!Arguments ------------------------------------
- type(green_type), intent(inout) :: weiss
- type(paw_dmft_type), intent(in) :: paw_dmft
-!Local variables-------------------------------
- integer :: buf_size,dim_hyb,dim_hyb_id,iatom,ierr,k,l,lpawu,m,myproc
- integer :: n,natom,ncid,nspinor,nsppol,nwlo,scheme,var_input_id,var_residue_id
- real(dp) :: alpha,w0
- real(dp), allocatable :: beta(:,:),buffer_new(:),c(:),norm(:),weight(:)
- real(dp), target, allocatable :: buffer(:,:)
- character(len=3) :: tag_iter
- character(len=fnlen) :: filename
-! *********************************************************************
-
- alpha    = paw_dmft%dmft_triqs_mxhyb
- filename = trim(paw_dmft%filapp) // "_BROYDEN_DATA.nc"
- m        = paw_dmft%idmftloop - 1
- l        = max(1,m-paw_dmft%dmft_triqs_broyden_niter)
- myproc   = paw_dmft%myproc
- natom    = paw_dmft%natom
- nspinor  = paw_dmft%nspinor
- nsppol   = paw_dmft%nsppol
- nwlo     = weiss%nw
- scheme   = paw_dmft%dmft_triqs_broyden_scheme
- w0       = 0.01_dp
-
- call write_tag(m+1)
-
- buf_size = 0
-
- do iatom=1,natom
-   lpawu = paw_dmft%lpawu(iatom)
-   if (lpawu == -1) cycle
-   buf_size = buf_size + (2*lpawu+1)**2
- end do ! iatom
-
- buf_size = buf_size * (nspinor)**2 * nsppol * (nwlo+weiss%nmoments-2) * 2
-
- if (myproc == 0) then
-
-   if (m == 0) then
-     NCF_CHECK(nf90_create(trim(filename),NF90_CLOBBER,ncid))
-     NCF_CHECK(nf90_def_dim(ncid,"dim_hyb",buf_size,dim_hyb_id))
-   else
-     NCF_CHECK(nf90_open(trim(filename),NF90_WRITE,ncid))
-     NCF_CHECK(nf90_inq_dimid(ncid,"dim_hyb",dim_hyb_id))
-     NCF_CHECK(nf90_inquire_dimension(ncid,dim_hyb_id,len=dim_hyb))
-     if (dim_hyb /= buf_size) ABI_ERROR("Inconsistency when writing Broyden file !")
-     NCF_CHECK(nf90_redef(ncid))
-   end if ! idmftloop=1
-
-   NCF_CHECK(nf90_def_var(ncid,"input_"//tag_iter,NF90_DOUBLE,dim_hyb_id,var_input_id))
-   if (m > 0) then
-     call write_tag(m)
-     NCF_CHECK(nf90_def_var(ncid,"residue_"//tag_iter,NF90_DOUBLE,dim_hyb_id,var_residue_id))
-   end if
-
-   NCF_CHECK(nf90_enddef(ncid))
-
- end if ! myproc=0
-
- ABI_MALLOC(beta,(m-l,m-l))
- ABI_MALLOC(buffer,(buf_size,4))
- ABI_MALLOC(buffer_new,(buf_size))
- ABI_MALLOC(c,(m-l))
- ABI_MALLOC(norm,(m-l))
- ABI_MALLOC(weight,(m-l))
-
- if (scheme == 1) weight(:) = one
-
- call fill_buffer(1)
-
- if (myproc == 0) then
-
-   if (m > 0) then
-
-     call read_buffer(2,m-l+1,option=2)
-
-     buffer(:,1) = buffer_new(:) - buffer(:,2)
-
-     NCF_CHECK(nf90_put_var(ncid,var_residue_id,buffer(:,1)))
-
-     buffer_new(:) = buffer(:,2) + alpha*buffer(:,1)
-
-     do k=1,m-l
-       call read_buffer(2,k,get_weight=scheme==2)
-       norm(k) = norm2(buffer(:,2))
-       c(k) = dot_product(buffer(:,2),buffer(:,1)) / norm(k)
-       do n=1,k-1
-         call read_buffer(3,n)
-         beta(k,n) = weight(k) * weight(n) * dot_product(buffer(:,3),buffer(:,2)) / (norm(k)*norm(n))
-       end do ! n
-     end do ! k
-
-     do k=1,m-l
-       do n=k+1,m-l
-         beta(k,n) = beta(n,k)
-       end do ! n
-       beta(k,k) = weight(k)**2 + w0**2
-     end do ! k
-
-     if (m-l > 0) then
-       call matrginv(beta(:,:),m-l,m-l)
-     end if
-
-     do n=1,m-l
-       call read_buffer(2,n)
-       call read_buffer(3,n,option=1)
-       buffer(:,2) = (alpha*buffer(:,2)+buffer(:,3)) / norm(n)
-       do k=1,m-l
-         buffer_new(:) = buffer_new(:) - weight(k)*weight(n)*c(k)*beta(k,n)*buffer(:,2)
-       end do ! k
-     end do ! n
-
-   end if ! m>0
-
-   NCF_CHECK(nf90_put_var(ncid,var_input_id,buffer_new(:)))
-   NCF_CHECK(nf90_close(ncid))
-
- end if ! myproc=0
-
- if (m > 0) then
-   call xmpi_bcast(buffer_new(:),0,paw_dmft%spacecomm,ierr)
-   call fill_buffer(2)
- end if
-
- ABI_FREE(beta)
- ABI_FREE(buffer)
- ABI_FREE(buffer_new)
- ABI_FREE(c)
- ABI_FREE(norm)
- ABI_FREE(weight)
-
- contains
-
- subroutine write_tag(iter)
-
- !Arguments ------------------------------------
-  integer, intent(in) :: iter
- !Local variables ------------------------------
- ! ************************************************************************
-
- if (iter < 10) then
-   write(tag_iter,'("00",i1)') iter
- else if (iter >= 10 .and. iter < 100) then
-   write(tag_iter,'("0",i2)') iter
- else if (iter >= 100 .and. iter < 1000) then
-   write(tag_iter,'(i3)') iter
- else
-   ABI_ERROR("Broyden mixing cannot be used with more than 1000 iterations !")
- end if ! idmftloop
-
- end subroutine write_tag
-
- subroutine fill_buffer(option)
-
- !Arguments ------------------------------------
-  integer, intent(in) :: option
- !Local variables ------------------------------
-  integer :: i,ibuf,ifreq,im,im1,isppol,tndim
- ! ************************************************************************
-
- ibuf = 1
-
- do ifreq=1,nwlo
-   do iatom=1,natom
-     lpawu = paw_dmft%lpawu(iatom)
-     if (lpawu == -1) cycle
-     tndim = nspinor * (2*lpawu+1)
-     do isppol=1,nsppol
-       do im1=1,tndim
-         do im=1,tndim
-           if (option == 1) then
-             buffer_new(ibuf)   = dble(weiss%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol))
-             buffer_new(ibuf+1) = aimag(weiss%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol))
-           else if (option == 2) then
-             weiss%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol) = &
-                    & cmplx(buffer_new(ibuf),buffer_new(ibuf+1),kind=dp)
-           end if
-           ibuf = ibuf + 2
-         end do ! im
-       end do ! im1
-     end do ! isppol
-   end do ! iatom
- end do ! ifreq
-
- do i=2,weiss%nmoments-1
-   do iatom=1,natom
-     lpawu = paw_dmft%lpawu(iatom)
-     if (lpawu == -1) cycle
-     tndim = nspinor * (2*lpawu+1)
-     do isppol=1,nsppol
-       do im1=1,tndim
-         do im=1,tndim
-           if (option == 1) then
-             buffer_new(ibuf)   = dble(weiss%moments(i)%matlu(iatom)%mat(im,im1,isppol))
-             buffer_new(ibuf+1) = aimag(weiss%moments(i)%matlu(iatom)%mat(im,im1,isppol))
-           else if (option == 2) then
-             weiss%moments(i)%matlu(iatom)%mat(im,im1,isppol) = &
-                    & cmplx(buffer_new(ibuf),buffer_new(ibuf+1),kind=dp)
-           end if
-           ibuf = ibuf + 2
-         end do ! im
-       end do ! im1
-     end do ! isppol
-   end do ! iatom
- end do ! i
-
- end subroutine fill_buffer
-
- subroutine read_buffer(ind_buf,iter,option,get_weight)
-
- !Arguments ------------------------------------
-  integer, intent(in) :: ind_buf,iter
-  integer, optional, intent(in) :: option
-  logical, optional, intent(in) :: get_weight
- !Local variables ------------------------------
-  integer :: i,opt,var_id
-  real(dp), pointer :: pt(:) => null()
-  character(len=7) :: tag
- ! ************************************************************************
-
- opt = 0
- if (present(option)) opt = option
-
- tag = merge("residue","input  ",opt==0)
- pt => buffer(:,ind_buf)
-
- do i=1,0,-1
-   if (opt == 2 .and. i == 1) continue
-   call write_tag(l-1+iter+i)
-   NCF_CHECK(nf90_inq_varid(ncid,trim(tag)//"_"//tag_iter,var_id))
-   if (i == 0 .and. opt /= 2) pt => buffer(:,4)
-   NCF_CHECK(nf90_get_var(ncid,var_id,pt(:)))
-   if (i == 0 .and. opt /= 2) buffer(:,ind_buf) = buffer(:,ind_buf) - pt(:)
-   if (present(get_weight)) then
-     if (get_weight .and. i == 0) weight(iter) = one / norm2(pt(:))
-   end if
- end do ! i
-
- pt => null()
-
- end subroutine read_buffer
-
-end subroutine mix_broyden
 !!***
 
 END MODULE m_forctqmc

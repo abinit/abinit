@@ -254,7 +254,7 @@ CONTAINS  !=====================================================================
    if (use_dmft > 0) then
      if (dmft_dc == 8 .and. (f4of2_sla(itypat) >= -0.1_dp .or. &
          & f6of2_sla(itypat) >= -0.1_dp) .and. dmft_yukawa_param == 1) then
-       message = "dmft_dc=8 not compatible with custom f4of2 and f6of2"
+       message = "dmft_dc=8 and dmft_yukawa_param=1 not compatible with custom f4of2 and f6of2"
        ABI_ERROR(message)
      end if
    end if
