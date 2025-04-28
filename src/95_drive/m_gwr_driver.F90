@@ -826,7 +826,7 @@ end if
    ks_ebands = tmp_ebands%chop(1, maxval(dtset%nband))
 
    ! Make sure that ef is inside the gap if semiconductor.
-   call ks_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
+   !call ks_ebands%update_occ(dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)
 
    call tmp_ebands%free()
    call wfk_hdr%vs_dtset(dtset)
@@ -1022,10 +1022,26 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables-------------------------------
- integer :: unt, ik_ibz, spin, band
+ integer :: unt, ik_ibz, spin, band, gap_err
+ real(dp) :: my_fermie
  character(len=500) :: msg
  character(len=fnlen) :: filepath
+ type(gaps_t) :: ks_gaps
 ! *************************************************************************
+
+ ks_gaps = ebands%get_gaps(gap_err)
+ call ks_gaps%print([std_out], header="Kohn-Sham gaps and band edges from IBZ mesh")
+ if (any(ks_gaps%ierr /= 0)) then
+   ABI_ERROR("Cannot compute gaps!")
+ end if
+
+ ! Make sure fermi level is within the gap. I know, the case nsppol = 2 is treated in a dirty way!
+ my_fermie = zero
+ do spin=1,ebands%nsppol
+   my_fermie = ks_gaps%vb_max(spin) + (ks_gaps%cb_min(spin) - ks_gaps%vb_max(spin)) / two
+ end do
+ my_fermie = my_fermie / ebands%nsppol
+ call ks_gaps%free()
 
  ! See https://manuals.cc4s.org/user-manual/objects/EigenEnergies.html
  filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.yaml'
@@ -1043,7 +1059,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  write(unt,'(A)')    '  type: TextFile'
  write(unt,'(A)')    'unit: 1.0     # Hartree units'
  write(unt,'(A)')    'metaData:'
- write(unt,'(A,E22.15)')    '  fermiEnergy: ',ebands%fermie
+ write(unt,'(A,E22.15)')    '  fermiEnergy: ',my_fermie
  write(unt,'(A)')    '  energies:'
 
  do spin=1,ebands%nsppol
