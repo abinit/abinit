@@ -29,6 +29,8 @@ module m_newrho
  use m_abi2big
  use m_dtset
 
+ use m_rcpaw, only : rcpaw_type
+ use m_extfpmd, only : extfpmd_type
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
@@ -167,7 +169,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 &  moved_atm_inside,mpi_enreg,my_natom,nattyp,nfft,&
 &  nfftmix,nfftmix_per_nfft,ngfft,ngfftmix,nkxc,npawmix,npwdiel,&
 &  nresid,ntypat,n1xccc,pawrhoij,pawtab,&
-&  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,&
+&  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,rcpaw,extfpmd,&
 &  mix_mgga,taug,taur,tauresid)
 
 !Arguments-------------------------------
@@ -185,6 +187,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
  type(wvl_denspot_type), intent(inout) :: wvl_den
+ type(extfpmd_type), intent(inout), pointer :: extfpmd
+ type(rcpaw_type), pointer, intent(inout) :: rcpaw
 !arrays
  integer,intent(in) :: atindx(dtset%natom)
  integer,intent(in) :: ffttomix(nfft*(nfftmix_per_nfft))
@@ -447,7 +451,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 &   mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &   nattyp,nfft,nfftmix,ngfft,ngfftmix,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
 &   ispmix,1,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
-&   susmat,vhartr_dum,vpsp_dum,nresid0,nrespc,vxc_dum,wvl,wvl_den,xred)
+&   susmat,vhartr_dum,vpsp_dum,nresid0,nrespc,vxc_dum,wvl,wvl_den,xred,rcpaw,extfpmd)
  else
    call wvl_prcref(dielar,dtset%iprcel,my_natom,nfftmix,npawmix,dtset%nspden,pawrhoij,&
 &   rhoijrespc,psps%usepaw,nresid0,nrespc)
@@ -523,6 +527,37 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      ABI_FREE(rhoijtmp)
    end do
  end if
+ 
+ if(usepaw==1.and.associated(rcpaw)) then
+   if(.not.associated(mix%rcpawmix)) ABI_MALLOC(mix%rcpawmix,(rcpaw%ntypat))
+   do iatom=1,rcpaw%ntypat
+     if(.not.associated(mix%rcpawmix(iatom)%occ)) then
+ ABI_MALLOC(mix%rcpawmix(iatom)%occ,(rcpaw%atm(iatom)%ln_size,rcpaw%atm(iatom)%nsppol))
+     endif
+     if(.not.associated(mix%rcpawmix(iatom)%f_rcpaw)) then
+ ABI_MALLOC(mix%rcpawmix(iatom)%f_rcpaw,(rcpaw%atm(iatom)%ln_size,rcpaw%atm(iatom)%nsppol,mix%n_fftgr)) 
+       mix%rcpawmix(iatom)%f_rcpaw=zero
+     endif
+     mix%rcpawmix(iatom)%occ=rcpaw%atm(iatom)%occ-rcpaw%atm(iatom)%occ_res 
+     mix%rcpawmix(iatom)%f_rcpaw(:,:,i_vresid1)=rcpaw%atm(iatom)%occ_res(:,:)
+     mix%rcpawmix(iatom)%f_rcpaw(:,:,i_vrespc1)=rcpaw%atm(iatom)%occ_respc(:,:)
+   enddo 
+ endif
+
+ if(associated(extfpmd)) then
+   if(.not.associated(mix%extfpmdmix)) ABI_MALLOC(mix%extfpmdmix,)
+   if(.not.associated(mix%extfpmdmix%f)) then
+     ABI_MALLOC(mix%extfpmdmix%f,(mix%n_fftgr))
+     mix%extfpmdmix%f=zero
+   endif
+   mix%extfpmdmix%nelect=zero
+   mix%extfpmdmix%nelect=extfpmd%nelect-extfpmd%nelect_res
+   mix%extfpmdmix%f(i_vresid1)=extfpmd%nelect_res
+   mix%extfpmdmix%f(i_vrespc1)=extfpmd%nelect_respc
+ endif
+
+
+
 
 !------Prediction of the components of the density
 
@@ -562,6 +597,17 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      ABI_ERROR(message)
    end if
  end if
+
+ if(usepaw==1.and.associated(rcpaw)) then
+   do iatom=1,size(mix%rcpawmix)
+     rcpaw%atm(iatom)%occ=mix%rcpawmix(iatom)%occ
+   enddo
+ endif
+
+ if(associated(extfpmd)) then
+   extfpmd%nelect=mix%extfpmdmix%nelect
+ endif
+
 
 !PAW: apply a simple mixing to rhoij (this is temporary)
  if(dtset%iscf==15 .or. dtset%iscf==16)then
