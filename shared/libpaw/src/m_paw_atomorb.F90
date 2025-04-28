@@ -319,9 +319,18 @@ subroutine destroy_atomorb(Atm)
  if (allocated(Atm%occ)) then
    LIBPAW_DEALLOCATE(Atm%occ)
  end if
+ if (allocated(Atm%occ_res)) then
+   LIBPAW_DEALLOCATE(Atm%occ)
+ end if
+if (allocated(Atm%occ_respc)) then
+   LIBPAW_DEALLOCATE(Atm%occ)
+ end if
  if (allocated(Atm%phi)) then
    LIBPAW_DEALLOCATE(Atm%phi)
  end if
+ if(allocated(amt%vhtnzc_orig) then
+   LIBPAW_DEALLOCATE(atm%vhtnzc_orig)
+ endif
 
 end subroutine destroy_atomorb
 !!***

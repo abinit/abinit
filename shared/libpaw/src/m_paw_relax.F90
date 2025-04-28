@@ -1041,6 +1041,7 @@ subroutine makebasis_marsman(atp)
    atp%PAW%Kop(2:atp%Grid%n,io)=(atp%PAW%eig(io)-atp%Pot%rv(2:atp%Grid%n)/&
 &                                atp%Grid%r(2:atp%Grid%n))*atp%PAW%ophi(2:atp%Grid%n,io)
  enddo
+ LIBPAW_DEALLOCATE(map)
 end subroutine makebasis_marsman
 
 
@@ -1157,8 +1158,12 @@ subroutine marsman_tphi(atp,map,l_in,n)
  enddo
  LIBPAW_DEALLOCATE(AA)
  LIBPAW_DEALLOCATE(BB)
+ LIBPAW_DEALLOCATE(p1)
+ LIBPAW_DEALLOCATE(p2)
  LIBPAW_DEALLOCATE(ksi_i0)
  LIBPAW_DEALLOCATE(ksi_ij)
+ LIBPAW_DEALLOCATE(ksi_i0_0)
+ LIBPAW_DEALLOCATE(ksi_ij_0)
 end subroutine marsman_tphi
 
 
@@ -6090,6 +6095,8 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
  ENDDO   ! end lmax loop
  WRITE(std_out,*) 'completed phi basis with ',nbase,' functions '
  PAW%nbase=nbase     ! reset nbase
+ LIBPAW_DEALLOCATE(checkden)
+ LIBPAW_DEALLOCATE(valden)
 END SUBROUTINE setbasis
 
 
@@ -6408,6 +6415,9 @@ END SUBROUTINE InitPAW
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Subroutine DestroyPAW(PAW)
  Type(PseudoInfo), INTENT(INOUT) :: PAW
+ IF(associated(PAW%Ktvtau)) LIBPAW_DEALLOCATE(PAW%Ktvtau)
+ IF(associated(PAW%Krveff)) LIBPAW_DEALLOCATE(PAW%Krveff)
+ if(associated(PAW%Kunscreen)) LIBPAW_DEALLOCATE(PAW%Kunscreen)
  IF (ASSOCIATED(PAW%rcio)) LIBPAW_DEALLOCATE(PAW%rcio)
  If (ASSOCIATED(PAW%vloc)) LIBPAW_DEALLOCATE(PAW%vloc)
  If (ASSOCIATED(PAW%abinitvloc)) LIBPAW_DEALLOCATE(PAW%abinitvloc)

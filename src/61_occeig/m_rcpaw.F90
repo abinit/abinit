@@ -152,6 +152,7 @@ subroutine rcpaw_destroy(rcpaw)
    enddo
    ABI_FREE(rcpaw%val)
  endif
+ if(allocated(rcpaw%eijkl_is_sym) ABI_FREE(rcpaw%eijkl_is_sym)
  rcpaw=>null()
 
 end subroutine rcpaw_destroy
@@ -251,7 +252,6 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,psps,ntypat,paw_an,my_nat
    itypat=dtset%typat(iatom)
    mult(itypat)=mult(itypat)+1
  enddo
- write(std_out,*) 'TEST MULT',mult(1)
  rcpaw%ntypat=ntypat
  rcpaw%edcc=zero
  rcpaw%eeigc=zero
@@ -273,7 +273,6 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,psps,ntypat,paw_an,my_nat
    rcpaw%atm(itypat)%nspden=dtset%nspden
    if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) rcpaw%all_atoms_relaxed=.false.
  enddo
- write(std_out,*) 'TEST MULT',mult(1),rcpaw%atm(1)%mult
 
  ! Init atp
  do itypat=1,ntypat
@@ -476,9 +475,15 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
      endif
      rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig+eigshift/rcpaw%atm(itypat)%mult
      if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc)rcpaw%atm(itypat)%nc_conv=.true.
-     write(std_out,*)'TEST 1',rcpaw%atm(itypat)%nc_conv,rcpaw%atm(itypat)%eig(1,1),eigshift
    endif
  enddo
+
+ if(.not.rcpaw%all_atoms_relaxed) then
+   if (.not.present(distribfft)) then
+     ABI_FREE(fftn3_distrib)
+     ABI_FREE(ffti3_local)
+   end if
+ endif
 
  rcpaw%all_atoms_relaxed=.true.
  do itypat=1,dtset%ntypat 
@@ -488,8 +493,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
      rcpaw%all_atoms_relaxed=.false.
    endif
  enddo
- write(std_out,*)'TEST 2',rcpaw%atm(1)%nc_conv,rcpaw%atm(1)%eig(1,1)
- 
+
 
 end subroutine rcpaw_core_eig
 !!***
