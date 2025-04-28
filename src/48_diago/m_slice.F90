@@ -301,6 +301,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     
     ! Local variables --------------------------------
     integer :: total_spacedim, ierr
+    logical :: on_host, on_device
 
     ! *********************************************************************
 
@@ -348,7 +349,18 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     ! Set flags to initial state (before Transpose)
     slice%use_linalg = .true.
     slice%use_colsrows = .false.
-    !call slice_queryHostDevice(slice)
+    call slice_queryHostDevice(slice,on_host,on_device)
+
+    write(std_out,*) 'At slice_init:'
+    write(std_out,*) 'slice%spacecom id=', slice%spacecom 
+    write(std_out,*) 'slice%spacecom size=', xmpi_comm_size(slice%spacecom)
+    write(std_out,*) 'on_host=, on_device', on_host, on_device
+    write(std_out,*) 'slice%spacedim=', slice%spacedim
+    write(std_out,*) 'slice%bandpp=', slice%bandpp
+
+    if (xmpi_comm_size(slice%spacecom)) then
+        ABI_ERROR("Slicing with 1 MPI process not implemented")
+    end if
 
     ! Arrays
     call slice_allocateAll(slice)
@@ -538,31 +550,31 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
         call xgBlock_copy_from_gpu(resid0%self)
     end if
     
-    write(std_out,*) 'ok3'
-
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen, theta_, rows=1, cols=neigenpairs)
     call xgBlock_reverseMap(resid0%self, resid_, rows=1, cols=neigenpairs) 
 
-    ! recover
     if (slice%gpu_option==ABI_GPU_OPENMP) then
         call xgBlock_copy_to_gpu(eigen)
         call xgBlock_copy_to_gpu(resid0%self)
     end if
-    
-    write(std_out,*) 'theta_=', theta_
- 
-    ! Sort thetas in increasing order and store result to eigen
+
+    ! Sort thetas in increasing order
     theta_reshaped(1:neigenpairs) = theta_(1,1:neigenpairs)
     permute_cols_ptr => permute_cols
     permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
     call sort_dp(neigenpairs, theta_reshaped, permute_cols_ptr, tol12)
     theta_(1,1:neigenpairs) = theta_reshaped(1:neigenpairs)
+    
+    ! update eigen on GPU with sorted values
+#ifdef HAVE_OPENMP_OFFLOAD
+    !$OMP TARGET ENTER DATA MAP(to:theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
+#endif
     call xgBlock_map(eigen_sorted, theta_, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
     call xgBlock_copy(eigen_sorted, eigen)
-
-    write(std_out,*) 'theta_reshaped=', theta_reshaped
-    write(std_out,*) 'ok4'
+!#ifdef HAVE_OPENMP_OFFLOAD
+!    !$OMP TARGET EXIT DATA MAP(delete:theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
+!#endif
 
     ! Minimum and maximum quotients
     lambda_minus = theta_reshaped(1)
@@ -594,6 +606,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     ! Divide resources into slice tasks
     if (slice%nslice==1) then
         slice%nproc_per_slice = xmpi_comm_size(slice%spacecom)
+        write(std_out,*) 'slice%nproc_per_slice=', slice%nproc_per_slice
+        write(std_out,*) 'slice%spacecom size=', xmpi_comm_size(slice%spacecom)
         slice%lookup_proc = 0
     else
         call slice_allocateResources(slice)
@@ -799,14 +813,11 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     X0_active = slice%me_Xext_active
     call xgBlock_setBlock(eigen, eigen_active, rows=neigenpairs, cols=1)
     call xgBlock_setBlock(residu, residu_active, rows=neigenpairs, cols=1)
-    
+   
+    write(std_out,*) 'calling runSlice from rank and subrank', xmpi_comm_rank(slice%spacecom), xmpi_comm_rank(comm)
+ 
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
-
-    write(std_out,*) 'slice eigs active='
-    call xgBlock_print(eigen_active, std_out)
-    write(std_out,*) 'slice eigs='
-    call xgBlock_print(eigen, std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -827,9 +838,6 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     call xgTransposer_transpose(slice%xgTransposerXext, STATE_LINALG)
     ABI_NVTX_END_RANGE()
     ! Note: At this point slice%me_Xext_active is recovered into slice%XextLinalg
-
-    write(std_out,*) 'slice eigs after transpose='
-    call xgBlock_print(eigen, std_out)
 
     slice%use_colsrows = .false.
     slice%use_linalg = .true.
@@ -919,14 +927,14 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xg_setBlock(X_NAB, xAXColsRows, slice%total_spacedim, bandpp, fcol=bandpp + 1)     ! xAXColsRows
     call xg_setBlock(X_NAB, xBXColsRows, slice%total_spacedim, bandpp, fcol=2*bandpp + 1)   ! xBXColsRows
     
-    ! Allocate one-dimensional memory (distributed)
+    ! Allocate one-dimensional memory (distributed per parallel processes)
     ! using space_res
     call xg_init(Results1, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
     call xg_init(Results2, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
     call xg_init(eigen_mpi, space_res, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
     ! using SPACE_R
     call xg_init(resid_mpi, SPACE_R, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
- 
+
     ! Allocate memory for X in colsrows representation
     call xgTransposer_constructor(xgTransposerX, X, xXColsRows, nspinor, STATE_LINALG,&
         TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
@@ -972,34 +980,31 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
     call xgBlock_add(X_next, xAXColsRows)                              ! X_next = H|Psi> - eig * S|Psi>
     call xgBlock_colwiseNorm2(X_next, resid_mpi%self, comm_loc=xmpi_comm_null)  ! resid = |X_next|^2
    
-    write(std_out,*) 'ok4'
-    
     ! MPI communication for gathering all thetas (using summation strategy on columns)
     my_rank = xmpi_comm_rank(slice%spacecom)
     shift = my_rank * bandpp
     ! for eigen
     call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=bandpp, fcol=1+shift)
     call xgBlock_reshape(eigen_mpi%self, 1, bandpp)
-    if (space_res==SPACE_R) then     
+    if (space_res==SPACE_R) then 
         call xgBlock_copy(eigen_mpi%self, eigen_block)
         call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
     else
-        if (slice%gpu_option==ABI_GPU_OPENMP) then
-            call xgBlock_copy_from_gpu(eigen_mpi%self)
-        end if
         ! workaround to copy from SPACE_C to SPACE_R
         ABI_MALLOC_IFNOT(theta_mpi_reshaped,(bandpp))
         theta_mpi_reshaped_ptr => theta_mpi_reshaped
         call xgBlock_reverseMap(eigen_mpi%self, theta_mpi, rows=1, cols=bandpp)
         theta_mpi_reshaped(1:bandpp) = theta_mpi(1,1:bandpp)
-        call xgBlock_map_1d(eigen_mpi_reshaped, theta_mpi_reshaped_ptr, SPACE_R, bandpp, gpu_option=ABI_GPU_DISABLED)
+#ifdef HAVE_OPENMP_OFFLOAD
+        !$OMP TARGET ENTER DATA MAP(to:theta_mpi_reshaped) IF(slice%gpu_option==ABI_GPU_OPENMP)
+#endif
+        call xgBlock_map_1d(eigen_mpi_reshaped, theta_mpi_reshaped_ptr, SPACE_R, bandpp, gpu_option=slice%gpu_option)
         call xgBlock_copy(eigen_mpi_reshaped, eigen_block)
         call xgBlock_mpi_sum(eigen, comm=slice%spacecom)
+#ifdef HAVE_OPENMP_OFFLOAD
+        !$OMP TARGET EXIT DATA MAP(delete:theta_mpi_reshaped) IF(slice%gpu_option==ABI_GPU_OPENMP)
+#endif
         ABI_SFREE(theta_mpi_reshaped)
-        if (slice%gpu_option==ABI_GPU_OPENMP) then
-            call xgBlock_copy_to_gpu(eigen_block)
-            call xgBlock_copy_to_gpu(eigen_mpi%self)
-        end if
     end if
     ! for resid (SPACE_R)
     call xgBlock_setBlock(resid, resid_block, rows=1, cols=bandpp, fcol=1+shift)
@@ -1334,6 +1339,10 @@ subroutine slice_markActiveTask(slice)
     slice%me_nproc_slice = slice%nproc_per_slice(slice%me_id_slice)
     slice%me_ndeg_slice = slice%poly_degrees(slice%me_id_slice)
 
+    if(slice%me_nproc_slice==1) then
+        ABI_ERROR("Slicing with a single MPI process not implemented.")
+    end if
+
     ABI_MALLOC_IFNOT(slice%me_ncolsColsRows_slice, (slice%me_nproc_slice))
     ABI_MALLOC_IFNOT(slice%me_nrowsLinalg_slice, (slice%me_nproc_slice))
 
@@ -1462,15 +1471,10 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xgBlock_reshape(eigen, 1, slice%neigenpairs)
     call xgBlock_reshape(resid, 1, slice%neigenpairs)
 
-    write(std_out,*) 'slice eigs='
-    call xgBlock_print(eigen, std_out)
-
     ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
     if (slice%paral_kgb==1) then
-        write(std_out,*) 'passe par ici 1'
         if (xmpi_comm_size(slice%spacecom) > 1) then
             ! Copy only for first process in slice subcomm 
-            ! IL TODO 24/04 on a l'impression qu'il ne passe pas par ici
             if (xmpi_comm_rank(slice%me_comm_slice)==0) then
                 my_rank = xmpi_comm_rank(slice%spacecom)
                 my_slice = slice%lookup_proc(my_rank + 1)
@@ -1483,9 +1487,6 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
                 call xgBlock_copy(resid, resid_ext_slice)
             end if
     
-            write(std_out,*) 'slice after copy eigs='
-            call xgBlock_print(eigen_ext_slice, std_out)
-
             ! All processes wait before summing 
             call xmpi_barrier(slice%spacecom)
 
@@ -1493,11 +1494,10 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
             call xgBlock_mpi_sum(resid_ext%self, comm=slice%spacecom)
 
         else
-            ! TODO
-            write(std_out,*) 'slice%spacecom', slice%spacecom, 'slice%paral_kgb', slice%paral_kgb 
+            call xgBlock_copy(eigen, eigen_ext%self)
+            call xgBlock_copy(resid, resid_ext%self)
         end if
     else
-        write(std_out,*) 'passe par ici 2'
         call xgBlock_copy(eigen, eigen_ext%self)
         call xgBlock_copy(resid, resid_ext%self)
     end if 
@@ -1537,9 +1537,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         if (islice == 1     ) fcol_in_slice = 1
         if (islice == slice%nslice) lcol_in_slice = neigenpairs_slice
 
-        !write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
-        !write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
-        !write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
+        write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
+        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
+        write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
 
         ! After merge: Update first columns to copy from Xext to X
         slice%fcol_in_X(islice)= tot_ncols_kept + 1
@@ -1555,7 +1555,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     if (tot_ncols_kept < slice%neigenpairs) then
         ABI_ERROR("Too few converged eigenvalues kept. Increase tolfilter")
     else if (tot_ncols_kept > slice%neigenpairs) then
-        ABI_WARNING("Too many converged eigenvalues kept. Increase tolfilter.")
+        ABI_ERROR("Too many converged eigenvalues kept. Increase tolfilter.")
     end if
 
     ! Copy from extended memory to regular memory
@@ -1789,7 +1789,7 @@ subroutine fair_allocation(n, m, w, p, x)
     x = allocation
 
     do i=1,n
-        write(std_out,*) '# proc # workload # allocated resources', i, real(w(i)*m(i))/real(x(i)), x(i)
+        write(std_out,*) '# task # workload # allocated resources', i, real(w(i)*m(i))/real(x(i)), x(i)
     end do
 
 end subroutine fair_allocation

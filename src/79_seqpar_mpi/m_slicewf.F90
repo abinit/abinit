@@ -227,6 +227,11 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
  write(std_out,*) 'ok1'
+ 
+ write(std_out,*) 'calling slice_init'
+ write(std_out,*) 'dtset%paral_kgb=', dtset%paral_kgb
+ write(std_out,*) 'spacecom=', spacecom, xmpi_comm_size(spacecom)
+ write(std_out,*) 'spacedim=', spacedim
 
  call slice_init(slice,dtset%nslice,nband,spacedim,dtset%tolwfr_diago,dtset%paral_kgb,&
         dtset%paral_slice,dtset%mdeg_filter,dtset%tolfilter,dtset%ecut,l_mpi_enreg%bandpp,&
