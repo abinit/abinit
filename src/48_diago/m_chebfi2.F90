@@ -267,6 +267,12 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
 
  call timab(tim_init,2,tsec)
 
+ write(std_out,*) 'At chebfi_init:'
+ write(std_out,*) 'chebfi%spacecom id=', chebfi%spacecom 
+ write(std_out,*) 'chebfi%spacecom size=', xmpi_comm_size(chebfi%spacecom)
+ write(std_out,*) 'chebfi%spacedim=', chebfi%spacedim
+ write(std_out,*) 'chebfi%bandpp=', chebfi%bandpp
+
 end subroutine chebfi_init
 !!***
 
@@ -1165,6 +1171,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     ABI_NVTX_END_RANGE()
     call timab(tim_getAX_BX,2,tsec)
 
+    write(std_out,*) 'starting filter in proc', xmpi_comm_rank(chebfi%spacecom)
+
     ! Apply polynomial filtering to active MPI ColsRows block-column
     if (is_lowpass) then
         ! [lambda_minus,lambda_plus) is diminished using Chebyshev
@@ -1187,12 +1195,15 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
             custom_ncolsColsRows=.true.,nrowsLinalg_sub=nrowsLinalg_ptr)
         ! Note: bandpp is custom because it is created from resource allocator
 
+        ! Allocate chebfi%AX, chebfi%BX
         call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,&
             chebfi%AX%self,chebfi%xAXColsRows,STATE_COLSROWS)
         call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,&
             chebfi%BX%self,chebfi%xBXColsRows,STATE_COLSROWS)
         ! Note: at this point chebfi%AX and chebfi%BX are empty. Must transpose
         !       to fill with correct values.
+
+        write(std_out,*) xgBlock_getId(chebfi%AX%self)
 
         chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
         chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
@@ -1202,6 +1213,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
         call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
         call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
+
+        write(std_out,*) xgBlock_getId(chebfi%AX%self)
     
     else
         call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
@@ -1216,15 +1229,21 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     end if
     write(std_out,'(a,i6,i6)') 'local # proc has # rows ', xmpi_comm_rank(chebfi%spacecom), rows(chebfi%X)
 
+    write(std_out,*) 'chebfi%eigenvalues before RR'
+    call xgBlock_print(chebfi%eigenvalues,std_out)
+
     ! Apply Rayleigh-Ritz to active MPI Linalg row-block
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
-    call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,&
+    call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,eigen,ierr,0,tim_RR,&
         chebfi%gpu_option,solve_ax_bx=.true.)
     ABI_NVTX_END_RANGE()
 
     if ( ierr /= 0 ) then
         ABI_WARNING("RayleighRitz did not work, but continue anyway.")
     end if
+
+    write(std_out,*) 'chebfi%eigenvalues after RR'
+    call xgBlock_print(chebfi%eigenvalues,std_out)
 
     ! Compute residual norm *squared*
     if (chebfi%paw) then
@@ -1398,9 +1417,15 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
             call xgBlock_reverseMap(eigen_block, theta, rows=1, cols=chebfi%bandpp)
             theta_reshaped = 0.d0
             theta_reshaped(1,1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
+#ifdef HAVE_OPENMP_OFFLOAD
+            !$OMP TARGET ENTER DATA MAP(to:theta_reshaped) IF(chebfi%gpu_option==ABI_GPU_OPENMP)
+#endif
             call xgBlock_map(eigen_block, theta_reshaped_ptr, space_res, rows=1, &
                 cols=chebfi%bandpp, gpu_option=chebfi%gpu_option)
             call xgBlock_copy(eigen_block, DivResults%self)
+#ifdef HAVE_OPENMP_OFFLOAD
+            !$OMP TARGET EXIT DATA MAP(delete:theta_reshaped) IF(chebfi%gpu_option==ABI_GPU_OPENMP)
+#endif
             ABI_SFREE(theta_reshaped)
         end if
         ! restore dimensions
