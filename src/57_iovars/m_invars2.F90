@@ -3141,6 +3141,33 @@ if (dtset%usekden==1) then
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fix_korq',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%eph_fix_korq = key_value(1:1)
 
+ ! RCPAW variables
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_rcpaw',tread,'INT')
+ if(tread==1) dtset%use_rcpaw = intarr(1)
+ 
+ if(dtset%use_rcpaw==1) then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_frocc',tread,'INT')
+   if(tread==1) dtset%rcpaw_frocc = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrpaw',tread,'INT')
+   if(tread==1) dtset%rcpaw_nfrpaw = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrtnc',tread,'INT')
+   if(tread==1) dtset%rcpaw_nfrtnc = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_verbosity',tread,'INT')
+   if(tread==1) dtset%rcpaw_verbosity = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_tolnc',tread,'DPR')
+   if(tread==1) dtset%rcpaw_tolnc = dprarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_frtypat',tread,'INT')
+   if(tread==1) dtset%rcpaw_frtypat(1:ntypat) = intarr(1:ntypat)
+
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_scenergy',tread,'ENE')
+   if(tread==1) dtset%rcpaw_scenergy(1:ntypat) = dprarr(1:ntypat)
+ endif
+
 ! Print variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%write_files = key_value

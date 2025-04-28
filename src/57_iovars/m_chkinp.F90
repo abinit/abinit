@@ -3689,6 +3689,16 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end do
    end if
 
+!  rcpaw_frocc
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frocc',dt%rcpaw_frocc,2,(/0,1/),iout)
+
+!  rcpaw_frtypat
+   do itypat=1,dt%ntypat
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frtypat',dt%rcpaw_frtypat(itypat),2,(/0,1/),iout)
+   enddo
+
+!  rcpaw_verbosity
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_verbosity',dt%rcpaw_verbosity,2,(/0,1/),iout)
 
 !  recgratio
    if (dt%tfkinfunc==2) then
@@ -4147,6 +4157,16 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
    end if
+
+!  usercpaw
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
+   if(dt%use_rcpaw==1) then
+     if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
+       &(dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
+       &(dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
+       &(dt%usepaw/=1)) &
+       &ABI_ERROR('RCPAW: work in progress')
+   endif
 
 !  usexcnhat
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,3,(/-1,0,1/),iout)

@@ -2968,6 +2968,7 @@ end subroutine paw_setup_copy
  Atm%mult=1
  Atm%lmn2_size = 0
  Atm%zion=Atm%znucl-Atm%zcore
+ Atm%zcore_orig=Atm%zcore
  if(Atm%dirac) Atm%nspinor=2
  nmesh=igrid
  if(nmesh>0)then
@@ -3168,6 +3169,11 @@ end subroutine paw_setup_copy
    Atm%l_size =2*Atm%l_max-1
    LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
    Atm%mode = ORB_FROZEN
+   LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
+   Atm%max_occ=Atm%occ
+   atm%zcore_conv=.false.
+   atm%nc_conv=.false.
+   atm%nresid_c=one
 
 !   ! * Setup of kln2ln.
 !   !TODO this has to be tested
