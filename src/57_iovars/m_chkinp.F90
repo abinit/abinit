@@ -808,7 +808,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,2*dt%dmftqmc_l,iout)
        end if
        cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_config',dt%dmftctqmc_config,4,(/0,1,2,3/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_localprop',dt%dmftctqmc_localprop,4,(/0,1,2,3/),iout)
        if (dt%dmft_entropy>=1) then
          cond_string(1)='dmft_entropy' ; cond_values(1)=dt%dmft_entropy
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nlambda',dt%dmft_nlambda,3,iout)

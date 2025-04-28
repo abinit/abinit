@@ -1017,7 +1017,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! Rotation of Magnetic moment for CT-QMC
  !
  ! =======================
- if(nspinor .eq. 2 .and. paw_dmft%dmftctqmc_config .gt. 1) then
+ if(nspinor .eq. 2 .and. paw_dmft%dmftctqmc_localprop .gt. 1) then
    write(message,'(a,2x,2a)') ch10, " == Making rotation for magnetic moments", ch10
    call wrtout(std_out,message,'COLL')
 
@@ -1070,7 +1070,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    write(message,'(a,2x,2a)') ch10, " ==> Rotation done", ch10
    call wrtout(std_out,message,'COLL')
 
- end if ! dmftctqmc_config
+ end if ! dmftctqmc_localprop
  !======================
 
  ! =========================================================================================
@@ -1320,7 +1320,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call CtqmcInterface_setOpts(hybrid, &
           & opt_Fk       = opt_fk, &
           & opt_order    = paw_dmft%dmftctqmc_order, &
-          & opt_histo    = paw_dmft%dmftctqmc_config, &
+          & opt_histo    = paw_dmft%dmftctqmc_localprop, &
           & opt_movie    = paw_dmft%dmftctqmc_mov, &
           & opt_analysis = paw_dmft%dmftctqmc_correl, &
           & opt_check    = paw_dmft%dmftctqmc_check, &
@@ -1339,7 +1339,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        ! =================================================================
        call CtqmcoffdiagInterface_setOpts(hybridoffdiag,opt_Fk=opt_fk, &
            & opt_order    = paw_dmft%dmftctqmc_order, &
-           & opt_histo    = paw_dmft%dmftctqmc_config, &
+           & opt_histo    = paw_dmft%dmftctqmc_localprop, &
            & opt_movie    = paw_dmft%dmftctqmc_mov, &
            & opt_analysis = paw_dmft%dmftctqmc_correl, &
            & opt_check    = paw_dmft%dmftctqmc_check, &
