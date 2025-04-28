@@ -271,10 +271,6 @@ MODULE m_paw_dmft
   ! only for debug
   ! 0 : nothing, 1 : impurity, 2 : bath, 3 : both
 
-  integer :: dmftctqmc_config
-  ! ABINIT CTQMC: Enables histogram of occupations
-  ! 0 : nothing, 1 : enabled
-
   integer :: dmftctqmc_correl
   ! ABINIT CTQMC: Gives analysis for CTQMC
   ! 0 : nothing, 1 : activated Correlations.dat
@@ -287,6 +283,10 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_grnns
   ! ABINIT CTQMC: compute green function noise for each imaginary time
   ! 0 : nothing, 1 : activated
+
+  integer :: dmftctqmc_localprop
+  ! ABINIT CTQMC: local properties calculations
+  ! 0 : nothing, 1 : Histogram, 2 : magnetic susceptibility, 3 : charge susceptibility
 
   integer :: dmftctqmc_meas
   ! ABINIT/TRIQS CTQMC: measurements are done every dmftctqmc_meas step
@@ -1099,7 +1099,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmftctqmc_mrka   = dtset%dmftctqmc_mrka
  paw_dmft%dmftctqmc_mov    = dtset%dmftctqmc_mov
  paw_dmft%dmftctqmc_order  = dtset%dmftctqmc_order
- paw_dmft%dmftctqmc_config = dtset%dmftctqmc_config
+ paw_dmft%dmftctqmc_localprop = dtset%dmftctqmc_localprop
 
  if (dmft_solv == 5 .or. dmft_solv >= 8) then
    write(message,'(2a,i6)') ch10,&
@@ -1666,7 +1666,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
      call CtqmcInterface_setOpts(paw_dmft%hybrid(iatom),&
                                 &  opt_Fk       = 1,&
                                 &  opt_order    = paw_dmft%dmftctqmc_order, &
-                                &  opt_histo    = paw_dmft%dmftctqmc_config,&
+                                &  opt_histo    = paw_dmft%dmftctqmc_localprop,&
                                 &  opt_movie    = paw_dmft%dmftctqmc_mov,   &
                                 &  opt_analysis = paw_dmft%dmftctqmc_correl,&
                                 &  opt_check    = paw_dmft%dmftctqmc_check, &
