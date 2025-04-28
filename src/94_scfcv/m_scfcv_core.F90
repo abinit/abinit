@@ -391,7 +391,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 ! red_efieldbar_lc(3) is local reduced electric field, defined by Eq.(28) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
 ! pbar(3) and dbar(3) are reduced polarization and displacement field,
 !    defined by Eq.(27) and (29) Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
- real(dp) :: dummy0(0),dummy6(6)
+ real(dp) :: dummy01(0),dummy02(0),dummy03(0),dummy04(0),dummy05(0),dummy06(0),dummy07(0),dummy08(0),dummy09(0),dummy010(0)
+ real(dp) :: dummy61(6),dummy62(6)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: dielinv(:,:,:,:,:),dtn_pc(:,:)
  real(dp),allocatable :: fcart(:,:),forold(:,:),gred(:,:),gresid(:,:)
@@ -1914,10 +1915,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        if(.not.rcpaw%all_atoms_relaxed) then
          optn=1
          if(rcpaw%istep>rcpaw%nfrtnc) optn=0
-         call atm2fft(atindx1,xccc3d,vpsp,dummy0,dummy0,dummy0,dummy0,&
-&         gmet,gprimd,dummy0,dummy0,gsqcut,mgfftf,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,psps%ntypat,&
+         call atm2fft(atindx1,xccc3d,vpsp,dummy01,dummy02,dummy03,dummy04,&
+&         gmet,gprimd,dummy05,dummy06,gsqcut,mgfftf,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,psps%ntypat,&
 &         1,0,0,0,optn,1,0,1,psps,pawtab,ph1df,psps%qgrid_vl,dtset%qprtrb,&
-&         dtset%rcut,dummy0,rprimd,dummy6,dummy6,ucvol,psps%usepaw,dummy0,dummy0,dummy0,dtset%vprtrb,psps%vlspl,&
+&         dtset%rcut,dummy07,rprimd,dummy61,dummy62,ucvol,psps%usepaw,dummy08,dummy09,dummy010,dtset%vprtrb,psps%vlspl,&
 &         comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &         paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
          call pspcor(ecore,psps%epsatm,dtset%natom,dtset%ntypat,dtset%typat,psps%ziontypat)

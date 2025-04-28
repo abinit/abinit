@@ -1166,7 +1166,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab,&
 
        !k>l
        do klmn1=klmn+1,lmn2_size
-         if(is_sym) then
+         if(eijkl_is_sym) then
            dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn,klmn1)
          else
            dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn1,klmn)
