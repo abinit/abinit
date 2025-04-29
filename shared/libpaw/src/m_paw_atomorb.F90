@@ -320,10 +320,10 @@ subroutine destroy_atomorb(Atm)
    LIBPAW_DEALLOCATE(Atm%occ)
  end if
  if (allocated(Atm%occ_res)) then
-   LIBPAW_DEALLOCATE(Atm%occ)
+   LIBPAW_DEALLOCATE(Atm%occ_res)
  end if
 if (allocated(Atm%occ_respc)) then
-   LIBPAW_DEALLOCATE(Atm%occ)
+   LIBPAW_DEALLOCATE(Atm%occ_respc)
  end if
  if (allocated(Atm%phi)) then
    LIBPAW_DEALLOCATE(Atm%phi)

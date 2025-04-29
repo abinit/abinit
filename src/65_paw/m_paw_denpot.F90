@@ -32,7 +32,7 @@ MODULE m_paw_denpot
  use m_time, only : timab
 
  use m_rcpaw
- use m_paw_relax
+ use m_paw_atom_solve
  use m_extfpmd,          only : extfpmd_type
  use m_paw_atomorb,      only : orb_relaxed_core
  use m_pawang,           only : pawang_type
@@ -449,13 +449,12 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
      nhat1=rcpaw%val(iatom)%nhat1
      compch_sph=rcpaw%val(iatom)%compch_sph
    else
-     ! This needs testing but is probably correct
      extfpmd_rho=zero
-     !if(present(extfpmd)) then
-     !  if(associated(extfpmd)) then
-     !    extfpmd_rho=extfpmd%nelect/ucvol 
-     !  endif
-     !endif
+     if(present(extfpmd)) then
+       if(associated(extfpmd)) then
+         !extfpmd_rho=extfpmd%nelect/ucvol !This needs testing but is probably correct 
+       endif
+     endif
      call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
 &     nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
 &     pawrhoij(iatom),pawtab(itypat),rho1,trho1,extfpmd_rho=extfpmd_rho,one_over_rad2=one_over_rad2)
@@ -2435,7 +2434,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
  type(rcpaw_type),pointer, intent(inout) :: rcpaw
  type(dataset_type), intent(in) :: dtset
  type(pseudopotential_type),intent(inout) :: psps
- type(pawang_type),intent(inout) :: pawang
+ type(pawang_type),intent(in),target :: pawang
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  type(pawtab_type), target,intent(inout) :: pawtab(ntypat)
@@ -2446,13 +2445,14 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
 !Local variables-------------------------------
 !scalars
  integer :: iatom,itypat
- integer :: iln,mesh_size
+ integer :: mesh_size
  integer :: ispden
  integer :: lm_size
  integer :: my_comm_atom,iat,ierr
  integer :: opt_compch
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: extfpmd_rho
+ type(pawang_type),pointer :: pawang_
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_cur(:)
@@ -2476,6 +2476,8 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    endif
  endif
 
+ pawang_=>pawang
+
  !!!! loop over atoms 
  do itypat=1,dtset%ntypat
    mesh_size=pawtab(itypat)%mesh_size
@@ -2494,7 +2496,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
        rcpaw%val(iat)%compch_sph=zero
        call pawdensities(rcpaw%val(iat)%compch_sph,cplex,itypat,lmselect_cur,paw_an(iat)%lmselect,lm_size,&
 &      rcpaw%val(iat)%nhat1,dtset%nspden,nzlmopt,&
-&      opt_compch,0,-1,1,pawang,dtset%pawprtvol,pawrad(itypat),pawrhoij(iat),pawtab(itypat),rcpaw%val(iat)%rho1,rcpaw%val(iat)%trho1,extfpmd_rho)
+&      opt_compch,0,-1,1,pawang_,dtset%pawprtvol,pawrad(itypat),pawrhoij(iat),pawtab(itypat),rcpaw%val(iat)%rho1,rcpaw%val(iat)%trho1,extfpmd_rho)
        rcpaw%val(iat)%has_dens=.true.
        do ispden=1,dtset%nspden
          nval_tmp(1:pawtab(itypat)%mesh_size)=nval_tmp(1:pawtab(itypat)%mesh_size)+rcpaw%val(iat)%rho1(1:pawtab(itypat)%mesh_size,1,ispden)*&
@@ -2516,16 +2518,16 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
      call atompaw_solve(rcpaw%atp(itypat),pawrad(itypat),pawtab(itypat),&
 &          nval,psps%mqgrid_vl,psps%qgrid_vl,psps%epsatm(itypat),psps%vlspl(:,:,itypat),&
 &          psps%ziontypat(itypat),&
-&          (rcpaw%istep<=rcpaw%nfrpaw),(rcpaw%istep<=rcpaw%nfrtnc),rcpaw%atm(itypat),rcpaw%tolnc)
+&          (rcpaw%istep<=rcpaw%nfrpaw),(rcpaw%istep<=rcpaw%nfrtnc),rcpaw%atm(itypat))
    endif
    ABI_FREE(nval)
  enddo
 
  if(rcpaw%istep<=rcpaw%nfrpaw+1) then
-   call pawinit(zero,0,zero,zero,dtset%pawlcutd,0,0,0,0,0,pawang,pawrad,0,pawtab,0,0,0,rcpaw_update=.true.)
+   call pawinit(zero,0,zero,zero,dtset%pawlcutd,0,0,0,0,0,pawang_,pawrad,0,pawtab,0,0,0,rcpaw_update=.true.)
  endif
  rcpaw%eijkl_is_sym=.false.
- call rcpaw_core_energies(rcpaw,pawtab,ntypat)
+ call rcpaw_core_energies(rcpaw,ntypat)
 
 end subroutine paw_relax_core
 !!***
