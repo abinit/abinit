@@ -152,7 +152,7 @@ subroutine rcpaw_destroy(rcpaw)
    enddo
    ABI_FREE(rcpaw%val)
  endif
- if(allocated(rcpaw%eijkl_is_sym) ABI_FREE(rcpaw%eijkl_is_sym)
+ if(allocated(rcpaw%eijkl_is_sym)) ABI_FREE(rcpaw%eijkl_is_sym)
  rcpaw=>null()
 
 end subroutine rcpaw_destroy

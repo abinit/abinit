@@ -449,12 +449,13 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
      nhat1=rcpaw%val(iatom)%nhat1
      compch_sph=rcpaw%val(iatom)%compch_sph
    else
+     ! This needs testing but is probably correct
      extfpmd_rho=zero
-     if(present(extfpmd)) then
-       if(associated(extfpmd)) then
-         extfpmd_rho=extfpmd%nelect/ucvol 
-       endif
-     endif
+     !if(present(extfpmd)) then
+     !  if(associated(extfpmd)) then
+     !    extfpmd_rho=extfpmd%nelect/ucvol 
+     !  endif
+     !endif
      call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
 &     nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
 &     pawrhoij(iatom),pawtab(itypat),rho1,trho1,extfpmd_rho=extfpmd_rho,one_over_rad2=one_over_rad2)

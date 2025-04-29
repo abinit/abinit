@@ -328,7 +328,7 @@ if (allocated(Atm%occ_respc)) then
  if (allocated(Atm%phi)) then
    LIBPAW_DEALLOCATE(Atm%phi)
  end if
- if(allocated(amt%vhtnzc_orig) then
+ if(allocated(atm%vhtnzc_orig)) then
    LIBPAW_DEALLOCATE(atm%vhtnzc_orig)
  endif
 
