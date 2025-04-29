@@ -888,7 +888,7 @@ end subroutine print_matlu
    do iatom=1,natom
 
      lpawu = gloc(iatom)%lpawu
-     if (lpawu == 1) cycle
+     if (lpawu == -1) cycle
      ndim = 2*lpawu + 1
      glocsym_mat => glocsym(iatom)%mat
 
