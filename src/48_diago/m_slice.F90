@@ -565,16 +565,23 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
     call sort_dp(neigenpairs, theta_reshaped, permute_cols_ptr, tol12)
     theta_(1,1:neigenpairs) = theta_reshaped(1:neigenpairs)
-    
+
+    write(std_out,*) 'sorted theta 1D=', theta_(1,1:20)
+ 
     ! update eigen on GPU with sorted values
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET ENTER DATA MAP(to:theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
 #endif
     call xgBlock_map(eigen_sorted, theta_, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
+    write(std_out,*) 'eigen_sorted after sort'
+    call xgBlock_print(eigen_sorted,std_out)
     call xgBlock_copy(eigen_sorted, eigen)
 !#ifdef HAVE_OPENMP_OFFLOAD
 !    !$OMP TARGET EXIT DATA MAP(delete:theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
 !#endif
+    
+    write(std_out,*) 'eigen after sort'
+    call xgBlock_print(eigen,std_out)
 
     ! Minimum and maximum quotients
     lambda_minus = theta_reshaped(1)
@@ -816,8 +823,14 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
    
     write(std_out,*) 'calling runSlice from rank and subrank', xmpi_comm_rank(slice%spacecom), xmpi_comm_rank(comm)
  
+    write(std_out,*) 'getid before runSlice', xgBlock_getId(X0_active)
+    
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
+
+    write(std_out,*) 'getid after runSlice', xgBlock_getId(X0_active)
+    
+    !call xgBlock_print(chebfi%eigenvalues,std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -1510,7 +1523,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen_ext%self, theta_ext, rows=1, cols=slice%neigenpairs_ext)
 
-    write(std_out,*) 'theta_ext', theta_ext
+    !write(std_out,*) 'theta_ext', theta_ext
 
     ! recover
     if (slice%gpu_option==1) then

@@ -226,8 +226,6 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=gpu_option)
 
- write(std_out,*) 'ok1'
- 
  write(std_out,*) 'calling slice_init'
  write(std_out,*) 'dtset%paral_kgb=', dtset%paral_kgb
  write(std_out,*) 'spacecom=', spacecom, xmpi_comm_size(spacecom)
@@ -239,30 +237,28 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
         dtset%spectral_cut,l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
         gpu_thread_limit=dtset%gpu_thread_limit)
  
- write(std_out,*) 'ok2'
- 
  call slice_allschedule(slice, xgx0, getghc_gsc1, xgeigen, nspinor)
  
-! if (dtset%nslice>1) then
-!    ! Release collective cg memory from GPU, will only use active task memory
-!#ifdef HAVE_OPENMP_OFFLOAD
-!    !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-!    !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-!#endif
-! end if
+ if (dtset%nslice>1) then
+    ! Release collective cg memory from GPU, will only use active task memory
+#ifdef HAVE_OPENMP_OFFLOAD
+    !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+    !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
  call slice_run(slice, getghc_gsc1, getBm1X, xgeigen, xgresidu, nspinor)
 
-! ! Retransfer collective cg memory on GPU
-! if (dtset%nslice>1) then
-!#ifdef HAVE_OPENMP_OFFLOAD
-!   !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-!#endif
-!   call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
-! end if
+ if (dtset%nslice>1) then
+    ! Retransfer collective cg memory on GPU
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+   call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
+ end if
 
  call slice_allmerge(slice, xgx0, xgeigen, xgresidu)
 
