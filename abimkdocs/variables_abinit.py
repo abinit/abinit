@@ -1680,7 +1680,7 @@ Variable(
 Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
 It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy
 of some parallelism for some [[optdriver]] value was not correct, with a large loss of computing resources.
-Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
+Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of resources might be spend
 when they are booked for a run that cannot use these.
 Accordingly, the user might blame ABINIT for being slow while the user has simply not activated
 the relevant parallelism, or activated an irrelevant parallelism.
@@ -1696,7 +1696,8 @@ The following relevances and adequacies are checked at present if [[chkparal]]=1
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
 the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW).
 
-The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present. The default values should not yield loss of computing power.
+The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present.
+The default values should not yield loss of computing power.
 """,
 ),
 
@@ -11732,7 +11733,7 @@ See [[cite:Henkelman2000a]]
 
 Note that, in all cases, it is possible to define the value of the spring
 constant connecting images with [[neb_spring]], keeping it constant or
-allowing it to vary between 2 values (to have higher resolution close to the saddle point).  
+allowing it to vary between 2 values (to have higher resolution close to the saddle point).
 All these methods are also compatible with the variable cell NEB (evolution of lattice vectors along the path), which can be applied using [[neb_cell_algo]].
 """,
 ),
@@ -11749,16 +11750,16 @@ Variable(
     added_in_version="v10",
     text=r"""
 This variable must be enabled to perform Variable Cell Nudged Elastic Band (NEB) calculations,
-i.e. to allow the primitive cell vectors evolve along the path.  
+i.e. to allow the primitive cell vectors evolve along the path.
 The possible values are:
 
   * 0 --> **No cell evolution** (default value)
 
-  * 1 --> **Generalized Solid-State NEB (GSS-NEB)**  
+  * 1 --> **Generalized Solid-State NEB (GSS-NEB)**
   Implements the method described in [[cite:Sheppard2012]].
 
-  * 2 --> **Variable-Cell NEB (VC-NEB)**  
-  Implements the method described in [[cite:Qian2013]].  
+  * 2 --> **Variable-Cell NEB (VC-NEB)**
+  Implements the method described in [[cite:Qian2013]].
     WARNING: Not yet usable! (to be fixed)
 
 > Note: variable-cell NEB is only compatible with the steepest-descent

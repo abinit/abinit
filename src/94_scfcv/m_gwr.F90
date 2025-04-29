@@ -1624,7 +1624,7 @@ end block
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "sig_diago", "b1gw", "b2gw", "symsigma", "symchi", "scf_iteration" &
+     "gwr_completed", "sig_diago", "b1gw", "b2gw", "symsigma", "symchi", "scf_iteration" &
    ])
    NCF_CHECK(ncerr)
 
@@ -1659,8 +1659,8 @@ end block
    ! ======================================================
    NCF_CHECK(nctk_set_datamode(ncid))
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-     "sig_diago", "b1gw", "b2gw", "symsigma", "symchi", "scf_iteration"], &
-     [merge(1, 0, gwr%sig_diago), gwr%b1gw, gwr%b2gw, gwr%dtset%symsigma, dtset%symchi, gwr%scf_iteration])
+     "gwr_completed", "sig_diago", "b1gw", "b2gw", "symsigma", "symchi", "scf_iteration"], &
+     [0, merge(1, 0, gwr%sig_diago), gwr%b1gw, gwr%b2gw, gwr%dtset%symsigma, dtset%symchi, gwr%scf_iteration])
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
@@ -6320,6 +6320,7 @@ end if
      NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
      NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag"), c2r(sigxc_rw_diag)))
      NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag"), spfunc_diag))
+     NCF_CHECK(nf90_put_var(ncid, vid("gwr_completed"), 1))
      NCF_CHECK(nf90_close(ncid))
    end if
  end if ! master
@@ -6980,6 +6981,10 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
      defmode=.True.)
    NCF_CHECK(ncerr)
 
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "gwr_completed" &
+   ])
+
    ! Define arrays with results.
    ! TODO: Add metadata for mats: spin sum, vc cutoff, t/w mesh, handle nspinor 2
    ncerr = nctk_def_arrays(ncid, [ &
@@ -7004,6 +7009,12 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
 
    ! Write global arrays.
    NCF_CHECK(nctk_set_datamode(ncid))
+
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "gwr_completed"], &
+     [0])
+   NCF_CHECK(ncerr)
+
    NCF_CHECK(nf90_put_var(ncid, vid("ngkpt"), gwr%ngkpt))
    NCF_CHECK(nf90_put_var(ncid, vid("ngqpt"), gwr%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, vid("qibz"), gwr%qibz))
@@ -7077,6 +7088,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
    end do ! my_iqi
  end do ! my_is
 
+ NCF_CHECK(nf90_put_var(ncid, vid("gwr_completed"), 1))
  NCF_CHECK(nf90_close(ncid))
  call cwtime_report(" gwr_ncwrite_tchi_wc:", cpu, wall, gflops)
 
