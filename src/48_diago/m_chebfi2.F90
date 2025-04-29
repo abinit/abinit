@@ -1203,7 +1203,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         ! Note: at this point chebfi%AX and chebfi%BX are empty. Must transpose
         !       to fill with correct values.
 
-        write(std_out,*) xgBlock_getId(chebfi%AX%self)
+        write(std_out,*) 'getid before tranpose AX', xgBlock_getId(chebfi%AX%self)
+        write(std_out,*) 'getid before tranpose xAX', xgBlock_getId(chebfi%xAXColsRows)
+        write(std_out,*) 'getid before tranpose xX', xgBlock_getId(chebfi%xXColsRows)
 
         chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
         chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
@@ -1214,7 +1216,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
         call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
 
-        write(std_out,*) xgBlock_getId(chebfi%AX%self)
+        write(std_out,*) 'getid after transpose', xgBlock_getId(chebfi%AX%self)
     
     else
         call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
@@ -1242,8 +1244,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         ABI_WARNING("RayleighRitz did not work, but continue anyway.")
     end if
 
-    write(std_out,*) 'chebfi%eigenvalues after RR'
-    call xgBlock_print(chebfi%eigenvalues,std_out)
+    !write(std_out,*) 'chebfi%eigenvalues after RR'
+    !call xgBlock_print(chebfi%eigenvalues,std_out)
 
     ! Compute residual norm *squared*
     if (chebfi%paw) then
