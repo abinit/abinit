@@ -285,7 +285,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  type(electronpositron_type),pointer:: electronpositron
  type(hdr_type),intent(inout) :: hdr
  type(extfpmd_type),pointer,intent(inout) :: extfpmd
- type(pawang_type),intent(inout) :: pawang
+ type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(inout) :: pawfgr
  type(pseudopotential_type),intent(inout) :: psps
  type(recursion_type),intent(inout) :: rec_set
@@ -735,7 +735,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if (dtset%use_rcpaw==1) then
      ABI_WARNING("Untested Mode RCPAW")
      if(.not.associated(rcpaw)) ABI_MALLOC(rcpaw,)
-     call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps,psps%ntypat,paw_an,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
+     call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,paw_an,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
    end if
 
 !  Allocation of projected WF (optional)
@@ -1944,7 +1944,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if(associated(rcpaw)) then
        if(.not.rcpaw%all_atoms_relaxed) then
          call rcpaw_core_eig(pawtab,pawrad,dtset%ntypat,rcpaw,dtset,&
-&         nfftf,pawfgrtab,vtrial,cplex,ucvol_local,paw_an,&
+&         nfftf,vtrial,cplex,ucvol_local,paw_an,&
 &         gmet,rprimd,xred,ngfftf,my_natom,&
 &         distribfft=mpi_enreg%distribfft,comm_fft=spaceComm_fft,&
 &         mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
@@ -2336,16 +2336,16 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call timab(1461,2,tsec)
  call timab(1462,1,tsec)
 
-! if(associated(rcpaw)) then
+!! if(associated(rcpaw)) then
 ! write(std_out,*) 'RC PRT',dtset%acell_orig(1,1),dtset%tsmear*Ha_K,etotal,&
 !&results_gs%fcart(1,1)*Ha_eV/Bohr_Ang,results_gs%fcart(2,1)*Ha_eV/Bohr_Ang,results_gs%fcart(3,1)*Ha_eV/Bohr_Ang,&
 !&results_gs%fcart(1,2)*Ha_eV/Bohr_Ang,results_gs%fcart(2,2)*Ha_eV/Bohr_Ang,results_gs%fcart(3,2)*Ha_eV/Bohr_Ang,&
 !& -(results_gs%strten(1)+results_gs%strten(2)+results_gs%strten(3)) *HaBohr3_GPa / three,energies%e_fermie,&
-!& rcpaw%atm(1)%eig(2,1),&!,rcpaw%atm(2)%eig(2,1),&
-!& rcpaw%atm(1)%eig(3,1)!,rcpaw%atm(2)%eig(3,1)
+!& rcpaw%atm(1)%eig(2,1),rcpaw%atm(2)%eig(2,1),&
+!& rcpaw%atm(1)%eig(3,1),rcpaw%atm(2)%eig(3,1)
 !!& eigen(1),eigen(2),&
 !!& eigen(3),eigen(8)
-! endif
+!! endif
 
 !Transfer eigenvalues and occupation computed by BigDFT in afterscfloop to eigen.
 #if defined HAVE_BIGDFT

@@ -33,7 +33,7 @@ module m_rcpaw
  use m_paw_atomorb
  use m_paw_atom
  use m_paral_atom
- use m_paw_relax
+ use m_paw_atom_solve
  use m_pawpsp,           only : pawpsp_init_core
  use m_extfpmd,          only : extfpmd_type
  use defs_datatypes,     only : pseudopotential_type
@@ -152,7 +152,7 @@ subroutine rcpaw_destroy(rcpaw)
    enddo
    ABI_FREE(rcpaw%val)
  endif
- if(allocated(rcpaw%eijkl_is_sym)) ABI_FREE(rcpaw%eijkl_is_sym)
+ ABI_SFREE(rcpaw%eijkl_is_sym)
  rcpaw=>null()
 
 end subroutine rcpaw_destroy
@@ -185,9 +185,9 @@ subroutine destroy_valdens(val)
 
  val%compch_sph=zero
  val%has_dens=.false.
- if (allocated(val%rho1)) ABI_FREE(val%rho1)
- if (allocated(val%trho1)) ABI_FREE(val%trho1)
- if (allocated(val%nhat1)) ABI_FREE(val%nhat1)
+ ABI_SFREE(val%rho1)
+ ABI_SFREE(val%trho1)
+ ABI_SFREE(val%nhat1)
 
 end subroutine destroy_valdens
 !!***
@@ -211,12 +211,11 @@ end subroutine destroy_valdens
 !!
 !! SOURCE
 
-subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,psps,ntypat,paw_an,my_natom,comm_atom,mpi_atmtab)
+subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,comm_atom,mpi_atmtab)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ntypat,my_natom
  integer,optional,intent(in) :: comm_atom
- type(pseudopotential_type),intent(inout) :: psps
  type(rcpaw_type), pointer, intent(inout) :: rcpaw
  type(dataset_type), intent(in) :: dtset
 !arrays
@@ -260,9 +259,15 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,psps,ntypat,paw_an,my_nat
  rcpaw%tolnc=dtset%rcpaw_tolnc
 
  ! Init arrays 
- if(.not.allocated(rcpaw%val)) ABI_MALLOC(rcpaw%val,(my_natom))
- if(.not.allocated(rcpaw%atm)) ABI_MALLOC(rcpaw%atm,(ntypat))
- if(.not.allocated(rcpaw%atp)) ABI_MALLOC(rcpaw%atp,(ntypat))
+ if(.not.allocated(rcpaw%val)) then
+   ABI_MALLOC(rcpaw%val,(my_natom))
+ endif
+ if(.not.allocated(rcpaw%atm)) then
+   ABI_MALLOC(rcpaw%atm,(ntypat))
+ endif
+ if(.not.allocated(rcpaw%atp)) then
+   ABI_MALLOC(rcpaw%atp,(ntypat))
+ endif
  rcpaw%all_atoms_relaxed=.true.
  do itypat=1,ntypat
    call pawpsp_init_core(rcpaw%atm(itypat),psp_filename=filpsp(itypat))
@@ -321,7 +326,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,psps,ntypat,paw_an,my_nat
  endif
  rcpaw%nfrtnc=dtset%rcpaw_nfrtnc
 
- call rcpaw_core_energies(rcpaw,pawtab,ntypat)
+ call rcpaw_core_energies(rcpaw,ntypat)
 
 end subroutine rcpaw_init
 !!***
@@ -345,7 +350,7 @@ end subroutine rcpaw_init
 !! SOURCE
 
 subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
-& nfft,pawfgrtab,vtrial,cplex,ucvol,paw_an,&
+& nfft,vtrial,cplex,ucvol,paw_an,&
 &                      gmet,rprimd,xred,ngfft,my_natom,&
 &                      distribfft,comm_fft,mpi_atmtab,comm_atom)
 !Arguments ------------------------------------
@@ -363,7 +368,6 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  integer,intent(in) :: ngfft(18)
  type(pawtab_type), target,intent(inout) :: pawtab(ntypat)
  type(pawrad_type), intent(in) :: pawrad(ntypat)
- type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
  real(dp),intent(in),target :: vtrial(cplex*nfft,dtset%nspden)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  real(dp),intent(in) :: gmet(3,3)
@@ -516,13 +520,12 @@ end subroutine rcpaw_core_eig
 !!
 !! SOURCE
 
-subroutine rcpaw_core_energies(rcpaw,pawtab,ntypat)
+subroutine rcpaw_core_energies(rcpaw,ntypat)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ntypat
  type(rcpaw_type), pointer, intent(inout) :: rcpaw
 !arrays
- type(pawtab_type), intent(in) :: pawtab(ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -543,7 +546,6 @@ subroutine rcpaw_core_energies(rcpaw,pawtab,ntypat)
    endif
  enddo
  write(std_out,*) rcpaw%istep,'ekinc=',rcpaw%ekinc, 'eeig=',rcpaw%eeigc,'edcc=',rcpaw%edcc,'ehnzc',rcpaw%ehnzc
- write(std_out,*) rcpaw%atm(1)%mult,rcpaw%atm(1)%edcc,ntypat
 
 end subroutine rcpaw_core_energies
 !!***

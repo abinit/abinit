@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_paw_relax
+!!****m* ABINIT/m_paw_atom_solve
 !! NAME
-!!  m_paw_relax
+!!  m_paw_atom_solve
 !!
 !! FUNCTION
 !! This module provides a modified version of atompaw ( created by NAWH, MT, FJ) that is needed to implement relaxed core paw.
@@ -22,7 +22,7 @@
 
 #include "libpaw.h"
 
-module m_paw_relax
+module m_paw_atom_solve
 
  USE_DEFS
  USE_MSG_HANDLING
@@ -32,12 +32,8 @@ module m_paw_relax
  use m_libpaw_libxc
  use m_pawtab
  use m_pawrad
-! use m_pawang
-! use m_pawrhoij
  use m_paw_atomorb
  use m_paw_atom,     only :  atompaw_ehnzc,atompaw_dij0,atompaw_kij
-! use m_pawfgrtab,    only : pawfgrtab_type
-! use m_paw_finegrid, only : pawgylm,pawrfgd_fft
  use m_paw_numeric
  use m_pawpsp
  use m_libpaw_tools, only : libpaw_get_free_unit
@@ -55,9 +51,10 @@ module m_paw_relax
 
  
  ! Numerics
+ logical,private,save :: has_to_print
  real(dp),private,save :: machine_zero, machine_precision,machine_infinity 
  real(dp), PRIVATE,save :: minlog,maxlog,minexp,maxexp 
- real(dp), PRIVATE,save :: minlogarg,maxlogarg,minexparg,maxexparg 
+ real(dp), PRIVATE,save :: minlogarg,maxlogarg,minexparg,maxexparg
  real(dp), PARAMETER, PRIVATE :: MaxMix=0.5_dp,seterr=tol11,settoosmall=tol16
  integer, parameter, private :: MaxIter=2000
  ! Grid
@@ -507,7 +504,7 @@ CONTAINS !===========================================================
 
 subroutine atompaw_solve(atp,pawrad,pawtab,&
   & nval,mqgrid_vl,qgrid_vl,epsatm,vlspl,&
-& zion,update_paw,update_tnc,atm,tolnc)
+& zion,update_paw,update_tnc,atm)
 
 ! TODO : vtau
  implicit none
@@ -518,7 +515,6 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  logical,intent(in) :: update_paw,update_tnc
  real(dp), intent(inout) :: epsatm
  real(dp), intent(inout) :: zion
- real(dp), intent(in) :: tolnc
  type(atompaw_type), intent(inout) :: atp
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),intent(inout) :: pawtab
@@ -593,14 +589,14 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  do ir=2,atp%Grid%n
     coredens(ir)=atp%Orbit%coreden(ir)/(four*pi*atp%Grid%r(ir)**2)
  enddo
- call extrapolate(atp%Grid,coredens)
+ call extrapolate(coredens)
  do ir=1,size(pawtab%coredens)
    pawtab%coredens(ir)=coredens(ir)
  enddo
  ! Update edcc
  ff=zero
  ff(2:atp%Grid%n)=atp%Pot%rv(2:atp%Grid%n)*coredens(2:atp%Grid%n)*atp%Grid%r(2:atp%Grid%n)*four_pi
- CALL extrapolate(atp%Grid,ff)
+ CALL extrapolate(ff)
  atm%edcc=integrator(atp%Grid,ff)/two
  LIBPAW_DEALLOCATE(ff)
  ! Update ehnzc
@@ -637,7 +633,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    do ir=2,atp%Grid%n
      tcoredens(ir)=atp%PAW%tcore(ir)/(four*pi*atp%Grid%r(ir)**2)
    enddo
-   call extrapolate(atp%Grid,tcoredens)
+   call extrapolate(tcoredens)
    ! Update tnc
    do ir=1,pawtab%mesh_size
      pawtab%tcoredens(ir,1)=tcoredens(ir)
@@ -683,7 +679,9 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
      enddo
    enddo
    ! Update Kij
-   if(.not.allocated(pawtab%kij)) LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))
+   if(.not.allocated(pawtab%kij)) then
+     LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))
+   endif
    call calc_kij(atp%PAW,atp%Grid,pawtab%kij,pawtab,atp%scalarrelativistic)
  endif
 
@@ -788,8 +786,8 @@ subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,verbosity,e_semicore)
  maxexparg=-LOG(machine_precision);  maxexp=EXP(maxexparg)
 
  ! Read atp input and initialize (temporary)
- atp%has_to_print=.false.
- if(verbosity==1) atp%has_to_print=.true.
+ has_to_print=.false.
+ if(verbosity==1) has_to_print=.true.
  call input_dataset_read(atp,input_file)
  atp%npsc=0
  atp%nppc=1
@@ -903,10 +901,10 @@ subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,verbosity,e_semicore)
  ff=zero
  ff(2:atp%Grid%n)=atp%Pot%rv(2:atp%Grid%n)*&
 &                   atp%Orbit%coreden(2:atp%Grid%n)/atp%Grid%r(2:atp%Grid%n)
- CALL extrapolate(atp%Grid,ff)
+ CALL extrapolate(ff)
  atm%edcc=integrator(atp%Grid,ff)/two
  ff(2:atp%Grid%n)=atp%Orbit%coreden(2:atp%Grid%n)/(four*pi*atp%Grid%r(2:atp%Grid%n)**2)
- CALL extrapolate(atp%Grid,ff)
+ CALL extrapolate(ff)
  call pawrad_init(radmesh,atp%Grid%n,pawrad%mesh_type,pawrad%rstep,pawrad%lstep)
  call atompaw_ehnzc(ff,radmesh,atm%ehnzc,atm%znucl)
  LIBPAW_DEALLOCATE(ff)
@@ -951,18 +949,42 @@ subroutine atompaw_destroy(atp)
 
 ! *********************************************************************
 
- if(allocated(atp%orbit_mod_n)) LIBPAW_DEALLOCATE(atp%orbit_mod_n)
- if(allocated(atp%orbit_mod_l)) LIBPAW_DEALLOCATE(atp%orbit_mod_l)
- if(allocated(atp%orbit_mod_k)) LIBPAW_DEALLOCATE(atp%orbit_mod_k)
- if(allocated(atp%orbit_mod_occ)) LIBPAW_DEALLOCATE(atp%orbit_mod_occ)
- if(allocated(atp%orbit_iscore)) LIBPAW_DEALLOCATE(atp%orbit_iscore)
- if(allocated(atp%orbit_val_n)) LIBPAW_DEALLOCATE(atp%orbit_val_n)
- if(allocated(atp%orbit_val_l)) LIBPAW_DEALLOCATE(atp%orbit_val_l)
- if(allocated(atp%orbit_val_k)) LIBPAW_DEALLOCATE(atp%orbit_val_k)
- if(allocated(atp%basis_add_l)) LIBPAW_DEALLOCATE(atp%basis_add_l)
- if(allocated(atp%basis_add_k)) LIBPAW_DEALLOCATE(atp%basis_add_k)
- if(allocated(atp%basis_add_energy)) LIBPAW_DEALLOCATE(atp%basis_add_energy)
- if(allocated(atp%basis_func_rc)) LIBPAW_DEALLOCATE(atp%basis_func_rc)
+ if(allocated(atp%orbit_mod_n)) then 
+   LIBPAW_DEALLOCATE(atp%orbit_mod_n)
+ endif
+ if(allocated(atp%orbit_mod_l)) then
+   LIBPAW_DEALLOCATE(atp%orbit_mod_l)
+ endif
+ if(allocated(atp%orbit_mod_k)) then
+   LIBPAW_DEALLOCATE(atp%orbit_mod_k)
+ endif
+ if(allocated(atp%orbit_mod_occ)) then
+   LIBPAW_DEALLOCATE(atp%orbit_mod_occ)
+ endif
+ if(allocated(atp%orbit_iscore)) then
+   LIBPAW_DEALLOCATE(atp%orbit_iscore)
+ endif
+ if(allocated(atp%orbit_val_n)) then
+   LIBPAW_DEALLOCATE(atp%orbit_val_n)
+ endif
+ if(allocated(atp%orbit_val_l)) then
+   LIBPAW_DEALLOCATE(atp%orbit_val_l)
+ endif
+ if(allocated(atp%orbit_val_k)) then
+   LIBPAW_DEALLOCATE(atp%orbit_val_k)
+ endif
+ if(allocated(atp%basis_add_l)) then
+   LIBPAW_DEALLOCATE(atp%basis_add_l)
+ endif
+ if(allocated(atp%basis_add_k)) then
+   LIBPAW_DEALLOCATE(atp%basis_add_k)
+ endif
+ if(allocated(atp%basis_add_energy)) then
+   LIBPAW_DEALLOCATE(atp%basis_add_energy)
+ endif
+ if(allocated(atp%basis_func_rc)) then
+   LIBPAW_DEALLOCATE(atp%basis_func_rc)
+ endif
  call DestroyGrid(atp%Grid)
  call DestroyOrbit(atp%Orbit)
  call DestroyPot(atp%Pot)
@@ -1095,7 +1117,7 @@ subroutine marsman_tphi(atp,map,l_in,n)
      dp1=zero
      call derivative(atp%grid,p1,dp1,1,irc)
      p2(:)=p2(:)*atp%grid%r(:)**l_in
-     call extrapolate(atp%Grid,p2)
+     call extrapolate(p2)
      ksi_i0_0(ii)=dp1(irc)
      jj=0
      do io2=1,atp%PAW%nbase
@@ -1111,7 +1133,7 @@ subroutine marsman_tphi(atp,map,l_in,n)
          CALL forward_numerov(atp%Grid,l,irc+5,energy,atp%PAW%rveff,zeroval,p1,nodes,proj=atp%PAW%otp(:,io2))!,p3val=p1(3))
          ksi_ij(:,ii,jj)=p1(:)
          p2(:)=p2(:)*atp%grid%r(:)**l_in
-         call extrapolate(atp%Grid,p2)
+         call extrapolate(p2)
          dp1=zero
          call derivative(atp%grid,p1,dp1,1,irc)
          ksi_ij_0(ii,jj)=dp1(irc)
@@ -1446,7 +1468,7 @@ end subroutine Prepare_Orbit
 subroutine print_check_atompaw_params(atp)
  ! TODO : dirac
  type(atompaw_type),intent(in) :: atp
- integer :: norb,io,ll,nn,ii, ik,kk
+ integer :: norb,io,ll,nn,ii
  if(atp%finitenucleus) LIBPAW_ERROR('Finitenucleus not implemented')
  if(atp%usespline) LIBPAW_ERROR('Usespline not implemented')
  if(atp%HFpostprocess) LIBPAW_ERROR('HFpostprocess not implemented')
@@ -1520,7 +1542,7 @@ subroutine print_check_atompaw_params(atp)
        !   DO ii=1+ll,nn
        !     io=io+1
        !     WRITE(STD_OUT,'(7x,i1,1x,i1,2x,i2,2x,2a)') ii,ll,kk," : ", &
-&      !       MERGE("CORE   ","VALENCE",atp%orbit_iscore(io))
+       ! &      MERGE("CORE   ","VALENCE",atp%orbit_iscore(io))
        !   END DO
        ! END DO
       END IF
@@ -1626,38 +1648,38 @@ subroutine print_check_atompaw_params(atp)
   IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l : radius"
   IF (atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l kappa :radius"
   norb=0
- ! DO ll=0,atp%lmax
- !   DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic)
- !     kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
- !     IF (.NOT.atp%diracrelativistic) kk=0
- !     DO io=1,atp%norbit_val
- !       IF (atp%orbit_val_l(io)==ll.AND. &
-&!          ((.NOT.atp%diracrelativistic).OR.atp%orbit_val_k(io)==kk))THEN
- !         norb=norb+1
- !         IF (.NOT.atp%diracrelativistic) &
-&!           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,a,f7.4)') &
-&!           norb," - ",atp%orbit_val_n(io),ll," :",atp%basis_func_rc(norb)
- !         IF (atp%diracrelativistic) &
-&!           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,2x,i2,2x,a,f7.4)') &
-&!           norb," - ",atp%orbit_val_n(io),ll,kk," :",atp%basis_func_rc(norb)
- !       END IF
- !     END DO
- !     IF (atp%nbasis_add>0) THEN
- !       DO io=1,atp%nbasis_add
- !         IF (atp%basis_add_l(io)==ll.AND. &
-&!          ((.NOT.atp%diracrelativistic).OR.atp%basis_add_k(io)==kk))THEN
- !           norb=norb+1
- !           IF (.NOT.atp%diracrelativistic) &
-&!             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,a,f7.4)') &
-&!             norb," - ",".",ll," : ",atp%basis_func_rc(norb)
- !           IF (atp%diracrelativistic) &
-&!             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,2x,i2,2x,a,f7.4)') &
-&!             norb," - ",".",ll,kk," : ",atp%basis_func_rc(norb)
- !         END IF
- !       END DO
- !     END IF
- !   END DO
- ! END DO
+!  DO ll=0,atp%lmax
+!    DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic)
+!      kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
+!      IF (.NOT.atp%diracrelativistic) kk=0
+!      DO io=1,atp%norbit_val
+!        IF (atp%orbit_val_l(io)==ll.AND. &
+!&          ((.NOT.atp%diracrelativistic).OR.atp%orbit_val_k(io)==kk))THEN
+!          norb=norb+1
+!          IF (.NOT.atp%diracrelativistic) &
+!&           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,a,f7.4)') &
+!&           norb," - ",atp%orbit_val_n(io),ll," :",atp%basis_func_rc(norb)
+!          IF (atp%diracrelativistic) &
+!&           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,2x,i2,2x,a,f7.4)') &
+!&           norb," - ",atp%orbit_val_n(io),ll,kk," :",atp%basis_func_rc(norb)
+!        END IF
+!      END DO
+!      IF (atp%nbasis_add>0) THEN
+!        DO io=1,atp%nbasis_add
+!          IF (atp%basis_add_l(io)==ll.AND. &
+!&          ((.NOT.atp%diracrelativistic).OR.atp%basis_add_k(io)==kk))THEN
+!            norb=norb+1
+!            IF (.NOT.atp%diracrelativistic) &
+!&             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,a,f7.4)') &
+!&             norb," - ",".",ll," : ",atp%basis_func_rc(norb)
+!            IF (atp%diracrelativistic) &
+!&             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,2x,i2,2x,a,f7.4)') &
+!&             norb," - ",".",ll,kk," : ",atp%basis_func_rc(norb)
+!          END IF
+!        END DO
+!      END IF
+!    END DO
+!  END DO
 end subroutine print_check_atompaw_params
 
 
@@ -1677,9 +1699,7 @@ SUBROUTINE Potential_Init(Orbit,Pot,Grid)
  TYPE(OrbitInfo),INTENT(IN) :: Orbit
  TYPE(PotentialInfo),INTENT(INOUT) :: Pot
  TYPE(GridInfo),INTENT(IN) :: Grid
- INTEGER  :: i,io,ir,xocc,ip,l,nfix,j,np
- real(dp) :: en0,qcal,qf,rescale,z,small,zeff,ecoul,v0,etxc,eex
- LOGICAL :: success
+ real(dp) :: ecoul,v0
  CALL atompaw_poisson(Grid,Pot%q,Orbit%den,Pot%rvh,ecoul,v0)
  write(std_out,*) 'In Potential_Init', Pot%q,ecoul
 END SUBROUTINE Potential_Init
@@ -1718,8 +1738,8 @@ SUBROUTINE Orbit_Init(Orbit,Pot,atp)
  TYPE(PotentialInfo),INTENT(INOUT) :: Pot
  TYPE(OrbitInfo),INTENT(INOUT) :: Orbit
  type(atompaw_type), intent(in) :: atp
- INTEGER  :: i,io,ir,ip,l,nfix,np,kappa
- real(dp) :: en0,qcal,qf,rescale,z,small,zeff,xocc,fac,fpi
+ INTEGER  :: io,ir,l,np,kappa
+ real(dp) :: qcal,rescale,zeff,xocc,fpi
  REAL(dp),allocatable :: d(:)
  INTEGER :: initialconfig=0
  IF (initialconfig/=0) STOP 'Error in aeatom -- Orbit_Init already called'
@@ -1788,7 +1808,7 @@ SUBROUTINE Orbit_Init(Orbit,Pot,atp)
  ! determine difference with tauW (Weizsaker)
  LIBPAW_ALLOCATE(d,(atp%Grid%n)); fpi=4*pi
  d(2:atp%Grid%n)=Orbit%den(2:atp%Grid%n)/(fpi*atp%Grid%r(2:atp%Grid%n)**2)
- call extrapolate(atp%Grid,d)
+ call extrapolate(d)
  CALL derivative(atp%Grid,d,Orbit%deltatau)
  Do ir=1,atp%Grid%n
    if (d(ir)>machine_zero) then
@@ -1798,7 +1818,7 @@ SUBROUTINE Orbit_Init(Orbit,Pot,atp)
    endif
  enddo
  d(2:atp%Grid%n)=Orbit%tau(2:atp%Grid%n)/(fpi*atp%Grid%r(2:atp%Grid%n)**2)
- call extrapolate(atp%Grid,d)
+ call extrapolate(d)
  Orbit%deltatau=d-Orbit%deltatau
  LIBPAW_DEALLOCATE(d)
 END SUBROUTINE Orbit_Init
@@ -1822,7 +1842,6 @@ subroutine InitOrbit(Orbit,norbit,n,exctype,diracrelativistic,scalarrelativistic
  logical, intent(in) :: frozencorecalculation,frozenvalecalculation
  integer, intent(in) :: n,norbit
  character(*),intent(in) :: exctype
- integer :: ok
  CALL DestroyOrbit(Orbit)
  Orbit%norbit=norbit;Orbit%exctype=trim(exctype)
  Orbit%nps=0;Orbit%npp=0;Orbit%npd=0;Orbit%npf=0;Orbit%npg=0
@@ -1872,22 +1891,54 @@ end subroutine InitOrbit
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine DestroyOrbit(Orbit)
  type (OrbitInfo), intent(inout) :: Orbit
- if (associated(Orbit%np)) LIBPAW_DEALLOCATE(Orbit%np)
- if (associated(Orbit%l)) LIBPAW_DEALLOCATE(Orbit%l)
- if (associated(Orbit%kappa)) LIBPAW_DEALLOCATE(Orbit%kappa)
- if (associated(Orbit%iscore)) LIBPAW_DEALLOCATE(Orbit%iscore)
- if (associated(Orbit%eig)) LIBPAW_DEALLOCATE(Orbit%eig)
- if (associated(Orbit%occ)) LIBPAW_DEALLOCATE(Orbit%occ)
- if (associated(Orbit%wfn)) LIBPAW_DEALLOCATE(Orbit%wfn)
- if (associated(Orbit%otau)) LIBPAW_DEALLOCATE(Orbit%otau)
- if (associated(Orbit%lwfn)) LIBPAW_DEALLOCATE(Orbit%lwfn)
- if (associated(Orbit%den)) LIBPAW_DEALLOCATE(Orbit%den)
- if (associated(Orbit%tau)) LIBPAW_DEALLOCATE(Orbit%tau)
- IF (ASSOCIATED(Orbit%deltatau)) LIBPAW_DEALLOCATE(Orbit%deltatau)
- if (associated(Orbit%lqp)) LIBPAW_DEALLOCATE(Orbit%lqp)
- if (associated(Orbit%X)) LIBPAW_DEALLOCATE(Orbit%X)
- if(associated(Orbit%coreden)) LIBPAW_DEALLOCATE(Orbit%coreden)
- if(associated(Orbit%valeden)) LIBPAW_DEALLOCATE(Orbit%valeden)
+ if (associated(Orbit%np)) then
+   LIBPAW_DEALLOCATE(Orbit%np)
+ endif
+ if (associated(Orbit%l)) then
+   LIBPAW_DEALLOCATE(Orbit%l)
+ endif
+ if (associated(Orbit%kappa)) then
+   LIBPAW_DEALLOCATE(Orbit%kappa)
+ endif
+ if (associated(Orbit%iscore)) then
+   LIBPAW_DEALLOCATE(Orbit%iscore)
+ endif
+ if (associated(Orbit%eig)) then
+   LIBPAW_DEALLOCATE(Orbit%eig)
+ endif
+ if (associated(Orbit%occ)) then
+   LIBPAW_DEALLOCATE(Orbit%occ)
+ endif
+ if (associated(Orbit%wfn)) then
+   LIBPAW_DEALLOCATE(Orbit%wfn)
+ endif
+ if (associated(Orbit%otau)) then
+   LIBPAW_DEALLOCATE(Orbit%otau)
+ endif
+ if (associated(Orbit%lwfn)) then
+   LIBPAW_DEALLOCATE(Orbit%lwfn)
+ endif
+ if (associated(Orbit%den)) then
+   LIBPAW_DEALLOCATE(Orbit%den)
+ endif
+ if (associated(Orbit%tau)) then
+   LIBPAW_DEALLOCATE(Orbit%tau)
+ endif
+ IF (ASSOCIATED(Orbit%deltatau)) then
+   LIBPAW_DEALLOCATE(Orbit%deltatau)
+ endif
+ if (associated(Orbit%lqp)) then
+   LIBPAW_DEALLOCATE(Orbit%lqp)
+ endif
+ if (associated(Orbit%X)) then
+   LIBPAW_DEALLOCATE(Orbit%X)
+ endif
+ if(associated(Orbit%coreden)) then
+   LIBPAW_DEALLOCATE(Orbit%coreden)
+ endif
+ if(associated(Orbit%valeden)) then
+   LIBPAW_DEALLOCATE(Orbit%valeden)
+ endif
 end subroutine DestroyOrbit
 
 
@@ -1942,7 +1993,6 @@ end subroutine CopyOrbit
 subroutine InitPot(Pot,n)
  integer, intent(in) :: n
  type (PotentialInfo), intent(inout) :: Pot
- integer :: ok
  CALL DestroyPot(Pot)
  LIBPAW_ALLOCATE(Pot%rv,(n))
  LIBPAW_ALLOCATE(Pot%rvn,(n))
@@ -1961,13 +2011,27 @@ end subroutine InitPot
 !!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine DestroyPot(Pot)
  type (PotentialInfo), intent(inout) :: Pot
- if (associated(Pot%rv)) LIBPAW_DEALLOCATE(Pot%rv)
- if (associated(Pot%rvn)) LIBPAW_DEALLOCATE(Pot%rvn)
- if (associated(Pot%rvh)) LIBPAW_DEALLOCATE(Pot%rvh)
- if (associated(Pot%rvx)) LIBPAW_DEALLOCATE(Pot%rvx)
- if (associated(Pot%vtau)) LIBPAW_DEALLOCATE(Pot%vtau)
- if (allocated(Pot%ww)) LIBPAW_DEALLOCATE(Pot%ww)
- if (allocated(Pot%jj)) LIBPAW_DEALLOCATE(Pot%jj)
+ if (associated(Pot%rv)) then
+   LIBPAW_DEALLOCATE(Pot%rv)
+ endif
+ if (associated(Pot%rvn)) then
+   LIBPAW_DEALLOCATE(Pot%rvn)
+ endif
+ if (associated(Pot%rvh)) then
+   LIBPAW_DEALLOCATE(Pot%rvh)
+ endif
+ if (associated(Pot%rvx)) then
+   LIBPAW_DEALLOCATE(Pot%rvx)
+ endif
+ if (associated(Pot%vtau)) then
+   LIBPAW_DEALLOCATE(Pot%vtau)
+ endif
+ if (allocated(Pot%ww)) then
+   LIBPAW_DEALLOCATE(Pot%ww)
+ endif
+ if (allocated(Pot%jj)) then
+   LIBPAW_DEALLOCATE(Pot%jj)
+ endif
 end subroutine DestroyPot
 
 
@@ -2029,8 +2093,8 @@ SUBROUTINE LDAGGA_SCF(atp)
 ! TODO : vtau
  TYPE(atompaw_type), INTENT(inout) :: atp
  TYPE(Anderson_context):: AC
- INTEGER :: n,i
- real(dp) :: en1,etxc,eex,Mixing
+ INTEGER :: n
+ real(dp) :: en1,etxc,eex
  real(dp), ALLOCATABLE :: arg(:)
  LOGICAL :: success
  n=atp%Grid%n
@@ -2072,10 +2136,9 @@ SUBROUTINE LDAGGASub(w,energy,residue,err,success,update,atp)
  LOGICAL, INTENT(OUT) :: success
  LOGICAL, INTENT(IN) :: update
  type(atompaw_type), intent(inout) :: atp
- INTEGER :: i,j,k,n,io,nw
+ INTEGER :: i,j,n,io,nw
  real(dp),ALLOCATABLE :: dum(:)
  real(dp) :: x
- INTEGER:: fcount=0
  TYPE (OrbitInfo) :: tmpOrbit
  TYPE (PotentialInfo) :: tmpPot
  n=atp%Grid%n
@@ -2149,7 +2212,7 @@ SUBROUTINE Get_EXC(atp,Pot,Orbit)
  TYPE(atompaw_type), INTENT(inout) :: atp
  real(dp) :: eex,etot,etxc
  real(dp), ALLOCATABLE :: dum(:)
- INTEGER :: k,n
+ INTEGER :: n
  n=atp%Grid%n
  CALL exch(atp%Grid,Orbit%den,Pot%rvx,etxc,eex,itype=atp%itype,ixc=atp%ixc,xclevel=atp%xclevel,&
 &       needvtau=Pot%needvtau,tau=Orbit%tau,vtau=Pot%vtau)
@@ -2181,7 +2244,7 @@ END SUBROUTINE Get_EXC
 SUBROUTINE initexch(atp)
 ! TODO : vtau
  type(atompaw_type), intent(inout) :: atp
- integer :: id(2)=(/0,0/)
+ !integer :: id(2)=(/0,0/)
  CALL Uppercase(atp%exctype)
  WRITE(STD_OUT,*) atp%exctype
  SELECT CASE(TRIM(atp%exctype))
@@ -2256,10 +2319,9 @@ SUBROUTINE radialexcpbe(Grid,density,Exc,vxc,mu,beta,fin)
  REAL(dp), INTENT(IN) :: density(:)
  REAL(dp), INTENT(OUT) :: Exc, vxc(:)
  INTEGER, INTENT(IN), OPTIONAL :: fin
- INTEGER :: i,j , ierr,Npts
+ INTEGER :: i,Npts
  REAL(dp),ALLOCATABLE :: gradient(:),gradmag(:),gxc(:),dgxcdr(:),fxc(:)
- REAL(dp) :: dfxcdn,dfxcdgbg,sgn
- REAL(dp) :: h
+ REAL(dp) :: dfxcdn,dfxcdgbg
  Npts=Grid%n
  IF (PRESENT(fin)) Npts=fin
  LIBPAW_ALLOCATE(gradient,(Npts))
@@ -2281,7 +2343,7 @@ SUBROUTINE radialexcpbe(Grid,density,Exc,vxc,mu,beta,fin)
    ! to Marc Torrent and Francois Jollet
  ENDDO
  fxc(1)=zero
- CALL extrapolate(Grid,vxc)
+ CALL extrapolate(vxc)
  Exc = integrator(Grid,fxc,1,Npts)
  LIBPAW_DEALLOCATE(gradient)
  LIBPAW_DEALLOCATE(gradmag)
@@ -2322,15 +2384,13 @@ SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,ta
  LOGICAL, INTENT(OUT), OPTIONAL :: needvtau
  REAL(dp), INTENT(IN),OPTIONAL :: tau(:)
  REAL(dp), INTENT(INOUT),OPTIONAL :: vtau(:)
- REAL(dp), ALLOCATABLE ::  tmpd(:),tmpv(:),dum(:),lrho(:)
- REAL(dp), ALLOCATABLE :: exci(:),dfxcdgbg(:,:),gxc(:),dgxcdr(:)
- REAL(dp), ALLOCATABLE :: grad(:),gradmag(:)
- REAL(dp), ALLOCATABLE :: tmpt(:),tmpl(:),dgxcdl(:)
+ REAL(dp), ALLOCATABLE ::  tmpd(:),tmpv(:),dum(:)
+! REAL(dp), ALLOCATABLE :: exci(:),dfxcdgbg(:,:),gxc(:),dgxcdr(:)
+! REAL(dp), ALLOCATABLE :: grad(:),gradmag(:)
+! REAL(dp), ALLOCATABLE :: tmpt(:),tmpl(:),dgxcdl(:)
  REAL(dp) :: fpi,beta,mu
- INTEGER :: i,n,i1,i2,mgga,nspden
- REAL(dp) :: r,r2,rho,exc,vxc
- character(len=500) :: msg
- integer :: firstcall=1
+ INTEGER :: i,n!,i1,i2,mgga,nspden
+ REAL(dp) :: r,r2,exc,vxc
  n=Grid%n
  IF (PRESENT(fin)) n=fin
  fpi=4*pi
@@ -2357,7 +2417,7 @@ SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,ta
        DO i=2,n
          tmpd(i)=den(i)/(fpi*(Grid%r(i)**2))
        ENDDO
-       CALL extrapolate(Grid,tmpd)
+       CALL extrapolate(tmpd)
        IF (PRESENT(fin)) THEN
          CALL radialexcpbe(Grid,tmpd,eexc,tmpv,mu,beta,fin)
        ELSE
@@ -2385,7 +2445,7 @@ SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,ta
      r2=r*r
      tmpd(i)=den(i)/(fpi*r2)
    ENDDO
-   CALL extrapolate(Grid,tmpd)
+   CALL extrapolate(tmpd)
    DO i=1,n
      CALL pwldafunc(tmpd(i),exc,vxc)
      tmpd(i)=den(i)*(exc-vxc)
@@ -2406,6 +2466,9 @@ SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,ta
    LIBPAW_DEALLOCATE(tmpv)
    LIBPAW_DEALLOCATE(dum)
  ENDIF
+ if(present(xclevel).or.present(tau).or.present(ixc)) then
+   write(std_out,*) 'xclevel, ixc, tau: work in progress'
+ endif
 ! Following is from NB 
 !    LIBPAW_ALLOCATE(tmpd,(n))
 !    LIBPAW_ALLOCATE(tmpv,(n))
@@ -2526,7 +2589,7 @@ SUBROUTINE pwldafunc(den,exc,vxc)
  real(dp), PARAMETER :: b3=1.63820_dp
  real(dp), PARAMETER :: b4=0.49294_dp
  ! Variables depending on den
- real(dp) :: n,g,kf,rs,ks
+ real(dp) :: n,kf,rs,ks
  real(dp) :: ex,ec,pprs,decdrs
  real(dp) :: term
  n=den
@@ -2653,8 +2716,8 @@ SUBROUTINE Updatewfn(Grid,Pot,Orbit,rvin,success,BDsolve)
  logical, intent(in) :: bdsolve
  real(dp), INTENT(IN) ::  rvin(:)
  LOGICAL :: success,calc_s,calc_p,calc_d,calc_f,calc_g
- INTEGER :: icount,i,j,k,n,it,start,np,ierr,nroot,s1,s2,s2t
- INTEGER :: is,ip,id,jf,ig,io,l,nfix,ir,nzeff,jierr,nz,kappa
+ INTEGER :: icount,n,it,start,ierr,nroot,s1,s2,s2t
+ INTEGER :: io,l,jierr,nz
  real(dp) :: h,emin,zz
  real(dp), ALLOCATABLE :: dum(:)
  LOGICAL :: OK
@@ -2927,12 +2990,12 @@ SUBROUTINE Get_KinCoul(Grid,Pot,Orbit,SCF,noalt)
  TYPE(OrbitInfo), INTENT(INOUT) :: Orbit
  TYPE(SCFInfo), INTENT(INOUT) :: SCF
  LOGICAL, OPTIONAL :: noalt
- real(dp) :: ecoul,eex,etot,ekin,eone,h,x,v0,qcal,etxc,small,rescale
- real(dp) :: electrons,fac,xocc
- INTEGER :: icount,i,j,k,l,m,n,io
+ real(dp) :: ecoul,eex,ekin,eone,h,x,qcal,small,rescale
+ real(dp) :: electrons,xocc
+ INTEGER :: i,n,io
  real(dp), ALLOCATABLE :: dum(:)
  real(dp) :: small0=tol6,fpi
- INTEGER :: counter=1,ii
+ INTEGER :: counter=1
  n=Grid%n; h=Grid%h
  small=small0
  LIBPAW_ALLOCATE(dum,(n))
@@ -2971,7 +3034,7 @@ SUBROUTINE Get_KinCoul(Grid,Pot,Orbit,SCF,noalt)
  !   Determine difference with tauW (Weizsaker)       
  fpi=4*pi
  dum(2:Grid%n)=Orbit%den(2:Grid%n)/(fpi*Grid%r(2:Grid%n)**2)
- CALL extrapolate(Grid,dum)
+ CALL extrapolate(dum)
  CALL derivative(Grid,dum,Orbit%deltatau)
  Do i=1,Grid%n
    if (dum(i)>machine_zero) then
@@ -2981,7 +3044,7 @@ SUBROUTINE Get_KinCoul(Grid,Pot,Orbit,SCF,noalt)
    endif
  enddo        
  dum(2:Grid%n)=Orbit%tau(2:Grid%n)/(fpi*Grid%r(2:Grid%n)**2)
- call extrapolate(Grid,dum)
+ call extrapolate(dum)
  Orbit%deltatau=dum-Orbit%deltatau
  call poisson_marc(Grid,Pot%q,Orbit%den,Pot%rvh,ecoul)   
 ! call atompaw_poisson(Grid,Pot%q,Orbit%den,Pot%rvh,ecoul)
@@ -3016,6 +3079,7 @@ END SUBROUTINE Get_KinCoul
 !!  Get_Nuclearpotential
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE Get_Nuclearpotential(Grid,Pot)
+! TODO : finitenucleus
  TYPE(GridInfo), INTENT(INOUT) :: Grid
  TYPE(PotentialInfo), INTENT(INOUT) :: Pot
 !  Various finite nuclear models follow the manuscript of Andrae
@@ -3026,10 +3090,9 @@ SUBROUTINE Get_Nuclearpotential(Grid,Pot)
 !     Note that logarithmic grid is reset to be compatible with
 !       nuclear model with approximately NN integration points within
 !       finite nucleus
- INTEGER :: n
- real(dp) :: h,q,v0,v0p
- real(dp) :: r,RR,r0,a
- INTEGER :: i,j,k
+ real(dp) :: h
+ real(dp) :: RR,r0,a
+ INTEGER :: i
  INTEGER, PARAMETER :: NN=651    ! number of grid points within RR
  real(dp), PARAMETER :: gridrange=100._dp
  real(dp), PARAMETER :: bohr=0.529177249_dp  !Ang/Bohr from Andrae
@@ -3039,104 +3102,105 @@ SUBROUTINE Get_Nuclearpotential(Grid,Pot)
      Pot%rvn(i)=-2*Pot%nz!*0.5!Hartree
    ENDDO
  ELSE
-   write(std_out,*) 'Finite nucleus model  -- readjusting integration grid'
-   a=bohr*10._dp**(-5)*(0.57_dp+0.836*   &
-    &     (-1.168_dp+Pot%nz*(2.163_dp+Pot%nz*0.004467_dp)))
-       !  From Eqs. A.3 and 51 in Andrae paper
-   write(std_out,*) 'a parameter calculated to be', a
-   call destroygrid(Grid)
-   SELECT CASE(Pot%finitenucleusmodel)
-      CASE DEFAULT
-        write(std_out,*) 'Error in finitenucleusmodel',Pot%finitenucleusmodel
-        write(std_out,*) ' Exiting '
-        Stop
-      CASE(0)
-        write(std_out,*) 'Original Gaussian model'
-        RR=Pot%nz
-        RR=2.9*10._dp**(-5)*(RR**0.3333333333333333333333333_dp)
-        h=log(FLOAT(NN))/(NN-1)
-        r0=RR/(NN-1)
-        write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
-        Call InitGrid(Grid,h,gridrange,r0=r0)
-        write(std_out,*) 'New Grid ', Grid%n
-        Call DestroyPot(Pot)
-        Call InitPot(Pot,Grid%n)
-        DO i=1,Grid%n
-          Pot%rvn(i)=-2*Pot%nz*derf(Grid%r(i)/RR)
-        ENDDO
-        Pot%Nv0=-2*Pot%nz*sqrt(4._dp/pi)
-        Pot%Nv0p=0._dp
-      CASE(2)
-        write(std_out,*) 'Model 2 -- Breit'
-        RR=sqrt(2._dp)*a
-        h=log(FLOAT(NN))/(NN-1)
-        r0=RR/(NN-1)
-        write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
-        Call InitGrid(Grid,h,gridrange,r0=r0)
-        write(std_out,*) 'New Grid ', Grid%n
-        Call DestroyPot(Pot)
-        Call InitPot(Pot,Grid%n)
-        DO i=1,Grid%n
-          if (Grid%r(i)<RR) then
-            Pot%rvn(i)=-2*Pot%nz*Grid%r(i)*(2._dp-Grid%r(i)/RR)/RR
-          else
-            Pot%rvn(i)=-2*Pot%nz
-          endif
-        ENDDO
-        Pot%Nv0=-2*Pot%nz*2.0_dp/RR
-        Pot%Nv0p=2*Pot%nz/(RR**2)
-      CASE(3)
-        write(std_out,*) 'Model 3 -- uniform'
-        RR=sqrt(5._dp/3._dp)*a
-        h=log(FLOAT(NN))/(NN-1)
-        r0=RR/(NN-1)
-        write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
-        Call InitGrid(Grid,h,gridrange,r0=r0)
-        write(std_out,*) 'New Grid ', Grid%n
-        Call DestroyPot(Pot)
-        Call InitPot(Pot,Grid%n)
-        DO i=1,Grid%n
-          if (Grid%r(i)<RR) then
-            Pot%rvn(i)=-3*Pot%nz*Grid%r(i)*&
-               &     (1._dp-(Grid%r(i)/RR)**2/3)/RR
-          else
-            Pot%rvn(i)=-2*Pot%nz
-          endif
-        ENDDO
-          Pot%Nv0=-3*Pot%nz/RR
-          Pot%Nv0p=0._dp
-      CASE(4)
-        write(std_out,*) 'Model 4 -- exponential'
-        RR=sqrt(1._dp/12._dp)*a
-        h=log(FLOAT(NN))/(NN-1)
-        r0=RR/(NN-1)
-        write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
-        Call InitGrid(Grid,h,gridrange,r0=r0)
-        write(std_out,*) 'New Grid ', Grid%n
-        Call DestroyPot(Pot)
-        Call InitPot(Pot,Grid%n)
-        DO i=1,Grid%n
-         Pot%rvn(i)=-2*Pot%nz*   &
-           &  (1._dp-exp(-grid%r(i)/RR)*(1._dp+0.5_dp*Grid%r(i)/RR))
-        ENDDO
-        Pot%Nv0=-Pot%nz/RR
-        Pot%Nv0p=0._dp
-      CASE(5)
-        write(std_out,*) 'Model 5 -- Gaussian'
-        RR=sqrt(2._dp/3._dp)*a
-        h=log(FLOAT(NN))/(NN-1)
-        r0=RR/(NN-1)
-        write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
-        Call InitGrid(Grid,h,gridrange,r0=r0)
-        write(std_out,*) 'New Grid ', Grid%n
-        Call DestroyPot(Pot)
-        Call InitPot(Pot,Grid%n)
-        DO i=1,Grid%n
-          Pot%rvn(i)=-2*Pot%nz*erf(Grid%r(i)/RR)
-        ENDDO
-        Pot%Nv0=-2*Pot%nz/RR*(sqrt(4._dp/pi))
-        Pot%Nv0p=0._dp
-    END SELECT
+   STOP
+ !  write(std_out,*) 'Finite nucleus model  -- readjusting integration grid'
+ !  a=bohr*10._dp**(-5)*(0.57_dp+0.836*   &
+ !   &     (-1.168_dp+Pot%nz*(2.163_dp+Pot%nz*0.004467_dp)))
+ !      !  From Eqs. A.3 and 51 in Andrae paper
+ !  write(std_out,*) 'a parameter calculated to be', a
+ !  call destroygrid(Grid)
+ !  SELECT CASE(Pot%finitenucleusmodel)
+ !     CASE DEFAULT
+ !       write(std_out,*) 'Error in finitenucleusmodel',Pot%finitenucleusmodel
+ !       write(std_out,*) ' Exiting '
+ !       Stop
+ !     CASE(0)
+ !       write(std_out,*) 'Original Gaussian model'
+ !       RR=Pot%nz
+ !       RR=2.9*10._dp**(-5)*(RR**0.3333333333333333333333333_dp)
+ !       h=log(FLOAT(NN))/(NN-1)
+ !       r0=RR/(NN-1)
+ !       write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
+ !       Call InitGrid(Grid,h,gridrange,r0=r0)
+ !       write(std_out,*) 'New Grid ', Grid%n
+ !       Call DestroyPot(Pot)
+ !       Call InitPot(Pot,Grid%n)
+ !       DO i=1,Grid%n
+ !         Pot%rvn(i)=-2*Pot%nz*derf(Grid%r(i)/RR)
+ !       ENDDO
+ !       Pot%Nv0=-2*Pot%nz*sqrt(4._dp/pi)
+ !       Pot%Nv0p=0._dp
+ !     CASE(2)
+ !       write(std_out,*) 'Model 2 -- Breit'
+ !       RR=sqrt(2._dp)*a
+ !       h=log(FLOAT(NN))/(NN-1)
+ !       r0=RR/(NN-1)
+ !       write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
+ !       Call InitGrid(Grid,h,gridrange,r0=r0)
+ !       write(std_out,*) 'New Grid ', Grid%n
+ !       Call DestroyPot(Pot)
+ !       Call InitPot(Pot,Grid%n)
+ !       DO i=1,Grid%n
+ !         if (Grid%r(i)<RR) then
+ !           Pot%rvn(i)=-2*Pot%nz*Grid%r(i)*(2._dp-Grid%r(i)/RR)/RR
+ !         else
+ !           Pot%rvn(i)=-2*Pot%nz
+ !         endif
+ !       ENDDO
+ !       Pot%Nv0=-2*Pot%nz*2.0_dp/RR
+ !       Pot%Nv0p=2*Pot%nz/(RR**2)
+ !     CASE(3)
+ !       write(std_out,*) 'Model 3 -- uniform'
+ !       RR=sqrt(5._dp/3._dp)*a
+ !       h=log(FLOAT(NN))/(NN-1)
+ !       r0=RR/(NN-1)
+ !       write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
+ !       Call InitGrid(Grid,h,gridrange,r0=r0)
+ !       write(std_out,*) 'New Grid ', Grid%n
+ !       Call DestroyPot(Pot)
+ !       Call InitPot(Pot,Grid%n)
+ !       DO i=1,Grid%n
+ !         if (Grid%r(i)<RR) then
+ !           Pot%rvn(i)=-3*Pot%nz*Grid%r(i)*&
+ !              &     (1._dp-(Grid%r(i)/RR)**2/3)/RR
+ !         else
+ !           Pot%rvn(i)=-2*Pot%nz
+ !         endif
+ !       ENDDO
+ !         Pot%Nv0=-3*Pot%nz/RR
+ !         Pot%Nv0p=0._dp
+ !     CASE(4)
+ !       write(std_out,*) 'Model 4 -- exponential'
+ !       RR=sqrt(1._dp/12._dp)*a
+ !       h=log(FLOAT(NN))/(NN-1)
+ !       r0=RR/(NN-1)
+ !       write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
+ !       Call InitGrid(Grid,h,gridrange,r0=r0)
+ !       write(std_out,*) 'New Grid ', Grid%n
+ !       Call DestroyPot(Pot)
+ !       Call InitPot(Pot,Grid%n)
+ !       DO i=1,Grid%n
+ !        Pot%rvn(i)=-2*Pot%nz*   &
+ !          &  (1._dp-exp(-grid%r(i)/RR)*(1._dp+0.5_dp*Grid%r(i)/RR))
+ !       ENDDO
+ !       Pot%Nv0=-Pot%nz/RR
+ !       Pot%Nv0p=0._dp
+ !     CASE(5)
+ !       write(std_out,*) 'Model 5 -- Gaussian'
+ !       RR=sqrt(2._dp/3._dp)*a
+ !       h=log(FLOAT(NN))/(NN-1)
+ !       r0=RR/(NN-1)
+ !       write(std_out,*) 'calling InitGrid with h, r0 =',h,r0
+ !       Call InitGrid(Grid,h,gridrange,r0=r0)
+ !       write(std_out,*) 'New Grid ', Grid%n
+ !       Call DestroyPot(Pot)
+ !       Call InitPot(Pot,Grid%n)
+ !       DO i=1,Grid%n
+ !         Pot%rvn(i)=-2*Pot%nz*erf(Grid%r(i)/RR)
+ !       ENDDO
+ !       Pot%Nv0=-2*Pot%nz/RR*(sqrt(4._dp/pi))
+ !       Pot%Nv0p=0._dp
+ !   END SELECT
   ENDIF
 END SUBROUTINE Get_Nuclearpotential
 
@@ -3162,8 +3226,8 @@ Subroutine Azeroexpand(Grid,Pot,l,energy,qq,gamma,c1,c2,MA,MB,nr)
  real(dp), INTENT(IN) :: energy
  real(dp), intent(inout) :: qq,gamma,c1,c2,MA,MB
  Integer, optional, INTENT(IN) :: nr
- Integer :: i,j,k,n
- real(dp) :: nz,xx,yy,angm,alpha2,balpha2
+ Integer :: n
+ real(dp) :: nz,angm,alpha2,balpha2
  real(dp) :: Tm10,Tm11,T00,Tm21,Tm22,term
  n=Grid%n
  if (present(nr)) n=min(n,nr)
@@ -3221,7 +3285,7 @@ SUBROUTINE wfnsrinit(Grid,l,wfn,lwfn,istart,finitenucleus,gamma,c1,c2,MA,MB,jj)
  INTEGER, INTENT(OUT) :: istart
  logical, intent(in) :: finitenucleus
  real(dp) :: rr,M
- INTEGER :: i,j,n
+ INTEGER :: i
  wfn=0; lwfn=0
  istart=6
  do i=1,istart
@@ -3254,7 +3318,7 @@ subroutine wfnsrasym(Grid,wfn,lwfn,energy,iend,qq,jj)
  real(dp),intent(in) :: jj(:)
  INTEGER, INTENT(OUT) :: iend
  real(dp) :: rr,x,m,qx
- INTEGER :: i,j,n
+ INTEGER :: i,n
  if (energy>0._dp) then
    write(std_out,*) 'Error in wfnsrasym -- energy > 0', energy
    stop
@@ -3299,7 +3363,7 @@ SUBROUTINE unboundsr(Grid,Pot,nr,l,energy,wfn,nodes)
  real(dp), INTENT(IN) :: energy
  real(dp), INTENT(INOUT) :: wfn(:)
  INTEGER, INTENT(INOUT) :: nodes
- INTEGER :: n,i,j,k,ierr,istart
+ INTEGER :: n,istart
  real(dp) :: scale,gamma,c1,c2,MA,MB,qq
  real(dp), allocatable :: lwfn(:),zz(:,:,:),yy(:,:)
  n=Grid%n
@@ -3367,11 +3431,11 @@ SUBROUTINE boundsr(Grid,Pot,eig,wfn,l,nroot,emin,ierr,success)
  real(dp), ALLOCATABLE :: p1(:),p2(:),dd(:)
  INTEGER :: n
  real(dp) :: nz,h,v0,v0p
- real(dp) :: err,convrez,energy,zeroval,gamma,c1,c2,MA,MB
+ real(dp) :: err,convrez,energy,gamma,c1,c2,MA,MB
  real(dp) :: scale,emax,best,rout,qq
- real(dp) :: arg,r,r2,veff,pppp1,rin,dele,x,rvp1,pnp1,bnp1
- INTEGER :: iter,i,j,k,node,match,mxroot,ntroot,ir,iroot
- INTEGER :: least,many,ifac,istart,iend
+ real(dp) :: rin,dele,x
+ INTEGER :: iter,i,j,node,match,mxroot,ntroot,ir,iroot
+ INTEGER :: ifac,istart,iend
  LOGICAL :: ok
  real(dp), allocatable :: lwfn(:),zz(:,:,:),yy(:,:)
  n=Grid%n
@@ -3652,19 +3716,45 @@ END SUBROUTINE Anderson_ResetMix
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE FreeAnderson(AC)
  TYPE (Anderson_Context), INTENT(INOUT) :: AC
- IF (ASSOCIATED(AC%Matrix)) LIBPAW_DEALLOCATE(AC%Matrix)
- IF (ASSOCIATED(AC%Gamma)) LIBPAW_DEALLOCATE(AC%Gamma)
- IF (ASSOCIATED(AC%DF)) LIBPAW_DEALLOCATE(AC%DF)
- IF (ASSOCIATED(AC%Fprev)) LIBPAW_DEALLOCATE(AC%Fprev)
- IF (ASSOCIATED(AC%DX)) LIBPAW_DEALLOCATE(AC%DX)
- IF (ASSOCIATED(AC%Xprev)) LIBPAW_DEALLOCATE(AC%Xprev)
- IF (ASSOCIATED(AC%IPIV)) LIBPAW_DEALLOCATE(AC%IPIV)
- IF (ASSOCIATED(AC%S)) LIBPAW_DEALLOCATE(AC%S)
- IF (ASSOCIATED(AC%RWork)) LIBPAW_DEALLOCATE(AC%RWork)
- IF (ASSOCIATED(AC%U)) LIBPAW_DEALLOCATE(AC%U)
- IF (ASSOCIATED(AC%VT)) LIBPAW_DEALLOCATE(AC%VT)
- IF (ASSOCIATED(AC%Work)) LIBPAW_DEALLOCATE(AC%Work)
- IF (ASSOCIATED(AC%DupMatrix)) LIBPAW_DEALLOCATE(AC%DupMatrix)
+ IF (ASSOCIATED(AC%Matrix)) then
+   LIBPAW_DEALLOCATE(AC%Matrix)
+ endif
+ IF (ASSOCIATED(AC%Gamma)) then
+   LIBPAW_DEALLOCATE(AC%Gamma)
+ endif
+ IF (ASSOCIATED(AC%DF)) then
+   LIBPAW_DEALLOCATE(AC%DF)
+ endif
+ IF (ASSOCIATED(AC%Fprev)) then
+   LIBPAW_DEALLOCATE(AC%Fprev)
+ endif
+ IF (ASSOCIATED(AC%DX)) then
+   LIBPAW_DEALLOCATE(AC%DX)
+ endif
+ IF (ASSOCIATED(AC%Xprev)) then
+   LIBPAW_DEALLOCATE(AC%Xprev)
+ endif
+ IF (ASSOCIATED(AC%IPIV)) then
+   LIBPAW_DEALLOCATE(AC%IPIV)
+ endif
+ IF (ASSOCIATED(AC%S)) then
+   LIBPAW_DEALLOCATE(AC%S)
+ endif
+ IF (ASSOCIATED(AC%RWork)) then
+   LIBPAW_DEALLOCATE(AC%RWork)
+ endif
+ IF (ASSOCIATED(AC%U)) then
+   LIBPAW_DEALLOCATE(AC%U)
+ endif
+ IF (ASSOCIATED(AC%VT)) then
+   LIBPAW_DEALLOCATE(AC%VT)
+ endif
+ IF (ASSOCIATED(AC%Work)) then
+   LIBPAW_DEALLOCATE(AC%Work)
+ endif
+ IF (ASSOCIATED(AC%DupMatrix)) then
+   LIBPAW_DEALLOCATE(AC%DupMatrix)
+ endif
  RETURN
 END SUBROUTINE FreeAnderson
 
@@ -3693,8 +3783,7 @@ SUBROUTINE InitAnderson_dr(AC,Err_Unit,Nmax,VecSize,NewMix,CondNo,&
  INTEGER, INTENT(IN) :: MaxIter
  real(dp), INTENT(IN) :: err,toosmall
  LOGICAL, INTENT(IN) :: verbose
- INTEGER :: i
- real(dp)    :: tmp , a1,a2,a3
+ real(dp)    :: a1,a2,a3
  AC%Nmax = Nmax          !*** Store the contants
  AC%VecSize = VecSize
  AC%NewMix = NewMix
@@ -3747,8 +3836,8 @@ SUBROUTINE DoAndersonMix(AC,w,E,Esub,success,atp)
  LOGICAL, INTENT(OUT) :: success
  type(atompaw_type), intent(inout) :: atp
  real(dp), ALLOCATABLE :: residue(:),tmp(:)
- real(dp) :: energy,err,v1,v2,v3,v4
- INTEGER :: i,j,k,l,m,n
+ real(dp) :: err,v1,v2,v3,v4
+ INTEGER :: i,n
  real(dp), PARAMETER :: conv1=4.d13,conv2=3.d13,conv3=2.d13,conv4=1.d13
  LOGICAL :: OK
  INTERFACE
@@ -4476,10 +4565,10 @@ subroutine SolveAXeqBM(n,A,B,many)
  integer, intent(in) :: n,many
  real(dp), intent(in) :: A(:,:)
  real(dp), intent(inout) :: B(:)
- integer :: i,j,LWORK
+ integer :: i,LWORK
  real(dp), parameter :: rtol=tol9
  real(dp), parameter :: one=1,zero=0
- real(dp) :: xx,tol
+ real(dp) :: xx
  real(dp), allocatable :: C(:,:),U(:,:),VT(:,:),X(:)
  real(dp), allocatable :: WORK(:)
  real(dp), allocatable :: S(:)
@@ -4537,7 +4626,7 @@ SUBROUTINE taufromwfn(otau,Grid,wfn,l,energy,rPot)
  INTEGER, INTENT(IN) :: l
  REAL(dp), INTENT(OUT) :: otau(:)
  LOGICAL,PARAMETER :: from_e=.false.
- INTEGER :: n,i
+ INTEGER :: n
  REAL(dp) :: fac
  REAL(dp), allocatable:: pbr(:),dpdr(:),d2pdr(:)
  n=Grid%n
@@ -4555,7 +4644,7 @@ SUBROUTINE taufromwfn(otau,Grid,wfn,l,energy,rPot)
    pbr(2:n)=wfn(2:n)/Grid%r(2:n)
    CALL derivative(Grid,pbr,dpdr,2,n)
    otau(2:n)=(Grid%r(2:n)*dpdr(2:n))**2 + fac*pbr(2:n)**2
-   CALL extrapolate(Grid,otau) ; if (l>0) otau(1)=0._dp
+   CALL extrapolate(otau) ; if (l>0) otau(1)=0._dp
    LIBPAW_DEALLOCATE(pbr)
    LIBPAW_DEALLOCATE(dpdr)
  ELSEIF (from_e) THEN
@@ -4567,7 +4656,7 @@ SUBROUTINE taufromwfn(otau,Grid,wfn,l,energy,rPot)
 !  4pir^2* Tau(r) = [Eigenvalue - Veff(r)]*Wfn^2      
    IF (.TRUE.) THEN
      otau(2:n)=(energy-rPot(2:n)/Grid%r(2:n))*wfn(2:n)**2
-     CALL extrapolate(Grid,otau) ; if (l>0) otau(1)=0._dp
+     CALL extrapolate(otau) ; if (l>0) otau(1)=0._dp
 !  Another one:
 !  From energy + correction
    ELSE
@@ -4584,7 +4673,7 @@ SUBROUTINE taufromwfn(otau,Grid,wfn,l,energy,rPot)
      otau(2:n)=0.5_dp*d2pdr(2:n)*Grid%r(2:n)**2 &
 &             +(energy-rPot(2:n)/Grid%r(2:n))*wfn(2:n)**2
      otau(2:n)=otau(2:n) + fac*pbr(2:n)**2
-     CALL extrapolate(Grid,otau) ; if (l>0) otau(1)=0._dp
+     CALL extrapolate(otau) ; if (l>0) otau(1)=0._dp
      LIBPAW_DEALLOCATE(pbr)
      LIBPAW_DEALLOCATE(dpdr)
      LIBPAW_DEALLOCATE(d2pdr)
@@ -4723,7 +4812,7 @@ SUBROUTINE poisson_marc(Grid,q,den,rv,ecoul)
  real(dp), INTENT(IN):: den(:)
  real(dp), INTENT(INOUT) :: rv(:),ecoul,q
  real(dp), ALLOCATABLE :: aa(:),bb(:),cc(:),dd(:)
- real(dp) :: sd,sl,h,h2
+ real(dp) :: h
  INTEGER :: i,n,ir,jr
  n=Grid%n
  h=Grid%h
@@ -4784,12 +4873,11 @@ SUBROUTINE zeropot(Grid,rv,v0,v0p)
  real(dp), INTENT(IN) :: rv(:)    ! Note: rv(1) corresponds to r=0
  real(dp), INTENT(OUT) :: v0,v0p
  real(dp) :: tmp(15),tmp1(15)
- INTEGER :: i,n
  tmp(2:15)=rv(2:15)/Grid%r(2:15)
- CALL extrapolate(Grid,tmp(1:15))
+ CALL extrapolate(tmp(1:15))
  v0=tmp(1)
  CALL derivative(Grid,tmp(1:15),tmp1(1:15),2,15)
- CALL extrapolate(Grid,tmp1(1:15))
+ CALL extrapolate(tmp1(1:15))
  v0p=tmp1(1)
 END SUBROUTINE zeropot
 
@@ -4904,7 +4992,7 @@ FUNCTION integrator(Grid,arg,str,fin)
  real(dp), INTENT(IN) :: arg(:)
  INTEGER, INTENT(IN), OPTIONAL :: str,fin
  real(dp), ALLOCATABLE :: dum(:)
- INTEGER :: i,n,i1,i2
+ INTEGER :: n,i1,i2
  n=Grid%n
  i1=1;i2=n
  IF (PRESENT(str).AND.PRESENT(fin)) THEN
@@ -5008,9 +5096,8 @@ end function countnodes
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! extrapolate(Grid,v)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE extrapolate(Grid,v)
+SUBROUTINE extrapolate(v)
  ! extrapolate array v to r=0 at v(1)
- TYPE (GridInfo), INTENT(IN) :: Grid
  real(dp), INTENT(INOUT) :: v(:)  ! assume v(2),v(3)...  given
  v(1)=5._dp*v(2)-10._dp*v(3)+10._dp*v(4)-5._dp*v(5)+v(6) ! fourth order formula
 END SUBROUTINE extrapolate
@@ -5101,8 +5188,6 @@ FUNCTION Gsecondderiv(Grid,index,g)
  TYPE (GridInfo), INTENT(IN) :: Grid
  INTEGER, INTENT(IN) :: index
  real(dp), INTENT(IN) :: g(:)
- real(dp), ALLOCATABLE :: f(:)
- INTEGER :: i,n
  Gsecondderiv=0
  IF (Grid%type==lineargrid) THEN
    Gsecondderiv=secondderiv(index,g,Grid%h)
@@ -5141,7 +5226,7 @@ FUNCTION secondderiv(index,f,h)
  real(dp) :: secondderiv
  INTEGER, INTENT(IN) :: index
  real(dp), INTENT(IN) :: f(:),h
- INTEGER :: i,n
+ INTEGER :: n
  n=SIZE(f)
  secondderiv=0
  if (index==1.and.n>=5) THEN
@@ -5440,8 +5525,6 @@ SUBROUTINE findh_given_r0(Z,range,r0,n,hval)
  INTEGER, INTENT(IN) :: n
  real(dp), INTENT(IN) :: Z,range,r0
  real(dp), INTENT(INOUT) :: hval
- real(dp) :: h0,dh,f,df
- INTEGER :: i,j,k
  hval=log((Z*range/r0 + 1._dp))/(n-1)
 end subroutine findh_given_r0
 
@@ -5457,7 +5540,7 @@ SUBROUTINE findh(Z,range,n,hval,r0)
  real(dp), INTENT(IN) :: range
  real(dp), INTENT(INOUT) :: hval,r0
  real(dp) :: h0,dh,f,df
- INTEGER :: i,j,k
+ INTEGER :: i
  INTEGER, parameter :: iter=1000
  real(dp), parameter :: eps=1.e-15
  LOGICAL :: success
@@ -5568,10 +5651,18 @@ END SUBROUTINE InitGrid
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE DestroyGrid(Grid)
  TYPE (GridInfo), INTENT(INOUT) :: Grid
- IF (ASSOCIATED(Grid%r)) LIBPAW_DEALLOCATE(Grid%r)
- IF (ASSOCIATED(Grid%drdu)) LIBPAW_DEALLOCATE(Grid%drdu)
- IF (ASSOCIATED(Grid%pref)) LIBPAW_DEALLOCATE(Grid%pref)
- IF (ASSOCIATED(Grid%rr02)) LIBPAW_DEALLOCATE(Grid%rr02)
+ IF (ASSOCIATED(Grid%r)) then
+   LIBPAW_DEALLOCATE(Grid%r)
+ endif
+ IF (ASSOCIATED(Grid%drdu)) then
+   LIBPAW_DEALLOCATE(Grid%drdu)
+ endif
+ IF (ASSOCIATED(Grid%pref)) then
+   LIBPAW_DEALLOCATE(Grid%pref)
+ endif
+ IF (ASSOCIATED(Grid%rr02)) then
+   LIBPAW_DEALLOCATE(Grid%rr02)
+ endif
 END SUBROUTINE DestroyGrid
 
 
@@ -5599,9 +5690,9 @@ SUBROUTINE backward_numerov(Grid,l,match,energy,rv,wfn,wgt,nend,proj)
  real(dp), intent(in), optional :: proj(:)
  integer, intent(in), optional :: nend
  real(dp), ALLOCATABLE :: a(:),b(:),p(:),c(:)
- real(dp) :: xx,angm,h,h2,scale
+ real(dp) :: angm,h,h2,scale
  real(dp), PARAMETER :: vlarg=1.d30
- INTEGER :: i,j,k,n
+ INTEGER :: i,n
  LOGICAL :: withwgt
  withwgt=.false.
  If (PRESENT(wgt)) withwgt=.true.
@@ -5674,7 +5765,7 @@ SUBROUTINE forward_numerov(Grid,l,many,energy,rv,zeroval,wfn,nodes,wgt,proj,p3va
  real(dp), ALLOCATABLE :: a(:),b(:),p(:),c(:)
  real(dp) :: xx,angm,h,h2,scale
  real(dp), PARAMETER :: vlarg=1.d30
- INTEGER :: i,j,k,n
+ INTEGER :: i
  LOGICAL :: withwgt
  withwgt=.false.
  If (PRESENT(wgt)) withwgt=.true.
@@ -5752,9 +5843,9 @@ SUBROUTINE SetPAWOptions2(atp,success)
 ! TODO : vtau,ultrasoft
  LOGICAL , INTENT(OUT) :: success
  type(atompaw_type), intent(inout) :: atp
- INTEGER :: i,pdeg,l
- integer :: Orthoindex,PSindex,Projectorindex,Vlocalindex
- real(dp) :: qcut,x,y,e
+ INTEGER :: l
+ integer :: Projectorindex,Vlocalindex
+ real(dp) :: e
  success=.true.
  IF (atp%projector_type==PROJECTOR_TYPE_MARSMAN) Projectorindex=MARSMAN
  IF (atp%vloc_type==VLOC_TYPE_MTROULLIER)  Vlocalindex=MTROULLIER
@@ -5834,14 +5925,12 @@ SUBROUTINE Troullier(Grid,Pot,PAW,l,e,needvtau,scalarrelativistic)
  real(dp), ALLOCATABLE :: VNC(:)
  real(dp) :: A0,A,B,B0,C,C0,D,F,S
  real(dp) :: Coef(6),Coef0,Coef0old
- real(dp) :: h,rc,delta,x,pp,dpp,ddpp,dddpp,ddddpp
- real(dp) :: gam,bet
- INTEGER :: i,j,k,n,iter,nr,nodes,irc,ok,m,wavetype
+ real(dp) :: h,rc,delta,x,dpp,ddpp,dddpp,ddddpp
+ INTEGER :: i,n,iter,nr,nodes,irc
  INTEGER, PARAMETER :: niter=5000
  real(dp), PARAMETER :: small=tol9
  real(dp), ALLOCATABLE ::  wfn(:),p(:),dum(:),aux(:)
  real(dp), POINTER :: r(:),rv(:)
- CHARACTER(132) :: line
  n=Grid%n
  h=Grid%h
  r=>Grid%r
@@ -5964,11 +6053,9 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
  TYPE(OrbitInfo), INTENT(INOUT) :: Orbit
  TYPE(PseudoInfo), intent(inout) :: PAW
  TYPE(atompaw_type), intent(in) :: atp
- INTEGER :: n,irc,nbase,l,lmax,mxbase,lng,currentnode,nroot
- INTEGER :: i,j,k,io,ok,nbl,nr,nodes,ib,loop,niter,iter,ibasis_add
- LOGICAL :: success
- real(dp) :: h,rc,q00,energy,rat,delta,thisconv,qeff,tq,range
- real(dp) :: ecoul,etxc,eexc
+ INTEGER :: n,irc,nbase,l,lmax,mxbase,currentnode
+ INTEGER :: i,k,io,nbl,nr,nodes,ibasis_add
+ real(dp) :: h,rc,energy,rat,range
  real(dp),allocatable :: checkden(:),valden(:)
  real(dp), POINTER  :: r(:)
  n=Grid%n
@@ -6110,8 +6197,7 @@ SUBROUTINE smoothcore(Grid,orig,PAW)
  type(pseudoInfo), intent(inout) :: PAW
  real(dp) :: rc,h,x,y,z,u0,u2,u4
  real(dp), allocatable :: d1(:),d2(:)
- INTEGER :: i,j,k,n,irc
- INTEGER :: counter=0
+ INTEGER :: i,n,irc
  n=Grid%n
  h=Grid%h
  irc=PAW%irc_core
@@ -6147,8 +6233,8 @@ SUBROUTINE setcoretail(Grid,coreden,PAW)
  TYPE(GridInfo), INTENT(IN) :: Grid
  real(dp), INTENT(IN) :: coreden(:)
  type(pseudoInfo), intent(inout) :: PAW
- real(dp) :: rc,h,x,y,z,u0,u2,u4
- INTEGER :: i,j,k,n,irc
+ real(dp) :: rc,h,z
+ INTEGER :: i,n,irc
  n=Grid%n
  h=Grid%h
  irc=PAW%irc_core
@@ -6190,7 +6276,7 @@ SUBROUTINE altdtij(Grid,PAW,ib,ic,tij)
  TYPE(PseudoInfo), INTENT(IN) :: PAW
  INTEGER, INTENT(IN) :: ib,ic
  REAL(8), INTENT(OUT) :: tij
- INTEGER :: n,i,ok,l,irc
+ INTEGER :: n,i,l,irc
  REAL(8) :: angm
  REAL(8), POINTER :: r(:)
  REAL(8), ALLOCATABLE :: dum(:),tdel1(:),tdel2(:),aux(:),auxp(:)
@@ -6235,11 +6321,9 @@ SUBROUTINE besselps(Grid,Pot,PAW)
  TYPE(Gridinfo), INTENT(IN) :: Grid
  TYPE(Potentialinfo), INTENT(IN) :: Pot
  TYPE(Pseudoinfo), INTENT(INOUT) ::  PAW
- INTEGER :: i,irc,l,n
- real(dp) :: e,rc,alpha,beta,vv,vvp,AA,QQ,xx(1)
- real(dp),ALLOCATABLE ::  VNC(:),wfn(:)
+ INTEGER :: i,irc,n
+ real(dp) :: rc,alpha,beta,vv,vvp,AA,QQ,xx(1)
  real(dp),POINTER :: r(:),rv(:)
- CHARACTER(132) :: line
  n=Grid%n
  r=>Grid%r
  rv=>Pot%rv
@@ -6310,7 +6394,7 @@ SUBROUTINE InitPAW(PAW,Grid,Orbit)
  TYPE(GridInfo), INTENT(IN) :: Grid
  TYPE(OrbitInfo), INTENT(IN) :: Orbit
  Type(PseudoInfo), INTENT(INOUT) :: PAW
- INTEGER :: io,l,n,mxbase,nbase,ok
+ INTEGER :: io,l,n,mxbase,nbase
 !Initialize logical variables
  PAW%multi_rc=.false.
  PAW%poscorenhat=.true.
@@ -6415,69 +6499,195 @@ END SUBROUTINE InitPAW
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Subroutine DestroyPAW(PAW)
  Type(PseudoInfo), INTENT(INOUT) :: PAW
- IF(associated(PAW%Ktvtau)) LIBPAW_DEALLOCATE(PAW%Ktvtau)
- IF(associated(PAW%Krveff)) LIBPAW_DEALLOCATE(PAW%Krveff)
- if(associated(PAW%Kunscreen)) LIBPAW_DEALLOCATE(PAW%Kunscreen)
- IF (ASSOCIATED(PAW%rcio)) LIBPAW_DEALLOCATE(PAW%rcio)
- If (ASSOCIATED(PAW%vloc)) LIBPAW_DEALLOCATE(PAW%vloc)
- If (ASSOCIATED(PAW%abinitvloc)) LIBPAW_DEALLOCATE(PAW%abinitvloc)
- If (ASSOCIATED(PAW%abinitnohat)) LIBPAW_DEALLOCATE(PAW%abinitnohat)
- If (ASSOCIATED(PAW%rveff)) LIBPAW_DEALLOCATE(PAW%rveff)
- If (ASSOCIATED(PAW%AErefrv)) LIBPAW_DEALLOCATE(PAW%AErefrv)
- If (ASSOCIATED(PAW%rvx)) LIBPAW_DEALLOCATE(PAW%rvx)
- If (ASSOCIATED(PAW%trvx)) LIBPAW_DEALLOCATE(PAW%trvx)
- If (ASSOCIATED(PAW%projshape)) LIBPAW_DEALLOCATE(PAW%projshape)
- If (ASSOCIATED(PAW%hatshape)) LIBPAW_DEALLOCATE(PAW%hatshape)
- If (ASSOCIATED(PAW%hatden)) LIBPAW_DEALLOCATE(PAW%hatden)
- If (ASSOCIATED(PAW%hatpot)) LIBPAW_DEALLOCATE(PAW%hatpot)
- If (ASSOCIATED(PAW%den)) LIBPAW_DEALLOCATE(PAW%den)
- If (ASSOCIATED(PAW%tden)) LIBPAW_DEALLOCATE(PAW%tden)
- If (ASSOCIATED(PAW%core)) LIBPAW_DEALLOCATE(PAW%core)
- If (ASSOCIATED(PAW%tcore)) LIBPAW_DEALLOCATE(PAW%tcore)
- If (ASSOCIATED(PAW%coretau)) LIBPAW_DEALLOCATE(PAW%coretau)
- If (ASSOCIATED(PAW%tcoretau)) LIBPAW_DEALLOCATE(PAW%tcoretau)
- If (ASSOCIATED(PAW%valetau)) LIBPAW_DEALLOCATE(PAW%valetau)
- If (ASSOCIATED(PAW%tvaletau)) LIBPAW_DEALLOCATE(PAW%tvaletau)
- If (ASSOCIATED(PAW%vtau)) LIBPAW_DEALLOCATE(PAW%vtau)
- If (ASSOCIATED(PAW%tvtau)) LIBPAW_DEALLOCATE(PAW%tvtau)
- If (ASSOCIATED(PAW%nhatv)) LIBPAW_DEALLOCATE(PAW%nhatv)
- If (ASSOCIATED(PAW%np)) LIBPAW_DEALLOCATE(PAW%np)
- If (ASSOCIATED(PAW%l)) LIBPAW_DEALLOCATE(PAW%l)
- If (ASSOCIATED(PAW%nodes)) LIBPAW_DEALLOCATE(PAW%nodes)
- If (ASSOCIATED(PAW%kappa)) LIBPAW_DEALLOCATE(PAW%kappa)
- If (ASSOCIATED(PAW%rng)) LIBPAW_DEALLOCATE(PAW%rng)
- If (ASSOCIATED(PAW%label)) LIBPAW_DEALLOCATE(PAW%label)
- If (ASSOCIATED(PAW%phi)) LIBPAW_DEALLOCATE(PAW%phi)
- If (ASSOCIATED(PAW%tphi)) LIBPAW_DEALLOCATE(PAW%tphi)
- If (ASSOCIATED(PAW%tp)) LIBPAW_DEALLOCATE(PAW%tp)
- If (ASSOCIATED(PAW%ophi)) LIBPAW_DEALLOCATE(PAW%ophi)
- If (ASSOCIATED(PAW%otphi)) LIBPAW_DEALLOCATE(PAW%otphi)
- If (ASSOCIATED(PAW%otp)) LIBPAW_DEALLOCATE(PAW%otp)
- If (ASSOCIATED(PAW%Kop)) LIBPAW_DEALLOCATE(PAW%Kop)
- If (ASSOCIATED(PAW%eig)) LIBPAW_DEALLOCATE(PAW%eig)
- If (ASSOCIATED(PAW%occ)) LIBPAW_DEALLOCATE(PAW%occ)
- If (ASSOCIATED(PAW%ck)) LIBPAW_DEALLOCATE(PAW%ck)
- If (ASSOCIATED(PAW%vrc)) LIBPAW_DEALLOCATE(PAW%vrc)
- If (ASSOCIATED(PAW%oij)) LIBPAW_DEALLOCATE(PAW%oij)
- If (ASSOCIATED(PAW%dij)) LIBPAW_DEALLOCATE(PAW%dij)
- If (ASSOCIATED(PAW%wij)) LIBPAW_DEALLOCATE(PAW%wij)
- If (ASSOCIATED(PAW%rVf)) LIBPAW_DEALLOCATE(PAW%rVf)
- If (ASSOCIATED(PAW%rtVf)) LIBPAW_DEALLOCATE(PAW%rtVf)
- If (ASSOCIATED(PAW%g)) LIBPAW_DEALLOCATE(PAW%g)
- If (ASSOCIATED(PAW%Kij)) LIBPAW_DEALLOCATE(PAW%Kij)
- If (ASSOCIATED(PAW%Vfij)) LIBPAW_DEALLOCATE(PAW%Vfij)
- If (ASSOCIATED(PAW%mLij)) LIBPAW_DEALLOCATE(PAW%mLij)
- If (ASSOCIATED(PAW%DR)) LIBPAW_DEALLOCATE(PAW%DR)
- If (ASSOCIATED(PAW%DRVC)) LIBPAW_DEALLOCATE(PAW%DRVC)
- If (ASSOCIATED(PAW%TXVC)) LIBPAW_DEALLOCATE(PAW%TXVC)
- If (ASSOCIATED(PAW%valencemap)) LIBPAW_DEALLOCATE(PAW%valencemap)
- If (ASSOCIATED(PAW%lmbd)) LIBPAW_DEALLOCATE(PAW%lmbd)
- If (ASSOCIATED(PAW%DRC)) LIBPAW_DEALLOCATE(PAW%DRC)
- If (ASSOCIATED(PAW%DRCC)) LIBPAW_DEALLOCATE(PAW%DRCC)
- If (ASSOCIATED(PAW%DRCjkl)) LIBPAW_DEALLOCATE(PAW%DRCjkl)
- If (ASSOCIATED(PAW%mLic)) LIBPAW_DEALLOCATE(PAW%mLic)
- If (ASSOCIATED(PAW%mLcc)) LIBPAW_DEALLOCATE(PAW%mLcc)
- If (ASSOCIATED(PAW%Dcj)) LIBPAW_DEALLOCATE(PAW%Dcj)
+ IF(associated(PAW%Ktvtau)) then
+   LIBPAW_DEALLOCATE(PAW%Ktvtau)
+ endif
+ IF(associated(PAW%Krveff)) then
+   LIBPAW_DEALLOCATE(PAW%Krveff)
+ endif
+ if(associated(PAW%Kunscreen)) then
+   LIBPAW_DEALLOCATE(PAW%Kunscreen)
+ endif
+ IF (ASSOCIATED(PAW%rcio)) then
+   LIBPAW_DEALLOCATE(PAW%rcio)
+ endif
+ If (ASSOCIATED(PAW%vloc)) then
+   LIBPAW_DEALLOCATE(PAW%vloc)
+ endif
+ If (ASSOCIATED(PAW%abinitvloc)) then
+   LIBPAW_DEALLOCATE(PAW%abinitvloc)
+ endif
+ If (ASSOCIATED(PAW%abinitnohat)) then
+   LIBPAW_DEALLOCATE(PAW%abinitnohat)
+ endif
+ If (ASSOCIATED(PAW%rveff)) then
+   LIBPAW_DEALLOCATE(PAW%rveff)
+ endif
+ If (ASSOCIATED(PAW%AErefrv)) then
+   LIBPAW_DEALLOCATE(PAW%AErefrv)
+ endif
+ If (ASSOCIATED(PAW%rvx)) then
+   LIBPAW_DEALLOCATE(PAW%rvx)
+ endif
+ If (ASSOCIATED(PAW%trvx)) then
+  LIBPAW_DEALLOCATE(PAW%trvx)
+ endif
+ If (ASSOCIATED(PAW%projshape)) then
+   LIBPAW_DEALLOCATE(PAW%projshape)
+ endif
+ If (ASSOCIATED(PAW%hatshape)) then
+   LIBPAW_DEALLOCATE(PAW%hatshape)
+ endif
+ If (ASSOCIATED(PAW%hatden)) then
+   LIBPAW_DEALLOCATE(PAW%hatden)
+ endif
+ If (ASSOCIATED(PAW%hatpot)) then
+   LIBPAW_DEALLOCATE(PAW%hatpot)
+ endif
+ If (ASSOCIATED(PAW%den)) then
+   LIBPAW_DEALLOCATE(PAW%den)
+ endif
+ If (ASSOCIATED(PAW%tden)) then
+   LIBPAW_DEALLOCATE(PAW%tden)
+ endif
+ If (ASSOCIATED(PAW%core)) then
+   LIBPAW_DEALLOCATE(PAW%core)
+ endif
+ If (ASSOCIATED(PAW%tcore)) then
+   LIBPAW_DEALLOCATE(PAW%tcore)
+ endif
+ If (ASSOCIATED(PAW%coretau)) then
+   LIBPAW_DEALLOCATE(PAW%coretau)
+ endif
+ If (ASSOCIATED(PAW%tcoretau)) then
+   LIBPAW_DEALLOCATE(PAW%tcoretau)
+ endif
+ If (ASSOCIATED(PAW%valetau)) then
+   LIBPAW_DEALLOCATE(PAW%valetau)
+ endif
+ If (ASSOCIATED(PAW%tvaletau)) then
+   LIBPAW_DEALLOCATE(PAW%tvaletau)
+ endif
+ If (ASSOCIATED(PAW%vtau)) then
+   LIBPAW_DEALLOCATE(PAW%vtau)
+ endif
+ If (ASSOCIATED(PAW%tvtau)) then
+   LIBPAW_DEALLOCATE(PAW%tvtau)
+ endif
+ If (ASSOCIATED(PAW%nhatv)) then
+   LIBPAW_DEALLOCATE(PAW%nhatv)
+ endif
+ If (ASSOCIATED(PAW%np)) then
+   LIBPAW_DEALLOCATE(PAW%np)
+ endif
+ If (ASSOCIATED(PAW%l)) then
+   LIBPAW_DEALLOCATE(PAW%l)
+ endif
+ If (ASSOCIATED(PAW%nodes)) then
+   LIBPAW_DEALLOCATE(PAW%nodes)
+ endif
+ If (ASSOCIATED(PAW%kappa)) then
+   LIBPAW_DEALLOCATE(PAW%kappa)
+ endif
+ If (ASSOCIATED(PAW%rng)) then
+   LIBPAW_DEALLOCATE(PAW%rng)
+ endif
+ If (ASSOCIATED(PAW%label)) then
+   LIBPAW_DEALLOCATE(PAW%label)
+ endif
+ If (ASSOCIATED(PAW%phi)) then
+   LIBPAW_DEALLOCATE(PAW%phi)
+ endif
+ If (ASSOCIATED(PAW%tphi)) then
+   LIBPAW_DEALLOCATE(PAW%tphi)
+ endif
+ If (ASSOCIATED(PAW%tp)) then
+   LIBPAW_DEALLOCATE(PAW%tp)
+ endif
+ If (ASSOCIATED(PAW%ophi)) then
+   LIBPAW_DEALLOCATE(PAW%ophi)
+ endif
+ If (ASSOCIATED(PAW%otphi)) then
+   LIBPAW_DEALLOCATE(PAW%otphi)
+ endif
+ If (ASSOCIATED(PAW%otp)) then
+   LIBPAW_DEALLOCATE(PAW%otp)
+ endif
+ If (ASSOCIATED(PAW%Kop)) then
+   LIBPAW_DEALLOCATE(PAW%Kop)
+ endif
+ If (ASSOCIATED(PAW%eig)) then
+   LIBPAW_DEALLOCATE(PAW%eig)
+ endif
+ If (ASSOCIATED(PAW%occ)) then
+   LIBPAW_DEALLOCATE(PAW%occ)
+ endif
+ If (ASSOCIATED(PAW%ck)) then
+   LIBPAW_DEALLOCATE(PAW%ck)
+ endif
+ If (ASSOCIATED(PAW%vrc)) then
+   LIBPAW_DEALLOCATE(PAW%vrc)
+ endif
+ If (ASSOCIATED(PAW%oij)) then
+   LIBPAW_DEALLOCATE(PAW%oij)
+ endif
+ If (ASSOCIATED(PAW%dij)) then
+   LIBPAW_DEALLOCATE(PAW%dij)
+ endif
+ If (ASSOCIATED(PAW%wij)) then
+   LIBPAW_DEALLOCATE(PAW%wij)
+ endif
+ If (ASSOCIATED(PAW%rVf)) then
+   LIBPAW_DEALLOCATE(PAW%rVf)
+ endif
+ If (ASSOCIATED(PAW%rtVf)) then
+   LIBPAW_DEALLOCATE(PAW%rtVf)
+ endif
+ If (ASSOCIATED(PAW%g)) then
+   LIBPAW_DEALLOCATE(PAW%g)
+ endif
+ If (ASSOCIATED(PAW%Kij)) then
+   LIBPAW_DEALLOCATE(PAW%Kij)
+ endif
+ If (ASSOCIATED(PAW%Vfij)) then
+   LIBPAW_DEALLOCATE(PAW%Vfij)
+ endif
+ If (ASSOCIATED(PAW%mLij)) then
+   LIBPAW_DEALLOCATE(PAW%mLij)
+ endif
+ If (ASSOCIATED(PAW%DR)) then
+   LIBPAW_DEALLOCATE(PAW%DR)
+ endif
+ If (ASSOCIATED(PAW%DRVC)) then
+   LIBPAW_DEALLOCATE(PAW%DRVC)
+ endif
+ If (ASSOCIATED(PAW%TXVC)) then
+   LIBPAW_DEALLOCATE(PAW%TXVC)
+ endif
+ If (ASSOCIATED(PAW%valencemap)) then
+   LIBPAW_DEALLOCATE(PAW%valencemap)
+ endif
+ If (ASSOCIATED(PAW%lmbd)) then
+   LIBPAW_DEALLOCATE(PAW%lmbd)
+ endif
+ If (ASSOCIATED(PAW%DRC)) then
+   LIBPAW_DEALLOCATE(PAW%DRC)
+ endif
+ If (ASSOCIATED(PAW%DRCC)) then
+   LIBPAW_DEALLOCATE(PAW%DRCC)
+ endif
+ If (ASSOCIATED(PAW%DRCjkl)) then
+   LIBPAW_DEALLOCATE(PAW%DRCjkl)
+ endif
+ If (ASSOCIATED(PAW%mLic)) then
+   LIBPAW_DEALLOCATE(PAW%mLic)
+ endif
+ If (ASSOCIATED(PAW%mLcc)) then
+   LIBPAW_DEALLOCATE(PAW%mLcc)
+ endif
+ If (ASSOCIATED(PAW%Dcj)) then
+   LIBPAW_DEALLOCATE(PAW%Dcj)
+ endif
  If (ASSOCIATED(PAW%OCCwfn)) then
    call DestroyOrbit(PAW%OCCwfn)
    LIBPAW_DEALLOCATE(PAW%OCCwfn)
@@ -6508,10 +6718,11 @@ SUBROUTINE BoundNumerov(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,BDsolve,success)
  LOGICAL, INTENT(IN) :: BDsolve
  LOGICAL, INTENT(INOUT) :: success
  INTEGER, PARAMETER :: repeat=4
- INTEGER :: i,j,k,n,many,count
- real(dp), ALLOCATABLE :: vec(:,:),f(:),dum(:),e(:)
- real(dp) :: x
+ INTEGER :: j
  ! TODO : BDsolve
+ if(BDsolve) then
+   STOP
+ endif
  write(std_out,*) 'Before newboundsch',l,nroot, Eig(1:nroot)
  CALL newboundsch(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,success)
  write(std_out,*) 'After newboundsch',l,nroot, Eig(1:nroot)
@@ -6558,12 +6769,12 @@ SUBROUTINE newboundsch(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,ok)
  INTEGER, PARAMETER :: niter=300
  real(dp), ALLOCATABLE :: p1(:),p2(:),dd(:)
  INTEGER :: n,ierr
- real(dp) :: h,q,qq
+ real(dp) :: h,qq
  real(dp) :: err,convrez,energy,zeroval,zz
  real(dp) :: scale,emin,emax,best,rout,ppp
- real(dp) :: arg,r,r2,veff,pppp1,rin,dele,x,rvp1,pnp1,bnp1
- INTEGER :: iter,i,j,k,node,match,mxroot,ntroot,ir,iroot
- INTEGER :: least,many,ifac
+ real(dp) :: rin,dele,x
+ INTEGER :: iter,i,j,node,match,ir,iroot
+ INTEGER :: ifac
  ifac=0
  n=Grid%n
  h=Grid%h
@@ -6778,8 +6989,8 @@ SUBROUTINE unboundsch(Grid,rv,v0,v0p,nr,l,energy,wfn,nodes)
  real(dp), INTENT(IN) :: energy
  real(dp), INTENT(INOUT) :: wfn(:)
  INTEGER, INTENT(INOUT) :: nodes
- INTEGER :: n,i,j,k,ierr
- real(dp) :: zeroval,scale,zz
+ INTEGER :: n,ierr
+ real(dp) :: zeroval,scale
  n=Grid%n
  IF (nr > n) THEN
    WRITE(STD_OUT,*) 'Error in unboundsch -- nr > n', nr,n
@@ -6878,7 +7089,7 @@ END SUBROUTINE UpperCase
 LOGICAL FUNCTION checkline2(inputline,in1,in2)
  CHARACTER(*), INTENT(IN) :: inputline
  CHARACTER(*), INTENT(IN) :: in1,in2
- INTEGER :: i,leninput,len1,len2
+ INTEGER :: leninput,len1,len2
  CHARACTER(120) :: inputline_u,in1_u,in2_u
  inputline_u=trim(inputline) ; call UpperCase(inputline_u)
  in1_u=trim(in1) ; call UpperCase(in1_u)
@@ -7000,7 +7211,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    CALL eliminate_comment(inputline)
    READ(inputline,*) atp%atomic_symbol,atp%atomic_charge
    !Print read data
-   IF (atp%has_to_print) THEN
+   IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a,a2)') "Atomic symbol : ",atp%atomic_symbol
      WRITE(STD_OUT,'(3x,a,i0)') "Atomic charge : ",atp%atomic_charge
    END IF
@@ -7138,7 +7349,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    IF (atp%fixed_zero) &
   &   READ(unit=exchangecorrelationandgridline(ifixz+10:),fmt=*)atp%fixed_zero_index
    !Print read data
-   IF (atp%has_to_print) THEN
+   IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,2a)')     "Scalar-relativistic calculation:",MERGE("YES"," NO",atp%scalarrelativistic)
      WRITE(STD_OUT,'(3x,2a)')     "Dirac-relativistic calculation:",MERGE("YES"," NO",atp%diracrelativistic)
      IF (atp%usespline) THEN
@@ -7189,7 +7400,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
 &                              +max(atp%np(4)-3,0)+max(atp%np(5)-4,0)
    IF (atp%diracrelativistic) atp%norbit=2*atp%norbit-atp%np(1)
    !Print read data
-   IF (atp%has_to_print) THEN
+   IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a,5(1x,i0))') "Max. quantum numbers(s,p,d,f,g):",atp%np(1:5)
      WRITE(STD_OUT,'(3x,a,i0)') "Total number of orbitals: ",atp%norbit
    END IF
@@ -7219,10 +7430,18 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      tmp_k(atp%norbit_mod)=kk
      tmp_occ(atp%norbit_mod)=xocc
    END DO
-   IF(ALLOCATED(atp%orbit_mod_l)) LIBPAW_DEALLOCATE(atp%orbit_mod_l)
-   IF(ALLOCATED(atp%orbit_mod_n)) LIBPAW_DEALLOCATE(atp%orbit_mod_n)
-   IF(ALLOCATED(atp%orbit_mod_k)) LIBPAW_DEALLOCATE(atp%orbit_mod_k)
-   IF(ALLOCATED(atp%orbit_mod_occ)) LIBPAW_DEALLOCATE(atp%orbit_mod_occ)
+   IF(ALLOCATED(atp%orbit_mod_l)) then
+     LIBPAW_DEALLOCATE(atp%orbit_mod_l)
+   endif
+   IF(ALLOCATED(atp%orbit_mod_n)) then
+     LIBPAW_DEALLOCATE(atp%orbit_mod_n)
+   endif
+   IF(ALLOCATED(atp%orbit_mod_k)) then
+     LIBPAW_DEALLOCATE(atp%orbit_mod_k)
+   endif
+   IF(ALLOCATED(atp%orbit_mod_occ)) then
+     LIBPAW_DEALLOCATE(atp%orbit_mod_occ)
+   endif
    LIBPAW_ALLOCATE(atp%orbit_mod_l,(atp%norbit_mod))
    LIBPAW_ALLOCATE(atp%orbit_mod_n,(atp%norbit_mod))
    LIBPAW_ALLOCATE(atp%orbit_mod_k,(atp%norbit_mod))
@@ -7238,7 +7457,9 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
  !------------------------------------------------------------------
  !=== Core and valence states
    !Read core and valence states
-   IF (ALLOCATED(atp%orbit_iscore)) LIBPAW_DEALLOCATE(atp%orbit_iscore)
+   IF (ALLOCATED(atp%orbit_iscore)) then
+     LIBPAW_DEALLOCATE(atp%orbit_iscore)
+   endif
    LIBPAW_ALLOCATE(atp%orbit_iscore,(atp%norbit))
    DO io=1,atp%norbit
      DO
@@ -7257,9 +7478,15 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    END DO
    !Store valence states
    atp%norbit_val=atp%norbit-COUNT(atp%orbit_iscore(:))
-   IF (ALLOCATED(atp%orbit_val_n)) LIBPAW_DEALLOCATE(atp%orbit_val_n)
-   IF (ALLOCATED(atp%orbit_val_l)) LIBPAW_DEALLOCATE(atp%orbit_val_l)
-   IF (ALLOCATED(atp%orbit_val_k)) LIBPAW_DEALLOCATE(atp%orbit_val_k)
+   IF (ALLOCATED(atp%orbit_val_n)) then
+     LIBPAW_DEALLOCATE(atp%orbit_val_n)
+   endif
+   IF (ALLOCATED(atp%orbit_val_l)) then
+     LIBPAW_DEALLOCATE(atp%orbit_val_l)
+   endif
+   IF (ALLOCATED(atp%orbit_val_k)) then
+     LIBPAW_DEALLOCATE(atp%orbit_val_k)
+   endif
    LIBPAW_ALLOCATE(atp%orbit_val_n,(atp%norbit_val))
    LIBPAW_ALLOCATE(atp%orbit_val_l,(atp%norbit_val))
    LIBPAW_ALLOCATE(atp%orbit_val_k,(atp%norbit_val))
@@ -7285,7 +7512,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    END DO
    IF (atp%norbit_val/=nval) STOP 'input_dataset: bug -- wrong nval!'
    !Print read data
-   IF (atp%has_to_print) THEN
+   IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a)') "Core and valence orbitals:"
      IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') "n l : type"
      IF (atp%diracrelativistic)      WRITE(STD_OUT,'(7x,a)') "n l kappa :type"
@@ -7323,7 +7550,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    CALL eliminate_comment(inputline)
    READ(inputline,*) atp%lmax
    !Print read data
-   IF (atp%has_to_print) THEN
+   IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a,i0)') "Basis, maximum L : ",atp%lmax
    END IF
    !------------------------------------------------------------------
@@ -7366,7 +7593,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      END IF
    ENDIF
    !Print read data
-   IF (atp%has_to_print) THEN
+   IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a,f7.4)') "Augmentation region radius : ",atp%rc
      WRITE(STD_OUT,'(3x,a,f7.4)') "Core dens. matching radius : ",atp%rc_core
      WRITE(STD_OUT,'(3x,a,f7.4)') "Local pot. matching radius : ",atp%rc_vloc
@@ -7407,9 +7634,15 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
        READ(inputline,*) basis_add_energy(atp%nbasis_add-nadd+1:atp%nbasis_add)
      END DO
    END DO
-   IF (ALLOCATED(atp%basis_add_l)) LIBPAW_DEALLOCATE(atp%basis_add_l)
-   IF (ALLOCATED(atp%basis_add_k)) LIBPAW_DEALLOCATE(atp%basis_add_k)
-   IF (ALLOCATED(atp%basis_add_energy)) LIBPAW_DEALLOCATE(atp%basis_add_energy)
+   IF (ALLOCATED(atp%basis_add_l)) then
+     LIBPAW_DEALLOCATE(atp%basis_add_l)
+   endif
+   IF (ALLOCATED(atp%basis_add_k)) then
+     LIBPAW_DEALLOCATE(atp%basis_add_k)
+   endif
+   IF (ALLOCATED(atp%basis_add_energy)) then
+     LIBPAW_DEALLOCATE(atp%basis_add_energy)
+   endif
    LIBPAW_ALLOCATE(atp%basis_add_l,(atp%nbasis_add))
    LIBPAW_ALLOCATE(atp%basis_add_k,(atp%nbasis_add))
    LIBPAW_ALLOCATE(atp%basis_add_energy,(atp%nbasis_add))
@@ -7420,7 +7653,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    END IF
    atp%nbasis=COUNT(.NOT.atp%orbit_iscore(:))+atp%nbasis_add
    !Print read data
-   IF (atp%has_to_print) THEN
+   IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a,i0)') "Initial number of basis functions:",atp%nbasis-atp%nbasis_add
      WRITE(STD_OUT,'(3x,a,i0)') "Number of additional basis functions:",atp%nbasis_add
      WRITE(STD_OUT,'(3x,a,i0)') "Total number of basis functions:",atp%nbasis
@@ -7533,7 +7766,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
  END IF
  atp%shapetcore=(INDEX(inputline,'SHAPETCORE')>0)
  !Print read data
- IF (atp%has_to_print) THEN
+ IF (has_to_print) THEN
    WRITE(STD_OUT,'(3x,a)') "Projectors description:"
    IF (atp%projector_type==PROJECTOR_TYPE_BLOECHL) &
  &    WRITE(STD_OUT,'(7x,a)') "Type              : BLOECHL"
@@ -7638,7 +7871,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      atp%vloc_type=VLOC_TYPE_VPSMATCHNC
  ENDIF
  !Print read data
- IF (atp%has_to_print) THEN
+ IF (has_to_print) THEN
    IF (atp%vloc_type==VLOC_TYPE_MTROULLIER) &
  &    WRITE(STD_OUT,'(7x,a,i0,a,f7.4)') "Local pseudopotential type : MTROULLIER,l=",&
  &          atp%vloc_l,", energy=",atp%vloc_ene
@@ -7679,7 +7912,9 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
 &    atp%projector_type==PROJECTOR_TYPE_VANDERBILT.OR.&
 &    atp%projector_type==PROJECTOR_TYPE_MODRRKJ.OR.&
 & atp%projector_type==PROJECTOR_TYPE_HF.AND.atp%vloc_type==VLOC_TYPE_MTROULLIER)THEN
-   IF (ALLOCATED(atp%basis_func_rc)) LIBPAW_DEALLOCATE(atp%basis_func_rc)
+   IF (ALLOCATED(atp%basis_func_rc)) then
+     LIBPAW_DEALLOCATE(atp%basis_func_rc)
+   endif
    LIBPAW_ALLOCATE(atp%basis_func_rc,(atp%nbasis))
    norb=0
    DO ll=0,atp%lmax
@@ -7712,7 +7947,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    END DO
    IF (atp%nbasis/=norb) STOP 'input_dataset: error -- inconsistency in the number of basis functions!'
    !  Print read data
-   IF (atp%has_to_print) THEN
+   IF (has_to_print) THEN
      WRITE(STD_OUT,'(3x,a)') "Matching radius for basis functions:"
      IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l : radius"
      IF (atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l kappa : radius"
@@ -7751,7 +7986,9 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      END DO
    END IF
  ELSE ! Other projectors
-   IF (ALLOCATED(atp%basis_func_rc)) LIBPAW_DEALLOCATE(atp%basis_func_rc)
+   IF (ALLOCATED(atp%basis_func_rc)) then
+     LIBPAW_DEALLOCATE(atp%basis_func_rc)
+   endif
    LIBPAW_ALLOCATE(atp%basis_func_rc,(0))
  END IF
  !------------------------------------------------------------------
@@ -7771,5 +8008,5 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
 END SUBROUTINE input_dataset_read
 
 
-end module m_paw_relax
+end module m_paw_atom_solve
 !!***
