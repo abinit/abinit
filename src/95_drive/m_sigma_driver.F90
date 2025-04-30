@@ -1571,10 +1571,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Prepare the storage of QP amplitudes and energies
  ! Initialize with KS wavefunctions and energies.
- Sr%eigvec_qp=czero; Sr%en_qp_diago=zero
+ ! FIXME: This array should be allocated only if self-consistent
+ if (sr%needs_eigvec_qp) Sr%eigvec_qp=czero
+ Sr%en_qp_diago=zero
  do ib=1,Sigp%nbnds
    Sr%en_qp_diago(ib,:,:) = ks_ebands%eig(ib,:,:)
-   Sr%eigvec_qp(ib,ib,:,:) = cone
+   if (sr%needs_eigvec_qp) Sr%eigvec_qp(ib,ib,:,:) = cone
  end do
 
  ! Store <n,k,s|V_xc[n_val]|n,k,s> and <n,k,s|V_U|n,k,s> ===
