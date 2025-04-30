@@ -95,7 +95,7 @@ dmftqmc_n        1.d6   # Number of QMC sweeps
 dmftqmc_therm    10000  # Thermalization
 dmftctqmc_gmove  0      # Global move occurence in QMC
 dmftctqmc_order  50     # Perturbation order
-dmftctqmc_config 2      # Activate Histogram and spin susceptibility
+dmftctqmc_localprop 2      # Activate Histogram and spin susceptibility
 
 #Definition of DFT+U
 usepawu1    4           #
