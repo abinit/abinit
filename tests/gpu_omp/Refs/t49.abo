@@ -76,6 +76,8 @@ _ WF disk file :      1.436 Mbytes ; DEN or POT disk file :      0.956 Mbytes.
         dmftbandf2         20
         dmftbandi1          0
         dmftbandi2          5
+  dmftctqmc_basis1          1
+  dmftctqmc_basis2          2
         dmft_iter1         10
         dmft_iter2          1
         dmft_mxsf1     6.0000000000E-01
@@ -86,6 +88,12 @@ _ WF disk file :      1.436 Mbytes ; DEN or POT disk file :      0.956 Mbytes.
         dmft_nwlo2        100
   dmft_occnd_imag1          1
   dmft_occnd_imag2          0
+        dmftqmc_l1          0
+        dmftqmc_l2         50
+        dmftqmc_n1     0.0000000000E+00
+        dmftqmc_n2     1.0000000000E+06
+    dmftqmc_therm1          0
+    dmftqmc_therm2      10000
              ecut      1.20000000E+01 Hartree
 -          fftalg         112
            getwfk          -1
@@ -1093,6 +1101,8 @@ total_energy_dc_eV  : -1.07328898770684E+03
         dmftbandf2         20
         dmftbandi1          0
         dmftbandi2          5
+  dmftctqmc_basis1          1
+  dmftctqmc_basis2          2
         dmft_iter1         10
         dmft_iter2          1
         dmft_mxsf1     6.0000000000E-01
@@ -1103,6 +1113,12 @@ total_energy_dc_eV  : -1.07328898770684E+03
         dmft_nwlo2        100
   dmft_occnd_imag1          1
   dmft_occnd_imag2          0
+        dmftqmc_l1          0
+        dmftqmc_l2         50
+        dmftqmc_n1     0.0000000000E+00
+        dmftqmc_n2     1.0000000000E+06
+    dmftqmc_therm1          0
+    dmftqmc_therm2      10000
              ecut      1.20000000E+01 Hartree
            etotal1    -3.9481923194E+01
            etotal2    -3.9442646255E+01
