@@ -1143,7 +1143,8 @@ if (dtset%prt_lorbmag==1) then
      write(msg,'(2a,i3)') ch10,&
 &     '  Warning: Chipsi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
      call wrtout(std_out, msg)
-     call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
+     call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filctqmcdatain,dtfil%filselfin, &
+                  & dtfil%filnam_ds(3),dtfil%fnameabo_app,dtfil%ireadctqmcdata,dtfil%ireadself,paw_dmft,pawtab(:))
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute chipsi
