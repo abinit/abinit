@@ -235,6 +235,8 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
 
 !******************************************************************************************
 
+ write(std_out, * ) 'RCPAW initialization'
+
  !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=dtset%natom))
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
@@ -286,7 +288,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
      rcpaw%atp(itypat)%xclevel=dtset%xclevel
      rcpaw%atp(itypat)%electrons=dtset%nelect
      call atompaw_init(itypat,pawtab(itypat),pawrad(itypat),rcpaw%atp(itypat),&
-&    int(rcpaw%atm(itypat)%znucl),rcpaw%atm(itypat),dtset%rcpaw_verbosity,dtset%rcpaw_scenergy(itypat))
+&    int(rcpaw%atm(itypat)%znucl),rcpaw%atm(itypat),dtset%rcpaw_scenergy(itypat))
    endif
  enddo
  
@@ -380,7 +382,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: ii,itypat
  integer :: mesh_size
- integer :: il,nfgd,ifft
+ integer :: il,nfgd,ifft,iln
  integer :: n1,n2,n3,i3,ispden
  integer :: my_comm_atom,iat,ierr
  logical :: my_atmtab_allocated,paral_atom,grid_found
@@ -498,6 +500,12 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
    endif
  enddo
 
+ do itypat=1,dtset%ntypat
+   write(std_out,*) 'RCPAW core eigenergies (Ha) and occupations for typat ',itypat
+   do iln=1,rcpaw%atm(itypat)%ln_size
+     write(std_out,*) rcpaw%atm(itypat)%eig(iln,1),rcpaw%atm(itypat)%occ(iln,1)
+   enddo
+ enddo 
 
 end subroutine rcpaw_core_eig
 !!***
@@ -545,7 +553,8 @@ subroutine rcpaw_core_energies(rcpaw,ntypat)
      rcpaw%ehnzc=rcpaw%ehnzc+rcpaw%atm(itypat)%ehnzc*rcpaw%atm(itypat)%mult
    endif
  enddo
- write(std_out,*) rcpaw%istep,'ekinc=',rcpaw%ekinc, 'eeig=',rcpaw%eeigc,'edcc=',rcpaw%edcc,'ehnzc',rcpaw%ehnzc
+ write(std_out,*)'RCPAW energies at step ',rcpaw%istep,':', ' ekinc = ',rcpaw%ekinc,' eeig = ',&
+& rcpaw%eeigc,' edcc = ',rcpaw%edcc,' ehnzc = ',rcpaw%ehnzc
 
 end subroutine rcpaw_core_energies
 !!***

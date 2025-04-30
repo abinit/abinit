@@ -2515,6 +2515,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    !!!
    nval=nval/rcpaw%atm(itypat)%mult
    if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then
+     write(std_out,*) 'RCPAW: core relaxation for typat ',itypat
      call atompaw_solve(rcpaw%atp(itypat),pawrad(itypat),pawtab(itypat),&
 &          nval,psps%mqgrid_vl,psps%qgrid_vl,psps%epsatm(itypat),psps%vlspl(:,:,itypat),&
 &          psps%ziontypat(itypat),&

@@ -764,9 +764,6 @@ contains
  intarr(1,:)=dtsets(:)%rcpaw_nfrtnc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrtnc','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_verbosity
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_verbosity','INT',0)
-
  dprarr(1,:)=dtsets(:)%rcpaw_tolnc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tolnc','DPR',0)
 
