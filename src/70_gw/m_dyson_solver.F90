@@ -524,7 +524,9 @@ if (mod10 /= 1) then
    end if
    call xheev("Vectors","Upper", ld_matrix, hdp, eig)
 
-   Sr%eigvec_qp(ib1:ib2,ib1:ib2,sk_ibz,spin)=hdp(:,:)
+   if (Sr%needs_eigvec_qp) then
+     Sr%eigvec_qp(ib1:ib2,ib1:ib2,sk_ibz,spin)=hdp(:,:)
+   end if
    Sr%en_qp_diago(ib1:ib2,sk_ibz,spin)=eig(:)
  end do
 

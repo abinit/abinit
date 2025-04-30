@@ -157,6 +157,9 @@ module m_sigma
   ! (nbnds, nkibz, nsppol))
   ! QP energies, $\epsilon_{nks}^{QP}$.
 
+  logical :: needs_eigvec_qp = .True.
+
+ ! FIXME: These arrays are huge and should be allocated only if self-consistent
   complex(dpc),allocatable :: eigvec_qp(:,:,:,:)
   ! (nbnds, nbnds, nkibz, nsppol))
   ! Expansion of the QP amplitudes in the QP basis set of the previous iteration.
@@ -954,14 +957,11 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
 
  ! QP amplitudes and energies
  ABI_CALLOC(sigma%en_qp_diago,(sigma%nbnds,sigma%nkibz,sigma%nsppol))
- ABI_CALLOC(sigma%eigvec_qp,(sigma%nbnds,sigma%nbnds,sigma%nkibz,sigma%nsppol))
 
- ! Dont know if it is better to do this here or in the sigma
- ! * Initialize with KS wavefunctions and energies
- !do ib=1,sigma%nbnds
- ! sigma%en_qp_diago(ib,:,:)=en(:,ib,:)
- ! sigma%eigvec_qp(ib,ib,:,:)=cone
- !end do
+ sigma%needs_eigvec_qp = sigp%gwcalctyp >= 10
+ if (sigma%needs_eigvec_qp) then
+   ABI_CALLOC(sigma%eigvec_qp,(sigma%nbnds,sigma%nbnds,sigma%nkibz,sigma%nsppol))
+ end if
 
  ABI_CALLOC(sigma%vxcme, (b1gw:b2gw, sigma%nkibz, sigma%nsppol*sigma%nsig_ab))
  ABI_CALLOC(sigma%vUme, (b1gw:b2gw, sigma%nkibz, sigma%nsppol*sigma%nsig_ab))
@@ -1441,7 +1441,7 @@ integer function sigma_ncwrite(sigma, Sigp, Er, ncid) result (ncerr)
 
  ! TODO: Decrease size of file: Remove arrays whose size scale as mband ** 2
  ! especially those that are not commonly used e.g. hhartree.
- ncerr = nctk_def_arrays(ncid, [&
+ ncerr = nctk_def_arrays(ncid, [ &
    nctkarr_t("kptgw", "dp", "number_of_reduced_dimensions, nkptgw"),&
    nctkarr_t("minbnd", "i", "nkptgw, number_of_spins"),&
    nctkarr_t("maxbnd", "i", "nkptgw, number_of_spins"), &
@@ -1455,7 +1455,6 @@ integer function sigma_ncwrite(sigma, Sigp, Er, ncid) result (ncerr)
    nctkarr_t('degw', "dp", 'cplex, nbgw, number_of_kpoints, number_of_spins'),&
    nctkarr_t('dsigmee0', "dp", 'cplex, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('egw', "dp",'cplex, max_number_of_states, number_of_kpoints, number_of_spins'),&
-   nctkarr_t('eigvec_qp', "dp",'cplex, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins'),&
    nctkarr_t('hhartree', "dp",'cplex, nbgw, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('sigmee', "dp", 'cplex, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('sigcmee0', "dp",'cplex, nbgw, number_of_kpoints, ndim_sig'),&
@@ -1464,6 +1463,12 @@ integer function sigma_ncwrite(sigma, Sigp, Er, ncid) result (ncerr)
    nctkarr_t('ze0',"dp", 'cplex, nbgw, number_of_kpoints, number_of_spins'),&
    nctkarr_t('omega4sd', "dp", 'cplex, nbgw, number_of_kpoints, nomega4sd, number_of_spins')])
  NCF_CHECK(ncerr)
+
+ if (sigma%needs_eigvec_qp) then
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t('eigvec_qp', "dp",'cplex, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins')])
+   NCF_CHECK(ncerr)
+ end if
 
  if (sigma%usepawu == 0) then
    ncerr = nctk_def_arrays(ncid, nctkarr_t("vUme", "dp", 'nbgw, number_of_kpoints, ndim_sig'))
@@ -1540,10 +1545,12 @@ integer function sigma_ncwrite(sigma, Sigp, Er, ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('egw'), rdata4 *Ha_eV))
  ABI_FREE(rdata4)
 
- ABI_MALLOC(rdata5, (cplex, sigma%nbnds, sigma%nbnds, sigma%nkibz, sigma%nsppol))
- rdata5 = c2r(sigma%eigvec_qp)
- NCF_CHECK(nf90_put_var(ncid, vid('eigvec_qp'), rdata5))
- ABI_FREE(rdata5)
+ if (sigma%needs_eigvec_qp) then
+   ABI_MALLOC(rdata5, (cplex, sigma%nbnds, sigma%nbnds, sigma%nkibz, sigma%nsppol))
+   rdata5 = c2r(sigma%eigvec_qp)
+   NCF_CHECK(nf90_put_var(ncid, vid('eigvec_qp'), rdata5))
+   ABI_FREE(rdata5)
+ end if
 
  ABI_MALLOC(rdata5,(cplex, nbgw, nbgw, sigma%nkibz, sigma%nsppol * sigma%nsig_ab))
  rdata5 = c2r(sigma%hhartree)

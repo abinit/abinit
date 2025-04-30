@@ -67,7 +67,7 @@ module m_pstat
    ! Number of file descriptor slots currently allocated
 
   real(dp) :: vmrss_mb = -one
-  ! Size of memory portions.
+  ! Actual physical RAM used.
   ! It contains the three following parts (VmRSS = RssAnon + RssFile + RssShmem)
 
   real(dp) :: vmpeak_mb = -one
