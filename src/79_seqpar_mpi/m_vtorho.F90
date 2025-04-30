@@ -1452,7 +1452,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           dtset%symrel,dtset%tnons,dtset%symafm)
 
 !        ==  allocate paw_dmft%chipsi and paw_dmft%eigen_dft
-         call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
+         call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filctqmcdatain, &
+                      & dtfil%filselfin,dtfil%filnam_ds(3),dtfil%fnameabo_app,dtfil%ireadctqmcdata, &
+                      & dtfil%ireadself,paw_dmft,pawtab(:))
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  compute chipsi
@@ -1467,7 +1469,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call timab(620,2,tsec)
          call flush_unit(std_out)
 
-
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
 
@@ -1475,7 +1476,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          edmft=paw_dmft%e_hu-paw_dmft%e_dc
          energies%e_dc=paw_dmft%e_dc
          energies%e_hu=paw_dmft%e_hu
-         if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral == 1 &
+         if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral > 0 &
             & .and. (dtset%dmft_solv == 6 .or. dtset%dmft_solv == 7)) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
