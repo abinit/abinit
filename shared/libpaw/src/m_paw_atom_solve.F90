@@ -5322,20 +5322,15 @@ SUBROUTINE cfdsol(Grid,zz,yy,jj1,jj2)
  isgn = ( jj2 - jj1 ) / iabs( jj2 - jj1 )
  IF ( isgn .EQ. + 1 ) THEN
    IF ( jj1 .LE. 5 .OR. jj2 .GT. mesh ) THEN
-     if(has_to_print) write(std_out,10) isgn,jj1,jj2,mesh
-     CALL EXIT(1)
+     LIBPAW_ERROR(' ***error in subroutine difsol')
    ENDIF
  ELSEIF ( isgn .EQ. - 1 ) THEN
    IF ( jj1 .GE. ( mesh - 4 ) .OR. jj2 .LT. 1 ) THEN
-      if(has_to_print) write(std_out,10) isgn,jj1,jj2,mesh
-      CALL EXIT(1)
+     LIBPAW_ERROR(' ***error in subroutine difsol')
    ENDIF
  ELSE
    if(has_to_print) write(std_out,10) isgn,jj1,jj2,mesh
  ENDIF
-10  FORMAT(' ***error in subroutine difsol',/,&
-       &' isgn =',i2,' jj1 =',i5,' jj2 =',i5,' mesh =',i5,&
-       &' are not allowed')
  LIBPAW_ALLOCATE(tmpz,(2,2,mesh))
  tmpz=zz
  DO i=1,2
@@ -5414,20 +5409,15 @@ SUBROUTINE cfdsoliter(Grid,zz,yy,jj1,jj2)
  isgn = ( jj2 - jj1 ) / iabs( jj2 - jj1 )
  IF ( isgn .EQ. + 1 ) THEN
    IF ( jj1 .LE. 5 .OR. jj2 .GT. mesh ) THEN
-     if(has_to_print) WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
-     CALL EXIT(1)
+     LIBPAW_ERROR(' ***error in subroutine difsol')
    ENDIF
  ELSEIF ( isgn .EQ. - 1 ) THEN
    IF ( jj1 .GE. ( mesh - 4 ) .OR. jj2 .LT. 1 ) THEN
-     if(has_to_print) WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
-     CALL EXIT(1)
+     LIBPAW_ERROR(' ***error in subroutine difsol')
    ENDIF
  ELSE
    if(has_to_print) WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
  ENDIF
-10  FORMAT(' ***error in subroutine difsol',/,&
-      &' isgn =',i2,' jj1 =',i5,' jj2 =',i5,' mesh =',i5,&
-      &' are not allowed')
  LIBPAW_ALLOCATE(tmpz,(2,2,mesh))
  tmpz=zz
  DO i=1,2
