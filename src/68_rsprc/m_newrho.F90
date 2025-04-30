@@ -227,6 +227,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp) :: gprimd(3,3),rmet(3,3),ro(2),tsec(2),vhartr_dum(1),vpsp_dum(1)
  real(dp) :: vxc_dum(1,1)
  real(dp) :: nelect_extfpmd_=zero
+ real(dp),target :: dum0(0)
  real(dp),allocatable :: magng(:,:,:),magntaug(:,:,:)
  real(dp),allocatable :: nresid0(:,:),nrespc(:,:),nreswk(:,:,:)
  real(dp),allocatable :: rhoijrespc(:),rhoijtmp(:,:)
@@ -235,7 +236,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp), pointer :: rhomag(:,:), npaw(:)
  real(dp),allocatable :: tauresid0(:,:),taurespc(:,:)
  real(dp),allocatable :: taumag(:,:)
- real(dp), pointer :: rcpaw_arr_(:)=>null()
+ real(dp), pointer :: rcpaw_arr_(:)
  real(dp),allocatable, target :: rcpaw_arr(:)
 
 ! *************************************************************************
@@ -542,7 +543,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      ABI_FREE(rhoijtmp)
    end do
  end if
- 
+
+ rcpaw_arr_=>dum0 
  if(associated(rcpaw)) then
    indx=0
    do itypat=1,size(rcpaw%atm)

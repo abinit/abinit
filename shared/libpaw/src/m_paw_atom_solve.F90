@@ -527,6 +527,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
 !scalars
  integer :: io,ir,icor
  logical :: success
+ character(len=500) :: msg
  real(dp) :: insph,norm,shift
  real(dp) :: yp1,ypn,ekin,delta_zcore
 !arrays
@@ -566,14 +567,19 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    call SCFatom(atp,.false.)
  endif
 
+ write(msg,'(a)') 'atompaw_solve: orbital, norm, %in sphere'
+ call wrtout(std_out,msg,'COLL') 
  ! Update core density
  atp%Orbit%coreden=zero
  ! Compute new nc
+ icor=0
  do io=1,atp%Orbit%norbit
    if(atp%Orbit%iscore(io)) then
+     icor=icor+1
      norm=overlap(atp%Grid,atp%Orbit%wfn(1:atp%Grid%n,io),atp%Orbit%wfn(1:atp%Grid%n,io),1,atp%Grid%n)
      insph=overlap(atp%Grid,atp%Orbit%wfn(1:atp%PAW%irc,io),atp%Orbit%wfn(1:atp%PAW%irc,io),1,atp%PAW%irc)
-     write(std_out,*)'CORE in sphere assesment (orb,norm,insphere,ratio):',io,norm,insph,insph/norm
+     write(msg,*)icor,norm,insph/norm*100.0_dp
+     call wrtout(std_out,msg,'COLL')
      atp%Orbit%coreden=atp%Orbit%coreden+atp%Orbit%occ(io)*(atp%Orbit%wfn(:,io))**2
    endif
  enddo
@@ -583,7 +589,8 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    atm%nresid_c=sqrt(integrator(atp%Grid,ff)/atp%grid%r(atp%grid%n))
    ff(1:atp%Grid%n)=atp%Orbit%coreden(1:atp%Grid%n)
    atm%nresid_c=atm%nresid_c/integrator(atp%Grid,ff)
-   write(std_out,*) 'RMS CORE=',atm%nresid_c
+   write(msg,*) 'atompaw_solve: nc residue',atm%nresid_c
+   call wrtout(std_out,msg,'COLL')
  endif
  ! Update core dens
  do ir=2,atp%Grid%n
@@ -688,7 +695,8 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  if(.not.atm%zcore_conv) then
    zion=atm%znucl-atm%zcore
    delta_zcore=atm%zcore-atm%zcore_orig
-   write(std_out,*)'DQc',delta_zcore,atm%zcore,atm%zcore_orig
+   write(msg,*) 'atompaw_solve: delta_zcore',delta_zcore
+   call wrtout(std_out,msg,'COLL')
    ! Compute nhatc=shapefunction*delta_zcore
    call pawrad_init(vloc_mesh,mesh_size=size(pawtab%vhtnzc),mesh_type=pawrad%mesh_type,&
 &   rstep=pawrad%rstep,lstep=pawrad%lstep)
@@ -711,7 +719,8 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
 &                     vloc_mesh,pawtab%vhtnzc,yp1,ypn,&
 &                     zion)
    call  paw_spline(qgrid_vl,vlspl(:,1),mqgrid_vl,yp1,ypn,vlspl(:,2))
-   write(std_out,*) 'EPSATM new',epsatm
+   write(msg,*) 'atompaw_solve: nc epsatm',epsatm
+   call wrtout(std_out,msg,'COLL')
  endif
 
  ! update dij0
@@ -742,13 +751,13 @@ end subroutine atompaw_solve
 !! SOURCE
 !! Inspired from SCFatom_init in atompaw
 
-subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,verbosity,e_semicore)
+subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,e_semicore)
  ! TODO : scalar, dirac, vtau, splines, BDsolve
 
  implicit none
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: znucl, verbosity,itypat
+ integer, intent(in) :: znucl, itypat
  real(dp), intent(in) :: e_semicore
  type(pawtab_type), intent(inout) :: pawtab
  type(pawrad_type), intent(in) :: pawrad
@@ -785,7 +794,6 @@ subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,verbosity,e_semicore)
 
  ! Read atp input and initialize (temporary)
  has_to_print=.false.
- if(verbosity==1) has_to_print=.true.
  call input_dataset_read(atp,input_file)
  atp%npsc=0
  atp%nppc=1
@@ -893,8 +901,6 @@ subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,verbosity,e_semicore)
      atm%eeigc=atm%eeigc+atp%Orbit%eig(io)*atp%Orbit%occ(io)/two
    endif
  enddo
- write(std_out,*) 'EIG TEST'
- write(std_out,*) atp%Orbit%eig
  LIBPAW_ALLOCATE(ff,(atp%grid%n))
  ff=zero
  ff(2:atp%Grid%n)=atp%Pot%rv(2:atp%Grid%n)*&
@@ -1026,7 +1032,6 @@ subroutine makebasis_marsman(atp)
  call zeropot(atp%Grid,atp%PAW%rveff,v0,v0p)
  do io=1,atp%PAW%nbase
    l=atp%PAW%l(io)
-   write(std_out,*) l
    if(l==0) then
      ns=ns+1
      map(io)=ns
@@ -1213,7 +1218,7 @@ subroutine calc_kij(PAW,grid,kij,pawtab,scalarrelativistic)
          CALL deltakinetic_ij(Grid,PAW%ophi(:,ib),PAW%ophi(:,jb), &
 &              PAW%otphi(:,ib),PAW%otphi(:,jb),l,x,PAW%irc)
        Endif
-       WRITE(STD_OUT,'(" Kinetic ", 3i5, 1p,3e15.7)') ib,jb,l,x
+       if(has_to_print) WRITE(STD_OUT,'(" Kinetic ", 3i5, 1p,3e15.7)') ib,jb,l,x
        Kij_atp(ib,jb)=x
      ENDIF
    ENDDO
@@ -1308,10 +1313,10 @@ SUBROUTINE Prepare_Orbit(atp,i,j)
      ENDDO
    ENDIF
    atp%Orbit%norbit=icount
-   write(std_out,*)' Below are listed the default occupations '
-   write(std_out,"(' n  l     occupancy')")
+   if(has_to_print) write(std_out,*)' Below are listed the default occupations '
+   if(has_to_print) write(std_out,"(' n  l     occupancy')")
    DO io=1,atp%Orbit%norbit
-       WRITE(std_out,'(i2,1x,i2,4x,1p,1e15.7)') &
+       if(has_to_print) WRITE(std_out,'(i2,1x,i2,4x,1p,1e15.7)') &
 &           atp%Orbit%np(io),atp%Orbit%l(io),atp%Orbit%occ(io)
    ENDDO
    atp%Orbit%iscore=atp%orbit_iscore
@@ -1321,16 +1326,15 @@ SUBROUTINE Prepare_Orbit(atp,i,j)
      xocc=atp%orbit_mod_occ(io)
      nfix=nl(ip,l+1)
      IF (nfix<=0.OR.nfix>atp%Orbit%norbit) THEN
-       WRITE(STD_OUT,*) 'error in occupations -- ip,l,xocc:',ip,l,xocc,nfix,atp%Orbit%norbit
-       STOP
+       LIBPAW_ERROR('error in occupations')
      ENDIF
      atp%Orbit%occ(nfix)=xocc
    END DO
-   WRITE(STD_OUT,*) ' Corrected occupations are: '
-   WRITE(STD_OUT,"(' n  l     occupancy')")
+   if(has_to_print) WRITE(STD_OUT,*) ' Corrected occupations are: '
+   if(has_to_print) WRITE(STD_OUT,"(' n  l     occupancy')")
    atp%electrons=0._dp
    DO io=1,atp%Orbit%norbit
-      WRITE(STD_OUT,'(i2,1x,i2,4x,1p,1e15.7)')  &
+      if(has_to_print) WRITE(STD_OUT,'(i2,1x,i2,4x,1p,1e15.7)')  &
   &        atp%Orbit%np(io),atp%Orbit%l(io),atp%Orbit%occ(io)
       atp%electrons=atp%electrons+atp%Orbit%occ(io)
       if(.not.atp%Orbit%iscore(io)) atp%Orbit%qval=atp%Orbit%qval+atp%Orbit%occ(io)
@@ -1482,202 +1486,203 @@ subroutine print_check_atompaw_params(atp)
 & trim(atp%exctype).eq.('GGA-PBESOL'))) LIBPAW_ERROR('Only LDA-PW, GGA-PBE and GGA-PBESOL implemented')
  if(.not.(atp%vloc_type==VLOC_TYPE_BESSEL.or.atp%vloc_type==VLOC_TYPE_MTROULLIER))&
 &  LIBPAW_ERROR('Only bessel vloc and troullier for now')
-  WRITE(STD_OUT,'(/,3x,a)') "===== Atompaw parameters ====="
- ! Atom
-  WRITE(STD_OUT,'(3x,a,a2)') "Atomic symbol : ",atp%atomic_symbol
-  WRITE(STD_OUT,'(3x,a,i0)') "Atomic charge : ",atp%atomic_charge
- ! Algo
-  WRITE(STD_OUT,'(3x,2a)')     "Scalar-relativistic calculation:",MERGE("YES"," NO",atp%scalarrelativistic)
-  WRITE(STD_OUT,'(3x,2a)')     "Dirac-relativistic calculation:",MERGE("YES"," NO",atp%diracrelativistic)
-  WRITE(STD_OUT,'(3x,2a)')     "Frozen core calculation:",MERGE("YES"," NO",atp%frozencorecalculation)
-  WRITE(STD_OUT,'(3x,2a)')     "Frozen vale calculation:",MERGE("YES"," NO",atp%frozenvalecalculation)
-  IF (atp%usespline) THEN
-    WRITE(STD_OUT,'(3x,a)')    "    - Use a spline solver"
-  END IF
-  WRITE(STD_OUT,'(3x,2a)')     "Exchange-correlation functional:",TRIM(atp%exctype)
-  WRITE(STD_OUT,'(3x,3a)')     " (mGGA kinetic energy functional:",MERGE("YES"," NO",atp%needvtau),")"
-  WRITE(STD_OUT,'(3x,2a)')     "Finite-nucleus calculation:",MERGE("YES"," NO",atp%finitenucleus)
-  IF (atp%finitenucleus) THEN
-    WRITE(STD_OUT,'(3x,a,i0)') "    - Finite-nucleus model:",atp%finitenucleusmodel
-  END IF
-  WRITE(STD_OUT,'(3x,2a)')     "Block-Davidson calculation:",MERGE("YES"," NO",atp%BDsolve)
- ! Grid
-  WRITE(STD_OUT,'(3x,a,i0)')     "Grid type:",atp%Grid%type
-  WRITE(STD_OUT,'(3x,a,i0)')   "Grid size:",atp%Grid%n
-  WRITE(STD_OUT,'(3x,a,f7.3)') "Grid maximum value:",atp%Grid%r(atp%Grid%n)
-  if(atp%usespline) then
-  WRITE(STD_OUT,'(3x,a,f7.3,2x,i0)') "Spline grid r0, ns              :",&
-&     atp%splr0,atp%splns
-  endif
-  ! XC
-  WRITE(STD_OUT,'(3x,2a)')     "Hartree-Fock, post-processing:",MERGE("YES"," NO",atp%HFpostprocess)
-  WRITE(STD_OUT,'(3x,2a)')     "Hartree-Fock, localized coreex.:",MERGE("YES"," NO",atp%localizedcoreexchange)
-  WRITE(STD_OUT,'(3x,2a)')     "Hartree-Fock, fixed zero:",MERGE("YES"," NO",atp%fixed_zero)
-  IF (atp%fixed_zero) THEN
-    WRITE(STD_OUT,'(3x,a,i0)') "    - HF fixed zero index:",atp%fixed_zero_index
-  END IF
-  IF (atp%BDsolve.and.atp%gridkey=='LINEAR') THEN
-    WRITE(STD_OUT,'(/,3x,a)') "WARNING: BlockDavidson solver works very slowlywith linear grid!"
-  END IF
-  WRITE(STD_OUT,'(3x,a,5(1x,i0))') "Max. quantum numbers (s,p,d,f,g):",atp%np(1:5)
-  WRITE(STD_OUT,'(3x,a,i0)') "Total number of orbitals: ",atp%norbit
-  WRITE(STD_OUT,'(3x,a)') "Core and valence orbitals:"
-  IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') "n l : type"
-  IF (atp%diracrelativistic)      WRITE(STD_OUT,'(7x,a)') "n l kappa :type"
-  io=0
-  DO ll=0,4
-    nn=atp%np(ll+1)
-    IF (nn>0) THEN
-      IF (.NOT.atp%diracrelativistic) THEN
-        DO ii=1+ll,nn
-          io=io+1
-          WRITE(STD_OUT,'(7x,i1,1x,i1,2a)') ii,ll," : ", &
-&           MERGE("CORE   ","VALENCE",atp%orbit_iscore(io))
-        END DO
-      ELSE
-       ! DO ik=1,nkappa(ll+1)
-       !   kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
-       !   DO ii=1+ll,nn
-       !     io=io+1
-       !     WRITE(STD_OUT,'(7x,i1,1x,i1,2x,i2,2x,2a)') ii,ll,kk," : ", &
-       ! &      MERGE("CORE   ","VALENCE",atp%orbit_iscore(io))
-       !   END DO
-       ! END DO
-      END IF
-    END IF
-  END DO
-  WRITE(STD_OUT,'(3x,a,i0)') "Basis, maximum L : ",atp%lmax
- !cutoff radii
-  WRITE(STD_OUT,'(3x,a,f7.4)') "Augmentation region radius : ",atp%rc
-  WRITE(STD_OUT,'(3x,a,f7.4)') "Core dens. matching radius : ",atp%rc_core
-  WRITE(STD_OUT,'(3x,a,f7.4)') "Local pot. matching radius : ",atp%rc_vloc
-  WRITE(STD_OUT,'(3x,a,f7.4)') "Compens. shape func radius : ",atp%rc_shap
- !Additional basis
-  WRITE(STD_OUT,'(3x,a,i0)') "Initial number of basis functions:",atp%nbasis-atp%nbasis_add
-  WRITE(STD_OUT,'(3x,a,i0)') "Number of additional basis functions:",atp%nbasis_add
-  WRITE(STD_OUT,'(3x,a,i0)') "Total number of basis functions:",atp%nbasis
-  WRITE(STD_OUT,'(3x,a)') "Additional basis functions:"
-  IF (.NOT.atp%diracrelativistic) THEN
-    WRITE(STD_OUT,'(7x,a)') "l : energy"
-    DO io=1,atp%nbasis_add
-      WRITE(STD_OUT,'(7x,i1,a,f7.4)') atp%basis_add_l(io),":",atp%basis_add_energy(io)
-    END DO
-  ELSE
-    WRITE(STD_OUT,'(7x,a)') "l kappa : energy"
-    DO io=1,atp%nbasis_add
-      WRITE(STD_OUT,'(7x,i1,2x,i2,2x,a,f7.4)') atp%basis_add_l(io), &
-&         atp%basis_add_k(io)," : " ,atp%basis_add_energy(io)
-    END DO
-  END IF
- !Projectors
-  WRITE(STD_OUT,'(3x,a)') "Projectors description:"
-  IF (atp%projector_type==PROJECTOR_TYPE_BLOECHL) &
-&   WRITE(STD_OUT,'(7x,a)') "Type              : BLOECHL"
-  IF (atp%projector_type==PROJECTOR_TYPE_VANDERBILT) &
-&   WRITE(STD_OUT,'(7x,a)') "Type              : VANDERBILT"
-  IF (atp%projector_type==PROJECTOR_TYPE_MODRRKJ) &
-&   WRITE(STD_OUT,'(7x,a)') "Type              : MODRRKJ"
-  IF (atp%projector_type==PROJECTOR_TYPE_CUSTOM) &
-&   WRITE(STD_OUT,'(7x,a)') "Type              : CUSTOM"
-  IF (atp%projector_type==PROJECTOR_TYPE_HF) &
-&   WRITE(STD_OUT,'(7x,a)') "Type : HARTREE-FOCK"
-  IF (atp%projector_type/=PROJECTOR_TYPE_HF) THEN
-    IF (atp%pseudo_type==PSEUDO_TYPE_BLOECHL) &
-&     WRITE(STD_OUT,'(7x,a)') "Pseudization      : BLOECHL"
-    IF (atp%pseudo_type==PSEUDO_TYPE_POLYNOM) &
-&     WRITE(STD_OUT,'(7x,a)') "Pseudization      : POLYNOM"
-    IF (atp%pseudo_type==PSEUDO_TYPE_RRKJ) &
-&     WRITE(STD_OUT,'(7x,a)') "Pseudization      : RRKJ"
-    IF (atp%pseudo_type==PSEUDO_TYPE_BLOECHL_K) &
-&     WRITE(STD_OUT,'(7x,a)') "Pseudization      : BLOECHL KERKER"
-    IF (atp%pseudo_type==PSEUDO_TYPE_POLYNOM2) &
-&     WRITE(STD_OUT,'(7x,a,i0,a,es9.3)') "Pseudization      : POLYNOM2,pdeg=",&
-&      atp%pseudo_polynom2_pdeg,", qcut=",atp%pseudo_polynom2_qcut
-    IF (atp%ortho_type==ORTHO_TYPE_GRAMSCHMIDT) &
-&     WRITE(STD_OUT,'(7x,a)') "Orthogonalisation : GRAM-SCHMIDT"
-    IF (atp%ortho_type==ORTHO_TYPE_VANDERBILT) &
-&     WRITE(STD_OUT,'(7x,a)') "Orthogonalisation : VANDERBILT"
-    IF (atp%ortho_type==ORTHO_TYPE_SVD) &
-&     WRITE(STD_OUT,'(7x,a)') "Orthogonalisation : SVD"
-  END IF
-  IF (atp%shapefunc_type==SHAPEFUNC_TYPE_GAUSSIAN) &
-&   WRITE(STD_OUT,'(3x,a,es9.3)') "Compensation charge shape function: GAUSSIAN,tol=",&
-&   atp%shapefunc_gaussian_param
-  IF (atp%shapefunc_type==SHAPEFUNC_TYPE_SINC) &
-&   WRITE(STD_OUT,'(3x,a)') "Compensation charge shape function : SINC2"
-  IF (atp%shapefunc_type==SHAPEFUNC_TYPE_BESSEL) &
-&   WRITE(STD_OUT,'(3x,a)') "Compensation charge shape function : BESSEL"
-  IF (atp%hf_coretol>0) &
-&   WRITE(STD_OUT,'(3x,a,es9.3)') "Core tolerance for Hartree-Fock:",atp%hf_coretol
-  WRITE(STD_OUT,'(3x,2a)') "Smooth tcore shape (no negative nhat):",MERGE("YES"," NO",atp%shapetcore)
- !Local Psp
-     IF (atp%vloc_type==VLOC_TYPE_MTROULLIER) &
-&   WRITE(STD_OUT,'(7x,a,i0,a,f7.4)') "Local pseudopotential type:MTROULLIER,l=",&
-&         atp%vloc_l,", energy=",atp%vloc_ene
-  IF (atp%vloc_type==VLOC_TYPE_ULTRASOFT) &
-&   WRITE(STD_OUT,'(7x,a,i0,a,f7.4)') "Local pseudopotential type:ULTRASOFT,l=",&
-&         atp%vloc_l,", energy=",atp%vloc_ene
-  IF (atp%vloc_type==VLOC_TYPE_BESSEL) &
-&   WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : BESSEL"
-  IF (atp%vloc_type==VLOC_TYPE_VPSMATCHNC) &
-&   WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : VPS MATCHNC"
-  IF (atp%vloc_type==VLOC_TYPE_VPSMATCHNNC) &
-&   WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : VPS MATCHNNC"
-  IF (atp%vloc_type==VLOC_TYPE_SETVLOC) THEN
-    WRITE(STD_OUT,'(7x,a,es9.4,a,es9.4)') "Local pseudopotential type:SETVLOC,coef=",&
-&         atp%vloc_setvloc_coef,", rad=",atp%vloc_setvloc_rad
-    IF (atp%needvtau) THEN
-      write(STD_OUT,*) 'SETVLOC  option not available for MGGA'
-        stop
-    ENDIF
-  ENDIF
-  IF (atp%vloc_type==VLOC_TYPE_KERKER_EXPF) &
-&   WRITE(STD_OUT,'(7x,a,4(1x,i0))') "Local pseudopotential type : KERKER EXPF,powers=",&
-&         atp%vloc_kerker_power(1:4)
-  IF (atp%vloc_type==VLOC_TYPE_KERKER_POLY) &
-&   WRITE(STD_OUT,'(7x,a,4(1x,i0))') "Local pseudopotential type : KERKER POLY,powers=",&
-&         atp%vloc_kerker_power(1:4)
-  IF (atp%vloc_type==VLOC_TYPE_MTROULLIER.AND.atp%needvtau) THEN
-    WRITE(STD_OUT,'(7x,a)') 'NOTE: MTROULLIER Vloc not available for mGGA!'
-    WRITE(STD_OUT,'(7x,a)') '      Calling VPSmatch with norm conservation instead.'
-    WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : VPS MATCHNC"
-  END IF
-  WRITE(STD_OUT,'(3x,a)') "Matching radius for basis functions:"
-  IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l : radius"
-  IF (atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l kappa :radius"
-  norb=0
-!  DO ll=0,atp%lmax
-!    DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic)
-!      kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
-!      IF (.NOT.atp%diracrelativistic) kk=0
-!      DO io=1,atp%norbit_val
-!        IF (atp%orbit_val_l(io)==ll.AND. &
-!&          ((.NOT.atp%diracrelativistic).OR.atp%orbit_val_k(io)==kk))THEN
-!          norb=norb+1
-!          IF (.NOT.atp%diracrelativistic) &
-!&           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,a,f7.4)') &
-!&           norb," - ",atp%orbit_val_n(io),ll," :",atp%basis_func_rc(norb)
-!          IF (atp%diracrelativistic) &
-!&           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,2x,i2,2x,a,f7.4)') &
-!&           norb," - ",atp%orbit_val_n(io),ll,kk," :",atp%basis_func_rc(norb)
-!        END IF
-!      END DO
-!      IF (atp%nbasis_add>0) THEN
-!        DO io=1,atp%nbasis_add
-!          IF (atp%basis_add_l(io)==ll.AND. &
-!&          ((.NOT.atp%diracrelativistic).OR.atp%basis_add_k(io)==kk))THEN
-!            norb=norb+1
-!            IF (.NOT.atp%diracrelativistic) &
-!&             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,a,f7.4)') &
-!&             norb," - ",".",ll," : ",atp%basis_func_rc(norb)
-!            IF (atp%diracrelativistic) &
-!&             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,2x,i2,2x,a,f7.4)') &
-!&             norb," - ",".",ll,kk," : ",atp%basis_func_rc(norb)
-!          END IF
-!        END DO
-!      END IF
-!    END DO
-!  END DO
+ if(has_to_print) then
+   WRITE(STD_OUT,'(/,3x,a)') "===== Atompaw parameters ====="
+  ! Atom
+   WRITE(STD_OUT,'(3x,a,a2)') "Atomic symbol : ",atp%atomic_symbol
+   WRITE(STD_OUT,'(3x,a,i0)') "Atomic charge : ",atp%atomic_charge
+  ! Algo
+   WRITE(STD_OUT,'(3x,2a)')     "Scalar-relativistic calculation:",MERGE("YES"," NO",atp%scalarrelativistic)
+   WRITE(STD_OUT,'(3x,2a)')     "Dirac-relativistic calculation:",MERGE("YES"," NO",atp%diracrelativistic)
+   WRITE(STD_OUT,'(3x,2a)')     "Frozen core calculation:",MERGE("YES"," NO",atp%frozencorecalculation)
+   WRITE(STD_OUT,'(3x,2a)')     "Frozen vale calculation:",MERGE("YES"," NO",atp%frozenvalecalculation)
+   IF (atp%usespline) THEN
+     WRITE(STD_OUT,'(3x,a)')    "    - Use a spline solver"
+   END IF
+   WRITE(STD_OUT,'(3x,2a)')     "Exchange-correlation functional:",TRIM(atp%exctype)
+   WRITE(STD_OUT,'(3x,3a)')     " (mGGA kinetic energy functional:",MERGE("YES"," NO",atp%needvtau),")"
+   WRITE(STD_OUT,'(3x,2a)')     "Finite-nucleus calculation:",MERGE("YES"," NO",atp%finitenucleus)
+   IF (atp%finitenucleus) THEN
+     WRITE(STD_OUT,'(3x,a,i0)') "    - Finite-nucleus model:",atp%finitenucleusmodel
+   END IF
+   WRITE(STD_OUT,'(3x,2a)')     "Block-Davidson calculation:",MERGE("YES"," NO",atp%BDsolve)
+  ! Grid
+   WRITE(STD_OUT,'(3x,a,i0)')     "Grid type:",atp%Grid%type
+   WRITE(STD_OUT,'(3x,a,i0)')   "Grid size:",atp%Grid%n
+   WRITE(STD_OUT,'(3x,a,f7.3)') "Grid maximum value:",atp%Grid%r(atp%Grid%n)
+   if(atp%usespline) then
+   WRITE(STD_OUT,'(3x,a,f7.3,2x,i0)') "Spline grid r0, ns              :",&
+&      atp%splr0,atp%splns
+   endif
+   ! XC
+   WRITE(STD_OUT,'(3x,2a)')     "Hartree-Fock, post-processing:",MERGE("YES"," NO",atp%HFpostprocess)
+   WRITE(STD_OUT,'(3x,2a)')     "Hartree-Fock, localized coreex.:",MERGE("YES"," NO",atp%localizedcoreexchange)
+   WRITE(STD_OUT,'(3x,2a)')     "Hartree-Fock, fixed zero:",MERGE("YES"," NO",atp%fixed_zero)
+   IF (atp%fixed_zero) THEN
+     WRITE(STD_OUT,'(3x,a,i0)') "    - HF fixed zero index:",atp%fixed_zero_index
+   END IF
+   IF (atp%BDsolve.and.atp%gridkey=='LINEAR') THEN
+     WRITE(STD_OUT,'(/,3x,a)') "WARNING: BlockDavidson solver works very slowlywith linear grid!"
+   END IF
+   WRITE(STD_OUT,'(3x,a,5(1x,i0))') "Max. quantum numbers (s,p,d,f,g):",atp%np(1:5)
+   WRITE(STD_OUT,'(3x,a,i0)') "Total number of orbitals: ",atp%norbit
+   WRITE(STD_OUT,'(3x,a)') "Core and valence orbitals:"
+   IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') "n l : type"
+   IF (atp%diracrelativistic)      WRITE(STD_OUT,'(7x,a)') "n l kappa :type"
+   io=0
+   DO ll=0,4
+     nn=atp%np(ll+1)
+     IF (nn>0) THEN
+       IF (.NOT.atp%diracrelativistic) THEN
+         DO ii=1+ll,nn
+           io=io+1
+           WRITE(STD_OUT,'(7x,i1,1x,i1,2a)') ii,ll," : ", &
+&            MERGE("CORE   ","VALENCE",atp%orbit_iscore(io))
+         END DO
+       ELSE
+        ! DO ik=1,nkappa(ll+1)
+        !   kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
+        !   DO ii=1+ll,nn
+        !     io=io+1
+        !     WRITE(STD_OUT,'(7x,i1,1x,i1,2x,i2,2x,2a)') ii,ll,kk," : ", &
+        ! &      MERGE("CORE   ","VALENCE",atp%orbit_iscore(io))
+        !   END DO
+        ! END DO
+       END IF
+     END IF
+   END DO
+   WRITE(STD_OUT,'(3x,a,i0)') "Basis, maximum L : ",atp%lmax
+  !cutoff radii
+   WRITE(STD_OUT,'(3x,a,f7.4)') "Augmentation region radius : ",atp%rc
+   WRITE(STD_OUT,'(3x,a,f7.4)') "Core dens. matching radius : ",atp%rc_core
+   WRITE(STD_OUT,'(3x,a,f7.4)') "Local pot. matching radius : ",atp%rc_vloc
+   WRITE(STD_OUT,'(3x,a,f7.4)') "Compens. shape func radius : ",atp%rc_shap
+  !Additional basis
+   WRITE(STD_OUT,'(3x,a,i0)') "Initial number of basis functions:",atp%nbasis-atp%nbasis_add
+   WRITE(STD_OUT,'(3x,a,i0)') "Number of additional basis functions:",atp%nbasis_add
+   WRITE(STD_OUT,'(3x,a,i0)') "Total number of basis functions:",atp%nbasis
+   WRITE(STD_OUT,'(3x,a)') "Additional basis functions:"
+   IF (.NOT.atp%diracrelativistic) THEN
+     WRITE(STD_OUT,'(7x,a)') "l : energy"
+     DO io=1,atp%nbasis_add
+       WRITE(STD_OUT,'(7x,i1,a,f7.4)') atp%basis_add_l(io),":",atp%basis_add_energy(io)
+     END DO
+   ELSE
+     WRITE(STD_OUT,'(7x,a)') "l kappa : energy"
+     DO io=1,atp%nbasis_add
+       WRITE(STD_OUT,'(7x,i1,2x,i2,2x,a,f7.4)') atp%basis_add_l(io), &
+&          atp%basis_add_k(io)," : " ,atp%basis_add_energy(io)
+     END DO
+   END IF
+  !Projectors
+   WRITE(STD_OUT,'(3x,a)') "Projectors description:"
+   IF (atp%projector_type==PROJECTOR_TYPE_BLOECHL) &
+&    WRITE(STD_OUT,'(7x,a)') "Type              : BLOECHL"
+   IF (atp%projector_type==PROJECTOR_TYPE_VANDERBILT) &
+&    WRITE(STD_OUT,'(7x,a)') "Type              : VANDERBILT"
+   IF (atp%projector_type==PROJECTOR_TYPE_MODRRKJ) &
+&    WRITE(STD_OUT,'(7x,a)') "Type              : MODRRKJ"
+   IF (atp%projector_type==PROJECTOR_TYPE_CUSTOM) &
+&    WRITE(STD_OUT,'(7x,a)') "Type              : CUSTOM"
+   IF (atp%projector_type==PROJECTOR_TYPE_HF) &
+&    WRITE(STD_OUT,'(7x,a)') "Type : HARTREE-FOCK"
+   IF (atp%projector_type/=PROJECTOR_TYPE_HF) THEN
+     IF (atp%pseudo_type==PSEUDO_TYPE_BLOECHL) &
+&      WRITE(STD_OUT,'(7x,a)') "Pseudization      : BLOECHL"
+     IF (atp%pseudo_type==PSEUDO_TYPE_POLYNOM) &
+&      WRITE(STD_OUT,'(7x,a)') "Pseudization      : POLYNOM"
+     IF (atp%pseudo_type==PSEUDO_TYPE_RRKJ) &
+&      WRITE(STD_OUT,'(7x,a)') "Pseudization      : RRKJ"
+     IF (atp%pseudo_type==PSEUDO_TYPE_BLOECHL_K) &
+&      WRITE(STD_OUT,'(7x,a)') "Pseudization      : BLOECHL KERKER"
+     IF (atp%pseudo_type==PSEUDO_TYPE_POLYNOM2) &
+&      WRITE(STD_OUT,'(7x,a,i0,a,es9.3)') "Pseudization      : POLYNOM2,pdeg=",&
+&       atp%pseudo_polynom2_pdeg,", qcut=",atp%pseudo_polynom2_qcut
+     IF (atp%ortho_type==ORTHO_TYPE_GRAMSCHMIDT) &
+&      WRITE(STD_OUT,'(7x,a)') "Orthogonalisation : GRAM-SCHMIDT"
+     IF (atp%ortho_type==ORTHO_TYPE_VANDERBILT) &
+&      WRITE(STD_OUT,'(7x,a)') "Orthogonalisation : VANDERBILT"
+     IF (atp%ortho_type==ORTHO_TYPE_SVD) &
+&      WRITE(STD_OUT,'(7x,a)') "Orthogonalisation : SVD"
+   END IF
+   IF (atp%shapefunc_type==SHAPEFUNC_TYPE_GAUSSIAN) &
+&    WRITE(STD_OUT,'(3x,a,es9.3)') "Compensation charge shape function: GAUSSIAN,tol=",&
+&    atp%shapefunc_gaussian_param
+   IF (atp%shapefunc_type==SHAPEFUNC_TYPE_SINC) &
+&    WRITE(STD_OUT,'(3x,a)') "Compensation charge shape function : SINC2"
+   IF (atp%shapefunc_type==SHAPEFUNC_TYPE_BESSEL) &
+&    WRITE(STD_OUT,'(3x,a)') "Compensation charge shape function : BESSEL"
+   IF (atp%hf_coretol>0) &
+&    WRITE(STD_OUT,'(3x,a,es9.3)') "Core tolerance for Hartree-Fock:",atp%hf_coretol
+   WRITE(STD_OUT,'(3x,2a)') "Smooth tcore shape (no negative nhat):",MERGE("YES"," NO",atp%shapetcore)
+  !Local Psp
+      IF (atp%vloc_type==VLOC_TYPE_MTROULLIER) &
+&    WRITE(STD_OUT,'(7x,a,i0,a,f7.4)') "Local pseudopotential type:MTROULLIER,l=",&
+&          atp%vloc_l,", energy=",atp%vloc_ene
+   IF (atp%vloc_type==VLOC_TYPE_ULTRASOFT) &
+&    WRITE(STD_OUT,'(7x,a,i0,a,f7.4)') "Local pseudopotential type:ULTRASOFT,l=",&
+&          atp%vloc_l,", energy=",atp%vloc_ene
+   IF (atp%vloc_type==VLOC_TYPE_BESSEL) &
+&    WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : BESSEL"
+   IF (atp%vloc_type==VLOC_TYPE_VPSMATCHNC) &
+&    WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : VPS MATCHNC"
+   IF (atp%vloc_type==VLOC_TYPE_VPSMATCHNNC) &
+&    WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : VPS MATCHNNC"
+   IF (atp%vloc_type==VLOC_TYPE_SETVLOC) THEN
+     WRITE(STD_OUT,'(7x,a,es9.4,a,es9.4)') "Local pseudopotential type:SETVLOC,coef=",&
+&          atp%vloc_setvloc_coef,", rad=",atp%vloc_setvloc_rad
+     IF (atp%needvtau) THEN
+       LIBPAW_ERROR('SETVLOC  option not available for MGGA')
+     ENDIF
+   ENDIF
+   IF (atp%vloc_type==VLOC_TYPE_KERKER_EXPF) &
+&    WRITE(STD_OUT,'(7x,a,4(1x,i0))') "Local pseudopotential type : KERKER EXPF,powers=",&
+&          atp%vloc_kerker_power(1:4)
+   IF (atp%vloc_type==VLOC_TYPE_KERKER_POLY) &
+&    WRITE(STD_OUT,'(7x,a,4(1x,i0))') "Local pseudopotential type : KERKER POLY,powers=",&
+&          atp%vloc_kerker_power(1:4)
+   IF (atp%vloc_type==VLOC_TYPE_MTROULLIER.AND.atp%needvtau) THEN
+     WRITE(STD_OUT,'(7x,a)') 'NOTE: MTROULLIER Vloc not available for mGGA!'
+     WRITE(STD_OUT,'(7x,a)') '      Calling VPSmatch with norm conservation instead.'
+     WRITE(STD_OUT,'(7x,a)') "Local pseudopotential type : VPS MATCHNC"
+   END IF
+   WRITE(STD_OUT,'(3x,a)') "Matching radius for basis functions:"
+   IF (.NOT.atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l : radius"
+   IF (atp%diracrelativistic) WRITE(STD_OUT,'(7x,a)') " # - n l kappa :radius"
+   norb=0
+!   DO ll=0,atp%lmax
+!     DO ik=1,MERGE(nkappa(ll+1),1,atp%diracrelativistic)
+!       kk=MERGE(ll,-(ll+1),ik==1);IF (ll==0) kk=-1
+!       IF (.NOT.atp%diracrelativistic) kk=0
+!       DO io=1,atp%norbit_val
+!         IF (atp%orbit_val_l(io)==ll.AND. &
+! &          ((.NOT.atp%diracrelativistic).OR.atp%orbit_val_k(io)==kk))THEN
+!           norb=norb+1
+!           IF (.NOT.atp%diracrelativistic) &
+! &           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,a,f7.4)') &
+! &           norb," - ",atp%orbit_val_n(io),ll," :",atp%basis_func_rc(norb)
+!           IF (atp%diracrelativistic) &
+! &           WRITE(STD_OUT,'(7x,i2,a,i1,1x,i1,2x,i2,2x,a,f7.4)') &
+! &           norb," - ",atp%orbit_val_n(io),ll,kk," :",atp%basis_func_rc(norb)
+!         END IF
+!       END DO
+!       IF (atp%nbasis_add>0) THEN
+!         DO io=1,atp%nbasis_add
+!           IF (atp%basis_add_l(io)==ll.AND. &
+! &          ((.NOT.atp%diracrelativistic).OR.atp%basis_add_k(io)==kk))THEN
+!             norb=norb+1
+!             IF (.NOT.atp%diracrelativistic) &
+! &             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,a,f7.4)') &
+! &             norb," - ",".",ll," : ",atp%basis_func_rc(norb)
+!             IF (atp%diracrelativistic) &
+! &             WRITE(STD_OUT,'(7x,i2,a,a1,1x,i1,2x,i2,2x,a,f7.4)') &
+! &             norb," - ",".",ll,kk," : ",atp%basis_func_rc(norb)
+!           END IF
+!         END DO
+!       END IF
+!     END DO
+!   END DO
+ endif
 end subroutine print_check_atompaw_params
 
 
@@ -1699,7 +1704,7 @@ SUBROUTINE Potential_Init(Orbit,Pot,Grid)
  TYPE(GridInfo),INTENT(IN) :: Grid
  real(dp) :: ecoul,v0
  CALL atompaw_poisson(Grid,Pot%q,Orbit%den,Pot%rvh,ecoul,v0)
- write(std_out,*) 'In Potential_Init', Pot%q,ecoul
+ if(has_to_print) write(std_out,*) 'In Potential_Init', Pot%q,ecoul
 END SUBROUTINE Potential_Init
 
 
@@ -1751,7 +1756,7 @@ SUBROUTINE Orbit_Init(Orbit,Pot,atp)
      l=Orbit%l(io)
      xocc=Orbit%occ(io)
      if(.not.Orbit%frozenvalecalculation) Orbit%eig(io)=-(zeff/(np))**2!/2.0!Hartree
-     WRITE(std_out,*) io,np,l,xocc,Orbit%eig(io)
+     if(has_to_print) WRITE(std_out,*) io,np,l,xocc,Orbit%eig(io)
      DO ir=1,atp%Grid%n
        Orbit%wfn(ir,io)=hwfn(zeff,np,l,atp%Grid%r(ir))
        IF (ABS(Orbit%wfn(ir,io))<machine_zero) Orbit%wfn(ir,io)=0._dp
@@ -2110,14 +2115,12 @@ SUBROUTINE LDAGGA_SCF(atp)
  CALL DoAndersonMix(AC,arg,en1,LDAGGAsub,success,atp)
  atp%SCF%iter=AC%CurIter
  atp%SCF%delta=AC%res
- WRITE(STD_OUT,*) 'Anderson Mix ',success,AC%res ,' iter = ',AC%CurIter
+ if(has_to_print) WRITE(STD_OUT,*) 'Anderson Mix ',success,AC%res ,' iter = ',AC%CurIter
    if (AC%res>1._dp) then
-     WRITE(STD_OUT,*) 'Sadly the program has not converged.'
-     WRITE(STD_OUT,*) 'Consider trying splineinterp '     
-     STOP
+     LIBPAW_ERROR('Sadly the program has not converged, Consider trying splineinterp')     
    endif   
  CALL FreeAnderson(AC)
- write(std_out,*) 'Finished Anderson Mix', en1 ,' success = ', success
+ if(has_to_print) write(std_out,*) 'Finished Anderson Mix', en1 ,' success = ', success
  LIBPAW_DEALLOCATE(arg)
 END SUBROUTINE LDAGGA_SCF
 
@@ -2145,10 +2148,10 @@ SUBROUTINE LDAGGASub(w,energy,residue,err,success,update,atp)
  CALL CopyOrbit(atp%Orbit,tmpOrbit)
  CALL CopyPot(atp%Pot,tmpPot)
  CALL Updatewfn(atp%Grid,tmpPot,tmpOrbit,w,success,atp%BDsolve)
- write(std_out,*) 'completed updatewfn with success ', success
+ if(has_to_print) write(std_out,*) 'completed updatewfn with success ', success
  If (.not.success) then   !  attempt to stablize solution
    w=w+tmpPot%rvn
-   write(std_out,*) 'Current eigs', (atp%Orbit%eig(io),io=1,atp%Orbit%norbit)
+   if(has_to_print) write(std_out,*) 'Current eigs', (atp%Orbit%eig(io),io=1,atp%Orbit%norbit)
    j=n
    x=atp%Orbit%eig(1)
    if (atp%Orbit%norbit>1) then
@@ -2159,22 +2162,22 @@ SUBROUTINE LDAGGASub(w,energy,residue,err,success,update,atp)
    endif
    x=1._dp/sqrt(abs(x))
    j=FindGridIndex(atp%Grid,x)
-   write(std_out,*) 'index', x,j,atp%Grid%r(j)
+   if(has_to_print) write(std_out,*) 'index', x,j,atp%Grid%r(j)
    if (j<10)j=10
    if (j>n-10) j=n-10
    w(j+1)=(-1._dp+w(j+1)/2)
    do i=j+2,n
       w(i)=-2._dp
    enddo
-   write(std_out,*) 'Reset tmpPot ', j
-   write(std_out,*) '   Last points '
-      write(std_out,'(1p,20e15.7)') atp%Grid%r(n),w(n)
+   if(has_to_print) write(std_out,*) 'Reset tmpPot ', j
+   if(has_to_print) write(std_out,*) '   Last points '
+   if(has_to_print) write(std_out,'(1p,20e15.7)') atp%Grid%r(n),w(n)
    w=w-tmpPot%rvn
    CALL Updatewfn(atp%Grid,tmpPot,tmpOrbit,w,success,atp%BDsolve)
-   write(std_out,*) 'after updatwfn from reset ',success;
+   if(has_to_print) write(std_out,*) 'after updatwfn from reset ',success;
  Endif
  IF (.NOT.success) THEN
-   write(std_out,*) 'Bad luck in Sub'
+   if(has_to_print) write(std_out,*) 'Bad luck in Sub'
  ENDIF
  CALL Get_KinCoul(atp%Grid,tmpPot,tmpOrbit,atp%SCF)
  CALL Get_EXC(atp,tmpPot,tmpOrbit)
@@ -2219,12 +2222,14 @@ SUBROUTINE Get_EXC(atp,Pot,Orbit)
  atp%SCF%eexc=eex
  etot = atp%SCF%ekin+atp%SCF%estatic+atp%SCF%eexc
  atp%SCF%etot=etot
- WRITE(STD_OUT,*) '    Total                    :  ',etot
+ if(has_to_print) WRITE(STD_OUT,*) '    Total                    :  ',etot
  LIBPAW_ALLOCATE(dum,(n))
  dum=0
  dum(2:n)=Pot%rvx(2:n)*Orbit%den(2:n)/atp%Grid%r(2:n)
- WRITE(STD_OUT,*) '    Total   (DC form)        :  ',&
+ if(has_to_print) then
+  WRITE(STD_OUT,*) '    Total   (DC form)        :  ',&
 &        atp%SCF%eone-atp%SCF%ecoul+eex-integrator(atp%Grid,dum)
+ endif
  LIBPAW_DEALLOCATE(dum)
 END SUBROUTINE Get_EXC
 
@@ -2246,7 +2251,7 @@ SUBROUTINE initexch(atp)
  type(atompaw_type), intent(inout) :: atp
  !integer :: id(2)=(/0,0/)
  CALL Uppercase(atp%exctype)
- WRITE(STD_OUT,*) atp%exctype
+ if(has_to_print) WRITE(STD_OUT,*) atp%exctype
  SELECT CASE(TRIM(atp%exctype))
  !CASE default
  !  IF (have_libxc) THEN
@@ -2266,13 +2271,13 @@ SUBROUTINE initexch(atp)
  !  END IF
  CASE('LDA-PW')
    atp%itype = LDA_PW
-   WRITE(STD_OUT,*) 'Perdew-Wang correlation'
+   if(has_to_print) WRITE(STD_OUT,*) 'Perdew-Wang correlation'
  CASE('GGA-PBE')
    atp%itype = GGA_PBE
-   WRITE(STD_OUT,*) 'Perdew-Burke-Ernzerhof GGA'
+   if(has_to_print) WRITE(STD_OUT,*) 'Perdew-Burke-Ernzerhof GGA'
  CASE('GGA-PBESOL')
    atp%itype = GGA_PBESOL
-   WRITE(STD_OUT,*) 'Perdew-Burke-Ernzerhof modified (PBEsol) GGA'
+   if(has_to_print) WRITE(STD_OUT,*) 'Perdew-Burke-Ernzerhof modified (PBEsol) GGA'
  !CASE ('MGGA-R2SCAN-001')
  !  itype = MGGA_R2SCAN_001    
  !  WRITE(STD_OUT,*) 'R2SCAN MGGA with eta=0.001'
@@ -2287,7 +2292,6 @@ SUBROUTINE initexch(atp)
  !  itype = NO_XC
  !  WRITE(STD_OUT,*) 'No XC'
  END SELECT
- WRITE(STD_OUT,*)
 END SUBROUTINE initexch
 
 
@@ -2399,9 +2403,8 @@ SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,ta
  if (PRESENT(v0p)) v0p=0
  if (PRESENT(needvtau)) then
    if (needvtau.and.(PRESENT(vtau).eqv..false.)) then
-     write(std_out,*) 'exch:  Inconsistency in mgga ', needvtau,PRESENT(vtau)
-     write(std_out,*) 'exch:  stopping execution '
-     stop
+     if(has_to_print) write(std_out,*) 'exch:  Inconsistency in mgga ', needvtau,PRESENT(vtau)
+     LIBPAW_ERROR('exch:  stopping execution ')
     endif
  endif
  if (PRESENT(vtau)) vtau=0._dp
@@ -2467,7 +2470,7 @@ SUBROUTINE exch(Grid,den,rvxc,etxc,eexc,itype,ixc,xclevel,fin,v0,v0p,needvtau,ta
    LIBPAW_DEALLOCATE(dum)
  ENDIF
  if(present(xclevel).or.present(tau).or.present(ixc)) then
-   write(std_out,*) 'xclevel, ixc, tau: work in progress'
+   if(has_to_print) write(std_out,*)'xclevel, ixc, tau: work in progress'
  endif
 ! Following is from NB 
 !    LIBPAW_ALLOCATE(tmpd,(n))
@@ -2610,7 +2613,7 @@ SUBROUTINE pwldafunc(den,exc,vxc)
 &        b2+2*b4*rs))/(pprs*(pprs+1._dp/(2._dp*AA)))
  vxc = (4._dp/3._dp)*ex+ec-(decdrs*rs)/3._dp
  IF ((ABS(exc).GT.1.d65).OR.(ABS(vxc).GT.1.d65)) THEN
-    WRITE(STD_OUT,*) 'Problem in PW',n,rs,ec
+    if(has_to_print) WRITE(STD_OUT,*) 'Problem in PW',n,rs,ec
  ENDIF
  exc=2*exc; vxc=2*vxc      ! change to Rydberg units
  RETURN
@@ -2674,7 +2677,7 @@ SUBROUTINE pbefunc(den,grad,fxc,dfxcdn,dfxcdgbg,mu,beta)
  dfxcdgbg = ex*dFdsbg/(2._dp*kf) + dHdtbg/(2._dp*ks)
  IF ((ABS(fxc).GT.1.d65).OR.(ABS(dfxcdn).GT.1.d65).OR.&
 &          (ABS(dfxcdgbg).GT.1.d65)) THEN
-    WRITE(STD_OUT,*) 'Problem in PBE',n,g,rs,s,t,ec,A,H
+    if(has_to_print) WRITE(STD_OUT,*) 'Problem in PBE',n,g,rs,s,t,ec,A,H
  ENDIF
  RETURN
 END SUBROUTINE pbefunc
@@ -3023,7 +3026,7 @@ SUBROUTINE Get_KinCoul(Grid,Pot,Orbit,SCF,noalt)
    ENDIF
  ENDDO
  qcal=integrator(Grid,Orbit%den)
- WRITE(STD_OUT,*) 'qcal = ', qcal
+ if(has_to_print) WRITE(STD_OUT,*) 'qcal = ', qcal
  IF(Orbit%frozenvalecalculation) qcal=qcal+Orbit%qval
  IF(Orbit%frozenvalecalculation) Orbit%den=Orbit%den+Orbit%valeden
  electrons=Pot%q
@@ -3051,7 +3054,7 @@ SUBROUTINE Get_KinCoul(Grid,Pot,Orbit,SCF,noalt)
  dum=0
  dum(2:n)=Pot%rvn(2:n)*Orbit%den(2:n)/Grid%r(2:n)
  SCF%estatic=integrator(Grid,dum)+ecoul
- WRITE(STD_OUT,*) ' n  l     occupancy       energy'
+ if(has_to_print) WRITE(STD_OUT,*) ' n  l     occupancy       energy'
  ekin=0.0_dp; if (Orbit%frozencorecalculation) ekin=SCF%corekin
  eone=0.0_dp
  DO io=1,Orbit%norbit
@@ -3318,8 +3321,7 @@ subroutine wfnsrasym(Grid,wfn,lwfn,energy,iend,qq,jj)
  real(dp) :: rr,x,m,qx
  INTEGER :: i,n
  if (energy>0._dp) then
-   write(std_out,*) 'Error in wfnsrasym -- energy > 0', energy
-   stop
+   LIBPAW_ERROR('Error in wfnsrasym -- energy > 0')
  endif
  wfn=0; lwfn=0;
  n=Grid%n
@@ -3366,8 +3368,7 @@ SUBROUTINE unboundsr(Grid,Pot,nr,l,energy,wfn,nodes)
  real(dp), allocatable :: lwfn(:),zz(:,:,:),yy(:,:)
  n=Grid%n
  IF (nr > n) THEN
-   WRITE(std_out,*) 'Error in unboundsr -- nr > n', nr,n
-   STOP
+   LIBPAW_ERROR('Error in unboundsr')
  ENDIF
  call Azeroexpand(Grid,Pot,l,energy,qq,gamma,c1,c2,MA,MB,nr)
  LIBPAW_ALLOCATE(lwfn,(nr))
@@ -3453,7 +3454,7 @@ SUBROUTINE boundsr(Grid,Pot,eig,wfn,l,nroot,emin,ierr,success)
  convrez=convre
  IF (nz>0.001_dp) convrez=convre*nz
  ierr=0
-  write(std_out,*) 'z , l = ',nz,l
+ if(has_to_print) write(std_out,*) 'z , l = ',nz,l
  ! check how many roots expected by integration outward at
  !   energy = 0
  energy = 0
@@ -3465,12 +3466,12 @@ SUBROUTINE boundsr(Grid,Pot,eig,wfn,l,nroot,emin,ierr,success)
  call cfdsoliter(Grid,zz,yy,istart,n)
  call getwfnfromcfdsol(1,n,yy,p1)
  node=countnodes(2,n,p1)
- write(std_out,*) ' nodes at e=0  ', node
+ if(has_to_print) write(std_out,*) ' nodes at e=0  ', node
  mxroot=node+1
  ntroot=node
  IF (mxroot.LT.nroot) THEN
-   write(std_out,*)'error in boundsr - for l = ',l
-   write(std_out,*) nroot,' states requested but only',mxroot,' possible'
+   if(has_to_print) write(std_out,*)'error in boundsr - for l = ',l
+   if(has_to_print) write(std_out,*) nroot,' states requested but only',mxroot,' possible'
    DO ir=mxroot+1,nroot
      ierr=ierr+9*(10**(ir-1))
    ENDDO
@@ -3516,11 +3517,8 @@ SUBROUTINE boundsr(Grid,Pot,eig,wfn,l,nroot,emin,ierr,success)
      ELSEIF (node.GT.iroot-1) THEN
        IF (energy.LE.emin) THEN
          ierr=ierr+9*(10**(iroot-1))
-         write(std_out,*) 'boundsr error -- emin too high',l,nz,emin,energy
+         if(has_to_print) write(std_out,*) 'boundsr error -- emin too high',l,nz,emin,energy
          IF (energy.LE.emin-tol10) THEN
-           do i=2,n
-             write(999,'(1p,4e15.7)') Grid%r(i),Pot%jj(i)/Grid%r(i),Pot%ww(i),Pot%rv(i)
-           enddo
            STOP
          ENDIF
        ENDIF
@@ -3571,8 +3569,8 @@ SUBROUTINE boundsr(Grid,Pot,eig,wfn,l,nroot,emin,ierr,success)
    IF (.NOT.ok) THEN
      success=.false.
      ierr=ierr+ifac*(10**(iroot-1))
-     write(std_out,*) 'no convergence in boundsr',iroot,l,dele,energy
-     write(std_out,*) ' best guess of eig, dele = ',eig(iroot),best
+     if(has_to_print) write(std_out,*) 'no convergence in boundsr',iroot,l,dele,energy
+     if(has_to_print) write(std_out,*) ' best guess of eig, dele = ',eig(iroot),best
      IF (iroot.LT.mxroot) THEN
        DO ir=iroot+1,mxroot
          ierr=ierr+9*(10**(ir-1))
@@ -3667,8 +3665,7 @@ SUBROUTINE Anderson_Mix(AC, X, F)
    CALL DGESDD('A',j,j,AC%DupMatrix(1,1),n,AC%S(1), &
         AC%U(1,1),n,AC%VT(1,1),n,AC%Work(1),AC%Lwork, AC%IPIV(1),i)
    IF (i /= 0) THEN
-     WRITE(AC%Err_Unit,*) 'Anderson_Mix: Error in DGESDD. Error=',i
-     STOP
+     LIBPAW_ERROR('Anderson_Mix: Error in DGESDD.')
    END IF
    AC%Work(1:j) = AC%Gamma(1:j)
    AC%Gamma = 0
@@ -3896,7 +3893,7 @@ SUBROUTINE DoAndersonMix(AC,w,E,Esub,success,atp)
    CALL Anderson_Mix(AC,w,residue)
  ENDDO
  If (AC%CurIter.ge.AC%MaxIter) then
-   WRITE(STD_OUT,*) 'Anderson Mix reached MaxIter without success',AC%MaxIter
+   if(has_to_print) WRITE(STD_OUT,*) 'Anderson Mix reached MaxIter without success',AC%MaxIter
  Endif
  LIBPAW_DEALLOCATE(residue)
  LIBPAW_DEALLOCATE(tmp)
@@ -4102,8 +4099,7 @@ FUNCTION kummer(n,b,z)
  INTEGER :: i,k,j,nn
  real(dp) :: num,den,fac,bb
  if (n>0) then
-   write(std_out,*) 'Error in kummer function -- n>0',n
-   stop
+   LIBPAW_ERROR('Error in kummer function -- n>0')
  endif
  kummer=1._dp
  if (n==0) return
@@ -4492,8 +4488,7 @@ SUBROUTINE linsol(a,b,kk,la,ra,lb,det)
  INTEGER :: kkm,i,j,k,l,ipo,n,kmo
  d = 1._dp
  if (kk>min(la,ra,lb)) then
-   write(std_out,*) 'Dimension error in linsol ', la,ra,lb,kk
-   stop
+   LIBPAW_ERROR('Dimension error in linsol ')
  endif
  kkm=kk-1
  IF (kkm == 0) THEN
@@ -4548,8 +4543,10 @@ SUBROUTINE linsol(a,b,kk,la,ra,lb,det)
    ENDDO
  ENDIF
  !write(std_out,*) 'determinant from linsol ' , d
- IF(ABS(d).LT.tol10) WRITE(STD_OUT,*) '**warning from linsol --',&
+ IF(ABS(d).LT.tol10.and.has_to_print) then
+   WRITE(STD_OUT,*) '**warning from linsol --',&
 &     'determinant too small --',d
+ endif
  If (present(det)) det=d
 END SUBROUTINE linsol
 
@@ -4569,8 +4566,7 @@ subroutine SolveAXeqBM(n,A,B,many)
  real(dp), allocatable :: WORK(:)
  real(dp), allocatable :: S(:)
  if (many<1.or.many>n) then
-   write(std_out,*) 'Error in paw_SolveAXeqBM -- n, many ', n, many
-   stop
+   LIBPAW_ERROR('Error in paw_SolveAXeqBM')
  endif
  if (n == 1) then
    B(1)=B(1)/A(1,1)
@@ -4996,8 +4992,7 @@ FUNCTION integrator(Grid,arg,str,fin)
  ENDIF
  SELECT CASE(Grid%type)
  CASE default
-   write(std_out,*) 'Error in integrator -- grid ', Grid%type
-   STOP
+   LIBPAW_ERROR('Error in integrator')
  CASE(lineargrid)
    integrator=overint(n,Grid%h,arg(i1:i2))
  CASE(loggrid)
@@ -5113,25 +5108,21 @@ SUBROUTINE derivative(Grid,f,dfdr,begin,bend)
    IF (begin>=1.AND.bend<= Grid%n) THEN
      i1=begin;i2=bend;n=i2-i1+1
    ELSE
-     write(std_out,*) 'Error in derivative', begin,bend,Grid%n
-     STOP
+     LIBPAW_ERROR('Error in derivative')
    ENDIF
  ENDIF
  SELECT CASE(Grid%type)
  CASE default
-   write(std_out,*) 'Error in derivative -- grid ', Grid%type
-   STOP
+   LIBPAW_ERROR('Error in derivative')
  CASE(lineargrid)
    CALL nderiv(Grid%h,f(i1:i2),dfdr(i1:i2),n,i)
    IF (i/=0) THEN
-     write(std_out,*) 'Error in derivative -nderiv problem', i
-     STOP
+     LIBPAW_ERROR('Error in derivative -nderiv problem')
    ENDIF
  CASE(loggrid)
    CALL nderiv(Grid%h,f(i1:i2),dfdr(i1:i2),n,i)
    IF (i/=0) THEN
-     write(std_out,*) 'Error in derivative -nderiv problem', i
-     STOP
+     LIBPAW_ERROR('Error in derivative -nderiv problem')
    ENDIF
    dfdr(i1:i2)=dfdr(i1:i2)/Grid%drdu(i1:i2)
  END SELECT
@@ -5236,8 +5227,7 @@ FUNCTION secondderiv(index,f,h)
  else if (index>=5.and.index==n)   THEN
    secondderiv=(22*f(n-4)-112*f(n-3)+228*f(n-2)-208*f(n-1)+70*f(n))/(24*h*h)
  else
-   write(std_out,*) 'Error in secondderiv', index, SIZE(f)
-   STOP
+   LIBPAW_ERROR('Error in secondderiv')
  ENDIF
 END FUNCTION secondderiv
 
@@ -5263,8 +5253,7 @@ FUNCTION firstderiv(index,f,h)
  else if (index>=5.and.index==n)   THEN
    firstderiv=(3*f(n-4)-16*f(n-3)+36*f(n-2)-48*f(n-1)+25*f(n))/(12*h)
  else
-   write(std_out,*) 'Error in firstderiv', index, SIZE(f)
-   STOP
+   LIBPAW_ERROR('Error in firstderiv')
  ENDIF
 END FUNCTION firstderiv
 
@@ -5328,22 +5317,21 @@ SUBROUTINE cfdsol(Grid,zz,yy,jj1,jj2)
  real(dp) :: scale
  mesh=SIZE(yy(2,:))
  IF (SIZE(zz(2,2,:))/=mesh) THEN
-   write(std_out,*) 'cfdsol error - incompatible arrays', mesh,SIZE(zz(2,2,:))
-   STOP
+   LIBPAW_ERROR('cfdsol error - incompatible arrays')
  ENDIF
  isgn = ( jj2 - jj1 ) / iabs( jj2 - jj1 )
  IF ( isgn .EQ. + 1 ) THEN
    IF ( jj1 .LE. 5 .OR. jj2 .GT. mesh ) THEN
-     write(std_out,10) isgn,jj1,jj2,mesh
+     if(has_to_print) write(std_out,10) isgn,jj1,jj2,mesh
      CALL EXIT(1)
    ENDIF
  ELSEIF ( isgn .EQ. - 1 ) THEN
    IF ( jj1 .GE. ( mesh - 4 ) .OR. jj2 .LT. 1 ) THEN
-      write(std_out,10) isgn,jj1,jj2,mesh
+      if(has_to_print) write(std_out,10) isgn,jj1,jj2,mesh
       CALL EXIT(1)
    ENDIF
  ELSE
-   write(std_out,10) isgn,jj1,jj2,mesh
+   if(has_to_print) write(std_out,10) isgn,jj1,jj2,mesh
  ENDIF
 10  FORMAT(' ***error in subroutine difsol',/,&
        &' isgn =',i2,' jj1 =',i5,' jj2 =',i5,' mesh =',i5,&
@@ -5421,22 +5409,21 @@ SUBROUTINE cfdsoliter(Grid,zz,yy,jj1,jj2)
  real(dp) :: scale,small
  mesh=SIZE(yy(2,:))
  IF (SIZE(zz(2,2,:))/=mesh) THEN
-   WRITE(STD_OUT,*) 'cfdsol error - incompatible arrays',mesh,SIZE(zz(2,2,:))
-   STOP
+  LIBPAW_ERROR('cfdsol error - incompatible arrays')
  ENDIF
  isgn = ( jj2 - jj1 ) / iabs( jj2 - jj1 )
  IF ( isgn .EQ. + 1 ) THEN
    IF ( jj1 .LE. 5 .OR. jj2 .GT. mesh ) THEN
-     WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
+     if(has_to_print) WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
      CALL EXIT(1)
    ENDIF
  ELSEIF ( isgn .EQ. - 1 ) THEN
    IF ( jj1 .GE. ( mesh - 4 ) .OR. jj2 .LT. 1 ) THEN
-     WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
+     if(has_to_print) WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
      CALL EXIT(1)
    ENDIF
  ELSE
-   WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
+   if(has_to_print) WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
  ENDIF
 10  FORMAT(' ***error in subroutine difsol',/,&
       &' isgn =',i2,' jj1 =',i5,' jj2 =',i5,' mesh =',i5,&
@@ -5555,7 +5542,7 @@ SUBROUTINE findh(Z,range,n,hval,r0)
    endif
  enddo
  if (.not.success) then
-   write(std_out,*) 'Warning in findh -- dh > eps ', dh,h0
+   if(has_to_print) write(std_out,*) 'Warning in findh -- dh > eps ', dh,h0
  endif
  hval=h0
  r0=hval/Z
@@ -5574,7 +5561,7 @@ SUBROUTINE InitGrid(Grid,h,range,r0,do_not_print,pawrad)
  TYPE(pawrad_type),optional, INTENT(IN) :: pawrad
  INTEGER :: i,n
  LOGICAL :: do_print
- do_print=.true.;if (present(do_not_print)) do_print=.not.do_not_print
+ do_print=.false.;if (present(do_not_print)) do_print=.not.do_not_print
  if (present(pawrad)) then
    if (pawrad%mesh_type/=2) then
      LIBPAW_ERROR("Error wrong pawrad grid")
@@ -5848,17 +5835,23 @@ SUBROUTINE SetPAWOptions2(atp,success)
  !Store the description of Vloc scheme in a string
  if (Vlocalindex==MTROULLIER) then
    l=atp%vloc_l ; e=atp%vloc_ene
-   WRITE(atp%PAW%Vloc_description,&
+   if(has_to_print) then
+     WRITE(atp%PAW%Vloc_description,&
 &    '("Vloc: Norm-conserving Troullier-Martins with l=",i1,";e=",1p,1e12.4)')l,e
+   endif
  endif
  if (Vlocalindex==ULTRASOFT) then
    l=atp%vloc_l ; e=atp%vloc_ene
-   WRITE(atp%PAW%Vloc_description,&
+   if(has_to_print) then
+     WRITE(atp%PAW%Vloc_description,&
 &    '("Vloc: Non norm-conserving form with l= ",i1,";e= ",1p,1e12.4)')l,e
+   endif
  endif
  if (Vlocalindex==BESSEL) then
-   WRITE(atp%PAW%Vloc_description,&
+   if(has_to_print) then
+     WRITE(atp%PAW%Vloc_description,&
 &      '("Vloc: truncated form - Vps(r)=A.sin(qr)/r for r<rc")')
+   endif
  endif
  !Call the routine computing Vloc - Not mGGA
  IF (.NOT.atp%needvtau) THEN
@@ -5898,8 +5891,8 @@ SUBROUTINE SetPAWOptions2(atp,success)
  ENDIF
   !Output in summary file
  IF (atp%needvtau) THEN
-   WRITE(std_out,*) 'Sequence of dataset construction steps modified for mGGA'      
-   WRITE(std_out,*) 'Only projectors from Vanderbilt scheme available'
+   if(has_to_print) WRITE(std_out,*) 'Sequence of dataset construction steps modified for mGGA'      
+   if(has_to_print) WRITE(std_out,*) 'Only projectors from Vanderbilt scheme available'
  ENDIF
  CALL StoreTOCCWFN(atp%PAW)
 END SUBROUTINE SetPAWOptions2
@@ -5954,7 +5947,7 @@ SUBROUTINE Troullier(Grid,Pot,PAW,l,e,needvtau,scalarrelativistic)
  F=rc*(2*rv(irc)-rc*(2*Gfirstderiv(Grid,irc,rv) &
 &     -rc*Gsecondderiv(Grid,irc,rv)))+&
 &     4*(l+1)*(C0-B0)-2*(l+1)*D-2*C0**2-2*B0*D
- WRITE(STD_OUT,*) 'In troullier -- matching parameters',S,A0,B0,C0,D,F
+ if(has_to_print) WRITE(STD_OUT,*) 'In troullier -- matching parameters',S,A0,B0,C0,D,F
  delta=1.d10
  iter=0
  Coef0=0
@@ -5976,8 +5969,8 @@ SUBROUTINE Troullier(Grid,Pot,PAW,l,e,needvtau,scalarrelativistic)
    Coef0=(LOG(S/x))/2
    delta=ABS(Coef0-Coef0old)
  ENDDO
- WRITE(STD_OUT,*) '  VNC converged in ', iter,'  iterations'
- WRITE(STD_OUT,*) '  Coefficients  -- ', Coef0,Coef(1:6)
+ if(has_to_print) WRITE(STD_OUT,*) '  VNC converged in ', iter,'  iterations'
+ if(has_to_print) WRITE(STD_OUT,*) '  Coefficients  -- ', Coef0,Coef(1:6)
  ! Now  calculate VNC
  if (needvtau) then
    aux=0._dp
@@ -5997,10 +5990,10 @@ SUBROUTINE Troullier(Grid,Pot,PAW,l,e,needvtau,scalarrelativistic)
    ddddpp=(1/(rc**4)*(24*Coef(2)+x*(360*Coef(3)+x*(1680*Coef(4)+&
 &       x*(5040*Coef(5)+x*11880*Coef(6))))))
    IF (i==irc) THEN
-     WRITE(STD_OUT,*) 'check  dp ', dpp,  B0/rc
-     WRITE(STD_OUT,*) 'check ddp ', ddpp, C0/rc**2
-     WRITE(STD_OUT,*) 'check dddp', dddpp, D/rc**3
-     WRITE(STD_OUT,*) 'check ddddp', ddddpp, F/rc**4
+     if(has_to_print) WRITE(STD_OUT,*) 'check  dp ', dpp,  B0/rc
+     if(has_to_print) WRITE(STD_OUT,*) 'check ddp ', ddpp, C0/rc**2
+     if(has_to_print) WRITE(STD_OUT,*) 'check dddp', dddpp, D/rc**3
+     if(has_to_print) WRITE(STD_OUT,*) 'check ddddp', ddddpp, F/rc**4
    ENDIF
    if (needvtau) then
      VNC(i)=e+(1._dp+PAW%tvtau(i))*(ddpp+dpp*(dpp+2*(l+1)/r(i))) &
@@ -6011,7 +6004,7 @@ SUBROUTINE Troullier(Grid,Pot,PAW,l,e,needvtau,scalarrelativistic)
      dum(i)=(r(i)**(l+1))*EXP(p(i))
  ENDDO
  x=overlap(Grid,dum(1:irc),dum(1:irc),1,irc)
- WRITE(STD_OUT,*) 'check norm ',x,S
+ if(has_to_print) WRITE(STD_OUT,*) 'check norm ',x,S
  VNC(irc:n)=rv(irc:n)/r(irc:n)
  PAW%rveff(1:n)=VNC(1:n)*r(1:n)
  LIBPAW_DEALLOCATE(VNC)
@@ -6096,10 +6089,10 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
        exit
      endif
    enddo
-   write(std_out,*) 'range ', k,range!; call flush_unit(std_out)
+   if(has_to_print) write(std_out,*) 'range ', k,range!; call flush_unit(std_out)
  ENDIF
- WRITE(STD_OUT,*) '  basis functions:'
- WRITE(STD_OUT,*)' No.   n     l         energy         occ   '
+ if(has_to_print) WRITE(STD_OUT,*) '  basis functions:'
+ if(has_to_print) WRITE(STD_OUT,*)' No.   n     l         energy         occ   '
  nbase=0 ; ibasis_add=1
  DO l=0,lmax
    currentnode=-1
@@ -6113,7 +6106,7 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
          PAW%np(nbase)=Orbit%np(io)
          PAW%l(nbase)=l
          PAW%nodes(nbase)=PAW%np(nbase)-l-1
-         write(std_out,*) 'l,nbase,node',l,nbase,currentnode
+         if(has_to_print) write(std_out,*) 'l,nbase,node',l,nbase,currentnode
          PAW%eig(nbase)=Orbit%eig(io)
          PAW%occ(nbase)=Orbit%occ(io)
          if(Orbit%frozenvalecalculation.and.(Orbit%eig(io).GE.Orbit%e_semicore)) then
@@ -6131,7 +6124,7 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
            STOP 'Error -- setbasis subroutine not ready for diracrelativistic!'
          endif  
          PAW%valencemap(io)=nbase
-         WRITE(STD_OUT,'(3i6,1p,2e15.6)') nbase,PAW%np(nbase),l,&
+         if(has_to_print) WRITE(STD_OUT,'(3i6,1p,2e15.6)') nbase,PAW%np(nbase),l,&
 &                 PAW%eig(nbase),PAW%occ(nbase)!; call flush_unit(std_out)
        ENDIF
      ENDIF
@@ -6140,18 +6133,18 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
      IF (ibasis_add>atp%nbasis_add) EXIT generalizedloop
      IF (atp%basis_add_l(ibasis_add)/=l) EXIT generalizedloop
      energy=atp%basis_add_energy(ibasis_add)
-     IF (energy<0._dp) &
-&        WRITE(STD_OUT,*) 'energy is negative',energy,' -- WARNING WARNING !!!'
+     IF (energy<0._dp.and.has_to_print) then
+       WRITE(STD_OUT,*) 'energy is negative',energy,' -- WARNING WARNING !!!'
+     endif
      nbase=nbase+1
      IF (nbase > mxbase ) THEN
-       WRITE(STD_OUT,*) 'Error in  setbasis -- too many functions ',nbase,mxbase
-       STOP
+       LIBPAW_ERROR('Error in  setbasis -- too many functions ')
      ENDIF
      PAW%l(nbase)=l
      PAW%np(nbase)=999
      PAW%nodes(nbase)=currentnode+1
      currentnode=PAW%nodes(nbase)
-     write(std_out,*) 'l,nbase,node',l,nbase,currentnode
+     if(has_to_print) write(std_out,*) 'l,nbase,node',l,nbase,currentnode
      PAW%eig(nbase)=energy
      PAW%occ(nbase)=0._dp
      PAW%phi(1:n,nbase)=0._dp
@@ -6167,14 +6160,16 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
      rat=MAX(ABS(PAW%phi(irc,nbase)),ABS(PAW%phi(irc+1,nbase)))
      rat=DSIGN(rat,PAW%phi(irc,nbase))
      PAW%phi(1:n,nbase)=PAW%phi(1:n,nbase)/rat
-     write(std_out,*) 'MAX PHI=',nbase,maxval(PAW%phi(:,nbase))
-     WRITE(STD_OUT,'(3i6,1p,2e15.6)') nbase,PAW%np(nbase),l,             &
+     if(has_to_print) write(std_out,*) 'MAX PHI=',nbase,maxval(PAW%phi(:,nbase))
+     if(has_to_print) then
+       WRITE(STD_OUT,'(3i6,1p,2e15.6)') nbase,PAW%np(nbase),l,             &
 &           PAW%eig(nbase),PAW%occ(nbase)
+     endif
      nbl=nbl+1
      ibasis_add=ibasis_add+1
    ENDDO generalizedloop
  ENDDO   ! end lmax loop
- WRITE(std_out,*) 'completed phi basis with ',nbase,' functions '
+ if(has_to_print) WRITE(std_out,*) 'completed phi basis with ',nbase,' functions '
  PAW%nbase=nbase     ! reset nbase
  LIBPAW_DEALLOCATE(checkden)
  LIBPAW_DEALLOCATE(valden)
@@ -6196,7 +6191,7 @@ SUBROUTINE smoothcore(Grid,orig,PAW)
  h=Grid%h
  irc=PAW%irc_core
  rc=PAW%rc_core
- write(std_out,*) 'In smoothcore ', irc,rc
+ if(has_to_print) write(std_out,*) 'In smoothcore ', irc,rc
  LIBPAW_ALLOCATE(d1,(n))
  LIBPAW_ALLOCATE(d2,(n))
  CALL derivative(Grid,orig,d1)
@@ -6204,11 +6199,11 @@ SUBROUTINE smoothcore(Grid,orig,PAW)
  x=orig(irc)
  y=d1(irc)*rc
  z=d2(irc)*(rc*rc)
- write(std_out,*) 'smoothcore: x,y,z = ', x,y,z
+ if(has_to_print) write(std_out,*) 'smoothcore: x,y,z = ', x,y,z
  u0=3*x - 9*y/8 + z/8
  u2=-3*x + 7*y/4 - z/4
  u4=x - 5*y/8 + z/8
- write(std_out,*) 'smoothcore: u0,u2,u4 = ', u0,u2,u4
+ if(has_to_print) write(std_out,*) 'smoothcore: u0,u2,u4 = ', u0,u2,u4
  PAW%tcore=orig
  do i=1,irc
    x=(Grid%r(i)/rc)**2
@@ -6244,7 +6239,7 @@ SUBROUTINE setcoretail(Grid,coreden,PAW)
      exit
    endif
  enddo
- write(std_out,*) 'coretailpoints = ',PAW%coretailpoints
+ if(has_to_print) write(std_out,*) 'coretailpoints = ',PAW%coretailpoints
 END SUBROUTINE setcoretail
 
 
@@ -6368,8 +6363,7 @@ SUBROUTINE EvaluateTp(l,A,B,C,D,F,coef)
    Coef(1)=Coef10
  ENDDO
  IF (iter >= niter) THEN
-   WRITE(STD_OUT,*) 'Error in EvaluateTP -- no convergence'
-   STOP
+   LIBPAW_ERROR('Error in EvaluateTP -- no convergence')
  ENDIF
 END SUBROUTINE EvaluateTp
 
@@ -6405,8 +6399,8 @@ SUBROUTINE InitPAW(PAW,Grid,Orbit)
  ENDDO
  mxbase=nbase+5*max(1,PAW%lmax) !Estimate excess
  PAW%nbase=nbase
- WRITE(STD_OUT,*) 'Found ', nbase,' valence basis functions '
- WRITE(STD_OUT,*) 'Allocating for ', mxbase, ' total basis functions'
+ if(has_to_print) WRITE(STD_OUT,*) 'Found ', nbase,' valence basis functions '
+ if(has_to_print) WRITE(STD_OUT,*) 'Allocating for ', mxbase, ' total basis functions'
  LIBPAW_ALLOCATE(PAW%projshape,(n))
  LIBPAW_ALLOCATE(PAW%hatden,(n))
  LIBPAW_ALLOCATE(PAW%hatpot,(n))
@@ -6717,9 +6711,9 @@ SUBROUTINE BoundNumerov(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,BDsolve,success)
  if(BDsolve) then
    STOP
  endif
- write(std_out,*) 'Before newboundsch',l,nroot, Eig(1:nroot)
+ if(has_to_print) write(std_out,*) 'Before newboundsch',l,nroot, Eig(1:nroot)
  CALL newboundsch(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,success)
- write(std_out,*) 'After newboundsch',l,nroot, Eig(1:nroot)
+ if(has_to_print) write(std_out,*) 'After newboundsch',l,nroot, Eig(1:nroot)
  ! adjust sign
  Do j=1,nroot
    if (Psi(3,j)<0._dp) Psi(:,j)=-Psi(:,j)
@@ -6826,7 +6820,7 @@ SUBROUTINE newboundsch(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,ok)
      ELSEIF (node.GT.iroot-1) THEN
        IF (energy.LT.emin) THEN
          ierr=ierr+9*(10**(iroot-1))
-         WRITE(STD_OUT,*) 'newboundsch error -- emin too high',l,nz,emin,energy
+         if(has_to_print) WRITE(STD_OUT,*) 'newboundsch error -- emin too high',l,nz,emin,energy
          RETURN
        ENDIF
        emax=MIN(emax,energy+tol5)
@@ -6850,7 +6844,7 @@ SUBROUTINE newboundsch(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,ok)
          best=x
        ENDIF
        IF (ABS(dele).LE.convrez) THEN
-         WRITE(STD_OUT,*) 'converged iter with dele' , iter,dele
+         if(has_to_print) WRITE(STD_OUT,*) 'converged iter with dele' , iter,dele
          ok=.TRUE.
          !  eigenvalue found
          ierr=ierr+10**(iroot-1)
@@ -6875,8 +6869,8 @@ SUBROUTINE newboundsch(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,ok)
    ENDDO BigIter !iter
    IF (.NOT.ok) THEN
      ierr=ierr+ifac*(10**(iroot-1))
-     WRITE(STD_OUT,*) 'no convergence in newboundsch',iroot,l,dele,energy
-     WRITE(STD_OUT,*) ' best guess of eig, dele = ',Eig(iroot),best
+     if(has_to_print) WRITE(STD_OUT,*) 'no convergence in newboundsch',iroot,l,dele,energy
+     if(has_to_print) WRITE(STD_OUT,*) ' best guess of eig, dele = ',Eig(iroot),best
      IF (iroot.LT.nroot) THEN
        DO ir=iroot+1,nroot
          ierr=ierr+9*(10**(ir-1))
@@ -6891,12 +6885,12 @@ SUBROUTINE newboundsch(Grid,rv,v0,v0p,nz,l,nroot,Eig,Psi,ok)
      ENDDO
    ENDIF
  ENDDO !iroot
- WRITE(STD_OUT,'("finish boundsch with eigenvalues -- ",1p,20e15.7)') &
+ if(has_to_print) WRITE(STD_OUT,'("finish boundsch with eigenvalues -- ",1p,20e15.7)') &
  &    Eig(1:nroot)
  LIBPAW_DEALLOCATE(p1)
  LIBPAW_DEALLOCATE(p2)
  LIBPAW_DEALLOCATE(dd)
- WRITE(STD_OUT,*) 'returning from newboundsch -- ierr=',ierr
+ if(has_to_print) WRITE(STD_OUT,*) 'returning from newboundsch -- ierr=',ierr
 END SUBROUTINE newboundsch
 
 
@@ -6987,8 +6981,7 @@ SUBROUTINE unboundsch(Grid,rv,v0,v0p,nr,l,energy,wfn,nodes)
  real(dp) :: zeroval,scale
  n=Grid%n
  IF (nr > n) THEN
-   WRITE(STD_OUT,*) 'Error in unboundsch -- nr > n', nr,n
-   STOP
+   LIBPAW_ERROR('Error in unboundsch -- nr > n')
  ENDIF
  ! initialize wfn
  wfn=0
@@ -7193,7 +7186,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
  read_basis_data_=.true.;if (PRESENT(read_basis_data))read_basis_data_=read_basis_data
 !Print a title
  IF(read_global_data_.OR.read_elec_data_.OR.read_coreval_data_.OR.read_basis_data_)THEN
-   WRITE(STD_OUT,'(/,3x,a)') "===== READING OF INPUT FILE ====="
+   if(has_to_print) WRITE(STD_OUT,'(/,3x,a)') "===== READING OF INPUT FILE ====="
  END IF
 !------------------------------------------------------------------
 !Start reading of AE data
@@ -7414,8 +7407,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      IF (xocc<0._dp.OR.&
 &      ((.NOT.atp%diracrelativistic).AND.(xocc>2._dp*(2*ll+1))).OR.&
 &      ((     atp%diracrelativistic).AND.(xocc>2._dp*ABS(kk)))) THEN
-       WRITE(STD_OUT,*) 'input_dataset: error in occupations -- ip,l,kap,xocc:',nn,ll,kk,xocc,'!'
-       STOP
+       LIBPAW_ERROR('input_dataset: error in occupations')
      END IF
      atp%norbit_mod=atp%norbit_mod+1
      if (atp%norbit_mod>norbit_max) stop 'input_dataset_occ: error -- to many occupation lines!'
@@ -7465,7 +7457,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
          IF (has_to_echo) WRITE(ecunit,'(a)') TRIM(inputline)
          EXIT
        ELSE
-         WRITE(STD_OUT,*) ' >> Please input c or v!'
+         LIBPAW_ERROR('Please input c or v!')
        END IF
      END DO
      atp%orbit_iscore(io)=(CHR=='c'.OR.CHR=='C')
@@ -7555,8 +7547,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    CALL extractword(1,inputline,inputword);inputword=trim(inputword)
    IF (inputword/="") READ(inputword,*) atp%rc
    IF (atp%rc<=tol12) THEN
-     WRITE(STD_OUT,*) 'input_dataset: error -- rc too small ',atp%rc,'!'
-     STOP
+     LIBPAW_ERROR('input_dataset: error -- rc too small ')
    END IF
    CALL extractword(2,inputline,inputword);inputword=trim(inputword)
    IF (inputword/="") THEN
@@ -7568,22 +7559,18 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
        IF (inputword/="") THEN
          READ(inputword,*) atp%rc_core
        ELSE
-         WRITE(STD_OUT,*) 'input_dataset: error -- rc(core) is missing!'
-         STOP
+         LIBPAW_ERROR('input_dataset: error -- rc(core) is missing!')
        END IF
      ELSE
-       WRITE(STD_OUT,*) 'input_dataset: error -- rc(Vloc) is missing!'
-       STOP
+       LIBPAW_ERROR('input_dataset: error -- rc(Vloc) is missing!')
      END IF
      IF (atp%rc_shap<=tol12.OR.atp%rc_vloc<=tol12.OR.&
 &        atp%rc_core<=tol12) THEN
-       WRITE(STD_OUT,*) 'input_dataset: error -- one rc is too small!'
-       STOP
+       LIBPAW_ERROR('input_dataset: error -- one rc is too small!')
      END IF
      IF (atp%rc_shap>atp%rc.OR.atp%rc_vloc>atp%rc.OR.&
 &        atp%rc_core>atp%rc) THEN
-       WRITE(STD_OUT,*) 'input_dataset: error -- rc_shape, rc_vloc and rc_core must be <rc!'
-       STOP
+       LIBPAW_ERROR('input_dataset: error -- rc_shape, rc_vloc and rc_core must be <rc!')
      END IF
    ENDIF
    !Print read data
@@ -7722,7 +7709,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    atp%projector_type=PROJECTOR_TYPE_HF
    atp%pseudo_type=PSEUDO_TYPE_HF
    atp%ortho_type=ORTHO_TYPE_HF
-   WRITE(STD_OUT,'(3x,a)') '>> You are using HF XC type: pseudo and orthogonalization line will be ignored!'
+   if(has_to_print) WRITE(STD_OUT,'(3x,a)') '>> You are using HF XC type: pseudo and orthogonalization line will be ignored!'
  END IF
  IF ((atp%pseudo_type==PSEUDO_TYPE_BLOECHL.OR. &
 &     atp%pseudo_type==PSEUDO_TYPE_BLOECHL_K) &
@@ -7860,9 +7847,9 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
    IF (atp%vloc_l<0.or.atp%vloc_l>10) STOP 'input_dataset: error while reading Vloc parameters!'
  END IF
  IF (atp%vloc_type==VLOC_TYPE_MTROULLIER.AND.atp%needvtau) then
-      WRITE(STD_OUT,'(7x,a)') 'NOTE: MTROULLIER Vloc not available for mGGA!'
-     WRITE(STD_OUT,'(7x,a)') '      Calling VPSmatch with norm conservation instead.'
-     atp%vloc_type=VLOC_TYPE_VPSMATCHNC
+   if(has_to_print) WRITE(STD_OUT,'(7x,a)') 'NOTE: MTROULLIER Vloc not available for mGGA!'
+   if(has_to_print) WRITE(STD_OUT,'(7x,a)') '      Calling VPSmatch with norm conservation instead.'
+   atp%vloc_type=VLOC_TYPE_VPSMATCHNC
  ENDIF
  !Print read data
  IF (has_to_print) THEN
@@ -7882,8 +7869,7 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
      WRITE(STD_OUT,'(7x,a,es9.4,a,es9.4)') "Local pseudopotential type :SETVLOC, coef=",&
  &          atp%vloc_setvloc_coef,", rad=",atp%vloc_setvloc_rad
      IF (atp%needvtau) THEN
-       write(STD_OUT,*) 'SETVLOC  option not available for MGGA'
-       stop
+       LIBPAW_ERROR('SETVLOC  option not available for MGGA')
      ENDIF     
    ENDIF  
    IF (atp%vloc_type==VLOC_TYPE_KERKER_EXPF) &
@@ -7990,9 +7976,9 @@ SUBROUTINE input_dataset_read(atp,inputfile,echofile,&
  ENDIF
  !Final message
  IF(read_global_data_.OR.read_elec_data_.OR.read_coreval_data_.OR.read_basis_data_)THEN
-   WRITE(STD_OUT,'(3x,a)') "===== END READING OF INPUT FILE ====="
+   if(has_to_print) WRITE(STD_OUT,'(3x,a)') "===== END READING OF INPUT FILE ====="
  END IF
- WRITE(STD_OUT,'(2/)')
+ if(has_to_print) WRITE(STD_OUT,'(2/)')
  !------------------------------------------------------------------
  !Close files
  CLOSE(ifunit)

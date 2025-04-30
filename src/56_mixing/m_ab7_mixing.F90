@@ -137,7 +137,6 @@ subroutine nullify_(mix)
 !Arguments ------------------------------------
 !scalars
  type(ab7_mixing_object), intent(inout) :: mix
- integer  :: itypat
 ! *************************************************************************
 
  ! Nullify internal pointers.
@@ -614,7 +613,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 
 !Local variables-------------------------------
 !scalars
- integer :: temp_unit,itypat !i_all, i_stat
+ integer :: temp_unit !i_all, i_stat
  real(dp) :: tsec(2)
  character(len = *), parameter :: subname = "ab7_mixing_eval_deallocate"
  character(len=500) :: msg
@@ -696,7 +695,7 @@ end subroutine ab7_mixing_eval_deallocate
  real(dp), intent(in), optional :: potden(mix%space * mix%nfft,mix%nspden)
  real(dp), intent(out), optional :: resnrm
  real(dp),intent(inout),optional :: nelect_extfpmd
- real(dp),intent(inout),optional,target :: rcpaw_arr(mix%n_rcpawmix)
+ real(dp),intent(inout),optional,target :: rcpaw_arr(mix%n_rcpawmix*mix%use_rcpaw)
 
 !Local variables-------------------------------
 !scalars
@@ -704,7 +703,7 @@ end subroutine ab7_mixing_eval_deallocate
  integer :: usepaw, pawoptmix_, response_
  real(dp) :: resnrm_,nelect_extfpmd_
 !arrays
- real(dp),target :: dum(1)
+ real(dp),target :: dum(1),dum0(0)
  real(dp),pointer :: pawarr_(:),rcpawarr_(:)
 
 ! *************************************************************************
@@ -752,7 +751,7 @@ end subroutine ab7_mixing_eval_deallocate
  if (present(response)) response_ = response
  pawarr_ => dum ; if (present(pawarr)) pawarr_ => pawarr
  nelect_extfpmd_=zero;if(present(nelect_extfpmd)) nelect_extfpmd_=nelect_extfpmd
- rcpawarr_=>null(); if(present(rcpaw_arr)) rcpawarr_=>rcpaw_arr
+ rcpawarr_ => dum0; if(present(rcpaw_arr)) rcpawarr_ => rcpaw_arr
 
  ! Do the mixing.
  resnrm_ = 0.d0
@@ -1952,12 +1951,12 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
  real(dp),intent(inout) :: f_fftgr(cplex*nfft,nspden,n_fftgr)
  real(dp),intent(inout) :: f_paw(npawmix,n_fftgr*usepaw),vpaw(npawmix*usepaw)
  real(dp),intent(inout) :: vtrial(cplex*nfft,nspden)
- real(dp),intent(inout) :: f_extfpmd(useextfpmd*nfft)
+ real(dp),intent(inout) :: f_extfpmd(useextfpmd*n_fftgr)
  real(dp),intent(inout) :: f_rcpaw(use_rcpaw*nrcpawmix,use_rcpaw*n_fftgr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: npulaymax=50
- integer :: i_vstore,ierr,ifft,ii,index,isp,jj,comm_atom_,niter,npulay,tmp,itypat,iln
+ integer :: i_vstore,ierr,ifft,ii,index,isp,jj,comm_atom_,niter,npulay,tmp
  real(dp),save :: prod_resid_old,resid_old,resid_old2
  real(dp) :: aa1,aa2,bb,cc1,cc2,current,det,lambda,lambda2,resid_best
  character(len=500) :: message

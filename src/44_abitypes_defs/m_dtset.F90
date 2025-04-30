@@ -639,7 +639,6 @@ type, public :: dataset_type
  integer :: rcpaw_frocc = 0
  integer :: rcpaw_nfrpaw = 2
  integer :: rcpaw_nfrtnc = 2
- integer :: rcpaw_verbosity = 0
 !S
  integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
@@ -2094,7 +2093,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rcpaw_frocc       = dtin%rcpaw_frocc
  dtout%rcpaw_nfrpaw       = dtin%rcpaw_nfrpaw
  dtout%rcpaw_nfrtnc       = dtin%rcpaw_nfrtnc
- dtout%rcpaw_verbosity    = dtin%rcpaw_verbosity
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
  dtout%recnrec            = dtin%recnrec
@@ -3730,7 +3728,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
- list_vars=trim(list_vars)//' rcpaw_scenergy rcpaw_nfrpaw rcpaw_frocc rcpaw_tolnc rcpaw_verbosity rcpaw_nfrtnc rcpaw_frtypat'
+ list_vars=trim(list_vars)//' rcpaw_scenergy rcpaw_nfrpaw rcpaw_frocc rcpaw_tolnc rcpaw_nfrtnc rcpaw_frtypat'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'

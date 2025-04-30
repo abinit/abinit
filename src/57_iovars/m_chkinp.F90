@@ -3697,9 +3697,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frtypat',dt%rcpaw_frtypat(itypat),2,(/0,1/),iout)
    enddo
 
-!  rcpaw_verbosity
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_verbosity',dt%rcpaw_verbosity,2,(/0,1/),iout)
-
 !  recgratio
    if (dt%tfkinfunc==2) then
      write(msg, '(a,a)' ) ch10,'=== RECURSION METHOD ==========================================================='

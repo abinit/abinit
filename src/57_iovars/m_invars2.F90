@@ -3155,9 +3155,6 @@ if (dtset%usekden==1) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrtnc',tread,'INT')
    if(tread==1) dtset%rcpaw_nfrtnc = intarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_verbosity',tread,'INT')
-   if(tread==1) dtset%rcpaw_verbosity = intarr(1)
-
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_tolnc',tread,'DPR')
    if(tread==1) dtset%rcpaw_tolnc = dprarr(1)
 
