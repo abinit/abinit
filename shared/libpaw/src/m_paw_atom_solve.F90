@@ -622,8 +622,6 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
      atm%eeigc=atm%eeigc+atp%Orbit%eig(io)*half*atp%Orbit%occ(io)
    endif
  enddo
- write(std_out,*) 'TEST 3', atm%eeigc,atm%eig(1,1),atm%eig(2,1),atm%eig(3,1)
-
 
  ! Update tnc
  if(update_tnc) then 
@@ -2212,10 +2210,12 @@ SUBROUTINE Get_EXC(atp,Pot,Orbit)
  TYPE(atompaw_type), INTENT(inout) :: atp
  real(dp) :: eex,etot,etxc
  real(dp), ALLOCATABLE :: dum(:)
- INTEGER :: n
+ INTEGER :: n,fin
  n=atp%Grid%n
+ fin=atp%grid%n
+ if(atp%frozenvalecalculation) fin=atp%PAW%irc+5
  CALL exch(atp%Grid,Orbit%den,Pot%rvx,etxc,eex,itype=atp%itype,ixc=atp%ixc,xclevel=atp%xclevel,&
-&       needvtau=Pot%needvtau,tau=Orbit%tau,vtau=Pot%vtau)
+&       needvtau=Pot%needvtau,tau=Orbit%tau,vtau=Pot%vtau,fin=fin)
  atp%SCF%eexc=eex
  etot = atp%SCF%ekin+atp%SCF%estatic+atp%SCF%eexc
  atp%SCF%etot=etot
@@ -2990,7 +2990,7 @@ SUBROUTINE Get_KinCoul(Grid,Pot,Orbit,SCF,noalt)
  TYPE(OrbitInfo), INTENT(INOUT) :: Orbit
  TYPE(SCFInfo), INTENT(INOUT) :: SCF
  LOGICAL, OPTIONAL :: noalt
- real(dp) :: ecoul,eex,ekin,eone,h,x,qcal,small,rescale
+ real(dp) :: ecoul,ekin,eone,h,x,qcal,small,rescale
  real(dp) :: electrons,xocc
  INTEGER :: i,n,io
  real(dp), ALLOCATABLE :: dum(:)
@@ -3090,8 +3090,6 @@ SUBROUTINE Get_Nuclearpotential(Grid,Pot)
 !     Note that logarithmic grid is reset to be compatible with
 !       nuclear model with approximately NN integration points within
 !       finite nucleus
- real(dp) :: h
- real(dp) :: RR,r0,a
  INTEGER :: i
  INTEGER, PARAMETER :: NN=651    ! number of grid points within RR
  real(dp), PARAMETER :: gridrange=100._dp
@@ -3670,8 +3668,6 @@ SUBROUTINE Anderson_Mix(AC, X, F)
         AC%U(1,1),n,AC%VT(1,1),n,AC%Work(1),AC%Lwork, AC%IPIV(1),i)
    IF (i /= 0) THEN
      WRITE(AC%Err_Unit,*) 'Anderson_Mix: Error in DGESDD. Error=',i
-     tmp = 0
-     tmp = 1._dp/tmp
      STOP
    END IF
    AC%Work(1:j) = AC%Gamma(1:j)
@@ -5206,8 +5202,6 @@ FUNCTION Gfirstderiv(Grid,index,g)
  TYPE (GridInfo), INTENT(IN) :: Grid
  INTEGER, INTENT(IN) :: index
  real(dp), INTENT(IN) :: g(:)
- real(dp), ALLOCATABLE :: f(:)
- INTEGER :: i,n
  Gfirstderiv=0
  IF (Grid%type==lineargrid) THEN
    Gfirstderiv=firstderiv(index,g,Grid%h)
@@ -5284,7 +5278,7 @@ FUNCTION overlap(Grid,f1,f2,str,fin)
  real(dp), INTENT(IN) :: f1(:),f2(:)
  INTEGER, INTENT(IN), OPTIONAL :: str,fin
  real(dp), ALLOCATABLE :: dum(:)
- INTEGER :: i,n,i1,i2
+ INTEGER :: n,i1,i2
  n=Grid%n
  i1=1;i2=n
  IF (PRESENT(str).AND.PRESENT(fin)) THEN
@@ -6989,7 +6983,7 @@ SUBROUTINE unboundsch(Grid,rv,v0,v0p,nr,l,energy,wfn,nodes)
  real(dp), INTENT(IN) :: energy
  real(dp), INTENT(INOUT) :: wfn(:)
  INTEGER, INTENT(INOUT) :: nodes
- INTEGER :: n,ierr
+ INTEGER :: n
  real(dp) :: zeroval,scale
  n=Grid%n
  IF (nr > n) THEN

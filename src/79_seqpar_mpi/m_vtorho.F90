@@ -616,7 +616,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ! XG 20210312 : I prefectly agree with you. This is historical, and should be changed, after testing and update of reference files.
        if ((itimes(1) > 1 .or. (itimes(2)>1)) .and. dtset%rmm_diis /= 0) nnsclo_now = 1
        if(associated(rcpaw)) then
-         if(istep<=rcpaw%nfrpaw) nnsclo_now = 3
+         if(istep<=rcpaw%nfrpaw) then
+           nnsclo_now = 3
+         elseif(istep<=2) then
+           nnsclo_now =2
+         endif
        endif
      else
        ! Wavelets

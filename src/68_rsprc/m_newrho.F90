@@ -219,13 +219,14 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 !scalars
  integer,parameter :: tim_fourdp9=9
  integer :: cplex,dplex,errid,i_vresid1,i_vrespc1,iatom,ifft,indx,iq,iq0,irhoij,ispden,jfft
- integer :: jrhoij,klmn,kklmn,kmix,mpicomm,nfftot,qphase
+ integer :: jrhoij,klmn,kklmn,kmix,mpicomm,nfftot,qphase,itypat,iln,isppol
  logical :: mpi_summarize,reset
  real(dp) :: fact,ucvol,ucvol_local
  character(len=500) :: message
 !arrays
  real(dp) :: gprimd(3,3),rmet(3,3),ro(2),tsec(2),vhartr_dum(1),vpsp_dum(1)
  real(dp) :: vxc_dum(1,1)
+ real(dp) :: nelect_extfpmd_=zero
  real(dp),allocatable :: magng(:,:,:),magntaug(:,:,:)
  real(dp),allocatable :: nresid0(:,:),nrespc(:,:),nreswk(:,:,:)
  real(dp),allocatable :: rhoijrespc(:),rhoijtmp(:,:)
@@ -234,6 +235,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp), pointer :: rhomag(:,:), npaw(:)
  real(dp),allocatable :: tauresid0(:,:),taurespc(:,:)
  real(dp),allocatable :: taumag(:,:)
+ real(dp), pointer :: rcpaw_arr_(:)=>null()
+ real(dp),allocatable, target :: rcpaw_arr(:)
 
 ! *************************************************************************
 
@@ -472,6 +475,18 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    i_vrespc1=mix%i_vrespc(1)
  end if
 
+ if(associated(extfpmd)) then
+   mix%useextfpmd=1
+ endif
+ if(associated(rcpaw)) then
+   mix%use_rcpaw=1
+   mix%n_rcpawmix=0
+   do itypat=1,size(rcpaw%atm)
+     mix%n_rcpawmix=mix%n_rcpawmix+rcpaw%atm(itypat)%ln_size*rcpaw%atm(itypat)%nsppol
+   enddo
+   ABI_MALLOC(rcpaw_arr,(mix%n_rcpawmix))
+ endif
+
 !Initialise working arrays for the mixing object.
  if (moved_atm_inside == 1) then
    call ab7_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
@@ -528,34 +543,27 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    end do
  end if
  
- if(usepaw==1.and.associated(rcpaw)) then
-   if(.not.associated(mix%rcpawmix)) ABI_MALLOC(mix%rcpawmix,(rcpaw%ntypat))
-   do iatom=1,rcpaw%ntypat
-     if(.not.associated(mix%rcpawmix(iatom)%occ)) then
- ABI_MALLOC(mix%rcpawmix(iatom)%occ,(rcpaw%atm(iatom)%ln_size,rcpaw%atm(iatom)%nsppol))
-     endif
-     if(.not.associated(mix%rcpawmix(iatom)%f_rcpaw)) then
- ABI_MALLOC(mix%rcpawmix(iatom)%f_rcpaw,(rcpaw%atm(iatom)%ln_size,rcpaw%atm(iatom)%nsppol,mix%n_fftgr)) 
-       mix%rcpawmix(iatom)%f_rcpaw=zero
-     endif
-     mix%rcpawmix(iatom)%occ=rcpaw%atm(iatom)%occ-rcpaw%atm(iatom)%occ_res 
-     mix%rcpawmix(iatom)%f_rcpaw(:,:,i_vresid1)=rcpaw%atm(iatom)%occ_res(:,:)
-     mix%rcpawmix(iatom)%f_rcpaw(:,:,i_vrespc1)=rcpaw%atm(iatom)%occ_respc(:,:)
+ if(associated(rcpaw)) then
+   indx=0
+   do itypat=1,size(rcpaw%atm)
+     do isppol=1,rcpaw%atm(itypat)%nsppol
+       do iln=1,rcpaw%atm(itypat)%ln_size
+         indx=indx+1
+         mix%f_rcpaw(indx,i_vresid1)=rcpaw%atm(itypat)%occ_res(iln,isppol)
+         mix%f_rcpaw(indx,i_vrespc1)=rcpaw%atm(itypat)%occ_respc(iln,isppol)
+         rcpaw_arr(indx)=rcpaw%atm(itypat)%occ(iln,isppol)-rcpaw%atm(itypat)%occ_res(iln,isppol)
+       enddo
+     enddo
    enddo 
+   rcpaw_arr_=>rcpaw_arr
  endif
 
  if(associated(extfpmd)) then
-   if(.not.associated(mix%extfpmdmix)) ABI_MALLOC(mix%extfpmdmix,)
-   if(.not.associated(mix%extfpmdmix%f)) then
-     ABI_MALLOC(mix%extfpmdmix%f,(mix%n_fftgr))
-     mix%extfpmdmix%f=zero
-   endif
-   mix%extfpmdmix%nelect=zero
-   mix%extfpmdmix%nelect=extfpmd%nelect-extfpmd%nelect_res
-   mix%extfpmdmix%f(i_vresid1)=extfpmd%nelect_res
-   mix%extfpmdmix%f(i_vrespc1)=extfpmd%nelect_respc
+   extfpmd%nelect=extfpmd%nelect-extfpmd%nelect_res
+   mix%f_extfpmd(i_vresid1)=extfpmd%nelect_res
+   mix%f_extfpmd(i_vrespc1)=extfpmd%nelect_respc
+   nelect_extfpmd_=extfpmd%nelect
  endif
-
 
 
 
@@ -583,6 +591,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 & reset = reset, isecur = dtset%isecur,&
 & pawopt = dtset%pawoptmix, pawarr = npaw, &
 & etotal = etotal, potden = vtrial, &
+& nelect_extfpmd = nelect_extfpmd_,&
+& rcpaw_arr = rcpaw_arr_ ,&
 & comm_atom=mpi_enreg%comm_atom)
  if (errid == AB7_ERROR_MIXING_INC_NNSLOOP) then
    dbl_nnsclo = 1
@@ -598,16 +608,18 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    end if
  end if
 
- if(usepaw==1.and.associated(rcpaw)) then
-   do iatom=1,size(mix%rcpawmix)
-     rcpaw%atm(iatom)%occ=mix%rcpawmix(iatom)%occ
+ if(associated(rcpaw)) then
+   indx=0
+   do itypat=1,size(rcpaw%atm)
+     do isppol=1,rcpaw%atm(itypat)%nsppol
+       do iln=1,rcpaw%atm(itypat)%ln_size
+         indx=indx+1
+         rcpaw%atm(itypat)%occ(iln,isppol)=rcpaw_arr_(indx)
+       enddo
+     enddo
    enddo
+   ABI_FREE(rcpaw_arr)
  endif
-
- if(associated(extfpmd)) then
-   extfpmd%nelect=mix%extfpmdmix%nelect
- endif
-
 
 !PAW: apply a simple mixing to rhoij (this is temporary)
  if(dtset%iscf==15 .or. dtset%iscf==16)then
