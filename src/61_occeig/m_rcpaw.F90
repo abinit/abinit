@@ -227,7 +227,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
 
 !Local variables-------------------------------
 !scalars
- integer :: itypat,iatom,lm_size,mesh_size,cplex,my_comm_atom,iat,iln
+ integer :: itypat,iatom,lm_size,mesh_size,cplex,my_comm_atom,iat
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer :: mult(ntypat)
@@ -529,7 +529,7 @@ subroutine rcpaw_core_energies(rcpaw,ntypat)
 
 !Local variables-------------------------------
 !scalars
- integer :: itypat,iln
+ integer :: itypat
 
 !******************************************************************************************
 

@@ -50,33 +50,22 @@ module m_ab7_mixing
  integer, parameter, public :: AB7_MIXING_REAL_SPACE     = 1
  integer, parameter, public :: AB7_MIXING_FOURRIER_SPACE = 2
 
- type, public :: rcpawmix_type
-   real(dp), pointer :: occ(:,:) => null()
-   real(dp), pointer :: f_rcpaw(:,:,:) => null()
- end type rcpawmix_type
- 
- type, public :: extfpmdmix_type
-   real(dp),pointer   :: f(:) => null()
-   real(dp)  :: nelect 
- end type 
-
 
  type, public :: ab7_mixing_object
-    integer :: iscf
+    integer :: iscf,useextfpmd,use_rcpaw
     integer :: nfft, nspden, kind, space
 
     logical :: useprec
     integer :: mffmem
     character(len = fnlen) :: diskCache
-    integer :: n_index, n_fftgr, n_pulayit, n_pawmix
+    integer :: n_index, n_fftgr, n_pulayit, n_pawmix,n_rcpawmix
 
     integer, dimension(:), pointer :: i_rhor, i_vtrial, i_vresid, i_vrespc
     real(dp), dimension(:,:,:), pointer :: f_fftgr, f_atm
     real(dp), dimension(:,:), pointer :: f_paw
 
-    type(rcpawmix_type), dimension(:), pointer :: rcpawmix => null()
-    type(extfpmdmix_type), pointer :: extfpmdmix => null()
-
+    real(dp),dimension(:),pointer :: f_extfpmd
+    real(dp),dimension(:,:), pointer :: f_rcpaw
 
     ! Private
     integer :: n_atom
@@ -125,6 +114,9 @@ subroutine init_(mix)
  mix%n_atom    = 0
  mix%space     = 0
  mix%useprec   = .true.
+ mix%useextfpmd = 0
+ mix%use_rcpaw = 0
+ mix%n_rcpawmix = 0
 
  call nullify_(mix)
 
@@ -145,6 +137,7 @@ subroutine nullify_(mix)
 !Arguments ------------------------------------
 !scalars
  type(ab7_mixing_object), intent(inout) :: mix
+ integer  :: itypat
 ! *************************************************************************
 
  ! Nullify internal pointers.
@@ -155,6 +148,8 @@ subroutine nullify_(mix)
  nullify(mix%f_fftgr)
  nullify(mix%f_atm)
  nullify(mix%f_paw)
+ nullify(mix%f_extfpmd)
+ nullify(mix%f_rcpaw)
 
 end subroutine nullify_
 !!***
@@ -428,7 +423,8 @@ end subroutine ab7_mixing_use_moving_atoms
 !!
 !! SOURCE
 subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
-&  arr_respc, arr_paw_resid, arr_paw_respc, arr_atm)
+&  arr_respc, arr_paw_resid, arr_paw_respc, arr_atm, &
+&  arr_extfpmd_resid,arr_extfpmd_respc,arr_rcpaw_resid,arr_rcpaw_respc)
 
 !Arguments ------------------------------------
 !scalars
@@ -439,6 +435,9 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  real(dp), intent(in), optional :: arr_respc(mix%space * mix%nfft, mix%nspden)
  real(dp), intent(in), optional :: arr_paw_resid(mix%n_pawmix), arr_paw_respc(mix%n_pawmix)
  real(dp), intent(in), optional :: arr_atm(3, mix%n_atom)
+ real(dp),intent(in), optional :: arr_extfpmd_resid,arr_extfpmd_respc
+ real(dp),intent(in), optional :: arr_rcpaw_resid(mix%n_rcpawmix*mix%use_rcpaw)
+ real(dp),intent(in), optional :: arr_rcpaw_respc(mix%n_rcpawmix*mix%use_rcpaw)
 ! *************************************************************************
 
 
@@ -463,6 +462,13 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
          & '  Working arrays not yet allocated.'
     return
  end if
+ if (mix%n_rcpawmix>0 .and. (.not. associated(mix%f_rcpaw))) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, '(a,a,a,a)' )ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (3) -',ch10,&
+         & '  Working arrays not yet allocated.'
+    return
+ end if
  errid = AB7_NO_ERROR
 
  if (mix%n_fftgr>0) then
@@ -476,6 +482,14 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  if (mix%n_atom>0) then
    if (present(arr_atm).and.mix%i_vresid(1)>0) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
  end if
+ if(associated(mix%f_extfpmd)) then
+   if(present(arr_extfpmd_resid).and.mix%i_vresid(1)>0) mix%f_extfpmd(mix%i_vresid(1))=arr_extfpmd_resid
+   if(present(arr_extfpmd_respc).and.mix%i_vrespc(1)>0) mix%f_extfpmd(mix%i_vrespc(1))=arr_extfpmd_respc
+ endif
+ if(mix%n_rcpawmix>0) then
+   if(present(arr_rcpaw_resid).and.mix%i_vresid(1)>0) mix%f_rcpaw(:,mix%i_vresid(1))=arr_rcpaw_resid(:)
+   if(present(arr_rcpaw_resid).and.mix%i_vrespc(1)>0)mix%f_rcpaw(:,mix%i_vrespc(1))=arr_rcpaw_respc(:)
+ endif
 
 end subroutine ab7_mixing_copy_current_step
 !!***
@@ -553,6 +567,24 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     !call memocc_abi(i_stat, mix%f_atm, 'mix%f_atm', subname)
     ABI_MALLOC(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
  end if
+ 
+ if(.not.associated(mix%f_extfpmd)) then
+   if(mix%useextfpmd==1) then
+     ABI_MALLOC(mix%f_extfpmd,(mix%n_fftgr))
+     mix%f_extfpmd=zero
+   else
+     ABI_MALLOC(mix%f_extfpmd,(0))
+   endif
+ endif 
+
+ if(.not.associated(mix%f_rcpaw)) then
+   if(mix%use_rcpaw==1) then
+     ABI_MALLOC(mix%f_rcpaw,(mix%n_rcpawmix,mix%n_fftgr))
+     mix%f_rcpaw=zero
+   else
+     ABI_MALLOC(mix%f_rcpaw,(0,0))
+   endif
+ endif
 
  end subroutine ab7_mixing_eval_allocate
 !!***
@@ -582,7 +614,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 
 !Local variables-------------------------------
 !scalars
- integer :: temp_unit !i_all, i_stat
+ integer :: temp_unit,itypat !i_all, i_stat
  real(dp) :: tsec(2)
  character(len = *), parameter :: subname = "ab7_mixing_eval_deallocate"
  character(len=500) :: msg
@@ -613,6 +645,14 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
        ABI_FREE(mix%f_paw)
        nullify(mix%f_paw)
     end if
+    if(associated(mix%f_extfpmd)) then
+      ABI_FREE(mix%f_extfpmd)
+      nullify(mix%f_extfpmd) 
+    endif
+    if(associated(mix%f_rcpaw)) then
+      ABI_FREE(mix%f_rcpaw)
+      nullify(mix%f_rcpaw)
+    endif
  end if
 
 end subroutine ab7_mixing_eval_deallocate
@@ -638,7 +678,7 @@ end subroutine ab7_mixing_eval_deallocate
  subroutine ab7_mixing_eval(mix, arr, istep, nfftot, ucvol, &
 & mpi_comm, mpi_summarize, errid, errmess, &
 & reset, isecur, pawarr, pawopt, response, etotal, potden, &
-& resnrm, comm_atom)
+& resnrm, nelect_extfpmd,rcpaw_arr,comm_atom)
 
 !Arguments ------------------------------------
 !scalars
@@ -655,15 +695,17 @@ end subroutine ab7_mixing_eval_deallocate
  real(dp), intent(in), optional :: etotal
  real(dp), intent(in), optional :: potden(mix%space * mix%nfft,mix%nspden)
  real(dp), intent(out), optional :: resnrm
+ real(dp),intent(inout),optional :: nelect_extfpmd
+ real(dp),intent(inout),optional,target :: rcpaw_arr(mix%n_rcpawmix)
 
 !Local variables-------------------------------
 !scalars
  integer :: moveAtm, dbl_nnsclo, initialized, isecur_
  integer :: usepaw, pawoptmix_, response_
- real(dp) :: resnrm_
+ real(dp) :: resnrm_,nelect_extfpmd_
 !arrays
  real(dp),target :: dum(1)
- real(dp),pointer :: pawarr_(:)
+ real(dp),pointer :: pawarr_(:),rcpawarr_(:)
 
 ! *************************************************************************
 
@@ -709,6 +751,8 @@ end subroutine ab7_mixing_eval_deallocate
  response_ = 0
  if (present(response)) response_ = response
  pawarr_ => dum ; if (present(pawarr)) pawarr_ => pawarr
+ nelect_extfpmd_=zero;if(present(nelect_extfpmd)) nelect_extfpmd_=nelect_extfpmd
+ rcpawarr_=>null(); if(present(rcpaw_arr)) rcpawarr_=>rcpaw_arr
 
  ! Do the mixing.
  resnrm_ = 0.d0
@@ -729,7 +773,8 @@ end subroutine ab7_mixing_eval_deallocate
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
          & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
          & resnrm_, arr, errid, errmess,&
-         & rcpawmix=mix%rcpawmix,extfpmdmix=mix%extfpmdmix,&
+         & mix%useextfpmd,mix%f_extfpmd,nelect_extfpmd_,&
+         & mix%use_rcpaw,mix%n_rcpawmix,mix%f_rcpaw,rcpawarr_,&
          & comm_atom=comm_atom)
     else
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
@@ -737,7 +782,8 @@ end subroutine ab7_mixing_eval_deallocate
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
          & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
          & resnrm_, arr, errid, errmess,&
-         & rcpawmix=mix%rcpawmix,extfpmdmix=mix%extfpmdmix)
+         & mix%useextfpmd,mix%f_extfpmd,nelect_extfpmd_,&
+         & mix%use_rcpaw,mix%n_rcpawmix,mix%f_rcpaw,rcpawarr_)
     end if
     !  Change atomic positions
     if((istep==1 .or. mix%iscf==AB7_MIXING_SIMPLE) .and. mix%n_atom > 0)then
@@ -1886,25 +1932,28 @@ end subroutine scfeig
 subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 & mpicomm,mpi_summarize,nfft,npawmix,nspden,n_fftgr,&
 & n_index,opt_denpot,pawoptmix,usepaw,vpaw,vresid,vtrial,errid,errmess, &
-& rcpawmix,extfpmdmix,&
+& useextfpmd,f_extfpmd,nelect_extfpmd,&
+& use_rcpaw,nrcpawmix,f_rcpaw,rcpaw_occ,&
 & comm_atom) ! optional
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,iscf,istep,n_fftgr,n_index,nfft
+ integer,intent(in) :: cplex,iscf,istep,n_fftgr,n_index,nfft,useextfpmd,use_rcpaw,nrcpawmix
  integer,intent(in) :: npawmix,nspden,opt_denpot,pawoptmix,usepaw,mpicomm
  integer, intent(in),optional :: comm_atom
  integer,intent(out) :: errid
  character(len = 500), intent(out) :: errmess
  logical, intent(in) :: mpi_summarize
  real(dp), intent(out) :: vresid
- type(rcpawmix_type),pointer, optional,intent(inout) :: rcpawmix(:)
- type(extfpmdmix_type),pointer,optional, intent(inout) :: extfpmdmix
+ real(dp),intent(inout) :: nelect_extfpmd
+ real(dp),intent(inout) :: rcpaw_occ(nrcpawmix*use_rcpaw)
 !arrays
  integer,intent(inout) :: i_vrespc(n_index),i_vtrial(n_index)
  real(dp),intent(inout) :: f_fftgr(cplex*nfft,nspden,n_fftgr)
  real(dp),intent(inout) :: f_paw(npawmix,n_fftgr*usepaw),vpaw(npawmix*usepaw)
  real(dp),intent(inout) :: vtrial(cplex*nfft,nspden)
+ real(dp),intent(inout) :: f_extfpmd(useextfpmd*nfft)
+ real(dp),intent(inout) :: f_rcpaw(use_rcpaw*nrcpawmix,use_rcpaw*n_fftgr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: npulaymax=50
@@ -1980,20 +2029,14 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      vpaw(:)=vpaw(:)+f_paw(:,i_vrespc(1))
    end if
 
-   if(present(rcpawmix)) then
-     if(associated(rcpawmix)) then
-       do itypat=1,size(rcpawmix)
-         if (iscf/=2)rcpawmix(itypat)%f_rcpaw(:,:,i_vstore)=rcpawmix(itypat)%occ(:,:)
-          rcpawmix(itypat)%occ(:,:)=rcpawmix(itypat)%occ(:,:)+rcpawmix(itypat)%f_rcpaw(:,:,i_vrespc(1))
-       enddo
-     endif
+   if(useextfpmd==1) then
+     if (iscf/=2) f_extfpmd(i_vstore)=nelect_extfpmd
+     nelect_extfpmd=nelect_extfpmd+f_extfpmd(i_vrespc(1))
    endif
 
-   if(present(extfpmdmix)) then
-     if(associated(extfpmdmix)) then
-       if (iscf/=2) extfpmdmix%f(i_vstore)=extfpmdmix%nelect
-       extfpmdmix%nelect=extfpmdmix%nelect+extfpmdmix%f(i_vrespc(1))
-     endif
+   if(use_rcpaw==1) then
+     if (iscf/=2) f_rcpaw(:,i_vstore)=rcpaw_occ(:)
+     rcpaw_occ(:)=rcpaw_occ(:)+f_rcpaw(:,i_vrespc(1))
    endif
 
 !  _______________________________________________________________
@@ -2053,26 +2096,19 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      f_paw(index,i_vstore)=current
    end do
 
-   if(present(rcpawmix)) then
-     if(associated(rcpawmix)) then
-       do itypat=1,size(rcpawmix)
-         do iln=1,size(rcpawmix(itypat)%occ(:,1))
-           current=rcpawmix(itypat)%occ(iln,1)
-           rcpawmix(itypat)%occ(iln,:)=(one-lambda)*(current+rcpawmix(itypat)%f_rcpaw(iln,:,i_vrespc(1)))&
-&          +lambda*(rcpawmix(itypat)%f_rcpaw(iln,:,i_vtrial(1))+rcpawmix(itypat)%f_rcpaw(iln,:,i_vrespc(2)))
-           rcpawmix(itypat)%f_rcpaw(iln,:,i_vstore)=current
-         enddo
-       enddo
-     endif
-    endif
-
-   if(present(extfpmdmix)) then
-     if(associated(extfpmdmix)) then
-       current=extfpmdmix%nelect
-       extfpmdmix%nelect=(one-lambda)*extfpmdmix%f(i_vrespc(1))+lambda*extfpmdmix%f(i_vtrial(1))+extfpmdmix%f(i_vrespc(2))
-       extfpmdmix%f(i_vstore)=current
-     endif
+   if(useextfpmd==1) then
+     current=nelect_extfpmd
+     nelect_extfpmd=(one-lambda)*f_extfpmd(i_vrespc(1))+lambda*f_extfpmd(i_vtrial(1))+f_extfpmd(i_vrespc(2))
+     f_extfpmd(i_vstore)=current
    endif
+
+   do index=1,nrcpawmix
+     current=rcpaw_occ(index)
+     rcpaw_occ(index)=(one-lambda)*(current+f_rcpaw(index,i_vrespc(1)))&
+&     +lambda      *(f_rcpaw(index,i_vtrial(1))+f_rcpaw(index,i_vrespc(2)))
+     f_rcpaw(index,i_vstore)=current
+   end do
+
 
 !  _______________________________________________________________
 !  Here Anderson algorithm using two previous iterations
@@ -2145,29 +2181,23 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      f_paw(index,i_vstore)=current
    end do
 
-   if(present(rcpawmix)) then
-     if(associated(rcpawmix)) then
-       do itypat=1,size(rcpawmix)
-         do iln=1,size(rcpawmix(itypat)%occ(:,1))
-           current=rcpawmix(itypat)%occ(iln,1)
-           rcpawmix(itypat)%occ(iln,:)=(one-lambda-lambda2)*(current+rcpawmix(itypat)%f_rcpaw(iln,:,i_vrespc(1)))&
-&     +lambda*(rcpawmix(itypat)%f_rcpaw(iln,:,i_vtrial(1))+rcpawmix(itypat)%f_rcpaw(iln,:,i_vrespc(2)))&
-&     +lambda2*(rcpawmix(itypat)%f_rcpaw(iln,:,i_vtrial(2))+rcpawmix(itypat)%f_rcpaw(iln,:,i_vrespc(3)))
-           rcpawmix(itypat)%f_rcpaw(iln,:,i_vstore)=current
-         enddo
-       enddo
-     endif
+   if(useextfpmd==1) then
+     current=nelect_extfpmd
+     nelect_extfpmd=(one-lambda-lambda2)*(current+f_extfpmd(i_vrespc(1)))&
+&    +lambda*(f_extfpmd(i_vtrial(1))+f_extfpmd(i_vrespc(2)))&
+&    +lambda2*(f_extfpmd(i_vtrial(2))+f_extfpmd(i_vrespc(3)))
+     f_extfpmd(i_vstore)=current
    endif
 
-   if(present(extfpmdmix)) then
-     if(associated(extfpmdmix)) then
-       current=extfpmdmix%nelect
-       extfpmdmix%nelect=(one-lambda-lambda2)*(current+extfpmdmix%f(i_vrespc(1)))&
-&   +lambda*(extfpmdmix%f(i_vtrial(1))+extfpmdmix%f(i_vrespc(2)))&
-&   +lambda2*(extfpmdmix%f(i_vtrial(2))+extfpmdmix%f(i_vrespc(3)))
-       extfpmdmix%f(i_vstore)=current
-     endif
-   endif
+   do index=1,nrcpawmix
+     current=rcpaw_occ(index)
+     rcpaw_occ(index)=&
+&     (one-lambda-lambda2)*(current                 +f_rcpaw(index,i_vrespc(1)))&
+&     +lambda             *(f_rcpaw(index,i_vtrial(1))+f_rcpaw(index,i_vrespc(2)))&
+&     +lambda2            *(f_rcpaw(index,i_vtrial(2))+f_rcpaw(index,i_vrespc(3)))
+     f_rcpaw(index,i_vstore)=current
+   end do
+
 
 !  _______________________________________________________________
 !  Here Pulay algorithm
@@ -2263,32 +2293,26 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      f_paw(index,i_vstore)=current
    end do
 
-   if(present(rcpawmix)) then
-     if(associated(rcpawmix)) then
-       do itypat=1,size(rcpawmix)
-         do iln=1,size(rcpawmix(itypat)%occ(:,1))
-           current=rcpawmix(itypat)%occ(iln,1)
-           rcpawmix(itypat)%occ(iln,:)=alpha(niter)*(current+rcpawmix(itypat)%f_rcpaw(iln,:,i_vrespc(1)))
-           do ii=niter-1,1,-1
-             rcpawmix(itypat)%occ(iln,:)=rcpawmix(itypat)%occ(iln,:)+alpha(ii)&
-&   *(rcpawmix(itypat)%f_rcpaw(iln,:,i_vtrial(niter-ii))+rcpawmix(itypat)%f_rcpaw(iln,:,i_vrespc(1+niter-ii)))
-           enddo
-           rcpawmix(itypat)%f_rcpaw(iln,:,i_vstore)=current
-         enddo
-       enddo
-     endif
+   if(useextfpmd==1) then
+     current=nelect_extfpmd
+     nelect_extfpmd=alpha(niter)*(current+f_extfpmd(i_vrespc(1)))
+     do ii=niter-1,1,-1
+       nelect_extfpmd=nelect_extfpmd+alpha(ii)&
+&        *(f_extfpmd(i_vtrial(niter-ii))+f_extfpmd(i_vrespc(1+niter-ii)))
+     enddo
+     f_extfpmd(i_vstore)=current
    endif
 
-   if(present(extfpmdmix)) then
-     if(associated(extfpmdmix)) then
-       current=extfpmdmix%nelect
-       do ii=niter-1,1,-1
-         extfpmdmix%nelect=extfpmdmix%nelect+alpha(ii)&
-&          *(extfpmdmix%f(i_vtrial(niter-ii))+extfpmdmix%f(i_vrespc(1+niter-ii)))
-       enddo
-       extfpmdmix%f(i_vstore)=current
-     endif
-   endif
+   do index=1,nrcpawmix
+     current=rcpaw_occ(index)
+     rcpaw_occ(index)=alpha(niter)*(current+f_rcpaw(index,i_vrespc(1)))
+     do ii=niter-1,1,-1
+       rcpaw_occ(index)=rcpaw_occ(index)+alpha(ii) &
+&       *(f_rcpaw(index,i_vtrial(niter-ii))+f_rcpaw(index,i_vrespc(1+niter-ii)))
+     end do
+     f_rcpaw(index,i_vstore)=current
+   end do
+
 
    ABI_FREE(alpha)
 !  _______________________________________________________________
