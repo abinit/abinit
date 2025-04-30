@@ -2431,6 +2431,7 @@ subroutine chi0diel_apply_adjdielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngff
  !real(dp) :: temp(2, nfft, nspden)                                                         !DEBUG
 
 ! *************************************************************************
+ write(6,*)'chi0diel apply_adjdielmat'; flush(6) !DEBUG
 
  adjdielmat_rho_g = rho_g
 
@@ -2444,12 +2445,12 @@ subroutine chi0diel_apply_adjdielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngff
 
 !1) Applying the Kernel (vc or vc + Kxc depending on iprcel)
  call precon%apply_kernel(dtset, mpi_enreg, ngfft, adjdielmat_rho_g)
- !call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g, "applied_vc.txt")          !DEBUG
+ !call precon%save_applied_op_g(ngfft, rho_g, adjdielmat_rho_g, "applied_vc.txt")          !DEBUG
 
 !2) Applying the model chi0 operator
  !temp = adjdielmat_rho_g                                                                   !DEBUG
  call precon%apply_chi0(dtset, mgfft, mpi_enreg, ngfft, adjdielmat_rho_g)
- !call precon%save_applied_op(ngfft, 2, temp, adjdielmat_rho_g, "applied_chi0.txt")         !DEBUG
+ !call precon%save_applied_op_g(ngfft, temp, adjdielmat_rho_g, "applied_chi0.txt")         !DEBUG
 
 !0.2) Basis change : Changing back to the default spin-basis
  call precon%from_pauli(1, adjdielmat_rho_g)
@@ -2463,7 +2464,7 @@ subroutine chi0diel_apply_adjdielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngff
  end do
 
 !For code validation only
- !call precon%save_applied_op(ngfft, 2, rho_g, adjdielmat_rho_g, "applied_adjdielmat.txt")  !DEBUG
+ !call precon%save_applied_op_g(ngfft, rho_g, adjdielmat_rho_g, "applied_adjdielmat.txt")  !DEBUG
 
 end subroutine chi0diel_apply_adjdielmat
 !!***
@@ -2510,6 +2511,7 @@ subroutine chi0diel_apply_dielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, 
  integer :: ispden
 
 ! *************************************************************************
+ write(6,*)'chi0diel apply_dielmat'; flush(6) !DEBUG
  
  dielmat_v_g = v_g
 
@@ -2539,7 +2541,7 @@ subroutine chi0diel_apply_dielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, 
  end do
 
  !For code validation only 
- !call precon%save_applied_op(ngfft, 2, v_g, dielmat_v_g, "applied_dielmat.txt)
+ !call precon%save_applied_op_g(ngfft, v_g, dielmat_v_g, "applied_dielmat.txt") !DEBUG
 
 end subroutine chi0diel_apply_dielmat
 !!***
@@ -2606,6 +2608,7 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
  real(dp), allocatable :: workr(:)
 
 ! *************************************************************************
+ write(6,*)'chi0diel start'; flush(6) !DEBUG
 
  if (ngfft(10)>1) then
    ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
@@ -2672,7 +2675,8 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
  ABI_FREE(est)
 
 !Simple mixing : TODO diemixmag
- vrespc = precon%diemix * vrespc
+ !vrespc = precon%diemix * vrespc
+ vrespc = precon%diemix * vresid  !DEBUG
 
  contains
 
