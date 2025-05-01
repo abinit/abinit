@@ -167,7 +167,6 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
  real(dp) :: kbz_gw(3),tsec(2)
  real(dp),allocatable :: e0pde(:),eig(:),scme(:)
  complex(dpc),allocatable :: hdp(:,:),tmpcdp(:),hhartree(:,:,:),htotal(:,:,:),h_tmp1(:,:),h_tmp2(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -476,7 +475,7 @@ if (mod10 /= 1) then
  do spin=1,Sr%nsppol*Sr%nsig_ab
    do jb=ib1,ib2
      do kb=ib1,ib2
-      htotal(kb,jb,spin) = hhartree(kb,jb,spin) + Sr%x_mat(kb,jb,sk_ibz,spin) + sigcme(ie0,kb,jb,spin)
+       htotal(kb,jb,spin) = hhartree(kb,jb,spin) + Sr%x_mat(kb,jb,sk_ibz,spin) + sigcme(ie0,kb,jb,spin)
      end do
    end do
  end do
@@ -590,7 +589,6 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1,fmt2,fmthh,kpt_index,fmtfile
  character(len=fnlen) :: filename
-
 ! *************************************************************************
 
  if (nsp==3.or.nsp>4) then
