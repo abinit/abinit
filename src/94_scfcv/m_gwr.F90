@@ -2412,6 +2412,7 @@ subroutine gwr_build_green(gwr, free_ugb)
  type(__slkmat_t), target :: work_gb, green
 !arrays
  integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
+ !integer :: occ_idx(gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol)
  real(dp) :: tsec(2) , kk_ibz(3) !, kg(3)
  real(dp),contiguous, pointer :: qp_eig(:,:,:), qp_occ(:,:,:)
 ! *************************************************************************
@@ -2429,6 +2430,8 @@ subroutine gwr_build_green(gwr, free_ugb)
    msg = sjoin("Fermi energy is not set to zero! fermie:", ftoa(gwr%ks_ebands%fermie))
    ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, msg)
 
+   !occ_idx = gwr%ks_ebands%get_occupied()
+
    ! Allocate my Green's functions in IBZ if this is the first iteration.
    mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
    call gwr%malloc_free_mats(mask_kibz, "green", "malloc")
@@ -2439,6 +2442,8 @@ subroutine gwr_build_green(gwr, free_ugb)
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
    msg = sjoin("Fermi energy is not set to zero! fermie:", ftoa(gwr%qp_ebands%fermie))
    ABI_CHECK(abs(gwr%qp_ebands%fermie) < tol12, msg)
+
+   !occ_idx = gwr%qp_ebands%get_occupied()
  end if
 
  ABI_CHECK(allocated(gwr%ugb), "gwr%ugb array should be allocated!")
@@ -2487,7 +2492,10 @@ subroutine gwr_build_green(gwr, free_ugb)
          ! Now build G(g,g',ipm) with PZGEMM.
          isgn = merge(1, -1, ipm == 2)
          ija = [1, 1]; ijb = [1, 1]
+
          ! TODO: optimize this part
+         ! This wont' work for metals
+         !nb_occ = occ_idx(ik_ibz, spin)
          nb_occ = -1
          !if (ipm == 1) then
          !  ija = [1, nb_occ]; ijb = ija
@@ -4427,9 +4435,9 @@ subroutine gwr_build_tchi(gwr)
    ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
    ABI_MALLOC(desc_mykbz, (gwr%my_nkbz))
 
+   if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
    call wrtout(std_out, " Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
    call wrtout(std_out, " Here we're gonna have a big allocation peak...")
-   if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
@@ -4440,6 +4448,7 @@ subroutine gwr_build_tchi(gwr)
    end do
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))
    call wrtout(std_out, sjoin(" Local memory for chi_q(g',r) matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
    ! Loop over my spins and my taus.
    do my_is=1,gwr%my_nspins
@@ -5208,7 +5217,7 @@ subroutine gwr_build_wc(gwr)
  integer :: units(2)
  real(dp) :: qq_ibz(3), tsec(2)
  complex(dpc) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
- complex(gwpc), allocatable :: eps_glob(:,:)
+ !complex(gwpc), allocatable :: eps_glob(:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -5287,29 +5296,13 @@ subroutine gwr_build_wc(gwr)
        ! NB: PZGETRF requires square block cyclic decomposition along the two axes
        ! hence we have to redistribute the data before calling invert.
 
-#if 0
        call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
-       call cwtime_report("change_size_blocs", cpu_tmp, wall_tmp, gflops_tmp)
-
-       call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
+       ! Use hpd_invert as eps along imag axis is always hermitian.
        !call em1%invert()
-       call em1%hpd_invert("U") ! TODO: Can use hpd_invert
-       call cwtime_report("hpd_invert", cpu_tmp, wall_tmp, gflops_tmp)
-
-       call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
+       call em1%hpd_invert("U")
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
-       call cwtime_report("take_from", cpu_tmp, wall_tmp, gflops_tmp)
-
-#else
-       call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
-       call wc%collect_cplx(npwe, npwe, [1,1], eps_glob)
-       call xginv(eps_glob, npwe)
-       !call zhpd_invert("U", eps_glob, npwe)
-       !call slk_matrix_from_global_dpc_2D(em1, "U", eps_glob)
-       ABI_FREE(eps_glob)
-       call cwtime_report("new buggy inv", cpu_tmp, wall_tmp, gflops_tmp)
-#endif
+       call cwtime_report("hpd_invert", cpu_tmp, wall_tmp, gflops_tmp)
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
        !call print_arr(units, wc%buffer_cplx)
