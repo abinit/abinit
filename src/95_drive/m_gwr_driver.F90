@@ -87,6 +87,7 @@ module m_gwr_driver
  use m_gwr,             only : gwr_t
  use m_vcoul,           only : vcgen_t
  !use m_ephtk,          only : ephtk_update_ebands
+ use m_pstat,           only : pstat_proc
 
  implicit none
 
@@ -238,11 +239,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  units(:) = [std_out, ab_out]
 
  call cwtime(cpu, wall, gflops, "start")
+ call pstat_proc%print(_PSTAT_ARGS_)
 
-! write(msg,'(7a)')&
+! write(msg,'(a)')&
 ! ' GWR: Calculation of the GW corrections with GWR code ',ch10,ch10,&
-! ' Based on a program developed by R.W. Godby, V. Olevano, G. Onida, and L. Reining.',ch10,&
-! ' Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.'
 ! call wrtout(units, msg)
 !
 #if defined HAVE_GW_DPC
@@ -646,6 +646,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call timab(561,2,tsec)
  end if
 
+ call pstat_proc%print(_PSTAT_ARGS_)
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
  if (string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL")) then
@@ -898,6 +899,7 @@ end if
      ! All the modifications to ebands should be done here.
      !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
    end if
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg_seq, comm)
    if (gwr%idle_proc) goto 100
@@ -1108,7 +1110,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  use m_fft_mesh,      only : setmesh
  use m_fft,           only : uplan_t
  use m_vcoul,         only : vcgen_t
- use m_pstat,         only : pstat_t
+
  use m_sort,          only : sort_gvecs
  use m_pawpwij,       only : pawpwij_t, pawpwij_init, pawpwij_free
 
@@ -1137,7 +1139,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  logical,parameter :: trust_no_one = .False.
  type(uplan_t) :: uplan_1, uplan_2, uplan_m
  type(vcgen_t) :: vcgen
- !type(pstat_t) :: pstat
  integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method, nlmn_atm(cryst%natom)
  integer,pointer :: gvec_max(:,:)
  integer,allocatable,target :: m_gvec(:,:), sorted_kg_k(:,:)

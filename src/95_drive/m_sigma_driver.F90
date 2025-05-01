@@ -48,6 +48,7 @@ module m_sigma_driver
  use m_hide_blas,     only : xdotc
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_pstat,         only : pstat_proc
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gfft, setmesh
@@ -386,6 +387,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
   gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
 
+ call pstat_proc%print(_PSTAT_ARGS_)
+
  call timab(403,2,tsec) ! setup_sigma
  call timab(402,1,tsec) ! Init1
 
@@ -717,6 +720,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! This test has been disabled (too expensive!)
  if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
+ call pstat_proc%print(_PSTAT_ARGS_)
  call timab(404,2,tsec) ! rdkss
  call timab(405,1,tsec) ! Init2
 
@@ -1668,6 +1672,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end do
  end do
 
+ call pstat_proc%print(_PSTAT_ARGS_)
  call timab(408,2,tsec) ! hqp_init
  call timab(409,1,tsec) ! getW
 
@@ -1942,6 +1947,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if ! PAW or NC PPm and/or needs density
  end if ! sigma_needs_ppm
 
+ call pstat_proc%print(_PSTAT_ARGS_)
  call timab(409,2,tsec) ! getW
 
  if (wfd%my_rank == master) then
@@ -2391,6 +2397,7 @@ endif
    do ikcalc=1,Sigp%nkptgw
      ! Index of the irred k-point for GW
      ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
+     call pstat_proc%print(_PSTAT_ARGS_)
 
      ! Do not compute MELS if the k-point was read from the checkpoint file
      ! this IF only affects GW density matrix update!
@@ -2434,9 +2441,11 @@ endif
        write(msg,'(a1)')  ' '
        call wrtout(std_out,msg)
      end if
-   end do
+   end do ! ikcalc
+
    ! for the time being, do not remove this barrier!
    call xmpi_barrier(Wfd%comm)
+   call pstat_proc%print(_PSTAT_ARGS_)
    call timab(421,2,tsec) ! calc_sigx_me
 
    ! ==========================================================
