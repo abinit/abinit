@@ -5329,7 +5329,7 @@ SUBROUTINE cfdsol(Grid,zz,yy,jj1,jj2)
      LIBPAW_ERROR(' ***error in subroutine difsol')
    ENDIF
  ELSE
-   if(has_to_print) write(std_out,10) isgn,jj1,jj2,mesh
+   if(has_to_print) write(std_out,*) isgn,jj1,jj2,mesh
  ENDIF
  LIBPAW_ALLOCATE(tmpz,(2,2,mesh))
  tmpz=zz
@@ -5416,7 +5416,7 @@ SUBROUTINE cfdsoliter(Grid,zz,yy,jj1,jj2)
      LIBPAW_ERROR(' ***error in subroutine difsol')
    ENDIF
  ELSE
-   if(has_to_print) WRITE(STD_OUT,10) isgn,jj1,jj2,mesh
+   if(has_to_print) WRITE(STD_OUT,*) isgn,jj1,jj2,mesh
  ENDIF
  LIBPAW_ALLOCATE(tmpz,(2,2,mesh))
  tmpz=zz
