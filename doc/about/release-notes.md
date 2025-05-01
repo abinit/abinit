@@ -1,16 +1,197 @@
+## v10.4
+
+Version 10.4, released on May 15, 2025.
+List of changes with respect to version 10.2.
+<!-- Release notes updated on May 5, 2025. -->
+
+Many thanks to the contributors to the ABINIT project between
+October 2024 and March 2025.
+<!-- (with some late contributions until XXX 2024). -->
+These release notes
+are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
+<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1076, 1077, 1079, 1081, then 1083 to 1169, 
+EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had alreacy been included in v10.2,
+and EXCEPT MR1160, 1165 and 1168, that will be included in v10.6 .  
+For later releases v10.4, the list of MR is to be completed. -->
+The list of contributors includes:
+ALL v10.4 TO BE UPDATED !!!
+
+G. Antonius, M. Azizi, L. Baguet, J.-M. Beuken, O. Bistoni, A. Blanchet, F. Bottin, F. Bruneval, Siyu Chen, F. Gendron, M. Giantomassi, X. Gonze,
+P. Kestener, L. MacEnulty, M. Mignolet, C. Paillard,
+S. Ponce, M. Royo, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, Xu He, J. Zwanziger
+
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+* * *
+
+### **A.** Remarks and warnings.
+
+**A.1** Change nline default to 6 for ChebFi algorithm .
+
+By M. Torrent (MR1069)
+
+**A.2** Renaming tests/Psps_for_tests to tests/Pspdir
+
+By X. Gonze (fc5345534a and subsequent commits)
+
+* * *
+
+### **B.** Most noticeable developments
+
+**B.1** GPU porting of the DFPT driver of ABINIT
+
+The global GPU porting of ABINIT using recent libraries/compilers, started three years ago, has been continued.
+In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for ground-state calculations [[optdriver]]=0
+had been made available.
+
+In the present release 10.2, the Density-Functional Perturbation Theory [[optdriver]]=1
+has been ported, using OpenMP, along with the following perturbations:
+- phonons ([[rfphon]])
+- electric field ([[rfelfd]])
+- strains ([[rfstrs]])
+Numerous tests are available, [[test:gpu_omp_11]] to [[test:gpu_omp_25]]
+
+See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2 for the OpenMP capabilities.
+For the description of the modifications of ABINIT, see the Merge Requests (MR) below.
+
+By M. Sarraute and M. Torrent (MR 1027, MR1055, MR1059, MR1071)
+
+
+* * *
+
+
+### **C.** Changes for the developers or for the installation of ABINIT (including information about compilers)
+
+
+**C.1** The "MINIMAL" tag has been added to a selected set of automatic tests (about 20 abi files).
+They cover the basic functionalities of ABINIT, and the detection of failures is modified and made more robust.
+There should not be false failures due to tight tolerances.
+So, this should be the ideal set of tests to be executed after a new installation.
+Use "runtests.py -k MINIMAL". Also, "make check-local" and "make check-am" trigger this suite.
+
+By M. Verstrate, M. Torrent and X. Gonze (MR1035, MR1041)
+
+**C.2** Fix support for new compilers: ifort / ifx oneAPI 2024 ( replace some implicit loop by an explicit one ) and improve detection of cray compilers.
+In addition, oneapi and newer intel compilers refuse the old syntax -mkl=cluster, moved to -qmkl. One can presume that all future compilations will be done with this.
+So, this has been modified in config/m4/sd_math_linalg_core.m4 .
+
+By J.-M. Beuken (MR995) and M. Verstraete (MR1007)
+
+**C.3** The build system has been modified in order to include cmake files in 'make dist'. Some modifications needed to compile with cmake have been made.
+
+By M. Torrent (MR986, MR1032)
+
+**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in doc/developers/developers_howto.md .
+
+By P. Kestener (MR994), and a comment from Maxime Mignolet.
+
+**C.5** Manage GPU markers with compilation flag rather than input parameters.
+
+By M. Sarraute (MR989)
+
+**C.6** Improve NVPL lib support in build system
+
+By M. Torrent (MR1069)
+
+**C.7** Upgrade of mksite.py (abimkdocs).
+
+Make mksite.py compatible with mkdocs-material==9.5.43, mkdocs==1.6.1 and python3.12
+
+By M. Giantomassi (MR1078), with checking by M. Azizi of possible glitches in the web pages.
+
+* * *
+
+### **D.**  Other developments (possibly not yet finalized), other new tests, new input variables, new tutorial.
+
+**D.1** The work on the ground-state GPU porting of ABINIT is continuing.
+
+Concerning eigensolvers on AMD GPU:
+By eigensolver routines, I refer to LAPACK DSYGVD/ZHEGVD and DSYEVD/ZHEEVD, which are provided on GPU by AMD HipSOLVER and NVIDIA CuSOLVER under specific names.
+As of today, DSYGVD and DSYEVD are significantly slower on AMD GPU, and usually account for most of execution time in Adastra GPU partition.
+But somehow, the complex variants ZHEGVD and ZHEEVD are incredibly slow, which lead to introduce a workaround,
+use ZHEGVJ instead of ZHEGVD: J stands for Jacobi and it takes two extra parameter for tolerance and max step.
+The maximum step number was raised from 1 to 100, as numerical issues would sometime occur otherwise. Performance impact seems light.
+At varianes, ZHEEVD is used on CPU: AMD HIP provides a ZHEEVJ it was not possible to make it work.
+Running ZHEEVD on CPU is slow... but faster than AMD HIP ZHEEVD
+
+Concerning GPU-aware MPI:
+This concept consists of providing GPU buffers addresses to MPI routines. If GPU-direct is enabled, data will transmit between GPU interconnect, aka NVlink (NVIDIA) or InfinityFabric (AMD), UAlink (next-gen AMD/Intel). In ABINIT, it can be enabled using enable_mpi_gpu_aware=yes  in Autotools buildsys (CMake buildsys uses autodetect).
+This usually bring performance improvements, if GPU-direct is enabled, works fine on NVIDIA A100... but works erratically on AMD MI250.
+It is only used to perform a MPI_SUM in xg_RayleighRitz, which is a performance bottleneck on GPU.
+Anyway, this section was broken for some usecases ([[istwfk]]==2, AMD GPU) in xg submod so it has been fixed.
+
+In addition, there were the following fixes:
+fix unprotected OpenMP TARGET directives;
+fix compilation with NVHPC 23.11-24.7 by switching mkrho optionals positions.
+
+By M. Sarraute (MR1056, MR1060, MR1061)
+
+
+**D.2** Tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available,  [[test:gpu_kokkos_01]] and [[test:gpu_kokkos_02]], nonlop with BLAS, chebycheff.
+See input variable [[gpu_option]]=3.
+
+By M. Sarraute and M. Torrent (b3b2ce14ca1)
+
+
+**D.3** New tests of the GPU (OpenMP) porting of ABINIT are available, [[test:gpu_omp_04]] to [[test:gpu_omp_09]]. See input variable [[gpu_option]]=2.
+Bug fix:  istwfk==2 when using CHEBFI as diago algorithm.
+Small fixes around ELPA+GPU, Cray and GPU-aware MPI have been done.
+
+* * *
+
+### **E.**  Bug fixes, not yet mentioned in the previous sections of these release notes.
+
+**E.1** Fix bugs in the recognition of symmetries (trigonal and hexagonal groups).
+
+Work based on a user's report of a Wyckoff position error in space groups 151 and 153.
+Update symsghexa and update relevant tests. Provide a new [[test:v10_02]] that tests all Wyckoff positions in groups 143-167, the trigonal groups.
+See also [[test:v10_40]] and [[test:v3_98]].
+By J.Zwanziger and M. Verstraete (MR1019, MR1025)
+
+
+**E.2** Fix an error when using ABI_GPU_LEGACY with xg_tools ([[wfoptalg]]=114 or 111).
+
+By L. Baguet (MR988)
+
+
+**E.3** Fix: velocity was not read from hist file with [[restartxf]].
+
+By He Xu (MR991)
+
+**E.4** Multibinit fixes: multibinit spin monte carlo did not run; multibinit did not read more than one single-ion anisotropy from xml file.
+
+By He Xu (MR992)
+
+**E.19** Miscellaneous bug fixes and cleaning
+
+By He Xu (MR1009), by M. Verstraete (MR1025)
+
+* * *
+
+
+
+
+
+
+
+
 ## v10.2
 
 Version 10.2, released on October 10, 2024.
 List of changes with respect to version 10.0.
-<!-- Release notes updated on Nov 27, 2024. -->
+<!-- Release notes updated on Feb 15, 2025. -->
 
 Many thanks to the contributors to the ABINIT project between
 March 2024 and October 2024.
-<!-- (with some late contributions until XXX 2024). -->
+<!-- (with some late contributions/fixes until Feb 2025). -->
 These release notes
 are relative to modifications/improvements of ABINIT v10.2 with respect to v10.0, with also some late fixes to v10.0, after March 2024,
 that had not yet been documented.
-<!-- Initially, merge requests from MR986 up to and including MR1062 in the beta-release v10.2.1. Also, MR1034, MR1064 to MR1067, MR1069 to MR1072, MR1074 are taken into account in v10.2.3, publicly released. For v10.2.5, MR1075, 1078 and 1987 are also included. -->
+<!-- Initially, merge requests from MR986 up to and including MR1062 in the beta-release v10.2.1. Also, MR1034, MR1064 to MR1067, MR1069 to MR1072, MR1074 are taken into account in v10.2.3, publicly released. For v10.2.5, MR1075, 1078 and 1087 are also included. For v10.2.7, MR1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115 are also included.-->
 
 The list of contributors includes:
 G. Antonius, M. Azizi, L. Baguet, J.-M. Beuken, O. Bistoni, A. Blanchet, F. Bottin, F. Bruneval, Siyu Chen, F. Gendron, M. Giantomassi, X. Gonze,
@@ -461,7 +642,7 @@ Bug 3: random compiler errors with cray. Modifications done to compile and run w
 
 By L. Baguet (MR1087)
 
-**E.18** Miscellaneous bug fixes and cleaning
+**E.19** Miscellaneous bug fixes and cleaning
 
 By He Xu (MR1009), by M. Verstraete (MR1025)
 
