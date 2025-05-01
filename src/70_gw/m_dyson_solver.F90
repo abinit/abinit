@@ -340,9 +340,6 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
         zz = CMPLX(qp_ene(jb,sk_ibz,spin), zero)
       end if
 
-      !call spade%init(sr%nomega_i, sr%omega_i, tmpcdp)
-      !call spade%eval(zz, sigc_e0, dvdz=dsigc_de0)
-
       ! Diagonal elements of sigcme
       ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
       do iab=1,Sr%nsig_ab
@@ -356,6 +353,8 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
           Sr%sigcmee0(jb,sk_ibz,is_idx) =  pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
           Sr%dsigmee0(jb,sk_ibz,is_idx) = dpade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
         end if
+        !call spade%init(sr%nomega_i, sr%omega_i, tmpcdp)
+        !call spade%eval(zz, Sr%sigcmee0(jb,sk_ibz,is_idx), dvdz=Sr%dsigmee0(jb,sk_ibz,is_idx))
       end do !iab
 
       ! Z = (1 - dSigma / domega(E0))^{-1}
@@ -365,6 +364,21 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
         Sr%ze0(jb,sk_ibz,1) = one / (one - SUM(Sr%dsigmee0(jb,sk_ibz,:)))
       end if
 
+#define _DEV_PERTURBATIVE
+
+#ifdef _DEV_PERTURBATIVE
+      ! Use perturbative approach with Z.
+      Sr%degw(jb,sk_ibz,spin) = Sr%ze0(jb,sk_ibz,spin) * &
+        (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin) + &
+         Sr%hhartree(jb,jb,sk_ibz,spin))
+
+      Sr%egw(jb,sk_ibz,spin) = Sr%e0(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
+
+      ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
+      Sr%sigmee(jb,sk_ibz,spin) = &
+        Sr%sigxme(jb,sk_ibz,spin)+Sr%sigcmee0(jb,sk_ibz,spin)+Sr%degw(jb,sk_ibz,spin)*Sr%dsigmee0(jb,sk_ibz,spin)
+
+#else
       ! MG FIXME: Here we are solving the non-linear QP equation using the Pade' continuation + root finding
       ! but this is very misleading because in the output file we are still reporting the Z factor
       ! and there's no mention that the QP energies have been obtained from the non-linear equation!!
@@ -407,7 +421,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
         end if
         dct = dsigc - one
         zz = newrap_step(zz, ctdpc, dct)
-      end do
+      end do ! do while
 
       if (.not. converged) then
         write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
@@ -420,6 +434,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
       Sr%egw(jb,sk_ibz,spin) = zz
       Sr%degw(jb,sk_ibz,spin) = Sr%egw(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin)
       Sr%sigmee(jb,sk_ibz,spin) = Sr%sigxme(jb,sk_ibz,spin) + sigc
+#endif
 
       ! Spectra of Sigma, remember that Sr%nomega_r does not contains the frequencies
       ! used to evaluate the derivative each frequency is obtained using the pade_expression
