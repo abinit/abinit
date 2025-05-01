@@ -231,7 +231,7 @@ subroutine pstat_print(pstat, file, line)
  if (present(line)) f90line = line
  if (present(file)) f90name = basename(file)
 
- ydoc = yamldoc_open("!PstatData")
+ ydoc = yamldoc_open("PstatData")
 
  call ydoc%add_int("pid", pstat%pid)
  !call ydoc%add_int("threads", pstat%threads)
