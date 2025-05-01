@@ -143,6 +143,7 @@ module m_gwr
  use m_hide_blas
 
  use defs_datatypes,  only : pseudopotential_type
+ use m_hide_lapack,   only : xginv, xhdp_invert
  use defs_abitypes,   only : mpi_type
  use m_gwdefs,        only : GW_TOL_DOCC, GW_TOLQ0, GW_TOL_W0, GW_Q0_DEFAULT, cone_gw, czero_gw, j_gw, sigijtab_t, &
                              sigijtab_free, g0g0w
@@ -5195,7 +5196,7 @@ subroutine gwr_build_wc(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr
+ integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr, npwe
  integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, cpu_tmp, wall_tmp, gflops_tmp
  logical :: q_is_gamma, free_tchi, print_time, keep_wcimw
@@ -5207,6 +5208,7 @@ subroutine gwr_build_wc(gwr)
  integer :: units(2)
  real(dp) :: qq_ibz(3), tsec(2)
  complex(dpc) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
+ complex(gwpc), allocatable :: eps_glob(:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -5247,6 +5249,7 @@ subroutine gwr_build_wc(gwr)
 
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
    ig0 = desc_q%ig0
+   npwe = desc_q%npw
 
    ! The spin loop is needed so that procs in different pools can operate
    ! on their own matrix that has been already summed over (collinear) spins.
@@ -5284,6 +5287,7 @@ subroutine gwr_build_wc(gwr)
        ! NB: PZGETRF requires square block cyclic decomposition along the two axes
        ! hence we have to redistribute the data before calling invert.
 
+#if 0
        call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
        call cwtime_report("change_size_blocs", cpu_tmp, wall_tmp, gflops_tmp)
@@ -5296,6 +5300,16 @@ subroutine gwr_build_wc(gwr)
        call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
        call cwtime_report("take_from", cpu_tmp, wall_tmp, gflops_tmp)
+
+#else
+       call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
+       call wc%collect_cplx(npwe, npwe, [1,1], eps_glob)
+       call xginv(eps_glob, npwe)
+       !call zhpd_invert("U", eps_glob, npwe)
+       !call slk_matrix_from_global_dpc_2D(em1, "U", eps_glob)
+       ABI_FREE(eps_glob)
+       call cwtime_report("new buggy inv", cpu_tmp, wall_tmp, gflops_tmp)
+#endif
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
        !call print_arr(units, wc%buffer_cplx)
