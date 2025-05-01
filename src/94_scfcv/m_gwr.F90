@@ -5197,7 +5197,7 @@ subroutine gwr_build_wc(gwr)
  integer,parameter :: master = 0
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr
  integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
- real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, cpu_tmp, wall_tmp, gflops_tmp
  logical :: q_is_gamma, free_tchi, print_time, keep_wcimw
  character(len=5000) :: msg
  complex(dpc) :: vcs_g1, vcs_g2
@@ -5284,10 +5284,18 @@ subroutine gwr_build_wc(gwr)
        ! NB: PZGETRF requires square block cyclic decomposition along the two axes
        ! hence we have to redistribute the data before calling invert.
 
+       call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
+       call cwtime_report("change_size_blocs", cpu_tmp, wall_tmp, gflops_tmp)
+
+       call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
        !call em1%invert()
        call em1%hpd_invert("U") ! TODO: Can use hpd_invert
+       call cwtime_report("hpd_invert", cpu_tmp, wall_tmp, gflops_tmp)
+
+       call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
+       call cwtime_report("take_from", cpu_tmp, wall_tmp, gflops_tmp)
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
        !call print_arr(units, wc%buffer_cplx)
@@ -5773,7 +5781,6 @@ else
  mem_mb = slk_array_locmem_mb(wc_rpr) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(sigc_rpr))
  call wrtout(std_out, sjoin(" Local memory for PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
  if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
-
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
