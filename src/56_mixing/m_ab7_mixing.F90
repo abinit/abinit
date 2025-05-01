@@ -858,6 +858,8 @@ subroutine ab7_mixing_deallocate(mix)
  ABI_SFREE_PTR(mix%f_fftgr)
  ABI_SFREE_PTR(mix%f_paw)
  ABI_SFREE_PTR(mix%f_atm)
+ ABI_SFREE_PTR(mix%f_extfpmd)
+ ABI_SFREE_PTR(mix%f_rcpaw)
 
  call nullify_(mix)
 
