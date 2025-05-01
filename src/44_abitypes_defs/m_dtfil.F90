@@ -34,6 +34,7 @@ module m_dtfil
  use m_io_tools,     only : open_file, file_exists
  use m_libpaw_tools, only : libpaw_log_flag_set
  use m_parser,       only : parsefile, intagm
+ use m_pstat,        only : pstat_proc
 
  implicit none
 
@@ -1864,6 +1865,9 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      end if
    end if
  end if
+
+ ! Init pstat_proc.
+ call pstat_proc%from_pid()
 
  call xmpi_barrier(comm)
  return

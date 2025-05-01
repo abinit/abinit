@@ -89,6 +89,7 @@ module m_screening_driver
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
  use minimax_grids,      only : gx_minimax_grid !, gx_get_error_message
+ use m_pstat,         only : pstat_proc
 
  implicit none
 
@@ -321,6 +322,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
    ngfft_gw,Hdr_wfk,Hdr_local,Cryst,Kmesh,Qmesh,ks_ebands,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
+ call pstat_proc%print(_PSTAT_ARGS_)
  call timab(302,2,tsec) ! screening(init)
  call print_ngfft([std_out], ngfft_gw, header='FFT mesh used for oscillator strengths')
 
@@ -640,6 +642,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! This test has been disabled (too expensive!)
  if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
+ call pstat_proc%print(_PSTAT_ARGS_)
  call timab(316,2,tsec) ! screening(wfs
  call timab(319,1,tsec) ! screening(1)
 
@@ -1091,6 +1094,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !======================================================================
 !==== Loop over q-points. Calculate \epsilon^{-1} and save on disc ====
 !======================================================================
+ call pstat_proc%print(_PSTAT_ARGS_)
  call timab(321,2,tsec) ! screening(2)
 
  iqcalc = 0
@@ -1129,6 +1133,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call wrtout([ab_out, std_out], msg)
    is_qeq0 = 0; if (normv(Qmesh%ibz(:,iqibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
 
+   call pstat_proc%print(_PSTAT_ARGS_)
    call timab(306,2,tsec)
 
    if (is_qeq0 == 1) then
@@ -1481,6 +1486,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      end do
    end if
 
+   call pstat_proc%print(_PSTAT_ARGS_)
    call timab(309,2,tsec)
    call timab(310,1,tsec) ! wrscr
 

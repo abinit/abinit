@@ -45,9 +45,11 @@
 #ifdef HAVE_FC_LONG_LINES
 #define _FILE_LINE_ARGS_    ,file=__FILE__, line=__LINE__
 #define _FILE_ABIFUNC_LINE_ARGS_    ,file=__FILE__, line=__LINE__
+#define _PSTAT_ARGS_    file=__FILE__, line=__LINE__
 #else
 #define _FILE_LINE_ARGS_
 #define _FILE_ABIFUNC_LINE_ARGS_
+#define _PSTAT_ARGS_
 #endif
 
 /** this does not work with gfort, pgi, **/

@@ -27,7 +27,7 @@ module m_pstat
  use m_errors
  use m_yaml
 
- use m_fstrings, only : find_and_select
+ use m_fstrings, only : find_and_select, basename
  use m_clib,     only : clib_getpid
 
  implicit none
@@ -50,7 +50,7 @@ module m_pstat
 !!
 !! SOURCE
 
- type, public :: pstat_t
+ type, private :: pstat_t
 
   logical :: ok = .False.
   ! False if stat file is not available
@@ -86,7 +86,7 @@ module m_pstat
  end type pstat_t
 !!***
 
- !type(pstat_t),save,public :: pstat_proc
+ type(pstat_t),save,public :: pstat_proc
 
 !----------------------------------------------------------------------
 
@@ -208,35 +208,42 @@ end subroutine pstat_from_file
 !!  pstat_print
 !!
 !! FUNCTION
-!!  Print object in Yaml format.
+!!  Print object in Yaml format to std_out
 !!
 !! SOURCE
 
-subroutine pstat_print(pstat, units, header)
+subroutine pstat_print(pstat, file, line)
 
  class(pstat_t),intent(inout) :: pstat
- integer,intent(in) :: units(:)
- character(len=*),optional,intent(in) :: header
+ character(len=*),optional,intent(in) :: file
+ integer,optional,intent(in) :: line
 
 !Local variables-------------------------------
- character(len=500) :: header__
+ integer :: units(1)
+ integer :: f90line = 0
+ character(len=500) :: f90name='Subroutine Unknown'
  type(yamldoc_t) :: ydoc
 ! *************************************************************************
 
  if (pstat%pid == -1) return
  call pstat%from_file(pstat%filepath)
 
- header__ = "unknown"; if (present(header)) header__ = header
- ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
+ if (present(line)) f90line = line
+ if (present(file)) f90name = basename(file)
+
+ ydoc = yamldoc_open("!PstatData")
 
  call ydoc%add_int("pid", pstat%pid)
- call ydoc%add_int("threads", pstat%threads)
- call ydoc%add_int("fdsize", pstat%fdsize)
+ !call ydoc%add_int("threads", pstat%threads)
+ !call ydoc%add_int("fdsize", pstat%fdsize)
+ call ydoc%add_string("file", f90name)
+ call ydoc%add_int("line", f90line)
  call ydoc%add_real("vmrss_mb", pstat%vmrss_mb)
  call ydoc%add_real("vmpeak_mb", pstat%vmpeak_mb)
  call ydoc%add_real("vmstk_mb", pstat%vmstk_mb)
  if (len_trim(pstat%iomsg) > 0) call ydoc%add_string("iomsg", trim(pstat%iomsg))
 
+ units(1) = std_out
  call ydoc%write_units_and_free(units)
 
 end subroutine pstat_print
