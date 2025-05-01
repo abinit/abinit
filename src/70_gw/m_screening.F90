@@ -1640,7 +1640,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
- CASE(5)
+ CASE (5)
    ! One-shot scalar bootstrap approximation
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
@@ -1686,7 +1686,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      call print_arr([std_out], chi0(:,:,io))
    end do
 
-CASE(6)
+ CASE (6)
    ! RPA bootstrap by Rigamonti [[cite:Rigamonti2015]] and Berger [[cite:Berger2015]]
    ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
