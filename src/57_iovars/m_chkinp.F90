@@ -4161,8 +4161,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
        &(dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
        &(dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
-       &(dt%usepaw/=1)) &
-       &ABI_ERROR('RCPAW: work in progress')
+       &(dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
+       ABI_ERROR('RCPAW: work in progress')
+     endif
    endif
 
 !  usexcnhat

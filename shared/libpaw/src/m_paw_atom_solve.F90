@@ -895,8 +895,12 @@ subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,e_semicore)
    if(atp%Orbit%iscore(io)) then
      icor=icor+1
      CALL kinetic(atp%Grid,atp%Orbit%wfn(:,io),atp%Orbit%l(io),ekin)
-     if(abs(atp%Orbit%eig(io)/two-atm%eig(icor,1))>tol6) LIBPAW_ERROR('Inconsistent RCPAW core files')
-     if(abs(atp%Orbit%occ(io)-atm%occ(icor,1))>tol6) LIBPAW_ERROR('Inconsistent RCPAW core files')
+     if(abs(atp%Orbit%eig(io)/two-atm%eig(icor,1))>tol6) then
+       LIBPAW_ERROR('Inconsistent RCPAW core files')
+     endif
+     if(abs(atp%Orbit%occ(io)-atm%occ(icor,1))>tol6) then
+       LIBPAW_ERROR('Inconsistent RCPAW core files')
+     endif
      atm%ekinc=atm%ekinc+ekin/two*atp%Orbit%occ(io)
      atm%eeigc=atm%eeigc+atp%Orbit%eig(io)*atp%Orbit%occ(io)/two
    endif
@@ -1471,21 +1475,46 @@ subroutine print_check_atompaw_params(atp)
  ! TODO : dirac
  type(atompaw_type),intent(in) :: atp
  integer :: norb,io,ll,nn,ii
- if(atp%finitenucleus) LIBPAW_ERROR('Finitenucleus not implemented')
- if(atp%usespline) LIBPAW_ERROR('Usespline not implemented')
- if(atp%HFpostprocess) LIBPAW_ERROR('HFpostprocess not implemented')
- if(atp%localizedcoreexchange) LIBPAW_ERROR('Localized core exchange not implemented')
- if(atp%BDsolve) LIBPAW_ERROR('BD solver not implemented')
- if(atp%fixed_zero) LIBPAW_ERROR('Fixed zero not implemented')
- if(atp%needvtau) LIBPAW_ERROR('Vtau not implemented')
- if(atp%shapetcore) LIBPAW_ERROR('Shapetcore not implemented')
- if(atp%ColleSalvetti) LIBPAW_ERROR('ColleSalvetti not implemented')
- if(.not.atp%ortho_type==ORTHO_TYPE_VANDERBILT) LIBPAW_ERROR('RCPAW only possible with Vanderbilt ortho scheme')
- if(atp%diracrelativistic) LIBPAW_ERROR('Diracrelativism not implemented yet')
+ if(atp%finitenucleus) then
+   LIBPAW_ERROR('Finitenucleus not implemented')
+ endif
+ if(atp%usespline) then
+   LIBPAW_ERROR('Usespline not implemented')
+ endif
+ if(atp%HFpostprocess) then
+   LIBPAW_ERROR('HFpostprocess not implemented')
+ endif
+ if(atp%localizedcoreexchange) then
+   LIBPAW_ERROR('Localized core exchange not implemented')
+ endif
+ if(atp%BDsolve) then
+   LIBPAW_ERROR('BD solver not implemented')
+ endif
+ if(atp%fixed_zero) then
+   LIBPAW_ERROR('Fixed zero not implemented')
+ endif
+ if(atp%needvtau) then
+   LIBPAW_ERROR('Vtau not implemented')
+ endif
+ if(atp%shapetcore) then
+   LIBPAW_ERROR('Shapetcore not implemented')
+ endif
+ if(atp%ColleSalvetti) then
+   LIBPAW_ERROR('ColleSalvetti not implemented')
+ endif
+ if(.not.atp%ortho_type==ORTHO_TYPE_VANDERBILT) then
+   LIBPAW_ERROR('RCPAW only possible with Vanderbilt ortho scheme')
+ endif
+ if(atp%diracrelativistic) then
+   LIBPAW_ERROR('Diracrelativism not implemented yet')
+ endif
  if(.not.(trim(atp%exctype).eq.('LDA-PW').or.trim(atp%exctype).eq.('GGA-PBE').or.&
-& trim(atp%exctype).eq.('GGA-PBESOL'))) LIBPAW_ERROR('Only LDA-PW, GGA-PBE and GGA-PBESOL implemented')
- if(.not.(atp%vloc_type==VLOC_TYPE_BESSEL.or.atp%vloc_type==VLOC_TYPE_MTROULLIER))&
-&  LIBPAW_ERROR('Only bessel vloc and troullier for now')
+& trim(atp%exctype).eq.('GGA-PBESOL'))) then
+   LIBPAW_ERROR('Only LDA-PW, GGA-PBE and GGA-PBESOL implemented')
+ endif
+ if(.not.(atp%vloc_type==VLOC_TYPE_BESSEL.or.atp%vloc_type==VLOC_TYPE_MTROULLIER)) then
+   LIBPAW_ERROR('Only bessel vloc and troullier for now')
+ endif
  if(has_to_print) then
    WRITE(STD_OUT,'(/,3x,a)') "===== Atompaw parameters ====="
   ! Atom

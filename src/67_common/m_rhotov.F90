@@ -24,7 +24,7 @@ module m_rhotov
  use defs_wvltypes
  use m_errors
  use m_abicore
- use m_ab7_mixing
+ use m_abi_mixing
  use m_abi2big
  use m_xmpi
  use m_cgtools

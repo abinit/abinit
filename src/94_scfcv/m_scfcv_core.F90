@@ -31,7 +31,7 @@ module m_scfcv_core
  use m_abicore
  use m_wffile
  use m_rec
- use m_ab7_mixing
+ use m_abi_mixing
  use m_errors
  use m_efield
  use mod_prc_memory
@@ -359,7 +359,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  type(MPI_type) :: mpi_enreg_diel
  type(xcdata_type) :: xcdata
  type(energies_type) :: energies
- type(ab7_mixing_object) :: mix,mix_mgga
+ type(abi_mixing_object) :: mix,mix_mgga
  logical,parameter :: VERBOSE=.FALSE.
  logical :: dummy_nhatgr,eijkl_is_sym
  logical :: finite_efield_flag=.false.
@@ -734,7 +734,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    eijkl_is_sym=.true.
    if (dtset%use_rcpaw==1) then
      ABI_WARNING("Untested Mode RCPAW")
-     if(.not.associated(rcpaw)) ABI_MALLOC(rcpaw,)
+     if(.not.associated(rcpaw)) then
+       ABI_MALLOC(rcpaw,)
+     endif
      call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,paw_an,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
    end if
 
@@ -810,36 +812,36 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end do
    end if
    if (dtset%iscf > 0) then
-     denpot = AB7_MIXING_POTENTIAL
-     if (dtset%iscf > 10) denpot = AB7_MIXING_DENSITY
+     denpot = ABI_MIXING_POTENTIAL
+     if (dtset%iscf > 10) denpot = ABI_MIXING_DENSITY
      if (psps%usepaw==1.and.dtset%pawmixdg==0 .and. dtset%usewvl==0) then
-       ispmix=AB7_MIXING_FOURRIER_SPACE;nfftmix=dtset%nfft;ngfftmix(:)=ngfft(:)
+       ispmix=ABI_MIXING_FOURRIER_SPACE;nfftmix=dtset%nfft;ngfftmix(:)=ngfft(:)
      else
-       ispmix=AB7_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
+       ispmix=ABI_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
      end if
      !TRangel: added to avoid segfaults with Wavelets
      nfftmix_per_nfft=0;if(nfftf>0) nfftmix_per_nfft=(1-nfftmix/nfftf)
-     call ab7_mixing_new(mix, iscf10, denpot, ispmix, nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
+     call abi_mixing_new(mix, iscf10, denpot, ispmix, nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
      if (errid /= AB7_NO_ERROR) then
        ABI_ERROR(msg)
      end if
      if (dtset%usekden/=0) then
        if (dtset%useria==12345) then  ! This is temporary
-         call ab7_mixing_new(mix_mgga, iscf10, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
+         call abi_mixing_new(mix_mgga, iscf10, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
        else
-         call ab7_mixing_new(mix_mgga, 0, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
+         call abi_mixing_new(mix_mgga, 0, denpot, ispmix, nfftmix, dtset%nspden, 0, errid, msg, dtset%npulayit)
        end if
        if (errid /= AB7_NO_ERROR) then
          ABI_ERROR(msg)
        end if
      end if
      if (dtset%mffmem == 0) then
-       call ab7_mixing_use_disk_cache(mix, dtfil%fnametmp_fft)
-       if (dtset%usekden/=0.and.denpot==AB7_MIXING_DENSITY) &
-&        call ab7_mixing_use_disk_cache(mix, dtfil%fnametmp_fft_mgga)
+       call abi_mixing_use_disk_cache(mix, dtfil%fnametmp_fft)
+       if (dtset%usekden/=0.and.denpot==ABI_MIXING_DENSITY) &
+&        call abi_mixing_use_disk_cache(mix, dtfil%fnametmp_fft_mgga)
      end if
 !   else if (dtset%iscf==0.and.dtset%usewvl==1) then
-!     ispmix=AB7_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
+!     ispmix=ABI_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
    end if
  else
    ABI_MALLOC(nvresid,(0,0))
@@ -2153,8 +2155,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call timab(1459,1,tsec)
 
  if (dtset%iscf > 0) then
-   call ab7_mixing_deallocate(mix)
-   if (dtset%usekden/=0) call ab7_mixing_deallocate(mix_mgga)
+   call abi_mixing_deallocate(mix)
+   if (dtset%usekden/=0) call abi_mixing_deallocate(mix_mgga)
  end if
 
  if (dtset%usefock==1)then

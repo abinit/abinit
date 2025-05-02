@@ -29,7 +29,7 @@ module m_vtorho
  use defs_wvltypes
  use m_abicore
  use m_xmpi
- use m_ab7_mixing
+ use m_abi_mixing
  use m_errors
  use m_wffile
  use m_efield
