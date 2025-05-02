@@ -84,6 +84,12 @@ _ WF disk file :      0.646 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
+        dmftqmc_l1          0
+        dmftqmc_l2         20
+        dmftqmc_n1     0.0000000000E+00
+        dmftqmc_n2     1.0000000000E+06
+    dmftqmc_therm1          0
+    dmftqmc_therm2      10000
         dmft_rslf1          1
         dmft_rslf2          0
         dmft_solv1          5
@@ -1015,7 +1021,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     263.704     263.654
  ******************************************
  DFT+DMFT Method is used
  ******************************************
- 
+
 
  ******************************************
  DFT+DMFT Method is used
@@ -1783,6 +1789,12 @@ total_energy_dc_eV  : -1.96120823466341E+03
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
+        dmftqmc_l1          0
+        dmftqmc_l2         20
+        dmftqmc_n1     0.0000000000E+00
+        dmftqmc_n2     1.0000000000E+06
+    dmftqmc_therm1          0
+    dmftqmc_therm2      10000
         dmft_rslf1          1
         dmft_rslf2          0
         dmft_solv1          5
