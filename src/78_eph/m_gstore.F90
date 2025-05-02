@@ -162,6 +162,7 @@ module m_gstore
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_mlwfovlp,       only : wan_t
+ use m_pstat,          only : pstat_proc
 
  implicit none
 
@@ -631,6 +632,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  units = [std_out, ab_out]
 
  call wrtout(std_out, " gstore_init: building gstore_t object...")
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Set basic parameters.
  gstore%comm = comm; gstore%nsppol = nsppol; gstore%path = path
@@ -1038,6 +1040,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ABI_FREE(kbz2ibz)
 
  call cwtime_report(" gstore_init:", cpu, wall, gflops)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  if (has_gwan .and. with_cplex /= 0) then
    call wrtout(units, " Using Wannier interpolation to compute and store e-ph matrix elements ...", pre_newlines=1)
@@ -3228,6 +3231,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! TODO: Should compute it on the basis of my_nkpt and my_nqpt
  qbuf_size = 16
  call wrtout(std_out, sjoin(" Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -3302,6 +3306,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2, 3*(2*mgfft+1)*natom))
@@ -3530,6 +3535,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ! Inside the loops we compute gkq_nu(2, nb, nb, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    ! Loop over my set of q-points
    prev_iqbz = -1

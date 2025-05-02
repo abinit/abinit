@@ -89,6 +89,7 @@ module m_dfpt_loopert
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,      only : ctocprj
  use m_symkpt,     only : symkpt
+ use m_pstat,      only : pstat_proc
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -1125,6 +1126,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ABI_MALLOC(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
+   call pstat_proc%print(_PSTAT_ARGS_)
 
 ! Initialize the wave function type and read GS WFK
    call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
@@ -1297,6 +1299,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
      ABI_MALLOC(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
    end if
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    !if (sum(dtset%qptn(1:3)**2)>=1.d-14) then ! non-zero q
 !TODO: for many other q this should be avoidable, in principle all if qptrlatt is a subgrid of kprtlatt
@@ -1867,6 +1870,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  If immediate exit, and wavefunctions were not read, must zero eigenvalues
    if (iexit/=0) eigen1(:)=zero
    if (iexit/=0.and.(.not.kramers_deg)) eigen1_mq(:)=zero
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    if (iexit==0) then
 
@@ -1994,6 +1998,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    end if ! End of the check of hasty exit
 
+   call pstat_proc%print(_PSTAT_ARGS_)
    call timab(146,1,tsec)
 
 !  Print out message at the end of the iterations
@@ -2102,7 +2107,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      cg1_3(:,:,idir) = cg1(:,:)
      has_cg1_3(idir) = .TRUE.
    end if
-
 
    call outresid(dtset,kpt_rbz,dtset%mband, nband_rbz,nkpt_rbz,dtset%nsppol,resid)
 

@@ -5207,7 +5207,7 @@ subroutine gwr_build_wc(gwr)
  integer,parameter :: master = 0
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr, npwe
  integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
- real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, cpu_tmp, wall_tmp, gflops_tmp
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q !, cpu_tmp, wall_tmp, gflops_tmp
  logical :: q_is_gamma, free_tchi, print_time, keep_wcimw
  character(len=5000) :: msg
  complex(dpc) :: vcs_g1, vcs_g2
@@ -5296,13 +5296,13 @@ subroutine gwr_build_wc(gwr)
        ! NB: PZGETRF requires square block cyclic decomposition along the two axes
        ! hence we have to redistribute the data before calling invert.
 
-       call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
+       !call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
        ! Use hpd_invert as eps along imag axis is always hermitian.
        !call em1%invert()
        call em1%hpd_invert("U")
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
-       call cwtime_report("hpd_invert", cpu_tmp, wall_tmp, gflops_tmp)
+       !call cwtime_report(" hpd_invert", cpu_tmp, wall_tmp, gflops_tmp)
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
        !call print_arr(units, wc%buffer_cplx)

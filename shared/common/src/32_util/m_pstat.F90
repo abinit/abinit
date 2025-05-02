@@ -226,6 +226,9 @@ subroutine pstat_print(pstat, file, line)
 ! *************************************************************************
 
  if (pstat%pid == -1) return
+ units(1) = std_out
+ if (std_out < 1) return
+
  call pstat%from_file(pstat%filepath)
 
  if (present(line)) f90line = line
@@ -243,7 +246,7 @@ subroutine pstat_print(pstat, file, line)
  call ydoc%add_real("vmstk_mb", pstat%vmstk_mb)
  if (len_trim(pstat%iomsg) > 0) call ydoc%add_string("iomsg", trim(pstat%iomsg))
 
- units(1) = std_out
+
  call ydoc%write_units_and_free(units)
 
 end subroutine pstat_print

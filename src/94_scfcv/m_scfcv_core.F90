@@ -120,6 +120,7 @@ module m_scfcv_core
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_rhohxc
  use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
+ use m_pstat,            only : pstat_proc
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -534,11 +535,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 ! End CP addition
  end if
 
- select case(dtset%usepotzero)
- case(0,1)
+ select case (dtset%usepotzero)
+ case (0,1)
    energies%e_corepsp   = ecore / ucvol
    energies%e_corepspdc = zero
- case(2)
+ case (2)
    ! No need to include the PspCore energy since it is already included in the
    ! local pseudopotential  (vpsp)
    energies%e_corepsp   = zero
@@ -1009,6 +1010,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  if (dtset%iscf==22) energies%h0=zero
 
  call timab(1441,2,tsec)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
 !##################################################################
 !PERFORM ELECTRONIC ITERATIONS
