@@ -155,18 +155,17 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
       [[
           use mpi_f08
           USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
-          INTEGER(KIND=MPI_ADDRESS_KIND), INTENT(IN) :: size
-          INTEGER ::  :: rank, ierr, disp_unit
+          implicit none
+
+          INTEGER(KIND=MPI_ADDRESS_KIND) :: size
+          INTEGER :: rank, ierr, disp_unit
           TYPE(MPI_Info) :: info
           TYPE(MPI_Comm) :: comm
-          TYPE(C_PTR) :: :: baseptr
+          TYPE(C_PTR) :: baseptr
           TYPE(MPI_Win) ::  win
-          INTEGER :: ierr
-          implicit none
 
           call MPI_Init(ierr)
           call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
-          call MPI_Win_allocate_shared(100, 4, MPI_INFO_NULL, MPI_COMM_WORLD, buf, win, ierr)
           call MPI_Win_allocate_shared(size, disp_unit, info, comm, baseptr, win, ierr)
           call MPI_Win_free(win, ierr)
           call MPI_Finalize(ierr)
