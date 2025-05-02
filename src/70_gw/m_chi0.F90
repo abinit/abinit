@@ -59,6 +59,7 @@ module m_chi0
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init, paw_ihr, paw_cross_ihr_comm
  use m_read_plowannier, only : read_plowannier
  use m_plowannier,      only : plowannier_type
+ use m_pstat,           only : pstat_proc
 
  implicit none
 
@@ -69,6 +70,8 @@ module m_chi0
  public :: cchi0
  public :: chi0q0_intraband
 !!***
+
+ integer,parameter :: LOG_MODK = 5
 
 contains
 !!***
@@ -199,7 +202,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_fourdp=1,enough=10,two_poles=2,one_pole=1,ndat1=1
+ integer,parameter :: tim_fourdp=1, enough=10, two_poles=2, one_pole=1, ndat1=1
  integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c
  integer :: band1,band2,iat1,iat2,iat,ig,ig1,ig2,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
@@ -241,7 +244,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  type(pawpwij_t),allocatable :: Pwij(:),Pwij_fft(:)
  type(pawhur_t),allocatable :: Hur(:)
  type(vkbr_t),allocatable :: vkbr(:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -411,10 +413,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
  call Gsph_epsG0%fft_tabs([0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
  if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-#ifdef FC_IBM
- ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
- use_padfft = 0
-#endif
+ !use_padfft = 0
  if (use_padfft==0) then
    ABI_FREE(gw_gbound)
    ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2*use_padfft))
@@ -506,6 +505,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    call Ltg_q%print([std_out], prtvol=Dtset%prtvol)
  end if
  call wrtout(std_out, sjoin(' Calculation status: ', itoa(nkpt_summed), ' k-points to be completed'))
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ABI_MALLOC(vkbr, (Kmesh%nibz))
  gradk_not_done = .TRUE.
@@ -527,8 +527,10 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-     write(msg,'(2(a,i4),a,i2,a,i3)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin=',spin,' done by mpi rank:',Wfd%my_rank
-     call wrtout(std_out, msg)
+     if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
+       write(msg,'(2(a,i0),a,i2,a,i0)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin=',spin,' done by rank:',Wfd%my_rank
+       call wrtout(std_out, msg)
+     end if
 
      ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
      call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
@@ -1403,6 +1405,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
 
  write(msg,'(a,i0,a)')' Calculation status: ',nkpt_summed,' k-points to be completed'
  call wrtout(std_out, msg)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! ============================================
  ! === Begin big fat loop over transitions ===
@@ -1460,8 +1463,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
 
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-     write(msg,'(2(a,i4),a,i2,a,i3)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin= ',spin,' done by mpi rank:',Wfd%my_rank
-     call wrtout(std_out,msg)
+     if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
+       write(msg,'(2(a,i4),a,i2,a,i3)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin= ',spin,' done by rank:',Wfd%my_rank
+       call wrtout(std_out,msg)
+     end if
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
      call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
@@ -1474,7 +1479,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
      ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
      call kmesh%get_BZ_item(ikmq_bz,kmq_bz,ikmq_ibz,isym_kmq,itim_kmq,ph_mkmqt,umklp_kmq,isirred_kmq)
 
-!BEGIN DEBUG
+     !BEGIN DEBUG
      !if (ANY(umklp_k /=0)) then
      !  write(msg,'(a,3i2)')" umklp_k /= 0 ",umklp_k
      !  ABI_ERROR(msg)
@@ -1490,7 +1495,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
      !  write(msg,'(a,6(1x,i0))')"  ABS(g0) > Ep%mg0 ",g0,Ep%mg0
      !  ABI_ERROR(msg)
      !end if
-!END DEBUG
+     !END DEBUG
 
      ! Copy tables for rotated FFT points
      tabr_k(:)  =ktabr(:,ik_bz)
@@ -1510,10 +1515,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
      ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
      call Gsph_epsG0%fft_tabs(g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
      if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-#ifdef FC_IBM
- ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
- use_padfft = 0
-#endif
+     !use_padfft = 0
      if (use_padfft==0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2*use_padfft))
@@ -2054,7 +2056,6 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj1_ibz(:,:),Cp_bks(:,:)
  type(pawpwij_t),allocatable :: Pwij(:)
  type(pawhur_t),allocatable :: Hur(:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")

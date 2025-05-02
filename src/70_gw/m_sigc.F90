@@ -53,6 +53,7 @@ module m_sigc
  use m_hide_lapack,   only : xheev
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
+ use m_pstat,         only : pstat_proc
 
  implicit none
 
@@ -61,6 +62,8 @@ module m_sigc
 
  public :: calc_sigc_me
 !!***
+
+ integer,parameter :: LOG_MODK = 5
 
 contains
 !!***
@@ -556,8 +559,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end do
  end if !symsigma
 
- write(msg,'(2a,i6,a)')ch10,' calculation status ( ',nq_summed,' to be completed):'
+ write(msg,'(2a,i0,a)')ch10,' calculation status ( ',nq_summed,' to be completed):'
  call wrtout(std_out, msg)
+
 
  ! Here we have a problem in case of CD since epsm1q might be huge
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
@@ -586,6 +590,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
  end if
  call timab(432,2,tsec) ! Init
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! ==========================================
  ! ==== Fat loop over k_i in the full BZ ====
@@ -655,8 +660,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        end do
      end if
 
-     write(msg,'(3(a,i0),a,i0)')' Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by mpi-rank: ',Wfd%my_rank
-     call wrtout(std_out, msg)
+     if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
+       write(msg,'(3(a,i0),a,i0)')' Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by rank: ',Wfd%my_rank
+       call wrtout(std_out, msg)
+     end if
 
      ! Find the corresponding irred q-point.
      call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
