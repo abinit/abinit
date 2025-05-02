@@ -6,6 +6,8 @@ import os
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
 import platform
+import shutil
+import tempfile
 import json
 
 from os.path import join as pj, abspath as absp, basename
@@ -95,6 +97,9 @@ class TestBot(object):
       "keywords"         : ("", _str2list, "String with the keywords that should be selected/ignored."),
       "etsf_check"       : ("no", _yesno2bool, "yes to activate the validation of the netcdf files produced by Abinit."),
       "verbose"          : (0,    int, "Verbosity level"),
+      "tmp_basedir"      : ("", str, "temporary folder where the tests will be executed and copied back"),
+      "mpi_args"         : ("", str, "args passed to the mpi command"),
+      "force_mpi"        : ("no", _yesno2bool, "force usage of of mpirun_np prefix"),
     }
 
     @classmethod
@@ -137,6 +142,9 @@ class TestBot(object):
             "keywords",
             "etsf_check",
             "verbose",
+            "tmp_basedir",
+            "mpi_args",
+            "force_mpi",
         ]
 
         for attr in attrs2read:
@@ -283,14 +291,19 @@ class TestBot(object):
         test_suite = abitests.select_tests(suite_args, keys=self.keywords, regenerate=False)
 
         # Create workdir.
-        workdir = "TestBot_MPI" + str(mpi_nprocs)
+        workdir_name = "TestBot_MPI" + str(mpi_nprocs)
         if self.has_openmp:
-            workdir += "_OMP" + str(self.omp_num_threads)
+            workdir_name += "_OMP" + str(self.omp_num_threads)
 
-        if os.path.exists(workdir):
-            raise RuntimeError("%s already exists!" % workdir)
+        if os.path.exists(workdir_name):
+            raise RuntimeError("%s already exists!" % workdir_name)
         else:
-            os.mkdir(workdir)
+            os.mkdir(workdir_name)
+
+        if self.tmp_basedir:
+            workdir = os.path.join(tempfile.mkdtemp(dir=self.tmp_basedir), workdir_name)
+        else:
+            workdir = workdir_name
 
         # Run the tests.
         if self.has_openmp:
@@ -302,7 +315,7 @@ class TestBot(object):
         print(msg)
 
         job_runner = self.seq_runner
-        if mpi_nprocs > 1:
+        if mpi_nprocs > 1 or self.force_mpi:
             job_runner = self.mpi_runner
 
         results = test_suite.run_tests(self.build_env, workdir, job_runner,
@@ -332,6 +345,13 @@ class TestBot(object):
 
         # Push the location of the tarball file
         self.targz_fnames.append(results.targz_fname)
+
+        if self.tmp_basedir:
+            for fn in ["results.tar.gz", "suite_report.html"]:
+                try:
+                    shutil.copy2(os.path.join(workdir, fn), workdir_name)
+                except:
+                    print("Could not copy back file ", fn)
 
         return results.nfailed, results.npassed, results.nexecuted
 
