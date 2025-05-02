@@ -656,6 +656,13 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
      end do
      ABI_FREE(vhatijl)
      ABI_FREE(intvhatl)
+     if(.not.rcpaw_update_) then
+       do klmn=1,lmn2_size
+         do klmn1=1,klmn-1
+           eijkl(klmn,klmn1)=eijkl(klmn1,klmn)
+         enddo
+       enddo
+     endif
    end do ! iloop
 
    if(rcpaw_update_) goto 10
