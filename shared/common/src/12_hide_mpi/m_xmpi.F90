@@ -5329,12 +5329,9 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
 !Local variables-------------------
  integer :: disp_unit
-#ifdef HAVE_MPI
-#if 0
-!#ifdef _GMATTEO_WHISH_LIST
+#elif defined HAVE_MPI3
  integer :: ierr
  integer(kind=XMPI_ADDRESS_KIND) :: my_size
-#endif
 #endif
 !----------------------------------------------------------------------
 
@@ -5342,20 +5339,18 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
  select case (kind)
  case (sp)
-  disp_unit = xmpi_bsize_sp
+   disp_unit = xmpi_bsize_sp
  case (dp)
-  disp_unit = xmpi_bsize_dp
+   disp_unit = xmpi_bsize_dp
  case default
-  call xmpi_abort(msg="Invalid kind")
+   call xmpi_abort(msg="Invalid kind")
  end select
 
  ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08 else gcc complains with
  ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
  ! See https://github.com/pmodels/mpich/issues/2659
 
-#ifdef HAVE_MPI
-#if 0
-!#ifdef _GMATTEO_WHISH_LIST
+#if defined HAVE_MPI3
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
                               !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
@@ -5371,7 +5366,6 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 #else
   if (.FALSE.) write(std_out,*) count, info
-#endif
 #endif
 
 end subroutine xcomm_allocate_shared_master
