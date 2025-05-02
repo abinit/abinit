@@ -43,6 +43,7 @@ module m_screen
  use m_vcoul,          only : vcoul_t
  use m_io_screening,   only : read_screening, hscr_t, ncname_from_id, em1_ncname
  use m_ppmodel,        only : ppmodel_t, PPM_NONE, PPM_NOTAB
+ use m_pstat,          only : pstat_proc
 
  implicit none
 
@@ -1093,6 +1094,8 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  end if
 
  if (from_file) call Hscr%free()
+
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  DBG_EXIT("COLL")
 

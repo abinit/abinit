@@ -220,7 +220,7 @@ module defs_basis
  ! Max Memory in Mb available for a MPI processor
  ! This quantity might be used at runtime to determine how to distribute memory.
  ! The default value (2Gb) can be changed at runtime via the command line interface.
- real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
+ real(dp), save, protected :: mem_per_cpu_mb = two * 1024_dp
 
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
@@ -456,7 +456,6 @@ subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
-
 !************************************************************************
 
  if (PRESENT(new_do_write_log))    do_write_log   =new_do_write_log
@@ -487,7 +486,6 @@ subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
-
 !************************************************************************
 
  if (PRESENT(new_ab_out))  ab_out  = new_ab_out
@@ -518,7 +516,6 @@ subroutine print_kinds(unit)
 
 !Local variables-------------------------------
  integer :: my_unt
-
 ! *********************************************************************
 
  my_unt=std_out; if (PRESENT(unit)) my_unt = unit
@@ -564,7 +561,6 @@ integer pure function str2wfktask(str) result(wfk_task)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: str
-
 !************************************************************************
 
  select case (str)
@@ -612,7 +608,6 @@ subroutine set_mem_per_cpu_mb(mem_mb)
 
 !Arguments-------------------------------------
  real(dp),intent(in) :: mem_mb
-
 ! *********************************************************************
 
  !print *, "Setting mem_per_cpu_mb to", mem_mb

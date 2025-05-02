@@ -23,6 +23,7 @@ module m_pstat
 
  use, intrinsic :: iso_c_binding
  use defs_basis
+ use m_xmpi
  use m_abicore
  use m_errors
  use m_yaml
@@ -83,6 +84,7 @@ module m_pstat
    procedure :: from_pid => pstat_from_pid     ! Init object from process identifier (main entry point).
    procedure :: from_file => pstat_from_file   ! Init object from file (useful for debugging).
    procedure :: print => pstat_print           ! Print object.
+   procedure :: min_mem_mb_per_proc => pstat_min_mem_mb_per_proc
  end type pstat_t
 !!***
 
@@ -252,41 +254,47 @@ subroutine pstat_print(pstat, file, line)
 end subroutine pstat_print
 !!***
 
-!!****f* m_pstat/pstat_mpi_max
+!!****f* m_pstat/pstat_min_mem_mb_per_proc
 !! NAME
-!!  pstat_mpi_max
+!!  pstat_min_mem_mb_per_proc
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  This function estimates the available memory (in MB) per process, within the MPI communicator comm
+!!  based on process statistics (pstat).
 !!
 !! SOURCE
 
-#if 0
+real(dp) function pstat_min_mem_mb_per_proc(pstat, comm) result(min_mem_mb)
 
-subroutine pstat_mpi_max(pstat, vmrss_mb, comm)
-
+!Arguments ------------------------------------
  class(pstat_t),intent(inout) :: pstat
- real(dp),intent(out) :: vmrss_mb
  integer,intent(in) :: comm
 
- !integer :: ierr, int_list(5)
- real(dp) :: real_list(3)
+!Local variables-------------------------------
+ integer :: ierr
+ logical :: all_ok
+! *************************************************************************
 
  call pstat%from_file(pstat%filepath)
 
- real_list = [pstat%vmrss_mb, pstat%vmpeak_mb, pstat%vmstk_mb]
- !call xmpi_max_ip(real_list, comm, ierr)
+ all_ok = pstat%ok
+ call xmpi_land(all_ok, comm)
 
- pstat%vmrss_mb = real_list(1)
- pstat%vmpeak_mb = real_list(2)
- pstat%vmstk_mb = real_list(3)
+ if (.not. all_ok) then
+   ! Handle case in which pstat is not available or something went wrong when reading.
+   min_mem_mb = mem_per_cpu_mb * half
+ end if
 
-end subroutine pstat_mpi_max
+ ! Compute min inside comm
+ call xmpi_min(pstat%vmrss_mb, min_mem_mb, comm, ierr)
+
+ min_mem_mb = (mem_per_cpu_mb - min_mem_mb) * (three / four) ! Don't be greedy!
+
+ ! Fallback for too small values
+ if (min_mem_mb <= tol1) min_mem_mb = mem_per_cpu_mb * half
+
+end function pstat_min_mem_mb_per_proc
 !!***
-#endif
 
 end module m_pstat
 !!***

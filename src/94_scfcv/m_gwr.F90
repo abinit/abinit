@@ -2292,6 +2292,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      ! Find band_step that gives good compromise between memory and efficiency.
      !band_step = memb_limited_step(1, nbsum, 2*npwsp_disk, xmpi_bsize_dp, 1024.0_dp)
      band_step = 200
+
      do bstart=1, nbsum, band_step
        bstop = min(bstart + band_step - 1, nbsum); nb = bstop - bstart + 1
 
@@ -8415,6 +8416,24 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
 
 end subroutine sc_sum
 !!***
+
+!!****f* m_gwr/memb_limited_step
+!! NAME
+!!  memb_limited_step
+!!
+!! FUNCTION
+!!  Compute  the amount of memory needed to process all the data between start and stop,
+!!  and limits the number of steps to avoid exceeding maxmem_mb.
+!!
+!! INPUTS
+!!	start, stop: integer range of indices.
+!!	num_items: number of data items processed per index.
+!!	bsize: size in bytes per data item.
+!!	maxmem_mb: maximum allowed memory usage (in megabytes)
+!!
+!! OUTPUT
+!!
+!! SOURCE
 
 integer pure function memb_limited_step(start, stop, num_items, bsize, maxmem_mb) result(step)
  integer,intent(in) :: start, stop, num_items, bsize

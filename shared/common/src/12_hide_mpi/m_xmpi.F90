@@ -776,7 +776,6 @@ subroutine xmpi_init()
  integer :: required,provided
 #endif
 #endif
-
 ! *************************************************************************
 
  call set_num_threads_if_undef()
@@ -904,7 +903,6 @@ subroutine xmpi_set_inplace_operations(bool)
 
 !Local variables-------------------
  logical,intent(in) :: bool
-
 ! *************************************************************************
 
  xmpi_use_inplace_operations = bool
@@ -928,7 +926,6 @@ integer function xmpi_get_unit() result(unt)
 
 !Local variables-------------------
  logical :: isopen
-
 ! *************************************************************************
 
  do unt=1024,-1,-1
@@ -957,7 +954,6 @@ subroutine xmpi_end()
 
 !Local variables-------------------
  integer :: mpierr
-
 ! *************************************************************************
 
  mpierr=0
@@ -1121,7 +1117,6 @@ subroutine xmpi_show_info(unit)
 
 !Local variables-------------------
  integer :: my_unt
-
 ! *************************************************************************
 
  my_unt = std_out; if (PRESENT(unit)) my_unt=unit
@@ -1219,7 +1214,6 @@ integer function xmpi_comm_size(comm)
 
 !Local variables-------------------------------
  integer :: mpierr
-
 ! *************************************************************************
 
  mpierr=0; xmpi_comm_size=1
@@ -1255,7 +1249,6 @@ subroutine xmpi_comm_free_0D(comm)
 !scalars
 #ifdef HAVE_MPI
  integer :: comm_world,err_handler_dum,err_handler_sav,ierr,mpierr,mpierr_class
-
 ! *************************************************************************
 
  if (comm/=xmpi_comm_null.and.comm/=xmpi_world.and.comm/=xmpi_comm_self) then
@@ -1305,7 +1298,6 @@ subroutine xmpi_comm_free_1D(comms)
 !scalars
 #ifdef HAVE_MPI
  integer :: comm_world,err_handler_dum,err_handler_sav,ii,mpierr
-
 ! *************************************************************************
 
  comm_world=xmpi_world ! Needed to bypass a bug in some OMPI implementations (intent(inout))
@@ -1350,7 +1342,6 @@ subroutine xmpi_comm_free_2D(comms)
 !scalars
 #ifdef HAVE_MPI
  integer :: comm_world,err_handler_dum,err_handler_sav,ii,jj,mpierr
-
 ! *************************************************************************
 
  comm_world=xmpi_world ! Needed to bypass a bug in some OMPI implementations (intent(inout))
@@ -1398,7 +1389,6 @@ subroutine xmpi_comm_free_3D(comms)
 !scalars
 #ifdef HAVE_MPI
  integer :: comm_world,err_handler_dum,err_handler_sav,ii,jj,kk,mpierr
-
 ! *************************************************************************
 
  comm_world=xmpi_world ! Needed to bypass a bug in some OMPI implementations (intent(inout))
@@ -1448,7 +1438,6 @@ subroutine xmpi_group_free(spaceGroup)
 !scalars
 #ifdef HAVE_MPI
  integer :: comm_world,err_handler_dum,err_handler_sav,ierr,mpierr,mpierr_class
-
 ! *************************************************************************
 
  if (spaceGroup/=xmpi_group_null) then
@@ -1500,7 +1489,6 @@ subroutine xmpi_group_incl(group,nranks,ranks,newgroup,mpierr)
  integer,intent(inout) :: newgroup
 !arrays
  integer,intent(in) :: ranks(nranks)
-
 ! *************************************************************************
 
  mpierr=0 ; newgroup=xmpi_group_null
@@ -1538,7 +1526,6 @@ subroutine xmpi_comm_create(comm,group,newcomm,mpierr)
  integer,intent(in) :: comm,group
  integer,intent(out) :: mpierr
  integer,intent(inout) :: newcomm
-
 ! *************************************************************************
 
  mpierr=0
@@ -1589,7 +1576,6 @@ integer function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
 #ifdef HAVE_MPI
  integer :: group,ierr,subgroup
 #endif
-
 ! *************************************************************************
 
  xmpi_subcomm=xmpi_comm_null
@@ -1650,7 +1636,6 @@ subroutine xmpi_comm_multiple_of(ntasks, input_comm, idle_proc, output_comm)
 
 !Local variables-------------------------------
  integer :: color, my_rank, ierr, input_nproc
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(input_comm)
@@ -1729,7 +1714,6 @@ subroutine xmpi_comm_group(comm,spaceGroup,mpierr)
 !Arguments-------------------------
  integer,intent(in) :: comm
  integer,intent(out) :: mpierr,spaceGroup
-
 ! *************************************************************************
 
  mpierr=0; spaceGroup=xmpi_group_null
@@ -1768,7 +1752,6 @@ subroutine xmpi_comm_split(input_comm, color, key, output_comm, mpierr)
 !Arguments-------------------------
  integer,intent(in) :: color,input_comm,key
  integer,intent(out) :: mpierr,output_comm
-
 ! *************************************************************************
 
  mpierr=0; output_comm=input_comm
@@ -1813,7 +1796,6 @@ subroutine xmpi_group_translate_ranks(spaceGroup1,nrank,ranks1,&
 !arrays
  integer,intent(in) :: ranks1(nrank)
  integer,intent(out) :: ranks2(nrank)
-
 ! *************************************************************************
 
  mpierr=0; ranks2(:)=xmpi_undefined
@@ -1861,7 +1843,6 @@ subroutine xmpi_comm_translate_ranks(from_comm, nrank, from_ranks, to_comm, to_r
 !Local variables-------------------------------
 !scalars
  integer :: ierr,from_group,to_group
-
 ! *************************************************************************
 
  ! Get the groups
@@ -1927,7 +1908,6 @@ subroutine xmpi_barrier(comm)
 #ifdef HAVE_MPI
  integer :: nprocs
 #endif
-
 ! *************************************************************************
 
  ier = 0
@@ -1966,9 +1946,9 @@ subroutine xmpi_name(name_ch, ierr)
 !Local variables-------------------
  integer :: len
 ! character(len=MPI_MAX_PROCESSOR_NAME) :: name_ch
-
 ! *************************************************************************
-!Get the name of this processor (usually the hostname)
+
+ ! Get the name of this processor (usually the hostname)
 
  ierr = 0
 
@@ -2015,7 +1995,6 @@ subroutine xmpi_iprobe(source,tag,mpicomm,flag,mpierr)
 #ifdef HAVE_MPI
  integer :: ier,status(MPI_STATUS_SIZE)
 #endif
-
 ! *************************************************************************
 
  mpierr = 0
@@ -2055,7 +2034,6 @@ subroutine xmpi_wait(request, mpierr)
 #ifdef HAVE_MPI
  integer :: ier,status(MPI_STATUS_SIZE)
 #endif
-
 ! *************************************************************************
 
  mpierr = 0
@@ -2096,7 +2074,6 @@ subroutine xmpi_waitall_1d(array_of_requests, mpierr)
 #ifdef HAVE_MPI
  integer :: ier,status(MPI_STATUS_SIZE,size(array_of_requests))
 #endif
-
 ! *************************************************************************
 
  mpierr = 0
@@ -2135,7 +2112,6 @@ subroutine xmpi_waitall_2d(array_of_requests, mpierr)
 
 !Local variables-------------------
  integer :: flat_requests(product(shape(array_of_requests)))
-
 ! *************************************************************************
 
  ! MPI_WAITALL is a Fortran interface so cannot pass count and base address a la C
@@ -2175,7 +2151,6 @@ subroutine xmpi_request_free(requests,mpierr)
 #ifdef HAVE_MPI
  integer :: ier,ii
 #endif
-
 ! *************************************************************************
 
  mpierr = 0
@@ -2231,7 +2206,6 @@ subroutine xmpi_error_string(mpierr,err_string,ilen,ierror)
  integer,intent(in) :: mpierr
  integer,intent(out) :: ilen,ierror
  character(len=*),intent(out) :: err_string
-
 ! *************************************************************************
 
  ilen=0
@@ -2276,7 +2250,6 @@ subroutine xmpi_comm_set_errhandler(comm,new_err_handler,old_err_handler,ierror)
 
 !Local variables-------------------------
  integer :: mpierr1,mpierr2,my_comm
-
 ! *************************************************************************
 
  ierror=0
@@ -2347,7 +2320,6 @@ subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
 
 !Local variables-------------------------------
  integer :: res,nprocs,my_rank,block_p1,block
-
 ! *************************************************************************
 
  nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -2395,7 +2367,6 @@ subroutine xmpi_split_block(ntasks, comm, my_ntasks, my_inds)
 
 !Local variables-------------------------------
  integer :: ii, istart, istop
-
 ! *************************************************************************
 
  call xmpi_split_work(ntasks, comm, istart, istop)
@@ -2435,7 +2406,6 @@ subroutine xmpi_split_cyclic(ntasks, comm, my_ntasks, my_inds)
 
 !Local variables-------------------------------
  integer :: ii, cnt, itask, my_rank, nprocs
-
 ! *************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -2488,7 +2458,6 @@ subroutine xmpi_split_list(ntasks, list, comm, my_ntasks, my_inds)
 
 !Local variables-------------------------------
  integer :: my_start, my_stop
-
 ! *************************************************************************
 
  call xmpi_split_work(ntasks, comm, my_start, my_stop)
@@ -2549,7 +2518,6 @@ subroutine xmpi_split_work2_i4b(ntasks, nprocs, istart, istop)
 
 !Local variables-------------------------------
  integer :: res,irank,block,block_tmp
-
 ! *************************************************************************
 
  block_tmp = ntasks/nprocs
@@ -2596,7 +2564,6 @@ subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop)
 
 !Local variables-------------------------------
  integer(i8b) :: res,irank,block,block_tmp
-
 ! *************************************************************************
 
  block_tmp = ntasks/nprocs
@@ -2715,7 +2682,6 @@ pure logical function xmpi_distrib_with_replicas(itask, ntasks, rank, nprocs) re
 
 !Local variables-------------------------------
  integer :: ii,mnp_pool,rk_base
-
 ! *************************************************************************
 
  ! If the number of processors is less than ntasks, we have max one processor per task
@@ -2797,7 +2763,6 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
  integer(KIND=XMPI_ADDRESS_KIND) :: disps(2)
  integer :: types(2)
 #endif
-
 ! *************************************************************************
 
 #ifdef HAVE_MPI
@@ -3073,7 +3038,6 @@ subroutine xmpi_largetype_free(largetype,largetype_op)
 #ifdef HAVE_MPI
  integer :: ierr
 #endif
-
 ! *************************************************************************
 
 #ifdef HAVE_MPI
