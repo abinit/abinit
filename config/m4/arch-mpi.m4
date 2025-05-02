@@ -281,7 +281,7 @@ AC_DEFUN([_ABI_MPI_CHECK_INTEGER16], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_INTEGER16])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: ii = MPI_INTEGER16
@@ -449,7 +449,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
 
   dnl Back-up build environment
   ABI_ENV_BACKUP
-                                                                                            
+
   dnl Prepare build environment
   CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
@@ -457,7 +457,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer,parameter :: siz=5
@@ -473,11 +473,11 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
       !  IN comm	communicator (handle)
       !  OUT request	communication request (handle)
 
-      call MPI_IBCAST(buffer, siz, MPI_INTEGER, root, comm, request, ierr) 
+      call MPI_IBCAST(buffer, siz, MPI_INTEGER, root, comm, request, ierr)
 
     ]])], [abi_mpi_ibcast_ok="yes"], [abi_mpi_ibcast_ok="no"])
   AC_LANG_POP
-                                                                                            
+
   dnl Restore build environment
   ABI_ENV_RESTORE
 
@@ -490,7 +490,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
-]) # _ABI_MPI_CHECK_IBCAST     
+]) # _ABI_MPI_CHECK_IBCAST
 
 
                     ########################################
@@ -518,7 +518,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLGATHER], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLGATHER (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5
@@ -550,7 +550,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLGATHER], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLGATHER     
+]) # _ABI_MPI_CHECK_IALLGATHER
 
 
                     # ------------------------------------ #
@@ -578,7 +578,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLTOALL (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5
@@ -608,7 +608,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLTOALL     
+]) # _ABI_MPI_CHECK_IALLTOALL
 
 
                     # ------------------------------------ #
@@ -636,7 +636,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALLV], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLTOALLV (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5, group_size=3
@@ -689,7 +689,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
   # Back-up build environment
   ABI_ENV_BACKUP
-                                                                                            
+
   # Prepare build environment
   CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
@@ -697,7 +697,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer,parameter :: siz=5,group_size=3
@@ -715,7 +715,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
     ]])], [abi_mpi_igatherv_ok="yes"], [abi_mpi_igatherv_ok="no"])
   AC_LANG_POP
-                                                                                            
+
   # Restore build environment
   ABI_ENV_RESTORE
 
@@ -756,7 +756,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLREDUCE (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: count=5
@@ -782,7 +782,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLREDUCE     
+]) # _ABI_MPI_CHECK_IALLREDUCE
 
 
                     # ------------------------------------ #
@@ -977,7 +977,7 @@ AC_DEFUN([ABI_MPI_DETECT], [
       else
         AC_MSG_NOTICE([forcing MPI-${abi_mpi_level} standard level support])
         if test "${abi_mpi_level}" != "${abi_mpi_fc_level}"; then
-        AC_MSG_WARN([detected MPI-${abi_mpi_fc_level} support but using MPI-${abi_mpi_level} instructions])
+          AC_MSG_WARN([detected MPI-${abi_mpi_fc_level} support but using MPI-${abi_mpi_level} instructions])
         fi
       fi
 

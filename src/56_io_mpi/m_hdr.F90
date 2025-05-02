@@ -39,9 +39,7 @@ module m_hdr
  use m_crystal
  use m_wffile
  use m_sort
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use netcdf
  use m_nctk
  use m_dtset

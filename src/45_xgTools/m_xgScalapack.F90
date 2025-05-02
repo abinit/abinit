@@ -22,16 +22,13 @@ module m_xgScalapack
 
   use defs_basis, only : std_err, std_out, dp, ABI_GPU_DISABLED, ABI_GPU_OPENMP
   use m_abicore
+  USE_MPI
   use m_xmpi
   use m_errors
   use m_slk
   use m_xg
   use m_xomp
   use m_time,     only: timab
-
-#ifdef HAVE_MPI2
- use mpi
-#endif
 
   implicit none
 

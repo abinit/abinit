@@ -23,16 +23,13 @@ module m_opernla_gemm
  use defs_basis
  use m_abicore
  use m_errors
+ USE_MPI
  use m_xmpi
  use m_abi_linalg
  use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
-
-#if defined HAVE_MPI2 && defined HAVE_GPU_MPI
- use mpi
-#endif
 
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
@@ -94,7 +91,7 @@ subroutine opernla_gemm_distributed(rank,nprocs,npw,ndat,&
    end if
 
    if(modulo(iblock,2)==1) then
-!    XG20241028 : This coding confused the gnu_8.5 compiler of buda2_gnu_8.5_cuda, wrt the contiguous character of the target. 
+!    XG20241028 : This coding confused the gnu_8.5 compiler of buda2_gnu_8.5_cuda, wrt the contiguous character of the target.
 !    It declared an error. Make it simple !
 !    work_buf => projs_local(1:cplex,1:npw,1:nprojs_last_blk)
 !    recv_buf => projs_recv(1:cplex,1:npw,1:nprojs_last_blk)
@@ -302,8 +299,8 @@ subroutine opernla_xgemm(cplex,transa,transb,nprojs,ndat,npw,alpha,a,lda,b,ldb,b
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,signs=2)
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
-!!                        - strain component (1:9) in the case (choice=33,signs=2) 
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
@@ -321,7 +318,7 @@ subroutine opernla_xgemm(cplex,transa,transb,nprojs,ndat,npw,alpha,a,lda,b,ldb,b
 !!  npw=number of plane waves in reciprocal space
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  ph3d(2,npw,matblk)=three-dimensional phase factors
-!!  [qdir]= optional, direction of the q-gradient (only for choice=22 choice=25 and choice=33) 
+!!  [qdir]= optional, direction of the q-gradient (only for choice=22 choice=25 and choice=33)
 !!  signs=chooses possible output:
 !!   signs=1: compute derivatives in all directions
 !!   signs=2: compute derivative in direction IDIR only

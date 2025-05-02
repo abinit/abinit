@@ -721,12 +721,13 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
  integer,parameter :: maxpow3 =6       ! int(log(largest_ngfft+half)/log(three))
  integer,parameter :: maxpow5 =6       ! int(log(largest_ngfft+half)/log(five))
 !#if defined HAVE_FFTW3 || defined HAVE_DFTI
-! integer,parameter :: maxpow7 =5       ! FFTW3 and DFTI support powers of 7 and 11
-! integer,parameter :: maxpow11=4
-!#else
+#ifdef _GMATTEO_WHISH_LIST
+ integer,parameter :: maxpow7 =5       ! FFTW3 and DFTI support powers of 7 and 11
+ integer,parameter :: maxpow11=4
+#else
  integer,parameter :: maxpow7 =0
  integer,parameter :: maxpow11=0
-!#endif
+#endif
  integer,parameter :: mmsrch=(maxpow2+1)*(maxpow3+1)*(maxpow5+1)*(maxpow7+1)*(maxpow11+1)
  integer,parameter :: nfactor=10, mpower=5
 !Arrays

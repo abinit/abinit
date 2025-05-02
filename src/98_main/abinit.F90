@@ -83,9 +83,7 @@ program abinit
  use m_errors
  use m_argparse
  use m_nctk
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 
  use defs_datatypes,only : pspheader_type
  use defs_abitypes, only : MPI_type

@@ -22,6 +22,7 @@
 
 module m_abi_linalg
 
+ USE_MPI
  use defs_basis
  use m_errors
  use m_abicore
@@ -46,10 +47,6 @@ module m_abi_linalg
 
 #if defined HAVE_MPI1
  include 'mpif.h'
-#endif
-
-#if defined HAVE_MPI2
- use mpi
 #endif
 
  use m_time,  only : timab

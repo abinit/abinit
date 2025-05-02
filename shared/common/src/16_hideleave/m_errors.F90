@@ -25,12 +25,8 @@ MODULE m_errors
  use m_profiling_abi
  use m_xmpi
  use m_specialmsg, only : wrtout
-#ifdef HAVE_NETCDF
+ USE_MPI
  use netcdf
-#endif
-#ifdef HAVE_MPI2
- use mpi
-#endif
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
@@ -493,7 +489,6 @@ subroutine netcdf_check(ncerr, msg, file, line)
 
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
  if (ncerr /= NF90_NOERR) then
 
    f90line = 0; if (present(line)) f90line = line
@@ -505,7 +500,6 @@ subroutine netcdf_check(ncerr, msg, file, line)
 
    call msg_hndl(my_msg, "ERROR", "PERS", f90name, f90line)
  end if
-#endif
 
 end subroutine netcdf_check
 !!***

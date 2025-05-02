@@ -24,9 +24,7 @@ module m_sigmaph
  use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_mpinfo
  use m_errors

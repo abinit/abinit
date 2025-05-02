@@ -528,7 +528,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
      if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
-       write(msg,'(2(a,i0),a,i2,a,i0)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin=',spin,' done by rank:',Wfd%my_rank
+       write(msg,'(2(a,i0),a,i2,a,i0)')' ik: ',ik_bz,'/',Kmesh%nbz,' spin: ',spin,' done by rank: ',Wfd%my_rank
        call wrtout(std_out, msg)
      end if
 
@@ -1463,7 +1463,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
      if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
-       write(msg,'(2(a,i4),a,i2,a,i3)')' ik= ',ik_bz,'/',Kmesh%nbz,' spin= ',spin,' done by rank:',Wfd%my_rank
+       write(msg,'(2(a,i0),a,i0,a,i0)')' ik: ',ik_bz,'/',Kmesh%nbz,' spin: ',spin,' done by rank: ',Wfd%my_rank
        call wrtout(std_out,msg)
      end if
 
@@ -2322,7 +2322,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,bmask=bmask)
      if (my_nband==0) CYCLE
 
-     write(msg,'(2(a,i4),a,i2,a,i3)')' ik = ',ik_bz,' / ',Kmesh%nbz,' spin = ',spin,' done by processor ',Wfd%my_rank
+     write(msg,'(2(a,i0),a,i0,a,i0)')' ik: ',ik_bz,' / ',Kmesh%nbz,' spin: ',spin,' done by rank: ',Wfd%my_rank
      call wrtout(std_out, msg)
 
      do lbidx=1,my_nband

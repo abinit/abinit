@@ -22,9 +22,7 @@
 module m_gwr_driver
 
  use, intrinsic :: iso_c_binding
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use defs_basis
  use defs_wvltypes
  use m_errors

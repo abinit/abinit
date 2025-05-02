@@ -52,11 +52,14 @@ import re
 #ARITH_GOTO_RE = re.compile("go\s*to\s*\([0-9,\s]+\)",re.I)
 #CALL_RE = re.compile("(?:^|[^a-zA-Z0-9_% ]\s*)(\w+)(?=\s*\(\s*(?:.*?)\s*\))",re.I)
 
+
 class HasRegex(object):
     """
     Mixin class providing regular expressions used to analyze Fortran code.
     Many regexs use `^` so we assume source lines have been already stripped.
     """
+    USE_MPI_EXPLICIT = re.compile(r"use\s+mpi\s*", re.I)
+
     # https://software.intel.com/en-us/fortran-compiler-18.0-developer-guide-and-reference-interface
 
     # A quoted expression.
