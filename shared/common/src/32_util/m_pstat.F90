@@ -227,6 +227,11 @@ subroutine pstat_print(pstat, file, line)
  type(yamldoc_t) :: ydoc
 ! *************************************************************************
 
+#ifdef FC_NVHP
+  ! Yet another wild NVHPC bug (only on eos_nvhpc_23.9_elpa)
+  return
+#endif
+
  if (pstat%pid == -1) return
  units(1) = std_out
  if (std_out < 1) return
@@ -236,7 +241,6 @@ subroutine pstat_print(pstat, file, line)
  if (present(line)) f90line = line
  if (present(file)) f90name = basename(file)
 
-#ifndef FC_NVHP
  ydoc = yamldoc_open("PstatData")
 
  call ydoc%add_int("pid", pstat%pid)
@@ -251,12 +255,10 @@ subroutine pstat_print(pstat, file, line)
 
  call ydoc%write_units_and_free(units)
 
-#else
  ! Yet another wild NVHPC bug (only on eos_nvhpc_23.9_elpa)
- write(std_out, "(a)")"--- !PstatData"
- write(std_out, *)"vmrss_mb: ", pstat%vmrss_mb
- write(std_out, "(a)")"..."
-#endif
+ !write(std_out, "(a)")"--- !PstatData"
+ !write(std_out, *)"vmrss_mb: ", pstat%vmrss_mb
+ !write(std_out, "(a)")"..."
 
 end subroutine pstat_print
 !!***
