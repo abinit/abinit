@@ -110,6 +110,7 @@ program abinit
  use m_outvars,       only : outvars
  use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
+ use m_common, only : get_dtsets_pspheads
 
 #ifdef HAVE_GPU
  use m_gpu_toolbox
@@ -127,8 +128,6 @@ program abinit
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories,&
  &                         f_timing_initialize,f_timing_reset,wvl_timing => timing
 #endif
-
- use m_common, only : get_dtsets_pspheads
 
  implicit none
 
@@ -253,8 +252,7 @@ program abinit
    call wrtout([std_out, ab_out], msg)
  end if
 
- msg=' abinit : after writing the name of files '
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
 
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()

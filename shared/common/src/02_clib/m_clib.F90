@@ -251,13 +251,13 @@ end subroutine clib_mkdir_if_needed
 !!  clib_setenv
 !!
 !! FUNCTION
-!!       The setenv() function adds the variable name to the environment
-!!       with the value value, if name does not already exist.  If name
-!!       does exist in the environment, then its value is changed to value
-!!       if overwrite is nonzero; if overwrite is zero, then the value of
-!!       name is not changed (and setenv() returns a success status).
-!!       This function makes copies of the strings pointed to by name and
-!!       value (by contrast with putenv(3)).
+!!   The setenv() function adds the variable name to the environment
+!!   with the value value, if name does not already exist.  If name
+!!   does exist in the environment, then its value is changed to value
+!!   if overwrite is nonzero; if overwrite is zero, then the value of
+!!   name is not changed (and setenv() returns a success status).
+!!   This function makes copies of the strings pointed to by name and
+!!   value (by contrast with putenv(3)).
 !!
 !! SOURCE
 

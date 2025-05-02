@@ -1842,7 +1842,6 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
  real(dp) :: ecut_tmp(3,2,10),tsec(2)
  real(dp),allocatable :: zionpsp(:)
  character(len=fnlen), allocatable :: pspfilnam_(:), pseudo_paths(:)
-
 !************************************************************************
 
  me = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
