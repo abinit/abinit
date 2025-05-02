@@ -768,10 +768,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          end do
 
          if (Dtset%gwpara == 2) then
-           call wrtout(std_out, "AC xmpi_sum begin")
+           ! FIXME: It seems that non all the procs get here if nband is small!
+           !call wrtout(std_out, "AC xmpi_sum begin")
            call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
            call xmpi_sum(neig, Wfd%comm, ierr)
-           call wrtout(std_out, "AC xmpi_sum end")
+           !call wrtout(std_out, "AC xmpi_sum end")
          endif
 
          call timab(444,2,tsec) ! ac_lrk_diag
@@ -780,8 +781,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        if (mod10==SIG_QPGW_CD) then
          ! For model GW we need transpose(conjg(epsm1_qbz))
          do io=1,Er%nomega
-          epsm1_tmp(:,:) = GWPC_CONJG(epsm1_qbz(:,:,io))
-          epsm1_trcc_qbz(:,:,io) = TRANSPOSE(epsm1_tmp)
+           epsm1_tmp(:,:) = GWPC_CONJG(epsm1_qbz(:,:,io))
+           epsm1_trcc_qbz(:,:,io) = TRANSPOSE(epsm1_tmp)
          end do
        end if
      end if ! gwcalctyp

@@ -69,6 +69,7 @@ module m_wfd
  use m_cgprj,          only : getcprj
  use m_hamiltonian,    only : gs_hamiltonian_type
  use m_nonlop,         only : nonlop
+ use m_pstat,          only : pstat_proc
 
  implicit none
 
@@ -4508,7 +4509,7 @@ subroutine wfdgw_write_wfk(Wfd, Hdr, ebands, wfk_fname, wfknocheck)
 
      ! Extract the block of wavefunctions from Wfd.
      ! Try to allocate all u(g) first,
-     ! TODO If not enough memory fallback to a blocked algorithm.
+     ! TODO: If not enough memory fallback to a blocked algorithm.
      cgsize = Wfd%nspinor * npw_k * how_manyb
      ABI_MALLOC_OR_DIE(cg_k, (2,cgsize), ierr)
 
@@ -4798,10 +4799,15 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       else
         ! Master reads full set of bands and broadcasts data, then each proc extract its own set of wavefunctions.
         ! TODO: Should read in blocks to reduce memory footprint
+        ! See for instance gwr_read_ugb_from_wfk for blocked algorithm.
+
         ABI_MALLOC_OR_DIE(allcg_k, (2, npw_disk*wfd%nspinor*(bmax-bmin+1)), ierr)
+        call pstat_proc%print(_PSTAT_ARGS_)
+
         if (my_rank == master) then
           call wfk%read_band_block([bmin, bmax], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=allcg_k, eig_k=eig_k)
         end if
+
         call xmpi_bcast(kg_k, wfd%master, wfd%comm, ierr)
         call xmpi_bcast(eig_k, wfd%master, wfd%comm, ierr)
         call xmpi_bcast(allcg_k, wfd%master, wfd%comm, ierr)
@@ -5001,7 +5007,6 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  real(dp) :: kpoint(3)
  complex(dpc),allocatable :: ceikr(:),phk_atm(:)
  type(pawcprj_type),allocatable :: Cp1(:,:)
-
 ! *************************************************************************
 
  ! TODO ngfft should be included in pawfgrtab_type

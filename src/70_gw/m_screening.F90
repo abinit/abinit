@@ -56,6 +56,7 @@ MODULE m_screening
                                HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_paw_sphharm,     only : ylmc
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
+ use m_pstat,           only : pstat_proc
 
  implicit none
 
@@ -796,8 +797,8 @@ subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
    end do
    if (unclassified > 0) then
      write(msg,'(3a,i6)')&
-&      'Some complex frequencies are too small to qualify as real or imaginary.',ch10,&
-&      'Number of unidentified frequencies = ', unclassified
+       'Some complex frequencies are too small to qualify as real or imaginary.',ch10,&
+       'Number of unidentified frequencies = ', unclassified
      ABI_WARNING(msg)
    end if
  end if
@@ -807,8 +808,8 @@ subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
  if (npwe_asked>0) then
    if (npwe_asked>Er%Hscr%npwe) then
      write(msg,'(a,i8,2a,i8)')&
-&     'Number of G-vectors saved on file is less than the value required = ',npwe_asked,ch10,&
-&     'Calculation will proceed with Max available npwe = ',Er%Hscr%npwe
+      'Number of G-vectors saved on file is less than the value required = ',npwe_asked,ch10,&
+      'Calculation will proceed with Max available npwe = ',Er%Hscr%npwe
      ABI_WARNING(msg)
    else  ! Redefine the no. of G"s for W.
      Er%npwe=npwe_asked
