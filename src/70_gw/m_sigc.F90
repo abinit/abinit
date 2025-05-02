@@ -241,7 +241,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: neig(Er%nomega_i)
  real(gwp) :: epsm1_ev(Sigp%npwc)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -338,9 +337,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  end if
 
  if (mod10==SIG_GW_AC) then
-   write(msg,'(3a,i6,a,i6)')&
+   write(msg,'(3a,i0,a,i0)')&
      ' Using a low-rank formula for AC', ch10, &
-     ' Number of epsm1 eigenvectors retained: ',neigmax,' over ',Sigp%npwc
+     ' Number of epsm1 eigenvectors retained: ',neigmax,' over: ',Sigp%npwc
    call wrtout(std_out, msg)
  endif
 
@@ -463,7 +462,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
    !
    ! For the extrapolar method we need the onsite terms of the PW in the FT mesh.
-   ! * gw_gfft is the set of plane waves in the FFT Box for the oscillators.
+   ! gw_gfft is the set of plane waves in the FFT Box for the oscillators.
    if (Sigp%gwcomp==1) then
      ABI_MALLOC(gw_gfft,(3,gwc_nfftot))
      q0=zero
@@ -475,7 +474,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  if (mod10==SIG_GW_AC) then
    ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation
-
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, Er%nomega_i))
    call coeffs_gausslegint(zero,one,gl_knots,gl_wts,Er%nomega_i)
 
@@ -561,7 +559,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  write(msg,'(2a,i0,a)')ch10,' calculation status ( ',nq_summed,' to be completed):'
  call wrtout(std_out, msg)
-
 
  ! Here we have a problem in case of CD since epsm1q might be huge
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
@@ -751,7 +748,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          neig(:) = 0
          do iiw=1,Er%nomega_i
            ! Use the available MPI tasks to parallelize over iw'
-           if ( Dtset%gwpara == 2 .and. MODULO(iiw-1,Wfd%nproc) /= Wfd%my_rank ) CYCLE
+           if (Dtset%gwpara == 2 .and. MODULO(iiw-1,Wfd%nproc) /= Wfd%my_rank ) CYCLE
 
            ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
            ! The first frequencies are always real, skip them.
@@ -763,28 +760,31 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            call xheev('V','L',npwc,ac_epsm1cqwz2(:,:,iiw),epsm1_ev)
 
            ! Eliminate the spurious positive eigenvalues that may occur in harsh conditions
-           neig(iiw) = MIN(COUNT(epsm1_ev(:)<-1.0e-10_dp),neigmax)
+           neig(iiw) = MIN(COUNT(epsm1_ev(:)<-1.0e-10_dp), neigmax)
 
            do ilwrk=1,neig(iiw)
              ac_epsm1cqwz2(:,ilwrk,iiw) = ac_epsm1cqwz2(:,ilwrk,iiw) * SQRT( -epsm1_ev(ilwrk) )
            end do
          end do
-         if ( Dtset%gwpara == 2 ) then
+
+         if (Dtset%gwpara == 2) then
+           call wrtout(std_out, "AC xmpi_sum begin")
            call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
            call xmpi_sum(neig, Wfd%comm, ierr)
+           call wrtout(std_out, "AC xmpi_sum end")
          endif
-         call timab(444,2,tsec) ! ac_lrk_diag
 
+         call timab(444,2,tsec) ! ac_lrk_diag
        end if
 
        if (mod10==SIG_QPGW_CD) then
-         ! For model GW we need transpose(conjg(epsm1_qbz)) ===
+         ! For model GW we need transpose(conjg(epsm1_qbz))
          do io=1,Er%nomega
           epsm1_tmp(:,:) = GWPC_CONJG(epsm1_qbz(:,:,io))
           epsm1_trcc_qbz(:,:,io) = TRANSPOSE(epsm1_tmp)
          end do
        end if
-     end if !gwcalctyp
+     end if ! gwcalctyp
 
      ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
@@ -1950,7 +1950,6 @@ subroutine calc_sig_ppm_comp(npwc,nomega,rhotwgp,botsq,otq,omegame0i_io,zcut,the
  character(len=500) :: msg
 !arrays
  complex(gwpc),allocatable :: ket_comp(:)
-
 !*************************************************************************
 
  if (ppmodel/=1.and.ppmodel/=2) then

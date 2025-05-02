@@ -53,6 +53,7 @@ module m_sigx
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
+ use m_pstat,         only : pstat_proc
 
  implicit none
 
@@ -62,6 +63,8 @@ module m_sigx
  public :: calc_sigx_me
  public :: sigx_symmetrize   ! Symmetrize Sig_x matrix elements
 !!***
+
+ integer,parameter :: LOG_MODK = 5
 
 contains
 !!***
@@ -336,6 +339,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
    ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
  end if
 
+ call pstat_proc%print(_PSTAT_ARGS_)
+
  do spin=1,nsppol
    if (ALL(proc_distrb(:,:,spin) /= wfd%my_rank)) CYCLE ! Spin parallelism.
 
@@ -400,8 +405,10 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
        end do
      end if
 
-     write(msg,'(2(a,i4),a,i3)')' calc_sigx_me: ik_bz ',ik_bz,'/',Kmesh%nbz,' done by mpi-rank: ',wfd%my_rank
-     call wrtout(std_out, msg)
+     if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
+       write(msg,'(2(a,i4),a,i3)')' calc_sigx_me: ik_bz ',ik_bz,'/',Kmesh%nbz,' done by mpi-rank: ',wfd%my_rank
+       call wrtout(std_out, msg)
+     end if
 
      ! Find the corresponding irreducible q-point.
      ! NB: non-zero umklapp G_o is not allowed. There's a check in setup_sigma
