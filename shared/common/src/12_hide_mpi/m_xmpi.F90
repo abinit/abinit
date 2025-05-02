@@ -5329,7 +5329,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
 !Local variables-------------------
  integer :: disp_unit
-#elif defined HAVE_MPI3
+#ifdef HAVE_MPI3
  integer :: ierr
  integer(kind=XMPI_ADDRESS_KIND) :: my_size
 #endif
@@ -5350,7 +5350,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
  ! See https://github.com/pmodels/mpich/issues/2659
 
-#if defined HAVE_MPI3
+#ifdef HAVE_MPI3
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
                               !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
