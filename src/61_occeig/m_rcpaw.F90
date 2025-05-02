@@ -398,7 +398,9 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  
  if(.not.rcpaw%all_atoms_relaxed) then
    ! Initializations
-   if(cplex.ne.1) ABI_ERROR('cplex not 1')
+   if(cplex.ne.1) then
+     ABI_ERROR('cplex not 1')
+   endif
    paral_atom=(present(comm_atom).and.(my_natom/=dtset%natom))
    nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
    my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom

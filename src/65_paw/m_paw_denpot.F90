@@ -2466,7 +2466,9 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,dtset%natom,my_natom_ref=my_natom)
 
- if(cplex.ne.1) ABI_ERROR('RCPAW: cplex not 1')
+ if(cplex.ne.1) then
+   ABI_ERROR('RCPAW: cplex not 1')
+ endif
  opt_compch=0;if (option/=1) opt_compch=1
  
  extfpmd_rho=zero

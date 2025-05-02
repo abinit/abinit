@@ -25,7 +25,7 @@ module m_newrho
  use defs_wvltypes
  use m_errors
  use m_abicore
- use m_ab7_mixing
+ use m_abi_mixing
  use m_abi2big
  use m_dtset
 
@@ -136,12 +136,12 @@ contains
 !! SIDE EFFECTS
 !!  dtn_pc(3,natom)=preconditioned change of atomic position,
 !!                                          in reduced coordinates
-!!  mix<type(ab7_mixing_object)>=all data defining the mixing algorithm for the density
+!!  mix<type(abi_mixing_object)>=all data defining the mixing algorithm for the density
 !!  rhor(nfft,nspden)= at input, it is the "out" trial density that gave nresid=(rho_out-rho_in)
 !!                     at output, it is an updated "mixed" trial density
 !!  rhog(2,nfft)= Fourier transform of the new trial density
 !!  ===== if usekden==1 =====
-!!  [mix_mgga<type(ab7_mixing_object)>]=all data defining the mixing algorithm
+!!  [mix_mgga<type(abi_mixing_object)>]=all data defining the mixing algorithm
 !!     for the kinetic energy density
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
@@ -181,8 +181,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  integer,intent(inout) :: dbl_nnsclo
  real(dp),intent(in) :: etotal,gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
- type(ab7_mixing_object), intent(inout) :: mix
- type(ab7_mixing_object), intent(inout),optional :: mix_mgga
+ type(abi_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout),optional :: mix_mgga
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
@@ -274,8 +274,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      message='Several arrays are missing!'
      ABI_BUG(message)
    end if
-   if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
-&      mix_mgga%iscf==AB7_MIXING_EIG) then
+   if (mix_mgga%iscf==ABI_MIXING_CG_ENERGY.or.mix_mgga%iscf==ABI_MIXING_CG_ENERGY_2.or.&
+&      mix_mgga%iscf==ABI_MIXING_EIG) then
      message='kinetic energy density cannot be mixed with the selected mixing algorithm!'
      ABI_ERROR(message)
    end if
@@ -490,15 +490,15 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Initialise working arrays for the mixing object.
  if (moved_atm_inside == 1) then
-   call ab7_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
+   call abi_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
  end if
- call ab7_mixing_eval_allocate(mix, istep)
+ call abi_mixing_eval_allocate(mix, istep)
 
 !Copy current step arrays.
  if (moved_atm_inside == 1) then
-   call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc, arr_atm = grhf)
+   call abi_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc, arr_atm = grhf)
  else
-   call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc)
+   call abi_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc)
  end if
  if (errid /= AB7_NO_ERROR) then
    ABI_ERROR(message)
@@ -506,8 +506,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Same treatment for the kinetic energy density
  if (dtset%usekden==1) then
-   call ab7_mixing_eval_allocate(mix_mgga, istep)
-   call ab7_mixing_copy_current_step(mix_mgga, tauresid0, errid, message, arr_respc = taurespc)
+   call abi_mixing_eval_allocate(mix_mgga, istep)
+   call abi_mixing_copy_current_step(mix_mgga, tauresid0, errid, message, arr_respc = taurespc)
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(message)
    end if
@@ -588,7 +588,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (initialized == 0) reset = .true.
 
 !Electronic density mixing
- call ab7_mixing_eval(mix, rhomag, istep, nfftot, ucvol_local, &
+ call abi_mixing_eval(mix, rhomag, istep, nfftot, ucvol_local, &
 & mpicomm, mpi_summarize, errid, message, &
 & reset = reset, isecur = dtset%isecur,&
 & pawopt = dtset%pawoptmix, pawarr = npaw, &
@@ -603,7 +603,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  end if
 !Kinetic energy density mixing (if any)
  if (dtset%usekden==1) then
-   call ab7_mixing_eval(mix_mgga, taumag, istep, nfftot, ucvol_local, &
+   call abi_mixing_eval(mix_mgga, taumag, istep, nfftot, ucvol_local, &
 &   mpicomm, mpi_summarize, errid, message, reset = reset)
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(message)
@@ -720,8 +720,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  ABI_FREE(npaw)
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
- call ab7_mixing_eval_deallocate(mix)
- if (dtset%usekden==1) call ab7_mixing_eval_deallocate(mix_mgga)
+ call abi_mixing_eval_deallocate(mix)
+ if (dtset%usekden==1) call abi_mixing_eval_deallocate(mix_mgga)
 
 !Fourier transform the density
  if (ispmix==1.and.nfft==nfftmix) then
