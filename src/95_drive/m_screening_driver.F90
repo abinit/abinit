@@ -180,7 +180,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: nscf,nzlmopt,mband
  integer :: optcut,optgr0,optgr1,optgr2,option,approx_type,option_test,optgrad
  integer :: optrad,optrhoij,psp_gencond,my_rank, ig
- integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat, ncerr
+ integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat, ncerr, gap_err
  real(dp) :: compch_fft,compch_sph,domegareal,e0,ecore,ecut_eff,ecutdg_eff
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
  real(dp) :: alpha,rhoav,factor,ec_gm,el_temp
@@ -207,7 +207,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(wvl_data) :: wvl_dummy
  character(len=nctk_slen) :: wing_shape
 !arrays
- integer :: ibocc(Dtset%nsppol),ngfft_gw(18),ngfftc(18),ngfftf(18)
+ integer :: ibocc(Dtset%nsppol),ngfft_gw(18),ngfftc(18),ngfftf(18), units(2)
  integer,allocatable :: irottb(:,:),ktabr(:,:),ktabrf(:,:),l_size_atm(:)
  integer,allocatable :: ks_vbik(:,:),ks_occ_idx(:,:),qp_vbik(:,:),nband(:,:)
  integer,allocatable :: nq_spl(:),nlmn_atm(:),gw_gfft(:,:)
@@ -236,30 +236,27 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(plowannier_type) :: wanbz,wanibz,wanibz_in
 
- integer :: gap_err
  real(dp) :: te_min, te_max
  type(gaps_t) :: gaps
  real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
  real(dp),allocatable :: t2w_cos_wgs(:,:), w2t_cos_wgs(:,:), t2w_sin_wgs(:,:)
  real(dp) :: ft_max_error(3), cosft_duality_error
-
 !************************************************************************
-
- DBG_ENTER("COLL")
 
  call timab(301,1,tsec) ! overall time
  call timab(302,1,tsec) ! screening(init
+ units = [std_out, ab_out]
 
  write(msg,'(6a)')&
  ' SCREENING: Calculation of the susceptibility and dielectric matrices ',ch10,ch10,&
  ' Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.',ch10,&
  ' Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.'
- call wrtout([ab_out, std_out], msg)
+ call wrtout(units, msg)
 
  if(dtset%ucrpa>0) then
    write(msg,'(6a)')ch10,&
     ' cRPA Calculation: The calculation of the polarisability is constrained (ucrpa/=0)',ch10
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
  end if
 #if defined HAVE_GW_DPC
  if (gwpc/=8) then
@@ -273,7 +270,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 #else
  write(msg,'(a,i2,a)')'.Using single precision arithmetic ; gwpc = ',gwpc,ch10
 #endif
- call wrtout([ab_out, std_out], msg)
+ call wrtout(units, msg)
 
  ! === Initialize MPI variables, and parallelization level ===
  ! gwpara: 0--> sequential run, 1--> parallelism over k-points, 2--> parallelism over bands.
@@ -761,13 +758,13 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ' screening : performing a first self-consistency',ch10,&
    ' update of the energies in W by a scissor operator',ch10,&
    ' applying a scissor operator of [eV] : ',Ep%mbpt_sciss*Ha_eV,ch10
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
    call qp_ebands%apply_scissors(Ep%mbpt_sciss)
  else if (update_energies) then
    write(msg,'(4a)')&
     ' screening : performing a first self-consistency',ch10,&
     ' update of the energies in W by a previous GW calculation via GW file: ',TRIM(gw_fname)
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
    ABI_MALLOC(igwene,(qp_ebands%mband, qp_ebands%nkpt, qp_ebands%nsppol))
    call rdgw(qp_ebands,gw_fname,igwene,extrapolate=.FALSE.)
    !call rdgw(qp_ebands,gw_fname,igwene,extrapolate=.TRUE.)
@@ -1076,10 +1073,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Report frequency mesh for chi0.
  write(msg,'(2a)')ch10,' calculating chi0 at frequencies [eV] :'
- call wrtout([ab_out, std_out], msg)
+ call wrtout(units, msg)
  do iomega=1,Ep%nomega
    write(msg,'(i3,2es16.6)')iomega,Ep%omega(iomega)*Ha_eV
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
  end do
 
  ! Allocate chi0, wings and array for chi0_sumrule check.
@@ -1130,7 +1127,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    bar=REPEAT('-',80)
    write(msg,'(4a,1x,a,i2,a,f9.6,2(",",f9.6),3a)')ch10,ch10,bar,ch10,&
      ' q-point number ',label,'        q = (',(Qmesh%ibz(ii,iqibz),ii=1,3),') [r.l.u.]',ch10,bar
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
    is_qeq0 = 0; if (normv(Qmesh%ibz(:,iqibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
 
    call pstat_proc%print(_PSTAT_ARGS_)
@@ -1205,7 +1202,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    do iomega=1,MIN(Ep%nomega, NOMEGA_PRINTED)
      write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
-     call wrtout([ab_out, std_out], msg)
+     call wrtout(units, msg)
      write(msg,'(1x,a,i3,a,i4,a)')' chi0(q =',iqibz, ', omega =',iomega,', G,G'')'
      if (Ep%nqcalc /= Ep%nqibz) write(msg,'(a,i3,a,i4,a)')'  chi0(q=',iqcalc,', omega=',iomega,', G,G'')'
      call wrtout(std_out, msg)
@@ -1221,7 +1218,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    if (Ep%nomega > NOMEGA_PRINTED) then
      write(msg,'(a,i3,a)')' No. of calculated frequencies > ',NOMEGA_PRINTED,', stop printing '
-     call wrtout([ab_out, std_out], msg)
+     call wrtout(units, msg)
    end if
 
    ! Write chi0 to _SUSC file
@@ -1341,7 +1338,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    select case (dtset%gwgamma)
    case (0)
      approx_type=0; option_test=0; dim_kxcg=0
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
+     ABI_MALLOC(kxcg, (nfftf_tot, dim_kxcg))
 
    case (1, 2)
      ! ALDA TDDFT kernel vertex
@@ -1363,10 +1360,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      if (Dtset%gwgamma==3) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
      if (Dtset%gwgamma==4) option_test=0 ! TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(fxc_ADA,(Ep%npwe,Ep%npwe,Ep%nqibz))
-!    Use userrd to set kappa
+     ! Use userrd to set kappa
      if (Dtset%userrd==zero) Dtset%userrd = 2.1_dp
-!    Set correct value of kappa (should be scaled with alpha*r_s where)
-!    r_s is Wigner-Seitz radius and alpha=(4/(9*Pi))^(1/3)
+     ! Set correct value of kappa (should be scaled with alpha*r_s where)
+     ! r_s is Wigner-Seitz radius and alpha=(4/(9*Pi))^(1/3)
      rhoav = (omegaplasma*omegaplasma)/four_pi
      r_s = (three/(four_pi*rhoav))**third
      alpha = (four*ninth*piinv)**third
@@ -1379,7 +1376,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
    case (-3, -4, -5, -6, -7, -8)
-   ! Bootstrap kernel and variants
+     ! Bootstrap kernel and variants
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      if (Dtset%gwgamma>-5) then
        ABI_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
@@ -1398,7 +1395,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
    case (-11)
-   ! LR+ALDA hybrid vertex kernel
+     ! LR+ALDA hybrid vertex kernel
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      ikxc=7; dim_kxcg=1
      ABI_WARNING('EXPERIMENTAL: LR+ALDA hybrid kernel is being added to screening')
@@ -1440,8 +1437,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    if (my_rank == master .and. is_qeq0==1) then
      call spectra%repr(msg)
-     call wrtout([ab_out, std_out], msg)
-
+     call wrtout(units, msg)
      if (Ep%nomegaer > 2) then
        call spectra%write(W_EELF  ,Dtfil%fnameabo_eelf)
        call spectra%write(W_EM_LF ,Dtfil%fnameabo_em1_lf)
@@ -1604,8 +1600,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  call timab(301,2,tsec)
 
- DBG_EXIT("COLL")
-
 end subroutine screening
 !!***
 
@@ -1694,8 +1688,6 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
 
 ! *************************************************************************
-
- DBG_ENTER('COLL')
 
  units = [std_out, ab_out]
 
@@ -1969,7 +1961,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
     ' The inverse dielectric matrix will be calculated on zero frequency only',ch10,&
     ' please note that the calculated epsilon^-1 cannot be used ',ch10,&
     ' to calculate QP corrections using plasmonpole model 1',ch10
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
  end if
 
  ! Max number of omega along the imaginary axis
@@ -2093,7 +2085,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
     ' Dielectric matrix will be calculated only for some ',ch10,&
     ' selected q points provided by the user through the input variables ',ch10,&
     ' nqptdm and qptdm'
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
    ltest= Ep%nqcalc <= Qmesh%nibz
    ABI_CHECK(ltest, 'nqptdm should not exceed the number of q points in the IBZ')
    Ep%qcalc(:,:)=Dtset%qptdm(:,1:Ep%nqcalc)
@@ -2218,8 +2210,6 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  if (Ep%gwcomp==1 .and. Ep%spmeth>0) then
    ABI_ERROR("Hilbert transform and extrapolar method are not compatible")
  end if
-
- DBG_EXIT('COLL')
 
 end subroutine setup_screening
 !!***
@@ -2387,41 +2377,31 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
 !scalars
  integer,intent(in)                    :: iqibz,npvel
  real(dp),intent(in)                   :: pvelmax(3)
-
  type(em1params_t),intent(in) :: Ep
  type(gsphere_t),intent(in)            :: Gsph_epsG0
  type(kmesh_t),intent(in)              :: Qmesh
  type(vcoul_t),intent(in)              :: Vcp
  type(crystal_t),intent(in)            :: Cryst
  type(Datafiles_type),intent(in)       :: Dtfil
-
  complex(gwpc),intent(in)              :: epsm1(Ep%npwe,Ep%npwe,Ep%nomega)
-
  real(dp),intent(inout)                :: rspower(npvel)
 
 !Local variables ------------------------------
- integer :: ipvel,ig
- integer :: iq_bz,iq_ibz,isym_q,itim_q
- integer :: iomega,iomegap,nomega_re
- integer :: unt_rsp
+ integer :: ipvel,ig, iq_bz,iq_ibz,isym_q,itim_q
+ integer :: iomega,iomegap,nomega_re,unt_rsp, units(2)
  integer,allocatable :: iomega_re(:)
 
  real(dp),parameter :: zp=1.0_dp              ! Hard-coded charge of the impinging particle
  real(dp) :: omega_p
- real(dp) :: im_epsm1_int(1)
- real(dp) :: qbz(3),qpgcart(3),qpg_red(3)
- real(dp) :: pvel(3,npvel),pvel_norm(npvel)
- real(dp) :: ypp_i(Ep%nomega)
- real(dp) :: vcoul(Ep%npwe)
- real(dp),allocatable :: im_epsm1_diag_qbz(:,:),tmp_data(:)
- real(dp),allocatable :: omega_re(:)
-
+ real(dp) :: im_epsm1_int(1), qbz(3),qpgcart(3),qpg_red(3)
+ real(dp) :: pvel(3,npvel),pvel_norm(npvel),ypp_i(Ep%nomega),vcoul(Ep%npwe)
+ real(dp),allocatable :: im_epsm1_diag_qbz(:,:),tmp_data(:),omega_re(:)
  character(len=500)     :: msg
  character(len=fnlen+4) :: fname
-
 !************************************************************************
 
- !
+ units = [std_out, ab_out]
+
  ! First set up the velocities array from the input variables npvel and pvelmax(3)
  ! Remember pvelmax is in Cartesian coordinates and so is pvel
  do ipvel=1,npvel
@@ -2450,7 +2430,6 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
    endif
  enddo
 
- !
  ! Loop over all the q-points in the full Brillouin zone and select only the
  ! ones that corresponds to the correct q-point in the irreducible wedge we are
  ! currently treating (index iqibz)
@@ -2471,7 +2450,6 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
      vcoul(Gsph_epsG0%rottb(ig,itim_q,isym_q))=Vcp%vc_sqrt(ig,iqibz)**2
    enddo
 
-   !
    ! Sum over G vectors
    do ig=1,Ep%npwe
      !
@@ -2481,8 +2459,8 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
        qpg_red(:) = qbz(:) + Gsph_epsG0%gvec(:,ig)
        ! Transform q + G from reduced to cartesian with the symmetry operation
        qpgcart(:) = two_pi * Cryst%gprimd(:,1) * qpg_red(1) &
-&                 + two_pi * Cryst%gprimd(:,2) * qpg_red(2) &
-&                 + two_pi * Cryst%gprimd(:,3) * qpg_red(3)
+                  + two_pi * Cryst%gprimd(:,2) * qpg_red(2) &
+                  + two_pi * Cryst%gprimd(:,3) * qpg_red(3)
 
        ! omega_p = ( q + G ) . v
        omega_p =  DOT_PRODUCT( qpgcart(:) , pvel(:,ipvel) )
@@ -2491,7 +2469,7 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
        ! range of epsm1 and thus that the interpolation will go fine
        if ( ABS(omega_p) > omega_re(nomega_re) ) then
          write(msg,'(a,e16.4,2a,e16.4)') ' freqremax is currently ',omega_re(nomega_re),ch10,&
-&                                        ' increase it to at least ',omega_p
+                                        ' increase it to at least ',omega_p
          ABI_WARNING(msg)
        endif
 
@@ -2501,13 +2479,10 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
        call spline( omega_re, tmp_data, nomega_re, 1.0e+32_dp, 1.0e+32_dp, ypp_i)
        call splint( nomega_re, omega_re, tmp_data, ypp_i, 1, (/ ABS(omega_p) /),  im_epsm1_int )
 
-       !
        ! Apply the odd parity of Im epsm1 in  omega to recover the causal response function
        if (omega_p<zero) im_epsm1_int(1)=-im_epsm1_int(1)
 
-       !
        ! Calculate 4 * pi / |q+G|**2 * omega_p * Im{ epsm1_GG(q,omega_p) }
-       !
        im_epsm1_int(1) = omega_p * vcoul(ig) * im_epsm1_int(1)
 
        ! Accumulate the final result without the prefactor
@@ -2529,17 +2504,17 @@ subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cry
    rspower(:) = - zp**2 / ( Cryst%ucvol * Qmesh%nbz * pvel_norm(:) ) * rspower(:)
 
    write(msg,'(2a)')         ch10,' ==== Random stopping power along Cartesian direction  === '
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,3(f12.4,2x),a)') ' ====  ',pvelmax(:),'===='
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a)')               '#  |v| (a.u.) , RSP (a.u.) '
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
    do ipvel=1,npvel
      write(msg,'(f16.8,4x,f16.8)') pvel_norm(ipvel),rspower(ipvel)
-     call wrtout([ab_out, std_out], msg)
+     call wrtout(units, msg)
    enddo
    write(msg,'(2a)')              ' ========================================================= ',ch10
-   call wrtout([ab_out, std_out], msg)
+   call wrtout(units, msg)
 
    fname=TRIM(Dtfil%filnam_ds(4))//'_RSP'
    if (open_file(fname,msg,newunit=unt_rsp,status='unknown',form='formatted') /= 0) then
@@ -2606,19 +2581,17 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
 !Local variables-------------------------------
 !scalars
- integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr
- real(dp) :: ecorr,ecorr_gm
- real(dp) :: lambda
+ integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr, units(2)
+ real(dp) :: ecorr,ecorr_gm,lambda
  logical :: q_is_gamma
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: z(:),zl(:),zlw(:),zw(:)
  complex(gwpc),allocatable :: chi0_diag(:),chitmp(:,:),chi0_diag_gm(:),chitmp_gm(:,:)
  real(gwpc),allocatable :: eig(:)
-
 ! *************************************************************************
 
- DBG_ENTER("COLL")
+ units = [std_out, ab_out]
 
 ! initialize MPI data
  master=0
@@ -2650,7 +2623,7 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
  do io=2,Ep%nomega
    !if (q_is_gamma) then
-   !  call wrtout([std_out, ab_out], "RPA: Ignoring q==0"); cycle
+   !  call wrtout(units, "RPA: Ignoring q==0"); cycle
    !end if
 
    if(gwrpacorr==1) then ! exact integration over the coupling constant
@@ -2757,21 +2730,21 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
      end if
      write(unt,'(a,(2x,f14.8))') '#RPA',ecorr
      write(msg,'(2a,(2x,f14.8))') ch10,' RPA energy [Ha] :',ecorr
-     call wrtout([ab_out, std_out], msg)
+     call wrtout(units, msg)
      if(gwrpacorr>1) then
        do ilambda=1,gwrpacorr
          write(unt,'(i6,2x,f10.6,2x,e13.6)') ilambda,zl(ilambda),ec_rpa(ilambda)
          write(msg,'(i6,2x,f10.6,2x,e13.6)') ilambda,zl(ilambda),ec_rpa(ilambda)
-         call wrtout([ab_out, std_out], msg)
+         call wrtout(units, msg)
        end do
      end if
      if(gwgmcorr==1) then ! Only exact integration over the coupling constant
        write(unt,'(a,(2x,f14.8))') '#GM',ecorr_gm
        write(msg,'(2a,(2x,f14.8))') ch10,' Galitskii-Migdal energy [Ha] :',ecorr_gm
-       call wrtout([ab_out, std_out], msg)
+       call wrtout(units, msg)
        write(unt,'(a1)') ' '
        write(msg,'(a1)') ' '
-       call wrtout([ab_out, std_out], msg)
+       call wrtout(units, msg)
      end if
      close(unt)
    end if
@@ -2788,8 +2761,6 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  ABI_FREE(zlw)
  ABI_FREE(z)
  ABI_FREE(zw)
-
- DBG_EXIT("COLL")
 
 end subroutine calc_rpa_functional
 !!***
