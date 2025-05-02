@@ -91,6 +91,7 @@ module m_rcpaw
    type(atomorb_type),allocatable :: atm(:)
    type(atompaw_type),allocatable :: atp(:)
    type(valdens_type),allocatable :: val(:)
+   logical, allocatable :: eijkl_is_sym(:)
    integer :: nfrtnc
    logical :: frocc
  end type rcpaw_type
@@ -151,6 +152,7 @@ subroutine rcpaw_destroy(rcpaw)
    enddo
    ABI_FREE(rcpaw%val)
  endif
+ ABI_SFREE(rcpaw%eijkl_is_sym)
  rcpaw=>null()
 
 end subroutine rcpaw_destroy
@@ -240,6 +242,9 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,dtset%natom,my_natom_ref=my_natom)
+
+ ABI_MALLOC(rcpaw%eijkl_is_sym,(dtset%ntypat))
+ rcpaw%eijkl_is_sym(:)=.true.
 
  ! Initilizations
  rcpaw%istep=0

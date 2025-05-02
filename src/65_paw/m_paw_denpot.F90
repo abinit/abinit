@@ -196,7 +196,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
  integer :: my_comm_atom,ndij,nkxc1,nk3xc1,nsppol,opt_compch,pawu_algo,pawu_dblec
  integer :: qphase,usecore,usekden,usetcore,usepawu,usexcnhat,usenhat,usefock
  logical :: keep_vhartree,my_atmtab_allocated,need_kxc,need_k3xc,need_vxctau
- logical :: non_magnetic_xc,paral_atom,temp_vxc,rcpaw_has_valdens
+ logical :: non_magnetic_xc,paral_atom,temp_vxc,eijkl_is_sym,rcpaw_has_valdens
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,ssxc,eexcdc,eexdctemp
  real(dp) :: eexc_val,ssxc_val,eexcdc_val,eexex,eexexdc,eextemp,ssxtemp,eh2
  real(dp) :: edftumdc,edftumdcdc,edftufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
@@ -782,7 +782,14 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 
 !  Hartree Dij computation
    if (ipositron/=1) then
-     call pawdijhartree(paw_ij(iatom)%dijhartree,cplex,nspden,pawrhoij(iatom),pawtab(itypat))
+     eijkl_is_sym=.true.
+     if(present(rcpaw)) then
+       if(associated(rcpaw)) then
+         eijkl_is_sym=rcpaw%eijkl_is_sym(itypat)
+       endif
+     endif
+     call pawdijhartree(paw_ij(iatom)%dijhartree,cplex,nspden,pawrhoij(iatom),pawtab(itypat),&
+&     is_sym=eijkl_is_sym)
    else
      paw_ij(iatom)%dijhartree(:)=zero
    end if
@@ -2522,6 +2529,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
  if(rcpaw%istep<=rcpaw%nfrpaw+1) then
    call pawinit(zero,0,zero,zero,dtset%pawlcutd,0,0,0,0,0,pawang_,pawrad,0,pawtab,0,0,0,rcpaw_update=.true.)
  endif
+ rcpaw%eijkl_is_sym=.false.
  call rcpaw_core_energies(rcpaw,ntypat)
 
 end subroutine paw_relax_core

@@ -361,7 +361,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  type(energies_type) :: energies
  type(abi_mixing_object) :: mix,mix_mgga
  logical,parameter :: VERBOSE=.FALSE.
- logical :: dummy_nhatgr
+ logical :: dummy_nhatgr,eijkl_is_sym
  logical :: finite_efield_flag=.false.
  logical :: non_magnetic_xc=.false.
  logical :: recompute_cprj=.false.,reset_mixing=.false.
@@ -731,6 +731,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call xg_nonlop_init_cplex_alldij(xg_nonlop,paw_ij)
    end if
 
+   eijkl_is_sym=.true.
    if (dtset%use_rcpaw==1) then
      ABI_WARNING("Untested Mode RCPAW")
      if(.not.associated(rcpaw)) then
@@ -1047,6 +1048,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
    if(associated(rcpaw)) then
      rcpaw%istep=istep
+     if(istep>1) eijkl_is_sym=.false.
    endif
 
 
@@ -1542,7 +1544,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     electronpositron_calctype=ipositron,&
 &     electronpositron_pawrhoij=pawrhoij_ep,&
 &     electronpositron_lmselect=lmselect_ep,&
-&     nucdipmom=dtset%nucdipmom)
+&     nucdipmom=dtset%nucdipmom,eijkl_is_sym=eijkl_is_sym)
 
 !    Symetrize Dij
      call symdij(gprimd,indsym,ipert,my_natom,dtset%natom,dtset%nsym,&
