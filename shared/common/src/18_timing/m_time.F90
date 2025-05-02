@@ -25,9 +25,7 @@ module m_time
  use m_abicore
  use m_errors
  use, intrinsic :: iso_c_binding
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_clib
 

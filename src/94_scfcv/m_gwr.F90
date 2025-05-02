@@ -2266,7 +2266,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    call wfk%open_read(wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
  end if
 
- ! TODO This to be able to maximize the size of cg_work
+ ! TODO This to maximize the size of cg_work and decrease number of IO operations.
  !min_mem_mb = pstat_proc%pstat_min_mem_mb_per_proc(gwr%comm)
 
  do spin=1,gwr%nsppol
@@ -2290,7 +2290,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
      ! TODO: Optimize this part
      ! Find band_step that gives good compromise between memory and efficiency.
-     !band_step = memb_limited_step(1, nbsum, 2*npwsp_disk, xmpi_bsize_dp, min_mem_mb)
+     !band_step = memb_limited_step(1, nbsum, 2*npwsp_disk, xmpi_bsize_dp, min_mem_mb * 0.8_dp)
      band_step = 200
 
      do bstart=1, nbsum, band_step
@@ -4408,7 +4408,10 @@ subroutine gwr_build_tchi(gwr)
 
    use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc .and. gwr%kpt_comm%nproc > 1
    use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
+#ifndef _GMATTEO_WHISH_LIST
    use_shmem_for_k = .False.
+#endif
+   if (gwr%dtset%userie == 234) use_shmem_for_k = .False.
 
    if (use_shmem_for_k) then
      buf_count = 2 * (sc_nfftsp * max_ndat * 2)
@@ -5351,7 +5354,7 @@ subroutine gwr_build_wc(gwr)
    end associate
 
    if (print_time) then
-     write(msg,'(4x,2(a,i0),a)')"My iqi [", my_iqi, "/", gwr%my_nqibz, "]"
+     write(msg,'(4x,2(a,i0),a)')"My iq_ibz [", my_iqi, "/", gwr%my_nqibz, "]"
      call cwtime_report(msg, cpu_q, wall_q, gflops_q)
    end if
  end do ! my_iqi

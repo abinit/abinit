@@ -22,11 +22,9 @@
 module m_gwpt
 
  use, intrinsic :: iso_c_binding
-#ifdef HAVE_MPI2
- use mpi
-#endif
  use defs_basis
  use m_abicore
+ USE_MPI
  use m_xmpi
  use m_mpinfo
  use m_errors

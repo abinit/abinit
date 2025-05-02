@@ -741,7 +741,7 @@ subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
  my_rank = xmpi_comm_rank(comm)
 
  ! Read header from file.
- call wrtout(std_out,sjoin('init_Er_from_file- testing file: ',fname))
+ call wrtout(std_out, sjoin('init_Er_from_file- testing file: ', fname))
  call Er%hscr%from_file(fname, fform, comm)
 
  ! Master echoes the header.
@@ -753,8 +753,8 @@ subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
  Er%fform      =fform
  Er%Tordering=Er%Hscr%Tordering
 
-!TODO these quantitities should be checked and initiliazed in mkdump_Er
-!BEGIN HARCODED
+ !TODO these quantitities should be checked and initiliazed in mkdump_Er
+ !BEGIN HARCODED
  Er%nI       = 1
  Er%nJ       = 1
  Er%ikxc     = 0
@@ -796,9 +796,9 @@ subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
      end if
    end do
    if (unclassified > 0) then
-     write(msg,'(3a,i6)')&
+     write(msg,'(3a,i0)')&
        'Some complex frequencies are too small to qualify as real or imaginary.',ch10,&
-       'Number of unidentified frequencies = ', unclassified
+       'Number of unidentified frequencies: ', unclassified
      ABI_WARNING(msg)
    end if
  end if
@@ -864,9 +864,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: dim_wing,iqibz,is_qeq0,mqmem_,npwe_asked
- integer :: unt_dump,fform,rdwr,ierr
- integer :: my_rank,comm_self
+ integer :: dim_wing,iqibz,is_qeq0,mqmem_,npwe_asked,unt_dump,fform,rdwr,ierr,my_rank,comm_self
  real(dp) :: ucvol
  character(len=500) :: msg
  character(len=fnlen) :: ofname
@@ -874,13 +872,16 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
  type(hscr_t) :: Hscr_cp
  type(spectra_t) :: spectra
 !arrays
+ integer :: units(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  complex(gwpc),allocatable :: epsm1(:,:,:)
  complex(dpc),allocatable :: dummy_lwing(:,:,:),dummy_uwing(:,:,:),dummy_head(:,:,:)
 ! *********************************************************************
 
- ABI_CHECK(id_required==4,'Value of id_required not coded')
- ABI_CHECK(npwe==Er%npwe,"mismatch in npwe")
+ ABI_CHECK(id_required==4, 'Value of id_required not coded')
+ ABI_CHECK(npwe==Er%npwe, "mismatch in npwe")
+
+ units = [std_out, ab_out]
 
  my_rank = xmpi_comm_rank(comm); comm_self = xmpi_comm_self
  call metric(gmet,gprimd,-1,rmet,Vcp%rprimd,ucvol)
@@ -892,27 +893,29 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
  in_varname = ncname_from_id(er%hscr%id)
  out_varname = ncname_from_id(id_required)
 
- write(std_out,*)'Er%ID: ',Er%ID,', Er%Hscr%ID: ',Er%Hscr%ID
+ !write(std_out,*)'Er%ID: ',Er%ID,', Er%Hscr%ID: ',Er%Hscr%ID
 
  if (Er%ID==Er%Hscr%ID) then
    ! === The two-point function we are asking for is already stored on file ===
    ! * According to mqmem either read and store the entire matrix in memory or do nothing.
 
-   if (Er%mqmem>0) then
+   if (Er%mqmem > 0) then
      ! In-core solution.
      write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
      call wrtout(std_out,msg)
-     ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
+
+     ABI_MALLOC_OR_DIE(Er%epsm1, (npwe, npwe, Er%nomega, Er%nqibz), ierr)
 
      if (iomode == IO_MODE_MPI) then
        !call wrtout(std_out, "read_screening with MPI_IO")
        ABI_WARNING("SUSC files is buggy. Using Fortran IO")
-       call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
+       call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, IO_MODE_FORTRAN, comm)
      else
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
      end if
+
    else
-     ! Out-of-core solution ===
+     ! Out-of-core solution
      ABI_COMMENT("mqmem==0 => allocating a single q-slice of (W|chi0) (slower but less memory).")
      continue
    end if
@@ -925,9 +928,9 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
    ! * According to Er%mqmem either calculate e^-1 dumping the result to a file
    !   for a subsequent use or calculate e^-1 keeping everything in memory.
 
-   if (Er%mqmem==0) then
-     ! === Open file and write the header for the SCR file ===
-     ! * For the moment only master works.
+   if (Er%mqmem == 0) then
+     ! Open file and write the header for the SCR file ===
+     ! For the moment only master works.
 
      if (my_rank==master) then
        if (iomode == IO_MODE_ETSF) then
@@ -955,7 +958,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call hscr_io(hscr_cp,fform,rdwr,unt_dump,comm_self,master,iomode)
        call Hscr_cp%free()
 
-       ABI_MALLOC_OR_DIE(epsm1,(npwe,npwe,Er%nomega), ierr)
+       ABI_MALLOC_OR_DIE(epsm1, (npwe, npwe, Er%nomega), ierr)
 
        do iqibz=1,Er%nqibz
          is_qeq0=0
@@ -976,13 +979,13 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          if (approx_type<2 .or. approx_type>3) then
            ABI_WARNING('Entering out-of core RPA or Kxc branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
-&                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-&                    dummy_lwing,dummy_uwing,epsm1,spectra,comm_self)
+                                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
+                                  dummy_lwing,dummy_uwing,epsm1,spectra,comm_self)
          else
            ABI_WARNING('Entering out-of core fxc_ADA branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
-&                    approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-&                    dummy_lwing,dummy_uwing,epsm1,spectra,comm_self,fxc_ADA(:,:,iqibz))
+                                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
+                                  dummy_lwing,dummy_uwing,epsm1,spectra,comm_self,fxc_ADA(:,:,iqibz))
          end if
 
          ABI_FREE(dummy_head)
@@ -991,7 +994,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
          if (is_qeq0==1) then
            call spectra%repr(msg)
-           call wrtout([std_out, ab_out], msg)
+           call wrtout(units, msg)
          end if
          call spectra%free()
 
@@ -1019,7 +1022,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      mqmem_=Er%mqmem; npwe_asked=npwe
      call init_Er_from_file(Er,ofname,mqmem_,npwe_asked,comm)
 
-     !Now Er% has been reinitialized and ready-to-use.
+     ! Now Er% has been reinitialized and ready-to-use.
      Er%id = id_required
      call em1results_print(Er)
    else
@@ -1048,13 +1051,13 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        if (approx_type<2 .or. approx_type>3) then
          ABI_WARNING('Entering in-core RPA and Kxc branch')
          call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
-&                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-&                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm)
+                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
+                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm)
        else
          ABI_WARNING('Entering in-core fxc_ADA branch')
          call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
-&                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-&                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
+                  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
+                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
        end if
 
        ABI_FREE(dummy_lwing)
@@ -1063,7 +1066,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
        if (is_qeq0==1) then
          call spectra%repr(msg)
-         call wrtout([std_out, ab_out], msg)
+         call wrtout(units, msg)
        end if
 
        call spectra%free()
@@ -1892,7 +1895,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  ABI_FREE(tmp_nlf)
  ABI_FREE(tmp_eelf)
 
- call cwtime_report("make_epsm1_driver", cpu, wall, gflops)
+ call cwtime_report(" make_epsm1_driver", cpu, wall, gflops)
 
 end subroutine make_epsm1_driver
 !!***

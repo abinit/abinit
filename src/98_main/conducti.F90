@@ -34,9 +34,7 @@ program conducti
  use m_xmpi
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_conducti
 
  use m_io_tools,  only : open_file

@@ -27,9 +27,7 @@ MODULE m_mpinfo
  use defs_basis
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_sort
  use m_distribfft

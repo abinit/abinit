@@ -30,9 +30,8 @@ USE m_profiling_abi
 USE m_errors
 USE m_xmpi
 #endif
-#ifdef HAVE_MPI2
-USE mpi
-#endif
+
+USE_MPI
 
 IMPLICIT NONE
 

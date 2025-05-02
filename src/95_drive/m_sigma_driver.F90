@@ -380,8 +380,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! ===============================================
  ! ==== Initialize Sigp, Er and basic objects ====
  ! ===============================================
- ! * Sigp is completetly initialized here.
- ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in Er%mkdump
+ ! Sigp is completetly initialized here.
+ ! Er is only initialized with dimensions, (SCR|SUSC) file is read in Er%mkdump
  call timab(403,1,tsec) ! setup_sigma
 
  call setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
@@ -1681,10 +1681,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! TODO Er%nomega should be initialized so that only the frequencies really needed are stored in memory
  ! TODO The same piece of code is present in screening.
  if (sigma_needs_w(Sigp)) then
+
    select case (dtset%gwgamma)
    case (0)
      id_required=4; ikxc=0; approx_type=0; option_test=0; dim_kxcg=0
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
+     ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
    case (1, 2)
      ! ALDA TDDFT kernel vertex
@@ -1720,11 +1721,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      if (Dtset%usepaw==1) then
        ! Use PAW all-electron density
        call kxc_driver(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,ks_aepaw_rhor,&
-       Er%npwe,dim_kxcg,kxcg,Gsph_c%gvec,xmpi_comm_self,dbg_mode=dbg_mode)
+                        Er%npwe,dim_kxcg,kxcg,Gsph_c%gvec,xmpi_comm_self,dbg_mode=dbg_mode)
      else
        ! Norm-conserving
        call kxc_driver(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,ks_rhor,&
-       Er%npwe,dim_kxcg,kxcg,Gsph_c%gvec,xmpi_comm_self,dbg_mode=dbg_mode)
+                       Er%npwe,dim_kxcg,kxcg,Gsph_c%gvec,xmpi_comm_self,dbg_mode=dbg_mode)
      end if
 
    case (3, 4)
@@ -1756,7 +1757,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      id_required=4; ikxc=7; approx_type=2;
      if (Dtset%gwgamma==3) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
      if (Dtset%gwgamma==4) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(fxc_ADA,(Er%npwe,Er%npwe,Er%nqibz))
+     ABI_MALLOC(fxc_ADA, (Er%npwe, Er%npwe, Er%nqibz))
      ! Use userrd to set kappa
      if (Dtset%userrd==zero) Dtset%userrd = 2.1_dp
      ! Set correct value of kappa (should be scaled with alpha*r_s where)
@@ -1770,12 +1771,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      if (Dtset%usepaw==1) then
        ! Use PAW all-electron density
        call kxc_ADA(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,&
-       ks_aepaw_rhor,Er%npwe,Er%nqibz,Er%qibz,&
-       fxc_ADA,Gsph_c%gvec,xmpi_comm_self,kappa_init=Dtset%userrd,dbg_mode=dbg_mode)
+                    ks_aepaw_rhor,Er%npwe,Er%nqibz,Er%qibz,&
+                    fxc_ADA,Gsph_c%gvec,xmpi_comm_self,kappa_init=Dtset%userrd,dbg_mode=dbg_mode)
      else
        ! Norm conserving
        call kxc_ADA(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,&
-       ks_rhor,Er%npwe,Er%nqibz,Er%qibz,&
+                    ks_rhor,Er%npwe,Er%nqibz,Er%qibz,&
        fxc_ADA,Gsph_c%gvec,xmpi_comm_self,kappa_init=Dtset%userrd,dbg_mode=dbg_mode)
      end if
 
@@ -1863,8 +1864,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    my_plsmf = drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf = Dtset%ppmfrq
    Dtset%ppmfrq = my_plsmf
 
-   ! if(dtset%ucrpa==0) then
-   if (Dtset%gwgamma<3) then
+   !if(dtset%ucrpa==0) then
+   if (Dtset%gwgamma < 3) then
      call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm)
@@ -1873,7 +1874,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm,fxc_ADA)
    end if
-!   end if
+   !end if
    ABI_SFREE(kxcg)
    ABI_SFREE(fxc_ADA)
    ABI_SFREE(ks_aepaw_rhor)
@@ -1933,14 +1934,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      write(msg,'(a,f8.4)')' sigma: PAW AE density used for PPmodel integrates to: ',SUM(ks_aepaw_rhor(:,1))*Cryst%ucvol/nfftf
      call wrtout(std_out, msg)
 
-     if (Er%mqmem/=0) then
+     if (Er%mqmem /= 0) then
        ! Calculate ppmodel parameters for all q-points.
        call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_aepaw_rhor(:,1))
      end if
 
    else
      ! NC or PAW with PPmodel 1.
-     if (Er%mqmem/=0) then
+     if (Er%mqmem /= 0) then
        ! Calculate ppmodel parameters for all q-points
        call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
      end if
@@ -2331,12 +2332,12 @@ endif
    !   close(67)
    ! endif!DEBUG
    call calc_ucrpa(itypatcor,cryst,Kmesh,lcor,M1_q_m,Qmesh,Er%npwe,sigp%npwx,&
-&   Cryst%nsym,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,&
-&'Gsum',Cryst%ucvol,Wfd,Er%fname,dtset%plowan_compute,rhot1,wanbz)
+                   Cryst%nsym,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,&
+                   'Gsum',Cryst%ucvol,Wfd,Er%fname,dtset%plowan_compute,rhot1,wanbz)
 
-!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-!Deallocation of wan and rhot1
-!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   !Deallocation of wan and rhot1
+   !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    if (dtset%plowan_compute >=10) then
      do pwx=1,sigp%npwx
        do ibz=1,Qmesh%nibz
@@ -3627,18 +3628,18 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  mqmem=0; if (Dtset%gwmem/10==1) mqmem=1
 
  if (dtset%getscr /=0 .or. dtset%irdscr/=0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
-   fname=Dtfil%fnameabi_scr
- else if (Dtset%getsuscep/=0.or.Dtset%irdsuscep/=0) then
-   fname=Dtfil%fnameabi_sus
+   fname = Dtfil%fnameabi_scr
+ else if (Dtset%getsuscep/=0 .or. Dtset%irdsuscep/=0) then
+   fname = Dtfil%fnameabi_sus
  else
-   fname=Dtfil%fnameabi_scr
+   fname = Dtfil%fnameabi_scr
    !FIXME this has to be cleaned, in tgw2_3 Dtset%get* and Dtset%ird* are  not defined
    !ABI_ERROR("getsuscep or irdsuscep are not defined")
  end if
  !
  ! === Setup of q-mesh in the whole BZ ===
- ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
- !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
+ ! Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
+ ! epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  !
  if (sigma_needs_w(Sigp)) then
    if (.not. file_exists(fname)) then
@@ -3646,7 +3647,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ABI_COMMENT(sjoin("File not found. Will try netcdf file:", fname))
    end if
 
-   call Er%init_from_file(fname,mqmem,Dtset%npweps,comm)
+   call Er%init_from_file(fname, mqmem, Dtset%npweps, comm)
 
    Sigp%npwc=Er%npwe
    if (Sigp%npwc>Sigp%npwx) then
@@ -3704,7 +3705,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 ! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
  call Gsph_Max%init(Cryst, Sigp%npwvec, gvec=gvec_kss)
-!BEGINDEBUG
+
+ !BEGIN DEBUG
  ! Make sure that the two G-spheres are equivalent.
  ierr=0
  if (sigma_needs_w(Sigp)) then
@@ -3726,7 +3728,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    end if
  end do
  ABI_CHECK(ierr==0,"Mismatch between Gsph_x and gvec_kss")
-!ENDDEBUG
+!END DEBUG
 
  ABI_FREE(gvec_kss)
  !
@@ -3756,7 +3758,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  if(usefock_ixc==1)then
    nvcoul_init=2
-   if(mod(Dtset%gwcalctyp,10)==5)then
+   if (mod(Dtset%gwcalctyp, 10) == 5)then
      write(msg,'(4a,i3,a,i3,4a,i5)')ch10,&
      ' The starting wavefunctions were obtained from self-consistent calculations in the planewave basis set',ch10,&
      ' with ixc = ',Dtset%ixc,' associated with usefock =',usefock_ixc,ch10,&

@@ -30,9 +30,7 @@ MODULE libtetrabz_common
   !
   use m_abicore
   use m_errors
-#if defined HAVE_MPI2
-  use mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_DOUBLE_COMPLEX, MPI_SUM, MPI_IN_PLACE
-#endif
+  USE_MPI
 
   IMPLICIT NONE
 
@@ -295,9 +293,6 @@ END SUBROUTINE libtetrabz_kgrid
 !
 SUBROUTINE libtetrabz_divideMPI(comm,nt,nt_front,nt_local)
   !
-#if defined HAVE_MPI2
-  USE mpi, ONLY : MPI_COMM_SIZE, MPI_COMM_RANK
-#endif
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: comm, nt

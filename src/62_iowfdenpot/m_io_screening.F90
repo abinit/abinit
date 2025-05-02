@@ -25,9 +25,7 @@ MODULE m_io_screening
  use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_mpiotk
  use m_nctk

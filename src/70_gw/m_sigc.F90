@@ -452,7 +452,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(rhotwgp, (npwc*nspinor))
  ABI_MALLOC(vc_sqrt_qbz, (npwc))
 
- if (Er%mqmem == 0) then ! Use out-of-core solution for epsilon.
+ if (Er%mqmem == 0) then
+   ! Use out-of-core solution for epsilon.
    ABI_COMMENT('Reading q-slices from file. Slower but less memory.')
  end if                                                                                !
 
@@ -475,18 +476,20 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if (mod10==SIG_GW_AC) then
    ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, Er%nomega_i))
-   call coeffs_gausslegint(zero,one,gl_knots,gl_wts,Er%nomega_i)
+   call coeffs_gausslegint(zero, one, gl_knots, gl_wts, Er%nomega_i)
 
    ierr = 0
-   do io=1,Er%nomega_i ! First frequencies are always real
+   do io=1,Er%nomega_i
+      ! First frequencies are always real
      if (ABS(AIMAG(one*Er%omega(Er%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
-      ierr = ierr + 1
-      if (Wfd%my_rank == Wfd%master) then
-        if (io == 1) write(std_out, "(a)")"omega_file, gauss_legendre_omega (ev)"
-        write(std_out,*)io, AIMAG(Er%omega(Er%nomega_r+io)) * Ha_eV, (one/gl_knots(io)-one) * Ha_eV
-      end if
+       ierr = ierr + 1
+       if (Wfd%my_rank == Wfd%master) then
+         if (io == 1) write(std_out, "(a)")"omega_file, gauss_legendre_omega (ev)"
+         write(std_out,*)io, AIMAG(Er%omega(Er%nomega_r+io)) * Ha_eV, (one/gl_knots(io)-one) * Ha_eV
+       end if
      end if
    end do
+
    if (ierr /= 0) then
      write(std_out, *)"Er%nomega_r:", Er%nomega_r, "Er%nomega_i:", Er%nomega_i
      write(msg,'(3a)')&
@@ -563,7 +566,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! Here we have a problem in case of CD since epsm1q might be huge
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
  if ( ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
-   if (.not.(mod10==SIG_GW_CD.and.Er%mqmem==0)) then
+   if (.not.(mod10==SIG_GW_CD .and. Er%mqmem==0)) then
      ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
    end if
  end if
@@ -658,7 +661,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end if
 
      if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
-       write(msg,'(3(a,i0),a,i0)')' Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by rank: ',Wfd%my_rank
+       write(msg,'(3(a,i0),a,i0)')' Sigma_c: ik_bz: ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by rank: ',Wfd%my_rank
        call wrtout(std_out, msg)
      end if
 
@@ -701,7 +704,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call pawpwij_init(Pwij_qg,npwc,q0,Gsph_c%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
      end if
 
-     if (Er%mqmem==0) then
+     if (Er%mqmem == 0) then
        ! Read q-slice of epsilon^{-1}|chi0 in Er%epsm1(:,:,:,1) (much slower but less memory).
        call Er%get_epsm1(Vcp,0,0,Dtset%iomode,xmpi_comm_self,iqibzA=iq_ibz)
        if (sigma_needs_ppm(Sigp)) then
@@ -741,11 +744,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
        if (mod10==SIG_GW_AC) then
 
-         call timab(444,1,tsec) ! ac_lrk_diag
+         call timab(444,1,tsec)
+         ! ac_lrk_diag
          ! Important to set to zero here for all procs since we're going to use a dirty reduction later
          ! The reduction 'xmpi_sum' does not induce a significant performance loss in the tested systems
          ac_epsm1cqwz2(:,:,:) = czero_gw
          neig(:) = 0
+
          do iiw=1,Er%nomega_i
            ! Use the available MPI tasks to parallelize over iw'
            if (Dtset%gwpara == 2 .and. MODULO(iiw-1,Wfd%nproc) /= Wfd%my_rank ) CYCLE
@@ -800,8 +805,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call timab(445,1,tsec) ! loop
      do ib=1,Sigp%nbnds
 
-       ! Parallelism over spin
-       ! This processor has this k-point but what about spin?
+       ! Parallelism over spin. This processor has this k-point but what about spin?
        if (proc_distrb(ib,ik_bz,spin) /= wfd%my_rank) CYCLE
 
        call wfd%get_ur(ib, ik_ibz, spin, ur_ibz)

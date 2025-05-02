@@ -31,10 +31,8 @@ module m_polynomial_coeff
  use m_errors
  use m_abicore
  use m_polynomial_term
+ USE_MPI
  use m_xmpi
-#ifdef HAVE_MPI2
- use mpi
-#endif
 
  use m_sort,      only : sort_dp
  use m_io_tools,  only : open_file, get_unit

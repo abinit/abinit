@@ -53,9 +53,7 @@ module m_wfk
  use m_abicore
  use m_errors
  use m_dtset
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_mpiotk
  use m_hdr

@@ -13,6 +13,18 @@
 #define _ABINIT_COMMON_H
 
 /*
+#define _GMATTEO_WHISH_LIST
+*/
+
+#if defined HAVE_MPI2
+#define USE_MPI use mpi
+#elif defined HAVE_MPI3
+#define USE_MPI use mpi_f08
+#else
+#define USE_MPI
+#endif
+
+/*
  * Language standards requires the existance of pre-defined macros
  * Microsoft Visual C++ does not define __STDC__,
  * Sun Workshop 4.2 supports C94 without setting __STDC_VERSION__ to the proper value

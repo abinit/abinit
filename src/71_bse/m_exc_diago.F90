@@ -24,10 +24,8 @@ MODULE m_exc_diago
  use m_bs_defs
  use m_abicore
  use m_errors
+ USE_MPI
  use m_xmpi
-#if defined HAVE_MPI2
- use mpi
-#endif
  use m_hdr
  use m_sort
  use m_slk

@@ -236,6 +236,7 @@ subroutine pstat_print(pstat, file, line)
  if (present(line)) f90line = line
  if (present(file)) f90name = basename(file)
 
+#ifndef FC_NVHP
  ydoc = yamldoc_open("PstatData")
 
  call ydoc%add_int("pid", pstat%pid)
@@ -248,8 +249,14 @@ subroutine pstat_print(pstat, file, line)
  call ydoc%add_real("vmstk_mb", pstat%vmstk_mb)
  if (len_trim(pstat%iomsg) > 0) call ydoc%add_string("iomsg", trim(pstat%iomsg))
 
-
  call ydoc%write_units_and_free(units)
+
+#else
+ ! Yet another wild NVHPC bug (only on eos_nvhpc_23.9_elpa)
+ write(std_out, "(a)")"--- !PstatData"
+ write(std_out, *)"vmrss_mb: ", pstat%vmrss_mb
+ write(std_out, "(a)")"..."
+#endif
 
 end subroutine pstat_print
 !!***
@@ -283,12 +290,13 @@ real(dp) function pstat_min_mem_mb_per_proc(pstat, comm) result(min_mem_mb)
  if (.not. all_ok) then
    ! Handle case in which pstat is not available or something went wrong when reading.
    min_mem_mb = mem_per_cpu_mb * half
+   return
  end if
 
  ! Compute min inside comm
  call xmpi_min(pstat%vmrss_mb, min_mem_mb, comm, ierr)
 
- min_mem_mb = (mem_per_cpu_mb - min_mem_mb) * (three / four) ! Don't be greedy!
+ min_mem_mb = (mem_per_cpu_mb - min_mem_mb)
 
  ! Fallback for too small values
  if (min_mem_mb <= tol1) min_mem_mb = mem_per_cpu_mb * half

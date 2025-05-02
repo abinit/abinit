@@ -25,9 +25,7 @@ module m_slk
  use m_xmpi
  use m_errors
  use m_abicore
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif

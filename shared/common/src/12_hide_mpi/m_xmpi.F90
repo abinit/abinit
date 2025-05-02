@@ -32,9 +32,7 @@ module m_xmpi
 #ifdef HAVE_FC_ISO_FORTRAN_2008
  use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
@@ -5333,6 +5331,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  integer :: disp_unit
 #ifdef HAVE_MPI
 #if 0
+!#ifdef _GMATTEO_WHISH_LIST
  integer :: ierr
  integer(kind=XMPI_ADDRESS_KIND) :: my_size
 #endif
@@ -5347,16 +5346,16 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  case (dp)
   disp_unit = xmpi_bsize_dp
  case default
-  call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
+  call xmpi_abort(msg="Invalid kind")
  end select
 
- ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08
- ! else the gcc with mpicc complains with
+ ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08 else gcc complains with
  ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
  ! See https://github.com/pmodels/mpich/issues/2659
 
 #ifdef HAVE_MPI
 #if 0
+!#ifdef _GMATTEO_WHISH_LIST
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
                               !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
@@ -5371,11 +5370,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 #else
-  ! this macro is being used befor m_errors is compiled, so work around it
-! ABI_UNUSED(count)
-! ABI_UNUSED(info)
-  if (.FALSE.) write(std_out,*) count
-  if (.FALSE.) write(std_out,*) info
+  if (.FALSE.) write(std_out,*) count, info
 #endif
 #endif
 
