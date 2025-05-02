@@ -1353,8 +1353,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call timab(431,2,tsec)
  call timab(424,2,tsec) ! calc_sigc_me
 
- call cwtime(cpu_time,wall_time,gflops,"stop")
- write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+ call cwtime_report("calc_sigc_me", cpu_time, wall_time, gflops)
 
  DBG_EXIT("COLL")
 
@@ -1470,9 +1469,7 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
    enough=enough+1
    if (enough<=50) then
      ABI_WARNING(sjoin('Number of G1-G2 pairs outside the G-sphere for Wfns: ',itoa(outofbox)))
-     if (enough==50) then
-       call wrtout(std_out,' ========== Stop writing Warnings ==========')
-     end if
+     if (enough==50) call wrtout(std_out,' ========== Stop writing Warnings ==========')
    end if
  end if
 

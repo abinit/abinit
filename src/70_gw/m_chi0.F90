@@ -1055,8 +1055,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    ABI_FREE(coeffW_BZ)
  endif
 
- call cwtime(cpu_time, wall_time, gflops, "stop")
- write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+ call cwtime_report("cchi0q0", cpu_time, wall_time, gflops)
 
  DBG_EXIT("COLL")
 
@@ -1920,8 +1919,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  endif
 
  call timab(331,2,tsec)
- call cwtime(cpu_time,wall_time,gflops,"stop")
- write(std_out,'(2(a,f9.1))')" cpu_time = ",cpu_time,", wall_time = ",wall_time
+ call cwtime_report("cchi0", cpu_time, wall_time, gflops)
 
  DBG_EXIT("COLL")
 
