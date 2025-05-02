@@ -148,13 +148,35 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
     # Try to compile a MPI-2 Fortran program
     AC_MSG_CHECKING([which level of MPI is supported by the Fortran compiler])
     AC_LANG_PUSH([Fortran])
+
+    # AC_MSG_CHECKING([whether MPI-3 Fortran is supported])
+
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
-              use mpi
-              integer :: ierr
-              call mpi_init(ierr)
-              call mpi_finalize(ierr)
-      ]])], [abi_mpi_fc_level="2"], [abi_mpi_fc_level="1"])
+          use mpi_f08
+          implicit none
+          integer :: ierr, win, rank
+          integer, parameter :: size = 1
+          real :: buf(size)
+          call MPI_Init(ierr)
+          call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
+          call MPI_Win_create(buf, size, 4, MPI_INFO_NULL, MPI_COMM_WORLD, win, ierr)
+          call MPI_Win_free(win, ierr)
+          call MPI_Finalize(ierr)
+      ]])], [abi_mpi_fc_level="3"], [abi_mpi_fc_level="not_3"])
+
+    if test "${abi_mpi_fc_level}" = "not_3"; then
+
+      # Try to compile a MPI-2 Fortran program
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+        [[
+                use mpi
+                integer :: ierr
+                call mpi_init(ierr)
+                call mpi_finalize(ierr)
+        ]])], [abi_mpi_fc_level="2"], [abi_mpi_fc_level="1"])
+    fi
+
     AC_LANG_POP([Fortran])
     AC_MSG_RESULT([${abi_mpi_fc_level}])
 
