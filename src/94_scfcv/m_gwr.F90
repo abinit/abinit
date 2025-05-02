@@ -2267,7 +2267,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  end if
 
  ! TODO This to be able to maximize the size of cg_work
- !call pstat_proc%mpi_max(vmrss_mb, gwr%comm%value)
+ !min_mem_mb = pstat_proc%pstat_min_mem_mb_per_proc(gwr%comm)
 
  do spin=1,gwr%nsppol
    if (io_in_kcomm .and. .not. any(gwr%my_spins == spin)) cycle
@@ -2290,7 +2290,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
      ! TODO: Optimize this part
      ! Find band_step that gives good compromise between memory and efficiency.
-     !band_step = memb_limited_step(1, nbsum, 2*npwsp_disk, xmpi_bsize_dp, 1024.0_dp)
+     !band_step = memb_limited_step(1, nbsum, 2*npwsp_disk, xmpi_bsize_dp, min_mem_mb)
      band_step = 200
 
      do bstart=1, nbsum, band_step
@@ -4446,7 +4446,9 @@ subroutine gwr_build_tchi(gwr)
      ncol_glob = gwr%g_nfft * gwr%nspinor
      ABI_CHECK(block_dist_1d(ncol_glob, gwr%g_comm%nproc, col_bsize, msg), msg)
      call chiq_gpr(my_iqi)%init(npwsp, gwr%g_nfft * gwr%nspinor, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     if (gwr%comm%me == 0 .and. mod(my_iqi, 2) == 0) call pstat_proc%print(_PSTAT_ARGS_)
    end do
+
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))
    call wrtout(std_out, sjoin(" Local memory for chi_q(g',r) matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
