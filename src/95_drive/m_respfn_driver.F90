@@ -1182,7 +1182,7 @@ ABI_NVTX_END_RANGE()
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
  call timab(136,2,tsec)
- call pstat_proc%print(_PSTAT_ARGS_)
+ _CALL_PSTAT_LOG()
 
 !-----3. Initialisation of 1st response, taking into account the q vector.
 
@@ -1446,7 +1446,7 @@ ABI_NVTX_END_RANGE()
  ABI_MALLOC(eigbrd,(2,dtset%mband*dtset%nsppol,dtset%nkpt,3,natom,3,natom*dim_eigbrd))
 
  call timab(137,2,tsec)
- call pstat_proc%print(_PSTAT_ARGS_)
+ _CALL_PSTAT_LOG()
 
 
 !Check whether exiting was required by the user.

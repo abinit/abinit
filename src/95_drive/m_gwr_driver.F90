@@ -237,7 +237,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  units(:) = [std_out, ab_out]
 
  call cwtime(cpu, wall, gflops, "start")
- call pstat_proc%print(_PSTAT_ARGS_)
+ _CALL_PSTAT_LOG()
 
 ! write(msg,'(a)')&
 ! ' GWR: Calculation of the GW corrections with GWR code ',ch10,ch10,&
@@ -644,7 +644,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call timab(561,2,tsec)
  end if
 
- call pstat_proc%print(_PSTAT_ARGS_)
+ _CALL_PSTAT_LOG()
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
  if (string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL")) then
@@ -897,7 +897,7 @@ end if
      ! All the modifications to ebands should be done here.
      !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
    end if
-   call pstat_proc%print(_PSTAT_ARGS_)
+   _CALL_PSTAT_LOG()
 
    call gwr%init(dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg_seq, comm)
    if (gwr%idle_proc) goto 100

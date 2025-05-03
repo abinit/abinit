@@ -590,7 +590,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
  end if
  call timab(432,2,tsec) ! Init
- call pstat_proc%print(_PSTAT_ARGS_)
+ _CALL_PSTAT_LOG()
 
  ! ==========================================
  ! ==== Fat loop over k_i in the full BZ ====
