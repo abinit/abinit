@@ -79,7 +79,6 @@ module m_gemm_nonlop
 contains
 
  function gemm_nonlop_ompgpu_work_mem(istwfk, ndat, ngrads, npw, indlmn, nattyp, ntypat, lmnmax, signs, wfoptalg) result(req_mem)
-   implicit none
 
    integer, intent(in) :: istwfk, ndat, ngrads, npw, ntypat, lmnmax, signs, wfoptalg
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
@@ -133,7 +132,6 @@ contains
 !----------------------------------------------------------------------
 
  function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, mpi_block_size, ngrads, use_distrib) result(req_mem)
-   implicit none
 
    integer, intent(in) :: npw, ntypat, mpi_block_size, ngrads
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)

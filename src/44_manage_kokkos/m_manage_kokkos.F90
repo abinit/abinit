@@ -53,7 +53,6 @@ module m_manage_kokkos
      &                                 nattyp_max) &
      & bind(c, name='opernlc_ylm_allwf_kokkos_cpp')
      use, intrinsic :: iso_c_binding
-     implicit none
      integer(kind=c_int32_t), value, intent(in)    :: cplex, cplex_enl, cplex_fac
      integer(kind=c_int32_t), value, intent(in)    :: dimenl1, dimenl2, dimekbq
      integer(kind=c_int32_t), value, intent(in)    :: iatm, itypat, ntypat, nprojs
@@ -80,7 +79,6 @@ module m_manage_kokkos
    subroutine add_array_kokkos(array1_ptr, array2_ptr, array_size) &
      & bind(c, name='add_array_kokkos_cpp')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr)            , value             :: array1_ptr
      type(c_ptr)            , value             :: array2_ptr
      integer(kind=c_int32_t), value, intent(in) :: array_size
@@ -103,7 +101,6 @@ module m_manage_kokkos
      &                                            hugevalue) &
      & bind(c, name='assemble_energy_contribution_kokkos_cpp')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr)            , value             :: ghc_ptr
      type(c_ptr)            , value             :: gsc_ptr
      type(c_ptr)            , value             :: kinpw_k2_ptr

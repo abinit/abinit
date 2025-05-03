@@ -69,7 +69,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine extract_real_part(data_out, data_in, size) bind(c, name='cuda_extract_real_part')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),             value :: data_out
      type(c_ptr),             value :: data_in
      integer(kind=c_int32_t), value :: size
@@ -79,7 +78,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine extract_imag_part(data_out, data_in, size) bind(c, name='cuda_extract_imag_part')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),             value :: data_out
      type(c_ptr),             value :: data_in
      integer(kind=c_int32_t), value :: size
@@ -89,7 +87,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine insert_real_part(data_out, data_in, size) bind(c, name='cuda_insert_real_part')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),             value :: data_out
      type(c_ptr),             value :: data_in
      integer(kind=c_int32_t), value :: size
@@ -99,7 +96,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine insert_imag_part(data_out, data_in, size) bind(c, name='cuda_insert_imag_part')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),             value :: data_out
      type(c_ptr),             value :: data_in
      integer(kind=c_int32_t), value :: size
@@ -108,7 +104,6 @@ module m_gemm_nonlop_gpu
    !> data_in and data_out must be pointers in device memory
    subroutine fix_realvec(data, npw_in, ndat_nspinor, option) bind(c, name='cuda_fix_realvec')
      use, intrinsic :: iso_c_binding
-     implicit none
      type(c_ptr),                    intent(inout) :: data
      integer(kind=c_int32_t), value, intent(in)    :: npw_in
      integer(kind=c_int32_t), value, intent(in)    :: ndat_nspinor
