@@ -915,7 +915,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      call wrtout(std_out, msg)
 
      Er%use_shared_win = .False.
-     Er%use_shared_win = .True.
+     !Er%use_shared_win = .True.
 
      iomode__ = iomode
      if (iomode__ == IO_MODE_MPI) then
