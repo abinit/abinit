@@ -5211,6 +5211,7 @@ subroutine xcomm_set_to_null(xcomm)
 !Arguments ------------------------------------
  class(xcomm_t),intent(inout) :: xcomm
 !----------------------------------------------------------------------
+
  call xcomm%free()
  xcomm%value = xmpi_comm_null
 end subroutine xcomm_set_to_null
@@ -5225,10 +5226,12 @@ end subroutine xcomm_free
 
 ! Build sub-communicators in a Cartesian grid.
 subroutine xcomm_from_cart_sub(xcomm, comm_cart, keepdim)
+
 !Arguments ------------------------------------
  class(xcomm_t),intent(out) :: xcomm
  integer,intent(in) :: comm_cart
  logical,intent(in) :: keepdim(:)
+
 !Local variables-------------------------------
  integer :: ierr
 !----------------------------------------------------------------------
@@ -5240,6 +5243,31 @@ subroutine xcomm_from_cart_sub(xcomm, comm_cart, keepdim)
  xcomm%nproc = xmpi_comm_size(xcomm%value)
 
 end subroutine xcomm_from_cart_sub
+
+! Creates new communicators based on split types and keys
+
+type(xcomm_t) function xcomm_split_type(xcomm, split_type, key) result(out_xcomm)
+
+ type(xcomm_t),intent(in) :: xcomm
+ integer,intent(in),optional :: split_type, key
+
+!Local variables-------------------------------
+ integer :: split_type__, key__, shared_comm, ierr
+!----------------------------------------------------------------------
+
+ key__ = 0; if (present(key)) key__ = key
+ split_type__ = MPI_COMM_TYPE_SHARED; if (present(split_type)) split_type__ = split_type
+
+#ifdef HAVE_MPI
+ ! Get node-level communicator
+ call MPI_Comm_split_type(xcomm%value, split_type__, key__, MPI_INFO_NULL, shared_comm, ierr)
+ if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="MPI_COMM_SPLIT_TYPE returned ierr /= 0")
+ out_xcomm = xcomm_from_mpi_int(shared_comm, free=.True.)
+#else
+ call out_xcomm%set_to_self()
+#endif
+
+end function xcomm_split_type
 
 ! Prepare a typical gatherv operation in which each MPI rank sends
 ! `nitems_per_rank(rank+1)` items and each item has length `nelem_per_item`.
