@@ -790,60 +790,6 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE], [
 
                     # ------------------------------------ #
 
-# _ABI_MPI_CHECK_WIN_ALLOCATE_SHARED_CPTR()
-# ---------------------------
-#
-# Checks whether the MPI library supports MPI_WIN_ALLOCATE_SHARED_CPTR (MPI3)
-# See https://github.com/pmodels/mpich/issues/2659
-#
-# See https://manpages.ubuntu.com/manpages/focal/man3/MPI_Win_allocate_shared.openmpi.3.html
-#
-AC_DEFUN([_ABI_MPI_CHECK_WIN_ALLOCATE_SHARED_CPTR], [
-  # Set default values
-  abi_mpi_win_allocate_shared_cptr="no"
-
-  # Back-up build environment
-  ABI_ENV_BACKUP
-
-  # Prepare build environment
-  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
-  LDFLAGS="${FC_LDFLAGS}"
-  LIBS="${FC_LIBS} ${abi_mpi_libs}"
-
-  # Note: we assume a MPI implementation that provides the mpi module
-  # and not the Fortran 2008 Syntax with `USE mpi_f08`
-  AC_MSG_CHECKING([whether the MPI library supports MPI_WIN_ALLOCATE_ADDRESS_KIND (MPI3)])
-  AC_LANG_PUSH([Fortran])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[
-      use mpi
-      USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
-      implicit none
-      INTEGER :: DISP_UNIT, INFO, COMM, WIN, IERROR
-      INTEGER(KIND=MPI_ADDRESS_KIND) :: SIZE
-      TYPE(C_PTR) :: BASEPTR
-
-      call MPI_WIN_ALLOCATE_CPTR(SIZE, DISP_UNIT, INFO, COMM, BASEPTR, WIN, IERROR)
-      call MPI_WIN_ALLOCATE_SHARED_CPTR(SIZE, DISP_UNIT, INFO, COMM, BASEPTR, WIN, IERROR)
-
-    ]])], [abi_mpi_win_allocate_shared_cptr="yes"], [abi_mpi_win_allocate_shared_cptr="no"])
-  AC_LANG_POP([Fortran])
-  AC_MSG_RESULT([${abi_mpi_win_allocate_shared_cptr}])
-
-  # Restore build environment
-  ABI_ENV_RESTORE
-
-  # Forward information to the compiler
-  if test "${abi_mpi_win_allocate_shared_address_kind}" = "yes"; then
-    AC_DEFINE([HAVE_MPI_WIN_ALLOCATE_SHARED_CPTR], 1,
-      [Define to 1 if your MPI library supports MPI_WIN_ALLOCATE_SHARED with ADDRESS_KIND.])
-  fi
-
-]) # _ABI_MPI_CHECK_WIN_ALLOCATE_SHARED_CPTR
-
-
-                    # ------------------------------------ #
-
 # _ABI_MPI_CREATE_WRAPPER(COMPILER_TYPE, SERIAL_COMPILER, MPI_COMPILER)
 # ---------------------------------------------------------------------
 #
@@ -1110,7 +1056,6 @@ AC_DEFUN([ABI_MPI_DETECT], [
       _ABI_MPI_CHECK_IALLTOALLV()
       _ABI_MPI_CHECK_IGATHERV()
       _ABI_MPI_CHECK_IALLREDUCE()
-      _ABI_MPI_CHECK_WIN_ALLOCATE_SHARED_CPTR()
 
     fi # sd_mpi_ok
 
