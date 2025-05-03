@@ -2126,7 +2126,6 @@ end function crystal_from_file
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
 &                                           blocksize,nblocks,warn_on_fail)
-   implicit none
 
    integer,intent(in)     :: ikpt,ndat,nband,nspinor,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib

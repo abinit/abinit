@@ -874,7 +874,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: dim_wing,iqibz,is_qeq0,mqmem_,npwe_asked,unt_dump,fform,rdwr,ierr,my_rank,comm_self
+ integer :: dim_wing,iqibz,is_qeq0,mqmem_,npwe_asked,unt_dump,fform,rdwr,ierr,my_rank,comm_self, iomode__
  real(dp) :: ucvol
  character(len=500) :: msg
  character(len=fnlen) :: ofname
@@ -914,18 +914,18 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      write(msg,'(a,f12.1,a)')' Memory for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
      call wrtout(std_out, msg)
 
-     Er%use_shared_win = .True.
      Er%use_shared_win = .False.
+     Er%use_shared_win = .True.
+
+     iomode__ = iomode
+     if (iomode__ == IO_MODE_MPI) then
+       ABI_WARNING("SUSC files is buggy. Using Fortran IO")
+       iomode__ = IO_MODE_FORTRAN
+     end if
 
      if (.not. Er%use_shared_win) then
        ABI_MALLOC_OR_DIE(Er%epsm1, (npwe, npwe, Er%nomega, Er%nqibz), ierr)
-
-       if (iomode == IO_MODE_MPI) then
-         ABI_WARNING("SUSC files is buggy. Using Fortran IO")
-         call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, IO_MODE_FORTRAN, comm)
-       else
-         call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
-       end if
+       call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, comm)
 
      else
 
@@ -941,6 +941,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, Er%epsm1_win)
        call c_f_pointer(void_ptr, Er%epsm1, shape=[npwe, npwe, Er%nomega, Er%nqibz])
        call xcomm%free()
+       call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, comm)
        end block
 
      end if

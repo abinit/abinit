@@ -160,7 +160,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 & pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -854,8 +853,6 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
  use m_profiling_abi
  use m_dynmat,      only : cart39
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,optgeom
@@ -1034,8 +1031,6 @@ end subroutine dfptlw_typeIproc
 
 
 subroutine read_1eig(eigen,formeig,mband,nkpt,nsppol,wffnm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

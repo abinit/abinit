@@ -704,7 +704,6 @@ subroutine hscr_print(Hscr, header, unit, prtvol, mode_paral)
  integer :: iomega,iqibz,unt,verbose
  character(len=4) :: mode
  character(len=500) :: msg
-
 ! *************************************************************************
 
  unt=std_out; if (PRESENT(unit      )) unt    =unit
@@ -922,7 +921,6 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
 
 !Local variables-------------------------------
  integer :: ierr
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -997,7 +995,6 @@ subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
 !scalars
  class(hscr_t),intent(inout) :: Hscr
  integer,intent(in) :: npwe, nqibz, nomega, nqlwl
-
 ! *************************************************************************
 
  !@hscr_t
@@ -1030,7 +1027,6 @@ subroutine hscr_free(hscr)
 
 !Arguments ------------------------------------
  class(hscr_t),intent(inout) :: hscr
-
 ! *************************************************************************
 
  ABI_SFREE(hscr%gvec)
@@ -1303,7 +1299,6 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iqibz, epsm1)
 #else
  real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1396,11 +1391,9 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ipwe,fform,iomega,iqibz,unt,rdwr,my_rank,nprocs,my_iomode
- integer :: varid,ncerr
+ integer :: ipwe,fform,iomega,iqibz,unt,rdwr,my_rank,nprocs,my_iomode, varid, ncerr
 #ifdef HAVE_MPI_IO
- integer :: test_fform,mpi_err,ierr,sc_mode
- integer :: bsize_frm,mpi_type_frm
+ integer :: test_fform,mpi_err,ierr,sc_mode, bsize_frm,mpi_type_frm
  integer :: mpi_fh,buf_dim !,mat_ggw,mat_ggwq
  integer(XMPI_OFFSET_KIND) :: offset,displ_wq !,my_offpad
  !complex(dpc) :: ctmp
@@ -1420,7 +1413,6 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
  integer :: spins(2),s1,s2
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1709,7 +1701,6 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
  integer(kind=MPI_OFFSET_KIND) :: fmarker,positloc
  integer :: nqlwl(1),statux(MPI_STATUS_SIZE)
 #endif
-
 ! *************************************************************************
 
  offset = 0
@@ -1793,7 +1784,6 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  integer,allocatable :: merge_table(:,:)
  real(dp) :: qdiff(3)
  complex(gwpc),allocatable :: epsm1(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -1916,7 +1906,6 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  type(abifile_t) :: abifile
 !arrays
  complex(gwpc),allocatable :: epsm1(:,:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2039,7 +2028,6 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  real(dp),allocatable :: real_omega(:),imag_omega(:)
  complex(gwpc),allocatable :: epsm1(:,:,:,:),epsm1_temp(:,:,:,:)
  complex(dpc),allocatable :: omega_storage(:)
-
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2315,7 +2303,6 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  type(abifile_t) :: abifile
 !arrays
  complex(gwpc),allocatable :: epsm1(:,:,:),epsm1_temp(:,:,:)
-
 ! *************************************************************************
 
  comm = xmpi_comm_self
@@ -2432,7 +2419,6 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  integer,parameter :: master = 0
  integer :: my_rank, fform, npwe_file, nqlwl, ierr
  character(len=500) :: msg
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)

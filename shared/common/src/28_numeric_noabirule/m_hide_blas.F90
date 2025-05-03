@@ -171,7 +171,6 @@ interface xscal
   !
   subroutine sscal(n,sa,sx,incx)
     use defs_basis
-    implicit none
     integer :: incx
     integer :: n
     real(sp) :: sa
@@ -180,7 +179,6 @@ interface xscal
   !
   subroutine dscal(n,da,dx,incx)
     use defs_basis
-    implicit none
     integer :: incx
     integer :: n
     real(dp):: da
@@ -189,7 +187,6 @@ interface xscal
   !
   subroutine cscal(n,ca,cx,incx)
     use defs_basis
-    implicit none
     integer :: incx
     integer :: n
     complex(spc) :: ca
@@ -198,7 +195,6 @@ interface xscal
   !
   subroutine zscal(n,za,zx,incx)
     use defs_basis
-    implicit none
     integer :: incx
     integer :: n
     complex(dpc) :: za
@@ -207,7 +203,6 @@ interface xscal
   !
   subroutine  csscal(n,sa,cx,incx)
     use defs_basis
-    implicit none
     integer :: incx
     integer :: n
     real(sp) :: sa
@@ -216,7 +211,6 @@ interface xscal
   !
   subroutine  zdscal(n,da,zx,incx)
     use defs_basis
-    implicit none
     integer :: incx
     integer :: n
     real(dp) :: da
@@ -287,7 +281,6 @@ interface xcopy
  !
  subroutine scopy(n,sx,incx,sy,incy)
    use defs_basis
-   implicit none
    integer,intent(in) :: incx
    integer,intent(in) :: incy
    integer,intent(in) :: n
@@ -297,7 +290,6 @@ interface xcopy
  !
  subroutine  dcopy(n,dx,incx,dy,incy)
    use defs_basis
-   implicit none
    integer,intent(in) :: incx
    integer,intent(in) :: incy
    integer,intent(in) :: n
@@ -307,7 +299,6 @@ interface xcopy
  !
  subroutine  ccopy(n,cx,incx,cy,incy)
    use defs_basis
-   implicit none
    integer,intent(in) :: incx
    integer,intent(in) :: incy
    integer,intent(in) :: n
@@ -317,7 +308,6 @@ interface xcopy
  !
  subroutine  zcopy(n,cx,incx,cy,incy)
    use defs_basis
-   implicit none
    integer,intent(in) :: incx
    integer,intent(in) :: incy
    integer,intent(in) :: n

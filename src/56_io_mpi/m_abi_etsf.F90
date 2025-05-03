@@ -78,8 +78,6 @@ CONTAINS  !===========================================================
 
 subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itype
@@ -128,16 +126,11 @@ end subroutine abi_etsf_init
 
 subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,usewvl,npsp,ntypat
 !arrays
  integer,intent(in) :: lmn_size(npsp)
-
-!Local variables-------------------------------
-
 ! *************************************************************************
 
 !if ETSF_IO is undefined, do nothing
