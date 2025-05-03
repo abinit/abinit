@@ -69,7 +69,7 @@
   Since eos_nvhpc_23.9_elpa crashes (likely due to optional arguments), we disable it if FC_NVHP
 **/
 
-#ifndef FC_NVHP
+#ifndef FC_NVHPC
 #define _CALL_PSTAT_LOG() call pstat_proc%print(_PSTAT_ARGS_)
 #else
 #define _CALL_PSTAT_LOG()
