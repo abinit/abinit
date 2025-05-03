@@ -100,8 +100,6 @@ contains
 !! req_mem=amount in bytes of required memory for getghc_ompgpu
 function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
 
- implicit none
-
  type(gs_hamiltonian_type),intent(in),target :: gs_ham
  integer, intent(in) :: ndat
  integer(kind=c_size_t) :: req_mem, ghc_mem, nonlop_mem

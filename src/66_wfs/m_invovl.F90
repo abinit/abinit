@@ -192,7 +192,6 @@ end type invovl_kpt_type
    !> allocate GPU workspace for apply_invovl
    subroutine f_gpu_apply_invovl_inner_alloc(proj_dim, ntypat, realloc) bind(c, name='gpu_apply_invovl_inner_alloc')
      use, intrinsic :: iso_c_binding
-     implicit none
      integer(kind=c_int32_t),        intent(in) :: proj_dim(3)
      integer(kind=c_int32_t), value, intent(in) :: ntypat
      integer(kind=c_int32_t), value, intent(in) :: realloc
@@ -205,7 +204,6 @@ end type invovl_kpt_type
    !> allocate GPU workspace for make_invovl (sij and s_approx)
    subroutine f_gpu_apply_invovl_matrix_alloc(cplx, nprojs, lmnmax, ntypat, realloc) bind(c, name='gpu_apply_invovl_matrix_alloc')
      use, intrinsic :: iso_c_binding
-     implicit none
      integer(kind=c_int32_t), value, intent(in) :: cplx
      integer(kind=c_int32_t), value, intent(in) :: nprojs
      integer(kind=c_int32_t), value, intent(in) :: ntypat
@@ -220,7 +218,6 @@ end type invovl_kpt_type
    !> init data for GPU
    subroutine f_gpu_init_invovl_data(indlmn_dim, indlmn_ptr) bind(c, name='init_invovl_data')
      use, intrinsic :: iso_c_binding
-     implicit none
      integer(kind=c_int32_t),        intent(in)    :: indlmn_dim(3)
      type(c_ptr)            , value                :: indlmn_ptr
    end subroutine f_gpu_init_invovl_data
@@ -229,7 +226,6 @@ end type invovl_kpt_type
    subroutine f_upload_inverse_overlap(invovl_gpu, cplx, nprojs, lmnmax, ntypat) bind(c, name='upload_inverse_overlap')
      use, intrinsic :: iso_c_binding
      import invovl_kpt_gpu_type
-     implicit none
      type(invovl_kpt_gpu_type), value, intent(in) :: invovl_gpu
      integer(kind=c_int32_t),   value, intent(in) :: cplx
      integer(kind=c_int32_t),   value, intent(in) :: nprojs
@@ -242,7 +238,6 @@ end type invovl_kpt_type
      & nattyp_dim, nattyp_ptr, ntypat, lmnmax, cplx, block_sliced) bind(c, name='solve_inner_gpu')
 
      use, intrinsic :: iso_c_binding
-     implicit none
      integer(kind=c_int32_t),        intent(in) :: proj_dim(3)
      type(c_ptr)            , value             :: proj_ptr
      type(c_ptr)            , value             :: sm1proj_ptr
@@ -270,7 +265,6 @@ CONTAINS
 !! Create a invovl_pkt_gpu_type from a cpu counter part for cuda interoperability
 !! SOURCE
   function make_invovl_kpt_gpu(invovl) result(invovl_gpu)
-    implicit none
     type(invovl_kpt_type), intent(inout),target :: invovl
     type(invovl_kpt_gpu_type)                   :: invovl_gpu
 
@@ -475,7 +469,6 @@ CONTAINS
 subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  use m_abi_linalg
- implicit none
 
  type(gs_hamiltonian_type),intent(in), target :: ham
  integer, intent(in) :: dimffnl
@@ -800,8 +793,6 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   use, intrinsic :: iso_c_binding
 #endif
 
-  implicit none
-
   ! args
   type(gs_hamiltonian_type), intent(in), target :: ham
   integer, intent(in) :: npw, ndat
@@ -1061,7 +1052,6 @@ end subroutine apply_invovl
 subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj, block_sliced)
 
  use m_abi_linalg
- implicit none
 
  integer,intent(in) :: ndat,cplx
  type(invovl_kpt_type), intent(in) :: invovl
@@ -1175,7 +1165,6 @@ end subroutine solve_inner
 subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
   use m_abi_linalg
-  implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx
   real(dp), intent(inout), target :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
@@ -1243,7 +1232,6 @@ end subroutine apply_block
 !!***
 
  function invovl_ompgpu_work_mem(ham, ndat) result(req_mem)
-   implicit none
 
    type(gs_hamiltonian_type), intent(in) :: ham
    integer, intent(in) :: ndat
@@ -1266,7 +1254,6 @@ end subroutine apply_block
  end function invovl_ompgpu_work_mem
 
  function invovl_ompgpu_static_mem(ham) result(req_mem)
-   implicit none
 
    type(gs_hamiltonian_type), intent(in) :: ham
    integer :: nprojs, cplx, itypat
@@ -1308,8 +1295,6 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU)
   use, intrinsic :: iso_c_binding
 #endif
-
-  implicit none
 
   ! args
   type(gs_hamiltonian_type), intent(in), target :: ham
@@ -1469,7 +1454,6 @@ end subroutine apply_invovl_ompgpu
 subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj, block_sliced)
 
  use m_abi_linalg
- implicit none
 
  integer,intent(in) :: ndat,cplx
  type(invovl_kpt_type), intent(in), target :: invovl
@@ -1654,7 +1638,6 @@ end subroutine solve_inner_ompgpu
 subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
   use m_abi_linalg
-  implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx
   real(dp), intent(inout), target :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)

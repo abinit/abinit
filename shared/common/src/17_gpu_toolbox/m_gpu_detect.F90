@@ -98,7 +98,7 @@ CONTAINS  !===========================================================
   call xmpi_name(name_ch,ierr)
 
   !--Array containing the number of gpu seen by any cpu
-  call xmpi_allgather(ndev, gpu_map, xmpi_max_processor_name, commcart, ierr)
+  call xmpi_allgather(ndev, gpu_map, commcart, ierr)
   !   write(std_out,*)' me,nedevice ',gpu_map
 
   !--Array containing the name of the cpu
