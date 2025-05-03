@@ -339,7 +339,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
    ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
  end if
 
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  do spin=1,nsppol
    if (ALL(proc_distrb(:,:,spin) /= wfd%my_rank)) CYCLE ! Spin parallelism.

@@ -715,7 +715,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  units = [std_out, ab_out]
 
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
@@ -1186,7 +1186,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(qselect)
  zpr_frohl_sphcorr = zero; zpr_frohl_sphcorr_done = .False.
 
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
@@ -2489,7 +2489,7 @@ end if
    !call wrtout(std_out, sjoin("xmpi_count_requests", itoa(xmpi_count_requests)))
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
-   _CALL_PSTAT_LOG()
+   call pstat_proc%print(_PSTAT_ARGS_)
  end do ! my_ikcalc
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)

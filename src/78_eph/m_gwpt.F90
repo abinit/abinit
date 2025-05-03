@@ -368,7 +368,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with model dielectric function")
  end if
  !call screen%ppm%print(units)
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  if (nqlwl == 0) then
    nqlwl=1
@@ -455,7 +455,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
  call wfd%print([std_out], header="Wavefunctions for GWPT calculation.")
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -741,7 +741,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, screen_filepath, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
  ABI_FREE(qlwl)
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p
  ABI_MALLOC(kg_k, (3, mpw))
@@ -796,7 +796,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call rhotoxc(bigexc, bigsxc, kxc, mpi_enreg, nfft, ngfft, &
               dum_nhat, 0, dum_nhat, 0, nkxc, nk3xc, non_magnetic_xc, n3xccc0, option, rhor, &
               cryst%rprimd, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! ===================================================
  ! Loop over MPI distributed spins in Sigma (gqk%comm)

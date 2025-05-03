@@ -541,7 +541,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
    call ppm%malloc_iqibz(iq_ibz)
  end do
 
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  DBG_EXIT("COLL")
 

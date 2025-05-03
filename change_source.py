@@ -66,8 +66,7 @@ def replace_string(s):
          #"call pstat_proc%print(_PSTAT_ARGS_)": "_PSTAT_LOG()",
          #"_PSTAT_LOG": "_CALL_PSTAT_LOG",
          #"_PSTAT_LOG()": "_CALL_PSTAT_LOG",
-         #"_PSTAT_LOG()":
-         "_CALL_PSTAT_LOG": "_CALL_PSTAT_LOG()",
+         "_CALL_PSTAT_LOG()": "call pstat_proc%print(_PSTAT_ARGS_)",
 
     }
 

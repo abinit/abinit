@@ -590,7 +590,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
  end if
  call timab(432,2,tsec) ! Init
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
  if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)

@@ -1010,7 +1010,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  if (dtset%iscf==22) energies%h0=zero
 
  call timab(1441,2,tsec)
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
 !##################################################################
 !PERFORM ELECTRONIC ITERATIONS
