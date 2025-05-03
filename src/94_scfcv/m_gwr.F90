@@ -2126,7 +2126,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  end associate
 
  call cwtime_report(" gwr_load_kcalc_from_wfk:", cpu, wall, gflops)
- call pstat_proc%print(_PSTAT_ARGS_)
+ _CALL_PSTAT_LOG()
 
 end subroutine gwr_load_kcalc_wfd
 !!***
@@ -2252,7 +2252,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    end do
  end do
  call gwr%print_mem([std_out])
- if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+ if (gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
  mpw_disk = maxval(gwr%wfk_hdr%npwarr)
  ABI_MALLOC(kg_k_disk, (3, mpw_disk))
@@ -4439,7 +4439,7 @@ subroutine gwr_build_tchi(gwr)
    ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
    ABI_MALLOC(desc_mykbz, (gwr%my_nkbz))
 
-   if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+   if (gwr%comm%me == 0) _CALL_PSTAT_LOG()
    call wrtout(std_out, " Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
    call wrtout(std_out, " Here we're gonna have a big allocation peak...")
 
@@ -4449,12 +4449,12 @@ subroutine gwr_build_tchi(gwr)
      ncol_glob = gwr%g_nfft * gwr%nspinor
      ABI_CHECK(block_dist_1d(ncol_glob, gwr%g_comm%nproc, col_bsize, msg), msg)
      call chiq_gpr(my_iqi)%init(npwsp, gwr%g_nfft * gwr%nspinor, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     if (gwr%comm%me == 0 .and. mod(my_iqi, 2) == 0) call pstat_proc%print(_PSTAT_ARGS_)
+     if (gwr%comm%me == 0 .and. mod(my_iqi, 2) == 0) _CALL_PSTAT_LOG()
    end do
 
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))
    call wrtout(std_out, sjoin(" Local memory for chi_q(g',r) matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
-   if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+   if (gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
    ! Loop over my spins and my taus.
    do my_is=1,gwr%my_nspins
@@ -4465,7 +4465,7 @@ subroutine gwr_build_tchi(gwr)
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
-       if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+       if (my_it == 1 .and. gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
        ! Loop over r in the unit cell that is now MPI-distributed inside g_comm.
        ! This is a bottleneck but perhaps one can take advantage of localization.
@@ -4654,7 +4654,7 @@ end if
 
     mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
     call wrtout(std_out, sjoin(" Local memory for chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
-    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+    if (gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
 
     ! * The little group is needed when symchi == 1
@@ -4696,7 +4696,7 @@ end if
 
       ! Sum over my k-points in the BZ.
       call slk_array_set(chiq_rpr, czero)
-      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+      if (my_it == 1 .and. gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
       do my_ikf=1,gwr%my_nkbz
         print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -4778,7 +4778,7 @@ end if
    call wrtout(std_out, " Mixed space algorithm for chi completed")
  end if
 
- if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+ if (gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
  !call wrtout(std_out, sjoin(" max_abs_imag_chit", ftoa(max_abs_imag_chit)))
 
@@ -5630,11 +5630,11 @@ if (gwr%use_supercell_for_sigma) then
 
      ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
      call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
-     if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+     if (my_it == 1 .and. gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
      ! Wc_q(g,g') --> Wc_q(g',r) e^{iq.r} for each q in the BZ treated by me.
      call gwr%get_myq_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
-     if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+     if (my_it == 1 .and. gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
@@ -5793,7 +5793,7 @@ else
 
  mem_mb = slk_array_locmem_mb(wc_rpr) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(sigc_rpr))
  call wrtout(std_out, sjoin(" Local memory for PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
- if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+ if (gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -5835,7 +5835,7 @@ else
      ! Redistribute W_q(g,g') in the IBZ so that each MPI proc can reconstruct Wc_q in the BZ inside the loops
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      call slk_array_set(sigc_rpr, czero)
-     if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+     if (my_it == 1 .and. gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
      ! Sum over my k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
@@ -5945,7 +5945,7 @@ else
  call wrtout(std_out, " Mixed space algorithm for sigma completed")
 end if
 
- if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+ if (gwr%comm%me == 0) _CALL_PSTAT_LOG()
 
  call sigijtab_free(Sigcij_tab)
  ABI_FREE(Sigcij_tab)

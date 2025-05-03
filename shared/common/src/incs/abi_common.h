@@ -64,14 +64,15 @@
 #define _PSTAT_ARGS_
 #endif
 
-/** Macro used for pstat memory logging.
-    Since eos_nvhpc_23.9_elpa crashes (likely due to optional arguments), here we disable it
+/**
+  Macro used for pstat memory logging.
+  Since eos_nvhpc_23.9_elpa crashes (likely due to optional arguments), we disable it if FC_NVHP
 **/
 
 #ifndef FC_NVHP
-#define PSTAT_LOG call pstat_proc(_PSTAT_ARGS_)
+#define _CALL_PSTAT_LOG() call pstat_proc%print(_PSTAT_ARGS_)
 #else
-#define PSTAT_LOG
+#define _CALL_PSTAT_LOG()
 #endif
 
 /** this does not work with gfort, pgi, **/

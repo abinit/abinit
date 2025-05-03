@@ -752,7 +752,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
         dtset%gpu_option,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
 
    call timab(642,2,tsec)
-   call pstat_proc%print(_PSTAT_ARGS_)
+   _CALL_PSTAT_LOG()
 
 !  ****************************************************************************
 !  Main case selection in driver

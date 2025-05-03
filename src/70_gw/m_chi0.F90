@@ -505,7 +505,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    call Ltg_q%print([std_out], prtvol=Dtset%prtvol)
  end if
  call wrtout(std_out, sjoin(' Calculation status: ', itoa(nkpt_summed), ' k-points to be completed'))
- call pstat_proc%print(_PSTAT_ARGS_)
+ _CALL_PSTAT_LOG()
 
  ABI_MALLOC(vkbr, (Kmesh%nibz))
  gradk_not_done = .TRUE.
@@ -1404,7 +1404,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
 
  write(msg,'(a,i0,a)')' Calculation status: ',nkpt_summed,' k-points to be completed'
  call wrtout(std_out, msg)
- call pstat_proc%print(_PSTAT_ARGS_)
+ _CALL_PSTAT_LOG()
 
  ! ============================================
  ! === Begin big fat loop over transitions ===
