@@ -54,7 +54,7 @@ CONTAINS
 !
 SUBROUTINE libtetrabz_initialize(ltetra,nge,ngw,bvec,linterpol,wlsm,nk_local,nt_local,nkBZ,ik_global,ik_local,kvec,comm)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: ltetra, nge(3), ngw(3)
   REAL(8),INTENT(IN) :: bvec(3,3)
@@ -201,7 +201,7 @@ END SUBROUTINE libtetrabz_initialize
 !
 SUBROUTINE libtetrabz_kgrid(linterpol,ivvec,ng,nkBZ,nk_local,nt_local,ik_global,ik_local,kvec,comm)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   LOGICAL,INTENT(INOUT) :: linterpol
   INTEGER,INTENT(IN) :: ivvec(3,20,6), ng(3), nkBZ
@@ -293,7 +293,7 @@ END SUBROUTINE libtetrabz_kgrid
 !
 SUBROUTINE libtetrabz_divideMPI(comm,nt,nt_front,nt_local)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: comm, nt
   INTEGER,INTENT(OUT) :: nt_front, nt_local
@@ -319,7 +319,7 @@ END SUBROUTINE libtetrabz_divideMPI
 !
 pure SUBROUTINE libtetrabz_sort(n,key,indx)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   integer,INTENT(IN) :: n
   REAL(8),INTENT(inout) :: key(n)
@@ -351,7 +351,7 @@ END SUBROUTINE libtetrabz_sort
 !
 pure SUBROUTINE libtetrabz_interpol_indx(nintp,ng,kvec,kintp,wintp)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(in) :: nintp, ng(3)
   REAL(8),INTENT(in) :: kvec(3)
@@ -452,7 +452,7 @@ END SUBROUTINE libtetrabz_interpol_indx
 
 pure function a_from_e(e) result(a)
 
-  IMPLICIT NONE
+  !IMPLICIT NONE
   REAL(8),INTENT(IN) :: e(4)
   REAL(8) :: a(4,4)
 
@@ -474,7 +474,7 @@ end function a_from_e
 !
 pure SUBROUTINE libtetrabz_tsmall_a1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -501,7 +501,7 @@ END SUBROUTINE libtetrabz_tsmall_a1
 !
 pure SUBROUTINE libtetrabz_tsmall_b1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -528,7 +528,7 @@ END SUBROUTINE libtetrabz_tsmall_b1
 !
 pure SUBROUTINE libtetrabz_tsmall_b2(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -555,7 +555,7 @@ END SUBROUTINE libtetrabz_tsmall_b2
 !
 pure SUBROUTINE libtetrabz_tsmall_b3(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -582,7 +582,7 @@ END SUBROUTINE libtetrabz_tsmall_b3
 !
 pure SUBROUTINE libtetrabz_tsmall_c1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -609,7 +609,7 @@ END SUBROUTINE libtetrabz_tsmall_c1
 !
 pure SUBROUTINE libtetrabz_tsmall_c2(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -636,7 +636,7 @@ END SUBROUTINE libtetrabz_tsmall_c2
 !
 pure SUBROUTINE libtetrabz_tsmall_c3(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -663,7 +663,7 @@ END SUBROUTINE libtetrabz_tsmall_c3
 !
 pure SUBROUTINE libtetrabz_triangle_a1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -690,7 +690,7 @@ END SUBROUTINE libtetrabz_triangle_a1
 !
 pure SUBROUTINE libtetrabz_triangle_b1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -717,7 +717,7 @@ END SUBROUTINE libtetrabz_triangle_b1
 !
 pure SUBROUTINE libtetrabz_triangle_b2(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -744,7 +744,7 @@ END SUBROUTINE libtetrabz_triangle_b2
 !
 pure SUBROUTINE libtetrabz_triangle_c1(e,V,tsmall)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
   REAL(8),INTENT(OUT) :: V
@@ -771,7 +771,7 @@ END SUBROUTINE libtetrabz_triangle_c1
 !
 SUBROUTINE libtetrabz_mpisum_d(comm,scaler)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER :: comm
   REAL(8) :: scaler
@@ -791,7 +791,7 @@ END SUBROUTINE libtetrabz_mpisum_d
 !
 SUBROUTINE libtetrabz_mpisum_dv(comm,ndim,vector)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER :: comm, ndim
   REAL(8) :: vector(ndim)
@@ -818,7 +818,7 @@ END SUBROUTINE libtetrabz_mpisum_dv
 !
 SUBROUTINE libtetrabz_mpisum_zv(comm,ndim,vector)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER :: comm, ndim
   COMPLEX(8) :: vector(ndim)
