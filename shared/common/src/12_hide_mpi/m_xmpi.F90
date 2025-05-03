@@ -5361,13 +5361,12 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  class(xcomm_t),intent(inout) :: xcomm
  integer(kind=XMPI_ADDRESS_KIND), intent(in) :: count
  integer,intent(in) :: kind, info
- !INTEGER(KIND=XMPI_ADDRESS_KIND) :: baseptr
  type(c_ptr),intent(out) :: baseptr
  integer,intent(out) :: win
 
 !Local variables-------------------
  integer :: disp_unit, ierr
- integer(kind=XMPI_ADDRESS_KIND) :: my_size, address
+ integer(kind=XMPI_ADDRESS_KIND) :: my_size
 !----------------------------------------------------------------------
 
  if (.not. xcomm%can_use_shmem()) call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
@@ -5387,18 +5386,22 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
  ! C_PTR to INTEGER(KIND=MPI_ADDRESS_KIND) is not directly portable in standard Fortran unless
  ! the implementation guarantees that a pointer can be represented as an integer of the appropriate kind.
- ! MPI doesn’t specify this explicitly, but most implementations allow it.
- address = transfer(baseptr, address)
+ ! MPI doesn't specify this explicitly, but most implementations allow it.
+ !address = transfer(baseptr, address)
 
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
 #ifdef HAVE_MPI
- call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, address, win, ierr)
-                              !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
-                              !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
+ !call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, address, win, ierr)
+ !                             !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
+ !                             !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
+
+ call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
+
  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_allocated_shared returned ierr /= 0")
 
  if (xcomm%me /= 0) then
-   call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, address, ierr)
+   !call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, address, ierr)
+   call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
    if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_shared_query returned ierr /= 0")
  end if
  !MPI_WIN_SHARED_QUERY(WIN, RANK, SIZE, DISP_UNIT, BASEPTR, IERROR)
