@@ -47,7 +47,6 @@ MODULE m_plowannier
  use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_get,pawcprj_free
  use m_pawrad, only : pawrad_type, simp_gen
 
-
  implicit none
 
  private
@@ -2338,7 +2337,6 @@ end subroutine compute_coeff_plowannier
  use m_abicore
  use m_io_tools,  only : open_file
  use m_specialmsg, only : wrtout
- implicit none
 
  !Arguments-------------------------
  type(plowannier_type),intent(in) :: wan
@@ -2411,7 +2409,6 @@ end subroutine compute_coeff_plowannier
  use defs_abitypes
  use m_io_tools,  only : open_file
  use m_specialmsg, only : wrtout
- implicit none
 
  !Arguments-------------------------
  type(plowannier_type),intent(inout) :: wan_in
@@ -2509,7 +2506,6 @@ end subroutine get_plowannier
    use m_bz_mesh, only : kmesh_t
    use m_crystal, only : crystal_t
    use m_pawang, only  : pawang_type
-   implicit none
 
 !Arguments-------------------------
    type(plowannier_type),intent(inout) :: wanibz
@@ -2779,8 +2775,6 @@ end subroutine fullbz_plowannier
 !! SOURCE
 
  subroutine zero_operwan(wan,operwan)
-
-   implicit none
 
    !Arguments----------------------------------
    type(plowannier_type), intent(in) :: wan

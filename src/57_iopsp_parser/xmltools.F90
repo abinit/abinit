@@ -123,7 +123,7 @@ CONTAINS
     !
     ! returns attrval_i=0 if not found or not readable
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: attrname
     INTEGER, INTENT(OUT) :: attrval_i
     !
@@ -144,7 +144,7 @@ CONTAINS
     !
     ! returns attrval_l=.false. if not found or not readable
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: attrname
     LOGICAL, INTENT(OUT) :: attrval_l
     !
@@ -165,7 +165,7 @@ CONTAINS
     !
     ! returns attrval_r=0 if not found or not readable
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: attrname
     REAL(dp), INTENT(OUT) :: attrval_r
     !
@@ -186,7 +186,7 @@ CONTAINS
     !
     ! returns attrval_c='' if not found
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: attrname
     CHARACTER(LEN=*), INTENT(OUT) :: attrval_c
     !
@@ -229,7 +229,7 @@ CONTAINS
   !
   SUBROUTINE add_i_attr ( attrname, attrval_i )
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: attrname
     INTEGER, INTENT(IN) :: attrval_i
     !
@@ -239,7 +239,7 @@ CONTAINS
   !
   SUBROUTINE add_l_attr ( attrname, attrval_l )
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: attrname
     LOGICAL, INTENT(IN) :: attrval_l
     !
@@ -249,7 +249,7 @@ CONTAINS
   !
   SUBROUTINE add_r_attr ( attrname, attrval_r )
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: attrname
     REAL(dp), INTENT(IN) :: attrval_r
     !
@@ -259,7 +259,7 @@ CONTAINS
   !
   SUBROUTINE add_c_attr ( attrname, attrval_c )
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: attrname, attrval_c
     !
     IF ( .NOT. ALLOCATED(attrlist) ) THEN
@@ -931,7 +931,7 @@ CONTAINS
     !
   subroutine readtag_c ( tag, cval, ierr)
     !
-    implicit none
+    !implicit none
     !
     character(len=*), intent(in) :: tag
     character(len=*), intent(out):: cval
@@ -1007,7 +1007,7 @@ CONTAINS
   !
   subroutine xmlr_opentag ( tag, ierr)
     !
-    implicit none
+    !implicit none
     !
     character(len=*), intent(in) :: tag
     integer, intent(out), optional :: ierr
@@ -1164,7 +1164,7 @@ CONTAINS
   !
   subroutine xmlr_closetag ( tag, ierr)
     !
-    implicit none
+    !implicit none
     !
     character(len=*), intent(in), optional :: tag
     integer, intent(out), optional :: ierr

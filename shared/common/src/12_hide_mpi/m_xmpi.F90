@@ -176,6 +176,7 @@ module m_xmpi
    procedure :: set_to_self => xcomm_set_to_self
    procedure :: free => xcomm_free
    procedure :: from_cart_sub => xcomm_from_cart_sub   ! Build sub-communicators in a Cartesian grid.
+   procedure :: split_type => xcomm_split_type         ! Creates new communicators based on split types and keys
    procedure :: prep_gatherv => xcomm_prep_gatherv     ! Prepare a typical gatherv operation.
    procedure :: print_names => xcomm_print_names
    procedure :: can_use_shmem => xcomm_can_use_shmem
@@ -5248,7 +5249,7 @@ end subroutine xcomm_from_cart_sub
 
 type(xcomm_t) function xcomm_split_type(xcomm, split_type, key) result(out_xcomm)
 
- type(xcomm_t),intent(in) :: xcomm
+ class(xcomm_t),intent(in) :: xcomm
  integer,intent(in),optional :: split_type, key
 
 !Local variables-------------------------------
