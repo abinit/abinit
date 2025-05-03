@@ -20,7 +20,7 @@ class DataExtractor(object):
     """Setup extraction of formatted documents and significant lines."""
 
     IGNORE_LINES_STARTING_WITH = [
-        "MPI startup():",
+        "MPI startup(): Warning: I_MPI_PMI_LIBRARY",
     ]
 
     def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):
