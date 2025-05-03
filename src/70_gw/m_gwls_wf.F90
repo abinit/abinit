@@ -66,7 +66,6 @@ contains
 
 subroutine set_wf(dv2,nx2,ny2,nz2,nk2,nb2,ng2,cbf2,cf2,cb2)
 
-implicit none
 real(dp), intent(in) :: dv2
 integer, intent(in) :: nx2, ny2, nz2, nk2, nb2, ng2, cbf2, cf2, cb2
 ! *************************************************************************
@@ -100,7 +99,6 @@ end subroutine set_wf
 
 real(dp) function norm_k(v)
 
-implicit none
 real(dp), intent(in) :: v(2,nk)
 ! *************************************************************************
 norm_k = 0.0_dp
@@ -132,7 +130,6 @@ end function norm_k
 
 real(dp) function norm_kc(v)
 
-implicit none
 complex(dpc), intent(in) :: v(nk)
 ! *************************************************************************
 norm_kc = zero
@@ -163,7 +160,6 @@ end function norm_kc
 
 complex(dpc) function scprod_kc(v1,v2)
 
-implicit none
 complex(dpc), intent(in) :: v1(nk), v2(nk)
 ! *************************************************************************
 scprod_kc = zero
@@ -194,7 +190,6 @@ end function scprod_kc
 
 ! real(dp) function contribution(alpha,beta,k,norm_svne)
 !
-!  implicit none
 !  real(dp), intent(in) :: alpha(k), beta(k-1), norm_svne
 !  integer, intent(in) :: k
 !
@@ -240,7 +235,6 @@ end function scprod_kc
 
 ! function contribution_bloc(alpha,beta,kmax,norm_svne,nseeds)
 !
-!  implicit none
 !  real(dp) :: contribution_bloc(2)
 !  integer, intent(in) :: kmax, nseeds
 !  real(dp), intent(in) :: alpha(2,nseeds,nseeds,kmax), beta(2,nseeds,nseeds,kmax-1), norm_svne
@@ -318,7 +312,6 @@ function scprod_k(v1,v2)
 ! This function computes the inner product of two "vectors" (typically
 ! wavefunctions), < v1 | v2 >.
 !--------------------------------------------------------------------------------
-implicit none
 real(dp) :: scprod_k(2)
 real(dp), intent(in) :: v1(2,nk), v2(2,nk)
 ! *************************************************************************
