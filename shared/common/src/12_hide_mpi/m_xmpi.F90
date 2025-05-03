@@ -5252,10 +5252,10 @@ type(xcomm_t) function xcomm_split_type(xcomm, split_type, key) result(out_xcomm
 !----------------------------------------------------------------------
 
  key__ = 0; if (present(key)) key__ = key
- split_type__ = MPI_COMM_TYPE_SHARED; if (present(split_type)) split_type__ = split_type
 
 #ifdef HAVE_MPI
  ! Get node-level communicator
+ split_type__ = MPI_COMM_TYPE_SHARED; if (present(split_type)) split_type__ = split_type
  call MPI_Comm_split_type(xcomm%value, split_type__, key__, MPI_INFO_NULL, shared_comm, ierr)
  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="MPI_COMM_SPLIT_TYPE returned ierr /= 0")
  out_xcomm = xcomm_from_mpi_int(shared_comm, free=.True.)
@@ -5375,7 +5375,8 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
    call xmpi_abort(msg="Invalid kind")
  end select
 
- ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08 else gcc complains with
+#ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
+ ! This call is problematic as the API with type(c_ptr) requires mpi_f08 else gcc complains with
  ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
  ! See https://github.com/pmodels/mpich/issues/2659
 
@@ -5385,29 +5386,19 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  !address = transfer(baseptr, address)
 
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
-#ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
- !call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, address, win, ierr)
- !                             !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
- !                             !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
-
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
-
  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_allocated_shared returned ierr /= 0")
 
  if (xcomm%me /= 0) then
-   !call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, address, ierr)
    call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
    if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_shared_query returned ierr /= 0")
  end if
- !MPI_WIN_SHARED_QUERY(WIN, RANK, SIZE, DISP_UNIT, BASEPTR, IERROR)
- !       INTEGER WIN, RANK, DISP_UNIT, IERROR
- !       INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
 
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 
 #else
- call xmpi_abort(msg="calling xcomm_allocate_shared_master without MPI!!")
+ call xmpi_abort(msg="MPI_WIN_ALLOCATE_SHARED with C_PTR is not supported by you MPI library!")
 #endif
 
 end subroutine xcomm_allocate_shared_master

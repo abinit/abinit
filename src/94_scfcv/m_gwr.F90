@@ -4638,16 +4638,20 @@ end if
     ! ===================================================================
     call print_chi_header()
 
-    call wrtout(std_out, " Will try to allocate memory for G_k(r',r) and chi_q(r',r)...")
+    call wrtout(std_out, " Allocatin memory for G_k(r',r) and chi_q(r',r)...")
+    call wrtout(std_out, " Here we're gonna have a big allocation peak...")
+
     ! Need all nqibz matrices here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
     nrsp = gwr%g_nfft * gwr%nspinor
     col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
     ABI_MALLOC(chiq_rpr, (gwr%nqibz))
     do iq_ibz=1,gwr%nqibz
       call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+      if (gwr%comm%me == 0 .and. mod(iq_ibz, 2) == 0) call pstat_proc%print(_PSTAT_ARGS_)
     end do
+
+    ! TODO: Can save memory here as we don't need +/- tau for each k/k+q
     do ipm=1,2
-      ! TODO: Can save memory here as we don't need +/- tau for each k/k+q
       call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
       call gkq_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
     end do
@@ -4655,7 +4659,6 @@ end if
     mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
     call wrtout(std_out, sjoin(" Local memory for chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
     if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
-
 
     ! * The little group is needed when symchi == 1
     ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve qibz are included as well.
@@ -5778,7 +5781,7 @@ else
    call ltg_kcalc(ikcalc)%print([std_out], prtvol=gwr%dtset%prtvol)
  end do
 
- ! Allocate PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell.
+ call wrtout(std_out, "Allocating PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell.")
  nrsp = gwr%g_nfft * gwr%nspinor
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
 

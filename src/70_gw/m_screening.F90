@@ -140,7 +140,7 @@ MODULE m_screening
 
   integer :: epsm1_win = xmpi_undefined
 
-  complex(gwpc), contiguous, pointer :: epsm1(:,:,:,:)
+  complex(gwpc), contiguous, pointer :: epsm1(:,:,:,:) => null()
   ! epsm1(npwe,npwe,nomega,nqibz)
   ! Contains the two-point function $\epsilon_{G,Gp}(q,omega)$ in frequency and reciprocal space.
   ! We use a pointer so that we can associated it to MPI shared memory window.
@@ -289,10 +289,6 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !! Deallocate all the pointers in Er that result to be associated.
 !! Perform also a cleaning of the Header.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -913,13 +909,14 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
    if (Er%mqmem > 0) then
      ! In-core solution.
+     Er%use_shared_win = .False.
+#ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
+     Er%use_shared_win = .True.
+     !Er%use_shared_win = nprocs > 1
+#endif
+
      write(msg,'(a,f12.1,a)')' Memory for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
      call wrtout(std_out, msg)
-
-     Er%use_shared_win = .False.
-#ifndef HAVE_MPI_ALLOCATE_SHARED_CPTR
-     Er%use_shared_win = .True.
-#endif
 
      iomode__ = iomode
      if (iomode__ == IO_MODE_MPI) then
@@ -944,12 +941,17 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(Er%nomega * Er%nqibz)
        call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, Er%epsm1_win)
        call c_f_pointer(void_ptr, Er%epsm1, shape=[npwe, npwe, Er%nomega, Er%nqibz])
-       ! This to avoid race conditions, as only one proc in sharex_xcomm should read from file.
+
        shared_xcomm =  xcomm%split_type()
+       ! Start the RMA epoch.
+       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
        if (shared_xcomm%me == 0) then
+         ! Only one proc in shared_xcomm reads from file.
          call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, xmpi_comm_self)
        end if
        call xcomm%free(); call shared_xcomm%free()
+       ! close the RMA epoch.
+       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
        end block
 
      end if
