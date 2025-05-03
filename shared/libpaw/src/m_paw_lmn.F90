@@ -38,7 +38,7 @@ MODULE m_paw_lmn
                            !   il, jl ,im, jm, ilm, jlm for each symmetric klm=(ilm,jlm)
  public :: klmn2ijlmn      ! Calculates ilmn and jlmn from klmn.
  public :: make_indln      ! Calculates indln(2,ln_size) giving l and n for i=ln
- public :: uppert_index    ! The sequential index of an element in the upper triangle of a matrix 
+ public :: uppert_index    ! The sequential index of an element in the upper triangle of a matrix
 
 CONTAINS  !========================================================================================
 !!***
@@ -61,8 +61,6 @@ CONTAINS  !=====================================================================
 
 subroutine ilm2lm(ilm,ll,mm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ilm
@@ -72,7 +70,7 @@ subroutine ilm2lm(ilm,ll,mm)
  integer :: ii
 ! *********************************************************************
 
- if (ilm<1) then 
+ if (ilm<1) then
    LIBPAW_ERROR("Wrong ilm")
  end if
 
@@ -108,14 +106,12 @@ end subroutine ilm2lm
 !!  orbitals(ln_size)=Give the value of l for each element of the augmented basis set.
 !!
 !! OUTPUT
-!!  indlmn(6,lmn_size)=array giving l,m,n,lm,ln,s for i=lmn 
+!!  indlmn(6,lmn_size)=array giving l,m,n,lm,ln,s for i=lmn
 !!  indlmn(8,lmn_size)=array giving l,m,sign of kappa,ln,spinor,2*j,2*m_j in case of dirac relativism
 !!
 !! SOURCE
 
 subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -133,7 +129,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
 
 !************************************************************************
 
- if(.not.present(kappa)) then 
+ if(.not.present(kappa)) then
    LIBPAW_ALLOCATE(nprj,(0:MAXVAL(orbitals)))
    LIBPAW_ALLOCATE(indlmn,(6,lmn_size))
    indlmn=0
@@ -161,7 +157,7 @@ subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn,kappa)
      il=orbitals(iln)
      kappa_sign=sign(1,kappa(iln)) ! sgn(kappa)=+1 or -1
      spinor=2-modulo(ib,2)       ! spinor= 1 or 2
-     i2j=2*il-kappa_sign              ! j=l-sgn(kappa)/2 = l-1/2 or l+1/2 
+     i2j=2*il-kappa_sign              ! j=l-sgn(kappa)/2 = l-1/2 or l+1/2
      do ilm=1,i2j+1
        !mj= -j,...,j
        i2mj=-i2j+2*(ilm-1)       ! 2m_j= -jc ... +jc
@@ -214,8 +210,6 @@ end subroutine make_indlmn
 !! SOURCE
 
 subroutine make_indklmn(lcutdens,lmn_size,lmn2_size,indlmn,indklmn,klm_diag)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -298,8 +292,6 @@ end subroutine make_indklmn
 
 subroutine make_kln2ln(lmn_size,lmn2_size,ln2_size,indlmn,indklmn,kln2ln)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmn2_size,lmn_size,ln2_size
@@ -377,8 +369,6 @@ end subroutine make_kln2ln
 !! SOURCE
 
 subroutine make_klm2lm(lmn_size,lmn2_size,lm2_size,indlmn,indklmn,klm2lm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -461,8 +451,6 @@ end subroutine make_klm2lm
 
 subroutine klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: klmn,lmn_size
@@ -512,8 +500,6 @@ end subroutine klmn2ijlmn
 
 subroutine make_indln(lmn_size,ln_size,indlmn,indln)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmn_size,ln_size
@@ -551,7 +537,7 @@ end subroutine make_indln
 !!   uppert_index
 !!
 !! FUNCTION
-!!  Helper function returning the sequential index of an element in the upper triangle of a matrix 
+!!  Helper function returning the sequential index of an element in the upper triangle of a matrix
 !!  given the row-index ii and the column-index jj. If ii>jj the index of the element a_{jj,ii} is returned.
 !!
 !! INPUTS
@@ -561,8 +547,6 @@ end subroutine make_indln
 !! SOURCE
 
 function uppert_index(ii,jj)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

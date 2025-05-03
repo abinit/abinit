@@ -23,7 +23,7 @@ module m_build_info
 
   implicit none
 
-! Try to prevent problems with the length of the argument 
+! Try to prevent problems with the length of the argument
 ! (should not exceed the line length of 132 character).
 ! So, always start the string to be replaced at the beginning of a line.
 
@@ -43,7 +43,7 @@ module m_build_info
   character(len=*),parameter :: version_build = &
 &   "@ABINIT_VERSION_BUILD@"
 
-! Info on compilers. Try to prevent problems with the length of the argument 
+! Info on compilers. Try to prevent problems with the length of the argument
 ! (should not exceed the line length of 132 character).
   character(len=*),parameter :: cc_info    = &
 &   "@abi_cc_vendor@@abi_cc_version@"
@@ -103,7 +103,7 @@ module m_build_info
 &   "@enable_exports@"
   character(len=*),parameter :: enable_gw_dpc = &
 &   "@enable_gw_dpc@"
- 
+
 contains  !===========================================================
 !!***
 
@@ -131,17 +131,15 @@ contains  !===========================================================
 
 subroutine dump_config(my_unit)
 
-  implicit none
-
 !Arguments ------------------------------------
   integer,intent(in) :: my_unit
 
 !Local variables-------------------------------
 
 ! *********************************************************************
- 
+
 ! TODO: things that might be added through preprocessing options, e.g.
-! date and time of compilation 
+! date and time of compilation
 
   write(my_unit,*)
   write(my_unit,'(1x,a)') repeat('+',78)

@@ -96,7 +96,6 @@ CONTAINS !===========================================================
 
  subroutine prt_device_info(device)
 
-  implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: device
@@ -162,8 +161,6 @@ CONTAINS !===========================================================
 
  subroutine InitGPU(gpuinfo,device)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)              :: device
@@ -199,7 +196,6 @@ CONTAINS !===========================================================
 
  subroutine Get_ndevice(ndevice)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ndevice
@@ -230,8 +226,6 @@ CONTAINS !===========================================================
 
 subroutine Get_Mem_Dev(device,max_mem_dev)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: device
@@ -255,8 +249,6 @@ end subroutine Get_Mem_Dev
 !! SOURCE
 
  subroutine CleanGPU(gpuinfo)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -293,7 +285,6 @@ end subroutine Get_Mem_Dev
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -403,8 +394,6 @@ end subroutine Get_Mem_Dev
 
  subroutine unsetdevice_cuda(gpu_option)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: gpu_option
@@ -452,8 +441,6 @@ end subroutine Get_Mem_Dev
 !! SOURCE
 
  subroutine get_fastest_devices(devices,nb_devices)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -535,8 +522,6 @@ contains
 !! SOURCE
 
  subroutine my_sort(list1,list2,iperm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

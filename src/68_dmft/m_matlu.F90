@@ -417,9 +417,6 @@ end subroutine copy_matlu
 
 subroutine copy_matlu_from_ndat(mat1,mat2,natom,ndat,idat,opt_diag,opt_non_diag,opt_re)
 
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
 !type
  integer, intent(in) :: natom,ndat,idat
@@ -485,9 +482,6 @@ end subroutine copy_matlu_from_ndat
 !! SOURCE
 
 subroutine copy_matlu_to_ndat(mat1,mat2,natom,ndat,idat,opt_diag,opt_non_diag,opt_re)
-
- use defs_basis
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1759,10 +1753,9 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine gather_matlu(gloc,gathergloc,natom,option,prtopt)
- use defs_basis
+
  use defs_wvltypes
  use m_crystal, only : crystal_t
- implicit none
 
 ! type  matlus_type
 !  SEQUENCE
@@ -2840,9 +2833,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine conjg_matlu(matlu1,natom)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2899,9 +2890,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine ln_matlu(matlu1,natom)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3378,9 +3367,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine magmomforb_matlu(matlu,mu,natom,option,optprt)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3621,9 +3608,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine magmomfspin_matlu(matlu,mu,natom,option,optprt)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3889,9 +3874,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine magmomfzeeman_matlu(matlu,mu,natom,option,optprt)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4186,9 +4169,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine chi_matlu(matlu,natom,option,optprt)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars

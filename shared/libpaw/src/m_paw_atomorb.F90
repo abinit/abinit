@@ -140,7 +140,7 @@ MODULE m_paw_atomorb
   ! indln(2,ln_size)
   ! Array giving l and n for i=ln
 
-  integer, allocatable :: indklmn(:,:) 
+  integer, allocatable :: indklmn(:,:)
    ! indklmn(8,lmn2_size)
    ! Array giving klm, kln, abs(il-jl), (il+jl), ilm and jlm, ilmn and jlmn for each klmn=(ilmn,jlmn)
    ! Note: ilmn=(il,im,in) and ilmn<=jlmn
@@ -229,8 +229,6 @@ CONTAINS  !=====================================================================
 
 subroutine destroy_atomorb(Atm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(atomorb_type),intent(inout) :: Atm
@@ -302,8 +300,6 @@ end subroutine destroy_atomorb
 
 subroutine get_atomorb_charge(Atm,Radmesh,nele,radens)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(out) :: nele
@@ -374,8 +370,6 @@ end subroutine get_atomorb_charge
 !! SOURCE
 
 subroutine get_overlap(Atm,Atmesh,Radmesh2,isppol,nphi,phi,phi_indln,overlap)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -477,8 +471,6 @@ end subroutine get_overlap
 
 subroutine print_atomorb(Atm,header,unit,prtvol,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(atomorb_type),intent(in) :: Atm
@@ -559,8 +551,6 @@ end subroutine print_atomorb
 !! SOURCE
 
 function my_mode2str(mode) result(str)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
