@@ -25,7 +25,6 @@ module m_sigma_driver
  use m_gwdefs
  use defs_wvltypes
  use m_dtset
- use mpi
  use m_xmpi
  use m_xomp
  use m_errors
@@ -1890,7 +1889,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  if (sigma_needs_ppm(Sigp)) then
    ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that Er%epsm1 is read-only.
-   if (Er%use_shared_win) call MPI_Win_fence(MPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
+   if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
 
    my_plsmf=drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf=Dtset%ppmfrq
    call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
@@ -1952,7 +1951,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if ! PAW or NC PPm and/or needs density
 
    ! If epsm1 is MPI-shared, we have to close the RMA epoch.
-   if (Er%use_shared_win) call MPI_Win_fence(MPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
+   if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
  end if ! sigma_needs_ppm
 
  _CALL_PSTAT_LOG()

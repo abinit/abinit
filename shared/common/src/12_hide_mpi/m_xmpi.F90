@@ -65,6 +65,10 @@ module m_xmpi
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
  integer,public,parameter :: xmpi_success        = MPI_SUCCESS
  integer,public,parameter :: xmpi_max_processor_name = MPI_MAX_PROCESSOR_NAME
+ integer,public,parameter :: XMPI_MODE_NOPRECEDE = MPI_MODE_NOPRECEDE
+ integer,public,parameter :: XMPI_MODE_NOSTORE   = MPI_MODE_NOSTORE
+ integer,public,parameter :: XMPI_MODE_NOPUT     = MPI_MODE_NOPUT
+ integer,public,parameter :: XMPI_MODE_NOSUCCEED = MPI_MODE_NOSUCCEED
 
 #else
  ! Fake replacements for the sequential version. Values are taken from
@@ -83,6 +87,10 @@ module m_xmpi
  integer,public,parameter :: xmpi_info_null      = 0
  integer,public,parameter :: xmpi_success        = 0
  integer,public,parameter :: xmpi_max_processor_name = 128
+ integer,public,parameter :: XMPI_MODE_NOPRECEDE = 1
+ integer,public,parameter :: XMPI_MODE_NOSTORE   = 2
+ integer,public,parameter :: XMPI_MODE_NOPUT     = 8
+ integer,public,parameter :: XMPI_MODE_NOSUCCEED = 32
 #endif
 
 #ifdef HAVE_MPI
@@ -736,18 +744,6 @@ interface xmpi_lor
   module procedure xmpi_lor_log3d
 end interface xmpi_lor
 !!!***
-
-! This to bypass missing interface for MPI_WIN_ALLOCATE etc
-! See https://github.com/pmodels/mpich/issues/2659
-!INTERFACE MPI_WIN_ALLOCATE_SHARED
-!SUBROUTINE MPI_WIN_ALLOCATE_SHARED_CPTR(SIZE, DISP_UNIT, INFO, COMM, &
-!BASEPTR, WIN, IERROR)
-!USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
-!INTEGER :: DISP_UNIT, INFO, COMM, WIN, IERROR
-!INTEGER(KIND=XMPI_ADDRESS_KIND) :: SIZE
-!TYPE(C_PTR) :: BASEPTR
-!END SUBROUTINE
-!END INTERFACE MPI_WIN_ALLOCATE_SHARED
 
 !----------------------------------------------------------------------
 
@@ -4316,7 +4312,6 @@ function xmpio_max_address(offset)
 !scalars
  integer(XMPI_ADDRESS_KIND) :: address
  integer(XMPI_OFFSET_KIND),parameter :: max_address=HUGE(address)-100
-
 !************************************************************************
 
  xmpio_max_address = (offset >= max_address)
@@ -5390,7 +5385,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  !address = transfer(baseptr, address)
 
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
  !call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, address, win, ierr)
  !                             !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
  !                             !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
@@ -5559,28 +5554,27 @@ subroutine pool2d_free(pool)
 end subroutine pool2d_free
 !!***
 
-subroutine xmpi_win_fence(win, assert)
+subroutine xmpi_win_fence(win, assert, ierr)
 
 !Arguments ------------------------------------
-  integer,intent(in) :: win
-  integer,optional,intent(in) :: assert
-!Local variables-------------------------------
-  integer :: assert__, ierr
+ integer,intent(in) :: win, assert
+ integer,intent(out) :: ierr
 !----------------------------------------------------------------------
 
-  assert__ = 0; if (present(assert)) assert__ = assert
 #ifdef HAVE_MPI
-  call MPI_WIN_FENCE(assert__, win, ierr)
-  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="MPI_WIN_FENCE return ierr /= 0")
+ call MPI_WIN_FENCE(assert, win, ierr)
 #endif
+
 end subroutine xmpi_win_fence
 
-subroutine xmpi_win_free(win)
-  integer,intent(inout) :: win
+subroutine xmpi_win_free(win, ierr)
+ integer,intent(inout) :: win
+ integer,intent(out) :: ierr
+
 #ifdef HAVE_MPI
-  integer :: ierr
-  call MPI_WIN_FREE(win, ierr)
+ call MPI_WIN_FREE(win, ierr)
 #endif
+
 end subroutine xmpi_win_free
 !!***
 

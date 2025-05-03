@@ -71,8 +71,6 @@ contains
 !=====================================================================================================
  subroutine tdep_calc_MoorePenrose(CoeffMoore,Forces,simult,Invar,IFC_coeff,MPIdata)
 
-  implicit none
-
   type(Input_type),intent(in) :: Invar
   type(Coeff_Moore_type), intent(in) :: CoeffMoore
   double precision, intent(in)  :: Forces(3*Invar%natom*Invar%my_nstep)
@@ -234,8 +232,6 @@ contains
 !====================================================================================================
  subroutine tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,&
 &                              Rlatt_cart,Rlatt4dos,Sym,ucart)
-
-  implicit none
 
   type(Input_type),intent(inout) :: Invar
   type(Lattice_type),intent(in) :: Lattice
@@ -658,8 +654,6 @@ contains
  subroutine tdep_calc_model(Forces_MD,Forces_TDEP,Invar,MPIdata,Phi1Ui,Phi2UiUj,&
 &                           Phi3UiUjUk,Phi4UiUjUkUl,U0)
 
-  implicit none
-
   type(Input_type),intent(in) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision, intent(in)  :: Forces_MD(3*Invar%natom*Invar%my_nstep)
@@ -819,9 +813,6 @@ contains
 !====================================================================================================
 subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPIdata,&
 &                            ncoeff,norder,nshell,order,proj,Sym)
-
-  implicit none
-
 
   integer,intent(in) :: iatcell,ishell,jatom,katom,latom,nshell,order,norder
   integer,intent(inout) :: ncoeff

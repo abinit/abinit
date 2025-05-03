@@ -73,8 +73,6 @@ contains
 !! SOURCE
 subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  type(dataset_type),         intent(inout) :: dtset
@@ -167,8 +165,6 @@ end subroutine rttddft_setup_ele_step
 !!
 !! SOURCE
 subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, psps, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

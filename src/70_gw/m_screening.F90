@@ -300,6 +300,8 @@ subroutine em1results_free(Er)
 
 !Arguments ------------------------------------
  class(Epsilonm1_results),intent(inout) :: Er
+
+ integer :: ierr
 ! *************************************************************************
 
  !integer
@@ -311,7 +313,7 @@ subroutine em1results_free(Er)
 
  !complex
  if (Er%use_shared_win) then
-   call xmpi_win_free(Er%epsm1_win)
+   call xmpi_win_free(Er%epsm1_win, ierr)
    nullify(Er%epsm1)
  else
    ABI_SFREE_PTR(Er%epsm1)
@@ -874,7 +876,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: dim_wing,iqibz,is_qeq0,mqmem_,npwe_asked,unt_dump,fform,rdwr,ierr,my_rank,comm_self, iomode__
+ integer :: dim_wing,iqibz,is_qeq0,mqmem_,npwe_asked,unt_dump,fform,rdwr,ierr,my_rank,iomode__, nprocs
  real(dp) :: ucvol
  character(len=500) :: msg
  character(len=fnlen) :: ofname
@@ -893,7 +895,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
  units = [std_out, ab_out]
 
- my_rank = xmpi_comm_rank(comm); comm_self = xmpi_comm_self
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  call metric(gmet,gprimd,-1,rmet,Vcp%rprimd,ucvol)
 
  ! if (Er%ID/=0) call reset_Epsilonm1(Er)
@@ -915,7 +917,9 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      call wrtout(std_out, msg)
 
      Er%use_shared_win = .False.
-     !Er%use_shared_win = .True.
+#ifndef HAVE_MPI_ALLOCATE_SHARED_CPTR
+     Er%use_shared_win = .True.
+#endif
 
      iomode__ = iomode
      if (iomode__ == IO_MODE_MPI) then
@@ -991,7 +995,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        Hscr_cp%npwe = npwe
 
        rdwr=2; fform=Hscr_cp%fform
-       call hscr_cp%io(fform,rdwr,unt_dump,comm_self,master,iomode)
+       call hscr_cp%io(fform,rdwr,unt_dump,xmpi_comm_self,master,iomode)
        call Hscr_cp%free()
 
        ABI_MALLOC_OR_DIE(epsm1, (npwe, npwe, Er%nomega), ierr)
@@ -1002,9 +1006,9 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ! FIXME there's a problem with SUSC files and MPI-IO
          !if (iomode == IO_MODE_MPI) then
          !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
-         !  call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,IO_MODE_FORTRAN,comm_self,iqiA=iqibz)
+         !  call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,IO_MODE_FORTRAN,xmpi_comm_self,iqiA=iqibz)
          !else
-         call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,iomode,comm_self,iqiA=iqibz)
+         call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,iomode,xmpi_comm_self,iqiA=iqibz)
          !end if
 
          dim_wing=0; if (is_qeq0==1) dim_wing=3
@@ -1016,12 +1020,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
            ABI_WARNING('Entering out-of core RPA or Kxc branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
                                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                                  dummy_lwing,dummy_uwing,epsm1,spectra,comm_self)
+                                  dummy_lwing,dummy_uwing,epsm1,spectra,xmpi_comm_self)
          else
            ABI_WARNING('Entering out-of core fxc_ADA branch')
            call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
                                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                                  dummy_lwing,dummy_uwing,epsm1,spectra,comm_self,fxc_ADA(:,:,iqibz))
+                                  dummy_lwing,dummy_uwing,epsm1,spectra,xmpi_comm_self,fxc_ADA(:,:,iqibz))
          end if
 
          ABI_FREE(dummy_head)
@@ -1397,7 +1401,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 !scalars
  integer,parameter :: master=0
  integer :: i1,i2,ig1,ig2,io,ierr,irank,my_nqlwl !iqlwl
- integer :: nor,my_rank,nprocs,comm_self,g1mg2_idx
+ integer :: nor,my_rank,nprocs,g1mg2_idx
  real(dp) :: ucvol
  logical :: is_qeq0,use_MPI
  character(len=500) :: msg
@@ -1424,9 +1428,6 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  call cwtime(cpu, wall, gflops, "start")
-
- ! MG TODO We use comm_self for the inversion as the single precision version is not yet available
- comm_self = xmpi_comm_self
 
  call metric(gmet,gprimd,-1,rmet,Vcp%rprimd,ucvol)
 
@@ -1492,7 +1493,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
        !write(std_out,*)"dim_wing",dim_wing
        call rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),my_nqlwl,dim_wing, &
                          chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:), &
-                         tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+                         tmp_lf,tmp_nlf,tmp_eelf,xmpi_comm_self)
 
          ! Store results.
          epsm_lf(io,:) = tmp_lf
@@ -1604,7 +1605,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      chi0 = chi0_save
      io=1 ! for now only at omega=0
      call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
-        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,xmpi_comm_self)
      conv_err = smallest_real
      do ig2=1,npwe*nJ
        do ig1=1,npwe*nI
@@ -1643,7 +1644,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
-         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,xmpi_comm_self)
        epsm_lf(io,:) = tmp_lf
        epsm_nlf(io,:) = tmp_nlf
        eelf(io,:) = tmp_eelf
@@ -1689,7 +1690,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
-          chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+          chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,xmpi_comm_self)
        epsm_lf(io,:) = tmp_lf
        epsm_nlf(io,:) = tmp_nlf
        eelf(io,:) = tmp_eelf
@@ -1728,7 +1729,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
    io = 1 ! static
    call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
-     chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+     chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,xmpi_comm_self)
    epsm_lf(1,:) = tmp_lf
 
    ! chi(RPA) = chi0 * (1 - chi0 * v_c)^-1
@@ -1766,7 +1767,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
-         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,xmpi_comm_self)
        epsm_lf(io,:) = tmp_lf
        epsm_nlf(io,:) = tmp_nlf
        eelf(io,:) = tmp_eelf
@@ -1854,7 +1855,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_hyb_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_lr,kxcg_mat,option_test,my_nqlwl,dim_wing,omega(io),&
-         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
+         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,xmpi_comm_self)
        epsm_lf(io,:) = tmp_lf
        epsm_nlf(io,:) = tmp_nlf
        eelf(io,:) = tmp_eelf
