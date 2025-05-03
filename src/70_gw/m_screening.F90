@@ -22,6 +22,8 @@
 
 MODULE m_screening
 
+ use, intrinsic :: iso_c_binding
+
  use defs_basis
  use m_abicore
  use m_hide_blas
@@ -132,13 +134,16 @@ MODULE m_screening
   ! qlwl(3,nqlwl)
   ! q-points used for the long wave-length limit treatment.
 
-  !real(gwp),allocatable :: epsm1_pole(:,:,:,:)
-  ! epsm1(npwe,npwe,nomega,nqibz)
-  ! Contains the two-point function $\epsilon_{G,Gp}(q,omega)$ in frequency and reciprocal space.
+  logical :: use_shared_win = .False.
+  ! This flag allows us to understand if espm1 is associates to a MPI window or not.
+  ! In the former case, we should free the window and not the pointer
 
-  complex(gwpc),allocatable :: epsm1(:,:,:,:)
+  integer :: epsm1_win = xmpi_undefined
+
+  complex(gwpc), contiguous, pointer :: epsm1(:,:,:,:)
   ! epsm1(npwe,npwe,nomega,nqibz)
   ! Contains the two-point function $\epsilon_{G,Gp}(q,omega)$ in frequency and reciprocal space.
+  ! We use a pointer so that we can associated it to MPI shared memory window.
 
   complex(dpc),allocatable :: omega(:)
   ! omega(nomega)
@@ -299,11 +304,19 @@ subroutine em1results_free(Er)
 
  !integer
  ABI_SFREE(Er%gvec)
+
  !real
  ABI_SFREE(Er%qibz)
  ABI_SFREE(Er%qlwl)
+
  !complex
- ABI_SFREE(Er%epsm1)
+ if (Er%use_shared_win) then
+   call xmpi_win_free(Er%epsm1_win)
+   nullify(Er%epsm1)
+ else
+   ABI_SFREE_PTR(Er%epsm1)
+ end if
+
  ABI_SFREE(Er%omega)
 
  !datatypes
@@ -555,7 +568,6 @@ subroutine Epsm1_rotate_iqbz(Er, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange,ep
        sg1 = Gsph%rottb(ii,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(ii,isym_q)
        epsm1_qbz(sg1,sg2,iw) = Er%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
-       !epsm1_qbz(sg1,sg2,iw) = Er%epsm1(ii,jj,iw,iq_loc) * phmSgt(ii) * CONJG(phmSgt(jj))
      end do
    end do
  end do
@@ -671,14 +683,12 @@ subroutine Epsm1_rotate_iqbz_inplace(Er,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exch
        sg1 = Gsph%rottb(ii,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(ii,isym_q)
        work(sg1,sg2) = Er%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
-       !work(grottb(ii),grottb(jj))=Er%epsm1(ii,jj,iw,iq_loc)*phmSgt(ii)*CONJG(phmSgt(jj))
      end do
    end do
    Er%epsm1(:,:,iw,iq_loc) = work(:,:)
  end do
- !
+
  ! === Account for time-reversal ===
- !Er%epsm1(:,:,iw,iq_loc)=TRANSPOSE(Er%epsm1(:,:,iw,iq_loc))
  if (itim_q==2) then
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
@@ -895,23 +905,44 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
  !write(std_out,*)'Er%ID: ',Er%ID,', Er%Hscr%ID: ',Er%Hscr%ID
 
- if (Er%ID==Er%Hscr%ID) then
-   ! === The two-point function we are asking for is already stored on file ===
-   ! * According to mqmem either read and store the entire matrix in memory or do nothing.
+ if (Er%ID == Er%Hscr%ID) then
+   ! The two-point function we are asking for is already stored on file
+   ! According to mqmem either read and store the entire matrix in memory or do nothing.
 
    if (Er%mqmem > 0) then
      ! In-core solution.
-     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
-     call wrtout(std_out,msg)
+     write(msg,'(a,f12.1,a)')' Memory for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
+     call wrtout(std_out, msg)
 
-     ABI_MALLOC_OR_DIE(Er%epsm1, (npwe, npwe, Er%nomega, Er%nqibz), ierr)
+     Er%use_shared_win = .True.
+     Er%use_shared_win = .False.
 
-     if (iomode == IO_MODE_MPI) then
-       !call wrtout(std_out, "read_screening with MPI_IO")
-       ABI_WARNING("SUSC files is buggy. Using Fortran IO")
-       call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, IO_MODE_FORTRAN, comm)
+     if (.not. Er%use_shared_win) then
+       ABI_MALLOC_OR_DIE(Er%epsm1, (npwe, npwe, Er%nomega, Er%nqibz), ierr)
+
+       if (iomode == IO_MODE_MPI) then
+         ABI_WARNING("SUSC files is buggy. Using Fortran IO")
+         call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, IO_MODE_FORTRAN, comm)
+       else
+         call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
+       end if
+
      else
-       call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
+
+       block
+       integer :: comm__
+       type(c_ptr) :: void_ptr
+       integer(kind=XMPI_ADDRESS_KIND) :: count
+       type(xcomm_t) :: xcomm
+       comm__ = comm
+       xcomm = xcomm_from_mpi_int(comm__)
+#define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
+       count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(Er%nomega * Er%nqibz)
+       call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, Er%epsm1_win)
+       call c_f_pointer(void_ptr, Er%epsm1, shape=[npwe, npwe, Er%nomega, Er%nqibz])
+       call xcomm%free()
+       end block
+
      end if
 
    else
@@ -1029,7 +1060,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! ========================
      ! === In-core solution ===
      ! ========================
-     ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
+     ABI_MALLOC_OR_DIE(Er%epsm1, (npwe,npwe,Er%nomega,Er%nqibz), ierr)
 
      ! FIXME there's a problem with SUSC files and MPI-IO
      !if (iomode == IO_MODE_MPI) then
@@ -1134,7 +1165,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
  select case (Er%mqmem)
  case (0)
    !  Out-of-core solution
-   ABI_SFREE(Er%epsm1)
+   ABI_SFREE_PTR(Er%epsm1)
    ABI_MALLOC_OR_DIE(Er%epsm1,(Er%npwe,Er%npwe,Er%nomega,1), ierr)
 
    ! FIXME there's a problem with SUSC files and MPI-IO
