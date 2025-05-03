@@ -64,6 +64,7 @@ module m_xmpi
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
  integer,public,parameter :: xmpi_success        = MPI_SUCCESS
+ integer,public,parameter :: xmpi_max_processor_name = MPI_MAX_PROCESSOR_NAME
 
 #else
  ! Fake replacements for the sequential version. Values are taken from
@@ -81,6 +82,7 @@ module m_xmpi
  integer,public,parameter :: xmpi_msg_len        = 1000
  integer,public,parameter :: xmpi_info_null      = 0
  integer,public,parameter :: xmpi_success        = 0
+ integer,public,parameter :: xmpi_max_processor_name = 128
 #endif
 
 #ifdef HAVE_MPI
@@ -1938,24 +1940,21 @@ end subroutine xmpi_barrier
 subroutine xmpi_name(name_ch, ierr)
 
 !Arguments-------------------------
- character(20),intent(out) :: name_ch
+ character(xmpi_max_processor_name),intent(out) :: name_ch
  integer,intent(out) ::  ierr
 
 !Local variables-------------------
  integer :: len
-! character(len=MPI_MAX_PROCESSOR_NAME) :: name_ch
 ! *************************************************************************
 
  ! Get the name of this processor (usually the hostname)
-
  ierr = 0
-
 #ifdef HAVE_MPI
  call MPI_GET_PROCESSOR_NAME(name_ch, len, ierr)
- name_ch = trim(name_ch)
+ name_ch = trim(name_ch(1:len))
 
 #else
- name_ch ='0'
+ name_ch = '0'
 #endif
 
 end subroutine xmpi_name
@@ -5277,17 +5276,27 @@ subroutine xcomm_print_names(xcomm)
  class(xcomm_t),intent(in) :: xcomm
 
 !Local variables-------------------
- integer :: ip, ierr
- character(20) :: my_name, names(xcomm%nproc)
+ integer :: ip, ierr !, shared_comm
+ character(len=xmpi_max_processor_name) :: my_name, names(xcomm%nproc)
 !----------------------------------------------------------------------
 
  call xmpi_name(my_name, ierr)
- call xmpi_allgather(my_name, names, xcomm%value, ierr)
+ ! FIXME
+ !call xmpi_allgather(my_name, names, xcomm%value, ierr)
+
+! ! Get node-level communicator.
+! shared_comm = xmpi_comm_world
+!#ifdef HAVE_MPI
+! call MPI_Comm_split_type(xcomm%value, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, shared_comm, ierr)
+!#endif
+! shared_rank = xmpi_comm_rank(shared_comm)
+! shared_size = xmpi_comm_size(shared_comm)
 
  if (xcomm%me == 0) then
    write(std_out, "(a5,2x,a20)")"rank", "hostname"
    do ip=0,xcomm%nproc-1
      write(std_out, "(i5,2x,a20)")ip, trim(names(ip+1))
+     !write(*,*) 'Global rank', xcomm%me, trim(name(:name_len)), 'Shared rank', shared_rank, 'Shared size', shared_size
    end do
  end if
 
@@ -5328,13 +5337,8 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  integer,intent(out) :: win
 
 !Local variables-------------------
- integer :: disp_unit
-#ifdef HAVE_MPI_WIN_ALLOCATE_SHARED_CPTR
- integer :: ierr
- integer(kind=XMPI_ADDRESS_KIND) :: my_size
-#endif
- integer(kind=XMPI_ADDRESS_KIND) :: address
- address = transfer(baseptr, address)
+ integer :: disp_unit, ierr
+ integer(kind=XMPI_ADDRESS_KIND) :: my_size, address
 !----------------------------------------------------------------------
 
  if (.not. xcomm%can_use_shmem()) call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
@@ -5352,14 +5356,22 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
  ! See https://github.com/pmodels/mpich/issues/2659
 
-#ifdef HAVE_MPI_WIN_ALLOCATE_SHARED_CPTR
- my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
- call MPI_WIN_ALLOCATE_SHARED_CPTR(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
-                                  !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
-                                  !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
+ ! C_PTR to INTEGER(KIND=MPI_ADDRESS_KIND) is not directly portable in standard Fortran unless
+ ! the implementation guarantees that a pointer can be represented as an integer of the appropriate kind.
+ ! MPI doesn’t specify this explicitly, but most implementations allow it.
+ address = transfer(baseptr, address)
 
- if (xcomm%me /= 0) call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
- if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="allocated_shared returned ierr /= 0")
+ my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
+#ifdef HAVE_MPI
+ call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, address, win, ierr)
+                              !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
+                              !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
+ if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_allocated_shared returned ierr /= 0")
+
+ if (xcomm%me /= 0) then
+   call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, address, ierr)
+   if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_shared_query returned ierr /= 0")
+ end if
  !MPI_WIN_SHARED_QUERY(WIN, RANK, SIZE, DISP_UNIT, BASEPTR, IERROR)
  !       INTEGER WIN, RANK, DISP_UNIT, IERROR
  !       INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
@@ -5368,7 +5380,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 
 #else
-  if (.FALSE.) write(std_out,*) count, info
+ call xmpi_abort(msg="calling xcomm_allocate_shared_master without MPI!!")
 #endif
 
 end subroutine xcomm_allocate_shared_master

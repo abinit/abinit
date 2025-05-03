@@ -52,7 +52,7 @@ MODULE m_screening
  use m_fft,             only : fourdp
  use m_gsphere,         only : gsphere_t
  use m_vcoul,           only : vcoul_t
- use m_io_screening,    only : hscr_io, read_screening, write_screening, &
+ use m_io_screening,    only : read_screening, write_screening, &
                                HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_paw_sphharm,     only : ylmc
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
@@ -955,7 +955,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        Hscr_cp%npwe = npwe
 
        rdwr=2; fform=Hscr_cp%fform
-       call hscr_io(hscr_cp,fform,rdwr,unt_dump,comm_self,master,iomode)
+       call hscr_cp%io(fform,rdwr,unt_dump,comm_self,master,iomode)
        call Hscr_cp%free()
 
        ABI_MALLOC_OR_DIE(epsm1, (npwe, npwe, Er%nomega), ierr)
@@ -3146,7 +3146,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
      if (open_file(path,msg,newunit=unt,form="unformatted", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
-     !call hscr_io(er%hscr,fform,rdwr,unt,comm,master,iomode)
+     !call er%hscr%io(fform,rdwr,unt,comm,master,iomode)
      do iw=1,nomega
        write(unt)chi0_head(:,:,iw)
      end do

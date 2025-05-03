@@ -226,7 +226,7 @@ MODULE m_io_screening
     procedure :: bcast => hscr_bcast            ! Broadcast the header.
     procedure :: free => hscr_free              ! Free the header.
     procedure :: copy => hscr_copy              ! Copy the SCR|SUSC header.
-
+    procedure :: io => hscr_io                  ! I/O of the header (read/write/echo).
  end type hscr_t
 !!***
 
@@ -236,8 +236,6 @@ MODULE m_io_screening
  integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
  integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
  ! The latest headform used when writing.
-
- public :: hscr_io              ! I/O of the header (read/write/echo).
 
  public :: hscr_new             ! Create header.
  public :: hscr_merge           ! Merge two or more headers.
@@ -320,12 +318,12 @@ subroutine hscr_from_file(hscr, path, fform, comm)
      if (open_file(path,msg,newunit=unt,form="unformatted", status="old",action="read") /= 0) then
        ABI_ERROR(msg)
      end if
-     call hscr_io(hscr,fform,rdwr5,unt,xmpi_comm_self,master,IO_MODE_FORTRAN)
+     call hscr%io(fform, rdwr5, unt, xmpi_comm_self, master, IO_MODE_FORTRAN)
      close(unt)
    else
      ! Netcdf format
      NCF_CHECK(nctk_open_read(unt, path, xmpi_comm_self))
-     call hscr_io(hscr,fform,rdwr5,unt,xmpi_comm_self,master,IO_MODE_ETSF)
+     call hscr%io(fform, rdwr5, unt, xmpi_comm_self, master, IO_MODE_ETSF)
      NCF_CHECK(nf90_close(unt))
    end if
 
@@ -415,8 +413,8 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
  if (rdwr==1 .or. rdwr==5) then
 
    if (.True.) then
-   ! TODO: only master should read but then I have to skip the header.
-   !if (my_rank == master) then
+     ! TODO: only master should read but then I have to skip the header.
+     !if (my_rank == master) then
      ! Read the abinit header, rewinding of the file (if any) is done here.
      if (iomode==IO_MODE_FORTRAN) then
        call hscr%hdr%fort_read(unt, fform, rewind=(rdwr==1))
@@ -1471,11 +1469,11 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
    if (open_file(fname,msg,newunit=unt,form="unformatted",status="old",action="read") /= 0) then
      ABI_ERROR(msg)
    end if
-   call hscr_io(hscr,fform,rdwr,unt,comm,master,my_iomode)
+   call hscr%io(fform, rdwr, unt, comm, master, my_iomode)
 
  case (IO_MODE_ETSF)
    NCF_CHECK(nctk_open_read(unt, fname, xmpi_comm_self))
-   call hscr_io(hscr,fform,rdwr,unt,comm,master,my_iomode)
+   call hscr%io(fform, rdwr, unt, comm, master, my_iomode)
 
  case default
    ABI_ERROR(sjoin("Wrong iomode:", iomode2str(my_iomode)))
@@ -1852,7 +1850,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
    ABI_ERROR("Files to be merged have different fform. Cannot merge data")
  end if
 
- call hscr_io(ohscr,fform_merge,rdwr2,ount,comm,master,iomode)
+ call ohscr%io(fform_merge, rdwr2, ount, comm, master, iomode)
 
  npwe4m   = ohscr%npwe
  nomega4m = ohscr%nomega
@@ -1969,7 +1967,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  end if
  varname = abifile%varname
 
- call hscr_io(hscr_recov,fform1,rdwr2,unt,comm,master,iomode)
+ call hscr_recov%io(fform1,rdwr2,unt,comm,master,iomode)
 
  nqibzA=1; nomega_asked=hscr%nomega; npwe_asked=hscr%npwe
 
@@ -2215,7 +2213,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  end if
  varname = abifile%varname
 
- call hscr_io(ohscr,fform_merge,rdwr2,ount,comm,master,iomode)
+ call ohscr%io(fform_merge,rdwr2,ount,comm,master,iomode)
 
  npwe4mI = ohscr%npwe*ohscr%nI
  npwe4mJ = ohscr%npwe*ohscr%nJ
@@ -2362,7 +2360,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  end if
  varname = abifile%varname
 
- call hscr_io(ohscr,fform_merge,rdwr2,ount,comm,master,iomode)
+ call ohscr%io(fform_merge,rdwr2,ount,comm,master,iomode)
 
  npwe4mI = ohscr%npwe*ohscr%nI; npwe4mJ = ohscr%npwe*ohscr%nJ
  nomega4m = ohscr%nomega
