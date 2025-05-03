@@ -1219,7 +1219,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  call cwtime(cpu, wall, gflops, "start")
  loc2_size = ghg_mat%sizeb_local(2)
 
- if (my_rank == master) _CALL_PSTAT_LOG()
+ if (my_rank == master) call pstat_proc%print(_PSTAT_ARGS_)
 
  do il_g2=1, loc2_size, batch_size
    ! Operate on ndat g-vectors starting at the igsp2_start global index.
@@ -1477,7 +1477,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ! NB: global H shape is (h_size, h_size) even for partial diago.
  ! then one extracts the (hsize, nband_k) sub-matrix before returning.
  call ghg_4diag%copy(eigvec)
- if (my_rank == master) _CALL_PSTAT_LOG()
+ if (my_rank == master) call pstat_proc%print(_PSTAT_ARGS_)
 
 #ifndef HAVE_LINALG_ELPA
  call wrtout([std_out, ab_out], &
@@ -1517,7 +1517,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  end if
 
  if (my_rank == master) then
-   _CALL_PSTAT_LOG()
+   call pstat_proc%print(_PSTAT_ARGS_)
    ! Write eigenvalues.
    frmt1 = '(8x,*(1x,f7.3))'
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
@@ -1666,7 +1666,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ABI_FREE(ffnl)
  call destroy_mpi_enreg(mpi_enreg_seq); call gs_hamk%free(); call psb%free()
 
- if (my_rank == master) _CALL_PSTAT_LOG()
+ if (my_rank == master) call pstat_proc%print(_PSTAT_ARGS_)
 
  call timab(1919, 2, tsec)
 

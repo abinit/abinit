@@ -1091,7 +1091,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
  if (from_file) call Hscr%free()
 
- _CALL_PSTAT_LOG()
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  DBG_EXIT("COLL")
 
