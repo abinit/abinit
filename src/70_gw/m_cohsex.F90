@@ -24,6 +24,7 @@ module m_cohsex
  use defs_basis
  use m_defs_ptgroups
  use m_gwdefs
+ use mpi
  use m_xmpi
  use m_errors
  use m_abicore
@@ -443,6 +444,9 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
    ABI_COMMENT('Reading q-slices from file. Slower but less memory.')
  end if
 
+ ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that Er%epsm1 is read-only.
+ if (Er%use_shared_win) call MPI_Win_fence(MPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
+
  call timab(442,2,tsec)
 
  ! ==========================================
@@ -716,6 +720,9 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      ABI_FREE(Cprj_kgw)
    end if
  end do !spin
+
+ ! If epsm1 is MPI-shared, we have to close the RMA epoch.
+ if (Er%use_shared_win) call MPI_Win_fence(MPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
 
  ABI_FREE(igfftcg0)
 

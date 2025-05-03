@@ -933,15 +933,19 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        integer :: comm__
        type(c_ptr) :: void_ptr
        integer(kind=XMPI_ADDRESS_KIND) :: count
-       type(xcomm_t) :: xcomm
+       type(xcomm_t) :: xcomm, shared_xcomm
        comm__ = comm
        xcomm = xcomm_from_mpi_int(comm__)
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
        count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(Er%nomega * Er%nqibz)
        call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, Er%epsm1_win)
        call c_f_pointer(void_ptr, Er%epsm1, shape=[npwe, npwe, Er%nomega, Er%nqibz])
-       call xcomm%free()
-       call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, comm)
+       ! This to avoid race conditions, as only one proc in sharex_xcomm should read from file.
+       shared_xcomm =  xcomm%split_type()
+       if (shared_xcomm%me == 0) then
+         call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, xmpi_comm_self)
+       end if
+       call xcomm%free(); call shared_xcomm%free()
        end block
 
      end if
