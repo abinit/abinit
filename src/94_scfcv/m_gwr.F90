@@ -2560,7 +2560,7 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
  integer,optional,intent(inout) :: gt_scbox_win
 
 !Local variables-------------------------------
- integer :: my_ikf, ik_bz, ipm, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc) ! ig,
+ integer :: my_ikf, ik_bz, ipm, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc), ierr ! ig,
  !real(dp) :: tsec(2) !, cpu, wall, gflops
 ! *************************************************************************
 
@@ -2597,7 +2597,7 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
    idat_list = cshift([(ii, ii=1,gwr%kpt_comm%nproc)], shift=-gwr%kpt_comm%me)
 
    do iepoch=1,gwr%kpt_comm%nproc
-     call xmpi_win_fence(gt_scbox_win)
+     call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr)
      idat = idat_list(iepoch)
      if (idat > ndat) goto 10
      if (iepoch == 1) then
@@ -2628,7 +2628,7 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
      10 continue
      !call xmpi_barrier(gwr%kpt_comm%value)
      !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-     call xmpi_win_fence(gt_scbox_win)
+     call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr)
    end do ! iepoch
  end if
 
@@ -2668,7 +2668,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
  integer,optional,intent(inout) :: wct_scbox_win
 
 !Local variables-------------------------------
- integer :: my_iqf, iq_bz, idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc) ! gg(3), ig,
+ integer :: my_iqf, iq_bz, idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc), ierr ! gg(3), ig,
  !real(dp) :: tsec(2) !, cpu, wall, gflops
 ! *************************************************************************
 
@@ -2701,7 +2701,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
    idat_list = cshift([(ii, ii=1,gwr%kpt_comm%nproc)], shift=-gwr%kpt_comm%me)
 
    do iepoch=1,gwr%kpt_comm%nproc
-     call xmpi_win_fence(wct_scbox_win)
+     call xmpi_win_fence(XMPI_MODE_NOSUCCEED, wct_scbox_win, ierr)
      idat = idat_list(iepoch)
      if (idat > ndat) goto 10
      if (iepoch == 1) wct_scbox(:,idat) = czero_gw
@@ -2725,7 +2725,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
      10 continue
      !call xmpi_barrier(gwr%kpt_comm%value)
      !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(wct_scbox)
-     call xmpi_win_fence(wct_scbox_win)
+     call xmpi_win_fence(XMPI_MODE_NOPRECEDE, wct_scbox_win, ierr)
    end do ! iepoch
  end if
 
@@ -4408,7 +4408,7 @@ subroutine gwr_build_tchi(gwr)
 
    use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc .and. gwr%kpt_comm%nproc > 1
    use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
-#ifndef _GMATTEO_WHISH_LIST
+#ifndef HAVE_MPI_ALLOCATE_SHARED_CPTR
    use_shmem_for_k = .False.
 #endif
    if (gwr%dtset%userie == 234) use_shmem_for_k = .False.
@@ -4522,7 +4522,7 @@ else
 
          ! Now each MPI proc operates on different idat entries.
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-         call xmpi_win_fence(gt_scbox_win)
+         call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr)
          idat = gwr%kpt_comm%me + 1
          if (idat <= ndat) then
            do ipm=1,2
@@ -4533,7 +4533,7 @@ else
          end if
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
          !call xmpi_barrier(gwr%kpt_comm%value)
-         call xmpi_win_fence(gt_scbox_win)
+         call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr)
 end if
 
          ! Now extract tchi_q(g',r) on the ecuteps (q+g)-sphere from the FFT box in the supercell
@@ -4618,7 +4618,7 @@ end if
    end do ! my_is
 
    if (use_shmem_for_k) then
-     call xmpi_win_free(gt_scbox_win)
+     call xmpi_win_free(gt_scbox_win, ierr)
    else
      ABI_FREE(gt_scbox)
    end if
@@ -5565,7 +5565,9 @@ if (gwr%use_supercell_for_sigma) then
 
  use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc .and. gwr%kpt_comm%nproc > 1
  use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
- !use_shmem_for_k = .False.
+#ifndef HAVE_MPI_ALLOCATE_SHARED_CPTR
+ use_shmem_for_k = .False.
+#endif
 
  if (use_shmem_for_k) then
    buf_count = 2 * (sc_nfftsp * max_ndat * 2)
@@ -5679,7 +5681,7 @@ else
                              wct_scbox_win=wct_scbox_win)
 
        ! Now each MPI proc operates on different idat entries.
-       call xmpi_win_fence(gt_scbox_win)
+       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr)
        idat = gwr%kpt_comm%me + 1
        if (idat <= ndat) then
          call wt_plan%execute(wct_scbox(:,idat), -1, ndat=gwr%nspinor, iscale=0)
@@ -5690,7 +5692,7 @@ else
        end if
        !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
        !call xmpi_barrier(gwr%kpt_comm%value)
-       call xmpi_win_fence(gt_scbox_win)
+       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr)
 end if
 
        ! Integrate Sigma matrix elements in the R-supercell for ndat r-points and accumulate.
@@ -5748,12 +5750,11 @@ end if
    ABI_FREE(gt_scbox)
    ABI_FREE(wct_scbox)
  else
-   call xmpi_win_free(gt_scbox_win)
-   call xmpi_win_free(wct_scbox_win)
+   call xmpi_win_free(gt_scbox_win, ierr)
+   call xmpi_win_free(wct_scbox_win, ierr)
  end if
 
- call green_plan%free()
- call wt_plan%free()
+ call green_plan%free(); call wt_plan%free()
 
  ABI_FREE(green_scgvec)
  ABI_FREE(wc_scgvec)

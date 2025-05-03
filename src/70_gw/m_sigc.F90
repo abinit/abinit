@@ -19,7 +19,6 @@ module m_sigc
  use m_gwdefs
  use m_abicore
  use m_xmpi
- use mpi
  use m_xomp
  use m_defs_ptgroups
  use m_errors
@@ -594,7 +593,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  _CALL_PSTAT_LOG()
 
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
- if (Er%use_shared_win) call MPI_Win_fence(MPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
+ if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
 
  ! ==========================================
  ! ==== Fat loop over k_i in the full BZ ====
@@ -1202,7 +1201,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  end do ! spin
 
  ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that Er%epsm1 is read-only.
- if (Er%use_shared_win) call MPI_Win_fence(MPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
+ if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
 
  ABI_FREE(sigcme2)
  ABI_FREE(sigcme_3)

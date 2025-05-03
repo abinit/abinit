@@ -57,7 +57,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_crystal(Crystal,Invar,Lattice,Sym)
 
-  implicit none
   type(crystal_t),intent(out) :: Crystal
   type(Input_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
@@ -92,7 +91,6 @@ contains
 
  subroutine tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt_cart,Shell2at,Sym)
 
-  implicit none
   type(crystal_t),intent(in) :: Crystal
   type(ifc_type),intent(out) :: Ifc
   type(ddb_type),intent(in) :: DDB
@@ -207,7 +205,6 @@ contains
 
  subroutine tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
 
-  implicit none
   type(crystal_t),intent(in) :: Crystal
   type(ddb_type),intent(out) :: DDB
   type(Qbz_type),intent(out) :: Qbz
@@ -326,7 +323,6 @@ contains
 
  subroutine tdep_write_ddb(DDB,Crystal,Invar)
 
-  implicit none
   type(crystal_t),intent(inout) :: Crystal
   type(ddb_type),intent(inout) :: DDB
   type(Input_type),intent(in) :: Invar
@@ -353,8 +349,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_read_ifc(Ifc,Invar,natom_unitcell)
-
-  implicit none
 
   integer,intent(in) :: natom_unitcell
   type(Input_type),intent(in) :: Invar
@@ -460,8 +454,6 @@ end subroutine tdep_read_ifc
 
 subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
 
-  implicit none
-
   integer,intent(in) :: natom_unitcell,unitfile
   type(Input_type),intent(in) :: Invar
   type(ifc_type),intent(inout) :: Ifc
@@ -509,8 +501,6 @@ end subroutine tdep_write_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rlatt4abi,Shell2at,Sym)
-
-  implicit none
 
   integer,intent(in) :: dipdip,natom_unitcell,option
   type(Input_type),intent(in) :: Invar
@@ -665,7 +655,6 @@ end subroutine tdep_ifc2phi2
 
  subroutine tdep_destroy_qbz(Qbz)
 
-  implicit none
   type(Qbz_type),intent(inout) :: Qbz
 
   ABI_FREE(Qbz%qbz)

@@ -790,6 +790,60 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE], [
 
                     # ------------------------------------ #
 
+# _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR()
+# ---------------------------
+#
+# Checks whether the MPI library supports MPI_WIN_ALLOCATE_SHARED with C_PTR
+#
+
+AC_DEFUN([_ABI_MPI_CHECK_ALLOCATE_SHARED_PTR], [
+  # Set default values
+  abi_mpi_allocate_shared_ok="no"
+
+  # Back-up build environment
+  ABI_ENV_BACKUP
+
+  # Prepare build environment
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+  LDFLAGS="${FC_LDFLAGS}"
+  LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+  # Try to compile a Fortran MPI program
+  # Note: we assume a MPI implementation that provides the mpi module
+  AC_MSG_CHECKING([whether the MPI library supports MPI_ALLOCATE_SHARED with C_PTR)])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+       use mpi
+       use iso_c_binding
+
+       integer :: win, disp_unit, ierr, comm
+       type(c_ptr) :: baseptr
+       integer(kind=MPI_ADDRESS_KIND) :: my_size, address
+
+       my_size = 0; my_size =  disp_unit
+       call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, MPI_INFO_NULL, comm, address, win, ierr)
+       call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
+    ]])], [abi_mpi_allocate_shared_ok="yes"], [abi_mpi_allocate_shared_ok="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${abi_mpi_allocate_shared_ok}])
+
+  # Restore build environment
+  ABI_ENV_RESTORE
+
+  # Forward information to the compiler
+  if test "${abi_mpi_allocate_shared_ok}" = "yes"; then
+    AC_DEFINE([HAVE_MPI_ALLOCATE_SHARED_CPTR], 1,
+      [Define to 1 if your MPI library supports MPI_ALLOCATE_SHARE with C_PTR.])
+  else
+    AC_MSG_WARN([Your MPI library does not support MPI_ALLOCATE_SHARE with C_PTR.])
+  fi
+
+]) # _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR
+
+
+                    # ------------------------------------ #
+
 # _ABI_MPI_CREATE_WRAPPER(COMPILER_TYPE, SERIAL_COMPILER, MPI_COMPILER)
 # ---------------------------------------------------------------------
 #
@@ -1056,6 +1110,7 @@ AC_DEFUN([ABI_MPI_DETECT], [
       _ABI_MPI_CHECK_IALLTOALLV()
       _ABI_MPI_CHECK_IGATHERV()
       _ABI_MPI_CHECK_IALLREDUCE()
+      _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR()
 
     fi # sd_mpi_ok
 
