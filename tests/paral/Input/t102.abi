@@ -1,4 +1,7 @@
 # Test K-resolved Spectral function of Iron BCC
+fftalg 112 #only for test       
+iomode 3   #only for test       
+
 # Parameters are not realistics
 # Multi-dataset parameters
 ndtset 1    # 
@@ -95,19 +98,20 @@ jpawu2      0.84  eV    # Values of J for each angular momentum
 # Spectral Function SECTION              
 #                                        
 #=====================                   
+nbdbuf 10
 nstep3 75                # Number of iterations                   
 usedmft3 1               # Use dmft                
 usepawu3 14                              
 dmft_rslf3 1             # Read Self-energy                 
 tolwfr3 1.0d-12                          
 
-nbandkss3   17           # Number of states 
+nbandkss3   20           # Number of states 
 kssform3    3
 #pawfatbnd2  1           # Fatbands, only resolved for total angular momenta
 dmft_kspectralfunc3 1    # Activate k-resolved spectral function
 iscf3      -2            # 
 kptopt3    -5            # Bandstructure: 5 segments
-ndivsm3     40           # Lengths of minimal segment
+ndivsm3     20           # Lengths of minimal segment
 kptbounds3               # The four segments of the band structure are
 #                        # connecting 5 points of the Brillouin zone,
 #                        # given here.
@@ -130,7 +134,7 @@ kptbounds3               # The four segments of the band structure are
 #%% [NCPU_4]
 #%% files_to_test =
 #%%   t102_MPI4.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.1;
-#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself, tolnlines = 0, tolab = 0;
+#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself, tolnlines = 10, tolab = 0.1e-4, tolrel = 0.1e-4;
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
