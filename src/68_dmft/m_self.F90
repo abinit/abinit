@@ -668,9 +668,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      call int2char4(iatom,tag_at)
      ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
      if (optrw == 2) then
-       tmpmatrot = trim(paw_dmft%filapp)//'.UnitaryMatrix_for_DiagLevel_iatom'//trim(tag_at)
+       tmpmatrot = trim(paw_dmft%filapp)//'.UnitaryMatrix_iatom'//trim(tag_at)
      else if (optrw == 1) then
-       tmpmatrot = trim(paw_dmft%filnamei)//'.UnitaryMatrix_for_DiagLevel_iatom'//trim(tag_at)
+       tmpmatrot = trim(paw_dmft%filnamei)//'.UnitaryMatrix_iatom'//trim(tag_at)
      end if ! optrw
      unitrot = 3189 + iatom
 #ifdef FC_NAG

@@ -129,13 +129,13 @@ kptbounds3               # The four segments of the band structure are
 #%% [shell]
 #%% pre_commands = iw_cp t102_MPI4o_DS2_DEN t102_MPI4o_DS2_DEN;
 #%%   iw_cp t102_MPI4i_DS3Self_ra-omega_iatom0001_isppol1 t102_MPI4i_DS3Self_ra-omega_iatom0001_isppol1;
-#%%   iw_cp t102_MPI4i_DS3.UnitaryMatrix_for_DiagLevel_iatom0001 t102_MPI4i_DS3.UnitaryMatrix_for_DiagLevel_iatom0001;
+#%%   iw_cp t102_MPI4i_DS3.UnitaryMatrix_iatom0001 t102_MPI4i_DS3.UnitaryMatrix_iatom0001;
 #%%   iw_cp t102_MPI4o_DS3Self-omega_iatom0001_isppol1 t102_MPI4o_DS3Self-omega_iatom0001_isppol1;
-#%%   iw_cp t102_MPI4o_DS3_spectralfunction_realfrequencygrid t102_MPI4o_DS3_spectralfunction_realfrequencygrid;
+#%%   iw_cp t102_MPI4o_DS3_spectralfunction_realgrid t102_MPI4o_DS3_spectralfunction_realgrid;
 #%% [NCPU_4]
 #%% files_to_test =
 #%%   t102_MPI4.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.1;
-#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself, tolnlines=100,tolab = 0.1,tolrel=0.1,fld_options=-easy;
+#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kresolved, tolnlines=100,tolab = 0.1,tolrel=0.1,fld_options=-easy;
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
