@@ -4464,7 +4464,10 @@ subroutine gwr_build_tchi(gwr)
        call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
        itau = gwr%my_itaus(my_it)
 
-       ! TODO: To reduce memory one could allocate and then accumulate only a subset of k-points.
+       ! TODO: To reduce memory one could allocate and then accumulate chi only for a subset of k-points in the BZ
+       ! inside an extra loop over k-groups. This increase the number of FFTs by ngroups but memory decreases
+       ! get_myk_green_gpr should receive a mask and box2gsph should accumulate for ik_group > 1.
+       ! First of all, I need to undestand if get_myk_green_gpr is responsible for the OOM (very likely)
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
@@ -7160,8 +7163,6 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 !Local variables-------------------------------
  integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw
  complex(gwpc),contiguous,pointer :: cfft_ptr(:,:,:,:)
- !real(dp) :: tsec(2) !, cpu, wall, gflops
- !character(len=500) :: msg
 ! *************************************************************************
 
  !call timab(1931, 1, tsec)
@@ -7177,8 +7178,7 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
      i2 = modulo(kg_k(2, ipw), n2) + 1
      i3 = modulo(kg_k(3, ipw), n3) + 1
      !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
-     !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
-     !  ABI_ERROR(msg)
+     !  ABI_ERROR(sjoin("The G-vector: ",ltoa(kg_k(:, ipw))," falls outside the FFT box. Increase boxcutmin (?)"))
      !end if
      cfft_ptr(i1,i2,i3,idat) = cg(ipw+npw*(idat-1))
    end do
@@ -7224,7 +7224,6 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
 !Local variables-------------------------------
  integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, icg
  complex(gwpc),contiguous,pointer :: cfft_ptr(:,:,:,:)
- !character(len=500) :: msg
 ! *************************************************************************
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
@@ -7239,8 +7238,7 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
      i2 = modulo(kg_k(2, ipw), n2) + 1
      i3 = modulo(kg_k(3, ipw), n3) + 1
      !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
-     !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
-     !  ABI_ERROR(msg)
+     !  ABI_ERROR(sjoin("The G-vector: ",ltoa(kg_k(:, ipw))," falls outside the FFT box. Increase boxcutmin (?)")
      !end if
      icg = ipw + (idat - 1) * npw
      cg(icg) = cfft_ptr(i1, i2, i3, idat)

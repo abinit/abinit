@@ -40,7 +40,7 @@ MODULE m_screening
 
  use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_TOLQ0, czero_gw, GW_Q0_DEFAULT
- use m_fstrings,        only : toupper, endswith, sjoin, itoa
+ use m_fstrings,        only : toupper, endswith, sjoin, itoa, strcat
  use m_io_tools,        only : open_file
  use m_time,            only : cwtime, cwtime_report
  use m_numeric_tools,   only : print_arr, hermitianize
@@ -927,8 +927,8 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      if (.not. epsm1%use_shared_win) then
 
        if (nprocs > 1) then
-         msg = sjoin("- WARNING: Cannot use MPI shared memory as MPI library does not support MPI_WIN_ALLOCATE_SHARED with C_PTR", ch10, &
-                     "- Memory for epsm1 will increase with nprocs per node!")
+         msg = strcat("- WARNING: Cannot use MPI shared memory as MPI library does not support MPI_WIN_ALLOCATE_SHARED with C_PTR", ch10, &
+                      "- Memory for epsm1 will increase with nprocs per node!")
          ABI_WARNING(msg)
          call wrtout(ab_out, msg)
        end if
