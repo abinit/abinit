@@ -7238,7 +7238,7 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
      i2 = modulo(kg_k(2, ipw), n2) + 1
      i3 = modulo(kg_k(3, ipw), n3) + 1
      !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
-     !  ABI_ERROR(sjoin("The G-vector: ",ltoa(kg_k(:, ipw))," falls outside the FFT box. Increase boxcutmin (?)")
+     !  ABI_ERROR(sjoin("The G-vector: ",ltoa(kg_k(:, ipw))," falls outside the FFT box. Increase boxcutmin (?)"))
      !end if
      icg = ipw + (idat - 1) * npw
      cg(icg) = cfft_ptr(i1, i2, i3, idat)
