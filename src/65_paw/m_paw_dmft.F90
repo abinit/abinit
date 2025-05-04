@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_paw_dmft
+!****m* ABINIT/m_paw_dmft
 !! NAME
 !!  m_paw_dmft
 !!
@@ -1560,7 +1560,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,fnamei,fnametmp_app,p
 !==================
 
  if (dtset%iscf < 0 .and. paw_dmft%dmft_solv >= 5 .and. paw_dmft%dmft_solv <= 8) then
-   tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
+   tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realgrid'
    inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    grid_unt = 2000
    if (.not. lexist) then
