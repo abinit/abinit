@@ -2597,7 +2597,7 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
    idat_list = cshift([(ii, ii=1,gwr%kpt_comm%nproc)], shift=-gwr%kpt_comm%me)
 
    do iepoch=1,gwr%kpt_comm%nproc
-     call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr)
+     call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr) ! Start the RMA epoch
      idat = idat_list(iepoch)
      if (idat > ndat) goto 10
      if (iepoch == 1) then
@@ -2628,7 +2628,7 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
      10 continue
      !call xmpi_barrier(gwr%kpt_comm%value)
      !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-     call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr)
+     call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr) ! End the RMA epoch
    end do ! iepoch
  end if
 
@@ -2701,7 +2701,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
    idat_list = cshift([(ii, ii=1,gwr%kpt_comm%nproc)], shift=-gwr%kpt_comm%me)
 
    do iepoch=1,gwr%kpt_comm%nproc
-     call xmpi_win_fence(XMPI_MODE_NOSUCCEED, wct_scbox_win, ierr)
+     call xmpi_win_fence(XMPI_MODE_NOPRECEDE, wct_scbox_win, ierr) ! Start the RMA epoch
      idat = idat_list(iepoch)
      if (idat > ndat) goto 10
      if (iepoch == 1) wct_scbox(:,idat) = czero_gw
@@ -2725,7 +2725,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
      10 continue
      !call xmpi_barrier(gwr%kpt_comm%value)
      !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(wct_scbox)
-     call xmpi_win_fence(XMPI_MODE_NOPRECEDE, wct_scbox_win, ierr)
+     call xmpi_win_fence(XMPI_MODE_NOSUCCEED, wct_scbox_win, ierr) ! End the RMA epoch
    end do ! iepoch
  end if
 
@@ -4442,6 +4442,8 @@ subroutine gwr_build_tchi(gwr)
    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
    call wrtout(std_out, " Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
    call wrtout(std_out, " Here we're gonna have a big allocation peak...")
+   ! TODO: To reduce memory one could use a diagonal approximation for chi at large G so that we can use a smaller ecuteps.
+
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
@@ -4523,7 +4525,7 @@ else
 
          ! Now each MPI proc operates on different idat entries.
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-         call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr)
+         call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr) ! Start the RMA epoch
          idat = gwr%kpt_comm%me + 1
          if (idat <= ndat) then
            do ipm=1,2
@@ -4534,7 +4536,7 @@ else
          end if
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
          !call xmpi_barrier(gwr%kpt_comm%value)
-         call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr)
+         call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr) ! End the RMA epoch
 end if
 
          ! Now extract tchi_q(g',r) on the ecuteps (q+g)-sphere from the FFT box in the supercell
@@ -5685,7 +5687,7 @@ else
                              wct_scbox_win=wct_scbox_win)
 
        ! Now each MPI proc operates on different idat entries.
-       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr)
+       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr) ! Start the RMA epoch
        idat = gwr%kpt_comm%me + 1
        if (idat <= ndat) then
          call wt_plan%execute(wct_scbox(:,idat), -1, ndat=gwr%nspinor, iscale=0)
@@ -5696,7 +5698,7 @@ else
        end if
        !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
        !call xmpi_barrier(gwr%kpt_comm%value)
-       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, gt_scbox_win, ierr)
+       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, gt_scbox_win, ierr) ! End the RMA epoch
 end if
 
        ! Integrate Sigma matrix elements in the R-supercell for ndat r-points and accumulate.

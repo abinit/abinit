@@ -40,7 +40,7 @@ module m_sigma
  use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
- use m_screening,      only : epsilonm1_results
+ use m_screening,      only : epsm1_t
  use m_stream_string,  only : stream_string
 
  implicit none
@@ -275,14 +275,14 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine write_sigma_header(Sigp, Er, Cryst, Kmesh, Qmesh)
+subroutine write_sigma_header(Sigp, epsm1, Cryst, Kmesh, Qmesh)
 
 !Arguments ------------------------------------
 !scalars
  class(sigparams_t),intent(in) :: Sigp
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(crystal_t),intent(in) :: Cryst
- type(Epsilonm1_results),intent(in) :: Er
+ type(epsm1_t),intent(in) :: epsm1
 
 !Local variables-------------------------------
 !scalars
@@ -372,21 +372,21 @@ subroutine write_sigma_header(Sigp, Er, Cryst, Kmesh, Qmesh)
  if (sigma_needs_w(Sigp)) then
    write(msg,'(2a)')ch10,' EPSILON^-1 parameters (SCR file):'
    call wrtout(units, msg)
-   write(msg,'(a,i12)')' dimension of the eps^-1 matrix on file   ',Er%Hscr%npwe
+   write(msg,'(a,i12)')' dimension of the eps^-1 matrix on file   ',epsm1%Hscr%npwe
    call wrtout(units, msg)
-   write(msg,'(a,i12)')' dimension of the eps^-1 matrix used      ',Er%npwe
+   write(msg,'(a,i12)')' dimension of the eps^-1 matrix used      ',epsm1%npwe
    call wrtout(units, msg)
-   write(msg,'(a,i12)')' number of plane-waves for wavefunctions  ',Er%Hscr%npwwfn_used
+   write(msg,'(a,i12)')' number of plane-waves for wavefunctions  ',epsm1%Hscr%npwwfn_used
    call wrtout(units, msg)
-   write(msg,'(a,i12)')' number of bands                          ',Er%Hscr%nbnds_used
+   write(msg,'(a,i12)')' number of bands                          ',epsm1%Hscr%nbnds_used
    call wrtout(units, msg)
    write(msg,'(a,i12)')' number of q-points in IBZ                ',Qmesh%nibz
    call wrtout(units, msg)
-   write(msg,'(a,i12)')' number of frequencies                    ',Er%nomega
+   write(msg,'(a,i12)')' number of frequencies                    ',epsm1%nomega
    call wrtout(units, msg)
-   write(msg,'(a,i12)')' number of real frequencies               ',Er%nomega_r
+   write(msg,'(a,i12)')' number of real frequencies               ',epsm1%nomega_r
    call wrtout(units, msg)
-   write(msg,'(a,i12)')' number of imag frequencies               ',Er%nomega_i
+   write(msg,'(a,i12)')' number of imag frequencies               ',epsm1%nomega_i
    call wrtout(units, msg)
  end if
 
@@ -1392,14 +1392,14 @@ end subroutine find_wpoles_for_cd
 !!
 !! SOURCE
 
-integer function sigma_ncwrite(sigma, Sigp, Er, ncid) result (ncerr)
+integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
 
 !Arguments ------------------------------------
 !scalars
  class(sigma_t),target,intent(in) :: sigma
  class(sigparams_t),target,intent(in) :: Sigp
  integer,intent(in) :: ncid
- type(Epsilonm1_results),target,intent(in) :: Er
+ type(epsm1_t),target,intent(in) :: epsm1
 
 !Local variables ---------------------------------------
 !scalars
@@ -1505,7 +1505,7 @@ integer function sigma_ncwrite(sigma, Sigp, Er, ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('ecuteps'), Sigp%ecuteps))
  NCF_CHECK(nf90_put_var(ncid, vid('ecutsigx'), Sigp%ecutsigx))
  NCF_CHECK(nf90_put_var(ncid, vid('sigma_nband'), Sigp%nbnds))
- NCF_CHECK(nf90_put_var(ncid, vid('scr_nband'), Er%Hscr%nbnds_used))
+ NCF_CHECK(nf90_put_var(ncid, vid('scr_nband'), epsm1%Hscr%nbnds_used))
  NCF_CHECK(nf90_put_var(ncid, vid('gwcalctyp'), sigma%gwcalctyp))
  NCF_CHECK(nf90_put_var(ncid, vid('usepawu'), sigma%usepawu))
  NCF_CHECK(nf90_put_var(ncid, vid('kptgw'), sigma%kptgw))
