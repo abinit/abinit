@@ -4468,6 +4468,12 @@ subroutine gwr_build_tchi(gwr)
        ! inside an extra loop over k-groups. This increase the number of FFTs by ngroups but memory decreases
        ! get_myk_green_gpr should receive a mask and box2gsph should accumulate for ik_group > 1.
        ! First of all, I need to undestand if get_myk_green_gpr is responsible for the OOM (very likely)
+       !do my_ikf_start=1, gwr%my_nkbz, nkf_batch
+       !  nkf_now = blocked_loop(my_ikf_start, gwr%my_nkbz, nkf_batch_size)
+       !  my_ikf_stop = min(my_ikf_start + nkf_now, gwr%my_nkbz)
+       !  kbz_mask = .False.; kbz_mask(my_ifk_start:my_ifk_stop) = .True.
+       !  operation = OP_COPY; if (mu_ifk_start /= 0) operation = OP_SUM
+       !end do ! my_ifk_start
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
@@ -4563,7 +4569,7 @@ end if
            write(msg,'(4x,3(a,i0),a)')"Chi my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
            call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
          end if
-      end do ! my_ir (end cpu intensive loop)
+       end do ! my_ir (end cpu intensive loop)
 
        ! Free descriptors and PBLAS matrices in kBZ.
        call desc_array_free(desc_mykbz); call slk_array_free(gt_gpr)
