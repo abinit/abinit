@@ -860,7 +860,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
        & ABI_ERROR(message)
    end if ! option=4
    if (option == 5) then
-     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved' !//trim(char1)
+     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kres' !//trim(char1)
      if (open_file(tmpfil,message,newunit=spfkresolved_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
      ABI_MALLOC(sf,(nkpt,green%nw))
