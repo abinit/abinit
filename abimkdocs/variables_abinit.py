@@ -3399,23 +3399,24 @@ simulation. Slow down the simulation.
 ),
 
 Variable(
-    abivarname="dmftctqmc_config",
+    abivarname="dmftctqmc_localprop",
     varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of weight of CONFIGurations",
+    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of local properties",
     characteristics=['[[DEVELOP]]'],
     requires="[[dmft_solv]] in [5, 8]",
     added_in_version="9.5.0",
     text=r"""
-Compute weight of configuration computed during CTQMC calculations.
-For example, for a calculation on $d$ orbitals, the calculations
-gives the weight of 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
+Compute properties of the local impurity during the CTQMC calculations.
   * 0 --> Nothing done
-  * 1 --> Calculation of weight of configurations
-  * 2 --> Calculation of local magnetic susceptibilty
+  * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
+gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
+  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$, 
+whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
+  * 3 --> Add the Calculation of local charge susceptibility.
 """,
 ),
 
