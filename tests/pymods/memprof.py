@@ -243,17 +243,22 @@ class AbimemFile:
         Return list of Entries.
         """
         locus_to_entries = defaultdict(list)
-        for entry in all_entries:
-            locus_entries[entry.locus].append(entry)
+        for entry in self.all_entries:
+            locus_to_entries[entry.locus].append(entry)
 
         new_entries = []
-        for entry_list in locus_entries.values():
+        for entry_list in locus_to_entries.values():
             # class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memory")):
             e0 = entry_list[0]
-            tot_size = sum(e.size for e in entry_list)
-            tot_memory = max(e.tot_memory for e in entry_list)
-            new_entry = Entry(e0.vname, e0.ptr, e0.action, tot_size, e0.file, e0.list, tot_memory)
-            new_entries.append(new_entry)
+            args = (e0.vname, 
+                    e0.action, 
+                    e0.ptr, 
+                    sum(e.size for e in entry_list),
+                    e0.file, 
+                    e0.line, 
+                    max(e.tot_memory for e in entry_list),
+                   )
+            new_entries.append(Entry(*args))
 
         return new_entries
 
