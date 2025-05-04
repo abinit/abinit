@@ -43,7 +43,7 @@ module m_cohsex
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
- use m_screening,     only : epsilonm1_results
+ use m_screening,     only : epsm1_t
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_pawang,        only : pawang_type
@@ -80,7 +80,7 @@ contains
 !! sigmak_ibz=Index of the k-point in the IBZ.
 !! minbnd, maxbnd= min and Max band index for GW correction (for this k-point)
 !! iomode=Option defining the file format of the SCR file (Fortran, NETCDF)
-!! Er <Epsilonm1_results> (see the definition of this structured datatype)
+!! epsm1 <epsm1_t> (see the definition of this structured datatype)
 !!    %mqmem=if 0 use out-of-core method in which a single q-slice of espilon is read inside the loop over k
 !!    %nomega_i=Number of imaginary frequencies.
 !!    %nomega_r=Number of real frequencies.
@@ -148,7 +148,7 @@ contains
 !!
 !! SOURCE
 
-subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_c,Vcp,&
+subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_c,Vcp,&
 & Kmesh,Qmesh,Ltg_k,Pawtab,Pawang,Paw_pwff,Psps,Wfd,allQP_sym,gwc_ngfft,iomode,prtvol,sigcme_tmp)
 
 !Arguments ------------------------------------
@@ -158,7 +158,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(vcoul_t),intent(in) :: Vcp
- type(Epsilonm1_results),intent(inout) :: Er
+ type(epsm1_t),intent(inout) :: epsm1
  type(gsphere_t),intent(in) :: Gsph_c
  type(littlegroup_t),intent(in) :: Ltg_k
  type(Pseudopotential_type),intent(in) :: Psps
@@ -439,12 +439,12 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ABI_MALLOC(igfftcg0,(Gsph_c%ng))
 
  ! Out-of-core solution for epsilon.
- if (Er%mqmem==0) then
+ if (epsm1%mqmem==0) then
    ABI_COMMENT('Reading q-slices from file. Slower but less memory.')
  end if
 
- ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that Er%epsm1 is read-only.
- if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
+ ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
+ if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
 
  call timab(442,2,tsec)
 
@@ -526,13 +526,13 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
        call pawpwij_init(Pwij_qg, npwc, q0, Gsph_c%gvec, Cryst%rprimd, Psps, Pawtab, Paw_pwff)
      end if
 
-     if (Er%mqmem==0) then
-       ! Read q-slice of epsilon^{-1}|chi0 in Er%epsm1(:,:,:,1) (much slower but less memory).
-       call Er%get_epsm1(Vcp,0,0,iomode,xmpi_comm_self,iqibzA=iq_ibz)
+     if (epsm1%mqmem==0) then
+       ! Read q-slice of epsilon^{-1}|chi0 in epsm1%epsm1(:,:,:,1) (much slower but less memory).
+       call epsm1%get_epsm1(Vcp,0,0,iomode,xmpi_comm_self,iqibzA=iq_ibz)
      end if
 
      ! Only omega==0 for SEX or COHSEX
-     call Er%rotate_iqbz(iq_bz, 1, npwc, Gsph_c, Qmesh, .True., epsm1_qbz)
+     call epsm1%rotate_iqbz(iq_bz, 1, npwc, Gsph_c, Qmesh, .True., epsm1_qbz)
 
      ! Get Fourier components of the Coulomb interaction in the BZ.
      ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
@@ -721,7 +721,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  end do !spin
 
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
- if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
+ if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
 
  ABI_FREE(igfftcg0)
 

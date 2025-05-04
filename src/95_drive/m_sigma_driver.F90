@@ -63,7 +63,7 @@ module m_sigma_driver
  use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge, wave_t
  use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
- use m_screening,     only : epsilonm1_results
+ use m_screening,     only : epsm1_t
  use m_ppmodel,       only : ppmodel_t
  use m_sigma,         only : sigma_t, write_sigma_header
  use m_dyson_solver,  only : solve_dyson
@@ -216,7 +216,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(vcoul_t) :: Vcp, Vcp_ks, Vcp_full
  type(crystal_t) :: Cryst
  type(Energies_type) :: KS_energies,QP_energies
- type(Epsilonm1_results) :: Er
+ type(epsm1_t) :: epsm1
  type(gsphere_t) :: Gsph_Max,Gsph_x,Gsph_c
  type(hdr_type) :: Hdr_wfk,Hdr_sigma,Hdr_rhor
  type(melflags_t) :: KS_mflags,QP_mflags
@@ -377,15 +377,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  call timab(402,2,tsec) ! Init1
  !
- ! ===============================================
- ! ==== Initialize Sigp, Er and basic objects ====
- ! ===============================================
+ ! ==================================================
+ ! ==== Initialize Sigp, epsm1 and basic objects ====
+ ! ==================================================
  ! Sigp is completetly initialized here.
- ! Er is only initialized with dimensions, (SCR|SUSC) file is read in Er%mkdump
+ ! epsm1 is only initialized with dimensions, (SCR|SUSC) file is read in epsm1%mkdump
  call timab(403,1,tsec) ! setup_sigma
 
  call setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
-  gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
+  gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,epsm1,Sigp,comm)
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -398,7 +398,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  end if
 
  pole_screening = .FALSE.
- if (Er%fform==2002) then
+ if (epsm1%fform==2002) then
    pole_screening = .TRUE.
    ABI_WARNING(' EXPERIMENTAL - Using a pole-fit screening!')
  end if
@@ -620,7 +620,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    work_size = mband * Kmesh%nibz * Sigp%nsppol
 
    ! Non-scalable memory in Mb i.e. memory that is not distribute with MPI.
-   nonscal_mem = (two*gwpc*Er%npwe**2*Er%nomega*(Er%mqmem+1)*b2Mb) * 1.1_dp
+   nonscal_mem = (two*gwpc*epsm1%npwe**2*epsm1%nomega*(epsm1%mqmem+1)*b2Mb) * 1.1_dp
 
    ! List of configurations.
    ! Assuming an OpenMP implementation with perfect speedup!
@@ -1676,9 +1676,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(408,2,tsec) ! hqp_init
  call timab(409,1,tsec) ! getW
 
- ! Get epsilon^{-1} either from the _SCR or the _SUSC file and store it in Er%epsm1
- ! If Er%mqmem==0, allocate and read a single q-slice inside csigme.
- ! TODO Er%nomega should be initialized so that only the frequencies really needed are stored in memory
+ ! Get epsilon^{-1} either from the _SCR or the _SUSC file and store it in epsm1%epsm1
+ ! If epsm1%mqmem==0, allocate and read a single q-slice inside csigme.
+ ! TODO epsm1%nomega should be initialized so that only the frequencies really needed are stored in memory
  ! TODO The same piece of code is present in screening.
  if (sigma_needs_w(Sigp)) then
 
@@ -1690,7 +1690,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    case (1, 2)
      ! ALDA TDDFT kernel vertex
      !ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
-     ABI_CHECK(Er%ID==0,"Er%ID should be 0")
+     ABI_CHECK(epsm1%ID==0, "epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then
        ! If we have PAW, we need the full density on the fine grid
@@ -1721,17 +1721,17 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      if (Dtset%usepaw==1) then
        ! Use PAW all-electron density
        call kxc_driver(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,ks_aepaw_rhor,&
-                        Er%npwe,dim_kxcg,kxcg,Gsph_c%gvec,xmpi_comm_self,dbg_mode=dbg_mode)
+                        epsm1%npwe,dim_kxcg,kxcg,Gsph_c%gvec,xmpi_comm_self,dbg_mode=dbg_mode)
      else
        ! Norm-conserving
        call kxc_driver(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,ks_rhor,&
-                       Er%npwe,dim_kxcg,kxcg,Gsph_c%gvec,xmpi_comm_self,dbg_mode=dbg_mode)
+                       epsm1%npwe,dim_kxcg,kxcg,Gsph_c%gvec,xmpi_comm_self,dbg_mode=dbg_mode)
      end if
 
    case (3, 4)
      ! ADA non-local kernel vertex
      !ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
-     ABI_CHECK(Er%ID==0,"Er%ID should be 0")
+     ABI_CHECK(epsm1%ID==0, "epsm1%ID should be 0")
      ABI_CHECK(Sigp%nsppol==1,"ADA vertex for GWGamma not available yet for spin-polarised cases")
 
      if (Dtset%usepaw==1) then ! If we have PAW, we need the full density on the fine grid
@@ -1757,7 +1757,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      id_required=4; ikxc=7; approx_type=2;
      if (Dtset%gwgamma==3) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
      if (Dtset%gwgamma==4) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(fxc_ADA, (Er%npwe, Er%npwe, Er%nqibz))
+     ABI_MALLOC(fxc_ADA, (epsm1%npwe, epsm1%npwe, epsm1%nqibz))
      ! Use userrd to set kappa
      if (Dtset%userrd==zero) Dtset%userrd = 2.1_dp
      ! Set correct value of kappa (should be scaled with alpha*r_s where)
@@ -1771,12 +1771,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      if (Dtset%usepaw==1) then
        ! Use PAW all-electron density
        call kxc_ADA(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,&
-                    ks_aepaw_rhor,Er%npwe,Er%nqibz,Er%qibz,&
+                    ks_aepaw_rhor,epsm1%npwe,epsm1%nqibz,epsm1%qibz,&
                     fxc_ADA,Gsph_c%gvec,xmpi_comm_self,kappa_init=Dtset%userrd,dbg_mode=dbg_mode)
      else
        ! Norm conserving
        call kxc_ADA(Dtset,Cryst,ikxc,ngfftf,nfftf_tot,Wfd%nspden,&
-                    ks_rhor,Er%npwe,Er%nqibz,Er%qibz,&
+                    ks_rhor,epsm1%npwe,epsm1%nqibz,epsm1%qibz,&
        fxc_ADA,Gsph_c%gvec,xmpi_comm_self,kappa_init=Dtset%userrd,dbg_mode=dbg_mode)
      end if
 
@@ -1786,7 +1786,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    case (-3, -4, -5, -6, -7, -8)
      ! bootstrap kernels
      ! ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
-     ABI_CHECK(Er%ID==0,"Er%ID should be 0")
+     ABI_CHECK(epsm1%ID==0,"epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then
        ! If we have PAW, we need the full density on the fine grid
@@ -1827,7 +1827,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    case (-11)
      !LR+ALDA kernel
      !ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
-     ABI_CHECK(Er%ID==0,"Er%ID should be 0")
+     ABI_CHECK(epsm1%ID==0,"epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then
        ! If we have PAW, we need the full density on the fine grid
@@ -1866,11 +1866,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    !if(dtset%ucrpa==0) then
    if (Dtset%gwgamma < 3) then
-     call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
+     call epsm1%mkdump(Vcp,epsm1%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm)
    else
-     call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
+     call epsm1%mkdump(Vcp,epsm1%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm,fxc_ADA)
    end if
@@ -1888,11 +1888,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden*use_aerhor))
 
  if (sigma_needs_ppm(Sigp)) then
-   ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that Er%epsm1 is read-only.
-   if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
+   ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
+   if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
 
    my_plsmf=drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf=Dtset%ppmfrq
-   call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
+   call PPm%init(epsm1%mqmem,epsm1%nqibz,epsm1%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
 
    ! PPm%force_plsmf= force_ppmfrq  ! this line to change the plasme frequency in HL expression.
 
@@ -1937,21 +1937,21 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      write(msg,'(a,f8.4)')' sigma: PAW AE density used for PPmodel integrates to: ',SUM(ks_aepaw_rhor(:,1))*Cryst%ucvol/nfftf
      call wrtout(std_out, msg)
 
-     if (Er%mqmem /= 0) then
+     if (epsm1%mqmem /= 0) then
        ! Calculate ppmodel parameters for all q-points.
-       call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_aepaw_rhor(:,1))
+       call PPm%setup(Cryst,Qmesh,epsm1%npwe,epsm1%nomega,epsm1%omega,epsm1%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_aepaw_rhor(:,1))
      end if
 
    else
      ! NC or PAW with PPmodel 1.
-     if (Er%mqmem /= 0) then
+     if (epsm1%mqmem /= 0) then
        ! Calculate ppmodel parameters for all q-points
-       call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
+       call PPm%setup(Cryst,Qmesh,epsm1%npwe,epsm1%nomega,epsm1%omega,epsm1%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
      end if
    end if ! PAW or NC PPm and/or needs density
 
    ! If epsm1 is MPI-shared, we have to close the RMA epoch.
-   if (Er%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
+   if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
  end if ! sigma_needs_ppm
 
  call pstat_proc%print(_PSTAT_ARGS_)
@@ -1961,7 +1961,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Write info on the run on ab_out, then open files to store final results.
    call ks_ebands%report_gap(header='KS Band Gaps',unit=ab_out)
    if(dtset%ucrpa == 0) then
-     call write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
+     call write_sigma_header(Sigp,epsm1,Cryst,Kmesh,Qmesh)
    end if
 
    ! unt_gw:  File with GW corrections.
@@ -2337,9 +2337,9 @@ endif
    !   enddo!pwx
    !   close(67)
    ! endif!DEBUG
-   call calc_ucrpa(itypatcor,cryst,Kmesh,lcor,M1_q_m,Qmesh,Er%npwe,sigp%npwx,&
+   call calc_ucrpa(itypatcor,cryst,Kmesh,lcor,M1_q_m,Qmesh,epsm1%npwe,sigp%npwx,&
                    Cryst%nsym,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,&
-                   'Gsum',Cryst%ucvol,Wfd,Er%fname,dtset%plowan_compute,rhot1,wanbz)
+                   'Gsum',Cryst%ucvol,Wfd,epsm1%fname,dtset%plowan_compute,rhot1,wanbz)
 
    !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    !Deallocation of wan and rhot1
@@ -2468,7 +2468,7 @@ endif
 
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
-         call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,Er,Gsph_c,Vcp,Kmesh,Qmesh,&
+         call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,epsm1,Gsph_c,Vcp,Kmesh,Qmesh,&
                         Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
                         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
@@ -2477,7 +2477,7 @@ endif
             ! Do not compute correlation MELS if the k-point was read from the checkpoint file
             ! this IF only affects GW density matrix update
             call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,qp_ebands, &
-                              Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
+                              Sigp,Sr,epsm1,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
                               Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
                               gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
           else
@@ -2559,7 +2559,7 @@ endif
 
      ABI_FREE(bdm_mask)       ! The master already used bdm_mask
      ABI_FREE(nat_occs)       ! Occs were already placed in qp_ebands
-     call Er%free()           ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory
+     call epsm1%free()        ! We no longer need epsm1 for GW@KS-DFT 1RDM but we may need space on the RAM memory
 
      if (gw1rdm==2 .and. Sigp%nkptgw==Wfd%nkibz) then
        ! Compute energies only if all k-points are available
@@ -2849,7 +2849,7 @@ endif
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ks_ebands%ncwrite(ncid))
-     NCF_CHECK(Sr%ncwrite(Sigp, Er, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
+     NCF_CHECK(Sr%ncwrite(Sigp, epsm1, ncid)) ! WARNING!! If gw1rdm>0 then epsm1 is no longer present!!
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
@@ -2933,25 +2933,13 @@ endif
    ABI_FREE(QP_paw_ij)
  end if
 
- call wfd%free()
- call destroy_mpi_enreg(MPI_enreg_seq)
+ call wfd%free(); call destroy_mpi_enreg(MPI_enreg_seq)
+ call Kmesh%free(); call Qmesh%free(); call Gsph_Max%free(); call Gsph_x%free(); call Gsph_c%free()
+ call Vcp%free(); call cryst%free(); call Sr%free()
+ if (.not.rdm_update) call epsm1%free()
+ call PPm%free(); call Hdr_sigma%free(); call Hdr_wfk%free(); call ks_ebands%free();call qp_ebands%free(); call KS_me%free()
  call littlegroup_free(Ltg_k)
  ABI_FREE(Ltg_k)
- call Kmesh%free()
- call Qmesh%free()
- call Gsph_Max%free()
- call Gsph_x%free()
- call Gsph_c%free()
- call Vcp%free()
- call cryst%free()
- call Sr%free()
- if (.not.rdm_update) call Er%free()
- call PPm%free()
- call Hdr_sigma%free()
- call Hdr_wfk%free()
- call ks_ebands%free()
- call qp_ebands%free()
- call KS_me%free()
  call esymm_free(KS_sym)
  ABI_FREE(KS_sym)
 
@@ -2996,7 +2984,7 @@ end subroutine sigma
 !! Hdr_wfk<hdr_type>=The header of the WFK file
 !! Hdr_out<hdr_type>=The header to be used for the results of sigma calculations.
 !! Vcp<vcoul_t>= Datatype gathering information on the coulombian interaction and the cutoff technique.
-!! Er<Epsilonm1_results>=Datatype storing data used to construct the screening (partially Initialized in OUTPUT)
+!! epsm1<epsm1_t>=Datatype storing data used to construct the screening (partially Initialized in OUTPUT)
 !! ks_ebands<ebands_t>=The KS energies and occupation factors.
 !! gwc_ngfft(18), gwx_ngfft(18)= FFT meshes for the oscillator strengths used for the correlated and the
 !!   exchange part of the self-energy, respectively.
@@ -3005,7 +2993,7 @@ end subroutine sigma
 !! SOURCE
 
 subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
-& gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
+& gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,epsm1,Sigp,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3017,7 +3005,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  type(Pseudopotential_type),intent(in) :: Psps
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Dtset%usepaw)
  type(sigparams_t),intent(out) :: Sigp
- type(Epsilonm1_results),intent(out) :: Er
+ type(epsm1_t),intent(out) :: epsm1
  type(ebands_t),intent(out) :: ks_ebands
  type(kmesh_t),intent(out) :: Kmesh,Qmesh
  type(crystal_t),intent(out) :: Cryst
@@ -3619,7 +3607,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! of elements <i,kgw,s|\Sigma|j,kgw,s> that have to be calculated. No use of symmetries, except for Hermiticity.
  call sigma_tables(Sigp, Kmesh)
 
- ! === Read external file and initialize basic dimension of Er% ===
+ ! === Read external file and initialize basic dimension of epsm1 ===
  ! TODO use mqmem as input variable instead of gwmem
 
  ! === If required, use a matrix for $\Sigma_c$ which is smaller than that stored on file ===
@@ -3653,26 +3641,28 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ABI_COMMENT(sjoin("File not found. Will try netcdf file:", fname))
    end if
 
-   call Er%init_from_file(fname, mqmem, Dtset%npweps, comm)
+   ! Initialize epsm1 from fname.
+   call epsm1%from_file(fname, mqmem, Dtset%npweps, comm)
 
-   Sigp%npwc=Er%npwe
+   Sigp%npwc=epsm1%npwe
    if (Sigp%npwc>Sigp%npwx) then
      Sigp%npwc=Sigp%npwx
      ABI_COMMENT("Found npw_correlation > npw_exchange, Imposing npwc=npwx")
      ! There is a good reason for doing so, see csigme.F90 and the size of the arrays
      ! rhotwgp and rhotwgp: we need to define a max size and we opt for Sigp%npwx.
    end if
-   Er%npwe=Sigp%npwc
-   Dtset%npweps=Er%npwe
-   call Qmesh%init(Cryst,Er%nqibz,Er%qibz,Dtset%kptopt)
+
+   epsm1%npwe=Sigp%npwc
+   Dtset%npweps=epsm1%npwe
+   call Qmesh%init(Cryst,epsm1%nqibz,epsm1%qibz,Dtset%kptopt)
 
  else
-   Er%npwe     =1
+   epsm1%npwe     =1
    Sigp%npwc   =1
    Dtset%npweps=1
    call find_qmesh(Qmesh,Cryst,Kmesh)
-   ABI_MALLOC(Er%gvec,(3,1))
-   Er%gvec(:,1) = [0, 0, 0]
+   ABI_MALLOC(epsm1%gvec,(3,1))
+   epsm1%gvec(:,1) = [0, 0, 0]
  end if
 
  call Qmesh%print(units, header="Q-mesh for screening function", prtvol=Dtset%prtvol)
@@ -3703,7 +3693,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%mG0 = ng0sh_opt
 
 ! G-sphere for W and Sigma_c is initialized from the SCR file.
- call Gsph_c%init(Cryst, Er%npwe, gvec=Er%gvec)
+ call Gsph_c%init(Cryst, epsm1%npwe, gvec=epsm1%gvec)
  call Gsph_x%init(Cryst, Sigp%npwx, gvec=gvec_kss)
  Sigp%ecuteps = Gsph_c%ecut
  Dtset%ecuteps = Sigp%ecuteps
@@ -3869,7 +3859,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
               gwx_nfftot, method, Sigp%mG0, Cryst, enforce_sym)
 
  ! FFT mesh for sigma_c.
- call setmesh(gmet, Gsph_Max%gvec, gwc_ngfft, Sigp%npwvec, Er%npwe, Sigp%npwwfn,&
+ call setmesh(gmet, Gsph_Max%gvec, gwc_ngfft, Sigp%npwvec, epsm1%npwe, Sigp%npwwfn,&
               gwc_nfftot, method, Sigp%mG0, Cryst, enforce_sym, unit=dev_null)
 
  ! ======================================================================

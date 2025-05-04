@@ -67,17 +67,17 @@ MODULE m_screening
 
 !----------------------------------------------------------------------
 
-!!****t* m_screening/epsilonm1_results
+!!****t* m_screening/epsm1_t
 !! NAME
-!! epsilonm1_results
+!! epsm1_t
 !!
 !! FUNCTION
-!! For the GW part of ABINIT, the epsilonm1_results structured datatype
+!! For the GW part of ABINIT, the epsm1_t structured datatype
 !! gather the results of screening: the inverse dielectric matrix, and the omega matrices.
 !!
 !! SOURCE
 
- type,public :: Epsilonm1_results
+ type,public :: epsm1_t
 
   integer :: id
   ! Matrix identifier: O if not yet defined, 1 for chi0,
@@ -158,29 +158,29 @@ MODULE m_screening
 
  contains
 
-   procedure :: free => em1results_free
+   procedure :: free => epsm1_free
     ! Free memory
 
-   procedure :: print => em1results_print
+   procedure :: print => epsm1_print
      ! Print basic info
 
-   procedure :: rotate_iqbz => Epsm1_rotate_iqbz
+   procedure :: rotate_iqbz => epsm1_rotate_iqbz
      ! Symmetrize two-point function at a q-point in the BZ.
 
-   procedure :: rotate_iqbz_inplace => Epsm1_rotate_iqbz_inplace
+   procedure :: rotate_iqbz_inplace => epsm1_rotate_iqbz_inplace
      ! In-place version of the above
 
-   procedure :: init_from_file => init_Er_from_file
+   procedure :: from_file => epsm1_from_file
      ! Initialize the object from file
 
-   procedure :: mkdump => mkdump_Er
+   procedure :: mkdump => epsm1_mkdump
      ! Dump the object to a file.
 
    procedure :: get_epsm1 => get_epsm1
 
    procedure :: decompose_epsm1 => decompose_epsm1
 
- end type Epsilonm1_results
+ end type epsm1_t
 
  public :: make_epsm1_driver              ! Calculate the inverse symmetrical dielectric matrix starting from chi0
  public :: mkem1_q0                       ! Construct the microscopic dielectric matrix for q-->0
@@ -282,59 +282,59 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_screening/em1results_free
+!!****f* m_screening/epsm1_free
 !! NAME
-!! em1results_free
+!! epsm1_free
 !!
 !! FUNCTION
-!! Deallocate all the pointers in Er that result to be associated.
+!! Deallocate all the pointers in epsm1 that result to be associated.
 !! Perform also a cleaning of the Header.
 !!
 !! SOURCE
 
-subroutine em1results_free(Er)
+subroutine epsm1_free(epsm1)
 
 !Arguments ------------------------------------
- class(Epsilonm1_results),intent(inout) :: Er
+ class(epsm1_t),intent(inout) :: epsm1
 
  integer :: ierr
 ! *************************************************************************
 
  !integer
- ABI_SFREE(Er%gvec)
+ ABI_SFREE(epsm1%gvec)
 
  !real
- ABI_SFREE(Er%qibz)
- ABI_SFREE(Er%qlwl)
+ ABI_SFREE(epsm1%qibz)
+ ABI_SFREE(epsm1%qlwl)
 
  !complex
- if (Er%use_shared_win) then
-   call xmpi_win_free(Er%epsm1_win, ierr)
-   nullify(Er%epsm1)
+ if (epsm1%use_shared_win) then
+   call xmpi_win_free(epsm1%epsm1_win, ierr)
+   nullify(epsm1%epsm1)
  else
-   ABI_SFREE_PTR(Er%epsm1)
+   ABI_SFREE_PTR(epsm1%epsm1)
  end if
 
- ABI_SFREE(Er%omega)
+ ABI_SFREE(epsm1%omega)
 
  !datatypes
- call Er%Hscr%free()
+ call epsm1%Hscr%free()
 
-end subroutine em1results_free
+end subroutine epsm1_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_screening/em1results_print
+!!****f* m_screening/epsm1_print
 !! NAME
-!!  em1results_print
+!!  epsm1_print
 !!
 !! FUNCTION
 !! Print the basic dimensions and the most important
-!! quantities reported in the Epsilonm1_results data type.
+!! quantities reported in the epsm1_t data type.
 !!
 !! INPUTS
-!!  Er<Epsilonm1_results>=The data type.
+!!  epsm1<epsm1_t>=The data type.
 !!  unit[optional]=the unit number for output.
 !!  prtvol[optional]=verbosity level.
 !!  mode_paral[optional]=either COLL or PERS.
@@ -344,10 +344,10 @@ end subroutine em1results_free
 !!
 !! SOURCE
 
-subroutine em1results_print(Er, unit, prtvol, mode_paral)
+subroutine epsm1_print(epsm1, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
- class(Epsilonm1_results),intent(in) :: Er
+ class(epsm1_t),intent(in) :: epsm1
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
 
@@ -363,7 +363,7 @@ subroutine em1results_print(Er, unit, prtvol, mode_paral)
  mode   ='COLL'; if (present(mode_paral)) mode = mode_paral
 
  ! === chi0 or \epsilon^{-1} ? ===
- SELECT CASE (Er%ID)
+ SELECT CASE (epsm1%ID)
  CASE (0)
    rfname = 'Undefined'
  CASE (1)
@@ -375,15 +375,15 @@ subroutine em1results_print(Er, unit, prtvol, mode_paral)
  CASE (4)
    rfname = 'Symmetrical Inverse Dielectric Matrix'
  CASE DEFAULT
-   ABI_BUG(sjoin('Wrong Er%ID:',itoa(Er%ID)))
+   ABI_BUG(sjoin('Wrong epsm1%ID:',itoa(epsm1%ID)))
  END SELECT
 
  ! For chi, \espilon or \epsilon^{-1}, define the approximation.
  rfapprox='None'
- if (Er%ID>=2.or.Er%ID<=4) then
-   if (Er%ikxc==0) then
+ if (epsm1%ID>=2.or.epsm1%ID<=4) then
+   if (epsm1%ikxc==0) then
      rfapprox='RPA'
-   else if (Er%ikxc>0) then
+   else if (epsm1%ikxc>0) then
      rfapprox='Static TDDFT'
    else
      rfapprox='TDDFT'
@@ -392,33 +392,33 @@ subroutine em1results_print(Er, unit, prtvol, mode_paral)
 
  ! === If TDDFT and \epsilon^{-1}, define the type ===
  rftest='None'
-! if (Er%ID==0) then
-!  if (Er%test_type==0) then
+! if (epsm1%ID==0) then
+!  if (epsm1%test_type==0) then
 !   rftest='TEST-PARTICLE'
-!  else if (Er%test_type==1) then
+!  else if (epsm1%test_type==1) then
 !   rftest='TEST-ELECTRON'
 !  else
 !   write(msg,'(4a,i3)')ch10,&
-!&   ' em1results_print : BUG - ',ch10,&
-!&   ' Wrong value of Er%test_type = ',Er%test_type
+!&   ' epsm1_print : BUG - ',ch10,&
+!&   ' Wrong value of epsm1%test_type = ',epsm1%test_type
 !   ABI_ERROR(msg)
 !  end if
 ! end if
 
  ! === Define time-ordering ===
  rforder='Undefined'
- if (Er%Tordering==1) then
+ if (epsm1%Tordering==1) then
    rforder='Time-Ordered'
- else if (Er%Tordering==2) then
+ else if (epsm1%Tordering==2) then
    rforder='Advanced'
- else if (Er%Tordering==3) then
+ else if (epsm1%Tordering==3) then
    rforder='Retarded'
  else
-   ABI_BUG(sjoin('Wrong er%tordering= ',itoa(Er%Tordering)))
+   ABI_BUG(sjoin('Wrong epsm1%tordering= ',itoa(epsm1%Tordering)))
  end if
 
  kxcname='None'
- if (Er%ikxc/=0) then
+ if (epsm1%ikxc/=0) then
    !TODO Add function to retrieve kxc name
    ABI_ERROR('Add function to retrieve kxc name')
    kxcname='XXXXX'
@@ -426,7 +426,7 @@ subroutine em1results_print(Er, unit, prtvol, mode_paral)
 
  write(msg,'(6a,5(3a))')ch10,&
    ' ==== Info on the Response Function ==== ',ch10,&
-   '  Associated File ................  ',TRIM(Er%fname),ch10,&
+   '  Associated File ................  ',TRIM(epsm1%fname),ch10,&
    '  Response Function Type .......... ',TRIM(rfname),ch10,&
    '  Type of Approximation ........... ',TRIM(rfapprox),ch10,&
    '  XC kernel used .................. ',TRIM(kxcname),ch10,&
@@ -434,19 +434,19 @@ subroutine em1results_print(Er, unit, prtvol, mode_paral)
    '  Time-Ordering ................... ',TRIM(rforder),ch10
  call wrtout(unt,msg,mode)
  write(msg,'(a,2i4,a,3(a,i4,a),a,3i4,2a,i4,a)')&
-   '  Number of components ............ ',Er%nI,Er%nJ,ch10,&
-   '  Number of q-points in the IBZ ... ',Er%nqibz,ch10,&
-   '  Number of q-points for q-->0 .... ',Er%nqlwl,ch10,&
-   '  Number of G-vectors ............. ',Er%npwe,ch10,&
-   '  Number of frequencies ........... ',Er%nomega,Er%nomega_r,Er%nomega_i,ch10,&
-   '  Value of mqmem .................. ',Er%mqmem,ch10
+   '  Number of components ............ ',epsm1%nI,epsm1%nJ,ch10,&
+   '  Number of q-points in the IBZ ... ',epsm1%nqibz,ch10,&
+   '  Number of q-points for q-->0 .... ',epsm1%nqlwl,ch10,&
+   '  Number of G-vectors ............. ',epsm1%npwe,ch10,&
+   '  Number of frequencies ........... ',epsm1%nomega,epsm1%nomega_r,epsm1%nomega_i,ch10,&
+   '  Value of mqmem .................. ',epsm1%mqmem,ch10
  call wrtout(unt,msg,mode)
 
- if (Er%nqlwl/=0) then
-   write(msg,'(a,i3)')' q-points for long wavelength limit: ',Er%nqlwl
+ if (epsm1%nqlwl/=0) then
+   write(msg,'(a,i3)')' q-points for long wavelength limit: ',epsm1%nqlwl
    call wrtout(unt,msg,mode)
-   do iqlwl=1,Er%nqlwl
-     write(msg,'(1x,i5,a,3es16.8)')iqlwl,') ',Er%qlwl(:,iqlwl)
+   do iqlwl=1,epsm1%nqlwl
+     write(msg,'(1x,i5,a,3es16.8)')iqlwl,') ',epsm1%qlwl(:,iqlwl)
      call wrtout(unt,msg,mode)
    end do
  end if
@@ -454,22 +454,22 @@ subroutine em1results_print(Er, unit, prtvol, mode_paral)
  if (my_prtvol>0) then
    ! Print out head and wings in the long-wavelength limit.
    ! TODO add additional stuff.
-   write(msg,'(a,i4)')' Calculated Frequencies: ',Er%nomega
+   write(msg,'(a,i4)')' Calculated Frequencies: ',epsm1%nomega
    call wrtout(unt,msg,mode)
-   do iw=1,Er%nomega
-     write(msg,'(i4,es14.6)')iw,Er%omega(iw)*Ha_eV
+   do iw=1,epsm1%nomega
+     write(msg,'(i4,es14.6)')iw,epsm1%omega(iw)*Ha_eV
      call wrtout(unt,msg,mode)
    end do
 
-   write(msg,'(a,i4)')' Calculated q-points: ',Er%nqibz
+   write(msg,'(a,i4)')' Calculated q-points: ',epsm1%nqibz
    call wrtout(unt,msg,mode)
-   do iqibz=1,Er%nqibz
-     write(msg,'(1x,i4,a,3es16.8)')iqibz,') ',Er%qibz(:,iqibz)
+   do iqibz=1,epsm1%nqibz
+     write(msg,'(1x,i4,a,3es16.8)')iqibz,') ',epsm1%qibz(:,iqibz)
      call wrtout(unt,msg,mode)
    end do
  end if ! my_prtvol>0
 
-end subroutine em1results_print
+end subroutine epsm1_print
 !!***
 
 !----------------------------------------------------------------------
@@ -486,13 +486,13 @@ end subroutine em1results_print
 !!
 !! INPUTS
 !!  nomega=Number of frequencies required. All frequencies from 1 up to nomega are symmetrized.
-!!  npwc=Number of G vectors in symmetrized matrix, has to be smaller than Er%npwe.
+!!  npwc=Number of G vectors in symmetrized matrix, has to be smaller than epsm1%npwe.
 !!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
-!!  Er<Epsilonm1_results>=Data structure containing the inverse dielectric matrix.
+!!  epsm1<epsm1_t>=Data structure containing the inverse dielectric matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!    %grottb
 !!    %phmSGt
-!!  Qmesh<kmesh_t>=Structure defining the q-mesh used for Er.
+!!  Qmesh<kmesh_t>=Structure defining the q-mesh used for epsm1.
 !!    %nbz=Number of q-points in the BZ
 !!    %tab(nbz)=Index of the symmetric q-point in the IBZ, for each point in the BZ
 !!    %tabo(nbz)=The operation that rotates q_ibz onto \pm q_bz (depending on tabi)
@@ -524,11 +524,11 @@ end subroutine em1results_print
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz(Er, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange,epsm1_qbz)
+subroutine Epsm1_rotate_iqbz(epsm1, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange,epsm1_qbz)
 
 !Arguments ------------------------------------
 !scalars
- class(Epsilonm1_results),intent(in) :: Er
+ class(epsm1_t),intent(in) :: epsm1
  integer,intent(in) :: iq_bz,nomega,npwc
  logical,intent(in) :: remove_exchange
  type(gsphere_t),target,intent(in) :: Gsph
@@ -544,14 +544,14 @@ subroutine Epsm1_rotate_iqbz(Er, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange,ep
  real(dp) :: qbz(3)
 ! *********************************************************************
 
- ABI_CHECK(Er%nomega >= nomega, 'Too many frequencies required')
- ABI_CHECK(Er%npwe >= npwc, 'Too many G-vectors required')
+ ABI_CHECK(epsm1%nomega >= nomega, 'Too many frequencies required')
+ ABI_CHECK(epsm1%npwe >= npwc, 'Too many G-vectors required')
 
  ! Get iq_ibz, and symmetries from iq_ibz.
  call Qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
 
- ! If out-of-memory, only Er%espm1(:,:,:,1) has been allocated and filled.
- iq_loc=iq_ibz; if (Er%mqmem==0) iq_loc=1
+ ! If out-of-memory, only epsm1%espm1(:,:,:,1) has been allocated and filled.
+ iq_loc=iq_ibz; if (epsm1%mqmem==0) iq_loc=1
 
  ! MG: grottb is a 1-1 mapping, hence we can collapse the loops (false sharing is not an issue here).
  !grottb => Gsph%rottb (1:npwc,itim_q,isym_q)
@@ -565,7 +565,7 @@ subroutine Epsm1_rotate_iqbz(Er, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange,ep
      do ii=1,npwc
        sg1 = Gsph%rottb(ii,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(ii,isym_q)
-       epsm1_qbz(sg1,sg2,iw) = Er%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
+       epsm1_qbz(sg1,sg2,iw) = epsm1%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
      end do
    end do
  end do
@@ -605,15 +605,14 @@ end subroutine Epsm1_rotate_iqbz
 !!
 !! INPUTS
 !!  nomega=Number of frequencies required. All frequencies from 1 up to nomega are symmetrized.
-!!  npwc=Number of G vectors in symmetrized matrix, has to be smaller than Er%npwe.
+!!  npwc=Number of G vectors in symmetrized matrix, has to be smaller than epsm1%npwe.
 !!  remove_exchange=If .TRUE., return e^{-1}-1 namely remove the exchange part.
-!!  Er<Epsilonm1_results>=Data structure containing the inverse dielectric matrix.
+!!  epsm1<epsm1_t>=Data structure containing the inverse dielectric matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
-!!  Er<Epsilonm1_results>=Data structure containing the inverse dielectric matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!    %grottb
 !!    %phmSGt
-!!  Qmesh<kmesh_t>=Structure defining the q-mesh used for Er.
+!!  Qmesh<kmesh_t>=Structure defining the q-mesh used for epsm1.
 !!    %nbz=Number of q-points in the BZ
 !!    %tab(nbz)=Index of the symmetric q-point in the IBZ, for each point in the BZ
 !!    %tabo(nbz)=The operation that rotates q_ibz onto \pm q_bz (depending on tabi)
@@ -621,7 +620,7 @@ end subroutine Epsm1_rotate_iqbz
 !!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
 !!
 !! OUTPUT
-!!  Er%epsm1(npwc,npwc,nomega,iq_loc) symmetrised
+!!  epsm1%epsm1(npwc,npwc,nomega,iq_loc) symmetrised
 !!
 !! NOTES
 !!  In the present implementation we are not considering a possible umklapp vector G0 in the
@@ -642,11 +641,11 @@ end subroutine Epsm1_rotate_iqbz
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz_inplace(Er,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange)
+subroutine Epsm1_rotate_iqbz_inplace(epsm1,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange)
 
 !Arguments ------------------------------------
 !scalars
- class(Epsilonm1_results),intent(inout) :: Er
+ class(epsm1_t),intent(inout) :: epsm1
  integer,intent(in) :: iq_bz,nomega,npwc
  logical,intent(in) :: remove_exchange
  type(gsphere_t),target,intent(in) :: Gsph
@@ -661,16 +660,16 @@ subroutine Epsm1_rotate_iqbz_inplace(Er,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exch
  complex(gwpc),allocatable :: work(:,:)
 ! *********************************************************************
 
- ABI_CHECK(Er%nomega>=nomega,'Too many frequencies required')
- ABI_CHECK(Er%npwe  >=npwc , 'Too many G-vectors required')
+ ABI_CHECK(epsm1%nomega>=nomega,'Too many frequencies required')
+ ABI_CHECK(epsm1%npwe  >=npwc , 'Too many G-vectors required')
 
  ABI_MALLOC(work,(npwc,npwc))
 
- ! * Get iq_ibz, and symmetries from iq_ibz.
+ ! Get iq_ibz, and symmetries from iq_ibz.
  call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
 
- ! If out-of-memory, only Er%espm1(:,:,:,1) has been allocated and filled.
- iq_loc=iq_ibz; if (Er%mqmem==0) iq_loc=1
+ ! If out-of-memory, only epsm1%espm1(:,:,:,1) has been allocated and filled.
+ iq_loc=iq_ibz; if (epsm1%mqmem==0) iq_loc=1
 
 !$OMP PARALLEL DO PRIVATE(sg2,sg1,phmsg1t,phmsg2t_star) IF (nomega > 1)
  do iw=1,nomega
@@ -680,17 +679,17 @@ subroutine Epsm1_rotate_iqbz_inplace(Er,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exch
      do ii=1,npwc
        sg1 = Gsph%rottb(ii,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(ii,isym_q)
-       work(sg1,sg2) = Er%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
+       work(sg1,sg2) = epsm1%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
      end do
    end do
-   Er%epsm1(:,:,iw,iq_loc) = work(:,:)
+   epsm1%epsm1(:,:,iw,iq_loc) = work(:,:)
  end do
 
  ! === Account for time-reversal ===
  if (itim_q==2) then
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
-     call sqmat_itranspose(npwc,Er%epsm1(:,:,iw,iq_loc))
+     call sqmat_itranspose(npwc,epsm1%epsm1(:,:,iw,iq_loc))
    end do
  end if
 
@@ -699,7 +698,7 @@ subroutine Epsm1_rotate_iqbz_inplace(Er,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exch
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
      do ii=1,npwc
-       Er%epsm1(ii,ii,iw,iq_loc)=Er%epsm1(ii,ii,iw,iq_loc)-1.0_gwp
+       epsm1%epsm1(ii,ii,iw,iq_loc)=epsm1%epsm1(ii,ii,iw,iq_loc)-1.0_gwp
      end do
    end do
  endif
@@ -711,12 +710,12 @@ end subroutine Epsm1_rotate_iqbz_inplace
 
 !----------------------------------------------------------------------
 
-!!****f* m_screening/init_Er_from_file
+!!****f* m_screening/epsm1_from_file
 !! NAME
-!!  init_Er_from_file
+!!  epsm1_from_file
 !!
 !! FUNCTION
-!!  Initialize basic dimensions and the important (small) arrays in an Epsilonm1_results data type
+!!  Initialize basic dimensions and the important (small) arrays in an epsm1_t data type
 !!  starting from a file containing either epsilon^{-1} (_SCR) or chi0 (_SUSC).
 !!
 !! INPUTS
@@ -726,14 +725,14 @@ end subroutine Epsm1_rotate_iqbz_inplace
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  Er<Epsilonm1_results>=The structure initialized with basic dimensions and arrays.
+!!  epsm1<epsm1_t>=The structure initialized with basic dimensions and arrays.
 !!
 !! SOURCE
 
-subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
+subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
 
 !Arguments ------------------------------------
- class(Epsilonm1_results),intent(inout) :: Er
+ class(epsm1_t),intent(inout) :: epsm1
  integer,intent(in) :: mqmem,npwe_asked,comm
  character(len=*),intent(in) :: fname
 
@@ -745,60 +744,60 @@ subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
  character(len=500) :: msg
 ! *********************************************************************
 
- !@Epsilonm1_results
+ !@epsm1_t
  my_rank = xmpi_comm_rank(comm)
 
  ! Read header from file.
- call wrtout(std_out, sjoin('init_Er_from_file- testing file: ', fname))
- call Er%hscr%from_file(fname, fform, comm)
+ call wrtout(std_out, sjoin('epsm1_from_file- testing file: ', fname))
+ call epsm1%hscr%from_file(fname, fform, comm)
 
  ! Master echoes the header.
- if (my_rank==master) call er%hscr%print()
+ if (my_rank==master) call epsm1%hscr%print()
 
  ! Generic Info
- Er%ID         =0       ! Not yet initialized as epsm1 is calculated in mkdump_Er.F90
- Er%fname      =fname
- Er%fform      =fform
- Er%Tordering=Er%Hscr%Tordering
+ epsm1%ID         =0       ! Not yet initialized as epsm1 is calculated in epsm1_mkdump.F90
+ epsm1%fname      =fname
+ epsm1%fform      =fform
+ epsm1%Tordering=epsm1%Hscr%Tordering
 
- !TODO these quantitities should be checked and initiliazed in mkdump_Er
+ !TODO these quantitities should be checked and initiliazed in epsm1_mkdump
  !BEGIN HARCODED
- Er%nI       = 1
- Er%nJ       = 1
- Er%ikxc     = 0
- Er%test_type=-1
+ epsm1%nI       = 1
+ epsm1%nJ       = 1
+ epsm1%ikxc     = 0
+ epsm1%test_type=-1
 
- Er%Hscr%headform=HSCR_LATEST_HEADFORM   ! XG20090912
+ epsm1%Hscr%headform = HSCR_LATEST_HEADFORM   ! XG20090912
 !END HARDCODED
 
- Er%nqibz=Er%Hscr%nqibz
- Er%mqmem=mqmem ; if (mqmem/=0) Er%mqmem=Er%nqibz
- ABI_MALLOC(Er%qibz,(3,Er%nqibz))
- Er%qibz(:,:)=Er%Hscr%qibz(:,:)
+ epsm1%nqibz=epsm1%Hscr%nqibz
+ epsm1%mqmem=mqmem ; if (mqmem/=0) epsm1%mqmem=epsm1%nqibz
+ ABI_MALLOC(epsm1%qibz, (3,epsm1%nqibz))
+ epsm1%qibz(:,:) = epsm1%Hscr%qibz(:,:)
 
- Er%nqlwl=Er%Hscr%nqlwl
- ABI_MALLOC(Er%qlwl,(3,Er%nqlwl))
- Er%qlwl(:,:)=Er%Hscr%qlwl(:,:)
+ epsm1%nqlwl = epsm1%Hscr%nqlwl
+ ABI_MALLOC(epsm1%qlwl, (3, epsm1%nqlwl))
+ epsm1%qlwl(:,:)=epsm1%Hscr%qlwl(:,:)
 
- Er%nomega=Er%Hscr%nomega
- ABI_MALLOC(Er%omega,(Er%nomega))
- Er%omega(:)=Er%Hscr%omega(:)
+ epsm1%nomega=epsm1%Hscr%nomega
+ ABI_MALLOC(epsm1%omega,(epsm1%nomega))
+ epsm1%omega(:)=epsm1%Hscr%omega(:)
 
  ! Count number of real, imaginary, and complex frequencies.
- Er%nomega_r = 1
- Er%nomega_i = 0
- if (Er%nomega == 2) then
-   Er%nomega_i = 1
+ epsm1%nomega_r = 1
+ epsm1%nomega_i = 0
+ if (epsm1%nomega == 2) then
+   epsm1%nomega_i = 1
  else
    unclassified = 0
    tol = tol6*Ha_eV
-   do iw = 2, Er%nomega
-     re =  REAL(Er%omega(iw))
-     im = AIMAG(Er%omega(iw))
+   do iw = 2, epsm1%nomega
+     re =  REAL(epsm1%omega(iw))
+     im = AIMAG(epsm1%omega(iw))
      if (re > tol .and. im < tol) then
-       Er%nomega_r = iw ! Real freqs are packed in the first locations.
+       epsm1%nomega_r = iw ! Real freqs are packed in the first locations.
      else if (re < tol .and. im > tol) then
-       Er%nomega_i = Er%nomega_i + 1
+       epsm1%nomega_i = epsm1%nomega_i + 1
      else
        unclassified = unclassified + 1
      end if
@@ -812,33 +811,33 @@ subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
  end if
 
  ! Get G-vectors.
- Er%npwe=Er%Hscr%npwe
+ epsm1%npwe=epsm1%Hscr%npwe
  if (npwe_asked>0) then
-   if (npwe_asked>Er%Hscr%npwe) then
+   if (npwe_asked>epsm1%Hscr%npwe) then
      write(msg,'(a,i8,2a,i8)')&
       'Number of G-vectors saved on file is less than the value required = ',npwe_asked,ch10,&
-      'Calculation will proceed with Max available npwe = ',Er%Hscr%npwe
+      'Calculation will proceed with Max available npwe = ',epsm1%Hscr%npwe
      ABI_WARNING(msg)
    else  ! Redefine the no. of G"s for W.
-     Er%npwe=npwe_asked
+     epsm1%npwe=npwe_asked
    end if
  end if
 
- ! pointer to Er%Hscr%gvec ?
- ABI_MALLOC(Er%gvec,(3,Er%npwe))
- Er%gvec=Er%Hscr%gvec(:,1:Er%npwe)
+ ! pointer to epsm1%Hscr%gvec ?
+ ABI_MALLOC(epsm1%gvec,(3,epsm1%npwe))
+ epsm1%gvec=epsm1%Hscr%gvec(:,1:epsm1%npwe)
 
-end subroutine init_Er_from_file
+end subroutine epsm1_from_file
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_screening/mkdump_Er
+!!****f* m_screening/epsm1_mkdump
 !! NAME
-!!  mkdump_Er
+!!  epsm1_mkdump
 !!
 !! FUNCTION
-!!  Dump the content of an Epsilonm1_results data type on file.
+!!  Dump the content of an epsm1_t data type on file.
 !!
 !! INPUTS
 !!  id_required=Identifier of the matrix to be calculated
@@ -853,13 +852,13 @@ end subroutine init_Er_from_file
 !!
 !! SOURCE
 
-subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
-                     ikxc_required,option_test,fname_dump,iomode,&
-                     nfftot,ngfft,comm,fxc_ADA)
+subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
+                        ikxc_required,option_test,fname_dump,iomode,&
+                        nfftot,ngfft,comm,fxc_ADA)
 
 !Arguments ------------------------------------
 !scalars
- class(Epsilonm1_results),intent(inout) :: Er
+ class(epsm1_t),intent(inout) :: epsm1
  integer,intent(in) :: id_required,approx_type,option_test,ikxc_required,nkxc
  integer,intent(in) :: iomode,nfftot,npwe,comm
  type(vcoul_t),intent(in) :: Vcp
@@ -867,7 +866,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 !arrays
  integer,intent(in) :: ngfft(18),gvec(3,npwe)
  complex(gwpc),intent(in) :: kxcg(nfftot,nkxc)
- complex(gwpc),intent(in), optional :: fxc_ADA(npwe*Er%nI,npwe*Er%nJ,Er%nqibz)
+ complex(gwpc),intent(in), optional :: fxc_ADA(npwe*epsm1%nI,npwe*epsm1%nJ,epsm1%nqibz)
 
 !Local variables-------------------------------
 !scalars
@@ -882,50 +881,50 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 !arrays
  integer :: units(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- complex(gwpc),allocatable :: epsm1(:,:,:)
+ complex(gwpc),allocatable :: tmp_epsm1(:,:,:)
  complex(dpc),allocatable :: dummy_lwing(:,:,:),dummy_uwing(:,:,:),dummy_head(:,:,:)
 ! *********************************************************************
 
  ABI_CHECK(id_required==4, 'Value of id_required not coded')
- ABI_CHECK(npwe==Er%npwe, "mismatch in npwe")
+ ABI_CHECK(npwe == epsm1%npwe, "mismatch in npwe")
 
  units = [std_out, ab_out]
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  call metric(gmet,gprimd,-1,rmet,Vcp%rprimd,ucvol)
 
- ! if (Er%ID/=0) call reset_Epsilonm1(Er)
- Er%ID=id_required
+ ! if (epsm1%ID/=0) call reset_Epsilonm1(epsm1)
+ epsm1%ID=id_required
 
  ofname = fname_dump
- in_varname = ncname_from_id(er%hscr%id)
+ in_varname = ncname_from_id(epsm1%hscr%id)
  out_varname = ncname_from_id(id_required)
 
- !write(std_out,*)'Er%ID: ',Er%ID,', Er%Hscr%ID: ',Er%Hscr%ID
+ !write(std_out,*)'epsm1%ID: ',epsm1%ID,', epsm1%Hscr%ID: ',epsm1%Hscr%ID
 
- if (Er%ID == Er%Hscr%ID) then
+ if (epsm1%ID == epsm1%Hscr%ID) then
    ! The two-point function we are asking for is already stored on file
    ! According to mqmem either read and store the entire matrix in memory or do nothing.
 
-   if (Er%mqmem > 0) then
+   if (epsm1%mqmem > 0) then
      ! In-core solution.
-     Er%use_shared_win = .False.
+     epsm1%use_shared_win = .False.
 #ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
-     Er%use_shared_win = .True.
-     !Er%use_shared_win = nprocs > 1 ! TODO
+     epsm1%use_shared_win = .True.
+     !epsm1%use_shared_win = nprocs > 1 ! TODO
 #endif
-     !Er%use_shared_win = .False.
+     epsm1%use_shared_win = .False.    ! This to go back to the old non-scalable version.
 
      iomode__ = iomode
      if (iomode__ == IO_MODE_MPI) then
-       ABI_WARNING("SUSC files is buggy. Using Fortran IO")
+       ABI_WARNING("SUSC files with IO_MODE_MPI is buggy. Using Fortran IO")
        iomode__ = IO_MODE_FORTRAN
      end if
 
-     write(msg,'(a,f12.1,a)')' Memory for Er%epsm1: ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
+     write(msg,'(a,f12.1,a)')' Memory for epsm1%epsm1: ',two*gwpc*npwe**2*epsm1%nomega*epsm1%nqibz*b2Mb,' [Mb] <<< MEM'
      call wrtout(std_out, msg)
 
-     if (.not. Er%use_shared_win) then
+     if (.not. epsm1%use_shared_win) then
 
        if (nprocs > 1) then
          msg = sjoin("- WARNING: Cannot use MPI shared memory as MPI library does not support MPI_WIN_ALLOCATE_SHARED with C_PTR", ch10, &
@@ -934,8 +933,8 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          call wrtout(ab_out, msg)
        end if
 
-       ABI_MALLOC_OR_DIE(Er%epsm1, (npwe, npwe, Er%nomega, Er%nqibz), ierr)
-       call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, comm)
+       ABI_MALLOC_OR_DIE(epsm1%epsm1, (npwe, npwe, epsm1%nomega, epsm1%nqibz), ierr)
+       call read_screening(in_varname, epsm1%fname, epsm1%npwe, epsm1%nqibz, epsm1%nomega, epsm1%epsm1, iomode__, comm)
 
      else
 
@@ -949,18 +948,18 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        comm__ = comm
        xcomm = xcomm_from_mpi_int(comm__)
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
-       count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(Er%nomega * Er%nqibz)
-       call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, Er%epsm1_win)
-       call c_f_pointer(void_ptr, Er%epsm1, shape=[npwe, npwe, Er%nomega, Er%nqibz])
+       count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(epsm1%nomega * epsm1%nqibz)
+       call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
+       call c_f_pointer(void_ptr, epsm1%epsm1, shape=[npwe, npwe, epsm1%nomega, epsm1%nqibz])
 
-       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr) ! Start the RMA epoch.
+       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr) ! Start the RMA epoch.
        shared_xcomm = xcomm%split_type()
        if (shared_xcomm%me == 0) then
          ! Only one proc in shared_xcomm reads from file.
-         call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, xmpi_comm_self)
+         call read_screening(in_varname, epsm1%fname, epsm1%npwe, epsm1%nqibz, epsm1%nomega, epsm1%epsm1, iomode__, xmpi_comm_self)
        end if
        call xcomm%free(); call shared_xcomm%free()
-       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, Er%epsm1_win, ierr) ! Close the RMA epoch.
+       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr) ! Close the RMA epoch.
        end block
 
      end if
@@ -976,10 +975,10 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
  else
    ! === The matrix stored on file do not correspond to the quantity required ===
    ! * Presently only the transformation chi0 => e^-1 is coded
-   ! * According to Er%mqmem either calculate e^-1 dumping the result to a file
+   ! * According to epsm1%mqmem either calculate e^-1 dumping the result to a file
    !   for a subsequent use or calculate e^-1 keeping everything in memory.
 
-   if (Er%mqmem == 0) then
+   if (epsm1%mqmem == 0) then
      ! Open file and write the header for the SCR file ===
      ! For the moment only master works.
 
@@ -992,11 +991,11 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
            ABI_ERROR(msg)
          end if
        end if
-       call wrtout(std_out,sjoin('mkdump_Er: calculating and writing epsilon^-1 matrix on file: ',ofname))
+       call wrtout(std_out,sjoin('epsm1_mkdump: calculating and writing epsilon^-1 matrix on file: ',ofname))
 
        ! Update the entries in the header that have been modified.
        ! TODO, write function to return title, just for info
-       call Er%Hscr%copy(Hscr_cp)
+       call epsm1%Hscr%copy(Hscr_cp)
        Hscr_cp%ID = id_required
        Hscr_cp%ikxc = ikxc_required
        Hscr_cp%test_type = option_test
@@ -1009,34 +1008,34 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call hscr_cp%io(fform,rdwr,unt_dump,xmpi_comm_self,master,iomode)
        call Hscr_cp%free()
 
-       ABI_MALLOC_OR_DIE(epsm1, (npwe, npwe, Er%nomega), ierr)
+       ABI_MALLOC_OR_DIE(tmp_epsm1, (npwe, npwe, epsm1%nomega), ierr)
 
-       do iqibz=1,Er%nqibz
+       do iqibz=1,epsm1%nqibz
          is_qeq0=0
-         if (normv(Er%qibz(:,iqibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
+         if (normv(epsm1%qibz(:,iqibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
          ! FIXME there's a problem with SUSC files and MPI-IO
          !if (iomode == IO_MODE_MPI) then
          !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
-         !  call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,IO_MODE_FORTRAN,xmpi_comm_self,iqiA=iqibz)
+         !  call read_screening(in_varname,epsm1%fname,npwe,1,epsm1%nomega,tmp_epsm1,IO_MODE_FORTRAN,xmpi_comm_self,iqiA=iqibz)
          !else
-         call read_screening(in_varname,Er%fname,npwe,1,Er%nomega,epsm1,iomode,xmpi_comm_self,iqiA=iqibz)
+         call read_screening(in_varname,epsm1%fname,npwe,1,epsm1%nomega,tmp_epsm1,iomode,xmpi_comm_self,iqiA=iqibz)
          !end if
 
          dim_wing=0; if (is_qeq0==1) dim_wing=3
-         ABI_MALLOC(dummy_lwing,(npwe*Er%nI,Er%nomega,dim_wing))
-         ABI_MALLOC(dummy_uwing,(npwe*Er%nJ,Er%nomega,dim_wing))
-         ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
+         ABI_MALLOC(dummy_lwing,(npwe*epsm1%nI,epsm1%nomega,dim_wing))
+         ABI_MALLOC(dummy_uwing,(npwe*epsm1%nJ,epsm1%nomega,dim_wing))
+         ABI_MALLOC(dummy_head,(dim_wing,dim_wing,epsm1%nomega))
 
          if (approx_type<2 .or. approx_type>3) then
            ABI_WARNING('Entering out-of core RPA or Kxc branch')
-           call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
+           call make_epsm1_driver(iqibz,dim_wing,npwe,epsm1%nI,epsm1%nJ,epsm1%nomega,epsm1%omega,&
                                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                                  dummy_lwing,dummy_uwing,epsm1,spectra,xmpi_comm_self)
+                                  dummy_lwing,dummy_uwing,tmp_epsm1,spectra,xmpi_comm_self)
          else
            ABI_WARNING('Entering out-of core fxc_ADA branch')
-           call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
+           call make_epsm1_driver(iqibz,dim_wing,npwe,epsm1%nI,epsm1%nJ,epsm1%nomega,epsm1%omega,&
                                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                                  dummy_lwing,dummy_uwing,epsm1,spectra,xmpi_comm_self,fxc_ADA(:,:,iqibz))
+                                  dummy_lwing,dummy_uwing,tmp_epsm1,spectra,xmpi_comm_self,fxc_ADA(:,:,iqibz))
          end if
 
          ABI_FREE(dummy_head)
@@ -1049,7 +1048,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          end if
          call spectra%free()
 
-         call write_screening(out_varname,unt_dump,iomode,npwe,Er%nomega,iqibz,epsm1)
+         call write_screening(out_varname,unt_dump,iomode,npwe,epsm1%nomega,iqibz,tmp_epsm1)
        end do
 
        if (iomode == IO_MODE_ETSF) then
@@ -1058,7 +1057,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          close(unt_dump)
        endif
 
-       ABI_FREE(epsm1)
+       ABI_FREE(tmp_epsm1)
      end if !master
 
      ! Master broadcasts ofname.
@@ -1066,49 +1065,49 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! SCR file before it is written by the master. xmpi_bcast will synch the procs.
      call xmpi_bcast(ofname,  master, comm, ierr)
 
-     ! Now Er% "belongs" to the file "ofname", thus
+     ! Now epsm1% "belongs" to the file "ofname", thus
      ! each proc has to destroy and re-initialize the object.
-     call Er%free()
+     call epsm1%free()
 
-     mqmem_=Er%mqmem; npwe_asked=npwe
-     call Er%init_from_file(ofname, mqmem_, npwe_asked, comm)
+     mqmem_=epsm1%mqmem; npwe_asked=npwe
+     call epsm1%from_file(ofname, mqmem_, npwe_asked, comm)
 
-     ! Now Er% has been reinitialized and ready-to-use.
-     Er%id = id_required
-     call Er%print()
+     ! Now epsm1% has been reinitialized and ready-to-use.
+     epsm1%id = id_required
+     call epsm1%print()
    else
      ! ========================
      ! === In-core solution ===
      ! ========================
-     ABI_MALLOC_OR_DIE(Er%epsm1, (npwe,npwe,Er%nomega,Er%nqibz), ierr)
+     ABI_MALLOC_OR_DIE(epsm1%epsm1, (npwe,npwe,epsm1%nomega,epsm1%nqibz), ierr)
 
      ! FIXME there's a problem with SUSC files and MPI-IO
      !if (iomode == IO_MODE_MPI) then
      !  !call wrtout(std_out, "read_screening with MPI_IO")
      !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
-     !  call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
+     !  call read_screening(in_varname,epsm1%fname,npwe,epsm1%nqibz,epsm1%nomega,epsm1%epsm1,IO_MODE_FORTRAN,comm)
      !else
-     call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm)
+     call read_screening(in_varname,epsm1%fname,npwe,epsm1%nqibz,epsm1%nomega,epsm1%epsm1,iomode,comm)
      !end if
 
-     do iqibz=1,Er%nqibz
-       is_qeq0=0; if (normv(Er%qibz(:,iqibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
+     do iqibz=1,epsm1%nqibz
+       is_qeq0=0; if (normv(epsm1%qibz(:,iqibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
 
        dim_wing=0; if (is_qeq0==1) dim_wing=3 ! FIXME
-       ABI_MALLOC(dummy_lwing,(npwe*Er%nI,Er%nomega,dim_wing))
-       ABI_MALLOC(dummy_uwing,(npwe*Er%nJ,Er%nomega,dim_wing))
-       ABI_MALLOC(dummy_head,(dim_wing,dim_wing,Er%nomega))
+       ABI_MALLOC(dummy_lwing,(npwe*epsm1%nI,epsm1%nomega,dim_wing))
+       ABI_MALLOC(dummy_uwing,(npwe*epsm1%nJ,epsm1%nomega,dim_wing))
+       ABI_MALLOC(dummy_head,(dim_wing,dim_wing,epsm1%nomega))
 
        if (approx_type<2 .or. approx_type>3) then
          ABI_WARNING('Entering in-core RPA and Kxc branch')
-         call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
+         call make_epsm1_driver(iqibz,dim_wing,npwe,epsm1%nI,epsm1%nJ,epsm1%nomega,epsm1%omega,&
                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm)
+                  dummy_lwing,dummy_uwing,epsm1%epsm1(:,:,:,iqibz),spectra,comm)
        else
          ABI_WARNING('Entering in-core fxc_ADA branch')
-         call make_epsm1_driver(iqibz,dim_wing,npwe,Er%nI,Er%nJ,Er%nomega,Er%omega,&
+         call make_epsm1_driver(iqibz,dim_wing,npwe,epsm1%nI,epsm1%nJ,epsm1%nomega,epsm1%omega,&
                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                  dummy_lwing,dummy_uwing,Er%epsm1(:,:,:,iqibz),spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
+                  dummy_lwing,dummy_uwing,epsm1%epsm1(:,:,:,iqibz),spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
        end if
 
        ABI_FREE(dummy_lwing)
@@ -1123,12 +1122,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call spectra%free()
      end do
 
-     Er%id = id_required
-     call Er%print()
+     epsm1%id = id_required
+     call epsm1%print()
    end if
  end if
 
-end subroutine mkdump_Er
+end subroutine epsm1_mkdump
 !!***
 
 !----------------------------------------------------------------------
@@ -1144,7 +1143,7 @@ end subroutine mkdump_Er
 !!  This method implements both in-core and the out-of-core solution
 !!  In the later, epsilon^-1 or chi0 are read from file.
 !!  It is possible to specify options to retrieve (RPA |TDDDT, [TESTCHARGE|TESTPARTICLE]).
-!!  All dimensions are already initialized in the Er% object, this method
+!!  All dimensions are already initialized in the epsm1% object, this method
 !!  should act as a wrapper around rdscr and make_epsm1_driver. A better
 !!  implementation will be done in the following once the coding of file handlers is completed.
 !!
@@ -1156,18 +1155,18 @@ end subroutine mkdump_Er
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  Er%epsm1
+!!  epsm1%epsm1
 !!
 !! TODO
-!!  Remove this routine. Now everything should be done with mkdump_Er
+!!  Remove this routine. Now everything should be done with epsm1_mkdump
 !!
 !! SOURCE
 
-subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
+subroutine get_epsm1(epsm1,Vcp,approx_type,option_test,iomode,comm,iqibzA)
 
 !Arguments ------------------------------------
 !scalars
- class(Epsilonm1_results),intent(inout) :: Er
+ class(epsm1_t),intent(inout) :: epsm1
  integer,intent(in) :: iomode,option_test,approx_type,comm
  integer,optional,intent(in) :: iqibzA
  type(vcoul_t),intent(in) :: Vcp
@@ -1182,27 +1181,27 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
  ! Vcp not yet used.
  ng = Vcp%ng
 
- select case (Er%mqmem)
+ select case (epsm1%mqmem)
  case (0)
    !  Out-of-core solution
-   ABI_SFREE_PTR(Er%epsm1)
-   ABI_MALLOC_OR_DIE(Er%epsm1,(Er%npwe,Er%npwe,Er%nomega,1), ierr)
+   ABI_SFREE_PTR(epsm1%epsm1)
+   ABI_MALLOC_OR_DIE(epsm1%epsm1,(epsm1%npwe,epsm1%npwe,epsm1%nomega,1), ierr)
 
    ! FIXME there's a problem with SUSC files and MPI-IO
    !if (iomode == IO_MODE_MPI) then
-   !  !write(std_out,*)"read_screening with iomode",iomode,"file: ",trim(er%fname)
+   !  !write(std_out,*)"read_screening with iomode",iomode,"file: ",trim(epsm1%fname)
    !  ABI_WARNING("SUSC files is buggy. Using Fortran IO")
-   !  call read_screening(em1_ncname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm,iqiA=iqibzA)
+   !  call read_screening(em1_ncname,epsm1%fname,epsm1%npwe,epsm1%nqibz,epsm1%nomega,epsm1%epsm1,IO_MODE_FORTRAN,comm,iqiA=iqibzA)
    !else
-   call read_screening(em1_ncname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,iomode,comm,iqiA=iqibzA)
+   call read_screening(em1_ncname,epsm1%fname,epsm1%npwe,epsm1%nqibz,epsm1%nomega,epsm1%epsm1,iomode,comm,iqiA=iqibzA)
    !end if
 
-   if (Er%id == 4) then
+   if (epsm1%id == 4) then
      ! If q-slice of epsilon^-1 has been read then return
-     !call Er%print()
+     !call epsm1%print()
      return
    else
-     ABI_ERROR(sjoin('Wrong Er%ID', itoa(er%id)))
+     ABI_ERROR(sjoin('Wrong epsm1%ID', itoa(epsm1%id)))
    end if
 
  case default
@@ -1228,14 +1227,14 @@ end subroutine get_epsm1
 !!
 !! SOURCE
 
-subroutine decompose_epsm1(Er, iqibz, eigs)
+subroutine decompose_epsm1(epsm1, iqibz, eigs)
 
 !Arguments ------------------------------------
 !scalars
- class(Epsilonm1_results),intent(in) :: Er
+ class(epsm1_t),intent(in) :: epsm1
  integer,intent(in) :: iqibz
 !arrays
- complex(dpc),intent(out) :: eigs(Er%npwe,Er%nomega)
+ complex(dpc),intent(out) :: eigs(epsm1%npwe,epsm1%nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -1248,13 +1247,13 @@ subroutine decompose_epsm1(Er, iqibz, eigs)
  logical :: sortcplx !BUG in abilint
 ! *********************************************************************
 
- ABI_CHECK(Er%mqmem/=0,'mqmem==0 not implemented')
+ ABI_CHECK(epsm1%mqmem/=0,'mqmem==0 not implemented')
 
- npwe = Er%npwe
+ npwe = epsm1%npwe
 
- do iw=1,Er%nomega
+ do iw=1,epsm1%nomega
 
-   if (ABS(REAL(Er%omega(iw)))>0.00001) then
+   if (ABS(REAL(epsm1%omega(iw)))>0.00001) then
      ! Eigenvalues for a generic complex matrix
      lwork=4*2*npwe
      ABI_MALLOC(wwc,(npwe))
@@ -1264,7 +1263,7 @@ subroutine decompose_epsm1(Er, iqibz, eigs)
      ABI_MALLOC(vs,(npwe,npwe))
      ABI_MALLOC(Afull,(npwe,npwe))
 
-     Afull=Er%epsm1(:,:,iw,iqibz)
+     Afull=epsm1%epsm1(:,:,iw,iqibz)
 
      !for the moment no sort, maybe here I should sort using the real part?
      call ZGEES('V','N',sortcplx,npwe,Afull,npwe,sdim,wwc,vs,npwe,work,lwork,rwork,bwork,info)
@@ -1294,7 +1293,7 @@ subroutine decompose_epsm1(Er, iqibz, eigs)
      do ig2=1,npwe
        do ig1=1,ig2
          idx=idx+1
-         Adpp(idx)=Er%epsm1(ig1,ig2,iw,iqibz)
+         Adpp(idx)=epsm1%epsm1(ig1,ig2,iw,iqibz)
        end do
      end do
 
@@ -3194,7 +3193,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
      if (open_file(path,msg,newunit=unt,form="unformatted", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
-     !call er%hscr%io(fform,rdwr,unt,comm,master,iomode)
+     !call epsm1%hscr%io(fform,rdwr,unt,comm,master,iomode)
      do iw=1,nomega
        write(unt)chi0_head(:,:,iw)
      end do
