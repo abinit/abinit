@@ -5389,16 +5389,19 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_allocated_shared returned ierr /= 0")
 
+ ! Synchronize to ensure memory is allocated.
+ call MPI_Barrier(xcomm%value, ierr)
+
  if (xcomm%me /= 0) then
    call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
    if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_shared_query returned ierr /= 0")
  end if
 
  ! No local operations prior to this epoch, so give an assertion
- call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
+ !call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 
 #else
- call xmpi_abort(msg="MPI_WIN_ALLOCATE_SHARED with C_PTR is not supported by you MPI library!")
+ call xmpi_abort(msg="MPI_WIN_ALLOCATE_SHARED with C_PTR is not supported by your MPI library!")
 #endif
 
 end subroutine xcomm_allocate_shared_master
@@ -5552,6 +5555,7 @@ subroutine xmpi_win_fence(win, assert, ierr)
  integer,intent(out) :: ierr
 !----------------------------------------------------------------------
 
+ ierr = 0
 #ifdef HAVE_MPI
  call MPI_WIN_FENCE(assert, win, ierr)
 #endif
@@ -5562,6 +5566,7 @@ subroutine xmpi_win_free(win, ierr)
  integer,intent(inout) :: win
  integer,intent(out) :: ierr
 
+ ierr = 0
 #ifdef HAVE_MPI
  call MPI_WIN_FREE(win, ierr)
 #endif

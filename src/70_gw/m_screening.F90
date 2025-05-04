@@ -912,11 +912,9 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      Er%use_shared_win = .False.
 #ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
      Er%use_shared_win = .True.
-     !Er%use_shared_win = nprocs > 1
+     !Er%use_shared_win = nprocs > 1 ! TODO
 #endif
-
-     write(msg,'(a,f12.1,a)')' Memory for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
-     call wrtout(std_out, msg)
+     !Er%use_shared_win = .False.
 
      iomode__ = iomode
      if (iomode__ == IO_MODE_MPI) then
@@ -924,7 +922,18 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        iomode__ = IO_MODE_FORTRAN
      end if
 
+     write(msg,'(a,f12.1,a)')' Memory for Er%epsm1: ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
+     call wrtout(std_out, msg)
+
      if (.not. Er%use_shared_win) then
+
+       if (nprocs > 1) then
+         msg = sjoin("- WARNING: Cannot use MPI shared memory as MPI library does not support MPI_WIN_ALLOCATE_SHARED with C_PTR", ch10, &
+                     "- Memory for epsm1 will increase with nprocs per node!")
+         ABI_WARNING(msg)
+         call wrtout(ab_out, msg)
+       end if
+
        ABI_MALLOC_OR_DIE(Er%epsm1, (npwe, npwe, Er%nomega, Er%nqibz), ierr)
        call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, comm)
 
@@ -935,6 +944,8 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        type(c_ptr) :: void_ptr
        integer(kind=XMPI_ADDRESS_KIND) :: count
        type(xcomm_t) :: xcomm, shared_xcomm
+
+       call wrtout(std_out, " HAPPY: Using MPI shared memory, memory for epsm1 won't increase with nprocs per node!")
        comm__ = comm
        xcomm = xcomm_from_mpi_int(comm__)
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
@@ -942,16 +953,14 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, Er%epsm1_win)
        call c_f_pointer(void_ptr, Er%epsm1, shape=[npwe, npwe, Er%nomega, Er%nqibz])
 
-       shared_xcomm =  xcomm%split_type()
-       ! Start the RMA epoch.
-       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, Er%epsm1_win, ierr)
+       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr) ! Start the RMA epoch.
+       shared_xcomm = xcomm%split_type()
        if (shared_xcomm%me == 0) then
          ! Only one proc in shared_xcomm reads from file.
          call read_screening(in_varname, Er%fname, Er%npwe, Er%nqibz, Er%nomega, Er%epsm1, iomode__, xmpi_comm_self)
        end if
        call xcomm%free(); call shared_xcomm%free()
-       ! close the RMA epoch.
-       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, Er%epsm1_win, ierr)
+       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, Er%epsm1_win, ierr) ! Close the RMA epoch.
        end block
 
      end if
@@ -1059,14 +1068,14 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
      ! Now Er% "belongs" to the file "ofname", thus
      ! each proc has to destroy and re-initialize the object.
-     call em1results_free(Er)
+     call Er%free()
 
      mqmem_=Er%mqmem; npwe_asked=npwe
-     call init_Er_from_file(Er,ofname,mqmem_,npwe_asked,comm)
+     call Er%init_from_file(ofname, mqmem_, npwe_asked, comm)
 
      ! Now Er% has been reinitialized and ready-to-use.
      Er%id = id_required
-     call em1results_print(Er)
+     call Er%print()
    else
      ! ========================
      ! === In-core solution ===
@@ -1115,7 +1124,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      end do
 
      Er%id = id_required
-     call em1results_print(Er)
+     call Er%print()
    end if
  end if
 
@@ -1190,7 +1199,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
 
    if (Er%id == 4) then
      ! If q-slice of epsilon^-1 has been read then return
-     !call em1results_print(Er)
+     !call Er%print()
      return
    else
      ABI_ERROR(sjoin('Wrong Er%ID', itoa(er%id)))

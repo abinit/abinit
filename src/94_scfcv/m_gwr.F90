@@ -4442,7 +4442,6 @@ subroutine gwr_build_tchi(gwr)
    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
    call wrtout(std_out, " Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
    call wrtout(std_out, " Here we're gonna have a big allocation peak...")
-
    do my_iqi=1,gwr%my_nqibz
      iq_ibz = gwr%my_qibz_inds(my_iqi)
      npwsp = gwr%tchi_desc_qibz(iq_ibz)%npw * gwr%nspinor
@@ -4462,6 +4461,8 @@ subroutine gwr_build_tchi(gwr)
      do my_it=1,gwr%my_ntau
        call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
        itau = gwr%my_itaus(my_it)
+
+       ! TODO: To reduce memory one could allocate and then accumulate only a subset of k-points.
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
