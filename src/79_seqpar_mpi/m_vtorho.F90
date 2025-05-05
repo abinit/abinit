@@ -89,7 +89,7 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
- use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm, &
                                       gemm_nonlop_block_size, gemm_nonlop_is_distributed
 
  use m_abstract_wf,        only : abstract_wf, init_mywfc
@@ -1046,7 +1046,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (gemm_nonlop_use_gemm) then
          call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
          &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
-         if(istep<=1) call reset_gemm_nonlop()
        end if
 
 #if defined HAVE_GPU_CUDA
@@ -1452,7 +1451,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           dtset%symrel,dtset%tnons,dtset%symafm)
 
 !        ==  allocate paw_dmft%chipsi and paw_dmft%eigen_dft
-         call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
+         call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filctqmcdatain, &
+                      & dtfil%filselfin,dtfil%filnam_ds(3),dtfil%fnameabo_app,dtfil%ireadctqmcdata, &
+                      & dtfil%ireadself,paw_dmft,pawtab(:))
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  compute chipsi
@@ -1467,7 +1468,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call timab(620,2,tsec)
          call flush_unit(std_out)
 
-
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
 
@@ -1475,7 +1475,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          edmft=paw_dmft%e_hu-paw_dmft%e_dc
          energies%e_dc=paw_dmft%e_dc
          energies%e_hu=paw_dmft%e_hu
-         if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral == 1 &
+         if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral > 0 &
             & .and. (dtset%dmft_solv == 6 .or. dtset%dmft_solv == 7)) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp

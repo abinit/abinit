@@ -3571,8 +3571,13 @@ include 'mpif.h'
     write(op%ostream,*) "================================="
 
     MALLOC(occ,(2**op%flavors,1:flavors))
+#ifdef FC_LLVM
+    MALLOC(occtot,(2**op%flavors) )
+    MALLOC(spintot,(2**op%flavors) )
+#else
     MALLOC(occtot,(2**op%flavors))
     MALLOC(spintot,(2**op%flavors))
+#endif
     do n1=1,2**op%flavors
       ! Compute occupations of individual Orbitals
       n3=n1-1
