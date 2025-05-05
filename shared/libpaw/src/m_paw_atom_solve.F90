@@ -4003,7 +4003,7 @@ FUNCTION factorial(n)
  real(dp) :: factorial
  INTEGER, INTENT(IN) :: n
  INTEGER :: i
- factorial=1
+ factorial=one
  IF (n.LT.2) RETURN
  DO i=2,n
    factorial=factorial*i
