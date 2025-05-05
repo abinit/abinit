@@ -766,9 +766,10 @@ subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,e_semicore)
 !arrays
 !Local variables-------------------------------
 !scalars
- CHARACTER(len=100) :: input_file
+ CHARACTER(len=500) :: input_file
  REAL(dp)    :: a1,a2,a3,hval,r0
- INTEGER :: ii,jj,icor,ir,io
+ INTEGER :: ii,jj,icor,ir,io,fnln
+ logical :: fmt_abinit,fmt_xml
  real(dp) :: ekin
  type(pawrad_type) :: radmesh
 !arrays
@@ -776,7 +777,19 @@ subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,e_semicore)
 
 ! *************************************************************************
 
- write(input_file,'(I3.3)') itypat;input_file=trim(input_file)//'_input_atp'
+ input_file=trim(atm%fname)
+ fnln=len(trim(atm%fname))
+ fmt_abinit=.false.
+ if (fnln>6) fmt_abinit=(input_file(fnln-6:fnln)=='.abinit')
+ fmt_xml=.false.
+ if (fnln>3) fmt_xml=(input_file(fnln-3:fnln)=='.xml')
+ if(fmt_abinit) then
+   input_file=input_file(1:fnln-6)//'input_atp'
+ elseif(fmt_xml) then
+   input_file=input_file(1:fnln-3)//'input_atp'
+ else
+   input_file=input_file(1:fnln)//'input_atp'
+ endif
 ! Initialize global constants
  machine_precision = zero
  a1 = 4._dp/3._dp
