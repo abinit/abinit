@@ -944,7 +944,7 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        integer(kind=XMPI_ADDRESS_KIND) :: count
        type(xcomm_t) :: xcomm, shared_xcomm
 
-       call wrtout(std_out, " HAPPY: Using MPI shared memory, memory for epsm1 won't increase with nprocs per node!")
+       call wrtout(std_out, "- HAPPY: Using MPI shared memory, memory for epsm1 won't increase with nprocs per node!")
        comm__ = comm
        xcomm = xcomm_from_mpi_int(comm__)
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)

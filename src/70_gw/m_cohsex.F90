@@ -29,7 +29,7 @@ module m_cohsex
  use m_abicore
 
  use defs_datatypes,  only : pseudopotential_type
- use m_time,          only : timab
+ use m_time,          only : timab, cwtime, cwtime_report
  use m_fstrings,      only : sjoin, itoa
  use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize, imin_loc
@@ -58,6 +58,8 @@ module m_cohsex
 
  public :: cohsex_me
 !!***
+
+ integer,parameter :: LOG_MODK = 5
 
 contains
 !!***
@@ -185,8 +187,9 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer :: ndegs,wtqm,wtqp,mod10
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,ifft,npw_k
  real(dp) :: fact_spin,theta_mu_minus_e0i,tol_empty,gw_gsq
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
- logical :: iscompatibleFFT,q_is_gamma
+ logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
@@ -215,6 +218,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  DBG_ENTER("COLL")
 
  call timab(423,1,tsec) ! cohsex_me
+ call cwtime(cpu_all, wall_all, gflops_all,"start")
 
  ! Initial check
  ABI_CHECK(Sr%nomega_r == Sigp%nomegasr,"")
@@ -444,7 +448,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  end if
 
  ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
- if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
+ if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
 
  call timab(442,2,tsec)
 
@@ -479,6 +483,8 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      if (ALL(proc_distrb(:,ik_bz,spin)/=Wfd%my_rank)) CYCLE
 
      call timab(443,1,tsec) ! csigme (initq)
+     print_time = wfd%my_rank == 0 .and. (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0)
+     if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! Find the corresponding irreducible k-point
      call kmesh%get_BZ_item(ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
@@ -705,6 +711,11 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
        end do !kb to calculate matrix elements of $\Sigma$
      end do !ib
 
+     if (print_time) then
+       write(msg,'(3(a,i0))')' cohsex: ik_bz: ',ik_bz,'/',Kmesh%nbz,", spin: ",spin
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (ik_bz == LOG_MODK) call wrtout(std_out, " ...")
+     end if
+
      ! Deallocate k-dependent quantities.
      ABI_FREE(gw_gbound)
      if (Psps%usepaw==1) then
@@ -721,7 +732,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  end do !spin
 
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
- if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
+ if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
 
  ABI_FREE(igfftcg0)
 
@@ -824,6 +835,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  call timab(495,2,tsec) ! csigme(SigC)
  call timab(491,2,tsec)
  call timab(423,2,tsec) ! cohsex_me
+ call cwtime_report("cohsex_me", cpu_all, wall_all, gflops_all)
 
  DBG_EXIT("COLL")
 
@@ -883,7 +895,6 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
  integer :: ig,ig4,ig4x,ig4y,ig4z,igp,igmin,ispinor,spad,outofbox
 !arrays
  integer :: g2mg1(3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
