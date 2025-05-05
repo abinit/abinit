@@ -5396,7 +5396,10 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  end if
 
  ! No local operations prior to this epoch, so give an assertion
- !call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
+ call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
+ if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_shared_query returned ierr /= 0")
+
+ call MPI_Barrier(xcomm%value, ierr)
 
 #else
  call xmpi_abort(msg="MPI_WIN_ALLOCATE_SHARED with C_PTR is not supported by your MPI library!")
@@ -5546,7 +5549,7 @@ subroutine pool2d_free(pool)
 end subroutine pool2d_free
 !!***
 
-subroutine xmpi_win_fence(win, assert, ierr)
+subroutine xmpi_win_fence(assert, win, ierr)
 
 !Arguments ------------------------------------
  integer,intent(in) :: win, assert
