@@ -2948,8 +2948,8 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
 
  call cwtime(cpu, wall, gflops, "start")
 
- !mem_mb = two * gwr%my_nkbz * two * gwpc * gwr%g_nfft * gwr%gree_mpw * b2Mb /  gwr%g_slkproc%nbprocs
- !call wrtout(std_out, sjoin("Local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+ mem_mb = two * gwr%my_nkbz * two * gwpc * gwr%g_nfft * gwr%green_mpw * b2Mb /  gwr%g_slkproc%grid%nbprocs
+ call wrtout(std_out, sjoin("Estimated local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ABI_MALLOC(ceikr, (gwr%g_nfft * gwr%nspinor))
 
@@ -2969,6 +2969,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
 
    do ipm=1,2
      ! Allocate rgp PBLAS matrix to store G_kbz(r,g')
+     ! Here we're gonna have a lot of memory allocated due to loop over the full BZ!.
      associate (g_gp => gt_pm(ipm))
      npwsp = desc_k%npw * gwr%nspinor
      ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
@@ -4377,7 +4378,7 @@ subroutine gwr_build_tchi(gwr)
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win
  integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2 !, ii
  integer :: use_umklp ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
- integer :: my_ikf_start, my_ikf_stop, nkf_batch_size, nkf_now, op_type
+ integer :: my_ikf_start, my_ikf_stop !, nkf_batch_size, nkf_now, op_type
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: cpu_ikf, wall_ikf, gflops_ikf
@@ -4488,7 +4489,7 @@ subroutine gwr_build_tchi(gwr)
    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
    select_my_kbz = .True.
-   nkf_batch_size = gwr%my_nkbz
+   !nkf_batch_size = gwr%my_nkbz
 
    ! Loop over my spins and my taus.
    do my_is=1,gwr%my_nspins
@@ -4502,12 +4503,15 @@ subroutine gwr_build_tchi(gwr)
        ! get_myk_green_gpr should receive a mask and box2gsph should accumulate for ik_group > 1.
        ! First of all, I need to undestand if get_myk_green_gpr is responsible for the OOM (very likely)
 
-       do my_ikf_start=1, gwr%my_nkbz, nkf_batch_size
-         nkf_now = blocked_loop(my_ikf_start, gwr%my_nkbz, nkf_batch_size)
-         my_ikf_stop = min(my_ikf_start + nkf_now, gwr%my_nkbz)
-         !select_my_kbz = .False.; select_my_kbz(my_ifk_start:my_ifk_stop) = .True.
-         !op_type = OP_COPY; if (my_ifk_start /= 0) op_type = OP_SUM
-       end do ! my_ifk_start
+       ! This trick cannot be used for chi as we have GG but it might be implemented for GW
+       ! where Sigma = G1_k W + G2_k W + G3_k W ...
+
+       !do my_ikf_start=1, gwr%my_nkbz, nkf_batch_size
+       !  nkf_now = blocked_loop(my_ikf_start, gwr%my_nkbz, nkf_batch_size)
+       !  my_ikf_stop = min(my_ikf_start + nkf_now, gwr%my_nkbz)
+       !  !select_my_kbz = .False.; select_my_kbz(my_ifk_start:my_ifk_stop) = .True.
+       !  !op_type = OP_COPY; if (my_ifk_start /= 0) op_type = OP_SUM
+       !end do ! my_ifk_start
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, select_my_kbz, desc_mykbz, gt_gpr)

@@ -913,7 +913,7 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      epsm1%use_shared_win = .True.
      !epsm1%use_shared_win = nprocs > 1 ! TODO
 #endif
-     epsm1%use_shared_win = .False.    ! This to go back to the old non-scalable version.
+     !epsm1%use_shared_win = .False.    ! This to go back to the old non-scalable version.
 
      iomode__ = iomode
      if (iomode__ == IO_MODE_MPI) then
@@ -952,14 +952,16 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
        call c_f_pointer(void_ptr, epsm1%epsm1, shape=[npwe, npwe, epsm1%nomega, epsm1%nqibz])
 
-       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr) ! Start the RMA epoch.
+       ! Only one proc in shared_xcomm reads from file.
        shared_xcomm = xcomm%split_type()
+       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr) ! Start the RMA epoch.
+       ABI_CHECK_MPI(ierr, "")
        if (shared_xcomm%me == 0) then
-         ! Only one proc in shared_xcomm reads from file.
          call read_screening(in_varname, epsm1%fname, epsm1%npwe, epsm1%nqibz, epsm1%nomega, epsm1%epsm1, iomode__, xmpi_comm_self)
        end if
-       call xcomm%free(); call shared_xcomm%free()
        call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr) ! Close the RMA epoch.
+       ABI_CHECK_MPI(ierr, "")
+       call xcomm%free(); call shared_xcomm%free()
        end block
 
      end if
