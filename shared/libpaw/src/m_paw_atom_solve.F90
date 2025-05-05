@@ -4024,20 +4024,24 @@ FUNCTION hwfn(z,np,l,r)
  real(dp), INTENT(IN) :: z,r
  INTEGER, INTENT(IN) :: np,l
  INTEGER :: node,k
- real(dp) :: scale,rho,pref,term,sum
+ real(dp) :: scale_,rho,pref,term,sum_
  node=np-l-1
- scale=2._dp*z/np
- rho=scale*r
- pref=scale*SQRT(scale*factorial(np+l)/(2*np*factorial(node)))
+ scale_=2._dp*z/np
+ rho=scale_*r
+ write(std_out,*)scale_
+ write(std_out,*)factorial(np+l)
+ write(std_out,*)2*np*factorial(node)
+ write(std_out,*)scale_*factorial(np+l)/(2*np*factorial(node))
+ pref=scale_*SQRT(scale_*factorial(np+l)/(2*np*factorial(node)))
  term=(rho**l)/factorial(2*l+1)
- sum=term
+ sum_=term
  IF (node.GT.0) THEN
    DO k=1,node
      term=-term*(node-k+1)*rho/(k*(2*l+1+k))
-     sum=sum+term
+     sum_=sum_+term
    ENDDO
  ENDIF
- hwfn=r*pref*EXP(-0.5_dp*rho)*sum
+ hwfn=r*pref*ddexp(-0.5_dp*rho)*sum_
 END FUNCTION hwfn
 
 

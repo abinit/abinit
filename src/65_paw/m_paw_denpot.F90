@@ -2532,6 +2532,9 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
  rcpaw%eijkl_is_sym=.false.
  call rcpaw_core_energies(rcpaw,ntypat)
 
+ !Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
 end subroutine paw_relax_core
 !!***
 
