@@ -37,6 +37,7 @@ MODULE m_io_screening
  use m_crystal
 
  use m_gwdefs,          only : em1params_t, GW_TOLQ
+ use m_time,            only : cwtime, cwtime_report !, sec2str, timab
  use m_fstrings,        only : sjoin, itoa, endswith, replace_ch0
  use m_copy,            only : alloc_copy
  use m_io_tools,        only : open_file, file_exists, iomode2str
@@ -1398,6 +1399,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
  integer(XMPI_OFFSET_KIND) :: offset,displ_wq !,my_offpad
  !complex(dpc) :: ctmp
 #endif
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg,errmsg
  logical :: read_qslice
  type(hscr_t) :: Hscr
@@ -1416,6 +1418,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+ call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  my_iomode = iomode
@@ -1651,6 +1654,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, 
 
  call Hscr%free()
 
+ !call cwtime_report("- read_screening:", cpu, wall, gflops)
  DBG_EXIT("COLL")
 
  return

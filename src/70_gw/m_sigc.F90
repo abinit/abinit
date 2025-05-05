@@ -22,11 +22,11 @@ module m_sigc
  use m_xomp
  use m_defs_ptgroups
  use m_errors
- use m_time
  use m_splines
  use m_dtset
 
  use defs_datatypes,  only : pseudopotential_type
+ use m_time,          only : timab, cwtime, cwtime_report
  use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
  use m_hide_lapack,   only : xheev
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
@@ -200,10 +200,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: spad,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
  integer :: iwc,ifft
- real(dp) :: cpu_time,wall_time,gflops
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in, z2,en_high,gw_gsq,w_localmax,w_max
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
- logical :: iscompatibleFFT,q_is_gamma
+ logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=500) :: msg,sigma_type
  type(wave_t),pointer :: wave_sum, wave_jb
  complex(gwpc),allocatable :: botsq(:,:),otq(:,:),eig(:,:)
@@ -256,7 +256,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call timab(424,1,tsec) ! calc_sigc_me
  call timab(431,1,tsec) ! calc_sigc_me
  call timab(432,1,tsec) ! Init
- call cwtime(cpu_time,wall_time,gflops,"start")
+ call cwtime(cpu_all, wall_all, gflops_all,"start")
 
  ! Initialize MPI variables
  qp_ene => QP_BSt%eig; qp_occ => QP_BSt%occ
@@ -594,7 +594,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
  if (epsm1%use_shared_win) then
-   call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
+   call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr) ! Start the RMA epoch.
    ABI_CHECK_MPI(ierr, "")
  end if
 
@@ -644,6 +644,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      if (ALL(proc_distrb(:,ik_bz,spin)/=Wfd%my_rank)) CYCLE
 
      call timab(434,1,tsec) ! initq
+     print_time = wfd%my_rank == 0 .and. (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0)
+     if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! Find the corresponding irreducible k-point
      call kmesh%get_BZ_item(ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
@@ -664,11 +666,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          wtqp = wtqp + Ltg_k%wtksym(1,isym,iq_bz)
          wtqm = wtqm + Ltg_k%wtksym(2,isym,iq_bz)
        end do
-     end if
-
-     if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
-       write(msg,'(3(a,i0),a,i0)')' Sigma_c: ik_bz: ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by rank: ',Wfd%my_rank
-       call wrtout(std_out, msg)
      end if
 
      ! Find the corresponding irred q-point.
@@ -1172,6 +1169,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end do !ib
 
      call timab(445,2,tsec) ! csigme(SigC)
+     if (print_time) then
+       write(msg,'(3(a,i0))')' Sigma_c: ik_bz: ',ik_bz,'/',Kmesh%nbz,", spin: ",spin
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (ik_bz == LOG_MODK) call wrtout(std_out, " ...")
+     end if
 
      ! Deallocate k-dependent quantities.
      ABI_FREE(gw_gbound)
@@ -1205,7 +1206,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
  if (epsm1%use_shared_win) then
-   call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
+   call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr) ! Close the RMA epoch.
    ABI_CHECK_MPI(ierr, "")
  end if
 
@@ -1369,7 +1370,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call timab(431,2,tsec)
  call timab(424,2,tsec) ! calc_sigc_me
 
- call cwtime_report("calc_sigc_me", cpu_time, wall_time, gflops)
+ call cwtime_report("calc_sigc_me", cpu_all, wall_all, gflops_all)
 
  DBG_EXIT("COLL")
 

@@ -208,12 +208,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
  integer :: my_nbbp,my_nbbpks,spin,nsppol,iq,nq
  integer :: comm,ierr,my_wl,my_wr,iomegal,iomegar,gw_mgfft,dummy
- real(dp) :: cpu_time,wall_time,gflops
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: fac,fac1,fac2,fac3,fac4,spin_fact,deltaf_b1b2,weight,factor
  real(dp) :: max_rest,min_rest,my_max_rest,my_min_rest, qlen
  real(dp) :: en_high,deltaeGW_enhigh_b2,wl,wr,numerator,deltaeGW_b1b2,gw_gsq,memreq
  complex(dpc) :: deltaeKS_b1b2
- logical :: qzero,luwindow,is_metallic
+ logical :: qzero, luwindow, is_metallic, print_time
  character(len=500) :: msg_tmp,msg,allup
  type(gsphere_t) :: Gsph_FFT
  type(wave_t),pointer :: wave1, wave2
@@ -248,7 +248,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 
  DBG_ENTER("COLL")
 
- call cwtime(cpu_time, wall_time, gflops, "start")
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Change FFT mesh if needed
  if (ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3))) call wfd%change_ngfft(Cryst,Psps,ngfft_gw)
@@ -527,10 +527,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-     if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
-       write(msg,'(2(a,i0),a,i2,a,i0)')' ik: ',ik_bz,'/',Kmesh%nbz,' spin: ',spin,' done by rank: ',Wfd%my_rank
-       call wrtout(std_out, msg)
-     end if
+     print_time = wfd%my_rank == 0 .and. (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0)
+     if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! Get ik_ibz, non-symmorphic phase and symmetries from ik_bz.
      call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt)
@@ -866,6 +864,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
      if (Psps%usepaw == 0 .and. Ep%inclvkb /= 0 .and. Ep%symchi == 1) then
        call vkbr_free(vkbr(ik_ibz)) ! Not need anymore as we loop only over IBZ.
      end if
+
+     if (print_time) then
+       write(msg,'(3(a,i0))')' chi0q0: ik_bz: ',ik_bz,'/',Kmesh%nbz,", spin: ",spin
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (ik_bz == LOG_MODK) call wrtout(std_out, " ...")
+     end if
+
    end do !ik_bz
  end do !spin
 
@@ -1055,7 +1059,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
    ABI_FREE(coeffW_BZ)
  endif
 
- call cwtime_report("cchi0q0", cpu_time, wall_time, gflops)
+ call cwtime_report("cchi0q0", cpu_all, wall_all, gflops_all)
 
  DBG_EXIT("COLL")
 
@@ -1174,14 +1178,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  integer :: nfound,nkpt_summed,nspinor,nsppol,mband
  integer :: comm,gw_mgfft,use_padfft,gw_fftalga,lcor,mgfftf,use_padfftf
  integer :: my_nbbp,my_nbbpks,spin,nbmax,dummy
- real(dp) :: cpu_time,wall_time,gflops
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: deltaeGW_b1kmq_b2k,deltaeGW_enhigh_b2k,deltaf_b1kmq_b2k
  real(dp) :: e_b1_kmq,en_high,fac,fac2,fac3,f_b1_kmq,factor,max_rest,min_rest,my_max_rest
  real(dp) :: my_min_rest,numerator,spin_fact,weight,wl,wr
  real(dp) :: gw_gsq,memreq
  complex(dpc) :: ph_mkmqt,ph_mkt
  complex(gwpc) :: local_czero_gw
- logical :: qzero,isirred_k,isirred_kmq,luwindow,is_metallic
+ logical :: qzero,isirred_k,isirred_kmq,luwindow,is_metallic, print_time
  character(len=500) :: msg,allup
  type(gsphere_t) :: Gsph_FFT
 !arrays
@@ -1210,7 +1214,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  DBG_ENTER("COLL")
 
  call timab(331,1,tsec) ! cchi0
- call cwtime(cpu_time,wall_time,gflops,"start")
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
  is_metallic = qp_ebands%has_metal_scheme()
@@ -1462,10 +1466,8 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
 
      if (ALL(bbp_ks_distrb(:,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-     if (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0) then
-       write(msg,'(2(a,i0),a,i0,a,i0)')' ik: ',ik_bz,'/',Kmesh%nbz,' spin: ',spin,' done by rank: ',Wfd%my_rank
-       call wrtout(std_out,msg)
-     end if
+     print_time = wfd%my_rank == 0 .and. (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0)
+     if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
      call kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp_k,isirred_k)
@@ -1788,6 +1790,11 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
        end do !band2
      end do !band1
 
+     if (print_time) then
+       write(msg,'(3(a,i0))')' chi0: ik_bz: ',ik_bz,'/',Kmesh%nbz,", spin: ",spin
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (ik_bz == LOG_MODK) call wrtout(std_out, " ...")
+     end if
+
      ABI_FREE(gw_gbound)
      if (Dtset%pawcross==1) then
        ABI_FREE(gboundf)
@@ -1919,7 +1926,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  endif
 
  call timab(331,2,tsec)
- call cwtime_report("cchi0", cpu_time, wall_time, gflops)
+ call cwtime_report("cchi0", cpu_all, wall_all, gflops_all)
 
  DBG_EXIT("COLL")
 
@@ -2020,7 +2027,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  real(dp),parameter :: dummy_dosdeltae=HUGE(zero)
  real(dp) :: o_entropy,o_nelect,maxocc
  complex(dpc) :: ph_mkt
- logical :: iscompatibleFFT,is_metallic !,ltest
+ logical :: iscompatibleFFT, is_metallic, print_time
  character(len=500) :: msg,msg_tmp !,allup
  type(kmesh_t) :: Kmesh
  type(littlegroup_t) :: Ltg_q
