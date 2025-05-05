@@ -2548,7 +2548,7 @@ end subroutine slk_pgemm_dp
 !! SOURCE
 
 subroutine slk_pgemm_sp(transa, transb, matrix1, alpha, matrix2, beta, results, &
-                      ija, ijb, ijc) ! optional
+                        ija, ijb, ijc) ! optional
 
 !Arguments ------------------------------------
  character(len=1),intent(in) :: transa, transb
@@ -2668,7 +2668,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 #ifdef HAVE_LINALG_SCALAPACK
  !Local variables-------------------------------
  integer            :: LRWORK,LIWORK,LCWORK,INFO
- character(len=500) :: msg
+ !character(len=500) :: msg
  integer         , dimension(1) :: IWORK_tmp
  DOUBLE PRECISION, dimension(1) :: RWORK_tmp
  complex(dpc)     , dimension(1) :: CWORK_tmp
@@ -2729,8 +2729,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   end if
 
   if (INFO/=0) then
-    write(msg,'(A,I0)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
-    ABI_ERROR(msg)
+    ABI_ERROR(sjoin("Problem to compute workspace to use ScaLAPACK, INFO: ", itoa(INFO)))
   endif
   !write(std_out, *)"First call to compute workspace OK"
 
@@ -2796,8 +2795,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   ! MG: TODO: Recheck the computation of the workspace as I got INFO 2 with a 5x5x5 si supercell.
   if (INFO/=0) then
-    write(msg,'(A,I0)') "Problem to compute eigenvalues and eigenvectors with ScaLAPACK, INFO=",INFO
-    ABI_ERROR(msg)
+    ABI_ERROR(sjoin("Problem to compute eigenvalues and eigenvectors with ScaLAPACK, INFO:", itoa(INFO)))
   endif
 
   ABI_FREE(IFAIl)
@@ -3036,7 +3034,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
   integer            :: LRWORK,LIWORK,LCWORK,INFO
-  character(len=500) :: msg
+  !character(len=500) :: msg
   integer         , dimension(1) :: IWORK_tmp
   DOUBLE PRECISION, dimension(1) :: RWORK_tmp
   complex(dpc)     , dimension(1) :: CWORK_tmp
@@ -3096,8 +3094,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   endif
 
   if (INFO/=0) then
-     write(msg,'(A,I0)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
-     ABI_ERROR(msg)
+     ABI_ERROR(sjoin("Problem to compute workspace to use ScaLAPACK, INFO=",itoa(INFO)))
   endif
 
   TWORK_tmp(1) = IWORK_tmp(1)
@@ -3157,8 +3154,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   endif
 
   if (INFO/=0) then
-     write(msg,'(A,I0)') "Problem to compute eigen problem with ScaLAPACK, INFO=",INFO
-     ABI_ERROR(msg)
+     ABI_ERROR(sjoin("Problem to compute eigen problem with ScaLAPACK, INFO=", itoa(INFO)))
   endif
 
   ABI_FREE(IFAIl)
@@ -3475,7 +3471,7 @@ end subroutine compute_eigen2
 !! SOURCE
 
 subroutine slk_heev(mat, jobz, uplo, vec, w, &
-                      mat_size, ija, ijz) ! Optional
+                    mat_size, ija, ijz) ! Optional
 
 !Arguments ------------------------------------
 !scalars
