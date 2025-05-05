@@ -7,6 +7,7 @@ iomode 3   #only for test
 ndtset 1    # 
 jdtset 3    #
 getden3 2    # take density from DMFT
+getself3 3    # take self-energy from previous DMFT
 
 #Definition of the unit cell
 acell   3*5.5         # Cubic cell with
@@ -130,12 +131,12 @@ kptbounds3               # The four segments of the band structure are
 #%% pre_commands = iw_cp t102_MPI4o_DS2_DEN t102_MPI4o_DS2_DEN;
 #%%   iw_cp t102_MPI4i_DS3Self_ra-omega_iatom0001_isppol1 t102_MPI4i_DS3Self_ra-omega_iatom0001_isppol1;
 #%%   iw_cp t102_MPI4i_DS3.UnitaryMatrix_iatom0001 t102_MPI4i_DS3.UnitaryMatrix_iatom0001;
-#%%   iw_cp t102_MPI4o_DS3Self-omega_iatom0001_isppol1 t102_MPI4o_DS3Self-omega_iatom0001_isppol1;
+#%%   iw_cp t102_MPI4o_DS3_Self-omega_iatom0001_isppol1 t102_MPI4o_DS3_Self-omega_iatom0001_isppol1;
 #%%   iw_cp t102_MPI4o_DS3_spectralfunction_realgrid t102_MPI4o_DS3_spectralfunction_realgrid;
 #%% [NCPU_4]
 #%% files_to_test =
 #%%   t102_MPI4.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.1;
-#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines=100,tolab = 0.2,tolrel=0.2,fld_options=-easy;
+#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines=100,tolab = 1.0e-4,tolrel=2.0,fld_options=-medium;
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
