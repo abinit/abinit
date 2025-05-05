@@ -136,7 +136,7 @@ kptbounds3               # The four segments of the band structure are
 #%% [NCPU_4]
 #%% files_to_test =
 #%%   t102_MPI4.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.1;
-#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines=100,tolab = 1.0e-4,tolrel=2.0,fld_options=-medium;
+#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines=100,tolabs=0.01,tolrel=0.1,fld_options=-medium;
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
