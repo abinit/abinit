@@ -1271,7 +1271,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          end do
        case (ABI_GPU_OPENMP)
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_PTR(nhat12_atm,nhat12)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(nhat12_atm,nhat12)
          call abi_gpu_xaxpy(2, nfft*ndat2*ndat1*(nspinor**2),&
          &    cone,c_loc(nhat12_atm(:,:,:,:,:,ia)),1,c_loc(nhat12),1)
          !$OMP END TARGET DATA
@@ -1337,7 +1337,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      grnhat_12=-grnhat_12
    case (ABI_GPU_OPENMP)
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(grnhat_12)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(grnhat_12)
      call abi_gpu_xscal(1, size(grnhat_12),cminusone,c_loc(grnhat_12),1)
      !$OMP END TARGET DATA
 #endif
@@ -2444,7 +2444,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
          prod=prod*ucvol/dble(ngridtot)
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_PTR(prod)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(prod)
          call abi_gpu_xscal(1,qphase*lm_size*ndat*nattyp,scal,c_loc(prod),1)
          !$OMP END TARGET DATA
 #endif

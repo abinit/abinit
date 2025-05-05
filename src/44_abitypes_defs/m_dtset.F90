@@ -27,14 +27,14 @@ module m_dtset
  use m_errors
  use m_xmpi
 
- use m_fstrings,     only : inupper
- use m_numeric_tools,only : arth
- use m_matrix,       only : mati3inv
- use m_symtk,        only : littlegroup_q, symatm
- use m_symkpt,       only : symkpt
- use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert, sylwtens
- use m_parser,       only : intagm, chkvars_in_string
- use m_crystal,      only : crystal_t
+ use m_fstrings,      only : inupper
+ use m_numeric_tools, only : arth
+ use m_matrix,        only : mati3inv
+ use m_symtk,         only : littlegroup_q, symatm
+ use m_symkpt,        only : symkpt
+ use m_geometry,      only : mkrdim, metric, littlegroup_pert, irreducible_set_pert, sylwtens
+ use m_parser,        only : intagm, chkvars_in_string
+ use m_crystal,       only : crystal_t
 
  implicit none
 
@@ -138,13 +138,14 @@ type, public :: dataset_type
  integer :: dmft_nwli
  integer :: dmft_nwlo
  integer :: dmft_occnd_imag
+ integer :: dmft_optim
  integer :: dmft_prt_maxent
+ integer :: dmft_prtself
  integer :: dmft_prtwan
  integer :: dmft_rslf
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
- integer :: dmft_test
  integer :: dmft_triqs_compute_integral
  integer :: dmft_triqs_det_init_size
  integer :: dmft_triqs_det_n_operations_before_check
@@ -156,11 +157,10 @@ type, public :: dataset_type
  integer :: dmft_triqs_measure_density_matrix
  integer :: dmft_triqs_move_double
  integer :: dmft_triqs_move_shift
- integer :: dmft_triqs_nbins_histo
  integer :: dmft_triqs_nleg
  integer :: dmft_triqs_nsubdivisions
- integer :: dmft_triqs_ntau_delta
  integer :: dmft_triqs_off_diag
+ integer :: dmft_triqs_read_ctqmcdata
  integer :: dmft_triqs_seed_a
  integer :: dmft_triqs_seed_b
  integer :: dmft_triqs_therm_restart
@@ -170,15 +170,16 @@ type, public :: dataset_type
  integer :: dmft_use_full_chipsi
  integer :: dmft_wanorthnorm
  integer :: dmft_x2my2d
+ integer :: dmft_yukawa_param
  integer :: dmftbandi
  integer :: dmftbandf
  integer :: dmftcheck
  integer :: dmftctqmc_basis
  integer :: dmftctqmc_check
- integer :: dmftctqmc_config
  integer :: dmftctqmc_correl
  integer :: dmftctqmc_gmove
  integer :: dmftctqmc_grnns
+ integer :: dmftctqmc_localprop
  integer :: dmftctqmc_meas
  integer :: dmftctqmc_mov
  integer :: dmftctqmc_mrka
@@ -233,6 +234,7 @@ type, public :: dataset_type
  integer :: ga_fitness
  integer :: ga_n_rules
  integer :: getabiwan = 0
+ integer :: getctqmcdata = 0
  integer :: getgwan = 0
  integer :: getcell = 0
  integer :: getddb = 0
@@ -250,6 +252,7 @@ type, public :: dataset_type
  integer :: getpawden = 0
  integer :: getqps = 0
  integer :: getscr = 0
+ integer :: getself = 0
  integer :: getsuscep = 0
  integer :: getvpq = 0
  integer :: getvel = 0
@@ -822,7 +825,9 @@ type, public :: dataset_type
  real(dp) :: diemixmag
  real(dp) :: dilatmx
  real(dp) :: dmft_charge_prec
+ real(dp) :: dmft_epsilon_yukawa
  real(dp) :: dmft_fermi_step
+ real(dp) :: dmft_lambda_yukawa
  real(dp) :: dmft_mxsf
  real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc
@@ -831,7 +836,7 @@ type, public :: dataset_type
  real(dp) :: dmft_triqs_det_singular_threshold
  real(dp) :: dmft_triqs_epsilon
  real(dp) :: dmft_triqs_imag_threshold
- real(dp) :: dmft_triqs_move_global_prob
+ real(dp) :: dmft_triqs_pauli_prob
  real(dp) :: dmft_triqs_tol_block
  real(dp) :: dmft_triqs_wmax
  real(dp) :: dmft_wanrad
@@ -1094,6 +1099,7 @@ type, public :: dataset_type
  character(len=1) :: eph_fix_korq = "k"
  character(len=fnlen) :: geoopt = ABI_NOFILE
  character(len=fnlen) :: moldyn = ABI_NOFILE
+ character(len=fnlen) :: dmft_orbital_filepath = ABI_NOFILE
 
  contains
 
@@ -1529,25 +1535,30 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_dc            = dtin%dmft_dc
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_charge_prec   = dtin%dmft_charge_prec
+ dtout%dmft_epsilon_yukawa = dtin%dmft_epsilon_yukawa
  dtout%dmft_fermi_step    = dtin%dmft_fermi_step
  dtout%dmft_iter          = dtin%dmft_iter
  dtout%dmft_kspectralfunc = dtin%dmft_kspectralfunc
+ dtout%dmft_lambda_yukawa = dtin%dmft_lambda_yukawa
  dtout%dmft_nlambda       = dtin%dmft_nlambda
  dtout%dmft_mxsf          = dtin%dmft_mxsf
  dtout%dmft_nwlo          = dtin%dmft_nwlo
  dtout%dmft_nwli          = dtin%dmft_nwli
  dtout%dmft_occnd_imag    = dtin%dmft_occnd_imag
+ dtout%dmft_optim         = dtin%dmft_optim
+ dtout%dmft_orbital_filepath = dtin%dmft_orbital_filepath
  dtout%dmft_prt_maxent    = dtin%dmft_prt_maxent
+ dtout%dmft_prtself       = dtin%dmft_prtself
  dtout%dmft_prtwan        = dtin%dmft_prtwan
  dtout%dmft_read_occnd    = dtin%dmft_read_occnd
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
- dtout%dmft_test          = dtin%dmft_test
  dtout%dmft_use_all_bands = dtin%dmft_use_all_bands
  dtout%dmft_use_full_chipsi = dtin%dmft_use_full_chipsi
  dtout%dmft_wanrad        = dtin%dmft_wanrad
  dtout%dmft_x2my2d        = dtin%dmft_x2my2d
+ dtout%dmft_yukawa_param  = dtin%dmft_yukawa_param
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmft_triqs_compute_integral = dtin%dmft_triqs_compute_integral
@@ -1565,13 +1576,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_loc_n_max = dtin%dmft_triqs_loc_n_max
  dtout%dmft_triqs_measure_density_matrix = dtin%dmft_triqs_measure_density_matrix
  dtout%dmft_triqs_move_double = dtin%dmft_triqs_move_double
- dtout%dmft_triqs_move_global_prob = dtin%dmft_triqs_move_global_prob
  dtout%dmft_triqs_move_shift = dtin%dmft_triqs_move_shift
- dtout%dmft_triqs_nbins_histo = dtin%dmft_triqs_nbins_histo
+ dtout%dmft_triqs_pauli_prob = dtin%dmft_triqs_pauli_prob
  dtout%dmft_triqs_nleg = dtin%dmft_triqs_nleg
  dtout%dmft_triqs_nsubdivisions = dtin%dmft_triqs_nsubdivisions
- dtout%dmft_triqs_ntau_delta = dtin%dmft_triqs_ntau_delta
  dtout%dmft_triqs_off_diag = dtin%dmft_triqs_off_diag
+ dtout%dmft_triqs_read_ctqmcdata = dtin%dmft_triqs_read_ctqmcdata
  dtout%dmft_triqs_seed_a = dtin%dmft_triqs_seed_a
  dtout%dmft_triqs_seed_b = dtin%dmft_triqs_seed_b
  dtout%dmft_triqs_therm_restart = dtin%dmft_triqs_therm_restart
@@ -1588,7 +1598,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_correl   = dtin%dmftctqmc_correl
  dtout%dmftctqmc_gmove    = dtin%dmftctqmc_gmove
  dtout%dmftctqmc_grnns    = dtin%dmftctqmc_grnns
- dtout%dmftctqmc_config   = dtin%dmftctqmc_config
+ dtout%dmftctqmc_localprop = dtin%dmftctqmc_localprop
  dtout%dmftctqmc_meas     = dtin%dmftctqmc_meas
  dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
  dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
@@ -1701,6 +1711,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getbsreso          = dtin%getbsreso
  dtout%getbscoup          = dtin%getbscoup
  dtout%getcell            = dtin%getcell
+ dtout%getctqmcdata       = dtin%getctqmcdata
  dtout%getddb             = dtin%getddb
  dtout%getdvdb            = dtin%getdvdb
  dtout%getabiwan          = dtin%getabiwan
@@ -1734,6 +1745,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getwfq_filepath    = dtin%getwfq_filepath
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
+ dtout%getself            = dtin%getself
  dtout%getsuscep          = dtin%getsuscep
  dtout%getvel             = dtin%getvel
  dtout%getwfk             = dtin%getwfk
@@ -3522,24 +3534,24 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
- list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_config dmftctqmc_meas dmftctqmc_mrka'
+ list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_localprop dmftctqmc_meas dmftctqmc_mrka'
  list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmft_triqs_compute_integral dmft_triqs_det_init_size'
  list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
  list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold'
  list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_epsilon dmft_triqs_gaussorder dmft_triqs_imag_threshold'
  list_vars=trim(list_vars)//' dmft_triqs_leg_measure dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
  list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_move_double'
- list_vars=trim(list_vars)//' dmft_triqs_move_global_prob dmft_triqs_move_shift dmft_triqs_nbins_histo'
- list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_ntau_delta dmft_triqs_off_diag'
+ list_vars=trim(list_vars)//' dmft_triqs_move_shift'
+ list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob dmft_triqs_read_ctqmcdata'
  list_vars=trim(list_vars)//' dmft_triqs_seed_a dmft_triqs_seed_b dmft_triqs_therm_restart'
  list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_triqs_wmax dmftcheck'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
- list_vars=trim(list_vars)//' dmft_entropy dmft_fermi_step'
- list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_mxsf dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_prt_maxent dmft_prtwan dmft_read_occnd'
+ list_vars=trim(list_vars)//' dmft_entropy dmft_epsilon_yukawa dmft_fermi_step'
+ list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_lambda_yukawa dmft_mxsf dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_optim dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
- list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
+ list_vars=trim(list_vars)//' dmft_t2g dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
+ list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dmft_yukawa_param dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
@@ -3583,13 +3595,13 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
- list_vars=trim(list_vars)//' genafm geoopt getbscoup getbseig getbsreso getcell'
+ list_vars=trim(list_vars)//' genafm geoopt getbscoup getbseig getbsreso getcell getctqmcdata'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
  list_vars=trim(list_vars)//' getabiwan getabiwan_filepath getgwan getgwan_filepath'
- list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
+ list_vars=trim(list_vars)//' getqps getscr getscr_filepath getself'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvpq getvpq_filepath'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
