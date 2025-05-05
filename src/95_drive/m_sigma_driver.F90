@@ -3121,7 +3121,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      end do
    else
      ! Logarithmic mesh along the imaginary axis.
-     ABI_ERROR("AC + log mesh not implemented")
+     ABI_ERROR("AC with log mesh not implemented")
      !domegasi=(Sigp%omegasimax/Sigp%omegasimin)**(one/(Sigp%nomegasi-1))
      !Sigp%omegasi(1)=czero; ldi=domegasi
      !do io=2,Sigp%nomegasi
@@ -3132,14 +3132,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
    ! MRM: do not print for 1-RDM correction
    if(Sigp%gwcalctyp/=21) then
-    write(msg,'(4a)')ch10,&
-     ' setup_sigma : calculating Sigma(iw)',&
-     ' at imaginary frequencies [eV] (Fermi Level set to 0) ',ch10
-    call wrtout(units, msg)
-    do io=1,Sigp%nomegasi
-      write(msg,'(2(f10.3,2x))')Sigp%omegasi(io)*Ha_eV
-      call wrtout(units, msg)
-    end do
+     write(msg,'(4a)')ch10,&
+      ' setup_sigma : calculating Sigma(iw)',&
+      ' at imaginary frequencies [eV] (Fermi Level set to 0) ',ch10
+     call wrtout(units, msg)
+     do io=1,Sigp%nomegasi
+       write(msg,'(2(f10.3,2x))')Sigp%omegasi(io)*Ha_eV
+       call wrtout(units, msg)
+     end do
    endif
 
    ltest=(Sigp%omegasimax>0.1d-4.and.Sigp%nomegasi>0)
@@ -3330,8 +3330,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
 
- ! === Initialize the band structure datatype ===
- ! * Copy WFK energies and occupations up to Sigp%nbnds==Dtset%nband(:)
+ ! Initialize the band structure datatype
+ ! Copy WFK energies and occupations up to Sigp%nbnds==Dtset%nband(:)
  bantot = SUM(Dtset%nband(1:Dtset%nkpt*nsppol))
  ABI_MALLOC(doccde,(bantot))
  ABI_MALLOC(eigen,(bantot))
@@ -3418,7 +3418,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for the corrections.")
 
    if (gap_err /= 0 .and. dtset%gw_qprange == 0) then
-     msg = "Problem while computing the fundamental and direct gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
+     msg = "Problem while computing fundamental/direct gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
      ABI_WARNING(msg)
      dtset%gw_qprange = 1
    end if
@@ -3530,7 +3530,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      do ikcalc=1,Sigp%nkptgw
        if (Dtset%bdgw(2,ikcalc,spin) > Sigp%nbnds) then
          write(msg,'(a,2i0,2(a,i0),2a,i0)')&
-          "For (k,s) ",ikcalc,spin," bdgw= ",Dtset%bdgw(2,ikcalc,spin), " > nbnds=",Sigp%nbnds,ch10,&
+          "For (k,s) ",ikcalc, spin," bdgw= ",Dtset%bdgw(2,ikcalc,spin), " > nbnds=",Sigp%nbnds,ch10,&
           "Calculation will continue with bdgw =",Sigp%nbnds
          ABI_COMMENT(msg)
          Dtset%bdgw(2, ikcalc, spin) = Sigp%nbnds
