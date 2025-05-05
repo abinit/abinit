@@ -1704,7 +1704,7 @@ subroutine xmpi_sum_dp2d(xval,comm,ier,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
          call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
 #else
@@ -1726,7 +1726,7 @@ subroutine xmpi_sum_dp2d(xval,comm,ier,use_omp_map)
          !$OMP TARGET ENTER DATA MAP(alloc:xsum)
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval,xsum)
          call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(i2,i1) MAP(to:xval,xsum)
@@ -1852,7 +1852,7 @@ subroutine xmpi_sum_dp3d(xval,comm,ier,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
          call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
 #else
@@ -1874,7 +1874,7 @@ subroutine xmpi_sum_dp3d(xval,comm,ier,use_omp_map)
          !$OMP TARGET ENTER DATA MAP(alloc:xsum)
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval,xsum)
          call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
          !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(i3) MAP(to:xval,xsum)
@@ -2776,7 +2776,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval)
          call MPI_ALLREDUCE(MPI_IN_PLACE,xval,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
 #else
@@ -2798,7 +2798,7 @@ subroutine xmpi_sum_c2dc(xval,comm,ier,use_omp_map)
          !$OMP TARGET ENTER DATA MAP(alloc:xsum)
 #ifdef HAVE_GPU_MPI
          ! Proper GPU-aware call
-         !$OMP TARGET DATA USE_DEVICE_PTR(xval,xsum)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(xval,xsum)
          call MPI_ALLREDUCE(xval,xsum,nn,my_dt,my_op,comm,ier)
          !$OMP END TARGET DATA
          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(i2,i1) MAP(to:xval,xsum)

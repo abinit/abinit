@@ -150,7 +150,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
      end if
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectout,projections)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(work_buf,vectout,projections)
      call abi_gpu_xgemm(cplex, 'N','N', &
      &                  npw, ndat, nprojs_cur_blk, cone, &
      &                  c_loc(work_buf), npw, &
@@ -181,7 +181,7 @@ subroutine opernlb_gemm_distributed(rank,nprocs,npw,ndat,&
      call DCOPY(cplex*npw*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
    else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(work_buf,recv_buf)
      call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npw*nprojs_last_blk*dp)
      !$OMP END TARGET DATA
 #endif
@@ -238,7 +238,7 @@ subroutine opernlb_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,a,lda,b,ldb,b
      end if
    else if (gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(a,b,c)
      call abi_gpu_xgemm(cplex,transa,transb,npw,ndat,nprojs,alpha,&
      &    c_loc(a),lda,c_loc(b(1,ibeg,1)),ldb,beta,c_loc(c),ldc)
      !$OMP END TARGET DATA
@@ -657,7 +657,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
        svectout = svectout + vectin ! TODO understand this
      else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_PTR(vectin,svectout)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(vectin,svectout)
        call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, &
        &    c_loc(vectin), 1, c_loc(svectout), 1)
        !$OMP END TARGET DATA

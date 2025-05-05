@@ -219,7 +219,7 @@ After the variational expression is minimized, the optimal $\boldsymbol{A}$ and 
 the polaron in real space can be reconstructed via Eqs. (\ref{eq:polaron_phi}),(\ref{eq:polaron_tau}).
 Schematically, the optimization process is described in the following chart:
 
-![](eph4vpq_assets/flow.pdf){: style="width:600px"}
+![](eph4vpq_assets/flow.png){: style="width:600px"}
 
 
 ## Typical workflow for self-trapped polaron calculations
@@ -1349,7 +1349,7 @@ For each state, we have
 One can use software that can read `.xsf` file format (e.g. VESTA) to visualize these outputs.
 The following figure shows the charge distribution of each polaronic state:
 
-![](eph4vpq_assets/LiF_hole_polaron3.pdf)
+![](eph4vpq_assets/LiF_hole_polaron3.png)
 
 Note that state 1 and 3 are instances of a **triply-degenerate hole polaron**,
 and oriented along two different directions of the <100> cubic family.
@@ -1508,7 +1508,7 @@ abinit teph4vpq_10.abi > teph4vpq_10.log 2> err &
 This produces usual `*xsf` files that can be used for viauslization.
 If we open `teph4vpq_10o_pstate_1_POLARON.xsf` in VESTA, the following charge distribution can bee seen:
 
-![](eph4vpq_assets/LiF_large.pdf)
+![](eph4vpq_assets/LiF_large.png)
 
 
 <!--

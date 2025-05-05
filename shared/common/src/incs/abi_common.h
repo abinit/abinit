@@ -410,6 +410,18 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define COLLAPSE(x)
 #endif
 
+/* Legacy OpenMP 4.5 compliance from NVHPC
+ * Before 25.1, USE_DEVICE_PTR was the sole clause supported for
+ * hinting GPU addresses in OMP TARGET DATA directives, complying with OpenMP 4.5.
+ * Starting from NVHPC 25.1, the compiler :
+ *   - honors USE_DEVICE_ADDR following OpenMP 5 norm
+ *   - emit deprecation warnings at USE_DEVICE_PTR, while still supporting it
+ * This macro exists to keep support for older NVHPC versions.
+ */
+#if __NVCOMPILER_MAJOR__ < 25
+#define USE_DEVICE_ADDR USE_DEVICE_PTR
+#endif
+
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */
 #define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
