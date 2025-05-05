@@ -819,7 +819,7 @@ end subroutine abi_mixing_eval_deallocate
  end if
 
  if (present(resnrm)) resnrm = resnrm_
- ABI_SFREE(rcpawarr_)
+ nullify(rcpawarr_)
 
 end subroutine abi_mixing_eval
 !!***
