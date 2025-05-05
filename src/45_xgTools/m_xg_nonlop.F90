@@ -467,7 +467,7 @@ contains
   integer,intent(in)              :: atindx(:)
 
   logical :: paral_atom
-  integer :: isppol, iatom, iatom_tot, iatom_type, nlmn, nlmn_max, natom, nspinor, shift
+  integer :: isppol, iatom, iatom_input, iatom_type, nlmn, nlmn_max, natom, nspinor, shift
   integer :: ilmn, jlmn, j0lmn, jjlmn, ijlmn
   integer :: cplex_alldij,cplex_dij,isp,isps,jsp,jsps,ijsp
   real(dp),pointer :: Dij_iatom_(:,:)
@@ -502,10 +502,11 @@ contains
   do isppol=1,nsppol
 
     do iatom=1,xg_nonlop%my_natom ! loop over atoms treated by this proc
-      iatom_tot=iatom;if (paral_atom) iatom_tot=xg_nonlop%mpi_atmtab(iatom)
-      iatom_type = atindx(iatom_tot) ! convert iatom from input file to iatom ordered by type
+      iatom_input = iatom
+      if (paral_atom) iatom_input=xg_nonlop%mpi_atmtab(iatom) ! mpi_atmtab(iatom) has the ordering of the input file
+      iatom_type = atindx(iatom_input) ! convert iatom from input file to iatom ordered by type
       nlmn=xg_nonlop%nlmn_natom(iatom_type)
-      shift=1+(iatom_tot-1)*nspinor*nlmn_max+(isppol-1)*natom*nspinor*nlmn_max
+      shift=1+(iatom_type-1)*nspinor*nlmn_max+(isppol-1)*natom*nspinor*nlmn_max
       call xg_setBlock(xg_nonlop%Dij,Dij_iatom,nspinor*nlmn,nspinor*nlmn,fcol=shift)
       cplex_dij=paw_ij(iatom)%cplex_dij
       call xgBlock_reverseMap(Dij_iatom,Dij_iatom_)
@@ -2169,7 +2170,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
        !call timab(tim_apply_Aij_copy,2,tsec)
 
        !call timab(tim_apply_Aij_gemm,1,tsec)
-!       call xgBlock_gemm('n','n',1.0d0,Aij_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
+       !call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
        call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn)
        !call timab(tim_apply_Aij_gemm,2,tsec)
 
@@ -2714,10 +2715,18 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    type(xgBlock_t), intent(inout) :: Xin,cprj_work,work_mpi
    type(xgBlock_t), optional, intent(inout) :: Xout
 
-   if (xg_nonlop%paw) then
-     call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Dij_spin,Xin,cprjin,cprj_work,work_mpi,Xout)
+   if (present(Xout)) then
+     if (xg_nonlop%paw) then
+       call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Dij_spin,Xin,cprjin,cprj_work,work_mpi,Xout=Xout)
+     else
+       call xg_nonlop_getDX(xg_nonlop,xg_nonlop%ekb%self,Xin,cprjin,cprj_work,work_mpi,Xout=Xout)
+     end if
    else
-     call xg_nonlop_getDX(xg_nonlop,xg_nonlop%ekb%self,Xin,cprjin,cprj_work,work_mpi,Xout)
+     if (xg_nonlop%paw) then
+       call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Dij_spin,Xin,cprjin,cprj_work,work_mpi)
+     else
+       call xg_nonlop_getDX(xg_nonlop,xg_nonlop%ekb%self,Xin,cprjin,cprj_work,work_mpi)
+     end if
    end if
 
  end subroutine xg_nonlop_getHX
