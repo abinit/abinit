@@ -2202,9 +2202,17 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
  end if
 
   ! Allocate memory if not done yet.
+#ifdef FC_LLVM
+  !FIXME I don't understand why LLVM fails here...
+  !I put preproc so others know extra spaces are on purpose
+  ABI_REMALLOC(ppm%bigomegatwsq_qbz_vals, (ppm%npwc, ppm%dm2_botsq) )
+  ABI_REMALLOC(ppm%omegatw_qbz_vals, (ppm%npwc, ppm%dm2_otq) )
+  ABI_REMALLOC(ppm%eigpot_qbz_vals, (ppm%dm_eig, ppm%dm_eig) )
+#else
   ABI_REMALLOC(ppm%bigomegatwsq_qbz_vals, (ppm%npwc, ppm%dm2_botsq))
   ABI_REMALLOC(ppm%omegatw_qbz_vals, (ppm%npwc, ppm%dm2_otq))
   ABI_REMALLOC(ppm%eigpot_qbz_vals, (ppm%dm_eig, ppm%dm_eig))
+#endif
 
  if (q_isirred) then
    ! Symmetrization is not needed. Copy the data in memory and change the status.

@@ -812,7 +812,7 @@ end subroutine print_matlu
          at_indx = paw_dmft%indsym(irot,iatom)
          gloc_mat    => gloc(at_indx)%mat
 
-         !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp,zarot,gloc_mat)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(gloc_tmp,zarot,gloc_mat)
          call abi_gpu_xgemm_strided(2,"n","n",ndim,ndim,ndim,cone,&
          &    c_loc(gloc_mat(:,:,:)),ndim,ndim*ndim,&
          &    c_loc(zarot(:,1:ndim,irot,lpawu+1)),ndim_max,0,czero,&
@@ -821,7 +821,7 @@ end subroutine print_matlu
        end do ! irot
        call gpu_device_synchronize()
 
-       !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp,zarot,gloc_tmp2)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(gloc_tmp,zarot,gloc_tmp2)
        call abi_gpu_xgemm_strided(2,"t","n",ndim,ndim*nsppol,ndim,cone,&
        &    c_loc(zarot(:,:,:,lpawu+1)),ndim_max,ndim_max*ndim_max,&
        &    c_loc(gloc_tmp(:,:,:)),ndim_max,ndim_max*ndim_max*nsppol,czero,&
@@ -840,7 +840,7 @@ end subroutine print_matlu
          end do  ! m2
        end do ! isppol
 
-       !$OMP TARGET DATA USE_DEVICE_PTR(glocsym_mat)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(glocsym_mat)
        call abi_gpu_xscal(2, ndim*ndim*nsppol, ratio, c_loc(glocsym_mat), 1)
        !$OMP END TARGET DATA
 
@@ -944,7 +944,7 @@ end subroutine print_matlu
          at_indx = paw_dmft%indsym(irot,iatom)
          gloc_mat    => gloc_nmrep(at_indx)%mat
 
-         !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp3,zarot,gloc_mat)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(gloc_tmp3,zarot,gloc_mat)
          call abi_gpu_xgemm_strided(2,"n","n",ndim,ndim,ndim,cone,&
          &    c_loc(gloc_mat(:,:,:)),ndim,ndim*ndim,&
          &    c_loc(zarot(:,1:ndim,irot,lpawu+1)),ndim_max,0,czero,&
@@ -954,7 +954,7 @@ end subroutine print_matlu
        call gpu_device_synchronize()
 
 
-       !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp3,zarot,gloc_tmp4)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(gloc_tmp3,zarot,gloc_tmp4)
        call abi_gpu_xgemm_strided(2,"t","n",ndim,ndim*4*nsppol,ndim,cone,&
        &    c_loc(zarot(:,:,:,lpawu+1)),ndim_max,ndim_max*ndim_max,&
        &    c_loc(gloc_tmp3(:,:,:,:)),ndim,ndim*ndim*4*nsppol,czero,&
@@ -994,7 +994,7 @@ end subroutine print_matlu
        end do ! irot
 
     !  ==  Normalize sum
-       !$OMP TARGET DATA USE_DEVICE_PTR(glocsym_mat)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(glocsym_mat)
        call abi_gpu_xscal(2, ndim*ndim*4*nsppol, ratio, c_loc(glocsym_mat), 1)
        !$OMP END TARGET DATA
 

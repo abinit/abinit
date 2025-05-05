@@ -2650,8 +2650,15 @@ include 'mpif.h'
 
 
     MALLOC(occ,(2**this%flavors,1:flavors))
+#ifdef FC_LLVM
+    !FIXME I don't understand why LLVM fails here...
+    !I put preproc so others know extra spaces are on purpose
+    MALLOC(occtot,(2**this%flavors) )
+    MALLOC(spintot,(2**this%flavors) )
+#else
     MALLOC(occtot,(2**this%flavors))
     MALLOC(spintot,(2**this%flavors))
+#endif
     do n1=1,2**this%flavors
       ! Compute occupations of individual Orbitals
       n3=n1-1
