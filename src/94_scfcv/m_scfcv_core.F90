@@ -2342,17 +2342,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call timab(1461,2,tsec)
  call timab(1462,1,tsec)
 
-!! if(associated(rcpaw)) then
-! write(std_out,*) 'RC PRT',dtset%acell_orig(1,1),dtset%tsmear*Ha_K,etotal,&
-!&results_gs%fcart(1,1)*Ha_eV/Bohr_Ang,results_gs%fcart(2,1)*Ha_eV/Bohr_Ang,results_gs%fcart(3,1)*Ha_eV/Bohr_Ang,&
-!&results_gs%fcart(1,2)*Ha_eV/Bohr_Ang,results_gs%fcart(2,2)*Ha_eV/Bohr_Ang,results_gs%fcart(3,2)*Ha_eV/Bohr_Ang,&
-!& -(results_gs%strten(1)+results_gs%strten(2)+results_gs%strten(3)) *HaBohr3_GPa / three,energies%e_fermie,&
-!& rcpaw%atm(1)%eig(2,1),rcpaw%atm(2)%eig(2,1),&
-!& rcpaw%atm(1)%eig(3,1),rcpaw%atm(2)%eig(3,1)
-!!& eigen(1),eigen(2),&
-!!& eigen(3),eigen(8)
-!! endif
-
 !Transfer eigenvalues and occupation computed by BigDFT in afterscfloop to eigen.
 #if defined HAVE_BIGDFT
  if (dtset%usewvl == 1) then
