@@ -622,6 +622,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    enddo
    ABI_FREE(rcpaw_arr)
  endif
+ ABI_SFREE(rcpawarr_)
 
 !PAW: apply a simple mixing to rhoij (this is temporary)
  if(dtset%iscf==15 .or. dtset%iscf==16)then

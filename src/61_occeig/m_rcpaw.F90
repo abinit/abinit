@@ -309,6 +309,9 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
   rcpaw%val(iat)%has_dens=.false.
  enddo
 
+ !Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
  ! Init non arrays
  rcpaw%nelect_core=zero
  do itypat=1,ntypat
@@ -487,6 +490,8 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  enddo
 
  if(.not.rcpaw%all_atoms_relaxed) then
+   !Destroy atom table used for parallelism
+   call free_my_atmtab(my_atmtab,my_atmtab_allocated)
    if (.not.present(distribfft)) then
      ABI_FREE(fftn3_distrib)
      ABI_FREE(ffti3_local)

@@ -311,12 +311,12 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
                  rcpaw%atm(itypat)%zcore=rcpaw%atm(itypat)%zcore+rcpaw%atm(itypat)%occ(iln,isppol)
                  rcpaw%entropy=rcpaw%entropy+ ent_core(iln)*rcpaw%atm(itypat)%max_occ(iln,isppol)*rcpaw%atm(itypat)%mult
                enddo
-               ABI_FREE(occ_tmp_core)
-               ABI_FREE(doccde_tmp_core)
-               ABI_FREE(arg_core)
-               ABI_FREE(derfun_core)
-               ABI_FREE(ent_core)
              enddo
+             ABI_FREE(occ_tmp_core)
+             ABI_FREE(doccde_tmp_core)
+             ABI_FREE(arg_core)
+             ABI_FREE(derfun_core)
+             ABI_FREE(ent_core)
              rcpaw%nelect_core=rcpaw%nelect_core+rcpaw%atm(itypat)%zcore*rcpaw%atm(itypat)%mult
            endif
          end do
