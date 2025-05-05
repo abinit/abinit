@@ -287,7 +287,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
      rcpaw%atp(itypat)%ixc=dtset%ixc
      rcpaw%atp(itypat)%xclevel=dtset%xclevel
      rcpaw%atp(itypat)%electrons=dtset%nelect
-     call atompaw_init(itypat,pawtab(itypat),pawrad(itypat),rcpaw%atp(itypat),&
+     call atompaw_init(pawtab(itypat),pawrad(itypat),rcpaw%atp(itypat),&
 &    int(rcpaw%atm(itypat)%znucl),rcpaw%atm(itypat),dtset%rcpaw_scenergy(itypat))
    endif
  enddo

@@ -1605,6 +1605,8 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
      LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
      LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
+     LIBPAW_ALLOCATE(Atm%occ_res,(Atm%ln_size,Atm%nsppol))
+     LIBPAW_ALLOCATE(Atm%occ_respc,(Atm%ln_size,Atm%nsppol))
      if (Atm%dirac) then
        LIBPAW_ALLOCATE(Atm%kappa,(Atm%ln_size)) 
      endif

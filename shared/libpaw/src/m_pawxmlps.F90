@@ -3062,6 +3062,8 @@ end subroutine paw_setup_copy
  if(Atm%ln_size>0)then
    LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
    LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
+   LIBPAW_ALLOCATE(Atm%occ_res,(Atm%ln_size,Atm%nsppol))
+   LIBPAW_ALLOCATE(Atm%occ_respc,(Atm%ln_size,Atm%nsppol))
    LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
    if (Atm%dirac) then
      LIBPAW_ALLOCATE(Atm%kappa,(Atm%ln_size))

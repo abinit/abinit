@@ -751,13 +751,13 @@ end subroutine atompaw_solve
 !! SOURCE
 !! Inspired from SCFatom_init in atompaw
 
-subroutine atompaw_init(itypat,pawtab,pawrad,atp,znucl,atm,e_semicore)
+subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,e_semicore)
  ! TODO : scalar, dirac, vtau, splines, BDsolve
 
  implicit none
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: znucl, itypat
+ integer, intent(in) :: znucl
  real(dp), intent(in) :: e_semicore
  type(pawtab_type), intent(inout) :: pawtab
  type(pawrad_type), intent(in) :: pawrad
