@@ -5380,9 +5380,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
  ! See https://github.com/pmodels/mpich/issues/2659
 
- ! C_PTR to INTEGER(KIND=MPI_ADDRESS_KIND) is not directly portable in standard Fortran unless
- ! the implementation guarantees that a pointer can be represented as an integer of the appropriate kind.
- ! MPI doesn't specify this explicitly, but most implementations allow it.
+ ! Converting C_PTR to INTEGER(KIND=MPI_ADDRESS_KIND) with the trick below is not portable:
  !address = transfer(baseptr, address)
 
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit

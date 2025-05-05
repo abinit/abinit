@@ -1889,7 +1889,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  if (sigma_needs_ppm(Sigp)) then
    ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
-   if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
+   if (epsm1%use_shared_win) then
+     call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
+     ABI_CHECK_MPI(ierr, "")
+   end if
 
    my_plsmf=drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf=Dtset%ppmfrq
    call PPm%init(epsm1%mqmem,epsm1%nqibz,epsm1%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
@@ -1951,7 +1954,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if ! PAW or NC PPm and/or needs density
 
    ! If epsm1 is MPI-shared, we have to close the RMA epoch.
-   if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
+   if (epsm1%use_shared_win) then
+     call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
+     ABI_CHECK_MPI(ierr, "")
+   end if
  end if ! sigma_needs_ppm
 
  call pstat_proc%print(_PSTAT_ARGS_)
