@@ -134,7 +134,8 @@ module m_slice
     ! Load balance criteria for fair resource allocation (paral_slice option)
     !---------------------------------------------------
     integer, parameter :: FAIR_BANDPP      = 1              ! bandpp (unweigted)
-    integer, parameter :: FAIR_BANDPP_WDEG = 2              ! bandpp weighted by degree 
+    integer, parameter :: FAIR_BANDPP_WDEG = 2              ! bandpp weighted by degree
+    integer, parameter :: EVEN_SLICES      = 3              ! all slices have the same num of procs 
 
     ! Public 'slice' datatype
     !-------------------------------------------------
@@ -545,6 +546,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     
     ! ===================== Compute guaranteed spectral bounds ======================================== 
 
+    ! Copy is done on CPU so update the CPU data
     if (slice%gpu_option==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(eigen)
         call xgBlock_copy_from_gpu(resid0%self)
@@ -554,11 +556,6 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     call xgBlock_reverseMap(eigen, theta_, rows=1, cols=neigenpairs)
     call xgBlock_reverseMap(resid0%self, resid_, rows=1, cols=neigenpairs) 
 
-    if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call xgBlock_copy_to_gpu(eigen)
-        call xgBlock_copy_to_gpu(resid0%self)
-    end if
-
     ! Sort thetas in increasing order
     theta_reshaped(1:neigenpairs) = theta_(1,1:neigenpairs)
     permute_cols_ptr => permute_cols
@@ -566,23 +563,17 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     call sort_dp(neigenpairs, theta_reshaped, permute_cols_ptr, tol12)
     theta_(1,1:neigenpairs) = theta_reshaped(1:neigenpairs)
 
-    write(std_out,*) 'sorted theta 1D=', theta_(1,1:20)
- 
     ! update eigen on GPU with sorted values
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET ENTER DATA MAP(to:theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
+    !$OMP TARGET UPDATE TO(theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
 #endif
     call xgBlock_map(eigen_sorted, theta_, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
-    write(std_out,*) 'eigen_sorted after sort'
-    call xgBlock_print(eigen_sorted,std_out)
     call xgBlock_copy(eigen_sorted, eigen)
 !#ifdef HAVE_OPENMP_OFFLOAD
 !    !$OMP TARGET EXIT DATA MAP(delete:theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
 !#endif
     
-    write(std_out,*) 'eigen after sort'
-    call xgBlock_print(eigen,std_out)
-
     ! Minimum and maximum quotients
     lambda_minus = theta_reshaped(1)
     lambda_plus = theta_reshaped(neigenpairs)
@@ -823,14 +814,12 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
    
     write(std_out,*) 'calling runSlice from rank and subrank', xmpi_comm_rank(slice%spacecom), xmpi_comm_rank(comm)
  
-    write(std_out,*) 'getid before runSlice', xgBlock_getId(X0_active)
+    write(std_out,*) 'getid before runSlice X0_active', xgBlock_getId(X0_active)
     
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
 
-    write(std_out,*) 'getid after runSlice', xgBlock_getId(X0_active)
-    
-    !call xgBlock_print(chebfi%eigenvalues,std_out)
+    write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -1269,42 +1258,47 @@ subroutine slice_allocateResources(slice)
     ! Local variables
     integer :: iproc
     ! Arrays
-    integer, allocatable, target :: weights(:)
-    integer, pointer :: weights_ptr(:) => null()
-    integer, pointer :: task_sizes(:) => null()
-    integer, pointer :: task_nprocs(:) => null()
-    integer, pointer :: assigned_task(:) => null()
+    integer, allocatable :: weights(:)
     
     ! *********************************************************************
 
-    ABI_MALLOC_IFNOT(weights, (slice%nslice))
+    if (slice%paral_slice==EVEN_SLICES) then
+       
+        if (modulo(slice%nproc,slice%nslice)/=0) then
+            ABI_ERROR("nslice must divide nproc evenly")
+        end if
+        slice%lookup_proc = (([(iproc, iproc = 1, slice%nproc)] - 1) * slice%nslice) / slice%nproc
+        slice%nproc_per_slice = slice%nproc / slice%nslice
 
-    weights_ptr => weights
-    task_sizes => slice%neigenpairs_per_slice
-    task_nprocs => slice%nproc_per_slice
-    assigned_task => slice%lookup_proc
+    else
 
-    ! Apply weighted fair allocation with a load balance criterion
-    select case(slice%paral_slice)
-    case(FAIR_BANDPP)
-        weights = 1 
-    case(FAIR_BANDPP_WDEG)
-        weights = slice%poly_degrees
-    end select
-   
-    ! Solve allocation problem to find the amount of resource allocated to each slice
-    call fair_allocation(slice%nslice, task_sizes, weights_ptr, slice%nproc, task_nprocs)
+        ABI_MALLOC_IFNOT(weights, (slice%nslice))
+
+        ! Apply weighted fair allocation with a load balance criterion
+        select case(slice%paral_slice)
+        case(FAIR_BANDPP)
+            weights = 1 
+        case(FAIR_BANDPP_WDEG)
+            weights = slice%poly_degrees
+        end select
     
-    ! Call the subroutine to assign tasks (=slices) to processes
-    call assign_tasks_to_processes(task_nprocs, assigned_task)
+        ! Solve allocation problem to find the amount of resource allocated to each slice
+        call fair_allocation(slice%nslice, slice%neigenpairs_per_slice, weights, slice%nproc, &
+                slice%nproc_per_slice)
+    
+        ! Call the subroutine to assign tasks (=slices) to processes
+        call assign_tasks_to_processes(slice%nproc_per_slice, slice%lookup_proc)
+
+        ! Free temporary memory
+        ABI_SFREE(weights) 
+
+    end if
+    
+    call xmpi_barrier(slice%spacecom)
+
     do iproc = 1, slice%nproc
         write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
     end do
-
-    call xmpi_barrier(slice%spacecom)
-
-    ! Free temporary memory
-    ABI_SFREE(weights) 
 
 end subroutine slice_allocateResources
 !***
@@ -1340,9 +1334,6 @@ subroutine slice_markActiveTask(slice)
 
     ! Local variables
     integer :: my_rank, my_rank_sub, ierr
-    integer, pointer :: me_colsrows_ptr(:) => null()
-    integer, pointer :: me_linalg_ptr(:) => null()
-    integer, pointer :: all_colsrows_ptr(:) => null()
 
     ! *********************************************************************
  
@@ -1359,15 +1350,11 @@ subroutine slice_markActiveTask(slice)
     ABI_MALLOC_IFNOT(slice%me_ncolsColsRows_slice, (slice%me_nproc_slice))
     ABI_MALLOC_IFNOT(slice%me_nrowsLinalg_slice, (slice%me_nproc_slice))
 
-    all_colsrows_ptr => slice%ncolsColsRows
-    me_colsrows_ptr => slice%me_ncolsColsRows_slice
-    me_linalg_ptr => slice%me_nrowsLinalg_slice
-
     ! Compute column distribution across active resources
-    call distribute_vectors(slice%me_neigenpairs_slice, slice%me_nproc_slice, me_colsrows_ptr)
+    call distribute_vectors(slice%me_neigenpairs_slice, slice%me_nproc_slice, slice%me_ncolsColsRows_slice)
     
     ! Compute row distribution across active resources
-    call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, me_linalg_ptr)
+    call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, slice%me_nrowsLinalg_slice)
 
     ! Split global comm into disjoint sub-comms, only procs with the same color communicate
     if (slice%nslice==1) then
@@ -1395,7 +1382,7 @@ subroutine slice_markActiveTask(slice)
     ! Concatenate slice%me_ncolsColsRows_slice into collective slice%ncolsColsRows
     my_rank_sub = xmpi_comm_rank(slice%me_comm_slice)
     slice%me_bandpp_slice = slice%me_ncolsColsRows_slice(my_rank_sub + 1)
-    call xmpi_allgather(slice%me_bandpp_slice, all_colsrows_ptr, slice%spacecom, ierr)
+    call xmpi_allgather(slice%me_bandpp_slice, slice%ncolsColsRows, slice%spacecom, ierr)
     if ( ierr /= xmpi_success ) then
         ABI_ERROR("Error while gathering number of columns in colsrows for all slices")
     end if
@@ -1445,7 +1432,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     ! Local variables-------------------------------
     integer :: my_rank, my_slice, neigenpairs_slice
     integer :: fcol_ext, fcol, tot_ncols_kept, lcol_ext
-    integer :: islice, fcol_in_slice, lcol_in_slice
+    integer :: islice, fcol_in_slice, lcol_in_slice, rem
     real(dp) :: part_low_bound, part_upp_bound
     logical :: on_host, on_device
     ! Derived types
@@ -1460,6 +1447,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     real(dp), allocatable :: theta_reshaped(:)
  
     ! *********************************************************************
+
+    write(std_out,*) 'eigen converged='
+    call xgBlock_print(eigen,std_out)
 
     ! Two ways to get slice eigenvalues to filter
     ! 1) (implemented)
@@ -1487,7 +1477,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
     if (slice%paral_kgb==1) then
         if (xmpi_comm_size(slice%spacecom) > 1) then
-            ! Copy only for first process in slice subcomm 
+            ! Copy only once, eg for first process in slice subcomm 
             if (xmpi_comm_rank(slice%me_comm_slice)==0) then
                 my_rank = xmpi_comm_rank(slice%spacecom)
                 my_slice = slice%lookup_proc(my_rank + 1)
@@ -1500,8 +1490,13 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
                 call xgBlock_copy(resid, resid_ext_slice)
             end if
     
-            ! All processes wait before summing 
+            ! All processes wait to finish copying before summing 
             call xmpi_barrier(slice%spacecom)
+
+            write(std_out,*) 'eigen_ext%self at proc/subproc', xmpi_comm_rank(slice%spacecom),&
+&               xmpi_comm_rank(slice%me_comm_slice)
+            write(std_out,*) 'fcol_ext=', fcol_ext
+            !call xgBlock_print(eigen_ext%self,std_out)
 
             call xgBlock_mpi_sum(eigen_ext%self, comm=slice%spacecom)
             call xgBlock_mpi_sum(resid_ext%self, comm=slice%spacecom)
@@ -1515,21 +1510,14 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         call xgBlock_copy(resid, resid_ext%self)
     end if 
 
-    if (slice%gpu_option==1) then
+    ! Copy is on CPU so update CPU data from GPU
+    if (slice%gpu_option==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(eigen_ext%self)
         call xgBlock_copy_from_gpu(resid_ext%self)
     end if
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen_ext%self, theta_ext, rows=1, cols=slice%neigenpairs_ext)
-
-    !write(std_out,*) 'theta_ext', theta_ext
-
-    ! recover
-    if (slice%gpu_option==1) then
-        call xgBlock_copy_to_gpu(eigen_ext%self)
-        call xgBlock_copy_to_gpu(resid_ext%self)
-    end if
 
     ! Filter eigenvalues in extended space using spectral partition
     tot_ncols_kept = 0
@@ -1540,18 +1528,29 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         ABI_MALLOC_IFNOT(theta_reshaped, (neigenpairs_slice)) 
         fcol_ext = slice%fcol_in_Xext(islice)
         lcol_ext = fcol_ext + neigenpairs_slice - 1
-        theta_reshaped(1:neigenpairs_slice) = theta_ext(1, fcol_ext:lcol_ext)
+        if (islice == slice%nslice) then
+            lcol_ext = slice%neigenpairs_ext
+        end if
+        theta_reshaped(1:neigenpairs_slice) = theta_ext(1,fcol_ext:lcol_ext)
 
         ! Apply filter criterion to find kept first and last column in slice
         part_low_bound = slice%part_low_bounds(islice)
         part_upp_bound = slice%part_upp_bounds(islice)
         fcol_in_slice = maxloc(theta_reshaped, dim=1, mask=(theta_reshaped < part_low_bound)) + 1
         lcol_in_slice = maxloc(theta_reshaped, dim=1, mask=(theta_reshaped < part_upp_bound))            
-        if (islice == 1     ) fcol_in_slice = 1
-        if (islice == slice%nslice) lcol_in_slice = neigenpairs_slice
+        if (islice == 1) then
+            fcol_in_slice = 1
+        else if (islice == slice%nslice) then
+            rem = slice%neigenpairs - tot_ncols_kept
+            if (rem < 0) then
+                ABI_ERROR("Not enough eigenvalues in last slice. Increase tolfilter or nstep_mixed.")
+            end if
+            lcol_in_slice = fcol_in_slice + rem - 1
+        end if
 
         write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
         write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
+        write(std_out,*) 'filtered eigenvalues=', theta_reshaped
         write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
 
         ! After merge: Update first columns to copy from Xext to X
@@ -1566,9 +1565,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     
     ! Detect missing or extra eigenvalues
     if (tot_ncols_kept < slice%neigenpairs) then
-        ABI_ERROR("Too few converged eigenvalues kept. Increase tolfilter")
+        ABI_ERROR("Too few converged eigenvalues kept. Increase tolfilter or nstep_mixed.")
     else if (tot_ncols_kept > slice%neigenpairs) then
-        ABI_ERROR("Too many converged eigenvalues kept. Increase tolfilter.")
+        ABI_ERROR("Too many converged eigenvalues kept. Increase tolfilter or nstep_mixed.")
     end if
 
     ! Copy from extended memory to regular memory
