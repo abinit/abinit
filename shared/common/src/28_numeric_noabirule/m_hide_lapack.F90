@@ -335,7 +335,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -484,7 +484,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
  !integer :: istwf_k
  !logical :: want_eigenvectors
  !type(matrix_scalapack)    :: Slk_mat,Slk_vec
- !type(processor_scalapack) :: Slk_processor
+ !type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -773,7 +773,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -934,7 +934,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  type(matrix_scalapack)    :: Slk_matA,Slk_matB
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -1117,7 +1117,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
  !type(matrix_scalapack)    :: Slk_matA,Slk_matB
- !type(processor_scalapack) :: Slk_processor
+ !type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -1379,7 +1379,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -1606,7 +1606,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
  !integer :: istwf_k
  !logical :: want_eigenvectors
  !type(matrix_scalapack)    :: Slk_mat,Slk_vec
- !type(processor_scalapack) :: Slk_processor
+ !type(slk_processor_t) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -1869,7 +1869,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -2126,7 +2126,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
  !integer :: istwf_k
  !logical :: want_eigenvectors
  !type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
- !type(processor_scalapack) :: Slk_processor
+ !type(slk_processor_t) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -2543,7 +2543,7 @@ subroutine cginv(a, n, comm)
  !integer :: ierr,istwf_k,ipiv_size,liwork
  !integer,allocatable :: iwork(:)
  !type(matrix_scalapack)    :: Slk_mat
- !type(processor_scalapack) :: Slk_processor
+ !type(slk_processor_t) :: Slk_processor
 #endif
 
 ! *************************************************************************
@@ -2723,7 +2723,7 @@ subroutine zginv(a, n, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: istwf_k,ierr
  type(matrix_scalapack)    :: Slk_mat
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 
 ! *************************************************************************
@@ -2856,7 +2856,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: istwf_k,ierr
  type(matrix_scalapack)    :: Slk_mat
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 
 ! *************************************************************************

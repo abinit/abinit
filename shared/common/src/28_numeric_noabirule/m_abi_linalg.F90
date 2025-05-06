@@ -101,7 +101,7 @@ module m_abi_linalg
  integer,save,public :: slk_communicator=xmpi_comm_null
  integer,save,public :: slk_complement_communicator=xmpi_comm_null
 #ifdef HAVE_LINALG_SCALAPACK
- type(processor_scalapack),save,public :: slk_processor
+ type(slk_processor_t),save,public :: slk_processor
 #endif
 
 !Plasma can be activated via command line
