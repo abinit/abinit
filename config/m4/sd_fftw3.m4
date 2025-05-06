@@ -107,6 +107,29 @@ AC_DEFUN([SD_FFTW3_INIT], [
     fi
   fi
 
+
+  # if mode is def and pkg_config exists and no prefix -> use pkg_config
+  #
+  if test "${sd_fftw3_enable}" = "yes" -a \( "${sd_fftw3_init}" = "def" -o "${sd_fftw3_init}" = "yon" \) -a "${sd_fftw3_prefix}" = ""; then
+     #check if PKG_CONFIG exists (if not keep default mode)
+     AC_MSG_NOTICE([setting for ${sd_fftw3_init} potential move to pkg])
+     AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+     
+     AC_MSG_NOTICE([setting for ${sd_fftw3_init} potential move to pkg, PKG=${PKG_CONFIG}])
+     if test "$PKG_CONFIG" != "no"; then
+	 AC_MSG_CHECKING([for fftw3 via pkg-config])
+         AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+         if "$PKG_CONFIG" --exists  fftw3; then
+		AC_MSG_RESULT([yes])
+		sd_fftw3_init="pkg"
+	 else
+		AC_MSG_RESULT([no])
+		sd_fftw3_init="def"
+	 fi
+     fi
+  fi
+
+  AC_MSG_NOTICE([setup to ${sd_fftw3_init} after checking for pkg])
   # Make sure configuration is correct
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_FFTW3_CHECK_CONFIG
@@ -146,6 +169,22 @@ AC_DEFUN([SD_FFTW3_INIT], [
         test ! -z "${FFTW3_FCFLAGS}" && sd_fftw3_fcflags="${FFTW3_FCFLAGS}"
         test ! -z "${FFTW3_LDFLAGS}" && sd_fftw3_ldflags="${FFTW3_LDFLAGS}"
         test ! -z "${FFTW3_LIBS}" && sd_fftw3_libs="${FFTW3_LIBS}"
+        ;;
+
+
+      pkg)
+        TMP_FFTW_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags fftw3`
+        TMP_FFTW_FFFLAGS="${TMP_FFTW_CPPFLAGS}"
+        TMP_FFTW_LIBS=`$PKG_CONFIG --libs  --keep-system-libs fftw3`
+        TMP_FFTWF_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags fftw3f`
+        TMP_FFTWF_FFFLAGS="${TMP_FFTW_CPPFLAGS}"
+        TMP_FFTWF_LIBS=`$PKG_CONFIG --libs  --keep-system-libs fftw3f`
+        sd_fftw3_cppflags="${TMP_FFTW_CPPFLAGS} ${TMP_FFTWF_CPPFLAGS}"
+        sd_fftw3_cflags="${TMP_FFTW_CPPFLAGS} ${TMP_FFTWF_CPPFLAGS}"
+        #sd_fftw3_cxxflags="${TMP_FFTW_CPPFLAGS}"
+        sd_fftw3_fcflags="${TMP_FFTW_FFLAGS} ${TMP_FFTWF_FFLAGS}"
+        sd_fftw3_ldflags="${TMP_FFTW_LIBS} -lfftw3_threads -lpthread ${TMP_FFTWF_LIBS} -lfftw3f_threads"
+        sd_fftw3_libs="${TMP_FFTW_LIBS} -lfftw3_threads -lpthread ${TMP_FFTWF_LIBS} -lfftw3f_threads"
         ;;
 
       *)
@@ -293,7 +332,8 @@ AC_DEFUN([_SD_FFTW3_CHECK_USE], [
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
-        call dfftw_init_threads(2)
+        integer iret
+        call dfftw_init_threads(iret)
         call dfftw_plan_with_nthreads(8)
         call dfftw_cleanup_threads()
       ]])], [sd_fftw3_threads_ok="yes"], [sd_fftw3_threads_ok="no"])
@@ -449,7 +489,7 @@ AC_DEFUN([_SD_FFTW3_CHECK_CONFIG], [
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_fftw3_vars}"; then
+  if test -n "${tmp_fftw3_vars}" -a ! "${sd_fftw3_init}" = "pkg"; then
     sd_fftw3_enable="yes"
     sd_fftw3_init="env"
     if test "${tmp_fftw3_invalid}" = "yes"; then
