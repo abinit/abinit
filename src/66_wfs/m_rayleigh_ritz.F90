@@ -338,8 +338,8 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  call sca_evec%init(nband,nband,slk_processor,istwf_k)
 
  ! Get info
- blocksize = sca_ham%sizeb_blocs(1) ! Assume square blocs
- nbproc = slk_processor%grid%nbprocs
+ blocksize = sca_ham%size_blocs(1) ! Assume square blocs
+ nbproc = slk_processor%grid%nprocs
  grid_dims = slk_processor%grid%dims
 
  !======================================================================================================
@@ -404,7 +404,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
    ! Sum to iproc, and fill sca_ matrices
    call xmpi_sum_master(ham_iproc, iproc, slk_communicator, ierr)
    call xmpi_sum_master(ovl_iproc, iproc, slk_communicator, ierr)
-   if(iproc == slk_processor%myproc) then
+   if(iproc == slk_processor%my_rank) then
      ! DCOPY to bypass the real/complex issue
      if(cplx == 2) then
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), ham_iproc, 1, sca_ham%buffer_cplx, 1)
@@ -475,7 +475,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
 
    ! Get data from iproc
    ABI_MALLOC(evec_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
-   if(iproc == slk_processor%myproc) then
+   if(iproc == slk_processor%my_rank) then
      if(cplx == 2) then
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), sca_evec%buffer_cplx, 1, evec_iproc, 1)
      else

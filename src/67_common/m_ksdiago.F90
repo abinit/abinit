@@ -47,7 +47,7 @@ module m_ksdiago
  use m_time,              only : cwtime, cwtime_report, timab
  use m_geometry,          only : metric, normv
  use m_hide_lapack,       only : xhegv_cplex, xheev_cplex, xheevx_cplex, xhegvx_cplex
- use m_slk,               only : matrix_scalapack, processor_scalapack, block_dist_1d, &
+ use m_slk,               only : matrix_scalapack, slk_processor_t, block_dist_1d, &
                                  compute_eigen_problem, compute_generalized_eigen_problem
  use m_bz_mesh,           only : findnq, findq, findqg0, identk
  use m_kg,                only : mkkin, mkkpg
@@ -115,10 +115,10 @@ module m_ksdiago
    integer,pointer :: comm
    ! pointer to MPI communicator in mat
 
-   type(processor_scalapack) :: processor
+   type(slk_processor_t) :: processor
 
    type(matrix_scalapack) :: mat
-   ! PBLAS matrix with MPI-distributed Fourier components
+   ! PBLAS matrix with MPI-distributed Fourier components (double precision)
    ! Local buffer: (2, npwsp * my_nband)
    ! Global matrix: (npwsp, nband_k)
 
@@ -1034,7 +1034,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  type(MPI_type) :: mpi_enreg_seq
  type(gs_hamiltonian_type) :: gs_hamk
  type(matrix_scalapack) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag, eigvec
- type(processor_scalapack) :: proc_1d, proc_4diag
+ type(slk_processor_t) :: proc_1d, proc_4diag
  type(uplan_t) :: uplan_k
  type(fftbox_plan3_t) :: box_plan
  type(psbands_t) :: psb
@@ -1217,7 +1217,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
 
  ! Loop over the |beta,G''> component.
  call cwtime(cpu, wall, gflops, "start")
- loc2_size = ghg_mat%sizeb_local(2)
+ loc2_size = ghg_mat%size_local(2)
 
  if (my_rank == master) call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -1542,15 +1542,15 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
    call wrtout(std_out, " Generating stochastic bands...")
    ! Initial setup.
    call psb%init(dtset, h_size, eig_ene, gs_fermie) !, nband_k)
-   my_npwsp = eigvec%sizeb_local(1)
-   nb_glob = eigvec%sizeb_global(2)
+   my_npwsp = eigvec%size_local(1)
+   nb_glob = eigvec%size_global(2)
    ABI_CALLOC(ps_ug, (my_npwsp, psb%maxsto_per_slice, psb%nslices))
    ABI_MALLOC(thetas, (nb_glob, psb%maxsto_per_slice))
 
    ! Loop over global bands.
    do ib_glob=1, nb_glob
     ! Need the same random phases on all MPI procs.
-    if (eigvec%processor%myproc == master) call random_number(thetas)
+    if (eigvec%processor%my_rank == master) call random_number(thetas)
     call xmpi_bcast(thetas, master, eigvec%processor%comm, ierr)
 
      ! Get slice index from ib_glob.
@@ -1625,7 +1625,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ugb%comm => ugb%mat%processor%comm
 
  ugb%my_bstart = ugb%mat%loc2gcol(1)
- ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%sizeb_local(2))
+ ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%size_local(2))
  ugb%my_nband = ugb%my_bstop - ugb%my_bstart + 1
 
  if (ugb%my_nband > 0) then
@@ -1822,7 +1822,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  ugb%comm => ugb%mat%processor%comm
 
  ugb%my_bstart = ugb%mat%loc2gcol(1)
- ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%sizeb_local(2))
+ ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%size_local(2))
  ugb%my_nband = ugb%my_bstop - ugb%my_bstart + 1
 
  if (ugb%my_nband > 0) then
@@ -1936,7 +1936,7 @@ end subroutine ugb_print
 !!***
 !----------------------------------------------------------------------
 
-!!****f* m_slk/ugb_collect_cprj
+!!****f* m_ksdiago/ugb_collect_cprj
 !! NAME
 !!  ugb_collect_cprj
 !!

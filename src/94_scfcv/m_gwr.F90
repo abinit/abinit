@@ -171,7 +171,7 @@ module m_gwr
  use m_gsphere,       only : kg_map, gsphere_t
  use m_melemts,       only : melements_t
  use m_ioarr,         only : fftdatar_write
- use m_slk,           only : matrix_scalapack, slkmat_sp_t, processor_scalapack, slk_array_free, slk_array_set, &
+ use m_slk,           only : matrix_scalapack, slkmat_sp_t, slk_processor_t, slk_array_free, slk_array_set, &
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t
@@ -573,7 +573,7 @@ module m_gwr
    type(mpi_type),pointer :: mpi_enreg => null()
    ! Sequential mpi_type needed to invoke ABINIT routines requiring it.
 
-   type(processor_scalapack) :: g_slkproc
+   type(slk_processor_t) :: g_slkproc
    ! 1D PBLAS grid to block-distribute matrices along columns inside gcomm.
 
    type(__slkmat_t),allocatable :: gt_kibz(:,:,:,:)
@@ -619,7 +619,7 @@ module m_gwr
    ! to mix it with low-level just to make memory for ugb scale better.
    ! The size of ugb is negligible when compared to G and Chi.
 
-   type(processor_scalapack) :: gtau_slkproc
+   type(slk_processor_t) :: gtau_slkproc
    ! Scalapack grid with (g,tau) processors
 
    integer :: ugb_nband = -1
@@ -2493,7 +2493,7 @@ subroutine gwr_build_green(gwr, free_ugb)
          work_gb%buffer_cplx = ugb_ks%buffer_cplx
 
          !$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_rfact)
-         do il_b=1, work_gb%sizeb_local(2)
+         do il_b=1, work_gb%size_local(2)
            band = work_gb%loc2gcol(il_b)
            f_nk = qp_occ(band, ik_ibz, spin)
            eig_nk = qp_eig(band, ik_ibz, spin)
@@ -2904,12 +2904,12 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
    associate (gk_i => gwr%gt_kibz(ipm, ik_ibz, itau, spin), gk_f => gt_pm(ipm))
    call gk_i%copy(gk_f)
    !!$OMP PARALLEL DO PRIVATE(ig1, g2, ph2, ig1, g2, ph1)
-   do il_g2=1, gk_f%sizeb_local(2)
+   do il_g2=1, gk_f%size_local(2)
      ig2 = mod(gk_f%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
      g2 = desc_kbz%gvec(:,ig2)
      !g2 = desc_kibz%gvec(:,ig2)
      ph2 = exp(+j_dpc * two_pi * dot_product(g2, tnon))
-     do il_g1=1, gk_f%sizeb_local(1)
+     do il_g1=1, gk_f%size_local(1)
        ig1 = mod(gk_f%loc2grow(il_g1) - 1, desc_kbz%npw) + 1
        g1 = desc_kbz%gvec(:,ig1)
        !g1 = desc_kibz%gvec(:,ig1)
@@ -2974,7 +2974,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
 
  call cwtime(cpu, wall, gflops, "start")
 
- mem_mb = two * gwr%my_nkbz * two * gwpc * gwr%g_nfft * gwr%green_mpw * b2Mb /  gwr%g_slkproc%grid%nbprocs
+ mem_mb = two * gwr%my_nkbz * two * gwpc * gwr%g_nfft * gwr%green_mpw * b2Mb /  gwr%g_slkproc%grid%nprocs
  call wrtout(std_out, sjoin("Estimated local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ABI_MALLOC(ceikr, (gwr%g_nfft * gwr%nspinor))
@@ -3003,8 +3003,8 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
      !ABI_CHECK_IEQ(size(g_gp%buffer_cplx, dim=2), size(rgp%buffer_cplx, dim=2), "len2")
 
      ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
-     do ig2=1, g_gp%sizeb_local(2), gwr%uc_batch_size
-       ndat = blocked_loop(ig2, g_gp%sizeb_local(2), gwr%uc_batch_size)
+     do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
+       ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
        call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
 
        if (.not. k_is_gamma) then
@@ -3104,9 +3104,9 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_kbz%istwfk, size_blocs=[-1, col_bsize])
 
    associate (g_gp => gt_pm(ipm))
-   do ig2=1, g_gp%sizeb_local(2), gwr%uc_batch_size
+   do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
      ! G_k(g,g') -> G_k(r,g') and store results in rgp.
-     ndat = blocked_loop(ig2, g_gp%sizeb_local(2), gwr%uc_batch_size)
+     ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
      call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
 
      ! Multiply by e^{ig0.r}
@@ -3121,9 +3121,9 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
    ! MPI transpose: G_k(r,g') -> G_k(g',r) and transform g' index.
    call rgp%ptrans("N", gpr, free=.True.)
 
-   do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
+   do ir1=1, gpr%size_local(2), gwr%uc_batch_size
      ! G_k(g',r) -> G_k(r',r) and store results in rgp.
-     ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
+     ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
      call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0)
 
      ! Multiply by e^{ig0.r}
@@ -3189,8 +3189,8 @@ end subroutine gwr_get_gkbz_rpr_pm
 !!  !                   desc%gvec, gwpc, gwr%dtset%gpu_option)
 !!  !
 !!  ! ! F(g,g') --> F(r,g') and store results in rgp.
-!!  ! do ig2=1, g_gp%sizeb_local(2), gwr%uc_batch_size
-!!  !   ndat = blocked_loop(ig2, g_gp%sizeb_local(2), gwr%uc_batch_size)
+!!  ! do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
+!!  !   ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
 !!  !   call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
 !!  ! end do
 !!  !
@@ -3198,8 +3198,8 @@ end subroutine gwr_get_gkbz_rpr_pm
 !!  ! call rgp%ptrans("N", gpr, free=.True.)
 !!  !
 !!  ! ! F(g',r) --> F(r',r) and store results in rp_r.
-!!  ! do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
-!!  !   ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
+!!  ! do ir1=1, gpr%size_local(2), gwr%uc_batch_size
+!!  !   ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
 !!  !   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), rp_r%buffer_cplx(:,ir1), isign=-1, iscale=0)
 !!  ! end do
 !!  !
@@ -3252,8 +3252,8 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  !isign = -1
 
  ! F(r',r) --> F(g',r) and store results in gp_r.
- do ir2=1, rp_r%sizeb_local(2), gwr%uc_batch_size
-   ndat = blocked_loop(ir2, rp_r%sizeb_local(2), gwr%uc_batch_size)
+ do ir2=1, rp_r%size_local(2), gwr%uc_batch_size
+   ndat = blocked_loop(ir2, rp_r%size_local(2), gwr%uc_batch_size)
    call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0) ! this should be OK
  end do
 
@@ -3263,8 +3263,8 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  call gp_r%ptrans("C", r_gp, free=.True.)
 
  ! F(r,g') --> F(g,g') and store results in g_gp.
- do ig2=1, g_gp%sizeb_local(2), gwr%uc_batch_size
-   ndat = blocked_loop(ig2, g_gp%sizeb_local(2), gwr%uc_batch_size)
+ do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
+   ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
    call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0) ! this should be OK
  end do
 
@@ -3353,13 +3353,13 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  call wq_i%copy(wc_qbz)
 
  !!!$OMP PARALLEL DO PRIVATE(ig2, g2, phs2, ig1, g2, ph1)
- do il_g2=1, wq_f%sizeb_local(2)
+ do il_g2=1, wq_f%size_local(2)
    ig2 = mod(wq_f%loc2gcol(il_g2) - 1, desc_qbz%npw) + 1
    g2 = desc_qbz%gvec(:,ig2)
    !g2 = desc_qibz%gvec(:,ig2)
    !ph2 = exp(-j_dpc * two_pi * dot_product(g2, tnon))
    ph2 = exp(+j_dpc * two_pi * dot_product(g2, tnon))
-   do il_g1=1, wq_f%sizeb_local(1)
+   do il_g1=1, wq_f%size_local(1)
      ig1 = mod(wq_f%loc2grow(il_g1) - 1, desc_qbz%npw) + 1
      g1 = desc_qbz%gvec(:,ig1)
      !g1 = desc_qibz%gvec(:,ig1)
@@ -3437,8 +3437,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
                      desc_q%gvec, gwpc, gwr%dtset%gpu_option)
 
    ! FFT and store results in rgp
-   do ig2=1,wc_qbz%sizeb_local(2), gwr%uc_batch_size
-     ndat = blocked_loop(ig2, wc_qbz%sizeb_local(2), gwr%uc_batch_size)
+   do ig2=1,wc_qbz%size_local(2), gwr%uc_batch_size
+     ndat = blocked_loop(ig2, wc_qbz%size_local(2), gwr%uc_batch_size)
      call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
 
      ! Multiply by e^{iq.r}
@@ -3518,8 +3518,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
                    desc_qbz%gvec, gwpc, gwr%dtset%gpu_option)
 
  ! FFT Wc(g,g') -> Wc(r,g') and store results in rgp
- do ig2=1,wc_ggp%sizeb_local(2), gwr%uc_batch_size
-   ndat = blocked_loop(ig2, wc_ggp%sizeb_local(2), gwr%uc_batch_size)
+ do ig2=1,wc_ggp%size_local(2), gwr%uc_batch_size
+   ndat = blocked_loop(ig2, wc_ggp%size_local(2), gwr%uc_batch_size)
    call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
 
    ! Multiply by e^{ig0.r}
@@ -3534,8 +3534,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  call rgp%ptrans("N", gpr, free=.True.)
 
  ! Wc_q(g',r) -> Wc_q(r',r) and store results in wc_rgp.
- do ir1=1,gpr%sizeb_local(2), gwr%uc_batch_size
-   ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
+ do ir1=1,gpr%size_local(2), gwr%uc_batch_size
+   ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
    call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0)
 
    ! Multiply by e^{ig0.r}
@@ -3661,8 +3661,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      ! Use the first itau index to get the size of the local buffer.
      ! Block over ig2 to reduce the number of MPI calls and take advantage of ZGEMM.
      it0 = gwr%my_itaus(1)
-     loc1_size = mats(it0)%sizeb_local(1)
-     loc2_size = mats(it0)%sizeb_local(2)
+     loc1_size = mats(it0)%size_local(1)
+     loc2_size = mats(it0)%size_local(2)
 
      ! batch_size in terms of columns
      ! TODO: Determine batch_size automatically to avoid going OOM
@@ -3678,8 +3678,8 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
        ABI_MALLOC(alpha_c, (loc1_size, batch_size))
      end if
 
-     do ig2=1,mats(it0)%sizeb_local(2), batch_size
-       ndat = blocked_loop(ig2, mats(it0)%sizeb_local(2), batch_size)
+     do ig2=1,mats(it0)%size_local(2), batch_size
+       ndat = blocked_loop(ig2, mats(it0)%size_local(2), batch_size)
 
        ! TODO
        ! When fit mode is activated, collect all tau/omega points for this set of (g1, g2) inside tau_comm
@@ -3690,7 +3690,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          do idat=1,ndat
            do my_it=1,gwr%my_ntau
              itau = gwr%my_itaus(my_it)
-             do ig1=1,mats(it0)%sizeb_local(1)
+             do ig1=1,mats(it0)%size_local(1)
                glob_cwork(itau, ig1, idat) = mats(itau)%buffer_cplx(ig1, ig2+idat-1)
              end do
            end do
@@ -3700,7 +3700,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          ! Start the fit
          cnt = 0; beta_r = zero; alpha_c = zero
          do idat=1,ndat
-           do ig1=1,mats(it0)%sizeb_local(1)
+           do ig1=1,mats(it0)%size_local(1)
               cnt = cnt + 1; if (gwr%tau_comm%skip(cnt)) cycle ! MPI parallelism inside tau_comm
               if (from_space == TAU_SPACE) then
                 call fit_tau_exp(gwr%ntau, gwr%tau_mesh, gwr%tau_wgs, glob_cwork(:,ig1,idat), &
@@ -3724,7 +3724,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
            cval = zero
-           do ig1=1,mats(it0)%sizeb_local(1)
+           do ig1=1,mats(it0)%size_local(1)
              if (do_chi_fit) then
                ! Evaluate the fit and remove it from the signal.
                if (from_space == TAU_SPACE) then
@@ -3756,7 +3756,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
          do my_it=1,gwr%my_ntau
            itau = gwr%my_itaus(my_it)
            cval = zero
-           do ig1=1,mats(it0)%sizeb_local(1)
+           do ig1=1,mats(it0)%size_local(1)
 
              if (do_chi_fit) then
                ! Add Fourier transform of the fitted model.
@@ -4547,7 +4547,7 @@ subroutine gwr_build_tchi(gwr)
        ! This is a bottleneck but perhaps one can take advantage of localization.
        ! Also, one can save all the FFTs in a matrix G(mnfft * ndat, my_nkbz) multiply by the e^{-ikr} phase
        ! and then use zgemm to compute Out(r,L) = [e^{-ikr}G_k(r)] e^{-ikL} with precomputed e^{-iLk} phases.
-       my_nr = gt_gpr(1,1)%sizeb_local(2)
+       my_nr = gt_gpr(1,1)%size_local(2)
 
        do my_ir=1, my_nr, gwr%sc_batch_size
          ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
@@ -4660,8 +4660,8 @@ subroutine gwr_build_tchi(gwr)
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
                            desc_q%gvec, gwpc, gwr%dtset%gpu_option)
 
-         do ig2=1, chi_rgp%sizeb_local(2), gwr%uc_batch_size
-           ndat = blocked_loop(ig2, chi_rgp%sizeb_local(2), gwr%uc_batch_size)
+         do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
+           ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
 
            if (.not. q_is_gamma) then
              !$OMP PARALLEL DO
@@ -5357,11 +5357,11 @@ subroutine gwr_build_wc(gwr)
        call gwr%tchi_qibz(iq_ibz, itau, spin)%copy(wc)
        if (free_tchi) call gwr%tchi_qibz(iq_ibz, itau, spin)%free()
 
-       do il_g2=1,wc%sizeb_local(2)
+       do il_g2=1,wc%size_local(2)
          iglob2 = wc%loc2gcol(il_g2)
          ig2 = mod(iglob2 - 1, desc_q%npw) + 1
          vcs_g2 = desc_q%vc_sqrt(ig2)
-         do il_g1=1,wc%sizeb_local(1)
+         do il_g1=1,wc%size_local(1)
            iglob1 = wc%loc2grow(il_g1)
            ig1 = mod(iglob1 - 1, desc_q%npw) + 1
            vcs_g1 = desc_q%vc_sqrt(ig1)
@@ -5393,11 +5393,11 @@ subroutine gwr_build_wc(gwr)
        !call print_arr(units, wc%buffer_cplx)
 
        ! Build Wc(q, iw) = e^{-1}_q(g,g',iw) - delta_{gg'} v_q(g,g') by removing bare vc
-       do il_g2=1,wc%sizeb_local(2)
+       do il_g2=1,wc%size_local(2)
          iglob2 = wc%loc2gcol(il_g2)
          ig2 = mod(iglob2 - 1, desc_q%npw) + 1
          vcs_g2 = desc_q%vc_sqrt(ig2)
-         do il_g1=1,wc%sizeb_local(1)
+         do il_g1=1,wc%size_local(1)
            iglob1 = wc%loc2grow(il_g1)
            ig1 = mod(iglob1 - 1, desc_q%npw) + 1
            vcs_g1 = desc_q%vc_sqrt(ig1)
@@ -5722,8 +5722,8 @@ if (gwr%use_supercell_for_sigma) then
      call gwr%get_myq_wc_gpr(itau, spin, select_my_qbz, desc_myqbz, wc_gpr)
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-     my_nr = gt_gpr(1,1)%sizeb_local(2)
-     ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
+     my_nr = gt_gpr(1,1)%size_local(2)
+     ABI_CHECK(my_nr == wc_gpr(1)%size_local(2), "my_nr != wc_gpr(1)%size_local(2)")
 
      ! Loop over r in the unit cell that is now MPI-distributed inside g_comm.
      do my_ir=1, my_nr, gwr%sc_batch_size
@@ -6524,13 +6524,13 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, sigm_pm)
  do ipm=1,2
    associate (rp_r => sig_rpr(1,ipm))
    ! Integrate over r'
-   !ABI_CHECK_IEQ(nfftsp, rp_r%sizeb_local(1), "First dimension should be local to each MPI proc!")
-   ABI_MALLOC(loc_cwork, (rp_r%sizeb_local(2)))
+   !ABI_CHECK_IEQ(nfftsp, rp_r%size_local(1), "First dimension should be local to each MPI proc!")
+   ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
    loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
    ! TODO
    !call xgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc )
    ! Integrate over r. Note complex conjugate.
-   do il_r1=1,rp_r%sizeb_local(2)
+   do il_r1=1,rp_r%size_local(2)
      ir1 = rp_r%loc2gcol(il_r1)
      sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_glob(ir1)) * loc_cwork(il_r1)
    end do
@@ -6574,7 +6574,7 @@ subroutine gwr_rpa_energy(gwr)
  character(len=500) :: msg
 !arrays
  type(__slkmat_t) :: chi_tmp, dummy_vec, chi_4diag
- type(processor_scalapack) :: proc_4diag
+ type(slk_processor_t) :: proc_4diag
  real(gwp),allocatable :: eig(:)
  real(dp),allocatable :: kin_qg(:), ec_rpa(:), ec_mp2(:), ecut_chi(:)
 ! *************************************************************************
@@ -6647,7 +6647,7 @@ subroutine gwr_rpa_energy(gwr)
 
          ! TODO: Contribution due to the head for q --> 0 is ignored.
          ! This is not optimal but consistent with calc_rpa_functional
-         do il_g2=1,tchi%sizeb_local(2)
+         do il_g2=1,tchi%size_local(2)
            !ig2 = mod(tchi%loc2gcol(il_g2) - 1, desc_q%npw) + 1
            ig2 = tchi%loc2gcol(il_g2)
            damp = one
@@ -6657,7 +6657,7 @@ subroutine gwr_rpa_energy(gwr)
            vcs_g2 = desc_q%vc_sqrt(ig2) * damp
            if (q_is_gamma .and. ig2 == ig0) vcs_g2 = zero
 
-           do il_g1=1,tchi%sizeb_local(1)
+           do il_g1=1,tchi%size_local(1)
              !ig1 = mod(tchi%loc2grow(il_g1) - 1, desc_q%npw) + 1
              ig1 = tchi%loc2grow(il_g1)
              damp = one
@@ -7159,7 +7159,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
 
        ! FIXME: Assuming PBLAS matrix distributed in contiguous blocks along the column index.
        ! This part must be changed if we use round robin distribution.
-       my_ncols = mats(itau)%sizeb_local(2)
+       my_ncols = mats(itau)%size_local(2)
        my_gcol_start = mats(itau)%loc2gcol(1)
 
        ! FIXME: This is wrong if spc
@@ -7647,7 +7647,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        call ugb_kibz%collect_cplx(npw_ki * nspinor, nb, [1, band1_start], ug1_block)
 
        ABI_MALLOC(gh1c_block, (2, npw_ki*nspinor, 3, nb))
-       do il_b1=1, ugb_kibz%sizeb_local(2)
+       do il_b1=1, ugb_kibz%size_local(2)
          band1 = ugb_kibz%loc2gcol(il_b1)
          eig_nk = gwr%ks_ebands%eig(band1, ik_ibz, spin)
 
@@ -7671,7 +7671,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
          ! Loop over "valence" states.
          !do band2=1,gwr%ugb_nband
-         do il_b2=1, ugb_kibz%sizeb_local(2)
+         do il_b2=1, ugb_kibz%size_local(2)
            band2 = ugb_kibz%loc2gcol(il_b2)
 
            deltaeKS_b1b2 = ks_eig(band1, ik_ibz, spin) - ks_eig(band2, ik_ibz, spin)
@@ -7990,7 +7990,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ABI_MALLOC(gbound_kcalc, (2 * u_mgfft + 8, 2))
      call sphereboundary(gbound_kcalc, desc_kcalc%istwfk, desc_kcalc%gvec, u_mgfft, desc_kcalc%npw)
 
-     do il_b=1,ugb_kcalc%sizeb_local(2)
+     do il_b=1,ugb_kcalc%size_local(2)
        band = ugb_kcalc%loc2gcol(il_b); if (band < bmin .or. band > bmax) CYCLE
        call fft_ug(desc_kcalc%npw, u_nfft, nspinor, ndat1, &
                    u_mgfft, u_ngfft, desc_kcalc%istwfk, desc_kcalc%gvec, gbound_kcalc, &
@@ -8095,7 +8095,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ! ==========================
      ugb_kibz => gwr%ugb(ik_ibz, spin)
 
-     do il_b=1,ugb_kibz%sizeb_local(2)
+     do il_b=1,ugb_kibz%size_local(2)
        ! Distribute bands inside tau_comm as wavefunctions are replicated
        if (gwr%tau_comm%skip(il_b)) cycle
        band_sum = ugb_kibz%loc2gcol(il_b)

@@ -34,7 +34,6 @@ MODULE m_exc_diago
  use m_io_tools,        only : open_file
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
- !use m_slk,             only : matrix_scalapack, processor_scalapack
  use m_crystal,         only : crystal_t
  use m_kpts,            only : listkk
  use m_bz_mesh,         only : kmesh_t
@@ -233,7 +232,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  logical,parameter :: is_fortran_file=.TRUE.
  real(dp),external :: PDLAMCH
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 
  integer :: ik, ic, iv, isppol, ireh, ep_ik, itemp
@@ -1101,7 +1100,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  character(50) :: uplo
  real(dp),external :: PDLAMCH
  type(matrix_scalapack)    :: Slk_F,Slk_Hbar,Slk_vec,Slk_ovlp !,Slk_tmp
- type(processor_scalapack) :: Slk_processor
+ type(slk_processor_t) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -1381,7 +1380,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
      call Slk_Hbar%loc2glob(iloc,jloc,iglob,jglob)
      ctmp = tmp_cbuffer(el)
      if (iglob==jglob.and..not.Bsp%have_complex_ene) ctmp = DBLE(ctmp) ! Force the diagonal to be real.
-     rrs_kind = rrs_of_glob(iglob,jglob,Slk_Hbar%sizeb_global)
+     rrs_kind = rrs_of_glob(iglob,jglob,Slk_Hbar%size_global)
      if (rrs_kind==1.and.jglob<iglob) then ! Lower resonant
        ctmp = DCONJG(ctmp)
      else if (rrs_kind==-1.and.jglob>=iglob) then  ! Lower Anti-resonant (Diagonal is included).
@@ -1441,7 +1440,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
      iloc = myel2loc(1,el)
      jloc = myel2loc(2,el)
      call Slk_Hbar%loc2glob(iloc, jloc, iglob, jglob)
-     ccs_kind = ccs_of_glob(iglob,jglob,Slk_Hbar%sizeb_global)
+     ccs_kind = ccs_of_glob(iglob,jglob,Slk_Hbar%size_global)
      ctmp = tmp_cbuffer(el)
      if (ccs_kind==-1) ctmp = DCONJG(ctmp) ! Anti-coupling (Diagonal is included).
      Slk_Hbar%buffer_cplx(iloc,jloc) = ctmp
@@ -1469,8 +1468,8 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    !
    ! Global F = (1  0)
    !            (0 -1)
-   do jloc=1,Slk_F%sizeb_local(2)
-     do iloc=1,Slk_F%sizeb_local(1)
+   do jloc=1,Slk_F%size_local(2)
+     do iloc=1,Slk_F%size_local(1)
        call Slk_F%loc2glob(iloc, jloc, iglob, jglob)
        if (iglob==jglob) then
          if (iglob<=SUM(Bsp%nreh)) then
@@ -1505,7 +1504,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 !#endif
 
 !#ifdef DEV_MG_DEBUG_THIS
-!   if (PRODUCT(Slk_Hbar%sizeb_local) /= exc_size**2) then
+!   if (PRODUCT(Slk_Hbar%size_local) /= exc_size**2) then
 !     ABI_ERROR("Wrong size")
 !   end if
 !
