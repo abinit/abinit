@@ -298,7 +298,7 @@ AC_DEFUN([_SD_FFT_DUMP_CONFIG], [
 # FIXME: compiler vendors should be managed by Steredeg
 # FIXME: linear algebra should be managed by Steredeg
 AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
-  AC_MSG_CHECKING([which FFT flavors to enable])
+  AC_MSG_CHECKING([which FFT flavors to enable for ${sd_linalg_flavor}])
 
   # Start from the internal implementation
   sd_fft_selected_flavors="goedecker"
@@ -327,6 +327,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
   AC_MSG_RESULT([${sd_fft_selected_flavors}])
 
   # Warn about incompatibilities
+  if test "${tmp_linalg_has_mkl}" != ""; then
   AC_MSG_WARN([MKL is incompatible with FFTW3
 
                     Please use DFTI instead and consult
@@ -336,6 +337,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
                     will abort. Otherwise, your FFTW3 settings will be ignored.
 
 ])
+  fi 
 
   # Clean-up the mess
   unset tmp_fft_has_fftw3
