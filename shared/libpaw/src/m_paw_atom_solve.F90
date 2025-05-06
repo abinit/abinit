@@ -1937,52 +1937,52 @@ end subroutine InitOrbit
 subroutine DestroyOrbit(Orbit)
  type (OrbitInfo), intent(inout) :: Orbit
  if (associated(Orbit%np)) then
-   LIBPAW_DEALLOCATE(Orbit%np)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%np)
  endif
  if (associated(Orbit%l)) then
-   LIBPAW_DEALLOCATE(Orbit%l)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%l)
  endif
  if (associated(Orbit%kappa)) then
-   LIBPAW_DEALLOCATE(Orbit%kappa)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%kappa)
  endif
  if (associated(Orbit%iscore)) then
-   LIBPAW_DEALLOCATE(Orbit%iscore)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%iscore)
  endif
  if (associated(Orbit%eig)) then
-   LIBPAW_DEALLOCATE(Orbit%eig)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%eig)
  endif
  if (associated(Orbit%occ)) then
-   LIBPAW_DEALLOCATE(Orbit%occ)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%occ)
  endif
  if (associated(Orbit%wfn)) then
-   LIBPAW_DEALLOCATE(Orbit%wfn)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%wfn)
  endif
  if (associated(Orbit%otau)) then
-   LIBPAW_DEALLOCATE(Orbit%otau)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%otau)
  endif
  if (associated(Orbit%lwfn)) then
-   LIBPAW_DEALLOCATE(Orbit%lwfn)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%lwfn)
  endif
  if (associated(Orbit%den)) then
-   LIBPAW_DEALLOCATE(Orbit%den)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%den)
  endif
  if (associated(Orbit%tau)) then
-   LIBPAW_DEALLOCATE(Orbit%tau)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%tau)
  endif
  IF (ASSOCIATED(Orbit%deltatau)) then
-   LIBPAW_DEALLOCATE(Orbit%deltatau)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%deltatau)
  endif
  if (associated(Orbit%lqp)) then
-   LIBPAW_DEALLOCATE(Orbit%lqp)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%lqp)
  endif
  if (associated(Orbit%X)) then
-   LIBPAW_DEALLOCATE(Orbit%X)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%X)
  endif
  if(associated(Orbit%coreden)) then
-   LIBPAW_DEALLOCATE(Orbit%coreden)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%coreden)
  endif
  if(associated(Orbit%valeden)) then
-   LIBPAW_DEALLOCATE(Orbit%valeden)
+   LIBPAW_POINTER_DEALLOCATE(Orbit%valeden)
  endif
 end subroutine DestroyOrbit
 
@@ -4033,6 +4033,8 @@ FUNCTION hwfn(z,np,l,r)
  write(std_out,*)2*np*factorial(node)
  write(std_out,*)scale_*factorial(np+l)/(2*np*factorial(node))
  pref=scale_*SQRT(scale_*factorial(np+l)/(2*np*factorial(node)))
+ write(std_out,*)pref
+ write(std_out,*) factorial(2*l+1)
  term=(rho**l)/factorial(2*l+1)
  sum_=term
  IF (node.GT.0) THEN
