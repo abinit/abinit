@@ -3048,6 +3048,42 @@ Number of iterations for the DMFT inner loop.
 ),
 
 Variable(
+    abivarname="dmft_magnfield",
+    varset="dmft",
+    vartype="integer",
+    dimension="scalar",
+    defaultval=0,
+    memonics="Dynamical Mean Field Theory: Magnetic Field",
+    chararacteristics=['[[DEVELOP]]'],
+    added_in_version="10.4.0",
+    text=r"""
+Apply a magnetic field in Tesla ($B_z = \mu_0 H_z$) in combination with [[dmft_magnfield_b]] to add the Zeeman contribution
+to the energy levels. If the applied field is suffieciently small, it can be used to calculate the uniform magnetic susceptibility.
+The Zeeman contribution in Hartree corresponds to $B_z \mu_B g_e S_z$ when [[nspinor]] == 1.
+
+* 1 --> Add the Zeeman contribution to the calculated Kohn-Sham states to build the green's function. 
+Only valid for [[nspinor]] == 1.
+
+* 2 --> Add the Zeeman contribution to the energy levels of the DMFT local Hamiltonian and not in the Weiss-field. This is a strong
+approximation.
+""",
+),
+
+Variable(
+    abivarname="dmft_magnfield_b",                                    
+    varset="dmft",                                                  
+    vartype="real",                                              
+    dimension="scalar",                                             
+    defaultval=0.0,                                                   
+    memonics="Dynamical Mean Field Theory: Magnetic Field Value of Bz",         
+    chararacteristics=['[[DEVELOP]]'],                              
+    added_in_version="10.4.0",                                      
+    text=r"""                                                       
+Value of the magnetic field $B_z$ (in Tesla) applied when [[dmft_magnfield]] is activated.
+""",
+),
+
+Variable(
     abivarname="dmft_mxsf",
     varset="dmft",
     vartype="real",
