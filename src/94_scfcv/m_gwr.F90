@@ -1389,7 +1389,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
 
 #ifdef HAVE_MPI
-block
+ block
  !integer,parameter :: k=1, g=2, t=3, s=4  ! Bad placement
  integer,parameter :: k=4, g=3, t=2, s=1   ! Much better placement
  dims_kgts = dims_kgts(4:1:-1)
@@ -1416,9 +1416,13 @@ block
  ! Communicator for the k-tau-spin 3D subgrid.
  keepdim = .True.; keepdim(g) = .False.; call gwr%kts_comm%from_cart_sub(comm_cart, keepdim)
  call xmpi_comm_free(comm_cart)
-end block
+ end block
 #endif
 
+ call wrtout(units, sjoin("P kpt_comm can use shmem:", yesno(gwr%kpt_comm%can_use_shmem())))
+ call wrtout(units, sjoin("P g_comm can use shmem:", yesno(gwr%g_comm%can_use_shmem())))
+ call wrtout(units, sjoin("P tau_comm can use shmem:", yesno(gwr%tau_comm%can_use_shmem())))
+ call wrtout(units, sjoin("P spin_comm can use shmem", yesno(gwr%spin_comm%can_use_shmem())))
  !call gwr%kpt_comm%print_names(); call gwr%g_comm%print_names()
 
  ! Define batch sizes for FFT transforms taking into account k-point parallelism, OpenMP threads and GPUs.
@@ -2417,11 +2421,14 @@ subroutine gwr_build_green(gwr, free_ugb)
 !Local variables-------------------------------
 !scalars
  integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nb_occ, nbsum ! ig_glob, ig_loc, jg_loc,
+ integer :: ii, icomp
+ real(dp), parameter :: eratio = 0.95_dp
  real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k
- logical :: print_time
+ logical :: print_time, compute_svd
  character(len=500) :: msg
- real(dp) :: gt_rfact
- type(__slkmat_t), target :: work_gb, green
+ real(dp) :: gt_rfact, s2_sum, s2_sum_all
+ type(__slkmat_t), target :: work_gb, green, u_mat, vt_mat
+ real(gwpc),allocatable :: s_vals(:)
 !arrays
  integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
  !integer :: occ_idx(gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol)
@@ -2515,6 +2522,25 @@ subroutine gwr_build_green(gwr, free_ugb)
          !  ija = [nb_occ+1, gwr%ugb_nband]; ijb = ija
          !end if
          call slk_pgemm("N", "C", work_gb, isgn * cone_gw, work_gb, czero_gw, green, ija=ija, ijb=ijb)
+
+         ! SVD. NB: green in destroyed in output
+         compute_svd = .False.
+         if (compute_svd) then
+           call green%svd("N", "N", u_mat, s_vals, vt_mat)
+           s2_sum_all = sum(s_vals**2)
+           icomp = -1
+           do ii=1,size(s_vals)
+             s2_sum = sum(s_vals(1:ii)**2)
+             if (icomp == -1 .and. s2_sum / s2_sum_all > eratio) icomp = ii
+             !write(std_out, *)ii, s_vals(ii), 100 * s2_sum / s2_sum_all
+           end do
+           write(std_out, "(a,i0,2a,3(a,1x,i0))") &
+              "For ik_ibz: ", ik_ibz, ", kpt: ", trim(ktoa(kk_ibz)), ", itau: ", itau, ", ipm: ", ipm, ", spin: ", spin
+           write(std_out, "(a,i0,2(a,f5.2),a,i0)") &
+              "Need ", icomp, " vectors with frac: ", (100.0_dp * icomp) / size(s_vals), &
+              " for eratio: ", eratio, " matrix size: ", size(s_vals)
+           ABI_FREE(s_vals)
+         end if
 
          ! Redistribute data.
          call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green)
@@ -4564,7 +4590,8 @@ subroutine gwr_build_tchi(gwr)
              end do
            end if
 
-         else ! use_shmem_for_k --> MPI shared window version. Only gt_scbox is shared.
+         else
+           ! use_shmem_for_k --> MPI shared window version. Only gt_scbox is shared.
 
            call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox, &
                                 gt_scbox_win=gt_scbox_win)
