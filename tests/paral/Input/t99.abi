@@ -1,102 +1,108 @@
-# _== Convergency and starting
-# DATASET 1: LDA 
-# DATASET 2: LDA+DMFT
+# ---------------------------------------------------------------------------------------------------------
+#
+# NiO with 4 atoms in DMFT
+# low cutoff, low number of k-points
+# DMFT with TRIQS tested with KGB parallelization
+#
+# ---------------------------------------------------------------------------------------------------------
+# -- Datasets and options
 ndtset 2
 jdtset 1 2
-prtvol    4
-pawprtvol 3
-getwfk -1
+prtvol 4
+pawprtvol -1
+getden2 1
 
-##### CONVERGENCE PARAMETERS
-nstep1   30
-nstep2   1
-ecut      16 # low cutoff !
-pawecutdg 60
-tolvrs 1.0d-7
-nband     23
-occopt 3 tsmear 2000 K
-#npulayit 30
+# -- Convergence Parameters
+nstep1 100
+nstep 1
+nline2 10
+nnsclo2 5
+ecut  8
+prtwf 0
+# as this cutoff, test is not physical at all (filling of correlated orbitals are obviously wrong)
+
+pawecutdg 20
+tolvrs 1.0d-15
+nband  34
+occopt 3 tsmear 0.003675
+
 
 ##### PHYSICAL PARAMETERS
-nspinor 1
-nsppol  2
-nspden  2
-natom 5 ntypat 3 typat 1 2 3 3 3 
-znucl  23.0 38.0 8.0
-# V Sr O*3
-xred 0.00 0.00 0.00
-     0.50 0.50 0.50 
-     0.50 0.00 0.00 
-     0.00 0.50 0.00 
-     0.00 0.00 0.50 
-acell   3*7.2605
-rprim 1.0 0.0 0.0
-      0.0 1.0 0.0
-      0.0 0.0 1.0 
+nsppol 2
+nspden 2
+natom 4 ntypat 2 typat 1 1 2 2
+chkprim 0
+#spinat 0 0 8  0 0  -7.99  0 0 0  0 0  0
+spinat 0 0 0  0 0 0.0  0 0 0  0 0  0
+znucl  28.0 8.0
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+xred 0 0 0
+    0.0 0.0 0.5
+    0.5 0.5 0.25
+    0.5 0.5 0.75
+acell   3*7.927
 
-# == Points k and symetries
-kptopt 4
-kptrlatt 3 0 0 0 3 0 0 0 3 # insufficient nb of k-points.
-nshiftk 4
-shiftk 1/2 1/2 1/2
-       1/2 0.0 0.0
-       0.0 1/2 0.0
-       0.0 0.0 1/2
-istwfk *1
+##### K-POINTS
+kptrlatt 2 0 0 0 2 0 0 0 2
+istwfk 1 1 1
+chksymbreak 0
 
-# == LDA+DMFT
+## == LDA+DMFT
 usedmft1 0
-usedmft2 1
-dmftbandi 21 # t2g bands only
-dmftbandf 23 # t2g bands only
-#dmft_nwlo 200 # log frequency are not used when dmft_solv=6 or 7
-dmft_nwli 100
+usedmft 1
+dmftbandi  9
+dmftbandf 34
+dmft_solv 6
 dmft_iter 1
-dmftcheck 0  
-dmft_rslf 0
-dmft_mxsf 0.7
-dmft_dc 1
-dmft_t2g 1   # special value for t2g only calculation.
-dmft_tolfreq 0.01
-dmftctqmc_triqs_nleg 30
-# For historical purposes only, do not use outside of tests
-dmft_occnd_imag 0
+dmft_nwli 500
+dmftcheck 0
+dmft_mxsf 0.3
+dmft_prtwan 1
+dmft_wanrad 5.0
+dmft_dc 8
+dmftqmc_l 500
+dmftqmc_therm 100
+dmft_triqs_off_diag 1
+dmftctqmc_basis 1
+dmftctqmc_meas 100
+dmftqmc_n 1.d3
+dmft_triqs_wmax 1.0
+dmft_prt_maxent 0
 
-# == CTQMC
-dmft_solv 7 # Rotationally invariant interaction with TRIQS/CTHYB Monte Carlo code.
-dmftqmc_l 201
-dmftqmc_n 1.d6
-dmftqmc_therm 10000
+##### DFT+U
+usepawu1    4
+usepawu     14
+dmatpuopt  1   # choose expression of the density matrix
+lpawu   2  1   # U on d-orbitals of Ni, on p-orbitals of O
+upawu1  0.00  0.0   # values in Hartree
+jpawu1  0.0000 0.0  # values in Hartree
+upawu2  0.30  0.2   # values in Hartree
+jpawu2  0.1000 0.1  # values in Hartree
 
-# == DFT+U
-usepawu1    1  
-usepawu     10
-dmatpuopt  1   # The density matrix: the simplest expression.
-lpawu  2 -1 -1
-upawu1  0.00  0.0  0.0  eV
-upawu2  3.1333333333333333  0.0  0.0  eV
-f4of2_sla3  0.0  0.0  0.0 
-jpawu2  0.7583333333333333  0.0  0.0  eV
+# == Parallelism
+paral_kgb 1
+np_spkpt 2
+npband 2
+npfft 1
+bandpp 17
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "23v.paw, 38sr.paw, 8o.2.paw"
+ pseudos "28ni.paw, 8o.2.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_TRIQS_v1_4
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [files]
-#%% files_to_test =
-#%%                  t01.abo,  tolnlines =2, tolabs =1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = 
-#%%   t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t99_MPI4o_DS2_Legendre_coefficients.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%% files_to_test = t99_MPI4.abo, tolnlines=0, tolabs=0.0, tolrel= 0.0, fld_options=-medium
 #%% [extra_info]
-#%% authors = B. Amadon, V. Planes
 #%% keywords = PAW, DMFT, CTQMC, TRIQS
-#%% description = Test CT-QMC within DMFT in ABINIT and QMC solver from TRIQS for VSrO3 NSCF over density
+#%% authors = B. Amadon, E. Castiel
+#%% description = Test KGB parallelization for DFT+DMFT calculations with TRIQS. NiO
 #%%<END TEST_INFO>

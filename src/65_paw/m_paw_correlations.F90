@@ -957,6 +957,8 @@ CONTAINS  !=====================================================================
 
          call calc_vee(f4of2,f6of2,jh,lcur,pawang,uh,pawtab(itypat)%vee(:,:,:,:),Loc_prtvol)
 
+         ABI_FREE(fk)
+
        end if ! dmft_dc=8
 
        call pawrad_free(pawrad_tmp)
