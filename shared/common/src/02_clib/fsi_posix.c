@@ -23,6 +23,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
 #include "abi_clib.h"
 #include "xmalloc.h"
 
@@ -56,4 +61,36 @@ void c_mkdir_if_needed(char *dirpath, int *ierr)
    else if (*ierr == 1) {
      *ierr = 0;
    }
+}
+
+
+/* Create and lock file. Use fctn to be POSIX-compliant
+   Caller is responsible for unlocking and closing the file
+*/
+void c_lock_file_by_name(const char *filename, int *fd, int *ierr) {
+
+    *fd = open(filename, O_RDWR | O_CREAT, 0666);
+    if (*fd == -1) {
+        perror("Error opening file");
+        *ierr = -1;
+    }
+
+    struct flock fl;
+    memset(&fl, 0, sizeof(fl));
+    fl.l_type = F_WRLCK;   // Write lock
+    fl.l_whence = SEEK_SET;
+    fl.l_start = 0;
+    fl.l_len = 0;          // Lock the whole file
+
+    if (fcntl(*fd, F_SETLKW, &fl) == -1) {
+        perror("Error locking file");
+        close(*fd);
+        *ierr = +1;
+    }
+}
+
+
+/* Close file descriptor */
+void c_close_fd(int *fd) {
+    close(*fd);
 }

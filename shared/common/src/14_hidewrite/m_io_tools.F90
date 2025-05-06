@@ -21,7 +21,9 @@
 
 MODULE m_io_tools
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
+ use m_clib
 
  implicit none
 
@@ -1204,18 +1206,33 @@ subroutine lock_and_write(filename, string, ierr)
  character(len=*),intent(in) :: filename,string
 
 !Local variables-------------------------------
- integer :: lock_unit,file_unit
- character(len=len(filename) + 5) :: lock
- !character(len=500) :: msg
-
+ integer :: lock_unit, file_unit, fd
+ integer(c_int) :: sleep_time
+ character(len=len(filename) + 5) :: lock_name
 ! *********************************************************************
 
- ierr = 0
+ ! Try to write message to std_out and ab_out.
+ ! NB: There's no gurantee that the message will be written because
+ ! the first MPI proc that gets here may not be connected to ab_out or std_out may have been redirected to /dev/null.
+ ! This is the reason why we try write to __ABI_MPIABORTFILE__ as well.
+ if (is_open_unit(std_out)) call write_lines(std_out, string, toflush=.true.)
+
+ if (is_open_unit(ab_out)) then
+   call write_lines(ab_out, string, toflush=.true.)
+ else
+   ! This proc is not the master one. Let's make it sleep a bit hoping that
+   ! the master proc can call this routine as well so that we have the message written to ab_out and std_out.
+   sleep_time = 1
+   call clib_sleep(sleep_time)
+ end if
 
  ! Try to acquire the lock.
- lock = trim(filename)//".lock"
+ ierr = 0; lock_name = trim(filename)//".lock"
+
+#if 0
+ ! OLD version based on Fortran open (does not work very well)
  lock_unit = get_unit()
- open(unit=lock_unit, file=trim(lock), status='new', err=99)
+ open(unit=lock_unit, file=trim(lock_name), status='new', err=99)
 
  file_unit = get_unit()
  open(unit=file_unit, file=trim(filename), form="formatted")
@@ -1223,6 +1240,20 @@ subroutine lock_and_write(filename, string, ierr)
  close(lock_unit, status="delete")
  close(file_unit)
  return
+
+#else
+
+ ! New version based on Posix calls.
+ call clib_lock_file_by_name(trim(lock_name)//c_null_char, fd, ierr)
+ if (ierr == 0) then
+   ! I got the lock --> write message to __ABI_MPIABORTFILE__
+   file_unit = get_unit()
+   open(unit=file_unit, file=trim(filename), form="formatted")
+   call write_lines(file_unit, string, toflush=.true.)
+   call clib_close_fd(fd)
+   call delete_file(lock_name, ierr)
+ end if
+#endif
 
 99 ierr = 1
 
@@ -1250,7 +1281,6 @@ integer function num_opened_units(ignore) result(nn)
 !Local variables-------------------------------
  integer :: ii,iostat
  logical  :: opened
-
 ! *********************************************************************
 
  nn = 0
@@ -1286,7 +1316,6 @@ subroutine show_units(ount)
  integer :: ii,iostat
  logical  :: named, opened
  character(len=fnlen) :: filename,form
-
 ! *********************************************************************
 
  write(ount,'(a)') '******** Fortran Logical Units ********'
