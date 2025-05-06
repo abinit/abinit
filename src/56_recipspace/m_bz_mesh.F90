@@ -2767,7 +2767,7 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
    ABI_MALLOC(Kpath%points, (3, Kpath%npts))
    kpath%points = bounds
  end if
-p
+
  ABI_MALLOC(Kpath%bounds, (3, Kpath%nbounds))
  Kpath%bounds = bounds
 

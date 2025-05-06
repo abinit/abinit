@@ -3,7 +3,7 @@
 !! m_slk
 !!
 !! FUNCTION
-!!  High-level objects and wrappers around the ScaLAPACK and ELPA API.
+!! High-level objects and wrappers around the ScaLAPACK and ELPA API.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2004-2025 ABINIT group (CS,GZ,FB,MG,MT)
@@ -120,25 +120,6 @@ module m_slk
 
 !----------------------------------------------------------------------
 
-!!****t* m_slk/descript_scalapack
-!! NAME
-!!  descript_scalapack
-!!
-!! FUNCTION
-!! ScaLAPACK matrix descriptor.
-!!
-!! TODO
-!! MG: This type is not very useful. One can directly expose tab and call it %desc
-!!
-!! SOURCE
-
- type,public :: descript_scalapack
-   integer :: tab(DLEN_)
- end type descript_scalapack
-!!***
-
-!----------------------------------------------------------------------
-
 !!****t* m_slk/basemat_t
 !! NAME
 !!  basemat_t
@@ -151,10 +132,10 @@ module m_slk
  type,private :: basemat_t
 
    integer :: sizeb_local(2) = -1
-    ! dimensions of the local buffer
+    ! dimensions of the local buffer.
 
    integer :: sizeb_global(2) = -1
-    ! dimensions of the global matrix
+    ! dimensions of the global matrix.
 
    integer :: sizeb_blocs(2) = -1
     ! size of the block of consecutive data
@@ -163,8 +144,7 @@ module m_slk
 
    type(processor_scalapack),pointer :: processor => null()
 
-   type(descript_scalapack) :: descript
-   !integer :: tab(DLEN_)
+   integer :: desc(DLEN_)
 
  contains
 
@@ -275,7 +255,7 @@ module m_slk
     ! Returns the byte size and the MPI datatype
 
    procedure :: svd => slkmat_svd
-    ! Compute Singular Value Decomposition of matrix in_mat (double precision version).
+    ! Singular Value Decomposition (double precision version).
 
  end type matrix_scalapack
 !!***
@@ -325,7 +305,7 @@ module m_slk
     ! Inverse of a Hermitian positive definite matrix.
 
    procedure :: svd => slkmat_sp_svd
-    ! Compute Singular Value Decomposition of matrix in_mat (single precision version).
+    ! Singular Value Decomposition (single precision version).
 
  end type slkmat_sp_t
 !!***
@@ -356,7 +336,7 @@ module m_slk
  public :: slk_matrix_to_global_dpc_2D     ! Fill a global matrix with respect to a SCALAPACK matrix.
                                            ! target: Two-dimensional Double precision complex matrix.
 
- public :: slk_pgemm                         ! Compute: C := alpha*A*B + beta*C
+ public :: slk_pgemm                       ! Compute: C := alpha*A*B + beta*C
  interface slk_pgemm
    module procedure slk_pgemm_dp
    module procedure slk_pgemm_sp
@@ -676,7 +656,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 
  ! Initialisation of the SCALAPACK description of the matrix
  ! (desc, m, n, mb, nb, irsrc, icsrc, ictxt, lld, info)
- call DESCINIT(matrix%descript%tab, nbli_global, nbco_global, &
+ call DESCINIT(matrix%desc, nbli_global, nbco_global, &
                matrix%sizeb_blocs(1), matrix%sizeb_blocs(2), 0, 0, &
                processor%grid%ictxt, MAX(1, matrix%sizeb_local(1)), info)
 
@@ -1148,7 +1128,7 @@ subroutine matrix_scalapack_free(mat)
  mat%sizeb_global = 0
  mat%sizeb_blocs = 0
  mat%sizeb_local = 0
- mat%descript%tab = 0
+ mat%desc = 0
 
  select type (mat)
  class is (matrix_scalapack)
@@ -1563,7 +1543,7 @@ integer function glob_loc__(matrix, idx, lico)
 ! *********************************************************************
 
  glob_loc__ = NUMROC(idx, matrix%sizeb_blocs(lico), &
-                   matrix%processor%coords(lico), 0, matrix%processor%grid%dims(lico))
+                     matrix%processor%coords(lico), 0, matrix%processor%grid%dims(lico))
 #endif
 
 end function glob_loc__
@@ -1604,7 +1584,7 @@ subroutine slk_glob2loc(mat, iglob, jglob, iloc, jloc, haveit)
 #ifdef HAVE_LINALG_SCALAPACK
  ! SUBROUTINE INFOG2L( GRINDX, GCINDX, DESC, NPROW, NPCOL, MYROW, MYCOL, LRINDX, LCINDX, RSRC, CSRC)
 
- call INFOG2L(iglob, jglob, mat%descript%tab, mat%processor%grid%dims(1), mat%processor%grid%dims(2), &
+ call INFOG2L(iglob, jglob, mat%desc, mat%processor%grid%dims(1), mat%processor%grid%dims(2), &
    mat%processor%coords(1), mat%processor%coords(2), iloc, jloc, row_src, col_src)
 
  haveit = all(mat%processor%coords == [row_src, col_src])
@@ -2395,10 +2375,10 @@ integer function my_locr(mat)
  integer :: M, MB_A, MYROW, RSRC_A, NPROW
 ! *************************************************************************
 
- M      = mat%descript%tab(M_ )      ! The number of rows in the global matrix.
- MB_A   = mat%descript%tab(MB_)      ! The number of rows in a block.
+ M      = mat%desc(M_ )      ! The number of rows in the global matrix.
+ MB_A   = mat%desc(MB_)      ! The number of rows in a block.
  MYROW  = mat%processor%coords(1)    ! The row index of my processor
- RSRC_A = mat%descript%tab(RSRC_)    ! The row of the processors at the beginning.
+ RSRC_A = mat%desc(RSRC_)    ! The row of the processors at the beginning.
  NPROW  = mat%processor%grid%dims(1) ! The number of processors per row in the Scalapack grid.
 
  my_locr = NUMROC( M, MB_A, MYROW, RSRC_A, NPROW )
@@ -2444,10 +2424,10 @@ integer function my_locc(mat)
  integer :: N, NB_A, MYCOL, CSRC_A, NPCOL
 ! *************************************************************************
 
- N      = mat%descript%tab(N_ )      ! The number of columns in the global matrix.
- NB_A   = mat%descript%tab(NB_)      ! The number of columns in a block.
+ N      = mat%desc(N_ )      ! The number of columns in the global matrix.
+ NB_A   = mat%desc(NB_)      ! The number of columns in a block.
  MYCOL  = mat%processor%coords(2)    ! The column index of my processor
- CSRC_A = mat%descript%tab(CSRC_)    ! The column of the processors at the beginning.
+ CSRC_A = mat%desc(CSRC_)    ! The column of the processors at the beginning.
  NPCOL  = mat%processor%grid%dims(2) ! The number of processors per column in the Scalapack grid.
 
  my_locc = NUMROC( N, NB_A, MYCOL, CSRC_A, NPCOL )
@@ -2516,14 +2496,14 @@ subroutine slk_pgemm_dp(transa, transb, matrix1, alpha, matrix2, beta, results, 
  ! pzgemm(transa, transb, m, n, k, alpha, a, ia, ja, desca, b, ib, jb, descb, beta, c, ic, jc, descc)
  if (matrix1%istwf_k /= 2) then
    call PZGEMM(transa, transb, mm, nn, kk, alpha, &
-               matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%descript%tab, &
-               matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%descript%tab, &
-               beta, results%buffer_cplx, ijc__(1), ijc__(2), results%descript%tab)
+               matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%desc, &
+               matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%desc, &
+               beta, results%buffer_cplx, ijc__(1), ijc__(2), results%desc)
  else
    call PDGEMM(transa, transb, mm, nn, kk, real(alpha, kind=dp), &
-               matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%descript%tab, &
-               matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%descript%tab, &
-               real(beta, kind=dp), results%buffer_cplx, ijc__(1), ijc__(2), results%descript%tab)
+               matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%desc, &
+               matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%desc, &
+               real(beta, kind=dp), results%buffer_cplx, ijc__(1), ijc__(2), results%desc)
  end if
 #endif
 
@@ -2590,14 +2570,14 @@ subroutine slk_pgemm_sp(transa, transb, matrix1, alpha, matrix2, beta, results, 
  ! pzgemm(transa, transb, m, n, k, alpha, a, ia, ja, desca, b, ib, jb, descb, beta, c, ic, jc, descc)
  if (matrix1%istwf_k /= 2) then
    call PCGEMM(transa, transb, mm, nn, kk, alpha, &
-               matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%descript%tab, &
-               matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%descript%tab, &
-               beta, results%buffer_cplx, ijc__(1), ijc__(2), results%descript%tab)
+               matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%desc, &
+               matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%desc, &
+               beta, results%buffer_cplx, ijc__(1), ijc__(2), results%desc)
  else
    call PSGEMM(transa, transb, mm, nn, kk, real(alpha, kind=sp), &
-               matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%descript%tab, &
-               matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%descript%tab, &
-               real(beta, kind=sp), results%buffer_cplx, ijc__(1), ijc__(2), results%descript%tab)
+               matrix1%buffer_cplx, ija__(1), ija__(2), matrix1%desc, &
+               matrix2%buffer_cplx, ijb__(1), ijb__(2), matrix2%desc, &
+               real(beta, kind=sp), results%buffer_cplx, ijc__(1), ijc__(2), results%desc)
  end if
 #endif
 
@@ -2722,19 +2702,19 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   if (istwf_k/=2) then
      call PZHEEVX('V', range, 'U',&
       matrix%sizeb_global(2),&
-      matrix%buffer_cplx,1,1,matrix%descript%tab, &
+      matrix%buffer_cplx,1,1,matrix%desc, &
       ZERO,ZERO,il,iu,ABSTOL,&
       m,nz,eigen,ORFAC, &
-      results%buffer_cplx,1,1,results%descript%tab, &
+      results%buffer_cplx,1,1,results%desc, &
       CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
       IFAIL,ICLUSTR,GAP,INFO)
   else
      call PDSYEVX('V', range, 'U',&
       matrix%sizeb_global(2),&
-      matrix%buffer_real,1,1,matrix%descript%tab, &
+      matrix%buffer_real,1,1,matrix%desc, &
       ZERO,ZERO,il,iu,ABSTOL,&
       m,nz,eigen,ORFAC, &
-      results%buffer_real,1,1,results%descript%tab, &
+      results%buffer_real,1,1,results%desc, &
       RWORK_tmp,-1,IWORK_tmp,-1,&
       IFAIL,ICLUSTR,GAP,INFO)
   end if
@@ -2786,20 +2766,20 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
     ! write(std_out,*) 'I am using PZHEEVX'
     call PZHEEVX('V', range, 'U',&
      matrix%sizeb_global(2),&
-     matrix%buffer_cplx,1,1,matrix%descript%tab, &
+     matrix%buffer_cplx,1,1,matrix%desc, &
      ZERO,ZERO,il,iu,ABSTOL,&
      m,nz,eigen,ORFAC, &
-     results%buffer_cplx,1,1,results%descript%tab, &
+     results%buffer_cplx,1,1,results%desc, &
      CWORK,LCWORK,RWORK,LRWORK,IWORK,LIWORK,&
      IFAIL,ICLUSTR,GAP,INFO)
   else
     ! write(std_out,*) ' I am using PDSYEVX'
     call PDSYEVX('V', range, 'U',&
      matrix%sizeb_global(2),&
-     matrix%buffer_real,1,1,matrix%descript%tab, &
+     matrix%buffer_real,1,1,matrix%desc, &
      ZERO,ZERO,il,iu,ABSTOL,&
      m,nz,eigen,ORFAC, &
-     results%buffer_real,1,1,results%descript%tab, &
+     results%buffer_real,1,1,results%desc, &
      RWORK,LRWORK,IWORK,LIWORK,&
      IFAIL,ICLUSTR,GAP,INFO)
   endif
@@ -3019,7 +2999,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
            tmp1%buffer_cplx,tmp2%buffer_cplx, &
            processor%coords(1),processor%coords(2), &
            processor%grid%dims(1),processor%grid%dims(2), &
-           matrix1%descript%tab,processor%comm,use_gpu_elpa=use_gpu_elpa__)
+           matrix1%desc,processor%comm,use_gpu_elpa=use_gpu_elpa__)
   else
      call solve_gevp_real(matrix1%sizeb_global(1), nev__, &
            matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
@@ -3027,7 +3007,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
            tmp1%buffer_real,tmp2%buffer_real, &
            processor%coords(1),processor%coords(2), &
            processor%grid%dims(1),processor%grid%dims(2), &
-           matrix1%descript%tab,processor%comm,use_gpu_elpa=use_gpu_elpa__)
+           matrix1%desc,processor%comm,use_gpu_elpa=use_gpu_elpa__)
   end if
   call tmp1%free()
   call tmp2%free()
@@ -3085,21 +3065,21 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   if (istwf_k /= 2) then
      call PZHEGVX(1, 'V', range, 'U',&
        matrix1%sizeb_global(2),&
-       matrix1%buffer_cplx,1,1,matrix1%descript%tab, &
-       matrix2%buffer_cplx,1,1,matrix2%descript%tab, &
+       matrix1%buffer_cplx,1,1,matrix1%desc, &
+       matrix2%buffer_cplx,1,1,matrix2%desc, &
        ZERO,ZERO,il,iu,ABSTOL,&
        m,nz,eigen,ORFAC, &
-       results%buffer_cplx,1,1,results%descript%tab, &
+       results%buffer_cplx,1,1,results%desc, &
        CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
        IFAIL,ICLUSTR,GAP,INFO)
   else
      call PDSYGVX(1,'V',range,'U',&
        matrix1%sizeb_global(2),&
-       matrix1%buffer_real,1,1,matrix1%descript%tab, &
-       matrix2%buffer_real,1,1,matrix2%descript%tab, &
+       matrix1%buffer_real,1,1,matrix1%desc, &
+       matrix2%buffer_real,1,1,matrix2%desc, &
        ZERO,ZERO,il,iu,ABSTOL,&
        m,nz,eigen,ORFAC, &
-       results%buffer_real,1,1,results%descript%tab, &
+       results%buffer_real,1,1,results%desc, &
        RWORK_tmp,-1,IWORK_tmp,-1,&
        IFAIL,ICLUSTR,GAP,INFO)
   endif
@@ -3144,22 +3124,22 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
      ! write(std_out,*) 'I am using PZHEGVX'
      call PZHEGVX(1,'V',range,'U',&
        matrix1%sizeb_global(2),&
-       matrix1%buffer_cplx,1,1,matrix1%descript%tab, &
-       matrix2%buffer_cplx,1,1,matrix2%descript%tab, &
+       matrix1%buffer_cplx,1,1,matrix1%desc, &
+       matrix2%buffer_cplx,1,1,matrix2%desc, &
        ZERO,ZERO,il,iu,ABSTOL,&
        m,nz,eigen,ORFAC, &
-       results%buffer_cplx,1,1,results%descript%tab, &
+       results%buffer_cplx,1,1,results%desc, &
        CWORK,LCWORK,RWORK,LRWORK,IWORK,LIWORK,&
        IFAIL,ICLUSTR,GAP,INFO)
   else
      ! write(std_out,*) 'I am using PDSYGVX'
      call PDSYGVX(1,'V',range,'U',&
        matrix1%sizeb_global(2),&
-       matrix1%buffer_real,1,1,matrix1%descript%tab, &
-       matrix2%buffer_real,1,1,matrix2%descript%tab, &
+       matrix1%buffer_real,1,1,matrix1%desc, &
+       matrix2%buffer_real,1,1,matrix2%desc, &
        ZERO,ZERO,il,iu,ABSTOL,&
        m,nz,eigen,ORFAC, &
-       results%buffer_real,1,1,results%descript%tab, &
+       results%buffer_real,1,1,results%desc, &
        RWORK,LRWORK,IWORK,LIWORK,&
        IFAIL,ICLUSTR,GAP,INFO)
   endif
@@ -3517,8 +3497,8 @@ subroutine slk_heev(mat, jobz, uplo, vec, w, &
 
  !call pzheev(jobz, uplo, n, a, ia, ja, desca, w, z, iz, jz, descz, work, lwork, rwork, lrwork, info)
 
- call PZHEEV(jobz, uplo, nn, mat%buffer_cplx, ija__(1), ija__(2), mat%descript%tab, &
-             w, vec%buffer_cplx, ijz__(1), ijz__(2), vec%descript%tab, work_dp, lwork, rwork_dp, lrwork, info)
+ call PZHEEV(jobz, uplo, nn, mat%buffer_cplx, ija__(1), ija__(2), mat%desc, &
+             w, vec%buffer_cplx, ijz__(1), ijz__(2), vec%desc, work_dp, lwork, rwork_dp, lrwork, info)
  ABI_CHECK(info == 0, sjoin("Error in the calculation of the workspace size, info:", itoa(info)))
 
  lwork = NINT(real(work_dp(1))); lrwork= NINT(rwork_dp(1)) !*2
@@ -3537,8 +3517,8 @@ subroutine slk_heev(mat, jobz, uplo, vec, w, &
  ABI_MALLOC(work_dp, (lwork))
  ABI_MALLOC(rwork_dp, (lrwork))
 
- call PZHEEV(jobz, uplo, nn, mat%buffer_cplx, ija__(1), ija__(2), mat%descript%tab, &
-             w, vec%buffer_cplx, ijz__(1), ijz__(2), vec%descript%tab, work_dp, lwork, rwork_dp, lrwork, info)
+ call PZHEEV(jobz, uplo, nn, mat%buffer_cplx, ija__(1), ija__(2), mat%desc, &
+             w, vec%buffer_cplx, ijz__(1), ijz__(2), vec%desc, work_dp, lwork, rwork_dp, lrwork, info)
  ABI_CHECK(info == 0, sjoin("PZHEEV returned info:", itoa(info)))
  ABI_FREE(work_dp)
  ABI_FREE(rwork_dp)
@@ -3615,8 +3595,8 @@ subroutine slkmat_sp_heev(mat, jobz, uplo, vec, w, &
 
  !call pzheev(jobz, uplo, n, a, ia, ja, desca, w, z, iz, jz, descz, work, lwork, rwork, lrwork, info)
 
- call PCHEEV(jobz, uplo, nn, mat%buffer_cplx, ija__(1), ija__(2), mat%descript%tab, &
-             w, vec%buffer_cplx, ijz__(1), ijz__(2), vec%descript%tab, work_sp, lwork, rwork_sp, lrwork, info)
+ call PCHEEV(jobz, uplo, nn, mat%buffer_cplx, ija__(1), ija__(2), mat%desc, &
+             w, vec%buffer_cplx, ijz__(1), ijz__(2), vec%desc, work_sp, lwork, rwork_sp, lrwork, info)
  ABI_CHECK(info == 0, sjoin("Error in the calculation of the workspace size, info:", itoa(info)))
 
  lwork = NINT(real(work_sp(1))); lrwork= NINT(rwork_sp(1)) !*2
@@ -3635,8 +3615,8 @@ subroutine slkmat_sp_heev(mat, jobz, uplo, vec, w, &
  ABI_MALLOC(work_sp, (lwork))
  ABI_MALLOC(rwork_sp, (lrwork))
 
- call PCHEEV(jobz, uplo, nn, mat%buffer_cplx, ija__(1), ija__(2), mat%descript%tab, &
-             w, vec%buffer_cplx, ijz__(1), ijz__(2), vec%descript%tab, work_sp, lwork, rwork_sp, lrwork, info)
+ call PCHEEV(jobz, uplo, nn, mat%buffer_cplx, ija__(1), ija__(2), mat%desc, &
+             w, vec%buffer_cplx, ijz__(1), ijz__(2), vec%desc, work_sp, lwork, rwork_sp, lrwork, info)
  ABI_CHECK(info == 0, sjoin("PCHEEV returned info:", itoa(info)))
  ABI_FREE(work_sp)
  ABI_FREE(rwork_sp)
@@ -3767,9 +3747,9 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
   !call pzheevx(jobz, range, uplo, n, a, ia, ja, desca, vl, vu, il, iu, abstol, m, nz, w,
   !             orfac, z, iz, jz, descz, work, lwork, rwork, lrwork, iwork, liwork, ifail, iclustr, gap, info)
 
-  call PZHEEVX(jobz,range,uplo, mat%sizeb_global(2),mat%buffer_cplx,1,1,mat%descript%tab,&
+  call PZHEEVX(jobz,range,uplo, mat%sizeb_global(2),mat%buffer_cplx,1,1,mat%desc,&
     vl,vu,il,iu,abstol,mene_found,nvec_calc,eigen,orfac,&
-    vec%buffer_cplx,1,1,vec%descript%tab,&
+    vec%buffer_cplx,1,1,vec%desc,&
     work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
   ABI_CHECK(info == 0, sjoin("Problem to compute workspace, info:", itoa(info)))
@@ -3814,9 +3794,9 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
 
   ! Call the scaLAPACK routine.
   ! write(std_out,*) 'I am using PZHEEVX'
-  call PZHEEVX(jobz,range,uplo, mat%sizeb_global(2),mat%buffer_cplx,1,1,mat%descript%tab,&
+  call PZHEEVX(jobz,range,uplo, mat%sizeb_global(2),mat%buffer_cplx,1,1,mat%desc,&
     vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
-    vec%buffer_cplx,1,1,vec%descript%tab,&
+    vec%buffer_cplx,1,1,vec%desc,&
     work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
  ! TODO
@@ -4041,12 +4021,12 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
  ! The distributed submatrices A(IA:*, JA:*), C(IC:IC+M-1,JC:JC+N-1),
  ! and B( IB:IB+N-1, JB:JB+N-1 ) must verify some alignment properties,
 
- desca = Slk_matA%descript%tab
- descb = Slk_matB%descript%tab
+ desca = Slk_matA%desc
+ descb = Slk_matB%desc
  if (firstchar(jobz, ["V", "v"])) then
-   descz = Slk_vec%descript%tab
+   descz = Slk_vec%desc
  else
-   descz = Slk_matA%descript%tab
+   descz = Slk_matA%desc
  end if
 
  ltest = .TRUE.
@@ -4086,10 +4066,10 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
  ! This is clearly seen in the source in which rwork(1:3) is accessed
  ! in the calcuation of the workspace size.
 
- call pzhegvx(ibtype,jobz,range,uplo, Slk_matA%sizeb_global(2),Slk_matA%buffer_cplx,1,1,Slk_matA%descript%tab,&
-   Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
+ call pzhegvx(ibtype,jobz,range,uplo, Slk_matA%sizeb_global(2),Slk_matA%buffer_cplx,1,1,Slk_matA%desc,&
+   Slk_matB%buffer_cplx,1,1,Slk_matB%desc,&
    vl,vu,il,iu,abstol,mene_found,nvec_calc,eigen,orfac,&
-   Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
+   Slk_vec%buffer_cplx,1,1,Slk_vec%desc,&
    work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
  ABI_CHECK(info == 0, sjoin("Problem to compute workspace, info:", itoa(info)))
@@ -4130,10 +4110,10 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
 
  ! Call the scaLAPACK routine.
  ! write(std_out,*) 'I am using PZHEGVX'
- call pzhegvx(ibtype,jobz,range,uplo, Slk_matA%sizeb_global(2),Slk_matA%buffer_cplx,1,1,Slk_matA%descript%tab,&
-    Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
+ call pzhegvx(ibtype,jobz,range,uplo, Slk_matA%sizeb_global(2),Slk_matA%buffer_cplx,1,1,Slk_matA%desc,&
+    Slk_matB%buffer_cplx,1,1,Slk_matB%desc,&
     vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
-    Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
+    Slk_vec%buffer_cplx,1,1,Slk_vec%desc,&
     work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
  ! Handle the possible error.
@@ -4230,18 +4210,18 @@ subroutine slk_invert(mat)
 !************************************************************************
 
  ! IMPORTANT NOTE: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
- if (mat%descript%tab(MB_) /= mat%descript%tab(NB_)) then
+ if (mat%desc(MB_) /= mat%desc(NB_)) then
    ABI_ERROR(" PZGETRF requires square block decomposition i.e MB_A = NB_A.")
  end if
 
- ipiv_size = my_locr(mat) + mat%descript%tab(MB_)
+ ipiv_size = my_locr(mat) + mat%desc(MB_)
  ABI_MALLOC(ipiv, (ipiv_size))
 
  select type (mat)
  class is (matrix_scalapack)
    if (allocated(mat%buffer_cplx)) then
      ! P * L * U  Factorization.
-     call PZGETRF(mat%sizeb_global(1), mat%sizeb_global(2), mat%buffer_cplx, 1, 1, mat%descript%tab,ipiv, info)
+     call PZGETRF(mat%sizeb_global(1), mat%sizeb_global(2), mat%buffer_cplx, 1, 1, mat%desc,ipiv, info)
      ABI_CHECK(info == 0, sjoin(" PZGETRF returned info:", itoa(info)))
 
      ! Get optimal size of workspace for PZGETRI.
@@ -4249,7 +4229,7 @@ subroutine slk_invert(mat)
      ABI_MALLOC(work_dp,(1))
      ABI_MALLOC(iwork,(1))
 
-     call PZGETRI(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab, ipiv, work_dp, lwork, iwork, liwork, info)
+     call PZGETRI(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%desc, ipiv, work_dp, lwork, iwork, liwork, info)
      ABI_CHECK(info == 0, "PZGETRI: Error while computing workspace size")
 
      lwork = nint(real(work_dp(1))); liwork=iwork(1)
@@ -4260,7 +4240,7 @@ subroutine slk_invert(mat)
      ABI_MALLOC(work_dp, (lwork))
      ABI_MALLOC(iwork, (liwork))
 
-     call PZGETRI(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab, ipiv, work_dp, lwork, iwork, liwork, info)
+     call PZGETRI(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%desc, ipiv, work_dp, lwork, iwork, liwork, info)
      ABI_CHECK(info == 0, sjoin("PZGETRI returned info:", itoa(info)))
      ABI_FREE(work_dp)
 
@@ -4271,7 +4251,7 @@ subroutine slk_invert(mat)
  class is (slkmat_sp_t)
    if (allocated(mat%buffer_cplx)) then
      ! P * L * U  Factorization.
-     call PCGETRF(mat%sizeb_global(1), mat%sizeb_global(2), mat%buffer_cplx, 1, 1, mat%descript%tab,ipiv, info)
+     call PCGETRF(mat%sizeb_global(1), mat%sizeb_global(2), mat%buffer_cplx, 1, 1, mat%desc,ipiv, info)
      ABI_CHECK(info == 0, sjoin(" PCGETRF returned info:", itoa(info)))
 
      ! Get optimal size of workspace for PZGETRI.
@@ -4279,7 +4259,7 @@ subroutine slk_invert(mat)
      ABI_MALLOC(work_sp,(1))
      ABI_MALLOC(iwork,(1))
 
-     call PCGETRI(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab, ipiv, work_sp, lwork, iwork, liwork, info)
+     call PCGETRI(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%desc, ipiv, work_sp, lwork, iwork, liwork, info)
      ABI_CHECK(info == 0, "PZGETRI: Error while computing workspace size")
 
      lwork = nint(real(work_sp(1))); liwork=iwork(1)
@@ -4290,7 +4270,7 @@ subroutine slk_invert(mat)
      ABI_MALLOC(work_sp, (lwork))
      ABI_MALLOC(iwork, (liwork))
 
-     call PCGETRI(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab, ipiv, work_sp, lwork, iwork, liwork, info)
+     call PCGETRI(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%desc, ipiv, work_sp, lwork, iwork, liwork, info)
      ABI_CHECK(info == 0, sjoin("PZGETRI returned info:", itoa(info)))
      ABI_FREE(work_sp)
 
@@ -4356,13 +4336,13 @@ subroutine slk_hpd_invert(mat, uplo, full)
  !  A = U**H * U,   if UPLO = 'U', or
  !  A = L  * L**H,  if UPLO = 'L',
  mm = mat%sizeb_global(1)
- call PZPOTRF(uplo, mm, mat%buffer_cplx, 1, 1, mat%descript%tab, info)
+ call PZPOTRF(uplo, mm, mat%buffer_cplx, 1, 1, mat%desc, info)
  ABI_CHECK(info == 0, sjoin("PZPOTRF returned info:", itoa(info)))
 
  ! PZPOTRI computes the inverse of a complex Hermitian positive definite
  ! distributed matrix sub( A ) = A(IA:IA+N-1,JA:JA+N-1) using the
  ! Cholesky factorization sub( A ) = U**H*U or L*L**H computed by PZPOTRF.
- call PZPOTRI(uplo, mm, mat%buffer_cplx, 1, 1, mat%descript%tab, info)
+ call PZPOTRI(uplo, mm, mat%buffer_cplx, 1, 1, mat%desc, info)
  ABI_CHECK(info == 0, sjoin("PZPOTRI returned info:", itoa(info)))
 
  full__ = .True.; if (present(full)) full__ = full
@@ -4385,8 +4365,8 @@ subroutine slk_hpd_invert(mat, uplo, full)
 
    ! call pzgeadd(trans, m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
    ! sub(C) := beta*sub(C) + alpha*op(sub(A))
-   call pzgeadd("C", mm, mm, cone, work_mat%buffer_cplx, 1, 1, work_mat%descript%tab, &
-         cone, mat%buffer_cplx, 1, 1, mat%descript%tab)
+   call pzgeadd("C", mm, mm, cone, work_mat%buffer_cplx, 1, 1, work_mat%desc, &
+         cone, mat%buffer_cplx, 1, 1, mat%desc)
    call work_mat%free()
 
    do il2=1,mat%sizeb_local(2)
@@ -4449,13 +4429,13 @@ subroutine slkmat_sp_hpd_invert(mat, uplo, full)
  !  A = U**H * U,   if UPLO = 'U', or
  !  A = L  * L**H,  if UPLO = 'L',
  mm = mat%sizeb_global(1)
- call PCPOTRF(uplo, mm, mat%buffer_cplx, 1, 1, mat%descript%tab, info)
+ call PCPOTRF(uplo, mm, mat%buffer_cplx, 1, 1, mat%desc, info)
  ABI_CHECK(info == 0, sjoin("PCPOTRF returned info:", itoa(info)))
 
  ! PZPOTRI computes the inverse of a complex Hermitian positive definite
  ! distributed matrix sub( A ) = A(IA:IA+N-1,JA:JA+N-1) using the
  ! Cholesky factorization sub( A ) = U**H*U or L*L**H computed by PZPOTRF.
- call PCPOTRI(uplo, mm, mat%buffer_cplx, 1, 1, mat%descript%tab, info)
+ call PCPOTRI(uplo, mm, mat%buffer_cplx, 1, 1, mat%desc, info)
  ABI_CHECK(info == 0, sjoin("PCPOTRI returned info:", itoa(info)))
 
  full__ = .True.; if (present(full)) full__ = full
@@ -4478,8 +4458,8 @@ subroutine slkmat_sp_hpd_invert(mat, uplo, full)
 
    ! call pzgeadd(trans, m, n, alpha, a, ia, ja, desca, beta, c, ic, jc, descc)
    ! sub(C) := beta*sub(C) + alpha*op(sub(A))
-   call pcgeadd("C", mm, mm, cone_sp, work_mat%buffer_cplx, 1, 1, work_mat%descript%tab, &
-         cone_sp, mat%buffer_cplx, 1, 1, mat%descript%tab)
+   call pcgeadd("C", mm, mm, cone_sp, work_mat%buffer_cplx, 1, 1, work_mat%desc, &
+         cone_sp, mat%buffer_cplx, 1, 1, mat%desc)
    call work_mat%free()
 
    do il2=1,mat%sizeb_local(2)
@@ -4576,14 +4556,14 @@ subroutine slk_ptrans(in_mat, trans, out_mat, &
      calpha__ = cone; if (present(alpha)) calpha__ = alpha
      cbeta__ = czero; if (present(beta)) cbeta__ = beta
      call pztranu(nn, mm, calpha__, in_mat%buffer_cplx, ija__(1), ija__(2), &
-                  in_mat%descript%tab, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%descript%tab)
+                  in_mat%desc, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%desc)
 
    case ("C")
      ! sub(C) := beta * sub(C) + alpha * conjg(sub(A)')
      calpha__ = cone; if (present(alpha)) calpha__ = alpha
      cbeta__ = czero; if (present(beta)) cbeta__ = beta
      call pztranc(nn, mm, calpha__, in_mat%buffer_cplx, ija__(1), ija__(2), &
-                  in_mat%descript%tab, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%descript%tab)
+                  in_mat%desc, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%desc)
 
    case default
      ABI_ERROR(sjoin("Invalid value for trans:", trans))
@@ -4593,7 +4573,7 @@ subroutine slk_ptrans(in_mat, trans, out_mat, &
      ralpha__ = one; if (present(alpha)) ralpha__ = real(alpha)
      rbeta__ = zero; if (present(beta)) rbeta__ = real(beta)
      call pdtran(nn, mm, ralpha__, in_mat%buffer_real, ija__(1), ija__(2), &
-                 in_mat%descript%tab, rbeta__, out_mat%buffer_real, ijc__(1), ijc__(2), out_mat%descript%tab)
+                 in_mat%desc, rbeta__, out_mat%buffer_real, ijc__(1), ijc__(2), out_mat%desc)
 #endif
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
@@ -4685,14 +4665,14 @@ subroutine slkmat_sp_ptrans(in_mat, trans, out_mat, &
      calpha__ = cone_sp; if (present(alpha)) calpha__ = alpha
      cbeta__ = czero_sp; if (present(beta)) cbeta__ = beta
      call pctranu(nn, mm, calpha__, in_mat%buffer_cplx, ija__(1), ija__(2), &
-                  in_mat%descript%tab, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%descript%tab)
+                  in_mat%desc, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%desc)
 
    case ("C")
      ! sub(C) := beta * sub(C) + alpha * conjg(sub(A)')
      calpha__ = cone_sp; if (present(alpha)) calpha__ = alpha
      cbeta__ = czero_sp; if (present(beta)) cbeta__ = beta
      call pctranc(nn, mm, calpha__, in_mat%buffer_cplx, ija__(1), ija__(2), &
-                  in_mat%descript%tab, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%descript%tab)
+                  in_mat%desc, cbeta__, out_mat%buffer_cplx, ijc__(1), ijc__(2), out_mat%desc)
 
    case default
      ABI_ERROR(sjoin("Invalid value for trans:", trans))
@@ -4702,7 +4682,7 @@ subroutine slkmat_sp_ptrans(in_mat, trans, out_mat, &
      ralpha__ = one_sp; if (present(alpha)) ralpha__ = real(alpha)
      rbeta__ = zero_sp; if (present(beta)) rbeta__ = real(beta)
      call pstran(nn, mm, ralpha__, in_mat%buffer_real, ija__(1), ija__(2), &
-                 in_mat%descript%tab, rbeta__, out_mat%buffer_real, ijc__(1), ijc__(2), out_mat%descript%tab)
+                 in_mat%desc, rbeta__, out_mat%buffer_real, ijc__(1), ijc__(2), out_mat%desc)
 #endif
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
@@ -4772,16 +4752,16 @@ subroutine slk_change_size_blocs(in_mat, out_mat, &
      ABI_CHECK_IEQ(kind(in_mat%buffer_cplx), kind(out_mat%buffer_cplx), "Different kind")
      ABI_CHECK(allocated(out_mat%buffer_cplx), "out_mat%buffer_cplx should be allocated")
      call pzgemr2d(in_mat%sizeb_global(1), in_mat%sizeb_global(2),  &
-                   in_mat%buffer_cplx, 1, 1, in_mat%descript%tab,   &
-                   out_mat%buffer_cplx, 1, 1, out_mat%descript%tab, &
+                   in_mat%buffer_cplx, 1, 1, in_mat%desc,   &
+                   out_mat%buffer_cplx, 1, 1, out_mat%desc, &
                    processor__%grid%ictxt)
 
    else if (allocated(in_mat%buffer_real)) then
      ABI_CHECK_IEQ(kind(in_mat%buffer_real), kind(out_mat%buffer_real), "Different kind")
      ABI_CHECK(allocated(out_mat%buffer_real), "out_mat%buffer_real should be allocated")
      call pdgemr2d(in_mat%sizeb_global(1), in_mat%sizeb_global(2),  &
-                   in_mat%buffer_real, 1, 1, in_mat%descript%tab,   &
-                   out_mat%buffer_real, 1, 1, out_mat%descript%tab, &
+                   in_mat%buffer_real, 1, 1, in_mat%desc,   &
+                   out_mat%buffer_real, 1, 1, out_mat%desc, &
                    processor__%grid%ictxt)
    else
      ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
@@ -4796,16 +4776,16 @@ subroutine slk_change_size_blocs(in_mat, out_mat, &
 
      ABI_CHECK(allocated(out_mat%buffer_cplx), "out_mat%buffer should be allocated")
      call pcgemr2d(in_mat%sizeb_global(1), in_mat%sizeb_global(2),  &
-                   in_mat%buffer_cplx, 1, 1, in_mat%descript%tab,   &
-                   out_mat%buffer_cplx, 1, 1, out_mat%descript%tab, &
+                   in_mat%buffer_cplx, 1, 1, in_mat%desc,   &
+                   out_mat%buffer_cplx, 1, 1, out_mat%desc, &
                    processor__%grid%ictxt)
 
    else if (allocated(in_mat%buffer_real)) then
      ABI_CHECK_IEQ(kind(in_mat%buffer_real), kind(out_mat%buffer_real), "Different kind")
      ABI_CHECK(allocated(out_mat%buffer_real), "out_mat%buffer_real should be allocated")
      call psgemr2d(in_mat%sizeb_global(1), in_mat%sizeb_global(2),  &
-                   in_mat%buffer_real, 1, 1, in_mat%descript%tab,   &
-                   out_mat%buffer_real, 1, 1, out_mat%descript%tab, &
+                   in_mat%buffer_real, 1, 1, in_mat%desc,   &
+                   out_mat%buffer_real, 1, 1, out_mat%desc, &
                    processor__%grid%ictxt)
    else
      ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
@@ -4877,14 +4857,14 @@ subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
  if (allocated(in_mat%buffer_cplx)) then
 #ifdef HAVE_LINALG_SCALAPACK
    call pzgemr2d(glob_nrows, glob_ncols, &
-                 in_mat%buffer_cplx, ija__(1), ija__(2), in_mat%descript%tab,   &
-                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%descript%tab, &
+                 in_mat%buffer_cplx, ija__(1), ija__(2), in_mat%desc,   &
+                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%desc, &
                  processor__%grid%ictxt)
 
  else if (allocated(in_mat%buffer_real)) then
    call pdgemr2d(glob_nrows, glob_ncols, &
-                 in_mat%buffer_real, ija__(1), ija__(2), in_mat%descript%tab,   &
-                 out_mat%buffer_real, ijb__(1), ijb__(2), out_mat%descript%tab, &
+                 in_mat%buffer_real, ija__(1), ija__(2), in_mat%desc,   &
+                 out_mat%buffer_real, ijb__(1), ijb__(2), out_mat%desc, &
                  processor__%grid%ictxt)
 #endif
  else
@@ -4948,7 +4928,7 @@ subroutine slk_take_from(out_mat, source, &
  ijb__ = [1, 1]; if (present(ijb)) ijb__ = ijb
 
  if (all(out_mat%sizeb_global == -1)) then
-   out_mat%descript%tab(CTXT_) = -1
+   out_mat%desc(CTXT_) = -1
  else
    ABI_CHECK_IEQ(out_mat%istwf_k, source%istwf_k, "istwfk_mat /= istwfk_source")
    if (any(out_mat%sizeb_global /= source%sizeb_global)) then
@@ -4961,14 +4941,14 @@ subroutine slk_take_from(out_mat, source, &
  if (allocated(source%buffer_cplx)) then
 #ifdef HAVE_LINALG_SCALAPACK
    call pzgemr2d(mm, nn,  &
-                 source%buffer_cplx, ija__(1), ija__(2), source%descript%tab,   &
-                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%descript%tab, &
+                 source%buffer_cplx, ija__(1), ija__(2), source%desc,   &
+                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%desc, &
                  source%processor%grid%ictxt)
 
  else if (allocated(source%buffer_real)) then
    call pdgemr2d(mm, nn,  &
-                 source%buffer_real, ija__(1), ija__(2), source%descript%tab,   &
-                 out_mat%buffer_real,ijb__(1), ijb__(2), out_mat%descript%tab, &
+                 source%buffer_real, ija__(1), ija__(2), source%desc,   &
+                 out_mat%buffer_real,ijb__(1), ijb__(2), out_mat%desc, &
                  source%processor%grid%ictxt)
 #endif
  else
@@ -5032,7 +5012,7 @@ subroutine slkmat_sp_take_from(out_mat, source, &
  ijb__ = [1, 1]; if (present(ijb)) ijb__ = ijb
 
  if (all(out_mat%sizeb_global == -1)) then
-   out_mat%descript%tab(CTXT_) = -1
+   out_mat%desc(CTXT_) = -1
  else
    ABI_CHECK_IEQ(out_mat%istwf_k, source%istwf_k, "istwfk_mat /= istwfk_source")
    if (any(out_mat%sizeb_global /= source%sizeb_global)) then
@@ -5045,14 +5025,14 @@ subroutine slkmat_sp_take_from(out_mat, source, &
  if (allocated(source%buffer_cplx)) then
 #ifdef HAVE_LINALG_SCALAPACK
    call pcgemr2d(mm, nn,  &
-                 source%buffer_cplx, ija__(1), ija__(2), source%descript%tab,   &
-                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%descript%tab, &
+                 source%buffer_cplx, ija__(1), ija__(2), source%desc,   &
+                 out_mat%buffer_cplx, ijb__(1), ijb__(2), out_mat%desc, &
                  source%processor%grid%ictxt)
 
  else if (allocated(source%buffer_real)) then
    call psgemr2d(mm, nn,  &
-                 source%buffer_real, ija__(1), ija__(2), source%descript%tab,   &
-                 out_mat%buffer_real,ijb__(1), ijb__(2), out_mat%descript%tab, &
+                 source%buffer_real, ija__(1), ija__(2), source%desc,   &
+                 out_mat%buffer_real,ijb__(1), ijb__(2), out_mat%desc, &
                  source%processor%grid%ictxt)
 #endif
  else
@@ -5111,13 +5091,13 @@ subroutine slk_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
    call self_processor%init(xmpi_comm_self)
    call out_mat%init(mm, nn, self_processor, in_mat%istwf_k, size_blocs=[mm, nn])
  else
-   out_mat%descript%tab(CTXT_) = -1
+   out_mat%desc(CTXT_) = -1
  end if
 
 #ifdef HAVE_LINALG_SCALAPACK
  call pzgemr2d(mm, nn,  &
-               in_mat%buffer_cplx, ija(1), ija(2), in_mat%descript%tab,   &
-               out_mat%buffer_cplx, 1, 1, out_mat%descript%tab, &
+               in_mat%buffer_cplx, ija(1), ija(2), in_mat%desc,   &
+               out_mat%buffer_cplx, 1, 1, out_mat%desc, &
                in_mat%processor%grid%ictxt)
 #endif
 
@@ -5183,13 +5163,13 @@ subroutine slkmat_sp_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
    call self_processor%init(xmpi_comm_self)
    call out_mat%init(mm, nn, self_processor, in_mat%istwf_k, size_blocs=[mm, nn])
  else
-   out_mat%descript%tab(CTXT_) = -1
+   out_mat%desc(CTXT_) = -1
  end if
 
 #ifdef HAVE_LINALG_SCALAPACK
  call pcgemr2d(mm, nn,  &
-               in_mat%buffer_cplx, ija(1), ija(2), in_mat%descript%tab,   &
-               out_mat%buffer_cplx, 1, 1, out_mat%descript%tab, &
+               in_mat%buffer_cplx, ija(1), ija(2), in_mat%desc,   &
+               out_mat%buffer_cplx, 1, 1, out_mat%desc, &
                in_mat%processor%grid%ictxt)
 #endif
 
@@ -5252,7 +5232,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
  select type (mat)
  class is (matrix_scalapack)
    if (allocated(mat%buffer_cplx)) then
-     !ctrace = PZLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab)
+     !ctrace = PZLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%desc)
      ctrace = zero
      do jloc=1,mat%sizeb_local(2)
        do iloc=1,mat%sizeb_local(1)
@@ -5262,7 +5242,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
      end do
 
    else if (allocated(mat%buffer_real)) then
-     !rtrace = PDLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%descript%tab)
+     !rtrace = PDLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%desc)
      rtrace = zero
      do jloc=1,mat%sizeb_local(2)
        do iloc=1,mat%sizeb_local(1)
@@ -5278,7 +5258,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
 
  class is (slkmat_sp_t)
     if (allocated(mat%buffer_cplx)) then
-     !ctrace_sp = PCLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%descript%tab)
+     !ctrace_sp = PCLATRA(mat%sizeb_global(1), mat%buffer_cplx, 1, 1, mat%desc)
      ctrace_sp = zero
      do jloc=1,mat%sizeb_local(2)
        do iloc=1,mat%sizeb_local(1)
@@ -5289,7 +5269,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
      ctrace = ctrace_sp
 
     else if (allocated(mat%buffer_real)) then
-      !rtrace_sp = PSLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%descript%tab)
+      !rtrace_sp = PSLATRA(mat%sizeb_global(1), mat%buffer_real, 1, 1, mat%desc)
       rtrace_sp = zero
       do jloc=1,mat%sizeb_local(2)
         do iloc=1,mat%sizeb_local(1)
@@ -6547,7 +6527,7 @@ subroutine slkmat_sp_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
 !************************************************************************
 
  ! IMPORTANT NOTE: PCGESVD requires square block decomposition i.e., MB_A = NB_A.
- if (in_mat%descript%tab(MB_) /= in_mat%descript%tab(NB_)) then
+ if (in_mat%desc(MB_) /= in_mat%desc(NB_)) then
    ABI_ERROR("PCGESVD requires square block decomposition i.e MB_A = NB_A.")
  end if
 
@@ -6566,9 +6546,9 @@ subroutine slkmat_sp_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
    ABI_MALLOC(rwork_sp, (1))
 
    call PCGESVD(jobu, jobvt, &
-                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%descript%tab, s_vals, &
-                u_mat%buffer_cplx, 1, 1, u_mat%descript%tab, &
-                vt_mat%buffer_cplx, 1, 1, vt_mat%descript%tab, &
+                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%desc, s_vals, &
+                u_mat%buffer_cplx, 1, 1, u_mat%desc, &
+                vt_mat%buffer_cplx, 1, 1, vt_mat%desc, &
                 cwork_sp, lwork, rwork_sp, info)
 
    ABI_CHECK(info == 0, sjoin("CZGESVD returned info:", itoa(info)))
@@ -6584,9 +6564,9 @@ subroutine slkmat_sp_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
 
    ! Perform SVD
    call PCGESVD(jobu, jobvt, &
-                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%descript%tab, s_vals, &
-                u_mat%buffer_cplx, 1, 1, u_mat%descript%tab, &
-                vt_mat%buffer_cplx, 1, 1, vt_mat%descript%tab, &
+                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%desc, s_vals, &
+                u_mat%buffer_cplx, 1, 1, u_mat%desc, &
+                vt_mat%buffer_cplx, 1, 1, vt_mat%desc, &
                 cwork_sp, lwork, rwork_sp, info)
 
    ABI_FREE(cwork_sp)
@@ -6635,7 +6615,7 @@ subroutine slkmat_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
 !************************************************************************
 
  ! IMPORTANT NOTE: PZGESVD requires square block decomposition i.e., MB_A = NB_A.
- if (in_mat%descript%tab(MB_) /= in_mat%descript%tab(NB_)) then
+ if (in_mat%desc(MB_) /= in_mat%desc(NB_)) then
    ABI_ERROR("PZGESVD requires square block decomposition i.e MB_A = NB_A.")
  end if
 
@@ -6654,9 +6634,9 @@ subroutine slkmat_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
    ABI_MALLOC(rwork_dp, (1))
 
    call PZGESVD(jobu, jobvt, &
-                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%descript%tab, s_vals, &
-                u_mat%buffer_cplx, 1, 1, u_mat%descript%tab, &
-                vt_mat%buffer_cplx, 1, 1, vt_mat%descript%tab, &
+                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%desc, s_vals, &
+                u_mat%buffer_cplx, 1, 1, u_mat%desc, &
+                vt_mat%buffer_cplx, 1, 1, vt_mat%desc, &
                 cwork_dp, lwork, rwork_dp, info)
 
    ABI_CHECK(info == 0, sjoin("CZGESVD returned info:", itoa(info)))
@@ -6672,9 +6652,9 @@ subroutine slkmat_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
 
    ! Perform SVD
    call PZGESVD(jobu, jobvt, &
-                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%descript%tab, s_vals, &
-                u_mat%buffer_cplx, 1, 1, u_mat%descript%tab, &
-                vt_mat%buffer_cplx, 1, 1, vt_mat%descript%tab, &
+                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%desc, s_vals, &
+                u_mat%buffer_cplx, 1, 1, u_mat%desc, &
+                vt_mat%buffer_cplx, 1, 1, vt_mat%desc, &
                 cwork_dp, lwork, rwork_dp, info)
 
    ABI_FREE(cwork_dp)
