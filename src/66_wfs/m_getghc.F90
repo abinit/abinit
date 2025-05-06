@@ -1339,7 +1339,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    if (gs_ham%usepaw==1 .and. has_fock) then
      if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_PTR(gvnlc,gvnlxc_)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlc,gvnlxc_)
        call abi_gpu_xaxpy(1, 2*npw_k2*my_nspinor*ndat, cminusone, &
        &    c_loc(gvnlc), 1, c_loc(gvnlxc_), 1)
        !$OMP END TARGET DATA
