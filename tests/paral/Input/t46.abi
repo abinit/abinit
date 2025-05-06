@@ -5,6 +5,8 @@
 ndtset 3
 jdtset 2 3 4
 
+cprj_in_memory 0
+
 npband 4
 
 wfoptalg1   0
