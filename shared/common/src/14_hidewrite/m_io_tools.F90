@@ -1206,7 +1206,7 @@ subroutine lock_and_write(filename, string, ierr)
  character(len=*),intent(in) :: filename,string
 
 !Local variables-------------------------------
- integer :: lock_unit, file_unit, fd
+ integer :: file_unit, fd ! lock_unit,
  integer(c_int) :: sleep_time
  character(len=len(filename) + 5) :: lock_name
 ! *********************************************************************
@@ -1239,6 +1239,8 @@ subroutine lock_and_write(filename, string, ierr)
  call write_lines(file_unit, string, toflush=.true.)
  close(lock_unit, status="delete")
  close(file_unit)
+
+99 ierr = 1
  return
 
 #else
@@ -1254,8 +1256,6 @@ subroutine lock_and_write(filename, string, ierr)
    call delete_file(lock_name, ierr)
  end if
 #endif
-
-99 ierr = 1
 
 end subroutine lock_and_write
 !!***
