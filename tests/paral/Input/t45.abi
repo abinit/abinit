@@ -7,6 +7,8 @@ jdtset 2 3 4
 
 npband 4
 
+cprj_in_memory 0
+
 wfoptalg1   0
 wfoptalg2  14
 wfoptalg3 114
