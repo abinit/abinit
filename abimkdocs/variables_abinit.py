@@ -3415,7 +3415,7 @@ Compute properties of the local impurity during the CTQMC calculations.
   * 0 --> Nothing done
   * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
 gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
-  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$, 
+  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$,
 whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
   * 3 --> Add the Calculation of local charge susceptibility.
 """,
@@ -15135,9 +15135,11 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to
-define the q-path used for phonon band structures and phonon linewidths. It
-gives the number of points used to sample the smallest segment in the q-path
-specified by [[ph_qpath]].
+define the q-path used for phonon band structures and phonon linewidths.
+It gives the number of points used to sample the smallest segment in the q-path specified by [[ph_qpath]].
+
+A negative value activates a specialized mode in which [[ph_nqpath]] and [[ph_qpath]]
+provide the full list of $\qq$-points to be used.
 """,
 ),
 

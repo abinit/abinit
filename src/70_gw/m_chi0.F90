@@ -2027,7 +2027,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  real(dp),parameter :: dummy_dosdeltae=HUGE(zero)
  real(dp) :: o_entropy,o_nelect,maxocc
  complex(dpc) :: ph_mkt
- logical :: iscompatibleFFT, is_metallic, print_time
+ logical :: iscompatibleFFT, is_metallic !, print_time
  character(len=500) :: msg,msg_tmp !,allup
  type(kmesh_t) :: Kmesh
  type(littlegroup_t) :: Ltg_q

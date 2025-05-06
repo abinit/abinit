@@ -2730,7 +2730,7 @@ end function box_len
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  gprimd(3,3)=Reciprocal lattice vectors
 !!  ndivsm=Number of divisions to be used for the smallest segment.
-!!   A negative value activates a specialized mode if with bounds is suppose to supply the full list of k-points.
+!!   A negative value activates a specialized mode in which bounds supplies the full list of k-points.
 !!
 !! SOURCE
 
@@ -2767,7 +2767,7 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
    ABI_MALLOC(Kpath%points, (3, Kpath%npts))
    kpath%points = bounds
  end if
-
+p
  ABI_MALLOC(Kpath%bounds, (3, Kpath%nbounds))
  Kpath%bounds = bounds
 
