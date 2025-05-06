@@ -5602,16 +5602,16 @@ subroutine xmpi_get_nodes_in_comm(in_comm, num_nodes, nprocs_per_node)
  num_nodes = merge(1, 0, node_rank == 0)
  call xmpi_sum(num_nodes, in_comm, ierr)
 
- if (present(nprocs_per_node)) then
-  !ABI_MALLOC(nprocs_per_node, (num_nodes))
-  !color = merge(0, 1, node_rank == 0)
-  !call xmpi_comm_split(in_comm, color, in_rank, masters_comm, ierr)
-  !if (color == 0) then
-  !  np = xmpi_comm_size(node_comm)
-  !  call MPI_GATHER(np, 1, MPI_INT, nprocs_per_node, 1, MPI_INT, 0, masters_comm, ierr)
-  !end if
-  !call xmpi_comm_free(masters_comm)
- end if
+ !if (present(nprocs_per_node)) then
+ !  ABI_MALLOC(nprocs_per_node, (num_nodes))
+ !  color = merge(0, 1, node_rank == 0)
+ !  call xmpi_comm_split(in_comm, color, in_rank, masters_comm, ierr)
+ !  if (color == 0) then
+ !    np = xmpi_comm_size(node_comm)
+ !    call MPI_GATHER(np, 1, MPI_INT, nprocs_per_node, 1, MPI_INT, 0, masters_comm, ierr)
+ !  end if
+ !  call xmpi_comm_free(masters_comm)
+ !end if
 
  call xmpi_comm_free(node_comm)
 #endif

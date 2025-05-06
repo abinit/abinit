@@ -138,7 +138,7 @@ module m_gstore
 
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
- use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0
+ use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno
  !use m_yaml,          only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
@@ -1181,7 +1181,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, my_is, np, my_rank, ierr, npp_bz
+ integer :: spin, my_is, np, my_rank, ierr, npp_bz, units(2)
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
  character(len=10) :: order
@@ -1189,6 +1189,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
  logical :: reorder, periods(ndims), keepdim(ndims)
  character(len=10) :: priority
 !----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
 
  associate (dtset => gstore%dtset)
  my_rank = xmpi_comm_rank(gstore%comm)
@@ -1383,6 +1385,12 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    ! Distribute perturbations inside pert_comm using block distribution.
    call xmpi_split_block(gqk%natom3, gqk%pert_comm%value, gqk%my_npert, gqk%my_pertcases)
    gqk%my_pert_start = gqk%my_pertcases(1)
+
+   call wrtout(units, sjoin("P qpt_comm can use shmem:", yesno(gqk%qpt_comm%can_use_shmem())))
+   call wrtout(units, sjoin("P kpt_comm can use shmem:", yesno(gqk%kpt_comm%can_use_shmem())))
+   call wrtout(units, sjoin("P bsum_comm can use shmem:", yesno(gqk%bsum_comm%can_use_shmem())))
+   call wrtout(units, sjoin("P pp_sum_comm can use shmem:", yesno(gqk%pp_sum_comm%can_use_shmem())))
+
  end do ! my_is
 
  if (my_rank == master) call gstore%print([std_out, ab_out])

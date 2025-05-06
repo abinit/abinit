@@ -90,16 +90,16 @@ module m_ksdiago
  type, public :: ugb_t
 
    integer :: istwf_k = -1
-   ! Storage mode of cg_k
+   ! Storage mode of cg_k.
 
    integer :: nspinor = -1
-   ! Number of spinors
+   ! Number of spinors.
 
    integer :: npw_k = -1
    ! Number of planewaves.
 
    integer :: npwsp = -1
-   ! nnpw_k * nspinor
+   ! nnpw_k * nspinor.
 
    integer :: nband_k = - 1
    ! Total number of bands (global)
@@ -107,7 +107,7 @@ module m_ksdiago
    integer :: my_bstart = -1, my_bstop = - 1, my_nband = - 1
    ! 1) Initial band
    ! 2) Last band
-   ! 3) Number of bands treated by this proc. 0 if idle proc
+   ! 3) Number of bands treated by this proc. 0 if idle proc.
 
    logical :: has_idle_procs
    ! True if there are procs in comm who don't own any column.
@@ -138,7 +138,7 @@ module m_ksdiago
  contains
 
    procedure :: from_diago  => ugb_from_diago
-    ! Build object by direct diagonalization of the KS Hamiltonian
+    ! Build object by direct diagonalization of the KS Hamiltonian.
 
    procedure :: from_wfk_file  => ugb_from_wfk_file
     ! Build object from WFK file.

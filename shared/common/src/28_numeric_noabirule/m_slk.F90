@@ -22,10 +22,10 @@
 module m_slk
 
  use defs_basis
+ USE_MPI
  use m_xmpi
  use m_errors
  use m_abicore
- USE_MPI
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif
@@ -127,6 +127,9 @@ module m_slk
 !! FUNCTION
 !! ScaLAPACK matrix descriptor.
 !!
+!! TODO
+!! MG: This type is not very useful. One can directly expose tab and call it %desc
+!!
 !! SOURCE
 
  type,public :: descript_scalapack
@@ -161,6 +164,7 @@ module m_slk
    type(processor_scalapack),pointer :: processor => null()
 
    type(descript_scalapack) :: descript
+   !integer :: tab(DLEN_)
 
  contains
 
@@ -270,6 +274,9 @@ module m_slk
    procedure :: bsize_and_type => slk_bsize_and_type
     ! Returns the byte size and the MPI datatype
 
+   procedure :: svd => slkmat_svd
+    ! Compute Singular Value Decomposition of matrix in_mat (double precision version).
+
  end type matrix_scalapack
 !!***
 
@@ -278,7 +285,7 @@ module m_slk
 !!  slkmat_sp_t
 !!
 !! FUNCTION
-!!  high-level interface to ScaLAPACK matrix (single precision version)
+!!  High-level interface to ScaLAPACK matrix (single precision version)
 !!
 !! SOURCE
 
@@ -316,6 +323,9 @@ module m_slk
 
    procedure :: hpd_invert => slkmat_sp_hpd_invert
     ! Inverse of a Hermitian positive definite matrix.
+
+   procedure :: svd => slkmat_sp_svd
+    ! Compute Singular Value Decomposition of matrix in_mat (single precision version).
 
  end type slkmat_sp_t
 !!***
@@ -517,7 +527,8 @@ end subroutine build_processor_scalapack
 !!
 !! SOURCE
 
-subroutine processor_init(processor, comm, grid_dims)
+subroutine processor_init(processor, comm, &
+                          grid_dims) ! optional
 
 !Arguments ------------------------------------
  class(processor_scalapack),intent(out) :: processor
@@ -592,7 +603,8 @@ end subroutine processor_free
 !!
 !! SOURCE
 
-subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, istwf_k, size_blocs)
+subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, istwf_k, &
+                                 size_blocs) ! optional
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: matrix
@@ -1355,7 +1367,6 @@ end function block_dist_1d
 !! SOURCE
 
 pure logical function slk_has_elpa() result (ans)
-! *********************************************************************
 
  ans = .False.
 #ifdef HAVE_LINALG_ELPA
@@ -6502,6 +6513,182 @@ subroutine slk_bsize_and_type(Slk_mat, bsize_elm, mpi_type_elm)
  end if
 
 end subroutine slk_bsize_and_type
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slkmat_sp_svd
+!! NAME
+!! slkmat_sp_svd
+!!
+!! FUNCTION
+!!  Compute Singular Value Decomposition of matrix in_mat (single precision version).
+!!
+!! SIDE EFFECTS
+!!  in_mat: matrix is destroyed in output.
+!!
+!! SOURCE
+
+subroutine slkmat_sp_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
+
+!Arguments ------------------------------------
+ class(slkmat_sp_t),intent(inout) :: in_mat
+ character(len=1),intent(in) :: jobu, jobvt
+ class(slkmat_sp_t),intent(out) :: u_mat, vt_mat
+ real(sp),allocatable, intent(out) :: s_vals(:)
+
+#ifdef HAVE_LINALG_SCALAPACK
+!Local variables ------------------------------
+!scalars
+ integer :: info, lwork, lrwork, isize, mm, nn
+!array
+ real(sp), allocatable :: rwork_sp(:)
+ complex(sp), allocatable :: cwork_sp(:)
+!************************************************************************
+
+ ! IMPORTANT NOTE: PCGESVD requires square block decomposition i.e., MB_A = NB_A.
+ if (in_mat%descript%tab(MB_) /= in_mat%descript%tab(NB_)) then
+   ABI_ERROR("PCGESVD requires square block decomposition i.e MB_A = NB_A.")
+ end if
+
+ mm = in_mat%sizeb_global(1); nn = in_mat%sizeb_global(2); isize = min(mm, nn)
+
+ ! Allocate singular values and output matrices.
+
+ ABI_CALLOC(s_vals, (isize))
+ if (jobu == "V") call u_mat%init(mm, isize, in_mat%processor, in_mat%istwf_k)
+ if (jobvt == "V") call vt_mat%init(isize, nn, in_mat%processor, in_mat%istwf_k)
+
+ if (allocated(in_mat%buffer_cplx)) then
+   ! Query optimal workspace size
+   lwork = -1
+   ABI_MALLOC(cwork_sp, (1))
+   ABI_MALLOC(rwork_sp, (1))
+
+   call PCGESVD(jobu, jobvt, &
+                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%descript%tab, s_vals, &
+                u_mat%buffer_cplx, 1, 1, u_mat%descript%tab, &
+                vt_mat%buffer_cplx, 1, 1, vt_mat%descript%tab, &
+                cwork_sp, lwork, rwork_sp, info)
+
+   ABI_CHECK(info == 0, sjoin("CZGESVD returned info:", itoa(info)))
+
+   ! Allocate optimal workspace
+   lwork = nint(real(cwork_sp(1)))
+   lrwork = nint(rwork_sp(1))
+   ABI_FREE(cwork_sp)
+   ABI_FREE(rwork_sp)
+
+   ABI_MALLOC(cwork_sp, (lwork))
+   ABI_MALLOC(rwork_sp, (lrwork))
+
+   ! Perform SVD
+   call PCGESVD(jobu, jobvt, &
+                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%descript%tab, s_vals, &
+                u_mat%buffer_cplx, 1, 1, u_mat%descript%tab, &
+                vt_mat%buffer_cplx, 1, 1, vt_mat%descript%tab, &
+                cwork_sp, lwork, rwork_sp, info)
+
+   ABI_FREE(cwork_sp)
+   ABI_FREE(rwork_sp)
+   ABI_CHECK(info == 0, sjoin("PCGESVD returned info:", itoa(info)))
+
+ else if (allocated(in_mat%buffer_real)) then
+   ABI_ERROR("SVD for real matrices not coded!")
+ else
+   ABI_ERROR("Neither complex nor real buffer are allocated!")
+ end if
+#endif
+
+end subroutine slkmat_sp_svd
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/slkmat_svd
+!! NAME
+!! slkmat_svd
+!!
+!! FUNCTION
+!!  Compute Singular Value Decomposition of matrix in_mat (double precision version).
+!!
+!! SIDE EFFECTS
+!!  in_mat: matrix is destroyed in output.
+!!
+!! SOURCE
+
+subroutine slkmat_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
+
+!Arguments ------------------------------------
+ class(matrix_scalapack),intent(inout) :: in_mat
+ character(len=1),intent(in) :: jobu, jobvt
+ class(matrix_scalapack),intent(out) :: u_mat, vt_mat
+ real(dp),allocatable, intent(out) :: s_vals(:)
+
+#ifdef HAVE_LINALG_SCALAPACK
+!Local variables ------------------------------
+!scalars
+ integer :: info, lwork, lrwork, isize, mm, nn
+!array
+ real(dp), allocatable :: rwork_dp(:)
+ complex(dp), allocatable :: cwork_dp(:)
+!************************************************************************
+
+ ! IMPORTANT NOTE: PZGESVD requires square block decomposition i.e., MB_A = NB_A.
+ if (in_mat%descript%tab(MB_) /= in_mat%descript%tab(NB_)) then
+   ABI_ERROR("PZGESVD requires square block decomposition i.e MB_A = NB_A.")
+ end if
+
+ mm = in_mat%sizeb_global(1); nn = in_mat%sizeb_global(2); isize = min(mm, nn)
+
+ ! Allocate singular values and output matrices.
+ ABI_CALLOC(s_vals, (isize))
+
+ if (jobu == "V") call u_mat%init(mm, isize, in_mat%processor, in_mat%istwf_k)
+ if (jobvt == "V") call vt_mat%init(isize, nn, in_mat%processor, in_mat%istwf_k)
+
+ if (allocated(in_mat%buffer_cplx)) then
+   ! Query optimal workspace size
+   lwork = -1
+   ABI_MALLOC(cwork_dp, (1))
+   ABI_MALLOC(rwork_dp, (1))
+
+   call PZGESVD(jobu, jobvt, &
+                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%descript%tab, s_vals, &
+                u_mat%buffer_cplx, 1, 1, u_mat%descript%tab, &
+                vt_mat%buffer_cplx, 1, 1, vt_mat%descript%tab, &
+                cwork_dp, lwork, rwork_dp, info)
+
+   ABI_CHECK(info == 0, sjoin("CZGESVD returned info:", itoa(info)))
+
+   ! Allocate optimal workspace
+   lwork = nint(real(cwork_dp(1)))
+   lrwork = nint(rwork_dp(1))
+   ABI_FREE(cwork_dp)
+   ABI_FREE(rwork_dp)
+
+   ABI_MALLOC(cwork_dp, (lwork))
+   ABI_MALLOC(rwork_dp, (lrwork))
+
+   ! Perform SVD
+   call PZGESVD(jobu, jobvt, &
+                mm, nn, in_mat%buffer_cplx, 1, 1, in_mat%descript%tab, s_vals, &
+                u_mat%buffer_cplx, 1, 1, u_mat%descript%tab, &
+                vt_mat%buffer_cplx, 1, 1, vt_mat%descript%tab, &
+                cwork_dp, lwork, rwork_dp, info)
+
+   ABI_FREE(cwork_dp)
+   ABI_FREE(rwork_dp)
+   ABI_CHECK(info == 0, sjoin("CZGESVD returned info:", itoa(info)))
+
+ else if (allocated(in_mat%buffer_real)) then
+   ABI_ERROR("SVD for real matrices not coded!")
+ else
+   ABI_ERROR("Neither complex nor real buffer are allocated!")
+ end if
+#endif
+
+end subroutine slkmat_svd
 !!***
 
 end module m_slk

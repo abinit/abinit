@@ -910,8 +910,8 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! In-core solution.
      epsm1%use_shared_win = .False.
 #ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
-     epsm1%use_shared_win = .True.
-     !epsm1%use_shared_win = nprocs > 1 ! TODO
+     epsm1%use_shared_win = nprocs > 1
+     !epsm1%use_shared_win = .True.
 #endif
      !epsm1%use_shared_win = .False.    ! This to go back to the old non-scalable version.
 
@@ -927,7 +927,7 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      if (.not. epsm1%use_shared_win) then
 
        if (nprocs > 1) then
-         msg = strcat("- WARNING: Cannot use MPI shared memory as MPI library does not support MPI_WIN_ALLOCATE_SHARED with C_PTR", ch10, &
+         msg = strcat("- WARNING: Cannot use MPI shared memory as MPI library does not support MPI_WIN_ALLOCATE_SHARED_CPTR", ch10, &
                       "- Memory for epsm1 will increase with nprocs per node!")
          ABI_WARNING(msg)
          call wrtout(ab_out, msg)
