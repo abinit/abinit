@@ -430,7 +430,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #ifdef HAVE_GW_DPC
 #  define GWPC_CONJG(cvar)  DCONJG(cvar)
 #  define GWPC_CMPLX(re,im) DCMPLX(re,im)
-#  define __slkmat_t matrix_scalapack
+#  define __slkmat_t slkmat_dp_t
 #else
 #  define GWPC_CONJG(cvar)  CONJG(cvar)
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)

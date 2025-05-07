@@ -308,7 +308,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
  real(dp) :: cg_new(2,npw*nspinor*nband),gsc_or_vnlxc_new(2,npw*nspinor*nband),ghc_new(2,npw*nspinor*nband)
  real(dp), allocatable :: ham_iproc(:,:), ovl_iproc(:,:), evec_iproc(:,:), left_temp(:,:), right_temp(:,:)
  real(dp) :: tsec(2)
- type(matrix_scalapack) :: sca_ham, sca_ovl, sca_evec
+ type(slkmat_dp_t) :: sca_ham, sca_ovl, sca_evec
  !character(len=500) :: message
  character :: blas_transpose
 

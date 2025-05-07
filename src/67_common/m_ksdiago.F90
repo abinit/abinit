@@ -47,7 +47,7 @@ module m_ksdiago
  use m_time,              only : cwtime, cwtime_report, timab
  use m_geometry,          only : metric, normv
  use m_hide_lapack,       only : xhegv_cplex, xheev_cplex, xheevx_cplex, xhegvx_cplex
- use m_slk,               only : matrix_scalapack, slk_processor_t, block_dist_1d, &
+ use m_slk,               only : slkmat_dp_t, slk_processor_t, block_dist_1d, &
                                  compute_eigen_problem, compute_generalized_eigen_problem
  use m_bz_mesh,           only : findnq, findq, findqg0, identk
  use m_kg,                only : mkkin, mkkpg
@@ -117,7 +117,7 @@ module m_ksdiago
 
    type(slk_processor_t) :: processor
 
-   type(matrix_scalapack) :: mat
+   type(slkmat_dp_t) :: mat
    ! PBLAS matrix with MPI-distributed Fourier components (double precision)
    ! Local buffer: (2, npwsp * my_nband)
    ! Global matrix: (npwsp, nband_k)
@@ -1033,7 +1033,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  character(len=500) :: msg
  type(MPI_type) :: mpi_enreg_seq
  type(gs_hamiltonian_type) :: gs_hamk
- type(matrix_scalapack) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag, eigvec
+ type(slkmat_dp_t) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag, eigvec
  type(slk_processor_t) :: proc_1d, proc_4diag
  type(uplan_t) :: uplan_k
  type(fftbox_plan3_t) :: box_plan

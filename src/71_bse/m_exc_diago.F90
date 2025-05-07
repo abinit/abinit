@@ -108,7 +108,6 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
  character(len=500) :: msg
 !arrays
  real(dp) :: gaps(3,QP_BSt%nsppol)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -231,7 +230,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  integer :: block_sizes(2,3),array_of_sizes(2),gsub(2,2)
  logical,parameter :: is_fortran_file=.TRUE.
  real(dp),external :: PDLAMCH
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ type(slkmat_dp_t) :: Slk_mat,Slk_vec
  type(slk_processor_t) :: Slk_processor
 #endif
 
@@ -247,7 +246,6 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  complex(dpc),allocatable :: exc_vl(:,:),exc_ene_c(:)
  complex(dpc) :: ctemp
 !! complex(dpc),allocatable :: ovlp(:,:)
-
 !************************************************************************
 
  DBG_ENTER("PERS")
@@ -280,8 +278,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 !#endif
  if (use_scalapack .and. nsppol == 2) then
    use_scalapack = .False.
-   msg = "Scalapack with nsppol==2 not yet available. Using sequential version"
-   ABI_WARNING(msg)
+   ABI_WARNING("Scalapack with nsppol==2 not yet available. Using sequential version")
  end if
 
  if (.not.use_scalapack .and. my_rank/=master) GOTO 10 ! Inversion is done by master only.
@@ -303,7 +300,6 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  call wrtout([std_out, ab_out], msg)
 
  ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
-
  ABI_MALLOC_OR_DIE(exc_ene_c,(exc_size), ierr)
 
  do_ep_renorm = .FALSE.
@@ -671,8 +667,7 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 
 !Local variables ------------------------------
 !scalars
- integer :: nstates_read,ii,j,k,eig_unt,ieig,hsize_exp
- integer :: hsize_read !,nstates
+ integer :: nstates_read,ii,j,k,eig_unt,ieig,hsize_exp, hsize_read !,nstates
  complex(dpc) :: bind_energy,ctemp
  character(len=500) :: msg
  !type(Hdr_type) :: tmp_Hdr
@@ -680,7 +675,6 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
  integer,allocatable :: iperm(:)
  real(dp),allocatable :: exc_rene(:)
  complex(dpc),allocatable :: exc_cene(:)
-
 !************************************************************************
 
  exc_gap = czero
@@ -736,9 +730,9 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
  bind_energy = gw_gap - exc_gap
 
  write(msg,"(3(a,2f6.2,2a))")&
-&  " GW  direct gap     ",gw_gap*Ha_eV,     " [eV] ",ch10,&
-&  " EXC direct gap     ",exc_gap*Ha_eV,    " [eV] ",ch10,&
-&  " EXC binding energy ",bind_energy*Ha_eV," [eV] ",ch10
+  " GW  direct gap     ",gw_gap*Ha_eV,     " [eV] ",ch10,&
+  " EXC direct gap     ",exc_gap*Ha_eV,    " [eV] ",ch10,&
+  " EXC binding energy ",bind_energy*Ha_eV," [eV] ",ch10
  call wrtout([std_out, ab_out], msg)
 
  msg=' Excitonic eigenvalues up to the GW energy gap [eV]'
@@ -815,20 +809,15 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  integer,parameter :: master=0,ldvl=1
  integer(i8b) :: bsize_ham
  integer :: ii,exc_size,hreso_unt,hcoup_unt,eig_unt,nsppol,nstates
- integer :: bsz,block,bs1,bs2,jj
- integer :: fform,row_sign
- integer :: mi,it,nprocs,my_rank !itp
+ integer :: bsz,block,bs1,bs2,jj, fform,row_sign, mi,it,nprocs,my_rank !itp
  integer :: nene_printed,ierr
  real(dp) :: exc_gap,exc_maxene,temp
- logical :: diago_is_real,do_full_diago
- logical :: do_ep_lifetime
+ logical :: diago_is_real,do_full_diago, do_ep_lifetime
  character(len=500) :: msg
  character(len=fnlen) :: hreso_fname,hcoup_fname,bseig_fname
 !arrays
- complex(dpc),allocatable :: exc_ham(:,:),exc_rvect(:,:),exc_ene(:),ovlp(:,:)
- complex(dpc),allocatable :: cbuff(:,:)
+ complex(dpc),allocatable :: exc_ham(:,:),exc_rvect(:,:),exc_ene(:),ovlp(:,:), cbuff(:,:)
  complex(dpc) :: vl_dpc(ldvl,1)
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
@@ -1074,14 +1063,12 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  integer(i8b) :: bsize_ham
  integer :: itype,il,iu,spin,row1,row2,pad_r1,pad_r2,neh1,neh2
  integer :: ii,exc_size,hreso_unt,hcoup_unt,eig_unt
- integer :: fform,neig_found,nstates
- integer :: mi,it,nprocs,my_rank
+ integer :: fform,neig_found,nstates, mi,it,nprocs,my_rank
  integer :: nene_printed,nsppol,row_sign,ierr
  real(dp) :: exc_gap,exc_maxene,abstol,vl,vu
  character(len=500) :: msg
  character(len=fnlen) :: reso_fname,coup_fname,bseig_fname
- logical :: use_scalapack,do_full_diago,diago_is_real
- logical :: do_ep_lifetime
+ logical :: use_scalapack,do_full_diago,diago_is_real, do_ep_lifetime
 !arrays
  real(dp),allocatable :: exc_ene(:) !,test_ene(:)
  complex(dpc),allocatable :: exc_ham(:,:),exc_rvect(:,:),fmat(:,:),ovlp(:,:)
@@ -1099,10 +1086,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  complex(dpc),allocatable :: tmp_cbuffer(:)
  character(50) :: uplo
  real(dp),external :: PDLAMCH
- type(matrix_scalapack)    :: Slk_F,Slk_Hbar,Slk_vec,Slk_ovlp !,Slk_tmp
+ type(slkmat_dp_t) :: Slk_F,Slk_Hbar,Slk_vec,Slk_ovlp !,Slk_tmp
  type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)

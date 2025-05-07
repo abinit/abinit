@@ -171,7 +171,7 @@ module m_gwr
  use m_gsphere,       only : kg_map, gsphere_t
  use m_melemts,       only : melements_t
  use m_ioarr,         only : fftdatar_write
- use m_slk,           only : matrix_scalapack, slkmat_sp_t, slk_processor_t, slk_array_free, slk_array_set, &
+ use m_slk,           only : slkmat_dp_t, slkmat_sp_t, slk_processor_t, slk_array_free, slk_array_set, &
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_init, wfd_t, wfdgw_t
