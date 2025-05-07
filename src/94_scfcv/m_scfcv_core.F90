@@ -362,7 +362,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  type(energies_type) :: energies
  type(abi_mixing_object) :: mix,mix_mgga
  logical,parameter :: VERBOSE=.FALSE.
- logical :: dummy_nhatgr,eijkl_is_sym
+ logical :: dummy_nhatgr
  logical :: finite_efield_flag=.false.
  logical :: non_magnetic_xc=.false.
  logical :: recompute_cprj=.false.,reset_mixing=.false.
@@ -379,6 +379,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  integer,allocatable :: gbound_diel(:,:),irrzondiel(:,:,:),kg_diel(:,:)
  integer,allocatable :: l_size_atm(:)
  integer,allocatable :: indsym_dum(:,:,:),symrec_dum(:,:,:), rmm_diis_status(:,:,:)
+ logical :: eijkl_is_sym(psps%ntypat)
  logical,pointer :: lmselect_ep(:,:)
  real(dp) :: dielar(7),dphase(3),favg(3),gmet(3,3),gprimd(3,3)
  real(dp) :: kpt_diel(3),pel(3),pel_cg(3),pelev(3),pion(3),ptot(3),qpt(3),red_ptot(3) !!REC
@@ -1049,7 +1050,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
    if(associated(rcpaw)) then
      rcpaw%istep=istep
-     if(istep>1) eijkl_is_sym=.false.
+     eijkl_is_sym=rcpaw%eijkl_is_sym
    endif
 
 
@@ -2406,7 +2407,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
     ABI_FREE(vectornd)
  end if
 
- if(associated(rcpaw)) call rcpaw_destroy(rcpaw)
+ if(associated(rcpaw)) then
+   call rcpaw_destroy(rcpaw)
+   ABI_FREE(rcpaw)
+ endif
 
  if((nstep>0.and.dtset%iscf>0).or.dtset%iscf==-1) then
    ABI_FREE(dielinv)

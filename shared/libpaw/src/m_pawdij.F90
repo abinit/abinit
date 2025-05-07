@@ -173,13 +173,13 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer,intent(in) :: nspden,ntypat,pawprtvol,pawspnorb,pawxcdev
  integer,optional,intent(in) :: electronpositron_calctype
  integer,optional,intent(in) :: comm_atom,mpi_comm_grid,natvshift
- logical,optional,intent(in) :: eijkl_is_sym
  real(dp),intent(in) :: spnorbscl,ucvol,charge
  real(dp),intent(in),optional ::fatvshift,hyb_mixing,hyb_mixing_sr
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  logical,optional,intent(in) :: electronpositron_lmselect(:,:)
+ logical,optional,intent(in) :: eijkl_is_sym(ntypat)
  real(dp),intent(in) :: gprimd(3,3),qphon(3)
  real(dp),intent(in) ::  vxc(:,:),xred(3,natom),znuc(ntypat)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
@@ -692,7 +692,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
      else
 !    ===== Need to compute DijHartree
        is_sym=.true.
-       if(present(eijkl_is_sym)) is_sym=eijkl_is_sym
+       if(present(eijkl_is_sym)) is_sym=eijkl_is_sym(itypat)
        if (ipositron/=1) then
          call pawdijhartree(dijhartree,qphase,nspden,pawrhoij(iatom),pawtab(itypat),is_sym=is_sym)
        else

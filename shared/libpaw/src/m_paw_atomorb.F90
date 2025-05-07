@@ -331,6 +331,7 @@ if (allocated(Atm%occ_respc)) then
  if(allocated(atm%vhtnzc_orig)) then
    LIBPAW_DEALLOCATE(atm%vhtnzc_orig)
  endif
+ call pawrad_free(atm%radmesh)
 
 end subroutine destroy_atomorb
 !!***
