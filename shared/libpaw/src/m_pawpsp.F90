@@ -1619,7 +1619,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
            if(present(radmesh_in)) then
              Atm%mesh_size = radmesh_in%mesh_size
              Atm%rcore=radmesh_in%rad(radmesh_in%mesh_size)
-             Atm%radmesh=radmesh_in
+             call pawrad_copy(radmesh_in,atm%radmesh)
            elseif(rcut>tol16) then
              call pawrad_init(tmpmesh,meshsz(ii),meshtp(ii),radstp(ii),logstp(ii),-one)
              msz_cut =min(pawrad_ifromr(tmpmesh,rcut)+6,tmpmesh%mesh_size) ! addsix more points
