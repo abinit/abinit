@@ -216,49 +216,49 @@ module m_slk
 
  contains
 
-   procedure :: get_head_and_wings => slk_get_head_and_wings
+   procedure :: get_head_and_wings => slkmat_dp_get_head_and_wings
     ! Return global arrays with the head and the wings of the matrix.
 
-   procedure :: set_head_and_wings => slk_set_head_and_wings
+   procedure :: set_head_and_wings => slkmat_dp_set_head_and_wings
     ! Set head and the wings of the matrix starting from global arrays.
 
    procedure :: copy => matrix_scalapack_copy
     ! Copy object
 
-   procedure :: hpd_invert => slk_hpd_invert
+   procedure :: hpd_invert => slkmat_dp_hpd_invert
     ! Inverse of a Hermitian positive definite matrix.
 
-   procedure :: ptrans => slk_ptrans
+   procedure :: ptrans => slkmat_dp_ptrans
     ! Transpose matrix
 
-   procedure :: cut => slk_cut
+   procedure :: cut => slkmat_dp_cut
     ! Extract submatrix and create new matrix with `size_blocs` and `processor`
 
-   procedure :: take_from => slk_take_from
+   procedure :: take_from => slkmat_dp_take_from
     ! Take values from source
 
-   procedure :: collect_cplx => slk_collect_cplx
+   procedure :: collect_cplx => slkmat_dp_collect_cplx
     ! Return on all processors the submatrix of shape (mm, nn) starting at position ija.
 
-   procedure :: heev => slk_heev
+   procedure :: heev => slkmat_dp_heev
     ! Compute eigenvalues and, optionally, eigenvectors of an Hermitian matrix A. A * X = lambda * X
 
-   procedure :: pzheevx => slk_pzheevx
+   procedure :: pzheevx => slkmat_dp_pzheevx
     ! Compute Eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix A. ! A * X = lambda *  X
 
-   procedure :: pzhegvx => slk_pzhegvx
+   procedure :: pzhegvx => slkmat_dp_pzhegvx
     ! Eigenvalues and, optionally, eigenvectors of a complex
     ! generalized Hermitian-definite eigenproblem, of the form
     ! sub( A )*x=(lambda)*sub( B )*x,  sub( A )*sub( B )x=(lambda)*x,
     ! or sub( B )*sub( A )*x=(lambda)*x.
 
-   procedure :: symmetrize => slk_symmetrize
+   procedure :: symmetrize => slkmat_dp_symmetrize
     ! Symmetrizes a square scaLAPACK matrix.
 
-   procedure :: bsize_and_type => slk_bsize_and_type
+   procedure :: bsize_and_type => slkmat_dp_bsize_and_type
     ! Returns the byte size and the MPI datatype
 
-   procedure :: svd => slkmat_svd
+   procedure :: svd => slkmat_dp_svd
     ! Singular Value Decomposition (double precision version).
 
  end type matrix_scalapack
@@ -858,9 +858,9 @@ end function basemat_check_local_shape
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_get_head_and_wings
+!!****f* m_slk/slkmat_dp_get_head_and_wings
 !! NAME
-!!  slk_get_head_and_wings
+!!  slkmat_dp_get_head_and_wings
 !!
 !! FUNCTION
 !!  Return global arrays with head and wings of the matrix.
@@ -869,7 +869,7 @@ end function basemat_check_local_shape
 !!
 !! SOURCE
 
-subroutine slk_get_head_and_wings(mat, head, low_wing, up_wing, call_mpi)
+subroutine slkmat_dp_get_head_and_wings(mat, head, low_wing, up_wing, call_mpi)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: mat
@@ -921,21 +921,21 @@ subroutine slk_get_head_and_wings(mat, head, low_wing, up_wing, call_mpi)
    call xmpi_sum(up_wing, mat%processor%comm, ierr)
  end if
 
-end subroutine slk_get_head_and_wings
+end subroutine slkmat_dp_get_head_and_wings
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_set_head_and_wings
+!!****f* m_slk/slkmat_dp_set_head_and_wings
 !! NAME
-!!  slk_set_head_and_wings
+!!  slkmat_dp_set_head_and_wings
 !!
 !! FUNCTION
 !!  Set head and wings of the matrix starting from global arrays.
 !!
 !! SOURCE
 
-subroutine slk_set_head_and_wings(mat, head, low_wing, up_wing)
+subroutine slkmat_dp_set_head_and_wings(mat, head, low_wing, up_wing)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(inout) :: mat
@@ -978,7 +978,7 @@ subroutine slk_set_head_and_wings(mat, head, low_wing, up_wing)
    end do
  end do
 
-end subroutine slk_set_head_and_wings
+end subroutine slkmat_dp_set_head_and_wings
 !!***
 
 !----------------------------------------------------------------------
@@ -3431,12 +3431,12 @@ end subroutine compute_eigen2
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_heev
+!!****f* m_slk/slkmat_dp_heev
 !! NAME
-!! slk_heev
+!! slkmat_dp_heev
 !!
 !! FUNCTION
-!!  slk_heev computes selected eigenvalues and, optionally, eigenvectors of an Hermitian matrix A.
+!!  slkmat_dp_heev computes selected eigenvalues and, optionally, eigenvectors of an Hermitian matrix A.
 !!   A * X = lambda * X
 !!
 !! INPUTS
@@ -3462,7 +3462,7 @@ end subroutine compute_eigen2
 !!
 !! SOURCE
 
-subroutine slk_heev(mat, jobz, uplo, vec, w, &
+subroutine slkmat_dp_heev(mat, jobz, uplo, vec, w, &
                     mat_size, ija, ijz) ! Optional
 
 !Arguments ------------------------------------
@@ -3525,7 +3525,7 @@ subroutine slk_heev(mat, jobz, uplo, vec, w, &
  ABI_FREE(rwork_dp)
 #endif
 
-end subroutine slk_heev
+end subroutine slkmat_dp_heev
 !!***
 
 !----------------------------------------------------------------------
@@ -3628,12 +3628,12 @@ end subroutine slkmat_sp_heev
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_pzheevx
+!!****f* m_slk/slkmat_dp_pzheevx
 !! NAME
-!!  slk_pzheevx
+!!  slkmat_dp_pzheevx
 !!
 !! FUNCTION
-!!  slk_pzheevx computes selected eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix A.
+!!  slkmat_dp_pzheevx computes selected eigenvalues and, optionally, eigenvectors of a complex Hermitian matrix A.
 !!  A * X = lambda * X
 !!
 !! INPUTS
@@ -3696,7 +3696,7 @@ end subroutine slkmat_sp_heev
 !!
 !! SOURCE
 
-subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene_found, eigen)
+subroutine slkmat_dp_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene_found, eigen)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(inout) :: mat
@@ -3856,17 +3856,17 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
  ABI_SFREE(iclustr)
 #endif
 
-end subroutine slk_pzheevx
+end subroutine slkmat_dp_pzheevx
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_pzhegvx
+!!****f* m_slk/slkmat_dp_pzhegvx
 !! NAME
-!!  slk_pzhegvx
+!!  slkmat_dp_pzhegvx
 !!
 !! FUNCTION
-!!  slk_pzhegvx provides an object-oriented interface to the ScaLAPACK routine PZHEGVX that
+!!  slkmat_dp_pzhegvx provides an object-oriented interface to the ScaLAPACK routine PZHEGVX that
 !!  computes selected eigenvalues and, optionally, eigenvectors of a complex generalized
 !!  Hermitian-definite eigenproblem, of the form
 !!  sub( A )*x=(lambda)*sub( B )*x,  sub( A )*sub( B )x=(lambda)*x,  or sub( B )*sub( A )*x=(lambda)*x.
@@ -3981,7 +3981,7 @@ end subroutine slk_pzheevx
 !!
 !! SOURCE
 
-subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
+subroutine slkmat_dp_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(inout) :: Slk_matA
@@ -4176,14 +4176,14 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
  ABI_SFREE(iclustr)
 #endif
 
-end subroutine slk_pzhegvx
+end subroutine slkmat_dp_pzhegvx
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/basemat_invertt
+!!****f* m_slk/basemat_invert
 !! NAME
-!! basemat_invertt
+!! basemat_invert
 !!
 !! FUNCTION
 !!  Compute the inverse of a complex matrix.
@@ -4291,9 +4291,9 @@ end subroutine basemat_invert
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_hpd_invert
+!!****f* m_slk/slkmat_dp_hpd_invert
 !! NAME
-!! slk_hpd_invert
+!! slkmat_dp_hpd_invert
 !!
 !! FUNCTION
 !!  Compute the inverse of an Hermitian positive definite matrix.
@@ -4315,7 +4315,7 @@ end subroutine basemat_invert
 !!
 !! SOURCE
 
-subroutine slk_hpd_invert(mat, uplo, full)
+subroutine slkmat_dp_hpd_invert(mat, uplo, full)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(inout) :: mat
@@ -4379,7 +4379,7 @@ subroutine slk_hpd_invert(mat, uplo, full)
  end if ! full__
 #endif
 
-end subroutine slk_hpd_invert
+end subroutine slkmat_dp_hpd_invert
 !!***
 
 !----------------------------------------------------------------------
@@ -4477,9 +4477,9 @@ end subroutine slkmat_sp_hpd_invert
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_ptrans
+!!****f* m_slk/slkmat_dp_ptrans
 !! NAME
-!!  slk_ptrans
+!!  slkmat_dp_ptrans
 !!
 !! FUNCTION
 !! Transposes a matrix
@@ -4503,7 +4503,7 @@ end subroutine slkmat_sp_hpd_invert
 !!
 !! SOURCE
 
-subroutine slk_ptrans(in_mat, trans, out_mat, &
+subroutine slkmat_dp_ptrans(in_mat, trans, out_mat, &
                       out_gshape, ija, ijc, size_blocs, alpha, beta, free) ! optional
 
 !Arguments ------------------------------------
@@ -4583,7 +4583,7 @@ subroutine slk_ptrans(in_mat, trans, out_mat, &
    if (free) call in_mat%free()
  end if
 
-end subroutine slk_ptrans
+end subroutine slkmat_dp_ptrans
 !!***
 
 !!****f* m_slk/slkmat_sp_ptrans
@@ -4806,9 +4806,9 @@ end subroutine basemat_change_size_blocs
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_cut
+!!****f* m_slk/slkmat_dp_cut
 !! NAME
-!!  slk_cut
+!!  slkmat_dp_cut
 !!
 !! FUNCTION
 !!  Extract submatrix of shape (glob_nrows, glob_ncols) starting at `ija` from `in_mat`
@@ -4821,8 +4821,8 @@ end subroutine basemat_change_size_blocs
 !!
 !! SOURCE
 
-subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
-                   size_blocs, processor, ija, ijb, free)  ! Optional
+subroutine slkmat_dp_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
+                         size_blocs, processor, ija, ijb, free)  ! Optional
 
 !Arguments ------------------------------------
  class(matrix_scalapack),target,intent(inout) :: in_mat
@@ -4848,7 +4848,7 @@ subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
  else
    call out_mat%init(glob_nrows, glob_ncols, processor__, in_mat%istwf_k)
  end if
- !call out_mat%print(header="output matrix generated by slk_cut")
+ !call out_mat%print(header="output matrix generated by slkmat_dp_cut")
 
  ! p?gemr2d: Copies a submatrix from one general rectangular matrix to another.
  ! prototype
@@ -4875,14 +4875,14 @@ subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
    if (free) call in_mat%free()
  end if
 
-end subroutine slk_cut
+end subroutine slkmat_dp_cut
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_take_from
+!!****f* m_slk/slkmat_dp_take_from
 !! NAME
-!!  slk_take_from
+!!  slkmat_dp_take_from
 !!
 !! FUNCTION
 !!  Take values from source
@@ -4895,7 +4895,7 @@ end subroutine slk_cut
 !!
 !! SOURCE
 
-subroutine slk_take_from(out_mat, source, &
+subroutine slkmat_dp_take_from(out_mat, source, &
                          ija, ijb, free) ! optional
 
 !Arguments ------------------------------------
@@ -4959,7 +4959,7 @@ subroutine slk_take_from(out_mat, source, &
    if (free) call source%free()
  end if
 
-end subroutine slk_take_from
+end subroutine slkmat_dp_take_from
 !!***
 
 !----------------------------------------------------------------------
@@ -5048,9 +5048,9 @@ end subroutine slkmat_sp_take_from
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_collect_cplx
+!!****f* m_slk/slkmat_dp_collect_cplx
 !! NAME
-!!  slk_collect_cplx
+!!  slkmat_dp_collect_cplx
 !!
 !! FUNCTION
 !!  Return on all processors the complex submatrix of shape (mm, nn) starting at position ija.
@@ -5060,7 +5060,7 @@ end subroutine slkmat_sp_take_from
 !!
 !! SOURCE
 
-subroutine slk_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
+subroutine slkmat_dp_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: in_mat
@@ -5115,7 +5115,7 @@ subroutine slk_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
    call xmpi_bcast(out_carr, master, in_mat%processor%comm, ierr)
  end if
 
-end subroutine slk_collect_cplx
+end subroutine slkmat_dp_collect_cplx
 !!***
 
 !----------------------------------------------------------------------
@@ -5688,7 +5688,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  ABI_CHECK_MPI(ierr,"READ_ALL")
 
  ! Symmetrize local buffer if uplo /= "All"
- call slk_symmetrize(Slk_mat, uplo, symtype)
+ call Slk_mat%symmetrize(uplo, symtype)
 
 !BEGINDEBUG
 !call MPI_FILE_READ_AT(mpi_fh,my_offset+xmpio_bsize_frm,ctest,1,MPI_DOUBLE_complex,MPI_STATUS_IGNORE,ierr)
@@ -5919,9 +5919,9 @@ end subroutine slk_single_fview_read_mask
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_symmetrize
+!!****f* m_slk/slkmat_dp_symmetrize
 !! NAME
-!!  slk_symmetrize
+!!  slkmat_dp_symmetrize
 !!
 !! FUNCTION
 !!  Symmetrize a square scaLAPACK matrix.
@@ -5943,7 +5943,7 @@ end subroutine slk_single_fview_read_mask
 !!
 !! SOURCE
 
-subroutine slk_symmetrize(Slk_mat, uplo, symtype)
+subroutine slkmat_dp_symmetrize(Slk_mat, uplo, symtype)
 
 !Arguments ------------------------------------
 !scalars
@@ -6029,7 +6029,7 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
    ABI_BUG(" Wrong uplo: "//TRIM(uplo))
  end select
 
-end subroutine slk_symmetrize
+end subroutine slkmat_dp_symmetrize
 !!***
 
 !----------------------------------------------------------------------
@@ -6439,9 +6439,9 @@ end subroutine slk_single_fview_write
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_bsize_and_type
+!!****f* m_slk/slkmat_dp_bsize_and_type
 !! NAME
-!!  slk_bsize_and_type
+!!  slkmat_dp_bsize_and_type
 !!
 !! FUNCTION
 !!  Returns the byte size and the MPI datatype associated to the matrix elements
@@ -6456,7 +6456,7 @@ end subroutine slk_single_fview_write
 !!
 !! SOURCE
 
-subroutine slk_bsize_and_type(Slk_mat, bsize_elm, mpi_type_elm)
+subroutine slkmat_dp_bsize_and_type(Slk_mat, bsize_elm, mpi_type_elm)
 
 !Arguments ------------------------------------
 !scalars
@@ -6490,7 +6490,7 @@ subroutine slk_bsize_and_type(Slk_mat, bsize_elm, mpi_type_elm)
    ABI_ERROR(msg)
  end if
 
-end subroutine slk_bsize_and_type
+end subroutine slkmat_dp_bsize_and_type
 !!***
 
 !----------------------------------------------------------------------
@@ -6582,9 +6582,9 @@ end subroutine slkmat_sp_svd
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slkmat_svd
+!!****f* m_slk/slkmat_dp_svd
 !! NAME
-!! slkmat_svd
+!! slkmat_dp_svd
 !!
 !! FUNCTION
 !!  Compute Singular Value Decomposition of matrix in_mat (double precision version).
@@ -6594,7 +6594,7 @@ end subroutine slkmat_sp_svd
 !!
 !! SOURCE
 
-subroutine slkmat_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
+subroutine slkmat_dp_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
 
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(inout) :: in_mat
@@ -6664,7 +6664,7 @@ subroutine slkmat_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
  end if
 #endif
 
-end subroutine slkmat_svd
+end subroutine slkmat_dp_svd
 !!***
 
 end module m_slk
