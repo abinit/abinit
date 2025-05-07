@@ -30,7 +30,6 @@ module m_wfk_analyze
  use m_crystal
  use m_ebands
  use m_nctk
- use m_wfk
  use m_wfd
  use m_dtset
  use m_dtfil
@@ -66,7 +65,7 @@ module m_wfk_analyze
  use m_sigtk,           only : sigtk_kpts_in_erange
  use m_iowf,            only : prtkbff
  use m_wfd_wannier,     only : wfd_run_wannier
- use m_wfk,             only : wfk_to_bz
+ use m_wfk,             only : wfk_to_bz, wfk_t, wfk_read_eigenvalues, wfk_check_symtab
 
  implicit none
 

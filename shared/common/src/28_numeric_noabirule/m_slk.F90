@@ -114,8 +114,10 @@ module m_slk
    ! the grid to which the processor is associated to.
 
  contains
-   procedure :: init => slk_processor_init   ! Initializes an instance of processor ScaLAPACK from a MPI communicator.
-   procedure :: free => slk_processor_free   ! Free the object
+   procedure :: init => slk_processor_init
+    ! Initializes an instance of processor ScaLAPACK from a MPI communicator.
+   procedure :: free => slk_processor_free
+    ! Free the object
  end type slk_processor_t
 !!***
 
@@ -277,8 +279,17 @@ module m_slk
    procedure :: from_global_sym  => slkmat_dp_from_global_sym
     ! Fills SCALAPACK matrix from full matrix.
 
-   procedure :: to_global_pack => slkmat_dp_tp_global_pack
+   procedure :: to_global_pack => slkmat_dp_to_global_pack
     ! Inserts a ScaLAPACK matrix into a global one.
+
+   procedure :: to_real_glob => slkmat_dp_to_real_glob
+    ! Inserts a ScaLAPACK matrix into a real matrix.
+
+   procedure :: to_complex_glob => slkmat_dp_to_complex_glob
+   ! Inserts a ScaLAPACK matrix into a complex matrix.
+
+   procedure :: from_complex_glob => slkmat_dp_from_complex_glob
+    ! Fills SCALAPACK matrix from a full matrix.
 
  end type slkmat_dp_t
 !!***
@@ -343,10 +354,6 @@ module m_slk
  public :: matrix_set_local_real           ! Sets a local matrix coefficient of double precision type.
  ! ???
 
- public :: matrix_from_complexmatrix       ! Fills SCALAPACK matrix from a full matrix.
-
- public :: matrix_to_realmatrix            ! Inserts a ScaLAPACK matrix into a real matrix.
- public :: matrix_to_complexmatrix         ! Inserts a ScaLAPACK matrix into a complex matrix.
  public :: slk_matrix_from_global_dpc_2D   ! Fill a complex SCALAPACK matrix with respect to a global matrix.
  public :: slk_matrix_from_global_dpc_1Dp  ! Fill a complex SCALAPACK matrix with respect to a global matrix.
                                            ! target: double precision complex matrix in packed form.
@@ -1888,9 +1895,9 @@ end subroutine slkmat_dp_from_real_glob
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_from_complexmatrix
+!!****f* m_slk/slkmat_dp_from_complex_glob
 !! NAME
-!!  matrix_from_complexmatrix
+!!  slkmat_dp_from_complex_glob
 !!
 !! FUNCTION
 !!  Routine to fill a SCALAPACK matrix from a global matrix (FULL STORAGE MODE)
@@ -1904,7 +1911,7 @@ end subroutine slkmat_dp_from_real_glob
 !!
 !! SOURCE
 
-subroutine matrix_from_complexmatrix(matrix, glob_mat, istwf_k)
+subroutine slkmat_dp_from_complex_glob(matrix, glob_mat, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(inout) :: matrix
@@ -1927,14 +1934,14 @@ subroutine matrix_from_complexmatrix(matrix, glob_mat, istwf_k)
    end do
  end do
 
-end subroutine matrix_from_complexmatrix
+end subroutine slkmat_dp_from_complex_glob
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slkmat_dp_tp_global_pack
+!!****f* m_slk/slkmat_dp_to_global_pack
 !! NAME
-!!  slkmat_dp_tp_global_pack
+!!  slkmat_dp_to_global_pack
 !!
 !! FUNCTION
 !!  Inserts a ScaLAPACK matrix into a global one in PACKED storage mode.
@@ -1949,7 +1956,7 @@ end subroutine matrix_from_complexmatrix
 !!
 !! SOURCE
 
-subroutine slkmat_dp_tp_global_pack(matrix, glob_pack, istwf_k)
+subroutine slkmat_dp_to_global_pack(matrix, glob_pack, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(in) :: matrix
@@ -1977,14 +1984,14 @@ subroutine slkmat_dp_tp_global_pack(matrix, glob_pack, istwf_k)
    end do
  end do
 
-end subroutine slkmat_dp_tp_global_pack
+end subroutine slkmat_dp_to_global_pack
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_to_realmatrix
+!!****f* m_slk/slkmat_dp_to_real_glob
 !! NAME
-!!  matrix_to_realmatrix
+!!  slkmat_dp_to_real_glob
 !!
 !! FUNCTION
 !!  Inserts a ScaLAPACK matrix into a real matrix in FULL STORAGE MODE.
@@ -1998,7 +2005,7 @@ end subroutine slkmat_dp_tp_global_pack
 !!
 !! SOURCE
 
-subroutine matrix_to_realmatrix(matrix, glob_mat, istwf_k)
+subroutine slkmat_dp_to_real_glob(matrix, glob_mat, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(in) :: matrix
@@ -2019,14 +2026,14 @@ subroutine matrix_to_realmatrix(matrix, glob_mat, istwf_k)
    end do
  end do
 
-end subroutine matrix_to_realmatrix
+end subroutine slkmat_dp_to_real_glob
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_to_complexmatrix
+!!****f* m_slk/slkmat_dp_to_complex_glob
 !! NAME
-!!  matrix_to_complexmatrix
+!!  slkmat_dp_to_complex_glob
 !!
 !! FUNCTION
 !!  Inserts a ScaLAPACK matrix into a complex matrix in FULL STORAGE MODE.
@@ -2040,7 +2047,7 @@ end subroutine matrix_to_realmatrix
 !!
 !! SOURCE
 
-subroutine matrix_to_complexmatrix(matrix, glob_cmat, istwf_k)
+subroutine slkmat_dp_to_complex_glob(matrix, glob_cmat, istwf_k)
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -2061,7 +2068,7 @@ subroutine matrix_to_complexmatrix(matrix, glob_cmat, istwf_k)
    end do
  end do
 
-end subroutine matrix_to_complexmatrix
+end subroutine slkmat_dp_to_complex_glob
 !!***
 
 !----------------------------------------------------------------------
@@ -3255,7 +3262,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
       end do
    end do
 #endif
-   call matrix_from_complexmatrix(sca_matrix1,matrix,istwf_k)
+   call sca_matrix1%from_complex_glob(matrix,istwf_k)
  else
    ABI_CHECK_IEQ(cplex, 1, "cplex != 2")
    ABI_MALLOC(r_tmp_evec,(nbli_global,nbco_global))
@@ -3282,10 +3289,10 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ==============================
 #ifdef HAVE_MPI
  if (istwf_k /= 2) then
-   call matrix_to_complexmatrix(sca_matrix2, z_tmp_evec, istwf_k)
+   call sca_matrix2%to_complex_glob(z_tmp_evec, istwf_k)
    call MPI_ALLREDUCE(z_tmp_evec, matrix, nbli_global*nbco_global, MPI_DOUBLE_complex, MPI_SUM,comm,ierr)
  else
-   call matrix_to_realmatrix(sca_matrix2, r_tmp_evec, istwf_k)
+   call sca_matrix2%to_real_glob(r_tmp_evec, istwf_k)
    call MPI_ALLREDUCE(r_tmp_evec, matrix, nbli_global*nbco_global, MPI_DOUBLE_PRECISION, MPI_SUM,comm,ierr)
  endif
 #endif
@@ -3388,8 +3395,8 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
       end do
    end do
 #endif
-   call matrix_from_complexmatrix(sca_matrix1, matrix1, istwf_k)
-   call matrix_from_complexmatrix(sca_matrix2, matrix2, istwf_k)
+   call sca_matrix1%from_complex_glob(matrix1, istwf_k)
+   call sca_matrix2%from_complex_glob(matrix2, istwf_k)
  else
    ABI_CHECK_IEQ(cplex, 1, "cplex != 1")
    ABI_MALLOC(r_tmp_evec,(nbli_global,nbco_global))
@@ -3418,11 +3425,11 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  ! ==============================
 #ifdef HAVE_MPI
  if ( istwf_k /= 2 ) then
-   call matrix_to_complexmatrix(sca_matrix3,z_tmp_evec,istwf_k)
+   call sca_matrix3%to_complex_glob(z_tmp_evec,istwf_k)
    call MPI_ALLREDUCE(z_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_complex, MPI_SUM,comm,ierr)
    ABI_FREE(z_tmp_evec)
  else
-   call matrix_to_realmatrix(sca_matrix3, r_tmp_evec, istwf_k)
+   call sca_matrix3%to_real_glob(r_tmp_evec, istwf_k)
    call MPI_ALLREDUCE(r_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_PRECISION, MPI_SUM,comm,ierr)
    ABI_FREE(r_tmp_evec)
  endif
