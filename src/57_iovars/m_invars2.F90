@@ -2732,7 +2732,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
- if(tread==1) dtset%cprj_in_memory=intarr(1)
+ if(tread==1) then
+   dtset%cprj_in_memory=intarr(1)
+ else if (dtset%wfoptalg==111.and.dtset%gpu_option==ABI_GPU_DISABLED) then
+    dtset%cprj_in_memory=1 ! cprj_in_memory set to 1 by default if chebfi2 and CPU
+ end if
  if (dtset%cprj_in_memory/=0.and.dtset%optdriver/=RUNL_GSTATE) then
    dtset%cprj_in_memory=0
    write(msg,'(a)') 'cprj_in_memory/=0 is implemented only for ground state (optdriver=0).&
