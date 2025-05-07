@@ -681,6 +681,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call chkint_eq(0,1,cond_string,cond_values,ierr,'iscf',dt%iscf,2,(/-2,-3/),iout)
        endif
 
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_magnfield',dt%dmft_magnfield,3,(/0,1,2/),iout)
+
+       if(dt%dmft_magnfield .gt. 0) then
+         cond_string(1)='dmft_magnfield' ; cond_values(1)=dt%dmft_magnfield
+         call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_magnfield_b',dt%dmft_magnfield_b,1,0.0_dp,iout)
+       endif
+
        if(dt%ucrpa==0.and.dt%dmft_solv/=9.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
