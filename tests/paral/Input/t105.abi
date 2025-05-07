@@ -1,0 +1,107 @@
+# ---------------------------------------------------------------------------------------------------------
+#
+# NiO in DMFT
+# low cutoff, low number of k-points
+# DMFT with TRIQS tested without self-consistency over density
+#
+# ---------------------------------------------------------------------------------------------------------
+# -- DATASETS AND OPTIONS
+ndtset 4
+jdtset 1 2 3 4
+prtvol 4
+pawprtvol -1
+getden -1
+getself -1
+
+##### CONVERGENCE PARAMETERS
+nstep1 30
+nstep 1
+nline 5
+nnsclo 5
+ecut 8
+# as this cutoff, test is not physical at all (filling of correlated orbitals are obviously wrong)
+
+pawecutdg 32
+tolvrs 1.0d-8
+nband  30
+occopt 3 tsmear 0.003675
+
+
+##### PHYSICAL PARAMETERS
+nspinor 2
+nsppol 1
+nspden 4
+natom 2 ntypat 2 typat 1 2
+znucl  28.0 8.0
+xred  0   0   0
+    1/2 1/2 1/2
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1/2 1/2 0.0
+acell 3*7.927
+spinat 0 0 0 0 0 0
+
+##### K-POINTS
+kptopt 4
+kptrlatt 1 0 0 0 1 0 0 0 1
+istwfk 1
+
+## == LDA+DMFT
+usedmft1 0
+usedmft 1
+dmftbandi  1
+dmftbandf 29
+dmft_solv 6   # DMFT without solver (used here with U=0).
+dmft_iter 1
+dmft_nwli 1000
+dmftcheck3 1
+dmft_tollc 0.000001
+dmft_mxsf 0.3
+dmft_dc 8
+dmft_yukawa_param2  2
+dmft_yukawa_param3  3
+dmft_yukawa_param4  4
+
+##### DFT+U
+usepawu1    4
+usepawu     14
+dmatpuopt  1   # choose expression of the density matrix
+lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
+upawu1  0.00  0.0   # values in Hartree
+jpawu1  0.0000 0.0  # values in Hartree
+upawu2  0.30  0.0   # values in Hartree
+jpawu2  0.0000 0.0  # values in Hartree
+upawu3  0.30  0.0   # values in Hartree
+jpawu3  0.0350 0.0  # values in Hartree
+upawu4  0.30  0.0   # values in Hartree
+jpawu4  0.0350 0.0  # values in Hartree
+
+dmftqmc_l 500
+dmftqmc_therm 100
+dmftctqmc_meas 100
+dmftctqmc_basis 4
+dmft_triqs_off_diag 1
+dmftqmc_n 1.d3
+dmft_lambda_yukawa 1.2
+dmft_epsilon_yukawa 1.0
+dmft_triqs_leg_measure 1
+dmft_triqs_nleg 30
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t45.abo, tolnlines = 61, tolabs = 1.0e-5, tolrel = 1.0e-3, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = B. Amadon
+#%% keywords = DMFT, PAW
+#%% description =
+#%%   DMFT tests on ferromagnetic NiO (2 atoms), check DMFT for several
+#%%   values of dmft_solv : computes occupations and energy.
+#%%<END TEST_INFO>

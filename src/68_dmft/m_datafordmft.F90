@@ -443,7 +443,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
                  end do ! ir
 
-               end if
+               end if ! prt_wan
 
                if (verif_band) then
                  do iproj=1,nproju
