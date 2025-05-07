@@ -30,7 +30,7 @@ module m_pawxmlps
  use fox_sax
 #endif
 
- use m_pawrad     , only : pawrad_type, pawrad_init, pawrad_free, pawrad_ifromr, bound_deriv
+ use m_pawrad     , only : pawrad_type, pawrad_init, pawrad_free, pawrad_ifromr, bound_deriv,pawrad_copy
  use m_paw_numeric, only : paw_spline, paw_splint
  use m_paw_atomorb, only : atomorb_type, ORB_FROZEN
  use m_paw_lmn
