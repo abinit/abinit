@@ -63,7 +63,7 @@ subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,co
 #ifdef HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_GPU_MPI
      ! Proper GPU-aware call
-     !$OMP TARGET DATA USE_DEVICE_PTR(xval,recvbuf)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(xval,recvbuf)
      call MPI_ALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
 &     recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,ier)
      !$OMP END TARGET DATA
