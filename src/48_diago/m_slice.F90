@@ -821,6 +821,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
 
+    write(std_out,*) 'chebfi%eigenvalues converged='
+    call xgBlock_print(chebfi%eigenvalues,std_out)
+
     ! Free temporary memory
     call chebfi_free(chebfi)
     ABI_SFREE(nrowsLinalg)
