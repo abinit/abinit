@@ -3078,7 +3078,7 @@ end subroutine paw_setup_copy
          if(present(pawrad)) then
            Atm%mesh_size = pawrad%mesh_size
            Atm%rcore=pawrad%rad(pawrad%mesh_size)
-           Atm%radmesh=pawrad
+           call pawrad_copy(pawrad,atm%radmesh)
          elseif(rcut>tol16) then
            msz_cut =min(pawrad_ifromr(radmesh(imeshae),rcut)+6,radmesh(imeshae)%mesh_size) ! add six more points six more points
            Atm%mesh_size = msz_cut

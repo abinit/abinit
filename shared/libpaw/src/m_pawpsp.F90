@@ -1677,7 +1677,6 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      LIBPAW_DEALLOCATE(meshtp)
      LIBPAW_DEALLOCATE(radstp)
      LIBPAW_DEALLOCATE(logstp)
-     close(unt) 
   
      Atm%l_size =2*Atm%l_max-1
      Atm%ln2_size  = Atm%ln_size *(Atm%ln_size +1)/2
