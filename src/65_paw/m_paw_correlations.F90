@@ -932,7 +932,9 @@ CONTAINS  !=====================================================================
          f6of2 = - one
          uh = fk(1)
 
-         if (lcur == 1) then
+         if (lcur == 0) then
+           jh = zero
+         else if (lcur == 1) then
            jh = fk(2) / dble(5.)
          else if (lcur == 2) then
            f4of2 = fk(3) / fk(2)
