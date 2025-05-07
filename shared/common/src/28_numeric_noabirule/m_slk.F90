@@ -12,7 +12,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
-!! Provide fallbacks for sequential version (No scalapack) so that we can implement generic algorithms.
+!! Provide fallbacks for sequential version (No scalapack) so that we can implement generic high-level algorithms.
 !!
 !! SOURCE
 
@@ -167,6 +167,10 @@ module m_slk
    procedure :: loc2gcol => basemat_loc2col
     ! Determine the global column index from the local index
 
+   procedure :: idx_loc => basemat_idx_loc
+    ! Local indices of an entry
+    ! from its global indices, independently of the processor.
+
    procedure :: locmem_mb => basemat_locmem_mb
     ! Return memory allocated for the local buffer in Mb.
 
@@ -196,16 +200,16 @@ module m_slk
 
 !----------------------------------------------------------------------
 
-!!****t* m_slk/matrix_scalapack
+!!****t* m_slk/slkmat_dp_t
 !! NAME
-!!  matrix_scalapack
+!!  slkmat_dp_t
 !!
 !! FUNCTION
 !!  high-level interface to ScaLAPACK matrix (double precision version)
 !!
 !! SOURCE
 
- type, public, extends(basemat_t) :: matrix_scalapack
+ type, public, extends(basemat_t) :: slkmat_dp_t
 
    real(dp),allocatable :: buffer_real(:,:)
     ! local part of the (real) matrix.
@@ -222,7 +226,7 @@ module m_slk
    procedure :: set_head_and_wings => slkmat_dp_set_head_and_wings
     ! Set head and the wings of the matrix starting from global arrays.
 
-   procedure :: copy => matrix_scalapack_copy
+   procedure :: copy => slkmat_dp_copy
     ! Copy object
 
    procedure :: hpd_invert => slkmat_dp_hpd_invert
@@ -261,7 +265,7 @@ module m_slk
    procedure :: svd => slkmat_dp_svd
     ! Singular Value Decomposition (double precision version).
 
- end type matrix_scalapack
+ end type slkmat_dp_t
 !!***
 
 !!****t* m_slk/slkmat_sp_t
@@ -317,15 +321,13 @@ module m_slk
  public :: block_dist_1d                   ! Return block size for one-dimensional block column/row distribution
  public :: slk_has_elpa                    ! Return True if ELPA support is activated
 
+ ! ???
  public :: matrix_get_local_cplx           ! Return a local matrix coefficient of complex type.
  public :: matrix_get_local_real           ! Return a local matrix coefficient of double precision type.
  public :: matrix_set_local_cplx           ! Sets a local matrix coefficient of complex type.
  public :: matrix_set_local_real           ! Sets a local matrix coefficient of double precision type.
- public :: idx_loc                         ! Local indices of an entry
-                                           ! from its global indices, independently of the processor.
- !public :: glob_loc__                     ! Return global location of a matrix coefficient.
- !public :: loc_glob__                     ! Return global index from a local index (row or column)
-                                           ! as a function of a given processor
+ ! ???
+
  public :: matrix_from_global              ! Fills SCALAPACK matrix from full matrix.
  public :: matrix_from_global_sym          ! Fills SCALAPACK matrix from a full matrix.
  public :: matrix_from_realmatrix          ! Fills SCALAPACK matrix from full matrix.
@@ -364,7 +366,7 @@ module m_slk
  public :: slk_single_fview_write            ! Returns an MPI datatype to write a scaLAPACK distributed matrix
                                              ! to a binary file using MPI-IO.
 
- public :: slk_array_free                    !  Deallocate array of matrix_scalapack elements
+ public :: slk_array_free                    !  Deallocate array of slkmat_dp_t elements
  interface slk_array_free
    module procedure slk_array1_free
    module procedure slk_array2_free
@@ -373,12 +375,12 @@ module m_slk
  end interface slk_array_free
 
  public :: slk_array_set                       ! Elemental routine to set the value of the buffer to a costant value `cvalue`.
- public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of matrix_scalapack elements
+ public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of slkmat_dp_t elements
 
  ! External functions.
 #ifdef HAVE_LINALG_SCALAPACK
  integer,external :: indxl2g, numroc
- DOUBLE PRECISION, external :: PDLAMCH
+ real(dp),external :: PDLAMCH
  real(dp),external :: PDLATRA
  real(sp),external :: PSLATRA
  complex(sp),external :: PCLATRA
@@ -654,8 +656,8 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
  matrix%size_local(2) = NUMROC(nbco_global,matrix%size_blocs(2), &
                                processor%coords(2), 0, processor%grid%dims(2))
 
- call idx_loc(matrix, matrix%size_global(1), matrix%size_global(2), &
-              matrix%size_local(1), matrix%size_local(2))
+ call matrix%idx_loc(matrix%size_global(1), matrix%size_global(2), &
+                     matrix%size_local(1), matrix%size_local(2))
 
  ! Initialisation of the SCALAPACK description of the matrix
  ! (desc, m, n, mb, nb, irsrc, icsrc, comm, lld, info)
@@ -670,7 +672,7 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
  ! Allocate local buffer.
  matrix%istwf_k = istwf_k
  select type (matrix)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    if (istwf_k /= 2) then
      ABI_MALLOC(matrix%buffer_cplx, (matrix%size_local(1), matrix%size_local(2)))
      matrix%buffer_cplx = czero
@@ -715,7 +717,7 @@ pure real(dp) function basemat_locmem_mb(mat) result(locmem_mb)
 
  locmem_mb = zero
  select type (mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    if (allocated(mat%buffer_real)) locmem_mb = product(int(shape(mat%buffer_real))) * dp
    if (allocated(mat%buffer_cplx)) locmem_mb = product(int(shape(mat%buffer_cplx))) * two * dp
  class is (slkmat_sp_t)
@@ -759,13 +761,13 @@ subroutine basemat_print(mat, header, unit, prtvol)
  unt = std_out; if (present(unit)) unt =unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
- msg = ' ==== Info on matrix_scalapack ==== '
+ msg = ' ==== Info on scalapack matrix ==== '
  if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(unt, msg)
 
  matrix_dtype = "undefined"
  select type (mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    if (allocated(mat%buffer_real)) matrix_dtype = "real dp"
    if (allocated(mat%buffer_cplx)) matrix_dtype = "complex dp"
 
@@ -822,7 +824,7 @@ logical function basemat_check_local_shape(mat, lshape, msg) result (ok)
  end if
 
  select type (mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) then
      ok = all(shape(mat%buffer_cplx) == lshape)
      if (.not. ok) then
@@ -872,7 +874,7 @@ end function basemat_check_local_shape
 subroutine slkmat_dp_get_head_and_wings(mat, head, low_wing, up_wing, call_mpi)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(in) :: mat
+ class(slkmat_dp_t),intent(in) :: mat
  complex(dp),intent(out) :: head, low_wing(mat%size_global(1)), up_wing(mat%size_global(2))
  logical,intent(in) :: call_mpi
 
@@ -938,7 +940,7 @@ end subroutine slkmat_dp_get_head_and_wings
 subroutine slkmat_dp_set_head_and_wings(mat, head, low_wing, up_wing)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: mat
+ class(slkmat_dp_t),intent(inout) :: mat
  complex(dp),intent(in) :: head, low_wing(mat%size_global(1)), up_wing(mat%size_global(2))
 
 !Local variables-------------------------------
@@ -1040,20 +1042,20 @@ end subroutine slkmat_sp_set_head_and_wings
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_scalapack_copy
+!!****f* m_slk/slkmat_dp_copy
 !! NAME
-!!  matrix_scalapack_copy
+!!  slkmat_dp_copy
 !!
 !! FUNCTION
 !!  Copy in_mat to out_mat. If empty is True, the values in the local buffer are not copied. Default: False
 !!
 !! SOURCE
 
-subroutine matrix_scalapack_copy(in_mat, out_mat, empty)
+subroutine slkmat_dp_copy(in_mat, out_mat, empty)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(in) :: in_mat
- class(matrix_scalapack),intent(out) :: out_mat
+ class(slkmat_dp_t),intent(in) :: in_mat
+ class(slkmat_dp_t),intent(out) :: out_mat
  logical,optional,intent(in) :: empty
 
 !Local variables-------------------------------
@@ -1072,7 +1074,7 @@ subroutine matrix_scalapack_copy(in_mat, out_mat, empty)
    end if
  end if
 
-end subroutine matrix_scalapack_copy
+end subroutine slkmat_dp_copy
 !!***
 
 !----------------------------------------------------------------------
@@ -1138,7 +1140,7 @@ subroutine basemat_free(mat)
  mat%desc = 0
 
  select type (mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    ABI_SFREE(mat%buffer_cplx)
    ABI_SFREE(mat%buffer_real)
 
@@ -1160,7 +1162,7 @@ end subroutine basemat_free
 !!  slk_array1_free
 !!
 !! FUNCTION
-!!  Deallocate 1d array of matrix_scalapack elements
+!!  Deallocate 1d array of slkmat_dp_t elements
 !!
 !! SOURCE
 
@@ -1180,7 +1182,7 @@ end subroutine slk_array1_free
 !!  slk_array2_free
 !!
 !! FUNCTION
-!!  Deallocate 2d array of matrix_scalapack elements
+!!  Deallocate 2d array of slkmat_dp_t elements
 !!
 !! SOURCE
 
@@ -1202,7 +1204,7 @@ end subroutine slk_array2_free
 !!  slk_array3_free
 !!
 !! FUNCTION
-!!  Deallocate 3d array of matrix_scalapack elements
+!!  Deallocate 3d array of slkmat_dp_t elements
 !!
 !! SOURCE
 
@@ -1226,7 +1228,7 @@ end subroutine slk_array3_free
 !!  slk_array4_free
 !!
 !! FUNCTION
-!!  Deallocate 4d array of matrix_scalapack elements
+!!  Deallocate 4d array of slkmat_dp_t elements
 !!
 !! SOURCE
 
@@ -1253,7 +1255,7 @@ end subroutine slk_array4_free
 !!
 !! FUNCTION
 !!  Elemental routine to set the value of the PBLAS buffer to a costant value `cvalue`.
-!!  Usually used to zero all the buffers in an array of matrix_scalapack objects.
+!!  Usually used to zero all the buffers in an array of slkmat_dp_t objects.
 !!
 !! SOURCE
 
@@ -1264,7 +1266,7 @@ elemental subroutine slk_array_set(mat, cvalue)
  complex(dp),intent(in) :: cvalue
 
  select type (mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cvalue
    if (allocated(mat%buffer_real)) mat%buffer_real = real(cvalue, kind=dp)
  class is (slkmat_sp_t)
@@ -1282,7 +1284,7 @@ end subroutine slk_array_set
 !!  slk_array_locmem_mb
 !!
 !! FUNCTION
-!!  Elemental function to compute the memory allocated for an array of matrix_scalapack elements
+!!  Elemental function to compute the memory allocated for an array of slkmat_dp_t elements
 !!  Usage: mem_mb = sum(mat_array)
 !!
 !! SOURCE
@@ -1388,7 +1390,7 @@ end function slk_has_elpa
 pure complex(dpc) function matrix_get_local_cplx(matrix, i, j)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(in) :: matrix
+ class(slkmat_dp_t),intent(in) :: matrix
  integer, intent(in) :: i,j
 ! *********************************************************************
 
@@ -1416,7 +1418,7 @@ end function matrix_get_local_cplx
 pure real(dp) function matrix_get_local_real(matrix,i,j)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(in) :: matrix
+ class(slkmat_dp_t),intent(in) :: matrix
  integer, intent(in) :: i,j
 ! *********************************************************************
 
@@ -1450,7 +1452,7 @@ end function matrix_get_local_real
 pure subroutine matrix_set_local_cplx(matrix,i,j,value)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: matrix
+ class(slkmat_dp_t),intent(inout) :: matrix
  integer, intent(in) :: i,j
  complex(dp), intent(in) :: value
 ! *********************************************************************
@@ -1482,7 +1484,7 @@ end subroutine matrix_set_local_cplx
 pure subroutine matrix_set_local_real(matrix, i, j, value)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: matrix
+ class(slkmat_dp_t),intent(inout) :: matrix
  integer, intent(in) :: i,j
  real(dp), intent(in) :: value
 ! *********************************************************************
@@ -1512,7 +1514,7 @@ end subroutine matrix_set_local_real
 !!
 !! SOURCE
 
-subroutine idx_loc(matrix, i, j, iloc, jloc)
+subroutine basemat_idx_loc(matrix, i, j, iloc, jloc)
 
 !Arguments ------------------------------------
  class(basemat_t),intent(in) :: matrix
@@ -1523,7 +1525,7 @@ subroutine idx_loc(matrix, i, j, iloc, jloc)
  iloc = glob_loc__(matrix, i, 1)
  jloc = glob_loc__(matrix, j, 2)
 
-end subroutine idx_loc
+end subroutine basemat_idx_loc
 !!***
 
 !----------------------------------------------------------------------
@@ -1743,7 +1745,7 @@ end function loc_glob__
 subroutine matrix_from_global(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: matrix
+ class(slkmat_dp_t),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
  real(dp),intent(in) :: reference(*)
 
@@ -1793,7 +1795,7 @@ end subroutine matrix_from_global
 subroutine matrix_from_global_sym(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout)  :: matrix
+ class(slkmat_dp_t),intent(inout)  :: matrix
  real(dp),intent(in) :: reference(:)
  integer,intent(in) :: istwf_k
 
@@ -1850,7 +1852,7 @@ end subroutine matrix_from_global_sym
 subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: matrix
+ class(slkmat_dp_t),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
 !arrays
  real(dp),intent(in) :: reference(:,:)
@@ -1894,7 +1896,7 @@ end subroutine matrix_from_realmatrix
 subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: matrix
+ class(slkmat_dp_t),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
 !arrays
  real(dp),intent(in) :: reference(:,:)
@@ -1939,7 +1941,7 @@ end subroutine matrix_from_complexmatrix
 subroutine matrix_to_global(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(in) :: matrix
+ class(slkmat_dp_t),intent(in) :: matrix
  integer,intent(in) :: istwf_k          !,nband_k
  real(dp),intent(inout) :: reference(*) !(nband_k*(nband_k+1))
 
@@ -1988,7 +1990,7 @@ end subroutine matrix_to_global
 subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(in) :: matrix
+ class(slkmat_dp_t),intent(in) :: matrix
  integer,intent(in) :: istwf_k
 !arrays
  real(dp),intent(inout) :: reference(:,:)
@@ -2031,7 +2033,7 @@ subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
- class(matrix_scalapack),intent(in) :: matrix
+ class(slkmat_dp_t),intent(in) :: matrix
 !arrays
  complex(dpc),intent(inout) :: reference(:,:)
 
@@ -2072,7 +2074,7 @@ end subroutine matrix_to_complexmatrix
 subroutine matrix_to_reference(matrix, reference, istwf_k)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(in) :: matrix
+ class(slkmat_dp_t),intent(in) :: matrix
  integer,intent(in) :: istwf_k
 !arrays
  real(dp),intent(inout) :: reference(:,:)
@@ -2119,7 +2121,7 @@ end subroutine matrix_to_reference
 !!    = "A":  Full matrix (used for general complex matrices)
 !!
 !! SIDE EFFECTS
-!!  mat<matrix_scalapack>=The distributed matrix.
+!!  mat<slkmat_dp_t>=The distributed matrix.
 !!    %buffer_cplx=Local buffer containg the value this node is dealing with.
 !!
 !! SOURCE
@@ -2128,7 +2130,7 @@ subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_mat)
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(inout)  :: mat
+ class(slkmat_dp_t),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
  complex(dpc),intent(in) :: glob_mat(:,:)
@@ -2204,7 +2206,7 @@ end subroutine slk_matrix_from_global_dpc_2D
 !!    = "L":  Lower triangular
 !!
 !! SIDE EFFECTS
-!!  mat<matrix_scalapack>=The distributed matrix.
+!!  mat<slkmat_dp_t>=The distributed matrix.
 !!    %buffer_cplx=Local buffer containg the value this node is dealing with.
 !!
 !! SOURCE
@@ -2213,7 +2215,7 @@ subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo,glob_pmat)
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(inout)  :: mat
+ class(slkmat_dp_t),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
  complex(dpc),intent(in) :: glob_pmat(:)
@@ -2284,7 +2286,7 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 !!  target: Two-dimensional double precision complex matrix.
 !!
 !! INPUTS
-!!  Slk_mat<matrix_scalapack>=The distributed matrix.
+!!  Slk_mat<slkmat_dp_t>=The distributed matrix.
 !!  uplo=String specifying whether the upper or lower triangular part of the global matrix has to be filled:
 !!    = "U":  Upper triangular
 !!    = "L":  Lower triangular
@@ -2300,7 +2302,7 @@ subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_mat)
 
 !Arguments ------------------------------------
 !scalaras
- class(matrix_scalapack),intent(in) :: mat
+ class(slkmat_dp_t),intent(in) :: mat
  character(len=*),intent(in) :: uplo
 !arrays
  complex(dpc),intent(inout) :: glob_mat(:,:)
@@ -2351,7 +2353,7 @@ end subroutine slk_matrix_to_global_dpc_2D
 !! my_locr
 !!
 !! FUNCTION
-!!  Method of matrix_scalapack wrapping the scaLAPACK tool LOCr.
+!!  Method of slkmat_dp_t wrapping the scaLAPACK tool LOCr.
 !!
 !! OUTPUT
 !!  my_locr= For the meaning see NOTES below.
@@ -2400,7 +2402,7 @@ end function my_locr
 !! my_locc
 !!
 !! FUNCTION
-!!  Method of matrix_scalapack wrapping the scaLAPACK tool LOCc.
+!!  Method of slkmat_dp_t wrapping the scaLAPACK tool LOCc.
 !!
 !! OUTPUT
 !!  my_locc= For the meaning see NOTES below.
@@ -2475,8 +2477,8 @@ subroutine slk_pgemm_dp(transa, transb, matrix1, alpha, matrix2, beta, results, 
 
 !Arguments ------------------------------------
  character(len=1),intent(in) :: transa, transb
- class(matrix_scalapack),intent(in) :: matrix1, matrix2
- class(matrix_scalapack),intent(inout) :: results
+ class(slkmat_dp_t),intent(in) :: matrix1, matrix2
+ class(slkmat_dp_t),intent(inout) :: results
  complex(dpc),intent(in) :: alpha, beta
  integer,optional,intent(in) :: ija(2), ijb(2), ijc(2)
 
@@ -2621,8 +2623,8 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
  class(slk_processor_t),intent(in) :: processor
- class(matrix_scalapack),intent(inout) :: matrix
- class(matrix_scalapack),intent(inout) :: results
+ class(slkmat_dp_t),intent(inout) :: matrix
+ class(slkmat_dp_t),intent(inout) :: results
  DOUBLE PRECISION,intent(inout) :: eigen(:)
  integer,intent(in)  :: comm,istwf_k
  integer,optional,intent(in) :: nev
@@ -2655,8 +2657,8 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 #else
  !Arguments ------------------------------------
  class(slk_processor_t),intent(in)       :: processor
- class(matrix_scalapack),intent(in)          :: matrix
- class(matrix_scalapack),intent(inout)       :: results
+ class(slkmat_dp_t),intent(in)          :: matrix
+ class(slkmat_dp_t),intent(inout)       :: results
  DOUBLE PRECISION,intent(inout) :: eigen(:)
  integer,intent(in)  :: comm,istwf_k
  integer,optional,intent(in) :: nev, use_gpu_elpa
@@ -2974,14 +2976,14 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
   class(slk_processor_t),intent(in)       :: processor
-  class(matrix_scalapack),intent(in)          :: matrix1,matrix2
-  class(matrix_scalapack),intent(inout)       :: results
+  class(slkmat_dp_t),intent(in)          :: matrix1,matrix2
+  class(slkmat_dp_t),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
   integer,optional,intent(in) :: use_gpu_elpa
 !Local
-  type(matrix_scalapack) :: tmp1, tmp2
+  type(slkmat_dp_t) :: tmp1, tmp2
   integer :: i,n_col, n_row, nev__,use_gpu_elpa__
 
   nev__ = matrix1%size_global(2); if (present(nev)) nev__ = nev
@@ -3016,8 +3018,8 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 #else
 !Arguments ------------------------------------
   class(slk_processor_t),intent(in)       :: processor
-  class(matrix_scalapack),intent(in)          :: matrix1,matrix2
-  class(matrix_scalapack),intent(inout)       :: results
+  class(slkmat_dp_t),intent(in)          :: matrix1,matrix2
+  class(slkmat_dp_t),intent(inout)       :: results
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
@@ -3209,8 +3211,8 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  integer :: i,j
 #endif
  integer :: ierr,use_gpu_elpa_
- type(matrix_scalapack) :: sca_matrix1
- type(matrix_scalapack) :: sca_matrix2
+ type(slkmat_dp_t) :: sca_matrix1
+ type(slkmat_dp_t) :: sca_matrix2
  real(dp),allocatable :: r_tmp_evec(:,:)
  complex(dpc),allocatable :: z_tmp_evec(:,:)
 ! *************************************************************************
@@ -3340,7 +3342,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  integer :: i,j
 #endif
  integer :: ierr,use_gpu_elpa_
- type(matrix_scalapack) :: sca_matrix1, sca_matrix2, sca_matrix3
+ type(slkmat_dp_t) :: sca_matrix1, sca_matrix2, sca_matrix3
  real(dp),allocatable :: r_tmp_evec(:,:)
  complex(dpc),allocatable :: z_tmp_evec(:,:)
 ! *************************************************************************
@@ -3467,9 +3469,9 @@ subroutine slkmat_dp_heev(mat, jobz, uplo, vec, w, &
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(inout) :: mat
+ class(slkmat_dp_t),intent(inout) :: mat
  character(len=*),intent(in) :: jobz, uplo
- class(matrix_scalapack),intent(inout) :: vec
+ class(slkmat_dp_t),intent(inout) :: vec
 !arrays
  real(dp),intent(out) :: w(:)
  integer,optional,intent(in) :: mat_size, ija(2), ijz(2)
@@ -3699,12 +3701,12 @@ end subroutine slkmat_sp_heev
 subroutine slkmat_dp_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene_found, eigen)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: mat
+ class(slkmat_dp_t),intent(inout) :: mat
  integer,intent(in) :: il, iu
  integer,intent(out) :: mene_found
  real(dp),intent(in) :: abstol,vl,vu
  character(len=*),intent(in) :: jobz,range,uplo
- class(matrix_scalapack),intent(inout) :: vec
+ class(slkmat_dp_t),intent(inout) :: vec
 !arrays
  real(dp),intent(out) :: eigen(*)
 
@@ -3875,9 +3877,9 @@ end subroutine slkmat_dp_pzheevx
 !!  to be Hermitian positive definite.
 !!
 !! INPUTS
-!!  Slk_matA<matrix_scalapack>=ScaLAPACK matrix (matrix A)
-!!  Slk_matB<matrix_scalapack>=ScaLAPACK matrix (matrix B)
-!!  Slk_vec<matrix_scalapack>=The distributed eigenvectors X. Not referenced if JOBZ="N"
+!!  Slk_matA<slkmat_dp_t>=ScaLAPACK matrix (matrix A)
+!!  Slk_matB<slkmat_dp_t>=ScaLAPACK matrix (matrix B)
+!!  Slk_vec<slkmat_dp_t>=The distributed eigenvectors X. Not referenced if JOBZ="N"
 !!
 !!  IBtype   (global input) integer
 !!          Specifies the problem type to be solved:
@@ -3936,14 +3938,14 @@ end subroutine slkmat_dp_pzheevx
 !!            On normal exit, the first mene_found entries contain the selected eigenvalues in ascending order.
 !!
 !! SIDE EFFECTS
-!!  Slk_vec<matrix_scalapack>:
+!!  Slk_vec<slkmat_dp_t>:
 !!   %buffer_cplx local output (global dimension (N,N)
 !!     If JOBZ = 'V', then on normal exit the first M columns of Z
 !!     contain the orthonormal eigenvectors of the matrix
 !!     corresponding to the selected eigenvalues.
 !!     If JOBZ = 'N', then Z is not referenced.
 !!
-!!  Slk_matA<matrix_scalapack>:
+!!  Slk_matA<slkmat_dp_t>:
 !!    %buffer_cplx
 !!      (local input/local output) complex(DPC) pointer into the
 !!      local memory to an array of dimension (LLD_A, LOCc(JA+N-1)).
@@ -3984,13 +3986,13 @@ end subroutine slkmat_dp_pzheevx
 subroutine slkmat_dp_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il, iu, abstol, Slk_vec, mene_found, eigen)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: Slk_matA
+ class(slkmat_dp_t),intent(inout) :: Slk_matA
  integer,intent(in) :: il,iu,ibtype
  integer,intent(out) :: mene_found
  real(dp),intent(in) :: abstol,vl,vu
  character(len=*),intent(in) :: jobz,range,uplo
- class(matrix_scalapack),intent(inout) :: Slk_matB
- class(matrix_scalapack),intent(inout) :: Slk_vec
+ class(slkmat_dp_t),intent(inout) :: Slk_matB
+ class(slkmat_dp_t),intent(inout) :: Slk_vec
 !arrays
  real(dp),intent(out) :: eigen(*)
 
@@ -4218,7 +4220,7 @@ subroutine basemat_invert(mat)
  ABI_MALLOC(ipiv, (ipiv_size))
 
  select type (mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) then
      ! P * L * U  Factorization.
      call PZGETRF(mat%size_global(1), mat%size_global(2), mat%buffer_cplx, 1, 1, mat%desc,ipiv, info)
@@ -4318,7 +4320,7 @@ end subroutine basemat_invert
 subroutine slkmat_dp_hpd_invert(mat, uplo, full)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: mat
+ class(slkmat_dp_t),intent(inout) :: mat
  character(len=*),intent(in) :: uplo
  logical,optional,intent(in) :: full
 
@@ -4326,7 +4328,7 @@ subroutine slkmat_dp_hpd_invert(mat, uplo, full)
 !Local variables ------------------------------
 !scalars
  integer :: info, mm, il1, il2, iglob1, iglob2
- type(matrix_scalapack) :: work_mat
+ type(slkmat_dp_t) :: work_mat
  logical :: full__
 !************************************************************************
 
@@ -4507,9 +4509,9 @@ subroutine slkmat_dp_ptrans(in_mat, trans, out_mat, &
                       out_gshape, ija, ijc, size_blocs, alpha, beta, free) ! optional
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: in_mat
+ class(slkmat_dp_t),intent(inout) :: in_mat
  character(len=1),intent(in) :: trans
- class(matrix_scalapack),intent(inout) :: out_mat
+ class(slkmat_dp_t),intent(inout) :: out_mat
  integer,optional,intent(in) :: out_gshape(2), size_blocs(2), ija(2), ijc(2)
  complex(dp),optional,intent(in) :: alpha, beta
  logical,optional,intent(in) :: free
@@ -4745,9 +4747,9 @@ subroutine basemat_change_size_blocs(in_mat, out_mat, &
 
 #ifdef HAVE_LINALG_SCALAPACK
  select type (in_mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    select type (out_mat)
-   class is (matrix_scalapack)
+   class is (slkmat_dp_t)
    if (allocated(in_mat%buffer_cplx)) then
      ABI_CHECK_IEQ(kind(in_mat%buffer_cplx), kind(out_mat%buffer_cplx), "Different kind")
      ABI_CHECK(allocated(out_mat%buffer_cplx), "out_mat%buffer_cplx should be allocated")
@@ -4825,9 +4827,9 @@ subroutine slkmat_dp_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
                          size_blocs, processor, ija, ijb, free)  ! Optional
 
 !Arguments ------------------------------------
- class(matrix_scalapack),target,intent(inout) :: in_mat
+ class(slkmat_dp_t),target,intent(inout) :: in_mat
  integer,intent(in) :: glob_nrows, glob_ncols
- class(matrix_scalapack),intent(out) :: out_mat
+ class(slkmat_dp_t),intent(out) :: out_mat
  integer,optional,intent(in) :: size_blocs(2)
  class(slk_processor_t), target, optional,intent(in) :: processor
  integer,optional,intent(in) :: ija(2), ijb(2)
@@ -4899,8 +4901,8 @@ subroutine slkmat_dp_take_from(out_mat, source, &
                          ija, ijb, free) ! optional
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: out_mat
- class(matrix_scalapack),intent(inout) :: source
+ class(slkmat_dp_t),intent(inout) :: out_mat
+ class(slkmat_dp_t),intent(inout) :: source
  integer,optional,intent(in) :: ija(2), ijb(2)
  logical,optional,intent(in) :: free
 
@@ -5063,7 +5065,7 @@ end subroutine slkmat_sp_take_from
 subroutine slkmat_dp_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(in) :: in_mat
+ class(slkmat_dp_t),intent(in) :: in_mat
  integer,intent(in) :: mm, nn, ija(2)
  complex(dp) ABI_ASYNC, allocatable,intent(out) :: out_carr(:,:)
  integer ABI_ASYNC, optional,intent(out) :: request
@@ -5072,7 +5074,7 @@ subroutine slkmat_dp_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
  integer,parameter :: master = 0
  integer :: ierr
  type(slk_processor_t) :: self_processor
- type(matrix_scalapack) :: out_mat
+ type(slkmat_dp_t) :: out_mat
 ! *************************************************************************
 
  ABI_CHECK(allocated(in_mat%buffer_cplx), "buffer_cplx is not allocated")
@@ -5226,7 +5228,7 @@ complex(dp) function basemat_get_trace(mat) result(ctrace)
 
 #ifdef HAVE_LINALG_SCALAPACK
  select type (mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) then
      !ctrace = PZLATRA(mat%size_global(1), mat%buffer_cplx, 1, 1, mat%desc)
      ctrace = zero
@@ -5320,7 +5322,7 @@ subroutine basemat_set_imag_diago_to_zero(mat, local_max)
  local_max = -huge(one)
 
  select type (mat)
- class is (matrix_scalapack)
+ class is (slkmat_dp_t)
    if (allocated(mat%buffer_real)) return
    do il2=1,mat%size_local(2)
      iglob2 = mat%loc2gcol(il2)
@@ -5363,7 +5365,7 @@ end subroutine basemat_set_imag_diago_to_zero
 !!  Routine to write a square scaLAPACK-distributed matrix to an external file using MPI-IO.
 !!
 !! INPUTS
-!!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK distribution with the local buffer
+!!  Slk_mat<slkmat_dp_t>=Structured datatype defining the scaLAPACK distribution with the local buffer
 !!    containing the distributed matrix.
 !!  uplo=String specifying whether only the upper or lower triangular part of the global matrix is used:
 !!    = "U":  Upper triangular
@@ -5406,7 +5408,7 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
  logical,intent(in) :: is_fortran_file
  character(len=*),optional,intent(in) :: fname
  character(len=*),intent(in) :: uplo
- class(matrix_scalapack),intent(in) :: Slk_mat
+ class(slkmat_dp_t),intent(in) :: Slk_mat
 !array
  integer,optional,intent(in) :: glob_subarray(2,2)
 
@@ -5587,7 +5589,7 @@ end subroutine slk_write
 !!  [flags]=MPI-IO flags used to open the file in MPI_FILE_OPEN. Default is MPI_MODE_RDONLY. Referenced only when fname is used.
 !!
 !! SIDE EFFECTS
-!!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK distribution with the local buffer
+!!  Slk_mat<slkmat_dp_t>=Structured datatype defining the scaLAPACK distribution with the local buffer
 !!    supposed to be allocated.
 !!    %buffer_cplx=Local buffer containg the distributed matrix stored on the external file.
 !!  If fname is present then the file is opened and closed inside the routine. Any exception is fatal.
@@ -5625,7 +5627,7 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  character(len=*),optional,intent(in) :: fname
  character(len=*),intent(in) :: uplo,symtype
  logical,intent(in) :: is_fortran_file
- class(matrix_scalapack),intent(inout) :: Slk_mat
+ class(slkmat_dp_t),intent(inout) :: Slk_mat
 
 !Local variables ------------------------------
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
@@ -5765,7 +5767,7 @@ end subroutine slk_read
 !!  mask_of_glob. The storage of the data on file is described via the user-defined function offset_of_glob.
 !!
 !! INPUTS
-!!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK matrix.
+!!  Slk_mat<slkmat_dp_t>=Structured datatype defining the scaLAPACK matrix.
 !!  mask_of_glob(row_glob,col_glob,size_glob) is an integer function that accepts in input
 !!     the global indices of the matrix size_glob(1:2) are the global dimensions.
 !!     Return 0 if (row_glob,col_glob) should not be read.
@@ -5801,7 +5803,7 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
  integer,intent(in) :: nsblocks
  integer,intent(out) :: my_nel,offset_err,slk_type,etype
  logical,optional,intent(in) :: is_fortran_file
- class(matrix_scalapack),intent(in) :: Slk_mat
+ class(slkmat_dp_t),intent(in) :: Slk_mat
 !arrays
  integer,intent(in) :: sub_block(2,2,nsblocks)
  integer,pointer :: myel2loc(:,:)
@@ -5937,7 +5939,7 @@ end subroutine slk_single_fview_read_mask
 !!    = "N" if matrix has no symmetry (not compatible with uplo="L" or uplo="U".
 !!
 !! SIDE EFFECTS
-!!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK distribution with the local buffer
+!!  Slk_mat<slkmat_dp_t>=Structured datatype defining the scaLAPACK distribution with the local buffer
 !!    supposed to be allocated.
 !!    %buffer_cplx=Local buffer containg the distributed matrix stored on the external file.
 !!
@@ -5947,7 +5949,7 @@ subroutine slkmat_dp_symmetrize(Slk_mat, uplo, symtype)
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(inout) :: Slk_mat
+ class(slkmat_dp_t),intent(inout) :: Slk_mat
  character(len=*),intent(in) :: uplo, symtype
 
 !Local variables ------------------------------
@@ -6043,7 +6045,7 @@ end subroutine slkmat_dp_symmetrize
 !!  a binary file using MPI-IO.
 !!
 !! INPUTS
-!!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK distribution with the local buffer.
+!!  Slk_mat<slkmat_dp_t>=Structured datatype defining the scaLAPACK distribution with the local buffer.
 !!  uplo=String specifying whether only the upper or lower triangular part of the global matrix is stored on disk:
 !!    = "U":  Upper triangular is stored
 !!    = "L":  Lower triangular is stored
@@ -6075,7 +6077,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(in) :: Slk_mat
+ class(slkmat_dp_t),intent(in) :: Slk_mat
  integer,intent(out) :: offset_err,slk_type,etype
  character(len=*),intent(in) :: uplo
  logical,optional,intent(in) :: is_fortran_file
@@ -6092,7 +6094,7 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
 !************************************************************************
 
 #ifdef HAVE_MPI_IO
-!@matrix_scalapack
+!@slkmat_dp_t
  bsize_frm = xmpio_bsize_frm    ! Byte size of the Fortran record marker.
  if (PRESENT(is_fortran_file)) then
    if (.not.is_fortran_file) bsize_frm = 0
@@ -6231,7 +6233,7 @@ end subroutine slk_single_fview_read
 !!  a binary file using MPI-IO.
 !!
 !! INPUTS
-!!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK distribution with the local buffer.
+!!  Slk_mat<slkmat_dp_t>=Structured datatype defining the scaLAPACK distribution with the local buffer.
 !!  uplo=String specifying whether only the upper or lower triangular part of the global matrix is stored on disk:
 !!    = "U":  Upper triangular is stored
 !!    = "L":  Lower triangular is stored
@@ -6275,7 +6277,7 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(in) :: Slk_mat
+ class(slkmat_dp_t),intent(in) :: Slk_mat
  integer,intent(out) :: offset_err,slk_type,etype,nelw
  character(len=*),intent(in) :: uplo
  logical,optional,intent(in) :: is_fortran_file
@@ -6296,7 +6298,7 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
 !************************************************************************
 
 #ifdef HAVE_MPI_IO
-!@matrix_scalapack
+!@slkmat_dp_t
  bsize_frm = xmpio_bsize_frm    ! Byte size of the Fortran record marker.
  if (PRESENT(is_fortran_file)) then
    if (.not.is_fortran_file) bsize_frm = 0
@@ -6448,7 +6450,7 @@ end subroutine slk_single_fview_write
 !!  that are stored in the ScaLAPACK_matrix
 !!
 !! INPUTS
-!!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK distribution with the local buffer
+!!  Slk_mat<slkmat_dp_t>=Structured datatype defining the scaLAPACK distribution with the local buffer
 !!
 !! OUTPUT
 !!  bsize_elm=Byte size of the matrix element.
@@ -6460,7 +6462,7 @@ subroutine slkmat_dp_bsize_and_type(Slk_mat, bsize_elm, mpi_type_elm)
 
 !Arguments ------------------------------------
 !scalars
- class(matrix_scalapack),intent(in) :: Slk_mat
+ class(slkmat_dp_t),intent(in) :: Slk_mat
  integer,intent(out) :: bsize_elm,mpi_type_elm
 
 !Local variables ------------------------------
@@ -6597,9 +6599,9 @@ end subroutine slkmat_sp_svd
 subroutine slkmat_dp_svd(in_mat, jobu, jobvt, u_mat, s_vals, vt_mat)
 
 !Arguments ------------------------------------
- class(matrix_scalapack),intent(inout) :: in_mat
+ class(slkmat_dp_t),intent(inout) :: in_mat
  character(len=1),intent(in) :: jobu, jobvt
- class(matrix_scalapack),intent(out) :: u_mat, vt_mat
+ class(slkmat_dp_t),intent(out) :: u_mat, vt_mat
  real(dp),allocatable, intent(out) :: s_vals(:)
 
 #ifdef HAVE_LINALG_SCALAPACK

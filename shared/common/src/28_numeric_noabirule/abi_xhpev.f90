@@ -43,7 +43,7 @@
 !Local variables-------------------------------
  integer :: info,use_slk_,use_gpu_elpa_,istwf_k_
 #ifdef HAVE_LINALG_SCALAPACK
- type(matrix_scalapack) :: sca_a,sca_ev
+ type(slkmat_dp_t) :: sca_a,sca_ev
  real(dp),allocatable :: tmp_evec(:,:)
  integer :: dim_evec1,ierr
 #endif

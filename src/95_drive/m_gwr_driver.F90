@@ -46,7 +46,6 @@ module m_gwr_driver
  use m_io_tools,        only : file_exists, open_file, get_unit, iomode_from_fname
  use m_time,            only : cwtime, cwtime_report, sec2str
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa, string_in, ltoa
- use m_slk,             only : matrix_scalapack
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor

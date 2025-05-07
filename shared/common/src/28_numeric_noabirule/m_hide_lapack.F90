@@ -261,7 +261,7 @@ subroutine wrap_CHEEV(jobz, uplo, n, a, w)
  ABI_FREE(rwork)
  ABI_FREE(work)
 
- !TODO scaLAPACK version (complex single precision buffer is needed in matrix_scalapack)
+ !TODO scaLAPACK version (complex single precision buffer is needed in slkmat_dp_t)
 
 end subroutine wrap_CHEEV
 !!***
@@ -334,7 +334,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ type(slkmat_dp_t)    :: Slk_mat,Slk_vec
  type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
@@ -483,7 +483,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
  !logical :: want_eigenvectors
- !type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ !type(slkmat_dp_t)    :: Slk_mat,Slk_vec
  !type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
@@ -772,10 +772,9 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ type(slkmat_dp_t)    :: Slk_mat,Slk_vec
  type(slk_processor_t) :: Slk_processor
 #endif
-
 !************************************************************************
 
  use_scalapack=.FALSE.
@@ -933,7 +932,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
- type(matrix_scalapack)    :: Slk_matA,Slk_matB
+ type(slkmat_dp_t)    :: Slk_matA,Slk_matB
  type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
@@ -1116,7 +1115,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
- !type(matrix_scalapack)    :: Slk_matA,Slk_matB
+ !type(slkmat_dp_t)    :: Slk_matA,Slk_matB
  !type(slk_processor_t) :: Slk_processor
 #endif
 !************************************************************************
@@ -1378,7 +1377,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ type(slkmat_dp_t)    :: Slk_mat,Slk_vec
  type(slk_processor_t) :: Slk_processor
 #endif
 
@@ -1605,7 +1604,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
  !logical :: want_eigenvectors
- !type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ !type(slkmat_dp_t)    :: Slk_mat,Slk_vec
  !type(slk_processor_t) :: Slk_processor
 #endif
 
@@ -1868,7 +1867,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: ierr,istwf_k
  logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
+ type(slkmat_dp_t)    :: Slk_matA,Slk_matB,Slk_vec
  type(slk_processor_t) :: Slk_processor
 #endif
 
@@ -2125,7 +2124,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: istwf_k
  !logical :: want_eigenvectors
- !type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
+ !type(slkmat_dp_t)    :: Slk_matA,Slk_matB,Slk_vec
  !type(slk_processor_t) :: Slk_processor
 #endif
 
@@ -2518,7 +2517,7 @@ end subroutine wrap_ZGEEV
 !! a(n,n)= array of complex elements, input, inverted at output
 !!
 !! TODO
-!!  Add Scalapack version, matrix_scalapack has to be modified by adding a single precision complex buffer.
+!!  Add Scalapack version
 !!
 !! SOURCE
 
@@ -2542,7 +2541,7 @@ subroutine cginv(a, n, comm)
 #ifdef HAVE_LINALG_SCALAPACK
  !integer :: ierr,istwf_k,ipiv_size,liwork
  !integer,allocatable :: iwork(:)
- !type(matrix_scalapack)    :: Slk_mat
+ !type(slkmat_dp_t)    :: Slk_mat
  !type(slk_processor_t) :: Slk_processor
 #endif
 
@@ -2602,7 +2601,7 @@ subroutine cginv(a, n, comm)
  CASE (.TRUE.)
 
 #if 0
-! FIXME matrix_scalapack does not have a single precision complex buffer
+! FIXME slkmat_dp_t does not have a single precision complex buffer
 
 #ifdef HAVE_LINALG_SCALAPACK
   call Slk_processor%init(comm)
@@ -2722,7 +2721,7 @@ subroutine zginv(a, n, comm)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: istwf_k,ierr
- type(matrix_scalapack)    :: Slk_mat
+ type(slkmat_dp_t)    :: Slk_mat
  type(slk_processor_t) :: Slk_processor
 #endif
 
@@ -2855,7 +2854,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
 !arrays
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: istwf_k,ierr
- type(matrix_scalapack)    :: Slk_mat
+ type(slkmat_dp_t)    :: Slk_mat
  type(slk_processor_t) :: Slk_processor
 #endif
 
