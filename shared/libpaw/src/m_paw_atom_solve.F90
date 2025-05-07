@@ -3,7 +3,7 @@
 !!  m_paw_atom_solve
 !!
 !! FUNCTION
-!! This module provides a modified version of atompaw ( created by NAWH, MT, FJ) that is needed to implement relaxed core paw.
+!! This module provides a modified version of atompaw (created by NAWH, MT, FJ) that is needed to implement relaxed core paw.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2013-2025 ABINIT group (MT,NBrouwer, JBoust)
@@ -357,7 +357,7 @@ END  TYPE Pseudoinfo
 
 
 !----------------------------------------------------------------------
-!!****t* m_paw_relax/atompaw_type
+!!****t* m_paw_atom_solve/atompaw_type
 !! NAME
 !! atompaw_type
 !!
@@ -487,11 +487,12 @@ CONTAINS !===========================================================
 !!***
 
 
-!!****f* m_paw_atom/atompaw_solve
+!!****f* m_paw_atom_solve/atompaw_solve
 !! NAME
 !! atompaw_solve
 !!
 !! FUNCTION
+!! Solve the atomic problem (at fixed valence) and update relevant quantities
 !!
 !! OUTPUT
 !!
@@ -561,17 +562,15 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  call pawrad_init(radmesh,atp%Grid%n,pawrad%mesh_type,pawrad%rstep,pawrad%lstep)
  LIBPAW_ALLOCATE(ff,(atp%grid%n))
 
-
  ! Solve atomic problem
  if(.not.atm%nc_conv) then
    call SCFatom(atp,.false.)
  endif
 
+ ! Compute new core density
  write(msg,'(a)') 'atompaw_solve: orbital, norm, %in sphere'
  call wrtout(std_out,msg,'COLL') 
- ! Update core density
  atp%Orbit%coreden=zero
- ! Compute new nc
  icor=0
  do io=1,atp%Orbit%norbit
    if(atp%Orbit%iscore(io)) then
@@ -583,6 +582,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
      atp%Orbit%coreden=atp%Orbit%coreden+atp%Orbit%occ(io)*(atp%Orbit%wfn(:,io))**2
    endif
  enddo
+
  ! Compute residue
  if(.not.atm%nc_conv) then
    ff(1:atp%Grid%n)=(atp%Orbit%coreden(1:atp%Grid%n)-coredens(1:atp%Grid%n))**2
@@ -592,6 +592,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    write(msg,*) 'atompaw_solve: nc residue',atm%nresid_c
    call wrtout(std_out,msg,'COLL')
  endif
+
  ! Update core dens
  do ir=2,atp%Grid%n
     coredens(ir)=atp%Orbit%coreden(ir)/(four*pi*atp%Grid%r(ir)**2)
@@ -600,12 +601,14 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  do ir=1,size(pawtab%coredens)
    pawtab%coredens(ir)=coredens(ir)
  enddo
+
  ! Update edcc
  ff=zero
  ff(2:atp%Grid%n)=atp%Pot%rv(2:atp%Grid%n)*coredens(2:atp%Grid%n)*atp%Grid%r(2:atp%Grid%n)*four_pi
  CALL extrapolate(ff)
  atm%edcc=integrator(atp%Grid,ff)/two
  LIBPAW_DEALLOCATE(ff)
+
  ! Update ehnzc
  call atompaw_ehnzc(coredens,radmesh,atm%ehnzc,atm%znucl)
 
@@ -721,6 +724,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    call  paw_spline(qgrid_vl,vlspl(:,1),mqgrid_vl,yp1,ypn,vlspl(:,2))
    write(msg,*) 'atompaw_solve: nc epsatm',epsatm
    call wrtout(std_out,msg,'COLL')
+   call pawrad_free(vloc_mesh)
  endif
 
  ! update dij0
@@ -731,16 +735,19 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  ! update tcoretau : TODO : tau
  ! update kinetic part of dij0 : TODO : positron
  ! Clean up
+ call pawrad_free(radmesh) 
+ 
 end subroutine atompaw_solve
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_paw_atom/atompaw_init
+!!****f* m_paw_atom_solve/atompaw_init
 !! NAME
 !! atompaw_init
 !!
 !! FUNCTION
+!! Initialize an atompaw type
 !!
 !! OUTPUT
 !!
@@ -777,6 +784,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,e_semicore)
 
 ! *************************************************************************
 
+ ! File to read (temporary)
  input_file=trim(atm%fname)
  fnln=len(trim(atm%fname))
  fmt_abinit=.false.
@@ -790,6 +798,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,e_semicore)
  else
    input_file=input_file(1:fnln)//'input_atp'
  endif
+
 ! Initialize global constants
  machine_precision = zero
  a1 = 4._dp/3._dp
@@ -804,9 +813,9 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,e_semicore)
  maxlogarg=1._dp/machine_precision; maxlog=LOG(maxlogarg)
  minexparg=LOG(machine_precision);  minexp=0._dp
  maxexparg=-LOG(machine_precision);  maxexp=EXP(maxexparg)
+ has_to_print=.false.
 
  ! Read atp input and initialize (temporary)
- has_to_print=.false.
  call input_dataset_read(atp,input_file)
  atp%npsc=0
  atp%nppc=1
@@ -930,6 +939,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,e_semicore)
  call atompaw_ehnzc(ff,radmesh,atm%ehnzc,atm%znucl)
  LIBPAW_DEALLOCATE(ff)
  atm%min_eigv=half*minval(atp%Orbit%eig,mask=.not.atp%Orbit%iscore)
+ call pawrad_free(radmesh)
 
  ! Prepare for frozen val calculation
  atp%frozenvalecalculation=.true.
@@ -947,11 +957,12 @@ end subroutine atompaw_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_paw_atom/atompaw_destroy
+!!****f* m_paw_atom_solve/atompaw_destroy
 !! NAME
 !! atompaw_destroy
 !!
 !! FUNCTION
+!! Destroy an atompaw type
 !!
 !! OUTPUT
 !!
@@ -1136,7 +1147,7 @@ subroutine marsman_tphi(atp,map,l_in,n)
      ksi_i0(:,ii)=p1(:)
      dp1=zero
      call derivative(atp%grid,p1,dp1,1,irc)
-     p2(:)=p2(:)*atp%grid%r(:)**l_in
+     p2(2:size(p2))=p2(2:size(p2))*atp%grid%r(2:size(p2))**l_in
      call extrapolate(p2)
      ksi_i0_0(ii)=dp1(irc)
      jj=0
@@ -1152,7 +1163,7 @@ subroutine marsman_tphi(atp,map,l_in,n)
          p1(2)=wfninit(-0.5_dp*atp%PAW%rveff(1),l,v0,v0p,energy,atp%Grid%r(2))
          CALL forward_numerov(atp%Grid,l,irc+5,energy,atp%PAW%rveff,zeroval,p1,nodes,proj=atp%PAW%otp(:,io2))!,p3val=p1(3))
          ksi_ij(:,ii,jj)=p1(:)
-         p2(:)=p2(:)*atp%grid%r(:)**l_in
+         p2(2:size(p2))=p2(2:size(p2))*atp%grid%r(2:size(p2))**l_in
          call extrapolate(p2)
          dp1=zero
          call derivative(atp%grid,p1,dp1,1,irc)
@@ -4028,14 +4039,12 @@ FUNCTION hwfn(z,np,l,r)
  node=np-l-1
  scale_=2._dp*z/np
  rho=scale_*r
- write(std_out,*)scale_
- write(std_out,*)factorial(np+l)
- write(std_out,*)2*np*factorial(node)
- write(std_out,*)scale_*factorial(np+l)/(2*np*factorial(node))
  pref=scale_*SQRT(scale_*factorial(np+l)/(2*np*factorial(node)))
- write(std_out,*)pref
- write(std_out,*) factorial(2*l+1)
- term=(rho**l)/factorial(2*l+1)
+ if(rho==zero.and.l==0) then
+   term=one/factorial(2*l+1)
+ else
+   term=(rho**l)/factorial(2*l+1)
+ endif
  sum_=term
  IF (node.GT.0) THEN
    DO k=1,node

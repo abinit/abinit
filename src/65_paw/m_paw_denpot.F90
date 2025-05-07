@@ -446,7 +446,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
    if(rcpaw_has_valdens) then
      rho1=rcpaw%val(iatom)%rho1
      trho1=rcpaw%val(iatom)%trho1
-     nhat1=rcpaw%val(iatom)%nhat1
+     if(usenhat==1) nhat1=rcpaw%val(iatom)%nhat1
      compch_sph=rcpaw%val(iatom)%compch_sph
    else
      extfpmd_rho=zero
@@ -2466,11 +2466,12 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,dtset%natom,my_natom_ref=my_natom)
 
+ ! Some setup
  if(cplex.ne.1) then
    ABI_ERROR('RCPAW: cplex not 1')
  endif
  opt_compch=0;if (option/=1) opt_compch=1
- 
+ pawang_=>pawang 
  extfpmd_rho=zero
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
@@ -2478,9 +2479,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    endif
  endif
 
- pawang_=>pawang
-
- !!!! loop over atoms 
+ ! loop over atoms 
  do itypat=1,dtset%ntypat
    mesh_size=pawtab(itypat)%mesh_size
    ABI_MALLOC(nval,(mesh_size))
@@ -2489,7 +2488,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    nval_tmp=zero
    do iat=1,my_natom
      iatom=iat;if (paral_atom) iatom=my_atmtab(iat)
-     if(dtset%typat(iatom)==itypat) then
+     if(dtset%typat(iatom)==itypat) then ! Average over atoms of same typat
        mesh_size=pawtab(itypat)%mesh_size
        lm_size=pawtab(itypat)%lcut_size**2
        ABI_MALLOC(lmselect_cur,(lm_size))
@@ -2509,14 +2508,13 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
      endif
    enddo
    ABI_FREE(nval_tmp)
-   !!! mpi reduction
-   if(paral_atom) then
+   ! mpi reduction
+   if(paral_atom) then 
      call xmpi_sum(nval,my_comm_atom,ierr)
      call xmpi_bcast(nval,0,my_comm_atom,ierr)
    endif
-   !!!
-   nval=nval/rcpaw%atm(itypat)%mult
-   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then
+   nval=nval/rcpaw%atm(itypat)%mult ! Average over atoms of same typat
+   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then ! Relax the core
      write(std_out,*) 'RCPAW: core relaxation for typat ',itypat
      call atompaw_solve(rcpaw%atp(itypat),pawrad(itypat),pawtab(itypat),&
 &          nval,psps%mqgrid_vl,psps%qgrid_vl,psps%epsatm(itypat),psps%vlspl(:,:,itypat),&
@@ -2526,10 +2524,13 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    ABI_FREE(nval)
  enddo
 
+ ! Updae PAW transform related quantities
  if(rcpaw%istep<=rcpaw%nfrpaw+1) then
    call pawinit(zero,0,zero,zero,dtset%pawlcutd,0,0,0,0,0,pawang_,pawrad,0,pawtab,0,0,0,rcpaw_update=.true.)
  endif
  rcpaw%eijkl_is_sym=.false.
+
+ ! Update core energies
  call rcpaw_core_energies(rcpaw,ntypat)
 
  !Destroy atom table used for parallelism

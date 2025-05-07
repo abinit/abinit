@@ -3,7 +3,8 @@
 !!  m_rcpaw
 !!
 !! FUNCTION
-!!  
+!! This module contains types and subroutines linked to the PAW core relaxation
+!!  approach  
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2019-2019 ABINIT group (NBrouwer,MT, JBoust)
@@ -64,6 +65,7 @@ module m_rcpaw
    real(dp), allocatable :: trho1(:,:,:)
    real(dp), allocatable :: nhat1(:,:,:)
  end type valdens_type
+!!***
 
 !----------------------------------------------------------------------
 
@@ -75,6 +77,13 @@ module m_rcpaw
 !!
 !! SOURCE
  type,public :: rcpaw_type
+   integer :: ntypat
+   integer :: istep
+   integer :: nfrpaw
+   integer :: nfrocc
+   integer :: nfrtnc
+   logical :: frocc
+   logical :: all_atoms_relaxed
    real(dp) :: nelect_core
    real(dp) :: nelect_core_orig
    real(dp) :: ehnzc
@@ -83,17 +92,10 @@ module m_rcpaw
    real(dp) :: eeigc
    real(dp) :: entropy
    real(dp) :: tolnc
-   integer :: ntypat
-   integer :: istep
-   integer :: nfrpaw
-   integer :: nfrocc
-   logical :: all_atoms_relaxed
+   logical, allocatable :: eijkl_is_sym(:)
    type(atomorb_type),allocatable :: atm(:)
    type(atompaw_type),allocatable :: atp(:)
    type(valdens_type),allocatable :: val(:)
-   logical, allocatable :: eijkl_is_sym(:)
-   integer :: nfrtnc
-   logical :: frocc
  end type rcpaw_type
 !!***
 
@@ -130,7 +132,7 @@ subroutine rcpaw_destroy(rcpaw)
 !Arguments ------------------------------------
 !scalars
  integer :: ii
- type(rcpaw_type), pointer, intent(inout) :: rcpaw
+ type(rcpaw_type), pointer,intent(inout) :: rcpaw
 
 !******************************************************************************************
 
@@ -153,7 +155,6 @@ subroutine rcpaw_destroy(rcpaw)
    ABI_FREE(rcpaw%val)
  endif
  ABI_SFREE(rcpaw%eijkl_is_sym)
- rcpaw=>null()
 
 end subroutine rcpaw_destroy
 !!***
@@ -243,24 +244,19 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,dtset%natom,my_natom_ref=my_natom)
 
+ ! Set up eijkl_is_sym
  ABI_MALLOC(rcpaw%eijkl_is_sym,(dtset%ntypat))
  rcpaw%eijkl_is_sym(:)=.true.
 
- ! Initilizations
+ ! Set up multiplicity of atoms
  rcpaw%istep=0
  mult=0
  do iatom=1,dtset%natom
    itypat=dtset%typat(iatom)
    mult(itypat)=mult(itypat)+1
  enddo
- rcpaw%ntypat=ntypat
- rcpaw%edcc=zero
- rcpaw%eeigc=zero
- rcpaw%ehnzc=zero
- rcpaw%ekinc=zero
- rcpaw%tolnc=dtset%rcpaw_tolnc
 
- ! Init arrays 
+ ! Allocate arrays 
  if(.not.allocated(rcpaw%val)) then
    ABI_MALLOC(rcpaw%val,(my_natom))
  endif
@@ -270,6 +266,8 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
  if(.not.allocated(rcpaw%atp)) then
    ABI_MALLOC(rcpaw%atp,(ntypat))
  endif
+
+ ! Init atm
  rcpaw%all_atoms_relaxed=.true.
  do itypat=1,ntypat
    call pawpsp_init_core(rcpaw%atm(itypat),psp_filename=filpsp(itypat))
@@ -308,11 +306,15 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
   rcpaw%val(iat)%compch_sph=zero
   rcpaw%val(iat)%has_dens=.false.
  enddo
-
- !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  ! Init non arrays
+ rcpaw%edcc=zero
+ rcpaw%eeigc=zero
+ rcpaw%ehnzc=zero
+ rcpaw%ekinc=zero
+ rcpaw%tolnc=dtset%rcpaw_tolnc
+ rcpaw%ntypat=ntypat
  rcpaw%nelect_core=zero
  do itypat=1,ntypat
    rcpaw%nelect_core=rcpaw%nelect_core+rcpaw%atm(itypat)%zcore*rcpaw%atm(itypat)%mult
@@ -331,6 +333,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
  endif
  rcpaw%nfrtnc=dtset%rcpaw_nfrtnc
 
+ ! Init core energies
  call rcpaw_core_energies(rcpaw,ntypat)
 
 end subroutine rcpaw_init
@@ -371,13 +374,13 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  integer,intent(in) :: ngfft(18)
- type(pawtab_type), target,intent(inout) :: pawtab(ntypat)
- type(pawrad_type), intent(in) :: pawrad(ntypat)
- real(dp),intent(in),target :: vtrial(cplex*nfft,dtset%nspden)
- type(paw_an_type),intent(inout) :: paw_an(my_natom)
  real(dp),intent(in) :: gmet(3,3)
  real(dp), intent(in) :: rprimd(3,3)
  real(dp), intent(in) :: xred(3,dtset%natom)
+ real(dp),intent(in),target :: vtrial(cplex*nfft,dtset%nspden)
+ type(pawtab_type), target,intent(inout) :: pawtab(ntypat)
+ type(pawrad_type), intent(in) :: pawrad(ntypat)
+ type(paw_an_type),intent(inout) :: paw_an(my_natom)
 
 !Local variables-------------------------------
 !scalars
@@ -392,15 +395,15 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  real(dp) :: eigshift,r2_tmp
 !arrays
  integer,pointer :: my_atmtab(:) 
- real(dp), allocatable :: nt1hat0(:)
  integer,allocatable :: ifftsph(:)
+ real(dp), allocatable :: nt1hat0(:)
  real(dp),allocatable :: rfgd(:,:)
  real(dp),allocatable :: vh_sph(:)
 
 !******************************************************************************************
- 
+
+ ! FFT grid 
  if(.not.rcpaw%all_atoms_relaxed) then
-   ! Initializations
    if(cplex.ne.1) then
      ABI_ERROR('cplex not 1')
    endif
@@ -439,15 +442,15 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
    end if
  endif
 
-   ! Loop on typat 
+ ! Loop on typat 
  do itypat=1,dtset%ntypat
    if(.not.rcpaw%atm(itypat)%nc_conv) then
      eigshift=zero
      do iat=1,my_natom
        iatom=iat;if (paral_atom) iatom=my_atmtab(iat)
-       if(dtset%typat(iatom)==itypat) then
+       if(dtset%typat(iatom)==itypat) then ! Average on atoms of same type
          mesh_size=pawtab(itypat)%mesh_size
-         ABI_MALLOC(nt1hat0,(pawtab(itypat)%mesh_size))
+         ABI_MALLOC(nt1hat0,(pawtab(itypat)%mesh_size)) ! spherical part of nt1+nhat
          nt1hat0=zero
          do ispden=1,dtset%nspden
            nt1hat0(1:pawtab(itypat)%mesh_size)=nt1hat0(1:pawtab(itypat)%mesh_size)+&
@@ -479,18 +482,18 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
          ABI_FREE(vh_sph)
        endif
      enddo
-     !!! mpi reduction
+     ! mpi reduction
      if(paral_atom) then
        call xmpi_sum(eigshift,my_comm_atom,ierr)
        call xmpi_bcast(eigshift,0,my_comm_atom,ierr)
      endif
-     rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig+eigshift/rcpaw%atm(itypat)%mult
+     rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig+eigshift/rcpaw%atm(itypat)%mult ! Average on atoms of same type
      if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc)rcpaw%atm(itypat)%nc_conv=.true.
    endif
  enddo
 
+ !Destroy atom table used for parallelism
  if(.not.rcpaw%all_atoms_relaxed) then
-   !Destroy atom table used for parallelism
    call free_my_atmtab(my_atmtab,my_atmtab_allocated)
    if (.not.present(distribfft)) then
      ABI_FREE(fftn3_distrib)
@@ -498,6 +501,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
    end if
  endif
 
+ ! Update convergence status of cores
  rcpaw%all_atoms_relaxed=.true.
  do itypat=1,dtset%ntypat 
    if(rcpaw%atm(itypat)%zcore_conv.and.rcpaw%atm(itypat)%nc_conv) then
@@ -507,6 +511,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
    endif
  enddo
 
+ ! Print core eigenenergies and occupations
  do itypat=1,dtset%ntypat
    write(std_out,*) 'RCPAW core eigenergies (Ha) and occupations for typat ',itypat
    do iln=1,rcpaw%atm(itypat)%ln_size
