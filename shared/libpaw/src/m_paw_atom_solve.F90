@@ -1903,21 +1903,21 @@ subroutine InitOrbit(Orbit,norbit,n,exctype,diracrelativistic,scalarrelativistic
  Orbit%nps=0;Orbit%npp=0;Orbit%npd=0;Orbit%npf=0;Orbit%npg=0
  Orbit%npsc=0;Orbit%nppc=0;Orbit%npdc=0;Orbit%npfc=0;Orbit%npgc=0
  Orbit%qval=0._dp
- LIBPAW_ALLOCATE(Orbit%np,(norbit))
- LIBPAW_ALLOCATE(Orbit%l,(norbit))
- LIBPAW_ALLOCATE(Orbit%eig,(norbit))
- LIBPAW_ALLOCATE(Orbit%occ,(norbit))
- LIBPAW_ALLOCATE(Orbit%iscore,(norbit))
+ LIBPAW_POINTER_ALLOCATE(Orbit%np,(norbit))
+ LIBPAW_POINTER_ALLOCATE(Orbit%l,(norbit))
+ LIBPAW_POINTER_ALLOCATE(Orbit%eig,(norbit))
+ LIBPAW_POINTER_ALLOCATE(Orbit%occ,(norbit))
+ LIBPAW_POINTER_ALLOCATE(Orbit%iscore,(norbit))
  Orbit%iscore=.false.
  Orbit%np=0;Orbit%l=0
  Orbit%eig=0._dp;Orbit%occ=0._dp
- LIBPAW_ALLOCATE(Orbit%wfn,(n,norbit))
- LIBPAW_ALLOCATE(Orbit%otau,(n,norbit))
- LIBPAW_ALLOCATE(Orbit%den,(n))
- LIBPAW_ALLOCATE(Orbit%tau,(n))
- LIBPAW_ALLOCATE(Orbit%coreden,(n))
- LIBPAW_ALLOCATE(Orbit%valeden,(n))
- LIBPAW_ALLOCATE(Orbit%deltatau,(n))
+ LIBPAW_POINTER_ALLOCATE(Orbit%wfn,(n,norbit))
+ LIBPAW_POINTER_ALLOCATE(Orbit%otau,(n,norbit))
+ LIBPAW_POINTER_ALLOCATE(Orbit%den,(n))
+ LIBPAW_POINTER_ALLOCATE(Orbit%tau,(n))
+ LIBPAW_POINTER_ALLOCATE(Orbit%coreden,(n))
+ LIBPAW_POINTER_ALLOCATE(Orbit%valeden,(n))
+ LIBPAW_POINTER_ALLOCATE(Orbit%deltatau,(n))
  Orbit%wfn=0._dp;Orbit%den=0._dp;Orbit%tau=0._dp;Orbit%otau=0._dp
  Orbit%deltatau=0._dp
  Orbit%coreden=0._dp ; Orbit%valeden=0._dp
@@ -1926,16 +1926,16 @@ subroutine InitOrbit(Orbit,norbit,n,exctype,diracrelativistic,scalarrelativistic
  Orbit%frozenvalecalculation=frozenvalecalculation
  Orbit%diracrelativistic=diracrelativistic
  If (Orbit%diracrelativistic) then
-   LIBPAW_ALLOCATE(Orbit%lwfn,(n,norbit))
-   LIBPAW_ALLOCATE(Orbit%kappa,(norbit))
+   LIBPAW_POINTER_ALLOCATE(Orbit%lwfn,(n,norbit))
+   LIBPAW_POINTER_ALLOCATE(Orbit%kappa,(norbit))
    Orbit%lwfn=0._dp
    Orbit%kappa=0._dp
  else
    nullify(Orbit%lwfn,Orbit%kappa)
  endif
  if (exctype == "HF".or.exctype == "EXXKLI") then
-   LIBPAW_ALLOCATE(Orbit%lqp,(norbit,norbit))
-   LIBPAW_ALLOCATE(Orbit%X,(n,norbit))
+   LIBPAW_POINTER_ALLOCATE(Orbit%lqp,(norbit,norbit))
+   LIBPAW_POINTER_ALLOCATE(Orbit%X,(n,norbit))
  else
    nullify(Orbit%lqp,Orbit%X)
  endif
@@ -2050,13 +2050,13 @@ subroutine InitPot(Pot,n)
  integer, intent(in) :: n
  type (PotentialInfo), intent(inout) :: Pot
  CALL DestroyPot(Pot)
- LIBPAW_ALLOCATE(Pot%rv,(n))
- LIBPAW_ALLOCATE(Pot%rvn,(n))
- LIBPAW_ALLOCATE(Pot%rvh,(n))
- LIBPAW_ALLOCATE(Pot%rvx,(n))
- LIBPAW_ALLOCATE(Pot%vtau,(n))
- LIBPAW_ALLOCATE(Pot%ww,(n))
- LIBPAW_ALLOCATE(Pot%jj,(n))
+ LIBPAW_POINTER_ALLOCATE(Pot%rv,(n))
+ LIBPAW_POINTER_ALLOCATE(Pot%rvn,(n))
+ LIBPAW_POINTER_ALLOCATE(Pot%rvh,(n))
+ LIBPAW_POINTER_ALLOCATE(Pot%rvx,(n))
+ LIBPAW_POINTER_ALLOCATE(Pot%vtau,(n))
+ LIBPAW_POINTER_ALLOCATE(Pot%ww,(n))
+ LIBPAW_POINTER_ALLOCATE(Pot%jj,(n))
  Pot%rv=0._dp;Pot%rvn=0._dp;Pot%rvh=0._dp;Pot%rvx=0._dp;Pot%vtau=0._dp
  Pot%ww=0._dp;Pot%jj=0._dp
 end subroutine InitPot
@@ -2068,19 +2068,19 @@ end subroutine InitPot
 subroutine DestroyPot(Pot)
  type (PotentialInfo), intent(inout) :: Pot
  if (associated(Pot%rv)) then
-   LIBPAW_DEALLOCATE(Pot%rv)
+   LIBPAW_POINTER_DEALLOCATE(Pot%rv)
  endif
  if (associated(Pot%rvn)) then
-   LIBPAW_DEALLOCATE(Pot%rvn)
+   LIBPAW_POINTER_DEALLOCATE(Pot%rvn)
  endif
  if (associated(Pot%rvh)) then
-   LIBPAW_DEALLOCATE(Pot%rvh)
+   LIBPAW_POINTER_DEALLOCATE(Pot%rvh)
  endif
  if (associated(Pot%rvx)) then
-   LIBPAW_DEALLOCATE(Pot%rvx)
+   LIBPAW_POINTER_DEALLOCATE(Pot%rvx)
  endif
  if (associated(Pot%vtau)) then
-   LIBPAW_DEALLOCATE(Pot%vtau)
+   LIBPAW_POINTER_DEALLOCATE(Pot%vtau)
  endif
  if (allocated(Pot%ww)) then
    LIBPAW_DEALLOCATE(Pot%ww)
@@ -3763,43 +3763,43 @@ END SUBROUTINE Anderson_ResetMix
 SUBROUTINE FreeAnderson(AC)
  TYPE (Anderson_Context), INTENT(INOUT) :: AC
  IF (ASSOCIATED(AC%Matrix)) then
-   LIBPAW_DEALLOCATE(AC%Matrix)
+   LIBPAW_POINTER_DEALLOCATE(AC%Matrix)
  endif
  IF (ASSOCIATED(AC%Gamma)) then
-   LIBPAW_DEALLOCATE(AC%Gamma)
+   LIBPAW_POINTER_DEALLOCATE(AC%Gamma)
  endif
  IF (ASSOCIATED(AC%DF)) then
-   LIBPAW_DEALLOCATE(AC%DF)
+   LIBPAW_POINTER_DEALLOCATE(AC%DF)
  endif
  IF (ASSOCIATED(AC%Fprev)) then
-   LIBPAW_DEALLOCATE(AC%Fprev)
+   LIBPAW_POINTER_DEALLOCATE(AC%Fprev)
  endif
  IF (ASSOCIATED(AC%DX)) then
-   LIBPAW_DEALLOCATE(AC%DX)
+   LIBPAW_POINTER_DEALLOCATE(AC%DX)
  endif
  IF (ASSOCIATED(AC%Xprev)) then
-   LIBPAW_DEALLOCATE(AC%Xprev)
+   LIBPAW_POINTER_DEALLOCATE(AC%Xprev)
  endif
  IF (ASSOCIATED(AC%IPIV)) then
-   LIBPAW_DEALLOCATE(AC%IPIV)
+   LIBPAW_POINTER_DEALLOCATE(AC%IPIV)
  endif
  IF (ASSOCIATED(AC%S)) then
-   LIBPAW_DEALLOCATE(AC%S)
+   LIBPAW_POINTER_DEALLOCATE(AC%S)
  endif
  IF (ASSOCIATED(AC%RWork)) then
-   LIBPAW_DEALLOCATE(AC%RWork)
+   LIBPAW_POINTER_DEALLOCATE(AC%RWork)
  endif
  IF (ASSOCIATED(AC%U)) then
-   LIBPAW_DEALLOCATE(AC%U)
+   LIBPAW_POINTER_DEALLOCATE(AC%U)
  endif
  IF (ASSOCIATED(AC%VT)) then
-   LIBPAW_DEALLOCATE(AC%VT)
+   LIBPAW_POINTER_DEALLOCATE(AC%VT)
  endif
  IF (ASSOCIATED(AC%Work)) then
-   LIBPAW_DEALLOCATE(AC%Work)
+   LIBPAW_POINTER_DEALLOCATE(AC%Work)
  endif
  IF (ASSOCIATED(AC%DupMatrix)) then
-   LIBPAW_DEALLOCATE(AC%DupMatrix)
+   LIBPAW_POINTER_DEALLOCATE(AC%DupMatrix)
  endif
  RETURN
 END SUBROUTINE FreeAnderson
@@ -3841,12 +3841,12 @@ SUBROUTINE InitAnderson_dr(AC,Err_Unit,Nmax,VecSize,NewMix,CondNo,&
  AC%N = -1                !** Init the rest of the structure
  AC%Slot = -1
  AC%CurIter=0
- LIBPAW_ALLOCATE(AC%Xprev,(VecSize))
- LIBPAW_ALLOCATE(AC%Fprev,(VecSize))
- LIBPAW_ALLOCATE(AC%DX,(VecSize,Nmax))
- LIBPAW_ALLOCATE(AC%DF,(VecSize,Nmax))
- LIBPAW_ALLOCATE(AC%Matrix,(Nmax,Nmax))
- LIBPAW_ALLOCATE(AC%Gamma,(Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%Xprev,(VecSize))
+ LIBPAW_POINTER_ALLOCATE(AC%Fprev,(VecSize))
+ LIBPAW_POINTER_ALLOCATE(AC%DX,(VecSize,Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%DF,(VecSize,Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%Matrix,(Nmax,Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%Gamma,(Nmax))
  AC%Lwork=5*Nmax*Nmax+10*Nmax
  AC%LRwork= 5*Nmax*Nmax+7*Nmax
  AC%ConditionNo= CondNo
@@ -3858,13 +3858,13 @@ SUBROUTINE InitAnderson_dr(AC,Err_Unit,Nmax,VecSize,NewMix,CondNo,&
    a3 = a2 + a2 + a2
    AC%Machaccur = ABS(a3 - 1._dp)
  ENDDO
- LIBPAW_ALLOCATE(AC%DupMatrix,(Nmax,Nmax))
- LIBPAW_ALLOCATE(AC%U,(Nmax, Nmax))
- LIBPAW_ALLOCATE(AC%VT,(Nmax,Nmax))
- LIBPAW_ALLOCATE(AC%Work,(AC%Lwork))
- LIBPAW_ALLOCATE(AC%RWork,(AC%LRWork))
- LIBPAW_ALLOCATE(AC%IPIV,(8*Nmax))
- LIBPAW_ALLOCATE(AC%S,(Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%DupMatrix,(Nmax,Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%U,(Nmax, Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%VT,(Nmax,Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%Work,(AC%Lwork))
+ LIBPAW_POINTER_ALLOCATE(AC%RWork,(AC%LRWork))
+ LIBPAW_POINTER_ALLOCATE(AC%IPIV,(8*Nmax))
+ LIBPAW_POINTER_ALLOCATE(AC%S,(Nmax))
  AC%Matrix = 0
  RETURN
 END SUBROUTINE InitAnderson_dr
@@ -5053,7 +5053,7 @@ FUNCTION integrator(Grid,arg,str,fin)
  CASE(lineargrid)
    integrator=overint(n,Grid%h,arg(i1:i2))
  CASE(loggrid)
-   LIBPAW_ALLOCATE(dum,(i1:i2))
+   LIBPAW_BOUND1_ALLOCATE(dum,BOUNDS(i1,i2))
    dum(i1:i2)=arg(i1:i2)*Grid%drdu(i1:i2)
    integrator=overint(n,Grid%h,dum(i1:i2),-1)
    LIBPAW_DEALLOCATE(dum)
@@ -5330,7 +5330,7 @@ FUNCTION overlap(Grid,f1,f2,str,fin)
  IF (PRESENT(str).AND.PRESENT(fin)) THEN
    i1=str; i2=fin; n=i2-i1+1
  ENDIF
- LIBPAW_ALLOCATE(dum,(i1:i2))
+ LIBPAW_BOUND1_ALLOCATE(dum,BOUNDS(i1,i2))
  dum(1:n)=f1(i1:i2)*f2(i1:i2)
  overlap=integrator(Grid,dum(1:n),1,n)
  LIBPAW_DEALLOCATE(dum)
@@ -5615,10 +5615,10 @@ SUBROUTINE InitGrid(Grid,h,range,r0,do_not_print,pawrad)
      STOP
    end if
    Grid%n=pawrad%mesh_size
-   LIBPAW_ALLOCATE(Grid%r,(Grid%n))
-   LIBPAW_ALLOCATE(Grid%drdu,(Grid%n))
-   LIBPAW_ALLOCATE(Grid%pref,(Grid%n))
-   LIBPAW_ALLOCATE(Grid%rr02,(Grid%n))
+   LIBPAW_POINTER_ALLOCATE(Grid%r,(Grid%n))
+   LIBPAW_POINTER_ALLOCATE(Grid%drdu,(Grid%n))
+   LIBPAW_POINTER_ALLOCATE(Grid%pref,(Grid%n))
+   LIBPAW_POINTER_ALLOCATE(Grid%rr02,(Grid%n))
    Grid%r(:)=pawrad%rad(:)
    Grid%drdu(:)=pawrad%radfact(:)
    Grid%rr02(:)=pawrad%radfact(:)**2
@@ -5639,10 +5639,10 @@ SUBROUTINE InitGrid(Grid,h,range,r0,do_not_print,pawrad)
      IF (r0*(EXP(h*(n-1))-1)<range-tol5) n=n+1
      Grid%n=n
      if (do_print) write(std_out,*) 'InitGrid: -- logarithmic ',n, h,range,r0
-     LIBPAW_ALLOCATE(Grid%r,(n))
-     LIBPAW_ALLOCATE(Grid%drdu,(n))
-     LIBPAW_ALLOCATE(Grid%pref,(n))
-     LIBPAW_ALLOCATE(Grid%rr02,(n))
+     LIBPAW_POINTER_ALLOCATE(Grid%r,(n))
+     LIBPAW_POINTER_ALLOCATE(Grid%drdu,(n))
+     LIBPAW_POINTER_ALLOCATE(Grid%pref,(n))
+     LIBPAW_POINTER_ALLOCATE(Grid%rr02,(n))
      DO i=1,n
        Grid%r(i)=r0*(EXP(Grid%h*(i-1))-1)
        Grid%drdu(i)=r0*EXP(Grid%h*(i-1))
@@ -5659,10 +5659,10 @@ SUBROUTINE InitGrid(Grid,h,range,r0,do_not_print,pawrad)
      IF (h*(n-1)<range-tol5) n=n+1
      Grid%n=n
      if (do_print) write(std_out,*) 'InitGrid: -- linear  ', n,h,range
-     LIBPAW_ALLOCATE(Grid%r,(n))
-     LIBPAW_ALLOCATE(Grid%drdu,(n))
-     LIBPAW_ALLOCATE(Grid%pref,(n))
-     LIBPAW_ALLOCATE(Grid%rr02,(n))
+     LIBPAW_POINTER_ALLOCATE(Grid%r,(n))
+     LIBPAW_POINTER_ALLOCATE(Grid%drdu,(n))
+     LIBPAW_POINTER_ALLOCATE(Grid%pref,(n))
+     LIBPAW_POINTER_ALLOCATE(Grid%rr02,(n))
      DO i=1,n
        Grid%r(i)=(Grid%h*(i-1))
        Grid%drdu(i)=1._dp
@@ -5680,16 +5680,16 @@ END SUBROUTINE InitGrid
 SUBROUTINE DestroyGrid(Grid)
  TYPE (GridInfo), INTENT(INOUT) :: Grid
  IF (ASSOCIATED(Grid%r)) then
-   LIBPAW_DEALLOCATE(Grid%r)
+   LIBPAW_POINTER_DEALLOCATE(Grid%r)
  endif
  IF (ASSOCIATED(Grid%drdu)) then
-   LIBPAW_DEALLOCATE(Grid%drdu)
+   LIBPAW_POINTER_DEALLOCATE(Grid%drdu)
  endif
  IF (ASSOCIATED(Grid%pref)) then
-   LIBPAW_DEALLOCATE(Grid%pref)
+   LIBPAW_POINTER_DEALLOCATE(Grid%pref)
  endif
  IF (ASSOCIATED(Grid%rr02)) then
-   LIBPAW_DEALLOCATE(Grid%rr02)
+   LIBPAW_POINTER_DEALLOCATE(Grid%rr02)
  endif
 END SUBROUTINE DestroyGrid
 
@@ -6448,31 +6448,31 @@ SUBROUTINE InitPAW(PAW,Grid,Orbit)
  PAW%nbase=nbase
  if(has_to_print) WRITE(STD_OUT,*) 'Found ', nbase,' valence basis functions '
  if(has_to_print) WRITE(STD_OUT,*) 'Allocating for ', mxbase, ' total basis functions'
- LIBPAW_ALLOCATE(PAW%projshape,(n))
- LIBPAW_ALLOCATE(PAW%hatden,(n))
- LIBPAW_ALLOCATE(PAW%hatpot,(n))
- LIBPAW_ALLOCATE(PAW%hatshape,(n))
- LIBPAW_ALLOCATE(PAW%vloc,(n))
- LIBPAW_ALLOCATE(PAW%rveff,(n))
- LIBPAW_ALLOCATE(PAW%abinitvloc,(n))
- LIBPAW_ALLOCATE(PAW%abinitnohat,(n))
- LIBPAW_ALLOCATE(PAW%AErefrv,(n))
- LIBPAW_ALLOCATE(PAW%rvx,(n))
- LIBPAW_ALLOCATE(PAW%trvx,(n))
- LIBPAW_ALLOCATE(PAW%den,(n))
- LIBPAW_ALLOCATE(PAW%tden,(n))
- LIBPAW_ALLOCATE(PAW%core,(n))
- LIBPAW_ALLOCATE(PAW%tcore,(n))
- LIBPAW_ALLOCATE(PAW%coretau,(n))
- LIBPAW_ALLOCATE(PAW%tcoretau,(n))
- LIBPAW_ALLOCATE(PAW%valetau,(n))
- LIBPAW_ALLOCATE(PAW%tvaletau,(n))
- LIBPAW_ALLOCATE(PAW%vtau,(n))
- LIBPAW_ALLOCATE(PAW%tvtau,(n))
- LIBPAW_ALLOCATE(PAW%nhatv,(n))
- LIBPAW_ALLOCATE(PAW%Ktvtau,(n))
- LIBPAW_ALLOCATE(PAW%Krveff,(n))
- LIBPAW_ALLOCATE(PAW%Kunscreen,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%projshape,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%hatden,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%hatpot,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%hatshape,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%vloc,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%rveff,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%abinitvloc,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%abinitnohat,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%AErefrv,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%rvx,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%trvx,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%den,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%tden,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%core,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%tcore,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%coretau,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%tcoretau,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%valetau,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%tvaletau,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%vtau,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%tvtau,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%nhatv,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%Ktvtau,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%Krveff,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%Kunscreen,(n))
  PAW%projshape=0._dp;PAW%hatden=0._dp;PAW%hatpot=0._dp
  PAW%hatshape=0._dp;PAW%vloc=0._dp;PAW%rveff=0._dp
  PAW%abinitvloc=0._dp;PAW%abinitnohat=0._dp
@@ -6483,49 +6483,49 @@ SUBROUTINE InitPAW(PAW,Grid,Orbit)
  PAW%valetau=0._dp;PAW%tvaletau=0._dp
  PAW%vtau=0._dp;PAW%tvtau=0._dp
  PAW%Ktvtau=0._dp;PAW%Krveff=0._dp;PAW%Kunscreen=0._dp
- LIBPAW_ALLOCATE(PAW%phi,(n,mxbase))
- LIBPAW_ALLOCATE(PAW%tphi,(n,mxbase))
- LIBPAW_ALLOCATE(PAW%tp,(n,mxbase))
- LIBPAW_ALLOCATE(PAW%ophi,(n,mxbase))
- LIBPAW_ALLOCATE(PAW%otphi,(n,mxbase))
- LIBPAW_ALLOCATE(PAW%otp,(n,mxbase))
- LIBPAW_ALLOCATE(PAW%np,(mxbase))
- LIBPAW_ALLOCATE(PAW%l,(mxbase))
- LIBPAW_ALLOCATE(PAW%eig,(mxbase))
- LIBPAW_ALLOCATE(PAW%occ,(mxbase))
- LIBPAW_ALLOCATE(PAW%ck,(mxbase))
- LIBPAW_ALLOCATE(PAW%vrc,(mxbase))
- LIBPAW_ALLOCATE(PAW%Kop,(n,mxbase))
- LIBPAW_ALLOCATE(PAW%rng,(mxbase))
- LIBPAW_ALLOCATE(PAW%rcio,(mxbase))
- LIBPAW_ALLOCATE(PAW%nodes,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%phi,(n,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%tphi,(n,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%tp,(n,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%ophi,(n,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%otphi,(n,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%otp,(n,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%np,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%l,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%eig,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%occ,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%ck,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%vrc,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%Kop,(n,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%rng,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%rcio,(mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%nodes,(mxbase))
  PAW%phi=0._dp;PAW%tphi=0._dp;PAW%tp=0._dp
  PAW%ophi=0._dp;PAW%otphi=0._dp;PAW%otp=0._dp
  PAW%eig=0._dp;PAW%occ=0._dp;PAW%vrc=0._dp;PAW%ck=0._dp;PAW%Kop=0._dp
  PAW%rcio=0._dp;PAW%np=0;PAW%l=0
  if(Orbit%diracrelativistic) then
-   LIBPAW_ALLOCATE(PAW%kappa,(mxbase))
+   LIBPAW_POINTER_ALLOCATE(PAW%kappa,(mxbase))
    PAW%kappa=0
  endif        
  PAW%rng=Grid%n
- LIBPAW_ALLOCATE(PAW%oij,(mxbase,mxbase))
- LIBPAW_ALLOCATE(PAW%dij,(mxbase,mxbase))
- LIBPAW_ALLOCATE(PAW%wij,(mxbase,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%oij,(mxbase,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%dij,(mxbase,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%wij,(mxbase,mxbase))
  PAW%oij=0._dp;PAW%dij=0._dp;PAW%wij=0._dp
- LIBPAW_ALLOCATE(PAW%rVf,(n))
- LIBPAW_ALLOCATE(PAW%rtVf,(n))
- LIBPAW_ALLOCATE(PAW%Kij,(mxbase,mxbase))
- LIBPAW_ALLOCATE(PAW%Vfij,(mxbase,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%rVf,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%rtVf,(n))
+ LIBPAW_POINTER_ALLOCATE(PAW%Kij,(mxbase,mxbase))
+ LIBPAW_POINTER_ALLOCATE(PAW%Vfij,(mxbase,mxbase))
  PAW%rVf=0._dp;PAW%rtVf=0._dp;PAW%Kij=0._dp;PAW%Vfij=0._dp
  IF (Orbit%exctype=='HF') THEN
-   LIBPAW_ALLOCATE(PAW%lmbd,(Orbit%norbit,mxbase))
+   LIBPAW_POINTER_ALLOCATE(PAW%lmbd,(Orbit%norbit,mxbase))
    PAW%lmbd=0._dp
  ELSE
    nullify(PAW%lmbd)
  ENDIF
- LIBPAW_ALLOCATE(PAW%valencemap,(Orbit%norbit))
- LIBPAW_ALLOCATE(PAW%OCCwfn,)
- LIBPAW_ALLOCATE(PAW%TOCCwfn,)
+ LIBPAW_POINTER_ALLOCATE(PAW%valencemap,(Orbit%norbit))
+ LIBPAW_DATATYPE_ALLOCATE(PAW%OCCwfn,)
+ LIBPAW_DATATYPE_ALLOCATE(PAW%TOCCwfn,)
 END SUBROUTINE InitPAW
 
 
@@ -6535,201 +6535,201 @@ END SUBROUTINE InitPAW
 Subroutine DestroyPAW(PAW)
  Type(PseudoInfo), INTENT(INOUT) :: PAW
  IF(associated(PAW%Ktvtau)) then
-   LIBPAW_DEALLOCATE(PAW%Ktvtau)
+   LIBPAW_POINTER_DEALLOCATE(PAW%Ktvtau)
  endif
  IF(associated(PAW%Krveff)) then
-   LIBPAW_DEALLOCATE(PAW%Krveff)
+   LIBPAW_POINTER_DEALLOCATE(PAW%Krveff)
  endif
  if(associated(PAW%Kunscreen)) then
-   LIBPAW_DEALLOCATE(PAW%Kunscreen)
+   LIBPAW_POINTER_DEALLOCATE(PAW%Kunscreen)
  endif
  IF (ASSOCIATED(PAW%rcio)) then
-   LIBPAW_DEALLOCATE(PAW%rcio)
+   LIBPAW_POINTER_DEALLOCATE(PAW%rcio)
  endif
  If (ASSOCIATED(PAW%vloc)) then
-   LIBPAW_DEALLOCATE(PAW%vloc)
+   LIBPAW_POINTER_DEALLOCATE(PAW%vloc)
  endif
  If (ASSOCIATED(PAW%abinitvloc)) then
-   LIBPAW_DEALLOCATE(PAW%abinitvloc)
+   LIBPAW_POINTER_DEALLOCATE(PAW%abinitvloc)
  endif
  If (ASSOCIATED(PAW%abinitnohat)) then
-   LIBPAW_DEALLOCATE(PAW%abinitnohat)
+   LIBPAW_POINTER_DEALLOCATE(PAW%abinitnohat)
  endif
  If (ASSOCIATED(PAW%rveff)) then
-   LIBPAW_DEALLOCATE(PAW%rveff)
+   LIBPAW_POINTER_DEALLOCATE(PAW%rveff)
  endif
  If (ASSOCIATED(PAW%AErefrv)) then
-   LIBPAW_DEALLOCATE(PAW%AErefrv)
+   LIBPAW_POINTER_DEALLOCATE(PAW%AErefrv)
  endif
  If (ASSOCIATED(PAW%rvx)) then
-   LIBPAW_DEALLOCATE(PAW%rvx)
+   LIBPAW_POINTER_DEALLOCATE(PAW%rvx)
  endif
  If (ASSOCIATED(PAW%trvx)) then
-  LIBPAW_DEALLOCATE(PAW%trvx)
+  LIBPAW_POINTER_DEALLOCATE(PAW%trvx)
  endif
  If (ASSOCIATED(PAW%projshape)) then
-   LIBPAW_DEALLOCATE(PAW%projshape)
+   LIBPAW_POINTER_DEALLOCATE(PAW%projshape)
  endif
  If (ASSOCIATED(PAW%hatshape)) then
-   LIBPAW_DEALLOCATE(PAW%hatshape)
+   LIBPAW_POINTER_DEALLOCATE(PAW%hatshape)
  endif
  If (ASSOCIATED(PAW%hatden)) then
-   LIBPAW_DEALLOCATE(PAW%hatden)
+   LIBPAW_POINTER_DEALLOCATE(PAW%hatden)
  endif
  If (ASSOCIATED(PAW%hatpot)) then
-   LIBPAW_DEALLOCATE(PAW%hatpot)
+   LIBPAW_POINTER_DEALLOCATE(PAW%hatpot)
  endif
  If (ASSOCIATED(PAW%den)) then
-   LIBPAW_DEALLOCATE(PAW%den)
+   LIBPAW_POINTER_DEALLOCATE(PAW%den)
  endif
  If (ASSOCIATED(PAW%tden)) then
-   LIBPAW_DEALLOCATE(PAW%tden)
+   LIBPAW_POINTER_DEALLOCATE(PAW%tden)
  endif
  If (ASSOCIATED(PAW%core)) then
-   LIBPAW_DEALLOCATE(PAW%core)
+   LIBPAW_POINTER_DEALLOCATE(PAW%core)
  endif
  If (ASSOCIATED(PAW%tcore)) then
-   LIBPAW_DEALLOCATE(PAW%tcore)
+   LIBPAW_POINTER_DEALLOCATE(PAW%tcore)
  endif
  If (ASSOCIATED(PAW%coretau)) then
-   LIBPAW_DEALLOCATE(PAW%coretau)
+   LIBPAW_POINTER_DEALLOCATE(PAW%coretau)
  endif
  If (ASSOCIATED(PAW%tcoretau)) then
-   LIBPAW_DEALLOCATE(PAW%tcoretau)
+   LIBPAW_POINTER_DEALLOCATE(PAW%tcoretau)
  endif
  If (ASSOCIATED(PAW%valetau)) then
-   LIBPAW_DEALLOCATE(PAW%valetau)
+   LIBPAW_POINTER_DEALLOCATE(PAW%valetau)
  endif
  If (ASSOCIATED(PAW%tvaletau)) then
-   LIBPAW_DEALLOCATE(PAW%tvaletau)
+   LIBPAW_POINTER_DEALLOCATE(PAW%tvaletau)
  endif
  If (ASSOCIATED(PAW%vtau)) then
-   LIBPAW_DEALLOCATE(PAW%vtau)
+   LIBPAW_POINTER_DEALLOCATE(PAW%vtau)
  endif
  If (ASSOCIATED(PAW%tvtau)) then
-   LIBPAW_DEALLOCATE(PAW%tvtau)
+   LIBPAW_POINTER_DEALLOCATE(PAW%tvtau)
  endif
  If (ASSOCIATED(PAW%nhatv)) then
-   LIBPAW_DEALLOCATE(PAW%nhatv)
+   LIBPAW_POINTER_DEALLOCATE(PAW%nhatv)
  endif
  If (ASSOCIATED(PAW%np)) then
-   LIBPAW_DEALLOCATE(PAW%np)
+   LIBPAW_POINTER_DEALLOCATE(PAW%np)
  endif
  If (ASSOCIATED(PAW%l)) then
-   LIBPAW_DEALLOCATE(PAW%l)
+   LIBPAW_POINTER_DEALLOCATE(PAW%l)
  endif
  If (ASSOCIATED(PAW%nodes)) then
-   LIBPAW_DEALLOCATE(PAW%nodes)
+   LIBPAW_POINTER_DEALLOCATE(PAW%nodes)
  endif
  If (ASSOCIATED(PAW%kappa)) then
-   LIBPAW_DEALLOCATE(PAW%kappa)
+   LIBPAW_POINTER_DEALLOCATE(PAW%kappa)
  endif
  If (ASSOCIATED(PAW%rng)) then
-   LIBPAW_DEALLOCATE(PAW%rng)
+   LIBPAW_POINTER_DEALLOCATE(PAW%rng)
  endif
  If (ASSOCIATED(PAW%label)) then
-   LIBPAW_DEALLOCATE(PAW%label)
+   LIBPAW_POINTER_DEALLOCATE(PAW%label)
  endif
  If (ASSOCIATED(PAW%phi)) then
-   LIBPAW_DEALLOCATE(PAW%phi)
+   LIBPAW_POINTER_DEALLOCATE(PAW%phi)
  endif
  If (ASSOCIATED(PAW%tphi)) then
-   LIBPAW_DEALLOCATE(PAW%tphi)
+   LIBPAW_POINTER_DEALLOCATE(PAW%tphi)
  endif
  If (ASSOCIATED(PAW%tp)) then
-   LIBPAW_DEALLOCATE(PAW%tp)
+   LIBPAW_POINTER_DEALLOCATE(PAW%tp)
  endif
  If (ASSOCIATED(PAW%ophi)) then
-   LIBPAW_DEALLOCATE(PAW%ophi)
+   LIBPAW_POINTER_DEALLOCATE(PAW%ophi)
  endif
  If (ASSOCIATED(PAW%otphi)) then
-   LIBPAW_DEALLOCATE(PAW%otphi)
+   LIBPAW_POINTER_DEALLOCATE(PAW%otphi)
  endif
  If (ASSOCIATED(PAW%otp)) then
-   LIBPAW_DEALLOCATE(PAW%otp)
+   LIBPAW_POINTER_DEALLOCATE(PAW%otp)
  endif
  If (ASSOCIATED(PAW%Kop)) then
-   LIBPAW_DEALLOCATE(PAW%Kop)
+   LIBPAW_POINTER_DEALLOCATE(PAW%Kop)
  endif
  If (ASSOCIATED(PAW%eig)) then
-   LIBPAW_DEALLOCATE(PAW%eig)
+   LIBPAW_POINTER_DEALLOCATE(PAW%eig)
  endif
  If (ASSOCIATED(PAW%occ)) then
-   LIBPAW_DEALLOCATE(PAW%occ)
+   LIBPAW_POINTER_DEALLOCATE(PAW%occ)
  endif
  If (ASSOCIATED(PAW%ck)) then
-   LIBPAW_DEALLOCATE(PAW%ck)
+   LIBPAW_POINTER_DEALLOCATE(PAW%ck)
  endif
  If (ASSOCIATED(PAW%vrc)) then
-   LIBPAW_DEALLOCATE(PAW%vrc)
+   LIBPAW_POINTER_DEALLOCATE(PAW%vrc)
  endif
  If (ASSOCIATED(PAW%oij)) then
-   LIBPAW_DEALLOCATE(PAW%oij)
+   LIBPAW_POINTER_DEALLOCATE(PAW%oij)
  endif
  If (ASSOCIATED(PAW%dij)) then
-   LIBPAW_DEALLOCATE(PAW%dij)
+   LIBPAW_POINTER_DEALLOCATE(PAW%dij)
  endif
  If (ASSOCIATED(PAW%wij)) then
-   LIBPAW_DEALLOCATE(PAW%wij)
+   LIBPAW_POINTER_DEALLOCATE(PAW%wij)
  endif
  If (ASSOCIATED(PAW%rVf)) then
-   LIBPAW_DEALLOCATE(PAW%rVf)
+   LIBPAW_POINTER_DEALLOCATE(PAW%rVf)
  endif
  If (ASSOCIATED(PAW%rtVf)) then
-   LIBPAW_DEALLOCATE(PAW%rtVf)
+   LIBPAW_POINTER_DEALLOCATE(PAW%rtVf)
  endif
  If (ASSOCIATED(PAW%g)) then
-   LIBPAW_DEALLOCATE(PAW%g)
+   LIBPAW_POINTER_DEALLOCATE(PAW%g)
  endif
  If (ASSOCIATED(PAW%Kij)) then
-   LIBPAW_DEALLOCATE(PAW%Kij)
+   LIBPAW_POINTER_DEALLOCATE(PAW%Kij)
  endif
  If (ASSOCIATED(PAW%Vfij)) then
-   LIBPAW_DEALLOCATE(PAW%Vfij)
+   LIBPAW_POINTER_DEALLOCATE(PAW%Vfij)
  endif
  If (ASSOCIATED(PAW%mLij)) then
-   LIBPAW_DEALLOCATE(PAW%mLij)
+   LIBPAW_POINTER_DEALLOCATE(PAW%mLij)
  endif
  If (ASSOCIATED(PAW%DR)) then
-   LIBPAW_DEALLOCATE(PAW%DR)
+   LIBPAW_POINTER_DEALLOCATE(PAW%DR)
  endif
  If (ASSOCIATED(PAW%DRVC)) then
-   LIBPAW_DEALLOCATE(PAW%DRVC)
+   LIBPAW_POINTER_DEALLOCATE(PAW%DRVC)
  endif
  If (ASSOCIATED(PAW%TXVC)) then
-   LIBPAW_DEALLOCATE(PAW%TXVC)
+   LIBPAW_POINTER_DEALLOCATE(PAW%TXVC)
  endif
  If (ASSOCIATED(PAW%valencemap)) then
-   LIBPAW_DEALLOCATE(PAW%valencemap)
+   LIBPAW_POINTER_DEALLOCATE(PAW%valencemap)
  endif
  If (ASSOCIATED(PAW%lmbd)) then
-   LIBPAW_DEALLOCATE(PAW%lmbd)
+   LIBPAW_POINTER_DEALLOCATE(PAW%lmbd)
  endif
  If (ASSOCIATED(PAW%DRC)) then
-   LIBPAW_DEALLOCATE(PAW%DRC)
+   LIBPAW_POINTER_DEALLOCATE(PAW%DRC)
  endif
  If (ASSOCIATED(PAW%DRCC)) then
-   LIBPAW_DEALLOCATE(PAW%DRCC)
+   LIBPAW_POINTER_DEALLOCATE(PAW%DRCC)
  endif
  If (ASSOCIATED(PAW%DRCjkl)) then
-   LIBPAW_DEALLOCATE(PAW%DRCjkl)
+   LIBPAW_POINTER_DEALLOCATE(PAW%DRCjkl)
  endif
  If (ASSOCIATED(PAW%mLic)) then
-   LIBPAW_DEALLOCATE(PAW%mLic)
+   LIBPAW_POINTER_DEALLOCATE(PAW%mLic)
  endif
  If (ASSOCIATED(PAW%mLcc)) then
-   LIBPAW_DEALLOCATE(PAW%mLcc)
+   LIBPAW_POINTER_DEALLOCATE(PAW%mLcc)
  endif
  If (ASSOCIATED(PAW%Dcj)) then
-   LIBPAW_DEALLOCATE(PAW%Dcj)
+   LIBPAW_POINTER_DEALLOCATE(PAW%Dcj)
  endif
  If (ASSOCIATED(PAW%OCCwfn)) then
    call DestroyOrbit(PAW%OCCwfn)
-   LIBPAW_DEALLOCATE(PAW%OCCwfn)
+   LIBPAW_DATATYPE_DEALLOCATE(PAW%OCCwfn)
  end if
  If (ASSOCIATED(PAW%TOCCwfn)) then
    call DestroyOrbit(PAW%TOCCwfn)
-   LIBPAW_DEALLOCATE(PAW%TOCCwfn)
+   LIBPAW_DATATYPE_DEALLOCATE(PAW%TOCCwfn)
  end if
 End Subroutine DestroyPAW
 
