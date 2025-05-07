@@ -265,6 +265,21 @@ module m_slk
    procedure :: svd => slkmat_dp_svd
     ! Singular Value Decomposition (double precision version).
 
+   procedure :: to_global => slkmat_dp_to_global
+    ! Fill a full matrix with respect to a SCALAPACK matrix.
+
+   procedure :: from_real_glob => slkmat_dp_from_real_glob
+    ! Fills SCALAPACK matrix from full matrix.
+
+   procedure :: from_global_pack => slkmat_dp_from_global_pack
+    ! Fills SCALAPACK matrix from full matrix.
+
+   procedure :: from_global_sym  => slkmat_dp_from_global_sym
+    ! Fills SCALAPACK matrix from full matrix.
+
+   procedure :: to_global_pack => slkmat_dp_tp_global_pack
+    ! Inserts a ScaLAPACK matrix into a global one.
+
  end type slkmat_dp_t
 !!***
 
@@ -328,14 +343,10 @@ module m_slk
  public :: matrix_set_local_real           ! Sets a local matrix coefficient of double precision type.
  ! ???
 
- public :: matrix_from_global              ! Fills SCALAPACK matrix from full matrix.
- public :: matrix_from_global_sym          ! Fills SCALAPACK matrix from a full matrix.
- public :: matrix_from_realmatrix          ! Fills SCALAPACK matrix from full matrix.
  public :: matrix_from_complexmatrix       ! Fills SCALAPACK matrix from a full matrix.
- public :: matrix_to_global                ! Inserts a ScaLAPACK matrix into a global one.
+
  public :: matrix_to_realmatrix            ! Inserts a ScaLAPACK matrix into a real matrix.
  public :: matrix_to_complexmatrix         ! Inserts a ScaLAPACK matrix into a complex matrix.
- public :: matrix_to_reference             ! Fill a full matrix with respect to a SCALAPACK matrix.
  public :: slk_matrix_from_global_dpc_2D   ! Fill a complex SCALAPACK matrix with respect to a global matrix.
  public :: slk_matrix_from_global_dpc_1Dp  ! Fill a complex SCALAPACK matrix with respect to a global matrix.
                                            ! target: double precision complex matrix in packed form.
@@ -1726,28 +1737,28 @@ end function loc_glob__
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_from_global
+!!****f* m_slk/slkmat_dp_from_global_pack
 !! NAME
-!!  matrix_from_global
+!!  slkmat_dp_from_global_pack
 !!
 !! FUNCTION
 !!  Routine to fill a SCALAPACK matrix from a global PACKED matrix.
 !!
 !! INPUTS
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!  reference= one-dimensional array with packed matrix.
+!!  glob_mat_pack= one-dimensional array with packed matrix.
 !!
 !! SIDE EFFECTS
 !!  matrix= the matrix to process
 !!
 !! SOURCE
 
-subroutine matrix_from_global(matrix, reference, istwf_k)
+subroutine slkmat_dp_from_global_pack(matrix, glob_mat_pack, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
- real(dp),intent(in) :: reference(*)
+ real(dp),intent(in) :: glob_mat_pack(*)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob,ind
@@ -1761,42 +1772,42 @@ subroutine matrix_from_global(matrix, reference, istwf_k)
 
      if (istwf_k/=2) then
        ind = jglob*(jglob-1)+2*iglob-1
-       val_cplx = dcmplx(reference(ind),reference(ind+1))
+       val_cplx = dcmplx(glob_mat_pack(ind),glob_mat_pack(ind+1))
        call matrix_set_local_cplx(matrix,i,j,val_cplx)
      else
        ind = (jglob*(jglob-1))/2 + iglob
-       val_real = reference(ind)
+       val_real = glob_mat_pack(ind)
        call matrix_set_local_real(matrix,i,j,val_real)
      end if
 
    end do
  end do
 
-end subroutine matrix_from_global
+end subroutine slkmat_dp_from_global_pack
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_from_global_sym
+!!****f* m_slk/slkmat_dp_from_global_sym
 !! NAME
-!!  matrix_from_global_sym
+!!  slkmat_dp_from_global_sym
 !!
 !! FUNCTION
 !!
 !! INPUTS
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!  reference= one-dimensional array
+!!  glob_vec_pack= one-dimensional array in packed form
 !!
 !! SIDE EFFECTS
 !!  matrix= the matrix to process
 !!
 !! SOURCE
 
-subroutine matrix_from_global_sym(matrix, reference, istwf_k)
+subroutine slkmat_dp_from_global_sym(matrix, glob_vec_pack, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(inout)  :: matrix
- real(dp),intent(in) :: reference(:)
+ real(dp),intent(in) :: glob_vec_pack(:)
  integer,intent(in) :: istwf_k
 
 !Local variables-------------------------------
@@ -1814,7 +1825,7 @@ subroutine matrix_from_global_sym(matrix, reference, istwf_k)
        ind = jglob*(jglob-1)+2*iglob-1
      end if
      if (istwf_k /= 2) then
-       val_cplx = dcmplx(reference(ind),reference(ind+1))
+       val_cplx = dcmplx(glob_vec_pack(ind),glob_vec_pack(ind+1))
        if (jglob < iglob) then
          call matrix_set_local_cplx(matrix,i,j,conjg(val_cplx))
        else
@@ -1822,40 +1833,40 @@ subroutine matrix_from_global_sym(matrix, reference, istwf_k)
        end if
      else
        ind = (ind + 1) / 2
-       val_real = reference(ind)
+       val_real = glob_vec_pack(ind)
        call matrix_set_local_real(matrix,i,j,val_real)
      end if
    end do
  end do
 
-end subroutine matrix_from_global_sym
+end subroutine slkmat_dp_from_global_sym
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_from_realmatrix
+!!****f* m_slk/slkmat_dp_from_real_glob
 !! NAME
-!!  matrix_from_realmatrix
+!!  slkmat_dp_from_real_glob
 !!
 !! FUNCTION
 !!  Routine to fill a SCALAPACK matrix from a real global matrix (FULL STORAGE MODE)
 !!
 !! INPUTS
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!  reference= a real matrix
+!!  glob_mat= a real matrix
 !!
 !! SIDE EFFECTS
 !!  matrix= the matrix to process
 !!
 !! SOURCE
 
-subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
+subroutine slkmat_dp_from_real_glob(matrix, glob_mat, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
 !arrays
- real(dp),intent(in) :: reference(:,:)
+ real(dp),intent(in) :: glob_mat(:,:)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob
@@ -1867,12 +1878,12 @@ subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
  do i=1,matrix%size_local(1)
    do j=1,matrix%size_local(2)
      call matrix%loc2glob(i, j, iglob, jglob)
-     val = reference(iglob, jglob)
+     val = glob_mat(iglob, jglob)
      call matrix_set_local_real(matrix,i,j,val)
    end do
  end do
 
-end subroutine matrix_from_realmatrix
+end subroutine slkmat_dp_from_real_glob
 !!***
 
 !----------------------------------------------------------------------
@@ -1886,20 +1897,20 @@ end subroutine matrix_from_realmatrix
 !!
 !! INPUTS
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!  reference= a complex matrix
+!!  glob_mat= a complex matrix
 !!
 !! SIDE EFFECTS
 !!  matrix= the matrix to process
 !!
 !! SOURCE
 
-subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
+subroutine matrix_from_complexmatrix(matrix, glob_mat, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(inout) :: matrix
  integer,intent(in) :: istwf_k
 !arrays
- real(dp),intent(in) :: reference(:,:)
+ real(dp),intent(in) :: glob_mat(:,:)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob
@@ -1911,7 +1922,7 @@ subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
  do i=1,matrix%size_local(1)
    do j=1,matrix%size_local(2)
      call matrix%loc2glob(i, j, iglob, jglob)
-     val = dcmplx(reference(2*iglob-1, jglob),reference(2*iglob, jglob))
+     val = dcmplx(glob_mat(2*iglob-1, jglob),glob_mat(2*iglob, jglob))
      call matrix_set_local_cplx(matrix,i,j,val)
    end do
  end do
@@ -1921,9 +1932,9 @@ end subroutine matrix_from_complexmatrix
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_to_global
+!!****f* m_slk/slkmat_dp_tp_global_pack
 !! NAME
-!!  matrix_to_global
+!!  slkmat_dp_tp_global_pack
 !!
 !! FUNCTION
 !!  Inserts a ScaLAPACK matrix into a global one in PACKED storage mode.
@@ -1934,16 +1945,16 @@ end subroutine matrix_from_complexmatrix
 !!  nband_k= number of bands at this k point for that spin polarization
 !!
 !! SIDE EFFECTS
-!!  reference= one-dimensional array
+!!  glob_pack= one-dimensional array
 !!
 !! SOURCE
 
-subroutine matrix_to_global(matrix, reference, istwf_k)
+subroutine slkmat_dp_tp_global_pack(matrix, glob_pack, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(in) :: matrix
  integer,intent(in) :: istwf_k          !,nband_k
- real(dp),intent(inout) :: reference(*) !(nband_k*(nband_k+1))
+ real(dp),intent(inout) :: glob_pack(*) !(nband_k*(nband_k+1))
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob,ind
@@ -1956,17 +1967,17 @@ subroutine matrix_to_global(matrix, reference, istwf_k)
      ind = jglob*(jglob-1)+2*iglob-1
      if (ind <= matrix%size_global(2)*(matrix%size_global(2)+1)) then
         if (istwf_k/=2) then
-         reference(ind)   = real(matrix_get_local_cplx(matrix,i,j))
-         reference(ind+1) = aimag(matrix_get_local_cplx(matrix,i,j))
+         glob_pack(ind)   = real(matrix_get_local_cplx(matrix,i,j))
+         glob_pack(ind+1) = aimag(matrix_get_local_cplx(matrix,i,j))
        else
           ind=(ind+1)/2 !real packed storage
-          reference(ind) = matrix_get_local_real(matrix,i,j)
+          glob_pack(ind) = matrix_get_local_real(matrix,i,j)
        end if
      end if
    end do
  end do
 
-end subroutine matrix_to_global
+end subroutine slkmat_dp_tp_global_pack
 !!***
 
 !----------------------------------------------------------------------
@@ -1983,17 +1994,17 @@ end subroutine matrix_to_global
 !!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! SIDE EFFECTS
-!!  reference= the matrix to fill
+!!  glob_mat= the matrix to fill
 !!
 !! SOURCE
 
-subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
+subroutine matrix_to_realmatrix(matrix, glob_mat, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(in) :: matrix
  integer,intent(in) :: istwf_k
 !arrays
- real(dp),intent(inout) :: reference(:,:)
+ real(dp),intent(inout) :: glob_mat(:,:)
 
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob
@@ -2004,7 +2015,7 @@ subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
  do i=1,matrix%size_local(1)
    do j=1,matrix%size_local(2)
      call matrix%loc2glob(i, j, iglob, jglob)
-     reference(iglob,jglob) = matrix_get_local_real(matrix,i,j)
+     glob_mat(iglob,jglob) = matrix_get_local_real(matrix,i,j)
    end do
  end do
 
@@ -2025,17 +2036,17 @@ end subroutine matrix_to_realmatrix
 !!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! SIDE EFFECTS
-!!  reference= the matrix to fill
+!!  glob_cmat= the matrix to fill
 !!
 !! SOURCE
 
-subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
+subroutine matrix_to_complexmatrix(matrix, glob_cmat, istwf_k)
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
  class(slkmat_dp_t),intent(in) :: matrix
 !arrays
- complex(dpc),intent(inout) :: reference(:,:)
+ complex(dpc),intent(inout) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob
@@ -2046,7 +2057,7 @@ subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
  do i=1,matrix%size_local(1)
    do j=1,matrix%size_local(2)
      call matrix%loc2glob(i, j, iglob, jglob)
-     reference(iglob,jglob) = matrix_get_local_cplx(matrix,i,j)
+     glob_cmat(iglob,jglob) = matrix_get_local_cplx(matrix,i,j)
    end do
  end do
 
@@ -2055,9 +2066,9 @@ end subroutine matrix_to_complexmatrix
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/matrix_to_reference
+!!****f* m_slk/slkmat_dp_to_global
 !! NAME
-!!  matrix_to_reference
+!!  slkmat_dp_to_global
 !!
 !! FUNCTION
 !!  Routine to fill a full matrix with respect to a SCALAPACK matrix.
@@ -2067,17 +2078,17 @@ end subroutine matrix_to_complexmatrix
 !!  istwf_k= 2 if we have a real matrix else complex.
 !!
 !! SIDE EFFECTS
-!!  reference= one-dimensional array
+!!  glob_mat= one-dimensional array
 !!
 !! SOURCE
 
-subroutine matrix_to_reference(matrix, reference, istwf_k)
+subroutine slkmat_dp_to_global(matrix, glob_mat, istwf_k)
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(in) :: matrix
  integer,intent(in) :: istwf_k
 !arrays
- real(dp),intent(inout) :: reference(:,:)
+ real(dp),intent(inout) :: glob_mat(:,:)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob,ind
@@ -2089,18 +2100,18 @@ subroutine matrix_to_reference(matrix, reference, istwf_k)
 
      if (istwf_k/=2) then
        ind=(iglob-1)*2+1
-       reference(ind,  jglob) = real(matrix_get_local_cplx(matrix,i,j))
-       reference(ind+1,jglob) = aimag(matrix_get_local_cplx(matrix,i,j))
+       glob_mat(ind,  jglob) = real(matrix_get_local_cplx(matrix,i,j))
+       glob_mat(ind+1,jglob) = aimag(matrix_get_local_cplx(matrix,i,j))
      else
         ind=iglob
-        reference(ind,jglob) = matrix_get_local_real(matrix,i,j)
-        !reference(ind+1,jglob) = 0._dp
+        glob_mat(ind,jglob) = matrix_get_local_real(matrix,i,j)
+        !glob_mat(ind+1,jglob) = 0._dp
      end if
 
    end do
  end do
 
-end subroutine matrix_to_reference
+end subroutine slkmat_dp_to_global
 !!***
 
 !----------------------------------------------------------------------
@@ -2114,7 +2125,7 @@ end subroutine matrix_to_reference
 !!  target: Two-dimensional double precision complex matrix
 !!
 !! INPUTS
-!!  glob_mat=Two-dimensional array containing the global matrix.
+!!  glob_cmat=Two-dimensional array containing the global matrix.
 !!  uplo=String specifying whether only the upper or lower triangular part of the global matrix is used:
 !!    = "U":  Upper triangular
 !!    = "L":  Lower triangular
@@ -2126,14 +2137,14 @@ end subroutine matrix_to_reference
 !!
 !! SOURCE
 
-subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_mat)
+subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_cmat)
 
 !Arguments ------------------------------------
 !scalars
  class(slkmat_dp_t),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
- complex(dpc),intent(in) :: glob_mat(:,:)
+ complex(dpc),intent(in) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer :: ii, jj, iglob, jglob
@@ -2148,7 +2159,7 @@ subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_mat)
    do jj=1,mat%size_local(2)
      do ii=1,mat%size_local(1)
        call mat%loc2glob(ii, jj, iglob, jglob)
-       mat%buffer_cplx(ii,jj) = glob_mat(iglob,jglob)
+       mat%buffer_cplx(ii,jj) = glob_cmat(iglob,jglob)
      end do
    end do
 
@@ -2158,9 +2169,9 @@ subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_mat)
      do ii=1,mat%size_local(1)
        call mat%loc2glob(ii, jj, iglob, jglob)
        if (jglob>=iglob) then
-         mat%buffer_cplx(ii,jj) =        glob_mat(iglob,jglob)
+         mat%buffer_cplx(ii,jj) =        glob_cmat(iglob,jglob)
        else
-         mat%buffer_cplx(ii,jj) = DCONJG(glob_mat(jglob,iglob))
+         mat%buffer_cplx(ii,jj) = DCONJG(glob_cmat(jglob,iglob))
        end if
      end do
    end do
@@ -2171,9 +2182,9 @@ subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_mat)
      do ii=1,mat%size_local(1)
        call mat%loc2glob(ii, jj, iglob, jglob)
        if (jglob<=iglob) then
-         mat%buffer_cplx(ii,jj) = glob_mat(iglob,jglob)
+         mat%buffer_cplx(ii,jj) = glob_cmat(iglob,jglob)
        else
-         mat%buffer_cplx(ii,jj) = DCONJG(glob_mat(jglob,iglob))
+         mat%buffer_cplx(ii,jj) = DCONJG(glob_cmat(jglob,iglob))
        end if
      end do
    end do
@@ -2196,10 +2207,10 @@ end subroutine slk_matrix_from_global_dpc_2D
 !!  target: double precision complex matrix in packed form.
 !!
 !! INPUTS
-!!  glob_pmat(n*(n+1)/2)=One-dimensional array containing the global matrix A packed columnwise in a linear array.
-!!    The j-th column of A is stored in the array glob_pmat as follows:
-!!      if uplo = "U", glob_pmat(i + (j-1)*j/2)       = A(i,j) for 1<=i<=j;
-!!      if uplo = "L", glob_pmat(i + (j-1)*(2*n-j)/2) = A(i,j) for j<=i<=n.
+!!  glob_cmat_pack(n*(n+1)/2)=One-dimensional array containing the global matrix A packed columnwise in a linear array.
+!!    The j-th column of A is stored in the array glob_cmat_pack as follows:
+!!      if uplo = "U", glob_cmat_pack(i + (j-1)*j/2)       = A(i,j) for 1<=i<=j;
+!!      if uplo = "L", glob_cmat_pack(i + (j-1)*(2*n-j)/2) = A(i,j) for j<=i<=n.
 !!      where n is the number of rows or columns in the global matrix.
 !!  uplo=String specifying whether only the upper or lower triangular part of the global matrix is used:
 !!    = "U":  Upper triangular
@@ -2211,14 +2222,14 @@ end subroutine slk_matrix_from_global_dpc_2D
 !!
 !! SOURCE
 
-subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo,glob_pmat)
+subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo, glob_cmat_pack)
 
 !Arguments ------------------------------------
 !scalars
  class(slkmat_dp_t),intent(inout)  :: mat
  character(len=*),intent(in) :: uplo
 !array
- complex(dpc),intent(in) :: glob_pmat(:)
+ complex(dpc),intent(in) :: glob_cmat_pack(:)
 
 !Local variables-------------------------------
  integer :: ii,jj,iglob,jglob,ind,n
@@ -2227,9 +2238,9 @@ subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo,glob_pmat)
 
  ABI_CHECK(allocated(mat%buffer_cplx), "%buffer_cplx not allocated")
 
- szm = SIZE(glob_pmat)
+ szm = SIZE(glob_cmat_pack)
  n = NINT( (-1 + SQRT(one+8*szm) )*half )
- if (n*(n+1)/2 /= SIZE(glob_pmat)) then
+ if (n*(n+1)/2 /= SIZE(glob_cmat_pack)) then
    ABI_ERROR("Buggy compiler")
  end if
 
@@ -2243,10 +2254,10 @@ subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo,glob_pmat)
 
        if (jglob>=iglob) then
          ind = iglob + jglob*(jglob-1)/2
-         mat%buffer_cplx(ii,jj) = glob_pmat(ind)
+         mat%buffer_cplx(ii,jj) = glob_cmat_pack(ind)
        else
          ind = jglob + iglob*(iglob-1)/2
-         mat%buffer_cplx(ii,jj) = DCONJG( glob_pmat(ind) )
+         mat%buffer_cplx(ii,jj) = DCONJG( glob_cmat_pack(ind) )
        end if
 
      end do
@@ -2260,10 +2271,10 @@ subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo,glob_pmat)
 
        if (jglob<=iglob) then
          ind = iglob + (jglob-1)*(2*n-jglob)/2
-         mat%buffer_cplx(ii,jj) = glob_pmat(ind)
+         mat%buffer_cplx(ii,jj) = glob_cmat_pack(ind)
        else
          ind = jglob + (iglob-1)*(2*n-iglob)/2
-         mat%buffer_cplx(ii,jj) = DCONJG( glob_pmat(ind) )
+         mat%buffer_cplx(ii,jj) = DCONJG( glob_cmat_pack(ind) )
        end if
      end do
    end do
@@ -2293,19 +2304,19 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 !!    = "A":  Full matrix is filled (used for general complex matrices)
 !!
 !! SIDE EFFECTS
-!!  glob_mat=The global matrix where the entries owned by this processors have been overwritten.
+!!  glob_cmat=The global matrix where the entries owned by this processors have been overwritten.
 !!  Note that the remaing entries not treated by this node are not changed.
 !!
 !! SOURCE
 
-subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_mat)
+subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_cmat)
 
 !Arguments ------------------------------------
 !scalaras
  class(slkmat_dp_t),intent(in) :: mat
  character(len=*),intent(in) :: uplo
 !arrays
- complex(dpc),intent(inout) :: glob_mat(:,:)
+ complex(dpc),intent(inout) :: glob_cmat(:,:)
 
 !Local variables-------------------------------
  integer :: ii,jj,iglob,jglob
@@ -2317,7 +2328,7 @@ subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_mat)
    do jj=1,mat%size_local(2)
      do ii=1,mat%size_local(1)
        call mat%loc2glob(ii, jj, iglob, jglob)
-       glob_mat(iglob,jglob) = mat%buffer_cplx(ii,jj)
+       glob_cmat(iglob,jglob) = mat%buffer_cplx(ii,jj)
      end do
    end do
 
@@ -2326,7 +2337,7 @@ subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_mat)
    do jj=1,mat%size_local(2)
      do ii=1,mat%size_local(1)
        call mat%loc2glob(ii, jj, iglob, jglob)
-       if (jglob>=iglob) glob_mat(iglob,jglob) = mat%buffer_cplx(ii,jj)
+       if (jglob>=iglob) glob_cmat(iglob,jglob) = mat%buffer_cplx(ii,jj)
      end do
    end do
 
@@ -2335,7 +2346,7 @@ subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_mat)
    do jj=1,mat%size_local(2)
      do ii=1,mat%size_local(1)
        call mat%loc2glob(ii, jj, iglob, jglob)
-       if (jglob<=iglob) glob_mat(iglob,jglob) = mat%buffer_cplx(ii,jj)
+       if (jglob<=iglob) glob_cmat(iglob,jglob) = mat%buffer_cplx(ii,jj)
      end do
    end do
 
@@ -3257,7 +3268,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
       end do
    end do
 #endif
-   call matrix_from_realmatrix(sca_matrix1,matrix,istwf_k)
+   call sca_matrix1%from_real_glob(matrix, istwf_k)
  endif
 
  ! ================================
@@ -3271,10 +3282,10 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ==============================
 #ifdef HAVE_MPI
  if (istwf_k /= 2) then
-   call matrix_to_complexmatrix(sca_matrix2,z_tmp_evec,istwf_k)
+   call matrix_to_complexmatrix(sca_matrix2, z_tmp_evec, istwf_k)
    call MPI_ALLREDUCE(z_tmp_evec, matrix, nbli_global*nbco_global, MPI_DOUBLE_complex, MPI_SUM,comm,ierr)
  else
-   call matrix_to_realmatrix(sca_matrix2,r_tmp_evec,istwf_k)
+   call matrix_to_realmatrix(sca_matrix2, r_tmp_evec, istwf_k)
    call MPI_ALLREDUCE(r_tmp_evec, matrix, nbli_global*nbco_global, MPI_DOUBLE_PRECISION, MPI_SUM,comm,ierr)
  endif
 #endif
@@ -3377,8 +3388,8 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
       end do
    end do
 #endif
-   call matrix_from_complexmatrix(sca_matrix1,matrix1,istwf_k)
-   call matrix_from_complexmatrix(sca_matrix2,matrix2,istwf_k)
+   call matrix_from_complexmatrix(sca_matrix1, matrix1, istwf_k)
+   call matrix_from_complexmatrix(sca_matrix2, matrix2, istwf_k)
  else
    ABI_CHECK_IEQ(cplex, 1, "cplex != 1")
    ABI_MALLOC(r_tmp_evec,(nbli_global,nbco_global))
@@ -3392,8 +3403,8 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
       end do
    end do
 #endif
-   call matrix_from_realmatrix(sca_matrix1,matrix1,istwf_k)
-   call matrix_from_realmatrix(sca_matrix2,matrix2,istwf_k)
+   call sca_matrix1%from_real_glob(matrix1,istwf_k)
+   call sca_matrix2%from_real_glob(matrix2,istwf_k)
  endif
 
  ! ================================
@@ -3411,7 +3422,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
    call MPI_ALLREDUCE(z_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_complex, MPI_SUM,comm,ierr)
    ABI_FREE(z_tmp_evec)
  else
-   call matrix_to_realmatrix(sca_matrix3,r_tmp_evec,istwf_k)
+   call matrix_to_realmatrix(sca_matrix3, r_tmp_evec, istwf_k)
    call MPI_ALLREDUCE(r_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_PRECISION, MPI_SUM,comm,ierr)
    ABI_FREE(r_tmp_evec)
  endif
