@@ -9,12 +9,13 @@ October 2024 and March 2025.
 <!-- (with some late contributions until XXX 2024). -->
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
-<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1076, 1077, 1079, 1081, then 1083 to 1169, 
+<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1169, 
 EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had alreacy been included in v10.2,
 and EXCEPT MR1160, 1165 and 1168, that will be included in v10.6 .  
 For later releases v10.4, the list of MR is to be completed. -->
 The list of contributors includes:
-ALL v10.4 TO BE UPDATED !!!
+
+LIST TO BE TO BE UPDATED !!!
 
 G. Antonius, M. Azizi, L. Baguet, J.-M. Beuken, O. Bistoni, A. Blanchet, F. Bottin, F. Bruneval, Siyu Chen, F. Gendron, M. Giantomassi, X. Gonze,
 P. Kestener, L. MacEnulty, M. Mignolet, C. Paillard,
@@ -30,35 +31,103 @@ Xavier
 
 ### **A.** Remarks and warnings.
 
-**A.1** Change nline default to 6 for ChebFi algorithm .
+TO BE UPDATED !
+
+OLD **A.1** Change nline default to 6 for ChebFi algorithm .
 
 By M. Torrent (MR1069)
 
-**A.2** Renaming tests/Psps_for_tests to tests/Pspdir
+OLD **A.2** Renaming tests/Psps_for_tests to tests/Pspdir
 
 By X. Gonze (fc5345534a and subsequent commits)
 
 * * *
 
+
 ### **B.** Most noticeable developments
 
-**B.1** GPU porting of the DFPT driver of ABINIT
+**B.1** Variational Polaron Equations
+
+The variational polaron equation implementation in ABINIT is ready for production.
+It allows one to compute to compute polaron formation energies and associated quantities, in the
+strong-coupling approximation. See e.g. .
+
+By V. Vasilchenko, with help from M. Giantomassi, X. Gonze and S. Ponce (MR1126, 1161, 1164, 1165, 1166)
+
+
+**B.2** Real-time Time-Dependent Density-Functional-Theory
+
+The real-time time-dependent density-functional theory implementation in ABINIT is ready for production.
+It includes the calculation of the current density to an impulse electric field and associated response functions
+(conductivity, dielectric function). Different time-propagators are coded, see [[td_propagator]].
+A [[tutorial:rttddft]] is available.
+Activate it using [[optdriver]]=9. Control the number of time steps using [[ntime]], and the time step value using [[dtele]].
+Related input variables : [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced–vecpot]], [[td_ef_tzero]], [[td_ef_pol]].
+Related tests : [[test:rttddft_1]] to  [[test:rttddft_1]] and [[test:trttdft_1] to [[test:trttdft_4].
+
+By F. Brieuc (MR1137)
+
+ 
+**B.3** Computation of stress in mGGA
+
+
+By M. Torrent (MR1099)
+
+
+**B.4** Transport properties from electron-phonon interaction : thermal transport, and cumulant.
+
+
+By G. Allemand, R. Gupta, M. Giantomassi, M. Verstraete (MR1156, 1162, 1102)
+
+
+**B.5** Multibinit TO BE DESCRIBED
+
+
+By XXXX (MR1146)
+
+
+**B.6** Progresses in Dynamical Mean Field Theory (DMFT)
+
+TO BE DESCRIBED 
+By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148)
+
+
+**B.7** Progresses with orbital magnetization, chemical shielding, and electric field gradient.
+
+
+By J. Zwanziger (MR1101, 1111, 1119, 1128)
+
+
+
+
+**B.8** GPU porting of DMFT and mGGA
 
 The global GPU porting of ABINIT using recent libraries/compilers, started three years ago, has been continued.
-In the previous release 10.0, two implementations (OpenMP or KOKKOS+CUDA) for ground-state calculations [[optdriver]]=0
+In the previous releases 10.0 and 10.2, ground-state calculations [[optdriver]]=0 including Fock operator, 
+and Density-Functional Perturbation Theory [[optdriver]]=1
 had been made available.
 
-In the present release 10.2, the Density-Functional Perturbation Theory [[optdriver]]=1
-has been ported, using OpenMP, along with the following perturbations:
-- phonons ([[rfphon]])
-- electric field ([[rfelfd]])
-- strains ([[rfstrs]])
+In the present release 10.4, DMFT
+ [[optdriver]]=1 ??
+has been ported, also using OpenMP.
+
+Also, metaGGA (mGGA) computations are now possible with GPU.
+
+
+
 Numerous tests are available, [[test:gpu_omp_11]] to [[test:gpu_omp_25]]
 
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2 for the OpenMP capabilities.
 For the description of the modifications of ABINIT, see the Merge Requests (MR) below.
 
 By M. Sarraute and M. Torrent (MR 1027, MR1055, MR1059, MR1071)
+
+
+
+**B.9** New capabilities of aTDEP
+
+
+By G. Antonius and F. Bottin (MR 1105, 1112, 1113, 1117, 1145, 1155)
 
 
 * * *
@@ -208,7 +277,7 @@ Xavier
 
 ### **A.** Remarks and warnings.
 
-**A.1** Change nline default to 6 for ChebFi algorithm .
+**A.1** Change [[nline]] default to 6 for ChebFi algorithm .
 
 By M. Torrent (MR1069)
 
@@ -217,6 +286,7 @@ By M. Torrent (MR1069)
 By X. Gonze (fc5345534a and subsequent commits)
 
 * * *
+
 
 ### **B.** Most noticeable developments
 
@@ -304,12 +374,12 @@ See  [[test:v9_92]].
 
 Also, [[useextfpmd]]=4 has been fixed, by computing the band shift. Now [[useextfpmd]]=1 and [[useextfpmd]]=4 show very similar results (not exactly equal though).
 
-The value of extfpmd_eshift has been added in the header of wave function files (made optional in order not to break post processing tools): this allows for a faster restart of a calculation from the wavefunctions.
+The value of [[extfpmd_eshift]] has been added in the header of wave function files (made optional in order not to break post processing tools): this allows for a faster restart of a calculation from the wavefunctions.
 
 By A. Blanchet (MR1013).
 
-
 * * *
+
 
 ### **C.** Changes for the developers or for the installation of ABINIT (including information about compilers)
 
@@ -352,12 +422,13 @@ By M. Giantomassi (MR1078), with checking by M. Azizi of possible glitches in th
 
 * * *
 
+
 ### **D.**  Other developments (possibly not yet finalized), other new tests, new input variables, new tutorial.
 
 **D.1** The work on the ground-state GPU porting of ABINIT is continuing.
 
 Concerning eigensolvers on AMD GPU:
-By eigensolver routines, I refer to LAPACK DSYGVD/ZHEGVD and DSYEVD/ZHEEVD, which are provided on GPU by AMD HipSOLVER and NVIDIA CuSOLVER under specific names.
+By eigensolver routines, one refers to LAPACK DSYGVD/ZHEGVD and DSYEVD/ZHEEVD, which are provided on GPU by AMD HipSOLVER and NVIDIA CuSOLVER under specific names.
 As of today, DSYGVD and DSYEVD are significantly slower on AMD GPU, and usually account for most of execution time in Adastra GPU partition.
 But somehow, the complex variants ZHEGVD and ZHEEVD are incredibly slow, which lead to introduce a workaround,
 use ZHEGVJ instead of ZHEGVD: J stands for Jacobi and it takes two extra parameter for tolerance and max step.
@@ -385,7 +456,7 @@ By M. Sarraute and M. Torrent (b3b2ce14ca1)
 
 
 **D.3** New tests of the GPU (OpenMP) porting of ABINIT are available, [[test:gpu_omp_04]] to [[test:gpu_omp_09]]. See input variable [[gpu_option]]=2.
-Bug fix:  istwfk==2 when using CHEBFI as diago algorithm.
+Bug fix:  [[istwfk]]==2 when using CHEBFI as diago algorithm.
 Small fixes around ELPA+GPU, Cray and GPU-aware MPI have been done.
 
 By M. Sarraute and M. Torrent (MR1002, MR1004)
@@ -401,7 +472,7 @@ kptopt 4 now allows for systems with nuclear dipole moments ([[nucdipmom]]).
 Usually not much symmetry is left once a single nuclear dipole moment has been added, but there may be some.
 See [[test:v10_40]].
 
-The requirement for m_orbmag routine to have pawxcdev 0 has been lifted. The default 1 works fine also, and the flexibility in pawxcdev makes the m_orbmag routine compatible with more features (mgga related, hybrid functional related, etc)
+The requirement for m_orbmag routine to have [[pawxcdev]] 0 has been lifted. The default 1 works fine also, and the flexibility in pawxcdev makes the m_orbmag routine compatible with more features (mgga related, hybrid functional related, etc)
 
 The fock_getghc code has been corrected to allow for cplex_dij = 2 case; necessary for use with [[nucdipmom]]. Now for example pbe0 calculations run together with nuclear dipole moments, allowing NMR shieldings to be calculated in the hybrid functional case.
 
@@ -483,7 +554,7 @@ By M. Giantomassi (5b9bb0e88ab, 306ccc446a2, c03fa967bde)
 **D.17** New test for mGGA Norm conserving, [[test:v9_95]].
 Copper atom isolated in a box.
 Tests the reading of the upf2 potential, and inputs related to the model core kinetic energy density, then their usage.
-nc_xccc_gspace 0 calculates model core contribution in real space, and is much cleaner (0 kinE and density outside NLCC radius).
+[[nc_xccc_gspace]] 0 calculates model core contribution in real space, and is much cleaner (0 kinE and density outside NLCC radius).
 Density (+kinE) mixing works much better than potential mixing: in the vacuum the mGGA potential is very sensitive.
 
 By M. Vertraete  (43214101824)
@@ -518,6 +589,7 @@ Clickable version of the tutorial flowchart
 By M. Azizi (MR1076, backported to ABINITv10.2)
 
 
+* * *
 
 ### **E.**  Bug fixes, not yet mentioned in the previous sections of these release notes.
 
@@ -646,7 +718,7 @@ By L. Baguet (MR1087)
 
 By He Xu (MR1009), by M. Verstraete (MR1025)
 
-
+* * *
 
 
 ## v10.0
