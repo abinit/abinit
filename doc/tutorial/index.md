@@ -1274,7 +1274,7 @@ The following themes are covered: ABINIT postprocessors, static DFT, Many-Body T
 Density-Functional Perturbation Theory -DFPT- and electron-phonon interaction, multiscale calculations with MULTIBINIT,
 and parallelism. See the [[theory:acronyms|list of acronyms]].
 
-The basic tutorials are prerequisite for all other tutorials, as represented by the heavy orange arrows.
+The basic tutorials are prerequisite for all other tutorials.
 Then, some relationships between intermediate-level and advanced-level tutorials are indicated, in brown.
 A heavy brown arrow indicates that the starting intermediate tutorial is mandatory for all the tutorials of the indicated theme,
 while a dashed brown arrow indicates that only some of the tutorials of the indicated theme will need it.
