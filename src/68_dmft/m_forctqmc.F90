@@ -48,7 +48,7 @@ MODULE m_forctqmc
  use m_matlu, only : add_matlu,checkdiag_matlu,checkreal_matlu,chi_matlu,copy_matlu,destroy_matlu, &
      & diag_matlu,diff_matlu,fac_matlu,gather_matlu,init_matlu,magmomforb_matlu,magmomfspin_matlu, &
      & magmomfzeeman_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu, &
-     & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu
+     & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu,magnfield_matlu
  use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
  use m_paw_correlations, only : calc_vee
  use m_paw_dmft, only : paw_dmft_type
@@ -137,6 +137,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(matlu_type), allocatable :: dmat_diag(:),eigvectmatlu(:),hybri_coeff(:),matlu1(:),matlu2(:),matlu3(:)
  type(matlu_type), allocatable :: matlu4(:),matlumag(:),matlumag_orb(:),matlumag_spin(:),matlumag_tot(:)
  type(matlu_type), allocatable :: udens_atoms(:),udens_atoms_for_s(:)
+ type(matlu_type), allocatable :: levels_temp(:),magnfield(:)
  type(vee_type), allocatable :: vee_for_s(:),vee_rotated(:)
  character(len=13) :: tag
  character(len=500) :: message
@@ -315,6 +316,30 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      call print_matlu(energy_level%matlu(:),natom,1)
    end if ! pawprtvol>=3
 
+   !==================================================================
+   ! Add Zeeman contributions to local energy levels when nspinor = 2
+   !==================================================================
+   if(paw_dmft%dmft_magnfield .eq. 2) then
+
+     ABI_MALLOC(magnfield,(natom))
+     ABI_MALLOC(levels_temp,(natom))
+
+     write(message,'(a,2x,a)') ch10, " == Add Zeeman contributions to local energy levels in Ylm"
+     call wrtout(std_out,message,'COLL')
+
+     call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,magnfield)
+     call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,levels_temp)
+     call copy_matlu(energy_level%matlu,levels_temp,natom)
+
+     !Spin-Orbit case, not much tested so far (need to remove AFM sym)
+     call magnfield_matlu(magnfield,natom,paw_dmft%dmft_magnfield_b,2)
+     !call print_matlu(magnfield,natom,1)
+     call add_matlu(levels_temp,magnfield,energy_level%matlu,natom,-1)
+     call print_matlu(energy_level%matlu,natom,1)
+
+     ABI_FREE(magnfield)
+     ABI_FREE(levels_temp)
+   endif !dmft_magnfield
  end if ! useylm
 
  ABI_MALLOC(vee_rotated,(natom))
