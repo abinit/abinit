@@ -63,7 +63,7 @@ It includes the calculation of the current density to an impulse electric field 
 A [[tutorial:rttddft]] is available.
 Activate it using [[optdriver]]=9. Control the number of time steps using [[ntime]], and the time step value using [[dtele]].
 Related input variables : [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]].
-Related tests : [[test:rttddft_01]] to  [[test:rttddft_06]] as well as test:trttdft_1 to test:trttdft_4.
+Related tests : [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as [[test:rttdft_1]] to [[test:rttdft_4]].
 
 By F. Brieuc (MR1137)
 
