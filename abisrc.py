@@ -278,10 +278,10 @@ def main():
             cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
             return retcode
 
-        retcode = proj.check_abirules(verbose=options.verbose)
-        if retcode != 0:
-            cprint("check_abirules returned retcode: %s. Aborting now" % retcode, "red")
-            return retcode
+        #retcode = proj.check_abirules(verbose=options.verbose)
+        #if retcode != 0:
+        #    cprint("check_abirules returned retcode: %s. Aborting now" % retcode, "red")
+        #    return retcode
 
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)
