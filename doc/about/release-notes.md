@@ -86,7 +86,7 @@ It includes the calculation of the current density response to an impulse electr
 Activate it using [[optdriver]]=9. Control the number of time steps using [[ntime]], and the time step value using [[dtele]].
 The corresponding [[tutorial:rttddft]] is available.
 Related input variables : [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]].
-Related tests : [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial,[[test:rttddft_1]] to [[test:rttddft_4]].
+Related tests : [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial, test:rttddft_1 to test:rttddft_4. (Link to be re-established when the tests will be enabled).
 
 By F. Brieuc (MR1137)
 
@@ -149,6 +149,9 @@ By Xu He, Louis Bastogne, Alireza Sasani, Fernando Gomez-Ortiz, Subhadeep Bandyo
 * Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (though not yet tested neither documented)
 * Two extra components for the energy are printed.
 
+STILL TO BE DONE : tests and documentation of the input variables dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
+
+Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmftct_triqs_nleg]] are documented, but not tested.
 There has also been miscellaneous DMFT fixes and improvements
 
 By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148 give more details)
@@ -167,7 +170,7 @@ By M. Torrent (MR1099)
 **B.7** Orbital magnetization, chemical shielding, and electric field gradient : mGGA, abipy integration, GPU.
 
 * The mGGA has been implemented for the DDK DFPT perturbation, and the computation of the orbital magnetization has been tested with R2SCAN, both with and without spinors.
-* ZORA terms coupling electron spin to nuclear magnetic dipole moments are now computed. This accomplishes accurate chemical shielding calculations (see orbmag) in the presence of significant relativistic effects.
+* ZORA terms coupling electron spin to nuclear magnetic dipole moments are now computed. This accomplishes accurate chemical shielding calculations in the presence of significant relativistic effects.
 * Added GSR netcdf output of orbital magnetism and electric field gradient. Together with previous ORBMAG.nc additions, this completes abinit work for integration with abipy developments. 
 * GPU porting : DDK and orbital magnetism response with nuclear dipole moment and nspinor 2 are available.
 
@@ -177,20 +180,21 @@ By J. Zwanziger with help from M. Giantomassi (MR1101, 1111, 1119, 1128)
 
 
 
-**B.8** GPU porting of DMFT and mGGA, and miscellaneous GPU improvements.
+**B.8** GPU porting of DMFT,  mGGA and spin-orbit and miscellaneous GPU improvements.
 
 The global GPU porting of ABINIT using recent libraries/compilers, started three years ago, has been continued.
 In the previous releases 10.0 and 10.2, ground-state calculations [[optdriver]]=0 including Fock operator, 
 and Density-Functional Perturbation Theory [[optdriver]]=1 had been made available.
 
-In the present release 10.4, DMFT and mGGA have been ported to GPU, also using OpenMP.
+In the present release 10.4, DMFT and mGGA have been ported to GPU, also using OpenMP. Also, the previous implementations have been generalized to the spin-orbit case.
+Bugs have been fixed in the previous implementations, slowdowns have been eliminated, and some documentation has been added.
+The implementation is working with compiler NVHPC 24.9 openmpi (in addition to NVHPC 23.9).
 
-Numerous tests are available, [[test:gpu_omp_11]] to [[test:gpu_omp_25]]
+Numerous new tests are available, [[test:gpu_omp_30]] to [[test:gpu_omp_46]], including checks for PAW and Norm-conserving formalism and nspden 4.
 
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2 for the OpenMP capabilities.
-For the description of the modifications of ABINIT, see the Merge Requests (MR) below.
 
-By M. Sarraute, L. Baguet and M. Torrent (MR 1027, MR1055, MR1059, MR1071)
+By M. Sarraute, with help from L. Baguet and M. Torrent (MR 1120, 1123, 1125, 1129, 1134, 1136, 1142, 1144, 1163)
 
 
 
@@ -198,6 +202,15 @@ By M. Sarraute, L. Baguet and M. Torrent (MR 1027, MR1055, MR1059, MR1071)
 
 
 By G. Antonius and F. Bottin (MR 1105, 1112, 1113, 1117, 1145, 1155)
+
+
+**B.10** Variable cell NEB 
+
+Generalized solid-state NEB algorithm has been implemented.
+New input variable : [[neb_cell_algo]].
+See [[test:v10_83]].
+
+By Q. Delacroix and M. Torrent (MR1149)
 
 
 * * *
