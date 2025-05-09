@@ -109,7 +109,7 @@ Related tests : [[tests:v10_104]] to [[tests:v10_107]]
 
 Support for [[useylm]]=1 has been implemented in EPH routines.
 
-There is a new [[eph_task]]=18 to compute e-ph matrix elements along a k- or q-path. See [[test:eph4zpr]]=9.
+There is a new [[eph_task]]=18 to compute e-ph matrix elements along a k- or q-path. See [[test:eph4zpr_9]].
 
 By G. Allemand, R. Gupta, M. Giantomassi, M. Verstraete (MR1156, 1162, 1102)
 
@@ -125,7 +125,7 @@ Multibinit has been improved in many different aspects.
 * Inhomogeneous Spatiotemporal Electric Fields: Implementation of inhomogeneous electric fields, varying in time and space, is now available. 
 This feature has yielded successful results, as documented in arXiv:2501.17057 and arXiv:2411.16395. 
 The following new input variables control this functionality: [[efield2@multibinit]], [[efield_lambda2@multibinit]], [[efield_period@multibinit]], 
-[[efield_gmean@multbinit]], [[efield_gvel@multibinit]], [[efield_type@multbinit]], [[efield_phase@multibinit]], [[efield_phase2@multibinit]], [[efield_sigma@multibinit]], and [[efield_background@multibinit]]. 
+[[efield_gmean@multibinit]], [[efield_gvel@multibinit]], [[efield_type@multibinit]], [[efield_phase@multibinit]], [[efield_phase2@multibinit]], [[efield_sigma@multibinit]], and [[efield_background@multibinit]]. 
 
 There have been also several bug Fixes:
 * Symmetry-Equivalent Term Completeness: Corrected an issue where the number of symmetry-equivalent terms was incomplete. 
@@ -135,7 +135,7 @@ Dipole-Dipole Interaction Box Consistency: Resolved an inconsistency between the
 
 The input variables fit_ncoeff_per_cycle and fit_drop_rate have been disabled.
 
-See [[test:v9_210]] to [[test:v9_215]] for the inhomogeneous spatiotemporal electric fields, [[test:v10_216]] for Weighting of training set.
+See [[test:v9_210]] to [[test:v9_215]] for the inhomogeneous spatiotemporal electric fields, [[test:v9_216]] for Weighting of training set.
 
 By Xu He, Louis Bastogne, Alireza Sasani, Fernando Gomez-Ortiz, Subhadeep Bandyopadhyay, with some inspiration from Huazhang Zhang (MR1146 gives more details on each contribution, including the author or inspirator)
 
