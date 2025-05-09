@@ -766,7 +766,7 @@ module m_gwr
    ! Read wavefunctions from WFK file.
 
    procedure :: build_green => gwr_build_green
-   ! Build Green's functions in imaginary time from the gwr%ugb matrices stored in memory.
+   ! Build Green's functions in imaginary time from the %ugb matrices stored in memory.
 
    procedure :: build_tchi => gwr_build_tchi
    ! Build the irreducible polarizability
@@ -2523,7 +2523,7 @@ subroutine gwr_build_green(gwr, free_ugb)
          !end if
          call slk_pgemm("N", "C", work_gb, isgn * cone_gw, work_gb, czero_gw, green, ija=ija, ijb=ijb)
 
-         ! SVD. NB: green in destroyed in output
+         ! SVD. NB: green matrix in destroyed in output.
          compute_svd = .False.
          if (compute_svd) then
            call green%svd("N", "N", u_mat, s_vals, vt_mat)
@@ -2538,7 +2538,7 @@ subroutine gwr_build_green(gwr, free_ugb)
               "For ik_ibz: ", ik_ibz, ", kpt: ", trim(ktoa(kk_ibz)), ", itau: ", itau, ", ipm: ", ipm, ", spin: ", spin
            write(std_out, "(a,i0,2(a,f5.2),a,i0)") &
               "Need ", icomp, " vectors with frac: ", (100.0_dp * icomp) / size(s_vals), &
-              " for eratio: ", eratio, " matrix size: ", size(s_vals)
+              "% to reach eratio: ", eratio, ", G matrix size: ", size(s_vals)
            ABI_FREE(s_vals)
          end if
 
@@ -4124,7 +4124,6 @@ subroutine desc_copy(in_desc, new_desc)
 !Arguments ------------------------------------
  class(desc_t),intent(in) :: in_desc
  class(desc_t),intent(out) :: new_desc
-
 ! *************************************************************************
 
  call new_desc%free()
@@ -4187,7 +4186,6 @@ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
  logical :: compute_mapping
  !real(dp) :: tsec(2) !, cpu, wall, gflops
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  ! TODO: Add op_type
@@ -4947,6 +4945,8 @@ end subroutine gwr_build_tchi
 !!  gwr_redistrib_gt_kibz
 !!
 !! FUNCTION
+!!  Redistribute/deallocate G_k
+!!
 !!  If action == "communicate":
 !!      Redistribute G_k for fixed (itau, spin) according to `need_kibz` table.
 !!      Also, set got_kibz to 1 for each IBZ k-point that has been received.
@@ -5008,7 +5008,7 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
      end if
    end do
 
-   ! Define the sender for each kibz in do_mpi_kibz
+   ! Define the sender for each kibz in do_mpi_kibz.
    call xmpi_min_ip(sender_kibz, gwr%kpt_comm%value, ierr)
 
    ! Allocate memory
@@ -5302,7 +5302,6 @@ subroutine gwr_build_wc(gwr)
  integer :: units(2)
  real(dp) :: qq_ibz(3), tsec(2)
  complex(dpc) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
- !complex(gwpc), allocatable :: eps_glob(:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -5310,6 +5309,7 @@ subroutine gwr_build_wc(gwr)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1924, 1, tsec)
  call wrtout(units, " Building correlated screening Wc(i omega) ...", pre_newlines=2)
+
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
  if (allocated(gwr%wc_qibz)) then
@@ -5853,9 +5853,9 @@ else
  !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
  !  - when accumulating the self-energy, we have to use weights that depend on x.
 
- ! * The little group is needed when symsigma == 1
- ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
- ! * Note that TR is not yet supported so timrev is set to 1 even if TR has been used to generate the GS IBZ.
+ ! The little group is needed when symsigma == 1
+ ! If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
+ ! Note that TR is not yet supported so timrev is set to 1 even if TR has been used to generate the GS IBZ.
  use_umklp = 1
  do ikcalc=1,gwr%nkcalc
    call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
@@ -5999,7 +5999,7 @@ else
        end if
      end do ! my_ikf
 
-     ! Deallocate extra Wc matrices defined by got_qibz
+     ! Deallocate extra Wc matrices defined by got_qibz.
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "free")
 
      ! Integrate self-energy matrix elements in the unit cell.
@@ -6038,7 +6038,7 @@ end if
  ! Collect results and average
  call xmpi_sum(sigc_it_mat, gwr%comm%value, ierr)
 
- ! Average degenerate states.
+ ! Average over degenerate states.
  if (gwr%dtset%symsigma == +1 .and. .not. gwr%use_supercell_for_sigma) then
  !if (gwr%dtset%symsigma == +1) then
    call wrtout(std_out, " Symsigma 1 --> Averaging Sig_c matrix elements within degenerate subspaces.")
@@ -6304,8 +6304,7 @@ end if
    end do ! spin
 
    ! Print KS and QP gaps
-   msg = "Kohn-Sham gaps and band edges from IBZ mesh"
-   call gwr%ks_gaps%print(units, header=msg)
+   call gwr%ks_gaps%print(units, header="Kohn-Sham gaps and band edges from IBZ mesh")
 
    new_gaps = gwr%qp_ebands%get_gaps(ierr)
    write(msg,"(a,i0,a)")" QP gaps and band edges taking into account Sigma_nk corrections for ",gwr%nkcalc," k-points"
@@ -6315,7 +6314,7 @@ end if
    end if
    call new_gaps%free()
 
-   ! Write results to txt files.
+   ! Write results to text files.
    if (open_file(strcat(gwr%dtfil%filnam_ds(4), '_SIGC_IT'), msg, newunit=unt_it, action="write") /= 0) then
      ABI_ERROR(msg)
    end if
@@ -7015,7 +7014,7 @@ subroutine gwr_check_scf_cycle(gwr, converged)
    !else
    !  call wrtout(units, sjoin(" Convergence achieved at iteration", itoa(gwr%scf_iteration)))
    end if
-   ! TODO: Increment scf_interation in GWR.nc
+   ! TODO: Increment scf_iteration in GWR.nc
  end if
 
 end subroutine gwr_check_scf_cycle

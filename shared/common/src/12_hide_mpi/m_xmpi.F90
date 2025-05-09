@@ -26,13 +26,13 @@
 
 module m_xmpi
 
- use defs_basis
- use m_profiling_abi
  use, intrinsic :: iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
  use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
  USE_MPI
+ use defs_basis
+ use m_profiling_abi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
@@ -46,6 +46,7 @@ module m_xmpi
 #ifdef HAVE_MPI1
  include 'mpif.h'
 #endif
+
 #ifndef HAVE_FC_ISO_FORTRAN_2008
  integer,parameter :: int16=2,int32=4,int64=8
 #endif
@@ -148,7 +149,7 @@ module m_xmpi
  logical,save, private :: xmpi_use_inplace_operations = .False.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
 
- ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
+ ! For MPI < v4, collective communication routines accept only a 32bit integer as data count.
  ! To exchange more than 2^32 data we need to create specific user-defined datatypes
  ! For this, we need some parameters:
  integer(KIND=int32),public,parameter :: xmpi_maxint32 = huge(0_int32)
@@ -800,7 +801,7 @@ subroutine xmpi_init()
 
  if (lflag) xmpi_tag_ub = attribute_val
 
-!  Define type values.
+ ! Define type values.
  call MPI_TYPE_SIZE(MPI_CHARACTER, xmpi_bsize_ch, mpierr)
  call MPI_TYPE_SIZE(MPI_INTEGER, xmpi_bsize_int, mpierr)
  call MPI_TYPE_SIZE(MPI_REAL, xmpi_bsize_sp, mpierr)
@@ -809,9 +810,7 @@ subroutine xmpi_init()
  call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX, xmpi_bsize_dpc, mpierr)
 
  ! Find the byte size of Fortran record marker used in MPI-IO routines.
- if (xmpio_bsize_frm == 0) then
-   call xmpio_get_info_frm(xmpio_bsize_frm, xmpio_mpi_type_frm, xmpi_world)
- end if
+ if (xmpio_bsize_frm == 0) call xmpio_get_info_frm(xmpio_bsize_frm, xmpio_mpi_type_frm, xmpi_world)
 #endif
 
  ! Try to increase stack size.
@@ -824,7 +823,7 @@ subroutine xmpi_init()
      !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
    end if
 
-   ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment
+   ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment.
    inquire(file=ABI_MPIABORTFILE, exist=exists)
    if (exists) then
      ! Get free unit (emulate F2008 newunit for portability reasons)
@@ -942,9 +941,6 @@ end function xmpi_get_unit
 !! FUNCTION
 !!  Hides MPI_FINALIZE from MPI library.
 !!
-!! INPUTS
-!!  None
-!!
 !! SOURCE
 
 subroutine xmpi_end()
@@ -1038,7 +1034,6 @@ subroutine xmpi_abort(comm, mpierr, msg, exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
- !call clib_sleep(3)
  call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 
@@ -1061,8 +1056,7 @@ end subroutine xmpi_abort
 !! Routine for clean exit of f90 code by one processor
 !!
 !! INPUTS
-!!   exit_status:
-!!     return code.
+!!   exit_status: return code.
 !!
 !! NOTES
 !!  By default, it uses "call exit(1)", that is not completely portable.
@@ -1074,7 +1068,6 @@ subroutine sys_exit(exit_status)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exit_status
-
 ! **********************************************************************
 
 #if defined FC_NAG
@@ -1083,7 +1076,7 @@ subroutine sys_exit(exit_status)
  call exit(exit_status)
 #else
  ! stop with exit_status
- ! MT 06-2013:stop function only accept parameters !
+ ! MT 06-2013:stop function only accept parameters!
  if (exit_status== 0) stop  "0"
  if (exit_status== 1) stop  "1"
  if (exit_status==-1) stop "-1"
@@ -1243,7 +1236,6 @@ subroutine xmpi_comm_free_0D(comm)
  integer,intent(inout) :: comm
 
 !Local variables-------------------------------
-!scalars
 #ifdef HAVE_MPI
  integer :: comm_world,err_handler_dum,err_handler_sav,ierr,mpierr,mpierr_class
 ! *************************************************************************
@@ -1346,8 +1338,7 @@ subroutine xmpi_comm_free_2D(comms)
 
  do jj=LBOUND(comms,DIM=2),UBOUND(comms,DIM=2)
    do ii=LBOUND(comms,DIM=1),UBOUND(comms,DIM=1)
-     if (comms(ii,jj)/=xmpi_comm_null.and.comms(ii,jj)/=xmpi_world.and. &
-&        comms(ii,jj)/=xmpi_comm_self) then
+     if (comms(ii,jj)/=xmpi_comm_null.and.comms(ii,jj)/=xmpi_world.and. comms(ii,jj)/=xmpi_comm_self) then
        call MPI_COMM_FREE(comms(ii,jj),mpierr)
      end if
    end do
@@ -1394,8 +1385,7 @@ subroutine xmpi_comm_free_3D(comms)
  do kk=LBOUND(comms,DIM=3),UBOUND(comms,DIM=3)
    do jj=LBOUND(comms,DIM=2),UBOUND(comms,DIM=2)
      do ii=LBOUND(comms,DIM=1),UBOUND(comms,DIM=1)
-       if (comms(ii,jj,kk)/=xmpi_comm_null.and.comms(ii,jj,kk)/=xmpi_world.and. &
-&          comms(ii,jj,kk)/=xmpi_comm_self) then
+       if (comms(ii,jj,kk)/=xmpi_comm_null.and.comms(ii,jj,kk)/=xmpi_world.and. comms(ii,jj,kk)/=xmpi_comm_self) then
          call MPI_COMM_FREE(comms(ii,jj,kk),mpierr)
        end if
      end do
@@ -2607,7 +2597,6 @@ subroutine xmpi_distab_4D(nprocs, task_distrib)
 !scalars
  integer :: ii,jj,n1,n2,n3,n4,ntasks,irank,remainder,ntpblock
  integer,allocatable :: list(:)
-
 !************************************************************************
 
  n1= SIZE(task_distrib,DIM=1)
@@ -2840,6 +2829,7 @@ end subroutine xmpi_largetype_create
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_SUM for integers
+
  subroutine largetype_sum_int(invec,inoutvec,len,datatype)
   integer :: len,datatype
   integer :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2865,6 +2855,7 @@ end subroutine xmpi_largetype_create
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_SUM for reals
+
  subroutine largetype_sum_real(invec,inoutvec,len,datatype)
   integer :: len,datatype
   real(sp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2916,6 +2907,7 @@ end subroutine xmpi_largetype_create
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_SUM for complex
+
  subroutine largetype_sum_cplx(invec,inoutvec,len,datatype)
   integer :: len,datatype
   complex(spc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2940,7 +2932,8 @@ end subroutine xmpi_largetype_create
 !!  largetype_sum_dcplx
 !!
 !! FUNCTION
-!!  Routine used to overload MPI_SUM for double commplex
+!!  Routine used to overload MPI_SUM for double complex
+
  subroutine largetype_sum_dcplx(invec,inoutvec,len,datatype)
   integer :: len,datatype
   complex(dpc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2966,6 +2959,7 @@ end subroutine xmpi_largetype_create
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_LOR for logicals
+
  subroutine largetype_lor_log(invec,inoutvec,len,datatype)
   integer :: len,datatype
   logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2991,6 +2985,7 @@ end subroutine xmpi_largetype_create
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_LANG for logicals
+
  subroutine largetype_land_log(invec,inoutvec,len,datatype)
   integer :: len,datatype
   logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -3117,7 +3112,6 @@ subroutine xmpio_type_struct(ncount, block_length, block_displ, block_type, new_
 #ifndef HAVE_MPI_TYPE_CREATE_STRUCT
  integer,allocatable :: tmp_displ(:)
 #endif
-
 !************************************************************************
 
 #ifdef HAVE_MPI_TYPE_CREATE_STRUCT
@@ -3184,7 +3178,6 @@ subroutine xmpio_get_info_frm(bsize_frm, mpi_type_frm, comm)
  integer :: statux(MPI_STATUS_SIZE)
  real(dp) :: xrand(fnlen)
 #endif
-
 !************************************************************************
 
  bsize_frm=0; mpi_type_frm=0
@@ -3350,7 +3343,6 @@ subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
  character(len=500) :: msg
 !arrays
  integer :: statux(MPI_STATUS_SIZE)
-
 !************************************************************************
 
  !Workaround for XLF.
@@ -3476,7 +3468,6 @@ subroutine xmpio_write_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
  character(len=500) :: msg
 !arrays
  integer :: statux(MPI_STATUS_SIZE)
-
 !************************************************************************
 
  ! Workaround for XLF
@@ -3600,7 +3591,6 @@ subroutine xmpio_create_fstripes(ncount, sizes, types, new_type, my_offpad, mpie
 !scalars
  integer :: type_x,type_y,bsize_frm,bsize_x,bsize_y,nx,ny,column_type
  integer(MPI_ADDRESS_KIND) :: stride
-
 !************************************************************************
 
  ! Byte size of the Fortran record marker.
@@ -3690,7 +3680,6 @@ subroutine xmpio_create_fsubarray_2D(sizes, subsizes, array_of_starts, old_type,
  integer(XMPI_OFFSET_KIND) :: st_x,st_y
  integer(MPI_ADDRESS_KIND) :: stride_x
  !character(len=500) :: msg
-
 !************************************************************************
 
  ! Byte size of the Fortran record marker.
@@ -3774,7 +3763,6 @@ subroutine xmpio_create_fsubarray_3D(sizes, subsizes, array_of_starts, old_type,
  integer(XMPI_OFFSET_KIND) :: st_x,st_y,st_z
  integer(MPI_ADDRESS_KIND) :: stride_x
  !character(len=500) :: msg
-
 !************************************************************************
 
  bsize_frm = xmpio_bsize_frm    ! Byte size of the Fortran record marker.
@@ -3870,7 +3858,6 @@ subroutine xmpio_create_fsubarray_4D(sizes, subsizes, array_of_starts, old_type,
  integer :: column_type,plane_type,ldx,ldy,ldz,lda,vol_type
  integer(XMPI_OFFSET_KIND) :: st_x,st_y,st_z,st_a
  integer(MPI_ADDRESS_KIND) :: stride_x
-
 !************************************************************************
 
  bsize_frm = xmpio_bsize_frm    ! Byte size of the Fortran record marker.
@@ -3984,7 +3971,6 @@ subroutine xmpio_check_frmarkers(fh, offset, sc_mode, nfrec, bsize_frecord, ierr
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
  integer(XMPI_OFFSET_KIND),allocatable :: delim_record(:)
-
 !************************************************************************
 
  ! Workaround for XLF
@@ -4158,7 +4144,6 @@ subroutine xmpio_read_int(fh, offset, sc_mode, ncount, buf, fmarker, mpierr, adv
  character(len=500) :: msg
 !arrays
  integer :: statux(MPI_STATUS_SIZE)
-
 !************************************************************************
 
  ! Workaround for XLF
@@ -4250,7 +4235,6 @@ subroutine xmpio_read_dp(fh, offset, sc_mode, ncount, buf, fmarker, mpierr, adva
  character(len=500) :: msg
 !arrays
  integer :: statux(MPI_STATUS_SIZE)
-
 !************************************************************************
 
  ! Workaround for XLF
@@ -4370,7 +4354,6 @@ subroutine xmpio_write_frmarkers(fh, offset, sc_mode, nfrec, bsize_frecord, ierr
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
  integer(XMPI_OFFSET_KIND),allocatable :: delim_record(:)
-
 !************************************************************************
 
  ! Workaround for XLF
@@ -4555,7 +4538,6 @@ subroutine xmpio_create_fherm_packed(array_of_starts,array_of_ends,is_fortran_fi
 !arrays
  integer,allocatable :: col_type(:),block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
-
 !************************************************************************
 
  offset_err=0
@@ -4704,7 +4686,6 @@ subroutine xmpio_create_coldistr_from_fpacked(sizes,my_cols,old_type,new_type,my
 !arrays
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
-
 !************************************************************************
 
  ! Byte size of the Fortran record marker.
@@ -4832,7 +4813,6 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
  integer(XMPI_OFFSET_KIND) :: bsize_mat(2)
-
 !************************************************************************
 
  if (sizes(1) /= SUM(block_sizes(1,1:2)) .or. &
@@ -5327,7 +5307,7 @@ subroutine xcomm_print_names(xcomm)
 end subroutine xcomm_print_names
 !!***
 
-! Return True if all procs in xcomm can create a shared memory region. Cache the result.
+! True if all procs in xcomm can create a shared memory region. Cache the result.
 logical function xcomm_can_use_shmem(xcomm) result(ok)
 
 !Arguments ------------------------------------

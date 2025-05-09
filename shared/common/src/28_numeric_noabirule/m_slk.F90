@@ -3820,10 +3820,6 @@ subroutine slkmat_dp_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec
     vec%buffer_cplx,1,1,vec%desc,&
     work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
- ! TODO
- !call pxheevx_info_to_msg(info, jobz, nvec_calc, mene_found, msg)
- !ABI_CHECK(info == 0, msg)
-
  ! Handle possible error.
  if (info < 0) then
    write(msg,'(a,i0,a)')" The ", -info, "-th argument of P?HEEVX had an illegal value."
@@ -3860,11 +3856,10 @@ subroutine slkmat_dp_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec
 
  ! Check the number of eigenvalues found wrt to the number of vectors calculated.
  if (firstchar(jobz, ['V','v']) .and. mene_found /= nvec_calc) then
-   write(msg,'(5a)')&
+   write(msg,'(5a)') &
    " The user supplied insufficient space and PZHEEVX is not able to detect this before beginning computation. ",ch10,&
    " To get all the eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
    " eigenvectors in Z (M .LE. DESCZ(N_)) and sufficient workspace to compute them. "
-   !ierr = huge(1)
    ABI_ERROR(msg)
  end if
 
