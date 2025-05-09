@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -20,28 +20,28 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_epweights.F90",
  "defs_elphon.F90",
- "m_ddb_diel.F90",
- "m_ddb_elast.F90",
- "m_ddb_interpolate.F90",
- "m_eliashberg_1d.F90",
- "m_elphon.F90",
- "m_ddb_flexo.F90",
- "m_harmonic_thermo.F90",
- "m_ddb_internalstr.F90",
- "m_a2ftr.F90",
  "m_anaddb_dataset.F90",
  "m_atprj.F90",
+ "m_a2ftr.F90",
  "m_band2eps_dataset.F90",
+ "m_ddb_diel.F90",
+ "m_ddb_elast.F90",
+ "m_ddb_flexo.F90",
+ "m_ddb_internalstr.F90",
+ "m_ddb_interpolate.F90",
+ "m_ddb_piezo.F90",
+ "m_eliashberg_1d.F90",
+ "m_elphon.F90",
  "m_gruneisen.F90",
+ "m_harmonic_thermo.F90",
  "m_ifc.F90",
+ "m_iogkk.F90",
  "m_lwf.F90",
  "m_phonons.F90",
  "m_primcell_ddb_info.F90",
- "m_sortph.F90",
- "m_ddb_piezo.F90",
  "m_raman.F90",
- "m_iogkk.F90",
  "m_relaxpol.F90",
+ "m_sortph.F90",
  "m_thmeig.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

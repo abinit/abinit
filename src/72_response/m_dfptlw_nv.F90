@@ -7,16 +7,10 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2024 ABINIT group (MR)
+!!  Copyright (C) 2022-2025 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -27,7 +21,7 @@
 #include "abi_common.h"
 
 module m_dfptlw_nv
-    
+
  use defs_basis
  use defs_abitypes
  use defs_datatypes
@@ -60,7 +54,7 @@ module m_dfptlw_nv
 
 ! *************************************************************************
 
-contains 
+contains
 !!***
 
 !!****f* ABINIT/m_dfptlw_nv/dfptlw_nv
@@ -68,12 +62,12 @@ contains
 !!  dfptlw_nv
 !!
 !! FUNCTION
-!!  This routine calculates the nonvariational Ewald contributions to the 
+!!  This routine calculates the nonvariational Ewald contributions to the
 !!  spatial-dispersion third-order energy derivatives.
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2 
+!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
 !!  mpert=maximum number of ipert
 !!  my_natom=number of atoms treated by current processor
@@ -93,19 +87,11 @@ contains
 !!  d3etot_nv(2,3,mpert,3,mpert,3,mpert)= array with the nonvariational
 !!              contributions of d3etot
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rprimd,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
-    
+
  implicit none
 
 !Arguments ------------------------------------
@@ -124,7 +110,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
 
 !Local variables-------------------------------
 !scalars
- integer :: alpha,beta,delta,gamma,i1dir,i2dir,i3dir,ii,i1pert,i2pert,i3pert,istr,natom,sumg0 
+ integer :: alpha,beta,delta,gamma,i1dir,i2dir,i3dir,ii,i1pert,i2pert,i3pert,istr,natom,sumg0
  real(dp) :: fac,tmpim,tmpre
  character(len=500) :: msg
 
@@ -134,14 +120,15 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
  real(dp),allocatable :: dyewdq(:,:,:,:,:,:),dyewdqdq(:,:,:,:,:,:)
  real(dp),allocatable :: dyewdqdq_tII(:,:,:,:,:,:)
  real(dp) :: qphon(3),vec1(3),vec2(3)
- 
+ real(dp) :: rprimd_t(3,3),gprimd_t(3,3)
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
 !Initialiations
  natom=dtset%natom
- 
+
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
 
    !1st q-gradient of Ewald contribution to the IFCs
@@ -164,7 +151,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
          end do
        end do
      end do
-   end do 
+   end do
    ABI_FREE(dyewdq)
 
  end if
@@ -180,7 +167,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
 
 
    !Convert the indexes labelling the strain perturbation into cartesian coordinates
-   !Transform the metric perturbation direction 
+   !Transform the metric perturbation direction
    !(treat it as an atomic displacement)
    flg1(:)=1
    do i1pert=1,natom
@@ -200,8 +187,8 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
        end do
      end do
    end do
-               
-   !Transform the second q-gradient direction 
+
+   !Transform the second q-gradient direction
    !(treat it as an electric field)
    do i1pert=1,natom
      do i1dir=1,3
@@ -221,7 +208,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
      end do
    end do
 
-   !Transform the first q-gradient direction 
+   !Transform the first q-gradient direction
    !(treat it as an electric field)
    do i1pert=1,natom
      do i1dir=1,3
@@ -261,6 +248,8 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
 
    !Transform back the first q-gradient direction to reduced coordinates
    !(treat it as an electric field)
+   rprimd_t=transpose(rprimd)
+   gprimd_t=transpose(gprimd)
    fac=two_pi**2
    do i1pert=1,natom
      do alpha=1,3
@@ -270,7 +259,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
              do gamma=1,3
                vec1(gamma)=dyewdqdq_tII(ii,alpha,i1pert,gamma,beta,delta)
              end do
-             call cart39(flg1,flg2,transpose(rprimd),natom+2,natom,transpose(gprimd),vec1,vec2)
+             call cart39(flg1,flg2,rprimd_t,natom+2,natom,gprimd_t,vec1,vec2)
              do gamma=1,3
                dyewdqdq_tII(ii,alpha,i1pert,gamma,beta,delta)=vec2(gamma)*fac
              end do
@@ -296,7 +285,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
          end do
        end do
      end do
-   end do 
+   end do
    ABI_FREE(dyewdqdq_tII)
 
  end if
@@ -312,10 +301,10 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
          do i2dir=1,3
            do i3pert=1,mpert
              do i3dir=1,3
-               if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then 
+               if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                  tmpre=d3etot_nv(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
                  tmpim=d3etot_nv(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-                 if (abs(tmpre)>zero.or.abs(tmpim)>zero) then 
+                 if (abs(tmpre)>zero.or.abs(tmpim)>zero) then
                    write(msg,'(3(a,i2,a,i1),2f18.8)') &
            ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
                  & tmpre, tmpim
@@ -328,7 +317,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
          end do
        end do
      end do
-   end do 
+   end do
    write(msg,'(a)') ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
@@ -344,7 +333,7 @@ end subroutine dfptlw_nv
 !!  dfptlw_geom
 !!
 !! FUNCTION
-!!  This routine computes the nonvariational geometric contribution to the 
+!!  This routine computes the nonvariational geometric contribution to the
 !!  third-order energy derivative of the flexoelectric force-response tensor.
 !!
 !! INPUTS
@@ -380,7 +369,7 @@ end subroutine dfptlw_nv
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  vpsp1_i1pertdqdq(cplex*nfft,nspden,n2dq)= local potential of second-order
-!!          gradient Hamiltonian for i1pert 
+!!          gradient Hamiltonian for i1pert
 !!  vpsp1_i1pertdq_geom(cplex*nfft,nspden,3)= local potential of first-order
 !!          gradient Hamiltonian for i1pert wrt i3dir and i2dir
 !!  useylmgr= if 1 use the derivative of spherical harmonics
@@ -392,18 +381,6 @@ end subroutine dfptlw_nv
 !! OUTPUT
 !!  d3etot_tgeom_k(2,n2dq)= nonvariational geometric contribution to d3etot for
 !     this kpt.
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      dfpt_vlocaldq,dfpt_vlocaldqdq,dotprod_g,getgh1dqc,getgh1dqc_setup
-!!      init_rf_hamiltonian,mkkpg,rf_hamkq%free,rf_hamkq%load_spin
-!!      rf_transgrid_and_pack
 !!
 !! SOURCE
 
@@ -494,11 +471,11 @@ subroutine dfptlw_geom(cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
 !extradiagonal shear strains
  gamma=i3dir
  do idq=1, n2dq
-   if (i2pert==natom+3) then                                   
+   if (i2pert==natom+3) then
      istr=i2dir
-   else                                                        
-     istr=idq*3+i2dir                                          
-   endif                                                       
+   else
+     istr=idq*3+i2dir
+   endif
    beta=idx(2*istr-1); delta=idx(2*istr)
 
    !-----------------------------------------------------------------------------------------------
@@ -530,7 +507,7 @@ subroutine dfptlw_geom(cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
        &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
        !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-       call init_rf_hamiltonian(2,gs_hamkq,i1pert,rf_hamkq,&
+       call rf_hamkq%init(2,gs_hamkq,i1pert,&
        & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
        call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -584,7 +561,7 @@ subroutine dfptlw_geom(cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
        ABI_FREE(ffnl1)
        ABI_FREE(ph3d)
 
-     end if  
+     end if
 
    end do !ii
 
@@ -606,7 +583,7 @@ subroutine dfptlw_geom(cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
    &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
    !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-   call init_rf_hamiltonian(2,gs_hamkq,i1pert,rf_hamkq,&
+   call rf_hamkq%init(2,gs_hamkq,i1pert,&
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
    call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 

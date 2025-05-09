@@ -8,8 +8,8 @@ t50o_DS5_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi, t54.abi, t55.abi, t56.abi
-#%% exclude_builders = eos_nvhpc_*, eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
 #%%   t51.stdout, tolnlines = 3, tolabs = 0.0, tolrel = 0.0

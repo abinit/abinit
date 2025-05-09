@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,7 +119,7 @@ program abinit
  use m_manage_cuda
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -187,7 +187,6 @@ program abinit
 
 !0) Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
- !call xlf_set_sighandler()
 
 !------------------------------------------------------------------------------
 
@@ -204,7 +203,6 @@ program abinit
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
-
 
 !------------------------------------------------------------------------------
 
@@ -384,7 +382,7 @@ program abinit
 #endif
 
 !Enable GPU markers (NVTX/ROCTX) if required
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  NVTX_INIT()
 #endif
 
@@ -602,8 +600,7 @@ program abinit
  print_mem_report = 1
  do ii=1,ndtset_alloc
    if ((dtsets(ii)%usewvl == 1) .or. (dtsets(ii)%icoulomb > 0)) then
-     print_mem_report = 0
-     exit
+     print_mem_report = 0; exit
    end if
  end do
 

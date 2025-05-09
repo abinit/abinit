@@ -88,9 +88,9 @@ znucl 3 9
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
-#%% exclude_builders = eos_nvhpc_*
 #%% [files]
 #%% files_to_test =
 #%%   t61.abo, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2

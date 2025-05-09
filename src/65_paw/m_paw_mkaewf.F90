@@ -6,7 +6,7 @@
 !! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,18 +32,15 @@ module m_paw_mkaewf
  use m_hdr
  use m_dtset
  use m_dtfil
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
- use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : wrap2_zero_one
  use m_fftcore,        only : sphereboundary
  use m_geometry,       only : xcart2xred
  use m_crystal,        only : crystal_t
- use m_ebands,         only : ebands_ncwrite
+ use m_ebands,         only : ebands_t
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
  use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
@@ -180,11 +177,8 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  type(pawcprj_type),allocatable :: Cprj_k(:,:)
  type(pawfgrtab_type) :: local_pawfgrtab(my_natom)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
-#ifdef HAVE_NETCDF
  integer :: fform,ncerr,ncid,ae_ncid,pw_ncid,aeons_ncid,psons_ncid
  character(len=fnlen) :: fname
-#endif
-
 ! ************************************************************************
 
  DBG_ENTER("COLL")
@@ -273,16 +267,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  end if
 
  ierr=0
-#ifndef HAVE_NETCDF
- ierr = -1
- write(msg,'(3a)')&
-& "netcdf support must be enabled in order to output AE PAW wavefunction. ",ch10,&
-& "No output will be produced, use --enable-netcdf at configure-time. "
- ABI_WARNING(msg)
- return
-!These statements are necessary to avoid the compiler complain about unused variables:
- ii=Dtset%usepaw;ii=Dtfil%unpaw;ii=Hdr%usepaw
-#endif
 
 !FIXME check ordering in cprj and Eventually in external file
 !why is iorder_cprj not stored in the file for crosschecking purpose?
@@ -298,7 +282,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  ABI_MALLOC(phkr,(2,nfftot))
  ABI_MALLOC(gbound,(2*mgfftf+8,2))
 
-#ifdef HAVE_NETCDF
 !=== Initialize ETSF_IO files ===
 ! FIXME: nspinor == 2 is buggy
 
@@ -344,7 +327,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
    ! Complete the geometry information.
    NCF_CHECK(crystal%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   NCF_CHECK(ebands%ncwrite(ncid))
 
    NCF_CHECK(nf90_close(ncid))
  end if
@@ -361,7 +344,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  psons_ncid = nctk_idname(ncid, "ur_ps_onsite")
 
  NCF_CHECK(nctk_set_datamode(ncid))
-#endif
 
 !Init structure storing phi_{nlm} and tphi_(nlm} on the dense FFT points located in the PAW spheres.
  ABI_MALLOC(Paw_onsite,(natom))
@@ -639,7 +621,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
          ABI_WARNING(msg)
        end if ! Check if serial run
 
-#ifdef HAVE_NETCDF
        ncerr = nf90_put_var(ncid, ae_ncid, ur_ae, &
           start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
        NCF_CHECK(ncerr)
@@ -655,7 +636,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
        ncerr = nf90_put_var(ncid, psons_ncid, ur_ps_onsite, &
          start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
        NCF_CHECK(ncerr)
-#endif
 
        ABI_FREE(ur_ae)
        ABI_FREE(ur_ae_onsite)

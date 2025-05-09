@@ -1,10 +1,15 @@
 # coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy.
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
 
 executable = "anaddb"
 
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+
 ValueWithConditions = dict
 Variable = dict
 
@@ -57,7 +62,7 @@ of uniaxial crystals, the z-axis should be chosen along the optical axis.
         added_in_version="before_v9",
         text=r"""
 Governs the imposition of the Acoustic Sum Rule (ASR) in the ANADDB application.
-Note that there is a similar input variable [[asr]] for ABINIT. 
+Note that there is a similar input variable [[asr]] for ABINIT.
 
   * 0 --> no ASR for interatomic force constants is imposed.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
@@ -109,7 +114,7 @@ exactly the same likely due to an extra symmetrisation in the
 diagonalisation routine. Of course, when the matrix at Gamma has been
 generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
-should use a diagonalisation routine for non-hermitian matrices. 
+should use a diagonalisation routine for non-hermitian matrices.
 ).
 """,
     ),

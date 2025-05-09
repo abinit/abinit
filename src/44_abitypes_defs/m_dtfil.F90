@@ -6,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,14 +84,20 @@ module m_dtfil
    !     0: no image
    !    >0: index of an image
 
+  integer :: ireadctqmcdata
+   ! ireadctqmcdata non-zero if the ctqmcdata file must be read
+
   integer :: ireadddb
-   ! ireadddb non-zero  if the ddb file must be read
+   ! ireadddb non-zero if the ddb file must be read
 
   integer :: ireadden
-   ! ireadden non-zero  if the den file must be read
+   ! ireadden non-zero if the den file must be read
 
   integer :: ireadkden
-   ! ireadkden non-zero  if the kden file must be read
+   ! ireadkden non-zero if the kden file must be read
+
+  integer :: ireadself
+   ! ireadself non-zero if the self file must be read
 
   integer :: ireadwf
    ! if(optdriver/=1), that is, no response-function computation,
@@ -137,6 +143,11 @@ module m_dtfil
    !   ab_in, ab_out, abi, abo, tmp
    ! if dataset mode, the same 5 filenames, appended with //'_DS'//trim(jdtset)
 
+  character(len=fnlen) :: filctqmcdatain
+   ! if no dataset mode                   : abi//'_CTQMC_DATA'
+   ! if dataset mode, and getctqmcdata==0 : abi//'_DS'//trim(jdtset)//'_CTQMC_DATA'
+   ! if dataset mode, and getctqmcdata/=0 : abo//'_DS'//trim(jgetctqmcdata)//'_CTQMC_DATA'
+
   character(len=fnlen) :: filddbsin
    ! if no dataset mode             : abi//'DDB'
    ! if dataset mode, and getddb==0 : abi//'_DS'//trim(jdtset)//'DDB'
@@ -171,6 +182,11 @@ module m_dtfil
    ! if dataset mode, and getpawden==0 : abi//'_DS'//trim(jdtset)//'PAWDEN'
    ! if dataset mode, and getpawden/=0 : abo//'_DS'//trim(jgetpawden)//'PAWDEN'
 
+  character(len=fnlen) :: filselfin
+   ! if no dataset mode              : abi//'_Self-omega'
+   ! if dataset mode, and getself==0 : abi//'_DS'//trim(jdtset)//'_Self-omega'
+   ! if dataset mode, and getself/=0 : abo//'_DS'//trim(jgetself)//'_Self-omega'
+
   character(len=fnlen) :: filsigephin
    ! Filename used to read SIGEPH.nc file.
    ! Initialize via getsigeph_filepath
@@ -187,9 +203,9 @@ module m_dtfil
    ! Filename used to read GWAN.nc file.
    ! Initialize via getgwan_filepath
 
-  character(len=fnlen) :: filvarpeqin
-   ! Filename used to read VARPEQ.nc file.
-   ! Initialize via getvarpeq_filepath
+  character(len=fnlen) :: filvpqin
+   ! Filename used to read VPQ.nc file.
+   ! Initialize via getvpq_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -347,7 +363,9 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_sig
   character(len=fnlen) :: fnameabo_spcur
   character(len=fnlen) :: fnameabo_sus
+  character(len=fnlen) :: fnameabo_td_current
   character(len=fnlen) :: fnameabo_td_ener
+  character(len=fnlen) :: fnameabo_td_ef
   character(len=fnlen) :: fnameabo_vha
   character(len=fnlen) :: fnameabo_vpsp
   character(len=fnlen) :: fnameabo_vso
@@ -391,6 +409,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_app_pot
   character(len=fnlen) :: fnameabo_app_opt
   character(len=fnlen) :: fnameabo_app_opt2
+  character(len=fnlen) :: fnameabo_app_orbmag
   character(len=fnlen) :: fnameabo_app_stm
   character(len=fnlen) :: fnameabo_app_vclmb
   character(len=fnlen) :: fnameabo_app_vha
@@ -484,12 +503,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  integer,parameter :: unwff1=1,unwff2=2,unwff3=8,unwffgs=3,unwfkq=4,unwft1=11
  integer,parameter :: unwft2=12,unwft3=15,unwftgs=13,unwftkq=14,unylm=24,unylm1=25
  integer,parameter :: unkss=40,unscr=41,unqps=43
- integer :: ii,iimage,ireadden,ireadkden,ireadwf,ixx,jdtset,will_read
+ integer :: ii,iimage,ireadctqmcdata,ireadden,ireadkden,ireadself,ireadwf,ixx,jdtset,will_read
  character(len=10) :: appen,tag
  character(len=9) :: stringvar
  character(len=15) :: stringfile
  character(len=500) :: msg
- character(len=fnlen) :: filsus,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr,fil_efmas
+ character(len=fnlen) :: filsus,filctqmcdatain,filddbsin,fildens1in,fildensin,filpawdensin,filkdensin,filqps,filscr,filselfin,fil_efmas
  character(len=fnlen) :: fnamewff1,fnamewffddk,fnamewffdelfd,fnamewffdkdk,fnamewffdkde,fnamewffk,fnamewffq
  character(len=fnlen) :: filbseig,filfft,filhaydock,fil_bsreso,fil_bscoup
  character(len=fnlen) :: filwfkfine
@@ -656,11 +675,11 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                  getpath=dtset%getgwan_filepath)
  if (will_read == 0) dtfil%filgwanin = ABI_NOFILE
 
- ! According to getvarpeq_filepath, build _VARPEQ file name
- stringfile='_VARPEQ.nc'; stringvar='varpeq'
- call mkfilename(filnam, dtfil%filvarpeqin, dtset%getvarpeq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                 getpath=dtset%getvarpeq_filepath)
- if (will_read == 0) dtfil%filvarpeqin = ABI_NOFILE
+ ! According to getvpq_filepath, build _VPQ file name
+ stringfile='_VPQ.nc'; stringvar='vpq'
+ call mkfilename(filnam, dtfil%filvpqin, dtset%getvpq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getvpq_filepath)
+ if (will_read == 0) dtfil%filvpqin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -781,9 +800,25 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                  getpath=dtset%getwfkfine_filepath)
  if(will_read==0)filwfkfine=trim(filnam_ds(3))//'_WFK'
 
+ ! According to getself, build _Self-omega file name, referred as filselfin
+ ! A default is available if getself is 0
+ stringfile='_Self-omega' ; stringvar='self'
+ call mkfilename(filnam,filselfin,dtset%getself,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+ if(will_read==0)filselfin=trim(filnam_ds(3))//'_Self-omega'
+ ireadself=will_read
+
+ ! According to getctqmcdata, build _CTQMC_DATA file name, referred as filctqmcdatain
+ ! A default is available if getctqmcdata is 0
+ stringfile='_CTQMC_DATA' ; stringvar='ctqmcdata'
+ call mkfilename(filnam,filctqmcdatain,dtset%getctqmcdata,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
+ if(will_read==0)filctqmcdatain=trim(filnam_ds(3))//'_CTQMC_DATA'
+ ireadctqmcdata=will_read
+
  dtfil%ireadden      =ireadden
  dtfil%ireadkden     =ireadkden
  dtfil%ireadwf       =ireadwf
+ dtfil%ireadself     =ireadself
+ dtfil%ireadctqmcdata=ireadctqmcdata
  dtfil%filnam_ds(1:5)=filnam_ds(1:5)
 
  dtfil%fnameabi_bsham_reso=fil_bsreso
@@ -794,11 +829,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabi_qps  =filqps
  dtfil%fnameabi_scr  =filscr
  dtfil%fnameabi_efmas=fil_efmas
+ dtfil%filctqmcdatain=filctqmcdatain
  dtfil%filddbsin     =filddbsin
  dtfil%fildensin     =fildensin
  dtfil%fildens1in    =fildens1in
  dtfil%filkdensin    =filkdensin
  dtfil%filpawdensin  =filpawdensin
+ dtfil%filselfin     =filselfin
  dtfil%fnameabi_wfkfine = filwfkfine
  dtfil%filstat       =filstat
  dtfil%fnamewffk     =fnamewffk
@@ -849,7 +886,9 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'
  dtfil%fnameabo_spcur=trim(dtfil%filnam_ds(4))//'_SPCUR'
  dtfil%fnameabo_sus=trim(dtfil%filnam_ds(4))//'_SUS'
+ dtfil%fnameabo_td_current=trim(dtfil%filnam_ds(4))//'_TDCURRENT'
  dtfil%fnameabo_td_ener=trim(dtfil%filnam_ds(4))//'_TDENER'
+ dtfil%fnameabo_td_ef=trim(dtfil%filnam_ds(4))//'_TDEFIELD'
  dtfil%fnameabo_vha=trim(dtfil%filnam_ds(4))//'_VHA'
  dtfil%fnameabo_vpsp=trim(dtfil%filnam_ds(4))//'_VPSP'
  dtfil%fnameabo_vso=trim(dtfil%filnam_ds(4))//'_VSO'
@@ -1061,6 +1100,7 @@ subroutine dtfil_init_time(dtfil,iapp)
  dtfil%fnameabo_app_nesting=trim(filapp)//'_NEST'
  dtfil%fnameabo_app_opt=trim(filapp)//'_OPT'
  dtfil%fnameabo_app_opt2=trim(filapp)//'_OPT2'
+ dtfil%fnameabo_app_orbmag=trim(filapp)//'_ORBMAG'
  dtfil%fnameabo_app_pawden=trim(filapp)//'_PAWDEN'
  dtfil%fnameabo_app_pot=trim(filapp)//'_POT'
  dtfil%fnameabo_app_stm=trim(filapp)//'_STM'
@@ -1114,7 +1154,7 @@ end subroutine dtfil_init_time
 !! SOURCE
 
 subroutine fappnd(filapp,filnam,iapp,&
-&                 suff) ! optional argument
+                  suff) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -1129,7 +1169,6 @@ subroutine fappnd(filapp,filnam,iapp,&
  character(len=3) :: suffixe
  character(len=8) :: nchar
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if(iapp==0)then
@@ -1819,7 +1858,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 !    Print greetings for interactive user
      write(std_out,*,err=10,iomsg=errmsg)' ABINIT ',trim(abinit_version)
      write(std_out,*,err=10,iomsg=errmsg)' '
-     write(std_out,*,err=10,iomsg=errmsg)' I am not the master. Writing log in ',fillog 
+     write(std_out,*,err=10,iomsg=errmsg)' I am not the master. Writing log in ',fillog
    else
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(NULL_FILE,msg,unit=std_out,action="write") /= 0) then

@@ -11,9 +11,9 @@ ABINITv2.2 is able to read them with core correction (thanks to AF).
 
 # The original cpi file
 
-We will suppose that the user has been able to generate a `cpi` file from the FHI98PP code. 
+We will suppose that the user has been able to generate a `cpi` file from the FHI98PP code.
 There is one such file in the `~abinit/tests/Pspdir` directory,
-with the name `al_h.cpi` (the FHI98PP code generated a file named `al:h.cpi`, 
+with the name `al_h.cpi` (the FHI98PP code generated a file named `al:h.cpi`,
 but the name was changed, to allow portability under DOS/Windows) .
 It begins by:
 
@@ -114,11 +114,11 @@ Line 4 describes 3 parameters needed to read the model core-charge
 Line 5-7 have no interest up to now.
 
 A pseudopotential with format 6 will be treated by
-the routine `psp6in.f`, that calls `psp5lo.f` (local part) and `psp5nl.f` (non-local part). 
+the routine `psp6in.f`, that calls `psp5lo.f` (local part) and `psp5nl.f` (non-local part).
 There is no `psp6lo.f` or `psp6nl.f`.
 
 The integral of (V(r)+Zion/r) r^2 in psp5lo.f is performed
 from 0 to the highest allowed radius (usually about 100 a.u.),
-except that beyond 20 a.u. no value of abs(V(r)) larger than 2.0d-8 is tolerated. 
-This will allow to cut off spurious behaviour of pseudopotential whose data file 
+except that beyond 20 a.u. no value of abs(V(r)) larger than 2.0d-8 is tolerated.
+This will allow to cut off spurious behaviour of pseudopotential whose data file
 is written in single precision.

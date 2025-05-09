@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # Toolbox for Research on Interacting Quantum Systems (TRIQS)
@@ -25,7 +25,7 @@ AC_DEFUN([SD_TRIQS_INIT], [
   sd_triqs_init="unknown"
   sd_triqs_ok="unknown"
   sd_triqs_api_version="unknown"
-  sd_triqs_complex="unknown"
+  sd_triqs_complex=""
 
   # Set adjustable parameters
   sd_triqs_options="$1"
@@ -84,6 +84,12 @@ AC_DEFUN([SD_TRIQS_INIT], [
         sd_triqs_init="dir"
       fi],
     [ sd_triqs_enable="${sd_triqs_enable_def}"; sd_triqs_init="def"])
+
+  AC_ARG_ENABLE([triqs-complex],
+    [AS_HELP_STRING([--enable-triqs-complex],
+      [Activate support for complex version of TRIQS (default: no)])],
+    [sd_triqs_complex="${enableval}"],
+    [sd_triqs_complex="no"])
 
   # Declare environment variables
   AC_ARG_VAR([TRIQS_CPPFLAGS], [C preprocessing flags for TRIQS.])
@@ -206,6 +212,10 @@ AC_DEFUN([SD_TRIQS_DETECT], [
           AC_DEFINE([HAVE_TRIQS_v2_0], 1,
             [Define to 1 if you have the TRIQS 2.0 libraries.])
           ;;
+        3.2)
+          AC_DEFINE([HAVE_TRIQS_v3_2], 1,
+            [Define to 1 if you have the TRIQS 3.2 libraries.])
+          ;;
         3.4)
           AC_DEFINE([HAVE_TRIQS_v3_4], 1,
             [Define to 1 if you have the TRIQS 3.4 libraries.])
@@ -214,11 +224,6 @@ AC_DEFUN([SD_TRIQS_DETECT], [
           AC_MSG_ERROR([TRIQS API version ${sd_triqs_api_version} not implemented in the build system])
           ;;
       esac
-
-      if test "${sd_triqs_complex}" = "yes"; then
-        AC_DEFINE([HAVE_TRIQS_COMPLEX], 1,
-          [Define to 1 if you have the complex TRIQS version.])
-      fi
 
     else
       if test "${sd_triqs_status}" = "optional" -a \
@@ -262,8 +267,8 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
   LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
   LIBS="${sd_triqs_libs} ${LIBS}"
 
-  # Check TRIQS C++ API
-  AC_MSG_CHECKING([whether the TRIQS library works])
+  # Check TRIQS internal C++ API
+  AC_MSG_CHECKING([whether you are linked against the internal TRIQS library])
   AC_LANG_PUSH([C++])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
@@ -272,27 +277,30 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
     ]],
     [[
       gf_struct_t gf_struct;
-      triqs_cthyb::solver_core solver({1.,gf_struct,1,1,1,1,true});
+      triqs_cthyb::solver_core solver({1.,gf_struct,1,1,1,true});
+      triqs_cthyb::many_body_op_t H;
+      auto paramCTQMC = triqs_cthyb::solve_parameters_t(H,1);
+      paramCTQMC.time_invariance = true;
     ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="3.4"], [sd_triqs_ok="no"])
   AC_LANG_POP([C++])
   AC_MSG_RESULT([${sd_triqs_ok}])
 
-  # Check if we have the complex version
-  if test "${sd_triqs_ok}" = "yes"; then
-    AC_MSG_CHECKING([whether the TRIQS library supports complex Hamiltonian])
+  # Check TRIQS C++ API
+  if test "${sd_triqs_ok}" != "yes"; then
+    AC_MSG_CHECKING([whether the TRIQS library works])
     AC_LANG_PUSH([C++])
     AC_LINK_IFELSE([AC_LANG_PROGRAM(
       [[
 #       include <triqs_cthyb/solver_core.hpp>
-#       include <complex>
-        using namespace triqs_cthyb;
+        using triqs::hilbert_space::gf_struct_t;
       ]],
       [[
-        many_body_op_t H;
-        H += 1i;
-      ]])], [sd_triqs_complex="yes"], [sd_triqs_complex="no"])
+        auto omega = cppdlr::build_dlr_rf(1.,1.e-6);
+        gf_struct_t gf_struct;
+        triqs_cthyb::solver_core solver({1.,gf_struct,1,1,1,true});
+      ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="3.2"], [sd_triqs_ok="no"])
     AC_LANG_POP([C++])
-    AC_MSG_RESULT([${sd_triqs_complex}])
+    AC_MSG_RESULT([${sd_triqs_ok}])
   fi
 
   # Check old TRIQS C++ API
@@ -570,5 +578,7 @@ AC_DEFUN([_SD_TRIQS_DUMP_CONFIG], [
     else
       AC_MSG_RESULT([${sd_triqs_libs}])
     fi
+    AC_MSG_CHECKING([whether to enable the complex version of TRIQS])
+    AC_MSG_RESULT([${sd_triqs_complex}])
   fi
 ]) # _SD_TRIQS_DUMP_CONFIG

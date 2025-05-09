@@ -6,7 +6,7 @@
 !!   Routines related to the local part of the pseudopotentials.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM, DRH)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MM, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,8 +55,8 @@ module m_mklocl
  public :: mklocl_recipspace
  public :: dfpt_vlocal           ! Local part of 1st-order potential due to atomic displacement.
  public :: vlocalstr             ! Compute strain derivatives of local ionic potential
- public :: dfpt_vlocaldq         ! Compute the first q-gradient of the 1st-order potential due to atomic displacement. 
- public :: dfpt_vlocaldqdq       ! Compute the second q-gradient of the 1st-order potential due to atomic displacement. 
+ public :: dfpt_vlocaldq         ! Compute the first q-gradient of the 1st-order potential due to atomic displacement.
+ public :: dfpt_vlocaldqdq       ! Compute the second q-gradient of the 1st-order potential due to atomic displacement.
  public :: dfpt_vmetdqdq       ! Compute the second q-gradient of the 1st-order potential due to a metric perturbation.
 !!***
 
@@ -435,7 +435,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 #ifdef FC_NVHPC
                  !Silly trick to prevent NVHPC optimization issue
                  if(nothing) write(100,*) shift1,shift2,shift3
-#endif                 
+#endif
 
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
@@ -492,7 +492,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
                  ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
 &                 - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
                  vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
-&                 - 2.0_dp*vion1                 ) / gsquar 
+&                 - 2.0_dp*vion1                 ) / gsquar
 
                  gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
 &                 gprimd(1,3)*dble(ig3)
@@ -506,7 +506,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
                  do ia=ia1,ia2
                    sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
                    sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
-                 end do               
+                 end do
 !                Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
                  term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
 !                Compute contribution to stress tensor
@@ -525,7 +525,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 !                 ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
 !&                 - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
 !                 vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
-!&                 - 2.0_dp*vion1          ) / gsquar 
+!&                 - 2.0_dp*vion1          ) / gsquar
 !
 !                 gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
 !&                 gprimd(1,3)*dble(ig3)
@@ -540,7 +540,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 !                   sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
 !                   sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
 !                 end do
-!                 !Implement beta correction as in eq. 62 (PRB 96 075448 2017)           
+!                 !Implement beta correction as in eq. 62 (PRB 96 075448 2017)
 !                 gcart_para = sqrt(gcart(1)**2+gcart(2)**2)
 !                 gcart_perp = gcart(3)
 !                 gsquar = gcart(1)**2+gcart(2)**2+gcart(3)**2
@@ -553,7 +553,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 !                 end if
 !!                Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
 !                 term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
-!!                Compute contribution to stress tensor                 
+!!                Compute contribution to stress tensor
 !                 lpsstr(1)=lpsstr(1)-term*(gcart(1)*gcart(1))*(1+beta)
 !                 lpsstr(2)=lpsstr(2)-term*(gcart(2)*gcart(2))*(1+beta)
 !                 lpsstr(3)=lpsstr(3)-term*(gcart(3)*gcart(3)-gsquar)
@@ -636,7 +636,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
  end if
 
- ABI_FREE(gcutoff) 
+ ABI_FREE(gcutoff)
 
  if(option==2)then
 !  Init mpi_comm
@@ -671,12 +671,12 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 !     lpsstr(3)=(lpsstr(3)-eei)/ucvol
 !     lpsstr(4)=lpsstr(4)/ucvol
 !     lpsstr(5)=lpsstr(5)/ucvol
-!     lpsstr(6)=lpsstr(6)/ucvol   
+!     lpsstr(6)=lpsstr(6)/ucvol
      !lpsstr=lpsstr/ucvol
-!   endif 
+!   endif
 
  end if
- 
+
  if(option==4)then
 !  Init mpi_comm
    if(mpi_enreg%nproc_fft>1)then
@@ -1341,9 +1341,9 @@ end subroutine vlocalstr
 !! dfpt_vlocaldq
 !!
 !! FUNCTION
-!! Compute q-gradient (at q=0) of the local part of 1st-order 
-!! atomic displacement potential from the appropriate
-!! atomic pseudopotential with structure and derivative factor.
+!! Compute q-gradient (at q=0) of the local part of 1st-order
+!! atomic displacement local potential or pseudocore density from the appropriate
+!! atomic pseudopotential data with structure and derivative factor.
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1363,34 +1363,38 @@ end subroutine vlocalstr
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
-!!  qdir=direction of the q-gradient 
+!!  qdir=direction of the q-gradient
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
+!!             if optnc=1-> spline fit of n_c(q) for each type of atom.
+!!  optnc= (OPTIONAL) if present and equal to 1, does the calculation assuming a
+!!         pseudocore density
 !!
 !! OUTPUT
-!!  vpsp1dq(cplex*nfft)=q-gradient (at q=0) of the first-order local 
+!!  vpsp1dq(cplex*nfft)=q-gradient (at q=0) of the first-order local
 !!  crystal pseudopotential in real space
 !!    (including the minus sign, forgotten in the paper non-linear..
 !!
 !! NOTES
 !! * IMPORTANT: the formalism followed in this routine
-!!   assumes a phase factor for the perturbation that 
+!!   assumes a phase factor for the perturbation that
 !!   is different to the one used elsewhere in the code (See M.Stengel paper):
-!!         
+!!
 !!             here: e^{i q (R_l + \tau_{\kappa})}
-!!   rest of ABINIT: e^{i q R_l}  
+!!   rest of ABINIT: e^{i q R_l}
 !!
 !!  **A -i factor has been factorized out in all the contributions of the first
-!!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
+!!    q-gradient of the atomic displacement Hamiltonian. This is lately included
 !!    in the matrix element calculation.
 !!
 !! SOURCE
 
 subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq)
+& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,&
+& optnc) !optional
 
  implicit none
 
@@ -1398,6 +1402,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
  integer,intent(in) :: qdir
+ integer,optional,intent(in) :: optnc
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1408,8 +1413,9 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
 !Local variables -------------------------
 !scalars
- integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
- integer :: itypat,re=1
+ integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1
+ integer :: itypat, optnc_
+ integer, parameter :: im=2, re=1
  real(dp),parameter :: tolfix=1.000000001_dp
  real(dp) :: cutoff,gfact,gmag,gq1
  real(dp) :: gq2,gq3,gsquar
@@ -1425,6 +1431,8 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 ! *********************************************************************
 
  iatom=ipert
+
+ optnc_=0; if (present(optnc)) optnc_=optnc
 
  if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
 
@@ -1447,7 +1455,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
 !  This is to allow q=0
    qeq0=.false.
-   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then 
+   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
@@ -1493,8 +1501,10 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 !            Evaluate spline fit to get V(q) and V(q)':
              call splfit(qgrid,vion1dq,vlspl(:,:,itypat),1,(/gmag/),vion1,mqgrid,1)
 
-             vion1=vion1/gsquar
-             vion1dq=(vion1dq-2.0_dp*gmag*vion1)/gsquar
+             if (optnc_==0) then
+               vion1=vion1/gsquar
+               vion1dq=(vion1dq-2.0_dp*gmag*vion1)/gsquar
+             end if
 
              gvec=(/ig1,ig2,ig3/)
              gfact=dot_product(gmet(qdir,:),gvec(:))/gmag
@@ -1506,7 +1516,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
              if (idir==qdir) then
                sfr=sfr + phre_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
                sfi=sfi - phimag_vl3(ig1,ig2,ig3,iatom)*two_pi*vion1(1)
-             end if         
+             end if
 
              work1(re,ii)=sfr
              work1(im,ii)=sfi
@@ -1516,6 +1526,11 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
        end if
      end do
    end do
+
+!  Consider the macroscopic term in the case of the pseudocore density
+   if (optnc_==1.and.idir==qdir) then
+     work1(re,1)= two_pi*vlspl(1,1,itypat)
+   end if
 
 !  Transform back to real space
    call fourdp(cplex,work1,vpsp1dq,1,mpi_enreg,nfft,1,ngfft,0)
@@ -1595,7 +1610,7 @@ end subroutine dfpt_vlocaldq
 !! dfpt_vlocaldqdq
 !!
 !! FUNCTION
-!! Compute 2nd q-gradient (at q=0) of the local part of 1st-order 
+!! Compute 2nd q-gradient (at q=0) of the local part of 1st-order
 !! atomic displacement potential from the appropriate
 !! atomic pseudopotential with structure and derivative factor.
 !!
@@ -1617,31 +1632,31 @@ end subroutine dfpt_vlocaldq
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
-!!  qdir1=direction of the first q-gradient 
-!!  qdir2=direction of the second q-gradient 
+!!  qdir1=direction of the first q-gradient
+!!  qdir2=direction of the second q-gradient
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
 !!
 !! OUTPUT
-!!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order local 
+!!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order local
 !!  crystal pseudopotential in real space
 !!
 !! NOTES
 !! * IMPORTANT: the formalism followed in this routine
-!!   assumes a phase factor for the perturbation that 
+!!   assumes a phase factor for the perturbation that
 !!   is different to the one used elsewhere in the code (See M.Stengel paper):
-!!         
+!!
 !!             here: e^{i q (R_l + \tau_{\kappa})}
-!!   rest of ABINIT: e^{i q R_l}  
+!!   rest of ABINIT: e^{i q R_l}
 !!
 !!  **A -i factor has been factorized out in all the contributions of the second
-!!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
-!!    in the whole frozen contribution to the q-gradient of the 
+!!    q-gradient of the atomic displacement Hamiltonian. This is lately included
+!!    in the whole frozen contribution to the q-gradient of the
 !!    2nd order energy wrt an atomic displacement and a strain:
 !!    \Delta E^{\tau_{\kappa\alpha}^* (\beta)}_{m\kvec,\gamma\delta}
-!!     
+!!
 !!
 !! SOURCE
 
@@ -1712,7 +1727,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
 !  This is to allow q=0
    qeq0=.false.
-   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then 
+   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
@@ -1863,17 +1878,17 @@ end subroutine dfpt_vlocaldqdq
 !!***
 
 
-!!****f* ABINIT/dfpt_vmetdqdq	
+!!****f* ABINIT/dfpt_vmetdqdq
 !! NAME
 !! dfpt_vmetdqdq
 !!
 !! FUNCTION
-!! Compute second q-gradient (at q=0) of the local part of 1st-order 
-!! metric potential from the appropriate atomic pseudopotential 
-!! with structure and derivative factor. Additionaly, compute the 
-!! second q-gradient (at q=0) of the Hartree and XC (if GGA) potentials of the metric 
+!! Compute second q-gradient (at q=0) of the local part of 1st-order
+!! metric potential from the appropriate atomic pseudopotential
+!! with structure and derivative factor. Additionaly, compute the
+!! second q-gradient (at q=0) of the Hartree and XC (if GGA) potentials of the metric
 !! perturbation.
-!! Cartesian coordinates are employed to define the direction of the 
+!! Cartesian coordinates are employed to define the direction of the
 !! metric perturbation and the two q-gradients.
 !!
 !! INPUTS
@@ -1895,9 +1910,9 @@ end subroutine dfpt_vlocaldqdq
 !!  nspden=number of spin-density components
 !!  ntypat=number of types of atoms in cell.
 !!  n1,n2,n3=fft grid.
-!!  opthartdqdq= if 1 activates the calculation 2nd q-gradient of the Hartree potential 
+!!  opthartdqdq= if 1 activates the calculation 2nd q-gradient of the Hartree potential
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
-!!  qdir=direction of the q-gradient 
+!!  qdir=direction of the q-gradient
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
@@ -1907,23 +1922,23 @@ end subroutine dfpt_vlocaldqdq
 !!
 !! OUTPUT
 !!  vhart1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the GS density Hartree potential from the metric perturbation
-!!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order metric local 
+!!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order metric local
 !!  crystal pseudopotential in real space
 !!  vxc1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the GS density XC potential from the metric perturbation (only finite if GGA)
 !!
 !! NOTES
 !! ** IMPORTANT: the formalism followed in this routine
-!!    assumes a phase factor for the perturbation that 
+!!    assumes a phase factor for the perturbation that
 !!    is different to the one used elsewhere in the code (See M.Stengel paper):
-!!         
+!!
 !!             here: e^{i q (R_l + \tau_{\kappa})}
-!!    rest of ABINIT: e^{i q R_l}  
+!!    rest of ABINIT: e^{i q R_l}
 !!
 !!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
 !!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
-!!    in the reduced to cartesian derivative conversion process) is here 
+!!    in the reduced to cartesian derivative conversion process) is here
 !!    explicictly included in the formulas.
-!!  
+!!
 !!  **Notice that idir=1-9, in contrast to the strain perturbation (idir=1-6),
 !!    because this term is not symmetric w.r.t permutations of the two strain
 !!    indices.
@@ -2005,7 +2020,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 
 !  This is to allow q=0
    qeq0=.false.
-   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then 
+   if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) then
      qeq0=.true.
    else
      msg='This routine cannot be used for q/=0'
@@ -2067,7 +2082,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
                end do
 
                gfact=gqc(beta)*gqc(delta)*gqc(gamma)/gsquar
-  
+
                term1=delbd*gqc(gamma)+delbg*gqc(delta)+deldg*gqc(beta)
                term1=term1-gfact
                term1=term1*vion1dq(1)/gmag
@@ -2107,7 +2122,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    if (opthartdqdq==1) then
 
      pisqrinv=1.0_dp/pi**2
-     
+
      ii=0
      do i3=1,n3
        ig3=i3-(i3/id3)*n3-1
@@ -2143,7 +2158,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
                gqc(3)=gprimd(3,1)*gq(1)+gprimd(3,2)*gq(2)+gprimd(3,3)*gq(3)
 
                term1=4.0_dp*gqc(beta)*gqc(gamma)*gqc(delta)*uogsquar*uogsquar
-               term2=delbd*gqc(gamma)+delbg*gqc(delta)+deldg*gqc(beta) 
+               term2=delbd*gqc(gamma)+delbg*gqc(delta)+deldg*gqc(beta)
                term2=-term2*uogsquar
 
                work1re=pisqrinv*uogsquar*(term1+term2)
@@ -2165,7 +2180,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !    Transform back to real space
      call fourdp(cplex,work1,vhart1dqdq,1,mpi_enreg,nfft,1,ngfft,0)
 
-!  End the calculation of the Hartree contribution 
+!  End the calculation of the Hartree contribution
    end if
 
    ABI_FREE(work1)
@@ -2176,7 +2191,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
      call dfpt_mkvxcgga_n0met(beta,1,delta,gamma,gprimd,kxc,mpi_enreg, &
    & nfft,ngfft,nkxc,nspden,rhor,vxc1dqdq)
 
-     !Fictitious i factor temporarily applied. 
+     !Fictitious i factor temporarily applied.
      !It is later canceled by the (-i) factor of the total matrix element
      do ii=1,nfft
        jj=ii*2

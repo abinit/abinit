@@ -6,7 +6,7 @@
 !!  This module contains routines for spline interpolation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2024 ABINIT group (YP, BAmadon)
+!!  Copyright (C) 2010-2025 ABINIT group (YP, BAmadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1030,6 +1030,167 @@ SUBROUTINE INTRPL(L,X,Y,N,U,V,dv,dv2,ideriv)
      & ' ERROR DETECTED IN ROUTINE INTRPL')
 !
 END subroutine intrpl
+!!***
+
+!!****f* m_splines/spline2
+!! NAME
+!!  spline2
+!!
+!! FUNCTION
+!!  SPLINE2 computes the first derivatives of a cubic spline.
+!!
+!! INPUTS
+!!    Input, integer N, the number of data points; N must be at least 2.
+!!    In the special case where N = 2 and IBCBEG = IBCEND = 0, the
+!!    spline will actually be linear.
+!!
+!!    Input, double precision X(N), the knot values, that is, the points where data
+!!    is specified.  The knot values should be distinct, and increasing.
+!!
+!!    Input, double precision Y(N), the data values to be interpolated.
+!!
+!!    Input, double precision YBCBEG, YBCEND, the values to be used in the boundary
+!!    conditions if IBCBEG or IBCEND is equal to 1 or 2.
+!!
+!!    Input, integer IBCBEG, IBCEND, the type of boundary conditions at the first / last point
+!!    If 1, the value of the first derivative is constrained to YBCBEG / YBCEND
+!!    If 2, the value of the second derivative is constrained to YBCBEG / YBCEND
+!!    If 3, the third derivative is continuous at the second / second to last point (not-a-knot)
+!!
+!! OUTPUT
+!!    Output, double precision YP(N), the first derivatives of the cubic spline.
+!!    On [x(i),x(i+1)], the spline y(i)+yp(i)*(x-x(i))+c*(x-x(i))**2+d*(x-x(i))**3 can then
+!!    be reconstructed with c = (3*s-2*yp(i)-yp(i+1))/(x(i+1)-x(i))
+!!                          d = (yp(i)+yp(i+1)-2*s)/(x(i+1)-x(i))**2
+!!                          s = (y(i+1)-y(i))/(x(i+1)-x(i))
+!!
+!!    Solving the tridiagonal system on the first derivatives rather than the
+!!    second derivatives as in the regular spline subroutine allows for the
+!!    fantastic "not-a-knot" boundary condition.
+!!
+!! SOURCE
+
+subroutine spline2(x,y,n,yp,ybcbeg,ybcend,ibcbeg,ibcend)
+
+ integer,intent(in) :: n,ibcbeg,ibcend
+ real(dp),intent(in) :: ybcbeg,ybcend
+ real(dp),intent(in) :: x(n),y(n)
+ real(dp),intent(inout) :: yp(n)
+
+ integer :: i
+ real(dp) :: pinv,ratio
+ real(dp),allocatable :: tmp(:)
+
+ ABI_MALLOC(tmp,(n))
+
+ if (ibcbeg==1) then
+   yp(1)=zero ; tmp(1)=ybcbeg
+ else if (ibcbeg==2) then
+   yp(1)=-half ; tmp(1)=(six*((y(2)-y(1))/(x(2)-x(1)))-ybcbeg*(x(2)-x(1)))/four
+ else if (ibcbeg==3) then
+   yp(1)=(x(1)-x(3))/(x(3)-x(2))
+   tmp(1)=((y(2)-y(1))*(x(3)-x(2))*(two*x(3)+x(2)-three*x(1))/(x(2)-x(1))+(y(3)-y(2))* &
+         & (x(2)-x(1))**2/(x(3)-x(2)))/((x(3)-x(2))*(x(3)-x(1)))
+ else
+   ABI_BUG("Option not recognized for ibcbeg !")
+ end if
+
+ if (ibcend==1) then
+   yp(n)=zero ; tmp(n)=ybcend
+ else if (ibcend==2) then
+   yp(n)=half ; tmp(n)=(six*(y(n)-y(n-1))/(x(n)-x(n-1))+ybcend*(x(n)-x(n-1)))/four
+ else if (ibcend==3) then
+   yp(n)=(x(n)-x(n-2))/(x(n-1)-x(n-2))
+   tmp(n)=((y(n-1)-y(n-2))*(x(n)-x(n-1))**2/(x(n-1)-x(n-2))+ &
+        & (y(n)-y(n-1))*(x(n-1)-x(n-2))*(three*x(n)-x(n-1)-two*x(n-2)) &
+        & /(x(n)-x(n-1)))/((x(n-1)-x(n-2))*(x(n)-x(n-2)))
+ else
+   ABI_BUG("Option not recognized for ibcend !")
+ end if
+
+ do i=2,n-1
+   ratio = (x(i+1)-x(i))/(x(i+1)-x(i-1))
+   pinv = one/(two+ratio*yp(i-1))
+   yp(i) = (ratio-one)*pinv
+   tmp(i) = (three*((y(i)-y(i-1))*(x(i+1)-x(i))/(x(i)-x(i-1))+ &
+          & (y(i+1)-y(i))*(x(i)-x(i-1))/(x(i+1)-x(i)))/(x(i+1)-x(i-1))-&
+          & ratio*tmp(i-1))*pinv
+   if (abs(tmp(i))<1.d5*tiny(zero)) tmp(i) = zero   !MT20050927
+ end do
+
+ yp(n) = (tmp(n)-yp(n)*tmp(n-1))/(yp(n)*yp(n-1)+one)
+ do i=n-1,1,-1
+   yp(i)=yp(i)*yp(i+1)+tmp(i)
+ end do
+
+ ABI_FREE(tmp)
+
+end subroutine spline2
+!!***
+
+!!****f* m_splines/spline2_complex
+!! NAME
+!!  spline2_complex
+!!
+!! FUNCTION
+!!  SPLINE2_COMPLEX computes the first derivatives of a cubic spline for a complex function.
+!!
+!! INPUTS
+!!    Input, integer N, the number of data points; N must be at least 2.
+!!    In the special case where N = 2 and IBCBEG = IBCEND = 0, the
+!!    spline will actually be linear.
+!!
+!!    Input, double precision X(N), the knot values, that is, the points where data
+!!    is specified.  The knot values should be distinct, and increasing.
+!!
+!!    Input, double precision Y(N), the data values to be interpolated.
+!!
+!!    Input, double precision YBCBEG, YBCEND, the values to be used in the boundary
+!!    conditions if IBCBEG or IBCEND is equal to 1 or 2.
+!!
+!!    Input, integer IBCBEG, IBCEND, the type of boundary conditions at the first / last point
+!!    If 1, the value of the first derivative is constrained to YBCBEG / YBCEND
+!!    If 2, the value of the second derivative is constrained to YBCBEG / YBCEND
+!!    If 3, the third derivative is continuous at the second / second to last point (not-a-knot)
+!!
+!! OUTPUT
+!!    Output, double precision YP(N), the first derivatives of the cubic spline.
+!!    On [x(i),x(i+1)], the spline y(i)+yp(i)*(x-x(i))+c*(x-x(i))**2+d*(x-x(i))**3 can then
+!!    be reconstructed with c = (3*s-2*yp(i)-yp(i+1))/(x(i+1)-x(i))
+!!                          d = (yp(i)+yp(i+1)-2*s)/(x(i+1)-x(i))**2
+!!                          s = (y(i+1)-y(i))/(x(i+1)-x(i))
+!!
+!!    Solving the tridiagonal system on the first derivatives rather than the
+!!    second derivatives as in the regular spline subroutine allows for the
+!!    fantastic "not-a-knot" boundary condition.
+!!
+!! SOURCE
+
+subroutine spline2_complex(x,y,n,yp,ybcbeg,ybcend,ibcbeg,ibcend)
+
+ integer,intent(in) :: n,ibcbeg,ibcend
+ complex(dpc),intent(in) :: ybcbeg,ybcend
+ real(dp),intent(in) :: x(n)
+ complex(dpc),intent(in) :: y(n)
+ complex(dpc),intent(inout) :: yp(n)
+
+ real(dp),allocatable :: y_tmp(:),yp_i(:),yp_r(:)
+
+ ABI_MALLOC(y_tmp,(n))
+ ABI_MALLOC(yp_i,(n))
+ ABI_MALLOC(yp_r,(n))
+
+ y_tmp(:) = dble(y(:))
+ call spline2(x(:),y_tmp(:),n,yp_r(:),dble(ybcbeg),dble(ybcend),ibcbeg,ibcend)
+ y_tmp(:) = aimag(y(:))
+ call spline2(x(:),y_tmp(:),n,yp_i(:),aimag(ybcbeg),aimag(ybcend),ibcbeg,ibcend)
+ yp(:) = cmplx(yp_r(:),yp_i(:),kind=dp)
+
+ ABI_FREE(y_tmp)
+ ABI_FREE(yp_i)
+ ABI_FREE(yp_r)
+
+end subroutine spline2_complex
 !!***
 
 end module m_splines

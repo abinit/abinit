@@ -73,7 +73,7 @@ cp ../tatdep1_1.* .
 
 Let us discuss the meaning of these five files :
 
-#### 		^^2.1.1 The data files *tatdep1_1xred.dat*, *tatdep1_1fcart.dat* and *tatdep1_1etotal.dat*^^
+#### 		^^2.1.1 The data files *tatdep1_1_xred.dat*, *tatdep1_1_fcart.dat* and *tatdep1_1_etotal.dat*^^
 
 These ones store some data coming from the AIMD simulations : the reduced coordinates, the cartesian forces and the total energy of all the atoms in the supercell, respectively. In the present example, only 20 snapshots are extracted from a very long trajectory with thousands molecular dynamic time steps.
 
@@ -146,7 +146,7 @@ This file reproduces all the steps encountered during the execution of `atdep`. 
 
 ```
   .Version    3.0 of PHONONS
-  .Copyright (C) 1998-2024 ABINIT group (FB,JB).
+  .Copyright (C) 1998-2025 ABINIT group (FB,JB).
    ABINIT comes with ABSOLUTELY NO WARRANTY.
    It is free software, and you are welcome to redistribute it
    under certain conditions (GNU General Public License,
@@ -333,13 +333,13 @@ This file reproduces all the steps encountered during the execution of `atdep`. 
 ```
 
 
-#### 		^^2.2.2 The phonon frequencies file *tatdep1_1omega.dat*^^
+#### 		^^2.2.2 The phonon frequencies file *tatdep1_1_omega.dat*^^
 
-{% dialog tests/tutoatdep/Refs/tatdep1_1omega.dat %}
+{% dialog tests/tutoatdep/Refs/tatdep1_1_omega.dat %}
 
 You can plot the phonon spectrum. If you use the |xmgrace| tool, launch:
 
-      xmgrace -nxy tatdep1_1omega.dat
+      xmgrace -nxy tatdep1_1_omega.dat
 
 You should get this picture :
 
@@ -350,21 +350,21 @@ On the Y-axis, you have the frequencies (in THz, see the input file). On the X-a
 !!! note
     The path along the BZ can be changed using the [[atdep:bzpath]] input variable. 
 
-The BZ boundaries and all the **q**-points included in the path are available in the *tatdep1_1qpt.dat* file :
+The BZ boundaries and all the **q**-points included in the path are available in the *tatdep1_1_qpt.dat* file :
 
-{% dialog tests/tutoatdep/Refs/tatdep1_1qpt.dat %}
+{% dialog tests/tutoatdep/Refs/tatdep1_1_qpt.dat %}
 
 As you can see, in the present calculation the path is as follows : $\Gamma$ - X - W - X' - K - $\Gamma$ - L. Concerning the results, you can compare the phonon spectrum obtained in this tutorial with the first figure of [this paper](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.91.135501). As you can see, the overall agreement is very good but not perfect due the too small number of atomic configurations (20) and the difference between the experimental (80 K) and theoretical (900 K) temperatures. If you perform AIMD simulations at various temperatures and store more than 20 atomic configurations, you will obtain the following picture : 
 
 ![Al experimental spectrum](atdep1_assets/tatdep1_1exp.jpg)
 
 !!! warning 
-    The *tatdep1_1qpt.dat* file do not be confused with the *tatdep1_1qbz.dat* file which defines the Monkhorst-Pack (MP) **q**-point mesh used to compute the vDOS : $g(\omega)=\frac{1}{3N_a}\sum_{s=1}^{3N_a}\sum_{\mathbf{q}\in BZ} \delta(\omega-\omega_s(\mathbf{q}))$ such as $\int_0^{\omega_{max}} g(\omega)d\omega =1$, with $\omega_{max}$ the highest phonon frequency of the system. The vDOS is written in the *tatdep1_1vdos.dat* file. You may plot it to verify that the vDOS is consistent with the phonon spectrum.
+    The *tatdep1_1_qpt.dat* file do not be confused with the *tatdep1_1_qbz.dat* file which defines the Monkhorst-Pack (MP) **q**-point mesh used to compute the vDOS : $g(\omega)=\frac{1}{3N_a}\sum_{s=1}^{3N_a}\sum_{\mathbf{q}\in BZ} \delta(\omega-\omega_s(\mathbf{q}))$ such as $\int_0^{\omega_{max}} g(\omega)d\omega =1$, with $\omega_{max}$ the highest phonon frequency of the system. The vDOS is written in the *tatdep1_1_vdos.dat* file. You may plot it to verify that the vDOS is consistent with the phonon spectrum.
 
 
-#### 		^^2.2.3 The thermodynamic file *tatdep1_1thermo.dat*^^
+#### 		^^2.2.3 The thermodynamic file *tatdep1_1_thermo.dat*^^
 
-{% dialog tests/tutoatdep/Refs/tatdep1_1thermo.dat %}
+{% dialog tests/tutoatdep/Refs/tatdep1_1_thermo.dat %}
 
 In this file, we print all the thermodynamic data that we can compute by using the phonon spectrum and/or the vDOS. The main quantity is the free energy $\mathcal{F}$. This one can be splitted in two parts:
 
@@ -396,7 +396,7 @@ $$
   S_{\rm vib} = 3N_a k_B \int_0^{\omega_{max}} \left[\frac{\beta\hbar\omega}{2}\coth(\frac{\beta\hbar\omega}{2}) - \ln \left(2\sinh(\frac{\beta\hbar\omega}{2})\right)\right] g(\omega)d\omega
 $$
 
-All these thermodynamic data are computed and written in the *tatdep1_1thermo.dat*. Note that this file is divided in two parts :
+All these thermodynamic data are computed and written in the *tatdep1_1_thermo.dat*. Note that this file is divided in two parts :
  
 - the first one is dedicated to the thermodynamic data obtained at the temperature defined by the input variable [[atdep:temperature]].
 
@@ -429,7 +429,7 @@ All these thermodynamic data are computed and written in the *tatdep1_1thermo.da
 !!! note
     In the harmonic approximation (HA), the phonon frequencies do not depend on the temperature but only on the volume $V$, so we have $\omega_{\rm HA} = \omega(V)$. Using a constant vDOS, it's then possible to compute all the thermodynamic data, whatever the temperature "$\beta$" (see the equations above). In this case, the temperature variation of the thermodynamic quantities comes from the filling of phononic states using the Bose-Einstein statistics. To go beyond, and capture the thermal expansion for example, we can assume that the temperature effects are **implicit** through the variation of the volume $V(T)$. This is the quasi-harmonic approximation (QHA) : $\omega_{\rm QHA}=\omega(V(T))$. If in many cases the QHA gives excellent results, it fails to reproduce an **explicit** variation of the thermodynamic data with respect to the temperature (by definition, using QHA, the phonon frequencies cannot vary at constant volume ; i.e. along an isochore). This **explicit** variation comes from anharmonic effects and only be captured by going beyond the second order in the energy expansion. That is the work done by aTDEP, by recasting all the 3rd, 4th... terms of the energy expansion within the 2nd order, in an **effective** way. Since the 2nd order effective IFC now takes into account all these terms, it captures the temperature effects and we have $\omega_{\rm Anh}=\omega(T,V(T)$.
 
-In the *tatdep1_1thermo.dat* file corresponding to the present calculation, several remarks can be done. You can see that the specific heat $C_{\rm vib,V}$ is equal to 2.972 (in $k_B$ units) at $T$ = 900 K. In the second part of this file, you see that this quantity converges towards 3 at high temperature, as expected by the Dulong-Petit law (in this part we are in HA, so this law is fulfilled). This result is consistent with the experimental Debye temperature $\Theta_D \approx$ 400 K ; at $T$ = 900 K the behaviour of aluminum is classical and no longer quantum, since all the phononic states are filled. This can be seen also for another quantity. Plot the vibrational internal energy $U_{\rm vib}^{ \rm HA}$ as the function of temperature (see the second part of the file). And plot also $U_{\rm vib}^{\rm Classic}=3k_B T$ corresponding to the classic formulation (in eV, so use the conversion factor 1 eV = 11 604 K). You will see that the classic limit is achieved between 400 and 600 K, as expected.
+In the *tatdep1_1_thermo.dat* file corresponding to the present calculation, several remarks can be done. You can see that the specific heat $C_{\rm vib,V}$ is equal to 2.972 (in $k_B$ units) at $T$ = 900 K. In the second part of this file, you see that this quantity converges towards 3 at high temperature, as expected by the Dulong-Petit law (in this part we are in HA, so this law is fulfilled). This result is consistent with the experimental Debye temperature $\Theta_D \approx$ 400 K ; at $T$ = 900 K the behaviour of aluminum is classical and no longer quantum, since all the phononic states are filled. This can be seen also for another quantity. Plot the vibrational internal energy $U_{\rm vib}^{ \rm HA}$ as the function of temperature (see the second part of the file). And plot also $U_{\rm vib}^{\rm Classic}=3k_B T$ corresponding to the classic formulation (in eV, so use the conversion factor 1 eV = 11 604 K). You will see that the classic limit is achieved between 400 and 600 K, as expected.
 
 ### 	2.3 Numerical convergence (accuracy and precision)
 
@@ -471,7 +471,7 @@ Rcut6
 
 then set "rcut 6.0" in the input file *tatdep1_1.abi" and finally launch `atdep`. Repeat this process for "Rcut8" and "Rcut10" and plot all the phonon spectra together :  
 
-      xmgrace -nxy Rcut6omega.dat -nxy Rcut8omega.dat -nxy Rcut10omega.dat -nxy tatdep1_1omega.dat
+      xmgrace -nxy Rcut6_omega.dat -nxy Rcut8_omega.dat -nxy Rcut10_omega.dat -nxy tatdep1_1_omega.dat
 
 You should get the following picture :
 
@@ -507,7 +507,7 @@ $$
 
 Thanks to this drastic reduction of the IFC coefficients, only 50 to 100 atomic uncorrelated configurations are generally needed to obtain converged properties at the 2nd order (in this example, and in the whole ABINIT package, we only propose examples with a maximum of 20 uncorrelated configurations in order to avoid a too huge amount of data). As previously discussed for the cutoff radius, we can study the convergence of the calculation with respect to the number of uncorrelated atomic configurations. Set [[atdep:nstep_max]] equal to 5 in *tatdep1_1.abi*, replace the root of the ouput file name by "Ntep5" in the *tatdep1_1.files* and launch `atdep`. Do it again for 8 time steps then plot :
 
-      xmgrace -nxy Nstep5omega.dat -nxy Nstep8omega.dat -nxy tatdep1_1omega.dat
+      xmgrace -nxy Nstep5_omega.dat -nxy Nstep8_omega.dat -nxy tatdep1_1_omega.dat
 
 You should get the following picture :
 
@@ -516,7 +516,7 @@ You should get the following picture :
 In conclusion, a too small number of uncorrelated atomic configurations leads to a large error in the phonon spectrum. Therefore, do not hesitate to pursue the AIMD simulation (in order to accumulate a larger number of configurations) until achieving the convergence of the phonon spectrum.   
 
 !!! note
-    Another input variable impacts the number of atomic configurations : [[atdep:slice]]. This optional variable selects one configuration over [[atdep:slice]], so the calculation will have ([[atdep:nstep_max]]-[[atdep:nstep_min]])/[[atdep:slice]] configurations at all. To test its utility, you can add a line "slice 4" in the section "optional input variable", change the root of the output file name by "slice" and launch `atdep`. The value of this optional variable is now echoed at the begining of the output file and you can find that the "real number of time steps" is now 5 (and no longer 20). Finally, you can plot the phonon spectrum and see the differences with respect to have the 20 configurations (*tatdep1_1omega.dat*) or only the 5 first (*Nstep5omega.dat*). 
+    Another input variable impacts the number of atomic configurations : [[atdep:slice]]. This optional variable selects one configuration over [[atdep:slice]], so the calculation will have ([[atdep:nstep_max]]-[[atdep:nstep_min]])/[[atdep:slice]] configurations at all. To test its utility, you can add a line "slice 4" in the section "optional input variable", change the root of the output file name by "slice" and launch `atdep`. The value of this optional variable is now echoed at the begining of the output file and you can find that the "real number of time steps" is now 5 (and no longer 20). Finally, you can plot the phonon spectrum and see the differences with respect to have the 20 configurations (*tatdep1_1_omega.dat*) or only the 5 first (*Nstep5_omega.dat*). 
 
 ####		^^2.3.3 Other important parameters^^
 
@@ -586,7 +586,7 @@ atdep < tatdep1_3.files > log 2> err &
 For the moment, we are interested in the phonon spectra. You can plot them together :
 
 ```
-xmgrace -nxy tatdep1_2omega.dat -nxy tatdep1_3omega.dat
+xmgrace -nxy tatdep1_2_omega.dat -nxy tatdep1_3_omega.dat
 ```
 
 You shoud obtain this picture :
@@ -686,24 +686,24 @@ You can now open the input file :
 
 {% dialog tests/tutoatdep/Input/tatdep1_5.abi %}
 
-As can be seen in the first lines, U-$\gamma$ is a cubic ([[atdep:brav]](1)=7) body-centered ([[atdep:brav]](2)=-1) phase with one atom in the unitcell. Three optional input parameters are set : [[atdep:enunit]]=1 (the frequency unit is cm$^{-1}$), [[atdep:bzpath]]=5 G H P G N (the BZ path is $\Gamma-H-P-\Gamma-N$) and [[atdep:use_ideal_positions]]=1 (the atomic displacements are computed wrt the bcc ideal positions). Now you can execute `atdep` :
+As can be seen in the first lines, U-$\gamma$ is a cubic ([[atdep:brav]](1)=7) body-centered ([[atdep:brav]](2)=-1) phase with one atom in the unitcell. Four optional input parameters are set : [[atdep:enunit]]=1 (the frequency unit is cm$^{-1}$), [[atdep:bzpath]]=5 G H P G N (five special points define the following BZ path $\Gamma-H-P-\Gamma-N$), [[atdep:bzlength]]=4 100 88 88 71 (the length of the 4 elementary paths $\Gamma-H$, $H-P$, $H-\Gamma$ and $\Gamma-N$ are 100, 88, 88 and 71, respectively), and [[atdep:use_ideal_positions]]=1 (the atomic displacements are computed wrt the bcc ideal positions). Now you can execute `atdep` :
 
 ```sh
 atdep < tatdep1_5.files > log 2> err &
 ```
 
-You can plot the phonon spectrum of U-$\gamma$ : *tatdep1_5omega.dat*. This one is almost equal to the one published in [[cite:Bouchet2017]]. All the soft modes (around $\Gamma$, N and H) obtained using DFPT are now positive. This shows that the phase is now dynamically stable at T = 900 K (even if this phase is not yet thermodynamically stable). However, we can see that the system is on the verge of instability. The transverse branches at the $N$ point are very low and the Born criterion for cubic systems (C$_{11}$-C$_{12}$>0) highlighting the mechanical stability is hardly fulfilled.   
+You can plot the phonon spectrum of U-$\gamma$ : *tatdep1_5_omega.dat*. This one is almost equal to the one published in [[cite:Bouchet2017]]. All the soft modes (around $\Gamma$, N and H) obtained using DFPT are now positive. This shows that the phase is now dynamically stable at T = 900 K (even if this phase is not yet thermodynamically stable). However, we can see that the system is on the verge of instability. The transverse branches at the $N$ point are very low and the Born criterion for cubic systems (C$_{11}$-C$_{12}$>0) highlighting the mechanical stability is hardly fulfilled.   
 
 ###	4.2 Thermodynamics
 
-Since we have the phonon spectrum (and the vDOS) of the U-$\gamma$ phase, we can now compute its thermodynamic properties (see the *tatdep1_5thermo.dat* file) and compare them to the ones obtained for the U-$\alpha$ phase (see the *tatdep1_4thermo.dat* file). Let us evaluate the thermodynamic stability of U-$\gamma$ phase wrt to the U-$\alpha$ one. For this purpose, we will focus on the data extrapolated at the harmonic level (the second part of these two \*thermo.dat files). If we plot the total free energy of these two phases, we obtain : 
+Since we have the phonon spectrum (and the vDOS) of the U-$\gamma$ phase, we can now compute its thermodynamic properties (see the *tatdep1_5_thermo.dat* file) and compare them to the ones obtained for the U-$\alpha$ phase (see the *tatdep1_4_thermo.dat* file). Let us evaluate the thermodynamic stability of U-$\gamma$ phase wrt to the U-$\alpha$ one. For this purpose, we will focus on the data extrapolated at the harmonic level (the second part of these two \*thermo.dat files). If we plot the total free energy of these two phases, we obtain : 
 
 ![U alpha_gamma](atdep1_assets/tatdep1_5freeenergy.png)
 
 We otbain that the phase transition between the U-$\alpha$ and the U-$\gamma$ phases is around T = 900 K, which is in very good agreement with experiments. You can see that he stabilization of the U-$\gamma$ phase wrt the U-$\alpha$ one comes from the entropy :
 
 ```sh
-vimdiff tatdep1_5thermo.dat tatdep1_4thermo.dat
+vimdiff tatdep1_5_thermo.dat tatdep1_4_thermo.dat
 ```
 
 !!! note
@@ -732,7 +732,7 @@ atdep < tatdep1_5.files > log 2> err &
 It's now possible to compare the thermodynamics of the "bcc" and "sc" phases by doing :
 
 ```sh
-vimdiff tatdep1_6thermo.dat tatdep1_5thermo.dat
+vimdiff tatdep1_6_thermo.dat tatdep1_5_thermo.dat
 ```
 
 You can see that the free energy, the entropy, the specific heat... are equal. The thermodynamics of the system is the same, whatever the "cell description" we can assume. This invariance is satisfactory from a scientific point of view.

@@ -23,13 +23,13 @@
 
 #Definition of the atoms
  natom  1
- typat  1  
+ typat  1
  xred  0.0 0.0 0.0
 
 #Numerical parameters of the calculation : planewave basis set and k point grid
  ecut 10
  kptopt 3
- ngkpt 8 8 8 
+ ngkpt 8 8 8
  nshiftk 4
  shiftk 0.5 0.5 0.5
         0.5 0.0 0.0

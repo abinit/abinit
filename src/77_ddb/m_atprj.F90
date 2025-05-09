@@ -7,7 +7,7 @@
 !! Module to output atomic projections of phonon modes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (MJV)
+!! Copyright (C) 2011-2025 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

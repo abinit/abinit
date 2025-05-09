@@ -6,14 +6,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2024 ABINIT group (MR)
+!!  Copyright (C) 2022-2025 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -24,7 +20,7 @@
 #include "abi_common.h"
 
 module m_dfptlw_pert
-    
+
  use defs_basis
  use defs_abitypes
  use defs_datatypes
@@ -33,7 +29,6 @@ module m_dfptlw_pert
  use m_errors
  use m_profiling_abi
  use m_hamiltonian
- use m_cgtools
  use m_pawcprj
  use m_pawfgr
  use m_wfk
@@ -62,7 +57,7 @@ module m_dfptlw_pert
 
 ! *************************************************************************
 
-contains 
+contains
 !!***
 
 !!****f* ABINIT/m_dfptlw_pert/dfptlw_pert
@@ -75,15 +70,8 @@ contains
 !! The main inputs are :
 !!   - GS WFs and Hamiltonian (cg,gs_hamkq)
 !!   - 1st-order WFs for two perturbations i1pert/i1dir,i2pert/i2dir (cg1,cg2)
-!!   - 1st-order Local+SCF potentials for i1pert and i2pert 
+!!   - 1st-order Local+SCF potentials for i1pert and i2pert
 !!   - 1st-order WFs DDK and 2nd-order WF D2_DKDK (d2_dkdk_f)
-!!
-!! COPYRIGHT
-!! Copyright (C) 2018-2024 ABINIT group (MR)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol) = array for planewave
@@ -115,8 +103,8 @@ contains
 !!  natom = number of atoms in unit cell
 !!  n1dq= third dimension of vlocal1_i1pertdq
 !!  n2dq= third dimension of vlocal1_i2pertdq
-!!  nfft= number of FFT grid points (for this proc) 
-!!  ngfft(1:18)=integer array with FFT box dimensions and other 
+!!  nfft= number of FFT grid points (for this proc)
+!!  ngfft(1:18)=integer array with FFT box dimensions and other
 !!  nkpt = number of k points
 !!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
 !!  nspden = number of spin-density components
@@ -156,12 +144,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  TO DO!
-!!
-!! PARENTS
-!!      m_dfptlw_loop
-!!
-!! CHILDREN
-!!      dotprod_vn
 !!
 !! SOURCE
 
@@ -211,7 +193,7 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
 
 !Variables ------------------------------------
 !scalars
- integer :: bandtot,bd2tot,icg,idq,ierr,ii,ikc,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6 
+ integer :: bandtot,bd2tot,icg,idq,ierr,ii,ikc,ikg,ikpt,ilm,isppol,istwf_k,me,n1,n2,n3,n4,n5,n6
  integer :: nband_k,npw_k,spaceworld,tim_getgh1c
  integer :: usepaw
  real(dp) :: tmpim,tmpre,wtk_k
@@ -231,7 +213,7 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
  real(dp),allocatable :: eig1_k(:),eig2_k(:),occ_k(:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:)
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -243,7 +225,7 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
 
 !Init parallelism
  spaceworld=mpi_enreg%comm_cell
- me=mpi_enreg%me_kpt 
+ me=mpi_enreg%me_kpt
 
 !Additional definitions
  tim_getgh1c=0
@@ -262,10 +244,10 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
  d3etot_telec=zero
  d3etot_tgeom=zero
 
-!Calculate the electrostatic contribution 
+!Calculate the electrostatic contribution
  call lw_elecstic(cplex,d3etot_telec,gmet,gs_hamkq%gprimd,gsqcut,&
 & i3dir,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
- 
+
 !Loop over spins
  bandtot = 0
  bd2tot = 0
@@ -324,7 +306,7 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
      eig2_k(:)=eigen2(1+bd2tot:2*nband_k**2+bd2tot)
 
      !Compute the stationary terms of d3etot depending on response functions
-     call dfpt_1wf(cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
+     call dfpt_1wf(cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,&
      & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,icg,&
      & i1dir,i2dir,i3dir,i1pert,i2pert,ikpt,isppol,istwf_k,&
      & kg_k,kpt,mkmem_rbz,mpi_enreg,mpw,natom,nband_k,&
@@ -333,13 +315,13 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
      & vpsp1_i1pertdq,vpsp1_i2pertdq,&
      & wtk_k,ylm_k,ylmgr_k)
 
-!    Add the contribution from each k-point. 
+!    Add the contribution from each k-point.
      d3etot_t1=d3etot_t1 + d3etot_t1_k
      d3etot_t2=d3etot_t2 + d3etot_t2_k
      d3etot_t3=d3etot_t3 + d3etot_t3_k
      d3etot_t4=d3etot_t4 + d3etot_t4_k
      d3etot_t5=d3etot_t5 + d3etot_t5_k
- 
+
      !Compute the nonvariational geometric term
      call cwtime(cpu, wall, gflops, "start")
      if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
@@ -416,8 +398,8 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
  end if
 
 !Join all the contributions in e3tot except t4 and t5 which may need to be
-!converted to type-II in case of strain perturbation. 
-!Apply here the two factor to the stationary wf1 contributions 
+!converted to type-II in case of strain perturbation.
+!Apply here the two factor to the stationary wf1 contributions
 !(see PRB 105, 064101 (2022))
  d3etot_t1(:)=two*d3etot_t1(:)
  d3etot_t2(:)=two*d3etot_t2(:)
@@ -435,10 +417,10 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
  do idq=1,n2dq
    if (abs(d3etot_t4(1,idq))<tol8) d3etot_t4(1,idq)= zero
    if (abs(d3etot_tgeom(1,idq))<tol8) d3etot_tgeom(1,idq)= zero
- end do 
+ end do
  do idq=1,n1dq
    if (abs(d3etot_t5(1,idq))<tol8) d3etot_t5(1,idq)= zero
- end do 
+ end do
  if (abs(d3etot_telec(1))<tol8) d3etot_telec(1)= zero
  if (abs(e3tot(1))    <tol8)     e3tot(1)= zero
 
@@ -517,7 +499,7 @@ end subroutine dfptlw_pert
 !!  direction.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2024 ABINIT group (MR)
+!!  Copyright (C) 2022-2025 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -531,8 +513,8 @@ end subroutine dfptlw_pert
 !!  i3dir= directions of the 3th perturbations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mpi_enreg=information about MPI parallelization
-!!  nfft= number of FFT grid points (for this proc) 
-!!  ngfft(1:18)=integer array with FFT box dimensions and other 
+!!  nfft= number of FFT grid points (for this proc)
+!!  ngfft(1:18)=integer array with FFT box dimensions and other
 !!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
 !!  nspden = number of spin-density components
 !!  rho1g1(2,nfft)=G-space RF electron density in electrons/bohr**3 (i1pert)
@@ -547,10 +529,6 @@ end subroutine dfptlw_pert
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -562,12 +540,6 @@ end subroutine dfptlw_pert
 
 subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
 & i3dir,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
-    
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: cplex,i3dir
@@ -589,12 +561,12 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
 !arrays
  real(dp),allocatable :: rhor1_cplx(:,:)
  real(dp),allocatable :: vxc1dq(:,:),vxc1dq_car(:,:,:),vqgradhart(:)
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- 
-!If GGA xc first calculate the Cartesian q gradient of the xc kernel
+
+!If GGA xc first calculate the Cartesian q gradient of the xc potential
  if (nkxc == 7) then
    ABI_MALLOC(vxc1dq,(2*nfft,nspden))
    ABI_MALLOC(vxc1dq_car,(2*nfft,nspden,3))
@@ -629,7 +601,7 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
 
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
  call dotprod_vn(2,rhor1_cplx,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
- 
+
  d3etot_telec(1)=dotr
  d3etot_telec(2)=doti
 
@@ -652,7 +624,7 @@ end subroutine lw_elecstic
 !!  and k points.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2024 ABINIT group (MR)
+!!  Copyright (C) 2022-2025 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -687,10 +659,6 @@ end subroutine lw_elecstic
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -702,12 +670,6 @@ end subroutine lw_elecstic
 
 subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,mpi_enreg,mpw,nkpt, &
 & npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
-    
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -720,18 +682,18 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kptns(3,nkpt),rmet(3,3)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(mpw*mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
- real(dp),intent(out) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)                       
+ real(dp),intent(out) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)
 
 !Local variables-------------------------------
 !scalars
  integer :: ii,ikc,ikg,ikpt,ilm,nkpg,npw_k
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpt(3)
  real(dp),allocatable :: ffnl_k(:,:,:,:),kpg_k(:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:),ylmgr_k_part(:,:,:)
- 
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -740,7 +702,7 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
  ikg=0
  ikc=0
  do ikpt = 1, nkpt
- 
+
    npw_k = npwarr(ikpt)
    if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,1,mpi_enreg%me)) then
      cycle ! Skip the rest of the k-point loop
@@ -774,9 +736,8 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
    else if (dimffnl==10) then
      ABI_MALLOC(ylmgr_k_part,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
      ylmgr_k_part(:,:,:)=ylmgr_k(:,:,:)
-   else 
-     msg='wrong size for ffnl via dimffnl!'
-     ABI_BUG(msg)
+   else
+     ABI_BUG('wrong size for ffnl via dimffnl!')
    end if
 
 

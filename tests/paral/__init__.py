@@ -22,6 +22,8 @@ inp_files = [
 "t07.abi",
 "t08.abi",
 "t09.abi",
+"t19.abi", # test cprj_in_memory=1 (dilatmx>1,PAW,istwfk>1,DFTI)
+"t20.abi", # test cprj_in_memory=1 (dilatmx>1,PAW,istwfk>1,no DFTI)
 "t21.abi",
 "t22.abi",
 "-t23.abi", # disabled
@@ -34,6 +36,8 @@ inp_files = [
 "t30.abi",
 "t31.abi",
 "t32.abi",
+"t33.abi", # test npband>1 for Norm-Conserving
+"t34.abi", # test chebfi oracle (PAW,istwfk=1)
 "t35.abi", # test xg_nonlop_option=1 (PAW,istwfk=1)
 "t36.abi", # test cprj_in_memory=1 (PAW,istwfk>1,no DFTI)
 "t37.abi", # test cprj_in_memory=1 (NC,istwfk>1,no DFTI)
@@ -92,4 +96,5 @@ inp_files = [
 "t99.abi",
 "t100.abi",
 "t101.abi",
+"t102.abi",
 ]

@@ -7,7 +7,7 @@
 # v1, v2, ... directories.
 # Before running this script, read README in this directory.
 
-# Copyright (C) 2004-2024 ABINIT group (LSi)
+# Copyright (C) 2004-2025 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
@@ -1136,7 +1136,7 @@ sub dovdwkgtest {
         if ($OStype eq 'MacOS') {
                 system ("$CODE_VDWKG < $infn \xb7 $logfn ");
                 }
-        else {  
+        else {
                 $REDIRECT_ERR = "2> $errfn";
                 system ("$CODE_VDWKG < $infn > $logfn $REDIRECT_ERR");
                 $REDIRECT_ERR = '2>&1';

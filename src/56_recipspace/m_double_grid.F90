@@ -8,7 +8,7 @@
 !! and contains the mapping between the two meshes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (YG, SP, MJV)
+!! Copyright (C) 2008-2025 ABINIT group (YG, SP, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@ MODULE m_double_grid
  use m_krank
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_indices
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
 
  implicit none
 

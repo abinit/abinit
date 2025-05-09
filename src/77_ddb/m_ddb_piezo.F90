@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XW)
+!!  Copyright (C) 1999-2025 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,9 +24,7 @@ module m_ddb_piezo
  use m_abicore
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,       only : sjoin, itoa
  use m_hide_lapack,    only : matrginv
@@ -814,7 +812,6 @@ subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,
 !end if the elaflag==4 for the fixed didplacement field elastic tensor
 !end the part for computation of elastic at fixed displacement field
 
-#ifdef HAVE_NETCDF
  ! write tensors to netcdf file.
  if (ncid /= nctk_noid) then
    ncerr = nctk_def_arrays(ncid, [ &
@@ -846,7 +843,6 @@ subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "elastic_tensor_relaxed_ion_fixed_D"), elast_dis))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "compliance_tensor_relaxed_ion_fixed_D"), compliance_dis))
  end if
-#endif
 
 end subroutine ddb_piezo
 !!***

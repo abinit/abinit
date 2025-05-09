@@ -7,7 +7,7 @@
 !!  using real spherical Harmonics.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,8 @@ MODULE m_paw_slater
  use m_splines
 
  use m_fstrings,     only : basename
- use m_paw_atomorb,  only : atomorb_type, init_atomorb, print_atomorb, destroy_atomorb, get_overlap
+ use m_paw_atomorb,  only : atomorb_type, print_atomorb, destroy_atomorb, get_overlap
+ use m_pawpsp,       only : pawpsp_init_core
  use m_crystal,      only : crystal_t
  use m_paw_io,       only : pawio_print_ij
  use m_pawang,       only : pawang_type
@@ -844,10 +845,9 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
 
 !Local variables ---------------------------------------
 !scalars
- integer :: itypat,ic,ierr,lmn_size,lmn2_size,ln_size,isppol
+ integer :: itypat,lmn_size,lmn2_size,ln_size,isppol
  real(dp) :: rcut
- character(len=500) :: header,msg
- character(len=fnlen) :: fcore,string
+ character(len=500) :: header
 !arrays
  integer,allocatable :: phi_indln(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: phi(:,:)
@@ -870,18 +870,10 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
  do itypat=1,Cryst%ntypat
 
    ! Read core orbitals for this atom type.
-   string = filpsp(itypat)
-   fcore = "CORE_"//TRIM(basename(string))
-   ic = INDEX (TRIM(string), "/" , back=.TRUE.) ! if string is a path, prepend path to fcore.
-   if (ic>0 .and. ic<LEN_TRIM(string)) fcore = filpsp(itypat)(1:ic)//TRIM(fcore)
-
    rcut=Pawtab(itypat)%rpaw
-   call init_atomorb(Atm(itypat),Radatm(itypat),rcut,fcore,pawprtvol,ierr)
+   call pawpsp_init_core(Atm(itypat),psp_filename=trim(filpsp(itypat)),rcut_in=rcut)
+   Radatm(itypat)=Atm(itypat)%radmesh
 
-   if (ierr/=0) then
-     msg = " Error reading core orbitals from file: "//TRIM(fcore)
-     ABI_ERROR(msg)
-   end if
    write(header,'(a,i4,a)')" === Atom type = ",itypat," === "
    call print_atomorb(Atm(itypat),header,unit=std_out,prtvol=pawprtvol)
    !

@@ -14,7 +14,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,6 +59,7 @@ module m_spmat_csr
      procedure :: mv_mpi => csr_mat_t_mv_mpi ! mpi version of mv
      procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
      procedure :: mv_one_row =>csr_mat_t_mv_one_row ! mv of one rows
+     procedure :: get_block => csr_mat_t_get_block  ! get a block into a dense matrix
   end type CSR_mat_t
 
 contains
@@ -292,6 +293,25 @@ contains
        end do
     end do
   end subroutine CSR_mat_t_mv_select_row
+
+  subroutine CSR_mat_t_get_block(self,irow_start, icol_start, nrow, ncol, blk)
+    class(CSR_mat_t), intent(in)::self 
+    integer, intent(in) :: nrow,  irow_start, ncol, icol_start
+    real(dp), intent(out) :: blk(nrow, ncol)
+    integer :: i, irow, i1, i2, j, icol
+    blk(:, :)=0.0_dp
+    do j=1, nrow
+       irow = irow_start+j-1
+       i1=self%row_shift(irow)
+       i2=self%row_shift(irow+1)-1
+       do i=i1, i2
+          icol = self%icol(i)
+          if(icol>=icol_start .and. icol<icol_start+ncol) then
+              blk(j, icol-icol_start+1) = self%val(i)
+          endif
+       end do
+    end do
+  end subroutine CSR_mat_t_get_block
 
 !  subroutine print(self)
 !    class(CSR_mat_t), intent(in) :: self

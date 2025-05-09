@@ -3424,7 +3424,7 @@
   0.0000000000000000E+00  0.0000000000000000E+00  0.0000000000000000E+00
   0.0000000000000000E+00  0.0000000000000000E+00
 </LDA_minus_half_potential>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 C 6                                       ! Definition of material
 XC_LDA_X+XC_LDA_C_PW scalarrelativistic loggrid 2001
 2 2 0 0 0 0                                 ! Max. n per angular momentum: 4s 3p 3d

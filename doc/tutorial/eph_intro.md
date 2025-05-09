@@ -51,6 +51,15 @@ before moving to EPH computations.
 For further information about the difference between EPH and ANADDB, see also [[cite:Gonze2019]].
 Further details about the EPH implementation are available in [[cite:Brunin2020b]].
 
+!!! tip
+
+    To run all the tests associated to the GWR code with `NUM` MPI processes
+    and `PYTASKS` python multiprocessing, use:
+
+    ```
+    runtests.py -k GWR -n NUM -j PYTASKS
+    ```
+
 ## EPH workflow
 
 A typical EPH workflow with arrows denoting dependencies between the different steps

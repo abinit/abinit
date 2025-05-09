@@ -1986,7 +1986,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="13" value="   0.9821688410E-02" text="(Hf_y-O1_y)^6">
+  <coefficient number="13" value="   0.3328851502E-01" text="(Hf_y-O1_y)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -2024,7 +2024,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="14" value="   0.1093932787E-01" text="(Hf_y-O1_y)^8">
+  <coefficient number="14" value="   0.8904680656E-01" text="(Hf_y-O1_y)^8">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="8">
         <cell_a>0 0 0</cell_a>
@@ -2062,7 +2062,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="15" value="   0.1524807975E+02" text="(Hf_y-O1_y)^4(eta_2)^2">
+  <coefficient number="15" value="   0.6280798586E+00" text="(Hf_y-O1_y)^4(eta_2)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -2106,7 +2106,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="16" value="   0.7140789062E+03" text="(Hf_y-O1_y)^2(eta_2)^4">
+  <coefficient number="16" value="   0.7972784136E+02" text="(Hf_y-O1_y)^2(eta_2)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -2150,7 +2150,7 @@
       <strain power=" 4" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="17" value="   0.7254179724E+02" text="(Hf_y-O1_y)^6(eta_2)^2">
+  <coefficient number="17" value="   0.8310675942E+01" text="(Hf_y-O1_y)^6(eta_2)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -2194,7 +2194,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="18" value="   0.2014006413E+07" text="(Hf_y-O1_y)^2(eta_2)^6">
+  <coefficient number="18" value="   0.8581527500E+06" text="(Hf_y-O1_y)^2(eta_2)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -2238,7 +2238,7 @@
       <strain power=" 6" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="19" value="   0.3146268000E-04" text="(Hf_x-O1_x)^6">
+  <coefficient number="19" value="   0.2231967000E-04" text="(Hf_x-O1_x)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -2312,7 +2312,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="20" value="   0.1685084000E-04" text="(Hf_x-O1_x)^8">
+  <coefficient number="20" value="   0.1791925000E-04" text="(Hf_x-O1_x)^8">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="8">
         <cell_a>0 0 0</cell_a>
@@ -2386,7 +2386,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="21" value="   0.2311097000E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^2(Hf_y-O3_y)^2">
+  <coefficient number="21" value="   0.8628285000E-04" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^2(Hf_y-O3_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -2724,7 +2724,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="22" value="   0.1368411900E-03" text="(Hf_x-O1_x)^4(Hf_z-O1_z)^2(Hf_y-O3_y)^2">
+  <coefficient number="22" value="   0.1158524000E-03" text="(Hf_x-O1_x)^4(Hf_z-O1_z)^2(Hf_y-O3_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -3062,7 +3062,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="23" value="   0.1178386600E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^4(Hf_y-O3_y)^2">
+  <coefficient number="23" value="   0.1023564000E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^4(Hf_y-O3_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -3400,7 +3400,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="24" value="   0.1201890200E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^2(Hf_y-O3_y)^4">
+  <coefficient number="24" value="   0.1056440400E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^2(Hf_y-O3_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -3738,7 +3738,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="25" value="   0.1096114869E-01" text="(Hf_y-O1_y)^4(Hf_y-O1_y[0 1 0])^2">
+  <coefficient number="25" value="   0.1602396400E-01" text="(Hf_y-O1_y)^4(Hf_y-O1_y[0 1 0])^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -3800,7 +3800,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="26" value="   0.7182543159E-01" text="(Hf_y-O1_y)^6(Hf_y-O1_y[0 1 0])^2">
+  <coefficient number="26" value="   0.1014654045E+00" text="(Hf_y-O1_y)^6(Hf_y-O1_y[0 1 0])^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -3862,7 +3862,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="27" value="   0.1573446613E+00" text="(Hf_y-O1_y)^4(Hf_y-O1_y[0 1 0])^4">
+  <coefficient number="27" value="   0.2371083197E+00" text="(Hf_y-O1_y)^4(Hf_y-O1_y[0 1 0])^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -3894,7 +3894,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="28" value="   0.5416134000E-04" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^2">
+  <coefficient number="28" value="   0.2946176000E-04" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -4136,7 +4136,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="29" value="   0.2347089000E-04" text="(Hf_x-O1_x)^6(Hf_y-O2_y)^2">
+  <coefficient number="29" value="   0.2511129000E-04" text="(Hf_x-O1_x)^6(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -4378,7 +4378,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="30" value="   0.7771326000E-04" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^4">
+  <coefficient number="30" value="   0.7318690000E-04" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -4500,7 +4500,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="31" value="   0.4078292685E-01" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^2(eta_1)^2">
+  <coefficient number="31" value="   0.3774732960E-02" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^2(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -4766,7 +4766,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="32" value="   0.9166363030E-02" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^2(eta_1)^2">
+  <coefficient number="32" value="   0.8020580950E-02" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^2(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -5032,7 +5032,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="33" value="   0.3668492430E-01" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^4(eta_1)^2">
+  <coefficient number="33" value="   0.8438664970E-02" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^4(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -5298,7 +5298,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="34" value="   0.2035931210E+03" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^2(eta_1)^4">
+  <coefficient number="34" value="   0.1171192054E+02" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^2(eta_1)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -5564,7 +5564,7 @@
       <strain power=" 4" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="35" value="   0.3141413276E-01" text="(Hf_x-O1_x)^4(eta_3)^2">
+  <coefficient number="35" value="   0.4841664710E-02" text="(Hf_x-O1_x)^4(eta_3)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -5650,7 +5650,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
   </coefficient>
-  <coefficient number="36" value="   0.2391792032E+02" text="(Hf_x-O1_x)^2(eta_3)^4">
+  <coefficient number="36" value="   0.4908814266E+01" text="(Hf_x-O1_x)^2(eta_3)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -5736,7 +5736,7 @@
       <strain power=" 4" voigt=" 1"/>
     </term>
   </coefficient>
-  <coefficient number="37" value="   0.2971173237E-01" text="(Hf_x-O1_x)^6(eta_3)^2">
+  <coefficient number="37" value="   0.8626447250E-02" text="(Hf_x-O1_x)^6(eta_3)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -5822,7 +5822,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
   </coefficient>
-  <coefficient number="38" value="   0.8628643105E+05" text="(Hf_x-O1_x)^2(eta_3)^6">
+  <coefficient number="38" value="   0.2011333780E+05" text="(Hf_x-O1_x)^2(eta_3)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -5908,7 +5908,7 @@
       <strain power=" 6" voigt=" 1"/>
     </term>
   </coefficient>
-  <coefficient number="39" value="   0.5392543000E-03" text="(Hf_x-O1_x)^4(Hf_y-O1_y)^2">
+  <coefficient number="39" value="   0.5879506200E-03" text="(Hf_x-O1_x)^4(Hf_y-O1_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -6030,7 +6030,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="40" value="   0.2392305980E-02" text="(Hf_x-O1_x)^2(Hf_y-O1_y)^4">
+  <coefficient number="40" value="   0.3032170560E-02" text="(Hf_x-O1_x)^2(Hf_y-O1_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -6152,7 +6152,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="41" value="   0.5131364200E-03" text="(Hf_x-O1_x)^6(Hf_y-O1_y)^2">
+  <coefficient number="41" value="   0.6410557700E-03" text="(Hf_x-O1_x)^6(Hf_y-O1_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -6274,7 +6274,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="42" value="   0.1370027215E-01" text="(Hf_x-O1_x)^2(Hf_y-O1_y)^6">
+  <coefficient number="42" value="   0.1816304769E-01" text="(Hf_x-O1_x)^2(Hf_y-O1_y)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -6396,7 +6396,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="43" value="   0.3597089090E-02" text="(Hf_x-O1_x)^4(Hf_y-O1_y)^4">
+  <coefficient number="43" value="   0.4964895750E-02" text="(Hf_x-O1_x)^4(Hf_y-O1_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -6518,7 +6518,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="44" value="   0.1690377000E-03" text="(Hf_x-O1_x)^4(Hf_z-O3_z)^2">
+  <coefficient number="44" value="   0.2359007000E-03" text="(Hf_x-O1_x)^4(Hf_z-O3_z)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -6760,7 +6760,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="45" value="   0.1051918530E-02" text="(Hf_x-O1_x)^2(Hf_z-O3_z)^4">
+  <coefficient number="45" value="   0.1500096770E-02" text="(Hf_x-O1_x)^2(Hf_z-O3_z)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -7002,7 +7002,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="46" value="   0.1592437400E-03" text="(Hf_x-O1_x)^6(Hf_z-O3_z)^2">
+  <coefficient number="46" value="   0.2430462400E-03" text="(Hf_x-O1_x)^6(Hf_z-O3_z)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -7244,7 +7244,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="47" value="   0.7963271780E-02" text="(Hf_x-O1_x)^2(Hf_z-O3_z)^6">
+  <coefficient number="47" value="   0.1126639516E-01" text="(Hf_x-O1_x)^2(Hf_z-O3_z)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -7486,7 +7486,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="48" value="   0.1587137430E-02" text="(Hf_x-O1_x)^4(Hf_z-O3_z)^4">
+  <coefficient number="48" value="   0.2466828820E-02" text="(Hf_x-O1_x)^4(Hf_z-O3_z)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -7728,7 +7728,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="49" value="   0.6268493000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^2">
+  <coefficient number="49" value="   0.4423123000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -7970,7 +7970,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="50" value="   0.5261064000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^4">
+  <coefficient number="50" value="   0.4177048000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -8212,7 +8212,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="51" value="   0.4109395000E-04" text="(Hf_x-O1_x)^6(Hf_z-O2_z)^2">
+  <coefficient number="51" value="   0.4351251000E-04" text="(Hf_x-O1_x)^6(Hf_z-O2_z)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -8454,7 +8454,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="52" value="   0.3449824000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^6">
+  <coefficient number="52" value="   0.3950612000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -8696,7 +8696,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="53" value="   0.5858684000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^4">
+  <coefficient number="53" value="   0.6183540000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -8938,7 +8938,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="54" value="   0.5858684000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^2(eta_4)^2">
+  <coefficient number="54" value="   0.0000000000E+00" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^2(eta_4)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -9204,7 +9204,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="55" value="   0.5858684000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^2(eta_4)^2">
+  <coefficient number="55" value="   0.0000000000E+00" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^2(eta_4)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -9470,7 +9470,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="56" value="   0.5858684000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^4(eta_4)^2">
+  <coefficient number="56" value="   0.0000000000E+00" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^4(eta_4)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -9736,7 +9736,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="57" value="   0.5858684000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^2(eta_4)^4">
+  <coefficient number="57" value="   0.0000000000E+00" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^2(eta_4)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -10002,7 +10002,7 @@
       <strain power=" 4" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="58" value="   0.1635402528E+01" text="(Hf_y-O1_y)^4(eta_1)^2">
+  <coefficient number="58" value="   0.3180486313E+00" text="(Hf_y-O1_y)^4(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -10088,7 +10088,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="59" value="   0.1728254096E+03" text="(Hf_y-O1_y)^2(eta_1)^4">
+  <coefficient number="59" value="   0.4120886985E+02" text="(Hf_y-O1_y)^2(eta_1)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -10174,7 +10174,7 @@
       <strain power=" 4" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="60" value="   0.1290962701E+02" text="(Hf_y-O1_y)^6(eta_1)^2">
+  <coefficient number="60" value="   0.4162504619E+01" text="(Hf_y-O1_y)^6(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -10260,7 +10260,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="61" value="   0.6770332895E+06" text="(Hf_y-O1_y)^2(eta_1)^6">
+  <coefficient number="61" value="   0.1621869139E+06" text="(Hf_y-O1_y)^2(eta_1)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -10346,7 +10346,7 @@
       <strain power=" 6" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="62" value="   0.2520316400E-03" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^2(Hf_y-O2_y)^2">
+  <coefficient number="62" value="   0.3340286900E-03" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^2(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -10684,7 +10684,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="63" value="   0.3287829600E-03" text="(Hf_x-O1_x)^4(Hf_x-O2_x)^2(Hf_y-O2_y)^2">
+  <coefficient number="63" value="   0.4590427400E-03" text="(Hf_x-O1_x)^4(Hf_x-O2_x)^2(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -11022,7 +11022,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="64" value="   0.1891722460E-02" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^4(Hf_y-O2_y)^2">
+  <coefficient number="64" value="   0.2829996160E-02" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^4(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -11360,7 +11360,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="65" value="   0.3549288900E-03" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^2(Hf_y-O2_y)^4">
+  <coefficient number="65" value="   0.4881354700E-03" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^2(Hf_y-O2_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>

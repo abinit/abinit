@@ -50,14 +50,13 @@ program macroave
  use m_abicore
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_macroave
 
  use m_fstrings,        only : sjoin, strcat, endswith
  use m_io_tools,        only : file_exists, open_file
+
  implicit none
 
 !Arguments -----------------------------------
@@ -302,15 +301,11 @@ program macroave
      if (open_file(FNAMERHO, msg, newunit=unit2, form="unformatted", status="old") /= 0) then
        ABI_ERROR(msg)
      end if
-     call hdr_fort_read(hdr, unit2, fform)
+     call hdr%fort_read(unit2, fform)
      ABI_CHECK(FFORM /= 0, "fform == 0")
    else
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(unit2, fnamerho, xmpi_comm_self))
-     call hdr_ncread(hdr, unit2, fform)
-#else
-     ABI_ERROR("Netcdf support is missing!")
-#endif
+     call hdr%ncread(unit2, fform)
    end if
 
 !  For debugging
@@ -336,12 +331,10 @@ program macroave
      end do
      close(UNIT2)
    else
-#ifdef HAVE_NETCDF
      varname = varname_from_fname(fnamerho)
      NCF_CHECK(nf90_inq_varid(unit2, varname, varid))
      ! [cplex, n1, n2, n3, nspden]
      NCF_CHECK(nf90_get_var(unit2, varid, rho, start=[1,1,1,1,1], count=[1, mesh(1), mesh(2), mesh(3), nspden]))
-#endif
    end if
 
 !    Units for the potential in Ab-init are in Hartrees,

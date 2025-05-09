@@ -19,55 +19,75 @@ from .parser import FortranKissParser, fort2html
 from .tools import lazy_property, NotebookWriter
 from .termcolor import cprint
 
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 
-EXTERNAL_MODS = {
+
+# Dictionary mapping the name of the Fortran external module to the list
+# of external dependencies as used in config/specs/corelibs.conf.
+# None means that the Fortran module does not rely on external libs e.g. intrinsic modules.
+EXTERNAL_MODS_DEPS = {
     # Intrinsics
-    "iso_fortran_env",
-    "iso_c_binding",
-    "ieee_arithmetic",
-    "ieee_exceptions",
-    "ieee_features",
+    "iso_fortran_env": None,
+    "iso_c_binding": None,
+    "ieee_arithmetic": None,
+    "ieee_exceptions": None,
+    "ieee_features": None,
     # Modules provided by compilers.
-    "f90_unix_proc",
-    "f90_unix_dir",
-    "ifcore",
+    "f90_unix_proc": None,
+    "f90_unix_dir": None,
+    "ifcore": None,
     # MPI modules.
-    "mpi",
-    "mpi_f08",
+    "mpi": ["mpi"],
+    "mpi_f08": ["mpi"],
     # External libraries.
-    "openacc",
-    "omp_lib",
-    "mkl_dfti",
-    "netcdf",
-    "etsf_io_low_level",
-    "etsf_io",
-    "plasma",
-    "elpa",
-    "elpa1",
-    "fox_sax",
-    "m_libpaw_libxc_funcs",
-    "m_psml",
-    "m_psml_api",
+    "openacc": ["gpu"],
+    "omp_lib": None,
+    "mkl_dfti": ["fft"],
+    "netcdf": ["hdf5", "netcdf", "netcdf_fortran"],
+    "etsf_io_low_level": ["hdf5", "netcdf", "netcdf_fortran"],
+    "etsf_io": ["hdf5", "netcdf", "netcdf_fortran"],
+    "plasma": ["linalg"],
+    "elpa": ["linalg"],
+    "elpa1": ["linalg"],
+    "fox_sax": None,
+    "m_libpaw_libxc_funcs": None,
+    "m_psml": ["libpsml"],
+    "m_psml_api": ["libpsml"],
     # Bigdft modules.
-    "yaml_output",
-    "bigdft_api",
-    "module_base",
-    "module_types",
-    "module_xc",
-    "poisson_solver",
-    "dynamic_memory",
+    "yaml_output": ["bigdft"],
+    "bigdft_api": ["bigdft"],
+    "module_base": ["bigdft"],
+    "module_types": ["bigdft"],
+    "module_xc": ["bigdft"],
+    "poisson_solver" : ["bigdft"],
+    "dynamic_memory": ["bigdft"],
     # Abinit-specific modules.
     #"m_build_info",
     #"m_optim_dumper",
-    "libxc_functionals",
+    "libxc_functionals": ["libxc"],
     # Scale-UP for effective models
-    "scup_global",
+    "scup_global": None,
     # GreenX library (temporary version)
-    "gx_minimax",
-    "mp2_grids",
+    #"gx_minimax",
+    #"mp2_grids",
     # YAKL module
-    "gator_mod",
+    "gator_mod": ["gpu"],
 }
+
+EXTERNAL_MODS = EXTERNAL_MODS_DEPS.keys()
+
+
+def load_mod(filepath):
+    """To maintain compatibility with py <= 3.12"""
+    try:
+        import imp
+        return imp.load_source(filepath, filepath)
+    except ModuleNotFoundError:
+        from importlib.machinery import SourceFileLoader
+        return SourceFileLoader(filepath, filepath).load_module()
 
 
 class FortranFile(object):
@@ -219,7 +239,7 @@ class FortranFile(object):
             if os.path.join("shared", "libpaw") in head:
                 #print("Setting dirlevel to 30 for shared/libpaw/src since head:", head)
                 return 39
-            cprint("Cannot detect dirlevel in: %s" % self.path, "red")
+            cprint("Cannot detect dirlevel in: %s" % self.path, color="red")
             raise
 
     @lazy_property
@@ -363,6 +383,82 @@ class FortranFile(object):
         return fg
 
 
+def enclose(lines, magic_line, filepath):
+    """
+    Find magic_line in list of lines read from filepath.
+    Return: (start, stop)
+    """
+    try:
+        start = lines.index(magic_line)
+    except ValueError:
+        #print(lines)
+        raise ValueError("Cannot find magic_line=%s in filepath=%s" % (magic_line, filepath))
+
+    for i, l in enumerate(lines[start:]):
+        if l.endswith(")"):
+            if len(l.strip()) > 1:
+                raise RuntimeError("Closing `)` should be placed on a separate line while got: l=%s in filepath=%" % (l, filepath))
+            return start, i + start + 1
+
+    #print(lines)
+    raise ValueError("Cannot find closing `)` after magic_line=%s in filepath=%s" % (magic_line, filepath))
+
+
+def parse_extra_dist(filepath, varname):
+    """
+    Parses a file containing EXTRA_DIST lines and extracts file names.
+
+    Args:
+        filepath (str): Path to the file to be parsed.
+
+    Returns:
+        list: A list of extracted file names.
+    """
+    filenames = []
+    with open(filepath, 'rt') as file:
+        multiline = False
+        for line in file:
+            line = line.strip()
+
+            # Detect the start of the EXTRA_DIST block
+            if line.startswith(varname):
+                # Remove the prefix and check for backslash continuation
+                line = line[len(varname):].strip()
+                multiline = line.endswith("\\")
+                filenames.extend(line.strip(" \\").split())
+
+            # Handle continued lines
+            elif multiline:
+                multiline = line.endswith("\\")
+                filenames.extend(line.strip(" \\").split())
+
+    return filenames
+
+
+def parse_amf(filepath):
+    """
+    Parse the amf file. Return list of files.
+    """
+    if not os.path.exists(filepath):
+        return []
+
+    #EXTRA_DIST += \
+    #  md5.h \
+    #  xmalloc.h
+    extra_dist = parse_extra_dist(filepath, "EXTRA_DIST +=")
+    extra_dist = [f for f in extra_dist if any(f.endswith(ext) for ext in (".h", ".c", ".f90", ".hpp", ".cpp"))]
+    #print("extra_dist", extra_dist)
+    return extra_dist
+
+    # finc_list = \
+    #     xmpi_allgather.finc \
+	#     xmpi_land_lor.finc
+    #finc_list = parse_extra_dist(filepath, "finc_list =")
+    #print("finc_list", finc_list)
+
+    #return extra_dist + finc_list
+
+
 class AbinitProject(NotebookWriter):
     """
     This object defines the main entry point for client code.
@@ -424,14 +520,6 @@ class AbinitProject(NotebookWriter):
         start = time.time()
         def filter_fortran(files):
             return [f for f in files if f.endswith(".f") or f.endswith(".F90")]
-
-        def load_mod(filepath):
-            try:
-                import imp
-                return imp.load_source(filepath, filepath)
-            except ModuleNotFoundError:
-                from importlib.machinery import SourceFileLoader
-                return SourceFileLoader(filepath, filepath).load_module()
 
         name2path = OrderedDict()
         for d in self.dirpaths:
@@ -682,7 +770,8 @@ class AbinitProject(NotebookWriter):
             #dtypes.update(self.all_datatypes)
             for mod in f.modules:
                 for dtype in mod.types:
-                    assert dtype.name not in dtypes
+                    if dtype.name in dtypes:
+                        cprint("dtype.name `%s` is already in dtypes dict:" % dtype.name, color="red")
                     dtypes[dtype.name] = (dtype, f)
 
         return {k: dtypes[k] for k in sorted(dtypes.keys())}
@@ -709,14 +798,14 @@ class AbinitProject(NotebookWriter):
                 interface = name2interface[what]
                 print(interface.to_string(verbose=verbose))
             else:
-                cprint("Cannot find interface `%s` in project" % what, "red")
+                cprint("Cannot find interface `%s` in project" % what, color="red")
                 matches = difflib.get_close_matches(what, name2interface.keys())
                 if matches:
-                    cprint("Perhaps you meant: {}".format(matches), "red")
+                    cprint("Perhaps you meant: {}".format(matches), color="red")
         else:
             # Print all interfaces.
             for interface in name2interface.values():
-                cprint(repr(interface), "yellow")
+                cprint(repr(interface), color="yellow")
                 print(interface.to_string(verbose=verbose))
                 print("")
 
@@ -731,10 +820,10 @@ class AbinitProject(NotebookWriter):
             if obj is not None: return obj
 
         # Print closest matches
-        cprint("Cannot find public entity `%s`" % str(name), "red")
+        cprint("Cannot find public entity `%s`" % str(name), color="red")
         matches = difflib.get_close_matches(name, all_names)
         if matches:
-            cprint("Perhaps you meant: {}".format(matches), "red")
+            cprint("Perhaps you meant: {}".format(matches), color="red")
 
         return None
 
@@ -750,7 +839,7 @@ class AbinitProject(NotebookWriter):
 
         # Print closest matches
         matches = difflib.get_close_matches(name, all_names)
-        if matches: cprint("Perhaps you meant: {}".format(matches), "red")
+        if matches: cprint("Perhaps you meant: {}".format(matches), color="red")
 
         return None
 
@@ -872,22 +961,49 @@ class AbinitProject(NotebookWriter):
 
         return allmods
 
+    def get_program_names_dirnames(self, verbose):
+        """
+        Return list of program names and list of directories required by each program name.
+        """
+        # Find programs
+        program_paths = []
+        for path, fort_file in self.fort_files.items():
+            if fort_file.programs:
+                program_paths.append((fort_file, path))
+
+        prog_names, prog_dirnames = [], []
+        for prog_file, path in program_paths:
+            # Note include_files_in_dirs
+            allmods = self.find_allmods(path, include_files_in_dirs=True)
+            dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
+            if verbose:
+                print("For program:", prog_file.name)
+                pprint(dirnames)
+
+            prog_name = prog_file.programs[0].name
+            if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
+            if prog_name.lower() == "fortran_gator": continue
+            prog_names.append(prog_name)
+            prog_dirnames.append(dirnames)
+
+        return prog_names, prog_dirnames
+
     def write_binaries_conf(self, dryrun=False, verbose=0):
         """
         Write new binaries.conf file
+
+        Args:
+            dryrun: True to operate in dryrun mode.
+            verbose: Verbosity level.
         """
         # Read binaries.conf and add new list of libraries.
         # NB: To treat `dependencies` in an automatic way, I would need either an
         # explicit "use external_module" or an explicit "include foo.h" so
         # that I can map these names to external libraries.
         # This means that I **cannot generate** the entire file in a programmatic way
-        # but only the libraries entries.
-        try:
-            from ConfigParser import ConfigParser
-        except ImportError:
-            from configparser import ConfigParser
-
+        # but only the library entries.
         binconf_path = os.path.join(self.top, "config", "specs", "binaries.conf")
+        print("Writing", binconf_path, " ...")
 
         # Read INI file.
         config = ConfigParser()
@@ -910,26 +1026,12 @@ class AbinitProject(NotebookWriter):
 
         print("Finding all binary dependencies...")
         start = time.time()
-        # Find programs
-        program_paths = []
-        for path, fort_file in self.fort_files.items():
-            if fort_file.programs:
-                program_paths.append((fort_file, path))
 
-        for prog_file, path in program_paths:
-            # Note include_files_in_dirs
-            allmods = self.find_allmods(path, include_files_in_dirs=True)
-            dirnames = sorted(set(mod.dirname for mod in allmods), reverse=True)
-            if verbose:
-                print("For program:", prog_file.name)
-                pprint(dirnames)
-
-            prog_name = prog_file.programs[0].name
-            if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
-            if prog_name.lower() == "fortran_gator": continue
+        prog_names, prog_dirnames = self.get_program_names_dirnames(verbose)
+        for prog_name, dirnames in zip(prog_names, prog_dirnames):
             config.set(prog_name, "libraries", "\n" + "\n".join(dirnames))
             # py3k
-            #config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
+            config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)
 
         print("Analysis completed in %.2f [s]" % (time.time() - start))
 
@@ -957,10 +1059,14 @@ class AbinitProject(NotebookWriter):
             abinit.dep --> Dependencies inside the directory
             abinit.dir --> Dependencies outside the directory
             abinit.amf --> File with EXTRA_DIST
+
+        Args:
+            dryrun: True to operate in dryrun mode.
+            verbose: Verbosity level.
         """
+        print("Writing buildsys_files ...")
         # Group Fortfiles by dirname
         dir2files = self.groupby_dirname()
-
 
         template = """\
 # Dependencies ({kind}) of directory {directory}
@@ -1003,7 +1109,6 @@ class AbinitProject(NotebookWriter):
                 print("# For dirpath:", dirpath)
                 print(s, end=2 * "\n")
             else:
-                #shutil.copyfile(abinitdep_path, abinitdep_path + ".bkp")
                 with open(abinitdep_path, "wt") as fh:
                     fh.write(s)
 
@@ -1019,9 +1124,166 @@ class AbinitProject(NotebookWriter):
             if dryrun:
                 print(s, end=2 * "\n")
             else:
-                #if os.path.exists(abinitdir_path): shutil.copyfile(abinitdir_path, abinitdir_path + ".bkp")
                 with open(abinitdir_path, "wt") as fh:
                     fh.write(s)
+
+            # TODO
+            """
+            #########################
+            # Integration with CMAKE
+            #########################
+
+            # Read CMakeList.txt in new_lines. NB: use rstrip to preserve indentation.
+            cmakelist_path = os.path.join(dirpath, "CMakeLists.txt")
+            new_lines = [l.rstrip() for l in open(cmakelist_path).readlines()]
+
+            #add_library(78_eph STATIC
+            #  m_berry_curvature.F90
+            #  m_cumulant.F90
+            #  ...
+            #)
+            dirname = os.path.basename(dirpath)
+            magic = f"add_library({dirname} STATIC"
+            start, stop = enclose(new_lines, magic, cmakelist_path)
+            del new_lines[start+1:stop-1]
+
+            # Get list of source files from abinit.src.
+            mod = load_mod(os.path.join(dirpath, "abinit.src"))
+            extra_files = parse_amf(os.path.join(dirpath, "abinit.amf"))
+            #print("extra_files:", extra_files)
+            new_files = mod.sources + extra_files
+            new_lines[start+1:start+1] = [(2*" " + f) for f in new_files]
+
+            ## This section is optional!
+            #target_link_libraries(78_eph
+            #  PUBLIC
+            #  abinit::10_defs
+            #  abinit::16_hideleave
+            #  ...
+            #)
+            try:
+                magic = f"target_link_libraries({dirname}"
+                start, stop = enclose(new_lines, magic, cmakelist_path)
+                #del new_lines[start+1:stop-1]
+                #new_lines[start+1:start+1] = mod.sources
+                #print("\n".join(new_lines))
+
+            except ValueError:
+                print(f"INFO: {dirname=} does not export libraries!")
+                pass
+
+            ################################
+            # Write new CMakeLists.txt file.
+            ################################
+            new_str = "\n".join(new_lines)
+            #print(new_str)
+            #with open(cmakelist_path, "wt") as fh:
+            #    fh.write(new_str)
+            """
+
+            # Here we check that all binaries are listed in CmakeLists.txt
+            path = os.path.join(self.top, "src", "98_main", "CMakeLists.txt")
+            with open(path, "rt") as fh:
+                lines = [l.lstrip().rstrip() for l in fh]
+
+            prog_names, _ = self.get_program_names_dirnames(verbose)
+            errors = []
+            for prog_name in prog_names:
+                magic = "abi_build_exe(%s)" % prog_name
+                if magic not in lines:
+                    errors.append("Cannot find `%s` in %s" % (magic, path))
+            if errors:
+                raise RuntimeError("\n".join(errors))
+
+    def update_corelibs(self, dryrun=False, verbose=0):
+        """
+        Update corelibs.conf file taking into account the external dependecies.
+
+        Args:
+            dryrun: True to operate in dryrun mode.
+            verbose: Verbosity level.
+        """
+        # Read INI file.
+        config = ConfigParser()
+        corelibs_path = os.path.join(self.top, "config", "specs", "corelibs.conf")
+        print("Update dependencies", corelibs_path, " ...")
+        config.read(corelibs_path)
+
+        for dirname, fortfile in self.iter_dirname_fortfile():
+            dirname = os.path.basename(dirname)
+            if dirname == "98_main": continue
+            section = config[dirname]
+            if "dependencies" not in section:
+                # Section is optional
+                old_dependencies = None
+            else:
+                old_dependencies = set(section["dependencies"].split())
+
+            new_dependencies = []
+            for use_name in fortfile.all_uses:
+                deps = EXTERNAL_MODS_DEPS.get(use_name, None)
+                if deps is None: continue
+                if verbose:
+                    print("use_name:", use_name, "deps", deps)
+                new_dependencies.extend(deps)
+            new_dependencies = set(new_dependencies)
+            if verbose:
+                print("For dirname", dirname, "\nnew_dependencies:", new_dependencies, "\nold_dependencies:", old_dependencies)
+
+            if old_dependencies is None:
+                # dependencies is not specified for this directory.
+                if new_dependencies:
+                    if verbose:
+                        print("dirname", dirname, "does not have a dependencies section but uses:", new_dependencies)
+                    config[dirname]["dependencies"] = " ".join(d for d in sorted(new_dependencies))
+            else:
+                for new_dep in new_dependencies:
+                    if verbose and new_dep not in old_dependencies:
+                        print("dirname", dirname, "uses:", new_dep, " that is not listed in", old_dependencies)
+                config[dirname]["dependencies"] = " ".join(d for d in sorted(old_dependencies.union(old_dependencies)))
+
+        header = """\
+# -*- INI -*-
+#
+# Copyright (C) 2009-2025 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Config file for the core libraries of Abinit
+#
+# Note: The following statements are in the Python "INI" format, with
+#       case-sensitivity activated.
+#
+# Available options:
+#
+#   * abirules     : whether to check conformance to the abirules (mandatory);
+#
+#   * dependencies : external dependencies, when relevant (optional);
+#
+#   * optional     : whether the build of the library is optional (mandatory);
+#
+#   * parent       : code block the subdirectory belongs to, selected between
+#                    "common", "core", or "libpaw" (mandatory).
+#
+
+# WARNING: Make sure all comments start at column 1 of the text, because some
+#          versions of ConfigParser shipped with RedHat-based systems will
+#          mess-up indented comments with the fields defined before.
+
+# WARNING: modify the defaults with *extreme* care!
+
+# The shared part of ABINIT has Valid indices: 00..39
+# Note: please keep LibPAW last in this section
+#
+"""
+        if not dryrun:
+            with io.open(corelibs_path, "wt", encoding="utf8") as fh:
+                fh.write(header)
+                config.write(fh)
 
     def touch_alldeps(self, verbose=0):
         """
@@ -1067,21 +1329,21 @@ class AbinitProject(NotebookWriter):
             count = len(fort_file.subroutines) + len(fort_file.functions)
             if count == 0: continue
             if fort_file.name in white_list:
-                cprint("WHITE_LIST [%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), "green")
+                cprint("WHITE_LIST [%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), color="green")
             else:
-                cprint("[%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), "red")
+                cprint("[%s] Found %d procedure(s) outside modules!" % (fort_file.name, count), color="red")
                 retcode += 1
 
         # check_dirlevel()
         for fort_file in self.fort_files.values():
             for child in fort_file.all_usedby_mods:
                 if child.dirlevel < fort_file.dirlevel:
-                    cprint("%s should be below level: %s" % (repr(child), fort_file.dirlevel), "red")
+                    cprint("%s should be below level: %s" % (repr(child), fort_file.dirlevel), color="red")
                     retcode += 1
 
         #retcode += self.check_abirules(verbose=verbose)
 
-        cprint("retcode %d" % retcode, "green" if retcode == 0 else "red")
+        cprint("retcode %d" % retcode, color="green" if retcode == 0 else "red")
         return retcode
 
     def check_abirules(self, verbose=0):
@@ -1106,7 +1368,6 @@ class AbinitProject(NotebookWriter):
         # Find files with procedures.
         paths = sorted(set(p.path for p in obj.parents))
         if verbose: print(paths)
-        # TODO from pymods.tools import Editor
         from fkiss.tools import Editor
         return Editor().edit_files(paths, ask_for_exit=True)
 
@@ -1167,7 +1428,7 @@ class AbinitProject(NotebookWriter):
         for _, fort_file in self.iter_dirname_fortfile():
             orphans = find_orphans_in_fort_file(fort_file)
             if orphans:
-                cprint("Found %d orphans in file: %s" % (len(orphans), fort_file.basename), "yellow")
+                cprint("Found %d orphans in file: %s" % (len(orphans), fort_file.basename), color="yellow")
                 for o in orphans:
                     print("\t", repr(o))
 
@@ -1289,11 +1550,11 @@ class AbinitProject(NotebookWriter):
         obj = self.find_public_entity(name)
 
         if obj is None:
-            cprint("Cannot find public entity `%s` in Abinit project." % name, "red")
+            cprint("Cannot find public entity `%s` in Abinit project." % name, color="red")
             return None
         if not obj.is_procedure:
             cprint("Only procedures can be visualized with graphviz. Received class: %s" % obj.__class__,
-                   "yellow")
+                   color="yellow")
             return None
 
         # https://www.graphviz.org/doc/info/

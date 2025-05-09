@@ -6,7 +6,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2024 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2025 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,6 +46,8 @@ module m_pawpsp
 &                     atompaw_dij0, atompaw_kij
  use m_pawxc, only: pawxc, pawxcm, pawxc_get_usekden
  use m_paw_gaussfit, only: gaussfit_projector
+ use m_paw_lmn
+ use m_paw_atomorb,  only : atomorb_type, ORB_FROZEN
 
  implicit none
 
@@ -56,6 +58,7 @@ module m_pawpsp
  public:: pawpsp_nl              !make paw projector form factors f_l(q)
  public:: pawpsp_read            !read psp from file
  public:: pawpsp_read_header     !read header of psp file
+ public:: pawpsp_init_core       !guess the name of the core wf file and initialize a paw_atomorb type for the core
  public:: pawpsp_read_corewf     !read core wavefunction
  public:: pawpsp_read_header_2   !reads pspversion, basis_size and lmn_size
  public:: pawpsp_rw_atompaw      !read and writes ATOMPAW psp with gaussian |p>
@@ -1326,59 +1329,65 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
 end subroutine pawpsp_read
 !!***
 
-!-------------------------------------------------------------------------
+!----------------------------------------------------------------------
 
-!!****f* m_pawpsp/pawpsp_read_corewf
+!!****f* m_pawpsp/pawpsp_init_core
 !! NAME
-!!  pawpsp_read_corewf
+!!  pawpsp_init_core
 !!
 !! FUNCTION
+!!  Initialize a structure of type atomorb_type from a core file.
 !!
 !! INPUTS
-!! [filename]= (optional) core WF file name
+!!  psp_filename= (optional) Name of the file containing core electrons
+!!  rcut_in= (optional) Radius cut-off for radial mesh quantities
+!!  radmesh= (optional) Radial mesh
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
+!!  Atm<paw_atomorb_type>=Structure defining the set of core orbitals.
 !!
 !! SOURCE
-subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,radmesh,phi_cor,&
-&                             filename,kappacor) ! optional arguments
 
+subroutine pawpsp_init_core(Atm,psp_filename,rcut_in,radmesh)
 !Arguments ------------------------------------
- integer,intent(out) :: lmncmax,nphicor
- character(len=*),optional :: filename
-!arrays
- integer,allocatable,intent(inout) :: indlmn_core(:,:),lcor(:),ncor(:)
- integer,allocatable,intent(inout),optional :: kappacor(:)
- real(dp),allocatable,intent(inout) :: phi_cor(:,:),energy_cor(:)
- type(pawrad_type),intent(in) :: radmesh
+!scalars
+ character(len=*), intent(in),optional :: psp_filename
+ real(dp), intent(in), optional :: rcut_in
+ type(atomorb_type),intent(inout) :: Atm
+ type(pawrad_type), intent(in),optional :: radmesh
 
 !Local variables-------------------------------
- integer :: ib,i1,i2,il,im,ilm,ilmn,iln,ios,jln
- integer :: nmesh,npts,unt,flagrel,tmp1,tmp2,tmp3,kappa,spinor,i2j,i2mj
- real(dp) :: noccor,r1,r2
- logical :: ex,oldformat,usexml,diracrel
- character(len=8) :: dum,dum1,dum2,dum3,dum4
+!scalars
+ integer :: unt,ios,fnln,ic
+ logical :: ex,fmt_xml,old_fmt,def_name,fmt_abinit
  character(len=80) :: fline
  character(len=500) :: msg
- character(len=fnlen) :: filename_
-
-!arrays
- integer,allocatable :: meshtp(:),meshsz(:)
- real(dp),allocatable :: rad(:),radstp(:),work(:)
- real(dp),allocatable :: logstp(:),phitmp(:)
- type(pawrad_type) :: tmpmesh
+ character(len=fnlen) :: filename_,string
+ real(dp) :: rcut
 
 ! ************************************************************************
 
-!Check for core WF file existence and XML format
- usexml=.false.;oldformat=.false.
- if (present(filename)) then
-!  Core WF file given as optional argument
-   filename_=filename;ex=.false.
+ rcut=zero
+ if(present(rcut_in)) rcut=rcut_in
+ fmt_xml=.false.
+ old_fmt=.false.
+ def_name=.false.
+
+ if (present(psp_filename)) then
+! Core WF file given as optional argument
+   filename_=trim(psp_filename)
+   fnln=len(trim(psp_filename))
+   fmt_abinit=.false.
+   if (fnln>6) fmt_abinit=(filename_(fnln-6:fnln)=='.abinit')  
+   fmt_xml=.false.
+   if (fnln>3) fmt_xml=(filename_(fnln-3:fnln)=='.xml')
+   if(fmt_abinit) then
+     filename_=filename_(1:fnln-6)//'corewf.abinit'
+   elseif(fmt_xml) then
+     filename_=filename_(1:fnln-3)//'corewf.xml'
+   else
+     filename_=filename_(1:fnln)//'.corewf'
+   endif
    inquire(file=trim(filename_),iostat=ios,exist=ex)
    if (ios/=0) then
      write(msg,'(2a)') 'INQUIRE returns an error for file ',trim(filename_)
@@ -1386,15 +1395,22 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
    end if
    if (.not.ex) then
      write(msg,'(3a)') 'This file does not exist: ',trim(filename_),'!'
-     LIBPAW_ERROR(msg)
+     LIBPAW_WARNING(msg)
+     string=trim(psp_filename)
+     filename_="CORE_"//trim(libpaw_basename(string)) 
+     ic = index (trim(string), "/" , back=.true.)
+     if (ic>0 .and. ic<len_trim(string)) filename_=psp_filename(1:ic)//trim(filename_)
+     inquire(file=trim(filename_),iostat=ios,exist=ex)
+     if (ios/=0) then
+       write(msg,'(2a)') 'INQUIRE returns an error for file ',trim(filename_)
+       LIBPAW_ERROR(msg)
+     end if
+     if (.not.ex) def_name=.true.
    end if
-   unt = libpaw_get_free_unit()
-   open(unit=unt,file=trim(filename_),form='formatted',status='old', action="read")
-   read(unt,*) fline
-   close(unt)
-   usexml=(fline(1:5)=='<?xml')
- else
-!  Core WF file: new format
+ endif 
+ 
+ if(.not.present(psp_filename).or.(def_name)) then
+!   Core WF file: new format
    filename_='corewf.abinit';ex=.false.
    inquire(file=trim(filename_),iostat=ios,exist=ex)
    if (ios/=0) then
@@ -1409,224 +1425,328 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
        write(msg,'(3a)') 'INQUIRE returns an error for file ',trim(filename_),'!'
        LIBPAW_ERROR(msg)
      end if
-     usexml=ex
+     fmt_xml=ex
      if (.not.ex) then
-!      Core WF file: old format
-       filename_='corewf.dat';ex=.false.
-       inquire(file=trim(filename_),iostat=ios,exist=ex)
-       if (ios/=0) then
-         write(msg,'(3a)') 'INQUIRE returns an error for file ',trim(filename_),'!'
-         LIBPAW_ERROR(msg)
-       end if
-       oldformat=ex
-       if (.not.ex) then
-!        No core WF file found
-         write(msg, '(3a)' )&
-&         'Checks for existence of files corewf.abinit[.xml] or corewf.dat',ch10,&
-&         'but INQUIRE finds file does not exist!'
-         LIBPAW_ERROR(msg)
-       end if
+       write(msg, '(3a)' )'Please provide an up-to-date corewf file'
+       LIBPAW_ERROR(msg) 
+!!      Core WF file: old format
+!       filename_='corewf.dat';ex=.false.
+!       inquire(file=trim(filename_),iostat=ios,exist=ex)
+!       if (ios/=0) then
+!         write(msg,'(3a)') 'INQUIRE returns an error for file ',trim(filename_),'!'
+!         LIBPAW_ERROR(msg)
+!       end if
+!       old_fmt=ex
+!       if (.not.ex) then
+!!        No core WF file found
+!         write(msg, '(3a)' )&
+!&         'Checks for existence of files corewf.abinit[.xml] or corewf.dat',ch10,&
+!&         'but INQUIRE finds file does not exist!'
+!         LIBPAW_ERROR(msg)
+!       end if
      end if
    end if
- end if
+   write(msg, '(3a)' )&
+     'Reading corewf file', trim(filename_),' : the calculation will NOT be &
+&    correct for several atomic types !'
+   LIBPAW_WARNING(msg)
+ endif
 
-!Core WF file is in new XML format
- if ((.not.oldformat).and.(usexml)) then
-   if(present(kappacor)) then
-     call rdpawpsxml_core(energy_cor,trim(filename_),lcor,ncor,nphicor,radmesh,phi_cor, &
-&                         kappacor=kappacor)
+ 
+
+ unt = libpaw_get_free_unit()
+ open(unit=unt,file=trim(filename_),form='formatted',status='old',action="read")
+ read(unt,*) fline
+ close(unt)
+ fmt_xml=(fline(1:5)=='<?xml')
+
+ if (fmt_xml) then
+   write(std_out,*) 'USING XML format'
+   if(present(radmesh)) then
+     write(std_out,*) 'Using input radial mesh to init atm'
+     call rdpawpsxml_core(Atm,trim(filename_),rcut,pawrad=radmesh)
    else
-     call rdpawpsxml_core(energy_cor,trim(filename_),lcor,ncor,nphicor,radmesh,phi_cor)
+     call rdpawpsxml_core(Atm,trim(filename_),rcut)
+   endif
+ else
+   if(present(radmesh)) then
+     write(std_out,*) 'Using input radial mesh to init atm'
+     call pawpsp_read_corewf(Atm,trim(filename_),rcut,radmesh_in=radmesh)
+   else
+     call pawpsp_read_corewf(Atm,trim(filename_),rcut)
    endif
  endif
 
+end subroutine pawpsp_init_core
+!!***
+
+
+!-------------------------------------------------------------------------
+
+!!****f* m_pawpsp/pawpsp_read_corewf
+!! NAME
+!!  pawpsp_read_corewf
+!!
+!! FUNCTION
+!!  Initialize a structure of type atomorb_type from a non-XML core file.
+!!
+!! INPUTS
+!!  filename_= core WF file name
+!!  oldformat= old format for the file or not
+!!  rcut= radius cut-off for radial mesh quantities
+!!  ramesh_in= (optional) radial mesh
+!! 
+!! OUTPUT
+!!  Atm<paw_atomorb_type>= Structure defining the set of core orbitals.
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*), intent(in) :: filename_
+ real(dp), intent(in) ::  rcut
+ type(atomorb_type), intent(inout) :: Atm
+ type(pawrad_type), intent(in), optional :: radmesh_in
+
+!Local variables-------------------------------
+!scalars
+ integer :: iln,imsh,ii,isppol,mt,ms,kk,dirac
+ integer :: il,ilmn,jl,jlmn,k0lmn,klmn
+ integer :: imainmesh,lmax,msz_cut,nmesh
+ integer :: pspcod,pspdat,unt
+ character(len=80) :: line
+ character(len=500) :: msg
+ real(dp) :: rs,ls,deriv1,deriv2
+ type(pawrad_type) :: tmpmesh
+!arrays
+ integer,allocatable :: orbitals(:)
+ integer,allocatable :: meshtp(:),meshsz(:)
+ real(dp),allocatable :: radstp(:),logstp(:)
+ real(dp),allocatable :: phitmp(:),work(:)
+
+! ************************************************************************
+
+! Some default parameters
+ Atm%nspden=1
+ Atm%dirac=.false. 
+ Atm%fname = filename_
+ Atm%l_max=0
+ Atm%l_size=0
+ Atm%ln_size=0
+ Atm%ln2_size=0
+ Atm%lmn_size=0
+ Atm%lmn2_size=0
+ Atm%mesh_size=0
+ Atm%mult=1
+ Atm%rcore=0.0_dp
+
 !Core WF file is in (proprietary) format
- if ((.not.oldformat).and.(.not.usexml)) then
+! if (.not.oldformat) then
    unt = libpaw_get_free_unit()
    open(unt,file=trim(filename_),form='formatted',action="read")
-   read(unt,*) ! skip title
-
-   diracrel=.false.
-   read(unit=unt,fmt=*,err=23,end=23) flagrel,tmp1,tmp2,tmp3
-   if (flagrel==2) diracrel=.true.
-   23 continue
-   
-   if(present(kappacor).and.(.not.diracrel)) then
-     write(msg,'(3a)') 'Error in pawpsp_read_core:',ch10, &
-&     '  Diracrel corewf file has to be provided!'
-     LIBPAW_ERROR(msg)
-   endif
-   if((.not.present(kappacor)).and.diracrel) then
-     write(msg,'(3a)') 'Error in pawpsp_read_core:',ch10, &
-&     '  Cannot use diracrelativistic corewf file!'
-     LIBPAW_ERROR(msg)
-   endif
-
-   read(unt,*) ! skip zatom,zcore,pspdat
-   read(unt,*) ! skip pspcod,pspxc,lmax
-   read(unt,*) ! skip pspfmt,creatorID
-   read(unt,*) nphicor
-   read(unt,*) ! skip orbitals
-   read(unt,*) nmesh
-   LIBPAW_ALLOCATE(meshsz,(nmesh))
-   LIBPAW_ALLOCATE(meshtp,(nmesh))
-   LIBPAW_ALLOCATE(radstp,(nmesh))
-   LIBPAW_ALLOCATE(logstp,(nmesh))
-   do iln=1,nmesh
-     r2=zero;read(unt,'(a80)') fline
-     read(unit=fline,fmt=*,err=20,end=20) ib,i1,i2,r1,r2
-     20 continue
-     if (ib<=nmesh) then
-       meshtp(ib)=i1;meshsz(ib)=i2
-       radstp(ib)=r1;logstp(ib)=r2
+   !1)
+   read(unt,*) !title
+   !2)
+   read(unt,err=23,end=23,fmt=*) dirac, Atm%method, Atm%nspinor, Atm%nsppol
+   write(msg,'(4(i2,2x),22x,a)' )dirac, Atm%method,Atm%nspinor,Atm%nsppol,' dirac, method, nspinor, nsppol.'
+   if(dirac==1) Atm%dirac=.true.
+23 backspace(unt) 
+   read(unt,*) Atm%method, Atm%nspinor, Atm%nsppol
+   write(msg,'(3(i2,2x),22x,a)' )Atm%method,Atm%nspinor,Atm%nsppol,'method,nspinor, nsppol.'
+   go to 24
+24 continue
+   call wrtout(std_out,msg,'COLL')
+   !3)
+   read(unt,*) Atm%znucl, Atm%zcore, pspdat
+   Atm%zion=Atm%znucl-Atm%zcore
+   write(msg,'(2f10.5,2x,i8,2x,a)' )Atm%znucl, Atm%zcore, pspdat,'znucl,zcore,pspdat'
+   call wrtout(std_out,msg,'COLL')
+   if(Atm%zcore>zero) then
+     !4)
+     read(unt,*)pspcod,Atm%ixc,lmax
+     write(msg,'(2i5,2x,2x,a)')Atm%ixc,lmax,'ixc,lmax'
+     Atm%l_max  =  lmax+1
+     !5) 
+     read(unt,*) ! skip pspfmt,creatorID
+     !6)
+     read(unt,*)Atm%ln_size, Atm%lmn_size
+     !7)
+     LIBPAW_ALLOCATE(orbitals,(Atm%ln_size))
+     read(unt,*) (orbitals(iln), iln=1,Atm%ln_size)
+     lmax = maxval(orbitals)
+     if (lmax+1/=Atm%l_max) then
+       write(msg,'(a)')" lmax read from file does not agree with orbitals. "
+       LIBPAW_ERROR(msg)
      end if
-   end do
-   read(unt,*) ! skip rmax(core)
-   LIBPAW_ALLOCATE(ncor,(nphicor))
-   LIBPAW_ALLOCATE(lcor,(nphicor))
-   LIBPAW_ALLOCATE(energy_cor,(nphicor))
-   LIBPAW_ALLOCATE(phi_cor,(radmesh%mesh_size,nphicor))
-   if(present(kappacor).and.diracrel) then
-     LIBPAW_ALLOCATE(kappacor,(nphicor))
-   endif
-   do iln=1,nphicor
-     read(unt,*) ! skip comment
-     read(unt,*) i1
-     if(present(kappacor).and.diracrel) then
-       read(unt,*) ncor(iln),lcor(iln),kappacor(iln)
-     else
-       read(unt,*) ncor(iln),lcor(iln)
+     !8)
+     read(unt,*)nmesh
+     LIBPAW_ALLOCATE(meshsz,(nmesh))
+     LIBPAW_ALLOCATE(meshtp,(nmesh))
+     LIBPAW_ALLOCATE(radstp,(nmesh))
+     LIBPAW_ALLOCATE(logstp,(nmesh))
+     do imsh=1,nmesh
+       ls=zero;read(unt,'(a80)') line
+       read(unit=line,fmt=*,err=20,end=20) ii,mt,ms,rs,ls
+       20 continue
+       if (ii<=nmesh) then
+         meshtp(ii)=mt;meshsz(ii)=ms
+         radstp(ii)=rs;logstp(ii)=ls
+       end if
+     end do
+     !9) 
+     read(unt,*) Atm%rcore
+     !10)
+     LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
+     LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
+     LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
+     if (Atm%dirac) then
+       LIBPAW_ALLOCATE(Atm%kappa,(Atm%ln_size)) 
      endif
-     read(unt,*) energy_cor(iln)
-     energy_cor(iln)=energy_cor(iln)*half ! For consistency reasons (in the legacy coreWF format, energies are in Ry)
-     LIBPAW_ALLOCATE(phitmp,(meshsz(i1)))
-     read(unt,*) phitmp
-     if ((radmesh%mesh_type/=meshtp(i1)) &
-&     .or.(radmesh%rstep/=radstp(i1)) &
-&     .or.(radmesh%lstep/=logstp(i1))) then
-       call pawrad_init(tmpmesh,mesh_size=meshsz(i1),mesh_type=meshtp(i1),rstep=radstp(i1),lstep=logstp(i1))
-       npts=radmesh%mesh_size
-       if (tmpmesh%rmax<radmesh%rmax+tol8) npts=pawrad_ifromr(radmesh,tmpmesh%rmax)-1
-       LIBPAW_ALLOCATE(work,(meshsz(i1)))
-       call bound_deriv(phitmp,tmpmesh,meshsz(i1),r1,r2)
-       call paw_spline(tmpmesh%rad,phitmp,meshsz(i1),r1,r2,work)
-       call paw_splint(meshsz(i1),tmpmesh%rad,phitmp,work,npts,radmesh%rad(1:npts),phi_cor(1:npts,iln))
-       if (npts<radmesh%mesh_size) phi_cor(npts+1:radmesh%mesh_size,iln)=zero
-       LIBPAW_DEALLOCATE(work)
-       call pawrad_free(tmpmesh)
+     do isppol=1,Atm%nsppol
+       do iln=1,Atm%ln_size
+         read(unt,*) ! skip comment
+         read(unt,*) ii
+         if (iln==1.and.isppol==1) then
+           imainmesh=ii
+           if(present(radmesh_in)) then
+             Atm%mesh_size = radmesh_in%mesh_size
+             Atm%rcore=radmesh_in%rad(radmesh_in%mesh_size)
+             Atm%radmesh=radmesh_in
+           elseif(rcut>tol16) then
+             call pawrad_init(tmpmesh,meshsz(ii),meshtp(ii),radstp(ii),logstp(ii),-one)
+             msz_cut =min(pawrad_ifromr(tmpmesh,rcut)+6,tmpmesh%mesh_size) ! addsix more points
+             Atm%mesh_size = msz_cut
+             Atm%rcore = tmpmesh%rad(msz_cut)
+             call pawrad_init(Atm%radmesh,Atm%mesh_size,meshtp(ii),radstp(ii),logstp(ii),-one)
+             call pawrad_free(tmpmesh)
+           else
+             Atm%mesh_size= meshsz(ii)
+             call pawrad_init(Atm%radmesh,meshsz(ii),meshtp(ii),radstp(ii),logstp(ii),0d0)
+             Atm%rcore=Atm%radmesh%rad(Atm%mesh_size)
+           endif
+           LIBPAW_ALLOCATE(Atm%phi,(Atm%mesh_size,Atm%ln_size,Atm%nsppol))
+         else if ((ii/=imainmesh).and.(.not.present(radmesh_in))) then
+           write(msg,'(3a)')&
+  &        ' All Phi core must be given on the same radial mesh !',ch10,&
+  &        ' Action: check your pseudopotential file.'
+           ABI_ERROR(msg)
+         end if
+         read(unt,*) Atm%indln(2,iln),Atm%indln(1,iln),kk
+         read(unt,*) Atm%eig(iln,isppol),Atm%occ(iln,isppol)
+         Atm%eig(iln,isppol)=Atm%eig(iln,isppol)*half ! For consistency reasons (in the legacy coreWF format, energies are in Ry)
+         if(Atm%dirac) then
+           Atm%kappa(iln)=kk
+         endif
+         !11)
+         LIBPAW_ALLOCATE(phitmp,(meshsz(ii)))
+         read(unt,*) phitmp
+         if (present(radmesh_in)) then
+           if ((radmesh_in%mesh_type/=meshtp(ii)) &
+  &         .or.(radmesh_in%rstep/=radstp(ii)) &
+  &         .or.(radmesh_in%lstep/=logstp(ii))) then
+             call pawrad_init(tmpmesh,mesh_size=meshsz(ii),mesh_type=meshtp(ii),rstep=radstp(ii),lstep=logstp(ii))
+             ms=radmesh_in%mesh_size
+             if (tmpmesh%rmax<radmesh_in%rmax+tol8) ms=pawrad_ifromr(radmesh_in,tmpmesh%rmax)-1
+             LIBPAW_ALLOCATE(work,(meshsz(ii)))
+             call bound_deriv(phitmp,tmpmesh,meshsz(ii),deriv1,deriv2)
+             call paw_spline(tmpmesh%rad,phitmp,meshsz(ii),deriv1,deriv2,work)
+             call paw_splint(meshsz(ii),tmpmesh%rad,phitmp,work,ms,radmesh_in%rad(1:ms),Atm%phi(1:ms,iln,isppol))
+             if (ms<radmesh_in%mesh_size) Atm%phi(ms+1:radmesh_in%mesh_size,iln,isppol)=zero
+             LIBPAW_DEALLOCATE(work)
+             call pawrad_free(tmpmesh)
+           else
+             ms=min(meshsz(ii),radmesh_in%mesh_size)
+             Atm%phi(1:ms,iln,isppol)=phitmp(1:ms)
+             if (ms<radmesh_in%mesh_size) Atm%phi(ms+1:radmesh_in%mesh_size,iln,isppol)=zero
+           end if
+         else
+           Atm%phi(:,iln,isppol) = phitmp(1:Atm%mesh_size)
+         endif
+         LIBPAW_DEALLOCATE(phitmp)
+       end do
+     enddo
+     LIBPAW_DEALLOCATE(meshsz)
+     LIBPAW_DEALLOCATE(meshtp)
+     LIBPAW_DEALLOCATE(radstp)
+     LIBPAW_DEALLOCATE(logstp)
+     close(unt) 
+  
+     Atm%l_size =2*Atm%l_max-1
+     Atm%ln2_size  = Atm%ln_size *(Atm%ln_size +1)/2
+     Atm%lmn2_size = Atm%lmn_size*(Atm%lmn_size+1)/2
+  
+     if(Atm%dirac) then
+       call make_indlmn(Atm%ln_size, Atm%lmn_size,orbitals,Atm%indlmn,kappa=Atm%kappa)
      else
-       npts=min(meshsz(i1),radmesh%mesh_size)
-       phi_cor(1:npts,iln)=phitmp(1:npts)
-       if (npts<radmesh%mesh_size) phi_cor(npts+1:radmesh%mesh_size,iln)=zero
-     end if
-     LIBPAW_DEALLOCATE(phitmp)
-   end do
-   LIBPAW_DEALLOCATE(meshsz)
-   LIBPAW_DEALLOCATE(meshtp)
-   LIBPAW_DEALLOCATE(radstp)
-   LIBPAW_DEALLOCATE(logstp)
- end if
+       call make_indlmn(Atm%ln_size, Atm%lmn_size, orbitals, Atm%indlmn)
+     endif
 
- close(unt)
-
-!Core WF file is in old (proprietary) format
- if ((oldformat).and.(.not.usexml)) then
-   unt = libpaw_get_free_unit()
-   open(unt,file=trim(filename_),form='formatted',action="read")
-   do while (dum/='atompaw ')
-     read(unt,'(a8)') dum
-   end do
-   read(unt,'(2i4)') npts,nphicor
-   LIBPAW_ALLOCATE(ncor,(nphicor))
-   LIBPAW_ALLOCATE(lcor,(nphicor))
-   LIBPAW_ALLOCATE(energy_cor,(nphicor))
-   LIBPAW_ALLOCATE(phi_cor,(npts,nphicor))
-   LIBPAW_ALLOCATE(rad,(npts))
-   do iln=1,nphicor
-     read(unt,'(a4,i4,a3,i4,a6,f15.7,a8,f15.7)') &
-&     dum1,ncor(iln),dum2,lcor(iln),dum3,noccor,dum4,energy_cor(iln)
-     energy_cor(iln)=energy_cor(iln)*half ! For consistency reasons (in the legacy coreWF format, energies are in Ry)
-
-     do jln=1,npts
-       read(unt,*) rad(jln),phi_cor(jln,iln)
+     ! * Setup of indklmn and klm_diag.
+     LIBPAW_ALLOCATE(Atm%indklmn,(8,Atm%lmn2_size))
+     LIBPAW_ALLOCATE(Atm%klm_diag,(Atm%lmn2_size))
+     call make_indklmn(HUGE(1), Atm%lmn_size, Atm%lmn2_size, Atm%indlmn,Atm%indklmn, Atm%klm_diag)
+   
+     ! * Setup of klmntomn.
+     LIBPAW_ALLOCATE(Atm%klmntomn,(4,Atm%lmn2_size))
+     do jlmn=1,Atm%lmn_size
+       jl= Atm%indlmn(1,jlmn)
+       k0lmn=jlmn*(jlmn-1)/2
+       do ilmn=1,jlmn
+         il= Atm%indlmn(1,ilmn)
+         klmn=k0lmn+ilmn
+         Atm%klmntomn(1,klmn) = Atm%indlmn(2,ilmn)+il+1 ! im
+         Atm%klmntomn(2,klmn) = Atm%indlmn(2,jlmn)+jl+1 ! jm
+         Atm%klmntomn(3,klmn) = Atm%indlmn(3,ilmn)      ! in
+         Atm%klmntomn(4,klmn) = Atm%indlmn(3,jlmn)      ! jn
+       end do
      end do
-     read(unt,*)
-   end do
-   LIBPAW_DEALLOCATE(rad)
+   
+     LIBPAW_DEALLOCATE(orbitals)
+     LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
+     Atm%mode = ORB_FROZEN
+ 
+     ! * Setup of kln2ln.
+     !TODO this has to be tested
+   !  LIBPAW_ALLOCATE(Atm%kln2ln,(6,Atm%ln2_size))
+   !  call make_kln2ln(Atm%lmn_size,Atm%lmn2_size,Atm%ln2_size,Atm%indlmn,Atm%indklmn,Atm%kln2ln)
+ 
+   endif
    close(unt)
- end if
+! end if
 
-!Set an array 'a la' indlmn
-
-
-!===== DIRAC-RELATIVISTIC CASE =====
-!Warning due to the nature of the dirac-relativistic solution used:
-!  These corewf have complex spherical harmonics, which need to be converted later!
- if(present(kappacor)) then
-
-   lmncmax=0
-   do ib=1,nphicor
-     il=lcor(ib)
-     kappa=sign(1,kappacor(ib))
-     i2j=2*il-kappa!j=l-sgn(kappa)/2
-     lmncmax=lmncmax+i2j+1
-   end do
-   lmncmax=lmncmax*2
-   LIBPAW_ALLOCATE(indlmn_core,(8,lmncmax))
-   indlmn_core=0;ilmn=0;iln=0
-   do ib=1,2*nphicor
-     iln=iln+modulo(ib,2)
-     il=lcor(iln)
-     kappa=sign(1,kappacor(iln)) ! sgn(kappa)=+1 or -1
-     spinor=2-modulo(ib,2)       ! spinor= 1 or 2
-     i2j=2*il-kappa              ! j=l-sgn(kappa)/2 = l-1/2 or l+1/2 
-     do ilm=1,i2j+1
-       !mj= -j,...,j
-       i2mj=-i2j+2*(ilm-1)       ! 2m_j= -jc ... +jc
-       im=(i2mj-3+2*spinor)/2    ! m=m_j-1/2 (spinor=1) or m_j+1/2 (spinor=2)
-       if(abs(im)<=il) then
-         !Valid value for sph. harm., i.e. abs(m)<=l
-         indlmn_core(1,ilmn+ilm)=il !l
-         indlmn_core(2,ilmn+ilm)=im !m
-         indlmn_core(3,ilmn+ilm)=kappa !sign of kappa
-         indlmn_core(4,ilmn+ilm)=il*il+im+il+1 !lm
-         indlmn_core(5,ilmn+ilm)=iln !ln also includes the two kappa values here
-         indlmn_core(6,ilmn+ilm)=spinor !spinor index (1 up, 2 down)
-         indlmn_core(7,ilmn+ilm)=i2j !2*j (times 2 to make it an integer)
-         indlmn_core(8,ilmn+ilm)=i2mj !2*m_j (times 2 to make it an integer)
-       else
-         !Invalid value for sph. harm. ; will be multiplied by zero later
-         indlmn_core(1,ilmn+ilm)=-1 !Invalid value that should be checked later
-         indlmn_core(2:8,ilmn+ilm)=-1 ; indlmn_core(3,ilmn+ilm)=0
-       endif
-     end do
-     ilmn=ilmn+i2j+1
-   end do
-
-!===== NON OR SCALAR-RELATIVISTIC CASE =====
- else
-   lmncmax=0
-   do ib=1,nphicor
-     il=lcor(ib)
-     lmncmax=lmncmax+2*il+1
-   end do
-   LIBPAW_ALLOCATE(indlmn_core,(6,lmncmax))
-   indlmn_core=0;ilmn=0;iln=0
-   do ib=1,nphicor
-     il=lcor(ib)
-     iln=iln+1
-     do ilm=1,2*il+1
-       indlmn_core(1,ilmn+ilm)=il
-       indlmn_core(2,ilmn+ilm)=ilm-(il+1)
-       indlmn_core(3,ilmn+ilm)=1
-       indlmn_core(4,ilmn+ilm)=il*il+ilm
-       indlmn_core(5,ilmn+ilm)=iln
-       indlmn_core(6,ilmn+ilm)=1
-     end do
-     ilmn=ilmn+2*il+1
-   end do
-
- endif ! Relativistic?
+!!Core WF file is in old (proprietary) format
+! if(oldformat) then
+!   unt = libpaw_get_free_unit()
+!   open(unt,file=trim(filename_),form='formatted',action="read")
+!   do while (dum/='atompaw ')
+!     read(unt,'(a8)') dum
+!   end do
+!   read(unt,'(2i4)') Atm%mesh_size,Atm%ln_size
+!   Atm%ln2_size  = Atm%ln_size *(Atm%ln_size +1)/2
+!   LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
+!   LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,1))
+!   LIBPAW_ALLOCATE(Atm%phi,(Atm%mesh_size,Atm%ln_size,1)) 
+!   LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,1))
+!   LIBPAW_ALLOCATE(rad,(Atm%mesh_size))
+!   do iln=1,Atm%ln_size
+!     read(unt,'(a4,i4,a3,i4,a6,f15.7,a8,f15.7)') &
+!&       dum1,Atm%indln(2,iln),dum2,Atm%indln(1,iln),dum3,Atm%occ(iln,1),Atm%eig(iln,1)
+!     Atm%eig(iln,1)=Atm%eig(iln,1)*half ! For consistency reasons (in the legacy coreWF format, energies are in Ry)
+!     do ims=1,Atm%mesh_size
+!       read(unt,*) rad(ims),Atm%phi(ims,iln,1)
+!     end do
+!     read(unt,*)
+!   end do
+!   call pawrad_init(Atm%radmesh,mesh_size=Atm%mesh_size,mesh_type=1,rstep=rad(2)-rad(1),lstep=zero)
+!   Atm%rcore=Atm%radmesh%rad(Atm%mesh_size)
+!   LIBPAW_DEALLOCATE(rad)
+!   close(unt)
+! end if
 
 end subroutine pawpsp_read_corewf
 !!***
@@ -1749,6 +1869,7 @@ end subroutine pawpsp_rw_atompaw
 !!  xclevel= XC functional level
 !!  zion=nominal valence of atom as specified in psp file
 !!  znucl=atomic number of atom as specified in input file to main routine
+!!  [el_temp]=electronic temperature (hartree)
 !!
 !! OUTPUT
 !!  epsatm=$ (4\pi)\int_0^\infty [r^2 (V(r)+\frac{Zv}{r}) dr]$(hartree)
@@ -1771,7 +1892,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 &          mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &          qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &          vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
-&          tcoretau,coretau_mesh,xc_taupos) !optional
+&          tcoretau,coretau_mesh,xc_taupos,el_temp) !optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1780,7 +1901,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  integer,intent(in) ::mmax
  integer,intent(in) :: xclevel
  real(dp),intent(in) :: hyb_mixing,xc_denpos,zion,znucl
- real(dp),intent(in),optional :: xc_taupos
+ real(dp),intent(in),optional :: xc_taupos,el_temp
  real(dp),intent(out) :: epsatm,xcccrc
  type(pawrad_type),intent(in) :: core_mesh,tproj_mesh,vale_mesh
  type(pawrad_type),intent(in),optional :: coretau_mesh
@@ -1804,7 +1925,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  integer :: j0lmn,jlm,jlmn,jln,klmn,msz,msz1,msz_tmp,mst_tmp,nspden,usekden
  logical :: has_dij0,non_magnetic_xc,reduced_ncor,reduced_taucor,reduced_nval,reduced_vloc,testval
  real(dp),parameter :: reduced_rstep=0.00025_dp,rm_vloc=20.0_dp
- real(dp) :: d2nvdq0,intg,intvh,lstep_tmp,my_xc_taupos,qcore,qq,rstep_tmp,yp1,ypn
+ real(dp) :: d2nvdq0,intg,intvh,lstep_tmp,my_xc_taupos,my_el_temp,qcore,qq,rstep_tmp,yp1,yp2,ypn
  character(len=500) :: msg
  type(pawang_type) :: pawang_tmp
  type(pawrad_type) :: rcore_mesh,rcoretau_mesh,rvale_mesh,rvloc_mesh,tproj_mesh_new
@@ -1831,6 +1952,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 ! end if
 
 !Check optional arguments
+ my_el_temp=merge(el_temp,zero,present(el_temp))
  usekden=merge(0,1,pawtab%has_coretau==0)
  my_xc_taupos=xc_denpos;if (present(xc_taupos)) my_xc_taupos=xc_taupos
  if (present(tcoretau)) then
@@ -2253,16 +2375,16 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
        if (nspden==2) work2(msz+1:2*msz)=half*nwk
        if (nspden==2) work3(msz+1:2*msz)=half*nhatwk
        if (pawxcdev/=0) then
-         call pawxcm(ncorwk,yp1,ypn,0,hyb_mixing,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxcm(ncorwk,yp1,ypn,0,hyb_mixing,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+         call pawxcm(ncorwk,yp1,ypn,yp2,0,hyb_mixing,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
+&         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos,my_el_temp)
+         call pawxcm(ncorwk,yp1,ypn,yp2,0,hyb_mixing,ixc,work1,1,tmp_lmselect,work3,0,non_magnetic_xc,msz,nspden,5,&
+&         pawang_tmp,vloc_mesh,pawxcdev,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos,my_el_temp)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
-&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+         call pawxc(ncorwk,yp1,ypn,yp2,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
+&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,0,vxc1,xclevel,xc_denpos,my_el_temp)
+         call pawxc(ncorwk,yp1,ypn,yp2,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,msz,nspden,5,&
+&         pawang_tmp,vloc_mesh,work2,pawtab%usetcore,2,vxc2,xclevel,xc_denpos,my_el_temp)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
@@ -2276,16 +2398,16 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
        LIBPAW_ALLOCATE(work1,(msz))
        tmp1 => work1
        if (pawxcdev/=0) then
-         call pawxcm(ncorwk,yp1,ypn,0,hyb_mixing,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxcm(ncorwk,yp1,ypn,0,hyb_mixing,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+         call pawxcm(ncorwk,yp1,ypn,yp2,0,hyb_mixing,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
+&         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos,my_el_temp)
+         call pawxcm(ncorwk,yp1,ypn,yp2,0,hyb_mixing,ixc,work1,1,tmp_lmselect,nhatwk,0,non_magnetic_xc,msz,1,5,&
+&         pawang_tmp,vloc_mesh,pawxcdev,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos,my_el_temp)
          vxc1=vxc1/sqrt(four_pi);vxc2=vxc2/sqrt(four_pi) ! Deduce Vxc from its first moment
        else
-         call pawxc(ncorwk,yp1,ypn,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos)
-         call pawxc(ncorwk,yp1,ypn,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
-&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos)
+         call pawxc(ncorwk,yp1,ypn,yp2,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
+&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,0,vxc1,xclevel,xc_denpos,my_el_temp)
+         call pawxc(ncorwk,yp1,ypn,yp2,hyb_mixing,ixc,work1,tmp1,1,tmp_lmselect,nhatwk,0,0,non_magnetic_xc,msz,1,5,&
+&         pawang_tmp,vloc_mesh,nwk,pawtab%usetcore,2,vxc2,xclevel,xc_denpos,my_el_temp)
        end if
        LIBPAW_DEALLOCATE(nwk)
        LIBPAW_DEALLOCATE(ncorwk)
@@ -2585,15 +2707,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  tmp1 => work1 ; tmp2 => work1
 
  if (pawxcdev/=0) then
-   call pawxcm(ncore,pawtab%exccore,yp1,0,hyb_mixing,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
-&   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos)
+   call pawxcm(ncore,pawtab%exccore,yp1,pawtab%sxccore,0,hyb_mixing,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
+&   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos,my_el_temp)
  else
    if (present(tcoretau)) then
-     call pawxc(ncore,pawtab%exccore,yp1,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau,xc_taupos=my_xc_taupos)
+     call pawxc(ncore,pawtab%exccore,yp1,pawtab%sxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
+&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,my_el_temp,coretau=tcoretau,xc_taupos=my_xc_taupos)
    else
-     call pawxc(ncore,pawtab%exccore,yp1,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos)
+     call pawxc(ncore,pawtab%exccore,yp1,pawtab%sxccore,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
+&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,my_el_temp)
    end if
  end if
 
@@ -2968,6 +3090,7 @@ end subroutine pawpsp_wvl_calc
 !!  xclevel= XC functional level
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!  [xc_taupos]= lowest allowed kinetic energy density (for mGGA XC functionals)
+!!  [el_temp]=electronic temperature (hartree)
 !!  zion=nominal valence of atom as specified in psp file
 !!  znucl=atomic number of atom as specified in input file to main routine
 !!
@@ -3001,7 +3124,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
 & lnmax,mmax,mqgrid_ff,mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 & pawxcdev, qgrid_ff,qgrid_vl,usewvl,usexcnhat_in,vlspl,xcccrc,&
 & xclevel,xc_denpos,zion,znucl,&
-& xc_taupos) ! Optional argument
+& xc_taupos,el_temp) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -3009,7 +3132,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
  integer,intent(inout) ::mmax
  integer,intent(in) :: xclevel,icoulomb,usewvl
  real(dp),intent(in) :: hyb_mixing,xc_denpos,zion,znucl
- real(dp),intent(in),optional :: xc_taupos
+ real(dp),intent(in),optional :: xc_taupos,el_temp
  real(dp),intent(out) :: epsatm,xcccrc
  type(pawpsp_header_type),intent(in) :: pawpsp_header
  type(pawrad_type),intent(inout) :: pawrad
@@ -3025,7 +3148,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
  integer :: ir,iread1,ishpfmesh,ivalemesh,ivlocmesh,j0lmn,jlm,pngau
  integer :: jlmn,jln,klmn,msz,nmesh,nval,pspversion,shft,sz10,usexcnhat,vlocopt
  real(dp), parameter :: rmax_vloc=10.0_dp
- real(dp) :: fourpi,my_xc_taupos,occ,rc,yp1,ypn
+ real(dp) :: fourpi,my_xc_taupos,my_el_temp,occ,rc,yp1,ypn
  logical :: save_core_msz
  character(len=500) :: msg
  type(pawrad_type) :: core_mesh,coretau_mesh,shpf_mesh,tproj_mesh,vale_mesh,vloc_mesh
@@ -3056,6 +3179,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
  imainmesh=-1;icoremesh=-1;icoretaumesh=-1;iprojmesh=-1
  ishpfmesh=-1;ivalemesh=-1;ivlocmesh=-1
  my_xc_taupos=xc_denpos;if(present(xc_taupos)) my_xc_taupos=xc_taupos
+ my_el_temp=merge(el_temp,zero,present(el_temp))
 
 !==========================================================
 !Initialize partial waves quantum numbers
@@ -3842,7 +3966,7 @@ pawtab%lamb_shielding=paw_setuploc%lamb_shielding
 &     mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &     qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
-&     tcoretau=tcoretau,coretau_mesh=coretau_mesh,xc_taupos=my_xc_taupos)
+&     tcoretau=tcoretau,coretau_mesh=coretau_mesh,xc_taupos=my_xc_taupos,el_temp=my_el_temp)
 
  if(usewvl==1 .or. icoulomb > 0) then
 !  Calculate up to the 5th derivative of tcoredens
@@ -3921,6 +4045,7 @@ end subroutine pawpsp_17in
 !!  xclevel= XC functional level
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!  [xc_taupos]= lowest allowed kinetic energy density (for mGGA XC functionals)
+!!  [el_temp]=electronic temperature (hartree)
 !!  zion=nominal valence of atom as specified in psp file
 !!
 !! OUTPUT
@@ -3941,7 +4066,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 & lmax,lnmax,mmax,mqgrid_ff,mqgrid_vl,&
 & pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
 & usewvl,usexcnhat_in,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
-& xc_taupos) ! Optional argument
+& xc_taupos,el_temp) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -3950,7 +4075,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
  integer, intent(in):: mqgrid_ff,mqgrid_vl,pawxcdev
  integer, intent(in):: usewvl,usexcnhat_in,xclevel
  real(dp), intent(in):: hyb_mixing,xc_denpos,zion,znucl
- real(dp), intent(in),optional:: xc_taupos
+ real(dp), intent(in),optional:: xc_taupos,el_temp
  real(dp), intent(out):: epsatm,xcccrc
  type(pawrad_type), intent(inout):: pawrad
  type(pawtab_type), intent(inout) :: pawtab
@@ -3964,7 +4089,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
  integer :: imainmesh,nmesh
  integer :: pspversion,usexcnhat,vlocopt
  logical :: save_core_msz
- real(dp) :: my_xc_taupos
+ real(dp) :: my_xc_taupos,my_el_temp
  type(pawrad_type) :: core_mesh,tproj_mesh,vale_mesh,vloc_mesh
 !arrays
  real(dp),pointer :: ncore(:),tncore(:),tcoretau(:),tnvale(:),tproj(:,:),vlocr(:)
@@ -3988,11 +4113,12 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 &  vale_mesh,vlocopt,vlocr,vloc_mesh,znucl)
 
  my_xc_taupos=xc_denpos;if(present(xc_taupos)) my_xc_taupos=xc_taupos
+ my_el_temp=merge(el_temp,zero,present(el_temp))
  call pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 &     mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &     qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
-&     tcoretau=tcoretau,coretau_mesh=core_mesh,xc_taupos=my_xc_taupos)
+&     tcoretau=tcoretau,coretau_mesh=core_mesh,xc_taupos=my_xc_taupos,el_temp=my_el_temp)
 
  if(usewvl==1 .or. icoulomb > 0) then
 !  Calculate up to the 5th derivative of tcoredens
@@ -4825,6 +4951,7 @@ end subroutine pawpsp_bcast
 !!    [xc_denpos]=tolerance on density for the calculation of XC potential
 !!              (if density<xc_denpos, density=zero)
 !!    [xc_taupos]=tolerance on kinetic energy density for the calculation of XC potential (mGGA)
+!!    [el_temp]=electronic temperature (hartree)
 !!
 !! OUTPUT
 !!  pawrad <type(pawrad_type)>=data containing PAW radial grid information
@@ -4841,7 +4968,7 @@ subroutine pawpsp_main( &
 & pawrad,pawtab,&
 & filpsp,usewvl,icoulomb,hyb_mixing,ixc,xclevel,pawxcdev,usexcnhat,&
 & qgrid_ff,qgrid_vl,ffspl,vlspl,epsatm,xcccrc,zionpsp,znuclpsp,&
-& wvl_ngauss,psxml,comm_mpi,xc_denpos,xc_taupos) ! Optional arguments
+& wvl_ngauss,psxml,comm_mpi,xc_denpos,xc_taupos,el_temp) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -4849,7 +4976,7 @@ subroutine pawpsp_main( &
  integer,intent(in) :: pawxcdev,usewvl,usexcnhat,xclevel
  integer,optional,intent(in) :: comm_mpi
  real(dp),intent(in):: hyb_mixing,zionpsp,znuclpsp
- real(dp),optional,intent(in) :: xc_denpos,xc_taupos
+ real(dp),optional,intent(in) :: xc_denpos,xc_taupos,el_temp
  real(dp),intent(out) :: epsatm,xcccrc
  character(len=fnlen),intent(in):: filpsp   ! name of the psp file
  type(pawrad_type),intent(inout) :: pawrad
@@ -4865,13 +4992,13 @@ subroutine pawpsp_main( &
  integer :: has_coretau,has_tproj,has_wvl,ipsp,lmax,lloc,lnmax,mmax,me,mqgrid_ff,mqgrid_vl
  integer :: pspcod,pspxc,usexml
  real(dp),parameter :: xc_denpos_default=tol14
- real(dp) :: my_xc_denpos,my_xc_taupos,r2well,zion,znucl
+ real(dp) :: my_xc_denpos,my_el_temp,my_xc_taupos,r2well,zion,znucl
  character(len=500) :: msg
  type(pawpsp_header_type) :: pawpsp_header
 !arrays
 
 ! *************************************************************************
-
+ 
 !Check consistency of parameters
  if (icoulomb/= 0.or.usewvl==1) then
    if (.not.present(wvl_ngauss)) then
@@ -4894,6 +5021,7 @@ subroutine pawpsp_main( &
 
  my_xc_denpos=xc_denpos_default;if (present(xc_denpos)) my_xc_denpos=xc_denpos
  my_xc_taupos=my_xc_denpos;if (present(xc_taupos)) my_xc_taupos=xc_taupos
+ my_el_temp=merge(el_temp,zero,present(el_temp))
  pawtab%usexcnhat=usexcnhat
  me=0;if (present(comm_mpi))me=xmpi_comm_rank(comm_mpi)
 
@@ -4946,7 +5074,8 @@ subroutine pawpsp_main( &
      call pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 &     lmax,lnmax,mmax,mqgrid_ff,mqgrid_vl,&
 &     pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
-&     usewvl,usexcnhat,vlspl,xcccrc,xclevel,my_xc_denpos,zion,znucl,xc_taupos=my_xc_taupos)
+&     usewvl,usexcnhat,vlspl,xcccrc,xclevel,my_xc_denpos,zion,znucl,&
+&     xc_taupos=my_xc_taupos,el_temp=my_el_temp)
 
    else if (pspcod==17)then
 !    XML format
@@ -4954,7 +5083,7 @@ subroutine pawpsp_main( &
      call pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
 &     lnmax,mmax,mqgrid_ff,mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 &     pawxcdev,qgrid_ff,qgrid_vl,usewvl,usexcnhat,vlspl,xcccrc,&
-&     xclevel,my_xc_denpos,zion,znucl,xc_taupos=my_xc_taupos)
+&     xclevel,my_xc_denpos,zion,znucl,xc_taupos=my_xc_taupos,el_temp=my_el_temp)
 
    end if
  end if!me==0

@@ -6,7 +6,7 @@
 !!   Driver for EPH calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2024 ABINIT group (MG, MVer, GA)
+!!  Copyright (C) 2009-2025 ABINIT group (MG, MVer, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ module m_eph_driver
  use m_distribfft
  use netcdf
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : MPI_type
  use m_io_tools,        only : file_exists, open_file
  use m_time,            only : cwtime, cwtime_report
@@ -72,6 +72,7 @@ module m_eph_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
  use m_gwpt,            only : gwpt_run
  use m_varpeq,          only : varpeq_run, varpeq_plot
+ use m_eph_path,        only : eph_path_run
 
  implicit none
 
@@ -372,7 +373,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtset%prtfsurf /= 0) then
      path = strcat(dtfil%filnam_ds(4), "_BXSF")
      call wrtout(units, sjoin("- Writing Fermi surface to file:", path))
-     if (ebands_write_bxsf(ebands, cryst, path) /= 0) then
+     if (ebands%write_bxsf(cryst, path) /= 0) then
        msg = "Cannot produce file for Fermi surface, check log file for more info"
        ABI_WARNING(msg)
        call wrtout(ab_out, msg)
@@ -383,13 +384,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtset%prtnest /= 0 .and. dtset%ph_nqpath > 0) then
      path = strcat(dtfil%filnam_ds(4), "_NEST")
      call wrtout(ab_out, sjoin("- Writing nesting factor to file:", path))
-     if (ebands_write_nesting(ebands, cryst, path, dtset%prtnest, &
+     if (ebands%write_nesting(cryst, path, dtset%prtnest, &
          dtset%tsmear, dtset%fermie_nest, dtset%ph_qpath(:,1:dtset%ph_nqpath), msg) /= 0) then
        ABI_WARNING(msg)
        call wrtout(ab_out,msg)
      end if
    end if
-   if (use_wfk) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   if (use_wfk) call ebands%write(dtset%prtebands, dtfil%filnam_ds(4))
  end if
 
  call cwtime_report(" eph%ebands_postprocess:", cpu, wall, gflops)
@@ -514,7 +515,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dtset%prtbltztrp == 1 .and. my_rank == master) then
    call ifc%outphbtrap(cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, dtfil%filnam_ds(4))
    ! BoltzTraP output files in GENEric format
-   call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
+   call ebands%prtbltztrp(cryst, dtfil%filnam_ds(4))
  end if
 
  ! Output phonon isosurface in Xcrysden format.
@@ -537,6 +538,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (cryst%compare(dvdb%cryst, header=" Comparing WFK crystal with DVDB crystal") /= 0) then
      ABI_ERROR("Crystal structure from WFK and DVDB do not agree! Check messages above!")
    end if
+   dvdb%prtvol = dtset%prtvol
    if (dtset%prtvol > 10) dvdb%debug = .True.
 
    ! This to symmetrize the DFPT potentials.
@@ -630,8 +632,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
                   gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
 
- call print_ngfft(ngfftc, header='Coarse FFT mesh used for the wavefunctions')
- call print_ngfft(ngfftf, header='Dense FFT mesh used for densities and potentials')
+ call print_ngfft([std_out], ngfftc, header='Coarse FFT mesh used for the wavefunctions')
+ call print_ngfft([std_out], ngfftf, header='Dense FFT mesh used for densities and potentials')
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
@@ -649,9 +651,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! === Open and read pseudopotential files ===
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
-
- ! TODO: Make sure that all subdrivers work with useylm == 1
- ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
 
  ! Relase nkpt-based arrays in dtset to decrease memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
@@ -673,16 +672,18 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (2, -2)
    ! Compute e-ph matrix elements.
+   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call eph_gkk(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (3)
-   ! Compute phonon self-energy.
+   ! Compute phonon-electron self-energy.
+   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call eph_phpi(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (4, -4)
-   ! Compute electron self-energy (phonon contribution).
+   ! Compute electron-phonon self-energy (phonon contribution).
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
@@ -702,9 +703,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model.
-   if (my_rank == master) then
-     call frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
-   end if
+   if (my_rank == master) call frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (7)
    ! Compute phonon-limited RTA from SIGEPH.nc file.
@@ -720,9 +719,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
-   if (my_rank == master) then
-     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
-   end if
+   if (my_rank == master) call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (11)
    ! Compute and write e-ph matrix elements to GSTORE.nc file.
@@ -842,8 +839,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (17)
    ! Compute e-ph matrix elements with the GWPT formalism.
+   ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
    call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk0_hdr, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+
+ case (18)
+   ! Compute e-ph matrix elements along a q-path
+   call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
@@ -859,8 +861,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call ddb%free()
  call ifc%free()
  call wfk0_hdr%free()
- call ebands_free(ebands)
- call ebands_free(ebands_kq)
+ call ebands%free()
+ call ebands_kq%free()
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
 

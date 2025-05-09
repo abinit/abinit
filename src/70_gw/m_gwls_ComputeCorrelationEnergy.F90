@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,10 +48,7 @@ use m_errors
 use m_dtset
 
 use m_time,             only : timab
-use m_io_tools,         only : get_unit,open_file
-use m_paw_dmft,         only : paw_dmft_type
-use m_ebands,           only : ebands_init, ebands_free
-use m_gaussian_quadrature, only: gaussian_quadrature_gegenbauer, gaussian_quadrature_legendre
+use m_io_tools,         only : get_unit, open_file
 
 
 implicit none

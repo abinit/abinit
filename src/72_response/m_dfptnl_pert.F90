@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group ()
+!!  Copyright (C) 2008-2025 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,7 +84,7 @@ contains
 !!   - 1st-order WFs DDK,DDE and 2nd-order WF DKDE (ddk_f)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2024 ABINIT group (LB)
+!! Copyright (C) 2018-2025 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -298,7 +298,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  usepaw = psps%usepaw
  size_cprj = nspinor
 
- call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq_i2pert,paw_ij1=paw_ij1_i2pert,has_e1kbsc=.true.)
+ call rf_hamkq_i2pert%init(cplex,gs_hamkq,i2pert,paw_ij1=paw_ij1_i2pert,has_e1kbsc=.true.)
 
  ABI_MALLOC(dummy_array,(0))
  ABI_MALLOC(dummy_array2,(0,0))
@@ -1132,19 +1132,19 @@ end subroutine dfptnl_pert
 !!   \frac{\delta^2 E_{Hxc}}{\delta n(r) \delta n(r\prim)}
 !!$
 !!   (seventh term of Eq. (110) of X. Gonze, PRA 52, 1096 (1995) [[cite:Gonze1995]]).
-!! 
+!!
 !!   The following is essentially the 4th and the 3rd terms of PRB 71,125107 [[cite:Veithen2005]].
 !!
-!!   However, we treat the nonlinear xc core correction in a slightly different way, 
+!!   However, we treat the nonlinear xc core correction in a slightly different way,
 !!   in order to keep the symmetry between pert1,pert2 and pert3. It helps for debugging.
 !!
-!!   Namely, here we consider Exc as a functional depending on the TOTAL density (core+valence), 
+!!   Namely, here we consider Exc as a functional depending on the TOTAL density (core+valence),
 !!   so it does not depend explicitely on the perturbation, and the term given above is always zero.
 !!   The "lost" terms are recovered adding the derivative of the core densities for EVERY perturbations,
 !!   and not only to 'pert2', as in the first case.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2020-2024 ABINIT group (LB)
+!! Copyright (C) 2020-2025 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1300,7 +1300,7 @@ subroutine dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfftf,nfftotf,nspden,rho1
 
  DBG_EXIT("COLL")
 
-end subroutine  dfptnl_exc3  
+end subroutine  dfptnl_exc3
 !!***
 
 end module m_dfptnl_pert

@@ -4,7 +4,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2024 ABINIT group (XG)
+!!  Copyright (C) 2009-2025 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,6 +99,7 @@ subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,nato
  integer :: iimage,next_itimimage
 !arrays
  real(dp),allocatable :: etotal(:),fcart(:,:,:),rprimd(:,:,:),xcart(:,:,:),xred(:,:,:)
+ real(dp),allocatable :: strten(:,:)
 
 ! *************************************************************************
 
@@ -108,11 +109,13 @@ subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,nato
  ABI_MALLOC(xcart,(3,natom,nimage))
  ABI_MALLOC(fcart,(3,natom,nimage))
  ABI_MALLOC(rprimd,(3,3,nimage))
- call get_geometry_img(etotal,natom,nimage,results_img(:,itimimage_eff),&
-& fcart,rprimd,xcart,xred)
+ ABI_MALLOC(strten,(6,nimage))
+
+ call get_geometry_img(results_img(:,itimimage_eff),etotal,natom,nimage,&
+&                      fcart,rprimd,strten,xcart,xred)
 
 !Compute new atomic positions in each cell
- call mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
+ call mep_steepest(fcart,list_dynimage,mep_param,natom,natom,ndynimage,nimage,rprimd,xcart,xred)
 
 !Store acell, rprim, xred and vel for the new iteration
  next_itimimage=itimimage+1
@@ -130,6 +133,7 @@ subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,nato
  ABI_FREE(xcart)
  ABI_FREE(fcart)
  ABI_FREE(rprimd)
+ ABI_FREE(strten)
 
 end subroutine predict_steepest
 !!***

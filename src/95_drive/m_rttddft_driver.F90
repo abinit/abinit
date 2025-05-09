@@ -6,7 +6,7 @@
 !!  Real-Time Time Dependent DFT (RT-TDDFT)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FB)
+!!  Copyright (C) 2021-2025 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,6 @@ module m_rttddft_driver
  use defs_basis
  use defs_abitypes,        only: MPI_type
  use defs_datatypes,       only: pseudopotential_type
-
  use m_dtfil,              only: datafiles_type
  use m_dtset,              only: dataset_type
  use m_errors,             only: msg_hndl
@@ -35,7 +34,8 @@ module m_rttddft_driver
  use m_rttddft_tdks,       only: tdks_type
  use m_rttddft_propagate,  only: rttddft_propagate_ele
  use m_rttddft_properties, only: rttddft_calc_density, &
-                               & rttddft_calc_etot
+                               & rttddft_calc_etot,    &
+                               & rttddft_calc_current
  use m_specialmsg,         only: wrtout
  use m_time,               only: cwtime
 
@@ -101,6 +101,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  !scalars
  character(len=500)   :: msg
  integer              :: istep
+ real(dp)             :: integrated_density, stability
  type(tdks_type)      :: tdks
  !arrays
  real(dp)             :: cpu, wall, gflops
@@ -112,12 +113,9 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
                  & ch10,'---------------------------------------------------------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
-
- !FB: Do not allow RT-TDDFT for now. Still under development
- write(msg,'(3a)') ch10,'Real-time time dependent DFT is not yet available. Still under development..',ch10
- call wrtout(ab_out,msg)
+ write(msg,'(7a)') ch10,' RT-TDDFT is under active development and should thus be used with caution ',&
+                 & ch10,'---------------------------------------------------------------------------',ch10
  if (do_write_log) call wrtout(std_out,msg)
- ABI_ERROR(msg)
 
  !** 1) Initialization: create main tdks (Time-Dependent Kohn-Sham) object
  write(msg,'(3a)') ch10,'---------------------------   Initialization   ----------------------------',ch10
@@ -129,33 +127,61 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  !Compute initial electronic density
  call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
+ !Compute current at t=0 (or t-dt) and update vector potential accordingly
+ if (dtset%prtcurrent/=0 .or. tdks%tdef%induced_vecpot) then
+   call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
+ end if
+
  !** 2) Propagation loop
  write(msg,'(3a)') ch10,'-------------------------   Starting propagation   ------------------------',ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
- 
+
  do istep = tdks%first_step, tdks%first_step+tdks%ntime-1
 
-   call cwtime(cpu, wall, gflops, "start")
- 
-   !Perform electronic step
+   call cwtime(cpu,wall,gflops,"start")
+
+   !*** Perform electronic step ***
    !Compute new WF at time t and energy contribution at time t-dt
    call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
 
    !Compute total energy at time t-dt
    call rttddft_calc_etot(dtset,tdks%energies,tdks%etot,tdks%occ)
 
+   !Update electric field and vector potential value
+   call tdks%tdef%update(dtset,mpi_enreg,istep*tdks%dt,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                       & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
+
    !Compute new electronic density at t
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
+
+   !Compute current at t
+   if (dtset%prtcurrent/=0 .or. tdks%tdef%induced_vecpot) then
+      call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
+   end if
 
    !Compute and output useful electronic values
    call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
 
-   !TODO: If Ehrenfest dynamics perform nuclear step
+   !Test of stability
+   integrated_density = sum(tdks%rhor(:,1))*tdks%ucvol/tdks%nfftf
+   stability = abs(integrated_density-dtset%nelect)/dtset%nelect
+   if (stability > 0.1_dp) then
+      write(msg,"(3a)") "The integrated density has changed by more than 10%!", ch10, &
+                     &  "The integration is unstable, you should probably decrease the timestep dtele."
+      ABI_ERROR(msg)
+   else if (stability > 0.05_dp) then
+      write(msg,"(3a)") "The integrated density has changed by more than 5%!", ch10, &
+                     &  "You should be careful, the integration might be unstable"
+      ABI_WARNING(msg)
+   end if
+
+   !TODO: *** Perform nuclear step ***
+   ! For Ehrenfest dynamics
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
    call cwtime(cpu,wall,gflops,"stop")
-   write(msg,'(a,2f8.2,a)') 'Time - cpu, wall (sec):', cpu, wall, ch10
+   write(msg,'(a,2f8.2,a)') '- Time - cpu, wall (sec):', cpu, wall, ch10
    call wrtout(ab_out,msg)
    if (do_write_log) call wrtout(std_out,msg)
 

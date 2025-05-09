@@ -7,7 +7,7 @@
 !! and functions to get cpu and wall time.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG, XG, MT, TD)
+!! Copyright (C) 2009-2025 ABINIT group (MG, XG, MT, TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -557,7 +557,6 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, com
 !Local variables-------------------------------
 !scalars
  character(len=500) :: avg_type
-
 ! *************************************************************************
 
  if (present(comm)) then
@@ -732,23 +731,20 @@ end function time_get_papiopt
 !!  Timing subroutine. Calls machine-dependent "timein" which returns elapsed cpu and wall clock times in sec.
 !!  Depending on value of "option" routine will:
 !!
-!!  (0) Zero all accumulators
-!!  (1 or -1) Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
-!!  (2 or -2) Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
-!!  (3) DEPRECATED Start with new incremental time slice for accumulator n
-!!        using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
-!!        Typically used immediately after a call to timab for another counter with option=2. This saves one call to timein.
-!!  (4) Report time slice for accumlator n (not full time accumlated)
-!!  (5) Option to suppress timing (nn should be 0) or reenable it (nn /=0)
-!!  For negative options : same action than positive values, except for -1 and -2, 
+!!  0: Zero all accumulators
+!!  1 or -1: Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
+!!  2 or -2: Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
+!!  3:  DEPRECATED Start with new incremental time slice for accumulator n
+!!      using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
+!!      Typically used immediately after a call to timab for another counter with option=2. This saves one call to timein.
+!!  4: Report time slice for accumlator n (not full time accumlated)
+!!  5: Option to suppress timing (nn should be 0) or reenable it (nn /=0)
+!!  For negative options: same action than positive values, except for -1 and -2,
 !!    use stored values for cpu, wall, and PAPI infos ( ! do not use for stop ), instead of calling "timein".
 !!    Typically used immediately after a call to timab for another counter with option=2 or 1. This saves one call to timein.
 !!
-!!
-!!  If, on first entry, subroutine is not being initialized, it
-!!  will automatically initialize as well as rezero accumulator n.
-!!  However, initialization SHOULD be done explicitly by the user
-!!  so that it can be done near the top of his/her main routine.
+!!  If, on first entry, subroutine is not being initialized, it will automatically initialize as well as rezero accumulator n.
+!!  However, initialization SHOULD be done explicitly by the user so that it can be done near the top of his/her main routine.
 !!
 !! INPUTS
 !!  nn=index of accumulator (distinguish what is being timed); NOT used if option=0
@@ -756,10 +752,8 @@ end function time_get_papiopt
 !!
 !! OUTPUT
 !!  on option=4:
-!!    tottim(2,nn)=accumulated time for accumulator nn; otherwise
-!!     tottim is a dummy variable.
-!!    option gives the number of times that the
-!!     accumulator has been incremented
+!!    tottim(2,nn)=accumulated time for accumulator nn; otherwise tottim is a dummy variable.
+!!    option gives the number of times that the accumulator has been incremented
 !!
 !! SOURCE
 !!

@@ -6,7 +6,7 @@
 !!  Tools for the management of a set of Fermi surface k-points
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG, MVer)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,8 +34,7 @@ module m_fstab
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : itoa, sjoin, ktoa
  use m_numeric_tools,  only : bisect
- use m_symtk,          only : matr3inv
- use defs_datatypes,   only : ebands_t
+ use m_matrix,         only : matr3inv
  use m_special_funcs,  only : gaussian
  use m_kpts,           only : kpts_timrev_from_kptopt, smpbz, kpts_map
 
@@ -193,7 +192,6 @@ subroutine fstab_free(fstab)
 
 !Arguments ------------------------------------
  class(fstab_t),intent(inout) :: fstab
-
 ! ************************************************************************
 
  ! integer

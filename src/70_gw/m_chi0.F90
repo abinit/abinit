@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2025 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_chi0
  use m_wfd
  use m_dtset
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use m_fstrings,        only : ftoa, sjoin, itoa
  use m_gwdefs,          only : GW_TOL_DOCC, GW_TOL_W0, czero_gw, em1params_t, g0g0w
  use m_numeric_tools,   only : imin_loc, print_arr
@@ -38,7 +38,7 @@ module m_chi0
  use m_crystal,         only : crystal_t
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gfft
  use m_occ,             only : getnel
- use m_ebands,          only : pack_eneocc, unpack_eneocc, ebands_has_metal_scheme
+ use m_ebands,          only : ebands_t, pack_eneocc, unpack_eneocc
  use m_bz_mesh,         only : kmesh_t, littlegroup_t
  use m_gsphere,         only : gsphere_t
  use m_io_tools,        only : flush_unit
@@ -259,7 +259,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  ABI_CHECK(Wfd%nfftot == nfftot_gw, "Wrong nfftot_gw")
  dim_rtwg = 1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
 
- is_metallic = ebands_has_metal_scheme(qp_ebands)
+ is_metallic = qp_ebands%has_metal_scheme()
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
@@ -503,7 +503,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  nkpt_summed = Kmesh%nbz
  if (Ep%symchi /= 0) then
    nkpt_summed = Ltg_q%nibz_ltg
-   call Ltg_q%print(std_out, Dtset%prtvol)
+   call Ltg_q%print([std_out], prtvol=Dtset%prtvol)
  end if
  call wrtout(std_out, sjoin(' Calculation status: ', itoa(nkpt_summed), ' k-points to be completed'))
 
@@ -1212,7 +1212,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
- is_metallic = ebands_has_metal_scheme(qp_ebands)
+ is_metallic = qp_ebands%has_metal_scheme()
 
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
@@ -1398,7 +1398,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi == 1) then
    nkpt_summed = Ltg_q%nibz_ltg
-   call Ltg_q%print(std_out, Dtset%prtvol)
+   call Ltg_q%print([std_out], prtvol=Dtset%prtvol)
  end if
 
  write(msg,'(a,i0,a)')' Calculation status: ',nkpt_summed,' k-points to be completed'
@@ -2061,7 +2061,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  nsppol  = Wfd%nsppol
  nspinor = Wfd%nspinor
- is_metallic = ebands_has_metal_scheme(BSt)
+ is_metallic = BSt%has_metal_scheme()
 
  gw_mgfft = MAXVAL(ngfft_gw(1:3))
  gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
@@ -2290,7 +2290,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  nkpt_summed=Kmesh%nbz
  if (Ep%symchi/=0) then
    nkpt_summed=Ltg_q%nibz_ltg
-   call Ltg_q%print(std_out, Wfd%prtvol)
+   call Ltg_q%print([std_out], prtvol=Wfd%prtvol)
  end if
  !
  ! ============================================
@@ -2428,7 +2428,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  do iomega=1,MIN(Ep%nomega,NOMEGA_PRINTED)
    write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0_intra(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
    call wrtout(std_out, msg)
-   call print_arr(chi0(:,:,iomega),unit=std_out)
+   call print_arr([std_out], chi0(:,:,iomega))
  end do
 
  ! =====================

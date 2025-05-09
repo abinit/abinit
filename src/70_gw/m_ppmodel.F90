@@ -6,7 +6,7 @@
 !!  Module containing the definition of the ppmodel_t used to deal with the plasmonpole technique.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2025 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1196,25 +1196,22 @@ end subroutine cppm1par
 !!
 !! SOURCE
 
-subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatwsq,omegatw,invalid_freq)
+subroutine cppm2par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, gmet, bigomegatwsq, omegatw, invalid_freq)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwc,nfftf,invalid_freq
 !arrays
- integer,intent(in) :: gvec(3,npwc)
- integer,intent(in) :: ngfftf(18)
- real(dp),intent(in) :: qpt(3),gmet(3,3),gprimd(3,3)
- real(dp),intent(in) :: rhor(nfftf)
+ integer,intent(in) :: gvec(3,npwc), ngfftf(18)
+ real(dp),intent(in) :: qpt(3),gmet(3,3),gprimd(3,3), rhor(nfftf)
  complex(gwpc),intent(in) :: epsm1(npwc,npwc)
- complex(gwpc),intent(out) :: bigomegatwsq(npwc,npwc)
- complex(gwpc),intent(out) :: omegatw(npwc,npwc)
+ complex(gwpc),intent(out) :: bigomegatwsq(npwc,npwc), omegatw(npwc,npwc)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig,igp,nimwp,ngfft1,ngfft2,ngfft3,gmgp_idx,ierr
  real(dp) :: lambda,phi,AA
- logical,parameter :: use_symmetrized=.TRUE.,check_imppf=.FALSE.
+ logical,parameter :: use_symmetrized=.TRUE., check_imppf=.FALSE.
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -1238,15 +1235,15 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
  ngfft1=ngfftf(1); ngfft2=ngfftf(2); ngfft3=ngfftf(3)
 
  ABI_MALLOC(tmp_rhor,(nfftf))
- tmp_rhor=rhor ! To avoid having to use intent(inout).
+ tmp_rhor = rhor ! To avoid having to use intent(inout).
  call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
- !
+
  ! Calculate the FFT index of each (G-Gp) vector and assign
  ! the value of the correspondent density simultaneously
- ABI_MALLOC_OR_DIE(rhogg,(npwc,npwc), ierr)
+ ABI_MALLOC_OR_DIE(rhogg,(npwc, npwc), ierr)
 
  ierr=0
  do ig=1,npwc
@@ -1351,13 +1348,11 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
    end do
  end do
 
- write(msg,'(3a,i0,a,i0)')' at q-point : ',trim(ktoa(qpt)), ' # imaginary plasmonpole frequencies: ',nimwp,' / ',npwc**2
- call wrtout(std_out,msg)
-
- write(msg,'(2a,f12.8,2a,3i5)')ch10,&
-  ' cppm2par : omega twiddle minval [eV]  = ',MINVAL(ABS(omegatw))*Ha_eV,ch10,&
-  '            omega twiddle min location = ',MINLOC(ABS(omegatw))
- call wrtout(std_out,msg)
+ write(msg,'(3a,i0,a,i0)')' At q-point : ',trim(ktoa(qpt)), ' # imaginary plasmonpole frequencies: ',nimwp,' / ',npwc**2
+ call wrtout(std_out, msg)
+ write(msg,'(a,f12.8,a,3(i0,1x))') &
+  " omega twiddle minval: ", MINVAL(ABS(omegatw))*Ha_eV, "[eV], min location: ",MINLOC(ABS(omegatw))
+ call wrtout(std_out, msg)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
 
@@ -2207,25 +2202,30 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
 
  if (ppm%has_qibz(iq_ibz) == PPM_TAB_ALLOCATED) then
    ! Calculate the ppmodel tables for this q_ibz
-   call ppm%new_setup(iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_ggw, nfftf, &
-                      Gsph%gvec, ngfftf, rhor_tot) !Optional
+   call ppm%new_setup(iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_ggw, nfftf, Gsph%gvec, ngfftf, rhor_tot)
  end if
 
   ! Allocate memory if not done yet.
+#ifdef FC_LLVM
+  !FIXME I don't understand why LLVM fails here...
+  !I put preproc so others know extra spaces are on purpose
+  ABI_REMALLOC(ppm%bigomegatwsq_qbz_vals, (ppm%npwc, ppm%dm2_botsq) )
+  ABI_REMALLOC(ppm%omegatw_qbz_vals, (ppm%npwc, ppm%dm2_otq) )
+  ABI_REMALLOC(ppm%eigpot_qbz_vals, (ppm%dm_eig, ppm%dm_eig) )
+#else
   ABI_REMALLOC(ppm%bigomegatwsq_qbz_vals, (ppm%npwc, ppm%dm2_botsq))
   ABI_REMALLOC(ppm%omegatw_qbz_vals, (ppm%npwc, ppm%dm2_otq))
   ABI_REMALLOC(ppm%eigpot_qbz_vals, (ppm%dm_eig, ppm%dm_eig))
+#endif
 
  if (q_isirred) then
-   ! Symmetrization is not needed.
-   ! Copy the data in memory and change the status.
+   ! Symmetrization is not needed. Copy the data in memory and change the status.
    ppm%bigomegatwsq_qbz_vals = ppm%bigomegatwsq(iq_ibz)%vals
    ppm%omegatw_qbz_vals = ppm%omegatw(iq_ibz)%vals
    ppm%eigpot_qbz_vals = ppm%eigpot(iq_ibz)%vals
 
  else
-   ! q-point in the BZ. Calculate new table for this q-point in the BZ.
-   ! Beware: Dimensions should not change.
+   ! q-point in the BZ. Calculate new table for this q-point in the BZ. Beware: Dimensions should not change.
    call ppm%get_qbz(Gsph, Qmesh, iq_bz, ppm%bigomegatwsq_qbz_vals, ppm%omegatw_qbz_vals, ppm%eigpot_qbz_vals)
 
    ! Release the table in the IBZ if required.

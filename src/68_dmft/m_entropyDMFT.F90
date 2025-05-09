@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,7 +66,7 @@ module m_entropyDMFT
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,7 +118,7 @@ contains
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -297,7 +297,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -350,7 +350,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -492,7 +492,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -607,7 +607,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -687,8 +687,9 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       call wrtout(ab_out,message,"COLL")
       call pawpuxinit(dt%dmatpuopt,dt%exchmix,dt%f4of2_sla,dt%f6of2_sla,&
 &        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%nspinor,dt%ntypat,dt%optdcmagpawu,pawang,dt%pawprtvol,&
-&        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu,&
-&        dmft_proj=dt%dmft_proj,dmft_dc=dt%dmft_dc)
+&        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu,dmft_orbital=dt%dmft_orbital, &
+&        dmft_dc=dt%dmft_dc,dmft_orbital_filepath=dt%dmft_orbital_filepath,dmft_yukawa_param=dt%dmft_yukawa_param, &
+&        dmft_lambda_yukawa=dt%dmft_lambda_yukawa,dmft_epsilon_yukawa=dt%dmft_epsilon_yukawa)
       ABI_FREE(upawu)
       ABI_FREE(jpawu)
     end if
@@ -704,7 +705,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -746,7 +747,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
     if ( e_t%mylambda == 1 ) then
       ! Save entropy and internal energy for U=0
-      e_t%entropy0 = energies%entropy
+      e_t%entropy0 = energies%entropy_ks
       ! 1 is for usepaw that is 1 in DMFT, optdc is to know if the DC scheme is
       ! calculated.
       call energies_eval_eint(energies,dt,1,optdc,e_t%energies(E_DIRECT,E_U0),e_t%energies(E_DC,E_U0))
@@ -854,7 +855,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -997,7 +998,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1088,7 +1089,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

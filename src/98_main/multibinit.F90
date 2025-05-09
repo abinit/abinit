@@ -6,7 +6,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (AM)
+!! Copyright (C) 1999-2025 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,6 @@ program multibinit
   use m_io_tools,   only : flush_unit, open_file
   use m_time,       only : asctime, timein
   use m_dtfil,      only : isfile
-
   !use m_generate_training_set, only : generate_training_set
   !use m_compute_anharmonics, only : compute_anharmonics
   use m_init10,              only : init10
@@ -112,7 +111,7 @@ program multibinit
   write(message,'(a,i5,a)') '-  nproc =',nproc,ch10
   call wrtout(std_out,message,'COLL')
 
-  !Initialise the code : write heading, and read names of files.
+  !Initialise the code: write heading, and read names of files.
   call init10(args%input_path, filnam,comm)
 
   ! set filnam(2), and (3) from input path
@@ -204,13 +203,13 @@ program multibinit
      write(std_out,"(a,f13.1)")"overall_wall_time: ",tsec(2)
      write(std_out,"(a,i0)")"mpi_procs: ",xmpi_comm_size(xmpi_world)
      write(std_out,"(a,i0)")"omp_threads: ",xomp_get_num_threads(open_parallel=.True.)
-   !write(std_out,"(a,i0)")"num_warnings: ",nwarning
-   !write(std_out,"(a,i0)")"num_comments: ",ncomment
+     !write(std_out,"(a,i0)")"num_warnings: ",nwarning
+     !write(std_out,"(a,i0)")"num_comments: ",ncomment
      write(std_out,"(a)")"..."
      call flush_unit(std_out)
    end if
 
-!Write information on file about the memory before ending mpi module, if memory profiling is enabled
+   ! Write information on file about the memory before ending mpi module, if memory profiling is enabled
    call abinit_doctor("__multibinit")
 
    call flush_unit(ab_out)

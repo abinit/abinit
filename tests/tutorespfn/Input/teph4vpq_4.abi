@@ -1,0 +1,102 @@
+# LiF: computation of a small hole polaron on 3x3x3, 4x4x4, 5x5x5 k/q-grids
+# with long-range Frohlich correction.
+
+# NOTE that dataset mode is used only for the tutorial
+# In production, it is advisable to compute polaron on each grid in a separate run
+
+ ndtset 3
+
+ optdriver  7   # Electron-phonon driver
+ eph_task   13  # Activate the Variational Polaron Equations solver
+
+# Variational Polaron Equations parameters
+ vpq_pkind  "hole"  # Hole polaron
+ vpq_tolgrs  1e-5   # Tolerance on the gradient norm
+
+ # these parameters are default but given here explicitly for clarity
+ vpq_aseed      "gau_energy"  # Initial charge localization is Guassian-like
+ vpq_gpr_energy  0. 1.        # Gaussian parameters for initial charge
+ vpq_nstates     1            # Number of polaronic states
+ vpq_nstep       50           # Maximum number of optimization steps
+
+# Frohlich correction
+ eph_frohl_ntheta  32   # Number of divisions for the spherical integration of
+                        # the long-range part of electron-phonon energy.
+                        # Non-zero value activates the computation of Frohlich
+                        # corrections.
+                        # ntheta=32 gives the optimal number of divisions for the
+                        # spherical integration.
+
+ vpq_avg_g  1  # Apply Frohlich correction to e-ph coupling
+
+
+# Electron-phonon matrix elements
+ getgstore_filepath1 "teph4vpq_3o_DS1_GSTORE.nc" # 3x3x3 k/q-mesh
+ getgstore_filepath2 "teph4vpq_3o_DS2_GSTORE.nc" # 4x4x4 k/q-mesh
+ getgstore_filepath3 "teph4vpq_3o_DS3_GSTORE.nc" # 5x5x5 k/q-mesh
+
+# Wavefunction
+# Read the WFK file from the preparatory run
+ getwfk_filepath1 "teph4vpq_2o_DS1_WFK"  # 3x3x3 k-mesh
+ getwfk_filepath2 "teph4vpq_2o_DS2_WFK"  # 4x4x4 k-mesh
+ getwfk_filepath3 "teph4vpq_2o_DS3_WFK"  # 5x5x5 k-mesh
+
+ ngkpt1   3 3 3  # These parameters have to consistent with the WFK file
+ ngkpt2   4 4 4
+ ngkpt3   5 5 5
+
+ kptopt   1
+ nshiftk  1
+ shiftk   0 0 0
+ nband    6
+ ecut     30
+
+# Phonons
+ ddb_ngqpt  3 3 3          # This has to be consistent with the DDB file
+ getddb_filepath
+ "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
+                           # NOTE: for the input parameters used to produce
+                           # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
+
+# Pseudopotentials
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_05_pbe_std_psp8"
+ pseudos "Li.psp8, F.psp8"
+
+# Structure
+ natom   2
+ ntypat  2
+ typat   1 2
+ znucl   3 9
+ xred    0.0  0.0  0.0
+         0.5  0.5  0.5
+
+ acell 3*7.675
+ rprim 0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_*
+#%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
+#%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
+#%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,
+#%%              teph4vpq_10.abi
+#%% [files]
+#%% use_git_submodule = LiF_eph_varpeq
+#%% files_to_test =
+#%%   teph4vpq_4.abo, tolnlines = 110, tolabs = 1e-4, tolrel = 2e-1
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = V. Vasilchenko
+#%% keywords = DFPT, EPH, POLARON
+#%% description =
+#%%   LiF, Fm-3m space group.
+#%%   Computation of a small hole polaron on 3x3x3, 4x4x4, 5x5x5 k/q-grids
+#%%   via Variational Polaron Equations with long-range Frohlich correction.
+#%%<END TEST_INFO>

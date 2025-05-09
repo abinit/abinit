@@ -87,7 +87,7 @@ def main():
       if not isinstance(var.varfile, str) or var.varfile not in varfile_names:
         print('FAIL: the field varfile of ', abivarname, ' should be one of the valid varfiles')
         retcode += 1
- 
+
   if retcode != 0:
     print('Found ',retcode,' FAIL.')
     print('Number of variables in ABINIT :',len(variables))

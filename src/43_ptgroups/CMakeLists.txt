@@ -36,7 +36,7 @@ add_library(43_ptgroups STATIC
   m_ptg_O.F90
   m_ptg_Td.F90
   m_ptg_Oh.F90
-  )
+)
 
 set_target_properties(43_ptgroups
   PROPERTIES
@@ -57,6 +57,7 @@ target_compile_definitions(43_ptgroups
 target_link_libraries(43_ptgroups
   PUBLIC
   28_numeric_noabirule
-  32_util)
+  32_util
+)
 
 add_library(abinit::43_ptgroups ALIAS 43_ptgroups)

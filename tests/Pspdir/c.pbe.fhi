@@ -2267,27 +2267,27 @@ OPIUM generated C potential
 #    Opium Parameter File                                  #
 ############################################################
 #-----------------------------------------------------------
-#Command line   : opium c c.log ae ps nl fhi 
- 
-#Opium version  : 3.6 
-#Compile Host   : itplin16.epfl.ch 
-#Compile OS     : Linux 2.6.35.12-88.fc14.x86_64 x86_64 
-#Compile Date   : Fri Apr 15 12:39:44 CEST 2011 
+#Command line   : opium c c.log ae ps nl fhi
+
+#Opium version  : 3.6
+#Compile Host   : itplin16.epfl.ch
+#Compile OS     : Linux 2.6.35.12-88.fc14.x86_64 x86_64
+#Compile Date   : Fri Apr 15 12:39:44 CEST 2011
 #-----------------------------------------------------------
-#Execution Host : itplin16.epfl.ch 
+#Execution Host : itplin16.epfl.ch
 #Execution Date : Fri May 27 15:51:03 2011
- 
+
 #-----------------------------------------------------------
 ############################################################
 [Atom]
 C
-3                
-100 2.00  -      
+3
+100 2.00  -
 200 2.00  -
 210 2.00  -
 
 [Pseudo]
-2 1.45 1.55      
+2 1.45 1.55
 opt
 
 [Optinfo]
@@ -2298,7 +2298,7 @@ opt
 p
 
 [Configs]
-2  
+2
 #
 200 1.00   -
 210 3.00   -
@@ -2311,7 +2311,7 @@ p
 lfc
 
 [XC]
-gga 
+gga
 
 [LogInfo]
 0

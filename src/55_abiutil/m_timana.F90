@@ -9,7 +9,7 @@
 !! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -573,6 +573,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(625)='integrate_green                 '
  names(626)='dmft-other                      '
  names(627)='Print/Read self                 '
+ names(628)='saveocc_dmft                    '
 
  names(630)='prep_getghc                     '
  names(631)='prep_getghc(before if)          '
@@ -1135,9 +1136,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1764) = 'chebfi2_barrier               '
  names(1765) = 'chebfi2_copy                  '
 
- names(1769) = 'chebfi2_X_NP@init             '
- names(1770) = 'chebfi2_AX_BX@init            '
-
  names(1779) = 'chebfi2(other)                '
 
  names(1780)='ctgk_rotate'; basic(1780) = 1
@@ -1525,7 +1523,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/790,791,792,793,794,795,796/)
    case(44)
 !      Estimate the complement of dmft (in vtorho, only)
-     tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
+     tslots(:10)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627,-628/)
 !   case(45)
 !!      Estimate the complement of nonlop_ylm
 !     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
@@ -1925,7 +1923,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(45)
          list(:50)=(/ (ii,ii=1150,1199,1) /)                         ; msg='outscfcv '
        case(46)
-         list(:8)=(/ (ii,ii=620,627,1) /)                            ; msg='dmft '
+         list(:9)=(/ (ii,ii=620,628,1) /)                            ; msg='dmft '
        case(47)
          list(:9)=(/ (ii,ii=1001,1009,1) /)                          ; msg='initberry '
        case(50)

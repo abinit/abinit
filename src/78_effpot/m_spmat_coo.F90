@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,6 +80,23 @@ contains
        endif
     end do
   end subroutine diag
+
+  !subroutine get_block(self, irow_start, icol_start, nrow, ncol, blk)
+  !  class(COO_mat_t), intent(in)::self 
+  !  integer, intent(in) :: nrow,  irow_start, ncol, icol_start
+  !  real(dp), intent(out) :: blk(nrow, ncol)
+  !  integer :: ind, ind_i, ind_j
+  !  blk(:, :)=0.0_dp
+  !  do ind=1, self%nnz
+  !     ind_i=self%ind%data(1, ind)
+  !     ind_j=self%ind%data(2, ind)
+  !     if (ind_i>=irow) then
+  !        d(ind_i)=d(ind_i)+self%val%data(ind)
+  !     endif
+  !  end do
+  !end subroutine diag
+
+
 
   !-----------------------------------------------------------------------
   !> @brief COO sparse matrix-vector multiplication. naive implementation.

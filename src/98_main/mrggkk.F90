@@ -7,7 +7,7 @@
 !! different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2025 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,9 +45,7 @@ program mrggkk
  use m_errors
  use m_wfk
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
 
  use m_build_info,      only : abinit_version
@@ -324,7 +322,7 @@ program mrggkk
 
 !  read in header of GS file and eigenvalues
 !  could force a comparison of header with global header above for consistency
-   call hdr_fort_read(hdr, unitgkk, fform)
+   call hdr%fort_read(unitgkk, fform)
    ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", filegkk))
 
    mband = maxval(hdr%nband)
@@ -346,7 +344,7 @@ program mrggkk
    ABI_MALLOC(eig_k,(2*mband*mband))
    do i1wf=1,n1wf
 !    read in header of 1WF file
-     call hdr_fort_read(hdr1, unitgkk, fform)
+     call hdr1%fort_read(unitgkk, fform)
      if (fform == 0) then
        write(message,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
        ABI_ERROR(message)

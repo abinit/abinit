@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG, DC, GMR)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, DC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1898,6 +1898,10 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
  real(dp),allocatable :: alpha(:),amatinv(:,:),amat_paw(:),rwork(:)
 
 ! *************************************************************************
+
+!FIXME Decreasing optimization with NVHPC in this routine
+!      because of significant numerical divergence (spotted in 24.9)
+!nvf$r opt=1
 
 !DEBUG
 !write(std_out,*)' scfopt : enter ; istep,iscf ',istep,iscf

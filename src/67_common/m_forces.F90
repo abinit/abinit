@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,6 +18,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_forces
 
@@ -47,6 +50,10 @@ module m_forces
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_mkcore,           only : mkcore, mkcore_alt
  use m_mkcore_wvl,       only : mkcore_wvl
+
+#if defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -118,10 +125,10 @@ contains
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  usefock=1 if fock operator is used; 0 otherwise.
-!!  usekden= 1 is kinetic energy density has to be computed, 0 otherwise
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  vresid(nfft,nspden)=potential residual (if non-collinear magn., only trace of it)
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree) in real space
-!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA): derivative of XC energy density
+!!  vxctau(nfft,nspden,4*usevxctau)=(only for meta-GGA): derivative of XC energy density
 !!                                wrt kinetic energy density (depsxcdtau)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  xred_old(3,natom)=previous reduced dimensionless atomic coordinates
@@ -167,13 +174,14 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &                  grhf,grnl,grvdw,grxc,gsqcut,indsym,&
 &                  maxfor,mgfft,mpi_enreg,n1xccc,n3xccc,&
 &                  nattyp,nfft,ngfft,ngrvdw,ntypat,&
-&                  pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,usefock,&
+&                  pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,&
+&                  usefock,usevxctau,&
 &                  vresid,vxc,vxctau,wvl,wvl_den,xred,&
 &                  electronpositron) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfft,n1xccc,n3xccc,nfft,ngrvdw,ntypat,usefock
+ integer,intent(in) :: mgfft,n1xccc,n3xccc,nfft,ngrvdw,ntypat,usefock,usevxctau
  real(dp),intent(in) :: gsqcut
  real(dp),intent(out) :: diffor,maxfor
  type(MPI_type),intent(in) :: mpi_enreg
@@ -191,7 +199,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  real(dp),intent(in) :: grvdw(3,ngrvdw),grnl(3*dtset%natom)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
- real(dp),intent(in) :: vxc(nfft,dtset%nspden),vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(in) :: vxc(nfft,dtset%nspden),vxctau(nfft,dtset%nspden,4*usevxctau)
  real(dp),intent(inout) :: fcart(3,dtset%natom),forold(3,dtset%natom)
  real(dp),intent(inout) :: vresid(nfft,dtset%nspden),xred(3,dtset%natom)
  real(dp),intent(out) :: favg(3),gred(3,dtset%natom),gresid(3,dtset%natom)
@@ -203,9 +211,9 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,coretau_method,fdir,iatom,idir,indx,ipositron,itypat,mu
+ integer :: coredens_method,coretau_method,fdir,has_vxctau,iatom,idir,indx,ipositron,itypat,mu
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
- real(dp) :: eei_dum1,eei_dum2,ucvol,ucvol_local,vol_element
+ real(dp) :: eei_dum1,eei_dum2,ucvol,ucvol_local,vol_element,entropy_dum1
  logical :: calc_epaw3_forces, efield_flag
  logical :: is_hybrid_ncpp
 !arrays
@@ -222,6 +230,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 ! *************************************************************************
 
  call timab(69,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_FORCES)
 
 !Save input value of forces
  ABI_MALLOC(fin,(3,dtset%natom))
@@ -229,6 +238,14 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+!Test size of vxctau
+ has_vxctau=size(vxctau)
+ if (has_vxctau/=nfft*dtset%nspden*4.and.has_vxctau/=0) then
+   ABI_BUG('Wrong size for vxctau!')
+ else if (has_vxctau/=0) then
+   has_vxctau=1
+ end if
 
 !Check if we're in hybrid norm conserving pseudopotential
  is_hybrid_ncpp=(psps%usepaw==0 .and. &
@@ -301,7 +318,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    end if
    if (n3xccc==0.and.coredens_method==1) grxc=zero
    ABI_FREE(vxctotg)
-   if (dtset%usekden==1.and.coretau_method==1..and.n3xccc>0) then
+   if (dtset%usekden==1.and.usevxctau==1.and.coretau_method==1.and.n3xccc>0) then
 !    Compute contribution to forces from pseudo kinetic energy core density
      optv=0;optn=1;optn2=4
      ABI_MALLOC(grxctau,(3,dtset%natom))
@@ -370,7 +387,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      ABI_MALLOC(xccc3d_dum,(n3xccc))
      if (coredens_method==2) then
        if (is_hybrid_ncpp) then
-         call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+         call xchybrid_ncpp_cc(dtset,eei_dum1,entropy_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
 &         dummy6,eei_dum2,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
        else
          if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
@@ -397,7 +414,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
          end if
        end if
      end if
-     if (dtset%usekden==1.and.coretau_method==2) then
+     if (dtset%usekden==1.and.usevxctau==1.and.coretau_method==2) then
        ABI_MALLOC(grxctau,(3,dtset%natom))
        call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxctau,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
 &       dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
@@ -617,6 +634,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    end if
  end if
 
+ ABI_NVTX_END_RANGE()
  call timab(69,2,tsec)
 
 end subroutine forces

@@ -7,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (GA)
+!!  Copyright (C) 2008-2025 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,9 +30,7 @@ module m_ddb_interpolate
  use m_ddb_hdr
  use m_ifc
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_bz_mesh,         only : make_path
@@ -217,6 +215,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &
 &   natom,ntypat,crystal%typat,crystal%ucvol,crystal%zion)
 
+   ! TODO (GA): Should replace this with ddb_set_d2matr
    ! Store the dynamical matrix into a block of the new ddb
    jblok = iqpt
    ddb_new%val(1,1:nsize,jblok) = reshape(d2red(1,:,:,:,:), shape = (/nsize/))

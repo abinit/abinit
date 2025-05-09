@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # Wavelet BigDFT library (BigDFT)
@@ -117,7 +117,15 @@ AC_DEFUN([SD_BIGDFT_INIT], [
         sd_bigdft_cppflags="-I${with_bigdft}/include"
         sd_bigdft_fcflags="${sd_bigdft_fcflags_def} -I${with_bigdft}/include"
         sd_bigdft_ldflags="${sd_bigdft_ldflags_def}"
-        sd_bigdft_libs="-L${with_bigdft}/lib ${sd_bigdft_libs_def}"
+
+        # Check if libyaml.a exists in the BigDFT lib directory
+        if test -f "${with_bigdft}/lib/libyaml.a"; then
+          AC_MSG_NOTICE([Found libyaml.a in ${with_bigdft}/lib, using static linking.])
+          sd_bigdft_libs="-L${with_bigdft}/lib -lbigdft-1 -labinit -lpaw_bigdft ${with_bigdft}/lib/libyaml.a"
+        else
+          AC_MSG_NOTICE([libyaml.a not found in ${with_bigdft}/lib, using dynamic linking (-lyaml).])
+          sd_bigdft_libs="-L${with_bigdft}/lib -lbigdft-1 -labinit -lpaw_bigdft -lyaml"
+        fi
         ;;
 
       env)

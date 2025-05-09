@@ -1,13 +1,13 @@
-Compromise psp for oxygen with rc=1.5 ec=25 double reference                    
-   8.000       6.000      980710     zatom,zion,pspdat 
+Compromise psp for oxygen with rc=1.5 ec=25 double reference
+   8.000       6.000      980710     zatom,zion,pspdat
    5   3   1   1   600     0         pspcod,pspxc,lmax,lloc,mmax,r2well
    0.999999999999999955E-06  0.307523885541775704E-01  1   r1,al, pspso
    0  0  0   2     1.49157651759552068               l,e99.0,e99.9,nproj,rcpsp
    0  0  0   0                                       rms,ekb1,ekb2,epsatm
    1  0  0   0      1.49157651759552068              l,e99.0,e99.9,nproj,rcpsp
    0  0  0   0                                       rms,ekb1,ekb2,epsatm
-   0  0  0                                           rchrg,fchrg,qchrg 
-   0 = l 
+   0  0  0                                           rchrg,fchrg,qchrg
+   0 = l
   -6.2921423009631701E+00  -6.2921423009628246E+00  -6.2921423009624577E+00
   -6.2921423009620687E+00  -6.2921423009616531E+00  -6.2921423009612116E+00
   -6.2921423009607418E+00  -6.2921423009602435E+00  -6.2921423009597133E+00

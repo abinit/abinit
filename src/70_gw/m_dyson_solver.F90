@@ -6,7 +6,7 @@
 !!  This module contains procedures to solve the Dyson equation to find QP energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG)
+!! Copyright (C) 2008-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -771,7 +771,6 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
 !Local variables-------------------------------
 !scalars
 ! integer :: ii
-
 ! *************************************************************************
 
  self%npts = npts
@@ -810,7 +809,6 @@ subroutine sigma_pade_eval(self, zz, val, dzdval)
  complex(dp),intent(in) :: zz
  complex(dp),intent(out) :: val
  complex(dp),optional,intent(out) :: dzdval
-
 ! *************************************************************************
 
  ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
@@ -855,7 +853,6 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  logical :: converged
  complex(dpc) :: ctdpc, dct, dsigc, sigc
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! Use Newton-Rapson to find the root of:
@@ -864,13 +861,13 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
 
  iter = 0; converged = .FALSE.; ctdpc = cone
  zsc = z_guess
- do while (ABS(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
+ do while (abs(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
    iter = iter + 1
 
    call self%eval(zsc, sigc, dzdval=dsigc)
    ctdpc = e0 - v_meanf + sigx + sigc - zsc
 
-   if (ABS(ctdpc) < NR_ABS_ROOT_ERR) then
+   if (Abs(ctdpc) < NR_ABS_ROOT_ERR) then
      converged=.TRUE.; EXIT
    end if
    dct = dsigc - one
@@ -881,7 +878,7 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  if (.not. converged) then
    write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
      'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
-     'Absolute Error = ',ABS(ctdpc),' > ',NR_ABS_ROOT_ERR
+     'Absolute Error: ',abs(ctdpc),' > ',NR_ABS_ROOT_ERR
    ierr = 1
  end if
 

@@ -3,7 +3,7 @@
 !! m_FFT_prof
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -355,7 +355,7 @@ subroutine fft_test_print(Ftest, header, unit, mode_paral, prtvol)
  end if
 
  write(msg,'(a,i3)')"FFT setup for fftalg ",Ftest%ngfft(7)
- call print_ngfft(Ftest%ngfft, header=msg, unit=my_unt)
+ call print_ngfft([my_unt], Ftest%ngfft, header=msg)
 
 end subroutine fft_test_print
 !!***

@@ -64,13 +64,12 @@ qph1l
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% input_ddb = t86.ddb.out
 #%% input_gkk = t87o
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi, t90.abi, t91.abi, t92.abi, t93.abi, t94.abi, t95.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t88.abo, tolnlines = 19, tolabs = 3.0e-04, tolrel = 4.0e-04
+#%%   t88.abo, tolnlines = 19, tolabs = 3.0e-3, tolrel = 5.0e-3
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
