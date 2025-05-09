@@ -109,7 +109,7 @@ Related tests : [[tests:v10_104]] to [[tests:v10_107]]
 
 Support for [[useylm]]=1 has been implemented in EPH routines.
 
-There is a new [[eph_task]]=18 to compute e-ph matrix elements along a k- or q-path. See [[test:eph4zpr]]=9.
+There is a new [[eph_task]]=18 to compute e-ph matrix elements along a k- or q-path. See [[test:eph4zpr_9]].
 
 By G. Allemand, R. Gupta, M. Giantomassi, M. Verstraete (MR1156, 1162, 1102)
 
