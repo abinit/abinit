@@ -3049,6 +3049,44 @@ Number of iterations for the DMFT inner loop.
 ),
 
 Variable(
+    abivarname="dmft_magnfield",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: Magnetic Field",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.4.0",
+    text=r"""
+Apply a magnetic field in Tesla ($B_z = \mu_0 H_z$) in combination with [[dmft_magnfield_b]] to add the Zeeman contribution
+to the energy levels. If the applied field is sufficiently small, it can be used to calculate the uniform magnetic susceptibility.
+The Zeeman contribution in Hartree corresponds to $B_z \mu_B g_e S_z$ when [[nspinor]] == 1.
+
+* 1 --> Add the Zeeman contribution to the calculated Kohn-Sham states to build the green's function.
+Only valid for [[nspinor]] == 1.
+
+* 2 --> Add the Zeeman contribution to the energy levels of the DMFT local impurity Hamiltonian and not in the Weiss-field. This is a strong
+approximation.
+""",
+),
+
+Variable(
+    abivarname="dmft_magnfield_b",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Dynamical Mean Field Theory: Magnetic Field Value of Bz",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.4.0",
+    text=r"""
+Value of the magnetic field $B_z$ (in Tesla) applied when [[dmft_magnfield]] is activated.
+""",
+),
+
+Variable(
     abivarname="dmft_mxsf",
     varset="dmft",
     vartype="real",
@@ -3412,12 +3450,16 @@ Variable(
     added_in_version="9.5.0",
     text=r"""
 Compute properties of the local impurity during the CTQMC calculations.
+
   * 0 --> Nothing done
+
   * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
 gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
+
   * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$,
 whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
-  * 3 --> Add the Calculation of local charge susceptibility.
+
+  * 3 --> Add the calculation of local charge susceptibility.
 """,
 ),
 
