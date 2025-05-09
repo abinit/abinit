@@ -3,7 +3,7 @@
 !!  m_io_tools
 !!
 !! FUNCTION
-!!  This module contains basic tools to deal with Fortran IO
+!!  This module provides basic tools to deal with Fortran IO.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2008-2025 ABINIT group (MG)
@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_io_tools
+module m_io_tools
 
  use, intrinsic :: iso_c_binding
  use defs_basis
@@ -72,29 +72,29 @@ MODULE m_io_tools
  end interface
 
   integer,parameter :: MIN_UNIT_NUMBER=10  ! Fortran does not define the range for logical unit numbers (they not be negative)
+
 #ifdef FC_NAG
-  integer,parameter :: MAX_UNIT_NUMBER=64    ! There's a serious problem in Nag6.0. In principle
-                                             ! Maximum unit number: 2147483647
+  integer,parameter :: MAX_UNIT_NUMBER=64    ! There's a serious problem in Nag6.0.
+                                             ! In principle, Maximum unit number: 2147483647
 #else
   integer,parameter :: MAX_UNIT_NUMBER=1024  ! The following values should be safe
 #endif
+
   integer,parameter :: IO_MAX_LEN=500
   character(len=1),parameter :: BLANK=' '
 
   ! For interactive sessions
   integer,parameter :: IO_EOT=-1           ! End of transmission i.e CTRL+D
-  !character(len=4),parameter :: PS1='>>> '
-  ! Prepend prompt with `-` to bypass bug in intel18-19 so that flddiff.py will ignore the line
-  character(len=4),parameter :: PS1='->> '
-  character(len=4),parameter :: PS2='??? '
+  character(len=4),parameter :: PS1 = '->> '
+  character(len=4),parameter :: PS2 = '??? '
 
-  integer,parameter :: IO_NO_AVAILABLE_UNIT  =-1   ! No units are available for Fortran I/O
-  integer,parameter :: IO_FILE_NOT_ASSOCIATED=-2   ! File is not associated with any unit
+  integer,parameter :: IO_NO_AVAILABLE_UNIT  =-1   ! No units available for Fortran I/O
+  integer,parameter :: IO_FILE_NOT_ASSOCIATED=-2   ! File is not associated with any unit.
 
   ! Enforce IO_MODE_FORTRAN in iomode_from_fname
   logical,save,protected :: enforce_fortran_io__ = .False.
 
-CONTAINS  !===========================================================
+contains  !===========================================================
 !!***
 
 !!****f* m_io_tools/get_unit
@@ -102,10 +102,8 @@ CONTAINS  !===========================================================
 !!  get_unit
 !!
 !! FUNCTION
-!!  Obtain a logical Fortran unit.
-!!  A free unit is reported if no argument is specified.
-!!  If the file name is supplied, the function reports the unit number
-!!  associated to the file
+!!  Obtain a logical Fortran unit. A free unit is reported if no argument is specified.
+!!  If the file name is supplied, the function reports the unit number associated to the file
 !!  Note that GET_UNIT assumes that units 0, 5, 6 (stderr, stdin, std_out)
 !!  are special, and will never return those values.
 !!
@@ -148,10 +146,6 @@ end function get_free_unit
 !! FUNCTION
 !!  Returns the unit number associated to an open file whose name is fname.
 !!  If the file is not connected to an unit number, returns IO_FILE_NOT_ASSOCIATED
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -209,11 +203,7 @@ end function file_exists
 !!  ierr=Non-zero value indicates that a problem occured.
 !!   111 = To signal that the file does not exist.
 !!   112 = File exist, is open but no associated unit is found!
-!!   Other values are system-dependent as the value is returned by a open or close
-!!   instruction.
-!!
-!! SIDE EFFECTS
-!!  The specified file is deleted.
+!!   Other values are system-dependent as the value is returned by a open or close instruction.
 !!
 !! SOURCE
 
@@ -264,10 +254,6 @@ end subroutine delete_file
 !! FUNCTION
 !!  Returns .TRUE. if unit is connected to fname.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 logical function is_connected(unit, fname)
@@ -295,10 +281,6 @@ end function is_connected
 !! FUNCTION
 !!  Returns .TRUE. if unit is associated to an open file.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 logical function is_open_unit(unit)
@@ -320,10 +302,6 @@ end function is_open_unit
 !! FUNCTION
 !!  Returns .TRUE. if the file name fname is open.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 logical function is_open_fname(fname)
@@ -344,10 +322,6 @@ end function is_open_fname
 !!
 !! FUNCTION
 !!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -383,10 +357,6 @@ end subroutine prompt_int0D
 !! FUNCTION
 !!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine prompt_rdp0D(msg,rvalue)
@@ -421,10 +391,6 @@ end subroutine prompt_rdp0D
 !! FUNCTION
 !!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!  If strip_comment is True (default), all the characters after "#" or "!" are ignored.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -470,10 +436,6 @@ end subroutine prompt_string
 !! FUNCTION
 !!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine prompt_int1D(msg,ivect)
@@ -509,10 +471,6 @@ end subroutine prompt_int1D
 !! FUNCTION
 !!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine prompt_int2D(msg,iarr)
@@ -546,10 +504,6 @@ end subroutine prompt_int2D
 !!
 !! FUNCTION
 !!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -585,10 +539,6 @@ end subroutine prompt_rdp1D
 !! FUNCTION
 !!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine prompt_rdp2D(msg,rarr)
@@ -623,10 +573,6 @@ end subroutine prompt_rdp2D
 !! FUNCTION
 !!  A primitive prompt. Writes msg on std_out and reads the value entered by the user.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine prompt_exit()
@@ -659,10 +605,6 @@ end subroutine prompt_exit
 !! FUNCTION
 !!  Reads string from unit=std_in_ or unit if specified, ignoring blank lines
 !!  and deleting comments beginning with `!`. Return exit code.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -701,8 +643,6 @@ end function read_string
 !!
 !! INPUTS
 !!  unit=Fortran logical Unit number
-!!
-!! OUTPUT
 !!
 !! NOTES
 !!  Available only if the compiler implements this intrinsic procedure.
@@ -797,7 +737,6 @@ pure logical function isncfile(fname)
 !Local variables-------------------------------
 !scalars
  integer :: ic,nch_trim
-
 ! *************************************************************************
 
  nch_trim=LEN_TRIM(fname)
@@ -836,7 +775,6 @@ pure integer function iomode_from_fname(fname) result(iomode)
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: fname
-
 ! *************************************************************************
 
  if (isncfile(fname)) then
@@ -870,7 +808,6 @@ subroutine enforce_fortran_io(bool)
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: bool
-
 ! *************************************************************************
 
  enforce_fortran_io__ = bool
@@ -895,7 +832,6 @@ pure function iomode2str(iomode)
 !scalars
  character(len=48) :: iomode2str
  integer,intent(in) :: iomode
-
 ! *************************************************************************
 
  select case (iomode)
@@ -947,7 +883,6 @@ subroutine mvrecord(funt,nrec,ierr)
 !Local variables-------------------------------
 !scalars
  integer :: irec
-
 ! *************************************************************************
 
  ierr = 0
@@ -1004,7 +939,6 @@ function open_file(file, iomsg, unit, newunit, access, form, status, action, rec
 !Local variables-------------------------------
 !scalars
  character(len=500) :: my_access,my_form,my_status,my_action,msg
-
 ! *************************************************************************
 
  my_access = "sequential"; if (present(access)) my_access = access
@@ -1077,7 +1011,6 @@ function close_unit(unit,iomsg,status) result(iostat)
 
 !Local variables-------------------------------
  character(len=500) :: msg
-
 ! *************************************************************************
 
  iomsg = "" ! iomsg is not changed if close succeeds
@@ -1137,7 +1070,6 @@ subroutine write_lines(unit,message,toflush)
 !scalars
  integer :: msg_size,ii,jj,rtnpos
  logical :: toflush_
-
 !******************************************************************
 
  msg_size = len_trim(message)
@@ -1206,14 +1138,15 @@ subroutine lock_and_write(filename, string, ierr)
  character(len=*),intent(in) :: filename,string
 
 !Local variables-------------------------------
- integer :: file_unit, fd ! lock_unit,
+ integer :: file_unit, fd
  integer(c_int) :: sleep_time
  character(len=len(filename) + 5) :: lock_name
 ! *********************************************************************
 
- ! Try to write message to std_out and ab_out.
- ! NB: There's no gurantee that the message will be written because
- ! the first MPI proc that gets here may not be connected to ab_out or std_out may have been redirected to /dev/null.
+ ! Try to write string to std_out and ab_out.
+ ! NB: There's no gurantee that string will be written because
+ ! the first MPI proc that gets here may not be connected to ab_out
+ ! or std_out may have been redirected to /dev/null.
  ! This is the reason why we try write to __ABI_MPIABORTFILE__ as well.
  if (is_open_unit(std_out)) call write_lines(std_out, string, toflush=.true.)
 
@@ -1221,7 +1154,7 @@ subroutine lock_and_write(filename, string, ierr)
    call write_lines(ab_out, string, toflush=.true.)
  else
    ! This proc is not the master one. Let's make it sleep a bit hoping that
-   ! the master proc can call this routine as well so that we have the message written to ab_out and std_out.
+   ! the master proc calls this routine as well...
    sleep_time = 1
    call clib_sleep(sleep_time)
  end if
@@ -1229,33 +1162,15 @@ subroutine lock_and_write(filename, string, ierr)
  ! Try to acquire the lock.
  ierr = 0; lock_name = trim(filename)//".lock"
 
-#if 0
- ! OLD version based on Fortran open (does not work very well)
- lock_unit = get_unit()
- open(unit=lock_unit, file=trim(lock_name), status='new', err=99)
-
- file_unit = get_unit()
- open(unit=file_unit, file=trim(filename), form="formatted")
- call write_lines(file_unit, string, toflush=.true.)
- close(lock_unit, status="delete")
- close(file_unit)
-
-99 ierr = 1
- return
-
-#else
-
- ! New version based on Posix calls.
  call clib_lock_file_by_name(trim(lock_name)//c_null_char, fd, ierr)
  if (ierr == 0) then
-   ! I got the lock --> write message to __ABI_MPIABORTFILE__
+   ! I got the lock --> write string to __ABI_MPIABORTFILE__
    file_unit = get_unit()
    open(unit=file_unit, file=trim(filename), form="formatted")
    call write_lines(file_unit, string, toflush=.true.)
    call clib_close_fd(fd)
    call delete_file(lock_name, ierr)
  end if
-#endif
 
 end subroutine lock_and_write
 !!***
@@ -1385,5 +1300,5 @@ end subroutine write_units
 
 !----------------------------------------------------------------------
 
-END MODULE m_io_tools
+end module m_io_tools
 !!***
