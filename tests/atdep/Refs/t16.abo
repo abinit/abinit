@@ -1,6 +1,6 @@
-  
-.Version    3.0 of PHONONS
-.Copyright (C) 1998-2024 ABINIT group (FB,JB).
+ 
+.Version    4.0 of ATDEP
+.Copyright (C) 1998-2025 ABINIT group (FB,JB).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 13 Sep 2024.
+.Starting date : 16 Feb 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -26,6 +26,7 @@
  typat_unitcell          1
  ntypat                  1
  amu                   238.0289000000
+ znucl                  92.0000000000
  ======================= Define the supercell ================================
  rprimd              
                         26.0647552000    0.0000000000    0.0000000000
@@ -50,15 +51,15 @@
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1
- temperature           900.0000000000
  ======================= Define computational details ========================
  nstep_max               20
  nstep_min                1
  rcut                   13.0300000000
+ temperature           900.0000000000
  ======================= Optional input variables ============================
  use_ideal_positions     1
- readifc                 2
  enunit                  1 (Phonon frequencies in cm-1)
+ readifc                 2
  USE IDEAL POSITIONS TO COMPUTE SPECTRUM
 -Number of processors    1    1
  
@@ -642,10 +643,10 @@
  
  ========== For an Anisotropic Material =======================================
  Sijkl [in GPa-1]=
- | S11 S12 S13 S14 S15 S16 |      0.415   -0.206   -0.206    0.000    0.000   -0.000
- | S21 S22 S23 S24 S25 S26 |     -0.206    0.415   -0.206    0.000    0.000   -0.000
- | S31 S32 S33 S34 S35 S36 |     -0.206   -0.206    0.415    0.000    0.000   -0.000
- | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.029    0.000   -0.000
+ | S11 S12 S13 S14 S15 S16 |      0.415   -0.206   -0.206   -0.000   -0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.206    0.415   -0.206   -0.000   -0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.206   -0.206    0.415   -0.000   -0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.029   -0.000   -0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.029   -0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.029
  

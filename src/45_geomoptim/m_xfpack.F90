@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, MJV, DCA, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@ module m_xfpack
  use m_abicore
  use m_abimover
 
- use m_symtk,      only : matr3inv
+ use m_matrix,     only : matr3inv
  use m_geometry,   only : mkradim, mkrdim, metric, strainsym
  use m_results_gs , only : results_gs_type
  use m_bfgs,        only : hessupdt

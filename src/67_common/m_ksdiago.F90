@@ -6,7 +6,7 @@
 !!  Direct diagonalization of the KS Hamiltonian H_k(G,G')
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ module m_ksdiago
  use m_hdr
  use m_wfk
 
- use defs_datatypes,      only : pseudopotential_type, ebands_t
+ use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
  use m_gwdefs,            only : GW_TOLQ0, GW_Q0_DEFAULT !, cone_gw, czero_gw, j_gw
  use m_dtset,             only : dataset_type
@@ -70,6 +70,7 @@ module m_ksdiago
  use m_wfd,               only : wfd_t, wfd_init
  use m_vcoul,             only : vcgen_t
  use m_occ,               only : get_fact_spin_tol_empty
+ use m_pstat,             only : pstat_t
 
  implicit none
 
@@ -487,10 +488,10 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
  ! Initialize the Hamiltonian datatype on the coarse FFT mesh.
  if (present(electronpositron)) then
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
     mgfftc, ngfftc, rprimd, nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
  else
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, natom, typat, xred, nfftc, &
     mgfftc, ngfftc, rprimd, nloalg, paw_ij=paw_ij, usecprj=0)
  end if
 
@@ -791,7 +792,6 @@ subroutine init_ddiago_ctl(Dctl, jobz, spin, nspinor, ecut, kpoint, nloalg, gmet
  type(MPI_type) :: mpi_enreg_seq
 !arrays
  integer,allocatable :: kg_k(:,:)
-
 ! *************************************************************************
 
  call initmpi_seq(mpi_enreg_seq) ! Fake MPI_type.
@@ -959,7 +959,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !arrays
  integer,intent(in) :: ngfftc(18)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
- !real(dp),intent(inout) :: vxctau(nfftf, dtset%nspden, 4*dtset%usekden)
+ !real(dp),intent(inout) :: vxctau(nfftf, dtset%nspden, 4*usevxctau)
  real(dp),allocatable,intent(out) :: eig_k(:)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_ij_type),intent(in) :: paw_ij(cryst%natom*psps%usepaw)
@@ -987,6 +987,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type(processor_scalapack) :: proc_1d, proc_4diag
  type(uplan_t) :: uplan_k
  type(fftbox_plan3_t) :: box_plan
+ type(pstat_t) :: pstat
 !arrays
  integer,allocatable :: gfft(:,:)
  real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3), my_gw_qlwl(3) ! q0(3),
@@ -995,7 +996,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  real(dp),target,allocatable :: bras(:,:)
  complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
 ! *********************************************************************
 
  call timab(1919, 1, tsec)
@@ -1003,7 +1003,13 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! See sequence of calls in vtorho.
  ! Check that usekden is not 0 if want to use vxctau
- !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+ !with_vxctau = dtset%usekden/=0
+
+ if (dtset%usekden/=0) then
+   ABI_ERROR("nscf_init with mgga not yet coded")
+ end if
+ ! Check if want to use vxctau
+ !with_vxctau = (present(vxctau).and.usevxctau/=0)
 
  !====================
  !=== Check input ====
@@ -1018,10 +1024,13 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (dtset%ixc < 0) then
-   if (libxc_functionals_ismgga() .and. .not. libxc_functionals_is_tb09()) then
+   if (libxc_functionals_ismgga() .and. .not. libxc_functionals_is_potential_only()) then
      ABI_ERROR("meta-gga functionals are not compatible with direct diagonalization!")
    end if
  end if
+
+ ! Init pstat object.
+ call pstat%from_pid()
 
  ! MPI_type for sequential part.
  call initmpi_seq(mpi_enreg_seq)
@@ -1045,10 +1054,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  if (present(electronpositron)) then
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
     mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
  else
-   call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
+   call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
     mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0)
  end if
 
@@ -1161,6 +1170,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Loop over the |beta,G''> component.
  call cwtime(cpu, wall, gflops, "start")
  loc2_size = ghg_mat%sizeb_local(2)
+
+ if (my_rank == master) call pstat%print([std_out], header="Before build_ham")
 
  do il_g2=1, loc2_size, batch_size
    ! Operate on ndat g-vectors starting at the igsp2_start global index.
@@ -1408,7 +1419,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  !=== Diagonalization of <G|H|G''> matrix ===
  !===========================================
  ABI_MALLOC(eig_ene, (h_size))
- !print *, "ghg_trace:", ghg_mat%get_trace()
 
  ! Change size block. Use 2D rectangular grid of processors for diagonalization, if possible.
  call proc_4diag%init(comm)
@@ -1420,12 +1430,16 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! then one extracts the (hsize, nband_k) sub-matrix before returning.
  call ghg_4diag%copy(eigvec)
 
+#ifndef HAVE_LINALG_ELPA
+ call wrtout([std_out, ab_out], &
+ "- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.")
+#endif
+
  if (do_full_diago) then
    write(msg,'(5a, (a,i0), 2a)')ch10,&
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
      " H_gg' Matrix size: ",npwsp, ", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
    call wrtout(std_out, msg)
-
    call cwtime(cpu, wall, gflops, "start")
    if (psps%usepaw == 0) then
      !call ghg_4diag%pzheev("V", "U", eigvec, eig_ene)
@@ -1454,6 +1468,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (my_rank == master) then
+   call pstat%print([std_out], header="After diago")
+
    ! Write eigenvalues.
    frmt1 = '(8x,*(1x,f7.3))'
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
@@ -1525,19 +1541,18 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)
  end if ! usepaw
 
- call cwtime_report(" block column distribution", cpu, wall, gflops)
+ call cwtime_report(" block column distribution completed", cpu, wall, gflops)
 
  ! Free memory.
  ABI_FREE(eig_ene)
  ABI_FREE(kpg_k)
  ABI_FREE(ph3d)
  ABI_FREE(ffnl)
- call destroy_mpi_enreg(mpi_enreg_seq)
- call gs_hamk%free()
+ call destroy_mpi_enreg(mpi_enreg_seq); call gs_hamk%free()
+
+ if (my_rank == master) call pstat%print([std_out], header="end of ugb_from_diago")
 
  call timab(1919, 2, tsec)
-
- !ABI_ERROR("ugb_from_diago OK")
 
 end subroutine ugb_from_diago
 !!***
@@ -1547,6 +1562,7 @@ end subroutine ugb_from_diago
 !! ugb_from_wfk_file
 !!
 !! FUNCTION
+!!  Initialize an ugb_t instance from a WFK file.
 !!
 !! INPUTS
 !!  spin: spin index.
@@ -1728,7 +1744,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  call ugb%print(units, dtset%prtvol)
 
  call wfk_hdr%free()
- call ebands_free(wfk_ebands)
+ call wfk_ebands%free()
 
 end subroutine ugb_from_wfk_file
 !!***
@@ -1748,7 +1764,6 @@ subroutine ugb_free(ugb)
 
 !Arguments ------------------------------------
  class(ugb_t),intent(inout) :: ugb
-
 ! *************************************************************************
 
  call ugb%mat%free()
@@ -1786,7 +1801,6 @@ subroutine ugb_print(ugb, units, prtvol, header)
 !Local variables-------------------------------
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
-
 ! *************************************************************************
 
  ABI_UNUSED(prtvol)
@@ -1827,7 +1841,6 @@ subroutine ugb_collect_cprj(ugb, nspinor, nb, band_start, out_cprj)
 
 !Local variables-------------------------------
  integer :: ierr, my_ibs, out_ibs, band, cnt
-
 ! *************************************************************************
 
  ABI_CHECK_IEQ(size(ugb%cprj_k, dim=1), size(out_cprj, dim=1), "size1 should be the same")
@@ -1956,7 +1969,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call hyb%wfd%print(header="Wavefunctions for Hybrid WKF file")
+ call hyb%wfd%print([std_out], header="Wavefunctions for Hybrid WKF file")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -2075,7 +2088,6 @@ subroutine hyb_free(hyb)
 
 !Arguments ------------------------------------
  class(hyb_t),intent(inout) :: hyb
-
 ! *************************************************************************
 
  ABI_SFREE(hyb%kibz)
@@ -2088,9 +2100,7 @@ subroutine hyb_free(hyb)
  ABI_SFREE(hyb%qbz2ibz)
 
  ! Free datatypes
- call hyb%wfd%free()
- call hyb%vcgen%free()
- call ebands_free(hyb%ebands)
+ call hyb%wfd%free(); call hyb%vcgen%free(); call hyb%ebands%free()
 
 end subroutine hyb_free
 !!***

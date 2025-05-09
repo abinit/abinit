@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2024 ABINIT group (MT)
+!!  Copyright (C) 2017-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -146,7 +146,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
 
 !Initialize Hamiltonian datastructure
- call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & mpi_spintab=mpi_enreg%my_isppoltab,paw_ij=paw_ij,ph1d=ph1d)

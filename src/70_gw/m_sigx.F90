@@ -6,7 +6,7 @@
 !!  Calculate diagonal and off-diagonal matrix elements of the exchange part of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2025 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_sigx
  use m_errors
  use m_time
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use m_fstrings,      only : itoa, sjoin, ktoa, ltoa
  use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize
@@ -52,6 +52,7 @@ module m_sigx
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_occ,           only : get_fact_spin_tol_empty
+ use m_ebands,        only : ebands_t
 
  implicit none
 
@@ -312,7 +313,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
  nq_summed = Kmesh%nbz
  if (Sigp%symsigma > 0) then
-   call ltg_k%print(std_out, prtvol, mode_paral='COLL')
+   call ltg_k%print([std_out], prtvol=prtvol)
    nq_summed = sum(ltg_k%ibzq(:))
  end if ! symsigma
 
@@ -554,7 +555,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
        theta_mu_minus_esum  = fact_spin * qp_occ(band_sum, ik_ibz, spin)
        theta_mu_minus_esum2 = sqrt(abs(fact_spin * qp_occ(band_sum, ik_ibz, spin))) ! MBB Nat. orb. funct. approx. sqrt(occ)
 
-       if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then     ! MRM: allow negative occ numbers
+       if (abs(theta_mu_minus_esum / fact_spin) >= tol_empty) then  ! MRM: allow negative occ numbers
          do kb=bmin,bmax
            ! Copy the ket Sigma_x |phi_{k,kb}>.
            rhotwgp(:) = rhotwg_ki(:, kb)

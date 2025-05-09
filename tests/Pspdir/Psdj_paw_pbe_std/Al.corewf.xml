@@ -10047,7 +10047,7 @@
   0.0000000000000000E+00  0.0000000000000000E+00  0.0000000000000000E+00
   0.0000000000000000E+00
 </ae_core_lwavefunction>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Al 13
 XC_GGA_X_PBE+XC_GGA_C_PBE diracrelativistic loggrid 3001
 3 3 0 0 0 0

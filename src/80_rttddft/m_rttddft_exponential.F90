@@ -7,7 +7,7 @@
 !!  part of the propagator using various approximations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FB)
+!!  Copyright (C) 2021-2025 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,7 +99,6 @@ contains
  integer                         :: npw_t
  integer                         :: sij_opt
  integer                         :: tim_getghc = 5
- integer                         :: nfact
  logical                         :: l_paw, l_eig, l_enl
  real(dp)                        :: dt
  !arrays
@@ -151,11 +150,8 @@ contains
  !*** Taylor expansion ***
  ABI_MALLOC(tmp,(2, npw_t*nspinor*nband_t))
  tmp(:,:) = cg_t(:,:)
- nfact = 1
 
  do iorder = 1, dtset%td_exp_order
-
-   nfact = nfact*iorder
 
    !** Apply Hamiltonian
    sij_opt = 0
@@ -171,11 +167,11 @@ contains
    !** Also apply S^-1 in PAW case
    if (l_paw) then
       call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor,dtset%invovl_blksliced)
-      tmp(1,:) =  dt*gsm1hc(2,:)/real(nfact,dp)
-      tmp(2,:) = -dt*gsm1hc(1,:)/real(nfact,dp)
+      tmp(1,:) =  dt*gsm1hc(2,:)/real(iorder,dp)
+      tmp(2,:) = -dt*gsm1hc(1,:)/real(iorder,dp)
    else
-      tmp(1,:) =  dt*ghc(2,:)/real(nfact,dp)
-      tmp(2,:) = -dt*ghc(1,:)/real(nfact,dp)
+      tmp(1,:) =  dt*ghc(2,:)/real(iorder,dp)
+      tmp(2,:) = -dt*ghc(1,:)/real(iorder,dp)
    end if
 
    !** Compute properties if requested

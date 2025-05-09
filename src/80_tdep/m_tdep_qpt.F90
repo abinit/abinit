@@ -421,7 +421,7 @@ contains
   type(QptBound_type), allocatable :: QptBound(:)
 
   nqpt=0
-  if (MPIdata%iam_master) open(unit=40,file=trim(Invar%output_prefix)//'qpt.dat')
+  if (MPIdata%iam_master) open(unit=40,file=trim(Invar%output_prefix)//'_qpt.dat')
   write(Invar%stdout,*) ' '
   write(Invar%stdout,*) '#############################################################################'
   write(Invar%stdout,*) '########################## Q points generation  #############################'
@@ -470,7 +470,7 @@ contains
     if (qpt_tot.gt.1) then
       ABI_MALLOC(Qpt%lgth_segments,(qpt_tot-1)); Qpt%lgth_segments(:)=0
       do ii=1,qpt_tot-1
-        Qpt%lgth_segments(ii)=int(dsqrt((Qpt%special_cart(ii,1)-Qpt%special_cart(ii+1,1))**2+&
+        Qpt%lgth_segments(ii)=nint(dsqrt((Qpt%special_cart(ii,1)-Qpt%special_cart(ii+1,1))**2+&
 &                                       (Qpt%special_cart(ii,2)-Qpt%special_cart(ii+1,2))**2+&
 &                                       (Qpt%special_cart(ii,3)-Qpt%special_cart(ii+1,3))**2)*100*2*pi)
       end do
@@ -478,7 +478,7 @@ contains
       tmp_int=Qpt%lgth_segments(1)
       do ii=1,qpt_tot-1
         if (Invar%bzlength.eq.0) then
-          Qpt%lgth_segments(ii)=int(real(Qpt%lgth_segments(ii))/real(tmp_int)*100)
+          Qpt%lgth_segments(ii)=nint(real(Qpt%lgth_segments(ii)*100)/real(tmp_int))
         else if (Invar%bzlength.gt.0) then
           Qpt%lgth_segments(ii)=Invar%lgth_segments(ii)
         else if (Invar%bzlength.lt.0) then

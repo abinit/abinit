@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -22,6 +22,7 @@ sources = [
 "m_cumulant.F90",
 "m_eph_double_grid.F90",
 "m_ephwg.F90",
+"m_eph_path.F90",
 "m_frohlich.F90",
 "m_gstore.F90",
 "m_gkk.F90",

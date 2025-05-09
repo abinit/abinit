@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XW, DW)
+!!  Copyright (C) 1999-2025 ABINIT group (XW, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,9 +27,7 @@ module m_ddb_elast
  use m_crystal
  use m_ddb
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,       only : itoa, sjoin
  use m_hide_lapack,    only : matrginv
@@ -75,9 +73,9 @@ contains
 !! ncid=NC file handle (open in the caller)
 !!
 !! OUTPUT
-!! elast=relaxed-ion elastic tensor(without stress correction) (6*6) in Voigt notation
-!! elast_clamped=clamped-ion elastic tensor(without stress correction) (6*6) in Voigt notation
-!! elast_stress=relaxed-ion elastic tensor(with stress correction) (6*6) in Voigt notation
+!! elast=relaxed-ion elastic tensor (without stress correction) (6*6) in Voigt notation
+!! elast_clamped=clamped-ion elastic tensor (without stress correction) (6*6) in Voigt notation
+!! elast_stress=relaxed-ion elastic tensor (with stress correction) (6*6) in Voigt notation
 !!
 !! NOTES
 !! The elastic (compliance) tensors calculated here are under boundary conditions of
@@ -154,7 +152,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 
 !then consider the volume, because the unit above is in
 !Hartree, in fact the elastic constant should be in
-!the units of presure, the energy/volume
+!the units of pressure, the energy/volume
 !And then transform the unit to si unit using GPa
 !from Hartree/Bohr^3
 
@@ -573,7 +571,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
      end do
    end if
 
-!  then the complinace tensors with stress correction
+!  then the compliance tensors with stress correction
    write(message,'(5a)')ch10,&
 &   ' Compliance Tensor (relaxed ion with stress correction) (unit: 10^-2(GP)^-1):',ch10,&
 &   '  (at fixed electric field boundary condition)',ch10
@@ -612,7 +610,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
  ! Units are GPa for elastic constants and GPa^-1 for compliance constants
 
  if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
    ! Define dimensions
    NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
@@ -642,10 +639,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion'), elast))
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_clamped_ion'), elast_clamped))
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion_stress_corrected'), elast_stress))
-
-#else
-   ABI_ERROR("Netcdf support not enabled")
-#endif
  end if
 
 contains

@@ -7,7 +7,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2024 ABINIT group (MT, FJ, NH, TRangel)
+!! Copyright (C) 2013-2025 ABINIT group (MT, FJ, NH, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,6 +53,7 @@ MODULE m_paw_sphharm
  public :: gaunt            ! Gaunt coeffients for complex Yml
  public :: realgaunt        ! Compute "real Gaunt coefficients" with "real spherical harmonics"
  public :: nablarealgaunt   ! Compute the integrals Grad(Slimi).Grad(Sjmj) Slkmk of real spherical harmonics
+ public :: make_dyadic      ! Compute integrals of S_limi(alpha*1 - \beta*\hat{r}\hat{r})S_ljmj
 
 !Private functions
  private :: create_slm2ylm  ! For a given angular momentum lcor, compute slm2ylm
@@ -265,7 +266,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
  real(dp),parameter :: PPAD=tol8
  real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi,c
  character(len=500) :: msg
- complex(dpc) :: ctmp 
+ complex(dpc) :: ctmp
 
 ! *************************************************************************
 
@@ -584,9 +585,18 @@ subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
        cphi=one
        sphi=zero
        ctheta=rr(3,inpt)/rnorm
-!      MM030519 : abs is needed to prevent very small negative arg
-       stheta=sqrt(abs((one-ctheta)*(one+ctheta)))
-       if (stheta>tol10) then
+       ! LB-2025/01:
+       ! If ctheta is too close to 1 (or -1), then stheta is small with poor accuracy,
+       ! which leads to a numerical instability visible (but negligible) in stress and forces components.
+       ! Here we have stheta>1e-6 with a minimum of 2 correct digits when close to 1e-6.
+       if (abs(one-ctheta)<tol12) then
+         ctheta=one
+         stheta=zero
+       else if (abs(one+ctheta)<tol12) then
+         ctheta=-one
+         stheta=zero
+       else
+         stheta=sqrt(one-ctheta*ctheta)
          cphi=rr(1,inpt)/(rnorm*stheta)
          sphi=rr(2,inpt)/(rnorm*stheta)
        end if
@@ -730,7 +740,7 @@ end subroutine initylmr
 !!
 !! NOTES
 !! Ylm is the standard complex-valued spherical harmonic, Slm is the real spherical harmonic
-!! used througout abinit. 
+!! used througout abinit.
 !!
 !! SOURCE
 
@@ -757,7 +767,7 @@ subroutine ys(l2,m2,l1,m1,ys_val)
  if ( abs(m2) /= abs(m1) ) return
 
  mp1=(-1)**abs(m1)
- 
+
  if(m1.EQ.0) then
    ys_val=cone
  else if((m1.GT.0).AND.(m2.GT.0)) then
@@ -813,7 +823,7 @@ subroutine lxyz(lp,mp,idir,ll,mm,lidir)
  if ( lp /= ll ) return
 
  jpme=czero; jmme=czero; jme=czero
- if (mp==mm) then 
+ if (mp==mm) then
    jme=cone*mm
  else if (mp==mm+1) then
    jpme=-cone*sqrt(half*((ll*(ll+1))-mm*(mm+1)))
@@ -2914,6 +2924,109 @@ end subroutine realgaunt
 
 !----------------------------------------------------------------------
 
+!!****f* m_pawsphharm/make_dyadic
+!! NAME
+!! make_dyadic
+!!
+!! FUNCTION
+!! compute integrals S_limi (\alpha*1-\beta\hat{r}\hat{r}) S_ljmj
+!! for the general dyadic \alpha*1-\beta\hat{r}\hat{r}
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  dyadic(3,3,lm2_size)=dyadic term for each S_iS_j pair
+!!
+!! NOTE
+!!  dyadic is indexed in voigt-style format:
+!!    (1,1,klm) : xx
+!!    (2,2,klm) : xx
+!!    (3,3,klm) : xx
+!!    (2,3,klm) : yz
+!!    (1,3,klm) : xz
+!!    (1,2,klm) : xy
+!!  and symmetric around diagonal
+!!
+!! SOURCE
+
+subroutine make_dyadic(alpha,beta,dyadic,gntselect,gs1,gs2,lm2_size,ngnt,realgnt)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: gs1,gs2,lm2_size,ngnt
+ real(dp),intent(in) :: alpha,beta
+!arrays
+ integer,intent(in) :: gntselect(gs1,gs2)
+ real(dp),intent(in) :: realgnt(ngnt)
+ real(dp),intent(out) :: dyadic(3,3,lm2_size)
+
+!Local variables ------------------------------
+!scalars
+integer :: dlm,ignt,klm
+real(dp) :: afact,rgnt
+real(dp),parameter :: c1=sqrt(four_pi/five)
+real(dp),parameter :: c2=one/sqrt(three)
+real(dp),parameter :: c3=sqrt(four_pi)
+!arrays
+
+!************************************************************************
+
+dyadic = zero
+do klm = 1, lm2_size
+  do dlm = 1, 9
+    if ( (dlm>1) .AND. (dlm<5) ) cycle ! no L=1 contributions
+    ignt = gntselect(dlm,klm)
+    if (ignt<1) cycle
+    rgnt=realgnt(ignt)
+    select case(dlm)
+
+    ! S00, appears in xx, yy, zz
+    case (1)
+      afact = rgnt*c3*(alpha-beta/three)
+      dyadic(1,1,klm) = dyadic(1,1,klm)+afact
+      dyadic(2,2,klm) = dyadic(2,2,klm)+afact
+      dyadic(3,3,klm) = dyadic(3,3,klm)+afact
+
+    ! S2,-2 appears in xy
+    case (5)
+      dyadic(1,2,klm) = dyadic(1,2,klm)-rgnt*beta*c1*c2
+
+    ! S2,-1 appears yz
+    case (6)
+      dyadic(2,3,klm) = dyadic(2,3,klm)-rgnt*beta*c1*c2
+
+    ! S2,0 appears in xx, yy, zz
+    case (7)
+      afact = rgnt*beta*c1/three
+      dyadic(1,1,klm) = dyadic(1,1,klm) + afact
+      dyadic(2,2,klm) = dyadic(2,2,klm) + afact
+      dyadic(3,3,klm) = dyadic(3,3,klm) - two*afact
+
+    ! S2,1 appears in xz
+    case (8)
+      dyadic(1,3,klm) = dyadic(1,3,klm)-rgnt*beta*c1*c2
+
+    ! S2,2 appears in xx, yy
+    case (9)
+      afact=rgnt*beta*c1*c2
+      dyadic(1,1,klm) = dyadic(1,1,klm)-afact
+      dyadic(2,2,klm) = dyadic(2,2,klm)+afact
+    case default
+    end select
+
+    dyadic(3,1,klm) = dyadic(1,3,klm)
+    dyadic(2,1,klm) = dyadic(1,2,klm)
+    dyadic(3,2,klm) = dyadic(2,3,klm)
+
+  end do
+end do
+
+end subroutine make_dyadic
+!!***
+
+!----------------------------------------------------------------------
+
+
 !!****f* m_paw_sphharm/nablarealgaunt
 !! NAME
 !! nablarealgaunt
@@ -2934,7 +3047,7 @@ end subroutine realgaunt
 !!
 !! SOURCE
 
-subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt) 
+subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2965,7 +3078,7 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
  ii=0
  if (l_max>1) then
    if (l_max_ij>=1) then
-     ii=ii+1 ; nabgauntselect(1,2,2)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi)) 
+     ii=ii+1 ; nabgauntselect(1,2,2)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi))
      ii=ii+1 ; nabgauntselect(1,3,3)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi))
      ii=ii+1 ; nabgauntselect(1,4,4)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi))
    end if
@@ -3047,7 +3160,7 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
 
 !If not tabulated, compute the integrals
  if (l_max>3.or.l_max_ij>3) then
- 
+
    ntheta=25 ; nphi=25
    call ylm_angular_mesh(ntheta,nphi,angl_size,cart_coord,ang_wgth)
 
@@ -3056,7 +3169,7 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
    LIBPAW_ALLOCATE(ylmr,(ylm_size,angl_size))
    LIBPAW_ALLOCATE(ylmrgr,(3,ylm_size,angl_size))
    call initylmr(mpsang,0,angl_size,ang_wgth,2,cart_coord,ylmr,ylmr_gr=ylmrgr)
- 
+
    if (debug) open(unit=111,file='nablarealgaunt.dat',form='formatted')
 
    do ilm=1,l_max**2
@@ -3272,7 +3385,7 @@ end subroutine create_mlms2jmj
 !!  This file comes from the file crystal_symmetry.f
 !!  by N.A.W. Holzwarth and A. Tackett for the code pwpaw
 !!  XG20200718 However, this routine was not accurate in the determination
-!!  of beta when cosbeta was close to one (indeed this is a special case). 
+!!  of beta when cosbeta was close to one (indeed this is a special case).
 !!  This has been corrected. Moreover, sinbeta has been made an output in order
 !!  to allow accurate calculations in dbeta. Also, tolerances have been made consistent.
 !!
@@ -3442,8 +3555,8 @@ pure function phim(costheta,sintheta,mm)
 !!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
 !!  - Assume l relatively small so that factorials do not cause
 !!    roundoff error
-!!  - XG20200718 This routine was inaccurate when cosbeta was close to one or minus one. 
-!!    This has been fixed by adding sinbeta argument obtained from mkeuler. 
+!!  - XG20200718 This routine was inaccurate when cosbeta was close to one or minus one.
+!!    This has been fixed by adding sinbeta argument obtained from mkeuler.
 !!    Tolerances have been adjusted as well.
 !!
 !! SOURCE

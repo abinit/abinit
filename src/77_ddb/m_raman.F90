@@ -6,7 +6,7 @@
 !!  Raman susceptibilities of zone-center phonons and electroo tensor.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2025 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +25,7 @@ module m_raman
  use m_errors
  use m_abicore
 
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
 
  implicit none
 

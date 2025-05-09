@@ -7,7 +7,7 @@
 !!  and the functions needed to extract them
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2024 ABINIT group (MMancini, MT, FDahm)
+!!  Copyright (C) 2009-2025 ABINIT group (MMancini, MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -336,7 +336,7 @@ end subroutine Get_Mem_Dev
    end if
 
    ! Initialize Kokkos and YAKL if requested
-   if(gpu_option==ABI_GPU_KOKKOS .or. gpu_option==ABI_GPU_LEGACY) then
+   if(gpu_option==ABI_GPU_KOKKOS) then
 #ifdef HAVE_KOKKOS
      ! initialize kokkos
      if (xmpi_comm_rank(xmpi_world) == 0) then

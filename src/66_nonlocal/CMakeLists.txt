@@ -7,9 +7,8 @@ set(66_nonlocal_SRC
   m_cgprj.F90
   m_contract.F90
   m_fock.F90
-  m_gemm_nonlop_ompgpu.F90
   m_gemm_nonlop_gpu.F90
-	m_gemm_nonlop_projectors.F90
+  m_gemm_nonlop_projectors.F90
   m_gemm_nonlop.F90
   m_hamiltonian.F90
   m_metstr.F90
@@ -28,14 +27,14 @@ set(66_nonlocal_SRC
   m_opernlb_ylm.F90
   m_opernlb_ylm_mv.F90
   m_opernlc_ylm.F90
-  m_opernlc_ylm_allwf_cpu.F90
-  m_opernlc_ylm_ompgpu.F90
+  m_opernlc_ylm_allwf.F90
   m_opernld_ylm.F90
   m_opernld_ylm_allwf.F90
-  )
+)
 
 add_library(66_nonlocal STATIC
-  ${66_nonlocal_SRC})
+  ${66_nonlocal_SRC}
+)
 
 
 set_target_properties(66_nonlocal
@@ -69,7 +68,7 @@ target_link_libraries(66_nonlocal
   abinit::45_xgTools
   abinit::62_poisson
   abinit::65_paw
-  )
+)
 
 if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
   target_link_libraries(66_nonlocal

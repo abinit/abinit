@@ -11,7 +11,7 @@
 !! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (YG)
+!! Copyright (C) 2001-2025 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,12 +30,10 @@ module m_eprenorms
  use m_abicore
  use m_errors
  use m_xmpi
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
+ use m_ebands
 
- use defs_datatypes, only : ebands_t
  use m_crystal,      only : crystal_t
  use m_kpts,         only : listkk
 
@@ -207,13 +205,9 @@ subroutine eprenorms_from_epnc(Epren,filename)
 
 !Local variables------------------------------
  integer :: nkpt, mband, nsppol, ntemp
-#ifdef HAVE_NETCDF
  integer :: ncid
-#endif
-
 ! ************************************************************************
 
-#ifdef HAVE_NETCDF
  NCF_CHECK(nctk_open_read(ncid, filename, xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(ncid))
 
@@ -232,8 +226,6 @@ subroutine eprenorms_from_epnc(Epren,filename)
  ! TODO: This should be changed. What is stored is a linewidth, not a lifetime,
  ! we postone the change so as to not break compatibility
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"lifetime"), Epren%linewidth))
-
-#endif
 
 end subroutine eprenorms_from_epnc
 !!***

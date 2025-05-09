@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
+!!  Copyright (C) 2008-2025 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1065,6 +1065,7 @@ subroutine initmpi_atom(dtset,mpi_enreg)
    msg=''
    if (dtset%usepaw==0)  msg= 'Parallelisation over atoms not compatible with usepaw=0 !'
    if (dtset%usedmft==1) msg=' Parallelisation over atoms not compatible with usedmft=1 !'
+   if (dtset%usedmft==10) msg=' Parallelisation over atoms not compatible with usedmft=10 !'
    if (dtset%usewvl==1)  msg= 'Parallelisation over atoms not compatible with usewvl=1 !'
    if (dtset%prtden>1.and.dtset%paral_kgb<=0) &
 &   msg= 'Parallelisation over atoms not compatible with prtden>1 (PAW AE densities) !'
@@ -1645,9 +1646,11 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
          ABI_BUG('Error on nrank !')
        end if
 !      Sort images by increasing index (this step is MANDATORY !!)
-       ABI_MALLOC(ranks,(nrank))
-       call sort_int(nrank,mpi_enreg%my_imgtab,ranks)
-       ABI_FREE(ranks)
+       if (nrank>0) then
+         ABI_MALLOC(ranks,(nrank))
+         call sort_int(nrank,mpi_enreg%my_imgtab,ranks)
+         ABI_FREE(ranks)
+       end if
      else
        ABI_MALLOC(mpi_enreg%my_imgtab,(0))
      end if

@@ -6,7 +6,7 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG, DRH, MT, MKV, GA)
+!!  Copyright (C) 1999-2025 ABINIT group (XG, DRH, MT, MKV, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,15 +41,16 @@ module m_respfn_driver
  use m_dtfil
  use m_gemm_nonlop_projectors
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_fstrings,    only : strcat, endswith
- use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
+ use m_matrix,      only : matr3inv
+ use m_symtk,       only : littlegroup_q, symmetrize_xred
  use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
- use m_geometry,    only : irreducible_set_pert, symredcart
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, sylwtens, dfpt_prtph, &
+ use m_geometry,    only : irreducible_set_pert, symredcart, sylwtens
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
                            asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
  use m_ddb,         only : ddb_type
  use m_ddb_hdr,     only : ddb_hdr_type
@@ -66,11 +67,10 @@ module m_respfn_driver
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
                            pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim, &
                            pawrhoij_print_rhoij, pawrhoij_io
-
  use m_pawdij,      only : pawdij, symdij, pawdij_print_dij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
- use m_pawxc,       only : pawxc_get_nkxc
+ use m_pawxc,       only : pawxc_get_nkxc, pawxc_get_usekden
  use m_paw_dmft,    only : paw_dmft_type
  use m_paw_sphharm, only : setsym_ylm
  use m_paw_nhat,    only : nhatgrid,pawmknhat
@@ -89,7 +89,7 @@ module m_respfn_driver
  use m_atm2fft,     only : atm2fft
  use m_dfpt_loopert,only : dfpt_looppert, eigen_meandege
  use m_rhotoxc,     only : rhotoxc
- use m_drivexc,     only : check_kxc
+ use m_drivexc,     only : check_kxc, xc_need_kden
  use m_xc_tb09,     only : xc_tb09_update_c
  use m_mklocl,      only : mklocl, mklocl_recipspace
  use m_common,      only : setup1, prteigrs
@@ -105,7 +105,7 @@ module m_respfn_driver
  use m_alloc_hamilt_gpu
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -232,15 +232,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
- integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
+ integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usevxctau,usevxctau_paw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
- real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
- real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
- real(dp) :: ucvol,vxcavg
- character(len=500) :: message
+ real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,bigexc,bigsxc
+ real(dp) :: epaw,epawdc,spaw,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
+ real(dp) :: ucvol,vxcavg,el_temp
+ character(len=500) :: msg
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_fine,hdr0,hdr_den
  type(ddb_type) :: ddb
@@ -261,7 +261,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0)
- real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
+ real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),tsec(2)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
  real(dp),allocatable :: d2cart_bbb(:,:,:,:,:,:),d2eig0(:,:,:,:,:)
@@ -310,12 +310,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Structured debugging if dtset%prtvol==-level
  if(dtset%prtvol==-level)then
-   write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' respfn : enter , debug mode '
-   call wrtout(std_out,message)
+   write(msg,'(80a,a,a)')  ('=',ii=1,80),ch10,' respfn : enter , debug mode '
+   call wrtout(std_out,msg)
  end if
 
 !Option input variables
  iscf=dtset%iscf
+
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
 !Respfn input variables
  asr=dtset%asr   ; chneut=dtset%chneut ; rfdir(1:3)=dtset%rfdir(1:3)
@@ -340,8 +343,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !LIKELY TO BE TAKEN AWAY
  initialized=0
- ek=zero ; ehart=zero ; enxc=zero ; eei=zero ; enl=zero
- eii=zero ; eew=zero ; ecore=zero
+ ek=zero ; ehart=zero ; bigexc=zero ; eei=zero ; enl=zero
+ eii=zero ; eew=zero ; ecore=zero ; bigsxc=zero
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
@@ -421,7 +424,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(135,1,tsec)
 
 !Initialize band structure datatype
- bstruct = ebands_from_dtset(dtset, npwarr)
+ call bstruct%from_dtset(dtset, npwarr)
 
 !Initialize PAW atomic occupancies
  if (psps%usepaw==1) then
@@ -437,8 +440,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Initialize header
  gscase=0
- call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr, &
-& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%init(bstruct,codvsn,dtset,pawtab,gscase,psps,wvl%descr, &
+              comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
@@ -450,7 +453,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
- call ebands_free(bstruct)
+ call bstruct%free()
 
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1
@@ -483,7 +486,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(136,1,tsec)
 
  ! Report on eigen0 values   ! Should use prteigrs.F90
- !write(message, '(a,a)' )
+ !write(msg, '(a,a)' )
  !call wrtout(std_out,ch10//' respfn : eigen0 array')
  !nkpt_eff=dtset%nkpt
  !nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
@@ -493,15 +496,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  !  do ikpt=1,dtset%nkpt
  !    nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
  !    if(ikpt<=nkpt_eff)then
- !      write(message, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
- !      call wrtout(std_out,message)
+ !      write(msg, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
+ !      call wrtout(std_out,msg)
  !      do iband=1,nband_k,4
- !        write(message, '(a,4es16.6)')'  ',eigen0(iband+band_index:min(iband+3,nband_k)+band_index)
- !        call wrtout(std_out,message)
+ !        write(msg, '(a,4es16.6)')'  ',eigen0(iband+band_index:min(iband+3,nband_k)+band_index)
+ !        call wrtout(std_out,msg)
  !      end do
  !    else if(ikpt==nkpt_eff+1)then
- !      write(message,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigen0.',ch10
- !      call wrtout(std_out,message)
+ !      write(msg,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigen0.',ch10
+ !      call wrtout(std_out,msg)
  !    end if
  !    band_index=band_index+nband_k
  !  end do
@@ -696,8 +699,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
    has_vhartree=0
    if(dtset%orbmag>0 .AND. dtset%pawspnorb > 0) has_vhartree=1
+   usevxctau_paw=pawxc_get_usekden(dtset%ixc)
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
-        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vhartree=has_vhartree,has_vxctau=dtset%usekden,&
+        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vhartree=has_vhartree,has_vxctau=usevxctau_paw,&
         &   has_vxc_ex=1,has_kxc=has_kxc,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
@@ -943,7 +947,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_MALLOC(kxc,(nfftf,nkxc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
- ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
+ ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*usevxctau))
 
  call xcdata_init(xcdata,dtset=dtset)
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
@@ -955,9 +960,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
- call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+ call rhotoxc(bigexc,bigsxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
-& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+& rprimd,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
 & taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
 
 !Compute local + Hxc potential, and subtract mean potential.
@@ -984,7 +989,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
 
-   call pawdenpot(compch_sph,epaw,epawdc,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
 &   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
@@ -994,7 +999,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,natom,nfftf,nfftotf,&
 &   dtset%nspden,ntypat,paw_an,paw_ij,pawang,pawfgrtab,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,&
-&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,nucdipmom=dtset%nucdipmom,&
+&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
+&   nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call symdij(gprimd,indsym,ipert,my_natom,natom,dtset%nsym,ntypat,0,&
 &   paw_ij,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,&
@@ -1110,8 +1116,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_NVTX_START_RANGE(NVTX_DFPT_ELT)
 !  Verify that k-point set has full space-group symmetry; otherwise exit
    timrev=1
-   if (symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev,message) /= 0) then
-     ABI_ERROR(message)
+   if (symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev,msg) /= 0) then
+     ABI_ERROR(msg)
    end if
 
 !  Calculate the kinetic part of the elastic tensor
@@ -1124,7 +1130,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfftf,ngfftf,rhog)
 
 !  Calculate the xc part of the elastic tensor
-   call dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfftf,&
+   call dfpt_eltfrxc(atindx,dtset,eltfrxc,bigexc,gsqcut,kxc,mpi_enreg,mgfftf,&
 &   nattyp,nfftf,ngfftf,ngfftf,nhat,nkxc,n3xccc,pawtab,ph1df,psps,rhor,rprimd,&
 &   usexcnhat,vxc,xccc3d,xred)
 
@@ -1180,8 +1186,8 @@ ABI_NVTX_END_RANGE()
 
  call timab(137,1,tsec)
 
- write(message,'(3a)')ch10,' ==>  initialize data related to q vector <== ',ch10
- call wrtout([std_out, ab_out] ,message)
+ write(msg,'(3a)')ch10,' ==>  initialize data related to q vector <== ',ch10
+ call wrtout([std_out, ab_out] ,msg)
 
  qphon(:)=dtset%qptn(:)
  sumg0=1
@@ -1190,31 +1196,31 @@ ABI_NVTX_END_RANGE()
  qzero=0
  if(qeq0)then
    qphon(:)=zero
-   write(message,'(3a)')&
+   write(msg,'(3a)')&
 &   ' respfn : the norm of the phonon wavelength (as input) was small (<1.d-7).',ch10,&
 &   '  q has been set exactly to (0 0 0)'
-   call wrtout(std_out,message)
+   call wrtout(std_out,msg)
    sumg0=0
    qzero=1
  else
    if(rfelfd/=0 .or. rfstrs/=0 .or. rfddk /= 0  .or. rf2_dkdk /= 0 .or. rf2_dkde /= 0) then
 !    Temporarily, ...
-     write(message, '(a,a,a,3es16.6,a,a,5(a,i2),a,a,a)' )ch10,&
+     write(msg, '(a,a,a,3es16.6,a,a,5(a,i2),a,a,a)' )ch10,&
 &     'The treatment of non-zero wavevector q is restricted to phonons.',&
 &     'However, the input normalized qpt is',qphon(:),',',ch10,&
 &     'while rfelfd=',rfelfd,', rfddk=',rfddk,', rf2_dkdk=',rf2_dkdk,', rf2_dkde=',rf2_dkde,&
 &     ' and rfstrs=',rfstrs,'.',ch10,&
 &     'Action: change qpt, or rfelfd, or rfstrs in the input file.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
    if(chneut/=0)then
-     write(message,'(2a)')ch10,' chneut/=0 not allowed with q/=0 => chneut reset to 0 locally.'
-     ABI_WARNING(message)
+     write(msg,'(2a)')ch10,' chneut/=0 not allowed with q/=0 => chneut reset to 0 locally.'
+     ABI_WARNING(msg)
      chneut=0
    end if
    if(asr/=0)then
-     write(message,'(2a)')ch10,' asr/=0 not allowed with q/=0 => asr reset to 0 locally.'
-     ABI_WARNING(message)
+     write(msg,'(2a)')ch10,' asr/=0 not allowed with q/=0 => asr reset to 0 locally.'
+     ABI_WARNING(msg)
      asr=0
    end if
 
@@ -1224,15 +1230,15 @@ ABI_NVTX_END_RANGE()
  ABI_MALLOC(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
 
- write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
- call wrtout([std_out, ab_out] ,message)
+ write(msg,'(a)') ' The list of irreducible perturbations for this q vector is:'
+ call wrtout([std_out, ab_out] ,msg)
  ii=1
  do ipert=1,natom+6  ! GA: Why natom+6 instead of natom+MPERT_MAX ?
    do idir=1,3
      if(rfpert(ipert)==1.and.rfdir(idir)==1)then
        if( pertsy(idir,ipert)==1 )then
-         write(message, '(i5,a,i2,a,i4)' )ii,')    idir=',idir,'    ipert=',ipert
-         call wrtout([std_out, ab_out] ,message)
+         write(msg, '(i5,a,i2,a,i4)' )ii,')    idir=',idir,'    ipert=',ipert
+         call wrtout([std_out, ab_out] ,msg)
          ii=ii+1
        end if
      end if
@@ -1241,11 +1247,11 @@ ABI_NVTX_END_RANGE()
 
 !test if the user left default rfdir 0 0 0
  if (ii==1 .and. rf2_dkdk==0 .and. rf2_dkde==0) then
-   write(message,'(5a)')ch10,&
+   write(msg,'(5a)')ch10,&
 &   ' WARNING: no perturbations to be done at this q-point.',ch10,&
 &   ' You may have forgotten to set the rfdir or rfatpol variables. Continuing normally.',ch10
-   call wrtout(ab_out,message)
-   ABI_WARNING(message)
+   call wrtout(ab_out,msg)
+   ABI_WARNING(msg)
  end if
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
@@ -1256,13 +1262,13 @@ ABI_NVTX_END_RANGE()
    rfpert_nl(:,natom+2,:,1:natom,:,natom+2) = 1
    rfpert_nl(:,natom+2,:,natom+2,:,1:natom) = 1
    call sytens(indsym,natom+2,natom,dtset%nsym,rfpert_nl,symrec,dtset%symrel)
-   write(message, '(a,a,a,a,a)' ) ch10, &
+   write(msg, '(a,a,a,a,a)' ) ch10, &
 &   ' The list of irreducible elements of the Raman and non-linear',&
 &   ch10,' optical susceptibility tensors is:',ch10
-   call wrtout(std_out,message)
+   call wrtout(std_out,msg)
 
-   write(message,'(12x,a)')'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
-   call wrtout(std_out,message)
+   write(msg,'(12x,a)')'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
+   call wrtout(std_out,msg)
    n1 = 0
    rf2_dirs_from_rfpert_nl(:,:) = 0
    do i1pert = 1, natom + 2
@@ -1273,8 +1279,8 @@ ABI_NVTX_END_RANGE()
              do i3dir = 1,3
                if (rfpert_nl(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                  n1 = n1 + 1
-                 write(message,'(2x,i4,a,6(5x,i3))') n1,')', i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
-                 call wrtout(std_out,message)
+                 write(msg,'(2x,i4,a,6(5x,i3))') n1,')', i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
+                 call wrtout(std_out,msg)
                  if (i2pert==natom+2) then
                    if (i3pert==natom+2) then
                      rf2_dirs_from_rfpert_nl(i3dir,i2dir) = 1
@@ -1289,14 +1295,14 @@ ABI_NVTX_END_RANGE()
        end do
      end do
    end do
-   write(message,'(a,a)') ch10,ch10
-   call wrtout(std_out,message)
+   write(msg,'(a,a)') ch10,ch10
+   call wrtout(std_out,msg)
 
    call wrtout(std_out,'rf2_dirs_from_rfpert_nl :')
    do i1dir = 1, 3
      do i2dir = 1, 3
-       write(message,'(3(a,i1))') ' ',i1dir,' ',i2dir,' : ',rf2_dirs_from_rfpert_nl(i1dir,i2dir)
-       call wrtout(std_out,message)
+       write(msg,'(3(a,i1))') ' ',i1dir,' ',i2dir,' : ',rf2_dirs_from_rfpert_nl(i1dir,i2dir)
+       call wrtout(std_out,msg)
      end do
    end do
  end if
@@ -1312,7 +1318,7 @@ ABI_NVTX_END_RANGE()
    end where
  end do
 
-  if (dtset%prepalw/=0) then
+ if (dtset%prepalw/=0) then
    ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
    rfpert_lw=0
    if (dtset%prepalw==1) then
@@ -1329,11 +1335,11 @@ ABI_NVTX_END_RANGE()
 !   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel,symrel_cart)
    call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel)
 
-   write(message,'(7a)') ch10, ' The following reducible perturbations will also be ', ch10, &
+   write(msg,'(7a)') ch10, ' The following reducible perturbations will also be ', ch10, &
                              & ' explicitly calculated for a correct subsequent ', ch10, &
                              & ' execution of the longwave driver:', ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
    do i3pert = 1,natom+8
      do i3dir = 1, 3
        do i2pert = 1, natom+8
@@ -1343,15 +1349,15 @@ ABI_NVTX_END_RANGE()
                if (rfpert_lw(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
                  if (pertsy(i1dir,i1pert)==-1) then
                    pertsy(i1dir,i1pert)=1
-                   write(message,'(a,i2,a,i4)' )'    idir=',i1dir,'    ipert=',i1pert
-                   call wrtout(ab_out,message,'COLL')
-                   call wrtout(std_out,message,'COLL')
+                   write(msg,'(a,i2,a,i4)' )'    idir=',i1dir,'    ipert=',i1pert
+                   call wrtout(ab_out,msg,'COLL')
+                   call wrtout(std_out,msg,'COLL')
                  end if
                  if (pertsy(i2dir,i2pert)==-1) then
                    pertsy(i2dir,i2pert)=1
-                   write(message,'(a,i2,a,i4)' )'    idir=',i2dir,'    ipert=',i2pert
-                   call wrtout(ab_out,message,'COLL')
-                   call wrtout(std_out,message,'COLL')
+                   write(msg,'(a,i2,a,i4)' )'    idir=',i2dir,'    ipert=',i2pert
+                   call wrtout(ab_out,msg,'COLL')
+                   call wrtout(std_out,msg,'COLL')
                  end if
                end if
              end do
@@ -1360,8 +1366,8 @@ ABI_NVTX_END_RANGE()
        end do
      end do
    end do
-   write(message,'(a,a)') ch10,ch10
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,a)') ch10,ch10
+   call wrtout(std_out,msg,'COLL')
    ABI_FREE(rfpert_lw)
  end if
 
@@ -1453,8 +1459,8 @@ ABI_NVTX_END_RANGE()
 
  if (iexit==0) then
 !  #######################################################################
-   write(message,'(a,80a)')ch10,('=',mu=1,80)
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(a,80a)')ch10,('=',mu=1,80)
+   call wrtout([std_out, ab_out], msg)
 
    ddkfil(:)=0
 
@@ -1485,7 +1491,7 @@ ABI_NVTX_END_RANGE()
 &   nfftf,nhat,dtset%nkpt,nkxc,dtset%nspden,dtset%nsym,occ,&
 &   paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &   pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
-&   usecprj,usevdw,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
+&   usecprj,usevdw,usevxctau,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &   eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
 !  #####################################################################
@@ -1493,9 +1499,9 @@ ABI_NVTX_END_RANGE()
 
  call timab(138,1,tsec)
 
- write(message, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
+ write(msg, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
   ' ---- first-order wavefunction calculations are completed ----',ch10
- call wrtout([std_out, ab_out], message)
+ call wrtout([std_out, ab_out], msg)
 
  ABI_FREE(vxc)
  ABI_FREE(vxctau)
@@ -1522,15 +1528,15 @@ ABI_NVTX_END_RANGE()
 !Were 2DTE computed ?
  if(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and. rfuser==0 .and. rfmagn==0)then
 
-   write(message,'(a,a)' )ch10,' respfn : d/dk was computed, but no 2DTE, so no DDB output.'
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(a,a)' )ch10,' respfn : d/dk was computed, but no 2DTE, so no DDB output.'
+   call wrtout([std_out, ab_out], msg)
 
 !  If 2DTE were computed, only one processor must output them and compute
 !  frequencies.
  else if(me==0)then
 
-   write(message,'(a,a)' )ch10,' ==> Compute Derivative Database <== '
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(a,a)' )ch10,' ==> Compute Derivative Database <== '
+   call wrtout([std_out, ab_out], msg)
 
 !  In the RESPFN code, dfpt_nstdy and stady3 were called here
    d2nfr(:,:,:,:,:)=d2lo(:,:,:,:,:)+d2nl(:,:,:,:,:)
@@ -1733,27 +1739,27 @@ ABI_NVTX_END_RANGE()
      if(rfphon==1)then
 !      Compute and print the T=0 Fan, and possibly DDW contributions to the eigenenergies.
        if(dtset%ieig2rf > 0) then
-         write(message, '(80a,9a)' ) ('=',mu=1,80),ch10,ch10,&
+         write(msg, '(80a,9a)' ) ('=',mu=1,80),ch10,ch10,&
 &         ' ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- ',ch10,&
 &         ' Warning : the total shift must be computed through anaddb,                  ',ch10,&
 &         ' here, only the contribution of one q point is printed.                      ',ch10,&
 &         ' Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.'
-         call wrtout([std_out, ab_out], message)
+         call wrtout([std_out, ab_out], msg)
 
          if(qeq0)then
-           write(message, '(a)' )' Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.'
-           call wrtout([std_out, ab_out], message)
+           write(msg, '(a)' )' Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.'
+           call wrtout([std_out, ab_out], msg)
          end if
 
-         write(message, '(a)' ) ' '
-         call wrtout([std_out, ab_out], message)
+         write(msg, '(a)' ) ' '
+         call wrtout([std_out, ab_out], msg)
 
          call prteigrs(eigen0,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &         dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,3,0,dtset%prtvol,&
 &         eigen0,zero,zero,dtset%wtk)
 
-         write(message, '(a)' ) ch10
-         call wrtout([std_out, ab_out], message)
+         write(msg, '(a)' ) ch10
+         call wrtout([std_out, ab_out], msg)
 
 !        Compute and print Fan contribution
          ABI_MALLOC(eigen_fan,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1767,8 +1773,8 @@ ABI_NVTX_END_RANGE()
 
          if(qeq0 .or. dtset%getgam_eig2nkq>0)then
 
-           write(message, '(a)' ) ch10
-           call wrtout([std_out, ab_out], message)
+           write(msg, '(a)' ) ch10
+           call wrtout([std_out, ab_out], msg)
 
 !          Compute and print Diagonal Debye-Waller contribution
            ABI_MALLOC(eigen_ddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1788,19 +1794,19 @@ ABI_NVTX_END_RANGE()
                call elph2_fanddw(dim_eig2nkq,displ,results_respfn%gam_eig2nkq,eigen_ddw,&
 &               gprimd,dtset%mband,natom,dtset%nkpt,dtset%nsppol,2,phfrq,dtset%prtvol)
              else
-               write(message,'(a,i0,2a,i0,2a)')&
+               write(msg,'(a,i0,2a,i0,2a)')&
 &               'results_respfn%gam_jdtset=',results_respfn%gam_jdtset,ch10,&
 &               'dtset%getgam_eig2nkq=',dtset%getgam_eig2nkq,ch10,&
 &               'So, it seems eig2nkq at gamma has not yet been computed, while it is needed now.'
-               ABI_BUG(message)
+               ABI_BUG(msg)
              end if
            end if
            call eigen_meandege(eigen0,eigen_ddw,eigen_ddw_mean,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,2)
            call prteigrs(eigen_ddw_mean,dtset%enunit,fermie,fermih,dtfil%fnameabo_eig,ab_out,-1,dtset%kptns,dtset%kptopt,&
 &           dtset%mband,dtset%nband,dtset%nbdbuf,dtset%nkpt,1,dtset%nsppol,occ,dtset%occopt,6,0,dtset%prtvol,&
 &           eigen0,zero,zero,dtset%wtk)
-           write(message, '(a)' ) ch10
-           call wrtout([std_out, ab_out], message)
+           write(msg, '(a)' ) ch10
+           call wrtout([std_out, ab_out], msg)
 
 !          Print sum of mean Fan and DDW
            ABI_MALLOC(eigen_fanddw,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -1991,7 +1997,7 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 !Local variables ------------------------------
 !scalars
  integer :: flag,iband,idir,idir2,jband
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: loctenscart(2,3,3)
  real(dp),allocatable :: loctenscart_bbb(:,:,:,:,:)
@@ -2040,8 +2046,8 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 
  if (prtbbb == 1) then
 
-   write(message,'(a,a)')ch10, ' Band by band decomposition of the localisation tensor (bohr^2)'
-   call wrtout([std_out, ab_out], message)
+   write(msg,'(a,a)')ch10, ' Band by band decomposition of the localisation tensor (bohr^2)'
+   call wrtout([std_out, ab_out], msg)
 
    do iband = 1,mband
      do jband = 1,mband
@@ -2055,10 +2061,10 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
        loctenscart_bbb(:,:,:,iband,jband) = loctenscart_bbb(:,:,:,iband,jband)/(two_pi**2)
 
 
-       write(message,'(a,a,i5,a,i5,a)')ch10, &
+       write(msg,'(a,a,i5,a,i5,a)')ch10, &
        ' Localisation tensor (bohr^2) for band ',iband,',',jband, &
        ' in cartesian coordinates'
-       call wrtout([std_out, ab_out], message)
+       call wrtout([std_out, ab_out], msg)
 
        write(ab_out,*)'     direction              matrix element'
        write(ab_out,*)'  alpha     beta       real part   imaginary part'
@@ -2076,16 +2082,16 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
  end if  !prtbbb
 
  if (usepaw==0) then
-   write(message,'(a,a,a,a)')ch10, &
+   write(msg,'(a,a,a,a)')ch10, &
 &   ' Total localisation tensor (bohr^2) in cartesian coordinates',ch10,&
 &   '  WARNING : still subject to testing - especially symmetries.'
  else
-   write(message,'(a,a,a,a,a,a)')ch10, &
+   write(msg,'(a,a,a,a,a,a)')ch10, &
 &   ' Total localisation tensor (bohr^2) in cartesian coordinates',ch10,&
 &   '  WARNING : probably wrong for PAW (printing for testing purpose)',ch10,&
 &   '  WARNING : still subject to testing - especially symmetries.'
  end if
- call wrtout([std_out, ab_out], message)
+ call wrtout([std_out, ab_out], msg)
 
  write(ab_out,*)'     direction              matrix element'
  write(ab_out,*)'  alpha     beta       real part   imaginary part'
@@ -2098,11 +2104,11 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
  end do
 
  if (flag == 1) then
-   write(message,'(6a)')ch10,&
+   write(msg,'(6a)')ch10,&
 &   ' WARNING : Localization tensor calculation (this does not apply to other properties).',ch10,&
 &   '  Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,',ch10,&
 &   '  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.'
-   call wrtout([std_out, ab_out], message)
+   call wrtout([std_out, ab_out], msg)
  end if
 
  ABI_SFREE(loctenscart_bbb)
@@ -2239,9 +2245,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
 
 ! *********************************************************************
 
-! GA: As much as I can tell, the option outd2 is always set to 1.
-!     This variable should be removed
-
+! GA: As much as I can tell, the option outd2 is always set to 1. This variable should be removed
 
 !Long print : includes detail of every part of the 2nd-order energy
  if(prtvol>=10)then
@@ -2256,15 +2260,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            write(iout,*)' '
            do ipert2=1,natom
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 dyew(1,idir1,ipert1,idir2,ipert2),&
-&                 dyew(2,idir1,ipert1,idir2,ipert2)
+                  dyew(1,idir1,ipert1,idir2,ipert2),&
+                  dyew(2,idir1,ipert1,idir2,ipert2)
                end if
              end do
            end do
@@ -2279,18 +2282,15 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            write(iout,*)' '
            do ipert2=1,natom
              do idir2=1,3
                if(rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  if(ipert1==ipert2)then
-                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                   dyfrlo(idir1,idir2,ipert2),zero
+                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,dyfrlo(idir1,idir2,ipert2),zero
                  else
-                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                   zero,zero
+                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,zero,zero
                  end if
                end if
              end do
@@ -2306,8 +2306,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            write(iout,*)' '
            do ipert2=1,natom
              do idir2=1,3
@@ -2315,14 +2314,13 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
                  if(ipert1==ipert2.or.dyfr_nondiag==1)then
                    if (dyfr_cplex==1) then
                      write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                     dyfrnl(1,idir1,idir2,ipert1,1+(ipert2-1)*dyfr_nondiag),zero
+                       dyfrnl(1,idir1,idir2,ipert1,1+(ipert2-1)*dyfr_nondiag),zero
                    else
                      write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                     dyfrnl(:,idir1,idir2,ipert1,1+(ipert2-1)*dyfr_nondiag)
+                       dyfrnl(:,idir1,idir2,ipert1,1+(ipert2-1)*dyfr_nondiag)
                    end if
                  else
-                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                   zero,zero
+                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,zero,zero
                  end if
                end if
              end do
@@ -2333,21 +2331,19 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
 
 !    Now the nonlinear xc core correction(1) part
      write(iout,*)' '
-     write(iout,*)' Frozen wf xc core (1) part',&
-&     ' of the dynamical matrix'
+     write(iout,*)' Frozen wf xc core (1) part',' of the dynamical matrix'
      write(iout,*)'    j1       j2             matrix element'
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            write(iout,*)' '
            do ipert2=1,natom
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 dyfrx1(1,idir1,ipert1,idir2,ipert2),&
-&                 dyfrx1(2,idir1,ipert1,idir2,ipert2)
+                  dyfrx1(1,idir1,ipert1,idir2,ipert2),&
+                  dyfrx1(2,idir1,ipert1,idir2,ipert2)
                end if
              end do
            end do
@@ -2357,24 +2353,20 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
 
 !    Now the nonlinear xc core correction(2) part
      write(iout,*)' '
-     write(iout,*)' Frozen wf xc core (2) part',&
-&     ' of the dynamical matrix'
+     write(iout,*)' Frozen wf xc core (2) part',' of the dynamical matrix'
      write(iout,*)'    j1       j2             matrix element'
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            write(iout,*)' '
            do ipert2=1,natom
              do idir2=1,3
                if(rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  if(ipert1==ipert2)then
-                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                   dyfrx2(idir1,idir2,ipert2),zero
+                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,dyfrx2(idir1,idir2,ipert2),zero
                  else
-                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                   zero,zero
+                   write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,zero,zero
                  end if
                end if
              end do
@@ -2391,15 +2383,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        write(iout,*)' dir pert dir pert     real part   imaginary part'
        do ipert1=1,natom
          do idir1=1,3
-           if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&           .or.   outd2==1                           )then
+           if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
              write(iout,*)' '
              do ipert2=1,natom
                do idir2=1,3
                  if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                    write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                   dyvdw(1,idir1,ipert1,idir2,ipert2),&
-&                   dyvdw(2,idir1,ipert1,idir2,ipert2)
+                     dyvdw(1,idir1,ipert1,idir2,ipert2),&
+                     dyvdw(2,idir1,ipert1,idir2,ipert2)
                  end if
                end do
              end do
@@ -2423,8 +2414,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        ii=1
        do ipert2=natom+3,natom+4
          do idir2=1,3
-           write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&           piezofrnl(ii,idir1),zero
+           write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,piezofrnl(ii,idir1),zero
            ii=ii+1
          end do
        end do
@@ -2442,8 +2432,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        do idir1=1,3
          write(iout,*)' '
          do idir2=1,3
-           write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&           becfrnl(idir2,ipert2,idir1),zero
+           write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,becfrnl(idir2,ipert2,idir1),zero
          end do
        end do
      end do
@@ -2459,16 +2448,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=natom+3,natom+4
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+3*(ipert1-natom-3)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 elteew(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,elteew(ii,jj),zero
                end if
              end do
            end do
@@ -2484,16 +2471,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+6+3*(ipert1-1)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 elteew(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,elteew(ii,jj),zero
                end if
              end do
            end do
@@ -2508,16 +2493,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=natom+3,natom+4
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+3*(ipert1-natom-3)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltfrloc(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2, eltfrloc(ii,jj),zero
                end if
              end do
            end do
@@ -2532,16 +2515,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+6+3*(ipert1-1)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltfrloc(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2, eltfrloc(ii,jj),zero
                end if
              end do
            end do
@@ -2556,16 +2537,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=natom+3,natom+4
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+3*(ipert1-natom-3)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltfrnl(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2, eltfrnl(ii,jj),zero
                end if
              end do
            end do
@@ -2580,16 +2559,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+6+3*(ipert1-1)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltfrnl(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,eltfrnl(ii,jj),zero
                end if
              end do
            end do
@@ -2604,16 +2581,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=natom+3,natom+4
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+3*(ipert1-natom-3)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltfrxc(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2, eltfrxc(ii,jj),zero
                end if
              end do
            end do
@@ -2628,16 +2603,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,natom
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+6+3*(ipert1-1)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltfrxc(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,eltfrxc(ii,jj),zero
                end if
              end do
            end do
@@ -2652,16 +2625,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=natom+3,natom+4
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+3*(ipert1-natom-3)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltfrkin(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,eltfrkin(ii,jj),zero
                end if
              end do
            end do
@@ -2676,16 +2647,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=natom+3,natom+4
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+3*(ipert1-natom-3)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltfrhar(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2, eltfrhar(ii,jj),zero
                end if
              end do
            end do
@@ -2700,16 +2669,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=natom+3,natom+4
        do idir1=1,3
-         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1)&
-&         .or.   outd2==1                           )then
+         if ( (rfpert(ipert1)==1.and.rfdir(idir1)==1) .or. outd2==1) then
            ii=idir1+3*(ipert1-natom-3)
            write(iout,*)' '
            do ipert2=natom+3,natom+4
              do idir2=1,3
                if (rfpert(ipert2)==1.and.rfdir(idir2)==1)then
                  jj=idir2+3*(ipert2-natom-3)
-                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 eltcore(ii,jj),zero
+                 write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,eltcore(ii,jj),zero
                end if
              end do
            end do
@@ -2902,14 +2869,14 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      write(iout,*)' dir pert dir pert     real part   imaginary part'
      do ipert1=1,mpert
        do idir1=1,3
-         if(rfpert(ipert1)==1.and.rfdir(idir1)==1)then
+         if(rfpert(ipert1)==1.and.rfdir(idir1)==1) then
            write(iout,*)' '
            do ipert2=1,mpert
              do idir2=1,3
-               if(rfpert(ipert2)==1.and.rfdir(idir2)==1)then
+               if(rfpert(ipert2)==1.and.rfdir(idir2)==1) then
                  write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
-&                 d2eig0(1,idir1,ipert1,idir2,ipert2),&
-&                 d2eig0(2,idir1,ipert1,idir2,ipert2)
+                  d2eig0(1,idir1,ipert1,idir2,ipert2),&
+                  d2eig0(2,idir1,ipert1,idir2,ipert2)
                end if
              end do
            end do
@@ -3509,7 +3476,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
 !scalars
  integer :: iband,iblok,idir,idir1,idir2,ii,ipert,ipert1,ipert2
  integer :: jj,nblok,selectz
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
@@ -3700,11 +3667,11 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
    if((berryopt==4 .or. berryopt==6 .or. berryopt==7 .or. berryopt==14 .or. berryopt==16 .or. berryopt==17 )  &
 &   .and. minval(abs(blkflg(:,natom+2,:,natom+2)))/=0)then   !!HONG  need to check for fixed D and E calculation
      if(minval(abs(blkflg(:,natom+2,:,natom+2)-1))/=0)then
-       write(message,'(5a)')&
+       write(msg,'(5a)')&
 &       '  In case of finite electric field, and electric field perturbation,',ch10,&
 &       '  the three directions for the perturbations must be treated.',ch10,&
 &       '  Action : set idir to 1 1 1, or forget about finite electric field.'
-       ABI_ERROR(message)
+       ABI_ERROR(msg)
      end if
      do ipert=1,mpert
        do idir=1,3

@@ -7,7 +7,7 @@
 !!  i.e. quantities expressed with <Phi_i|...|Phi_j> and/or <tild_Phi_i|...|tild_Phi_j>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2024 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2025 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,9 +26,11 @@ MODULE m_paw_onsite
  USE_MSG_HANDLING
  USE_MEMORY_PROFILING
 
+ use m_paw_atomorb, only : atomorb_type
  use m_pawrad,      only : pawrad_type, pawrad_deducer0, simp_gen, nderiv_gen
  use m_pawtab,      only : pawtab_type
  use m_paw_sphharm, only : setnabla_ylm
+
 
  implicit none
 
@@ -239,8 +241,7 @@ end subroutine pawnabla_init
 !!  Pawtab(ntypat) <type(pawtab_type>=PAW tabulated starting data:
 !!    %mesh_size=Dimension of radial mesh
 !!    %lmn_size=Number of (l,m,n) elements for the PAW basis
-!!  phi_cor(mesh_size,nphicor)=core wave-functions for the current type of atoms.
-!!  indlmn_cor(6,nlmn_core)= array giving l,m,n,lm,ln,s for i=lmn, for the core wave functions.
+!!  atm <type(paw_atomorb_type>= core tabulated data
 !!
 !! OUTPUT
 !!  See side effects
@@ -258,15 +259,13 @@ end subroutine pawnabla_init
 !!
 !! SOURCE
 
-subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,diracflag)
+subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,atm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpsang,ntypat
- integer,intent(in),optional :: diracflag
 !arrays
- integer,intent(in) :: indlmn_cor(:,:)
- real(dp),intent(in) :: phi_cor(:,:)
+ type(atomorb_type),intent(in) :: atm(ntypat)
  type(pawtab_type),target,intent(inout) :: pawtab(ntypat)
  type(pawrad_type),intent(in) :: pawrad(ntypat)
 
@@ -285,22 +284,12 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
 
 ! *************************************************************************
 
- mesh_size_cor=size(phi_cor,1)
- nln_cor=size(phi_cor,2)
+ do itypat=1,ntypat
+   if(atm(itypat)%nsppol==2) LIBPAW_ERROR('Work in progress')
+   lcmax=atm(itypat)%l_max
+   ltmax=max(lcmax,mpsang)
+ enddo
 
- dirac=.false.
- if(present(diracflag)) then
-    dirac=(diracflag==1)
-    if(diracflag==1.and.size(indlmn_cor,1)<8) then
-      msg='Wrong first dimension of indlmn_cor in pawnabla_core_init for diracrelativism!'
-      LIBPAW_BUG(msg)
-    endif
- endif
-
-!To be checked
- lmncmax=size(indlmn_cor,2) !Includes spinors if diracrel core wf are used
- lcmax=maxval(indlmn_cor(1,:))
- ltmax=max(lcmax+1,mpsang)
  LIBPAW_ALLOCATE(ang_phipphj,(ltmax**2,ltmax**2,8))
 
  if (ltmax>4)then
@@ -325,6 +314,10 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
  call setnabla_ylm(ang_phipphj,ltmax)
 
  do itypat=1,ntypat
+   dirac=atm(itypat)%dirac
+   mesh_size_cor=atm(itypat)%mesh_size
+   nln_cor=atm(itypat)%ln_size
+   lmncmax=atm(itypat)%lmn_size
 
 !  COMPUTE nabla_ij := <phi_i|nabla|phi_cor> for this type
    mesh_size=min(pawtab(itypat)%partialwave_mesh_size,pawrad(itypat)%mesh_size)
@@ -364,11 +357,11 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
 !      = \int (phi d/dr(phi_core) - phi phj_core/r) dr
 !    with Phi=phi/r and Phi_core=phi_core/r
    do jln=1,nln_cor
-     ff(1:mesh_size)=phi_cor(1:mesh_size,jln)
+     ff(1:mesh_size)=atm(itypat)%phi(1:mesh_size,jln,1)
      call nderiv_gen(dphi,ff,pawrad(itypat))
      do iln=1,nln
        ff(2:mesh_size)=pawtab(itypat)%phi(2:mesh_size,iln)*dphi(2:mesh_size) &
-&       -pawtab(itypat)%phi(2:mesh_size,iln)*phi_cor(2:mesh_size,jln)/rad(2:mesh_size)
+&       -pawtab(itypat)%phi(2:mesh_size,iln)*atm(itypat)%phi(2:mesh_size,jln,1)/rad(2:mesh_size)
        call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
        call simp_gen(intg,ff,pawrad(itypat))
        int1(iln,jln)=intg
@@ -379,7 +372,7 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
 !    with Phi=phi/r and Phi_core=phi_core/r
    do jln=1,nln_cor
      do iln=1,nln
-       ff(2:mesh_size)=(pawtab(itypat)%phi(2:mesh_size,iln)*phi_cor(2:mesh_size,jln))/rad(2:mesh_size)
+       ff(2:mesh_size)=(pawtab(itypat)%phi(2:mesh_size,iln)*atm(itypat)%phi(2:mesh_size,jln,1))/rad(2:mesh_size)
        call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
        call simp_gen(intg,ff,pawrad(itypat))
        int2(iln,jln)=intg
@@ -391,12 +384,12 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
 
 !    Integration of the radial part, Note unpacked loop
      do jlmn=1,lmncmax
-       jl=indlmn_cor(1,jlmn)
-       jm=indlmn_cor(2,jlmn)
+       jl=atm(itypat)%indlmn(1,jlmn)
+       jm=atm(itypat)%indlmn(2,jlmn)
 
-       sgnkappa=indlmn_cor(3,jlmn)
-       jmj=half*indlmn_cor(8,jlmn) ! 2mj is stored in indlmn_cor
-       js=indlmn_cor(6,jlmn)       ! 1 is up, 2 is down
+       sgnkappa=atm(itypat)%indlmn(3,jlmn)
+       jmj=half*atm(itypat)%indlmn(8,jlmn) ! 2mj is stored in indlmn_cor
+       js=atm(itypat)%indlmn(6,jlmn)       ! 1 is up, 2 is down
 
 !      Calculate spinor dependend coeffs
 !        (Clebsch-Gordan, I guess)
@@ -415,8 +408,8 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
          endif
        endif
 
-       jlm=indlmn_cor(4,jlmn)
-       jln=indlmn_cor(5,jlmn)
+       jlm=atm(itypat)%indlmn(4,jlmn)
+       jln=atm(itypat)%indlmn(5,jlmn)
 
        do ilmn=1,lmn_size
          ilm=indlmn(4,ilmn)
@@ -508,9 +501,9 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
 
 !    Integration of the radial part, Note unpacked loop
      do jlmn=1,lmncmax
-       jl=indlmn_cor(1,jlmn)
-       jlm=indlmn_cor(4,jlmn)
-       jln =indlmn_cor(5,jlmn)
+       jl=atm(itypat)%indlmn(1,jlmn)
+       jlm=atm(itypat)%indlmn(4,jlmn)
+       jln =atm(itypat)%indlmn(5,jlmn)
        do ilmn=1,lmn_size
          ilm=indlmn(4,ilmn)
          iln =indlmn(5,ilmn)
@@ -531,7 +524,6 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor,dir
      pawtab(itypat)%has_nabla=3
 
    end if ! Relativistic?
-
    LIBPAW_DEALLOCATE(ff)
    LIBPAW_DEALLOCATE(rad)
    LIBPAW_DEALLOCATE(int1)
@@ -546,6 +538,7 @@ end subroutine pawnabla_core_init
 !!***
 
 !----------------------------------------------------------------------
+
 
 end module m_paw_onsite
 !!***

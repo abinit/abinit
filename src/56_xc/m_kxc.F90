@@ -8,7 +8,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -396,11 +396,10 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  integer :: ifft,ikxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
  logical :: non_magnetic_xc
  real(dp),parameter :: gsqcut=1._dp
- real(dp) :: el_temp,enxc,rhocuttot,rhomin,vxcavg
+ real(dp) :: el_temp,bigexc,bigsxc,rhocuttot,rhomin,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
- real(dp) :: strsxc(6)
  real(dp) :: dum(0)
  real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcr(:,:),rhog(:,:),rhorcut(:,:),vhartree(:)
@@ -487,8 +486,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = 2 !See rhotoxc.f
 
    call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+   call rhotoxc(bigexc,bigsxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
+&   optionrhoxc,rhorcut,rprimd,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
 !  DEBUG
 !  fx for tests.
@@ -542,8 +541,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    optionrhoxc = -2 !See rhotoxc.f
 
    call hartre(1,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog,rprimd,dummyvgeo,vhartree)
-   call rhotoxc(enxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
-&   optionrhoxc,rhorcut,rprimd,strsxc,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
+   call rhotoxc(bigexc,bigsxc,kxcr,mpi_enreg,nfft,ngfft,dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
+&   optionrhoxc,rhorcut,rprimd,1,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartree)
 
    kxcr(:,2) = 0.5_dp*kxcr(:,2)
 
@@ -557,7 +556,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  end if
 
 !DEBUG
-!write(std_out,*) ' kxc_alda:  Exc  = ',enxc
+!write(std_out,*) ' kxc_alda:  Exc  = ',bigexc
+!write(std_out,*) ' kxc_alda:  Sxc  = ',bigsxc
 !write(std_out,*) ' kxc_alda: <Vxc> = ',vxcavg
 !ENDDEBUG
 
@@ -1000,12 +1000,12 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
  logical :: non_magnetic_xc
- real(dp) :: el_temp,enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
+ real(dp) :: el_temp,bigexc,bigsxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
  character(len=500) :: msg,fname
  type(xcdata_type) :: xcdata
  type(MPI_type) :: MPI_enreg_seq
 !arrays
- real(dp) :: qphon(3),strsxc(6),dum(0)
+ real(dp) :: qphon(3),dum(0)
  real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcpw_g(:,:),kxcr(:,:),phas(:,:,:)
  real(dp),allocatable :: rhog(:,:),vhartr(:),kxcpw_r(:,:),vxclda(:,:)
@@ -1042,6 +1042,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 
  if (ixc>=1.and.ixc<11) then ! LDA case
    nkxc= 2*min(nspden,2)-1   ! 1 or 3
+ elseif (ixc==51) then ! TLDA case, same as LDA above
+   nkxc= 2*min(nspden,2)-1
  else                        ! GGA case
    nkxc=12*min(nspden,2)-5   ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
@@ -1081,10 +1083,10 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft_tot,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
 
 !Compute the kernel.
- call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
+ call rhotoxc(bigexc,bigsxc,kxcr,MPI_enreg_seq,nfft_tot,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,rhor,Cryst%rprimd,&
-& strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
+& 1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
  ABI_FREE(rhog)
  ABI_FREE(vhartr)
@@ -1252,14 +1254,14 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
  integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
  logical :: non_magnetic_xc
- real(dp) :: el_temp,enxc,gsqcut,ucvol !,rs,Kx,Kc
+ real(dp) :: el_temp,bigexc,bigsxc,gsqcut,ucvol !,rs,Kx,Kc
  real(dp) :: vxcavg,kappa,abs_qpg_sq,abs_qpgp_sq
  real(dp) :: difx,dify,difz,inv_kappa_sq
  character(len=500) :: msg,fname
  type(MPI_type) :: MPI_enreg_seq
  type(xcdata_type) :: xcdata
 !arrays
- real(dp) :: qpg(3),qpgp(3),qphon(3),strsxc(6),q_point(3),dum(0)
+ real(dp) :: qpg(3),qpgp(3),qphon(3),q_point(3),dum(0)
  real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: kxcr(:,:)
  real(dp),allocatable :: rhog(:,:),vhartr(:),vxclda(:,:)
@@ -1313,6 +1315,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 
  if (ixc>=1.and.ixc<11) then      ! LDA case
    nkxc= 2*min(Dtset%nspden,2)-1  ! 1 or 3
+ elseif (ixc==51) then ! TLDA case, same as LDA above
+   nkxc= 2*min(Dtset%nspden,2)-1
  else                             ! GGA case
    nkxc=12*min(Dtset%nspden,2)-5  ! 7 or 19
    ABI_CHECK(dtset%xclevel==2,"Functional should be GGA")
@@ -1391,10 +1395,10 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  end if
 
  call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
- call rhotoxc(enxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
+ call rhotoxc(bigexc,bigsxc,kxcr,MPI_enreg_seq,nfft,ngfft,&
 & dum,0,dum,0,nkxc,nk3xc,non_magnetic_xc,&
 & n3xccc,option,my_rhor,Cryst%rprimd,&
-& strsxc,1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
+& 1,vxclda,vxcavg,xccc3d,xcdata,vhartr=vhartr)
 
 !Check for extreme (NaN) values
 !do ir=1,nfft

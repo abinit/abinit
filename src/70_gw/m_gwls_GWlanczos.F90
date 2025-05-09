@@ -6,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2025 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +18,6 @@
 #endif
 
 #include "abi_common.h"
-
 
 module m_gwls_GWlanczos
 !----------------------------------------------------------------------------------------------------
@@ -42,8 +41,6 @@ use m_pawang
 use m_errors
 
 use m_io_tools,         only : get_unit
-use m_paw_dmft,         only : paw_dmft_type
-use m_ebands,           only : ebands_init, ebands_free
 
 implicit none
 save

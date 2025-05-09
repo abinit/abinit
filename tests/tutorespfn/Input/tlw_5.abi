@@ -17,7 +17,7 @@ tlw_4o_DS5_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% exclude_builders = bob_gnu_13.2_openmp, scope_gnu_10.2_paral
+#%% exclude_builders = scope_gnu_10.2_paral, bob_gnu_13.2_openmp
 #%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% [files]
 #%% files_to_test =
@@ -27,8 +27,8 @@ tlw_4o_DS5_DDB
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
-#%% description =  
+#%% description =
 #%%   Input file for mrgddb
-#%%   Apparently, there is a (minor, erratic) problem with openmp (2 procs), for the echo of pseudopotential data in the tlw_5.ddb.out file 
+#%%   Apparently, there is a (minor, erratic) problem with openmp (2 procs), for the echo of pseudopotential data in the tlw_5.ddb.out file
 #%% topics = longwave
 #%%<END TEST_INFO>

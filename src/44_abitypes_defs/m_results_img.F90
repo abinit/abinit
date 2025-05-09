@@ -7,7 +7,7 @@
 !!  to store results from GS calculations for a given image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (MT)
+!! Copyright (C) 2011-2025 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1192,39 +1192,40 @@ end subroutine scatter_array_img
 !!                      (positions, forces, energy, ...)
 !!
 !! OUTPUT
+!!  acell(3,nimage)=length scales of primitive translations (bohr)
 !!  etotal(3,natom,nimage)=total energy of each image
 !!  fcart(3,natom,nimage)=cartesian forces in each image
-!!  rprimd(3,3,nimage)   =dimensional primitive translations for each image
+!!  rprim(3,3,nimage)=dimensionless primitive translations in real space
+!!  rprimd(3,3,nimage)=dimensional primitive translations for each image
+!!  strten(6,nimage)=stress tensor in cartesian coordinates
 !!  xcart(3,natom,nimage)=cartesian coordinates of atoms in each image
-!!  xred(3,natom,nimage) =reduced coordinates of atoms in each image
+!!  xred(3,natom,nimage)=reduced coordinates of atoms in each image
 !!
 !! SIDE EFFECTS
 !!
 !! SOURCE
 
-subroutine get_geometry_img(etotal,natom,nimage,results_img,fcart,rprimd,xcart,xred)
+subroutine get_geometry_img(results_img,etotal,natom,nimage,fcart,rprimd,strten,xcart,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nimage
 !arrays
  real(dp),intent(out) :: etotal(nimage),fcart(3,natom,nimage),rprimd(3,3,nimage)
- real(dp),intent(out) :: xcart(3,natom,nimage),xred(3,natom,nimage)
+ real(dp),intent(out) :: strten(6,nimage),xcart(3,natom,nimage),xred(3,natom,nimage)
  type(results_img_type),intent(in) :: results_img(nimage)
 !Local variables-------------------------------
 !scalars
  integer :: iimage
 !arrays
- real(dp) :: acell(3),rprim(3,3)
 
 !************************************************************************
 
  do iimage=1,nimage
-   acell(:)  =results_img(iimage)%acell(:)
-   rprim(:,:)=results_img(iimage)%rprim(:,:)
    xred (:,:,iimage)=results_img(iimage)%xred(:,:)
    fcart(:,:,iimage)=results_img(iimage)%results_gs%fcart(:,:)
-   call mkrdim(acell,rprim,rprimd(:,:,iimage))
+   strten(:,iimage)=results_img(iimage)%results_gs%strten(:)
+   call mkrdim(results_img(iimage)%acell(:),results_img(iimage)%rprim(:,:),rprimd(:,:,iimage))
    call xred2xcart(natom,rprimd(:,:,iimage),xcart(:,:,iimage),xred(:,:,iimage))
    etotal(iimage)=results_img(iimage)%results_gs%etotal
  end do

@@ -13,7 +13,7 @@ add_library(41_geometry STATIC
   m_symlist.F90
   m_symsg.F90
   m_symfind.F90
-  )
+)
 
 set_target_properties(41_geometry
   PROPERTIES

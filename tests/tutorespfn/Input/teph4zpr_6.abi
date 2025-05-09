@@ -53,9 +53,9 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_*,
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% test_chain =  teph4zpr_1.abi, teph4zpr_2.abi, teph4zpr_3.abi, teph4zpr_4.abi,
-#%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi
+#%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi, teph4zpr_9.abi
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =

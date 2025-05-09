@@ -6,7 +6,7 @@
 !! This module provides routines for the calculation of the dielectric constant (anaddb)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG,XW, MVeithen, EB)
+!!  Copyright (C) 1999-2025 ABINIT group (XG,XW, MVeithen, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,9 +27,7 @@ module m_ddb_diel
  use m_abicore
  use m_ddb
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_crystal,        only : crystal_t
@@ -240,7 +238,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
        endif ! mode decompo of epsilon
 
        ! write the relaxed ion dielectric tensor to the netcdf
-#ifdef HAVE_NETCDF
        if (ncid /= nctk_noid) then
          ncerr = nctk_def_arrays(ncid, [nctkarr_t("emacro_cart_rlx", "dp", &
          "number_of_cartesian_directions, number_of_cartesian_directions")],defmode=.True.)
@@ -248,7 +245,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
          NCF_CHECK(nctk_set_datamode(ncid))
          NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart_rlx"), dielt_rlx))
        end if
-#endif
 
 !    Frequency-dependent dielectric tensor case
      if(dieflag==1) then
@@ -578,7 +574,6 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
      end do
 
      ! write the oscillator strength to the netcdf
-#ifdef HAVE_NETCDF
      if (ncid /= nctk_noid) then
        ncerr = nctk_def_arrays(ncid, [nctkarr_t("oscillator_strength", "dp", &
        "complex, number_of_cartesian_directions, number_of_cartesian_directions, number_of_phonon_modes")], &
@@ -587,7 +582,6 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
        NCF_CHECK(nctk_set_datamode(ncid))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "oscillator_strength"), oscstr))
      end if
-#endif
    end if
 
    ABI_FREE(metacharacter)

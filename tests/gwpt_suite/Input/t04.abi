@@ -1,0 +1,75 @@
+ #gwpt_np_wpqbks 1 1 8 1 1 1
+
+# ZPR computation at the Gamma point for MgO.
+ nband 9
+ ecut 45.0
+ #prtvol 10
+
+ ngkpt 4 4 4
+ nshiftk 1
+ shiftk 0 0 0
+
+ # TODO: Should have a default value
+ elph2_imagden 0.1 eV
+
+##############################################
+####                 SECTION: EPH
+##############################################
+ optdriver 7              # Enter EPH driver
+ eph_task 17              # GWPT computation
+
+ getddb_filepath "diamond_eph_gwpt/out_DDB"
+ ddb_ngqpt 2 2 2          # The code expects to find in the DDB
+                          # all the IBZ q-points corresponding to a 4x4x4 q-mesh
+
+ ecuteps 1
+ ecutsigx 1
+ boxcutmin 1.1
+ tolwfr 1e-8
+
+ mdf_epsinf 12    # For model dielectric function
+ ppmodel 2
+
+ getdvdb_filepath "t01_DVDB"
+ getdrhodb_filepath "t02_DRHODB"
+ getwfk_filepath "t03o_WFK"     # 4x4x4 k-mesh with 70 bands
+ getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
+ getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
+
+ #gstore_kzone "bz"; gstore_qzone "ibz"
+ gstore_kzone "ibz"; gstore_qzone "bz"; gstore_kfilter "qprange"
+ gstore_gmode "atom"
+
+ # Disable output of phonon DOS and phonon bands
+ prtphdos 0
+ prtphbands 0
+
+##############################################
+####                 SECTION: Sigma_nk
+##############################################
+ zcut 0.01 eV
+
+# Read crystal structure from DEN.nc file
+ structure "abifile:diamond_eph_gwpt/gso_DEN.nc"
+
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"
+ pseudos "C.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi
+#%% [files]
+#%% use_git_submodule = diamond_eph_gwpt
+#%% files_to_test =
+#%%   t04.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = GWPT calculation
+#%%<END TEST_INFO>

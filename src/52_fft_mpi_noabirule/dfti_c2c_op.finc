@@ -1,25 +1,29 @@
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
- integer :: status 
+ integer :: status,arr(4)
  type(DFTI_DESCRIPTOR),pointer :: Desc1
 
 ! *************************************************************************
 
  status = DftiCreateDescriptor(Desc1, DEV_DFTI_PRECISION, DFTI_COMPLEX, 3, (/nx ,ny ,nz/) )
  DFTI_CHECK(status)
-                                                                                     
+
  status = DftiSetValue(Desc1, DFTI_NUMBER_OF_TRANSFORMS, ndat)
  status = DftiSetValue(Desc1, DFTI_INPUT_DISTANCE,  ldx*ldy*ldz)
- status = DftiSetValue(Desc1, DFTI_INPUT_STRIDES,  (/0,1,ldx,ldx*ldy/) )
+ arr(1) = 0
+ arr(2) = 1
+ arr(3) = ldx
+ arr(4) = ldx*ldy
+ status = DftiSetValue(Desc1, DFTI_INPUT_STRIDES,  arr )
  status = DftiSetValue(Desc1, DFTI_OUTPUT_DISTANCE,  ldx*ldy*ldz)
- status = DftiSetValue(Desc1, DFTI_OUTPUT_STRIDES,  (/0,1,ldx,ldx*ldy/) )
+ status = DftiSetValue(Desc1, DFTI_OUTPUT_STRIDES,  arr )
  status = DftiSetValue(Desc1, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
 
  if (isign == -1 .and. iscale /= 0) then
    status = DftiSetValue(Desc1, DFTI_FORWARD_SCALE, one/DBLE(nx*ny*nz) )
  end if
-                                                                                     
+
  status = DftiCommitDescriptor(Desc1)
  DFTI_CHECK(status)
 
@@ -27,7 +31,7 @@
    status = DftiComputeForward(Desc1, ff, gg)
  else if (isign==+1) then
    status = DftiComputeBackward(Desc1, ff, gg)
- else 
+ else
    ABI_ERROR("Wrong isign")
  end if
  DFTI_CHECK(status)
@@ -35,7 +39,7 @@
  status = DftiFreeDescriptor(Desc1)
  DFTI_CHECK(status)
 
-#else 
+#else
  ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign/))
  ABI_UNUSED(ff)

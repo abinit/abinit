@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (AL)
+!!  Copyright (C) 2014-2025 ABINIT group (AL)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,7 +124,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  real(dp) :: resid_vec(2, npw*nspinor)
  logical :: has_fock,paw
  integer :: shift, shift_cg_loadbalanced
- integer :: iband, iline, ispinor
+ integer :: iband, ideg, ispinor
  integer :: sij_opt, cpopt
  real(dp) :: eval, tsec(2)
  integer :: tim_getghc = 5, ierr
@@ -132,10 +132,10 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer, allocatable :: index_wavef_band(:)
  real(dp) :: maxeig, mineig
  real(dp), allocatable :: resids_filter(:), residvec_filter(:,:)
- integer, allocatable :: nline_bands(:)
+ integer, allocatable :: ndeg_filter_bands(:)
  integer :: iactive, nactive
  real(dp) :: ampfactor
- integer :: nline_max, nline_decrease, nline_tolwfr
+ integer :: ndeg_filter_max, ndeg_filter_decrease, ndeg_filter_tolwfr
  ! real(dp) :: load_imbalance
  integer :: mcg
  real(dp) :: dprod_r, dprod_i
@@ -144,7 +144,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer :: sdisplsloc(mpi_enreg%nproc_band), sendcountsloc(mpi_enreg%nproc_band)
  integer :: ikpt_this_proc, npw_filter, nband_filter
  type(pawcprj_type), allocatable :: cwaveprj(:,:), cwaveprj_next(:,:), cwaveprj_prev(:,:)
- ! integer :: nline_total
+ ! integer :: ndeg_filter_total
 
  ! timers
  integer, parameter :: timer_chebfi = 1600, timer_alltoall = 1601, timer_apply_inv_ovl = 1602, timer_rotation = 1603
@@ -287,7 +287,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  call timab(timer_update_eigen, 1, tsec)
  ABI_MALLOC(resids_filter, (nband_filter))
  ABI_MALLOC(residvec_filter, (2, npw_filter*nspinor))
- ABI_MALLOC(nline_bands, (nband_filter))
+ ABI_MALLOC(ndeg_filter_bands, (nband_filter))
  do iband=1, nband_filter
    shift = npw_filter*nspinor*(iband-1)
    call dotprod_g(eig(iband),dprod_i,gs_hamk%istwf_k,npw_filter*nspinor,1,ghc_filter(:, shift+1:shift+npw_filter*nspinor),&
@@ -313,29 +313,28 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  filter_low = maxeig
  call timab(timer_update_eigen, 2, tsec)
 
- ! Decide how many iterations per band are needed
+ ! Decide which polynomial filter degree per band is needed
  ! don't go above this, or face bad conditioning of the Gram matrix.
- nline_max = cheb_oracle(mineig, filter_low, dtset%ecut, 1e-16_dp, 40)
- ! if(mpi_enreg%me == 0) write(0, *) nline_max
+ ndeg_filter_max = cheb_oracle(mineig, filter_low, dtset%ecut, 1e-16_dp, 40)
  do iband=1, nband_filter
-   ! nline necessary to converge to tolwfr
-   nline_tolwfr = cheb_oracle(eig(iband), filter_low, dtset%ecut, dtset%tolwfr_diago / resids_filter(iband), dtset%nline)
-   ! nline necessary to decrease residual by a constant factor
-   nline_decrease = cheb_oracle(eig(iband), filter_low, dtset%ecut, 0.1_dp, dtset%nline)
+   ! Filter degree necessary to converge to tolwfr
+   ndeg_filter_tolwfr = cheb_oracle(eig(iband), filter_low, dtset%ecut, dtset%tolwfr_diago / resids_filter(iband), dtset%mdeg_filter)
+   ! Filter degree necessary to decrease residual by a constant factor
+   ndeg_filter_decrease = cheb_oracle(eig(iband), filter_low, dtset%ecut, 0.1_dp, dtset%mdeg_filter)
 
-   nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, dtset%nline), 1)
-   nline_bands(iband) = dtset%nline ! fiddle with this to use locking
+   ndeg_filter_bands(iband) = MAX(MIN(ndeg_filter_tolwfr, ndeg_filter_decrease, ndeg_filter_max, dtset%mdeg_filter), 1)
+   ndeg_filter_bands(iband) = dtset%mdeg_filter ! fiddle with this to use locking
  end do
 
 
  !!!!! Uncomment for diagnostics
- ! nline_total = SUM(nline_bands)
- ! call xmpi_sum(nline_total, mpi_enreg%comm_band, ierr)
- ! load_imbalance = (SUM(nline_bands) - REAL(nline_total)/REAL(mpi_enreg%nproc_band)) / &
- ! &                (REAL(nline_total)/REAL(mpi_enreg%nproc_band))
+ ! ndeg_filter_total = SUM(ndeg_filter_bands)
+ ! call xmpi_sum(ndeg_filter_total, mpi_enreg%comm_band, ierr)
+ ! load_imbalance = (SUM(ndeg_filter_bands) - REAL(ndeg_filter_total)/REAL(mpi_enreg%nproc_band)) / &
+ ! &                (REAL(ndeg_filter_total)/REAL(mpi_enreg%nproc_band))
  ! call xmax_mpi(load_imbalance, mpi_enreg%comm_band, ierr)
 
- ! write(message, *) 'Mean nline', REAL(nline_total)/REAL(nband), 'max imbalance (%)', load_imbalance*100
+ ! write(message, *) 'Mean ndeg_filter', REAL(ndeg_filter_total)/REAL(nband), 'max imbalance (%)', load_imbalance*100
  ! call wrtout(std_out,message,'COLL')
 
  ABI_FREE(resids_filter)
@@ -344,13 +343,13 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  !======================================================================================================
  ! Chebyshev polynomial application
  !======================================================================================================
- ! Filter by a chebyshev polynomial of degree nline
- do iline=1,dtset%nline
+ ! Filter by a chebyshev polynomial of max. degree mdeg_filter
+ do ideg=1,dtset%mdeg_filter
    ! Filter only on [iactive, iactive+nactive-1]
    iactive = nband_filter
    do iband = 1, nband_filter
-     ! does iband need an iteration?
-     if (nline_bands(iband) >= iline) then
+     ! does iband need a higher degree for polynomila filter?
+     if (ndeg_filter_bands(iband) >= ideg) then
        iactive = iband
        exit
      end if
@@ -364,7 +363,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    filter_center = (dtset%ecut+filter_low)/2
    filter_radius = (dtset%ecut-filter_low)/2
 
-   ! write(message, *) 'Applying invovl, iteration', iline
+   ! write(message, *) 'Applying invovl, iteration', ideg
    ! call wrtout(std_out,message,'COLL')
 
    ! If paw, have to apply S^-1
@@ -378,7 +377,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    end if
 
    ! Chebyshev iteration: UPDATE cg
-   if(iline == 1) then
+   if(ideg == 1) then
      cg_filter_next(:,shift:) = one/filter_radius * (gsm1hc_filter(:,shift:) - filter_center*cg_filter(:,shift:))
    else
      cg_filter_next(:,shift:) = two/filter_radius * (gsm1hc_filter(:,shift:) - filter_center*cg_filter(:,shift:)) &
@@ -386,7 +385,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    end if
    ! Update gsc and cwaveprj
    if(paw) then
-     if(iline == 1) then
+     if(ideg == 1) then
        gsc_filter_next(:,shift:) = one/filter_radius * (ghc_filter(:,shift:) - filter_center*gsc_filter(:,shift:))
        !cwaveprj_next = one/filter_radius * (cwaveprj_next - filter_center*cwaveprj)
        call pawcprj_axpby(-filter_center/filter_radius, one/filter_radius,cwaveprj(:,iactive:),cwaveprj_next(:,iactive:))
@@ -423,7 +422,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
      cpopt = -1
    end if
 
-   write(message, *) 'Getghc, iteration', iline
+   write(message, *) 'Getghc, degree of polynom', ideg
    call wrtout(std_out,message,'COLL')
 
    call timab(timer_getghc, 1, tsec)
@@ -441,11 +440,11 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    mpi_enreg%bandpp = nband_filter
 
    call timab(timer_getghc, 2, tsec)
- end do ! end loop on nline
+ end do ! end loop on ideg
 
  ! normalize according to the previously computed rayleigh quotients (inaccurate, but cheap)
  do iband = 1, nband_filter
-   ampfactor = cheb_poly(eig(iband), nline_bands(iband), filter_low, dtset%ecut)
+   ampfactor = cheb_poly(eig(iband), ndeg_filter_bands(iband), filter_low, dtset%ecut)
    if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 ! just in case, avoid amplifying too much
    shift = npw_filter*nspinor*(iband-1)
    cg_filter(:, shift+1:shift+npw_filter*nspinor) = cg_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
@@ -467,7 +466,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    ABI_FREE(cwaveprj_next)
    ABI_FREE(cwaveprj_prev)
  end if
- ABI_FREE(nline_bands)
+ ABI_FREE(ndeg_filter_bands)
  ABI_FREE(cg_filter_next)
  ABI_FREE(cg_filter_prev)
  ABI_FREE(gsc_filter_prev)

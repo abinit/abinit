@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group ()
+!!  Copyright (C) 2008-2025 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,7 +100,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2025 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -683,7 +683,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  Exchange-correlation
 
    call echo_xc_name(dtset%ixc)
-
    if (dtset%ixc<0) then
      el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
      call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)

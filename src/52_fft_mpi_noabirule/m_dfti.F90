@@ -6,7 +6,7 @@
 !!  This module provides wrappers for the MKL DFTI routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG)
+!! Copyright (C) 2009-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1780,8 +1780,8 @@ subroutine dfti_r2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
- integer :: status,nhp,padx,i1,i2,i3,igp,igf,imgf,ii
- integer :: i1inv,i2inv,i3inv,idat,padatf
+ integer :: status,nhp,padx,i1,i2,i3,igp,igf,imgf,ii,arr3(3)
+ integer :: i1inv,i2inv,i3inv,idat,padatf,arr(4)
  type(DFTI_DESCRIPTOR),pointer :: Desc
  type(C_PTR) :: cptr
 !arrays
@@ -1795,14 +1795,25 @@ subroutine dfti_r2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 
  call dfti_alloc_complex(nhp*ndat,cptr,gg_hp)
 
- status = DftiCreateDescriptor(Desc, DFTI_DOUBLE, DFTI_REAL, 3, (/nx,ny,nz/) )
+ arr3(1) = nx
+ arr3(2) = ny
+ arr3(3) = nz
+ status = DftiCreateDescriptor(Desc, DFTI_DOUBLE, DFTI_REAL, 3, arr3 )
  DFTI_CHECK(status)
 
  status = DftiSetValue(Desc, DFTI_CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX)
  status = DftiSetValue(Desc, DFTI_PLACEMENT, DFTI_NOT_INPLACE )
- status = DftiSetValue(Desc, DFTI_INPUT_STRIDES,  (/0, 1, ldx,  ldx*ldy/))
+ arr(1) = 0
+ arr(2) = 1
+ arr(3) = ldx
+ arr(4) = ldx*ldy
+ status = DftiSetValue(Desc, DFTI_INPUT_STRIDES,  arr)
  status = DftiSetValue(Desc, DFTI_INPUT_DISTANCE, ldx*ldy*ldz)
- status = DftiSetValue(Desc, DFTI_OUTPUT_STRIDES, (/0, 1, padx, padx*ny/))
+ arr(1) = 0
+ arr(2) = 1
+ arr(3) = padx
+ arr(4) = padx*ny
+ status = DftiSetValue(Desc, DFTI_OUTPUT_STRIDES, arr)
  status = DftiSetValue(Desc, DFTI_OUTPUT_DISTANCE, nhp)
  status = DftiSetValue(Desc, DFTI_NUMBER_OF_TRANSFORMS, ndat)
  status = DftiSetValue(Desc, DFTI_FORWARD_SCALE, one / DBLE(nx*ny*nz) )
@@ -1956,7 +1967,7 @@ subroutine dfti_c2r_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
- integer :: status,nhp,padx,i2,i3,igp,igf,idat,padatf,padatp,ii
+ integer :: status,nhp,padx,i2,i3,igp,igf,idat,padatf,padatp,ii,arr(4),arr3(3)
  type(DFTI_DESCRIPTOR),pointer :: Desc
  type(C_PTR) :: cptr
 !arrays
@@ -1991,14 +2002,25 @@ subroutine dfti_c2r_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
    end do
  end do
 
- status = DftiCreateDescriptor(Desc, DFTI_DOUBLE, DFTI_REAL, 3, (/nx,ny,nz/) )
+ arr3(1) = nx
+ arr3(2) = ny
+ arr3(3) = nz
+ status = DftiCreateDescriptor(Desc, DFTI_DOUBLE, DFTI_REAL, 3, arr3 )
  DFTI_CHECK(status)
 
  status = DftiSetValue(Desc, DFTI_CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX)
  status = DftiSetValue(Desc, DFTI_PLACEMENT, DFTI_NOT_INPLACE )
- status = DftiSetValue(Desc, DFTI_INPUT_STRIDES, (/0, 1, padx, padx*ny/))
+ arr(1) = 0
+ arr(2) = 1
+ arr(3) = padx
+ arr(4) = padx*ny
+ status = DftiSetValue(Desc, DFTI_INPUT_STRIDES, arr)
  status = DftiSetValue(Desc, DFTI_INPUT_DISTANCE, nhp)
- status = DftiSetValue(Desc, DFTI_OUTPUT_STRIDES, (/0, 1, ldx, ldx*ldy/))
+ arr(1) = 0
+ arr(2) = 1
+ arr(3) = ldx
+ arr(4) = ldx*ldy
+ status = DftiSetValue(Desc, DFTI_OUTPUT_STRIDES, arr)
  status = DftiSetValue(Desc, DFTI_OUTPUT_DISTANCE, ldx*ldy*ldz)
  status = DftiSetValue(Desc, DFTI_NUMBER_OF_TRANSFORMS, ndat)
  DFTI_CHECK(status)
