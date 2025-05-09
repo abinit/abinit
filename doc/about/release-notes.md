@@ -198,7 +198,66 @@ By M. Sarraute, with help from L. Baguet and M. Torrent (MR 1120, 1123, 1125, 11
 
 
 
-**B.9** New capabilities of aTDEP
+**B.9** aTDEP : Command-Line Interface, file format, and compatibility with Abipy.
+
+atdep tests and timing
+New atdep test for initial atoms translation to the same unit cell.
+New atdep test for rotation of the crystal to the conventional orientation.
+Add final summary YAML block at the end of atdep standard output.
+Fix length of file names for some atdep outputs.
+MR 1155
+
+aTDEP: Remove the exclusions in the input files of the atdep test series
+Make regularization in the Moore-Penrose inversion to avoid numerical issues
+Some values are rounded to ensure identical output displays
+Replace int() by nint() to fix the precision on all the bots.
+MR 1145
+
+atdep CLI and file format 
+New syntax for running atdep
+
+One can specify the input file as a command line argument, e.g.
+atdep run.abi
+Introduce 3 new input variables to replace the files file:
+output_file
+outdata_prefix
+indata_prefix
+runtests.py will invoke atdep with CLI.
+
+atdep io name convention
+
+Align the convention for file names in atdep in accordance
+with other parts of the code.
+Single underscore after indata_prefix and after outdata_prefix.
+Use standard output instead of forcing the name 'atdep.log'.
+
+Overhaul of the atdep file format
+
+Free format like abinit.
+Can give input variables in any order, spread them over several lines, etc.
+
+
+Minor changes in the output format
+Update tests refs accordingly.
+
+
+Other new input variables
+
+
+debug_mode to replace the old way of activating debug mode
+special_qpt so that variable bzpath is no longer of mixed type (int + str)
+MR1117
+
+
+Added znucl@atdep in variables documentation. MR1113
+
+
+atdep flexibility  MR1112
+
+The atdep utility now outputs a DDB file.
+Add the optional variable znucl in atdep so that it is included in the output DDB.
+The test atdep/t38 compares the output DDB against a reference.   
+MR1105.
 
 
 By G. Antonius and F. Bottin (MR 1105, 1112, 1113, 1117, 1145, 1155)
