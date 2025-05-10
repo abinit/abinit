@@ -230,10 +230,10 @@ See [[test:v10_83]].
 By Q. Delacroix and M. Torrent (MR1149)
 
 
-**B.11** Dynamical quadrupoles for standard pesudopotentials (with non-linear XC core correction).
+**B.11** Dynamical quadrupoles for standard pseudopotentials (with non-linear XC core correction).
 
-Previously, dynamical quadrupoles could be computed with norm-conserving pseudopotentials without non-linear XC core correction.
-However, all modern pseudopotentials includes this feature (e.g. pseud-dojo).
+Previously, dynamical quadrupoles could be computed only using norm-conserving pseudopotentials without non-linear XC core correction.
+However, the best pseudopotentials include this feature (e.g. pseudo-dojo).
 This implementation has been done.
 
 By M. Royo (MR1154).
@@ -264,35 +264,123 @@ This needed some modifications to the testbot.py script to handle a few more opt
 By G. Petretto, with tests by JM Beuken (MR1169)
 
 
+**C.2** Improve autotools & CMake build systems (GPU markers, TRIQS, levmar) 
+
+By M. Torrent (MR1151)
+
+**C.3** Add documentation on how to debug and profile MPI jobs
+
+In the developer HowTo, added
+
+* New guide on how to use NVTX markers on CPU (devtool recently enabled since !1151 (merged)) and profile MPI jobs using NVIDIA Nsight.
+* New tip on the gdb debugger section on how to use gdb for MPI jobs.
+
+By I. Lygatsika (MR1158)
+
+**C.4** Change HDF5 detection when using "with_hdf5=path/to/hdf5". Same for netcdf and netcdf-fortran
+
+The situation was the following :
+
+When giving a path in the ac9 file ("with_hdf5=path/to/hdf5"), the build system kind of ignores the command line if some environment variables are found (HDF5_CPPFLAGS,HDF5_CFLAGS,HDF5_FFLAGS,HDF5_FCFLAGS,HDF5_LDFLAGS,HDF5_LIBS). In that case the build system uses only the environment variables, whatever the path given in the ac9 file. This feature leads to confusing situations, especially when environment variables are set by the system, not the developer himself.
+
+The new policy is the following :
+
+The build system follows the command line "with_hdf5=path/to/hdf5", whatever the context. If some environment variables are found, a warning is printed and the developer is advised to set "with_hdf5=yes" if he or she wants to use environment variables.
+
+The same change is done for netcdf and netcdf-fortran.
+In addition, for netcdf (netcdf-fortran), fcflags and libs are filled with the information given by nc-config (nf-config), which is a binary found in "path/to/netcdf/bin/".
+This merge improves hdf5 and netcdf detection on our supercomputers, and works on the testfarm.
+
+**C.5** Add netcdf_fortran as dependency for 42_parser and 68_dmft   
+The fortran file in 42_parser and 68_dmft both have "use netcdf"
+but netcdf_fortran is not marked as dependency which does not seem consistent.
+
+By O. Mattelaer (MR1140)
+
+**C.6** Intel debug
+
+Corrections to improve the use of debug options from the intel compiler (still 2020 version) :
+
+At first there were crashes at compiling time : the compiler does not like operations on arrays inside a matmul call
+then I removed tons of warnings of temporary arrays, sometimes allocating explicitly an array (when the subarray is not contiguous, or very small), sometimes using a pointer (when it is contiguous). There are still many warnings, but for GS computations with lobpcg or chebfi and PAW pseudos the amount of warnings is limited, so one can run big computations without generating gigabytes of output every minute.
+
+The debug options used are : -traceback -check all -check uninit -ftrapuv -debug all -warn declarations
+All these changes do not affect the performances at all.
+
+By L. Baguet (MR1139)
+
+**C.7** OneAPI
+Adding mpiifx and mpiicx before mpiifort and mpiicc in order to better support the new versions of oneAPI.
+
+By Hsiaoyi Tsai (MR1114)
+
 * * *
 
-### **D.**  Other developments (possibly not yet finalized), other new tests, new input variables, new tutorial.
+### **D.**  Other developments (possibly not yet finalized), other new tests, new input variables, new tutorials.
+
+**D.1** Various improvements to Conducti in PAW.
+Among others, the code can now handle different atomic types in the unit cell and compute the reflectivity at any angle.
+A complete userguide was also written and some bugs were fixed.
+
+By J. Boust (MR1152)
+
+
+**D.2** Improvements and bug fixes in the implementation of [[cprj_in_memory]]
+
+* Fixed a  memory issue in xg_tools for systems with high number of plane waves (solve the problem presented in merge !1058 (merged))
+* Some mpi communications outside the diago were too long for systems with nsppol=2, now it's fine
+
+As a consequence of the first point, xg_tools now uses OpenMP "collapse" directive when appropriate (as discussed with @torrent).
+
+Other minor corrections :
+
+* Prediction of memory footprint for chebfi with gemm_nonlop is now activated only if gemm_nonlop_use_gemm is activated
+* Timing of mkinvovl in vtorho was producing negative values of "other" timing in vtorho, so it is suppressed
+* Correction to reduce the numerical noise on stress and forces when comparing PAW calculations done with different compilers and/or different machines.
+* Change the design in xg_nonlop, which solves several issues :
+no more warnings "temporary array was created" for some cases (seen on ubuntu and the testfarm), and
+no more crash for other (rare) cases.
+* Also set cprj_in_memory to 0 if optdriver is not GS.
+
+By L. Baguet (MR1067, 1108, 1133)
+
+**D.3** Dilatmx with chebfi or lobpcg
+Change nbdbuf for all testcases with chebfi2 to clearly show that band residuals of occupied bands are as good as with lobpcg.
+
+By L. Baguet (MR1122)
+
+**D.4** Math operation beautification (from Abidev24 Hackathon)
+The goal was mainly to improve the readability of the code through the use of Fortran intrinsic math functions and vectorization capabilities.
+
+By M. Mignolet, F. Gomez-Ortiz and I. Lygatsika (MR1083)
+
 
 
 * * *
 
 ### **E.**  Bug fixes, not yet mentioned in the previous sections of these release notes.
 
-**E.1** Fix bugs in the recognition of symmetries (trigonal and hexagonal groups).
+**E.1** The [[prtevk]] variable was not read from input file. Now fixed.
 
-Work based on a user's report of a Wyckoff position error in space groups 151 and 153.
-Update symsghexa and update relevant tests. Provide a new [[test:v10_02]] that tests all Wyckoff positions in groups 143-167, the trigonal groups.
-See also [[test:v10_40]] and [[test:v3_98]].
-By J.Zwanziger and M. Verstraete (MR1019, MR1025)
+By M. Torrent (MR1141)
 
 
-**E.2** Fix an error when using ABI_GPU_LEGACY with xg_tools ([[wfoptalg]]=114 or 111).
+**E.2** Add netcdf_fortran as dependency for 42_parser and 68_dmft 
+The fortran file in 42_parser and 68_dmft both have "use netcdf"
+but netcdf_fortran is not marked as dependency which does not seem consistent.
 
-By L. Baguet (MR988)
+By O. Mattelaer (MR1140)
+
+**E.3** The syntax for $(<.current_version) might not work properly in some older versions of sh, making $(cat .current_version) a more stable alternative.
+
+By Hsiaoyi Tsai (MR1114)
 
 
-**E.3** Fix: velocity was not read from hist file with [[restartxf]].
+**E.4** Using libyaml.a instead -lyaml if bigdft using internal yaml 
 
-By He Xu (MR991)
+In fallbacks, bigdft will install its internal yaml library if the system does not have the yaml library. However, this is not shown in the dynamic linking during the execution of abinit; using static linking can avoid the issue of missing libraries.
 
-**E.4** Multibinit fixes: multibinit spin monte carlo did not run; multibinit did not read more than one single-ion anisotropy from xml file.
-
-By He Xu (MR992)
+By Hsiaoyi Tsai (MR1138)
 
 **E.19** Miscellaneous bug fixes and cleaning
 
