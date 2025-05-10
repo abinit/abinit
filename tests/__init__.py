@@ -159,7 +159,7 @@ _tsuite_dirs = [
     "hpc_gpu_omp",
     "gpu_omp",
     "gpu_kokkos",
-    "rttddft",
+    "rttddft_suite",
     "seq",
     "tutoatdep",
     "tutomultibinit",
