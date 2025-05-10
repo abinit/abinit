@@ -43,4 +43,8 @@ inp_files = [
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
     "t83.abi" ,  # Test variable cell nudged elastic band method
+#   "t104.abi" ,  # description to be provided
+#   "t105.abi" ,  # description to be provided
+#   "t106.abi" ,  # description to be provided
+#   "t107.abi" ,  # description to be provided
 ]
