@@ -286,7 +286,7 @@ By M. Royo (MR1154).
 
 For the GWR, use [[optdriver]]=6, and specify [[gwr_task]]. 
 
-See [[test:gwr1_1]] to [[test:gwr1_5]].
+See [[test:gwr_1]] to [[test:gwr_5]].
 
 By M. Giantomassi (MR1147, MR1154) 
 
@@ -294,9 +294,11 @@ By M. Giantomassi (MR1147, MR1154)
 **B.14** Support for entropy for thermal exchange-correlation functionals. 
 
 At finite temperature, the exchange-correlation free energy is defined as:
-F_\mathrm{xc} = E_\mathrm{xc} - TS_\mathrm{xc}.
-ABINIT was initially designed for zero-temperature exchange-correlation (xc) functionals, where S_\mathrm{xc} \equiv 0 and F_\mathrm{xc} \equiv E_\mathrm{xc}. However, this is not the case for finite-temperature xc functionals.
-To obtain the correct total internal energy and total entropy, both needed for accurate equation-of-state data, S_\mathrm{xc} must be accessible when summing energies after the SCF cycle. Otherwise, only properties derived from the free energy, such as stresses, pressure, and forces, will be correctly computed. This implementation ensures that S_\mathrm{xc} is properly accounted for.
+$F_\mathrm{xc} = E_\mathrm{xc} - TS_\mathrm{xc}$.
+
+ABINIT was initially designed for zero-temperature exchange-correlation (xc) functionals, where $S_\mathrm{xc} \equiv 0$ and $F_\mathrm{xc} \equiv E_\mathrm{xc}$. However, this is not the case for finite-temperature xc functionals.
+To obtain the correct total internal energy and total entropy, both needed for accurate equation-of-state data, $S_\mathrm{xc}$ must be accessible when summing energies after the SCF cycle. 
+Otherwise, only properties derived from the free energy, such as stresses, pressure, and forces, will be correctly computed. This implementation ensures that $S_\mathrm{xc}$ is properly accounted for.
 
 In a previous release, ABINIT was adapted to communicate the electronic temperature to LibXC. However, the issue is that while LibXC provides the exchange-correlation free energy, it does not yet return the entropy contribution.
 We have implemented native exchange-correlation free energy functionals to ensure accurate equation-of-state data.
@@ -319,7 +321,7 @@ By A. Blanchet (MR1121, MR1135).
 
 The [[mdeg_filter]] input variable for spectrum filtering algorithms has been defined, for spectrum filtering algorithms.
 Moreover, it can be automatically  computed:
-[[chebfi_oracle]], [[oracle_factor]] and [[oracle_min_occ]] can be used to activate and control the 
+[[chebfi_oracle]], [[oracle_factor]] and oracle_min_occ (TO BE DOCUMENTED) can be used to activate and control the 
 computation of [[mdeg_filter]] parameter from the residuals. 
 
 See [[test:10_7]] to [[test:10_10]] and [[test:paral_34]].
