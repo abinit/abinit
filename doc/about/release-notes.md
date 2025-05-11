@@ -330,6 +330,34 @@ The timing in chebfi has been corrected.
 By L. Baguet (MR1103) and M. Torrent (MR1098)
 
 
+**B.16** Abipy : Automated computation of luminescence spectra.
+
+A set of Python modules integrated into the AbiPy framework now facilitates the automated computation of phonon-resolved luminescence spectra for defects in in-
+organic solids.  The workflow automates key steps in a classical computational process, from the initial ∆SCF DFT cal-
+culations with constrained occupations to simulate the excited state, to the generation of defect phonon modes
+in large supercells, and finally the calculation of luminescence spectra based on Huang-Rhys theory, using
+the generating function formalism.
+
+The workflow is available in the GitHub abipy repo. See for example https://abinit.github.io/abipy/flow_gallery/run_lumi_Eu_doped_SLA.html, 
+and https://abinit.github.io/abipy/flow_gallery/run_lumi_NV_center.html.
+
+By J. Bouquiaux, with help from M. Giantomassi (see the forthcoming ABINIT2025 paper and a forthcoming JOSS paper).
+
+
+**B.17** Abipy : Automated computation of thermal expansion (volumetric as well as anisotropic)
+
+Recent developments in AbiPy have introduced Python modules and workflows designed to enhance the
+efficiency and applicability of the Quasi-Harmonic Approximation (QHA) for materials with diverse crystallo-
+graphic symmetries. These advancements focus on optimizing the computation of thermal expansion by inte-
+grating methods such as the Zero Static Internal Stress Approximation (ZSISA) and its volume-constrained vari-
+ant, v-ZSISA.
+
+The workflow is available in the Github abipy repo. See for example
+https://abinit.github.io/abipy/flow_gallery/run_qha_vzsisa.html .
+
+By S. Rostami, with help from M. Giantomassi and X. Gonze (see forthcoming ABINIT2025 paper).
+
+
 * * *
 
 
