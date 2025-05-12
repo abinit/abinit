@@ -148,7 +148,8 @@ contains
  ABI_MALLOC(zfield_tr,((natom+5)*3,ndim))
 
  ABI_MALLOC(ddb%val_fs,(2,ddb%msize,ddb%nblok))
- if (mpopt==2) ABI_MALLOC(ddb%val_rs,(2,ddb%msize,ddb%nblok))
+! if (mpopt==2) ABI_MALLOC(ddb%val_rs,(2,ddb%msize,ddb%nblok))
+ ABI_MALLOC(ddb%val_rs,(2,ddb%msize,ddb%nblok))
 
  ABI_MALLOC(ifcmat,(3*natom,3*natom))
  ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
@@ -588,7 +589,6 @@ contains
  ABI_FREE(work)
 
  !Write the results in meaningfull arrays
- !use idty here to store an intermediate array
  invbarmagsus=work1
  
  !At last, calculate the susceptibility and its inverse
@@ -599,6 +599,15 @@ contains
  ABI_FREE(ipiv)
  ABI_FREE(work1)
  ABI_FREE(work2)
+
+!!TMP shift of invmagsus
+! do irow= 1, ndim
+!   invmagsus(irow,irow)= invmagsus(irow,irow) - 2.072d-4 
+! end do 
+! invmagsus(1,3)= invmagsus(1,3) + 1.924d-4
+! invmagsus(2,4)= invmagsus(2,4) + 1.924d-4
+! invmagsus(3,1)= invmagsus(3,1) + 1.924d-4
+! invmagsus(4,2)= invmagsus(4,2) + 1.924d-4
 
  if (prtopt==1.and.prtvol>1) then
 !TODO: remove
@@ -1040,7 +1049,7 @@ contains
  end if 
   
 !Store the FS and RS flavors on the DDB array
- do ipert2=1,natom+2
+ do ipert2=1,natom+5
    do idir2=1,3
      icol=idir2+(ipert2-1)*3
      indexat2(icol)=ipert2
