@@ -34,7 +34,7 @@ module m_energies
  private
 
 !public parameter
- integer, public, parameter :: n_energies=45
+ integer, public, parameter :: n_energies=47
 
 !!***
 
@@ -204,6 +204,12 @@ module m_energies
   real(dp) :: e_zeeman=zero
    ! Zeeman spin times magnetic field contribution to the XC energy
 
+  real(dp) :: e_cpaw=zero
+   ! PAW core energy
+
+  real(dp) :: e_cpawdc=zero
+   ! PAW core double-counting energy
+
  end type energies_type
 
 !public procedures.
@@ -288,6 +294,8 @@ subroutine energies_init(energies)
  energies%e_xc_vdw      = zero
  energies%h0            = zero
  energies%e_zeeman      = zero
+ energies%e_cpaw        = zero
+ energies%e_cpawdc      = zero
 
 end subroutine energies_init
 !!***
@@ -366,6 +374,8 @@ end subroutine energies_init
  energies_out%e_xc_vdw             = energies_in%e_xc_vdw
  energies_out%h0                   = energies_in%h0
  energies_out%e_zeeman             = energies_in%e_zeeman
+ energies_out%e_cpaw               = energies_in%e_cpaw
+ energies_out%e_cpawdc             = energies_in%e_cpawdc
 
 end subroutine energies_copy
 !!***
@@ -451,6 +461,8 @@ end subroutine energies_copy
    energies_array(43)=energies%h0
    energies_array(44)=energies%e_zeeman
    energies_array(45)=energies%e_nucdip
+   energies_array(46)=energies%e_cpaw
+   energies_array(47)=energies%e_cpawdc
  end if
 
  if (option==-1) then
@@ -591,6 +603,7 @@ end subroutine energies_to_array
    if (positron) eint=eint+energies%e0_electronpositron+energies%e_electronpositron
    if(abs(energies%e_extfpmd)>tiny(0.0_dp)) eint=eint+energies%e_extfpmd
    if (dtset%usedmft==1) eint = eint + energies%e_hu - energies%e_dc
+   if(abs(energies%e_cpaw)>tiny(0.0_dp)) eint=eint+energies%e_cpaw
  end if
  if (optdc>=1) then
    eintdc = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
@@ -604,6 +617,7 @@ end subroutine energies_to_array
 &   +energies%e0_electronpositron+energies%e_electronpositron
    if(abs(energies%e_extfpmd)>tiny(0.0_dp)) eintdc=eintdc+energies%edc_extfpmd
    if (dtset%usedmft==1) eintdc = eintdc + energies%e_hu - energies%e_dc
+   if(abs(energies%e_cpawdc)>tiny(0.0_dp)) eintdc=eintdc+energies%e_cpawdc
  end if
 
 end subroutine energies_eval_eint

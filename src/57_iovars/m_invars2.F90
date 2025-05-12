@@ -2754,7 +2754,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
- if(tread==1) dtset%cprj_in_memory=intarr(1)
+ if(tread==1) then
+   dtset%cprj_in_memory=intarr(1)
+ else if (dtset%wfoptalg==111.and.dtset%gpu_option==ABI_GPU_DISABLED) then
+    dtset%cprj_in_memory=1 ! cprj_in_memory set to 1 by default if chebfi2 and CPU
+ end if
  if (dtset%cprj_in_memory/=0.and.dtset%optdriver/=RUNL_GSTATE) then
    dtset%cprj_in_memory=0
    write(msg,'(a)') 'cprj_in_memory/=0 is implemented only for ground state (optdriver=0).&
@@ -3162,6 +3166,30 @@ if (dtset%usekden==1) then
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fix_korq',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%eph_fix_korq = key_value(1:1)
+
+ ! RCPAW variables
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_rcpaw',tread,'INT')
+ if(tread==1) dtset%use_rcpaw = intarr(1)
+ 
+ if(dtset%use_rcpaw==1) then
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_frocc',tread,'INT')
+   if(tread==1) dtset%rcpaw_frocc = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrpaw',tread,'INT')
+   if(tread==1) dtset%rcpaw_nfrpaw = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrtnc',tread,'INT')
+   if(tread==1) dtset%rcpaw_nfrtnc = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_tolnc',tread,'DPR')
+   if(tread==1) dtset%rcpaw_tolnc = dprarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_frtypat',tread,'INT')
+   if(tread==1) dtset%rcpaw_frtypat(1:ntypat) = intarr(1:ntypat)
+
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_scenergy',tread,'ENE')
+   if(tread==1) dtset%rcpaw_scenergy(1:ntypat) = dprarr(1:ntypat)
+ endif
 
 ! Print variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
