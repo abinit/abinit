@@ -146,6 +146,10 @@ module m_xmpi
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released.
 
+ integer,save, public ABI_PROTECTED :: xmpi_count_wins = 0
+ ! Count number of windows created
+ ! This counter should be zero at the end of the run if all windows have been released.
+
  logical,save, private :: xmpi_use_inplace_operations = .False.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
 
@@ -168,7 +172,7 @@ module m_xmpi
 !! FUNCTION
 !!  A small object storing the MPI communicator, the rank of the process and the size of the communicator.
 !!  Provides helper functions to perform typical operations and parallelize loops.
-!!  The datatype is initialized with xmpi_comm_self
+!!  The datatype is initialized with xmpi_comm_self.
 !!
 !! SOURCE
 
@@ -181,15 +185,15 @@ module m_xmpi
 
  contains
    procedure :: skip => xcomm_skip                     ! Skip iteration according to rank
-   procedure :: set_to_null => xcomm_set_to_null
-   procedure :: set_to_self => xcomm_set_to_self
-   procedure :: free => xcomm_free
+   procedure :: set_to_null => xcomm_set_to_null       ! Init object using xmpi_comm_null.
+   procedure :: set_to_self => xcomm_set_to_self       ! Init object using xmpi_comm_self.
+   procedure :: free => xcomm_free                     ! Free the communicator.
    procedure :: from_cart_sub => xcomm_from_cart_sub   ! Build sub-communicators in a Cartesian grid.
    procedure :: split_type => xcomm_split_type         ! Creates new communicators based on split types and keys
    procedure :: prep_gatherv => xcomm_prep_gatherv     ! Prepare a typical gatherv operation.
    procedure :: print_names => xcomm_print_names
-   procedure :: can_use_shmem => xcomm_can_use_shmem
-   procedure :: allocate_shared_master => xcomm_allocate_shared_master
+   procedure :: can_use_shmem => xcomm_can_use_shmem   ! true if communicator can use shared memory.
+   procedure :: allocate_shared_master => xcomm_allocate_shared_master  ! Allocate MPI shared memory
  end type xcomm_t
 
  public :: xcomm_from_mpi_int
@@ -5359,13 +5363,13 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! This call is problematic as the API with type(c_ptr) requires mpi_f08 else gcc complains with
  ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
  ! See https://github.com/pmodels/mpich/issues/2659
-
  ! Converting C_PTR to INTEGER(KIND=MPI_ADDRESS_KIND) with the trick below is not portable:
  !address = transfer(baseptr, address)
 
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="mpi_win_allocated_shared returned ierr /= 0")
+ xmpi_count_wins = xmpi_count_wins + 1
 
  ! Synchronize to ensure memory is allocated.
  call MPI_Barrier(xcomm%value, ierr)
@@ -5544,12 +5548,17 @@ subroutine xmpi_win_fence(assert, win, ierr)
 end subroutine xmpi_win_fence
 
 subroutine xmpi_win_free(win, ierr)
+
+!Arguments-------------------------
  integer,intent(inout) :: win
  integer,intent(out) :: ierr
+!----------------------------------------------------------------------
 
  ierr = 0
 #ifdef HAVE_MPI
  call MPI_WIN_FREE(win, ierr)
+ win = xmpi_undefined
+ xmpi_count_wins = xmpi_count_wins - 1
 #endif
 
 end subroutine xmpi_win_free
