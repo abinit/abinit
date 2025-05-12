@@ -216,6 +216,7 @@ subroutine destroy_energy(energies_dmft,paw_dmft)
  paw_dmft%e_dc  = energies_dmft%e_dc_tot
  paw_dmft%e_hu  = energies_dmft%e_hu_tot
  paw_dmft%sdmft = energies_dmft%sdmft
+ paw_dmft%simp  = energies_dmft%simp
 
  energies_dmft%e_hu => null()
  ABI_SFREE(energies_dmft%e_dc)

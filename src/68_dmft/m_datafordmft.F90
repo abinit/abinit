@@ -179,7 +179,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
 ! Init parallelism
  paral_kgb = mpi_enreg%paral_kgb
- comm_kpt = merge(mpi_enreg%comm_kpt,mpi_enreg%comm_cell,paral_kgb==1)
+ comm_kpt  = merge(mpi_enreg%comm_kpt,mpi_enreg%comm_cell,paral_kgb==1)
  comm_band = mpi_enreg%comm_band
  me_kpt  = mpi_enreg%me_kpt
  me_band = mpi_enreg%me_band
@@ -278,12 +278,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    else
      bfield=paw_dmft%dmft_magnfield_b
      write(message,'(2a)') ch10,'Adding Zeeman contribution to DFT eigenvalues'
-     call wrtout(std_out,message,'COLL') 
+     call wrtout(std_out,message,'COLL')
   endif
  else
    bfield=0.0
  endif
-  
+
 !==   put eigen into eigen_dft
  paw_dmft%eigen => eigen(:)
  band_index = 0
@@ -860,6 +860,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
 !   write(unt,*) "Fermi level (in Ryd)="
 !   write(unt,*) fermie*two
    close(unt)
+
  end subroutine chipsi_print
 !!***
 
@@ -897,9 +898,9 @@ subroutine chipsi_print(paw_dmft,pawtab)
  type(matlu_type), allocatable :: levels_temp(:),magnfield(:)
 !************************************************************************
 
- natom = paw_dmft%natom
+ natom   = paw_dmft%natom
  nspinor = paw_dmft%nspinor
- nsppol = paw_dmft%nsppol
+ nsppol  = paw_dmft%nsppol
  if (present(nondiag)) nondiag = .false.
 
 !======================================================================

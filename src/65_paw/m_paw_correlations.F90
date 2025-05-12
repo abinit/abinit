@@ -846,7 +846,7 @@ CONTAINS  !=====================================================================
        else  ! read orbital from file
          call int2char4(itypat,tag2)
          tmpfil = trim(adjustl(dmft_orbital_filepath)) // '_' // tag2
-         write(message,'(2a)') " Using wavefunction from file ",trim(tmpfil)
+         write(message,'(3a)') ch10," Using wavefunction from file ",trim(tmpfil)
          call wrtout(std_out,message,"COLL")
          inquire(file=trim(tmpfil),exist=lexist)
          if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
@@ -920,7 +920,7 @@ CONTAINS  !=====================================================================
            call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))
          end if
 
-         write(message,'(2a)') " Yukawa parameters for atom type: ",adjustl(tag)
+         write(message,'(3a)') ch10," Yukawa parameters for atom type: ",adjustl(tag)
          call wrtout(std_out,message,"COLL")
          write(message,'(a,f9.4)') " Lambda: ",lambda
          call wrtout(std_out,message,"COLL")

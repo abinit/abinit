@@ -1,107 +1,128 @@
-# ---------------------------------------------------------------------------------------------------------
-#
-# NiO in DMFT
-# low cutoff, low number of k-points
-# DMFT with TRIQS tested without self-consistency over density
-#
-# ---------------------------------------------------------------------------------------------------------
-# -- DATASETS AND OPTIONS
-ndtset 4
-jdtset 1 2 3 4
-prtvol 4
-pawprtvol -1
-getden -1
-getself -1
+# _== Convergency and starting
+# DATASET 1: LDA
+# DATASET 2: LDA+DMFT
+ndtset 2
+jdtset 1 2
+
+getden2 1
+# nline1 7
+# nnsclo1 7
+nline2 5
+#nnsclo2 10
+
+prtvol    4
+pawprtvol 2
 
 ##### CONVERGENCE PARAMETERS
-nstep1 30
-nstep 1
-nline 5
-nnsclo 5
-ecut 8
-# as this cutoff, test is not physical at all (filling of correlated orbitals are obviously wrong)
-
-pawecutdg 32
-tolvrs 1.0d-8
-nband  30
-occopt 3 tsmear 0.003675
-
+nstep1   30
+nstep2   1
+ecut     4 # low cutoff !
+#ngfft 32 32 32
+#ngfftdg 32 32 32
+pawecutdg 8
+tolvrs1 1.0d-5
+toldfe2 1.0d-8
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
+nband     64
+nbdbuf    4
+occopt 3 tsmear 1200 K
 
 ##### PHYSICAL PARAMETERS
-nspinor 2
+natom 5 ntypat 3 typat 1 2 3 3 3
+znucl  23.0 38.0 8.0
+# V Sr O*3
+xred 0.00 0.00 0.00
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
+     0.00 0.00 0.50
+acell   3*7.2605
+rprim 1.0 0.0 0.0    #Real space PRIMitive translations
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+
+# == Points k and symetries
+ngkpt   2 2 2    #K - PoinTs grid : Real space LATTice
+nshiftk 2
+shiftk 1/2 1/2 1/2
+       0.0 0.0 0.0
+istwfk *1
+
 nsppol 1
 nspden 4
-natom 2 ntypat 2 typat 1 2
-znucl  28.0 8.0
-xred  0   0   0
-    1/2 1/2 1/2
-rprim 0.0 1/2 1/2
-      1/2 0.0 1/2
-      1/2 1/2 0.0
-acell 3*7.927
-spinat 0 0 0 0 0 0
+nspinor 2
 
-##### K-POINTS
-kptopt 4
-kptrlatt 1 0 0 0 1 0 0 0 1
-istwfk 1
-
-## == LDA+DMFT
+# == LDA+DMFT
 usedmft1 0
-usedmft 1
-dmftbandi  1
-dmftbandf 29
-dmft_solv 6   # DMFT without solver (used here with U=0).
+usedmft2 1
+dmftbandi 9 # include Sr s band
+dmftbandf 45 # include V t2g bands
+dmft_nwli 500
 dmft_iter 1
-dmft_nwli 1000
-dmftcheck3 1
-dmft_tollc 0.000001
-dmft_mxsf 0.3
+dmft_mxsf 0.7
 dmft_dc 8
-dmft_yukawa_param2  2
-dmft_yukawa_param3  3
-dmft_yukawa_param4  4
+dmft_yukawa_param 2
 
-##### DFT+U
-usepawu1    4
-usepawu     14
-dmatpuopt  1   # choose expression of the density matrix
-lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
-upawu1  0.00  0.0   # values in Hartree
-jpawu1  0.0000 0.0  # values in Hartree
-upawu2  0.30  0.0   # values in Hartree
-jpawu2  0.0000 0.0  # values in Hartree
-upawu3  0.30  0.0   # values in Hartree
-jpawu3  0.0350 0.0  # values in Hartree
-upawu4  0.30  0.0   # values in Hartree
-jpawu4  0.0350 0.0  # values in Hartree
+dmft_prtwan 1
+dmft_triqs_wmax 1.0
 
-dmftqmc_l 500
-dmftqmc_therm 100
+dmft_solv 6 # Rotationally invariant TRIQS
+
+# == DFT+U
+#usepawu1    4
+usepawu2     14
+dmatpuopt  1   # The density matrix: the simplest expression.
+lpawu  2  1 -1
+upawu1  0.00  0.0  0.0  eV
+f4of2_sla3  0.0  0.0  0.0
+upawu2  3.1333333333333333  1.0  0.0  eV
+jpawu2  0.7583333333333333  0.0  0.0  eV
+
+paral_kgb1 0
+paral_kgb2 1
+np_spkpt2 2
+npband2 2
+npfft2 1
+bandpp2 32
+
 dmftctqmc_meas 100
 dmftctqmc_basis 4
-dmft_triqs_off_diag 1
+dmftqmc_therm 10
+dmftqmc_l 500
+dmft_triqs_off_diag 0
 dmftqmc_n 1.d3
-dmft_lambda_yukawa 1.2
-dmft_epsilon_yukawa 1.0
-dmft_triqs_leg_measure 1
-dmft_triqs_nleg 30
+
+dmft_triqs_entropy 1
+dmft_triqs_compute_integral 1
+dmft_triqs_gaussorder 2
+dmft_wanrad 3.0
+
+prtwf 0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "28ni.paw, 8o.2.paw"
+ pseudos "23v.paw, 38sr.paw, 8o.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
-#%% files_to_test =
-#%%   t45.abo, tolnlines = 61, tolabs = 1.0e-5, tolrel = 1.0e-3, fld_options = -easy
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test =
+#%%   t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI4o_DS2_Wannier_functions_iatom0001_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI4o_DS2_Wannier_functions_iatom0002_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI4o_DS2.UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI4o_DS2.UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI4o_DS2Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI4o_DS2Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
-#%% authors = B. Amadon
-#%% keywords = DMFT, PAW
-#%% description =
-#%%   DMFT tests on ferromagnetic NiO (2 atoms), check DMFT for several
-#%%   values of dmft_solv : computes occupations and energy.
+#%% authors = B. Amadon, E. Castiel
+#%% keywords = DMFT, TRIQS
+#%% description = DFT+DMFT for SrVO3 using TRIQS with KGB parallelism
+#%% topics = DMFT, parallelism
 #%%<END TEST_INFO>
