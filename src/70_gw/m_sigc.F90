@@ -197,9 +197,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: band,band1,band2,idle,rank,jik,jk_bz,jk_ibz,kb,nspinor
  integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc
- integer :: spad,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10
+ integer :: spad,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10, iwc,ifft
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
- integer :: iwc,ifft
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in, z2,en_high,gw_gsq,w_localmax,w_max
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
@@ -244,10 +243,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  DBG_ENTER("COLL")
 
  ! Initial check
- ABI_CHECK(Sr%nomega_r==Sigp%nomegasr,"")
- ABI_CHECK(Sr%nomega4sd==Sigp%nomegasrd,"")
- ABI_CHECK(Sigp%npwc==Gsph_c%ng,"")
- ABI_CHECK(Sigp%npwvec==Gsph_Max%ng,"")
+ ABI_CHECK(Sr%nomega_r == Sigp%nomegasr, "")
+ ABI_CHECK(Sr%nomega4sd == Sigp%nomegasrd, "")
+ ABI_CHECK(Sigp%npwc == Gsph_c%ng, "")
+ ABI_CHECK(Sigp%npwvec == Gsph_Max%ng, "")
 
  mod10=MOD(Sigp%gwcalctyp,10)
 
@@ -288,12 +287,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    neigmax = MIN(Dtset%gwaclowrank,Sigp%npwc)
  else
    neigmax = Sigp%npwc
- endif
+ end if
 
  ABI_MALLOC(w_maxval,(minbnd:maxbnd))
  w_maxval = zero
 
- if ( ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call Wfd%change_ngfft(Cryst,Psps,gwc_ngfft)
+ if (ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3))) call Wfd%change_ngfft(Cryst,Psps,gwc_ngfft)
  gwc_mgfft   = MAXVAL(gwc_ngfft(1:3))
  gwc_fftalga = gwc_ngfft(7)/100 !; gwc_fftalgc=MOD(gwc_ngfft(7),10)
 
@@ -478,7 +477,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
    ierr = 0
    do io=1,epsm1%nomega_i
-      ! First frequencies are always real
+     ! First frequencies are always real
      if (ABS(AIMAG(one*epsm1%omega(epsm1%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
        ierr = ierr + 1
        if (Wfd%my_rank == Wfd%master) then
@@ -520,7 +519,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  !TODO gmatteo: these arrays are never used in practice. Should we remove them?
  ! Arrays storing the contribution given by the Hermitian/anti-Hermitian part of \Sigma_c
  ABI_MALLOC(aherm_sigc_ket, (npwc*nspinor, nomega_sigc))
- ABI_MALLOC( herm_sigc_ket, (npwc*nspinor, nomega_sigc))
+ ABI_MALLOC(herm_sigc_ket,  (npwc*nspinor, nomega_sigc))
 #endif
 
  sigcme_tmp=czero
@@ -578,15 +577,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ABI_MALLOC(epsm1_tmp, (npwc, npwc))
  end if
 
- ABI_MALLOC(igfftcg0,(Gsph_Max%ng))
- ABI_MALLOC(ur_ibz,(gwc_nfftot*nspinor))
- ABI_MALLOC(usr_bz,(gwc_nfftot*nspinor))
+ ABI_MALLOC(igfftcg0, (Gsph_Max%ng))
+ ABI_MALLOC(ur_ibz, (gwc_nfftot*nspinor))
+ ABI_MALLOC(usr_bz, (gwc_nfftot*nspinor))
 
  if (Dtset%pawcross==1) then
-   ABI_MALLOC(igfftfcg0,(Gsph_c%ng))
-   ABI_MALLOC(ur_ae_sum,(nfftf*nspinor))
-   ABI_MALLOC(ur_ae_onsite_sum,(nfftf*nspinor))
-   ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
+   ABI_MALLOC(igfftfcg0, (Gsph_c%ng))
+   ABI_MALLOC(ur_ae_sum, (nfftf*nspinor))
+   ABI_MALLOC(ur_ae_onsite_sum, (nfftf*nspinor))
+   ABI_MALLOC(ur_ps_onsite_sum, (nfftf*nspinor))
  end if
  call timab(432,2,tsec) ! Init
  call pstat_proc%print(_PSTAT_ARGS_)
@@ -688,10 +687,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      if (Dtset%pawcross==1) then
        ABI_MALLOC(gboundf,(2*mgfftf+8,2))
        call Gsph_c%fft_tabs(g0,mgfftf,rho_ngfft,use_padfftf,gboundf,igfftfcg0)
-       if ( ANY(gwc_fftalga == (/2,4/)) ) use_padfftf=0
-       if (use_padfftf==0) then
+       if (any(gwc_fftalga == [2, 4]) ) use_padfftf=0
+       if (use_padfftf == 0) then
          ABI_FREE(gboundf)
-         ABI_MALLOC(gboundf,(2*mgfftf+8,2*use_padfftf))
+         ABI_MALLOC(gboundf, (2*mgfftf+8,2*use_padfftf))
        end if
      end if
 
