@@ -926,7 +926,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, eigen, resid, nspinor)
 
     ! Allocate temporary memory (distributed in colsrows representation)
     call xg_init(X_NAB, slice%space, slice%total_spacedim, 3*bandpp, slice%spacecom, &
-        me_g0=slice%me_g0, gpu_option=slice%gpu_option)
+        me_g0=slice%me_g0_fft, gpu_option=slice%gpu_option)
 
     call xg_setBlock(X_NAB, X_next, slice%total_spacedim, bandpp)                           ! X_next
     call xg_setBlock(X_NAB, xAXColsRows, slice%total_spacedim, bandpp, fcol=bandpp + 1)     ! xAXColsRows
