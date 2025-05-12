@@ -35,6 +35,7 @@ MODULE m_dyson_solver
  use m_hide_lapack,   only : xheev
  use m_bz_mesh,       only : kmesh_t
  use m_sigma,         only : sigma_t
+ use m_melemts,       only : melements_t
 
  implicit none
 
@@ -140,7 +141,7 @@ CONTAINS  !====================================================================
 !!
 !! SOURCE
 
-subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene,Sr,prtvol,Dtfil,comm)
+subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene,Sr,ks_me,prtvol,Dtfil,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -149,6 +150,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
  type(Datafiles_type),intent(in) :: Dtfil
  type(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(inout) :: Sr
+ type(melements_t),intent(in) :: ks_me
 !arrays
  real(dp),intent(in) :: qp_ene(Sr%nbnds,Sr%nkibz,Sr%nsppol)
  complex(dpc),intent(in) :: sigcme(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Sigp%nsppol*Sigp%nsig_ab)
@@ -158,7 +160,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
  integer,parameter :: master=0
  integer :: iab,ib1,ib2,ikbz_gw,io,spin,is_idx,isym,iter,itim,jb, ie0
  integer :: sk_ibz,kb,ld_matrix,mod10,nsploop,my_rank
- real(dp) :: alpha,beta,smrt
+ real(dp) :: alpha,beta,smrt,vxc_val, vu, v_meanf
  complex(dpc) :: ctdpc,dct,dsigc,sigc,zz,phase
  logical :: converged,ltest
  character(len=500) :: msg
@@ -368,11 +370,23 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
 
 #ifdef _DEV_PERTURBATIVE
       call wrtout([std_out, ab_out], "COMMENT: Using perturbative approach with Z.")
-      Sr%degw(jb,sk_ibz,spin) = Sr%ze0(jb,sk_ibz,spin) * &
-        (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin) + &
-         Sr%hhartree(jb,jb,sk_ibz,spin))
 
-      Sr%egw(jb,sk_ibz,spin) = Sr%e0(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
+      ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
+      vxc_val = ks_me%vxcval(jb, jb, sk_ibz, spin)
+      vu = zero !; if (gwr%dtset%usepawu /= 0) vu = gwr%ks_me%vu(band, band, ik_ibz, spin)
+      v_meanf = vxc_val + vu
+
+      ! qp_ene = e0 + z_e0 * (sigc_e0__ + sigx - v_meanf)
+      Sr%egw(jb,sk_ibz,spin) = Sr%e0(jb,sk_ibz,spin) + Sr%ze0(jb,sk_ibz,spin) * &
+        (Sr%sigcmee0(jb,sk_ibz,spin) + Sr%sigxme(jb,sk_ibz,spin) - v_meanf)
+
+      Sr%degw(jb,sk_ibz,spin) = Sr%egw(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin)
+
+      !Sr%degw(jb,sk_ibz,spin) = Sr%ze0(jb,sk_ibz,spin) * &
+      !  (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin) + &
+      !   Sr%hhartree(jb,jb,sk_ibz,spin))
+
+      !Sr%egw(jb,sk_ibz,spin) = Sr%e0(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
 
       ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
       Sr%sigmee(jb,sk_ibz,spin) = &
