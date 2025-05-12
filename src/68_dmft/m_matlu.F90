@@ -85,6 +85,7 @@ MODULE m_matlu
  public :: xmpi_matlu
  public :: symmetrize_matlu
  public :: ylm2jmj_matlu
+ public :: magnfield_matlu
 !!***
 
 !!****t* m_matlu/matlu_type
@@ -818,7 +819,7 @@ end subroutine print_matlu
          at_indx = paw_dmft%indsym(irot,iatom)
          gloc_mat    => gloc(at_indx)%mat
 
-         !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp,zarot,gloc_mat)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(gloc_tmp,zarot,gloc_mat)
          call abi_gpu_xgemm_strided(2,"n","n",ndim,ndim,ndim,cone,&
          &    c_loc(gloc_mat(:,:,:)),ndim,ndim*ndim,&
          &    c_loc(zarot(:,1:ndim,irot,lpawu+1)),ndim_max,0,czero,&
@@ -827,7 +828,7 @@ end subroutine print_matlu
        end do ! irot
        call gpu_device_synchronize()
 
-       !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp,zarot,gloc_tmp2)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(gloc_tmp,zarot,gloc_tmp2)
        call abi_gpu_xgemm_strided(2,"t","n",ndim,ndim*nsppol,ndim,cone,&
        &    c_loc(zarot(:,:,:,lpawu+1)),ndim_max,ndim_max*ndim_max,&
        &    c_loc(gloc_tmp(:,:,:)),ndim_max,ndim_max*ndim_max*nsppol,czero,&
@@ -846,7 +847,7 @@ end subroutine print_matlu
          end do  ! m2
        end do ! isppol
 
-       !$OMP TARGET DATA USE_DEVICE_PTR(glocsym_mat)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(glocsym_mat)
        call abi_gpu_xscal(2, ndim*ndim*nsppol, ratio, c_loc(glocsym_mat), 1)
        !$OMP END TARGET DATA
 
@@ -949,7 +950,7 @@ end subroutine print_matlu
          at_indx = paw_dmft%indsym(irot,iatom)
          gloc_mat    => gloc_nmrep(at_indx)%mat
 
-         !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp3,zarot,gloc_mat)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(gloc_tmp3,zarot,gloc_mat)
          call abi_gpu_xgemm_strided(2,"n","n",ndim,ndim,ndim,cone,&
          &    c_loc(gloc_mat(:,:,:)),ndim,ndim*ndim,&
          &    c_loc(zarot(:,1:ndim,irot,lpawu+1)),ndim_max,0,czero,&
@@ -959,7 +960,7 @@ end subroutine print_matlu
        call gpu_device_synchronize()
 
 
-       !$OMP TARGET DATA USE_DEVICE_PTR(gloc_tmp3,zarot,gloc_tmp4)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(gloc_tmp3,zarot,gloc_tmp4)
        call abi_gpu_xgemm_strided(2,"t","n",ndim,ndim*4*nsppol,ndim,cone,&
        &    c_loc(zarot(:,:,:,lpawu+1)),ndim_max,ndim_max*ndim_max,&
        &    c_loc(gloc_tmp3(:,:,:,:)),ndim,ndim*ndim*4*nsppol,czero,&
@@ -999,7 +1000,7 @@ end subroutine print_matlu
        end do ! irot
 
     !  ==  Normalize sum
-       !$OMP TARGET DATA USE_DEVICE_PTR(glocsym_mat)
+       !$OMP TARGET DATA USE_DEVICE_ADDR(glocsym_mat)
        call abi_gpu_xscal(2, ndim*ndim*4*nsppol, ratio, c_loc(glocsym_mat), 1)
        !$OMP END TARGET DATA
 
@@ -4625,5 +4626,144 @@ end subroutine add_matlu
  end subroutine ylm2jmj_matlu
 !!***
 
+!!***                                                                                                       
+!!****f* m_matlu/magnfield_matlu                                                                        
+!! NAME                                                                                                     
+!! magnfield_matlu                                                                                        
+!!                                                                                                          
+!! FUNCTION                                                                                                 
+!! return the matrix of magnetic moment mz times Bz                      
+!!                                                                                                          
+!!                                                                                                          
+!! COPYRIGHT                                                                                                
+!! Copyright (C) 2005-2025 ABINIT group (FGendron)                                                          
+!! This file is distributed under the terms of the                                                          
+!! GNU General Public License, see ~abinit/COPYING                                                          
+!! or http://www.gnu.org/copyleft/gpl.txt .                                                                 
+!!                                                                                                          
+!! INPUTS                                                                                                   
+!! matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity in Ylm basis                          
+!! natom :: number of atoms                                                                                 
+!! bfield :: value of magnetic field in Tesla
+!! option = 1 :: scalar spin angular momentum along z axis
+!! option = 2 :: SOC total angular momentum (L+2S) along z axis
+!!                                                                                                          
+!! OUTPUT                                                                                                   
+!!  matlu(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: product                                              
+!!                                                                                                          
+!! SIDE EFFECTS                                                                                             
+!!                                                                                                          
+!! NOTES                                                                                                    
+!!                                                                                                          
+!! SOURCE                                                                                                   
+ subroutine magnfield_matlu(matlu,natom,bfield,option)                                               
+ use defs_basis                                                                                             
+ use defs_wvltypes                                                                                          
+ implicit none                                                                                              
+                                                                                                            
+!Arguments ------------------------------------                                                             
+!scalars                                                                                                    
+ integer, intent(in) :: natom,option
+ real(dp) :: bfield                                                                
+!arrays                                                                                                     
+ type(matlu_type), intent(inout) :: matlu(natom)                                                            
+!Local variables-------------------------------                                                             
+!scalars                                                                                                    
+ integer :: iatom,im,ndim,isppol                                                                
+ integer :: ll,ml1,jc1,ms1,tndim
+ real(dp) :: xj                                                                                             
+!arrays                                                                                                     
+ type(coeff2c_type), allocatable :: magnmatb(:)
+!************************************************************************
+
+ !================================
+ ! Allocate matrices
+ !================================
+
+ ABI_MALLOC(magnmatb,(natom))
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu .ne. -1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))
+     magnmatb(iatom)%value=czero
+   endif
+ enddo
+
+ if(option .eq. 1) then
+
+ !================================
+ ! Scalar magnetism (Spin only case)
+ ! H = mu_B*g_e*S_Z*B_z
+ !================================
+  
+   do iatom=1,natom
+     if(matlu(iatom)%lpawu .ne. -1) then
+       ndim=2*matlu(iatom)%lpawu+1
+       do isppol=1,matlu(iatom)%nsppol 
+         do im=1,ndim
+           if (isppol .eq. 1) then
+             matlu(iatom)%mat(im,im,isppol) = half*bfield
+           else
+             matlu(iatom)%mat(im,im,isppol) = -half*bfield 
+           endif
+         enddo ! im
+       enddo ! isppol
+     endif ! lpawu
+   enddo ! natom        
+
+
+ elseif(option .eq. 2) then
+  
+ !================================      
+ ! Spin-orbit magnetism   
+ ! H = mu_B*(L_z+g_e*S_Z)*B_z                 
+ !================================      
+
+   do iatom=1,natom
+     if(matlu(iatom)%lpawu .ne. -1) then
+       tndim=2*(2*matlu(iatom)%lpawu+1)
+       ll=matlu(iatom)%lpawu
+
+       jc1=0
+       do ms1=-1,1
+         xj=float(ms1)+half
+         do ml1=-ll,ll
+           jc1=jc1+1
+           if(jc1 < tndim+1) then
+             if (xj < 0.0) then
+               magnmatb(iatom)%value(jc1,jc1) = half*(ml1-2*xj)*bfield
+             elseif(xj > 0.0) then
+               magnmatb(iatom)%value(jc1,jc1) = half*(ml1-2*xj)*bfield
+             endif
+           endif
+         enddo !ml1
+       enddo ! ms1
+     endif !lpawu
+   enddo !natom
+ endif !option       
+
+ !=======================
+ ! reshape matrix
+ !=======================
+ 
+ if(option .eq. 2) then
+   call gather_matlu(matlu,magnmatb(natom),natom,option=-1,prtopt=1)
+ endif
+
+ !================================                     
+ ! Deallocate matrices                                   
+ !================================                     
+                                                       
+ do iatom=1,natom                                      
+   if(matlu(iatom)%lpawu .ne. -1) then                 
+     ABI_FREE(magnmatb(iatom)%value)   
+   endif                                               
+ enddo                                                 
+ 
+ ABI_FREE(magnmatb)
+
+ end subroutine magnfield_matlu 
+!!***                             
+    
 END MODULE m_matlu
 !!***
