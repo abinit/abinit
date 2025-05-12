@@ -125,6 +125,7 @@ contains
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: ci_alpha(:,:,:),lm_alpha(:,:,:)
  complex(dpc), allocatable :: ci_epsilon(:,:,:),lm_epsilon(:,:,:)
+ complex(dpc), allocatable :: ci_mchi(:,:,:),lm_mchi(:,:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
  complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),magphongreen(:,:),phongreen(:,:),phongreen_fm(:,:)
@@ -183,6 +184,8 @@ contains
  ABI_MALLOC(lm_alpha,(3,3,nomega))
  ABI_MALLOC(ci_epsilon,(3,3,nomega))
  ABI_MALLOC(lm_epsilon,(3,3,nomega))
+ ABI_MALLOC(ci_mchi,(3,3,nomega))
+ ABI_MALLOC(lm_mchi,(3,3,nomega))
  ABI_MALLOC(modezeff,(3,3*natom,nomega))
  ABI_MALLOC(dummysus,(ndim,ndim))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
@@ -323,13 +326,17 @@ contains
      call phonon_green(amu,eigvec,eta,int_fsddb,& 
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
+
+     call ri_d2etot(int_fsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_mchi(:,:,iw),&
+   & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_mchi(:,:,iw),magsus,mpert,mmom(:,:,iw),&
+   & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
    else if (mpopt==2) then
      call phonon_green(amu,eigvec,eta,int_rsddb,& 
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
 
-     call ri_d2etot(int_rsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),lm_alpha(:,:,iw),&
-   & lm_epsilon(:,:,iw),magsus,mpert,mmom(:,:,iw),&
+     call ri_d2etot(int_rsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_mchi(:,:,iw),&
+   & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_mchi(:,:,iw),magsus,mpert,mmom(:,:,iw),&
    & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
    end if
 
@@ -491,29 +498,51 @@ contains
     call wrtout(spin_unit,msg,'COLL')
  end do
 
-! write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-!
-! write(spin_unit,*) ' '
-! write(spin_unit,*) '#  Real part of clamped-ion macroscopic spin susceptibility tensor (at. units)'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
-! call wrtout(spin_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((real(macmagsus(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(spin_unit,msg,'COLL')
-! end do
-!
-! write(spin_unit,*) ' '
-! write(spin_unit,*) '#  Imaginary part of clamped-ion macroscopic spin susceptibility tensor (at. units)'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
-! call wrtout(spin_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((aimag(macmagsus(i,j,iw)),j=1,3),i=1,3)
-!    call wrtout(spin_unit,msg,'COLL')
-! end do
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Real part of clamped-ion macroscopic spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ci_mchi(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Imaginary part of clamped-ion macroscopic spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ci_mchi(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Real part of relaxed-ion macroscopic spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ci_mchi(i,j,iw)+lm_mchi(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Imaginary part of relaxed-ion macroscopic spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ci_mchi(i,j,iw)+lm_mchi(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
 
  close (spin_unit)
 
@@ -1011,6 +1040,10 @@ contains
  ABI_FREE(zfield_tr)
  ABI_FREE(ci_epsilon)
  ABI_FREE(lm_epsilon)
+ ABI_FREE(ci_mchi)
+ ABI_FREE(lm_mchi)
+ ABI_FREE(ci_alpha)
+ ABI_FREE(lm_alpha)
  ABI_FREE(macmagsus)
  ABI_FREE(omega)
  ABI_FREE(phfrq)
@@ -1782,7 +1815,7 @@ end subroutine me_altcalc
 #include "abi_common.h"
 
 
- subroutine ri_d2etot(blkval,ci_alpha,ci_epsilon,lm_alpha,lm_epsilon,magsus,mpert,mcoup, &
+ subroutine ri_d2etot(blkval,ci_alpha,ci_epsilon,ci_mchi,lm_alpha,lm_epsilon,lm_mchi,magsus,mpert,mcoup, &
 & mcoup_tr,natom,ndim,phongreen,ucvol)
 
 !Arguments ------------------------------------
@@ -1795,6 +1828,8 @@ end subroutine me_altcalc
  complex(dpc), intent(out) :: lm_alpha(3,3)
  complex(dpc), intent(out) :: ci_epsilon(3,3)
  complex(dpc), intent(out) :: lm_epsilon(3,3)
+ complex(dpc), intent(out) :: ci_mchi(3,3)
+ complex(dpc), intent(out) :: lm_mchi(3,3)
  complex(dpc), intent(in) :: magsus(ndim,ndim)
  complex(dpc), intent(in) :: mcoup(ndim,(natom+5)*3)
  complex(dpc), intent(in) :: mcoup_tr((natom+5)*3,ndim)
@@ -1842,6 +1877,40 @@ end subroutine me_altcalc
  end do 
 
  !Magnetoelectric susceptibility
+ ipert1= natom + 5
+ do idir1= 1, 3
+   irow= idir1
+   do ipert2= 1, natom
+     do idir2= 1, 3
+       icol= (ipert2-1)*3 + idir2
+       coup(irow,icol)= c_blkval(idir1,ipert1,idir2,ipert2)
+     end do
+   end do
+ end do
+
+ ipert1= natom + 2
+ do idir1= 1, 3
+   irow= idir1
+   do ipert2= 1, natom
+     do idir2= 1, 3
+       icol= (ipert2-1)*3 + idir2
+       coup_tr(icol,irow)= c_blkval(idir2,ipert2,idir1,ipert1)
+     end do
+   end do
+ end do
+
+ lm_alpha= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
+ 
+ ipert1= natom + 5
+ ipert2= natom + 2
+ fac= one/ucvol
+ do idir1= 1, 3
+   do idir2= 1, 3
+     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)*fac
+   end do
+ end do 
+
+ !Magnetic susceptibility 
  fac= one/ucvol
  ipert1= natom + 5
  do idir1= 1, 3
@@ -1854,12 +1923,12 @@ end subroutine me_altcalc
      end do
    end do
  end do
- ipert2= natom + 2
- lm_alpha= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
+ ipert2= natom + 5
+ lm_mchi= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
  
  do idir1= 1, 3
    do idir2= 1, 3
-     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
+     ci_mchi(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
    end do
  end do 
  
