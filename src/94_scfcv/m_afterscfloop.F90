@@ -367,6 +367,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  logical :: save_cg1_3,test_gylmgr,test_nfgd,test_rfgd
  logical :: remove_inv=.false.,wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
+ real(dp) :: maxmag, difmag
  character(len=500) :: message
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands_k
@@ -393,6 +394,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(250,1,tsec)
  call timab(251,1,tsec)
 
+ maxmag=zero;difmag=zero
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  nfftotf=product(ngfftf(1:3))
@@ -988,7 +990,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !print a warning to the output file (non-dummy arguments: dtset%nstep,
 !residm, diffor - infos from tollist have been saved inside )
  choice=3
- call scprqt(choice,cpus,deltae,diffor,dtset,&
+ call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,&
 & dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
 & 1,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,maxfor,&

@@ -180,7 +180,7 @@ contains
 !!
 !! SOURCE
 
-subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
+subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fermih,fname_eig,filnam1,initGS,&
 &  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
 &  nband,nkpt,nstep,occ,optres,&
@@ -194,7 +194,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
- real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm
+ real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm,maxmagsph,difmagsph
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
@@ -243,7 +243,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  use_dpfft = .False.
 
  tmagnet=0
- if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2)tmagnet=1
+ if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2) tmagnet=1
+ if((dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) tmagnet=2
 
  ishift=0
  residm_band = zero
@@ -305,22 +306,22 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      write(colname, "(A)") "residm  "
    end if
    if (nstep>0 .and. (iscf>=0 .or.iscf==-3) .and. dtset%prtstm==0) then
-     if(tmagnet==1)then
+     if(tmagnet==2 .and. response==0)then
        if (prtfor==0) then
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2    magn'
+            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2    difmagsph   maxmagsph '
          else
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2    magn'
+            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2    difmagsph   maxmagsph '
          end if
        else
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2   diffor   maxfor   magn'
+            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2   diffor   maxfor     difmagsph   maxmagsph'
          else
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2   diffor   maxfor   magn'
+            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2   diffor   maxfor     difmagsph   maxmagsph'
          end if
        end if
      else
@@ -343,12 +344,22 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            end if
          end if
        else
-         if (optres==0) then
-           write(message, '(4a)' ) ch10,&
-            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2'
+         if(tmagnet==2 .and. iscf>0 )then
+           if (optres==0) then
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2    difmagsph maxmagsph'
+           else
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2    difmagsph maxmagsph'
+           end if
          else
-           write(message, '(4a)' ) ch10,&
-            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2'
+           if (optres==0) then
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2 '
+           else
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2 '
+           end if
          end if
        end if
      end if
@@ -385,7 +396,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if (dtset%prtvol>=10) call wrtout([std_out, ab_out], ' ')
 
    ! Calculate up and down charge and magnetization
-   if(tmagnet==1) then
+   if(tmagnet==1 ) then
      rhoup = zero
      rhodn = zero
      nband_index = 1
@@ -434,20 +445,23 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      format_istep='i3'
      if(istep>99)format_istep='i5'
      if(istep>9999)format_istep='i7'
-     if(tmagnet==1)then
-       if(magnet<10)then
-         format_magnet='f6.3)'
-       else if(magnet<100)then
-         format_magnet='f6.2)'
-       else
-         format_magnet='f6.1)'
-       end if
+     !if(tmagnet==1)then
+     if(tmagnet==2 .and. response==0)then
+     !  if(magnet<10)then
+     !    format_magnet='f6.3)'
+     !  else if(magnet<100)then
+     !    format_magnet='f6.2)'
+     !  else
+     !    format_magnet='f6.1)'
+     !  end if
        if (prtfor==0) then
-         write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,0p,'//format_magnet ) &
-          ' ETOT',istep,etotal,deltae,residm,res2,magnet
+         !write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,0p,'//format_magnet ) &
+         write(message, '(a,'//format_istep//',1p,g22.14,5es10.3)' ) &
+          !' ETOT',istep,etotal,deltae,residm,res2,magnet
+          ' ETOT',istep,etotal,deltae,residm,res2,difmagsph,maxmagsph
        else
-         write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,es8.1,es9.2,0p,'//format_magnet ) &
-          ' ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor,magnet
+         write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,es8.1,es9.2,2es10.3)' ) &
+          ' ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor,difmagsph,maxmagsph
        end if
      else
        firstchar=' '
@@ -461,8 +475,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
             firstchar,'ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor
          end if
        else
-         write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
-          firstchar,'ETOT',istep,etotal,deltae,residm,res2
+         if(tmagnet==2 .and. iscf>0 )then
+           write(message, '(2a,'//format_istep//',1p,g22.14,1x,5es10.3)' ) &
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2,difmagsph,maxmagsph
+         else
+           write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2
+         end if
        end if
      end if
      !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
