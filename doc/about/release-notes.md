@@ -324,7 +324,7 @@ Moreover, it can be automatically  computed:
 [[chebfi_oracle]], [[oracle_factor]] and oracle_min_occ (TO BE DOCUMENTED) can be used to activate and control the 
 computation of [[mdeg_filter]] parameter from the residuals. 
 
-See [[test:v10_7]] to [[test:v10_10]] and [[test:paral_34]].
+See [[test:v10_07]] to [[test:v10_10]] and [[test:paral_34]].
 
 Also, the residuals in chebfi and lobpcg ([[wfoptalg]]==114 and 111) have been corrected, which solves the issue #168 (closed).
 The timing in chebfi has been corrected.
