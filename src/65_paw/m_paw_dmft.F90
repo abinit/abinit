@@ -520,7 +520,10 @@ MODULE m_paw_dmft
   ! Number of valence electrons
 
   real(dp) :: sdmft
-  ! DMFT correction to the entropy
+  ! DFT+DMFT total entropy
+
+  real(dp) :: simp
+  ! DFT+DMFT entropy of the impurity electrons
 
   real(dp) :: temp
   ! Temperature (Ha)

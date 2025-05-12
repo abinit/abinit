@@ -988,7 +988,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
            else if (nsppol_ == 2) then
              ABI_MALLOC(veeylm2,(nflavor,nflavor,nflavor,nflavor))
            end if
-           call vee_ndim2tndim_hu(lpawu,veeylm(:,:,:,:),veeylm2)
+           call vee_ndim2tndim_hu(lpawu,veeylm(:,:,:,:),veeylm2(:,:,:,:))
          end if ! rot_type
          veetemp3 => veeylm(:,:,:,:)
        end if ! rot_type=2 or 4
