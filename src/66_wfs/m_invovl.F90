@@ -714,7 +714,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    !$OMP TARGET ENTER DATA MAP(alloc:invovl_gram_projs)
    !$OMP TARGET ENTER DATA MAP(to:projs)
 
-   !$OMP TARGET DATA USE_DEVICE_PTR(invovl_gram_projs,projs)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(invovl_gram_projs,projs)
    call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl_gram_projs), invovl%nprojs)
@@ -1551,14 +1551,14 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
 #if defined HAVE_GPU_HIP && defined FC_LLVM
-   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
                 c_loc(sm1proj_amdref), nlmntot_this_proc, czero, &
                 c_loc(PtPsm1proj_amdref), nprojs)
    !$OMP END TARGET DATA
 #else
-   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj, PtPsm1proj)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj, PtPsm1proj)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
                 c_loc(sm1proj), nlmntot_this_proc, czero, &
@@ -1677,14 +1677,14 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
            ! perform natom multiplications of size nlmn
            ! compute y = mat*x
            if(cplx == 2) then
-             !$OMP TARGET DATA USE_DEVICE_PTR(mat,x,y)
+             !$OMP TARGET DATA USE_DEVICE_ADDR(mat,x,y)
              call abi_gpu_zhemm('L','U', nlmn, ham%nattyp(itypat), cone, &
                    c_loc(mat(:, :, :, itypat)), ham%lmnmax, &
                    c_loc(x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)), nlmn, czero, &
                    c_loc(y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)), nlmn)
              !$OMP END TARGET DATA
            else
-             !$OMP TARGET DATA USE_DEVICE_PTR(mat,x,y)
+             !$OMP TARGET DATA USE_DEVICE_ADDR(mat,x,y)
              call abi_gpu_xsymm(cplx, 'L','U', nlmn, ham%nattyp(itypat), cone, &
                    c_loc(mat(:, :, :, itypat)), ham%lmnmax, &
                    c_loc(x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, idat)), nlmn, czero, &
@@ -1707,7 +1707,7 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
       ! perform natom multiplications of size nlmn
       ! be careful here matrix extracted from x and y are not memory contiguous
       ! ==> so in the GPU version we will need to adapt leading dimension
-      !$OMP TARGET DATA USE_DEVICE_PTR(mat_ptr,x_ptr,y_ptr)
+      !$OMP TARGET DATA USE_DEVICE_ADDR(mat_ptr,x_ptr,y_ptr)
       call abi_gpu_xgemm_strided(cplx, 'N','N', &
               nlmn, ham%nattyp(itypat), nlmn, cone, &
               c_loc(mat_ptr), ham%lmnmax, 0, &

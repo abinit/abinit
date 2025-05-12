@@ -2215,7 +2215,7 @@ integer function wfd_get_wave_ptr(wfd, band, ik_ibz, spin, wave_ptr, msg) result
 
  ierr = 1
  if (any(wfd%bks2wfd(:, band, ik_ibz, spin) == 0)) then
-   write(msg,'(a,i0,a,3(i0,1x))')" MPI rank ",Wfd%my_rank," doesn't have ug for (band, ik_ibz, spin): ",band,ik_ibz,spin
+   write(msg,'(a,i0,a,3(i0,1x))')" MPI rank ",Wfd%my_rank," does not have wavefunction coefficients (ug) for (band, ik_ibz, spin): ",band,ik_ibz,spin
    wave_ptr => null(); return
  end if
 

@@ -73,7 +73,7 @@ diemac 12.0                       # Adapt preconditioning to insulators
 #%% keywords = NEB
 #%% description = 
 #%%   Test the GSS-NEB method (Nudged Elastic Band with variable cell)
-#%%   Cubic cristal of berrylium
+#%%   Cubic cristal of beryllium
 #%%   7 images, exploring the distortion of a cell when moving an atom
 #%% topics = TransPath
 #%%<END TEST_INFO>
