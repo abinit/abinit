@@ -947,13 +947,13 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call wrtout(std_out, "- HAPPY: Using MPI shared memory, memory for epsm1 won't increase with nprocs per node!")
        comm__ = comm
        xcomm = xcomm_from_mpi_int(comm__)
+       shared_xcomm = xcomm%split_type()
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
        count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(epsm1%nomega * epsm1%nqibz)
-       call xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
+       call shared_xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
        call c_f_pointer(void_ptr, epsm1%epsm1, shape=[npwe, npwe, epsm1%nomega, epsm1%nqibz])
 
        ! Only one proc in shared_xcomm reads from file.
-       shared_xcomm = xcomm%split_type()
        call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr) ! Start the RMA epoch.
        ABI_CHECK_MPI(ierr, "")
        if (shared_xcomm%me == 0) then
