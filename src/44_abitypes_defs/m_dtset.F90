@@ -3559,7 +3559,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_optim dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_t2g dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' ! dmft_wanorthnorm is not documented
+ list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' 
  list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dmft_yukawa_param dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
@@ -3709,9 +3709,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
- list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtcurrent prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
- list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtddb prtden'
+ list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtcurrent prtddb prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm'
  list_vars=trim(list_vars)//' prtebands prtefg prtefmas prteig prteliash prtelf prtevk'
  list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prthist prtkden prtkpt prtlden'

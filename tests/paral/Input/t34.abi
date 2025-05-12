@@ -6,6 +6,8 @@ ndtset 7
 
 npband 4
 
+cprj_in_memory 0
+
 wfoptalg 111
 
 nline  8

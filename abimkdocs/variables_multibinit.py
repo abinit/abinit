@@ -576,7 +576,7 @@ Set the range of the powers for the anharmonic coefficients
 
 
 Variable(
-    abivarname="fit_max_nobdy@multibinit",
+    abivarname="fit_max_nbody@multibinit",
     varset="multibinit",
     vartype="integer",
     topics=['FitProcess_basic'],
