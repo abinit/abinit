@@ -921,15 +921,15 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
  !write(std_out,*)'epsm1%ID: ',epsm1%ID,', epsm1%Hscr%ID: ',epsm1%Hscr%ID
 
  if (epsm1%ID == epsm1%Hscr%ID) then
-   ! The two-point function we are asking for is already stored on file
+   ! The two-point function we are asking for is already stored on file.
    ! According to mqmem either read and store the entire matrix in memory or do nothing.
 
    if (epsm1%mqmem > 0) then
      ! In-core solution.
      epsm1%use_mpi_shared_win = .False.
 #ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
-     epsm1%use_mpi_shared_win = nprocs > 1
-     !epsm1%use_mpi_shared_win = .True.
+     !epsm1%use_mpi_shared_win = nprocs > 1
+     epsm1%use_mpi_shared_win = .True.     ! This to test shared memory with one proc.
 #endif
      !epsm1%use_mpi_shared_win = .False.    ! This to go back to the old non-scalable version.
 
