@@ -134,16 +134,21 @@ MODULE m_screening
   ! qlwl(3,nqlwl)
   ! q-points used for the long wave-length limit treatment.
 
-  logical :: use_shared_win = .False.
+  logical :: use_mpi_shared_win = .False.
   ! This flag allows us to understand if espm1 is associates to a MPI window or not.
   ! In the former case, we should free the window and not the pointer
 
   integer :: epsm1_win = xmpi_undefined
 
+  type(xcomm_t) :: shared_comm
+
   complex(gwpc), contiguous, pointer :: epsm1(:,:,:,:) => null()
   ! epsm1(npwe,npwe,nomega,nqibz)
   ! Contains the two-point function $\epsilon_{G,Gp}(q,omega)$ in frequency and reciprocal space.
   ! We use a pointer so that we can associated it to MPI shared memory window.
+
+  complex(gwpc), contiguous, pointer :: epsm1_qbz(:,:,:) => null()
+  integer :: epsm1_qbz_win = xmpi_undefined
 
   complex(dpc),allocatable :: omega(:)
   ! omega(nomega)
@@ -179,6 +184,9 @@ MODULE m_screening
    procedure :: get_epsm1 => get_epsm1
 
    procedure :: decompose_epsm1 => decompose_epsm1
+
+   procedure :: malloc_epsm1_qbz => epsm1_malloc_epsm1_qbz
+   procedure :: free_epsm1_qbz => epsm1_free_epsm1_qbz
 
  end type epsm1_t
 
@@ -276,6 +284,7 @@ MODULE m_screening
  public :: lwl_free
 !!***
 
+#define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
 
 CONTAINS  !========================================================================================
 !!***
@@ -308,12 +317,18 @@ subroutine epsm1_free(epsm1)
  ABI_SFREE(epsm1%qlwl)
 
  !complex
- if (epsm1%use_shared_win) then
+ if (epsm1%use_mpi_shared_win) then
    call xmpi_win_free(epsm1%epsm1_win, ierr)
    nullify(epsm1%epsm1)
+   if (epsm1%epsm1_qbz_win /= xmpi_undefined) then
+     call xmpi_win_free(epsm1%epsm1_qbz_win, ierr)
+     nullify(epsm1%epsm1_qbz)
+   end if
  else
    ABI_SFREE_PTR(epsm1%epsm1)
+   ABI_SFREE_PTR(epsm1%epsm1_qbz)
  end if
+ call epsm1%shared_comm%free()
 
  ABI_SFREE(epsm1%omega)
 
@@ -524,21 +539,21 @@ end subroutine epsm1_print
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz(epsm1, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange,epsm1_qbz)
+subroutine Epsm1_rotate_iqbz(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exchange) !, epsm1_qbz)
 
 !Arguments ------------------------------------
 !scalars
  class(epsm1_t),intent(in) :: epsm1
- integer,intent(in) :: iq_bz,nomega,npwc
+ integer,intent(in) :: iq_bz, nomega, npwc
  logical,intent(in) :: remove_exchange
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
 !arrays
- complex(gwpc),intent(out) :: epsm1_qbz(npwc,npwc,nomega)
+ !complex(gwpc),intent(out) :: epsm1_qbz(npwc,npwc,nomega)
 
 !Local variables-------------------------------
 !scalars
- integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2
+ integer :: iw,ii,jj,iq_ibz,itim_q,isym_q,iq_loc,sg1,sg2, ierr
  complex(gwpc) :: phmsg1t,phmsg2t_star
 !arrays
  real(dp) :: qbz(3)
@@ -551,44 +566,47 @@ subroutine Epsm1_rotate_iqbz(epsm1, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange
  call Qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
 
  ! If out-of-memory, only epsm1%espm1(:,:,:,1) has been allocated and filled.
- iq_loc=iq_ibz; if (epsm1%mqmem==0) iq_loc=1
+ iq_loc = iq_ibz; if (epsm1%mqmem == 0) iq_loc=1
 
- ! MG: grottb is a 1-1 mapping, hence we can collapse the loops (false sharing is not an issue here).
- !grottb => Gsph%rottb (1:npwc,itim_q,isym_q)
- !phmSgt => Gsph%phmSGt(1:npwc,isym_q)
+ if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_qbz_win, ierr) ! Start the RMA epoch.
 
-!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(sg2,sg1,phmsg1t,phmsg2t_star)
+ ! MG: rottb is a 1-1 mapping, hence we can collapse the loops (false sharing is not an issue here).
+!!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(sg2,sg1,phmsg1t,phmsg2t_star) IF (NOT epsm1%use_mpi_shared_win)
  do iw=1,nomega
+   if (epsm1%shared_comm%skip(iw)) cycle ! MPI parallelism with shared memory.
    do jj=1,npwc
      sg2 = Gsph%rottb(jj, itim_q, isym_q)
      phmsg2t_star = CONJG(Gsph%phmSGt(jj, isym_q))
      do ii=1,npwc
        sg1 = Gsph%rottb(ii,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(ii,isym_q)
-       epsm1_qbz(sg1,sg2,iw) = epsm1%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
+       epsm1%epsm1_qbz(sg1,sg2,iw) = epsm1%epsm1(ii,jj,iw,iq_loc) * phmsg1t * phmsg2t_star
      end do
    end do
  end do
  !
- ! === Account for time-reversal ===
- !epsm1_qbz(:,:,iw)=TRANSPOSE(epsm1_qbz(:,:,iw))
+ ! Account for time-reversal
  if (itim_q==2) then
-!$OMP PARALLEL DO IF (nomega > 1)
+!!$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
-     call sqmat_itranspose(npwc,epsm1_qbz(:,:,iw))
+     if (epsm1%shared_comm%skip(iw)) cycle ! MPI parallelism with shared memory.
+     call sqmat_itranspose(npwc, epsm1%epsm1_qbz(:,:,iw))
    end do
  end if
 
  if (remove_exchange) then
-   ! === Subtract the exchange contribution ===
+   ! Subtract the exchange contribution
    ! If it's a pole screening, the exchange contribution is already removed
-!$OMP PARALLEL DO IF (nomega > 1)
+!!$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
+     if (epsm1%shared_comm%skip(iw)) cycle ! MPI parallelism with shared memory.
      do ii=1,npwc
-       epsm1_qbz(ii,ii,iw)=epsm1_qbz(ii,ii,iw)-CMPLX(1.0_gwp,0.0_gwp)
+       epsm1%epsm1_qbz(ii,ii,iw) = epsm1%epsm1_qbz(ii,ii,iw) - cmplx(1.0_gwp,0.0_gwp)
      end do
    end do
  endif
+
+ if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_qbz_win, ierr) ! Close the RMA epoch.
 
 end subroutine Epsm1_rotate_iqbz
 !!***
@@ -600,8 +618,8 @@ end subroutine Epsm1_rotate_iqbz
 !!  Epsm1_rotate_iqbz_inplace
 !!
 !! FUNCTION
-!!  Same function as Epsm1_rotate_iqbz, ecxept now the array Ep%epsm1 is modified inplace
-!!  thorugh an auxiliary work array of dimension (npwc,npwc)
+!!  Same function as Epsm1_rotate_iqbz, but now the array Ep%epsm1 is modified inplace
+!!  via an auxiliary work array of shape (npwc,npwc)
 !!
 !! INPUTS
 !!  nomega=Number of frequencies required. All frequencies from 1 up to nomega are symmetrized.
@@ -663,7 +681,7 @@ subroutine Epsm1_rotate_iqbz_inplace(epsm1,iq_bz,nomega,npwc,Gsph,Qmesh,remove_e
  ABI_CHECK(epsm1%nomega>=nomega,'Too many frequencies required')
  ABI_CHECK(epsm1%npwe  >=npwc , 'Too many G-vectors required')
 
- ABI_MALLOC(work,(npwc,npwc))
+ ABI_MALLOC(work, (npwc, npwc))
 
  ! Get iq_ibz, and symmetries from iq_ibz.
  call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
@@ -685,7 +703,7 @@ subroutine Epsm1_rotate_iqbz_inplace(epsm1,iq_bz,nomega,npwc,Gsph,Qmesh,remove_e
    epsm1%epsm1(:,:,iw,iq_loc) = work(:,:)
  end do
 
- ! === Account for time-reversal ===
+ ! Account for time-reversal
  if (itim_q==2) then
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
@@ -693,7 +711,7 @@ subroutine Epsm1_rotate_iqbz_inplace(epsm1,iq_bz,nomega,npwc,Gsph,Qmesh,remove_e
    end do
  end if
 
- ! === Subtract the exchange contribution ===
+ ! Subtract the exchange contribution.
  if (remove_exchange) then
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
@@ -908,12 +926,12 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
    if (epsm1%mqmem > 0) then
      ! In-core solution.
-     epsm1%use_shared_win = .False.
+     epsm1%use_mpi_shared_win = .False.
 #ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
-     epsm1%use_shared_win = nprocs > 1
-     !epsm1%use_shared_win = .True.
+     epsm1%use_mpi_shared_win = nprocs > 1
+     !epsm1%use_mpi_shared_win = .True.
 #endif
-     !epsm1%use_shared_win = .False.    ! This to go back to the old non-scalable version.
+     !epsm1%use_mpi_shared_win = .False.    ! This to go back to the old non-scalable version.
 
      iomode__ = iomode
      if (iomode__ == IO_MODE_MPI) then
@@ -924,7 +942,9 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      write(msg,'(a,f12.1,a)')' Memory for epsm1%epsm1: ',two*gwpc*npwe**2*epsm1%nomega*epsm1%nqibz*b2Mb,' [Mb] <<< MEM'
      call wrtout(std_out, msg)
 
-     if (.not. epsm1%use_shared_win) then
+     if (.not. epsm1%use_mpi_shared_win) then
+
+       call epsm1%shared_comm%set_to_self()
 
        if (nprocs > 1) then
          msg = strcat("- WARNING: Cannot use MPI shared memory as MPI library does not support MPI_WIN_ALLOCATE_SHARED_CPTR", ch10, &
@@ -937,31 +957,30 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call read_screening(in_varname, epsm1%fname, epsm1%npwe, epsm1%nqibz, epsm1%nomega, epsm1%epsm1, iomode__, comm)
 
      else
-
        block
        integer :: comm__
        type(c_ptr) :: void_ptr
        integer(kind=XMPI_ADDRESS_KIND) :: count
-       type(xcomm_t) :: xcomm, shared_xcomm
+       type(xcomm_t) :: xcomm
 
        call wrtout(std_out, "- HAPPY: Using MPI shared memory, memory for epsm1 won't increase with nprocs per node!")
        comm__ = comm
        xcomm = xcomm_from_mpi_int(comm__)
-       shared_xcomm = xcomm%split_type()
-#define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
+       epsm1%shared_comm = xcomm%split_type()
+
        count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(epsm1%nomega * epsm1%nqibz)
-       call shared_xcomm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
+       call epsm1%shared_comm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
        call c_f_pointer(void_ptr, epsm1%epsm1, shape=[npwe, npwe, epsm1%nomega, epsm1%nqibz])
 
-       ! Only one proc in shared_xcomm reads from file.
+       ! Only one proc in shared_comm reads from file.
        call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr) ! Start the RMA epoch.
        ABI_CHECK_MPI(ierr, "")
-       if (shared_xcomm%me == 0) then
+       if (epsm1%shared_comm%me == 0) then
          call read_screening(in_varname, epsm1%fname, epsm1%npwe, epsm1%nqibz, epsm1%nomega, epsm1%epsm1, iomode__, xmpi_comm_self)
        end if
        call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr) ! Close the RMA epoch.
        ABI_CHECK_MPI(ierr, "")
-       call xcomm%free(); call shared_xcomm%free()
+       call xcomm%free()
        end block
 
      end if
@@ -1132,6 +1151,53 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 end subroutine epsm1_mkdump
 !!***
 
+subroutine epsm1_malloc_epsm1_qbz(epsm1, npwc, nomega)
+
+!Arguments ------------------------------------
+ class(epsm1_t),intent(inout) :: epsm1
+ integer,intent(in) :: npwc, nomega
+
+!Local variables-------------------------------
+ integer :: ierr
+ integer(kind=XMPI_ADDRESS_KIND) :: count
+ type(c_ptr) :: void_ptr
+! *********************************************************************
+
+ ABI_CHECK(epsm1%npwe >= npwc, 'Too many G-vectors required')
+
+ if (.not. epsm1%use_mpi_shared_win) then
+   ABI_MALLOC_OR_DIE(epsm1%epsm1_qbz, (npwc, npwc, nomega), ierr)
+ else
+   count = _MOK(2 * npwc) * _MOK(npwc) * _MOK(nomega)
+   call epsm1%shared_comm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_qbz_win)
+   call c_f_pointer(void_ptr, epsm1%epsm1_qbz, shape=[npwc, npwc, nomega])
+ end if
+
+end subroutine epsm1_malloc_epsm1_qbz
+!!***
+
+
+subroutine epsm1_free_epsm1_qbz(epsm1)
+
+!Arguments ------------------------------------
+ class(epsm1_t),intent(inout) :: epsm1
+
+!Local variables-------------------------------
+ integer :: ierr
+! *********************************************************************
+
+ if (.not. epsm1%use_mpi_shared_win) then
+   ABI_SFREE_PTR(epsm1%epsm1_qbz)
+ else
+   if (epsm1%epsm1_qbz_win /= xmpi_undefined) then
+     call xmpi_win_free(epsm1%epsm1_qbz_win, ierr)
+     nullify(epsm1%epsm1_qbz)
+   end if
+ end if
+
+end subroutine epsm1_free_epsm1_qbz
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_screening/get_epsm1
@@ -1249,7 +1315,7 @@ subroutine decompose_epsm1(epsm1, iqibz, eigs)
  logical :: sortcplx !BUG in abilint
 ! *********************************************************************
 
- ABI_CHECK(epsm1%mqmem/=0,'mqmem==0 not implemented')
+ ABI_CHECK(epsm1%mqmem /= 0, 'mqmem==0 not implemented')
 
  npwe = epsm1%npwe
 
@@ -2536,7 +2602,7 @@ subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_u
  complex(dpc),allocatable :: eps_lwing(:,:),eps_uwing(:,:),eps_body(:,:),cvec(:)
 !************************************************************************
 
- ABI_CHECK(npwe/=1,"npwe must be >1")
+ ABI_CHECK(npwe /= 1, "npwe must be >1")
  ABI_UNUSED(comm)
 
  ! Precompute 1/|G|.

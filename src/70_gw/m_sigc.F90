@@ -220,15 +220,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  complex(gwpc) :: sigcohme(Sigp%nsig_ab)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
  complex(gwpc),allocatable :: botsq_conjg_transp(:,:),ac_epsm1cqwz2(:,:,:)
- complex(gwpc),allocatable :: epsm1_qbz(:,:,:),epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:)
+ complex(gwpc),allocatable :: epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:) ! epsm1_qbz(:,:,:),
  complex(gwpc),allocatable :: sigc_ket(:,:),ket1(:,:),ket2(:,:)
- complex(gwpc),allocatable :: herm_sigc_ket(:,:),aherm_sigc_ket(:,:)
- complex(gwpc),allocatable :: rhotwg_ki(:,:)
+ complex(gwpc),allocatable :: herm_sigc_ket(:,:),aherm_sigc_ket(:,:), rhotwg_ki(:,:)
  complex(gwpc),allocatable :: sigcme2(:,:),sigcme_3(:),sigcme_new(:),sigctmp(:,:)
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_ibz(:),wf1swf2_g(:),usr_bz(:)
  complex(gwpc),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
- complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:)
- complex(gwpc),allocatable :: otq_transp(:,:)
+ complex(gwpc),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:), otq_transp(:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
  complex(dpc),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
@@ -333,7 +331,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  end if
 
  if (mod10==SIG_GW_AC.and.Sigp%gwcomp==1) then
-   ABI_ERROR("not implemented")
+   ABI_ERROR("gwcomp with AC not implemented")
  end if
 
  if (mod10==SIG_GW_AC) then
@@ -565,9 +563,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Here we have a problem in case of CD since epsm1q might be huge
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
- if ( ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
-   if (.not.(mod10==SIG_GW_CD .and. epsm1%mqmem==0)) then
-     ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, epsm1%nomega), ierr)
+ if (ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
+   if (.not. (mod10==SIG_GW_CD .and. epsm1%mqmem == 0)) then
+     !ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, epsm1%nomega), ierr)
+     call epsm1%malloc_epsm1_qbz(npwc, epsm1%nomega)
    end if
  end if
 
@@ -593,10 +592,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call pstat_proc%print(_PSTAT_ARGS_)
 
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
- if (epsm1%use_shared_win) then
-   call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr) ! Start the RMA epoch.
-   ABI_CHECK_MPI(ierr, "")
- end if
+ if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
 
  ! ==========================================
  ! ==== Fat loop over k_i in the full BZ ====
@@ -736,13 +732,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end if
 
      if (ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
+
        ! Numerical integration or model GW with contour deformation or Analytic Continuation
        ! TODO In case of AC we should symmetrize only the imaginary frequencies
        if (mod10==SIG_GW_CD.and.epsm1%mqmem==0) then
          ! Do in-place symmetrisation
          call epsm1%rotate_iqbz_inplace(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh,.TRUE.)
        else
-         call epsm1%rotate_iqbz(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, .TRUE., epsm1_qbz)
+         ! This call sets epsm1%epsm1_qbz(npwc, npwc, epsm1%nomega)
+         call epsm1%rotate_iqbz(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, .TRUE.) !, epsm1%epsm1_qbz)
        end if
 
        if (mod10==SIG_GW_AC) then
@@ -760,8 +758,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
            ! The first frequencies are always real, skip them.
-           z2=gl_knots(iiw)*gl_knots(iiw)
-           ac_epsm1cqwz2(:,:,iiw)= gl_wts(iiw)*epsm1_qbz(:,:,epsm1%nomega_r+iiw)/z2
+           z2 = gl_knots(iiw)*gl_knots(iiw)
+           ac_epsm1cqwz2(:,:,iiw) = gl_wts(iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw) / z2
 
            ! (epsm1-1) has negative eigenvalues
            ! after the diago, they will be sorted starting from the most negative
@@ -789,7 +787,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        if (mod10==SIG_QPGW_CD) then
          ! For model GW we need transpose(conjg(epsm1_qbz))
          do io=1,epsm1%nomega
-           epsm1_tmp(:,:) = GWPC_CONJG(epsm1_qbz(:,:,io))
+           epsm1_tmp(:,:) = GWPC_CONJG(epsm1%epsm1_qbz(:,:,io))
            epsm1_trcc_qbz(:,:,io) = TRANSPOSE(epsm1_tmp)
          end do
        end if
@@ -972,7 +970,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                 method=Dtset%cd_frqim_method)
            else
              call calc_sigc_cd(npwc,npwc,nspinor,nomega_tot,epsm1%nomega,epsm1%nomega_r,epsm1%nomega_i,rhotwgp,&
-               epsm1%omega,epsm1_qbz,omegame0i,theta_mu_minus_e0i,sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
+               epsm1%omega,epsm1%epsm1_qbz,omegame0i,theta_mu_minus_e0i,sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
                method=Dtset%cd_frqim_method)
            end if
 
@@ -1047,7 +1045,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            ! Calculate \Sigma(E_k)|k> to obtain <j|\Sigma(E_k)|k>
            call calc_sigc_cd(npwc,npwc,nspinor,nomega_tot,epsm1%nomega,epsm1%nomega_r,epsm1%nomega_i,rhotwgp,&
-              epsm1%omega,epsm1_qbz,omegame0i,theta_mu_minus_e0i,ket1,Dtset%ppmfrq,npoles_missing(kb),&
+              epsm1%omega,epsm1%epsm1_qbz,omegame0i,theta_mu_minus_e0i,ket1,Dtset%ppmfrq,npoles_missing(kb),&
               method=Dtset%cd_frqim_method)
 
            if (Sigp%gwcalctyp==29) then
@@ -1204,11 +1202,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end if
  end do ! spin
 
- ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
- if (epsm1%use_shared_win) then
-   call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr) ! Close the RMA epoch.
-   ABI_CHECK_MPI(ierr, "")
- end if
+ ! If epsm1 is MPI-shared, we have to close the RMA epoch.
+ if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
+ call epsm1%free_epsm1_qbz()
 
  ABI_FREE(sigcme2)
  ABI_FREE(sigcme_3)
@@ -1339,23 +1335,22 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end if
  end if
 
- ABI_FREE(npoles_missing)
- ABI_FREE(ur_ibz)
- ABI_FREE(usr_bz)
- ABI_FREE(ktabr)
- ABI_FREE(rhotwg_ki)
- ABI_FREE(rhotwg)
- ABI_FREE(rhotwgp)
- ABI_FREE(vc_sqrt_qbz)
- ABI_FREE(omegame0i)
- ABI_FREE(sigctmp)
- ABI_FREE(sigc)
- ABI_FREE(w_maxval)
-
+ ABI_SFREE(npoles_missing)
+ ABI_SFREE(ur_ibz)
+ ABI_SFREE(usr_bz)
+ ABI_SFREE(ktabr)
+ ABI_SFREE(rhotwg_ki)
+ ABI_SFREE(rhotwg)
+ ABI_SFREE(rhotwgp)
+ ABI_SFREE(vc_sqrt_qbz)
+ ABI_SFREE(omegame0i)
+ ABI_SFREE(sigctmp)
+ ABI_SFREE(sigc)
+ ABI_SFREE(w_maxval)
  ABI_SFREE(sigc_ket)
  ABI_SFREE(ket1)
  ABI_SFREE(ket2)
- ABI_SFREE(epsm1_qbz)
+ !ABI_SFREE(epsm1_qbz)
  ABI_SFREE(epsm1_trcc_qbz)
  ABI_SFREE(epsm1_tmp)
  ABI_SFREE(degtab)
@@ -1526,7 +1521,8 @@ end subroutine calc_coh_comp
 !! SOURCE
 
 subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotwgp,&
-& omega,epsm1q,omegame0i,theta_mu_minus_e0i,ket,plasmafreq,npoles_missing,calc_poles,method)
+                        omega,epsm1q,omegame0i,theta_mu_minus_e0i,ket,plasmafreq,npoles_missing,&
+                        calc_poles, method) ! optional
 
 !Arguments ------------------------------------
 !scalars

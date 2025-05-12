@@ -1889,7 +1889,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  if (sigma_needs_ppm(Sigp)) then
    ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
-   if (epsm1%use_shared_win) then
+   if (epsm1%use_mpi_shared_win) then
      call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
      ABI_CHECK_MPI(ierr, "")
    end if
@@ -1954,7 +1954,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if ! PAW or NC PPm and/or needs density
 
    ! If epsm1 is MPI-shared, we have to close the RMA epoch.
-   if (epsm1%use_shared_win) then
+   if (epsm1%use_mpi_shared_win) then
      call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
      ABI_CHECK_MPI(ierr, "")
    end if
@@ -1966,9 +1966,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  if (wfd%my_rank == master) then
    ! Write info on the run on ab_out, then open files to store final results.
    call ks_ebands%report_gap(header='KS Band Gaps',unit=ab_out)
-   if(dtset%ucrpa == 0) then
-     call write_sigma_header(Sigp,epsm1,Cryst,Kmesh,Qmesh)
-   end if
+   if(dtset%ucrpa == 0) call write_sigma_header(Sigp,epsm1,Cryst,Kmesh,Qmesh)
 
    ! unt_gw:  File with GW corrections.
    ! unt_sig: Self-energy as a function of frequency.
@@ -2030,15 +2028,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
   ! Everything, indeed, should be done in a clean and transparent way inside csigme.
 
  call wfd%print([std_out])
-
  call wrtout(std_out, sigma_type_from_key(mod10))
 
- if (gwcalctyp<10) then
+ if (gwcalctyp < 10) then
    msg = " Perturbative Calculation"
-   if (gwcalctyp==1) msg = " Newton Raphson method "
- else if (gwcalctyp<20) then
+   if (gwcalctyp == 1) msg = " Newton Raphson method "
+ else if (gwcalctyp < 20) then
    msg = " Self-Consistent on Energies only"
- else if (gwcalctyp==21) then
+ else if (gwcalctyp == 21) then
    msg = " GW 1-RDM Corrections"
  else
    msg = " Self-Consistent on Energies and Wavefunctions"
@@ -2058,15 +2055,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! prevents me from refactoring the code. In particular I want to store the self-energy
  ! results inside the sigma_results datatypes hence one needs to know all the dimensions
  ! at the beginning of the execution (e.g. in setup_sigma) so that one can easily allocate the arrays in the type.
- if(Dtset%ucrpa>=1) then
-   !Read the band
+ if (Dtset%ucrpa >= 1) then
+   ! Read the band
    if (dtset%plowan_compute<10)then
      if (open_file("forlb.ovlp",msg,newunit=temp_unt,form="formatted", status="unknown") /= 0) then
        ABI_ERROR(msg)
      end if
      rewind(temp_unt)
      read(temp_unt,*)
-   read(temp_unt,*)
+     read(temp_unt,*)
      read(temp_unt,*) msg, ib1, ib2
      close(temp_unt)
    else
@@ -2078,12 +2075,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      read(temp_unt,*)
      read(temp_unt,'(a7,2i4)') msg, ib1, ib2
      close(temp_unt)
+   endif
  endif
-endif
 
  ! Do not store it for rdm_update because it might be too large!
- if(.not.rdm_update) then
-   ABI_MALLOC(sigcme,(nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
+ if (.not. rdm_update) then
+   ABI_MALLOC(sigcme, (nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
    sigcme=czero
  endif
 
@@ -2114,7 +2111,7 @@ endif
  ! This routine shows how the wavefunctions are distributed.
  !call wfd_show_bkstab(Wfd,unit=std_out)
 
- if(Dtset%ucrpa>=1) then
+ if (Dtset%ucrpa>=1) then
    ! Calculation of the Rho_n for calc_ucrpa
    call wrtout(std_out, sjoin("begin of Ucrpa calc for a nb of kpoints of: ",itoa(Sigp%nkptgw)))
    ! Wannier basis: rhot1_q_m will need an atom index in the near future.
@@ -2135,10 +2132,11 @@ endif
 
    M1_q_m=czero
    rhot1_q_m=czero
-!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-!Initialization of wan objects and getting psichies
-!Allocation of rhot1
-!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   !Initialization of wan objects and getting psichies
+   !Allocation of rhot1
+   !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    if (dtset%plowan_compute>=10)then
      call wrtout(units, " cRPA calculations using wannier weights from data.plowann")
      call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,dtset%plowan_iatom,&
@@ -2156,10 +2154,9 @@ endif
      end do
    endif
 
-!   do ikcalc=1,Sigp%nkptgw
-
-!   if(cryst%nsym==1) nkcalc=Kmesh%nbz
-!   if(cryst%nsym>1)  nkcalc=Kmesh%nibz
+   !do ikcalc=1,Sigp%nkptgw
+   !if(cryst%nsym==1) nkcalc=Kmesh%nbz
+   !if(cryst%nsym>1)  nkcalc=Kmesh%nibz
    nkcalc=Kmesh%nbz
    !if(1==1)then!DEBUG
    !open(67,file="test.rhot1",status="REPLACE")

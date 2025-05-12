@@ -1409,6 +1409,15 @@ subroutine abinit_doctor(prefix, print_mem_report)
 #endif
  end if
 
+ ! Check for MPI windows.
+ if (xmpi_count_wins /= 0) then
+   write(msg, "(a,i0,a)")"Leaking ", xmpi_count_wins, " MPI windows at the end of the run"
+   ABI_WARNING(msg)
+#ifdef HAVE_MEM_PROFILING
+   ABI_ERROR(msg)
+#endif
+ end if
+
 end subroutine abinit_doctor
 !!***
 

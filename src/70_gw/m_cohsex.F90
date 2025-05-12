@@ -201,7 +201,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  complex(gwpc) :: sigcohme(Sigp%nsig_ab)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:),sigsex(:)
- complex(gwpc),allocatable :: epsm1_qbz(:,:,:), sigc_ket(:,:)
+ complex(gwpc),allocatable :: sigc_ket(:,:)  ! epsm1_qbz(:,:,:),
  complex(gwpc),allocatable :: rhotwg_ki(:,:), sigctmp(:,:)
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
@@ -212,7 +212,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
  type(esymm_t),pointer :: QP_sym(:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -439,7 +438,9 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  call wrtout(std_out,msg)
 
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
- ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, 1), ierr)
+ !ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, 1), ierr)
+ call epsm1%malloc_epsm1_qbz(npwc, 1)
+
  ABI_MALLOC(igfftcg0,(Gsph_c%ng))
 
  ! Out-of-core solution for epsilon.
@@ -448,7 +449,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  end if
 
  ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
- if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
+ if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
 
  call timab(442,2,tsec)
 
@@ -538,7 +539,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      end if
 
      ! Only omega==0 for SEX or COHSEX
-     call epsm1%rotate_iqbz(iq_bz, 1, npwc, Gsph_c, Qmesh, .True., epsm1_qbz)
+     call epsm1%rotate_iqbz(iq_bz, 1, npwc, Gsph_c, Qmesh, .True.) !, epsm1_qbz)
 
      ! Get Fourier components of the Coulomb interaction in the BZ.
      ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
@@ -631,7 +632,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
          ! SEX part. TODO add check on theta_mu_minus_e0i
          do ispinor=1,nspinor
            spadc = (ispinor-1) * npwc
-           call XGEMV('N',npwc,npwc,cone_gw,epsm1_qbz(:,:,1),npwc,rhotwgp(1+spadc:),1,czero_gw,sigsex,1)
+           call XGEMV('N',npwc,npwc,cone_gw,epsm1%epsm1_qbz(:,:,1),npwc,rhotwgp(1+spadc:),1,czero_gw,sigsex,1)
 
            sigsex(:)= -theta_mu_minus_e0i*sigsex(:)
 
@@ -685,7 +686,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
                                    gw_gfft,Cprj_kgw(:,i1:i1+spad),Cprj_kgw(:,i2:i2+spad),wf1swf2_g)
                end if
 
-               call calc_coh(nspinor,Sigp%nsig_ab,gwc_nfftot,gwc_ngfft,npwc,Gsph_c%gvec,wf1swf2_g,epsm1_qbz(:,:,1),&
+               call calc_coh(nspinor,Sigp%nsig_ab,gwc_nfftot,gwc_ngfft,npwc,Gsph_c%gvec,wf1swf2_g,epsm1%epsm1_qbz(:,:,1),&
                              vc_sqrt_qbz,Vcp%i_sz,iq_ibz,(jb==kb),sigcohme)
 
                do io=1,nomega_sigc ! Should be 1
@@ -732,7 +733,8 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  end do !spin
 
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
- if (epsm1%use_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
+ if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
+ call epsm1%free_epsm1_qbz()
 
  ABI_FREE(igfftcg0)
 
@@ -822,14 +824,13 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ABI_FREE(rhotwgp)
  ABI_FREE(vc_sqrt_qbz)
  ABI_FREE(sigc_ket)
- ABI_FREE(epsm1_qbz)
+ !ABI_FREE(epsm1_qbz)
  ABI_FREE(sigctmp)
  ABI_FREE(sigc)
  ABI_FREE(sigsex)
  ABI_FREE(proc_distrb)
  ABI_SFREE(wf1swf2_g)
  ABI_SFREE(coh_distrb)
-
  ABI_SFREE(degtab)
 
  call timab(495,2,tsec) ! csigme(SigC)
