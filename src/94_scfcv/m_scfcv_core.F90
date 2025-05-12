@@ -49,7 +49,7 @@ module m_scfcv_core
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
  use m_berryphase_new,   only : update_e_field_vars
- use m_dens,             only : constrained_dft_t, constrained_dft_ini, constrained_dft_free
+ use m_dens,             only : constrained_dft_t, constrained_dft_ini, constrained_dft_free, calcdenmagsph, calmaxdifmag
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin, itoa
  use m_symtk,            only : symmetrize_xred
@@ -366,6 +366,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !arrays
  integer :: ngfft(18),ngfftdiel(18),ngfftf(18),ngfftmix(18),npwarr_diel(1)
  integer :: npwtot_diel(1)
+ integer :: mu
  integer, save :: scfcv_jdtset = 0 ! To simulate iapp behavior
  integer, save :: scfcv_itime = 1 ! To simulate iapp behavior
  integer,allocatable :: dimcprj(:),dimcprj_srt(:)
@@ -380,6 +381,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp) :: efield_old_cart(3), ptot_cart(3)
  real(dp) :: red_efield2(3),red_efield2_old(3)
  real(dp) :: vpotzero(2)
+ real(dp) :: maxmag , difmag  
 ! red_efield1(3),red_efield2(3) is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
 ! red_efield1(3) for fixed ebar calculation, red_efield2(3) for fixed reduced d calculation, in mixed BC
 ! red_efieldbar_lc(3) is local reduced electric field, defined by Eq.(28) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
@@ -396,6 +398,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
  real(dp),allocatable :: vectornd(:,:,:),vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),xcctau3d(:),ylmdiel(:,:)
+ real(dp),allocatable :: intgden(:,:),intgden0(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  type(scf_history_type) :: scf_history_wf
  type(constrained_dft_t) :: constrained_dft
@@ -606,12 +609,15 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  choice=1 ; diffor=zero ; res2=zero
  ABI_MALLOC(fcart,(3,dtset%natom))
  ABI_MALLOC(gred,(3,dtset%natom))
+ ABI_MALLOC(intgden,(dtset%nspden,dtset%natom))
+ ABI_MALLOC(intgden0,(dtset%nspden,dtset%natom))
  gred(:,:)=zero
  fcart(:,:)=results_gs%fcart(:,:) ! This is a side effect ...
+ intgden(:,:)=zero
 !results_gs should not be used as input of scfcv_core
 !HERE IS PRINTED THE FIRST LINE OF SCFCV
 
- call scprqt(choice,cpus,deltae,diffor,dtset,&
+ call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 & dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 & maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
@@ -1731,7 +1737,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if(paw_dmft%use_dmft==1) then
        call prtene(dtset,energies,std_out,psps%usepaw)
      end if
-     call scprqt(choice,cpus,deltae,diffor,dtset,&
+     if(response==0.and.(dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+       intgden0=intgden
+       call calcdenmagsph(mpi_enreg,dtset%natom,dtset%nfft,ngfft,dtset%nspden,&
+                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
+      !Compute maximal magnet and maximal difference of magnet
+       call calmaxdifmag(intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+     endif
+     call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
@@ -1944,7 +1957,14 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call timab(1453,1,tsec)
      choice=2
      ABI_NVTX_START_RANGE(NVTX_SCFCV_SCPRQT)
-     call scprqt(choice,cpus,deltae,diffor,dtset,&
+     if(response==0.and.(dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+       intgden0=intgden
+       call calcdenmagsph(mpi_enreg,dtset%natom,dtset%nfft,ngfft,dtset%nspden,&
+                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
+       call calmaxdifmag(intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+     endif
+
+     call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
 &     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
