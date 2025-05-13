@@ -928,8 +928,8 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! In-core solution.
      epsm1%use_mpi_shared_win = .False.
 #ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
-     !epsm1%use_mpi_shared_win = nprocs > 1
-     epsm1%use_mpi_shared_win = .True.     ! This to test shared memory with one proc.
+     epsm1%use_mpi_shared_win = nprocs > 1
+     !epsm1%use_mpi_shared_win = .True.     ! This to test shared memory with one proc.
 #endif
      !epsm1%use_mpi_shared_win = .False.    ! This to go back to the old non-scalable version.
 
@@ -943,7 +943,6 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      call wrtout(std_out, msg)
 
      if (.not. epsm1%use_mpi_shared_win) then
-
        call epsm1%shared_comm%set_to_self()
 
        if (nprocs > 1) then
@@ -982,7 +981,6 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_CHECK_MPI(ierr, "")
        call xcomm%free()
        end block
-
      end if
 
    else
