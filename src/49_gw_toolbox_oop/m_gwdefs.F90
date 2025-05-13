@@ -478,17 +478,12 @@ end subroutine sigijtab_free
 !! FUNCTION
 !!  Free dynamic memory allocated in the structure.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine sigparams_free(Sigp)
 
 !Arguments ------------------------------------
  class(sigparams_t),intent(inout) :: Sigp
-
 ! *************************************************************************
 
  !@sigparams_t
