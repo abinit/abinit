@@ -109,6 +109,7 @@ module m_sigma_driver
  use m_plowannier,    only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                              fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
                              destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
+ use minimax_grids,   only : gx_minimax_grid !, gx_get_error_message
 
  implicit none
 
@@ -2996,7 +2997,7 @@ end subroutine sigma
 !! SOURCE
 
 subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
-& gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,epsm1,Sigp,comm)
+  gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,ks_ebands,Gsph_Max,Gsph_x,Gsph_c,Vcp,epsm1,Sigp,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3021,19 +3022,18 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: pertcase0=0,master=0
+ integer,parameter :: pertcase0 = 0, master = 0, linear_iw_mesh = 0, minimax_iw_mesh = 1
  integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng, nsppol
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
- integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
- real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
+ integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc, iw_mesh_type
+ real(dp),parameter :: OMEGASIMIN=0.01d0, tol_enediff=0.001_dp*eV_Ha
  real(dp) :: domegas,domegasi,ucvol,rcut
- logical,parameter :: linear_imag_mesh=.TRUE.
  logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg
  character(len=fnlen) :: fname,fcore,string
  type(wvl_internal_type) :: wvl
- type(gaps_t) :: gaps
+ type(gaps_t) :: ks_gaps
 !arrays
  integer :: ng0sh_opt(3),G0(3),q_umklp(3),kpos(6), units(2)
  integer,allocatable :: npwarr(:),val_indices(:,:)
@@ -3072,8 +3072,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! === For HF, SEX or COHSEX use Hybertsen-Louie PPM (only $\omega=0$) ===
  ! * Use fake screening for HF.
  ! FIXME Why, we should not redefine Sigp%ppmodel
- gwcalctyp=Sigp%gwcalctyp
- mod10 =MOD(Sigp%gwcalctyp,10)
+ gwcalctyp = Sigp%gwcalctyp
+ mod10 = MOD(Sigp%gwcalctyp,10)
  if (mod10==5.or.mod10==6.or.mod10==7) Sigp%ppmodel=2
  if (mod10<5.and.MOD(Sigp%gwcalctyp,1)/=1) then ! * One shot GW (PPM or contour deformation).
    if (Dtset%nomegasrd==1) then ! avoid division by zero!
@@ -3090,125 +3090,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    Sigp%nomegasrd  =1
    Sigp%maxomega4sd=zero
    Sigp%deltae     =zero
- end if
-
- ! For analytic continuation define the number of imaginary frequencies for Sigma
- ! Tests show than more than 12 freqs in the Pade approximant worsen the results!
- Sigp%nomegasi=0
-
- if (mod10==1) then
-   Sigp%nomegasi  =Dtset%nomegasi
-   Sigp%omegasimax=Dtset%omegasimax
-   Sigp%omegasimin=OMEGASIMIN
-   write(msg,'(4a,i3,2(2a,f8.3),a)')ch10,&
-    ' Parameters for analytic continuation : ',ch10,&
-    '  number of imaginary frequencies for sigma =  ',Sigp%nomegasi,ch10,&
-    '  min frequency for sigma on imag axis [eV] =  ',Sigp%omegasimin*Ha_eV,ch10,&
-    '  max frequency for sigma on imag axis [eV] =  ',Sigp%omegasimax*Ha_eV,ch10
-   call wrtout(std_out, msg)
-
-   !TODO this should not be done here but in init_sigma_t
-   ABI_MALLOC(Sigp%omegasi,(Sigp%nomegasi))
-
-   if (linear_imag_mesh) then
-     ! Linear mesh along the imaginary axis.
-     domegasi=Sigp%omegasimax/(Sigp%nomegasi-1)
-     do io=1,Sigp%nomegasi
-       Sigp%omegasi(io)=CMPLX(zero,(io-1)*domegasi)
-     end do
-   else
-     ! Logarithmic mesh along the imaginary axis.
-     ABI_ERROR("AC with log mesh not implemented")
-     !domegasi=(Sigp%omegasimax/Sigp%omegasimin)**(one/(Sigp%nomegasi-1))
-     !Sigp%omegasi(1)=czero; ldi=domegasi
-     !do io=2,Sigp%nomegasi
-     ! omega(io)=CMPLX(zero,ldi*Sigp%omegasimin)
-     ! Sigp%omegasi(io)=ldi*domegasi
-     !end do
-   end if
-
-   ! MRM: do not print for 1-RDM correction
-   if(Sigp%gwcalctyp/=21) then
-     write(msg,'(4a)')ch10,&
-      ' setup_sigma : calculating Sigma(iw)',&
-      ' at imaginary frequencies [eV] (Fermi Level set to 0) ',ch10
-     call wrtout(units, msg)
-     do io=1,Sigp%nomegasi
-       write(msg,'(2(f10.3,2x))')Sigp%omegasi(io)*Ha_eV
-       call wrtout(units, msg)
-     end do
-   endif
-
-   ltest=(Sigp%omegasimax>0.1d-4.and.Sigp%nomegasi>0)
-   ABI_CHECK(ltest,'Wrong value of omegasimax or nomegasi')
-   if (Sigp%gwcalctyp/=1) then ! only one shot GW is allowed for AC.
-     !ABI_ERROR("SC-GW with analytic continuation is not coded") ! MRM: let's allow it
-   end if
- end if
-
- if (Sigp%symsigma/=0.and.gwcalctyp>=20) then
-   ABI_WARNING("SC-GW with symmetries is still under development. Use at your own risk!")
-   ABI_ERROR("SC-GW requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!")
- end if
-
- ! Setup parameters for Spectral function.
- if (Dtset%gw_customnfreqsp/=0) then
-   Sigp%nomegasr = Dtset%gw_customnfreqsp
-   ABI_WARNING('Custom grid for spectral function specified. Assuming experienced user.')
-   if (Dtset%gw_customnfreqsp/=0) then
-     Dtset%nfreqsp = Dtset%gw_customnfreqsp
-     ABI_WARNING('nfreqsp has been set to the same number as gw_customnfreqsp')
-   end if
- else
-   Sigp%nomegasr  =Dtset%nfreqsp
-   Sigp%minomega_r=Dtset%freqspmin
-   Sigp%maxomega_r=Dtset%freqspmax
- end if
-
- if (Sigp%nomegasr>0) then
-   if (Dtset%gw_customnfreqsp==0) then
-     ! Check
-     if (Sigp%minomega_r >= Sigp%maxomega_r) then
-       ABI_ERROR('freqspmin must be smaller than freqspmax!')
-     end if
-     if(Sigp%nomegasr==1) then
-      domegas=0.d0
-     else
-      domegas=(Sigp%maxomega_r-Sigp%minomega_r)/(Sigp%nomegasr-1)
-     endif
-     !TODO this should be moved to Sr% and done in init_sigma_t
-     ABI_MALLOC(Sigp%omega_r,(Sigp%nomegasr))
-     do io=1,Sigp%nomegasr
-       Sigp%omega_r(io) = CMPLX(Sigp%minomega_r + domegas*(io-1),zero)
-     end do
-     write(msg,'(4a,i8,3(2a,f8.3),a)')ch10,&
-       ' Parameters for the calculation of the spectral function : ',ch10,&
-       '  Number of points    = ',Sigp%nomegasr,ch10,&
-       '  Min frequency  [eV] = ',Sigp%minomega_r*Ha_eV,ch10,&
-       '  Max frequency  [eV] = ',Sigp%maxomega_r*Ha_eV,ch10,&
-       '  Frequency step [eV] = ',domegas*Ha_eV,ch10
-     call wrtout(std_out, msg)
-   else
-     Sigp%minomega_r = MINVAL(Dtset%gw_freqsp(:))
-     Sigp%maxomega_r = MAXVAL(Dtset%gw_freqsp(:))
-     !TODO this should be moved to Sr% and done in init_sigma_t
-     ABI_MALLOC(Sigp%omega_r,(Sigp%nomegasr))
-     do io=1,Sigp%nomegasr
-       Sigp%omega_r(io) = CMPLX(Dtset%gw_freqsp(io),zero)
-     end do
-     write(msg,'(4a,i8,2(2a,f8.3),3a)')ch10,&
-       ' Parameters for the calculation of the spectral function : ',ch10,&
-       '  Number of points    = ',Sigp%nomegasr,ch10,&
-       '  Min frequency  [eV] = ',Sigp%minomega_r*Ha_eV,ch10,&
-       '  Max frequency  [eV] = ',Sigp%maxomega_r*Ha_eV,ch10,&
-       '  A custom set of frequencies is used! See the input file for values.',ch10
-     call wrtout(std_out, msg)
-   end if
- else
-   !In indefo all these quantities are set to zero
-   !Sigp%nomegasr=1
-   !allocate(Sigp%omega_r(Sigp%nomegasr))
-   !Sigp%omega_r(1)=0
  end if
 
  ! Dimensional primitive translations rprimd (from input), gprimd, metrics and unit cell volume
@@ -3373,8 +3254,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
  call ks_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)
 
- gaps = ks_ebands%get_gaps(gap_err)
- call gaps%print([std_out])
+ ks_gaps = ks_ebands%get_gaps(gap_err)
+ call ks_gaps%print([std_out])
  call ks_ebands%report_gap(unit=std_out)
 
  ABI_MALLOC(val_indices,(ks_ebands%nkpt, nsppol))
@@ -3468,15 +3349,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ! gw_qprange is not specified in the input.
      ! Include the direct and the fundamental KS gap.
      ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
-     ! we have compute the union of the k-points where the fundamental and the direct gaps are located.
+     ! we have compute the union of the k-points where the fundamental and the direct KS gaps are located.
      !
      ! Find the list of `interesting` kpoints.
      ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
-     nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
+     nk_found = 1; kpos(1) = ks_gaps%fo_kpos(1,1)
 
      do spin=1,nsppol
        do ifo=1,3
-         ik = gaps%fo_kpos(ifo, spin)
+         ik = ks_gaps%fo_kpos(ifo, spin)
          found = .FALSE.; jj = 0
          do while (.not. found .and. jj < nk_found)
            jj = jj + 1; found = (kpos(jj) == ik)
@@ -3910,7 +3791,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! ==== Final compatibility tests ====
  ! ===================================
  ltest=(ks_ebands%mband == Sigp%nbnds .and. ALL(ks_ebands%nband == Sigp%nbnds))
- ABI_CHECK(ltest,'BUG in definition of ks_ebands%nband')
+ ABI_CHECK(ltest, 'BUG in definition of ks_ebands%nband')
 
  ! FIXME
  if (Dtset%symsigma/=0 .and. Sigp%nomegasr/=0) then
@@ -3927,7 +3808,170 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    if (Sigp%gwcomp==1) ABI_ERROR("AC with extrapolar technique not implemented")
  end if
 
- call gaps%free()
+ ! For analytic continuation define the number of imaginary frequencies for Sigma
+ ! Tests show than more than 12 freqs in the Pade approximant worsen the results!
+ Sigp%nomegasi=0
+
+ if (mod10 == 1) then
+   Sigp%nomegasi   = abs(Dtset%nomegasi)
+   iw_mesh_type = linear_iw_mesh
+   if (dtset%nomegasi < 0) iw_mesh_type = minimax_iw_mesh
+   Sigp%omegasimax = Dtset%omegasimax
+   Sigp%omegasimin = OMEGASIMIN
+
+   write(msg,'(4a,i3,2(2a,f8.3),a)')ch10,&
+    ' Parameters for analytic continuation : ',ch10,&
+    '  number of imaginary frequencies for sigma =  ',Sigp%nomegasi,ch10,&
+    '  min frequency for sigma on imag axis [eV] =  ',Sigp%omegasimin*Ha_eV,ch10,&
+    '  max frequency for sigma on imag axis [eV] =  ',Sigp%omegasimax*Ha_eV,ch10
+   call wrtout(std_out, msg)
+
+   !TODO this should not be done here but in init_sigma_t
+   ABI_MALLOC(Sigp%omegasi, (Sigp%nomegasi))
+
+   select case (iw_mesh_type)
+   case (linear_iw_mesh)
+     ! Linear mesh along the imaginary axis.
+     domegasi=Sigp%omegasimax/(Sigp%nomegasi-1)
+     do io=1,Sigp%nomegasi
+       Sigp%omegasi(io)=CMPLX(zero,(io-1)*domegasi)
+     end do
+
+   case (minimax_iw_mesh)
+     block
+     integer :: nbsum
+     real(dp) :: te_min = -one, te_max = one
+     real(dp) :: ft_max_error(3) = -one
+     real(dp) :: cosft_duality_error = -one
+     real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
+     real(dp),allocatable :: cosft_wt(:,:), cosft_tw(:,:), sinft_wt(:,:)
+
+     nbsum = sigp%nbnds
+
+     call wrtout(std_out, "Computing minimax grid")
+     ! Compute min/max transition energy taking into account nsppol if any.
+     te_min = minval(ks_gaps%cb_min - ks_gaps%vb_max)
+     te_max = maxval(ks_ebands%eig(nbsum,:,:) - ks_ebands%eig(1,:,:))
+     if (te_min <= tol6) then
+       te_min = tol6
+       ABI_ERROR("System is metallic or with a very small fundamental gap! Check energies in WFK file!")
+     end if
+
+     call gx_minimax_grid(sigp%nomegasi, te_min, te_max, &      ! in
+                          tau_mesh, tau_wgs, iw_mesh, iw_wgs, & ! out args allocated by the routine.
+                          cosft_wt, cosft_tw, sinft_wt, &
+                          ft_max_error, cosft_duality_error, ierr)
+     ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+
+     Sigp%omegasi = j_dpc * iw_mesh
+
+     ABI_SFREE(tau_mesh)
+     ABI_SFREE(tau_wgs)
+     ABI_SFREE(iw_mesh)
+     ABI_SFREE(iw_wgs)
+     ABI_SFREE(cosft_wt)
+     ABI_SFREE(cosft_tw)
+     ABI_SFREE(sinft_wt)
+     end block
+
+   !case (log_iw_mesh)
+     !ABI_ERROR("AC with log mesh not implemented")
+     ! Logarithmic mesh along the imaginary axis.
+     !domegasi=(Sigp%omegasimax/Sigp%omegasimin)**(one/(Sigp%nomegasi-1))
+     !Sigp%omegasi(1)=czero; ldi=domegasi
+     !do io=2,Sigp%nomegasi
+     ! omega(io)=CMPLX(zero,ldi*Sigp%omegasimin)
+     ! Sigp%omegasi(io)=ldi*domegasi
+     !end do
+   case default
+     ABI_ERROR(sjoin("Invalid iw_mesh_type:", itoa(iw_mesh_type)))
+   end select
+
+   ! MRM: do not print for 1-RDM correction
+   if(Sigp%gwcalctyp/=21) then
+     write(msg,'(4a)')ch10,&
+      ' setup_sigma: calculating Sigma(iw)',&
+      ' at imaginary frequencies [eV] (Fermi Level set to 0) ',ch10
+     call wrtout(units, msg)
+     do io=1,Sigp%nomegasi
+       write(msg,'(2(f10.3,2x))')Sigp%omegasi(io)*Ha_eV
+       call wrtout(units, msg)
+     end do
+   endif
+
+   ltest=(Sigp%omegasimax>0.1d-4.and.Sigp%nomegasi>0)
+   ABI_CHECK(ltest,'Wrong value of omegasimax or nomegasi')
+   if (Sigp%gwcalctyp/=1) then ! only one shot GW is allowed for AC.
+     !ABI_ERROR("SC-GW with analytic continuation is not coded") ! MRM: let's allow it
+   end if
+ end if
+
+ if (Sigp%symsigma/=0.and.gwcalctyp>=20) then
+   ABI_WARNING("SC-GW with symmetries is still under development. Use at your own risk!")
+   ABI_ERROR("SC-GW requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!")
+ end if
+
+ ! Setup parameters for Spectral function.
+ if (Dtset%gw_customnfreqsp/=0) then
+   Sigp%nomegasr = Dtset%gw_customnfreqsp
+   ABI_WARNING('Custom grid for spectral function specified. Assuming experienced user.')
+   if (Dtset%gw_customnfreqsp/=0) then
+     Dtset%nfreqsp = Dtset%gw_customnfreqsp
+     ABI_WARNING('nfreqsp has been set to the same number as gw_customnfreqsp')
+   end if
+ else
+   Sigp%nomegasr  =Dtset%nfreqsp
+   Sigp%minomega_r=Dtset%freqspmin
+   Sigp%maxomega_r=Dtset%freqspmax
+ end if
+
+ if (Sigp%nomegasr>0) then
+   if (Dtset%gw_customnfreqsp==0) then
+     ! Check
+     if (Sigp%minomega_r >= Sigp%maxomega_r) then
+       ABI_ERROR('freqspmin must be smaller than freqspmax!')
+     end if
+     if(Sigp%nomegasr==1) then
+      domegas=0.d0
+     else
+      domegas=(Sigp%maxomega_r-Sigp%minomega_r)/(Sigp%nomegasr-1)
+     endif
+     !TODO this should be moved to Sr% and done in init_sigma_t
+     ABI_MALLOC(Sigp%omega_r,(Sigp%nomegasr))
+     do io=1,Sigp%nomegasr
+       Sigp%omega_r(io) = CMPLX(Sigp%minomega_r + domegas*(io-1),zero)
+     end do
+     write(msg,'(4a,i8,3(2a,f8.3),a)')ch10,&
+       ' Parameters for the calculation of the spectral function : ',ch10,&
+       '  Number of points    = ',Sigp%nomegasr,ch10,&
+       '  Min frequency  [eV] = ',Sigp%minomega_r*Ha_eV,ch10,&
+       '  Max frequency  [eV] = ',Sigp%maxomega_r*Ha_eV,ch10,&
+       '  Frequency step [eV] = ',domegas*Ha_eV,ch10
+     call wrtout(std_out, msg)
+   else
+     Sigp%minomega_r = MINVAL(Dtset%gw_freqsp(:))
+     Sigp%maxomega_r = MAXVAL(Dtset%gw_freqsp(:))
+     !TODO this should be moved to Sr% and done in init_sigma_t
+     ABI_MALLOC(Sigp%omega_r,(Sigp%nomegasr))
+     do io=1,Sigp%nomegasr
+       Sigp%omega_r(io) = CMPLX(Dtset%gw_freqsp(io),zero)
+     end do
+     write(msg,'(4a,i8,2(2a,f8.3),3a)')ch10,&
+       ' Parameters for the calculation of the spectral function : ',ch10,&
+       '  Number of points    = ',Sigp%nomegasr,ch10,&
+       '  Min frequency  [eV] = ',Sigp%minomega_r*Ha_eV,ch10,&
+       '  Max frequency  [eV] = ',Sigp%maxomega_r*Ha_eV,ch10,&
+       '  A custom set of frequencies is used! See the input file for values.',ch10
+     call wrtout(std_out, msg)
+   end if
+ else
+   !In indefo all these quantities are set to zero
+   !Sigp%nomegasr=1
+   !allocate(Sigp%omega_r(Sigp%nomegasr))
+   !Sigp%omega_r(1)=0
+ end if
+
+ call ks_gaps%free()
 
  ABI_FREE(val_indices)
 

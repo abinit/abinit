@@ -189,8 +189,6 @@ module m_gwdefs
  public :: sigma_is_herm
  public :: sigma_needs_w
  public :: sigma_needs_ppm
- !public :: sigma_sc_on_wfs
- !public :: sigma_sc_on_ene
  public :: g0g0w
 
 ! Private variables
@@ -536,7 +534,6 @@ function sigma_type_from_key(key) result(sigma_type)
 !Local variables ------------------------------
 !scalars
  character(len=500) :: msg
-
 !************************************************************************
 
  sigma_type = "None"
@@ -578,7 +575,6 @@ pure logical function sigma_is_herm(Sigp)
 
 !Local variables ------------------------------
  integer :: mod10
-
 !************************************************************************
 
  mod10=MOD(Sigp%gwcalctyp,10)
@@ -609,7 +605,6 @@ pure logical function sigma_needs_w(Sigp)
 
 !Local variables ------------------------------
  integer :: mod10
-
 !************************************************************************
 
  mod10=MOD(Sigp%gwcalctyp,10)
@@ -639,7 +634,6 @@ pure logical function sigma_needs_ppm(Sigp)
 
 !Local variables ------------------------------
  integer :: mod10
-
 !************************************************************************
 
  mod10=MOD(Sigp%gwcalctyp,10)
@@ -678,7 +672,6 @@ function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
 !scalars
  real(dp) :: sgn
  character(len=500) :: msg
-
 !************************************************************************
 
  if (delta_ene**2 > tol14) then
