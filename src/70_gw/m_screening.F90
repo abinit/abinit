@@ -20,7 +20,7 @@
 
 #include "abi_common.h"
 
-MODULE m_screening
+module m_screening
 
  use, intrinsic :: iso_c_binding
  use defs_basis
@@ -3431,5 +3431,5 @@ subroutine lwl_free(lwl)
 end subroutine lwl_free
 !!***
 
-END MODULE m_screening
+end module m_screening
 !!***

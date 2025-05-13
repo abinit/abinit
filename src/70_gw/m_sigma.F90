@@ -34,14 +34,14 @@ module m_sigma
  use netcdf
  use m_wfd
 
- use m_ebands,         only : ebands_t
  use defs_abitypes,    only : MPI_type
+ use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : c2r
  use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc
  use m_crystal,        only : crystal_t
+ use m_ebands,         only : ebands_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
  use m_screening,      only : epsm1_t
- use m_stream_string,  only : stream_string
 
  implicit none
 
@@ -289,7 +289,6 @@ subroutine write_sigma_header(Sigp, epsm1, Cryst, Kmesh, Qmesh)
  integer :: gwcalctyp,mod10
  character(len=500) :: msg
  integer :: units(2)
-
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -444,7 +443,6 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
  type(yamldoc_t) :: ydoc
 !arrays
  character(len=12) :: tag_spin(2)
-
 ! *************************************************************************
 
  gwcalctyp=Sigp%gwcalctyp
@@ -912,7 +910,6 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
 !Local variables-------------------------------
 !scalars
  integer :: b1gw,b2gw,mod10
-
 ! *************************************************************************
 
  !@sigma_t
@@ -1416,7 +1413,9 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  ncerr = nctk_def_dims(ncid, [&
    nctkdim_t("cplex", cplex), nctkdim_t("b1gw", sigma%b1gw), nctkdim_t("b2gw", sigma%b2gw),&
    nctkdim_t("nbgw", nbgw), nctkdim_t("nkptgw", sigma%nkptgw), nctkdim_t("ndim_sig", ndim_sig), &
-   nctkdim_t("nomega4sd", sigma%nomega4sd), nctkdim_t("nsig_ab", sigma%nsig_ab)], defmode=.True.)
+   nctkdim_t("nomega4sd", sigma%nomega4sd), nctkdim_t("nsig_ab", sigma%nsig_ab), &
+   nctkdim_t("scr_nomega", epsm1%nomega) &
+ ], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ! No. of real frequencies, might be zero.
@@ -1432,7 +1431,8 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  ! =======================
  ! == Define variables ===
  ! =======================
- ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: 'sigma_nband', 'scr_nband', 'gwcalctyp', 'usepawu'])
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+   'sigma_nband', 'scr_nband', 'gwcalctyp', 'usepawu', "nfreqre", "nfreqim"])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
@@ -1461,7 +1461,9 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
    nctkarr_t('sigcme4sd', "dp",'cplex, nbgw, number_of_kpoints, nomega4sd, ndim_sig'),&
    nctkarr_t('sigxcme4sd', "dp", 'cplex, nbgw, number_of_kpoints, nomega4sd, ndim_sig'),&
    nctkarr_t('ze0',"dp", 'cplex, nbgw, number_of_kpoints, number_of_spins'),&
-   nctkarr_t('omega4sd', "dp", 'cplex, nbgw, number_of_kpoints, nomega4sd, number_of_spins')])
+   !nctkarr_t('scr_omega', "dp", 'cplex, scr_nomega') &
+   nctkarr_t('omega4sd', "dp", 'cplex, nbgw, number_of_kpoints, nomega4sd, number_of_spins') &
+ ])
  NCF_CHECK(ncerr)
 
  if (sigma%needs_eigvec_qp) then
@@ -1508,6 +1510,8 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('scr_nband'), epsm1%Hscr%nbnds_used))
  NCF_CHECK(nf90_put_var(ncid, vid('gwcalctyp'), sigma%gwcalctyp))
  NCF_CHECK(nf90_put_var(ncid, vid('usepawu'), sigma%usepawu))
+ NCF_CHECK(nf90_put_var(ncid, vid('nfreqre'), epsm1%nomega_r))
+ NCF_CHECK(nf90_put_var(ncid, vid('nfreqim'), epsm1%nomega_i))
  NCF_CHECK(nf90_put_var(ncid, vid('kptgw'), sigma%kptgw))
  NCF_CHECK(nf90_put_var(ncid, vid('minbnd'), sigma%minbnd))
  NCF_CHECK(nf90_put_var(ncid, vid('maxbnd'),sigma%maxbnd))
@@ -1530,7 +1534,7 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('vUme'), sigma%vUme * Ha_eV))
 
  ! Have to transfer complex arrays
- ABI_MALLOC(rdata4,(cplex,b1gw:b2gw, sigma%nkibz, sigma%nsppol))
+ ABI_MALLOC(rdata4,(cplex, b1gw:b2gw, sigma%nkibz, sigma%nsppol))
  rdata4=c2r(sigma%degw)
  NCF_CHECK(nf90_put_var(ncid, vid('degw'), rdata4 * Ha_eV))
  ABI_FREE(rdata4)
@@ -1575,7 +1579,7 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  ABI_FREE(rdata4)
 
  if (sigma%nomega_i > 0) then
-  ABI_MALLOC(rdata5, (cplex,nbgw, sigma%nkibz, sigma%nomega_i, sigma%nsppol*sigma%nsig_ab))
+  ABI_MALLOC(rdata5, (cplex, nbgw, sigma%nkibz, sigma%nomega_i, sigma%nsppol*sigma%nsig_ab))
   rdata5 = c2r(sigma%sigcmesi)
   NCF_CHECK(nf90_put_var(ncid, vid('sigcmesi'), rdata5*Ha_eV))
   ABI_FREE(rdata5)
@@ -1607,7 +1611,7 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
    ABI_FREE(rdata5)
  end if
 
- ABI_MALLOC(rdata5, (cplex,nbgw, sigma%nkibz, sigma%nomega4sd, sigma%nsppol*sigma%nsig_ab))
+ ABI_MALLOC(rdata5, (cplex, nbgw, sigma%nkibz, sigma%nomega4sd, sigma%nsppol*sigma%nsig_ab))
  rdata5 = c2r(sigma%sigxcme4sd)
  NCF_CHECK(nf90_put_var(ncid, vid('sigxcme4sd'), rdata5 * Ha_eV))
  ABI_FREE(rdata5)
@@ -1628,6 +1632,12 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  rdata5 = c2r(sigma%omega4sd)
  NCF_CHECK(nf90_put_var(ncid, vid('omega4sd'), rdata5 * Ha_eV))
  ABI_FREE(rdata5)
+
+ !ABI_CHECK_IGE(epsm1%nomega, 0, "nomega")
+ !ABI_MALLOC(rdata2, (2, epsm1%nomega))
+ !rdata2 = c2r(epsm1%omega)
+ !!NCF_CHECK(nf90_put_var(ncid, vid('scr_omega'), rdata2 * Ha_eV))
+ !ABI_FREE(rdata2)
 
 contains
  integer function vid(vname)
