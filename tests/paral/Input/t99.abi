@@ -5,10 +5,7 @@ ndtset 2
 jdtset 1 2
 
 getden2 1
-# nline1 7
-# nnsclo1 7
 nline2 5
-#nnsclo2 10
 
 prtvol    4
 pawprtvol 3
@@ -17,9 +14,8 @@ pawprtvol 3
 nstep1   30
 nstep2   2
 ecut     4 # low cutoff !
-#ngfft 32 32 32
-#ngfftdg 32 32 32
 pawecutdg 8
+
 tolvrs1 1.0d-5
 toldfe2 1.0d-8
 # Added in v9.11:
@@ -82,7 +78,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 
 paral_kgb1 0
 paral_kgb2 1
-np_spkpt2 2
+np_spkpt2 4
 npband2 2
 npfft2 1
 bandpp2 16
@@ -92,7 +88,7 @@ dmftctqmc_basis 0
 dmftqmc_therm 10
 dmftqmc_l 500
 dmft_triqs_off_diag 0
-dmftqmc_n 5.d2
+dmftqmc_n 1.d3
 
 dmft_orbital -1 -1  1
 dmft_orbital_filepath  "t99"
@@ -117,31 +113,15 @@ prtwf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [shell]
 #%% pre_commands = iw_cp t99_0001 . ; iw_cp t99_0002 .;
 #%% [paral_info]
-#%% nprocs_to_test = 4
-#%% max_nprocs = 4
-#%% [NCPU_4]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
 #%% files_to_test =
-#%%   t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Wannier_functions_iatom0001_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Wannier_functions_iatom0002_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2.UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2.UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_CTQMC_HISTOGRAM_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_CTQMC_HISTOGRAM_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_DMFTOCCND, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_DMFTORBITAL_itypat0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_DMFTORBITAL_itypat0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Hybridization_diag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Hybridization_diag_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Gtau_diag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Gtau_diag_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Gtau_diag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Gtau_diag_DLR_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
 #%% authors = B. Amadon, E. Castiel
 #%% keywords = DMFT, TRIQS

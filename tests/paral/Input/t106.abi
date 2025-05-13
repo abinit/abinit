@@ -84,14 +84,17 @@ dmft_triqs_move_double 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [files]
 #%% [paral_info]
-#%% nprocs_to_test = 1, 4
-#%% max_nprocs = 4
+#%% nprocs_to_test = 1, 4, 8
+#%% max_nprocs = 8
 #%% [NCPU_1]
 #%% files_to_test = t91_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [NCPU_4]
 #%% files_to_test = t91_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [NCPU_8]
+#%% files_to_test = t91_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% keywords = PAW, DMFT, TRIQS
 #%% authors = B. Amadon, E. Castiel

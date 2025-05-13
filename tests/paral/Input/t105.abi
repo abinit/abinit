@@ -5,10 +5,6 @@ ndtset 2
 jdtset 1 2
 
 getden2 1
-# nline1 7
-# nnsclo1 7
-nline2 5
-#nnsclo2 10
 
 prtvol    4
 pawprtvol 2
@@ -17,15 +13,9 @@ pawprtvol 2
 nstep1   30
 nstep2   1
 ecut     4 # low cutoff !
-#ngfft 32 32 32
-#ngfftdg 32 32 32
 pawecutdg 8
-tolvrs1 1.0d-5
-toldfe2 1.0d-8
-# Added in v9.11:
-tolwfr_diago 1d-30
-# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
-# To reproduce old behaviour : set stringent value of tolwfr_diago
+
+tolvrs  1.0d-5
 nband     64
 nbdbuf    4
 occopt 3 tsmear 1200 K
@@ -72,7 +62,6 @@ dmft_triqs_wmax 1.0
 dmft_solv 6 # Rotationally invariant TRIQS
 
 # == DFT+U
-#usepawu1    4
 usepawu2     14
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2  1 -1
@@ -83,7 +72,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 
 paral_kgb1 0
 paral_kgb2 1
-np_spkpt2 2
+np_spkpt2 4
 npband2 2
 npfft2 1
 bandpp2 32
@@ -108,10 +97,11 @@ prtwf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [paral_info]
-#%% nprocs_to_test = 4
-#%% max_nprocs = 4
-#%% [NCPU_4]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
 #%% files_to_test =
 #%%   t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%%   t99_MPI4o_DS2_Wannier_functions_iatom0001_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
