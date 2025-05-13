@@ -23,7 +23,6 @@
 MODULE m_screening
 
  use, intrinsic :: iso_c_binding
-
  use defs_basis
  use m_abicore
  use m_hide_blas

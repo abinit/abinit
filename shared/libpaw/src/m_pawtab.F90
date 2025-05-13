@@ -1668,7 +1668,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    end if
    if (allocated(pawtab%vhtnzc)) then
      siz_vhtnzc=size(pawtab%vhtnzc)                 !(mesh_size)
-     if (siz_vhtnzc/=pawtab%mesh_size) msg=trim(msg)//' vhtnzc'
+     if (siz_vhtnzc<pawtab%mesh_size) msg=trim(msg)//' vhtnzc'
      nn_dpr=nn_dpr+siz_vhtnzc
    end if
    if (allocated(pawtab%vhnzc)) then
@@ -2698,8 +2698,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_DEALLOCATE(pawtab%vhtnzc)
    end if
    if (siz_vhtnzc>0) then
-     LIBPAW_ALLOCATE(pawtab%vhtnzc,(pawtab%mesh_size))
-     pawtab%vhtnzc=list_dpr(ii:ii+pawtab%mesh_size-1)
+     LIBPAW_ALLOCATE(pawtab%vhtnzc,(siz_vhtnzc))
+     pawtab%vhtnzc=list_dpr(ii:ii+siz_vhtnzc-1)
      ii=ii+siz_vhtnzc
    end if
    if (allocated(pawtab%vhnzc)) then
