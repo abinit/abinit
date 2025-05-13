@@ -1780,12 +1780,10 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  Ep%nkibz =Hdr_wfk%nkpt
 
  if (Ep%nbnds>mband) then
-   Ep%nbnds=mband
-   Dtset%nband(:)=mband
-   write(msg,'(4a,i4,a)')ch10,&
-     ' Number of bands found less then required. ',ch10,&
-     ' Calculation will proceed with nbnds = ',mband,ch10
-   ABI_WARNING(msg)
+   write(msg,'(2a,2(a,i0))') &
+    'Number of bands stored in WFK file is less than required. ',ch10,&
+    "WFK mband:", mband, ", chi0 nband: ", Ep%nbnds
+   ABI_ERROR(msg)
  end if
 
  cryst = Hdr_wfk%get_crystal(gw_timrev=timrev, remove_inv=remove_inv)
