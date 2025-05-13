@@ -3022,15 +3022,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: pertcase0 = 0, master = 0, linear_iw_mesh = 0, minimax_iw_mesh = 1
+ integer,parameter :: pertcase0 = 0, master = 0
  integer :: bantot,enforce_sym,gwcalctyp,ib,ibtot,icutcoul_eff,ii,ikcalc,ikibz,io,isppol,itypat,jj,method
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng, nsppol
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
- integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc, iw_mesh_type
+ integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
  real(dp),parameter :: OMEGASIMIN=0.01d0, tol_enediff=0.001_dp*eV_Ha
  real(dp) :: domegas,domegasi,ucvol,rcut
  logical :: ltest,remove_inv,changed,found
- character(len=500) :: msg
+ character(len=500) :: msg, iw_mesh_type
  character(len=fnlen) :: fname,fcore,string
  type(wvl_internal_type) :: wvl
  type(gaps_t) :: ks_gaps
@@ -3814,30 +3814,23 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  if (mod10 == 1) then
    Sigp%nomegasi   = abs(Dtset%nomegasi)
-   iw_mesh_type = linear_iw_mesh
-   if (dtset%nomegasi < 0) iw_mesh_type = minimax_iw_mesh
+   iw_mesh_type = "linear"
+   if (dtset%nomegasi < 0) iw_mesh_type = "minimax"
    Sigp%omegasimax = Dtset%omegasimax
    Sigp%omegasimin = OMEGASIMIN
-
-   write(msg,'(4a,i3,2(2a,f8.3),a)')ch10,&
-    ' Parameters for analytic continuation : ',ch10,&
-    '  number of imaginary frequencies for sigma =  ',Sigp%nomegasi,ch10,&
-    '  min frequency for sigma on imag axis [eV] =  ',Sigp%omegasimin*Ha_eV,ch10,&
-    '  max frequency for sigma on imag axis [eV] =  ',Sigp%omegasimax*Ha_eV,ch10
-   call wrtout(std_out, msg)
 
    !TODO this should not be done here but in init_sigma_t
    ABI_MALLOC(Sigp%omegasi, (Sigp%nomegasi))
 
    select case (iw_mesh_type)
-   case (linear_iw_mesh)
+   case ("linear")
      ! Linear mesh along the imaginary axis.
      domegasi=Sigp%omegasimax/(Sigp%nomegasi-1)
      do io=1,Sigp%nomegasi
        Sigp%omegasi(io)=CMPLX(zero,(io-1)*domegasi)
      end do
 
-   case (minimax_iw_mesh)
+   case ("minimax")
      block
      integer :: nbsum
      real(dp) :: te_min = -one, te_max = one
@@ -3865,16 +3858,16 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
      Sigp%omegasi = j_dpc * iw_mesh
 
-     ABI_SFREE(tau_mesh)
-     ABI_SFREE(tau_wgs)
-     ABI_SFREE(iw_mesh)
-     ABI_SFREE(iw_wgs)
-     ABI_SFREE(cosft_wt)
-     ABI_SFREE(cosft_tw)
-     ABI_SFREE(sinft_wt)
+     ABI_FREE_NOCOUNT(tau_mesh)
+     ABI_FREE_NOCOUNT(tau_wgs)
+     ABI_FREE_NOCOUNT(iw_mesh)
+     ABI_FREE_NOCOUNT(iw_wgs)
+     ABI_FREE_NOCOUNT(cosft_wt)
+     ABI_FREE_NOCOUNT(cosft_tw)
+     ABI_FREE_NOCOUNT(sinft_wt)
      end block
 
-   !case (log_iw_mesh)
+   !case ("log")
      !ABI_ERROR("AC with log mesh not implemented")
      ! Logarithmic mesh along the imaginary axis.
      !domegasi=(Sigp%omegasimax/Sigp%omegasimin)**(one/(Sigp%nomegasi-1))
@@ -3884,19 +3877,28 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ! Sigp%omegasi(io)=ldi*domegasi
      !end do
    case default
-     ABI_ERROR(sjoin("Invalid iw_mesh_type:", itoa(iw_mesh_type)))
+     ABI_ERROR(sjoin("Invalid iw_mesh_type:", iw_mesh_type))
    end select
 
+   write(msg,'(7a,i3,2(2a,f8.3),a)')ch10,&
+    ' Parameters for the analytic continuation of Sigma_c(i omega): ',ch10,&
+    '  Mesh type:                      = ', trim(iw_mesh_type), ch10, &
+    '  Number of imaginary frequencies = ',Sigp%nomegasi,ch10,&
+    '  Min frequency on imag axis (eV) = ',minval(aimag(sigp%omegasi)) * Ha_eV,ch10,&
+    '  Max frequency on imag axis (eV) = ',maxval(aimag(sigp%omegasi)) * Ha_eV,ch10
+   call wrtout(units, msg)
+
    ! MRM: do not print for 1-RDM correction
-   if(Sigp%gwcalctyp/=21) then
+   if (Sigp%gwcalctyp /= 21) then
      write(msg,'(4a)')ch10,&
       ' setup_sigma: calculating Sigma(iw)',&
-      ' at imaginary frequencies [eV] (Fermi Level set to 0) ',ch10
+      ' at imaginary frequencies (eV) (Fermi Level set to 0) ',ch10
      call wrtout(units, msg)
      do io=1,Sigp%nomegasi
        write(msg,'(2(f10.3,2x))')Sigp%omegasi(io)*Ha_eV
        call wrtout(units, msg)
      end do
+     call wrtout(units, "")
    endif
 
    ltest=(Sigp%omegasimax>0.1d-4.and.Sigp%nomegasi>0)
