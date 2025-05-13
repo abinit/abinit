@@ -1612,7 +1612,14 @@ meta: {optdriver: 4, gwcalctyp: 1, }
           total number of points  =         8000
 
 
- setup_sigma: calculating Sigma(iw) at imaginary frequencies [eV] (Fermi Level set to 0)
+ Parameters for the analytic continuation of Sigma_c(i omega):
+  Mesh type:                      = linear
+  Number of imaginary frequencies =  10
+  Min frequency on imag axis (eV) =    0.000
+  Max frequency on imag axis (eV) =   40.000
+
+
+ setup_sigma: calculating Sigma(iw) at imaginary frequencies (eV) (Fermi Level set to 0)
 
      0.000       0.000
      0.000       4.444
@@ -1624,6 +1631,7 @@ meta: {optdriver: 4, gwcalctyp: 1, }
      0.000      31.111
      0.000      35.556
      0.000      40.000
+
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
  r_s =    1.9964
@@ -1798,7 +1806,14 @@ meta: {optdriver: 4, gwcalctyp: 1, }
           total number of points  =         8000
 
 
- setup_sigma: calculating Sigma(iw) at imaginary frequencies [eV] (Fermi Level set to 0)
+ Parameters for the analytic continuation of Sigma_c(i omega):
+  Mesh type:                      = linear
+  Number of imaginary frequencies =  10
+  Min frequency on imag axis (eV) =    0.000
+  Max frequency on imag axis (eV) =   40.000
+
+
+ setup_sigma: calculating Sigma(iw) at imaginary frequencies (eV) (Fermi Level set to 0)
 
      0.000       0.000
      0.000       4.444
