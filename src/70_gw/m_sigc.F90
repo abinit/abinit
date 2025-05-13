@@ -468,9 +468,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
    if (epsm1%use_mpi_shared_win) then
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
-       ad_count = _MOK(2*npwc) * _MOK(npwc) * _MOK(epsm1%nomega_i)
-       call epsm1%shared_comm%allocate_shared_master(ad_count, gwpc, xmpi_info_null, void_ptr, ac_epsm1cqwz2_win)
-       call c_f_pointer(void_ptr, ac_epsm1cqwz2, shape=[npwc, npwc, epsm1%nomega_i])
+     ad_count = _MOK(2*npwc) * _MOK(npwc) * _MOK(epsm1%nomega_i)
+     call epsm1%shared_comm%allocate_shared_master(ad_count, gwpc, xmpi_info_null, void_ptr, ac_epsm1cqwz2_win)
+     call c_f_pointer(void_ptr, ac_epsm1cqwz2, shape=[npwc, npwc, epsm1%nomega_i])
    else
      ABI_CALLOC(ac_epsm1cqwz2, (npwc, npwc, epsm1%nomega_i))
    end if
@@ -1088,7 +1088,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            if (Sigp%gwcomp==1) then
              ! Evaluate Extrapolar term TODO this does not work with spinor
              if (extrapolar_distrb(jb,kb,ik_bz,spin) == Wfd%my_rank ) then
-               ! Do it once as it does not depend on the ib index summed over.
+               ! Do it once as it does not depend on the ib index being summed over.
                extrapolar_distrb(jb,kb,ik_bz,spin) = xmpi_undefined_rank
 #if 1
                call calc_wfwfg(ktabr(:,jk_ibz),jik, spinrot_kgw, & ! TODO: why jk_ibz?

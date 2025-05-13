@@ -3048,13 +3048,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  DBG_ENTER('COLL')
  units = [std_out, ab_out]
-
- ! Check for calculations that are not implemented
- nsppol = dtset%nsppol
- ltest = ALL(Dtset%nband(1:Dtset%nkpt*nsppol) == Dtset%nband(1))
- ABI_CHECK(ltest,'Dtset%nband(:) must be constant')
-
  my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
+
+ nsppol = dtset%nsppol
+ ABI_CHECK(ALL(Dtset%nband(1:Dtset%nkpt*nsppol) == Dtset%nband(1)), 'Dtset%nband(:) must be constant')
 
  ! Basic parameters
  Sigp%ppmodel    = Dtset%ppmodel
@@ -3069,14 +3066,16 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
             ! 2 => take advantage of time-reversal symmetry
  if (any(dtset%kptopt == [3, 4])) timrev = 1
 
- ! === For HF, SEX or COHSEX use Hybertsen-Louie PPM (only $\omega=0$) ===
- ! * Use fake screening for HF.
+ ! For HF, SEX or COHSEX use Hybertsen-Louie PPM (only $\omega=0$) ===
+ ! Use fake screening for HF.
  ! FIXME Why, we should not redefine Sigp%ppmodel
  gwcalctyp = Sigp%gwcalctyp
- mod10 = MOD(Sigp%gwcalctyp,10)
- if (mod10==5.or.mod10==6.or.mod10==7) Sigp%ppmodel=2
- if (mod10<5.and.MOD(Sigp%gwcalctyp,1)/=1) then ! * One shot GW (PPM or contour deformation).
-   if (Dtset%nomegasrd==1) then ! avoid division by zero!
+ mod10 = MOD(Sigp%gwcalctyp, 10)
+ if (any(mod10 == [5, 6, 7])) Sigp%ppmodel=2
+ if (mod10<5 .and. MOD(Sigp%gwcalctyp,1)/=1) then !
+   ! One shot GW (PPM or contour deformation).
+   if (Dtset%nomegasrd==1) then
+     ! avoid division by zero!
      Sigp%nomegasrd  =1
      Sigp%maxomega4sd=zero
      Sigp%deltae     =zero
@@ -3109,7 +3108,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  test_npwkss = 0
  call make_gvec_kss(Dtset%nkpt,Dtset%kptns,Hdr_wfk%ecut_eff,Dtset%symmorphi,Dtset%nsym,Dtset%symrel,Dtset%tnons,&
                     gprimd,Dtset%prtvol,test_npwkss,test_gvec_kss,ierr)
- ABI_CHECK(ierr==0,"Fatal error in make_gvec_kss")
+ ABI_CHECK(ierr==0, "Fatal error in make_gvec_kss")
 
  ABI_MALLOC(gvec_kss,(3, test_npwkss))
  gvec_kss = test_gvec_kss
@@ -3124,7 +3123,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    end if
  end do
  ABI_CHECK(ierr == 0, "Mismatch between gvec_kss and test_gvec_kss")
-
  ABI_FREE(test_gvec_kss)
 
  ! Get important dimensions from the WFK header
@@ -3133,24 +3131,19 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%nsig_ab = Hdr_wfk%nspinor**2  ! TODO Is it useful calculating only diagonal terms?
 
  if (Sigp%nbnds > mband) then
-   Sigp%nbnds     = mband
-   Dtset%nband(:) = mband
-   Dtset%mband    = MAXVAL(Dtset%nband)
-   write(msg,'(3a,i4,a)')&
-    'Number of bands found less then required',ch10,&
-    'calculation will proceed with nbnds = ',mband,ch10
-   ABI_WARNING(msg)
+   write(msg,'(2a,2(a,i0))') &
+    'Number of bands stored WFK file is less than required. ',ch10,&
+    "WFK mband: ", mband, ", self-energy nband: ", sigp%nbnds
+   ABI_ERROR(msg)
  end if
 
  ! Check input
- if (Sigp%ppmodel==3.or.Sigp%ppmodel==4) then
-   if (gwcalctyp>=10) then
-     write(msg,'(a,i3,a)')' The ppmodel chosen and gwcalctyp ',Dtset%gwcalctyp,' are not compatible. '
-     ABI_ERROR(msg)
+ if (any(Sigp%ppmodel== [3, 4])) then
+   if (gwcalctyp >= 10) then
+     ABI_ERROR(sjoin('The ppmodel chosen and gwcalctyp: ', itoa(Dtset%gwcalctyp),' are not compatible.'))
    end if
    if (Sigp%nspinor==2) then
-     write(msg,'(a,i3,a)')' The ppmodel chosen and nspinor ',Sigp%nspinor,' are not compatible. '
-     ABI_ERROR(msg)
+     ABI_ERROR(sjoin('The ppmodel chosen and nspinor: ', itoa(Sigp%nspinor), ' are not compatible.'))
    end if
  end if
 
@@ -3187,14 +3180,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    ltest = (Sigp%npwx >= ng_kss)
    ABI_CHECK(ltest,"Sigp%npwx<ng_kss!")
 
-   ! * Fill gvec_kss with larger sphere.
+   ! Fill gvec_kss with larger sphere.
    ABI_FREE(gvec_kss)
    ABI_MALLOC(gvec_kss,(3,Sigp%npwx))
    gvec_kss = gsphere_sigx_p
    ABI_FREE(gsphere_sigx_p)
  end if
 
- ! Set up of the k-points and tables in the whole BZ ===
+ ! Set up of the k-points and tables in the whole BZ
  ! TODO Recheck symmorphy and inversion
  call Kmesh%init(Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.FALSE.)
  !call Kmesh%init(Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.TRUE.)
@@ -3249,7 +3242,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ABI_FREE(eigen)
  ABI_FREE(npwarr)
 
- ! Calculate KS occupation numbers and ks_vbk(nkibz, nsppol) ====
+ ! Calculate KS occupation numbers and ks_vbk(nkibz, nsppol)
  ! ks_vbk gives the (valence|last Fermi band) index for each k and spin.
  ! spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
  call ks_ebands%update_occ(Dtset%spinmagntarget, prtvol=0)

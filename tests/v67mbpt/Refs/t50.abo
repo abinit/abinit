@@ -62,7 +62,7 @@ _ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =          15        mffmem =           1         mkmem =           3
+-    mband =          14        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
 P This job should need less than                       3.281 Mbytes of memory.
@@ -183,7 +183,7 @@ P           mkmem4          3
             natom           2
             nband1         10
             nband2         14
-            nband3         15
+            nband3         14
             nband4          8
            nbdbuf1          4
            nbdbuf2          2
@@ -218,7 +218,7 @@ P           mkmem4          3
                        0.000000  0.000000  0.000000  0.000000
               occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000
+                       0.000000  0.000000
               occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver1          0
@@ -589,7 +589,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 3, mband: 15, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
+dimensions: {natom: 2, nkpt: 3, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 3, gwcalctyp: 0, }
@@ -1156,7 +1156,7 @@ P           mkmem4          3
             natom           2
             nband1         10
             nband2         14
-            nband3         15
+            nband3         14
             nband4          8
            nbdbuf1          4
            nbdbuf2          2
@@ -1191,7 +1191,7 @@ P           mkmem4          3
                        0.000000  0.000000  0.000000  0.000000
               occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000
+                       0.000000  0.000000
               occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver1          0
