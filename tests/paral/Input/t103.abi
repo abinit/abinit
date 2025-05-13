@@ -94,10 +94,10 @@ prtcurrent 1      # Print current
 #%% max_nprocs = 8
 #%% [NCPU_8]
 #%% files_to_test =
-#%%   t103_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t103_MPI8o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t103_MPI8o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t103_MPI8o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t103_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t103_MPI8o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t103_MPI8o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t103_MPI8o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
 #%% [extra_info]
 #%% authors = F. Brieuc
 #%% keywords = RTTDDFT
