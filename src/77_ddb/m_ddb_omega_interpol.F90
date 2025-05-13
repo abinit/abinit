@@ -124,12 +124,12 @@ contains
  complex(dpc), allocatable :: lm_zfield(:,:,:),zfield(:,:,:),zfield_tr(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: ci_alpha(:,:,:),lm_alpha(:,:,:)
+ complex(dpc), allocatable :: ci_localpha(:,:,:),lm_localpha(:,:,:)
  complex(dpc), allocatable :: ci_epsilon(:,:,:),lm_epsilon(:,:,:)
  complex(dpc), allocatable :: ci_mchi(:,:,:),lm_mchi(:,:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
  complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),magphongreen(:,:),phongreen(:,:),phongreen_fm(:,:)
- complex(dpc), allocatable :: ri_magelsus(:,:),lm_magelsus(:,:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
  complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
 
@@ -182,6 +182,8 @@ contains
  ABI_MALLOC(ri_genelsus,(3*natom+ndim,3,nomega))
  ABI_MALLOC(ci_alpha,(3,3,nomega))
  ABI_MALLOC(lm_alpha,(3,3,nomega))
+ ABI_MALLOC(ci_localpha,(ndim,3,nomega))
+ ABI_MALLOC(lm_localpha,(ndim,3,nomega))
  ABI_MALLOC(ci_epsilon,(3,3,nomega))
  ABI_MALLOC(lm_epsilon,(3,3,nomega))
  ABI_MALLOC(ci_mchi,(3,3,nomega))
@@ -190,8 +192,6 @@ contains
  ABI_MALLOC(dummysus,(ndim,ndim))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(lm_magsus,(ndim,ndim,nomega))
- ABI_MALLOC(ri_magelsus,(ndim,3))
- ABI_MALLOC(lm_magelsus,(ndim,3,nomega))
  ABI_MALLOC(invmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(dummymom,(ndim,(natom+5)*3))
  ABI_MALLOC(dummymom_tr,(ndim,(natom+5)*3))
@@ -327,16 +327,16 @@ contains
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
 
-     call ri_d2etot(int_fsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_mchi(:,:,iw),&
-   & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_mchi(:,:,iw),magsus,mpert,mmom(:,:,iw),&
+     call ri_d2etot(int_fsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_localpha(:,:,iw),ci_mchi(:,:,iw),&
+   & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),magsus(:,:,iw),mpert,mmom(:,:,iw),&
    & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
    else if (mpopt==2) then
      call phonon_green(amu,eigvec,eta,int_rsddb,& 
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
    & phfrq(:,iw),phongreen,phonspec(iw),typat)
 
-     call ri_d2etot(int_rsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_mchi(:,:,iw),&
-   & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_mchi(:,:,iw),magsus,mpert,mmom(:,:,iw),&
+     call ri_d2etot(int_rsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_localpha(:,:,iw),ci_mchi(:,:,iw),&
+   & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),magsus(:,:,iw),mpert,mmom(:,:,iw),&
    & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
    end if
 
@@ -454,27 +454,27 @@ contains
 !    call wrtout(spin_unit,msg,'COLL')
 ! end do
 !
-! write(spin_unit,*) ' '
-! write(spin_unit,*) '#  Real part of relaxed-ion local spin susceptibility tensor (at. units)'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
-! call wrtout(spin_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((real(magsus(i,j,iw)+lm_magsus(i,j,iw)),j=1,ndim),i=1,ndim)
-!    call wrtout(spin_unit,msg,'COLL')
-! end do
-!
-! write(spin_unit,*) ' '
-! write(spin_unit,*) '#  Imaginary part of relaxed-ion local spin susceptibility tensor (at. units)'
-! write(msg,'(a,a)') ch10,&
-!&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
-! call wrtout(spin_unit,msg,'COLL')
-! do iw=1,nomega
-!    write(msg,pfmt) &
-! &  omega(iw), ((aimag(magsus(i,j,iw)+lm_magsus(i,j,iw)),j=1,ndim),i=1,ndim)
-!    call wrtout(spin_unit,msg,'COLL')
-! end do
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Real part of relaxed-ion local spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(magsus(i,j,iw)+lm_magsus(i,j,iw)),j=1,ndim),i=1,ndim)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Imaginary part of relaxed-ion local spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(magsus(i,j,iw)+lm_magsus(i,j,iw)),j=1,ndim),i=1,ndim)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
 
  write(spin_unit,*) ' '
  write(spin_unit,*) '#  Real part of the inverse of the clamped-ion local spin susceptibility tensor (at. units)'
@@ -637,7 +637,7 @@ contains
  call wrtout(mmom_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((real(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
+ &  omega(iw), ((real(ci_localpha(i,j,iw)),j=1,3),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
@@ -649,7 +649,7 @@ contains
  call wrtout(mmom_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((aimag(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
+ &  omega(iw), ((aimag(ci_localpha(i,j,iw)),j=1,3),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
@@ -678,32 +678,30 @@ contains
 !    call wrtout(mmom_unit,msg,'COLL')
 ! end do
 !
-! write(mmom_unit,*) ' '
-! write(mmom_unit,*) '#  Real part of relaxed-ion local magnetoelectric tensor (at. units)'
-! write(msg,'(a,a,a)') ch10,&
-!&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
-!&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
-! call wrtout(mmom_unit,msg,'COLL')
-! do iw=1,nomega
-!    ri_magelsus(:,:)=mmom(:,3*(natom+1)+1:3*(natom+2),iw)+lm_magelsus(:,:,iw)
-!    write(msg,pfmt) &
-! &  omega(iw), ((real(ri_magelsus(i,j)),j=1,3),i=1,ndim)
-!    call wrtout(mmom_unit,msg,'COLL')
-! end do
-!
-! write(mmom_unit,*) ' '
-! write(mmom_unit,*) '#  Imaginary part of relaxed-ion local magnetoelectric tensor (at. units)'
-! write(msg,'(a,a,a)') ch10,&
-!&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
-!&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
-! call wrtout(mmom_unit,msg,'COLL')
-! do iw=1,nomega
-!    ri_magelsus(:,:)=mmom(:,3*(natom+1)+1:3*(natom+2),iw)+lm_magelsus(:,:,iw)
-!    write(msg,pfmt) &
-! &  omega(iw), ((aimag(ri_magelsus(i,j)),j=1,3),i=1,ndim)
-!    call wrtout(mmom_unit,msg,'COLL')
-! end do
-!
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Real part of relaxed-ion local magnetoelectric tensor (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ci_localpha(i,j,iw)+lm_localpha(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Imaginary part of relaxed-ion local magnetoelectric tensor (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ci_localpha(i,j,iw)+lm_localpha(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
 ! write(mmom_unit,*) ' '
 ! write(mmom_unit,*) '# [Alternative calc] Real part of relaxed-ion local magnetoelectric tensor (at. units)'
 ! write(msg,'(a,a,a)') ch10,&
@@ -1044,6 +1042,8 @@ contains
  ABI_FREE(lm_mchi)
  ABI_FREE(ci_alpha)
  ABI_FREE(lm_alpha)
+ ABI_FREE(ci_localpha)
+ ABI_FREE(lm_localpha)
  ABI_FREE(macmagsus)
  ABI_FREE(omega)
  ABI_FREE(phfrq)
@@ -1061,8 +1061,6 @@ contains
  ABI_FREE(zeff)
  ABI_FREE(zeff_tr)
  ABI_FREE(genzeff_tr)
- ABI_FREE(ri_magelsus)
- ABI_FREE(lm_magelsus)
  ABI_FREE(ri_genelsus)
  ABI_FREE(modezeff)
  ABI_SFREE(w0hessian)
@@ -1815,7 +1813,8 @@ end subroutine me_altcalc
 #include "abi_common.h"
 
 
- subroutine ri_d2etot(blkval,ci_alpha,ci_epsilon,ci_mchi,lm_alpha,lm_epsilon,lm_mchi,magsus,mpert,mcoup, &
+ subroutine ri_d2etot(blkval,ci_alpha,ci_epsilon,ci_localpha,ci_mchi,&
+& lm_alpha,lm_epsilon,lm_localpha,lm_magsus,lm_mchi,magsus,mpert,mcoup, &
 & mcoup_tr,natom,ndim,phongreen,ucvol)
 
 !Arguments ------------------------------------
@@ -1826,11 +1825,14 @@ end subroutine me_altcalc
  real(dp), intent(in) :: blkval(2,3,mpert,3,mpert,1)
  complex(dpc), intent(out) :: ci_alpha(3,3)
  complex(dpc), intent(out) :: lm_alpha(3,3)
+ complex(dpc), intent(out) :: ci_localpha(ndim,3)
+ complex(dpc), intent(out) :: lm_localpha(ndim,3)
  complex(dpc), intent(out) :: ci_epsilon(3,3)
  complex(dpc), intent(out) :: lm_epsilon(3,3)
  complex(dpc), intent(out) :: ci_mchi(3,3)
  complex(dpc), intent(out) :: lm_mchi(3,3)
- complex(dpc), intent(in) :: magsus(ndim,ndim)
+ complex(dpc), intent(inout) :: magsus(ndim,ndim)
+ complex(dpc), intent(out) :: lm_magsus(ndim,ndim)
  complex(dpc), intent(in) :: mcoup(ndim,(natom+5)*3)
  complex(dpc), intent(in) :: mcoup_tr((natom+5)*3,ndim)
  complex(dpc), intent(in) :: phongreen(3*natom,3*natom)
@@ -1877,6 +1879,7 @@ end subroutine me_altcalc
  end do 
 
  !Magnetoelectric susceptibility
+ fac= one/ucvol
  ipert1= natom + 5
  do idir1= 1, 3
    irow= idir1
@@ -1903,15 +1906,18 @@ end subroutine me_altcalc
  
  ipert1= natom + 5
  ipert2= natom + 2
- fac= one/ucvol
  do idir1= 1, 3
    do idir2= 1, 3
-     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)*fac
+     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)/ucvol
    end do
  end do 
 
+ !Local magnetoelectric susceptibilty
+  ci_localpha(:,:)= mcoup(:,(natom+1)*3+1:(natom+2)*3)
+  lm_localpha(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,coup_tr(:,:))) 
+
  !Magnetic susceptibility 
- fac= one/ucvol
+ fac= -one/ucvol
  ipert1= natom + 5
  do idir1= 1, 3
    irow= idir1
@@ -1928,10 +1934,12 @@ end subroutine me_altcalc
  
  do idir1= 1, 3
    do idir2= 1, 3
-     ci_mchi(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
+     ci_mchi(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)/ucvol
    end do
  end do 
  
+ !Local magnetic susceptibility 
+ lm_magsus(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,mcoup_tr(1:natom*3,:)))
 
  ABI_FREE(c_blkval)
  ABI_FREE(coup)
