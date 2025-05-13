@@ -897,9 +897,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  ! paw_dmft%idmftloop=0
  ! paw_dmft%mbandc  = 0
 
- icb=0
+ icb = 0
  mbandc = 0
- do iband=1, mband
+ do iband=1,mband
   if (iband >= dmftbandi .and. iband <= dmftbandf) then
    paw_dmft%band_in(iband)=.true.
    mbandc = mbandc + 1
@@ -1719,7 +1719,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
 !   enddo
 ! enddo
 
- paw_dmft%gpu_option=dtset%gpu_option
+ paw_dmft%gpu_option = dtset%gpu_option
  paw_dmft%fermie_dft = fermie_dft ! in Ha
  paw_dmft%fermie = fermie_dft
 

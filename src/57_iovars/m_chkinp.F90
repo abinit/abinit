@@ -852,7 +852,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          end if
        end if
        if (dt%nspinor==2.and.dt%nspden==1) ABI_ERROR(' nspinor=2, nspden=1 and usedmft=1 is not implemented')
-       if (maxval(abs(dt%nband-dt%nband(1)))>0) ABI_ERROR("Every kpt needs to have the same number of bands in DMFT")
+       if (maxval(abs(dt%nband(1:dt%nkpt)-dt%nband(1)))>0) ABI_ERROR("Every kpt needs to have the same number of bands in DMFT")
        do iatom=1,natom
          lpawu = dt%lpawu(dt%typat(iatom))
          if (lpawu==-1) cycle

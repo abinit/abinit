@@ -16,7 +16,7 @@ ecut      10
 pawecutdg 40
 tolvrs  1.0d-10
 nband     17
-occopt 3 tsmear 0.0173918086  #0.00173918086
+occopt 3 tsmear 0.0173918086
 diemix 0.1
 
 ##### PHYSICAL PARAMETERS
@@ -30,7 +30,6 @@ rprim 0.0 1/2 1/2
 
 # == Points k and symetries
 paral_kgb 0
-fftalg 112 # Needed to preserve the old behaviour.
 kptopt 4
 kptrlatt 4 0 0 0 4 0 0 0 4
 nshiftk 4
@@ -44,7 +43,7 @@ usedmft1 0
 usedmft2 1
 dmftbandi 5
 dmftbandf 17
-dmft_nwli 2 #500
+dmft_nwli 2
 dmft_iter 1
 dmftcheck 0
 
@@ -60,8 +59,8 @@ dmftctqmc_meas    100
 dmft_mxsf 0.1
 dmft_dc 8
 dmft_yukawa_param 4
-dmft_epsilon_yukawa 0.1
-dmft_lambda_yukawa 0.2
+dmft_epsilon_yukawa 0.5
+dmft_lambda_yukawa 0.15
 
 # == DFT+U
 usepawu1    4
@@ -80,28 +79,25 @@ dmft_triqs_loc_n_max 3
 
 dmft_tolfreq  0.01
 
-use_yaml 1
-
  pp_dirpath "$ABI_PSPDIR"
  pseudos "58ce.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [files]
 #%% [paral_info]
-#%% nprocs_to_test = 4,10
-#%% max_nprocs = 10
+#%% nprocs_to_test = 1, 4, 8
+#%% max_nprocs = 8
+#%% [NCPU_1]
+#%% files_to_test = t92_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [NCPU_4]
-#%% files_to_test =
-#%%   t92_MPI4.abo, use_yaml = yes , tolnlines=  178, tolabs=  0.03, tolrel= 0.03, fld_options = -medium
-#%% file = ./t92_MPI4.yaml
-#%% [NCPU_10]
-#%% files_to_test =
-#%%   t92_MPI10.abo, use_yaml = yes, tolnlines=   178, tolabs=  0.06, tolrel= 0.05, fld_options = -medium
-#%% file = ./t92_MPI10.yaml
+#%% files_to_test = t92_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [NCPU_8]
+#%% files_to_test = t92_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
-#%% authors = J. Bieder, B. Amadon
-#%% keywords = DMFT, CTQMC
+#%% authors = J. Bieder, B. Amadon, E. Castiel
+#%% keywords = DMFT, CTQMC, TRIQS
 #%% description = Test CT-QMC parallelism
 #%%<END TEST_INFO>
