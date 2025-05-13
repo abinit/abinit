@@ -32,7 +32,7 @@ working in the terminal), the installation/compilation steps are:
      For further details, consult [this link](https://wiki.abinit.org/doku.php?id=build:configure).
   5. Issue `make` (or `make -jN` for compiling with N processors, e.g. `make -j4`
      to use four processors). This step might take dozen of minutes depending on the compilation options.
-     More information are available [here](#how-to-make-the-executables).
+     More information are available [here](#how-to-compile-the-executables).
   6. Optionally, issue `make install` to install the package (root privileges are needed if the installation direction
      is not specified via `--prefix`).
 
@@ -57,7 +57,7 @@ In particular, the current documentation for the fallback procedure is available
 
 If you succeed to build the executables, and would like to check whether
 the executables work properly, please consult the two sections on [Internal tests](#how-to-run-the-internal-tests)
-and [Automatic tests](#how-to-make-the-automatic-tests).
+and [Automatic tests](#how-to-execute-the-automatic-tests).
 
 If you want to have a much better handling on the ABINIT source code than normal users, or if
 you downloaded ABINIT from Gitlab or GitHub anyhow, then consult the section [For developers](#for-developers).
@@ -226,7 +226,7 @@ When the hostname.ac9 file is ready, you can come back to the configure/make seq
 
 ## How to build ABINIT with CMake ?
 
-As an alternative to the autotools, you can use [CMake](https://cmake.org/) to build ABINIT. You just need to follow step 1 and 2 from the [overview](#Overview) above. No need to write an _ac9 file__, `CMake` should be able to figure out where all required software dependencies are installed on your build host.
+As an alternative to the autotools, you can use [CMake](https://cmake.org/) to build ABINIT. You just need to follow step 1 and 2 from the [overview](#overview) above. No need to write an _ac9 file__, `CMake` should be able to figure out where all required software dependencies are installed on your build host.
 
 Here are the steps for building abinit, where all options take default values:
 

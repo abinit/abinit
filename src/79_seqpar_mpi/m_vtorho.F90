@@ -29,7 +29,7 @@ module m_vtorho
  use defs_wvltypes
  use m_abicore
  use m_xmpi
- use m_ab7_mixing
+ use m_abi_mixing
  use m_errors
  use m_wffile
  use m_efield
@@ -57,6 +57,7 @@ module m_vtorho
  use m_pawrhoij,           only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_inquire_dim
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
+ use m_rcpaw,              only : rcpaw_type
  use m_energies,           only : energies_type
  use m_hamiltonian,        only : gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_bandfft_kpt,        only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_set_ikpt, &
@@ -89,7 +90,7 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
- use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm, &
                                       gemm_nonlop_block_size, gemm_nonlop_is_distributed
 
  use m_abstract_wf,        only : abstract_wf, init_mywfc
@@ -319,7 +320,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           pwind,pwind_alloc,pwnsfac,results_gs,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,usevxctau,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,&
-&           xg_nonlop,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
+&           xg_nonlop,xred,ylm,ylmgr,ylmdiel, rmm_diis_status,rcpaw)
 
 !Arguments -------------------------------
 !scalars
@@ -345,6 +346,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(wffile_type), intent(inout) :: wffnew
  type(wvl_data), intent(inout) :: wvl
  type(xg_nonlop_t),intent(inout) :: xg_nonlop
+ type(rcpaw_type),pointer,intent(inout) :: rcpaw
 !arrays
  integer, intent(in) :: atindx(natom),atindx1(natom),gbound_diel(2*mgfftdiel+8,2)
  integer, intent(in) :: indsym(4,dtset%nsym,natom)
@@ -389,7 +391,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer,parameter :: tim_mkrho=2
  !integer,save :: nwarning=0
  integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
- integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
+ integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt,itypat
  integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
@@ -405,6 +407,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
  integer :: dmft_dftocc
+ real(dp) :: nelect,min_eigv
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
  character(len=500) :: msg
@@ -612,6 +615,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ! Here I change the default behavior to avoid the extra loop but only if RMM-DIIS is used.
        ! XG 20210312 : I prefectly agree with you. This is historical, and should be changed, after testing and update of reference files.
        if ((itimes(1) > 1 .or. (itimes(2)>1)) .and. dtset%rmm_diis /= 0) nnsclo_now = 1
+       if(associated(rcpaw)) then
+         if(istep<=rcpaw%nfrpaw) then
+           nnsclo_now = 3
+         elseif(istep<=2) then
+           nnsclo_now =2
+         endif
+       endif
      else
        ! Wavelets
        if (iscf==0) then
@@ -1046,7 +1056,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (gemm_nonlop_use_gemm) then
          call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
          &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
-         if(istep<=1) call reset_gemm_nonlop()
        end if
 
 #if defined HAVE_GPU_CUDA
@@ -1361,12 +1370,29 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%nband,dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
 
+     ! RCPAW
+     nelect=dtset%nelect
+     if(associated(rcpaw)) then
+       if(rcpaw%istep==1) then
+         min_eigv=minval(eigen)
+         do itypat=1,dtset%ntypat
+           rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig-rcpaw%atm(itypat)%min_eigv+min_eigv
+         enddo
+       endif
+       nelect=nelect+rcpaw%nelect_core_orig
+       if(rcpaw%frocc) then
+         if(rcpaw%istep>rcpaw%nfrocc) then
+           nelect=nelect-rcpaw%nelect_core
+         endif
+       endif
+     endif
+
 !    Compute occupations
      call timab(990,1,tsec)
      call newocc(doccde,eigen,energies%entropy_ks,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
-&     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
+&     dtset%spinmagntarget,dtset%mband,dtset%nband,nelect,dtset%ne_qFD,dtset%nh_qFD,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
-&     dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
+&     dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd,rcpaw=rcpaw)
      call timab(990,2,tsec)
 
 !    !=========  DMFT call begin ============================================
@@ -1452,7 +1478,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           dtset%symrel,dtset%tnons,dtset%symafm)
 
 !        ==  allocate paw_dmft%chipsi and paw_dmft%eigen_dft
-         call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
+         call init_dmft(cryst_struc,dmatpawu(:,:,:,:),dtset,energies%e_fermie,dtfil%filctqmcdatain, &
+                      & dtfil%filselfin,dtfil%filnam_ds(3),dtfil%fnameabo_app,dtfil%ireadctqmcdata, &
+                      & dtfil%ireadself,paw_dmft,pawtab(:))
          call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !        ==  compute chipsi
@@ -1467,7 +1495,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call timab(620,2,tsec)
          call flush_unit(std_out)
 
-
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
 
@@ -1475,7 +1502,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          edmft=paw_dmft%e_hu-paw_dmft%e_dc
          energies%e_dc=paw_dmft%e_dc
          energies%e_hu=paw_dmft%e_hu
-         if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral == 1 &
+         if (dtset%dmft_triqs_entropy == 1 .and. dtset%dmft_triqs_compute_integral > 0 &
             & .and. (dtset%dmft_solv == 6 .or. dtset%dmft_solv == 7)) energies%entropy = paw_dmft%sdmft
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp

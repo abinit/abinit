@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_ab7_mixing
+!!****m* ABINIT/m_abi_mixing
 !! NAME
-!! m_ab7_mixing
+!! m_abi_mixing
 !!
 !! FUNCTION
 !!
@@ -19,7 +19,7 @@
 #include "abi_common.h"
 
 
-module m_ab7_mixing
+module m_abi_mixing
 
  use defs_basis
  use m_abicore
@@ -35,56 +35,60 @@ module m_ab7_mixing
  private
 !!***
 
- integer, parameter, public :: AB7_MIXING_NONE        = 0
- integer, parameter, public :: AB7_MIXING_EIG         = 1
- integer, parameter, public :: AB7_MIXING_SIMPLE      = 2
- integer, parameter, public :: AB7_MIXING_ANDERSON    = 3
- integer, parameter, public :: AB7_MIXING_ANDERSON_2  = 4
- integer, parameter, public :: AB7_MIXING_CG_ENERGY   = 5
- integer, parameter, public :: AB7_MIXING_CG_ENERGY_2 = 6
- integer, parameter, public :: AB7_MIXING_PULAY       = 7
+ integer, parameter, public :: ABI_MIXING_NONE        = 0
+ integer, parameter, public :: ABI_MIXING_EIG         = 1
+ integer, parameter, public :: ABI_MIXING_SIMPLE      = 2
+ integer, parameter, public :: ABI_MIXING_ANDERSON    = 3
+ integer, parameter, public :: ABI_MIXING_ANDERSON_2  = 4
+ integer, parameter, public :: ABI_MIXING_CG_ENERGY   = 5
+ integer, parameter, public :: ABI_MIXING_CG_ENERGY_2 = 6
+ integer, parameter, public :: ABI_MIXING_PULAY       = 7
 
- integer, parameter, public :: AB7_MIXING_POTENTIAL  = 0
- integer, parameter, public :: AB7_MIXING_DENSITY    = 1
+ integer, parameter, public :: ABI_MIXING_POTENTIAL  = 0
+ integer, parameter, public :: ABI_MIXING_DENSITY    = 1
 
- integer, parameter, public :: AB7_MIXING_REAL_SPACE     = 1
- integer, parameter, public :: AB7_MIXING_FOURRIER_SPACE = 2
+ integer, parameter, public :: ABI_MIXING_REAL_SPACE     = 1
+ integer, parameter, public :: ABI_MIXING_FOURRIER_SPACE = 2
 
- type, public :: ab7_mixing_object
-    integer :: iscf
+
+ type, public :: abi_mixing_object
+    integer :: iscf,useextfpmd,use_rcpaw
     integer :: nfft, nspden, kind, space
 
     logical :: useprec
     integer :: mffmem
     character(len = fnlen) :: diskCache
-    integer :: n_index, n_fftgr, n_pulayit, n_pawmix
+    integer :: n_index, n_fftgr, n_pulayit, n_pawmix,n_rcpawmix
 
     integer, dimension(:), pointer :: i_rhor, i_vtrial, i_vresid, i_vrespc
     real(dp), dimension(:,:,:), pointer :: f_fftgr, f_atm
     real(dp), dimension(:,:), pointer :: f_paw
 
+    real(dp),dimension(:),pointer :: f_extfpmd
+    real(dp),dimension(:,:), pointer :: f_rcpaw
+
     ! Private
     integer :: n_atom
     real(dp), pointer :: xred(:,:), dtn_pc(:,:)
- end type ab7_mixing_object
+ end type abi_mixing_object
 
- public :: ab7_mixing_new
- public :: ab7_mixing_deallocate
+ public :: abi_mixing_new
+ public :: abi_mixing_deallocate
 
- public :: ab7_mixing_use_disk_cache
- public :: ab7_mixing_use_moving_atoms
- public :: ab7_mixing_copy_current_step
+ public :: abi_mixing_use_disk_cache
+ public :: abi_mixing_use_moving_atoms
+ public :: abi_mixing_copy_current_step
 
- public :: ab7_mixing_eval_allocate
- public :: ab7_mixing_eval
- public :: ab7_mixing_eval_deallocate
+ public :: abi_mixing_eval_allocate
+ public :: abi_mixing_eval
+ public :: abi_mixing_eval_deallocate
 !!***
 
 contains
 !!***
 
 
-!!****f* m_ab7_mixing/init_
+!!****f* m_abi_mixing/init_
 !! NAME
 !!  init_
 !!
@@ -97,11 +101,11 @@ subroutine init_(mix)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(out) :: mix
+ type(abi_mixing_object), intent(out) :: mix
 ! *************************************************************************
 
  ! Default values.
- mix%iscf      = AB7_MIXING_NONE
+ mix%iscf      = ABI_MIXING_NONE
  mix%mffmem    = 1
  mix%n_index   = 0
  mix%n_fftgr   = 0
@@ -110,13 +114,16 @@ subroutine init_(mix)
  mix%n_atom    = 0
  mix%space     = 0
  mix%useprec   = .true.
+ mix%useextfpmd = 0
+ mix%use_rcpaw = 0
+ mix%n_rcpawmix = 0
 
  call nullify_(mix)
 
 end subroutine init_
 !!***
 
-!!****f* m_ab7_mixing/nullify
+!!****f* m_abi_mixing/nullify
 !! NAME
 !!  nullify_
 !!
@@ -129,7 +136,7 @@ subroutine nullify_(mix)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
 ! *************************************************************************
 
  ! Nullify internal pointers.
@@ -140,13 +147,15 @@ subroutine nullify_(mix)
  nullify(mix%f_fftgr)
  nullify(mix%f_atm)
  nullify(mix%f_paw)
+ nullify(mix%f_extfpmd)
+ nullify(mix%f_rcpaw)
 
 end subroutine nullify_
 !!***
 
-!!****f* m_ab7_mixing/ab7_mixing_new
+!!****f* m_abi_mixing/abi_mixing_new
 !! NAME
-!!  ab7_mixing_new
+!!  abi_mixing_new
 !!
 !! FUNCTION
 !!
@@ -158,12 +167,12 @@ end subroutine nullify_
 !!
 !! SOURCE
 
-subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
+subroutine abi_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 &  npawmix, errid, errmess, npulayit, useprec)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(out) :: mix
+ type(abi_mixing_object), intent(out) :: mix
  integer, intent(in) :: iscf, kind, space, nfft, nspden, npawmix
  integer, intent(out) :: errid
  character(len = 500), intent(out) :: errmess
@@ -173,34 +182,34 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 !Local variables-------------------------------
 !scalars
  integer :: ii !, i_stat
- character(len = *), parameter :: subname = "ab7_mixing_new"
+ character(len = *), parameter :: subname = "abi_mixing_new"
 ! *************************************************************************
 
  ! Set default values.
  call init_(mix)
 
  ! Argument checkings.
- if (kind /= AB7_MIXING_POTENTIAL .and. kind /= AB7_MIXING_DENSITY) then
+ if (kind /= ABI_MIXING_POTENTIAL .and. kind /= ABI_MIXING_DENSITY) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_set_arrays: ERROR -',ch10,&
+         & ' abi_mixing_set_arrays: ERROR -',ch10,&
          & '  Mixing must be done on density or potential only.'
     return
  end if
- if (space /= AB7_MIXING_REAL_SPACE .and. space /= AB7_MIXING_FOURRIER_SPACE) then
+ if (space /= ABI_MIXING_REAL_SPACE .and. space /= ABI_MIXING_FOURRIER_SPACE) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_set_arrays: ERROR -',ch10,&
+         & ' abi_mixing_set_arrays: ERROR -',ch10,&
          & '  Mixing must be done in real or Fourrier space only.'
     return
  end if
- if (iscf /= AB7_MIXING_EIG .and. iscf /= AB7_MIXING_SIMPLE .and. &
-      & iscf /= AB7_MIXING_ANDERSON .and. &
-      & iscf /= AB7_MIXING_ANDERSON_2 .and. &
-      & iscf /= AB7_MIXING_CG_ENERGY .and. &
-      & iscf /= AB7_MIXING_PULAY .and. &
-      & iscf /= AB7_MIXING_CG_ENERGY_2 .and. &
-      & iscf /= AB7_MIXING_NONE) then
+ if (iscf /= ABI_MIXING_EIG .and. iscf /= ABI_MIXING_SIMPLE .and. &
+      & iscf /= ABI_MIXING_ANDERSON .and. &
+      & iscf /= ABI_MIXING_ANDERSON_2 .and. &
+      & iscf /= ABI_MIXING_CG_ENERGY .and. &
+      & iscf /= ABI_MIXING_PULAY .and. &
+      & iscf /= ABI_MIXING_CG_ENERGY_2 .and. &
+      & iscf /= ABI_MIXING_NONE) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, "(A,I0,A)") "Unknown mixing scheme (", iscf, ")."
     return
@@ -220,45 +229,45 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 
  ! Set-up internal dimensions.
  !These arrays are needed only in the self-consistent case
- if (iscf == AB7_MIXING_NONE) then
+ if (iscf == ABI_MIXING_NONE) then
     !    For iscf==0, one additional vector is needed.
     !    The index 1 is attributed to the new residual potential.
     mix%n_fftgr=1 ; mix%n_index=1
- else if (iscf == AB7_MIXING_EIG) then
+ else if (iscf == ABI_MIXING_EIG) then
     !    For iscf==1, five additional vectors are needed.
     !    The index 1 is attributed to the old trial potential,
     !    The new residual potential, and the new
     !    preconditioned residual potential receive now a temporary index
     !    The indices number 4 and 5 are attributed to work vectors.
     mix%n_fftgr=5 ; mix%n_index=1
- else if(iscf == AB7_MIXING_SIMPLE) then
+ else if(iscf == ABI_MIXING_SIMPLE) then
     !    For iscf==2, three additional vectors are needed.
     !    The index number 1 is attributed to the old trial vector
     !    The new residual potential, and the new preconditioned
     !    residual potential, receive now a temporary index.
     mix%n_fftgr=3 ; mix%n_index=1
     if (.not. mix%useprec) mix%n_fftgr = 2
- else if(iscf == AB7_MIXING_ANDERSON) then
+ else if(iscf == ABI_MIXING_ANDERSON) then
     !    For iscf==3 , four additional vectors are needed.
     !    The index number 1 is attributed to the old trial vector
     !    The new residual potential, and the new and old preconditioned
     !    residual potential, receive now a temporary index.
     mix%n_fftgr=4 ; mix%n_index=2
     if (.not. mix%useprec) mix%n_fftgr = 3
- else if (iscf == AB7_MIXING_ANDERSON_2) then
+ else if (iscf == ABI_MIXING_ANDERSON_2) then
     !    For iscf==4 , six additional vectors are needed.
     !    The indices number 1 and 2 are attributed to two old trial vectors
     !    The new residual potential, and the new and two old preconditioned
     !    residual potentials, receive now a temporary index.
     mix%n_fftgr=6 ; mix%n_index=3
     if (.not. mix%useprec) mix%n_fftgr = 5
- else if(iscf == AB7_MIXING_CG_ENERGY .or. iscf == AB7_MIXING_CG_ENERGY_2) then
+ else if(iscf == ABI_MIXING_CG_ENERGY .or. iscf == ABI_MIXING_CG_ENERGY_2) then
     !    For iscf==5 or 6, ten additional vectors are needed
     !    The index number 1 is attributed to the old trial vector
     !    The index number 6 is attributed to the search vector
     !    Other indices are attributed now. Altogether ten vectors
     mix%n_fftgr=10 ; mix%n_index=3
- else if(iscf == AB7_MIXING_PULAY) then
+ else if(iscf == ABI_MIXING_PULAY) then
     !    For iscf==7, lot of additional vectors are needed
     !    The index number 1 is attributed to the old trial vector
     !    The index number 2 is attributed to the old residual
@@ -288,21 +297,21 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
  mix%i_vrespc(:)=0
 
  ! Setup initial values.
- if (iscf == AB7_MIXING_NONE) then
+ if (iscf == ABI_MIXING_NONE) then
     mix%i_vresid(1)=1
- else if (iscf == AB7_MIXING_EIG) then
+ else if (iscf == ABI_MIXING_EIG) then
     mix%i_vtrial(1)=1 ; mix%i_vresid(1)=2 ; mix%i_vrespc(1)=3
- else if(iscf == AB7_MIXING_SIMPLE) then
+ else if(iscf == ABI_MIXING_SIMPLE) then
     mix%i_vtrial(1)=1 ; mix%i_vresid(1)=2 ; mix%i_vrespc(1)=3
     if (.not. mix%useprec) mix%i_vrespc(1)=2
- else if(iscf == AB7_MIXING_ANDERSON) then
+ else if(iscf == ABI_MIXING_ANDERSON) then
     mix%i_vtrial(1)=1 ; mix%i_vresid(1)=2
     if (mix%useprec) then
        mix%i_vrespc(1)=3 ; mix%i_vrespc(2)=4
     else
        mix%i_vrespc(1)=2 ; mix%i_vrespc(2)=3
     end if
- else if (iscf == AB7_MIXING_ANDERSON_2) then
+ else if (iscf == ABI_MIXING_ANDERSON_2) then
     mix%i_vtrial(1)=1 ; mix%i_vtrial(2)=2
     mix%i_vresid(1)=3
     if (mix%useprec) then
@@ -310,13 +319,13 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
     else
        mix%i_vrespc(1)=3 ; mix%i_vrespc(2)=4 ; mix%i_vrespc(3)=5
     end if
- else if(iscf == AB7_MIXING_CG_ENERGY .or. iscf == AB7_MIXING_CG_ENERGY_2) then
+ else if(iscf == ABI_MIXING_CG_ENERGY .or. iscf == ABI_MIXING_CG_ENERGY_2) then
     mix%n_fftgr=10 ; mix%n_index=3
     mix%i_vtrial(1)=1
     mix%i_vresid(1)=2 ; mix%i_vresid(2)=4 ; mix%i_vresid(3)=7
     mix%i_vrespc(1)=3 ; mix%i_vrespc(2)=5 ; mix%i_vrespc(3)=8
     mix%i_rhor(2)=9 ; mix%i_rhor(3)=10
- else if(iscf == AB7_MIXING_PULAY) then
+ else if(iscf == ABI_MIXING_PULAY) then
     do ii=1,mix%n_pulayit
        mix%i_vtrial(ii)=2*ii-1 ; mix%i_vrespc(ii)=2*ii
     end do
@@ -325,12 +334,12 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
     if (.not. mix%useprec) mix%i_vresid(1)=2
  end if ! iscf cases
 
-end subroutine ab7_mixing_new
+end subroutine abi_mixing_new
 !!***
 
-!!****f* m_ab7_mixing/ab7_mixing_use_disk_cache
+!!****f* m_abi_mixing/abi_mixing_use_disk_cache
 !! NAME
-!!  ab7_mixing_use_disk_cache
+!!  abi_mixing_use_disk_cache
 !!
 !! FUNCTION
 !!
@@ -343,11 +352,11 @@ end subroutine ab7_mixing_new
 !!
 !! SOURCE
 
-subroutine ab7_mixing_use_disk_cache(mix, fnametmp_fft)
+subroutine abi_mixing_use_disk_cache(mix, fnametmp_fft)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
  character(len = *), intent(in) :: fnametmp_fft
 ! *************************************************************************
 
@@ -358,13 +367,13 @@ subroutine ab7_mixing_use_disk_cache(mix, fnametmp_fft)
     mix%mffmem = 1
  end if
 
-end subroutine ab7_mixing_use_disk_cache
+end subroutine abi_mixing_use_disk_cache
 !!***
 
 
-!!****f* m_ab7_mixing/ab7_mixing_use_moving_atoms
+!!****f* m_abi_mixing/abi_mixing_use_moving_atoms
 !! NAME
-!!  ab7_mixing_use_moving_atoms
+!!  abi_mixing_use_moving_atoms
 !!
 !! FUNCTION
 !!
@@ -378,11 +387,11 @@ end subroutine ab7_mixing_use_disk_cache
 !!
 !! SOURCE
 
-subroutine ab7_mixing_use_moving_atoms(mix, natom, xred, dtn_pc)
+subroutine abi_mixing_use_moving_atoms(mix, natom, xred, dtn_pc)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
  integer, intent(in) :: natom
  real(dp), intent(in), target :: dtn_pc(3, natom)
  real(dp), intent(in), target :: xred(3, natom)
@@ -393,13 +402,13 @@ subroutine ab7_mixing_use_moving_atoms(mix, natom, xred, dtn_pc)
  mix%dtn_pc => dtn_pc
  mix%xred => xred
 
-end subroutine ab7_mixing_use_moving_atoms
+end subroutine abi_mixing_use_moving_atoms
 !!***
 
 
-!!****f* m_ab7_mixing/ab7_mixing_copy_current_step
+!!****f* m_abi_mixing/abi_mixing_copy_current_step
 !! NAME
-!!  ab7_mixing_copy_current_step
+!!  abi_mixing_copy_current_step
 !!
 !! FUNCTION
 !!
@@ -412,39 +421,50 @@ end subroutine ab7_mixing_use_moving_atoms
 !! NOTES
 !!
 !! SOURCE
-subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
-&  arr_respc, arr_paw_resid, arr_paw_respc, arr_atm)
+subroutine abi_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
+&  arr_respc, arr_paw_resid, arr_paw_respc, arr_atm, &
+&  arr_extfpmd_resid,arr_extfpmd_respc,arr_rcpaw_resid,arr_rcpaw_respc)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
  real(dp), intent(in) :: arr_resid(mix%space * mix%nfft, mix%nspden)
  integer, intent(out) :: errid
  character(len = 500), intent(out) :: errmess
  real(dp), intent(in), optional :: arr_respc(mix%space * mix%nfft, mix%nspden)
  real(dp), intent(in), optional :: arr_paw_resid(mix%n_pawmix), arr_paw_respc(mix%n_pawmix)
  real(dp), intent(in), optional :: arr_atm(3, mix%n_atom)
+ real(dp),intent(in), optional :: arr_extfpmd_resid,arr_extfpmd_respc
+ real(dp),intent(in), optional :: arr_rcpaw_resid(mix%n_rcpawmix*mix%use_rcpaw)
+ real(dp),intent(in), optional :: arr_rcpaw_respc(mix%n_rcpawmix*mix%use_rcpaw)
 ! *************************************************************************
 
 
  if (mix%n_fftgr>0 .and. (.not. associated(mix%f_fftgr))) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_set_arr_current_step: ERROR (1) -',ch10,&
+         & ' abi_mixing_set_arr_current_step: ERROR (1) -',ch10,&
          & '  Working arrays not yet allocated.'
     return
  end if
  if (mix%n_pawmix>0 .and. (.not. associated(mix%f_paw))) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_set_arr_current_step: ERROR (2) -',ch10,&
+         & ' abi_mixing_set_arr_current_step: ERROR (2) -',ch10,&
          & '  Working arrays not yet allocated.'
     return
  end if
  if (mix%n_atom>0 .and. (.not. associated(mix%f_atm))) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_set_arr_current_step: ERROR (3) -',ch10,&
+         & ' abi_mixing_set_arr_current_step: ERROR (3) -',ch10,&
+         & '  Working arrays not yet allocated.'
+    return
+ end if
+ if (mix%n_rcpawmix>0 .and. (.not. associated(mix%f_rcpaw))) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, '(a,a,a,a)' )ch10,&
+         & ' abi_mixing_set_arr_current_step: ERROR (3) -',ch10,&
          & '  Working arrays not yet allocated.'
     return
  end if
@@ -461,14 +481,22 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  if (mix%n_atom>0) then
    if (present(arr_atm).and.mix%i_vresid(1)>0) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
  end if
+ if(associated(mix%f_extfpmd)) then
+   if(present(arr_extfpmd_resid).and.mix%i_vresid(1)>0) mix%f_extfpmd(mix%i_vresid(1))=arr_extfpmd_resid
+   if(present(arr_extfpmd_respc).and.mix%i_vrespc(1)>0) mix%f_extfpmd(mix%i_vrespc(1))=arr_extfpmd_respc
+ endif
+ if(mix%n_rcpawmix>0) then
+   if(present(arr_rcpaw_resid).and.mix%i_vresid(1)>0) mix%f_rcpaw(:,mix%i_vresid(1))=arr_rcpaw_resid(:)
+   if(present(arr_rcpaw_resid).and.mix%i_vrespc(1)>0)mix%f_rcpaw(:,mix%i_vrespc(1))=arr_rcpaw_respc(:)
+ endif
 
-end subroutine ab7_mixing_copy_current_step
+end subroutine abi_mixing_copy_current_step
 !!***
 
 
-!!****f* m_ab7_mixing/ab7_mixing_eval_allocate
+!!****f* m_abi_mixing/abi_mixing_eval_allocate
 !! NAME
-!!  ab7_mixing_eval_allocate
+!!  abi_mixing_eval_allocate
 !!
 !! FUNCTION
 !!
@@ -482,18 +510,18 @@ end subroutine ab7_mixing_copy_current_step
 !!
 !! SOURCE
 
-subroutine ab7_mixing_eval_allocate(mix, istep)
+subroutine abi_mixing_eval_allocate(mix, istep)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
  integer, intent(in), optional :: istep
 
 !Local variables-------------------------------
 !scalars
  integer :: istep_,temp_unit !, i_stat
  real(dp) :: tsec(2)
- character(len = *), parameter :: subname = "ab7_mixing_eval_allocate"
+ character(len = *), parameter :: subname = "abi_mixing_eval_allocate"
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -538,14 +566,32 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     !call memocc_abi(i_stat, mix%f_atm, 'mix%f_atm', subname)
     ABI_MALLOC(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
  end if
+ 
+ if(.not.associated(mix%f_extfpmd)) then
+   if(mix%useextfpmd==1) then
+     ABI_MALLOC(mix%f_extfpmd,(mix%n_fftgr))
+     mix%f_extfpmd=zero
+   else
+     ABI_MALLOC(mix%f_extfpmd,(0))
+   endif
+ endif 
 
- end subroutine ab7_mixing_eval_allocate
+ if(.not.associated(mix%f_rcpaw)) then
+   if(mix%use_rcpaw==1) then
+     ABI_MALLOC(mix%f_rcpaw,(mix%n_rcpawmix,mix%n_fftgr))
+     mix%f_rcpaw=zero
+   else
+     ABI_MALLOC(mix%f_rcpaw,(0,0))
+   endif
+ endif
+
+ end subroutine abi_mixing_eval_allocate
 !!***
 
 
-!!****f* m_ab7_mixing/ab7_mixing_eval_deallocate
+!!****f* m_abi_mixing/abi_mixing_eval_deallocate
 !! NAME
-!!  ab7_mixing_eval_deallocate
+!!  abi_mixing_eval_deallocate
 !!
 !! FUNCTION
 !!
@@ -559,17 +605,17 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
 !!
 !! SOURCE
 
- subroutine ab7_mixing_eval_deallocate(mix)
+ subroutine abi_mixing_eval_deallocate(mix)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
 
 !Local variables-------------------------------
 !scalars
  integer :: temp_unit !i_all, i_stat
  real(dp) :: tsec(2)
- character(len = *), parameter :: subname = "ab7_mixing_eval_deallocate"
+ character(len = *), parameter :: subname = "abi_mixing_eval_deallocate"
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -598,15 +644,23 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
        ABI_FREE(mix%f_paw)
        nullify(mix%f_paw)
     end if
+    if(associated(mix%f_extfpmd)) then
+      ABI_FREE(mix%f_extfpmd)
+      nullify(mix%f_extfpmd) 
+    endif
+    if(associated(mix%f_rcpaw)) then
+      ABI_FREE(mix%f_rcpaw)
+      nullify(mix%f_rcpaw)
+    endif
  end if
 
-end subroutine ab7_mixing_eval_deallocate
+end subroutine abi_mixing_eval_deallocate
 !!***
 
 
-!!****f* m_ab7_mixing/ab7_mixing_eval
+!!****f* m_abi_mixing/abi_mixing_eval
 !! NAME
-!!  ab7_mixing_eval
+!!  abi_mixing_eval
 !!
 !! FUNCTION
 !!
@@ -620,14 +674,14 @@ end subroutine ab7_mixing_eval_deallocate
 !!
 !! SOURCE
 
- subroutine ab7_mixing_eval(mix, arr, istep, nfftot, ucvol, &
+ subroutine abi_mixing_eval(mix, arr, istep, nfftot, ucvol, &
 & mpi_comm, mpi_summarize, errid, errmess, &
 & reset, isecur, pawarr, pawopt, response, etotal, potden, &
-& resnrm, comm_atom)
+& resnrm, nelect_extfpmd,rcpaw_arr,comm_atom)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
  integer, intent(in) :: istep, nfftot, mpi_comm
  real(dp), intent(in) :: ucvol
  real(dp), intent(inout) :: arr(mix%space * mix%nfft,mix%nspden)
@@ -640,37 +694,39 @@ end subroutine ab7_mixing_eval_deallocate
  real(dp), intent(in), optional :: etotal
  real(dp), intent(in), optional :: potden(mix%space * mix%nfft,mix%nspden)
  real(dp), intent(out), optional :: resnrm
+ real(dp),intent(inout),optional :: nelect_extfpmd
+ real(dp),intent(inout),optional,target :: rcpaw_arr(mix%n_rcpawmix*mix%use_rcpaw)
 
 !Local variables-------------------------------
 !scalars
  integer :: moveAtm, dbl_nnsclo, initialized, isecur_
  integer :: usepaw, pawoptmix_, response_
- real(dp) :: resnrm_
+ real(dp) :: resnrm_,nelect_extfpmd_
 !arrays
- real(dp),target :: dum(1)
- real(dp),pointer :: pawarr_(:)
+ real(dp),target :: dum(1),dum0(0)
+ real(dp),pointer :: pawarr_(:),rcpawarr_(:)
 
 ! *************************************************************************
 
  ! Argument checkings.
- !if (mix%iscf == AB7_MIXING_NONE) then
+ !if (mix%iscf == ABI_MIXING_NONE) then
  !   errid = AB7_ERROR_MIXING_ARG
  !   write(errmess, '(a,a,a,a)' )ch10,&
- !        & ' ab7_mixing_eval: ERROR -',ch10,&
+ !        & ' abi_mixing_eval: ERROR -',ch10,&
  !        & '  No method has been chosen.'
  !   return
  !end if
  if (mix%n_pawmix > 0 .and. .not. present(pawarr)) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_eval: ERROR -',ch10,&
+         & ' abi_mixing_eval: ERROR -',ch10,&
          & '  PAW is used, but no pawarr argument provided.'
     return
  end if
  if (mix%n_atom > 0 .and. (.not. associated(mix%dtn_pc) .or. .not. associated(mix%xred))) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_eval: ERROR -',ch10,&
+         & ' abi_mixing_eval: ERROR -',ch10,&
          & '  Moving atoms is used, but no xred or dtn_pc attributes provided.'
     return
  end if
@@ -694,47 +750,54 @@ end subroutine ab7_mixing_eval_deallocate
  response_ = 0
  if (present(response)) response_ = response
  pawarr_ => dum ; if (present(pawarr)) pawarr_ => pawarr
+ nelect_extfpmd_=zero;if(present(nelect_extfpmd)) nelect_extfpmd_=nelect_extfpmd
+ rcpawarr_ => dum0; if(present(rcpaw_arr)) rcpawarr_ => rcpaw_arr
 
  ! Do the mixing.
  resnrm_ = 0.d0
- if (mix%iscf == AB7_MIXING_NONE) then
+ if (mix%iscf == ABI_MIXING_NONE) then
    arr(:,:)=arr(:,:)+mix%f_fftgr(:,:,1)
- else if (mix%iscf == AB7_MIXING_EIG) then
+ else if (mix%iscf == ABI_MIXING_EIG) then
     !  This routine compute the eigenvalues of the SCF operator
     call scfeig(istep, mix%space * mix%nfft, mix%nspden, &
          & mix%f_fftgr(:,:,mix%i_vrespc(1)), arr, &
          & mix%f_fftgr(:,:,1), mix%f_fftgr(:,:,4:5), errid, errmess)
- else if (mix%iscf == AB7_MIXING_SIMPLE .or. &
-      & mix%iscf == AB7_MIXING_ANDERSON .or. &
-      & mix%iscf == AB7_MIXING_ANDERSON_2 .or. &
-      & mix%iscf == AB7_MIXING_PULAY) then
+ else if (mix%iscf == ABI_MIXING_SIMPLE .or. &
+      & mix%iscf == ABI_MIXING_ANDERSON .or. &
+      & mix%iscf == ABI_MIXING_ANDERSON_2 .or. &
+      & mix%iscf == ABI_MIXING_PULAY) then
     if (present(comm_atom)) then
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
          & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
-         & resnrm_, arr, errid, errmess, comm_atom=comm_atom)
+         & resnrm_, arr, errid, errmess,&
+         & mix%useextfpmd,mix%f_extfpmd,nelect_extfpmd_,&
+         & mix%use_rcpaw,mix%n_rcpawmix,mix%f_rcpaw,rcpawarr_,&
+         & comm_atom=comm_atom)
     else
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
          & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
-         & resnrm_, arr, errid, errmess)
+         & resnrm_, arr, errid, errmess,&
+         & mix%useextfpmd,mix%f_extfpmd,nelect_extfpmd_,&
+         & mix%use_rcpaw,mix%n_rcpawmix,mix%f_rcpaw,rcpawarr_)
     end if
     !  Change atomic positions
-    if((istep==1 .or. mix%iscf==AB7_MIXING_SIMPLE) .and. mix%n_atom > 0)then
+    if((istep==1 .or. mix%iscf==ABI_MIXING_SIMPLE) .and. mix%n_atom > 0)then
        !    GAF: 2009-06-03
        !    Apparently there are not reason
        !    to restrict iscf=2 for ionmov=5
        mix%xred(:,:) = mix%xred(:,:) + mix%dtn_pc(:,:)
     end if
- else if (mix%iscf == AB7_MIXING_CG_ENERGY .or.  mix%iscf == AB7_MIXING_CG_ENERGY_2) then
+ else if (mix%iscf == ABI_MIXING_CG_ENERGY .or.  mix%iscf == ABI_MIXING_CG_ENERGY_2) then
     !  Optimize next vtrial using an algorithm based
     !  on the conjugate gradient minimization of etotal
     if (.not. present(etotal) .or. .not. present(potden)) then
        errid = AB7_ERROR_MIXING_ARG
        write(errmess, '(a,a,a,a)' )ch10,&
-            & ' ab7_mixing_eval: ERROR -',ch10,&
+            & ' abi_mixing_eval: ERROR -',ch10,&
             & '  Arguments etotal or potden are missing for CG on energy methods.'
        return
     end if
@@ -756,14 +819,15 @@ end subroutine ab7_mixing_eval_deallocate
  end if
 
  if (present(resnrm)) resnrm = resnrm_
+ nullify(rcpawarr_)
 
-end subroutine ab7_mixing_eval
+end subroutine abi_mixing_eval
 !!***
 
 
-!!****f* m_ab7_mixing/ab7_mixing_deallocate
+!!****f* m_abi_mixing/abi_mixing_deallocate
 !! NAME
-!!  ab7_mixing_deallocate
+!!  abi_mixing_deallocate
 !!
 !! FUNCTION
 !!
@@ -777,15 +841,15 @@ end subroutine ab7_mixing_eval
 !!
 !! SOURCE
 
-subroutine ab7_mixing_deallocate(mix)
+subroutine abi_mixing_deallocate(mix)
 
 !Arguments ------------------------------------
 !scalars
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
 
 !Local variables-------------------------------
 !scalars
- character(len = *), parameter :: subname = "ab7_mixing_deallocate"
+ character(len = *), parameter :: subname = "abi_mixing_deallocate"
 ! *************************************************************************
 
  ABI_SFREE_PTR(mix%i_rhor)
@@ -795,13 +859,15 @@ subroutine ab7_mixing_deallocate(mix)
  ABI_SFREE_PTR(mix%f_fftgr)
  ABI_SFREE_PTR(mix%f_paw)
  ABI_SFREE_PTR(mix%f_atm)
+ ABI_SFREE_PTR(mix%f_extfpmd)
+ ABI_SFREE_PTR(mix%f_rcpaw)
 
  call nullify_(mix)
 
-end subroutine ab7_mixing_deallocate
+end subroutine abi_mixing_deallocate
 !!***
 
-!!****f* m_ab7_mixing/scfcge
+!!****f* m_abi_mixing/scfcge
 !!
 !! NAME
 !! scfcge
@@ -1812,7 +1878,7 @@ subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
 end subroutine scfeig
 !!***
 
-!!****f* m_ab7_mixing/scfopt
+!!****f* m_abi_mixing/scfopt
 !!
 !! NAME
 !! scfopt
@@ -1868,22 +1934,28 @@ end subroutine scfeig
 subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 & mpicomm,mpi_summarize,nfft,npawmix,nspden,n_fftgr,&
 & n_index,opt_denpot,pawoptmix,usepaw,vpaw,vresid,vtrial,errid,errmess, &
+& useextfpmd,f_extfpmd,nelect_extfpmd,&
+& use_rcpaw,nrcpawmix,f_rcpaw,rcpaw_occ,&
 & comm_atom) ! optional
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,iscf,istep,n_fftgr,n_index,nfft
+ integer,intent(in) :: cplex,iscf,istep,n_fftgr,n_index,nfft,useextfpmd,use_rcpaw,nrcpawmix
  integer,intent(in) :: npawmix,nspden,opt_denpot,pawoptmix,usepaw,mpicomm
  integer, intent(in),optional :: comm_atom
  integer,intent(out) :: errid
  character(len = 500), intent(out) :: errmess
  logical, intent(in) :: mpi_summarize
  real(dp), intent(out) :: vresid
+ real(dp),intent(inout) :: nelect_extfpmd
+ real(dp),intent(inout) :: rcpaw_occ(nrcpawmix*use_rcpaw)
 !arrays
  integer,intent(inout) :: i_vrespc(n_index),i_vtrial(n_index)
  real(dp),intent(inout) :: f_fftgr(cplex*nfft,nspden,n_fftgr)
  real(dp),intent(inout) :: f_paw(npawmix,n_fftgr*usepaw),vpaw(npawmix*usepaw)
  real(dp),intent(inout) :: vtrial(cplex*nfft,nspden)
+ real(dp),intent(inout) :: f_extfpmd(useextfpmd*n_fftgr)
+ real(dp),intent(inout) :: f_rcpaw(use_rcpaw*nrcpawmix,use_rcpaw*n_fftgr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: npulaymax=50
@@ -1959,6 +2031,16 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      vpaw(:)=vpaw(:)+f_paw(:,i_vrespc(1))
    end if
 
+   if(useextfpmd==1) then
+     if (iscf/=2) f_extfpmd(i_vstore)=nelect_extfpmd
+     nelect_extfpmd=nelect_extfpmd+f_extfpmd(i_vrespc(1))
+   endif
+
+   if(use_rcpaw==1) then
+     if (iscf/=2) f_rcpaw(:,i_vstore)=rcpaw_occ(:)
+     rcpaw_occ(:)=rcpaw_occ(:)+f_rcpaw(:,i_vrespc(1))
+   endif
+
 !  _______________________________________________________________
 !  Here Anderson algorithm using one previous iteration
  else if((istep==2 .or. iscf==3).and.iscf/=7)then
@@ -2015,6 +2097,20 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 &     +lambda      *(f_paw(index,i_vtrial(1))+f_paw(index,i_vrespc(2)))
      f_paw(index,i_vstore)=current
    end do
+
+   if(useextfpmd==1) then
+     current=nelect_extfpmd
+     nelect_extfpmd=(one-lambda)*f_extfpmd(i_vrespc(1))+lambda*f_extfpmd(i_vtrial(1))+f_extfpmd(i_vrespc(2))
+     f_extfpmd(i_vstore)=current
+   endif
+
+   do index=1,nrcpawmix
+     current=rcpaw_occ(index)
+     rcpaw_occ(index)=(one-lambda)*(current+f_rcpaw(index,i_vrespc(1)))&
+&     +lambda      *(f_rcpaw(index,i_vtrial(1))+f_rcpaw(index,i_vrespc(2)))
+     f_rcpaw(index,i_vstore)=current
+   end do
+
 
 !  _______________________________________________________________
 !  Here Anderson algorithm using two previous iterations
@@ -2086,6 +2182,24 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 &     +lambda2            *(f_paw(index,i_vtrial(2))+f_paw(index,i_vrespc(3)))
      f_paw(index,i_vstore)=current
    end do
+
+   if(useextfpmd==1) then
+     current=nelect_extfpmd
+     nelect_extfpmd=(one-lambda-lambda2)*(current+f_extfpmd(i_vrespc(1)))&
+&    +lambda*(f_extfpmd(i_vtrial(1))+f_extfpmd(i_vrespc(2)))&
+&    +lambda2*(f_extfpmd(i_vtrial(2))+f_extfpmd(i_vrespc(3)))
+     f_extfpmd(i_vstore)=current
+   endif
+
+   do index=1,nrcpawmix
+     current=rcpaw_occ(index)
+     rcpaw_occ(index)=&
+&     (one-lambda-lambda2)*(current                 +f_rcpaw(index,i_vrespc(1)))&
+&     +lambda             *(f_rcpaw(index,i_vtrial(1))+f_rcpaw(index,i_vrespc(2)))&
+&     +lambda2            *(f_rcpaw(index,i_vtrial(2))+f_rcpaw(index,i_vrespc(3)))
+     f_rcpaw(index,i_vstore)=current
+   end do
+
 
 !  _______________________________________________________________
 !  Here Pulay algorithm
@@ -2180,6 +2294,27 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
      end do
      f_paw(index,i_vstore)=current
    end do
+
+   if(useextfpmd==1) then
+     current=nelect_extfpmd
+     nelect_extfpmd=alpha(niter)*(current+f_extfpmd(i_vrespc(1)))
+     do ii=niter-1,1,-1
+       nelect_extfpmd=nelect_extfpmd+alpha(ii)&
+&        *(f_extfpmd(i_vtrial(niter-ii))+f_extfpmd(i_vrespc(1+niter-ii)))
+     enddo
+     f_extfpmd(i_vstore)=current
+   endif
+
+   do index=1,nrcpawmix
+     current=rcpaw_occ(index)
+     rcpaw_occ(index)=alpha(niter)*(current+f_rcpaw(index,i_vrespc(1)))
+     do ii=niter-1,1,-1
+       rcpaw_occ(index)=rcpaw_occ(index)+alpha(ii) &
+&       *(f_rcpaw(index,i_vtrial(niter-ii))+f_rcpaw(index,i_vrespc(1+niter-ii)))
+     end do
+     f_rcpaw(index,i_vstore)=current
+   end do
+
 
    ABI_FREE(alpha)
 !  _______________________________________________________________
@@ -3022,5 +3157,5 @@ subroutine aprxdr(cplex,choice,dedv_mix,dedv_new,dedv_old,&
 end subroutine aprxdr
 !!***
 
-end module m_ab7_mixing
+end module m_abi_mixing
 !!***

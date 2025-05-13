@@ -1,108 +1,147 @@
-##########################################################
-# Automatic test for ABINIT:                             #
-#    C 2 atoms, Diamond, LDA, PAW                        #
-#   DS1: GS calculation to create initial WFK            #
-#   DS2: RT-TDDFT with Impulsional TDEF                  #
-#   DS3: RT-TDDFT with Impulsional TDEF -- restart       #
-#   Test Impulse TD Electric field and restart           #
-#   without induced vector potential with paral_kgb 1    #
-##########################################################
+# Test K-resolved Spectral function of Iron BCC
+fftalg 112 #only for test       
+iomode 3   #only for test       
 
-ndtset 3
-
-# Parallelism
-paral_kgb 1
-npkpt 4
-npband 2
-
-optdriver1 0 # Ground-state
-optdriver 9  # RT-TDDFT
-
-# RT-TDDFT section
-getwfk2 -1         # Read initial orbitals from the first dataset
-dtele  0.1         # Electronic time step
-ntime  50          # Maximum number or time step
-td_ef_type 1       # Impulse electric field
-td_ef_tzero 0.3    # applied at time tzero
-td_restart3 1      # DS3 restart trajectory from DS2
+# Parameters are not realistics
+# Multi-dataset parameters
+ndtset 1    # 
+jdtset 3    #
+getden3 2    # take density from DMFT
+getself3 3    # take self-energy from previous DMFT
 
 #Definition of the unit cell
-acell 3*3.53 angstrom  # Lengths of the primitive vectors (equilibrium volume)
-rprim                  # 3 orthogonal primitive vectors (FCC lattice)
-  0.0 1/2 1/2
-  1/2 0.0 1/2
-  1/2 1/2 0.0
-nsym 0                 # Automatic detection of symetries
+acell   3*5.5         # Cubic cell with
+rprim -0.5  0.5  0.5  # real space primitive translation vectors
+       0.5 -0.5  0.5
+       0.5  0.5 -0.5
 
 #Definition of the atom types and pseudopotentials
-ntypat 1          # There is only one type of atom
-znucl 6           # Atomic number of the possible type(s) of atom. Here carbon.
-pp_dirpath "$ABI_PSPDIR"        # Path to the directory where
-                                # pseudopotentials for tests are stored
-pseudos "Psdj_paw_pw_std/C.xml" # PAW atomic data for Carbon
+natom  1                # number atom
+ntypat 1                # Types of atom
+znucl  26               # Z of Iron
+typat 1                 # Fe
+xred 0.00 0.00 0.00     # This keyword indicates that the location of the atoms
 
-#Definition of the atoms
-natom 2           # There are two atoms
-typat 1 1         # They both are of type 1, that is, Carbon
-xred              # Location of the atoms: Diamond structure
-  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom 1
-  1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
+pp_dirpath "$ABI_PSPDIR"  # This is the path to the directory where
+pseudos "26fe.lda2.paw"   # pseudopotentials for tests are stored
 
-#Definition of bands and occupation numbers
-nband 8           # Compute 8 bands (4 occupied, 4 empty)
-nbdbuf 2          # No need to converge the last two empty bands
-occopt 1          # Automatic generation of occupation numbers, as a semiconductor
+#Planewave basis set, number of bands and occupations
+ecut      24.0          # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 48.0          # PAW: Energy Cutoff for the Double Grid
+nband     20            # Number of bands
+occopt    3             # Occupation option for metal
+tsmear    1000 K        # Temperature of smearing
 
-#Numerical parameters of the calculation : planewave basis set and k point grid
-ecut 12           # Maximal plane-wave kinetic energy cut-off, in Hartree
-pawecutdg 24      # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
-kptopt 3          # Automatic generation of k points, no taking symmetry into account
-ngkpt 2 2 2       # k-points grid based on the primitive vectors
-nshiftk 4         # of the reciprocal space, repeated four times,
-shiftk            # with different shifts:
-  0.5 0.5 0.5
-  0.5 0.0 0.0
-  0.0 0.5 0.0
-  0.0 0.0 0.5
-istwfk *1         # Wavefunctions are complex for all k-points
+pawprtvol 3             # Printing additional information
 
-#Parameters for the SCF procedure
-nstep 20          # Maximal number of SCF cycles
-tolvrs 1.0d-10    # Will stop when, twice in a row, the difference
-                  # between two consecutive evaluations of potential residual
-                  # differ by less than tolvrs
-tolwfr 1.0d-20    # Additional convergence criterion on the largest residual
-                  # to ensure that wavefunctions are also tighlty converged
-                  # as they will be used as initial conditions for the following
-                  # RT-TDDFT run
+#Definition of k-points grid                 
+kptopt 1                           
+ngkpt 8 8 8                        
+nshiftk 2                          
+shiftk 0.25 0.25 0.25              
+      -0.25 -0.25 -0.25            
+                                   
+istwfk *1                          
 
-#Printing parameters
-prtwf1 1          # Print wavefunctions (required for following RT-TDDFT runs)
-prtwf 0           # Do not print wavefunctions at each step during RT-TDDFT
-prtden 0          # Do not print density
-prteig 0          # Do not print eigenvalues
-prtebands 0       # Do not print ebands
-prtgsr 0          # Do not print GSR
-prtcurrent 1      # Print current
+#First dataset specific parameters
+nstep1    30            # Number of iterations for the DFT convergence
+nline1    10            # Number of line minimisations
+nnsclo1   10            # Number of non-self consistent loops
+tolvrs 1.0d-15
+
+#Define spin properties
+nsppol 1                # Non spin-polarized wavefunction
+nspden 1                # Non magnetic
+spinat 0.0 0.0 0.0      # No magnetization
+
+#DFT alone
+usedmft1 0
+
+#Second dataset specific parameters
+nstep2    10             # Number of iterations for the DFT+DMFT convergence
+nline2    10             # Number of line minimisations
+nnsclo2   10             # Number of non-self consistent loops
+#DFT+DMFT
+usedmft2  1              # Active DMFT
+dmftbandi 5              # First band included in the projection. Initial
+dmftbandf 13             # and final bands.
+dmft_nwlo 2001           # Logarythmic frequency mesh
+dmft_nwli 1000000        # Linear freqeuncy mesh
+dmft_iter 1              # Number of iterations of the DMFT part.
+                         # We often use single-shot, since anyway the charge density
+                         # changes through the DFT+DMFT anyway.
+dmftcheck 0
+dmft_rslf 1              # Read self-energy, if nothing (like here) initialize.
+dmft_mxsf 0.8            # Mixing of the old and new self-energy at every iterations.
+dmft_dc   5              # Double counting type. 1 is Fully Localized Limit (FLL)
+
+#CTQMC
+dmft_solv        5       # Choice of solver: Internal CT-SEG.
+#
+dmftqmc_l        500     # Number of time slices for G(tau).
+dmftqmc_n        1.d9    # Number of QMC sweeps
+dmftqmc_therm    100000  # Thermalization
+dmftctqmc_gmove  0       # Global move occurence in QMC
+dmftctqmc_order  50      # Perturbation order
+
+#Hubbard
+usepawu1     4          # For density matrix printout.
+usepawu2    14
+dmatpuopt   2           # The density matrix: the simplest expression.
+lpawu       2           # Angular momentum for the projected Hamiltonian
+upawu1      0.00   eV
+upawu2      5.5  eV     # Values of U for each angular momentum
+jpawu1      0.0
+jpawu2      0.84  eV    # Values of J for each angular momentum
+
+#=====================                   
+#                                        
+# Spectral Function SECTION              
+#                                        
+#=====================                   
+nbdbuf 10
+nstep3 75                # Number of iterations                   
+usedmft3 1               # Use dmft                
+usepawu3 14                              
+dmft_rslf3 1             # Read Self-energy                 
+tolwfr3 1.0d-12                          
+
+nbandkss3   20           # Number of states 
+kssform3    3
+#pawfatbnd2  1           # Fatbands, only resolved for total angular momenta
+dmft_kspectralfunc3 1    # Activate k-resolved spectral function
+iscf3      -2            # 
+kptopt3    -5            # Bandstructure: 5 segments
+ndivsm3     20           # Lengths of minimal segment
+kptbounds3               # The four segments of the band structure are
+#                        # connecting 5 points of the Brillouin zone,
+#                        # given here.
+        0.0 0.0 0.0      # Gamma
+        0.0 1/2 0.0      # N
+        1/4 1/4 1/4      # P
+        0.0 0.0 0.0      # Gamma
+        1/2 1/2 1/2      # H
+        0.0 1/2 0.0      # N
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
-#%% [paral_info]
-#%% nprocs_to_test = 8
-#%% max_nprocs = 8
-#%% [NCPU_8]
+#%% exclude_builders = alps_gnu_14.2_cov, alps_intel_2025_elpa, eos_intel_2023_cmake, eos_nvhpc_23.9_elpa
+#%% [shell]
+#%% pre_commands = iw_cp t102_MPI4o_DS2_DEN t102_MPI4o_DS2_DEN;
+#%%   iw_cp t102_MPI4i_DS3Self_ra-omega_iatom0001_isppol1 t102_MPI4i_DS3Self_ra-omega_iatom0001_isppol1;
+#%%   iw_cp t102_MPI4i_DS3.UnitaryMatrix_iatom0001 t102_MPI4i_DS3.UnitaryMatrix_iatom0001;
+#%%   iw_cp t102_MPI4o_DS3_Self-omega_iatom0001_isppol1 t102_MPI4o_DS3_Self-omega_iatom0001_isppol1;
+#%%   iw_cp t102_MPI4o_DS3_spectralfunction_realgrid t102_MPI4o_DS3_spectralfunction_realgrid;
+#%% [NCPU_4]
 #%% files_to_test =
-#%%   t102_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t102_MPI8o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t102_MPI8o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t102_MPI8o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t102_MPI4.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.1;
+#%%   t102_MPI4o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines=0,tolabs = 0.1e-04 , tolrel = 0.1e+04, fld_options = -easy 
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = F. Brieuc
-#%% keywords = RTTDDFT
-#%% description =
-#%%   Diamond, LDA, PAW
-#%%   Tests RT-TDDFT with time-dependent electric field
-#%% topics = RTTDDFT
+#%% authors = F. Gendron
+#%% keywords = dmft_kspectralfunc
+#%% description = Test for the k-resolved spectral function with self-energy in real frequency
 #%%<END TEST_INFO>
