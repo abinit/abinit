@@ -15,6 +15,7 @@
 
 module m_sigc
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_gwdefs
  use m_abicore
@@ -169,7 +170,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc
  integer :: spad,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10, iwc,ifft
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
- integer :: ilwrk, neigmax
+ integer :: ilwrk, neigmax, ac_epsm1cqwz2_win
+ integer(kind=XMPI_ADDRESS_KIND) :: ad_count
+ type(c_ptr) :: void_ptr
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in, z2,en_high,gw_gsq,w_localmax,w_max
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
@@ -462,8 +465,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ! To calculate \int_0^\infty domegap f(omegap), we calculate \int_0^1 dz f(1/z-1)/z^2.
    omegap(:) = one / gl_knots(:) - one
    omegap2(:) = omegap(:) ** 2
-   ABI_MALLOC(ac_epsm1cqwz2, (npwc, npwc, epsm1%nomega_i))
-   ac_epsm1cqwz2(:,:,:) = czero_gw
+
+   if (epsm1%use_mpi_shared_win) then
+#define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
+       ad_count = _MOK(2*npwc) * _MOK(npwc) * _MOK(epsm1%nomega_i)
+       call epsm1%shared_comm%allocate_shared_master(ad_count, gwpc, xmpi_info_null, void_ptr, ac_epsm1cqwz2_win)
+       call c_f_pointer(void_ptr, ac_epsm1cqwz2, shape=[npwc, npwc, epsm1%nomega_i])
+   else
+     ABI_CALLOC(ac_epsm1cqwz2, (npwc, npwc, epsm1%nomega_i))
+   end if
  end if
 
  ! Calculate total number of frequencies and allocate related arrays.
@@ -711,9 +721,17 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
          ABI_MALLOC(epsm1_eig, (Sigp%npwc))
 
+         if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, ac_epsm1cqwz2_win, ierr) ! Start the RMA epoch.
+
          do iiw=1,epsm1%nomega_i
-           ! Use the available MPI tasks to parallelize over iw'
-           if (Dtset%gwpara == 2 .and. MODULO(iiw-1, Wfd%nproc) /= Wfd%my_rank) CYCLE
+
+           if (.not. epsm1%use_mpi_shared_win) then
+             ! Use the MPI procs in wfd%comm to parallelize over iw'.
+             if (dtset%gwpara == 2 .and. MODULO(iiw-1, Wfd%nproc) /= Wfd%my_rank) CYCLE
+           else
+             ! Use the MPI procs in shared_comm to parallelize over iw'.
+             if (dtset%gwpara == 2 .and. epsm1%shared_comm%skip(iiw-1)) CYCLE
+           end if
 
            ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
            ! The first frequencies are always real, skip them.
@@ -736,8 +754,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          if (Dtset%gwpara == 2) then
            ! FIXME: It seems that non all the procs get here if nband is small!
            !call wrtout(std_out, "AC xmpi_sum begin")
-           call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
-           call xmpi_sum(neig, Wfd%comm, ierr)
+           if (.not. epsm1%use_mpi_shared_win) then
+             call xmpi_sum(neig, Wfd%comm, ierr)
+             call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
+           else
+             ! No neeed to MPI_SUM ac_epsm1cqwz2_win as we're using shared memory.
+             call xmpi_sum(neig, epsm1%shared_comm%value, ierr)
+             call xmpi_win_fence(XMPI_MODE_NOSUCCEED, ac_epsm1cqwz2_win, ierr) ! Close the RMA epoch.
+           end if
            !call wrtout(std_out, "AC xmpi_sum end")
          end if
 
@@ -1320,7 +1344,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_SFREE(wf1swf2_g)
  ABI_SFREE(extrapolar_distrb)
  ABI_SFREE(proc_distrb)
- ABI_SFREE_PTR(ac_epsm1cqwz2)
+
+ if (mod10 == SIG_GW_AC) then
+   if (epsm1%use_mpi_shared_win) then
+     call xmpi_win_free(ac_epsm1cqwz2_win, ierr)
+   else
+     ABI_SFREE_PTR(ac_epsm1cqwz2)
+   end if
+ end if
 
  call timab(431,2,tsec)
  call timab(424,2,tsec) ! calc_sigc_me
