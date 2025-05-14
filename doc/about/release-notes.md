@@ -15,11 +15,13 @@ and EXCEPT MR1160, 1165 and 1168, that will be included in v10.6 .
 For later releases v10.4, the list of MR is to be completed. -->
 The list of contributors includes:
 
-LIST TO BE TO BE UPDATED !!!
-
-G. Antonius, M. Azizi, L. Baguet, J.-M. Beuken, O. Bistoni, A. Blanchet, F. Bottin, F. Bruneval, Siyu Chen, F. Gendron, M. Giantomassi, X. Gonze,
-P. Kestener, L. MacEnulty, M. Mignolet, C. Paillard,
-S. Ponce, M. Royo, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, Xu He, J. Zwanziger
+G. Allemand, B. Amadon, G. Antonius, M. Azizi, L. Baguet, S. Bandyopadhyay, L. Bastogne, 
+R. Béjaud, J.-M. Beuken, A. Blanchet, J. Boust, F. Bottin, J. Bouquiaux, F. Brieuc, 
+E. Castiel, Q. Delacroix, F. Gendron, G. Geneste, M. Giantomassi, 
+O. Gingras, F. Gomez-Ortiz, X. Gonze, R. Gupta,
+I.-M. Lygatsika, O. Mattelaer, M. Mignolet, G. Petretto,
+S. Ponce, S. Rostami, M. Royo, M. Sarraute, A. Sasani, Le Shu, M. Torrent, Hsiaoyi Tsai, 
+V. Vasilchenko, M. Verstraete, Xu He, Huazhang Zhang, J. Zwanziger
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -33,7 +35,7 @@ Xavier
 
 **A.1** Remark: forthcoming ABINIT paper
 
-ABINIT will be the subject of a forthcoming paper, that will contain the brief description the new features of ABINIT since 
+ABINIT will be the subject of a forthcoming paper, that will contain the brief description of the new features of ABINIT since 
 the 2020 previous papers [[cite:Gonze2020]] and [[cite:Romero2020]]. This will provide complementary information to the present release notes.
 So, when it will be available, the user is strongly suggested to rely on both these release notes and this paper.
 
@@ -429,6 +431,8 @@ The build system follows the command line "with_hdf5=path/to/hdf5", whatever the
 The same change is done for netcdf and netcdf-fortran.
 In addition, for netcdf (netcdf-fortran), fcflags and libs are filled with the information given by nc-config (nf-config), which is a binary found in "path/to/netcdf/bin/".
 This merge improves hdf5 and netcdf detection on our supercomputers, and works on the testfarm.
+
+By L. Baguet (MR1079).
 
 **C.5** Add netcdf_fortran as dependency for 42_parser and 68_dmft   
 
