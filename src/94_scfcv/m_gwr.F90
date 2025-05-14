@@ -1842,12 +1842,12 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
    spin = gwr%my_spins(my_is)
    do my_it=1,gwr%my_ntau
      itau = gwr%my_itaus(my_it)
-     ! All the PBLAS matrices are MPI distributed over g' in blocks
+     ! NB: all the PBLAS matrices are MPI distributed over g' in blocks if action == "malloc"
 
      select case (what)
      case ("green")
        ! ========================
-       ! Allocate/free G_k(g,g')
+       ! Allocate/free G_k(g,g', +-itau)
        ! ========================
        ABI_CHECK_IEQ(size(mask_ibz), gwr%nkibz, "wrong mask size")
 
@@ -1865,7 +1865,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
 
      case ("tchi", "wc")
        ! ===========================
-       ! Allocate/free tchi_q(g,g')
+       ! Allocate/free tchi_q(g,g', +itau)
        ! ===========================
        ABI_CHECK_IEQ(size(mask_ibz), gwr%nqibz, "wrong mask size")
 
@@ -1881,7 +1881,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
 
      case ("sigma")
        ! ================================
-       ! Allocate/free sigmac_kibz(g,g')
+       ! Allocate/free sigmac_kibz(g,g', +- itau)
        ! ================================
        ABI_CHECK_IEQ(size(mask_ibz), gwr%nkibz, "wrong mask size")
        do ik_ibz=1,gwr%nkibz
@@ -4712,8 +4712,9 @@ subroutine gwr_build_tchi(gwr)
     ! ===================================================================
     call print_chi_header()
 
-    call wrtout(std_out, " Allocatin memory for G_k(r',r) and chi_q(r',r)...")
+    call wrtout(std_out, " Allocating memory for G_k(r',r) and chi_q(r',r)...")
     call wrtout(std_out, " Here we're gonna have a big allocation peak...")
+    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
     ! Need all nqibz matrices here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
     nrsp = gwr%g_nfft * gwr%nspinor
@@ -4728,6 +4729,7 @@ subroutine gwr_build_tchi(gwr)
     do ipm=1,2
       call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
       call gkq_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+      call pstat_proc%print(_PSTAT_ARGS_)
     end do
 
     mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
@@ -4744,18 +4746,17 @@ subroutine gwr_build_tchi(gwr)
       !call ltg_qibz(iq_ibz)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
     end do
 
+    ! Compute mask with the k-points in the IBZ required by this MPI proc.
     need_kibz = 0
     do my_ikf=1,gwr%my_nkbz
       ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
       do iq_ibz=1,gwr%nqibz
         qq_ibz = gwr%qibz(:, iq_ibz)
         kpq_bz = kk_bz + qq_ibz
-        !kpq_bz = qq_ibz - kk_bz
-        !kpq_bz = kk_bz - qq_ibz
         ! TODO: here I may need to take into account the umklapp
         call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
         !ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
-        ikq_ibz = gwr%kbz2ibz(1,ikq_bz)
+        ikq_ibz = gwr%kbz2ibz(1, ikq_bz)
         need_kibz(ikq_ibz) = 1
       end do
     end do
@@ -4950,8 +4951,9 @@ end subroutine gwr_build_tchi
 !!  If action == "communicate":
 !!      Redistribute G_k for fixed (itau, spin) according to `need_kibz` table.
 !!      Also, set got_kibz to 1 for each IBZ k-point that has been received.
+!!
 !!  If action == "free":
-!!      Use input `got_kibz` array to deallocate matrices.
+!!      Use input `got_kibz` array to deallocate matrices received in a previous call.
 !!
 !! INPUTS
 !!
@@ -4978,6 +4980,7 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+
  !num_pm = 2; ipm_list__ = [1, 2]
  !if (present(ipm_list)) then
  !  num_pm = size(ipm_list)
@@ -5002,7 +5005,7 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
      if (allocated(gwr%green_desc_kibz(ik_ibz)%gvec)) sender_kibz(ik_ibz) = gwr%kpt_comm%me
      if (need_kibz(ik_ibz) /= 0 .and. .not. allocated(gwr%green_desc_kibz(ik_ibz)%gvec)) then
        ! NB: Use same args as those used to init the descriptors in gwr_init
-       ! so that gvec ordering is consistent across MPI procs.
+       ! so that the ordering of gvec is consistent across MPI procs.
        got_kibz(ik_ibz) = 1
        call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, gwr%dtset%ecutwfn, gwr)
      end if
