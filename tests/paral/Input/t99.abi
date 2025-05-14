@@ -64,7 +64,7 @@ dmft_yukawa_param 1
 dmft_prtwan 1
 dmft_triqs_wmax 1.0
 
-dmft_solv 6 # Rotationally invariant TRIQS
+dmft_solv 6 # Density-density TRIQS
 
 # == DFT+U
 usepawu1    4
@@ -84,7 +84,7 @@ npfft2 1
 bandpp2 16
 
 dmftctqmc_meas 100
-dmftctqmc_basis 0
+dmftctqmc_basis 3
 dmftqmc_therm 10
 dmftqmc_l 500
 dmft_triqs_off_diag 0
@@ -122,6 +122,14 @@ prtwf 0
 #%% [NCPU_8]
 #%% files_to_test =
 #%%   t99_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2.UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2.UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2_Wannier_functions_iatom0001_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2_Wannier_functions_iatom0002_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2_DMFTORBITAL_itypat0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2_DMFTORBITAL_itypat0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
 #%% authors = B. Amadon, E. Castiel
 #%% keywords = DMFT, TRIQS

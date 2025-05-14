@@ -8,6 +8,7 @@ jdtset 1 2
 prtvol    4
 pawprtvol 3
 getwfk  -1
+nsym 1
 
 ##### CONVERGENCE PARAMETERS
 nstep1   30
@@ -18,6 +19,8 @@ tolvrs  1.0d-10
 nband     17
 occopt 3 tsmear 0.0173918086
 diemix 0.1
+nline2 10
+nnsclo2 10
 
 ##### PHYSICAL PARAMETERS
 natom 1 ntypat  1 typat  1
@@ -30,13 +33,9 @@ rprim 0.0 1/2 1/2
 
 # == Points k and symetries
 paral_kgb 0
-kptopt 4
-kptrlatt 4 0 0 0 4 0 0 0 4
-nshiftk 4
-shiftk 1/2 1/2 1/2
-       1/2 0.0 0.0
-       0.0 1/2 0.0
-       0.0 0.0 1/2
+kptopt 1
+ngkpt 2 2 1
+chksymbreak 0
 
 # == LDA+DMFT
 usedmft1 0
@@ -50,11 +49,11 @@ dmftcheck 0
 # == CTQMC
 dmft_solv 7 # CTQMC
 dmftqmc_l 500
-dmftqmc_n 1.d3
+dmftqmc_n 1.d5
 dmftqmc_therm 100
 
-dmftctqmc_basis   2
-dmftctqmc_meas    100
+dmftctqmc_basis   1
+dmftctqmc_meas    10
 
 dmft_mxsf 0.1
 dmft_dc 8
@@ -73,9 +72,9 @@ jpawu1  0.0000  # values in Hartree
 jpawu2  0.5 eV
 
 dmft_triqs_off_diag 1
-dmft_triqs_leg_measure 1
-dmft_triqs_nleg 10
 dmft_triqs_loc_n_max 3
+dmft_triqs_wmax 1.5
+dmft_triqs_tol_block 1.d-8
 
 dmft_tolfreq  0.01
 
@@ -91,11 +90,11 @@ dmft_tolfreq  0.01
 #%% nprocs_to_test = 1, 4, 8
 #%% max_nprocs = 8
 #%% [NCPU_1]
-#%% files_to_test = t92_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t107_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [NCPU_4]
-#%% files_to_test = t92_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t107_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [NCPU_8]
-#%% files_to_test = t92_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t107_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon, E. Castiel
 #%% keywords = DMFT, CTQMC, TRIQS

@@ -59,7 +59,7 @@ dmft_yukawa_param 2
 dmft_prtwan 1
 dmft_triqs_wmax 1.0
 
-dmft_solv 6 # Rotationally invariant TRIQS
+dmft_solv 6 # Density-density TRIQS
 
 # == DFT+U
 usepawu2     14
@@ -89,6 +89,8 @@ dmft_triqs_compute_integral 1
 dmft_triqs_gaussorder 2
 dmft_wanrad 3.0
 
+dmft_orbital 1  2  0
+
 prtwf 0
 
  pp_dirpath "$ABI_PSPDIR"
@@ -103,13 +105,15 @@ prtwf 0
 #%% max_nprocs = 8
 #%% [NCPU_8]
 #%% files_to_test =
-#%%   t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Wannier_functions_iatom0001_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Wannier_functions_iatom0002_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2.UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2.UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8o_DS2_Wannier_functions_iatom0001_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8o_DS2_Wannier_functions_iatom0002_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8o_DS2.UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8o_DS2.UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8o_DS2Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8o_DS2Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8o_DS2_CTQMC_HISTOGRAM_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t105_MPI8o_DS2_CTQMC_HISTOGRAM_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
 #%% authors = B. Amadon, E. Castiel
 #%% keywords = DMFT, TRIQS

@@ -18,13 +18,13 @@ nstep1 100
 nstep 1
 nline2 10
 nnsclo2 5
-ecut  8
+ecut  6
 # as this cutoff, test is not physical at all (filling of correlated orbitals are obviously wrong)
 
-pawecutdg 20
-tolvrs 1.0d-15
+pawecutdg 12
+tolvrs 1.0d-5
 nband  34
-occopt 3 tsmear 0.003675
+occopt 3 tsmear 0.008275
 
 ##### PHYSICAL PARAMETERS
 nsppol 1
@@ -43,9 +43,10 @@ xred 0 0 0
 acell   3*7.927
 
 ##### K-POINTS
-kptrlatt 2 0 0 0 2 0 0 0 2
-istwfk 1 1 1
 chksymbreak 0
+kptopt 1
+ngkpt 2 2 3
+istwfk *1
 
 ## == LDA+DMFT
 usedmft1 0
@@ -66,17 +67,19 @@ dmatpuopt  1   # choose expression of the density matrix
 lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00  0.0   # values in Hartree
 jpawu1  0.0000 0.0  # values in Hartree
-upawu2  0.30  0.0   # values in Hartree
+upawu2  0.20  0.0   # values in Hartree
 jpawu2  0.1000 0.0  # values in Hartree
 
-dmftqmc_therm 10
-dmftctqmc_basis 1
-dmftctqmc_meas 100
+dmftqmc_therm 50
+dmftctqmc_basis 2
+dmftctqmc_meas 50
 dmft_triqs_off_diag 1
 dmftqmc_l 500
-dmftqmc_n 1.d2
-dmft_triqs_wmax 1.0
+dmftqmc_n 1.d3
 dmft_triqs_move_double 0
+dmft_yukawa_param 3
+dmft_triqs_leg_measure 1
+dmft_triqs_nleg 10
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "28ni.paw, 8o.2.paw"
@@ -90,11 +93,15 @@ dmft_triqs_move_double 0
 #%% nprocs_to_test = 1, 4, 8
 #%% max_nprocs = 8
 #%% [NCPU_1]
-#%% files_to_test = t91_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t106_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [NCPU_4]
-#%% files_to_test = t91_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t106_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI4o_DS2_Gtau_diag_Legendre_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI4o_DS2_Gtau_diag_Legendre_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI4o_DS2_Gtau_offdiag_Legendre_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI4o_DS2_Gtau_offdiag_Legendre_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [NCPU_8]
-#%% files_to_test = t91_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t106_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% keywords = PAW, DMFT, TRIQS
 #%% authors = B. Amadon, E. Castiel
