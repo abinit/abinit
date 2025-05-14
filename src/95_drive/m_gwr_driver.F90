@@ -1002,6 +1002,8 @@ end if
 
  call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq); call gwr%free()
 
+ call pstat_proc%print(_PSTAT_ARGS_)
+
 end subroutine gwr_driver
 !!***
 
