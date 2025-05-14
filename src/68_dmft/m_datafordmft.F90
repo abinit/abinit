@@ -955,6 +955,8 @@ subroutine chipsi_print(paw_dmft,pawtab)
    !call print_matlu(magnfield,natom,1)
    call add_matlu(levels_temp,magnfield,energy_level%matlu,natom,-1)
    call print_matlu(energy_level%matlu,natom,1)
+   call destroy_matlu(magnfield,natom)
+   call destroy_matlu(levels_temp,natom)
 
   ABI_FREE(magnfield)
   ABI_FREE(levels_temp)
