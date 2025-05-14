@@ -108,7 +108,8 @@ program abinit
  use m_outvars,       only : outvars
  use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
- use m_common, only : get_dtsets_pspheads
+ use m_common,        only : get_dtsets_pspheads
+ use m_pstat,         only : pstat_proc
 
 #ifdef HAVE_GPU
  use m_gpu_toolbox
@@ -619,6 +620,8 @@ program abinit
 #endif
 
  call xpapi_shutdown()
+
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam(4), print_mem_report=print_mem_report)

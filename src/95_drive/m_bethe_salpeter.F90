@@ -57,7 +57,7 @@ module m_bethe_salpeter
  use m_gsphere,         only : gsphere_t
  use m_vcoul,           only : vcoul_t
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
- use m_wfd,             only : wfd_init, wfdgw_t, test_charge
+ use m_wfd,             only : wfdgw_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
  use m_io_screening,    only : hscr_t, get_hscr_qmesh_gsph
@@ -479,7 +479,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ABI_MALLOC(keep_ur,(mband,Kmesh%nibz,Dtset%nsppol))
  keep_ur=.FALSE.; if (MODULO(Dtset%gwmem,10)==1) keep_ur = .TRUE.
 
- call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Dtset%nsppol,bks_mask,&
+ call wfd%init(Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Dtset%nsppol,bks_mask,&
   Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_osc,&
   Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
@@ -519,7 +519,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ABI_MALLOC(keep_ur,(mband,Kmesh_dense%nibz,Dtset%nsppol))
    keep_ur=.FALSE.; if (MODULO(Dtset%gwmem,10)==1) keep_ur = .TRUE.
 
-   call wfd_init(Wfd_dense,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh_dense%nibz,Dtset%nsppol,&
+   call Wfd_dense%init(Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh_dense%nibz,Dtset%nsppol,&
     bks_mask,Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,ngfft_osc,&
     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 

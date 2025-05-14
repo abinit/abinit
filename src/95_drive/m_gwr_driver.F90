@@ -64,7 +64,7 @@ module m_gwr_driver
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free, paw_rho_tw_g
  use m_kg,              only : getph
- use m_wfd,             only : wfd_init, wfd_t, test_charge
+ use m_wfd,             only : wfd_t, test_charge
  use m_pspini,          only : pspini
  use m_paw_correlations,only : pawpuxinit
  use m_paw_dmft,        only : paw_dmft_type
@@ -1143,7 +1143,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")

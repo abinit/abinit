@@ -67,7 +67,7 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc, multithreaded_getghc
- use m_wfd,               only : wfd_t, wfd_init
+ use m_wfd,               only : wfd_t
  use m_vcoul,             only : vcgen_t
  use m_occ,               only : get_fact_spin_tol_empty
  use m_pstat,             only : pstat_proc
@@ -2078,7 +2078,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1 !; wfd_istwfk = wfk_hdr%istwf_k
 
- call wfd_init(hyb%wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
+ call hyb%wfd%init(cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
