@@ -88,7 +88,7 @@ module m_screening_driver
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
- use minimax_grids,      only : gx_minimax_grid !, gx_get_error_message
+ use minimax_grids,   only : gx_minimax_grid !, gx_get_error_message
  use m_pstat,         only : pstat_proc
 
  implicit none
@@ -203,7 +203,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(hscr_t) :: Hem1,Hchi0
  type(wfdgw_t) :: Wfd,Wfdf
  type(spectra_t) :: spectra
- type(chi_t) :: chihw
+ !type(chi_t) :: chihw
  type(wvl_data) :: wvl_dummy
  character(len=nctk_slen) :: wing_shape
 !arrays
@@ -1145,10 +1145,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
       Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
       ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
 
-     chihw = chi_new(ep%npwe, ep%nomega)
-     chihw%head = chi0_head
-     chihw%lwing = chi0_lwing
-     chihw%uwing = chi0_uwing
+     !chihw = chi_new(ep%npwe, ep%nomega)
+     !chihw%head = chi0_head
+     !chihw%lwing = chi0_lwing
+     !chihw%uwing = chi0_uwing
 
      ! Add the intraband term if required and metallic occupation scheme is used.
      add_chi0_intraband=.FALSE. !add_chi0_intraband=.TRUE.
@@ -1445,7 +1445,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      end if
    end if ! master and is_qeq0==1
 
-   if (is_qeq0==1) call chi_free(chihw)
+   !if (is_qeq0==1) call chi_free(chihw)
 
    call spectra%free()
    ABI_SFREE(kxcg)
@@ -1874,34 +1874,9 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
 
  ! === Create structure describing the G-sphere used for chi0/espilon and Wfns ===
  ! * The cutoff is >= ecuteps to allow for umklapp
-#if 0
- call Gsph_wfn%init(Cryst, 0, ecut=Dtset%ecutwfn)
- Dtset%npwwfn = Gsph_wfn%ng
- Ep%npwwfn = Gsph_wfn%ng
- ierr = 0
- do ig=1,MIN(Gsph_wfn%ng, ng_kss)
-   if ( ANY(Gsph_wfn%gvec(:,ig) /= gvec_kss(:,ig)) ) then
-     write(std_out,*)ig, Gsph_wfn%gvec(:,ig), gvec_kss(:,ig)
-   end if
- end do
- ABI_CHECK(ierr==0,"Wrong gvec_wfn")
-#else
  call Gsph_wfn%init(Cryst, Ep%npwvec, gvec=gvec_kss)
-#endif
 
-#if 0
- call Gsph_epsG0%init(Cryst, 0, ecut=ecutepspG0)
- Ep%npwepG0 = Gsph_epsG0%ng
- ierr = 0
- do ig=1,MIN(Gsph_epsG0%ng, ng_kss)
-   if ( ANY(Gsph_epsG0%gvec(:,ig) /= gvec_kss(:,ig)) ) then
-     write(std_out,*)ig, Gsph_epsG0%gvec(:,ig), gvec_kss(:,ig)
-   end if
- end do
- ABI_CHECK(ierr==0,"Wrong gvec_epsG0")
-#else
  call Gsph_epsG0%init(Cryst, Ep%npwepG0, gvec=gvec_kss)
-#endif
  !
  ! =======================================================================
  ! ==== Setup of the FFT mesh used for the oscillator matrix elements ====
@@ -2049,8 +2024,8 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
 
  if (Ep%spmeth/=0) then
    write(msg,'(2a,i3,2a,i8)')ch10,&
-&    ' setup_screening: using spectral method: ',Ep%spmeth,ch10,&
-&    ' Number of frequencies for imaginary part: ',Ep%nomegasf
+    ' setup_screening: using spectral method: ',Ep%spmeth,ch10,&
+    ' Number of frequencies for imaginary part: ',Ep%nomegasf
    call wrtout(std_out, msg)
    if (Ep%spmeth==2) then
      write(msg,'(a,f8.5,a)')' Gaussian broadening = ',Ep%spsmear*Ha_eV,' [eV]'
@@ -2121,12 +2096,11 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ! === Initialize the band structure datatype ===
  ! * Copy KSS energies and occupations up to Ep%nbnds==Dtset%nband(:)
  ! TODO Recheck symmorphy and inversion
- bantot=SUM(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol))
+ bantot = SUM(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol))
 
- ABI_MALLOC(doccde,(bantot))
- ABI_MALLOC(eigen,(bantot))
- ABI_MALLOC(occfact,(bantot))
- doccde(:)=zero; eigen(:)=zero; occfact(:)=zero
+ ABI_CALLOC(doccde, (bantot))
+ ABI_CALLOC(eigen, (bantot))
+ ABI_CALLOC(occfact, (bantot))
 
  jj=0; ibtot=0
  do isppol=1,Dtset%nsppol
@@ -2203,7 +2177,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  end if
 
  ltest = (ks_ebands%mband == Ep%nbnds .and. ALL(ks_ebands%nband == Ep%nbnds))
- ABI_CHECK(ltest,'BUG in definition of ks_ebands%nband')
+ ABI_CHECK(ltest, 'BUG in definition of ks_ebands%nband')
 
  if (Ep%gwcomp==1 .and. Ep%spmeth>0) then
    ABI_ERROR("Hilbert transform and extrapolar method are not compatible")
@@ -2554,19 +2528,19 @@ end subroutine random_stopping_power
 !!  Pvc<vcoul_t>=Structure gathering data on the Coulombian interaction
 !!  Qmesh<kmesh_t>=Data type with information on the q-sampling
 !!  Dtfil<Datafiles_type)>=variables related to files
-!!  spaceComm=MPI communicator.
+!!  comm=MPI communicator.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa,ec_gm)
+subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa,ec_gm)
 
  use m_hide_lapack, only : xginv, xheev
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iqcalc,iq,gwrpacorr,gwgmcorr,spaceComm
+ integer,intent(in) :: iqcalc,iq,gwrpacorr,gwgmcorr,comm
  real(dp),intent(inout) :: ec_gm
  type(kmesh_t),intent(in) :: Qmesh
  type(vcoul_t),intent(in) :: Pvc
@@ -2579,7 +2553,8 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
 !Local variables-------------------------------
 !scalars
- integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr, units(2)
+ integer,parameter :: master = 0
+ integer :: ig1,ig2,ilambda,io,rank,nprocs,unt,ierr, units(2)
  real(dp) :: ecorr,ecorr_gm,lambda
  logical :: q_is_gamma
  character(len=500) :: msg
@@ -2591,10 +2566,9 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
 
  units = [std_out, ab_out]
 
-! initialize MPI data
- master=0
- rank   = xmpi_comm_rank(spaceComm)
- nprocs = xmpi_comm_size(spaceComm)
+ ! initialize MPI data
+ rank   = xmpi_comm_rank(comm)
+ nprocs = xmpi_comm_size(comm)
 
  !if (rank==master) then ! presently only master has chi0 in screening
 
@@ -2610,7 +2584,6 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  ABI_MALLOC(zlw,(gwrpacorr))
  ABI_MALLOC(zl,(gwrpacorr))
  call coeffs_gausslegint(zero,one,zl,zlw,gwrpacorr)
-
 
  ABI_MALLOC(chi0_diag,(Ep%npwe))
  ABI_MALLOC_OR_DIE(chitmp,(Ep%npwe,Ep%npwe), ierr)
@@ -2717,8 +2690,8 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  ! This would allow for a manual parallelization over q-points
  if(iqcalc==Ep%nqcalc) then
 
-   call xmpi_sum_master(ec_rpa,master,spaceComm,ierr)
-   call xmpi_sum_master(ec_gm,master,spaceComm,ierr)
+   call xmpi_sum_master(ec_rpa,master,comm,ierr)
+   call xmpi_sum_master(ec_gm,master,comm,ierr)
 
    if(rank==master) then
      ecorr = sum( zlw(:)*ec_rpa(:) )

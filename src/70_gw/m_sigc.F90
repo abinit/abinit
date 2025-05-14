@@ -694,9 +694,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      !      A check, however, is performed in sigma.
      !    - If gwcomp==1 and mod10 in [1,2,9], one needs both to set up botsq and epsm1_q
      if (sigp%needs_ppm()) then
-       ABI_MALLOC(botsq, (PPm%npwc, PPm%dm2_botsq))
-       ABI_MALLOC(otq, (PPm%npwc, PPm%dm2_otq))
-       ABI_MALLOC(eig, (PPm%dm_eig, PPm%dm_eig))
        call PPm%get_qbz(Gsph_c, Qmesh, iq_bz, botsq, otq, eig)
      end if
 
