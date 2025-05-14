@@ -33,18 +33,20 @@ Xavier
 
 **A.1** Remark: forthcoming ABINIT paper
 
-This ABINIT version will be the subject of a global paper, that will contain the brief description the new features of ABINIT since 
-the 2020 previous global papers [[cite:Gonze2020]] and [[cite:Romero2020]]. This will provide complementary information to the present release notes.
-So, when this paper will be available, the user is strongly suggested to rely on both these release notes and this paper.
+ABINIT will be the subject of a forthcoming paper, that will contain the brief description the new features of ABINIT since 
+the 2020 previous papers [[cite:Gonze2020]] and [[cite:Romero2020]]. This will provide complementary information to the present release notes.
+So, when it will be available, the user is strongly suggested to rely on both these release notes and this paper.
 
 **A.2** Downgrading of [[ionmov]], in favor of [[geoopt]] and [[moldyn]].
 
-The old variable [[ionmov]] (previously used for geometry optimization and molecular dynamics) has been reworked. 
-[[ionmov]] is now a developer variable, and its usage has been replaced 
-by two new input variables [[geoopt]] and [[moldyn]]. For example, [[ionmov]] 2 corresponds now to [[geoopt]] "bfgs" .
+The variable [[ionmov]] (used to define geometry optimization and molecular dynamics) is now considered to be a developer variable. 
+Two new input variables should be preferred to drive these : [[geoopt]] and [[moldyn]]. For example, [[ionmov]] 2 corresponds now to [[geoopt]] "bfgs" .
 
-All documentation and tutorials include these changes. For backward compatibility reasons, [[ionmov]] can still be used. 
-Multibinit has not been modified. See [[topic:MolecularDynamics]] and [[topic:GeoOpt]] for more informations.
+All documentation and tutorials include these changes (there are many input files now using these). 
+For backward compatibility reasons, [[ionmov]] can still be used. 
+Multibinit has not been modified. 
+
+See [[topic:MolecularDynamics]] and [[topic:GeoOpt]] for more informations.
 
 By Augustin Blanchet, Romuald Béjaud, Fabien Brieuc, Grégory Geneste (MR1085). See also point B.5 .
 
@@ -54,7 +56,7 @@ By Augustin Blanchet, Romuald Béjaud, Fabien Brieuc, Grégory Geneste (MR1085).
 * The directory tests/gwr has been renamed tests/gwr_suite
 * The directory tests/gwpt has been renamed tests/gwpt_suite
 
-This is to avoid name confusion with the tutorial bearing the same name.
+This is to avoid confusion with the tutorial bearing the same name.
 Accordingly, the new suite of tests for real-time time-dependent DFT has been named tests/rttddft_suite .
 
 By M. Giantomassi and X. Gonze.
@@ -71,7 +73,7 @@ It allows one to compute to compute polaron formation energies and associated qu
 strong-coupling approximation. See [[cite:Vasilchenko2022]], and a forthcoming Vasilchenko2025 paper (reference to be added when published).
 Activate it using [[optdriver]]=7 and [[eph_task]]=13 (see also [[eph_task]]=-13).
 The corresponding [[tutorial:eph4vpq]] is available.
-In this tutorial, there are 10 tests: [[test:eph4vpq_1]] to [[test:eph4vpq_10]].
+In this tutorial, there are 10 tests, [[test:eph4vpq_1]] to [[test:eph4vpq_10]].
 
 Related input variables: [[getvpq]], [[getvpq_filepath]],[[vpq_aseed]], [[vpq_avg_g]], [[vpq_gpr_energy]], [[vpq_gpr_length]],
 [[vpq_interp]], 
@@ -97,7 +99,9 @@ It includes the calculation of the current density response to an impulse electr
 (conductivity, dielectric function). Different time-propagators are coded, see [[td_propagator]].
 Activate it using [[optdriver]]=9. Control the number of time steps using [[ntime]], and the time step value using [[dtele]].
 The corresponding [[tutorial:rttddft]] is available.
-Related input variables : [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]].
+
+Related input variables : [[prtcurrent]], [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]].
+The new input units "fs" and "as" have been introduced (for "femtoseconds" and "attoseconds".
 Related tests : [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial, test:rttddft_1 to test:rttddft_4. (Link to be re-established when the tests will be enabled).
 
 By F. Brieuc (MR1137)
@@ -105,23 +109,26 @@ By F. Brieuc (MR1137)
  
 **B.3** Electron-phonon interaction : thermal transport, cumulant and miscellaneous improvements.
 
-Thanks to the treatment of thermal gradients, in addition to electric fields, 
+Thanks to the treatment of thermal gradients in addition to electric fields, 
 the calculation of Seebeck, electronic thermal conductivity and Peltier coefficients is available both in the Relexation-Time Approximation 
 (RTA - [[eph_task]]=7)
-as well as in the Iterative Boltzmann Transport Equation (IBTE - [[eph_task]]=8).
+and in the Iterative Boltzmann Transport Equation (IBTE - [[eph_task]]=8).
+
 WHICH TESTS ?
 
 A chemical potential varying with temperature in the transport coefficient calculations is available, in the RTA.
+
 WHICH TESTS ?
 
 The calculation of mobility using Dyson-Migdal spectral functions 
 (that can be generated by different means, including the cumulant approach - [[eph_task]]=9)
 has also been implemented. 
-Related test:v10_104 to test:v10_107 - These tests had not been activated ...
+Related test:v10_104 to test:v10_107 - These tests had not been activated.
 
 Support for [[useylm]]=1 has been implemented in EPH routines.
 
-There is a new [[eph_task]]=18 to compute e-ph matrix elements along a k- or q-path. See [[test:eph4zpr_9]].
+There is a new [[eph_task]]=18 to compute e-ph matrix elements along a k- or q-path. See [[test:eph4zpr_9]]. 
+See also the new input variables [[eph_path_brange]], [[eph_fix_korq]], and [[eph_fix_wavevec]].
 
 By G. Allemand, R. Gupta, M. Giantomassi, M. Verstraete (MR1156, 1162, 1102)
 
@@ -130,7 +137,7 @@ By G. Allemand, R. Gupta, M. Giantomassi, M. Verstraete (MR1156, 1162, 1102)
 
 Multibinit has been improved in many different aspects.
 
-* Variable Maximum N-body Term Generation: Users can now generate terms with a variable maximum number of bodies using the max_nbody parameter, providing increased flexibility in model construction.
+* Variable Maximum N-body Term Generation: Users can now generate terms with a variable maximum number of bodies using the fit_max_nbody@multibinit parameter (TO BE DOCUMENTED, AND TO BE TESTED), providing increased flexibility in model construction.
 * Weighted Training Set: To improve fitting accuracy for structures near minima and saddle points, the [[fit_weight_T@multibinit]] input variable has been added. This allows users to apply a Boltzmann-distribution-like weighting to training samples, reducing the influence of high-energy, high-force, and high-stress structures. 
 * Enhanced Bounding Strategy: A new bounding strategy ([[bound_option@multibinit]]=1) is implemented, restricting bounding to terms with the same "nbody" count. The previous scheme remains available via [[bound_option@multibinit]]=2. 
 * Homogeneous Electric Fields: Support for homogeneous electric fields has been added through the [[efield@multibinit]] and [[efield_lambda@multibinit]] input variables. 
@@ -143,7 +150,7 @@ There have been also several bug Fixes:
 * Symmetry-Equivalent Term Completeness: Corrected an issue where the number of symmetry-equivalent terms was incomplete. 
 Dipole-Dipole Interaction Box Consistency: Resolved an inconsistency between the dipole-dipole interaction box and the simulation box when distances in the DDB exceeded the simulation box dimensions.
 * Stress Correction Term: Fixed an error in the stress correction term. (Contribution by Louis Bastogne)
-* Spin Monte Carlo: fix a bug which results in crash  in spin Monte Carlo.
+* Spin Monte Carlo: fix a bug which results in crash in spin Monte Carlo.
 
 The input variables fit_ncoeff_per_cycle and fit_drop_rate have been disabled.
 
@@ -158,18 +165,23 @@ New molecular dynamics algorithms
 
 * A new Langevin algorithm, [[moldyn]]="nvt_langevin" ([[ionmov]]=16), is now available for molecular dynamics. It was originally used for PIMD simulations ([[imgmov]]=9) and had been well tested. "nvt_langevin" directly calls the PIMD algorithm, automatically setting [[nimage]]=1.
 * A new molecular dynamics algorithm, [[moldyn]]="npt_langevin", is introduced for use only with [[optcell]]=2, incorporating friction coefficient for the thermostat ([[friction]]) and of the barostat ([[frictionbar]]).
-Since both algorithms are non-deterministic, restarting molecular dynamics, controlled by [[restartxf]], is done only by reading the _HIST.nc file, bypassing the prediction algorithms.
+Since both algorithms are non-deterministic, the restart of a molecular dynamics run controlled by [[restartxf]] is done only by reading the _HIST.nc file, bypassing the prediction algorithms.
 
 These algorithms are tested in [[test:v10_20]] and [[test:v10_21]].
 
 New features in the _HIST.nc file
 
 * The output file _HIST.nc now includes the evolution of [[vel_cell]] (the VELocity of the CELL parameters). Previously, this variable was only included in _HIST.nc file for PIMD simulations ([[imgmov]]!=0).
-* The Number of Degrees Of Freedom (ndof) is now printed as a non-evolving integer scalar in the _HIST.nc file. Previously, it was not possible to determine the relationship between the kinetic energy and ionic temperature, only from the _HIST.nc file. Post-processing tools may include this change, computing the ionic temperature as: T = 2Ek/ndof. The internal variable ndof is initialized as ndof=3N for non-contrained molecular dynamics algorithms. It is properly set to 3N-4 for moldyn="isokin" and 3N-3 for some other contrained algorithms. It also accounts for fixed atoms. However, it should be used with caution, as it is not tested for all algorithms.
+* The Number of Degrees Of Freedom (ndof) is now printed as a non-evolving integer scalar in the _HIST.nc file. 
+Previously, it was not possible to determine the relationship between the kinetic energy and ionic temperature only from the _HIST.nc file. 
+Post-processing tools may include this change, computing the ionic temperature as: T = 2Ek/ndof. 
+The internal variable ndof is initialized as ndof=3N for non-contrained molecular dynamics algorithms. 
+It is properly set to 3N-4 for moldyn="isokin" and 3N-3 for some other contrained algorithms. 
+It also accounts for fixed atoms. However, it should be used with caution, as it is not tested for all algorithms.
 
 PIMD changes
 
-* The friction coefficient for the PIMD langevin algorithm has been replaced from the [[vis]] input variable to the [[friction]] input variable.
+* The friction coefficient for the PIMD langevin algorithm has been switched from the [[vis]] input variable to the [[friction]] input variable.
 * In the NPT Langevin algorithm, atomic velocities were previously expressed in reduced coordinates, leading to incorrect kinetic energy values the _HIST.nc file. 
 This issue has now been corrected.
 * Number of Degrees Of Freedom (ndof) associated with the PIMD algorithms (imgmov) is now also printed as a non-evolving integer scalar in the _HIST.nc file.
@@ -181,7 +193,7 @@ By Augustin Blanchet, Romuald Béjaud, Fabien Brieuc, Grégory Geneste (MR1085) 
 
 * There has been a massive optimization of the code, as well as a cleaning.
 * New functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file...)
-* One can run dmft susceptiblity of supercell with correlated and non correlated atoms.
+* One can run dmft susceptibility with correlated and non correlated atoms.
 * A new option to run DFT+DMFT has been added : one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
 * Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (though not yet tested neither documented)
 * Two extra components for the energy are printed.
@@ -196,7 +208,7 @@ By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148
 
 **B.7** Computation of stress in mGGA
 
-mGGA exchange-correlation functionals for the energy (e.g. R2SCAN01 and other ones available in libxc) are now 
+mGGA exchange-correlation functionals for the energy (e.g. R2SCAN01 and the other mGGA functionals available in libxc) are now 
 available with the stresses, allowing to use these for cell optimization. 
 
 See [[test:v9_95]].
@@ -208,7 +220,7 @@ By M. Torrent (MR1099)
 
 * The mGGA has been implemented for the DDK DFPT perturbation, and the computation of the orbital magnetization has been tested with R2SCAN, both with and without spinors.
 * ZORA terms coupling electron spin to nuclear magnetic dipole moments are now computed. This accomplishes accurate chemical shielding calculations in the presence of significant relativistic effects.
-* Added GSR netcdf output of orbital magnetism and electric field gradient. Together with previous ORBMAG.nc additions, this completes abinit work for integration with abipy developments. 
+* Orbital magnetism and electric field gradient have been added to the GSR netcdf file. Together with previous ORBMAG.nc additions, this completes abinit work for integration with abipy developments. 
 * GPU porting : DDK and orbital magnetism response with nuclear dipole moment and nspinor 2 are available.
 
 See [[test:v10_41]], [[test:v10_42]] and [[test:gpu_omp_31]].
@@ -227,7 +239,10 @@ In the present release 10.4, DMFT and mGGA have been ported to GPU, also using O
 Bugs have been fixed in the previous implementations, slowdowns have been eliminated, and some documentation has been added.
 The implementation is working with compiler NVHPC 24.9 openmpi (in addition to NVHPC 23.9).
 
+The new input variable [[gpu_thread_limit]] has been introduced, allowing to avoid to use a high number of threads in some OpenMP regions of the code (NOT TESTED)
+
 Numerous new tests are available, [[test:gpu_omp_30]] to [[test:gpu_omp_46]], including checks for PAW and Norm-conserving formalism and nspden 4.
+Also, [[test:gpu_06]] has been added for GPU+PAW+non-collinear magnetism.
 
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2 for the OpenMP capabilities.
 
@@ -249,7 +264,7 @@ The aTDEP utility has been upgraded to match the standard of most executables in
 * There is a final summary YAML block at the end of atdep standard output.
 
 Moreover, aTDEP has been debugged and made more portable (no exclusion for selected workers of the ABINIT test farm). There are more tests 
-of aTEDP features, e.g for initial atoms translation to the same unit cell. anf for otation of the crystal to the conventional orientation.
+of aTEDP features, e.g for initial atoms translation to the same unit cell and for rotation of the crystal to the conventional orientation.
 The variable [[bzpath@atdep]] is no longer of mixed type (int + str), thanks to [[special_qpt@atdep]].
 The optional variable [[znucl@atdep]] has been added so that it is included in the output DDB.
 
@@ -269,8 +284,8 @@ By Q. Delacroix and M. Torrent (MR1149)
 
 **B.12** Dynamical quadrupoles for standard pseudopotentials (with non-linear XC core correction).
 
-Previously, dynamical quadrupoles could be computed only using norm-conserving pseudopotentials without non-linear XC core correction.
-However, the best pseudopotentials include this feature (e.g. pseudo-dojo).
+Previously, dynamical quadrupoles could be computed only using norm-conserving pseudopotentials WITHOUT non-linear XC core correction.
+However, the state-of-the-art pseudopotentials include this feature (e.g. pseudo-dojo).
 This implementation has been done.
 
 See [[test:v10_43]].
@@ -394,7 +409,7 @@ By M. Mignolet (MR1081), M. Torrent (MR1089, 1151), M. Sarraute (MR1096), M. Ver
 
 **C.3** Add documentation on how to debug and profile MPI jobs
 
-In the developer HowTo, added
+In the developer HowTo, added:
 
 * New guide on how to use NVTX markers on CPU (devtool recently enabled since !1151 (merged)) and profile MPI jobs using NVIDIA Nsight.
 * New tip on the gdb debugger section on how to use gdb for MPI jobs.
@@ -416,8 +431,9 @@ In addition, for netcdf (netcdf-fortran), fcflags and libs are filled with the i
 This merge improves hdf5 and netcdf detection on our supercomputers, and works on the testfarm.
 
 **C.5** Add netcdf_fortran as dependency for 42_parser and 68_dmft   
+
 The fortran file in 42_parser and 68_dmft both have "use netcdf"
-but netcdf_fortran is not marked as dependency which does not seem consistent.
+but netcdf_fortran is not marked as dependency which does not seem consistent. This has been fixed.
 
 By O. Mattelaer (MR1140)
 
@@ -425,8 +441,10 @@ By O. Mattelaer (MR1140)
 
 Corrections to improve the use of debug options from the intel compiler (still 2020 version) :
 
-At first there were crashes at compiling time : the compiler does not like operations on arrays inside a matmul call
-then I removed tons of warnings of temporary arrays, sometimes allocating explicitly an array (when the subarray is not contiguous, or very small), sometimes using a pointer (when it is contiguous). There are still many warnings, but for GS computations with lobpcg or chebfi and PAW pseudos the amount of warnings is limited, so one can run big computations without generating gigabytes of output every minute.
+At first there were crashes at compiling time : the compiler does not like operations on arrays inside a matmul call.
+Then many of warnings of temporary arrays have been removed, sometimes allocating explicitly an array (when the subarray is not contiguous, or very small), sometimes using a pointer (when it is contiguous). 
+There are still many warnings, but for GS computations with lobpcg or chebfi and 
+PAW pseudos the amount of warnings is limited, so one can run big computations without generating gigabytes of output every minute.
 
 The debug options used are : -traceback -check all -check uninit -ftrapuv -debug all -warn declarations
 All these changes do not affect the performances at all.
@@ -443,17 +461,10 @@ By Hsiaoyi Tsai (MR1114)
 ### **D.**  Other developments (possibly not yet finalized), other new tests, new input variables, new tutorials.
 
 
-**D.1** Oracle in Chebyshev, and corrections for residuals.
-
-
-
-
-By L. Baguet (MR1103)
-
 **D.1** Various improvements to Conducti in PAW.
 
 Among others, the code can now handle different atomic types in the unit cell and compute the reflectivity at any angle.
-A complete userguide was also written and some bugs were fixed.
+A complete userguide is now available, and some bugs were fixed.
 
 By J. Boust (MR1152)
 
@@ -473,28 +484,34 @@ Other minor corrections :
 * Change the design in xg_nonlop, which solves several issues :
 no more warnings "temporary array was created" for some cases (seen on ubuntu and the testfarm), and
 no more crash for other (rare) cases.
-* Also set cprj_in_memory to 0 if optdriver is not GS.
+* Also set [[cprj_in_memory]] to 0 if optdriver is not GS.
+
+See [[test:paral_19]], [[test:paral_20]], [[test:v10_19]], [[test:v10_24]], [[test:v10_25]].
 
 By L. Baguet (MR1067, 1108, 1133)
 
-**D.3** Dilatmx with chebfi or lobpcg
-Change nbdbuf for all testcases with chebfi2 to clearly show that band residuals of occupied bands are as good as with lobpcg.
+**D.3** Test cases for [[dilatmx]] with chebfi or lobpcg
+
+See [[test:paral_33]] and [[test:paral_34]].
 
 By L. Baguet (MR1122)
 
-**D.4** Math operation beautification (from Abidev24 Hackathon)
+**D.4** Change [[nbdbuf]] for all testcases with chebfi2 to clearly show that band residuals of occupied bands are as good as with lobpcg.
+
+By L. Baguet (MR1122)
+
+
+**D.5** Math operation beautification (from Abidev24 Hackathon)
 The goal was mainly to improve the readability of the code through the use of Fortran intrinsic math functions and vectorization capabilities.
 
 By M. Mignolet, F. Gomez-Ortiz and I. Lygatsika (MR1083)
 
 
-**D.4** Developments and bug fixes in extended First-Principles Molecular Dynamics (high temperature).
+**D.6** Developments and bug fixes in extended First-Principles Molecular Dynamics (high temperature).
 
-ABINIT can compute extFPMD high energy contributions with a discrete sum on the orbitals. This is activated with [[useextfpmd]]=5.
-
-
+ABINIT can compute extFPMD high energy contributions with a discrete sum on the orbitals. 
 This is activated with [[useextfpmd]]=5, and controlled with the new input variable [[extfpmd_nband]].
-This allows ABINIT to compute smooth DOS between Kohn-Sham eingenstates and extended ideal electronic states.
+This allows ABINIT to compute smooth DOS between Kohn-Sham eigenstates and extended ideal electronic states.
 See  [[test:v9_92]]. 
 
 Also, [[useextfpmd]]=4 has been fixed, by computing the band shift. Now [[useextfpmd]]=1 and [[useextfpmd]]=4 show very similar results (not exactly equal though).
@@ -504,8 +521,7 @@ The value of extfpmd_eshift has been added in the header of wave function files 
 By A. Blanchet (MR1121, MR1135). 
 
 
-
-**D.5** MRGDDB polishing.
+**D.7** MRGDDB polishing.
 
 Allow for single DDB file in command line interface for DDB conversion.
 Remove unwanted output file fort.7.
@@ -513,13 +529,14 @@ Remove unwanted output file fort.7.
 By G. Antonius (MR1132). 
 
 
-**D.6** Spinat check
+**D.8** Spinat check
 
 Reestablish the test on spinat and update input and ref files [[test:v5_16]]
 
 By Le Shu (MR 1093)
 
-**D.7.** Dynamical allocation of the input string.
+
+**D.9.** Dynamical allocation of the input string.
 
 Now, INPUT_STRING is allocated dynamically instead of using strlen=2000000.
 This reduces the size of the NetCDF files by ~2 MB and also decreases the memory footprint
@@ -537,39 +554,33 @@ By M. Giantomassi (MR1109)
 By M. Torrent (MR1141)
 
 
-**E.2** Add netcdf_fortran as dependency for 42_parser and 68_dmft 
-The fortran file in 42_parser and 68_dmft both have "use netcdf"
-but netcdf_fortran is not marked as dependency which does not seem consistent.
-
-By O. Mattelaer (MR1140)
-
-**E.3** The syntax for $(<.current_version) might not work properly in some older versions of sh, making $(cat .current_version) a more stable alternative.
+**E.2** The syntax for $(<.current_version) might not work properly in some older versions of sh, making $(cat .current_version) a more stable alternative.
 
 By Hsiaoyi Tsai (MR1114)
 
 
-**E.4** Using libyaml.a instead -lyaml if bigdft using internal yaml 
+**E.3** Using libyaml.a instead -lyaml if bigdft using internal yaml 
 
 In fallbacks, bigdft will install its internal yaml library if the system does not have the yaml library. However, this is not shown in the dynamic linking during the execution of abinit; using static linking can avoid the issue of missing libraries.
 
 By Hsiaoyi Tsai (MR1138)
 
 
-**E.5** Fixing langevin_pimd moldyn algorithm
+**E.4** Fixing langevin_pimd moldyn algorithm
 
 The recently implemented Langevin PIMD was encountering NaN values when Abinit was compiled with specific optimization options. This issue was fixed by initializing arrays.
 
 By A. Blanchet (MR1094)
 
 
-**E.6.** Tolerances have been cleaned in tests/Input/*.abi files.
+**E.5.** Tolerances have been cleaned in tests/Input/*.abi files.
 
 By M. Azizi (MR1086)
 
 
-**E.7** Miscellaneous bug fixes and cleaning
+**E.6** Miscellaneous bug fixes and cleaning
 
-* Correct wfoptalg initialization for GPU (no more [[wfoptalg]]=14 for [[gpu_option]]>1)
+* Correct [[wfoptalg]] initialization for GPU (no more [[wfoptalg]]=14 for [[gpu_option]]>1)
 * Correct [[test:v10_11]] test adding more bands so LOBPCG runs are correct
 * Include [[nbdbuf]] in the check of the last occupancy in vtorho (and correct the exit condition for [[nsppol]]=2)
 * xmpi_distrib_2D: fix edge case where the code would try to distribute n points over N>n processes
@@ -884,7 +895,9 @@ By M. Giantomassi (MR1047)
 
 By F. Bottin (MR1048)
 
+
 **D.16** GWPT implementation is on-going. See [[eph_task]]=17. Testing has been initialized, see test:gwpt_01 to test:gwpt_04
+New input variable [[gwpt_np_wpqbks]].
 Note that for the time being, gwpt is commented in tests/\_\_init\_\_.py
 
 By M. Giantomassi (5b9bb0e88ab, 306ccc446a2, c03fa967bde)
