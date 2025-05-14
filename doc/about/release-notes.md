@@ -16,7 +16,7 @@ For later releases v10.4, the list of MR is to be completed. -->
 The list of contributors includes:
 
 G. Allemand, B. Amadon, G. Antonius, M. Azizi, L. Baguet, S. Bandyopadhyay, L. Bastogne, 
-R. Béjaud, J.-M. Beuken, A. Blanchet, J. Boust, F. Bottin, J. Bouquiaux, F. Brieuc, 
+R. Béjaud, J.-M. Beuken, A. Blanchet, F. Bottin, J. Boust, J. Bouquiaux, F. Brieuc, 
 E. Castiel, Q. Delacroix, F. Gendron, G. Geneste, M. Giantomassi, 
 O. Gingras, F. Gomez-Ortiz, X. Gonze, R. Gupta,
 I.-M. Lygatsika, O. Mattelaer, M. Mignolet, G. Petretto,
