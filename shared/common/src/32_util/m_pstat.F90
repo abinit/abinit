@@ -214,15 +214,16 @@ end subroutine pstat_from_file
 !!
 !! SOURCE
 
-subroutine pstat_print(pstat, file, line, comm)
+subroutine pstat_print(pstat, comm, file, line)
 
  class(pstat_t),intent(inout) :: pstat
  character(len=*),optional,intent(in) :: file
  integer,optional,intent(in) :: line, comm
 
 !Local variables-------------------------------
- integer :: units(1)
+ integer :: units(1), ierr
  integer :: f90line = 0
+ real(dp) :: min_mpicomm_vmrss_mb, max_mpicomm_vmrss_mb
  character(len=500) :: f90name='Subroutine Unknown'
  type(yamldoc_t) :: ydoc
 ! *************************************************************************
@@ -236,10 +237,12 @@ subroutine pstat_print(pstat, file, line, comm)
  if (present(line)) f90line = line
  if (present(file)) f90name = basename(file)
 
- !if present(comm) then
- !  call xmpi_min_ip(pstat%vmrss_mb, min_mem_mb, comm, ierr)
- !  call xmpi_max_ip(pstat%vmrss_mb, min_mem_mb, comm, ierr)
- !end if
+ min_mpicomm_vmrss_mb = pstat%vmrss_mb
+ max_mpicomm_vmrss_mb = pstat%vmrss_mb
+ if (present(comm)) then
+   call xmpi_min(pstat%vmrss_mb, min_mpicomm_vmrss_mb, comm, ierr)
+   call xmpi_max(pstat%vmrss_mb, max_mpicomm_vmrss_mb, comm, ierr)
+ end if
 
 #ifndef FC_NVHPC
  ydoc = yamldoc_open("PstatData")
@@ -247,6 +250,8 @@ subroutine pstat_print(pstat, file, line, comm)
  call ydoc%add_string("file", f90name)
  call ydoc%add_int("line", f90line)
  call ydoc%add_real("vmrss_mb", pstat%vmrss_mb)
+ call ydoc%add_real("min_mpicomm_vmrss_mb", min_mpicomm_vmrss_mb)
+ call ydoc%add_real("max_mpicomm_vmrss_mb", max_mpicomm_vmrss_mb)
  call ydoc%add_real("vmpeak_mb", pstat%vmpeak_mb)
  call ydoc%add_real("vmstk_mb", pstat%vmstk_mb)
  if (len_trim(pstat%iomsg) > 0) call ydoc%add_string("iomsg", trim(pstat%iomsg))
@@ -255,6 +260,8 @@ subroutine pstat_print(pstat, file, line, comm)
  ! Yet another wild NVHPC bug (only on eos_nvhpc_23.9_elpa)
  write(std_out, "(a)")"--- !PstatData"
  write(std_out, *)"vmrss_mb: ", pstat%vmrss_mb
+ write(std_out, *)"min_mpicomm_vmrss: ", min_mpicomm_vmrss_mb
+ write(std_out, *)"max_mpicomm_vmrss: ", max_mpicomm_vmrss_mb
  write(std_out, "(a)")"..."
 #endif
 

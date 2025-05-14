@@ -621,7 +621,7 @@ program abinit
 
  call xpapi_shutdown()
 
- call pstat_proc%print(_PSTAT_ARGS_)
+ call pstat_proc%print(comm=xmpi_world _FILE_LINE_ARGS_)
 
  ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam(4), print_mem_report=print_mem_report)
