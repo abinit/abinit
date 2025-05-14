@@ -66,7 +66,7 @@ prtebands 0       # Do not print ebands
 #%% test_chain = trttddft_1.abi, trttddft_2.abi, trttddft_3.abi
 #%% [files]
 #%% files_to_test =
-#%%   trttddft_1.abo, tolnlines=  1, tolabs=  1.0e-6, tolrel=  1.0e-4, fld_options= -medium;
+#%%   trttddft_1.abo, tolnlines=  1, tolabs=  1.0e-6, tolrel=  1.0e-4, fld_options= -easy;
 #%% [paral_info]
 #%% max_nprocs = 7
 #%% [extra_info]
