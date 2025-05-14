@@ -607,7 +607,7 @@ end subroutine slk_processor_free
 !! SOURCE
 
 subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
-                                 size_blocs) ! optional
+                        size_blocs) ! optional
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: matrix
@@ -4628,7 +4628,7 @@ end subroutine slkmat_dp_ptrans
 !! SOURCE
 
 subroutine slkmat_sp_ptrans(in_mat, trans, out_mat, &
-                      out_gshape, ija, ijc, size_blocs, alpha, beta, free) ! optional
+                            out_gshape, ija, ijc, size_blocs, alpha, beta, free) ! optional
 
 !Arguments ------------------------------------
  class(slkmat_sp_t),intent(inout) :: in_mat

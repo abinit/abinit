@@ -4706,143 +4706,131 @@ subroutine gwr_build_tchi(gwr)
    ABI_FREE(chiq_gpr)
    call green_plan%free()
 
-  else  ! not gwr%use_supercell_for_tchi
-    ! ===================================================================
-    ! Mixed-space algorithm in the unit cell with convolutions in k-space
-    ! ===================================================================
-    call print_chi_header()
+ else ! not gwr%use_supercell_for_tchi
+   ! ===================================================================
+   ! Mixed-space algorithm in the unit cell with convolutions in k-space
+   ! ===================================================================
+   call print_chi_header()
 
-    call wrtout(std_out, " Allocating memory for G_k(r',r) and chi_q(r',r)...")
-    call wrtout(std_out, " Here we're gonna have a big allocation peak...")
-    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+   call wrtout(std_out, " Allocating memory for G_k(r',r) and chi_q(r',r)...")
+   call wrtout(std_out, " Here we're gonna have a big allocation peak...")
+   if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-    ! Need all nqibz matrices here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
-    nrsp = gwr%g_nfft * gwr%nspinor
-    col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-    ABI_MALLOC(chiq_rpr, (gwr%nqibz))
-    do iq_ibz=1,gwr%nqibz
-      call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-      if (gwr%comm%me == 0 .and. mod(iq_ibz, 2) == 0) call pstat_proc%print(_PSTAT_ARGS_)
-    end do
+   ! Need all nqibz matrices here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
+   nrsp = gwr%g_nfft * gwr%nspinor
+   col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+   ABI_MALLOC(chiq_rpr, (gwr%nqibz))
+   do iq_ibz=1,gwr%nqibz
+     call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     if (gwr%comm%me == 0 .and. mod(iq_ibz, 2) == 0) call pstat_proc%print(_PSTAT_ARGS_)
+   end do
 
-    ! TODO: Can save memory here as we don't need +/- tau for each k/k+q
-    do ipm=1,2
-      call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-      call gkq_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-      call pstat_proc%print(_PSTAT_ARGS_)
-    end do
+   ! TODO: Can save memory here as we don't need +/- tau for each k+q.
+   do ipm=1,2
+     call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     call gkq_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+   end do
 
-    mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
-    call wrtout(std_out, sjoin(" Local memory for chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
-    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+   call pstat_proc%print(_PSTAT_ARGS_)
+   mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
+   call wrtout(std_out, sjoin(" Local memory for chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-    ! * The little group is needed when symchi == 1
-    ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve qibz are included as well.
-    ! * Note that TR is not yet supported so timrev is set to 1 even if TR has been used to generate the GS IBZ.
-    ABI_MALLOC(ltg_qibz, (gwr%nqibz))
-    use_umklp = 1
-    do iq_ibz=1,gwr%nqibz
-      call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
-      !call ltg_qibz(iq_ibz)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
-    end do
+   ! The little group is needed when symchi == 1
+   ! If use_umklp == 1 then symmetries requiring an umklapp to preserve qibz are included as well.
+   ! Note that TR is not yet supported so timrev is set to 1 even if TR has been used to generate the GS IBZ.
+   ABI_MALLOC(ltg_qibz, (gwr%nqibz))
+   use_umklp = 1
+   do iq_ibz=1,gwr%nqibz
+     call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
+     !call ltg_qibz(iq_ibz)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
+   end do
 
-    ! Compute mask with the k-points in the IBZ required by this MPI proc.
-    need_kibz = 0
-    do my_ikf=1,gwr%my_nkbz
-      ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
-      do iq_ibz=1,gwr%nqibz
-        qq_ibz = gwr%qibz(:, iq_ibz)
-        kpq_bz = kk_bz + qq_ibz
-        ! TODO: here I may need to take into account the umklapp
-        call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
-        !ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
-        ikq_ibz = gwr%kbz2ibz(1, ikq_bz)
-        need_kibz(ikq_ibz) = 1
-      end do
-    end do
+   ! Compute mask with the k-points in the IBZ required by this MPI proc.
+   need_kibz = 0
+   do my_ikf=1,gwr%my_nkbz
+     ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
+     do iq_ibz=1,gwr%nqibz
+       qq_ibz = gwr%qibz(:, iq_ibz); kpq_bz = kk_bz + qq_ibz
+       call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
+       ! TODO: here I may need to take into account the umklapp
+       !ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
+       ikq_ibz = gwr%kbz2ibz(1, ikq_bz)
+       need_kibz(ikq_ibz) = 1
+     end do
+   end do
 
-    do my_is=1,gwr%my_nspins
-    spin = gwr%my_spins(my_is)
-    do my_it=1,gwr%my_ntau
-      call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
-      itau = gwr%my_itaus(my_it)
+   do my_is=1,gwr%my_nspins
+   spin = gwr%my_spins(my_is)
+   do my_it=1,gwr%my_ntau
+     call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
+     itau = gwr%my_itaus(my_it)
 
-      ! Redistribute G_k(g,g') with k in the IBZ so that each MPI proc
-      ! can reconstruct G_{k+q} in the BZ inside the MPI-distributed loops.
-      ! TODO: support for ipm_list else we have a memory leak.
-      call gwr%redistrib_gt_kibz(itau, spin, need_kibz, got_kibz, "communicate") !ipm_list=
+     ! Redistribute G_k(g,g') with k in the IBZ so that each MPI proc
+     ! can reconstruct G_{k+q} in the BZ inside the MPI-distributed loops.
+     ! TODO: support for ipm_list else we have a memory leak.
+     call gwr%redistrib_gt_kibz(itau, spin, need_kibz, got_kibz, "communicate") !ipm_list=
+     if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-      ! Sum over my k-points in the BZ.
-      call slk_array_set(chiq_rpr, czero)
-      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+     ! Sum over my k-points in the BZ.
+     call slk_array_set(chiq_rpr, czero)
+     do my_ikf=1,gwr%my_nkbz
+       print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
+       if (print_time) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
+       ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
 
-      do my_ikf=1,gwr%my_nkbz
-        print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
-        if (print_time) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
-        ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
+       ! Use symmetries to get G_kbz(g,g') from the IBZ, then G_kbz(g,g') -> G_kbz(r',r).
+       ! TODO: here I may need to take into account the umklapp
+       call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm, ipm_list=[1]) ! g0=??
 
-        !ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
-        !trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
-        !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-        !tsign_k = merge(1, -1, trev_k == 0)
-        !if (.not. isirr_k) cycle
+       do iq_ibz=1,gwr%nqibz
+         if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
+         qq_ibz = gwr%qibz(:,iq_ibz); kpq_bz = kk_bz + qq_ibz
 
-        ! Use symmetries to get G_kbz(g,g') from the IBZ, then G_kbz(g,g') -> G_kbz(r',r).
-        ! TODO: here I may need to take into account the umklapp
-        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm, ipm_list=[1]) ! g0=??
+         call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
+         ! TODO: here I may need to take into account the umklapp if k+q is outside the BZ.
+         !ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
 
-        do iq_ibz=1,gwr%nqibz
-          if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
-          qq_ibz = gwr%qibz(:,iq_ibz)
-          kpq_bz = kk_bz + qq_ibz
-          !kpq_bz = qq_ibz - kk_bz
+         ! Use symmetries to get G_kqbz(g,g') from the IBZ, then G_kqbz(g,g') -> G_kqbz(r',r).
+         ! Also, we don't need G(+/-t) for both k, k+q wavevectors.
+         call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=g0_kq, ipm_list=[2])
 
-          ! TODO: here I may need to take into account the umklapp if k+q is outside the BZ.
-          call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
-          !ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
+         ! The weight depends on q_ibz and the symmetries of the little group of qq_ibz.
+         wtqp = one / gwr%nkbz; wtqm = zero
+         if (gwr%dtset%symchi /= 0) then
+           wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
+           wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
+           ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
+         end if
 
-          ! Use symmetries to get G_kqbz(g,g') from the IBZ, then G_kqbz(g,g') -> G_kqbz(r',r).
-          ! Also, we don't need G(+/-t) for both k, k+q wavevectors.
-          call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=g0_kq, ipm_list=[2])
+         chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
+           !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
+           wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works but requires ptrans with C
+       end do ! my_iqi
 
-          ! The weight depends on q_ibz and the symmetries of the little group of qq_ibz.
-          wtqp = one / gwr%nkbz; wtqm = zero
-          if (gwr%dtset%symchi /= 0) then
-            wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
-            wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
-            ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
-          end if
+       if (print_time) then
+         write(msg,'(4x,3(a,i0),a)')"Chi my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
+         call cwtime_report(msg, cpu_ikf, wall_ikf, gflops_ikf)
+       end if
+     end do ! my_ikf
 
-          chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
-             !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
-             wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works
-                                                                                  ! but requires ptrans with C
-        end do ! my_iqi
+     ! Deallocate got_kibz Green's functions.
+     call gwr%redistrib_gt_kibz(itau, spin, need_kibz, got_kibz, "free")
 
-        if (print_time) then
-          write(msg,'(4x,3(a,i0),a)')"Chi my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
-          call cwtime_report(msg, cpu_ikf, wall_ikf, gflops_ikf)
-        end if
-      end do ! my_ikf
+     ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ.
+     do iq_ibz=1,gwr%nqibz
+       call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
+     end do
 
-      ! Deallocate got_kibz Green's functions.
-      call gwr%redistrib_gt_kibz(itau, spin, need_kibz, got_kibz, "free")
+     tchi_rfact = one / gwr%cryst%ucvol
+     do iq_ibz=1,gwr%nqibz
+       if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
+       call gwr_rpr_to_ggp(gwr, gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), gwr%tchi_qibz(iq_ibz,itau,spin))
+       gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx = gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx * tchi_rfact
+     end do ! iq_ibz
 
-      ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ.
-      do iq_ibz=1,gwr%nqibz
-        call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
-      end do
-
-      do iq_ibz=1,gwr%nqibz
-        if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
-        ! TODO: Recheck API and scaling factor.
-        call gwr_rpr_to_ggp(gwr, gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), gwr%tchi_qibz(iq_ibz,itau,spin))
-        tchi_rfact = one / gwr%cryst%ucvol  !/ (gwr%nkbz * gwr%nqbz)
-        gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx = gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx * tchi_rfact
-      end do ! my_iqi
-
-      write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
-      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
+     write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
+     call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
    end do ! my_it
    end do ! spin
 
@@ -4853,19 +4841,19 @@ subroutine gwr_build_tchi(gwr)
      call ltg_qibz(iq_ibz)%free()
    end do
    ABI_FREE(ltg_qibz)
-   call wrtout(std_out, " Mixed space algorithm for chi completed")
- end if
+   call wrtout(std_out, " Mixed space algorithm for chi completed.")
+
+ end if ! super cell or mixed space algorithm.
+ !call wrtout(std_out, sjoin(" max_abs_imag_chit", ftoa(max_abs_imag_chit)))
 
  if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
-
- !call wrtout(std_out, sjoin(" max_abs_imag_chit", ftoa(max_abs_imag_chit)))
 
  ! Print trace of chi_q(i tau) matrices for testing purposes.
  if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "tchi_qibz")
 
+ ! Write tchi(i tau). NB: this option is not documented in the docs.
  keep_tchim = .False.
  if (gwr%dtset%prtsuscep == -1) then
-   ! Write tchi(i tau). NB: this option is not documented in the docs.
    call gwr%ncwrite_tchi_wc("tchi", "tau", keep_tchim, trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
    keep_tchim = .True.
  end if
@@ -4908,8 +4896,8 @@ subroutine gwr_build_tchi(gwr)
  ! Print trace of chi_q(i omega) matrices for testing purposes.
  if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "tchi_qibz")
 
- if (abs(gwr%dtset%prtsuscep) == 1) then
    ! Write file with chi0(i omega).
+ if (abs(gwr%dtset%prtsuscep) == 1) then
    call gwr%ncwrite_tchi_wc("tchi", "omega", keep_tchim, trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
  end if
 
