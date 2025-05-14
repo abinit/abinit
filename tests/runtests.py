@@ -651,7 +651,7 @@ def main():
     results = test_suite.run_tests(build_env, workdir, runner,
                                    mpi_nprocs=mpi_nprocs,
                                    omp_nthreads=omp_nthreads,
-                                   max_cpus=mpi_nprocs, #ncpus_detected,
+                                   max_cpus=ncpus_detected,
                                    max_gpus=ngpus_detected,
                                    py_nprocs=py_nprocs,
                                    runmode=runmode,
