@@ -2041,7 +2041,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
    do ii=1,nfiles
      if (ii == ifile) CYCLE
      if (Hscr_file(ifile)%nqibz /= Hscr_file(ii)%nqibz) then
-       ABI_ERROR(' One or more files do not have the same number of q-points!')
+       ABI_ERROR('One or more files do not have the same number of q-points!')
      end if
      do iqibz=1,Hscr_file(1)%nqibz
        if (ABS(SUM(Hscr_file(ifile)%qibz(:,iqibz)-Hscr_file(ii)%qibz(:,iqibz))) > tol6) then
@@ -2052,17 +2052,17 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  end do
 
  ! nfreq_tot here is the total *possible* number of freq.
- nfreq_tot=0
+ nfreq_tot = 0
  do ifile=1,nfiles
    nfreq_tot = nfreq_tot + Hscr_file(ifile)%nomega
  end do
 
  ABI_MALLOC(omega_storage, (nfreq_tot))
- ABI_MALLOC(freq_indx, (nfreq_tot,nfiles))
+ ABI_MALLOC(freq_indx, (nfreq_tot, nfiles))
  ABI_MALLOC(ifile_indx, (nfreq_tot))
  omega_storage = CMPLX(-one,-one); freq_indx = 0; ifile_indx = 0
 
- ! Calculate the total number of real freq and store
+ ! Calculate the total number of real freqs and store
  nfreqre = 0
  do ifile=1,nfiles
    do ifrq=1,Hscr_file(ifile)%nomega
@@ -2071,7 +2071,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      if (AIMAG(Hscr_file(ifile)%omega(ifrq)) > tol16) skip = .TRUE.
      if (REAL(Hscr_file(ifile)%omega(ifrq)) > freqremax) skip = .TRUE.
      ! Check for repetition or non-monotonic points
-     if (nfreqre>1) then
+     if (nfreqre > 1) then
        do ii=1,nfreqre
          if (ABS(REAL(Hscr_file(ifile)%omega(ifrq)) - REAL(omega_storage(ii))) < tol6) skip = .TRUE.
        end do
@@ -2081,7 +2081,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      ! Store (complex) frequency and index
      omega_storage(nfreqre) = Hscr_file(ifile)%omega(ifrq)
      ifile_indx(nfreqre) = ifile
-     freq_indx(nfreqre,ifile) = ifrq
+     freq_indx(nfreqre, ifile) = ifrq
      write(std_out,'(a,es16.6,a,i0,2(a,i0))')&
        ' Found real frequency: ',REAL(omega_storage(nfreqre))*Ha_eV,' [eV], number: ',nfreqre,&
        ', in file: ',ifile,' local index: ',ifrq
@@ -2090,10 +2090,10 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 
  if (nfreqre > 0) then
    ! Sort real frequencies
-   ABI_MALLOC(real_omega,(nfreqre))
-   ABI_MALLOC(pos_indx,(nfreqre))
-   ABI_MALLOC(i_temp,(nfreqre))
-   ABI_MALLOC(i2_temp,(nfreqre,nfiles))
+   ABI_MALLOC(real_omega, (nfreqre))
+   ABI_MALLOC(pos_indx, (nfreqre))
+   ABI_MALLOC(i_temp, (nfreqre))
+   ABI_MALLOC(i2_temp, (nfreqre,nfiles))
    real_omega(1:nfreqre) = REAL(omega_storage(1:nfreqre)) ! Copy real frequencies to temp. sorting array
    do ii=1,nfreqre ! Set up indexing array
      pos_indx(ii) = ii
@@ -2128,16 +2128,16 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      ifile_indx(nfreqre+nfreqim) = ifile
      freq_indx(nfreqre+nfreqim,ifile) = ifrq
      write(std_out,'(a,es16.6,a,i0,2(a,i0))')&
-      ' Found imaginary frequency: ',AIMAG(omega_storage(nfreqre+nfreqim))*Ha_eV,' [eV], number: ',nfreqim,&
+      ' Found imag frequency: ',AIMAG(omega_storage(nfreqre+nfreqim))*Ha_eV,' [eV], number: ',nfreqim,&
       ', in file: ',ifile,' local index: ',ifrq
    end do
  end do
 
  ! Sort imaginary frequencies
- ABI_MALLOC(imag_omega,(nfreqim))
- ABI_MALLOC(pos_indx,(nfreqim))
- ABI_MALLOC(i_temp,(nfreqim))
- ABI_MALLOC(i2_temp,(nfreqim,nfiles))
+ ABI_MALLOC(imag_omega, (nfreqim))
+ ABI_MALLOC(pos_indx, (nfreqim))
+ ABI_MALLOC(i_temp, (nfreqim))
+ ABI_MALLOC(i2_temp, (nfreqim, nfiles))
 
  ! Copy imaginary frequencies to temp. sorting array
  imag_omega(1:nfreqim) = AIMAG(omega_storage(nfreqre+1:nfreqre+nfreqim))
@@ -2162,7 +2162,8 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  ABI_FREE(i_temp)
  ABI_FREE(i2_temp)
 
- nfreq_tot = nfreqre + nfreqim ! Here nfreq_tot becomes the *true* number of freq
+ ! Here nfreq_tot becomes the *true* number of freq
+ nfreq_tot = nfreqre + nfreqim
  write(std_out,'(2a,i0,a)') ch10,' Merging ',nfreq_tot,' frequencies.'
  write(std_out,'(2(a,i0),2a)') ' ',nfreqre,' real, and ',nfreqim,' imaginary.',ch10
 
@@ -2173,7 +2174,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  ! Then modify entries for new frequency grid
  ohscr%nomega = nfreq_tot
  ABI_FREE(ohscr%omega)
- ABI_MALLOC(ohscr%omega,(nfreq_tot))
+ ABI_MALLOC(ohscr%omega, (nfreq_tot))
  ohscr%omega(1:nfreq_tot) = omega_storage(1:nfreq_tot)
 
  npwe4mI = ohscr%npwe*ohscr%nI
@@ -2196,30 +2197,31 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
    end if
  end if
 
- ! * Write the header.
+ ! Write the header.
  fform_merge = ohscr%fform
-
  abifile = abifile_from_fform(fform_merge)
  if (abifile%fform == 0) then
     ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform_merge)))
  end if
  varname = abifile%varname
 
- call ohscr%io(fform_merge,rdwr2,ount,comm,master,iomode)
+ call ohscr%io(fform_merge, rdwr2, ount, comm, master, iomode)
 
  npwe4mI = ohscr%npwe*ohscr%nI
  npwe4mJ = ohscr%npwe*ohscr%nJ
  nomega4m = ohscr%nomega
+
+ ! FIXME: Lot of memory allocated here. One can read and write inside the ifile loop
+ ! provided that partial frequencies are always contiguous and files are in the proper order
  ABI_MALLOC_OR_DIE(epsm1,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
 
  do iqibz=1,ohscr%nqibz
-
    do ifile=1,nfiles
      ! allocate temporary array
      npwe4mI = Hscr_file(ifile)%npwe*Hscr_file(ifile)%nI
      npwe4mJ = Hscr_file(ifile)%npwe*Hscr_file(ifile)%nJ
      nomega4m = Hscr_file(ifile)%nomega
-     ABI_MALLOC_OR_DIE(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
+     ABI_MALLOC_OR_DIE(epsm1_temp, (npwe4mI, npwe4mJ, nomega4m, 1), ierr)
 
      ! read screening
      call read_screening(varname,filenames(ifile),npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iqibz)

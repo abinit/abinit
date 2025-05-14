@@ -401,7 +401,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  ABI_MALLOC(tabr_k,(nfft))
  ABI_MALLOC(ur1_kibz,(nfft*nspinor))
  ABI_MALLOC(ur2_kibz,(nfft*nspinor))
-
  ABI_MALLOC(usr1_k,(nfft*nspinor))
  ABI_MALLOC(ur2_k,(nfft*nspinor))
  !
@@ -882,8 +881,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  ! * Master took care of the contribution in case of (metallic|spin) polarized systems.
  select case (Ep%spmeth)
  case (0)
-   ! Adler-Wiser expression
-   ! Sum contributions from each proc.
+   ! Adler-Wiser expression. Sum contributions from each proc.
    ! Looping on frequencies to avoid problems with the size of the MPI packet.
    do io=1,Ep%nomega
      call xmpi_sum(chi0(:,:,io),comm,ierr)

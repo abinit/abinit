@@ -661,6 +661,7 @@ type, public :: dataset_type
  integer :: symdynmat = 1
  integer :: symsigma = 1
  integer :: symv1scf = 0
+ integer :: scr_wrange(2) = 0
 !T
  integer :: td_exp_order
  integer :: td_mexcit
@@ -1671,6 +1672,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ph_intmeth        = dtin%ph_intmeth
  dtout%symdynmat         = dtin%symdynmat
  dtout%symv1scf          = dtin%symv1scf
+ dtout%scr_wrange        = dtin%scr_wrange
  dtout%ph_nqshift        = dtin%ph_nqshift
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
@@ -3751,7 +3753,7 @@ subroutine chkvars(string)
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'
- list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk'
+ list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk scr_wrange'
 !MS Variables for SCALE-UP
 !This is only for the developer version, not for the production version. So, was commented.
 ! @Marcus: simply uncomment these lines in v9.1 (not v9.0 !), and continue to develop without worrying.
