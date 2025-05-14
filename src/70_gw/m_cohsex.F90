@@ -795,7 +795,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  end do
 
  ! Reconstruct the full sigma matrix from the upper triangle (only for HF, SEX and COHSEX)
- if (Sigp%gwcalctyp>=20 .and. sigma_is_herm(Sigp) ) then
+ if (Sigp%gwcalctyp>=20 .and. sigp%is_herm() ) then
    ABI_CHECK(nspinor==1,"cannot hermitianize non-collinear sigma!")
    do spin=1,nsppol
      do io=1,nomega_sigc

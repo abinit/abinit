@@ -341,7 +341,6 @@ subroutine ppm_free(ppm)
 
 !Local variables-------------------------------
  integer :: dim_q,iq_ibz
-
 ! *********************************************************************
 
  ABI_SFREE(ppm%bigomegatwsq_qbz_vals)
@@ -398,7 +397,6 @@ subroutine ppm_malloc_iqibz(ppm, iq_ibz)
 
 !Local variables-------------------------------
  integer :: ierr
-
 ! *********************************************************************
 
  ABI_CHECK(allocated(ppm%bigomegatwsq), "bigomegatwsq is not allocated")
@@ -442,7 +440,6 @@ subroutine ppm_table_free_iqibz(ppm, iq_ibz)
 !Arguments ------------------------------------
  class(ppmodel_t),intent(inout) :: ppm
  integer,intent(in) :: iq_ibz
-
 ! *********************************************************************
 
  if (allocated(ppm%bigomegatwsq)) call array_free(ppm%bigomegatwsq(iq_ibz))
@@ -1892,7 +1889,6 @@ subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
  real(dp) :: qpg_dot_qpgp
 !arrays
  real(dp) :: b1(3),b2(3),b3(3),gppq(3),gpq(3),norm(npwc)
-
 !************************************************************************
 
  b1=two_pi*gprimd(:,1); b2=two_pi*gprimd(:,2); b3=two_pi*gprimd(:,3)

@@ -37,7 +37,7 @@ module m_sigma
  use defs_abitypes,    only : MPI_type
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : c2r
- use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc
+ use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, unt_sigc
  use m_crystal,        only : crystal_t
  use m_ebands,         only : ebands_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
@@ -368,7 +368,7 @@ subroutine write_sigma_header(Sigp, epsm1, Cryst, Kmesh, Qmesh)
    endif
  end if
 
- if (sigma_needs_w(Sigp)) then
+ if (Sigp%needs_w()) then
    write(msg,'(2a)')ch10,' EPSILON^-1 parameters (SCR file):'
    call wrtout(units, msg)
    write(msg,'(a,i12)')' dimension of the eps^-1 matrix on file   ',epsm1%Hscr%npwe

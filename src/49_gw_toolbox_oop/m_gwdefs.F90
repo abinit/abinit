@@ -25,6 +25,8 @@ module m_gwdefs
  use m_abicore
  use m_errors
 
+ use m_fstrings, only : sjoin, itoa
+
  implicit none
 
  private
@@ -186,9 +188,6 @@ module m_gwdefs
  integer,public,parameter :: SIG_QPGW_CD     =9  ! model GW without PPM
 
  public :: sigma_type_from_key
- public :: sigma_is_herm
- public :: sigma_needs_w
- public :: sigma_needs_ppm
  public :: g0g0w
 
 ! Private variables
@@ -384,6 +383,9 @@ module m_gwdefs
 
   contains
     procedure :: free => sigparams_free
+    procedure :: is_herm => sigma_is_herm
+    procedure :: needs_w => sigma_needs_w
+    procedure :: needs_ppm => sigma_needs_ppm
  end type sigparams_t
 !!***
 
@@ -399,20 +401,13 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Free dynamic memory allocated in the structure.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine em1params_free(Ep)
 
 !Arguments ------------------------------------
  class(em1params_t),intent(inout) :: Ep
-
 ! *************************************************************************
-
- !@em1params_t
 
 !real
  ABI_SFREE(Ep%qcalc)
@@ -484,8 +479,6 @@ subroutine sigparams_free(Sigp)
  class(sigparams_t),intent(inout) :: Sigp
 ! *************************************************************************
 
- !@sigparams_t
-
 !integer
  ABI_SFREE(Sigp%kptgw2bz)
  ABI_SFREE(Sigp%minbnd)
@@ -532,7 +525,6 @@ function sigma_type_from_key(key) result(sigma_type)
  character(len=STR_LEN) :: sigma_type
 
 !Local variables ------------------------------
-!scalars
  character(len=500) :: msg
 !************************************************************************
 
@@ -547,8 +539,7 @@ function sigma_type_from_key(key) result(sigma_type)
  if (key==SIG_QPGW_CD )  sigma_type = ' model GW without PPM'
 
  if (sigma_type == "None") then
-   write(msg,'(a,i0)')" Unknown value for key= ",key
-   ABI_ERROR(msg)
+   ABI_ERROR(sjoin("Unknown value for key: ", itoa(key)))
  end if
 
 end function sigma_type_from_key
@@ -577,7 +568,7 @@ pure logical function sigma_is_herm(Sigp)
  integer :: mod10
 !************************************************************************
 
- mod10=MOD(Sigp%gwcalctyp,10)
+ mod10 = MOD(Sigp%gwcalctyp,10)
  sigma_is_herm = ANY(mod10 == [SIG_HF, SIG_SEX, SIG_COHSEX])
 
 end function sigma_is_herm

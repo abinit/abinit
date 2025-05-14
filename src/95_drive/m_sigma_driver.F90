@@ -1681,7 +1681,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! If epsm1%mqmem==0, allocate and read a single q-slice inside csigme.
  ! TODO epsm1%nomega should be initialized so that only the frequencies really needed are stored in memory
  ! TODO The same piece of code is present in screening.
- if (sigma_needs_w(Sigp)) then
+ if (sigp%needs_w()) then
 
    select case (dtset%gwgamma)
    case (0)
@@ -1888,7 +1888,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use_aerhor=0
  ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden*use_aerhor))
 
- if (sigma_needs_ppm(Sigp)) then
+ if (sigp%needs_ppm()) then
    ! If epsm1 is MPI-shared, we have to start the RMA epoch. Note that epsm1%epsm1 is read-only.
    if (epsm1%use_mpi_shared_win) then
      call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
@@ -1901,9 +1901,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! PPm%force_plsmf= force_ppmfrq  ! this line to change the plasme frequency in HL expression.
 
    if (Wfd%usepaw==1 .and. Ppm%userho==1) then
-     ! * For PAW and ppmodel 2-3-4 we need the AE rho(G) without compensation charge.
-     ! * It would be possible to calculate rho(G) using Paw_pwff, though. It should be faster but
-     !    results will depend on the expression used for the matrix elements. This approach is safer.
+     ! For PAW and ppmodel 2-3-4 we need the AE rho(G) without compensation charge.
+     ! It would be possible to calculate rho(G) using Paw_pwff, though. It should be faster but
+     ! results will depend on the expression used for the matrix elements. This approach is safer.
      use_aerhor=1
      ABI_FREE(ks_aepaw_rhor)
      ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden))
@@ -3512,7 +3512,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  ! epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  !
- if (sigma_needs_w(Sigp)) then
+ if (sigp%needs_w()) then
    if (.not. file_exists(fname)) then
      fname = nctk_ncify(fname)
      ABI_COMMENT(sjoin("File not found. Will try netcdf file:", fname))
@@ -3582,7 +3582,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  !BEGIN DEBUG
  ! Make sure that the two G-spheres are equivalent.
  ierr=0
- if (sigma_needs_w(Sigp)) then
+ if (sigp%needs_w()) then
    ng = MIN(SIZE(Gsph_c%gvec,DIM=2),SIZE(gvec_kss,DIM=2))
    do ig1=1,ng
      if (ANY(Gsph_c%gvec(:,ig1)/=gvec_kss(:,ig1))) then
@@ -4016,7 +4016,7 @@ subroutine sigma_tables(Sigp, Kmesh, esymm)
 ! *************************************************************************
 
  only_diago = sigp%gwcalctyp < 20
- sigc_is_herm = sigma_is_herm(Sigp)
+ sigc_is_herm = sigp%is_herm()
 
  ABI_MALLOC(kcalc2ibz, (sigp%nkptgw))
  do ikcalc=1,sigp%nkptgw
@@ -4240,7 +4240,6 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  real(dp) :: el_temp
 !arrays
  real(dp) :: k0(3)
-
 !************************************************************************
 
  ABI_UNUSED(Kmesh%nibz)
