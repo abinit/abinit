@@ -1767,7 +1767,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        call calcdenmagsph(mpi_enreg,dtset%natom,dtset%nfft,ngfft,dtset%nspden,&
                             dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
       !Compute maximal magnet and maximal difference of magnet
-       call calmaxdifmag(intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+       call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
      endif
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,dtfil%fnameabo_app_eig,&
@@ -2034,7 +2034,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        intgden0=intgden
        call calcdenmagsph(mpi_enreg,dtset%natom,dtset%nfft,ngfft,dtset%nspden,&
                             dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
-       call calmaxdifmag(intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+       call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
      endif
 
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
