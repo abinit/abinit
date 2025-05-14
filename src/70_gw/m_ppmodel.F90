@@ -239,7 +239,7 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
  integer,intent(in) :: iq_bz
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
- complex(gwpc),intent(out) :: botsq(:,:),otq(:,:),eig(:,:)
+ complex(gwpc),allocatable,intent(out) :: botsq(:,:),otq(:,:),eig(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -251,6 +251,10 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
 
  ! Save the index of the q-point for checking purpose.
  ppm%iq_bz = iq_bz
+
+ ABI_MALLOC(botsq, (ppm%npwc, ppm%dm2_botsq))
+ ABI_MALLOC(otq, (ppm%npwc, ppm%dm2_otq))
+ ABI_MALLOC(eig, (ppm%dm_eig, ppm%dm_eig))
 
  ! Here there is a problem with the small q, still cannot use BZ methods
  iq_ibz = Qmesh%tab(iq_bz); isym_q = Qmesh%tabo(iq_bz); itim_q = (3-Qmesh%tabi(iq_bz))/2

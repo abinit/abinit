@@ -202,7 +202,7 @@ module m_gwdefs
 !!
 !! FUNCTION
 !! For the GW part of ABINIT, the  em1params_t structured datatype
-!! gather different parameters used to calculate the inverse dielectric matrices.
+!! gather different parameters used to calculate the inverse dielectric matrix in SCREENING
 !!
 !! SOURCE
 
@@ -210,7 +210,7 @@ module m_gwdefs
 
 !scalars
   integer :: awtr                   ! If 1 the Adler-Wiser expression for Chi_0 is evaluated
-                                    !  taking advantage of time-reversal symmetry
+                                    ! taking advantage of time-reversal symmetry
   integer :: gwcalctyp              ! Calculation type (see input variable)
   integer :: gwcomp                 ! 1 if extrapolar technique is used. 0 otherwise.
   integer :: inclvkb                ! Integer flag related to the evaluation of the commutator for q-->0
@@ -237,7 +237,7 @@ module m_gwdefs
   real(dp) :: gwencomp              ! Extrapolar energy used if gwcomp==1.
   real(dp) :: omegaermin            ! Minimum real frequency used in the contour deformation method
   real(dp) :: omegaermax            ! Maximum real frequency used in the contour deformation method
-  real(dp) :: mbpt_sciss              ! Scissor energy used in chi0
+  real(dp) :: mbpt_sciss            ! Scissor energy used in chi0
   real(dp) :: spsmear               ! Smearing of the delta in case of spmeth==2
   real(dp) :: zcut                  ! Small imaginary shift to avoid poles in chi0
 
