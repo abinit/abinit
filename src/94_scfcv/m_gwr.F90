@@ -174,7 +174,7 @@ module m_gwr
  use m_slk,           only : slkmat_dp_t, slkmat_sp_t, slk_processor_t, slk_array_free, slk_array_set, &
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
- use m_wfd,           only : wfd_init, wfd_t, wfdgw_t
+ use m_wfd,           only : wfd_t, wfdgw_t
  use m_ddk,           only : ddkop_t, ddkop_new
  use m_pawtab,        only : pawtab_type
  use m_pawcprj,       only : pawcprj_type
@@ -2123,7 +2123,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1
 
- call wfd_init(wfd, gwr%cryst, gwr%pawtab, gwr%psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
+ call wfd%init(gwr%cryst, gwr%pawtab, gwr%psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
                dtset%nspden, dtset%nspinor, dtset%ecutwfn, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%g_ngfft, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, gwr%comm%value)
 

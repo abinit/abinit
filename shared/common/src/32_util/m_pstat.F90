@@ -214,11 +214,11 @@ end subroutine pstat_from_file
 !!
 !! SOURCE
 
-subroutine pstat_print(pstat, file, line)
+subroutine pstat_print(pstat, file, line, comm)
 
  class(pstat_t),intent(inout) :: pstat
  character(len=*),optional,intent(in) :: file
- integer,optional,intent(in) :: line
+ integer,optional,intent(in) :: line, comm
 
 !Local variables-------------------------------
  integer :: units(1)
@@ -236,11 +236,14 @@ subroutine pstat_print(pstat, file, line)
  if (present(line)) f90line = line
  if (present(file)) f90name = basename(file)
 
+ !if present(comm) then
+ !  call xmpi_min_ip(pstat%vmrss_mb, min_mem_mb, comm, ierr)
+ !  call xmpi_max_ip(pstat%vmrss_mb, min_mem_mb, comm, ierr)
+ !end if
+
 #ifndef FC_NVHPC
  ydoc = yamldoc_open("PstatData")
  call ydoc%add_int("pid", pstat%pid)
- !call ydoc%add_int("threads", pstat%threads)
- !call ydoc%add_int("fdsize", pstat%fdsize)
  call ydoc%add_string("file", f90name)
  call ydoc%add_int("line", f90line)
  call ydoc%add_real("vmrss_mb", pstat%vmrss_mb)

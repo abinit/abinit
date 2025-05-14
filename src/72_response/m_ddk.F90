@@ -49,7 +49,7 @@ MODULE m_ddk
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
  use m_wfk,           only : wfk_read_ebands !, wfk_read_h1mat
- use m_wfd,           only : wfd_t, wfd_init, wave_t
+ use m_wfd,           only : wfd_t, wave_t
  use m_ebands,        only : ebands_t
 
  implicit none
@@ -350,7 +350,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
  end if
 
  ! Initialize distributed wavefunctions object
- call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkpt, nsppol,&
+ call wfd%init(cryst, pawtab, psps, keep_ur, mband, nband, nkpt, nsppol,&
    bks_mask, dtset%nspden, nspinor, hdr%ecut, dtset%ecutsm, dtset%dilatmx, ebands%istwfk, ebands%kptns,&
    ngfftc, dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 

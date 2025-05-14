@@ -60,7 +60,7 @@ module m_screening_driver
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gfft, setmesh
  use m_fft,           only : fourdp
- use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge
+ use m_wfd,           only : wfdgw_t, wfdgw_copy, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
  use m_chi0tk,        only : output_chi0sumrule
@@ -607,12 +607,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Initialize the wf descriptor (allocate %ug and %ur if required).
 
- call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
+ call wfd%init(Cryst,Pawtab,Psps,keep_ur,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
   Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_gw,&
   Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
  if (Dtset%pawcross==1) then
-   call wfd_init(Wfdf,Cryst,Pawtab,Psps,keep_ur,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
+   call Wfdf%init(Cryst,Pawtab,Psps,keep_ur,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
     Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_gw,&
     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
  end if

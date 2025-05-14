@@ -48,7 +48,7 @@ module m_wfd
  use m_cgtk,           only : cgtk_change_gsphere, cgtk_rotate
  use m_fftcore,        only : print_ngfft, kgindex, sphereboundary, ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh, calc_ceikr, check_rot_fft
- use m_fft,            only : fft_ug !, fft_ug_dpc, fft_ur_dpc
+ use m_fft,            only : fft_ug
  use m_kg,             only : getph, ph1d3d, mkkpg
  use m_gsphere,        only : kg_map, make_istwfk_table
  use m_fftcore,        only : kpgsph, get_kg
@@ -467,9 +467,11 @@ module m_wfd
 
    procedure :: dump_errinfo => wfd_dump_errinfo
 
+   procedure :: init => wfd_init                ! Main creation method.
+
  end type wfd_t
 
- public :: wfd_init                ! Main creation method.
+ !public :: wfd_init                ! Main creation method.
 
  !public :: wfd_get_socpert
  public :: test_charge
@@ -879,11 +881,11 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
 !Arguments ------------------------------------
 !scalars
+ class(wfd_t),intent(inout) :: Wfd
  integer,intent(in) :: mband,comm,prtvol,pawprtvol,nkibz,nsppol,nspden,nspinor
  real(dp),intent(in) :: ecut,ecutsm,dilatmx
  type(crystal_t),intent(in) :: Cryst
  type(pseudopotential_type),intent(in) :: Psps
- class(wfd_t),intent(inout) :: Wfd
 !array
  integer,intent(in) :: ngfft(18),istwfk(nkibz),nband(nkibz,nsppol),nloalg(3)
  real(dp),intent(in) :: kibz(3,nkibz)
@@ -1139,11 +1141,9 @@ end subroutine wfd_init
 subroutine wfd_free(Wfd)
 
 !Arguments ------------------------------------
-!scalars
  class(wfd_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
-!scalars
  integer :: ib, ik, is
 !************************************************************************
 

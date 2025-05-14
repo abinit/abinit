@@ -620,7 +620,7 @@ subroutine read_wfd()
  ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
  keep_ur = .False.; bks_mask = .True.
 
- call wfd_init(wfd,cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
+ call wfd%init(cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
    dtset%nspden,dtset%nspinor,ecut_eff,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
 
@@ -646,7 +646,7 @@ subroutine wfd_run_wannier__(wfk_filepath, dtset_, ebands_, hdr_)
  ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
  !wfk0_hdr%istwfk = 1; ebands%istwfk = 1; dtset%istwfk = 1
 
- call wfd_init(wfd, cryst, pawtab, psps, keep_ur, ebands_%mband, ebands_%nband, ebands_%nkpt, dtset_%nsppol, bks_mask, &
+ call wfd%init(cryst, pawtab, psps, keep_ur, ebands_%mband, ebands_%nband, ebands_%nkpt, dtset_%nsppol, bks_mask, &
    dtset_%nspden,  dtset_%nspinor, ecut_eff, dtset_%ecutsm, dtset_%dilatmx, hdr_%istwfk, ebands_%kptns, ngfftc, &
    dtset_%nloalg, dtset_%prtvol, dtset_%pawprtvol, comm)
 

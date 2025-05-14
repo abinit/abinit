@@ -245,8 +245,6 @@ module m_wfk
       ! Write all the H1 matrix elements.
  end type wfk_t
 
-
-
  public :: wfk_to_bz               ! Generate a new WFK file with wavefunctions in the full BZ and istwfk==1
                                    ! Mainly used to interface ABINIT with other codes that
                                    ! cannot handle symmetries e.g. lobster
