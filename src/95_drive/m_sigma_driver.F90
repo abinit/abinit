@@ -2184,39 +2184,22 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call xmpi_sum(M1_q_m,Wfd%comm,ierr)
      M1_q_m=M1_q_m/Kmesh%nbz/Wfd%nsppol
      rhot1_q_m=rhot1_q_m/Kmesh%nbz/Wfd%nsppol
-     ! do pwx=1,sigp%npwx
-     !   do ibz=1,Qmesh%nibz
-     !     do ispinor1=1,dtset%nspinor
-     !       do ispinor2=1,dtset%nspinor
-     !         do iatom1=1,cryst%nattyp(itypatcor)
-     !           do im1=1,2*lcor+1
-     !             do im2=1,2*lcor+1
-     !               write(67,*)ibz,im1,im2,rhot1_q_m(iatom1,ispinor1,ispinor2,im1,im2,pwx,ibz)
-     !             enddo
-     !           enddo
-     !         enddo
-     !       enddo
-     !     enddo
-     !   enddo
-     ! enddo
+     !do pwx=1,sigp%npwx; do ibz=1,Qmesh%nibz; do ispinor1=1,dtset%nspinor; do ispinor2=1,dtset%nspinor; do iatom1=1,cryst%nattyp(itypatcor)
+     !  do im1=1,2*lcor+1; do im2=1,2*lcor+1
+     !    write(67,*)ibz,im1,im2,rhot1_q_m(iatom1,ispinor1,ispinor2,im1,im2,pwx,ibz)
+     !enddo; enddo; enddo; enddo; enddo; enddo; enddo
    else
      call reduce_operwan_realspace(wanbz,rhot1,sigp%npwx,Qmesh%nibz,Wfd%comm,Kmesh%nbz,Wfd%nsppol)
      !call cwtime(cpu,wall,gflops,"start") !reduction of rhot1
      ! dim=0
-     ! do pwx=1,sigp%npwx
-     ! do ibz=1,Qmesh%nibz
-     !   do spin=1,wanbz%nsppol
-     !   do ispinor1=1,wanbz%nspinor
-     !   do ispinor2=1,wanbz%nspinor
-     !     do iatom1=1,wanbz%natom_wan
-     !     do iatom2=1,wanbz%natom_wan
-     !       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
-     !       do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
-     !         do il1=1,wanbz%nbl_atom_wan(iatom1)
-     !         do il2=1,wanbz%nbl_atom_wan(iatom2)
+     ! do pwx=1,sigp%npwx; do ibz=1,Qmesh%nibz
+     !   do spin=1,wanbz%nsppol; do ispinor1=1,wanbz%nspinor; ispinor2=1,wanbz%nspinor
+     !     do iatom1=1,wanbz%natom_wan; do iatom2=1,wanbz%natom_wan
+     !       do pos1=1,size(wanbz%nposition(iatom1)%pos,1); do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     !         do il1=1,wanbz%nbl_atom_wan(iatom1); do il2=1,wanbz%nbl_atom_wan(iatom2)
      !           do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
      !           do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
-     ! dim=dim+1
+     !              dim=dim+1
      !           enddo!im2
      !           enddo!im1
      !         enddo!il2
@@ -2232,68 +2215,28 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! enddo!pwx
      ! ABI_MALLOC(buffer,(dim))
      ! nnn=0
-     ! do pwx=1,sigp%npwx
-     ! do ibz=1,Qmesh%nibz
-     !     do spin=1,wanbz%nsppol
-     !     do ispinor1=1,wanbz%nspinor
-     !     do ispinor2=1,wanbz%nspinor
-     !       do iatom1=1,wanbz%natom_wan
-     !       do iatom2=1,wanbz%natom_wan
-     !         do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
-     !         do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
-     !           do il1=1,wanbz%nbl_atom_wan(iatom1)
-     !           do il2=1,wanbz%nbl_atom_wan(iatom2)
-     !             do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
-     !             do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
-     ! nnn=nnn+1
-     ! buffer(nnn)=rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
-     !             enddo!im2
-     !             enddo!im1
-     !           enddo!il2
-     !           enddo!il1
-     !         enddo!pos2
-     !         enddo!pos1
-     !       enddo!iatom2
-     !       enddo!iatom1
-     !     enddo!ispinor2
-     !     enddo!ispinor1
-     !   enddo!spin
-     ! enddo!ibz
-     ! enddo!pwx
-     ! call xmpi_barrier(Wfd%comm)
+     ! do pwx=1,sigp%npwx; do ibz=1,Qmesh%nibz; do spin=1,wanbz%nsppol; do ispinor1=1,wanbz%nspinor; do ispinor2=1,wanbz%nspinor
+     ! do iatom1=1,wanbz%natom_wan; do iatom2=1,wanbz%natom_wan
+     ! do pos1=1,size(wanbz%nposition(iatom1)%pos,1); do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     ! do il1=1,wanbz%nbl_atom_wan(iatom1); do il2=1,wanbz%nbl_atom_wan(iatom2)
+     ! do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+     ! do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+     !   nnn=nnn+1
+     !   buffer(nnn)=rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
+     ! enddo; enddo; enddo; enddo; enddo; enddo; enddo; enddo; enddo; enddo; enddo; enddo; enddo
      ! call xmpi_sum(buffer,Wfd%comm,ierr)
-     ! call xmpi_barrier(Wfd%comm)
      ! buffer=buffer/Kmesh%nbz/Wfd%nsppol
      ! nnn=0
-     ! do pwx=1,sigp%npwx
-     ! do ibz=1,Qmesh%nibz
-     !   do spin=1,wanbz%nsppol
-     !   do ispinor1=1,wanbz%nspinor
-     !   do ispinor2=1,wanbz%nspinor
-     !     do iatom1=1,wanbz%natom_wan
-     !     do iatom2=1,wanbz%natom_wan
-     !       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
-     !       do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
-     !         do il1=1,wanbz%nbl_atom_wan(iatom1)
-     !         do il2=1,wanbz%nbl_atom_wan(iatom2)
-     !           do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
-     !           do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
-     !  nnn=nnn+1
-     !  rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=buffer(nnn)
-     !  !write(67,*)ibz,im1,im2,rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
-     !           enddo!im2
-     !           enddo!im1
-     !         enddo!il2
-     !         enddo!il1
-     !       enddo!pos2
-     !       enddo!pos1
-     !     enddo!iatom2
-     !     enddo!iatom1
-     !   enddo!ispinor2
-     !   enddo!ispinor1
-     !   enddo!spin
-     ! enddo!ibz
-     ! enddo!pwx
+     ! do pwx=1,sigp%npwx; do ibz=1,Qmesh%nibz; do spin=1,wanbz%nsppol; do ispinor1=1,wanbz%nspinor; do ispinor2=1,wanbz%nspinor
+     ! do iatom1=1,wanbz%natom_wan; do iatom2=1,wanbz%natom_wan
+     ! do pos1=1,size(wanbz%nposition(iatom1)%pos,1); do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     ! do il1=1,wanbz%nbl_atom_wan(iatom1); do il2=1,wanbz%nbl_atom_wan(iatom2)
+     ! do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+     ! do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+     !   nnn=nnn+1
+     !   rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=buffer(nnn)
+     !   !write(67,*)ibz,im1,im2,rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
+     ! enddo; enddo; enddo;enddo; enddo; enddo;enddo; enddo; enddo; enddo; enddo; enddo; enddo
      ! ABI_FREE(buffer)
    endif
 
@@ -2361,7 +2304,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(M1_q_m)
 
  else
-   ! MRM: sigmak_todo is an array indicating whether the k-point must be computed for GW correction. This array is set to DO IT (to 1) for any GW calculation
+   ! MRM: sigmak_todo is an array indicating whether the k-point must be computed for GW correction.
+   ! This array is set to DO IT (to 1) for any GW calculation
    ! and it will only change to NOT DO IT (to 0) in case that a density matrix update calc. is used and we are reading checkpoint files
    ABI_MALLOC(sigmak_todo,(Wfd%nkibz))
    sigmak_todo(:)=1
@@ -2868,11 +2812,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  !==== Close Files ====
  !=====================
  if (wfd%my_rank == master) then
-   close(unt_gw )
-   close(unt_gwdiag)
-   close(unt_sig)
-   close(unt_sgr)
-   close(unt_sigc)
+   close(unt_gw); close(unt_gwdiag); close(unt_sig); close(unt_sgr); close(unt_sigc)
    if (mod10==SIG_GW_AC) close(unt_sgm)
  end if
  !
@@ -2896,10 +2836,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(grvdw)
- if(.not.rdm_update) then
-   ABI_FREE(sigcme)
- end if
-
+ ABI_SFREE(sigcme)
  ABI_SFREE(kxc)
  ABI_SFREE(qp_vtrial)
  ABI_FREE(ks_nhat)
@@ -2947,7 +2884,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call esymm_free(KS_sym)
  ABI_FREE(KS_sym)
 
- if (Sigp%symsigma==1.and.gwcalctyp>=20) then
+ if (Sigp%symsigma == 1 .and. gwcalctyp>=20) then
    call esymm_free(QP_sym)
    ABI_FREE(QP_sym)
  end if
@@ -3154,7 +3091,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  if (Sigp%npwwfn > ng_kss) then ! cannot use more G"s for the wfs than those stored on file
    Sigp%npwwfn  =ng_kss
    Dtset%npwwfn =ng_kss
-   write(msg,'(2a,(a,i8,a))')&
+   write(msg,'(2a,(a,i0,a))')&
     'Number of G-vectors for WFS found in the KSS file is less than required',ch10,&
     'calculation will proceed with npwwfn  = ',Sigp%npwwfn,ch10
    ABI_WARNING(msg)
@@ -3172,7 +3109,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    Sigp%npwx     = ng_sigx
    Dtset%npwsigx = ng_sigx
 
-   write(msg,'(2a,(a,i8,a))')&
+   write(msg,'(2a,(a,i0,a))')&
      'Number of G-vectors for Sigma_x found in the KSS file is less than required',ch10,&
      'calculation will proceed with npwsigx = ',Sigp%npwx,ch10
    ABI_WARNING(msg)
@@ -3580,28 +3517,28 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  call Gsph_Max%init(Cryst, Sigp%npwvec, gvec=gvec_kss)
 
  !BEGIN DEBUG
- ! Make sure that the two G-spheres are equivalent.
- ierr=0
- if (sigp%needs_w()) then
-   ng = MIN(SIZE(Gsph_c%gvec,DIM=2),SIZE(gvec_kss,DIM=2))
-   do ig1=1,ng
-     if (ANY(Gsph_c%gvec(:,ig1)/=gvec_kss(:,ig1))) then
-       ierr=ierr+1
-       write(std_out,*)" Gsph_c, gvec_kss ",ig1,"/",ng,Gsph_c%gvec(:,ig1),gvec_kss(:,ig1)
-     end if
-   end do
-   ABI_CHECK(ierr==0,"Mismatch between Gsph_c and gvec_kss")
- end if
- ierr=0
- ng = MIN(SIZE(Gsph_x%gvec,DIM=2),SIZE(gvec_kss,DIM=2))
- do ig1=1,ng
-   if (ANY(Gsph_x%gvec(:,ig1)/=gvec_kss(:,ig1))) then
-     ierr=ierr+1
-     write(std_out,*)" Gsph_x, gvec_kss ",ig1,"/",ng,Gsph_x%gvec(:,ig1),gvec_kss(:,ig1)
-   end if
- end do
- ABI_CHECK(ierr==0,"Mismatch between Gsph_x and gvec_kss")
-!END DEBUG
+ !Make sure that the two G-spheres are equivalent.
+ !ierr=0
+ !if (sigp%needs_w()) then
+ !  ng = MIN(SIZE(Gsph_c%gvec,DIM=2),SIZE(gvec_kss,DIM=2))
+ !  do ig1=1,ng
+ !    if (ANY(Gsph_c%gvec(:,ig1)/=gvec_kss(:,ig1))) then
+ !      ierr=ierr+1
+ !      write(std_out,*)" Gsph_c, gvec_kss ",ig1,"/",ng,Gsph_c%gvec(:,ig1),gvec_kss(:,ig1)
+ !    end if
+ !  end do
+ !  ABI_CHECK(ierr==0,"Mismatch between Gsph_c and gvec_kss")
+ !end if
+ !ierr=0
+ !ng = MIN(SIZE(Gsph_x%gvec,DIM=2),SIZE(gvec_kss,DIM=2))
+ !do ig1=1,ng
+ !  if (ANY(Gsph_x%gvec(:,ig1)/=gvec_kss(:,ig1))) then
+ !    ierr=ierr+1
+ !    write(std_out,*)" Gsph_x, gvec_kss ",ig1,"/",ng,Gsph_x%gvec(:,ig1),gvec_kss(:,ig1)
+ !  end if
+ !end do
+ !ABI_CHECK(ierr==0,"Mismatch between Gsph_x and gvec_kss")
+ !END DEBUG
 
  ABI_FREE(gvec_kss)
  !
