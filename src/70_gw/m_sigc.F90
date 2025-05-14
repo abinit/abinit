@@ -675,7 +675,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      if (epsm1%mqmem == 0) then
        ! Read q-slice of epsilon^{-1}|chi0 in epsm1%epsm1(:,:,:,1) (much slower but less memory).
        call epsm1%get_epsm1(Vcp,0,0,Dtset%iomode,xmpi_comm_self,iqibzA=iq_ibz)
-       if (sigma_needs_ppm(Sigp)) then
+       if (sigp%needs_ppm()) then
          if (Wfd%usepaw==1.and.PPm%userho==1) then
            ! Use PAW AE rhor.
            call PPm%setup(Cryst,Qmesh,epsm1%npwe,epsm1%nomega,epsm1%omega,epsm1%epsm1,rho_nfftot,Gsph_c%gvec,&
@@ -693,7 +693,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      !      indeed the equation is different since we have to use G-G0.
      !      A check, however, is performed in sigma.
      !    - If gwcomp==1 and mod10 in [1,2,9], one needs both to set up botsq and epsm1_q
-     if (sigma_needs_ppm(Sigp)) then
+     if (sigp%needs_ppm()) then
        ABI_MALLOC(botsq, (PPm%npwc, PPm%dm2_botsq))
        ABI_MALLOC(otq, (PPm%npwc, PPm%dm2_otq))
        ABI_MALLOC(eig, (PPm%dm_eig, PPm%dm_eig))
@@ -758,7 +758,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              call xmpi_sum(neig, Wfd%comm, ierr)
              call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
            else
-             ! No neeed to MPI_SUM ac_epsm1cqwz2_win as we're using shared memory.
+             ! No neeed to MPI_SUM ac_epsm1cqwz2_win as we're using MPI shared memory.
              call xmpi_sum(neig, epsm1%shared_comm%value, ierr)
              call xmpi_win_fence(XMPI_MODE_NOSUCCEED, ac_epsm1cqwz2_win, ierr) ! Close the RMA epoch.
            end if
@@ -930,7 +930,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
          CASE (SIG_GW_AC)
            ! GW with Analytic continuation.
-           ! This part is so optimized for AC that there is nothing to do here !
+           ! This part is so optimized for AC that there is nothing to do here!
 
          CASE (SIG_GW_CD)
            ! GW with contour deformation.
@@ -1162,7 +1162,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ABI_FREE(gboundf)
      end if
 
-     if (sigma_needs_ppm(Sigp)) then
+     if (sigp%needs_ppm()) then
        ABI_FREE(botsq)
        ABI_FREE(otq)
        ABI_FREE(eig)
