@@ -357,6 +357,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     write(std_out,*) 'slice%spacecom size=', xmpi_comm_size(slice%spacecom)
     write(std_out,*) 'on_host=, on_device', on_host, on_device
     write(std_out,*) 'slice%spacedim=', slice%spacedim
+    write(std_out,*) 'slice%total_spacedim=', slice%total_spacedim
     write(std_out,*) 'slice%bandpp=', slice%bandpp
 
     if (xmpi_comm_size(slice%spacecom)) then
@@ -496,7 +497,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
 
     ! Local variables --------------------------------
     integer :: neigenpairs, iband, min_loc, islice
-    integer :: fcol, fcol_ext, ncols
+    integer :: fcol, fcol_ext, ncols, itest, iparal
     logical :: on_host, on_device
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: tol12 = 1.0e-12
@@ -506,12 +507,12 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     type(xgBlock_t) :: slicecols_in
     type(xgBlock_t) :: slicecols_ext_out
     ! Arrays
+    integer :: npband_list(4)
     integer, allocatable, target :: permute_cols(:)
     real(dp), allocatable, target :: theta_reshaped(:)
     integer, pointer :: permute_cols_ptr(:) => null()
     real(dp), pointer :: theta_(:,:) => null()
     real(dp), pointer :: resid_(:,:) => null()
-    real(dp), pointer :: theta_reshaped_ptr(:) => null()
     
     ! *********************************************************************
 
@@ -595,20 +596,115 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
         slice%poly_low_bounds = lambda_minus
         slice%poly_upp_bounds = lambda_plus
     else
-        theta_reshaped_ptr => theta_reshaped
-        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
+        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
     end if
 
-    ! ===================== Resource management system =================================================
-    
-    ! Divide resources into slice tasks
-    if (slice%nslice==1) then
-        slice%nproc_per_slice = xmpi_comm_size(slice%spacecom)
-        write(std_out,*) 'slice%nproc_per_slice=', slice%nproc_per_slice
-        write(std_out,*) 'slice%spacecom size=', xmpi_comm_size(slice%spacecom)
-        slice%lookup_proc = 0
+    ! ===================== Resource management system ================================================= 
+
+    if (slice%paral_slice==12) then
+
+        ! === IML temporary Memory Estimation
+
+        write(std_out,*) 'Memory check for slicing (for test cases ti-255, ga2o3-1280 ONLY)'
+        npband_list = (/ 32, 64, 128, 192 /)
+
+        do itest=1, 4 ! loop on number of MPI processes to distribute
+            slice%nproc=npband_list(itest)
+            do iparal=1, 2 ! loop on paral_slice strategy (1 or 2)
+                slice%paral_slice = iparal
+                if (neigenpairs==6144) then
+                    do islice=2, 4 
+                        slice%nslice=islice
+                        call slice_allocateAll(slice)
+                        write(std_out,*) ' '
+                        write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
+&                                   ' nproc=', slice%nproc
+                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+                        call slice_allocateResources(slice)
+                        if (ANY( slice%nproc_per_slice==0 )) then
+                            write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
+                        else
+                            write(std_out,'(a)') 'Memory estimate:' 
+                            write(std_out,'(a,i6,a,i6)') 'max bandpp=', &
+&                                   maxval(slice%neigenpairs_per_slice/slice%nproc_per_slice), &
+&                                   ' max spacedim=', maxval(slice%total_spacedim/slice%nproc_per_slice)
+                        end if
+                        write(std_out,*) ' '
+                    end do
+                else if (neigenpairs==12288) then
+                    do islice=2, 8 
+                        slice%nslice=islice
+                        call slice_allocateAll(slice)
+                        write(std_out,*) ' '
+                        write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
+&                                   ' nproc=', slice%nproc
+                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+                        call slice_allocateResources(slice)
+                        if (ANY( slice%nproc_per_slice==0 )) then
+                            write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
+                        else
+                            write(std_out,'(a)') 'Memory estimate:' 
+                            write(std_out,'(a,i6,a,i6)') 'max bandpp=', &
+&                                   maxval(slice%neigenpairs_per_slice/slice%nproc_per_slice), &
+&                                   ' max spacedim=', maxval(slice%total_spacedim/slice%nproc_per_slice)
+                        end if
+                        write(std_out,*) ' '
+                    end do
+                else if (neigenpairs==18432) then
+                    do islice=2, 12
+                        slice%nslice=islice
+                        call slice_allocateAll(slice)
+                        write(std_out,*) ' '
+                        write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
+&                                   ' nproc=', slice%nproc
+                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+                        call slice_allocateResources(slice)
+                        if (ANY( slice%nproc_per_slice==0 )) then
+                            write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
+                        else
+                            write(std_out,'(a)') 'Memory estimate:' 
+                            write(std_out,'(a,i6,a,i6)') 'max bandpp=', &
+&                                   maxval(slice%neigenpairs_per_slice/slice%nproc_per_slice), &
+&                                   ' max spacedim=', maxval(slice%total_spacedim/slice%nproc_per_slice)
+                        end if
+                        write(std_out,*) ' '
+                    end do
+                else if (neigenpairs==2048) then
+                    do islice=2, 4
+                        slice%nslice=islice
+                        call slice_allocateAll(slice)
+                        write(std_out,*) ' '
+                        write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
+&                                   ' nproc=', slice%nproc
+                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+                        call slice_allocateResources(slice)
+                        if (ANY( slice%nproc_per_slice==0 )) then
+                            write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
+                        else
+                            write(std_out,'(a)') 'Memory estimate:' 
+                            write(std_out,'(a,i6,a,i6)') 'max bandpp=', &
+&                                   maxval(slice%neigenpairs_per_slice/slice%nproc_per_slice), &
+&                                   ' max spacedim=', maxval(slice%total_spacedim/slice%nproc_per_slice)
+                        end if
+                        write(std_out,*) ' '
+                    end do
+                end if
+            end do
+        end do
+        ABI_ERROR("temporary marker to stop calculation")
+
     else
-        call slice_allocateResources(slice)
+
+        ! Divide resources into slice tasks
+        if (slice%nslice==1) then
+            slice%nproc_per_slice = xmpi_comm_size(slice%spacecom)
+            write(std_out,*) 'slice%nproc_per_slice=', slice%nproc_per_slice
+            write(std_out,*) 'slice%spacecom size=', xmpi_comm_size(slice%spacecom)
+            slice%lookup_proc = 0
+        else
+            call slice_allocateResources(slice)
+        end if
+
     end if
 
     ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
@@ -1200,10 +1296,11 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         nvec = last_col - first_col + 1
 
         ! Print slice interval info
-        write(std_out,'(a,i2)') '======= Slice ', islice
-        write(std_out,*) '   Partition, width=', part_low, part_upp, part_upp - part_low
-        write(std_out,*) 'With overlap, width=', poly_low, poly_upp, poly_upp - poly_low
-        write(std_out,'(a,i6,a,i6)') 'nvec= ', nvec, ' ndeg= ', ndeg
+        write(std_out,'(a,i2,a,i6,a,i6)') '======= Slice ', islice, ' | nvec=', nvec, ' ndeg=', ndeg
+        write(std_out,'(a)') 'Partition: lower bound, upper bound, width='
+        write(std_out,*) part_low, part_upp, part_upp - part_low
+        write(std_out,'(a)') 'Support (with overlap): lower bound, upper bound, width='
+        write(std_out,*) poly_low, poly_upp, poly_upp - poly_low
         write(std_out,*) ' '
 
         ! Compute last index in extended memory (without ovlp)
@@ -1299,9 +1396,9 @@ subroutine slice_allocateResources(slice)
     
     call xmpi_barrier(slice%spacecom)
 
-    do iproc = 1, slice%nproc
-        write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
-    end do
+    !do iproc = 1, slice%nproc
+    !    write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
+    !end do
 
 end subroutine slice_allocateResources
 !***
@@ -1803,8 +1900,9 @@ subroutine fair_allocation(n, m, w, p, x)
     ! Assign the final allocation to the output variable
     x = allocation
 
+    write(std_out,'(a)') 'Memory allocation info:'
     do i=1,n
-        write(std_out,*) '# task # workload # allocated resources', i, real(w(i)*m(i))/real(x(i)), x(i)
+        write(std_out,'(a,i4,i6,i5)') '#task #workld #allocatd resources', i, w(i)*m(i)/x(i), x(i)
     end do
 
 end subroutine fair_allocation
