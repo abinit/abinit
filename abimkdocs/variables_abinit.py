@@ -3011,7 +3011,7 @@ Quantum Monte Carlo). See also the input variable [[dmft_nlambda]].
 ),
 
 Variable(
-    abivarname="dmft_kspectralfunc",
+    abivarname="dmft_kspectral_func",
     varset="dmft",
     vartype="integer",
     topics=['DMFT_useful'],
