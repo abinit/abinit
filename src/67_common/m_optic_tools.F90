@@ -625,7 +625,7 @@ integer :: my_rank, nproc, my_k1, my_k2, ierr
 integer :: fout1,fout2,fout3,fout4,fout5,fout6,fout7
 real(dp) :: f1,f2,f3, ha2ev
 real(dp) :: ene,totre,totabs,totim
-real(dp) :: e1,e2,el,en,em,emin,emax,my_emin,my_emax
+real(dp) :: el,en,em,emin,emax,my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu,wmn,wnm,wln,wnl,wml,wlm, t1
 complex(dpc) :: idel,w,zi
 complex(dpc) :: mat2w,mat1w1,mat1w2,mat2w_tra,mat1w3_tra
