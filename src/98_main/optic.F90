@@ -342,6 +342,8 @@ program optic
 
  end if ! my_rank == master
 
+ call flush_unit(std_out)
+
  ! Master broadcasts input variables.
  call hdr%bcast(master, my_rank, comm)
  call xmpi_bcast(broadening, master, comm, ierr)
@@ -397,6 +399,8 @@ program optic
    write(std_out,'(a,2i8)')      ' nkpt,mband        =',nkpt,mband
    write(std_out,'(a, f10.5,a)' ) ' ecut              =',hdr%ecut_eff,' Ha'
  end if
+
+ call flush_unit(std_out)
 
  ! Read the eigenvalues of ground-state and ddk files
  ABI_MALLOC(eigen0, (mband*nkpt*nsppol))
@@ -488,7 +492,7 @@ program optic
    write(std_out,'(a,f10.5,a)')' Tolerance on closeness to singularities     =', tolerance, ' Ha'
    write(std_out,'(a,f10.5,a)')' Smearing factor      =', broadening, ' Ha'
    if (do_antiresonant) then
-     write(std_out,'(a)') ' Will use the antiresonant approximation '
+     write(std_out,'(a)') ' Will use the antiresonant approximation (meaning that the antiresonant terms are neglected)'
    else
      write(std_out,'(a)') ' Will not use the antiresonant approximation (only available for nlinopt, nonlin2 and linel components!) '
    end if
@@ -676,6 +680,7 @@ program optic
 
  ! optical frequency dependent dielectric function for semiconductors
  call wrtout(std_out," optic : Call linopt")
+ call flush_unit(std_out)
 
  do itemp=1,ep_ntemp
    call ks_ebands%copy(eph_ebands)
@@ -703,6 +708,8 @@ program optic
 
  ! second harmonic generation susceptibility for semiconductors
  call wrtout(std_out," optic : Call nlinopt")
+ call flush_unit(std_out)
+
  do ii=1,num_nonlin_comp
    nlin1 = int( nonlin_comp(ii)/100.0_dp)
    nlin2 = int((nonlin_comp(ii)-nlin1*100.0_dp)/10.0_dp)
