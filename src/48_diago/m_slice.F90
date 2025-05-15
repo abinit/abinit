@@ -621,6 +621,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
                         write(std_out,*) ' '
                         write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
 &                                   ' nproc=', slice%nproc
+                        write(std_out,*) ' '
                         call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
                         call slice_allocateResources(slice)
                         if (ANY( slice%nproc_per_slice==0 )) then
@@ -640,6 +641,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
                         write(std_out,*) ' '
                         write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
 &                                   ' nproc=', slice%nproc
+                        write(std_out,*) ' '
                         call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
                         call slice_allocateResources(slice)
                         if (ANY( slice%nproc_per_slice==0 )) then
@@ -659,6 +661,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
                         write(std_out,*) ' '
                         write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
 &                                   ' nproc=', slice%nproc
+                        write(std_out,*) ' '
                         call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
                         call slice_allocateResources(slice)
                         if (ANY( slice%nproc_per_slice==0 )) then
@@ -678,6 +681,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
                         write(std_out,*) ' '
                         write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
 &                                   ' nproc=', slice%nproc
+                        write(std_out,*) ' '
                         call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
                         call slice_allocateResources(slice)
                         if (ANY( slice%nproc_per_slice==0 )) then
@@ -1298,12 +1302,10 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         nvec = last_col - first_col + 1
 
         ! Print slice interval info
-        write(std_out,'(a,i2,a,i6,a,i6)') '======= Slice ', islice, ' | nvec=', nvec, ' ndeg=', ndeg
-        write(std_out,'(a)') 'Partition: lower bound, upper bound, width='
+        write(std_out,'(a,i2,a,i6,a,i6,a)') '======= Slice ', islice, ' nvec=', nvec, ' ndeg=', ndeg,&
+&               '      lb, ub, width'
         write(std_out,*) part_low, part_upp, part_upp - part_low
-        write(std_out,'(a)') 'Support (with overlap): lower bound, upper bound, width='
         write(std_out,*) poly_low, poly_upp, poly_upp - poly_low
-        write(std_out,*) ' '
 
         ! Compute last index in extended memory (without ovlp)
         last_col_ext = first_col_ext + nvec - 1
@@ -1904,7 +1906,7 @@ subroutine fair_allocation(n, m, w, p, x)
 
     write(std_out,'(a)') 'Memory allocation info:'
     do i=1,n
-        write(std_out,'(a,i4,i6,i5)') '#task #workld #allocatd resources', i, w(i)*m(i)/x(i), x(i)
+        write(std_out,'(a,i4,i6,i5)') '#task #workload #allocated resources', i, w(i)*m(i)/x(i), x(i)
     end do
 
 end subroutine fair_allocation
