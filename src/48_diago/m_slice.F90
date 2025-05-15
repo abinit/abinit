@@ -509,7 +509,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     ! Arrays
     integer :: npband_list(4)
     integer, allocatable, target :: permute_cols(:)
-    real(dp), allocatable, target :: theta_reshaped(:)
+    real(dp), allocatable :: theta_reshaped(:)
     integer, pointer :: permute_cols_ptr(:) => null()
     real(dp), pointer :: theta_(:,:) => null()
     real(dp), pointer :: resid_(:,:) => null()
