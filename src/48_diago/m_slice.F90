@@ -509,7 +509,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     ! Arrays
     integer :: npband_list(4)
     integer, allocatable, target :: permute_cols(:)
-    real(dp), allocatable :: theta_reshaped(:)
+    real(dp), allocatable, target :: theta_reshaped(:)
+    real(dp), pointer :: theta_reshaped_ptr(:) => null()
     integer, pointer :: permute_cols_ptr(:) => null()
     real(dp), pointer :: theta_(:,:) => null()
     real(dp), pointer :: resid_(:,:) => null()
@@ -534,6 +535,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
 
     ABI_MALLOC_IFNOT(theta_reshaped, (neigenpairs))
     ABI_MALLOC_IFNOT(permute_cols, (neigenpairs))
+    theta_reshaped_ptr => theta_reshaped
 
     call xgBlock_reshape(eigen, 1, neigenpairs)
     call xgBlock_zero(eigen)
@@ -561,7 +563,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     theta_reshaped(1:neigenpairs) = theta_(1,1:neigenpairs)
     permute_cols_ptr => permute_cols
     permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
-    call sort_dp(neigenpairs, theta_reshaped, permute_cols_ptr, tol12)
+    call sort_dp(neigenpairs, theta_reshaped_ptr, permute_cols_ptr, tol12)
     theta_(1,1:neigenpairs) = theta_reshaped(1:neigenpairs)
 
     ! update eigen on GPU with sorted values
@@ -596,7 +598,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
         slice%poly_low_bounds = lambda_minus
         slice%poly_upp_bounds = lambda_plus
     else
-        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
     end if
 
     ! ===================== Resource management system ================================================= 
@@ -619,7 +621,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
                         write(std_out,*) ' '
                         write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
 &                                   ' nproc=', slice%nproc
-                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
                         call slice_allocateResources(slice)
                         if (ANY( slice%nproc_per_slice==0 )) then
                             write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
@@ -638,7 +640,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
                         write(std_out,*) ' '
                         write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
 &                                   ' nproc=', slice%nproc
-                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
                         call slice_allocateResources(slice)
                         if (ANY( slice%nproc_per_slice==0 )) then
                             write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
@@ -657,7 +659,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
                         write(std_out,*) ' '
                         write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
 &                                   ' nproc=', slice%nproc
-                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
                         call slice_allocateResources(slice)
                         if (ANY( slice%nproc_per_slice==0 )) then
                             write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
@@ -676,7 +678,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
                         write(std_out,*) ' '
                         write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
 &                                   ' nproc=', slice%nproc
-                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped, plot_filter=.false.)
+                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
                         call slice_allocateResources(slice)
                         if (ANY( slice%nproc_per_slice==0 )) then
                             write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
