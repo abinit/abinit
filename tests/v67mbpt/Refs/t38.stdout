@@ -164,11 +164,11 @@
  Found real frequency:     2.900000E+01 [eV], number: 30, in file: 2 local index: 9
  Found real frequency:     3.000000E+01 [eV], number: 31, in file: 2 local index: 10
  Found real frequency:     3.100000E+01 [eV], number: 32, in file: 2 local index: 11
- Found imaginary frequency:     4.997053E+00 [eV], number: 1, in file: 1 local index: 22
- Found imaginary frequency:     1.292938E+01 [eV], number: 2, in file: 1 local index: 23
- Found imaginary frequency:     2.552116E+01 [eV], number: 3, in file: 1 local index: 24
- Found imaginary frequency:     4.550938E+01 [eV], number: 4, in file: 1 local index: 25
- Found imaginary frequency:     7.723868E+01 [eV], number: 5, in file: 1 local index: 26
+ Found imag frequency:     4.997053E+00 [eV], number: 1, in file: 1 local index: 22
+ Found imag frequency:     1.292938E+01 [eV], number: 2, in file: 1 local index: 23
+ Found imag frequency:     2.552116E+01 [eV], number: 3, in file: 1 local index: 24
+ Found imag frequency:     4.550938E+01 [eV], number: 4, in file: 1 local index: 25
+ Found imag frequency:     7.723868E+01 [eV], number: 5, in file: 1 local index: 26
 
  Merging 37 frequencies.
  32 real, and 5 imaginary.
