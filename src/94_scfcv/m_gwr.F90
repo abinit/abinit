@@ -2919,7 +2919,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
      end do
    end do
    end associate
- end do
+ end do ! ii
  end associate
 
 10 continue
@@ -3042,7 +3042,7 @@ end subroutine gwr_get_myk_green_gpr
 !!
 !! FUNCTION
 !!  Compute G_k(r',r) from G_k(g,g') for k in the BZ and given spin and tau.
-!!  Note that output matrix `gk_rpr_pm` is transposed i.e. (r',r) instead of (r,r').
+!!  Note that the output matrix `gk_rpr_pm` is transposed i.e. (r',r) instead of (r,r').
 !!
 !! INPUTS
 !!
@@ -3090,7 +3090,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  end if
 
  ! Get G_k(g,g', +/- itau) in the BZ.
- call gwr%rotate_gpm(ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list=ipm_list__)
+ call gwr%rotate_gpm(ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list=ipm_list__(1:num_pm))
 
  call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
                    desc_kbz%gvec, gwpc, gwr%dtset%gpu_option)
@@ -3126,7 +3126,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
      call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0)
 
-     ! Multiply by e^{ig0.r}
+     ! Multiply by e^{ig0.r}.
      if (have_g0) then
        do idat=0,ndat-1
          gk_rpr_pm(ipm)%buffer_cplx(:, ir1+idat) = conjg(ceig0r) * gk_rpr_pm(ipm)%buffer_cplx(:, ir1+idat)
@@ -3137,7 +3137,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
 
    ! Rescale?
    !gk_rpr_pm(ipm)%buffer_cplx = gk_rpr_pm(ipm)%buffer_cplx * gwr%g_nfft
- end do ! ipm
+ end do ! ii
 
  call slk_array_free(gt_pm); call desc_kbz%free(); call uplan_k%free()
 
@@ -4409,7 +4409,7 @@ subroutine gwr_build_tchi(gwr)
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit, wtqp, wtqm
  complex(gwpc) :: head_q
  complex(dp) :: chq(3), wng(3)
- logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, print_time, keep_tchim ! isirr_k,
+ logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, print_time, keep_tchim !, doit ! isirr_k,
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_q ! desc_k,
  type(__slkmat_t) :: chi_rgp
@@ -4716,7 +4716,7 @@ subroutine gwr_build_tchi(gwr)
    call wrtout(std_out, " Here we're gonna have a big allocation peak...")
    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-   ! Need all nqibz matrices here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
+   ! Need all nqibz matrices in chi_q here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
    nrsp = gwr%g_nfft * gwr%nspinor
    col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
    ABI_MALLOC(chiq_rpr, (gwr%nqibz))
@@ -4725,18 +4725,18 @@ subroutine gwr_build_tchi(gwr)
      if (gwr%comm%me == 0 .and. mod(iq_ibz, 2) == 0) call pstat_proc%print(_PSTAT_ARGS_)
    end do
 
+   ! Allocate G_k(r',r, +/- tau) and G_kq(r',r, +/- tau)
    ! TODO: Can save memory here as we don't need +/- tau for each k+q.
    do ipm=1,2
      call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
      call gkq_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
    end do
 
-   call pstat_proc%print(_PSTAT_ARGS_)
    mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
    call wrtout(std_out, sjoin(" Local memory for chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
-   if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
+   call pstat_proc%print(_PSTAT_ARGS_)
 
-   ! The little group is needed when symchi == 1
+   ! The little group is needed when symchi == 1 (default)
    ! If use_umklp == 1 then symmetries requiring an umklapp to preserve qibz are included as well.
    ! Note that TR is not yet supported so timrev is set to 1 even if TR has been used to generate the GS IBZ.
    ABI_MALLOC(ltg_qibz, (gwr%nqibz))
@@ -4746,7 +4746,7 @@ subroutine gwr_build_tchi(gwr)
      !call ltg_qibz(iq_ibz)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
    end do
 
-   ! Compute mask with the k-points in the IBZ required by this MPI proc.
+   ! Compute mask with the k+q points in the IBZ required by this MPI proc.
    need_kibz = 0
    do my_ikf=1,gwr%my_nkbz
      ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
@@ -4760,6 +4760,7 @@ subroutine gwr_build_tchi(gwr)
      end do
    end do
 
+   ! Begin loop over spin and tau points.
    do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_it=1,gwr%my_ntau
@@ -4774,6 +4775,7 @@ subroutine gwr_build_tchi(gwr)
 
      ! Sum over my k-points in the BZ.
      call slk_array_set(chiq_rpr, czero)
+
      do my_ikf=1,gwr%my_nkbz
        print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
        if (print_time) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
@@ -4783,6 +4785,7 @@ subroutine gwr_build_tchi(gwr)
        ! TODO: here I may need to take into account the umklapp
        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm, ipm_list=[1]) ! g0=??
 
+       ! Accumulate contribution to chi_q(r',r) with q in the IBZ.
        do iq_ibz=1,gwr%nqibz
          if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
          qq_ibz = gwr%qibz(:,iq_ibz); kpq_bz = kk_bz + qq_ibz
@@ -4792,7 +4795,7 @@ subroutine gwr_build_tchi(gwr)
          !ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
 
          ! Use symmetries to get G_kqbz(g,g') from the IBZ, then G_kqbz(g,g') -> G_kqbz(r',r).
-         ! Also, we don't need G(+/-t) for both k, k+q wavevectors.
+         ! Note that only G_kq(-itau) is needed.
          call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=g0_kq, ipm_list=[2])
 
          ! The weight depends on q_ibz and the symmetries of the little group of qq_ibz.
@@ -4803,10 +4806,11 @@ subroutine gwr_build_tchi(gwr)
            ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
          end if
 
+         ! Accumulate.
          chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
-           !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
            wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works but requires ptrans with C
-       end do ! my_iqi
+           !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
+       end do ! iq_ibz
 
        if (print_time) then
          write(msg,'(4x,3(a,i0),a)')"Chi my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"

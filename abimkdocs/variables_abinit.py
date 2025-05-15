@@ -25636,7 +25636,12 @@ This variable can be used to select a subset of frequencies in the Screening to 
 Abinit will produce partial SCR files that can be merged with the mrgscr tool before starting the SIGMA calculation.
 
 Selecting a subset of frequencies allows one to reduce the memory requirements in the SCREENING computation.
+as the size of the polarizability matrix is proportional to the total number of frequencies.
 This is particularly useful when performing CD or AC computations.
+
+Note that in the case of AC, the total SCR file is supposed to contain 1 + [[nfreqim]] frequencies with the first point
+being the static limit.
+As a consequence, the full set of frequencies spans the [1, 1 + nfreqim ] range.
 """,
 ),
 
