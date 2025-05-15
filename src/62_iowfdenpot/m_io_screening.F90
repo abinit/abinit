@@ -2148,7 +2148,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  ! Sort frequencies while keeping track of index
  if (MOD(hscr_file(1)%gwcalctyp,10) == SIG_GW_AC) then
    ! Sort in descending order
-   call sort_dp(nfreqim,imag_omega,pos_indx,tol16,-1)
+   call sort_dp(nfreqim,imag_omega,pos_indx,tol16,order=-1)
  else
    ! Sort in ascending order
    call sort_dp(nfreqim,imag_omega,pos_indx,tol16)

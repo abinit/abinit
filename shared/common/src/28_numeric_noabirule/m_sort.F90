@@ -346,7 +346,7 @@ subroutine sort_rpts(n, rpts, metric, iperm, tol, rmod, order)
  end do
  ABI_MALLOC(iperm, (n))
  iperm = [(ii, ii=1,n)]
- call sort_dp(n, my_rmod, iperm, my_tol, my_order)
+ call sort_dp(n, my_rmod, iperm, my_tol, order = my_order)
 
  if (present(rmod)) then
    call move_alloc(my_rmod, rmod)
@@ -405,7 +405,7 @@ subroutine sort_rvals(n, in_vals, iperm, sorted_vals, tol, order)
  sorted_vals = in_vals
  ABI_MALLOC(iperm, (n))
  iperm = [(ii, ii=1,n)]
- call sort_dp(n, sorted_vals, iperm, my_tol, my_order)
+ call sort_dp(n, sorted_vals, iperm, my_tol, order = my_order)
 
 end subroutine sort_rvals
 !!***
@@ -465,7 +465,7 @@ subroutine sort_gvecs(npw_k, kpoint, gmet, in_gvec, out_gvec, iperm, tol, order)
    kin_kg(ig) = half * normv(kpoint + in_gvec(:, ig), gmet, "G") ** 2
  end do
 
- call sort_dp(npw_k, kin_kg, iperm__, my_tol, my_order)
+ call sort_dp(npw_k, kin_kg, iperm__, my_tol, order = my_order)
  ABI_FREE(kin_kg)
 
  ABI_MALLOC(out_gvec, (3, npw_k))

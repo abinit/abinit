@@ -15,7 +15,7 @@ t54o_DS3_SCR
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% keywords = GW
-#%% authors = M. Giantomassi
+#%% authors = H. Tsai, M. Giantomassi
 #%% description =
 #%%   Test of mrgscr utility. Option for merging frequency points.
 #%%<END TEST_INFO>
