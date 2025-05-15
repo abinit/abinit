@@ -19,7 +19,7 @@ R. Béjaud, J.-M. Beuken, A. Blanchet, F. Bottin, J. Boust, J. Bouquiaux, F. Bri
 E. Castiel, Q. Delacroix, F. Gendron, G. Geneste, M. Giantomassi, 
 O. Gingras, F. Gomez-Ortiz, X. Gonze, R. Gupta,
 I.-M. Lygatsika, O. Mattelaer, M. Mignolet, G. Petretto,
-S. Ponce, S. Rostami, M. Royo, M. Sarraute, A. Sasani, Le Shu, M. Torrent, Hsiaoyi Tsai, 
+S. Ponce, S. Rostami, M. Royo, M. Sarraute, A. Sasani, Le Shu, M. Torrent, V. Trinquet, Hsiaoyi Tsai, 
 V. Vasilchenko, M. Verstraete, Xu He, Huazhang Zhang, J. Zwanziger.
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -546,6 +546,16 @@ per node when all cores on the node are used as MPI processes.
 
 By M. Giantomassi (MR1109)
 
+**D.10.** Optic utility : antiresonant terms and band decomposition 
+
+Anti-resonant contributions were missing in the Optic calculations of second-harmonic generation.
+Now they can be included. Use  do_antiresonant = .FALSE. parameter in the input file of optics (meaning that the antiresonant approximation is NOT done - this is confusing and should be changed).
+
+Add option to print the contribution of each bands-triplet to the SHG at a given frequency.
+
+By V. Trinquet (MR1143)
+
+**
 
 * * *
 
