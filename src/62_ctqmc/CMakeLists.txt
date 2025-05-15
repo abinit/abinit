@@ -7,7 +7,9 @@ add_library(62_ctqmc STATIC
   m_data4entropyDMFT.F90
   m_Ctqmc.F90
   m_Ctqmcoffdiag.F90
+  m_CtqmcoffdiagComplex.F90
   m_CtqmcInterface.F90
+ m_CtqmcoffdiagInterfaceComplex.F90
   m_CtqmcoffdiagInterface.F90
   m_FFTHyb.F90
   m_GreenHyb.F90

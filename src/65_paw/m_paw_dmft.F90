@@ -988,6 +988,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    else if (dmft_solv == 9) then
      write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
        & give your personal script'
+    else if (dmft_solv == 10) then                                                                          
+      write(message,'(2a)') ch10,' DMFT uses the Complex Continuous Time Quantum Monte Carlo solver of ABINIT'     
    end if ! dmft_solv
  else if(use_dmft == 10) then
    write(message, '(a,a)') ch10,' DMFT uses the python invocation and orbitals constructed using Wannier90 '
