@@ -629,7 +629,7 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
  !character(len=500) :: msg
 ! *********************************************************************
 
- !call matrix%free()
+ call matrix%free()
 
  sizeb = DEFAULT_SIZE_BLOCS
  if (processor%grid%use_gpu) sizeb = DEFAULT_SIZE_BLOCS_GPU
@@ -4519,7 +4519,7 @@ end subroutine slkmat_sp_hpd_invert
 !! SOURCE
 
 subroutine slkmat_dp_ptrans(in_mat, trans, out_mat, &
-                      out_gshape, ija, ijc, size_blocs, alpha, beta, free) ! optional
+                            out_gshape, ija, ijc, size_blocs, alpha, beta, free) ! optional
 
 !Arguments ------------------------------------
  class(slkmat_dp_t),intent(inout) :: in_mat
