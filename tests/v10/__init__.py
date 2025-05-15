@@ -47,4 +47,5 @@ inp_files = [
 #   "t105.abi" ,  # description to be provided
 #   "t106.abi" ,  # description to be provided
 #   "t107.abi" ,  # description to be provided
+    "t108.abi",  # Test for rcpaw
 ]

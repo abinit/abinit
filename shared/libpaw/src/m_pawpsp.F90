@@ -1564,6 +1564,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
    !3)
    read(unt,*) Atm%znucl, Atm%zcore, pspdat
    Atm%zion=Atm%znucl-Atm%zcore
+   Atm%zcore_orig=Atm%zcore
    write(msg,'(2f10.5,2x,i8,2x,a)' )Atm%znucl, Atm%zcore, pspdat,'znucl,zcore,pspdat'
    call wrtout(std_out,msg,'COLL')
    if(Atm%zcore>zero) then
@@ -1604,6 +1605,8 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
      LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
      LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
+     LIBPAW_ALLOCATE(Atm%occ_res,(Atm%ln_size,Atm%nsppol))
+     LIBPAW_ALLOCATE(Atm%occ_respc,(Atm%ln_size,Atm%nsppol))
      if (Atm%dirac) then
        LIBPAW_ALLOCATE(Atm%kappa,(Atm%ln_size)) 
      endif
@@ -1616,7 +1619,7 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
            if(present(radmesh_in)) then
              Atm%mesh_size = radmesh_in%mesh_size
              Atm%rcore=radmesh_in%rad(radmesh_in%mesh_size)
-             Atm%radmesh=radmesh_in
+             call pawrad_copy(radmesh_in,atm%radmesh)
            elseif(rcut>tol16) then
              call pawrad_init(tmpmesh,meshsz(ii),meshtp(ii),radstp(ii),logstp(ii),-one)
              msz_cut =min(pawrad_ifromr(tmpmesh,rcut)+6,tmpmesh%mesh_size) ! addsix more points
@@ -1674,7 +1677,6 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      LIBPAW_DEALLOCATE(meshtp)
      LIBPAW_DEALLOCATE(radstp)
      LIBPAW_DEALLOCATE(logstp)
-     close(unt) 
   
      Atm%l_size =2*Atm%l_max-1
      Atm%ln2_size  = Atm%ln_size *(Atm%ln_size +1)/2
@@ -1709,6 +1711,11 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      LIBPAW_DEALLOCATE(orbitals)
      LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
      Atm%mode = ORB_FROZEN
+     LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
+     Atm%max_occ=Atm%occ
+     atm%zcore_conv=.false.
+     atm%nc_conv=.false.
+     atm%nresid_c=one
  
      ! * Setup of kln2ln.
      !TODO this has to be tested
@@ -2512,14 +2519,15 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 
 !Keep VH(tnZc) eventually in memory
  if (pawtab%has_vhtnzc==1) then
-   LIBPAW_ALLOCATE(pawtab%vhtnzc,(pawtab%mesh_size))
    if ((reduced_vloc).and.(rvloc_mesh%mesh_type==pawrad%mesh_type)&
 &   .and.(rvloc_mesh%rstep==pawrad%rstep).and.(rvloc_mesh%lstep==pawrad%lstep)) then
-     pawtab%vhtnzc(1:pawtab%mesh_size)=rvlocr(1:pawtab%mesh_size)
+     LIBPAW_ALLOCATE(pawtab%vhtnzc,(rvloc_mesh%mesh_size))
+     pawtab%vhtnzc(:)=rvlocr(:)
      pawtab%has_vhtnzc=2
    else if ((vloc_mesh%mesh_type==pawrad%mesh_type)&
 &     .and.(vloc_mesh%rstep==pawrad%rstep).and.(vloc_mesh%lstep==pawrad%lstep)) then
-     pawtab%vhtnzc(1:pawtab%mesh_size)=vlocr(1:pawtab%mesh_size)
+     LIBPAW_ALLOCATE(pawtab%vhtnzc,(size(vlocr)))
+     pawtab%vhtnzc(:)=vlocr(:)
      pawtab%has_vhtnzc=2
    else
      msg = 'Vloc mesh is not right !'
