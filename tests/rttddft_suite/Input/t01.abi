@@ -53,7 +53,7 @@ nband 42
 # Convergence parameters
 ecut 8
 pawecutdg 16
-tolvrs 1.d-4
+tolvrs 1.d-8
 nstep 20
 
 pp_dirpath "$ABI_PSPDIR/Psdj_paw_pbe_std"
