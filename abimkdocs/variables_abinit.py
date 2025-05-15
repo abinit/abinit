@@ -11911,6 +11911,15 @@ Variable(
     text=r"""
 [[nfreqim]] sets the number of pure imaginary frequencies used to calculate
 the dielectric matrix in order to perform the numerical integration of the GW self-energy.
+
+!!! important
+
+    This is the only parameter required to define the frequency mesh along the imaginary axis
+    when computing a SCR file for the AC method i.e. [[gw_calctyp]] = x1.
+    For AC, indeed, one uses Gauss-Legendre quadrature method in the [0, 1] interval
+    as we replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
+
+    Note that the AC grid is not log as required by the CD thus AC and CD cannot use the same SCR file.
 """,
 ),
 
@@ -12636,9 +12645,24 @@ Variable(
     requires="[[optdriver]] == 4 and [[gwcalctyp]] == 1",
     added_in_version="before_v9",
     text=r"""
-[[nomegasi]] defines the number of frequency points used to sample the self-
-energy along the imaginary axis. The frequency mesh is linear and covers the
-interval between `omegasimin`=0.01 Hartree and [[omegasimax]].
+[[nomegasi]] defines the number of frequency points used to sample the self-energy
+along the imaginary axis when the AC method is used.
+
+If [[nomegasi]] > 0, the code uses a linear frequency mesh covering the interval
+between `omegasimin` = 0.01 Hartree and [[omegasimax]].
+
+A negative value, instructs the code to use a minimax mesh automatically computed from [[nomegasi]], [[nband]]
+and the fundamental gap.
+In this case, [[nomegasi]] is similar in spirit to the [[gwr_ntau]] variable used in the GWR code.
+
+!!! important
+
+    The mesh for the self-energy is completely decoupled from the frequency mesh used
+    for the SCR file that is defined by [[nfreqim]].
+    The mesh in the SCR file is used to compute the convolution between G and W along the imaginary axis:
+    i.e. the $\omega'$ variable in Eq. 43 of [[cite:Golze2019]].
+    Conversely, [[nomegasi]] and [[omegasimax]] define the set of imaginary frequencies $\omega$ in $\Sigma$.
+    (cfr. Eq. 43).
 """,
 ),
 
