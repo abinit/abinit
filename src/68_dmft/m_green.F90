@@ -873,7 +873,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
      if (open_file(tmpfil,message,newunit=spfkresolved_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
      write(spfkresolved_unt,'(3a)') "# This is the k-resolved spectral function.",ch10, &
-                                & "#  Real frequency (Ha)       Spectral function"
+                                & "#  Real frequency (Ha)          Spectral function            ikpt"
      ABI_MALLOC(sf,(nkpt,green%nw))
      sf(:,:) = czero
      do ifreq=1,green%nw

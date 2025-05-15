@@ -738,7 +738,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
 !      ===========================
 
        if (self%w_type == "real") then
-         tmpfil = trim(merge(paw_dmft%filnamei,paw_dmft%filapp,optrw==1))//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
+         tmpfil = trim(merge(paw_dmft%filnamei,paw_dmft%filapp,optrw==1))//'_Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is
        else
          if (present(opt_char)) then
            tmpfil = trim(paw_dmft%filapp)//'Self_ra-omega_iatom'//trim(tag_at)//'_isppol'//tag_is//opt_char
