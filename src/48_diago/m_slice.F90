@@ -360,7 +360,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     write(std_out,*) 'slice%total_spacedim=', slice%total_spacedim
     write(std_out,*) 'slice%bandpp=', slice%bandpp
 
-    if (xmpi_comm_size(slice%spacecom)) then
+    if (xmpi_comm_size(slice%spacecom)==1) then
         ABI_ERROR("Slicing with 1 MPI process not implemented")
     end if
 
