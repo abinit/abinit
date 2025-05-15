@@ -15,13 +15,13 @@ paral_kgb 0 #This is enforced because of getwfk -1 to avoid strange behavior
 
 # -- Convergence Parameters
 nstep1 100
-nstep 1
+nstep 2
 nline2 10
 nnsclo2 5
-ecut  6
+ecut  4
 # as this cutoff, test is not physical at all (filling of correlated orbitals are obviously wrong)
 
-pawecutdg 12
+pawecutdg 8
 tolvrs 1.0d-5
 nband  34
 occopt 3 tsmear 0.008275
@@ -72,10 +72,10 @@ jpawu2  0.1000 0.0  # values in Hartree
 
 dmftqmc_therm 50
 dmftctqmc_basis 2
-dmftctqmc_meas 50
+dmftctqmc_meas 10
 dmft_triqs_off_diag 1
 dmftqmc_l 500
-dmftqmc_n 1.d3
+dmftqmc_n 5.d2
 dmft_triqs_move_double 0
 dmft_yukawa_param 3
 dmft_triqs_leg_measure 1
