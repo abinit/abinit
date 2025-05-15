@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 15 May 2025.
-- ( at 16h00 )
+- ( at 16h53 )
   
 - input  file    -> t56.abi
 - output file    -> t56.abo
@@ -30,12 +30,12 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =          25        mffmem =           1         mkmem =           1
-       mpw =         544          nfft =       13824          nkpt =           6
+-    mband =          25        mffmem =           1         mkmem =           6
+       mpw =         528          nfft =       13824          nkpt =           6
 ================================================================================
-P This job should need less than                       5.235 Mbytes of memory.
+P This job should need less than                       6.264 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
+_ WF disk file :      1.210 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
  
 --------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
           ecutwfn      1.20000000E+01 Hartree
 -          fftalg         512
         gwcalctyp           1
-           istwfk        0    0    1    0    1    1
+           istwfk        0    0    7    0    3    2
               kpt     -2.50000000E-01 -2.50000000E-01  0.00000000E+00
                       -2.50000000E-01  2.50000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -70,7 +70,7 @@ _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
          kptrlatt        2   -2    2     -2    2    2     -2   -2    2
           kptrlen      2.04340000E+01
-P           mkmem           1
+P           mkmem           6
             natom           2
             nband          25
             ngfft          24      24      24
@@ -158,12 +158,12 @@ P           mkmem           1
  
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 8, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
  
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 6, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 544, }
+dimensions: {natom: 2, nkpt: 6, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 528, }
 cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 4, gwcalctyp: 1, }
@@ -403,7 +403,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
         gwcalctyp           1
-           istwfk        0    0    1    0    1    1
+           istwfk        0    0    7    0    3    2
               kpt     -2.50000000E-01 -2.50000000E-01  0.00000000E+00
                       -2.50000000E-01  2.50000000E-01  0.00000000E+00
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
@@ -414,7 +414,7 @@ data: !SigmaeeData |
                        5.00000000E-01  5.00000000E-01  0.00000000E+00
          kptrlatt        2   -2    2     -2    2    2     -2   -2    2
           kptrlen      2.04340000E+01
-P           mkmem           1
+P           mkmem           6
             natom           2
             nband          25
             ngfft          24      24      24
@@ -587,15 +587,15 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
  
 ================================================================================
  
  Calculation completed.
-.Delivered   0 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.6
+.Delivered   0 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.5  wall=          0.5
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 62 allocations and 62 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 7180 allocations and 7180 deallocations in Fortran
+-   There were 29909 allocations and 29909 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0

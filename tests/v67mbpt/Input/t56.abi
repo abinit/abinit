@@ -3,7 +3,6 @@
 # Calculation of the Self-Energy matrix elements with Analytic Continuation
 #
 
-gwpara      2
 gwcalctyp   1
 
 ecut      12.0
@@ -57,8 +56,6 @@ shiftk
         0.5 0.0 0.5
         0.5 0.5 0.0
 
-istwfk  *1         # This is mandatory in all the GW steps.
-
 # Definition of the SCF procedure
 nstep   500       # Maximal number of SCF cycles
 diemac  12.0
@@ -76,7 +73,7 @@ diemac  12.0
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
-#%% authors = M. Giantomassi
+#%% authors = H. Tsai, M. Giantomassi
 #%% keywords = GW
 #%% description =
 #%%   Calculation of the Self-Energy matrix elements with Analytic Continuation
