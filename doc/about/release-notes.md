@@ -1,18 +1,17 @@
 ## v10.4
 
 Version 10.4, released on May 15, 2025.
-List of changes with respect to version 10.2.
-<!-- Release notes updated on May 5, 2025. -->
+<!-- Release notes updated on May 15, 2025. -->
 
-Many thanks to the contributors to the ABINIT project between
-October 2024 and March 2025.
-<!-- (with some late contributions until XXX 2024). -->
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
 <!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1169, 
 EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had alreacy been included in v10.2,
 and EXCEPT MR1160, 1165 and 1168, that will be included in v10.6 .  
 For later releases v10.4, the list of MR is to be completed. -->
+<!-- (with some late contributions until XXX 2024). -->
+
+Many thanks to the contributors to the ABINIT project between October 2024 and April 2025 !
 The list of contributors includes:
 
 G. Allemand, B. Amadon, G. Antonius, M. Azizi, L. Baguet, S. Bandyopadhyay, L. Bastogne, 
@@ -21,7 +20,7 @@ E. Castiel, Q. Delacroix, F. Gendron, G. Geneste, M. Giantomassi,
 O. Gingras, F. Gomez-Ortiz, X. Gonze, R. Gupta,
 I.-M. Lygatsika, O. Mattelaer, M. Mignolet, G. Petretto,
 S. Ponce, S. Rostami, M. Royo, M. Sarraute, A. Sasani, Le Shu, M. Torrent, Hsiaoyi Tsai, 
-V. Vasilchenko, M. Verstraete, Xu He, Huazhang Zhang, J. Zwanziger
+V. Vasilchenko, M. Verstraete, Xu He, Huazhang Zhang, J. Zwanziger.
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -37,12 +36,13 @@ Xavier
 
 ABINIT will be the subject of a forthcoming paper, that will contain the brief description of the new features of ABINIT since 
 the 2020 previous papers [[cite:Gonze2020]] and [[cite:Romero2020]]. This will provide complementary information to the present release notes.
-So, when it will be available, the user is strongly suggested to rely on both these release notes and this paper.
+So, when it will be available, the user is strongly suggested to rely on both the present release notes and this paper.
 
-**A.2** Downgrading of [[ionmov]], in favor of [[geoopt]] and [[moldyn]].
+**A.2** Downgrading of [[ionmov]], in favor of [[geoopt]] and [[moldyn]] 
 
 The variable [[ionmov]] (used to define geometry optimization and molecular dynamics) is now considered to be a developer variable. 
-Two new input variables should be preferred to drive these : [[geoopt]] and [[moldyn]]. For example, [[ionmov]] 2 corresponds now to [[geoopt]] "bfgs" .
+Two new input variables should be preferred to drive these calculatioins: [[geoopt]] and [[moldyn]]. 
+For example, [[ionmov]] 2 corresponds now to [[geoopt]] "bfgs" .
 
 All documentation and tutorials include these changes (there are many input files now using these). 
 For backward compatibility reasons, [[ionmov]] can still be used. 
@@ -71,7 +71,7 @@ By M. Giantomassi and X. Gonze.
 **B.1** Variational Polaron Equations
 
 The variational polaron equation implementation in ABINIT is ready for production.
-It allows one to compute to compute polaron formation energies and associated quantities, in the
+It allows one to compute polaron formation energies and associated quantities, in the
 strong-coupling approximation. See [[cite:Vasilchenko2022]], and a forthcoming Vasilchenko2025 paper (reference to be added when published).
 Activate it using [[optdriver]]=7 and [[eph_task]]=13 (see also [[eph_task]]=-13).
 The corresponding [[tutorial:eph4vpq]] is available.
@@ -102,8 +102,8 @@ It includes the calculation of the current density response to an impulse electr
 Activate it using [[optdriver]]=9. Control the number of time steps using [[ntime]], and the time step value using [[dtele]].
 The corresponding [[tutorial:rttddft]] is available.
 
-Related input variables : [[prtcurrent]], [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]].
-The new input units "fs" and "as" have been introduced (for "femtoseconds" and "attoseconds".
+Related input variables : prtcurrent (TO BE DOCUMENTED), [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]].
+The new input units "fs" and "as" have been introduced (for "femtoseconds" and "attoseconds").
 Related tests : [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial, test:rttddft_1 to test:rttddft_4. (Link to be re-established when the tests will be enabled).
 
 By F. Brieuc (MR1137)
@@ -129,8 +129,8 @@ Related test:v10_104 to test:v10_107 - These tests had not been activated.
 
 Support for [[useylm]]=1 has been implemented in EPH routines.
 
-There is a new [[eph_task]]=18 to compute e-ph matrix elements along a k- or q-path. See [[test:eph4zpr_9]]. 
-See also the new input variables [[eph_path_brange]], [[eph_fix_korq]], and [[eph_fix_wavevec]].
+There is a new [[eph_task]]=18 to compute e-ph matrix elements along a k- or q-path. See [[test:eph4zpr_9]] 
+as well as the new input variables [[eph_path_brange]], [[eph_fix_korq]], and [[eph_fix_wavevec]].
 
 By G. Allemand, R. Gupta, M. Giantomassi, M. Verstraete (MR1156, 1162, 1102)
 
@@ -149,9 +149,10 @@ The following new input variables control this functionality: [[efield2@multibin
 [[efield_gmean@multibinit]], [[efield_gvel@multibinit]], [[efield_type@multibinit]], [[efield_phase@multibinit]], [[efield_phase2@multibinit]], [[efield_sigma@multibinit]], and [[efield_background@multibinit]]. 
 
 There have been also several bug Fixes:
+
 * Symmetry-Equivalent Term Completeness: Corrected an issue where the number of symmetry-equivalent terms was incomplete. 
 Dipole-Dipole Interaction Box Consistency: Resolved an inconsistency between the dipole-dipole interaction box and the simulation box when distances in the DDB exceeded the simulation box dimensions.
-* Stress Correction Term: Fixed an error in the stress correction term. (Contribution by Louis Bastogne)
+* Stress Correction Term: Fixed an error in the stress correction term. 
 * Spin Monte Carlo: fix a bug which results in crash in spin Monte Carlo.
 
 The input variables fit_ncoeff_per_cycle and fit_drop_rate have been disabled.
@@ -165,15 +166,16 @@ By Xu He, Louis Bastogne, Alireza Sasani, Fernando Gomez-Ortiz, Huazhang Zhang, 
 
 New molecular dynamics algorithms
 
-* A new Langevin algorithm, [[moldyn]]="nvt_langevin" ([[ionmov]]=16), is now available for molecular dynamics. It was originally used for PIMD simulations ([[imgmov]]=9) and had been well tested. "nvt_langevin" directly calls the PIMD algorithm, automatically setting [[nimage]]=1.
-* A new molecular dynamics algorithm, [[moldyn]]="npt_langevin", is introduced for use only with [[optcell]]=2, incorporating friction coefficient for the thermostat ([[friction]]) and of the barostat ([[frictionbar]]).
+* A new Langevin algorithm, [[moldyn]]="nvt_langevin" ([[ionmov]]=16), is now available for molecular dynamics. It was originally used for PIMD simulations ([[imgmov]]=9). "nvt_langevin" directly calls the PIMD algorithm, automatically setting [[nimage]]=1.
+* A new molecular dynamics algorithm, [[moldyn]]="npt_langevin", is introduced for use only with [[optcell]]=2, incorporating friction coefficient for the thermostat ([[friction]]) and for the barostat ([[frictionbar]]).
 Since both algorithms are non-deterministic, the restart of a molecular dynamics run controlled by [[restartxf]] is done only by reading the _HIST.nc file, bypassing the prediction algorithms.
 
 These algorithms are tested in [[test:v10_20]] and [[test:v10_21]].
 
 New features in the _HIST.nc file
 
-* The output file _HIST.nc now includes the evolution of [[vel_cell]] (the VELocity of the CELL parameters). Previously, this variable was only included in _HIST.nc file for PIMD simulations ([[imgmov]]!=0).
+* The output file _HIST.nc now includes the evolution of [[vel_cell]] (the VELocity of the CELL parameters). 
+Previously, this variable was only included in _HIST.nc file for PIMD simulations (non-zero [[imgmov]]).
 * The Number of Degrees Of Freedom (ndof) is now printed as a non-evolving integer scalar in the _HIST.nc file. 
 Previously, it was not possible to determine the relationship between the kinetic energy and ionic temperature only from the _HIST.nc file. 
 Post-processing tools may include this change, computing the ionic temperature as: T = 2Ek/ndof. 
@@ -186,7 +188,6 @@ PIMD changes
 * The friction coefficient for the PIMD langevin algorithm has been switched from the [[vis]] input variable to the [[friction]] input variable.
 * In the NPT Langevin algorithm, atomic velocities were previously expressed in reduced coordinates, leading to incorrect kinetic energy values the _HIST.nc file. 
 This issue has now been corrected.
-* Number of Degrees Of Freedom (ndof) associated with the PIMD algorithms (imgmov) is now also printed as a non-evolving integer scalar in the _HIST.nc file.
 
 By Augustin Blanchet, Romuald Béjaud, Fabien Brieuc, Grégory Geneste (MR1085) - See also point A.2 .
 
@@ -194,10 +195,10 @@ By Augustin Blanchet, Romuald Béjaud, Fabien Brieuc, Grégory Geneste (MR1085) 
 **B.6** Progresses in Dynamical Mean Field Theory (DMFT)
 
 * There has been a massive optimization of the code, as well as a cleaning.
-* New functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file...)
+* New functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file...) IS IT POSSIBLE TO COMPLETE THE LIST OF NEW FUNCTIONALITIES ?
 * One can run dmft susceptibility with correlated and non correlated atoms.
 * A new option to run DFT+DMFT has been added : one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
-* Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (though not yet tested neither documented)
+* Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (though not yet tested neither documented - THIS IS TO BE CLARIFIED)
 * Two extra components for the energy are printed.
 
 STILL TO BE DONE : tests and documentation of the input variables dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
@@ -220,10 +221,10 @@ By M. Torrent (MR1099)
 
 **B.8** Orbital magnetization, chemical shielding, and electric field gradient : mGGA, abipy integration, GPU.
 
-* The mGGA has been implemented for the DDK DFPT perturbation, and the computation of the orbital magnetization has been tested with R2SCAN, both with and without spinors.
+* The mGGA has been implemented for the DDK DFPT perturbation, enabling mGGA calculations of the orbital magnetization, that has been tested with R2SCAN, both with and without spinors.
 * ZORA terms coupling electron spin to nuclear magnetic dipole moments are now computed. This accomplishes accurate chemical shielding calculations in the presence of significant relativistic effects.
 * Orbital magnetism and electric field gradient have been added to the GSR netcdf file. Together with previous ORBMAG.nc additions, this completes abinit work for integration with abipy developments. 
-* GPU porting : DDK and orbital magnetism response with nuclear dipole moment and nspinor 2 are available.
+* GPU porting : DDK and orbital magnetism response with nuclear dipole moment and [[nspinor]]= 2 are available.
 
 See [[test:v10_41]], [[test:v10_42]] and [[test:gpu_omp_31]].
 
@@ -241,9 +242,9 @@ In the present release 10.4, DMFT and mGGA have been ported to GPU, also using O
 Bugs have been fixed in the previous implementations, slowdowns have been eliminated, and some documentation has been added.
 The implementation is working with compiler NVHPC 24.9 openmpi (in addition to NVHPC 23.9).
 
-The new input variable [[gpu_thread_limit]] has been introduced, allowing to avoid to use a high number of threads in some OpenMP regions of the code (NOT TESTED)
+The new input variable [[gpu_thread_limit]] has been introduced, allowing to avoid to use a high number of threads in some OpenMP regions of the code (NOT TESTED).
 
-Numerous new tests are available, [[test:gpu_omp_30]] to [[test:gpu_omp_46]], including checks for PAW and Norm-conserving formalism and nspden 4.
+Numerous new tests are available, [[test:gpu_omp_30]] to [[test:gpu_omp_46]], including checks for PAW and norm-conserving formalism and nspden 4.
 Also, [[test:gpu_06]] has been added for GPU+PAW+non-collinear magnetism.
 
 See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]]=2 for the OpenMP capabilities.
@@ -272,7 +273,7 @@ The optional variable [[znucl@atdep]] has been added so that it is included in t
 
 See [[test:atdep_05]], [[test:atdep_05]], [[test:atdep_38]]-[[test:atdep_40]].
 
-By G. Antonius and F. Bottin (MR 1105, 1112, 1113, 1117, 1145, 1155)
+By G. Antonius with some contribution by F. Bottin (MR 1105, 1112, 1113, 1117, 1145, 1155)
 
 
 **B.11** Variable cell NEB 
@@ -325,7 +326,7 @@ We have introduced two new native thermal xc functionals:
 * [[ixc]] = 60: KDT16 (GGA based) [[cite:Karasiev2018]].
 
 These functionals are not compatible with spin-polarized calculations yet. The documentation includes them, as well as a warning while using LibXC thermal functionals.
-The already implemented Ichimaru thermal lda functional ([[ixc]]=50) now sets xc entropy the same way as KSDT and KDT16 functionals.
+The already implemented Ichimaru thermal LDA functional ([[ixc]]=50) now sets xc entropy the same way as KSDT and KDT16 functionals.
 
 The extfpmd now works with [[occopt]] != 3, by setting the el_temp in the initialization (but still only with metallic occupations).
 
@@ -349,30 +350,26 @@ The timing in chebfi has been corrected.
 By L. Baguet (MR1103) and M. Torrent (MR1098)
 
 
-**B.16** Abipy : Automated computation of luminescence spectra.
+**B.16** Abipy : Automated computation of luminescence spectra
 
-A set of Python modules integrated into the AbiPy framework now facilitates the automated computation of phonon-resolved luminescence spectra for defects in in-
-organic solids.  The workflow automates key steps in a classical computational process, from the initial ∆SCF DFT cal-
-culations with constrained occupations to simulate the excited state, to the generation of defect phonon modes
-in large supercells, and finally the calculation of luminescence spectra based on Huang-Rhys theory, using
-the generating function formalism.
+A set of Python modules integrated into the AbiPy framework now facilitates the automated computation of phonon-resolved luminescence spectra for defects in inorganic solids.  
+The workflow automates key steps in a classical computational process, from the initial ∆SCF DFT calculations with constrained occupations to simulate the excited state, 
+to the generation of defect phonon modes in large supercells, and finally the calculation of luminescence spectra based on Huang-Rhys theory, using the generating function formalism.
 
-The workflow is available in the GitHub abipy repo. See for example https://abinit.github.io/abipy/flow_gallery/run_lumi_Eu_doped_SLA.html, 
-and https://abinit.github.io/abipy/flow_gallery/run_lumi_NV_center.html.
+The workflow is available in the GitHub abipy repo. 
+See for example <https://abinit.github.io/abipy/flow_gallery/run_lumi_Eu_doped_SLA.html>, 
+and <https://abinit.github.io/abipy/flow_gallery/run_lumi_NV_center.html>.
 
 By J. Bouquiaux, with help from M. Giantomassi (see the forthcoming ABINIT2025 paper and a forthcoming JOSS paper).
 
 
 **B.17** Abipy : Automated computation of thermal expansion (volumetric as well as anisotropic)
 
-Recent developments in AbiPy have introduced Python modules and workflows designed to enhance the
-efficiency and applicability of the Quasi-Harmonic Approximation (QHA) for materials with diverse crystallo-
-graphic symmetries. These advancements focus on optimizing the computation of thermal expansion by inte-
-grating methods such as the Zero Static Internal Stress Approximation (ZSISA) and its volume-constrained vari-
-ant, v-ZSISA.
+Abipy workflows for thermal expansion calculations are available, within the Quasi-Harmonic Approximation (QHA) for materials with diverse crystallographic symmetries,
+with efficient Zero Static Internal Stress Approximation (ZSISA) and its volume-constrained variant, v-ZSISA. 
 
 The workflow is available in the Github abipy repo. See for example
-https://abinit.github.io/abipy/flow_gallery/run_qha_vzsisa.html .
+<https://abinit.github.io/abipy/flow_gallery/run_qha_vzsisa.html> .
 
 By S. Rostami, with help from M. Giantomassi and X. Gonze (see forthcoming ABINIT2025 paper).
 
@@ -475,8 +472,8 @@ By J. Boust (MR1152)
 
 **D.2** Improvements and bug fixes in the implementation of [[cprj_in_memory]]
 
-* Fixed a  memory issue in xg_tools for systems with high number of plane waves (solve the problem presented in merge !1058 (merged))
-* Some mpi communications outside the diago were too long for systems with nsppol=2, now it's fine
+* Fixed a  memory issue in xg_tools for systems with high number of plane waves (solve the problem presented in merge !1058 (merged)).
+* Some MPI communications outside the diago were too long for systems with [[nsppol]]=2, now it's fine.
 
 As a consequence of the first point, xg_tools now uses OpenMP "collapse" directive when appropriate (as discussed with @torrent).
 
@@ -505,7 +502,8 @@ By L. Baguet (MR1122)
 By L. Baguet (MR1122)
 
 
-**D.5** Math operation beautification (from Abidev24 Hackathon)
+**D.5** Math operation beautification (from Abidev24 Hackathon).
+
 The goal was mainly to improve the readability of the code through the use of Fortran intrinsic math functions and vectorization capabilities.
 
 By M. Mignolet, F. Gomez-Ortiz and I. Lygatsika (MR1083)
@@ -535,7 +533,7 @@ By G. Antonius (MR1132).
 
 **D.8** Spinat check
 
-Reestablish the test on spinat and update input and ref files [[test:v5_16]]
+Reestablish the test on [[spinat]] and update input and ref files [[test:v5_16]]
 
 By Le Shu (MR 1093)
 
