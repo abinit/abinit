@@ -16,8 +16,7 @@ optdriver    4        # Self-Energy calculation
 getwfk_filepath "./t54o_DS1_WFK"
 getscr_filepath "./t55o_SCR"
 nband       25
-nomegasi    10        # No. of points for \Sigma(i\omega) sampled along the imaginary axis
-omegasimax  40.0 eV
+nomegasi    -10       # Using minimax mesh
 
 nkptgw  2
 kptgw
