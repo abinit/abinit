@@ -43,7 +43,7 @@ module m_optic_tools
  use m_ebands
 
  use m_numeric_tools,   only : c2r
- use m_io_tools,        only : open_file
+ use m_io_tools,        only : flush_unit, open_file
  use m_crystal,         only : crystal_t
 
  implicit none
@@ -686,6 +686,12 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
 
 ! *********************************************************************
 
+!DEBUG
+!write(std_out,*)' nlinopt : enter '
+!write(std_out,*)' nlinopt : tol=',tol
+!call flush_unit(std_out)
+!ENDDEBUG
+
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
  mband = ks_ebands%mband
 
@@ -1164,6 +1170,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                    a211=zero
                  end if ! if .not.do_antiresonant
                end if
+
                t1=wln-wnm
                if (abs(t1).gt.tol) then
                  b131=b131/t1
@@ -1473,18 +1480,22 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                    a133=zero
                  end if ! .not.do_antiresonant
                end if
+
                t1=wnm-wml
                if (abs(t1).gt.tol) then
                  b123=b123/t1
                else
                  b123=zero
                end if
-               t2=(wml+wmn)
-               if (abs(t2).gt.tol) then
-                 a133=a133/t2
-               else
-                 a133=zero
-               end if
+
+               if (.not.do_antiresonant) then
+                 t2=(wml+wmn)
+                 if (abs(t2).gt.tol) then
+                   a133=a133/t2
+                 else
+                   a133=zero
+                 end if
+               end if ! .not.do_antiresonant
                b11=b11+2._dp*b113
                b12_13=b12_13+b123-b133
                b21_22=b21_22-b213+b223
