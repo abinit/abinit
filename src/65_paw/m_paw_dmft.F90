@@ -342,6 +342,9 @@ MODULE m_paw_dmft
   integer :: ireadself
   ! Internal flag to indicate if an input self file must be read
 
+  integer :: kptopt
+  ! Option to generate kpts
+
   integer :: lchipsiortho
   ! Internal flag
   ! =0 <Chi|Psi> is not orthonormalized
@@ -1077,6 +1080,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%u_for_s  = 4.1_dp
  paw_dmft%j_for_s  = 0.5_dp
 
+ paw_dmft%kptopt = dtset%kptopt
+
 !=======================
 !==  Choose solver
 !=======================
@@ -1170,9 +1175,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==============================
 
  paw_dmft%wtk => dtset%wtk(:)
- if (dtset%iscf < 0) paw_dmft%wtk(:) = one / dble(nkpt)
+ if (dtset%iscf < 0 .and. dtset%kptopt < 0) paw_dmft%wtk(:) = one / dble(nkpt)
  sumwtk = sum(paw_dmft%wtk(1:nkpt))
- if (abs(sumwtk-one) > tol11 .and. dtset%iscf >= 0) then
+ if (abs(sumwtk-one) > tol11) then
    write(message,'(a,f15.11)') ' sum of k-point is incorrect',sumwtk
    ABI_BUG(message)
  end if
@@ -1678,9 +1683,9 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
      open(unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted')
 #endif
      rewind(grid_unt)
-     write(message,'(3a)') ch10,"  == Read grid frequency in file ",trim(tmpfil)
+     write(message,'(3a)') ch10,"  == Read real frequency grid from file ",trim(tmpfil)
      call wrtout(std_out,message,'COLL')
-     write(message,'(3a,i4)') 'opened file : ',trim(tmpfil),' unit ',grid_unt
+     write(message,'(5x,3a,i4)') 'Opened file : ',trim(tmpfil),' on unit ',grid_unt
      call wrtout(std_out,message,'COLL')
      read(grid_unt,*,iostat=ioerr) ngrid
      ABI_MALLOC(paw_dmft%omega_r,(ngrid))

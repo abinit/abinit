@@ -1,15 +1,14 @@
 # _== Convergency and starting
 # DATASET 1: LDA
 # DATASET 2: LDA+DMFT
-ndtset 3
-jdtset 1 2 3
+ndtset 1
+jdtset 3
 
 getden1 0
 getden  1
 getself3 2
 nline 5
-nline2 10
-nnsclo2 10
+nnsclo2 5
 
 prtvol    4
 pawprtvol 2
@@ -61,7 +60,7 @@ dmft_dc 6
 
 dmft_triqs_wmax 1.0
 
-dmft_solv 6 # Rotationally invariant TRIQS
+dmft_solv 7 # Rotationally invariant TRIQS
 
 # == DFT+U
 usepawu1    0
@@ -75,8 +74,8 @@ jpawu   0.7583333333333333  0.0  0.0  eV
 
 paral_kgb 0
 
-dmftctqmc_meas 100
-dmftctqmc_basis 4
+dmftctqmc_meas 10
+dmftctqmc_basis 3
 dmftqmc_therm 10
 dmftqmc_l 500
 dmft_triqs_off_diag 0
@@ -89,16 +88,18 @@ nbandkss3 20
 kssform3  3
 tolwfr3 1.d-5
 nstep3 5
-kptopt3 -1
-ndivsm3  20
-kptbounds3
-        0.0 0.0 0.0      # Gamma
-        0.0 1/2 0.0      # N
-
+#kptopt3 -1
+#ndivsm3  2
+#kptbounds3
+#        0.0 0.0 0.0      # Gamma
+#        0.0 1/2 0.0      # N
 prtwf 0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "23v.paw, 38sr.paw, 8o.paw"
+
+dmft_triqs_leg_measure 1
+dmft_triqs_nleg 20
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

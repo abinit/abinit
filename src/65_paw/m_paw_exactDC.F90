@@ -160,16 +160,19 @@ CONTAINS  !=====================================================================
    end do ! m
  end do ! m1
 
+ if (maxval(rho_angle(:,:)-abs(rho_angle(:,:))) > tol10) ABI_WARNING("WARNING: the density is negative !")
+ rho_angle(:,:) = abs(rho_angle(:,:))
+
  do ir=1,meshsz
    do j=1,2*ln+1
      do i=1,ln+1
-       rho = rho_angle(i,j) * pawtab%proj2(ir) / (max(pawrad%rad(ir),epsilon(one))**2)
+       rho = rho_angle(i,j) * pawtab%proj2(ir) / max(pawrad%rad(ir)**2,epsilon(one))
        rs1 = (four_pi * rho / three)**(third)
        rs1s(1) = rs1
        call ExchangeLDA(exx(:),vxx(:),rs1s(:),pawtab%lambda,1)
        exc(i,j,ir) = exx(1) * half / pawtab%eps ! convert from Rydberg to Hartree
        vxc(i,j,ir) = vxx(1) * half / pawtab%eps
-       rs1s(1) = one / (max(rs1,epsilon(one)))
+       rs1s(1) = one / max(rs1,epsilon(one))
        call CorrLDA_2(ecc(:),vcc(:),rs1s(:),pawtab%lambda,pawtab%eps,1)
        exc(i,j,ir) = exc(i,j,ir) + ecc(1)*half
        vxc(i,j,ir) = vxc(i,j,ir) + vcc(1)*half
