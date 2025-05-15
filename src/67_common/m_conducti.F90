@@ -1811,6 +1811,7 @@ end subroutine conducti_paw
    end if
    ABI_FREE(oml_emis)
  end if
+ ABI_FREE(typat)
  ABI_FREE(ncor)
  ABI_FREE(lcor)
  ABI_FREE(kappacor)
