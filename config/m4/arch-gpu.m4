@@ -165,9 +165,19 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   abi_gpu_cuda_version_10="unknown"
   abi_gpu_nvtx_v3="unknown"
 
-  # Make use of the CUDA_ROOT environment variable
+  # Make use of the CUDA_ROOT, CUDA_HOME, CUDA_PREFIX, CUDA_PATH and NVHPC_CUDA_HOME
+  # environment variables to find CUDA from user environment
   if test "${abi_gpu_cuda_root}" = ""; then
     abi_gpu_cuda_root="${CUDA_ROOT}"
+  fi
+  if test "${abi_gpu_cuda_root}" = ""; then
+    abi_gpu_cuda_root="${CUDA_HOME}"
+  fi
+  if test "${abi_gpu_cuda_root}" = ""; then
+    abi_gpu_cuda_root="${CUDA_PREFIX}"
+  fi
+  if test "${abi_gpu_cuda_root}" = ""; then
+    abi_gpu_cuda_root="${NVHPC_CUDA_HOME}"
   fi
 
   # Check whether to look for generic files
@@ -200,6 +210,14 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     else
       AC_MSG_RESULT([${NVCC}])
     fi
+
+  fi
+
+  # Populate NVCC C flags with interesting values
+  abi_gpu_nvcc_flags_base="-O3 -Xptxas=-v --use_fast_math --compiler-options -O3,-fPIC -DHAVE_CONFIG_H --forward-unknown-opts"
+
+  # Check whether to look for generic files
+  if test "${abi_gpu_cuda_root}" != ""; then
 
     # Headers
     AC_MSG_CHECKING([for Cuda headers])
@@ -338,6 +356,8 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   AC_MSG_NOTICE([Cuda libs: ${abi_gpu_cuda_libs}])
 
   AC_SUBST(abi_gpu_nvtx_v3)
+  AC_SUBST(NVCC_CFLAGS_ARCH)
+  AC_SUBST(abi_gpu_nvcc_flags_base)
 
 ]) # _ABI_GPU_INIT_CUDA
 
