@@ -861,11 +861,11 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
    write(message,'(2a)') ch10,"  == About to print spectral function"
    call wrtout(std_out,message,'COLL')
    if (option == 4) then
-     tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
+     tmpfil = trim(paw_dmft%filapp)//'_SpFunc-'//trim(char1)
      if (open_file(tmpfil,message,newunit=spf_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
      write(spf_unt,'(3a)') "# This is the total spectral function (DOS).",ch10, &
-                         & "#    Real frequency             Spectral function"
+                         & "#    Real frequency (Ha)        Spectral function"
 
    end if ! option=4
    if (option == 5) then
@@ -873,7 +873,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
      if (open_file(tmpfil,message,newunit=spfkresolved_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
      write(spfkresolved_unt,'(3a)') "# This is the k-resolved spectral function.",ch10, &
-                                & "#  Real frequency (Ha)          Spectral function            ikpt"
+                                & "#  Real frequency (eV)       Spectral function (eV^-1)   ikpt"
      ABI_MALLOC(sf,(nkpt,green%nw))
      sf(:,:) = czero
      do ifreq=1,green%nw
