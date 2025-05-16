@@ -2,9 +2,9 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!!****m* ABINIT/m_CtqmcoffdiagComplexInterface
+!!****m* ABINIT/m_CtqmcoffdiagInterfaceComplex
 !! NAME
-!!  m_CtqmcoffdiagComplexInterface
+!!  m_CtqmcoffdiagInterfaceComplex
 !! 
 !! FUNCTION 
 !!  Manage a ctqmc simulation. 
@@ -21,7 +21,7 @@
 !! SOURCE
 
 #include "defs.h"
-MODULE m_CtqmcoffdiagComplexInterface
+MODULE m_CtqmcoffdiagInterfaceComplex
 USE m_CtqmcoffdiagComplex
 use defs_basis
 
@@ -29,9 +29,9 @@ IMPLICIT NONE
 
 !!***
 
-!!****t* m_CtqmcoffdiagComplexInterface/CtqmcoffdiagComplexInterface
+!!****t* m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex
 !! NAME
-!!  CtqmcoffdiagComplexInterface
+!!  CtqmcoffdiagInterfaceComplex
 !!
 !! FUNCTION
 !!  This structured datatype contains the necessary data
@@ -44,7 +44,7 @@ IMPLICIT NONE
 !!
 !! SOURCE
 
-TYPE CtqmcoffdiagComplexInterface
+TYPE CtqmcoffdiagInterfaceComplex
   TYPE(CtqmcoffdiagComplex) :: Hybrid
   INTEGER :: opt_fk       = 0
   INTEGER :: opt_order    = 0
@@ -55,15 +55,15 @@ TYPE CtqmcoffdiagComplexInterface
   INTEGER :: opt_spectra  = 0
   INTEGER :: opt_noise    = 0
   INTEGER :: opt_gMove    = 0
-END TYPE CtqmcoffdiagComplexInterface
+END TYPE CtqmcoffdiagInterfaceComplex
 !!***
 
 CONTAINS
 !!***
 
-!!****f* ABINIT/m_CtqmcoffdiagComplexInterface/CtqmcoffdiagComplexInterface_init
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_init
 !! NAME
-!!  CtqmcoffdiagComplexInterface_init
+!!  CtqmcoffdiagInterfaceComplex_init
 !!
 !! FUNCTION
 !!  Initialize with permanent parameters
@@ -96,11 +96,11 @@ CONTAINS
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagComplexInterface_init(op,iseed,sweeps,thermalization,&
+SUBROUTINE CtqmcoffdiagInterfaceComplex_init(op,iseed,sweeps,thermalization,&
 &measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag,nspinor)
 
 !Arguments ------------------------------------
-  TYPE(CtqmcoffdiagComplexInterface), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
   INTEGER, OPTIONAL, INTENT(IN) :: MPI_COMM
   INTEGER, INTENT(IN) :: iseed
   DOUBLE PRECISION, INTENT(IN) :: sweeps
@@ -148,12 +148,12 @@ SUBROUTINE CtqmcoffdiagComplexInterface_init(op,iseed,sweeps,thermalization,&
   op%opt_check    = 0
   op%opt_noise    = 0
   op%opt_spectra  = 0
-END SUBROUTINE CtqmcoffdiagComplexInterface_init
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_init
 !!***
 
-!!****f* ABINIT/m_CtqmcoffdiagComplexInterface/CtqmcoffdiagComplexInterface_setOpts
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_setOpts
 !! NAME
-!!  CtqmcoffdiagComplexInterface_setOpts
+!!  CtqmcoffdiagInterfaceComplex_setOpts
 !!
 !! FUNCTION
 !!  Set and save options for many runs
@@ -187,11 +187,11 @@ END SUBROUTINE CtqmcoffdiagComplexInterface_init
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagComplexInterface_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
+SUBROUTINE CtqmcoffdiagInterfaceComplex_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
 & opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
-  TYPE(CtqmcoffdiagComplexInterface), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_histo
@@ -221,12 +221,12 @@ SUBROUTINE CtqmcoffdiagComplexInterface_setOpts(op,opt_Fk,opt_order,opt_histo,op
   IF ( PRESENT(opt_gMove) ) &
     op%opt_gMove = opt_gMove
 
-END SUBROUTINE CtqmcoffdiagComplexInterface_setOpts
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_setOpts
 !!***
 
-!!****f* ABINIT/m_CtqmcoffdiagComplexInterface/CtqmcoffdiagComplexInterface_run
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_run
 !! NAME
-!!  CtqmcoffdiagComplexInterface_run
+!!  CtqmcoffdiagInterfaceComplex_run
 !!
 !! FUNCTION
 !!  run a ctqmc simu and get results
@@ -257,11 +257,11 @@ END SUBROUTINE CtqmcoffdiagComplexInterface_setOpts
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagComplexInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
+SUBROUTINE CtqmcoffdiagInterfaceComplex_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
 &Magmom_spin,Magmom_tot,Iatom,fname) 
 
 !Arguments ------------------------------------
-  TYPE(CtqmcoffdiagComplexInterface), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
   COMPLEX(KIND=8)      , DIMENSION(:,:,:), INTENT(IN ) :: G0omega
   DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(OUT) :: Gtau
   COMPLEX(KIND=8)      , DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
@@ -363,12 +363,12 @@ SUBROUTINE CtqmcoffdiagComplexInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU
   CALL CtqmcoffdiagComplex_printAll(op%Hybrid)
   !CALL CtqmcoffdiagComplex_printQMC(op%Hybrid)
 
-END SUBROUTINE CtqmcoffdiagComplexInterface_run
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_run
 !!***
 
-!!****f* ABINIT/m_CtqmcoffdiagComplexInterface/CtqmcoffdiagComplexInterface_setSweeps
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_setSweeps
 !! NAME
-!!  CtqmcoffdiagComplexInterface_setSweeps
+!!  CtqmcoffdiagInterfaceComplex_setSweeps
 !!
 !! FUNCTION
 !!  change sweeps on the fly
@@ -391,19 +391,19 @@ END SUBROUTINE CtqmcoffdiagComplexInterface_run
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagComplexInterface_setSweeps(op, sweeps)
+SUBROUTINE CtqmcoffdiagInterfaceComplex_setSweeps(op, sweeps)
 
 !Arguments ------------------------------------
-  TYPE(CtqmcoffdiagComplexInterface), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
   DOUBLE PRECISION, INTENT(IN) :: sweeps
 
   CALL CtqmcoffdiagComplex_setSweeps(op%Hybrid,sweeps)
-END SUBROUTINE CtqmcoffdiagComplexInterface_setSweeps
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_setSweeps
 !!***
 
-!!****f* ABINIT/m_CtqmcoffdiagComplexInterface/CtqmcoffdiagComplexInterface_finalize
+!!****f* ABINIT/m_CtqmcoffdiagInterfaceComplex/CtqmcoffdiagInterfaceComplex_finalize
 !! NAME
-!!  CtqmcoffdiagComplexInterface_finalize
+!!  CtqmcoffdiagInterfaceComplex_finalize
 !!
 !! FUNCTION
 !!  Destroy simulation
@@ -425,10 +425,10 @@ END SUBROUTINE CtqmcoffdiagComplexInterface_setSweeps
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagComplexInterface_finalize(op)
+SUBROUTINE CtqmcoffdiagInterfaceComplex_finalize(op)
 
 !Arguments ------------------------------------
-  TYPE(CtqmcoffdiagComplexInterface), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
 
   !IF ( op%Hybrid%init .EQV. .TRUE. ) THEN
 !    CALL CtqmcoffdiagComplex_printAll(op%Hybrid)
@@ -436,8 +436,8 @@ SUBROUTINE CtqmcoffdiagComplexInterface_finalize(op)
     CALL CtqmcoffdiagComplex_destroy(op%Hybrid)
   !END IF
 
-END SUBROUTINE CtqmcoffdiagComplexInterface_finalize
+END SUBROUTINE CtqmcoffdiagInterfaceComplex_finalize
 !!***
 
-END MODULE m_CtqmcoffdiagComplexInterface
+END MODULE m_CtqmcoffdiagInterfaceComplex
 !!***

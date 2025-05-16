@@ -427,10 +427,10 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
      energies_dmft%e_hu => energies_dmft%e_hu_mig(:)
      energies_dmft%e_hu_tot = energies_dmft%e_hu_mig_tot
      energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_tot
-   else if (paw_dmft%dmft_solv == 5 .or. paw_dmft%dmft_solv == 8 .or. &
+   else if (paw_dmft%dmft_solv == 5 .or. paw_dmft%dmft_solv == 8 .or. paw_dmft%dmft_solv == 10 .or.&
       & ((paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) .and. &
       & paw_dmft%dmft_triqs_measure_density_matrix) .and. occ_type /= " lda") then
-     if (paw_dmft%dmft_solv == 8) then
+     if (paw_dmft%dmft_solv == 8 .or. paw_dmft%dmft_solv == 10) then
        write(message,'(2a)') ch10,"Warning, energy is recently computed, not checked"
        call wrtout(std_out,message,'COLL')
      end if

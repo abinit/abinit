@@ -32,7 +32,7 @@ MODULE m_forctqmc
  use m_Ctqmcoffdiag
  use m_CtqmcoffdiagInterface
  use m_CtqmcoffdiagComplex
-! use m_CtqmcoffdiagInterfaceComplex
+ use m_CtqmcoffdiagInterfaceComplex
  use m_data4entropyDMFT
  use m_errors
  use m_GreenHyb
@@ -126,7 +126,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(oper_type) :: energy_level,level_diag
  type(CtqmcInterface) :: hybrid
  type(CtqmcoffdiagInterface) :: hybridoffdiag
-! type(CtqmcoffdiagInterfaceComplex) :: hybridoffdiagComplex 
+ type(CtqmcoffdiagInterfaceComplex) :: hybridoffdiagComplex 
  real(dp) :: umod(2,2)
  complex(dp) :: integral(2,2)
  real(dp), allocatable :: docc(:,:),gtmp(:,:),gtmp_nd(:,:,:),levels_ctqmc(:),vee(:,:,:,:)
@@ -1380,13 +1380,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      if (paw_dmft%dmft_solv == 10) then                                          
        nomega = paw_dmft%dmftqmc_l                                              
-    !   call CtqmcoffdiagInterfaceComplex_init(hybridoffdiagComplex,paw_dmft%dmftqmc_seed,&    
-    !     & paw_dmft%dmftqmc_n,paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_meas,&  
-    !     & nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,std_out,&          
-    !     & paw_dmft%spacecomm,opt_nondiag,paw_dmft%nspinor)                     
+       call CtqmcoffdiagInterfaceComplex_init(hybridoffdiagComplex,paw_dmft%dmftqmc_seed,&    
+         & paw_dmft%dmftqmc_n,paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_meas,&  
+         & nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,std_out,&          
+         & paw_dmft%spacecomm,opt_nondiag,paw_dmft%nspinor)                     
        !    options                                                             
        ! =================================================================      
-       call CtqmcoffdiagInterface_setOpts(hybridoffdiag,opt_Fk=opt_fk, &        
+       call CtqmcoffdiagInterfaceComplex_setOpts(hybridoffdiagComplex,opt_Fk=opt_fk, &        
            & opt_order    = paw_dmft%dmftctqmc_order, &                         
            & opt_histo    = paw_dmft%dmftctqmc_localprop, &                     
            & opt_movie    = paw_dmft%dmftctqmc_mov, &                           
@@ -1498,12 +1498,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
         ! =================================================================                                                          
       else if (paw_dmft%dmft_solv == 10) then                                                                                         
         ! =================================================================                                                          
-                                                                                                                                     
-        call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd(:,:,:),&                          
+        
+        ABI_MALLOC(docc,(nflavor,nflavor))
+        docc(:,:) = zero
+                                                                                                                
+        call CtqmcoffdiagInterfaceComplex_run(hybridoffdiagComplex,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd(:,:,:),&                          
            & Gw=gw_tmp_nd(:,:,:),D=doccsum,E=green%ecorr_qmc(iatom),Noise=noise,matU=dble(udens_atoms(iatom)%mat(:,:,1)),&           
            & Docc=docc(:,:),opt_levels=levels_ctqmc(:),hybri_limit=hybri_limit(:,:),Magmom_orb=REAL(magmom_orb(iatom)%value),&       
            & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)  
-
+ 
+        ABI_FREE(docc)        
        ! =================================================================
        !    CTQMC run TRIQS
        ! =================================================================
@@ -1566,6 +1570,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    if (paw_dmft%dmft_solv == 8) then
      call CtqmcoffdiagInterface_finalize(hybridoffdiag)
    end if
+   if (paw_dmft%dmft_solv == 10) then                                  
+     call CtqmcoffdiagInterfaceComplex_finalize(hybridoffdiagComplex)               
+   end if                                                             
    write(message,'(a,2x,a)') ch10," == Destroy CTQMC done"
    call wrtout(std_out,message,'COLL')
    ABI_FREE(hybri_limit)
@@ -2526,7 +2533,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
       write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
       close(unt)
     endif
-    if(paw_dmft%dmft_solv==8) then
+    if(paw_dmft%dmft_solv==8 .or. paw_dmft%dmft_solv == 10) then
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_unsym_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
         ABI_ERROR(message)
