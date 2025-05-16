@@ -22574,9 +22574,11 @@ Variable(
     characteristics=['[[MAGNETIC_FIELD]]'],
     added_in_version="before_v9",
     text=r"""
-Give the value of the Zeeman field, $H$, acting on the spinorial wavefunctions.
-Note that Tesla are admitted. This sets the magnitude of $\mu_0H$, in Tesla,
-with H in Amperes/metre.
+Give the value of the Zeeman field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part).
+As usual, the default is atomic units.
+
+Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
+Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
 """,
 ),
 
