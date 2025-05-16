@@ -571,6 +571,17 @@ test "${XPPFLAGS}" = "" && \
 test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
   FPPFLAGS="${FPPFLAGS_DEBUG} ${FPPFLAGS_OPTIM} ${FPPFLAGS_HINTS} ${FPPFLAGS_EXTRA}"
 
+# Final adjustments for NVCC
+if test "${abi_gpu_flavor}" == "cuda-double" -o "${abi_gpu_flavor}" == "cuda-simple"; then
+  if test "${NVCC_CFLAGS_ARCH}" = "" -a "$GPU_ARCH" != ""; then
+    NVCC_CFLAGS_ARCH="-arch=sm_${GPU_ARCH}"
+  fi
+
+  test "${NVCC_CFLAGS}" = "" && \
+    NVCC_CFLAGS="${NVCC_CFLAGS_ARCH} ${abi_gpu_nvcc_flags_base} ${NVCC_CFLAGS_EXTRA}"
+fi
+
+
 # Determine Fortran link flags (FCLIBS)
 # This is needed after FCFLAGS has been set as some compilers have extra
 # libraries linked due to optimizations levels or OpenMP

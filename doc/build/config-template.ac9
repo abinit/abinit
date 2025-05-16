@@ -650,7 +650,11 @@
 
 # Forced nVidia C compiler flags (should not be set)
 #
-#NVCC_CFLAGS="-arch=sm_13"
+#NVCC_CFLAGS="-O3 -Xptxas=-v --use_fast_math --compiler-options -O3,-fPIC -DHAVE_CONFIG_H --forward-unknown-opts"
+
+# Forced nVidia C compiler flags specific to arch (should not be set)
+#
+#NVCC_CFLAGS_ARCH="-arch=sm_13"
 
 # Forced nVidia linker flags (should not be set)
 #
