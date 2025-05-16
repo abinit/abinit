@@ -1902,7 +1902,7 @@ end subroutine add_matlu
 
  if (present(nsppol_imp)) nsppolimp = nsppol_imp
  if (present(checkstop)) checkstop_in = checkstop
- if (present(test)) blockdiag = (test == 8)
+ if (present(test)) blockdiag = (test == 8 .or. test == 10)
  if (present(opt_real)) optreal = opt_real
 
  call zero_matlu(matlu_diag(:),natom)
