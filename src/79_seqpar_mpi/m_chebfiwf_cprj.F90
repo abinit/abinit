@@ -40,13 +40,10 @@ module m_chebfiwf_cprj
  use m_xg
  use m_xg_nonlop
  use m_chebfi2_cprj
- use m_dtset
-
  use m_chebfi
  use m_invovl
 
  use m_dtset,       only : dataset_type
-
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_getghc,      only : multithreaded_getghc

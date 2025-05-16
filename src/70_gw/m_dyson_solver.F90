@@ -373,12 +373,6 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
 
        Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
 
-       !Sr%degw(jb,ik_ibz,spin) = Sr%ze0(jb,ik_ibz,spin) * &
-       !  (Sr%sigxme(jb,ik_ibz,spin) + Sr%sigcmee0(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin) + &
-       !   Sr%hhartree(jb,jb,ik_ibz,spin))
-
-       !Sr%egw(jb,ik_ibz,spin) = Sr%e0(jb,ik_ibz,spin) + Sr%degw(jb,ik_ibz,spin)
-
        ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
        Sr%sigmee(jb,ik_ibz,spin) = &
          Sr%sigxme(jb,ik_ibz,spin)+Sr%sigcmee0(jb,ik_ibz,spin)+Sr%degw(jb,ik_ibz,spin)*Sr%dsigmee0(jb,ik_ibz,spin)
