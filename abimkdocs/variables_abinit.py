@@ -25649,7 +25649,7 @@ Variable(
     abivarname="scr_wrange",
     varset="gw",
     vartype="integer",
-    topics=['GW_expert'],
+    topics=['Susceptibility_useful'],
     dimensions=[2],
     defaultval=[0, 0],
     mnemonics="SCReening frequency RANGE",

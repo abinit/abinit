@@ -2714,7 +2714,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        end if
      end do
 
-     if (wfd%my_rank == master) call Sr%write_sigma_results(ikcalc, ik_ibz, Sigp, ks_ebands)
+     if (wfd%my_rank == master) call Sr%write_results(ikcalc, ik_ibz, Sigp, ks_ebands)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson

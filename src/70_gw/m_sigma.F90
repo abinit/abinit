@@ -4,8 +4,7 @@
 !!
 !! FUNCTION
 !!  This module provides the definition of the sigma_t data type
-!!  used to store results of the GW calculation as well as as
-!!  methods bound to the object.
+!!  used to store results of the GW calculation.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2008-2025 ABINIT group (MG, FB, GMR, VO, LR, RWG)
@@ -55,8 +54,7 @@ module m_sigma
 !! sigma_t
 !!
 !! FUNCTION
-!! For the GW part of ABINIT, the sigma_t structured datatype
-!! gather the results of a sigma calculation.
+!! The sigma_t structured datatype gathers the results of a GW calculation.
 !!
 !! TODO
 !!   ragged arrays (nk,nsppol) --> values ?
@@ -89,11 +87,6 @@ module m_sigma
   integer,allocatable :: minbnd(:,:)
   ! (nkptgw, nsppol)
   ! Min band index considered in GW for this k-point.
-
-  !real(dp),allocatable :: ame(:,:,:)
-  ! (nbnds, nkibz, nomega))
-  ! Diagonal matrix elements of the spectral function.
-  ! Commented out, it can be calculated from the other quantities
 
   real(dp),allocatable :: degwgap(:,:)
   ! (nkibz, nsppol)
@@ -221,10 +214,10 @@ module m_sigma
 
  contains
    procedure :: init => sigma_init
-    ! Initialize the object
+    ! Initialize the object.
 
    procedure :: free => sigma_free
-    ! Deallocate memory
+    ! Deallocate memory.
 
    procedure :: get_exene => sigma_get_exene
     ! Compute exchange energy.
@@ -232,27 +225,25 @@ module m_sigma
     procedure :: get_excene => sigma_get_excene
     ! Compute exchange-correlation MBB (Nat. Orb. Funct. Approx.) energy.
 
-    procedure :: get_haene => mels_get_haene
+    procedure :: get_haene => sigma_get_haene
      ! Compute hartree energy.
 
-    procedure :: get_kiene => mels_get_kiene
+    procedure :: get_kiene => sigma_get_kiene
      ! Compute kinetic energy.
 
     procedure :: ncwrite => sigma_ncwrite
      ! Write data in netcdf format.
 
-    procedure :: write_sigma_results => write_sigma_results
-    procedure :: print_Sigma_perturbative => print_Sigma_perturbative
-    procedure :: print_Sigma_QPSC => print_Sigma_QPSC
-
+    procedure :: write_results => sigma_write_results
+    procedure :: print_perturbative => sigma_print_pertubative
+    procedure :: print_qpsc => sigma_print_qpsc
  end type sigma_t
 
- public  :: write_sigma_header
  public  :: sigma_distribute_bks
+ public ::  write_sigma_header
 !!***
 
-
-CONTAINS  !========================================================================================
+contains  !========================================================================================
 !!***
 
 !!****f* m_sigma/write_sigma_header
@@ -286,7 +277,7 @@ subroutine write_sigma_header(Sigp, epsm1, Cryst, Kmesh, Qmesh)
 
 !Local variables-------------------------------
 !scalars
- integer :: gwcalctyp,mod10
+ integer :: gwcalctyp, mod10
  character(len=500) :: msg
  integer :: units(2)
 ! *************************************************************************
@@ -315,7 +306,7 @@ subroutine write_sigma_header(Sigp, epsm1, Cryst, Kmesh, Qmesh)
  CASE (9)
    write(msg,'(a)')' MODEL GW without PLASMON POLE MODEL'
  CASE DEFAULT
-   write(msg,'(a,i3)')' Wrong value for Sigp%gwcalctyp = ',Sigp%gwcalctyp
+   write(msg,'(a,i0)')' Wrong value for Sigp%gwcalctyp = ',Sigp%gwcalctyp
    ABI_BUG(msg)
  END SELECT
  call wrtout(units, msg)
@@ -409,9 +400,9 @@ end subroutine write_sigma_header
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigma/write_sigma_results
+!!****f* m_sigma/sigma_write_results
 !! NAME
-!! write_sigma_results
+!! sigma_write_results
 !!
 !! FUNCTION
 !!  Write the final results of the GW calculation.
@@ -427,7 +418,7 @@ end subroutine write_sigma_header
 !!
 !! SOURCE
 
-subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
+subroutine sigma_write_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
 
 !Arguments ------------------------------------
 !scalars
@@ -499,8 +490,8 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp >= 10) then
-       call sigma%print_Sigma_QPSC(ikibz,ib,is,ks_ebands,unit=dev_null, ydoc=ydoc)
-       call sigma%print_Sigma_QPSC(ikibz,ib,is,ks_ebands,unit=std_out,prtvol=1)
+       call sigma%print_QPSC(ikibz, ib, is, ks_ebands, units=[dev_null], ydoc=ydoc)
+       call sigma%print_QPSC(ikibz, ib, is, ks_ebands, units=[std_out], prtvol=1)
 
        write(unt_gwdiag,'(i6,3f9.4)')                                 &
         ib,                                                           &
@@ -511,12 +502,12 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
      else
        ! If not ppmodel, write out also the imaginary part in ab_out
        SELECT CASE(mod10)
-       CASE(1,2)
-         call sigma%print_Sigma_perturbative(ikibz,ib,is,unit=dev_null,ydoc=ydoc,prtvol=1)
+       CASE (1,2)
+         call sigma%print_perturbative(ikibz, ib, is, units=[dev_null], ydoc=ydoc, prtvol=1)
        CASE DEFAULT
-         call sigma%print_Sigma_perturbative(ikibz,ib,is,unit=dev_null,ydoc=ydoc)
+         call sigma%print_perturbative(ikibz, ib, is, units=[dev_null], ydoc=ydoc)
        END SELECT
-       call sigma%print_Sigma_perturbative(ikibz,ib,is,unit=std_out,prtvol=1)
+       call sigma%print_perturbative(ikibz, ib, is, units=[std_out], prtvol=1)
      end if
 
      write(unt_gw,'(i6,3f9.4)')         &
@@ -548,7 +539,7 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
       gw_spectral_function(sigma,io,ib,ikibz,is),&
       ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is))
    end do
-   !
+
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      write(unt_sgr,'("# ik, ib",2i5)')ikibz,ib
      do io=1,sigma%nomega4sd
@@ -558,6 +549,7 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
          AIMAG(sigma%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV
      end do
    end do
+
    !MRM
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      write(unt_sigc,'("# ik, ib",2i5)')ikibz,ib
@@ -568,7 +560,7 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
          AIMAG(sigma%sigcme4sd(ib,ikibz,io,is)) *Ha_eV
      end do
    end do
-   !
+
    if (mod10 == 1) then
      ! For AC, write sigma matrix elements along the imaginary axis
      do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
@@ -584,7 +576,7 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
 
  end do !is
 
-end subroutine write_sigma_results
+end subroutine sigma_write_results
 !!***
 
 !----------------------------------------------------------------------
@@ -608,7 +600,6 @@ real(dp) pure function gw_spectral_function(sigma, io, ib, ikibz, spin) result(a
 !Arguments ------------------------------------
  class(sigma_t),intent(in) :: sigma
  integer,intent(in) :: io,ib,ikibz,spin
-
 ! *********************************************************************
 
  aw = one / pi * abs(aimag(sigma%sigcme(ib,ikibz,io,spin))) &
@@ -620,9 +611,9 @@ end function gw_spectral_function
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigma/print_Sigma_perturbative
+!!****f* m_sigma/sigma_print_pertubative
 !! NAME
-!! print_Sigma_perturbative
+!! sigma_print_pertubative
 !!
 !! FUNCTION
 !!  Write the results of the GW calculation done with the perturbative approach
@@ -633,32 +624,41 @@ end function gw_spectral_function
 !!
 !! SOURCE
 
-subroutine print_Sigma_perturbative(sigma, ik_ibz, iband, isp, unit, prtvol, mode_paral, witheader, ydoc)
+subroutine sigma_print_pertubative(sigma, ik_ibz, band, spin, units, &
+                                   prtvol, with_header, ydoc) ! Optional
 
 !Arguments ------------------------------------
 !scalars
  class(sigma_t),intent(in) :: sigma
- integer,intent(in) :: iband,ik_ibz,isp
- integer,optional,intent(in) :: prtvol,unit
- character(len=*),optional,intent(in) :: mode_paral
- logical,optional,intent(in) :: witheader
+ integer,intent(in) :: band,ik_ibz,spin
+ integer,optional,intent(in) :: prtvol,units(:)
+ logical,optional,intent(in) :: with_header
  type(yamldoc_t),intent(inout),optional :: ydoc
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,verbose
- character(len=4) :: my_mode
+ integer :: verbose
  character(len=500) :: msg
-
 ! *********************************************************************
 
- my_unt =std_out; if (PRESENT(unit      )) my_unt =unit
- verbose=0      ; if (PRESENT(prtvol    )) verbose=prtvol
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode=mode_paral
+ verbose=0      ; if (PRESENT(prtvol)) verbose=prtvol
 
- if (PRESENT(witheader)) then
-   if (witheader) then
-     call wrtout(my_unt,' Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E ',my_mode)
+ !if (with_notations) then
+ !call wrtout(units, "(a)")" Notations:"
+ !call wrtout(units, "(a)")"E0 is the KS eigenenergy")
+ !call wrtout(units, "(a)")"VxcDFT gives the KS exchange-correlation potential expectation value")
+ !call wrtout(units, "(a)")"SigX gives the exchange contribution to the self-energy")
+ !call wrtout(units, "(a)")"SigC(E0) gives the correlation contribution to the self-energy, evaluated at the KS eigenenergy")
+ !call wrtout(units, "(a)")"Z is the renormalisation factor")
+ !call wrtout(units, "(a)")"dSigC/dE is the energy derivative of SigC with respect to the energy")
+ !call wrtout(units, "(a)")"SigC(E) gives the correlation contribution to the self-energy, evaluated at the GW energy")
+ !call wrtout(units, "(a)")"E-E0 is the difference between GW energy and KS eigenenergy")
+ !call wrtout(units, "(a)")"E is the final GW quasiparticle energy")
+ !end if
+
+ if (PRESENT(with_header)) then
+   if (with_header) then
+     call wrtout(units,' Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E ')
    end if
  end if
 
@@ -666,137 +666,133 @@ subroutine print_Sigma_perturbative(sigma, ik_ibz, iband, isp, unit, prtvol, mod
 
    if (sigma%nsig_ab/=1) then
      write(msg,'(i5,9f8.3)')                       &
-           iband,                                  &
-           sigma%e0          (iband,ik_ibz,1)*Ha_eV,  &
-           SUM(sigma%vxcme   (iband,ik_ibz,:))*Ha_eV, &
-           SUM(sigma%sigxme  (iband,ik_ibz,:))*Ha_eV, &
-      REAL(SUM(sigma%sigcmee0(iband,ik_ibz,:)))*Ha_eV,&
-      REAL(sigma%ze0         (iband,ik_ibz,1)),       &
-      REAL(SUM(sigma%dsigmee0(iband,ik_ibz,:))),      &
-      REAL(SUM(sigma%sigmee  (iband,ik_ibz,:)))*Ha_eV,&
-      REAL(sigma%degw        (iband,ik_ibz,1))*Ha_eV, &
-      REAL(sigma%egw         (iband,ik_ibz,1))*Ha_eV
-     call wrtout(my_unt,msg,my_mode)
+           band,                                  &
+           sigma%e0          (band,ik_ibz,1)*Ha_eV,  &
+           SUM(sigma%vxcme   (band,ik_ibz,:))*Ha_eV, &
+           SUM(sigma%sigxme  (band,ik_ibz,:))*Ha_eV, &
+      REAL(SUM(sigma%sigcmee0(band,ik_ibz,:)))*Ha_eV,&
+      REAL(sigma%ze0         (band,ik_ibz,1)),       &
+      REAL(SUM(sigma%dsigmee0(band,ik_ibz,:))),      &
+      REAL(SUM(sigma%sigmee  (band,ik_ibz,:)))*Ha_eV,&
+      REAL(sigma%degw        (band,ik_ibz,1))*Ha_eV, &
+      REAL(sigma%egw         (band,ik_ibz,1))*Ha_eV
+     call wrtout(units, msg)
      if (present(ydoc)) call ydoc%add_tabular_line(msg)
      if (verbose/=0) then
        write(msg,'(i5,9f8.3)')                        &
-              iband,                                  &
+              band,                                  &
               zero,                                   &
               zero,                                   &
               zero,                                   &
-        AIMAG(SUM(sigma%sigcmee0(iband,ik_ibz,:)))*Ha_eV,&
-        AIMAG(sigma%ze0         (iband,ik_ibz,1)),       &
-        AIMAG(SUM(sigma%dsigmee0(iband,ik_ibz,:))),      &
-        AIMAG(SUM(sigma%sigmee  (iband,ik_ibz,:)))*Ha_eV,&
-        AIMAG(sigma%degw        (iband,ik_ibz,1))*Ha_eV, &
-        AIMAG(sigma%egw         (iband,ik_ibz,1))*Ha_eV
-       call wrtout(my_unt,msg,my_mode)
+        AIMAG(SUM(sigma%sigcmee0(band,ik_ibz,:)))*Ha_eV,&
+        AIMAG(sigma%ze0         (band,ik_ibz,1)),       &
+        AIMAG(SUM(sigma%dsigmee0(band,ik_ibz,:))),      &
+        AIMAG(SUM(sigma%sigmee  (band,ik_ibz,:)))*Ha_eV,&
+        AIMAG(sigma%degw        (band,ik_ibz,1))*Ha_eV, &
+        AIMAG(sigma%egw         (band,ik_ibz,1))*Ha_eV
+       call wrtout(units, msg)
        if(present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
   else
     write(msg,'(i5,9f8.3)')                    &
-          iband,                               &
-          sigma%e0      (iband,ik_ibz,isp)*Ha_eV, &
-          sigma%vxcme   (iband,ik_ibz,isp)*Ha_eV, &
-          sigma%sigxme  (iband,ik_ibz,isp)*Ha_eV, &
-     REAL(sigma%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
-     REAL(sigma%ze0     (iband,ik_ibz,isp)),      &
-     REAL(sigma%dsigmee0(iband,ik_ibz,isp)),      &
-     REAL(sigma%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
-     REAL(sigma%degw    (iband,ik_ibz,isp))*Ha_eV,&
-     REAL(sigma%egw     (iband,ik_ibz,isp))*Ha_eV
-    call wrtout(my_unt,msg,my_mode)
+          band,                                &
+          sigma%e0      (band,ik_ibz,spin)*Ha_eV, &
+          sigma%vxcme   (band,ik_ibz,spin)*Ha_eV, &
+          sigma%sigxme  (band,ik_ibz,spin)*Ha_eV, &
+     REAL(sigma%sigcmee0(band,ik_ibz,spin))*Ha_eV,&
+     REAL(sigma%ze0     (band,ik_ibz,spin)),      &
+     REAL(sigma%dsigmee0(band,ik_ibz,spin)),      &
+     REAL(sigma%sigmee  (band,ik_ibz,spin))*Ha_eV,&
+     REAL(sigma%degw    (band,ik_ibz,spin))*Ha_eV,&
+     REAL(sigma%egw     (band,ik_ibz,spin))*Ha_eV
+    call wrtout(units, msg)
     if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
     if (verbose/=0) then
       write(msg,'(i5,9f8.3)')                      &
-              iband,                               &
+              band,                               &
               zero,                                &
               zero,                                &
               zero,                                &
-        AIMAG(sigma%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
-        AIMAG(sigma%ze0     (iband,ik_ibz,isp)),      &
-        AIMAG(sigma%dsigmee0(iband,ik_ibz,isp)),      &
-        AIMAG(sigma%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
-        AIMAG(sigma%degw    (iband,ik_ibz,isp))*Ha_eV,&
-        AIMAG(sigma%egw     (iband,ik_ibz,isp))*Ha_eV
-       call wrtout(my_unt,msg,my_mode)
+        AIMAG(sigma%sigcmee0(band,ik_ibz,spin))*Ha_eV,&
+        AIMAG(sigma%ze0     (band,ik_ibz,spin)),      &
+        AIMAG(sigma%dsigmee0(band,ik_ibz,spin)),      &
+        AIMAG(sigma%sigmee  (band,ik_ibz,spin))*Ha_eV,&
+        AIMAG(sigma%degw    (band,ik_ibz,spin))*Ha_eV,&
+        AIMAG(sigma%egw     (band,ik_ibz,spin))*Ha_eV
+       call wrtout(units,msg)
        if (present(ydoc)) call ydoc%add_tabular_line(msg)
     end if
   end if
 
  else
    ! PAW+U+GW calculation.
-   ABI_CHECK(sigma%nsig_ab==1,'DFT+U with spinor not implemented')
+   ABI_CHECK(sigma%nsig_ab==1, 'DFT+U with spinor not implemented')
    write(msg,'(i5,10f8.3)')                   &
-         iband,                               &
-         sigma%e0      (iband,ik_ibz,isp)*Ha_eV, &
-         sigma%vxcme   (iband,ik_ibz,isp)*Ha_eV, &
-         sigma%vUme    (iband,ik_ibz,isp)*Ha_eV, &
-         sigma%sigxme  (iband,ik_ibz,isp)*Ha_eV, &
-    REAL(sigma%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
-    REAL(sigma%ze0     (iband,ik_ibz,isp)),      &
-    REAL(sigma%dsigmee0(iband,ik_ibz,isp)),      &
-    REAL(sigma%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
-    REAL(sigma%degw    (iband,ik_ibz,isp))*Ha_eV,&
-    REAL(sigma%egw     (iband,ik_ibz,isp))*Ha_eV
-   call wrtout(my_unt,msg,my_mode)
+         band,                               &
+         sigma%e0      (band,ik_ibz,spin)*Ha_eV, &
+         sigma%vxcme   (band,ik_ibz,spin)*Ha_eV, &
+         sigma%vUme    (band,ik_ibz,spin)*Ha_eV, &
+         sigma%sigxme  (band,ik_ibz,spin)*Ha_eV, &
+    REAL(sigma%sigcmee0(band,ik_ibz,spin))*Ha_eV,&
+    REAL(sigma%ze0     (band,ik_ibz,spin)),      &
+    REAL(sigma%dsigmee0(band,ik_ibz,spin)),      &
+    REAL(sigma%sigmee  (band,ik_ibz,spin))*Ha_eV,&
+    REAL(sigma%degw    (band,ik_ibz,spin))*Ha_eV,&
+    REAL(sigma%egw     (band,ik_ibz,spin))*Ha_eV
+   call wrtout(units,msg)
    if(present(ydoc)) call ydoc%add_tabular_line(msg)
 
    if (verbose/=0) then
      write(msg,'(i5,10f8.3)')                   &
-           iband,                               &
+           band,                               &
            zero,                                &
            zero,                                &
            zero,                                &
            zero,                                &
-     AIMAG(sigma%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
-     AIMAG(sigma%ze0     (iband,ik_ibz,isp)),      &
-     AIMAG(sigma%dsigmee0(iband,ik_ibz,isp)),      &
-     AIMAG(sigma%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
-     AIMAG(sigma%degw    (iband,ik_ibz,isp))*Ha_eV,&
-     AIMAG(sigma%egw     (iband,ik_ibz,isp))*Ha_eV
-     call wrtout(my_unt,msg,my_mode)
+     AIMAG(sigma%sigcmee0(band,ik_ibz,spin))*Ha_eV,&
+     AIMAG(sigma%ze0     (band,ik_ibz,spin)),      &
+     AIMAG(sigma%dsigmee0(band,ik_ibz,spin)),      &
+     AIMAG(sigma%sigmee  (band,ik_ibz,spin))*Ha_eV,&
+     AIMAG(sigma%degw    (band,ik_ibz,spin))*Ha_eV,&
+     AIMAG(sigma%egw     (band,ik_ibz,spin))*Ha_eV
+     call wrtout(units, msg)
      if(present(ydoc)) call ydoc%add_tabular_line(msg)
    end if
  end if
 
-end subroutine print_Sigma_perturbative
+end subroutine sigma_print_pertubative
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigma/print_Sigma_QPSC
+!!****f* m_sigma/sigma_print_qpsc
 !! NAME
-!!  print_Sigma_QPSC
+!!  sigma_print_qpsc
 !!
 !! FUNCTION
 !!  Write the results of the GW calculation in case of self-consistency
 !!
 !! SOURCE
 
-subroutine print_Sigma_QPSC(sigma,ik_ibz,iband,isp,ks_ebands,unit,prtvol,mode_paral,ydoc)
+subroutine sigma_print_qpsc(sigma, ik_ibz, band, spin, ks_ebands, units, &
+                            prtvol, ydoc) ! Optional
 
 !Arguments ------------------------------------
 !scalars
  class(sigma_t),intent(in) :: sigma
- integer,intent(in) :: iband,ik_ibz,isp
- integer,intent(in),optional :: prtvol,unit
- character(len=*),intent(in),optional :: mode_paral
+ integer,intent(in) :: band,ik_ibz,spin
+ integer,intent(in),optional :: prtvol, units(:)
  type(ebands_t),intent(in) :: ks_ebands
  type(yamldoc_t),intent(inout),optional :: ydoc
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,verbose
- character(len=4) :: my_mode
+ integer :: verbose
  character(len=500) :: msg
-
 ! *********************************************************************
 
- my_unt =std_out; if (PRESENT(unit      )) my_unt =unit
  verbose=0      ; if (PRESENT(prtvol    )) verbose=prtvol
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode=mode_paral
 
 ! write(msg,'(a)')&
 !&   ' Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]',&
@@ -805,74 +801,74 @@ subroutine print_Sigma_QPSC(sigma,ik_ibz,iband,isp,ks_ebands,unit,prtvol,mode_pa
  if (sigma%usepawu==0 .or. .TRUE.) then
    if (sigma%nsig_ab/=1) then
      write(msg,'(i5,12(2x,f8.3))')                       &
-           iband,                                        &
-           ks_ebands%eig     (iband,ik_ibz,1)*Ha_eV,        &
-           SUM(sigma%vxcme   (iband,ik_ibz,:))*Ha_eV,       &
-           sigma%e0          (iband,ik_ibz,1)*Ha_eV,        &
-      REAL(SUM(sigma%hhartree(iband,iband,ik_ibz,:)))*Ha_eV,&
-           SUM(sigma%sigxme  (iband,ik_ibz,:))*Ha_eV,       &
-      REAL(SUM(sigma%sigcmee0(iband,ik_ibz,:)))*Ha_eV,      &
-      REAL(sigma%ze0         (iband,ik_ibz,1)),             &
-      REAL(SUM(sigma%dsigmee0(iband,ik_ibz,:))),            &
-      REAL(SUM(sigma%sigmee  (iband,ik_ibz,:)))*Ha_eV,      &
-      REAL(sigma%degw        (iband,ik_ibz,1))*Ha_eV,       &
-      REAL(sigma%egw         (iband,ik_ibz,1))*Ha_eV,       &
-           sigma%en_qp_diago (iband,ik_ibz,1)*Ha_eV
-     call wrtout(my_unt,msg,my_mode)
+           band,                                        &
+           ks_ebands%eig     (band,ik_ibz,1)*Ha_eV,        &
+           SUM(sigma%vxcme   (band,ik_ibz,:))*Ha_eV,       &
+           sigma%e0          (band,ik_ibz,1)*Ha_eV,        &
+      REAL(SUM(sigma%hhartree(band,band,ik_ibz,:)))*Ha_eV,&
+           SUM(sigma%sigxme  (band,ik_ibz,:))*Ha_eV,       &
+      REAL(SUM(sigma%sigcmee0(band,ik_ibz,:)))*Ha_eV,      &
+      REAL(sigma%ze0         (band,ik_ibz,1)),             &
+      REAL(SUM(sigma%dsigmee0(band,ik_ibz,:))),            &
+      REAL(SUM(sigma%sigmee  (band,ik_ibz,:)))*Ha_eV,      &
+      REAL(sigma%degw        (band,ik_ibz,1))*Ha_eV,       &
+      REAL(sigma%egw         (band,ik_ibz,1))*Ha_eV,       &
+           sigma%en_qp_diago (band,ik_ibz,1)*Ha_eV
+     call wrtout(units, msg)
      if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
      write(msg,'(i5,12(2x,f8.3))')                        &
-            iband,                                        &
+            band,                                        &
             zero,                                         &
             zero,                                         &
             zero,                                         &
-      AIMAG(SUM(sigma%hhartree(iband,iband,ik_ibz,:)))*Ha_eV,&
+      AIMAG(SUM(sigma%hhartree(band,band,ik_ibz,:)))*Ha_eV,&
             zero,                                         &
-      AIMAG(SUM(sigma%sigcmee0(iband,ik_ibz,:)))*Ha_eV,      &
-      AIMAG(sigma%ze0         (iband,ik_ibz,1)),             &
-      AIMAG(SUM(sigma%dsigmee0(iband,ik_ibz,:))),            &
-      AIMAG(SUM(sigma%sigmee  (iband,ik_ibz,:)))*Ha_eV,      &
-      AIMAG(sigma%degw        (iband,ik_ibz,1))*Ha_eV,       &
-      AIMAG(sigma%egw         (iband,ik_ibz,1))*Ha_eV,       &
+      AIMAG(SUM(sigma%sigcmee0(band,ik_ibz,:)))*Ha_eV,      &
+      AIMAG(sigma%ze0         (band,ik_ibz,1)),             &
+      AIMAG(SUM(sigma%dsigmee0(band,ik_ibz,:))),            &
+      AIMAG(SUM(sigma%sigmee  (band,ik_ibz,:)))*Ha_eV,      &
+      AIMAG(sigma%degw        (band,ik_ibz,1))*Ha_eV,       &
+      AIMAG(sigma%egw         (band,ik_ibz,1))*Ha_eV,       &
             zero
      if (verbose/=0) then
-       call wrtout(my_unt,msg,my_mode)
-       if( present(ydoc)) call ydoc%add_tabular_line(msg)
+       call wrtout(units, msg)
+       if (present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
    else
      write(msg,'(i5,12(2x,f8.3))')                       &
-           iband,                                        &
-           ks_ebands%eig    (iband,ik_ibz,isp)*Ha_eV,       &
-           sigma%vxcme      (iband,ik_ibz,isp)*Ha_eV,       &
-           sigma%e0         (iband,ik_ibz,isp)*Ha_eV,       &
-      REAL(sigma%hhartree   (iband,iband,ik_ibz,isp))*Ha_eV,&
-           sigma%sigxme     (iband,ik_ibz,isp)*Ha_eV,       &
-      REAL(sigma%sigcmee0   (iband,ik_ibz,isp))*Ha_eV,      &
-      REAL(sigma%ze0        (iband,ik_ibz,isp)),            &
-      REAL(sigma%dsigmee0   (iband,ik_ibz,isp)),            &
-      REAL(sigma%sigmee     (iband,ik_ibz,isp))*Ha_eV,      &
-      REAL(sigma%degw       (iband,ik_ibz,isp))*Ha_eV,      &
-      REAL(sigma%egw        (iband,ik_ibz,isp))*Ha_eV,      &
-           sigma%en_qp_diago(iband,ik_ibz,isp)*Ha_eV
-     call wrtout(my_unt,msg,my_mode)
+           band,                                        &
+           ks_ebands%eig    (band,ik_ibz,spin)*Ha_eV,       &
+           sigma%vxcme      (band,ik_ibz,spin)*Ha_eV,       &
+           sigma%e0         (band,ik_ibz,spin)*Ha_eV,       &
+      REAL(sigma%hhartree   (band,band,ik_ibz,spin))*Ha_eV,&
+           sigma%sigxme     (band,ik_ibz,spin)*Ha_eV,       &
+      REAL(sigma%sigcmee0   (band,ik_ibz,spin))*Ha_eV,      &
+      REAL(sigma%ze0        (band,ik_ibz,spin)),            &
+      REAL(sigma%dsigmee0   (band,ik_ibz,spin)),            &
+      REAL(sigma%sigmee     (band,ik_ibz,spin))*Ha_eV,      &
+      REAL(sigma%degw       (band,ik_ibz,spin))*Ha_eV,      &
+      REAL(sigma%egw        (band,ik_ibz,spin))*Ha_eV,      &
+           sigma%en_qp_diago(band,ik_ibz,spin)*Ha_eV
+     call wrtout(units, msg)
      if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
      write(msg,'(i5,12(2x,f8.3))')                       &
-            iband,                                       &
+            band,                                       &
             zero,                                        &
             zero,                                        &
             zero,                                        &
-      AIMAG(sigma%hhartree  (iband,iband,ik_ibz,isp))*Ha_eV,&
+      AIMAG(sigma%hhartree  (band,band,ik_ibz,spin))*Ha_eV,&
             zero,                                        &
-      AIMAG(sigma%sigcmee0   (iband,ik_ibz,isp))*Ha_eV,     &
-      AIMAG(sigma%ze0        (iband,ik_ibz,isp)),           &
-      AIMAG(sigma%dsigmee0   (iband,ik_ibz,isp)),           &
-      AIMAG(sigma%sigmee     (iband,ik_ibz,isp))*Ha_eV,     &
-      AIMAG(sigma%degw       (iband,ik_ibz,isp))*Ha_eV,     &
-      AIMAG(sigma%egw        (iband,ik_ibz,isp))*Ha_eV,     &
+      AIMAG(sigma%sigcmee0   (band,ik_ibz,spin))*Ha_eV,     &
+      AIMAG(sigma%ze0        (band,ik_ibz,spin)),           &
+      AIMAG(sigma%dsigmee0   (band,ik_ibz,spin)),           &
+      AIMAG(sigma%sigmee     (band,ik_ibz,spin))*Ha_eV,     &
+      AIMAG(sigma%degw       (band,ik_ibz,spin))*Ha_eV,     &
+      AIMAG(sigma%egw        (band,ik_ibz,spin))*Ha_eV,     &
             zero
      if (verbose/=0) then
-       call wrtout(my_unt,msg,my_mode)
+       call wrtout(units, msg)
        if (present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
    end if
@@ -882,7 +878,7 @@ subroutine print_Sigma_QPSC(sigma,ik_ibz,iband,isp,ks_ebands,unit,prtvol,mode_pa
    ABI_ERROR("PAW+U+GW not yet implemented")
  end if
 
-end subroutine print_Sigma_QPSC
+end subroutine sigma_print_qpsc
 !!***
 
 !----------------------------------------------------------------------
@@ -903,17 +899,15 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
 
 !Arguments ------------------------------------
  class(sigma_t),intent(inout) :: sigma
- integer,intent(in) :: nkibz,usepawu
-!scalars
  type(sigparams_t),intent(in) :: Sigp
+ integer,intent(in) :: nkibz, usepawu
 
 !Local variables-------------------------------
 !scalars
  integer :: b1gw,b2gw,mod10
 ! *************************************************************************
 
- !@sigma_t
- mod10=MOD(Sigp%gwcalctyp,10)
+ mod10 = MOD(Sigp%gwcalctyp,10)
 
  ! Copy important dimensions
  sigma%nkptgw     =Sigp%nkptgw
@@ -1161,9 +1155,9 @@ end function sigma_get_excene
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/mels_get_haene
+!!****f* ABINIT/sigma_get_haene
 !! NAME
-!! mels_get_haene
+!! sigma_get_haene
 !!
 !! FUNCTION
 !! Compute the Hartree energy
@@ -1181,7 +1175,7 @@ end function sigma_get_excene
 !!
 !! SOURCE
 
-real(dp) pure function mels_get_haene(sigma, Mels, kmesh, bands) result(eh_energy)
+real(dp) pure function sigma_get_haene(sigma, Mels, kmesh, bands) result(eh_energy)
 
 !Arguments ------------------------------------
 !scalars
@@ -1211,14 +1205,14 @@ real(dp) pure function mels_get_haene(sigma, Mels, kmesh, bands) result(eh_energ
 
  eh_energy = half * eh_energy
 
-end function mels_get_haene
+end function sigma_get_haene
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/mels_get_kiene
+!!****f* ABINIT/sigma_get_kiene
 !! NAME
-!! mels_get_kiene
+!! sigma_get_kiene
 !!
 !! FUNCTION
 !! Compute the kinetic energy
@@ -1236,7 +1230,7 @@ end function mels_get_haene
 !!
 !! SOURCE
 
-real(dp) pure function mels_get_kiene(sigma, Mels, kmesh, bands) result(ek_energy)
+real(dp) pure function sigma_get_kiene(sigma, Mels, kmesh, bands) result(ek_energy)
 
 !Arguments ------------------------------------
  class(sigma_t),intent(in) :: sigma
@@ -1264,7 +1258,7 @@ real(dp) pure function mels_get_kiene(sigma, Mels, kmesh, bands) result(ek_energ
    end do
  end do
 
-end function mels_get_kiene
+end function sigma_get_kiene
 !!***
 
 !----------------------------------------------------------------------
@@ -1274,16 +1268,14 @@ end function mels_get_kiene
 !!  find_wpoles_for_cd
 !!
 !! FUNCTION
-!!  Find the max frequency needed to account for all the poles
-!!  of GW used in the contour deformation technique.
+!!  Find the max frequency needed to account for all the poles of the GW self-energy
+!!  in the case of contour deformation technique.
 !!
 !! INPUTS
 !!  Sigp=sigparams_t
 !!
 !! OUTPUT
 !!  omega_max
-!!
-!! NOTES
 !!
 !! SOURCE
 
