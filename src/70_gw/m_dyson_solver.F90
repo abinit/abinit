@@ -33,6 +33,7 @@ module m_dyson_solver
  use m_io_tools,      only : open_file
  use m_fstrings,      only : int2char10
  use m_hide_lapack,   only : xheev
+ use m_dtset,         only : dataset_type
  use m_bz_mesh,       only : kmesh_t
  use m_sigma,         only : sigma_t
  use m_melemts,       only : melements_t
@@ -136,14 +137,15 @@ CONTAINS  !====================================================================
 !!
 !! SOURCE
 
-subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, Sigp, Kmesh, sigcme, qp_ene, Sr, ks_me, prtvol, Dtfil, comm)
+subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, sigcme, qp_ene, Sr, ks_me, Dtfil, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ikcalc,nomega_sigc,prtvol,minbnd,maxbnd,comm
+ integer,intent(in) :: ikcalc,nomega_sigc,minbnd,maxbnd,comm
+ type(dataset_type),intent(in) :: dtset
+ type(sigparams_t),intent(in) :: Sigp
  type(kmesh_t),intent(in) :: Kmesh
  type(Datafiles_type),intent(in) :: Dtfil
- type(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(inout) :: Sr
  type(melements_t),intent(in) :: ks_me
 !arrays
@@ -153,10 +155,10 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, Sigp, Kmesh, sigcme,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iab,ib1,ib2,ikbz_gw,io,spin,is_idx,isym,iter,itim,jb, ie0
+ integer :: iab,ib1,ib2,ikbz_gw,io,spin,is_idx,isym,iter,itim,jb, ie0, ierr
  integer :: ik_ibz,kb,ld_matrix,mod10,nsploop,my_rank, units(2)
- real(dp) :: alpha,beta,smrt,vxc_val, vu, v_meanf
- complex(dpc) :: ctdpc,dct,dsigc,sigc,zz,zsc, phase
+ real(dp) :: alpha, beta, smrt, vxc_val, vu, v_meanf, sigx
+ complex(dpc) :: ctdpc, dct, dsigc, sigc, sigc_zsc, zz, zsc, phase
  logical :: converged,ltest
  character(len=500) :: msg
  type(sigma_pade_t) :: spade
@@ -397,56 +399,27 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, Sigp, Kmesh, sigcme,
        end if
 
        ! Solve the QP equation with Newton-Rapson starting from e0
-       !alphac_pm = zero; betar_pm = zero; zcut_pm = zero
-       !call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,spin), alphac_pm, betar_pm, zcut_pm)
+       alphac_pm = zero; betar_pm = zero; zcut_pm = zero
+       call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,spin), alphac_pm, betar_pm, zcut_pm)
 
        ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
-       !vxc_val = ks_me%vxcval(jb, jb, ik_ibz, spin)
-       !vu = zero; if (dtset%usepawu /= 0) vu = gwr%ks_me%vu(jb, jb, ik_ibz, spin)
-       !v_meanf = vxc_val + vu
-       !sigx = Sr%sigxme(jb,ik_ibz,spin)
+       vxc_val = ks_me%vxcval(jb, jb, ik_ibz, spin)
+       vu = zero; if (dtset%usepawu /= 0) vu = ks_me%vu(jb, jb, ik_ibz, spin)
+       v_meanf = vxc_val + vu
+       sigx = Sr%sigxme(jb,ik_ibz,spin)
 
-       !call spade%qp_solve(sr%e0(jb,ik_ibz,spin), v_meanf, sigx, zz, zsc, msg, ierr)
-       !call spade%free()
+       call spade%qp_solve(sr%e0(jb,ik_ibz,spin), v_meanf, sigx, zz, zsc, sigc_zsc, msg, ierr)
+       call spade%free()
        !qpe_pade_kcalc(ibc, ikcalc, spin) = zsc
        !qp_solver_ierr(ibc, ikcalc, spin) = ierr
-       !if (ierr /= 0) then
-       !  ABI_WARNING(msg)
-       !end if
-
-       iter = 0; converged = .FALSE.; ctdpc = cone
-       do while (ABS(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
-         iter = iter + 1
-         sigc = czero; dsigc = czero
-         if (REAL(zz) > tol12) then
-           tmpcdp(:) = sigcme(:,jb,jb,spin)
-           sigc  =  pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
-           dsigc = dpade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
-         else
-           tmpcdp(:) = CONJG(sigcme(:,jb,jb,spin))
-           sigc  =  pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
-           dsigc = dpade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
-         end if
-         ctdpc = Sr%e0(jb,ik_ibz,spin) - Sr%vxcme(jb,ik_ibz,spin) - Sr%vUme(jb,ik_ibz,spin) + Sr%sigxme(jb,ik_ibz,spin) &
-                 + sigc - zz
-         if (ABS(ctdpc) < NR_ABS_ROOT_ERR) then
-           converged=.TRUE.; EXIT
-         end if
-         dct = dsigc - one
-         zz = newrap_step(zz, ctdpc, dct)
-       end do ! do while
-
-       if (.not. converged) then
-         write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
-           'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
-           'Absolute Error = ',ABS(ctdpc),' > ',NR_ABS_ROOT_ERR
+       if (ierr /= 0) then
          ABI_WARNING(msg)
        end if
 
-       ! Store the final result TODO re-shift everything according to efermi
-       Sr%egw(jb,ik_ibz,spin) = zz
+       ! Store the final result (self-consistent result for zz and Sigma_c(zz_scf)
+       Sr%egw(jb,ik_ibz,spin) = zsc
        Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
-       Sr%sigmee(jb,ik_ibz,spin) = Sr%sigxme(jb,ik_ibz,spin) + sigc
+       Sr%sigmee(jb,ik_ibz,spin) = Sr%sigxme(jb,ik_ibz,spin) + sigc_zsc
 #endif
 
        ! Spectra of Sigma, remember that Sr%nomega_r does not contain the frequencies
@@ -521,7 +494,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, Sigp, Kmesh, sigcme,
    end do
 
    ! Print the different matrix elements of sigma if QPSC and prtvol>9
-   if (Sigp%gwcalctyp >=20 .and. mod10 /= 1 .and. prtvol>9 .and. my_rank==master) then
+   if (Sigp%gwcalctyp >=20 .and. mod10 /= 1 .and. dtset%prtvol>9 .and. my_rank==master) then
      call print_sigma_melems(ikcalc,ib1,ib2,Sr%nsppol*Sr%nsig_ab,htotal,hhartree,&
                              Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,:),sigcme(ie0,:,:,:),Dtfil%filnam_ds(4))
    end if
@@ -888,25 +861,29 @@ end subroutine sigma_pade_eval
 !!  v_meanf: matrix element of the mean-field Hamiltonian
 !!  sigx: matrix element of the exchange self-energy.
 !!  z_guess: Initial guess for the QP energy
+!!
+!! OUTPUT
+!!  zsc: root.
+!!  sigc: Sigma_c(zsc)
 !!  msg: Error message if ierr /= 0.
 !!  ierr: Exit status.
 !!
 !! SOURCE
 
-subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
+subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, sigc_zsc, msg, ierr)
 
 !Arguments ------------------------------------
  class(sigma_pade_t),intent(in) :: self
  real(dp),intent(in) :: e0, v_meanf, sigx
  complex(dp),intent(in) :: z_guess
- complex(dp),intent(out) :: zsc
+ complex(dp),intent(out) :: zsc, sigc_zsc
  integer,intent(out) :: ierr
 
 !Local variables-------------------------------
 !scalars
  integer :: iter
  logical :: converged
- complex(dpc) :: ctdpc, dct, dsigc, sigc
+ complex(dpc) :: ctdpc, dct, dsigc
  character(len=500) :: msg
 ! *************************************************************************
 
@@ -919,8 +896,8 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  do while (abs(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
    iter = iter + 1
 
-   call self%eval(zsc, sigc, dvdz=dsigc)
-   ctdpc = e0 - v_meanf + sigx + sigc - zsc
+   call self%eval(zsc, sigc_zsc, dvdz=dsigc)
+   ctdpc = e0 - v_meanf + sigx + sigc_zsc - zsc
 
    if (abs(ctdpc) < NR_ABS_ROOT_ERR) then
      converged=.TRUE.; EXIT

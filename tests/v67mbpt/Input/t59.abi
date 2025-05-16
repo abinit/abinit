@@ -1,6 +1,6 @@
 # Crystalline silicon calculation of the GW corrections.
 # Using contour deformation for Sigma
-# Calculation of the Self-Energy matrix elements with Contour Deformation 
+# Calculation of the Self-Energy matrix elements with Contour Deformation
 #
 
 gwcalctyp   2
@@ -73,7 +73,7 @@ diemac  12.0
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = H. Tsai, M. Giantomassi
-#%% keywords = GW
+#%% keywords = GW, CD
 #%% description =
 #%%   Calculation of the Self-Energy matrix elements with Contour Deformation
 #%%<END TEST_INFO>

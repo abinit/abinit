@@ -1639,8 +1639,8 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    !ket(spadc+1:spadc+npwc,:)=ket(spadc+1:spadc+npwc,:)/pi
    ! ---------------- end of original implementation -----------------------
 
-   select case(INTMETHOD)
-   case(FABIEN)
+   select case (INTMETHOD)
+   case (FABIEN)
      ! Hopefully more effective implementation MS 04.08.2011
      ! Perform integration along imaginary axis using BLAS
      ! First calculate first and last weights
@@ -1649,7 +1649,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
      domegaright = (omega_imag(nomegaei+1)+omega_imag(nomegaei))
      right(:)    = -AIMAG(omega_imag(nomegaei+1)-omega_imag(nomegaei))*REAL(omegame0i_tmp(:))
      left(:)     = quarter*AIMAG(domegaleft)*AIMAG(domegaright) &
-&                   +REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:))
+                    +REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:))
      do ios=1,nomega
        weight(nomegaei+1,ios) = ATAN(right(ios)/left(ios))
      end do
@@ -1659,7 +1659,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
        domegaright = (omega_imag(io+1)+omega_imag(io  ))
        right(:)    = -half*AIMAG(omega_imag(io+1)-omega_imag(io-1))*REAL(omegame0i_tmp(:))
        left(:)     = REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:)) &
-&       +quarter*AIMAG(domegaleft)*AIMAG(domegaright)
+        +quarter*AIMAG(domegaleft)*AIMAG(domegaright)
        do ios=1,nomega
          weight(io,ios) = ATAN(right(ios)/left(ios))
        end do
@@ -1669,9 +1669,9 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
      fact = CMPLX(piinv,zero)
 
      call xgemm('N','N',npwc,nomega,nomegaei+1,fact,epsrho_imag,npwc,&
-&     weight,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+      weight,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
 
-   case(TRAPEZOID)
+   case (TRAPEZOID)
 !   Trapezoidal rule Transform omega coordinates
      alph     = plasmafreq
      alphsq   = alph*alph
@@ -1690,16 +1690,16 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
        aterml(:)    = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(io  )-tbetasq(:))
        right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
        logup(:)     = ABS(((alphsq+tbetasq(:))*xtab(io+1)-two*tbetasq(:)) &
-&                     *xtab(io+1)+tbetasq(:))
+                      *xtab(io+1)+tbetasq(:))
        logdown(:)   = ABS(((alphsq+tbetasq(:))*xtab(io  )-two*tbetasq(:)) &
-&                     *xtab(io  )+tbetasq(:))
+                      *xtab(io  )+tbetasq(:))
        ! Trapezoid integration weights
        weight(io,:)  = CMPLX(-(half*alph*tbeta(:)*LOG(logup(:)/logdown(:)) + tbetasq(:) &
-&                         *right(:))/(alphsq+tbetasq(:)),zero)
+                          *right(:))/(alphsq+tbetasq(:)),zero)
        weight2(io,:) = CMPLX(-right(:),zero)
        ! Linear interpolation coefficients for each section (sum over ig)
        tfone(:,io)   = (epsrho_imag(:,io+1)-epsrho_imag(:,io)) &
-&                      /(xtab(io+1)-xtab(io))
+                      /(xtab(io+1)-xtab(io))
        tftwo(:,io)   = epsrho_imag(:,io) - tfone(:,io)*xtab(io)
      end do
 
@@ -1708,22 +1708,23 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
      aterml(:)   = inv_alph*tinv_beta(:)*((alphsq+tbetasq(:))*xtab(nomegaei+1)-tbetasq(:))
      logup(:)    = alphsq*xtab(nomegaei+1)*xtab(nomegaei+1)
      logdown(:)  = ABS(((alphsq+tbetasq(:))*xtab(nomegaei+1)-two*tbetasq(:)) &
-&                   *xtab(nomegaei+1)+tbetasq(:))
+                   *xtab(nomegaei+1)+tbetasq(:))
      right(:)     = ATAN((atermr(:)-aterml(:))/(one+atermr(:)*aterml(:)))
      weight (nomegaei+1,:) = CMPLX(-(half*(alphsq*tinv_beta(:)*LOG(logdown(:)/logup(:)) &
-&     - tbeta(:)*LOG(xtab(nomegaei+1)*xtab(nomegaei+1))) - alph*right(:)),zero)
+      - tbeta(:)*LOG(xtab(nomegaei+1)*xtab(nomegaei+1))) - alph*right(:)),zero)
      tfone(:,nomegaei+1) = -(zero-epsrho_imag(:,nomegaei+1)*AIMAG(omega_imag(nomegaei+1))) &
                            /(one-xtab(nomegaei+1))
 
      ! Use BLAS call to perform matrix-matrix multiplication and accumulation
      fact = CMPLX(piinv,zero)
 
+     ! FIXME: Temporary copy of ket
      call xgemm('N','N',npwc,nomega,nomegaei+1,fact,tfone,npwc,&
-&     weight ,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+       weight ,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
      call xgemm('N','N',npwc,nomega,nomegaei  ,fact,tftwo,npwc,&
-&     weight2,nomegaei  ,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
+       weight2,nomegaei  ,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
 
-   case(NSPLINE)
+   case (NSPLINE)
      ! Natural spline followed by Gauss-Kronrod
      ! Transform omega coordinates
      alph     = plasmafreq
