@@ -2695,7 +2695,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(sigcme_k,(nomega_sigc,ib2-ib1+1,ib2-ib1+1,Sigp%nsppol*Sigp%nsig_ab))
      sigcme_k=sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)
 
-     call solve_dyson(ikcalc,ib1,ib2,nomega_sigc,Sigp,Kmesh,sigcme_k,qp_ebands%eig,Sr,ks_me,Dtset%prtvol,Dtfil,Wfd%comm)
+     call solve_dyson(ikcalc, ib1, ib2, nomega_sigc, dtset, Sigp, Kmesh, sigcme_k, qp_ebands%eig, &
+                      Sr, ks_me, Dtfil, Wfd%comm)
      ABI_FREE(sigcme_k)
      !
      ! Calculate direct gap for each spin and print out final results.

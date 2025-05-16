@@ -5512,7 +5512,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir, cpu_ikf, wall_ikf, gflops_ikf
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, wtqm, wtqp, beta_r
- complex(dp) :: zz, zsc, sigc_e0__, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev, alpha_c
+ complex(dp) :: zz, zsc, sigc_e0__, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev, alpha_c, sigc_zsc
  logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, do_sigma_fit
  logical :: compute_this_kbz, print_time, define, sigc_is_herm, band_inversion
  character(len=500) :: msg
@@ -6132,7 +6132,7 @@ end if
 
      ! Solve the QP equation with Newton-Rapson starting from e0.
      zz = cmplx(e0, zero)
-     call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
+     call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, sigc_zsc, msg, ierr)
      qp_pade(band, ikcalc, spin) = zsc
      pade_solver_ierr(band, ikcalc, spin) = ierr
      ABI_WARNING_IF(ierr /= 0, msg)
