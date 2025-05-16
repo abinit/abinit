@@ -2016,13 +2016,13 @@ subroutine findq(nkbz, kbz, nsym, symrec, symafm, gprimd, nqibz, qibz, timrev)
               gprimd(3,ii)*gprimd(3,:)
  end do
  !
- ! === Loop over k-points in BZ, form k-k1 and translate in first BZ ===
+ ! Loop over k-points in BZ, form k-k1 and translate in first BZ.
  ! iq is the no. of q-points found, zero at the beginning
  iq=0
  do ik=1,nkbz
    qposs(:)=kbz(:,ik)-kbz(:,1)
-   ! === Check whether this q (or its equivalent) has already been found ===
-   ! * Use spatial inversion instead of time reversal whenever possible.
+   ! Check whether this q (or its equivalent) has already been found.
+   ! Use spatial inversion instead of time reversal whenever possible.
    found=.FALSE.
    do iqp=1,iq
      do itim=1,timrev
@@ -2043,11 +2043,11 @@ subroutine findq(nkbz, kbz, nsym, symrec, symafm, gprimd, nqibz, qibz, timrev)
  end do
 
  if (iq/=nqibz) then
-   write(msg,'(2(a,i5))')' iq= ',iq,'/= nqibz= ',nqibz
+   write(msg,'(2(a,i0))')' iq= ',iq,'/= nqibz= ',nqibz
    ABI_BUG(msg)
  end if
  !
- ! * Translate q-points to 1st BZ in the interval [-1/2,1/2[
+ ! Translate q-points to 1st BZ in the interval [-1/2,1/2[
  do iq=1,nqibz
    do ii=1,3
      call wrap2_pmhalf(qibz(ii,iq),qred,shift1)

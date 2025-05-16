@@ -962,6 +962,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_CHECK(all(abs(ks_ebands%kptns - kibz) < tol12), "ks_ebands%kibz != kibz")
 
  if (.not. (isdiagmat(ks_ebands%kptrlatt) .and. ks_ebands%nshiftk == 1)) then
+     !.and. (gwr%use_supercell_for_tchi .or. gwr%use_supercell_for_tchi)) then
    ABI_ERROR("GWR code requires ngkpt with one shift!")
  end if
  gwr%ngkpt = get_diag(ks_ebands%kptrlatt)
@@ -991,21 +992,18 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
 
- ! Setup qIBZ, weights and BZ.
+ ! Setup IBZ q-points, weights and BZ.
  ! Always use q --> -q symmetry even in systems without inversion
  ! TODO: Might add input variable to rescale the q-mesh.
  my_nshiftq = 1; my_shiftq = zero; qptrlatt = ks_ebands%kptrlatt
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
-                             gwr%nqibz, gwr%qibz, gwr%wtq, gwr%nqbz, gwr%qbz)
-                             !new_kptrlatt=gwr%qptrlatt, new_shiftk=gwr%qshift,
-                             !bz2ibz=new%ind_qbz2ibz)  # FIXME
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &  ! in
+                             gwr%nqibz, gwr%qibz, gwr%wtq, gwr%nqbz, gwr%qbz)    ! out
 
  ABI_CHECK(all(abs(gwr%qibz(:,1)) < tol16), "First qpoint in qibz should be Gamma!")
  gwr%ngqpt = get_diag(qptrlatt)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(gwr%qbz2ibz, (6, gwr%nqbz))
-
  qrank = krank_from_kptrlatt(gwr%nqibz, gwr%qibz, qptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrec", qptopt1, cryst, qrank, gwr%nqbz, gwr%qbz, gwr%qbz2ibz) /= 0) then
@@ -1024,8 +1022,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ==========================
  gwr%ks_gaps = ks_ebands%get_gaps(gap_err)
  if (my_rank == master) then
-   !call ks_ebands%print([std_out], header="KS band structure", prtvol=gwr%dtset%prtvol)
-   !call ks_ebands%print_gaps([ab_out], header="KS gaps (Fermi energy set to zero)")
+   !call ks_ebands%print(units, header="KS band structure", prtvol=gwr%dtset%prtvol)
    call gwr%ks_gaps%print(units, header="Kohn-Sham gaps and band edges from IBZ mesh")
  end if
 
@@ -1164,7 +1161,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_FREE(degblock_all)
  ABI_FREE(ndeg_all)
 
- ! Now we can finally compute max_nbcalc
+ ! Now we can finally compute max_nbcalc.
  gwr%max_nbcalc = maxval(gwr%nbcalc_ks)
  ABI_MALLOC(gwr%bstop_ks, (gwr%nkcalc, gwr%nsppol))
  gwr%bstop_ks = gwr%bstart_ks + gwr%nbcalc_ks - 1
@@ -2031,17 +2028,9 @@ end subroutine gwr_free
 ! Free array of desc_t objects.
 subroutine desc_array1_free(desc_array1)
   type(desc_t),intent(inout) :: desc_array1(:)
-  !logical,optional,intent(in) :: select(:)
   integer :: ii
 
-  !if (present(select)) then
-  !  ABI_CHECK_IEQ(size(desc_array1), size(select), "size(desc_array1), size(select)")
-  !end if
-
   do ii=1,size(desc_array1, dim=1)
-    !if (present(select)) then
-    !  if (.not. select(ii)) continue
-    !end if
     call desc_array1(ii)%free()
   end do
 end subroutine desc_array1_free
@@ -3267,6 +3256,8 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
    ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
    call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0) ! this should be OK
  end do
+
+ !g_gp%buffer_cplx = scale_fact * g_gp%buffer_cplx
 
  call uplan_k%free(); call r_gp%free()
 
@@ -4722,8 +4713,8 @@ subroutine gwr_build_tchi(gwr)
    ABI_MALLOC(chiq_rpr, (gwr%nqibz))
    do iq_ibz=1,gwr%nqibz
      call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     if (gwr%comm%me == 0 .and. mod(iq_ibz, 2) == 0) call pstat_proc%print(_PSTAT_ARGS_)
    end do
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    ! Allocate G_k(r',r, +/- tau) and G_kq(r',r, +/- tau)
    ! TODO: Can save memory here as we don't need +/- tau for each k+q.
@@ -4829,7 +4820,7 @@ subroutine gwr_build_tchi(gwr)
      tchi_rfact = one / gwr%cryst%ucvol
      do iq_ibz=1,gwr%nqibz
        if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
-       call gwr_rpr_to_ggp(gwr, gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), gwr%tchi_qibz(iq_ibz,itau,spin))
+       call gwr_rpr_to_ggp(gwr, gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), gwr%tchi_qibz(iq_ibz,itau,spin)) ! tchi_rfact
        gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx = gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx * tchi_rfact
      end do ! iq_ibz
 
@@ -6178,6 +6169,7 @@ end if
        !  /( (real(rw_mesh(iw) - Sr%hhartree(ib, ib, ik_ibz, spin) - sigx_xc)) ** 2 &
        !    +(aimag(sigc_e0__)) ** 2) / Ha_eV
      end do ! iw
+     call spade%free()
 
    end do ! band
  end do ! ikcalc

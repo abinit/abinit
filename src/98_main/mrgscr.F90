@@ -260,7 +260,7 @@ program mrgscr
 
  cryst = HScr0%Hdr%get_crystal(remove_inv=.FALSE.)
 
- kptopt=1
+ kptopt = 1
  call Kmesh%init(Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
  call Kmesh%print([std_out], header="K-mesh for the wavefunctions", prtvol=prtvol)
 
@@ -341,7 +341,6 @@ program mrgscr
    case (2)
      ! Analyse file ----------------------------------------------------------------
      ABI_CHECK(iomode==IO_MODE_FORTRAN, "netcdf output not coded")
-
      write(std_out,'(a)') ' 2 => Extraction of file contents'
 
      ! Initialize the G-sphere.

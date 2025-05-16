@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_dyson_solver
+module m_dyson_solver
 
  use defs_basis
  use m_xmpi
@@ -65,13 +65,19 @@ MODULE m_dyson_solver
     complex(dp) :: alphac_pm(2)
     logical :: do_sigma_fit
 
-    complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
-    ! pointer to input mesh and values.
+    complex(dp),allocatable :: zmesh(:)
+    ! input mesh
+
+    complex(dp),allocatable :: sigc_cvals(:)
+    ! values on mesh
 
  contains
 
    procedure :: init => sigma_pade_init
    ! Init object
+
+   procedure :: free => sigma_pade_free
+   ! Free memory
 
    procedure :: eval => sigma_pade_eval
    ! Evaluate self-energy and derivative along the real axis.
@@ -338,6 +344,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
         alphac_pm = zero; betar_pm = zero; zcut_pm = zero
         call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,is_idx), alphac_pm, betar_pm, zcut_pm)
         call spade%eval(zz, Sr%sigcmee0(jb,sk_ibz,is_idx), dvdz=Sr%dsigmee0(jb,sk_ibz,is_idx))
+        call spade%free()
       end do !iab
 
       ! Z = (1 - dSigma / domega(E0))^{-1}
@@ -347,7 +354,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
         Sr%ze0(jb,sk_ibz,1) = one / (one - SUM(Sr%dsigmee0(jb,sk_ibz,:)))
       end if
 
-#define _DEV_PERTURBATIVE
+!#define _DEV_PERTURBATIVE
 
 #ifdef _DEV_PERTURBATIVE
       call wrtout([std_out, ab_out], "COMMENT: Using perturbative approach with Z.")
@@ -385,13 +392,14 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
 
       if (Sigp%mbpt_sciss>0.1d-4) then
         ! e0 is replaced by qp_ene which contains the updated energy eigenvalue.
-        zz = CMPLX(qp_ene(jb,sk_ibz,spin),0.0)
+        zz = CMPLX(qp_ene(jb,sk_ibz,spin), zero)
       end if
 
       ! Solve the QP equation with Newton-Rapson starting from e0
       !alphac_pm = zero; betar_pm = zero; zcut_pm = zero
       !call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,spin), alphac_pm, betar_pm, zcut_pm)
-      !call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
+      !call spade%qp_solve(Sr%e0(jb,sk_ibz,spin), v_meanf, sigx, zz, zsc, msg, ierr)
+      !call spade%free()
       !qpe_pade_kcalc(ibc, ikcalc, spin) = zsc
       !qp_solver_ierr(ibc, ikcalc, spin) = ierr
       !if (ierr /= 0) then
@@ -780,14 +788,28 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, alphac_pm, betar_pm, z
 ! *************************************************************************
 
  self%npts = npts
- self%zmesh => zmesh(1:self%npts)
- self%sigc_cvals => sigc_cvals(1:self%npts)
+ ABI_MALLOC(self%zmesh, (npts))
+ ABI_MALLOC(self%sigc_cvals, (npts))
+ self%zmesh = zmesh
+ self%sigc_cvals = sigc_cvals
+
  self%alphac_pm = alphac_pm
  self%betar_pm = betar_pm
  self%zcut_pm = zcut_pm
  self%do_sigma_fit = .False.
 
 end subroutine sigma_pade_init
+!!***
+
+subroutine sigma_pade_free(self)
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(inout) :: self
+! *************************************************************************
+
+ ABI_SFREE(self%zmesh)
+ ABI_SFREE(self%sigc_cvals)
+
+end subroutine sigma_pade_free
 !!***
 
 !----------------------------------------------------------------------
@@ -798,7 +820,7 @@ end subroutine sigma_pade_init
 !!
 !! FUNCTION
 !!  Evaluate the Pade' at the complex point `zz`.
-!!  Return result in val and, optional, the derivative at zz in `dvdz`
+!!  Return result in `val` and, optionally, the derivative at zz in `dvdz`
 !!
 !! SOURCE
 
@@ -829,12 +851,12 @@ subroutine sigma_pade_eval(self, zz, val, &
  end if
 
  if (self%do_sigma_fit) then
-   ! Add analytic expression
+   ! Add analytic expression.
    val = val + self%alphac_pm(1) / (self%betar_pm(1) + zz) &
              + self%alphac_pm(2) / (self%betar_pm(2) - zz)
 
    if (present(dvdz)) then
-     ! Add analytic expression
+     ! Add analytic expression.
      dvdz = dvdz - self%alphac_pm(1) / ((self%betar_pm(1) + zz) ** 2)  &
                  - self%alphac_pm(2) / ((self%betar_pm(2) - zz) ** 2)
    end if
@@ -854,6 +876,12 @@ end subroutine sigma_pade_eval
 !!  in the complex plane starting from the initial guess `z_guess`.
 !!
 !! INPUTS
+!!  e0: KS energy
+!!  v_meanf: matrix element of the mean-field Hamiltonian
+!!  sigx: matrix element of the exchange self-energy.
+!!  z_guess: Initial guess for the QP energy
+!!  msg: Error message if ierr /= 0.
+!!  ierr: Exit status.
 !!
 !! SOURCE
 
@@ -897,7 +925,7 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  if (.not. converged) then
    write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
      'Newton-Raphson method did not converge after: ', NR_MAX_NITER,' iterations.',ch10,&
-     'Absolute error: ',abs(ctdpc), ' > ', NR_ABS_ROOT_ERR
+     'Absolute error: ', abs(ctdpc), ' > ', NR_ABS_ROOT_ERR
    ierr = 1
  end if
 
@@ -906,5 +934,5 @@ end subroutine sigma_pade_qp_solve
 
 !----------------------------------------------------------------------
 
-END MODULE m_dyson_solver
+end module m_dyson_solver
 !!***
