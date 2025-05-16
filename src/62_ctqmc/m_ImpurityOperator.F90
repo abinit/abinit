@@ -95,6 +95,7 @@ PUBLIC  :: ImpurityOperator_init
 PUBLIC  :: ImpurityOperator_reset
 PUBLIC  :: ImpurityOperator_computeU
 PUBLIC  :: ImpurityOperator_setUmat
+PUBLIC  :: ImpurityOperator_setUmatComplex
 PUBLIC  :: ImpurityOperator_setMu
 PUBLIC  :: ImpurityOperator_activateParticle
 PUBLIC  :: ImpurityOperator_getAvailableTime
@@ -362,6 +363,7 @@ SUBROUTINE ImpurityOperator_setUmat(this, matU)
 !Arguments ------------------------------------
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: matU
+
   INTEGER :: iflavor1
   INTEGER :: iflavor2
 
@@ -370,13 +372,59 @@ SUBROUTINE ImpurityOperator_setUmat(this, matU)
 
   DO iflavor1 = 1, this%flavors
     DO iflavor2 = iflavor1+1, this%flavors
-      this%mat_U(iflavor1,iflavor2) = matU(iflavor1,iflavor2)
-      this%mat_U(iflavor2,iflavor1) = matU(iflavor2,iflavor1)
+      this%mat_U(iflavor1,iflavor2) = dble(matU(iflavor1,iflavor2))
+      this%mat_U(iflavor2,iflavor1) = dble(matU(iflavor2,iflavor1))
     END DO
   END DO
 END SUBROUTINE ImpurityOperator_setUmat
 !!***
 
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_setUmatComplex              
+!! NAME                                                                  
+!!  ImpurityOperator_setUmatComplex                                             
+!!                                                                       
+!! FUNCTION                                                              
+!!  Set directly the U interaction                                   
+!!                                                                       
+!! COPYRIGHT                                                             
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)                     
+!!  This file is distributed under the terms of the                      
+!!  GNU General Public License, see ~abinit/COPYING                      
+!!  or http://www.gnu.org/copyleft/gpl.txt .                             
+!!                                                                       
+!! INPUTS                                                                
+!!  this=ImpurtityOperator                                               
+!!  matU=interaction this                                                
+!!                                                                       
+!! OUTPUT                                                                
+!!                                                                       
+!! SIDE EFFECTS                                                          
+!!                                                                       
+!! NOTES                                                                 
+!!                                                                       
+!! SOURCE                                                                
+                                                                         
+SUBROUTINE ImpurityOperator_setUmatComplex(this, matU)                          
+                                                                         
+!Arguments ------------------------------------                          
+  TYPE(ImpurityOperator), INTENT(INOUT) :: this                          
+  COMPLEX(KIND=8), DIMENSION(:,:), INTENT(IN ) :: matU                   
+                                                                         
+  INTEGER :: iflavor1                                                    
+  INTEGER :: iflavor2                                                    
+                                                                         
+  IF ( SIZE(matU) .NE. this%flavors*this%flavors ) &                     
+    CALL ERROR("ImpurityOperator_setUmatComplex : Wrong interaction this")      
+                                                                         
+  DO iflavor1 = 1, this%flavors                                          
+    DO iflavor2 = iflavor1+1, this%flavors                               
+      this%mat_U(iflavor1,iflavor2) = dble(matU(iflavor1,iflavor2))      
+      this%mat_U(iflavor2,iflavor1) = dble(matU(iflavor2,iflavor1))      
+    END DO                                                               
+  END DO                                                                 
+END SUBROUTINE ImpurityOperator_setUmatComplex                                  
+!!***                                                                    
+                                                                         
 !!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_setMu
 !! NAME
 !!  ImpurityOperator_setMu
