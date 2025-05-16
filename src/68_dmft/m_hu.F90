@@ -651,7 +651,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
 
- triqs = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
+ triqs = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7 .or. paw_dmft%dmft_solv == 10)
 
  dmft_optim = paw_dmft%dmft_optim
 

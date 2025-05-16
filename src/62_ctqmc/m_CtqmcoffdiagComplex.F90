@@ -998,12 +998,13 @@ SUBROUTINE CtqmcoffdiagComplex_setU(op,matU)
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagComplex), INTENT(INOUT) ::op
 !Local variables ------------------------------
-  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: matU
+!!  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: matU
+ COMPLEX(KIND=8), DIMENSION(:,:), INTENT(IN) :: matU
 
   IF ( SIZE(matU) .NE. op%flavors*op%flavors ) &
     CALL ERROR("CtqmcoffdiagComplex_setU : Wrong interaction matrix (size)        ")
 
-  CALL ImpurityOperator_setUmat(op%Impurity, matU)
+  CALL ImpurityOperator_setUmatComplex(op%Impurity, matU)
   op%setU = .TRUE.
 END SUBROUTINE CtqmcoffdiagComplex_setU
 !!***
