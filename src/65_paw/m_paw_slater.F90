@@ -43,7 +43,7 @@ MODULE m_paw_slater
  use m_pawang,       only : pawang_type
  use m_paw_sphharm,   only : realgaunt
  use m_pawrad,       only : pawrad_type, pawrad_free, pawrad_isame, &
-&                           pawrad_deducer0, simp_gen, calc_slatradl
+&                           pawrad_deducer0, simp_gen, calc_slatradl,pawrad_copy
  use m_pawtab,       only : pawtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_lmn,      only : make_kln2ln, make_klm2lm, make_indln, klmn2ijlmn
@@ -872,7 +872,7 @@ subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,di
    ! Read core orbitals for this atom type.
    rcut=Pawtab(itypat)%rpaw
    call pawpsp_init_core(Atm(itypat),psp_filename=trim(filpsp(itypat)),rcut_in=rcut)
-   Radatm(itypat)=Atm(itypat)%radmesh
+   call pawrad_copy(Atm(itypat)%radmesh,Radatm(itypat))
 
    write(header,'(a,i4,a)')" === Atom type = ",itypat," === "
    call print_atomorb(Atm(itypat),header,unit=std_out,prtvol=pawprtvol)
