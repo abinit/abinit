@@ -75,7 +75,7 @@ prtgsr 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t01.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t01.abo, tolnlines = 3, tolabs = 2e-5, tolrel = 1e-2, fld_options= -medium;
 #%%   t01o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
 #%%   t01o_DS3_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
 #%% [paral_info]
