@@ -35,8 +35,8 @@ MODULE m_io_screening
  use m_hdr
  use m_sort
  use m_crystal
+ use m_gwdefs
 
- use m_gwdefs,          only : em1params_t, GW_TOLQ
  use m_time,            only : cwtime, cwtime_report !, sec2str, timab
  use m_fstrings,        only : sjoin, itoa, endswith, replace_ch0
  use m_copy,            only : alloc_copy
@@ -2146,7 +2146,14 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  end do
 
  ! Sort frequencies while keeping track of index
- call sort_dp(nfreqim,imag_omega,pos_indx,tol16)
+ if (MOD(hscr_file(1)%gwcalctyp,10) == SIG_GW_AC) then
+   ! Sort in descending order
+   call sort_dp(nfreqim,imag_omega,pos_indx,tol16,order=-1)
+ else
+   ! Sort in ascending order
+   call sort_dp(nfreqim,imag_omega,pos_indx,tol16)
+ end if
+
  i_temp(1:nfreqim) = ifile_indx(nfreqre+1:nfreqre+nfreqim)
  i2_temp(1:nfreqim,1:nfiles) = freq_indx(nfreqre+1:nfreqre+nfreqim,1:nfiles)
 
