@@ -130,9 +130,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  real(dp) :: umod(2,2)
  complex(dp) :: integral(2,2)
  real(dp), allocatable :: docc(:,:),gtmp(:,:),gtmp_nd(:,:,:),levels_ctqmc(:),vee(:,:,:,:)
- complex(dp), allocatable :: muorb,muspin,muzeem
- complex(dp), allocatable :: fw1(:,:),fw1_nd(:,:,:),gw_tmp(:,:),gw_tmp_nd(:,:,:)
- complex(dp), allocatable :: gw1_nd(:,:,:),hybri_limit(:,:),levels_ctqmc_nd(:,:),shift(:)
+ complex(dpc), allocatable :: muorb,muspin,muzeem,levels_ctqmc_complex(:)
+ complex(dpc), allocatable :: fw1(:,:),fw1_nd(:,:,:),gw_tmp(:,:),gw_tmp_nd(:,:,:)
+ complex(dpc), allocatable :: gw1_nd(:,:,:),hybri_limit(:,:),levels_ctqmc_nd(:,:),shift(:)
  type(coeff2c_type), allocatable :: magmom_orb(:),magmom_spin(:),magmom_tot(:)
  type(hu_type), allocatable :: hu_for_s(:)
  type(matlu_type), allocatable :: dmat_diag(:),eigvectmatlu(:),hybri_coeff(:),matlu1(:),matlu2(:),matlu3(:)
@@ -1139,6 +1139,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ABI_MALLOC(levels_ctqmc,(nflavor))
    ABI_MALLOC(levels_ctqmc_nd,(nflavor,nflavor))
    levels_ctqmc_nd(:,:) = czero
+   ABI_MALLOC(levels_ctqmc_complex,(nflavor))
+   levels_ctqmc_complex(:) = czero
    ABI_MALLOC(hybri_limit,(nflavor,nflavor))
    hybri_limit(:,:) = czero
    fw1_nd(:,:,:) = czero
@@ -1169,18 +1171,26 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
                      & weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1+(ispinor1-1)*tndim,im1+(ispinor1-1)*tndim,isppol)
                  end do  ! ifreq
                  fw1_nd(:,iflavor1,iflavor1) = fw1(:,iflavor1)
-
-                 levels_ctqmc(iflavor1) = &
-                    & dble(energy_level%matlu(iatom)%mat(im1+(ispinor1-1)*tndim,im1+(ispinor1-1)*tndim,isppol))
-                 hybri_limit(iflavor1,iflavor1) = hybri_coeff(iatom)%mat(im1+(ispinor1-1)*tndim,im1+(ispinor1-1)*tndim,isppol)
-
+                 
+                 if(paw_dmft%dmft_solv .eq. 10) then
+                   levels_ctqmc_complex(iflavor1) = &
+                     & energy_level%matlu(iatom)%mat(im1+(ispinor1-1)*tndim,im1+(ispinor1-1)*tndim,isppol)
+                 else 
+                   levels_ctqmc(iflavor1) = &
+                      & dble(energy_level%matlu(iatom)%mat(im1+(ispinor1-1)*tndim,im1+(ispinor1-1)*tndim,isppol))
+                   hybri_limit(iflavor1,iflavor1) = hybri_coeff(iatom)%mat(im1+(ispinor1-1)*tndim,im1+(ispinor1-1)*tndim,isppol)
+                 endif
 
                    ! case nsppol=nspinor=1
                  if (nsppol == 1 .and. nspinor == 1) then
                    fw1(:,iflavor1+tndim) = fw1(:,iflavor1)
                    fw1_nd(:,iflavor1+tndim,iflavor1+tndim) = fw1(:,iflavor1)
-                   levels_ctqmc(iflavor1+tndim) = levels_ctqmc(iflavor1)
-                   hybri_limit(iflavor1+tndim,iflavor1+tndim) = hybri_limit(iflavor1,iflavor1)
+                   if(paw_dmft%dmft_solv .eq. 10) then
+                     levels_ctqmc_complex(iflavor1+tndim) = levels_ctqmc_complex(iflavor1)
+                   else
+                     levels_ctqmc(iflavor1+tndim) = levels_ctqmc(iflavor1)
+                     hybri_limit(iflavor1+tndim,iflavor1+tndim) = hybri_limit(iflavor1,iflavor1)
+                   endif
                  end if
 
                ! off diagonal terms
@@ -1504,7 +1514,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
                                                                                                                 
         call CtqmcoffdiagInterfaceComplex_run(hybridoffdiagComplex,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd(:,:,:),&                          
            & Gw=gw_tmp_nd(:,:,:),D=doccsum,E=green%ecorr_qmc(iatom),Noise=noise,matU=udens_atoms(iatom)%mat(:,:,1),&           
-           & Docc=docc(:,:),opt_levels=levels_ctqmc(:),hybri_limit=hybri_limit(:,:),Magmom_orb=REAL(magmom_orb(iatom)%value),&       
+           & Docc=docc(:,:),opt_levels=levels_ctqmc_complex(:),hybri_limit=hybri_limit(:,:),Magmom_orb=REAL(magmom_orb(iatom)%value),&       
            & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)  
  
         ABI_FREE(docc)        
@@ -1578,6 +1588,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ABI_FREE(hybri_limit)
    ABI_FREE(levels_ctqmc_nd)
    ABI_FREE(levels_ctqmc)
+   ABI_FREE(levels_ctqmc_complex)
    ABI_FREE(fw1)
    ABI_FREE(fw1_nd)
 

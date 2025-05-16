@@ -227,7 +227,8 @@ TYPE CtqmcoffdiagComplex
 
   DOUBLE PRECISION :: U
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: mu
+!  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: mu
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: mu
 ! levels
 
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:) :: hybri_limit
@@ -1178,7 +1179,7 @@ SUBROUTINE CtqmcoffdiagComplex_setMu(op, levels)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagComplex)                     , INTENT(INOUT) :: op
-  DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ) :: levels
+  COMPLEX(KIND=8), DIMENSION(:), INTENT(IN ) :: levels
 
   IF ( op%flavors .NE. SIZE(levels,1) ) &
     CALL WARNALL("CtqmcoffdiagComplex_setMu : Taking energy levels from weiss G(iw)")
@@ -1532,7 +1533,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
     !  END IF
   ! --- compute residual K (?)
       K = REAL(CMPLX(0,(2.d0*DBLE(op%Wmax)-1.d0)*pi_invBeta,8)*F_omega(op%Wmax,iflavor,iflavor2))
-      CALL GreenHyboffdiag_setMuD1(op%Greens,iflavor,iflavor2,op%mu(iflavor),K)
+      CALL GreenHyboffdiag_setMuD1(op%Greens,iflavor,iflavor2,dble(op%mu(iflavor)),K)
     END DO
   END DO
 
@@ -2335,7 +2336,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         !write(std_out,*) "        .................",beta , time_avail , op%mu(op%Impurity%activeFlavor),op%Impurity%activeFlavor
 
         IF ( (time1 * (tail + 1.d0 )) &
-             .LT. (beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
+             .LT. (beta * time_avail * det_ratio * DEXP(dble(op%mu(op%Impurity%activeFlavor))*length + overlap) ) ) THEN
 !          write(*,*) "before"
 !          CALL ListCdagCoffdiag_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
           CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
@@ -2401,7 +2402,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         !sui!write(6,*) "                  DET",det_ratio,signdetprev
         END IF
        !ii  write(6,*) "                  DET",det_ratio
-        IF ( (time1 * beta * time_avail * DEXP(op%mu(op%Impurity%activeFlavor)*length+overlap)) &
+        IF ( (time1 * beta * time_avail * DEXP(dble(op%mu(op%Impurity%activeFlavor))*length+overlap)) &
              .LT. (tail * det_ratio ) ) THEN
           CALL ImpurityOperator_remove(op%Impurity,position)
           CALL BathOperatoroffdiag_setMRemove(op%Bath,op%Impurity%particles) 
@@ -2721,7 +2722,7 @@ SUBROUTINE CtqmcoffdiagComplex_trySwap(op,flav_i,flav_j)
 
 !    END IF
     local_ratio = DEXP(-overlapic2*overlapjc2+overlapic1*overlapjc1 &
-                      +(lengthj-lengthi)*(op%mu(flavor_i)-op%mu(flavor_j)))
+                      +(lengthj-lengthi)*dble((op%mu(flavor_i))-dble(op%mu(flavor_j))))
    !ii  write(6,*) "local_ratio",local_ratio
 
     ! Wloc = exp(muN-Uo)

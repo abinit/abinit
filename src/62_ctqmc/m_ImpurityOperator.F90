@@ -55,10 +55,9 @@ TYPE, PUBLIC :: ImpurityOperator
   DOUBLE PRECISION _PRIVATE          :: beta
    !  Inverse of temperature.
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: mat_U
-   !  for iflavor1 and iflavor2, mat_U(iflavor1,iflavor2) is the
-   !  coulomb interaction between iflavor1 and iflavor2.
-
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:)   :: mat_U
+  !  for iflavor1 and iflavor2, mat_U(iflavor1,iflavor2) is the
+  !  coulomb interaction between iflavor1 and iflavor2.
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) _PRIVATE :: overlaps   ! total overlaps
    !  for iflavor1 and iflavor2 overlaps(iflavor1,iflavor2) is the total
@@ -372,8 +371,8 @@ SUBROUTINE ImpurityOperator_setUmat(this, matU)
 
   DO iflavor1 = 1, this%flavors
     DO iflavor2 = iflavor1+1, this%flavors
-      this%mat_U(iflavor1,iflavor2) = dble(matU(iflavor1,iflavor2))
-      this%mat_U(iflavor2,iflavor1) = dble(matU(iflavor2,iflavor1))
+      this%mat_U(iflavor1,iflavor2) = matU(iflavor1,iflavor2)
+      this%mat_U(iflavor2,iflavor1) = matU(iflavor2,iflavor1)
     END DO
   END DO
 END SUBROUTINE ImpurityOperator_setUmat
@@ -1135,7 +1134,7 @@ FUNCTION ImpurityOperator_getTraceAdd(this, CdagC_1) RESULT(trace)
     antisym_sign = -1.d0
   END IF
 
-  trace = antisym_sign * DEXP(this%mat_U(this%activeFlavor,this%activeFlavor)*length + overlap)
+  trace = antisym_sign * DEXP(dble(this%mat_U(this%activeFlavor,this%activeFlavor))*length + overlap) 
 
 END FUNCTION ImpurityOperator_getTraceAdd
 !!***
@@ -1200,7 +1199,7 @@ FUNCTION ImpurityOperator_getTraceRemove(this, position) RESULT(trace)
     antisym_sign = -1.d0
   END IF
 
-  trace = antisym_sign * DEXP(-this%mat_U(this%activeFlavor,this%activeFlavor)*length-overlap)
+  trace = antisym_sign * DEXP(-dble(this%mat_U(this%activeFlavor,this%activeFlavor))*length-overlap)
 
 END FUNCTION ImpurityOperator_getTraceRemove
 !!***
