@@ -52,7 +52,7 @@ nband 24
 
 # Convergence parameters
 ecut 16
-tolvrs 1.d-8
+tolvrs 1.d-12
 nstep 20
 
 pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8"
