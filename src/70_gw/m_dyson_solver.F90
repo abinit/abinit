@@ -236,7 +236,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, Sigp, Kmesh, sigcme,
            ABI_WARNING(msg)
            do io=1,Sr%nomega4sd
              write(msg, '(2f8.4)')e0pde(io)*Ha_eV,scme(io)*Ha_eV
-             call wrtout(units, msg)
+             call wrtout(std_out, msg)
            end do
          end if
 
