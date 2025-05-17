@@ -1,5 +1,5 @@
 
-.Version 10.4.0.2 of ABINIT, released Apr 2025.
+.Version 10.4.0.3 of ABINIT, released Apr 2025.
 .(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 15 May 2025.
-- ( at 18h32 )
+.Starting date : Sat 17 May 2025.
+- ( at 10h15 )
 
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/gwr_suite_t12/t12.abi
 - output file    -> t12.abo
@@ -118,6 +118,9 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
    gwr_sigma_algo1          1
    gwr_sigma_algo2          1
    gwr_sigma_algo3          2
+      gw_icutcoul1          6
+      gw_icutcoul2          6
+      gw_icutcoul3         16
            istwfk        2    3    7
               ixc          11
            jdtset        1    2    3
@@ -546,7 +549,7 @@ nkibz: 3
 nqibz: 3
 inclvkb: 2
 q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
-gw_icutcoul: 6
+gw_icutcoul: 16
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
@@ -627,6 +630,7 @@ iteration_state: {dtset: 3, }
 
 
 
+
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -636,16 +640,16 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    2.454
-QP_gap     :    7.573
-Delta_QP_KS:    5.118
+QP_gap     :    7.673
+Delta_QP_KS:    5.219
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        2   -0.451  -11.382  -13.466   -0.295    0.866   -2.061   -2.061   -2.512    2.000
-        3   -0.451  -11.382  -13.466   -0.295    0.866   -2.061   -2.061   -2.512    2.000
-        4   -0.451  -11.382  -13.466   -0.295    0.866   -2.061   -2.061   -2.512    2.000
-        5    2.003   -9.974   -4.987   -1.469    0.869    3.057    3.057    5.060    0.000
-        6    2.003   -9.974   -4.987   -1.469    0.869    3.057    3.057    5.060    0.000
-        7    2.003   -9.974   -4.987   -1.469    0.869    3.057    3.057    5.060    0.000
+        2   -0.451  -11.382  -13.885   -0.278    0.862   -2.398   -2.398   -2.850    2.000
+        3   -0.451  -11.382  -13.885   -0.278    0.862   -2.398   -2.398   -2.850    2.000
+        4   -0.451  -11.382  -13.885   -0.278    0.862   -2.398   -2.398   -2.850    2.000
+        5    2.003   -9.974   -5.148   -1.562    0.864    2.820    2.820    4.823    0.000
+        6    2.003   -9.974   -5.148   -1.562    0.864    2.820    2.820    4.823    0.000
+        7    2.003   -9.974   -5.148   -1.562    0.864    2.820    2.820    4.823    0.000
 ...
 
 
@@ -658,13 +662,13 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    3.497
-QP_gap     :    8.451
-Delta_QP_KS:    4.954
+QP_gap     :    8.551
+Delta_QP_KS:    5.054
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        3   -1.736  -11.091  -13.334   -0.118    0.837   -1.976   -1.976   -3.712    2.000
-        4   -1.736  -11.091  -13.334   -0.118    0.837   -1.976   -1.976   -3.712    2.000
-        5    1.761   -9.965   -5.012   -1.539    0.872    2.979    2.979    4.739    0.000
+        3   -1.736  -11.091  -13.756   -0.099    0.836   -2.310   -2.310   -4.047    2.000
+        4   -1.736  -11.091  -13.756   -0.099    0.836   -2.310   -2.310   -4.047    2.000
+        5    1.761   -9.965   -5.157   -1.645    0.867    2.744    2.744    4.505    0.000
 ...
 
 
@@ -678,8 +682,8 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
  Indirect band gap semiconductor
- Fundamental gap:     2.963 (eV)
-   VBM:    -2.512 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     3.301 (eV)
+   VBM:    -2.850 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         3.887 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
 
@@ -734,6 +738,9 @@ data: !Tabular |
    gwr_sigma_algo1          1
    gwr_sigma_algo2          1
    gwr_sigma_algo3          2
+      gw_icutcoul1          6
+      gw_icutcoul2          6
+      gw_icutcoul3         16
            istwfk        2    3    7
               ixc          11
            jdtset        1    2    3
