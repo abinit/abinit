@@ -1550,7 +1550,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_FREE(iwork)
 
  ! Initialize Coulomb interaction.
- ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
  call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
                      dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)

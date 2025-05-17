@@ -32,7 +32,7 @@ gwr_chi_algo3 2      # Use convolutions for Chi.
 gwr_sigma_algo3 2    # Use convolutions for Sigma
 gwr_boxcutmin3  1.0  # This should be subject to convergence studies
 gwr_max_hwtene  0.6  # Filter transitions when computing head and wings.
-#gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+gw_icutcoul3   16    # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 #gw_icutcoul3   0    # Spherical cutoff
 #ecutwfn3 3.0
 #gwr_ucsc_batch3 3 5
