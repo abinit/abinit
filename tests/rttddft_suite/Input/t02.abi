@@ -52,7 +52,7 @@ nband 24
 
 # Convergence parameters
 ecut 16
-tolvrs 1.d-4
+tolvrs 1.d-12
 nstep 20
 
 pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8"
@@ -74,9 +74,9 @@ prtgsr 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t02.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t02o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t02o_DS3_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t02.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t02o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t02o_DS3_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
