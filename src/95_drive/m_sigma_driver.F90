@@ -3842,6 +3842,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  end if
 
  ! Setup parameters for Spectral function.
+ ! TODO: Mesh should be centered on e0
  if (Dtset%gw_customnfreqsp/=0) then
    Sigp%nomegasr = Dtset%gw_customnfreqsp
    ABI_WARNING('Custom grid for spectral function specified. Assuming experienced user.')
@@ -3855,17 +3856,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    Sigp%maxomega_r=Dtset%freqspmax
  end if
 
- if (Sigp%nomegasr>0) then
-   if (Dtset%gw_customnfreqsp==0) then
+ if (Sigp%nomegasr > 0) then
+   if (Dtset%gw_customnfreqsp == 0) then
      ! Check
      if (Sigp%minomega_r >= Sigp%maxomega_r) then
        ABI_ERROR('freqspmin must be smaller than freqspmax!')
      end if
-     if(Sigp%nomegasr==1) then
-      domegas=0.d0
-     else
-      domegas=(Sigp%maxomega_r-Sigp%minomega_r)/(Sigp%nomegasr-1)
-     endif
+     domegas = zero
+     if(Sigp%nomegasr /= 1) domegas = (Sigp%maxomega_r-Sigp%minomega_r)/(Sigp%nomegasr-1)
+
      !TODO this should be moved to Sr% and done in init_sigma_t
      ABI_MALLOC(Sigp%omega_r,(Sigp%nomegasr))
      do io=1,Sigp%nomegasr
@@ -3884,7 +3883,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      !TODO this should be moved to Sr% and done in init_sigma_t
      ABI_MALLOC(Sigp%omega_r,(Sigp%nomegasr))
      do io=1,Sigp%nomegasr
-       Sigp%omega_r(io) = CMPLX(Dtset%gw_freqsp(io),zero)
+       Sigp%omega_r(io) = CMPLX(Dtset%gw_freqsp(io), zero)
      end do
      write(msg,'(4a,i8,2(2a,f8.3),3a)')ch10,&
        ' Parameters for the calculation of the spectral function : ',ch10,&
@@ -3901,9 +3900,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    !Sigp%omega_r(1)=0
  end if
 
- call ks_gaps%free()
-
  ABI_FREE(val_indices)
+ call ks_gaps%free()
 
  DBG_EXIT('COLL')
 

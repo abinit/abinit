@@ -194,7 +194,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
  complex(gwpc),allocatable :: botsq_conjg_transp(:,:)
  complex(gwpc),pointer, contiguous :: ac_epsm1cqwz2(:,:,:) => null()
- complex(gwpc),allocatable :: epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:) ! epsm1_qbz(:,:,:),
+ complex(gwpc),allocatable :: epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:)
  complex(gwpc),allocatable :: sigc_ket(:,:),ket1(:,:),ket2(:,:)
  complex(gwpc),allocatable :: herm_sigc_ket(:,:),aherm_sigc_ket(:,:), rhotwg_ki(:,:)
  complex(gwpc),allocatable :: sigcme2(:,:),sigcme_3(:),sigcme_new(:),sigctmp(:,:)
@@ -530,11 +530,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  write(msg,'(2a,i0,a)')ch10,' calculation status ( ',nq_summed,' to be completed):'
  call wrtout(std_out, msg)
 
- ! Here we have a problem in case of CD since epsm1q might be huge
+ ! Here we have a problem in case of CD or AC since epsm1q might be huge.
+ ! For this reason we use MPI shared memory for epsm1%epsm1_qbz(npwc, npwc, epsm1%nomega) inside shared_comm.
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
  if (ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
    if (.not. (mod10==SIG_GW_CD .and. epsm1%mqmem == 0)) then
-     !ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, epsm1%nomega), ierr)
      call epsm1%malloc_epsm1_qbz(npwc, epsm1%nomega)
    end if
  end if
@@ -705,8 +705,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Do in-place symmetrisation.
          call epsm1%rotate_iqbz_inplace(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh,.TRUE.)
        else
-         ! This call sets epsm1%epsm1_qbz(npwc, npwc, epsm1%nomega)
-         call epsm1%rotate_iqbz(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, .TRUE.) !, epsm1%epsm1_qbz)
+         ! This call sets the value of epsm1%epsm1_qbz(npwc, npwc, epsm1%nomega)
+         call epsm1%rotate_iqbz(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, .TRUE.)
        end if
 
        if (mod10 == SIG_GW_AC) then
@@ -1331,7 +1331,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_SFREE(sigc_ket)
  ABI_SFREE(ket1)
  ABI_SFREE(ket2)
- !ABI_SFREE(epsm1_qbz)
  ABI_SFREE(epsm1_trcc_qbz)
  ABI_SFREE(epsm1_tmp)
  ABI_SFREE(degtab)
