@@ -45,7 +45,7 @@
 !!
 !!   - in GWR, the k-mesh must be Gamma-centered.
 !!   - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
-!!   - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes).
+!!   - The frequency/tau meshes are automatically defined by gwr_ntau and the KS energies up to nband (minimax meshes).
 !!
 !!  Technical problems:
 !!
@@ -143,7 +143,6 @@ module m_gwr
  use m_hide_blas
 
  use defs_datatypes,  only : pseudopotential_type
- use m_hide_lapack,   only : xginv, xhdp_invert
  use defs_abitypes,   only : mpi_type
  use m_gwdefs,        only : GW_TOL_DOCC, GW_TOLQ0, GW_TOL_W0, GW_Q0_DEFAULT, cone_gw, czero_gw, j_gw, sigijtab_t, &
                              sigijtab_free, g0g0w
@@ -5517,9 +5516,9 @@ subroutine gwr_build_sigmac(gwr)
  logical :: compute_this_kbz, print_time, define, sigc_is_herm, band_inversion
  character(len=500) :: msg
  type(gaps_t) :: new_gaps
- !type(desc_t), pointer :: desc_q !, desc_k
  type(yamldoc_t) :: ydoc
  type(c_ptr) :: void_ptr
+ type(sigma_pade_t) :: spade
 !arrays
  integer :: sc_ngfft(18), need_qibz(gwr%nqibz), got_qibz(gwr%nqibz), units(2), dat_units(3), g0_q(3) ! gg(3),
  integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
@@ -5546,7 +5545,6 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: qpz_ene(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
  complex(dp) :: qp_pade(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigxc_rw_diag(gwr%nwr, gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
- type(sigma_pade_t) :: spade
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
 ! *************************************************************************
 
@@ -7043,7 +7041,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
 
  ! Cannot reuse SCR.nc/SUSC.nc fileformat as:
  !  - hscr_new requires ep% instance
- !  - old file formats assume Gamma-centered g vectors.
+ !  - old file formats assume Gamma-centered G vectors.
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -8732,7 +8730,6 @@ subroutine gwr_gamma_gw(gwr, nfftf, ngfftf, vpsp)
              gw_rhog, cryst%rprimd, dtset%vcutgeo, gw_vhartr)
 
  ! TODO
-
  ABI_FREE(nateigv)
  ABI_FREE(nat_occs)
  ABI_FREE(xrdm_k_full)

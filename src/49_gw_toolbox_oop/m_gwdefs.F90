@@ -519,13 +519,10 @@ end subroutine sigparams_free
 !!
 !! SOURCE
 
-function sigma_type_from_key(key) result(sigma_type)
+character(len=STR_LEN) function sigma_type_from_key(key) result(sigma_type)
 
+!Arguments ------------------------------------
  integer,intent(in) :: key
- character(len=STR_LEN) :: sigma_type
-
-!Local variables ------------------------------
- character(len=500) :: msg
 !************************************************************************
 
  sigma_type = "None"
@@ -650,13 +647,12 @@ end function sigma_needs_ppm
 !!
 !! SOURCE
 
-function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
+complex(dpc) function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: opt_poles
  real(dp),intent(in) :: TOL_W0,delta_ene,numerator,zcut
- complex(dpc) :: g0g0w
  complex(dpc),intent(in) :: omega
 
 !Local variables ------------------------------

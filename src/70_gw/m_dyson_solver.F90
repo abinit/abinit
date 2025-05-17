@@ -155,11 +155,11 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iab,ib1,ib2,ikbz_gw,io,spin,is_idx,isym,iter,itim,jb, ie0, ierr
+ integer :: iab,ib1,ib2,ikbz_gw,io,spin,is_idx,isym,itim,jb, ie0, ierr
  integer :: ik_ibz,kb,ld_matrix,mod10,nsploop,my_rank, units(2)
  real(dp) :: alpha, beta, smrt, vxc_val, vu, v_meanf, sigx
- complex(dpc) :: ctdpc, dct, dsigc, sigc, sigc_zsc, zz, zsc, phase
- logical :: converged,ltest
+ complex(dpc) :: dsigc, sigc, sigc_zsc, zz, zsc, phase
+ logical :: ltest
  character(len=500) :: msg
  type(sigma_pade_t) :: spade
 !arrays
@@ -383,8 +383,6 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
        ! and there's no mention that the QP energies have been obtained from the non-linear equation!!
        ! One should change the format used to print the results or at least warn the user!
 
-       ! Find roots of E^0-V_xc-V_U+Sig_x+Sig_c(z)-z, i.e E^qp.
-       ! using Newton-Raphson method and starting point E^0
        zz = CMPLX(Sr%e0(jb,ik_ibz,spin), zero)
 
        if (Sigp%mbpt_sciss>0.1d-4) then
@@ -393,6 +391,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
        end if
 
        ! Solve the QP equation with Newton-Rapson starting from e0
+       ! Find root of E^0-V_xc-V_U+Sig_x+Sig_c(z)-z, i.e E^qp.
        alphac_pm = zero; betar_pm = zero; zcut_pm = zero
        call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,spin), alphac_pm, betar_pm, zcut_pm)
 
