@@ -877,7 +877,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
  real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
  real(dp) :: prev_efficiency, prev_speedup, regterm, prev_dual_error
- logical :: isirr_k, changed, q_is_gamma, reorder
+ logical :: isirr_k, changed, q_is_gamma, reorder, can_use_kshifts
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
  type(est_t) :: est
@@ -960,8 +960,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_CHECK_IEQ(gwr%nkibz, ks_ebands%nkpt, "nkibz != ks_ebands%nkpt")
  ABI_CHECK(all(abs(ks_ebands%kptns - kibz) < tol12), "ks_ebands%kibz != kibz")
 
- if (.not. (isdiagmat(ks_ebands%kptrlatt) .and. ks_ebands%nshiftk == 1)) then
-     !.and. (gwr%use_supercell_for_tchi .or. gwr%use_supercell_for_tchi)) then
+ can_use_kshifts = .not. gwr%use_supercell_for_tchi .and. .not. gwr%use_supercell_for_tchi
+ !can_use_kshifts = .False.
+
+ if (.not. (isdiagmat(ks_ebands%kptrlatt) .and. ks_ebands%nshiftk == 1) .and. .not. can_use_kshifts) then
    ABI_ERROR("GWR code requires ngkpt with one shift!")
  end if
  gwr%ngkpt = get_diag(ks_ebands%kptrlatt)
@@ -977,7 +979,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Order kbz by stars and rearrange entries in kbz2ibz table.
  call kpts_pack_in_stars(gwr%nkbz, gwr%kbz, gwr%kbz2ibz)
-
  if (my_rank == master) then
    call kpts_map_print(units, " Mapping kBZ --> kIBZ", "symrec", gwr%kbz, kibz, gwr%kbz2ibz, gwr%dtset%prtvol)
  end if
@@ -991,6 +992,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
 
+if (.not. can_use_kshifts) then
+
  ! Setup IBZ q-points, weights and BZ. Always use q --> -q symmetry even in systems without inversion
  my_nshiftq = 1; my_shiftq = zero; qptrlatt = ks_ebands%kptrlatt
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &  ! in
@@ -1001,13 +1004,14 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Table with symrec conventions for the symmetrization of chi.
  ABI_MALLOC(gwr%qbz2ibz, (6, gwr%nqbz))
+
  qrank = krank_from_kptrlatt(gwr%nqibz, gwr%qibz, qptrlatt, compute_invrank=.False.)
  if (kpts_map("symrec", qptopt1, cryst, qrank, gwr%nqbz, gwr%qbz, gwr%qbz2ibz) /= 0) then
    ABI_ERROR("Cannot map qBZ to IBZ!")
  end if
  call qrank%free()
 
-#if 1
+else
  ! === Create basic data types for the calculation ===
  ! Kmesh defines the k-point sampling for the wavefunctions.
  ! Qmesh defines the q-point sampling for chi0, all possible differences k1-k2 reduced to the IBZ.
@@ -1024,16 +1028,34 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  Kmesh%nshift        = Dtset%nshiftk
  ABI_MALLOC(Kmesh%shift, (3, Kmesh%nshift))
  Kmesh%shift(:,:)    = Dtset%shiftk(:,1:Dtset%nshiftk)
- call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
+ !call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
 
  ! === Find Q-mesh ===
  ! Stop if a nonzero umklapp is needed to reconstruct the BZ.
  ! epsilon^-1(Sq) indeed should be symmetrized in csigme using a different expression (G-G_o is needed)
  call qmesh%find_qmesh(cryst, Kmesh)
- call qmesh%print(units, "Q-mesh for the screening function", prtvol=dtset%prtvol)
+ !call qmesh%print(units, "Q-mesh for the screening function", prtvol=dtset%prtvol)
+
+ gwr%nqibz = qmesh%nibz
+ gwr%nqbz = qmesh%nbz
+
+ call alloc_copy(qmesh%ibz, gwr%qibz)
+ call alloc_copy(qmesh%wt, gwr%wtq)
+ call alloc_copy(qmesh%bz, gwr%qbz)
+
+ ABI_CHECK(all(abs(gwr%qibz(:,1)) < tol16), "First qpoint in qibz should be Gamma!")
+ gwr%ngqpt = -1
+
+ ! Table with symrec conventions for the symmetrization of chi.
+ ABI_MALLOC(gwr%qbz2ibz, (6, gwr%nqbz))
 
  do iq_bz=1,Qmesh%nbz
-   call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym, itim)
+   call qmesh%get_bz_item(iq_bz, qbz, iq_ibz, isym, itim)
+   gwr%qbz2ibz(1, iq_bz) = iq_ibz
+   gwr%qbz2ibz(2, iq_bz) = isym
+   gwr%qbz2ibz(3:5, iq_bz) = zero
+   ! Note different conventions from itim between the Qmesh routines used in conventional GW and Abinit routines.
+   gwr%qbz2ibz(6, iq_bz) = merge(0, 1, itim == 1)
    sq = (3-2*itim) * MATMUL(cryst%symrec(:,:,isym), qmesh%ibz(:,iq_ibz))
    if (ANY(ABS(qbz-sq) > 1.0d-4)) then
      write(msg,'(a,3f6.3,a,3f6.3,2a,9i3,a,i2,2a)')&
@@ -1044,9 +1066,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    end if
  end do
  call kmesh%free(); call qmesh%free()
- stop
  end block
-#endif
+
+endif
 
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
  call kpts_pack_in_stars(gwr%nqbz, gwr%qbz, gwr%qbz2ibz)
@@ -1974,7 +1996,6 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%chi0_head_myw)
  ABI_SFREE(gwr%chi0_uwing_myw)
  ABI_SFREE(gwr%chi0_lwing_myw)
- ABI_SFREE(gwr%qbz2ibz)
  ABI_SFREE(gwr%my_spins)
  ABI_SFREE(gwr%my_itaus)
  ABI_SFREE(gwr%tau_master)
