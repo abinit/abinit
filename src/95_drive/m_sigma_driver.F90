@@ -2982,6 +2982,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
  type(vcoul_t) :: Vcp_ks
+ integer :: nbsum
+ real(dp) :: te_min = -one, te_max = one
+ real(dp) :: ft_max_error(3) = -one
+ real(dp) :: cosft_duality_error = -one
+ real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
+ real(dp),allocatable :: cosft_wt(:,:), cosft_tw(:,:), sinft_wt(:,:)
 ! *************************************************************************
 
  DBG_ENTER('COLL')
@@ -3513,7 +3519,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%ecuteps = Gsph_c%ecut
  Dtset%ecuteps = Sigp%ecuteps
 
-! === Make biggest G-sphere of Sigp%npwvec vectors ===
+! Make biggest G-sphere of Sigp%npwvec vectors.
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
  call Gsph_Max%init(Cryst, Sigp%npwvec, gvec=gvec_kss)
 
@@ -3762,14 +3768,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      end do
 
    case ("minimax")
-     block
-     integer :: nbsum
-     real(dp) :: te_min = -one, te_max = one
-     real(dp) :: ft_max_error(3) = -one
-     real(dp) :: cosft_duality_error = -one
-     real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
-     real(dp),allocatable :: cosft_wt(:,:), cosft_tw(:,:), sinft_wt(:,:)
-
      nbsum = sigp%nbnds
 
      call wrtout(std_out, "Computing minimax grid")
@@ -3796,7 +3794,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ABI_FREE_NOCOUNT(cosft_wt)
      ABI_FREE_NOCOUNT(cosft_tw)
      ABI_FREE_NOCOUNT(sinft_wt)
-     end block
 
    !case ("log")
      !ABI_ERROR("AC with log mesh not implemented")

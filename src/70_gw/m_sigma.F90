@@ -34,9 +34,9 @@ module m_sigma
  use m_wfd
 
  use defs_abitypes,    only : MPI_type
+ use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, unt_sigc
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : c2r
- use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, unt_sigc
  use m_crystal,        only : crystal_t
  use m_ebands,         only : ebands_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
@@ -645,26 +645,26 @@ subroutine sigma_print_pertubative(sigma, ik_ibz, band, spin, units, &
 
  !if (with_notations) then
  !call wrtout(units, "(a)")" Notations:"
- !call wrtout(units, "(a)")"E0 is the KS eigenenergy")
- !call wrtout(units, "(a)")"VxcDFT gives the KS exchange-correlation potential expectation value")
- !call wrtout(units, "(a)")"SigX gives the exchange contribution to the self-energy")
- !call wrtout(units, "(a)")"SigC(E0) gives the correlation contribution to the self-energy, evaluated at the KS eigenenergy")
- !call wrtout(units, "(a)")"Z is the renormalisation factor")
- !call wrtout(units, "(a)")"dSigC/dE is the energy derivative of SigC with respect to the energy")
- !call wrtout(units, "(a)")"SigC(E) gives the correlation contribution to the self-energy, evaluated at the GW energy")
- !call wrtout(units, "(a)")"E-E0 is the difference between GW energy and KS eigenenergy")
- !call wrtout(units, "(a)")"E is the final GW quasiparticle energy")
+ !call wrtout(units, "(a)")"E0: KS eigenvalue")
+ !call wrtout(units, "(a)")"VxcDFT: KS exchange-correlation potential expectation value")
+ !call wrtout(units, "(a)")"SigX: exchange part of the self-energy")
+ !call wrtout(units, "(a)")"SigC(E0) correlation part of the self-energy, evaluated at the KS eigenenergy")
+ !call wrtout(units, "(a)")"Z: renormalisation factor")
+ !call wrtout(units, "(a)")"dSigC/dE: energy derivative of SigC with respect to the energy")
+ !call wrtout(units, "(a)")"SigC(E): correlation part of the self-energy, evaluated at the QP energy")
+ !call wrtout(units, "(a)")"E-E0: difference between QP energy and KS eigenenergy")
+ !call wrtout(units, "(a)")"E: quasiparticle energy")
  !end if
 
- if (PRESENT(with_header)) then
+ if (present(with_header)) then
    if (with_header) then
      call wrtout(units,' Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E ')
    end if
  end if
 
- if (sigma%usepawu==0) then
+ if (sigma%usepawu == 0) then
 
-   if (sigma%nsig_ab/=1) then
+   if (sigma%nsig_ab /= 1) then
      write(msg,'(i5,9f8.3)')                       &
            band,                                  &
            sigma%e0          (band,ik_ibz,1)*Ha_eV,  &
@@ -678,9 +678,9 @@ subroutine sigma_print_pertubative(sigma, ik_ibz, band, spin, units, &
       REAL(sigma%egw         (band,ik_ibz,1))*Ha_eV
      call wrtout(units, msg)
      if (present(ydoc)) call ydoc%add_tabular_line(msg)
-     if (verbose/=0) then
+     if (verbose /= 0) then
        write(msg,'(i5,9f8.3)')                        &
-              band,                                  &
+              band,                                   &
               zero,                                   &
               zero,                                   &
               zero,                                   &
@@ -708,9 +708,9 @@ subroutine sigma_print_pertubative(sigma, ik_ibz, band, spin, units, &
     call wrtout(units, msg)
     if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
-    if (verbose/=0) then
+    if (verbose /= 0) then
       write(msg,'(i5,9f8.3)')                      &
-              band,                               &
+              band,                                &
               zero,                                &
               zero,                                &
               zero,                                &
@@ -729,7 +729,7 @@ subroutine sigma_print_pertubative(sigma, ik_ibz, band, spin, units, &
    ! PAW+U+GW calculation.
    ABI_CHECK(sigma%nsig_ab==1, 'DFT+U with spinor not implemented')
    write(msg,'(i5,10f8.3)')                   &
-         band,                               &
+         band,                                &
          sigma%e0      (band,ik_ibz,spin)*Ha_eV, &
          sigma%vxcme   (band,ik_ibz,spin)*Ha_eV, &
          sigma%vUme    (band,ik_ibz,spin)*Ha_eV, &
@@ -801,7 +801,7 @@ subroutine sigma_print_qpsc(sigma, ik_ibz, band, spin, ks_ebands, units, &
  if (sigma%usepawu==0 .or. .TRUE.) then
    if (sigma%nsig_ab/=1) then
      write(msg,'(i5,12(2x,f8.3))')                       &
-           band,                                        &
+           band,                                         &
            ks_ebands%eig     (band,ik_ibz,1)*Ha_eV,        &
            SUM(sigma%vxcme   (band,ik_ibz,:))*Ha_eV,       &
            sigma%e0          (band,ik_ibz,1)*Ha_eV,        &
@@ -818,12 +818,12 @@ subroutine sigma_print_qpsc(sigma, ik_ibz, band, spin, ks_ebands, units, &
      if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
      write(msg,'(i5,12(2x,f8.3))')                        &
-            band,                                        &
+            band,                                         &
             zero,                                         &
             zero,                                         &
             zero,                                         &
       AIMAG(SUM(sigma%hhartree(band,band,ik_ibz,:)))*Ha_eV,&
-            zero,                                         &
+            zero,                                           &
       AIMAG(SUM(sigma%sigcmee0(band,ik_ibz,:)))*Ha_eV,      &
       AIMAG(sigma%ze0         (band,ik_ibz,1)),             &
       AIMAG(SUM(sigma%dsigmee0(band,ik_ibz,:))),            &
@@ -836,12 +836,12 @@ subroutine sigma_print_qpsc(sigma, ik_ibz, band, spin, ks_ebands, units, &
        if (present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
    else
-     write(msg,'(i5,12(2x,f8.3))')                       &
-           band,                                        &
+     write(msg,'(i5,12(2x,f8.3))')                          &
+           band,                                            &
            ks_ebands%eig    (band,ik_ibz,spin)*Ha_eV,       &
            sigma%vxcme      (band,ik_ibz,spin)*Ha_eV,       &
            sigma%e0         (band,ik_ibz,spin)*Ha_eV,       &
-      REAL(sigma%hhartree   (band,band,ik_ibz,spin))*Ha_eV,&
+      REAL(sigma%hhartree   (band,band,ik_ibz,spin))*Ha_eV, &
            sigma%sigxme     (band,ik_ibz,spin)*Ha_eV,       &
       REAL(sigma%sigcmee0   (band,ik_ibz,spin))*Ha_eV,      &
       REAL(sigma%ze0        (band,ik_ibz,spin)),            &
@@ -854,12 +854,12 @@ subroutine sigma_print_qpsc(sigma, ik_ibz, band, spin, ks_ebands, units, &
      if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
      write(msg,'(i5,12(2x,f8.3))')                       &
-            band,                                       &
+            band,                                        &
             zero,                                        &
             zero,                                        &
             zero,                                        &
       AIMAG(sigma%hhartree  (band,band,ik_ibz,spin))*Ha_eV,&
-            zero,                                        &
+            zero,                                           &
       AIMAG(sigma%sigcmee0   (band,ik_ibz,spin))*Ha_eV,     &
       AIMAG(sigma%ze0        (band,ik_ibz,spin)),           &
       AIMAG(sigma%dsigmee0   (band,ik_ibz,spin)),           &
@@ -903,7 +903,6 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
  integer,intent(in) :: nkibz, usepawu
 
 !Local variables-------------------------------
-!scalars
  integer :: b1gw,b2gw,mod10
 ! *************************************************************************
 
@@ -918,14 +917,14 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
  sigma%scissor_ene=Sigp%mbpt_sciss
 
  !FIXME this should be done in sigma_allocate
- ABI_MALLOC(sigma%minbnd,(sigma%nkptgw,Sigp%nsppol))
- ABI_MALLOC(sigma%maxbnd,(sigma%nkptgw,Sigp%nsppol))
+ ABI_MALLOC(sigma%minbnd, (sigma%nkptgw,Sigp%nsppol))
+ ABI_MALLOC(sigma%maxbnd, (sigma%nkptgw,Sigp%nsppol))
  sigma%minbnd=Sigp%minbnd; sigma%maxbnd=Sigp%maxbnd
- ABI_MALLOC(sigma%kptgw,(3,sigma%nkptgw))
+ ABI_MALLOC(sigma%kptgw, (3,sigma%nkptgw))
  sigma%kptgw=Sigp%kptgw
 
- sigma%b1gw     =Sigp%minbdgw ! * min and Max GW band index over k and spin.
- sigma%b2gw     =Sigp%maxbdgw !   Used to dimension arrays.
+ sigma%b1gw     =Sigp%minbdgw ! min and Max GW band index over k and spin.
+ sigma%b2gw     =Sigp%maxbdgw ! Used to dimension arrays.
  sigma%nbnds    =Sigp%nbnds
  sigma%nkibz    =nkibz
  sigma%nsppol   =Sigp%nsppol
@@ -941,17 +940,15 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
  b1gw=sigma%b1gw
  b2gw=sigma%b2gw
 
- !TODO write routine to allocate all this stuff
-
  ! hhartree(b1,b2,k,s)= <b1,k,s|T+v_{loc}+v_{nl}+v_{H}|b2,k,s>
- ABI_CALLOC(sigma%hhartree,(b1gw:b2gw,b1gw:b2gw,sigma%nkibz,sigma%nsppol*sigma%nsig_ab))
+ ABI_CALLOC(sigma%hhartree, (b1gw:b2gw,b1gw:b2gw,sigma%nkibz,sigma%nsppol*sigma%nsig_ab))
 
- ! QP amplitudes and energies
- ABI_CALLOC(sigma%en_qp_diago,(sigma%nbnds,sigma%nkibz,sigma%nsppol))
+ ! QP amplitudes and energies.
+ ABI_CALLOC(sigma%en_qp_diago, (sigma%nbnds,sigma%nkibz,sigma%nsppol))
 
  sigma%needs_eigvec_qp = sigp%gwcalctyp >= 10
  if (sigma%needs_eigvec_qp) then
-   ABI_CALLOC(sigma%eigvec_qp,(sigma%nbnds,sigma%nbnds,sigma%nkibz,sigma%nsppol))
+   ABI_CALLOC(sigma%eigvec_qp, (sigma%nbnds,sigma%nbnds,sigma%nkibz,sigma%nsppol))
  end if
 
  ABI_CALLOC(sigma%vxcme, (b1gw:b2gw, sigma%nkibz, sigma%nsppol*sigma%nsig_ab))
@@ -973,24 +970,24 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
  ABI_CALLOC(sigma%egwgap, (sigma%nkibz, sigma%nsppol))
 
  ! These quantities are used to evaluate $\Sigma(E)$ around the KS\QP eigenvalue
- ABI_CALLOC(sigma%omega4sd,(b1gw:b2gw, sigma%nkibz, sigma%nomega4sd, sigma%nsppol))
- ABI_CALLOC(sigma%sigcme4sd,(b1gw:b2gw, sigma%nkibz, sigma%nomega4sd, sigma%nsppol*sigma%nsig_ab))
- ABI_CALLOC(sigma%sigxcme4sd,(b1gw:b2gw, sigma%nkibz, sigma%nomega4sd, sigma%nsppol*sigma%nsig_ab))
+ ABI_CALLOC(sigma%omega4sd, (b1gw:b2gw, sigma%nkibz, sigma%nomega4sd, sigma%nsppol))
+ ABI_CALLOC(sigma%sigcme4sd, (b1gw:b2gw, sigma%nkibz, sigma%nomega4sd, sigma%nsppol*sigma%nsig_ab))
+ ABI_CALLOC(sigma%sigxcme4sd, (b1gw:b2gw, sigma%nkibz, sigma%nomega4sd, sigma%nsppol*sigma%nsig_ab))
 
- !TODO Find  better treatment
  ! Mesh along the real axis.
- if (sigma%nomega_r>0) then
+ !TODO Find  better treatment
+ if (sigma%nomega_r > 0) then
    ABI_MALLOC(sigma%omega_r, (sigma%nomega_r))
    sigma%omega_r(:)=Sigp%omega_r(:)
  end if
 
  ! Analytic Continuation
  ! FIXME omegasi should not be in Sigp% here we should construct the mesh
- if (mod10==1) then
+ if (mod10 == 1) then
    ABI_MALLOC(sigma%omega_i, (sigma%nomega_i))
    sigma%omega_i = Sigp%omegasi
-   ABI_CALLOC(sigma%sigcmesi, (b1gw:b2gw, sigma%nkibz, sigma%nomega_i, sigma%nsppol*sigma%nsig_ab))
-   ABI_CALLOC(sigma%sigxcmesi,(b1gw:b2gw, sigma%nkibz, sigma%nomega_i, sigma%nsppol*sigma%nsig_ab))
+   ABI_CALLOC(sigma%sigcmesi,  (b1gw:b2gw, sigma%nkibz, sigma%nomega_i, sigma%nsppol*sigma%nsig_ab))
+   ABI_CALLOC(sigma%sigxcmesi, (b1gw:b2gw, sigma%nkibz, sigma%nomega_i, sigma%nsppol*sigma%nsig_ab))
  end if
 
 end subroutine sigma_init
@@ -1279,13 +1276,13 @@ end function sigma_get_kiene
 !!
 !! SOURCE
 
-subroutine find_wpoles_for_cd(Sigp, sigma, Kmesh, BSt, omega_max)
+subroutine find_wpoles_for_cd(Sigp, sigma, Kmesh, ebands, omega_max)
 
 !Arguments ------------------------------------
 !scalars
  class(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(in) :: sigma
- type(ebands_t),intent(in) :: Bst
+ type(ebands_t),intent(in) :: ebands
  type(kmesh_t),intent(in) :: Kmesh
  real(dp),intent(out) :: omega_max
 
@@ -1293,8 +1290,7 @@ subroutine find_wpoles_for_cd(Sigp, sigma, Kmesh, BSt, omega_max)
 !scalars
  integer :: spin,ik_ibz,band_gr,bgw_start,bgw_stop,io,ioe0j
  integer :: ikgw,ikgw_ibz,ikgw_bz,band_gw,nomega_tot
- real(dp) :: e_green,e_screen,theta_mu_minus_e0i,e_qp
- real(dp) :: fact_sp
+ real(dp) :: e_green,e_screen,theta_mu_minus_e0i,e_qp,fact_sp
  !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: omegame0i(:)
@@ -1305,8 +1301,8 @@ subroutine find_wpoles_for_cd(Sigp, sigma, Kmesh, BSt, omega_max)
  ! === Normalization of theta_mu_minus_e0i ===
  ! * If nsppol==2, qp_occ $\in [0,1]$
  fact_sp=one
- if (Bst%nsppol==1) then
-   fact_sp=half; if (Bst%nspinor==2) fact_sp=one
+ if (ebands%nsppol==1) then
+   fact_sp=half; if (ebands%nspinor==2) fact_sp=one
  end if
  !
  ! Total number of frequencies for sigma (Spectral function + mesh for the derivative).
@@ -1316,11 +1312,11 @@ subroutine find_wpoles_for_cd(Sigp, sigma, Kmesh, BSt, omega_max)
  ioe0j=sigma%nomega4sd/2+1
  !
  ! Loop over bands used to construct the Green function.
- do spin=1,Bst%nsppol
-   do ik_ibz=1,Bst%nkpt
-     do band_gr=1,Bst%nband(ik_ibz+(spin-1)*Bst%nkpt)
-       e_green           = Bst%eig(band_gr,ik_ibz,spin)
-       theta_mu_minus_e0i= Bst%occ(band_gr,ik_ibz,spin)*fact_sp
+ do spin=1,ebands%nsppol
+   do ik_ibz=1,ebands%nkpt
+     do band_gr=1,ebands%nband(ik_ibz+(spin-1)*ebands%nkpt)
+       e_green           = ebands%eig(band_gr,ik_ibz,spin)
+       theta_mu_minus_e0i= ebands%occ(band_gr,ik_ibz,spin)*fact_sp
        !
        ! Loop over GW states.
        do ikgw=1,Sigp%nkptgw
@@ -1330,7 +1326,7 @@ subroutine find_wpoles_for_cd(Sigp, sigma, Kmesh, BSt, omega_max)
          ikgw_ibz =Kmesh%tab(ikgw_bz)
 
          do band_gw=bgw_start,bgw_stop
-           e_qp      = Bst%eig(band_gw,ikgw_ibz,spin)
+           e_qp      = ebands%eig(band_gw,ikgw_ibz,spin)
            !
            ! Get frequencies $\omega$-\epsilon_in$ to evaluate  $d\Sigma/dE$, note the spin
            ! subtract e_KS since we have stored e_KS+ Delta \omega in sigma%omega4sd, not required for AC
@@ -1701,7 +1697,6 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
  integer :: g0(3)
  real(dp) :: kgwmk(3)
  integer :: get_more(Wfd%nproc),my_band_list(Wfd%mband)
- !integer :: test(Wfd%mband,Kmesh%nbz,nsppol)
  logical :: bmask(Wfd%mband)
 !************************************************************************
 
@@ -1717,7 +1712,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
    if (can_symmetrize(spin)) then
      do ik_bz=1,Kmesh%nbz
        ik_ibz = Kmesh%tab(ik_bz)
-       kgwmk= kptgw-Kmesh%bz(:,ik_bz) ! kptgw must be inside the BZ
+       kgwmk = kptgw-Kmesh%bz(:,ik_bz) ! kptgw must be inside the BZ
        call findqg0(iq_bz,g0,kgwmk,Qmesh%nbz,Qmesh%bz,mG0) ! <- (mg0=mG0) Identify q_bz and G0 where q_bz+G0=k_gw-k_bz
        if (Ltg_kgw%ibzq(iq_bz)==1) then
          bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
