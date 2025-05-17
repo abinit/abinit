@@ -1017,10 +1017,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
                             t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
                             ft_max_error, cosft_duality_error, ierr)
        ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
-       !if (ierr /= 0) then
-       !  call gx_get_error_message(msg)
-       !  ABI_ERROR(msg)
-       !end if
 
        call gaps%free()
        do iomega=1,Ep%nomegaei
@@ -2578,11 +2574,11 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  ! Calculate Gauss-Legendre quadrature knots and weights for the omega integration
  ABI_MALLOC(zw, (Ep%nomegaei))
  ABI_MALLOC(z, (Ep%nomegaei))
- call coeffs_gausslegint(zero,one,z,zw,Ep%nomegaei)
+ call coeffs_gausslegint(zero, one, z, zw, Ep%nomegaei)
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the lambda integration
- ABI_MALLOC(zlw,(gwrpacorr))
- ABI_MALLOC(zl,(gwrpacorr))
+ ABI_MALLOC(zlw, (gwrpacorr))
+ ABI_MALLOC(zl, (gwrpacorr))
  call coeffs_gausslegint(zero,one,zl,zlw,gwrpacorr)
 
  ABI_MALLOC(chi0_diag,(Ep%npwe))
