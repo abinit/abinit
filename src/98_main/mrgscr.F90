@@ -62,7 +62,7 @@ program mrgscr
  use m_mpinfo,              only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,            only : normv, metric
  use m_gsphere,             only : gsphere_t
- use m_bz_mesh,             only : kmesh_t, find_qmesh
+ use m_bz_mesh,             only : kmesh_t
  use m_vcoul,               only : vcoul_t
  use m_ioarr,               only : read_rhor
  use m_io_screening,        only : read_screening, hscr_t, ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
@@ -264,7 +264,7 @@ program mrgscr
  call Kmesh%init(Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
  call Kmesh%print([std_out], header="K-mesh for the wavefunctions", prtvol=prtvol)
 
- call find_qmesh(Qmesh, Cryst, Kmesh)
+ call qmesh%find_qmesh(Cryst, Kmesh)
  call qmesh%print([std_out], header="Q-mesh for the screening function", prtvol=prtvol)
 
  ABI_MALLOC(foundq,(Qmesh%nibz))

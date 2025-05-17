@@ -29,9 +29,7 @@ module m_invars2
  use m_sort
  use m_dtset
  use libxc_functionals
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
@@ -45,7 +43,7 @@ module m_invars2
  use m_ingeo,     only : invacuum
  use m_ipi,       only : ipi_check_initial_consistency
  use m_crystal,   only : crystal_t
- use m_bz_mesh,   only : kmesh_t, find_qmesh
+ use m_bz_mesh,   only : kmesh_t
  use m_drivexc,   only : has_kxc
  use m_mep,       only : MEP_SOLVER_STEEPEST,NEB_ALGO_CINEB
 
@@ -122,7 +120,6 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
  integer :: bravais(11)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: zionpsp(:)
-
 !*************************************************************************
 
  do idtset=1,ndtset_alloc
@@ -4364,12 +4361,10 @@ if (dtset%usekden==1) then
    ABI_MALLOC(Kmesh%shift, (3, Kmesh%nshift))
    Kmesh%shift(:,:) = Dtset%shiftk(:,1:Dtset%nshiftk)
    !call Kmesh%print("K-mesh for the wavefunctions",ab_out, dtset%prtvol)
-   call find_qmesh(Qmesh, Cryst, Kmesh)
-#ifdef HAVE_NETCDF
+   call Qmesh%find_qmesh(Cryst, Kmesh)
    if (my_rank == master) then
      NCF_CHECK(nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt))
    end if
-#endif
    call xmpi_barrier(comm)
    ABI_ERROR_NODUMP("Aborting now")
  end if

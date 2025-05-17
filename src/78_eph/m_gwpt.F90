@@ -66,7 +66,7 @@ module m_gwpt
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_kg,             only : getph
- use m_bz_mesh,        only : isamek, kmesh_t, find_qmesh
+ use m_bz_mesh,        only : isamek, kmesh_t
  use m_gsphere,        only : gsphere_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ioarr,          only : read_rhor
@@ -357,7 +357,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    w_info%use_mdf = MDL_NONE
  else
    ! Init pp_mesh from the K-mesh reported in the WFK file.
-   call find_qmesh(pp_mesh, cryst, kmesh)
+   call pp_mesh%find_qmesh(cryst, kmesh)
    ! The G-sphere for W and Sigma_c is initialized from ecuteps.
    call gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
    dtset%npweps = gsph_c%ng
