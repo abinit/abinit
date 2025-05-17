@@ -58,7 +58,8 @@ MODULE m_numeric_tools
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
  public :: cspint                ! Estimates the integral of a tabulated function.
  public :: ctrap                 ! Corrected trapezoidal integral on uniform grid of spacing hh.
- public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
+ public :: gaussleg_int          ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
+ public :: gaussleg_int_static   ! Same as gaussleg_int but expects arrays allocated by the caller.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
  public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
@@ -1824,7 +1825,6 @@ integer pure function lfind(mask, back)
 !scalars
  integer :: ii,nitems
  logical :: do_back
-
 !************************************************************************
 
  do_back = .False.; if (present(back)) do_back = back
@@ -1887,7 +1887,6 @@ subroutine list2blocks(list,nblocks,blocks)
  integer :: ii,nitems
 !arrays
  integer :: work(2,size(list))
-
 !************************************************************************
 
  nitems = size(list)
@@ -1955,7 +1954,6 @@ subroutine mask2blocks(mask,nblocks,blocks)
  logical :: inblock
 !arrays
  integer :: work(2,SIZE(mask))
-
 !************************************************************************
 
  ! Find first element.
@@ -2506,7 +2504,6 @@ end subroutine trapezoidal_
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: xx(:)
-
 !************************************************************************
 
  select case (nn)
@@ -2599,12 +2596,10 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
 !Local variables-------------------------------
 !scalars
  integer :: K,KM,NT,NX,NX0,it,ix
- real(dp) :: EPS,old_st,st,old_quad,dqromb
- real(dp) :: TOL
+ real(dp) :: EPS,old_st,st,old_quad,dqromb,TOL
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: h(:),s(:)
- real(dp),allocatable :: wx(:),xx(:)
+ real(dp),allocatable :: h(:),s(:),wx(:),xx(:)
 ! *************************************************************************
 
  ierr = 0
@@ -2614,9 +2609,8 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  quad =zero
 
  select case (qopt)
-
  case (1)
-   ! === Trapezoidal, closed form, O(1/N^2)
+   ! Trapezoidal, closed form, O(1/N^2)
    do it=1,NT
      call trapezoidal_(func,it,xmin,xmax,quad)
      if (it>5) then ! Avoid spurious early convergence
@@ -2626,7 +2620,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
    end do
 
  case (2)
-  ! === Extended Simpson rule based on trapezoidal O(1/N^4) ===
+   ! Extended Simpson rule based on trapezoidal O(1/N^4)
    do it=1,NT
      call trapezoidal_(func,it,xmin,xmax,st)
      if (it==1) then
@@ -2642,7 +2636,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
    end do
 
  case (3)
-  ! === Midpoint rule, open form, O(1/N^2) ===
+  ! Midpoint rule, open form, O(1/N^2).
   do it=1,NT
     call midpoint_(func,it,xmin,xmax,quad)
     if (it>4) then ! Avoid spurious early convergence
@@ -2652,7 +2646,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
   end do
 
  case (4)
-   ! === Midpoint rule with cancellation of leading 1/N^2 term, open form, O(1/N^4) ===
+   ! Midpoint rule with cancellation of leading 1/N^2 term, open form, O(1/N^4)
    do it=1,NT
      call midpoint_(func,it,xmin,xmax,st)
      if (it==1) then
@@ -2668,7 +2662,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
    end do
 
  case (5)
-   ! === Romberg Integration, closed form ===
+   ! Romberg Integration, closed form.
    K=5 ; KM=K-1 ! Order 10
    ABI_MALLOC(h,(NT+1))
    ABI_MALLOC(s,(NT+1))
@@ -2688,12 +2682,12 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
      end if
      s(it+1)=s(it)
      h(it+1)=quarter*h(it) ! Quarter makes the extrapolation a polynomial in h^2,
-   end do                 ! This is required to use the Euler-Maclaurin formula
+   end do                   ! This is required to use the Euler-Maclaurin formula
    ABI_FREE(h)
    ABI_FREE(s)
 
  case (6)
-   ! === Romberg Integration, closed form ===
+   ! Romberg Integration, closed form
    K=5 ; KM=K-1 ! Order 10
    ABI_MALLOC(h,(NT+1))
    ABI_MALLOC(s,(NT+1))
@@ -2718,13 +2712,11 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
    ABI_FREE(s)
 
  case (7)
-   ! === Gauss-Legendre ===
-   NX0=5 ; if (PRESENT(npts)) NX0=npts
+   ! Gauss-Legendre
+   NX0=5; if (PRESENT(npts)) NX0=npts
    NX=NX0
    do it=1,NT
-     ABI_MALLOC(wx,(NX))
-     ABI_MALLOC(xx,(NX))
-     call coeffs_gausslegint(xmin,xmax,xx,wx,NX)
+     call gaussleg_int(NX, xmin, xmax, xx, wx)
      quad=zero
      do ix=1,NX
        quad=quad+wx(ix)*func(xx(ix))
@@ -2768,11 +2760,9 @@ end subroutine quadrature
 !! OUTPUT
 !!  ans=resulting integral by corrected trapezoid
 !!
-!! NOTES
-!!
 !! SOURCE
 
-subroutine ctrap(imax,ff,hh,ans)
+subroutine ctrap(imax, ff, hh, ans)
 
 !Arguments ------------------------------------
 !scalars
@@ -2946,7 +2936,6 @@ subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
   real(dp) :: s
   real(dp) :: term
   real(dp) :: u
-
 !************************************************************************
 
   if ( ntab < 3 ) then
@@ -3059,17 +3048,17 @@ subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
 end subroutine cspint
 !!***
 
-!!****f* m_numeric_tools/coeffs_gausslegint
+!!****f* m_numeric_tools/gaussleg_int
 !! NAME
-!!  coeffs_gausslegint
+!!  gaussleg_int
 !!
 !! FUNCTION
 !! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
 !! Inspired by a routine due to G. Rybicki.
 !!
 !! INPUTS
-!! xmin=lower bound of integration
-!! xmax=upper bound of integration
+!! xmin=lower bound of integration.
+!! xmax=upper bound of integration.
 !! n=order of integration
 !!
 !! OUTPUT
@@ -3078,13 +3067,13 @@ end subroutine cspint
 !!
 !! SOURCE
 
-subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
+subroutine gaussleg_int(n, xmin, xmax, x, weights)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
- real(dp),intent(in) :: xmin,xmax
- real(dp),intent(out) :: x(n),weights(n)
+ real(dp),intent(in) :: xmin, xmax
+ real(dp),allocatable,intent(out) :: x(:), weights(:)
 
 !Local variables ------------------------------
 !scalars
@@ -3092,8 +3081,10 @@ subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
  real(dp),parameter :: tol=1.d-13
  real(dp),parameter :: pi=4.d0*atan(1.d0)
  real(dp) :: z,z1,xmean,p1,p2,p3,pp,xl
-
 !************************************************************************
+
+ ABI_MALLOC(x, (n))
+ ABI_MALLOC(weights, (n))
 
  xl=(xmax-xmin)*0.5d0
  xmean=(xmax+xmin)*0.5d0
@@ -3124,8 +3115,39 @@ subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
   weights(n+1-i)=weights(i)
  end do
 
-end subroutine coeffs_gausslegint
+end subroutine gaussleg_int
 !!***
+
+!!****f* m_numeric_tools/gaussleg_int_static
+!! NAME
+!!  gaussleg_int_static
+!!
+!! FUNCTION
+!! Similar to gaussleg_int but expects output arrays to be allocated by the caller.
+!!
+!! SOURCE
+
+subroutine gaussleg_int_static(n, xmin, xmax, x, weights)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: n
+ real(dp),intent(in) :: xmin, xmax
+ real(dp),intent(out) :: x(n), weights(n)
+
+!Local variables ------------------------------
+ real(dp),allocatable :: x__(:), weights__(:)
+!************************************************************************
+
+ call gaussleg_int(n, xmin, xmax, x__, weights__)
+
+ x = x__
+ weights__ = weights__
+
+ ABI_FREE(x__)
+ ABI_FREE(weights__)
+
+end subroutine gaussleg_int_static
 
 !----------------------------------------------------------------------
 
@@ -3151,20 +3173,17 @@ end subroutine coeffs_gausslegint
 !!
 !! SOURCE
 
-function simpson_cplx(npts,step,ff)
+complex(dpc) function simpson_cplx(npts,step,ff)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npts
  real(dp),intent(in)  :: step
  complex(dpc),intent(in) :: ff(npts)
- complex(dpc) :: simpson_cplx
 
 !Local variables ------------------------------
-!scalars
  integer :: ii,my_n
  complex(dpc) :: sum_even, sum_odd
-
 !************************************************************************
 
  my_n=npts; if ((npts/2)*2 == npts) my_n=npts-3
@@ -3235,8 +3254,8 @@ subroutine hermitianize_spc(mat,uplo)
  nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
-
- case ("A","a") ! Full matrix has been calculated.
+ case ("A","a")
+   ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
@@ -3248,7 +3267,8 @@ subroutine hermitianize_spc(mat,uplo)
    end do
    ABI_FREE(tmp)
 
- case ("U","u") ! Only the upper triangle is used.
+ case ("U","u")
+   ! Only the upper triangle is used.
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
@@ -3259,7 +3279,8 @@ subroutine hermitianize_spc(mat,uplo)
      end do
    end do
 
- case ("L","l") ! Only the lower triangle is used.
+ case ("L","l")
+  ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
@@ -3301,7 +3322,7 @@ end subroutine hermitianize_spc
 !!
 !! SOURCE
 
-subroutine hermitianize_dpc(mat,uplo)
+subroutine hermitianize_dpc(mat, uplo)
 
 !Arguments ------------------------------------
 !scalars
@@ -3320,7 +3341,8 @@ subroutine hermitianize_dpc(mat,uplo)
 
  select case (uplo(1:1))
 
- case ("A","a") ! Full matrix has been calculated.
+ case ("A","a")
+   ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
@@ -3331,7 +3353,8 @@ subroutine hermitianize_dpc(mat,uplo)
    end do
    ABI_FREE(tmp)
 
- case ("U","u") ! Only the upper triangle is used.
+ case ("U","u")
+   ! Only the upper triangle is used.
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
@@ -3342,7 +3365,8 @@ subroutine hermitianize_dpc(mat,uplo)
      end do
    end do
 
- case ("L","l") ! Only the lower triangle is used.
+ case ("L","l")
+  ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
@@ -4327,7 +4351,6 @@ integer function denominator(dd,ierr,tolerance)
  integer,parameter :: largest_integer = HUGE(1)
  integer :: ii
  real(dp) :: my_tol
-
 !************************************************************************
 
  ii=1
@@ -4366,7 +4389,6 @@ integer function mincm(ii,jj)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ii,jj
-
 !************************************************************************
 
  if (ii==0.or.jj==0) then
@@ -4434,7 +4456,6 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
  character(len=500) :: msg
 !arrays
  complex(dpc),allocatable :: div(:),den(:)
-
 !************************************************************************
 
  ABI_MALLOC(div,(nz))
@@ -5835,12 +5856,6 @@ end function central_finite_diff
 !! Set seed to any value < 0 to initialize or reinitialize sequence.
 !! Parameters are chosen from integer overflow=2**23 (conservative).
 !! For some documentation, see Numerical Recipes, 1986, p196.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! NOTES
 !!
 !! SOURCE
 
