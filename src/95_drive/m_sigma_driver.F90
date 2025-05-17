@@ -56,7 +56,7 @@ module m_sigma_driver
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_ebands,        only : ebands_t, gaps_t
  use m_energies,      only : energies_type, energies_init
- use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, isamek, get_ng0sh, find_qmesh
+ use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, isamek, get_ng0sh
  use m_gsphere,       only : gsphere_t, merge_and_sort_kg, setshells
  use m_kg,            only : getph, getcut
  use m_xcdata,        only : get_xclevel
@@ -3481,7 +3481,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    epsm1%npwe     =1
    Sigp%npwc   =1
    Dtset%npweps=1
-   call find_qmesh(Qmesh,Cryst,Kmesh)
+   call qmesh%find_qmesh(Cryst,Kmesh)
    ABI_MALLOC(epsm1%gvec,(3,1))
    epsm1%gvec(:,1) = [0, 0, 0]
  end if

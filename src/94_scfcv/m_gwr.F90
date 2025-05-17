@@ -166,7 +166,7 @@ module m_gwr
  use m_fft,           only : fftbox_plan3_t, uplan_t, fft_ug, fft_ur, fourdp
  use m_fft_mesh,      only : calc_ceikr, calc_ceigr, ctimes_eikr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_map_print, kpts_pack_in_stars
- use m_bz_mesh,       only : littlegroup_t, findqg0
+ use m_bz_mesh,       only : littlegroup_t, findqg0, kmesh_t
  use m_gsphere,       only : kg_map, gsphere_t
  use m_melemts,       only : melements_t
  use m_ioarr,         only : fftdatar_write
@@ -991,9 +991,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
 
- ! Setup IBZ q-points, weights and BZ.
- ! Always use q --> -q symmetry even in systems without inversion
- ! TODO: Might add input variable to rescale the q-mesh.
+ ! Setup IBZ q-points, weights and BZ. Always use q --> -q symmetry even in systems without inversion
  my_nshiftq = 1; my_shiftq = zero; qptrlatt = ks_ebands%kptrlatt
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &  ! in
                              gwr%nqibz, gwr%qibz, gwr%wtq, gwr%nqbz, gwr%qbz)    ! out
@@ -1001,14 +999,54 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_CHECK(all(abs(gwr%qibz(:,1)) < tol16), "First qpoint in qibz should be Gamma!")
  gwr%ngqpt = get_diag(qptrlatt)
 
- ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
+ ! Table with symrec conventions for the symmetrization of chi.
  ABI_MALLOC(gwr%qbz2ibz, (6, gwr%nqbz))
  qrank = krank_from_kptrlatt(gwr%nqibz, gwr%qibz, qptrlatt, compute_invrank=.False.)
-
  if (kpts_map("symrec", qptopt1, cryst, qrank, gwr%nqbz, gwr%qbz, gwr%qbz2ibz) /= 0) then
    ABI_ERROR("Cannot map qBZ to IBZ!")
  end if
  call qrank%free()
+
+#if 1
+ ! === Create basic data types for the calculation ===
+ ! Kmesh defines the k-point sampling for the wavefunctions.
+ ! Qmesh defines the q-point sampling for chi0, all possible differences k1-k2 reduced to the IBZ.
+ ! TODO Kmesh%bz should be in [-half, half[ but this modification is painful!
+ block
+ integer :: isym, itim
+ type(kmesh_t) :: Kmesh, Qmesh
+ real(dp) :: qbz(3), sq(3)
+
+ call Kmesh%init(cryst, gwr%nkibz, kibz, dtset%kptopt, wrap_1zone=.FALSE.)
+
+ ! Some required information are not filled up inside kmesh_init. So doing it here, even though it is not clean
+ Kmesh%kptrlatt(:,:) = Dtset%kptrlatt(:,:)
+ Kmesh%nshift        = Dtset%nshiftk
+ ABI_MALLOC(Kmesh%shift, (3, Kmesh%nshift))
+ Kmesh%shift(:,:)    = Dtset%shiftk(:,1:Dtset%nshiftk)
+ call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
+
+ ! === Find Q-mesh ===
+ ! Stop if a nonzero umklapp is needed to reconstruct the BZ.
+ ! epsilon^-1(Sq) indeed should be symmetrized in csigme using a different expression (G-G_o is needed)
+ call qmesh%find_qmesh(cryst, Kmesh)
+ call qmesh%print(units, "Q-mesh for the screening function", prtvol=dtset%prtvol)
+
+ do iq_bz=1,Qmesh%nbz
+   call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym, itim)
+   sq = (3-2*itim) * MATMUL(cryst%symrec(:,:,isym), qmesh%ibz(:,iq_ibz))
+   if (ANY(ABS(qbz-sq) > 1.0d-4)) then
+     write(msg,'(a,3f6.3,a,3f6.3,2a,9i3,a,i2,2a)')&
+      ' qpoint ',qbz,' is the symmetric of ',qmesh%ibz(:,iq_ibz),ch10,&
+      ' through operation ',cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
+      ' however a non zero umklapp G_o vector is required and this is not yet allowed'
+     ABI_ERROR(msg)
+   end if
+ end do
+ call kmesh%free(); call qmesh%free()
+ stop
+ end block
+#endif
 
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
  call kpts_pack_in_stars(gwr%nqbz, gwr%qbz, gwr%qbz2ibz)

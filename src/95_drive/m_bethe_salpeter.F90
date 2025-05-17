@@ -50,7 +50,7 @@ module m_bethe_salpeter
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gfft, setmesh
  use m_fft,             only : fourdp
- use m_bz_mesh,         only : kmesh_t, get_ng0sh, find_qmesh, make_mesh
+ use m_bz_mesh,         only : kmesh_t, get_ng0sh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_t
  use m_kg,              only : getph
@@ -1155,7 +1155,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  else
    ! Init Qmesh from the K-mesh reported in the WFK file.
-   call find_qmesh(Qmesh, Cryst, Kmesh)
+   call Qmesh%find_qmesh(Cryst, Kmesh)
    ! The G-sphere for W and Sigma_c is initialized from ecuteps.
    call Gsph_c%init(Cryst, 0, ecut=Dtset%ecuteps)
    Dtset%npweps = Gsph_c%ng
@@ -1990,10 +1990,8 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  END SELECT
 
  ! Init Qmesh
- call find_qmesh(Qmesh_dense,Cryst,Kmesh_dense)
-
+ call Qmesh_dense%find_qmesh(Cryst,Kmesh_dense)
  call Gsph_c%init(Cryst, 0, ecut=Dtset%ecuteps)
-
  call double_grid_init(Kmesh,Kmesh_dense,Dtset%kptrlatt,BSp%interp_kmult,grid)
 
  BSp%nkibz_interp = Kmesh_dense%nibz  !We might allow for a smaller number of points....

@@ -49,7 +49,7 @@ module m_screening_driver
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_ebands,        only : ebands_t,  gaps_t
- use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, get_ng0sh, find_qmesh
+ use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, get_ng0sh
  use m_kg,            only : getph
  use m_gsphere,       only : gsphere_t, setshells
  use m_vcoul,         only : vcoul_t
@@ -1792,40 +1792,38 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  call cryst%print(mode_paral='COLL')
 
  ! === Create basic data types for the calculation ===
- ! * Kmesh defines the k-point sampling for the wavefunctions.
- ! * Qmesh defines the q-point sampling for chi0, all possible differences k1-k2 reduced to the IBZ.
- ! TODO Kmesh%bz should be [-half,half[ but this modification will be painful!
+ ! Kmesh defines the k-point sampling for the wavefunctions.
+ ! Qmesh defines the q-point sampling for chi0, all possible differences k1-k2 reduced to the IBZ.
+ ! TODO Kmesh%bz should be in [-half, half[ but this modification is painful!
 
- call Kmesh%init(Cryst,Ep%nkibz,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.FALSE.)
- !call Kmesh%init(Cryst,Ep%nkibz,Hdr_wfk%kptns,Dtset%kptopt,wrap_1zone=.TRUE.)
- ! Some required information are not filled up inside kmesh_init
- ! So doing it here, even though it is not clean
- Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
- Kmesh%nshift        =Dtset%nshiftk
- ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
- Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
+ call Kmesh%init(cryst, ep%nkibz, hdr_wfk%kptns, dtset%kptopt, wrap_1zone=.FALSE.)
 
+ ! Some required information are not filled up inside kmesh_init. So doing it here, even though it is not clean
+ Kmesh%kptrlatt(:,:) = Dtset%kptrlatt(:,:)
+ Kmesh%nshift        = Dtset%nshiftk
+ ABI_MALLOC(Kmesh%shift, (3,Kmesh%nshift))
+ Kmesh%shift(:,:)    = Dtset%shiftk(:,1:Dtset%nshiftk)
  call Kmesh%print(units, header="K-mesh for the wavefunctions", prtvol=Dtset%prtvol)
 
- ! === Find Q-mesh, and do setup for long wavelength limit ===
- ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
- !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
- call find_qmesh(Qmesh,Cryst,Kmesh)
-
- call Qmesh%print(units, "Q-mesh for the screening function", prtvol=dtset%prtvol)
+ ! === Find Q-mesh ===
+ ! Stop if a nonzero umklapp is needed to reconstruct the BZ.
+ ! epsilon^-1(Sq) indeed should be symmetrized in csigme using a different expression (G-G_o is needed)
+ call qmesh%find_qmesh(Cryst, Kmesh)
+ call qmesh%print(units, "Q-mesh for the screening function", prtvol=dtset%prtvol)
 
  do iqbz=1,Qmesh%nbz
-   call qmesh%get_BZ_item(iqbz,qbz,iq_ibz,isym,itim)
-   sq = (3-2*itim)*MATMUL(Cryst%symrec(:,:,isym),Qmesh%ibz(:,iq_ibz))
-   if (ANY(ABS(qbz-sq )>1.0d-4)) then
+   call qmesh%get_BZ_item(iqbz, qbz, iq_ibz, isym, itim)
+   sq = (3-2*itim) * MATMUL(cryst%symrec(:,:,isym), qmesh%ibz(:,iq_ibz))
+   if (ANY(ABS(qbz-sq) > 1.0d-4)) then
      write(msg,'(a,3f6.3,a,3f6.3,2a,9i3,a,i2,2a)')&
-      ' qpoint ',qbz,' is the symmetric of ',Qmesh%ibz(:,iq_ibz),ch10,&
-      ' through operation ',Cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
+      ' qpoint ',qbz,' is the symmetric of ',qmesh%ibz(:,iq_ibz),ch10,&
+      ' through operation ',cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
       ' however a non zero umklapp G_o vector is required and this is not yet allowed'
      ABI_ERROR(msg)
    end if
  end do
 
+ ! Setup for long wavelength limit
  if (Dtset%gw_nqlwl==0) then
    Ep%nqlwl=1
    ABI_MALLOC(Ep%qlwl,(3,Ep%nqlwl))
@@ -2042,7 +2040,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
    !end if
    ! For spin-spin interaction
    ! Ep%nI=4; Ep%nJ=4
-   ABI_CHECK(Ep%npwepG0 == Ep%npwe, "npwepG0 must be == npwe if spinor==2")
+   ABI_CHECK(Ep%npwepG0 == Ep%npwe, "npwepG0 must be == npwe if nspinor==2")
    !ABI_CHECK(Ep%symchi == 0, "symchi/=0 and nspinor=2 not available")
  end if
 
