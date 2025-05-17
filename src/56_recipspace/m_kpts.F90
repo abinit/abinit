@@ -1711,7 +1711,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
    indkpt = 0
    call symkpt(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
-&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded,bz2ibz_smap,xmpi_comm_self)
+               nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded,bz2ibz_smap,xmpi_comm_self)
 
    ABI_FREE(symrec)
    ABI_FREE(wtk_fullbz)
@@ -1725,7 +1725,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    timrev=1;if (kptopt==4) timrev=0
 
    call symkpt_new(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
-&   nkpt_computed,nsym_used,symrec,timrev,bz2ibz_smap,xmpi_comm_self)
+                   nkpt_computed,nsym_used,symrec,timrev,bz2ibz_smap,xmpi_comm_self)
 
    ABI_FREE(symrec)
    ABI_CALLOC(wtk_folded,(nkpt_fullbz))

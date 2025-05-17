@@ -33,7 +33,7 @@ module m_bader
  use m_time,          only : timein
  use m_geometry,      only : metric
  use m_parser,        only : inread
- use m_numeric_tools, only : coeffs_gausslegint
+ use m_numeric_tools, only : gaussleg_int_static
  use m_hide_lapack,   only : jacobi, lubksb, ludcmp
 
  implicit none
@@ -140,21 +140,9 @@ module m_bader
  real(dp), allocatable, save :: xred(:,:),xatm(:,:),rminl(:)
  real(dp), save :: tpi,sqfp,fpi,sqpi,sqtpi,atp(3,npos)
  real(dp), save :: h0,hmin,r0,ttsrf,ttcp,tttot
- real(dp), save :: cth(ngaus),th(ngaus),ph(ngaus),wcth(ngaus),wph(ngaus),rs(ngaus,ngaus)
+ real(dp), save :: cth(ngaus), th(ngaus), ph(ngaus), wcth(ngaus), wph(ngaus), rs(ngaus,ngaus)
  real(dp), save :: pc(3,npos*ndif), evpc(3,npos*ndif),zpc(3,3,npos*ndif), pcrb(3,npos*ndif)
  logical, save :: deb,ldeb
-!!! interface chgbas
-!!!    subroutine bschg1(vv,dir)
-!!!      implicit none
-!!!      integer, intent(in) :: dir
-!!!      real(dp),intent(inout) :: vv(3)
-!!!    end subroutine bschg1
-!!!    subroutine bschg2(aa,dir)
-!!!      implicit none
-!!!      integer, intent(in) :: dir
-!!!      real(dp),intent(inout) :: aa(3,3)
-!!!    end subroutine bschg2
-!!! end interface chgbas
 
 !- Set of parameters for the aim utility -----------------------------------
  real(dp), parameter :: aim_rhocormin=1.d-10  ! the minimal core density
@@ -3848,8 +3836,8 @@ subroutine integrho(aim_dtset,znucl_batom)
  if (gaus) then
    ct1=cos(themin)
    ct2=cos(themax)
-   call coeffs_gausslegint(ct1,ct2,cth,wcth,nth)
-   call coeffs_gausslegint(phimin,phimax,ph,wph,nph)
+   call gaussleg_int_static(nth, ct1, ct2, cth, wcth)
+   call gaussleg_int_static(nph, phimin, phimax, ph, wph)
  end if
 
  do ii=1,nth
@@ -4155,8 +4143,8 @@ subroutine integvol()
  if (gaus) then
    ct1=cos(themin)
    ct2=cos(themax)
-   call coeffs_gausslegint(ct1,ct2,cth,wcth,nth)
-   call coeffs_gausslegint(phimin,phimax,ph,wph,nph)
+   call gaussleg_int_static(nth, ct1, ct2, cth, wcth)
+   call gaussleg_int_static(nph, phimin, phimax, ph, wph)
  end if
 
  do ii=1,nth
@@ -4603,13 +4591,11 @@ subroutine surf(aim_dtset)
 
  ct1=cos(aim_dtset%themin)
  ct2=cos(aim_dtset%themax)
- call coeffs_gausslegint(ct1,ct2,cth,wcth,nth)
- call coeffs_gausslegint(aim_dtset%phimin,aim_dtset%phimax,ph,wph,nph)
+ call gaussleg_int_static(nth, ct1, ct2, cth, wcth)
+ call gaussleg_int_static(nph, aim_dtset%phimin, aim_dtset%phimax, ph, wph)
 
-!DEBUG
-!write(std_out,*)' surf : wcth=',wcth(1:nth)
-!write(std_out,*)' surf : wph=',wph(1:nth)
-!ENDDEBUG
+ !write(std_out,*)' surf : wcth=',wcth(1:nth)
+ !write(std_out,*)' surf : wph=',wph(1:nth)
 
  do ijj=1,nth
    th(ijj)=acos(cth(ijj))
@@ -4793,7 +4779,7 @@ subroutine surf(aim_dtset)
              rs(ith2,iph2)=rr
            end if
            rr=rs(ith2,iph2)
-!          write(unts,'(2F12.8,2E16.8)') theta,phi,rr,wcth(ijj)*wph(jj)
+           !write(unts,'(2F12.8,2E16.8)') theta,phi,rr,wcth(ijj)*wph(jj)
            write(std_out,'(":RSUR PC ",3i3,4E16.8,F10.4)') ijj,jj,kk,theta,phi,rr,wcth(ith2)*wph(iph2),t2
            write(untout,'(a,2i3,3E16.8)') '-  ',jj,kk,theta,phi,rr
            rthe0=rr
@@ -4806,15 +4792,12 @@ subroutine surf(aim_dtset)
 
    end do ! ijj (loop on BCP)
 
-!  DEBUG
 !  write(std_out,*)' surf : near BCP '
 !  do ijj=1,nth
 !  do jj=1,nph
 !  write(std_out,*)ijj,jj,rs(ijj,jj)
 !  end do
 !  end do
-!  ENDDEBUG
-
 
    srch=.true.
    do ijj=nbcp+1,nbcp+nrcp     ! Loop on RCP
@@ -4901,14 +4884,12 @@ subroutine surf(aim_dtset)
 
    end do ! ijj (Loop on RCP)
 
-!  DEBUG
 !  write(std_out,*)' surf : near RCP '
 !  do ijj=1,nth
 !  do jj=1,nph
 !  write(std_out,*)ijj,jj,rs(ijj,jj)
 !  end do
 !  end do
-!  ENDDEBUG
 
 !  Boundary angles
    rthe0=r0

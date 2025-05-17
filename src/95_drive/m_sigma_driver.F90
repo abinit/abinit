@@ -3490,12 +3490,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  do iqbz=1,Qmesh%nbz
    call qmesh%get_BZ_item(iqbz, q_bz, iq_ibz, isym, itim, umklp=q_umklp)
-   !print *, "iqbz, q_bz, iq_ibz, isym, itim, umklp"
-   !print *, iqbz, q_bz, iq_ibz, isym, itim, q_umklp
+   !print *, "iqbz, q_bz, iq_ibz, isym, itim, umklp"; print *, iqbz, q_bz, iq_ibz, isym, itim, q_umklp
 
    if (ANY(q_umklp/=0)) then
      sq = (3-2*itim)*MATMUL(Cryst%symrec(:,:,isym),Qmesh%ibz(:,iq_ibz))
-     write(std_out,*) sq,Qmesh%bz(:,iqbz)
+     !write(std_out,*) sq,Qmesh%bz(:,iqbz)
      write(msg,'(a,3f6.3,a,3f6.3,2a,9i3,a,i2,2a)')&
        'qpoint ',Qmesh%bz(:,iqbz),' is the symmetric of ',Qmesh%ibz(:,iq_ibz),ch10,&
        'through operation ',Cryst%symrec(:,:,isym),' and itim ',itim,ch10,&
