@@ -1511,6 +1511,10 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  omega_distrb = my_rank
  use_MPI = .FALSE.
  use_MPI = nprocs >= nomega  ! Parallelism is not used
+ ! FIXME: MPI modi is termporarly disabled here because we need to know if
+ ! screening is allocated in shared memory or not.
+ ! Perhaps now it makes mores sense to use Scalapack/ELPA instead of parallelizing the loop over frequencies
+ use_MPI = .FALSE.
 
  if (use_MPI) then
    ! Initialize distribution table for frequencies.
