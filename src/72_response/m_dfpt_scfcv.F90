@@ -24,7 +24,7 @@
 module m_dfpt_scfcv
 
  use defs_basis
- use m_ab7_mixing
+ use m_abi_mixing
  use m_efield
  use m_errors
  use m_dtset
@@ -88,7 +88,7 @@ module m_dfpt_scfcv
  use m_mkcore,         only : dfpt_mkcore
  use m_spacepar,   only : hartrestr, make_vectornd, symrhg
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -418,7 +418,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  character(len=fnlen) :: fi1o
 !character(len=fnlen) :: fi1o_vtk
  integer  :: prtopt
- type(ab7_mixing_object) :: mix
+ type(abi_mixing_object) :: mix
  type(efield_type) :: dtefield
 !arrays
  integer :: ngfftmix(18)
@@ -634,25 +634,25 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &                     *pawrhoij1(iatom)%cplex_rhoij*pawrhoij1(iatom)%qphase
      end do
    end if
-   denpot = AB7_MIXING_POTENTIAL
-   if (dtset%iscf > 10) denpot = AB7_MIXING_DENSITY
+   denpot = ABI_MIXING_POTENTIAL
+   if (dtset%iscf > 10) denpot = ABI_MIXING_DENSITY
    if (psps%usepaw==1.and.dtset%pawmixdg==0) then
-     ispmix=AB7_MIXING_FOURRIER_SPACE;nfftmix=dtset%nfft;ngfftmix(:)=dtset%ngfft(:)
+     ispmix=ABI_MIXING_FOURRIER_SPACE;nfftmix=dtset%nfft;ngfftmix(:)=dtset%ngfft(:)
    else
-     ispmix=AB7_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
+     ispmix=ABI_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
    end if
    if (iscf10_mod == 5 .or. iscf10_mod == 6) then
-     call ab7_mixing_new(mix, iscf10_mod, denpot, cplex, &
+     call abi_mixing_new(mix, iscf10_mod, denpot, cplex, &
 &     nfftf, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
    else
-     call ab7_mixing_new(mix, iscf10_mod, denpot, max(cplex, ispmix), &
+     call abi_mixing_new(mix, iscf10_mod, denpot, max(cplex, ispmix), &
 &     nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
    end if
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(msg)
    end if
    if (dtset%mffmem == 0) then
-     call ab7_mixing_use_disk_cache(mix, dtfil%fnametmp_fft)
+     call abi_mixing_use_disk_cache(mix, dtfil%fnametmp_fft)
    end if
  end if ! iscf, nstep
 
@@ -1272,7 +1272,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !endif
 
 
-!Eventually close the dot file, before calling dfpt_nstdy
+!Eventually close the DDK file, before calling dfpt_nstdy
  if ((ipert==dtset%natom+2.and.sum((dtset%qptn(1:3))**2)<=1.0d-7.and.&
 & (dtset%berryopt/=4 .and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 & dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17)).or.&
@@ -1289,7 +1289,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !Deallocate the no more needed arrays
  if (iscf_mod>0.and.nstep>0) then
-   call ab7_mixing_deallocate(mix)
+   call abi_mixing_deallocate(mix)
  end if
  if( (nstep>0 .and. iscf_mod>0) .or. iscf_mod==-1 ) then
    ABI_FREE(dielinv)
@@ -1333,8 +1333,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  call timab(160,2,tsec)
  call timab(150,1,tsec)
 
- if (psps%usepaw==0.and.dtset%userie/=919.and.dtset%gpu_option/=ABI_GPU_OPENMP .and. &
-& (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
+ if (psps%usepaw==0.and.dtset%userie/=919 .and. (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
 &   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
@@ -1353,9 +1352,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !Use of NSTPAW3 for NCPP (instead of DFPT_NSELT/DFPT_NSTDY) can be forced with userie=919
 !MT oct. 2015: this works perfectly on all automatic tests
 !MS jan. 2025: As dfpt_nstpaw has been ported and optimised on OpenMP GPU,
-!              use it when OpenMP GPU is requested.
+!              use it when OpenMP GPU is requested (outside of rfstrs).
  if(ipert<=dtset%natom+4)then
-   if (psps%usepaw==1.or.dtset%userie==919.or.dtset%gpu_option==ABI_GPU_OPENMP) then
+   if (psps%usepaw==1.or.dtset%userie==919.or.&
+&       (dtset%gpu_option==ABI_GPU_OPENMP.and.(ipert/=dtset%natom+3.and.ipert/=dtset%natom+4))) then
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
 &     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,mband_mem_rbz,ncpgr,&
@@ -1963,7 +1963,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  integer,intent(inout) :: dbl_nnsclo !vz_i
  real(dp),intent(in) :: etotal
  type(MPI_type),intent(in) :: mpi_enreg
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ffttomix(nfft*(1-nfftmix/nfft))
@@ -2100,10 +2100,10 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  i_vrespc1=mix%i_vrespc(1)
 
 !Initialise working arrays for the mixing object.
- call ab7_mixing_eval_allocate(mix, istep)
+ call abi_mixing_eval_allocate(mix, istep)
 
 !Copy current step arrays.
- call ab7_mixing_copy_current_step(mix, vresid0, errid, msg, arr_respc = vrespc)
+ call abi_mixing_copy_current_step(mix, vresid0, errid, msg, arr_respc = vrespc)
 
  if (errid /= AB7_NO_ERROR) then
    ABI_ERROR(msg)
@@ -2143,7 +2143,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 
  mpicomm=0;mpi_summarize=.false.
  reset=.false.;if (initialized==0) reset=.true.
- call ab7_mixing_eval(mix, vtrial0, istep, nfftot, ucvol, &
+ call abi_mixing_eval(mix, vtrial0, istep, nfftot, ucvol, &
 & mpicomm, mpi_summarize, errid, msg, &
 & reset = reset, isecur = dtset%isecur, &
 & pawopt = dtset%pawoptmix, response = 1, pawarr = vpaw, &
@@ -2237,7 +2237,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  end if
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
- call ab7_mixing_eval_deallocate(mix)
+ call abi_mixing_eval_deallocate(mix)
 
 !Restore potential
  if (ispmix==1.and.nfft==nfftmix) then

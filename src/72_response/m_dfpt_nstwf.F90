@@ -76,7 +76,7 @@ module m_dfpt_nstwf
 
  use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -102,7 +102,7 @@ contains
 !! This routine compute the non-stationary expression for the
 !! second derivative of the total energy, for a whole row of
 !! mixed derivatives (including diagonal terms contributing
-!! to non-stationnary 2nd-order total energy).
+!! to non-stationary 2nd-order total energy).
 !! Compared with NC-pseudopotentials, PAW contributions include:
 !!  - changes of the overlap between 0-order wave-functions,
 !!  - on-site contributions.
@@ -490,12 +490,19 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      mpert1=mpert1+1;jpert1(mpert1)=ipert
    end if
    do ipert1=1,mpert
-     if (ipert1/=ipert.and.&
-&     (ipert1<=dtset%natom.or.&
-&     (ipert1==dtset%natom+2.and.has_ddk_file).or.&
-&     ((ipert>dtset%natom.and.ipert/=dtset%natom+5).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
-&     ((ipert1==dtset%natom+2).and.has_ddk_file))) then
-       mpert1=mpert1+1;jpert1(mpert1)=ipert1
+     if (ipert1/=ipert) then
+       if(dtset%usepaw==1) then
+         if((ipert1<=dtset%natom.or.(ipert1==dtset%natom+2.and.has_ddk_file).or.&
+&            ((ipert>dtset%natom.and.ipert/=dtset%natom+5).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
+&            ((ipert1==dtset%natom+2).and.has_ddk_file))) then
+           mpert1=mpert1+1;jpert1(mpert1)=ipert1
+         end if
+       else ! dtset%usepaw==0
+         if ((ipert1<=dtset%natom.or.(ipert1==dtset%natom+2.and.has_ddk_file)).or.&
+    &     ((ipert==dtset%natom+3.or.ipert==dtset%natom+4).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4))) then
+           mpert1=mpert1+1;jpert1(mpert1)=ipert1
+         end if
+       end if
      end if
    end do
  else
@@ -878,7 +885,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
        vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
        call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
-     end if   
+     end if
      !! add vxctau for mGGA to GS hamiltonian and RF hamiltonian
      if (with_vxctau) then
        call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
@@ -1513,7 +1520,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                    gvnlx1 = gvnlx1-gh1
                  else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-                   !$OMP TARGET DATA USE_DEVICE_PTR(gvnlx1,gh1)
+                   !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1,gh1)
                    call abi_gpu_xaxpy(1, 2*npw1_k*nspinor*ndat, cminusone, &
                    &    c_loc(gh1), 1, c_loc(gvnlx1), 1)
                    !$OMP END TARGET DATA

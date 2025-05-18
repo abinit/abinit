@@ -1443,13 +1443,13 @@ contains
       case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR)
         call abi_gpu_xcopy(1, size, c_loc(xgBlockA__vecR), incx, c_loc(xgBlockB__vecR), incy)
         !$OMP END TARGET DATA
       case(SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC)
         call abi_gpu_xcopy(2, size, c_loc(xgBlockA__vecC), incx, c_loc(xgBlockB__vecC), incy)
         !$OMP END TARGET DATA
       end select
@@ -1778,7 +1778,7 @@ contains
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
         call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           c_loc(xgBlockA__vecR), xgBlockA%LDim, &
@@ -1828,7 +1828,7 @@ contains
           xgBlockA__vecR => xgBlockA%vecR
           xgBlockB__vecR => xgBlockB%vecR
           xgBlockW__vecR => xgBlockW%vecR
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
           call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
             calpha, &
             c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
@@ -1898,7 +1898,7 @@ contains
           xgBlockA__vecC => xgBlockA%vecC
           xgBlockB__vecC => xgBlockB%vecC
           xgBlockW__vecC => xgBlockW%vecC
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecC)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecC)
           call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
             calpha, &
             c_loc(xgBlockA__vecC), xgBlockA%LDim, &
@@ -1940,7 +1940,7 @@ contains
           xgBlockA__vecR => xgBlockA%vecR
           xgBlockB__vecR => xgBlockB%vecR
           xgBlockW__vecR => xgBlockW%vecR
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
           call abi_gpu_xgemm(1, transa, transb, 2*xgBlockW%rows, xgBlockW%cols, K, &
             calpha, &
             c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
@@ -2133,12 +2133,12 @@ contains
       select case(xgBlock%space)
       case (SPACE_R)
         xgBlock__vecR => xgBlock%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
         call abi_gpu_xpotrf(1,uplo,xgBlock%rows,c_loc(xgBlock__vecR),xgBlock%LDim,info)
         !$OMP END TARGET DATA
       case (SPACE_C)
         xgBlock__vecC => xgBlock%vecC
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
         call abi_gpu_xpotrf(2,uplo,xgBlock%rows,c_loc(xgBlock__vecC),xgBlock%LDim,info)
         !$OMP END TARGET DATA
       case (SPACE_CR)
@@ -2274,7 +2274,7 @@ contains
       case (SPACE_R)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockW__vecR)
         call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
             c_loc(xgBlockA__vecR),xgBlockA%LDim, &
             c_loc(xgBlockW__vecR),info)
@@ -2300,7 +2300,7 @@ contains
       case (SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockW__vecR => xgBlockW%vecR
-        !!$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockW__vecR)
+        !!$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockW__vecR)
         !call abi_gpu_xheevd(2,jobz,uplo,xgBlockA%cols, &
         !    c_loc(xgBlockA__vecC),xgBlockA%LDim, &
         !    c_loc(xgBlockW__vecR),info)
@@ -2733,7 +2733,7 @@ contains
         !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
         !  call checkResize(iwork,liwork,int(iwork(1)))
         !end if
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
         call abi_gpu_xhegvd(1, itype, jobz, uplo, &
           &             xgBlockA%rows, &
           &             c_loc(xgBlockA__vecR), xgBlockA%ldim, &
@@ -2785,7 +2785,7 @@ contains
         !  !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
         !  call checkResize(iwork,liwork,int(iwork(1)))
         !end if
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecR)
         call abi_gpu_xhegvd(2, itype, jobz, uplo, &
           &             xgBlockA%rows, &
           &             c_loc(xgBlockA__vecC), xgBlockA%ldim, &
@@ -3123,14 +3123,14 @@ contains
       case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecR,xgBlockB__vecR)
         call abi_gpu_xtrsm(1,side,uplo,transa,diag,fact*xgBlockB%rows,xgBlockB%cols, &
           calpha,c_loc(xgBlockA__vecR),xgBlockA%LDim,c_loc(xgBlockB__vecR),fact*xgBlockB%LDim)
         !$OMP END TARGET DATA
       case (SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC)
         call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
           calpha,c_loc(xgBlockA__vecC),xgBlockA%LDim,c_loc(xgBlockB__vecC),xgBlockB%LDim)
         !$OMP END TARGET DATA
@@ -3189,7 +3189,7 @@ contains
         alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
 #elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+      !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlockA__vecC,xgBlockB__vecC)
       xgBlockA__vecC => xgBlockA%vecC
       xgBlockB__vecC => xgBlockB%vecC
       call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
@@ -3630,19 +3630,7 @@ contains
     type(xgBlock_t) , intent(inout) :: xgBlock
     integer,intent(in),optional :: comm
 
-    integer :: ierr,comm_,fact
-
-#if defined HAVE_OPENMP_OFFLOAD
-#if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
-    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
-#endif
-#if !defined HAVE_MPI2_INPLACE
-    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC_buf(:,:)
-    real(kind=c_double), ABI_CONTIGUOUS pointer :: vecR_buf(:,:)
-#endif
-#endif
+    integer :: ierr,comm_
 
     if (.not.present(comm)) then
       comm_ = xgBlock%spacedim_comm
@@ -3656,7 +3644,6 @@ contains
         call gpu_device_synchronize()
       end if
 
-      fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
       select case(xgBlock%space)
 
         case (SPACE_R,SPACE_CR)
@@ -4133,13 +4120,13 @@ contains
       case (SPACE_R,SPACE_CR)
         xgBlock1__vecR => xgBlock1%vecR
         xgBlock2__vecR => xgBlock2%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecR,xgBlock2__vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecR,xgBlock2__vecR)
         call abi_gpu_xaxpy(1, xgBlock1%cols*fact*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecR),1,c_loc(xgBlock1__vecR),1)
         !$OMP END TARGET DATA
       case (SPACE_C)
         xgBlock1__vecC => xgBlock1%vecC
         xgBlock2__vecC => xgBlock2%vecC
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecC,xgBlock2__vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
         call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
         !$OMP END TARGET DATA
       end select
@@ -4200,7 +4187,7 @@ contains
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       xgBlock1__vecC => xgBlock1%vecC
       xgBlock2__vecC => xgBlock2%vecC
-      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecC,xgBlock2__vecC)
+      !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
       call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
       !$OMP END TARGET DATA
 #endif
@@ -5103,12 +5090,12 @@ contains
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
           xgBlock__vecR => xgBlock%vecR
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
           call abi_gpu_xscal(1, fact*xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock__vecR), inc)
           !$OMP END TARGET DATA
         case (SPACE_C)
           xgBlock__vecC => xgBlock%vecC
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+          !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
           call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock__vecC), inc)
           !$OMP END TARGET DATA
         end select
@@ -5133,14 +5120,14 @@ contains
         case (SPACE_R,SPACE_CR)
           xgBlock__vecR => xgBlock%vecR
           do i=1,xgBlock%cols
-            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+            !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecR)
             call abi_gpu_xscal(1, fact*xgBlock%rows/inc, valc, c_loc(xgBlock__vecR(1,i)), inc)
             !$OMP END TARGET DATA
           end do
         case (SPACE_C)
           xgBlock__vecC => xgBlock%vecC
           do i=1,xgBlock%cols
-            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+            !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock__vecC)
             call abi_gpu_xscal(2, xgBlock%rows/inc, valc, c_loc(xgBlock__vecC(1,i)), inc)
             !$OMP END TARGET DATA
           end do
@@ -5524,28 +5511,31 @@ contains
   !! NAME
   !! xgBlock_reshape
 
-  subroutine xgBlock_reshape(xgBlock,newShape)
+  subroutine xgBlock_reshape(xgBlock,newrows,newcols)
     use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlock
-    integer        , intent(in   ) :: newShape(2)
-    integer :: fact
+    integer        , intent(in   ) :: newrows
+    integer        , intent(in   ) :: newcols
+    integer :: fact,newshape(2)
     type(c_ptr) :: cptr
 
-    if ( xgBlock%rows*xgBlock%cols /= newShape(1)*newShape(2) ) then
+    if ( xgBlock%rows*xgBlock%cols /= newrows*newcols ) then
       write(std_out,*) "xgBlock%rows", xgBlock%rows
       write(std_out,*) "xgBlock%cols", xgBlock%cols
-      write(std_out,*) "newShape(1)", newShape(1)
-      write(std_out,*) "newShape(2)", newShape(2)
+      write(std_out,*) "newrows", newrows
+      write(std_out,*) "newcols", newcols
       write(std_out,*) "xgBlock%rows*xgBlock%cols", xgBlock%rows*xgBlock%cols
-      write(std_out,*) "newShape(1)*newShape(2)", newShape(1)*newShape(2)
+      write(std_out,*) "newrows*newcols", newrows*newcols
       ABI_ERROR("Bad shape")
     end if
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
-    xgBlock%LDim = newShape(1)+( (xgBlock%LDim-xgBlock%rows)* xgBlock%cols)/newShape(2)
-    xgBlock%rows = newShape(1)
-    xgBlock%cols = newShape(2)
+    xgBlock%LDim = newrows+( (xgBlock%LDim-xgBlock%rows)* xgBlock%cols)/newcols
+    xgBlock%rows = newrows
+    xgBlock%cols = newcols
+    newshape(1) = newrows
+    newshape(2) = newcols
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       cptr = getClocR(fact*xgBlock%LDim,xgBlock%cols,xgBlock%vecR)
@@ -5586,13 +5576,13 @@ contains
         ABI_ERROR('nspinor should divide the number of cols')
       end if
       call xgBlock_setBlock(xgBlock,xgBlock_spinor,nrows,ncols)
-      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,(/nrows*nspinor,ncols/nspinor/))
+      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,nrows*nspinor,ncols/nspinor)
     else if (option==ROWS2COLS) then
       if (modulo(nrows,nspinor)/=0) then
         ABI_ERROR('nspinor should divide the number of rows')
       end if
       call xgBlock_setBlock(xgBlock,xgBlock_spinor,nrows,ncols)
-      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,(/nrows/nspinor,ncols*nspinor/))
+      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,nrows/nspinor,ncols*nspinor)
     else
       ABI_ERROR('bad option value')
     end if
@@ -5705,12 +5695,12 @@ contains
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         byte_count = int(fact, c_size_t) * xgBlock%ldim * xgBlock%cols * dp
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecR)
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
         !$OMP END TARGET DATA
       case (SPACE_C)
         byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecC)
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
         !$OMP END TARGET DATA
       end select

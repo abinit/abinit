@@ -206,7 +206,9 @@ contains
  end if
 
  no_opernla_mv = nloalg(1)==4.or.nloalg(1)==8.or.nloalg(1)==10 ! have to be consistent with nonlop_ylm
- no_opernla_gemm = (.not. gemm_nonlop_use_gemm) .or. choice==4 .or. choice==6 .or. ndat==1
+ no_opernla_gemm = (.not. gemm_nonlop_use_gemm) &
+ &    .or. choice==4 .or. choice==6 .or. ndat==1 &
+ &    .or. l_gpu_option/=gemm_nonlop_gpu_option
 
 !Define dimensions of projected scalars
  dimffnl=size(ffnl,2)
@@ -809,7 +811,7 @@ contains
  dimlmn=0  ! Type-sorted cprj
  if (one_atom) then
    itypat=typat(iatom)
-   dimlmn(ia+1:ia+nattyp(itypat))=count(indlmn_atm(3,:,itypat)>0)
+   dimlmn(1:nattyp(itypat))=count(indlmn_atm(3,:,itypat)>0)
  else
    ia=0
    do itypat=1,ntypat0

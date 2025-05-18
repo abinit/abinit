@@ -35,7 +35,7 @@ use m_abicore
 use m_xmpi
 use m_pawang
 use m_errors
-use m_ab7_mixing
+use m_abi_mixing
 use m_mpinfo
 use m_crystal
 

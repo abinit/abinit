@@ -33,6 +33,8 @@ module m_cumulant
  use m_dtfil
  use netcdf
 
+ !use m_ebands, only: ebands_free, ebands_get_carriers, ebands_get_muT_with_fd
+ !use m_ebands,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, is_open
  use m_time,           only : cwtime, cwtime_report
@@ -40,6 +42,7 @@ module m_cumulant
  use m_numeric_tools,  only : simpson_cplx, arth, c2r, simpson, safe_div, simpson_int, ctrap, linfit, linspace
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
  use m_distribfft,     only : init_distribfft_seq
+ !use m_kpts,           only : kpts_timrev_from_kptopt
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_fft,            only : fourdp
  use m_fftcore,        only : ngfft_seq,fftalg_isavailable
@@ -274,6 +277,11 @@ module m_cumulant
    ! gw_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in frequency domain(omega, kT, band) for given (ikcalc, spin).
 
+     real(dp),allocatable :: spfunc_dm_wr(:,:,:,:,:)
+     real(dp),allocatable :: spfunc_wr(:,:,:,:,:)
+   ! ce_spfunc_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
+   ! spectral function for dyson migdal case (omega, kT, band, ikcalc, spin).
+
    ! real(dp),allocatable :: ce_spfunc_wr(:,:,:,:,:)
    ! ce_spfunc_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Absorption spectrum (omega, kT, band, ikcalc, spin).
@@ -414,8 +422,8 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
 
  ! Free memory
 !100
-call cumulant%free()
-call sigmaph%free()
+ call cumulant%free()
+ call sigmaph%free()
 
 end subroutine cumulant_driver
 !!***
@@ -678,6 +686,8 @@ subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
  end if
 
  !ABI_CALLOC(self%ce_spfunc_wr, (self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol))
+ ABI_CALLOC(self%spfunc_dm_wr, (self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol))
+ ABI_CALLOC(self%spfunc_wr, (self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol))
  ABI_CALLOC(self%gw_vals, (self%nwr_ce, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%nsppol))
 
  if (self%debug == 1) then
@@ -884,8 +894,12 @@ subroutine cumulant_compute(self)
          ! Defining time mesh
          ! all variables with nwr_ce size are to use after interpolation of the
          ! cumulant function in case we want to add more points
-         time_max = (log(self%tolcum) / ( - abs(aimag(self%vals_e0ks(itemp, ib, my_ik,spin)) )) )
-
+         if (abs(aimag(self%vals_e0ks(itemp, ib, my_ik, spin))) >  1.0e-16) then
+           time_max = log(self%tolcum) / (-abs(aimag(self%vals_e0ks(itemp, ib, my_ik, spin))))
+         else
+           time_max = log(self%tolcum) / (-1.0e-16)
+           ABI_WARNING("Imaginary part of the self energy is 0 in cumulant calculation. Reset to 1.e-16")
+         endif
          init_t = 0.0
          time_step_init = 1.0/(nwr - 1.0)
          time_mesh_temp(:) = arth(init_t, time_step_init, nwr)
@@ -1277,10 +1291,11 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 
      nbands = self%nbcalc_ks(ikcalc, spin)
      call cwtime(cpu, wall, gflops, "start")
-
-     do ib=self%bmin,self%bmax
+     !do ib=self%bmin,self%bmax
+     do ib=self%bstart_ks(ikcalc, spin),self%bstart_ks(ikcalc, spin)+self%nbcalc_ks(ikcalc, spin)-1
        !if (ib > self%bmin) cycle ! MG HACK To be able to run tests quickly.
-       ib_eph = ib - self%bmin + 1
+       !ib_eph = ib - self%bmin + 1
+       ib_eph = ib - self%bstart_ks(ikcalc, spin) + 1
        eig_nk = self%ebands%eig(ib, ik_ibz, spin)
        wr_step = self%wrmesh_b(2,ib_eph,my_ik,spin) - self%wrmesh_b(1,ib_eph,my_ik,spin)
        vr(:) = self%vbks(:, ib, ik_ibz, spin)
@@ -1313,6 +1328,11 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 ! TODO: add the Dyson Migdal as well, to compare properly the transport with the same KG equation
                 sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
                 sp_func_dm = -aimag (gdm_vals(iw)) / pi
+
+
+                self%spfunc_dm_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func_dm
+
+                self%spfunc_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func
 !                test_Aw(itemp) = test_Aw(itemp) + sp_func
                 dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
                 self%print_dfdw(iw,itemp) = dfdw
@@ -1588,11 +1608,17 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
      nctkarr_t("gw_vals", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("ks_enes", "dp", "max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("spfunc_dm_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t('dfdw',"dp", "nwr, ntemp"), &
      nctkarr_t('conductivity_mu',"dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t('conductivity_mu_dm',"dp", "three, three, two, nsppol, ntemp"), &
      nctkarr_t('mobility_mu', "dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t('mobility_mu_dm', "dp", "three, three, two, nsppol, ntemp"), &
      nctkarr_t('seebeck',"dp", "three, three, two, nsppol, ntemp"), &
-     nctkarr_t('kappa',"dp", "three, three, two, nsppol, ntemp") &
+     nctkarr_t('seebeck_dm',"dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t('kappa',"dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t('kappa_dm',"dp", "three, three, two, nsppol, ntemp") &
    ])
    NCF_CHECK(ncerr)
 
@@ -1654,6 +1680,12 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
  ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "dw_vals"), nf90_collective)
  NCF_CHECK(ncerr)
 
+ ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "spfunc_dm_wr"), nf90_collective)
+ NCF_CHECK(ncerr)
+
+ ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "spfunc_wr"), nf90_collective)
+ NCF_CHECK(ncerr)
+
  if (any(abs(dtset%sigma_erange) > zero)) then
    ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "dfdw"), nf90_collective)
    NCF_CHECK(ncerr)
@@ -1668,6 +1700,18 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
    NCF_CHECK(ncerr)
 
    ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "kappa"), nf90_collective)
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "conductivity_mu_dm"), nf90_collective)
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "mobility_mu_dm"), nf90_collective)
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "seebeck_dm"), nf90_collective)
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "kappa_dm"), nf90_collective)
    NCF_CHECK(ncerr)
 
 
@@ -1718,6 +1762,17 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
                       count=[self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
  NCF_CHECK(ncerr)
 
+!DEBUG STUFF MJV
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "spfunc_dm_wr"), self%spfunc_dm_wr, &
+                      start=[1,1,1,ikcalc,spin], &
+                      count=[self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+ NCF_CHECK(ncerr)
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "spfunc_wr"), self%spfunc_wr, &
+                      start=[1,1,1,ikcalc,spin], &
+                      count=[self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+ NCF_CHECK(ncerr)
+
 
  if (any(abs(dtset%sigma_erange) > zero)) then
 
@@ -1738,6 +1793,27 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
  NCF_CHECK(ncerr)
 
  ncerr = nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu, &
+                      start=[1,1,1,spin,1], &
+                      count=[3, 3, 2, self%my_nspins , self%ntemp])
+ NCF_CHECK(ncerr)
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "seebeck_dm"), self%seebeck_dm, &
+                      start=[1,1,1,spin,1], &
+                      count=[3, 3, 2, self%my_nspins , self%ntemp])
+ NCF_CHECK(ncerr)
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "kappa_dm"), self%kappa_dm, &
+                      start=[1,1,1,spin,1], &
+                      count=[3, 3, 2, self%my_nspins , self%ntemp])
+ NCF_CHECK(ncerr)
+
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu_dm"), self%mobility_mu_dm, &
+                      start=[1,1,1,spin,1], &
+                      count=[3, 3, 2, self%my_nspins , self%ntemp])
+ NCF_CHECK(ncerr)
+
+ ncerr = nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu_dm"), self%conductivity_mu_dm, &
                       start=[1,1,1,spin,1], &
                       count=[3, 3, 2, self%my_nspins , self%ntemp])
  NCF_CHECK(ncerr)
@@ -1855,12 +1931,13 @@ subroutine cumulant_free(self)
  ABI_SFREE(self%dw_vals)
  ABI_SFREE(self%gw_vals)
  !ABI_SFREE(self%ce_spfunc_wr)
+ ABI_SFREE(self%spfunc_dm_wr)
+ ABI_SFREE(self%spfunc_wr)
  ABI_SFREE(self%conductivity_mu)
+ ABI_SFREE(self%conductivity_mu_dm)
  ABI_SFREE(self%mobility_mu)
  ABI_SFREE(self%mobility_mu_dm)
  ABI_SFREE(self%transport_mu_e)
- ABI_SFREE(self%conductivity_mu_dm)
-
  ABI_SFREE(self%print_dfdw)
  ABI_SFREE(self%seebeck)
  ABI_SFREE(self%seebeck_dm)

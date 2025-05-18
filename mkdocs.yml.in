@@ -124,6 +124,7 @@ nav:
     - topics/RandStopPow.md
     - topics/Recursion.md
     - topics/RPACorrEn.md
+    - topics/RTTDDFT.md
     - topics/SCFControl.md
     - topics/SCFAlgorithms.md
     - topics/SelfEnergy.md
@@ -163,6 +164,7 @@ nav:
         - PAW: variables/paw.md
         - DFPT: variables/dfpt.md
         - Relaxation: variables/rlx.md
+        - RTTDDFT: variables/rttddft.md
         - VdW: variables/vdw.md
         - Wannier90: variables/w90.md
     - Anaddb: variables/anaddb.md
@@ -210,6 +212,7 @@ nav:
         - Bethe-Salpeter: tutorial/bse.md
         - DMFT: tutorial/dmft.md
         - TDDFT (Casida): tutorial/tddft.md
+        - RT-TDDFT: tutorial/rttddft.md
     - DFPT & electron-phonon:
         - elastic: tutorial/elastic.md
         - nonlinear : tutorial/nlo.md
@@ -218,6 +221,7 @@ nav:
         - eph_intro : tutorial/eph_intro.md
         - eph for mobilities : tutorial/eph4mob.md
         - eph for zero-point renormalization : tutorial/eph4zpr.md
+        - eph for variational polaron equations : tutorial/eph4vpq.md
         #- tutorial/eph4isotc.md
         - eph_legacy : tutorial/eph_legacy.md
         - eph_tdep_legacy : tutorial/eph_tdep_legacy.md

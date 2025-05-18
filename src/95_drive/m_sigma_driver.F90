@@ -29,7 +29,7 @@ module m_sigma_driver
  use m_xomp
  use m_errors
  use m_abicore
- use m_ab7_mixing
+ use m_abi_mixing
  use m_nctk
  use m_kxc
  use m_distribfft

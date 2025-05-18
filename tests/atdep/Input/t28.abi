@@ -29,7 +29,6 @@ order 4 5. 5.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atdep
-#%% exclude_builders = alps_intel_2025_elpa
 #%% md_hist = t28
 #%% [files]
 #%% files_to_test = 
