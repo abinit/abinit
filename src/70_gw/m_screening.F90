@@ -772,10 +772,10 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
  if (my_rank==master) call epsm1%hscr%print()
 
  ! Generic Info
- epsm1%ID         =0       ! Not yet initialized as epsm1 is calculated in epsm1_mkdump.F90
- epsm1%fname      =fname
- epsm1%fform      =fform
- epsm1%Tordering=epsm1%Hscr%Tordering
+ epsm1%ID         = 0       ! Not yet initialized as epsm1 is calculated in epsm1_mkdump.F90
+ epsm1%fname      = trim(fname)
+ epsm1%fform      = fform
+ epsm1%Tordering  = epsm1%Hscr%Tordering
 
  !TODO these quantitities should be checked and initiliazed in epsm1_mkdump
  !BEGIN HARCODED
@@ -801,14 +801,13 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
  epsm1%omega(:)=epsm1%Hscr%omega(:)
 
  ! Count number of real, imaginary, and complex frequencies.
- epsm1%nomega_r = 1
- epsm1%nomega_i = 0
+ epsm1%nomega_r = 1; epsm1%nomega_i = 0
  if (epsm1%nomega == 2) then
    epsm1%nomega_i = 1
  else
    unclassified = 0
    tol = tol6*Ha_eV
-   do iw = 2, epsm1%nomega
+   do iw=2, epsm1%nomega
      re =  REAL(epsm1%omega(iw))
      im = AIMAG(epsm1%omega(iw))
      if (re > tol .and. im < tol) then
@@ -828,14 +827,15 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
  end if
 
  ! Get G-vectors.
- epsm1%npwe=epsm1%Hscr%npwe
+ epsm1%npwe = epsm1%Hscr%npwe
  if (npwe_asked>0) then
    if (npwe_asked>epsm1%Hscr%npwe) then
      write(msg,'(a,i8,2a,i8)')&
       'Number of G-vectors saved on file is less than the value required = ',npwe_asked,ch10,&
       'Calculation will proceed with Max available npwe = ',epsm1%Hscr%npwe
      ABI_WARNING(msg)
-   else  ! Redefine the no. of G"s for W.
+   else
+     ! Redefine the no. of G"s for W.
      epsm1%npwe=npwe_asked
    end if
  end if

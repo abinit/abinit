@@ -177,11 +177,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in, z2,en_high,gw_gsq,w_localmax,w_max
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT, q_is_gamma, print_time
- character(len=500) :: msg
+ character(len=500) :: msg, iw_mesh_type
  type(wave_t),pointer :: wave_sum, wave_jb
  complex(gwpc),allocatable :: botsq(:,:),otq(:,:),eig(:,:)
 !arrays
- integer :: g0(3),spinor_padc(2,4),got(Wfd%nproc)
+ integer :: g0(3),spinor_padc(2,4),got(Wfd%nproc), units(2)
  integer,allocatable :: proc_distrb(:,:,:),extrapolar_distrb(:,:,:,:),degtab(:,:,:)
  integer,allocatable :: igfftcg0(:),gw_gfft(:,:),gw_gbound(:,:),irottb(:,:),ktabr(:,:)
  integer,allocatable :: igfftfcg0(:),gboundf(:,:),ktabrf(:,:),npoles_missing(:)
@@ -215,6 +215,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 !************************************************************************
 
  DBG_ENTER("COLL")
+
+ units = [std_out, ab_out]
 
  ! Initial check
  ABI_CHECK(Sr%nomega_r == Sigp%nomegasr, "")
@@ -287,20 +289,16 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call wrtout(std_out, sigma_type_from_key(mod10))
 
  ! Set up logical flags for Sigma calculation.
- if (mod10 == SIG_GW_AC .and. Sigp%gwcalctyp/=1) then
-   if (Sigp%gwcalctyp /= 21) then
-     ABI_ERROR("gwcalctyp /= 21 not implemented")
-   else
-     write(msg,'(a34,i9)')'Constructing Sigma_c(iw) for k = ',ikcalc
-     call wrtout([std_out, ab_out], msg)
-   end if
- end if
-
- if (mod10 == SIG_GW_AC .and. Sigp%gwcomp==1) then
-   ABI_ERROR("gwcomp with AC not implemented")
- end if
-
  if (mod10 == SIG_GW_AC) then
+   ABI_CHECK_IEQ(Sigp%gwcomp, 0, "gwcomp with AC not implemented")
+   if (Sigp%gwcalctyp /= 1) then
+     ABI_CHECK(Sigp%gwcalctyp == 21, "gwcalctyp /= 21 not implemented")
+     write(msg,'(a34,i9)')'Constructing Sigma_c(iw) for k = ',ikcalc
+     call wrtout(units, msg)
+   end if
+
+   iw_mesh_type = "gauss_legendre"
+
    write(msg,'(3a,i0,a,i0)')&
      ' Using a low-rank formula for AC', ch10, &
      ' Number of epsm1 eigenvectors retained: ',neigmax,' over: ',Sigp%npwc
@@ -321,8 +319,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Allocate arrays used to accumulate the matrix elements of \Sigma_c over
  ! k-points and bands. Note that for AC requires only the imaginary frequencies
- !nomega_sigc=Sr%nomega_r+Sr%nomega4sd
- !if (mod10==SIG_GW_AC) nomega_sigc=Sr%nomega_i
  !
  ! === Define the G-G0 shifts for the FFT of the oscillators ===
  ! * Sigp%mG0 gives the MAX G0 component to account for umklapp.
@@ -419,7 +415,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if (epsm1%mqmem == 0) then
    ! Use out-of-core solution for epsilon.
    ABI_COMMENT('Reading q-slices from file. Slower but less memory.')
- end if                                                                                !
+ end if
 
  ! Additional allocations for PAW.
  if (Psps%usepaw==1) then
@@ -440,31 +436,41 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if (mod10 == SIG_GW_AC) then
    ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation.
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i))
-   call coeffs_gausslegint(zero, one, gl_knots, gl_wts, epsm1%nomega_i)
 
-   ierr = 0
-   do io=1,epsm1%nomega_i
-     ! First frequencies are always real
-     if (ABS(AIMAG(one*epsm1%omega(epsm1%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
-       ierr = ierr + 1
-       if (Wfd%my_rank == Wfd%master) then
-         if (io == 1) write(std_out, "(a)")"omega_file, gauss_legendre_omega (ev)"
-         write(std_out,*)io, AIMAG(epsm1%omega(epsm1%nomega_r+io)) * Ha_eV, (one/gl_knots(io)-one) * Ha_eV
+   select case (iw_mesh_type)
+   case ("gauss_legendre")
+     call coeffs_gausslegint(zero, one, gl_knots, gl_wts, epsm1%nomega_i)
+
+     ! To calculate \int_0^\infty domegap f(omegap), we calculate \int_0^1 dz f(1/z-1)/z^2.
+     omegap(:) = one / gl_knots(:) - one
+     omegap2(:) = omegap(:) ** 2
+
+     ierr = 0
+     do io=1,epsm1%nomega_i
+       ! First frequencies are always real
+       if (ABS(AIMAG(one*epsm1%omega(epsm1%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
+         ierr = ierr + 1
+         if (Wfd%my_rank == Wfd%master) then
+           if (io == 1) write(std_out, "(a)")"omega_file, gauss_legendre_omega (ev)"
+           write(std_out,*)io, AIMAG(epsm1%omega(epsm1%nomega_r+io)) * Ha_eV, (one/gl_knots(io)-one) * Ha_eV
+         end if
        end if
+     end do
+
+     if (ierr /= 0) then
+       write(std_out, *)"epsm1%nomega_r:", epsm1%nomega_r, "epsm1%nomega_i:", epsm1%nomega_i
+       write(msg,'(3a)')&
+         'Frequencies in the SCR file are not compatible with the analytic continuation and gauss-legendre.',ch10,&
+         'Verify the frequencies in the SCR file. '
+       ABI_ERROR(msg)
      end if
-   end do
 
-   if (ierr /= 0) then
-     write(std_out, *)"epsm1%nomega_r:", epsm1%nomega_r, "epsm1%nomega_i:", epsm1%nomega_i
-     write(msg,'(3a)')&
-       'Frequencies in the SCR file are not compatible with the analytic continuation.',ch10,&
-       'Verify the frequencies in the SCR file. '
-     ABI_ERROR(msg)
-  end if
+   case ("minimax")
+     ! Nothing to do at this level
 
-   ! To calculate \int_0^\infty domegap f(omegap), we calculate \int_0^1 dz f(1/z-1)/z^2.
-   omegap(:) = one / gl_knots(:) - one
-   omegap2(:) = omegap(:) ** 2
+   case default
+     ABI_ERROR(sjoin("Invalid iw_mesh_type:" , iw_mesh_type))
+   end select
 
    if (epsm1%use_mpi_shared_win) then
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
@@ -482,7 +488,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  nomega_tot = Sr%nomega_r + Sr%nomega4sd
  ABI_CALLOC(sigcme2, (nomega_tot,ib1:ib2))
  ABI_CALLOC(sigcme_3, (nomega_tot))
-
  ABI_CALLOC(sigctmp,(nomega_sigc,Sigp%nsig_ab))
  if (mod10 /= SIG_GW_AC) then
    ABI_MALLOC(sigc_ket, (npwc*nspinor, nomega_sigc))
@@ -604,8 +609,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    call timab(433,2,tsec) ! Init spin
 
    do ik_bz=1,Kmesh%nbz
-     ! Parallelization over k-points and spin
-     ! For the spin there is another check in the inner loop
+     ! Parallelization over k-points and spin. For the spin there is another check in the inner loop
      if (ALL(proc_distrb(:,ik_bz,spin)/=Wfd%my_rank)) CYCLE
 
      call timab(434,1,tsec) ! initq
@@ -715,9 +719,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Important to set to zero here for all procs since we're going to use a dirty reduction later
          ! The reduction 'xmpi_sum' does not induce a significant performance loss in the tested systems
          neig(:) = 0
-
          ABI_MALLOC(epsm1_eig, (Sigp%npwc))
-
          if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, ac_epsm1cqwz2_win, ierr) ! Start the RMA epoch.
 
          do iiw=1,epsm1%nomega_i
@@ -730,13 +732,22 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              if (dtset%gwpara == 2 .and. epsm1%shared_comm%skip(iiw-1)) CYCLE
            end if
 
-           ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
-           ! The first frequencies are always real, skip them.
-           z2 = gl_knots(iiw)*gl_knots(iiw)
-           ac_epsm1cqwz2(:,:,iiw) = gl_wts(iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw) / z2
+           select case (iw_mesh_type)
+           case ("gauss_legendre")
+             ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
+             ! The first frequencies are always real, skip them.
+             z2 = gl_knots(iiw)*gl_knots(iiw)
+             ac_epsm1cqwz2(:,:,iiw) = gl_wts(iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw) / z2
+
+           !case ("minimax")
+           !  ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
+
+           case default
+             ABI_ERROR(sjoin("Invalid iw_mesh_type:", iw_mesh_type))
+           end select
 
            ! (epsm1-1) has negative eigenvalues, after diago, they will be sorted starting from the most negative.
-           call xheev('V','L',npwc,ac_epsm1cqwz2(:,:,iiw),epsm1_eig)
+           call xheev('V','L', npwc, ac_epsm1cqwz2(:,:,iiw), epsm1_eig)
 
            ! Eliminate the spurious positive eigenvalues that may occur in harsh conditions.
            neig(iiw) = MIN(COUNT(epsm1_eig(:) < -1.0e-10_dp), neigmax)
@@ -1417,7 +1428,6 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
  integer :: ig,ig4,ig4x,ig4y,ig4z,igp,igmin,ispinor,ngfft1,ngfft2,ngfft3,spad,outofbox
 !arrays
  integer :: g2mg1(3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
