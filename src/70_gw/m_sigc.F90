@@ -30,7 +30,7 @@ module m_sigc
  use m_time,          only : timab, cwtime, cwtime_report
  use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
  use m_hide_lapack,   only : xheev
- use m_numeric_tools, only : hermitianize, imin_loc, gaussleg_int
+ use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
@@ -186,8 +186,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer,allocatable :: igfftcg0(:),gw_gfft(:,:),gw_gbound(:,:),irottb(:,:),ktabr(:,:)
  integer,allocatable :: igfftfcg0(:),gboundf(:,:),ktabrf(:,:),npoles_missing(:)
  real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),omegap(epsm1%nomega_i),omegap2(epsm1%nomega_i),q0(3),tsec(2),qbz(3)
- !real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i)
- real(dp),allocatable :: gl_knots(:),gl_wts(:)
+ real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i)
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
@@ -441,7 +440,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if (mod10 == SIG_GW_AC) then
    ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation.
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i))
-   call gaussleg_int(epsm1%nomega_i, zero, one, gl_knots, gl_wts)
+   call coeffs_gausslegint(zero, one, gl_knots, gl_wts, epsm1%nomega_i)
 
    ierr = 0
    do io=1,epsm1%nomega_i
@@ -1341,8 +1340,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_SFREE(wf1swf2_g)
  ABI_SFREE(extrapolar_distrb)
  ABI_SFREE(proc_distrb)
- ABI_SFREE(gl_knots)
- ABI_SFREE(gl_wts)
 
  if (mod10 == SIG_GW_AC) then
    if (epsm1%use_mpi_shared_win) then

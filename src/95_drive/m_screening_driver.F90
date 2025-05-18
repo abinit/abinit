@@ -44,7 +44,7 @@ module m_screening_driver
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
  use m_energies,      only : energies_type, energies_init
- use m_numeric_tools, only : print_arr, gaussleg_int, c2r
+ use m_numeric_tools, only : print_arr, coeffs_gausslegint, c2r
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
@@ -54,7 +54,7 @@ module m_screening_driver
  use m_gsphere,       only : gsphere_t, setshells
  use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : rdqps, rdgw, show_QP
- use m_screening,     only : make_epsm1_driver !, lwl_write, chi_t, chi_free, chi_new
+ use m_screening,     only : make_epsm1_driver, lwl_write, chi_t, chi_free, chi_new
  use m_io_screening,  only : hscr_new, write_screening, hscr_t
  use m_spectra,       only : spectra_t, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
@@ -987,7 +987,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  !  - Replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
  !  - Note that the grid is not log as required by CD thus we cannot use the same SCR file.
  if (Ep%analytic_continuation) then
-   call gaussleg_int(Ep%nomegaei, zero, one, z, zw)
+   ABI_MALLOC(z, (Ep%nomegaei))
+   ABI_MALLOC(zw, (Ep%nomegaei))
+   call coeffs_gausslegint(zero, one, z, zw, Ep%nomegaei)
    do iomega=1,Ep%nomegaei
      Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, one/z(iomega) - one, kind=dpc)
    end do
@@ -1184,10 +1186,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ABI_FREE(chi0intra_head)
      end if
 
-     !if (.False.) then
-     !  lwl_fname = strcat(dtfil%filnam_ds(4), "_LWL")
-     !  call lwl_write(lwl_fname,cryst,vcp,ep%npwe,ep%nomega,gsph_epsg0%gvec,chi0,chi0_head,chi0_lwing,chi0_uwing,comm)
-     !end if
+     if (.False.) then
+       lwl_fname = strcat(dtfil%filnam_ds(4), "_LWL")
+       call lwl_write(lwl_fname,cryst,vcp,ep%npwe,ep%nomega,gsph_epsg0%gvec,chi0,chi0_head,chi0_lwing,chi0_uwing,comm)
+     end if
 
      call timab(307,2,tsec)
 
@@ -1294,21 +1296,21 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! Calculate the Galitskii-Migdal and RPA functionals for the correlation energy if the polarizability on a
    ! Gauss-Legendre mesh along imaginary axis is available
-   if (Ep%analytic_continuation .and. Dtset%gwrpacorr>0) then
+   if (Ep%analytic_continuation .and. Dtset%gwrpacorr>0 ) then
      if (is_first_qcalc) then
        ABI_MALLOC(ec_rpa,(Dtset%gwrpacorr))
        ec_rpa(:)=zero
        ec_gm=zero
      end if
      call calc_rpa_functional(Dtset%gwrpacorr,Dtset%gwgmcorr,label,iqibz,Ep,Vcp,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa,ec_gm)
-     if (label == Ep%nqcalc) then
+     if (label==Ep%nqcalc) then
        ABI_FREE(ec_rpa)
      end if
    end if
 
-   ! ==========================================================
-   ! === Calculate RPA \tilde\epsilon^{-1} overwriting chi0 ===
-   ! ==========================================================
+   !  ==========================================================
+   !  === Calculate RPA \tilde\epsilon^{-1} overwriting chi0 ===
+   !  ==========================================================
    approx_type=0 ! RPA
    option_test=0 ! TESTPARTICLE
    dim_wing=0; if (is_qeq0==1) dim_wing=3
@@ -1682,6 +1684,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  real(dp),pointer :: energies_p(:,:,:)
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:)
+
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -1769,7 +1772,8 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ABI_CHECK(ierr == 0, "Mismatch between gvec_kss and test_gvec_kss")
  ABI_FREE(test_gvec_kss)
 
- ! Get important dimension from Hdr_wfk. Check also the consistency btw Hdr_wfk and Dtset.
+ ! Get important dimension from Hdr_wfk
+ ! Check also the consistency btw Hdr_wfk and Dtset.
  Ep%nsppol=Hdr_wfk%nsppol
  Ep%nkibz =Hdr_wfk%nkpt
 
@@ -1864,9 +1868,10 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
    ABI_ERROR(msg)
  end if
 
- ! Create structure describing the G-sphere used for chi0/espilon and Wfns ===
- ! The cutoff is >= ecuteps to allow for umklapp.
+ ! === Create structure describing the G-sphere used for chi0/espilon and Wfns ===
+ ! * The cutoff is >= ecuteps to allow for umklapp
  call Gsph_wfn%init(Cryst, Ep%npwvec, gvec=gvec_kss)
+
  call Gsph_epsG0%init(Cryst, Ep%npwepG0, gvec=gvec_kss)
  !
  ! =======================================================================
@@ -1929,16 +1934,16 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  end if
 
  ! Max number of omega along the imaginary axis
- if (Ep%analytic_continuation .or. Ep%contour_deformation) then
-   Ep%nomegaei = Dtset%nfreqim
-   if (Dtset%gw_frqim_inzgrid == 1) then
+ if (Ep%analytic_continuation.or.Ep%contour_deformation) then
+   Ep%nomegaei=Dtset%nfreqim
+   if (Dtset%gw_frqim_inzgrid==1) then
      ABI_WARNING('iomega = z/1-z transfom grid will be used for imaginary frequency grid')
    end if
-   if (Dtset%cd_customnimfrqs /= 0) then
+   if (Dtset%cd_customnimfrqs/=0) then
      ABI_WARNING('Custom imaginary grid specified. Assuming experienced user.')
      Ep%nomegaei=Dtset%cd_customnimfrqs
    end if
-   if (Ep%nomegaei == -1) then
+   if (Ep%nomegaei==-1) then
      Ep%nomegaei=NOMEGAGAUSS
      ABI_WARNING(sjoin('Number of imaginary frequencies set to default= ',itoa(NOMEGAGAUSS)))
    end if
@@ -2008,11 +2013,10 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
    Ep%nomegaec = Ep%nomegaei*(Ep%nomegaer-1)
  end if
 
- ! Total number of frequencies.
- Ep%nomega = Ep%nomegaer + Ep%nomegaei + Ep%nomegaec
+ Ep%nomega=Ep%nomegaer+Ep%nomegaei+Ep%nomegaec ! Total number of frequencies.
 
- ! Setup of the spectral method
- Ep%spmeth = Dtset%spmeth; Ep%nomegasf=Dtset%nomegasf; Ep%spsmear =Dtset%spbroad
+ ! ==== Setup of the spectral method ====
+ Ep%spmeth  =Dtset%spmeth; Ep%nomegasf=Dtset%nomegasf; Ep%spsmear =Dtset%spbroad
 
  if (Ep%spmeth/=0) then
    write(msg,'(2a,i3,2a,i8)')ch10,&
@@ -2036,13 +2040,13 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
    !ABI_CHECK(Ep%symchi == 0, "symchi/=0 and nspinor=2 not available")
  end if
 
- ! Enable the calculations of chi0 on user-specified q-points
+ ! === Enable the calculations of chi0 on user-specified q-points ===
  Ep%nqibz=Qmesh%nibz
- ABI_MALLOC(Ep%qibz, (3,Ep%nqibz))
+ ABI_MALLOC(Ep%qibz,(3,Ep%nqibz))
  Ep%qibz(:,:)=Qmesh%ibz(:,:)
 
  Ep%nqcalc=Ep%nqibz
- if (Dtset%nqptdm>0) Ep%nqcalc = Dtset%nqptdm
+ if (Dtset%nqptdm>0) Ep%nqcalc=Dtset%nqptdm
 
  ABI_MALLOC(Ep%qcalc,(3,Ep%nqcalc))
  if (Ep%nqcalc/=Ep%nqibz) then
@@ -2051,7 +2055,8 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
     ' selected q points provided by the user through the input variables ',ch10,&
     ' nqptdm and qptdm'
    call wrtout(units, msg)
-   ABI_CHECK(Ep%nqcalc <= Qmesh%nibz, 'nqptdm should not exceed the number of q points in the IBZ')
+   ltest= Ep%nqcalc <= Qmesh%nibz
+   ABI_CHECK(ltest, 'nqptdm should not exceed the number of q points in the IBZ')
    Ep%qcalc(:,:)=Dtset%qptdm(:,1:Ep%nqcalc)
    ! Check whether the q-points provided are correct.
    do iq=1,Ep%nqcalc
@@ -2085,7 +2090,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  end if
 
  ! === Initialize the band structure datatype ===
- ! Copy KSS energies and occupations up to Ep%nbnds==Dtset%nband(:)
+ ! * Copy KSS energies and occupations up to Ep%nbnds==Dtset%nband(:)
  ! TODO Recheck symmorphy and inversion
  bantot = SUM(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol))
 
@@ -2122,10 +2127,16 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  npwarr(:)=Ep%npwwfn
 
  call ks_ebands%init(bantot, Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
-                     doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-                     Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-                     dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-                     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+                  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
+                  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+                  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+                  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+
+ ! TODO modify outkss in order to calculate the eigenvalues also if NSCF calculation.
+ ! this fails simply because in case of NSCF occ  are zero
+ !ltest=(ALL(ABS(occfact-ks_ebands%occ)<1.d-2))
+ !call assert(ltest,'difference in occfact')
+ !write(std_out,*)MAXVAL(ABS(occfact(:)-ks_ebands%occ(:)))
 
  !TODO call ebands_update_occ here
  !call ks_ebands%update_occ(spinmagntarget,Dtset%prtvol)
@@ -2149,7 +2160,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  call pawrhoij_free(Pawrhoij)
  ABI_FREE(Pawrhoij)
 
- ! Setup of extrapolar technique.
+ ! ==== Setup of extrapolar technique ====
  Ep%gwcomp = Dtset%gwcomp; Ep%gwencomp = Dtset%gwencomp
  if (Ep%gwcomp == 1) then
    write(msg,'(a,f8.2,a)')' Using the completeness correction with gwencomp ',Ep%gwencomp*Ha_eV,' [eV] '
@@ -2217,6 +2228,7 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
 !arrays
  integer :: my_spins(Dtset%nsppol),nprocs_spin(Dtset%nsppol)
  integer,allocatable :: istart(:),istop(:)
+
 ! *************************************************************************
 
  ierr=0; nsppol=Dtset%nsppol
@@ -2509,7 +2521,7 @@ end subroutine random_stopping_power
 !! INPUTS
 !!  iq=index of the q-point in the array Qmesh%ibz where epsilon^-1 has to be calculated
 !!  Ep<em1params_t>=Structure with parameters and dimensions related to the inverse dielectric matrix.
-!!  vc<vcoul_t>=Structure gathering data on the Coulombian interaction
+!!  Pvc<vcoul_t>=Structure gathering data on the Coulombian interaction
 !!  Qmesh<kmesh_t>=Data type with information on the q-sampling
 !!  Dtfil<Datafiles_type)>=variables related to files
 !!  comm=MPI communicator.
@@ -2518,7 +2530,7 @@ end subroutine random_stopping_power
 !!
 !! SOURCE
 
-subroutine calc_rpa_functional(gwrpacorr, gwgmcorr, iqcalc, iq, Ep, vc, Qmesh, Dtfil, gmet, chi0, comm, ec_rpa, ec_gm)
+subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,comm,ec_rpa,ec_gm)
 
  use m_hide_lapack, only : xginv, xheev
 
@@ -2527,7 +2539,7 @@ subroutine calc_rpa_functional(gwrpacorr, gwgmcorr, iqcalc, iq, Ep, vc, Qmesh, D
  integer,intent(in) :: iqcalc,iq,gwrpacorr,gwgmcorr,comm
  real(dp),intent(inout) :: ec_gm
  type(kmesh_t),intent(in) :: Qmesh
- type(vcoul_t),intent(in) :: vc
+ type(vcoul_t),intent(in) :: Pvc
  type(Datafiles_type),intent(in) :: Dtfil
  type(em1params_t),intent(in) :: Ep
 !arrays
@@ -2544,8 +2556,8 @@ subroutine calc_rpa_functional(gwrpacorr, gwgmcorr, iqcalc, iq, Ep, vc, Qmesh, D
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: z(:),zl(:),zlw(:),zw(:)
- real(gwpc),allocatable :: eig(:)
  complex(gwpc),allocatable :: chi0_diag(:),chitmp(:,:),chi0_diag_gm(:),chitmp_gm(:,:)
+ real(gwpc),allocatable :: eig(:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
@@ -2554,14 +2566,20 @@ subroutine calc_rpa_functional(gwrpacorr, gwgmcorr, iqcalc, iq, Ep, vc, Qmesh, D
  rank   = xmpi_comm_rank(comm)
  nprocs = xmpi_comm_size(comm)
 
+ !if (rank==master) then ! presently only master has chi0 in screening
+
  ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff
  q_is_gamma = normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the omega integration
- call gaussleg_int(Ep%nomegaei, zero, one, z, zw)
+ ABI_MALLOC(zw, (Ep%nomegaei))
+ ABI_MALLOC(z, (Ep%nomegaei))
+ call coeffs_gausslegint(zero, one, z, zw, Ep%nomegaei)
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the lambda integration
- call gaussleg_int(gwrpacorr, zero, one, zl, zlw)
+ ABI_MALLOC(zlw, (gwrpacorr))
+ ABI_MALLOC(zl, (gwrpacorr))
+ call coeffs_gausslegint(zero,one,zl,zlw,gwrpacorr)
 
  ABI_MALLOC(chi0_diag,(Ep%npwe))
  ABI_MALLOC_OR_DIE(chitmp,(Ep%npwe,Ep%npwe), ierr)
@@ -2575,14 +2593,13 @@ subroutine calc_rpa_functional(gwrpacorr, gwgmcorr, iqcalc, iq, Ep, vc, Qmesh, D
    !  call wrtout(units, "RPA: Ignoring q==0"); cycle
    !end if
 
-   if(gwrpacorr==1) then
-     ! exact integration over the coupling constant
+   if(gwrpacorr==1) then ! exact integration over the coupling constant
 
-     if (modulo(io-2,nprocs)/=rank) cycle ! distributing the workload
+     if(modulo(io-2,nprocs)/=rank) cycle ! distributing the workload
 
      do ig2=1,Ep%npwe
        do ig1=1,Ep%npwe
-         chitmp(ig1,ig2) = vc%vc_sqrt(ig1,iq) * vc%vc_sqrt(ig2,iq) * chi0(ig1,ig2,io)
+         chitmp(ig1,ig2) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig2,iq) * chi0(ig1,ig2,io)
        end do !ig1
      end do !ig2
 
@@ -2591,78 +2608,83 @@ subroutine calc_rpa_functional(gwrpacorr, gwgmcorr, iqcalc, iq, Ep, vc, Qmesh, D
 
      do ig1=1,Ep%npwe
        ec_rpa(:) = ec_rpa(:) &
-          - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * (-log(one - eig(ig1))  - eig(ig1)) / (two * pi )
+&         - zw(io-1) / ( z(io-1) * z(io-1) ) &
+&              * Qmesh%wt(iq) * (-log( 1.0_dp-eig(ig1) )  - eig(ig1) ) / (2.0_dp * pi )
        ec_gm = ec_gm &
-         - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * ( eig(ig1) / (one - eig(ig1)) - eig(ig1)) / (two * pi )
+&         - zw(io-1) / ( z(io-1) * z(io-1) ) &
+&              * Qmesh%wt(iq) * ( eig(ig1) / ( 1.0_dp-eig(ig1) ) - eig(ig1) ) / (2.0_dp * pi )
      end do
      ABI_FREE(eig)
 
-   else
-     ! numerical integration over the coupling constant
+   else ! numerical integration over the coupling constant
+
      !if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
 
      do ilambda=1,gwrpacorr
        if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
        lambda=zl(ilambda)
        do ig1=1,Ep%npwe
-         chi0_diag(ig1) = vc%vc_sqrt(ig1,iq)**2 * chi0(ig1,ig1,io)
+         chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq)**2 * chi0(ig1,ig1,io)
        end do
 
-       if(ilambda==1 .and. gwgmcorr==1) then ! Copy v^1/2*Chi0*v^1/2 for Galitskii-Migdal
+       if(ilambda==1 .and. gwgmcorr==1) then     ! Copy v^1/2*Chi0*v^1/2 for Galitskii-Migdal
          chi0_diag_gm(:) = chi0_diag(:)
        end if
 
        do ig2=1,Ep%npwe
          do ig1=1,Ep%npwe
-           chitmp(ig1,ig2) = - lambda * vc%vc_sqrt(ig1,iq) * vc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
+           chitmp(ig1,ig2) = - lambda * Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
 
            if(ilambda==1 .and. gwgmcorr==1) then ! Use lambda=1 for Galitskii-Migdal
-             chitmp_gm(ig1,ig2) = - vc%vc_sqrt(ig1,iq) * vc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
+             chitmp_gm(ig1,ig2) = - Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
            end if
 
          end do !ig1
-         chitmp(ig2,ig2) = chitmp(ig2,ig2) + one
+         chitmp(ig2,ig2) = chitmp(ig2,ig2) + 1.0_dp
 
          if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare (1-v^1/2*Chi0*v^1/2) for Galitskii-Migdal
-           chitmp_gm(ig2,ig2) = chitmp_gm(ig2,ig2) + one
+           chitmp_gm(ig2,ig2) = chitmp_gm(ig2,ig2) + 1.0_dp
          end if
+
        end do !ig2
+       call xginv(chitmp(:,:),Ep%npwe)
+       chitmp(:,:) = matmul( chi0(:,:,io) , chitmp(:,:) )
 
-       call xginv(chitmp, Ep%npwe)
-       chitmp(:,:) = matmul( chi0(:,:,io), chitmp)
-
-       if (ilambda==1 .and. gwgmcorr==1) then   ! Prepare Chi = [(1-v^1/2*Chi0*v^1/2)]^-1 * Chi0 for Galitskii-Migdal
-         call xginv(chitmp_gm, Ep%npwe)
-         chitmp_gm(:,:) = matmul(chi0(:,:,io) , chitmp_gm)
+       if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare Chi = [(1-v^1/2*Chi0*v^1/2)]^-1 * Chi0 for Galitskii-Migdal
+         call xginv(chitmp_gm(:,:),Ep%npwe)
+         chitmp_gm(:,:) = matmul( chi0(:,:,io) , chitmp_gm(:,:) )
        end if
 
        do ig1=1,Ep%npwe
-         chi0_diag(ig1) = vc%vc_sqrt(ig1,iq) * vc%vc_sqrt(ig1,iq) * chitmp(ig1,ig1) - chi0_diag(ig1)
+         chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chitmp(ig1,ig1) - chi0_diag(ig1)
 
          if(ilambda==1 .and. gwgmcorr==1) then   ! Prepare v^1/2*Chi*v^1/2 - v^1/2*Chi0*v^1/2 for Galitskii-Migdal
-           chi0_diag_gm(ig1) = vc%vc_sqrt(ig1,iq) * vc%vc_sqrt(ig1,iq) * chitmp_gm(ig1,ig1) - chi0_diag_gm(ig1)
+           chi0_diag_gm(ig1) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chitmp_gm(ig1,ig1) - chi0_diag_gm(ig1)
          end if
 
        end do
 
        do ig1=1,Ep%npwe
          ec_rpa(ilambda) = ec_rpa(ilambda) &
-            - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag(ig1) ) / (2.0_dp * pi )
+&           - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag(ig1) ) / (2.0_dp * pi )
 
          if(ilambda==1 .and. gwgmcorr==1) then   ! Integrate [v*Chi-v*Chi0](iw) dw for Galitskii-Migdal
            ec_gm = ec_gm &
-            - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag_gm(ig1) ) / (2.0_dp * pi )
+&           - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag_gm(ig1) ) / (2.0_dp * pi )
          end if
 
        end do
 
      end do ! ilambda
+
    end if ! exact or numerical integration over the coupling constant
+
  end do ! io
+
 
  ! Output the correlation energy when the last q-point to be calculated is reached
  ! This would allow for a manual parallelization over q-points
- if (iqcalc==Ep%nqcalc) then
+ if(iqcalc==Ep%nqcalc) then
 
    call xmpi_sum_master(ec_rpa,master,comm,ierr)
    call xmpi_sum_master(ec_gm,master,comm,ierr)
@@ -2696,8 +2718,10 @@ subroutine calc_rpa_functional(gwrpacorr, gwgmcorr, iqcalc, iq, Ep, vc, Qmesh, D
 
  end if
 
- ABI_SFREE(chitmp_gm)
- ABI_SFREE(chi0_diag_gm)
+ if(gwgmcorr==1) then
+   ABI_FREE(chitmp_gm)
+   ABI_FREE(chi0_diag_gm)
+ end if
  ABI_FREE(chi0_diag)
  ABI_FREE(chitmp)
  ABI_FREE(zl)

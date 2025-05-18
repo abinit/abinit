@@ -114,16 +114,19 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  integer,allocatable :: list(:),bz2ibz_idx(:)
  real(dp) :: gmetkpt(3),ksym(3)
  real(dp),allocatable :: length2(:)
+
 ! *********************************************************************
 
  ABI_UNUSED((/comm/))
 
+!DEBUG
 !write(std_out,*)' symkpt : enter '
 !write(std_out,*)' chksymbreak,iout,nkbz,nsym,timrev,comm=',chksymbreak,iout,nkbz,nsym,timrev,comm
 !write(std_out,*)' symrec=',symrec
 !do ikpt=1,nkbz
 !  write(std_out,'(a,i4,3f12.4)' )' ikpt, bz(:,ikpt)=',ikpt,kbz(:,ikpt)
 !enddo
+!ENDDEBUG
 
  if (timrev/=1 .and. timrev/=0) then
    ABI_BUG(sjoin(' timrev should be 0 or 1, while it is equal to:', itoa(timrev)))
@@ -384,11 +387,13 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      !  call wrtout(std_out,msg)
      !end do
 
+     !DEBUG
      !call wrtout(std_out,'   Here are the new weights :')
      !do ikpt=1,nkbz,6
      !  write(msg, '(6f12.6)' ) wtk_folded(ikpt:min(nkbz,ikpt+5))
      !  call wrtout(std_out,msg)
      !end do
+     !ENDDEBUG
    else
      write(msg, '(a)' )' symkpt : not enough symmetry to change the number of k points.'
      call wrtout(iout,msg)
@@ -437,6 +442,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  character(len=500) :: msg
 !arrays
  real(dp) :: ksym(3),kpt1(3)
+
 ! *********************************************************************
 
  ABI_UNUSED(comm)
@@ -684,6 +690,7 @@ subroutine mapkptsets(chksymbreak,gmet,k_in,nk_in,&
  character(len=500) :: message
 !arrays
  real(dp) :: ksym(3),kpt1(3)
+
 ! *********************************************************************
 
  ABI_UNUSED(comm)
