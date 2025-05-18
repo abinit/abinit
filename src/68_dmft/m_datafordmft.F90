@@ -33,15 +33,14 @@ MODULE m_datafordmft
  use m_errors
  use m_fstrings, only : int2char4
  use m_io_tools, only : open_file
- use m_matlu, only : add_matlu,checkdiag_matlu,copy_matlu,destroy_matlu,diff_matlu, &
-                   & init_matlu,matlu_type,print_matlu,sym_matlu,xmpi_matlu
+ use m_matlu, only : add_matlu,checkdiag_matlu,destroy_matlu,diff_matlu,copy_matlu, &
+                   & init_matlu,matlu_type,print_matlu,sym_matlu,xmpi_matlu,magnfield_matlu
  use m_matrix, only : invsqrt_matrix
  use m_mpinfo, only : proc_distrb_cycle
  use m_oper, only : copy_oper,destroy_oper,diff_oper,downfold_oper,identity_oper,init_oper,oper_type,prod_oper
  use m_paw_dmft, only : paw_dmft_type
  use m_paw_ij, only : paw_ij_type
  use m_pawcprj, only : pawcprj_alloc,pawcprj_free,pawcprj_get,pawcprj_type
- use m_pawrad, only : pawrad_type,simp_gen
  use m_pawtab, only : pawtab_type
  use m_xmpi
 
@@ -129,7 +128,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  integer :: nproc_band,nproc_spkpt,nproju,npw,nspinor,nsploop,nsppol,nsppol_mem,opt_renorm
  integer :: option,paral_kgb,pawprtvol,siz_buf,siz_buf_psi,siz_paw,siz_proj,siz_wan,unt
  logical :: prt_wan,t2g,use_full_chipsi,verif_band,x2my2d
- real(dp) :: rint
+ real(dp) :: rint,bfield
  character(len=500) :: message
  type(oper_type) :: loc_norm_check
  integer, allocatable :: displs(:),recvcounts(:)
@@ -180,8 +179,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
 ! Init parallelism
  paral_kgb = mpi_enreg%paral_kgb
- comm_kpt  = mpi_enreg%comm_cell
- if (paral_kgb == 1) comm_kpt = mpi_enreg%comm_kpt
+ comm_kpt = merge(mpi_enreg%comm_kpt,mpi_enreg%comm_cell,paral_kgb==1)
  comm_band = mpi_enreg%comm_band
  me_kpt  = mpi_enreg%me_kpt
  me_band = mpi_enreg%me_band
@@ -271,6 +269,21 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    close(unt)
  end if ! proc=me
 
+!== Setup Zeeman Contributios -mu_b.ge.Sz.Bz to Kohn-Sham energies for nspinor==1
+ if(paw_dmft%dmft_magnfield .eq. 1) then
+   if(nspinor .eq. 2) then
+     write(message,'(a,a,2a)') ch10,&
+&    'Applying Zeeman contributions to Kohn-Sham energies  is only implemented for nspinor = 1.'
+     ABI_ERROR(message)
+   else
+     bfield=paw_dmft%dmft_magnfield_b
+     write(message,'(2a)') ch10,'Adding Zeeman contribution to DFT eigenvalues'
+     call wrtout(std_out,message,'COLL') 
+  endif
+ else
+   bfield=0.0
+ endif
+  
 !==   put eigen into eigen_dft
  paw_dmft%eigen => eigen(:)
  band_index = 0
@@ -281,8 +294,13 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      do iband=1,mband
        if (paw_dmft%band_in(iband)) then
          ibandc = ibandc + 1
-         paw_dmft%eigen_dft(ibandc,ikpt,isppol) = eigen(iband+band_index) ! in Ha
+        ! paw_dmft%eigen_dft(ibandc,ikpt,isppol) = eigen(iband+band_index) ! in Ha
         ! paw_dmft%eigen_dft(isppol,ikpt,ibandc)=fermie
+         if (isppol .eq. 1) then
+           paw_dmft%eigen_dft(ibandc,ikpt,isppol) = eigen(iband+band_index)-half*bfield ! in Ha
+         elseif(isppol .eq. 2) then
+           paw_dmft%eigen_dft(ibandc,ikpt,isppol) = eigen(iband+band_index)+half*bfield ! in Ha
+         endif
        end if
      end do ! iband
      band_index = band_index + nband_k
@@ -392,8 +410,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
          do iatom=1,natom
            lpawu = paw_dmft%lpawu(iatom)
            if (lpawu == -1) cycle
-           lpawu1 = lpawu
-           if (t2g .or. x2my2d) lpawu1 = 2
+           lpawu1 = merge(2,lpawu,t2g.or.x2my2d)
            itypat = paw_dmft%typat(iatom)
            ndim = 2*lpawu + 1
            nproju = pawtab(itypat)%nproju
@@ -679,8 +696,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  if (present(nbandkss)) then
    if ((me_kpt == 0 .and. nbandkss /= 0) .or. (paw_dmft%dmft_kspectralfunc == 1)) then
 !     opt_renorm=1 ! if ucrpa==1, no need for individual orthonormalization
-     opt_renorm = 3
-     if (dtset%ucrpa >= 1 .or. paw_dmft%dmft_kspectralfunc == 1) opt_renorm = 2
+     opt_renorm = merge(2,3,dtset%ucrpa>=1.or.paw_dmft%dmft_kspectralfunc==1)
      call chipsi_renormalization(paw_dmft,opt=opt_renorm)
      if (paw_dmft%myproc == 0) then
        call chipsi_print(paw_dmft,pawtab(:))
@@ -874,12 +890,16 @@ subroutine chipsi_print(paw_dmft,pawtab)
  type(oper_type), intent(inout) :: energy_level
  logical, optional, intent(out) :: nondiag
 !Local variables ------------------------------
- integer :: iatom,im,isppol,lpawu,natom,ndim
+ integer :: iatom,im,isppol,lpawu,natom,ndim,nspinor,nsppol
  character(len=13) :: tag
  character(len=500) :: message
+!type
+ type(matlu_type), allocatable :: levels_temp(:),magnfield(:)
 !************************************************************************
 
  natom = paw_dmft%natom
+ nspinor = paw_dmft%nspinor
+ nsppol = paw_dmft%nsppol
  if (present(nondiag)) nondiag = .false.
 
 !======================================================================
@@ -898,8 +918,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
    ndim = paw_dmft%nspinor * (2*lpawu+1)
    do isppol=1,paw_dmft%nsppol
      do im=1,ndim
-       energy_level%matlu(iatom)%mat(im,im,isppol) = energy_level%matlu(iatom)%mat(im,im,isppol) &
-          & - paw_dmft%fermie
+       energy_level%matlu(iatom)%mat(im,im,isppol) = energy_level%matlu(iatom)%mat(im,im,isppol) - paw_dmft%fermie
      end do ! im
    end do ! isppol
    energy_level%matlu(iatom)%mat(:,:,:) = energy_level%matlu(iatom)%mat(:,:,:) - hdc%matlu(iatom)%mat(:,:,:)
@@ -916,6 +935,30 @@ subroutine chipsi_print(paw_dmft,pawtab)
  call wrtout(std_out,message,'COLL')
 !call print_oper(energy_level,1,paw_dmft,1)
  call print_matlu(energy_level%matlu(:),natom,1)
+
+!========================================================
+!Add Zeeman contibutions to local energy levels in slm
+!========================================================
+ if(paw_dmft%dmft_magnfield .eq. 2 .and. nspinor .eq. 1) then
+   ABI_MALLOC(magnfield,(natom))
+   ABI_MALLOC(levels_temp,(natom))
+
+   write(message,'(a,2x,2a)') ch10, " == Adding Zeeman contribution to local energy levels"
+   call wrtout(std_out,message,'COLL')
+
+   !Apply-m.bz only in the local Hamiltonian
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,magnfield)
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,levels_temp)
+   call copy_matlu(energy_level%matlu,levels_temp,natom)
+
+   call magnfield_matlu(magnfield,natom,paw_dmft%dmft_magnfield_b,1)
+   !call print_matlu(magnfield,natom,1)
+   call add_matlu(levels_temp,magnfield,energy_level%matlu,natom,-1)
+   call print_matlu(energy_level%matlu,natom,1)
+
+  ABI_FREE(magnfield)
+  ABI_FREE(levels_temp)
+ endif
 
  end subroutine compute_levels
 !!***
@@ -1141,7 +1184,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  natom     = paw_dmft%natom
  nspinor   = paw_dmft%nspinor
  nsppol    = paw_dmft%nsppol
- ndim_max  = (2*paw_dmft%maxlpawu+1)*nspinor
+ ndim_max  = (2*paw_dmft%maxlpawu+1) * nspinor
  pawprtvol = 3
 
  if (nkpt /= 1 .and. present(jkpt)) ABI_BUG('BUG in chipsi_normalization')
@@ -1808,8 +1851,6 @@ end subroutine compute_wannier
 
 subroutine print_wannier(paw_dmft,istep)
 
- use m_io_tools, only : get_unit
-
 !Arguments ------------------------------------
  integer, intent(in) :: istep
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -1838,8 +1879,11 @@ subroutine print_wannier(paw_dmft,istep)
    nflavor = (2*lpawu+1) * paw_dmft%nspinor * paw_dmft%nsppol
    call int2char4(iatom,tag_at)
    ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-   tmpfil = trim(paw_dmft%filapp)//'Wannier_functions_iatom_'//trim(tag_at)//'_'//tag_iter
+   tmpfil = trim(paw_dmft%filapp)//'_Wannier_functions_iatom'//trim(tag_at)//'_'//tag_iter
    if (open_file(tmpfil,message,newunit=unt) /= 0) ABI_ERROR(message)
+   write(unt,'(4a)') "# Radial part of projective Wannier functions, after orthonormalization, for each flavor.", &
+       & ch10,"# First column is the radius (bohr) and the other columns correspond to the radial part of flavor i,", &
+       & " where i=1...2*(2*l+1) (spins up are first)"
    do ir=1,paw_dmft%radgrid(itypat)%mesh_size
      write(unt,*) paw_dmft%radgrid(itypat)%rad(ir),(dble(paw_dmft%wannier(ir,iflavor,iatom)),iflavor=1,nflavor)
    end do ! ir

@@ -25,6 +25,7 @@ temperature  9.00000000E+02
 #OPTIONAL_INPUT_VARIABLES
 bzpath 5
 special_qpt "G H P G N"
+bzlength 4 100 88 88 71
 use_ideal_positions 1
 enunit 1
  

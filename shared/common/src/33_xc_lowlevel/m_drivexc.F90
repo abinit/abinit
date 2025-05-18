@@ -937,14 +937,13 @@ end subroutine mkdenpos
 !!   === At present only available for LDA ===
 !!    if nspden=1 d2vxc(npts,1)=second derivative of the XC potential=3rd order derivative of energy
 !!    if nspden=2 d2vxc(npts,1), d2vxc(npts,2), d2vxc(npts,3), d2vxc(npts,4) (3rd derivative of energy)
-!!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! SOURCE
 
 subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &          rho_updn,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,el_temp, & ! mandatory arguments
 &          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &         ! optional arguments
-&          exexch,fxcT,hyb_mixing,xc_funcs)                                           ! optional parameters
+&          exexch,hyb_mixing,xc_funcs)                                                ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
@@ -959,7 +958,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  real(dp),intent(in),optional :: grho2_updn(npts,(2*nspden-1)*usegradient)
  real(dp),intent(in),optional :: lrho_updn(npts,nspden*uselaplacian),tau_updn(npts,nspden*usekden)
  real(dp),intent(out) :: exc(npts),tsxc(npts),vxcrho(npts,nspden)
- real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:)
+ real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc)
  real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho),vxclrho(npts,nvxclrho),vxctau(npts,nvxctau)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
@@ -1122,15 +1121,6 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  if (my_exexch/=0.and.usegradient==0) then
    message='exexch argument only valid for GGA!'
    ABI_BUG(message)
- end if
- if(ixc==50) then
-   if(.not.(present(fxcT)))then
-     message = 'fxcT is not present but are needed for IIT XC functional.'
-     ABI_BUG(message)
-   end if
-   if (size(fxcT)/=npts) then
-     ABI_BUG('fxcT size must be npts!')
-   end if
  end if
 
 !Initialize exchange-correlation entropy energy density to zero
@@ -1489,15 +1479,15 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !>>>>> XC entropy energy density 'tsxc' is needed to retrieve
 !>>>>> the proper internal energy E_xc
 
-!>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
+!>>>>> Ichimaru-Iyetomi-Tanaka, TLDA (no spin-pol) (IIT)
  else if (ixc==50) then
    if (order**2 <= 1) then
-     call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1))
+     call xciit(exc,tsxc,npts,order,rspts,el_temp,vxcrho(:,1))
    else
-     call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1),dvxc)
+     call xciit(exc,tsxc,npts,order,rspts,el_temp,vxcrho(:,1),dvxc=dvxc)
    end if
 
-!>>>>> Karasiev-Sjostrom-Dufty-Trickey TLDA (no spin-pol) (KSDT)
+!>>>>> Karasiev-Sjostrom-Dufty-Trickey, TLDA (no spin-pol) (KSDT)
  else if (ixc==51) then
    if (order**2 <= 1) then
      call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
@@ -1505,9 +1495,9 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc=dvxc)
    end if
 
-!>>>>> Karasiev-Dufty-Trickey TGGA (KDT16)
+!>>>>> Karasiev-Dufty-Trickey, TGGA (no spin-pol) (KDT16)
  else if(ixc==60) then
-   if(nvxcgrho /= 3 )then 
+   if(nvxcgrho /= 3 )then
      write(message, '(3a,i0,a,i0)')&
 &     'Wrong value of nvxcgrho:',ch10,&
 &     'ixc=',ixc,'ndvxcdgr=',nvxcgrho

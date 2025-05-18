@@ -650,8 +650,8 @@ First copy this self energy in the real axis in a Self energy file and a grid fi
 
 Create file containing the frequency grid with:
 
-    wc -l self_ra.dat >  tdmft_5o_DS3_spectralfunction_realfrequencygrid
-    cat self_ra.dat >> tdmft_5o_DS3_spectralfunction_realfrequencygrid
+    wc -l self_ra.dat >  tdmft_5o_DS3_spectralfunction_realgrid
+    cat self_ra.dat >> tdmft_5o_DS3_spectralfunction_realgrid
 
 As in this particular case, the three self energies for the three t2g orbitals are equal,
 we can do only one analytical continuation, and duplicate the results as in:
@@ -667,7 +667,7 @@ a different real axis self-energy for each orbitals (and thus do an analytical c
 Copy the file containing the rotation of the self energy in the local basis (useful for non cubic cases, here
 this matrix is just useless):
 
-    cp tdmft_5o_DS2.UnitaryMatrix_for_DiagLevel_iatom0001 tdmft_5i_DS3.UnitaryMatrix_for_DiagLevel_iatom0001 
+    cp tdmft_5o_DS2.UnitaryMatrix_iatom0001 tdmft_5i_DS3.UnitaryMatrix_iatom0001 
 
 Copy the Self energy in imaginary frequency for restart also (dmft_nwlo should be the same in the input
 file  tdmft_5.abi and tdmft_2.abi)
@@ -685,10 +685,10 @@ and relaunch the calculation.
     abinit tdmft_5.abi > log_5_dataset3
 
 
-Then the spectral function is obtained in file tdmft_5o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself. You can copy
+Then the spectral function is obtained in file tdmft_5o_DS3_DFTDMFT_SpectralFunction_kres. You can copy
 it in file bands.dat:
 
-    cp tdmft_5o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself bands_dmft.dat
+    cp tdmft_5o_DS3_DFTDMFT_SpectralFunction_kres bands_dmft.dat
 
 Extract DFT band structure from fatbands file in readable file for gnuplot (261 is the number
 of k-point used to plot the band structure (it can be obtained by "grep nkpt log_5_dataset3"):

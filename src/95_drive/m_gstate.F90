@@ -103,13 +103,12 @@ module m_gstate
  use m_cgprj,            only : ctocprj
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
  use m_fft,              only : fft_init_counters,fft_output_counters
- use m_getghc_ompgpu,    only : free_getghc_ompgpu_buffers
 
 #if defined HAVE_GPU
  use m_alloc_hamilt_gpu
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -873,12 +872,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) xred_old=xred
 
 !Initialize (eventually) extfpmd object
- if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
+ if(dtset%useextfpmd>=1) then
    if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
-&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,mpi_enreg,&
-&     dtset%extfpmd_nband)
+&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
+&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband)
    end if
  end if
 
@@ -913,7 +912,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Get nelect to build density
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,dtset%nband,extfpmd%nelect,&
-&     dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
+&     dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk)
    end if
    ABI_FREE(doccde)
 
@@ -965,12 +964,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 !### 10. PAW related operations
 
-!Initialize paw_dmft, even if neither dmft not paw are used
+!Initialize paw_dmft, even if neither dmft nor paw are used
 !write(std_out,*) "dtset%usedmft",dtset%usedmft
  use_sc_dmft=dtset%usedmft
 ! if(dtset%paral_kgb>0) use_sc_dmft=0
  !Should be done inside init_sc_dmft
- if ( dtset%usedmft /= 0 .and. dtset%dmft_entropy > 0) then
+ if ( dtset%usedmft /= 0 .and. dtset%dmft_entropy > 0 .and. dtset%usedmft /= 10) then
    call data4entropyDMFT_init(paw_dmft%forentropyDMFT,&
    dtset%natom,&
    dtset%typat,&
@@ -1018,7 +1017,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa,dmft_orbital=dtset%dmft_orbital(:),&
-&     dmft_dc=dtset%dmft_dc)
+&     dmft_dc=dtset%dmft_dc,dmft_orbital_filepath=dtset%dmft_orbital_filepath,dmft_yukawa_param=dtset%dmft_yukawa_param,&
+&     dmft_lambda_yukawa=dtset%dmft_lambda_yukawa,dmft_epsilon_yukawa=dtset%dmft_epsilon_yukawa)
 
    ! DEBUG:
    !if (me == master) call pawtab_print(Pawtab)
@@ -1055,9 +1055,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if (dtset%useylm/=1) then
      ABI_ERROR('xg_nonlop cannot be used with useylm/=1')
    end if
-   call xg_nonlop_init(xg_nonlop,psps%indlmn,mpi_enreg%my_atmtab,my_natom,nattyp,dtset%mkmem,dtset%ntypat,&
+   call xg_nonlop_init(xg_nonlop,psps%indlmn,my_natom,nattyp,dtset%mkmem,dtset%ntypat,&
                      dtset%nspinor,ucvol,dtset%usepaw,dtset%xg_nonlop_option,&
-                     mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom)
+                     mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom,&
+                     mpi_atmtab=mpi_enreg%my_atmtab)
    if (xg_nonlop%paw) then
      call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
    else
@@ -1789,9 +1790,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !Clean GPU work spaces
- if(dtset%gpu_option == ABI_GPU_OPENMP) then
-   call free_getghc_ompgpu_buffers()
- end if
 #if defined HAVE_GPU
  if (dtset%gpu_option/=ABI_GPU_DISABLED) then
    call dealloc_hamilt_gpu(2,dtset%gpu_option)

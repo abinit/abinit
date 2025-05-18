@@ -167,12 +167,12 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem, el_temp
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
- logical :: read_wfk, write_wfk, cc4s_task, rectangular, rdm_update, call_pawinit, cc4s_from_wfk
+ logical :: read_wfk, write_wfk, cc4s_task, rectangular, with_pools, rdm_update, call_pawinit, cc4s_from_wfk
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
  type(crystal_t) :: cryst, den_cryst, wfk_cryst
- type(ebands_t) :: ks_ebands, owfk_ebands
+ type(ebands_t) :: ks_ebands, owfk_ebands, tmp_ebands
  type(pawfgr_type) :: pawfgr
  type(wvl_data) :: wvl
  type(mpi_type) :: mpi_enreg_seq
@@ -199,7 +199,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(hyb_t) :: hyb
  type(xmpi_pool2d_t) :: diago_pool
 !arrays
- integer :: ngfftc(18),ngfftf(18),units(2)
+ integer :: ngfftc(18),ngfftf(18),units(2) !, grid3(3)
  integer,allocatable :: nq_spl(:), l_size_atm(:)
  integer,allocatable :: tmp_kstab(:,:,:), npwarr_ik(:), gvec_(:,:), istwfk_ik(:), nband_iks(:,:)
  real(dp) :: strsxc(6), diago_info(3, dtset%nkpt, dtset%nsppol),tsec(2)
@@ -305,7 +305,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ! Some variables need to be initialized/nullify at start
  usexcnhat = 0
  call energies_init(KS_energies)
- 
+
 !Get electronic temperature from dtset
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
@@ -463,7 +463,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ABI_MALLOC(ks_rhor, (nfftf, dtset%nspden))
 
  call read_rhor(den_path, cplex1, dtset%nspden, nfftf, ngfftf, dtset%usepaw, mpi_enreg_seq, ks_rhor, &
-                den_hdr, ks_pawrhoij, comm, allow_interp=.False.)
+                den_hdr, ks_pawrhoij, comm, allow_interp=.False., want_varname="density")
 
  den_cryst = den_hdr%get_crystal()
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
@@ -474,7 +474,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
  if (dtset%usekden == 1) then
    call read_rhor(kden_path, cplex1, dtset%nspden, nfftf, ngfftf, 0, mpi_enreg_seq, ks_taur, &
-                  kden_hdr, ks_pawrhoij, comm, allow_interp=.False.)
+                  kden_hdr, ks_pawrhoij, comm, allow_interp=.False., want_varname="kinedr")
    call kden_hdr%free()
    call prtrhomxmn(std_out, mpi_enreg_seq, nfftf, ngfftf, dtset%nspden, 1, ks_taur, optrhor=1, ucvol=cryst%ucvol)
  end if
@@ -688,7 +688,12 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ! Build MPI pools to distribute (kpt, spin).
    ! Try to get rectangular grids in each pool to improve efficiency in slk diago.
    rectangular = .True.; if (dtset%nkpt == 1) rectangular = .False.
-   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
+   with_pools = .True.
+   if (any(dtset%gwr_np_kgts /= 0) .and. (nprocs == dtset%gwr_np_kgts(2))) then
+      with_pools = .False.; call wrtout(std_out, " Deactivating pools in HDIAGO")
+   end if
+   !with_pools = .False.
+   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, with_pools, rectangular=rectangular)
    diago_info = zero
 
    ! TODO: Build hyb descriptor with hybrid orbitals from WFK file.
@@ -735,9 +740,12 @@ end if
 
        if (write_wfk) then
          ! occupancies are set to zero. Client code is responsible for recomputing occ and fermie when reading this WFK.
+         call wrtout(std_out, sjoin(" Writing kpoint ik_ibz:", itoa(ik_ibz), ", spin: ", itoa(spin), " to disk ..."))
          ABI_CALLOC(occ_k, (nband_k))
          color = merge(1, 0, ugb%my_nband > 0)
          call xmpi_comm_split(diago_pool%comm%value, color, diago_pool%comm%me, io_comm, ierr)
+         call wrtout(std_out, sjoin(" Number of MPI procs involved in IO operation:", &
+                     itoa(xmpi_comm_size(io_comm)), "/", itoa(diago_pool%comm%nproc)))
 
          if (ugb%my_nband > 0) then
            ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
@@ -746,17 +754,14 @@ end if
 
            ! Reopen file inside io_comm.
            call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, write_hdr=.False., write_frm=.False.)
+           !call wrtout(std_out,  "After owfk%open_write")
 
+           ! Write my bands.
            !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
            !sc_mode = xmpio_collective
            sc_mode = xmpio_single
            call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
                                        kg_k=ugb%kg_k, cg_k=cg_k_ptr, eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
-
-           !NCF_CHECK(nf90_inq_varid(owfk%fh, "reduced_coordinates_of_plane_waves", kg_varid))
-           !NCF_CHECK(nf90_put_var(owfk%fh, kg_varid, ugb%kg_k, start=[1,1,ik_ibz], count=[3,ugb%npw_k,1]))
-           !NCF_CHECK(nf90_sync(owfk%fh))
-           !print *, "ugb%kg_k:", ugb%kg_k; stop
            call owfk%close()
          end if
          call xmpi_comm_free(io_comm)
@@ -773,7 +778,6 @@ end if
        call ugb%free()
      end do ! ik_ibz
    end do ! spin
-
    call wrtout(std_out, " Direct diago completed by this MPI pool. Other pools might take more time if k != 0")
 
    call xmpi_sum_master(diago_info, master, comm, ierr)
@@ -801,7 +805,6 @@ end if
    if (my_rank == master) then
      if (write_wfk .and. iomode__ == IO_MODE_ETSF) then
        NCF_CHECK(owfk_ebands%ncwrite_path(cryst, out_path))
-       !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
      end if
      call owfk_ebands%print_gaps(units, header="KS gaps after direct diagonalization")
      if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)
@@ -816,7 +819,9 @@ end if
    ! Read orbitals from an external WFK file and produce output files for CC4S.
 
    ! Construct crystal and ks_ebands from the GS WFK file.
-   ks_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+   tmp_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+   ks_ebands = tmp_ebands%chop(1, maxval(dtset%nband))
+   call tmp_ebands%free()
    call wfk_hdr%vs_dtset(dtset)
 
    wfk_cryst = wfk_hdr%get_crystal()
@@ -828,9 +833,13 @@ end if
    if (my_rank == master) call cc4s_write_eigens(ks_ebands, dtfil)
 
    ! Build MPI pools to distribute (kpt, spin).
-   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=.False.)
-   ABI_CHECK_IEQ(dtset%nkpt, 1, "only Gamma-point is supported")
-   ABI_CHECK_IEQ(dtset%nsppol, 1, "only spin-unpolarized calculations are supported")
+   with_pools = .True.
+   if (any(dtset%gwr_np_kgts /= 0) .and. (nprocs == dtset%gwr_np_kgts(2))) then
+      with_pools = .False.; call wrtout(std_out, " Deactivating pools in HDIAGO")
+   end if
+   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, with_pools, rectangular=.False.)
+   ABI_CHECK_IEQ(dtset%nkpt, 1, "Only Gamma-point sampling is supported")
+   ABI_CHECK_IEQ(dtset%nsppol, 1, "Only spin-unpolarized calculations are supported")
 
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
@@ -863,7 +872,9 @@ end if
      call xmpi_bcast(wfk_path, master, comm, ierr)
 
      ! Construct crystal and ks_ebands from the GS WFK file.
-     ks_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+     tmp_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+     ks_ebands = tmp_ebands%chop(1, maxval(dtset%nband))
+     call tmp_ebands%free()
      call wfk_hdr%vs_dtset(dtset)
 
      wfk_cryst = wfk_hdr%get_crystal()
@@ -983,8 +994,7 @@ end if
  ABI_SFREE(pawfgrtab)
  ABI_SFREE(ks_paw_an)
 
- call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq)
- call gwr%free()
+ call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq); call gwr%free()
 
 end subroutine gwr_driver
 !!***
@@ -1005,10 +1015,26 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables-------------------------------
- integer :: unt, ik_ibz, spin, band
+ integer :: unt, ik_ibz, spin, band, gap_err
+ real(dp) :: my_fermie
  character(len=500) :: msg
  character(len=fnlen) :: filepath
+ type(gaps_t) :: ks_gaps
 ! *************************************************************************
+
+ ks_gaps = ebands%get_gaps(gap_err)
+ call ks_gaps%print([std_out], header="Kohn-Sham gaps and band edges from IBZ mesh")
+ if (any(ks_gaps%ierr /= 0)) then
+   ABI_ERROR("Cannot compute gaps!")
+ end if
+
+ ! Make sure fermi level is within the gap. I know, the case nsppol = 2 is treated in a dirty way!
+ my_fermie = zero
+ do spin=1,ebands%nsppol
+   my_fermie = ks_gaps%vb_max(spin) + (ks_gaps%cb_min(spin) - ks_gaps%vb_max(spin)) / two
+ end do
+ my_fermie = my_fermie / ebands%nsppol
+ call ks_gaps%free()
 
  ! See https://manuals.cc4s.org/user-manual/objects/EigenEnergies.html
  filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.yaml'
@@ -1026,7 +1052,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  write(unt,'(A)')    '  type: TextFile'
  write(unt,'(A)')    'unit: 1.0     # Hartree units'
  write(unt,'(A)')    'metaData:'
- write(unt,'(A,E22.15)')    '  fermiEnergy: ',ebands%fermie
+ write(unt,'(A,E22.15)')    '  fermiEnergy: ',my_fermie
  write(unt,'(A)')    '  energies:'
 
  do spin=1,ebands%nsppol

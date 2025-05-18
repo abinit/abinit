@@ -64,6 +64,7 @@ module m_mover
  use scup_global, only : global_set_parent_iter,global_set_print_parameters
 #endif
  use m_scup_dataset
+ use m_multibinit_dataset
 
  implicit none
 
@@ -175,7 +176,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size,multibinit_dtset)
 
 !Arguments ------------------------------------
 !scalars
@@ -195,6 +196,7 @@ real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
 type(scup_dtset_type),optional, intent(inout) :: scup_dtset
+type(multibinit_dtset_type),optional, intent(inout) ::multibinit_dtset
 integer,optional,intent(in) :: sc_size(3)
 
 !Local variables-------------------------------
@@ -227,6 +229,9 @@ integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 logical :: file_exists
 logical :: re_init_rho
+#ifdef FC_NVHPC
+logical :: wrong=.false. !Silly trick to prevent NVHPC optimization issue
+#endif
 real(dp) :: minE,wtime_step,now,prev
 !arrays
 integer :: itimes(2),ngfft(18),ngfftf(18)
@@ -306,12 +311,16 @@ real(dp) :: k0(3)
 
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
+
  if (ab_mover%restartxf<0)then
 !  Read history from file (and broadcast if MPI)
    if (me==master) then
      call read_md_hist(filename,hist_prev,specs%isVused,specs%isARused,ab_mover%restartxf==-3)
-   end if
+     endif
+
+
    call abihist_bcast(hist_prev,master,comm)
+
 
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
@@ -446,6 +455,7 @@ real(dp) :: k0(3)
 
    ! Fill history with the values of xred, acell and rprimd
    call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
+
 
    ! Fill velocities and ionic kinetic energy
    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
@@ -670,10 +680,25 @@ real(dp) :: k0(3)
            end if
 #endif
 
-           call effective_potential_evaluate( &
-&           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
-&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
-&           filename=name_file,elec_eval=need_elec_eval)
+            if(present(multibinit_dtset))then
+                !TODO: use multibinit_dtset to set the parameters of the effective potential
+                call effective_potential_evaluate( &
+&               effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
+&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
+&               filename=name_file,elec_eval=need_elec_eval,efield_type=multibinit_dtset%efield_type,efield=multibinit_dtset%efield,&
+&               efield2=multibinit_dtset%efield2,efield_lambda=multibinit_dtset%efield_lambda,efield_lambda2=multibinit_dtset%efield_lambda2,&
+&               efield_period=multibinit_dtset%efield_period,efield_phase=multibinit_dtset%efield_phase,efield_phase2=multibinit_dtset%efield_phase2,&
+&               efield_gmean=multibinit_dtset%efield_gmean,efield_gvel=multibinit_dtset%efield_gvel,efield_sigma=multibinit_dtset%efield_sigma,&
+&               efield_background=multibinit_dtset%efield_background,time=itime*ab_mover%dtion)
+            else
+                call effective_potential_evaluate( &
+&               effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
+&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
+&               filename=name_file,elec_eval=need_elec_eval,time=itime*ab_mover%dtion)
+            end if
+
+
+
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then
@@ -866,6 +891,10 @@ real(dp) :: k0(3)
      if (ab_mover%optcell/=0) then
        ! Cell may change
 
+#ifdef FC_NVHPC
+       ! Yet another wild NVHPC bug (only on eos_nvhpc_23.9_elpa)
+       if(wrong) write(100,*) xred
+#endif
        call matr3inv(rprimd,gprimd)
 
 !      If metric has changed since the initialization, update the Ylm's
@@ -1001,7 +1030,9 @@ real(dp) :: k0(3)
  ABI_FREE(xred_prev)
 
  call abihist_free(hist)
- call abihist_free(hist_prev)
+
+
+   call abihist_free(hist_prev)
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 

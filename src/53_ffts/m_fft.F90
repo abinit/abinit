@@ -2396,7 +2396,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 #ifdef HAVE_OPENMP_OFFLOAD
      call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        kg_kin,kg_kout,mgfft,me_g0,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-       weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
+       weight_ptr_r,weight_ptr_i,use_ndo=use_ndo,fofginb=fofginb)
 #endif
    end if
    if (.not.present(weight_array_r)) then
