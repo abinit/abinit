@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file
- sed -e 's!_largecore_!_lrgcore_!' $file > tmp.file
+ sed -e 's!tlw_!t3!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file
