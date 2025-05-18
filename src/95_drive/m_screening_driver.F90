@@ -235,7 +235,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(plowannier_type) :: wanbz,wanibz,wanibz_in
-
  real(dp) :: te_min, te_max
  type(gaps_t) :: gaps
  real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
@@ -923,12 +922,11 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &   Cryst%nsym,Cryst%ntypat,Paw_ij,Pawang,Dtset%pawprtvol,Pawtab,Cryst%rprimd,Cryst%symafm,&
 &   Cryst%symrec)
 #endif
-!
-!  Output of the pseudopotential strengths Dij and the augmentation occupancies Rhoij.
+   !  Output of the pseudopotential strengths Dij and the augmentation occupancies Rhoij.
    call pawprt(Dtset,Cryst%natom,Paw_ij,Pawrhoij,Pawtab)
    call timab(561,2,tsec)
  end if
- !
+
  ! Calculate frequency mesh.
  ! First omega is always zero without broadening.
  ! FIXME what about metals? I think we should add eta,
@@ -937,18 +935,23 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! MS Modified for tangent grid (07-01-2011)
  ABI_MALLOC(Ep%omega, (Ep%nomega))
  Ep%omega(1) = CMPLX(Ep%omegaermin, zero, kind=dpc)
- !Ep%omega(1) = j_dpc * 4.372035E-01 * eV_Ha
- !Ep%omega(1) = j_dpc * 4.372035E-01 * eV_Ha * 2
 
+ ep%iw_mesh_type = "None"; ep%rw_mesh_type = "None"; ep%cw_mesh_type = "None"
+ ABI_CALLOC(Ep%omega_wgs, (Ep%nomega))
+
+ ! Deal with real frequencies first.
  if (Ep%nomegaer > 1) then
-   ! Avoid division by zero.
+
    if (Dtset%gw_frqre_tangrid == 0 .and. Dtset%gw_frqre_inzgrid == 0) then
+     ep%rw_mesh_type = "linear"
      domegareal = (Ep%omegaermax -Ep%omegaermin) / (Ep%nomegaer -1)
      do iomega=2,Ep%nomegaer
        Ep%omega(iomega)=CMPLX(Ep%omegaermin+(iomega-1)*domegareal,zero,kind=dpc)
      end do
+
    else if (Dtset%gw_frqre_tangrid == 1.and. Dtset%gw_frqre_inzgrid == 0) then
      ! We have tangent transformed grid
+     ep%rw_mesh_type = "tangent_transform"
      ABI_WARNING('EXPERIMENTAL - Using tangent transform grid for contour deformation.')
      Ep%omegaermax = Dtset%cd_max_freq
      Ep%omegaermin = zero
@@ -964,7 +967,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      end do
      Ep%omegaermin = REAL(Ep%omega(1))
      Ep%omegaermax = REAL(Ep%omega(Ep%nomegaer))
+
    else if (Dtset%gw_frqre_tangrid==0.and.Dtset%gw_frqre_inzgrid==1) then
+     ep%rw_mesh_type = "equidistant_z"
      e0=Dtset%ppmfrq; if (e0<0.1d-4) e0=omegaplasma
      domegareal=one/(Ep%nomegaer)
      do iomega=1,Ep%nomegaer
@@ -973,6 +978,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      end do
      Ep%omegaermin = REAL(Ep%omega(1))
      Ep%omegaermax = REAL(Ep%omega(Ep%nomegaer))
+
    else
      ABI_ERROR('Error in specification of real frequency grid')
    end if
@@ -983,49 +989,69 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    Ep%omega(2)=CMPLX(zero,e0, kind=dpc)
  end if
 
- ! For AC, use Gauss-Legendre quadrature method.
- !  - Replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
- !  - Note that the grid is not log as required by CD thus we cannot use the same SCR file.
  if (Ep%analytic_continuation) then
-   ABI_MALLOC(z, (Ep%nomegaei))
-   ABI_MALLOC(zw, (Ep%nomegaei))
-   call coeffs_gausslegint(zero, one, z, zw, Ep%nomegaei)
-   do iomega=1,Ep%nomegaei
-     Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, one/z(iomega) - one, kind=dpc)
-   end do
-   ABI_FREE(z)
-   ABI_FREE(zw)
+   ! Negative value of dtset%nfreqim activates the minimax mesh
+   ep%iw_mesh_type = "gauss_legendre"
+   if (dtset%nfreqim < 0) ep%iw_mesh_type = "minimax"
 
-   if (dtset%userie == 4242) then
-       call wrtout(std_out, sjoin("userie == 4242 --> Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
-       gaps = ks_ebands%get_gaps(gap_err)
-       ABI_CHECK(gap_err == 0, "gap_err")
-       ! ================================
-       ! Setup tau/omega mesh and weights
-       ! ================================
-       ! Compute min/max transition energy taking into account nsppol if any.
-       te_min = minval(gaps%cb_min - gaps%vb_max)
-       te_max = maxval(ks_ebands%eig(mband,:,:) - ks_ebands%eig(1,:,:))
-       if (te_min <= tol6) then
-         te_min = tol6
-         ABI_ERROR("System is metallic or with a very small fundamental gap!")
-       end if
+   select case (ep%iw_mesh_type)
+   case ("gauss_legendre")
+     ! Use Gauss-Legendre quadrature method.
+     ! Replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
+     ! Note that the grid is not log as required by CD thus we cannot use the same SCR file.
 
-       call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
-                            tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
-                            iw_mesh, iw_wgs,   &
-                            t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
-                            ft_max_error, cosft_duality_error, ierr)
-       ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+     ABI_MALLOC(z, (Ep%nomegaei))
+     ABI_MALLOC(zw, (Ep%nomegaei))
+     call coeffs_gausslegint(zero, one, z, zw, Ep%nomegaei)
+     do iomega=1,Ep%nomegaei
+       Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, one/z(iomega) - one, kind=dpc)
+       Ep%omega_wgs(Ep%nomegaer + iomega) = zw(iomega)
+     end do
+     ABI_FREE(z)
+     ABI_FREE(zw)
 
-       call gaps%free()
-       do iomega=1,Ep%nomegaei
-         Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
-         !write(std_out, *)"iomega", Ep%omega(Ep%nomegaer + iomega)
-       end do
-    end if
+   case ("minimax")
+     call wrtout(std_out, sjoin("Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
+     gaps = ks_ebands%get_gaps(gap_err)
+     ABI_CHECK(gap_err == 0, "gap_err")
+     ! ================================
+     ! Setup tau/omega mesh and weights
+     ! ================================
+     ! Compute min/max transition energy taking into account nsppol if any.
+     te_min = minval(gaps%cb_min - gaps%vb_max)
+     te_max = maxval(ks_ebands%eig(mband,:,:) - ks_ebands%eig(1,:,:))
+     if (te_min <= tol6) then
+       te_min = tol6
+       ABI_ERROR("System is metallic or with a very small fundamental gap!")
+     end if
+
+     call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
+                          tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
+                          iw_mesh, iw_wgs,   &
+                          t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
+                          ft_max_error, cosft_duality_error, ierr)
+     ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+
+     do iomega=1,Ep%nomegaei
+       Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
+       Ep%omega_wgs(Ep%nomegaer + iomega) = iw_wgs(iomega)
+     end do
+
+     ABI_FREE(tau_mesh)
+     ABI_FREE(tau_wgs)
+     ABI_FREE(iw_mesh)
+     ABI_FREE(iw_wgs)
+     ABI_FREE(t2w_cos_wgs)
+     ABI_FREE(w2t_cos_wgs)
+     ABI_FREE(t2w_sin_wgs)
+     call gaps%free()
+
+   case default
+     ABI_ERROR(sjoin("Invalid iw_mesh_type:", ep%iw_mesh_type))
+   end select
 
  else if (Ep%contour_deformation .and. Dtset%cd_customnimfrqs /= 0) then
+   ep%iw_mesh_type = "custom"
    Ep%omega(Ep%nomegaer+1)=CMPLX(zero,Dtset%cd_imfrqs(1))
    do iomega=2,Ep%nomegaei
      if (Dtset%cd_imfrqs(iomega) <= Dtset%cd_imfrqs(iomega-1)) then
@@ -1035,6 +1061,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end do
 
  else if (Ep%contour_deformation .and. Dtset%gw_frqim_inzgrid /= 0) then
+   ep%iw_mesh_type = "equidistant_z"
    e0 = Dtset%ppmfrq; if (e0 < 0.1d-4) e0 = omegaplasma
    domegareal=one/(Ep%nomegaei+1)
    do iomega=1,Ep%nomegaei
@@ -1043,6 +1070,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end do
 
  else if (Ep%contour_deformation.and. Ep%nomegaei /= 0) then
+   ! This is the default for CD. see calc_sigc_cd for the integration routine.
+   ep%iw_mesh_type = "log_mesh"
    e0=Dtset%ppmfrq; if (e0<0.1d-4) e0=omegaplasma
    do iomega=1,Ep%nomegaei
      Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,e0/(Dtset%freqim_alpha-two)&
@@ -1935,7 +1964,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
 
  ! Max number of omega along the imaginary axis
  if (Ep%analytic_continuation.or.Ep%contour_deformation) then
-   Ep%nomegaei=Dtset%nfreqim
+   Ep%nomegaei = abs(Dtset%nfreqim)
    if (Dtset%gw_frqim_inzgrid==1) then
      ABI_WARNING('iomega = z/1-z transfom grid will be used for imaginary frequency grid')
    end if
@@ -1948,7 +1977,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
      ABI_WARNING(sjoin('Number of imaginary frequencies set to default= ',itoa(NOMEGAGAUSS)))
    end if
    if (Ep%nomegaei==0) then
-     ABI_WARNING(' nfreqim = 0! Assuming experienced user merging several frequency calculations.')
+     ABI_WARNING('nfreqim = 0! Assuming experienced user merging several frequency calculations.')
    end if
  end if
 
@@ -2565,6 +2594,8 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  ! initialize MPI data
  rank   = xmpi_comm_rank(comm)
  nprocs = xmpi_comm_size(comm)
+
+ ABI_CHECK(ep%iw_mesh_type == "gauss_legendre", "only gauss legendre mesh is supported")
 
  !if (rank==master) then ! presently only master has chi0 in screening
 

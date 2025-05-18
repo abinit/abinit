@@ -1671,7 +1671,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
       weight,nomegaei+1,cone_gw,ket(spadc+1:spadc+npwc,:),npwc)
 
    case (TRAPEZOID)
-!   Trapezoidal rule Transform omega coordinates
+     ! Trapezoidal rule Transform omega coordinates
      alph     = plasmafreq
      alphsq   = alph*alph
      inv_alph = one/alph
@@ -1679,7 +1679,7 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
      xtab(1:nomegaei+1) = AIMAG(omega_imag(:))/(AIMAG(omega_imag(:)) + alph)
      xtab(nomegaei+2)   = one
 
-!   Efficient trapezoidal rule with BLAS calls
+     ! Efficient trapezoidal rule with BLAS calls
      tbeta(:)     = REAL(omegame0i_tmp(:))
      tbetasq(:)   = tbeta(:)*tbeta(:)
      tinv_beta(:) = one/tbeta(:)
@@ -1821,7 +1821,8 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
    ! First see if the contribution has been checked before the routine is entered
    if (present(calc_poles)) then
      my_calc_poles = calc_poles
-   else ! Otherwise check locally if there is a contribution
+   else
+     ! Otherwise check locally if there is a contribution
      do ios=1,nomega
        if (omegame0i_tmp(ios)>tol12) then
          if ((local_one-theta_mu_minus_e0i)<tol12) my_calc_poles(ios) = .FALSE.
