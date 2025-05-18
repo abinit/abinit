@@ -218,6 +218,13 @@ MODULE m_io_screening
     ! Real frequencies are packed in the first section.
     ! TODO: Add frequency mesh type?
 
+  !real(dp),allocatable :: omega_wgs(:)
+  ! (nomega)
+  ! Weights for numerical integration, used for instance for minimax meshes.
+
+  !character(len=500) :: iw_mesh_type="None", rw_mesh_type="None", cw_mesh_type="None"
+  ! String defining the kind of sampling for imaginary (iw), real (rw) and complex (cw) frequencies
+
   type(hdr_type) :: hdr
     ! The abinit header.
 
@@ -871,6 +878,10 @@ type(hscr_t) function hscr_new(varname, dtset, ep, hdr_abinit, ikxc, test_type, 
  hscr%qibz(:,:) = Ep%qcalc
  hscr%qlwl(:,:) = Ep%qlwl
  hscr%omega(:) = Ep%omega
+ !hscr%omega_Wgs(:) = Ep%omega_wgs
+ !hscr%iw_mesh_type = Ep%iw_mesh_type
+ !hscr%rw_mesh_type = Ep%rw_mesh_type
+ !hscr%cw_mesh_type = Ep%cw_mesh_type
 
 ! HSCR_NEW
  hscr%awtr = dtset%awtr
@@ -974,6 +985,11 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
  call xmpi_bcast(hscr%kind_cdata, master, comm, ierr)
  ! HSCR_NEW
 
+ !call xmpi_bcast(hscr%omega_wgs, master, comm, ierr)
+ !call xmpi_bcast(hscr%iw_mesh_type, master, comm, ierr)
+ !call xmpi_bcast(hscr%rw_mesh_type, master, comm, ierr)
+ !call xmpi_bcast(hscr%cw_mesh_type, master, comm, ierr)
+
  DBG_EXIT("COLL")
 
 end subroutine hscr_bcast
@@ -1003,6 +1019,7 @@ subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
  ABI_MALLOC(hscr%qibz, (3, nqibz))
  ABI_MALLOC(hscr%qlwl, (3, nqlwl))
  ABI_MALLOC(hscr%omega, (nomega))
+ !ABI_CALLOC(hscr%omega_wgs, (nomega))
 
 end subroutine hscr_malloc
 !!***
@@ -1034,6 +1051,7 @@ subroutine hscr_free(hscr)
  ABI_SFREE(hscr%qibz)
  ABI_SFREE(hscr%qlwl)
  ABI_SFREE(hscr%omega)
+ !ABI_SFREE(hscr%omega_wgs)
 
  call hscr%Hdr%free()
 
@@ -1096,6 +1114,7 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  call alloc_copy(Hscr_in%qibz , Hscr_cp%qibz)
  call alloc_copy(Hscr_in%qlwl , Hscr_cp%qlwl)
  call alloc_copy(Hscr_in%omega, Hscr_cp%omega)
+ !call alloc_copy(Hscr_in%omega_wgs, Hscr_cp%omega_wgs)
 
 ! HSCR_NEW
  hscr_cp%awtr      =  hscr_in%awtr
@@ -1104,7 +1123,11 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  hscr_cp%gwcomp    =  hscr_in%gwcomp
  hscr_cp%gwgamma   =  hscr_in%gwgamma
  hscr_cp%gwencomp  =  hscr_in%gwencomp
- hscr_cp%kind_cdata  =  hscr_in%kind_cdata
+ hscr_cp%kind_cdata  = hscr_in%kind_cdata
+
+ !hscr_cp%iw_mesh_type = hscr_in%iw_mesh_type
+ !hscr_cp%rw_mesh_type = hscr_in%rw_mesh_type
+ !hscr_cp%cw_mesh_type = hscr_in%cw_mesh_type
 ! HSCR_NEW
 
 end subroutine hscr_copy

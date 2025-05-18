@@ -220,7 +220,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
  complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
  complex(dpc),allocatable :: chi0_head(:,:,:), chi0_lwing(:,:,:), chi0_uwing(:,:,:)
- real(dp),allocatable :: rwork_wing(:,:,:,:)
+ real(dp),allocatable :: rwork_wing(:,:,:,:), tmp_omega_wgs(:)
  complex(dp),allocatable :: chi0intra_lwing(:,:,:),chi0intra_uwing(:,:,:),chi0intra_head(:,:,:), tmp_omega(:)
  complex(gwpc),allocatable,target :: chi0(:,:,:),chi0intra(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: epsm1(:,:,:)
@@ -1089,7 +1089,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end do
  end if
 
- ! Here we select a subset of frequencies.
+ ! Here we change nomega and select a slice of frequencies.
  if (any(dtset%scr_wrange /= 0)) then
    ! Consistency check.
    call wrtout(units, sjoin(" Selecting frequency range: ", trim(ltoa(dtset%scr_wrange))))
@@ -1098,12 +1098,20 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_CHECK_IRANGE(ilast, 1, ep%nomega, "Invalid scr_wrange(2)")
    ABI_CHECK_IGEQ(ilast, ifirst, "scr_wrange(2) should be >= scr_wrange(1)")
 
+   ! New number of freqs.
    ep%nomega = ii
+
+   ! Trasfer freqs.
    ABI_MALLOC(tmp_omega, (ii))
    tmp_omega(:) = ep%omega(ifirst:ilast)
-   ABI_REMALLOC(ep%omega, (ii))
-   ep%omega = tmp_omega
-   ABI_FREE(tmp_omega)
+   ABI_FREE(ep%omega)
+   ABI_MOVE_ALLOC(tmp_omega, ep%omega)
+
+   ! Trasfer weights.
+   ABI_MALLOC(tmp_omega_wgs, (ii))
+   tmp_omega_wgs(:) = ep%omega_wgs(ifirst:ilast)
+   ABI_FREE(ep%omega_wgs)
+   ABI_MOVE_ALLOC(tmp_omega_wgs, ep%omega_wgs)
  end if
 
  ! Report frequency mesh for chi0.
