@@ -439,7 +439,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 
          ! Read real scalars
          read(unt, err=10, iomsg=errmsg)&
-           hscr%mbpt_sciss, hscr%spsmear, hscr%zcut, hscr%gwencomp,hscr%kind_cdata
+           hscr%mbpt_sciss, hscr%spsmear, hscr%zcut, hscr%gwencomp, hscr%kind_cdata
 
          ! Allocate arrays and read them
          call hscr_malloc(hscr, hscr%npwe, hscr%nqibz, hscr%nomega, hscr%nqlwl)
@@ -806,7 +806,7 @@ end subroutine hscr_print
 !!
 !! SOURCE
 
-type(hscr_t) function hscr_new(varname, dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
+type(hscr_t) function hscr_new(varname, dtset, ep, hdr_abinit, ikxc, test_type, tordering, titles, ngvec, gvec) result(hscr)
 
 !Arguments ------------------------------------
 !scalars

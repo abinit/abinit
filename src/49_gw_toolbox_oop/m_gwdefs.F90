@@ -242,7 +242,7 @@ module m_gwdefs
   real(dp) :: zcut                  ! Small imaginary shift to avoid poles in chi0
 
   logical :: analytic_continuation  ! if true calculate chi0 only along the imaginary axis
-  logical :: contour_deformation    ! if true calculated chi0 both along the real and the imaginary axis
+  logical :: contour_deformation    ! if true calculate chi0 both along the real and the imaginary axis
   logical :: plasmon_pole_model     ! if true a plasmonpole model is used (only 1 or 2 frequencies are calculated)
 
 !arrays
@@ -266,8 +266,15 @@ module m_gwdefs
   ! real frequencies used to calculate the imaginary part of chi0.
 
   complex(dpc),allocatable :: omega(:)
-  ! (nomegasf)
-  ! real and imaginary frequencies in chi0,epsilon and epsilonm1.
+  ! (nomega)
+  ! real and imaginary frequencies in chi0, epsilon and epsilonm1.
+
+  real(dp),allocatable :: omega_wgs(:)
+  ! (nomega)
+  ! Weights for numerical integration, used for instance for minimax meshes.
+
+  character(len=500) :: iw_mesh_type="None", rw_mesh_type="None", cw_mesh_type="None"
+  ! String defining the kind of sampling for imaginary (iw), real (rw) and complex (cw) frequencies
 
  contains
    procedure :: free => em1params_free
@@ -414,6 +421,8 @@ subroutine em1params_free(Ep)
  ABI_SFREE(Ep%qibz)
  ABI_SFREE(Ep%qlwl)
  ABI_SFREE(Ep%omegasf)
+ ABI_SFREE(Ep%omega_wgs)
+
 !complex
  ABI_SFREE(Ep%omega)
 
