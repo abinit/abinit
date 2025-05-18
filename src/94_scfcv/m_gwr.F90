@@ -1052,14 +1052,13 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
    do iq_bz=1,Qmesh%nbz
      call qmesh%get_bz_item(iq_bz, qbz, iq_ibz, isym, itim)
-     ! Note different conventions from itim between the Qmesh routines used in conventional GW and Abinit routines.
      gwr%qbz2ibz(1, iq_bz) = iq_ibz
      gwr%qbz2ibz(2, iq_bz) = isym
      gwr%qbz2ibz(3:5, iq_bz) = zero
+     ! Note different conventions from itim between the Qmesh routines used in conventional GW and Abinit routines.
      gwr%qbz2ibz(6, iq_bz) = merge(0, 1, itim == 1)
-
      sq = (3-2*itim) * MATMUL(cryst%symrec(:,:,isym), qmesh%ibz(:,iq_ibz))
-     if (ANY(ABS(qbz - sq) > 1.0d-4)) then
+     if (ANY(ABS(qbz-sq) > 1.0d-4)) then
        write(msg,'(a,3f6.3,a,3f6.3,2a,9i3,a,i2,2a)')&
         ' qpoint ',qbz,' is the symmetric of ',qmesh%ibz(:,iq_ibz),ch10,&
         ' through operation ',cryst%symrec(:,:,isym),' and itim ',itim,ch10,&

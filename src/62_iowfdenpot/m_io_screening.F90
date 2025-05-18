@@ -37,7 +37,7 @@ MODULE m_io_screening
  use m_crystal
  use m_gwdefs
 
- use m_time,            only : cwtime, cwtime_report
+ use m_time,            only : cwtime, cwtime_report !, sec2str, timab
  use m_fstrings,        only : sjoin, itoa, endswith, replace_ch0
  use m_copy,            only : alloc_copy
  use m_io_tools,        only : open_file, file_exists, iomode2str
@@ -155,6 +155,7 @@ MODULE m_io_screening
   integer :: tordering = 1
     ! 1 for Time-Ordered, 2 for Advanced, 3 for Retarded.
 
+! HSCR_NEW
   integer :: awtr = 1
   ! Input variable (time-reversal symmetry in RPA expression)
 
@@ -166,6 +167,7 @@ MODULE m_io_screening
 
   integer :: gwgamma = 0
   ! Input variable Vertex correction
+! HSCR_NEW
 
   real(dp) :: mbpt_sciss = zero
     ! Scissor Energy, zero if not used
@@ -176,6 +178,7 @@ MODULE m_io_screening
   real(dp) :: zcut = -one
     ! Imaginary shift to avoid the poles along the real axis.
 
+! HSCR_NEW
   real(dp) :: gwencomp = -one
    ! Input variable (GW compensation energy technique)
 
@@ -185,14 +188,19 @@ MODULE m_io_screening
   ! This flag could be use to reduce the memory requirements if spc:
   ! we run calculations in single precision dump the results with the same precision without
   ! having to allocate extra memory.
+! HSCR_NEW
 
+!arrays
+
+! HSCR_NEW
   real(dp) :: vcutgeo(3) = zero
    ! Input variable (defines coulomb cutoff)
+! HSCR_NEW
 
   character(len=80) :: titles(2)
     ! Titles describing the content of the file.
 
-  integer,allocatable :: gvec(:,:)
+  integer,allocatable  :: gvec(:,:)
     ! gvec(3,npwe)
     ! G vectors in reduced coordinates.
 
@@ -223,6 +231,13 @@ MODULE m_io_screening
  end type hscr_t
 !!***
 
+ integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
+ ! The list of headforms used for SCR/SUSC so far.
+
+ integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
+ integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
+ ! The latest headform used when writing.
+
  public :: hscr_new             ! Create header.
  public :: hscr_merge           ! Merge two or more headers.
  public :: write_screening      ! Write a q-slice of the matrix in G-space.
@@ -237,16 +252,7 @@ MODULE m_io_screening
  public :: ioscr_wmerge         ! Produce new file by merging the frequencies stored in other files.
  public :: ioscr_wremove        ! Produce new file by removing selected frequencies in the initial file.
 
-
- integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
- ! The list of headforms used for SCR/SUSC so far.
-
- integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
-
- integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
- ! The latest headform used when writing.
-
-contains  !================================================================================================
+CONTAINS  !================================================================================================
 !!***
 
 !!****f* m_io_screening/ncname_from_id
@@ -800,7 +806,7 @@ end subroutine hscr_print
 !!
 !! SOURCE
 
-type(hscr_t) function hscr_new(varname, dtset, ep, hdr_abinit, ikxc, test_type, tordering, titles, ngvec, gvec) result(hscr)
+type(hscr_t) function hscr_new(varname, dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
 
 !Arguments ------------------------------------
 !scalars
@@ -866,14 +872,15 @@ type(hscr_t) function hscr_new(varname, dtset, ep, hdr_abinit, ikxc, test_type, 
  hscr%qlwl(:,:) = Ep%qlwl
  hscr%omega(:) = Ep%omega
 
+! HSCR_NEW
  hscr%awtr = dtset%awtr
  hscr%icutcoul = dtset%gw_icutcoul
  hscr%vcutgeo = dtset%vcutgeo
  hscr%gwcomp = dtset%gwcomp
  hscr%gwgamma = dtset%gwgamma
  hscr%gwencomp = dtset%gwencomp
-! For the time being, data is always written in double-precision
- hscr%kind_cdata = "dpc"
+ hscr%kind_cdata = "dpc" ! For the time being, data is always written in double-precision
+! HSCR_NEW
 
 end function hscr_new
 !!***
@@ -893,6 +900,9 @@ end function hscr_new
 !!  master=ID of the master node.
 !!  my_rank=ID of the node that receives the data.
 !!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  (no output)
 !!
 !! SIDE EFFECTS
 !!  Hscr<type(hscr_t)>=the SCR header. For the master, it is already
@@ -954,6 +964,7 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
  ! Communicate the Abinit header.
  call hscr%Hdr%bcast(master, my_rank, comm)
 
+ ! HSCR_NEW
  call xmpi_bcast(hscr%awtr, master, comm, ierr)
  call xmpi_bcast(hscr%icutcoul, master, comm, ierr)
  call xmpi_bcast(hscr%vcutgeo, master, comm, ierr)
@@ -961,6 +972,7 @@ subroutine hscr_bcast(hscr, master, my_rank, comm)
  call xmpi_bcast(hscr%gwgamma, master, comm, ierr)
  call xmpi_bcast(hscr%gwencomp, master, comm, ierr)
  call xmpi_bcast(hscr%kind_cdata, master, comm, ierr)
+ ! HSCR_NEW
 
  DBG_EXIT("COLL")
 
@@ -986,6 +998,7 @@ subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
  integer,intent(in) :: npwe, nqibz, nomega, nqlwl
 ! *************************************************************************
 
+ !@hscr_t
  ABI_MALLOC(hscr%gvec, (3, npwe))
  ABI_MALLOC(hscr%qibz, (3, nqibz))
  ABI_MALLOC(hscr%qlwl, (3, nqlwl))
@@ -1048,6 +1061,7 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  class(hscr_t),intent(inout) :: Hscr_cp
 ! *************************************************************************
 
+ !@hscr_t
  ! Integer values.
  Hscr_cp%id          = Hscr_in%id
  Hscr_cp%ikxc        = Hscr_in%ikxc
@@ -1083,6 +1097,7 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  call alloc_copy(Hscr_in%qlwl , Hscr_cp%qlwl)
  call alloc_copy(Hscr_in%omega, Hscr_cp%omega)
 
+! HSCR_NEW
  hscr_cp%awtr      =  hscr_in%awtr
  hscr_cp%icutcoul  =  hscr_in%icutcoul
  hscr_cp%vcutgeo   =  hscr_in%vcutgeo
@@ -1090,6 +1105,7 @@ subroutine hscr_copy(Hscr_in, Hscr_cp)
  hscr_cp%gwgamma   =  hscr_in%gwgamma
  hscr_cp%gwencomp  =  hscr_in%gwencomp
  hscr_cp%kind_cdata  =  hscr_in%kind_cdata
+! HSCR_NEW
 
 end subroutine hscr_copy
 !!***
@@ -1101,7 +1117,7 @@ end subroutine hscr_copy
 !! hscr_merge
 !!
 !! FUNCTION
-!! This subroutine merges different header structured variable (hscr_t)
+!! This subroutine merges diffrent header structured variable (hscr_t)
 !!
 !! INPUTS
 !!  Hscr_in(:) <hscr_t)>=List of headers to be merged.
@@ -1127,6 +1143,7 @@ subroutine hscr_merge(Hscr_in, Hscr_out)
  real(dp),allocatable :: qset(:,:)
 ! *************************************************************************
 
+ !@hscr_t
  nhds=SIZE(Hscr_in)
 
  ! Initial copy of the header ===
@@ -1301,7 +1318,7 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iqibz, epsm1)
    ABI_FREE(epsm1d)
 
  case (IO_MODE_ETSF)
-   ! netcdf does not support complex datatypes. Here I use some iso_c_binding to  associate the memory
+   ! netcdf does not support complex datatypes. Here I use some C-magic to  associate the memory
    ! to a Fortran real pointer with the correct type and shape. Note that the data on file is always in double precision.
    ! but this is ok since: if the type of data differs from the netCDF variable type, type conversion will occur
    ! inside nf90_put_var
@@ -1695,6 +1712,7 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
  mpi_type_frm = xmpio_mpi_type_frm ! MPI type of the record marker.
 
  call hdr_mpio_skip(mpio_fh,fform,offset)
+
  call wrtout(std_out, sjoin("in hdr_mpio_skip with fform = ",itoa(fform)))
 
 #ifdef HAVE_MPI_IO
@@ -1895,6 +1913,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 ! *************************************************************************
 
  comm = xmpi_comm_self
+
  call wrtout(std_out, sjoin(". Recovering q-points in file:", ipath))
  call wrtout(std_out, sjoin(". Data written to file:", fname_out))
 
