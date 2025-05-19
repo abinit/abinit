@@ -357,7 +357,7 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
          Sr%ze0(jb,ik_ibz,1) = one / (one - SUM(Sr%dsigmee0(jb,ik_ibz,:)))
        end if
 
-#define _DEV_PERTURBATIVE
+!#define _DEV_PERTURBATIVE
 
 #ifdef _DEV_PERTURBATIVE
        call wrtout(units, "COMMENT: Using perturbative approach with Z.")

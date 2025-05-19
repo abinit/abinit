@@ -1090,10 +1090,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
                  case ("minimax")
                    do iiw=1,epsm1%nomega_i
-                     ! TODO: Recheck the piinv / two factor, Also we may have a minus sign here.
+                     ! NB: Sigma_c along the imag. axis has a -1/2pi factor in front
+                     ! here the -1 factor does not appear because we have performed an EIG decomposition of -(epsm1-1).
                      sigctmp(io,iab) = sigctmp(io,iab) + &
                        (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
-                          (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw))) )
+                          (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw))))
                    end do
 
                  case default
