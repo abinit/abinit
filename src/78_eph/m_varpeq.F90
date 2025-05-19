@@ -3247,6 +3247,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer :: nqibz, iq, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz, ip, ds_iscale
  logical :: isirr_k, isirr_q, have_scell_q, use_displaced_scell
  real(dp) :: cpu_all, wall_all, gflops_all, spread, kdotr
+ real(dp) :: psign
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(varpeq_t) :: vpq
@@ -3277,6 +3278,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ! Read A_nk and B_qnu and other useful tables from file
  call vpq%ncread(dtfil%filvpqin, comm, keep_open=.False.)
  !call wrtout(std_out, " Reading done")
+
+ psign = 1
+ if (vpq%pkind == "hole") psign = -1
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -3394,8 +3398,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
    call xmpi_sum_master(sc_displ_cart_re, master, comm, ierr)
    call xmpi_sum_master(sc_displ_cart_im, master, comm, ierr)
-   sc_displ_cart_re = -sqrt2 * sc_displ_cart_re / nqbz
-   sc_displ_cart_im = -sqrt2 * sc_displ_cart_im / nqbz
+   sc_displ_cart_re = -psign * sqrt2 * sc_displ_cart_re / nqbz
+   sc_displ_cart_im = -psign * sqrt2 * sc_displ_cart_im / nqbz
 
    ! Write polaron-induced displacements in XSF format.
    if (my_rank == master) then
