@@ -2289,10 +2289,10 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  do ii=1,nfreqim
    omega_storage(nfreqre+ii) = CMPLX(zero,imag_omega(ii))
    ifile = i_temp(pos_indx(ii))
-   ifrq = pos_indx(ii)
 
    ifile_indx(nfreqre+ii) = ifile
    freq_indx(nfreqre+ii,1:nfiles) = i2_temp(pos_indx(ii),1:nfiles)
+   ifrq = i2_temp(pos_indx(ii), ifile)
    imag_omega_wgs(ii) = Hscr_file(ifile)%omega_wgs(ifrq) ! TODO
  end do
 

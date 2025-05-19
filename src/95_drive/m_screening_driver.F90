@@ -1025,7 +1025,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ABI_ERROR("System is metallic or with a very small fundamental gap!")
      end if
 
-     call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
+     call gx_minimax_grid(abs(dtset%nfreqim), te_min, te_max,  &  ! in
                           tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
                           iw_mesh, iw_wgs,   &
                           t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
