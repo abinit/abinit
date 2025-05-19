@@ -753,7 +753,7 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
  call epsm1%hscr%from_file(fname, fform, comm)
 
  ! Master echoes the header.
- if (my_rank==master) call epsm1%hscr%print()
+ if (my_rank==master) call epsm1%hscr%print([std_out], 0)
 
  ! Generic Info
  epsm1%ID         = 0       ! Not yet initialized as epsm1 is calculated in epsm1_mkdump.F90
@@ -981,7 +981,7 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
    !   for a subsequent use or calculate e^-1 keeping everything in memory.
 
    if (epsm1%mqmem == 0) then
-     ! Open file and write the header for the SCR file ===
+     ! Open file and write the header for the SCR file.
      ! For the moment only master works.
 
      if (my_rank==master) then

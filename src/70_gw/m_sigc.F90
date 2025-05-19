@@ -985,9 +985,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! MODEL GW calculation WITH PPm  TODO Spinor not tested.
            ! Calculate \Sigma(E_k) |k> to obtain <j|\Sigma(E_k)|k>
            ABI_MALLOC(sigcme_new, (nomega_tot))
-           sigc_ket  = czero_gw
-           ket1      = czero_gw
-           ket2      = czero_gw
+           sigc_ket = czero_gw; ket1 = czero_gw; ket2 = czero_gw
 
            call PPm%calc_sigc(nspinor, npwc, nomega_tot, rhotwgp, botsq,otq, &
                               omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, ket1, sigcme_new)
@@ -1022,9 +1020,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! MODEL GW with numerical integration.
            ! Check if pole contributions need to be summed. this avoids unnecessary splint calls and saves time
            !me_calc_poles = .TRUE.
-           sigc_ket  = czero_gw
-           ket1      = czero_gw
-           ket2      = czero_gw
+           sigc_ket = czero_gw; ket1 = czero_gw; ket2 = czero_gw
 
            do io=1,nomega_tot
              if (omegame0i(io)>=zero.AND.(ABS(one-theta_mu_minus_e0i)>zero)) then
@@ -1125,7 +1121,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                  end if
                end if
 
-               ! The static contribution from completeness relation is calculated once ===
+               ! The static contribution from completeness relation is calculated once.
                call calc_coh_comp(iq_ibz,Vcp%i_sz,(jb==kb),nspinor,Sigp%nsig_ab,DBLE(Sr%egw(kb,jk_ibz,spin)-en_high),&
                  npwc,Gsph_c%gvec,gwc_ngfft,gwc_nfftot,wf1swf2_g,vc_sqrt_qbz,botsq,otq,sigcohme)
 
@@ -1405,12 +1401,10 @@ end subroutine calc_sigc_me
 !! sigcohme=partial contribution to the matrix element of $<jb k|\Sigma_{COH}| kb k>$
 !!  coming from this single q-point for completeness trick
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
-&  ngfft,nfftot,wfg2_jk,vc_sqrt,botsq,otq,sigcohme)
+                          ngfft,nfftot,wfg2_jk,vc_sqrt,botsq,otq,sigcohme)
 
 !Arguments ------------------------------------
 !scalars
@@ -1908,7 +1902,7 @@ end subroutine calc_sigc_cd
 !! calc_sig_ppm_comp
 !!
 !! FUNCTION
-!! Calculating contributions to self-energy operator using a plasmon-pole model
+!! Calculate contributions to self-energy operator using a plasmon-pole model.
 !!
 !! INPUTS
 !!  nomega=number of frequencies to consider
