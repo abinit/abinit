@@ -836,7 +836,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  call timab(495,2,tsec) ! csigme(SigC)
  call timab(491,2,tsec)
  call timab(423,2,tsec) ! cohsex_me
- call cwtime_report("cohsex_me", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" cohsex_me", cpu_all, wall_all, gflops_all)
 
  DBG_EXIT("COLL")
 

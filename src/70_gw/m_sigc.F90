@@ -1361,7 +1361,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call timab(431,2,tsec)
  call timab(424,2,tsec) ! calc_sigc_me
 
- call cwtime_report("calc_sigc_me", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" calc_sigc_me", cpu_all, wall_all, gflops_all)
 
  DBG_EXIT("COLL")
 
