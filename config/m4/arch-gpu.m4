@@ -162,6 +162,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   abi_gpu_cuda_incs="${GPU_CPPFLAGS}"
   abi_gpu_cuda_libs="${GPU_LIBS}"
   abi_gpu_cuda_root="${abi_gpu_prefix}"
+  abi_gpu_cuda_math_root=""
   abi_gpu_cuda_version_10="unknown"
   abi_gpu_nvtx_v3="unknown"
 
@@ -178,6 +179,15 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   fi
   if test "${abi_gpu_cuda_root}" = ""; then
     abi_gpu_cuda_root="${NVHPC_CUDA_HOME}"
+  fi
+
+  # If CUDA is provided by NVHPC SDK, math libraries such as cuBLAS, cuFFT or cuSOLVER
+  # are located in a separate directory
+  tmp_math_root=`echo ${abi_gpu_cuda_root} | sed 's/cuda/math_libs/'`
+  if test -s "${tmp_math_root}"; then
+    abi_gpu_cuda_math_root="${tmp_math_root}"
+  else
+    abi_gpu_cuda_math_root="${abi_gpu_cuda_root}"
   fi
 
   # Check whether to look for generic files
@@ -224,18 +234,22 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     abi_result=""
     if test -s "${abi_gpu_cuda_root}/include/cuda_runtime_api.h"; then
       if test "${GPU_CPPFLAGS}" = ""; then
-        abi_gpu_cuda_incs="-I${abi_gpu_cuda_root}/include"
+        if test "${abi_gpu_cuda_root}" == "${abi_gpu_cuda_math_root}"; then
+          abi_gpu_cuda_incs="-I${abi_gpu_cuda_root}/include"
+        else
+          abi_gpu_cuda_incs="-I${abi_gpu_cuda_root}/include -I${abi_gpu_cuda_math_root}/include"
+        fi
       fi
       abi_gpu_cuda_has_incs="yes"
       abi_result="${abi_result} run-time"
     fi
-    if test -s "${abi_gpu_cuda_root}/include/cufft.h"; then
+    if test -s "${abi_gpu_cuda_math_root}/include/cufft.h"; then
       abi_result="${abi_result} fft"
     fi
-    if test -s "${abi_gpu_cuda_root}/include/cublas.h"; then
+    if test -s "${abi_gpu_cuda_math_root}/include/cublas.h"; then
       abi_result="${abi_result} blas"
     fi
-    if test -s "${abi_gpu_cuda_root}/include/cusolver_common.h"; then
+    if test -s "${abi_gpu_cuda_math_root}/include/cusolver_common.h"; then
       abi_result="${abi_result} cusolver"
     fi
     if test -s "${abi_gpu_cuda_root}/SDK/C/common/inc/cutil.h"; then
@@ -254,8 +268,10 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     abi_result=""
     if test "${abi_cpu_64bits}" = "yes"; then
       abi_gpu_cuda_libdir="${abi_gpu_cuda_root}/lib64"
+      abi_gpu_cuda_math_libdir="${abi_gpu_cuda_math_root}/lib64"
     else
       abi_gpu_cuda_libdir="${abi_gpu_cuda_root}/lib"
+      abi_gpu_cuda_math_libdir="${abi_gpu_cuda_math_root}/lib"
     fi
     for tmp_cuda_dir in \
         /usr/lib \
@@ -281,26 +297,26 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       abi_result="${abi_result} run-time"
     fi
     if test "${abi_gpu_cuda_has_libs}" = "yes"; then
-      if test -e "${abi_gpu_cuda_libdir}/libcufft.${abi_so_ext}"; then
+      if test -e "${abi_gpu_cuda_math_libdir}/libcufft.${abi_so_ext}"; then
         if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcufft ${abi_gpu_cuda_libs}"
         fi
         abi_gpu_cuda_has_fft="yes"
         abi_result="${abi_result} fft"
       fi
-      if test -e "${abi_gpu_cuda_libdir}/libcublas.${abi_so_ext}"; then
+      if test -e "${abi_gpu_cuda_math_libdir}/libcublas.${abi_so_ext}"; then
         if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcublas ${abi_gpu_cuda_libs}"
         fi
         abi_gpu_cuda_has_linalg="yes"
         abi_result="${abi_result} blas"
       fi
-      if test -e "${abi_gpu_cuda_libdir}/libcublasLt.${abi_so_ext}"; then
+      if test -e "${abi_gpu_cuda_math_libdir}/libcublasLt.${abi_so_ext}"; then
         if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcublasLt ${abi_gpu_cuda_libs}"
         fi
       fi
-      if test -e "${abi_gpu_cuda_libdir}/libcusolver.${abi_so_ext}"; then
+      if test -e "${abi_gpu_cuda_math_libdir}/libcusolver.${abi_so_ext}"; then
         if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcusolver ${abi_gpu_cuda_libs}"
         fi
@@ -308,7 +324,11 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
         abi_result="${abi_result} cusolver"
       fi
       if test "${GPU_LIBS}" = ""; then
-        abi_gpu_cuda_libs="-L${abi_gpu_cuda_libdir} ${abi_gpu_cuda_libs}"
+        if test "${abi_gpu_cuda_root}" == "${abi_gpu_cuda_math_root}"; then
+          abi_gpu_cuda_libs="-L${abi_gpu_cuda_libdir} ${abi_gpu_cuda_libs}"
+        else
+          abi_gpu_cuda_libs="-L${abi_gpu_cuda_libdir} -L${abi_gpu_cuda_math_libdir} ${abi_gpu_cuda_libs}"
+        fi
       fi
     fi
 
@@ -785,8 +805,9 @@ AC_DEFUN([ABI_GPU_DETECT],[
     AC_MSG_RESULT([${abi_gpu_flavor}])
   fi
 
-  # FIXME: Update GPU libraries
+  # FIXME: Update GPU libraries and includes (in fcflags)
   sd_gpu_libs="${sd_gpu_libs} ${abi_gpu_libs}"
+  sd_gpu_fcflags="${sd_gpu_fcflags} ${abi_gpu_incs}"
 
   # Inform Automake
   AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none" -o "${abi_gpu_markers_enable}" = "yes"])
