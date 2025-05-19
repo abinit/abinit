@@ -1,20 +1,23 @@
 # _== Convergency and starting
 # DATASET 1: LDA
-# DATASET 2: LDA+DMFT
-ndtset 2
-jdtset 1 2
+# DATASET 2,3,4: LDA+DMFT
+ndtset 4
+jdtset 1 2 3 4
 
-getden2 1
+getden -1
+getself -1
+nnsclo1 0
+nline 5
+nnsclo 7
 
 prtvol    4
 pawprtvol 2
 
 ##### CONVERGENCE PARAMETERS
 nstep1   30
-nstep2   1
+nstep    1
 ecut     4 # low cutoff !
 pawecutdg 8
-
 tolvrs  1.0d-5
 nband     64
 nbdbuf    4
@@ -47,75 +50,67 @@ nspinor 2
 
 # == LDA+DMFT
 usedmft1 0
-usedmft2 1
+usedmft  1
 dmftbandi 9 # include Sr s band
 dmftbandf 45 # include V t2g bands
 dmft_nwli 500
 dmft_iter 1
 dmft_mxsf 0.7
-dmft_dc 8
-dmft_yukawa_param 2
+dmft_dc 7
+dmft_nominal 2 3 0 0 0
 
-dmft_prtwan 1
 dmft_triqs_wmax 1.0
 
-dmft_solv 6 # Density-density TRIQS
+dmft_solv 7 # Rotationally invariant TRIQS
+dmft_triqs_off_diag 1
+dmftctqmc_basis2 0
+dmftctqmc_basis3 1
+dmftctqmc_basis4 2
 
 # == DFT+U
-usepawu2     14
+usepawu1    0
+usepawu     14
 dmatpuopt  1   # The density matrix: the simplest expression.
+lpawu2 2 -1 -1
 lpawu  2  1 -1
 upawu1  0.00  0.0  0.0  eV
 f4of2_sla3  0.0  0.0  0.0
-upawu2  3.1333333333333333  1.0  0.0  eV
-jpawu2  0.7583333333333333  0.0  0.0  eV
+upawu   3.1333333333333333  1.0  0.0  eV
+jpawu   0.7583333333333333  0.0  0.0  eV
 
-paral_kgb1 0
-paral_kgb2 1
-np_spkpt2 4
-npband2 2
-npfft2 1
-bandpp2 32
+paral_kgb 0
 
-dmftctqmc_meas 100
-dmftctqmc_basis 4
-dmftqmc_therm 10
+dmftctqmc_meas 10
+dmftqmc_therm 100
 dmftqmc_l 500
-dmft_triqs_off_diag 0
 dmftqmc_n 1.d3
-
-dmft_triqs_entropy 1
-dmft_triqs_compute_integral 1
-dmft_triqs_gaussorder 2
-dmft_wanrad 3.0
-dmft_triqs_loc_n_min 1
-dmft_wanorthnorm 2
-dmft_orbital 1  2  0
+dmft_t2g2 1
+dmft_triqs_move_double 0
 
 prtwf 0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "23v.paw, 38sr.paw, 8o.paw"
 
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% [shell]
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test =
-#%%   t105_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t105_MPI8o_DS2_Wannier_functions_iatom0001_001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t105_MPI8o_DS2_Wannier_functions_iatom0002_001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t105_MPI8o_DS2_UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t105_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t105_MPI8o_DS2_Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t105_MPI8o_DS2_Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t110_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t110_MPI8o_DS4_Hybridization_offdiag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t110_MPI8o_DS4_Hybridization_diag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t110_MPI8o_DS4_DMFTOCCND, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t110_MPI8o_DS4_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t110_MPI8o_DS4_Gtau_diag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
 #%% authors = B. Amadon, E. Castiel
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for SrVO3 using TRIQS with KGB parallelism and spinors
+#%% description = DFT+DMFT for SrVO3: test different basis with TRIQS
 #%% topics = DMFT, parallelism
 #%%<END TEST_INFO>

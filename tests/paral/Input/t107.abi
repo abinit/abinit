@@ -15,12 +15,15 @@ nstep1   30
 nstep2   1
 ecut      10
 pawecutdg 40
-tolvrs  1.0d-10
+tolvrs  1.0d-5
 nband     17
 occopt 3 tsmear 0.0173918086
 diemix 0.1
 nline2 10
 nnsclo2 10
+
+nsppol 2
+nspden 2
 
 ##### PHYSICAL PARAMETERS
 natom 1 ntypat  1 typat  1
@@ -58,7 +61,7 @@ dmftctqmc_meas    10
 dmft_mxsf 0.1
 dmft_dc 8
 dmft_yukawa_param 4
-dmft_epsilon_yukawa 0.5
+dmft_epsilon_yukawa 0.9
 dmft_lambda_yukawa 0.15
 
 # == DFT+U
@@ -92,11 +95,13 @@ dmft_tolfreq  0.01
 #%% [NCPU_1]
 #%% files_to_test = t107_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [NCPU_4]
-#%% files_to_test = t107_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t107_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t107_MPI4o_DS2_Gtau_diag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t107_MPI4o_DS2_Gtau_offdiag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [NCPU_8]
 #%% files_to_test = t107_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon, E. Castiel
 #%% keywords = DMFT, CTQMC, TRIQS
-#%% description = Test CT-QMC parallelism
+#%% description = DFT+DMFT for Ce: test every parallelization scheme of TRIQS interface
 #%%<END TEST_INFO>

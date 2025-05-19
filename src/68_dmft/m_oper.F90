@@ -665,7 +665,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !&               (real(oper%ks(isppol,ikpt,ib,ib1)),imag(oper%ks(isppol,ikpt,ib,ib1)),ib1=iband1,iband2)
 !             call wrtout(std_out,message,'COLL')
            end if ! prtopt>=20
-           if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then ! only need to check diagonal elements
+           if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then ! no sense to perform this check on off-diagonal elements
              if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) > max(tol10,maximag)) then
                ximag   = .true.
                maximag = aimag(oper%ks(ib,ib,ikpt,isppol))

@@ -70,12 +70,12 @@ jpawu1  0.0000 0.0  # values in Hartree
 upawu2  0.20  0.0   # values in Hartree
 jpawu2  0.1000 0.0  # values in Hartree
 
-dmftqmc_therm 50
+dmftqmc_therm 1000
 dmftctqmc_basis 2
 dmftctqmc_meas 10
 dmft_triqs_off_diag 1
-dmftqmc_l 500
-dmftqmc_n 5.d2
+dmftqmc_l 50
+dmftqmc_n 1.d5
 dmft_triqs_move_double 0
 dmft_yukawa_param 3
 dmft_triqs_leg_measure 1
@@ -105,5 +105,5 @@ dmft_triqs_nleg 10
 #%% [extra_info]
 #%% keywords = PAW, DMFT, TRIQS
 #%% authors = B. Amadon, E. Castiel
-#%% description = Test k-point parallelization for DFT+DMFT calculations. NiO
+#%% description = DFT+DMFT for NiO : test TRIQS interface with Legendre measurement and off-diagonal elements
 #%%<END TEST_INFO>

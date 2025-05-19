@@ -1,13 +1,16 @@
 # _== Convergency and starting
 # DATASET 1: LDA
 # DATASET 2: LDA+DMFT
-ndtset 1
-jdtset 3
+# DATASET 3: k-resolved spectral function
+# DATASET 4: total spectral function
+ndtset 2
+jdtset 1 2
 
 getden1 0
-getden  1
-getself3 2
-nline 5
+getden2 1
+getden  2
+getself 2
+nline2 5
 nnsclo2 5
 
 prtvol    4
@@ -15,7 +18,7 @@ pawprtvol 2
 
 ##### CONVERGENCE PARAMETERS
 nstep1   30
-nstep    1
+nstep2    1
 ecut     4 # low cutoff !
 pawecutdg 8
 tolvrs  1.0d-5
@@ -54,7 +57,7 @@ usedmft  1
 dmftbandi 9 # include Sr s band
 dmftbandf 45 # include V t2g bands
 dmft_nwli 500
-dmft_iter 1
+dmft_iter 2
 dmft_mxsf 0.7
 dmft_dc 6
 
@@ -76,70 +79,84 @@ paral_kgb 0
 
 dmftctqmc_meas 10
 dmftctqmc_basis 3
-dmftqmc_therm 10
+dmftqmc_therm 1000
 dmftqmc_l 500
 dmft_triqs_off_diag 0
-dmftqmc_n 1.d3
+dmftqmc_n 5.d3
 
-dmft_kspectralfunc 0
-dmft_kspectralfunc3 1
-iscf3 -2
-nbandkss3 20
-kssform3  3
-tolwfr3 1.d-5
-nstep3 5
-#kptopt3 -1
-#ndivsm3  2
-#kptbounds3
-#        0.0 0.0 0.0      # Gamma
-#        0.0 1/2 0.0      # N
+dmft_kspectralfunc1 0
+dmft_kspectralfunc2 0
+dmft_kspectralfunc  1
+iscf1 17
+iscf2 17
+iscf -2
+nbandkss1 0
+nbandkss2 0
+nbandkss 20
+kssform  3
+tolwfr1 0.0
+tolwfr2 0.0
+tolwfr 1.d-5
+nstep 5
+kptopt3 -1
+ndivsm3  2
+kptbounds3
+        0.0 0.0 0.0      # Gamma
+        0.0 1/2 0.0      # N
 prtwf 0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "23v.paw, 38sr.paw, 8o.paw"
 
 dmft_triqs_leg_measure 1
-dmft_triqs_nleg 20
+dmft_triqs_nleg 15
+dmft_triqs_move_double 0
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% test_chain = t108.abi, t109.abi
 #%% [shell]
-#%% pre_commands = iw_cp t108o_DS3_spectralfunction_realgrid t108_MPI1o_DS3_spectralfunction_realgrid;
-#%%                iw_cp t108o_DS3_spectralfunction_realgrid t108_MPI4o_DS3_spectralfunction_realgrid;
-#%%                iw_cp t108o_DS3_spectralfunction_realgrid t108_MPI8o_DS3_spectralfunction_realgrid;
-#%%                iw_cp t108i_DS3.UnitaryMatrix_iatom0001   t108_MPI1i_DS3.UnitaryMatrix_iatom0001;
-#%%                iw_cp t108i_DS3.UnitaryMatrix_iatom0001   t108_MPI4i_DS3.UnitaryMatrix_iatom0001;
-#%%                iw_cp t108i_DS3.UnitaryMatrix_iatom0001   t108_MPI8i_DS3.UnitaryMatrix_iatom0001;
-#%%                iw_cp t108i_DS3.UnitaryMatrix_iatom0002   t108_MPI1i_DS3.UnitaryMatrix_iatom0002;
-#%%                iw_cp t108i_DS3.UnitaryMatrix_iatom0002   t108_MPI4i_DS3.UnitaryMatrix_iatom0002;
-#%%                iw_cp t108i_DS3.UnitaryMatrix_iatom0002   t108_MPI8i_DS3.UnitaryMatrix_iatom0002;
-#%%                iw_cp t108i_DS3Self_ra-omega_iatom0001_isppol1 t108_MPI1i_DS3Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t108i_DS3Self_ra-omega_iatom0001_isppol1 t108_MPI4i_DS3Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t108i_DS3Self_ra-omega_iatom0001_isppol1 t108_MPI8i_DS3Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t108i_DS3Self_ra-omega_iatom0002_isppol1 t108_MPI1i_DS3Self_ra-omega_iatom0002_isppol1;
-#%%                iw_cp t108i_DS3Self_ra-omega_iatom0002_isppol1 t108_MPI4i_DS3Self_ra-omega_iatom0002_isppol1;
-#%%                iw_cp t108i_DS3Self_ra-omega_iatom0002_isppol1 t108_MPI8i_DS3Self_ra-omega_iatom0002_isppol1;
+#%% post_commands = ww_cp t108_MPI1o_DS2_DEN t109_MPI1o_DS2_DEN;
+#%%                 ww_cp t108_MPI4o_DS2_DEN t109_MPI4o_DS2_DEN;
+#%%                 ww_cp t108_MPI8o_DS2_DEN t109_MPI8o_DS2_DEN;
+#%%                 ww_cp t108_MPI1o_DS2_Self-omega_iatom0001_isppol1 t109_MPI1o_DS2_Self-omega_iatom0001_isppol1;
+#%%                 ww_cp t108_MPI1o_DS2_Self-omega_iatom0002_isppol1 t109_MPI1o_DS2_Self-omega_iatom0002_isppol1;
+#%%                 ww_cp t108_MPI4o_DS2_Self-omega_iatom0001_isppol1 t109_MPI4o_DS2_Self-omega_iatom0001_isppol1;
+#%%                 ww_cp t108_MPI4o_DS2_Self-omega_iatom0002_isppol1 t109_MPI4o_DS2_Self-omega_iatom0002_isppol1;
+#%%                 ww_cp t108_MPI8o_DS2_Self-omega_iatom0001_isppol1 t109_MPI8o_DS2_Self-omega_iatom0001_isppol1;
+#%%                 ww_cp t108_MPI8o_DS2_Self-omega_iatom0002_isppol1 t109_MPI8o_DS2_Self-omega_iatom0002_isppol1;
+#%%                 ww_cp t108_MPI1o_DS2_UnitaryMatrix_iatom0001 t109_MPI1i_DS3_UnitaryMatrix_iatom0001;
+#%%                 ww_cp t108_MPI1o_DS2_UnitaryMatrix_iatom0002 t109_MPI1i_DS3_UnitaryMatrix_iatom0002;
+#%%                 ww_cp t108_MPI4o_DS2_UnitaryMatrix_iatom0001 t109_MPI4i_DS3_UnitaryMatrix_iatom0001;
+#%%                 ww_cp t108_MPI4o_DS2_UnitaryMatrix_iatom0002 t109_MPI4i_DS3_UnitaryMatrix_iatom0002;
+#%%                 ww_cp t108_MPI8o_DS2_UnitaryMatrix_iatom0001 t109_MPI8i_DS3_UnitaryMatrix_iatom0001;
+#%%                 ww_cp t108_MPI8o_DS2_UnitaryMatrix_iatom0002 t109_MPI8i_DS3_UnitaryMatrix_iatom0002;
+#%%                 ww_cp t108_MPI1o_DS2_UnitaryMatrix_iatom0001 t109_MPI1i_DS4_UnitaryMatrix_iatom0001;
+#%%                 ww_cp t108_MPI1o_DS2_UnitaryMatrix_iatom0002 t109_MPI1i_DS4_UnitaryMatrix_iatom0002;
+#%%                 ww_cp t108_MPI4o_DS2_UnitaryMatrix_iatom0001 t109_MPI4i_DS4_UnitaryMatrix_iatom0001;
+#%%                 ww_cp t108_MPI4o_DS2_UnitaryMatrix_iatom0002 t109_MPI4i_DS4_UnitaryMatrix_iatom0002;
+#%%                 ww_cp t108_MPI8o_DS2_UnitaryMatrix_iatom0001 t109_MPI8i_DS4_UnitaryMatrix_iatom0001;
+#%%                 ww_cp t108_MPI8o_DS2_UnitaryMatrix_iatom0002 t109_MPI8i_DS4_UnitaryMatrix_iatom0002;
+#%%                 ww_cp t108_MPI1o_DS2_DMFTOVERLAP_iatom0001_isppol1 t109_MPI1i_DS3_DMFTOVERLAP_iatom0001_isppol1;
+#%%                 ww_cp t108_MPI1o_DS2_DMFTOVERLAP_iatom0002_isppol1 t109_MPI1i_DS3_DMFTOVERLAP_iatom0002_isppol1;
+#%%                 ww_cp t108_MPI4o_DS2_DMFTOVERLAP_iatom0001_isppol1 t109_MPI4i_DS3_DMFTOVERLAP_iatom0001_isppol1;
+#%%                 ww_cp t108_MPI4o_DS2_DMFTOVERLAP_iatom0002_isppol1 t109_MPI4i_DS3_DMFTOVERLAP_iatom0002_isppol1;
+#%%                 ww_cp t108_MPI8o_DS2_DMFTOVERLAP_iatom0001_isppol1 t109_MPI8i_DS3_DMFTOVERLAP_iatom0001_isppol1;
+#%%                 ww_cp t108_MPI8o_DS2_DMFTOVERLAP_iatom0002_isppol1 t109_MPI8i_DS3_DMFTOVERLAP_iatom0002_isppol1;
 #%% [paral_info]
 #%% nprocs_to_test = 1, 4, 8
 #%% max_nprocs = 8
 #%% [NCPU_1]
-#%% files_to_test = t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t108_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [NCPU_4]
-#%% files_to_test =
-#%%   t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Wannier_functions_iatom0001_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2_Wannier_functions_iatom0002_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2.UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2.UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%   t99_MPI4o_DS2Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t108_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [NCPU_8]
-#%% files_to_test = t99_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t108_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
 #%% authors = B. Amadon, E. Castiel
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for SrVO3 using TRIQS with KGB parallelism
+#%% description = DFT+DMFT for SrVO3: test spectral function with TRIQS
 #%% topics = DMFT, parallelism
 #%%<END TEST_INFO>

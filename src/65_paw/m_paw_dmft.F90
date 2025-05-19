@@ -1175,7 +1175,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==============================
 
  paw_dmft%wtk => dtset%wtk(:)
- if (dtset%iscf < 0 .and. dtset%kptopt < 0) paw_dmft%wtk(:) = one / dble(nkpt)
+ ! In the case where we sample the full BZ, don't overwrite the wtk with 1/nkpt when we use TRIQS
+ if (dtset%iscf < 0 .and. (dtset%kptopt < 0 .or. &
+   & (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7))) paw_dmft%wtk(:) = one / dble(nkpt)
  sumwtk = sum(paw_dmft%wtk(1:nkpt))
  if (abs(sumwtk-one) > tol11) then
    write(message,'(a,f15.11)') ' sum of k-point is incorrect',sumwtk
