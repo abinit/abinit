@@ -126,6 +126,8 @@ prtwf 0
 #%%   t99_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%%   t99_MPI8o_DS2_Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%%   t99_MPI8o_DS2_Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2_DMFTOVERLAP_iatom0001_isppol1, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%   t99_MPI8o_DS2_DMFTOVERLAP_iatom0002_isppol1, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%%   t99_MPI8o_DS2_Wannier_functions_iatom0001_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%%   t99_MPI8o_DS2_Wannier_functions_iatom0002_002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%%   t99_MPI8o_DS2_DMFTORBITAL_itypat0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
