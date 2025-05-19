@@ -237,8 +237,8 @@ MODULE m_io_screening
  end type hscr_t
 !!***
 
- integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
- !integer,private,parameter :: HSCR_KNOWN_HEADFORMS(2) = [80, 81]
+ !integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
+ integer,private,parameter :: HSCR_KNOWN_HEADFORMS(2) = [80, 81]
  ! The list of headforms used for SCR/SUSC so far.
 
  integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
@@ -808,7 +808,6 @@ subroutine hscr_print(Hscr, units, prtvol, header)
  call wrtout(units,msg)
  write(msg,'(a,es16.6)')' Complex Imaginary Shift    ',hscr%zcut
  call wrtout(units,msg)
- !TODO
  write(msg,'(2a)')      ' rw_mesh_type    ',trim(hscr%rw_mesh_type)
  call wrtout(units,msg)
  write(msg,'(2a)')      ' iw_mesh_type    ',trim(hscr%iw_mesh_type)
@@ -2103,7 +2102,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  integer :: nfreq_tot,nfreqre,nfreqim,ifrq,npwe4mI,npwe4mJ,ierr, mod10, order
  character(len=500) :: msg
  logical :: skip
- character(len=nctk_slen) :: varname
+ character(len=nctk_slen) :: varname, rw_mesh_type, iw_mesh_type, cw_mesh_type
  type(abifile_t) :: abifile
 !arrays
  integer,allocatable :: freq_indx(:,:),ifile_indx(:),pos_indx(:),i_temp(:),i2_temp(:,:)
@@ -2119,6 +2118,33 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  end if
 
  mod10 = mod(hscr_file(1)%gwcalctyp, 10)
+
+ ! These are the meshes that will be reported in the final SCR file.
+ ! None means that we have a single point or no point at all along that axis
+ ! Clearly we cannot merge files with different meshes.
+ rw_mesh_type = "None"; iw_mesh_type = "None"; cw_mesh_type = "None"
+ do ifile=1,nfiles
+   if (hscr_file(ifile)%rw_mesh_type /= "None") then
+     if (rw_mesh_type /= "None" .and. rw_mesh_type /= hscr_file(ifile)%rw_mesh_type) then
+       ABI_ERROR(sjoin("Cannot merge rw_mesh_type:", rw_mesh_type, " with: ", hscr_file(ifile)%rw_mesh_type))
+     end if
+     rw_mesh_type = hscr_file(ifile)%rw_mesh_type
+   end if
+
+   if (hscr_file(ifile)%iw_mesh_type /= "None") then
+     if (iw_mesh_type /= "None" .and. iw_mesh_type /= hscr_file(ifile)%iw_mesh_type) then
+       ABI_ERROR(sjoin("Cannot merge iw_mesh_type:", iw_mesh_type, " with: ", hscr_file(ifile)%iw_mesh_type))
+     end if
+     iw_mesh_type = hscr_file(ifile)%iw_mesh_type
+   end if
+
+   if (hscr_file(ifile)%cw_mesh_type /= "None") then
+     if (cw_mesh_type /= "None" .and. cw_mesh_type /= hscr_file(ifile)%cw_mesh_type) then
+       ABI_ERROR(sjoin("Cannot merge cw_mesh_type:", cw_mesh_type, " with: ", hscr_file(ifile)%cw_mesh_type))
+     end if
+     cw_mesh_type = hscr_file(ifile)%cw_mesh_type
+   end if
+ end do ! ifile
 
  do ifile=2,nfiles
 
@@ -2138,18 +2164,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
    ABI_CHECK_IEQ(hscr_file(ifile)%test_type, hscr_file(1)%test_type, "Different test_type")
    ABI_CHECK_IEQ(hscr_file(ifile)%tordering, hscr_file(1)%tordering, "Different tordering")
    ABI_CHECK_IEQ(hscr_file(ifile)%gwgamma, hscr_file(1)%gwgamma, "Different gwgamma")
-
-   ! Check that w-meshes are the same.
-   if (hscr_file(ifile)%rw_mesh_type /= hscr_file(1)%rw_mesh_type) then
-     ABI_ERROR(sjoin('different rw_mesh_type:', hscr_file(ifile)%rw_mesh_type, hscr_file(1)%rw_mesh_type))
-   end if
-   if (hscr_file(ifile)%iw_mesh_type /= hscr_file(1)%iw_mesh_type) then
-     ABI_ERROR(sjoin('different iw_mesh_type:', hscr_file(ifile)%iw_mesh_type, hscr_file(1)%iw_mesh_type))
-   end if
-   if (hscr_file(ifile)%cw_mesh_type /= hscr_file(1)%cw_mesh_type) then
-     ABI_ERROR(sjoin('different cw_mesh_type:', hscr_file(ifile)%cw_mesh_type, hscr_file(1)%cw_mesh_type))
-   end if
- end do
+ end do ! ifile
 
  ! nfreq_tot here is the total *possible* number of freqs.
  nfreq_tot = 0
@@ -2298,13 +2313,17 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  call Hscr_file(1)%copy(ohscr)
 
  ! TODO: hscr_wmerge
- ! Then modify entries for new frequency grid
+ ! Then modify entries for new frequency grid.
  ohscr%nomega = nfreq_tot
 
  ABI_REMALLOC(ohscr%omega, (nfreq_tot))
  ABI_REMALLOC(ohscr%omega_wgs, (nfreq_tot))
  ohscr%omega = omega_storage(1:nfreq_tot)
  ohscr%omega_wgs = omega_wgs_storage
+
+ ohscr%rw_mesh_type = rw_mesh_type
+ ohscr%iw_mesh_type = iw_mesh_type
+ ohscr%cw_mesh_type = cw_mesh_type
 
  npwe4mI = ohscr%npwe*ohscr%nI
  npwe4mJ = ohscr%npwe*ohscr%nJ
