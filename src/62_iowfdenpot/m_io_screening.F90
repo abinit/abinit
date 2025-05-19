@@ -2102,7 +2102,8 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  integer :: nfreq_tot,nfreqre,nfreqim,ifrq,npwe4mI,npwe4mJ,ierr, mod10, order
  character(len=500) :: msg
  logical :: skip
- character(len=nctk_slen) :: varname, rw_mesh_type, iw_mesh_type, cw_mesh_type
+ character(len=nctk_slen) :: varname
+ character(len=etsfio_charlen) :: rw_mesh_type, iw_mesh_type, cw_mesh_type
  type(abifile_t) :: abifile
 !arrays
  integer,allocatable :: freq_indx(:,:),ifile_indx(:),pos_indx(:),i_temp(:),i2_temp(:,:)

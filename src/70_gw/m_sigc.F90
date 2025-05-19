@@ -164,7 +164,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp2=2,ndat1=1
- integer :: npw_k,iab,ib,ib1,ib2,ierr,ig,ii,iik,itim_q,i1,i2,npls
+ integer :: npw_k,iab,ib,ib1,ib2,ierr,ig,ii,iik,itim_q,i1,i2,npls,ib_sum
  integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: band,band1,band2,idle,rank,jik,jk_bz,jk_ibz,kb,nspinor
  integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc
@@ -185,12 +185,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer,allocatable :: proc_distrb(:,:,:),extrapolar_distrb(:,:,:,:),degtab(:,:,:)
  integer,allocatable :: igfftcg0(:),gw_gfft(:,:),gw_gbound(:,:),irottb(:,:),ktabr(:,:)
  integer,allocatable :: igfftfcg0(:),gboundf(:,:),ktabrf(:,:),npoles_missing(:)
- real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),omegap(epsm1%nomega_i),omegap2(epsm1%nomega_i),q0(3),tsec(2),qbz(3)
- real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i)
+ real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),q0(3),tsec(2),qbz(3)
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
+ real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i), omegap(epsm1%nomega_i), omegap2(epsm1%nomega_i)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
- complex(gwpc) :: sigcohme(Sigp%nsig_ab)
+ complex(gwpc) :: sigcohme(Sigp%nsig_ab), omegap_cplx(epsm1%nomega_i)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
  complex(gwpc),allocatable :: botsq_conjg_transp(:,:)
  complex(gwpc),pointer, contiguous :: ac_epsm1cqwz2(:,:,:) => null()
@@ -465,6 +465,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
    case ("minimax")
      ! Nothing to do at this level
+     omegap_cplx(:) = epsm1%omega(epsm1%nomega_r+1: epsm1%nomega_r+epsm1%nomega_i)
+     !write(std_out,*) "omegap_cplx", omegap_cplx
+     !omegap2(:) = zero
+     !write(std_out,*)"omega_i", Sr%omega_i(:)
 
    case default
      ABI_ERROR(sjoin("Invalid iw_mesh_type:" , epsm1%hscr%iw_mesh_type))
@@ -484,9 +488,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! sigcme2 is used to accumulate the diagonal matrix elements over k-points and
  ! GW bands, used only in case of ppmodel 3 and 4 (TODO save memory)
  nomega_tot = Sr%nomega_r + Sr%nomega4sd
- ABI_CALLOC(sigcme2, (nomega_tot,ib1:ib2))
+ ABI_CALLOC(sigcme2, (nomega_tot, ib1:ib2))
  ABI_CALLOC(sigcme_3, (nomega_tot))
- ABI_CALLOC(sigctmp,(nomega_sigc,Sigp%nsig_ab))
+ ABI_CALLOC(sigctmp,(nomega_sigc, Sigp%nsig_ab))
  if (mod10 /= SIG_GW_AC) then
    ABI_MALLOC(sigc_ket, (npwc*nspinor, nomega_sigc))
  end if
@@ -752,6 +756,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            ! Eliminate the spurious positive eigenvalues that may occur in harsh conditions.
            neig(iiw) = MIN(COUNT(epsm1_eig(:) < -1.0e-10_dp), neigmax)
+           !write(std_out, *) "neig(iiw): ", neig(iiw), ", neigmax: ", neigmax
 
            do ilwrk=1,neig(iiw)
              ac_epsm1cqwz2(:,ilwrk,iiw) = ac_epsm1cqwz2(:,ilwrk,iiw) * SQRT( -epsm1_eig(ilwrk) )
@@ -797,21 +802,21 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
      ! Sum over band
      call timab(445,1,tsec) ! loop
-     do ib=1,Sigp%nbnds
+     do ib_sum=1,Sigp%nbnds
 
        ! Parallelism over spin. This processor has this k-point but what about spin?
-       if (proc_distrb(ib,ik_bz,spin) /= wfd%my_rank) CYCLE
+       if (proc_distrb(ib_sum,ik_bz,spin) /= wfd%my_rank) CYCLE
 
-       call wfd%get_ur(ib, ik_ibz, spin, ur_ibz)
+       call wfd%get_ur(ib_sum, ik_ibz, spin, ur_ibz)
 
        if (Psps%usepaw==1) then
          ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
-         call Wfd%get_cprj(ib,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+         call Wfd%get_cprj(ib_sum, ik_ibz, spin, Cryst, Cprj_ksum, sorted=.FALSE.)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
          if (Dtset%pawcross==1) then
-           call Wfdf%paw_get_aeur(ib,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+           call Wfdf%paw_get_aeur(ib_sum,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
                                   ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          end if
        end if
@@ -819,7 +824,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call timab(436,2,tsec) ! (1)
        call timab(437,1,tsec) ! rho_tw_g
 
-       ! Get all <k-q,ib,s|e^{-i(q+G).r}|s,jb,k>, at once
+       ! Get all <k-q,ib_sum,s|e^{-i(q+G).r}|s,jb,k>, at once
        do jb=ib1,ib2
 
          call rho_tw_g(nspinor,npwc,gwc_nfftot,ndat1,gwc_ngfft,1,use_padfft,igfftcg0,gw_gbound,&
@@ -852,19 +857,19 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! === Treat analytically the case q --> 0 ===
          ! * The oscillator is evaluated at q=O as it is considered constant in the small cube around Gamma
          !   while the Colulomb term is integrated out.
-         ! * In the scalar case we have nonzero contribution only if ib==jb
-         ! * For nspinor==2 evalute <ib,up|jb,up> and <ib,dwn|jb,dwn>,
+         ! * In the scalar case we have nonzero contribution only if ib_sum==jb
+         ! * For nspinor==2 evalute <ib_sum,up|jb,up> and <ib_sum,dwn|jb,dwn>,
          !   impose orthonormalization since npwwfn might be < npwvec.
          if (ik_bz==jk_bz) then
            if (nspinor==1) then
              rhotwg_ki(1,jb)=czero_gw
-             if (ib==jb) rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
+             if (ib_sum==jb) rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp)
 
            else
              npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwc+1, jb) = zero
-             if (ib==jb) then
-               ABI_CHECK(Wfd%get_wave_ptr(ib, ik_ibz, spin, wave_sum, msg) == 0, msg)
+             if (ib_sum == jb) then
+               ABI_CHECK(Wfd%get_wave_ptr(ib_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
                cg_sum => wave_sum%ug
                ABI_CHECK(Wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
                cg_jb  => wave_jb%ug
@@ -878,12 +883,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          end if
        end do !jb  Got all matrix elements from minbnd up to maxbnd.
 
-       theta_mu_minus_e0i=fact_spin*qp_occ(ib,ik_ibz,spin)
+       theta_mu_minus_e0i=fact_spin*qp_occ(ib_sum,ik_ibz,spin)
 
        ! Starting point to evaluate the derivative of Sigma and the Spectral function
-       e0i=qp_ene(ib,ik_ibz,spin)
+       e0i=qp_ene(ib_sum,ik_ibz,spin)
 
-       ! Frequencies for the spectral function, e0i=qp_ene(ib,ik_ibz,spin)
+       ! Frequencies for the spectral function, e0i=qp_ene(ib_sum,ik_ibz,spin)
        ! FIXME the interval is not centered on eoi ! WHY?
        if (Sr%nomega_r>0) omegame0i(1:Sr%nomega_r)=DBLE(Sr%omega_r(1:Sr%nomega_r))-e0i
 
@@ -904,7 +909,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Get the upper part of rhotw_epsm1_rhotw that is hermitian by construction
            do jb=minbnd,maxbnd
              do kb=jb+1,maxbnd
-               rhotw_epsm1_rhotw(jb,kb,iiw) = CONJG( rhotw_epsm1_rhotw(kb,jb,iiw) )
+               rhotw_epsm1_rhotw(jb,kb,iiw) = CONJG(rhotw_epsm1_rhotw(kb,jb,iiw))
              end do
            end do
            ABI_FREE(epsm1_sqrt_rhotw)
@@ -1073,12 +1078,27 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              sigctmp(:,:) = czero_gw
              do iab=1,Sigp%nsig_ab
                do io=1,nomega_sigc
-                 omegame0i_ac  = Sr%omega_i(io)-qp_ene(ib,ik_ibz,spin)
-                 omegame0i2_ac = omegame0i_ac*omegame0i_ac
-                 do iiw=1,epsm1%nomega_i
-                   sigctmp(io,iab) = sigctmp(io,iab) + piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac &
-                                                      / (omegame0i2_ac + omegap2(iiw))
-                 end do
+                 omegame0i_ac  = Sr%omega_i(io) - qp_ene(ib_sum,ik_ibz,spin)
+
+                 select case (epsm1%hscr%iw_mesh_type)
+                 case ("gauss_legendre")
+                   omegame0i2_ac = omegame0i_ac*omegame0i_ac
+                   do iiw=1,epsm1%nomega_i
+                     sigctmp(io,iab) = sigctmp(io,iab) + &
+                       piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + omegap2(iiw))
+                   end do
+
+                 case ("minimax")
+                   do iiw=1,epsm1%nomega_i
+                     ! TODO: Recheck the piinv / two factor, Also we may have a minus sign here.
+                     sigctmp(io,iab) = sigctmp(io,iab) + &
+                       (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
+                          (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw))) )
+                   end do
+
+                 case default
+                   ABI_ERROR(sjoin("Invalid iw_mesh_type:", epsm1%hscr%iw_mesh_type))
+                 end select
                end do
              end do
 
@@ -1094,7 +1114,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            if (Sigp%gwcomp==1) then
              ! Evaluate Extrapolar term TODO this does not work with spinor
              if (extrapolar_distrb(jb,kb,ik_bz,spin) == Wfd%my_rank ) then
-               ! Do it once as it does not depend on the ib index being summed over.
+               ! Do it once as it does not depend on the ib_sum index being summed over.
                extrapolar_distrb(jb,kb,ik_bz,spin) = xmpi_undefined_rank
 #if 1
                call calc_wfwfg(ktabr(:,jk_ibz),jik, spinrot_kgw, & ! TODO: why jk_ibz?
@@ -1154,7 +1174,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
          call timab(439,2,tsec) ! csigme(SigC)
        end do !kb to calculate matrix elements of $\Sigma$
-     end do !ib
+     end do !ib_sum
 
      call timab(445,2,tsec) ! csigme(SigC)
      if (print_time) then
