@@ -234,8 +234,8 @@ program mrgscr
 
      write(std_out,'(2a)') ch10,' Enter freqremax [eV] for the merged file (Enter 0 to use all freq. found):'
      read(std_in,*)freqremax
-
      freqremax = freqremax/Ha_eV; if (freqremax<tol16) freqremax = HUGE(freqremax)
+
      call ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, hscr_merge)
 
    case default

@@ -1071,7 +1071,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  else if (Ep%contour_deformation.and. Ep%nomegaei /= 0) then
    ! This is the default for CD. see calc_sigc_cd for the integration routine.
-   ep%iw_mesh_type = "log_mesh"
+   ep%iw_mesh_type = "logarithmic"
    e0=Dtset%ppmfrq; if (e0<0.1d-4) e0=omegaplasma
    do iomega=1,Ep%nomegaei
      Ep%omega(Ep%nomegaer+iomega)=CMPLX(zero,e0/(Dtset%freqim_alpha-two)&
