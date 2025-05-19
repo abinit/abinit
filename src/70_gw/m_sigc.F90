@@ -463,8 +463,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ABI_ERROR(msg)
      end if
 
-   case ("minimax")
-     ! Nothing to do at this level
+   !case ("minimax")
+   !  ! Nothing to do at this level
 
    case default
      ABI_ERROR(sjoin("Invalid iw_mesh_type:" , epsm1%hscr%iw_mesh_type))
@@ -711,6 +711,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          call epsm1%rotate_iqbz(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, .TRUE.)
        end if
 
+       ABI_CHECK(.not. epsm1%use_mpi_shared_win, "shared")
+
        if (mod10 == SIG_GW_AC) then
          call timab(444,1,tsec)
          ! ac_lrk_diag
@@ -724,7 +726,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            if (.not. epsm1%use_mpi_shared_win) then
              ! Use the MPI procs in wfd%comm to parallelize over iw'.
-             if (dtset%gwpara == 2 .and. MODULO(iiw-1, Wfd%nproc) /= Wfd%my_rank) CYCLE
+             if (dtset%gwpara == 2 .and. MODULO(iiw-1, Wfd%nproc) /= Wfd%my_rank) then
+               ac_epsm1cqwz2(:,:,iiw) = zero
+               CYCLE
+             end if
            else
              ! Use the MPI procs in shared_comm to parallelize over iw'.
              if (dtset%gwpara == 2 .and. epsm1%shared_comm%skip(iiw-1)) CYCLE
@@ -737,8 +742,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              z2 = gl_knots(iiw)*gl_knots(iiw)
              ac_epsm1cqwz2(:,:,iiw) = gl_wts(iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw) / z2
 
-           case ("minimax")
-             ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
+           !case ("minimax")
+           !  ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
 
            case default
              ABI_ERROR(sjoin("Invalid iw_mesh_type:", epsm1%hscr%iw_mesh_type))
@@ -753,7 +758,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            do ilwrk=1,neig(iiw)
              ac_epsm1cqwz2(:,ilwrk,iiw) = ac_epsm1cqwz2(:,ilwrk,iiw) * SQRT( -epsm1_eig(ilwrk) )
            end do
-         end do
+         end do ! iiw
 
          ABI_FREE(epsm1_eig)
 
