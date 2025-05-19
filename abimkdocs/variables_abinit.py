@@ -1564,7 +1564,7 @@ In some cases, $n_i$ is set to 0:
 
   * if the band $i$ is in the buffer (see [[nbdbuf]])
 
-  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_minocc]]
+  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_min_occ]]
 
 The resulting degree applied to all bands could be 0, for example if the wave-functions are already converged.
 In that case no filter is applied, but the Rayleigh-Ritz procedure is done anyway.
@@ -25561,7 +25561,7 @@ This parameter controls the convergence rate of the wave-functions when using th
 ),
 
 Variable(
-    abivarname="oracle_minocc",
+    abivarname="oracle_min_occ",
     varset="gstate",
     vartype="real",
     topics=['TuningSpeedMem_expert'],
