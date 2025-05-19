@@ -1690,8 +1690,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    case (1, 2)
      ! ALDA TDDFT kernel vertex
-     !ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
-     ABI_CHECK(epsm1%ID==0, "epsm1%ID should be 0")
+     ABI_CHECK(epsm1%ID == 0, "epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then
        ! If we have PAW, we need the full density on the fine grid
@@ -1711,12 +1710,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
-     end if ! Dtset%usepaw==1
+     end if ! usepaw==1
 
      id_required=4; ikxc=7; approx_type=1; dim_kxcg=1
      if (Dtset%gwgamma==1) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
      if (Dtset%gwgamma==2) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
+     ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
      dbg_mode=.FALSE.
      if (Dtset%usepaw==1) then
@@ -1731,11 +1730,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    case (3, 4)
      ! ADA non-local kernel vertex
-     !ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      ABI_CHECK(epsm1%ID==0, "epsm1%ID should be 0")
-     ABI_CHECK(Sigp%nsppol==1,"ADA vertex for GWGamma not available yet for spin-polarised cases")
+     ABI_CHECK(Sigp%nsppol==1, "ADA vertex for GWGamma not available yet for spin-polarised cases")
 
-     if (Dtset%usepaw==1) then ! If we have PAW, we need the full density on the fine grid
+     if (Dtset%usepaw==1) then
+       ! If we have PAW, we need the full density on the fine grid
        ABI_MALLOC(ks_aepaw_rhor,(nfftf,Sigp%nsppol))
        if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
          ABI_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
@@ -1786,7 +1785,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    case (-3, -4, -5, -6, -7, -8)
      ! bootstrap kernels
-     ! ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
      ABI_CHECK(epsm1%ID==0,"epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then
@@ -1827,7 +1825,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    case (-11)
      !LR+ALDA kernel
-     !ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
      ABI_CHECK(epsm1%ID==0,"epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then
@@ -1865,17 +1862,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    my_plsmf = drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf = Dtset%ppmfrq
    Dtset%ppmfrq = my_plsmf
 
-   !if(dtset%ucrpa==0) then
    if (Dtset%gwgamma < 3) then
      call epsm1%mkdump(Vcp,epsm1%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
-                    approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
-                    nfftf_tot,ngfftf,comm)
+                       approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
+                       nfftf_tot,ngfftf,comm)
    else
      call epsm1%mkdump(Vcp,epsm1%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
-                    approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
-                    nfftf_tot,ngfftf,comm,fxc_ADA)
+                       approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
+                       nfftf_tot,ngfftf,comm,fxc_ADA=fxc_ADA)
    end if
-   !end if
    ABI_SFREE(kxcg)
    ABI_SFREE(fxc_ADA)
    ABI_SFREE(ks_aepaw_rhor)

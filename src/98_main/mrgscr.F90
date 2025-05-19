@@ -614,7 +614,7 @@ program mrgscr
      end if
 
      call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,&
-                  Hscr0%npwe,nqlwl,qlwl,comm)
+                   Hscr0%npwe,nqlwl,qlwl,comm)
      ABI_FREE(qlwl)
 
      ! Get the density from an external file ===
@@ -668,7 +668,7 @@ program mrgscr
      call epsm1%mkdump(Vcp,epsm1%npwe,Gsphere%gvec,dim_kxcg,kxcg,id_required,approx_type,ikxc,option_test,&
                        fname_dump,iomode,nfft,ngfft,comm)
      epsm1%mqmem=1
-     call epsm1%print()
+     call epsm1%print([std_out], 0)
 
      write(std_out,'(2a)',advance='no') ch10,' Would you like to calculate the eigenvalues of eps^{-1}_GG''(omega) [Y/N] ? '
      read(std_in,*) ans
