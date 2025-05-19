@@ -776,7 +776,7 @@ subroutine hscr_print(Hscr, units, prtvol, header)
  call wrtout(units,msg)
  write(msg,'(a,i8)') ' Treatment of q-->0 limit  ',hscr%inclvkb
  call wrtout(units,msg)
- write(msg,'(a,i8)') ' headform                  ',hscr%headform
+ write(msg,'(a,i8)') '- headform                  ',hscr%headform
  call wrtout(units,msg)
  write(msg,'(a,i8)') ' fform                     ',hscr%fform
  call wrtout(units,msg)
@@ -809,12 +809,12 @@ subroutine hscr_print(Hscr, units, prtvol, header)
  write(msg,'(a,es16.6)')' Complex Imaginary Shift    ',hscr%zcut
  call wrtout(units,msg)
  !TODO
- !write(msg,'(2a)')      ' rw_mesh_type    ',trim(hscr%rw_mesh_type)
- !call wrtout(units,msg)
- !write(msg,'(2a)')      ' iw_mesh_type    ',trim(hscr%iw_mesh_type)
- !call wrtout(units,msg)
- !write(msg,'(2a)')      ' cw_mesh_type    ',trim(hscr%cw_mesh_type)
- !call wrtout(units,msg)
+ write(msg,'(2a)')      ' rw_mesh_type    ',trim(hscr%rw_mesh_type)
+ call wrtout(units,msg)
+ write(msg,'(2a)')      ' iw_mesh_type    ',trim(hscr%iw_mesh_type)
+ call wrtout(units,msg)
+ write(msg,'(2a)')      ' cw_mesh_type    ',trim(hscr%cw_mesh_type)
+ call wrtout(units,msg)
 
  if (prtvol == 0) then
    call wrtout(units,' The header contains additional records.')
