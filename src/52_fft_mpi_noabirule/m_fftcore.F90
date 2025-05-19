@@ -721,7 +721,8 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
  integer,parameter :: maxpow3 =6       ! int(log(largest_ngfft+half)/log(three))
  integer,parameter :: maxpow5 =6       ! int(log(largest_ngfft+half)/log(five))
 !#if defined HAVE_FFTW3 || defined HAVE_DFTI
-#ifdef _GMATTEO_WHISH_LIST
+!#ifdef _GMATTEO_WHISH_LIST
+#if 0
  integer,parameter :: maxpow7 =5       ! FFTW3 and DFTI support powers of 7 and 11
  integer,parameter :: maxpow11=4
 #else
