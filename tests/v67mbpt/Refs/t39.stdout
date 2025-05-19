@@ -44,8 +44,8 @@
  Scissor Energy                 0.000000E+00
  Spectral smearing              1.000000E-01
  Complex Imaginary Shift        3.674933E-03
- rw_mesh_type    None
- iw_mesh_type    None
+ rw_mesh_type    linear
+ iw_mesh_type    logarithmic
  cw_mesh_type    None
 
  q-points [r.l.u.]:
@@ -171,8 +171,8 @@
  Scissor Energy                 0.000000E+00
  Spectral smearing              1.000000E-01
  Complex Imaginary Shift        3.674933E-03
- rw_mesh_type    None
- iw_mesh_type    None
+ rw_mesh_type    linear
+ iw_mesh_type    logarithmic
  cw_mesh_type    None
 
  q-points [r.l.u.]:
