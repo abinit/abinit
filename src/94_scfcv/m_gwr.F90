@@ -154,7 +154,7 @@ module m_gwr
  use m_copy,          only : alloc_copy
  use m_geometry,      only : normv, vdotw
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa, string_in, yesno
- use m_sort,          only : sort_dp, sort_rvals, sort_gvecs
+ use m_sort,          only : sort_rvals, sort_gvecs
  use m_krank,         only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_crystal,       only : crystal_t
  use m_dtset,         only : dataset_type

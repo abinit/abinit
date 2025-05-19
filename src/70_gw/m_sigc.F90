@@ -177,7 +177,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in, z2,en_high,gw_gsq,w_localmax,w_max
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT, q_is_gamma, print_time
- character(len=500) :: msg, iw_mesh_type
+ character(len=500) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
  complex(gwpc),allocatable :: botsq(:,:),otq(:,:),eig(:,:)
 !arrays
@@ -296,8 +296,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      write(msg,'(a34,i9)')'Constructing Sigma_c(iw) for k = ',ikcalc
      call wrtout(units, msg)
    end if
-
-   iw_mesh_type = "gauss_legendre"
 
    write(msg,'(3a,i0,a,i0)')&
      ' Using a low-rank formula for AC', ch10, &
@@ -437,7 +435,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation.
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i))
 
-   select case (iw_mesh_type)
+   select case (epsm1%hscr%iw_mesh_type)
    case ("gauss_legendre")
      call coeffs_gausslegint(zero, one, gl_knots, gl_wts, epsm1%nomega_i)
 
@@ -460,7 +458,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      if (ierr /= 0) then
        write(std_out, *)"epsm1%nomega_r:", epsm1%nomega_r, "epsm1%nomega_i:", epsm1%nomega_i
        write(msg,'(3a)')&
-         'Frequencies in the SCR file are not compatible with the analytic continuation and gauss-legendre.',ch10,&
+         'Frequencies in the SCR file are not compatible with the analytic continuation with gauss-legendre mesh.',ch10,&
          'Verify the frequencies in the SCR file. '
        ABI_ERROR(msg)
      end if
@@ -469,7 +467,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ! Nothing to do at this level
 
    case default
-     ABI_ERROR(sjoin("Invalid iw_mesh_type:" , iw_mesh_type))
+     ABI_ERROR(sjoin("Invalid iw_mesh_type:" , epsm1%hscr%iw_mesh_type))
    end select
 
    if (epsm1%use_mpi_shared_win) then
@@ -732,18 +730,18 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              if (dtset%gwpara == 2 .and. epsm1%shared_comm%skip(iiw-1)) CYCLE
            end if
 
-           select case (iw_mesh_type)
+           select case (epsm1%hscr%iw_mesh_type)
            case ("gauss_legendre")
              ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
              ! The first frequencies are always real, skip them.
              z2 = gl_knots(iiw)*gl_knots(iiw)
              ac_epsm1cqwz2(:,:,iiw) = gl_wts(iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw) / z2
 
-           !case ("minimax")
-           !  ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
+           case ("minimax")
+             ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
 
            case default
-             ABI_ERROR(sjoin("Invalid iw_mesh_type:", iw_mesh_type))
+             ABI_ERROR(sjoin("Invalid iw_mesh_type:", epsm1%hscr%iw_mesh_type))
            end select
 
            ! (epsm1-1) has negative eigenvalues, after diago, they will be sorted starting from the most negative.
@@ -1084,6 +1082,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                  end do
                end do
              end do
+
            else
              do iab=1,Sigp%nsig_ab
                spadc1 = spinor_padc(1, iab); spadc2 = spinor_padc(2, iab)

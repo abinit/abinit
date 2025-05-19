@@ -26,6 +26,7 @@ module m_gwdefs
  use m_errors
 
  use m_fstrings, only : sjoin, itoa
+ use m_nctk,     only : etsfio_charlen
 
  implicit none
 
@@ -273,7 +274,7 @@ module m_gwdefs
   ! (nomega)
   ! Weights for numerical integration, used for instance for minimax meshes.
 
-  character(len=500) :: iw_mesh_type="None", rw_mesh_type="None", cw_mesh_type="None"
+  character(len=etsfio_charlen) :: iw_mesh_type="None", rw_mesh_type="None", cw_mesh_type="None"
   ! String defining the kind of sampling for imaginary (iw), real (rw) and complex (cw) frequencies
 
  contains

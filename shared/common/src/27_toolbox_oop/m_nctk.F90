@@ -28,11 +28,11 @@
 
 MODULE m_nctk
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_build_info
  use m_errors
- use, intrinsic :: iso_c_binding
  use m_xmpi
  use netcdf
 

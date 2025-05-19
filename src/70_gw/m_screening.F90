@@ -1992,9 +1992,9 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
    end do ! iw
 
-   call xmpi_sum(epsm_lf, comm,ierr )
-   call xmpi_sum(epsm_nlf,comm,ierr)
-   call xmpi_sum(eelf,    comm,ierr)
+   call xmpi_sum(epsm_lf, comm, ierr)
+   call xmpi_sum(epsm_nlf,comm, ierr)
+   call xmpi_sum(eelf,    comm, ierr)
    ABI_FREE(buffer_lwing)
    ABI_FREE(buffer_uwing)
  end if
