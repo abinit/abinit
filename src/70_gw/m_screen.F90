@@ -904,7 +904,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    if (endswith(screen%fname, ".nc")) screen%iomode = IO_MODE_ETSF
    call hscr%from_file(screen%fname, fform, comm)
    ! Echo of the header
-   if (my_rank == master .and. screen%prtvol > 0) call hscr%print()
+   if (my_rank == master .and. screen%prtvol > 0) call hscr%print([std_out], 0)
 
    mat_type_read = Hscr%id
    nqlwl         = Hscr%nqlwl

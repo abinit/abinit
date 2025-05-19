@@ -198,7 +198,7 @@ program mrgscr
    is_scr = abifile%class == "epsm1"
    is_sus = abifile%class == "polariz"
 
-   call Hscr_file(ifile)%print(unit=std_out,prtvol=1)
+   call Hscr_file(ifile)%print([std_out], 1)
 
    if (ifile == 1) call metric(gmet,gprimd,-1,rmet,Hscr_file(ifile)%Hdr%rprimd,ucvol)
  end do !ifile
