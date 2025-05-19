@@ -916,15 +916,18 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
    
     write(std_out,*) 'calling runSlice from rank and subrank', xmpi_comm_rank(slice%spacecom), xmpi_comm_rank(comm)
  
-    write(std_out,*) 'getid before runSlice X0_active', xgBlock_getId(X0_active)
+    !write(std_out,*) 'getid before runSlice X0_active', xgBlock_getId(X0_active)
     
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
 
-    write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
+    !write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
 
     write(std_out,*) 'chebfi%eigenvalues converged='
     call xgBlock_print(chebfi%eigenvalues,std_out)
+
+    write(std_out,*) 'eigen (written to output) converged='
+    call xgBlock_print(eigen,std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -1261,11 +1264,12 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
             ndeg = slice%ndeg_filter
             f_u = cheb_poly(part_upp,ndeg,poly_upp,slice%maxeig_global)
             f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
-            do while( (f_u/f_uw < ramp) .and. (ndeg < ndeg_max) )
-                ndeg = ndeg + 1
-                f_u = cheb_poly(part_upp,ndeg,poly_upp,slice%maxeig_global)
-                f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
-            end do
+            !do while( (f_u/f_uw < ramp) .and. (ndeg < ndeg_max) )
+            !    ndeg = ndeg + 1
+            !    f_u = cheb_poly(part_upp,ndeg,poly_upp,slice%maxeig_global)
+            !    f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
+            !end do
+            write(std_out,*) 'first slice amplif factor f(out)/f(in)=', f_uw / f_u 
         else
             ! Amplification ratio is f(l)/f(l-w) and f(u)/f(u+w)
             lw = (poly_low - center)/radius ! scaled point outside slice
@@ -1275,12 +1279,13 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
             ndeg = 4
             f_l = 0.d0; f_u = 0.d0; f_lw = 1.d0; f_uw = 1.d0
             do while ( (f_l/f_lw < ramp) .and. (f_u/f_uw < ramp) .and. (ndeg < ndeg_max) )
+                ndeg = ndeg + 1
                 f_l  = bandpassIndicator_sca(l ,lw,uw,ndeg)
                 f_lw = bandpassIndicator_sca(lw,lw,uw,ndeg)
                 f_u  = bandpassIndicator_sca(u ,lw,uw,ndeg)
                 f_uw = bandpassIndicator_sca(uw,lw,uw,ndeg)
-                ndeg = ndeg + 1
             end do
+            write(std_out,*) 'left/right amplif factor f(out)/f(in)=', f_lw/f_l, f_uw/f_u
         end if
 
         ! Plot filter in interval [glb, ub) (set manually because depends on the case)
@@ -1552,7 +1557,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
  
     ! *********************************************************************
 
-    write(std_out,*) 'eigen converged='
+    write(std_out,*) 'eigen (read from input) converged='
     call xgBlock_print(eigen,std_out)
 
     ! Two ways to get slice eigenvalues to filter
@@ -1592,6 +1597,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
                 call xgBlock_setBlock(resid_ext%self, resid_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
                 call xgBlock_copy(eigen, eigen_ext_slice)
                 call xgBlock_copy(resid, resid_ext_slice)
+
+                write(std_out,*) 'eigen_ext_slice after copy='
+                call xgBlock_print(eigen_ext_slice,std_out)
             end if
     
             ! All processes wait to finish copying before summing 
@@ -1619,6 +1627,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         call xgBlock_copy_from_gpu(eigen_ext%self)
         call xgBlock_copy_from_gpu(resid_ext%self)
     end if
+
+    write(std_out,*) 'eigen_ext_slice after comm='
+    call xgBlock_print(eigen_ext%self,std_out)
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen_ext%self, theta_ext, rows=1, cols=slice%neigenpairs_ext)
