@@ -5,9 +5,9 @@ Version 10.4, released on May 15, 2025.
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
-<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1169,
+<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175,
 EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had alreacy been included in v10.2,
-and EXCEPT MR1160, 1165 and 1168, that will be included in v10.6 .
+and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .
 For later releases v10.4, the list of MR is to be completed. -->
 <!-- (with some late contributions until XXX 2024). -->
 
@@ -336,12 +336,12 @@ By A. Blanchet (MR1121, MR1135).
 
 **B.15** Degree of filtering and its oracle in Chebyshev algorithm
 
-The [[mdeg_filter]] input variable for spectrum filtering algorithms has been defined, for spectrum filtering algorithms.
-Moreover, it can be automatically  computed:
-[[chebfi_oracle]], [[oracle_factor]] and oracle_min_occ (TO BE DOCUMENTED) can be used to activate and control the
+The [[mdeg_filter]] input variable for spectrum filtering algorithms has been defined.
+Moreover, it can be automatically computed:
+[[chebfi_oracle]], [[oracle_factor]] and [[oracle_min_occ]] can be used to activate and control the
 computation of [[mdeg_filter]] parameter from the residuals.
 
-See [[test:v10_07]] to [[test:v10_10]] and [[test:paral_34]].
+See [[test:v10_07]] to [[test:v10_09]] and [[test:paral_34]].
 
 Also, the residuals in chebfi and lobpcg ([[wfoptalg]]==114 and 111) have been corrected, which solves the issue #168 (closed).
 The timing in chebfi has been corrected.
