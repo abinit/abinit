@@ -783,8 +783,8 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              open(unit=unitselfrot(im,ispinor,isppol,iatom),file=trim(tmpfilrot),status='unknown',form='formatted')
 #endif
              rewind(unitselfrot(im,ispinor,isppol,iatom))
-             write(unitselfrot(im,ispinor,isppol,iatom),*) "#  Diagonal component of the self-energy, in the basis that diagonalizes the electronic levels.", &
-                                                         & "#       Frequency (Ha)              Real part              Imaginary part"
+             write(unitselfrot(im,ispinor,isppol,iatom),'(3a)') "#  Diagonal component of the self-energy, in the basis that diagonalizes the electronic levels.", &
+                                                         & ch10,"#       Frequency (Ha)              Real part              Imaginary part"
 
            end do ! im
          end do ! ispinor
