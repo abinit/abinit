@@ -480,7 +480,6 @@ else()
 endif()
 
 if(Libxc_FOUND)
-  add_compile_definitions(HAVE_LIBXC)
   set(HAVE_LIBXC 1)
 endif()
 
