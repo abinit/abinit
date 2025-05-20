@@ -48,6 +48,7 @@ endif()
 if(ABINIT_ENABLE_GPU_CUDA)
   target_link_libraries(17_gpu_toolbox
     PUBLIC
+    CUDA::cudart
     CUDA::cufft
     CUDA::cublas
     CUDA::cusolver
