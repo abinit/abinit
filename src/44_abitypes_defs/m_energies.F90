@@ -34,7 +34,7 @@ module m_energies
  private
 
 !public parameter
- integer, public, parameter :: n_energies=46
+ integer, public, parameter :: n_energies=48
 
 !!***
 
@@ -207,6 +207,12 @@ module m_energies
   real(dp) :: e_zeeman=zero
    ! Zeeman spin times magnetic field contribution to the XC energy
 
+  real(dp) :: e_cpaw=zero
+   ! PAW core energy
+
+  real(dp) :: e_cpawdc=zero
+   ! PAW core double-counting energy
+
  end type energies_type
 
 !public procedures.
@@ -292,6 +298,8 @@ subroutine energies_init(energies)
  energies%e_xc_vdw      = zero
  energies%h0            = zero
  energies%e_zeeman      = zero
+ energies%e_cpaw        = zero
+ energies%e_cpawdc      = zero
 
 end subroutine energies_init
 !!***
@@ -371,6 +379,8 @@ end subroutine energies_init
  energies_out%e_xc_vdw             = energies_in%e_xc_vdw
  energies_out%h0                   = energies_in%h0
  energies_out%e_zeeman             = energies_in%e_zeeman
+ energies_out%e_cpaw               = energies_in%e_cpaw
+ energies_out%e_cpawdc             = energies_in%e_cpawdc
 
 end subroutine energies_copy
 !!***
@@ -457,6 +467,8 @@ end subroutine energies_copy
    energies_array(44)=energies%h0
    energies_array(45)=energies%e_zeeman
    energies_array(46)=energies%e_nucdip
+   energies_array(47)=energies%e_cpaw
+   energies_array(48)=energies%e_cpawdc
  end if
 
  if (option==-1) then
@@ -506,6 +518,8 @@ end subroutine energies_copy
    energies%h0                   = energies_array(44)
    energies%e_zeeman             = energies_array(45)
    energies%e_nucdip             = energies_array(46)
+   energies%e_cpaw               = energies_array(47)
+   energies%e_cpawdc             = energies_array(48)
  end if
 
 end subroutine energies_to_array
@@ -598,6 +612,7 @@ end subroutine energies_to_array
    if (positron) eint=eint+energies%e0_electronpositron+energies%e_electronpositron
    if(abs(energies%e_extfpmd)>tiny(0.0_dp)) eint=eint+energies%e_extfpmd
    if (dtset%usedmft==1) eint = eint + energies%e_hu - energies%e_dc
+   if(abs(energies%e_cpaw)>tiny(0.0_dp)) eint=eint+energies%e_cpaw
  end if
  if (optdc>=1) then
    eintdc = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
@@ -611,6 +626,7 @@ end subroutine energies_to_array
 &   +energies%e0_electronpositron+energies%e_electronpositron
    if(abs(energies%e_extfpmd)>tiny(0.0_dp)) eintdc=eintdc+energies%edc_extfpmd
    if (dtset%usedmft==1) eintdc = eintdc + energies%e_hu - energies%e_dc
+   if(abs(energies%e_cpawdc)>tiny(0.0_dp)) eintdc=eintdc+energies%e_cpawdc
  end if
 
 end subroutine energies_eval_eint
@@ -655,7 +671,7 @@ subroutine energies_ncwrite(enes, ncid)
   "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
   "e_paw", "e_pawdc", "e_pawxc", "e_sicdc", "e_vdw_dftd", &
   "e_xc", "e_xcdc", "e_xc_vdw", &
-  "h0", "e_zeeman", "e_fermih"], &
+  "h0", "e_zeeman", "e_fermih", "e_cpaw", "e_cpawdc"], &
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_dc, enes%e_eigenvalues, enes%e_elecfield, &
    enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
    enes%e_entropy, enes%entropy, enes%entropy_imp, enes%entropy_ks, enes%entropy_paw, enes%entropy_xc, enes%entropy_extfpmd, &
@@ -665,7 +681,7 @@ subroutine energies_ncwrite(enes, ncid)
    enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
    enes%e_paw, enes%e_pawdc, enes%e_pawxc, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
-   enes%h0,enes%e_zeeman,enes%e_fermih])
+   enes%h0,enes%e_zeeman,enes%e_fermih,enes%e_cpaw,enes%e_cpawdc])
 
  NCF_CHECK(ncerr)
 
