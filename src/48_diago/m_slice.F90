@@ -911,12 +911,16 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! Define pointers to actively used arrays
     !call xmpi_barrier(slice%spacecom)
     X0_active = slice%me_Xext_active
-    call xgBlock_setBlock(eigen, eigen_active, rows=neigenpairs, cols=1)
+    call xgBlock_reshape(eigen, 1, slice%neigenpairs)
+    call xgBlock_setBlock(eigen, eigen_active, rows=1, cols=neigenpairs, fcol=slice%fcol_in_X(slice%me_id_slice))
+    call xgBlock_reshape(eigen_active, neigenpairs, 1)
+    call xgBlock_reshape(eigen, slice%neigenpairs, 1)
     call xgBlock_setBlock(residu, residu_active, rows=neigenpairs, cols=1)
    
     write(std_out,*) 'calling runSlice from rank and subrank', xmpi_comm_rank(slice%spacecom), xmpi_comm_rank(comm)
  
-    !write(std_out,*) 'getid before runSlice X0_active', xgBlock_getId(X0_active)
+    write(std_out,*) 'eigen_active='
+    call xgBlock_print(eigen_active, std_out)
     
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
@@ -925,9 +929,6 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     write(std_out,*) 'chebfi%eigenvalues converged='
     call xgBlock_print(chebfi%eigenvalues,std_out)
-
-    write(std_out,*) 'eigen (written to output) converged='
-    call xgBlock_print(eigen,std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -1260,25 +1261,24 @@ subroutine slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta, plot_filte
         poly_upp = part_upp + wovlp
 
         if (islice==1) then
-            ! Amplification for first slice is f(u)/f(u+w)
-            ndeg = slice%ndeg_filter
-            f_u = cheb_poly(part_upp,ndeg,poly_upp,slice%maxeig_global)
-            f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
-            !do while( (f_u/f_uw < ramp) .and. (ndeg < ndeg_max) )
-            !    ndeg = ndeg + 1
-            !    f_u = cheb_poly(part_upp,ndeg,poly_upp,slice%maxeig_global)
-            !    f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
-            !end do
-            write(std_out,*) 'first slice amplif factor f(out)/f(in)=', f_uw / f_u 
+            ! Amplification for first slice is f(u+w)/f(u)
+            ndeg = slice%ndeg_filter - 1
+            f_uw = 1.d0; f_u = 1.d0
+            do while( f_uw/f_u > ramp .and. ndeg < ndeg_max )
+                ndeg = ndeg + 1
+                f_u = cheb_poly(part_upp,ndeg,poly_upp,slice%maxeig_global)
+                f_uw = cheb_poly(poly_upp,ndeg,poly_upp,slice%maxeig_global)
+            end do
+            write(std_out,*) 'slice 1 amplif factor f(out)/f(in)=', f_uw / f_u 
         else
-            ! Amplification ratio is f(l)/f(l-w) and f(u)/f(u+w)
+            ! Amplification is f(l-w)/f(l) (left) and f(u+w)/f(u) (upper)
             lw = (poly_low - center)/radius ! scaled point outside slice
             uw = (poly_upp - center)/radius ! scaled point outside slice
             l = (part_low - center)/radius ! scaled point inside slice
             u = (part_upp - center)/radius ! scaled point inside slice
-            ndeg = 4
-            f_l = 0.d0; f_u = 0.d0; f_lw = 1.d0; f_uw = 1.d0
-            do while ( (f_l/f_lw < ramp) .and. (f_u/f_uw < ramp) .and. (ndeg < ndeg_max) )
+            ndeg = 8
+            f_lw = 1.d0; f_uw = 1.d0; f_l = 1.d0; f_u = 1.d0
+            do while ( (f_lw/f_l > ramp .or. f_uw/f_u > ramp) .and. ndeg < ndeg_max )
                 ndeg = ndeg + 1
                 f_l  = bandpassIndicator_sca(l ,lw,uw,ndeg)
                 f_lw = bandpassIndicator_sca(lw,lw,uw,ndeg)
@@ -1539,7 +1539,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     type(xgBlock_t), intent(inout) :: resid
 
     ! Local variables-------------------------------
-    integer :: my_rank, my_slice, neigenpairs_slice
+    integer :: my_rank, my_slice, neigenpairs_slice, nkept
     integer :: fcol_ext, fcol, tot_ncols_kept, lcol_ext
     integer :: islice, fcol_in_slice, lcol_in_slice, rem
     real(dp) :: part_low_bound, part_upp_bound
@@ -1547,6 +1547,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     ! Derived types
     type(xg_t) :: eigen_ext
     type(xg_t) :: resid_ext
+    type(xgBlock_t) :: eigen_conv
+    type(xgBlock_t) :: resid_conv
     type(xgBlock_t) :: eigen_ext_slice
     type(xgBlock_t) :: resid_ext_slice
     type(xgBlock_t) :: X_kept, eigen_kept, resid_kept
@@ -1556,9 +1558,6 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     real(dp), allocatable :: theta_reshaped(:)
  
     ! *********************************************************************
-
-    write(std_out,*) 'eigen (read from input) converged='
-    call xgBlock_print(eigen,std_out)
 
     ! Two ways to get slice eigenvalues to filter
     ! 1) (implemented)
@@ -1585,39 +1584,40 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
 
     ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
     if (slice%paral_kgb==1) then
+
         if (xmpi_comm_size(slice%spacecom) > 1) then
+        
             ! Copy only once, eg for first process in slice subcomm 
             if (xmpi_comm_rank(slice%me_comm_slice)==0) then
                 my_rank = xmpi_comm_rank(slice%spacecom)
                 my_slice = slice%lookup_proc(my_rank + 1)
                 neigenpairs_slice = slice%neigenpairs_per_slice(my_slice + 1)
                 fcol_ext = slice%fcol_in_Xext(my_slice + 1)
-
+                fcol = slice%fcol_in_X(my_slice + 1)
+                ! set blocks copy from 
+                call xgBlock_setBlock(eigen, eigen_conv, rows=1, cols=neigenpairs_slice, fcol=fcol)
+                call xgBlock_setBlock(resid, resid_conv, rows=1, cols=neigenpairs_slice, fcol=fcol)
+                ! set blocks copy to
                 call xgBlock_setBlock(eigen_ext%self, eigen_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
                 call xgBlock_setBlock(resid_ext%self, resid_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
-                call xgBlock_copy(eigen, eigen_ext_slice)
-                call xgBlock_copy(resid, resid_ext_slice)
-
-                write(std_out,*) 'eigen_ext_slice after copy='
-                call xgBlock_print(eigen_ext_slice,std_out)
+                ! perform copy
+                call xgBlock_copy(eigen_conv, eigen_ext_slice)
+                call xgBlock_copy(resid_conv, resid_ext_slice)
             end if
     
             ! All processes wait to finish copying before summing 
             call xmpi_barrier(slice%spacecom)
 
-            write(std_out,*) 'eigen_ext%self at proc/subproc', xmpi_comm_rank(slice%spacecom),&
-&               xmpi_comm_rank(slice%me_comm_slice)
-            write(std_out,*) 'fcol_ext=', fcol_ext
-            !call xgBlock_print(eigen_ext%self,std_out)
-
             call xgBlock_mpi_sum(eigen_ext%self, comm=slice%spacecom)
             call xgBlock_mpi_sum(resid_ext%self, comm=slice%spacecom)
 
         else
+            ABI_BUG("Not implemented!") 
             call xgBlock_copy(eigen, eigen_ext%self)
             call xgBlock_copy(resid, resid_ext%self)
         end if
     else
+        ABI_BUG("Not implemented!") 
         call xgBlock_copy(eigen, eigen_ext%self)
         call xgBlock_copy(resid, resid_ext%self)
     end if 
@@ -1627,9 +1627,6 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         call xgBlock_copy_from_gpu(eigen_ext%self)
         call xgBlock_copy_from_gpu(resid_ext%self)
     end if
-
-    write(std_out,*) 'eigen_ext_slice after comm='
-    call xgBlock_print(eigen_ext%self,std_out)
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen_ext%self, theta_ext, rows=1, cols=slice%neigenpairs_ext)
@@ -1658,21 +1655,28 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         else if (islice == slice%nslice) then
             rem = slice%neigenpairs - tot_ncols_kept
             if (rem < 0) then
-                ABI_ERROR("Not enough eigenvalues in last slice. Increase tolfilter or nstep_mixed.")
+                ABI_ERROR("Not enough eigenvalues in last slice. Decrease tolfilter or nstep_mixed.")
+            else
+                lcol_in_slice = min(neigenpairs_slice, fcol_in_slice + rem - 1)
+                write(std_out,*) 'rem= lcol_in_slice=', rem, lcol_in_slice 
             end if
-            lcol_in_slice = fcol_in_slice + rem - 1
         end if
 
+        nkept = lcol_in_slice - fcol_in_slice + 1
+
         write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
-        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice
+        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice, nkept
         write(std_out,*) 'filtered eigenvalues=', theta_reshaped
         write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
+        write(std_out,*) 'tot_ncols_kept(prev)=', tot_ncols_kept 
 
         ! After merge: Update first columns to copy from Xext to X
         slice%fcol_in_X(islice)= tot_ncols_kept + 1
         slice%fcol_in_Xext(islice) = fcol_ext + fcol_in_slice - 1
-        slice%neigenpairs_per_slice(islice) = lcol_in_slice - fcol_in_slice + 1
-        tot_ncols_kept = tot_ncols_kept + slice%neigenpairs_per_slice(islice) 
+        slice%neigenpairs_per_slice(islice) = nkept
+        tot_ncols_kept = tot_ncols_kept + slice%neigenpairs_per_slice(islice)
+        
+        write(std_out,*) 'tot_ncols_kept(next)=', tot_ncols_kept 
 
         ABI_SFREE(theta_reshaped)
 
@@ -1680,9 +1684,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     
     ! Detect missing or extra eigenvalues
     if (tot_ncols_kept < slice%neigenpairs) then
-        ABI_ERROR("Too few converged eigenvalues kept. Increase tolfilter or nstep_mixed.")
+        ABI_ERROR("Too few converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
     else if (tot_ncols_kept > slice%neigenpairs) then
-        ABI_ERROR("Too many converged eigenvalues kept. Increase tolfilter or nstep_mixed.")
+        ABI_ERROR("Too many converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
     end if
 
     ! Copy from extended memory to regular memory
@@ -1690,6 +1694,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         fcol = slice%fcol_in_X(islice)
         fcol_ext = slice%fcol_in_Xext(islice)
         neigenpairs_slice = slice%neigenpairs_per_slice(islice)
+        write(std_out,*) 'block copy from fcol, ncols=', fcol_ext, neigenpairs_slice
+        write(std_out,*) 'block copy to fcol, ncols=', fcol, neigenpairs_slice
         ! Blocks to copy from
         call xgBlock_setBlock(slice%XextLinalg, X_kept, rows=slice%spacedim, cols=neigenpairs_slice, fcol=fcol_ext)
         call xgBlock_setBlock(eigen_ext%self, eigen_kept, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
@@ -2220,71 +2226,6 @@ function bandpass_sca(t, deg, gam) result(f_t)
     f_t = rho / rhog
 
 end function bandpass_sca
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/bandpassIndicator_sca
-!! NAME
-!! bandpassIndicator_sca
-!!
-!! FUNCTION
-!! Scalar Chebyshev-Jackson polynomial filter f(x) approximating an 
-!! indicator function, using degree deg evaluated at point x=t
-!!
-!! INPUTS
-!!  a,b=    interval to amplify included in -1,1
-!!  t=      scalar to evaluate filter on
-!!  deg=    order of Chebyshev expansion
-!!
-!! OUTPUT
-!!  res
-!!
-!! SOURCE
-
-function bandpassIndicator_sca(t,a,b,deg) result(f_t)
-
-    implicit none
-
-    !Arguments ------------------------------------
-    real(dp), intent(in ) :: t,a,b
-    integer , intent(in ) :: deg
-
-    real(dp) :: f_t
-    
-    !Local variables-------------------------------
-    real(dp) :: yt0,yt,yt_swap,ck,mu,damp
-    integer  :: i
-    
-    ! *********************************************************************
-
-    ! init cheby of deg=0,1 eval at t
-    yt0 = 1.d0
-    yt = t
-
-    ! init filter for deg=0
-    ck = Pi/(deg+2)
-    mu = 1/Pi*(ACOS(a)-ACOS(b))
-    damp = 1.d0
-    f_t = mu * damp * yt0
-
-    do i=1,deg 
-        
-        ! Update damping and expansion coefficient
-        mu = 2/Pi * (SIN(i*ACOS(a)) - SIN(i*ACOS(b)))/i
-        damp = ((1 - i/(deg+2))*SIN(ck)*COS(i*ck) + 1/(deg+2)*COS(ck)*SIN(i*ck))/SIN(ck)
-
-        ! Sum terms
-        f_t = f_t + mu * damp * yt
-
-        ! Update Chebyshev polynomial
-        yt_swap = yt
-        yt = 2 * t * yt - yt0
-        yt0 = yt_swap
-        
-    end do
-
-end function bandpassIndicator_sca
 !!***
 
 !----------------------------------------------------------------------

@@ -149,6 +149,7 @@ module m_chebfi2
  public :: chebfi_memInfo
  public :: chebfi_run
  public :: chebfi_runSlice
+ public :: bandpassIndicator_sca    ! polynomial bandpass filter at point x
 
  CONTAINS  !========================================================================================
 !!***
@@ -993,6 +994,121 @@ end subroutine chebfi_swapInnerBuffers
 
 !----------------------------------------------------------------------
 
+!!****f* m_chebfi2/chebfi_prepareAmpfactor
+!! NAME
+!! chebfi_prepAmpfactor
+!! 
+!! FUNCTION
+!! Utility function to distribute correctly eigenvalues to MPI procs.
+!! Performs MPI communication
+!!
+!! INPUTS
+!! chebfi=
+!! eigen= eigenvalues not distributed
+!! 
+!! OUTPUT
+!! DivResults= prepared eigenvalues same array as in chebfi_run
+!! 
+!! SOURCE
+
+subroutine chebfi_prepAmpfactor(chebfi, eigen, DivResults)
+
+    implicit none
+
+    ! Arguments ------------------------------------
+    type(xg_t), intent(inout) :: DivResults
+    type(xgBlock_t), intent(inout) :: eigen
+    type(chebfi_t),  intent(inout) :: chebfi
+
+    ! Local variables-------------------------------
+    ! scalars
+    integer :: space_res
+    integer :: my_rank, num_proc, shift, ierr
+    type(xgBlock_t) :: eigen_block
+    ! Arrays
+    integer, allocatable, target :: allbandpp(:)
+    real(dp), allocatable, target :: theta_reshaped(:,:)
+    integer, pointer :: allbandpp_ptr(:) => null()
+    real(dp), pointer :: theta_reshaped_ptr(:,:) => null()
+    real(dp), pointer :: theta(:,:) => null()
+
+    ! *********************************************************************
+
+    if (chebfi%space==SPACE_C) then
+        space_res = SPACE_C
+    else if (chebfi%space==SPACE_CR) then
+        space_res = SPACE_R
+    else
+        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
+    end if
+
+    if (chebfi%paral_kgb == 0) then
+        call xg_init(DivResults, space_res, rows=chebfi%neigenpairs, cols=1, gpu_option=chebfi%gpu_option)
+        ! Fill DivResults with full eigenvalues
+        ! TODO fix for workaround copy between space_res and SPACE_R
+        call xgBlock_copy(eigen, DivResults%self) 
+    else
+        call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option) 
+        if (xmpi_comm_size(chebfi%spacecom) > 1) then
+            my_rank = xmpi_comm_rank(chebfi%spacecom)
+            !shift = my_rank * chebfi%bandpp ! FIXME not working for different bandpp per rank
+            num_proc = xmpi_comm_size(chebfi%spacecom)
+            ABI_MALLOC_IFNOT(allbandpp,(num_proc))
+            allbandpp_ptr => allbandpp
+            call xmpi_allgather(chebfi%bandpp, allbandpp_ptr, chebfi%spacecom, ierr)
+            if ( ierr /= xmpi_success ) then
+                ABI_ERROR("Error while gathering number of bandpp for spacecom")
+            end if
+            if (my_rank==0) then
+                shift = 0
+            else
+                shift = sum(allbandpp(1:my_rank)) ! fixed
+            end if
+            ABI_SFREE(allbandpp)
+        else
+            shift = 0
+        end if
+        ! Fill DivResults(bandpp,1) with block of eigen(neigenpairs,1) of size bandpp
+        ! reshape to access column range
+        call xgBlock_reshape(DivResults%self, 1, chebfi%bandpp)
+        call xgBlock_reshape(eigen, 1, chebfi%neigenpairs)
+        if (space_res==SPACE_R) then
+            call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
+            call xgBlock_copy(eigen_block, DivResults%self)
+        else
+            ! workaround to copy from SPACE_R to SPACE_C
+            ABI_MALLOC_IFNOT(theta_reshaped,(2,chebfi%bandpp))
+            theta_reshaped_ptr => theta_reshaped
+            call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
+            call xgBlock_reverseMap(eigen_block, theta, rows=1, cols=chebfi%bandpp)
+            theta_reshaped = 0.d0
+            theta_reshaped(1,1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
+#ifdef HAVE_OPENMP_OFFLOAD
+            !$OMP TARGET ENTER DATA MAP(to:theta_reshaped) IF(chebfi%gpu_option==ABI_GPU_OPENMP)
+#endif
+            call xgBlock_map(eigen_block, theta_reshaped_ptr, space_res, rows=1, &
+                cols=chebfi%bandpp, gpu_option=chebfi%gpu_option)
+            call xgBlock_copy(eigen_block, DivResults%self)
+#ifdef HAVE_OPENMP_OFFLOAD
+            !$OMP TARGET EXIT DATA MAP(delete:theta_reshaped) IF(chebfi%gpu_option==ABI_GPU_OPENMP)
+#endif
+            ABI_SFREE(theta_reshaped)
+        end if
+        ! restore dimensions
+        call xgBlock_reshape(eigen, chebfi%neigenpairs, 1) 
+        call xgBlock_reshape(DivResults%self, chebfi%bandpp, 1) 
+    end if
+
+    ! DivResults must be on CPU for ampfactor routine
+    if (chebfi%gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_from_gpu(DivResults%self)
+    end if
+
+end subroutine chebfi_prepAmpfactor
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_chebfi2/chebfi_ampfactor
 !! NAME
 !! chebfi_ampfactor
@@ -1064,6 +1180,91 @@ subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filt
   end do
 
 end subroutine chebfi_ampfactor
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_ampfactorBandpass
+!! NAME
+!! chebfi_ampfactorBandpass
+!!
+!! FUNCTION
+!! Compute amplification factor for bandpass polynomial
+!! Numerical zero is 1e-3. Assumes prepAmpfactor prior to this.
+!!
+!! INPUTS
+!! eig (:,:)= eigenvalues
+!! lambda_minus,lambda_plus=
+!! center,radius= used to rescale bandpass filter to interval
+!! ndeg_filter= degree of bandpass polynomial filter
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  residu<type(xgBlock_t)>= vector of residuals
+!!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
+!!
+!! SOURCE
+
+subroutine chebfi_ampfactorBandpass(chebfi,DivResults,lambda_minus,lambda_plus,center,radius,ndeg_filter)
+
+  implicit none
+
+  ! Arguments ------------------------------------
+  integer,           intent(in   ) :: ndeg_filter
+  type(xgBlock_t),   intent(in   ) :: DivResults
+  real(dp),          intent(in   ) :: lambda_minus
+  real(dp),          intent(in   ) :: lambda_plus
+  real(dp),          intent(in   ) :: center
+  real(dp),          intent(in   ) :: radius
+  type(chebfi_t),    intent(inout) :: chebfi
+
+  ! Local variables-------------------------------
+  ! scalars
+  integer         :: iband,nbands
+  real(dp)        :: ampfactor
+  real(dp)        :: xred, ls, us
+  real(dp)        :: eig_per_band
+  type(xgBlock_t) :: X_part
+  type(xgBlock_t) :: AX_part
+  type(xgBlock_t) :: BX_part
+  real(dp),pointer :: eig(:,:)
+
+  ! *********************************************************************
+
+  if (chebfi%paral_kgb == 0) then
+    nbands = chebfi%neigenpairs
+  else
+    nbands = chebfi%bandpp
+  end if
+  ls = (lambda_minus-center)/radius
+  us = (lambda_plus-center)/radius
+
+  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=chebfi%bandpp)
+
+  do iband = 1, nbands
+
+    eig_per_band = eig(1,iband)
+
+    !poly(x, a, b, n), where x,a,b are scaled!!!
+    xred = (eig_per_band-center)/radius
+    ampfactor = bandpassIndicator_sca(xred, ls, us, ndeg_filter)
+
+    if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
+    
+    call xgBlock_setBlock(chebfi%xXColsRows, X_part, chebfi%total_spacedim, 1, fcol=iband)
+    call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, chebfi%total_spacedim, 1, fcol=iband)
+    call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, chebfi%total_spacedim, 1, fcol=iband)
+
+    !write(std_out,*) 'ampfactor, eig, iband=', eig_per_band, ampfactor, iband
+
+    call xgBlock_scale(X_part, 1/ampfactor, 1)
+    call xgBlock_scale(AX_part, 1/ampfactor, 1)
+    call xgBlock_scale(BX_part, 1/ampfactor, 1)
+
+  end do
+
+end subroutine chebfi_ampfactorBandpass
 !!***
 
 !----------------------------------------------------------------------
@@ -1189,7 +1390,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         write(std_out,*) 'lambda_plus=', lambda_plus
         write(std_out,*) 'mineig_global=', mineig_global
         write(std_out,*) 'maxeig_global=', maxeig_global
-        call chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
+        call chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_global,&
             maxeig_global,getAX_BX,getBm1X)
     end if
 
@@ -1246,15 +1447,19 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
 
     !write(std_out,*) 'chebfi%eigenvalues before RR'
     !call xgBlock_print(chebfi%eigenvalues,std_out)
-
+    
+    !write(std_out,*) 'id of X, (before RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
+    
     ! Apply Rayleigh-Ritz to active MPI Linalg row-block
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
     call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,eigen,ierr,0,tim_RR,&
         chebfi%gpu_option,solve_ax_bx=.true.)
     ABI_NVTX_END_RANGE()
+    
+    !write(std_out,*) 'id of X, (after RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
 
     if ( ierr /= 0 ) then
-        ABI_WARNING("RayleighRitz did not work, but continue anyway.")
+        ABI_BUG("RayleighRitz did not work")
     end if
 
     !write(std_out,*) 'chebfi%eigenvalues after RR'
@@ -1364,90 +1569,21 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     end interface
     
     !Local variables-------------------------------
-    type(xg_t) :: DivResults ! stores Rayleigh quotients
-    type(xgBlock_t) :: eigen_block
-    integer :: space_res
-    integer :: ideg, my_rank, num_proc, ierr, shift
+    integer :: ideg
     real(dp) :: center, radius, one_over_r, two_over_r
+    type(xg_t) :: DivResults ! Rayleigh quotients
     ! Arrays
     real(dp) :: tsec(2)
     integer, allocatable :: ndeg_filter_bands(:)
-    integer, allocatable, target :: allbandpp(:)
-    real(dp), allocatable, target :: theta_reshaped(:,:)
-    integer, pointer :: allbandpp_ptr(:) => null()
-    real(dp), pointer :: theta_reshaped_ptr(:,:) => null()
-    real(dp), pointer :: theta(:,:) => null()
 
     ! *********************************************************************
-
-    if (chebfi%space==SPACE_C) then
-        space_res = SPACE_C
-    else if (chebfi%space==SPACE_CR) then
-        space_res = SPACE_R
-    else
-        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
-    end if
-
-    ! All this is for the amplification factor
+   
     if (chebfi%paral_kgb == 0) then
         ABI_MALLOC_IFNOT(ndeg_filter_bands,(chebfi%neigenpairs))
-        call xg_init(DivResults, space_res, rows=chebfi%neigenpairs, cols=1, gpu_option=chebfi%gpu_option)
-        ! Fill DivResults with full eigenvalues
-        ! TODO fix for workaround copy between space_res and SPACE_R
-        call xgBlock_copy(eigen, DivResults%self) 
-    else
+    else    
         ABI_MALLOC_IFNOT(ndeg_filter_bands,(chebfi%bandpp))
-        call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option) 
-        if (xmpi_comm_size(chebfi%spacecom) > 1) then
-            my_rank = xmpi_comm_rank(chebfi%spacecom)
-            !shift = my_rank * chebfi%bandpp ! FIXME not working for different bandpp per rank
-            num_proc = xmpi_comm_size(chebfi%spacecom)
-            ABI_MALLOC_IFNOT(allbandpp,(num_proc))
-            allbandpp_ptr => allbandpp
-            call xmpi_allgather(chebfi%bandpp, allbandpp_ptr, chebfi%spacecom, ierr)
-            if ( ierr /= xmpi_success ) then
-                ABI_ERROR("Error while gathering number of bandpp for spacecom")
-            end if
-            if (my_rank==0) then
-                shift = 0
-            else
-                shift = sum(allbandpp(1:my_rank)) ! fixed
-            end if
-            ABI_SFREE(allbandpp)
-        else
-            shift = 0
-        end if
-        ! Fill DivResults(bandpp,1) with block of eigen(neigenpairs,1) of size bandpp
-        ! reshape to access column range
-        call xgBlock_reshape(DivResults%self, 1, chebfi%bandpp)
-        call xgBlock_reshape(eigen, 1, chebfi%neigenpairs)
-        if (space_res==SPACE_R) then
-            call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
-            call xgBlock_copy(eigen_block, DivResults%self)
-        else
-            ! workaround to copy from SPACE_R to SPACE_C
-            ABI_MALLOC_IFNOT(theta_reshaped,(2,chebfi%bandpp))
-            theta_reshaped_ptr => theta_reshaped
-            call xgBlock_setBlock(eigen, eigen_block, rows=1, cols=chebfi%bandpp, fcol=1+shift)
-            call xgBlock_reverseMap(eigen_block, theta, rows=1, cols=chebfi%bandpp)
-            theta_reshaped = 0.d0
-            theta_reshaped(1,1:chebfi%bandpp) = theta(1,1:chebfi%bandpp)
-#ifdef HAVE_OPENMP_OFFLOAD
-            !$OMP TARGET ENTER DATA MAP(to:theta_reshaped) IF(chebfi%gpu_option==ABI_GPU_OPENMP)
-#endif
-            call xgBlock_map(eigen_block, theta_reshaped_ptr, space_res, rows=1, &
-                cols=chebfi%bandpp, gpu_option=chebfi%gpu_option)
-            call xgBlock_copy(eigen_block, DivResults%self)
-#ifdef HAVE_OPENMP_OFFLOAD
-            !$OMP TARGET EXIT DATA MAP(delete:theta_reshaped) IF(chebfi%gpu_option==ABI_GPU_OPENMP)
-#endif
-            ABI_SFREE(theta_reshaped)
-        end if
-        ! restore dimensions
-        call xgBlock_reshape(eigen, chebfi%neigenpairs, 1) 
-        call xgBlock_reshape(DivResults%self, chebfi%bandpp, 1) 
     end if
-   
+
     ! Filter parameters
     ndeg_filter_bands(:) = chebfi%ndeg_filter
     center = (lambda_plus + lambda_minus)*0.5
@@ -1483,18 +1619,9 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     end do ! ideg
     ABI_NVTX_END_RANGE()
 
-    !write(std_out,*) 'getid inside lowpass xXColsRows (filtered N)', xgBlock_getId(chebfi%xXColsRows)
-    !write(std_out,*) 'getid inside lowpass xAXColsRows (filtered N)', xgBlock_getId(chebfi%xAXColsRows)
-
-    if (chebfi%gpu_option==ABI_GPU_OPENMP) then
-        call xgBlock_copy_from_gpu(DivResults%self)
-    end if
-
-    ! Scale X,AX,BX by amplification factor to reduce large values
+    ! Normalize approximately X,AX,BX without computing the norm
+    call chebfi_prepAmpfactor(chebfi, eigen, DivResults)
     call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
-
-    !write(std_out,*) 'getid inside lowpass xXColsRows (amplif)', xgBlock_getId(chebfi%xXColsRows)
-    !write(std_out,*) 'getid inside lowpass xAXColsRows (amplif)', xgBlock_getId(chebfi%xAXColsRows)
 
     ! Free temporary memory
     call xg_free(DivResults)
@@ -1517,6 +1644,7 @@ end subroutine chebfi_lowpassFilter
 !! 
 !! INPUTS
 !! chebfi <type(chebfi_t)>=memory workspace used to apply filter
+!! eigen= Rayleigh quotients to use in amplification of chebfi%xXColsRows
 !! lambda_minus= lower bound of interval to amplify
 !! lambda_plus= upper bound of interval to amplify
 !! mineig_global= used to rescale to [-1,1), will le -1
@@ -1531,13 +1659,14 @@ end subroutine chebfi_lowpassFilter
 !!
 !! SOURCE
 
-subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
+subroutine chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_global,&
         maxeig_global,getAX_BX,getBm1X)
 
     implicit none
 
     ! Arguments ------------------------------------
     type(chebfi_t), intent(inout) :: chebfi
+    type(xgBlock_t), intent(inout) :: eigen
     real(dp), intent(in) :: lambda_minus
     real(dp), intent(in) :: lambda_plus
     real(dp), intent(in) :: mineig_global
@@ -1563,6 +1692,7 @@ subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
     real(dp) :: center, radius, one_over_r, two_over_r
     real(dp) :: ls, us, cdeg, mu, damp
     type(xg_t) :: Heaviside
+    type(xg_t) :: DivResults ! Rayleigh quotients
     real(dp) :: tsec(2)
 
     ! *********************************************************************
@@ -1631,7 +1761,12 @@ subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
     end do ! end n
     ABI_NVTX_END_RANGE()
 
+    ! Normalize approximately X,AX,BX without computing the norm
+    call chebfi_prepAmpfactor(chebfi, eigen, DivResults)
+    call chebfi_ampfactorBandpass(chebfi, DivResults%self, lambda_minus, lambda_plus, center, radius, ndeg)
+
     ! Free temporary memory
+    call xg_free(DivResults)
     call xg_free(Heaviside)
 
 end subroutine chebfi_bandpassFilter
@@ -1744,6 +1879,73 @@ function cheb_poly1(xx,nn,aa,bb) result(yy)
 
 end function cheb_poly1
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/bandpassIndicator_sca
+!! NAME
+!! bandpassIndicator_sca
+!!
+!! FUNCTION
+!! Scalar Chebyshev-Jackson polynomial filter f(x) approximating an 
+!! indicator function, using degree deg evaluated at point x=t
+!!
+!! INPUTS
+!!  a,b=    interval to amplify included in -1,1
+!!  t=      scalar to evaluate filter on
+!!  deg=    order of Chebyshev expansion
+!!
+!! OUTPUT
+!!  res
+!!
+!! SOURCE
+
+function bandpassIndicator_sca(t,a,b,deg) result(f_t)
+
+    implicit none
+
+    !Arguments ------------------------------------
+    real(dp), intent(in ) :: t,a,b
+    integer , intent(in ) :: deg
+
+    real(dp) :: f_t
+    
+    !Local variables-------------------------------
+    real(dp) :: yt0,yt,yt_swap,ck,mu,damp
+    integer  :: i
+    
+    ! *********************************************************************
+
+    ! init cheby of deg=0,1 eval at t
+    yt0 = 1.d0
+    yt = t
+
+    ! init filter for deg=0
+    ck = Pi/(deg+2)
+    mu = 1/Pi*(ACOS(a)-ACOS(b))
+    damp = 1.d0
+    f_t = mu * damp * yt0
+
+    do i=1,deg 
+        
+        ! Update damping and expansion coefficient
+        mu = 2/Pi * (SIN(i*ACOS(a)) - SIN(i*ACOS(b)))/i
+        damp = ((1 - i/(deg+2))*SIN(ck)*COS(i*ck) + 1/(deg+2)*COS(ck)*SIN(i*ck))/SIN(ck)
+
+        ! Sum terms
+        f_t = f_t + mu * damp * yt
+
+        ! Update Chebyshev polynomial
+        yt_swap = yt
+        yt = 2 * t * yt - yt0
+        yt0 = yt_swap
+        
+    end do
+
+end function bandpassIndicator_sca
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_chebfi2/chebfi_set_ndeg_from_residu
 !! NAME
