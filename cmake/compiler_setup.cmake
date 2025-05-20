@@ -43,6 +43,9 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
       "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-eD;-hbounds>")
   endif()
 
+  # Add '-Oipa0', for disabling IPO (Inter-Procedural Optimisation) as compilation fails otherwise
+  add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-Oipa0>")
+
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Clang")
 
   # debug flags
