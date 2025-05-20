@@ -590,6 +590,10 @@ endif(HDF5_FOUND)
 # NetCDF_C / NetCDF_Fortran
 #
 pkg_check_modules(ABINIT_NETCDF QUIET IMPORTED_TARGET netcdf)
+# Extra check for Cray env...
+if(NOT ABINIT_NETCDF_FOUND)
+  pkg_check_modules(ABINIT_NETCDF QUIET IMPORTED_TARGET netcdf_parallel)
+endif()
 if(ABINIT_NETCDF_FOUND)
   message(STATUS "netcdf found via pkg-config")
   add_library(abinit::netcdf ALIAS PkgConfig::ABINIT_NETCDF)
@@ -598,6 +602,10 @@ else()
 endif()
 
 pkg_check_modules(ABINIT_NETCDF_FORTRAN QUIET IMPORTED_TARGET GLOBAL netcdf-fortran)
+#Extra check for Cray env...
+if(NOT ABINIT_NETCDF_FORTRAN_FOUND)
+  pkg_check_modules(ABINIT_NETCDF_FORTRAN QUIET IMPORTED_TARGET GLOBAL netcdf-fortran_parallel)
+endif()
 if(ABINIT_NETCDF_FORTRAN_FOUND)
   message(STATUS "netcdf-fortran found via pkg-config : ${ABINIT_NETCDF_FORTRAN_PREFIX}")
 
@@ -606,7 +614,7 @@ if(ABINIT_NETCDF_FORTRAN_FOUND)
   pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran prefix)
   if("${ABINIT_NETCDF_FORTRAN_PREFIX}" STREQUAL "")
     # Cray flavor of netcdf
-    pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran netcdf_prefix)
+    pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran_parallel netcdf_prefix)
   endif()
   get_target_property(ABINIT_NETCDF_FORTRAN_INC_TMP PkgConfig::ABINIT_NETCDF_FORTRAN INTERFACE_INCLUDE_DIRECTORIES)
   list(APPEND ABINIT_NETCDF_FORTRAN_INC_TMP "${ABINIT_NETCDF_FORTRAN_PREFIX}/include")
