@@ -8,7 +8,7 @@ add_library(67_triqs_ext STATIC
 
 set_target_properties(67_triqs_ext
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(67_triqs_ext
   PRIVATE
@@ -16,7 +16,7 @@ target_include_directories(67_triqs_ext
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(67_triqs_ext
