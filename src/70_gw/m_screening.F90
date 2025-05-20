@@ -879,6 +879,10 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
  character(len=nctk_slen) :: in_varname,out_varname
  type(hscr_t) :: Hscr_cp
  type(spectra_t) :: spectra
+ integer :: comm__
+ type(c_ptr) :: void_ptr
+ integer(kind=XMPI_ADDRESS_KIND) :: count
+ type(xcomm_t) :: xcomm
 !arrays
  integer :: units(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
@@ -939,12 +943,6 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call read_screening(in_varname, epsm1%fname, epsm1%npwe, epsm1%nqibz, epsm1%nomega, epsm1%epsm1, iomode__, comm)
 
      else
-       block
-       integer :: comm__
-       type(c_ptr) :: void_ptr
-       integer(kind=XMPI_ADDRESS_KIND) :: count
-       type(xcomm_t) :: xcomm
-
        call wrtout(std_out, "- HAPPY: Using MPI shared memory, memory for epsm1 won't increase with nprocs per node!")
        comm__ = comm
        xcomm = xcomm_from_mpi_int(comm__)
@@ -963,7 +961,6 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr) ! Close the RMA epoch.
        ABI_CHECK_MPI(ierr, "")
        call xcomm%free()
-       end block
      end if
 
    else
@@ -981,8 +978,7 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
    !   for a subsequent use or calculate e^-1 keeping everything in memory.
 
    if (epsm1%mqmem == 0) then
-     ! Open file and write the header for the SCR file.
-     ! For the moment only master works.
+     ! Open file and write the header for the SCR file. For the moment only master works.
 
      if (my_rank==master) then
        if (iomode == IO_MODE_ETSF) then
@@ -1027,12 +1023,12 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
            ABI_WARNING('Entering out-of core RPA or Kxc branch')
            call make_epsm1_driver(iq_ibz,dim_wing,npwe,epsm1%nI,epsm1%nJ,epsm1%nomega,epsm1%omega,&
                                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                                  dummy_lwing,dummy_uwing,tmp_epsm1,spectra,xmpi_comm_self)
+                                  dummy_lwing,dummy_uwing,tmp_epsm1,spectra,xmpi_comm_self,xmpi_undefined)
          else
            ABI_WARNING('Entering out-of core fxc_ADA branch')
            call make_epsm1_driver(iq_ibz,dim_wing,npwe,epsm1%nI,epsm1%nJ,epsm1%nomega,epsm1%omega,&
                                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                                  dummy_lwing,dummy_uwing,tmp_epsm1,spectra,xmpi_comm_self, &
+                                  dummy_lwing,dummy_uwing,tmp_epsm1,spectra,xmpi_comm_self, xmpi_undefined, &
                                   fxc_ADA=fxc_ADA(:,:,iq_ibz))
          end if
 
@@ -1077,9 +1073,47 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! ========================
      ! === In-core solution ===
      ! ========================
-     ABI_MALLOC_OR_DIE(epsm1%epsm1, (npwe,npwe,epsm1%nomega,epsm1%nqibz), ierr)
+     ! In-core solution.
+     epsm1%use_mpi_shared_win = .False.
+#ifdef HAVE_MPI_ALLOCATE_SHARED_CPTR
+     epsm1%use_mpi_shared_win = nprocs > 1
+     !epsm1%use_mpi_shared_win = .True.     ! This to test shared memory with one proc.
+#endif
+     !epsm1%use_mpi_shared_win = .False.    ! This to go back to the old non-scalable version.
 
-     call read_screening(in_varname,epsm1%fname,npwe,epsm1%nqibz,epsm1%nomega,epsm1%epsm1,iomode,comm)
+     if (.not. epsm1%use_mpi_shared_win) then
+       call epsm1%shared_comm%set_to_self()
+
+       if (nprocs > 1) then
+         msg = strcat("- WARNING: Cannot use MPI shared memory as MPI library does not support MPI_WIN_ALLOCATE_SHARED_CPTR", ch10, &
+                      "- Memory for epsm1 will increase with nprocs per node!")
+         ABI_WARNING(msg)
+         call wrtout(ab_out, msg)
+       end if
+
+       ABI_MALLOC_OR_DIE(epsm1%epsm1, (npwe,npwe,epsm1%nomega,epsm1%nqibz), ierr)
+       call read_screening(in_varname, epsm1%fname, npwe, epsm1%nqibz, epsm1%nomega, epsm1%epsm1, iomode, comm)
+
+     else
+       call wrtout(std_out, "- HAPPY: Using MPI shared memory, memory for epsm1 won't increase with nprocs per node!")
+       comm__ = comm
+       xcomm = xcomm_from_mpi_int(comm__)
+       epsm1%shared_comm = xcomm%split_type()
+
+       count = _MOK(2 * npwe) * _MOK(npwe) * _MOK(epsm1%nomega * epsm1%nqibz)
+       call epsm1%shared_comm%allocate_shared_master(count, gwpc, xmpi_info_null, void_ptr, epsm1%epsm1_win)
+       call c_f_pointer(void_ptr, epsm1%epsm1, shape=[npwe, npwe, epsm1%nomega, epsm1%nqibz])
+
+       ! Only one proc in shared_comm reads from file.
+       call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr) ! Start the RMA epoch.
+       ABI_CHECK_MPI(ierr, "")
+       if (epsm1%shared_comm%me == 0) then
+         call read_screening(in_varname, epsm1%fname, epsm1%npwe, epsm1%nqibz, epsm1%nomega, epsm1%epsm1, iomode__, xmpi_comm_self)
+       end if
+       call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr) ! Close the RMA epoch.
+       ABI_CHECK_MPI(ierr, "")
+       call xcomm%free()
+     end if
 
      do iq_ibz=1,epsm1%nqibz
        is_qeq0=0; if (normv(epsm1%qibz(:,iq_ibz),gmet,'G')<GW_TOLQ0) is_qeq0=1
@@ -1089,16 +1123,20 @@ subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_MALLOC(dummy_uwing,(npwe*epsm1%nJ,epsm1%nomega,dim_wing))
        ABI_MALLOC(dummy_head,(dim_wing,dim_wing,epsm1%nomega))
 
+       comm__ = comm
+       if (epsm1%use_mpi_shared_win) comm__ = epsm1%shared_comm%value
+
        if (approx_type<2 .or. approx_type>3) then
-         ABI_WARNING('Entering in-core RPA and Kxc branch')
+         ABI_COMMENT('Entering in-core RPA and Kxc branch')
          call make_epsm1_driver(iq_ibz,dim_wing,npwe,epsm1%nI,epsm1%nJ,epsm1%nomega,epsm1%omega,&
                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                  dummy_lwing,dummy_uwing,epsm1%epsm1(:,:,:,iq_ibz),spectra,comm)
+                  dummy_lwing,dummy_uwing,epsm1%epsm1(:,:,:,iq_ibz),spectra,comm__, epsm1%epsm1_win)
        else
-         ABI_WARNING('Entering in-core fxc_ADA branch')
+         ABI_COMMENT('Entering in-core fxc_ADA branch')
          call make_epsm1_driver(iq_ibz,dim_wing,npwe,epsm1%nI,epsm1%nJ,epsm1%nomega,epsm1%omega,&
                   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,dummy_head,&
-                  dummy_lwing,dummy_uwing,epsm1%epsm1(:,:,:,iq_ibz),spectra,comm,fxc_ADA=fxc_ADA(:,:,iq_ibz))
+                  dummy_lwing,dummy_uwing,epsm1%epsm1(:,:,:,iq_ibz),spectra,comm__, epsm1%epsm1_win, &
+                  fxc_ADA=fxc_ADA(:,:,iq_ibz))
        end if
 
        ABI_FREE(dummy_lwing)
@@ -1417,14 +1455,14 @@ end subroutine decompose_epsm1
 !!
 !! SOURCE
 
-subroutine make_epsm1_driver(iq_ibz,dim_wing,npwe,nI,nJ,nomega,omega,&
-  approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,chi0_head,&
-  chi0_lwing,chi0_uwing,chi0,spectra,comm,&
-  fxc_ADA,rhor) ! optional argument
+subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
+  approx_type, option_test, Vcp, nfftot, ngfft, nkxc, kxcg, gvec, &
+  chi0_head, chi0_lwing, chi0_uwing, chi0, spectra, comm, epsm1_win, &
+  fxc_ADA, rhor) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iq_ibz,nI,nJ,npwe,nomega,dim_wing,approx_type,option_test,nkxc,nfftot,comm
+ integer,intent(in) :: iq_ibz,nI,nJ,npwe,nomega,dim_wing,approx_type,option_test,nkxc,nfftot,comm, epsm1_win
  real(dp),intent(in),optional :: rhor
  type(vcoul_t),target,intent(in) :: Vcp
  type(spectra_t),intent(out) :: Spectra
@@ -1444,7 +1482,7 @@ subroutine make_epsm1_driver(iq_ibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  integer :: i1,i2,ig1,ig2,io,ierr,irank,my_nqlwl !iqlwl
  integer :: nor,my_rank,nprocs,g1mg2_idx
  real(dp) :: ucvol
- logical :: is_qeq0,use_MPI
+ logical :: is_qeq0, use_MPI, use_mpi_shared_win
  character(len=500) :: msg
 !arrays
  integer :: omega_distrb(nomega)
@@ -1475,12 +1513,14 @@ subroutine make_epsm1_driver(iq_ibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  is_qeq0 = normv(Vcp%qibz(:,iq_ibz),gmet,'G') < GW_TOLQ0
 
  omega_distrb = my_rank
+ use_mpi_shared_win = (epsm1_win /= xmpi_undefined)
  use_MPI = .FALSE.
  use_MPI = nprocs >= nomega  ! Parallelism is not used
- ! FIXME: MPI modi is termporarly disabled here because we need to know if
+
+ ! FIXME: MPI mode is termporarly disabled here because we need to know if
  ! screening is allocated in shared memory or not.
  ! Perhaps now it makes mores sense to use Scalapack/ELPA instead of parallelizing the loop over frequencies
- use_MPI = .FALSE.
+ !use_MPI = .FALSE.
 
  if (use_MPI) then
    ! Initialize distribution table for frequencies.
@@ -1527,6 +1567,8 @@ subroutine make_epsm1_driver(iq_ibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  ABI_MALLOC(tmp_lf, (my_nqlwl))
  ABI_MALLOC(tmp_nlf, (my_nqlwl))
  ABI_MALLOC(tmp_eelf, (my_nqlwl))
+
+ if (use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1_win, ierr) ! Start the RMA epoch.
 
  SELECT CASE (approx_type)
 
@@ -1580,7 +1622,7 @@ subroutine make_epsm1_driver(iq_ibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0(:,:,io),kxcg_mat,option_test,my_nqlwl,dim_wing,omega(io),&
-         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm)
+         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf, xmpi_comm_self)
 
        ! Store results.
        epsm_lf(io,:) = tmp_lf
@@ -1608,7 +1650,7 @@ subroutine make_epsm1_driver(iq_ibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
        call atddft_symepsm1(iq_ibz,Vcp,npwe,nI,nJ,chi0(:,:,io),fxc_ADA,option_test,my_nqlwl,dim_wing,omega(io),&
-                            chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm)
+                            chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,xmpi_comm_self)
 
        ! Store results.
        epsm_lf(io,:) = tmp_lf
@@ -1922,7 +1964,9 @@ subroutine make_epsm1_driver(iq_ibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ABI_BUG(sjoin('Wrong approx_type:',itoa(approx_type)))
  END SELECT
 
- if (use_MPI) then
+ if (use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1_win, ierr) ! Close the RMA epoch.
+
+ if (use_MPI .and. .not. use_mpi_shared_win) then
    ! Collect results on each node.
    ABI_MALLOC(buffer_lwing, (size(chi0_lwing,dim=1), size(chi0_lwing, dim=3)))
    ABI_MALLOC(buffer_uwing, (size(chi0_uwing,dim=1), size(chi0_uwing, dim=3)))

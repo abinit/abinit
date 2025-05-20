@@ -3841,16 +3841,17 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    Sigp%maxomega_r=Dtset%freqspmax
 
    ! TODO: Mesh should be centered on e0
-   !if (mod10 == 1 .and. sigp%nomegasr == 0 .and. Sigp%gwcalctyp /= 21) then
-   !  ! Note that in AC computing quantities on the real-axis is really cheap
-   !  ! so we can use very dense meshes without affecting performance.
-   !  ! The default for nfresp and freqspmax is zero.
-   !  drude_plasmon_freq = sqrt(four_pi * ks_ebands%nelect / cryst%ucvol)
-   !  wmax = dtset%freqspmax; if (abs(wmax) < tol6) wmax = two * drude_plasmon_freq
-   !  sigp%nomegasr = nint(wmax / (0.05_dp * eV_Ha))
-   !  if (mod(sigp%nomegasr, 2) == 0) sigp%nomegasr = sigp%nomegasr + 1
-   !  Sigp%maxomega_r = wmax
-   !end if
+   if (mod10 == 1 .and. sigp%nomegasr == 0 .and. Sigp%gwcalctyp /= 21) then
+     ! Note that in AC computing quantities on the real-axis is really cheap
+     ! so we can use very dense meshes without affecting performance.
+     ! The default for nfresp and freqspmax is zero.
+     ! Here we compute wr_step and nwrt so that we have  e0 +- the expected plasmom frequency
+     drude_plasmon_freq = sqrt(four_pi * ks_ebands%nelect / cryst%ucvol)
+     wmax = dtset%freqspmax; if (abs(wmax) < tol6) wmax = two * drude_plasmon_freq
+     !sigp%nomegasr = nint(wmax / (0.05_dp * eV_Ha))
+     !if (mod(sigp%nomegasr, 2) == 0) sigp%nomegasr = sigp%nomegasr + 1
+     !sigp%maxomega_r = wmax
+   end if
 
  end if
 

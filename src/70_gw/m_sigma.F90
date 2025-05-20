@@ -409,7 +409,7 @@ end subroutine write_sigma_header
 !!
 !! INPUTS
 !!  ks_ebands<ebands_t>=Info on the KS band structure energies.
-!!  ikibz= index of the k-point in the array kibz, where GW corrections are calculated
+!!  ik_ibz= index of the k-point in the array kibz, where GW corrections are calculated
 !!  ikcalc= index of the k-point in the array Sigp%kptgw2bz
 !!  Sigp=sigparams_t datatype
 !!
@@ -418,12 +418,12 @@ end subroutine write_sigma_header
 !!
 !! SOURCE
 
-subroutine sigma_write_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
+subroutine sigma_write_results(sigma, ikcalc, ik_ibz, Sigp, ks_ebands)
 
 !Arguments ------------------------------------
 !scalars
  class(sigma_t),intent(in) :: sigma
- integer,intent(in) :: ikcalc,ikibz
+ integer,intent(in) :: ikcalc,ik_ibz
  type(ebands_t),intent(in) :: ks_ebands
  type(sigparams_t),intent(in) :: Sigp
 
@@ -467,9 +467,9 @@ subroutine sigma_write_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
    ydoc = yamldoc_open('SelfEnergy_ee', width=11, real_fmt='(3f8.3)')
    call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
    call ydoc%add_int('spin', is, int_fmt="(i1)")
-   call ydoc%add_real('KS_gap', sigma%e0gap(ikibz,is)*Ha_eV)
-   call ydoc%add_real('QP_gap', sigma%egwgap(ikibz,is)*Ha_eV)
-   call ydoc%add_real('Delta_QP_KS', sigma%degwgap(ikibz,is)*Ha_eV)
+   call ydoc%add_real('KS_gap', sigma%e0gap(ik_ibz,is)*Ha_eV)
+   call ydoc%add_real('QP_gap', sigma%egwgap(ik_ibz,is)*Ha_eV)
+   call ydoc%add_real('Delta_QP_KS', sigma%degwgap(ik_ibz,is)*Ha_eV)
    call ydoc%open_tabular('data', tag='SigmaeeData')
    call ydoc%add_tabular_line(msg)
 
@@ -490,41 +490,41 @@ subroutine sigma_write_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp >= 10) then
-       call sigma%print_QPSC(ikibz, ib, is, ks_ebands, units=[dev_null], ydoc=ydoc)
-       call sigma%print_QPSC(ikibz, ib, is, ks_ebands, units=[std_out], prtvol=1)
+       call sigma%print_QPSC(ik_ibz, ib, is, ks_ebands, units=[dev_null], ydoc=ydoc)
+       call sigma%print_QPSC(ik_ibz, ib, is, ks_ebands, units=[std_out], prtvol=1)
 
        write(unt_gwdiag,'(i6,3f9.4)')                                 &
         ib,                                                           &
-        sigma%en_qp_diago(ib,ikibz,is)*Ha_eV,                            &
-        (sigma%en_qp_diago(ib,ikibz,is) - ks_ebands%eig(ib,ikibz,is))*Ha_eV,&
+        sigma%en_qp_diago(ib,ik_ibz,is)*Ha_eV,                            &
+        (sigma%en_qp_diago(ib,ik_ibz,is) - ks_ebands%eig(ib,ik_ibz,is))*Ha_eV,&
         zero
 
      else
        ! If not ppmodel, write out also the imaginary part in ab_out
        SELECT CASE(mod10)
        CASE (1,2)
-         call sigma%print_perturbative(ikibz, ib, is, units=[dev_null], ydoc=ydoc, prtvol=1)
+         call sigma%print_perturbative(ik_ibz, ib, is, units=[dev_null], ydoc=ydoc, prtvol=1)
        CASE DEFAULT
-         call sigma%print_perturbative(ikibz, ib, is, units=[dev_null], ydoc=ydoc)
+         call sigma%print_perturbative(ik_ibz, ib, is, units=[dev_null], ydoc=ydoc)
        END SELECT
-       call sigma%print_perturbative(ikibz, ib, is, units=[std_out], prtvol=1)
+       call sigma%print_perturbative(ik_ibz, ib, is, units=[std_out], prtvol=1)
      end if
 
      write(unt_gw,'(i6,3f9.4)')         &
       ib,                               &
-      REAL (sigma%egw (ib,ikibz,is))*Ha_eV,&
-      REAL (sigma%degw(ib,ikibz,is))*Ha_eV,&
-      AIMAG(sigma%egw (ib,ikibz,is))*Ha_eV
+      REAL (sigma%egw (ib,ik_ibz,is))*Ha_eV,&
+      REAL (sigma%degw(ib,ik_ibz,is))*Ha_eV,&
+      AIMAG(sigma%egw (ib,ik_ibz,is))*Ha_eV
    end do !ib
 
-   if (sigma%e0gap(ikibz,is)**2+sigma%egwgap(ikibz,is)**2+sigma%degwgap(ikibz,is)**2 > tol10) then
+   if (sigma%e0gap(ik_ibz,is)**2+sigma%egwgap(ik_ibz,is)**2+sigma%degwgap(ik_ibz,is)**2 > tol10) then
      ! Output the direct gap for each spin
      ! If all the gaps are zero, this means that it could not be computed in the calling routine
-     write(msg,'(2a,f8.3)')ch10,' E^0_gap       ',sigma%e0gap(ikibz,is)*Ha_eV
+     write(msg,'(2a,f8.3)')ch10,' E^0_gap       ',sigma%e0gap(ik_ibz,is)*Ha_eV
      call wrtout(std_out,msg)
-     write(msg,'(a,f8.3)')      ' E^GW_gap      ',sigma%egwgap(ikibz,is)*Ha_eV
+     write(msg,'(a,f8.3)')      ' E^GW_gap      ',sigma%egwgap(ik_ibz,is)*Ha_eV
      call wrtout(std_out,msg)
-     write(msg,'(a,f8.3,a)')    ' DeltaE^GW_gap ',sigma%degwgap(ikibz,is)*Ha_eV,ch10
+     write(msg,'(a,f8.3,a)')    ' DeltaE^GW_gap ',sigma%degwgap(ik_ibz,is)*Ha_eV,ch10
      call wrtout(std_out,msg)
    end if
 
@@ -534,42 +534,42 @@ subroutine sigma_write_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
    do io=1,sigma%nomega_r
      write(unt_sig,'(100(e12.5,2x))')&
       REAL(sigma%omega_r(io))*Ha_eV,&
-      (REAL(sigma%sigxcme(ib,ikibz,io,is))*Ha_eV,&
-      AIMAG(sigma%sigxcme(ib,ikibz,io,is))*Ha_eV,&
-      gw_spectral_function(sigma,io,ib,ikibz,is),&
+      (REAL(sigma%sigxcme(ib,ik_ibz,io,is))*Ha_eV,&
+      AIMAG(sigma%sigxcme(ib,ik_ibz,io,is))*Ha_eV,&
+      gw_spectral_function(sigma,io,ib,ik_ibz,is),&
       ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is))
    end do
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
-     write(unt_sgr,'("# ik, ib",2i5)')ikibz,ib
+     write(unt_sgr,'("# ik, ib",2i5)')ik_ibz,ib
      do io=1,sigma%nomega4sd
        write(unt_sgr,'(100(e12.5,2x))')              &
-         REAL (sigma%omega4sd  (ib,ikibz,io,is)) *Ha_eV,&
-         REAL (sigma%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV,&
-         AIMAG(sigma%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV
+         REAL (sigma%omega4sd  (ib,ik_ibz,io,is)) *Ha_eV,&
+         REAL (sigma%sigxcme4sd(ib,ik_ibz,io,is)) *Ha_eV,&
+         AIMAG(sigma%sigxcme4sd(ib,ik_ibz,io,is)) *Ha_eV
      end do
    end do
 
    !MRM
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
-     write(unt_sigc,'("# ik, ib",2i5)')ikibz,ib
+     write(unt_sigc,'("# ik, ib",2i5)')ik_ibz,ib
      do io=1,sigma%nomega4sd
        write(unt_sigc,'(100(e12.5,2x))')              &
-         REAL (sigma%omega4sd  (ib,ikibz,io,is)) *Ha_eV,&
-         REAL (sigma%sigcme4sd(ib,ikibz,io,is)) *Ha_eV,&
-         AIMAG(sigma%sigcme4sd(ib,ikibz,io,is)) *Ha_eV
+         REAL (sigma%omega4sd  (ib,ik_ibz,io,is)) *Ha_eV,&
+         REAL (sigma%sigcme4sd(ib,ik_ibz,io,is)) *Ha_eV,&
+         AIMAG(sigma%sigcme4sd(ib,ik_ibz,io,is)) *Ha_eV
      end do
    end do
 
    if (mod10 == 1) then
      ! For AC, write sigma matrix elements along the imaginary axis
      do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
-       write(unt_sgm,'("# ik, ib",2i5)')ikibz,ib
+       write(unt_sgm,'("# ik, ib",2i5)')ik_ibz,ib
        do io=1,sigma%nomega_i
          write(unt_sgm,'(3(e12.5,2x))')             &
           AIMAG(sigma%omega_i(io))              *Ha_eV,&
-          REAL (sigma%sigxcmesi(ib,ikibz,io,is))*Ha_eV,&
-          AIMAG(sigma%sigxcmesi(ib,ikibz,io,is))*Ha_eV
+          REAL (sigma%sigxcmesi(ib,ik_ibz,io,is))*Ha_eV,&
+          AIMAG(sigma%sigxcmesi(ib,ik_ibz,io,is))*Ha_eV
        end do
      end do
    end if
@@ -589,22 +589,22 @@ end subroutine sigma_write_results
 !!  Compute the spectral function
 !!
 !! INPUTS
-!!  io,ib,ikibz,spin=Frequency, band, k-point, spin index
+!!  io,ib,ik_ibz,spin=Frequency, band, k-point, spin index
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-real(dp) pure function gw_spectral_function(sigma, io, ib, ikibz, spin) result(aw)
+real(dp) pure function gw_spectral_function(sigma, io, ib, ik_ibz, spin) result(aw)
 
 !Arguments ------------------------------------
  class(sigma_t),intent(in) :: sigma
- integer,intent(in) :: io,ib,ikibz,spin
+ integer,intent(in) :: io,ib,ik_ibz,spin
 ! *********************************************************************
 
- aw = one / pi * abs(aimag(sigma%sigcme(ib,ikibz,io,spin))) &
-   /( (real(sigma%omega_r(io) - sigma%hhartree(ib,ib,ikibz,spin) - sigma%sigxcme(ib,ikibz,io,spin)))**2 &
-     +(aimag(sigma%sigcme(ib,ikibz,io,spin))) ** 2) / Ha_eV
+ aw = one / pi * abs(aimag(sigma%sigcme(ib,ik_ibz,io,spin))) &
+   /( (real(sigma%omega_r(io) - sigma%hhartree(ib,ib,ik_ibz,spin) - sigma%sigxcme(ib,ik_ibz,io,spin)))**2 &
+     +(aimag(sigma%sigcme(ib,ik_ibz,io,spin))) ** 2) / Ha_eV
 
 end function gw_spectral_function
 !!***

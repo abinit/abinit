@@ -185,6 +185,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
  real(dp) :: alpha,rhoav,factor,ec_gm,el_temp
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
+ integer, parameter :: epsm1_win = xmpi_undefined
  logical :: found,iscompatibleFFT,is_dfpt=.false.,use_tr,is_first_qcalc
  logical :: add_chi0_intraband,update_energies,call_pawinit
  character(len=10) :: string
@@ -1454,22 +1455,32 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
    end select
 
-   if (approx_type<2) then !ALDA
+   if (approx_type<2) then
+     ! ALDA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
        approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
-       chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
-   else if (approx_type<3) then !ADA
+       chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm, epsm1_win)
+
+   else if (approx_type<3) then
+     ! ADA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
        approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
-       chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
-   else if (approx_type<7) then !Bootstrap
+       chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm, epsm1_win, &
+       fxc_ADA=fxc_ADA(:,:,iqibz))
+
+   else if (approx_type<7) then
+      ! Bootstrap
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
        approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
-       chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
-   else if (approx_type<8) then  !LR+ALDA
+       chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm, epsm1_win)
+
+   else if (approx_type<8) then
+     ! LR + ALDA
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
        approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
-       chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm,rhor=rhoav)
+       chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm, epsm1_win, &
+       rhor=rhoav)
+
    else
      ABI_ERROR(sjoin("Wrong approx_type:", itoa(approx_type)))
    end if
@@ -2205,10 +2216,6 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  end if
 
  ! Final compatibility tests
- if (ANY(ks_ebands%istwfk /= 1)) then
-   ABI_WARNING('istwfk/=1 is still under development')
- end if
-
  ltest = (ks_ebands%mband == Ep%nbnds .and. ALL(ks_ebands%nband == Ep%nbnds))
  ABI_CHECK(ltest, 'BUG in definition of ks_ebands%nband')
 
