@@ -18,7 +18,7 @@ add_library(57_iopsp_parser STATIC
 
 set_target_properties(57_iopsp_parser
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(57_iopsp_parser
   PRIVATE
@@ -26,7 +26,7 @@ target_include_directories(57_iopsp_parser
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(57_iopsp_parser
