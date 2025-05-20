@@ -5919,8 +5919,8 @@ subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
  end if
  call wrtout([std_out, ab_out], msg)
 
-!$write(msg,'(a,f9.4)')' Renormalizing smooth charge density using nratio = ',nratio
-!! rhor(:,:)=nratio*rhor(:,:)
+ !write(msg,'(a,f9.4)')' Renormalizing smooth charge density using nratio = ',nratio
+ !rhor(:,:)=nratio*rhor(:,:)
 
  write(msg,'(a,f9.6)')' average of density, n = ',rhoav
  call wrtout([std_out, ab_out], msg)

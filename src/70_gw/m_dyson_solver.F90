@@ -358,8 +358,8 @@ subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, 
        end if
 
 !#define _DEV_PERTURBATIVE
-
-#ifdef _DEV_PERTURBATIVE
+!#ifdef _DEV_PERTURBATIVE
+#if 0
        call wrtout(units, "COMMENT: Using perturbative approach with Z.")
 
        ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
