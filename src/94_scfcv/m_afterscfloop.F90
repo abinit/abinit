@@ -28,7 +28,7 @@ module m_afterscfloop
  use m_abicore
  use m_ebands
  use m_efield
- use m_ab7_mixing
+ use m_abi_mixing
  use m_hdr
  use m_dtset
  use m_dtfil

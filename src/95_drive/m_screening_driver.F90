@@ -28,7 +28,7 @@ module m_screening_driver
  use m_xmpi
  use m_xomp
  use m_errors
- use m_ab7_mixing
+ use m_abi_mixing
  use m_kxc
  use m_nctk
  use netcdf
