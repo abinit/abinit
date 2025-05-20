@@ -2461,10 +2461,11 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 
  ! Then modify entries for new frequency grid.
  ohscr%nomega = nfreq_tot
- ABI_FREE(ohscr%omega)
- ABI_MALLOC(ohscr%omega,(nfreq_tot))
+ ABI_REMALLOC(ohscr%omega, (nfreq_tot))
+ ABI_REMALLOC(ohscr%omega_wgs, (nfreq_tot))
  do ifrq=1,nfreq_tot
    ohscr%omega(ifrq) = ihscr%omega(freq_indx(ifrq))
+   ohscr%omega_wgs(ifrq) = ihscr%omega_wgs(freq_indx(ifrq))
  end do
 
  npwe4mI = ohscr%npwe*ohscr%nI

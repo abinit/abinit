@@ -875,7 +875,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s, isym, itim
- real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
+ real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int, drude_plasmon_freq
  real(dp) :: prev_efficiency, prev_speedup, regterm, prev_dual_error
  logical :: isirr_k, changed, q_is_gamma, reorder, can_use_kshifts
  character(len=5000) :: msg
@@ -939,10 +939,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Note that in GWR computing quantities on the real-axis is really cheap
  ! so we can use very dense meshes without affecting performance.
  ! The default for nfresp and freqspmax is zero.
- ! TODO: Perhaps we can make it optional as in legacy-GW.
- wmax = dtset%freqspmax; if (abs(wmax) < tol6) wmax = 100 * eV_Ha
+ drude_plasmon_freq = sqrt(four_pi * ks_ebands%nelect / cryst%ucvol)
+ wmax = dtset%freqspmax; if (abs(wmax) < tol6) wmax = two * drude_plasmon_freq
  gwr%nwr = dtset%nfreqsp
- if (gwr%nwr ==  0) gwr%nwr = nint(wmax / (0.05 * eV_Ha))
+ if (gwr%nwr ==  0) gwr%nwr = nint(wmax / (0.05_dp * eV_Ha))
  if (mod(gwr%nwr, 2) == 0) gwr%nwr = gwr%nwr + 1
  gwr%wr_step = wmax / (gwr%nwr - 1)
 

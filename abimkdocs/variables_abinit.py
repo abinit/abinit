@@ -25646,7 +25646,6 @@ This parameter controls the minimal occupancy when using the oracle in the Cheby
 """,
 ),
 
-
 Variable(
     abivarname="scr_wrange",
     varset="gw",
@@ -25656,7 +25655,7 @@ Variable(
     defaultval=[0, 0],
     mnemonics="SCReening frequency RANGE",
     added_in_version="10.4.0",
-    requires="[[optdriver]] in [6]",
+    requires="[[optdriver]] == 6",
     text=r"""
 This variable can be used to select a subset of frequencies in the Screening to be computed.
 Abinit will produce partial SCR files that can be merged with the mrgscr tool before starting the SIGMA calculation.
@@ -25665,9 +25664,9 @@ Selecting a subset of frequencies allows one to reduce the memory requirements i
 as the size of the polarizability matrix is proportional to the total number of frequencies.
 This is particularly useful when performing CD or AC computations.
 
-Note that in the case of AC, the total SCR file is supposed to contain 1 + [[nfreqim]] frequencies with the first point
-being the static limit.
-As a consequence, the full set of frequencies spans the [1, 1 + nfreqim ] range.
+Note that in the case of AC, the total SCR file is supposed to contain 1 + [[nfreqim]] frequencies
+with the first point being the static limit.
+As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
 """,
 ),
 
