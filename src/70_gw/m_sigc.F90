@@ -219,10 +219,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  units = [std_out, ab_out]
 
  ! Initial check
- ABI_CHECK(Sr%nomega_r == Sigp%nomegasr, "")
- ABI_CHECK(Sr%nomega4sd == Sigp%nomegasrd, "")
- ABI_CHECK(Sigp%npwc == Gsph_c%ng, "")
- ABI_CHECK(Sigp%npwvec == Gsph_Max%ng, "")
+ ABI_CHECK_IEQ(Sr%nomega_r, Sigp%nomegasr, "")
+ ABI_CHECK_IEQ(Sr%nomega4sd, Sigp%nomegasrd, "")
+ ABI_CHECK_IEQ(Sigp%npwc, Gsph_c%ng, "")
+ ABI_CHECK_IEQ(Sigp%npwvec, Gsph_Max%ng, "")
 
  mod10 = MOD(Sigp%gwcalctyp,10)
 
@@ -890,7 +890,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
        ! Frequencies for the spectral function, e0i=qp_ene(ib_sum,ik_ibz,spin)
        ! FIXME the interval is not centered on eoi ! WHY?
-       if (Sr%nomega_r>0) omegame0i(1:Sr%nomega_r)=DBLE(Sr%omega_r(1:Sr%nomega_r))-e0i
+       if (Sr%nomega_r>0) then
+         omegame0i(1:Sr%nomega_r)=DBLE(Sr%omega_r(1:Sr%nomega_r))-e0i
+         !omegame0i = arth(e0i - gwr%wr_step * (sr%nomega_r / 2), gwr%wr_step, sr%nomega_r)
+       end if
 
        call timab(437,2,tsec) ! rho_tw_g
        call timab(443,1,tsec) ! ac_lrk_appl

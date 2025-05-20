@@ -939,6 +939,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Note that in GWR computing quantities on the real-axis is really cheap
  ! so we can use very dense meshes without affecting performance.
  ! The default for nfresp and freqspmax is zero.
+ ! Here we compute wr_step and nwrt so that we have  e0 +- the expected plasmom frequency
  drude_plasmon_freq = sqrt(four_pi * ks_ebands%nelect / cryst%ucvol)
  wmax = dtset%freqspmax; if (abs(wmax) < tol6) wmax = two * drude_plasmon_freq
  gwr%nwr = dtset%nfreqsp
