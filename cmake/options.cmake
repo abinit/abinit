@@ -225,6 +225,6 @@ set(ABI_DEBUG_FLAVOR "basic" CACHE STRING
   "Abinit C compiler debug flavor : basic, verbose, enhanced, paranoid, naughty")
 set_property(CACHE ABI_DEBUG_FLAVOR PROPERTY STRINGS basic verbose enhanced paranoid naughty)
 
-set(ABI_OPTIM_FLAVOR "safe" CACHE STRING
+set(ABI_OPTIM_FLAVOR "standard" CACHE STRING
   "Abinit C/Fortran compiler optim flavor : safe, standard, aggressive")
 set_property(CACHE ABI_OPTIM_FLAVOR PROPERTY STRINGS safe standard aggressive)
