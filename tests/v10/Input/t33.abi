@@ -1,0 +1,26 @@
+!anaddb calculation of flexoelectric tensor
+
+flexoflag  1  
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% exclude_builders = scope_gnu_10.2_paral
+#%% input_ddb = t32.ddb.out
+#%% test_chain =  t31.abi, t32.abi, t33.abi
+#%% [files]
+#%% files_to_test =
+#%%   t33.abo, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT, LONGWAVE
+#%% description = anaddb input file for flexoelectric tensor calculation.
+#%%  This set of tests duplicates the content of the lw tutorial, except for the usage of NetCDF instead of text DDB in the tutorial
+##%% topics = longwave
+#%%<END TEST_INFO>
+
