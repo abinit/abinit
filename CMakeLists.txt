@@ -421,6 +421,8 @@ if(OpenMP_FOUND)
         set(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE 1)
       endif()
 
+    else()
+      message(STATUS "OpenMP offload isn't supported and disabled.")
     endif()
   endif(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
 
