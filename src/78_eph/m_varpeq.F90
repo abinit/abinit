@@ -3370,7 +3370,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          do ip=1,vpq%nstates
            ! Summing over ph modes.
            do nu=1,natom3
-             bstar_qnu = vpq%b_spin(nu, iq, ip, spin) * cphase_tr
+             ! skip acoustic modes at Gamma
+             if (abs(phfreqs_ibz(nu, iq_ibz)) < tol12) cycle
+
+             bstar_qnu = conjg(vpq%b_spin(nu, iq, ip, spin)) * cphase_tr / sqrt(phfreqs_ibz(nu, iq_ibz))
              c3tmp = (displ_cart_qbz(1,:,uc_iat,nu) + j_dpc * displ_cart_qbz(2,:,uc_iat,nu)) * bstar_qnu * cphase
              sc_displ_cart_re(:,sc_iat,ip,spin) = sc_displ_cart_re(:,sc_iat,ip,spin) + real(c3tmp)
              sc_displ_cart_im(:,sc_iat,ip,spin) = sc_displ_cart_im(:,sc_iat,ip,spin) + aimag(c3tmp) ! This to check if the imag part is zero.

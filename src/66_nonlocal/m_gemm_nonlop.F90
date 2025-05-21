@@ -231,7 +231,7 @@ contains
   integer :: cplex, cplex_enl, cplex_fac
   integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
-  integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
+  integer,allocatable :: cplex_dgxdt(:), cplex_d2gxdt(:)
   logical :: local_vectproj,use_enl_ndat
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: sij_typ(:,:)
@@ -545,6 +545,8 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET ENTER DATA MAP(to:sij_typ) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
+  else
+    ABI_MALLOC(sij_typ,(1,ntypat)) ! Dummy alloc
   end if
 
   ndgxdt = -1
@@ -608,6 +610,8 @@ contains
   end if
   optder = 0;if (ndgxdtfac>0) optder = 1
   if (nd2gxdtfac>0) optder=2
+  ABI_MALLOC(cplex_dgxdt, (ndgxdt))
+  ABI_MALLOC(cplex_d2gxdt,(nd2gxdt))
   cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
   ! When istwf_k > 1, gx derivatives can be real or pure imaginary
   ! cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
@@ -1211,6 +1215,9 @@ contains
   if (allocated(sij_typ)) then
     ABI_FREE(sij_typ)
   end if
+
+  ABI_FREE(cplex_dgxdt)
+  ABI_FREE(cplex_d2gxdt)
 
   if(.not. local_vectproj) then
     ABI_FREE(projections)

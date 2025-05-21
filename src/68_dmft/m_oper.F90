@@ -793,7 +793,7 @@ subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
          !$OMP TARGET ENTER DATA MAP(alloc:work)
          !do idat=1,oper%ndat,32
            !blk=min(32,oper%ndat-idat+1)
-           !$OMP TARGET DATA USE_DEVICE_PTR(ks,work)
+           !$OMP TARGET DATA USE_DEVICE_ADDR(ks,work)
            !call gpu_xginv_strided(2,mbandc,ks(:,1+(idat-1)*mbandc:idat*mbandc,ikpt,isppol),mbandc,mbandc*mbandc,1)
            !call gpu_xginv_strided(2,mbandc,ks(:,1+(idat-1)*mbandc:(idat+blk-1)*mbandc,ikpt,isppol),mbandc,mbandc*mbandc,blk,work)
            call gpu_xginv_strided(2,mbandc,ks(:,:,ikpt,isppol),mbandc,mbandc*mbandc,oper%ndat,work)
@@ -937,7 +937,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
              &    ndim_max,oper%ks(:,:,ikpt,isppol),mbandc,czero,mat_temp(:,:,:),ndim)
            else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,ks)
+             !$OMP TARGET DATA USE_DEVICE_ADDR(mat_temp,chipsi,ks)
              call abi_gpu_xgemm(2,"n","n",ndim,mbandc*ndat,mbandc,cone,c_loc(chipsi(:,:,ik,isppol,iatom)),&
              &    ndim_max,c_loc(ks(:,:,ikpt,isppol)),mbandc,czero,c_loc(mat_temp(:,:,:)),ndim)
              !$OMP END TARGET DATA
@@ -991,7 +991,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
            end do ! ndat
          else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,mat_temp2)
+           !$OMP TARGET DATA USE_DEVICE_ADDR(mat_temp,chipsi,mat_temp2)
            call abi_gpu_xgemm_strided(2,'n','c',ndim,ndim,mbandc,cone,c_loc(mat_temp(:,:,:)),ndim,ndim*mbandc,&
            &    c_loc(chipsi(:,:,ik,isppol,iatom)),ndim_max,0,czero,c_loc(mat_temp2(:,:,:)),ndim,ndim*ndim,ndat)
            !$OMP END TARGET DATA
@@ -1021,7 +1021,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
        else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          alpha = dcmplx(wtk(ik), 0.0_dp)
-         !$OMP TARGET DATA USE_DEVICE_PTR(mat,mat_temp2)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(mat,mat_temp2)
          call abi_gpu_xaxpy(2, ndim*ndim*ndat, alpha, &
          &    c_loc(mat_temp2), 1, c_loc(mat(:,:,1+(isppol-1)*ndat:isppol*ndat)), 1)
          !$OMP END TARGET DATA
@@ -1198,17 +1198,17 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 
        else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,mat)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(mat_temp,chipsi,mat)
          call abi_gpu_xgemm(2,"c","n",mbandc,ndat*ndim,ndim,cone,c_loc(chipsi(:,:,ik,isppol,iatom)),&
          &    ndim,c_loc(mat(:,:,(isppol-1)*ndat+1:isppol*ndat)),ndim,czero,c_loc(mat_temp(:,:)),mbandc)
          !$OMP END TARGET DATA
 
-         !$OMP TARGET DATA USE_DEVICE_PTR(mat_temp,chipsi,mat_temp2)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(mat_temp,chipsi,mat_temp2)
          call abi_gpu_xgemm_strided(2,'n','n',mbandc,mbandc,ndim,cone,c_loc(mat_temp(:,:)),mbandc,ndim*mbandc,&
          &    c_loc(chipsi(:,:,ik,isppol,iatom)),ndim_max,0,czero,c_loc(mat_temp2(:,:)),mbandc,mbandc*mbandc,ndat)
          !$OMP END TARGET DATA
-         !$OMP TARGET DATA USE_DEVICE_PTR(ks,mat_temp2)
-         call abi_gpu_xaxpy(2, mbandc*mbandc*ndat, cone, &
+         !$OMP TARGET DATA USE_DEVICE_ADDR(ks,mat_temp2)
+         call abi_gpu_xaxpy(1, 2*mbandc*mbandc*ndat, cone, &
          &    c_loc(mat_temp2), 1, c_loc(ks(:,:,ikpt,isppol)), 1)
          !$OMP END TARGET DATA
 #endif

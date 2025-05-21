@@ -1564,7 +1564,7 @@ In some cases, $n_i$ is set to 0:
 
   * if the band $i$ is in the buffer (see [[nbdbuf]])
 
-  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_minocc]]
+  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_min_occ]]
 
 The resulting degree applied to all bands could be 0, for example if the wave-functions are already converged.
 In that case no filter is applied, but the Rayleigh-Ritz procedure is done anyway.
@@ -22504,9 +22504,11 @@ Variable(
     characteristics=['[[MAGNETIC_FIELD]]'],
     added_in_version="before_v9",
     text=r"""
-Give the value of the Zeeman field, $H$, acting on the spinorial wavefunctions.
-Note that Tesla are admitted. This sets the magnitude of $\mu_0H$, in Tesla,
-with H in Amperes/metre.
+Give the value of the Zeeman field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part).
+As usual, the default is atomic units.
+
+Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field. 
+Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
 """,
 ),
 
@@ -25559,7 +25561,7 @@ This parameter controls the convergence rate of the wave-functions when using th
 ),
 
 Variable(
-    abivarname="oracle_minocc",
+    abivarname="oracle_min_occ",
     varset="gstate",
     vartype="real",
     topics=['TuningSpeedMem_expert'],
