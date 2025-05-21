@@ -80,6 +80,16 @@ option (ABINIT_ENFORCE_CUDA_AWARE_MPI "Some MPI cuda-aware implementation are no
 
 option(ABINIT_ENABLE_GPU_CUDA "Enable GPU build (using Nvidia CUDA backend, default OFF)" OFF)
 if(ABINIT_ENABLE_GPU_CUDA)
+
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    message(FATAL_ERROR
+      "When using CUDA, you need to provide -DCMAKE_CUDA_ARCHITECTURES "
+      "with the NVIDIA GPU compute capability matching your environment.\n"
+      "For example, if targetting NVIDIA GPU A100:\n"
+      "-DCMAKE_CUDA_ARCHITECTURES=80 \n"
+    )
+  endif()
+
   include(CheckLanguage)
   check_language(CUDA)
   if (CMAKE_CUDA_COMPILER)
@@ -111,6 +121,18 @@ endif()
 
 option(ABINIT_ENABLE_GPU_HIP "Enable GPU build (using AMD HIP backend, default OFF)" OFF)
 if(ABINIT_ENABLE_GPU_HIP)
+
+  if(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
+    message(FATAL_ERROR
+      "When using HIP, you need to provide -DCMAKE_HIP_ARCHITECTURES "
+      "with the AMD GPU target matching your environment.\n"
+      "For example, if targetting AMD GPU Instinct MI250:\n"
+      "-DCMAKE_HIP_ARCHITECTURES=gfx90a \n"
+    )
+  endif()
+
+  # For shutting annoying warning from ROCM Cmake module
+  set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 
   find_package(HIP)
   find_package(hipfft)
