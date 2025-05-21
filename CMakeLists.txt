@@ -373,16 +373,18 @@ if(OpenMP_FOUND)
     set(HAVE_OMP_COLLAPSE 1)
   endif()
 
-  # Fix an inconsistency causing the absence of OpenMP flag at link step when using Cray compiler
   if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Cray")
-    string(REPLACE " " ";" OpenMP_Fortran_FLAGS_LIST ${OpenMP_Fortran_FLAGS})
-    add_link_options(${OpenMP_Fortran_FLAGS_LIST})
+    # Fix an inconsistency causing compilation problems despite '-fopenmp' and '-h omp' are supposed to be synonymous !!
+    # Original flag for OpenMP in Cray FTN is : -h omp
+    set(OpenMP_Fortran_FLAGS "-fopenmp")
+    add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-fopenmp>")
+    add_link_options("$<$<AND:$<LINK_LANGUAGE:Fortran>>:-fopenmp>")
   endif()
 
   if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
     # check for OpenMP GPU offload support (OpenMP v5 onwards)
     try_compile(HAVE_OPENMP_OFFLOAD_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_offload.F90
-      LINK_OPTIONS ${OpenMP_Fortran_FLAGS_LIST}
+      LINK_OPTIONS ${OpenMP_Fortran_FLAGS}
       LINK_LIBRARIES OpenMP::OpenMP_Fortran)
 
     if(HAVE_OPENMP_OFFLOAD_BOOL)
