@@ -523,7 +523,9 @@ AC_DEFUN([_ABI_GPU_INIT_HIP],[
     abi_result=""
     if test -s "${abi_gpu_hip_root}/includea/hip/hip_runtime_api.h"; then
       if test "${GPU_CPPFLAGS}" = ""; then
-        abi_gpu_hip_incs="-I${abi_gpu_hip_root}/include"
+        # Use HIP with binding to AMD ROCM by default.
+        # Binding to CUDA, with __HIP_PLATFORM_NVIDIA__ isn't tested
+        abi_gpu_hip_incs="-D__HIP_PLATFORM_AMD__ -I${abi_gpu_hip_root}/include"
       fi
       abi_gpu_hip_has_incs="yes"
       abi_result="${abi_result} run-time"
