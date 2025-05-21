@@ -4,6 +4,10 @@
 # Fortran
 ##################################################################
 
+# Common Fortran properties managed by CMake
+set(CMAKE_Fortran_FORMAT "FREE")
+
+
 # full list of compilers supported by cmake :
 # https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html
 
@@ -135,7 +139,7 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC") # NVFORTRAN
 
   # TODO : improve
   add_compile_options(
-    "$<$<COMPILE_LANGUAGE:Fortran>:-Mextend;-Mpreprocess;-Mfree;-Minfo=mp,accel,par,pfo>")
+    "$<$<COMPILE_LANGUAGE:Fortran>:-Mextend;-Mpreprocess;-Minfo=mp,accel,par,pfo>")
 
   # debug flags
   add_compile_options(
