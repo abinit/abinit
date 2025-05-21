@@ -315,6 +315,7 @@ if (MPI_FOUND)
     set(HAVE_MPI_BUGGY_INTERFACES 1)
   endif()
 
+  set(ABINIT_ENABLE_GPU_AWARE_MPI FALSE)
   # try to detect if our MPI implementation is cuda-aware
   # 1. If using OpenMPI, then try to parse output of ompi_info
   # 2. If using MPICH, TODO
@@ -334,6 +335,7 @@ if (MPI_FOUND)
         if ( (_output MATCHES "smcuda") )
           message(STATUS "Found OpenMPI with CUDA-aware support available.")
           set(HAVE_GPU_MPI 1)
+          set(ABINIT_ENABLE_GPU_AWARE_MPI TRUE)
         else()
           message(WARNING "OpenMPI found, but it is not built with CUDA support.")
         endif()
@@ -348,13 +350,15 @@ if (MPI_FOUND)
       # TODO
     endif()
 
-    # unconditionally set HAVE_GPU_MPI if the user say so
-    # this may be need because our detection above is not bullet proof
-    if (ABINIT_ENFORCE_CUDA_AWARE_MPI)
-      set(HAVE_GPU_MPI 1)
-    endif()
-
   endif(ABINIT_ENABLE_GPU_CUDA)
+
+  # unconditionally set HAVE_GPU_MPI if the user say so
+  # this may be need because our detection above is not bullet proof
+  if (ABINIT_ENFORCE_GPU_AWARE_MPI)
+    set(HAVE_GPU_MPI 1)
+    set(ABINIT_ENABLE_GPU_AWARE_MPI TRUE)
+  endif()
+
 
 endif(MPI_FOUND)
 
@@ -1086,6 +1090,7 @@ if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP OR HAVE_OPENMP_OFFLOAD OR AB
   else()
     message(STATUS "  > OpenMP offload not enabled!")
   endif()
+  message(STATUS "  > GPU-aware MPI enabled : ${ABINIT_ENABLE_GPU_AWARE_MPI}")
   if (ABINIT_KOKKOS_WANTED)
     message(STATUS "  > Kokkos enabled:")
     if (ABINIT_KOKKOS_BUILD)
