@@ -63,7 +63,8 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
   endif()
 
   # Add '-Oipa0', for disabling IPO (Inter-Procedural Optimisation) as compilation fails otherwise
-  add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-Oipa0>")
+  # Add '-ef', for having Fortran module files in lowercase
+  add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-Oipa0;-ef>")
 
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Clang")
 
