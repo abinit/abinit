@@ -76,7 +76,7 @@ if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(DO_BUILD_67_PYTHON_INVOCATION_EXT ON)
 endif()
 
-option (ABINIT_ENFORCE_CUDA_AWARE_MPI "Some MPI cuda-aware implementation are not well detected; use this variable to enforce if you that your MPI implementation is Cuda-aware." OFF)
+option (ABINIT_ENFORCE_GPU_AWARE_MPI "Some MPI GPU-aware implementations are not well detected; use this variable to enforce if you know that your MPI implementation is GPU-aware." OFF)
 
 option(ABINIT_ENABLE_GPU_CUDA "Enable GPU build (using Nvidia CUDA backend, default OFF)" OFF)
 if(ABINIT_ENABLE_GPU_CUDA)
