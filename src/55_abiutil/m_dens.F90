@@ -1510,9 +1510,6 @@ end subroutine mag_penalty_e
 !!  gr_intgden(3,nspden,natom)=grad wrt atomic positions, of integrated density (magnetization...) for each atom in a sphere. Optional arg
 !!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
 !!    Note that when intgden is present, the definition of the spherical integration function changes, as it is smoothed.
-!!  intgden_im(nspden, natom) = Imaginary part of the integrated density (magnetization...) for each atom in a sphere of radius ratsph. 
-!!    Used only for complex-valued densities.
-!!    Note that when intgden is present, the definition of the spherical integration function changes, as it is smoothed.
 !!  intgf2(natom,natom)=overlaps of the spherical integration functions for each atom in a sphere of radius ratsph. Optional arg
 !!  rhomag(2,nspden)=integrated complex density (magnetization...) over full u.c. vol. Optional argument
 !!    In collinear case component 1 is total density and 2 is _magnetization_ up-down
@@ -1523,7 +1520,7 @@ end subroutine mag_penalty_e
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,intgden_im)
+&    option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1539,7 +1536,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),intent(out),optional  :: dentot(nspden)
  real(dp),intent(out),optional  :: gr_intgden(3,nspden,natom)
  real(dp),intent(out),optional  :: intgden(cplex,nspden,natom)
- real(dp),intent(out),optional  :: intgden_im(nspden,natom)
  real(dp),intent(out),optional  :: intgf2(natom,natom)
  real(dp),intent(out),optional  :: rhomag(2,nspden)
  real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)
@@ -1574,9 +1570,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    intgden=zero
  endif
  intgden_im_=zero
- if(present(intgden_im))then
-   intgden_im=zero
- endif
  if(present(gr_intgden))then
    gr_intgden=zero
  endif
@@ -1880,15 +1873,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    if(present(intgden))intgden = intgden_
  end if
 
- if(present(intgden_im) .or. option/=0) then
-   if(mpi_enreg%nproc_fft>1)then
-     call timab(48,1,tsec)
-     call xmpi_sum(intgden_im_,mpi_enreg%comm_fft,ierr)
-     call timab(48,2,tsec)
-   end if
-   if(present(intgden_im))intgden_im = intgden_im_
- end if
-
  if(present(gr_intgden) .and. option<10 .and. ratsm2>tol12) then
    if(mpi_enreg%nproc_fft>1)then
      call timab(48,1,tsec)
@@ -1983,7 +1967,7 @@ end subroutine calcdenmagsph
 !!
 !! SOURCE
 
-subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, ratsm, ratsph, rhomag, typat, ziontypat,intgden_im)
+subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, ratsm, ratsph, rhomag, typat, ziontypat)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1995,19 +1979,19 @@ integer, intent(in) :: cplex
 !arrays
 integer,intent(in)  :: typat(natom)
 real(dp),intent(in) :: intgden(cplex,nspden,natom)
-real(dp),intent(in),optional :: intgden_im(cplex,nspden,natom)
 real(dp),intent(in) :: ratsph(ntypat),rhomag(2,nspden)
 real(dp),intent(in),optional :: ziontypat(ntypat)
 
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ix
+ integer :: iatom,ix,icplex
  real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
  real(dp) :: rho_tot, rho_tot_im
  real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
  real(dp) :: sum_mag_im, sum_mag_x_im,sum_mag_y_im,sum_mag_z_im,sum_rho_up_im,sum_rho_dn_im,sum_rho_tot_im ! SR
  character(len=500) :: msg,msg1
+ character(len=500) :: msg_cplex
 
 ! *************************************************************************
 
@@ -2102,92 +2086,85 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          if(nspden==2) msg=' Atom    Radius       grchrg        T(z)      up torque  down torque'
          if(nspden==4) msg=' Atom    Radius       Torque          T(x)        T(y)        T(z)  '
        endif
-       call wrtout(units,msg)
+       if (cplex==2) then
+         msg_cplex=msg
+       else
+         call wrtout(units,msg)
+       endif
 
      endif
 
      if(nspden==2)then
-       do iatom=1,natom
-         if(option/=21)then
-           write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom),intgden(1,2,iatom)
-         else
-           write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(1,1,iatom),intgden(1,2,iatom)
+       do icplex=1,cplex
+         sum_mag=zero
+         sum_rho_up=zero
+         sum_rho_dn=zero
+         sum_rho_tot=zero
+         if (cplex==2) then
+           if (icplex==1) then
+             write(msg, '(a)') ' Real part of magnetization:'
+             call wrtout(units,msg)
+           elseif (icplex==2) then
+             write(msg, '(a)') ' Imaginary part of magnetization:'
+             call wrtout(units,msg)
+             call wrtout(units,msg_cplex)
+           endif
          endif
-         write(msg,'(a,a,f12.6,a,f12.6)')trim(msg),'  ',(intgden(1,1,iatom)+intgden(1,2,iatom)),' ',(intgden(1,1,iatom)-intgden(1,2,iatom))
-         if(option==1 .and. present(ziontypat)) then
-           write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-(intgden(1,1,iatom)+intgden(1,2,iatom))
-         end if
+         do iatom=1,natom
+           if(option/=21)then
+             write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden(icplex,1,iatom),intgden(icplex,2,iatom)
+           else
+             write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(icplex,1,iatom),intgden(icplex,2,iatom)
+           endif
+           write(msg,'(a,a,f12.6,a,f12.6)')trim(msg),'  ',(intgden(icplex,1,iatom)+intgden(icplex,2,iatom)),' ',(intgden(icplex,1,iatom)-intgden(icplex,2,iatom))
+           if(option==1 .and. present(ziontypat)) then
+             write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-(intgden(icplex,1,iatom)+intgden(icplex,2,iatom))
+           end if
+           call wrtout(units,msg)
+           ! Compute the sum of the magnetization
+           sum_mag=sum_mag+intgden(icplex,1,iatom)-intgden(icplex,2,iatom)
+           sum_rho_up=sum_rho_up+intgden(icplex,1,iatom)
+           sum_rho_dn=sum_rho_dn+intgden(icplex,2,iatom)
+           sum_rho_tot=sum_rho_tot+intgden(icplex,1,iatom)+intgden(icplex,2,iatom)
+         end do
+         write(msg, '(a)') ' ---------------------------------------------------------------------'
          call wrtout(units,msg)
-         ! Compute the sum of the magnetization
-         sum_mag=sum_mag+intgden(1,1,iatom)-intgden(1,2,iatom)
-         sum_rho_up=sum_rho_up+intgden(1,1,iatom)
-         sum_rho_dn=sum_rho_dn+intgden(1,2,iatom)
-         sum_rho_tot=sum_rho_tot+intgden(1,1,iatom)+intgden(1,2,iatom)
-       end do
-       write(msg, '(a)') ' ---------------------------------------------------------------------'
-       call wrtout(units,msg)
-       write(msg, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
-       call wrtout(units,msg)
-
-       if(option==1)then
-         write(msg, '(a,f14.6)') ' Total magnetization (from the atomic spheres):       ', sum_mag
+         write(msg, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up,sum_rho_dn,'  ',sum_rho_tot,' ',sum_mag
          call wrtout(units,msg)
-         write(msg, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
+
+         if(option==1)then
+           write(msg, '(a,f14.6)') ' Total magnetization (from the atomic spheres):       ', sum_mag
+           call wrtout(units,msg)
+           if (icplex==1) then
+             write(msg, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll
+           elseif (icplex==2) then
+             write(msg, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll_im
+           endif
+           call wrtout(units,msg)
+         endif
+         write(msg, '(a)') ' '
          call wrtout(units,msg)
-       endif
-       write(msg, '(a)') ' '
-       call wrtout(units,msg)
-       !if (cplex==2) then
-       !  write(msg, '(a)') ' Imaginary part of magnetization:'
-       !  call wrtout(units,msg)
-       !  msg=' Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)'
-       !  call wrtout(units,msg)
-       !  do iatom=1,natom
-       !    if(option/=21)then
-       !      write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),intgden_im(1,iatom),intgden_im(2,iatom)
-       !    else
-       !      write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),-intgden_im(1,iatom),intgden_im(2,iatom)
-       !    endif
-       !    write(msg,'(a,a,f12.6,a,f12.6)')trim(msg),'  ',(intgden_im(1,iatom)+intgden_im(2,iatom)),' ',(intgden_im(1,iatom)-intgden_im(2,iatom))
-
-       !    if(option==1 .and. present(ziontypat)) then
-       !      write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-(intgden_im(1,iatom)+intgden_im(2,iatom))
-       !    end if
-       !    call wrtout(units,msg)
-       !    ! Compute the sum of the magnetization
-       !    sum_mag_im=sum_mag_im+intgden_im(1,iatom)-intgden_im(2,iatom)
-       !    sum_rho_up_im=sum_rho_up_im+intgden_im(1,iatom)
-       !    sum_rho_dn_im=sum_rho_dn_im+intgden_im(2,iatom)
-       !    sum_rho_tot_im=sum_rho_tot_im+intgden_im(1,iatom)+intgden_im(2,iatom)
-       !  end do
-       !write(msg, '(a)') ' ---------------------------------------------------------------------'
-       !call wrtout(units,msg)
-       !write(msg, '(a,2f13.6,a,f12.6,a,f12.6)') '  Sum:         ', sum_rho_up_im,sum_rho_dn_im,'  ',sum_rho_tot_im,' ',sum_mag_im
-       !call wrtout(units,msg)
-
-       !if(option==1)then
-       !  write(msg, '(a,f14.6)') ' Total magnetization (from the atomic spheres):       ', sum_mag_im
-       !  call wrtout(units,msg)
-       !  write(msg, '(a,f14.6)') ' Total magnetization (exact up - dn):                 ', mag_coll_im
-       !  call wrtout(units,msg)
-       !endif
-       !endif
+       enddo
 
      elseif(nspden==4) then
 
-       do iatom=1,natom
+       do icplex=1,cplex
+         sum_mag_x=zero
+         sum_mag_y=zero
+         sum_mag_z=zero
+         do iatom=1,natom
          if(option/=21)then
-           write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom),'  ',(intgden(1,ix,iatom),ix=2,4)
+           write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden(icplex,1,iatom),'  ',(intgden(icplex,ix,iatom),ix=2,4)
          else
-           write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(1,1,iatom),'  ',(intgden(1,ix,iatom),ix=2,4)
+           write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(icplex,1,iatom),'  ',(intgden(icplex,ix,iatom),ix=2,4)
          endif
          if(option==1 .and. present(ziontypat))&
-&          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-intgden(1,1,iatom)
+&          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-intgden(icplex,1,iatom)
          call wrtout(units,msg)
          ! Compute the sum of the magnetization in x, y and z directions
-         sum_mag_x=sum_mag_x+intgden(1,2,iatom)
-         sum_mag_y=sum_mag_y+intgden(1,3,iatom)
-         sum_mag_z=sum_mag_z+intgden(1,4,iatom)
+         sum_mag_x=sum_mag_x+intgden(icplex,2,iatom)
+         sum_mag_y=sum_mag_y+intgden(icplex,3,iatom)
+         sum_mag_z=sum_mag_z+intgden(icplex,4,iatom)
        end do
        write(msg, '(a)') ' ---------------------------------------------------------------------'
        call wrtout(units,msg)
@@ -2195,40 +2172,14 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        if(option==1)then
          write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
          call wrtout(units,msg)
-         write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
+         if (icplex==1) then
+           write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
+         elseif (icplex==2) then
+           write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x_im,mag_y_im,mag_z_im
+         endif
          call wrtout(units,msg)
        endif
-
-       write(msg, '(a)') ' '
-       call wrtout(units,msg)
-       !if (cplex==2) then
-       !  write(msg, '(a)') ' Imaginary part of magnetization:'
-       !  call wrtout(units,msg)
-       !  do iatom=1,natom
-       !    if(option/=21)then
-       !        write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden_im(1,iatom),'  ',(intgden_im(ix,iatom),ix=2,4)
-       !    else
-       !        write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),-intgden_im(1,iatom),'  ',(intgden_im(ix,iatom),ix=2,4)
-       !    endif
-       !    if(option==1 .and. present(ziontypat))&
-&      !      write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-intgden_im(1,iatom)
-       !    call wrtout(units,msg)
-       !    ! Compute the sum of the magnetization in x, y and z directions
-       !    sum_mag_x_im=sum_mag_x_im+intgden_im(2,iatom)
-       !    sum_mag_y_im=sum_mag_y_im+intgden_im(3,iatom)
-       !    sum_mag_z_im=sum_mag_z_im+intgden_im(4,iatom)
-       !  end do
-       !  write(msg, '(a)') ' ---------------------------------------------------------------------'
-       !  call wrtout(units,msg)
-
-       !  if(option==1)then
-       !    write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x_im,sum_mag_y_im,sum_mag_z_im
-       !    call wrtout(units,msg)
-       !    write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x_im,mag_y_im,mag_z_im
-       !    call wrtout(units,msg)
-       !  endif
-       !endif
-
+       enddo
      end if
 
    elseif(option==-1) then
@@ -2756,8 +2707,6 @@ end subroutine printmagvtk
 !! INPUTS
 !!  intgden(nspden,natom)     = Integrated magnetic moments at the current SCF step.
 !!  intgden0(nspden,natom)    = Integrated magnetic moments at the previous SCF step.
-!!  intgden_im(nspden,natom) [optional]     = Imaginary part of the magnetic moments at current SCF step.
-!!  intgden_im0(nspden,natom) [optional]    = Imaginary part of the magnetic moments at previous SCF step.
 !!  natom                     = Number of atoms.
 !!  nspden                    = Number of spin-density components (typically 1, 2, or 4).
 !!
@@ -2769,17 +2718,15 @@ end subroutine printmagvtk
 !!  None
 !!
 !! NOTES
-!!  This routine can handle both real and complex spin densities. Imaginary components are optional
-!!  and are only considered if both `intgden_im` and `intgden_im0` are present.
+!!  This routine can handle both real and complex spin densities. 
 !!
 !! SOURCE
 
-subroutine calmaxdifmag(cplex,intgden,intgden0,natom,nspden,maxmag,difmag,intgden_im,intgden_im0)
+subroutine calmaxdifmag(cplex,intgden,intgden0,natom,nspden,maxmag,difmag)
 
 !Arguments ---------------------------------------------
  integer,intent(in)   :: natom,nspden,cplex
  real(dp),intent(in) :: intgden(cplex,nspden,natom),intgden0(cplex,nspden,natom)
- real(dp),intent(in),optional  :: intgden_im(nspden,natom),intgden_im0(nspden,natom)
  real(dp),intent(out)::maxmag,difmag 
 !Local variables ------------------------------
  integer :: iatom,mu
@@ -2791,10 +2738,10 @@ subroutine calmaxdifmag(cplex,intgden,intgden0,natom,nspden,maxmag,difmag,intgde
          mag0=intgden0(1,1,iatom)-intgden0(1,2,iatom)
          maxmag=max(maxmag,abs(mag))
          difmag=max(difmag,abs(mag-mag0))
-         !if(present(intgden_im))then
-         !  mag=intgden_im(1,iatom)-intgden_im(2,iatom)
-         !  mag0=intgden_im0(1,iatom)-intgden_im0(2,iatom)
-         !endif
+         if (cplex==2) then
+           mag=intgden(2,1,iatom)-intgden(2,2,iatom)
+           mag0=intgden(2,1,iatom)-intgden0(2,2,iatom)
+         endif
          maxmag=max(maxmag,abs(mag))
          difmag=max(difmag,abs(mag-mag0))
      end do
@@ -2803,10 +2750,10 @@ subroutine calmaxdifmag(cplex,intgden,intgden0,natom,nspden,maxmag,difmag,intgde
        do mu=2,4
          maxmag=max(maxmag,abs(intgden(1,mu,iatom)))
          difmag=max(difmag,abs(intgden(1,mu,iatom)-intgden0(1,mu,iatom)))
-         !if(present(intgden_im))then
-         !  maxmag=max(maxmag,abs(intgden_im(mu,iatom)))
-         !  difmag=max(difmag,abs(intgden_im(mu,iatom)-intgden_im0(mu,iatom)))
-         !endif
+         if (cplex==2) then
+           maxmag=max(maxmag,abs(intgden(2,mu,iatom)))
+           difmag=max(difmag,abs(intgden(2,mu,iatom)-intgden0(2,mu,iatom)))
+         endif
        end do
      end do
    endif

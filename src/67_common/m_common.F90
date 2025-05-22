@@ -310,22 +310,18 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
        if (prtfor==0) then
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-            !'     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2    difmagsph   maxmagsph '
             '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   vres2   difmagsph maxmagsph'
          else
            write(message, '(4a)' ) ch10,&
-            !'     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2    difmagsph   maxmagsph '
             '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   nres2   difmagsph maxmagsph'
          end if
        else
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-            !'     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2   diffor   maxfor     difmagsph   maxmagsph'
-            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '  vres2    diffor    maxfor   difmagsph maxmagsph'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   vres2    diffor    maxfor   difmagsph maxmagsph'
          else
            write(message, '(4a)' ) ch10,&
-            !'     iter   Etot(hartree)     deltaE(h) ',colname,   '  nres2   diffor   maxfor     difmagsph   maxmagsph'
-            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '  nres2    diffor    maxfor   difmagsph maxmagsph'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   nres2    diffor    maxfor   difmagsph maxmagsph'
          end if
        end if
      else

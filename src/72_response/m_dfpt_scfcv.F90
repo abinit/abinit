@@ -74,7 +74,7 @@ module m_dfpt_scfcv
  use m_paw_dfpt,    only : pawdfptenergy
  use m_paw_nhat,    only : pawmknhat,pawnhatfr
  use m_rf2,         only : rf2_getidirs
- use m_dens,        only : calcdenmagsph, prtdenmagsph!, calmaxdifmag
+ use m_dens,        only : calcdenmagsph, prtdenmagsph, calmaxdifmag
  use m_dfpt_fef,    only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
  use m_dfpt_vtorho, only : dfpt_vtorho
  use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
@@ -428,8 +428,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qred2cart(3,3)
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
- real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
- real(dp) :: intgden_im(dtset%nspden,dtset%natom),intgden0(dtset%nspden,dtset%natom),intgden_im0(dtset%nspden,dtset%natom)
+ real(dp) :: intgden(cplex,dtset%nspden,dtset%natom),dentot(dtset%nspden)
+ real(dp) :: intgden0(cplex,dtset%nspden,dtset%natom)
 !real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
@@ -526,7 +526,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !nstep, tollist and iscf - still, diffor,res2,prtfor,fcart are here initialized to 0)
  choice=1 ; prtfor=0 ; diffor=zero ; res2=zero
  maxmag=zero;difmag=zero
- intgden=zero; intgden_im=zero
+ intgden=zero
  ABI_MALLOC(fcart,(3,dtset%natom))
 
 !At present, no double loop
@@ -1046,11 +1046,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      choice=2
 ! if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
 !   intgden0=intgden
-!   intgden_im0=intgden_im
 !   call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 !&     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-!&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,intgden_im=intgden_im)
-!   call calmaxdifmag(intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag,intgden_im,intgden_im0)
+!&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+!   call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
 ! endif
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
@@ -1125,11 +1124,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ! so we can just set fermih = fermie
 ! if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
 !   intgden0=intgden
-!   intgden_im0=intgden_im
 !   call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 !&     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-!&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,intgden_im=intgden_im)
-!   call calmaxdifmag(intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag,intgden_im,intgden_im0)
+!&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+!   call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
 ! endif
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
@@ -1460,7 +1458,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    end if
  end if
 ! if (dtset%iscf>0 .and. (ipert/=dtset%natom+5)) then 
-!     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,intgden_im=intgden_im)
+!     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
 ! endif
 
  if (iwrite_fftdatar(mpi_enreg)) then
