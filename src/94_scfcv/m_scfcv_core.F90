@@ -1764,13 +1764,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end if
      if(response==0.and.(dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
        intgden0=intgden
-       if (psps%usepaw==1) then
-         call calcdenmagsph(mpi_enreg,dtset%natom,pawfgr%nfft,pawfgr%ngfft,dtset%nspden,&
-                              dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
-       else
-         call calcdenmagsph(mpi_enreg,dtset%natom,dtset%nfft,ngfft,dtset%nspden,&
-                              dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
-       endif
+       call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,&
+                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
       !Compute maximal magnet and maximal difference of magnet
        call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
      endif
@@ -2037,13 +2032,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      ABI_NVTX_START_RANGE(NVTX_SCFCV_SCPRQT)
      if(response==0.and.(dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
        intgden0=intgden
-       if (psps%usepaw==1) then
-         call calcdenmagsph(mpi_enreg,dtset%natom,pawfgr%nfft,pawfgr%ngfft,dtset%nspden,&
-                              dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
-       else
-         call calcdenmagsph(mpi_enreg,dtset%natom,dtset%nfft,ngfft,dtset%nspden,&
-                              dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
-       endif
+       call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,&
+                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden)
        call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
      endif
 
