@@ -1237,25 +1237,21 @@ Variable(
     varset="multibinit",
     vartype="real",
     topics=['DynamicsMultibinit_basic'],
-    dimensions=[3],
+    dimensions=[3, "[[nefield]]"],
     defaultval=[0.0, 0.0, 0.0],
     mnemonics="Electric FIELD magnitude for Multibinit",
     added_in_version="before v9",
     text=r"""
-Set the magnitude for the electric field"""
+Set the magnitude for the electric field.
+For efield_type 6, multiple ([[nefield]])  efield values  are allowed, the format is 
+ex1, ey1, ez1, 
+ex2, ey2, ez2
+...
+exn, eyn, ezn
+where n is [[nefield]].
+"""
 ),
-Variable(
-    abivarname="efield2@multibinit",
-    varset="multibinit",
-    vartype="real",
-    topics=['DynamicsMultibinit_basic'],
-    dimensions=[3],
-    defaultval=[0.0, 0.0, 0.0],
-    mnemonics="Electric FIELD magnitude for 2nd field in Multibinit when efield_type is 6",
-    added_in_version="v10",
-    text=r"""
-Set the magnitude for the secondary electric field in multibinit when efield_type is 6"""
-),
+
 
 Variable(
     abivarname="efield_background@multibinit",
@@ -1280,20 +1276,14 @@ Variable(
     mnemonics="Electric FIELD periodicity LAMBDA.",
     added_in_version="v10",
     text=r"""
-Set the periodicity in real space for spatially inhomogeneous vector fields. 0.0 is interpreted as infinite"""
-),
-
-Variable(
-    abivarname="efield_lambda2@multibinit",
-    varset="multibinit",
-    vartype="real",
-    topics=['DynamicsMultibinit_basic'],
-    dimensions=[3],
-    defaultval=[0.0, 0.0, 0.0], 
-    mnemonics="Electric FIELD periodicity LAMBDA 2.",
-    added_in_version="v10",
-    text=r"""
-Set the periodicity in real space for the second spatially inhomogeneous vector fields when efield_type 6 is selected. 0.0 is interpreted as infinite"""
+Set the periodicity in real space for spatially inhomogeneous vector fields. 0.0 is interpreted as infinite.
+For efield_type 6, multiple ([[nefield]])  efield_lambda values  are allowed, the format is 
+lx1, ly1, lz1, 
+lx2, ly2, lz2
+...
+lxn, lyn, lzn
+where l means lambda and  n is [[nefield]].
+"""
 ),
 
 Variable(
@@ -1314,26 +1304,16 @@ Variable(
     varset="multibinit",
     vartype="real",
     topics=['DynamicsMultibinit_basic'],
-    dimensions="scalar",
+    dimensions=["[[nefield]]"],
     defaultval=0.0,
     mnemonics="Electric FIELD PHASE shift.",
     added_in_version="v10",
     text=r"""
-Set the phase shift for spatially or time modulated fields"""
+Set the phase shift for spatially or time modulated fields. 
+For efield_type 6, multiple ([[nefield]])  efield_phase values  are allowed.
+"""
 ),
 
-Variable(
-    abivarname="efield_phase2@multibinit",
-    varset="multibinit",
-    vartype="real",
-    topics=['DynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0.0,
-    mnemonics="Electric FIELD PHASE 2 shift.",
-    added_in_version="v10",
-    text=r"""
-Set the phase shift for spatially or time modulated fields for the second field in the case efield_type 6."""
-),
 
 Variable(
     abivarname="efield_gmean@multibinit",

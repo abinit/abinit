@@ -748,8 +748,6 @@ contains
     if(present(coeff_file_rw)) then
         ! TODO hexu: This functionality needs more test and is now temporarily disabled
         ! If test ok, remove setting it to 0. 
-        coeff_file_rw = 0
-
 
       if (coeff_file_rw==1 .and. generateterm_in == 1 ) then
         write (filename, "(A9,I2,I2,A4)") "TEST_TERMS", my_rank+1,fit_iatom_in,".xml"
