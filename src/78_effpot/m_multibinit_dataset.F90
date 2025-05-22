@@ -982,6 +982,7 @@ end if
 ! read efield
 call read_dpr_array_var(dptmp, size=multibinit_dtset%nefield*3, &
 &                    var_name='efield', type='DPR', default=0.0_dp)
+ABI_MALLOC(multibinit_dtset%efield, (3,multibinit_dtset%nefield))
 multibinit_dtset%efield= reshape(dptmp, (/3,multibinit_dtset%nefield/))
 ABI_FREE(dptmp)
 
@@ -993,6 +994,7 @@ call read_dpr_array_var( multibinit_dtset%efield_phase,  &
 ! read efield_lambda
 call read_dpr_array_var(dptmp,  size=multibinit_dtset%nefield*3, var_name='efield_lambda', &
 &           type='DPR', default=0.0_dp)
+ABI_MALLOC(multibinit_dtset%efield_lambda, (3,multibinit_dtset%nefield))
 multibinit_dtset%efield_lambda= reshape(dptmp, (/3,multibinit_dtset%nefield/))
 ABI_FREE(dptmp)
 
