@@ -117,6 +117,7 @@ jpawu2      0.9 eV  # Values of J
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = alps_intel_2025_elpa
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
