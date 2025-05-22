@@ -3511,7 +3511,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chebfi_oracle'
  list_vars=trim(list_vars)//' chkdilatmx chkexit chkparal chkprim'
- list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind coeff_file_rw'
+ list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
  list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
