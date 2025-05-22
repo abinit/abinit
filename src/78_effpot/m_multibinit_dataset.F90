@@ -1129,15 +1129,15 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
   multibinit_dtset%coeff_file_rw=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'coeff_file_rw',tread,'INT')
- if(tread==1) multibinit_dtset%coeff_file_rw=intarr(1)
- if(multibinit_dtset%coeff_file_rw<0.or.multibinit_dtset%coeff_file_rw>2)then
-   write(message, '(a,i8,a,a,a,a,a)' )&
-&   'coeff_file_rw is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
-    'are 0 or 1 2.',ch10,&
-&   'Action: correct coeff_file_rw in your input file.'
-   ABI_ERROR(message)
- end if
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'coeff_file_rw',tread,'INT')
+! if(tread==1) multibinit_dtset%coeff_file_rw=intarr(1)
+! if(multibinit_dtset%coeff_file_rw<0.or.multibinit_dtset%coeff_file_rw>2)then
+!   write(message, '(a,i8,a,a,a,a,a)' )&
+!&   'coeff_file_rw is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+!    'are 0 or 1 2.',ch10,&
+!&   'Action: correct coeff_file_rw in your input file.'
+!   ABI_ERROR(message)
+! end if
 
  multibinit_dtset%dtion=100
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtion',tread,'INT')
