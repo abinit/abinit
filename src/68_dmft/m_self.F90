@@ -535,7 +535,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer, allocatable :: unitselffunc_arr(:),unitselffunc_arr2(:),unitselfrot(:,:,:,:)
  real(dp), allocatable :: s_i(:,:),s_r(:,:) !,fermie_read2(:)
  complex(dpc), allocatable :: buffer(:)
- type(matlu_type), allocatable :: eigvectmatlu(:),level_diag(:)
+ type(matlu_type), allocatable :: eigvectmatlu(:),level_diag(:),selfmomrot(:)
  type(oper_type), allocatable :: selfrotmatlu(:)
 ! *********************************************************************
 
@@ -636,6 +636,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      call rotate_matlu(selfrotmatlu(ifreq)%matlu(:),eigvectmatlu(:),natom,1)
    end do ! ifreq
    call gather_oper(selfrotmatlu(:),self%distrib,paw_dmft,2,master=master)
+   if (self%has_moments == 1) then
+     ABI_MALLOC(selfmomrot,(natom))
+     call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),selfmomrot(:))
+     call copy_matlu(self%moments(1)%matlu(:),selfmomrot(:),natom)
+     call rotate_matlu(selfmomrot(:),eigvectmatlu(:),natom,1)
+   end if
    do ifreq=1,min(3,self%nw)
      write(tag_freq,'(i5)') ifreq
      if (ifreq < 3 .and. myproc == master) then ! very important to call print_matlu only on master node
@@ -984,6 +990,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
        if (optrw == 2 .and. optmaxent > 0) then
          do ispinor=1,nspinor
            do im=1,ndim
+             if (self%has_moments == 1) then
+               write(message,'(a,2x,2(es24.16e3,2x))') "# moment", &
+                 & dble(selfmomrot(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol)), &
+                 & aimag(selfmomrot(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol))
+               call wrtout(unitselfrot(im,ispinor,isppol,iatom),message,'COLL')
+             end if
              close(unitselfrot(im,ispinor,isppol,iatom))
              write(std_out,*) "Close file unit",unitselfrot(im,ispinor,isppol,iatom)
            end do ! im
@@ -1334,6 +1346,10 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    if (optrw == 2) then
      call destroy_oper(energy_level)
      call destroy_matlu(level_diag(:),natom)
+     if (self%has_moments == 1) then
+       call destroy_matlu(selfmomrot(:),natom)
+       ABI_FREE(selfmomrot)
+     end if
      do ifreq=1,self%nw
        call destroy_oper(selfrotmatlu(ifreq))
      end do ! ifreq
@@ -1904,7 +1920,7 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
    unt = get_unit()
    open(unit=unt,file=trim(filapp)//"_DFTDMFT_Self_forcheck_imagaxis_from_realaxis.dat",status='unknown',form='formatted')
    write(unt,'(6a)') "# Hilbert transform of the analytically continued self-energy. To be compared with the actual",ch10, &
-             & "# self-energy on the imaginary axis.",ch10,"# Matsubara Frequency (Ha.)       Real part                Imaginary part",ch10
+             & "# self-energy on the imaginary axis in the cubic basis.",ch10,"# Matsubara Frequency (Ha.)       Real part                Imaginary part",ch10
    tag_is = ""
    do iatom=1,natom
      lpawu = self%hdc%matlu(iatom)%lpawu

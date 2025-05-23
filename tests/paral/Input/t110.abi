@@ -1,116 +1,103 @@
-# _== Convergency and starting
+# == Convergency and starting
 # DATASET 1: LDA
-# DATASET 2,3,4: LDA+DMFT
-ndtset 4
-jdtset 1 2 3 4
-
-getden -1
-getself -1
-nnsclo1 0
-nline 5
-nnsclo 7
-
+# DATASET 2: DMFT
+ndtset 5
+jdtset 1 2 3 4 5
 prtvol    4
-pawprtvol 2
+pawprtvol 3
+getden1 0
+getden  1
 
 ##### CONVERGENCE PARAMETERS
 nstep1   30
-nstep    1
-ecut     4 # low cutoff !
-pawecutdg 8
-tolvrs  1.0d-5
-nband     64
-nbdbuf    4
-occopt 3 tsmear 1200 K
+nstep     1
+ecut      10
+pawecutdg 40
+tolvrs  1.0d-10
+nband     34
+occopt 3 tsmear 700 K
+diemix 0.1
+nline    5
+nnsclo1  0
+nnsclo   10
+fftalg   112
+
+nspinor 2
+nspden  4
+nsppol  1
+pawspnorb 1
 
 ##### PHYSICAL PARAMETERS
-natom 5 ntypat 3 typat 1 2 3 3 3
-znucl  23.0 38.0 8.0
-# V Sr O*3
-xred 0.00 0.00 0.00
-     0.50 0.50 0.50
-     0.50 0.00 0.00
-     0.00 0.50 0.00
-     0.00 0.00 0.50
-acell   3*7.2605
-rprim 1.0 0.0 0.0    #Real space PRIMitive translations
-      0.0 1.0 0.0
-      0.0 0.0 1.0
+natom 1 ntypat  1 typat  1
+znucl  58.0
+xred  0.d0   0.d0   0.d0
+acell   3*9.1274
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1/2 1/2 0.0
 
 # == Points k and symetries
-ngkpt   2 2 2    #K - PoinTs grid : Real space LATTice
-nshiftk 2
+paral_kgb 0
+kptopt 4
+kptrlatt 4 0 0 0 4 0 0 0 4
+nshiftk 4
 shiftk 1/2 1/2 1/2
-       0.0 0.0 0.0
-istwfk *1
-
-nsppol 1
-nspden 4
-nspinor 2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
 
 # == LDA+DMFT
 usedmft1 0
 usedmft  1
-dmftbandi 9 # include Sr s band
-dmftbandf 45 # include V t2g bands
-dmft_nwli 500
+dmftbandi 9
+dmftbandf 33
+dmft_nwli 400
 dmft_iter 1
-dmft_mxsf 0.7
+
+# == CTQMC
+dmft_solv 7 # CTQMC
+dmftqmc_l 200
+dmftqmc_n 1.d6
+dmftqmc_therm 5000
+dmftctqmc_basis2 1
+dmftctqmc_basis3 2
+dmftctqmc_basis4 3
+dmftctqmc_basis5 4
+dmftctqmc_meas 10
+
+dmft_mxsf 0.1
 dmft_dc 7
-dmft_nominal 2 3 0 0 0
+dmft_nominal 1
 
-dmft_triqs_wmax 1.0
-
-dmft_solv 7 # Rotationally invariant TRIQS
 dmft_triqs_off_diag 1
-dmftctqmc_basis2 0
-dmftctqmc_basis3 1
-dmftctqmc_basis4 2
+dmft_triqs_wmax 1.0
+dmft_triqs_loc_n_max 2
+dmft_triqs_epsilon 1.d-2
 
 # == DFT+U
-usepawu1    0
+usepawu1    4
 usepawu     14
-dmatpuopt  1   # The density matrix: the simplest expression.
-lpawu2 2 -1 -1
-lpawu  2  1 -1
-upawu1  0.00  0.0  0.0  eV
-f4of2_sla3  0.0  0.0  0.0
-upawu   3.1333333333333333  1.0  0.0  eV
-jpawu   0.7583333333333333  0.0  0.0  eV
+dmatpuopt  1   # choose expression of the density matrix
+lpawu   3   # U on d-orbitals of Ni, no U on oxygen
+upawu1  0.00     # values in Hartree
+upawu2  6 eV     # values in Hartree
+jpawu  0.0000  # values in Hartree
 
-paral_kgb 0
-
-dmftctqmc_meas 10
-dmftqmc_therm 100
-dmftqmc_l 500
-dmftqmc_n 1.d4
-dmft_t2g2 1
-dmft_triqs_move_double 0
-
-prtwf 0
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "23v.paw, 38sr.paw, 8o.paw"
-
+pp_dirpath "$ABI_PSPDIR"
+pseudos "58ce.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
-#%% [shell]
+#%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
 #%% files_to_test = t110_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t110_MPI8o_DS4_Hybridization_offdiag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t110_MPI8o_DS4_Hybridization_diag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t110_MPI8o_DS4_DMFTOCCND, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t110_MPI8o_DS4_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t110_MPI8o_DS4_Gtau_diag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
-#%% authors = B. Amadon, E. Castiel
+#%% authors = J. Bieder, B. Amadon, E. Castiel
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for SrVO3: test different basis with TRIQS
-#%% topics = DMFT, parallelism
+#%% description = DFT+DMFT for Ce : test TRIQS interface with different basis and spinors
 #%%<END TEST_INFO>

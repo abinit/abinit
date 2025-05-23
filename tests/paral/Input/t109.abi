@@ -1,165 +1,123 @@
-# _== Convergency and starting
-# DATASET 1: LDA
-# DATASET 2: LDA+DMFT
-# DATASET 3: k-resolved spectral function
-# DATASET 4: total spectral function
-ndtset 2
-jdtset 3 4
+# Multi_dataset parameters
+ndtset 2       # Two datasets
+jdtset 1 2     # one followed by two
+getden -1      # Second one takes the density of first
 
-getden1 0
-getden2 1
-getden  2
-getself 2
-nline2 5
-nnsclo2 5
+pawprtvol 3  # Printing additional information
+prtvol 4     #
 
-prtvol    4
-pawprtvol 2
+############################
+# Structural Parameters
+############################
+# Definition of unit cell
+acell 3*5.44761       # lattice parameter
+rprim -0.5  0.5  0.5  # Primitive cell
+       0.5 -0.5  0.5
+       0.5  0.5 -0.5
 
-##### CONVERGENCE PARAMETERS
-nstep1   30
-nstep2    1
-ecut     4 # low cutoff !
-pawecutdg 8
-tolvrs  1.0d-5
-nband     64
-nbdbuf    4
-occopt 3 tsmear 1200 K
+# Definition atom
+ntypat 1   # number of different types of atoms
+znucl 26   # z number of atom
 
-##### PHYSICAL PARAMETERS
-natom 5 ntypat 3 typat 1 2 3 3 3
-znucl  23.0 38.0 8.0
-# V Sr O*3
-xred 0.00 0.00 0.00
-     0.50 0.50 0.50
-     0.50 0.00 0.00
-     0.00 0.50 0.00
-     0.00 0.00 0.50
-acell   3*7.2605
-rprim 1.0 0.0 0.0    #Real space PRIMitive translations
-      0.0 1.0 0.0
-      0.0 0.0 1.0
+# Definition of the atoms
+natom 1           # number of atom
+typat 1           # type of atom
+xred 0.0 0.0 0.0  # reduced coordinates for primitive cell
 
-# == Points k and symetries
-ngkpt   2 2 2    #K - PoinTs grid : Real space LATTice
-nshiftk 2
-shiftk 1/2 1/2 1/2
-       0.0 0.0 0.0
-istwfk *1
+# Definition pseudopotentials
+pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
+pseudos "26fe.lda2.paw"
 
-nsppol 1
-nspden 4
-nspinor 2
+# Definition of the k-point grid
+kptopt 4
+ngkpt 4 4 4              # Reciprocal space vectors are built from
+                         # the rprim parameters. This is the size of the
+                         # reciprocal k-points.
+nshiftk 2                # Convergence of the density with regular shifts.
+shiftk 0.25  0.25  0.25
+      -0.25 -0.25 -0.25
 
-# == LDA+DMFT
-usedmft1 0
-usedmft  1
-dmftbandi 9 # include Sr s band
-dmftbandf 45 # include V t2g bands
-dmft_nwli 500
-dmft_iter 2
-dmft_mxsf 0.7
-dmft_dc 6
+############################
+# Energy Parameters
+############################
 
-dmft_triqs_wmax 1.0
+ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 50    # PAW: Energy Cutoff for the Double Grid
+nband 40        # Number of bands
+occopt 3        # Smearing type
+tsmear 3000 K   # Electronic smearing temperature
 
-dmft_solv 7 # Rotationally invariant TRIQS
+############################
+# DFT Calculation
+############################
 
-# == DFT+U
-usepawu1    0
-usepawu     14
-dmatpuopt  1   # The density matrix: the simplest expression.
-lpawu  2  1 -1
-upawu1  0.00  0.0  0.0  eV
-f4of2_sla3  0.0  0.0  0.0
-upawu   3.1333333333333333  1.0  0.0  eV
-jpawu   0.7583333333333333  0.0  0.0  eV
+usedmft1 0       # DFT alone
+nstep1 30        # Number of iterations for the DFT convergence
+tolvrs 1.0d-10  # Tolerance of the density for DFT convergence
 
-paral_kgb 0
+# Definition of the spin properties
+nsppol 1     # No spin-polarization
+nspden 4     # No Scalar magnetism
+nspinor 2    # No Spin-orbit
+spnorbscl 10 # SOC scaling
+
+############################
+# DMFT Calculation
+############################
+
+usedmft2  1       # DMFT calculation
+nstep2    1       # Number of iterations for the DFT+DMFT convergence
+nline2    7       # Number of line minimisations
+nnsclo2   10      # Number of non-self consistent loops
+
+#Definition for DMFT loop
+dmftbandi 9             # First KS band included in the projection for Wannier orbitals
+dmftbandf 26            # Last KS band included in the projection for Wannier orbitals
+dmft_nwli 100           # Linear frequency mesh
+dmft_iter 1             # Number of iterations of the DMFT part.
+                        # We often use single-shot, since anyway the charge density
+                        # changes through the DFT+DMFT anyway.
+dmft_mxsf 0.7           # Mixing of the old and new self-energy at every iterations.
+dmft_dc   6             # Double counting type. 6 is Around Mean Field (AMF)
+
+#Definition of impurity solver
+dmft_solv         6     # TRIQS in the density-density approximation
+dmftqmc_l        50     # Number of time slices for G(tau).
+dmftqmc_n        1.d5   # Number of QMC sweeps
+dmftqmc_therm    5000   # Thermalization
 
 dmftctqmc_meas 10
-dmftctqmc_basis 3
-dmftqmc_therm 1000
-dmftqmc_l 500
 dmft_triqs_off_diag 0
-dmftqmc_n 5.d3
+dmftctqmc_basis 1
+dmft_triqs_wmax 1.0
+dmft_triqs_epsilon 1d-2
 
-dmft_kspectralfunc1 0
-dmft_kspectralfunc2 0
-dmft_kspectralfunc  1
-iscf1 17
-iscf2 17
-iscf -2
-nbandkss1 0
-nbandkss2 0
-nbandkss 20
-kssform  3
-tolwfr1 0.0
-tolwfr2 0.0
-tolwfr 1.d-5
-nstep 5
-kptopt3 -1
-ndivsm3  2
-kptbounds3
-        0.0 0.0 0.0      # Gamma
-        0.0 1/2 0.0      # N
-prtwf 0
+dmft_triqs_entropy 1
+dmft_triqs_compute_integral 1
+dmft_triqs_gaussorder 2
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "23v.paw, 38sr.paw, 8o.paw"
-
-dmft_triqs_leg_measure 1
-dmft_triqs_nleg 15
-dmft_triqs_move_double 0
+#Definition of DFT+U
+usepawu1    4           #
+usepawu2    14          #
+dmatpuopt   2           #
+lpawu       2           # Angular momentum for the projected Hamiltonian
+upawu1      0.00 eV
+upawu2      5.5  eV  # Values of U for each angular momentum
+jpawu1      0.00 eV
+jpawu2      0.84 eV  # Values of J
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
-#%% test_chain = t108.abi, t109.abi
-#%% [shell]
-#%% pre_commands = iw_cp t109o_DS3_spectralfunction_realgrid t109_MPI1o_DS3_spectralfunction_realgrid;
-#%%                iw_cp t109o_DS3_spectralfunction_realgrid t109_MPI4o_DS3_spectralfunction_realgrid;
-#%%                iw_cp t109o_DS3_spectralfunction_realgrid t109_MPI8o_DS3_spectralfunction_realgrid;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0001_isppol1 t109_MPI1i_DS3_Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0002_isppol1 t109_MPI1i_DS3_Self_ra-omega_iatom0002_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0001_isppol1 t109_MPI4i_DS3_Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0002_isppol1 t109_MPI4i_DS3_Self_ra-omega_iatom0002_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0001_isppol1 t109_MPI8i_DS3_Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0002_isppol1 t109_MPI8i_DS3_Self_ra-omega_iatom0002_isppol1;
-#%%                iw_cp t109o_DS3_spectralfunction_realgrid t109_MPI1o_DS4_spectralfunction_realgrid;
-#%%                iw_cp t109o_DS3_spectralfunction_realgrid t109_MPI4o_DS4_spectralfunction_realgrid;
-#%%                iw_cp t109o_DS3_spectralfunction_realgrid t109_MPI8o_DS4_spectralfunction_realgrid;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0001_isppol1 t109_MPI1i_DS4_Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0002_isppol1 t109_MPI1i_DS4_Self_ra-omega_iatom0002_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0001_isppol1 t109_MPI4i_DS4_Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0002_isppol1 t109_MPI4i_DS4_Self_ra-omega_iatom0002_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0001_isppol1 t109_MPI8i_DS4_Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t109i_DS3_Self_ra-omega_iatom0002_isppol1 t109_MPI8i_DS4_Self_ra-omega_iatom0002_isppol1;
 #%% [paral_info]
-#%% nprocs_to_test = 1, 4, 8
+#%% nprocs_to_test = 8
 #%% max_nprocs = 8
-#%% [NCPU_1]
-#%% files_to_test = t109_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI1o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI1o_DS4_SpFunc-from_realaxisself, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI1o_DS3_DFTDMFT_SpectralFunction_orb_from_realaxisself_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI1o_DS3_DFTDMFT_SpectralFunction_orb_from_realaxisself_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%% [NCPU_4]
-#%% files_to_test = t109_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI4o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI4o_DS4_SpFunc-from_realaxisself, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI4o_DS3_DFTDMFT_SpectralFunction_orb_from_realaxisself_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI4o_DS3_DFTDMFT_SpectralFunction_orb_from_realaxisself_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [NCPU_8]
-#%% files_to_test = t109_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI8o_DS4_SpFunc-from_realaxisself, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI8o_DS3_DFTDMFT_SpectralFunction_orb_from_realaxisself_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t109_MPI8o_DS3_DFTDMFT_SpectralFunction_orb_from_realaxisself_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t109_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
-#%% authors = B. Amadon, E. Castiel
+#%% authors = F. Gendron, E. Castiel
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for SrVO3: test spectral function with TRIQS
-#%% topics = DMFT, parallelism
+#%% description = DFT+DMFT for Fe : test TRIQS interface with computation of entropy and spinors
+#%% topics = DMFT
 #%%<END TEST_INFO>
