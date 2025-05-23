@@ -661,6 +661,7 @@ contains
         end if  !need_verbose
 
           max_nbody_tmp(:) = 20
+          max_nbody_tmp(1: size(max_nbody)) = max_nbody
         call polynomial_coeff_getNorder(coeffs_iatom,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot_tmp,power_disps,&
           &                                  max_power_strain_in,0,sc_size,comm,anharmstr=(ii==1 .and. need_anharmstr),&
           &                                  spcoupling=need_spcoupling,distributed=.true.,&
