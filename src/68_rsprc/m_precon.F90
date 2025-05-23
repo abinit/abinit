@@ -18,7 +18,7 @@ module m_precon
 
     use defs_wvltypes
     use m_atomdata,     only : atom_length
-    use m_dfpt_mkvxc,   only : dfpt_mkvxc
+    use m_dfpt_mkvxc,   only : dfpt_mkvxc, dfpt_mkvxc_noncoll
     use m_fft,          only : fourdp, fourwf, fftpac
     use m_fftcore,      only : sphereboundary
     use m_mkrho
@@ -53,13 +53,14 @@ module m_precon
             !To compute loc_pola :
         integer, pointer :: atindx1(:), nattyp(:)
         real(dp), pointer :: xred(:, :)
-        real(dp), pointer :: rhor(:, :)
         !For ffts :
         integer  :: nfft
         !For Kxc :
         integer :: nkxc
         logical :: need_kxc
         real(dp), pointer :: kxc(:, :)
+        real(dp), pointer :: rhor(:, :)
+        real(dp), pointer :: vxc(:, :)
 
     contains
         procedure :: init => precon_init            ! Initialize the precon_object.
@@ -106,7 +107,7 @@ contains
     !!
     !! SOURCE
     subroutine precon_init(this, dtset, atindx1, cg, eigen, fermie, gprimd, &
-        &   irrzon, kg, nattyp, npwarr, phnons, rhor, rprimd, ucvol, xred)
+        &   irrzon, kg, nattyp, npwarr, phnons, rhor, rprimd, ucvol, vxc, xred)
 
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
@@ -120,7 +121,7 @@ contains
         integer, intent(in), target  :: irrzon(:, :, :), kg(:, :), npwarr(:)
         integer, intent(in), target :: atindx1(:), nattyp(:)
         real(dp), intent(in), target :: cg(:, :), eigen(:), phnons(:, :, :)
-        real(dp), intent(in), target :: rhor(:, :)
+        real(dp), intent(in), target :: rhor(:, :), vxc(:, :)
         real(dp), intent(in), target :: xred(:, :)
 
         ! *************************************************************************
@@ -147,13 +148,14 @@ contains
         this%npwarr => npwarr
         this%phnons => phnons
         this%rhor   => rhor
+        this%vxc    => vxc
         this%xred   => xred
         !Initializing LDOS specific variables
         if (this%iprcel == 202) then
             !Allocating the array containing ldos
             ABI_MALLOC(this%ldos, (this%nfft, this%nspden))
         end if
-        !Initializing ... specific variables
+        !Initializing chi0_diag specific variables
         if (this%iprcel == 203) then
             !Preparing the allocation of Kxc
             this%need_kxc = .true.
@@ -689,12 +691,12 @@ contains
         
         !Local variables-------------------------------
         !scalars
-        integer :: cplex, n3xccc, nhat1dim, nhat1grdim, nkxc, option, usexcnhat
+        integer :: cplex, n3xccc, nhatdim, nhat1dim, nhat1grdim, nkxc, option, optnc, usexcnhat
         logical :: non_magnetic_xc
         !arrays
         real(dp), allocatable :: Kxc_vec_r(:, :), vec_r(:, :)
         !real(dp), allocatable :: vec_g_old(:, :, :)            !DEBUG
-        real(dp), allocatable :: nhat1(:, :), nhat1gr(:, :, :)
+        real(dp), allocatable :: nhat(:, :), nhat1(:, :), nhat1gr(:, :, :)
         real(dp) :: dummy_xccc3d1(0), dummy_qphon(3)
         
         ! *************************************************************************
@@ -724,9 +726,23 @@ contains
 
         ABI_MALLOC(Kxc_vec_r, (this%nfft, dtset%nspden))
 
-        call dfpt_mkvxc(cplex, dtset%ixc ,this%kxc, mpi_enreg, this%nfft, ngfft, nhat1, nhat1dim, &
-        &               nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, dtset%nspden, n3xccc, option, &
-        &               dummy_qphon, vec_r, this%rprimd, usexcnhat, Kxc_vec_r, dummy_xccc3d1)
+        if (dtset%nspden==1 .or. dtset%nspden==2) then
+            call dfpt_mkvxc(cplex, dtset%ixc ,this%kxc, mpi_enreg, this%nfft, ngfft, nhat1, nhat1dim, &
+            &               nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, dtset%nspden, n3xccc, option, &
+            &               dummy_qphon, vec_r, this%rprimd, usexcnhat, Kxc_vec_r, dummy_xccc3d1)
+        end if
+        
+        if (dtset%nspden==4) then
+            nhatdim = 0
+            ABI_MALLOC(nhat, (this%nfft, dtset%nspden*nhatdim)) ! TODO : PAW
+            optnc = 1   ! Compute the whole 2x2 Vres matrix
+            call dfpt_mkvxc_noncoll(cplex, dtset%ixc ,this%kxc, mpi_enreg, this%nfft, ngfft, nhat, nhatdim, &
+            &               nhat1, nhat1dim, nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, dtset%nspden,      &
+            &               n3xccc, optnc, option, dummy_qphon, this%rhor, vec_r, this%rprimd, usexcnhat,        &
+            &               this%vxc, Kxc_vec_r, dummy_xccc3d1)
+           ABI_FREE(nhat)
+        end if
+
         ABI_FREE(nhat1)
         ABI_FREE(nhat1gr)
 
@@ -1346,7 +1362,7 @@ contains
         !Local variables-------------------------------
         !scalars
         integer :: cplex
-        integer :: ispden, istwf_k, maxocc, mcg, my_nspinor, mband_mem, nband_k, ndat, nfftot, npw_k, option, tim_fourwf
+        integer :: ispden, istwf_k, maxocc, mcg, my_nspinor, mband_mem, nband_k, ndat, nfftot, npw_k, nspin, option, tim_fourwf
         integer :: i_eigen, i_cg, j_cg, ikg, ikpt, iband, isppol, ier
         integer :: n1, n2, n3, n4, n5, n6
         real(dp) :: fp, eigenval
@@ -1394,18 +1410,19 @@ contains
         write(6,*)'chi0diel apply_chi0_mag maxocc, this%dvol: ', maxocc, this%dvol; flush(6) !DEBUG
         
         !Allocating the array that will contain rho_ii
-        !ABI_MALLOC(rhoaug_r_ii, (2, n4, n5, n6))
+
+        
         if (dtset%nspinor==1) then
-            ABI_MALLOC(rhoaug_r_ii, (n4, n5, n6, 1))
-            ABI_MALLOC(rho_r_ii, (n1*n2*n3, 1))
+            nspin = 1   ! Number of spin components in the orbital densities.
         else if (dtset%nspinor==2) then
+            nspin = 4
             ABI_MALLOC(psi_r_i_up, (2, n4, n5, n6))
             ABI_MALLOC(psi_r_i_down, (2, n4, n5, n6))
-            ABI_MALLOC(rhoaug_r_ii, (n4, n5, n6, 4))
-            ABI_MALLOC(rho_r_ii, (n1*n2*n3, 4))
         else
             ABI_BUG("nspinor != 1 or 2")
         end if
+        ABI_MALLOC(rhoaug_r_ii, (n4, n5, n6, nspin))
+        ABI_MALLOC(rho_r_ii, (n1*n2*n3, nspin))
 
         !Allocating dummy arrays
         ABI_MALLOC(dummy_denpot, (0, n5, n6))
@@ -1513,7 +1530,7 @@ contains
                             do ispden=1, 4
                                 ! Transfer rhoaug_r_ii defined on the large fft-grid to the smaller density/potential fft-grid.
                                 call fftpac(ispden, mpi_enreg, 4, n1, n2, n3, n4, n5, n6, ngfft, rho_r_ii(:, ispden), rhoaug_r_ii(:, :, :, ispden), 1)
-                                rho_r_ii(:, ispden) = rho_r_ii(:, ispden) / (sum(rho_r_ii(:, ispden)) * this%dvol) !Normalizing rho_ii_r.
+                                rho_r_ii(:, ispden) = rho_r_ii(:, ispden) / (sum(rho_r_ii(:, ispden)) * this%dvol) !Normalizing rho_ii_r. TODO : check that normalizing each component make sense.
                                 ! dot product in Pauli basis :
                                 weights(i_eigen) = weights(i_eigen) + fp * maxocc * dot_product(rho_r_ii(:, ispden), vec_r(:, ispden)) * this%dvol  ! dotprod_vn
                             end do
@@ -1535,7 +1552,6 @@ contains
                     end if
                     
                 end do
-                !write(6,*)'chi0diel apply_chi0_mag:  i_cg, isppol', i_cg, isppol; flush(6) !DEBUG
 
                 if (dtset%mkmem /= 0) then
                     i_cg = i_cg + npw_k * dtset%nspinor * mband_mem
@@ -1548,7 +1564,7 @@ contains
         end do  !isppol
 
         ABI_FREE(rhoaug_r_ii)
-        if (dtset%nspinor==4) then
+        if (dtset%nspinor==2) then
             ABI_FREE(psi_r_i_up)
             ABI_FREE(psi_r_i_down)
         end if
