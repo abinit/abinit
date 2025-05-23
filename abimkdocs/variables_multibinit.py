@@ -1244,11 +1244,8 @@ Variable(
     text=r"""
 Set the magnitude for the electric field.
 For efield_type 6, multiple ([[nefield]])  efield values  are allowed, the format is 
-ex1, ey1, ez1, 
-ex2, ey2, ez2
-...
-exn, eyn, ezn
-where n is [[nefield]].
+Ex1, Ey1, Ez1, 
+Ex2, Ey2, Ez2
 """
 ),
 
@@ -1271,18 +1268,15 @@ Variable(
     varset="multibinit",
     vartype="real",
     topics=['DynamicsMultibinit_basic'],
-    dimensions=[3],
+    dimensions=[3, "[[nefield]]"],
     defaultval=[0.0, 0.0, 0.0],  
     mnemonics="Electric FIELD periodicity LAMBDA.",
     added_in_version="v10",
     text=r"""
 Set the periodicity in real space for spatially inhomogeneous vector fields. 0.0 is interpreted as infinite.
 For efield_type 6, multiple ([[nefield]])  efield_lambda values  are allowed, the format is 
-lx1, ly1, lz1, 
-lx2, ly2, lz2
-...
-lxn, lyn, lzn
-where l means lambda and  n is [[nefield]].
+λx1, λy1, λz1, 
+λx2, λy2, λz2
 """
 ),
 
@@ -1492,6 +1486,23 @@ Variable(
 
 """,
 ),
+
+
+Variable(
+    abivarname="nefield@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Number of Electric FEIELDs",
+    added_in_version="v10",
+    text=r"""
+Number of Electric fields to be used in the dynamics when efield_type 6.
+Currently only 2 efields are allowed. 
+""",
+),
+
 
 
 
