@@ -969,11 +969,12 @@ real(dp), allocatable ::  dptmp(:)
 if (multibinit_dtset%efield_type/=6 .and. multibinit_dtset%efield_type/=0)then
   multibinit_dtset%nefield=1
 else if (multibinit_dtset%efield_type==6)then
-  multibinit_dtset%nefield=0
+  multibinit_dtset%nefield=2
   call read_int_var( multibinit_dtset%nefield, 'nefield')
-  if (multibinit_dtset%nefield<0)then
+  if (multibinit_dtset%nefield/=2)then
      write(message, '(a,i0,a,a,a)' )&
-     &  'nefield is',multibinit_dtset%nefield,', which is not positive .',ch10,&
+     &  'nefield is',multibinit_dtset%nefield, &
+     &  ', which can only be 2 for efield_type=6 .',ch10,&
      &  'Action: correct nefield in your input file.'
      ABI_ERROR(message)
 end if
