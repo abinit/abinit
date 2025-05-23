@@ -146,7 +146,7 @@ Multibinit has been improved in many different aspects.
 * Inhomogeneous Spatiotemporal Electric Fields: Implementation of inhomogeneous electric fields, varying in time and space, is now available. 
 This feature has yielded successful results, as documented in arXiv:2501.17057 and arXiv:2411.16395. 
 The following new input variables control this functionality: [[efield_period@multibinit]], 
-[[efield_gmean@multibinit]], [[efield_gvel@multibinit]], [[efield_type@multibinit]], [[efield_phase@multibinit]], [[efield_phase2@multibinit]], [[efield_sigma@multibinit]], [[efield_background@multibinit]], and [[nefield@multibinit]]. 
+[[efield_gmean@multibinit]], [[efield_gvel@multibinit]], [[efield_type@multibinit]], [[efield_phase@multibinit]], [[efield_sigma@multibinit]], [[efield_background@multibinit]], and [[nefield@multibinit]]. 
 
 There have been also several bug Fixes:
 
