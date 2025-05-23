@@ -202,7 +202,7 @@ module m_gwdefs
 !! em1params_t
 !!
 !! FUNCTION
-!! For the GW part of ABINIT, the  em1params_t structured datatype
+!! For the GW part of ABINIT, the em1params_t structured datatype
 !! gather different parameters used to calculate the inverse dielectric matrix in SCREENING
 !!
 !! SOURCE

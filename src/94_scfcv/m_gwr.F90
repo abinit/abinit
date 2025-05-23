@@ -6422,6 +6422,7 @@ end if
      NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
 
      ! Define arrays with results.
+     ! TODO: Add matrix elements of vxc, have to trasfer data from vxcval to nkcalc packing
      define = .True.
      if (define) then
        ncerr = nctk_def_arrays(ncid, [ &
