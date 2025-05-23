@@ -139,7 +139,7 @@ By G. Allemand, R. Gupta, M. Giantomassi, M. Verstraete (MR1156, 1162, 1102)
 
 Multibinit has been improved in many different aspects.
 
-* Variable Maximum N-body Term Generation: Users can now generate terms with a variable maximum number of bodies using the fit_max_nbody@multibinit parameter (TO BE DOCUMENTED, AND TO BE TESTED), providing increased flexibility in model construction.
+* Variable Maximum N-body Term Generation: Users can now generate terms with a variable maximum number of bodies using the fit_max_nbody@multibinit parameter, providing increased flexibility in model construction.
 * Weighted Training Set: To improve fitting accuracy for structures near minima and saddle points, the [[fit_weight_T@multibinit]] input variable has been added. This allows users to apply a Boltzmann-distribution-like weighting to training samples, reducing the influence of high-energy, high-force, and high-stress structures. 
 * Enhanced Bounding Strategy: A new bounding strategy ([[bound_option@multibinit]]=1) is implemented, restricting bounding to terms with the same "nbody" count. The previous scheme remains available via [[bound_option@multibinit]]=2. 
 * Homogeneous Electric Fields: Support for homogeneous electric fields has been added through the [[efield@multibinit]] and [[efield_lambda@multibinit]] input variables. 
@@ -157,9 +157,9 @@ Dipole-Dipole Interaction Box Consistency: Resolved an inconsistency between the
 
 The input variables fit_ncoeff_per_cycle and fit_drop_rate have been disabled.
 
-See [[test:v9_210]] to [[test:v9_215]] for the inhomogeneous spatiotemporal electric fields, [[test:v9_216]] for Weighting of training set.
+See [[test:v9_210]] to [[test:v9_215]] for the inhomogeneous spatiotemporal electric fields, [[test:v9_216]] for Weighting of training set, [[test:v8_104]] for the maximum number of bodies.
 
-By Xu He, Louis Bastogne, Alireza Sasani, Fernando Gomez-Ortiz, Huazhang Zhang, with inspiration from Subhadeep Bandyopadhyay (MR1146 gives more details on each contribution, including the author or inspirator)
+By Xu He, Louis Bastogne, Alireza Sasani, Fernando Gomez-Ortiz, Huazhang Zhang, Philippe Ghosez, with inspiration from Subhadeep Bandyopadhyay (MR1146 gives more details on each contribution, including the author or inspirator)
 
 
 **B.5** New molecular dynamics algorithms, new features in the _HIST file, PIMD changes.
