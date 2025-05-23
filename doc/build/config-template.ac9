@@ -629,6 +629,7 @@
 #                  - 75 (NVIDIA Turing)
 #                  - 80 (NVIDIA Ampere)
 #                  - 90 (NVIDIA Hopper)
+#                  - gfx90a (AMD Instinct MI250)
 #
 #GPU_ARCH=80
 
