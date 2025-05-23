@@ -946,12 +946,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            end if
 
          CASE (SIG_GW_AC)
-           ! GW with Analytic continuation.
-           ! This part is so optimized for AC that there is nothing to do here!
+           ! GW with Analytic continuation. This part is so optimized for AC that there is nothing to do here!
 
          CASE (SIG_GW_CD)
            ! GW with contour deformation.
-           ! Check if pole contributions need to be summed. this avoids unnecessary splint calls and saves time
+           ! Check if pole contributions need to be summed. This avoids unnecessary splint calls and saves time.
            !me_calc_poles = .TRUE.
            sigc_ket  = czero_gw
            do io=1,nomega_tot
@@ -1092,9 +1091,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                    end do
 
                  case ("minimax")
+                   ! NB: Sigma_c along the imag. axis has a -1/2pi factor.
+                   ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
                    do iiw=1,epsm1%nomega_i
-                     ! NB: Sigma_c along the imag. axis has a -1/2pi factor.
-                     ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
                      sigctmp(io,iab) = sigctmp(io,iab) + &
                        (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
                           (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw))))

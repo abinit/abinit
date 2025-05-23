@@ -1038,13 +1038,13 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        Ep%omega_wgs(Ep%nomegaer + iomega) = iw_wgs(iomega)
      end do
 
-     ABI_FREE(tau_mesh)
-     ABI_FREE(tau_wgs)
-     ABI_FREE(iw_mesh)
-     ABI_FREE(iw_wgs)
-     ABI_FREE(t2w_cos_wgs)
-     ABI_FREE(w2t_cos_wgs)
-     ABI_FREE(t2w_sin_wgs)
+     ABI_FREE_NOCOUNT(tau_mesh)
+     ABI_FREE_NOCOUNT(tau_wgs)
+     ABI_FREE_NOCOUNT(iw_mesh)
+     ABI_FREE_NOCOUNT(iw_wgs)
+     ABI_FREE_NOCOUNT(t2w_cos_wgs)
+     ABI_FREE_NOCOUNT(w2t_cos_wgs)
+     ABI_FREE_NOCOUNT(t2w_sin_wgs)
      call gaps%free()
 
    case default

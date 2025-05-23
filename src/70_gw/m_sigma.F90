@@ -285,25 +285,25 @@ subroutine write_sigma_header(Sigp, epsm1, Cryst, Kmesh, Qmesh)
  units = [std_out, ab_out]
  call wrtout(units, ' SIGMA fundamental parameters:')
 
- gwcalctyp=Sigp%gwcalctyp
- mod10=MOD(Sigp%gwcalctyp,10)
+ gwcalctyp = Sigp%gwcalctyp
+ mod10 = MOD(Sigp%gwcalctyp,10)
 
  SELECT CASE (mod10)
- CASE (0)
+ CASE (SIG_GW_PPM)
    write(msg,'(a,i2)')' PLASMON POLE MODEL ',Sigp%ppmodel
- CASE (1)
+ CASE (SIG_GW_AC)
    write(msg,'(a)')' ANALYTIC CONTINUATION'
- CASE (2)
+ CASE (SIG_GW_CD)
    write(msg,'(a)')' CONTOUR DEFORMATION'
- CASE (5)
+ CASE (SIG_HF)
    write(msg,'(a)')' Hartree-Fock'
- CASE (6)
+ CASE (SIG_SEX)
    write(msg,'(a)')' Screened Exchange'
- CASE (7)
+ CASE (SIG_COHSEX)
    write(msg,'(a)')' COHSEX'
- CASE (8)
+ CASE (SIG_QPGW_PPM)
    write(msg,'(a,i2)')' MODEL GW with PLASMON POLE MODEL ',Sigp%ppmodel
- CASE (9)
+ CASE (SIG_QPGW_CD)
    write(msg,'(a)')' MODEL GW without PLASMON POLE MODEL'
  CASE DEFAULT
    write(msg,'(a,i0)')' Wrong value for Sigp%gwcalctyp = ',Sigp%gwcalctyp
@@ -349,11 +349,11 @@ subroutine write_sigma_header(Sigp, epsm1, Cryst, Kmesh, Qmesh)
    call wrtout(units, msg)
  end if
 
- if (mod10==1) then
+ if (mod10 == SIG_GW_AC) then
    write(msg,'(a,i12)')' number of imaginary frequencies for Sigma',Sigp%nomegasi
    call wrtout(units, msg)
    ! MRM not needed for GW 1RDM
-   if(gwcalctyp/=21) then
+   if (gwcalctyp/=21) then
      write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
      call wrtout(units, msg)
    endif
@@ -380,15 +380,30 @@ subroutine write_sigma_header(Sigp, epsm1, Cryst, Kmesh, Qmesh)
    call wrtout(units, msg)
  end if
 
-! MRM not needed for GW 1RDM
-  if (gwcalctyp/=21) then
+  ! MRM not needed for GW 1RDM
+  if (gwcalctyp /= 21) then
     write(msg,'(3a)')ch10,' matrix elements of self-energy operator (all in [eV])',ch10
     call wrtout(units, msg)
-  endif
+    !call wrtout(units, "(a)")" Notations:"
+    !call wrtout(units, "(a)")"E0: KS eigenvalue.")
+    !call wrtout(units, "(a)")"VxcDFT: KS exchange-correlation potential expectation value.")
+    !call wrtout(units, "(a)")"SigX: exchange part of the self-energy.")
+    !call wrtout(units, "(a)")"SigC(E0) correlation part of the self-energy, evaluated at the KS eigenenergy.")
+    !call wrtout(units, "(a)")"Z: renormalization factor.")
+    !call wrtout(units, "(a)")"dSigC/dE: energy derivative of SigC with respect to the energy.")
+    !call wrtout(units, "(a)")"SigC(E): correlation part of the self-energy, evaluated at the QP energy.")
+    !call wrtout(units, "(a)")"E-E0: difference between QP energy and KS eigenenergy.")
+    !call wrtout(units, "(a)")"E: quasiparticle energy.")
+    !if (mod10 == SIG_GW_AC) then
+    !  call wrtout(units, "For AC calculations, the KS Fermi level has been set to zero.")
+    !  call wrtout(units, "KS and QP energies are shifted accordingly.")
+    !  call wrtout(units, "IMPORTANT: In AC calculations, the QP energies are obtained by solving the non-linear QP equation along the real-axis")
+    !end if
+  end if
 
- if (gwcalctyp<10) then
+ if (gwcalctyp < 10) then
    write(msg,'(a)')' Perturbative Calculation'
- else if (gwcalctyp<20) then
+ else if (gwcalctyp < 20) then
    write(msg,'(a)')' Self-Consistent on Energies only'
  else
    write(msg,'(a)')' Self-Consistent on Energies and Wavefunctions'
@@ -408,13 +423,10 @@ end subroutine write_sigma_header
 !!  Write the final results of the GW calculation.
 !!
 !! INPUTS
-!!  ks_ebands<ebands_t>=Info on the KS band structure energies.
+!!  Sigp=sigparams_t datatype
 !!  ik_ibz= index of the k-point in the array kibz, where GW corrections are calculated
 !!  ikcalc= index of the k-point in the array Sigp%kptgw2bz
-!!  Sigp=sigparams_t datatype
-!!
-!! OUTPUT
-!!  (for writing routines, no output) otherwise, should be described
+!!  ks_ebands<ebands_t>=Info on the KS band structure energies.
 !!
 !! SOURCE
 
@@ -436,8 +448,8 @@ subroutine sigma_write_results(sigma, ikcalc, ik_ibz, Sigp, ks_ebands)
  character(len=12) :: tag_spin(2)
 ! *************************************************************************
 
- gwcalctyp=Sigp%gwcalctyp
- mod10=MOD(Sigp%gwcalctyp,10)
+ gwcalctyp = Sigp%gwcalctyp
+ mod10 = MOD(Sigp%gwcalctyp,10)
 
  ! unt_gw:  File with GW corrections.
  ! unt_sig: Self-energy as a function of frequency.
@@ -501,12 +513,12 @@ subroutine sigma_write_results(sigma, ikcalc, ik_ibz, Sigp, ks_ebands)
 
      else
        ! If not ppmodel, write out also the imaginary part in ab_out
-       SELECT CASE(mod10)
-       CASE (1,2)
+       select case(mod10)
+       case (SIG_GW_AC, SIG_GW_CD)
          call sigma%print_perturbative(ik_ibz, ib, is, units=[dev_null], ydoc=ydoc, prtvol=1)
-       CASE DEFAULT
+       case default
          call sigma%print_perturbative(ik_ibz, ib, is, units=[dev_null], ydoc=ydoc)
-       END SELECT
+       end select
        call sigma%print_perturbative(ik_ibz, ib, is, units=[std_out], prtvol=1)
      end if
 
@@ -519,7 +531,7 @@ subroutine sigma_write_results(sigma, ikcalc, ik_ibz, Sigp, ks_ebands)
 
    if (sigma%e0gap(ik_ibz,is)**2+sigma%egwgap(ik_ibz,is)**2+sigma%degwgap(ik_ibz,is)**2 > tol10) then
      ! Output the direct gap for each spin
-     ! If all the gaps are zero, this means that it could not be computed in the calling routine
+     ! If all the gaps are zero, this means that they could not be computed in the calling routine
      write(msg,'(2a,f8.3)')ch10,' E^0_gap       ',sigma%e0gap(ik_ibz,is)*Ha_eV
      call wrtout(std_out,msg)
      write(msg,'(a,f8.3)')      ' E^GW_gap      ',sigma%egwgap(ik_ibz,is)*Ha_eV
@@ -530,7 +542,7 @@ subroutine sigma_write_results(sigma, ikcalc, ik_ibz, Sigp, ks_ebands)
 
    call ydoc%write_and_free(ab_out)
 
-   ! Output of the spectral function
+   ! Output of the spectral function.
    do io=1,sigma%nomega_r
      write(unt_sig,'(100(e12.5,2x))')&
       REAL(sigma%omega_r(io))*Ha_eV,&
@@ -544,9 +556,9 @@ subroutine sigma_write_results(sigma, ikcalc, ik_ibz, Sigp, ks_ebands)
      write(unt_sgr,'("# ik, ib",2i5)')ik_ibz,ib
      do io=1,sigma%nomega4sd
        write(unt_sgr,'(100(e12.5,2x))')              &
-         REAL (sigma%omega4sd  (ib,ik_ibz,io,is)) *Ha_eV,&
-         REAL (sigma%sigxcme4sd(ib,ik_ibz,io,is)) *Ha_eV,&
-         AIMAG(sigma%sigxcme4sd(ib,ik_ibz,io,is)) *Ha_eV
+         REAL (sigma%omega4sd  (ib,ik_ibz,io,is)) * Ha_eV,&
+         REAL (sigma%sigxcme4sd(ib,ik_ibz,io,is)) * Ha_eV,&
+         AIMAG(sigma%sigxcme4sd(ib,ik_ibz,io,is)) * Ha_eV
      end do
    end do
 
@@ -555,21 +567,21 @@ subroutine sigma_write_results(sigma, ikcalc, ik_ibz, Sigp, ks_ebands)
      write(unt_sigc,'("# ik, ib",2i5)')ik_ibz,ib
      do io=1,sigma%nomega4sd
        write(unt_sigc,'(100(e12.5,2x))')              &
-         REAL (sigma%omega4sd  (ib,ik_ibz,io,is)) *Ha_eV,&
-         REAL (sigma%sigcme4sd(ib,ik_ibz,io,is)) *Ha_eV,&
-         AIMAG(sigma%sigcme4sd(ib,ik_ibz,io,is)) *Ha_eV
+         REAL (sigma%omega4sd  (ib,ik_ibz,io,is)) * Ha_eV,&
+         REAL (sigma%sigcme4sd(ib,ik_ibz,io,is))  * Ha_eV,&
+         AIMAG(sigma%sigcme4sd(ib,ik_ibz,io,is))  * Ha_eV
      end do
    end do
 
-   if (mod10 == 1) then
+   if (mod10 == SIG_GW_AC) then
      ! For AC, write sigma matrix elements along the imaginary axis
      do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
        write(unt_sgm,'("# ik, ib",2i5)')ik_ibz,ib
        do io=1,sigma%nomega_i
          write(unt_sgm,'(3(e12.5,2x))')             &
-          AIMAG(sigma%omega_i(io))              *Ha_eV,&
-          REAL (sigma%sigxcmesi(ib,ik_ibz,io,is))*Ha_eV,&
-          AIMAG(sigma%sigxcmesi(ib,ik_ibz,io,is))*Ha_eV
+          AIMAG(sigma%omega_i(io))                * Ha_eV,&
+          REAL (sigma%sigxcmesi(ib,ik_ibz,io,is)) * Ha_eV,&
+          AIMAG(sigma%sigxcmesi(ib,ik_ibz,io,is)) * Ha_eV
        end do
      end do
    end if
@@ -590,8 +602,6 @@ end subroutine sigma_write_results
 !!
 !! INPUTS
 !!  io,ib,ik_ibz,spin=Frequency, band, k-point, spin index
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -642,19 +652,6 @@ subroutine sigma_print_pertubative(sigma, ik_ibz, band, spin, units, &
 ! *********************************************************************
 
  verbose=0      ; if (PRESENT(prtvol)) verbose=prtvol
-
- !if (with_notations) then
- !call wrtout(units, "(a)")" Notations:"
- !call wrtout(units, "(a)")"E0: KS eigenvalue")
- !call wrtout(units, "(a)")"VxcDFT: KS exchange-correlation potential expectation value")
- !call wrtout(units, "(a)")"SigX: exchange part of the self-energy")
- !call wrtout(units, "(a)")"SigC(E0) correlation part of the self-energy, evaluated at the KS eigenenergy")
- !call wrtout(units, "(a)")"Z: renormalisation factor")
- !call wrtout(units, "(a)")"dSigC/dE: energy derivative of SigC with respect to the energy")
- !call wrtout(units, "(a)")"SigC(E): correlation part of the self-energy, evaluated at the QP energy")
- !call wrtout(units, "(a)")"E-E0: difference between QP energy and KS eigenenergy")
- !call wrtout(units, "(a)")"E: quasiparticle energy")
- !end if
 
  if (present(with_header)) then
    if (with_header) then
@@ -934,9 +931,9 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
  sigma%nomega4sd=Sigp%nomegasrd
  sigma%usepawu  =usepawu
 
- !======================================================
+ !================================================
  ! === Allocate arrays in the sigma_t datatype ===
- !======================================================
+ !================================================
  b1gw=sigma%b1gw
  b2gw=sigma%b2gw
 
@@ -983,7 +980,7 @@ subroutine sigma_init(sigma, Sigp, nkibz, usepawu)
 
  ! Analytic Continuation
  ! FIXME omegasi should not be in Sigp% here we should construct the mesh
- if (mod10 == 1) then
+ if (mod10 == SIG_GW_AC) then
    ABI_MALLOC(sigma%omega_i, (sigma%nomega_i))
    sigma%omega_i = Sigp%omegasi
    ABI_CALLOC(sigma%sigcmesi,  (b1gw:b2gw, sigma%nkibz, sigma%nomega_i, sigma%nsppol*sigma%nsig_ab))
@@ -1744,7 +1741,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
      where (proc_distrb == 0)
        proc_distrb = xmpi_undefined_rank
      elsewhere
-       proc_distrb = proc_distrb -1
+       proc_distrb = proc_distrb - 1
      end where
      !where (proc_distrb /= xmpi_undefined_rank)
      !  ltest = (ANY(proc_distrb == (/(ii,ii=0,Wfd%nproc-1)/)))

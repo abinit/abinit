@@ -214,7 +214,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  nspinor = dtset%nspinor
 
  ! Get fermie from the GS calculation.
- ! NB: It might understimate the real fermi level, especially if the den was computed on a shifted k-mesh
+ ! NB: It might understimate the real Fermi level, especially if the den was computed on a shifted k-mesh
  ! at present it's only used to implement pseudobands
  gs_fermie = wfk0_hdr%fermie
 

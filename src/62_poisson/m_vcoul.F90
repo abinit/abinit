@@ -261,7 +261,6 @@ subroutine gw_icutcoul_to_mode(gw_icutcoul, mode)
 !Arguments ------------------------------------
  integer,intent(in) :: gw_icutcoul
  character(len=*),intent(out) :: mode
-
 ! *************************************************************************
 
  mode = 'NONE'
@@ -331,7 +330,6 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  real(dp) :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp),allocatable :: vcoul(:,:),vcoul_lwl(:,:)
  real(dp),contiguous, pointer :: qibz(:,:), qbz(:,:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -596,7 +594,6 @@ subroutine cylinder_setup(cryst, vcutgeo, hcyl, pdir, opt_cylinder)
  integer :: ii
  real(dp),parameter :: tol999 = 999.0
  real(dp) :: check
-
 ! *************************************************************************
 
  ABI_CHECK(count(abs(vcutgeo) > tol6) == 1, 'Wrong cutgeo for cylinder')
@@ -646,7 +643,6 @@ subroutine surface_setup(cryst, vcutgeo, alpha, rcut, pdir, opt_slab)
  integer :: ii
  real(dp) :: check
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ABI_CHECK(count(vcutgeo /= zero) == 2, "Wrong vcutgeo")
@@ -693,7 +689,6 @@ real(dp) function integratefaux(rcut, gprimd, ucvol, comm)
  real(dp) :: qq1(3),qq2(3),bb4sinpiqq_2(3,nq),sin2piqq(nq),bb4sinpiqq2_2(3,0:nq),sin2piqq2(3,0:nq)
  real(dp) :: b1(3), b2(3), b3(3), bb(3)
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
-
 ! *************************************************************************
 
  ! nq is the number of sampling points along each axis for the numerical integration
@@ -794,7 +789,6 @@ real(dp) pure function faux(qq, rcut, b1, b2, b3)
 !Local variables-------------------------------
  real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
  real(dp) :: b1b1,b2b2,b3b3
-
 ! *************************************************************************
 
  b1b1 = dot_product(b1, b1); b2b2 = dot_product(b2, b2); b3b3 = dot_product(b3, b3)
@@ -822,7 +816,6 @@ real(dp) pure function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2
 !Local variables-------------------------------
  real(dp) :: b1b2,b2b3,b3b1
  b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
-
 ! *************************************************************************
 
  faux_fast = bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
@@ -855,7 +848,6 @@ integer pure function adapt_nmc(nmc_max, qpg2) result(nmc)
 !Arguments ------------------------------------
  integer,intent(in)  :: nmc_max
  real(dp),intent(in) :: qpg2
-
 ! *************************************************************************
 
  nmc = NINT( nmc_max / ( 1.0_dp + 1.0_dp * qpg2**6 ) )
@@ -903,7 +895,6 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
  integer,allocatable :: insort(:)
  real(dp) :: b1(3),b2(3),b3(3),gmet(3,3),gprimd(3,3),qbz(3),qpgc(3)
  real(dp),allocatable :: qpg_mod(:),rr(:,:,:),vcr(:,:),vcr_cut(:,:)
-
 !************************************************************************
 
  if (trim(Vcp%mode) /= 'CYLINDER') RETURN
@@ -1164,7 +1155,6 @@ subroutine vcoul_free(Vcp)
 
 !Arguments ------------------------------------
  class(vcoul_t),intent(inout) :: Vcp
-
 ! *************************************************************************
 
  ABI_SFREE(Vcp%qibz)
@@ -1199,7 +1189,6 @@ subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
  real(dp) :: lmin,vlength, ucvol_sc
  real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3), qtmp(3),qmin(3),qmin_cart(3)
  integer, allocatable :: seed(:)
-
 ! *************************************************************************
 
  mc%gmet = gmet
@@ -1258,7 +1247,7 @@ subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
            ! Get the q-vector in cartesian coordinates
            qmin_cart(:) = two_pi * MATMUL( gprimd_sc(:,:) , qtmp )
            ! Transform it back to the reciprocal space
-           qmin(:) = MATMUL( qcart2red , qmin_cart )
+           qmin(:) = MATMUL(qcart2red , qmin_cart)
          end if
        enddo
      enddo
@@ -1296,7 +1285,6 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
  integer :: ig, ig0, imc, nmc, my_rank, nprocs, ierr
  logical :: q_is_gamma
  real(dp)  :: qpg2, qpg(3)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -1315,7 +1303,7 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
 
  select case (trim(mode))
 
- case('MINIBZ')
+ case ('MINIBZ')
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1330,7 +1318,7 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
    end do ! ig
 
    if (q_is_gamma .and. my_rank == master) then
-     ! Override ig0 component
+     ! Compute ig0 component
      vcoul(ig0) = four_pi**2 * nkbz * mc%ucvol / ( 8.0_dp * pi**3 ) * mc%q0sph
      do imc=1,mc%nmc_max
        qpg(:) = qibz(:) + gvec(:,ig0) + mc%qran(:,imc)
@@ -1339,7 +1327,7 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
      end do
    end if
 
- case('MINIBZ-ERFC')
+ case ('MINIBZ-ERFC')
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1366,7 +1354,7 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
      end do
    end if
 
- case('MINIBZ-ERF')
+ case ('MINIBZ-ERF')
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1418,7 +1406,6 @@ subroutine mc_free(mc)
 
 !Arguments ------------------------------------
  class(mc_t),intent(inout) :: mc
-
 ! *************************************************************************
 
  ABI_SFREE(mc%qran)
@@ -1448,7 +1435,6 @@ subroutine beigi_cylinder_limit(opt_cylinder, cryst, nqibz, nkbz, rcut, hcyl, bo
  integer :: ii, iq, npar, npt, gamma_pt(3,1)
  real(dp) :: step, bz_plane, dx, integ, q0_vol, q0_volsph, b1(3),b2(3),b3(3)
  real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:), vcfit(:,:),xx(:),yy(:)
-
 ! *************************************************************************
 
  b1 = two_pi * cryst%gprimd(:,1); b2 = two_pi * cryst%gprimd(:,2); b3 = two_pi * cryst%gprimd(:,3)
@@ -1539,7 +1525,6 @@ subroutine beigi_surface_limit(opt_slab, cryst, nqibz, nkbz, rcut, alpha, boxcen
  integer :: ii, npt, gamma_pt(3,1)
  real(dp) :: step, bz_plane, dx, integ, q0_vol, q0_volsph, b1(3),b2(3),b3(3)
  real(dp),allocatable :: qfit(:,:),sigma(:),vcfit(:,:),xx(:),yy(:), qcart(:,:)
-
 ! *************************************************************************
 
  b1 = two_pi * cryst%gprimd(:,1); b2 = two_pi * cryst%gprimd(:,2); b3 = two_pi * cryst%gprimd(:,3)
@@ -1620,7 +1605,6 @@ real(dp) function carrier_isz(cryst, nqbz, qbz, rcut, comm) result(i_sz)
 !Local variables-------------------------------
  integer :: iq_bz
  real(dp) :: qbz_norm, bz_geometry_factor, qbz_cart(3), b1(3), b2(3), b3(3)
-
 !************************************************************************
 
  b1 = two_pi * cryst%gprimd(:,1); b2 = two_pi * cryst%gprimd(:,2); b3 = two_pi * cryst%gprimd(:,3)
@@ -1657,7 +1641,6 @@ real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, vc_ecut, ng, gvec) resu
 !Local variables-------------------------------
  integer :: iq_bz, ig
  real(dp) :: bz_geometry_factor, intfauxgb, alfa, qpg2, qpg(3)
-
 !************************************************************************
 
  ! the choice of alfa (the width of the gaussian) is somehow empirical
@@ -1706,7 +1689,6 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
  character(len=500) :: msg
  real(dp) :: vcoul0(1), q_gamma(3)
  !integer,allocatable :: gvec_(:,:)
-
 ! *************************************************************************
 
  ABI_UNUSED([vc_ecut])
@@ -1844,7 +1826,6 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm, &
  real(dp) :: rcut2
  logical :: q_is_gamma
  real(dp),allocatable :: vcoul(:)
-
 ! *************************************************************************
 
  q_is_gamma = normv(qpt, cryst%gmet, "G") < GW_TOLQ0

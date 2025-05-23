@@ -202,7 +202,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: gw1rdm,x1rdm
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: etot_sd,etot_mbb,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
+ real(dp) :: etot_sd,etot_mbb,evextnl_energy,ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,old_fermie
  real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy,tol_empty
  real(dp) :: ucvol,vxcavg,vxcavg_qp,el_temp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq, gsqcut,boxcut,ecutf
@@ -1651,10 +1651,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    qp_ebands%eig = qp_ebands%eig - qp_ebands%fermie
    Sr%egw = Sr%egw - qp_ebands%fermie
    Sr%e0  = Sr%e0  - qp_ebands%fermie
-   oldefermi = qp_ebands%fermie
+   old_fermie = qp_ebands%fermie
    ! TODO Recheck fermi
    ! Clean EVERYTHING in particulare the treatment of E fermi
-   qp_ebands%fermie=zero
+   qp_ebands%fermie = zero
  end if
  !
  ! === Setup frequencies around the KS\QP eigenvalues to compute Sigma derivatives (notice the spin) ===
