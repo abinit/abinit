@@ -633,6 +633,10 @@
 #
 #GPU_ARCH=80
 
+# Enable Unified Memory for NVIDIA GPUs (exclusive to NVHPC)
+#
+#enable_gpu_nvidia_unified_memory="no"
+
                        # ------------------------------ #
 
 # Advanced GPU options (experts only)

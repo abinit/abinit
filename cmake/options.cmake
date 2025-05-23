@@ -200,6 +200,10 @@ else()
   set(DO_BUILD_17_GPU_TOOLBOX FALSE)
 endif()
 
+option(ABINIT_ENABLE_NVIDIA_UNIFIED_MEM
+  "Enable Unified Memory for NVIDIA GPU (requires OpenMP Offload & NVHPC compiler, default OFF)" OFF)
+# Checks for this option occurs after compiler and OpenMP offload settings in root CMakeLists.txt
+
 if (ABINIT_ENABLE_GPU_CUDA)
   set(DO_BUILD_46_MANAGE_CUDA TRUE)
 else()
