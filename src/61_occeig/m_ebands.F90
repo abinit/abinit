@@ -41,13 +41,16 @@ module m_ebands
  use m_dtset
  use m_yaml
 
+
+
  use defs_datatypes,   only : ebands_base_t
+ use m_gwdefs,         only : GW_TOL_DOCC, GW_TOL_W0, g0g0w
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson, simpson_int, wrap2_zero_one, &
-                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices
+                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices, linspace
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -55,7 +58,7 @@ module m_ebands
  use m_occ,            only : getnel, newocc, occ_fd
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : isamek, kpath_t, kpath_new
+ use m_bz_mesh,        only : isamek, kpath_t, kpath_new, littlegroup_t, kmesh_t
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -381,6 +384,34 @@ end type ebands_t
 !!***
 
  public :: klinterp_new         ! Build interpolator.
+
+
+!!****t* m_ebands/green_chi0_t
+!! NAME
+!! green_chi0_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type,public :: green_chi0_t
+   integer :: nwr, nwi, nomega
+   type(kmesh_t) :: kmesh
+   type(kmesh_t) :: qmesh
+
+   complex(dp),allocatable :: omega(:)
+   complex(dp),allocatable :: green(:,:,:)
+   complex(dp),allocatable :: chi0(:,:,:)
+
+ contains
+   procedure :: init => green_chi0_init
+
+   procedure :: free => green_chi0_free
+    ! Free dynamic memory
+
+   procedure :: ncwrite_path => green_chi0_ncwrite_path
+
+ end type green_chi0_t
 
 !----------------------------------------------------------------------
 
@@ -6109,6 +6140,319 @@ subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, n_ehst)
  end do
 
 end subroutine ebands_get_carriers
+!!***
+
+!!****f* m_ebands/green_chi0_init
+!! NAME
+!! green_chi0_init
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine green_chi0_init(self, ebands, cryst, nspden, nwr, nwi, rw_max, iw_max, zcut, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(green_chi0_t),intent(out) :: self
+ class(ebands_t),intent(in) :: ebands
+ class(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nspden, nwr, nwi, comm
+ real(dp),intent(in) :: rw_max, iw_max, zcut
+
+!Local variables-------------------------------
+ integer,parameter :: two_poles = 2, one_pole = 1
+ integer :: spin, band1, band2, ierr, nbmax, iq_ibz, nfound, itemp, prtvol, io, nomega_tot
+ integer :: ik_bz, ik_ibz, ikmq_bz, ikmq_ibz, isym_k, isym_kmq, itim_k, itim_kmq, symchi
+ real(dp) :: max_occ, wtk, e_nk, e_b1_kmq, f_b1_kmq, deltaeGW_b1kmq_b2k, deltaf_b1kmq_b2k, spin_fact, weight
+ real(dp) :: rw_step, iw_step
+ complex(dp) :: ieta
+ logical :: qzero, isirred_k,isirred_kmq, use_tr !is_metallic
+ type(littlegroup_t) :: ltg_q
+!arrays
+ integer :: G0(3), umklp_k(3), umklp_kmq(3), units(2)
+ real(dp) :: kbz(3), kmq_bz(3), qpoint(3)
+ real(dp),allocatable :: wmesh(:)
+ complex(dp),allocatable :: green_w(:)
+!*********************************************************************
+
+ !max_occ = two / (ebands%nspinor * ebands%nsppol)
+ prtvol = 0
+ units = [std_out, ab_out]
+
+ ! Define frequency freesh
+ self%nwr = nwr
+ self%nwi = nwi
+ self%nomega = nwr + nwi
+ ABI_MALLOC(self%omega, (self%nomega))
+
+ associate (kmesh => self%kmesh, qmesh => self%qmesh, nomega => self%nomega, omega => self%omega)
+
+ ! Real frequencies.
+ if (nwr > 0) then
+   ABI_MALLOC(wmesh, (nwr))
+   wmesh = linspace(tol12, rw_max, nwr)
+   self%omega(1:nwr) = wmesh
+   ABI_FREE(wmesh)
+ end if
+
+ ! Imaginary frequencies.
+ if (nwi > 0) then
+   ABI_MALLOC(wmesh, (nwi))
+   wmesh = linspace(tol12, iw_max, nwr)
+   self%omega(nwi+1:) = j_dpc * wmesh(:)
+   ABI_FREE(wmesh)
+ end if
+
+ ! === Create basic data types for the calculation ===
+ ! Kmesh defines the k-point sampling for the wavefunctions.
+ ! Qmesh defines the q-point sampling for chi0, all possible differences k1-k2 reduced to the IBZ.
+ ! TODO Kmesh%bz should be in [-half, half[ but this modification is painful!
+
+ call kmesh%init(cryst, ebands%nkpt, ebands%kptns, ebands%kptopt, wrap_1zone=.FALSE.)
+
+ ! Some required information are not filled up inside kmesh_init. So doing it here, even though it is not clean
+ Kmesh%kptrlatt(:,:) = ebands%kptrlatt(:,:)
+ Kmesh%nshift        = ebands%nshiftk
+ ABI_MALLOC(Kmesh%shift, (3, Kmesh%nshift))
+ Kmesh%shift(:,:)    = ebands%shiftk(:,1:ebands%nshiftk)
+ call Kmesh%print(units, header="K-mesh", prtvol=prtvol)
+
+ ! === Find Q-mesh ===
+ ! Stop if a nonzero umklapp is needed to reconstruct the BZ.
+ ! epsilon^-1(Sq) indeed should be symmetrized in csigme using a different expression (G-G_o is needed)
+ call qmesh%find_qmesh(cryst, kmesh)
+ call qmesh%print(units, "Q-mesh for polarizability", prtvol=prtvol)
+
+ ! TODO: Write small routine as this piece of code is used several times.
+
+ ! Setup weight (2 for spin unpolarized systems, 1 for polarized).
+ ! spin_fact is used to normalize the occupation factors to one.
+ ! Consider also the AFM case.
+ !call spin_fact_and_kint_weight(ebands%nsppol, ebands%nspinor, nspden, kmesh%nbz)
+ select case (ebands%nsppol)
+ case (1)
+   weight = two / kmesh%nbz; spin_fact = half
+   if (nspden == 2) then
+     weight = one / kmesh%nbz; spin_fact = half
+   end if
+   if (ebands%nspinor == 2) then
+     weight = one / kmesh%nbz; spin_fact = one
+   end if
+ case (2)
+   weight = one / kmesh%nbz; spin_fact = one
+ case default
+   ABI_BUG(sjoin("Wrong nsppol:", itoa(ebands%nsppol)))
+ end select
+
+ nbmax = minval(ebands%nband)
+ use_tr = .True.
+ symchi = 0
+
+ ABI_CALLOC(self%green, (self%nomega, kmesh%nibz, ebands%nsppol))
+ ABI_MALLOC(green_w, (self%nomega))
+
+ do spin=1,ebands%nsppol
+   ! Loop over k-points in the BZ.
+   do ik_ibz=1,Kmesh%nibz
+     ! Loop over bands.
+     do band1=1,nbmax
+       e_nk = ebands%eig(band1, ik_ibz, spin)
+       ieta = merge(j_dpc * zcut, -j_dpc * zcut, e_nk >= ebands%fermie)
+       if (nwr > 0) green_w(1:nwr) = self%omega(1:nwr)   - e_nk + ieta
+       if (nwi > 0) green_w(nwr+1:) = self%omega(nwr+1:) - e_nk
+
+       self%green(:, ik_ibz, spin) = self%green(:, ik_ibz, spin) + (one / green_w(:))
+     end do
+   end do ! ik_ibz
+ end do
+
+ ABI_CALLOC(self%chi0, (self%nomega, qmesh%nibz, ebands%nsppol))
+
+ do iq_ibz=1,qmesh%nibz
+   qpoint(:) = qmesh%ibz(:, iq_ibz)
+
+   if (symchi == 1) then
+     !qtmp = Qmesh%ibz(:,iq); if (normv(qtmp,gmet,'G') < GW_TOLQ0) qtmp(:) = zero; use_umklp = 0
+     !call ltg_q%init(qtmp, kmesh%nbz, kmesh%bz, cryst, use_umklp, Ep%npwe, gvec=gvec_kss)
+   end if
+
+   do spin=1,ebands%nsppol
+     ! Loop over k-points in the BZ.
+     do ik_bz=1,Kmesh%nbz
+       if (symchi == 1) then
+         if (ltg_q%ibzq(ik_bz) /= 1) CYCLE  ! Only IBZ_q
+       end if
+
+       ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
+       call kmesh%get_BZ_item(ik_bz, kbz, ik_ibz, isym_k, itim_k)
+
+       ! Get index of k-q in the BZ, stop if not found as the weight=one/nkbz is not correct.
+       call kmesh%get_BZ_diff(kbz, qpoint, ikmq_bz, g0, nfound)
+       ABI_CHECK(nfound == 1, "Check kmesh")
+
+       ! Get ikmq_ibz, non-symmorphic phase, ph_mkmqt, and symmetries from ikmq_bz.
+       call kmesh%get_BZ_item(ikmq_bz, kmq_bz, ikmq_ibz, isym_kmq, itim_kmq)
+
+       do band1=1,nbmax ! Loop over "conduction" states.
+         e_b1_kmq = ebands%eig(band1, ikmq_ibz, spin)
+         f_b1_kmq = ebands%occ(band1, ikmq_ibz, spin)
+
+         do band2=1,nbmax ! Loop over "valence" states.
+           deltaf_b1kmq_b2k = spin_fact * (f_b1_kmq - ebands%occ(band2, ik_ibz, spin))
+
+           if (abs(deltaf_b1kmq_b2k) < GW_TOL_DOCC) CYCLE
+           deltaeGW_b1kmq_b2k = e_b1_kmq - ebands%eig(band2, ik_ibz, spin)
+
+           ! Standard Adler-Wiser expression.
+           ! Add the small imaginary of the Time-Ordered RF only for non-zero real omega ! FIXME What about metals?
+
+           if (.not. use_tr) then
+             ! Have to sum over all possible resonant and anti-resonant transitions.
+             do io=1,nomega
+               green_w(io) = g0g0w(omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,zcut,GW_TOL_W0,one_pole)
+             end do
+
+           else
+             if (band1 < band2) CYCLE ! Here we GAIN a factor ~2
+
+             do io=1,nomega
+               !Rangel: In metals, the intra-band transitions term does not contain the antiresonant part
+               !green_w(io) = g0g0w(omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,zcut,GW_TOL_W0)
+               if (band1 == band2) then
+                 green_w(io) = g0g0w(omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,zcut,GW_TOL_W0,one_pole)
+               else
+                 green_w(io) = g0g0w(omega(io),deltaf_b1kmq_b2k,deltaeGW_b1kmq_b2k,zcut,GW_TOL_W0,two_poles)
+               end if
+             end do !io
+           end if ! use_tr
+
+           self%chi0(:,iq_ibz,spin) = self%chi0(:,iq_ibz,spin) + green_w(:)
+
+           !do itemp=1,ntemp
+           !  if (eig_nk >= mu_e(itemp)) then
+           !    ! electron (assuming ef inside the gap if semiconductor)
+           !    n_ehst(1, spin, itemp) = n_ehst(1, spin, itemp) + &
+           !                             wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
+           !  else
+           !    ! holes
+           !    n_ehst(2, spin, itemp) = n_ehst(2, spin, itemp) + &
+           !                             wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
+           !  end if
+           !end do
+
+         end do ! band2
+       end do ! band1
+     end do ! ik_bz
+   end do ! spin
+   call ltg_q%free()
+ end do ! iq_ibz
+
+ ABI_FREE(green_w)
+
+ ! Collect results and divide by the volume
+ call xmpi_sum(self%chi0, comm, ierr)
+ self%chi0 = self%chi0 * weight / Cryst%ucvol
+ end associate
+
+end subroutine green_chi0_init
+!!***
+
+!!****f* m_ebands/green_chi0_free
+!! NAME
+!! green_chi0_free
+!!
+!! FUNCTION
+!!  Free memory
+!!
+!! SOURCE
+
+subroutine green_chi0_free(self)
+
+class(green_chi0_t),intent(inout) :: self
+
+ ABI_SFREE(self%omega)
+ ABI_SFREE(self%green)
+ ABI_SFREE(self%chi0)
+
+ call self%kmesh%free()
+ call self%qmesh%free()
+end subroutine green_chi0_free
+!!***
+
+!!****f* m_ebands/ebands_ncwrite
+!! NAME
+!! ebands_ncwrite
+!!
+!! FUNCTION
+!!  Writes the content of a green_chi0_t object to a NETCDF file. Return nf90_noerr if success.
+!!
+!! INPUTS
+!!  ncid =NC file handle
+!!
+!! SOURCE
+
+integer function green_chi0_ncwrite_path(self, cryst, ebands, path) result(ncerr)
+
+!Arguments ------------------------------------
+!scalars
+ class(green_chi0_t),intent(in) :: self
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+ character(len=*),intent(in) :: path
+
+!Local variables-------------------------------
+ integer :: ncid
+! *************************************************************************
+
+ ncerr = nf90_noerr
+ if (file_exists(path)) then
+    NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
+ else
+   ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
+   NCF_CHECK_MSG(ncerr, sjoin("Creating", path))
+ end if
+
+ NCF_CHECK(cryst%ncwrite(ncid))
+ NCF_CHECK(ebands_ncwrite(ebands, ncid))
+
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("nkibz", self%kmesh%nibz), nctkdim_t("nqibz", self%qmesh%nibz), &
+   nctkdim_t("nwr", self%nwr), nctkdim_t("nwi", self%nwi), nctkdim_t("nomega", self%nwr) &
+   ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+ !  "wr_step", "ecuteps", "ecut", "ecutwfn", "ecutsigx", "gwr_boxcutmin", &
+ !  "cosft_duality_error", "regterm" &
+ !])
+ !NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("omega", "dp", "two, nomega"), &
+   nctkarr_t("green", "dp", "two, nomega, nkibz, nsppol"), &
+   nctkarr_t("chi0", "dp", "two, nomega, nqibz, nsppol") &
+ ])
+ NCF_CHECK(ncerr)
+
+ ! ===========
+ ! Write data
+ ! ===========
+ NCF_CHECK(nctk_set_datamode(ncid))
+
+ !NCF_CHECK(nf90_put_var(ncid, vid("omega"), self%omega)))
+ !NCF_CHECK(nf90_put_var(ncid, vid("green"), self%green)))
+ !NCF_CHECK(nf90_put_var(ncid, vid("chi0"), self%chi0)))
+
+ NCF_CHECK(nf90_close(ncid))
+
+contains
+integer function vid(vname)
+  character(len=*),intent(in) :: vname
+  vid = nctk_idname(ncid, vname)
+end function vid
+
+end function green_chi0_ncwrite_path
 !!***
 
 end module m_ebands

@@ -506,9 +506,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ibocc(:)=MAXVAL(ks_occ_idx(:,:),DIM=1) ! Max occupied band index for each spin.
  ABI_FREE(ks_occ_idx)
 
- use_tr=.FALSE.; nbvw=0
+ use_tr =.FALSE.; nbvw=0
  if (Dtset%gwpara==2.or.Ep%awtr==1.or.Dtset%spmeth>0) then
-   use_tr=.TRUE.
+   use_tr = .TRUE.
    nbvw=MAXVAL(ibocc)
    nbcw=Ep%nbnds-nbvw
    write(msg,'(4a,i0,2a,i0,2a,i0,a)')ch10,&

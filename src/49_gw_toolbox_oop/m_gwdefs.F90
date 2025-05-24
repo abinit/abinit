@@ -439,10 +439,6 @@ end subroutine em1params_free
 !! FUNCTION
 !!   deallocate all memory in a sigijtab_t datatype.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine sigijtab_free(Sigijtab)
