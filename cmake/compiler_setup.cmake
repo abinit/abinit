@@ -4,6 +4,10 @@
 # Fortran
 ##################################################################
 
+# Common Fortran properties managed by CMake
+set(CMAKE_Fortran_FORMAT "FREE")
+
+
 # full list of compilers supported by cmake :
 # https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html
 
@@ -42,6 +46,25 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
     add_compile_options(
       "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-eD;-hbounds>")
   endif()
+
+  # optim flags
+  if (ABI_OPTIM_FLAVOR MATCHES "safe")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-O1>"
+      )
+  elseif (ABI_OPTIM_FLAVOR MATCHES "standard")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-O2;-hnofortran_ptr_alias;-hnofortran_ptr_overlap>"
+      )
+  elseif (ABI_OPTIM_FLAVOR MATCHES "aggressive")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-O3;-hnofortran_ptr_alias;-hnofortran_ptr_overlap>"
+      )
+  endif()
+
+  # Add '-Oipa0', for disabling IPO (Inter-Procedural Optimisation) as compilation fails otherwise
+  # Add '-ef', for having Fortran module files in lowercase
+  add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-Oipa0;-ef>")
 
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Clang")
 
@@ -132,7 +155,7 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC") # NVFORTRAN
 
   # TODO : improve
   add_compile_options(
-    "$<$<COMPILE_LANGUAGE:Fortran>:-Mextend;-Mpreprocess;-Mfree;-Minfo=mp,accel,par,pfo>")
+    "$<$<COMPILE_LANGUAGE:Fortran>:-Mextend;-Mpreprocess;-Minfo=mp,accel,par,pfo>")
 
   # debug flags
   add_compile_options(
@@ -181,12 +204,24 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang")
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "standard")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-O2;-mtune=native;-mcpu=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-O2>"
       )
+      # Cray handle itself native tuning
+      if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
+        add_compile_options(
+          "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-mtune=native;-mcpu=native>"
+          )
+      endif()
   elseif (ABI_OPTIM_FLAVOR MATCHES "aggressive")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-O3;-mtune=native;-mcpu=native;-ffp-contract=fast>"
+      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-O3>"
       )
+      # Cray handle itself native tuning
+      if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
+        add_compile_options(
+          "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-mtune=native;-mcpu=native;-ffp-contract=fast>"
+          )
+      endif()
   endif()
 
 elseif(CMAKE_C_COMPILER_ID MATCHES "ARMClang")
@@ -285,12 +320,24 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "standard")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-O2;-mtune=native;-mcpu=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-O2>"
       )
+    # Cray handle itself native tuning
+    if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
+      add_compile_options(
+        "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-mtune=native;-mcpu=native>"
+        )
+    endif()
   elseif (ABI_OPTIM_FLAVOR MATCHES "aggressive")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-O3;-mtune=native;-mcpu=native;-ffp-contract=fast>"
+      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-O3>"
       )
+    # Cray handle itself native tuning
+    if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
+      add_compile_options(
+        "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-mtune=native;-mcpu=native;-ffp-contract=fast>"
+        )
+    endif()
   endif()
 
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "ARMClang")
