@@ -24,6 +24,7 @@ module m_sigma
 
  use, intrinsic :: iso_c_binding
  use defs_basis
+ use m_gwdefs
  use m_xmpi
  use m_abicore
  use m_errors
@@ -34,7 +35,7 @@ module m_sigma
  use m_wfd
 
  use defs_abitypes,    only : MPI_type
- use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, unt_sigc
+ !use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, unt_sigc
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : c2r
  use m_crystal,        only : crystal_t
