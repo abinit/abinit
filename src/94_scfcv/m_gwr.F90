@@ -247,8 +247,6 @@ module m_gwr
    procedure :: to_scbox => desc_to_scbox
    ! Insert cg_k array defined on the k-centered g-sphere with npw vectors inside the FFT box.
 
-   !procedure :: get_npw_from_nband => desc_get_npw_from_nband
-
    procedure :: get_vc_sqrt => desc_get_vc_sqrt
    ! Compute square root of vc(q,g).
 
@@ -872,7 +870,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: my_it, my_ikf, ii, kptopt, my_iki, my_iqi, itau, spin, my_iqf
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid, smat_bsize1, smat_bsize2
  integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt
- integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj
+ integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj, gw_icutcoul
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s, isym, itim
  real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int, drude_plasmon_freq
@@ -1607,8 +1605,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! Initialize Coulomb interaction.
  vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
+ gw_icutcoul = dtset%gw_icutcoul
+ !if (gw_icutcoul == 16) gw_icutcoul = 6
  call gwr%vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
-                     dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+                     dtset%rcut, gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
 
  ! Now we know the value of g_ngfft. Setup tables for zero-padded FFTs.
  ! Build descriptors for Green's functions and tchi and setup tables for zero-padded FFTs.
@@ -4233,7 +4233,6 @@ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
 ! *************************************************************************
 
  ! TODO: Add op_type
-
  !call timab(1931, 1, tsec)
 
  n1 = sc_ngfft(1); n2 = sc_ngfft(2); n3 = sc_ngfft(3)
@@ -4507,10 +4506,10 @@ subroutine gwr_build_tchi(gwr)
 
    use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc .and. gwr%kpt_comm%nproc > 1
    use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
+   if (gwr%dtset%userie == 234) use_shmem_for_k = .False.
 #ifndef HAVE_MPI_ALLOCATE_SHARED_CPTR
    use_shmem_for_k = .False.
 #endif
-   if (gwr%dtset%userie == 234) use_shmem_for_k = .False.
 
    if (use_shmem_for_k) then
      buf_count = 2 * (sc_nfftsp * max_ndat * 2)
@@ -4944,7 +4943,7 @@ subroutine gwr_build_tchi(gwr)
  ! Print trace of chi_q(i omega) matrices for testing purposes.
  if (gwr%dtset%prtvol > 0) call gwr%print_trace(units, "tchi_qibz")
 
-   ! Write file with chi0(i omega).
+ ! Write file with chi0(i omega).
  if (abs(gwr%dtset%prtsuscep) == 1) then
    call gwr%ncwrite_tchi_wc("tchi", "omega", keep_tchim, trim(gwr%dtfil%filnam_ds(4))//'_TCHIM.nc')
  end if
@@ -5349,6 +5348,8 @@ subroutine gwr_build_wc(gwr)
  call timab(1924, 1, tsec)
  call wrtout(units, " Building correlated screening Wc(i omega) ...", pre_newlines=2)
 
+ call gwr%vcgen%print(units, " Info on Coulomb term used in epsilon and W", gwr%dtset%prtvol)
+
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
  if (allocated(gwr%wc_qibz)) then
@@ -5418,20 +5419,19 @@ subroutine gwr_build_wc(gwr)
 
        ! Invert symmetrized epsilon.
        ! NB: PZGETRF requires square block cyclic decomposition along the two axes
-       ! hence we have to redistribute the data before calling invert.
+       ! hence we have to redistribute the data before calling invert and then
+       ! go back to colum-distribution, that is: wc --> em1 --> wc
 
-       !call cwtime(cpu_tmp, wall_tmp, gflops_tmp, "start")
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
        ! Use hpd_invert as eps along imag axis is always hermitian.
        !call em1%invert()
        call em1%hpd_invert("U")
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
-       !call cwtime_report(" hpd_invert", cpu_tmp, wall_tmp, gflops_tmp)
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
        !call print_arr(units, wc%buffer_cplx)
 
-       ! Build Wc(q, iw) = e^{-1}_q(g,g',iw) - delta_{gg'} v_q(g,g') by removing bare vc
+       ! Build Wc(q, iw) = e^{-1}_q(g,g',iw) - delta_{gg'} v_q(g,g') by removing bare vc.
        do il_g2=1,wc%size_local(2)
          iglob2 = wc%loc2gcol(il_g2)
          ig2 = mod(iglob2 - 1, desc_q%npw) + 1
@@ -5454,10 +5454,8 @@ subroutine gwr_build_wc(gwr)
              if (iglob1 == ig0 .and. iglob2 == ig0) then
                vcs_g1 = sqrt(gwr%vcgen%i_sz); vcs_g2 = sqrt(gwr%vcgen%i_sz)
              else if (iglob1 == ig0) then
-               !vcs_g1 = (four_pi) ** (three/two) * q0sph ** 2 / two
                vcs_g1 = sqrt(gwr%vcgen%i_sz)
              else if (iglob2 == ig0) then
-               !vcs_g2 = (four_pi) ** (three/two) * q0sph ** 2 / two
                vcs_g2 = sqrt(gwr%vcgen%i_sz)
              end if
            end if
@@ -5605,6 +5603,15 @@ subroutine gwr_build_sigmac(gwr)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1925, 1, tsec)
 
+ units = [std_out, ab_out]
+ if (gwr%sig_diago) then
+   call wrtout(units, " Computing diagonal matrix elements of Sigma_c", pre_newlines=1)
+ else
+   call wrtout(units, " Computing diagonal + off-diagonal matrix elements of Sigma_c", pre_newlines=1)
+ end if
+
+ call gwr%vcgen%print(units, " Info on Coulomb term used in Sigma_c", gwr%dtset%prtvol)
+
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space: ", gwr%wc_space, " != itau"))
 
  !mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
@@ -5636,13 +5643,6 @@ subroutine gwr_build_sigmac(gwr)
 
  call sigijtab_free(Sigxij_tab)
  ABI_FREE(Sigxij_tab)
-
- units = [std_out, ab_out]
- !if (gwr%sig_diago) then
- !  call wrtout(units, " Computing diagonal matrix elements of Sigma_c", pre_newlines=1)
- !else
- !  call wrtout(units, " Computing diagonal + off-diagonal matrix elements of Sigma_c", pre_newlines=1)
- !end if
 
  ! Allocate matrix elements Sigmac_(itau) in the KS basis set.
  ii = gwr%b1gw; jj = gwr%b2gw
@@ -6099,7 +6099,7 @@ end if
  ! Store matrix elements of Sigma_c(it), separate even and odd part
  ! then use sine/cosine transform to get Sigma_c(i omega).
  ! Finally, perform analytic continuation with Pade' to go to the real-frequency axis
- ! and compute QP corrections and spectral functions. All procs execute this part as it's very cheap.
+ ! for computing QP corrections and spectral functions. All procs execute this part as it's very cheap.
 
  imag_zmesh(:) = j_dpc * gwr%iw_mesh
 
@@ -6190,6 +6190,7 @@ end if
      ABI_WARNING_IF(ierr /= 0, msg)
 
      call spade%eval(zz, sigc_e0__, dvdz=dsigc_de0)
+
      ! Z = (1 - dSigma / domega(E0))^{-1}
      z_e0 = one / (one - dsigc_de0)
 
@@ -6428,6 +6429,7 @@ end if
        ncerr = nctk_def_arrays(ncid, [ &
          nctkarr_t("e0_kcalc", "dp", "smat_bsize1, nkcalc, nsppol"), &
          nctkarr_t("ze0_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+         !nctkarr_t("vxc_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
          nctkarr_t("qpz_ene", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
          nctkarr_t("qp_pade", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
          nctkarr_t("pade_solver_ierr", "int", "smat_bsize1, nkcalc, nsppol"), &
@@ -7940,7 +7942,15 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
  call timab(1920, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+
  units = [std_out, ab_out]
+ if (gwr%sig_diago) then
+   call wrtout(units, " Computing diagonal matrix elements of Sigma_x", pre_newlines=1)
+ else
+   call wrtout(units, " Computing diagonal + off-diagonal matrix elements of Sigma_x", pre_newlines=1)
+ end if
+
+ call gwr%vcgen%print(units, " Info on Coulomb term used in Sigma_x", dtset%prtvol)
 
  nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
 
@@ -7951,12 +7961,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
  call sigijtab_free(Sigcij_tab)
  ABI_FREE(Sigcij_tab)
-
- if (gwr%sig_diago) then
-   call wrtout(units, " Computing diagonal matrix elements of Sigma_x", pre_newlines=1)
- else
-   call wrtout(units, " Computing diagonal + off-diagonal matrix elements of Sigma_x", pre_newlines=1)
- end if
 
  ! Allocate array with Sigma_x matrix elements depending on sig_diago
  ii = gwr%b1gw; jj = gwr%b2gw

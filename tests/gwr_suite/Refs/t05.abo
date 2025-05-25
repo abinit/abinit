@@ -685,6 +685,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
  Computing diagonal matrix elements of Sigma_x
+
+ cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and KS energies...
 
 
@@ -809,6 +811,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
  Building correlated screening Wc(i omega) ...
 
+ cutoff-mode = AUXILIARY_FUNCTION
+
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
@@ -861,6 +865,10 @@ iteration_state: {dtset: 3, }
     8  -0.465  -0.464  -0.458  -0.430  -0.315  -0.081
         0.000   0.000   0.000   0.000   0.000   0.000
 
+
+ Computing diagonal matrix elements of Sigma_c
+
+ cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
  QP results (energies in eV)
  Notations:
