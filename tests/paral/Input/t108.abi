@@ -111,6 +111,8 @@ jpawu2      0.84 eV  # Values of J
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% [shell]
+#%% pre_commands = iw_cp t108_0001 .;
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8

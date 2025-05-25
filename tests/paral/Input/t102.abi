@@ -126,7 +126,6 @@ kptbounds3               # The four segments of the band structure are
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = alps_gnu_14.2_cov, alps_intel_2025_elpa, eos_intel_2023_cmake, eos_nvhpc_23.9_elpa
 #%% [shell]
 #%% pre_commands = iw_cp t102_MPI4o_DS2_DEN t102_MPI4o_DS2_DEN;
 #%%   iw_cp t102_MPI4i_DS3_Self_ra-omega_iatom0001_isppol1 .;

@@ -535,7 +535,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
  integer, allocatable :: unitselffunc_arr(:),unitselffunc_arr2(:),unitselfrot(:,:,:,:)
  real(dp), allocatable :: s_i(:,:),s_r(:,:) !,fermie_read2(:)
  complex(dpc), allocatable :: buffer(:)
- type(matlu_type), allocatable :: eigvectmatlu(:),level_diag(:),selfmomrot(:)
+ type(matlu_type), allocatable :: eigvectmatlu(:),level_diag(:),selfmomrot(:,:)
  type(oper_type), allocatable :: selfrotmatlu(:)
 ! *********************************************************************
 
@@ -637,10 +637,12 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
    end do ! ifreq
    call gather_oper(selfrotmatlu(:),self%distrib,paw_dmft,2,master=master)
    if (self%has_moments == 1) then
-     ABI_MALLOC(selfmomrot,(natom))
-     call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),selfmomrot(:))
-     call copy_matlu(self%moments(1)%matlu(:),selfmomrot(:),natom)
-     call rotate_matlu(selfmomrot(:),eigvectmatlu(:),natom,1)
+     ABI_MALLOC(selfmomrot,(natom,self%nmoments))
+     do i=1,self%nmoments
+       call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),selfmomrot(:,i))
+       call copy_matlu(self%moments(i)%matlu(:),selfmomrot(:,i),natom)
+       call rotate_matlu(selfmomrot(:,i),eigvectmatlu(:),natom,1)
+     end do ! i
    end if
    do ifreq=1,min(3,self%nw)
      write(tag_freq,'(i5)') ifreq
@@ -991,11 +993,14 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
          do ispinor=1,nspinor
            do im=1,ndim
              if (self%has_moments == 1) then
-               write(message,'(a,2x,2(es24.16e3,2x))') "# moment", &
-                 & dble(selfmomrot(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol)), &
-                 & aimag(selfmomrot(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol))
-               call wrtout(unitselfrot(im,ispinor,isppol,iatom),message,'COLL')
-             end if
+               do i=1,self%nmoments
+                 write(tag_is,'(i1)') i
+                 write(message,'(a,2x,2(es24.16e3,2x))') "#moments_"//tag_is, &
+                   & dble(selfmomrot(iatom,i)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol)), &
+                   & aimag(selfmomrot(iatom,i)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol))
+                 call wrtout(unitselfrot(im,ispinor,isppol,iatom),message,'COLL')
+               end do ! i
+             end if ! nmoments
              close(unitselfrot(im,ispinor,isppol,iatom))
              write(std_out,*) "Close file unit",unitselfrot(im,ispinor,isppol,iatom)
            end do ! im
@@ -1347,7 +1352,9 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
      call destroy_oper(energy_level)
      call destroy_matlu(level_diag(:),natom)
      if (self%has_moments == 1) then
-       call destroy_matlu(selfmomrot(:),natom)
+       do i=1,self%nmoments
+         call destroy_matlu(selfmomrot(:,i),natom)
+       end do
        ABI_FREE(selfmomrot)
      end if
      do ifreq=1,self%nw
