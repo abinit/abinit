@@ -327,11 +327,9 @@ We have introduced two new native thermal xc functionals:
 These functionals are not compatible with spin-polarized calculations yet. The documentation includes them, as well as a warning while using LibXC thermal functionals.
 The already implemented Ichimaru thermal LDA functional ([[ixc]]=50) now sets xc entropy the same way as KSDT and KDT16 functionals.
 
-The extfpmd now works with [[occopt]] != 3, by setting the el_temp in the initialization (but still only with metallic occupations).
-
 See [[test:v10_22]] and [[test:v10_23]].
 
-By A. Blanchet (MR1121, MR1135).
+By A. Blanchet, V. V. Karasiev and M. Torrent (MR1121, MR1135).
 
 
 **B.15** Degree of filtering and its oracle in Chebyshev algorithm
@@ -510,17 +508,9 @@ By M. Mignolet, F. Gomez-Ortiz and I. Lygatsika (MR1083)
 
 **D.6** Developments and bug fixes in extended First-Principles Molecular Dynamics (high temperature).
 
-ABINIT can compute extFPMD high energy contributions with a discrete sum on the orbitals.
-This is activated with [[useextfpmd]]=5, and controlled with the new input variable [[extfpmd_nband]].
-This allows ABINIT to compute smooth DOS between Kohn-Sham eigenstates and extended ideal electronic states.
-See  [[test:v9_92]].
+The extended First-Principles Molecular Dynamics model now allows values of [[occopt]] different from 3 by setting the electronic temperature during the initialization (metallic occupations are still required).
 
-Also, [[useextfpmd]]=4 has been fixed, by computing the band shift. Now [[useextfpmd]]=1 and [[useextfpmd]]=4 show very similar results (not exactly equal though).
-
-The value of extfpmd_eshift has been added in the header of wave function files (made optional in order not to break post processing tools): this allows for a faster restart of a calculation from the wavefunctions.
-
-By A. Blanchet (MR1121, MR1135).
-
+By A. Blanchet (MR1135).
 
 **D.7** MRGDDB polishing.
 
