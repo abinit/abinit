@@ -42,7 +42,6 @@ module m_ebands
  use m_yaml
 
 
-
  use defs_datatypes,   only : ebands_base_t
  use m_gwdefs,         only : GW_TOL_DOCC, GW_TOL_W0, g0g0w
  use m_copy,           only : alloc_copy
@@ -95,6 +94,7 @@ contains
 
  procedure :: from_hdr => ebands_from_hdr
  ! Init object from the abinit header.
+
  procedure :: from_dtset => ebands_from_dtset
  ! Init object from the abinit dataset.
 
@@ -6162,15 +6162,15 @@ subroutine green_chi0_init(self, ebands, cryst, nspden, nwr, nwi, rw_max, iw_max
 
 !Local variables-------------------------------
  integer,parameter :: two_poles = 2, one_pole = 1
- integer :: spin, band1, band2, ierr, nbmax, iq_ibz, nfound, itemp, prtvol, io, nomega_tot
+ integer :: spin, band1, band2, ierr, nbmax, iq_ibz, nfound, prtvol, io
  integer :: ik_bz, ik_ibz, ikmq_bz, ikmq_ibz, isym_k, isym_kmq, itim_k, itim_kmq, symchi
- real(dp) :: max_occ, wtk, e_nk, e_b1_kmq, f_b1_kmq, deltaeGW_b1kmq_b2k, deltaf_b1kmq_b2k, spin_fact, weight
- real(dp) :: rw_step, iw_step
+ real(dp) :: e_nk, e_b1_kmq, f_b1_kmq, deltaeGW_b1kmq_b2k, deltaf_b1kmq_b2k, spin_fact, weight
+ !real(dp) :: rw_step, iw_step ! wtk,
  complex(dp) :: ieta
- logical :: qzero, isirred_k,isirred_kmq, use_tr !is_metallic
+ logical :: use_tr ! qzero, isirred_k, isirred_kmq, is_metallic
  type(littlegroup_t) :: ltg_q
 !arrays
- integer :: G0(3), umklp_k(3), umklp_kmq(3), units(2)
+ integer :: G0(3), units(2)  !umklp_k(3), umklp_kmq(3),
  real(dp) :: kbz(3), kmq_bz(3), qpoint(3)
  real(dp),allocatable :: wmesh(:)
  complex(dp),allocatable :: green_w(:)
@@ -6414,7 +6414,7 @@ integer function green_chi0_ncwrite_path(self, cryst, ebands, path) result(ncerr
  end if
 
  NCF_CHECK(cryst%ncwrite(ncid))
- NCF_CHECK(ebands_ncwrite(ebands, ncid))
+ NCF_CHECK(ebands%ncwrite(ncid))
 
  ncerr = nctk_def_dims(ncid, [ &
    nctkdim_t("nkibz", self%kmesh%nibz), nctkdim_t("nqibz", self%qmesh%nibz), &

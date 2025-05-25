@@ -1930,6 +1930,11 @@ subroutine vcgen_print(vcgen, units, header, prtvol)
  character(len=500) :: msg
 ! *************************************************************************
 
+ ABI_UNUSED(prtvol)
+
+ msg = ch10//' === '//trim(adjustl(header))//' === '
+ call wrtout(units, msg)
+
  select case (vcgen%mode)
 
  case ('MINIBZ')
