@@ -610,6 +610,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
  Computing diagonal matrix elements of Sigma_x
 
+ === Info on Coulomb term used in Sigma_x ===
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and KS energies...
 
@@ -651,6 +653,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
  Building correlated screening Wc(i omega) ...
 
+ === Info on Coulomb term used in epsilon and W ===
+
  cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
@@ -686,6 +690,8 @@ iteration_state: {dtset: 3, }
 
 
  Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
 
  cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
@@ -769,11 +775,15 @@ data: !Tabular |
 
  Computing diagonal matrix elements of Sigma_x
 
+ === Info on Coulomb term used in Sigma_x ===
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and QP energies...
 
 
  Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
 
  cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
@@ -869,11 +879,15 @@ data: !Tabular |
 
  Computing diagonal matrix elements of Sigma_x
 
+ === Info on Coulomb term used in Sigma_x ===
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and QP energies...
 
 
  Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
 
  cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
@@ -969,11 +983,15 @@ data: !Tabular |
 
  Computing diagonal matrix elements of Sigma_x
 
+ === Info on Coulomb term used in Sigma_x ===
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and QP energies...
 
 
  Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
 
  cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
@@ -1186,6 +1204,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
  Computing diagonal matrix elements of Sigma_x
 
+ === Info on Coulomb term used in Sigma_x ===
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and KS energies...
 
@@ -1227,6 +1247,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
  Building correlated screening Wc(i omega) ...
 
+ === Info on Coulomb term used in epsilon and W ===
+
  cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
@@ -1262,6 +1284,8 @@ iteration_state: {dtset: 4, }
 
 
  Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
 
  cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
@@ -1354,6 +1378,8 @@ data: !Tabular |
 
  Computing diagonal matrix elements of Sigma_x
 
+ === Info on Coulomb term used in Sigma_x ===
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and QP energies...
 
@@ -1395,6 +1421,8 @@ data: !Tabular |
 
  Building correlated screening Wc(i omega) ...
 
+ === Info on Coulomb term used in epsilon and W ===
+
  cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
@@ -1430,6 +1458,8 @@ iteration_state: {dtset: 4, }
 
 
  Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
 
  cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
@@ -1522,6 +1552,8 @@ data: !Tabular |
 
  Computing diagonal matrix elements of Sigma_x
 
+ === Info on Coulomb term used in Sigma_x ===
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and QP energies...
 
@@ -1563,6 +1595,8 @@ data: !Tabular |
 
  Building correlated screening Wc(i omega) ...
 
+ === Info on Coulomb term used in epsilon and W ===
+
  cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
@@ -1598,6 +1632,8 @@ iteration_state: {dtset: 4, }
 
 
  Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
 
  cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
@@ -1690,6 +1726,8 @@ data: !Tabular |
 
  Computing diagonal matrix elements of Sigma_x
 
+ === Info on Coulomb term used in Sigma_x ===
+
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and QP energies...
 
@@ -1731,6 +1769,8 @@ data: !Tabular |
 
  Building correlated screening Wc(i omega) ...
 
+ === Info on Coulomb term used in epsilon and W ===
+
  cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
@@ -1766,6 +1806,8 @@ iteration_state: {dtset: 4, }
 
 
  Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
 
  cutoff-mode = AUXILIARY_FUNCTION
 ================================================================================
@@ -1961,6 +2003,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
  Computing diagonal matrix elements of Sigma_x
+
+ === Info on Coulomb term used in Sigma_x ===
 
  cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and KS energies...
