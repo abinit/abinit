@@ -94,8 +94,8 @@ dmft_triqs_seed_b  95321
 
 prtwf 0
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "23v.paw, 38sr.paw, 8o.paw"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "23v.paw, 38sr.paw, 8o.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
