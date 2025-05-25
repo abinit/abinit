@@ -76,10 +76,20 @@ if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(DO_BUILD_67_PYTHON_INVOCATION_EXT ON)
 endif()
 
-option (ABINIT_ENFORCE_CUDA_AWARE_MPI "Some MPI cuda-aware implementation are not well detected; use this variable to enforce if you that your MPI implementation is Cuda-aware." OFF)
+option (ABINIT_ENFORCE_GPU_AWARE_MPI "Some MPI GPU-aware implementations are not well detected; use this variable to enforce if you know that your MPI implementation is GPU-aware." OFF)
 
 option(ABINIT_ENABLE_GPU_CUDA "Enable GPU build (using Nvidia CUDA backend, default OFF)" OFF)
 if(ABINIT_ENABLE_GPU_CUDA)
+
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    message(FATAL_ERROR
+      "When using CUDA, you need to provide -DCMAKE_CUDA_ARCHITECTURES "
+      "with the NVIDIA GPU compute capability matching your environment.\n"
+      "For example, if targetting NVIDIA GPU A100:\n"
+      "-DCMAKE_CUDA_ARCHITECTURES=80 \n"
+    )
+  endif()
+
   include(CheckLanguage)
   check_language(CUDA)
   if (CMAKE_CUDA_COMPILER)
@@ -111,6 +121,18 @@ endif()
 
 option(ABINIT_ENABLE_GPU_HIP "Enable GPU build (using AMD HIP backend, default OFF)" OFF)
 if(ABINIT_ENABLE_GPU_HIP)
+
+  if(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
+    message(FATAL_ERROR
+      "When using HIP, you need to provide -DCMAKE_HIP_ARCHITECTURES "
+      "with the AMD GPU target matching your environment.\n"
+      "For example, if targetting AMD GPU Instinct MI250:\n"
+      "-DCMAKE_HIP_ARCHITECTURES=gfx90a \n"
+    )
+  endif()
+
+  # For shutting annoying warning from ROCM Cmake module
+  set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 
   find_package(HIP)
   find_package(hipfft)
@@ -170,7 +192,7 @@ if(ABINIT_ENABLE_GPU_MARKERS)
   else()
       message(STATUS "ROCTX not found")
   endif()
-  
+
   if (NOT(NVTX_LIBRARY OR ROCTX_LIBRARY))
     message(SEND_ERROR "ABINIT_ENABLE_GPU_MARKERS activated but Neither NVTX or ROCTX have been found!")
   endif()

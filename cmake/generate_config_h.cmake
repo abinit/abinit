@@ -553,7 +553,7 @@ if (MPI_FOUND)
       try_compile(HAVE_NETCDF_FORTRAN_BOOL
         ${CMAKE_BINARY_DIR}/try_compile_netcdf
         ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_netcdf_fortran.F90
-        LINK_LIBRARIES PkgConfig::ABINIT_NETCDF_FORTRAN PkgConfig::ABINIT_NETCDF MPI::MPI_Fortran)
+        LINK_LIBRARIES HDF5::HDF5 PkgConfig::ABINIT_NETCDF_FORTRAN PkgConfig::ABINIT_NETCDF MPI::MPI_Fortran)
     endif()
     if (HAVE_NETCDF_FORTRAN_BOOL)
       message(STATUS "NetCDF Fortran support checked ok")
