@@ -147,7 +147,7 @@ type,public :: vcoul_t
 contains
    procedure :: init => vcoul_init    ! Main creation method.
    procedure :: plot => vcoul_plot    ! Plot vc in real and reciprocal space.
-   procedure :: print => vcoul_print  ! Report info on the object.
+   procedure :: print => vcoul_print  ! Print info on the object.
    procedure :: free => vcoul_free    ! Free memory
 
 end type vcoul_t
@@ -237,7 +237,7 @@ contains
   procedure :: init => vcgen_init                  ! Initialize the object
   procedure :: get_vc_sqrt => vcgen_get_vc_sqrt    ! Compute sqrt(vc(q,g))
   procedure :: free => vcgen_free                  ! Free memory
-  !procedure :: print => vcgen_print
+  procedure :: print => vcgen_print                ! Print info on the object.
 end type vcgen_t
 !!***
 
@@ -787,8 +787,7 @@ real(dp) pure function faux(qq, rcut, b1, b2, b3)
  real(dp),intent(in) :: b1(3), b2(3), b3(3)
 
 !Local variables-------------------------------
- real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
- real(dp) :: b1b1,b2b2,b3b3
+ real(dp) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3, b1b1,b2b2,b3b3
 ! *************************************************************************
 
  b1b1 = dot_product(b1, b1); b2b2 = dot_product(b2, b2); b3b3 = dot_product(b3, b3)
@@ -809,14 +808,14 @@ real(dp) pure function faux_fast(qq, bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: qq(3)
- real(dp),intent(in) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3
- real(dp),intent(in) :: rcut
+ real(dp),intent(in) :: bb4sinpiqq1_2, bb4sinpiqq2_2, bb4sinpiqq3_2, sin2piqq1, sin2piqq2, sin2piqq3, rcut
  real(dp),intent(in) :: b1(3), b2(3), b3(3)
 
 !Local variables-------------------------------
  real(dp) :: b1b2,b2b3,b3b1
- b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
 ! *************************************************************************
+
+ b1b2 = dot_product(b1, b2); b2b3 = dot_product(b2, b3); b3b1 = dot_product(b3, b1)
 
  faux_fast = bb4sinpiqq1_2 + bb4sinpiqq2_2 + bb4sinpiqq3_2 &
       +two*( b1b2 * sin2piqq1*sin2piqq2 &
@@ -840,8 +839,7 @@ end function faux_fast
 !! adapt_nmc
 !!
 !! FUNCTION
-!! Empirical law to decrease the Monte Carlo sampling
-!! for large q+G, for which the accuracy is not an issue
+!! Empirical law to decrease the Monte Carlo sampling for large |q+G|, for which the accuracy is not an issue
 
 integer pure function adapt_nmc(nmc_max, qpg2) result(nmc)
 
@@ -877,7 +875,7 @@ subroutine vcoul_plot(Vcp, Qmesh, Gsph, ng, vc, comm)
 !Arguments ------------------------------------
 !scalars
  class(vcoul_t),intent(in) :: Vcp
- integer,intent(in) :: ng,comm
+ integer,intent(in) :: ng, comm
  type(kmesh_t),intent(in) :: Qmesh
  type(gsphere_t),intent(in) :: Gsph
 !arrays
@@ -1017,7 +1015,7 @@ end subroutine vcoul_plot
 !! vcoul_print
 !!
 !! FUNCTION
-!!  Print the content of a Coulomb datatype.
+!!  Print info on a Coulomb datatype.
 !!
 !! INPUTS
 !!  units=Unit numbers for output
@@ -1135,8 +1133,6 @@ subroutine vcoul_print(Vcp, units, prtvol)
    end do
  end if
 
- !TODO add additional information
-
 end subroutine vcoul_print
 !!***
 
@@ -1147,7 +1143,7 @@ end subroutine vcoul_print
 !! vcoul_free
 !!
 !! FUNCTION
-!!  Free memory
+!!  Free dynamic memory
 !!
 !! SOURCE
 
@@ -1201,8 +1197,7 @@ subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
  qcart2red(:,:) = two_pi * gprimd(:,:)
  call matrginv(qcart2red, 3, 3)
 
- ! Find the largest sphere inside the miniBZ
- ! in order to integrate the divergence analytically
+ ! Find the largest sphere inside the miniBZ in order to integrate the divergence analytically
  mc%q0sph = HUGE(one)
  do i1 = -ncell+1, ncell
    qtmp(1) = dble(i1) * 0.5_dp
@@ -1312,7 +1307,7 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
      nmc = adapt_nmc(mc%nmc_max, qpg2)
      do imc=1,nmc
        qpg(:) = qibz(:) + gvec(:,ig) + mc%qran(:,imc)
-       qpg2 = normv(qpg, mc%gmet, 'G')**2
+       qpg2 = normv(qpg, mc%gmet, 'G') ** 2
        vcoul(ig) = vcoul(ig) + four_pi / qpg2 / REAL(nmc, dp)
      end do
    end do ! ig
@@ -1912,6 +1907,125 @@ end subroutine vcgen_free
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_vcoul/vcgen_print
+!! NAME
+!! vcgen_print
+!!
+!! FUNCTION
+!!  Print info on the object.
+!!
+!! SOURCE
+
+subroutine vcgen_print(vcgen, units, header, prtvol)
+
+!Arguments ------------------------------------
+ class(vcgen_t),intent(in) :: vcgen
+ integer,intent(in) :: units(:), prtvol
+ character(len=*),intent(in) :: header
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+ character(len=500) :: msg
+! *************************************************************************
+
+ select case (vcgen%mode)
+
+ case ('MINIBZ')
+   write(msg,'(3a)')ch10,' cutoff-mode = ',trim(vcgen%mode)
+   call wrtout(units, msg)
+
+ case ('MINIBZ-ERF')
+   write(msg,'(3a)')ch10,' cutoff-mode = ',trim(vcgen%mode)
+   call wrtout(units, msg)
+   write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
+     ' === Error function cutoff === ',ch10,ch10,&
+     '  Cutoff radius ......... ',vcgen%rcut,' [Bohr] ',ch10
+   call wrtout(units, msg)
+
+ case ('MINIBZ-ERFC')
+   write(msg,'(3a)')ch10,' cutoff-mode = ',trim(vcgen%mode)
+   call wrtout(units, msg)
+   write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
+     ' === Complement Error function cutoff === ',ch10,ch10,&
+     '  Cutoff radius ......... ',vcgen%rcut,' [Bohr] ',ch10
+   call wrtout(units, msg)
+
+ case ('SPHERE')
+   write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
+    ' === Spherical cutoff === ',ch10,ch10,&
+    '  Cutoff radius ......... ',vcgen%rcut,' [Bohr] ',ch10,&
+    '  Volume of the sphere .. ',four_pi/three*vcgen%rcut**3,' [Bohr^3] '
+    !FB: This has no meaning here! &  '  Sphere centered at .... ',vcgen%boxcenter,' (r.l.u) ',ch10
+    !MG It might be useful if the system is not centered on the origin because in this case the
+    !   matrix elements of the Coulomb have to be multiplied by a phase depending on boxcenter.
+    !   I still have to decide if it is useful to code this possibility and which variable use to
+    !   define the center (boxcenter is used in the tddft part).
+   call wrtout(units, msg)
+
+ case ('CYLINDER')
+   ii=imin_loc(ABS(vcgen%pdir-1))
+   write(msg,'(5a,f10.4,3a,i2,2a,3f10.2,a)')ch10,&
+     ' === Cylindrical cutoff === ',ch10,ch10,&
+     '  Cutoff radius ............... ',vcgen%rcut,' [Bohr] ',ch10,&
+     '  Axis parallel to direction... ',ii,ch10,&
+     '  Passing through point ....... ',vcgen%boxcenter,' (r.l.u) '
+   call wrtout(units, msg)
+
+   write(msg,'(2a)')'  Infinite length  ....... ',ch10
+   if (vcgen%hcyl/=zero) write(msg,'(a,f8.5,2a)')'  Finite length of ....... ',vcgen%hcyl,' [Bohr] ',ch10
+   call wrtout(units, msg)
+
+ CASE ('SLAB')
+   write(msg,'(5a,f10.4,3a,3f10.2,2a)')ch10,&
+     ' === Surface cutoff === ',ch10,ch10,&
+     '  Cutoff radius .................... ',vcgen%rcut,' [Bohr] ',ch10,&
+     '  Central plane passing through .... ',vcgen%boxcenter,' (r.l.u) ',ch10
+   call wrtout(units, msg)
+   !write(msg,'(a)')'  Infinite length  .......'
+   !if (vcgen%hcyl/=zero) write(msg,'(a,f8.5,a)')'  Finite length of .......',vcgen%hcyl,' [Bohr] '
+   !call wrtout(units, msg)
+
+ case ('AUXILIARY_FUNCTION')
+   write(msg,'(3a)')ch10,' cutoff-mode = ',trim(vcgen%mode)
+   call wrtout(units, msg)
+
+ case ('AUX_GB')
+   write(msg,'(3a)')ch10,' cutoff-mode = ',trim(vcgen%mode)
+   call wrtout(units, msg)
+
+ case ('CRYSTAL')
+   write(msg,'(3a)')ch10,' cutoff-mode = ',trim(vcgen%mode)
+   call wrtout(units, msg)
+
+ case ('ERF')
+   write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
+     ' === Error function cutoff === ',ch10,ch10,&
+     '  Cutoff radius ......... ',vcgen%rcut,' [Bohr] ',ch10
+   call wrtout(units, msg)
+
+ case ('ERFC')
+   write(msg,'(5a,f10.4,3a,f10.2,3a,3f10.5,2a)')ch10,&
+     ' === Complement Error function cutoff === ',ch10,ch10,&
+     '  Cutoff radius ......... ',vcgen%rcut,' [Bohr] ',ch10
+   call wrtout(units, msg)
+
+ case default
+   ABI_BUG(sjoin('Unknown cutoff mode: ', vcgen%mode))
+ end select
+
+ !if (vcgen%nqlwl > 0) then
+ !  write(msg,'(a,i3)')" q-points for optical limit: ",vcgen%nqlwl
+ !  call wrtout(units, msg)
+ !  do iqlwl=1,vcgen%nqlwl
+ !    write(msg,'(1x,i5,a,2x,3f12.6)') iqlwl,')',vcgen%qlwl(:,iqlwl)
+ !    call wrtout(units, msg)
+ !  end do
+ !end if
+
+end subroutine vcgen_print
+!!***
 
 end module m_vcoul
 !!***
