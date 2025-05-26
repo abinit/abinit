@@ -2104,10 +2104,10 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
            if (icplex==1) then
              write(msg, '(a)') ' Real part of magnetization:'
              call wrtout(units,msg)
+             call wrtout(units,msg_cplex)
            elseif (icplex==2) then
              write(msg, '(a)') '----------------------------'
              call wrtout(units,msg)
-             call wrtout(units,msg_cplex)
              write(msg, '(a)') ' Imaginary part of magnetization:'
              call wrtout(units,msg)
              call wrtout(units,msg_cplex)
