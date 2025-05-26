@@ -109,6 +109,7 @@ contains
 !!  cpus=cpu time limit in seconds
 !!  deltae=change in energy between the previous and present SCF cycle
 !!  diffor=maximum absolute change in component of fcart between present and previous SCF cycle.
+!!  difmag=maximum absolute change in magnetization between present and previous SCF cycle.
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | chkexit= if non-zero, check whether the user wishes to exit
 !!   | enunit=parameter determining units of output energies
@@ -150,6 +151,7 @@ contains
 !!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
+!!  maxmag=maximum absolute value of magnetization among all atoms.
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
 !!  mpi_enreg=information about MPI parallelization
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
@@ -344,15 +346,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
            end if
          end if
        else
-        ! if(tmagnet==2 .and. iscf>0 )then
-        !   if (optres==0) then
-        !     write(message, '(4a)' ) ch10,&
-        !      '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2    difmagsph maxmagsph'
-        !   else
-        !     write(message, '(4a)' ) ch10,&
-        !      '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2    difmagsph maxmagsph'
-        !   end if
-        ! else
+         if(tmagnet==2 .and. iscf>0 )then
+           if (optres==0) then
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2    difmagsph maxmagsph'
+           else
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2    difmagsph maxmagsph'
+           end if
+         else
            if (optres==0) then
              write(message, '(4a)' ) ch10,&
               '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2 '
@@ -360,7 +362,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
              write(message, '(4a)' ) ch10,&
               '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2 '
            end if
-        ! end if
+         end if
        end if
      end if
 
@@ -475,13 +477,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
             firstchar,'ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor
          end if
        else
-         !if(tmagnet==2 .and. iscf>0 )then
-         !  write(message, '(2a,'//format_istep//',1p,g22.14,1x,5es10.3)' ) &
-         !   firstchar,'ETOT',istep,etotal,deltae,residm,res2,difmagsph,maxmagsph
-         !else
+         if(tmagnet==2 .and. iscf>0 )then
+           write(message, '(2a,'//format_istep//',1p,g22.14,1x,5es10.3)' ) &
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2,difmagsph,maxmagsph
+         else
            write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
             firstchar,'ETOT',istep,etotal,deltae,residm,res2
-         !end if
+         end if
        end if
      end if
      !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
