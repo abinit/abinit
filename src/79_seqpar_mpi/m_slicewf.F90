@@ -160,6 +160,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  type(slice_t) :: slice
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
  ! arrays
+ real(dp) :: cg_temp(2,npw*nspinor*nband)
  real(dp) :: tsec(2)
  !integer(kind=c_size_t) :: sliceMem(2) 
  real(dp), allocatable :: l_gvnlxc(:,:)
@@ -215,12 +216,15 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
      if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
    end if
  end if
+ 
+ ! Temporary cg object used in Slicing
+ cg_temp(:,:) = cg(:,:)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:cg,cg_temp,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
- call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
+ call xgBlock_map(xgx0,cg_temp,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
 
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=gpu_option)
 
@@ -240,10 +244,10 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call slice_allschedule(slice, xgx0, getghc_gsc1, xgeigen, nspinor)
  
  if (dtset%nslice>1) then
-    ! Release collective cg memory from GPU, will only use active task memory
+    ! Release collective cg_temp memory from GPU, will only use active task memory
 #ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET UPDATE FROM(cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
-    !$OMP TARGET EXIT DATA MAP(delete:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+    !$OMP TARGET UPDATE FROM(cg_temp) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+    !$OMP TARGET EXIT DATA MAP(delete:cg_temp) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
  end if
 
@@ -253,11 +257,11 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call slice_run(slice, getghc_gsc1, getBm1X, xgeigen, xgresidu, nspinor)
 
  if (dtset%nslice>1) then
-    ! Retransfer collective cg memory on GPU
+    ! Retransfer collective cg_temp memory on GPU
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:cg) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:cg_temp) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
-   call xgBlock_map(xgx0,cg,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
+   call xgBlock_map(xgx0,cg_temp,space,spacedim,nband,comm=spacecom,me_g0=me_g0,gpu_option=gpu_option)
  end if
 
  call slice_allmerge(slice, xgx0, xgeigen, xgresidu)
@@ -307,7 +311,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg_temp,cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
  call timab(tim_slicewf,2,tsec)
