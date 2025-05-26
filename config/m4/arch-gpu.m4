@@ -646,6 +646,16 @@ AC_DEFUN([ABI_GPU_INIT],[
   abi_gpu_libs="${GPU_LIBS}"
   abi_gpu_arch="${GPU_ARCH}"
 
+  if test "${abi_gpu_enable}" = "yes"; then
+    if test "${abi_gpu_arch}" = "" -a "${NVCC_CFLAGS_ARCH}" = ""; then
+      AC_MSG_ERROR([GPU support is enabled but no GPU target architecture has been provided.
+                    Please set GPU_ARCH variable accordingly to your target GPU with either
+                    NVIDIA compute capability or AMDGPU target, for example:
+                    GPU_ARCH=80       , for NVIDIA A100
+                    GPU_ARCH=gfx90a   , for AMD Instinct MI250])
+    fi
+  fi
+
   if test "${abi_gpu_enable}" = "yes" -o "${abi_gpu_enable}" = "auto"; then
 
     # Banner
