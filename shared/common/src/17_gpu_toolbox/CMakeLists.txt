@@ -53,11 +53,6 @@ if(ABINIT_ENABLE_GPU_CUDA)
     CUDA::cublas
     CUDA::cusolver
     )
-  if(ABINIT_ENABLE_GPU_MARKERS)
-    target_link_libraries(17_gpu_toolbox
-      CUDA::nvToolsExt
-      )
-  endif()
 endif()
 
 if(ABINIT_ENABLE_GPU_HIP)
@@ -70,11 +65,13 @@ if(ABINIT_ENABLE_GPU_HIP)
     roc::rocfft
     roc::hipsolver
     )
-  if(ABINIT_ENABLE_GPU_MARKERS)
-    target_link_libraries(17_gpu_toolbox
-      ${ROCTX}
-      )
-  endif()
+endif()
+
+if(HAVE_GPU_MARKERS)
+  target_link_libraries(17_gpu_toolbox
+    PUBLIC
+    abinit::gpu_markers
+    )
 endif()
 
 if (ABINIT_YAKL_WANTED)

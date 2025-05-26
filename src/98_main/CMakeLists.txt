@@ -59,6 +59,13 @@ macro(abi_build_exe exe_name)
       abinit::netcdf)
   endif (ABINIT_NETCDF_FOUND)
 
+  if(HAVE_GPU_MARKERS)
+    target_link_libraries(${exe_name}
+      PUBLIC
+      abinit::gpu_markers
+      )
+  endif(HAVE_GPU_MARKERS)
+
   set_target_properties(${exe_name}
     PROPERTIES
     LINKER_LANGUAGE "Fortran")
