@@ -1044,13 +1044,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      choice=2
-! if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
-!   intgden0=intgden
-!   call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!&     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-!&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
-!   call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
-! endif
+     if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+       intgden0=intgden
+       call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&        dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+&        prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+       call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+     endif
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 &     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
@@ -1122,13 +1122,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ! To take into account new definition of hdr_update;
      ! test to avoid dfpt and occopt 9 was already done
      ! so we can just set fermih = fermie
-! if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
-!   intgden0=intgden
-!   call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!&     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-!&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
-!   call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
-! endif
+     if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+       intgden0=intgden
+       call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&        dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+&        prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+       call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
+     endif
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 &     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
@@ -1457,9 +1457,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
    end if
  end if
-! if (dtset%iscf>0 .and. (ipert/=dtset%natom+5)) then 
-!     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-! endif
+ !if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1).and.(ipert/=dtset%natom+5)) then
+ if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
+   call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+ endif
 
  if (iwrite_fftdatar(mpi_enreg)) then
    if (dtset%prtden>0) then

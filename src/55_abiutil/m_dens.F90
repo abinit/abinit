@@ -2105,6 +2105,9 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
              write(msg, '(a)') ' Real part of magnetization:'
              call wrtout(units,msg)
            elseif (icplex==2) then
+             write(msg, '(a)') '----------------------------'
+             call wrtout(units,msg)
+             call wrtout(units,msg_cplex)
              write(msg, '(a)') ' Imaginary part of magnetization:'
              call wrtout(units,msg)
              call wrtout(units,msg_cplex)
@@ -2152,6 +2155,19 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          sum_mag_x=zero
          sum_mag_y=zero
          sum_mag_z=zero
+         if (cplex==2) then
+           if (icplex==1) then
+             write(msg, '(a)') ' Real part of magnetization:'
+             call wrtout(units,msg)
+             call wrtout(units,msg_cplex)
+           elseif (icplex==2) then
+             write(msg, '(a)') '----------------------------'
+             call wrtout(units,msg)
+             write(msg, '(a)') ' Imaginary part of magnetization:'
+             call wrtout(units,msg)
+             call wrtout(units,msg_cplex)
+           endif
+         endif
          do iatom=1,natom
          if(option/=21)then
            write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden(icplex,1,iatom),'  ',(intgden(icplex,ix,iatom),ix=2,4)
@@ -2701,18 +2717,18 @@ end subroutine printmagvtk
 !!  calmaxdifmag
 !!
 !! FUNCTION
-!!  Compute the maximum magnetization among all atoms and the maximum difference
-!!  in magnetization between two successive SCF steps.
+!!   Compute the maximum absolute value of the magnetization among all atoms,
+!!   and the maximum absolute change in magnetization between the current and previous SCF cycles.
 !!
 !! INPUTS
-!!  intgden(nspden,natom)     = Integrated magnetic moments at the current SCF step.
-!!  intgden0(nspden,natom)    = Integrated magnetic moments at the previous SCF step.
+!!  intgden(cplex,nspden,natom)     = Integrated magnetic moments at the present SCF cycle.
+!!  intgden0(cplex,nspden,natom)    = Integrated magnetic moments at the previous SCF cycle.
 !!  natom                     = Number of atoms.
 !!  nspden                    = Number of spin-density components (typically 1, 2, or 4).
 !!
 !! OUTPUT
-!!  maxmag                    = Maximum magnetization among all atoms.
-!!  difmag                    = Maximum difference in magnetization between current and previous SCF steps.
+!!  maxmag                    = Maximum absolute value of magnetization among all atoms.
+!!  difmag                    = Maximum absolute change in magnetization between present and previous SCF cycle.
 !!
 !! SIDE EFFECTS
 !!  None
