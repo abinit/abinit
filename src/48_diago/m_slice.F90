@@ -919,16 +919,16 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
    
     write(std_out,*) 'calling runSlice from rank and subrank', xmpi_comm_rank(slice%spacecom), xmpi_comm_rank(comm)
  
-    write(std_out,*) 'eigen_active='
-    call xgBlock_print(eigen_active, std_out)
+    !write(std_out,*) 'eigen_active='
+    !call xgBlock_print(eigen_active, std_out)
     
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
 
     !write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
 
-    write(std_out,*) 'chebfi%eigenvalues converged='
-    call xgBlock_print(chebfi%eigenvalues,std_out)
+    !write(std_out,*) 'chebfi%eigenvalues converged='
+    !call xgBlock_print(chebfi%eigenvalues,std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -1666,8 +1666,10 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
 
         write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
         write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice, nkept
-        write(std_out,*) 'filtered eigenvalues=', theta_reshaped
-        write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
+        !write(std_out,*) 'filtered eigenvalues=', theta_reshaped
+        write(std_out,*) 'filtered eigval(first,last)=', theta_reshaped(1), theta_reshaped(neigenpairs_slice)
+        !write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
+        write(std_out,*) 'kept eigval(first,last)=', theta_reshaped(fcol_in_slice), theta_reshaped(lcol_in_slice)
         write(std_out,*) 'tot_ncols_kept(prev)=', tot_ncols_kept 
 
         ! After merge: Update first columns to copy from Xext to X
