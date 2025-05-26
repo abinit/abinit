@@ -1684,9 +1684,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     
     ! Detect missing or extra eigenvalues
     if (tot_ncols_kept < slice%neigenpairs) then
-        ABI_ERROR("Too few converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
+        ABI_WARNING("Too few converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
     else if (tot_ncols_kept > slice%neigenpairs) then
-        ABI_ERROR("Too many converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
+        ABI_WARNING("Too many converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
     end if
 
     ! Copy from extended memory to regular memory
@@ -1714,8 +1714,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xgBlock_reshape(eigen, slice%neigenpairs, 1) 
     call xgBlock_reshape(resid, slice%neigenpairs, 1) 
 
-    write(std_out,*) 'KEPT slice eigs='
-    call xgBlock_print(eigen, std_out)
+    !write(std_out,*) 'KEPT slice eigs='
+    !call xgBlock_print(eigen, std_out)
 
     ! Free memory
     call xg_free(eigen_ext)
