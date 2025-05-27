@@ -19,10 +19,13 @@ add_library(62_ctqmc STATIC
   m_ImpurityOperator.F90
   m_ListCdagC.F90
   m_MapHyb.F90
+  m_MapHybComplex.F90
   m_MatrixHyb.F90
+  m_MatrixHybComplex.F90
   m_OurRng.F90
   m_Stat.F90
   m_Vector.F90
+  m_VectorComplex.F90
   m_VectorInt.F90
   m_global.F90
   )
