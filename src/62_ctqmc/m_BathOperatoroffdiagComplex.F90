@@ -23,7 +23,8 @@
 
 #include "defs.h"
 MODULE m_BathOperatoroffdiagComplex
-USE m_MatrixHyb
+USE m_MatrixHybComplex
+USE m_VectorComplex
 USE m_Vector
 USE m_VectorInt
 USE m_Global
@@ -151,12 +152,12 @@ TYPE BathOperatoroffdiagComplex
   DOUBLE PRECISION                            :: Stilde
   ! Sherman Morrison notations 
 
-  TYPE(Vector)                                :: R 
+  TYPE(VectorComplex)                                :: R 
   ! Sherman Morrison notations R%vec(size).
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
-  TYPE(Vector)                                :: Q 
+  TYPE(VectorComplex)                                :: Q 
   ! Sherman Morrison notations 
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
@@ -173,13 +174,13 @@ TYPE BathOperatoroffdiagComplex
   ! computed for each flavor (As matrices are made of Blocks for each
   ! flavor because the code is restricted to diagonal F matrices)
 
-  TYPE(MatrixHyb)                             :: M  ! Flavors
+  TYPE(MatrixHybComplex)                             :: M  ! Flavors
   ! inverse of  Hybridization matrix  M%mat(global_size,global_size)
   ! contains the value of the hybridization for all flavor and segments times, 
   ! the times (mat_tau), and possibly the
   ! frequency
 
-  TYPE(MatrixHyb)                             :: M_update  ! Flavors
+  TYPE(MatrixHybComplex)                             :: M_update  ! Flavors
   !  used in BathOperatoroffdiagComplex_getdetF and in BathOperatoroffdiagComplex_checkM
   ! for checks 
 
@@ -273,13 +274,13 @@ SUBROUTINE BathOperatoroffdiagComplex_init(op, flavors, samples, beta, iTech,opt
 #endif
   op%Fshift=0
   
-  CALL Vector_init(op%R,100*op%flavors)
-  CALL Vector_init(op%Q,100*op%flavors)
+  CALL VectorComplex_init(op%R,100*op%flavors)
+  CALL VectorComplex_init(op%Q,100*op%flavors)
   CALL Vector_init(op%Rtau,100*op%flavors)
   CALL Vector_init(op%Qtau,100*op%flavors)
 
-  CALL MatrixHyb_init(op%M,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
-  CALL MatrixHyb_init(op%M_update,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
+  CALL MatrixHybComplex_init(op%M,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
+  CALL MatrixHybComplex_init(op%M_update,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
   op%F       = 0.d0
   op%set     = .TRUE.
   
@@ -327,12 +328,12 @@ SUBROUTINE BathOperatoroffdiagComplex_reset(op)
   op%sumtails    = 0
 !#endif
   op%doCheck = .FALSE.
-  CALL Vector_clear(op%R)
-  CALL Vector_clear(op%Q)
+  CALL VectorComplex_clear(op%R)
+  CALL VectorComplex_clear(op%Q)
   CALL Vector_clear(op%Rtau)
   CALL Vector_clear(op%Qtau)
 
-  CALL MatrixHyb_clear(op%M) !FIXME Should be consistent with ListCagC
+  CALL MatrixHybComplex_clear(op%M) !FIXME Should be consistent with ListCagC
   op%F       = 0.d0
   do iflavor=1,op%flavors
     op%tails(iflavor)=0
@@ -500,10 +501,10 @@ DOUBLE PRECISION  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posi
     IF ( Cdagbeta .LT. particle(op%activeFlavor)%list(op%updatePosCol,Cdag_) ) op%antiShift = .TRUE.
   END IF
 
-!  CALL Vector_setSize(op%R,tail)
-!  CALL Vector_setSize(op%Q,tail)
-  Vector_QuickResize(op%R,new_tail)
-  Vector_QuickResize(op%Q,new_tail)
+!  CALL VectorComplex_setSize(op%R,tail)
+!  CALL VectorComplex_setSize(op%Q,tail)
+  VectorComplex_QuickResize(op%R,new_tail)
+  VectorComplex_QuickResize(op%Q,new_tail)
   Vector_QuickResize(op%Rtau,new_tail)
   Vector_QuickResize(op%Qtau,new_tail)
 
@@ -781,7 +782,7 @@ DOUBLE PRECISION FUNCTION BathOperatoroffdiagComplex_getDetF(op,particle,option)
     beta = op%beta
     mbeta_two = -beta*0.5d0
     inv_dt =  op%inv_dt
-    CALL MatrixHyb_setSize(op%M_update,tail)
+    CALL MatrixHybComplex_setSize(op%M_update,tail)
     DO iflavordag=1,op%flavors
     DO iCdag = 1, op%tails(iflavordag)
       tCdag  = particle(iflavordag)%list(iCdag,Cdag_)
@@ -816,12 +817,12 @@ DOUBLE PRECISION FUNCTION BathOperatoroffdiagComplex_getDetF(op,particle,option)
       END DO
     END DO
     END DO
-    CALL MatrixHyb_inverse(op%M_update,BathOperatoroffdiagComplex_getDetF) ! calcul le det de la matrice et l'inverse
+    CALL MatrixHybComplex_inverse(op%M_update,BathOperatoroffdiagComplex_getDetF) ! calcul le det de la matrice et l'inverse
   ELSE
     if(present(option)) then
-      CALL MatrixHyb_getDet(op%M_update,BathOperatoroffdiagComplex_getDetF) ! det M = 1/detF !
+      CALL MatrixHybComplex_getDet(op%M_update,BathOperatoroffdiagComplex_getDetF) ! det M = 1/detF !
     else
-      CALL MatrixHyb_getDet(op%M,BathOperatoroffdiagComplex_getDetF) ! det M = 1/detF !
+      CALL MatrixHybComplex_getDet(op%M,BathOperatoroffdiagComplex_getDetF) ! det M = 1/detF !
     endif
     BathOperatoroffdiagComplex_getDetF = 1.d0 / BathOperatoroffdiagComplex_getDetF
   ENDIF
@@ -873,7 +874,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   DOUBLE PRECISION                  :: time
   DOUBLE PRECISION                  :: mbeta_two
   DOUBLE PRECISION                  :: inv_dt
-  TYPE(Vector) :: vec_tmp
+  TYPE(VectorComplex) :: vec_tmp
   TYPE(VectorInt) :: vecI_tmp
   INTEGER :: m
   INTEGER :: count
@@ -927,10 +928,10 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   Stilde      =  op%Stilde
 
 !  !write(6,*) "before", positionRow, positionCol
-  !CALL MatrixHyb_print(op%M(aF),opt_print=1)
-! ---  MatrixHyb_setSize
+  !CALL MatrixHybComplex_print(op%M(aF),opt_print=1)
+! ---  MatrixHybComplex_setSize
   !write(6,*) "       BathOperatoroffdiagComplex_setMAdd before setsize",size(op%M%mat,1)
-  CALL MatrixHyb_setSize(op%M,new_tail)
+  CALL MatrixHybComplex_setSize(op%M,new_tail)
   !write(6,*) "       BathOperatoroffdiagComplex_setMAdd after setsize",size(op%M%mat,1)
 
   ! Compute Qtilde with Q
@@ -1072,7 +1073,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
 
   op%M%mat(PositionRow,PositionCol) = Stilde
 
-  !CALL MatrixHyb_print(op%M,opt_print=1)
+  !CALL MatrixHybComplex_print(op%M,opt_print=1)
 
 !  DO col = 1, new_tail
 !    time = op%Rtau%vec(col)
@@ -1130,14 +1131,14 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   !  END IF
   !END DO
 !  !write(6,*) "after"
-!  CALL MatrixHyb_print(op%M(aF),opt_print=1)
+!  CALL MatrixHybComplex_print(op%M(aF),opt_print=1)
 !CALL matrix_inverse(M)
-!CALL MatrixHyb_print(M)
+!CALL MatrixHybComplex_print(M)
 !CALL matrix_inverse(M)
 
   IF ( op%antiShift .EQV. .TRUE. ) THEN ! antisegment
   if(3==4) then
-    CALL Vector_init(vec_tmp,new_tail)
+    CALL VectorComplex_init(vec_tmp,new_tail)
     CALL VectorInt_init(vecI_tmp,new_tail)
   ! Shift if necessary according to op%antishift
   ! shift DIM=2 (col)
@@ -1192,7 +1193,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
       count = count+1
       m = m+1
     END DO
-    CALL Vector_destroy(vec_tmp)
+    CALL VectorComplex_destroy(vec_tmp)
     CALL VectorInt_destroy(vecI_tmp)
   endif
     !op%M(aF)%mat(1:new_tail,1:new_tail) = CSHIFT(op%M(aF)%mat(1:new_tail,1:new_tail), SHIFT=-1, DIM=1) ! Shift to the bottom
@@ -1286,7 +1287,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
   DOUBLE PRECISION                   :: invStilde
   DOUBLE PRECISION                   :: invStilde2
   TYPE(VectorInt) :: vecI_tmp
-  TYPE(Vector)    :: vec_tmp
+  TYPE(VectorComplex)    :: vec_tmp
 
   IF ( op%MRemoveFlag .EQV. .FALSE. ) &
     CALL ERROR("BathOperatoroffdiagComplex_setMRemove : MRemoveFlag turn off     ")
@@ -1316,7 +1317,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
   endif
 
 !  !write(6,*) "before", positionRow, positionCol
-!  CALL MatrixHyb_print(op%M(aF),opt_print=1)
+!  CALL MatrixHybComplex_print(op%M(aF),opt_print=1)
 
 !  IF ( new_tail .EQ. 0 ) THEN
 !!    IF ( op%antiShift .EQV. .TRUE.  ) THEN
@@ -1324,15 +1325,15 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
 !!      op%MRemoveFlag = .FALSE.
 !!      RETURN
 !!    END IF
-!    CALL MatrixHyb_clear(op%M(aF))
+!    CALL MatrixHybComplex_clear(op%M(aF))
 !    op%MRemoveFlag = .FALSE.
 !    RETURN
 !  END IF
 
-!  CALL Vector_setSize(op%Q,new_tail)
-!  CALL Vector_setSize(op%R,new_tail)
-  Vector_QuickResize(op%Q,new_tail)
-  Vector_QuickResize(op%R,new_tail)
+!  CALL VectorComplex_setSize(op%Q,new_tail)
+!  CALL VectorComplex_setSize(op%R,new_tail)
+  VectorComplex_QuickResize(op%Q,new_tail)
+  VectorComplex_QuickResize(op%R,new_tail)
 
 !  We use R and Q as op%R%vec and op%Q%vec
 !  op%R%vec => op%R
@@ -1357,9 +1358,9 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
 !!    op%Q%vec(1:positionRow-1) = op%M(aF)%mat(1:positionRow-1,positionCol)
 !!    op%Q%vec(positionRow:new_tail) = op%M(aF)%mat(positionRow+1:tail,positionCol)
 !write(*,*) positionRow, positionCol
-!CALL MatrixHyb_print(M)
-!CALL Vector_print(op%R)
-!CALL Vector_print(op%Q)
+!CALL MatrixHybComplex_print(M)
+!CALL VectorComplex_print(op%R)
+!CALL VectorComplex_print(op%Q)
 !CALL ListCdagC_print(op%ListCdagC)
 
   col      = 1
@@ -1383,13 +1384,13 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
     END DO
     col      = col      + 1 
   END DO
-  CALL MatrixHyb_setSize(op%M,new_tail)
+  CALL MatrixHybComplex_setSize(op%M,new_tail)
 
   IF ( op%antiShift .EQV. .TRUE. ) THEN ! antisegment
    if(3==4) then
     ! Shift if necessary according to op%antishift
     ! shift DIM=2 (col)
-    CALL Vector_init(vec_tmp,new_tail)
+    CALL VectorComplex_init(vec_tmp,new_tail)
     CALL VectorInt_init(vecI_tmp,new_tail)
     p = 1
     m = 1
@@ -1412,7 +1413,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
       count = count+1
       m = m+1
     END DO
-    CALL Vector_destroy(vec_tmp)
+    CALL VectorComplex_destroy(vec_tmp)
     CALL VectorInt_destroy(vecI_tmp)
     !op%M(aF)%mat(1:new_tail,1:new_tail) = &
     !           CSHIFT(op%M(aF)%mat(1:new_tail,1:new_tail), SHIFT=1, DIM=2) ! Shift to the top
@@ -1427,7 +1428,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
    end if
   END IF
 !  !write(6,*) "after "
-!  CALL MatrixHyb_print(op%M(aF),opt_print=1)
+!  CALL MatrixHybComplex_print(op%M(aF),opt_print=1)
 
   IF ( op%doCheck .EQV. .TRUE. ) THEN
 !#ifdef CTQMC_CHECK
@@ -1771,7 +1772,7 @@ SUBROUTINE BathOperatoroffdiagComplex_printM(op,ostream)
     CALL ERROR("BathOperatoroffdiagComplex_printM : no active hybrid function    ")
   ostream_val = 6
   IF ( PRESENT(ostream) ) ostream_val = ostream
-  CALL MatrixHyb_print(op%M,ostream_val)
+  CALL MatrixHybComplex_print(op%M,ostream_val)
 END SUBROUTINE BathOperatoroffdiagComplex_printM
 !!***
 
@@ -1861,11 +1862,11 @@ SUBROUTINE  BathOperatoroffdiagComplex_destroy(op)
 
   TYPE(BathOperatoroffdiagComplex), INTENT(INOUT) :: op
 
-  CALL MatrixHyb_destroy(op%M)
-  CALL MatrixHyb_destroy(op%M_update)
+  CALL MatrixHybComplex_destroy(op%M)
+  CALL MatrixHybComplex_destroy(op%M_update)
 
-  CALL Vector_destroy(op%R)
-  CALL Vector_destroy(op%Q)
+  CALL VectorComplex_destroy(op%R)
+  CALL VectorComplex_destroy(op%Q)
   CALL Vector_destroy(op%Rtau)
   CALL Vector_destroy(op%Qtau)
   FREEIF(op%F)
@@ -1955,7 +1956,7 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
   TYPE(BathOperatoroffdiagComplex) , INTENT(INOUT) :: op
   TYPE(ListCdagC)    , INTENT(IN   ) :: particle(:)
 !Local variables ------------------------------
-!  TYPE(MatrixHyb)                    :: checkMatrix
+!  TYPE(MatrixHybComplex)                    :: checkMatrix
   LOGICAL :: checkTau
   INTEGER :: tail
   INTEGER :: iC
@@ -1980,11 +1981,11 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
   aF = op%activeFlavor
   !Construction de la matrix
   tail = op%sumtails
-!  CALL MatrixHyb_init(checkMatrix,op%iTech,size=tail,Wmax=op%samples)
-!  CALL MatrixHyb_setSize(checkMatrix,tail)
+!  CALL MatrixHybComplex_init(checkMatrix,op%iTech,size=tail,Wmax=op%samples)
+!  CALL MatrixHybComplex_setSize(checkMatrix,tail)
 
   ! --- set size of the matrix
-  CALL MatrixHyb_setSize(op%M_update,tail)
+  CALL MatrixHybComplex_setSize(op%M_update,tail)
 
   ! --- compute useful quantities
   beta   =  op%beta
@@ -2025,11 +2026,11 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
   END DO ! iCdag
   END DO ! iflavora
 
-!    CALL MatrixHyb_Print(checkMatrix)
+!    CALL MatrixHybComplex_Print(checkMatrix)
   ! --- Inverse matrix
-  CALL MatrixHyb_inverse(op%M_update)
+  CALL MatrixHybComplex_inverse(op%M_update)
 
-!    CALL MatrixHyb_Print(checkMatrix)
+!    CALL MatrixHybComplex_Print(checkMatrix)
   do it=1,op%sumtails
     !write(6,*) "        checkM end M_update%mat_tau",(op%M_update%mat_tau(it,it1),it1=1,op%sumtails)
   enddo
@@ -2063,18 +2064,18 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
 
   IF ( checkTau .EQV. .TRUE. ) THEN
     CALL WARN("BathOperatoroffdiagComplex_checkM : mat_tau differs should be")
-    CALL MatrixHyb_print(op%M_update,opt_print=1)
+    CALL MatrixHybComplex_print(op%M_update,opt_print=1)
     CALL WARN("BathOperatoroffdiagComplex_checkM : whereas it is")
-    CALL MatrixHyb_print(op%M,opt_print=1)
+    CALL MatrixHybComplex_print(op%M,opt_print=1)
   END IF
   op%meanError = op%meanError + errormax
   IF ( errormax .GT. 1.d0 ) THEN 
     WRITE(a,'(I4)') INT(error1*100.d0)
     !write(6,'(I4)') INT(error1*100.d0)
-!    CALL MatrixHyb_Print(op%M)
+!    CALL MatrixHybComplex_Print(op%M)
     CALL WARN("BathOperatoroffdiagComplex_checkM") 
   END IF
-!  CALL MatrixHyb_destroy(checkMatrix)
+!  CALL MatrixHybComplex_destroy(checkMatrix)
 END SUBROUTINE BathOperatoroffdiagComplex_checkM
 !!***
 
@@ -2110,7 +2111,7 @@ SUBROUTINE BathOperatoroffdiagComplex_recomputeM(op,particle,flav_i,flav_j)
   TYPE(ListCdagC)    , INTENT(IN   ) :: particle(:)
   INTEGER :: flav_i,flav_j
 !Local variables ------------------------------
-!  TYPE(MatrixHyb)                    :: checkMatrix
+!  TYPE(MatrixHybComplex)                    :: checkMatrix
   INTEGER :: tail
   INTEGER :: iC
   INTEGER :: iCdag
@@ -2132,11 +2133,11 @@ SUBROUTINE BathOperatoroffdiagComplex_recomputeM(op,particle,flav_i,flav_j)
   aF = op%activeFlavor
   !Construction de la matrix
   tail = op%sumtails
-!  CALL MatrixHyb_init(checkMatrix,op%iTech,size=tail,Wmax=op%samples)
-!  CALL MatrixHyb_setSize(checkMatrix,tail)
+!  CALL MatrixHybComplex_init(checkMatrix,op%iTech,size=tail,Wmax=op%samples)
+!  CALL MatrixHybComplex_setSize(checkMatrix,tail)
 
   ! --- set size of the matrix
-  CALL MatrixHyb_setSize(op%M_update,tail)
+  CALL MatrixHybComplex_setSize(op%M_update,tail)
 
   ! --- compute useful quantities
   beta   =  op%beta
@@ -2183,11 +2184,11 @@ SUBROUTINE BathOperatoroffdiagComplex_recomputeM(op,particle,flav_i,flav_j)
     END DO ! iCdag
   END DO ! iflavora
 
-!    CALL MatrixHyb_Print(checkMatrix)
+!    CALL MatrixHybComplex_Print(checkMatrix)
   ! --- Inverse matrix
-  CALL MatrixHyb_inverse(op%M_update)
+  CALL MatrixHybComplex_inverse(op%M_update)
 
-!    CALL MatrixHyb_Print(checkMatrix)
+!    CALL MatrixHybComplex_Print(checkMatrix)
   do it=1,op%sumtails
     !write(6,*) "        checkM end M_update%mat_tau",(op%M_update%mat_tau(it,it1),it1=1,op%sumtails)
   enddo

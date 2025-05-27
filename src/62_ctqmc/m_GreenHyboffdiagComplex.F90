@@ -23,11 +23,11 @@
 MODULE m_GreenHyboffdiagComplex
 
  USE m_global
- USE m_MatrixHyb
- USE m_Vector
+ USE m_MatrixHybComplex
+ USE m_VectorComplex
  USE m_VectorInt
  USE m_ListCdagC
- USE m_MapHyb
+ USE m_MapHybComplex
 #ifdef HAVE_MPI2
  USE mpi
 #endif
@@ -141,13 +141,13 @@ MODULE m_GreenHyboffdiagComplex
   COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:) :: oper_w_old
    ! Old frequency Green's function (not used)
 
-  TYPE(Vector)                            :: oper_old          
+  TYPE(VectorComplex)                            :: oper_old          
    ! useless data
 
   TYPE(VectorInt)                         :: index_old          
    ! useless data
 
-  TYPE(MapHyb), ALLOCATABLE, DIMENSION(:,:)  :: map
+  TYPE(MapHybComplex), ALLOCATABLE, DIMENSION(:,:)  :: map
    ! value of time and Green's functions computed in GreenHyboffdiagComplex_measHybrid
    ! These values are used to fill op%oper in the same routine.
 
@@ -264,13 +264,13 @@ include 'mpif.h'
     op%iTech = GREENHYB_TAU
   END IF
   ! end if
-  CALL Vector_init(op%oper_old,10000)
+  CALL VectorComplex_init(op%oper_old,10000)
   CALL VectorInt_init(op%index_old,10000)
   DT_FREEIF(op%map)
   MALLOC(op%map,(nflavors,nflavors))
   do iflavor=1,nflavors
     do iflavorbis=1,nflavors
-      CALL MapHyb_init(op%map(iflavor,iflavorbis),10000)
+      CALL MapHybComplex_init(op%map(iflavor,iflavorbis),10000)
     enddo
   enddo
 
@@ -352,11 +352,11 @@ SUBROUTINE GreenHyboffdiagComplex_clear(op)
   TYPE(GreenHyboffdiagComplex)     , INTENT(INOUT) :: op
   INTEGER :: iflavor,iflavorbis
 
-  !CALL Vector_clear(op%oper_old)
+  !CALL VectorComplex_clear(op%oper_old)
   !CALL VectorInt_clear(op%index_old)
   do iflavor=1,op%nflavors
     do iflavorbis=1,op%nflavors
-      CALL MapHyb_clear(op%map(iflavor,iflavorbis))
+      CALL MapHybComplex_clear(op%map(iflavor,iflavorbis))
     enddo
   enddo
   op%measurements = 0
@@ -455,7 +455,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
 
 !Arguments ------------------------------------
   TYPE(GreenHyboffdiagComplex)    , INTENT(INOUT) :: op
-  TYPE(MatrixHyb)   , INTENT(IN   ) :: Mmatrix
+  TYPE(MatrixHybComplex)   , INTENT(IN   ) :: Mmatrix
   TYPE(ListCdagC)   , INTENT(IN   ) :: ListCdagC_1(op%nflavors)
   DOUBLE PRECISION  , INTENT(IN   ) :: signvalue
   LOGICAL        , INTENT(IN   ) :: updated
@@ -558,10 +558,10 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
           !  endif
           END DO
       ! tail**2 is the number of possible t-t'
-      ! MapHyb_setSize with resize map tail*tail will thus be the new
+      ! MapHybComplex_setSize with resize map tail*tail will thus be the new
       ! op%map%tail
       ! update size of map and map%tail
-          CALL MapHyb_setSize(op%map(iflavor,iflavorbis),&
+          CALL MapHybComplex_setSize(op%map(iflavor,iflavorbis),&
 &          ListCdagC_1(iflavor)%tail*ListCdagC_1(iflavorbis)%tail)
         END DO
       END DO
@@ -1811,11 +1811,11 @@ SUBROUTINE GreenHyboffdiagComplex_destroy(op)
   op%inv_dt       = 0.d0
   op%delta_t      = 0.d0
   CALL VectorInt_destroy(op%index_old)
-  CALL Vector_destroy(op%oper_old)
+  CALL VectorComplex_destroy(op%oper_old)
   do iflavor=1,op%nflavors
     do iflavorbis=1,op%nflavors
      !sui!write(6,*) "test",iflavor,iflavorbis
-      CALL MapHyb_destroy(op%map(iflavor,iflavorbis))
+      CALL MapHybComplex_destroy(op%map(iflavor,iflavorbis))
     enddo
   enddo
   DT_FREEIF(op%map)
