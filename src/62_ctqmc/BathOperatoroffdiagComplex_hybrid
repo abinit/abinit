@@ -1,0 +1,23 @@
+  fsign = 1.d0
+  t_val = time
+ !sui!write(6,*) "              getdetAdd t_val",t_val
+  IF ( t_val .LT. 0.d0 ) THEN
+    ! if t < 0 op%F(t,activeF,activeF) = -op%F(t+beta,activeF,activeF)
+    t_val = t_val + op%beta
+    fsign  = -1.d0 
+  END IF
+
+  ratioh = t_val * op%inv_dt + 1.d0 ! t / delta t
+ !sui!write(6,*) "              getdetAdd ratioh",ratioh
+  index = INT(ratioh)
+ !sui!write(6,*) "              getdetAdd index",index
+  ratioh = ratioh - DBLE(index)
+ !sui!write(6,*) "              getdetAdd ratioh",ratioh
+
+  ! first order interpolation
+ !sui!write(6,*) "              getdetAdd fsign",fsign  
+ !sui!write(6,*) "              getdetAdd Fs   ",op%F(index,iflavora,iflavorb)
+ !sui!write(6,*) "              getdetAdd Fs   ",op%F(index+1,iflavora,iflavorb)
+  ! index + 1 can be sizeHybrid + 1 => value is 0 (cf. BathOperatoroffdiag_init routine)
+  hybrid = fsign * (op%F(index,iflavora,iflavorb) + &
+    ratioh * ( op%F(index+1,iflavora,iflavorb) - op%F(index,iflavora,iflavorb) ))
