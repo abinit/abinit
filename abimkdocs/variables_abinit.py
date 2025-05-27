@@ -11915,7 +11915,7 @@ the dielectric matrix in order to perform the numerical integration of the GW se
 !!! important
 
     This is the only parameter required to define the frequency mesh along the imaginary axis
-    when computing a SCR file for the AC method i.e. [[gw_calctyp]] = x1.
+    when computing a SCR file for the AC method i.e. [[gwcalctyp]] = x1.
     For AC, indeed, one uses Gauss-Legendre quadrature method in the [0, 1] interval
     as we replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
 
