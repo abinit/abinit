@@ -281,6 +281,7 @@ if calc_conducti:
         efield_ft = ezero*np.ones(nw)+1j*np.zeros(nw)
     else:
         w, efield_ft = fourier_direct(time,efield,0.0,nfft)
+        nw = len(w)
         # check that we get a real part only
         if np.any(np.abs(np.imag(efield))>1e-10):
             print("Warning: FFT of the electric field seems to have a non zero imaginary part.")

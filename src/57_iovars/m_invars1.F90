@@ -2820,7 +2820,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_ef_type=0
    dtsets(idtset)%td_ef_induced_vecpot=0
    dtsets(idtset)%td_ef_tzero=zero
-   dtsets(idtset)%td_ef_tau=1000.0_dp
+   dtsets(idtset)%td_ef_tau=1.0_dp
    dtsets(idtset)%td_ef_pol=[1.0_dp,0.0_dp,0.0_dp]
    dtsets(idtset)%td_ef_lambda=10000.0_dp
    dtsets(idtset)%td_ef_ezero=0.1_dp

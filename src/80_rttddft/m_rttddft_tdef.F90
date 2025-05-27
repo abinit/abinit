@@ -88,7 +88,7 @@ contains
 !!  td_ef_ezero = Amplitude (E_0 = |E_0|*polarization)
 !!  td_ef_tzero = time at which the pulse is switched on
 !!  td_ef_lambda = wavelength (for sin^2 pulse)
-!!  td_ef_tau = time width of the pulse (for sin^2 pulse)
+!!  td_ef_tau = time width of the pulse (for finite-width delta kick or sin^2 pulse)
 !!  time = propagation time
 !!  nkpt = number of kpoints
 !!  kpts = kpoints array
@@ -114,15 +114,15 @@ subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lam
 
 ! ***********************************************************************
 
- if (td_ef_type > 1 .or. td_ef_type < 0) then
+ if (td_ef_type > 2 .or. td_ef_type < 0) then
    ABI_ERROR("Wrong value of td_ef_type")
  end if
 
  tdef%ef_type  = td_ef_type
  tdef%ef_ezero = td_ef_pol*td_ef_ezero
+ tdef%ef_tzero = td_ef_tzero
  tdef%ef_tau   = td_ef_tau
  tdef%ef_omega = 2.0_dp*pi*Sp_Lt/td_ef_lambda !2*pi*f=2*pi*c/lambda
- tdef%ef_tzero = td_ef_tzero
  tdef%ef_sin_a = 2.0_dp*pi/td_ef_tau + tdef%ef_omega
  tdef%ef_sin_b = 2.0_dp*pi/td_ef_tau - tdef%ef_omega
  if (td_ef_induced_vecpot == 0) then
@@ -195,7 +195,7 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
  character(len=500) :: msg
  integer            :: i
  logical            :: lvecpot_ind
- real(dp)           :: tmp(3)
+ real(dp)           :: tmp(3), expt
 
 ! ***********************************************************************
 
@@ -213,9 +213,14 @@ subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,
       if (time >= tdef%ef_tzero) then
          tdef%vecpot_ext(:) = -tdef%ef_ezero(:)
       end if
+   !"Finite" delta-kick pulse: Vector potential is a finite width sigmoid function
+   case (2)
+      expt = exp(-(time-tdef%ef_tzero)/tdef%ef_tau)
+      tdef%efield(:) = tdef%ef_ezero(:)/tdef%ef_tau * expt/(1+expt)**2
+      tdef%vecpot_ext(:) = -tdef%ef_ezero(:)/(1+expt)**2
    !Pulse with sin^2 shape:
    !E(t) = E0*cos(w*(t-t0))*sin^2(pi*(t-t0)/tau)
-   !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/taur-w))*sin((2pi/tau-w)*(t-t0))
+   !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/tau-w))*sin((2pi/tau-w)*(t-t0))
 !  case(2)
 !     if (time >= tdef%ef_tzero+tdef%ef_tau) then
 !        tdef%efield(:) = zero
