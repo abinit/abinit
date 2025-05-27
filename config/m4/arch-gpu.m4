@@ -277,6 +277,11 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
         abi_gpu_cuda_has_linalg="yes"
         abi_result="${abi_result} blas"
       fi
+      if test -e "${abi_gpu_cuda_libdir}/libcublasLt.${abi_so_ext}"; then
+        if test "${GPU_LIBS}" = ""; then
+          abi_gpu_cuda_libs="-lcublasLt ${abi_gpu_cuda_libs}"
+        fi
+      fi
       if test -e "${abi_gpu_cuda_libdir}/libcusolver.${abi_so_ext}"; then
         if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcusolver ${abi_gpu_cuda_libs}"
