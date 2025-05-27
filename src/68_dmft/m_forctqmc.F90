@@ -116,7 +116,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !Local variables ------------------------------
  integer :: iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
  integer :: ispinor1,ispinor2,isppol,itau,itypat,lpawu,myproc,natom,ndim,nflavor,nomega,nproc
- integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_nondiag
+ integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_nondiag,opt_complex
  integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
  integer, parameter :: optdb = 0
  logical :: nondiaglevels
@@ -130,7 +130,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  real(dp) :: umod(2,2)
  complex(dp) :: integral(2,2)
  real(dp), allocatable :: docc(:,:),gtmp(:,:),gtmp_nd(:,:,:),levels_ctqmc(:),vee(:,:,:,:)
- complex(dpc), allocatable :: muorb,muspin,muzeem,levels_ctqmc_complex(:)
+ complex(dpc), allocatable :: muorb,muspin,muzeem,levels_ctqmc_complex(:),gtmp_ndc(:,:,:)
  complex(dpc), allocatable :: fw1(:,:),fw1_nd(:,:,:),gw_tmp(:,:),gw_tmp_nd(:,:,:)
  complex(dpc), allocatable :: gw1_nd(:,:,:),hybri_limit(:,:),levels_ctqmc_nd(:,:),shift(:)
  type(coeff2c_type), allocatable :: magmom_orb(:),magmom_spin(:),magmom_tot(:)
@@ -223,6 +223,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  useylm = 0
  if (nspinor == 2) useylm = 1 ! to avoid complex G(tau)
+
+ opt_complex = 0
+ if (paw_dmft%dmft_solv .eq. 10) opt_complex = 1 !Complex G(tau)
 
  !write(6,*) "nspinor,useylm",nspinor,useylm
  if (useylm == 0) then
@@ -1433,6 +1436,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ! PSC with MPI only (and max2_open64). paw_dmf%hybrid is corrupted
      ! somewhere but I could not find the place in all DMFT routines
    ABI_MALLOC(gtmp_nd,(paw_dmft%dmftqmc_l,nflavor,nflavor))
+   if(paw_dmft%dmft_solv .eq. 10) then
+     ABI_MALLOC(gtmp_ndc,(paw_dmft%dmftqmc_l,nflavor,nflavor))
+   endif
    call flush_unit(std_out)
 
      ! =================================================================
@@ -1512,7 +1518,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
         ABI_MALLOC(docc,(nflavor,nflavor))
         docc(:,:) = zero
                                                                                                                 
-        call CtqmcoffdiagInterfaceComplex_run(hybridoffdiagComplex,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd(:,:,:),&                          
+        call CtqmcoffdiagInterfaceComplex_run(hybridoffdiagComplex,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_ndc(:,:,:),&                          
            & Gw=gw_tmp_nd(:,:,:),D=doccsum,E=green%ecorr_qmc(iatom),Noise=noise,matU=udens_atoms(iatom)%mat(:,:,1),&           
            & Docc=docc(:,:),opt_levels=levels_ctqmc_complex(:),hybri_limit=hybri_limit(:,:),Magmom_orb=REAL(magmom_orb(iatom)%value),&       
            & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)  
@@ -1564,7 +1570,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    ! Print green function is files directly from CTQMC
    ! --------------------------------------------------
-   call ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+   call ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gtmp_ndc,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
 
    ! If the CTQMC code in ABINIT was used, then destroy it and deallocate arrays
@@ -1600,7 +1606,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
    ! Put green's function values from CTQMC into green structure
    !------------------------------------------------------------
-   call ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag)
+   call ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gtmp_ndc,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag,opt_complex)
 
    ! Deallocate arrays for CTQMC
    !----------------------------
@@ -1610,6 +1616,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ABI_FREE(gw_tmp_nd)
    ABI_FREE(gtmp)
    ABI_FREE(gtmp_nd)
+   if(paw_dmft%dmft_solv .eq. 10) then
+     ABI_FREE(gtmp_ndc)
+   endif
 
    ! Do Fourier transform if it was not done (ie if TRIQS is used without legendre measurement)
    !-------------------------------------------------------------------------------------------
@@ -2335,12 +2344,14 @@ end subroutine testcode_ctqmc
 !! INPUTS
 !!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
 !!  gtmp_nd(dmftqmc_l,nflavor,nflavor) = Green's fct in imag time (with off diag terms)
+!!  gtmp_ndc(dmftqmc_l,nflavor,nflavor) = Complex Green's fct in imag time (with off diag terms)  
 !!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
 !!  gtmp(dmftqmc_l,nflavor) = Green's fct in imag time (diag)
 !!  gw_tmp(nb_of_frequency,nflavor+1) =Green's fct in imag freq (diag)
 !!  iatom = atoms on which the calculation has been done
 !!  leg_measure = logical, to Legendre Measurement or not (if done Green function is frequency is computed)
 !!  opt_nondiag = integer, it activated, then
+!!  opt_complex = integer, 1 activate complex Gtau
 !!
 !! OUTPUT
 !!  green <type(green_type)>= green's function
@@ -2352,17 +2363,18 @@ end subroutine testcode_ctqmc
 !!
 !! SOURCE
 
-subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag)
+subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gtmp_ndc,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag,opt_complex)
 
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(green_type), intent(inout) :: green
  real(dp), allocatable, intent(in) :: gtmp_nd(:,:,:)
- complex(dp), allocatable, intent(in) :: gw_tmp(:,:)
- complex(dp), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
+ complex(dpc), allocatable, intent(in) :: gtmp_ndc(:,:,:)
+ complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
+ complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
- integer, intent(in) :: iatom,opt_nondiag
+ integer, intent(in) :: iatom,opt_nondiag,opt_complex
  logical(kind=1), intent(in) :: leg_measure
  character(len=500) :: message
 
@@ -2385,7 +2397,7 @@ subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iat
 
 !   built time and frequency green's function from output of CTQMC
 ! =================================================================
- if(opt_nondiag==1) then
+ if(opt_nondiag==1 .and. opt_complex==0) then
    do isppol=1,paw_dmft%nsppol
      do ispinor1=1,paw_dmft%nspinor
        do im1=1,tndim
@@ -2419,6 +2431,39 @@ subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iat
        end do  ! im1
      end do  ! ispinor
    end do ! isppol
+!= Complex case
+ elseif(opt_nondiag==1 .and. opt_complex==1) then                                                                        
+   do isppol=1,paw_dmft%nsppol                                                                                       
+     do ispinor1=1,paw_dmft%nspinor                                                                                  
+       do im1=1,tndim                                                                                                
+         iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)                                                            
+         do ispinor2=1,paw_dmft%nspinor                                                                              
+           do im2=1,tndim                                                                                            
+             iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)                                                        
+             do itau=1,paw_dmft%dmftqmc_l                                                                            
+               green%oper_tau(itau)%matlu(iatom)%mat(im1+(ispinor1-1)*tndim,im2+(ispinor2-1)*tndim,isppol)=&         
+&               gtmp_ndc(itau,iflavor1,iflavor2)                                                                      
+               ! symetrize over spin if nsppol=nspinor=1                                                             
+               if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1) then                                                   
+                 green%oper_tau(itau)%matlu(iatom)%mat(im1+(ispinor1-1)*tndim,im2+(ispinor2-1)*tndim,isppol)=&       
+&                 (gtmp_ndc(itau,iflavor1,iflavor2)+gtmp_ndc(itau,iflavor1+tndim,iflavor2+tndim))/two                  
+               end if                                                                                                
+             end do  !itau      
+             do ifreq=1,paw_dmft%dmft_nwlo                                                                       
+               green%oper(ifreq)%matlu(iatom)%mat(im1+(ispinor1-1)*tndim,im2+(ispinor2-1)*tndim,isppol)=&        
+&               gw_tmp_nd(ifreq,iflavor1,iflavor2)                                                               
+             ! symetrize over spin if nsppol=nspinor=1                                                           
+               if(paw_dmft%nsppol==1.and.paw_dmft%nspinor==1) then                                               
+                 green%oper(ifreq)%matlu(iatom)%mat(im1+(ispinor1-1)*tndim,im2+(ispinor2-1)*tndim,isppol)=&      
+&                 (gw_tmp_nd(ifreq,iflavor1,iflavor2)+&                                                          
+&                 gw_tmp_nd(ifreq,iflavor1+tndim,iflavor2+tndim))/two                                            
+               end if                                                                                            
+             end do ! ifreq                                                                                      
+           end do  ! im2                                                                                             
+         end do  ! ispinor2                                                                                          
+       end do  ! im1                                                                                                 
+     end do  ! ispinor                                                                                               
+   end do ! isppol                                                                                                   
  else
    iflavor=0
    do isppol=1,paw_dmft%nsppol
@@ -2469,6 +2514,7 @@ end subroutine ctqmcoutput_to_green
 !! INPUTS
 !!  paw_dmft <type(paw_dmft_type)>= DMFT data structure
 !!  gtmp_nd(dmftqmc_l,nflavor,nflavor) = Green's fct in imag time (with off diag terms)
+!!  gtmp_ndc(dmftqmc_l,nflavor,nflavor) = Complex Green's fct in imag time (with off diag terms)
 !!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
 !!  gtmp(dmftqmc_l,nflavor) = Green's fct in imag time (diag)
 !!  gw_tmp(nb_of_frequency,nflavor+1) =Green's fct in imag freq (diag)
@@ -2483,14 +2529,15 @@ end subroutine ctqmcoutput_to_green
 !!
 !! SOURCE
 
-subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gtmp_ndc,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type), intent(in)  :: paw_dmft
  real(dp), allocatable, intent(inout) :: gtmp_nd(:,:,:)
- complex(dp), allocatable, intent(in) :: gw_tmp(:,:)
- complex(dp), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
+ complex(dpc), allocatable, intent(in) :: gtmp_ndc(:,:,:)
+ complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
+ complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
  integer, intent(in) :: iatom
 
@@ -2544,7 +2591,7 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
       write(unt,'(29f21.14)') 1/paw_dmft%temp, (-1_dp-gtmp(1,iflavor), iflavor=1, nflavor)
       close(unt)
     endif
-    if(paw_dmft%dmft_solv==8 .or. paw_dmft%dmft_solv == 10) then
+    if(paw_dmft%dmft_solv==8 ) then
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_unsym_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
         ABI_ERROR(message)
@@ -2554,6 +2601,27 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
         ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
       end do
       close(unt)
+    endif
+    if(paw_dmft%dmft_solv .eq. 10) then                                                             
+      if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_diag_CTQMC_"//gtau_iter//".dat",&                    
+&      message, newunit=unt) /= 0) then                                                                                      
+       ABI_ERROR(message)                                                                                                   
+      end if                                                                                                                 
+      do itau=1,paw_dmft%dmftqmc_l 
+        write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&   
+&       (gtmp_ndc(itau,iflavor,iflavor), iflavor=1,nflavor)        
+      end do                                                                               
+      close(unt)
+      if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_full_CTQMC_"//gtau_iter//".dat",&            
+&      message, newunit=unt) /= 0) then                                                                              
+        ABI_ERROR(message)                                                                                           
+      end if                                                                                                         
+      do itau=1, paw_dmft%dmftqmc_l                                                                    
+        write(unt,'(296f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&              
+&       ((gtmp_ndc(itau,iflavor,iflavor1),iflavor=iflavor1,nflavor), iflavor1=1, nflavor)                                           
+      end do                                                                                          
+      close(unt)                                                                                      
+    endif
 !      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
 !        ABI_MALLOC(matlu1,(paw_dmft%natom))
 !        call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
@@ -2595,16 +2663,16 @@ subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 !        call destroy_matlu(matlu1,paw_dmft%natom)
 !        ABI_FREE(matlu1)
 !      endif ! if natom=1
-      if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
-&      message, newunit=unt) /= 0) then
-        ABI_ERROR(message)
-      end if
-      do itau=1,paw_dmft%dmftqmc_l
-        write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
-        ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
-      end do
-      close(unt)
-    endif
+!      if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
+!&      message, newunit=unt) /= 0) then
+!        ABI_ERROR(message)
+!      end if
+!      do itau=1,paw_dmft%dmftqmc_l
+!        write(unt,'(196f21.14)') float(itau-1)/float(paw_dmft%dmftqmc_l)/paw_dmft%temp,&
+!        ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
+!      end do
+!      close(unt)
+!    endif
     !open(unit=4243, file=trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_F_"//gtau_iter//".dat")
     !call BathOperator_printF(paw_dmft%hybrid(iatom)%hybrid%bath,4243) !Already comment here
     !close(4243)

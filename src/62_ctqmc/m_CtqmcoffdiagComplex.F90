@@ -34,8 +34,8 @@
 MODULE m_CtqmcoffdiagComplex
 
  USE m_Global
- USE m_GreenHyboffdiag
- USE m_BathOperatoroffdiag
+ USE m_GreenHyboffdiagComplex
+ USE m_BathOperatoroffdiagComplex
  USE m_ImpurityOperator
  USE m_Stat
  USE m_FFTHyb
@@ -234,7 +234,7 @@ TYPE CtqmcoffdiagComplex
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:) :: hybri_limit
 ! coeff A such that F=-A/(iwn)
 
-  TYPE(GreenHyboffdiag)                        :: Greens 
+  TYPE(GreenHyboffdiagComplex)                        :: Greens 
 ! Green's function
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: measN 
@@ -298,7 +298,7 @@ TYPE CtqmcoffdiagComplex
 ! for check
 
 !#endif
-  TYPE(BathOperatoroffdiag)              :: Bath
+  TYPE(BathOperatoroffdiagComplex)              :: Bath
 
 
   TYPE(ImpurityOperator)          :: Impurity
@@ -440,7 +440,7 @@ include 'mpif.h'
 
   CALL CtqmcoffdiagComplex_allocateAll(op)
 
-  CALL GreenHyboffdiag_init(op%Greens,op%samples, op%beta,INT(buffer(5)), &
+  CALL GreenHyboffdiagComplex_init(op%Greens,op%samples, op%beta,INT(buffer(5)), &
   iTech=INT(buffer(9)),MY_COMM=op%MY_COMM)
 
 
@@ -532,7 +532,7 @@ SUBROUTINE CtqmcoffdiagComplex_setParameters(op,buffer)
   END IF
 !  op%mu = op%mu + op%Impurity%shift_mu
 !sui!write(std_out,*) "op%opt_nondiag",op%opt_nondiag
-  CALL BathOperatoroffdiag_init(op%Bath, op%flavors, op%samples, op%beta, INT(buffer(9)), op%opt_nondiag)
+  CALL BathOperatoroffdiagComplex_init(op%Bath, op%flavors, op%samples, op%beta, INT(buffer(9)), op%opt_nondiag)
 
   op%para = .TRUE.
 
@@ -927,7 +927,7 @@ SUBROUTINE CtqmcoffdiagComplex_setG0wTab(op,Gomega,opt_fk)
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
   CALL CtqmcoffdiagComplex_computeF(op,Gomega, F, opt_fk)  ! mu is changed
  !write(6,*) "eee111"
-  CALL BathOperatoroffdiag_setF(op%Bath, F)
+  CALL BathOperatoroffdiagComplex_setF(op%Bath, F)
  ! CALL BathOperatoroffdiag_printF(op%Bath,333)
  !write(6,*) "eee"
   FREE(F)
@@ -1066,7 +1066,7 @@ SUBROUTINE CtqmcoffdiagComplex_clear(op)
   op%errorImpurity = 0.d0
   op%errorBath     = 0.d0
 !#endif
-  CALL GreenHyboffdiag_clear(op%Greens)
+  CALL GreenHyboffdiagComplex_clear(op%Greens)
 !#ifdef CTCtqmcoffdiagComplex_ANALYSIS
   IF ( op%opt_analysis .EQ. 1 .AND. ALLOCATED(op%measCorrelation) ) &    
     op%measCorrelation = 0.d0 
@@ -1122,10 +1122,10 @@ SUBROUTINE CtqmcoffdiagComplex_reset(op)
   !INTEGER                  :: iflavor
   DOUBLE PRECISION         :: sweeps
 
-  CALL GreenHyboffdiag_reset(op%Greens)
+  CALL GreenHyboffdiagComplex_reset(op%Greens)
   CALL CtqmcoffdiagComplex_clear(op)
   CALL ImpurityOperator_reset(op%Impurity)
-  CALL BathOperatoroffdiag_reset    (op%Bath)
+  CALL BathOperatoroffdiagComplex_reset    (op%Bath)
   op%measN(3,:) = 0.d0
   !complete restart -> measN=0
   op%done = .FALSE.
@@ -1280,7 +1280,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: F_omega
   COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE   :: F_omega_inv
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
-  TYPE(GreenHyboffdiag)                                     :: F_tmp
+  TYPE(GreenHyboffdiagComplex)                     :: F_tmp
   !character(len=4) :: tag_proc
   !character(len=30) :: tmpfil
   !INTEGER :: unitnb
@@ -1297,9 +1297,9 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   ! --- Initialize F_tmp 
   !=================================
   IF ( op%have_MPI .EQV. .TRUE. ) THEN
-    CALL GreenHyboffdiag_init(F_tmp,samples,op%beta,flavors,MY_COMM=op%MY_COMM)
+    CALL GreenHyboffdiagComplex_init(F_tmp,samples,op%beta,flavors,MY_COMM=op%MY_COMM)
   ELSE
-    CALL GreenHyboffdiag_init(F_tmp,samples,op%beta,flavors)
+    CALL GreenHyboffdiagComplex_init(F_tmp,samples,op%beta,flavors)
   END IF
 !  K = op%mu
 
@@ -1400,7 +1400,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
      !  for test: Fourier of G0(iwn)
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    !sui!write(std_out,*) "opt_fk=0"
-     CALL GreenHyboffdiag_setOperW(F_tmp,F_omega)
+     CALL GreenHyboffdiagComplex_setOperW(F_tmp,F_omega)
   ! IF ( op%rank .EQ. 0 ) THEN
   !    DO iflavor = 1, flavors
   !      DO iflavor2 = 1, flavors
@@ -1415,7 +1415,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   !      END DO
   !    END DO
   !  ENDIF
-     CALL GreenHyboffdiag_backFourier(F_tmp,func="green")
+     CALL GreenHyboffdiagComplex_backFourier(F_tmp,func="green")
      ! --- Put the result in F
      DO iflavor = 1, flavors
        DO iflavor2 = 1, flavors
@@ -1533,7 +1533,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
     !  END IF
   ! --- compute residual K (?)
       K = REAL(CMPLX(0,(2.d0*DBLE(op%Wmax)-1.d0)*pi_invBeta,8)*F_omega(op%Wmax,iflavor,iflavor2))
-      CALL GreenHyboffdiag_setMuD1(op%Greens,iflavor,iflavor2,dble(op%mu(iflavor)),K)
+      CALL GreenHyboffdiagComplex_setMuD1(op%Greens,iflavor,iflavor2,dble(op%mu(iflavor)),K)
     END DO
   END DO
 
@@ -1542,7 +1542,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   enddo
 
   ! --- Creates F_tmp%oper_w
-  CALL GreenHyboffdiag_setOperW(F_tmp,F_omega)
+  CALL GreenHyboffdiagComplex_setOperW(F_tmp,F_omega)
  ! do  iflavor=1, flavors ; do  iflavor2=1, flavors ; write(337,*) "#",iflavor,iflavor2 ; do  iomega=1,op%Wmax
  !   write(337,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2)),&
  !&   imag(F_tmp%oper_w(iomega,iflavor,iflavor2))
@@ -1598,7 +1598,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   ! --- have (F(\tau))
   !CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
    write(std_out,*) "WARNING opt_hybri_limit==0"
-  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
+  CALL GreenHyboffdiagComplex_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
 !  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=1)
  ! CALL GreenHyboffdiag_backFourier(F_tmp)
 
@@ -1674,7 +1674,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   FREE(F_omega)
   FREE(F_omega_inv)
   !write(6,*) "QQQQ4"
-  CALL GreenHyboffdiag_destroy(F_tmp)
+  CALL GreenHyboffdiagComplex_destroy(F_tmp)
   !write(6,*) "QQQQ2"
 
 
@@ -1798,7 +1798,7 @@ include 'mpif.h'
   IF ( PRESENT( opt_check ) ) THEN
     op%opt_check = opt_check
     CALL ImpurityOperator_doCheck(op%Impurity,opt_check)
-    CALL BathOperatoroffdiag_doCheck(op%Bath,opt_check)
+    CALL BathOperatoroffdiagComplex_doCheck(op%Bath,opt_check)
   END IF
   IF ( PRESENT( opt_movie ) ) &
     op%opt_movie = opt_movie
@@ -2047,7 +2047,7 @@ SUBROUTINE CtqmcoffdiagComplex_loop(op,itotal,ilatex)
       updated_swap(iflavor) = .FALSE.
       if ( op%opt_nondiag >0 )  iflavor_d=0
       if ( op%opt_nondiag==0 )  iflavor_d=iflavor
-      CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d) 
+      CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d) 
 
       CALL CtqmcoffdiagComplex_measN        (op, iflavor, updated)
       IF ( op%opt_analysis .EQ. 1 ) &
@@ -2306,7 +2306,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         !write(std_out,*) "      length", length
 
 !      -----  Computes the determinant ratio
-        det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles) 
+        det_ratio = BathOperatoroffdiagComplex_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles) 
 
 !      -----  Computes the overlap
         overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
@@ -2342,7 +2342,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
           CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
 !          write(*,*) "after "
 !          CALL ListCdagCoffdiag_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
-          CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles) 
+          CALL BathOperatoroffdiagComplex_setMAdd(op%bath,op%Impurity%particles) 
           op%stats(nature(i)+CTQMC_ADDED) = op%stats(nature(i)+CTQMC_ADDED)  + 1.d0
           updated = .TRUE. .OR. updated
           tail = tail + 1.d0
@@ -2377,7 +2377,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         position = INT(((time1 * tail) + 1.d0) * signe )
         !prt!if(op%prtopt==1)  write(6,*) "         position",position 
         time_avail = ImpurityOperator_getAvailedTime(op%Impurity,position)
-        det_ratio  = BathOperatoroffdiag_getDetRemove(op%Bath,position)
+        det_ratio  = BathOperatoroffdiagComplex_getDetRemove(op%Bath,position)
         !write(6,*) "        det_ratio", det_ratio
         CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)
 !        length     = CdagC_length(CdagC_1)
@@ -2405,7 +2405,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         IF ( (time1 * beta * time_avail * DEXP(dble(op%mu(op%Impurity%activeFlavor))*length+overlap)) &
              .LT. (tail * det_ratio ) ) THEN
           CALL ImpurityOperator_remove(op%Impurity,position)
-          CALL BathOperatoroffdiag_setMRemove(op%Bath,op%Impurity%particles) 
+          CALL BathOperatoroffdiagComplex_setMRemove(op%Bath,op%Impurity%particles) 
           !op%seg_removed = op%seg_removed  + 1.d0
           op%stats(nature(i)+CTQMC_REMOV) = op%stats(nature(i)+CTQMC_REMOV)  + 1.d0
           updated = .TRUE. .OR. updated
@@ -2694,14 +2694,14 @@ SUBROUTINE CtqmcoffdiagComplex_trySwap(op,flav_i,flav_j)
     ! ===========================================
     ! First use M matrix to compute determinant
     ! ===========================================
-    detold     = BathOperatoroffdiag_getDetF(op%Bath) ! use op%Bath%M
+    detold     = BathOperatoroffdiagComplex_getDetF(op%Bath) ! use op%Bath%M
 
     ! ===========================================
     ! Second build M_update matrix to compute determinant after.
     ! ===========================================
     !CALL ListCdagCoffdiag_print(particle)
-    call BathOperatoroffdiag_recomputeM(op%Bath,op%impurity%particles,flavor_i,flavor_j) ! compute op%Bath%M_update
-    detnew     = BathOperatoroffdiag_getDetF(op%Bath,option=1) ! use op%Bath%M_update
+    call BathOperatoroffdiagComplex_recomputeM(op%Bath,op%impurity%particles,flavor_i,flavor_j) ! compute op%Bath%M_update
+    detnew     = BathOperatoroffdiagComplex_getDetF(op%Bath,option=1) ! use op%Bath%M_update
 
     lengthi    = ImpurityOperator_measN(op%Impurity,flavor_i)
     lengthj    = ImpurityOperator_measN(op%Impurity,flavor_j)
@@ -2740,7 +2740,7 @@ SUBROUTINE CtqmcoffdiagComplex_trySwap(op,flav_i,flav_j)
    !ii    enddo
    !ii    write(6,*) "Gmove accepted",rnd,local_ratio*det_ratio
       CALL ImpurityOperator_swap(op%Impurity, flavor_i,flavor_j)
-      CALL BathOperatoroffdiag_swap    (op%Bath    , flavor_i,flavor_j) !  use op%Bath%M_update to built new op%Bath%M
+      CALL BathOperatoroffdiagComplex_swap    (op%Bath    , flavor_i,flavor_j) !  use op%Bath%M_update to built new op%Bath%M
       
       op%swap = op%swap + 1.d0
       flav_i = flavor_i
@@ -3072,7 +3072,7 @@ include 'mpif.h'
 !#ifdef CTCtqmcoffdiagComplex_CHECK
   IF ( op%opt_check .GT. 0 ) THEN
     op%errorImpurity = ImpurityOperator_getError(op%Impurity) * inv_flavors 
-    op%errorBath     = BathOperatoroffdiag_getError    (op%Bath    ) * inv_flavors 
+    op%errorBath     = BathOperatoroffdiagComplex_getError    (op%Bath    ) * inv_flavors 
   END IF
 !#endif
 
@@ -3159,14 +3159,14 @@ include 'mpif.h'
 
   END DO
 !sui!write(6,*) "getresults"
-  CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue)
-  CALL GreenHyboffdiag_getHybrid(op%Greens)
+  CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue)
+  CALL GreenHyboffdiagComplex_getHybrid(op%Greens)
  ! write(6,*) "op%measN",op%measN(1,:)
   MALLOC(measN_1,(flavors))
   do iflavor=1,flavors
     measN_1(iflavor)=op%measN(1,iflavor)
   enddo
-  CALL GreenHyboffdiag_setN(op%Greens, measN_1(:))
+  CALL GreenHyboffdiagComplex_setN(op%Greens, measN_1(:))
   FREE(measN_1)
 
 ! todoab case _nd and _d are not completely described.
@@ -3800,9 +3800,9 @@ END SUBROUTINE CtqmcoffdiagComplex_symmetrizeGreen
 SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
 
 !Arguments ------------------------------------
- USE m_GreenHyboffdiag
+ USE m_GreenHyboffdiagComplex
   TYPE(CtqmcoffdiagComplex)          , INTENT(INOUT)    :: op
-  DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gtau
+  COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gtau
   COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
 !Local variables ------------------------------
   !INTEGER                            :: itime
@@ -3819,7 +3819,7 @@ SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
   DOUBLE PRECISION :: UUnn,iw !omega,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
-  TYPE(GreenHyboffdiag)                     :: F_tmp
+  TYPE(GreenHyboffdiagComplex)       :: F_tmp
 
   flavors = op%flavors
   DO iflavor1 = 1, flavors
@@ -3845,7 +3845,7 @@ SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
     DO iflavor1b = 1, flavors
       u3 =-(op%Impurity%mat_U(iflavor1,iflavor1b))*op%Greens%oper(1,iflavor1,iflavor1b)
       ! u3=U_{1,1b}*G_{1,1b}
-      CALL GreenHyboffdiag_setMoments(op%Greens,iflavor1,iflavor1b,u1,u2,u3)
+      CALL GreenHyboffdiagComplex_setMoments(op%Greens,iflavor1,iflavor1b,u1,u2,u3)
     END DO ! iflavor1b
 
   END DO ! iflavor1
@@ -3916,19 +3916,19 @@ SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
      !!write(6,*) "size gw",SIZE(Gw,DIM=2) ,flavors+1 
     IF ( SIZE(Gw,DIM=3) .EQ. flavors+1 ) THEN
      ! CALL GreenHyboffdiag_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
-      CALL GreenHyboffdiag_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
+      CALL GreenHyboffdiagComplex_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
       !write(6,*) "1"
       !IF ( op%rank .EQ. 0 ) write(20,*) Gw(:,iflavor1)
     ELSE IF ( SIZE(Gw,DIM=3) .EQ. flavors ) THEN  
-      CALL GreenHyboffdiag_forFourier(op%Greens,Gomega=Gw)
+      CALL GreenHyboffdiagComplex_forFourier(op%Greens,Gomega=Gw)
       !write(6,*) "2"
     ELSE
       CALL WARNALL("CtqmcoffdiagComplex_getGreen : Gw is not valid                    ")
-      CALL GreenHyboffdiag_forFourier(op%Greens,Wmax=op%Wmax)
+      CALL GreenHyboffdiagComplex_forFourier(op%Greens,Wmax=op%Wmax)
       !write(6,*) "3"
     END IF
   ELSE
-    CALL GreenHyboffdiag_forFourier(op%Greens,Wmax=op%Wmax)
+    CALL GreenHyboffdiagComplex_forFourier(op%Greens,Wmax=op%Wmax)
   END IF
 !  ============== write Gomega_nd.dat
 !================================================
@@ -3967,10 +3967,10 @@ SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
 
   IF ( op%have_MPI .EQV. .TRUE. ) THEN
     !CALL GreenHyboffdiag_init(F_tmp,op%samples,op%beta,op%flavors,MY_COMM=op%MY_COMM)
-    CALL GreenHyboffdiag_init(F_tmp,op%samples,op%beta,flavors)
+    CALL GreenHyboffdiagComplex_init(F_tmp,op%samples,op%beta,flavors)
     !write(6,*) "10a"
   ELSE
-    CALL GreenHyboffdiag_init(F_tmp,op%samples,op%beta,flavors)
+    CALL GreenHyboffdiagComplex_init(F_tmp,op%samples,op%beta,flavors)
     !write(6,*) "10b"
   END IF
 
@@ -4036,7 +4036,7 @@ SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
   endif
 !================================================
 
-  CALL GreenHyboffdiag_destroy(F_tmp)
+  CALL GreenHyboffdiagComplex_destroy(F_tmp)
 
   !FREE(F_tmp%oper_w)
 !  ==============================
@@ -4821,12 +4821,12 @@ SUBROUTINE CtqmcoffdiagComplex_destroy(op)
   flavors = op%flavors
 
   CALL ImpurityOperator_destroy(op%Impurity)
-  CALL BathOperatoroffdiag_destroy(op%Bath)
+  CALL BathOperatoroffdiagComplex_destroy(op%Bath)
   CALL Vector_destroy(op%measNoise(1))
   CALL Vector_destroy(op%measNoise(2))
 
 !sui!write(6,*) "before greenhyb_destroy in ctmqc_destroy"
-  CALL GreenHyboffdiag_destroy(op%Greens)
+  CALL GreenHyboffdiagComplex_destroy(op%Greens)
 !#ifdef CTCtqmcoffdiagComplex_ANALYSIS
   FREEIF(op%measCorrelation)
   FREEIF(op%measPerturbation)

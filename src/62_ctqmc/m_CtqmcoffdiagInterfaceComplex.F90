@@ -263,7 +263,7 @@ SUBROUTINE CtqmcoffdiagInterfaceComplex_run(op,G0omega, Gtau, Gw, D,E,Noise,matU
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterfaceComplex), INTENT(INOUT) :: op
   COMPLEX(KIND=8)      , DIMENSION(:,:,:), INTENT(IN ) :: G0omega
-  DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(OUT) :: Gtau
+  COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(OUT) :: Gtau
   COMPLEX(KIND=8)      , DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
   DOUBLE PRECISION, OPTIONAL      , INTENT(OUT) :: D
   DOUBLE PRECISION, OPTIONAL      , INTENT(OUT) :: E
