@@ -67,6 +67,13 @@ AC_DEFUN([ABI_INIT_CPU_INFO],[
       fi
       ;;
 
+    aarch64*)
+      abi_cpu_64bits="yes"
+      abi_cpu_bits="64"
+      abi_cpu_vendor="arm"
+      abi_cpu_model="unknown"
+      ;;
+
     powerpc*)
       abi_cpu_vendor="ibm"
       abi_cpu_model="${target_cpu}"
