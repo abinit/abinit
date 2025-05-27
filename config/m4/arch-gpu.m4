@@ -88,20 +88,44 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
       ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
   AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
 
+  # call this macro here to make sure variable `abi_gpu_cuda_version_129`
+  #
+  # check if we are using CUDA runtime version at least 12.9
+  # From version 12.9 of CUDA, NVTX library is named differently
+  #
+  AC_MSG_CHECKING([whether we have Cuda >= 12.9])
+  AC_LANG_PUSH(C)
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+      [[
+      #include <cuda_runtime_api.h>
+      ]],
+      [[
+#if CUDART_VERSION < 12090
+#error
+#endif
+      ]])], [abi_gpu_cuda_version_129="yes"], [abi_gpu_cuda_version_129="no"])
+  AC_MSG_RESULT([${abi_gpu_cuda_version_129}])
+
   if test "${abi_gpu_markers_enable}" = "yes"; then
     if test "${abi_gpu_cuda_version_10}" = "yes"; then
-      if test -e "${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext}"; then
+      AC_MSG_CHECKING([for NVTX v3 GPU markers])
+      nvtx_libname="nvToolsExt"
+      if test "${abi_gpu_cuda_version_129}" = "yes"; then
+        nvtx_libname="nvtx3interop"
+      fi
+      if test -e "${abi_gpu_cuda_libdir}/lib${nvtx_libname}.${abi_so_ext}"; then
         # always add link flags to nvtx if available
         if test "${GPU_LIBS}" = ""; then
-          abi_gpu_cuda_libs="-lnvToolsExt ${abi_gpu_cuda_libs}"
+          abi_gpu_cuda_libs="-l${nvtx_libname} ${abi_gpu_cuda_libs}"
         else
-          abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lnvToolsExt"
+          abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -l${nvtx_libname}"
         fi
         abi_gpu_nvtx_v3="yes"
         abi_result="${abi_result} nvtx_v3"
       else
-        AC_MSG_ERROR([Cuda NVTX: ${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext} not found])
+        AC_MSG_ERROR([Cuda NVTX: ${abi_gpu_cuda_libdir}/lib${nvtx_libname}.${abi_so_ext} not found])
       fi
+      AC_MSG_RESULT([${abi_result}])
     else
       AC_MSG_ERROR([Cuda NVTX was requested but is not available for CUDA < v10])
     fi
