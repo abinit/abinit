@@ -47,7 +47,7 @@ TYPE, PUBLIC :: MapHybComplex
   INTEGER _PRIVATE :: size
   INTEGER          :: tail
   INTEGER         , ALLOCATABLE, DIMENSION(:) :: listINT
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: listDBLE
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: listDBLE
 END TYPE MapHybComplex
 !!***
 
@@ -195,7 +195,7 @@ SUBROUTINE MapHybComplex_enlarge(this, size)
   INTEGER                                :: tail
   INTEGER                                :: size_val
   INTEGER         , ALLOCATABLE, DIMENSION(:) :: listINT_temp 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: listDBLE_temp 
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: listDBLE_temp 
 
   IF ( ALLOCATED(this%listINT) ) THEN
     FREEIF(listINT_temp)
@@ -337,7 +337,7 @@ RECURSIVE SUBROUTINE MapHybComplex_quickSort(this, begin, end)
   INTEGER                     :: it2
   INTEGER                     :: pivot
   INTEGER                     :: Iswap
-  DOUBLE PRECISION            :: Dswap
+  COMPLEX(KIND=8)             :: Dswap
 
   pivot = this%listINT((end-begin)/2 + begin) ! not the betterchoice.... FIXME
   it1 = begin

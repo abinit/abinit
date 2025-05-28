@@ -3,6 +3,6 @@
   DOUBLE PRECISION                        :: ratioh
   DOUBLE PRECISION                        :: fsign
   DOUBLE PRECISION                        :: t_val
-  DOUBLE PRECISION                        :: hybrid
+  COMPLEX(KIND=8)                         :: hybrid
 
   activeF = op%activeFlavor
