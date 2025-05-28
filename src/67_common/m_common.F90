@@ -246,7 +246,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 
  tmagnet=0
  if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2) tmagnet=1
- if((dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) tmagnet=2
+ if((iscf>0.or.iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) tmagnet=2
 
  ishift=0
  residm_band = zero
