@@ -57,7 +57,7 @@ TYPE, PUBLIC :: MatrixHybComplex
   INTEGER _PRIVATE :: Wmax
   ! size if the frequency grid for mat_omega
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)           :: mat
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:)           :: mat
   ! matrix of size "size"
 
   INTEGER         , ALLOCATABLE, DIMENSION(:,:)           :: mat_tau
@@ -226,7 +226,7 @@ SUBROUTINE MatrixHybComplex_enlarge(this, size)
 !Local variables ------------------------------
   INTEGER                                   :: width
   INTEGER                                   :: tail
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: this_temp 
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:) :: this_temp 
   INTEGER         , ALLOCATABLE, DIMENSION(:,:) :: this_temp_tau
   COMPLEX(KIND=8) , ALLOCATABLE, DIMENSION(:,:,:) :: this_temp_omega
   INTEGER                                   :: size_val
@@ -385,8 +385,8 @@ SUBROUTINE MatrixHybComplex_inverse(this,determinant)
 
 !Arguments ------------------------------------
   TYPE(MatrixHybComplex), INTENT(INOUT) :: this
-  DOUBLE PRECISION, OPTIONAL, INTENT(OUT) :: determinant
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: invMatrix
+  COMPLEX(KIND=8), OPTIONAL, INTENT(OUT) :: determinant
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:) :: invMatrix
 !Local variables ------------------------------
   !DOUBLE PRECISION :: reste
   INTEGER :: ligne
@@ -396,7 +396,7 @@ SUBROUTINE MatrixHybComplex_inverse(this,determinant)
   INTEGER :: sys_vir
   INTEGER :: tail
   INTEGER, DIMENSION(:), ALLOCATABLE :: pivot 
-  DOUBLE PRECISION :: det
+  COMPLEX(KIND=8) :: det
 
   tail = this%tail
   IF ( tail .EQ. 0 ) THEN
@@ -498,7 +498,7 @@ SUBROUTINE MatrixHybComplex_LU(this,pivot,determinant)
 !Arguments ------------------------------------
   TYPE(MatrixHybComplex), INTENT(INOUT) :: this
   INTEGER, DIMENSION(:), ALLOCATABLE, OPTIONAL, INTENT(INOUT) :: pivot
-  DOUBLE PRECISION, OPTIONAL, INTENT(OUT) :: determinant
+  COMPLEX(KIND=8), OPTIONAL, INTENT(OUT) :: determinant
 !Local variables ------------------------------
   INTEGER :: ligne
   INTEGER :: colonne 
@@ -508,10 +508,10 @@ SUBROUTINE MatrixHybComplex_LU(this,pivot,determinant)
   INTEGER :: tail
   INTEGER, DIMENSION(:), ALLOCATABLE :: pivot_tmp
   DOUBLE PRECISION :: max_col
-  DOUBLE PRECISION :: inverse_pivot
-  DOUBLE PRECISION :: coef
-  DOUBLE PRECISION :: det
-  DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: mat_tmp
+  COMPLEX(KIND=8) :: inverse_pivot
+  COMPLEX(KIND=8) :: coef
+  COMPLEX(KIND=8) :: det
+  COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE :: mat_tmp
 
   tail = this%tail
   det = 1.d0
@@ -599,7 +599,7 @@ SUBROUTINE MatrixHybComplex_getDet(this,det)
 
 !Arguments ------------------------------------
   TYPE(MatrixHybComplex) , INTENT(INOUT) :: this
-  DOUBLE PRECISION, INTENT(  OUT) :: det
+  COMPLEX(KIND=8), INTENT(  OUT) :: det
 
   IF ( this%tail .EQ. 0 ) THEN
     det = 1.d0

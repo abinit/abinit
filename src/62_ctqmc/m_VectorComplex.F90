@@ -46,7 +46,7 @@ PRIVATE
 TYPE, PUBLIC :: VectorComplex
   INTEGER         :: size
   INTEGER         :: tail
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)         :: vec 
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:)         :: vec 
 END TYPE VectorComplex
 !!***
 
@@ -100,7 +100,7 @@ SUBROUTINE VectorComplex_init(this, size)
   FREEIF(this%vec)
   MALLOC(this%vec,(1:size_val))
   this%tail     = 0 
-  this%vec = 0.d0
+  this%vec = complex(0.d0,0.d0)
 END SUBROUTINE VectorComplex_init
 !!***
 
@@ -182,7 +182,7 @@ SUBROUTINE VectorComplex_enlarge(this, size)
 !Local variables ------------------------------
   INTEGER                                 :: width
   INTEGER                                 :: tail
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: thistemp 
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: thistemp 
   INTEGER                                 :: size_val
 
   IF ( ALLOCATED(this%vec) ) THEN
@@ -232,7 +232,7 @@ SUBROUTINE VectorComplex_pushBack(this, value)
 
 !Arguments ------------------------------------
   TYPE(VectorComplex)    , INTENT(INOUT) :: this
-  DOUBLE PRECISION, INTENT(IN   ) :: value
+  COMPLEX(KIND=8), INTENT(IN   ) :: value
 !Local variables ------------------------------
   INTEGER                         :: tail
 
