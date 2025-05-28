@@ -478,9 +478,15 @@ AC_DEFUN([_ABI_GPU_INIT_HIP],[
   abi_gpu_hip_version_10="unknown"
   abi_gpu_nvtx_v3="unknown"
 
-  # Make use of the ROCM_ROOT environment variable
+  # Make use of the ROCM_ROOT, ROCM_PATH and ROCM_PREFIX environment variables
   if test "${abi_gpu_hip_root}" = ""; then
     abi_gpu_hip_root="${ROCM_ROOT}"
+  fi
+  if test "${abi_gpu_hip_root}" = ""; then
+    abi_gpu_hip_root="${ROCM_PATH}"
+  fi
+  if test "${abi_gpu_hip_root}" = ""; then
+    abi_gpu_hip_root="${ROCM_PREFIX}"
   fi
 
   # Check whether to look for generic files
