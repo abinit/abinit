@@ -3342,8 +3342,6 @@ end subroutine effective_potential_distributeResidualForces
 
 subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: ncoeff

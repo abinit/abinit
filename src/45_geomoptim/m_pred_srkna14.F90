@@ -4,7 +4,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
@@ -73,8 +72,6 @@ contains
 !! SOURCE
 
 subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

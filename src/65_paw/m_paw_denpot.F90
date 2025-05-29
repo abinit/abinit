@@ -436,7 +436,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 
 !  ===== Compute "on-site" densities (n1, ntild1, nhat1) =====
 !  ==========================================================
-   
+
    rcpaw_has_valdens=.false.
    if(present(rcpaw)) then
      if(associated(rcpaw)) then
@@ -452,7 +452,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
      extfpmd_rho=zero
      if(present(extfpmd)) then
        if(associated(extfpmd)) then
-         !extfpmd_rho=extfpmd%nelect/ucvol !This needs testing but is probably correct 
+         !extfpmd_rho=extfpmd%nelect/ucvol !This needs testing but is probably correct
        endif
      endif
      call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
@@ -1435,7 +1435,7 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
      ABI_FREE(bb)
    end if
 
-! Add extfpmd contribution 
+! Add extfpmd contribution
    if(present(extfpmd_rho)) then
      rho1(:,1,:)=rho1(:,1,:)+sqrt(four_pi)*extfpmd_rho
      if(opt_dens<=1) then
@@ -2471,7 +2471,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    ABI_ERROR('RCPAW: cplex not 1')
  endif
  opt_compch=0;if (option/=1) opt_compch=1
- pawang_=>pawang 
+ pawang_=>pawang
  extfpmd_rho=zero
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
@@ -2479,7 +2479,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    endif
  endif
 
- ! loop over atoms 
+ ! loop over atoms
  do itypat=1,dtset%ntypat
    mesh_size=pawtab(itypat)%mesh_size
    ABI_MALLOC(nval,(mesh_size))
@@ -2509,7 +2509,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    enddo
    ABI_FREE(nval_tmp)
    ! mpi reduction
-   if(paral_atom) then 
+   if(paral_atom) then
      call xmpi_sum(nval,my_comm_atom,ierr)
      call xmpi_bcast(nval,0,my_comm_atom,ierr)
    endif

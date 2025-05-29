@@ -461,7 +461,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !with the same mixing factor as the model dielectric function.
 ! RCPAW : precondition the core occupations residuals
 !with the same mixing factor as the model dielectric function
-! Extfpmd : precondition the extfpmd number of electrons 
+! Extfpmd : precondition the extfpmd number of electrons
 !with the same mixing factor as the model dielectric function
 
  if (istep>=dielstrt.and.dtset%iprcel>=21.and.dtset%iprcel<30) then

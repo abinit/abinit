@@ -1,6 +1,6 @@
 
 .Version 10.3.4.3 of ABINIT, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
+.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Wed 18 Dec 2024.
 - ( at 19h34 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/baguetl_chebfi-oracle/tests/TestBot_MPI1/gpu_omp_t51_MPI1/t51.abi
 - output file    -> t51_MPI1.abo
 - root for input  files -> t51_MPI1i
@@ -218,7 +218,7 @@ tolerances: {tolvrs: 1.00E-28, }
  ETOT 14  -10.417943516434    -5.329E-14 1.138E-03 5.694E-18
  ETOT 15  -10.417943516434    -9.948E-14 1.072E-03 1.153E-18
  ETOT 16  -10.417943516433     1.688E-13 1.026E-03 1.376E-18
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.17911254E-03  sigma(3 2)= -1.74491794E-03
   sigma(2 2)= -8.17911254E-03  sigma(3 1)= -1.74491794E-03
@@ -228,7 +228,7 @@ tolerances: {tolvrs: 1.00E-28, }
  scprqt:  WARNING -
   nstep=   16 was not enough SCF cycles to converge;
   density residual=  1.376E-18 exceeds tolvrs=  1.000E-28
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -274,7 +274,7 @@ force_length_stats: {min:   4.07882017E-01, max:   4.07882017E-01, mean:   4.078
  The following values must be close to each other ...
  Compensation charge over spherical meshes =      0.475538079729920
  Compensation charge over fine fft grid    =      0.475544024273735
- 
+
  ==== Results concerning PAW augmentation regions ====
 
  Total pseudopotential strength Dij (hartree):
@@ -395,7 +395,7 @@ force_length_stats: {min:   4.07882017E-01, max:   4.07882017E-01, mean:   4.078
 ================================================================================
 
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   87.769E-06; max=  10.260E-04
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -403,7 +403,7 @@ force_length_stats: {min:   4.07882017E-01, max:   4.07882017E-01, mean:   4.078
  rms dE/dt=  1.6484E+00; max dE/dt=  1.6484E+00; dE/dt below (all hartree)
     1       1.648435545751      1.648435545751      1.648435545751
     2      -1.648435545751     -1.648435545751     -1.648435545751
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
@@ -635,7 +635,7 @@ P           mkmem           1
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - Proc.   0 individual time (sec): cpu=         20.3  wall=         20.3
- 
+
 ================================================================================
 
  Calculation completed.

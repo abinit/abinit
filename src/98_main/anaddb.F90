@@ -589,7 +589,6 @@ program anaddb
 !**********************************************************************
  call mkphbs(Ifc, crystal, inp, ddb, asrq0, filnam(8), comm)
 
-
  ! Interpolate the DDB onto the first list of vectors and write the file.
  if (inp%prtddb == 1 .and. inp%ifcflag == 1) then
    call ddb_hdr%open_read(filnam(3), comm)

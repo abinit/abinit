@@ -230,7 +230,6 @@ SUBROUTINE tfpoint(thetas,phis,tweights,ln)
   !************************************************!
   !     GENERATES POINTS ON A UNIT SPHERE          !
   !************************************************!
-  IMPLICIT NONE
   !
   INTEGER, intent(in)  :: ln
   REAL*8, intent(out)  :: thetas(ln+1), phis(2*ln+1), tweights(ln+1)! spt(2,(ln+1)*(2*ln+1)),weight((ln+1)*(2*ln+1))
@@ -266,7 +265,6 @@ SUBROUTINE tfpoint(thetas,phis,tweights,ln)
 end SUBROUTINE tfpoint
 
 SUBROUTINE GRULE(N,X,W)
-  IMPLICIT NONE
   !
   !     DETERMINES THE (N+1)/2 NONNEGATIVE POINTS X(I) AND
   !     THE CORRESPONDING WEIGHTS W(I) OF THE N-POINT
@@ -321,7 +319,6 @@ SUBROUTINE GRULE(N,X,W)
 END SUBROUTINE GRULE
 
 subroutine ExchangeLDA(Ex, Vx, rs_1, lambda, N)
-  IMPLICIT NONE
   REAL*8, intent(in) :: lambda
   INTEGER, intent(in):: N
   REAL*8, intent(in) :: rs_1(N)
@@ -352,7 +349,6 @@ SUBROUTINE fexchange(xs,ex,dex,N)
   !* Evaluating a function (and its derivative) for exchange energy, which has a formula
   !*  f(x) = 1-1/(6*x^2)-4/(3*x)*atan(2*x)+(1+1/(12*x^2))/(2*x^2)*log(1+4*x^2)
   !* df/dx = 2/(3*x^3) + 4/(3*x^2)*atan(2*x) - (1+6*x^2)/(6*x^5)*log(1+4*x^2)
-  IMPLICIT NONE
   INTEGER, intent(in):: N
   REAL*8, intent(in) :: xs(N)
   REAL*8, intent(out):: ex(N), dex(N)
@@ -378,7 +374,6 @@ SUBROUTINE fexchange(xs,ex,dex,N)
 END SUBROUTINE fexchange
 
 subroutine CorrLDA_2(Ec, Vc, rs, lambda, eps, N)
-  IMPLICIT NONE
   INTEGER, intent(in):: N
   REAL*8, intent(in) :: rs(N)
   REAL*8, intent(in) :: lambda, eps
@@ -405,7 +400,6 @@ subroutine CorrLDA_2(Ec, Vc, rs, lambda, eps, N)
 end subroutine CorrLDA_2
 
 subroutine CorLDA(Ec,Vc,rs)
-  IMPLICIT NONE
   !  UNITS OF Rydberg
   !  UNIFORM-GAS CORRELATION OF PERDEW AND WANG 1991
   !  INPUT: SEITZ RADIUS (rs)
@@ -427,7 +421,6 @@ subroutine CorLDA(Ec,Vc,rs)
 end subroutine CorLDA
 
 SUBROUTINE  Gcor(GG,GGrs,rs, A,A1,B1,B2,B3,B4,P)
-  IMPLICIT NONE
   REAL*8, intent(in)  :: rs, A, A1, B1, B2, B3, B4
   INTEGER, intent(in) :: P
   REAL*8, intent(out) :: GG, GGrs
@@ -446,7 +439,6 @@ SUBROUTINE  Gcor(GG,GGrs,rs, A,A1,B1,B2,B3,B4,P)
 END SUBROUTINE Gcor
 
 subroutine EcVc_reduce_yw_2(rs,lambda,fn,qn,N)
-  IMPLICIT NONE
   INTEGER, intent(in):: N
   REAL*8, intent(in) :: rs(N)
   REAL*8, intent(in) :: lambda
@@ -482,7 +474,6 @@ subroutine EcVc_reduce_yw_2(rs,lambda,fn,qn,N)
 end subroutine EcVc_reduce_yw_2
 
 subroutine EcVc_reduce_di_2(rs,eps,fn,qn,N)
-  IMPLICIT NONE
   INTEGER, intent(in):: N
   REAL*8, intent(in) :: rs(N)
   REAL*8, intent(in) :: eps

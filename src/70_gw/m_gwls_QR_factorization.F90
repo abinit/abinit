@@ -92,7 +92,6 @@ subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 ! Thus, in that case, this routine implements some old school Gram-Schmidt
 ! algorithm.
 !--------------------------------------------------------------------------
-implicit none
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
 complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)
@@ -149,7 +148,6 @@ subroutine extract_SVD(mpi_communicator, Hsize,lsolutions_max,svd_matrix,svd_val
 !
 ! different algorithms are used, depending on parallelisation scheme.
 !--------------------------------------------------------------------------
-implicit none
 
 integer,      intent(in)    :: mpi_communicator
 integer,      intent(in)    :: Hsize, lsolutions_max
@@ -236,7 +234,6 @@ subroutine extract_SVD_lapack(Hsize,lsolutions_max,svd_matrix,svd_values)
 !
 !
 !--------------------------------------------------------------------------
-implicit none
 
 
 integer,      intent(in)    :: Hsize, lsolutions_max
@@ -387,7 +384,6 @@ subroutine extract_QR_Householder(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 ! distributed across processors and MPI communication is necessary.
 !
 !--------------------------------------------------------------------------
-implicit none
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
 complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)

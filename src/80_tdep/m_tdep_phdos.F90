@@ -39,8 +39,6 @@ contains
 subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Lattice,MPIdata,natom,&
 &                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
 
-  implicit none
-
   integer, intent(in) :: natom,natom_unitcell
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,natom)
   type(Input_type),intent(in) :: Invar
@@ -339,8 +337,6 @@ end subroutine tdep_calc_phdos
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
-
-  implicit none
 
   double precision, intent(in) :: U0
   type(Input_type),intent(in) :: Invar

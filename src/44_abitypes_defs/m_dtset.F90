@@ -439,6 +439,8 @@ type, public :: dataset_type
  integer :: nbdblock
  integer :: nbdbuf
  integer :: nberry
+ integer :: nb_protected = 0
+ integer :: nb_per_slice = 2
  integer :: nc_xccc_gspace = 0
  integer :: nconeq
  integer :: ncout = 1
@@ -659,6 +661,7 @@ type, public :: dataset_type
  integer :: symdynmat = 1
  integer :: symsigma = 1
  integer :: symv1scf = 0
+ integer :: scr_wrange(2) = 0
 !T
  integer :: td_exp_order
  integer :: td_mexcit
@@ -1669,6 +1672,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ph_intmeth        = dtin%ph_intmeth
  dtout%symdynmat         = dtin%symdynmat
  dtout%symv1scf          = dtin%symv1scf
+ dtout%scr_wrange        = dtin%scr_wrange
  dtout%ph_nqshift        = dtin%ph_nqshift
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
@@ -1932,6 +1936,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nbdbuf             = dtin%nbdbuf
  dtout%nbandhf            = dtin%nbandhf
  dtout%nberry             = dtin%nberry
+ dtout%nb_protected       = dtin%nb_protected
+ dtout%nb_per_slice       = dtin%nb_per_slice
  dtout%nc_xccc_gspace     = dtin%nc_xccc_gspace
  dtout%nbandkss           = dtin%nbandkss
  dtout%nconeq             = dtin%nconeq
@@ -3571,7 +3577,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_optim dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' 
+ list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm'
  list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dmft_yukawa_param dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
@@ -3690,8 +3696,8 @@ subroutine chkvars(string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq ncout nc_xccc_gspace'
- list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring nefield'
+ list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nb_protected nb_per_slice nconeq ncout'
+ list_vars=trim(list_vars)//' nc_xccc_gspace nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring nefield'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nblock_lobpcg nloc_alg nloc_mem nnos nnsclo nnsclohf'
@@ -3747,7 +3753,7 @@ subroutine chkvars(string)
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'
- list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk'
+ list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk scr_wrange'
 !MS Variables for SCALE-UP
 !This is only for the developer version, not for the production version. So, was commented.
 ! @Marcus: simply uncomment these lines in v9.1 (not v9.0 !), and continue to develop without worrying.

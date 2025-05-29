@@ -23,15 +23,13 @@
 
 module m_gpu_detect
 
- use m_abicore
-
  use defs_basis
+ use m_abicore
  use m_xmpi
 
 #if defined HAVE_GPU_CUDA
  use m_initcuda, only     : Get_ndevice
 #endif
-
 
  implicit none
 
@@ -40,6 +38,7 @@ module m_gpu_detect
  public ::            &
   find_set_gpu,       &  !Calc. the number of point,GPU,for any proc
   get_topo               !Put the topology of machine in an integer
+
 CONTAINS  !===========================================================
 !!***
 
@@ -64,9 +63,6 @@ CONTAINS  !===========================================================
 
  subroutine find_set_gpu(nproc,commcart,gpu_map,ngpu)
 
-  implicit none
-
-
 !Arguments ------------------------------------
   integer,intent(in) :: nproc,commcart
   integer,intent(out) :: ngpu
@@ -74,8 +70,7 @@ CONTAINS  !===========================================================
 !Local ---------------------------
   integer :: ierr,ndev,avail_gpu
   integer :: me,icpu,cpu_map_me
-  character(20) :: name_ch
-  character(20) :: nodes(0:nproc-1)
+  character(xmpi_max_processor_name) :: name_ch, nodes(0:nproc-1)
   character(500) :: msg
 ! *********************************************************************
 
@@ -83,6 +78,9 @@ CONTAINS  !===========================================================
   gpu_map = -1
   ndev = 0
   me = 0
+
+! MG COMMENT: One could use
+! call MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, shared_comm, ierr)
 
 #if defined HAVE_GPU_CUDA
   me = xmpi_comm_rank(commcart)
@@ -100,11 +98,11 @@ CONTAINS  !===========================================================
   call xmpi_name(name_ch,ierr)
 
   !--Array containing the number of gpu seen by any cpu
-  call  xmpi_allgather(ndev,gpu_map,commcart,ierr)
+  call xmpi_allgather(ndev, gpu_map, commcart, ierr)
   !   write(std_out,*)' me,nedevice ',gpu_map
 
   !--Array containing the name of the cpu
-  call  xmpi_allgather(name_ch,nodes,commcart,ierr)
+  call xmpi_allgather(name_ch, nodes, xmpi_max_processor_name, commcart,ierr)
 
   !--Printing Nodes name
   write(msg,'(3a)')&
@@ -138,7 +136,6 @@ CONTAINS  !===========================================================
   !--Count the total number of gpu
   ngpu = count(gpu_map>-1)
   !write(std_out,*)'total gpu',ngpu
-
 #endif
 
 end subroutine find_set_gpu
@@ -166,8 +163,6 @@ end subroutine find_set_gpu
 !! SOURCE
 
  subroutine get_topo(nproc,ngpu,topo)
-
-  implicit none
 
 !Arguments ------------------------------------
   integer,intent(in)  :: nproc,ngpu

@@ -551,7 +551,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
      rcpaw_getnel=>rcpaw
      do itypat=1,rcpaw%ntypat
        if(rcpaw%atm(itypat)%zcore_orig>zero) then
-         rcpaw%atm(itypat)%occ_res=-rcpaw%atm(itypat)%occ 
+         rcpaw%atm(itypat)%occ_res=-rcpaw%atm(itypat)%occ
        endif
      enddo
    endif
