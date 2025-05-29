@@ -140,16 +140,16 @@ TYPE BathOperatoroffdiagComplex
   DOUBLE PRECISION                            :: inv_dt
   ! inv_dt=1/dt
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:)   :: F ! qmc_l+2,Flavors
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:,:)   :: F ! qmc_l+2,Flavors
   ! Hybridization function F(1:op%sizeHybrid+1,1:flavors,1:flavors)
 
-  DOUBLE PRECISION                            :: S
+  COMPLEX(KIND=8)                            :: S
   ! Sherman Morrison notations 
 
-  DOUBLE PRECISION                            :: Stau
+  COMPLEX(KIND=8)                            :: Stau
   ! Sherman Morrison notations 
 
-  DOUBLE PRECISION                            :: Stilde
+  COMPLEX(KIND=8)                            :: Stilde
   ! Sherman Morrison notations 
 
   TYPE(VectorComplex)                                :: R 
@@ -281,7 +281,7 @@ SUBROUTINE BathOperatoroffdiagComplex_init(op, flavors, samples, beta, iTech,opt
 
   CALL MatrixHybComplex_init(op%M,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
   CALL MatrixHybComplex_init(op%M_update,op%iTech,size=Global_SIZE*op%flavors,Wmax=samples) !FIXME Should be consistent with ListCagC
-  op%F       = 0.d0
+  op%F       = cmplx(0.d0,0.d0)
   op%set     = .TRUE.
   
 END SUBROUTINE BathOperatoroffdiagComplex_init
@@ -334,7 +334,7 @@ SUBROUTINE BathOperatoroffdiagComplex_reset(op)
   CALL Vector_clear(op%Qtau)
 
   CALL MatrixHybComplex_clear(op%M) !FIXME Should be consistent with ListCagC
-  op%F       = 0.d0
+  op%F       = cmplx(0.d0,0.d0)
   do iflavor=1,op%flavors
     op%tails(iflavor)=0
     op%Fshift(iflavor)=0
@@ -416,7 +416,7 @@ END SUBROUTINE BathOperatoroffdiagComplex_activateParticle
 !! NOTES
 !!
 !! SOURCE
-DOUBLE PRECISION  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, position, particle)
+COMPLEX(KIND=8)  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, position, particle)
 
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex)      , INTENT(INOUT) :: op
@@ -437,8 +437,9 @@ DOUBLE PRECISION  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posi
   DOUBLE PRECISION                        :: Cdag
   DOUBLE PRECISION                        :: Cdagbeta
   DOUBLE PRECISION                        :: beta
-  DOUBLE PRECISION                        :: ratio
+  COMPLEX(KIND=8)                         :: ratio
   DOUBLE PRECISION                        :: time
+  COMPLEX(KIND=8)                         :: timec
 !  TYPE(CdagC)    , POINTER, DIMENSION(:)  :: list => NULL()
 #include "BathOperatoroffdiagComplex_hybrid.h"
 
@@ -594,13 +595,13 @@ DOUBLE PRECISION  FUNCTION BathOperatoroffdiagComplex_getDetAdd(op,CdagC_1, posi
   !ratio = op%S - DOT_PRODUCT(MATMUL(op%R%vec(1:tail),op%M(op%activeFlavor)%mat(1:tail,1:tail)),op%Q%vec(1:tail))
 
   ! product of matrix R and M(k) is computed now:
-  ratio = 0.d0
+  ratio = cmplx(0.d0,0.d0)
   DO it1 = tailbegin, tailend
-    time = 0.d0
+    timec = cmplx(0.d0,0.d0)
     DO it2 = tailbegin, tailend
-      time = time + op%R%vec(it2) * op%M%mat(it2,it1)
+      timec = timec + op%R%vec(it2) * op%M%mat(it2,it1)
     END DO
-    ratio = ratio + op%Q%vec(it1) * time
+    ratio = ratio + op%Q%vec(it1) * timec
   END DO
   !sui!write(6,*) "        = R Matrix",tail
   !sui!write(6,*) "        R      ",(op%R%vec(it1),it1=1,tail)
@@ -671,7 +672,7 @@ END FUNCTION BathOperatoroffdiagComplex_getDetAdd
 !!
 !! SOURCE
 
-DOUBLE PRECISION FUNCTION BathOperatoroffdiagComplex_getDetRemove(op,position)
+COMPLEX(KIND=8) FUNCTION BathOperatoroffdiagComplex_getDetRemove(op,position)
 
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex), INTENT(INOUT) :: op
@@ -755,7 +756,7 @@ END FUNCTION BathOperatoroffdiagComplex_getDetRemove
 !!
 !! SOURCE
 
-DOUBLE PRECISION FUNCTION BathOperatoroffdiagComplex_getDetF(op,particle,option)
+COMPLEX(KIND=8) FUNCTION BathOperatoroffdiagComplex_getDetF(op,particle,option)
 
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex)       , INTENT(INOUT)      :: op
@@ -776,7 +777,7 @@ DOUBLE PRECISION FUNCTION BathOperatoroffdiagComplex_getDetF(op,particle,option)
   INTEGER :: iflavordag,iflavorb
 #include "BathOperatoroffdiagComplex_hybrid.h"
 
-  BathOperatoroffdiagComplex_getDetF = 1.d0 ! pour eviter des divisions par 0
+  BathOperatoroffdiagComplex_getDetF = cmplx(1.d0,0.d0) ! pour eviter des divisions par 0
   IF ( PRESENT( particle ) ) THEN
     tail = op%sumtails
     beta = op%beta
@@ -870,7 +871,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setMAdd(op,particle)
   INTEGER                           :: positionCol
   INTEGER                           :: aF,indice
   INTEGER                           :: tailb,taile
-  DOUBLE PRECISION                  :: Stilde
+  COMPLEX(KIND=8)                   :: Stilde
   DOUBLE PRECISION                  :: time
   DOUBLE PRECISION                  :: mbeta_two
   DOUBLE PRECISION                  :: inv_dt
@@ -1284,8 +1285,8 @@ SUBROUTINE BathOperatoroffdiagComplex_setMRemove(op,particle)
   INTEGER                              :: i
   INTEGER                              :: j,it !,it1
   INTEGER                              :: p
-  DOUBLE PRECISION                   :: invStilde
-  DOUBLE PRECISION                   :: invStilde2
+  COMPLEX(KIND=8)                   :: invStilde
+  COMPLEX(KIND=8)                   :: invStilde2
   TYPE(VectorInt) :: vecI_tmp
   TYPE(VectorComplex)    :: vec_tmp
 
@@ -1477,7 +1478,7 @@ SUBROUTINE BathOperatoroffdiagComplex_swap(op, flavor1, flavor2)
   INTEGER           , INTENT(IN   ) :: flavor1
   INTEGER           , INTENT(IN   ) :: flavor2
   INTEGER            :: ii,iflavort,itmptail,flavora,flavorb
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: mat_temp
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:) :: mat_temp
   INTEGER         , ALLOCATABLE, DIMENSION(:,:) :: mat_tau_temp
 
   if(flavor1>flavor2) then
@@ -1651,7 +1652,7 @@ SUBROUTINE BathOperatoroffdiagComplex_setF(op,F)
 
 !Arguments ------------------------------------
   TYPE(BathOperatoroffdiagComplex)               , INTENT(INOUT) :: op
-  DOUBLE PRECISION, DIMENSION(:,:,:) , INTENT(IN   ) :: F
+  COMPLEX(KIND=8), DIMENSION(:,:,:) , INTENT(IN   ) :: F
 !Arguments ------------------------------------
   INTEGER                                          :: iflavor1
   INTEGER                                          :: iflavor2
@@ -1929,7 +1930,7 @@ END SUBROUTINE BathOperatoroffdiagComplex_doCheck
 !!  BathOperatoroffdiagComplex_checkM
 !!
 !! FUNCTION
-!!  compute from scratch the M matrix and compar it
+!!  compute from scratch the M matrix and compare it
 !!  with the already computed M matrix
 !!
 !! COPYRIGHT
@@ -1974,8 +1975,8 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
   DOUBLE PRECISION :: errorrel
   DOUBLE PRECISION :: tc
   DOUBLE PRECISION :: tCdag
-  DOUBLE PRECISION :: sumMmat
-  DOUBLE PRECISION :: sumCheck
+  COMPLEX(KIND=8) :: sumMmat
+  COMPLEX(KIND=8) :: sumCheck
 #include "BathOperatoroffdiagComplex_hybrid.h"
 
   aF = op%activeFlavor
@@ -2039,8 +2040,8 @@ SUBROUTINE BathOperatoroffdiagComplex_checkM(op,particle)
   enddo
 
   ! --- Compare M_update and M to check if calculation of M is correct
-  sumMmat =0.d0
-  sumCheck=0.d0
+  sumMmat =cmplx(0.d0,0.d0)
+  sumCheck=cmplx(0.d0,0.d0)
   error1 = 0.d0
   errormax = 0.d0
   checkTau = .FALSE.

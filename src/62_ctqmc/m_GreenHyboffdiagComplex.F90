@@ -126,7 +126,11 @@ MODULE m_GreenHyboffdiagComplex
 
   DOUBLE PRECISION :: signvalueold
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: oper
+  COMPLEX(KIND=8) :: phasevaluemeas      
+                                          
+  COMPLEX(KIND=8) :: phasevalueold       
+                                          
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:,:) :: oper
    ! oper(samples)
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omega
@@ -274,9 +278,11 @@ include 'mpif.h'
     enddo
   enddo
 
-  op%oper       = 0.d0
+  op%oper       = cmplx(0.d0,0.d0)
   op%signvaluemeas = 0.d0
   op%signvalueold = 0.d0
+  op%phasevaluemeas = cmplx(0.d0,0.d0)    
+  op%phasevalueold = cmplx(0.d0,0.d0)     
   op%set        = .TRUE.
   op%factor     = 1
   op%setMk      = 0
@@ -361,9 +367,11 @@ SUBROUTINE GreenHyboffdiagComplex_clear(op)
   enddo
   op%measurements = 0
   IF ( ALLOCATED(op%oper) ) &
-  op%oper         = 0.d0
+  op%oper         = cmplx(0.d0,0.d0)
   op%signvaluemeas = 0.d0
   op%signvalueold = 1.d0
+  op%phasevaluemeas = cmplx(0.d0,0.d0)    
+  op%phasevalueold = cmplx(0.d0,0.d0)     
   IF ( op%iTech .EQ. GREENHYB_OMEGA ) THEN
     IF ( ALLOCATED(op%oper_w) ) &
     op%oper_w       = CMPLX(0.d0,0.d0,8)
@@ -451,13 +459,14 @@ END SUBROUTINE GreenHyboffdiagComplex_setOperW
 !!
 !! SOURCE
 
-SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalue,activeflavor)
+SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalue,phasevalue,activeflavor)
 
 !Arguments ------------------------------------
   TYPE(GreenHyboffdiagComplex)    , INTENT(INOUT) :: op
   TYPE(MatrixHybComplex)   , INTENT(IN   ) :: Mmatrix
   TYPE(ListCdagC)   , INTENT(IN   ) :: ListCdagC_1(op%nflavors)
   DOUBLE PRECISION  , INTENT(IN   ) :: signvalue
+  COMPLEX(KIND=8)  , INTENT(IN)    :: phasevalue
   LOGICAL        , INTENT(IN   ) :: updated
   INTEGER, OPTIONAL  , INTENT(IN  ) :: activeflavor
 !Local variables ------------------------------
@@ -486,6 +495,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
   DOUBLE PRECISION               :: time
   DOUBLE PRECISION               :: signe,signe2
   DOUBLE PRECISION               :: argument
+  COMPLEX(KIND=8)                :: argumentc
   INTEGER                        :: iflavorbegin,iflavorend,prtopt
   !DOUBLE PRECISION               :: taupi_invbeta
   !COMPLEX(KIND=8)                   :: cargument
@@ -545,7 +555,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
                !write(6,*) " measHybrid  listDBLE ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listDBLE(iC),argument
             op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) =                &
                            op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) &
-                         + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold *  argument
+                         + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold * op%phasevalueold *  argument
            !if(op%map(iflavor,iflavorbis)%listINT(iC)==1.and.iflavor==iflavorbis) then
           !  if(iflavor==iflavorbis) then
           !   !sui!write(6,*) "G(0)", op%map(iflavor,iflavorbis)%listINT(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),iflavor
@@ -567,6 +577,8 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
       END DO
       op%signvaluemeas = op%signvaluemeas + op%signvalueold * argument
       op%measurements = op%measurements + op%factor
+      op%phasevaluemeas = op%phasevaluemeas + op%phasevalueold * op%signvalueold * argument      
+
     !sui!write(6,*) "   measurements", op%measurements
          !sui! write(6,*) "                  signvaluemeas",op%signvaluemeas,op%signvalueold*argument
          !sui! write(6,*) "                  signvaluemeas/measurements",op%signvaluemeas/op%measurements
@@ -682,7 +694,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
               ! sign. NOT DONE HERE??
   
 !             ----- Compute the Green's function as the value of the matrix M for times iCdag and iC.
-              argument = signe*Mmatrix%mat(iCdag_m,iC_m)
+              argumentc = signe*Mmatrix%mat(iCdag_m,iC_m)
   
               !index = INT( ( time * inv_dt ) + 1.5d0 )
               !IF (index .NE. Mmatrix%mat_tau(iCdag,iC)) THEN
@@ -693,7 +705,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
               idx_old = idx_old + 1
 
               ! --- define the  value of listDBLE as a function of idx_old
-              op%map(iflavor,iflavorbis)%listDBLE(idx_old) = argument
+              op%map(iflavor,iflavorbis)%listDBLE(idx_old) = argumentc
               !write(6,*) " measHybrid  listDBLE2 ",iflavor,iflavorbis,idx_old,argument
               !op%map%listINT(idx_old)  = index
 
@@ -741,6 +753,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
        iC_m_add=iC_m_add+tail
       END DO ! iflavor
       op%signvalueold = signvalue
+      op%phasevalueold = phasevalue 
    ! write(6,*) "LKLLL2D"
     CASE (GREENHYB_OMEGA)
     !  argument = DBLE(op%factor)
@@ -816,6 +829,7 @@ SUBROUTINE GreenHyboffdiagComplex_getHybrid(op)
   !sui!write(6,*) "measurements",op%measurements,op%delta_t,op%inv_beta
   !sui!write(6,*) "signevaluemeas meas",op%signvaluemeas,op%measurements
     op%signvaluemeas = op%signvaluemeas / DBLE(op%measurements)
+    op%phasevaluemeas = op%phasevaluemeas / DBLE(op%measurements)  
    ! print*, "op%oper",op%oper(1,1,1)
   !sui!write(6,*) "signevaluemeas/meas",op%signvaluemeas
    ! print*, "signevaluemeas/meas",op%signvaluemeas
@@ -870,8 +884,8 @@ SUBROUTINE GreenHyboffdiagComplex_setN(op,N)
     ! exactly the number of electrons in the flavor iflavor whereas
     ! op%oper is not exact, because it still has to be divided by
     ! signvaluemeas after the MPIREDUCE
-    op%oper(1,iflavor,iflavor) = (N(iflavor) - 1.d0)*op%signvaluemeas
-    op%oper(op%samples,iflavor,iflavor) = - N(iflavor)*op%signvaluemeas
+    op%oper(1,iflavor,iflavor) = (N(iflavor) - 1.d0)*op%phasevaluemeas
+    op%oper(op%samples,iflavor,iflavor) = - N(iflavor)*op%phasevaluemeas
     !op%oper(op%samples,iflavor,iflavor) = 2*op%oper(op%samples,iflavor,iflavor)
     !op%oper(1,iflavor,iflavor) = 2*op%oper(1,iflavor,iflavor)
     DO iflavor2=1, op%nflavors
@@ -1079,21 +1093,21 @@ include 'mpif.h'
   DOUBLE PRECISION :: minusOmegaTau
   DOUBLE PRECISION :: omegaa
   DOUBLE PRECISION :: minusTau
-  DOUBLE PRECISION :: sumTerm
+  COMPLEX(KIND=8) :: sumTerm
   DOUBLE PRECISION :: pi
   DOUBLE PRECISION :: twoPi
-  DOUBLE PRECISION :: correction
+  COMPLEX(KIND=8) :: correction
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: Domega
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: A_omega
   COMPLEX(KIND=8) , ALLOCATABLE, DIMENSION(:) :: C_omega
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: opertau
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: opertau
   CHARACTER(len=5) :: funct
   character(len=4) :: tag_proc
   character(len=30) :: tmpfil
 
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
   INTEGER :: my_count
-  DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: opertau_buf
+  COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: opertau_buf
 #endif
 
   IF ( op%set .EQV. .FALSE. ) &
@@ -1278,10 +1292,10 @@ include 'mpif.h'
         DO iomega = 1, omegaSamples
           omegaa         = Domega(iomega)
           minusOmegaTau = MOD(omegaa*minusTau, TwoPi)
-          sumTerm       = REAL(( op%oper_w(iomega,iflavor1,iflavor2) &
+          sumTerm       = ( op%oper_w(iomega,iflavor1,iflavor2) &
                           -  C_omega(iomega) ) &
                           !- CMPLX(0.d0, A_omega(iomega),8) ) &
-                          * EXP( CMPLX(0.d0, minusOmegaTau, 8)))
+                          * EXP( CMPLX(0.d0, minusOmegaTau, 8))
           opertau(itau)  = opertau(itau) + sumTerm
 !         Domega et minusomegatau identique MAIS oper_w different
             !write(unitnb,*) iomega,Domega(iomega),real(C_omega(iomega)),imag(C_omega(iomega))
@@ -1328,16 +1342,16 @@ include 'mpif.h'
 ! rassembler les resultats
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-        CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
+        CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &
                           opertau, counts, displs, &
-                          MPI_DOUBLE_PRECISION, op%MY_COMM, residu)
+                          MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)
 #else
     my_count=tauBegin-tauEnd+1
     MALLOC(opertau_buf,(my_count))
     opertau_buf(1:my_count)=opertau(tauBegin:tauEnd)
-    CALL MPI_ALLGATHERV(opertau_buf, my_count, MPI_DOUBLE_PRECISION, &
+    CALL MPI_ALLGATHERV(opertau_buf, my_count, MPI_DOUBLE_COMPLEX, &
                       opertau, counts, displs, &
-                      MPI_DOUBLE_PRECISION, op%MY_COMM, residu)
+                      MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)
     FREE(opertau_buf)
 #endif
 #endif
