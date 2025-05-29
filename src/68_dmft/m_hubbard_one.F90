@@ -89,8 +89,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
  use m_hu, only : destroy_vee,hu_type,init_vee,rotatevee_hu,vee_type
  use m_datafordmft, only : compute_levels
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 ! type(pawang_type), intent(in) :: pawang
@@ -397,7 +395,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  use m_green, only : green_type,init_green,destroy_green
  use m_hu, only : hu_type
  use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -840,9 +837,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! SOURCE
 
  recursive subroutine combin(ielec,nconfig,nconfig_nelec,nelec,nlevels,occ_level,occup)
-
- use defs_basis
- implicit none
 
 !Arguments ------------------------------------
 !scalars

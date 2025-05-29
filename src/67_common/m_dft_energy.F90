@@ -1116,7 +1116,7 @@ end subroutine mkresi
 !!  common case, at finite temperature, the electronic entropy is mainly constitued
 !!  of the non-interacting entropy (entropy_ks). Finite-temperature exchange-correlation
 !!  functionals or other methods may introduce additional entropy terms.
-!! 
+!!
 !! NOTE
 !!  (A. Blanchet): Should DMFT entropy be also added here?
 !!

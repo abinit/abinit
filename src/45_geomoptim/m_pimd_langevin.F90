@@ -95,8 +95,6 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 &          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
 &          volume,xred,xred_next,xred_prev)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage,natom,prtvolimg,trotter
@@ -528,8 +526,6 @@ end subroutine pimd_langevin_npt
 
 subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &                            rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1247,8 +1247,6 @@ subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gprimd,kxc,mpi_enreg,nfft, &
  use m_errors
  use m_profiling_abi
 
- implicit none
-
 !Arguments ------------------------------------
  !scalars
  integer , intent(in)  :: cplex,i3dir,ixc,nfft,nkxc,nspden

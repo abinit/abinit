@@ -1134,7 +1134,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab,&
  dijhartree=zero
  lmn2_size=pawrhoij%lmn2_size
  cplex_rhoij=pawrhoij%cplex_rhoij
- eijkl_is_sym=.true. 
+ eijkl_is_sym=.true.
  if(present(is_sym)) eijkl_is_sym=is_sym
 
 !Loop over (diagonal) spin-components

@@ -59,6 +59,7 @@ module m_lobpcgwf
 
  use, intrinsic :: iso_c_binding
 
+ implicit none
  private
 
  integer, parameter :: l_tim_getghc=5
@@ -82,7 +83,7 @@ module m_lobpcgwf
 subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid,nbdbuf)
 
- implicit none
+
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
@@ -255,8 +256,6 @@ end subroutine lobpcgwf2
 
 subroutine getghc_gsc1(X,AX,BX)
 
- implicit none
-
 !Arguments ------------------------------------
  type(xgBlock_t), intent(inout) :: X
  type(xgBlock_t), intent(inout) :: AX
@@ -315,8 +314,6 @@ subroutine getghc_gsc1(X,AX,BX)
 end subroutine getghc_gsc1
 
 subroutine build_pcon(pcon,kinpw,npw)
-
-  implicit none
 
   integer,intent(in) :: npw
   real(dp),intent(in) :: kinpw(:)

@@ -3,13 +3,16 @@
 !!  m_screen
 !!
 !! FUNCTION
-!!  Screening object used in the BSE code.
+!!  Screening object used in the BSE/GWPT code.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2014-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! TODO
+!!  Integrate these objects with quartic GW.
 !!
 !! SOURCE
 
@@ -43,6 +46,7 @@ module m_screen
  use m_vcoul,          only : vcoul_t
  use m_io_screening,   only : read_screening, hscr_t, ncname_from_id, em1_ncname
  use m_ppmodel,        only : ppmodel_t, PPM_NONE, PPM_NOTAB
+ use m_pstat,          only : pstat_proc
 
  implicit none
 
@@ -434,7 +438,7 @@ end subroutine fgg_free_0D
 !! fgg_free_1D
 !!
 !! FUNCTION
-!! Deallocate all the pointers in the structure that result to be associated.
+!! Deallocate all the memory.
 !!
 !! INPUT
 !!  [keep_qibz(:)]=Optional logical mask used to select the q-points that are deallocated.
@@ -486,7 +490,6 @@ subroutine fgg_init(Fgg, npw, nomega, nqlwl)
 
 !Local variables ------------------------------
  integer :: ierr
-
 ! *************************************************************************
 
  Fgg%nomega = nomega; Fgg%npw = npw; Fgg%nqlwl = nqlwl
@@ -531,7 +534,6 @@ subroutine screen_fgg_qbz_set(screen, iq_bz, nqlwl, how)
 !Local variables ------------------------------
 !scalars
  !character(len=500) :: msg
-
 !************************************************************************
 
  screen%fgg_qbz_idx = iq_bz ! Save the index of the q-point in the BZ.
@@ -610,7 +612,6 @@ logical pure function screen_ihave_fgg(screen, iq_ibz, how)
 
 !Local variables ------------------------------
  integer :: ii, check(2)
-
 !************************************************************************
 
  check = [MAT_ALLOCATED, MAT_STORED]
@@ -650,7 +651,6 @@ subroutine screen_nullify(screen)
 
 !Arguments ------------------------------------
  class(screen_t),intent(inout) :: screen
-
 ! *************************************************************************
 
  nullify(screen%Fgg_qbz); screen%fgg_qbz_stat=FGG_QBZ_ISPOINTER ! Needed since the initial status is undefined.
@@ -666,7 +666,7 @@ end subroutine screen_nullify
 !! screen_free
 !!
 !! FUNCTION
-!! Free the memory allocate in the datatype.
+!! Free the memory allocated in the datatype.
 !!
 !! SOURCE
 
@@ -674,7 +674,6 @@ subroutine screen_free(screen)
 
 !Arguments ------------------------------------
  class(screen_t),intent(inout) :: screen
-
 ! *************************************************************************
 
  ! integer
@@ -743,7 +742,6 @@ subroutine screen_print(screen, units, header)
 !Local variables-------------------------------
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
-
 ! *************************************************************************
 
  msg = ' ==== Info on the screen_t object ==== '; if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
@@ -824,7 +822,6 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  integer :: units(2), g0(3), iperm(Qmesh%nibz)
  real(dp) :: wt_list(Qmesh%nibz)
  !complex(gwpc),ABI_CONTIGUOUS pointer :: em1_ggw(:,:,:)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -907,7 +904,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    if (endswith(screen%fname, ".nc")) screen%iomode = IO_MODE_ETSF
    call hscr%from_file(screen%fname, fform, comm)
    ! Echo of the header
-   if (my_rank == master .and. screen%prtvol > 0) call hscr%print()
+   if (my_rank == master .and. screen%prtvol > 0) call hscr%print([std_out], 0)
 
    mat_type_read = Hscr%id
    nqlwl         = Hscr%nqlwl
@@ -1094,6 +1091,8 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
  if (from_file) call Hscr%free()
 
+ call pstat_proc%print(_PSTAT_ARGS_)
+
  DBG_EXIT("COLL")
 
 end subroutine screen_init
@@ -1114,7 +1113,7 @@ end subroutine screen_init
 !!  iq_bz=Index of the q-point in the BZ where F(q_bz)_GG' is wanted.
 !!  Cryst=Crystal structure.
 !!  Gsph=The G-sphere
-!!  Qmesh=Structure defining the q-mesh used for sample the BZ.
+!!  Qmesh=Structure defining the q-mesh used for sampling the BZ.
 !!
 !! SIDE EFFECTS
 !!   screen%ppm
@@ -1148,7 +1147,6 @@ subroutine screen_rotate_iqbz(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
  !character(len=500) :: msg
 !arrays
  real(dp) :: qbz(3)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1295,7 +1293,6 @@ subroutine screen_w0gemv(screen, trans, in_npw, nspinor, only_diago, alpha, beta
  integer :: ig,lda
 !arrays
  complex(gwpc),ABI_CONTIGUOUS pointer :: em1_qbz(:,:)
-
 ! *************************************************************************
 
  lda = screen%npw; em1_qbz => screen%Fgg_qbz%mat(:,:,1)
@@ -1374,7 +1371,6 @@ subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i
 
 !Local variables-------------------------------
  complex(gwpc),allocatable :: botsq_conjg_transp(:,:), otq_transp(:,:)
-
 ! *************************************************************************
 
  out_ket = czero_gw
@@ -1390,8 +1386,8 @@ subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i
                 otq   => screen%ppm%omegatw_qbz_vals, &
                 eig   => screen%ppm%eigpot_qbz_vals)
 
-       call screen%ppm%calc_sigc(nspinor, npw_c, nomega, rhotwgp, botsq, otq, &
-                                 omegame0i, zcut, theta_mu_minus_e0i, eig, npw_x, out_ket, sigcme)
+     call screen%ppm%calc_sigc(nspinor, npw_c, nomega, rhotwgp, botsq, otq, &
+                               omegame0i, zcut, theta_mu_minus_e0i, eig, npw_x, out_ket, sigcme)
 
      end associate
 
@@ -1483,7 +1479,6 @@ subroutine em1_symmetrize_ip(iq_bz, npw_c, nomega, Gsph, Qmesh, epsm1)
 !arrays
  real(dp) :: qbz(3)
  complex(gwpc),allocatable :: work(:,:)
-
 ! *********************************************************************
 
  ! Get iq_ibz, and symmetries from iq_ibz.
@@ -1575,7 +1570,6 @@ subroutine em1_symmetrize_op(iq_bz, npw_c, nomega, Gsph, Qmesh, in_epsm1, out_ep
  complex(gwpc) :: phmsg1t,phmsg2t_star
 !arrays
  real(dp) :: qbz(3)
-
 ! *********************************************************************
 
  ! Get iq_ibz, and symmetries from iq_ibz.
@@ -1585,14 +1579,14 @@ subroutine em1_symmetrize_op(iq_bz, npw_c, nomega, Gsph, Qmesh, in_epsm1, out_ep
    out_epsm1 = in_epsm1; return
  end if
 
-! grottb is a 1-1 mapping.
+ ! grottb is a 1-1 mapping.
 !$OMP PARALLEL DO PRIVATE(isg1,isg2,phmsg1t,phmsg2t_star) COLLAPSE(2) IF (nomega > 1)
  do iw=1,nomega
    do g2=1,npw_c
-     isg2=Gsph%rottb(g2,itim_q,isym_q)
+     isg2 = Gsph%rottb(g2,itim_q,isym_q)
      phmsg2t_star = CONJG(Gsph%phmSGt(g2,isym_q))
      do g1=1,npw_c
-       isg1=Gsph%rottb(g1,itim_q,isym_q)
+       isg1 = Gsph%rottb(g1,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(g1,isym_q)
        out_epsm1(isg1,isg2,iw) = in_epsm1(g1,g2,iw) * phmsg1t * phmsg2t_star
      end do

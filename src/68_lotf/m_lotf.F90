@@ -255,7 +255,6 @@ contains
 
   !--Evaluates "real" forces from external source, and computes
   ! the istantaneous best fit of the current model.
-  implicit none
   !Arguments ------------------------------------
   logical,intent(in) :: tfor
   integer,intent(in) :: nqmin, nqmax
@@ -812,7 +811,6 @@ contains
 &                  nfitmax,imat,bond_matrix_set,bond_compute,&
 &                  bond_fit_set,nbondex
   use eval_lotf,only : upd_lis0
-  implicit none
 
   !Arguments ------------------------------------
   integer,intent(in)   :: niter
@@ -920,7 +918,6 @@ contains
   use tools_lotf,only : dlvsum
   use bond_lotf,only : ibn_tot,nbondex,tafit
   use eval_lotf, only : phi_n_calc,calc_coord2,eval_forces_u_n
-  implicit none
 
   !Arguments ------------------------------------
   real(dp),intent(in) :: amass(lotfvar%natom)
@@ -1037,7 +1034,6 @@ contains
  subroutine intparms(itime)
   use bond_lotf,only : ibn_tot
   use tools_lotf,only : pinterp,pinterp_nolinear
-  implicit none
   !Arguments ------------------------------------
   integer,intent(in) :: itime!,nitex
   !Local ----------------------------------------
@@ -1075,7 +1071,6 @@ contains
  !! SOURCE
  subroutine alpha_update(dphi,jbo,alpha_dum)
   use bond_lotf,only : ibn_tot
-  implicit none
 
   !Arguments ------------------------
   real(dp),intent(in) :: dphi
@@ -1114,7 +1109,6 @@ contains
 
  function lotf_extrapolation(itime)
 
-  implicit none
 
   !Arguments ------------------------------------
   integer,intent(in) :: itime
@@ -1155,7 +1149,6 @@ contains
 
  subroutine force_to_vel(v2gauss,dtion,amass,vel_in,fcart,vel_out)
 
-  implicit none
 
   !Arguments ------------------------------------
   real(dp),intent(in) :: v2gauss,dtion
@@ -1212,7 +1205,6 @@ contains
 
  subroutine vel_to_gauss(vel_in,amass,v2gauss,vtest)
 
-  implicit none
 
   !Arguments ------------------------------------
   real(dp),intent(out) :: v2gauss
@@ -1344,7 +1336,6 @@ contains
  subroutine extrapolation_loop(itime,mditemp,dtion,amass,&
 &                           xcart,vel,xcart_next,vel_nexthalf)
 
-  implicit none
 
   !Arguments ------------------------------------
   integer,intent(in) :: itime
@@ -1436,7 +1427,6 @@ contains
  subroutine lotf_interpolation(itime,dtion,v2gauss,amass,xcart,vel,&
 &                           fcart_m,xcart_next,vel_nexthalf)
 
-  implicit none
 
   !Arguments ------------------------------------
   integer,intent(in) :: itime

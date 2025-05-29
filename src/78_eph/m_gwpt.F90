@@ -22,11 +22,9 @@
 module m_gwpt
 
  use, intrinsic :: iso_c_binding
-#ifdef HAVE_MPI2
- use mpi
-#endif
  use defs_basis
  use m_abicore
+ USE_MPI
  use m_xmpi
  use m_mpinfo
  use m_errors
@@ -68,7 +66,7 @@ module m_gwpt
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_kg,             only : getph
- use m_bz_mesh,        only : isamek, kmesh_t, find_qmesh
+ use m_bz_mesh,        only : isamek, kmesh_t
  use m_gsphere,        only : gsphere_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ioarr,          only : read_rhor
@@ -87,6 +85,7 @@ module m_gwpt
  use m_occ,            only : get_fact_spin_tol_empty
  use m_ppmodel,        only : PPM_HYBERTSEN_LOUIE, PPM_GODBY_NEEDS
  use m_ebands,         only : ebands_t
+ use m_pstat,          only : pstat_proc
 
  implicit none
 
@@ -358,7 +357,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    w_info%use_mdf = MDL_NONE
  else
    ! Init pp_mesh from the K-mesh reported in the WFK file.
-   call find_qmesh(pp_mesh, cryst, kmesh)
+   call pp_mesh%find_qmesh(cryst, kmesh)
    ! The G-sphere for W and Sigma_c is initialized from ecuteps.
    call gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
    dtset%npweps = gsph_c%ng
@@ -369,6 +368,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with model dielectric function")
  end if
  !call screen%ppm%print(units)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  if (nqlwl == 0) then
    nqlwl=1
@@ -450,11 +450,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(wfd_istwfk, (nkpt))
  wfd_istwfk = 1
 
- call wfd_init(wfd, cryst, pawtab, psps, keep_ur, dtset%mband, nband, nkpt, nsppol, bks_mask,&
+ call wfd%init(cryst, pawtab, psps, keep_ur, dtset%mband, nband, nkpt, nsppol, bks_mask,&
                nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
  call wfd%print([std_out], header="Wavefunctions for GWPT calculation.")
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -740,6 +741,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, screen_filepath, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
  ABI_FREE(qlwl)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p
  ABI_MALLOC(kg_k, (3, mpw))
@@ -794,6 +796,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call rhotoxc(bigexc, bigsxc, kxc, mpi_enreg, nfft, ngfft, &
               dum_nhat, 0, dum_nhat, 0, nkxc, nk3xc, non_magnetic_xc, n3xccc0, option, rhor, &
               cryst%rprimd, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! ===================================================
  ! Loop over MPI distributed spins in Sigma (gqk%comm)

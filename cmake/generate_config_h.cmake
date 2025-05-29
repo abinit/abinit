@@ -513,9 +513,15 @@ if (MPI_FOUND)
 
   try_compile(HAVE_MPI_GET_LIBRARY_VERSION_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_get_library_version.F90
     LINK_LIBRARIES MPI::MPI_Fortran)
-
   if(HAVE_MPI_GET_LIBRARY_VERSION_BOOL)
     set(HAVE_MPI_GET_LIBRARY_VERSION 1)
+  endif()
+
+  # check allocate_shared with C_PTR argument
+  try_compile(HAVE_MPI_ALLOCATE_SHARED_CPTR_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_allocate_shared_cptr.F90
+    LINK_LIBRARIES MPI::MPI_Fortran)
+  if(HAVE_MPI_ALLOCATE_SHARED_CPTR_BOOL)
+    set(HAVE_MPI_ALLOCATE_SHARED_CPTR 1)
   endif()
 
   # check runtime GPU-awareness ability

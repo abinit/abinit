@@ -26,7 +26,6 @@
 MODULE m_hu
 
  use defs_basis
-
  use m_abicore
  use m_errors
 
@@ -34,6 +33,7 @@ MODULE m_hu
  use m_matlu, only : matlu_type
  use m_paw_dmft, only : paw_dmft_type
  use m_pawtab, only : pawtab_type
+ use m_crystal, only : crystal_t
 
  implicit none
 
@@ -391,9 +391,6 @@ end subroutine init_hu
 
 subroutine copy_hu(ntypat,hu,hu_new)
 
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
 !type
  integer, intent(in) :: ntypat
@@ -476,10 +473,6 @@ end subroutine destroy_hu
 
 subroutine print_hu(hu,ntypat,prtopt)
 
- use defs_basis
- use m_crystal, only : crystal_t
- implicit none
-
 !Arguments ------------------------------------
 !type
  integer, intent(in):: ntypat
@@ -543,10 +536,6 @@ end subroutine print_hu
 !! SOURCE
 
 subroutine vee2udens_hu(hu,ntypat,prtopt)
-
- use defs_basis
- use m_crystal, only : crystal_t
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1643,7 +1632,6 @@ end subroutine vee2udensatom_hu
 !function reddd(mi,ndim)
 
 ! use defs_basis
-! implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1832,11 +1820,6 @@ end subroutine vee_slm2ylm_hu
 !! SOURCE
 
 subroutine vee_ndim2tndim_hu_r(lcor,mat_inp_c,mat_out_c,option)
-
- use defs_basis
- use m_errors
- use m_abicore
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
