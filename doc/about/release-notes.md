@@ -192,21 +192,28 @@ This issue has now been corrected.
 By Augustin Blanchet, Romuald Béjaud, Fabien Brieuc, Grégory Geneste (MR1085) - See also point A.2 .
 
 
-**B.6** Progresses in Dynamical Mean Field Theory (DMFT)
+**B.6** Support for entropy for thermal exchange-correlation functionals.
 
-* There has been a massive optimization of the code, as well as a cleaning.
-* New functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file...) IS IT POSSIBLE TO COMPLETE THE LIST OF NEW FUNCTIONALITIES ?
-* One can run dmft susceptibility with correlated and non correlated atoms.
-* A new option to run DFT+DMFT has been added : one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
-* Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (though not yet tested neither documented - THIS IS TO BE CLARIFIED)
-* Two extra components for the energy are printed.
+At finite temperature, the exchange-correlation free energy is defined as:
+$F_\mathrm{xc} = E_\mathrm{xc} - TS_\mathrm{xc}$.
 
-STILL TO BE DONE : tests and documentation of the input variables dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
+ABINIT was initially designed for zero-temperature exchange-correlation (xc) functionals, where $S_\mathrm{xc} \equiv 0$ and $F_\mathrm{xc} \equiv E_\mathrm{xc}$. However, this is not the case for finite-temperature xc functionals.
+To obtain the correct total internal energy and total entropy, both needed for accurate equation-of-state data, $S_\mathrm{xc}$ must be accessible when summing energies after the SCF cycle.
+Otherwise, only properties derived from the free energy, such as stresses, pressure, and forces, will be correctly computed. This implementation ensures that $S_\mathrm{xc}$ is properly accounted for.
 
-Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmftctqmc_triqs_nleg]] are documented, but not tested.
-There has also been miscellaneous DMFT fixes and improvements
+In a previous release, ABINIT was adapted to communicate the electronic temperature to LibXC. However, the issue is that while LibXC provides the exchange-correlation free energy, it does not yet return the entropy contribution.
+We have implemented native exchange-correlation free energy functionals to ensure accurate equation-of-state data.
+We have introduced two new native thermal xc functionals:
 
-By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148 give more details)
+* [[ixc]] = 51: corrKSDT (LDA based) [[cite:Karasiev2014]].
+* [[ixc]] = 60: KDT16 (GGA based) [[cite:Karasiev2018]].
+
+These functionals are not compatible with spin-polarized calculations yet. The documentation includes them, as well as a warning while using LibXC thermal functionals.
+The already implemented Ichimaru thermal LDA functional ([[ixc]]=50) now sets xc entropy the same way as KSDT and KDT16 functionals.
+
+See [[test:v10_22]] and [[test:v10_23]].
+
+By A. Blanchet, V. V. Karasiev and M. Torrent (MR1121, MR1135).
 
 
 **B.7** Computation of stress in mGGA
@@ -309,31 +316,7 @@ See [[test:gwr_1]] to [[test:gwr_5]].
 By M. Giantomassi (MR1147, MR1154) 
 
 
-**B.14** Support for entropy for thermal exchange-correlation functionals. 
-
-At finite temperature, the exchange-correlation free energy is defined as:
-$F_\mathrm{xc} = E_\mathrm{xc} - TS_\mathrm{xc}$.
-
-ABINIT was initially designed for zero-temperature exchange-correlation (xc) functionals, where $S_\mathrm{xc} \equiv 0$ and $F_\mathrm{xc} \equiv E_\mathrm{xc}$. However, this is not the case for finite-temperature xc functionals.
-To obtain the correct total internal energy and total entropy, both needed for accurate equation-of-state data, $S_\mathrm{xc}$ must be accessible when summing energies after the SCF cycle. 
-Otherwise, only properties derived from the free energy, such as stresses, pressure, and forces, will be correctly computed. This implementation ensures that $S_\mathrm{xc}$ is properly accounted for.
-
-In a previous release, ABINIT was adapted to communicate the electronic temperature to LibXC. However, the issue is that while LibXC provides the exchange-correlation free energy, it does not yet return the entropy contribution.
-We have implemented native exchange-correlation free energy functionals to ensure accurate equation-of-state data.
-We have introduced two new native thermal xc functionals:
-
-* [[ixc]] = 51: corrKSDT (LDA based) [[cite:Karasiev2014]].
-* [[ixc]] = 60: KDT16 (GGA based) [[cite:Karasiev2018]].
-
-These functionals are not compatible with spin-polarized calculations yet. The documentation includes them, as well as a warning while using LibXC thermal functionals.
-The already implemented Ichimaru thermal LDA functional ([[ixc]]=50) now sets xc entropy the same way as KSDT and KDT16 functionals.
-
-See [[test:v10_22]] and [[test:v10_23]].
-
-By A. Blanchet, V. V. Karasiev and M. Torrent (MR1121, MR1135).
-
-
-**B.15** Degree of filtering and its oracle in Chebyshev algorithm
+**B.14** Degree of filtering and its oracle in Chebyshev algorithm
 
 The [[mdeg_filter]] input variable for spectrum filtering algorithms has been defined.
 Moreover, it can be automatically computed:
@@ -348,7 +331,7 @@ The timing in chebfi has been corrected.
 By L. Baguet (MR1103) and M. Torrent (MR1098)
 
 
-**B.16** Abipy : Automated computation of luminescence spectra
+**B.15** Abipy : Automated computation of luminescence spectra
 
 A set of Python modules integrated into the AbiPy framework now facilitates the automated computation of phonon-resolved luminescence spectra for defects in inorganic solids.  
 The workflow automates key steps in a classical computational process, from the initial ∆SCF DFT calculations with constrained occupations to simulate the excited state, 
@@ -361,7 +344,7 @@ and <https://abinit.github.io/abipy/flow_gallery/run_lumi_NV_center.html>.
 By J. Bouquiaux, with help from M. Giantomassi (see the forthcoming ABINIT2025 paper and a forthcoming JOSS paper).
 
 
-**B.17** Abipy : Automated computation of thermal expansion (volumetric as well as anisotropic)
+**B.1<** Abipy : Automated computation of thermal expansion (volumetric as well as anisotropic)
 
 Abipy workflows for thermal expansion calculations are available, within the Quasi-Harmonic Approximation (QHA) for materials with diverse crystallographic symmetries,
 with efficient Zero Static Internal Stress Approximation (ZSISA) and its volume-constrained variant, v-ZSISA. 
@@ -460,12 +443,22 @@ By Hsiaoyi Tsai (MR1114)
 ### **D.**  Other developments (possibly not yet finalized), other new tests, new input variables, new tutorials.
 
 
-**D.1** Various improvements to Conducti in PAW.
+**D.1** Progresses in Dynamical Mean Field Theory (DMFT) 
 
-Among others, the code can now handle different atomic types in the unit cell and compute the reflectivity at any angle.
-A complete userguide is now available, and some bugs were fixed.
+There have been many improvements in the DMFT part of ABINIT, not yet though to be considered in production yet, because of lack of tests and/or documentation. This will be for ABINITv10.6 ... 
 
-By J. Boust (MR1152)
+* There has been a massive optimization of the code, as well as a cleaning.
+* New functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file...). List to be provided ...
+* One can run dmft susceptibility with correlated and non correlated atoms.
+* A new option to run DFT+DMFT has been added : one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
+* Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (to be tested and documented).
+* Two extra components for the energy are printed.
+* New input variables (to be tested and documented) : dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
+
+Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmftctqmc_triqs_nleg]] are documented, but not tested.
+There has also been miscellaneous DMFT fixes and improvements
+
+By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148 give more details)
 
 
 **D.2** Improvements and bug fixes in the implementation of [[cprj_in_memory]]
@@ -545,7 +538,13 @@ Add option to print the contribution of each bands-triplet to the SHG at a given
 
 By V. Trinquet (MR1143)
 
-**
+
+**D.11** Various improvements to Conducti in PAW.
+
+Among others, the code can now handle different atomic types in the unit cell and compute the reflectivity at any angle.
+A complete userguide is now available, and some bugs were fixed.
+
+By J. Boust (MR1152)
 
 * * *
 
