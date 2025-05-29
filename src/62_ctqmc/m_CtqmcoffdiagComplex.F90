@@ -210,6 +210,8 @@ TYPE CtqmcoffdiagComplex
 
   DOUBLE PRECISION :: signvalue
 
+  COMPLEX(KIND=8) :: phasevalue
+
   INTEGER :: MY_COMM
 ! 
 
@@ -453,6 +455,7 @@ include 'mpif.h'
   op%stats(:)     = 0.d0
  ! write(std_out,*) "op%stats",op%stats
   op%signvalue    = 1.d0
+  op%phasevalue   = cmplx(1.d0,0.d0) 
 !  op%signvaluecurrent    = 0.d0
 !  op%signvaluemeas = 0.d0
   op%swap         = 0.d0
@@ -919,7 +922,7 @@ SUBROUTINE CtqmcoffdiagComplex_setG0wTab(op,Gomega,opt_fk)
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN ) :: Gomega
   INTEGER                         , INTENT(IN ) :: opt_fk
 !Local variable -------------------------------
-  DOUBLE PRECISION, DIMENSION(:,:,:), ALLOCATABLE :: F
+  COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE :: F
 
   IF ( .NOT. op%para ) &
     CALL ERROR("CtqmcoffdiagComplex_setG0wTab : CtqmcoffdiagComplex_setParameters never called    ") 
@@ -1263,7 +1266,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   TYPE(CtqmcoffdiagComplex)                       , INTENT(INOUT) :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN   ) :: Gomega
   !INTEGER                         , INTENT(IN   ) :: Wmax
-  DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(INOUT) :: F
+  COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(INOUT) :: F
   INTEGER                         , INTENT(IN   ) :: opt_fk
 !Local variables ------------------------------
   INTEGER                                         :: flavors
@@ -2047,7 +2050,7 @@ SUBROUTINE CtqmcoffdiagComplex_loop(op,itotal,ilatex)
       updated_swap(iflavor) = .FALSE.
       if ( op%opt_nondiag >0 )  iflavor_d=0
       if ( op%opt_nondiag==0 )  iflavor_d=iflavor
-      CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d) 
+      CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,op%phasevalue,iflavor_d) 
 
       CALL CtqmcoffdiagComplex_measN        (op, iflavor, updated)
       IF ( op%opt_analysis .EQ. 1 ) &
@@ -3159,7 +3162,7 @@ include 'mpif.h'
 
   END DO
 !sui!write(6,*) "getresults"
-  CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue)
+  CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue,op%phasevalue)
   CALL GreenHyboffdiagComplex_getHybrid(op%Greens)
  ! write(6,*) "op%measN",op%measN(1,:)
   MALLOC(measN_1,(flavors))
@@ -3543,7 +3546,7 @@ include 'mpif.h'
     MALLOC(freqs,(1:FFTmrka%size/2))
     DO iflavor = 1, flavors
       ! mean value is removed to supress the continue composent 
-      CALL FFTHyb_setData(FFTmrka,op%density(iflavor,1:endDensity)/op%beta+op%Greens%oper(op%samples+1,iflavor,iflavor))
+      CALL FFTHyb_setData(FFTmrka,op%density(iflavor,1:endDensity)/op%beta+real(op%Greens%oper(op%samples+1,iflavor,iflavor)))
       CALL FFTHyb_run(FFTmrka,1)
       CALL FFTHyb_getData(FFTmrka,endDensity,op%density(iflavor,:),freqs)
     END DO

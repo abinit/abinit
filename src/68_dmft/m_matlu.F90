@@ -2645,7 +2645,7 @@ end subroutine add_matlu
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
         & ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10,&
         & "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10,&
-        & "(Except if dmft_solv=8,9 where these elements are taken into account)",ch10,"This is an approximation."
+        & "(Except if dmft_solv=8,9,10 where these elements are taken into account)",ch10,"This is an approximation."
    ABI_WARNING(message)
  else
    write(message,'(3x,2a,e12.4,a,e12.4,2a)') ch10,' Occupation matrix is diagonal : the off-diag part ',&
