@@ -344,7 +344,7 @@ and <https://abinit.github.io/abipy/flow_gallery/run_lumi_NV_center.html>.
 By J. Bouquiaux, with help from M. Giantomassi (see the forthcoming ABINIT2025 paper and a forthcoming JOSS paper).
 
 
-**B.1<** Abipy : Automated computation of thermal expansion (volumetric as well as anisotropic)
+**B.16** Abipy : Automated computation of thermal expansion (volumetric as well as anisotropic)
 
 Abipy workflows for thermal expansion calculations are available, within the Quasi-Harmonic Approximation (QHA) for materials with diverse crystallographic symmetries,
 with efficient Zero Static Internal Stress Approximation (ZSISA) and its volume-constrained variant, v-ZSISA. 
