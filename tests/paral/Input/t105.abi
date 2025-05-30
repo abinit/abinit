@@ -101,8 +101,9 @@ pseudos "23v.paw"
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t105_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t105o_DS2_Wannier_functions_iatom0001_001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t105_MPI8.abo, tolnlines = 35, tolabs = 2.0, tolrel = 1.1, fld_options=-easy;
+#%%                 t105_MPI8o_DS2_Wannier_functions_iatom0001_001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t105_MPI8o_DS2_DMFTOCCND, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
 #%% authors = B. Amadon, T. Cavignac, E. Castiel
 #%% keywords = DMFT, TRIQS

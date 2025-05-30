@@ -1,7 +1,8 @@
 # Multi_dataset parameters
-ndtset 2       # Two datasets
-jdtset 1 2     # one followed by two
-getden -1      # Second one takes the density of first
+ndtset 4
+jdtset 1 2 3 4
+getden1 0
+getden  1
 
 pawprtvol 3  # Printing additional information
 prtvol 4     #
@@ -14,6 +15,7 @@ acell 3*5.44761       # lattice parameter
 rprim -0.5  0.5  0.5  # Primitive cell
        0.5 -0.5  0.5
        0.5  0.5 -0.5
+nsym 1
 
 # Definition atom
 ntypat 1   # number of different types of atoms
@@ -29,7 +31,7 @@ pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
 pseudos "26fe.lda2.paw"
 
 # Definition of the k-point grid
-kptopt 4
+kptopt 1
 ngkpt 4 4 4              # Reciprocal space vectors are built from
                          # the rprim parameters. This is the size of the
                          # reciprocal k-points.
@@ -43,9 +45,9 @@ shiftk 0.25  0.25  0.25
 
 ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
 pawecutdg 50    # PAW: Energy Cutoff for the Double Grid
-nband 40        # Number of bands
+nband 20        # Number of bands
 occopt 3        # Smearing type
-tsmear 3000 K   # Electronic smearing temperature
+tsmear 1000 K   # Electronic smearing temperature
 
 ############################
 # DFT Calculation
@@ -56,55 +58,53 @@ nstep1 30        # Number of iterations for the DFT convergence
 tolvrs 1.0d-10  # Tolerance of the density for DFT convergence
 
 # Definition of the spin properties
-nsppol 1     # No spin-polarization
-nspden 4     # No Scalar magnetism
-nspinor 2    # No Spin-orbit
-spnorbscl 10 # SOC scaling
+nsppol 2     # No spin-polarization
+nspden 2     # No Scalar magnetism
+nspinor 1    # No Spin-orbit
+spinat 0.0 0.0 2.0
 
 ############################
 # DMFT Calculation
 ############################
+usedmft   1       # DMFT calculation
+nstep     1       # Number of iterations for the DFT+DMFT convergence
+nline     5       # Number of line minimisations
+nnsclo    10      # Number of non-self consistent loops
+nnsclo1   0
 
-usedmft2  1       # DMFT calculation
-nstep2    1       # Number of iterations for the DFT+DMFT convergence
-nline2    7       # Number of line minimisations
-nnsclo2   10      # Number of non-self consistent loops
-
-#Definition for DMFT loop
-dmftbandi 9             # First KS band included in the projection for Wannier orbitals
-dmftbandf 26            # Last KS band included in the projection for Wannier orbitals
-dmft_nwli 100           # Linear frequency mesh
+# Definition for DMFT loop
+dmftbandi 5             # First KS band included in the projection for Wannier orbitals
+dmftbandf 13            # Last KS band included in the projection for Wannier orbitals
+dmft_nwli 1000          # Linear frequency mesh
 dmft_iter 1             # Number of iterations of the DMFT part.
-                        # We often use single-shot, since anyway the charge density
-                        # changes through the DFT+DMFT anyway.
+
 dmft_mxsf 0.7           # Mixing of the old and new self-energy at every iterations.
-dmft_dc   6             # Double counting type. 6 is Around Mean Field (AMF)
+dmft_dc   2             # Double counting type. 6 is Around Mean Field (AMF)
 
 #Definition of impurity solver
-dmft_solv         6     # TRIQS in the density-density approximation
-dmftqmc_l        50     # Number of time slices for G(tau).
-dmftqmc_n        1.d5   # Number of QMC sweeps
-dmftqmc_therm    5000   # Thermalization
+dmft_solv  7           # TRIQS in the density-density approximation
+dmftqmc_l        500   # Number of time slices for G(tau).
+dmftqmc_n        1.d5  # Number of QMC sweeps
+dmftqmc_therm    1000  # Thermalization
+dmftctqmc_basis2 1
+dmftctqmc_basis3 2
+dmftctqmc_basis4 3
+dmftctqmc_meas   10
 
-dmftctqmc_meas 10
-dmft_triqs_off_diag 0
-dmftctqmc_basis 1
-dmft_triqs_wmax 1.0
-dmft_triqs_epsilon 1d-2
-
-dmft_triqs_entropy 1
-dmft_triqs_compute_integral 1
-dmft_triqs_gaussorder 2
+dmft_triqs_off_diag 1
+dmft_triqs_wmax  1.0
+dmft_triqs_epsilon 1.d-2
+dmft_shiftself 1.d-1
 
 #Definition of DFT+U
-usepawu1    4           #
-usepawu2    14          #
+usepawu1    1           #
+usepawu     10          #
 dmatpuopt   2           #
 lpawu       2           # Angular momentum for the projected Hamiltonian
 upawu1      0.00 eV
-upawu2      5.5  eV  # Values of U for each angular momentum
+upawu       5.5  eV  # Values of U for each angular momentum
 jpawu1      0.00 eV
-jpawu2      0.84 eV  # Values of J
+jpawu       0.84 eV  # Values of J
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -114,10 +114,10 @@ jpawu2      0.84 eV  # Values of J
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t109_MPI8.abo, tolnlines = 32, tolabs = 0.001, tolrel = 0.1, fld_options=-easy
+#%% files_to_test = t111_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
 #%% authors = F. Gendron, E. Castiel
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Fe : test TRIQS interface with computation of entropy and spinors
+#%% description = DFT+DMFT for Fe : test TRIQS interface for different basis with magnetic DFT
 #%% topics = DMFT
 #%%<END TEST_INFO>
