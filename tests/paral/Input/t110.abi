@@ -77,7 +77,6 @@ dmft_triqs_off_diag 1
 dmft_triqs_wmax 1.0
 dmft_triqs_loc_n_max 2
 dmft_triqs_epsilon 1.d-2
-dmft_triqs_tol_block5 1.0d-15
 
 # == DFT+U
 usepawu1    4
