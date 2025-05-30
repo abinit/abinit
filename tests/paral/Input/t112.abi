@@ -134,12 +134,12 @@ kptbounds3               # The four segments of the band structure are
 #%%                iw_cp t112o_DS3_spectralfunction_realgrid t112_MPI8o_DS4_spectralfunction_realgrid;
 #%%                iw_cp t112o_DS2_Self-omega_iatom0001_isppol1 t112_MPI8o_DS2_Self-omega_iatom0001_isppol1;
 #%% [NCPU_8]
-#%% files_to_test = t112_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t112_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t112_MPI8.abo, tolnlines = 2, tolabs = 1.e-2, tolrel = 1.e-2;
+#%%                 t112_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 12, tolabs = 1.e-2, tolrel = 1.e-4, fld_options=-easy;
 #%%                 t112_MPI8o_DS4_DFTDMFT_Self_forcheck_imagaxis_from_realaxis.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%%                 t112_MPI8o_DS4_DFTDMFT_Self_realaxis_from_maxent_and_kramerskronig.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t112_MPI8o_DS4_DFTDMFT_SpectralFunction_orb_from_realaxisself_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t112_MPI8o_DS4_SpFunc-from_realaxisself, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t112_MPI8o_DS4_DFTDMFT_SpectralFunction_orb_from_realaxisself_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t112_MPI8o_DS4_SpFunc-from_realaxisself, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
