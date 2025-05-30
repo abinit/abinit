@@ -91,7 +91,15 @@ pseudos "28ni.paw, 8o.2.paw"
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t106_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t106_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI8o_DS2_Selfrotformaxent0001_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI8o_DS2_Selfrotformaxent0002_isppol1_iflavor0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI8o_DS2_Gtau_diag_Legendre_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI8o_DS2_Gtau_diag_Legendre_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI8o_DS2_Gtau_offdiag_Legendre_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t106_MPI8o_DS2_Gtau_offdiag_Legendre_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
 #%% [extra_info]
 #%% keywords = PAW, DMFT, TRIQS
 #%% authors = B. Amadon, E. Castiel
