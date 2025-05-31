@@ -54,6 +54,7 @@ module m_sigc
  use m_hide_lapack,   only : xheev
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
+ use m_numeric_tools, only : pade
  use m_pstat,         only : pstat_proc
 
  implicit none
@@ -188,6 +189,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),q0(3),tsec(2),qbz(3)
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
  real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i), omegap(epsm1%nomega_i), omegap2(epsm1%nomega_i)
+ real(dp) :: conv_gl_knots(epsm1%nomega_i_conv),conv_gl_wts(epsm1%nomega_i_conv),conv_omegap(epsm1%nomega_i_conv),conv_omegap2(epsm1%nomega_i_conv), ratio
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
  complex(gwpc) :: sigcohme(Sigp%nsig_ab), omegap_cplx(epsm1%nomega_i)
@@ -211,7 +213,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(esymm_t),pointer :: QP_sym(:)
  integer :: neig(epsm1%nomega_i)
  real(gwp),allocatable :: epsm1_eig(:)
- complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:)
+ complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
+ real(dp) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -434,6 +437,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if (mod10 == SIG_GW_AC) then
    ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation.
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i))
+   ABI_MALLOC(conv_rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i_conv))
 
    select case (epsm1%hscr%iw_mesh_type)
    case ("gauss_legendre")
@@ -446,14 +450,24 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ierr = 0
      do io=1,epsm1%nomega_i
        ! First frequencies are always real
-       if (ABS(AIMAG(one*epsm1%omega(epsm1%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
+       if (ABS(AIMAG(one*epsm1%omega(epsm1%nomega_r+io))-omegap(io)) > 0.0001) then
          ierr = ierr + 1
          if (Wfd%my_rank == Wfd%master) then
            if (io == 1) write(std_out, "(a)")"omega_file, gauss_legendre_omega (ev)"
-           write(std_out,*)io, AIMAG(epsm1%omega(epsm1%nomega_r+io)) * Ha_eV, (one/gl_knots(io)-one) * Ha_eV
+           write(std_out,*)io, AIMAG(epsm1%omega(epsm1%nomega_r+io)) * Ha_eV, omegap(io) * Ha_eV
          end if
        end if
      end do
+
+     call coeffs_gausslegint(zero, one, conv_gl_knots, conv_gl_wts, epsm1%nomega_i_conv)
+
+     conv_omegap(:) = one / conv_gl_knots(:) - one
+
+    !  ratio = maxval(omegap) / maxval(conv_omegap)
+     ratio = one
+
+     conv_omegap(:) = ratio * conv_omegap(:)
+     conv_omegap2(:) = conv_omegap(:) ** 2
 
      if (ierr /= 0) then
        write(std_out, *)"epsm1%nomega_r:", epsm1%nomega_r, "epsm1%nomega_i:", epsm1%nomega_i
@@ -741,8 +755,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            case ("gauss_legendre")
              ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
              ! The first frequencies are always real, skip them.
-             z2 = gl_knots(iiw)*gl_knots(iiw)
-             ac_epsm1cqwz2(:,:,iiw) = gl_wts(iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw) / z2
+              ac_epsm1cqwz2(:,:,iiw) = epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
 
            case ("minimax")
              ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
@@ -917,6 +930,24 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            end do
            ABI_FREE(epsm1_sqrt_rhotw)
          end do
+            do jb=minbnd,maxbnd
+              do kb=minbnd,maxbnd
+                if (.false.) then
+                do iiw=1,epsm1%nomega_i_conv
+                  conv_rhotw_epsm1_rhotw(jb,kb,iiw) = pade(epsm1%nomega_i, &
+                            cmplx(omegap(:), kind = dpc), &
+                            cmplx(rhotw_epsm1_rhotw(jb,kb,:), kind = dpc), &
+                            cmplx(conv_omegap(iiw), kind = dpc))
+                end do
+                else
+                  call spline_r(epsm1%nomega_i, epsm1%nomega_i_conv, &
+                                omegap(epsm1%nomega_i:1:-1), conv_omegap(epsm1%nomega_i_conv:1:-1), &
+                                tmp_rhotw_epsm1_rhotw, &
+                                real(rhotw_epsm1_rhotw(jb,kb,epsm1%nomega_i:1:-1), kind = dp))
+                  conv_rhotw_epsm1_rhotw(jb,kb,:) = cmplx(tmp_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1), kind=gwpc)
+                end if
+              end do
+            end do
          call timab(443,2,tsec) ! ac_lrk_appl
        end if
 
@@ -1085,9 +1116,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                  select case (epsm1%hscr%iw_mesh_type)
                  case ("gauss_legendre")
                    omegame0i2_ac = omegame0i_ac*omegame0i_ac
-                   do iiw=1,epsm1%nomega_i
+                   do iiw=1,epsm1%nomega_i_conv
+                     z2 = ratio / conv_gl_knots(iiw)**2
                      sigctmp(io,iab) = sigctmp(io,iab) + &
-                       piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + omegap2(iiw))
+                       piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) * z2
                    end do
 
                  case ("minimax")
@@ -1367,6 +1399,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_SFREE(epsm1_tmp)
  ABI_SFREE(degtab)
  ABI_SFREE(rhotw_epsm1_rhotw)
+ ABI_SFREE(conv_rhotw_epsm1_rhotw)
  ABI_SFREE(aherm_sigc_ket)
  ABI_SFREE(herm_sigc_ket)
  ABI_SFREE(wf1swf2_g)
