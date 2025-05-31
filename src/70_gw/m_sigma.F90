@@ -1447,7 +1447,7 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
    nctkarr_t('sigcme4sd', "dp",'cplex, nbgw, number_of_kpoints, nomega4sd, ndim_sig'),&
    nctkarr_t('sigxcme4sd', "dp", 'cplex, nbgw, number_of_kpoints, nomega4sd, ndim_sig'),&
    nctkarr_t('ze0',"dp", 'cplex, nbgw, number_of_kpoints, number_of_spins'),&
-   !nctkarr_t('scr_omega', "dp", 'cplex, scr_nomega') &
+   nctkarr_t('scr_omega', "dp", 'cplex, scr_nomega'), &
    nctkarr_t('omega4sd', "dp", 'cplex, nbgw, number_of_kpoints, nomega4sd, number_of_spins') &
  ])
  NCF_CHECK(ncerr)
@@ -1619,11 +1619,11 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('omega4sd'), rdata5 * Ha_eV))
  ABI_FREE(rdata5)
 
- !ABI_CHECK_IGE(epsm1%nomega, 0, "nomega")
- !ABI_MALLOC(rdata2, (2, epsm1%nomega))
- !rdata2 = c2r(epsm1%omega)
- !!NCF_CHECK(nf90_put_var(ncid, vid('scr_omega'), rdata2 * Ha_eV))
- !ABI_FREE(rdata2)
+ ABI_CHECK_IGE(epsm1%nomega, 0, "nomega")
+ ABI_MALLOC(rdata2, (2, epsm1%nomega))
+ rdata2 = c2r(epsm1%omega)
+ NCF_CHECK(nf90_put_var(ncid, vid('scr_omega'), rdata2 * Ha_eV))
+ ABI_FREE(rdata2)
 
 contains
  integer function vid(vname)
