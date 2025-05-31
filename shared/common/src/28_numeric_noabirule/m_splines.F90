@@ -536,12 +536,11 @@ subroutine spline_r( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
 !scalars
  integer :: begin, end
  real(dp) :: ybcbeg, ybcend
- real(dp), allocatable :: ysplin2_lo(:)
+ real(dp) :: ysplin2_lo(nomega_lo)
 
  ybcbeg=zero
  ybcend=zero
 
- ABI_MALLOC(ysplin2_lo,(nomega_lo))
  call spline(omega_lo, tospline_lo, nomega_lo, ybcbeg, ybcend, ysplin2_lo)
  do begin = 1, nomega_li
    if (omega_li(begin) >= omega_lo(1)) exit
@@ -552,8 +551,7 @@ subroutine spline_r( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  ABI_CHECK(begin <= end, 'spline_r: omega_li not properly ordered')
  call splint(nomega_lo, omega_lo, tospline_lo, ysplin2_lo, end-begin+1, omega_li(begin:end), splined_li(begin:end))
  splined_li(1:begin-1) = tospline_lo(1)
-  splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
- ABI_FREE(ysplin2_lo)
+ splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
 
 end subroutine spline_r
 
@@ -590,16 +588,24 @@ subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
 
 !Local variables---------------------------------------
 !scalars
+ integer :: begin, end
  complex(dpc) :: ybcbeg, ybcend
- complex(dpc), allocatable :: ysplin2_lo(:)
+ complex(dpc) :: ysplin2_lo(nomega_lo)
 
  ybcbeg=czero
  ybcend=czero
 
- ABI_MALLOC(ysplin2_lo,(nomega_lo))
  call spline_complex(omega_lo, tospline_lo, nomega_lo, ybcbeg, ybcend, ysplin2_lo)
- call splint_complex( nomega_lo, omega_lo, tospline_lo,ysplin2_lo, nomega_li, omega_li, splined_li)
- ABI_FREE(ysplin2_lo)
+ do begin = 1, nomega_li
+   if (omega_li(begin) >= omega_lo(1)) exit
+ end do
+ do end = nomega_li, 1, -1
+   if (omega_li(end) <= omega_lo(nomega_lo)) exit
+ end do
+ ABI_CHECK(begin <= end, 'spline_r: omega_li not properly ordered')
+ call splint_complex( nomega_lo, omega_lo, tospline_lo,ysplin2_lo, end-begin+1, omega_li(begin:end), splined_li(begin:end))
+ splined_li(1:begin-1) = tospline_lo(1)
+ splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
 
 end subroutine spline_c
 !!***

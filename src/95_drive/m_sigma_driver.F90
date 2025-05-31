@@ -3468,6 +3468,20 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ! rhotwgp and rhotwgp: we need to define a max size and we opt for Sigp%npwx.
    end if
 
+   if (Dtset%nfreqim_conv==0) then
+     ! If no extra frequencies is requested, use the number of frequencies in the file.
+     epsm1%nomega_i_conv = epsm1%nomega_i
+   else if (Dtset%nfreqim_conv >= epsm1%nomega_i) then
+     ! If the requested number of frequencies is larger than the number in the file, use input value.
+     epsm1%nomega_i_conv = Dtset%nfreqim_conv
+   else if (Dtset%nfreqim_conv < epsm1%nomega_i) then
+     ! If the requested number of frequencies is less than the number in the file,
+     ! give an error
+     ABI_ERROR(sjoin("Requested number of frequencies for convolution", &
+                     " is less than the number in the file: ", itoa(Dtset%nfreqim_conv), &
+                     " < ", itoa(epsm1%nomega_i)))
+   end if
+
    epsm1%npwe=Sigp%npwc
    Dtset%npweps=epsm1%npwe
    call Qmesh%init(Cryst,epsm1%nqibz,epsm1%qibz,Dtset%kptopt)
