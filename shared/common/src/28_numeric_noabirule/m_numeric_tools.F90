@@ -4090,7 +4090,7 @@ subroutine calculate_pade_a(a, n, z, f)
 
  do i=2,n
    do j=i,n
-     if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
+    !  if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
      g(i,j)=(g(i-1,i-1)-g(i-1,j)) / ((z(j)-z(i-1))*g(i-1,j))
      !write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
    end do

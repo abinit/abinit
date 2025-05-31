@@ -54,7 +54,7 @@ module m_sigc
  use m_hide_lapack,   only : xheev
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
- use m_numeric_tools, only : pade
+!  use m_numeric_tools, only : pade
  use m_pstat,         only : pstat_proc
 
  implicit none
@@ -214,7 +214,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: neig(epsm1%nomega_i)
  real(gwp),allocatable :: epsm1_eig(:)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
- real(dp) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
+!  complex(dpc) :: omegapc(epsm1%nomega_i), conv_omegapc(epsm1%nomega_i_conv)
+ complex(dpc) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -468,6 +469,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
      conv_omegap(:) = ratio * conv_omegap(:)
      conv_omegap2(:) = conv_omegap(:) ** 2
+
+    !  omegapc = cmplx(omegap, kind=dpc)
+    !  conv_omegapc = cmplx(conv_omegap, kind=dpc)
 
      if (ierr /= 0) then
        write(std_out, *)"epsm1%nomega_r:", epsm1%nomega_r, "epsm1%nomega_i:", epsm1%nomega_i
@@ -932,20 +936,22 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          end do
             do jb=minbnd,maxbnd
               do kb=minbnd,maxbnd
-                if (.false.) then
-                do iiw=1,epsm1%nomega_i_conv
-                  conv_rhotw_epsm1_rhotw(jb,kb,iiw) = pade(epsm1%nomega_i, &
-                            cmplx(omegap(:), kind = dpc), &
-                            cmplx(rhotw_epsm1_rhotw(jb,kb,:), kind = dpc), &
-                            cmplx(conv_omegap(iiw), kind = dpc))
-                end do
-                else
-                  call spline_r(epsm1%nomega_i, epsm1%nomega_i_conv, &
+                ! if (.false.) then
+                !   tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,:)
+                !   do iiw=1,epsm1%nomega_i_conv
+                !     conv_rhotw_epsm1_rhotw(jb,kb,iiw) = pade(epsm1%nomega_i, &
+                !               omegapc, &
+                !               tmp_rhotw_epsm1_rhotw, &
+                !               conv_omegapc(iiw))
+                !   end do
+                ! else
+                  tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,epsm1%nomega_i:1:-1)
+                  call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
                                 omegap(epsm1%nomega_i:1:-1), conv_omegap(epsm1%nomega_i_conv:1:-1), &
-                                tmp_rhotw_epsm1_rhotw, &
-                                real(rhotw_epsm1_rhotw(jb,kb,epsm1%nomega_i:1:-1), kind = dp))
-                  conv_rhotw_epsm1_rhotw(jb,kb,:) = cmplx(tmp_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1), kind=gwpc)
-                end if
+                                tmp_conv_rhotw_epsm1_rhotw, &
+                                tmp_rhotw_epsm1_rhotw)
+                  conv_rhotw_epsm1_rhotw(jb,kb,:) = tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1)
+                ! end if
               end do
             end do
          call timab(443,2,tsec) ! ac_lrk_appl

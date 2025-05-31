@@ -1418,7 +1418,7 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  ! == Define variables ===
  ! =======================
  ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-   'sigma_nband', 'scr_nband', 'gwcalctyp', 'usepawu', "nfreqre", "nfreqim"])
+   'sigma_nband', 'scr_nband', 'gwcalctyp', 'usepawu', "nfreqre", "nfreqim", "nfreqim_conv"])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
@@ -1498,6 +1498,7 @@ integer function sigma_ncwrite(sigma, Sigp, epsm1, ncid) result (ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('usepawu'), sigma%usepawu))
  NCF_CHECK(nf90_put_var(ncid, vid('nfreqre'), epsm1%nomega_r))
  NCF_CHECK(nf90_put_var(ncid, vid('nfreqim'), epsm1%nomega_i))
+ NCF_CHECK(nf90_put_var(ncid, vid('nfreqim_conv'), epsm1%nomega_i_conv))
  NCF_CHECK(nf90_put_var(ncid, vid('kptgw'), sigma%kptgw))
  NCF_CHECK(nf90_put_var(ncid, vid('minbnd'), sigma%minbnd))
  NCF_CHECK(nf90_put_var(ncid, vid('maxbnd'),sigma%maxbnd))

@@ -805,7 +805,6 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
        unclassified = unclassified + 1
      end if
    end do
-   epsm1%nomega_i_conv = epsm1%nomega_i + 200
    if (unclassified > 0) then
      write(msg,'(3a,i0)')&
        'Some complex frequencies are too small to qualify as real or imaginary.',ch10,&
