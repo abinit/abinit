@@ -1852,13 +1852,16 @@ end subroutine phdos_ncwrite
 !! prefix=Prefix for output files.
 !! dielt(3,3)=dielectric tensor
 !! comm=MPI communicator
+!!  dcdq=Moment of IFCs from Fourier transform
+!!  d2cdq=Second Moment of IFCs from Fourier transform
+!!  phi1=Moment of IFCs from LW driver, if available
 !!
 !! OUTPUT
 !!  Only writing.
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm,dcdq,d2cdq,phi1,phi2)
 
 !Arguments -------------------------------
 !scalars
@@ -1869,7 +1872,10 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  type(anaddb_dataset_type),target,intent(in) :: inp
  type(ddb_type),intent(in) :: ddb
  type(asrq0_t),intent(inout) :: asrq0
-
+ real(dp),intent(in),optional :: dcdq(3,Crystal%natom,3,Crystal%natom,3)
+ real(dp),intent(in),optional :: d2cdq(3,Crystal%natom,3,Crystal%natom,3,3)
+ real(dp),intent(in),optional :: phi1(3,Crystal%natom,3,Crystal%natom,3)
+ real(dp),intent(in),optional :: phi2(3,Crystal%natom,3,3,3)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
@@ -1957,8 +1963,15 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
       Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
-      ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
-
+      ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self,Ifc%asr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+     if (asrq0%asr==6) then
+       qphon_padded = zero; qphon_padded(:,1) = qphon(:)
+       if (present(phi1)) then
+         call asrq0%apply(natom, ddb%mpert, ddb%msize, d2cart, qphon_padded, Crystal,dcdq,-phi1,-phi2,d2cdq)
+       else
+         call asrq0%apply(natom, ddb%mpert, ddb%msize, d2cart, qphon_padded, Crystal,dcdq)
+       end if
+     end if
    else if (ifcflag == 0) then
 
      !call ddb_diagoq(ddb, crystal, save_qpoints(:,iphl1), asrq0, ifc%symdynmat, rftyp, phfrq, displ, &
@@ -1966,7 +1979,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
      ! Look for the information in the DDB (no interpolation here!)
      rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0
-     qphon_padded = zero; qphon_padded(:,1) = qphon
+     qphon_padded = zero; qphon_padded(:,1) = qphon(:)
 
      call ddb%get_block(iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
@@ -1974,7 +1987,11 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      d2cart(:,1:ddb%msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-     call asrq0%apply(natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+     if (present(phi1)) then
+        call asrq0%apply(natom, ddb%mpert, ddb%msize, d2cart, qphon_padded, Crystal,dcdq,-phi1)
+     else
+        call asrq0%apply(natom, ddb%mpert, ddb%msize, d2cart, qphon_padded, Crystal)
+     end if
    end if
 
    ! Use inp%symdynmat instead of ifc because of ifcflag
@@ -2054,15 +2071,13 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  if (my_rank == master) then
    ABI_MALLOC(weights, (nfineqpath))
    weights = one
-
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal%ncwrite(ncid))
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart,save_phangmom)
-
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
-   if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
-     call ifc%calcnwrite_nana_terms(crystal, inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
-   end if
+   !if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
+   !  call ifc%calcnwrite_nana_terms(crystal, inp%nph2l, inp%qph2l, inp%qnrml2, ncid)
+   !end if
    NCF_CHECK(nf90_close(ncid))
 
    call phonons_write_phfrq(prefix, natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart, save_phangmom)
