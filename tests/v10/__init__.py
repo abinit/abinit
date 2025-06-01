@@ -28,6 +28,8 @@ inp_files = [
     "t19.abi" ,  # compare cprj_in_memory=1 with cprj_in_memory=0 for cell optimization.
     "t20.abi" ,  # test nvt_langevin MD algorithm (PIMD implementation)
     "t21.abi" ,  # test npt_langevin MD algorithm (PIMD implementation)
+    "t24.abi" ,  # test imposition of rotational invariance implementation in abinit (H2O molecule)
+    "t25.abi" ,  # test imposition of rotational invariance implementation in abinit (phosphorene)
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole 
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
