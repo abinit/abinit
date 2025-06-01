@@ -62,7 +62,7 @@ contains
 !! Crystal<crystal_t>=data type gathering info on the crystalline structure.
 !! Ifc<ifc_type>=Object containing the interatomic force constants.
 !!    %atmfrc(2,3,natom,3,natom,nrpt) = Interatomic Forces in real space
-!!    %dyewq0(3,3,natom)=Ewald part of the dynamical matrix, at q=0.
+!!    %dyewq0(3,natom,3,natom)=Ewald part of the dynamical matrix, at q=0.
 !!    %rpt(3,nrpt)=canonical coordinates of the R points in the unit cell These coordinates are normalized (=> * acell(3)!!)
 !!    %nrpt=number of R points in the Big Box
 !!    %trans(3,natom)=atomic translations : xred = rcan + trans
