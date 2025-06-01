@@ -50,7 +50,7 @@ MODULE m_ifc
  use m_geometry,    only : phdispl_cart2red, normv, mkrdim
  use m_kpts,        only : kpts_ibz_from_kptrlatt, smpbz
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
-                           make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, nanal9, gtdyn9, dymfz9, &
+                           make_bigbox, canat9, chkrp9, ftifc_q2r, ftifc_r2q, wght9, nanal9, gtdyn9, dymfz9, &
                            massmult_and_breaksym, dfpt_phfrq, dfpt_prtph
 
  implicit none
@@ -166,9 +166,9 @@ MODULE m_ifc
      ! trans(3,natom)
      ! Atomic translations: xred = rcan + trans
 
-   real(dp),allocatable :: dyewq0(:,:,:)
-     ! dyewq0(3,3,natom)
-     ! Atomic self-interaction correction to the dynamical matrix (only when dipdip = 1).
+   real(dp),allocatable :: dyewq0(:,:,:,:)
+     ! dyewq0(3,natom,3,natom)
+     ! Atomic zone-center electrostatic correction to the dynamical matrix (only when dipdip = 1).
 
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
@@ -212,6 +212,9 @@ MODULE m_ifc
 
     procedure :: fourq => ifc_fourq
      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
+
+      procedure :: get_dcdq => ifc_get_dcdq
+    !  Compute first derivative of reciprocal-space IFCs based on IFCs.  
 
     procedure :: get_dwdq => ifc_get_dwdq
     !  Compute phonon group velocities at an arbitrary q-point.
@@ -366,7 +369,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !scalars
  integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
- integer :: nqbz,option,plus,sumg0,irpt,irpt_new
+ integer :: nqbz,option,plus,sumg0,irpt,irpt_new,ipert,jpert
  integer :: nprocs,my_rank,my_ierr,ierr
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
@@ -377,7 +380,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: ngqpt(9),qptrlatt(3,3)
  integer,allocatable :: qmissing(:),ibz2bz(:),bz2ibz_smap(:,:)
  real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3), gprim_tmp(3,3), rprim_tmp(3,3)
- real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom)
+ real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,Crystal%natom,3,Crystal%natom)
  real(dp) :: displ_cart(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: phfrq(3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3,Crystal%natom)
@@ -386,7 +389,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:)
 
 !******************************************************************
-
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  call cwtime(cpu, wall, gflops, "start")
 
@@ -436,7 +438,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option)
    end if
-
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
  end if
@@ -549,7 +550,13 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option)
      end if
-     call q0dy3_apply(natom,dyewq0,dyew)
+     if (asr==2) then        
+       call q0dy3_apply(natom,dyewq0,dyew,1)
+     elseif (asr==6) then 
+       call q0dy3_apply(natom,dyewq0,dyew,6)
+     else
+       call q0dy3_apply(natom,dyewq0,dyew,0)
+     end if
      plus=0
      ! Implement Eq.(76) of Gonze&Lee PRB 55, 10355 (1997) [[cite:Gonze1997a]], possibly generalized for quadrupoles
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
@@ -704,7 +711,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      if (prtsrlr==1) then
        call omega_decomp(ddb%amu,natom,ntypat,Crystal%typat,dynmatfull,dynmat_sr,dynmat_lr,iqpt,nqbz,eigvec)
      end if
-
      ! Write the phonon frequencies (this is for checking purposes).
      ! Note: these phonon frequencies are not written on unit iout, only on unit std_out.
      call dfpt_prtph(displ_cart,0,enunit,-1,natom,phfrq,qphnrm,qpt)
@@ -979,7 +985,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  ! The dynamical matrix d2cart is calculated here:
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
    Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
-   Ifc%qdrp_cart,Ifc%ewald_option,comm_,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+   Ifc%qdrp_cart,Ifc%ewald_option,comm_, Ifc%asr,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
  ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(Ifc%amu,displ_cart,d2cart,eigval,eigvec,Crystal%indsym,&
@@ -1000,12 +1006,170 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
  ! Compute group velocities.
- if (present(dwdq)) call ifc%get_dwdq(crystal, my_qpt, phfrq, eigvec, dwdq, comm_)
+ if (present(dwdq)) call ifc%get_dwdq(crystal, my_qpt, phfrq, eigvec, dwdq, comm_, Ifc%asr)
 
  call timab(1748, 2, tsec)
 
 end subroutine ifc_fourq
 !!***
+
+!!****f* m_ifc/ifc_get_dcdq
+!! NAME
+!!  ifc_get_dcdq
+!!
+!! FUNCTION
+!!  Compute the first-derivative of reciprocal space IFCs based on real-space IFCs.
+!!
+!! INPUTS
+!!  ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
+!!  crystal<crystal_t> = Information on the crystalline structure.
+!!  comm: MPI communicator
+!!
+!! OUTPUT
+!!  dcdq(2,3,natom,3,natom,3) = first derivatives of reciprocal-space IFCs in cartesian coordinates.
+!!
+!! NOTES
+!!  Using:
+!!
+!!    dC/dq = \sum_b C(kappa alpha, kappa' beta) (0,b) (R_kappa'beta (b) - R_kappa alpha)
+!!
+!!
+!! SOURCE
+
+subroutine ifc_get_dcdq(ifc, cryst,dcdq,d2cdq, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: comm
+!arrays
+ real(dp),intent(out) :: dcdq(3,cryst%natom,3,cryst%natom,3)
+ real(dp),intent(out) :: d2cdq(3,cryst%natom,3,cryst%natom,3,3)
+ !real(dp),intent(out) :: d3cdq(3,cryst%natom,3,cryst%natom,3,3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii,jj, nu, kk, ll,mm,nn,ind
+ real(dp) :: qpt(3)
+!arrays
+ real(dp) :: dyntmp(2,3,cryst%natom,3,cryst%natom)
+ real(dp) :: dcdqcan(2,3,cryst%natom,3,cryst%natom,3)
+ real(dp) :: d2cdqcan(2,3,cryst%natom,3,cryst%natom,3,3)
+ !real(dp) :: d3cdqcan(2,3,cryst%natom,3,cryst%natom,3,3,3)
+ real(dp) :: dcdqred(2,3,cryst%natom,3,cryst%natom,3)
+ real(dp) :: d2cdqred(2,3,cryst%natom,3,cryst%natom,3,3)
+ !real(dp) :: d3cdqred(2,3,cryst%natom,3,cryst%natom,3,3,3)
+! ************************************************************************
+
+ ABI_UNUSED((/comm/))
+
+ qpt=zero ; dyntmp = zero
+ dcdq=zero ; dcdqcan= zero ; dcdqred = zero
+ d2cdq=zero ; d2cdqcan=zero ; d2cdqred = zero
+ !d3cdq=zero ; d3cdqcan=zero ; d3cdqred = zero
+ ! Compute the derivative based on the canonical coordinates
+ call dynmat_dq(qpt, cryst%natom, ifc%gprim, ifc%nrpt, ifc%rpt, ifc%atmfrc, ifc%wghatm, dcdqcan,d2cdqcan)
+ ! We have also to consider the phase factor introduced by the canonical coordinates (shift on
+ ! atoms coordinates in other unit cells)
+ ! Only a phase shift, but since we look at the derivative, this also have a contribution here
+ call ftifc_r2q(ifc%atmfrc,dyntmp, ifc%gprim, cryst%natom, 1, ifc%nrpt, ifc%rpt, qpt, ifc%wghatm, comm)
+ ! Move to reduced coordinates
+ do ii= 1,3
+   do jj=1,3
+     dcdqred(:,:,:,:,:,ii) = dcdqred(:,:,:,:,:,ii)+ifc%gprim(jj,ii)*dcdqcan(:,:,:,:,:,jj)
+     do kk=1,3
+       do ll=1,3
+         d2cdqred(:,:,:,:,:,ii,kk) = d2cdqred(:,:,:,:,:,ii,kk)+&
+                 ifc%gprim(ii,jj)*ifc%gprim(kk,ll)*d2cdqcan(:,:,:,:,:,jj,ll)
+         !do mm=1,3
+         !  do nn=1,3
+         !d3cdqred(:,:,:,:,:,ii,kk,mm) = d3cdqred(:,:,:,:,:,ii,kk,mm)+&
+         !        ifc%gprim(ii,jj)*ifc%gprim(kk,ll)*ifc%gprim(mm,nn)*d3cdqcan(:,:,:,:,:,jj,ll,nn)
+
+         !  end do
+         !end do
+       end do
+     end do
+   end do
+ end do
+ do ii=1,3
+   do nu = 1,cryst%natom
+     do jj=1,3
+       !do kk=1,3
+         !do ll=1,3
+           !do mm=1,3
+         !    d3cdqred(2,ii,nu,jj,:,kk,ll,mm) = d3cdqred(2,ii,nu,jj,:,kk,ll,mm)+&
+         !    dyntmp(1,ii,nu,jj,:)*(ifc%trans(kk,:)-ifc%trans(kk,nu))*(ifc%trans(ll,:)-ifc%trans(ll,nu))*(ifc%trans(mm,:)-ifc%trans(mm,nu))-&        
+         !    dcdqred(2,ii,nu,jj,:,kk)*(ifc%trans(ll,:)-ifc%trans(ll,nu))*(ifc%trans(mm,:)-ifc%trans(mm,nu))-&
+         !    dcdqred(2,ii,nu,jj,:,ll)*(ifc%trans(kk,:)-ifc%trans(kk,nu))*(ifc%trans(mm,:)-ifc%trans(mm,nu))-&
+         !    dcdqred(2,ii,nu,jj,:,mm)*(ifc%trans(ll,:)-ifc%trans(ll,nu))*(ifc%trans(kk,:)-ifc%trans(kk,nu))-&
+         !    d2cdqred(1,ii,nu,jj,:,kk,ll)*(ifc%trans(mm,:)-ifc%trans(mm,nu))-&
+         !    d2cdqred(1,ii,nu,jj,:,kk,mm)*(ifc%trans(ll,:)-ifc%trans(ll,nu))-&
+         !!    d2cdqred(1,ii,nu,jj,:,ll,mm)*(ifc%trans(kk,:)-ifc%trans(kk,nu))
+         !  end do
+         !end do
+       !end do
+       do kk=1,3
+         do ll=1,3
+           d2cdqred(1,ii,nu,jj,:,kk,ll) = d2cdqred(1,ii,nu,jj,:,kk,ll)-&
+           dyntmp(1,ii,nu,jj,:)*(ifc%trans(kk,:)-ifc%trans(kk,nu))*(ifc%trans(ll,:)-ifc%trans(ll,nu))+&
+           dcdqred(2,ii,nu,jj,:,kk)*(ifc%trans(ll,:)-ifc%trans(ll,nu))+dcdqred(2,ii,nu,jj,:,ll)*&
+           (ifc%trans(kk,:)-ifc%trans(kk,nu))
+         end do
+       end do
+       do kk=1,3
+         dcdqred(2,ii,nu,jj,:,kk) = dcdqred(2,ii,nu,jj,:,kk)-dyntmp(1,ii,nu,jj,:)*(ifc%trans(kk,:)-ifc%trans(kk,nu))
+       end do
+       !do kk=1,3
+       !  do ll=1,3
+       !    do mm=1,3
+       !      d3cdqred(2,ii,nu,jj,:,kk,ll,mm) = d3cdqred(2,ii,nu,jj,:,kk,ll,mm)-&
+       !      dyntmp(1,ii,nu,jj,:)*(ifc%trans(kk,:)-ifc%trans(kk,nu))*(ifc%trans(ll,:)-ifc%trans(ll,nu))*(ifc%trans(mm,:)-ifc%trans(mm,nu))-&
+       !      dcdqred(2,ii,nu,jj,:,kk)*(ifc%trans(ll,:)-ifc%trans(ll,nu))*(ifc%trans(mm,:)-ifc%trans(mm,nu))-&
+       !      dcdqred(2,ii,nu,jj,:,ll)*(ifc%trans(kk,:)-ifc%trans(kk,nu))*(ifc%trans(mm,:)-ifc%trans(mm,nu))-&
+       !      dcdqred(2,ii,nu,jj,:,mm)*(ifc%trans(ll,:)-ifc%trans(ll,nu))*(ifc%trans(kk,:)-ifc%trans(kk,nu))-&
+       !      d2cdqred(1,ii,nu,jj,:,kk,ll)*(ifc%trans(mm,:)-ifc%trans(mm,nu))+&
+       !      d2cdqred(1,ii,nu,jj,:,kk,mm)*(ifc%trans(ll,:)-ifc%trans(ll,nu))+&
+       !      d2cdqred(1,ii,nu,jj,:,ll,mm)*(ifc%trans(kk,:)-ifc%trans(kk,nu))
+       !    end do
+       !!!  end do
+       !end do
+       do kk=1,3
+         do ll=1,3
+           d2cdqred(1,ii,nu,jj,:,kk,ll) = d2cdqred(1,ii,nu,jj,:,kk,ll)-&
+           dyntmp(1,ii,nu,jj,:)*(cryst%xred(kk,:)-cryst%xred(kk,nu))*(cryst%xred(ll,:)-cryst%xred(ll,nu))-&
+           dcdqred(2,ii,nu,jj,:,kk)*(cryst%xred(ll,:)-cryst%xred(ll,nu))-dcdqred(2,ii,nu,jj,:,ll)*&
+           (cryst%xred(kk,:)-cryst%xred(kk,nu))           
+         end do
+       end do
+       do kk=1,3
+         dcdqred(2,ii,nu,jj,:,kk) = dcdqred(2,ii,nu,jj,:,kk)+dyntmp(1,ii,nu,jj,:)*(cryst%xred(kk,:)-cryst%xred(kk,nu))
+       end do
+     end do
+   end do
+ end do
+ ! Move to cartesian coordinates
+ do ii=1,3
+   do jj=1,3
+     dcdq(:,:,:,:,ii)=dcdq(:,:,:,:,ii)+dcdqred(2,:,:,:,:,jj)*cryst%rprimd(ii,jj)
+     do kk=1,3
+       do ll=1,3
+         d2cdq(:,:,:,:,ii,kk)=d2cdq(:,:,:,:,ii,kk)+d2cdqred(1,:,:,:,:,jj,ll)*cryst%rprimd(ii,jj)*cryst%rprimd(kk,ll)
+         !do mm=1,3
+         !  do nn=1,3
+         !    d3cdq(:,:,:,:,ii,kk,mm)=d3cdq(:,:,:,:,ii,kk,mm)+d3cdqred(2,:,:,:,:,jj,ll,nn)*cryst%rprimd(ii,jj)*cryst%rprimd(kk,ll)*cryst%rprimd(mm,nn)
+         !  end do
+         !end do
+       end do
+     end do
+   end do
+ end do
+ !print *, dcdq
+ !print *, 'RG', matmul(transpose(cryst%rprimd),cryst%gprimd)
+ !print *, 'GG', matmul(transpose(cryst%gprimd),cryst%rprimd)
+
+ end subroutine ifc_get_dcdq
 
 !!****f* m_ifc/ifc_get_dwdq
 !! NAME
@@ -1035,13 +1199,13 @@ end subroutine ifc_fourq
 !!
 !! SOURCE
 
-subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
+subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm, asr)
 
 !Arguments ------------------------------------
 !scalars
  class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
- integer,intent(in) :: comm
+ integer,intent(in) :: comm,asr
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(in) :: phfrq(3*cryst%natom)
@@ -1095,7 +1259,11 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
        call ewald9(ifc%acell,ifc%dielt,dyew,cryst%gmet,ifc%gprim,cryst%natom,qfd,&
           cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff,ifc%qdrp_cart,&
           ifc%ewald_option,dipquad=ifc%dipquad,quadquad=ifc%quadquad)
-       call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew)
+       if (asr==2 .or. asr==6) then
+         call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew,1)
+       else
+         call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew,0)
+       end if
        dddq(:,:,:,ii) = dddq(:,:,:,ii) + (jj * half / hh) * dyew
      end do
    end do
@@ -2225,7 +2393,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
        do nu=1,3
          ew1=zero
          if(ii==1)then
-           ew1=-Ifc%dyewq0(mu,nu,ia)
+           ew1=-Ifc%dyewq0(mu,ia,nu,ia)
          end if
          do jj=1,3
            do kk=1,3
@@ -2764,7 +2932,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
    ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
    ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
-   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self)
+   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,ifc%asr,xmpi_comm_self,ifc%asr)
 
 #ifdef HAVE_NETCDF
  if (present(ncid)) then
