@@ -2511,7 +2511,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ! Acoustic Sum Rule
   ! In case the interatomic forces are not calculated, the
   ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  asrq0 = ddb%get_asrq0(inp%asr,inp%rfmeth,crystal,comm,inp%dim_msr) 
+  asrq0 = ddb%get_asrq0(inp%asr,inp%rfmeth,crystal,inp%dim_msr,comm) 
 
 !**********************************************************************
 ! Interatomic Forces Calculation
@@ -2562,7 +2562,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,ifc%ewald_option,xmpi_comm_self)
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,ifc%ewald_option,xmpi_comm_self,ifc%asr)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&
