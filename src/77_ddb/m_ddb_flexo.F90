@@ -1423,7 +1423,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 !!  ddb_phi1
 !!
 !! FUNCTION
-!! Return the moment of IFCs Phi^(1)
+!! Return the moment of IFCs Phi^(1) and \sum_k Phi^(2)
 !!
 !! INPUTS
 !!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
@@ -1432,7 +1432,8 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 !!  filnamddb = name of the ddb file
 !!
 !! OUTPUT
-!!  phi1(3,natom,3,natom,3)=Moment of IFCs Phi^(1)
+!!  phi1(3,natom,3,natom,3)=First Moment of IFCs Phi^(1)
+!!  phi2(3,natom,3,3,3)=Second Moment of IFCs Phi^(2) summed over atoms
 !!
 !! SIDE EFFECTS
 !!
@@ -1440,7 +1441,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 !!
 !! SOURCE
 
-subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
+subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1,phi2)
 
  implicit none
 
@@ -1452,18 +1453,22 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
  character(len=fnlen) :: filnamddb
 !arrays
  real(dp),intent(out) :: phi1(3,ddb%natom,3,ddb%natom,3)
+ real(dp),intent(out) :: phi2(3,ddb%natom,3,3,3)
 
 !Local variables-------------------------------
  integer,parameter :: cvrsio8=20100401
- integer :: iblok
+ integer :: iblok,istrs,strsd1,strsd2,strst,strsd,qvecd
  logical :: intstrn_only,iwrite
  character(len=500) :: msg
 
 !arrays
- integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ integer :: rfelfd(4),rfphon(4),rfstrs(4),iat,iatd
+ integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
  integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3),fac
+ real(dp) :: sqrbkt_t1(3,ddb%natom,3,3,3)
  real(dp) :: d3cart(2,3,ddb%mpert,3,ddb%mpert,3,ddb%mpert)
+ real(dp) :: phi2tmp(3,ddb%mpert,3,3,3)
 
 ! *********************************************************************
 
@@ -1500,6 +1505,67 @@ subroutine ddb_phi1(ddb,ddb_lw,ddb_version,crystal,filnamddb,phi1)
 !Extraction of Phi^(1) tensor
  phi1(:,:,:,:,:) = fac*RESHAPE(d3cart(2,1:3,1:ddb%natom,1:3,1:ddb%natom,1:3,ddb%natom+8), &
                                & SHAPE=[3,ddb%natom,3,ddb%natom,3]) 
+
+!Define the factors to apply if DDB file has been created with the old version of
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=one
+ end if
+
+ do istrs=1,6
+   strsd1=alpha(istrs)
+   strsd2=beta(istrs)
+   strst=ddb%natom+3; if (istrs>3) strst=ddb%natom+4
+   strsd=istrs; if (istrs>3) strsd=istrs-3
+   do qvecd=1,3
+     do iat=1,ddb%natom
+       do iatd=1,3
+         phi2tmp(iatd,iat,qvecd,strsd1,strsd2)=fac*d3cart(1,iatd,iat,strsd,strst,qvecd,ddb%natom+8)
+         if (istrs>3) phi2tmp(iatd,iat,qvecd,strsd2,strsd1)=phi2tmp(iatd,iat,qvecd,strsd1,strsd2)
+       end do
+     end do
+   end do
+ end do    
+do qvecd=1,3
+   do strsd2=1,3
+     do strsd1=1,3
+       do iat=1,ddb%natom
+         sqrbkt_t1(1:3,iat,strsd1,strsd2,qvecd)=half*(phi2tmp(1:3,iat,qvecd,strsd1,strsd2) + &
+         & phi2tmp(1:3,iat,strsd2,strsd1,qvecd))
+       end do
+     end do
+   end do
+ end do
+
+!Now correct the stress in the square bracketed tesnor tensor
+!! do qvecd=1,3
+!   do strsd2=1,3
+!     do strsd1=1,3
+!       do iatd=1,3
+!         if (iatd==strsd1) then
+!           sqrbkt_t1(iatd,strsd1,strsd2,qvecd)=sqrbkt_t1(iatd,strsd1,strsd2,qvecd) - stress(strsd2,qvecd)
+!         endif
+!       end do
+!     end do
+!   end do
+! end do
+
+!Now convert back to type-II in order to obtain the frozen ion Lagrange elastic tensor.
+ phi2(:,:,:,:,:)=zero
+ do iatd=1,3
+   do qvecd=1,3
+     do strsd1=1,3
+       do strsd2=1,3
+         do iat=1,ddb%natom
+           phi2(iatd,iat,qvecd,strsd1,strsd2)=sqrbkt_t1(iatd,iat,strsd1,qvecd,strsd2) + &
+         & sqrbkt_t1(iatd,iat,strsd2,strsd1,qvecd)-sqrbkt_t1(iatd,iat,qvecd,strsd2,strsd1)
+         end do
+       end do
+     end do
+   end do
+ end do
  DBG_EXIT("COLL")
  end subroutine ddb_phi1
  !!***
