@@ -49,7 +49,7 @@ type primcell_ddb_info
   real(dp), allocatable :: acell(:)      ! acell(3)
   real(dp), allocatable :: amu(:)        ! amu(ntypat)=mass of the atoms (atomic mass unit)
   real(dp), allocatable :: dielt(:,:)    ! dielt(3,3)=dielectric tensor
-  real(dp), allocatable :: dyewq0(:,:,:) ! dyewq0(3,3,natom)=Ewald part of the dynamical matrix, at q=0
+  real(dp), allocatable :: dyewq0(:,:,:,:) ! dyewq0(3,natom,3,natom)=Ewald part of the dynamical matrix, at q=0
   real(dp), allocatable :: gmet(:,:)     ! gmet(3,3)
   real(dp), allocatable :: gprim(:,:)    ! gprim(3,3)
   real(dp), allocatable :: rcan(:,:)     ! rcan(3,natom)=atomic position in canonical coordinates
@@ -110,7 +110,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
  real(dp), intent(in) :: acell(3)
  real(dp), intent(in) :: amu(ntypat)
  real(dp), intent(in) :: dielt(3,3)
- real(dp), intent(in) :: dyewq0(3,3,natom)
+ real(dp), intent(in) :: dyewq0(3,natom,3,natom)
  real(dp), intent(in) :: gmet(3,3)
  real(dp), intent(in) :: gprim(3,3)
  real(dp), intent(in) :: rcan(3,natom)
@@ -148,7 +148,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
   ABI_MALLOC(pcell%acell,(3))
   ABI_MALLOC(pcell%amu,(ntypat))
   ABI_MALLOC(pcell%dielt,(3,3))
-  ABI_MALLOC(pcell%dyewq0,(3,3,natom))
+  ABI_MALLOC(pcell%dyewq0,(3,natom,3,natom))
   ABI_MALLOC(pcell%gmet,(3,3))
   ABI_MALLOC(pcell%gprim,(3,3))
   ABI_MALLOC(pcell%rcan,(3,natom))
@@ -252,7 +252,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
   ABI_MALLOC(pcell%acell,(3))
   ABI_MALLOC(pcell%amu,(pcell%ntypat))
   ABI_MALLOC(pcell%dielt,(3,3))
-  ABI_MALLOC(pcell%dyewq0,(3,3,pcell%natom))
+  ABI_MALLOC(pcell%dyewq0,(3,pcell%natom,3,pcell%natom))
   ABI_MALLOC(pcell%gmet,(3,3))
   ABI_MALLOC(pcell%gprim,(3,3))
   ABI_MALLOC(pcell%rcan,(3,pcell%natom))
