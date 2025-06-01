@@ -45,7 +45,7 @@ module m_ddb
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr,&
-                              msria_calc, asrprs, dfpt_phfrq, sytens
+                              msria_calc, msria_apply, asrprs, dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
  use m_psps,           only : psps_copy, psps_free
 
@@ -4112,7 +4112,7 @@ end function ddb_get_strten
 !!
 !! SOURCE
 
-type(asrq0_t) function ddb_get_asrq0(ddb,asr,rftyp,crystal,comm,dim_msr,d2dq) result(asrq0)
+type(asrq0_t) function ddb_get_asrq0(ddb,asr,rftyp,crystal,dim_msr,comm,d2dq) result(asrq0)
 
 !Arguments -------------------------------
 !scalars
@@ -4191,9 +4191,6 @@ type(asrq0_t) function ddb_get_asrq0(ddb,asr,rftyp,crystal,comm,dim_msr,d2dq) re
  case (6)  
    if (present(d2dq)) then
       call msria_calc(asr,crystal,asrq0%d2asr,ddb%val(:,:,iblok),d2dq,asrq0%d2dqmsr,dim_msr,ddb%mpert,ddb%natom)
-     print *, 'Using dC/dq from Long Wave driver or after Fourier transform'
-   else
-     print *, 'No dC/dq from DDB; postponing the ASR calculation after Fourier transform'       
    end if
    !call arsr_recip(asr,asrq0%d2asr,ddb%val(:,:,iblok),asrq0%d2dqmsr,dcdq,asrq0%dim_msr,ddb%mpert,&
    !        ddb%natom,crystal%xcart,crystal%xred,crystal%indsym,crystal%nsym,crystal%symrel,crystal%symafm,&
@@ -4459,7 +4456,7 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  d2cart(:,1:ddb%msize) = ddb%val(:,:,iblok)
 
  ! Eventually impose the acoustic sum rule based on previously calculated d2asr
- call asrq0%apply(natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+ call asrq0%apply(natom, ddb%mpert, ddb%msize, d2cart,qphon_padded,crystal)
 
  ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
@@ -4490,7 +4487,12 @@ end subroutine ddb_diagoq
 !!  natom=Number of atoms per unit cell.
 !!  mpert=Maximum number of perturbation (reported in ddb%mpert)
 !!  msize=Maximum size of array ddb%val
-!!  xcart(3,natom)=Atomic positions in Cartesian coordinates
+!!  qphon(3,3)=wavevectors for the three possible phonons
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  dcdq=Moment of IFCs from Fourier transform
+!!  d2cdq=Second Moment of IFCs from Fourier transform
+!!  phi1=First Moment of IFCs from LW driver, if available
+!!  phi2=Second Moment of IFCs from LW driver summed of kappa', if available
 !!
 !! SIDE EFFECTS
 !!   d2cart=matrix of second derivatives of total energy, in cartesian coordinates
@@ -4499,15 +4501,21 @@ end subroutine ddb_diagoq
 !!
 !! SOURCE
 
-subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
+subroutine asrq0_apply(asrq0, natom, mpert, msize, d2cart, qphon, crystal, dcdq, phi1,phi2,d2cdq)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom, msize, mpert
  class(asrq0_t),intent(inout) :: asrq0
+ type(crystal_t),intent(in) :: crystal        
 !arrays
- real(dp),intent(in) :: xcart(3,natom)
+ real(dp),intent(in) :: qphon(3,3)
  real(dp),intent(inout) :: d2cart(2,msize)
+ real(dp),intent(in),optional :: dcdq(3,natom,3,natom,3)
+ real(dp),intent(in),optional :: d2cdq(3,natom,3,natom,3,3)
+ real(dp),intent(in),optional :: phi1(3,natom,3,natom,3)
+ real(dp),intent(in),optional :: phi2(3,natom,3,3,3)
+
 
 ! ************************************************************************
 
@@ -4523,7 +4531,13 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
    call asria_corr(asrq0%asr, asrq0%d2asr, d2cart, mpert, natom)
  case (3,4)
    ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
-   call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,xcart)
+   call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,crystal%xcart)
+ case (6)
+   if (present(phi1)) then
+      call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal,dcdq,phi1,phi2,d2cdq)
+   else
+      call msria_apply(asrq0%asr,asrq0%d2asr,asrq0%d2dqmsr,d2cart,mpert,natom,qphon,crystal,dcdq)
+   end if
  case default
    ABI_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
  end select
