@@ -269,7 +269,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),allocatable :: d2matr(:,:,:,:,:),d2nfr(:,:,:,:,:),d2nl(:,:,:,:,:),d2ovl(:,:,:,:,:)
  real(dp),allocatable :: d2nl0(:,:,:,:,:),d2nl1(:,:,:,:,:),d2tmp(:,:,:,:,:),d2vn(:,:,:,:,:)
  real(dp),allocatable :: displ(:),doccde(:)
- real(dp),allocatable :: dyew(:,:,:,:,:),dyewq0(:,:,:),dyfrlo(:,:,:),dyfrlo_indx(:,:,:)
+ real(dp),allocatable :: dyew(:,:,:,:,:),dyewq0(:,:,:,:),dyfrlo(:,:,:),dyfrlo_indx(:,:,:)
  real(dp),allocatable :: dyfrnl(:,:,:,:,:),dyfrwf(:,:,:,:,:),dyfrx1(:,:,:,:,:),dyvdw(:,:,:,:,:)
  real(dp),allocatable :: dyfrx2(:,:,:),eigen0(:),eigval(:),eigvec(:)
  real(dp),allocatable :: eig2nkq(:,:,:,:,:,:,:),eigbrd(:,:,:,:,:,:,:)
@@ -1008,7 +1008,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
  dyfr_cplex=1;if (psps%usepaw==1.and.rfphon==1.and.(.not.qeq0)) dyfr_cplex=2
  ABI_MALLOC(dyew,(2,3,natom,3,natom))
- ABI_MALLOC(dyewq0,(3,3,natom))
+ ABI_MALLOC(dyewq0,(3,natom,3,natom))
  ABI_MALLOC(dyfrlo,(3,3,natom))
  ABI_MALLOC(dyfrx2,(3,3,natom))
  ABI_MALLOC(dyfrnl,(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag))
@@ -1017,7 +1017,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(piezofrnl,(6,3*pawpiezo))
  ABI_MALLOC(dyvdw,(2,3,natom,3,natom*usevdw))
  dyew(:,:,:,:,:)=zero
- dyewq0(:,:,:)=zero
+ dyewq0(:,:,:,:)=zero
  dyfrnl(:,:,:,:,:)=zero
  dyfrwf(:,:,:,:,:)=zero
  dyfrlo(:,:,:)=zero
@@ -1369,7 +1369,11 @@ ABI_NVTX_END_RANGE()
  if(rfphon==1)then
    call dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-   call q0dy3_apply(natom,dyewq0,dyew)
+   if (asr==2 .or. asr==6) then
+     call q0dy3_apply(natom,dyewq0,dyew,1)
+   else
+     call q0dy3_apply(natom,dyewq0,dyew,0)
+   end if        
  end if
 
 !1-order contribution of the xc core correction to the dynamical matrix
