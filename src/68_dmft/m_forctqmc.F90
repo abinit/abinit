@@ -1699,7 +1699,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    write(message,'(a,2x,a)') ch10, &  ! debug
       & " == Print Green's function for tau=0+ in the CTQMC basis"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug
-   call print_matlu(green%oper_tau(1)%matlu(:),natom,1)  ! debug
+   call print_matlu(green%oper_tau(1)%matlu(:),natom,1,compl=1)  ! debug
    write(message,'(a,2x,a)') ch10,&  ! debug
       & " == Print Green's function for smallest freq in the CTQMC basis"  ! debug
    call wrtout(std_out,message,'COLL')  ! debug

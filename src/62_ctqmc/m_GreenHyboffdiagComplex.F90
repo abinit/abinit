@@ -1371,7 +1371,7 @@ include 'mpif.h'
   ! -- Add correction for discontinuity.
 !      if(iflavor1==iflavor2) then
         !G(0+)-G(0-)=G(0+)+G(beta-)=A
-        opertau(tauSamples+1) = -real(C) - opertau(1)
+        opertau(tauSamples+1) = -C - opertau(1)
       !sui!write(6,*) "BackFourier",opertau(tauSamples+1),opertau(1),real(C)
 
         op%setT = .TRUE.

@@ -1420,50 +1420,49 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   !  ENDIF
      CALL GreenHyboffdiagComplex_backFourier(F_tmp,func="green")
      ! --- Put the result in F
-     DO iflavor = 1, flavors
-       DO iflavor2 = 1, flavors
-         DO itau=1,samples+1
-         F(itau,iflavor,iflavor2) = F_tmp%oper(itau,iflavor,iflavor2)
-         END DO
-       END DO
-     END DO
-     !IF ( op%rank .EQ. 0 ) THEN
-     !  DO iflavor = 1, flavors
-     !    DO iflavor2 = 1, flavors
-     !        write(346,*) "#",iflavor,iflavor2
-     !      do  itau=1,op%samples+1
-     !        write(346,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
-     !      enddo
-     !        write(346,*) 
-     !    END DO
-     !  END DO
-     !ENDIF
-     DO iflavor = 1, flavors
-       DO iflavor2 = 1, flavors
-         DO itau=1,samples+1
-!         This symetrization is general and valid even with SOC
-!         Without SOC, it leads to zero.
-         F(itau,iflavor,iflavor2) = (F_tmp%oper(itau,iflavor,iflavor2)+F_tmp%oper(itau,iflavor2,iflavor))/2.d0
-         END DO
-       END DO
-     END DO
-     open (unit=4367,file='G0tau_fromF',status='unknown',form='formatted')
+     DO iflavor = 1, flavors                                                                                                        
+       DO iflavor2 = 1, flavors                                                                                                     
+         DO itau=1,samples+1                                                                                                        
+!         This symetrization is general and valid even with SOC                                                                     
+!         Without SOC, it is useless ?                                                                                              
+         F(itau,iflavor,iflavor2) = (        F_tmp%oper(itau,iflavor,iflavor2)   +         &                                        
+ &                                     dconjg(F_tmp%oper(itau,iflavor2,iflavor))   )/2.d0                                           
+         END DO                                                                                                                     
+       END DO                                                                                                                       
+     END DO                                                                                                                         
+
+!    Print F
+     open (unit=4367,file='G0tau_fromF_Re',status='unknown',form='formatted')
      rewind(4367)
      IF ( op%rank .EQ. 0 ) THEN
        DO iflavor = 1, flavors
          DO iflavor2 = 1, flavors
              write(4367,*) "#",iflavor,iflavor2
            do  itau=1,op%samples+1
-             write(4367,*) (itau-1)*op%beta/(op%samples),F(itau,iflavor,iflavor2)
+             write(4367,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
            enddo
              write(4367,*) 
          END DO
-       !sui!write(std_out,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
        END DO
      ENDIF
-     !call flush(437)
+     call flush(4367)
      close(4367)
-     !call flush(6)
+
+     open (unit=4367,file='G0tau_fromF_Im',status='unknown',form='formatted')                               
+     rewind(4367)                                                                                           
+     IF ( op%rank .EQ. 0 ) THEN                                                                             
+       DO iflavor = 1, flavors                                                                              
+         DO iflavor2 = 1, flavors                                                                           
+             write(4367,*) "#",iflavor,iflavor2                                                             
+           do  itau=1,op%samples+1                                                                          
+             write(4367,*) (itau-1)*op%beta/(op%samples),aimag(F(itau,iflavor,iflavor2))                     
+           enddo                                                                                            
+             write(4367,*)                                                                                  
+         END DO                                                                                             
+       END DO                                                                                               
+     ENDIF   
+     call flush(4367)                                                                                               
+     close(4367)                                                                                            
      
      call xmpi_barrier(op%MY_COMM)
      !CALL ERROR("END OF CALCULATION")
@@ -1536,7 +1535,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
     !  END IF
   ! --- compute residual K (?)
       K = REAL(CMPLX(0,(2.d0*DBLE(op%Wmax)-1.d0)*pi_invBeta,8)*F_omega(op%Wmax,iflavor,iflavor2))
-      CALL GreenHyboffdiagComplex_setMuD1(op%Greens,iflavor,iflavor2,dble(op%mu(iflavor)),K)
+      CALL GreenHyboffdiagComplex_setMuD1(op%Greens,iflavor,iflavor2,real(op%mu(iflavor)),K)
     END DO
   END DO
 
@@ -1632,7 +1631,9 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
       DO itau=1,samples+1
 !      This symetrization is general and valid even with SOC
 !      Without SOC, it leads to zero.
-      F(itau,iflavor,iflavor2) = -(F_tmp%oper(samples+2-itau,iflavor,iflavor2)+F_tmp%oper(samples+2-itau,iflavor2,iflavor))/2.d0
+!      F(itau,iflavor,iflavor2) = -(F_tmp%oper(samples+2-itau,iflavor,iflavor2)+F_tmp%oper(samples+2-itau,iflavor2,iflavor))/2.d0
+       F(itau,iflavor,iflavor2) = -(        F_tmp%oper(samples+2-itau,iflavor,iflavor2)   +         &     
+  &                                  dconjg(F_tmp%oper(samples+2-itau,iflavor2,iflavor))   )/2.d0         
       END DO
     END DO
   END DO
@@ -2214,7 +2215,8 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
   DOUBLE PRECISION                      :: time1
   DOUBLE PRECISION                      :: time2
   DOUBLE PRECISION                      :: time_avail
-  DOUBLE PRECISION                      :: det_ratio,sign_det_ratio
+  COMPLEX(KIND=8)                       :: det_ratio
+  DOUBLE PRECISION                      :: sign_det_ratio
   DOUBLE PRECISION                      :: overlap
   DOUBLE PRECISION                      :: length
   DOUBLE PRECISION                      :: signe
@@ -2321,7 +2323,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         signdet=1.d0
         det_ratio=det_ratio*signdetprev
                  
-        IF ( det_ratio .LT. 0.d0 ) THEN
+        IF ( real(det_ratio) .LT. 0.d0 ) THEN
         !sui!write(std_out,*) "         NEGATIVE DET",det_ratio,signdetprev
           det_ratio   = - det_ratio
           sign_det_ratio=-1
@@ -2339,7 +2341,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         !write(std_out,*) "        .................",beta , time_avail , op%mu(op%Impurity%activeFlavor),op%Impurity%activeFlavor
 
         IF ( (time1 * (tail + 1.d0 )) &
-             .LT. (beta * time_avail * det_ratio * DEXP(dble(op%mu(op%Impurity%activeFlavor))*length + overlap) ) ) THEN
+             .LT. (beta * time_avail * abs(det_ratio) * DEXP(real(op%mu(op%Impurity%activeFlavor))*length + overlap) ) ) THEN
 !          write(*,*) "before"
 !          CALL ListCdagCoffdiag_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
           CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
@@ -2362,6 +2364,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
          !prt! enddo
 
           IF ( sign_det_ratio .LT. 0.d0 ) op%signvalue=-op%signvalue
+          op%phasevalue=op%phasevalue*det_ratio/abs(det_ratio)*sign_det_ratio
         !sui!write(6,*) "                  signvalue",op%signvalue
         ELSE
      !ii  write(6,*) "        Refused      addition: proba",time1
@@ -2393,7 +2396,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         signdetprev = ImpurityOperator_getsign(op%Impurity, time2, i, action, position)
         det_ratio=det_ratio*signdetprev
         signdet=1.d0
-        IF ( det_ratio .LT. 0.d0 ) THEN
+        IF ( real(det_ratio) .LT. 0.d0 ) THEN
         !sui!write(6,*) "         NEGATIVE DET",det_ratio,signdetprev
           det_ratio   = -det_ratio
           sign_det_ratio=-1
@@ -2405,8 +2408,8 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
         !sui!write(6,*) "                  DET",det_ratio,signdetprev
         END IF
        !ii  write(6,*) "                  DET",det_ratio
-        IF ( (time1 * beta * time_avail * DEXP(dble(op%mu(op%Impurity%activeFlavor))*length+overlap)) &
-             .LT. (tail * det_ratio ) ) THEN
+        IF ( (time1 * beta * time_avail * DEXP(real(op%mu(op%Impurity%activeFlavor))*length+overlap)) &
+             .LT. (tail * abs(det_ratio) ) ) THEN
           CALL ImpurityOperator_remove(op%Impurity,position)
           CALL BathOperatoroffdiagComplex_setMRemove(op%Bath,op%Impurity%particles) 
           !op%seg_removed = op%seg_removed  + 1.d0
@@ -2424,6 +2427,7 @@ SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
           !sui!write(6,*) "        M new",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
         !prt!  enddo
           IF ( sign_det_ratio .LT. 0.d0 ) op%signvalue=-op%signvalue
+          op%phasevalue=op%phasevalue*det_ratio/abs(det_ratio)*sign_det_ratio
         !sui!write(6,*) "                  signvalue",op%signvalue
         ELSE
      !ii  write(6,*) "        Refused      removal",time1
@@ -2725,7 +2729,7 @@ SUBROUTINE CtqmcoffdiagComplex_trySwap(op,flav_i,flav_j)
 
 !    END IF
     local_ratio = DEXP(-overlapic2*overlapjc2+overlapic1*overlapjc1 &
-                      +(lengthj-lengthi)*dble((op%mu(flavor_i))-dble(op%mu(flavor_j))))
+                      +(lengthj-lengthi)*real((op%mu(flavor_i))-real(op%mu(flavor_j))))
    !ii  write(6,*) "local_ratio",local_ratio
 
     ! Wloc = exp(muN-Uo)
@@ -3044,6 +3048,7 @@ include 'mpif.h'
   INTEGER                                       :: n2,n3,quotient,remainder,signe
   INTEGER                                       :: debut
   DOUBLE PRECISION                                       :: signvaluemeassum
+   COMPLEX(KIND=8)                               :: phasevaluemeassum       
 !  INTEGER                                       :: fin
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
@@ -3052,7 +3057,7 @@ include 'mpif.h'
   INTEGER                                       :: sizeoper,nbprocs,myrank
   DOUBLE PRECISION                              :: inv_size,sumh,sumtot
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
   TYPE(FFTHyb) :: FFTmrka
 
@@ -3411,6 +3416,7 @@ include 'mpif.h'
     buffer(spAll-5,1) = op%errorImpurity
     buffer(spAll-5,2) = op%errorBath 
     signvaluemeassum = 0
+    phasevaluemeassum = 0
 !#endif
 
 #ifdef HAVE_MPI
@@ -3425,11 +3431,13 @@ include 'mpif.h'
     FREE(buffer2_out)
 #endif
     CALL MPI_ALLREDUCE(buffer2, buffer2s, sizeoper*flavors*flavors, &
-                     MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+                     MPI_DOUBLE_COMPLEX, MPI_SUM, op%MY_COMM, ierr)
     CALL MPI_ALLREDUCE([op%runtime], arr, 1, MPI_DOUBLE_PRECISION, MPI_MAX, op%MY_COMM, ierr)
     op%runtime=arr(1)
     CALL MPI_ALLREDUCE([op%Greens%signvaluemeas], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
     signvaluemeassum=arr(1)
+    CALL MPI_ALLREDUCE([op%Greens%phasevaluemeas], arr , 1, MPI_DOUBLE_COMPLEX, MPI_SUM, op%MY_COMM, ierr)                                                                                   
+    phasevaluemeassum=arr(1)
 #if defined HAVE_MPI2_INPLACE
     IF ( op%opt_histo .GT. 0 ) THEN
       CALL MPI_ALLREDUCE(MPI_IN_PLACE,op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
@@ -3492,8 +3500,9 @@ include 'mpif.h'
     op%Greens%oper = buffer2s/float(nbprocs)
    ! write(6,*) "buffer2s",(op%Greens%oper(1,n1,n1),n1=1,flavors)
     op%Greens%signvaluemeas = signvaluemeassum/float(nbprocs)
+    op%Greens%phasevaluemeas = phasevaluemeassum/float(nbprocs)   
     !sui!write(6,*) "nbprocs",nbprocs,op%Greens%signvaluemeas
-    op%Greens%oper = op%Greens%oper / op%Greens%signvaluemeas
+    op%Greens%oper = op%Greens%oper / op%Greens%phasevaluemeas
    ! write(6,*) "buffer3s",(op%Greens%oper(1,n1,n1),n1=1,flavors)
     IF ( op%opt_order .GT. 0 ) THEN
       op%meas_fullemptylines= fullempty/float(nbprocs)
@@ -4244,6 +4253,7 @@ SUBROUTINE CtqmcoffdiagComplex_printQMC(op)
   WRITE(ostream,'(A28,F6.2)') "Anti-segments <0 sign [%] : ", op%stats(3)*invSweeps*100.d0
   !WRITE(ostream,'(A28,F12.2)') "Sum of sign       [%] : ", op%stats(3)
   WRITE(ostream,'(A28,F13.2)') "Signe value               : ", op%Greens%signvaluemeas
+  WRITE(ostream,'(A28,F13.2,F13.2)') "Phase value               : ", op%Greens%phasevaluemeas
   IF ( op%modGlobalMove(1) .LT. op%sweeps + 1 ) THEN
     WRITE(ostream,'(A28,F6.2)') "Global Move           [%] : ", op%swap         *invSweeps*100.d0*op%modGlobalMove(1)
     WRITE(ostream,'(A28,F6.2)') "Global Move Reduced   [%] : ", op%swap         / DBLE(op%modGlobalMove(2))*100.d0
@@ -4284,7 +4294,7 @@ SUBROUTINE CtqmcoffdiagComplex_printQMC(op)
   write(ostream,'(17x,30i10)') (iflavorbis,iflavorbis=1,op%flavors)
   write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors)
   do iflavor=1, op%flavors
-    write(ostream,'(7x,i10,a,30f10.4)') iflavor,"|",(op%Greens%oper(op%samples,iflavor,iflavorbis),iflavorbis=1,op%flavors)
+    write(ostream,'(7x,i10,a,30f10.4)') iflavor,"|",(real(op%Greens%oper(op%samples,iflavor,iflavorbis)),iflavorbis=1,op%flavors)
   enddo
   write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors),ch10
  !------------------------------------------------------------------------------------------
@@ -4293,7 +4303,7 @@ SUBROUTINE CtqmcoffdiagComplex_printQMC(op)
   write(ostream,'(17x,30i10)') (iflavorbis,iflavorbis=1,op%flavors)
   write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors)
   do iflavor=1, op%flavors
-    write(ostream,'(7x,i10,a,30f10.4)') iflavor,"|",(op%Greens%oper(1,iflavor,iflavorbis),iflavorbis=1,op%flavors)
+    write(ostream,'(7x,i10,a,30f10.4)') iflavor,"|",(real(op%Greens%oper(1,iflavor,iflavorbis)),iflavorbis=1,op%flavors)
   enddo
   write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors),ch10
  !------------------------------------------------------------------------------------------
@@ -4382,8 +4392,8 @@ SUBROUTINE CtqmcoffdiagComplex_printGreen(op, oFileIn)
   INTEGER                            :: sp1
   INTEGER                            :: iflavor,iflavorb
   INTEGER                            :: flavors !, iflavor2 !,iflavor1,
-  CHARACTER(LEN=4)                   :: cflavors
-  CHARACTER(LEN=50)                  :: string
+  CHARACTER(LEN=4)                   :: cflavors,hcflavors
+  CHARACTER(LEN=50)                  :: string,hstring
   DOUBLE PRECISION                   :: dt
   DOUBLE PRECISION                   :: sweeps
 
@@ -4398,6 +4408,10 @@ SUBROUTINE CtqmcoffdiagComplex_printGreen(op, oFileIn)
   END IF
   OPEN(UNIT=43, FILE="Gtau_nd.dat")
   rewind(43)
+  OPEN(UNIT=143, FILE="Gtau_nd_Re_ctqmc.dat")             
+  rewind(143)                                             
+  OPEN(UNIT=243, FILE="Gtau_nd_Im_ctqmc.dat")             
+  rewind(243)                                             
   sp1     =  op%samples
   dt      =  op%beta / DBLE(sp1)
   sp1     =  sp1 + 1
@@ -4429,18 +4443,26 @@ SUBROUTINE CtqmcoffdiagComplex_printGreen(op, oFileIn)
 !   END DO
 !  --- Print full non diagonal Gtau in Gtau_nd.dat
     WRITE(cflavors,'(I4)') (flavors*flavors+1)
+    WRITE(hcflavors,'(I4)') (flavors*flavors+1) 
 !   write(47,*) "cflavors",cflavors
     string = '(1x,'//TRIM(ADJUSTL(cflavors))//'ES22.14)'
+    hstring = '(1x,'//TRIM(ADJUSTL(hcflavors))//'ES22.14)' 
 !   write(47,*) string
     DO itime = 1, sp1
       WRITE(43,string) DBLE(itime-1)*dt, &
       & (/ ((op%Greens%oper(itime,iflavor,iflavorb), iflavorb=1, flavors),iflavor=1,flavors) /)
+      WRITE(143,hstring) DBLE(itime-1)*dt, &                                                             
+      & (/ ((real(op%Greens%oper(itime,iflavor,iflavorb)), iflavorb=1, flavors),iflavor=1,flavors) /)    
+      WRITE(243,hstring) DBLE(itime-1)*dt, &                                                             
+      & (/ ((aimag(op%Greens%oper(itime,iflavor,iflavorb)), iflavorb=1, flavors),iflavor=1,flavors) /)   
 !     WRITE(44,*) DBLE(itime-1)*dt, &
 !     & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
 !     WRITE(44,string) DBLE(itime-1)*dt, &
 !     & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
     END DO
       WRITE(43,*) 
+      WRITE(143,*)
+      WRITE(243,*)
   END IF
 !    DO iflavor = 1, flavors
 !      DO iflavor2 = 1, flavors
@@ -4455,8 +4477,8 @@ SUBROUTINE CtqmcoffdiagComplex_printGreen(op, oFileIn)
 
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
   CLOSE(43)
-! CLOSE(44)
-! CLOSE(45)
+  CLOSE(143)
+  CLOSE(243)
 ! CLOSE(46)
 ! CLOSE(47)
   !call flush_unit(43)
