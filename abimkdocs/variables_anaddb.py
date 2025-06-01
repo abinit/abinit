@@ -63,6 +63,15 @@ Note that there is a similar input variable [[asr]] for ABINIT.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
   the on-site interatomic force constants, in a symmetric way ( **asr** =2),
   or in the more general case, unconstrained way ( **asr** =1).
+  * 6 (temporary before splitting asr and msr variable) --> impose ASR and
+  rotational invariance on the interatomic force constants. This requires
+  the knowledge of the IFCS derivatives, estimated based on real-space
+  IFCs moments (requires [[anaddb:ifcflag]]=1) or reading them from flexoddb
+  (requires [[anaddb:flexoflag]]=1). Rotational invariance has a different
+  impact depending on the dimensionality of the problem, see [[anaddb:dim_msr]].
+  Invariance is imposed on the zone-center IFCs and/or their derivatives
+  thanks to a Moore-Penrose pseudo-inverse, correcting on-site and first-neigbhors
+  interactions. 
 
 More detailed explanations: the total energy should be invariant under
 translation of the crystal as a whole. This would guarantee that the three
@@ -259,6 +268,39 @@ Frequency-dependent dielectric tensor flag.
   * 4 --> Calculate dielectric tensor of both relaxed ion and free stress.
   We need information of internal strain and elastic tensor (relaxed ion) in this computation.
   So please set: [[anaddb:elaflag]]=2,3,4 or 5 and [[anaddb:instrflag]]=1
+""",
+    ),
+
+        Variable(
+        abivarname="dim_msr@anaddb",
+        varset="anaddb",
+        vartype="integer",
+        topics=['PhononBands_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="dimensionality rotational sum rule",
+        added_in_version="v10",
+        text=r"""
+  Control the dimensionaility of the problem when rotational invariance is imposed on the interatomic force constants
+  Indeed, along periodic lattices, rotational invariance imposes conditions on the IFCs derivative, while along
+  non-periodic ones, only the zone-center IFCs are impacted. The code doesn't automatically detect it based on the
+  input structure.
+
+  * 1 --> consider a 3D problem (IFCs derivatives used everywhere).
+
+  * 2 --> consider a 2D problem with non-periodic lattice along x
+
+  * 3 --> consider a 2D problem with non-periodic lattice along y
+  
+  * 4 --> consider a 2D problem with non-periodic lattice along z
+
+  * 5 --> consider a 1D problem with periodic lattice along x
+  
+  * 6 --> consider a 2D problem with periodic lattice along y
+  
+  * 7 --> consider a 2D problem with periodic lattice along z
+  
+  * 8 --> consider a 0D problem (molecule)
 """,
     ),
 
