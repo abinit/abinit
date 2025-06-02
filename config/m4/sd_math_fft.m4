@@ -103,12 +103,12 @@ AC_DEFUN([SD_FFT_DETECT], [
           sd_fftw3_libs="${sd_fftw3_libs} -Mnvpl=fft"
         fi
         SD_FFTW3_DETECT
-        # if test "${sd_fft_flavor}" = "fftw3-threads" -a "${sd_fftw3_threads_ok}" != "yes"; then
-        #   AC_MSG_ERROR([invalid FFT configuration
-        #          Selected FFT flavor is fftw3-threads but FFTW3 implementation
-        #          does not provide multi-threading!
-        #          Check your environment.])
-        #fi
+         if test "${sd_fft_flavor}" = "fftw3-threads" -a "${sd_fftw3_threads_ok}" != "yes"; then
+           AC_MSG_ERROR([invalid FFT configuration
+                  Selected FFT flavor is fftw3-threads but FFTW3 implementation
+                  does not provide multi-threading!
+                  Check your environment.])
+        fi
         if test "${sd_fftw3_ok}" = "yes"; then
           sd_fft_cppflags="${sd_fftw3_cppflags}"
           sd_fft_cflags="${sd_fftw3_cflags}"
