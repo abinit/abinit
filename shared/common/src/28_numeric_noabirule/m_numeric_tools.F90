@@ -4884,13 +4884,13 @@ pure function interpol1d(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
   res = zero
 
   do ii = 1, npts_i
-    do jj = 1, npts_o
-      if (pts_i(ii) < pts_o(jj)) exit
+    do jj = 1, npts_o + 1
+      if (jj == npts_o + 1 .or. pts_i(ii) < pts_o(jj)) exit
     end do
     if (jj == 1) then
-      res(ii) = val_o(jj)
-    else if (jj == npts_o) then
-      res(ii) = val_o(jj)
+      res(ii) = val_o(1)
+    else if (jj == npts_o + 1) then
+      res(ii) = val_o(npts_o)
     else
       x1 = pts_o(jj - 1)
       x2 = pts_o(jj)

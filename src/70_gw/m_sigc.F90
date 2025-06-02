@@ -604,6 +604,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                     MPI_INFO_NULL, &
                     file_epsm1, &
                     ierr)
+ call MPI_FILE_SET_SIZE(file_epsm1, 0_MPI_OFFSET_KIND, ierr)
  call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX, comm_size_dpc, ierr)
  call MPI_TYPE_SIZE(MPI_INTEGER, comm_size_int, ierr)
  call MPI_TYPE_SIZE(MPI_DOUBLE_PRECISION, comm_size_dp, ierr)
@@ -617,14 +618,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                            ierr)
     call MPI_FILE_WRITE_AT(file_epsm1, &
                            INT(7*comm_size_int,kind=MPI_OFFSET_KIND), &
-                           omegap(:), &
+                           omegap(epsm1%nomega_i:1:-1), &
                            epsm1%nomega_i, &
                            MPI_DOUBLE_PRECISION, &
                            MPI_STATUS_IGNORE, &
                            ierr)
     call MPI_FILE_WRITE_AT(file_epsm1, &
                            INT(7 * comm_size_int + epsm1%nomega_i * comm_size_dp,kind=MPI_OFFSET_KIND), &
-                           conv_omegap(:), &
+                           conv_omegap(epsm1%nomega_i_conv:1:-1), &
                            epsm1%nomega_i_conv, &
                            MPI_DOUBLE_PRECISION, &
                            MPI_STATUS_IGNORE, &
