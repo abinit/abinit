@@ -54,7 +54,7 @@ module m_sigc
  use m_hide_lapack,   only : xheev
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
-!  use m_numeric_tools, only : pade
+!  use m_numeric_tools, only : pade, interpol1d_c
  use m_pstat,         only : pstat_proc
 
 #define OUTPUT_EPSM1
@@ -993,6 +993,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                                 omegap(epsm1%nomega_i:1:-1), conv_omegap(epsm1%nomega_i_conv:1:-1), &
                                 tmp_conv_rhotw_epsm1_rhotw, &
                                 tmp_rhotw_epsm1_rhotw)
+                  ! tmp_conv_rhotw_epsm1_rhotw = interpol1d_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
+                  !                        omegap(epsm1%nomega_i:1:-1), conv_omegap(epsm1%nomega_i_conv:1:-1), &
+                  !                        tmp_rhotw_epsm1_rhotw)
                   conv_rhotw_epsm1_rhotw(jb,kb,:) = tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1)
 #ifdef OUTPUT_EPSM1
                   ! Write the result in the file, note that conv_rhotw_epsm1_rhotw is in reverse order
