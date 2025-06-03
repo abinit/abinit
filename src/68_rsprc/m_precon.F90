@@ -11,20 +11,30 @@
 
 module m_precon
 
-    use defs_abitypes,  only : MPI_type
+    use defs_abitypes,      only : MPI_type
     use defs_basis
     use m_dtset
+    use m_dtfil
     use m_xmpi
 
+    use defs_datatypes,     only : pseudopotential_type
     use defs_wvltypes
-    use m_atomdata,     only : atom_length
-    use m_dfpt_mkvxc,   only : dfpt_mkvxc, dfpt_mkvxc_noncoll
-    use m_fft,          only : fourdp, fourwf, fftpac
-    use m_fftcore,      only : sphereboundary
+    use m_atomdata,         only : atom_length
+    use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
+    use m_fft,              only : fourdp, fourwf, fftpac
+    use m_fftcore,          only : sphereboundary
     use m_mkrho
-    use m_mpinfo,       only : proc_distrb_cycle
+    use m_mpinfo,           only : proc_distrb_cycle
     use m_paw_dmft
-    use m_spacepar,     only : symrhg
+    use m_pawrhoij,         only : pawrhoij_type
+    use m_pawcprj,          only : pawcprj_type
+    use m_pawang,           only : pawang_type
+    use m_pawfgr,           only : pawfgr_type
+    use m_pawtab,           only : pawtab_type
+    use m_pawfgrtab,        only : pawfgrtab_type
+    use m_paw_occupancies,  only : pawmkrhoij
+    use m_paw_mkrho,        only : pawmkrho
+    use m_spacepar,         only : symrhg
 
 #if defined HAVE_LINALG_MKL_OMATCOPY
     use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
@@ -41,17 +51,22 @@ module m_precon
         !Geometry :
         real(dp) :: gprimd(3, 3), rprimd(3, 3)
         real(dp) :: ucvol, dvol
-        !For LDOS preconditioner :
+        !PAW :
+        type(pseudopotential_type), pointer :: psps
+        integer :: mband_cprj
+        integer, pointer :: dimcprj(:)
+        integer :: unpaw
+        type(pawcprj_type), pointer :: cprj(:, :)
+        type(pawang_type), pointer :: pawang
+        type(pawfgr_type), pointer :: pawfgr
+        type(pawfgrtab_type), pointer :: pawfgrtab(:)
+        type(pawtab_type), pointer :: pawtab(:)
+        !To compute (weighted) densities and other quantities :
         real(dp), pointer :: fermie
         real(dp), pointer :: cg(:, :), eigen(:), phnons(:, :, :)
         integer, pointer  :: kg(:, :), npwarr(:), irrzon(:, :, :)
-        real(dp) :: tdos
-        real(dp), allocatable :: ldos(:, :)
-        !For local polarizability preconditioner :
-        real(dp) :: gc
-        real(dp), allocatable :: loc_pola(:, :)
-            !To compute loc_pola :
-        integer, pointer :: atindx1(:), nattyp(:)
+        integer, pointer :: atindx(:), atindx1(:), nattyp(:)
+        integer, pointer :: symrec(:, :, :), indsym(:, :, :)
         real(dp), pointer :: xred(:, :)
         !For ffts :
         integer  :: nfft
@@ -61,6 +76,13 @@ module m_precon
         real(dp), pointer :: kxc(:, :)
         real(dp), pointer :: rhor(:, :)
         real(dp), pointer :: vxc(:, :)
+
+        !For LDOS preconditioner :
+        real(dp) :: tdos
+        real(dp), allocatable :: ldos(:, :)
+        !For local polarizability preconditioner :
+        real(dp) :: gc
+        real(dp), allocatable :: loc_pola(:, :)
 
     contains
         procedure :: init => precon_init            ! Initialize the precon_object.
@@ -91,8 +113,11 @@ contains
     !!
     !! INPUTS
     !!  dtset   = all input variables for this dataset
+    !!  atindx  =
     !!  atindx1 = index table for atoms, inverse of atindx (see gstate.f)
     !!  cg      = wf in G space
+    !!  cprj    =
+    !!  dimcprj =
     !!  eigen   = array of eigenvalues
     !!  fermie  = fermi energie
     !!  gprimd  = dimensional reciprocal space primitive translations
@@ -100,14 +125,20 @@ contains
     !!  kg      = reduced planewave coordinates
     !!  nattyp  = number of atoms of each type.
     !!  npwarr  = number of planewaves and boundary planewaves at each k
+    !!  pawang  =
+    !!  pawfgr  =
+    !!  pawfgrtab =
+    !!  pawtab  =
     !!  phnons  = nonsymmorphic translation phases
+    !!  psps    =
     !!  rprimd  = dimensional real space primitive translations
     !!  ucvol   = unit cell volume
     !!  xred    = reduced dimensionless atomic coordinates
     !!
     !! SOURCE
-    subroutine precon_init(this, dtset, atindx1, cg, eigen, fermie, gprimd, &
-        &   irrzon, kg, nattyp, npwarr, phnons, rhor, rprimd, ucvol, vxc, xred)
+    subroutine precon_init(this, dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, &
+        &   gprimd, indsym, irrzon, kg, mband_cprj, nattyp, npwarr, pawang, pawfgr, pawfgrtab, &
+        &   pawtab, phnons, psps, rhor, rprimd, symrec, ucvol, vxc, xred)
 
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
@@ -115,14 +146,23 @@ contains
         type(dataset_type),intent(in) :: dtset
         real(dp), intent(in) :: ucvol
         real(dp), intent(in), target :: fermie
-
+        integer, intent(in) :: mband_cprj
         !arrays
         real(dp), intent(in) :: gprimd(:, :), rprimd(:, :)
         integer, intent(in), target  :: irrzon(:, :, :), kg(:, :), npwarr(:)
-        integer, intent(in), target :: atindx1(:), nattyp(:)
+        integer, intent(in), target :: atindx(:), atindx1(:), nattyp(:)
+        integer, intent(in), target :: symrec(:, :, :), indsym(:, :, :)
         real(dp), intent(in), target :: cg(:, :), eigen(:), phnons(:, :, :)
         real(dp), intent(in), target :: rhor(:, :), vxc(:, :)
         real(dp), intent(in), target :: xred(:, :)
+        type(datafiles_type),intent(in) :: dtfil
+        type(pseudopotential_type), intent(in), target :: psps
+        integer, intent(in), target :: dimcprj(:)
+        type(pawcprj_type), intent(in), target :: cprj(:, :)
+        type(pawang_type), intent(in), target :: pawang
+        type(pawfgr_type), intent(in), target :: pawfgr
+        type(pawfgrtab_type), intent(in), target :: pawfgrtab(:)
+        type(pawtab_type), intent(in), target :: pawtab(:)
 
         ! *************************************************************************
         !Constant data from dtset
@@ -138,23 +178,41 @@ contains
         this%ucvol  = ucvol
         this%need_kxc = .false.
         !Pointers
+        this%atindx => atindx 
         this%atindx1 => atindx1 
         this%cg     => cg
         this%eigen  => eigen
         this%fermie => fermie
+        this%indsym => indsym
         this%irrzon => irrzon
         this%kg     => kg
         this%nattyp => nattyp
         this%npwarr => npwarr
         this%phnons => phnons
+        this%psps   => psps
         this%rhor   => rhor
+        this%symrec => symrec
         this%vxc    => vxc
         this%xred   => xred
+        
+        !PAW :
+        if (psps%usepaw==1) then
+            this%unpaw = dtfil%unpaw
+            this%mband_cprj = mband_cprj
+            this%dimcprj    => dimcprj
+            this%cprj       => cprj
+            this%pawang     => pawang
+            this%pawfgr     => pawfgr
+            this%pawfgrtab  => pawfgrtab
+            this%pawtab     => pawtab
+        end if
+        
         !Initializing LDOS specific variables
         if (this%iprcel == 202) then
             !Allocating the array containing ldos
             ABI_MALLOC(this%ldos, (this%nfft, this%nspden))
         end if
+        
         !Initializing chi0_diag specific variables
         if (this%iprcel == 203) then
             !Preparing the allocation of Kxc
@@ -169,6 +227,7 @@ contains
                 end if
             end if
         end if
+        
         !Initializing loc_pola specific variables
         if (this%iprcel == 204) then
             !this%gc = 1.0 ! TODO
@@ -880,6 +939,92 @@ contains
         fprim = -1/tsmear * delta
         
     end function derivative_occ
+
+    !****f* m_precon/compute_density
+    !! NAME
+    !!  compute_density
+    !!
+    !! FUNCTION
+    !!  Wrapper for mkrho, symrhg and PAW
+    !!  Compute sum_i weight_i |psi_i|^2
+    !!
+    !! INPUTS
+    !!  dtset       = all input variables for this dataset
+    !!
+    !! SOURCE
+    subroutine compute_density(this, dtset, mpi_enreg, nfft, weights, w_rhor) ! Need two grid
+
+        !Arguments ------------------------------------
+        !scalars
+        class(precon_object), intent(in) :: this
+        type(dataset_type), intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
+        integer, intent(in) :: nfft
+        !arrays
+        real(dp), intent(in) :: weights(:)
+        real(dp), intent(out) :: w_rhor(:, :)
+
+        !Local variables-------------------------------
+        !scalars
+        type(pawrhoij_type) :: pawrhoij(mpi_enreg%my_natom*this%psps%usepaw)
+        integer :: dummy_int
+        integer :: mcg, cplex, nfftot, mcprj
+        real(dp) :: compch_fft
+        !arrays
+        real(dp) :: qphon(3)
+        real(dp), allocatable :: w_rhowfg(:, :), w_rhowfr(:, :)
+        type(paw_dmft_type)     :: dummy_paw_dmft
+        type(wvl_wf_type)       :: dummy_wvl_wfs
+        type(wvl_denspot_type)  :: dummy_wvl_den
+
+        if (this%psps%usepaw==0) then
+            ABI_MALLOC(w_rhowfr, (nfft, dtset%nspden))
+            ABI_MALLOC(w_rhowfg, (2, nfft))
+        else
+            ABI_MALLOC(w_rhowfr, (this%pawfgr%nfftc, dtset%nspden))
+            ABI_MALLOC(w_rhowfg, (2, this%pawfgr%nfftc))
+        end if
+
+        ! Compute the weighted density (w_rhor) using mkrho with weights in place of the occupations.
+        mcg = size(this%cg)
+        dummy_paw_dmft%use_dmft = 0
+        dummy_paw_dmft%use_sc_dmft = 0
+        call mkrho(this%cg, dtset, this%gprimd, this%irrzon, this%kg, mcg, mpi_enreg, this%npwarr, weights, &
+        &   dummy_paw_dmft, this%phnons, w_rhowfg, w_rhowfr, this%rprimd, 0, this%ucvol, dummy_wvl_den, dummy_wvl_wfs, option=0)
+        
+        ! Symmetrize the weighted density (w_rhor)
+        !TODO nfftmix != dtset%nfft en PAW grille
+        nfftot = dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
+        call symrhg(1, this%gprimd, this%irrzon, mpi_enreg, nfft, nfftot, dtset%ngfft, dtset%nspden, dtset%nsppol, &
+        &   dtset%nsym, this%phnons, w_rhowfg, w_rhowfr, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
+
+        if (this%psps%usepaw==0) then
+        ! In NC : the weighted density is directly w_rhowfr.
+            w_rhor = w_rhowfr
+        else
+        ! In PAW : Add rhoij terms to  w_rhowfr.
+            
+            !Compute the rhoij equivalent for the weighted density.
+            !   Sum_{n,k} {weight(n,k)*<Cnk|p_i><p_j|Cnk>}.
+            mcprj = size(this%cprj)
+            call pawmkrhoij(this%atindx, this%atindx1, this%cprj, this%dimcprj, dtset%istwfk, dtset%kptopt, dtset%mband, this%mband_cprj, &
+            &       mcprj, dtset%mkmem, mpi_enreg, dtset%natom, dtset%nband, dtset%nkpt, dtset%nspden, dtset%nspinor, &
+            &       dtset%nsppol, weights, dtset%paral_kgb, dummy_paw_dmft, pawrhoij, this%unpaw, dtset%usewvl, dtset%wtk)
+
+            !Compute the total weighted density.
+            cplex = 1
+            dummy_int=0
+            qphon = 0
+            call pawmkrho(1, compch_fft, cplex, this%gprimd, dummy_int, this%indsym, dummy_int, mpi_enreg, &
+            &       mpi_enreg%my_natom, dtset%natom, dtset%nspden, dtset%nsym, dtset%ntypat, dtset%paral_kgb, this%pawang, this%pawfgr, this%pawfgrtab, &
+            &       dtset%pawprtvol, pawrhoij, pawrhoij, this%pawtab, qphon, w_rhowfg, w_rhowfr, w_rhor, this%rprimd, dtset%symafm, &
+            &       this%symrec, dtset%typat, this%ucvol, dtset%usewvl, this%xred)
+        end if
+
+        ABI_FREE(w_rhowfr)
+        ABI_FREE(w_rhowfg)
+    
+    end subroutine compute_density
 
     !****f* m_precon/compute_ldos
     !! NAME
