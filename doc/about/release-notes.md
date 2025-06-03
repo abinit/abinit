@@ -103,7 +103,7 @@ It includes the calculation of the current density response to an impulse electr
 Activate it using [[optdriver]]=9. Control the number of time steps using [[ntime]], and the time step value using [[dtele]].
 The corresponding [[tutorial:rttddft]] is available.
 
-Related input variables : [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]], prtcurrent (to be documented).
+Related input variables : [[prtcurrent]], [[td_propagator]], [[dtele]], [[td_ef_type]], [[td_ef_induced_vecpot]], [[td_ef_tzero]], [[td_ef_pol]]
 The new input units "fs" and "as" have been introduced (for "femtoseconds" and "attoseconds").
 Related tests : [[test:rttddft_suite_01]] to  [[test:rttddft_suite_06]] as well as the tests of the tutorial, [[test:rttddft_1]] to [[test:rttddft_4]].
 
@@ -117,7 +117,7 @@ the calculation of Seebeck, electronic thermal conductivity and Peltier coeffici
 (RTA - [[eph_task]]=7)
 and in the Iterative Boltzmann Transport Equation (IBTE - [[eph_task]]=8).
 The implementation of chemical potential varying with temperature in the transport coefficient calculations has been fixed (in the RTA).
-Related tests for RTA: [[test:v9_60]], [[test:v9_61]], [[test:teph4mob_5]], [[test:teph4mob_6]], [[test:teph4mob_7]].
+Related tests for RTA: [[test:v9_60]], [[test:v9_61]], [[test:eph4mob_5]], [[test:eph4mob_6]], [[test:eph4mob_7]].
 Related tests for RTA and IBTE: [[test:v9_65]].
 
 The calculation of mobility using Dyson-Migdal spectral functions 
