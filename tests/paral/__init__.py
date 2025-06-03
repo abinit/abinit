@@ -95,7 +95,9 @@ inp_files = [
 "t97.abi",
 "t98.abi",
 "t99.abi",
-"t100.abi",
-"t101.abi",
-"t102.abi",
+"t100.abi", #DMFT ctqmc_localprop scalar
+"t101.abi", #DMFT ctqmc_localprop soc
+"t102.abi", #DMFT kspectralfunc=1
+"t103.abi", #DMFT magnfield=1
+"t104.abi", #DMFT magnfield=2
 ]
