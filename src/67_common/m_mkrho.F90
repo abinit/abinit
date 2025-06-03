@@ -144,7 +144,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer,intent(in),optional :: option,nfft_blocks
  real(dp),intent(in) :: ucvol
  type(extfpmd_type),intent(in),pointer,optional :: extfpmd
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(wvl_wf_type),intent(inout) :: wvl_wfs
