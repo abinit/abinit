@@ -1295,6 +1295,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  ! spectrum slicing routines
  names(2160) = 'slicewf                       '
+ names(2161) = 'slice_sched                   '
+ names(2162) = 'slice1_diago                  '
+ names(2163) = 'slice2_diago                  '
+ names(2164) = 'slice3_diago                  '
+ names(2165) = 'sliceX_diago                  '
+ names(2166) = 'slice(other)                  '
 
  ! TIMER_SIZE is 2199. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
@@ -1575,6 +1581,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(60)
 !      Estimate the complement of xg_nonlop_forces_stress
      tslots(:8)=(/2159,2150,-2151,-2152,-2153,-2154,-2155,-2156/)
+   case(61)
+!      Estimate the complement of slice
+     tslots(:7)=(/2166,2160,-2161,-2162,-2163,-2164,-2165/)
 
    case default
      cycle
@@ -1989,7 +1998,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(90)
          list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
        case(91)
-         list(:1)=(/ 2160 /); msg='slicewf core engine '
+         list(:7)=(/ 2160,2161,2162,2163,2164,2165,2166 /); msg='slicewf core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
