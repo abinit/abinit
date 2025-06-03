@@ -82,7 +82,6 @@ subroutine wvl_hpsitopsi(cprj,dtset,energies,istep,mcprj,mpi_enreg,residm,wvl,xc
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : hpsitopsi, calculate_energy_and_gradient
 #endif
-  implicit none
 
 !Arguments -------------------------------
   type(dataset_type), intent(in)         :: dtset
@@ -212,7 +211,6 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: psitohpsi, KS_POTENTIAL, total_energies
 #endif
- implicit none
 
 !Arguments-------------------------------
 !scalars
@@ -330,7 +328,6 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: nonlocal_forces
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -422,7 +419,6 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: CalculateTailCorrection
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars

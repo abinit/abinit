@@ -6,7 +6,7 @@
 !! FUNCTION
 !!  Logical AND accross the nodes.
 !!  Combines value from all processes and distribute the result back to all processes.
-!!  Target: logical scalar 
+!!  Target: logical scalar
 !!
 !! SOURCE
 
@@ -82,8 +82,6 @@ subroutine xmpi_land_log1d(xval,comm)
 
 end subroutine xmpi_land_log1d
 !!***
-
-
 
 !----------------------------------------------------------------------
 

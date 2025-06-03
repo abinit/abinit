@@ -26,7 +26,7 @@ module m_newvtr
  use m_abicore
  use m_errors
  use m_abi2big
- use m_ab7_mixing
+ use m_abi_mixing
  use m_cgtools
  use m_dtset
 
@@ -153,7 +153,7 @@ contains
 !!  vtrial(nfft,nspden)= at input, it is the "in" trial potential that gave vresid=(v_out-v_in)
 !!       at output, it is an updated "mixed" trial potential
 !!  ===== if size(vtau)>0, i.e. usevtau==1 =====
-!!  [mix_mgga<type(ab7_mixing_object)>]=all data defining the mixing algorithm for
+!!  [mix_mgga<type(abi_mixing_object)>]=all data defining the mixing algorithm for
 !!    the kinetic energy potential
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
@@ -215,8 +215,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  real(dp),intent(in) :: etotal,gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
- type(ab7_mixing_object),intent(inout) :: mix
- type(ab7_mixing_object),intent(inout),optional :: mix_mgga
+ type(abi_mixing_object),intent(inout) :: mix
+ type(abi_mixing_object),intent(inout),optional :: mix_mgga
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data), intent(inout) :: wvl
 !arrays
@@ -308,8 +308,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
       message='mix_gga array missing!'
       ABI_BUG(message)
    end if
-   if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
-&      mix_mgga%iscf==AB7_MIXING_EIG) then
+   if (mix_mgga%iscf==ABI_MIXING_CG_ENERGY.or.mix_mgga%iscf==ABI_MIXING_CG_ENERGY_2.or.&
+&      mix_mgga%iscf==ABI_MIXING_EIG) then
      message='kinetic energy potential cannot be mixed with the selected mixing algorithm!'
      ABI_ERROR(message)
    end if
@@ -491,23 +491,23 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 
 !Initialise working arrays for the mixing object.
  if (moved_atm_inside == 1) then
-   call ab7_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
+   call abi_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
  end if
- call ab7_mixing_eval_allocate(mix, istep)
+ call abi_mixing_eval_allocate(mix, istep)
 !Copy current step arrays.
  if (moved_atm_inside == 1) then
-   call ab7_mixing_copy_current_step(mix, vresid0, errid, message, &
+   call abi_mixing_copy_current_step(mix, vresid0, errid, message, &
 &   arr_respc = vrespc, arr_atm = grhf)
  else
-   call ab7_mixing_copy_current_step(mix, vresid0, errid, message, &
+   call abi_mixing_copy_current_step(mix, vresid0, errid, message, &
 &   arr_respc = vrespc)
  end if
  if (errid /= AB7_NO_ERROR) then
    ABI_ERROR(message)
  end if
  if (with_vtau) then
-   call ab7_mixing_eval_allocate(mix_mgga, istep)
-   call ab7_mixing_copy_current_step(mix_mgga, vtauresid0, errid, message, &
+   call abi_mixing_eval_allocate(mix_mgga, istep)
+   call abi_mixing_copy_current_step(mix_mgga, vtauresid0, errid, message, &
 &        arr_respc = vtaurespc)
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(message)
@@ -557,7 +557,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 
  reset = .false.
  if (initialized == 0) reset = .true.
- call ab7_mixing_eval(mix, vtrial0, istep, nfftot, ucvol_local, &
+ call abi_mixing_eval(mix, vtrial0, istep, nfftot, ucvol_local, &
 & mpicomm, mpi_summarize, errid, message, &
 & reset = reset, isecur = dtset%isecur, &
 & pawopt = dtset%pawoptmix, pawarr = vpaw, etotal = etotal, potden = rhor, &
@@ -568,7 +568,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    ABI_ERROR(message)
  end if
  if (with_vtau) then
-   call ab7_mixing_eval(mix_mgga, vtau0, istep, nfftot, ucvol_local, &
+   call abi_mixing_eval(mix_mgga, vtau0, istep, nfftot, ucvol_local, &
 &   mpicomm, mpi_summarize, errid, message, reset = reset)
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(message)
@@ -647,8 +647,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  ABI_FREE(vpaw)
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
- call ab7_mixing_eval_deallocate(mix)
- if (with_vtau) call ab7_mixing_eval_deallocate(mix_mgga)
+ call abi_mixing_eval_deallocate(mix)
+ if (with_vtau) call abi_mixing_eval_deallocate(mix_mgga)
 
  call timab(904,2,tsec)
 
@@ -691,7 +691,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  ABI_FREE(vtau0)
 
 !In case of metaGGA, re-compute vtau gradient
- if (with_vtau.and.mix_mgga%iscf/=AB7_MIXING_NONE) then
+ if (with_vtau.and.mix_mgga%iscf/=ABI_MIXING_NONE) then
    call xcpot(1,gprimd,0,0,mpi_enreg,nfft,ngfft,2,dtset%nspden,0,[zero,zero,zero],vxctau=vtau)
  end if
 
@@ -706,7 +706,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !When spin-polarized and fixed occupation numbers,
 !treat separately spin up and spin down.
 !Otherwise, use only global mean
- if (mix%iscf/=AB7_MIXING_NONE) then
+ if (mix%iscf/=ABI_MIXING_NONE) then
    do ispden=1,dtset%nspden
      if (dtset%nspden==2.and.dtset%occopt>=3.and. &
 &     abs(dtset%spinmagntarget+99.99_dp)<1.0d-10)then

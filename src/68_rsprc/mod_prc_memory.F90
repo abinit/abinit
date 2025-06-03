@@ -33,12 +33,12 @@ module mod_prc_memory
 
  implicit none
 
-private
+ private
 
-  real(dp),public,save,allocatable :: rdiemac(:)
+ real(dp),public,save,allocatable :: rdiemac(:)
 
-  integer,save,public :: cycle=0 ! This is great! A global variable with the same name as a Fortran Statement!
-  real(dp),save,public :: energy_min
+ integer,save,public :: cycle=0 ! This is great! A global variable with the same name as a Fortran Statement!
+ real(dp),save,public :: energy_min
 
 public :: prc_mem_init
 public :: prc_mem_free
@@ -58,8 +58,6 @@ public :: prc_mem_free
 !! SOURCE
 
 subroutine prc_mem_init(nfft)
-
-implicit none
 
 !Arguments -------------------------------
 integer, intent(in) :: nfft
@@ -89,15 +87,11 @@ integer, intent(in) :: nfft
 
 subroutine prc_mem_free()
 
-implicit none
-
 ! *********************************************************************
 
-   if (allocated(rdiemac))  then
-     ABI_FREE(rdiemac)
-   end if
+  ABI_SFREE(rdiemac)
 
- end subroutine prc_mem_free
+end subroutine prc_mem_free
 !!***
 
 end module mod_prc_memory

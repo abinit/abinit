@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "abi_clib.h"
 
@@ -25,8 +26,6 @@
 #define TC_INT 0
 #define TC_REAL 1
 #define TC_STRING 2
-
-typedef uint8_t bool;
 
 typedef union {
   int i;

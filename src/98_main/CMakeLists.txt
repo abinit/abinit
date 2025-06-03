@@ -46,12 +46,25 @@ macro(abi_build_exe exe_name)
       abinit::libxc)
   endif (Libxc_FOUND)
 
+  if (HDF5_FOUND)
+    target_link_libraries(${exe_name}
+      PUBLIC
+      HDF5::HDF5)
+  endif (HDF5_FOUND)
+
   if (ABINIT_NETCDF_FOUND)
     target_link_libraries(${exe_name}
       PUBLIC
       abinit::netcdf-fortran
       abinit::netcdf)
   endif (ABINIT_NETCDF_FOUND)
+
+  if(HAVE_GPU_MARKERS)
+    target_link_libraries(${exe_name}
+      PUBLIC
+      abinit::gpu_markers
+      )
+  endif(HAVE_GPU_MARKERS)
 
   set_target_properties(${exe_name}
     PROPERTIES

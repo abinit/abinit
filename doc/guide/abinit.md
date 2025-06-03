@@ -418,7 +418,7 @@ specified in atomic units and Tesla.
 
 The fourth class of
 variables have the characteristics **TIME**, and can be
-specified in atomic units and seconds.
+specified in atomic units, seconds, attoseconds and femtoseconds..
 
 The abinit parser recognize a dimension if it is specified after the list of numbers following the input variable
 keyword, in the input file.
@@ -434,6 +434,8 @@ mix thereof. Here is the list of recognized chains of characters:
   * nm --> nanometer (for lengths)
   * T or Tesla --> Tesla (for magnetic fields)
   * S or Sec or Second --> second (for time)
+  * as or asec or asecond --> attosecond (for time)
+  * ps or psec or psecond --> picosecond (for time)
 
 Some other character chains, like "au" (for atomic units) or "Hartree", or "Bohr" are not really treated,
 as the parser choose (by default) atomic units, which is the correct behaviour. Example:

@@ -79,9 +79,13 @@ prtebands 0       # Do not print ebands
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% test_chain = trttddft_1.abi, trttddft_2.abi, trttddft_3.abi
+#%% expected_failure = yes
 #%% [files]
 #%% files_to_test =
-#%%   trttddft_3.abo, tolnlines=  0, tolabs=  0.0, tolrel=  0.0
+#%%   trttddft_3o_DS1_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium;
+#%%   trttddft_3o_DS2_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium;
+#%%   trttddft_3o_DS3_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium;
 #%% [paral_info]
 #%% max_nprocs = 7
 #%% [extra_info]

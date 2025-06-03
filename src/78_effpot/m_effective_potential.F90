@@ -2251,8 +2251,8 @@ end subroutine effective_potential_writeAbiInput
 
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,rprimd,&
 &                                       displacement,du_delta,strain,xred,&
-&                                       compute_anharmonic,verbose,filename,elec_eval,efield_type,efield,efield2,&
-&                                       efield_lambda,efield_lambda2,efield_period,efield_phase,efield_phase2,&
+&                                       compute_anharmonic,verbose,filename,elec_eval,efield_type,efield, &
+&                                       efield_lambda, efield_period,efield_phase,nefield,&
 &                                       efield_gmean,efield_gvel,efield_sigma,efield_background,time)
 
 !Arguments ------------------------------------
@@ -2266,17 +2266,17 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   real(dp),intent(out) :: gred(3,natom)
   real(dp),intent(out) :: strten(6)
   real(dp),intent(in)  :: rprimd(3,3)
-  integer, intent(in),optional  :: efield_type
-  real(dp),intent(in),optional  :: xred(3,natom)
-  real(dp),intent(in),optional  :: efield(3),efield2(3)
-  real(dp),intent(in),optional  :: efield_background(3)
-  real(dp),intent(inout),optional  :: efield_lambda(3),efield_lambda2(3)
-  real(dp),intent(in),optional  :: efield_gmean(3)
-  real(dp),intent(in),optional  :: efield_gvel(3)
-  real(dp),intent(in),optional  :: efield_period
-  real(dp),intent(in),optional  :: efield_phase,efield_phase2
-  real(dp),intent(in),optional  :: efield_sigma
-  real(dp),intent(in),optional  :: time
+  integer, intent(in),optional  :: efield_type, nefield
+  real(dp),intent(in),optional :: xred(3,natom)
+  real(dp),intent(in),optional :: efield(3,*)
+  real(dp),intent(in),optional :: efield_background(3)
+  real(dp),intent(inout),optional :: efield_lambda(3,*)
+  real(dp),intent(in),optional :: efield_gmean(3)
+  real(dp),intent(in),optional :: efield_gvel(3)
+  real(dp),intent(in),optional :: efield_period
+  real(dp),intent(in),optional :: efield_phase(*)
+  real(dp),intent(in),optional :: efield_sigma
+  real(dp),intent(in),optional :: time
   real(dp),intent(in),optional :: strain(6)
   real(dp),intent(in),optional :: displacement(3,natom)
   real(dp),intent(in),optional :: du_delta(6,3,natom)
@@ -2648,8 +2648,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
 if(present(efield_type))then
  if (efield_type  /= 0) then
   call calculate_forces_efield(eff_pot,energy_part,eff_pot%mpi_coeff%comm,fcart_part,natom,&
-  &                       disp_tmp,xcart,efield_type,efield,efield2,efield_lambda,efield_lambda2,efield_period,&
-  &                       efield_phase,efield_phase2,efield_gmean,efield_gvel,efield_sigma,efield_background,time)
+  &                       disp_tmp,xcart,efield_type,efield,efield_lambda,efield_period,&
+  &                       efield_phase,efield_gmean,efield_gvel,efield_sigma,efield_background,time,nefield)
   if(need_verbose)then
       write(msg, '(a,1ES24.16,a)' ) ' Energy from electric field is             :',&
 &                                       energy_part,' Hartree'
@@ -2833,8 +2833,6 @@ end subroutine effective_potential_evaluate
 !! efield_gvel    Velocity of the Gaussian field
 !! efield_sigma   Std deviation of the efield
 !! efield_background Homogeneous background
-!! efield_lambda2  spatial modulation on secondary cos-like fields
-!! efield_phase2   Phase shift for secondary field
 !!
 !! OUTPUT
 !!
@@ -2843,23 +2841,24 @@ end subroutine effective_potential_evaluate
 !!
 !!
 subroutine calculate_forces_efield(eff_pot,energy_part,comm,fcart_part,natom,disp_tmp,xcart,&
-&                       efield_type,efield,efield2,efield_lambda,efield_lambda2,efield_period,efield_phase,&
-&                       efield_phase2,efield_gmean,efield_gvel,efield_sigma,efield_background,time)
+&                       efield_type,efield,efield_lambda,efield_period,efield_phase,&
+&                       efield_gmean,efield_gvel,efield_sigma,efield_background,time,nefield)
 !Arguments ------------------------------------
   integer, intent(in) :: natom,comm
   type(effective_potential_type),intent(in) :: eff_pot
   real(dp),intent(inout) :: energy_part
   real(dp),intent(inout) :: fcart_part(3,natom)
-  real(dp),intent(inout),optional  :: efield_lambda(3),efield_lambda2(3)
-  integer, intent(in)  :: efield_type
-  real(dp),intent(in),optional  :: efield(3),efield2(3)
-  real(dp),intent(in),optional  :: efield_background(3)
-  real(dp),intent(in),optional  :: efield_gmean(3)
-  real(dp),intent(in),optional  :: efield_gvel(3)
-  real(dp),intent(in),optional  :: efield_period
-  real(dp),intent(in),optional  :: efield_phase,efield_phase2
-  real(dp),intent(in),optional  :: efield_sigma
-  real(dp),intent(in),optional  :: time
+  integer, intent(in) :: efield_type
+  integer, intent(in), optional :: nefield
+  real(dp),intent(in),optional :: efield(3,*)
+  real(dp),intent(in),optional :: efield_background(3)
+  real(dp),intent(inout),optional :: efield_lambda(3,*)
+  real(dp),intent(in),optional :: efield_gmean(3)
+  real(dp),intent(in),optional :: efield_gvel(3)
+  real(dp),intent(in),optional :: efield_period
+  real(dp),intent(in),optional :: efield_phase(*)
+  real(dp),intent(in),optional :: efield_sigma
+  real(dp),intent(in),optional :: time
   real(dp),intent(in),optional :: disp_tmp(3,natom),xcart(3,natom)
 !Arguments ------------------------------------
 !Internal variables----------------------------
@@ -2867,37 +2866,42 @@ subroutine calculate_forces_efield(eff_pot,energy_part,comm,fcart_part,natom,dis
   real(dp):: argumento,argumento2
   integer :: icell,ierr,kk,ll
 !array
-  real(dp) :: ext_field(3),ext_field2(3),temp_pol(3),efield_kk(3),pos_gcenter(3),ext_field_bck(3)
+  real(dp) :: ext_field(3),ext_field2(3), temp_pol(3),efield_kk(3),pos_gcenter(3),ext_field_bck(3)
 !Internal variables----------------------------
 select case (efield_type)
 case(1)
-  if (present(efield)) then
-    ext_field =-1* efield
-  endif
+  ext_field = zero
   temp_pol = zero
-  energy_part = zero
-  fcart_part(:,:)  = zero
-  do icell = 1,eff_pot%mpi_coeff%my_ncell
-     ii = eff_pot%mpi_coeff%my_index_cells(4,icell)
-           do ia = 1,eff_pot%crystal%natom
-             kk = ii + ia
-             !We compute the polarization from the atomic displacements
-             temp_pol = temp_pol+ matmul(disp_tmp(:,kk),&
-                     & eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
-             !We compute the forces as the Born effective charges times the electric field
-             fcart_part(:,kk) = matmul(ext_field , eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
-           end do
-  end do
-  !We compute the energy as the Polarization times the electric field
-  energy_part=DOT_PRODUCT(ext_field(:),temp_pol(:))
-  call xmpi_sum(energy_part, comm, ierr)
-  call xmpi_sum(fcart_part , comm, ierr)
-case (2)
+  energy_part = zero 
+  fcart_part(:,:) = zero
   if (present(efield)) then
-    ext_field =-1* efield
+    ext_field = -1 * efield(:,1) ! Use first field by default
   endif
   if (present(efield_background)) then
-    ext_field_bck =-1* efield_background
+    ext_field = ext_field - efield_background
+  endif
+  
+  do icell = 1,eff_pot%mpi_coeff%my_ncell
+    ii = eff_pot%mpi_coeff%my_index_cells(4,icell)
+    do ia = 1,eff_pot%crystal%natom
+      kk = ii + ia
+      !We compute the polarization from the atomic displacements
+      temp_pol = temp_pol + matmul(disp_tmp(:,kk),&
+              & eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
+      !We compute the forces as the Born effective charges times the electric field  
+      fcart_part(:,kk) = matmul(ext_field, eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
+    end do
+  end do
+  !We compute the energy as the Polarization times the electric field
+  energy_part = DOT_PRODUCT(ext_field(:),temp_pol(:))
+  call xmpi_sum(energy_part, comm, ierr)
+  call xmpi_sum(fcart_part, comm, ierr)
+case (2)
+  if (present(efield) .and. present(nefield)) then
+    ext_field = -1 * efield(:,1) ! Use first field by default
+  endif
+  if (present(efield_background)) then
+    ext_field_bck = -1 * efield_background
   endif
   temp_pol = zero
   energy_part = zero
@@ -2907,7 +2911,7 @@ case (2)
            do ia = 1, eff_pot%crystal%natom
              kk = ii + ia
              !We compute the electric field value at the given time
-             efield_kk(:)=cos(-two_pi/efield_period*time+efield_phase)*ext_field(:)+ext_field_bck(:)
+             efield_kk(:)=cos(-two_pi/efield_period*time+efield_phase(1))*ext_field(:)+ext_field_bck(:)
              temp_pol = matmul(disp_tmp(:,kk),&
                      & eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
              fcart_part(:,kk) = matmul(efield_kk , eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
@@ -2918,7 +2922,7 @@ case (2)
   call xmpi_sum(fcart_part , comm, ierr)
 case (3)
   if (present(efield)) then
-    ext_field =-1* efield
+    ext_field =-1* efield(:, 1)
   endif
   if (present(efield_background)) then
     ext_field_bck =-1* efield_background
@@ -2929,8 +2933,8 @@ case (3)
   do ll=1,3
   !We update the value of the spatial modulation to convey with PBC in case
   !the lattice has been updated
-     if(efield_lambda(ll)/=0.0 .and. abs(efield_lambda(ll))<2.0*eff_pot%supercell%rprimd(ll,ll)) then
-        efield_lambda(ll)=sign(eff_pot%supercell%rprimd(ll,ll)/nint(eff_pot%supercell%rprimd(ll,ll)/efield_lambda(ll)),efield_lambda(ll))
+     if(efield_lambda(ll,1)/=0.0 .and. abs(efield_lambda(ll,1))<2.0*eff_pot%supercell%rprimd(ll,ll)) then
+        efield_lambda(ll,1)=sign(eff_pot%supercell%rprimd(ll,ll)/nint(eff_pot%supercell%rprimd(ll,ll)/efield_lambda(ll,1)),efield_lambda(ll,1))
      endif
   enddo
   do icell = 1,eff_pot%mpi_coeff%my_ncell
@@ -2939,11 +2943,11 @@ case (3)
              kk = ii + ia
              argumento=0.0
              do ll=1,3
-             if (efield_lambda(ll)/=0.0) then
-                     argumento=argumento+two_pi*xcart(ll,kk)/efield_lambda(ll)
+             if (efield_lambda(ll,1)/=0.0) then
+                     argumento=argumento+two_pi*xcart(ll,kk)/efield_lambda(ll,1)
              endif
              enddo
-             efield_kk(:)=cos(argumento+efield_phase)*ext_field(:)+ext_field_bck(:)
+             efield_kk(:)=cos(argumento+efield_phase(1))*ext_field(:)+ext_field_bck(:)
              temp_pol = matmul(disp_tmp(:,kk),&
                      & eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
              fcart_part(:,kk) = matmul(efield_kk , eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
@@ -2954,7 +2958,7 @@ case (3)
   call xmpi_sum(fcart_part , comm, ierr)
 case (4)
   if (present(efield)) then
-    ext_field =-1*efield
+    ext_field =-1*efield(:, 1)
   endif
   if (present(efield_background)) then
     ext_field_bck =-1* efield_background
@@ -2963,8 +2967,8 @@ case (4)
   energy_part = zero
   fcart_part(:,:)  = zero
   do ll=1,3
-     if(efield_lambda(ll)/=0.0 .and. abs(efield_lambda(ll))<2.0*eff_pot%supercell%rprimd(ll,ll)) then
-        efield_lambda(ll)=sign(eff_pot%supercell%rprimd(ll,ll)/nint(eff_pot%supercell%rprimd(ll,ll)/efield_lambda(ll)),efield_lambda(ll))
+     if(efield_lambda(ll,1)/=0.0 .and. abs(efield_lambda(ll,1))<2.0*eff_pot%supercell%rprimd(ll,ll)) then
+        efield_lambda(ll,1)=sign(eff_pot%supercell%rprimd(ll,ll)/nint(eff_pot%supercell%rprimd(ll,ll)/efield_lambda(ll,1)),efield_lambda(ll,1))
      endif
   enddo
   do icell = 1,eff_pot%mpi_coeff%my_ncell
@@ -2973,11 +2977,11 @@ case (4)
              kk = ii + ia
              argumento=0.0
              do ll=1,3
-             if (efield_lambda(ll)/=0.0) then
-                     argumento=argumento+two_pi*xcart(ll,kk)/efield_lambda(ll)
+             if (efield_lambda(ll,1)/=0.0) then
+                     argumento=argumento+two_pi*xcart(ll,kk)/efield_lambda(ll,1)
              endif
              enddo
-             efield_kk(:)=cos(argumento-two_pi/efield_period*time+efield_phase)*ext_field(:)+ext_field_bck(:)
+             efield_kk(:)=cos(argumento-two_pi/efield_period*time+efield_phase(1))*ext_field(:)+ext_field_bck(:)
              temp_pol = matmul(disp_tmp(:,kk),&
                      & eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
              fcart_part(:,kk) = matmul(efield_kk , eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
@@ -2987,8 +2991,8 @@ case (4)
   call xmpi_sum(energy_part, comm, ierr)
   call xmpi_sum(fcart_part , comm, ierr)
 case (5)
-  if (present(efield)) then
-    ext_field =-1* efield
+  if (present(efield) .and. present(nefield)) then
+    ext_field = -1 * efield(:,1) ! Use first field by default
   endif
   if (present(efield_background)) then
     ext_field_bck =-1* efield_background
@@ -3016,24 +3020,28 @@ case (5)
   call xmpi_sum(energy_part, comm, ierr)
   call xmpi_sum(fcart_part , comm, ierr)
 case (6)
-  if (present(efield)) then
-    ext_field =-1* efield
-  endif
-  if (present(efield2)) then
-    ext_field2 =-1* efield2
+  if (present(efield) .and. present(nefield)) then
+    if (nefield >= 1) then
+      ext_field = -1 * efield(:,1)
+      ext_field2 = -1 * efield(:,2)
+    endif
   endif
   if (present(efield_background)) then
-    ext_field_bck =-1* efield_background
+    ext_field_bck = -1 * efield_background
   endif
   temp_pol = zero
   energy_part = zero
   fcart_part(:,:)  = zero
   do ll=1,3
-     if(efield_lambda(ll)/=0.0 .and. abs(efield_lambda(ll))<2.0*eff_pot%supercell%rprimd(ll,ll)) then
-        efield_lambda(ll)=sign(eff_pot%supercell%rprimd(ll,ll)/nint(eff_pot%supercell%rprimd(ll,ll)/efield_lambda(ll)),efield_lambda(ll))
-     endif
-     if(efield_lambda2(ll)/=0.0 .and. abs(efield_lambda2(ll))<2.0*eff_pot%supercell%rprimd(ll,ll)) then
-        efield_lambda2(ll)=sign(eff_pot%supercell%rprimd(ll,ll)/nint(eff_pot%supercell%rprimd(ll,ll)/efield_lambda2(ll)),efield_lambda2(ll))
+     if(present(efield_lambda)) then
+       if(efield_lambda(ll,1)/=0.0 .and. abs(efield_lambda(ll,1))<2.0*eff_pot%supercell%rprimd(ll,ll)) then
+          efield_lambda(ll,1)=sign(eff_pot%supercell%rprimd(ll,ll)/nint(eff_pot%supercell%rprimd(ll,ll)/efield_lambda(ll,1)),efield_lambda(ll,1))
+       endif
+       if(present(nefield) .and. nefield >= 2) then
+         if(efield_lambda(ll,2)/=0.0 .and. abs(efield_lambda(ll,2))<2.0*eff_pot%supercell%rprimd(ll,ll)) then
+            efield_lambda(ll,2)=sign(eff_pot%supercell%rprimd(ll,ll)/nint(eff_pot%supercell%rprimd(ll,ll)/efield_lambda(ll,2)),efield_lambda(ll,2))
+         endif
+       endif
      endif
   enddo
   do icell = 1,eff_pot%mpi_coeff%my_ncell
@@ -3043,14 +3051,21 @@ case (6)
              argumento=0.0
              argumento2=0.0
              do ll=1,3
-             if (efield_lambda(ll)/=0.0) then
-                     argumento=argumento+two_pi*xcart(ll,kk)/efield_lambda(ll)
-             endif
-             if (efield_lambda2(ll)/=0.0) then
-                     argumento2=argumento2+two_pi*xcart(ll,kk)/efield_lambda2(ll)
-             endif
+               if (present(efield_lambda) .and. efield_lambda(ll,1)/=0.0) then
+                 argumento=argumento+two_pi*xcart(ll,kk)/efield_lambda(ll,1)
+               endif
+               if (present(efield_lambda) .and. present(nefield) &
+               & .and. nefield >= 2 .and. efield_lambda(ll,2)/=0.0) then
+                 argumento2=argumento2+two_pi*xcart(ll,kk)/efield_lambda(ll,2)
+               endif
              enddo
-             efield_kk(:)=cos(argumento+efield_phase)*ext_field(:)+cos(argumento2+efield_phase2)*ext_field2(:)+ext_field_bck(:)
+             efield_kk(:)=cos(argumento+efield_phase(1))*ext_field(:)
+             if (present(nefield) .and. nefield >= 2) then
+               efield_kk(:)=efield_kk(:)+cos(argumento2+efield_phase(2))*ext_field2
+             endif
+             if (present(efield_background)) then
+               efield_kk(:)=efield_kk(:)+ext_field_bck(:)
+             endif
              temp_pol = matmul(disp_tmp(:,kk),&
                      & eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
              fcart_part(:,kk) = matmul(efield_kk , eff_pot%harmonics_terms%zeff(:,:,eff_pot%supercell%atom_indexing(kk)))
@@ -3326,8 +3341,6 @@ end subroutine effective_potential_distributeResidualForces
 !! SOURCE
 
 subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

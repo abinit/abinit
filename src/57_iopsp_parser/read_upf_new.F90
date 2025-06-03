@@ -24,6 +24,8 @@ MODULE  read_upf_new_module
   use defs_basis, only : dp, std_out
   USE pseudo_types, ONLY: pseudo_upf, pseudo_config
 
+  IMPLICIT NONE
+
   !
   LOGICAL :: v2
   !! true if UPF v.2 version, false if new UPF with xml schema
@@ -41,7 +43,7 @@ CONTAINS
     !! Derived-type variable *upf* store in output the data read from file.
     !! File *filename* is opened and closed inside the routine
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(len=*), INTENT(IN) :: filename
     !! i/o filename
     TYPE(pseudo_upf),INTENT(OUT) :: upf
@@ -149,7 +151,7 @@ CONTAINS
     ! (UPF v.2 uses capitalized tags, UPF with schema use lowercase)
     !
     USE upf_utils, ONLY: capital
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(LEN=*) :: strin
     !
     INTEGER :: n
@@ -169,7 +171,7 @@ CONTAINS
   SUBROUTINE read_pp_header_schema ( upf )
     !--------------------------------------------------------
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     TYPE(pseudo_upf), INTENT(INOUT) :: upf ! the pseudo data
     !
     CALL xmlr_opentag( capitalize_if_v2('pp_header') )
@@ -208,7 +210,7 @@ CONTAINS
   SUBROUTINE read_pp_header_v2 ( upf )
     !--------------------------------------------------------
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     TYPE(pseudo_upf), INTENT(INOUT) :: upf ! the pseudo data
     !
     CHARACTER(LEN=1) :: dummy
@@ -249,7 +251,7 @@ CONTAINS
   SUBROUTINE read_pp_mesh ( upf )
     !--------------------------------------------------------
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     TYPE(pseudo_upf),INTENT(INOUT) :: upf ! the pseudo data
     integer :: mesh
     !
@@ -516,7 +518,7 @@ CONTAINS
   SUBROUTINE read_pp_pswfc ( upf )
     !--------------------------------------------------------
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     TYPE(pseudo_upf),INTENT(INOUT) :: upf ! the pseudo data
     !
     INTEGER :: nw, ind !, l
@@ -567,7 +569,7 @@ CONTAINS
   SUBROUTINE read_pp_full_wfc ( upf )
     !--------------------------------------------------------
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     TYPE(pseudo_upf),INTENT(INOUT) :: upf ! the pseudo data
     !
     INTEGER :: nb, mb
@@ -627,7 +629,7 @@ CONTAINS
   SUBROUTINE read_pp_spinorb ( upf )
     !--------------------------------------------------------
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     TYPE(pseudo_upf),INTENT(INOUT) :: upf ! the pseudo data
     INTEGER :: nw, nb, ierr
     CHARACTER(LEN=1) :: dummy
@@ -675,7 +677,7 @@ CONTAINS
   SUBROUTINE read_pp_paw ( upf )
     !--------------------------------------------------------
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     TYPE(pseudo_upf),INTENT(INOUT) :: upf ! the pseudo data
     INTEGER :: nb, mb
     !
@@ -747,7 +749,7 @@ CONTAINS
   SUBROUTINE read_pp_gipaw ( upf )
     !--------------------------------------------------------
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     TYPE(pseudo_upf),INTENT(INOUT) :: upf ! the pseudo data
     !
     INTEGER :: nb, mb, ierr

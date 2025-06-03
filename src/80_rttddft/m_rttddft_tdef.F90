@@ -99,8 +99,6 @@ contains
 !! SOURCE
 subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lambda,td_ef_tau,td_ef_induced_vecpot,nkpt,kpts)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  class(tdef_type), intent(inout) :: tdef
@@ -172,8 +170,6 @@ end subroutine tdef_init
 !!
 !! SOURCE
 subroutine tdef_update(tdef,dtset,mpi_enreg,time,rprimd,gprimd,kg,mpsang,npwarr,ylm,ylmgr,current,update_vecpot_ind)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -284,8 +280,6 @@ end subroutine tdef_update
 !!
 !! SOURCE
 subroutine tdef_restart(tdef,mpi_enreg,restart_unit)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

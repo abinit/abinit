@@ -61,7 +61,7 @@ real(dp) :: inf_shift_poles = 1.0d-4
 public :: sqmr, qmr, activate_inf_shift_poles, inf_shift_poles
 !!***
 
-contains 
+contains
 
 !!****f* m_hamiltonian/sqmr
 !! NAME
@@ -81,7 +81,7 @@ subroutine sqmr(b,x,lambda,project_on_what,omega,omega_imaginary,kill_Pc_x)
 ! This subroutine solves the linear algebra problem
 !
 !                                 A x = b
-! 
+!
 ! Where:
 !                INPUT
 !                -----
@@ -101,7 +101,7 @@ subroutine sqmr(b,x,lambda,project_on_what,omega,omega_imaginary,kill_Pc_x)
 ! with:
 !        omega     omega_imaginary      Operator
 !        ------------------------------------------------------
-!     absent          -            A =   (H - lambda)  
+!     absent          -            A =   (H - lambda)
 !     present         -            A =   (H - lambda)^2 - omega^2
 !     present    present, true     A =   (H - lambda)^2 + omega^2
 !
@@ -111,14 +111,13 @@ subroutine sqmr(b,x,lambda,project_on_what,omega,omega_imaginary,kill_Pc_x)
 !                1                projection on conduction states
 !                2                projection out of subspace degenerate with lambda
 !                3                projection on states beyond all the states explicitly stored
-! 
-! NOTE: It is the developper's responsibility to apply (H-ev) on the input 
+!
+! NOTE: It is the developper's responsibility to apply (H-ev) on the input
 !       if the frequency is not zero.
 !--------------------------------------------------------------------------------
-implicit none
 
 !External variables
-real(dp), intent(in)  :: b(2,npw_g) 
+real(dp), intent(in)  :: b(2,npw_g)
 real(dp), intent(in)  :: lambda
 real(dp), intent(out) :: x(2,npw_g)
 integer, intent(in)   :: project_on_what
@@ -232,8 +231,8 @@ else
 end if
 
 
-! Define the sign in front of (H-eig(v))**2. 
-! If omega_imaginary is not given, we assume that omega is real (and sign=-1). 
+! Define the sign in front of (H-eig(v))**2.
+! If omega_imaginary is not given, we assume that omega is real (and sign=-1).
 if (has_omega) then
   if ( imaginary ) then
     signe = one
@@ -254,22 +253,22 @@ end if
 singular = norm < 1.0d-12
 
 !--------------------------------------------------------------------------------
-! If the linear operator has a kernel, then the intermediate vectors obtained in 
-! SQMR must be projected out of this subspace several time at each iterations, 
-! otherwise SQMR is unstable. 
+! If the linear operator has a kernel, then the intermediate vectors obtained in
+! SQMR must be projected out of this subspace several time at each iterations,
+! otherwise SQMR is unstable.
 !
-! This is true even if the seed vector has been initially projected out of this 
-! subspace, since the preconditionning will re-introduce a non-zero component in 
-! the subspace of the kernel of the linear operator. 
+! This is true even if the seed vector has been initially projected out of this
+! subspace, since the preconditionning will re-introduce a non-zero component in
+! the subspace of the kernel of the linear operator.
 !                 ===>   Use project_on_what==2 in such cases.
 !
-! Here, test if the operator is singular and if we are NOT projecting out of 
-! the kernel. 
-!                ===>   If true, stop the code. 
+! Here, test if the operator is singular and if we are NOT projecting out of
+! the kernel.
+!                ===>   If true, stop the code.
 !
 !--------------------------------------------------------------------------------
 
-! Quit if the operator has an uncontrolled kernel, a sign that the routine is being 
+! Quit if the operator has an uncontrolled kernel, a sign that the routine is being
 ! misused by a developper...
 if (singular .and. ( (project_on_what==1 .and. (min_index > nbandv)) .or. project_on_what==0 ))  then
   write(std_out,*) "ERROR - SQMR: Quasi-singuar problem treated, min. eigenvalue of A is ", norm," < 1d-12."
@@ -310,7 +309,7 @@ if (head_node) then
     write(io_unit,10) "#   for this MPI group.                                                                 "
     write(io_unit,10) "#======================================================================================="
     flush(io_unit)
-  end if        
+  end if
 
   counter = counter + 1
   write(io_unit,10) "#                                                                                       "
@@ -344,7 +343,7 @@ end if ! head_node
 !--------------------------------------------------------------------------------
 ! Precondition to accelerate convergence
 !--------------------------------------------------------------------------------
-precondition_on = .true. 
+precondition_on = .true.
 if(imaginary) then
   if(omega > 10.0_dp) then
     precondition_on = .false.
@@ -353,7 +352,7 @@ end if
 
 ! DEBUG
 pow             = project_on_what
-!precondition_on = .false. 
+!precondition_on = .false.
 
 !Prepare to precondition
 if (precondition_on) then
@@ -410,7 +409,7 @@ k=k+1
 l=l+1
 
 ! Apply the A operator
-if (has_omega) then 
+if (has_omega) then
   call Hpsik(w,d,lambda)
   call Hpsik(w,cte=lambda)
   do ipw=1,npw_g
@@ -420,7 +419,7 @@ if (has_omega) then
   end do
 else
   call Hpsik(w,d,lambda)
-end if 
+end if
 
 ! Apply projections, if requested
 !if(dtset%gwcalctyp /= 2) then !This is a test to obtain the time taken by the orthos.
@@ -466,7 +465,7 @@ end if
 if(g(k)**2<tolwfr .or. k>= nline) exit
 !if(k>=nline) exit
 
-! Safety test every 100 iterations, check that estimated residual is of the right order of magnitude. 
+! Safety test every 100 iterations, check that estimated residual is of the right order of magnitude.
 ! If not, restart SQMR.
 if(mod(l,100)==0) then
   if(has_omega) then
@@ -535,7 +534,7 @@ call xmpi_sum(tmp, mpi_communicator,ierr) ! sum on all processors working on FFT
 norm_Axb = tmp(1)
 
 if (head_node) then
-  write(io_unit,*) "|Ax-b|^2 :",norm_Axb 
+  write(io_unit,*) "|Ax-b|^2 :",norm_Axb
   write(io_unit,*) "g(k)^2 :",g(k)**2
   flush(io_unit)
 end if
@@ -570,7 +569,7 @@ end do ! outer loop
 
 
 ktot = ktot+k
-if(k >= nline .and. head_node ) then 
+if(k >= nline .and. head_node ) then
   write(io_unit,10) " **** Iterations were not enough to converge!  ****"
 end if
 
@@ -669,10 +668,10 @@ subroutine qmr(b,x,lambda) !,project_on_what)
 !
 !                                 A x = b
 !
-! where A :=  (H - lambda)  can be non-hermitian. 
-! Thus, complex values of lambda are allowed and 
-! non-hermitian operators could be handled instead of H. 
-! 
+! where A :=  (H - lambda)  can be non-hermitian.
+! Thus, complex values of lambda are allowed and
+! non-hermitian operators could be handled instead of H.
+!
 ! Arguments :
 !                INPUT
 !                -----
@@ -691,7 +690,6 @@ subroutine qmr(b,x,lambda) !,project_on_what)
 !                2                projection out of subspace degenerate with lambda
 !                3                projection on states beyond all the states explicitly stored
 !--------------------------------------------------------------------------------
-implicit none
 
 !External variables
 real(dp), intent(in)  :: b(2,npw_k)
@@ -715,7 +713,7 @@ integer :: mpi_communicator
 if(sum(b**2) < tol12) then
   x=zero
 else
-  
+
   !Allocation
   ABI_MALLOC(xc,(npw_k))
   ABI_MALLOC(r ,(npw_k))
@@ -728,7 +726,7 @@ else
   ABI_MALLOC(t ,(npw_k))
   ABI_MALLOC(d ,(npw_k))
   ABI_MALLOC(s ,(npw_k))
-  
+
   ABI_MALLOC(beta    ,(nline))
   ABI_MALLOC(rho     ,(nline+1))
   ABI_MALLOC(zeta    ,(nline+1))
@@ -738,7 +736,7 @@ else
   ABI_MALLOC(delta   ,(nline))
   ABI_MALLOC(epsilonn,(nline))
   ABI_MALLOC(resid   ,(nline+1))
-  
+
   !Initialization
   x  = zero
   xc = zero
@@ -752,7 +750,7 @@ else
   t  = zero
   d  = zero
   s  = zero
-  
+
   beta     = zero
   rho      = zero
   zeta     = zero
@@ -762,40 +760,40 @@ else
   delta    = zero
   epsilonn = zero
   resid    = zero
-  
+
   call unset_precondition()
-  
-  
+
+
   !mpi_communicator = mpi_enreg%comm_fft
   mpi_communicator = mpi_enreg%comm_bandfft
-  
+
   lambdac  = dcmplx(lambda(1),lambda(2))
-  
+
   i = 1
   r = dcmplx(b(1,:),b(2,:))
   v = r
-  
+
   rho(i) = norm_kc(v)
   call xmpi_sum(rho(i),mpi_communicator ,ierr) ! sum on all processors working on FFT!
-  
+
   w = r
   call precondition_cplx(z,w)
   zeta(i) = norm_kc(z)
   call xmpi_sum(zeta(i),mpi_communicator,ierr) ! sum on all processors working on FFT!
-  
+
   gama(i) = one
   eta(i) = -one
   !theta(i) = zero
   !p = zero
   !q = zero
-  
+
   do i=1,nline
   v = v/rho(i)
   w = w/zeta(i)
   z = z/zeta(i)
   delta(i) = scprod_kc(z,v)
   call xmpi_sum(delta(i),mpi_communicator,ierr) ! sum on all processors working on FFT!
-  
+
   call precondition_cplx(y,v)
   if(i/=1) then
     p = y - (zeta(i)*delta(i)/epsilonn(i-1))*p
@@ -807,17 +805,17 @@ else
   call Hpsikc(t,p,lambdac)
   epsilonn(i) = scprod_kc(q,t)
   call xmpi_sum(epsilonn(i),mpi_communicator,ierr) ! sum on all processors working on FFT!
-  
+
   beta(i) = epsilonn(i)/delta(i)
   v = t - beta(i)*v
   rho(i+1) = norm_kc(v)
   call xmpi_sum(rho(i+1),mpi_communicator,ierr) ! sum on all processors working on FFT!
-  
+
   call Hpsikc(z,q,conjg(lambdac)) ; w = z - beta(i)*w
   call precondition_cplx(z,w)
   zeta(i+1) = norm_kc(z)
   call xmpi_sum(zeta(i+1), mpi_communicator,ierr) ! sum on all processors working on FFT!
-  
+
   theta(i+1) = rho(i+1)/(gama(i)*abs(beta(i)))
   gama(i+1) = 1./sqrt(1+theta(i+1)**2)
   eta(i+1) = -eta(i)*rho(i)*gama(i+1)**2/(beta(i)*gama(i)**2)
@@ -827,28 +825,28 @@ else
   r = r - s
   resid(i) = norm_kc(r)**2
   call xmpi_sum(resid(i), mpi_communicator,ierr) ! sum on all processors working on FFT!
-  
+
   !write(std_out,*) "QMR residual**2 = ",resid(i),"; i = ",i-1
   if(resid(i) < tolwfr) exit
   end do
-  
+
   if(i>=nline) then
     write(std_out,*) " **** Iterations were not enough to converge!  ****"
   end if
-  
+
   call Hpsikc(r,xc,lambdac)
   v = dcmplx(b(1,:),b(2,:))
   resid(nline+1) = norm_kc(r - v)**2
   call xmpi_sum(resid(nline+1),  mpi_communicator,ierr) ! sum on all processors working on FFT!
-  
+
   write(std_out,*) "QMR residual**2 (at end) = ",resid(nline+1),"; # iterations = ",i-1
-  
+
   x(1,:) = dble(xc)
   x(2,:) = dimag(xc)
-  
+
   !Deallocate
-  ABI_FREE(xc) 
-  ABI_FREE(r) 
+  ABI_FREE(xc)
+  ABI_FREE(r)
   ABI_FREE(v)
   ABI_FREE(w)
   ABI_FREE(z)
@@ -858,8 +856,8 @@ else
   ABI_FREE(t)
   ABI_FREE(d)
   ABI_FREE(s)
-  
-  ABI_FREE(beta    )  
+
+  ABI_FREE(beta    )
   ABI_FREE(rho     )
   ABI_FREE(zeta    )
   ABI_FREE(gama    )
@@ -867,7 +865,7 @@ else
   ABI_FREE(theta   )
   ABI_FREE(delta   )
   ABI_FREE(epsilonn)
-  ABI_FREE(resid   ) 
+  ABI_FREE(resid   )
 
 end if
 

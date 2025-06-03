@@ -278,12 +278,12 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    else
      bfield=paw_dmft%dmft_magnfield_b
      write(message,'(2a)') ch10,'Adding Zeeman contribution to DFT eigenvalues'
-     call wrtout(std_out,message,'COLL') 
+     call wrtout(std_out,message,'COLL')
   endif
  else
    bfield=0.0
  endif
-  
+
 !==   put eigen into eigen_dft
  paw_dmft%eigen => eigen(:)
  band_index = 0
@@ -955,6 +955,8 @@ subroutine chipsi_print(paw_dmft,pawtab)
    !call print_matlu(magnfield,natom,1)
    call add_matlu(levels_temp,magnfield,energy_level%matlu,natom,-1)
    call print_matlu(energy_level%matlu,natom,1)
+   call destroy_matlu(magnfield,natom)
+   call destroy_matlu(levels_temp,natom)
 
   ABI_FREE(magnfield)
   ABI_FREE(levels_temp)
