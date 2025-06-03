@@ -319,7 +319,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    !==================================================================
    ! Add Zeeman contributions to local energy levels when nspinor = 2
    !==================================================================
-   if(paw_dmft%dmft_magnfield .eq. 2) then
+   if(paw_dmft%dmft_magnfield .eq. 2 .and. nspinor .eq. 2) then
 
      ABI_MALLOC(magnfield,(natom))
      ABI_MALLOC(levels_temp,(natom))
@@ -336,6 +336,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      !call print_matlu(magnfield,natom,1)
      call add_matlu(levels_temp,magnfield,energy_level%matlu,natom,-1)
      call print_matlu(energy_level%matlu,natom,1)
+     call destroy_matlu(magnfield,natom)
+     call destroy_matlu(levels_temp,natom)
 
      ABI_FREE(magnfield)
      ABI_FREE(levels_temp)
