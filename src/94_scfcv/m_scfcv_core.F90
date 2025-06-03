@@ -865,8 +865,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
 ! Initializing precon-object for chi0 based preconditioning
 ! TODO : utiliser nfftmix
- call precon%init(dtset, atindx1, cg, eigen, results_gs%fermie, gprimd, &
- &   irrzon, kg, nattyp, npwarr, phnons, rhor, rprimd, ucvol, vxc, xred)
+ call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, gprimd, indsym, &
+ &  irrzon, kg, mband_cprj, nattyp, npwarr, pawang, pawfgr, pawfgrtab, &
+ &  pawtab, phnons, psps, rhor, rprimd, symrec, ucvol, vxc, xred)
  
 ! Here initialize the datastructure constrained_dft, for constrained DFT calculations
 ! as well as penalty function constrained magnetization
