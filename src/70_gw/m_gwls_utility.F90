@@ -75,8 +75,6 @@ complex(dpc) function complex_vector_product(v1,v2,l)
 !--------------------------------------------------------------------------
 ! This function computes the vector product of two complex vectors.
 !--------------------------------------------------------------------------
-implicit none
-
 integer,     intent(in)  :: l
 complex(dpc),intent(in)  :: v1(l), v2(l)
 
@@ -116,8 +114,6 @@ subroutine orthogonalize(mpi_communicator, Hsize,Qsize,Xsize,Q,X)
 !  Hsize means "dimension of the Hilbert space", so typically the number
 !  of plane waves...
 !--------------------------------------------------------------------------
-implicit none
-
 integer,     intent(in)  :: mpi_communicator
 integer,     intent(in)  :: Hsize, Qsize, Xsize
 complex(dpc),intent(in)  :: Q(Hsize,Qsize)
@@ -192,8 +188,6 @@ subroutine driver_invert_positive_definite_hermitian_matrix(matrix,ldim)
 !
 !        The subroutine overwrites the input.
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer     , intent(in)    :: ldim
 complex(dpc), intent(inout) :: matrix(ldim,ldim)
 
@@ -272,8 +266,6 @@ subroutine ritz_analysis_general(mpi_communicator,matrix_function,lmax,Hsize,Lba
 !                       eigenvalues      : the computed approximate eigenvalues
 !                                        of the matrix
 !----------------------------------------------------------------------
-implicit none
-
 interface
   subroutine matrix_function(v_out,v_in,l)
   use defs_basis

@@ -23,7 +23,7 @@ module eval_lotf
  use m_errors
 
  implicit none
- public  
+ public
 
  public ::                 &
    eval_forces_u_n,        &
@@ -45,7 +45,7 @@ contains
  !!
  !! INPUTS
  !! SOURCE
- !--Similar to SWCALC but without the triplets (used for the pair potential part and for the coordination) 
+ !--Similar to SWCALC but without the triplets (used for the pair potential part and for the coordination)
  subroutine phi_n_calc(alpha_dum,nneig,nlist,r0,rv,epot_dum,&
    &                        forcv,coordatom_dum,alpha_fdum)
 
@@ -94,9 +94,9 @@ contains
       nbond = ibmat(i1,i0)
 
       !--Cutoff radius for the pair potential
-      rcut2_pair = (alpha_dum(1,nbond) + drcphi)**2 
+      rcut2_pair = (alpha_dum(1,nbond) + drcphi)**2
 
-      if ((r_au(i1) < rcut2_pair)) then 
+      if ((r_au(i1) < rcut2_pair)) then
 
         call glue_pair_devs(alpha_dum(:,nbond),RDV(:,i1),r_au(i1),epot_2,fp,dfp)
 
@@ -112,7 +112,7 @@ contains
     else !--We have to count the forces on the fit atoms by the non-fit neighbours
 
       rcut2_pair = rcphi**2
-      if ( (r_au(i1) < rcut2_pair).and.(jat > iat) ) then 
+      if ( (r_au(i1) < rcut2_pair).and.(jat > iat) ) then
         !--Cutoff pair potential + NO MULTIPLE COUNTING
         call glue_pair(RDV(1,i1),r_au(i1),epot_2,fp)
         epot_dum = epot_dum + epot_2
@@ -122,18 +122,18 @@ contains
       endif
     endif ! Pair potential and pair forces and derivs only for fit pairs
 
-    !--COORDINATION 
+    !--COORDINATION
     select case(lotfvar%classic)
     case(5)
-      !--Cutoff radius for the density 
-      rcut2_rho  = rmrho**2 
+      !--Cutoff radius for the density
+      rcut2_rho  = rmrho**2
 
       !--Cutoff density
       if (r_au(i1) < rcut2_rho) then
         call calc_coord(r_au(i1),coordatom_dum)
       end if
 
-    case(6) 
+    case(6)
       if (tafit(jat)) then
 
         i0 = imat(iat) ! Index of atom iat in the fitting indexing (1,nfit)
@@ -141,7 +141,7 @@ contains
         nbond = ibmat_large(i3,i0)
 
         !--Cutoff radius for the density
-        rcut2_rho  = (rmrho+alpha_dum(1,nbond)-dphi)**2 
+        rcut2_rho  = (rmrho+alpha_dum(1,nbond)-dphi)**2
 
         !--Cutoff density
         if (r_au(i1) < rcut2_rho) then
@@ -150,7 +150,7 @@ contains
 
       else ! tafit = .false
         !--Cutoff radius for the density
-        rcut2_rho  = rmrho**2 
+        rcut2_rho  = rmrho**2
         if (r_au(i1) < rcut2_rho) then
           call calc_coord(r_au(i1),coordatom_dum)
         end if
@@ -186,10 +186,10 @@ contains
 ! *************************************************************************
 
   !--Cutoff radius for the density
-  rcut2_rho  = rmrho**2 
+  rcut2_rho  = rmrho**2
 
   !--Run over neighbours
-  do ii=1,nneig  
+  do ii=1,nneig
     call dist_pbc(rv(:,ii),r0,r_au(ii),RDV(:,ii))
 
     !--Cutoff density
@@ -223,7 +223,7 @@ contains
 ! *************************************************************************
 
   !--Cutoffradius for the density
-  rcut2_rho  = rmrho**2 
+  rcut2_rho  = rmrho**2
   U_tot = zero
   forc_dum2(:) = zero
 
@@ -288,12 +288,12 @@ contains
     if (tafit(jat)) then
 
       !--(0a) RHOP_SUM
-      i0 = imat(iat) 
+      i0 = imat(iat)
       i2 = imat(jat)
       nbond = ibmat_large(i2,i0)
 
       !--Cutoff radius for the density
-      rcut2_rho  = (rmrho+alpha_dum(1,nbond)-dphi)**2 
+      rcut2_rho  = (rmrho+alpha_dum(1,nbond)-dphi)**2
       if(r_au < rcut2_rho) then
         call rhop_value(r_st,alpha_dum(1,nbond),rho_p_esc)
       end if
@@ -305,11 +305,11 @@ contains
       end if
     endif
 
-    if (r_au < rcut2_rho) then 
+    if (r_au < rcut2_rho) then
 
-      rho_p_sum(:) = rho_p_sum(:) + rho_p_esc * RDV(:) / r_st 
+      rho_p_sum(:) = rho_p_sum(:) + rho_p_esc * RDV(:) / r_st
 
-      !--(0b) FORCES 
+      !--(0b) FORCES
       U_tot = up_list(iat) + up_list(jat)
       U_tot = U_tot * rho_p_esc
 
@@ -338,7 +338,6 @@ contains
   use GLUE_LOTF,only : rmrho,dphi,rho_devs
   use defs_param_lotf,only : lotfvar
   use bond_lotf,only : nbondex,nfitmax,tafit,imat,ibmat_large
-  implicit none
 
   !Arguments ------------------------
   real(dp),intent(in) ::  r0(3)
@@ -354,7 +353,7 @@ contains
   integer :: iat,ii,jat,i0,nbond,ixyz
   real(dp) :: r_au,RDV(3),r_st,rcut2_rho,U_tot0
   real(dp) :: rho_neigh_d,rho_neigh_p,rho_neigh_pd
-  real(dp) :: rho_p_sum(3,nfitmax) 
+  real(dp) :: rho_p_sum(3,nfitmax)
   real(dp) :: dFi_dbond_ij(3)
   real(dp) :: r_au_ik,r_st_ik,RDV_ik(3)
   real(dp) :: r_au_jk,r_st_jk,RDV_jk(3)
@@ -379,7 +378,7 @@ contains
   iunique(:) = 0
 
   !--1st NEIGHBOURS
-  first_neighbours : do ii=1,nneig 
+  first_neighbours : do ii=1,nneig
     jat=nlist(ii)
 
     call dist_pbc(rv(:,ii),r0,r_au,RDV)
@@ -392,13 +391,13 @@ contains
     rho_neigh_pd = zero
 
     !--Fit
-    if (tafit(jat)) then  
+    if (tafit(jat)) then
 
       nbond = ibmat_large(i2,i0)
-      rcut2_rho  = (rmrho+alpha_dum(1,nbond)-dphi)**2 
+      rcut2_rho  = (rmrho+alpha_dum(1,nbond)-dphi)**2
 
-      !--Cutoff 
-      if (r_au < rcut2_rho) then 
+      !--Cutoff
+      if (r_au < rcut2_rho) then
         call rho_devs(r_au,alpha_dum(1,nbond),rho_neigh_d,&
           rho_neigh_p,rho_neigh_pd)
 
@@ -422,7 +421,7 @@ contains
     go to 1002
 
     !--2nd NEIGHBOURS
-    second_neighbours : do i3=1,neig2(ii) 
+    second_neighbours : do i3=1,neig2(ii)
 
       kat=nlist2(i3,ii)
 
@@ -441,12 +440,12 @@ contains
         rho_p_ik = zero
         rho_pd_ik = zero
 
-        !--FIT pair iat-kat 
-        if (tafit(kat)) then 
+        !--FIT pair iat-kat
+        if (tafit(kat)) then
 
           nbond_ik = ibmat_large(i4,i0)
           rcut2_rho_ik  = (rmrho+alpha_dum(1,nbond_ik)-dphi)**2
-          !--Cutoff 
+          !--Cutoff
           if (r_au_ik < rcut2_rho_ik) then
             call rho_devs(r_au_ik,alpha_dum(1,nbond_ik),rho_d_ik,rho_p_ik,rho_pd_ik)
           endif ! cutoffs
@@ -457,14 +456,14 @@ contains
         rho_p_jk = zero
         rho_pd_jk = zero
 
-        !--FIT pair jat-kat 
-        if (tafit(kat).AND.tafit(jat)) then 
+        !--FIT pair jat-kat
+        if (tafit(kat).AND.tafit(jat)) then
 
           nbond_jk = ibmat_large(i4,i0)
           rcut2_rho_jk  = (rmrho+alpha_dum(1,nbond_jk)-dphi)**2
 
           !--Cutoff + no multiple counting
-          if (r_au_jk < rcut2_rho_jk.AND.kat > iat) then 
+          if (r_au_jk < rcut2_rho_jk.AND.kat > iat) then
             call rho_devs(r_au_jk,alpha_dum(1,nbond_jk),rho_d_jk,&
               rho_p_jk,rho_pd_jk)
           endif
@@ -473,16 +472,16 @@ contains
         if(r_au_jk < rcut2_rho_jk) then
           if(r_au_ik < rcut2_rho_ik) then
             dFi_dbond_jk(:) = dFi_dbond_jk(:) + upp_list(kat) * rho_d_jk * rho_p_ik *&
-              RDV_ik(:)/r_st_ik 
+              RDV_ik(:)/r_st_ik
           endif ! ik cutoff
 
           if(r_au < rcut2_rho) then
             dFi_dbond_jk(:) = dFi_dbond_jk(:) + upp_list(jat) * rho_d_jk * rho_neigh_p *&
-              RDV(:)/r_st 
+              RDV(:)/r_st
           endif ! ij cutoff
-        endif ! jk cutoff 
+        endif ! jk cutoff
 
-        !--Cutoff 
+        !--Cutoff
         if (r_au_jk < rcut2_rho_jk) then
           do ixyz=1,3
             !--Atom iat
@@ -492,7 +491,7 @@ contains
           enddo
         endif
 
-      endif ! atoms jat and kat are FIT and kat is not iat again 
+      endif ! atoms jat and kat are FIT and kat is not iat again
 
     enddo second_neighbours
 
@@ -511,40 +510,39 @@ contains
  !!  update neigbours relations
  !!
  !! lotfvar%nneigx : max number of neighbours
- !! tau0(3,natom) : atomic positions 
- !! neighl(lotfvar%nneigx,natom) : list of neighbours 
- !! nneig(natom) : number of neighbours 
- !! niter  : iteration number (itime) 
+ !! tau0(3,natom) : atomic positions
+ !! neighl(lotfvar%nneigx,natom) : list of neighbours
+ !! nneig(natom) : number of neighbours
+ !! niter  : iteration number (itime)
  !!
- !! upgraded to use the linked cell method (Knuth) 
- !! 
+ !! upgraded to use the linked cell method (Knuth)
+ !!
  !! INPUTS
  !! SOURCE
- subroutine  upd_lis0(tau0,neighl,nneig,niter)   
+ subroutine  upd_lis0(tau0,neighl,nneig,niter)
   use defs_param_lotf,only : lotfvar
   use work_var_lotf,only : rcut_nbl
   use tools_lotf,only : icf
   use pbc_lotf,only : dist_pbc,r2,rd,pbc_bb_proj,pbc_bb_contract,pbc_aa_contract
-  implicit none
 
   !Arguments ------------------------
-  integer,intent(in)   :: niter  
+  integer,intent(in)   :: niter
   integer,intent(out)  :: nneig(lotfvar%natom), neighl(lotfvar%nneigx,lotfvar%natom)
   real(dp),intent(inout) :: tau0(3,lotfvar%natom)
-  !Local --------------------------- 
+  !Local ---------------------------
   integer,parameter :: icellx_a=9500
   integer  :: icell_tot,icell
   integer  :: icnr, icnr2, icn, icn2
   integer  :: ic
   integer  :: ix, iy, iz
-  integer  :: n_count, iat,i 
-  integer  :: ica(3) 
-  integer  :: head(icellx_a)  
-  integer  :: list(lotfvar%natom)  
-  integer  :: neigh_cel(icellx_a,13) 
-  real(dp) :: r3(3), rcut2 
+  integer  :: n_count, iat,i
+  integer  :: ica(3)
+  integer  :: head(icellx_a)
+  integer  :: list(lotfvar%natom)
+  integer  :: neigh_cel(icellx_a,13)
+  real(dp) :: r3(3), rcut2
   real(dp) :: rdum(3)
-  real(dp) :: raa(3) 
+  real(dp) :: raa(3)
   character(len=500) :: message
 
 ! *************************************************************************
@@ -554,18 +552,18 @@ contains
     &  'Checking Input',n_count,niter,mod(n_count,lotfvar%nitex),lotfvar%nitex
   call wrtout(std_out,message,'COLL')
 
-  rcut2   = rcut_nbl*rcut_nbl     
+  rcut2   = rcut_nbl*rcut_nbl
 
   !--(1) gets all atoms within the "same" repeated cell zone
-  !     (from -0.5 to 0.5 in relative units) 
+  !     (from -0.5 to 0.5 in relative units)
   !at this part is changed to take into account symetries other than orthorombic.
   r3(:) = zero
 
-  !--length of the cell vectors :   
+  !--length of the cell vectors :
   raa(:) = pbc_aa_contract()
 
   !--put tau0 and taum in the cell -0.5/+0.5 for tau0
-  if(lotfvar%version==1) then 
+  if(lotfvar%version==1) then
     do i =1, lotfvar%natom
       !--compute rd
       call dist_pbc(tau0(:,i),r3)
@@ -573,7 +571,7 @@ contains
       tau0(:,i) =  tau0(:,i) + rdum(:)
       ! taum(:,i) =  taum(:,i) + rdum(:)
     enddo
-  elseif(lotfvar%version==2) then  
+  elseif(lotfvar%version==2) then
     do i =1, lotfvar%natom
       !--compute rd
       call dist_pbc(tau0(:,i),r3)
@@ -583,22 +581,22 @@ contains
   endif ! lotfvar%version says if taum is touched
 
   !--clears neighbour lists
-  nneig(:) = 0 
+  nneig(:) = 0
   neighl(:,:) = 0
 
 
-  !--OK, NOW KNUTH TRICK 
-  ! determines the cell partition of the run 
-  ! it means we cut volumes with edges // to the cell vectors   
+  !--OK, NOW KNUTH TRICK
+  ! determines the cell partition of the run
+  ! it means we cut volumes with edges // to the cell vectors
   ! but with length divided by an integer ica(1:3)
 
-  ica(:) = int(raa(:)/sqrt(4*rcut2)) 
+  ica(:) = int(raa(:)/sqrt(4*rcut2))
 
 
   write(message,'(a,3f12.8,4a,2f12.8)')&
     &     ' raa = ', raa(:),ch10,&
     &     ' Neighbour List Cutoff: ',ch10,&
-    &     '   rcut2, sqrt(4*rcut2) ',rcut2,sqrt(4*rcut2) 
+    &     '   rcut2, sqrt(4*rcut2) ',rcut2,sqrt(4*rcut2)
   call wrtout(std_out,message,'COLL')
 
   where(ica < 1) ica = 1
@@ -611,91 +609,91 @@ contains
   call wrtout(std_out,message,'COLL')
 
 
-  if(icell_tot > icellx_a) then 
+  if(icell_tot > icellx_a) then
     write(message,'(a,i8,2a)')&
       & 'ERROR IN UPD_LIS0: ICELL_TOT = ',icell_tot,ch10,&
       & 'ERROR IN UPD_LIS0: RAISE ICELLX_A'
     ABI_ERROR(message)
   endif
 
-  !-- clears head vector & constructs head & list      
+  !-- clears head vector & constructs head & list
   head(:icellx_a) = 0
 
   do i=1,lotfvar%natom
     rdum = pbc_bb_proj(tau0(:,i))
     icell = 1 + mod(int( (rdum(1)+0.5)* float(ica(1)) ),ica(1)) &
-      + mod(int( (rdum(2)+0.5)* float(ica(2)) ),ica(2)) * ica(1) & 
+      + mod(int( (rdum(2)+0.5)* float(ica(2)) ),ica(2)) * ica(1) &
       + mod(int( (rdum(3)+0.5)* float(ica(3)) ),ica(3)) * ica(1) * ica(2)
 
-    list(i) = head(icell) 
-    head(icell) = i 
+    list(i) = head(icell)
+    head(icell) = i
   enddo
 
-  !--Constructs the 13 neighbours of each cell 
+  !--Constructs the 13 neighbours of each cell
   do  IZ = 1, ica(3)
     do  IY = 1, ica(2)
       do  IX = 1, ica(1)
         ic               = icf(ix  ,iy,iz    ,ica(1),ica(2),ica(3))
-        neigh_cel(ic,1)  = icf(ix+1,iy,iz    ,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,2)  = icf(ix+1,iy+1,iz  ,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,3)  = icf(ix  ,iy+1,iz  ,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,4)  = icf(ix-1,iy+1,iz  ,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,5)  = icf(ix+1,iy  ,iz-1,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,6)  = icf(ix+1,iy+1,iz-1,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,7)  = icf(ix  ,iy+1,iz-1,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,8)  = icf(ix-1,iy+1,iz-1,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,9)  = icf(ix+1,iy  ,iz+1,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,10) = icf(ix+1,iy+1,iz+1,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,11) = icf(ix  ,iy+1,iz+1,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,12) = icf(ix-1,iy+1,iz+1,ica(1),ica(2),ica(3)) 
-        neigh_cel(ic,13) = icf(ix  ,iy  ,iz+1,ica(1),ica(2),ica(3)) 
+        neigh_cel(ic,1)  = icf(ix+1,iy,iz    ,ica(1),ica(2),ica(3))
+        neigh_cel(ic,2)  = icf(ix+1,iy+1,iz  ,ica(1),ica(2),ica(3))
+        neigh_cel(ic,3)  = icf(ix  ,iy+1,iz  ,ica(1),ica(2),ica(3))
+        neigh_cel(ic,4)  = icf(ix-1,iy+1,iz  ,ica(1),ica(2),ica(3))
+        neigh_cel(ic,5)  = icf(ix+1,iy  ,iz-1,ica(1),ica(2),ica(3))
+        neigh_cel(ic,6)  = icf(ix+1,iy+1,iz-1,ica(1),ica(2),ica(3))
+        neigh_cel(ic,7)  = icf(ix  ,iy+1,iz-1,ica(1),ica(2),ica(3))
+        neigh_cel(ic,8)  = icf(ix-1,iy+1,iz-1,ica(1),ica(2),ica(3))
+        neigh_cel(ic,9)  = icf(ix+1,iy  ,iz+1,ica(1),ica(2),ica(3))
+        neigh_cel(ic,10) = icf(ix+1,iy+1,iz+1,ica(1),ica(2),ica(3))
+        neigh_cel(ic,11) = icf(ix  ,iy+1,iz+1,ica(1),ica(2),ica(3))
+        neigh_cel(ic,12) = icf(ix-1,iy+1,iz+1,ica(1),ica(2),ica(3))
+        neigh_cel(ic,13) = icf(ix  ,iy  ,iz+1,ica(1),ica(2),ica(3))
       enddo
     enddo
   enddo
 
   !--Safety loops to avoid repetitions
 
-  !--(1) to avoid having twice the same neigh. cell 
+  !--(1) to avoid having twice the same neigh. cell
   do icell = 1,icell_tot
     do icnr = 1,13
       icn =  neigh_cel(icell,icnr)
       do icnr2 = icnr+1,13
         icn2 =  neigh_cel(icell,icnr2)
-        if(icn2==icn)  neigh_cel(icell,icnr2) = icell 
+        if(icn2==icn)  neigh_cel(icell,icnr2) = icell
       enddo
     enddo
   enddo
 
-  !--(2) to avoid counting twice the interaction between the same 
-  !     couple of  neigh. cells 
+  !--(2) to avoid counting twice the interaction between the same
+  !     couple of  neigh. cells
   do icell = 1,icell_tot
     do icnr = 1,13
       icn =  neigh_cel(icell,icnr)
       do icnr2 = 1,13
         icn2 =  neigh_cel(icn,icnr2)
-        if(icn2==icell) neigh_cel(icn,icnr2) = icn 
+        if(icn2==icell) neigh_cel(icn,icnr2) = icn
       enddo
     enddo
   enddo
 
   !--(3) constructs neighbour list looking through neighbour cells only
   do icell = 1,icell_tot
-    iat = head(icell) 
+    iat = head(icell)
     do while(iat > 0)
-      i = list(iat) 
-      do while(i  > 0) 
+      i = list(iat)
+      do while(i  > 0)
         if(i==iat) ABI_ERROR("i==iat")
         call dist_pbc(tau0(:,i),tau0(:,iat))
-        if(r2 < rcut2) then 
+        if(r2 < rcut2) then
           nneig(iat) = nneig(iat) + 1
           nneig(i)   = nneig(i)   + 1
-          neighl(nneig(iat),iat) = i 
-          neighl(nneig(i)  ,i  ) = iat 
-        endif  ! distance check 
-        i = list(i) 
+          neighl(nneig(iat),iat) = i
+          neighl(nneig(i)  ,i  ) = iat
+        endif  ! distance check
+        i = list(i)
       enddo
 
-      if(ANY(nneig(:) > lotfvar%nneigx))  then 
+      if(ANY(nneig(:) > lotfvar%nneigx))  then
         write(message,'(a,i8,a)')&
           'UPD_LIS CLASSIC: max no. of neighbours: ',lotfvar%nneigx,' is too small'
         ABI_ERROR(message)
@@ -707,27 +705,27 @@ contains
       do icnr = 1,13
         icn = neigh_cel(icell,icnr)
         if(icn==icell) cycle
-        i = head(icn) 
+        i = head(icn)
 
         do while(i>0)
           if(i==iat) ABI_ERROR("i==iat")
           call dist_pbc(tau0(:,i),tau0(:,iat))
-          if(r2 < rcut2) then 
+          if(r2 < rcut2) then
             nneig(iat) = nneig(iat) + 1
             nneig(i)   = nneig(i)   + 1
-            neighl(nneig(iat),iat) = i 
-            neighl(nneig(i)  ,i  ) = iat 
-          endif ! distance check  
-          i = list(i) 
+            neighl(nneig(iat),iat) = i
+            neighl(nneig(i)  ,i  ) = iat
+          endif ! distance check
+          i = list(i)
         enddo
-        if(ANY(nneig(:) > lotfvar%nneigx))  then 
+        if(ANY(nneig(:) > lotfvar%nneigx))  then
           write(message,'(a,i8,a)')&
             'UPD_LIS CLASSIC: max no. of neighbours: ',lotfvar%nneigx,' is too small'
           ABI_ERROR(message)
         endif
       enddo
 
-      iat = list(iat) 
+      iat = list(iat)
     enddo
   enddo
  end subroutine upd_lis0
@@ -742,25 +740,24 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !!  tau0(3,natom)=atomic positions 
- !!  rcf2_int=square of the cut off radius for this interaction 
+ !!  tau0(3,natom)=atomic positions
+ !!  rcf2_int=square of the cut off radius for this interaction
  !!
  !! OUTPUT
  !!  tfit_int(3,nbondex)=logical that determines which parameters
- !!  will be optimized ( if true the parameter is optimized)  
+ !!  will be optimized ( if true the parameter is optimized)
  !!
  !! NOTES
- !!  simple SW version (eventually modify for Tersoff or others             
- !!  all the bonds considered here are already 100% in the fitting zone.    
+ !!  simple SW version (eventually modify for Tersoff or others
+ !!  all the bonds considered here are already 100% in the fitting zone.
  !!  Here we just need to eliminate bonds or triplets that are too long..
- !! 
+ !!
  !! SOURCE
  subroutine tuneparms(tau0,tfit_int,rcf2_int)
 
   use defs_param_lotf,only : lotfvar
   use bond_lotf,only : ibn_tot,ibnd_mat,nbondex
   USE pbc_lotf,only : dist_pbc
-  implicit none
 
   !Arguments ------------------------
   real(dp),intent(in) :: rcf2_int
@@ -784,11 +781,11 @@ contains
     iat = ibnd_mat(1,ibn)
     i   = ibnd_mat(2,ibn)
     call dist_pbc(tau0(:,i),tau0(:,iat),r,R1)
-    r12 = sqrt(r) 
+    r12 = sqrt(r)
     if(r < rcf2_int) then
       il_fit_int = il_fit_int + 1
-      nbnds(iat) = nbnds(iat) + 1 
-      nbnds(i)   = nbnds(i) + 1 
+      nbnds(iat) = nbnds(iat) + 1
+      nbnds(i)   = nbnds(i) + 1
 
       tfit_int(:2,ibn) = .true.
       il_fit_par = il_fit_par + 2
@@ -802,8 +799,8 @@ contains
   do ibn = 1,ibn_tot
     iat = ibnd_mat(1,ibn)
     i   = ibnd_mat(2,ibn)
-    if( (npract(iat) > 50).and.(npract(i) > 50) )then  
-      ABI_ERROR('LOTF: NPRACT 50 (A) ') 
+    if( (npract(iat) > 50).and.(npract(i) > 50) )then
+      ABI_ERROR('LOTF: NPRACT 50 (A) ')
     endif
   enddo
 

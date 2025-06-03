@@ -64,7 +64,7 @@ inclvkb3  2
 awtr3     1
 symchi3   1
 getwfk3  2
-nband3   15
+nband3   14
 nfreqre3  1
 nfreqim3  0
 
@@ -84,7 +84,7 @@ bs_calctype4       1      # Use KS energies and orbitals to construct L0
 mbpt_sciss4          0.8 eV
 bs_coupling4       0      # No coupling (default)
 
-bs_loband4         2  
+bs_loband4         2
 nband4   8
 bs_freq_mesh4      0 10.0 0.01 eV
 bs_haydock_tol4    -0.001 0
@@ -101,7 +101,7 @@ ixc 7
 #%% [shell]
 #%% pre_commands = iw_cp test_EP.nc test_EP.nc
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%  t51.abo,                 tolnlines = 25 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t51o_DS4_T0001_EXC_MDF,  tolnlines = 800, tolabs = 1.3e+0, tolrel = 1.0e1, fld_options =  -ridiculous;
 #%%  t51o_DS4_T0005_EXC_MDF,  tolnlines = 800, tolabs = 1.7e-1, tolrel = 5.0e-1, fld_options =  -ridiculous;
@@ -111,7 +111,7 @@ ixc 7
 #%% [extra_info]
 #%% authors = Y. Gillet
 #%% keywords = NC, GW, BSE
-#%% description = 
+#%% description =
 #%%   Silicon: Solution of the Bethe-Salpeter equation (BSE) with temperature-dependent renormalization
 #%%   WARNING: This feature is still under testing, files and variables could change in the next versions
 #%%<END TEST_INFO>

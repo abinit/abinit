@@ -2,7 +2,7 @@
 ndtset 4
 
 ecut     12
-ecutsigx 8 
+ecutsigx 8
 
 nshiftk  1
 shiftk   3*0.
@@ -15,9 +15,9 @@ ixc_sigma 40
 
 nkptgw    3
 kptgw
-0.00000000E+00  0.00000000E+00  0.00000000E+00 
-5.00000000E-01  0.00000000E+00  0.00000000E+00 
-5.00000000E-01  5.00000000E-01  0.00000000E+00 
+0.00000000E+00  0.00000000E+00  0.00000000E+00
+5.00000000E-01  0.00000000E+00  0.00000000E+00
+5.00000000E-01  5.00000000E-01  0.00000000E+00
 
 bdgw  1 8 1 8 1 8
 
@@ -51,7 +51,7 @@ gw_icutcoul4  14
 rcut4       8.
 
 # Definition of the unit cell: fcc
-acell  3*10.217        
+acell  3*10.217
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5
        0.5  0.5  0.0
@@ -59,13 +59,13 @@ rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
 nband 12
 
 # Definition of the atom types
-ntypat 1          
-znucl 14         
+ntypat 1
+znucl 14
 
 # Definition of the atoms
-natom 2           
-typat 1 1         
-xred              
+natom 2
+typat 1 1
+xred
    0.0  0.0  0.0
    0.25 0.25 0.25
 
@@ -83,6 +83,6 @@ xred
 #%% [extra_info]
 #%% authors = F. Bruneval
 #%% keywords = NC, GW
-#%% description = 
+#%% description =
 #%%  HF in GW code with the miniBZ integration of the coulomb singularity
 #%%<END TEST_INFO>

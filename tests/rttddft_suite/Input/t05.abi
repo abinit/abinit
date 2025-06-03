@@ -1,0 +1,101 @@
+##########################################################
+# Automatic test for ABINIT:                             #
+#    C 2 atoms, Diamond, LDA, PAW                        #
+#   DS1: GS calculation to create initial WFK            #
+#   DS2: RT-TDDFT with Impulsional TDEF                  #
+#   DS3: RT-TDDFT with Impulsional TDEF -- restart       #
+#   Test Impulse TD Electric field and restart           #
+#   without induced vector potential                     #
+##########################################################
+
+ndtset 3
+
+optdriver1 0 # Ground-state
+optdriver 9  # RT-TDDFT
+
+# RT-TDDFT section
+getwfk2 -1         # Read initial orbitals from the first dataset
+dtele  0.1         # Electronic time step
+ntime  50          # Maximum number or time step
+td_ef_type 1       # Impulse electric field
+td_ef_tzero 0.3    # applied at time tzero
+td_restart3 1      # DS3 restart trajectory from DS2
+
+#Definition of the unit cell
+acell 3*3.53 angstrom  # Lengths of the primitive vectors (equilibrium volume)
+rprim                  # 3 orthogonal primitive vectors (FCC lattice)
+  0.0 1/2 1/2
+  1/2 0.0 1/2
+  1/2 1/2 0.0
+nsym 0                 # Automatic detection of symetries
+
+#Definition of the atom types and pseudopotentials
+ntypat 1          # There is only one type of atom
+znucl 6           # Atomic number of the possible type(s) of atom. Here carbon.
+pp_dirpath "$ABI_PSPDIR"        # Path to the directory where
+                                # pseudopotentials for tests are stored
+pseudos "Psdj_paw_pw_std/C.xml" # PAW atomic data for Carbon
+
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Carbon
+xred              # Location of the atoms: Diamond structure
+  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom 1
+  1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
+
+#Definition of bands and occupation numbers
+nband 8           # Compute 8 bands (4 occupied, 4 empty)
+nbdbuf 2          # No need to converge the last two empty bands
+occopt 1          # Automatic generation of occupation numbers, as a semiconductor
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 12           # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 24      # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
+kptopt 3          # Automatic generation of k points, no taking symmetry into account
+ngkpt 2 2 2       # k-points grid based on the primitive vectors
+nshiftk 4         # of the reciprocal space, repeated four times,
+shiftk            # with different shifts:
+  0.5 0.5 0.5
+  0.5 0.0 0.0
+  0.0 0.5 0.0
+  0.0 0.0 0.5
+istwfk *1         # Wavefunctions are complex for all k-points
+
+#Parameters for the SCF procedure
+nstep 20          # Maximal number of SCF cycles
+tolvrs 1.0d-10    # Will stop when, twice in a row, the difference
+                  # between two consecutive evaluations of potential residual
+                  # differ by less than tolvrs
+tolwfr 1.0d-20    # Additional convergence criterion on the largest residual
+                  # to ensure that wavefunctions are also tighlty converged
+                  # as they will be used as initial conditions for the following
+                  # RT-TDDFT run
+
+#Printing parameters
+prtwf1 1          # Print wavefunctions (required for following RT-TDDFT runs)
+prtwf 0           # Do not print wavefunctions at each step during RT-TDDFT
+prtden 0          # Do not print density
+prteig 0          # Do not print eigenvalues
+prtebands 0       # Do not print ebands
+prtgsr 0          # Do not print GSR
+prtcurrent 1      # Print current
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t05.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t05o_DS2_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t05o_DS2_TDCURRENT, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%%   t05o_DS2_TDEFIELD, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -medium;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = F. Brieuc
+#%% keywords = RTTDDFT
+#%% description =
+#%%   Diamond, LDA, PAW
+#%%   Tests RT-TDDFT with time-dependent electric field
+#%% topics = RTTDDFT
+#%%<END TEST_INFO>

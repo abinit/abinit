@@ -21,6 +21,7 @@ inp_files = [
 "t07.abi",
 "t08.abi",
 "t09.abi",
-"t10.abi" ,  # test Gamma-only HF with time-reversal symmetry (real wavefunctions)
-"t11.abi" ,  # test Gamma-only HF without time-reversal symmetry (complex wavefunctions)
+"t10.abi",  # test Gamma-only HF with time-reversal symmetry (real wavefunctions)
+"t11.abi",  # test Gamma-only HF without time-reversal symmetry (complex wavefunctions)
+"t12.abi",
 ]

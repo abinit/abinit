@@ -66,8 +66,6 @@ contains
 !! SOURCE
 subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: istep
@@ -125,8 +123,6 @@ end subroutine rttddft_propagate_ele
 !!
 !! SOURCE
 !subroutine rttddft_propagate_nuc(dtset, istep, mpi_enreg, psps, tdks)
-
-!implicit none
 
 !!Arguments ------------------------------------
 !!scalars

@@ -100,8 +100,6 @@ subroutine psp5in(ekb,ekb1,ekb2,epsatm,epspsp,e990,e999,ffspl,indlmn,&
 &                  nproj,n1xccc,pspso,qchrg,qgrid,rcpsp,rms,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lloc,lmax,lmnmax,lnmax,mmax,mpsang,mpssoang,mqgrid

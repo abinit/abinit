@@ -755,6 +755,32 @@ contains
  dprarr(1,:) = dtsets(:)%ratsph_extra
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ratsph_extra','LEN',0)
 
+ intarr(1,:)=dtsets(:)%rcpaw_frocc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_frocc','INT',0)
+
+ intarr(1,:)=dtsets(:)%rcpaw_nfrpaw
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrpaw','INT',0)
+
+ intarr(1,:)=dtsets(:)%rcpaw_nfrtnc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrtnc','INT',0)
+
+ dprarr(1,:)=dtsets(:)%rcpaw_tolnc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tolnc','DPR',0)
+
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     intarr(ii,idtset) = dtsets(idtset)%rcpaw_frtypat(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_frtypat','INT',0)
+
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%rcpaw_scenergy(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_scenergy','ENE',0)
+
  dprarr(1,:)=dtsets(:)%rcut
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcut','LEN',0)
 
@@ -1055,6 +1081,10 @@ contains
 
  intarr(1,:)=dtsets(:)%symv1scf
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symv1scf','INT',0)
+
+ intarr(1,:)=dtsets(:)%scr_wrange(1)
+ intarr(2,:)=dtsets(:)%scr_wrange(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'scr_wrange','INT',0)
 
 !###########################################################
 !### 03. Print all the input variables (T)

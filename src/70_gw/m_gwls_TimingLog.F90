@@ -74,7 +74,6 @@ subroutine setup_timing_log()
 ! This routine opens the timing log file.
 !--------------------------------------------------------------------------------
 use m_gwls_hamiltonian, only: mpi_enreg
-implicit none
 
 
 logical        :: file_exists
@@ -134,7 +133,6 @@ subroutine close_timing_log()
 !--------------------------------------------------------------------------------
 ! This routine closes the timing log file.
 !--------------------------------------------------------------------------------
-implicit none
 ! *************************************************************************
 
 if (head_node_timing) close(io_unit_timing_log)
@@ -159,7 +157,6 @@ subroutine write_text_block_in_Timing_log(string)
 !--------------------------------------------------------------------------------
 ! This routine opens the timing log file.
 !--------------------------------------------------------------------------------
-implicit none
 
 character(256):: string
 ! *************************************************************************
@@ -191,8 +188,6 @@ subroutine write_timing_log(string,time)
 !--------------------------------------------------------------------------------
 ! This routine opens the timing log file.
 !--------------------------------------------------------------------------------
-implicit none
-
 
 character(256):: string
 real(dp)     :: time
@@ -229,7 +224,6 @@ subroutine write_block_lanczos_timing_log(list_time,ntime)
 ! This routine writes the timing for the block lanczos routine.
 !--------------------------------------------------------------------------------
 use m_gwls_hamiltonian, only: mpi_enreg
-implicit none
 
 
 integer , intent(in) :: ntime
@@ -265,15 +259,15 @@ if (head_node) then
     write(io_unit,10) '#   computation                                     time (seconds)       '
     write(io_unit,10) '#==============================================================================================='
     write(io_unit,10) '#'
-  else 
+  else
     open(io_unit,file=block_lanczos_log_filename,position='append',status=files_status_old)
   end if
 
 
-  icounter = icounter + 1 
+  icounter = icounter + 1
   write(io_unit,10) ''
   write(io_unit,10) '#=========================='
-  write(io_unit,15) '# Call number ', icounter 
+  write(io_unit,15) '# Call number ', icounter
   write(io_unit,10) '#=========================='
   write(io_unit,10) ''
 
@@ -290,7 +284,7 @@ if (head_node) then
 
   close(io_unit)
 
-end if 
+end if
 
 10 format(A)
 15 format(A,I5)

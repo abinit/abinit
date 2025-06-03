@@ -31,12 +31,10 @@
 program conducti
 
  use defs_basis
+ USE_MPI
  use m_xmpi
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
  use m_conducti
 
  use m_io_tools,  only : open_file
@@ -140,7 +138,7 @@ program conducti
  tsec(2)=twall-twalli
  if (my_rank==0) then
    write(std_out, '(a,a,a,f13.1,a,f13.1)' ) &
-&   '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
+    '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  end if
 
  call abinit_doctor("__conducti")

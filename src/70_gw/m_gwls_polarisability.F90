@@ -47,7 +47,7 @@ real(dp),public :: matrix_function_omega(2)
 ! Some timing variables
 integer,  public :: counter_fft = 0, counter_sqmr = 0, counter_rprod = 0 , counter_proj = 0, counter_H = 0
 
-real(dp), public :: time1 = zero, time2 = zero, time_fft = zero 
+real(dp), public :: time1 = zero, time2 = zero, time_fft = zero
 real(dp), public :: time_sqmr = zero, time_rprod = zero, time_proj = zero, time_H = zero
 
 real(dp), allocatable, public :: Sternheimer_solutions_zero(:,:,:,:)
@@ -80,19 +80,18 @@ contains
 
 subroutine Pk(psi_inout,omega)
 !===============================================================================
-! 
+!
 ! This routine applies the polarizability operator to an arbitrary state psi_inout.
 !
 !
-! A note about parallelism: 
+! A note about parallelism:
 ! -------------------------
 !  The input/output is in "linear algebra" configuration, which is to say
 !  that ALL processors have a fraction of the G-vectors for this state. Internally,
-!  this routine will parallelise over bands and FFT, thus using the "FFT" 
-!  configuration of the data. For more information, see the lobpcgwf.F90, and 
+!  this routine will parallelise over bands and FFT, thus using the "FFT"
+!  configuration of the data. For more information, see the lobpcgwf.F90, and
 !  the article by F. Bottin et al.
 !===============================================================================
-implicit none
 
 real(dp), intent(inout) :: psi_inout(2,npw_k)
 real(dp), intent(in)  :: omega(2)
@@ -109,7 +108,7 @@ real(dp), allocatable ::   psik_in_alltoall(:,:), psik_tmp_alltoall(:,:)
 real(dp), allocatable ::   psik_ext(:,:), psik_ext_alltoall(:,:)
 
 
-real(dp), allocatable ::   psir(:,:,:,:), psir_ext(:,:,:,:) 
+real(dp), allocatable ::   psir(:,:,:,:), psir_ext(:,:,:,:)
 
 integer         :: cplex
 integer :: recy_i
@@ -126,7 +125,7 @@ real(dp), save ::  total_time1 = zero, total_time2 = zero, total_time = zero
 
 
 integer :: num_op_v, i_op_v, case_op_v
-real(dp):: factor_op_v 
+real(dp):: factor_op_v
 real(dp):: lbda
 real(dp):: zz(2)
 
@@ -148,7 +147,7 @@ call cpu_time(total_time1)
 
 
 !========================================
-! Allocate work arrays and define 
+! Allocate work arrays and define
 ! important parameters
 !========================================
 GWLS_TIMAB   = 1525
@@ -175,7 +174,7 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 
 !--------------------------------------------------------------------------------
-! 
+!
 ! The polarizability acting on a state | PSI > is given by
 !
 !     Pk | PSI >  = 2 sum_{v} | h_v^* phi_v >    ( factor of 2 comes from sum on spin)
@@ -241,7 +240,7 @@ else if( .not. activate_inf_shift_poles) then
   num_op_v  = 2
   factor_op_v  = -2.0_dp
 
-else 
+else
   case_op_v = 4
   num_op_v  = 2
   factor_op_v  = -2.0_dp
@@ -268,7 +267,7 @@ call wrtout(std_out,message,'COLL')
 !-----------------------------------------------------------------
 ! II) copy conjugate of initial wavefunction in local array,
 !     and set inout array to zero. Each FFT row of processors
-!     must have a copy of the initial wavefunction in FFT 
+!     must have a copy of the initial wavefunction in FFT
 !     configuration!
 !-----------------------------------------------------------------
 call cpu_time(time1)
@@ -290,7 +289,7 @@ end do
 call wf_block_distribute(psik_ext,  psik_ext_alltoall,1) ! LA -> FFT
 ! Now every row of FFT processors has a copy of the external state.
 
-! Copy the external state to the real space format, appropriate for real space products to be 
+! Copy the external state to the real space format, appropriate for real space products to be
 ! used later.
 
 call g_to_r(psir_ext,psik_ext_alltoall)
@@ -306,7 +305,7 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 call cpu_time(time2)
 time_fft    = time_fft + time2-time1
-counter_fft = counter_fft+1 
+counter_fft = counter_fft+1
 
 ! set external state to zero, ready to start cumulating the answer
 psi_inout = zero
@@ -322,7 +321,7 @@ do iblk = 1, nbdblock
 ! What is the valence band index for this block and this row of FFT processors? It is not clear from the
 ! code in lobpcgwf.F90; I'm going to *guess*.
 
-v = (iblk-1)*blocksize + mpi_band_rank + 1 ! CAREFUL! This is a guess. Revisit this if code doesn't work as intended. 
+v = (iblk-1)*blocksize + mpi_band_rank + 1 ! CAREFUL! This is a guess. Revisit this if code doesn't work as intended.
 
 
 !Solving of Sternheiner equation
@@ -350,7 +349,7 @@ end if
 
 
 !-----------------------------------------------------------------
-! V) Compute the real-space product of the input wavefunction 
+! V) Compute the real-space product of the input wavefunction
 !    with the valence wavefunction.
 !-----------------------------------------------------------------
 ! Unfortunately, the input wavefunctions will be FFT-transformed k-> r nbandv times
@@ -369,7 +368,7 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 call cpu_time(time2)
 time_fft    = time_fft + time2-time1
-counter_fft = counter_fft+1 
+counter_fft = counter_fft+1
 
 !-----------------------------------------------------------------
 ! VI) Project out to conduction space
@@ -388,7 +387,7 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 call cpu_time(time2)
 time_proj   = time_proj + time2-time1
-counter_proj= counter_proj+1 
+counter_proj= counter_proj+1
 
 
 !-----------------------------------------------------------------
@@ -412,7 +411,7 @@ if      (case_op_v == 1) then
 
   call cpu_time(time2)
   time_sqmr   = time_sqmr+ time2-time1
-  counter_sqmr= counter_sqmr+1 
+  counter_sqmr= counter_sqmr+1
 
   ! If we are constructing the $\hat \epsilon(i\omega = 0)$ matrix (and the Lanczos basis at the same time),
   ! keep the Sternheimer solutions for use in the projected Sternheimer section (in LA configuration).
@@ -426,7 +425,7 @@ if      (case_op_v == 1) then
       end if
       if(dtset%gwls_recycle == 2) then
         recy_i = (index_solution-1)*nbandv + v
-        !BUG : On petrus, NAG 5.3.1 + OpenMPI 1.6.2 cause read(...,rec=i) to read the data written by write(...,rec=i+1). 
+        !BUG : On petrus, NAG 5.3.1 + OpenMPI 1.6.2 cause read(...,rec=i) to read the data written by write(...,rec=i+1).
         !Workaround compatible only with nag : write(recy_unit,rec=recy_i+1).
         write(recy_unit,rec=recy_i) psik(:,(mb-1)*npw_k+1:mb*npw_k)
       end if
@@ -436,7 +435,7 @@ if      (case_op_v == 1) then
 
 else if (case_op_v == 2) then
 
-  ! frequency purely imaginary, operator to apply is 
+  ! frequency purely imaginary, operator to apply is
   ! [H-ev]/(lbda^2+[H-ev]^2)
   call cpu_time(time1)
 
@@ -453,7 +452,7 @@ else if (case_op_v == 2) then
 
   call cpu_time(time2)
   time_H    = time_H + time2-time1
-  counter_H = counter_H+1 
+  counter_H = counter_H+1
 
   call cpu_time(time1)
 
@@ -469,11 +468,11 @@ else if (case_op_v == 2) then
 
   call cpu_time(time2)
   time_sqmr   = time_sqmr+ time2-time1
-  counter_sqmr= counter_sqmr+1 
+  counter_sqmr= counter_sqmr+1
 
 else if (case_op_v == 3) then
 
-  ! frequency purely real, operator to apply is 
+  ! frequency purely real, operator to apply is
   !        1/[H-ev +/- lbda]
   !        TREATED WITH SQMR
 
@@ -494,10 +493,10 @@ else if (case_op_v == 3) then
 
   call cpu_time(time2)
   time_sqmr   = time_sqmr+ time2-time1
-  counter_sqmr= counter_sqmr+1 
+  counter_sqmr= counter_sqmr+1
 
 else if (case_op_v == 4) then
-  ! frequency purely real, operator to apply is 
+  ! frequency purely real, operator to apply is
   !        1/[H-ev +/- lbda]
   !        TREATED WITH QMR
 
@@ -516,7 +515,7 @@ else if (case_op_v == 4) then
 
   call cpu_time(time2)
   time_sqmr   = time_sqmr+ time2-time1
-  counter_sqmr= counter_sqmr+1 
+  counter_sqmr= counter_sqmr+1
 
 end if
 !-----------------------------------------------------------------
@@ -535,7 +534,7 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 call cpu_time(time2)
 time_proj   = time_proj + time2-time1
-counter_proj= counter_proj+1 
+counter_proj= counter_proj+1
 
 !-----------------------------------------------------------------
 ! IX) Conjugate result, and express in denpot format
@@ -557,10 +556,10 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 call cpu_time(time2)
 time_fft    = time_fft + time2-time1
-counter_fft = counter_fft+1 
+counter_fft = counter_fft+1
 
 !-----------------------------------------------------------------
-! X) Multiply by valence state in real space 
+! X) Multiply by valence state in real space
 !-----------------------------------------------------------------
 call cpu_time(time1)
 GWLS_TIMAB   = 1527
@@ -576,7 +575,7 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 call cpu_time(time2)
 time_fft    = time_fft + time2-time1
-counter_fft = counter_fft+1 
+counter_fft = counter_fft+1
 
 !-----------------------------------------------------------------
 ! XI) Return to LA configuration, and cumulate the sum
@@ -655,8 +654,6 @@ end subroutine Pk
 
 subroutine epsilon_k(psi_out,psi_in,omega)
 
-implicit none
-
 real(dp), intent(out) :: psi_out(2,npw_k)
 real(dp), intent(in)  :: psi_in(2,npw_k), omega(2)
 
@@ -688,7 +685,6 @@ subroutine set_dielectric_function_frequency(omega)
 !----------------------------------------------------------------------------------------------------
 ! This routine sets the value of the module's frequency.
 !----------------------------------------------------------------------------------------------------
-implicit none
 real(dp), intent(in) :: omega(2)
 
 ! *************************************************************************
@@ -716,7 +712,6 @@ subroutine matrix_function_epsilon_k(vector_out,vector_in,Hsize)
 ! This function is a simple wrapper around epsilon_k to be fed to the Lanczos
 ! algorithm.
 !----------------------------------------------------------------------------------------------------
-implicit none
 integer,      intent(in)  :: Hsize
 complex(dpc), intent(out) :: vector_out(Hsize)
 complex(dpc), intent(in)  :: vector_in(Hsize)

@@ -76,8 +76,6 @@ contains
 !! SOURCE
  subroutine rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,nspinor,enl,eig)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                   intent(in)              :: nband_k
@@ -262,8 +260,6 @@ contains
 !!
 !! SOURCE
 subroutine paral_kgb_transpose(cg_1,cg_2,mpi_enreg,nband_t,npw_t,nspinor,option,index_wavef_band)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars

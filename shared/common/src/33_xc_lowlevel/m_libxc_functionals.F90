@@ -1179,7 +1179,6 @@ end subroutine libxc_functionals_set_c_tb09
  function libxc_functionals_needs_tau(xc_functionals)
 
 !Arguments ------------------------------------
- implicit none
  logical :: libxc_functionals_needs_tau
  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
 
@@ -1215,7 +1214,6 @@ end subroutine libxc_functionals_set_c_tb09
  function libxc_functionals_needs_laplacian(xc_functionals)
 
 !Arguments ------------------------------------
- implicit none
  logical :: libxc_functionals_needs_laplacian
  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
 
@@ -1251,7 +1249,6 @@ end subroutine libxc_functionals_set_c_tb09
  function libxc_functionals_needs_temperature(xc_functionals)
 
 !Arguments ------------------------------------
- implicit none
  logical :: libxc_functionals_needs_temperature
  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
 
