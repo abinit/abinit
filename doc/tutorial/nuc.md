@@ -300,6 +300,12 @@ atomic site in a solid, the procedure is identical, except that you
 will have to run the sequence three times, once for each direction of
 the applied dipole. Then you will have obtained three component
 vectors $M_\alpha$, $M_\beta$, and $M_\gamma$, which you can assemble
-into a $3\times 3$ matrix, and diagonalize to find the principal
+into a $3\times 3$ matrix. Note that this matrix is the complete 
+chemical shielding tensor, which means that it includes both a symmetric
+and an antisymmetric part. The symmetric part, which can be extracted
+as $\sigma^s=\frac{1}{2}(\sigma + \sigma^T)$ (the sum of the matrix
+and its transpose), is the part relevant to spectroscopy. The antisymmetric
+part appears in relaxation. For normal spectroscopic studies,
+diagonalize the symmetric part to find the principal
 values and directions. The result is the shielding tensor at the site
 of interest, and orientated with respect to the Cartesian directions.

@@ -21,6 +21,7 @@ class DataExtractor(object):
 
     IGNORE_LINES_STARTING_WITH = [
         "MPI startup(): Warning: I_MPI_PMI_LIBRARY",
+        "MPI startup(): PMI server not found.",
     ]
 
     def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):

@@ -72,26 +72,26 @@ module m_energies
   real(dp) :: e_eigenvalues=zero
    ! Sum of the eigenvalues - Band energy (Hartree)
    ! (valid for double-counting scheme dtset%optene == 1)
-  
+
   real(dp) :: e_entropy=zero
    ! Entropy energy due to the occupation number smearing (if metal)
    ! Value is multiplied by dtset%tsmear, see %entropy for the entropy alone.
    ! (valid for metals, dtset%occopt>=3 .and. dtset%occopt<=8)
-  
+
   real(dp) :: entropy=zero
    ! Total entropy
-  
+
   real(dp) :: entropy_ks=zero
    ! Entropy contribution of the Kohn-Sham states (non-interacting entropy)
-  
+
   real(dp) :: entropy_paw=zero
    ! PAW contribution to the entropy (for finite-temperature xc functionals).
    ! This quantity is part of the total entropy (see %entropy).
-  
+
   real(dp) :: entropy_xc=zero
    ! Exchange-correlation contribution to the entropy (for finite-temperature xc functionals).
    ! This quantity is part of the total entropy (see %entropy).
-  
+
   real(dp) :: entropy_extfpmd=zero
    ! Extended FPMD model contribution to the entropy for high temperature simulations
 

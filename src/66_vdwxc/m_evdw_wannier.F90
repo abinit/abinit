@@ -75,8 +75,6 @@ contains
  subroutine evdw_wannier(csix,corrvdw,origmwan,natom,nsppol,orignwan,tdocc_wan,vdw_nfrag,&
 & vdw_supercell,vdw_typfrag,vdw_xc,rprimd,wann_centres,wann_spreads,xcart)
 
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(in)  :: origmwan,nsppol,natom,orignwan(nsppol)
  integer , intent(in)  :: vdw_nfrag,vdw_supercell(3),vdw_typfrag(natom),vdw_xc
@@ -408,7 +406,7 @@ contains
        rc(iwan,jj)= three*(0.769d0+half*dlog(wannspr(iwan,jj)))
 !      rv(iwan,jj)= (1.475d0-half_sqrt3*dlog(wannspr(iwan,jj)))*wannspr(iwan,jj)
 !      r_v suggested in JPhysChemA 113:5224 [[cite:Silvestrelli2009]]
-       rv(iwan,jj)= (rc(iwan,jj)*wannspr(iwan,jj))/sqrt3 
+       rv(iwan,jj)= (rc(iwan,jj)*wannspr(iwan,jj))/sqrt3
      end do
    end do
    corrvdw=0.0d0  !Initializing the vdW correction energy.
@@ -1049,7 +1047,6 @@ end subroutine evdw_wannier
 
  subroutine getFu(sn,sl,rn,rl,occn,occl,fu) ! sn-->spread(n), sl-->spread(l), rn --> rc(n), rl --> rc(l)
 
- implicit none
  real(dp),intent(in)::sn,sl,rn,rl,occn,occl
  real(dp),intent(out)::fu
  !local variables
@@ -1115,7 +1112,6 @@ end subroutine getFu
 !! SOURCE
  subroutine order_wannier(mwan,natom,nwan,nsppol,ord,vdw_typfrag,wanncent,xcart)
 
-   implicit none
 !Arguments
    integer, intent(in)    :: mwan,natom,nsppol,nwan(nsppol),vdw_typfrag(natom) !vz_d
    integer, intent(inout) :: ord(mwan,nsppol)
@@ -1168,7 +1164,6 @@ end subroutine getFu
 !! SOURCE
  subroutine ovlp_wann(mwan,nwan,nsppol,ord,wanncent,wannspr,xi)
 
-   implicit none
 !Arguments
    integer, intent(in)  :: mwan,nsppol,nwan(nsppol),ord(mwan,nsppol) !vz_d
    real(dp),intent(in)  :: wanncent(3,mwan,nsppol),wannspr(mwan,nsppol)
@@ -1317,7 +1312,6 @@ end subroutine getFu
 
  subroutine vv10limit(sn,sl,rn,rl,fu) ! sn-->spread(n), sl-->spread(l), rn --> rc(n), rl --> rc(l)
 
- implicit none
  real(dp),intent(in)::sn,sl,rn,rl
  real(dp),intent(out)::fu
  !local variables
@@ -1399,7 +1393,6 @@ end subroutine vv10limit
 
  subroutine amalgam(amagr,ngr,nsppol,nw,mwan,ord,nwan,vdw_nfrag,wanncent,wannspr)
 
- implicit none
  !Arguments
  integer,intent(in) :: nsppol,mwan,vdw_nfrag
  integer,intent(in) :: ord(mwan,nsppol),nwan(nsppol)

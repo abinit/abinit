@@ -159,8 +159,6 @@ contains
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine nvtx_init()
 
-    implicit none
-
     nvtx_names = [character(len=32) :: &
          & "MAIN_COMPUTATION", &
          & "SCF", &
@@ -416,8 +414,6 @@ contains
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine abi_nvtx_start_range(id)
 
-    implicit none
-
     ! dummy variables
     integer :: id
 
@@ -430,8 +426,6 @@ contains
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine abi_nvtx_end_range()
-
-    implicit none
 
     call nvtxEndRange()
 

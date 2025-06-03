@@ -43,7 +43,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_specialqpt(Invar,Lattice,MPIdata,Qpt,QptBound)
 
-  implicit none
   integer :: qpt_tot,qptbound_tot
   double precision :: zeta,eta,delta,mu,nu,angle_alpha
   type(Input_type),intent(in) :: Invar
@@ -245,7 +244,7 @@ contains
     write(Invar%stdout,*) 'Generate the BZ path using the Q points defined by default'
     if (MPIdata%iam_master) then
       write(40,*)         'Generate the BZ path using the Q points defined by default'
-    end if  
+    end if
     if ((Invar%bravais(1).eq.2).and.(Invar%bravais(2).eq.0)) then
 !     MONO: G-Y-H-C-E-M1-A-X-H1
 !FB      qpt_tot=9
@@ -400,7 +399,7 @@ contains
     write(Invar%stdout,*) 'Generate the BZ path using the Q points given in the input file'
     if (MPIdata%iam_master) then
       write(40,*)         'Generate the BZ path using the Q points given in the input file'
-    end if  
+    end if
     qpt_tot=Invar%bzpath
     ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
     Qpt%special_qpt(:)=Invar%special_qpt(:)
@@ -411,7 +410,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_qptpath(Invar,Lattice,MPIdata,Qpt)
 
-  implicit none
   integer :: ii,jj,kk,nqpt,iqpt,qpt_tot,tmp_int
   logical :: IsThisAllowed
   type(Input_type),intent(in) :: Invar
@@ -576,7 +574,6 @@ contains
 
  subroutine tdep_destroy_qpt(Qpt)
 
-  implicit none
   type(Qpoints_type),intent(inout) :: Qpt
 
   ABI_FREE(Qpt%special_qpt)
