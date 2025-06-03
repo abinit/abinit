@@ -279,8 +279,11 @@ module m_gemm_nonlop_gpu
   end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
+  write(std_out,*) 'debug 1'
   call gpu_memset(gemm_nonlop_gpu_data%    projections_gpu, izero, INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
+  write(std_out,*) 'debug 2'
   call gpu_memset(gemm_nonlop_gpu_data%  s_projections_gpu, izero, INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
+  write(std_out,*) 'debug 3'
   call gpu_memset(gemm_nonlop_gpu_data%vnl_projections_gpu, izero, INT(cplex_fac, c_size_t) * nprojs * nspinor*ndat * dp)
 
   if (dimekbq>1) then
