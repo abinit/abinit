@@ -4658,18 +4658,18 @@ end subroutine add_matlu
  type(coeff2c_type), allocatable :: magnmatb(:)
 !************************************************************************
 
- !================================
- ! Allocate matrices
- !================================
-
- ABI_MALLOC(magnmatb,(natom))
- do iatom=1,natom
-   if(matlu(iatom)%lpawu .ne. -1) then
-     tndim=2*(2*matlu(iatom)%lpawu+1)
-     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))
-     magnmatb(iatom)%value=czero
-   endif
- enddo
+ !================================                               
+ ! Allocate matrices                                             
+ !================================                               
+                                                                 
+ ABI_MALLOC(magnmatb,(natom))                                  
+ do iatom=1,natom                                              
+   if(matlu(iatom)%lpawu .ne. -1) then                         
+     tndim=2*(2*matlu(iatom)%lpawu+1)                          
+     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))           
+     magnmatb(iatom)%value=czero                               
+   endif                                                       
+ enddo                                                         
 
  if(option .eq. 1) then
 

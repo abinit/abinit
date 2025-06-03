@@ -1,0 +1,133 @@
+#Testing DMFT magnetic field (Zeeman)     
+
+#Multi_dataset parameters
+ndtset 2       # Two datasets
+jdtset 1 2     # one followed by two
+getden -1     # Second one takes the density of first
+
+ pawprtvol 3  # Printing additional information
+ prtvol 4     #
+ prtden -1    #  
+ prtwf  0     #
+
+# fftalg 512   # For tests
+# wfoptalg 10  #
+############################
+# Structural Parameters
+############################
+
+#Definition of unit cell
+ acell 3*5.72209       # lattice parameter  
+ rprim -0.5  0.5  0.5  # Primitive cell
+        0.5 -0.5  0.5
+        0.5  0.5 -0.5
+
+#Definition atom
+ ntypat 1   # number of different types of atoms
+ znucl 23   # z number of atom
+
+#Definition of the atoms
+ natom 1           # number of atom     
+ typat 1           # type of atom 
+ xred 0.0 0.0 0.0  # reduced coordinates for primitive cell 
+
+#Definition pseudopotentials
+ pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
+ pseudos "V.GGA_PBE-JTH.xml"      # name of pseudopotential
+
+#Definition of the k-point grid
+ kptopt 1
+ ngkpt 6 6 6              # Reciprocal space vectors are built from
+                          # the rprim parameters. This is the size of the
+                          # reciprocal k-points.
+ nshiftk 2                # Convergence of the density with regular shifts. 
+ shiftk 0.25  0.25  0.25
+       -0.25 -0.25 -0.25
+
+############################
+# Energy Parameters
+############################
+
+ ecut 15         # Maximal plane-wave kinetic energy cut-off, in Hartree
+ pawecutdg 30    # PAW: Energy Cutoff for the Double Grid
+ nband 20        # Number of bands
+ occopt 3        # Smearing type
+ tsmear 1200 K   # Electronic smearing temperature
+
+############################
+# DFT Calculation
+############################
+ usedmft1 0       # DFT alone
+ nstep1 30        # Number of iterations for the DFT convergence
+ nline1 5         # Number of line minimizations
+ nnsclo1 5        # Number of non-self consistent loop
+ tolvrs1 1.0d-12  # Tolerance of the density for DFT convergence
+
+#Definition of the spin properties
+ nsppol 2     # Spin-polarization
+ nspden 2     # Scalar magnetism
+ nspinor 1    # No Spin-orbit
+ spinat 0 0 0.5 # Magnetization vector
+
+############################
+# DMFT Calculation
+############################
+usedmft2 1        # DMFT calculation
+nstep2    1       # Number of iterations for the DFT+DMFT convergence
+nline2    10      # Number of line minimisations
+nnsclo2   10      # Number of non-self consistent loops
+tolvrs2   1.0d-12 # Tolerance of the density for DFT convergence
+
+#Definition for DMFT loop
+dmftbandi 5             # First KS band included in the projection for Wannier orbitals
+dmftbandf 10            # Last KS band included in the projection for Wannier orbitals
+dmft_nwlo 2001          # Logarythmic frequency mesh
+dmft_nwli 1000000       # Linear frequency mesh
+dmft_iter 1             # Number of iterations of the DMFT part.
+                        # We often use single-shot, since anyway the charge density
+                        # changes through the DFT+DMFT anyway.
+dmftcheck 0
+dmft_rslf 1             # Read self-energy, if nothing (like here) initialize.
+dmft_mxsf 0.8           # Mixing of the old and new self-energy at every iterations.
+dmft_dc   5             # Double counting type. 1 is Fully Localized Limit (FLL)
+dmft_wanorthnorm 2      # Renormalization preocedure
+
+dmft_magnfield 1        # Apply magnetic field on (1) KS energies (2) local Hamiltonian
+dmft_magnfield_b 0.005  # Magnetic density flux B(T) in Tesla
+
+#Definition of impurity solver
+dmft_solv          5    # CT-QMC solver in density-density approximation
+dmftqmc_l        500    # Number of time slices for G(tau).
+dmftqmc_n        1.d6   # Number of QMC sweeps
+dmftqmc_therm    50000  # Thermalization
+dmftctqmc_gmove  0      # Global move occurence in QMC
+dmftctqmc_order  50     # Perturbation order
+
+
+#DEfinition of DFT+U
+usepawu1    4           # FLL double counting without spin-polarization
+usepawu2    14          # FLL double counting in DMFT without spon-polarization
+dmatpuopt   2           # The density matrix: the simplest expression.
+lpawu       2           # Angular momentum for the projected Hamiltonian
+upawu1      0.00 eV
+upawu2      2.3  eV  # Values of U for each angular momentum
+jpawu1      0.00 eV
+jpawu2      0.9 eV  # Values of J
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = alps_intel_2025_elpa
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test =
+#%%   t103_MPI4.abo, tolnlines = 2, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-medium
+#%% [extra_info]
+#%% authors = F. Gendron
+#%% keywords = DMFT, dmft_magnfield
+#%% description =  Test apply magnetic field in KS states for DMFT. Not realistic
+#%% topics = DMFT
+#%%<END TEST_INFO>
+
