@@ -16091,6 +16091,20 @@ present run (cell size shape and atomic positions).
 """,
 ),
 
+Variable(
+    abivarname="prtcurrent",
+    varset="rttddft",
+    vartype="integer",
+    topics=['RTTDDFT_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT macroscopic CURRENT density",
+    added_in_version="10",
+    text=r""" 
+If set to 1, prints the time-dependent macroscopic current density 
+computed in real-time TDDFT calculations ([[optdriver]] 9).
+""",
+),
 
 Variable(
     abivarname="prtddb",
