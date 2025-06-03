@@ -1373,12 +1373,15 @@ subroutine slice_allocateResources(slice)
 
     if (slice%paral_slice==EVEN_SLICES) then
        
-        if (modulo(slice%nproc,slice%nslice)/=0) then
-            ABI_ERROR("nslice must divide nproc evenly")
-        end if
-        slice%lookup_proc = (([(iproc, iproc = 1, slice%nproc)] - 1) * slice%nslice) / slice%nproc
-        slice%nproc_per_slice = slice%nproc / slice%nslice
+        slice%nproc_per_slice = ceiling(real(slice%nproc) / real(slice%nslice))
 
+        ! remove from first slice if sum exceeds total nproc, allocation must sum to nproc
+        if (modulo(slice%nproc,slice%nslice)/=0) then
+            slice%nproc_per_slice(1) = 0
+            slice%nproc_per_slice(1) = slice%nproc - sum(slice%nproc_per_slice)
+        end if
+        
+        call assign_tasks_to_processes(slice%nproc_per_slice, slice%lookup_proc)
     else
 
         ABI_MALLOC_IFNOT(weights, (slice%nslice))
@@ -1405,9 +1408,9 @@ subroutine slice_allocateResources(slice)
     
     call xmpi_barrier(slice%spacecom)
 
-    !do iproc = 1, slice%nproc
-    !    write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
-    !end do
+    do iproc = 1, slice%nproc
+        write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
+    end do
 
 end subroutine slice_allocateResources
 !***

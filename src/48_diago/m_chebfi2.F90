@@ -1472,6 +1472,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
     end if
     call xgBlock_colwiseNorm2(chebfi%AX%self,residu) ! performs MPI comm
+
+    !write(std_out,*) 'max colwise residual norm squared='; call xgBlock_print(residu, std_out)
  
     ! Copy in Linalg representation (see chebfi_run, kept for reference)
     ! call xgBlock_copy(chebfi%X,X0)
@@ -1619,7 +1621,7 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     end do ! ideg
     ABI_NVTX_END_RANGE()
 
-    ! Normalize approximately X,AX,BX without computing the norm
+    ! Avoid overflow rescale
     call chebfi_prepAmpfactor(chebfi, eigen, DivResults)
     call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
 
@@ -1761,9 +1763,9 @@ subroutine chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_gl
     end do ! end n
     ABI_NVTX_END_RANGE()
 
-    ! Normalize approximately X,AX,BX without computing the norm
-    call chebfi_prepAmpfactor(chebfi, eigen, DivResults)
-    call chebfi_ampfactorBandpass(chebfi, DivResults%self, lambda_minus, lambda_plus, center, radius, ndeg)
+    ! Avoid overflow
+    !call chebfi_prepAmpfactor(chebfi, eigen, DivResults)
+    !call chebfi_ampfactorBandpass(chebfi, DivResults%self, lambda_minus, lambda_plus, center, radius, ndeg)
 
     ! Free temporary memory
     call xg_free(DivResults)
