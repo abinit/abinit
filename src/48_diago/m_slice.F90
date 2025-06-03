@@ -496,8 +496,10 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     end interface
 
     ! Local variables --------------------------------
+    integer, parameter :: tim_slice_sched = 2161
     integer :: neigenpairs, iband, min_loc, islice
     integer :: fcol, fcol_ext, ncols, itest, iparal
+    integer :: npband_test
     logical :: on_host, on_device
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: tol12 = 1.0e-12
@@ -508,6 +510,10 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     type(xgBlock_t) :: slicecols_ext_out
     ! Arrays
     integer :: npband_list(4)
+    real(dp) :: tsec(2)
+    integer, allocatable :: weights(:)
+    integer, allocatable :: npband_per_slice(:)
+    integer, allocatable :: nband_per_slice(:)
     integer, allocatable, target :: permute_cols(:)
     real(dp), allocatable, target :: theta_reshaped(:)
     real(dp), pointer :: theta_reshaped_ptr(:) => null()
@@ -517,6 +523,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     
     ! *********************************************************************
 
+    call timab(tim_slice_sched,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_SLICE_SCHEDULE)
     
     ! Sanity check for X0 (on GPU): verify we are in target enter data map
@@ -713,6 +720,39 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
 
     end if
 
+    ! Degree-load balance estimation: print info for application observability
+    npband_list = (/ 4, 8, 16, 32 /)
+    ABI_MALLOC_IFNOT(weights, (slice%nslice))
+    ABI_MALLOC_IFNOT(nband_per_slice, (slice%nslice))
+    ABI_MALLOC_IFNOT(npband_per_slice, (slice%nslice))
+    write(std_out,'(a)') '=============== Load balance observer ==================='
+    do itest=1, 4 ! loop on number of MPI processes to distribute
+        npband_test = npband_list(itest)
+        write(std_out,'(a,i4)') 'npband=', npband_test
+        weights(:) = slice%poly_degrees(:)
+        nband_per_slice(:) = slice%neigenpairs_per_slice(:)
+        ! Fair allocation
+        npband_per_slice = ceiling(real(npband_test) / real(slice%nslice))
+        if (modulo(npband_test,slice%nslice)/=0) then
+            npband_per_slice(1) = 0
+            npband_per_slice(1) = npband_test - sum(npband_per_slice)
+        end if
+        write(std_out,'(a,i7,a,i7)') 'FA  chunk size max bandpp=', maxval(nband_per_slice/npband_per_slice), &
+&           ' max spacedim=', maxval(slice%total_spacedim/npband_per_slice)
+        ! Weighted fair allocation
+        call fair_allocation(slice%nslice, nband_per_slice, weights, npband_test, npband_per_slice)
+        if (ANY( npband_per_slice==0 )) then
+            write(std_out,'(a)') 'WFA Invalid allocation: found slice without any procs'
+        else
+            write(std_out,'(a,i7,a,i7)') 'WFA chunk size max bandpp=', maxval(nband_per_slice/npband_per_slice), &
+&               ' max spacedim=', maxval(slice%total_spacedim/npband_per_slice)
+        end if
+    end do 
+    ABI_SFREE(weights)
+    ABI_SFREE(nband_per_slice)
+    ABI_SFREE(npband_per_slice)
+    write(std_out,'(a)') '========================================================='
+
     ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
     call slice_markActiveTask(slice)
 
@@ -764,6 +804,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     ABI_SFREE(theta_reshaped)
 
     ABI_NVTX_END_RANGE()
+    call timab(tim_slice_sched,2,tsec)
 
 end subroutine slice_allschedule
 !!***
@@ -820,6 +861,12 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         end subroutine getBm1X
     end interface
 
+    ! Timers
+    integer, parameter :: tim_slice_1 = 2162
+    integer, parameter :: tim_slice_2 = 2163
+    integer, parameter :: tim_slice_3 = 2164
+    integer, parameter :: tim_slice_X = 2165
+    integer :: tim_slice_me
     ! Variables
     type(chebfi_t) :: chebfi
     type(xgBlock_t) :: X0_active
@@ -832,11 +879,24 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     real(dp) :: oracle_factor, oracle_min_occ
     logical :: is_lowpass, on_host, on_device
     ! Arrays
+    real(dp) :: tsec(2)
     integer, allocatable, target :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null() 
     integer, pointer :: ncolsColsRows_ptr(:) => null()
 
     ! *********************************************************************
+    
+    if (slice%me_id_slice==1) then
+        tim_slice_me = tim_slice_1
+    else if (slice%me_id_slice==2) then
+        tim_slice_me = tim_slice_2
+    else if (slice%me_id_slice==3) then
+        tim_slice_me = tim_slice_3
+    else
+        tim_slice_me = tim_slice_X
+    end if
+    
+    call timab(tim_slice_me,1,tsec)
     
     ! Sanity check
     if ( (.not. slice%use_linalg) .and. slice%use_colsrows) then
@@ -942,6 +1002,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     !    call slice_queryHostDevice(slice, on_host, on_device)
     !    ABI_CHECK(on_device,"GPU not used when it should be!")
     !end if
+
+    ! Timer is BEFORE the barrier !!
+    call timab(tim_slice_me,2,tsec)
 
     ! Actually do the transposition to linalg
     call xmpi_barrier(slice%spacecom)
@@ -1926,10 +1989,14 @@ subroutine fair_allocation(n, m, w, p, x)
     ! Assign the final allocation to the output variable
     x = allocation
 
-    write(std_out,'(a)') 'Memory allocation info:'
-    do i=1,n
-        write(std_out,'(a,i4,i6,i5)') '#task #workload #allocated resources', i, w(i)*m(i)/x(i), x(i)
-    end do
+    !write(std_out,'(a)') 'Memory allocation info:'
+    !do i=1,n
+    !    if (x(i) .ne. 0) then
+    !        write(std_out,'(a,i4,i6,i5)') '#task #workload #allocated resources', i, w(i)*m(i)/x(i), x(i)
+    !    else
+    !        write(std_out,'(a,i4,i4,i4,i4)') 'Allocation error: x(i)= w(i)= m(i)= for i=', x(i), w(i), m(i), i
+    !    end if
+    !end do
 
 end subroutine fair_allocation
 !!***
