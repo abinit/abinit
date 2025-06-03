@@ -987,7 +987,7 @@ end if
    use_rcpaw_data=.false.
    if(present(rcpaw)) then
      if(associated(rcpaw)) then
-       if(allocated(rcpaw%atm)) then 
+       if(allocated(rcpaw%atm)) then
          if(dtset%ntypat==size(rcpaw%atm)) then
            atm(itypat)=rcpaw%atm(itypat)
            use_rcpaw_data=.true.

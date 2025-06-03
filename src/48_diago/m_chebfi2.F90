@@ -197,8 +197,6 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
                        ndeg_filter,nbdbuf,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols, &
                        oracle,oracle_factor,oracle_min_occ,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit,from_linalg)
 
- implicit none
-
  ! Arguments ------------------------------------
  integer       , intent(in   ) :: bandpp
  integer       , intent(in   ) :: eigenProblem
@@ -297,8 +295,6 @@ end subroutine chebfi_init
 
 subroutine chebfi_allocateAll(chebfi)
 
- implicit none
-
  ! Arguments ------------------------------------
  type(chebfi_t)  , intent(inout) :: chebfi
 
@@ -373,8 +369,6 @@ end subroutine chebfi_allocateAll
 
 subroutine chebfi_free(chebfi)
 
- implicit none
-
 !Arguments ------------------------------------
  type(chebfi_t) , intent(inout) :: chebfi
 
@@ -419,8 +413,6 @@ end subroutine chebfi_free
 !! SOURCE
 
 function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,bandpp) result(arraymem)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in   ) :: bandpp
@@ -519,8 +511,6 @@ end function chebfi_memInfo
 !! SOURCE
 
 subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
-
- implicit none
 
 !Arguments ------------------------------------
  type(chebfi_t) , intent(inout) :: chebfi
@@ -813,8 +803,6 @@ end subroutine chebfi_run
 
 subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 
- implicit none
-
 !Arguments ------------------------------------
  real(dp), intent(inout) :: maxeig
  real(dp), intent(inout) :: mineig
@@ -890,8 +878,6 @@ end subroutine chebfi_rayleighRitzQuotients
 !! SOURCE
 
 subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,ideg,center,one_over_r,two_over_r,getBm1X)
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp)       , intent(in) :: center
@@ -974,8 +960,6 @@ end subroutine chebfi_computeNextOrderChebfiPolynom
 !! SOURCE
 
 subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
-
-  implicit none
 
   ! Arguments ------------------------------------
   integer        , intent(in   ) :: spacedim
@@ -1130,8 +1114,6 @@ end subroutine chebfi_prepAmpfactor
 !! SOURCE
 
 subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filter_bands)
-
-  implicit none
 
   ! Arguments ------------------------------------
   integer,           intent(in   ) :: ndeg_filter_bands(:)
@@ -1798,8 +1780,6 @@ end subroutine chebfi_bandpassFilter
 
 function cheb_oracle1(xx,aa,bb,tol,nmax) result(nn)
 
-  implicit none
-
   ! Arguments ------------------------------------
   integer              :: nn
   integer,  intent(in) :: nmax
@@ -1856,8 +1836,6 @@ end function cheb_oracle1
 !! SOURCE
 
 function cheb_poly1(xx,nn,aa,bb) result(yy)
-
-  implicit none
 
   ! Arguments ------------------------------------
   integer,  intent(in) :: nn
@@ -1965,8 +1943,6 @@ end function bandpassIndicator_sca
 !! SOURCE
 
 subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,ndeg_filter_max,ndeg_filter)
-
- implicit none
 
  integer,intent(in) :: ndeg_filter_max
  integer,intent(out) :: ndeg_filter

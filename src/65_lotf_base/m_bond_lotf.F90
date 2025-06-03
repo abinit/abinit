@@ -67,11 +67,8 @@ contains
 
  subroutine bond_tafit_init(nax)
 
-  implicit none
-
   !Arguments ------------------------
   integer,intent(in) :: nax
-
 ! *************************************************************************
 
    ABI_MALLOC(tafit,(nax))
@@ -93,8 +90,6 @@ contains
 !! SOURCE
 
  subroutine bond_atom_init(nneigx,nneig,neighl)
-
-  implicit none
 
   !Arguments ------------------------
   integer,intent(in) :: nneigx
@@ -178,8 +173,6 @@ contains
 
  subroutine bond_matrix_alloc(nax,nneigx)
 
-  implicit none
-
   !Arguments ------------------------
   integer,intent(in) :: nax
   integer,intent(in) :: nneigx
@@ -204,8 +197,6 @@ contains
 !! SOURCE
 
  subroutine bond_matrix_set(nneig,neighl)
-
-  implicit none
 
   !Arguments ------------------------
   integer,intent(in) :: nneig(:)
@@ -264,8 +255,6 @@ contains
 !! SOURCE
 
  subroutine bond_compute(nneig,neighl)
-
-  implicit none
 
   !Arguments ------------------------
   integer,intent(in) :: nneig(:)
@@ -334,8 +323,6 @@ contains
 !! SOURCE
 
  subroutine bond_fit_set(nax,nfitdum)
-
-  implicit none
 
   !Arguments ------------------------
   integer,intent(in) :: nax

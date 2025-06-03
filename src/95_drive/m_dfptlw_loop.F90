@@ -160,7 +160,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 & pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -574,7 +573,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    call wrtout(std_out,message,'COLL')
                    !call wrtout(ab_out,message,'COLL')
 !                  Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-                   call wfk_open_read(ddk_f,fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
+                   call ddk_f%open_read(fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
 
                    !Prepare d2_dkdk wf file
                    !For i1pert
@@ -599,8 +598,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                      call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL')
-                     call wfk_open_read(d2_dkdk_f,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
-
+                     call d2_dkdk_f%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
                    end if
 
                    !Prepare d2_dkdk wf file
@@ -625,8 +623,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      end if
                      write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                      call wrtout(std_out,message,'COLL')
-                     !call wrtout(ab_out,message,'COLL')
-                     call wfk_open_read(d2_dkdk_f2,fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
+                     call d2_dkdk_f2%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
                    end if
 
                    !Perform the longwave DFPT part of the 3dte calculation
@@ -856,8 +853,6 @@ subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_ty
  use m_profiling_abi
  use m_dynmat,      only : cart39
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,optgeom
@@ -1037,8 +1032,6 @@ end subroutine dfptlw_typeIproc
 
 subroutine read_1eig(eigen,formeig,mband,nkpt,nsppol,wffnm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: formeig,mband,nkpt,nsppol
@@ -1083,14 +1076,14 @@ DBG_ENTER("COLL")
    write(msg,'(a,a)')'-open 1wf file :',trim(wffnm)
    call wrtout(std_out,msg,'COLL')
 
-   call wfk_open_read(Wfk1, wffnm, formeig, iomode, get_unit(), xmpi_comm_self, Hdr_out=hdr1)
+   call wfk1%open_read(wffnm, formeig, iomode, get_unit(), xmpi_comm_self, Hdr_out=hdr1)
  end if
 
  ! Master Broadcasts the header to all procs in comm
  call hdr1%bcast(master, my_rank, comm)
 
  !Allocate buffer for MPI communicatio with max dimensions.
- ABI_MALLOC(eig_buffer,((2*mband)**formeig*mband*nsppol))
+ ABI_MALLOC(eig_buffer, ((2*mband)**formeig*mband*nsppol))
 
  bd2tot = 0
  do isppol=1,nsppol
@@ -1098,8 +1091,7 @@ DBG_ENTER("COLL")
 
      !Master reads and broadcasts
      if (my_rank == master) then
-       call Wfk1%read_band_block([1,mband], ik_bz, isppol, xmpio_single, &
-     & eig_k=eig_buffer)
+       call Wfk1%read_band_block([1,mband], ik_bz, isppol, xmpio_single, eig_k=eig_buffer)
      end if
 
      call xmpi_bcast(eig_buffer, master, comm, ierr)
@@ -1108,7 +1100,6 @@ DBG_ENTER("COLL")
 
      !Keep track of total number of bands
      bd2tot = bd2tot + 2*mband**2
-
    end do
  end do
 
@@ -1118,7 +1109,6 @@ DBG_ENTER("COLL")
  ABI_FREE(eig_buffer)
 
  DBG_EXIT("COLL")
-
 
 end subroutine read_1eig
 !!***

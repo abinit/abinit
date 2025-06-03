@@ -27,9 +27,9 @@ module m_sigx
  use m_xmpi
  use m_defs_ptgroups
  use m_errors
- use m_time
 
  use defs_datatypes,  only : pseudopotential_type
+ use m_time,          only : timab, cwtime, cwtime_report
  use m_fstrings,      only : itoa, sjoin, ktoa, ltoa
  use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize
@@ -53,6 +53,7 @@ module m_sigx
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
+ use m_pstat,         only : pstat_proc
 
  implicit none
 
@@ -62,6 +63,8 @@ module m_sigx
  public :: calc_sigx_me
  public :: sigx_symmetrize   ! Symmetrize Sig_x matrix elements
 !!***
+
+ integer,parameter :: LOG_MODK = 5
 
 contains
 !!***
@@ -155,10 +158,11 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  integer :: spad, spadx1, spadx2, irow, npw_k, wtqm, wtqp
  integer :: npwx, x_nfft, x_mgfft, x_fftalga, nsig_ab
  integer :: nfftf, mgfftf, nhat12_grdim, my_nbks, use_padfft, use_padfftf
- real(dp) :: cpu, wall, gflops, fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
+ real(dp) :: fact_spin, theta_mu_minus_esum, theta_mu_minus_esum2, tol_empty
  complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
  complex(gwpc) :: gwpc_sigxme,gwpc_sigxme2,xdot_tmp
- logical :: iscompatibleFFT,q_is_gamma
+ logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=5000) :: msg
  type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
@@ -185,7 +189,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  DBG_ENTER("COLL")
 
  call timab(430,1,tsec) ! csigme (SigX)
- call cwtime(cpu, wall, gflops, "start")
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Initialize some values.
  gwcalctyp = Sigp%gwcalctyp; nspinor = wfd%nspinor; nsppol = wfd%nsppol; npwx = sigp%npwx
@@ -336,6 +340,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
    ABI_MALLOC(ur_ps_onsite_sum,(nfftf*nspinor))
  end if
 
+ call pstat_proc%print(_PSTAT_ARGS_)
+
  do spin=1,nsppol
    if (ALL(proc_distrb(:,:,spin) /= wfd%my_rank)) CYCLE ! Spin parallelism.
 
@@ -400,8 +406,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
        end do
      end if
 
-     write(msg,'(2(a,i4),a,i3)')' calc_sigx_me: ik_bz ',ik_bz,'/',Kmesh%nbz,' done by mpi-rank: ',wfd%my_rank
-     call wrtout(std_out, msg)
+     print_time = wfd%my_rank == 0 .and. (ik_bz < LOG_MODK .or. mod(ik_bz, LOG_MODK) == 0)
+     if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! Find the corresponding irreducible q-point.
      ! NB: non-zero umklapp G_o is not allowed. There's a check in setup_sigma
@@ -415,10 +421,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
      call Gsph_x%fft_tabs(g0, x_mgfft, x_ngfft, use_padfft, x_gbound, igfftxg0)
 
      if (any(x_fftalga == [2, 4])) use_padfft = 0 ! Padded-FFT is not coded in rho_tw_g
-#ifdef FC_IBM
-     ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
-     use_padfft = 0
-#endif
+     !use_padfft = 0
      if (use_padfft == 0) then
        ABI_FREE(x_gbound)
        ABI_MALLOC(x_gbound, (2*x_mgfft+8, 2*use_padfft))
@@ -597,6 +600,11 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
      end do ! band_sum
 
+     if (print_time) then
+       write(msg,'(3(a,i0))')' sigx: ik_bz: ',ik_bz,'/',Kmesh%nbz,", spin: ",spin
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (ik_bz == LOG_MODK) call wrtout(std_out, " ...")
+     end if
+
      ! Deallocate k-dependent quantities.
      ABI_FREE(x_gbound)
      if (pawcross==1) then
@@ -714,7 +722,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
  ABI_FREE(proc_distrb)
 
  call timab(430,2,tsec) ! csigme (SigX)
- call cwtime_report(" calc_sigx_me:", cpu, wall, gflops)
+ call cwtime_report(" calc_sigx_me:", cpu_all, wall_all, gflops_all)
 
  DBG_EXIT("COLL")
 

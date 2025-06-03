@@ -525,7 +525,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (ddkfil(idir1)/=0) then
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(idir1))
        call wrtout([std_out, ab_out],msg)
-       call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
+       call ddks(idir1)%open_read(fiwfddk(idir1), formeig1, dtset%iomode, ddkfil(idir1), xmpi_comm_self)
      end if
    end do
 
@@ -613,9 +613,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !  Factor to be applied for electric Field (Eff. charges and piezo. tensor are "minus" d2E)
    elfd_fact=one
    if ((ipert <=dtset%natom.or.ipert ==dtset%natom+3.or.ipert ==dtset%natom+4).and. &
-&   (ipert1==dtset%natom+2)) elfd_fact=-one
+       (ipert1==dtset%natom+2)) elfd_fact=-one
    if ((ipert1<=dtset%natom.or.ipert1==dtset%natom+3.or.ipert1==dtset%natom+4).and. &
-&   (ipert ==dtset%natom+2)) elfd_fact=-one
+       (ipert ==dtset%natom+2)) elfd_fact=-one
 
 !  We want to compute delta_u^(j1))=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !  see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
@@ -627,8 +627,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    end if
 
 !  Select which WF are needed
-   need_wfk=(.true.)
-   need_wf1=(.true.)
+   need_wfk=.true.
+   need_wf1=.true.
 
 !  Initialize data for NL 1st-order (j1) hamiltonian
    call rf_hamkq%init(cplex,gs_hamkq,ipert1,mpi_spintab=[0,0])

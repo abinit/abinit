@@ -92,8 +92,6 @@ contains
 subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rprimd,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer , intent(in)  :: mpert,my_natom

@@ -30,7 +30,7 @@
 
 module funct_pwscf
 !-------------------------------------------------------------------
-!  
+!
 !  setting routines:   set_dft_from_name (previously which_dft)
 !                      set_dft_from_indices
 !                      enforce_input_dft
@@ -138,7 +138,7 @@ module funct_pwscf
   !              obpz    G.Ortiz and P.Ballone, PRB 50, 1391 (1994) [[cite:Ortiz1994]]
   !              obpw    as above
   !              b88     A.D.Becke, PRA 38, 3098 (1988) [[cite:Becke1988]]
-  !              p86     J.P.Perdew, PRB 33, 8822 (1986) [[cite:Perdew1986]] 
+  !              p86     J.P.Perdew, PRB 33, 8822 (1986) [[cite:Perdew1986]]
   !              pbe     J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996) [[cite:Perdew1996]]
   !              pw91    J.P.Perdew and Y. Wang, PRB 46, 6671 (1992) [[cite:Perdew1992]]
   !              blyp    C.Lee, W.Yang, R.G.Parr, PRB 37, 785 (1988) [[cite:Lee1988]]
@@ -171,7 +171,7 @@ module funct_pwscf
   !    ishybrid: .TRUE. if the xc finctional is an HF+DFT hybrid like
   !              PBE0 or B3LYP or HF itself
   !
-  ! see comments above and routine "set_dft_from_name" below 
+  ! see comments above and routine "set_dft_from_name" below
   !
   ! data
   integer :: nxc, ncc, ngcx, ngcc
@@ -208,7 +208,7 @@ CONTAINS
   !-----------------------------------------------------------------------
 
     use flib_pwscf
-    implicit none
+    !implicit none
     ! input
     character(len=*)               :: dft_
     ! local
@@ -216,7 +216,7 @@ CONTAINS
     character (len=50):: dftout
     !
     !
-    ! if 
+    ! if
     !
     if ( discard_input_dft ) return
     !
@@ -286,7 +286,7 @@ CONTAINS
    endif
 
     if (matches ('PBC', dftout) ) then
-    ! special case : PBC  = PW + PBC 
+    ! special case : PBC  = PW + PBC
        call set_dft_value (icorr,4)
        call set_dft_value (igcc, 4)
     endif
@@ -311,7 +311,7 @@ CONTAINS
     end if
 
     ! special case : OPTX already contains LDA exchange
-     
+
     if (matches('OPTX',dftout)) then
        call set_dft_value(iexch,0)
     end if
@@ -402,7 +402,7 @@ CONTAINS
   !-----------------------------------------------------------------------
 
     use flib_pwscf
-    isgradient =  (igcx > 0) .or. (igcc > 0) 
+    isgradient =  (igcx > 0) .or. (igcc > 0)
     ismeta     =  (igcx == 7) .or. (igcx == 6 )
 
     ! PBE0
@@ -433,7 +433,7 @@ CONTAINS
   subroutine set_dft_value (m, i)
   !-----------------------------------------------------------------------
     use flib_pwscf
-    implicit none
+    !implicit none
     integer :: m, i
     ! local
 
@@ -466,7 +466,7 @@ CONTAINS
   !
     use defs_basis, only : std_out,std_out_default
     use flib_pwscf
-    implicit none
+    !implicit none
     ! input
     character(len=*) :: dft_
     ! data
@@ -499,7 +499,7 @@ CONTAINS
 !!
 !! SOURCE
 
-  subroutine start_exx 
+  subroutine start_exx
 
     use flib_pwscf
      if (.not. ishybrid) &
@@ -522,7 +522,7 @@ CONTAINS
 !! SOURCE
 
   !-----------------------------------------------------------------------
-  subroutine stop_exx 
+  subroutine stop_exx
 
     use flib_pwscf
      if (.not. ishybrid) &
@@ -757,7 +757,7 @@ CONTAINS
 
     use defs_basis, only : std_out,std_out_default
     use flib_pwscf
-    implicit none
+    !implicit none
      integer :: iexch_, icorr_, igcx_, igcc_
      if ( discard_input_dft ) return
      if (iexch == notset) iexch = iexch_
@@ -805,7 +805,7 @@ CONTAINS
   !---------------------------------------------------------------------
   subroutine dft_name(iexch_, icorr_, igcx_, igcc_, longname_, shortname_)
   !---------------------------------------------------------------------
-  implicit none
+  !implicit none
   integer iexch_, icorr_, igcx_, igcc_
   character (len=4) :: shortname_
   character (len=20):: longname_
@@ -828,7 +828,7 @@ CONTAINS
      shortname_ = ' '
   end if
   write(longname_,'(4a5)') exc(iexch_),corr(icorr_),gradx(igcx_),gradc(igcc_)
-  
+
   return
 end subroutine dft_name
 !!***
@@ -849,7 +849,7 @@ end subroutine dft_name
 subroutine write_dft_name
 !-----------------------------------------------------------------------
    use defs_basis, only : std_out,std_out_default
-   implicit none
+   !implicit none
 
    !write(std_out,'(5X,"Exchange-correlation      = ",A, &
    !     &  " (",4I1,")")') TRIM( dft ), iexch, icorr, igcx, igcc

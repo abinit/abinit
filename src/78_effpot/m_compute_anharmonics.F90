@@ -65,7 +65,6 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_strain
  use m_fstrings, only : itoa,int2char4,ftoa
-  implicit none
 
  !Arguments ------------------------------------
  !scalars

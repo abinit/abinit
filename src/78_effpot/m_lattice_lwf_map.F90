@@ -32,9 +32,7 @@ module m_lattice_lwf_map
   use m_nctk
   !use m_spmat_spvec, only: sp_real_vec
   use m_spmat_coo, only: COO_mat_t
-!#if defined HAVE_NETCDF
   use netcdf
-!#endif
   implicit none
   private
   !!***

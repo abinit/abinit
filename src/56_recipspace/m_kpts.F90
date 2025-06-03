@@ -310,7 +310,6 @@ type(htetra_t) function tetra_from_kptrlatt( &
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: rlatt(3,3),klatt(3,3)
  real(dp),allocatable :: kfull(:,:),my_kibz(:,:),my_wtk(:),new_shiftk(:,:)
-
 ! *************************************************************************
 
  ierr = 0
@@ -775,7 +774,6 @@ subroutine kpts_map_print(units, header, mode, bz, ibz, bz2ibz, prtvol)
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  logical :: isirr_k
  character(len=5000) :: msg
-
 ! *************************************************************************
 
  call wrtout(units, " "//trim(header))
@@ -894,7 +892,6 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
  real(dp) :: dk(3),kpg1(3),kpt1a(3),k1(3),k2(3)
  !real(dp) :: kasq,ka(3)
  real(dp),allocatable :: lkpg1(:),lkpg1_sorted(:)
-
 ! *************************************************************************
 
  call timab(1091, 1, tsec)
@@ -1392,7 +1389,6 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  real(dp) :: klatt3(3,3),kptrlattr(3,3),ktransf(3,3),ktransf_invt(3,3)
  real(dp) :: metmin(3,3),minim(3,3),rmet(3,3),rmet_super(3,3),rprimd_super(3,3)
  real(dp),allocatable :: deltak(:,:),kpt_fullbz(:,:),shiftk2(:,:),shiftk3(:,:),spkpt(:,:),wtk_folded(:),wtk_fullbz(:)
-
 ! *************************************************************************
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -2681,7 +2677,6 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
  real(dp) :: metmin(3,3),minim(3,3),r2d(3,3),rmet(3,3),rsuper(3,3)
  real(dp) :: shiftk_current(3,MAX_NSHIFTK),shiftk_trial(3,MAX_NSHIFTK)
  real(dp),allocatable :: kpt(:,:),kptrlen_list(:),wtk(:)
-
 ! *************************************************************************
 
  kptrlen_target=kptrlen
@@ -3333,13 +3328,12 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
  character(len=500) :: msg
 !arrays
  real(dp) :: dd(3),lng(nbounds-1)
-
 ! *************************************************************************
 
  if (ndiv_small<=0) then
    write(msg,'(3a,i0)')&
-&   'The argument ndiv_small should be a positive number,',ch10,&
-&   'however, ndiv_small=',ndiv_small
+   'The argument ndiv_small should be a positive number,',ch10,&
+   'however, ndiv_small=',ndiv_small
    ABI_ERROR(msg)
  end if
 

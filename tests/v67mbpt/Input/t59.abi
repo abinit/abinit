@@ -1,0 +1,79 @@
+# Crystalline silicon calculation of the GW corrections.
+# Using contour deformation for Sigma
+# Calculation of the Self-Energy matrix elements with Contour Deformation
+#
+
+gwcalctyp   2
+
+ecut      12.0
+ecutwfn    12.0
+ecutsigx   3.0
+ecuteps    3.0
+
+# Calculation of the Self-Energy matrix elements (GW corrections)
+optdriver    4        # Self-Energy calculation
+getwfk_filepath "./t57o_DS1_WFK"
+getscr_filepath "./t58o_SCR"
+nband       25
+nomegasi    10        # No. of points for \Sigma(i\omega) sampled along the imaginary axis
+omegasimax  40.0 eV
+
+nkptgw  2
+kptgw
+    0.00000000E+00  0.00000000E+00  0.00000000E+00
+    5.00000000E-01  5.00000000E-01  0.00000000E+00
+
+bdgw
+    1  7    # Enclose all the degenerate states.
+    1  7    # Enclose all the degenerate states.
+
+
+# Data common to the three different datasets
+# Definition of the unit cell: fcc
+acell  3*10.217
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl 14
+
+# Definition of the atoms
+natom 2
+typat  1 1
+xred
+      0.0  0.0  0.0
+      0.25 0.25 0.25
+
+# Definition of the k-point grid
+ngkpt   2 2 2
+nshiftk 4
+shiftk
+        0.0 0.0 0.0
+        0.0 0.5 0.5
+        0.5 0.0 0.5
+        0.5 0.5 0.0
+
+# Definition of the SCF procedure
+nstep   500       # Maximal number of SCF cycles
+diemac  12.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.psp"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t57.abi, t58.abi, t59.abi
+#%% [files]
+#%% files_to_test =
+#%%   t59.abo, tolnlines = 20, tolabs = 2.0e-2, tolrel = 5.0e-1, fld_options = -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = H. Tsai, M. Giantomassi
+#%% keywords = GW, CD
+#%% description =
+#%%   Calculation of the Self-Energy matrix elements with Contour Deformation
+#%%<END TEST_INFO>

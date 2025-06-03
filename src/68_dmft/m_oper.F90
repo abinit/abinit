@@ -28,14 +28,14 @@
 
 MODULE m_oper
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use defs_basis
  use m_abicore
  use m_errors
  use m_xomp
  use m_abi_linalg
- use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
- use m_abi_linalg, only : abi_xgemm
+ !use m_abi_linalg, only : abi_xgemm
  use m_hide_lapack, only : xginv
  use m_matlu, only : copy_matlu,destroy_matlu,diff_matlu,identity_matlu,init_matlu, &
                & inverse_matlu,matlu_type,print_matlu,prod_matlu,trace_matlu,zero_matlu

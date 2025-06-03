@@ -67,7 +67,7 @@ program mrggkk
  real(dp) :: tolgkk=tol6
  character(len=1),parameter :: comment="#"
  character(len=24) :: codename
- character(len=500) :: message
+ character(len=500) :: msg
  character(len=fnlen) :: file1wf,filegkk,filegs,outfile
  type(hdr_type) :: hdr,hdr1
  type(wfk_t) :: GS_wfk,PH_wfk
@@ -95,7 +95,7 @@ program mrggkk
 !write greating,read the file names, etc.
  call herald(codename,abinit_version,std_out)
 
- write(message,'(17a)')&
+ write(msg,'(17a)')&
 & ' Files file format: ',ch10,ch10,&
 & '  Name of the output file',ch10,&
 & '  Integer flag: 0 --> binary output,   1 --> ascii formatted output',ch10,&
@@ -104,7 +104,7 @@ program mrggkk
 & '  Names of the 1WF files...',ch10,&
 & '  Names of the GKK files...',ch10,ch10,&
 & ' Enter name of output file: '
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,msg)
 
 !get file with filenames and number of 1wf files
  read(*,'(a)') outfile
@@ -119,13 +119,13 @@ program mrggkk
 
  read(*,*) n1wf,ngkk,ntotgkk
 
- write(message,'(7a,i4,2a,i4,2a,i4,a)')&
-& ' Output                     = ',trim(outfile),ch10,&
-& ' Ground State file          = ',trim(filegs),ch10,&
-& ' Number of 1WF files        = ',n1wf,ch10,&
-& ' Number of GKK files        = ',ngkk,ch10,&
-& ' Total Number of 1WF in GKK = ',ntotgkk,ch10
- call wrtout(std_out,message,'COLL')
+ write(msg,'(7a,i4,2a,i4,2a,i4,a)')&
+ ' Output                     = ',trim(outfile),ch10,&
+ ' Ground State file          = ',trim(filegs),ch10,&
+ ' Number of 1WF files        = ',n1wf,ch10,&
+ ' Number of GKK files        = ',ngkk,ch10,&
+ ' Total Number of 1WF in GKK = ',ntotgkk,ch10
+ call wrtout(std_out,msg)
 
  iomode = IO_MODE_FORTRAN
 #ifdef HAVE_MPI_IO
@@ -135,8 +135,8 @@ program mrggkk
 
  ! Trick needed so that we can run the automatic tests with both Fortran and netcdf
  if (.not. file_exists(filegs) .and. file_exists(nctk_ncify(filegs))) then
-   write(message, "(3a)")"- File: ",trim(filegs)," does not exist but found netcdf file with similar name."
-   call wrtout(std_out,message,'COLL')
+   write(msg, "(3a)")"- File: ",trim(filegs)," does not exist but found netcdf file with similar name."
+   call wrtout(std_out,msg)
    filegs = nctk_ncify(filegs)
    iomode = IO_MODE_ETSF
  end if
@@ -144,22 +144,22 @@ program mrggkk
  !output without rewinding the file
  if (binascii == 0) then
    ! open output file
-   ios = open_file(outfile,message,unit=unitout,form='unformatted')
+   ios = open_file(outfile,msg,unit=unitout,form='unformatted')
    rdwrout = 6
  else if (binascii == 1) then
    !  rdwrout=4 ! use for screen output and change writes of eigen to (*,*)
    !  MJV 27/5/2008 removed 'new' constraint on gkk files: presume competent user!
-   ios = open_file(outfile,message,unit=unitout,form='formatted')
+   ios = open_file(outfile,msg,unit=unitout,form='formatted')
    rdwrout = 4
  else if (binascii == 2) then
    !  this is for simple "short" output of the matrices, without headers or imaginary part
-   ios = open_file(outfile,message,unit=unitout,form='formatted')
+   ios = open_file(outfile,msg,unit=unitout,form='formatted')
    rdwrout = 4
  else
    ABI_ERROR(' binascii must be between 0 and 2')
  end if
 
- ABI_CHECK(ios==0,message)
+ ABI_CHECK(ios==0,msg)
  rewind (unitout)
 
 !-------------------------------------------------------
@@ -167,9 +167,8 @@ program mrggkk
 !-------------------------------------------------------
 
 !open GS wf file
- call wrtout(std_out,' normal input for GS file',"COLL")
-
- call wfk_open_read(GS_wfk,filegs,formeig0,iomode,unitgs,comm)
+ call wrtout(std_out,' normal input for GS file')
+ call gs_wfk%open_read(filegs, formeig0, iomode, unitgs, comm)
 
 !Copy header of GS file to output.
  if (binascii /= 2) then
@@ -180,8 +179,7 @@ program mrggkk
      ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
    end if
  end if
-
- call wrtout(std_out,' header echoed to output file',"COLL")
+ call wrtout(std_out,' header echoed to output file')
 
  ABI_MALLOC(eig_k,(GS_wfk%mband))
 
@@ -222,16 +220,15 @@ program mrggkk
 
    ! Trick needed so that we can run the automatic tests with both Fortran and netcdf
    if (.not. file_exists(file1wf) .and. file_exists(nctk_ncify(file1wf))) then
-     write(message, "(3a)")"- File: ",trim(file1wf)," does not exist but found netcdf file with similar name."
-     call wrtout(std_out,message,'COLL')
+     write(msg, "(3a)")"- File: ",trim(file1wf)," does not exist but found netcdf file with similar name."
+     call wrtout(std_out,msg)
      file1wf = nctk_ncify(file1wf)
      iomode = IO_MODE_ETSF
    end if
 
 !  open 1wf file
-   call wrtout(std_out,' normal input for 1WF file ',"COLL")
-
-   call wfk_open_read(PH_wfk,file1wf,formeig1,iomode,unit1wf,comm,Hdr_out=hdr1)
+   call wrtout(std_out,' normal input for 1WF file ')
+   call ph_wfk%open_read(file1wf, formeig1, iomode, unit1wf, comm, Hdr_out=hdr1)
 
 !  copy header of 1WF file to output
    if (binascii /= 2) then
@@ -313,10 +310,10 @@ program mrggkk
    if (ipos/=0) filegkk=filegkk(:ipos-1)
 
 !  open gkk file
-   call wrtout(std_out,' normal input for GKK file',"COLL")
+   call wrtout(std_out,' normal input for GKK file')
 
-   if (open_file(filegkk,message,unit=unitgkk,form='unformatted',status='old') /= 0) then
-     ABI_ERROR(message)
+   if (open_file(filegkk,msg,unit=unitgkk,form='unformatted',status='old') /= 0) then
+     ABI_ERROR(msg)
    end if
    rewind (unitgkk)
 
@@ -327,7 +324,7 @@ program mrggkk
 
    mband = maxval(hdr%nband)
    ABI_MALLOC(eig_k,(mband))
-   call wrtout(std_out,'mrggkk : try to reread GS eigenvalues','COLL')
+   call wrtout(std_out,'mrggkk : try to reread GS eigenvalues')
 
    do spin=1,hdr%nsppol
      do ik_ibz=1,hdr%nkpt
@@ -346,8 +343,8 @@ program mrggkk
 !    read in header of 1WF file
      call hdr1%fort_read(unitgkk, fform)
      if (fform == 0) then
-       write(message,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
-       ABI_ERROR(message)
+       write(msg,'(a,i0,a)')' 1WF header number ',i1wf,' was mis-read. fform == 0'
+       ABI_ERROR(msg)
      end if
 
 !    copy header of 1WF file to output
@@ -407,11 +404,10 @@ program mrggkk
 
  close(unitout)
 
- write(message,'(2a)')ch10,' Done'
- call wrtout(std_out,message,'COLL')
+ write(msg,'(2a)')ch10,' Done'
+ call wrtout(std_out,msg)
 
  call flush_unit(std_out)
-
  call abinit_doctor("__mrggkk")
 
  call xmpi_end()

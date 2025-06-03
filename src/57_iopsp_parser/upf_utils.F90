@@ -41,7 +41,7 @@ FUNCTION capital( in_char )
   ! ... converts character to capital if lowercase
   ! ... copy character to output in all other cases
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   CHARACTER(LEN=1), INTENT(IN) :: in_char
   CHARACTER(LEN=1)             :: capital
@@ -64,7 +64,7 @@ FUNCTION lowercase( in_char )
   ! ... converts character to lowercase if capital
   ! ... copy character to output in all other cases
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   CHARACTER(LEN=1), INTENT(IN) :: in_char
   CHARACTER(LEN=1)             :: lowercase
@@ -86,7 +86,7 @@ LOGICAL FUNCTION isnumeric ( in_char )
   !
   ! ... check if a character is a number
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   CHARACTER(LEN=1), INTENT(IN) :: in_char
   CHARACTER(LEN=10), PARAMETER :: numbers = '0123456789'
@@ -105,7 +105,7 @@ FUNCTION matches( string1, string2 )
   !
   ! ... .TRUE. if string1 is contained in string2, .FALSE. otherwise
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   CHARACTER (LEN=*), INTENT(IN) :: string1, string2
   LOGICAL                       :: matches
@@ -138,7 +138,7 @@ END FUNCTION matches
     ! ierr = 0     no problem
     ! ierr > 0     fatal error
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(*),     INTENT(in)    :: str
     INTEGER,          INTENT(out)   :: major, minor, patch, ierr
     !
@@ -198,7 +198,7 @@ END FUNCTION matches
     ! "older":   str1 is older than str2
     ! " ":       str1 or str2 has a wrong format
     !
-    IMPLICIT NONE
+    !IMPLICIT NONE
     CHARACTER(*)  :: str1, str2
     CHARACTER(10) :: version_compare
     !
