@@ -169,7 +169,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
  integer :: bckbrvltt,brvltt,chkprim,chkprim_fake,expert_user
  integer :: fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: invar_z,ipsp,irreducible,isym,itranslat,itypat,jsym,marr,mismatch_fft_tnons,multi,multiplicity,natom_uc,natfix,natrd
- integer :: nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: natnd,nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
@@ -179,12 +179,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
  type(geo_t) :: geo
 !arrays
  integer :: bravais_reduced(11)
- integer,allocatable :: intarr(:)
+ integer,allocatable :: iatnd(:),intarr(:)
  integer,allocatable :: is_translation(:)
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),rprimd_primitive(3,3),scalecart(3)
- real(dp),allocatable :: mass_psp(:)
+ real(dp),allocatable :: mass_psp(:),nucdipmomlist(:,:)
  real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:),translations(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
@@ -608,8 +608,27 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
    if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
 
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
-   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
-   if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   natnd=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natnd',tread,'INT')
+   if(tread==1) natnd=intarr(1)
+   if(natnd > 0) then
+     ABI_MALLOC(iatnd,(natnd))
+     iatnd=0
+     call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+     if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+     ABI_MALLOC(nucdipmomlist,(3,natnd))
+     call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'nucdipmomlist',tread,'DPR')
+     if(tread==1) nucdipmomlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
+     nucdipmom=zero
+     do ii=1,natnd
+       nucdipmom(1:3,iatnd(ii))=nucdipmomlist(1:3,ii)
+     end do
+     ABI_FREE(iatnd)
+     ABI_FREE(nucdipmomlist)
+   else
+     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
+     if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   end if
 
    ! Compute xred/typat and spinat for the supercell
    if(multiplicity > 1)then
