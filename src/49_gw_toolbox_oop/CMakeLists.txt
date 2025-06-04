@@ -10,14 +10,14 @@ add_library(49_gw_toolbox_oop STATIC
 
 set_target_properties(49_gw_toolbox_oop
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(49_gw_toolbox_oop
   PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
 )
 
 target_compile_definitions(49_gw_toolbox_oop
