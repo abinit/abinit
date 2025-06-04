@@ -1476,7 +1476,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    ! space for all 3 ddk wavefunctions if call to orbmag will be needed
-   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_3)) ) then
+   if ( (dtset%orbmag .NE. 0) .AND. &
+     & ( (dtset%rfddk .EQ. 1) .OR. (dtset%rfelfd .EQ. 2) ) &
+     &  .AND. (.NOT. ALLOCATED(cg1_3)) ) then
      ABI_MALLOC(cg1_3,(2,mcg1,3))
      has_cg1_3(:) = .FALSE.
    end if
@@ -2176,7 +2178,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
    ! call orbmag if needed
-   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
+   if ( (dtset%orbmag .NE. 0) .AND. &
+     & ( (dtset%rfddk .EQ. 1) .OR. (dtset%rfelfd .EQ. 2) ) .AND. &
      & (COUNT(has_cg1_3) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then
