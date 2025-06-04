@@ -575,7 +575,83 @@
 #
 # Note: this is highly experimental - USE AT YOUR OWN RISKS!
 
-# Trigger and install prefix for GPU libraries and compilers
+# Trigger and install prefix for NVIDIA CUDA libraries and compilers
+#
+# Permitted values:
+#
+#   * no       : disable CUDA support
+#   * yes      : enable CUDA support, assuming the build environment
+#                is properly set
+#   * <prefix> : look for CUDA in the <prefix> directory
+#
+# Note: The build system expects to find subdirectories named bin/, lib/,
+#       include/ under the prefix.
+#
+#with_cuda="/usr/local/cuda"
+
+# CUDA C preprocessor flags (default is unset)
+#
+#CUDA_CPPFLAGS="-I/usr/local/include/cuda"
+
+# CUDA C flags (default is unset)
+#
+#CUDA_CFLAGS="-I/usr/local/include/cuda"
+
+# CUDA C++ flags (default is unset)
+#
+#CUDA_CXXFLAGS="-std=c++11"
+
+# CUDA Fortran flags (default is unset)
+#
+#CUDA_FCFLAGS="-I/usr/local/include/cuda"
+
+# CUDA link flags (default is unset)
+#
+#CUDA_LDFLAGS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
+
+# CUDA link flags (default is unset)
+#
+#CUDA_LIBS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
+
+# Trigger and install prefix for AMD ROCM libraries and compilers
+#
+# Permitted values:
+#
+#   * no       : disable ROCM support
+#   * yes      : enable ROCM support, assuming the build environment
+#                is properly set
+#   * <prefix> : look for ROCM in the <prefix> directory
+#
+# Note: The build system expects to find subdirectories named bin/, lib/,
+#       include/ under the prefix.
+#
+#with_rocm="/opt/rocm"
+
+# ROCM C preprocessor flags (default is unset)
+#
+#ROCM_CPPFLAGS="-I/usr/local/include/cuda"
+
+# ROCM C flags (default is unset)
+#
+#ROCM_CFLAGS="-I/usr/local/include/cuda"
+
+# ROCM C++ flags (default is unset)
+#
+#ROCM_CXXFLAGS="-std=c++11"
+
+# ROCM Fortran flags (default is unset)
+#
+#ROCM_FCFLAGS="-I/usr/local/include/cuda"
+
+# ROCM link flags (default is unset)
+#
+#ROCM_LDFLAGS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
+
+# ROCM link flags (default is unset)
+#
+#ROCM_LIBS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
+
+# Trigger and install prefix for GPU (CUDA or ROCM) libraries and compilers - deprecated
 #
 # Permitted values:
 #
@@ -589,37 +665,38 @@
 #
 #with_gpu="/usr/local/cuda"
 
-# Flavor of the GPU library to use (default is cuda-single)
+# Flavor of the GPU library to use (default is cuda-single) - deprecated
 #
 # Supported libraries:
 #
 #   * cuda-single : Cuda with single-precision arithmetic
 #   * cuda-double : Cuda with double-precision arithmetic
+#   * hip-double  : HIP with double-precision arithmetic
 #   * none        : not implemented (will replace enable_gpu)
 #
 #with_gpu_flavor="cuda-double"
 
-# GPU C preprocessor flags (default is unset)
+# GPU C preprocessor flags (default is unset) - deprecated
 #
 #GPU_CPPFLAGS="-I/usr/local/include/cuda"
 
-# GPU C flags (default is unset)
+# GPU C flags (default is unset) - deprecated
 #
 #GPU_CFLAGS="-I/usr/local/include/cuda"
 
-# GPU C++ flags (default is unset)
+# GPU C++ flags (default is unset) - deprecated
 #
 #GPU_CXXFLAGS="-std=c++11"
 
-# GPU Fortran flags (default is unset)
+# GPU Fortran flags (default is unset) - deprecated
 #
 #GPU_FCFLAGS="-I/usr/local/include/cuda"
 
-# GPU link flags (default is unset)
+# GPU link flags (default is unset) - deprecated
 #
 #GPU_LDFLAGS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
 
-# GPU link flags (default is unset)
+# GPU link flags (default is unset) - deprecated
 #
 #GPU_LIBS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
 
@@ -629,8 +706,13 @@
 #                  - 75 (NVIDIA Turing)
 #                  - 80 (NVIDIA Ampere)
 #                  - 90 (NVIDIA Hopper)
+#                  - gfx90a (AMD Instinct MI250)
 #
 #GPU_ARCH=80
+
+# Enable Unified Memory for NVIDIA GPUs (exclusive to NVHPC)
+#
+#enable_gpu_nvidia_unified_memory="no"
 
                        # ------------------------------ #
 
@@ -650,7 +732,11 @@
 
 # Forced nVidia C compiler flags (should not be set)
 #
-#NVCC_CFLAGS="-arch=sm_13"
+#NVCC_CFLAGS="-O3 -Xptxas=-v --use_fast_math --compiler-options -O3,-fPIC -DHAVE_CONFIG_H --forward-unknown-opts"
+
+# Forced nVidia C compiler flags specific to arch (should not be set)
+#
+#NVCC_CFLAGS_ARCH="-arch=sm_13"
 
 # Forced nVidia linker flags (should not be set)
 #

@@ -71,6 +71,7 @@ Core build parameters
   * MPI-IO enabled    : ${abi_mpi_io_enable}
   * OpenMP enabled    : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse}; GPU offload: ${tmp_omp_gpu_offload})
   * GPU    enabled    : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
+  * GPU-aware MPI     : ${abi_mpi_gpu_aware_enable}
 
   * LibXML2 enabled   : ${abi_libxml2_enable}
   * LibPSML enabled   : ${sd_libpsml_enable}
