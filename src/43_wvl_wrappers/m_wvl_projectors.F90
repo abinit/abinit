@@ -74,7 +74,6 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: createProjectorsArrays, wvl_timing => timing
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -171,7 +170,6 @@ subroutine wvl_projectors_free(proj)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : free_DFT_PSP_projectors,deallocate_gwf
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars

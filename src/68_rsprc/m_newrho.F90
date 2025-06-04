@@ -544,7 +544,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    end do
  end if
 
- rcpaw_arr_=>dum0 
+ rcpaw_arr_=>dum0
  if(associated(rcpaw)) then
    indx=0
    do itypat=1,size(rcpaw%atm)
@@ -556,7 +556,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
          rcpaw_arr(indx)=rcpaw%atm(itypat)%occ(iln,isppol)-rcpaw%atm(itypat)%occ_res(iln,isppol)
        enddo
      enddo
-   enddo 
+   enddo
    rcpaw_arr_=>rcpaw_arr
  endif
 

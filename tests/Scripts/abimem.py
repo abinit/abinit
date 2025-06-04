@@ -11,15 +11,10 @@ __author__ = "Matteo Giantomassi"
 import sys
 import os
 import re
-try:
-    import argparse
-except ImportError:
-    print("abimem.py requires argparse module and python >= 2.7")
-    raise
+import argparse
 
 import logging
 logger = logging.getLogger(__name__)
-
 
 from pprint import pprint
 
@@ -159,10 +154,10 @@ def ipython(options):
     import IPython
     abifile = options.memfiles[0]
     IPython.embed(header="""
-The Abinit file is bound to the `parsers` variable.
-Use `abifile.<TAB>` to list available methods.
-Use e.g. `abifile.plot?` to access docstring and `abifile.plot??` to visualize source.
-Use `print(abifile)` to print the object.
+The Abinit object: is bound to the `parsers` variable.
+Use `parsers.<TAB>` to list available methods.
+Use e.g. `parsers[0].plot?` to access docstring and `parsers[0].plot??` to visualize source.
+Use `print(parsers[0])` to print the object.
 """)
     return 0
 

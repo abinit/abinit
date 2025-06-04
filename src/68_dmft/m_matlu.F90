@@ -418,9 +418,6 @@ end subroutine copy_matlu
 
 subroutine copy_matlu_from_ndat(mat1,mat2,natom,ndat,idat,opt_diag,opt_non_diag,opt_re)
 
- use defs_basis
- implicit none
-
 !Arguments ------------------------------------
 !type
  integer, intent(in) :: natom,ndat,idat
@@ -486,9 +483,6 @@ end subroutine copy_matlu_from_ndat
 !! SOURCE
 
 subroutine copy_matlu_to_ndat(mat1,mat2,natom,ndat,idat,opt_diag,opt_non_diag,opt_re)
-
- use defs_basis
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1760,10 +1754,9 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine gather_matlu(gloc,gathergloc,natom,option,prtopt)
- use defs_basis
+
  use defs_wvltypes
  use m_crystal, only : crystal_t
- implicit none
 
 ! type  matlus_type
 !  SEQUENCE
@@ -2841,9 +2834,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine conjg_matlu(matlu1,natom)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2900,9 +2891,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine ln_matlu(matlu1,natom)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3379,9 +3368,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine magmomforb_matlu(matlu,mu,natom,option,optprt)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3622,9 +3609,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine magmomfspin_matlu(matlu,mu,natom,option,optprt)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3890,9 +3875,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine magmomfzeeman_matlu(matlu,mu,natom,option,optprt)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4187,9 +4170,7 @@ end subroutine add_matlu
 !!
 !! SOURCE
  subroutine chi_matlu(matlu,natom,option,optprt)
- use defs_basis
  use defs_wvltypes
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4627,68 +4608,68 @@ end subroutine add_matlu
  end subroutine ylm2jmj_matlu
 !!***
 
-!!***                                                                                                       
-!!****f* m_matlu/magnfield_matlu                                                                        
-!! NAME                                                                                                     
-!! magnfield_matlu                                                                                        
-!!                                                                                                          
-!! FUNCTION                                                                                                 
-!! return the matrix of magnetic moment mz times Bz                      
-!!                                                                                                          
-!!                                                                                                          
-!! COPYRIGHT                                                                                                
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)                                                          
-!! This file is distributed under the terms of the                                                          
-!! GNU General Public License, see ~abinit/COPYING                                                          
-!! or http://www.gnu.org/copyleft/gpl.txt .                                                                 
-!!                                                                                                          
-!! INPUTS                                                                                                   
-!! matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity in Ylm basis                          
-!! natom :: number of atoms                                                                                 
+!!***
+!!****f* m_matlu/magnfield_matlu
+!! NAME
+!! magnfield_matlu
+!!
+!! FUNCTION
+!! return the matrix of magnetic moment mz times Bz
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity in Ylm basis
+!! natom :: number of atoms
 !! bfield :: value of magnetic field in Tesla
 !! option = 1 :: scalar spin angular momentum along z axis
 !! option = 2 :: SOC total angular momentum (L+2S) along z axis
-!!                                                                                                          
-!! OUTPUT                                                                                                   
-!!  matlu(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: product                                              
-!!                                                                                                          
-!! SIDE EFFECTS                                                                                             
-!!                                                                                                          
-!! NOTES                                                                                                    
-!!                                                                                                          
-!! SOURCE                                                                                                   
- subroutine magnfield_matlu(matlu,natom,bfield,option)                                               
- use defs_basis                                                                                             
- use defs_wvltypes                                                                                          
- implicit none                                                                                              
-                                                                                                            
-!Arguments ------------------------------------                                                             
-!scalars                                                                                                    
+!!
+!! OUTPUT
+!!  matlu(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: product
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+ subroutine magnfield_matlu(matlu,natom,bfield,option)
+ use defs_basis
+ use defs_wvltypes
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
  integer, intent(in) :: natom,option
- real(dp) :: bfield                                                                
-!arrays                                                                                                     
- type(matlu_type), intent(inout) :: matlu(natom)                                                            
-!Local variables-------------------------------                                                             
-!scalars                                                                                                    
- integer :: iatom,im,ndim,isppol                                                                
+ real(dp) :: bfield
+!arrays
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,im,ndim,isppol
  integer :: ll,ml1,jc1,ms1,tndim
- real(dp) :: xj                                                                                             
-!arrays                                                                                                     
+ real(dp) :: xj
+!arrays
  type(coeff2c_type), allocatable :: magnmatb(:)
 !************************************************************************
 
- !================================
- ! Allocate matrices
- !================================
-
- ABI_MALLOC(magnmatb,(natom))
- do iatom=1,natom
-   if(matlu(iatom)%lpawu .ne. -1) then
-     tndim=2*(2*matlu(iatom)%lpawu+1)
-     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))
-     magnmatb(iatom)%value=czero
-   endif
- enddo
+ !================================                               
+ ! Allocate matrices                                             
+ !================================                               
+                                                                 
+ ABI_MALLOC(magnmatb,(natom))                                  
+ do iatom=1,natom                                              
+   if(matlu(iatom)%lpawu .ne. -1) then                         
+     tndim=2*(2*matlu(iatom)%lpawu+1)                          
+     ABI_MALLOC(magnmatb(iatom)%value,(tndim,tndim))           
+     magnmatb(iatom)%value=czero                               
+   endif                                                       
+ enddo                                                         
 
  if(option .eq. 1) then
 
@@ -4696,29 +4677,29 @@ end subroutine add_matlu
  ! Scalar magnetism (Spin only case)
  ! H = mu_B*g_e*S_Z*B_z
  !================================
-  
+
    do iatom=1,natom
      if(matlu(iatom)%lpawu .ne. -1) then
        ndim=2*matlu(iatom)%lpawu+1
-       do isppol=1,matlu(iatom)%nsppol 
+       do isppol=1,matlu(iatom)%nsppol
          do im=1,ndim
            if (isppol .eq. 1) then
              matlu(iatom)%mat(im,im,isppol) = half*bfield
            else
-             matlu(iatom)%mat(im,im,isppol) = -half*bfield 
+             matlu(iatom)%mat(im,im,isppol) = -half*bfield
            endif
          enddo ! im
        enddo ! isppol
      endif ! lpawu
-   enddo ! natom        
+   enddo ! natom
 
 
  elseif(option .eq. 2) then
-  
- !================================      
- ! Spin-orbit magnetism   
- ! H = mu_B*(L_z+g_e*S_Z)*B_z                 
- !================================      
+
+ !================================
+ ! Spin-orbit magnetism
+ ! H = mu_B*(L_z+g_e*S_Z)*B_z
+ !================================
 
    do iatom=1,natom
      if(matlu(iatom)%lpawu .ne. -1) then
@@ -4741,30 +4722,30 @@ end subroutine add_matlu
        enddo ! ms1
      endif !lpawu
    enddo !natom
- endif !option       
+ endif !option
 
  !=======================
  ! reshape matrix
  !=======================
- 
+
  if(option .eq. 2) then
    call gather_matlu(matlu,magnmatb(natom),natom,option=-1,prtopt=1)
  endif
 
- !================================                     
- ! Deallocate matrices                                   
- !================================                     
-                                                       
- do iatom=1,natom                                      
-   if(matlu(iatom)%lpawu .ne. -1) then                 
-     ABI_FREE(magnmatb(iatom)%value)   
-   endif                                               
- enddo                                                 
- 
+ !================================
+ ! Deallocate matrices
+ !================================
+
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu .ne. -1) then
+     ABI_FREE(magnmatb(iatom)%value)
+   endif
+ enddo
+
  ABI_FREE(magnmatb)
 
- end subroutine magnfield_matlu 
-!!***                             
-    
+ end subroutine magnfield_matlu
+!!***
+
 END MODULE m_matlu
 !!***

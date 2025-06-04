@@ -70,8 +70,6 @@ contains
 
 subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,skipcycle)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(abimover),intent(in)       :: ab_mover

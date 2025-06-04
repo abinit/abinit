@@ -30242,7 +30242,7 @@
   4.3846009137057086E-02 -1.9798940066295247E+00 -3.4236001651678474E+00
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -1.7329466994102038E+01"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Al 13
 GGA-PBE loggrid 2001  logderivrange -20 20
 3 3 0 0 0 0

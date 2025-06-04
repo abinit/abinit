@@ -116,10 +116,9 @@ module m_vtorho
  use m_nvtx_data
 #endif
 
-#ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding, only : c_int64_t
-#endif
-
+!#ifdef HAVE_FC_ISO_C_BINDING
+! use, intrinsic :: iso_c_binding, only : c_int64_t
+!#endif
 
  implicit none
 

@@ -25,6 +25,9 @@ module m_gwdefs
  use m_abicore
  use m_errors
 
+ use m_fstrings, only : sjoin, itoa
+ use m_nctk,     only : etsfio_charlen
+
  implicit none
 
  private
@@ -186,11 +189,6 @@ module m_gwdefs
  integer,public,parameter :: SIG_QPGW_CD     =9  ! model GW without PPM
 
  public :: sigma_type_from_key
- public :: sigma_is_herm
- public :: sigma_needs_w
- public :: sigma_needs_ppm
- !public :: sigma_sc_on_wfs
- !public :: sigma_sc_on_ene
  public :: g0g0w
 
 ! Private variables
@@ -204,8 +202,8 @@ module m_gwdefs
 !! em1params_t
 !!
 !! FUNCTION
-!! For the GW part of ABINIT, the  em1params_t structured datatype
-!! gather different parameters used to calculate the inverse dielectric matrices.
+!! For the GW part of ABINIT, the em1params_t structured datatype
+!! gather different parameters used to calculate the inverse dielectric matrix in SCREENING
 !!
 !! SOURCE
 
@@ -213,7 +211,7 @@ module m_gwdefs
 
 !scalars
   integer :: awtr                   ! If 1 the Adler-Wiser expression for Chi_0 is evaluated
-                                    !  taking advantage of time-reversal symmetry
+                                    ! taking advantage of time-reversal symmetry
   integer :: gwcalctyp              ! Calculation type (see input variable)
   integer :: gwcomp                 ! 1 if extrapolar technique is used. 0 otherwise.
   integer :: inclvkb                ! Integer flag related to the evaluation of the commutator for q-->0
@@ -240,12 +238,12 @@ module m_gwdefs
   real(dp) :: gwencomp              ! Extrapolar energy used if gwcomp==1.
   real(dp) :: omegaermin            ! Minimum real frequency used in the contour deformation method
   real(dp) :: omegaermax            ! Maximum real frequency used in the contour deformation method
-  real(dp) :: mbpt_sciss              ! Scissor energy used in chi0
+  real(dp) :: mbpt_sciss            ! Scissor energy used in chi0
   real(dp) :: spsmear               ! Smearing of the delta in case of spmeth==2
   real(dp) :: zcut                  ! Small imaginary shift to avoid poles in chi0
 
   logical :: analytic_continuation  ! if true calculate chi0 only along the imaginary axis
-  logical :: contour_deformation    ! if true calculated chi0 both along the real and the imaginary axis
+  logical :: contour_deformation    ! if true calculate chi0 both along the real and the imaginary axis
   logical :: plasmon_pole_model     ! if true a plasmonpole model is used (only 1 or 2 frequencies are calculated)
 
 !arrays
@@ -269,8 +267,15 @@ module m_gwdefs
   ! real frequencies used to calculate the imaginary part of chi0.
 
   complex(dpc),allocatable :: omega(:)
-  ! (nomegasf)
-  ! real and imaginary frequencies in chi0,epsilon and epsilonm1.
+  ! (nomega)
+  ! real and imaginary frequencies in chi0, epsilon and epsilonm1.
+
+  real(dp),allocatable :: omega_wgs(:)
+  ! (nomega)
+  ! Weights for numerical integration, used for instance for minimax meshes.
+
+  character(len=etsfio_charlen) :: iw_mesh_type="None", rw_mesh_type="None", cw_mesh_type="None"
+  ! String defining the kind of sampling for imaginary (iw), real (rw) and complex (cw) frequencies
 
  contains
    procedure :: free => em1params_free
@@ -386,6 +391,9 @@ module m_gwdefs
 
   contains
     procedure :: free => sigparams_free
+    procedure :: is_herm => sigma_is_herm
+    procedure :: needs_w => sigma_needs_w
+    procedure :: needs_ppm => sigma_needs_ppm
  end type sigparams_t
 !!***
 
@@ -401,26 +409,21 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Free dynamic memory allocated in the structure.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine em1params_free(Ep)
 
 !Arguments ------------------------------------
  class(em1params_t),intent(inout) :: Ep
-
 ! *************************************************************************
-
- !@em1params_t
 
 !real
  ABI_SFREE(Ep%qcalc)
  ABI_SFREE(Ep%qibz)
  ABI_SFREE(Ep%qlwl)
  ABI_SFREE(Ep%omegasf)
+ ABI_SFREE(Ep%omega_wgs)
+
 !complex
  ABI_SFREE(Ep%omega)
 
@@ -435,10 +438,6 @@ end subroutine em1params_free
 !!
 !! FUNCTION
 !!   deallocate all memory in a sigijtab_t datatype.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -478,20 +477,13 @@ end subroutine sigijtab_free
 !! FUNCTION
 !!  Free dynamic memory allocated in the structure.
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine sigparams_free(Sigp)
 
 !Arguments ------------------------------------
  class(sigparams_t),intent(inout) :: Sigp
-
 ! *************************************************************************
-
- !@sigparams_t
 
 !integer
  ABI_SFREE(Sigp%kptgw2bz)
@@ -533,15 +525,10 @@ end subroutine sigparams_free
 !!
 !! SOURCE
 
-function sigma_type_from_key(key) result(sigma_type)
+character(len=STR_LEN) function sigma_type_from_key(key) result(sigma_type)
 
+!Arguments ------------------------------------
  integer,intent(in) :: key
- character(len=STR_LEN) :: sigma_type
-
-!Local variables ------------------------------
-!scalars
- character(len=500) :: msg
-
 !************************************************************************
 
  sigma_type = "None"
@@ -555,8 +542,7 @@ function sigma_type_from_key(key) result(sigma_type)
  if (key==SIG_QPGW_CD )  sigma_type = ' model GW without PPM'
 
  if (sigma_type == "None") then
-   write(msg,'(a,i0)')" Unknown value for key= ",key
-   ABI_ERROR(msg)
+   ABI_ERROR(sjoin("Unknown value for key: ", itoa(key)))
  end if
 
 end function sigma_type_from_key
@@ -583,10 +569,9 @@ pure logical function sigma_is_herm(Sigp)
 
 !Local variables ------------------------------
  integer :: mod10
-
 !************************************************************************
 
- mod10=MOD(Sigp%gwcalctyp,10)
+ mod10 = MOD(Sigp%gwcalctyp,10)
  sigma_is_herm = ANY(mod10 == [SIG_HF, SIG_SEX, SIG_COHSEX])
 
 end function sigma_is_herm
@@ -614,7 +599,6 @@ pure logical function sigma_needs_w(Sigp)
 
 !Local variables ------------------------------
  integer :: mod10
-
 !************************************************************************
 
  mod10=MOD(Sigp%gwcalctyp,10)
@@ -644,7 +628,6 @@ pure logical function sigma_needs_ppm(Sigp)
 
 !Local variables ------------------------------
  integer :: mod10
-
 !************************************************************************
 
  mod10=MOD(Sigp%gwcalctyp,10)
@@ -670,20 +653,18 @@ end function sigma_needs_ppm
 !!
 !! SOURCE
 
-function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
+complex(dpc) function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in):: opt_poles
  real(dp),intent(in) :: TOL_W0,delta_ene,numerator,zcut
- complex(dpc) :: g0g0w
  complex(dpc),intent(in) :: omega
 
 !Local variables ------------------------------
 !scalars
  real(dp) :: sgn
  character(len=500) :: msg
-
 !************************************************************************
 
  if (delta_ene**2 > tol14) then

@@ -2543,6 +2543,13 @@ meta: {optdriver: 4, gwcalctyp: 21, }
  setmesh: FFT mesh size selected  =     9x    9x    9
           total number of points  =          729
 
+
+ Parameters for the analytic continuation of Sigma_c(i omega):
+  Mesh type:                      = linear
+  Number of imaginary frequencies =  40
+  Min frequency on imag axis (eV) =    0.000
+  Max frequency on imag axis (eV) =   50.000
+
  Number of electrons calculated from density =    2.0000; Expected =    2.0000
  average of density, n =  0.064000
  r_s =    1.5509

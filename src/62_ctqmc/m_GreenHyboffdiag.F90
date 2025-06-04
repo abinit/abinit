@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_GreenHyboffdiag
 !! NAME
 !!  m_GreenHyboffdiag
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage a green function for one orbital
 !!
 !! COPYRIGHT
@@ -28,10 +28,8 @@ MODULE m_GreenHyboffdiag
  USE m_VectorInt
  USE m_ListCdagC
  USE m_MapHyb
-#ifdef HAVE_MPI2
- USE mpi
-#endif
- 
+ USE_MPI
+
  IMPLICIT NONE
 
  public ::  GreenHyboffdiag_init
@@ -86,7 +84,7 @@ MODULE m_GreenHyboffdiag
   INTEGER :: samples
    ! samples=imaginary time slices (dmftqmc_l+1)
 
-  INTEGER :: measurements    
+  INTEGER :: measurements
    ! number of measurements for the Green's function
 
   INTEGER :: factor
@@ -97,10 +95,10 @@ MODULE m_GreenHyboffdiag
    ! MPI Communicator
 
   INTEGER :: size
-   ! size=1 
+   ! size=1
 
   INTEGER :: rank
-   ! rank=0 
+   ! rank=0
 
   INTEGER :: Wmax
    ! samples-1 if frequency Green's function
@@ -109,7 +107,7 @@ MODULE m_GreenHyboffdiag
    ! Precise if Frequency Green's function is computed or not
 
   INTEGER :: nflavors
-   ! Number of flavors 
+   ! Number of flavors
 
   DOUBLE PRECISION :: beta
    ! Inverse of temperature
@@ -130,21 +128,21 @@ MODULE m_GreenHyboffdiag
    ! oper(samples)
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omega
-   ! omega(Wmax) 
+   ! omega(Wmax)
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: Mk
    ! Moments for FT
 
-  COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:,:,:) :: oper_w 
+  COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:,:,:) :: oper_w
    ! Frequency Green's function
 
   COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:) :: oper_w_old
    ! Old frequency Green's function (not used)
 
-  TYPE(Vector)                            :: oper_old          
+  TYPE(Vector)                            :: oper_old
    ! useless data
 
-  TYPE(VectorInt)                         :: index_old          
+  TYPE(VectorInt)                         :: index_old
    ! useless data
 
   TYPE(MapHyb), ALLOCATABLE, DIMENSION(:,:)  :: map
@@ -477,10 +475,10 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
   INTEGER                        :: stail !,ii
 !  DOUBLE PRECISION               :: pi_invBeta
   DOUBLE PRECISION               :: mbeta_two
-  DOUBLE PRECISION               :: beta 
+  DOUBLE PRECISION               :: beta
   DOUBLE PRECISION               :: beta_tc
   DOUBLE PRECISION               :: tcbeta_tc
-  DOUBLE PRECISION               :: inv_dt 
+  DOUBLE PRECISION               :: inv_dt
   DOUBLE PRECISION               :: tC,tc_phys
   DOUBLE PRECISION               :: tCdag
   DOUBLE PRECISION               :: time
@@ -515,14 +513,14 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
 
   IF ( updated .EQV. .TRUE. ) THEN ! NEW change in the configuration
     ! FIXME SHOULD be much more faster
-    
+
 
    ! write(6,*) "LKLLL2b"
     SELECT CASE(op%iTech)
     CASE (GREENHYB_TAU)
       argument = DBLE(op%factor)
 !     At the beginning old_size=0, then it increases
-!     until 
+!     until
 !     for all values of iC, increment green%oper with the value of the
 !     Green's function in listDBLE(iC) obtained from previous iteration
 !     (below)
@@ -570,7 +568,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
     !sui!write(6,*) "   measurements", op%measurements
          !sui! write(6,*) "                  signvaluemeas",op%signvaluemeas,op%signvalueold*argument
          !sui! write(6,*) "                  signvaluemeas/measurements",op%signvaluemeas/op%measurements
-  
+
       ! This is new measurement, thus op%factor should be put to one
       op%factor = 1
    ! write(6,*) "LKLLL2C"
@@ -629,7 +627,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
 !  ---        time is equivalent to  time=(tc-tcdag)*(beta-tc) and is only
 !  ---        useful for signe
               time = tcbeta_tc - tCdag*beta_tc
-  
+
               !signe = SIGN(1.d0,time)
               !time = time + (signe-1.d0)*mbeta_two
               !signe = signe * SIGN(1.d0,beta-tC)
@@ -646,7 +644,7 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
               ! --- tc<tcdag and beta<tc signe=1  ! never
               ! --- tc>tcdag and beta<tc signe=-1 ! segment  at the edges
               !                                   ! tc'-tcdag < 0 (with tc'=tc-beta)  -> signe < 0
-              ! --- tc<tcdag and beta>tc signe=-1 ! antisegment in the middle 
+              ! --- tc<tcdag and beta>tc signe=-1 ! antisegment in the middle
               !                                   ! tc-tcdag  < 0 (with tc'=tc-beta)  -> signe < 0
               ! 22/09/14:
               ! ListCdagC_1 is the list of segment, so we are dealing
@@ -680,16 +678,16 @@ SUBROUTINE GreenHyboffdiag_measHybrid(op, Mmatrix, ListCdagC_1, updated,signvalu
               ! Si iflavor/=iflavorbis, tc-tcdag can be negative..so in
               ! this case, on should add beta to tc-tcdag with the minus
               ! sign. NOT DONE HERE??
-  
+
 !             ----- Compute the Green's function as the value of the matrix M for times iCdag and iC.
               argument = signe*Mmatrix%mat(iCdag_m,iC_m)
-  
+
               !index = INT( ( time * inv_dt ) + 1.5d0 )
               !IF (index .NE. Mmatrix%mat_tau(iCdag,iC)) THEN
               !  WRITE(*,*) index, Mmatrix%mat_tau(iCdag,iC)
               !!  CALL ERROR("Plantage")
               !END IF
-  
+
               idx_old = idx_old + 1
 
               ! --- define the  value of listDBLE as a function of idx_old
@@ -878,7 +876,7 @@ SUBROUTINE GreenHyboffdiag_setN(op,N)
       if(iflavor/=iflavor2) then
               ! UNEXPLAINED but MANDATORY to have exact results for U=0 nspinor=4 with pawspnorb=0
               ! Correction: The fact 2 is necessary for edge points because the points are at the
-              ! edges. 
+              ! edges.
               ! It is of course necessary to fulfill exact results (U=0).
     !tmpoper=(op%oper(op%samples,iflavor,iflavor2)-op%oper(1,iflavor,iflavor2))
     !op%oper(op%samples,iflavor,iflavor2) = tmpoper
@@ -936,7 +934,7 @@ SUBROUTINE GreenHyboffdiag_setMuD1(op,iflavor,iflavor2,mu,d1)
 !*********************************************************************
 
   ABI_UNUSED((/d1/))
-  
+
   mu2=0
   if(iflavor==iflavor2) mu2=mu
 
@@ -970,7 +968,7 @@ END SUBROUTINE GreenHyboffdiag_setMuD1
 !! INPUTS
 !!  op=Greenb
 !!  u1_iflavor1=\sum_{iflavor2} U_{iflavor2,iflavor1} N_iflavor2
-!!    (useful for first moment)  
+!!    (useful for first moment)
 !!  u2=\sum_{iflavor1,iflavor2,iflavor3} U_{iflavor1,iflavor2} N_iflavor2
 !!
 !! OUTPUT
@@ -993,18 +991,18 @@ SUBROUTINE GreenHyboffdiag_setMoments(op,iflavor1,iflavor1b,u1,u2,u3)
   DOUBLE PRECISION, INTENT(IN   ) :: u3
   INTEGER         , INTENT(IN   ) :: iflavor1
   INTEGER         , INTENT(IN   ) :: iflavor1b
-  
+
   if(iflavor1==iflavor1b) then
     op%Mk(iflavor1,iflavor1b,1) = -1.d0
-!   c_a(3)=-d1-mu*mu-2(-mu)(\sum_{b.ne.a} Uab nb) 
+!   c_a(3)=-d1-mu*mu-2(-mu)(\sum_{b.ne.a} Uab nb)
     op%Mk(iflavor1,iflavor1b,3) = op%Mk(iflavor1,iflavor1b,3) - 2.d0*(op%Mk(iflavor1,iflavor1b,2)*u1)
 
 !   c_a(2)=-mu+\sum_{b.ne.a} Uab n_b
     op%Mk(iflavor1,iflavor1b,2) = op%Mk(iflavor1,iflavor1b,2) + u1
  !sui!write(6,*) "setmiments",iflavor1,iflavor1b,u1
 
-!   c_a(3)=c_a(3) + \sum Uab^2 nb + \sum Uba Uca <nbnc> 
-!   ie c_a(3)=-d1+mu*mu-2mu*\sumb Uab nb + \sum Uab^2 nb + \sum Uba Uca <nbnc> 
+!   c_a(3)=c_a(3) + \sum Uab^2 nb + \sum Uba Uca <nbnc>
+!   ie c_a(3)=-d1+mu*mu-2mu*\sumb Uab nb + \sum Uab^2 nb + \sum Uba Uca <nbnc>
     op%Mk(iflavor1,iflavor1b,3) = op%Mk(iflavor1,iflavor1b,3) - u2
   else
     op%Mk(iflavor1,iflavor1b,1) = 0.d0
@@ -1100,7 +1098,7 @@ include 'mpif.h'
     CALL ERROR("GreenHyboffdiag_backFourier : Uninitialized GreenHyboffdiag structure")
   IF ( op%setW .EQV. .FALSE. ) &
     CALL ERROR("GreenHyboffdiag_backFourier : no G(iw)")
-  
+
   funct="hybri"
   if(present(func)) funct=func
 !sui!write(6,*) funct
@@ -1123,7 +1121,7 @@ include 'mpif.h'
     !    do  iomega=1,op%Wmax
     !      write(22236,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(op%oper_w(iomega,iflavor1,iflavor2))
     !    enddo
-    !    write(22236,*) 
+    !    write(22236,*)
     !  ENDDO
     !ENDDO
   ENDIF
@@ -1159,13 +1157,13 @@ include 'mpif.h'
           if(opt_hybri_limit==1) C= (hybri_limit(iflavor1,iflavor2))
         !sui!write(6,*) "C=                         ",C
         endif
-      endif 
+      endif
 
 
 
   ! --  correction on G(tau=0) is thus
       correction = -C*0.5d0
-    
+
   ! --  built frequency mesh
       Domega = (/ ((2.d0 * DBLE(iomega) - 1.d0)*pi_invbeta, iomega=1, omegaSamples) /)
 
@@ -1191,25 +1189,25 @@ include 'mpif.h'
        !   write(237,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(op%oper_w(iomega,iflavor1,iflavor2)-C_omega(iomega))
        !   write(238,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,C_omega(iomega)
        ! enddo
-       ! write(236,*) 
-       ! write(237,*) 
-       ! write(2236,*) 
-       ! write(2237,*) 
-       ! write(238,*) 
+       ! write(236,*)
+       ! write(237,*)
+       ! write(2236,*)
+       ! write(2237,*)
+       ! write(238,*)
       ENDIF
       IF ( op%rank .EQ. 1 ) THEN
        ! write(22360,*) "#",iflavor1,iflavor2
        ! do  iomega=1,op%Wmax
        !   write(22360,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(op%oper_w(iomega,iflavor1,iflavor2))
        ! enddo
-       ! write(22360,*) 
+       ! write(22360,*)
       ENDIF
       !open (unit=unitnb,file=trim(tmpfil),status='unknown',form='formatted')
       !write(unitnb,*) "#",iflavor1,iflavor2
       !do  iomega=1,op%Wmax
       !  write(unitnb,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(op%oper_w(iomega,iflavor1,iflavor2))
       !enddo
-      !write(unitnb,*) 
+      !write(unitnb,*)
   ! --  built time mesh
       IF (op%have_MPI .EQV. .TRUE.) THEN
         delta = tauSamples / op%size
@@ -1246,7 +1244,7 @@ include 'mpif.h'
      ! do  itau=1,op%size
      ! write(unitnb,*)  itau,counts(itau),displs(itau)
      ! enddo
-     ! write(unitnb,*) 
+     ! write(unitnb,*)
 
       unitnb=10000+op%rank
       call int2char4(op%rank,tag_proc)
@@ -1258,7 +1256,7 @@ include 'mpif.h'
      !! do  iomega=1,op%Wmax
      !! write(unitnb,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(op%oper_w(iomega,iflavor1,iflavor2)),C_omega(iomega),Domega(iomega)
      ! enddo
-     ! write(unitnb,*) 
+     ! write(unitnb,*)
 
      ! unitnb=40000+op%rank
      ! unitnb1=50000+op%rank
@@ -1287,22 +1285,22 @@ include 'mpif.h'
             !write(unitnb,*) iomega,Domega(iomega),real(C_omega(iomega)),imag(C_omega(iomega))
           !if(itau==tauend) then
           !  write(unitnb,*) iomega, sumTerm,opertau(itau),minusOmegaTau,op%oper_w(iomega,iflavor1,iflavor2),Domega(iomega)
-          !endif 
+          !endif
           !if(itau==max(tauBegin-1,1)) then
           !  write(unitnb1,*) iomega, sumTerm,opertau(itau),minusOmegaTau,op%oper_w(iomega,iflavor1,iflavor2),Domega(iomega)
-          !endif 
+          !endif
 
         END DO
-         ! if(itau==tauEnd) write(unitnb,*) 
-         ! if(itau==max(tauBegin-1,1)) write(unitnb1,*) 
+         ! if(itau==tauEnd) write(unitnb,*)
+         ! if(itau==max(tauBegin-1,1)) write(unitnb1,*)
 !        if(iflavor1==iflavor2) then
           opertau(itau) = correction + two_invBeta*opertau(itau)
          ! if(itau==tauend) then
          !   write(unitnb,*) "final", opertau(itau),correction
-         ! endif 
+         ! endif
          ! if(itau==max(tauBegin-1,1)) then
          !   write(unitnb1,*) "final",opertau(itau),correction
-         ! endif 
+         ! endif
              !write(66666,*) itau, opertau(itau),correction
 !        else
 !          opertau(itau) =              &
@@ -1318,11 +1316,11 @@ include 'mpif.h'
       !do  itau=1,tauSamples
       !  write(unitnb,*)    itau,opertau(itau)
       !enddo
-      !write(unitnb,*) 
+      !write(unitnb,*)
       !opertau(tauBegin-1)=0.d0
       !opertau(tauEnd+1)=0.d0
              !write(66666,*)
-  
+
   ! -- Gather
       IF ( op%have_MPI .EQV. .TRUE. ) THEN
 ! rassembler les resultats
@@ -1352,7 +1350,7 @@ include 'mpif.h'
      ! do  itau=tauBegin, tauEnd
      !   write(unitnb,*)    itau,opertau(itau)
      ! enddo
-     ! write(unitnb,*) 
+     ! write(unitnb,*)
 
   ! -- Add correction for discontinuity.
 !      if(iflavor1==iflavor2) then
@@ -1412,8 +1410,8 @@ include 'mpif.h'
 #endif
   TYPE(GreenHyboffdiag)             , INTENT(INOUT) :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gomega  ! INOUT for MPI
-  COMPLEX(KIND=8), DIMENSION(:), OPTIONAL, INTENT(IN   ) :: omega  
-  INTEGER                 , OPTIONAL, INTENT(IN   ) :: Wmax   
+  COMPLEX(KIND=8), DIMENSION(:), OPTIONAL, INTENT(IN   ) :: omega
+  INTEGER                 , OPTIONAL, INTENT(IN   ) :: Wmax
   INTEGER :: i
   INTEGER :: j
   INTEGER :: iflavor1
@@ -1445,7 +1443,7 @@ include 'mpif.h'
   DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE ::  X2
   DOUBLE PRECISION :: iw
   COMPLEX(KIND=8) :: iwtau
-  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp  
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omegatmp
 
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -1471,16 +1469,16 @@ include 'mpif.h'
   beta = op%beta
   Nom  = op%Wmax
   IF ( PRESENT(Gomega) ) THEN
-    Nom = SIZE(Gomega,1)    
+    Nom = SIZE(Gomega,1)
     !IF ( op%rank .EQ. 0 ) &
       !!write(6,*) "size Gomega", Nom
   END IF
   IF ( PRESENT(omega) ) THEN
     IF ( PRESENT(Gomega) .AND. SIZE(omega) .NE. Nom ) THEN
-      CALL ERROR("GreenHyboffdiag_forFourier : sizes mismatch              ")               
-    !ELSE 
+      CALL ERROR("GreenHyboffdiag_forFourier : sizes mismatch              ")
+    !ELSE
       !Nom = SIZE(omega)
-    END IF 
+    END IF
   END IF
   IF ( .NOT. PRESENT(Gomega) .AND. .NOT. PRESENT(omega) ) THEN
     IF ( PRESENT(Wmax) ) THEN
@@ -1506,16 +1504,16 @@ include 'mpif.h'
   delta=op%delta_t
   inv_delta = op%inv_dt
   inv_delta2 = inv_delta*inv_delta
- 
+
   MALLOC(diagL,(L-1))
   MALLOC(lastR,(L-1))
   MALLOC(diag,(L))
   MALLOC(lastC,(L-1))
 
-!(cf Stoer) for the spline interpolation : 
+!(cf Stoer) for the spline interpolation :
 ! second derivatives XM solution of A*XM=B.
 !A=(2.4.2.11) of Stoer&Bulirsch + 2 limit conditions
-!The LU decomposition of A is known explicitly; 
+!The LU decomposition of A is known explicitly;
 
   diag (1) = 4.d0 ! 1.d0 *4.d0 factor 4 added for conditionning
   diagL(1) = 0.25d0 !1.d0/4.d0
@@ -1535,7 +1533,7 @@ include 'mpif.h'
     lastR(i) = -(lastR(i-1)*diagL(i))
     lastC(i) = -(lastC(i-1)*diagL(i-1))
   END DO
-  
+
   tmp = 1.d0/diag(L-2)
   diag (L-1) = 4.d0 - tmp
   lastR(L-1) = (1.d0 - lastR(L-2))/ diag(L-1)
@@ -1557,7 +1555,7 @@ include 'mpif.h'
   Lspline = L-1
   MALLOC(X2,(1:Lspline+1)) ! We impose L = Nom
 
-  IF ( op%have_MPI .EQV. .TRUE. ) THEN  
+  IF ( op%have_MPI .EQV. .TRUE. ) THEN
     deltaw = Nom / op%size
     residu = Nom - op%size*deltaw
     IF ( op%rank .LT. op%size - residu ) THEN
@@ -1578,7 +1576,7 @@ include 'mpif.h'
     END DO
   ELSE
     omegaBegin = 1
-    omegaEnd   = Nom 
+    omegaEnd   = Nom
   END IF
 
 !  op%Mk(iflavor1,iflavor2,1) = 0.d0
@@ -1597,7 +1595,7 @@ include 'mpif.h'
   DO iflavor1 = 1, nflavors
     DO iflavor2 = 1, nflavors
    ! write(6,*) "   Moments:",op%Mk(iflavor1,iflavor2,:),iflavor1,iflavor2
-  
+
 ! construct the B vector from A.Xm=B
       XM(1) = 4.d0*op%Mk(iflavor1,iflavor2,3)
       XM(L) = (6.d0 * inv_delta) * ( op%Mk(iflavor1,iflavor2,2) - ( &
@@ -1613,15 +1611,15 @@ include 'mpif.h'
       END DO
 
 ! Find second derivatives XM: Solve the system
-! SOLVING Lq= XM 
-!  q = XM 
+! SOLVING Lq= XM
+!  q = XM
       do j=1,L-1
           XM(j+1)=XM(j+1)-(diagL(j)*XM(j))
           XM(L)  =XM(L)  -(lastR(j)*XM(j))
       end do
 
 
-! SOLVING U.XM=q 
+! SOLVING U.XM=q
 !  XM = q
       do j=L-1,2,-1
        XM(j+1)  = XM(j+1) / diag(j+1)
@@ -1653,12 +1651,12 @@ include 'mpif.h'
          END DO
          Gwtmp(i) = Gwtmp(i)/CMPLX(((iw*iw)*(iw*iw)*deltabis),0.d0,8) &
          + CMPLX( ( ((X2(2)-X2(1))+(X2(Lspline+1)-X2(Lspline)))/((iw*iw)*deltabis) -op%Mk(iflavor1,iflavor2,2) ) &
-         /(iw*iw) , (op%Mk(iflavor1,iflavor2,1)-op%Mk(iflavor1,iflavor2,3)/(iw*iw))/iw , 8) 
+         /(iw*iw) , (op%Mk(iflavor1,iflavor2,1)-op%Mk(iflavor1,iflavor2,3)/(iw*iw))/iw , 8)
                    !+ CMPLX( (X2(2)-X2(1))+(X2(Lspline+1)-X2(Lspline)), 0.d0, 8 ) ) &
                    !   / (((iw*iw)*(iw*iw))*CMPLX(deltabis,0.d0,8)) &
                    !- CMPLX(op%Mk(1),0.d0,8)/iw  &
                    !+ CMPLX(op%Mk(2),0.d0,8)/(iw*iw) &
-                   !- CMPLX(op%Mk(3),0.d0,8)/((iw*iw)*iw) 
+                   !- CMPLX(op%Mk(3),0.d0,8)/((iw*iw)*iw)
          !IF ( op%rank .EQ. 0 )  write(12819,*) iw,gwtmp(i)
        END DO
        !call flush(12819)
@@ -1742,7 +1740,7 @@ SUBROUTINE GreenHyboffdiag_print(op, ostream)
   INTEGER                        :: samples
   INTEGER                        :: iflavor1
   INTEGER                        :: iflavor2
-  
+
 
   IF ( op%set .EQV. .FALSE. ) &
     CALL ERROR("GreenHyboffdiag_print : green op%operator not set              ")
@@ -1754,7 +1752,7 @@ SUBROUTINE GreenHyboffdiag_print(op, ostream)
     OPEN(UNIT=ostream_val,FILE="Green.dat")
   END IF
 
-  samples =  op%samples 
+  samples =  op%samples
 
   DO iflavor1=1,op%nflavors
     DO iflavor2=1,op%nflavors
@@ -1762,7 +1760,7 @@ SUBROUTINE GreenHyboffdiag_print(op, ostream)
       DO isample = 1, samples
       WRITE(ostream_val,*) DBLE(isample-1)*op%delta_t, op%oper(isample,iflavor1,iflavor2)
       END DO
-      WRITE(ostream_val,*) 
+      WRITE(ostream_val,*)
     END DO
   END DO
 
@@ -1828,7 +1826,7 @@ END SUBROUTINE GreenHyboffdiag_destroy
 
 !!***
 ! This routine contains direct and inverse fourier transformation
-! It is a modification of a routine of the GNU GPL 
+! It is a modification of a routine of the GNU GPL
 ! code available on http://dmft.rutgers.edu/ and
 ! described in the RMP 2006 paper written by
 ! G.Kotliar, S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti
@@ -1836,11 +1834,11 @@ END SUBROUTINE GreenHyboffdiag_destroy
 !       TYPE   : SUBROUTINE
 !       PROGRAM: nfourier3
 !       PURPOSE: fourier-transform the natural-spline interpolation
-!                of function Green(tau) 
+!                of function Green(tau)
 !                calculate function Green(omega)
 !       I/O    :
 !       VERSION: 2-16-92
-!                29-Nov-95 removal of minimal bug concerning 
+!                29-Nov-95 removal of minimal bug concerning
 !                          DIMENSION of rindata
 !       COMMENT: cf J. Stoer R. Bulirsch, Introduction to numerical
 !                analysis (Springer, New York, 1980)
@@ -1886,11 +1884,11 @@ END SUBROUTINE GreenHyboffdiag_destroy
        !   write(98,*) i,tau,rincopy(i),rindata(i),rindata(i)-c1/two,-c1/two,-c2/4.d0*(-Beta+2.d0*tau)
        !   write(97,*) i,(-Beta+two*tau),c2/4.d0,2.d0*tau,-c2/4.d0*(-Beta+2.d0*tau)
        ENDDO
-       !   write(99,*) 
-       !   write(98,*) 
+       !   write(99,*)
+       !   write(98,*)
 !       if(lflag) then
 !         rincopy(L+1) = AA-rindata(1)
-!       else 
+!       else
          rincopy(L+1) = -rindata(1)
 !       endif
        !DO i = 1,L+1
@@ -1899,7 +1897,7 @@ END SUBROUTINE GreenHyboffdiag_destroy
        !write(6,*) lflag,Iwmax,L,Beta,delta
 !       Three = Two+One
 !       six = Two*Three
-     
+
 !c
 !c     spline interpolation:  the spline is given by
 !c     G(tau) = a(i) + b(i) (tau-tau_i) + c(i) ( )^2 + d(i) ( )^3
@@ -1924,7 +1922,7 @@ END SUBROUTINE GreenHyboffdiag_destroy
 !c     Bulirsch p. 98 second edition.
 !c     a b c d are the spline coefficients.
 !c     XM(j) is the second derivative at node j
-!c     
+!c
 
        DO j = 1, L
           a(j) = rincopy(j)
@@ -1953,7 +1951,7 @@ END SUBROUTINE GreenHyboffdiag_destroy
      &         ( b(j)+ Two*delta*c(j)+ three*delta**2*d(j) )/om**2 +&
      &         (- j_dpc*a(j) - delta*j_dpc*b(j) - delta**2*j_dpc*c(j) -&
      &         delta**3*j_dpc*d(j))/om)
- 
+
               coutdata(i+1) = coutdata(i+1) + ex*(&
      &        six*d(j)/om**4 - Two*j_dpc*c(j)/om**3 &
      &        -b(j)/om**2 + j_dpc*a(j)/om)

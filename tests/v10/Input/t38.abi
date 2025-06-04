@@ -1,12 +1,12 @@
 # Linear response function of natural optical activity for SiO2 quartz
-# (M. Royo and A. Zabalo 24.03.2023) 
+# (M. Royo and A. Zabalo 24.03.2023)
 
 ndtset 5
 
 #Set 1 : ground state self-consistency
 #*************************************
 getwfk1   0
-kptopt1   1 
+kptopt1   1
 tolvrs1   1.0d-18
 
 #Set 2: Response function calculation of d/dk wave function
@@ -29,12 +29,12 @@ tolwfr3   1.0d-20
 getddk4   2
 kptopt4   2
 rfelfd4   3
-tolvrs4   1.0d-8 
-prepalw4  4   
+tolvrs4   1.0d-8
+prepalw4  4
 
 #Set 5 : Natural optical activity calculation
 #********************************************
-optdriver5 10 
+optdriver5 10
 kptopt5   2
 get1wf5   4
 get1den5  4
@@ -61,7 +61,7 @@ rprim  1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 natom   9
 ntypat  2
 znucl   8 14
-typat   2 2 2 1 1 1 1 1 1 
+typat   2 2 2 1 1 1 1 1 1
 xred  5.3433698817E-01  5.3433698817E-01 -6.1679056924E-18
       0.0000000000E+00  4.6566301183E-01  6.6666666667E-01
       4.6566301183E-01  0.0000000000E+00  3.3333333333E-01
@@ -85,7 +85,7 @@ shiftk 0.0 0.0 0.5
 
 #Definition of the SCF procedure
 #*******************************
-nstep 80       
+nstep 80
 diemac 12.0
 
 
@@ -101,7 +101,7 @@ pseudos "O_without_nlcc.psp8, Si_without_nlcc.psp8"
 #%% executable = abinit
 #%% test_chain =  t38.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t38.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4

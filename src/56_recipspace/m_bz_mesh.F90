@@ -182,11 +182,11 @@ module m_bz_mesh
    procedure :: isirred => bz_mesh_isirred    ! TRUE if ik_bz is in the IBZ (a non-zero umklapp is not allowed)
    !prodedure :: pack_in_stars => bz_mesh_pack_in_stars
 
+   procedure :: find_qmesh => bz_mesh_find_qmesh  ! Find the Q-mesh defined as the set of all possible k1-k2 differences.
+
  end type kmesh_t
 
  public :: make_mesh             ! Initialize the mesh starting from kptrlatt and shiftk.
- public :: find_qmesh            ! Find the Q-mesh defined as the set of all possible k1-k2 differences.
-
  public :: isamek                ! Check whether two points are equal within an umklapp G0.
  public :: isequalk              ! Check whether two points are equal within an umklapp G0 (does not report G0)
  public :: findqg0               ! Identify q + G0 = k1-k2.
@@ -419,7 +419,6 @@ subroutine kmesh_init(Kmesh, cryst, nkibz, kibz, kptopt, &
  integer,allocatable :: ktab(:),ktabi(:),ktabo(:)
  real(dp) :: rm1t(3),kbz_wrap(3)
  real(dp),allocatable :: kbz(:,:),wtk(:)
-
 ! *************************************************************************
 
  ! === Initial tests on input arguments ===
@@ -710,10 +709,8 @@ subroutine setup_k_rotation(nsym, timrev, symrec, nbz, kbz, gmet, krottb, krottb
  logical :: found,isok
  character(len=500) :: msg
 !arrays
- integer :: g0(3)
- integer :: iperm(nbz),shlim(nbz+1)
+ integer :: g0(3), iperm(nbz),shlim(nbz+1)
  real(dp) :: shift(3),kbase(3),krot(3),knorm(nbz),kwrap(3),shlen(nbz+1)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -1020,7 +1017,6 @@ logical function isamek(k1, k2, g0)
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: k1(3),k2(3)
-
 ! *************************************************************************
 
  isamek = isinteger(k1 - k2, TOL_KDIFF)
@@ -1056,7 +1052,6 @@ logical function isequalk(q1, q2)
  real(dp),intent(in) :: q1(3),q2(3)
 
 !Local variables-------------------------------
-!arrays
  integer :: g0(3)
 ! *************************************************************************
 
@@ -1105,7 +1100,6 @@ logical function has_BZ_item(Kmesh, item, ikbz, g0)
  integer :: ik_bz,yetfound
 !arrays
  integer :: g0_tmp(3)
-
 ! *************************************************************************
 
  has_BZ_item=.FALSE.; ikbz=0; g0=0; yetfound=0
@@ -1267,7 +1261,6 @@ subroutine make_mesh(Kmesh, Cryst, kptopt, kptrlatt, nshiftk, shiftk,&
 !arrays
  integer :: my_vacuum(3)
  real(dp),allocatable :: kibz(:,:),wtk(:),my_shiftk(:,:),ref_kbz(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1397,14 +1390,11 @@ subroutine identk(kibz, nkibz, nkbzmx, nsym, timrev, symrec, symafm, kbz, ktab, 
 !scalars
  integer :: ik1,ik2,ikbz,ikibz,iold,isym,itim
  integer :: ikref,nkref,isym_swp,itim_swp,ikibz_swp
- logical :: is_irred_set
- logical :: found,ltest
+ logical :: is_irred_set, found,ltest
  character(len=500) :: msg
 !arrays
  integer :: g0(3)
- real(dp) :: knew(3),k1(3),k2(3)
- real(dp) :: kref(3),kbz_swp(3)
-
+ real(dp) :: knew(3),k1(3),k2(3),kref(3),kbz_swp(3)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1582,7 +1572,6 @@ subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
 !arrays
  integer :: roundk(3),kbigdiff(3),kbigfold(3,nkfold),iperm(nkfold)
  real(dp) :: k1mk2(3),ksmalldiff(3),norm(nkfold),ksmallfold(3,nkfold)
-
 !************************************************************************
 
  ! Compute smallest length of one component
@@ -1696,8 +1685,8 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
  real(dp),intent(out):: norm
 !arrays
  real(dp),intent(in) :: vect(3)
+
 !Local variables-------------------------------
-!scalars
  character(len=500) :: msg
 ! *************************************************************************
 
@@ -1762,7 +1751,6 @@ subroutine make_path(nbounds, bounds, met, space, ndivsm, ndivs, npts, path, uni
  character(len=500) :: msg
 !arrays
  real(dp) :: diff(3),lng(nbounds-1)
-
 ! *************************************************************************
 
  ABI_CHECK(ndivsm > 0, sjoin('ndivsm', itoa(ndivsm)))
@@ -1825,14 +1813,14 @@ end subroutine make_path
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/find_qmesh
+!!****f* m_bz_mesh/bz_mesh_find_qmesh
 !! NAME
-!! find_qmesh
+!! bz_mesh_find_qmesh
 !!
 !! FUNCTION
 !!  Find the q-mesh defined as all the possible differences between k-points
 !!  Find the irreducible q-points using a special treatment for the Gamma point.
-!!  Then call setup_kmesh to initialize the Qmesh datatype
+!!  Then call setup_kmesh to initialize the Qmesh datatype.
 !!
 !! INPUTS
 !!  Cryst<crystal_t>=datatype gathering info on the unit cell and symmetries
@@ -1843,10 +1831,10 @@ end subroutine make_path
 !!
 !! SOURCE
 
-subroutine find_qmesh(Qmesh, Cryst, Kmesh)
+subroutine bz_mesh_find_qmesh(Qmesh, Cryst, Kmesh)
 
 !Arguments ------------------------------------
- type(kmesh_t),intent(inout) :: Qmesh
+ class(kmesh_t),intent(inout) :: Qmesh
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
 
@@ -1855,7 +1843,6 @@ subroutine find_qmesh(Qmesh, Cryst, Kmesh)
  integer :: nqibz, kptopt
 !arrays
  real(dp),allocatable :: qibz(:,:)
-
 ! *************************************************************************
 
  ! Find the number of q-points such that q = k1 - k2.
@@ -1870,7 +1857,7 @@ subroutine find_qmesh(Qmesh, Cryst, Kmesh)
  call qmesh%init(cryst, nqibz, qibz, kptopt)
  ABI_FREE(qibz)
 
-end subroutine find_qmesh
+end subroutine bz_mesh_find_qmesh
 !!***
 
 !----------------------------------------------------------------------
@@ -2006,7 +1993,6 @@ subroutine findq(nkbz, kbz, nsym, symrec, symafm, gprimd, nqibz, qibz, timrev)
 !arrays
  integer :: g0(3)
  real(dp) :: gmet(3,3),qposs(3),qrot(3)
-
 !************************************************************************
 
  ! Compute reciprocal space metrics
@@ -2016,13 +2002,13 @@ subroutine findq(nkbz, kbz, nsym, symrec, symafm, gprimd, nqibz, qibz, timrev)
               gprimd(3,ii)*gprimd(3,:)
  end do
  !
- ! === Loop over k-points in BZ, form k-k1 and translate in first BZ ===
+ ! Loop over k-points in BZ, form k-k1 and translate in first BZ.
  ! iq is the no. of q-points found, zero at the beginning
  iq=0
  do ik=1,nkbz
    qposs(:)=kbz(:,ik)-kbz(:,1)
-   ! === Check whether this q (or its equivalent) has already been found ===
-   ! * Use spatial inversion instead of time reversal whenever possible.
+   ! Check whether this q (or its equivalent) has already been found.
+   ! Use spatial inversion instead of time reversal whenever possible.
    found=.FALSE.
    do iqp=1,iq
      do itim=1,timrev
@@ -2043,11 +2029,11 @@ subroutine findq(nkbz, kbz, nsym, symrec, symafm, gprimd, nqibz, qibz, timrev)
  end do
 
  if (iq/=nqibz) then
-   write(msg,'(2(a,i5))')' iq= ',iq,'/= nqibz= ',nqibz
+   write(msg,'(2(a,i0))')' iq= ',iq,'/= nqibz= ',nqibz
    ABI_BUG(msg)
  end if
  !
- ! * Translate q-points to 1st BZ in the interval [-1/2,1/2[
+ ! Translate q-points to 1st BZ in the interval [-1/2,1/2[
  do iq=1,nqibz
    do ii=1,3
      call wrap2_pmhalf(qibz(ii,iq),qred,shift1)
@@ -2097,9 +2083,7 @@ subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
  real(dp) :: tolq0=1.0D-3
  character(len=500) :: msg
 !arrays
- real(dp) :: glist1(2*ABS(mG0(1))+1),glist2(2*ABS(mG0(2))+1),glist3(2*ABS(mG0(3))+1)
- real(dp) :: qpg0(3),rg(3)
-
+ real(dp) :: glist1(2*ABS(mG0(1))+1),glist2(2*ABS(mG0(2))+1),glist3(2*ABS(mG0(3))+1), qpg0(3),rg(3)
 ! *************************************************************************
 
  iq = 0
@@ -2232,7 +2216,6 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec, 
  integer,pointer :: symafm(:),symrec(:,:,:)
  real(dp) :: knew(3)
  real(dp),allocatable :: ktest(:,:),wtk(:),wtk_folded(:)
-
 !************************************************************************
 
  ABI_CHECK(any(cryst%timrev == [1, 2]), sjoin("Wrong value for cryst%timrev:", itoa(cryst%timrev)))
@@ -2730,7 +2713,7 @@ end function box_len
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  gprimd(3,3)=Reciprocal lattice vectors
 !!  ndivsm=Number of divisions to be used for the smallest segment.
-!!   A negative value activates a specialized mode if with bounds is suppose to supply the full list of k-points.
+!!   A negative value activates a specialized mode in which bounds supplies the full list of k-points.
 !!
 !! SOURCE
 
@@ -2885,7 +2868,6 @@ end subroutine kpath_get_versors
 subroutine kpath_free(Kpath)
 
 !Arguments ------------------------------------
-!scalars
  class(kpath_t),intent(inout) :: Kpath
 ! *************************************************************************
 

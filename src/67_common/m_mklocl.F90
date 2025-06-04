@@ -1396,8 +1396,6 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,&
 & optnc) !optional
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
@@ -1663,8 +1661,6 @@ end subroutine dfpt_vlocaldq
 subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
 & ntypat,n1,n2,n3,ph1d,qdir1,qdir2,qgrid,qphon,ucvol,vlspl,vpsp1dqdq)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1953,8 +1949,6 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
 & kxc,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
 & ntypat,n1,n2,n3,nkxc,nspden,opthartdqdq,ph1d,qdir,qgrid,qphon,rhog,rhor,&
 & ucvol,vlspl,vhart1dqdq,vpsp1dqdq,vxc1dqdq)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

@@ -26,9 +26,7 @@ MODULE m_mpiotk
  use m_abicore
  use m_errors
  use m_xmpi
-#if defined HAVE_MPI2 && defined HAVE_MPI_IO
- use mpi
-#endif
+ USE_MPI
 
  use iso_c_binding
 

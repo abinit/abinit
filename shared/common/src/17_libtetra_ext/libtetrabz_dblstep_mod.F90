@@ -14,7 +14,7 @@
 ! distribute, sublicense, and/or sell copies of the Software, and to
 ! permit persons to whom the Software is furnished to do so, subject to
 ! the following conditions:
-! 
+!
 ! The above copyright notice and this permission notice shall be included
 ! in all copies or substantial portions of the Software.
 !
@@ -37,11 +37,11 @@ CONTAINS
 !
 ! Compute Occ * Step
 !
-SUBROUTINE libtetrabz_dblstep(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm) 
+SUBROUTINE libtetrabz_dblstep(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
   !
   use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3)
   REAL(C_DOUBLE),INTENT(IN) :: bvec(9), eig1(nb,PRODUCT(nge(1:3))), eig2(nb,PRODUCT(nge(1:3)))
@@ -100,7 +100,7 @@ SUBROUTINE libtetrabz_dblstep_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig1
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, &
   &                     ik_global(20,nt_local), ik_local(20,nt_local)
@@ -257,7 +257,7 @@ SUBROUTINE libtetrabz_dblstep2(nb,ei1,ej1,w1)
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nb
   REAL(8),INTENT(IN) :: ei1(4), ej1(4,nb)
