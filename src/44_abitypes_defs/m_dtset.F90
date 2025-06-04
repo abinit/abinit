@@ -429,6 +429,7 @@ type, public :: dataset_type
  integer :: mqgriddg
 !N
  integer :: natom
+ integer :: natnd
  integer :: natpawu
  integer :: natrd
  integer :: natsph
@@ -795,6 +796,7 @@ type, public :: dataset_type
  integer, allocatable ::  dynimage(:)        ! dynimage(nimage or mxnimage)
  integer, allocatable ::  efmas_bands(:,:)   ! efmas_bands(2,nkptgw)
  integer, allocatable ::  iatfix(:,:)        ! iatfix(3,natom)
+ integer, allocatable ::  iatnd(:)           ! iatnd(natnd)
  integer, allocatable ::  iatsph(:)          ! iatsph(natsph)
  integer, allocatable ::  istwfk(:)          ! istwfk(nkpt)
  integer, allocatable ::  kberry(:,:)        ! kberry(3,nberry)
@@ -1062,6 +1064,7 @@ type, public :: dataset_type
  real(dp), allocatable :: mixalch_orig(:,:,:) ! mixalch_orig(npspalch,ntypalch,nimage)
  real(dp), allocatable :: mixesimgf(:)        ! mixesimgf(nimage)
  real(dp), allocatable :: nucdipmom(:,:)      ! nucdipmom(3,natom)
+ real(dp), allocatable :: nucdipmomlist(:,:)  ! nucdipmomlist(3,natnd)
  real(dp), allocatable :: occ_orig(:,:)       ! occ_orig(mband*nkpt*nsppol,nimage)
  real(dp), allocatable :: pimass(:)           ! pimass(ntypat)
  real(dp), allocatable :: ph_qpath(:,:)       ! ph_qpath(3, nqpath)
@@ -1927,6 +1930,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mqgrid             = dtin%mqgrid
  dtout%mqgriddg           = dtin%mqgriddg
  dtout%natom              = dtin%natom
+ dtout%natnd              = dtin%natnd
  dtout%natrd              = dtin%natrd
  dtout%natsph             = dtin%natsph
  dtout%natsph_extra       = dtin%natsph_extra
@@ -2427,6 +2431,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%dynimage, dtout%dynimage)
  call alloc_copy(dtin%efmas_bands, dtout%efmas_bands)
  call alloc_copy(dtin%iatfix, dtout%iatfix)
+ call alloc_copy(dtin%iatnd, dtout%iatnd)
  call alloc_copy(dtin%iatsph, dtout%iatsph)
  call alloc_copy(dtin%istwfk, dtout%istwfk)
  call alloc_copy(dtin%kberry, dtout%kberry)
@@ -2473,6 +2478,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%mixalch_orig, dtout%mixalch_orig)
  call alloc_copy(dtin%mixesimgf, dtout%mixesimgf)
  call alloc_copy(dtin%nucdipmom, dtout%nucdipmom)
+ call alloc_copy(dtin%nucdipmomlist, dtout%nucdipmomlist)
  call alloc_copy(dtin%occ_orig, dtout%occ_orig)
  call alloc_copy(dtin%pimass, dtout%pimass)
  call alloc_copy(dtin%ptcharge, dtout%ptcharge)
@@ -2541,6 +2547,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%dynimage)
  ABI_SFREE(dtset%efmas_bands)
  ABI_SFREE(dtset%iatfix)
+ ABI_SFREE(dtset%iatnd)
  ABI_SFREE(dtset%iatsph)
  ABI_SFREE(dtset%istwfk)
  ABI_SFREE(dtset%kberry)
@@ -2590,6 +2597,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%mixalch_orig)
  ABI_SFREE(dtset%mixesimgf)
  ABI_SFREE(dtset%nucdipmom)
+ ABI_SFREE(dtset%nucdipmomlist)
  ABI_SFREE(dtset%occ_orig)
  ABI_SFREE(dtset%pimass)
  ABI_SFREE(dtset%ptcharge)
@@ -3652,7 +3660,7 @@ subroutine chkvars(string)
 !H
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
- list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
+ list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatnd iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
@@ -3694,7 +3702,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
  list_vars=trim(list_vars)//' moldyn mqgrid mqgriddg'
 !N
- list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
+ list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz natnd'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
  list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nb_protected nb_per_slice nconeq ncout'
  list_vars=trim(list_vars)//' nc_xccc_gspace nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring nefield'
@@ -3706,7 +3714,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft'
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
- list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nucefg nucfc nwfshist nzchempot'
+ list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat'
+ list_vars=trim(list_vars)//' nucdipmom nucdipmomlist nucefg nucfc nwfshist nzchempot'
 !O
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
