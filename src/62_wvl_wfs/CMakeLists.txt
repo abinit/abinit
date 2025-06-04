@@ -8,7 +8,7 @@ add_library(62_wvl_wfs STATIC
 
 set_target_properties(62_wvl_wfs
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(62_wvl_wfs
   PRIVATE
@@ -16,7 +16,7 @@ target_include_directories(62_wvl_wfs
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(62_wvl_wfs
