@@ -2609,11 +2609,12 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
 
 ! *************************************************************************
  write(6,*)'chi0diel start'; flush(6) !DEBUG
+ ! TODO : remove some of the arguments (mgfft, nfft, nspden) and just check that the size of vresid and vrespc are coherent with precon%nfftprc, ngfftprc, dtset%nspden
 
  if (ngfft(10)>1) then
    ABI_BUG("chi0-based preconditioning (chi0diel) used with fft-grid parallelization")
  end if
- if (nfft /= precon%nfft) then
+ if (nfft /= precon%nfftprc) then
    ABI_BUG("Mismatched nfft in chi0-based preconditioning")
  end if
 

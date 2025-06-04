@@ -230,13 +230,6 @@ contains
             end if
         end if
         
-        !Initializing loc_pola specific variables
-        if (this%iprcel == 204) then
-            !this%gc = 1.0 ! TODO
-            !Allocating the array containing the local polarizability
-            !ABI_MALLOC(this%loc_pola, (this%nfftprc, dtset%nspden))
-        end if
-
     end subroutine precon_init
 
     !****f* m_precon/precon_init_kxc
@@ -274,8 +267,6 @@ contains
     !!      For LDOS preconditioning (iprcel=202) : 
     !!          Compute the new ldos (local density of state) with current wavefunctions 
     !!          and the new tdos (total density of state = integral of ldos).
-    !!      For Pola preconditioning (Not implemented):
-    !!          Compute the local polarizability if istep = 1 (first SCF iteration).
     !!
     !! INPUTS
     !!  dtset     = All input variables for this dataset.
@@ -329,10 +320,6 @@ contains
         if (this%iprcel == 202) then
             !Deallocating the array containing ldos and tdos
             ABI_FREE(this%ldos)
-        end if
-
-        if (this%iprcel == 204) then
-            ABI_FREE(this%loc_pola)
         end if
 
     end subroutine precon_free
@@ -860,7 +847,7 @@ contains
         if (this%iprcel == 203) then
             ABI_MALLOC(Kxc_vec_g, (2, this%nfftprc, dtset%nspden))
             Kxc_vec_g = vec_g   !Copy ?
-            call apply_vc(this, ngfftprc, vec_g)    ! Apply vc in place
+            call apply_vc(this, dtset, ngfftprc, vec_g)    ! Apply vc in place
             call apply_Kxc(this, dtset, mpi_enreg, ngfftprc, Kxc_vec_g)
             vec_g = vec_g + Kxc_vec_g
             ABI_FREE(Kxc_vec_g)
@@ -1117,102 +1104,6 @@ contains
 
     end function complex_mult
 
-    !****f* m_precon/compute_loc_pola
-    !! NAME
-    !!  compute_loc_pola
-    !!
-    !! FUNCTION
-    !!  Compute the local polarizability estimate. WIP
-    !!
-    !! INPUTS
-    !!
-    !! SIDE EFFECTS
-    !!
-    !! SOURCE
-    subroutine compute_loc_pola(dtset, atindx1, gprimd, nattyp, nfft, &
-        &   nspden, mpi_enreg, rhor, rprimd, xred, &
-        &   loc_pola)
-
-        !Arguments ------------------------------------
-        !scalars
-        type(dataset_type),intent(in) :: dtset
-        integer, intent(in) :: nfft, nspden
-        type(MPI_type), intent(in) :: mpi_enreg
-        !arrays
-        integer, intent(in) :: atindx1(:), nattyp(:)
-        real(dp), intent(in) :: rhor(:, :), rprimd(3, 3), gprimd(3, 3), xred(:, :)
-        real(dp), intent(out) :: loc_pola(:, :)
-       
-        !Local variables-------------------------------
-        !scalars
-        integer :: itypat, iattyp, iatom, ig, ir, ispden
-        integer :: re, im
-        real(dp) :: l_atom
-        !arrays
-        integer :: g(3)
-        real(dp) :: form_factor(2), structure_factor(2)
-        real(dp) :: r_atom(3)
-        real(dp), allocatable:: rhor0(:), rhor0_atom(:)
-        real(dp), allocatable :: r2(:)
-        real(dp), allocatable:: rhog0_atom(:, :)
-        
-        ! *************************************************************************
-        
-        loc_pola = 0.0
-
-        ! Arrays allocation
-        ABI_MALLOC(rhor0, (nfft))
-        ABI_MALLOC(rhor0_atom, (nfft))
-        ABI_MALLOC(r2, (nfft))
-        ABI_MALLOC(rhog0_atom, (2, nfft))
-        re = 1
-        im = 2
-
-        do itypat = 1, dtset%ntypat !Loop over the types of atom
-            l_atom = atom_length(dtset%densty(itypat, 1), dtset%ziontypat(itypat), dtset%znucl(itypat))   ! Atomic decay length
-            
-            do iattyp = 1, nattyp(itypat) !Loop over the atom (of this type)
-                iatom = atindx1(iattyp)
-                r_atom = xred(:, iatom) !in reduced coordinates
-                
-                !1) Computing rhor0_atom (with Gaussians)
-                do ig = 1, nfft !Loop over the fft grid
-                    g = get_g_vector(ig, dtset%ngfft) !in reduced coordinates
-                    ! structure_factor(g) = exp(-i*2pi*dot(g, r_atom))
-                    structure_factor(re) = cos(-two_pi*dot_product(g, r_atom))
-                    structure_factor(im) = sin(-two_pi*dot_product(g, r_atom))
-                    ! form_factor(g) = exp(-(2pi*l_atom*g)^2) (Gaussian)
-                    form_factor(re) = exp(-(two_pi*l_atom*norm2(matmul(gprimd, g)))**2)
-                    form_factor(im) = 0 
-                    ! rhog0_atom = structure_factor * form_factor (multiplication in g-space)
-                    rhog0_atom(:, ig) = complex_mult(form_factor, structure_factor)
-                end do
-                !ifft to get rhor0_atom in real space
-                call fourdp(1, rhog0_atom, rhor0_atom, 1, mpi_enreg, nfft, 1, dtset%ngfft, 0) ! irfft (cplex=1)
-
-                !2) Computing norm(r-r_atom)^2 (periodized with sin)
-                !TODO : better + mistake (pic dans loc_pola)
-                do ir = 1, nfft
-                    r2(ir) = norm2(matmul(rprimd, 1/two_pi*sin(two_pi * (get_r_vector(ir, dtset%ngfft) - r_atom)))) ** 2
-                end do
-
-                !3) loc_pola = sum_atom rho_atom * |r-r_atom|^2
-                do ispden = 1, nspden
-                    ! TODO : add atom-specific coefficients
-                    loc_pola(:, ispden) = loc_pola(:, ispden) * rhor0/(rhor0+rhor0_atom) + rhor(:, ispden) * rhor0_atom/(rhor0+rhor0_atom) * r2
-                end do
-                rhor0 = rhor0 + rhor0_atom
-            
-            end do 
-        end do
-
-        ABI_FREE(rhor0)
-        ABI_FREE(rhor0_atom)
-        ABI_FREE(r2)
-        ABI_FREE(rhog0_atom)
-
-    end subroutine compute_loc_pola
-
     !****f* m_precon/save_applied_op_g
     !! NAME
     !!  save_applied_op_g
@@ -1353,71 +1244,6 @@ contains
         end if
 
     end subroutine apply_chi0_ldos
-
-    !****f* m_precon/apply_chi0_locpola
-    !! NAME
-    !!  apply_chi0_locpola
-    !!
-    !! FUNCTION
-    !!  Apply the local polarizability model chi0 operator to the vector vec_g (in place). WIP
-    !!  TODO
-    !!
-    !! INPUTS
-    !!  mpi_enreg    = Information about MPI parallelization.
-    !!  ngfft        = Contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
-    !!  ispden       = Index of spin-density component.
-    !!
-    !! SIDE EFFECTS
-    !!  vec_g (2, nfft, nspden) = Vector (in G-space) to which the model chi0 operator is applied (in place).
-    !!                         When nspden > 1 vec_g is in the Pauli basis.
-    !!
-    !! SOURCE
-    subroutine apply_chi0_locpola(this, mpi_enreg, ngfft, vec_g)
-
-        !Arguments ------------------------------------
-        class(precon_object), intent(in) :: this
-        !scalars
-        type(MPI_type), intent(in) :: mpi_enreg
-        !arrays
-        integer, intent(in) :: ngfft(:)
-        real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
-       
-        !Local variables-------------------------------
-        !scalars
-        !arrays
-        
-        ! *************************************************************************
-       
-        ! TODO : spin
-        !    ABI_MALLOC(work_g, (2, this%nfft))
-        !    ABI_MALLOC(vec_g_saved, (2, this%nfft))
-        !    vec_g_saved = vec_g
-        !    vec_g = 0.0
-        !    do i=1, 3
-        !        work_g = 0.0
-        !        !1) Multiplication by d_i(g) in reciprocal space
-        !        do i_g = 1, this%nfft
-        !            !g = two_pi * matmul(this%gprimd, g_vectors(:, i_g))
-        !            g = two_pi * matmul(this%gprimd, get_g_vector(i_g, ngfft))
-        !            work_g(:, i_g) = complex_mult( [0.0_dp, g(i)/sqrt(1+(norm2(g)/this%gc)**2)], vec_g_saved(:, i_g) )
-        !        end do
-
-        !        !2) Multiplication by the local polarizability in real space
-        !        call fourdp(cplex, work_g, work_r, 1, mpi_enreg, this%nfft, 1, ngfft, 0) !ifft
-        !        work_r = this%loc_pola(:, ispden) * work_r                                         !local multiplication
-        !        call fourdp(cplex, work_g, work_r, -1, mpi_enreg, this%nfft, 1, ngfft, 0) !fft
-
-        !        !3) Multiplication by d_i(g) in reciprocal space
-        !        do i_g = 1, this%nfft
-        !            g = two_pi * matmul(this%gprimd, get_g_vector(i_g, ngfft))
-        !            work_g(:, i_g) = complex_mult( [0.0_dp, g(i)/sqrt(1+(norm2(g)/this%gc)**2)], work_g(:, i_g) )
-        !        end do
-
-        !        vec_g = vec_g + work_g
-
-        !    end do
-
-    end subroutine apply_chi0_locpola
 
     !****f* m_precon/compute_weights_chi0_diag
     !! NAME
@@ -1730,28 +1556,14 @@ contains
 
         !1) Computing the weights : weight_i = sum_i fi' * <rhoii, vec>
         ABI_MALLOC(weights, (dtset%mband*dtset%nkpt*dtset%nsppol))
-        call compute_weights_chi0_diag(this, dtset, mgfft, mpi_enreg, ngfftprc, vec_g, weights)
+        call compute_weights_chi0_diag(this, dtset, mpi_enreg, vec_g, weights)
         
         !2) Computing chi0 * vec using mkrho with custom weights in place of the occupations.
-        call compute_weighted_density(this, dtset, mpi_enreg, weights, chi0_vec_r) ! TODO !!
-
-        ! In place : vec_g = chi0 * vec_g
         ABI_MALLOC(chi0_vec_r, (this%nfftprc, dtset%nspden))
-        mcg = size(this%cg, 2)
-        paw_dmft%use_dmft = 0
-        paw_dmft%use_sc_dmft = 0
-        call mkrho(this%cg, dtset, this%gprimd, this%irrzon, this%kg, mcg, mpi_enreg, this%npwarr, weights, &
-        &   paw_dmft, this%phnons, vec_g, chi0_vec_r, this%rprimd, 0, this%ucvol, wvl_den, wvl_wfs, option=0)
-        ABI_FREE(weights)
-        
-        nfftot = ngfft(1) * ngfft(2) * ngfft(3)
-        call symrhg(1, this%gprimd, this%irrzon, mpi_enreg, this%nfft, nfftot, ngfft, dtset%nspden, dtset%nsppol, &
-        &   dtset%nsym, this%phnons, vec_g, chi0_vec_r, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
-        ! TODO : PAW
-        ! TODO :  nfftmix != this%nfft en PAW grille
-        !call this%save_applied_op_r(dtset, ngfft, vec_r, chi0_vec_r, "applied_chi0_mag_r.txt")  !DEBUG
-
+        call compute_weighted_density(this, dtset, mpi_enreg, weights, chi0_vec_r) ! TODO : change compute_weighted_density to return the vector directly in G-space.
+        call fourdp(1, vec_g, chi0_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, ngfftprc, 0)
         ABI_FREE(chi0_vec_r)
+        ABI_FREE(weights)
 
         !Basis change : With collinear spins vec_g is not returned in the Pauli (tot/spin) basis by symrhg.
         call to_pauli(this, 1, vec_g)
@@ -1822,11 +1634,6 @@ contains
         !Diagonal chi0 model
         if (this%iprcel == 203) then
             call apply_chi0_diag(this, dtset, mgfft, mpi_enreg, ngfftprc, vec_g)
-        end if
-
-        !Local polarizability model - Not implemented
-        if (this%iprcel == 204) then
-            call apply_chi0_locpola(this, mpi_enreg, ngfftprc, vec_g)
         end if
 
     end subroutine apply_chi0
