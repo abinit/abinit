@@ -114,8 +114,6 @@ contains
 
 subroutine abiimages_ini(images,nimages,natom,nrecord)
 
- implicit none
-
 !Arguments ------------------------------------
  type(abiimages) ,intent(out) :: images
  integer         ,intent(in)  :: natom,nimages
@@ -163,8 +161,6 @@ end subroutine abiimages_ini
 !! SOURCE
 
 subroutine abiimages_fin(images)
-
- implicit none
 
 !Arguments ------------------------------------
  type(abiimages),intent(inout) :: images

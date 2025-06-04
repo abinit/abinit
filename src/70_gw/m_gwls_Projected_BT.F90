@@ -22,7 +22,7 @@
 
 module m_gwls_Projected_BT
 !----------------------------------------------------------------------------------------------------
-! This module contains routines to compute the projections of the Sternheimer equations for the 
+! This module contains routines to compute the projections of the Sternheimer equations for the
 ! BT operator, which appears in the Numerical integral.
 !----------------------------------------------------------------------------------------------------
 ! local modules
@@ -32,7 +32,7 @@ use m_gwls_TimingLog
 use m_gwls_hamiltonian
 use m_gwls_lineqsolver
 use m_gwls_GWlanczos
-use m_gwls_LanczosBasis 
+use m_gwls_LanczosBasis
 use m_gwls_DielectricArray
 use m_gwls_LanczosResolvents
 ! abinit modules
@@ -45,20 +45,20 @@ save
 private
 !!***
 
-! Module arrays, to be set and used in this module 
-integer, public  :: BT_lsternheimer 
+! Module arrays, to be set and used in this module
+integer, public  :: BT_lsternheimer
 complex(dp), public, allocatable :: projected_BT_A_matrix(:,:)
 complex(dp), public, allocatable :: projected_BT_L_matrix(:,:)
 complex(dp), public, allocatable :: projected_BT_BETA_matrix(:,:)
 
-integer, public  :: BT_lsternheimer_Lanczos 
+integer, public  :: BT_lsternheimer_Lanczos
 ! We use pointers so that arrays may be allocated in a subroutine
 complex(dp), public, pointer:: projected_BT_A_matrix_Lanczos(:,:)
 complex(dp), public, pointer:: projected_BT_L_matrix_Lanczos(:,:)
 complex(dp), public, pointer:: projected_BT_BETA_matrix_Lanczos(:,:)
 
 
-integer, public  :: BT_lsternheimer_model_Lanczos 
+integer, public  :: BT_lsternheimer_model_Lanczos
 ! We use pointers so that arrays may be allocated in a subroutine
 complex(dp), public, pointer :: projected_BT_A_matrix_model_Lanczos(:,:)
 complex(dp), public, pointer :: projected_BT_L_matrix_model_Lanczos(:,:)
@@ -97,8 +97,6 @@ kmax_numeric, npt_gauss, dielectric_array, array_integrand )
 ! already contains the properly modified basis vectors.
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer,      intent(in) :: nfreq
 real(dp),     intent(in) :: list_external_omega(nfreq)
 integer,      intent(in) :: lmax
@@ -116,7 +114,7 @@ logical   :: prec
 integer   :: l, l1, iw_ext, iw_prime, iw, mb, iblk, nbdblock_lanczos
 integer   :: ierr
 
-integer      :: mpi_band_rank 
+integer      :: mpi_band_rank
 
 integer      :: k
 integer      :: iz, nz
@@ -139,11 +137,11 @@ complex(dpc), allocatable :: right_vec_FFT(:)
 
 complex(dpc), allocatable :: right_vec_LA(:,:)
 complex(dpc), allocatable :: LR_M_matrix_LA(:,:,:)
-complex(dpc), allocatable :: Hamiltonian_Qk_LA(:,:,:) 
-complex(dpc), allocatable :: left_vecs_LA(:,:) 
-complex(dpc), allocatable :: shift_lanczos_matrix(:,:) 
+complex(dpc), allocatable :: Hamiltonian_Qk_LA(:,:,:)
+complex(dpc), allocatable :: left_vecs_LA(:,:)
+complex(dpc), allocatable :: shift_lanczos_matrix(:,:)
 
-complex(dpc), allocatable :: work_vec(:) 
+complex(dpc), allocatable :: work_vec(:)
 
 
 real(dp),     allocatable :: real_wrk_vec(:),   imag_wrk_vec(:)
@@ -187,7 +185,7 @@ external_omega = list_external_omega(iw_ext)
 
 do iw_prime = 1, npt_gauss
 
-! Remember! the first element of the list_omega array, which contain the imaginary 
+! Remember! the first element of the list_omega array, which contain the imaginary
 ! integration frequencies, is zero (which need not be computed explicitly)
 
 omega_prime = list_omega(iw_prime+1)
@@ -200,7 +198,7 @@ list_z(iw) = cmplx_1*external_omega+cmplx_i*omega_prime
 
 end do
 
-end do 
+end do
 
 
 ! initialize the array to zero
@@ -223,8 +221,8 @@ mpi_band_rank = mpi_enreg%me_band
 !
 ! The shift lanczos scheme will be implemented explicitly in the
 ! loop below instead of being wrapped in routines in the module
-! gwls_LanczosResolvents. The task to be performed is subtle 
-! because of the different data distributions and the need to 
+! gwls_LanczosResolvents. The task to be performed is subtle
+! because of the different data distributions and the need to
 ! project on all Lanczos vectors.
 !
 !-------------------------------------------------------------------
@@ -237,16 +235,16 @@ do iblk = 1, nbdblock_lanczos
 ! Change the configuration of the data
 do mb =1, blocksize
 l = (iblk-1)*blocksize+mb
-if (l <= lmax) then 
+if (l <= lmax) then
   psik_wrk(1,:)  = dble ( modified_Lbasis(:,l) )
   psik_wrk(2,:)  = dimag( modified_Lbasis(:,l) )
 else
   psik_wrk(:,:)  = zero
 end if
 
-psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:) 
+psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:)
 
-end do ! mb 
+end do ! mb
 
 ! change configuration of the data, from LA to FFT
 call wf_block_distribute(psikb_wrk,  psikg_wrk, 1) ! LA -> FFT
@@ -262,16 +260,16 @@ call compute_resolvent_column_shift_lanczos_right_vectors(seed_vector, right_vec
 ! Distribute the data from the FFT configuration back to the LA configuration
 ! We will use some public data from the LanczosResolvent module.
 !
-! PATTERN: xmpi_allgather(xval,nelem,recvbuf,spaceComm,ier) 
+! PATTERN: xmpi_allgather(xval,nelem,recvbuf,spaceComm,ier)
 ! unfortunately, there are only interfaces for real arguments, not complex.
 
-call xmpi_allgather( dble(right_vec_FFT), kmax_numeric, real_wrk_vec, mpi_enreg%comm_band, ierr) 
-call xmpi_allgather(dimag(right_vec_FFT), kmax_numeric, imag_wrk_vec, mpi_enreg%comm_band, ierr) 
+call xmpi_allgather( dble(right_vec_FFT), kmax_numeric, real_wrk_vec, mpi_enreg%comm_band, ierr)
+call xmpi_allgather(dimag(right_vec_FFT), kmax_numeric, imag_wrk_vec, mpi_enreg%comm_band, ierr)
 
 
 
-call xmpi_allgather( dble(LR_M_matrix), kmax_numeric**2, real_wrk_mat, mpi_enreg%comm_band, ierr) 
-call xmpi_allgather(dimag(LR_M_matrix), kmax_numeric**2, imag_wrk_mat, mpi_enreg%comm_band, ierr) 
+call xmpi_allgather( dble(LR_M_matrix), kmax_numeric**2, real_wrk_mat, mpi_enreg%comm_band, ierr)
+call xmpi_allgather(dimag(LR_M_matrix), kmax_numeric**2, imag_wrk_mat, mpi_enreg%comm_band, ierr)
 
 
 do mb =1, blocksize
@@ -289,12 +287,12 @@ psikg_wrk(1,:) = dble ( Hamiltonian_Qk(:,k) )
 psikg_wrk(2,:) = dimag( Hamiltonian_Qk(:,k) )
 
 ! change configuration of the data, from FFT to LA
-call wf_block_distribute(psikb_wrk,  psikg_wrk, 2) ! FFT -> LA 
+call wf_block_distribute(psikb_wrk,  psikg_wrk, 2) ! FFT -> LA
 
 do mb=1, blocksize
 
 Hamiltonian_Qk_LA(:, k, mb) =  cmplx_1*psikb_wrk(1,(mb-1)*npw_k+1:mb*npw_k) &
-&                                              +cmplx_i*psikb_wrk(2,(mb-1)*npw_k+1:mb*npw_k) 
+&                                              +cmplx_i*psikb_wrk(2,(mb-1)*npw_k+1:mb*npw_k)
 
 end do ! mb
 
@@ -311,10 +309,10 @@ l1 = (iblk-1)*blocksize+mb
 
 if (l1 > lmax) cycle
 
-!  Compute Q^dagger | left_vectors > 
+!  Compute Q^dagger | left_vectors >
 
 ! computes C = alpha *  op(A).op(B) + beta * C
-call ZGEMM(                         'C', &  ! First array is hermitian conjugated 
+call ZGEMM(                         'C', &  ! First array is hermitian conjugated
 'N', &  ! second array is taken as is
 kmax_numeric, &  ! number of rows of matrix op(A)
 lmax, &  ! number of columns of matrix op(B)
@@ -330,7 +328,7 @@ kmax_numeric)  ! LDC
 
 call xmpi_sum(left_vecs_LA,mpi_enreg%comm_bandfft,ierr) ! sum on all processors working on LA
 
-! Use shift Lanczos to compute all matrix elements! 
+! Use shift Lanczos to compute all matrix elements!
 
 ! THE FOLLOWING COULD BE DONE IN PARALLEL INSTEAD OF HAVING EVERY PROCESSOR DUMBLY DO THE SAME THING
 do iz = 1, nz
@@ -342,7 +340,7 @@ shift_lanczos_matrix(:,:) = LR_M_matrix_LA(:,:,mb)
 
 do k = 1, kmax_numeric
 shift_lanczos_matrix(k,k) = shift_lanczos_matrix(k,k)-z
-end do 
+end do
 
 ! since z could be complex, the matrix is not necessarily hermitian. Invert using general Lapack scheme
 call invert_general_matrix(kmax_numeric,shift_lanczos_matrix)
@@ -366,7 +364,7 @@ work_vec, &! Y array
 1)  ! INC Y
 
 
-! matrix_elements = < right_vecs | work_vec > 
+! matrix_elements = < right_vecs | work_vec >
 
 call ZGEMV(                       'C', &! A matrix is hermitan conjugate
 kmax_numeric, &! number of rows of matrix A
@@ -398,8 +396,8 @@ sum(dielectric_array(:,l1,iw_prime+1)*  &
 
 iw = iw+1
 
-end do !iw_prime 
-end do !iw_ext 
+end do !iw_prime
+end do !iw_ext
 
 
 
@@ -472,12 +470,10 @@ modified_Lbasis, kmax_numeric, npt_gauss, dielectric_array, array_integrand )
 ! where BT is obtained by shift Lanczos for all frequencies.  It is assumed that modified_Lbasis
 ! already contains the properly modified basis vectors.
 !
-! This routine performs the same function as compute_projected_BT_shift_Lanczos, but 
+! This routine performs the same function as compute_projected_BT_shift_Lanczos, but
 ! takes into account that the MODEL dielectric array is distributed over the processors.
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer,      intent(in) :: nfreq
 real(dp),     intent(in) :: list_external_omega(nfreq)
 integer,      intent(in) :: lmax, blocksize_eps
@@ -500,7 +496,7 @@ logical   :: prec
 integer   :: l, l1, lb, iw_ext, iw_prime, iw, mb, iblk, nbdblock_lanczos
 integer   :: ierr
 
-integer      :: mpi_band_rank 
+integer      :: mpi_band_rank
 
 integer      :: k
 integer      :: iz, nz
@@ -523,11 +519,11 @@ complex(dpc), allocatable :: right_vec_FFT(:)
 
 complex(dpc), allocatable :: right_vec_LA(:,:)
 complex(dpc), allocatable :: LR_M_matrix_LA(:,:,:)
-complex(dpc), allocatable :: Hamiltonian_Qk_LA(:,:,:) 
-complex(dpc), allocatable :: left_vecs_LA(:,:) 
-complex(dpc), allocatable :: shift_lanczos_matrix(:,:) 
+complex(dpc), allocatable :: Hamiltonian_Qk_LA(:,:,:)
+complex(dpc), allocatable :: left_vecs_LA(:,:)
+complex(dpc), allocatable :: shift_lanczos_matrix(:,:)
 
-complex(dpc), allocatable :: work_vec(:) 
+complex(dpc), allocatable :: work_vec(:)
 
 
 real(dp),     allocatable :: real_wrk_vec(:),   imag_wrk_vec(:)
@@ -571,7 +567,7 @@ external_omega = list_external_omega(iw_ext)
 
 do iw_prime = 1, npt_gauss
 
-! Remember! the first element of the list_omega array, which contain the imaginary 
+! Remember! the first element of the list_omega array, which contain the imaginary
 ! integration frequencies, is zero (which need not be computed explicitly)
 
 omega_prime = list_omega(iw_prime+1)
@@ -584,7 +580,7 @@ list_z(iw) = cmplx_1*external_omega+cmplx_i*omega_prime
 
 end do
 
-end do 
+end do
 
 
 ! initialize the array to zero
@@ -607,8 +603,8 @@ mpi_band_rank = mpi_enreg%me_band
 !
 ! The shift lanczos scheme will be implemented explicitly in the
 ! loop below instead of being wrapped in routines in the module
-! gwls_LanczosResolvents. The task to be performed is subtle 
-! because of the different data distributions and the need to 
+! gwls_LanczosResolvents. The task to be performed is subtle
+! because of the different data distributions and the need to
 ! project on all Lanczos vectors.
 !
 !-------------------------------------------------------------------
@@ -621,16 +617,16 @@ do iblk = 1, nbdblock_lanczos
 ! Change the configuration of the data
 do mb =1, blocksize
 l = (iblk-1)*blocksize+mb
-if (l <= lmax) then 
+if (l <= lmax) then
   psik_wrk(1,:)  = dble ( modified_Lbasis(:,l) )
   psik_wrk(2,:)  = dimag( modified_Lbasis(:,l) )
 else
   psik_wrk(:,:)  = zero
 end if
 
-psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:) 
+psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:)
 
-end do ! mb 
+end do ! mb
 
 ! change configuration of the data, from LA to FFT
 call wf_block_distribute(psikb_wrk,  psikg_wrk, 1) ! LA -> FFT
@@ -646,16 +642,16 @@ call compute_resolvent_column_shift_lanczos_right_vectors(seed_vector, right_vec
 ! Distribute the data from the FFT configuration back to the LA configuration
 ! We will use some public data from the LanczosResolvent module.
 !
-! PATTERN: xmpi_allgather(xval,nelem,recvbuf,spaceComm,ier) 
+! PATTERN: xmpi_allgather(xval,nelem,recvbuf,spaceComm,ier)
 ! unfortunately, there are only interfaces for real arguments, not complex.
 
-call xmpi_allgather( dble(right_vec_FFT), kmax_numeric, real_wrk_vec, mpi_enreg%comm_band, ierr) 
-call xmpi_allgather(dimag(right_vec_FFT), kmax_numeric, imag_wrk_vec, mpi_enreg%comm_band, ierr) 
+call xmpi_allgather( dble(right_vec_FFT), kmax_numeric, real_wrk_vec, mpi_enreg%comm_band, ierr)
+call xmpi_allgather(dimag(right_vec_FFT), kmax_numeric, imag_wrk_vec, mpi_enreg%comm_band, ierr)
 
 
 
-call xmpi_allgather( dble(LR_M_matrix), kmax_numeric**2, real_wrk_mat, mpi_enreg%comm_band, ierr) 
-call xmpi_allgather(dimag(LR_M_matrix), kmax_numeric**2, imag_wrk_mat, mpi_enreg%comm_band, ierr) 
+call xmpi_allgather( dble(LR_M_matrix), kmax_numeric**2, real_wrk_mat, mpi_enreg%comm_band, ierr)
+call xmpi_allgather(dimag(LR_M_matrix), kmax_numeric**2, imag_wrk_mat, mpi_enreg%comm_band, ierr)
 
 
 do mb =1, blocksize
@@ -673,12 +669,12 @@ psikg_wrk(1,:) = dble ( Hamiltonian_Qk(:,k) )
 psikg_wrk(2,:) = dimag( Hamiltonian_Qk(:,k) )
 
 ! change configuration of the data, from FFT to LA
-call wf_block_distribute(psikb_wrk,  psikg_wrk, 2) ! FFT -> LA 
+call wf_block_distribute(psikb_wrk,  psikg_wrk, 2) ! FFT -> LA
 
 do mb=1, blocksize
 
 Hamiltonian_Qk_LA(:, k, mb) =  cmplx_1*psikb_wrk(1,(mb-1)*npw_k+1:mb*npw_k) &
-&                                             +cmplx_i*psikb_wrk(2,(mb-1)*npw_k+1:mb*npw_k) 
+&                                             +cmplx_i*psikb_wrk(2,(mb-1)*npw_k+1:mb*npw_k)
 
 end do ! mb
 
@@ -695,10 +691,10 @@ l1 = (iblk-1)*blocksize+mb
 
 if (l1 > lmax) cycle
 
-!  Compute Q^dagger | left_vectors > 
+!  Compute Q^dagger | left_vectors >
 
 ! computes C = alpha *  op(A).op(B) + beta * C
-call ZGEMM(                         'C', &  ! First array is hermitian conjugated 
+call ZGEMM(                         'C', &  ! First array is hermitian conjugated
 'N', &  ! second array is taken as is
 kmax_numeric, &  ! number of rows of matrix op(A)
 lmax, &  ! number of columns of matrix op(B)
@@ -714,7 +710,7 @@ kmax_numeric)  ! LDC
 
 call xmpi_sum(left_vecs_LA,mpi_enreg%comm_bandfft,ierr) ! sum on all processors working on LA
 
-! Use shift Lanczos to compute all matrix elements! 
+! Use shift Lanczos to compute all matrix elements!
 
 ! THE FOLLOWING COULD BE DONE IN PARALLEL INSTEAD OF HAVING EVERY PROCESSOR DUMBLY DO THE SAME THING
 do iz = 1, nz
@@ -726,7 +722,7 @@ shift_lanczos_matrix(:,:) = LR_M_matrix_LA(:,:,mb)
 
 do k = 1, kmax_numeric
 shift_lanczos_matrix(k,k) = shift_lanczos_matrix(k,k)-z
-end do 
+end do
 
 ! since z could be complex, the matrix is not necessarily hermitian. Invert using general Lapack scheme
 call invert_general_matrix(kmax_numeric,shift_lanczos_matrix)
@@ -750,7 +746,7 @@ work_vec, &! Y array
 1)  ! INC Y
 
 
-! matrix_elements = < right_vecs | work_vec > 
+! matrix_elements = < right_vecs | work_vec >
 
 call ZGEMV(                       'C', &! A matrix is hermitan conjugate
 kmax_numeric, &! number of rows of matrix A
@@ -788,8 +784,8 @@ if ( model_lanczos_vector_belongs_to_this_node(l1) ) then
 
   iw = iw+1
 
-  end do !iw_prime 
-  end do !iw_ext 
+  end do !iw_prime
+  end do !iw_ext
 
 end if
 

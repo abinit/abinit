@@ -929,7 +929,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !Output of integrated density inside atomic spheres
  if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%zeemanfield)) > tol10) then
-   ABI_MALLOC(intgden,(nspden,natom))
+   ABI_MALLOC(intgden, (nspden, natom))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
                       ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
    !  for rhomag:
@@ -1344,7 +1344,6 @@ if (dtset%prt_lorbmag==1) then
  call timab(1154,1,tsec)
 
  ! Output of the GSR file (except when we are inside mover)
- ! Temporarily disable for CRAY
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
@@ -1360,12 +1359,14 @@ if (dtset%prt_lorbmag==1) then
      ! Write integrated density inside atomic spheres and ratsph(ntypat)=radius of spheres around atoms
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t("intgden", "dp", "number_of_components, number_of_atoms"), &
-       nctkarr_t("ratsph", "dp", "number_of_atom_species") &
+       nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
+       nctkarr_t("rhomag", "dp", "two, number_of_components") &
      ], defmode=.True.)
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "intgden"), intgden))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ratsph"), dtset%ratsph))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rhomag"), rhomag))
    end if
 
    if(allocated(efg)) then
@@ -1374,7 +1375,7 @@ if (dtset%prt_lorbmag==1) then
        nctkdim_t("ndir",3),&
        nctkdim_t("natom",dtset%natom),&
        nctkdim_t("ntypat",dtset%ntypat)],defmode=.True.)
-     NCF_CHECK(ncerr) 
+     NCF_CHECK(ncerr)
      ncerr = nctk_def_arrays(ncid, [&
        nctkarr_t("quadmom", "dp", "ntypat"),&
        nctkarr_t("efg", "dp", "ndir, ndir, natom")])

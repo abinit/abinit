@@ -134,8 +134,6 @@ CONTAINS !===========================================================
 
 subroutine pimd_init(dtset,pimd_param,is_master,force_imgmov)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: is_master
@@ -224,8 +222,6 @@ end subroutine pimd_init
 
 subroutine pimd_nullify(pimd_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pimd_type),intent(inout) :: pimd_param
@@ -279,8 +275,6 @@ end subroutine pimd_nullify
 !! SOURCE
 
 subroutine pimd_destroy(pimd_param)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -336,8 +330,6 @@ end subroutine pimd_destroy
 !! SOURCE
 
 subroutine pimd_init_qtb(dtset,qtb_file_unit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

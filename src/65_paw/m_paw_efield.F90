@@ -72,8 +72,6 @@ CONTAINS  !=====================================================================
 subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 &                   comm_atom) ! optional argument (parallelism)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: my_natom,natom,ntypat

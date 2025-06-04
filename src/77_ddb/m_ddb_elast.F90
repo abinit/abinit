@@ -3,7 +3,7 @@
 !!  m_ddb_elast
 !!
 !! FUNCTION
-!!
+!!  Elastic properties (clamped-ions and relaxed-ions).
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1999-2025 ABINIT group (XW, DW)
@@ -61,7 +61,7 @@ contains
 !! crystal<crystal_t>=Info on crystalline structure.
 !! blkval(2,3,mpert,3,mpert,nblok)=
 !!   second derivatives of total energy with respect to electric fields
-!!   atom displacements,strain,...... all in cartesian coordinates
+!!   atom displacements, strain,...... all in cartesian coordinates
 !! d2asr= ASR correction to the dynamical matrix at Gamma
 !! iblok= bolk number in DDB file
 !! iblok_stress= blok number which contain stress tensor
@@ -153,8 +153,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !then consider the volume, because the unit above is in
 !Hartree, in fact the elastic constant should be in
 !the units of pressure, the energy/volume
-!And then transform the unit to si unit using GPa
-!from Hartree/Bohr^3
+!And then transform the unit to si unit using GPa from Hartree/Bohr^3
 
  do ivarA=1,6
    do ivarB=1,6
@@ -162,16 +161,15 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    end do
  end do
 
-!then should consider the two situations:clamped and relaxed
-!ions respectively,give the initial value of elast_clamped
+!then should consider the two situations: clamped and relaxed
+!ions respectively, give the initial value of elast_clamped
  elast_clamped(:,:)=elast(:,:)
  elast_relaxed(:,:)=elast(:,:)
 
 !then do the matrix mulplication of instrain*K*instrain to get the
 !correction of the relaxed ion quantities, in case natom/=1
 
- if( (inp%elaflag==2 .or. inp%elaflag==3&
-& .or. inp%elaflag==4 .or. inp%elaflag==5) .and. natom/=1 )then
+ if( (inp%elaflag==2 .or. inp%elaflag==3 .or. inp%elaflag==4 .or. inp%elaflag==5) .and. natom/=1 )then
 !  extracting force matrix at gamma
    d2cart(1,:,:) = RESHAPE(blkval(1,1:3,1:natom,1:3,1:natom,iblok), (/3*natom,3*natom/))
    d2cart(2,:,:) = zero
@@ -182,13 +180,11 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    call asria_corr(inp%asr,d2asr,d2cart,natom,natom)
    kmatrix = d2cart(1,:,:)
 
-!  DEBUG
 !  write(std_out,'(/,a,/)')'the k matrix before inverse'
 !  do ii1=1,3*natom
 !  write(std_out,'(6es16.3)')kmatrix(ii1,1),kmatrix(ii1,2),kmatrix(ii1,3),&
 !  & kmatrix(ii1,4),kmatrix(ii1,5),kmatrix(ii1,6)
 !  end do
-!  ENDDEBUG
 
 !  according to formula, invert the kmatrix(3natom,3natom)
 
@@ -202,7 +198,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
      end do
    end do
 
-!  DEBUG
 !  The k matrix is not the inverse here - it has not been changed!
 !  write(std_out,'(/,a,/)')'the direct inverse of the Kmatrix'
 !  do ivarA=1,3*natom
@@ -211,11 +206,9 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  write(std_out,'(es16.6)')kmatrix(ivarA,ivarB)
 !  end do
 !  end do
-!  ENDDEBUG
 
 
-!  starting the pseudo-inverse processes
-!  then get the eigenvectors of the big matrix,give values to matrixBp
+!  starting the pseudo-inverse processes then get the eigenvectors of the big matrix,give values to matrixBp
 !  Pack the Nmatr matrix in Hermitian form
    ii1=1
    do ivarA=1,3*natom
@@ -234,7 +227,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
    ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
-!  DEBUG
 !  the eigenval and eigenvec
 !  write(std_out,'(/,a,/)')'the eigenvalues and eigenvectors'
 !  do ivarA=1,3*natom
@@ -247,13 +239,11 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  write(std_out,'(es16.6)')eigvecp(1,ivarB,ivarA)
 !  end do
 !  end do
-!  ENDDEBUG
 
 !  do the multiplication to get the reduced matrix,in two steps
 !  rotate to eigenbasis constructed above to isolate acoustic modes
    Apmatr(:,:) = MATMUL(TRANSPOSE(eigvecp(1,:,:)), MATMUL(kmatrix(:,:), eigvecp(1,:,:)))
 
-!  DEBUG
 !  the blok diagonal parts
 !  write(std_out,'(/,a,/)')'Apmatr'
 !  do ivarA=1,3*natom
@@ -262,8 +252,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  write(std_out,'(es16.6)')Apmatr(ivarA,ivarB)
 !  end do
 !  end do
-!  ENDDEBUG
-
 
 !  check the last three eigenvalues whether too large
    ivarB=0
@@ -300,8 +288,8 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  check the unstable phonon modes, if the first is negative then print warning message
    if(eigval(1)<-1.0*tol8)then
      write(message,'(a,a,a,a)') ch10,&
-&     'Unstable eigenvalue detected in force constant matrix at Gamma point.',ch10,&
-&     'The system under calculation is physically unstable.'
+     'Unstable eigenvalue detected in force constant matrix at Gamma point.',ch10,&
+     'The system under calculation is physically unstable.'
      ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
@@ -313,7 +301,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    end do
    Amatr(:,:) = MATMUL(MATMUL(eigvec(1,:,:), Cmatr(:,:)), TRANSPOSE(eigvec(1,:,:)))
 
-!  DEBUG
 !  write(std_out,'(/,a,/)')'the pseudo inverse of the force matrix'
 !  do ivarA=1,3*natom
 !  write(std_out,'(/)')
@@ -321,7 +308,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  write(std_out,'(es16.6)')Cmatr(ivarA,ivarB)
 !  end do
 !  end do
-!  ENDDEBUG
 
 !  so now the inverse of the reduced matrix is in the matrixA
 !  now do another mulplication to get the pseudoinverse of the original
@@ -337,8 +323,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    do ivarA=1,3*natom
      do ivarB=1,3*natom
        do ii1=1,3*natom
-         Apmatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)+eigvecp(1,ivarA,ii1)*&
-&         Cpmatr(ii1,ivarB)
+         Apmatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)+eigvecp(1,ivarA,ii1)*Cpmatr(ii1,ivarB)
        end do
      end do
    end do
@@ -346,8 +331,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    do ivarA=1,3*natom
      do ivarB=1,3*natom
        do ii1=1,3*natom
-         Cpmatr(ivarA,ivarB)=Cpmatr(ivarA,ivarB)+&
-&         Apmatr(ivarA,ii1)*eigvecp(1,ivarB,ii1)
+         Cpmatr(ivarA,ivarB)=Cpmatr(ivarA,ivarB)+Apmatr(ivarA,ii1)*eigvecp(1,ivarB,ii1)
        end do
      end do
    end do
@@ -360,20 +344,16 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    new2(:,:) = MATMUL(MATMUL(TRANSPOSE(instrain), kmatrix), instrain(:,:))
 
 
-!  then finish the matrix mupl., consider the unit cellvolume
-!  and the unit change next step
+!  then finish the matrix mupl., consider the unit cell volume and the unit change next step
    new2(:,:)=(new2(:,:)/ucvol)*HaBohr3_GPa
 
 !  then the relaxed one should be the previous one minus the new2 element
    elast_relaxed(:,:)=elast_relaxed(:,:)-new2(:,:)
  end if
-!the above end if end if for elaflag=2 or elafalg=3 or elafalg=4,
-!or elafalg=5 in line 125
+!the above end if end if for elaflag=2 or elafalg=3 or elafalg=4, or elafalg=5 in line 125
 
-!DEBUG
 !write(std_out,'(/,a,/)')'debug the unit cell volume'
 !write(std_out,'(2es16.6)')ucvol,HaBohr3_GPa
-!ENDDEBUG
 
 !then give the initial value of the compl_relaxed(6,6)
  compl_relaxed(:,:)=elast_relaxed(:,:)
@@ -399,8 +379,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    end if
  end if
 
- if(inp%elaflag==2.or.inp%elaflag==3&
-& .or. inp%elaflag==4.or. inp%elaflag==5)then
+ if(inp%elaflag==2.or.inp%elaflag==3 .or. inp%elaflag==4.or. inp%elaflag==5)then
    if(inp%instrflag==0)then
      write(message,'(a,a,a,a,a,a,a,a)' )ch10,&
 &     'in order to get the elastic  tensor(relaxed ion), ',ch10,&
@@ -463,8 +442,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    end if
  end if
 
- if(inp%elaflag==2.or.inp%elaflag==3&
-& .or. inp%elaflag==4 .or. inp%elaflag==5)then
+ if(inp%elaflag==2.or.inp%elaflag==3 .or. inp%elaflag==4 .or. inp%elaflag==5)then
 !  compl(:,:)=elast_relaxed(:,:)
    call matrginv(compl_relaxed,6,6)
    if(inp%instrflag==0)then
@@ -511,14 +489,12 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !begin the part of computing stress corrected elastic tensors
  if(inp%elaflag==5)then
 
-!  DEBUG
 !  check the iblok number of first derivative of energy
 !  write(std_out,'(/,a,/)')'iblok number at 8:00Pm'
 !  write(std_out,'(i)')iblok_stress
 !  write(std_out,'(a,f12.7)')'the total energy', blkval(1,1,1)
 !  write(std_out,*)'',blkval(1,:,:,:,:,iblok_stress)
 !  write(std_out,*)'',blkval(1,:,7,1,1,iblok_stress)
-!  ENDDEBUG
 
 !  firts give the corect stress values diagonal parts
    stress(1)=blkval(1,1,natom+3,1,1,iblok_stress)
