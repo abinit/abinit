@@ -1,8 +1,8 @@
 
- Version 4.4.4  of ABINIT 
- (sequential version, prepared for a MacOSX computer) 
+ Version 4.4.4  of ABINIT
+ (sequential version, prepared for a MacOSX computer)
 
- Copyright (C) 1998-2004 ABINIT group . 
+ Copyright (C) 1998-2004 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
  Starting date : Wed  4 May 2005.
-  
+
 - input  file    -> alas_relaxedion.in
 - output file    -> alas_relaxedion.out
 - root for input  files -> alasi_relaxedion
@@ -1172,7 +1172,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  25
 P newkpt: treating      4 bands with npw=     172 for ikpt=  26
 P newkpt: treating      4 bands with npw=     180 for ikpt=  27
 P newkpt: treating      4 bands with npw=     183 for ikpt=  28
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -1266,14 +1266,14 @@ P newkpt: treating      4 bands with npw=     183 for ikpt=  28
   sigma(1 1)= -1.21880975E-09  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.21880975E-09  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.21880975E-09  sigma(2 1)=  0.00000000E+00
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
- 
+
  At the end of Broyden step  0, total energy= -1.01368740819835E+01 Ha.
 
 
@@ -1347,7 +1347,7 @@ P newkpt: treating      4 bands with npw=     183 for ikpt=  28
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.40754758212239     1.40754758212239     1.40754758212239
@@ -1521,7 +1521,7 @@ P newkpt: treating      4 bands with npw=     183 for ikpt=  28
 - newkpt: read input wf with ikpt,npw=  49     190, make ikpt,npw=  49     190
 - newkpt: read input wf with ikpt,npw=  50     191, make ikpt,npw=  50     191
 - newkpt : prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -1620,7 +1620,7 @@ initberry: COMMENT -
   sigma(1 1)=  2.54883263E-06  sigma(3 2)=  3.84374222E-06
   sigma(2 2)=  2.54883263E-06  sigma(3 1)=  3.84374222E-06
   sigma(3 3)=  2.54883263E-06  sigma(2 1)=  3.84374222E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -1628,14 +1628,14 @@ initberry: COMMENT -
   sigma(1 1)= -8.57033132E-08  sigma(3 2)=  1.20920627E-06
   sigma(2 2)= -8.57033132E-08  sigma(3 1)=  1.20920627E-06
   sigma(3 3)= -8.57033132E-08  sigma(2 1)=  1.20920627E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 2.12551E-04 2.12551E-04 (free atoms)
   2.12550861321446E-04  2.12550861321446E-04  2.12550861321445E-04
  -2.12550861321446E-04 -2.12550861321446E-04 -2.12550861321445E-04
- 
+
  At the end of Broyden step  0, total energy= -1.01344915552212E+01 Ha.
 
 
@@ -1721,7 +1721,7 @@ initberry: COMMENT -
   sigma(1 1)=  2.54806805E-06  sigma(3 2)=  3.61888694E-06
   sigma(2 2)=  2.54806805E-06  sigma(3 1)=  3.61888694E-06
   sigma(3 3)=  2.54806805E-06  sigma(2 1)=  3.61888694E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -1729,14 +1729,14 @@ initberry: COMMENT -
   sigma(1 1)= -8.61680591E-08  sigma(3 2)=  9.84650822E-07
   sigma(2 2)= -8.61680591E-08  sigma(3 1)=  9.84650822E-07
   sigma(3 3)= -8.61680591E-08  sigma(2 1)=  9.84650822E-07
- 
+
  Cartesian coordinates (bohr)
   2.12550905761179E-04  2.12550905761179E-04  2.12550905761179E-04
   2.65966688729136E+00  2.65966688729136E+00  2.65966688729136E+00
  Cartesian forces (hart/bohr); max,rms= 1.71116E-04 1.71116E-04 (free atoms)
   1.71116277553620E-04  1.71116277553620E-04  1.71116277553620E-04
  -1.71116277553620E-04 -1.71116277553620E-04 -1.71116277553620E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01344917998727E+01 Ha.
 
 
@@ -1822,7 +1822,7 @@ initberry: COMMENT -
   sigma(1 1)=  2.54179485E-06  sigma(3 2)=  2.68780311E-06
   sigma(2 2)=  2.54179485E-06  sigma(3 1)=  2.68780311E-06
   sigma(3 3)=  2.54179485E-06  sigma(2 1)=  2.68780311E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -1830,14 +1830,14 @@ initberry: COMMENT -
   sigma(1 1)= -9.12027986E-08  sigma(3 2)=  5.48054601E-08
   sigma(2 2)= -9.12027986E-08  sigma(3 1)=  5.48054601E-08
   sigma(3 3)= -9.12027986E-08  sigma(2 1)=  5.48054601E-08
- 
+
  Cartesian coordinates (bohr)
   1.09034178686423E-03  1.09034178686423E-03  1.09034178686423E-03
   2.65878909581238E+00  2.65878909581238E+00  2.65878909581238E+00
  Cartesian forces (hart/bohr); max,rms= 5.55227E-07 5.55227E-07 (free atoms)
  -5.55226719613991E-07 -5.55226719613991E-07 -5.55226719613991E-07
   5.55226719613991E-07  5.55226719613991E-07  5.55226719613991E-07
- 
+
  At the end of Broyden step  2, total energy= -1.01344922494203E+01 Ha.
 
 
@@ -1957,7 +1957,7 @@ initberry: COMMENT -
  rms dE/dt=  5.9073E-06; max dE/dt=  5.9078E-06; dE/dt below (all hartree)
     1       0.000005907818      0.000005907818      0.000005907818
     2      -0.000005906872     -0.000005906872     -0.000005906872
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00057698402559     0.00057698402559     0.00057698402559
     2      1.40697059782745     1.40697059782745     1.40697059782745
@@ -2181,7 +2181,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -2277,7 +2277,7 @@ initberry: COMMENT -
   sigma(1 1)=  5.06976519E-06  sigma(3 2)=  7.67873811E-06
   sigma(2 2)=  5.06976519E-06  sigma(3 1)=  7.67873811E-06
   sigma(3 3)=  5.06976519E-06  sigma(2 1)=  7.67873811E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -2285,14 +2285,14 @@ initberry: COMMENT -
   sigma(1 1)= -1.86988472E-07  sigma(3 2)=  2.42198445E-06
   sigma(2 2)= -1.86988472E-07  sigma(3 1)=  2.42198445E-06
   sigma(3 3)= -1.86988472E-07  sigma(2 1)=  2.42198445E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 4.24732E-04 4.24732E-04 (free atoms)
   4.24731822281574E-04  4.24731822281574E-04  4.24731822281574E-04
  -4.24731822281574E-04 -4.24731822281574E-04 -4.24731822281574E-04
- 
+
  At the end of Broyden step  0, total energy= -1.01321145866383E+01 Ha.
 
 
@@ -2378,7 +2378,7 @@ initberry: COMMENT -
   sigma(1 1)=  5.06646613E-06  sigma(3 2)=  7.22775736E-06
   sigma(2 2)=  5.06646613E-06  sigma(3 1)=  7.22775736E-06
   sigma(3 3)=  5.06646613E-06  sigma(2 1)=  7.22775736E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -2386,14 +2386,14 @@ initberry: COMMENT -
   sigma(1 1)= -1.89091320E-07  sigma(3 2)=  1.97219990E-06
   sigma(2 2)= -1.89091320E-07  sigma(3 1)=  1.97219990E-06
   sigma(3 3)= -1.89091320E-07  sigma(2 1)=  1.97219990E-06
- 
+
  Cartesian coordinates (bohr)
   4.24731827237962E-04  4.24731827237962E-04  4.24731827237962E-04
   2.65945470629091E+00  2.65945470629091E+00  2.65945470629091E+00
  Cartesian forces (hart/bohr); max,rms= 3.41912E-04 3.41912E-04 (free atoms)
   3.41912437329771E-04  3.41912437329771E-04  3.41912437329771E-04
  -3.41912437329771E-04 -3.41912437329771E-04 -3.41912437329771E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01321155635268E+01 Ha.
 
 
@@ -2480,7 +2480,7 @@ initberry: COMMENT -
   sigma(1 1)=  5.04136523E-06  sigma(3 2)=  5.35612282E-06
   sigma(2 2)=  5.04136523E-06  sigma(3 1)=  5.35612282E-06
   sigma(3 3)=  5.04136523E-06  sigma(2 1)=  5.35612282E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -2488,14 +2488,14 @@ initberry: COMMENT -
   sigma(1 1)= -2.09251765E-07  sigma(3 2)=  1.05505824E-07
   sigma(2 2)= -2.09251765E-07  sigma(3 1)=  1.05505824E-07
   sigma(3 3)= -2.09251765E-07  sigma(2 1)=  1.05505824E-07
- 
+
  Cartesian coordinates (bohr)
   2.17819951824484E-03  2.17819951824485E-03  2.17819951824484E-03
   2.65770123915858E+00  2.65770123915857E+00  2.65770123915858E+00
  Cartesian forces (hart/bohr); max,rms= 2.22839E-06 2.22839E-06 (free atoms)
  -2.22839193594590E-06 -2.22839193594590E-06 -2.22839193594590E-06
   2.22839193594590E-06  2.22839193594590E-06  2.22839193594590E-06
- 
+
  At the end of Broyden step  2, total energy= -1.01321173535334E+01 Ha.
 
 
@@ -2615,7 +2615,7 @@ initberry: COMMENT -
  rms dE/dt=  2.3709E-05; max dE/dt=  2.3710E-05; dE/dt below (all hartree)
     1       0.000023710163      0.000023710163      0.000023710163
     2      -0.000023707868     -0.000023707868     -0.000023707868
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00115265354563     0.00115265354563     0.00115265354563
     2      1.40639492887764     1.40639492887764     1.40639492887764
@@ -2839,7 +2839,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -2936,7 +2936,7 @@ initberry: COMMENT -
   sigma(1 1)=  7.56108924E-06  sigma(3 2)=  1.15047858E-05
   sigma(2 2)=  7.56108924E-06  sigma(3 1)=  1.15047858E-05
   sigma(3 3)=  7.56108924E-06  sigma(2 1)=  1.15047858E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -2944,14 +2944,14 @@ initberry: COMMENT -
   sigma(1 1)= -3.05524850E-07  sigma(3 2)=  3.63817174E-06
   sigma(2 2)= -3.05524850E-07  sigma(3 1)=  3.63817174E-06
   sigma(3 3)= -3.05524850E-07  sigma(2 1)=  3.63817174E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 6.36528E-04 6.36528E-04 (free atoms)
   6.36528004554858E-04  6.36528004554858E-04  6.36528004554858E-04
  -6.36528004554858E-04 -6.36528004554858E-04 -6.36528004554858E-04
- 
+
  At the end of Broyden step  0, total energy= -1.01297431872775E+01 Ha.
 
 
@@ -3037,7 +3037,7 @@ initberry: COMMENT -
   sigma(1 1)=  7.55377942E-06  sigma(3 2)=  1.08265652E-05
   sigma(2 2)=  7.55377942E-06  sigma(3 1)=  1.08265652E-05
   sigma(3 3)=  7.55377942E-06  sigma(2 1)=  1.08265652E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -3045,14 +3045,14 @@ initberry: COMMENT -
   sigma(1 1)= -3.10150087E-07  sigma(3 2)=  2.96263567E-06
   sigma(2 2)= -3.10150087E-07  sigma(3 1)=  2.96263567E-06
   sigma(3 3)= -3.10150087E-07  sigma(2 1)=  2.96263567E-06
- 
+
  Cartesian coordinates (bohr)
   6.36528208394588E-04  6.36528208394588E-04  6.36528208394588E-04
   2.65924291030753E+00  2.65924291030753E+00  2.65924291030753E+00
  Cartesian forces (hart/bohr); max,rms= 5.12389E-04 5.12389E-04 (free atoms)
   5.12388960040040E-04  5.12388960040040E-04  5.12388960040040E-04
  -5.12388960040040E-04 -5.12388960040040E-04 -5.12388960040040E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01297453813701E+01 Ha.
 
 
@@ -3140,7 +3140,7 @@ initberry: COMMENT -
   sigma(1 1)=  7.49730171E-06  sigma(3 2)=  8.00487058E-06
   sigma(2 2)=  7.49730171E-06  sigma(3 1)=  8.00487058E-06
   sigma(3 3)=  7.49730171E-06  sigma(2 1)=  8.00487058E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -3148,14 +3148,14 @@ initberry: COMMENT -
   sigma(1 1)= -3.55540278E-07  sigma(3 2)=  1.52028596E-07
   sigma(2 2)= -3.55540278E-07  sigma(3 1)=  1.52028596E-07
   sigma(3 3)= -3.55540278E-07  sigma(2 1)=  1.52028596E-07
- 
+
  Cartesian coordinates (bohr)
   3.26382496125252E-03  3.26382496125252E-03  3.26382496125252E-03
   2.65661561655560E+00  2.65661561655560E+00  2.65661561655560E+00
  Cartesian forces (hart/bohr); max,rms= 5.02750E-06 5.02750E-06 (free atoms)
  -5.02750439772071E-06 -5.02750439772071E-06 -5.02750439772071E-06
   5.02750439772071E-06  5.02750439772071E-06  5.02750439772071E-06
- 
+
  At the end of Broyden step  2, total energy= -1.01297493908777E+01 Ha.
 
 
@@ -3275,7 +3275,7 @@ initberry: COMMENT -
  rms dE/dt=  5.3490E-05; max dE/dt=  5.3495E-05; dE/dt below (all hartree)
     1       0.000053495114      0.000053495114      0.000053495114
     2      -0.000053485331     -0.000053485331     -0.000053485331
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00172714178954     0.00172714178954     0.00172714178954
     2      1.40582044213661     1.40582044213661     1.40582044213661
@@ -3499,7 +3499,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -3597,7 +3597,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.00226264E-05  sigma(3 2)=  1.53220732E-05
   sigma(2 2)=  1.00226264E-05  sigma(3 1)=  1.53220732E-05
   sigma(3 3)=  1.00226264E-05  sigma(2 1)=  1.53220732E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -3605,14 +3605,14 @@ initberry: COMMENT -
   sigma(1 1)= -4.41444374E-07  sigma(3 2)=  4.85800241E-06
   sigma(2 2)= -4.41444374E-07  sigma(3 1)=  4.85800241E-06
   sigma(3 3)= -4.41444374E-07  sigma(2 1)=  4.85800241E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 8.47950E-04 8.47950E-04 (free atoms)
   8.47949653926485E-04  8.47949653926485E-04  8.47949653926485E-04
  -8.47949653926485E-04 -8.47949653926485E-04 -8.47949653926485E-04
- 
+
  At the end of Broyden step  0, total energy= -1.01273773697386E+01 Ha.
 
 
@@ -3699,7 +3699,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.00098431E-05  sigma(3 2)=  1.44152358E-05
   sigma(2 2)=  1.00098431E-05  sigma(3 1)=  1.44152358E-05
   sigma(3 3)=  1.00098431E-05  sigma(2 1)=  1.44152358E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -3707,14 +3707,14 @@ initberry: COMMENT -
   sigma(1 1)= -4.49467838E-07  sigma(3 2)=  3.95592483E-06
   sigma(2 2)= -4.49467838E-07  sigma(3 1)=  3.95592483E-06
   sigma(3 3)= -4.49467838E-07  sigma(2 1)=  3.95592483E-06
- 
+
  Cartesian coordinates (bohr)
   8.47949503534993E-04  8.47949503534993E-04  8.47949503534993E-04
   2.65903148830392E+00  2.65903148830392E+00  2.65903148830392E+00
  Cartesian forces (hart/bohr); max,rms= 6.82540E-04 6.82540E-04 (free atoms)
   6.82540134103924E-04  6.82540134103924E-04  6.82540134103924E-04
  -6.82540134103924E-04 -6.82540134103924E-04 -6.82540134103924E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01273812634308E+01 Ha.
 
 
@@ -3801,7 +3801,7 @@ initberry: COMMENT -
   sigma(1 1)=  9.90958396E-06  sigma(3 2)=  1.06345709E-05
   sigma(2 2)=  9.90958396E-06  sigma(3 1)=  1.06345709E-05
   sigma(3 3)=  9.90958396E-06  sigma(2 1)=  1.06345709E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -3809,14 +3809,14 @@ initberry: COMMENT -
   sigma(1 1)= -5.30066665E-07  sigma(3 2)=  1.94920257E-07
   sigma(2 2)= -5.30066665E-07  sigma(3 1)=  1.94920257E-07
   sigma(3 3)= -5.30066665E-07  sigma(2 1)=  1.94920257E-07
- 
+
  Cartesian coordinates (bohr)
   4.34690007073603E-03  4.34690007073603E-03  4.34690007073603E-03
   2.65553253849483E+00  2.65553253849483E+00  2.65553253849483E+00
  Cartesian forces (hart/bohr); max,rms= 8.85339E-06 8.85339E-06 (free atoms)
  -8.85339152162729E-06 -8.85339152162729E-06 -8.85339152162729E-06
   8.85339152162729E-06  8.85339152162729E-06  8.85339152162729E-06
- 
+
  At the end of Broyden step  2, total energy= -1.01273883600522E+01 Ha.
 
 
@@ -3936,7 +3936,7 @@ initberry: COMMENT -
  rms dE/dt=  9.4196E-05; max dE/dt=  9.4196E-05; dE/dt below (all hartree)
     1       0.000094195924      0.000094195924      0.000094195924
     2      -0.000094195708     -0.000094195708     -0.000094195708
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00230028045506     0.00230028045506     0.00230028045506
     2      1.40524730190934     1.40524730190934     1.40524730190934
@@ -4160,7 +4160,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -4258,7 +4258,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.24541388E-05  sigma(3 2)=  1.91304304E-05
   sigma(2 2)=  1.24541388E-05  sigma(3 1)=  1.91304304E-05
   sigma(3 3)=  1.24541388E-05  sigma(2 1)=  1.91304304E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -4266,14 +4266,14 @@ initberry: COMMENT -
   sigma(1 1)= -5.94931598E-07  sigma(3 2)=  6.08135999E-06
   sigma(2 2)= -5.94931598E-07  sigma(3 1)=  6.08135999E-06
   sigma(3 3)= -5.94931598E-07  sigma(2 1)=  6.08135999E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 1.05899E-03 1.05899E-03 (free atoms)
   1.05898947715677E-03  1.05898947715677E-03  1.05898947715677E-03
  -1.05898947715677E-03 -1.05898947715677E-03 -1.05898947715677E-03
- 
+
  At the end of Broyden step  0, total energy= -1.01250171482165E+01 Ha.
 
 
@@ -4360,7 +4360,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.24342508E-05  sigma(3 2)=  1.79939319E-05
   sigma(2 2)=  1.24342508E-05  sigma(3 1)=  1.79939319E-05
   sigma(3 3)=  1.24342508E-05  sigma(2 1)=  1.79939319E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -4368,14 +4368,14 @@ initberry: COMMENT -
   sigma(1 1)= -6.07402074E-07  sigma(3 2)=  4.95227908E-06
   sigma(2 2)= -6.07402074E-07  sigma(3 1)=  4.95227908E-06
   sigma(3 3)= -6.07402074E-07  sigma(2 1)=  4.95227908E-06
- 
+
  Cartesian coordinates (bohr)
   1.05898943613617E-03  1.05898943613617E-03  1.05898943613617E-03
   2.65882044859006E+00  2.65882044859006E+00  2.65882044859006E+00
  Cartesian forces (hart/bohr); max,rms= 8.52386E-04 8.52386E-04 (free atoms)
   8.52385563671429E-04  8.52385563671429E-04  8.52385563671429E-04
  -8.52385563671429E-04 -8.52385563671429E-04 -8.52385563671429E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01250232212863E+01 Ha.
 
 
@@ -4462,7 +4462,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.22778517E-05  sigma(3 2)=  1.32447466E-05
   sigma(2 2)=  1.22778517E-05  sigma(3 1)=  1.32447466E-05
   sigma(3 3)=  1.22778517E-05  sigma(2 1)=  1.32447466E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -4470,14 +4470,14 @@ initberry: COMMENT -
   sigma(1 1)= -7.33156262E-07  sigma(3 2)=  2.33738605E-07
   sigma(2 2)= -7.33156262E-07  sigma(3 1)=  2.33738605E-07
   sigma(3 3)= -7.33156262E-07  sigma(2 1)=  2.33738605E-07
- 
+
  Cartesian coordinates (bohr)
   5.42806196571997E-03  5.42806196571997E-03  5.42806196571997E-03
   2.65445137742062E+00  2.65445137742061E+00  2.65445137742061E+00
  Cartesian forces (hart/bohr); max,rms= 1.37856E-05 1.37856E-05 (free atoms)
  -1.37855999439651E-05 -1.37855999439651E-05 -1.37855999439651E-05
   1.37855999439651E-05  1.37855999439651E-05  1.37855999439651E-05
- 
+
  At the end of Broyden step  2, total energy= -1.01250342616789E+01 Ha.
 
 
@@ -4561,7 +4561,7 @@ initberry: COMMENT -
   sigma(1 1)=  1.22811946E-05  sigma(3 2)=  1.33209838E-05
   sigma(2 2)=  1.22811946E-05  sigma(3 1)=  1.33209838E-05
   sigma(3 3)=  1.22811946E-05  sigma(2 1)=  1.33209838E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -4569,14 +4569,14 @@ initberry: COMMENT -
   sigma(1 1)= -7.30301868E-07  sigma(3 2)=  3.09487329E-07
   sigma(2 2)= -7.30301868E-07  sigma(3 1)=  3.09487329E-07
   sigma(3 3)= -7.30301868E-07  sigma(2 1)=  3.09487329E-07
- 
+
  Cartesian coordinates (bohr)
   5.35852566882569E-03  5.35852566882569E-03  5.35852566882569E-03
   2.65452091358232E+00  2.65452091358232E+00  2.65452091358232E+00
  Cartesian forces (hart/bohr); max,rms= 1.74451E-07 1.74451E-07 (free atoms)
   1.74450580906450E-07  1.74450580906450E-07  1.74450580906451E-07
  -1.74450580906450E-07 -1.74450580906450E-07 -1.74450580906451E-07
- 
+
  At the end of Broyden step  3, total energy= -1.01250342645173E+01 Ha.
 
 
@@ -4696,7 +4696,7 @@ initberry: COMMENT -
  rms dE/dt=  1.8561E-06; max dE/dt=  1.8583E-06; dE/dt below (all hartree)
     1      -0.000001853793     -0.000001853793     -0.000001853793
     2       0.000001858347      0.000001858347      0.000001858347
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00283560966743     0.00283560966743     0.00283560966743
     2      1.40471197305976     1.40471197305976     1.40471197305976
@@ -4920,7 +4920,7 @@ initberry: COMMENT -
 - newkpt: read input wf with ikpt,npw=  49     190, make ikpt,npw=  49     190
 - newkpt: read input wf with ikpt,npw=  50     191, make ikpt,npw=  50     191
 - newkpt : prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -5019,7 +5019,7 @@ initberry: COMMENT -
   sigma(1 1)= -2.58048222E-06  sigma(3 2)= -3.85255201E-06
   sigma(2 2)= -2.58048222E-06  sigma(3 1)= -3.85255201E-06
   sigma(3 3)= -2.58048222E-06  sigma(2 1)= -3.85255201E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -5027,14 +5027,14 @@ initberry: COMMENT -
   sigma(1 1)=  6.63394519E-08  sigma(3 2)= -1.20573033E-06
   sigma(2 2)=  6.63394519E-08  sigma(3 1)= -1.20573033E-06
   sigma(3 3)=  6.63394519E-08  sigma(2 1)= -1.20573033E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 2.12921E-04 2.12921E-04 (free atoms)
  -2.12920583871062E-04 -2.12920583871062E-04 -2.12920583871062E-04
   2.12920583871062E-04  2.12920583871062E-04  2.12920583871062E-04
- 
+
  At the end of Broyden step  0, total energy= -1.01392621574041E+01 Ha.
 
 
@@ -5120,7 +5120,7 @@ initberry: COMMENT -
   sigma(1 1)= -2.58127103E-06  sigma(3 2)= -3.62897454E-06
   sigma(2 2)= -2.58127103E-06  sigma(3 1)= -3.62897454E-06
   sigma(3 3)= -2.58127103E-06  sigma(2 1)= -3.62897454E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -5128,14 +5128,14 @@ initberry: COMMENT -
   sigma(1 1)=  6.58520368E-08  sigma(3 2)= -9.81851475E-07
   sigma(2 2)=  6.58520368E-08  sigma(3 1)= -9.81851475E-07
   sigma(3 3)=  6.58520368E-08  sigma(2 1)= -9.81851475E-07
- 
+
  Cartesian coordinates (bohr)
  -2.12920717216659E-04 -2.12920717216659E-04 -2.12920717216659E-04
   2.66009235855877E+00  2.66009235855877E+00  2.66009235855877E+00
  Cartesian forces (hart/bohr); max,rms= 1.71444E-04 1.71444E-04 (free atoms)
  -1.71443901060512E-04 -1.71443901060512E-04 -1.71443901060512E-04
   1.71443901060512E-04  1.71443901060512E-04  1.71443901060512E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01392624029161E+01 Ha.
 
 
@@ -5222,7 +5222,7 @@ initberry: COMMENT -
   sigma(1 1)= -2.58758467E-06  sigma(3 2)= -2.70727386E-06
   sigma(2 2)= -2.58758467E-06  sigma(3 1)= -2.70727386E-06
   sigma(3 3)= -2.58758467E-06  sigma(2 1)= -2.70727386E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -5230,14 +5230,14 @@ initberry: COMMENT -
   sigma(1 1)=  6.07840304E-08  sigma(3 2)= -5.89051528E-08
   sigma(2 2)=  6.07840304E-08  sigma(3 1)= -5.89051527E-08
   sigma(3 3)=  6.07840304E-08  sigma(2 1)= -5.89051528E-08
- 
+
  Cartesian coordinates (bohr)
  -1.09302708049466E-03 -1.09302708049466E-03 -1.09302708049466E-03
   2.66097246699772E+00  2.66097246699772E+00  2.66097246699772E+00
  Cartesian forces (hart/bohr); max,rms= 5.64326E-07 5.64326E-07 (free atoms)
  -5.64326056993357E-07 -5.64326056993357E-07 -5.64326056993357E-07
   5.64326056993357E-07  5.64326056993357E-07  5.64326056993357E-07
- 
+
  At the end of Broyden step  2, total energy= -1.01392628566763E+01 Ha.
 
 
@@ -5357,7 +5357,7 @@ initberry: COMMENT -
  rms dE/dt=  6.0042E-06; max dE/dt=  6.0048E-06; dE/dt below (all hartree)
     1       0.000006004843      0.000006004843      0.000006004843
     2      -0.000006003471     -0.000006003471     -0.000006003471
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.00057840502179    -0.00057840502179    -0.00057840502179
     2      1.40812598810145     1.40812598810145     1.40812598810145
@@ -5581,7 +5581,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -5677,7 +5677,7 @@ initberry: COMMENT -
   sigma(1 1)= -5.18859539E-06  sigma(3 2)= -7.71387199E-06
   sigma(2 2)= -5.18859539E-06  sigma(3 1)= -7.71387199E-06
   sigma(3 3)= -5.18859539E-06  sigma(2 1)= -7.71387199E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -5685,14 +5685,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.17307945E-07  sigma(3 2)= -2.40796865E-06
   sigma(2 2)=  1.17307945E-07  sigma(3 1)= -2.40796865E-06
   sigma(3 3)=  1.17307945E-07  sigma(2 1)= -2.40796865E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 4.26215E-04 4.26215E-04 (free atoms)
  -4.26215473245025E-04 -4.26215473245025E-04 -4.26215473245025E-04
   4.26215473245025E-04  4.26215473245025E-04  4.26215473245025E-04
- 
+
  At the end of Broyden step  0, total energy= -1.01416557734706E+01 Ha.
 
 
@@ -5778,7 +5778,7 @@ initberry: COMMENT -
   sigma(1 1)= -5.19190527E-06  sigma(3 2)= -7.26807246E-06
   sigma(2 2)= -5.19190527E-06  sigma(3 1)= -7.26807246E-06
   sigma(3 3)= -5.19190527E-06  sigma(2 1)= -7.26807246E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -5786,14 +5786,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.15206741E-07  sigma(3 2)= -1.96096045E-06
   sigma(2 2)=  1.15206741E-07  sigma(3 1)= -1.96096045E-06
   sigma(3 3)=  1.15206741E-07  sigma(2 1)= -1.96096045E-06
- 
+
  Cartesian coordinates (bohr)
  -4.26215506129414E-04 -4.26215506129414E-04 -4.26215506129414E-04
   2.66030565354860E+00  2.66030565354860E+00  2.66030565354860E+00
  Cartesian forces (hart/bohr); max,rms= 3.43224E-04 3.43224E-04 (free atoms)
  -3.43223883583991E-04 -3.43223883583991E-04 -3.43223883583991E-04
   3.43223883583991E-04  3.43223883583991E-04  3.43223883583991E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01416567572540E+01 Ha.
 
 
@@ -5880,7 +5880,7 @@ initberry: COMMENT -
   sigma(1 1)= -5.21727666E-06  sigma(3 2)= -5.43408726E-06
   sigma(2 2)= -5.21727666E-06  sigma(3 1)= -5.43408726E-06
   sigma(3 3)= -5.21727666E-06  sigma(2 1)= -5.43408726E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -5888,14 +5888,14 @@ initberry: COMMENT -
   sigma(1 1)=  9.48329979E-08  sigma(3 2)= -1.21977597E-07
   sigma(2 2)=  9.48329979E-08  sigma(3 1)= -1.21977597E-07
   sigma(3 3)=  9.48329979E-08  sigma(2 1)= -1.21977597E-07
- 
+
  Cartesian coordinates (bohr)
  -2.18889404878287E-03 -2.18889404878287E-03 -2.18889404878287E-03
   2.66206832813074E+00  2.66206832813074E+00  2.66206832813074E+00
  Cartesian forces (hart/bohr); max,rms= 2.26130E-06 2.26130E-06 (free atoms)
  -2.26130189078955E-06 -2.26130189078955E-06 -2.26130189078955E-06
   2.26130189078955E-06  2.26130189078955E-06  2.26130189078955E-06
- 
+
  At the end of Broyden step  2, total energy= -1.01416585809587E+01 Ha.
 
 
@@ -6015,7 +6015,7 @@ initberry: COMMENT -
  rms dE/dt=  2.4059E-05; max dE/dt=  2.4057E-05; dE/dt below (all hartree)
     1       0.000024056760      0.000024056760      0.000024056760
     2      -0.000024061563     -0.000024061563     -0.000024061563
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.00115831284747    -0.00115831284747    -0.00115831284747
     2      1.40870589283924     1.40870589283924     1.40870589283924
@@ -6239,7 +6239,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -6336,7 +6336,7 @@ initberry: COMMENT -
   sigma(1 1)= -7.82555400E-06  sigma(3 2)= -1.15838636E-05
   sigma(2 2)= -7.82555400E-06  sigma(3 1)= -1.15838636E-05
   sigma(3 3)= -7.82555400E-06  sigma(2 1)= -1.15838636E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -6344,14 +6344,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.51671565E-07  sigma(3 2)= -3.60663802E-06
   sigma(2 2)=  1.51671565E-07  sigma(3 1)= -3.60663802E-06
   sigma(3 3)=  1.51671565E-07  sigma(2 1)= -3.60663802E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 6.39868E-04 6.39868E-04 (free atoms)
  -6.39867592047769E-04 -6.39867592047769E-04 -6.39867592047769E-04
   6.39867592047769E-04  6.39867592047769E-04  6.39867592047769E-04
- 
+
  At the end of Broyden step  0, total energy= -1.01440549236529E+01 Ha.
 
 
@@ -6438,7 +6438,7 @@ initberry: COMMENT -
   sigma(1 1)= -7.83296285E-06  sigma(3 2)= -1.09171779E-05
   sigma(2 2)= -7.83296285E-06  sigma(3 1)= -1.09171779E-05
   sigma(3 3)= -7.83296285E-06  sigma(2 1)= -1.09171779E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -6446,14 +6446,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.46989215E-07  sigma(3 2)= -2.93722588E-06
   sigma(2 2)=  1.46989215E-07  sigma(3 1)= -2.93722588E-06
   sigma(3 3)=  1.46989215E-07  sigma(2 1)= -2.93722588E-06
- 
+
  Cartesian coordinates (bohr)
  -6.39867668117491E-04 -6.39867668117491E-04 -6.39867668117491E-04
   2.66051930562422E+00  2.66051930562422E+00  2.66051930562422E+00
  Cartesian forces (hart/bohr); max,rms= 5.15332E-04 5.15332E-04 (free atoms)
  -5.15331669668507E-04 -5.15331669668507E-04 -5.15331669668507E-04
   5.15331669668507E-04  5.15331669668507E-04  5.15331669668507E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01440571410249E+01 Ha.
 
 
@@ -6541,7 +6541,7 @@ initberry: COMMENT -
   sigma(1 1)= -7.89012686E-06  sigma(3 2)= -8.18052853E-06
   sigma(2 2)= -7.89012686E-06  sigma(3 1)= -8.18052853E-06
   sigma(3 3)= -7.89012686E-06  sigma(2 1)= -8.18052853E-06
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -6549,14 +6549,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.01105119E-07  sigma(3 2)= -1.89296551E-07
   sigma(2 2)=  1.01105119E-07  sigma(3 1)= -1.89296551E-07
   sigma(3 3)=  1.01105119E-07  sigma(2 1)= -1.89296551E-07
- 
+
  Cartesian coordinates (bohr)
  -3.28764892542029E-03 -3.28764892542029E-03 -3.28764892542029E-03
   2.66316708934572E+00  2.66316708934572E+00  2.66316708934572E+00
  Cartesian forces (hart/bohr); max,rms= 5.12372E-06 5.12372E-06 (free atoms)
  -5.12372454520565E-06 -5.12372454520566E-06 -5.12372454520565E-06
   5.12372454520565E-06  5.12372454520566E-06  5.12372454520565E-06
- 
+
  At the end of Broyden step  2, total energy= -1.01440612642995E+01 Ha.
 
 
@@ -6676,7 +6676,7 @@ initberry: COMMENT -
  rms dE/dt=  5.4514E-05; max dE/dt=  5.4511E-05; dE/dt below (all hartree)
     1       0.000054511255      0.000054511255      0.000054511255
     2      -0.000054516662     -0.000054516662     -0.000054516662
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.00173974888844    -0.00173974888844    -0.00173974888844
     2      1.40928733223432     1.40928733223432     1.40928733223432
@@ -6900,7 +6900,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -6998,7 +6998,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.04912735E-05  sigma(3 2)= -1.54627043E-05
   sigma(2 2)= -1.04912735E-05  sigma(3 1)= -1.54627043E-05
   sigma(3 3)= -1.04912735E-05  sigma(2 1)= -1.54627043E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -7006,14 +7006,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.69502434E-07  sigma(3 2)= -4.80192843E-06
   sigma(2 2)=  1.69502434E-07  sigma(3 1)= -4.80192843E-06
   sigma(3 3)=  1.69502434E-07  sigma(2 1)= -4.80192843E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 8.53890E-04 8.53890E-04 (free atoms)
  -8.53889990965973E-04 -8.53889990965973E-04 -8.53889990965973E-04
   8.53889990965973E-04  8.53889990965973E-04  8.53889990965973E-04
- 
+
  At the end of Broyden step  0, total energy= -1.01464596029002E+01 Ha.
 
 
@@ -7101,7 +7101,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.05045203E-05  sigma(3 2)= -1.45764929E-05
   sigma(2 2)= -1.05045203E-05  sigma(3 1)= -1.45764929E-05
   sigma(3 3)= -1.05045203E-05  sigma(2 1)= -1.45764929E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -7109,14 +7109,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.61115112E-07  sigma(3 2)= -3.91085745E-06
   sigma(2 2)=  1.61115112E-07  sigma(3 1)= -3.91085745E-06
   sigma(3 3)=  1.61115112E-07  sigma(2 1)= -3.91085745E-06
- 
+
  Cartesian coordinates (bohr)
  -8.53889840041497E-04 -8.53889840041497E-04 -8.53889840041497E-04
   2.66073332825013E+00  2.66073332825013E+00  2.66073332825013E+00
  Cartesian forces (hart/bohr); max,rms= 6.87787E-04 6.87787E-04 (free atoms)
  -6.87787398839546E-04 -6.87787398839546E-04 -6.87787398839546E-04
   6.87787398839546E-04  6.87787398839546E-04  6.87787398839546E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01464635518015E+01 Ha.
 
 
@@ -7204,7 +7204,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.06063262E-05  sigma(3 2)= -1.09465405E-05
   sigma(2 2)= -1.06063262E-05  sigma(3 1)= -1.09465405E-05
   sigma(3 3)= -1.06063262E-05  sigma(2 1)= -1.09465405E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -7212,14 +7212,14 @@ initberry: COMMENT -
   sigma(1 1)=  7.94277401E-08  sigma(3 2)= -2.60786613E-07
   sigma(2 2)=  7.94277401E-08  sigma(3 1)= -2.60786613E-07
   sigma(3 3)=  7.94277401E-08  sigma(2 1)= -2.60786613E-07
- 
+
  Cartesian coordinates (bohr)
  -4.38962665724305E-03 -4.38962665724304E-03 -4.38962665724305E-03
   2.66426906176056E+00  2.66426906176056E+00  2.66426906176056E+00
  Cartesian forces (hart/bohr); max,rms= 9.12949E-06 9.12949E-06 (free atoms)
  -9.12948726603634E-06 -9.12948726603634E-06 -9.12948726603634E-06
   9.12948726603634E-06  9.12948726603634E-06  9.12948726603634E-06
- 
+
  At the end of Broyden step  2, total energy= -1.01464709181962E+01 Ha.
 
 
@@ -7339,7 +7339,7 @@ initberry: COMMENT -
  rms dE/dt=  9.7133E-05; max dE/dt=  9.7134E-05; dE/dt below (all hartree)
     1       0.000097133577      0.000097133577      0.000097133577
     2      -0.000097133107     -0.000097133107     -0.000097133107
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.00232289039093    -0.00232289039093    -0.00232289039093
     2      1.40987047092319     1.40987047092319     1.40987047092319
@@ -7563,7 +7563,7 @@ P newkpt: treating      4 bands with npw=     190 for ikpt=  48
 P newkpt: treating      4 bands with npw=     190 for ikpt=  49
 P newkpt: treating      4 bands with npw=     191 for ikpt=  50
   newkpt: prtvol=0 or 1, do not print more k-points.
- 
+
  setup2: Arith. and geom. avg. npw (full set) are     186.093     186.049
   initberry: for direction 1, nkstr =   6, nstr = 144
   initberry: for direction 2, nkstr =   6, nstr = 144
@@ -7661,7 +7661,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.31856637E-05  sigma(3 2)= -1.93502767E-05
   sigma(2 2)= -1.31856637E-05  sigma(3 1)= -1.93502767E-05
   sigma(3 3)= -1.31856637E-05  sigma(2 1)= -1.93502767E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -7669,14 +7669,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.70884339E-07  sigma(3 2)= -5.99372864E-06
   sigma(2 2)=  1.70884339E-07  sigma(3 1)= -5.99372864E-06
   sigma(3 3)=  1.70884339E-07  sigma(2 1)= -5.99372864E-06
- 
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.65987943810824E+00  2.65987943810824E+00  2.65987943810824E+00
  Cartesian forces (hart/bohr); max,rms= 1.06828E-03 1.06828E-03 (free atoms)
  -1.06827765151802E-03 -1.06827765151802E-03 -1.06827765151802E-03
   1.06827765151802E-03  1.06827765151802E-03  1.06827765151802E-03
- 
+
  At the end of Broyden step  0, total energy= -1.01488698076376E+01 Ha.
 
 
@@ -7763,7 +7763,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.32064628E-05  sigma(3 2)= -1.82459808E-05
   sigma(2 2)= -1.32064628E-05  sigma(3 1)= -1.82459808E-05
   sigma(3 3)= -1.32064628E-05  sigma(2 1)= -1.82459808E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -7771,14 +7771,14 @@ initberry: COMMENT -
   sigma(1 1)=  1.57697778E-07  sigma(3 2)= -4.88182021E-06
   sigma(2 2)=  1.57697778E-07  sigma(3 1)= -4.88182021E-06
   sigma(3 3)=  1.57697778E-07  sigma(2 1)= -4.88182021E-06
- 
+
  Cartesian coordinates (bohr)
  -1.06827740297121E-03 -1.06827740297121E-03 -1.06827740297121E-03
   2.66094771600830E+00  2.66094771600831E+00  2.66094771600831E+00
  Cartesian forces (hart/bohr); max,rms= 8.60586E-04 8.60586E-04 (free atoms)
  -8.60585648763712E-04 -8.60585648763712E-04 -8.60585648763712E-04
   8.60585648763712E-04  8.60585648763712E-04  8.60585648763712E-04
- 
+
  At the end of Broyden step  1, total energy= -1.01488759886082E+01 Ha.
 
 
@@ -7865,7 +7865,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.33659344E-05  sigma(3 2)= -1.37324293E-05
   sigma(2 2)= -1.33659344E-05  sigma(3 1)= -1.37324293E-05
   sigma(3 3)= -1.33659344E-05  sigma(2 1)= -1.37324293E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -7873,14 +7873,14 @@ initberry: COMMENT -
   sigma(1 1)=  2.97659074E-08  sigma(3 2)= -3.36728970E-07
   sigma(2 2)=  2.97659074E-08  sigma(3 1)= -3.36728970E-07
   sigma(3 3)=  2.97659074E-08  sigma(2 1)= -3.36728970E-07
- 
+
  Cartesian coordinates (bohr)
  -5.49475750215392E-03 -5.49475750215392E-03 -5.49475750215392E-03
   2.66537419513336E+00  2.66537419513336E+00  2.66537419513336E+00
  Cartesian forces (hart/bohr); max,rms= 1.43357E-05 1.43357E-05 (free atoms)
  -1.43357113928087E-05 -1.43357113928087E-05 -1.43357113928087E-05
   1.43357113928087E-05  1.43357113928087E-05  1.43357113928087E-05
- 
+
  At the end of Broyden step  2, total energy= -1.01488875561773E+01 Ha.
 
 
@@ -7964,7 +7964,7 @@ initberry: COMMENT -
   sigma(1 1)= -1.33697626E-05  sigma(3 2)= -1.36569344E-05
   sigma(2 2)= -1.33697626E-05  sigma(3 1)= -1.36569344E-05
   sigma(3 3)= -1.33697626E-05  sigma(2 1)= -1.36569344E-05
- 
+
 
  Stress tensor imposing a constant potential drop across  each lattice vector:
 
@@ -7972,14 +7972,14 @@ initberry: COMMENT -
   sigma(1 1)=  2.64723761E-08  sigma(3 2)= -2.60699452E-07
   sigma(2 2)=  2.64723761E-08  sigma(3 1)= -2.60699452E-07
   sigma(3 3)=  2.64723761E-08  sigma(2 1)= -2.60699452E-07
- 
+
  Cartesian coordinates (bohr)
  -5.56974308464028E-03 -5.56974308464028E-03 -5.56974308464028E-03
   2.66544918116423E+00  2.66544918116423E+00  2.66544918116423E+00
  Cartesian forces (hart/bohr); max,rms= 2.01444E-07 2.01444E-07 (free atoms)
  -2.01444126352729E-07 -2.01444126352729E-07 -2.01444126352729E-07
   2.01444126352729E-07  2.01444126352729E-07  2.01444126352729E-07
- 
+
  At the end of Broyden step  3, total energy= -1.01488875594471E+01 Ha.
 
 
@@ -8099,7 +8099,7 @@ initberry: COMMENT -
  rms dE/dt=  2.1433E-06; max dE/dt=  2.1423E-06; dE/dt below (all hartree)
     1       0.000002142252      0.000002142252      0.000002142252
     2      -0.000002144285     -0.000002144285     -0.000002144285
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.00294738111040    -0.00294738111040    -0.00294738111040
     2      1.41049496321763     1.41049496321763     1.41049496321763
@@ -8257,7 +8257,7 @@ initberry: COMMENT -
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
      acell    1.0639517752E+01  1.0639517752E+01  1.0639517752E+01 Bohr
        amu    2.69815390E+01  7.49215900E+01
@@ -9252,9 +9252,9 @@ P    mkmem35      91
 - Total wall clock time (s,m,h):       1222.6       20.38      0.340
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
-- routine                 cpu     %       wall     %      number of calls 
+- routine                 cpu     %       wall     %      number of calls
 -                                                          (-1=no count)
 - cgwf-O(npw)          369.182  47.1    578.886  47.3             -1
 - fourwf(pot)          128.570  16.4    198.179  16.2         675916

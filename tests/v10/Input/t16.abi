@@ -32,10 +32,11 @@ pawecutdg 10
 
 nstep 15
 nline  8
+mdeg_filter 8
 
 # bands and spinors
 nband  8
-nbdbuf 2
+nbdbuf 4
 
 tolvrs 1.0D-20
 
@@ -85,7 +86,6 @@ pseudos="P.psp8, Al.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = alps_intel_2025_elpa
 #%% need_cpp_vars = HAVE_DFTI
 #%% [files]
 #%% files_to_test =

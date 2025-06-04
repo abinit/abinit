@@ -1,0 +1,30 @@
+t32.ddb.out
+Total DDB for complete Silicon FxE tensor
+3
+t31o_DS1_DDB
+t31o_DS4_DDB
+t31o_DS5_DDB
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% exclude_builders = scope_gnu_10.2_paral
+#%% test_chain =  t31.abi, t32.abi, t33.abi
+#%% [files]
+#%% files_to_test =
+#%%   t32.ddb.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT, LONGWAVE
+#%% description =
+#%%   Input file for mrgddb
+#%%   Apparently, there is a (minor, erratic) problem with openmp (2 procs), for the echo of pseudopotential data in the t32.ddb.out file
+#%%  This set of tests duplicates the content of the lw tutorial, except for the usage of NetCDF instead of text DDB in the tutorial
+#%% topics = longwave
+#%%<END TEST_INFO>
+

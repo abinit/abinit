@@ -28,7 +28,7 @@ MODULE m_chi0tk
  use m_xomp
  use m_sort
 
- use defs_datatypes, only : ebands_t
+ use m_ebands,   only : ebands_t
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, one_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
  use m_hide_blas,only : xgerc, xgemm, xherk, xher

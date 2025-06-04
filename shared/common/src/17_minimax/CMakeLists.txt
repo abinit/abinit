@@ -10,7 +10,7 @@ add_library(17_minimax STATIC
 
 set_target_properties(17_minimax
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(17_minimax
   PRIVATE
@@ -20,7 +20,7 @@ target_include_directories(17_minimax
 
 target_include_directories(17_minimax
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
 

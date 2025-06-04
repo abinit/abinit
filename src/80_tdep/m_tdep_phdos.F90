@@ -49,7 +49,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   type(ifc_type),intent(inout) :: Ifc
   type(Lattice_type),intent(in) :: Lattice
   type(Symetries_type),intent(in) :: Sym
-  type(crystal_t),intent(in) :: Crystal
+  type(crystal_t),intent(inout) :: Crystal
   type(Qbz_type),intent(in) :: Qbz
   type(Qpoints_type),intent(in) :: Qpt
   type(ddb_type),intent(inout) :: DDB
@@ -61,7 +61,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   integer :: prtdos,iqpt,iq_ibz,iomega,iatom
   integer :: dos_ngqpt(3)
   integer :: count_wminmax(2)
-  character (len=25):: phdos_fname
+  character (len=fnlen):: phdos_fname
   double precision :: dossmear,integ,domega
   double precision :: dos_qshift(3)
   double precision, allocatable :: displ(:,:)
@@ -112,7 +112,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !     Write the Phi2-tmp.dat file
       if (Invar%debug) then
         write(Invar%stdout,'(a)') ' See the Phi2-tmp.dat file corresponding to the ifc_out.dat/Phi2 file'
-        open(unit=55,file=trim(Invar%output_prefix)//'Phi2-tmp.dat')
+        open(unit=55,file=trim(Invar%output_prefix)//'_Phi2-tmp.dat')
         do iatom=1,3*natom
           write(55,'(10000(f10.6,1x))') Phi2_tmp%SR(iatom,:)
         end do
@@ -122,6 +122,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
     call Ifc_tmp%free()
   end if
   call tdep_destroy_phi2(Phi2_tmp,Invar%loto)
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ON THE FINE GRID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -139,7 +140,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   wminmax = zero
   do
     call PHdos%init(Crystal,Ifc,prtdos,Invar%dosdeltae,dossmear,dos_ngqpt,1,dos_qshift, &
-      "freq_displ", wminmax, count_wminmax, XMPI_WORLD)
+      "freq_displ", wminmax, count_wminmax, XMPI_WORLD,prtout=.false.)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
@@ -161,7 +162,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   end do
   PHdos%phdos(:)=PHdos%phdos(:)/integ
   if (MPIdata%iam_master) then
-    open(unit=56,file=trim(Invar%output_prefix)//'vdos.dat')
+    open(unit=56,file=trim(Invar%output_prefix)//'_vdos.dat')
     do iomega=1,PHdos%nomega
       if (Invar%enunit.eq.0) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_eV*1000,PHdos%phdos(iomega)
       if (Invar%enunit.eq.1) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_cmm1   ,PHdos%phdos(iomega)
@@ -236,9 +237,9 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    open(unit=51,file=trim(Invar%output_prefix)//'eigenvectors-path-2.dat')
 !FB    open(unit=52,file=trim(Invar%output_prefix)//'dij-path-2.dat')
 !FB    open(unit=53,file=trim(Invar%output_prefix)//'omega-path-2.dat')
-    open(unit=51,file=trim(Invar%output_prefix)//'eigenvectors.dat')
-    open(unit=52,file=trim(Invar%output_prefix)//'dij.dat')
-    open(unit=53,file=trim(Invar%output_prefix)//'omega.dat')
+    open(unit=51,file=trim(Invar%output_prefix)//'_eigenvectors.dat')
+    open(unit=52,file=trim(Invar%output_prefix)//'_dij.dat')
+    open(unit=53,file=trim(Invar%output_prefix)//'_omega.dat')
     if (Invar%enunit.eq.0) write(53,'(a)') '# Phonon frequencies in meV'
     if (Invar%enunit.eq.1) write(53,'(a)') '# Phonon frequencies in cm-1'
     if (Invar%enunit.eq.2) write(53,'(a)') '# Phonon frequencies in mHa'
@@ -397,7 +398,7 @@ subroutine tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
 ! End of the calculation --> RETURN
 ! =================================
 
-  open(unit=20,file=trim(Invar%output_prefix)//'thermo.dat')
+  open(unit=20,file=trim(Invar%output_prefix)//'_thermo.dat')
   write(20,'(a)')'============= Direct results (without any inter/extrapolation) =================='
   write(20,'(1x,a,f10.3)')'For present temperature (in Kelvin): T= ',Invar%temperature
   write(20,'(1x,a,f12.3)')'  The cold contribution (in eV/atom): U_0 =',U0*Ha_eV

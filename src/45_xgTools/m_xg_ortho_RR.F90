@@ -38,7 +38,7 @@ module m_xg_ortho_RR
  use m_gpu_toolbox
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -127,6 +127,7 @@ module m_xg_ortho_RR
     if ( info /= 0 ) then
       ABI_COMMENT("Cholesky decomposition did not work. Orthonormalization not done")
       call xg_free(buffer)
+      ABI_NVTX_END_RANGE()
       return
     end if
 

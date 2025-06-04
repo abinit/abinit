@@ -1,0 +1,4 @@
+This directory, rttddft_suite, contains the suite of tests which
+are related to the implementation of real-time TDDFT
+
+Please, see the README file in the tests directory (above this one) to get help.

@@ -39,24 +39,24 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% input_prefix = t46o 
+#%% input_prefix = t46o
 #%% test_chain = t45.abi, t46.abi, t47.abi
 #%% [files]
-#%% files_to_test = t47.abo, tolnlines = 0, tolabs = 1.001e-05, tolrel = 2.000e-05, fld_options = -easy
+#%% files_to_test = t47.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
-#%%   Si2 molecule, spin-polarized. Test the option iscf=1 (eigenvalues of the SCF cycle). 
+#%% description =
+#%%   Si2 molecule, spin-polarized. Test the option iscf=1 (eigenvalues of the SCF cycle).
 #%%   Start from the wavefunctions of test 46.
 #%%   Cannot be executed in parallel:
 #%%         --- !ERROR
 #%%         message: |
 #%%         the number of bands in the spin up case must be equal to
 #%%         the number of bands in the spin down case.
-#%%         This is not the case for the k point number : 1 
+#%%         This is not the case for the k point number : 1
 #%%         The number of bands spin up and down are : 5 3 Action : change nband, or use the sequential
 #%%         version of ABINIT.
 #%%         src_file: chkinp.F90

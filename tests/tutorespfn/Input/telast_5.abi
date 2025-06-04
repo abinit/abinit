@@ -1,6 +1,6 @@
 #AlP in hypothetical wurzite (hexagonal) structure
 
-#Alternative response function calculation for some rigid-atom 
+#Alternative response function calculation for some rigid-atom
 #piezoelectric tensor elements.
 
    ndtset   3
@@ -48,7 +48,7 @@ berryopt2   -2       #specifies ddk wave functions wanted
                                         #process
 
 #Definition of the atom types and atoms
- ntypat   2 
+ ntypat   2
   znucl   13 15
   natom   4
   typat   1 1 2 2
@@ -62,7 +62,7 @@ berryopt2   -2       #specifies ddk wave functions wanted
          2/3  1/3  8.7517446813E-01
 
 #Gives the number of bands, explicitely (do not take the default)
-  nband   8              # For an insulator (if described correctly as an 
+  nband   8              # For an insulator (if described correctly as an
                          # insulator by DFT), conduction bands should not
                          # be included in response-function calculations
 
@@ -104,8 +104,8 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% [extra_info]
 #%% authors = D. Hamann
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   AlP in hypothetical wurzite (hexagonal) structure
-#%%   Alternative response function calculation for some rigid-atom 
+#%%   Alternative response function calculation for some rigid-atom
 #%%   piezoelectric tensor elements.
 #%%<END TEST_INFO>

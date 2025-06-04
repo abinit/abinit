@@ -29,7 +29,7 @@ module m_outwant
  use m_dtset
 
  use m_io_tools,   only : open_file
- use m_symtk,      only : matr3inv
+ use m_matrix,     only : matr3inv
 
  implicit none
 

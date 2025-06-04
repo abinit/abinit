@@ -33,7 +33,7 @@ MODULE m_prep_calc_ucrpa
  use m_defs_ptgroups
  use m_errors
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use m_time,          only : timab
  use m_hide_blas,     only : xdotc
  use m_geometry,      only : normv
@@ -55,7 +55,8 @@ MODULE m_prep_calc_ucrpa
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
  use m_read_plowannier, only : read_plowannier
- use m_plowannier, only : plowannier_type,operwan_realspace_type
+ use m_plowannier,     only : plowannier_type,operwan_realspace_type
+ use m_ebands,         only : ebands_t
 
  implicit none
 

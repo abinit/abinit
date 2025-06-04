@@ -5,7 +5,7 @@ post-processing tools
     Plot a band structure from an output file.
 
 - ab_extended_scissors_guess.py
-    Get the eigenvalues from an abinit _EIG.nc netcdf file. 
+    Get the eigenvalues from an abinit _EIG.nc netcdf file.
 
 - abinit_eignc_to_bandstructure.py
     Plot the bandstructure from _EIG.nc file.
@@ -40,7 +40,7 @@ post-processing tools
     Plot the bandstructure from _EIG.nc file.
 
 - Raman_spec.py
-    Determines the Raman spectra from the anaddb output file as a function 
+    Determines the Raman spectra from the anaddb output file as a function
     of frequency.  With version 0.4 the user creates a simple input file to run
     the script. Examples are given with in the script itself.  After finding the
     anaddb output file it extracts the raman matrix. The code is documented
@@ -55,4 +55,9 @@ post-processing tools
 - compare_phbands.py
     Script to plot the phonon band structure and compare with the LWF phonon
     band structure from the anaddb output file. The code is documented internally.
-    --help option is also available.                                                  
+    --help option is also available.
+
+- analyze_rttddft.py
+    Script to analyze the output of a real-time TDDFT run.
+    Computes the conductivity tensor and associated dielectric function from the
+    time-dependent current density.

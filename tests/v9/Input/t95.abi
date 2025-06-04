@@ -30,7 +30,7 @@ toldfe 1.e-10
 ixc -645642 # R2SCAN01 meta GGA
 usekden 1
 nc_xccc_gspace 0 # calculates model core contribution in real space. Cleaner
-#nc_xccc_gspace 1# calculates model core contribution in recip space. lots of noise ~ 1.e-5 density 
+#nc_xccc_gspace 1# calculates model core contribution in recip space. lots of noise ~ 1.e-5 density
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "29_Cu_m.upf"
@@ -40,7 +40,7 @@ nc_xccc_gspace 0 # calculates model core contribution in real space. Cleaner
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t95.abo, tolnlines = 0, tolabs = 0.0, tolrel = 1.0 , fld_options= -ridiculous;
+#%%   t95.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00 , fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

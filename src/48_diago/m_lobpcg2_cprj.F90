@@ -335,7 +335,7 @@ module m_lobpcg2_cprj
     type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock,occBlock
     type(xg_t):: cprj_work_all
-    double precision :: maxResidu, minResidu
+    double precision :: maxResidu, minResidu, dummy
     double precision :: dlamch,tolerance
     integer :: ierr = 0
     integer :: nrestart
@@ -390,9 +390,9 @@ module m_lobpcg2_cprj
     call xg_setBlock(eigenvalues3N,eigenvaluesN,blockdim,1)
     call xg_setBlock(eigenvalues3N,eigenvalues2N,blockdim2,1)
 
-    call xgBlock_reshape(eigen,(/ blockdim, nblock /))
-    call xgBlock_reshape(residu,(/ blockdim, nblock /))
-    call xgBlock_reshape(occ,(/ blockdim, nblock /))
+    call xgBlock_reshape(eigen,blockdim,nblock)
+    call xgBlock_reshape(residu,blockdim,nblock)
+    call xgBlock_reshape(occ,blockdim,nblock)
 
     lobpcg%AllX0     = X0
     lobpcg%AllcprjX0 = cprjX0
@@ -491,15 +491,15 @@ module m_lobpcg2_cprj
         end if
         call timab(tim_ax_nl,2,tsec)
 
-        ! Apply preconditioner
-        call timab(tim_pcond,1,tsec)
-        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
-        call timab(tim_pcond,2,tsec)
-
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+
+        ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
 
         call timab(tim_nbdbuf,1,tsec)
         if (nbdbuf>=0) then
@@ -516,8 +516,10 @@ module m_lobpcg2_cprj
             maxResidu = 0.0
           end if
         else if (nbdbuf==-101) then
+          call xgBlock_minmax(residuBlock,minResidu,dummy) ! Get minimum of true residuals
+          ! Compute effective residuals : res_eff = res * occ
           call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
-          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          call xgBlock_minmax(residu_eff%self,dummy,maxResidu) ! Get maximum of effective residuals
         else
           ABI_ERROR('Bad value of nbdbuf')
         end if
@@ -635,14 +637,14 @@ module m_lobpcg2_cprj
           call xgBlock_yxmax(lobpcg%W,eigenvaluesN,lobpcg%X)
         end if
         call timab(tim_ax_nl,2,tsec)
-        ! Apply preconditioner
-        call timab(tim_pcond,1,tsec)
-        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
-        call timab(tim_pcond,2,tsec)
         ! Recompute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+        ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
 
         call timab(tim_nbdbuf,1,tsec)
         if (nbdbuf>=0) then
@@ -658,8 +660,10 @@ module m_lobpcg2_cprj
             maxResidu = 0.0
           end if
         else if (nbdbuf==-101) then
+          call xgBlock_minmax(residuBlock,minResidu,dummy) ! Get minimum of true residuals
+          ! Compute effective residuals : res_eff = res * occ
           call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
-          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          call xgBlock_minmax(residu_eff%self,dummy,maxResidu) ! Get maximum of effective residuals
         else
           ABI_ERROR('Bad value of nbdbuf')
         end if
@@ -688,9 +692,9 @@ module m_lobpcg2_cprj
 
     end do !! End iblock loop
 
-    call xgBlock_reshape(eigen,(/ blockdim*nblock, 1 /))
-    call xgBlock_reshape(residu,(/ blockdim*nblock, 1 /))
-    call xgBlock_reshape(occ,(/ blockdim*nblock, 1 /))
+    call xgBlock_reshape(eigen,blockdim*nblock,1)
+    call xgBlock_reshape(residu,blockdim*nblock,1)
+    call xgBlock_reshape(occ,blockdim*nblock,1)
 
     call xg_free(eigenvalues3N)
     call xg_free(residu_eff)

@@ -181,7 +181,7 @@ if test "${abi_openmp_offload_enable}" = "yes"; then
 
   # Manage ARCH variable
   if test "${GPU_ARCH}" = ""; then
-    AC_MSG_WARN([GPU arch is not set (empty GPU_ARCH variable), defaulting to NVIDIA Ampere (=80)])
+    AC_MSG_ERROR([GPU target architecture is not set, please provide GPU_ARCH variable])
     GPU_ARCH=80
   fi
   # Perform pattern replacement in OpenMP offload flags with requested GPU arch

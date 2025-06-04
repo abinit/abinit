@@ -1,0 +1,83 @@
+# Input for RT-TDDFT tutorial
+# RT-TDDFT calculation
+# with default values for all parameters
+# Diamond at equilibrium volume
+
+# RT-TDDFT section
+optdriver 9        # RT-TDDFT
+getwfk_filepath "trttddft_1o_WFK"
+
+#Definition of the unit cell
+acell 3*3.53 angstrom  # Lengths of the primitive vectors (equilibrium volume)
+rprim                  # 3 orthogonal primitive vectors (FCC lattice)
+  0.0 1/2 1/2
+  1/2 0.0 1/2
+  1/2 1/2 0.0
+nsym 0                 # Automatic detection of symetries
+
+#Definition of the atom types and pseudopotentials
+ntypat 1          # There is only one type of atom
+znucl 6           # Atomic number of the possible type(s) of atom. Here carbon.
+pp_dirpath "$ABI_PSPDIR"        # Path to the directory where
+                                # pseudopotentials for tests are stored
+pseudos "Psdj_paw_pw_std/C.xml" # PAW atomic data for Carbon
+
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Carbon
+xred              # Location of the atoms: Diamond structure
+  0.0 0.0 0.0     #  Triplet giving the reduced coordinates of atom 1
+  1/4 1/4 1/4     #  Triplet giving the reduced coordinates of atom 2
+
+#Definition of bands and occupation numbers
+nband 8           # Compute 8 bands (4 occupied, 4 empty)
+nbdbuf 2          # No need to converge the last two empty bands
+occopt 1          # Automatic generation of occupation numbers, as a semiconductor
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 18           # Maximal plane-wave kinetic energy cut-off, in Hartree
+pawecutdg 36      # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
+kptopt 1          # Automatic generation of k points, taking into account the symmetry
+ngkpt 6 6 6       # k-points grid based on the primitive vectors
+nshiftk 4         # of the reciprocal space, repeated four times,
+shiftk            # with different shifts:
+  0.5 0.5 0.5
+  0.5 0.0 0.0
+  0.0 0.5 0.0
+  0.0 0.0 0.5
+istwfk *1         # Wavefunctions are complex for all k-points
+
+#Parameters for the SCF procedure
+nstep 20          # Maximum number of SCF cycles
+tolvrs 1.0d-10    # Will stop when, twice in a row, the difference
+                  # between two consecutive evaluations of potential residual
+                  # differ by less than tolvrs
+
+#Miscelaneous parameters
+prtwf 0           # Do not print wavefunctions
+prtden 0          # Do not print density
+prteig 0          # Do not print eigenvalues
+prtebands 0       # Do not print ebands
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = trttddft_1.abi, trttddft_2.abi, trttddft_3.abi
+#%% [files]
+#%% files_to_test =
+#%%   trttddft_2.abo, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium;
+#%%   trttddft_2o_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium;
+#%% [paral_info]
+#%% max_nprocs = 7
+#%% [extra_info]
+#%% authors = F. Brieuc
+#%% keywords = RTTDDFT, PAW
+#%% description =
+#%%   Input for RT-TDDFT tutorial
+#%%   Diamond at equilibrium volume
+#%%   RT-TDDFT calculation with default values for all parameters
+#%%<END TEST_INFO>

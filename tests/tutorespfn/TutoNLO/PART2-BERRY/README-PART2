@@ -7,7 +7,7 @@ Compute various quantities from Delta P
 Four different steps
 
 1. alas_zstar.in
-Z* from finite difference of the polarization 
+Z* from finite difference of the polarization
 under atomic displacements
 
 2. alas_ddk.in
@@ -17,13 +17,13 @@ Linear response calculation with finite difference ddk
 Provides coherent number for comparison with
 finite difference calculations of Z* and piezo coefficients
 
-3. alas_piezo_clampedion.in
-Clamped ion piezoelectric coefficients from finite difference 
+3. alas_pz_clamped.in
+Clamped ion piezoelectric coefficients from finite difference
 calculation of the polarization under macroscopic strains
 (ions fixed).
 
-4. alas_piezo_relaxedion.in
-Relaxed ion piezoelectric coefficients from finite difference 
+4. alas_pz_relaxed.in
+Relaxed ion piezoelectric coefficients from finite difference
 calculation of the polarization under macroscopic strains
 (relaxed ions).
 

@@ -1,0 +1,35 @@
+t35.ddb.out
+Total DDB for GaP phonons including quadrupoles interactions
+9
+t34o_DS4_DDB
+t34o_DS6_DDB
+t34o_DS7_DDB
+t34o_DS8_DDB
+t34o_DS9_DDB
+t34o_DS10_DDB
+t34o_DS11_DDB
+t34o_DS12_DDB
+t34o_DS5_DDB
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% exclude_builders = scope_gnu_10.2_paral, bob_gnu_13.2_openmp
+#%% test_chain =  t34.abi, t35.abi, t36.abi, t37.abi
+#%% [files]
+#%% files_to_test =
+#%%   t35.ddb.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT, LONGWAVE
+#%% description =
+#%%   Input file for mrgddb
+#%%   Apparently, there is a (minor, erratic) problem with openmp (2 procs), for the echo of pseudopotential data in the t35.ddb.out file
+#%%  This set of tests duplicates the content of the lw tutorial, except for the usage of NetCDF instead of text DDB in the tutorial
+#%% topics = longwave
+#%%<END TEST_INFO>

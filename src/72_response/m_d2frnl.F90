@@ -61,7 +61,7 @@ module m_d2frnl
  use m_paw_occupancies, only : pawaccrhoij
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -383,7 +383,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  end if
 
 !Initialize Hamiltonian (k-independent terms)
- call init_hamiltonian(gs_ham,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
+ call gs_ham%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
@@ -633,7 +633,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
      ! Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       call set_gemm_nonlop_ikpt(ikpt)
+       call set_gemm_nonlop_ikpt(ikpt,gs_ham%npw_fft_k,gs_ham%istwf_k,gs_ham%indlmn,&
+       &    gs_ham%ntypat,gs_ham%nattyp,gs_ham%gpu_option)
      end if ! gemm_nonlop_use_gemm
 
 

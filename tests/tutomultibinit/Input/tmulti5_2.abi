@@ -43,7 +43,6 @@ randomseed = 111111             ! DO NOT set randomseed. It is only for testing 
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
 #%% spin_pot = tmulti5_2.xml
-#%% exclude_builders = .*_nag_7.[01]_.*
 #%% coeff_xml = no
 #%% exec_args = --F03
 #%% [files]

@@ -19,8 +19,8 @@
 ! dealing with gamma LO-TO splitting issue.
    eivec  4
 
-!Wavevector list number 1 (Reduced coordinates and normalization factor)         
-  nph1l    71      ! number of phonons in list 1                             
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+  nph1l    71      ! number of phonons in list 1
 
   qph1l   0.0000  0.0000  0.0000   1.0    !(gamma point)
           0.0375  0.0375  0.0750   1.0
@@ -97,7 +97,7 @@
 !Wavevector list number 2 (Cartesian directions for non-analytic gamma phonons)
 
 !The output for this calculation must be cut-and-pasted into the
-! t59_out.freq file to be used as band2eps input to get proper LO-TO 
+! t59_out.freq file to be used as band2eps input to get proper LO-TO
 ! splitting at gamma.  Note that gamma occurrs twice.
 
   nph2l    1       ! number of directions in list 2
@@ -110,11 +110,11 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% exclude_builders = bob_gnu_13.2_openmp, scope_gnu_10.2_paral
+#%% exclude_builders = scope_gnu_10.2_paral, bob_gnu_13.2_openmp
 #%% test_chain = tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
-#%% input_ddb = tlw_5.ddb.out 
+#%% input_ddb = tlw_5.ddb.out
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tlw_6.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4

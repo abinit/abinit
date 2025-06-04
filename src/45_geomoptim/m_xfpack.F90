@@ -25,7 +25,7 @@ module m_xfpack
  use m_abicore
  use m_abimover
 
- use m_symtk,      only : matr3inv
+ use m_matrix,     only : matr3inv
  use m_geometry,   only : mkradim, mkrdim, metric, strainsym
  use m_results_gs , only : results_gs_type
  use m_bfgs,        only : hessupdt

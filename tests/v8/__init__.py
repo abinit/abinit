@@ -108,11 +108,12 @@ inp_files = [
 "t95.abi",
 "t96.abi",
 "t97.abi",
-#Additional-multibinit tests 
-"t98.abi", 
+#Additional-multibinit tests
+"t98.abi",
 "t99.abi",
 "t100.abi",
 "t101.abi",
 "t102.abi",
 "t103.abi",
+"t104.abi",
 ]

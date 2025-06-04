@@ -189,7 +189,7 @@ import glob
 top_level_files = glob.glob('*.py') + glob.glob('*.rst')
 
 string = "# Files from %s\n%s =" % ("top_level_dir","top_level_files")
-for fname in top_level_files:          
+for fname in top_level_files:
    string += " \\\n\t%s" % fname
 string += "\n\n"
 mf.write(string)

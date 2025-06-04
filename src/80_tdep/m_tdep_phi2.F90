@@ -462,8 +462,8 @@ subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
 ! Write the Phi2_unitcell.dat and Phi2.dat files
   if (Invar%debug.and.MPIdata%iam_master) then
     write(Invar%stdout,'(a)') ' See the Phi2*.dat file'
-    open(unit=52,file=trim(Invar%output_prefix)//'Phi2_unitcell.dat')
-    open(unit=55,file=trim(Invar%output_prefix)//'Phi2.dat')
+    open(unit=52,file=trim(Invar%output_prefix)//'_Phi2_unitcell.dat')
+    open(unit=55,file=trim(Invar%output_prefix)//'_Phi2.dat')
     do jatom=1,3*Invar%natom
       if (jatom.le.3*Invar%natom_unitcell) then
         write(52,'(10000(f10.6,1x))') Phi2(jatom,:)
@@ -791,7 +791,7 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
   double complex, allocatable   :: eigenV(:,:)
   
   nmode=size(Eigen2nd%eigenval,dim=1)
-  open(unit=52,file=trim(Prefix)//'phonon-bands.yaml')
+  open(unit=52,file=trim(Prefix)//'_phonon-bands.yaml')
   write(52,'(a,i4)') 'nqpoint:',Qpt%nqpt 
   write(52,'(a,i4)') 'npath:',Qpt%qpt_tot-1
   write(52,'(a)')    'segment_nqpoint:'

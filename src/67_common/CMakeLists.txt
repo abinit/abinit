@@ -40,7 +40,7 @@ add_library(67_common STATIC
 
 set_target_properties(67_common
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(67_common
   PRIVATE
@@ -48,7 +48,7 @@ target_include_directories(67_common
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(67_common
@@ -61,6 +61,7 @@ target_link_libraries(67_common
   abinit::16_hideleave
   abinit::44_abitools
   abinit::46_ghc_omp
+  abinit::48_diago
   abinit::52_fft_mpi_noabirule
   abinit::56_io_mpi
   abinit::56_mixing

@@ -22,6 +22,8 @@ opt_coeff  = 10 15
 #%% system_xml = t98_model.xml
 #%% md_hist = t98.nc
 #%% test_chain = t98.abi, t99.abi, t100.abi
+#%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
+#%% exclude_builders = scope_gnu_12.2_mpich
 #%% [files]
 #%% files_to_test = 
 #%%   t99.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;

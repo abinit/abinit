@@ -988,7 +988,6 @@ end function sjoin_7
 !!
 !! FUNCTION
 !!  Returns two concatenated strings.
-!!
 
 pure function strcat_2(str1,str2) result(ostr)
 

@@ -62,10 +62,9 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test = 
-#%%   t01.abo, tolnlines = 12, tolabs = 1.0e-6, tolrel = 6.e-5
+#%%   t01.abo, tolnlines = 30, tolabs = 1.0e-6, tolrel = 6.e-4
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -188,7 +188,8 @@ program anaddb
  call xmpi_bcast(lenstr, master, comm, ierr)
 
  ! Save input string in global variable so that we can access it in ntck_open_create
- INPUT_STRING = raw_string
+ ABI_MALLOC_TYPE_SCALAR(character(len=len_trim(raw_string)), INPUT_STRING)
+ INPUT_STRING = trim(raw_string)
 
  ! Read the inputs
  call invars9(inp, lenstr, natom, string)
@@ -485,7 +486,7 @@ program anaddb
    ! Print analysis of the real-space interatomic force constants
    ! TODO: ifc_out should not have side effects
    if (my_rank == master .and. inp%ifcout /= 0) then
-     call ifc%write(inp%ifcana, inp%atifc, inp%ifcout, inp%prt_ifc, ana_ncid)
+     call ifc%write(inp%ifcana, inp%atifc, inp%ifcout, inp%prt_ifc, ana_ncid, filnam(8))
    end if
  end if
 

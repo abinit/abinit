@@ -36,18 +36,18 @@ add_library(43_ptgroups STATIC
   m_ptg_O.F90
   m_ptg_Td.F90
   m_ptg_Oh.F90
-  )
+)
 
 set_target_properties(43_ptgroups
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(43_ptgroups
   PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(43_ptgroups
@@ -57,6 +57,7 @@ target_compile_definitions(43_ptgroups
 target_link_libraries(43_ptgroups
   PUBLIC
   28_numeric_noabirule
-  32_util)
+  32_util
+)
 
 add_library(abinit::43_ptgroups ALIAS 43_ptgroups)

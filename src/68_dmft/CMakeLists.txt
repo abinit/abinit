@@ -18,7 +18,7 @@ add_library(68_dmft STATIC
 
 set_target_properties(68_dmft
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(68_dmft
   PRIVATE
@@ -26,12 +26,18 @@ target_include_directories(68_dmft
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(68_dmft
   PRIVATE
   HAVE_CONFIG_H)
+
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(68_dmft
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
+endif()
 
 target_link_libraries(68_dmft
   PUBLIC

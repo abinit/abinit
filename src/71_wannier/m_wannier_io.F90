@@ -38,16 +38,15 @@ module m_wannier_io
 #endif
 
   use m_dtset, only : dataset_type
-  use defs_datatypes, only : pseudopotential_type, ebands_t
   use defs_abitypes, only : MPI_type
   use m_fft, only: fourwf
   use m_io_tools,        only : open_file, get_unit
   use m_fftcore,  only : sphereboundary
-  use m_pawtab,   only : pawtab_type
-  use m_pawcprj,  only : pawcprj_type
   use m_abstract_wf, only: abstract_wf, cg_cprj, wfd_wf
+  use m_ebands,   only : ebands_t
 
   implicit none
+
   private
 
   public :: write_Amn
