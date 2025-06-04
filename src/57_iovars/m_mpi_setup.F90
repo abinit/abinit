@@ -42,6 +42,7 @@ module m_mpi_setup
  use m_dtset,        only : dataset_type
  use m_kg,           only : getmpw
  use m_dtfil,        only : mkfilename
+ use m_mep,          only : NEB_CELL_ALGO_NONE
 
  implicit none
 
@@ -96,7 +97,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !scalars
  integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo, prtvol
  integer :: isppol,jdtset,marr,mband_lower,mband_upper
- integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,optdriver
+ integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,max_mpw,optdriver
  integer :: mband_mem
  integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
  integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
@@ -215,6 +216,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_nl_splitsize',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_nl_splitsize=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_thread_limit',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_thread_limit=intarr(1)
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nphf',tread0,'INT')
    if(tread0==1) dtsets(idtset)%nphf=intarr(1)
 
@@ -278,7 +282,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      end if
    end if
-     
+
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS.and.optdriver/=RUNL_RTTDDFT).and. &
 &   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
@@ -414,7 +418,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%npfft>1.and.usepaw==1) then
      dtsets(idtset)%pawmixdg=1
    end if
-     
+
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0.or.iexit>0) then
      ABI_FREE(intarr)
@@ -946,6 +950,18 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
    dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
 
+   ! For RT-TDDFT make sure that we use the thread-safe version of FFT
+   ! in case of Goedecker's FFT with more than one thread
+   if (optdriver==RUNL_RTTDDFT) then
+      if (dtsets(idtset)%ngfft(7)/100==FFT_SG .and. xomp_get_num_threads(open_parallel=.True. )>1) then
+         write(msg,'(3a)') 'fftalg=1XX is not thread-safe, so it cannot be used with nthreads>1',ch10,&
+         'thus switching fftalg to a thread-safe version.'
+         ABI_WARNING(msg)
+         dtsets(idtset)%ngfft(7) = 401
+         dtsets(idtset)%ngfftdg(7) = 401
+      end if
+   end if
+
    fftalg_read=.false.
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fftalg',tread0,'INT')
 
@@ -997,7 +1013,19 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      kpt_with_shift(3,:)=kpt_with_shift(3,:)+qphon(3)
    end if
    if (dtsets(idtset)%usewvl == 0) then
-     call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+     if (dtsets(idtset)%neb_cell_algo==NEB_CELL_ALGO_NONE) then
+       call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+     else
+       max_mpw=0
+       do ii=1,dtsets(idtset)%nimage
+         call mkrdim(dtsets(idtset)%acell_orig(1:3,ii),dtsets(idtset)%rprim_orig(1:3,1:3,ii),rprimd)
+         call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+         call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
+         if (mpw>max_mpw) max_mpw=mpw
+       end do
+       mpw=max_mpw
+     end if
+
      ! Allocate tables for parallel IO of the wavefunctions.
      if( xmpi_mpiio==1 .and. mpi_enregs(idtset)%paral_kgb == 1 .and. &
 &     any(dtsets(idtset)%iomode == [IO_MODE_MPI, IO_MODE_ETSF])) then
@@ -1052,6 +1080,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (dtsets(idtset)%usepaw==0) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%usewvl/=0) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%usedmft==1) dtsets(idtset)%paral_atom=0
+   if (dtsets(idtset)%usedmft==10) dtsets(idtset)%paral_atom=0
    if (optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_RESPFN.and.optdriver/=RUNL_GWLS) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%macro_uj/=0) dtsets(idtset)%paral_atom=0
 
@@ -1059,7 +1088,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  In case of the use of a GPU (Cuda), some defaults can change
 !  according to a threshold on matrix sizes
-   if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.or.dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
+   if (dtsets(idtset)%gpu_option==ABI_GPU_LEGACY) then
      if (optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS) then
        vectsize=dtsets(idtset)%mpw*dtsets(idtset)%nspinor/dtsets(idtset)%npspinor
        if (all(dtsets(idtset)%istwfk(:)==2)) vectsize=2*vectsize
@@ -1416,7 +1445,7 @@ end subroutine mpi_setup
          if (mpi_enreg%me==0) then
            inquire(file=trim(filden),exist=file_found)
            if (file_found) then
-             call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
+             call hdr0%from_fname(filden,ii,xmpi_comm_self)
              idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
              call hdr0%free()
              ABI_WARNING("Cannot find filden "//filden)

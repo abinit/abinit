@@ -355,7 +355,7 @@ subroutine fft_test_print(Ftest, header, unit, mode_paral, prtvol)
  end if
 
  write(msg,'(a,i3)')"FFT setup for fftalg ",Ftest%ngfft(7)
- call print_ngfft(Ftest%ngfft, header=msg, unit=my_unt)
+ call print_ngfft([my_unt], Ftest%ngfft, header=msg)
 
 end subroutine fft_test_print
 !!***

@@ -9,28 +9,30 @@ add_library(52_fft_mpi_noabirule STATIC
   m_fft_mesh.F90
   m_sgfft.F90
   m_sg2002.F90
-  )
+)
 
 set_target_properties(52_fft_mpi_noabirule
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(52_fft_mpi_noabirule
   PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
-  )
+  ${CMAKE_BINARY_DIR}/modules
+)
 
 target_compile_definitions(52_fft_mpi_noabirule
   PRIVATE
-  HAVE_CONFIG_H)
+  HAVE_CONFIG_H
+)
 
 target_link_libraries(52_fft_mpi_noabirule
   PUBLIC
   abinit::44_abitools
-  abinit::51_manage_mpi)
+  abinit::51_manage_mpi
+)
 
 if(OpenMP_FOUND)
   target_link_libraries(52_fft_mpi_noabirule

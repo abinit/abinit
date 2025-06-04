@@ -12755,7 +12755,7 @@
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -6.5868371788571327E+00"/>
 <lamb_shielding shielding="  3.7727127781672144E-04"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Na 11
 XC_GGA_X_PBE+XC_GGA_C_PBE scalarrelativistic loggrid 2001
 3 3 0 0 0 0

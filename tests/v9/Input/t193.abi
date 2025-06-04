@@ -57,7 +57,7 @@
 #%% keywords =
 #%% description =
 #%%   ZnSe wurtzite, rather inaccurate rprimd and xred.
-#%%   Test automatic correction of rprimd, tnons and xred, as well as 
+#%%   Test automatic correction of rprimd, tnons and xred, as well as
 #%%   automatic alignment of xred with the FFT grid, within the allowed tolsym tolerance.
 #%% topics = crystal
 #%%<END TEST_INFO>

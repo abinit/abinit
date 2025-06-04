@@ -31,11 +31,11 @@ ecut 5
 pawecutdg 10
 
 nstep 15
-nline  8
+nline  8  mdeg_filter 8
 
 # bands and spinors
 nband  16
-nbdbuf  4
+nbdbuf  8
 
 nspinor 2 nspden 4
 
@@ -44,7 +44,7 @@ tolvrs 1.0D-20
 kptopt 3
 
 # severely unconverged
-ngkpt 3*2 
+ngkpt 3*2
 nshiftk 1
 shiftk 3*0
 
@@ -61,8 +61,8 @@ prteig 0
 prtden 0
 
 # Definition of the unit cell: fcc
-# change cell parameter to increase the stress tensor 
-#acell  3*10.26 
+# change cell parameter to increase the stress tensor
+#acell  3*10.26
 acell  3*9.5         # Experimental lattice constants in Bohr
 rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
        0.5  0.0  0.5
@@ -92,7 +92,7 @@ pseudos "Si_r.psp8"
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t15.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -101,4 +101,4 @@ pseudos "Si_r.psp8"
 #%% keywords = NC,CPRJ
 #%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). NC,nspinor=2.
 #%%<END TEST_INFO>
- 
+

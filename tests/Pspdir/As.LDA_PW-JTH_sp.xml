@@ -9581,7 +9581,7 @@
  -8.6962175809271036E-01
 </exact_exchange_X_matrix>
 <exact_exchange core-core=" -8.0316482427665818E+01"/>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 As 33                                       ! Definition of material
 XC_LDA_X+XC_LDA_C_PW scalarrelativistic loggrid 1500
 4 4 3 0 0 0                                 ! Max. n per angular momentum: 4s 3p 3d

@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Hg,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Hg,  from PRB58, 3641 (1998)
    80   2  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.640000   -3.296329    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.812108    1.765041   -0.466127   -0.799941          rs, h11s, h22s, h33s
   1.053714    0.474056   -0.531816    0.000000          rp, h11p, h22p, h33p

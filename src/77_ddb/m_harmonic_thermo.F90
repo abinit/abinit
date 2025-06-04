@@ -29,7 +29,7 @@ module m_harmonic_thermo
  use m_xmpi
 
  use m_io_tools,       only : open_file
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
  use m_dynmat,         only : gtdyn9
  use m_geometry,       only : mkrdim
  use m_crystal,        only : crystal_t

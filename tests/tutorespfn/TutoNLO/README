@@ -4,19 +4,19 @@ Summary_NLO.txt
 summary of the results obtained for various properties using either
 response function or finite difference techniques.
 
-PART0-STRUCT
+P0-STRUCT
 structural optimization of AlAs to be used all along the tutorial
 (i.e. recomputed with the convergence parameters of the tutorial)
 
-PART1-DFPT
+P1-DFPT
 Linear and non-linear responses of AlAs to electric field and
 atomic displacements using DFPT.
 
-PART2-BERRY
+P2-BERRY
 Berry phase calculation under zero field to get different linear
 and non-linear responses from finite differences
 
-PART3-EFIELD
+P3-EFIELD
 Finite electric field calculation using the method of Souza and
 Vanderbilt, to get different linear and non-linear responses
 from finite differences.

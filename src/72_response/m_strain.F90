@@ -29,7 +29,7 @@ module m_strain
  use m_abicore
  use m_xmpi
 
- use m_symtk,         only : matr3inv
+ use m_matrix,        only : matr3inv
 
  implicit none
 

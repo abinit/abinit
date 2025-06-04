@@ -90,17 +90,17 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 
 #------------------------------------------------------------------------------#
 #
-# Additional compiler flags, compiler specific
-#
-#------------------------------------------------------------------------------#
-include(compiler_setup)
-
-#------------------------------------------------------------------------------#
-#
 # Top level Options
 #
 #------------------------------------------------------------------------------#
 include(options)
+
+#------------------------------------------------------------------------------#
+#
+# Additional compiler flags, compiler specific
+#
+#------------------------------------------------------------------------------#
+include(compiler_setup)
 
 #------------------------------------------------------------------------------#
 #
@@ -315,6 +315,7 @@ if (MPI_FOUND)
     set(HAVE_MPI_BUGGY_INTERFACES 1)
   endif()
 
+  set(ABINIT_ENABLE_GPU_AWARE_MPI FALSE)
   # try to detect if our MPI implementation is cuda-aware
   # 1. If using OpenMPI, then try to parse output of ompi_info
   # 2. If using MPICH, TODO
@@ -334,6 +335,7 @@ if (MPI_FOUND)
         if ( (_output MATCHES "smcuda") )
           message(STATUS "Found OpenMPI with CUDA-aware support available.")
           set(HAVE_GPU_MPI 1)
+          set(ABINIT_ENABLE_GPU_AWARE_MPI TRUE)
         else()
           message(WARNING "OpenMPI found, but it is not built with CUDA support.")
         endif()
@@ -348,13 +350,15 @@ if (MPI_FOUND)
       # TODO
     endif()
 
-    # unconditionally set HAVE_GPU_MPI if the user say so
-    # this may be need because our detection above is not bullet proof
-    if (ABINIT_ENFORCE_CUDA_AWARE_MPI)
-      set(HAVE_GPU_MPI 1)
-    endif()
-
   endif(ABINIT_ENABLE_GPU_CUDA)
+
+  # unconditionally set HAVE_GPU_MPI if the user say so
+  # this may be need because our detection above is not bullet proof
+  if (ABINIT_ENFORCE_GPU_AWARE_MPI)
+    set(HAVE_GPU_MPI 1)
+    set(ABINIT_ENABLE_GPU_AWARE_MPI TRUE)
+  endif()
+
 
 endif(MPI_FOUND)
 
@@ -373,16 +377,18 @@ if(OpenMP_FOUND)
     set(HAVE_OMP_COLLAPSE 1)
   endif()
 
-  # Fix an inconsistency causing the absence of OpenMP flag at link step when using Cray compiler
   if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Cray")
-    string(REPLACE " " ";" OpenMP_Fortran_FLAGS_LIST ${OpenMP_Fortran_FLAGS})
-    add_link_options(${OpenMP_Fortran_FLAGS_LIST})
+    # Fix an inconsistency causing compilation problems despite '-fopenmp' and '-h omp' are supposed to be synonymous !!
+    # Original flag for OpenMP in Cray FTN is : -h omp
+    set(OpenMP_Fortran_FLAGS "-fopenmp")
+    add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:-fopenmp>")
+    add_link_options("$<$<AND:$<LINK_LANGUAGE:Fortran>>:-fopenmp>")
   endif()
 
   if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
     # check for OpenMP GPU offload support (OpenMP v5 onwards)
     try_compile(HAVE_OPENMP_OFFLOAD_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_offload.F90
-      LINK_OPTIONS ${OpenMP_Fortran_FLAGS_LIST}
+      LINK_OPTIONS ${OpenMP_Fortran_FLAGS}
       LINK_LIBRARIES OpenMP::OpenMP_Fortran)
 
     if(HAVE_OPENMP_OFFLOAD_BOOL)
@@ -415,9 +421,33 @@ if(OpenMP_FOUND)
         set(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE 1)
       endif()
 
+    else()
+      message(STATUS "OpenMP offload isn't supported and disabled.")
     endif()
   endif(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
 
+  if(ABINIT_ENABLE_NVIDIA_UNIFIED_MEM)
+    if (NOT "${CMAKE_Fortran_COMPILER_ID}" MATCHES "NVHPC")
+      message(FATAL_ERROR "ABINIT_ENABLE_NVIDIA_UNIFIED_MEM requires NVHPC as compiler !")
+    endif()
+    if(NOT HAVE_OPENMP_OFFLOAD_BOOL)
+      message(FATAL_ERROR "Provided ABINIT_ENABLE_NVIDIA_UNIFIED_MEM but OpenMP offload isn't working !")
+    endif()
+    if(CMAKE_Fortran_COMPILER_VERSION VERSION_LESS "24.3.0")
+      message(FATAL_ERROR "Your NVHPC version is ${CMAKE_Fortran_COMPILER_VERSION}. Unified memory support starts from 24.3.0 !")
+    else()
+      set(UNIFIED_MEM_FLAG "-gpu=mem:unified")
+      # Use older flag for NVHPC 24.3, deprecated in newer versions
+      if(CMAKE_Fortran_COMPILER_VERSION VERSION_EQUAL "24.3.0")
+        set(UNIFIED_MEM_FLAG "-gpu=unified")
+      endif()
+      list(APPEND OPENMP_OFFLOAD_FLAGS "${UNIFIED_MEM_FLAG}")
+      add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:C>>:${UNIFIED_MEM_FLAG}>")
+      add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:CXX>>:${UNIFIED_MEM_FLAG}>")
+      add_compile_options("$<$<AND:$<COMPILE_LANGUAGE:Fortran>>:${UNIFIED_MEM_FLAG}>")
+      add_link_options("$<$<AND:$<LINK_LANGUAGE:Fortran>>:${UNIFIED_MEM_FLAG}>")
+    endif()
+  endif()
 endif()
 
 #
@@ -466,11 +496,14 @@ if(ABINIT_LIBXC_FOUND)
   add_library(abinit::libxc ALIAS PkgConfig::ABINIT_LIBXC)
 else()
   find_package(Libxc REQUIRED)
-  message(STATUS "Libxc found via cmake target")
+  if(Libxc_FOUND)
+    message(STATUS "Libxc found via cmake target")
+  else()
+    message(SEND_ERROR "Libxc NOT FOUND")
+  endif()
 endif()
 
 if(Libxc_FOUND)
-  add_compile_definitions(HAVE_LIBXC)
   set(HAVE_LIBXC 1)
 endif()
 
@@ -535,12 +568,23 @@ endif()
 # LEVMAR : use LevMar with cmake build-system
 # see : https://github.com/pkestene/levmar-cmake
 #
-find_package(levmar)
-if(levmar_FOUND)
-  add_library(abinit::levmar ALIAS levmar::levmar)
+
+find_library(LEVMAR_LIBRARY
+  NAMES levmar
+  PATHS ${LEVMAR_ROOT}/lib ${LEVMAR_ROOT}/lib64 /opt/levmar/lib
+  DOC "Location of the levmar library"
+)
+check_include_file("levmar.h" LEVMAR_HEADER_FOUND)
+if(LEVMAR_LIBRARY AND LEVMAR_HEADER_FOUND)
+  target_link_libraries(abinit ${LEVMAR_LIBRARY})
+  try_compile(LEVMAR_FOUND
+    ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_levmar.c)
+endif()
+if (LEVMAR_FOUND)
+  message(STATUS "levmar found: ${LEVMAR_LIBRARY}")
   set(HAVE_LEVMAR 1)
 else()
-  message(STATUS "levmar NOT FOUND")
+  message(STATUS "levmar not found")
 endif()
 
 #
@@ -567,26 +611,50 @@ find_package(HDF5)
 if(HDF5_FOUND)
   message(STATUS "HDF5 found via find_package")
   add_library(abinit::hdf5 ALIAS HDF5::HDF5)
+  set(ABINIT_HDF5_FOUND TRUE)
+else()
+  pkg_check_modules(ABINIT_HDF5 QUIET IMPORTED_TARGET hdf5)
+  if(NOT ABINIT_HDF5_FOUND)
+    # Second try for Cray parallel version
+    pkg_check_modules(ABINIT_HDF5 QUIET IMPORTED_TARGET hdf5_parallel)
+  endif()
+  if(ABINIT_HDF5_FOUND)
+    add_library(abinit::hdf5 ALIAS PkgConfig::ABINIT_HDF5)
+    message(STATUS "HDF5 found via pkg-config")
+  endif()
+endif()
+
+if(ABINIT_HDF5_FOUND)
   set(HAVE_HDF5 1)
 
   if(HDF5_IS_PARALLEL)
     set(HAVE_HDF5_MPI 1)
   endif()
-endif(HDF5_FOUND)
+else()
+  message(SEND_ERROR "HDF5 NOT FOUND")
+endif()
 
 
 #
 # NetCDF_C / NetCDF_Fortran
 #
 pkg_check_modules(ABINIT_NETCDF QUIET IMPORTED_TARGET netcdf)
+# Extra check for Cray env...
+if(NOT ABINIT_NETCDF_FOUND)
+  pkg_check_modules(ABINIT_NETCDF QUIET IMPORTED_TARGET netcdf_parallel)
+endif()
 if(ABINIT_NETCDF_FOUND)
   message(STATUS "netcdf found via pkg-config")
   add_library(abinit::netcdf ALIAS PkgConfig::ABINIT_NETCDF)
 else()
-  message(STATUS "netcdf NOT FOUND")
+  message(SEND_ERROR "netcdf NOT FOUND")
 endif()
 
 pkg_check_modules(ABINIT_NETCDF_FORTRAN QUIET IMPORTED_TARGET GLOBAL netcdf-fortran)
+#Extra check for Cray env...
+if(NOT ABINIT_NETCDF_FORTRAN_FOUND)
+  pkg_check_modules(ABINIT_NETCDF_FORTRAN QUIET IMPORTED_TARGET GLOBAL netcdf-fortran_parallel)
+endif()
 if(ABINIT_NETCDF_FORTRAN_FOUND)
   message(STATUS "netcdf-fortran found via pkg-config : ${ABINIT_NETCDF_FORTRAN_PREFIX}")
 
@@ -595,7 +663,7 @@ if(ABINIT_NETCDF_FORTRAN_FOUND)
   pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran prefix)
   if("${ABINIT_NETCDF_FORTRAN_PREFIX}" STREQUAL "")
     # Cray flavor of netcdf
-    pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran netcdf_prefix)
+    pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran_parallel netcdf_prefix)
   endif()
   get_target_property(ABINIT_NETCDF_FORTRAN_INC_TMP PkgConfig::ABINIT_NETCDF_FORTRAN INTERFACE_INCLUDE_DIRECTORIES)
   list(APPEND ABINIT_NETCDF_FORTRAN_INC_TMP "${ABINIT_NETCDF_FORTRAN_PREFIX}/include")
@@ -604,7 +672,7 @@ if(ABINIT_NETCDF_FORTRAN_FOUND)
   add_library(abinit::netcdf-fortran ALIAS PkgConfig::ABINIT_NETCDF_FORTRAN)
 
 else()
-  message(STATUS "netcdf-fortran NOT FOUND")
+  message(SEND_ERROR "netcdf-fortran NOT FOUND")
 endif()
 
 if (MPI_FOUND)
@@ -658,41 +726,38 @@ endif()
 # - set env var or cmake var TRIQS_ROOT to the root path of triqs install directory
 # - set env var CMAKE_PREFIX_PATH (usually by a modulefile on a supercomputer)
 #
-find_package(TRIQS)
+if (ABINIT_ENABLE_TRIQS)
+  find_package(TRIQS)
 
-if(TRIQS_FOUND)
-  add_library(abinit::triqs ALIAS triqs)
+  if(TRIQS_FOUND)
+    add_library(abinit::triqs ALIAS triqs)
+    set(HAVE_TRIQS 1)
 
-  set(HAVE_TRIQS 1)
-
-  # NOT sure about this, is TRIQS 3.x compatible with 2.0 ?
-  # (TODO : check with someone who knows triqs)
-  # Besides, it looks like currently abiniti is not compatible with triqs 3.x,
-  # some porting is needed
-  # if (TRIQS_VERSION_MAJOR VERSION_EQUAL "3")
-  #   set(DO_BUILD_67_TRIQS_EXT ON)
-  #   set(HAVE_TRIQS_v3 1)
-  #   set(HAVE_TRIQS_v2_0 1)
-  # endif()
-
-
-  if (TRIQS_VERSION_MAJOR VERSION_EQUAL "2" AND TRIQS_VERSION_MINOR VERSION_EQUAL "0")
-    set(DO_BUILD_67_TRIQS_EXT ON)
-    set(HAVE_TRIQS_v2_0 1)
+    # NOT sure about this, is TRIQS 3.x compatible with 2.0 ?
+    # (TODO : check with someone who knows triqs)
+    # Besides, it looks like currently abiniti is not compatible with triqs 3.x,
+    # some porting is needed
+    # if (TRIQS_VERSION_MAJOR VERSION_EQUAL "3")
+    #   set(DO_BUILD_67_TRIQS_EXT ON)
+    #   set(HAVE_TRIQS_v3 1)
+    #   set(HAVE_TRIQS_v2_0 1)
+    # endif()
+    if (TRIQS_VERSION_MAJOR VERSION_EQUAL "2" AND TRIQS_VERSION_MINOR VERSION_EQUAL "0")
+      set(DO_BUILD_67_TRIQS_EXT ON)
+      set(HAVE_TRIQS_v2_0 1)
+    endif()
+    if (TRIQS_VERSION_MAJOR VERSION_EQUAL "1" AND TRIQS_VERSION_MINOR VERSION_EQUAL "4")
+      set(DO_BUILD_67_TRIQS_EXT ON)
+      set(HAVE_TRIQS_v1_4 1)
+    endif()
+    #get_property(TRIQS_COMPILE_DEFINITIONS TARGET triqs PROPERTY INTERFACE_COMPILE_DEFINITIONS)
+    #get_property(TRIQS_COMPILE_FEATURES TARGET triqs PROPERTY INTERFACE_COMPILE_FEATURES)
+    #get_property(TRIQS_COMPILE_OPTIONS TARGET triqs PROPERTY INTERFACE_COMPILE_OPTIONS)
+    get_property(TRIQS_INCLUDE_DIRECTORIES TARGET triqs PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+    get_property(TRIQS_LINK_LIBRARIES TARGET triqs PROPERTY INTERFACE_LINK_LIBRARIES)
+  else()
+    message(SEND_ERROR "ABINIT_ENABLE_TRIQS activated but TRIQS has not been found!")
   endif()
-
-  if (TRIQS_VERSION_MAJOR VERSION_EQUAL "1" AND TRIQS_VERSION_MINOR VERSION_EQUAL "4")
-    set(DO_BUILD_67_TRIQS_EXT ON)
-    set(HAVE_TRIQS_v1_4 1)
-  endif()
-
-  #get_property(TRIQS_COMPILE_DEFINITIONS TARGET triqs PROPERTY INTERFACE_COMPILE_DEFINITIONS)
-  #get_property(TRIQS_COMPILE_FEATURES TARGET triqs PROPERTY INTERFACE_COMPILE_FEATURES)
-  #get_property(TRIQS_COMPILE_OPTIONS TARGET triqs PROPERTY INTERFACE_COMPILE_OPTIONS)
-  get_property(TRIQS_INCLUDE_DIRECTORIES TARGET triqs PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-  get_property(TRIQS_LINK_LIBRARIES TARGET triqs PROPERTY INTERFACE_LINK_LIBRARIES)
-else()
-  message(STATUS "triqs NOT FOUND")
 endif()
 
 #
@@ -834,7 +899,6 @@ if (LAPACK_FOUND)
 else()
   message(STATUS "    LAPACK not found ! Please recheck your environment variables.")
 endif()
-message(STATUS "")
 
 if (ABINIT_SCALAPACK_ENABLED)
   message(STATUS "Scalapack enabled:")
@@ -989,6 +1053,13 @@ else()
   message(STATUS "BigDFT not found!")
 endif()
 
+if (LEVMAR_FOUND)
+  message(STATUS "levmar found:")
+  message(STATUS "  > levmar path : ${LEVMAR_LIBRARY}")
+else()
+  message(STATUS "levmar not found!")
+endif()
+
 if (TRIQS_FOUND)
   message(STATUS "TRIQS found:")
   message(STATUS "  > TRIQS version        : ${TRIQS_VERSION}")
@@ -1042,6 +1113,7 @@ if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP OR HAVE_OPENMP_OFFLOAD OR AB
   else()
     message(STATUS "  > OpenMP offload not enabled!")
   endif()
+  message(STATUS "  > GPU-aware MPI enabled : ${ABINIT_ENABLE_GPU_AWARE_MPI}")
   if (ABINIT_KOKKOS_WANTED)
     message(STATUS "  > Kokkos enabled:")
     if (ABINIT_KOKKOS_BUILD)

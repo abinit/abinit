@@ -27,7 +27,7 @@ module m_dfpt_mkvxcstr
 
  use defs_abitypes, only : MPI_type
  use m_time,      only : timab
- use m_symtk,     only : matr3inv
+ use m_matrix,    only : matr3inv
  use m_xctk,      only : xcden, xcpot
 
  implicit none

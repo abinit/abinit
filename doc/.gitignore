@@ -21,10 +21,12 @@ variables/files.md
 variables/geo.md
 variables/gstate.md
 variables/gw.md
+variables/gwr.md
 variables/internal.md
 variables/paral.md
 variables/paw.md
 variables/rlx.md
+variables/rttddft.md
 variables/vdw.md
 variables/w90.md
 variables/optic.md
@@ -111,6 +113,7 @@ topics/q-points.md
 topics/RandStopPow.md
 topics/Recursion.md
 topics/RPACorrEn.md
+topics/RTTDDFT.md
 topics/SCFControl.md
 topics/SCFAlgorithms.md
 topics/SelfEnergy.md

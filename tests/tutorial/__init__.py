@@ -2,7 +2,7 @@
 need_cpp_vars = [
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -15,6 +15,7 @@ subsuites = [
 "bs",
 "gw1",
 "gw2",
+"gwr",
 "dftu",
 "lwf",
 "nuc",
@@ -22,6 +23,7 @@ subsuites = [
 "paw2",
 "positron",
 "spin",
+"rttddft",
 "tddft",
 "udet",
 "lruj",
@@ -30,7 +32,7 @@ subsuites = [
 
 #: List of input files
 inp_files = [
-"tbase1_1.abi", 
+"tbase1_1.abi",
 "tbase1_2.abi",
 "tbase1_3.abi",
 "tbase1_4.abi",
@@ -74,6 +76,11 @@ inp_files = [
 "tgw2_2.abi",
 "tgw2_3.abi",
 "tgw2_4.abi",
+"tgwr_1.abi",
+"tgwr_2.abi",
+"tgwr_3.abi",
+"tgwr_4.abi",
+"tgwr_5.abi",
 "tlwf_1.abi",
 "tnuc_1.abi",
 "tnuc_2.abi",
@@ -93,6 +100,10 @@ inp_files = [
 "tpositron_5.abi",
 "tpositron_6.abi",
 "tpositron_7.abi",
+"trttddft_1.abi",
+"trttddft_2.abi",
+"trttddft_3.abi",
+"trttddft_4.abi",
 "tspin_1.abi",
 "tspin_2.abi",
 "tspin_3.abi",

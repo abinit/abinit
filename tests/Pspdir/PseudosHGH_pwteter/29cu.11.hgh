@@ -1,6 +1,6 @@
-Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998) 
+Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
    29  11  010605 zatom,zion,pspdat
- 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well 
+ 3 1   2 0 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
   0.530000    0.000000    0.000000    0.000000   0.000000 rloc, c1, c2, c3, c4
   0.423734    3.888050    3.276584    2.290091          rs, h11s, h22s, h33s
   0.572177    1.751272    0.374943    0.000000          rp, h11p, h22p, h33p

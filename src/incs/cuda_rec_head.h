@@ -12,7 +12,9 @@
 #ifndef CUDA_REC_HEAD_H
 #define CUDA_REC_HEAD_H
 
+#if defined HAVE_CONFIG_H
 #include "config.h"
+#endif
 #include "cuda_header.h"
 
 

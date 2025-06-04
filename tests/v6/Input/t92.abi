@@ -30,7 +30,6 @@ t90o_DS11_GKK6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrggkk
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
 #%% [files]
 #%% files_to_test = 

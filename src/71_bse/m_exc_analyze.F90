@@ -28,7 +28,7 @@ module m_exc_analyze
  use m_xmpi
  use m_errors
 
- use defs_datatypes,      only : pseudopotential_type, ebands_t
+ use defs_datatypes,      only : pseudopotential_type
  use m_io_tools,          only : open_file
  use m_numeric_tools,     only : iseven, wrap2_zero_one
  use m_bz_mesh,           only : kmesh_t
@@ -67,7 +67,6 @@ contains
 !! BS_files<excfiles>=filenames used in the Bethe-Salpeter part.
 !! Kmesh<kmesh_t>=Info on the k-point sampling for wave functions.
 !! Cryst<crystal_t>=Structure defining the crystalline structure.
-!! KS_Bst<ebands_t>
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
 !! Pawrad(ntypat*usepaw)<type(pawrad_type)>=paw radial mesh and related data.
 !! Psps <pseudopotential_type>=variables related to pseudopotentials.

@@ -3,8 +3,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 executable = "aim"
 
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+
 ValueWithConditions = dict
 Variable=dict
 

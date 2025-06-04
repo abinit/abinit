@@ -130,7 +130,6 @@ pseudos "Si_r.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa, eos_nvhpc_23.11_elpa
 #%% [files]
 #%% files_to_test =
 #%%   t03.abo, tolnlines = 25, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;

@@ -30,7 +30,8 @@ MODULE m_memeval
  use defs_datatypes, only : pspheader_type
  use defs_abitypes,   only : MPI_type
  use m_geometry,      only : mkradim, mkrdim, xred2xcart, metric
- use m_symtk,         only : mati3inv, littlegroup_q
+ use m_matrix,        only : mati3inv
+ use m_symtk,         only : littlegroup_q
  use m_spgdata,       only : prtspgroup
  use m_fftcore,       only : getng
  use m_kg,            only : getmpw

@@ -3,8 +3,12 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 executable = "multibinit"
 
-from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
-#from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
+try:
+    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+except ImportError:
+    # This is needed for importing this module within Abipy
+    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+
 ValueWithConditions = dict
 Variable = dict
 
@@ -39,29 +43,30 @@ Variable(
 """,
 ),
 
-Variable(
-    abivarname="dipdip_range@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['LatticeModel_expert'],
-    dimensions=[3],
-    defaultval=0,
-    mnemonics="Dipole-Dipole range",
-    added_in_version="before_v9",
-    text=r"""
-Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
-
-* dipdip_range if superior to ncell and superior to short-range interaction
-* ncell if dipdip_range inferior to ncell
-* short-range if dipdip_range inferior to short-range interaction
-
-For example:
-
-    * if dipdip_range = 2 2 2 and the short range interaction if 3 3 3, the dipdip interaction will be set on 3 3 3
-
-    * if ncell = 15 15 15 and the dipdip_range is 6 6 6, the dipdip interaction will be set on 15 15 15
-""",
-),
+## Deprecated.
+#Variable(
+#    abivarname="dipdip_range@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['LatticeModel_expert'],
+#    dimensions=[3],
+#    defaultval=0,
+#    mnemonics="Dipole-Dipole range",
+#    added_in_version="before_v9",
+#    text=r"""
+#Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
+#
+#* dipdip_range if superior to ncell and superior to short-range interaction
+#* ncell if dipdip_range inferior to ncell
+#* short-range if dipdip_range inferior to short-range interaction
+#
+#For example:
+#
+#    * if dipdip_range = 2 2 2 and the short range interaction if 3 3 3, the dipdip interaction will be set on 3 3 3
+#
+#    * if ncell = 15 15 15 and the dipdip_range is 6 6 6, the dipdip interaction will be set on 15 15 15
+#""",
+#),
 
 
 Variable(
@@ -300,10 +305,6 @@ with number of steps [[multibinit:lwf_temperature_nstep]] will be done.
 The corresponding _lwf_hist.nc  file has the corresponding temperature in the filename.
 """,
 ),
-
-
-
-
 
 
 Variable(
@@ -572,6 +573,23 @@ Set the range of the powers for the anharmonic coefficients
 """,
 ),
 
+
+
+Variable(
+    abivarname="fit_max_nbody@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions=['max([[multibinit:fit_rangePower]])-min([[multibinit:fit_rangePower]])+1'],
+    defaultval=0,
+    mnemonics="FIT MAXimum Number of BODY for the coefficients",
+    added_in_version="before_v9",
+    text=r"""
+For terms of every order specified in [[multibinit:fit_rangePower]], set the maximum of the number of bodies involved. The number of values should be the same as the number of orders. This can reduce the number of terms generated, so that the high order terms can be generated within a reasonable time. Note that each atomic motion in one direction and each strain component count as one body.
+""",
+),
+
+
 Variable(
     abivarname="fit_cutoff@multibinit",
     varset="multibinit",
@@ -802,6 +820,32 @@ Indices of the banned coefficients during the fit process of the model
 ),
 
 Variable(
+    abivarname="fit_weight_T@multibinit",
+    varset="multibinit",
+    vartype="float",
+    topics=['FitProcess_expert'],
+    dimensions='scalar',
+    defaultval=-0.1,
+    mnemonics="FIT WEIGHT characteristic Temperature",
+    added_in_version="before_v9",
+    text=r"""
+A temperature-like parameter to tune the weights of the structures in the training set. 
+If the value is negative or 0, this weight scheme is not used and all structures in the training set are seen as equally important. 
+
+If it is positive:
+For each structure in the traning set, the average of the norm of the forces on the atoms are evaluated, and 
+the weight is evaluated as exp(-average(norm(force))/(kb T)). And then it is normalized so that the average of the weights is 1.
+With this weight scheme, the structure with large forces are seen as less important than the structre with small forces. 
+For small fit_weight_T, the weight are more biased to the structures with low forces.
+This can be useful when the structure near local minima and saddle points (in which the forces are close to 0) need to the emphasized. 
+Note that if the fig_weight_T is too small, the algoritm becomes inefficient as a large part of the training set has very low weight and are wasted. 
+""",
+),
+
+
+
+
+Variable(
     abivarname="ts_option@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -871,6 +915,27 @@ Variable(
 Number of maximum additional coefficients for the bound process
 """,
 ),
+
+Variable(
+        abivarname="bound_option@multibinit",
+        varset="multibinit",
+        vartype="integer",
+        topics=['BoundingProcess_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="BOUND OPTION",
+        added_in_version="v10",
+        text=r"""
+Type of bounding terms.
+Bounding terms are needed if the polynomial with all even terms are negative, or the polynomial contains odd terms. There are two strategies to generate bounding terms:
+
+* 1 -->  The bounding term should include all the types of displacement in the term to be bounded. 
+* 2 -->  The bounding term can inlude the terms with only part of the displacement types.
+
+For example, for a polynomial term x^2y^1, the bounding terms of order 4 will include $x^4$ with option 2, but not with option 1.
+""",
+),
+
 
 Variable(
     abivarname="bound_penalty@multibinit",
@@ -1141,6 +1206,150 @@ See [[abinit:dtion]]
 ),
 
 Variable(
+    abivarname="efield_type@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Electric FIELD TYPE for Multibinit",
+    added_in_version="v10",
+    text=r"""
+Set the electric field option for Multibinit.
+
+* 0 --> no electric field
+
+* 1 --> Homogeneous electric field. The electric field is constant in time and in space during the dynamics. This corresponds to the classical previous version
+
+* 2 --> Allows the computation of time modulated electric fields with the functional form cos(2*pi*t/T+phi)
+
+* 3 --> Allows the computation of spatially modulated electric fields with the functional form cos(2*pi*x/l_x+2*pi*y/l_y+2*pi*z/l_z+phi)
+
+* 4 --> Allows the computation of spatially and time modulated electric fields with the functional form cos(2*pi*x/l_x+2*pi*y/l_y+2*pi*z/l_z+2*pi*t/T+phi)
+
+* 5 --> Allows the computation of Gaussian like distributed electric fields.
+
+* 6 --> Allows the computation of 2 spatially modulated electric fields with the functional form of 3 at the same time."""
+),
+
+Variable(
+    abivarname="efield@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3, "[[multibinit:nefield]]"],
+    defaultval=[0.0, 0.0, 0.0],
+    mnemonics="Electric FIELD magnitude for Multibinit",
+    added_in_version="before v9",
+    text=r"""
+Set the magnitude for the electric field.
+For efield_type 6, multiple ([[multibinit:nefield]])  efield values  are allowed, the format is 
+Ex1, Ey1, Ez1, 
+Ex2, Ey2, Ez2
+"""
+),
+
+
+Variable(
+    abivarname="efield_background@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0.0, 0.0, 0.0], 
+    mnemonics="Electric FIELD magnitude for BACKGROUND field in Multibinit when efield_type is > 1",
+    added_in_version="v10",
+    text=r"""
+Set the magnitude for the background homogeneous electric field when efield_type > 1 in MB"""
+),
+
+Variable(
+    abivarname="efield_lambda@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3, "[[multibinit:nefield]]"],
+    defaultval=[0.0, 0.0, 0.0],  
+    mnemonics="Electric FIELD periodicity LAMBDA.",
+    added_in_version="v10",
+    text=r"""
+Set the periodicity in real space for spatially inhomogeneous vector fields. 0.0 is interpreted as infinite.
+For efield_type 6, multiple ([[multibinit:nefield]])  efield_lambda values  are allowed, the format is 
+λx1, λy1, λz1, 
+λx2, λy2, λz2
+"""
+),
+
+Variable(
+    abivarname="efield_period@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1000000000000000.0,
+    mnemonics="Electric FIELD PERIOD.",
+    added_in_version="v10",
+    text=r"""
+Set the periodicity in time for time modulated electric fields"""
+),
+
+Variable(
+    abivarname="efield_phase@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=["[[multibinit:nefield]]"],
+    defaultval=0.0,
+    mnemonics="Electric FIELD PHASE shift.",
+    added_in_version="v10",
+    text=r"""
+Set the phase shift for spatially or time modulated fields. 
+For efield_type 6, multiple ([[multibinit:nefield]])  efield_phase values  are allowed.
+"""
+),
+
+
+Variable(
+    abivarname="efield_gmean@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval= [0.0, 0.0, 0.0],    
+    mnemonics="Electric FIELD Gaussian MEAN.",
+    added_in_version="v10",
+    text=r"""
+Set the mean value for the Gaussian distributed electric field."""
+),
+
+Variable(
+    abivarname="efield_gvel@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3], 
+    defaultval= [0.0, 0.0, 0.0],    
+    mnemonics="Electric FIELD Gaussian VELocity.",
+    added_in_version="v10",
+    text=r"""
+Set the velocity of the center of the Gaussian distributed field."""
+),
+
+Variable(
+    abivarname="efield_sigma@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.01,
+    mnemonics="Electric FIELD gaussian SIGMA.",
+    added_in_version="v10",
+    text=r"""
+Set the standard deviation of the Gaussian field."""
+),
+
+
+Variable(
     abivarname="latt_friction@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -1277,6 +1486,23 @@ Variable(
 
 """,
 ),
+
+
+Variable(
+    abivarname="nefield@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Number of Electric FEIELDs",
+    added_in_version="v10",
+    text=r"""
+Number of Electric fields to be used in the dynamics when efield_type 6.
+Currently only 2 efields are allowed. 
+""",
+),
+
 
 
 
@@ -2176,9 +2402,6 @@ See also [[outdata_prefix@abinit]] and [[outdata_prefix@anaddb]]
 
 """
 ),
-
-
-
 
 
 ]

@@ -49,7 +49,7 @@ occopt 4
 tsmear 0.04
 
 #The relaxation
-ionmov 2
+geoopt "bfgs"
 tolmxf 5.0d-4    # This might be not sufficiently converged. The default is more stringent.
 ntime 10
 

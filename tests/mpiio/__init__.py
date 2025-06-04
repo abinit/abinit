@@ -5,7 +5,7 @@ need_cpp_vars = [
 "HAVE_MPI_IO",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -26,6 +26,6 @@ inp_files = [
 "t49.abi",
 "t51.abi",
 "t62.abi",
-"t69.abi", 
+"t69.abi",
 "-t99.abi", # disabled since it have no meaning with my modifications
 ]

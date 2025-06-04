@@ -25,7 +25,7 @@ module m_raman
  use m_errors
  use m_abicore
 
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
 
  implicit none
 
