@@ -15,7 +15,7 @@ add_library(17_gpu_toolbox STATIC
 
 set_target_properties(17_gpu_toolbox
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(17_gpu_toolbox
   PRIVATE
@@ -24,7 +24,7 @@ target_include_directories(17_gpu_toolbox
 
 target_include_directories(17_gpu_toolbox
   PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules;${CMAKE_CURRENT_SOURCE_DIR}>"
+  "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules;${CMAKE_CURRENT_SOURCE_DIR}>"
   $<INSTALL_INTERFACE:include/libpaw>
   )
 
