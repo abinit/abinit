@@ -1,14 +1,14 @@
 ## v10.4
 
 Version 10.4, released on May 15, 2025.
-<!-- Release notes updated on June 3, 2025. -->
+<!-- Release notes updated on June 4, 2025. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
 <!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175, 
 EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had alreacy been included in v10.2,
 and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .  
-For release v10.3, also MR1176 to 1182 are included, as well as MR1184-1186 and MR1188. MR1183 and MR1187 will be included in v10.6.
+For release v10.3, also MR1176 to 1182 are included, as well as MR1184-1186, MR1188 and MR1190. MR1183 and MR1187 will be included in v10.6.
 -->
 <!-- (with some late contributions until XXX 2024). -->
 
