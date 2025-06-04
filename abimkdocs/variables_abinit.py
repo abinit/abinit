@@ -16130,6 +16130,22 @@ the [BoltzTraP code](https://www.imc.tuwien.ac.at/forschungsbereich_theoretische
 ),
 
 Variable(
+    abivarname="prtchkprdm",
+    varset="files",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM",
+    requires="[[optdriver]] == 4",
+    added_in_version="9.4.0",
+    text=r"""
+[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
+It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
+""",
+),
+
+Variable(
     abivarname="prtcif",
     varset="dev",
     vartype="integer",
@@ -16146,18 +16162,17 @@ present run (cell size shape and atomic positions).
 ),
 
 Variable(
-    abivarname="prtchkprdm",
-    varset="files",
+    abivarname="prtcurrent",
+    varset="rttddft",
     vartype="integer",
-    topics=['GW_expert', 'SelfEnergy_expert'],
+    topics=['RTTDDFT_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM",
-    requires="[[optdriver]] == 4",
-    added_in_version="9.4.0",
+    mnemonics="PRinT macroscopic CURRENT density",
+    added_in_version="10",
     text=r"""
-[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
-It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
+If set to 1, prints the time-dependent macroscopic current density
+computed in real-time TDDFT calculations ([[optdriver]] 9).
 """,
 ),
 
