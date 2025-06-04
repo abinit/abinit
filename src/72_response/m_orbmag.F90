@@ -348,6 +348,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      end if
    end do
  end do
+
  ABI_MALLOC(ph1d,(2,dtset%natom*(2*(ngfft1+ngfft2+ngfft3)+3)))
  call getph(atindx,dtset%natom,ngfft1,ngfft2,ngfft3,ph1d,crystal%xred)
 
@@ -2619,16 +2620,18 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
 
   dterm%aij = czero
 
+  ! note that paw_ij has atoms ordered by input, while
+  ! we would like to order by groups of atoms with atindx
   do iat=1,dtset%natom
     iatom=atindx(iat)
     itypat=dtset%typat(iat)
     do klmn=1,pawtab(itypat)%lmn2_size
       do idij = 1, dterm%ndij
-        if (paw_ij(iatom)%cplex_dij .EQ. 2) then
+        if (paw_ij(iat)%cplex_dij .EQ. 2) then
           dterm%aij(iatom,klmn,idij) = &
-            & CMPLX(paw_ij(iatom)%dij(2*klmn-1,idij),paw_ij(iatom)%dij(2*klmn,idij))
+            & CMPLX(paw_ij(iat)%dij(2*klmn-1,idij),paw_ij(iat)%dij(2*klmn,idij))
         else
-          dterm%aij(iatom,klmn,idij) = CMPLX(paw_ij(iatom)%dij(klmn,idij),zero)
+          dterm%aij(iatom,klmn,idij) = CMPLX(paw_ij(iat)%dij(klmn,idij),zero)
         end if
       end do ! idij
     end do ! klmn
