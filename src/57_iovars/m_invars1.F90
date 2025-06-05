@@ -670,6 +670,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%algalch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%atndlist,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%cellcharge,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%chrgat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
@@ -680,6 +681,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%dmft_shiftself,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%dynimage,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%iatfix,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%iatnd,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%f4of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
@@ -997,6 +999,7 @@ subroutine indefo1(dtset)
 !A
  dtset%acell_orig(:,:)=zero
  dtset%algalch(:)=1
+ dtset%atndlist(:,:)=zero
  dtset%amu_orig(:,:)=-one
  dtset%autoparal=0
 !B
@@ -1026,6 +1029,7 @@ subroutine indefo1(dtset)
  dtset%gwls_n_proj_freq=0
 !I
  dtset%iatfix(:,:)=0
+ dtset%iatnd(:)=0
  dtset%icoulomb=0
  dtset%imgmov=0
  dtset%ivalence=0
@@ -1045,6 +1049,7 @@ subroutine indefo1(dtset)
  dtset%mkqmem=-1
  dtset%mk1mem=-1
 !N
+ dtset%natnd=0
  dtset%natpawu=0
  dtset%natsph=0
  dtset%natsph_extra=0
@@ -1431,10 +1436,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ABI_MALLOC(iatnd,(natnd))
  ABI_MALLOC(atndlist,(3,natnd))
  if(natnd > 0) then
+   if(allocated(dtset%iatnd)) then
+     ABI_FREE(dtset%iatnd)
+   end if
+   ABI_MALLOC(dtset%iatnd,(natnd))
    iatnd=0
    call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
    if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
-   dtset%iatnd=iatnd(1:natnd)
+   dtset%iatnd(1:natnd)=iatnd(1:natnd)
    atndlist=zero
    call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
    if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])

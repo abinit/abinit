@@ -566,11 +566,22 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,&
      ABI_ERROR(msg)
    end if
 
-   ! nucdipmom is read for each atom, from 1 to natom
-   call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
-   if(tread==1) then
-     nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom), [3, natom])
+   ! nucdipmom is read for each irreducible atom, from 1 to natom
+   nucdipmom=zero
+   if(natnd > 0) then
+     do ii=1,natnd
+       nucdipmom(1:3,iatnd(ii))=atndlist(1:3,ii)
+     end do
+   else
+     call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
+     if(tread==1)nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
    end if
+
+   !! nucdipmom is read for each atom, from 1 to natom
+   !call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
+   !if(tread==1) then
+   !  nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom), [3, natom])
+   !end if
 
    ! Will use the geometry builder
    if(tnatrd/=1 .and. nobj/=0)then
