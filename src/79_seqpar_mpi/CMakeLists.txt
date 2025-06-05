@@ -17,7 +17,7 @@ add_library(79_seqpar_mpi STATIC
 
 set_target_properties(79_seqpar_mpi
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(79_seqpar_mpi
   PRIVATE
@@ -25,7 +25,7 @@ target_include_directories(79_seqpar_mpi
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(79_seqpar_mpi
