@@ -805,7 +805,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    blksize_gemm_nonlop_tmp = gemm_nonlop_block_size; is_distrib_tmp = gemm_nonlop_is_distributed
    gemm_nonlop_block_size = dtset%gpu_nl_splitsize
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
-   &                        dtset%nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+   &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
    &                        optforces,0,-1,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
    &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
    gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
