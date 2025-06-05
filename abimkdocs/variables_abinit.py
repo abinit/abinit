@@ -274,6 +274,28 @@ See also the variables [[chneut]] and [[chneut@anaddb]], that govern the imposit
 ),
 
 Variable(
+    abivarname="atndlist",
+    varset="gstate",
+    vartype="real",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions=['[[3*natnd]]'],
+    defaultval=MultipleValue(number=None, value=0),
+    mnemonics="ATom Nuclear Dipole moment LIST",
+    requires="[[natnd]] > 0 and [[iatnd]]",
+    added_in_version="v10.5",
+    text=r"""
+Provides an alternative input to [[nucdipmom]] for the atoms carrying explicit 
+nuclear dipole moments. The number of atoms in the cell with explicit
+nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. There are 3*[[natnd]]
+entries in [[atndlist]]: the Cartesian x, y, and z components of the dipole moment to be
+assigned to each of the [[natnd]] atoms in the list. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
+Variable(
     abivarname="atvshift",
     varset="ffield",
     vartype="real",
@@ -7751,6 +7773,27 @@ along x, y or z directions, or a combination of these. See the variable
 ),
 
 Variable(
+    abivarname="iatnd",
+    varset="gstate",
+    vartype="integer",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions=['[[natnd]]'],
+    defaultval=0,
+    mnemonics="list of AToms with Nuclear Dipole moment",
+    requires="[[natnd]] > 0",
+    added_in_version="v10.5",
+    text=r"""
+Together with [[natnd]], provides an alternative input to [[nucdipmom]] for 
+the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with 
+explicit nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
+
+Variable(
     abivarname="iatsph",
     varset="gstate",
     vartype="integer",
@@ -11187,6 +11230,26 @@ along the Z direction during a structural optimization or molecular dynamics.
 When [[natfixz]] > 0, [[natfixz]] entries should be provided in array [[iatfixz]].
 """,
 ),
+
+Variable(
+    abivarname="natnd",
+    varset="gstate",
+    vartype="integer",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Number of AToms with Nuclear Dipole moment",
+    added_in_version="v10.5",
+    text=r"""
+Provides an alternative input to [[nucdipmom]] for the atoms carrying explicit 
+nuclear dipole moments. The number of atoms in the cell with explicit
+nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
 
 Variable(
     abivarname="natom",
