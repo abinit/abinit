@@ -177,7 +177,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !arrays
  integer,allocatable :: gbound(:,:)
  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
- logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,gpu_cwavef
  real(dp) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwavef_rot(:,:,:,:),occ_diag(:),occ_k(:)
@@ -293,6 +293,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  !FIXME Disable for now when running with HIP (bug sometimes occurs)
 #ifdef HAVE_GPU_HIP
  gpu_option=ABI_GPU_DISABLED
+#endif
+ gpu_cwavef=(gpu_option==ABI_GPU_OPENMP .and. dtset%nspinor==1 .and. paw_dmft%use_sc_dmft==0)
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(to:cg) if(gpu_cwavef)
 #endif
 
 !start loop over alpha and beta
@@ -691,6 +695,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                ABI_FREE(cwavef)
              end if
              ABI_MALLOC(cwavef,(2,npw_k*blocksize,dtset%nspinor))
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavef) IF(gpu_cwavef)
+#endif
            end if
            if(ioption==1)  then
              ABI_MALLOC(kg_k_cart_block,(npw_k))
@@ -714,7 +721,20 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
            do iblock=1,nbdblock
              if (dtset%nspinor==1) then
-               cwavef(:,1:npw_k*blocksize,1)=cg(:,1+(iblock-1)*npw_k*blocksize+icg:iblock*npw_k*blocksize+icg)
+               if(gpu_cwavef) then
+#ifdef HAVE_OPENMP_OFFLOAD
+                 !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg,cwavef) PRIVATE(ib)
+                 do ib=1,blocksize
+                   !$OMP PARALLEL DO PRIVATE(ipw)
+                   do ipw=1,npw_k
+                     cwavef(1,ipw+(ib-1)*npw_k,1)=cg(1,ipw+(ib-1)*npw_k+(iblock-1)*npw_k*blocksize+icg)
+                     cwavef(2,ipw+(ib-1)*npw_k,1)=cg(2,ipw+(ib-1)*npw_k+(iblock-1)*npw_k*blocksize+icg)
+                   end do
+                 end do
+#endif
+               else
+                 cwavef(:,1:npw_k*blocksize,1)=cg(:,1+(iblock-1)*npw_k*blocksize+icg:iblock*npw_k*blocksize+icg)
+               end if
              else
                if (mpi_enreg%paral_spinor==0) then
                  ishf=(iblock-1)*npw_k*my_nspinor*blocksize+icg
@@ -738,18 +758,32 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
                kpt_cart=gp2pi1*dtset%kptns(1,ikpt)+gp2pi2*dtset%kptns(2,ikpt)+gp2pi3*dtset%kptns(3,ikpt)
                kg_k_cart_block(1:npw_k)=gp2pi1*kg_k(1,1:npw_k)+gp2pi2*kg_k(2,1:npw_k)+gp2pi3*kg_k(3,1:npw_k)+kpt_cart
-               do ib=1,blocksize
-                 do ipw=1,npw_k
-                   cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                   cwavef(2,ipw,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
-                   cwavef(1,ipw,1)=cwftmp
-                   if (my_nspinor==2) then
-                     cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                     cwavef(2,ipw,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
-                     cwavef(1,ipw,2)=cwftmp
-                   end if
+               if(gpu_cwavef) then
+#ifdef HAVE_OPENMP_OFFLOAD
+                 !$OMP TARGET TEAMS DISTRIBUTE MAP(to:kg_k_cart_block,cwavef) PRIVATE(ib)
+                 do ib=1,blocksize
+                   !$OMP PARALLEL DO PRIVATE(ipw,cwftmp)
+                   do ipw=1,npw_k
+                     cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                     cwavef(2,ipw,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                     cwavef(1,ipw,1)=cwftmp
+                   end do
                  end do
-               end do
+#endif
+               else
+                 do ib=1,blocksize
+                   do ipw=1,npw_k
+                     cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                     cwavef(2,ipw,1)=cwavef(1,ipw+(ib-1)*npw_k,1)*kg_k_cart_block(ipw)
+                     cwavef(1,ipw,1)=cwftmp
+                     if (my_nspinor==2) then
+                       cwftmp=-cwavef(2,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
+                       cwavef(2,ipw,2)=cwavef(1,ipw+(ib-1)*npw_k,2)*kg_k_cart_block(ipw)
+                       cwavef(1,ipw,2)=cwftmp
+                     end if
+                   end do
+                 end do
+               end if
              else if(ioption==2)then
                ABI_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
              end if
@@ -849,12 +883,15 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                ABI_FREE_MANAGED(cwavef)
 #endif
              else
+#ifdef HAVE_OPENMP_OFFLOAD
+               !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(gpu_cwavef)
+#endif
                ABI_FREE(cwavef)
              end if
            end if
 
            ABI_FREE(occ_k)
-         end if
+         end if ! paral_kgb
 
          ABI_FREE(gbound)
 
@@ -999,6 +1036,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cg) if(gpu_cwavef)
+#endif
 !Add extfpmd free electrons contribution to density
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
