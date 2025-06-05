@@ -655,8 +655,11 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !scalars
  integer :: bandpp,ier,ikpt_this_proc,my_nspinor,ndatarecv,nproc_band,npw,nspinortot
  integer :: spaceComm=0,tim_nonlop
- logical :: do_transpose
+ logical :: do_transpose,transfer_cwavef
  integer :: l_gpu_option
+#ifdef HAVE_OPENMP_OFFLOAD
+ integer :: ipw,ind,iibandpp
+#endif
  !character(len=500) :: msg
 !arrays
  integer,  allocatable :: index_wavef_band(:)
@@ -741,6 +744,14 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    end if
  end if
 
+ transfer_cwavef=.false.
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(.not. xomp_target_is_present(c_loc(cwavef)) .and. hamk%gpu_option==ABI_GPU_OPENMP) then
+   transfer_cwavef=.true.
+ end if
+ !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(transfer_cwavef)
+#endif
+
  ABI_MALLOC(sendcountsloc,(nproc_band))
  ABI_MALLOC(sdisplsloc   ,(nproc_band))
  ABI_MALLOC(recvcountsloc,(nproc_band))
@@ -776,8 +787,15 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    ABI_MALLOC(gvnlc_alltoall2,  (2,ndatarecv*my_nspinor*bandpp))
  end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:cwavef_alltoall2) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
    ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:cwavef_alltoall1) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
    if(signs==2)then
      if (paw_opt/=3) then
        ABI_MALLOC(gvnlc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
@@ -814,13 +832,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 #endif
    else
      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall1,&
-         &     recvcountsloc,rdisplsloc,spaceComm,ier)
+         &     recvcountsloc,rdisplsloc,spaceComm,ier,use_omp_map=(hamk%gpu_option==ABI_GPU_OPENMP))
    end if
 
 
    else
-      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
-           &     recvcountsloc,rdisplsloc,spaceComm,ier)
+     call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
+           &     recvcountsloc,rdisplsloc,spaceComm,ier,use_omp_map=(hamk%gpu_option==ABI_GPU_OPENMP))
    end if
    call timab(581,2,tsec)
  else
@@ -830,10 +848,16 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
        call copy_gpu_to_gpu(C_LOC(cwavef_alltoall2), C_LOC(cwavef), INT(2, c_size_t) * ndatarecv * my_nspinor * bandpp * dp)
 #endif
+    else if (hamk%gpu_option == ABI_GPU_OPENMP) then
+      call gpu_copy(cwavef_alltoall2, cwavef, int(2,c_size_t)*ndatarecv*my_nspinor*bandpp)
     else
-       call DCOPY(2*ndatarecv*my_nspinor*bandpp,cwavef,1,cwavef_alltoall2,1)
+      call DCOPY(2*ndatarecv*my_nspinor*bandpp,cwavef,1,cwavef_alltoall2,1)
     end if
  end if
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(transfer_cwavef)
+#endif
 
 !=====================================================================
  if (bandpp==1) then
@@ -841,7 +865,22 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.nspinortot==2) then !Sort WF by spin
      call prep_sort_wavef_spin(nproc_band,my_nspinor,ndatarecv,recvcounts,rdispls,index_wavef_band)
-     cwavef_alltoall2(:, :) = cwavef_alltoall1(:,index_wavef_band)
+     if(hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE &
+       !$OMP& PRIVATE(iibandpp) MAP(to:cwavef_alltoall1,cwavef_alltoall2,index_wavef_band)
+       do iibandpp=1,bandpp*my_nspinor
+         !$OMP PARALLEL DO PRIVATE(ind,ipw)
+         do ipw = 1 ,ndatarecv
+           ind=index_wavef_band(ipw + ndatarecv*(iibandpp-1))
+           cwavef_alltoall2(1,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall1(1,ind)
+           cwavef_alltoall2(2,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall1(2,ind)
+         end do
+       end do
+#endif
+     else
+       cwavef_alltoall2(:, :) = cwavef_alltoall1(:,index_wavef_band)
+     end if
    end if
 
    if (paw_opt==2) then
@@ -873,7 +912,22 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !  -------------------------------------------------------
 !  Sorting of the waves functions below bandpp
 !  -------------------------------------------------------
-     cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
+     if(hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE &
+       !$OMP& PRIVATE(iibandpp) MAP(to:cwavef_alltoall1,cwavef_alltoall2,index_wavef_band)
+       do iibandpp=1,bandpp*my_nspinor
+         !$OMP PARALLEL DO PRIVATE(ind,ipw)
+         do ipw = 1 ,ndatarecv
+           ind=index_wavef_band(ipw + ndatarecv*(iibandpp-1))
+           cwavef_alltoall2(1,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall1(1,ind)
+           cwavef_alltoall2(2,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall1(2,ind)
+         end do
+       end do
+#endif
+     else
+       cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
+     end if
    end if
 
 !  -------------------------------------------------------
@@ -957,6 +1011,10 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  ABI_FREE(recvcountsloc)
  ABI_FREE(rdisplsloc)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef_alltoall2) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  if(hamk%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_FREE_MANAGED(cwavef_alltoall2)
@@ -972,6 +1030,9 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  end if
 
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:cwavef_alltoall1) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_FREE(cwavef_alltoall1)
    if(signs==2)then
      if (paw_opt/=3) then
