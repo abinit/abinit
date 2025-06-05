@@ -15,6 +15,10 @@
 
 static int version_2_cores(int major, int minor);
 
+// Static variable to keep track of the amound of MPI tasks assigned per GPU.
+// Used mainly to assert GPU memory usage.
+static int s__nprocs_per_gpu = 1;
+
 /*=========================================================================*/
 /*________________________ GPU_function called by HOST_____________________*/
 /*=========================================================================*/
@@ -34,6 +38,9 @@ static void  prt_dev_info()
       printf("\n  Device %d: \"%s\"\n", dev, deviceProp.name);
       printf("  Revision number:                               %d.%d\n", deviceProp.major,deviceProp.minor);
       printf("  Total amount of global memory:                 %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576.);
+      if(s__nprocs_per_gpu > 1) {
+        printf("  Amount of global memory per MPI task:          %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576./s__nprocs_per_gpu);
+      }
       printf("  Clock rate:                                    %3.1f GHz\n", deviceProp.clockRate/1000000.);
       printf("  Number of processors/cores:                    %d/%d\n", NProcs,NCores);
       if (NCores<0) {
@@ -87,12 +94,39 @@ void get_gpu_max_mem_(int* device, float* max_mem)
    return;
 }
 
+// Gives the max memory available for a GPU device ---------
+extern "C"
+void get_gpu_uuid_(int* device, char* uuid)
+{
+   hipDeviceProp_t deviceProp;
+   HIP_API_CHECK(hipGetDeviceProperties(&deviceProp, *device));
+   strncpy(uuid, deviceProp.uuid.bytes, 16);
+   return;
+}
+
+// Set new value for #MPI tasks being assigned per GPU ---------
+extern "C"
+void gpu_set_nprocs_per_gpu_(int* nprocs_per_gpu)
+{
+   s__nprocs_per_gpu=*nprocs_per_gpu;
+   return;
+}
+
+// Get current value for #MPI tasks being assigned per GPU ---------
+extern "C"
+void gpu_get_nprocs_per_gpu_(int* nprocs_per_gpu)
+{
+   *nprocs_per_gpu=s__nprocs_per_gpu;
+   return;
+}
+
 // Gives max available memory available for current GPU device ---------
 extern "C"
 void gpu_get_max_mem_cpp(size_t* max_mem)
 {
    size_t free_mem;
    HIP_API_CHECK(hipMemGetInfo(&free_mem, max_mem));
+   *max_mem/=s__nprocs_per_gpu;
    return;
 }
 
@@ -102,6 +136,7 @@ void gpu_get_free_mem_cpp(size_t* free_mem)
 {
    size_t max_mem;
    HIP_API_CHECK(hipMemGetInfo(free_mem, &max_mem));
+   *free_mem/=s__nprocs_per_gpu;
    return;
 }
 
@@ -207,7 +242,8 @@ void  get_dev_info_(int* device,
 		    int* sharemem,
 		    int* regist,
 		    int* nprocs,
-		    int* ncores
+		    int* ncores,
+		    char* uuid
 		    )
 {
   hipDeviceProp_t deviceProp;
@@ -224,6 +260,7 @@ void  get_dev_info_(int* device,
   *constmem = deviceProp.totalConstMem;
   *sharemem =  deviceProp.sharedMemPerBlock;
   *regist = deviceProp.regsPerBlock;
+  strncpy(uuid,deviceProp.uuid.bytes,16);
 }
 
 
