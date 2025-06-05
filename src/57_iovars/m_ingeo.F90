@@ -129,9 +129,9 @@ contains
 !!
 !! SOURCE
 
-subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
-  genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
-  msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
+subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,&
+  genafm,iatfix,iatnd,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
+  msym,natnd,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
   ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
   symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
@@ -139,7 +139,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
- integer,intent(in) :: nimage,npsp,npspalch,nspden,nsppol
+ integer,intent(in) :: natnd,nimage,npsp,npspalch,nspden,nsppol
  integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb,comm
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i
@@ -147,14 +147,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
  real(dp),intent(out) :: slabzbeg,slabzend,tolsym
  character(len=*),intent(in) :: string
 !arrays
- integer,intent(in) :: supercell_lattice(3)
+ integer,intent(in) :: iatnd(natnd),supercell_lattice(3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
  integer,intent(out) :: typat(natom)
- real(dp),intent(inout) :: chrgat(natom)
- real(dp),intent(inout) :: nucdipmom(3,natom)
- real(dp),intent(in) :: ratsph(ntypat)
+ real(dp),intent(inout) :: atndlist(3,natnd),chrgat(natom)
+ real(dp),intent(inout) :: nucdipmom(3,natom),ratsph(ntypat)
  real(dp),intent(inout) :: spinat(3,natom)
  real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
@@ -169,7 +168,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
  integer :: bckbrvltt,brvltt,chkprim,chkprim_fake,expert_user
  integer :: fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: invar_z,ipsp,irreducible,isym,itranslat,itypat,jsym,marr,mismatch_fft_tnons,multi,multiplicity,natom_uc,natfix,natrd
- integer :: natnd,nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
@@ -179,13 +178,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
  type(geo_t) :: geo
 !arrays
  integer :: bravais_reduced(11)
- integer,allocatable :: iatnd(:),intarr(:)
+ integer,allocatable :: intarr(:)
  integer,allocatable :: is_translation(:)
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),rprimd_primitive(3,3),scalecart(3)
- real(dp),allocatable :: mass_psp(:),nucdipmomlist(:,:)
- real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:),translations(:,:)
+ real(dp),allocatable :: mass_psp(:),tnons_cart(:,:),tnons_new(:,:),translations(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -608,23 +606,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
    if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
 
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
-   natnd=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natnd',tread,'INT')
-   if(tread==1) natnd=intarr(1)
+   nucdipmom=zero
    if(natnd > 0) then
-     ABI_MALLOC(iatnd,(natnd))
-     iatnd=0
-     call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
-     if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
-     ABI_MALLOC(nucdipmomlist,(3,natnd))
-     call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'nucdipmomlist',tread,'DPR')
-     if(tread==1) nucdipmomlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
-     nucdipmom=zero
      do ii=1,natnd
-       nucdipmom(1:3,iatnd(ii))=nucdipmomlist(1:3,ii)
+       nucdipmom(1:3,iatnd(ii))=atndlist(1:3,ii)
      end do
-     ABI_FREE(iatnd)
-     ABI_FREE(nucdipmomlist)
    else
      call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
      if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])

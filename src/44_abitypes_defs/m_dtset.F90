@@ -429,7 +429,7 @@ type, public :: dataset_type
  integer :: mqgriddg
 !N
  integer :: natom
- integer :: natnd
+ integer :: natnd = 0
  integer :: natpawu
  integer :: natrd
  integer :: natsph
@@ -1036,6 +1036,7 @@ type, public :: dataset_type
 !Real allocatables
  real(dp), allocatable :: acell_orig(:,:)   ! acell_orig(3,nimage)
  real(dp), allocatable :: amu_orig(:,:)     ! amu(ntypat,nimage)
+ real(dp), allocatable :: atndlist(:,:)     ! atndlist(3,natnd)
  real(dp), allocatable :: atvshift(:,:,:)   ! atvshift(16,nsppol,natom)
  real(dp), allocatable :: cd_imfrqs(:)      ! cd_imfrqs(cd_customnimfrqs)
  real(dp), allocatable :: cellcharge(:)     ! cellcharge(nimage)
@@ -1064,7 +1065,6 @@ type, public :: dataset_type
  real(dp), allocatable :: mixalch_orig(:,:,:) ! mixalch_orig(npspalch,ntypalch,nimage)
  real(dp), allocatable :: mixesimgf(:)        ! mixesimgf(nimage)
  real(dp), allocatable :: nucdipmom(:,:)      ! nucdipmom(3,natom)
- real(dp), allocatable :: nucdipmomlist(:,:)  ! nucdipmomlist(3,natnd)
  real(dp), allocatable :: occ_orig(:,:)       ! occ_orig(mband*nkpt*nsppol,nimage)
  real(dp), allocatable :: pimass(:)           ! pimass(ntypat)
  real(dp), allocatable :: ph_qpath(:,:)       ! ph_qpath(3, nqpath)
@@ -2454,6 +2454,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 !Allocate and copy real allocatable
  call alloc_copy(dtin%acell_orig, dtout%acell_orig)
  call alloc_copy(dtin%amu_orig, dtout%amu_orig)
+ call alloc_copy(dtin%atndlist, dtout%atndlist)
  call alloc_copy(dtin%atvshift, dtout%atvshift)
  call alloc_copy(dtin%cd_imfrqs, dtout%cd_imfrqs)
  call alloc_copy(dtin%cellcharge, dtout%cellcharge)
@@ -2478,7 +2479,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%mixalch_orig, dtout%mixalch_orig)
  call alloc_copy(dtin%mixesimgf, dtout%mixesimgf)
  call alloc_copy(dtin%nucdipmom, dtout%nucdipmom)
- call alloc_copy(dtin%nucdipmomlist, dtout%nucdipmomlist)
  call alloc_copy(dtin%occ_orig, dtout%occ_orig)
  call alloc_copy(dtin%pimass, dtout%pimass)
  call alloc_copy(dtin%ptcharge, dtout%ptcharge)
@@ -2572,6 +2572,7 @@ subroutine dtset_free(dtset)
 !real allocatable
  ABI_SFREE(dtset%acell_orig)
  ABI_SFREE(dtset%amu_orig)
+ ABI_SFREE(dtset%atndlist)
  ABI_SFREE(dtset%atvshift)
  ABI_SFREE(dtset%cd_imfrqs)
  ABI_SFREE(dtset%cellcharge)
@@ -2597,7 +2598,6 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%mixalch_orig)
  ABI_SFREE(dtset%mixesimgf)
  ABI_SFREE(dtset%nucdipmom)
- ABI_SFREE(dtset%nucdipmomlist)
  ABI_SFREE(dtset%occ_orig)
  ABI_SFREE(dtset%pimass)
  ABI_SFREE(dtset%ptcharge)
@@ -3538,7 +3538,7 @@ subroutine chkvars(string)
 !<ABINIT_VARS>
 !A
  list_vars=                 ' accuracy acell adpimd adpimd_gamma'
- list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atvshift autoparal'
+ list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atndlist atvshift autoparal'
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
@@ -3715,7 +3715,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft'
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat'
- list_vars=trim(list_vars)//' nucdipmom nucdipmomlist nucefg nucfc nwfshist nzchempot'
+ list_vars=trim(list_vars)//' nucdipmom nucefg nucfc nwfshist nzchempot'
 !O
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'

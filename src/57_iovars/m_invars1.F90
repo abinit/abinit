@@ -1203,7 +1203,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,parameter :: master = 0
  integer :: chksymbreak,expert_user,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
- integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
+ integer :: natnd,natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
@@ -1214,10 +1214,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  type(atomdata_t) :: atom
 !arrays
  integer :: cond_values(4),vacuum(3)
- integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
+ integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
- real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
- real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
+ real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
+ real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
@@ -1423,6 +1423,28 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'jfielddir',tread,'INT')
  if(tread==1) dtset%jfielddir(1:3)=intarr(1:3)
 
+ ! read in natnd, iatnd, atndlist helper variables
+ natnd=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natnd',tread,'INT')
+ if(tread==1) natnd=intarr(1)
+ dtset%natnd=natnd
+ ABI_MALLOC(iatnd,(natnd))
+ ABI_MALLOC(atndlist,(3,natnd))
+ if(natnd > 0) then
+   iatnd=0
+   call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+   if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+   dtset%iatnd=iatnd(1:natnd)
+   atndlist=zero
+   call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+   if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
+   if(allocated(dtset%atndlist)) then
+     ABI_FREE(dtset%atndlist)
+   end if
+   ABI_MALLOC(dtset%atndlist,(3,natnd))
+   dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
+ end if
+
  ! We need to know nsppol/nspinor/nspden before calling ingeo
  nsppol=dtset%nsppol
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsppol',tread,'INT')
@@ -1582,9 +1604,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !call flush(std_out)
 !ENDDEBUG
 
-   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
-    dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-    msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+   call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
+    iatnd,dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
+    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
     dtset%pawspnorb,dtset%ptgroupma,ratsph,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
@@ -1639,6 +1661,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(cellcharge < cellcharge_min)cellcharge_min=cellcharge
 
  end do
+
+ if(allocated(iatnd)) then
+   ABI_FREE(iatnd)
+ end if
+ if(allocated(atndlist)) then
+   ABI_FREE(atndlist)
+ end if
 
  ABI_FREE(amu)
  ABI_FREE(mixalch)
