@@ -3906,7 +3906,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0 .and. off_diag) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_Legendre_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_Leg_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(6a)') "# Off-diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -3921,7 +3921,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_Legendre_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_Leg_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(5a)') "# Diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"

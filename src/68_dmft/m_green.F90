@@ -941,7 +941,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
        sf_corr(:) = czero
        call int2char4(iatom,tag_at)
        ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpFunloc_iatom'//trim(tag_at)
        if (open_file(tmpfil,message,newunit=spcorb_unt,status='unknown',form='formatted') /= 0) &
          & ABI_ERROR(message)
        ndim = 2*lpawu + 1
