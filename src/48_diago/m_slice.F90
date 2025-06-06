@@ -545,6 +545,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
     theta_reshaped_ptr => theta_reshaped
 
     call xgBlock_reshape(eigen, 1, neigenpairs)
+    write(std_out,*) 'db xgBlock_zero call'
     call xgBlock_zero(eigen)
     call xgBlock_zero(resid0%self)
   
@@ -720,38 +721,42 @@ subroutine slice_allschedule(slice, X0, getAX_BX, eigen, nspinor)
 
     end if
 
-    ! Degree-load balance estimation: print info for application observability
-    npband_list = (/ 4, 8, 16, 32 /)
-    ABI_MALLOC_IFNOT(weights, (slice%nslice))
-    ABI_MALLOC_IFNOT(nband_per_slice, (slice%nslice))
-    ABI_MALLOC_IFNOT(npband_per_slice, (slice%nslice))
-    write(std_out,'(a)') '=============== Load balance observer ==================='
-    do itest=1, 4 ! loop on number of MPI processes to distribute
-        npband_test = npband_list(itest)
-        write(std_out,'(a,i4)') 'npband=', npband_test
-        weights(:) = slice%poly_degrees(:)
-        nband_per_slice(:) = slice%neigenpairs_per_slice(:)
-        ! Fair allocation
-        npband_per_slice = ceiling(real(npband_test) / real(slice%nslice))
-        if (modulo(npband_test,slice%nslice)/=0) then
-            npband_per_slice(1) = 0
-            npband_per_slice(1) = npband_test - sum(npband_per_slice)
-        end if
-        write(std_out,'(a,i7,a,i7)') 'FA  chunk size max bandpp=', maxval(nband_per_slice/npband_per_slice), &
-&           ' max spacedim=', maxval(slice%total_spacedim/npband_per_slice)
-        ! Weighted fair allocation
-        call fair_allocation(slice%nslice, nband_per_slice, weights, npband_test, npband_per_slice)
-        if (ANY( npband_per_slice==0 )) then
-            write(std_out,'(a)') 'WFA Invalid allocation: found slice without any procs'
-        else
-            write(std_out,'(a,i7,a,i7)') 'WFA chunk size max bandpp=', maxval(nband_per_slice/npband_per_slice), &
-&               ' max spacedim=', maxval(slice%total_spacedim/npband_per_slice)
-        end if
-    end do 
-    ABI_SFREE(weights)
-    ABI_SFREE(nband_per_slice)
-    ABI_SFREE(npband_per_slice)
-    write(std_out,'(a)') '========================================================='
+!    ! Degree-load balance estimation: print info for application observability
+!    npband_list = (/ 4, 8, 16, 32 /)
+!    ABI_MALLOC_IFNOT(weights, (slice%nslice))
+!    ABI_MALLOC_IFNOT(nband_per_slice, (slice%nslice))
+!    ABI_MALLOC_IFNOT(npband_per_slice, (slice%nslice))
+!    write(std_out,'(a)') '=============== Load balance observer ==================='
+!    do itest=1, 4 ! loop on number of MPI processes to distribute
+!        npband_test = npband_list(itest)
+!        write(std_out,'(a,i4)') 'npband=', npband_test
+!        weights(:) = slice%poly_degrees(:)
+!        nband_per_slice(:) = slice%neigenpairs_per_slice(:)
+!        ! Fair allocation
+!        npband_per_slice = ceiling(real(npband_test) / real(slice%nslice))
+!        if (modulo(npband_test,slice%nslice)/=0) then
+!            npband_per_slice(1) = 0
+!            npband_per_slice(1) = npband_test - sum(npband_per_slice)
+!        end if        
+!        if (ANY( npband_per_slice==0 )) then
+!            write(std_out,'(a)') 'FA  Invalid allocation: found slice without any procs'
+!        else
+!            write(std_out,'(a,i7,a,i7)') 'FA  chunk size max bandpp=', maxval(nband_per_slice/npband_per_slice), &
+!&               ' max spacedim=', maxval(slice%total_spacedim/npband_per_slice)
+!        end if
+!        ! Weighted fair allocation
+!        call fair_allocation(slice%nslice, nband_per_slice, weights, npband_test, npband_per_slice)
+!        if (ANY( npband_per_slice==0 )) then
+!            write(std_out,'(a)') 'WFA Invalid allocation: found slice without any procs'
+!        else
+!            write(std_out,'(a,i7,a,i7)') 'WFA chunk size max bandpp=', maxval(nband_per_slice/npband_per_slice), &
+!&               ' max spacedim=', maxval(slice%total_spacedim/npband_per_slice)
+!        end if
+!    end do 
+!    ABI_SFREE(weights)
+!    ABI_SFREE(nband_per_slice)
+!    ABI_SFREE(npband_per_slice)
+!    write(std_out,'(a)') '========================================================='
 
     ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
     call slice_markActiveTask(slice)
@@ -989,6 +994,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     !write(std_out,*) 'chebfi%eigenvalues converged='
     !call xgBlock_print(chebfi%eigenvalues,std_out)
+
+    !write(std_out,*) 'residuals='
+    !call xgBlock_print(residu_active,std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -1468,8 +1476,12 @@ subroutine slice_allocateResources(slice)
         ABI_SFREE(weights) 
 
     end if
-    
+   
     call xmpi_barrier(slice%spacecom)
+    
+    if (maxval(slice%lookup_proc)+1 .ne. slice%nslice) then
+        ABI_ERROR("Resource error: not enough procs to divide into slices. Please increase npband")
+    end if
 
     do iproc = 1, slice%nproc
         write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
@@ -1641,6 +1653,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xg_init(eigen_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
     call xg_init(resid_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
 
+    write(std_out,*) 'db xgBlock_zero call'
     call xgBlock_zero(eigen_ext%self)
     call xgBlock_zero(resid_ext%self)
 
@@ -1693,6 +1706,9 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
         call xgBlock_copy_from_gpu(eigen_ext%self)
         call xgBlock_copy_from_gpu(resid_ext%self)
     end if
+
+    !write(std_out,*) 'residuals='
+    !call xgBlock_print(resid_ext%self,std_out)
 
     ! Results could be complex, so neigenpairs has to be in cols, not rows
     call xgBlock_reverseMap(eigen_ext%self, theta_ext, rows=1, cols=slice%neigenpairs_ext)
@@ -1780,7 +1796,10 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
 
     ! Recover dimensions
     call xgBlock_reshape(eigen, slice%neigenpairs, 1) 
-    call xgBlock_reshape(resid, slice%neigenpairs, 1) 
+    call xgBlock_reshape(resid, slice%neigenpairs, 1)
+ 
+    write(std_out,*) 'residuals squared after all merge='
+    call xgBlock_print(resid,std_out)
 
     !write(std_out,*) 'KEPT slice eigs='
     !call xgBlock_print(eigen, std_out)
