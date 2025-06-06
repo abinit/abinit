@@ -202,7 +202,6 @@ integer pure function find_digit(string) result(ii)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
-
 ! *********************************************************************
 
  do ii=1,len_trim(string)
@@ -563,7 +562,6 @@ pure function round_brackets(istr) result(ostr)
  integer :: ii
  character(len=1) :: qq
  character(len=LEN(istr)+2) :: tmp
-
 ! *********************************************************************
 
  do ii=1,LEN(istr)
@@ -611,7 +609,6 @@ pure function quote(istr) result(ostr)
  integer :: ii
  character(len=1) :: qq
  character(len=LEN(istr)+2) :: tmp
-
 ! *********************************************************************
 
  do ii=1,LEN(istr)
@@ -657,7 +654,6 @@ pure function rmquotes(istr) result(ostr)
 
 !Local variables-------------------------------
  integer :: ii,cnt
-
 ! *********************************************************************
 
  ostr = ""; cnt = 0
@@ -857,7 +853,6 @@ pure function sjoin_2(str1,str2) result(ostr)
 
  character(len=*),intent(in) :: str1,str2
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+1) :: ostr
-
 ! *********************************************************************
 
  if (len_trim(str1) > 0) then
@@ -883,7 +878,6 @@ pure function sjoin_3(str1,str2,str3) result(ostr)
 
  character(len=*),intent(in) :: str1,str2,str3
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+2) :: ostr
-
 ! *********************************************************************
 
  ostr = sjoin_2(sjoin_2(str1, str2), str3)
@@ -905,7 +899,6 @@ pure function sjoin_4(str1,str2,str3,str4) result(ostr)
 
  character(len=*),intent(in) :: str1,str2,str3,str4
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+3) :: ostr
-
 ! *********************************************************************
 
  ostr = sjoin_2(str1, sjoin_3(str2, str3, str4))
@@ -927,7 +920,6 @@ pure function sjoin_5(str1,str2,str3,str4,str5) result(ostr)
 
  character(len=*),intent(in) :: str1,str2,str3,str4,str5
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+4) :: ostr
-
 ! *********************************************************************
 
  ostr = sjoin_2(str1, sjoin_4(str2, str3, str4, str5))
@@ -949,7 +941,6 @@ pure function sjoin_6(str1,str2,str3,str4,str5,str6) result(ostr)
 
  character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+5) :: ostr
-
 ! *********************************************************************
 
  ostr = sjoin_2(str1, sjoin_5(str2, str3, str4, str5, str6))
@@ -972,7 +963,6 @@ pure function sjoin_7(str1,str2,str3,str4,str5,str6,str7) result(ostr)
  character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6,str7
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+len(str7)+6) &
 &  :: ostr
-
 ! *********************************************************************
 
  ostr = sjoin_2(str1, sjoin_6(str2, str3, str4, str5, str6, str7))
@@ -993,7 +983,6 @@ pure function strcat_2(str1,str2) result(ostr)
 
  character(len=*),intent(in) :: str1,str2
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)) :: ostr
-
 ! *********************************************************************
 
  ostr=TRIM(str1)//TRIM(str2)
@@ -1015,7 +1004,6 @@ pure function strcat_3(str1, str2, str3) result(ostr)
 
  character(len=*),intent(in) :: str1,str2,str3
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)) :: ostr
-
 ! *********************************************************************
 
  ostr = TRIM(str1)//TRIM(str2)//TRIM(str3)
@@ -1037,7 +1025,6 @@ pure function strcat_4(str1, str2, str3, str4) result(ostr)
 
  character(len=*),intent(in) :: str1,str2,str3,str4
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+LEN_TRIM(str4)) :: ostr
-
 ! *********************************************************************
 
  ostr = TRIM(str1)//TRIM(str2)//TRIM(str3)//TRIM(str4)
@@ -1059,7 +1046,6 @@ pure function strcat_5(str1, str2, str3, str4, str5) result(ostr)
 
  character(len=*),intent(in) :: str1,str2,str3,str4,str5
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+LEN_TRIM(str4)+LEN_TRIM(str5)) :: ostr
-
 ! *********************************************************************
 
  ostr = TRIM(str1)//TRIM(str2)//TRIM(str3)//TRIM(str4)//trim(str5)
@@ -1081,7 +1067,6 @@ character(len=3) pure function yesno(bool)
 
 !Arguments ------------------------------------
  logical,intent(in) :: bool
-
 ! *********************************************************************
 
  if (bool) then
@@ -1107,7 +1092,6 @@ integer function atoi(string)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
-
 ! *********************************************************************
 
  read(string,*,err=10)atoi
@@ -1131,7 +1115,6 @@ real(dp) function atof(string)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
-
 ! *********************************************************************
 
  read(string,*,err=10)atof
@@ -1153,7 +1136,6 @@ pure function itoa_1b(value)
 
  integer(c_int8_t),intent(in) :: value
  character(len=22) :: itoa_1b
-
 ! *********************************************************************
 
  ! len=22 is large enough to contain integer*8
@@ -1174,7 +1156,6 @@ pure function itoa_4b(value)
 
  integer,intent(in) :: value
  character(len=22) :: itoa_4b
-
 ! *********************************************************************
 
  ! len=22 is large enough to contain integer*8
@@ -1199,7 +1180,6 @@ pure function ftoa(value, fmt)
  real(dp),intent(in) :: value
  character(len=*),optional,intent(in) :: fmt
  character(len=MAX_SLEN) :: ftoa
-
 ! *********************************************************************
 
  if (present(fmt)) then
@@ -1227,7 +1207,6 @@ pure function ktoa(kpt, fmt)
  real(dp),intent(in) :: kpt(3)
  character(len=*),optional,intent(in) :: fmt
  character(len=MAX_SLEN) :: ktoa
-
 ! *********************************************************************
 
  if (present(fmt)) then
@@ -1248,12 +1227,10 @@ end function ktoa
 !!
 !! FUNCTION
 !!  Convert a spin index into a string
-!!
 
 character(len=4) pure function stoa(spin)
 
-  integer,intent(in) :: spin
-
+ integer,intent(in) :: spin
 ! *********************************************************************
 
  select case (spin)
@@ -1287,7 +1264,6 @@ pure function ltoa_int(list) result(str)
 !Local variables-------------------------------
  integer :: ii,base,sz
  character(len=MAX_SLEN) :: temp
-
 ! *********************************************************************
 
  sz = size(list)
@@ -1343,7 +1319,6 @@ pure function ltoa_dp(list, fmt) result(str)
 !Local variables-------------------------------
  integer :: ii,base,sz
  character(len=MAX_SLEN) :: temp,myfmt,fa
-
 ! *********************************************************************
 
  myfmt = "es13.4"; if (present(fmt)) myfmt = fmt
@@ -1606,7 +1581,6 @@ pure function indent(istr) result(ostr)
  integer,parameter :: n=4 ! ostr is large enough to allocate all the possible indentations.
  integer :: ii,jj,kk
  character(len=1) :: ch
-
 ! *********************************************************************
 
  ostr = " "
@@ -1648,7 +1622,6 @@ pure logical function string_in(string, tokens) result(ans)
 
 !Local variables-------------------------------
  integer :: ii, prev, cnt
-
 ! *********************************************************************
 
  ans = .False.
@@ -1696,8 +1669,8 @@ pure function prep_char(istr, one_char) result(ostr)
 !Local variables-------------------------------
  integer :: ii,jj
  character(len=1) :: ch
-
 ! *********************************************************************
+
  ostr = ""
  jj = 1; ostr(jj:jj) = one_char
  !jj = 0
@@ -1748,7 +1721,6 @@ pure subroutine int2char4(iint,string)
 
 !Local variables-------------------------------
  integer :: lenstr
-
 ! *************************************************************************
 
  lenstr=min(len(string),25)
@@ -1810,7 +1782,6 @@ pure subroutine int2char10(iint,string)
 !scalars
  integer,intent(in) :: iint
  character(len=10),intent(out) :: string
-
 ! *************************************************************************
 
 !Note the use of floating numbers instead of large integers, for portability
@@ -1861,7 +1832,6 @@ integer pure function char_count(string, char)
  character(len=*),intent(in) :: string
  character(len=1),intent(in) :: char
  integer :: i
-
 ! *************************************************************************
 
  char_count = 0
@@ -1896,7 +1866,6 @@ integer function next_token(string, start, ostr) result(ierr)
 
 !Local variables-------------------------------
  integer :: ii,beg
-
 ! *************************************************************************
  !print *, "string:", trim(string(start:)), ", start:", start
 
@@ -1966,7 +1935,6 @@ subroutine inupper(string)
  !character(len=500) :: message
  character(len=26), parameter :: uplett='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
  character(len=26), parameter :: lolett='abcdefghijklmnopqrstuvwxyz'
-
 ! *************************************************************************
 !
 !On first entry make sure lower case letters stayed

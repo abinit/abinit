@@ -27,6 +27,7 @@ MODULE m_ioarr
 
  use defs_basis
  use m_abicore
+ USE_MPI
  use m_xmpi
  use m_wffile
  use m_errors
@@ -36,9 +37,6 @@ MODULE m_ioarr
  use m_ebands
  use m_hdr
  use m_pawrhoij
-#ifdef HAVE_MPI2
- use mpi
-#endif
  use netcdf
 
  use defs_abitypes,   only : mpi_type

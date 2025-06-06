@@ -84,8 +84,6 @@ contains
 
 subroutine epsilon_k_model(psi_out,psi_in)
 
-implicit none
-
 real(dp), intent(out) :: psi_out(2,npw_k)
 real(dp), intent(in)  :: psi_in(2,npw_k)
 
@@ -118,7 +116,7 @@ end subroutine epsilon_k_model
 subroutine setup_Pk_model(omega,epsilon_0)
 !---------------------------------------------------------------
 !
-! This subroutine prepares a global array in order to 
+! This subroutine prepares a global array in order to
 ! act with the model susceptibility, given by
 !
 ! Pk_model(r,r',i omega) = sum_v phi_v(r) Y(r-r',i omega) phi^*_v(r')
@@ -151,7 +149,7 @@ if (.not. allocated(psir_ext_model)) then
 end if
 
 R_omega = 2.0_dp*sqrt(epsilon_0**2+omega**2)
-if(abs(omega) > tol16 .or. abs(epsilon_0) > tol16) then 
+if(abs(omega) > tol16 .or. abs(epsilon_0) > tol16) then
   theta   = atan2(omega,epsilon_0)
 else
   theta   = zero
@@ -190,7 +188,7 @@ if (G_array(ig) > tol12) then
 else
   if ( abs(epsilon_0) < tol12 ) then
     model_Y(ig) = zero
-  else 
+  else
     model_Y(ig) = -4.0_dp*epsilon_0/(epsilon_0**2+omega**2)
   end if
 end if
@@ -218,7 +216,7 @@ if (G_array(ig) > tol12) then
 else
   if ( abs(epsilon_0) < tol12 ) then
     model_Y_LA(ig) = zero
-  else 
+  else
     model_Y_LA(ig) = -4.0_dp*epsilon_0/(epsilon_0**2+omega**2)
   end if
 end if
@@ -236,10 +234,10 @@ if (dielectric_model_type == 2) then
   !sqrt_density(:,:,:,:) = zero
   !do v= 1, nbandv
   !        sqrt_density(1,:,:,:) = sqrt_density(1,:,:,:) + valence_wfr(1,:,:,:,v)**2+valence_wfr(2,:,:,:,v)**2
-  !end do 
+  !end do
   !sqrt_density(1,:,:,:) = sqrt(sqrt_density(1,:,:,:))
 
-end if 
+end if
 
 
 end subroutine setup_Pk_model
@@ -260,31 +258,13 @@ end subroutine setup_Pk_model
 
 subroutine cleanup_Pk_model()
 
-implicit none
-
 ! *************************************************************************
 
-if (allocated(model_Y)) then
-  ABI_FREE(model_Y)
-end if
-
-if (allocated(model_Y_LA)) then
-  ABI_FREE(model_Y_LA)
-end if
-
-
-
-if (allocated(sqrt_density)) then
-  ABI_FREE(sqrt_density)
-end if
-
-if ( allocated(psir_model)) then
-  ABI_FREE(psir_model)
-end if
-
-if (allocated(psir_ext_model)) then
-  ABI_FREE(psir_ext_model)
-end if
+  ABI_SFREE(model_Y)
+  ABI_SFREE(model_Y_LA)
+  ABI_SFREE(sqrt_density)
+  ABI_SFREE(psir_model)
+  ABI_SFREE(psir_ext_model)
 
 end subroutine cleanup_Pk_model
 !!***
@@ -306,7 +286,6 @@ subroutine Pk_model(psi_out,psi_in)
 !------------------------------------------------------------------------------------------------------------------------
 ! Returns the action of a frequency-dependent model susceptibility
 !------------------------------------------------------------------------------------------------------------------------
-implicit none
 
 real(dp), intent(out) :: psi_out(2,npw_k)
 real(dp), intent(in)  :: psi_in(2,npw_k)
@@ -339,7 +318,6 @@ subroutine Pk_model_implementation_1(psi_out,psi_in)
 !------------------------------------------------------------------------------------------------------------------------
 ! Returns the action of a frequency-dependent model susceptibility
 !------------------------------------------------------------------------------------------------------------------------
-implicit none
 
 real(dp), intent(out) :: psi_out(2,npw_k)
 real(dp), intent(in)  :: psi_in(2,npw_k)
@@ -352,7 +330,7 @@ integer, save  :: icounter = 0
 
 integer  :: mb, iblk
 
-integer  :: mpi_band_rank    
+integer  :: mpi_band_rank
 
 real(dp) :: time1, time2
 real(dp) :: total_time1, total_time2
@@ -438,7 +416,7 @@ fft_time = fft_time+time2-time1
 ! Loop on all blocks of eigenstates
 do iblk = 1, nbdblock
 
-v = (iblk-1)*blocksize + mpi_band_rank + 1 ! CAREFUL! This is a guess. Revisit this if code doesn't work as intended. 
+v = (iblk-1)*blocksize + mpi_band_rank + 1 ! CAREFUL! This is a guess. Revisit this if code doesn't work as intended.
 
 call cpu_time(time1)
 GWLS_TIMAB   = 1537
@@ -446,7 +424,7 @@ OPTION_TIMAB = 1
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 
-! Multiply valence state by external state, yielding  |psik_g> = | phi_v x psi_in^* > 
+! Multiply valence state by external state, yielding  |psik_g> = | phi_v x psi_in^* >
 call gr_to_g(psik_g, psir_ext_model, valence_wavefunctions_FFT(:,:,iblk))
 
 OPTION_TIMAB = 2
@@ -519,7 +497,7 @@ call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 call cpu_time(time2)
 fft_time = fft_time+time2-time1
 
-!  Multiply by valence state in real space 
+!  Multiply by valence state in real space
 call cpu_time(time1)
 GWLS_TIMAB   = 1537
 OPTION_TIMAB = 1
@@ -574,7 +552,7 @@ OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
 
-end subroutine Pk_model_implementation_1 
+end subroutine Pk_model_implementation_1
 !!***
 
 !!****f* m_hamiltonian/matrix_function_epsilon_model_operator
@@ -594,10 +572,9 @@ subroutine matrix_function_epsilon_model_operator(vector_out,vector_in,Hsize)
 !----------------------------------------------------------------------------------------------------
 ! This function returns the action of the operator epsilon_model on a given vector.
 ! It is assumed that the frequency has been set in the module using setup_Pk_model.
-!    
+!
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
 integer,      intent(in)  :: Hsize
 complex(dpc), intent(out) :: vector_out(Hsize)
 complex(dpc), intent(in)  :: vector_in(Hsize)

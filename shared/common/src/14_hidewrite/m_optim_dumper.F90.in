@@ -21,8 +21,6 @@
 
 module m_optim_dumper
 
-  implicit none
-
   public :: dump_optim
 
 contains  !===========================================================
@@ -57,18 +55,16 @@ contains  !===========================================================
 !! SOURCE
 
 subroutine dump_optim(my_unit)
-    
-  use defs_basis
 
-  implicit none
+  use defs_basis
 
 !Arguments ------------------------------------
   integer,intent(in) :: my_unit
 
 !Local variables-------------------------------
- 
+
 ! *************************************************************************
- 
+
   write(my_unit,"(a,1x,a)") ch10,repeat("+",78)
   write(my_unit,"(1x,a,a,3x,a,a,a)") "Default optimizations:",ch10, &
 &   "@fcflags_opt_default@",ch10,ch10@config.optim@

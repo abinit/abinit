@@ -5,7 +5,7 @@
 !! FUNCTION
 !! This module contains definition the type spin_hist_t
 !! and its related routines
-!! The observables are also calculated. 
+!! The observables are also calculated.
 !!
 !! Datatypes:
 !!
@@ -34,7 +34,7 @@
 ! TODO hexu:
 ! sync ihist_latt when with lattice dynamics
 ! add average, variance, etc (should they be here?)
-! structural information and some parameters are no longer 
+! structural information and some parameters are no longer
 ! used here. They should be removed form this file.
 
 #if defined HAVE_CONFIG_H
@@ -72,7 +72,7 @@ module m_spin_hist
   !! * acell(3)         : Acell (acell , rprimd, xred: only initial value kept if there is!!  no lattice dynamics. Other wise for each step, the corresponding lattice step number is kept)
   !! * rprimd(3,3)      : Rprimd
   !! * xred(3,natoms)    : Xred
-  !! * index_spin     : the index of atom in spin model, -1 if it is not in the spin model 
+  !! * index_spin     : the index of atom in spin model, -1 if it is not in the spin model
   !! * heff(3,nspin,mxhist)   : effective magnetic field (cartesian)
   !! * snorm(nspin, mxhist) : magnetitude of spin.
   !! * S(3,nspin,mxhist)   : spin orientation of atoms (cartesian)
@@ -100,7 +100,7 @@ module m_spin_hist
      logical :: has_latt
 
      ! arrays
-     !  placeholders for structure-related parameters. They are not used currently. 
+     !  placeholders for structure-related parameters. They are not used currently.
      integer :: natoms
      real(dp) :: acell(3)
      real(dp) :: rprimd(3,3)
@@ -135,7 +135,7 @@ module m_spin_hist
      ! observables
      integer:: calc_thermo_obs, calc_traj_obs, calc_correlation_obs
 
-     real(dp), allocatable :: ms_sub(:,:)   ! staggered M. 
+     real(dp), allocatable :: ms_sub(:,:)   ! staggered M.
      real(dp), allocatable :: Cv(:) ! specfic heat
      real(dp), allocatable :: binderU4_sub(:,:), binderU4(:)
      real(dp), allocatable :: chi_sub(:, :), chi(:) ! magnetic susceptibility
@@ -181,8 +181,7 @@ contains
 
   subroutine initialize(self, nspin, mxhist, has_latt)
 
-    implicit none
-    class(spin_hist_t), intent(inout) :: self 
+    class(spin_hist_t), intent(inout) :: self
     integer, intent(in) :: nspin, mxhist
     logical, intent(in) :: has_latt
     !integer, optional,  intent(in) :: calc_traj_obs, calc_thermo_obs, calc_correlation_obs
@@ -224,7 +223,6 @@ contains
 !!***
 
   subroutine reset(self, array_to_zero)
-    implicit none
     class(spin_hist_t), intent(inout) :: self
     logical :: array_to_zero
     self%ntypat=0
@@ -254,12 +252,12 @@ contains
   !! set_atomic_structure
   !!
   !! FUNCTION
-  !! 
-  !! set atomic structure 
+  !!
+  !! set atomic structure
   !!
   !! INPUTS
   !! acell(3) = acell
-  !! rprimd(3, 3) = 
+  !! rprimd(3, 3) =
   !! xred(3, natoms) = positions in reduced coordinates
   !! spin_index(3, natoms) = index of atom in spin hamiltonian
   !! ntypat = number of types of atoms
@@ -298,7 +296,7 @@ contains
   !! set_params
   !!
   !! FUNCTION
-  !! 
+  !!
   !! set parameters for spin_hist_t
   !!
   !! INPUTS
@@ -308,7 +306,7 @@ contains
   !! OUTPUT
   !! hist <type(spin_hist_t)()> = spin hist type
   !! SOURCE
-  
+
   subroutine set_params(self, spin_nctime, spin_temperature)
 
     class(spin_hist_t), intent(inout) :: self
@@ -325,7 +323,7 @@ contains
   !! finalize
   !!
   !! FUNCTION
-  !! 
+  !!
   !! free memory for spin_hist_t
   !!
   !! INPUTS
@@ -335,7 +333,7 @@ contains
   !! SOURCE
   subroutine finalize(self)
 
-    class(spin_hist_t) , intent(inout) :: self 
+    class(spin_hist_t) , intent(inout) :: self
 
     if (allocated(self%xred)) then
        ABI_FREE(self%xred)
@@ -381,19 +379,19 @@ contains
 !!***
 
 
-  
+
   !!****f* m_spin_hist/get_S
   !!
   !! NAME
   !! get_S
   !!
   !! FUNCTION
-  !! 
+  !!
   !! get the S for step. step=0 is current. step=-1 is last...
   !!
   !! INPUTS
   !! hist <type(spin_hist_t)()> = spin hist type
-  !! step = index of step. current step is 0. last step is -1. 
+  !! step = index of step. current step is 0. last step is -1.
   !! OUTPUT
   !! S(3, nspin)=spin orientations at step
   !! SOURCE
@@ -418,7 +416,7 @@ contains
   !! inc1
   !!
   !! FUNCTION
-  !! 
+  !!
   !! time counter increase
   !!
   !! INPUTS

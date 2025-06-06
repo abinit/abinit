@@ -31,9 +31,7 @@ module m_tdep_phi4
 contains
 
 !====================================================================================================
- subroutine tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
-
-  implicit none 
+ subroutine tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym)
 
   type(Input_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell4at
@@ -53,7 +51,7 @@ contains
   ABI_MALLOC(ftot4,(3*Invar%natom,Invar%my_nstep)); ftot4(:,:)=0.d0
   do iatom=1,Invar%natom
     do ishell=1,Shell4at%nshell
-!     Build the 3x3x3x3 IFC of an atom in this shell    
+!     Build the 3x3x3x3 IFC of an atom in this shell
       if (Shell4at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
       do iatshell=1,Shell4at%neighbours(iatom,ishell)%n_interactions
         jatom=Shell4at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
@@ -61,7 +59,7 @@ contains
         latom=Shell4at%neighbours(iatom,ishell)%atoml_in_shell(iatshell)
         isym =Shell4at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
         itrans=Shell4at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+        call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans)
 !       Calculation of the force components (third order)
         do istep=1,Invar%my_nstep
           do ii=1,3
@@ -70,20 +68,20 @@ contains
                 do ll=1,3
                   ftot4(3*(iatom-1)+ii,istep)=ftot4(3*(iatom-1)+ii,istep)+&
 &                      Phi4_3333(ii,jj,kk,ll)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)*ucart(ll,latom,istep)
-                end do !ll 
-              end do !kk 
-            end do !jj 
-          end do !ii 
+                end do !ll
+              end do !kk
+            end do !jj
+          end do !ii
         end do !istep
       end do !iatshell
-    end do !ishell  
-  end do !iatom  
+    end do !ishell
+  end do !iatom
   ABI_FREE(Phi4_3333)
   ftot4(:,:)=ftot4(:,:)/6.d0
 
   ABI_MALLOC(ucart_blas  ,(3*Invar%natom)) ; ucart_blas  (:)=0.d0
   do istep=1,Invar%my_nstep
-    ucart_blas(:)=0.d0 
+    ucart_blas(:)=0.d0
     do jatom=1,Invar%natom
       do jj=1,3
         ucart_blas(3*(jatom-1)+jj)=ucart(jj,jatom,istep)
@@ -101,8 +99,6 @@ contains
 
 !====================================================================================================
 subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
-
-  implicit none
 
   type(Input_type),intent(in) :: Invar
   type(Symetries_type),intent(in) :: Sym
@@ -123,8 +119,8 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
   do isym=1,Sym%nsym
     do itrans=1,24
       ABI_MALLOC(Const%Sprod(isym,itrans)%SSSS,(3,81,3,3,3)); Const%Sprod(isym,itrans)%SSSS(:,:,:,:,:)=zero
-    end do  
-  end do  
+    end do
+  end do
 
 ! For each couple of atoms, transform the Phi4 (3x3x3) ifc matrix using the symetry operation (S)
 ! Note: iatom=1 is excluded in order to take into account the atomic sum rule (see below)
@@ -176,7 +172,7 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
         end do
       end do
     end do
-  end do  
+  end do
 
   write(Invar%stdout,*) ' Compute the coefficients (at the 4th order) used in the Moore-Penrose...'
   do ishell=1,Shell4at%nshell
@@ -192,7 +188,7 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
         ncoeff_prev=Shell4at%ncoeff_prev(ishell)+CoeffMoore%ncoeff3rd+CoeffMoore%ncoeff2nd+CoeffMoore%ncoeff1st
         ncoeff_prev_l=ncoeff_prev+1
         ncoeff_prev_h=ncoeff_prev+ncoeff
-  
+
         ABI_MALLOC(SSSS_proj,(3,3,3,3,ncoeff)) ; SSSS_proj(:,:,:,:,:)=zero
         do mu=1,3
           do nu=1,3
@@ -220,9 +216,9 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
 &               CoeffMoore%fcoeff(iindex_l:iindex_h,ncoeff_prev_l:ncoeff_prev_h)+&
 &               SSSS_proj(1:3,nu,xi,zeta,1:ncoeff)*ucart(nu,jatom,istep)*ucart(xi,katom,istep)*ucart(zeta,latom,istep)/6.d0 *&
 &               Invar%weights(istep)
-              end do  
-            end do  
-          end do  
+              end do
+            end do
+          end do
         end do !istep
         ABI_FREE(SSSS_proj)
       end do !iatshell
@@ -241,8 +237,6 @@ end subroutine tdep_calc_phi4fcoeff
 !=====================================================================================================
 subroutine tdep_calc_phi4ref(ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
 
-  implicit none
-
   type(Shell_type),intent(in) :: Shell4at
   integer,intent(in) :: ntotcoeff
   double precision, intent(in) :: proj(81,81,Shell4at%nshell)
@@ -253,20 +247,20 @@ subroutine tdep_calc_phi4ref(ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
   integer :: ii,jj,kk,ll,kappa
 
   do ishell=1,Shell4at%nshell
-!   Build the 3x3x3x3 IFC per shell    
+!   Build the 3x3x3x3 IFC per shell
     ncoeff     =Shell4at%ncoeff(ishell)
     ncoeff_prev=Shell4at%ncoeff_prev(ishell)
-    kappa=0  
+    kappa=0
     do ii=1,3
       do jj=1,3
         do kk=1,3
           do ll=1,3
             kappa=kappa+1
             Phi4_ref(ii,jj,kk,ll,ishell)=sum(proj(kappa,1:ncoeff,ishell)*Phi4_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff,1))
-          end do  
-        end do  
-      end do  
-    end do  
+          end do
+        end do
+      end do
+    end do
 !  Remove the rounding errors before writing (for non regression testing purposes)
     do ii=1,3
       do jj=1,3
@@ -276,15 +270,13 @@ subroutine tdep_calc_phi4ref(ntotcoeff,proj,Phi4_coeff,Phi4_ref,Shell4at)
           end do
         end do
       end do
-    end do  
-  end do  
+    end do
+  end do
 
 end subroutine tdep_calc_phi4ref
 
 !=====================================================================================================
 subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
-
-  implicit none
 
   type(Input_type),intent(in) :: Invar
   type(Symetries_type),intent(in) :: Sym
@@ -303,7 +295,7 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
   write(Invar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
   write(Invar%stdout,*) '#############################################################################'
 
-! Write the IFCs in the data.out file (with others specifications: 
+! Write the IFCs in the data.out file (with others specifications:
 ! number of atoms in a shell, Trace...)
   ABI_MALLOC(Phi4_3333,(3,3,3,3)) ; Phi4_3333(:,:,:,:)=0.d0
   do ishell=1,Shell4at%nshell
@@ -320,7 +312,7 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
         latom =Shell4at%neighbours(iatref,ishell)%atoml_in_shell(iatshell)
         isym  =Shell4at%neighbours(iatref,ishell)%sym_in_shell(iatshell)
         itrans=Shell4at%neighbours(iatref,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans) 
+        call tdep_build_phi4_3333(isym,Phi4_ref(:,:,:,:,ishell),Phi4_3333,Sym,itrans)
         write(Invar%stdout,'(a,i4,a,i4)') '  For iatcell=',iatref,' ,with type=',mod(iatref-1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
@@ -354,16 +346,14 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
         write(Invar%stdout,'(a,3(f9.6,1x))') '  (k,i) vector components:', (distance(latom,iatref,jj+1),jj=1,3)
         write(Invar%stdout,*) ' '
       end do !iatshell
-    end if !n_interactions 
-  end do !ishell 
+    end if !n_interactions
+  end do !ishell
   ABI_FREE(Phi4_3333)
 
 end subroutine tdep_write_phi4
 
 !=====================================================================================================
-subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans) 
-
-  implicit none
+subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
 
   type(Symetries_type),intent(in) :: Sym
   double precision, intent(in) :: Phi4_ref(3,3,3,3)
@@ -396,10 +386,10 @@ subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
       end do
     end do
   end do
-  
+
 ! Take into account the 6 allowed permutations
   Phi4_tmp(:,:,:,:)=Phi4_3333(:,:,:,:)
-  if ((itrans.lt.1).or.(itrans.gt.24)) then  
+  if ((itrans.lt.1).or.(itrans.gt.24)) then
     ABI_BUG('This value of the symmetry index is not permitted')
   end if
   do ii=1,3
@@ -437,8 +427,8 @@ subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
           Phi4_3333(ee,ff,gg,hh)=Phi4_tmp(ii,jj,kk,ll)
         end do
       end do
-    end do  
-  end do          
+    end do
+  end do
 
 end subroutine tdep_build_phi4_3333
 

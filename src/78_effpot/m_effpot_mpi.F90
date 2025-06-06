@@ -110,8 +110,6 @@ CONTAINS  !=====================================================================
 
 subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,natom,ndiv,nrpt
@@ -284,8 +282,6 @@ end subroutine effpot_mpi_init
 !! SOURCE
 
 subroutine effpot_mpi_free(effpot_mpi)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

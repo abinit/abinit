@@ -19,7 +19,7 @@ void dim_screening(double *p, double *y, int m, int n, void *adata)
   * y[n] is the measurement vector (containing the y-values)
   * adata[n] is the optional data supplied (fixed) this will contain
   *  the z-values with adata[0],adata[2],...,adata[2*i] containing the
-  *  real coordinate and adata[1],adata[3],...,adata[2*i+1] containing 
+  *  real coordinate and adata[1],adata[3],...,adata[2*i+1] containing
   *  the imaginary coordinate (0<=i<n) */
 
 register int ip,in,idx;
@@ -60,7 +60,7 @@ void dre_and_im_screening(double *p, double *y, int m, int n, void *adata)
   * y[n] is the measurement vector (containing the y-values)
   * adata[n] is the optional data supplied (fixed) this will contain
   *  the z-values with adata[0],adata[2],...,adata[2*i] containing the
-  *  real coordinate and adata[1],adata[3],...,adata[2*i+1] containing 
+  *  real coordinate and adata[1],adata[3],...,adata[2*i+1] containing
   *  the imaginary coordinate (0<=i<n) */
 
 register int ip,in,idx;
@@ -131,7 +131,7 @@ double opts[LM_OPTS_SZ], info[LM_INFO_SZ];
   }
   //printf("\n From C - adata array:\n");
   //for(i=0; i<c_nvals; ++i) printf("  (%g,i%g)",adata[2*i],adata[2*i+1]);
- 
+
   for(i=0; i<c_ncoeffs; i+=3){
     lower_bounds[i  ] = -DBL_MAX;
     lower_bounds[i+1] = 1E-16;
@@ -140,20 +140,20 @@ double opts[LM_OPTS_SZ], info[LM_INFO_SZ];
     upper_bounds[i+1] = DBL_MAX;
     upper_bounds[i+2] = -1E-16;
   }
-   
+
   /* invoke the optimisation function */
   //ret=dlevmar_dif(dim_screening, coeffs, yvals, c_ncoeffs, c_nvals, 5000, \
        opts, info, NULL, NULL, (void *)&adata); // without Jacobian
 
   //for(i=0; i<c_ncoeffs; i+=3){
-  //  if (coeffs[i+2]>-1E-16){ 
+  //  if (coeffs[i+2]>-1E-16){
       /* invoke the optimisation function with box boundaries*/
       ret=dlevmar_bc_dif(dim_screening, coeffs, yvals, c_ncoeffs, c_nvals, \
            lower_bounds, upper_bounds, 3000, opts, info, NULL, NULL, \
            (void *)&adata); // Box boundary conditions without Jacobian
     //}
   //}
-  
+
 
   if(c_prtvol>9){
     printf("\n From C - Levenberg-Marquardt returned in %g iter, reason %g, sumsq %g [%g]\n", info[5], info[6], info[1], info[0]);
@@ -201,7 +201,7 @@ double opts[LM_OPTS_SZ], info[LM_INFO_SZ];
   }
   //printf("\n From C - adata array:\n");
   //for(i=0; i<c_nvals; ++i) printf("  (%g,i%g)",adata[2*i],adata[2*i+1]);
- 
+
   for(i=0; i<c_ncoeffs; i+=3){
     lower_bounds[i  ] = -DBL_MAX;
     lower_bounds[i+1] = 1E-16;
@@ -210,20 +210,20 @@ double opts[LM_OPTS_SZ], info[LM_INFO_SZ];
     upper_bounds[i+1] = DBL_MAX;
     upper_bounds[i+2] = -1E-16;
   }
-   
+
   /* invoke the optimisation function */
   //ret=dlevmar_dif(dim_screening, coeffs, yvals, c_ncoeffs, c_nvals, 5000, \
        opts, info, NULL, NULL, (void *)&adata); // without Jacobian
 
   //for(i=0; i<c_ncoeffs; i+=3){
-  //  if (coeffs[i+2]>-1E-16){ 
+  //  if (coeffs[i+2]>-1E-16){
       /* invoke the optimisation function with box boundaries*/
       ret=dlevmar_bc_dif(dre_and_im_screening, coeffs, yvals, c_ncoeffs, c_nvals, \
            lower_bounds, upper_bounds, 1000, opts, info, NULL, NULL, \
            (void *)&adata); // Box boundary conditions without Jacobian
     //}
   //}
-  
+
 
   if(c_prtvol>9){
     printf("\n From C - Levenberg-Marquardt returned in %g iter, reason %g, sumsq %g [%g]\n", info[5], info[6], info[1], info[0]);

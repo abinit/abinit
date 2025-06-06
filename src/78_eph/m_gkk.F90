@@ -53,7 +53,7 @@ module m_gkk
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_eig2d,          only : gkk_t, gkk_init, gkk_ncwrite, gkk_free
- use m_wfd,            only : wfd_init, wfd_t
+ use m_wfd,            only : wfd_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ephtk,          only : ephtk_v1atm_to_vqnu
 
@@ -211,7 +211,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  wfd_istwfk = 1
 
  ! Initialize the wavefunction descriptors
- call wfd_init(wfd_k,cryst,pawtab,psps,keep_ur,mband,nband,nkpt,nsppol,bks_mask,&
+ call wfd_k%init(cryst,pawtab,psps,keep_ur,mband,nband,nkpt,nsppol,bks_mask,&
    nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_k%kptns,ngfft,&
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
@@ -221,7 +221,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
 
- call wfd_init(wfd_kq,cryst,pawtab,psps,keep_ur_kq,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
+ call wfd_kq%init(cryst,pawtab,psps,keep_ur_kq,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
    nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_kq%kptns,ngfft,&
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)

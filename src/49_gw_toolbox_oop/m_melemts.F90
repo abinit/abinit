@@ -200,15 +200,10 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Set all flags in melflags_t to 0.
 !!
-!! INPUTS
-!!
-!! SOURCE
-
 subroutine melflags_reset(Mflags)
 
 !Arguments ------------------------------------
  class(melflags_t),intent(inout) :: Mflags
-
 ! *************************************************************************
 
  Mflags%has_kinetic         = 0
@@ -247,7 +242,6 @@ subroutine melflags_copy(Mflags_in, Mflags_out)
 !Arguments ------------------------------------
  class(melflags_t),intent(in)    :: Mflags_in
  class(melflags_t),intent(inout) :: Mflags_out
-
 ! *************************************************************************
 
  call Mflags_out%reset()
@@ -282,7 +276,6 @@ subroutine melements_free(Mels)
 
 !Arguments ------------------------------------
  class(melements_t),intent(inout) :: Mels
-
 ! *************************************************************************
 
  ! integer arrays
@@ -337,7 +330,6 @@ subroutine my_select_melements(Mels, aname, flag_p, arr_p)
  type(melements_t),target,intent(in) :: Mels
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
-
 ! *************************************************************************
 
  SELECT CASE (tolower(aname))
@@ -409,7 +401,6 @@ subroutine melements_init(Mels, Mflags_in, nsppol, nspden, nspinor, nkibz, kibz,
 
 !Local variables-------------------------------
  integer :: ikibz,isppol,bmin,bmax,b1,b2
-
 ! *************************************************************************
 
  ! Copy flags.
@@ -519,7 +510,6 @@ subroutine melements_herm(Mels, aname)
 !arrays
  integer,parameter :: trsp_idx(2:4) = [2,4,3]
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
-
 ! *************************************************************************
 
  ! === Symmetrize matrix elements ===
@@ -603,7 +593,6 @@ subroutine melements_mpisum(Mels, comm, aname)
  !character(len=500) :: msg
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
-
 ! *************************************************************************
 
  do iname=1,NNAMES
@@ -670,7 +659,6 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
    complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
  end type rarr_dpc4
  type(rarr_dpc4),allocatable :: data_p(:)
-
 ! *************************************************************************
 
  !@melements_t
@@ -817,7 +805,6 @@ subroutine melements_zero(Mels, irrep_tab, aname)
  character(len=NAMELEN) :: key
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
-
 ! *************************************************************************
 
  do iname=1,NNAMES
@@ -888,7 +875,6 @@ end subroutine melements_zero
 !!scalars
 ! integer :: ik,ib,spin
 ! real(dp) :: wtk,occ_bks
-!
 !! *************************************************************************
 !
 ! ex_energy = zero

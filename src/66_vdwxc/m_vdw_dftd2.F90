@@ -84,8 +84,6 @@ contains
 subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xred,znucl,&
 &          dyn_vdw_dftd2,elt_vdw_dftd2,gred_vdw_dftd2,str_vdw_dftd2,qphon) ! Optionals
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,natom,ntypat,prtvol
@@ -492,8 +490,6 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !! SOURCE
 
 subroutine grad_cart2red(grad)
-
-implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(inout) :: grad(3)

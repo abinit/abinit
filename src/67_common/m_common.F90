@@ -1078,7 +1078,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
 ! ************************************************************************
 
-!Compute bantot
+ ! Compute bantot
  bantot=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
@@ -1658,7 +1658,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    end if
    if (usepaw==1) then
      call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
-     if(abs(energies%e_cpawdc)>tiny(0.0_dp)) then 
+     if(abs(energies%e_cpawdc)>tiny(0.0_dp)) then
        call dc_edoc%add_real('cpaw_dc', energies%e_cpawdc)
      endif
    end if
@@ -1849,7 +1849,6 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
  real(dp) :: ecut_tmp(3,2,10),tsec(2)
  real(dp),allocatable :: zionpsp(:)
  character(len=fnlen), allocatable :: pspfilnam_(:), pseudo_paths(:)
-
 !************************************************************************
 
  me = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -2134,7 +2133,6 @@ end function crystal_from_file
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
 &                                           blocksize,nblocks,warn_on_fail)
-   implicit none
 
    integer,intent(in)     :: ikpt,ndat,nband,nspinor,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib

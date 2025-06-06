@@ -320,6 +320,10 @@ prtvol = 0, max 20 points are written
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 1400.6
 - chi_q(r,g): 700.3
+P kpt_comm can use shmem: yes
+P g_comm can use shmem: yes
+P tau_comm can use shmem: yes
+P spin_comm can use shmem yes
 - FFT uc_batch_size: 1
 - FFT sc_batch_size: 1
  ==== Info on the gwr_t object ====
@@ -374,6 +378,10 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
  Computing diagonal matrix elements of Sigma_x
+
+ === Info on Coulomb term used in Sigma_x ===
+
+ cutoff-mode = AUXILIARY_FUNCTION
  Using KS orbitals and KS energies...
 
 
@@ -383,6 +391,10 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 
  Building correlated screening Wc(i omega) ...
+
+ === Info on Coulomb term used in epsilon and W ===
+
+ cutoff-mode = AUXILIARY_FUNCTION
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 1, }
@@ -419,6 +431,12 @@ iteration_state: {dtset: 1, }
       1.41553560E+01    9.97738319E-01    0.00000000E+00
 ...
 
+
+ Computing diagonal matrix elements of Sigma_c
+
+ === Info on Coulomb term used in Sigma_c ===
+
+ cutoff-mode = AUXILIARY_FUNCTION
 
 
  Building Sigma_c with convolutions in k-space:

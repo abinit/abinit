@@ -23,7 +23,7 @@ module flib_pwscf
 
   implicit none
 
-  contains 
+  contains
 !!***
 
 !!****f* flib_pwscf/matches
@@ -42,7 +42,7 @@ module flib_pwscf
 !-----------------------------------------------------------------------
 FUNCTION matches( string1, string2 )
 !-----------------------------------------------------------------------
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   CHARACTER (LEN=*), INTENT(IN) :: string1, string2
   LOGICAL                       :: matches
@@ -53,7 +53,7 @@ FUNCTION matches( string1, string2 )
   len2 = LEN_TRIM( string2 )
   !
   DO l = 1, ( len2 - len1 + 1 )
-     !   
+     !
      IF ( string1(1:len1) == string2(l:(l+len1-1)) ) THEN
         !
         matches = .TRUE.
@@ -65,7 +65,7 @@ FUNCTION matches( string1, string2 )
   END DO
   !
   matches = .FALSE.
-  ! 
+  !
   RETURN
   !
 END FUNCTION matches
@@ -88,7 +88,7 @@ END FUNCTION matches
 !-----------------------------------------------------------------------
 FUNCTION capital( in_char )
 !-----------------------------------------------------------------------
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   CHARACTER(LEN=1), INTENT(IN) :: in_char
   CHARACTER(LEN=1)             :: capital
@@ -134,7 +134,7 @@ END FUNCTION capital
 !-----------------------------------------------------------------------
 FUNCTION lowercase( in_char )
 !-----------------------------------------------------------------------
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   CHARACTER(LEN=1), INTENT(IN) :: in_char
   CHARACTER(LEN=1)             :: lowercase
@@ -178,7 +178,7 @@ END FUNCTION lowercase
 subroutine errore (routine, error, code)
 
   use defs_basis, only: std_out,std_out_default
-  implicit none
+  !implicit none
 
   !args
   character(*), intent(in) :: routine

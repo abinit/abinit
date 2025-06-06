@@ -79,6 +79,7 @@ end subroutine xmpi_allgather_int
 !!
 !! INPUTS
 !!  comm= MPI communicator
+!!  lenstr= Lenght of the string.
 !!
 !! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
@@ -94,18 +95,18 @@ end subroutine xmpi_allgather_int
 !!
 !! SOURCE
 
-subroutine xmpi_allgather_char(charval,recvbuf,comm,ier)
+subroutine xmpi_allgather_char(charval, recvbuf, lenstr, comm, ier)
 
 !Arguments-------------------------
- integer,intent(in)  :: comm
+ integer,intent(in)  :: lenstr, comm
  integer,intent(out) :: ier
- character(len=20),intent(inout) :: charval
- character(len=20), DEV_CONTARRD intent(inout) :: recvbuf(:)
+ character(len=lenstr),intent(inout) :: charval
+ character(len=lenstr), DEV_CONTARRD intent(inout) :: recvbuf(:)
 
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: ii
- character :: arr_charval(20)
+ character :: arr_charval(lenstr)
 #endif
 
 ! *************************************************************************
@@ -113,8 +114,8 @@ subroutine xmpi_allgather_char(charval,recvbuf,comm,ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
 !  allgather xval on all proc. in comm
-   do ii=1,20;arr_charval(ii)=charval(ii:ii);enddo
-   call MPI_ALLGATHER(arr_charval,20,MPI_CHARACTER,recvbuf,20,MPI_CHARACTER,comm,ier)
+   do ii=1,lenstr; arr_charval(ii)=charval(ii:ii); enddo
+   call MPI_ALLGATHER(arr_charval,lenstr,MPI_CHARACTER,recvbuf,lenstr,MPI_CHARACTER,comm,ier)
  else if (comm == MPI_COMM_SELF) then
    recvbuf=charval
  end if
