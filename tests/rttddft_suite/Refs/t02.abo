@@ -1,5 +1,5 @@
 
-.Version 10.4.0.6 of ABINIT, released Apr 2025.
+.Version 10.4.0.2 of ABINIT, released May 2025.
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 16 May 2025.
-- ( at 10h16 )
+.Starting date : Thu  5 Jun 2025.
+- ( at 18h10 )
   
 - input  file    -> /tmp/abinit/opt/Test_suite/rttddft_suite_t02/t02.abi
 - output file    -> t02.abo
@@ -614,15 +614,7 @@ meta: {optdriver: 9, }
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    1.00    1.00
+- Time - cpu, wall (sec):    1.04    1.04
 
 
 --- Iteration 2
@@ -630,15 +622,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 3
@@ -646,15 +630,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 4
@@ -662,15 +638,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 5
@@ -678,15 +646,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 6
@@ -694,15 +654,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 7
@@ -710,15 +662,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 8
@@ -726,15 +670,7 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 9
@@ -742,29 +678,13 @@ Integrated density (ie. total nb of electrons) =      12.0000000000
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 10
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.11    0.11
 
@@ -834,15 +754,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    1.99    2.00
+- Time - cpu, wall (sec):    2.07    2.07
 
 
 --- Iteration 2
@@ -851,15 +763,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.20    0.20
+- Time - cpu, wall (sec):    0.20    0.21
 
 
 --- Iteration 3
@@ -868,15 +772,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.20    0.21
 
 
 --- Iteration 4
@@ -885,15 +781,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.26    0.26
+- Time - cpu, wall (sec):    0.20    0.21
 
 
 --- Iteration 5
@@ -901,14 +789,6 @@ Converged after    0 self-consistent corrector steps
 
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
-
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
 
 - Time - cpu, wall (sec):    0.20    0.20
 
@@ -919,15 +799,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.20    0.20
+- Time - cpu, wall (sec):    0.27    0.27
 
 
 --- Iteration 7
@@ -936,15 +808,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.20    0.20
+- Time - cpu, wall (sec):    0.23    0.23
 
 
 --- Iteration 8
@@ -953,15 +817,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.20    0.20
+- Time - cpu, wall (sec):    0.21    0.21
 
 
 --- Iteration 9
@@ -970,15 +826,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.20    0.20
+- Time - cpu, wall (sec):    0.20    0.21
 
 
 --- Iteration 10
@@ -987,15 +835,7 @@ Converged after    0 self-consistent corrector steps
 Total energy =      -9.190397 Ha
 Integrated density (ie. total nb of electrons) =      12.0000000000
 
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
- Eigenvalues (hartree) for nkpt=   4  k points:
- kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.15040    0.15901    0.15901    0.15901    0.21157    0.21157    0.21157    0.46444
-   0.46444    0.46444    0.48445    0.48445    0.48445    0.48445    0.48445    0.48445
-   0.61999    0.61999    0.61999    0.74387    0.74387    0.74387    0.81161    0.81161
- prteigrs : prtvol=0 or 1, do not print more k-points.
-
-- Time - cpu, wall (sec):    0.20    0.20
+- Time - cpu, wall (sec):    0.25    0.25
 
 
 ---------------------------------------------------------------------------
@@ -1422,10 +1262,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.0
+- Proc.   0 individual time (sec): cpu=         10.4  wall=         10.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         39.6  wall=         39.8
++Overall time at end (sec) : cpu=         41.5  wall=         41.7

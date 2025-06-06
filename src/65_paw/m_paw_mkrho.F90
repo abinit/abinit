@@ -133,7 +133,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 &          my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawang,pawfgr,pawfgrtab,pawprtvol,&
 &          pawrhoij,pawrhoij_unsym,&
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
-&          pawang_sym,pawnhat,pawnhatgr,pawrhoij0,rhog) ! optional arguments
+&          pawang_sym,pawnhat,pawnhatgr,pawrhoij0,rhog,silent) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -145,6 +145,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  type(pawang_type),intent(in) :: pawang
  type(pawang_type),intent(in),optional :: pawang_sym
  type(pawfgr_type),intent(in) :: pawfgr
+ logical,optional,intent(in) :: silent
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom)
  integer,intent(in) :: symafm(nsym),symrec(3,3,nsym),typat(natom)
@@ -164,6 +165,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 !scalars
  integer :: choice,ider,izero,option
  character(len=500) :: msg
+ logical :: lsilent
 !arrays
  real(dp) :: tsec(2)
  real(dp),target :: rhodum(0,0,0)
@@ -189,6 +191,9 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
    ABI_BUG(msg)
  end if
 
+ !Check optional
+ lsilent=.false.; if(present(silent)) lsilent=silent
+
 !Symetrize PAW occupation matrix and store it in packed storage
  call timab(557,1,tsec)
  option=1;choice=1
@@ -196,12 +201,12 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
    call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,&
 &       natom,nsym,ntypat,option,pawang_sym,pawprtvol,pawtab,rprimd,symafm,&
 &       symrec,typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&       qphon=qphon)
+&       qphon=qphon,silent=lsilent)
  else
    call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,&
 &       natom,nsym,ntypat,option,pawang,pawprtvol,pawtab,rprimd,symafm,&
 &       symrec,typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&       qphon=qphon)
+&       qphon=qphon,silent=lsilent)
  end if
  call pawrhoij_free_unpacked(pawrhoij_unsym)
  call timab(557,2,tsec)

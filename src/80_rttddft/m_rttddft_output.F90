@@ -143,7 +143,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  end if
 
  !** Writes some info in main output file
- write(msg,'(a,a,f14.6,a)') ch10, 'Total energy = ', tdks%etot,' Ha'
+ write(msg,'(a,a,f14.6,a)') ch10,'Total energy = ', tdks%etot,' Ha'
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
@@ -271,17 +271,21 @@ subroutine prt_eig(dtfil, dtset, istep, mpi_enreg, tdks)
  spacecomm = mpi_enreg%comm_cell
  me = xmpi_comm_rank(spacecomm)
 
- write(step_nb,*) istep
- fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_EIG'
- resid = zero
- vxcavg_dum=zero
+ !to avoid some useless printing in the output file when both prteig and prtvol are set to 0
+ if (dtset%prteig /= 0 .or. dtset%prtvol /= 0) then
 
- if(me==0)then
-   call prteigrs(tdks%eigen,enunit,tdks%energies%e_fermie,tdks%energies%e_fermih,  &
-               & fname,ab_out,dtset%iscf,dtset%kptns,dtset%kptopt,dtset%mband,     &
-               & dtset%nband,dtset%nbdbuf,dtset%nkpt,0,dtset%nsppol,tdks%occ0,      &
-               & dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,dtset%tolwfr, &
-               & vxcavg_dum,dtset%wtk)
+    write(step_nb,*) istep
+   fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_EIG'
+   resid = zero
+   vxcavg_dum=zero
+
+   if(me==0)then
+      call prteigrs(tdks%eigen,enunit,tdks%energies%e_fermie,tdks%energies%e_fermih,  &
+                  & fname,ab_out,dtset%iscf,dtset%kptns,dtset%kptopt,dtset%mband,     &
+                  & dtset%nband,dtset%nbdbuf,dtset%nkpt,0,dtset%nsppol,tdks%occ0,      &
+                  & dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,dtset%tolwfr, &
+                  & vxcavg_dum,dtset%wtk)
+   end if
  end if
 
 end subroutine prt_eig

@@ -143,7 +143,7 @@ end subroutine rttddft_propagate_ele
 !
 ! ***********************************************************************
 
-!write(msg,'(2a,i5,a)') ch10,'--- Iteration',istep,ch10
+!write(msg,'(2a,i5,a)') ch10,'--- Iteration',istep
 !call wrtout(ab_out,msg)
 !if (do_write_log) call wrtout(std_out,msg)
 

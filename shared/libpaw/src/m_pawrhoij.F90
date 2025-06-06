@@ -3490,13 +3490,14 @@ end subroutine pawrhoij_print_rhoij
 
 subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,&
 &                            ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
-&                            mpi_atmtab,comm_atom,qphon,use_zeromag) ! optional arguments (parallelism)
+&                            mpi_atmtab,comm_atom,qphon,use_zeromag,silent) ! optional arguments (parallelism)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: choice,ipert,natom,nsym,ntypat,optrhoij,pawprtvol
  integer,optional,intent(in) :: comm_atom
  logical,optional,intent(in) :: use_zeromag
+ logical,optional,intent(in) :: silent
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom)
@@ -3524,6 +3525,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  logical :: paral_atom,paral_atom_unsym,use_afm,use_res
  character(len=8) :: pertstrg,wrt_mode
  character(len=500) :: msg
+ logical:: lsilent
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer :: nsym_used(2)
@@ -3591,7 +3593,8 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  end if
 
 !Printing of unsymetrized Rhoij
- if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+ lsilent=.false.; if(present(silent)) lsilent=silent
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001.and.(.not. lsilent)) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
@@ -4269,7 +4272,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 
 !*********************************************************************
 !Printing of symetrized Rhoij
- if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001.and.(.not.lsilent)) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1

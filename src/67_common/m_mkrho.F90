@@ -134,7 +134,7 @@ contains
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                option,extfpmd) !optional
+&                option,extfpmd, silent) !optional
 
 !Arguments ------------------------------------
 !scalars
@@ -147,6 +147,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(wvl_wf_type),intent(inout) :: wvl_wfs
  type(wvl_denspot_type), intent(inout) :: wvl_den
+ logical,intent(in),optional :: silent
 !no_abirules
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,  &
@@ -174,6 +175,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
  !character(len=500) :: message
+ logical :: lsilent
 !arrays
  integer,allocatable :: gbound(:,:)
  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
@@ -1046,10 +1048,13 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    ABI_FREE(taur_alphabeta)
  end if
 
-!Find and print minimum and maximum total electron density
-!(or total kinetic energy density, or total element of kinetic energy density tensor) and locations
- call wrtout(std_out,' mkrho: echo density (plane-wave part only)','COLL')
- call prtrhomxmn(std_out,mpi_enreg,dtset%nfft,dtset%ngfft,dtset%nspden,1,rhor,optrhor=ioption,ucvol=ucvol)
+ lsilent=.false.; if (present(silent)) lsilent=silent
+ if (.not.lsilent) then
+   !Find and print minimum and maximum total electron density
+   !(or total kinetic energy density, or total element of kinetic energy density tensor) and locations
+   call wrtout(std_out,' mkrho: echo density (plane-wave part only)','COLL')
+   call prtrhomxmn(std_out,mpi_enreg,dtset%nfft,dtset%ngfft,dtset%nspden,1,rhor,optrhor=ioption,ucvol=ucvol)
+ end if
 
  call timab(799,2,tsec)
  call timab(790+tim_mkrho,2,tsec)
