@@ -41,13 +41,14 @@ module m_ebands
  use m_dtset
  use m_yaml
 
+
  use defs_datatypes,   only : ebands_base_t
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson, simpson_int, wrap2_zero_one, &
-                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices
+                              isdiagmat, get_diag, interpol3d_0d, interpol3d_indices, linspace
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -55,7 +56,7 @@ module m_ebands
  use m_occ,            only : getnel, newocc, occ_fd
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : isamek, kpath_t, kpath_new
+ use m_bz_mesh,        only : isamek, kpath_t, kpath_new, littlegroup_t, kmesh_t
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -92,49 +93,50 @@ contains
 
  procedure :: from_hdr => ebands_from_hdr
  ! Init object from the abinit header.
+
  procedure :: from_dtset => ebands_from_dtset
  ! Init object from the abinit dataset.
 
  procedure :: copy                  => ebands_copy                       ! Copy of the ebands_t.
- procedure :: move_alloc            =>   ebands_move_alloc               ! Transfer allocation.
- procedure :: print                 =>   ebands_print                    ! Printout basic info on the data type.
- procedure :: get_bandenergy        =>   ebands_get_bandenergy           ! Returns the band energy of the system.
- procedure :: get_valence_idx       =>   ebands_get_valence_idx          ! Gives the index of the (valence|bands at E_f).
- procedure :: get_bands_from_erange =>   ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
- procedure :: vcbm_range_from_gaps  =>   ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
- procedure :: apply_scissors        =>   ebands_apply_scissors           ! Apply scissors operator (no k-dependency)
- procedure :: get_occupied          =>   ebands_get_occupied             ! Returns band indices after wich occupations are less than an input value.
- procedure :: enclose_degbands      =>   ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
- procedure :: get_bands_e0          =>   ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
- procedure :: get_erange            =>   ebands_get_erange               ! Compute the minimum and maximum energy enclosing a list of states.
- procedure :: nelect_per_spin       =>   ebands_nelect_per_spin          ! Returns number of electrons per spin channel
- procedure :: get_minmax            =>   ebands_get_minmax               ! Returns min and Max value of (eig|occ|doccde).
- procedure :: has_metal_scheme      =>   ebands_has_metal_scheme         ! .True. if metallic occupation scheme is used.
- procedure :: write_bxsf            =>   ebands_write_bxsf               ! Write 3D energies for Fermi surface visualization (XSF format)
- procedure :: update_occ            =>   ebands_update_occ               ! Update the occupation numbers.
- procedure :: set_scheme            =>   ebands_set_scheme               ! Set the occupation scheme.
- procedure :: set_fermie            =>   ebands_set_fermie               ! Change the fermi level (assume metallic scheme).
- procedure :: set_extrael           =>   ebands_set_extrael              ! Add extrael to initial number of electrons to simulate e/h doping. (assume metallic scheme).
- procedure :: get_muT_with_fd       =>   ebands_get_muT_with_fd          ! Change the number of electrons (assume metallic scheme).
- procedure :: calc_nelect           =>   ebands_calc_nelect              ! Compute nelect from Fermi level and Temperature.
- procedure :: report_gap            =>   ebands_report_gap               ! Print info on the fundamental and direct gap.
- procedure :: ncwrite               =>   ebands_ncwrite                  ! Write object to NETCDF file (use ncid)
- procedure :: ncwrite_path          =>   ebands_ncwrite_path             ! Dump the object into NETCDF file (use filepath)
- procedure :: write_nesting         =>   ebands_write_nesting            ! Calculate the nesting function and output data to file.
- procedure :: expandk               =>   ebands_expandk                  ! Build a new ebands_t in the full BZ.
- procedure :: downsample            =>   ebands_downsample               ! Build a new ebands_t with a downsampled IBZ.
- procedure :: chop                  =>   ebands_chop                     ! Build a new ebands_t with selected nbands.
- procedure :: get_edos              =>   ebands_get_edos                 ! Compute e-DOS from band structure.
- procedure :: get_jdos              =>   ebands_get_jdos                 ! Compute electron joint-DOS from band structure.
+ procedure :: move_alloc            => ebands_move_alloc               ! Transfer allocation.
+ procedure :: print                 => ebands_print                    ! Printout basic info on the data type.
+ procedure :: get_bandenergy        => ebands_get_bandenergy           ! Returns the band energy of the system.
+ procedure :: get_valence_idx       => ebands_get_valence_idx          ! Gives the index of the (valence|bands at E_f).
+ procedure :: get_bands_from_erange => ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
+ procedure :: vcbm_range_from_gaps  => ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
+ procedure :: apply_scissors        => ebands_apply_scissors           ! Apply scissors operator (no k-dependency)
+ procedure :: get_occupied          => ebands_get_occupied             ! Returns band indices after wich occupations are less than an input value.
+ procedure :: enclose_degbands      => ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
+ procedure :: get_bands_e0          => ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
+ procedure :: get_erange            => ebands_get_erange               ! Compute the minimum and maximum energy enclosing a list of states.
+ procedure :: nelect_per_spin       => ebands_nelect_per_spin          ! Returns number of electrons per spin channel
+ procedure :: get_minmax            => ebands_get_minmax               ! Returns min and Max value of (eig|occ|doccde).
+ procedure :: has_metal_scheme      => ebands_has_metal_scheme         ! .True. if metallic occupation scheme is used.
+ procedure :: write_bxsf            => ebands_write_bxsf               ! Write 3D energies for Fermi surface visualization (XSF format)
+ procedure :: update_occ            => ebands_update_occ               ! Update the occupation numbers.
+ procedure :: set_scheme            => ebands_set_scheme               ! Set the occupation scheme.
+ procedure :: set_fermie            => ebands_set_fermie               ! Change the fermi level (assume metallic scheme).
+ procedure :: set_extrael           => ebands_set_extrael              ! Add extrael to initial number of electrons to simulate e/h doping. (assume metallic scheme).
+ procedure :: get_muT_with_fd       => ebands_get_muT_with_fd          ! Change the number of electrons (assume metallic scheme).
+ procedure :: calc_nelect           => ebands_calc_nelect              ! Compute nelect from Fermi level and Temperature.
+ procedure :: report_gap            => ebands_report_gap               ! Print info on the fundamental and direct gap.
+ procedure :: ncwrite               => ebands_ncwrite                  ! Write object to NETCDF file (use ncid)
+ procedure :: ncwrite_path          => ebands_ncwrite_path             ! Dump the object into NETCDF file (use filepath)
+ procedure :: write_nesting         => ebands_write_nesting            ! Calculate the nesting function and output data to file.
+ procedure :: expandk               => ebands_expandk                  ! Build a new ebands_t in the full BZ.
+ procedure :: downsample            => ebands_downsample               ! Build a new ebands_t with a downsampled IBZ.
+ procedure :: chop                  => ebands_chop                     ! Build a new ebands_t with selected nbands.
+ procedure :: get_edos              => ebands_get_edos                 ! Compute e-DOS from band structure.
+ procedure :: get_jdos              => ebands_get_jdos                 ! Compute electron joint-DOS from band structure.
  procedure :: get_edos_matrix_elements => ebands_get_edos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving ! vectorial or tensorial matrix elements.
- procedure :: interp_kmesh          =>   ebands_interp_kmesh             ! Use SWK to interpolate energies on a k-mesh.
- procedure :: interp_kpath          =>   ebands_interp_kpath             ! Interpolate energies on a k-path.
- procedure :: interpolate_kpath     =>   ebands_interpolate_kpath
- procedure :: prtbltztrp            =>   ebands_prtbltztrp               ! Output files for BoltzTraP code.
- procedure :: write                 =>   ebands_write                    ! Driver routine to write bands in different txt formats.
- procedure :: get_carriers          =>   ebands_get_carriers             ! Compute carrier concentration from input Fermi level and list of Temperatures.
- procedure :: get_gaps              =>   ebands_get_gaps                 ! Build the gaps object from a bandstructure.
- procedure :: print_gaps            =>   ebands_print_gaps               ! Helper function to print gaps directrly from ebands.
+ procedure :: interp_kmesh          => ebands_interp_kmesh             ! Use SWK to interpolate energies on a k-mesh.
+ procedure :: interp_kpath          => ebands_interp_kpath             ! Interpolate energies on a k-path.
+ procedure :: interpolate_kpath     => ebands_interpolate_kpath
+ procedure :: prtbltztrp            => ebands_prtbltztrp               ! Output files for BoltzTraP code.
+ procedure :: write                 => ebands_write                    ! Driver routine to write bands in different txt formats.
+ procedure :: get_carriers          => ebands_get_carriers             ! Compute carrier concentration from input Fermi level and list of Temperatures.
+ procedure :: get_gaps              => ebands_get_gaps                 ! Build the gaps object from a bandstructure.
+ procedure :: print_gaps            => ebands_print_gaps               ! Helper function to print gaps directrly from ebands.
 
 end type ebands_t
 !!***

@@ -1185,45 +1185,43 @@ contains
 !!***
 
  subroutine xg_cprj_copy(cprj,xg_cprj,xg_nonlop,option)
- 
-   implicit none
- 
+
    integer, intent(in) :: option
    type(pawcprj_type),intent(inout)   :: cprj(:,:)
    type(xgBlock_t), intent(inout) :: xg_cprj
    type(xg_nonlop_t), intent(in)  :: xg_nonlop
- 
+
    real(dp),pointer :: cprj_contiguous(:,:)
    integer :: cplex,iatom,iband,iband_spin,ilmn,ispinor
    integer :: natom,nband_cprj,nlmn,nspinor
    integer :: start,end,space_cprj
    integer,allocatable :: nlmn_shift(:)
- 
+
    if (option/=XG_TO_CPRJ.and.option/=CPRJ_TO_XG) then
      ABI_ERROR('Bad option')
    end if
- 
+
    natom   = xg_nonlop%natom
    nspinor = xg_nonlop%nspinor
- 
+
    nband_cprj   = cols(xg_cprj)/nspinor
- 
+
    if (size(cprj,1)/=natom) then
      ABI_ERROR('Bad size for cprj (for dim=1)')
    end if
    if (size(cprj,2)/=nband_cprj*nspinor) then
      ABI_ERROR('Bad size for cprj (for dim=2)')
    end if
- 
+
    space_cprj = space(xg_cprj)
    cplex=2;if (space_cprj==SPACE_R) cplex=1
- 
+
    call xgBlock_reverseMap(xg_cprj,cprj_contiguous)
- 
+
    if (size(cprj_contiguous,1)/=cplex*xg_nonlop%cprjdim) then
      ABI_ERROR('Bad size for cprj_contiguous (for dim=1)')
    end if
- 
+
    ABI_MALLOC(nlmn_shift,(natom))
    nlmn_shift(1) = 0
    ! Check nlm for every atom and fill nlmn_shift
@@ -1290,7 +1288,7 @@ contains
    end if
 
    ABI_FREE(nlmn_shift)
- 
+
  end subroutine xg_cprj_copy
 
 end module m_cgprj

@@ -76,8 +76,8 @@ contains
 !!
 !! FUNCTION
 !! This routine computes the Berry Phase polarization
-!!  and the finite difference expression of the ddk.
-!!  See for example Na Sai et al., PRB 66, 104108 (2002) [[cite:Sai2002]]
+!! and the finite difference expression of the ddk.
+!! See for example Na Sai et al., PRB 66, 104108 (2002) [[cite:Sai2002]]
 !!
 !! INPUTS
 !! atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
@@ -144,8 +144,7 @@ contains
 !!
 !! TODO
 !!  - Use the analytical relation between the overlap matrices
-!!    S(k,k+dk) and S(k+dk,k) to avoid to recompute them
-!!    when ifor = 2.
+!!    S(k,k+dk) and S(k+dk,k) to avoid to recompute them when ifor = 2.
 !!
 !! NOTES
 !! - pel and pion do not take into account the factor 1/ucvol
@@ -211,7 +210,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 
 !!REC start
  integer :: jump
- real(dp),save ::pol0(3)
+ real(dp),save :: pol0(3)
  logical, save :: first=.true.
  logical :: lexist
 !!REC end
@@ -237,7 +236,6 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
  real(dp),allocatable :: dtm_mult(:,:,:), coef(:,:), polb_mult(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_buf(:,:),cprj_gat(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
-
 ! integer :: bband,bbs,bra_start,bra_end,ilmn,ipw,ispinor,jlmn,kband,kbs,ket_start,ket_end,klmn,npw_k
 ! integer :: nspinor,spnipw,spnshft
 ! real(dp) :: err_ovlp,mag_ovlp,max_err_ovlp, ovlp_r, ovlp_i, paw_r, paw_i
@@ -248,9 +246,6 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 !BEGIN TF_CHANGES
  integer :: me
 !END TF_CHANGES
-
-!no_abirules
-
 ! ***********************************************************************
 
 !DEBUG
@@ -287,34 +282,30 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 
  if (maxval(dtset%istwfk(:)) /= 1) then
    write(message, '(a,a,a)' )&
-&   'This routine does not work yet with istwfk /= 1.',ch10,&
-&   'This should have been tested previously ...'
+    'This routine does not work yet with istwfk /= 1.',ch10,&
+    'This should have been tested previously ...'
    ABI_BUG(message)
  end if
 
  if (usepaw == 1 .and. usecprj /= 1) then
-   message = ' PAW calculation but cprj datastructure has not been allocated !'
-   ABI_BUG(message)
+   ABI_BUG('PAW calculation but cprj datastructure has not been allocated !')
  end if
 
  if (save_cg13 .AND. (ddkflag /= 1) ) then
-   message = ' cg13 output requested but ddkflag not set '
-   ABI_BUG(message)
+   ABI_BUG('cg13 output requested but ddkflag not set')
  end if
 
  if (save_cg13 .AND. (mcg13 /= mcg) ) then
-   message = ' cg13 output requested but mcg13 /= mcg '
-   ABI_BUG(message)
+   ABI_BUG('cg13 output requested but mcg13 /= mcg')
  end if
 
  if (save_cg13 .AND. (size(cg13) /= 2*mcg13*3 ) ) then
-   message = ' cg13 output requested but cg13 size incorrect '
-   ABI_BUG(message)
+   ABI_BUG('cg13 output requested but cg13 size incorrect')
  end if
 
 ! useful flags for various efield possibilities
- efield_flag = ( dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt == 7 .or. &
-& dtset%berryopt ==14 .or. dtset%berryopt ==16 .or. dtset%berryopt ==17 )
+ efield_flag = (dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt == 7 .or. &
+                dtset%berryopt ==14 .or. dtset%berryopt ==16 .or. dtset%berryopt ==17 )
  calc_epaw3_force = ( efield_flag .and. dtset%optforces /= 0 .and. usepaw == 1 )
  calc_epaw3_stress = ( efield_flag .and. dtset%optstress /= 0  .and. usepaw == 1 )
 
@@ -362,7 +353,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 !allocate(dtm(2,dtefield%fnkpt*nsppol))
  ABI_MALLOC(dtm_mult,(2,dtefield%fnkpt*nsppol,berrystep))
  ABI_MALLOC(cg1_k,(2,mcg1_k))
- 
+
  if (usepaw == 1) then ! cprj allocation
    ncpgr = cprj(1,1)%ncpgr
    if ( calc_epaw3_force ) then
@@ -396,8 +387,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
    end if
 
    if ( efield_flag ) then
-     write(message,'(2a,i5,2a)')ch10,&
-&     ' nkpt = ',nkpt,ch10,' copy cprj to dtefield%cprj '
+     write(message,'(2a,i5,2a)')ch10,' nkpt = ',nkpt,ch10,' copy cprj to dtefield%cprj '
      call wrtout(std_out,message,'COLL')
 
      do isppol = 1, nsppol
@@ -410,8 +400,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
          if ((ikpt1 > nkpt).and.(ikpt_loc < mkmem)) exit
          nband_k = dtset%nband(ikpt1)
 
-         if ( (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt1,1,nband_k,isppol,me)) .and. &
-&         (ikpt_loc <= mkmem) ) cycle
+         if ( (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt1,1,nband_k,isppol,me)) .and. (ikpt_loc <= mkmem) ) cycle
 
          ikpt_loc = ikpt_loc + 1
 
@@ -434,11 +423,10 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
          ABI_FREE(ikpt1_recv)
 
        end do ! close loop over k-points
-
      end do ! end loop over nsppol
-
    end if ! end check on efield
  end if
+
 !!=======================================
 !! code to test orthonormality of cg_k
 !!=======================================
@@ -538,17 +526,13 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 &   dk(:),' (in reduced coordinates)',ch10,&
 &   gpard(1:3),' (in cartesian coordinates - atomic units)'
    call wrtout(std_out,message,'COLL')
-   if (unit_out /= 0) then
-     call wrtout(unit_out,message,'COLL')
-   end if
+   if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
 
    write(message,'(a,i5,a,a,i5)')&
 &   ' Number of strings: ',dtefield%nstr(idir),ch10,&
 &   ' Number of k points in string:', dtefield%nkstr(idir)
    call wrtout(std_out,message,'COLL')
-   if (unit_out /= 0) then
-     call wrtout(unit_out,message,'COLL')
-   end if
+   if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
 
 !  Check whether the polarization or the ddk must be computed
 
@@ -573,10 +557,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 &     dk(:),' (in reduced coordinates)',ch10,&
 &     gpard(1:3),' (in cartesian coordinates - atomic units)'
      call wrtout(std_out,message,'COLL')
-     if (unit_out /= 0) then
-       call wrtout(unit_out,message,'COLL')
-     end if
-
+     if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
    end if
 
 ! From smatrix routine: det_inv_smat = type of calculation
@@ -653,8 +634,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 
 !        DEBUG
 !        Please keep this debugging feature
-!        write(std_out,'(a,5i4)' )' berryphase_new : ikpt_loc,ikpt1,isppol,idir,ifor=',&
-!        &                                  ikpt_loc,ikpt1,isppol,idir,ifor
+!        write(std_out,'(a,5i4)' )' berryphase_new : ikpt_loc,ikpt1,isppol,idir,ifor=',ikpt_loc,ikpt1,isppol,idir,ifor
 !        ENDDEBUG
 
          inibz=0
@@ -905,11 +885,8 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
                  end if
 
                end if ! end check that I am his source
-
              end if ! end check that jkpt > 0 and jsppol > 0
-
            end if ! end if statements on dest == me or dest /= me
-
          end do  ! end loop over dest = 0, nproc - 1
 
          if (ikpt1 > 0 .and. isppol > 0) then ! if I am treating a kpt, compute the smatrix
@@ -1051,6 +1028,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
      end if
 
    end do   ! close loop over ifor
+
 !  MPI communicate stuff between everyone
    if (nproc>1) then
      count = 2*dtefield%fnkpt*nsppol*berrystep
@@ -1115,9 +1093,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
      ABI_MALLOC(resid,(mband*nkpt*nsppol))
      resid(:) = zero
 
-     call outresid(dtset,dtset%kptns,mband,&
-&                dtset%nband,nkpt,&
-&                nsppol,resid)
+     call outresid(dtset,dtset%kptns,mband,dtset%nband,nkpt,nsppol,resid)
 
      call outwf(cg1,dtset,psps,eig_dum,fiwf1o,hdr,kg,dtset%kptns,&
 &     mband,mcg,mkmem,mpi_enreg,mpw,natom,dtset%nband,&
@@ -1131,27 +1107,25 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
      ABI_FREE(resid)
    end if  ! ddkflag == 1
 ! end of ddk part for this idir
-    
-   
+
+
 !  ===========================================================================
 !  Compute the Berry phase polarization
 !  ===========================================================================
-     
+
    if (polflag == 1) then
-    
+
 !    Compute the electronic Berry phase
-    
+
      polb_mult(:,:)=zero
      do istep = 1,berrystep
-    
+
        if(berrystep==1) then
-         write(message,'(a,a)')ch10,&
-&         ' Compute the electronic contribution to polarization'
+         write(message,'(a,a)')ch10,' Compute the electronic contribution to polarization'
          call wrtout(std_out,message,'COLL')
        else
          write(message,'(a,a,i4,a)')ch10,&
-&         ' Compute the electronic contribution to polarization for a step of istep=',&
-&         istep,'*dk'
+         ' Compute the electronic contribution to polarization for a step of istep=',istep,'*dk'
          call wrtout(std_out,message,'COLL')
        end if
 
@@ -1179,8 +1153,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
          nstr = dtefield%fnkpt/nkstr
 
          write(message,'(a,i1,a,i2,a,i3,a,i6)')&
-&         '  berryphase_new: for direction ',idir, ' and istep ', istep, ', nkstr = ',nkstr,&
-&         ', nstr = ',nstr
+&         '  berryphase_new: for direction ',idir, ' and istep ', istep, ', nkstr = ',nkstr,', nstr = ',nstr
          call wrtout(std_out,message,'COLL')
          call wrtout(ab_out,message,'COLL')
 
@@ -1217,8 +1190,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 
        ABI_MALLOC(det_string,(2,nstr))
        ABI_MALLOC(polberry,(nstr))
-       write(message,'(a,10x,a,10x,a)')ch10,&
-&       'istr','polberry(istr)'
+       write(message,'(a,10x,a,10x,a)')ch10,'istr','polberry(istr)'
        call wrtout(std_out,message,'COLL')
 
        polbtot = zero
@@ -1427,8 +1399,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
        write(message,'(a)')' Compute the ionic contributions'
        call wrtout(std_out,message,'COLL')
 
-       write(message,'(a,2x,a,2x,a,15x,a)')ch10,&
-&       'itom', 'itypat', 'polion'
+       write(message,'(a,2x,a,2x,a,15x,a)')ch10,'itom', 'itypat', 'polion'
        call wrtout(std_out,message,'COLL')
 
        do iatom = 1, natom
@@ -1459,62 +1430,41 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
        poltot = politot + polbtot
 
        if (berrystep==1)then
-         write(message,'(a,a)')ch10,&
-&         ' Summary of the results'
+         write(message,'(a,a)')ch10,' Summary of the results'
          call wrtout(std_out,message,'COLL')
-         if (unit_out /= 0) then
-           call wrtout(unit_out,message,'COLL')
-         end if
+         if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
        else
-         write(message,'(a,a,i4)')ch10,&
-&         ' Summary of the results for istep =',istep
+         write(message,'(a,a,i4)')ch10,' Summary of the results for istep =',istep
          call wrtout(std_out,message,'COLL')
-         if (unit_out /= 0) then
-           call wrtout(unit_out,message,'COLL')
-         end if
+         if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
        end if
 
-       write(message,'(a,es19.9)')&
-&       ' Electronic Berry phase ' ,polbtot
+       write(message,'(a,es19.9)')' Electronic Berry phase ' ,polbtot
        call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) then
-         call wrtout(unit_out,message,'COLL')
-       end if
+       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
 
-       write(message,'(a,es19.9)') &
-&       '            Ionic phase ', politot
+       write(message,'(a,es19.9)')'            Ionic phase ', politot
        call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) then
-         call wrtout(unit_out,message,'COLL')
-       end if
+       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
 
-       write(message,'(a,es19.9)') &
-&       '            Total phase ', poltot
+       write(message,'(a,es19.9)')'            Total phase ', poltot
        call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) then
-         call wrtout(unit_out,message,'COLL')
-       end if
+       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
 
 !      REC start
        if(abs(dtset%polcen(idir))>tol8)then
          poltot = poltot-dtset%polcen(idir)
          write(message,'(a,f15.10)') &
-&         '    Translating Polarization by P0 for centrosymmetric cell: ',&
-&         dtset%polcen(idir)
+&         '    Translating Polarization by P0 for centrosymmetric cell: ',dtset%polcen(idir)
          call wrtout(std_out,message,'COLL')
-         if (unit_out /= 0) then
-           call wrtout(unit_out,message,'COLL')
-         end if
+         if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
        end if
 !      REC end
 
        poltot = poltot - 2.0_dp*nint(poltot/2._dp)
-       write(message,'(a,es19.9)') &
-&       '    Remapping in [-1,1] ', poltot
+       write(message,'(a,es19.9)')'    Remapping in [-1,1] ', poltot
        call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) then
-         call wrtout(unit_out,message,'COLL')
-       end if
+       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
 
 !      ! REC and HONG
 !      =====================================================================================
@@ -1580,9 +1530,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 &           ' P(',idir,') jumped to new branch. Shifting bac&
 &           k from ',poltot, ' by ',jump
            call wrtout(std_out,message,'COLL')
-           if (unit_out /= 0) then
-             call wrtout(unit_out,message,'COLL')
-           end if
+           if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
            poltot=poltot-jump
          end if
 
@@ -1607,19 +1555,13 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 &       '           Polarization ', pol*(e_Cb)/(Bohr_Ang*1d-10)**2,&
 &       ' C/m^2',ch10
        call wrtout(std_out,message,'COLL')
-       if (unit_out /= 0) then
-         call wrtout(unit_out,message,'COLL')
-       end if
-
+       if (unit_out /= 0) call wrtout(unit_out,message,'COLL')
 
        ABI_FREE(idxkstr_mult)
 
      end do !istep
-
      pel(idir) = polbtot
-
    end if   ! if calculate polarization polflag==1
-
  end do    ! Close loop over idir
 
 
@@ -1645,8 +1587,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
    if(usepaw.ne.1) then
      pelev=zero
    else
-     call pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
-&     comm_atom=mpi_enreg%comm_atom)
+     call pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,comm_atom=mpi_enreg%comm_atom)
 !    note that in the PAW case, the pelev contribution is already
 !    implicitly included in the electronic polarization, from the
 !    discretized derivative operator. In the NCPP case no such
@@ -1658,12 +1599,9 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 !    PAW finite field code in make_grad_berry.F90
 !    13 June 2012 J Zwanziger
    end if
-   call polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,3,&
-&   ptot_cart,rprimd,ucvol,unit_out,usepaw)
-
+   call polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,3,ptot_cart,rprimd,ucvol,unit_out,usepaw)
  end if
 
-!deallocate(pwind_k, dtm)
  ABI_FREE(pwnsfac_k)
  ABI_FREE(sflag_k)
  ABI_FREE(cg1_k)
@@ -1700,7 +1638,6 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
      call pawcprj_free(cprj_buf)
      ABI_FREE(cprj_buf)
    end if
-
  end if
 
  ABI_FREE(ikpt3)
@@ -1713,9 +1650,7 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
  ABI_FREE(polb_mult)
  ABI_FREE(dtm_mult)
 
-!DEBUG
 !write(std_out,*)'berryphase_new exit'
-!END_DEBUG
 
 end subroutine berryphase_new
 !!***
@@ -1726,13 +1661,6 @@ end subroutine berryphase_new
 !!
 !! FUNCTION
 !! This routine updates E field variables
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !! atindx(natom)=index table for atoms, inverse of atindx (see gstate.f)
@@ -1777,11 +1705,9 @@ end subroutine berryphase_new
 !!     spherical harmonics
 !!
 !! OUTPUT
-!! efield_old_cart(3)=updating cartesian values of efield (used in berryopt
-!!                    6,16,17)
+!! efield_old_cart(3)=updating cartesian values of efield (used in berryopt 6,16,17)
 !! pel_cg(3)=electronic polarization
-!! pelev(3)=leading order PAW contribution in pel_cg (for reporting purposes
-!!          only)
+!! pelev(3)=leading order PAW contribution in pel_cg (for reporting purposes only)
 !! pion(3)=ionic part of polarization
 !! ptot(3)=total polarization
 !! red_efield2=updating efield used in berryopt 16,17
@@ -1796,10 +1722,6 @@ end subroutine berryphase_new
 !! mpi_enreg=information about MPI parallelization
 !! ptot_cart(3)=total polarization in cartesian coordinates
 !! xred(3,natom)=reduced atomic coordinates
-!!
-!! TODO
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -2288,13 +2210,6 @@ end subroutine update_e_field_vars
 !! FUNCTION
 !! Print components of electric field, displacement field and polarization in nice format
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LBoeri, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | berryopt
@@ -2669,13 +2584,6 @@ end subroutine prtefield
 !! Initialization of variables and data structures used in polarization
 !! calculations
 !!
-!! COPYRIGHT
-!! Copyright (C) 2004-2025 ABINIT group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)> = all input variables in this dataset
 !!  gmet(3,3) = reciprocal space metric tensor in bohr**-2
@@ -2779,13 +2687,6 @@ end subroutine init_e_field_vars
 !! FUNCTION
 !! Initialization of Berryphase calculation of the polarization, the
 !! ddk and the response of an insulator to a homogenous electric field.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2004-2025 ABINIT group (MVeithen).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)> = all input variables in this dataset

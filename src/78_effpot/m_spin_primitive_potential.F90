@@ -916,7 +916,6 @@ contains
   ! used to check if file is .nc or .xml
   !-------------------------------------------------------------------!
   function  endswith(string1, string2) result(answer)
-    implicit none
     character(len=*), intent(in) :: string1
     character(len=*), intent(in) :: string2
     logical :: answer

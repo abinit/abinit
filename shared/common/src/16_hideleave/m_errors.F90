@@ -25,12 +25,8 @@ MODULE m_errors
  use m_profiling_abi
  use m_xmpi
  use m_specialmsg, only : wrtout
-#ifdef HAVE_NETCDF
+ USE_MPI
  use netcdf
-#endif
-#ifdef HAVE_MPI2
- use mpi
-#endif
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
@@ -493,7 +489,6 @@ subroutine netcdf_check(ncerr, msg, file, line)
 
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
  if (ncerr /= NF90_NOERR) then
 
    f90line = 0; if (present(line)) f90line = line
@@ -505,7 +500,6 @@ subroutine netcdf_check(ncerr, msg, file, line)
 
    call msg_hndl(my_msg, "ERROR", "PERS", f90name, f90line)
  end if
-#endif
 
 end subroutine netcdf_check
 !!***
@@ -1409,6 +1403,15 @@ subroutine abinit_doctor(prefix, print_mem_report)
  ! Check for pending requests.
  if (xmpi_count_requests /= 0) then
    write(msg, "(a,i0,a)")"Leaking ", xmpi_count_requests, " MPI requests at the end of the run"
+   ABI_WARNING(msg)
+#ifdef HAVE_MEM_PROFILING
+   ABI_ERROR(msg)
+#endif
+ end if
+
+ ! Check for MPI windows.
+ if (xmpi_count_wins /= 0) then
+   write(msg, "(a,i0,a)")"Leaking ", xmpi_count_wins, " MPI windows at the end of the run"
    ABI_WARNING(msg)
 #ifdef HAVE_MEM_PROFILING
    ABI_ERROR(msg)

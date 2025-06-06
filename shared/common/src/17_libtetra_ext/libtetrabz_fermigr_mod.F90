@@ -14,7 +14,7 @@
 ! distribute, sublicense, and/or sell copies of the Software, and to
 ! permit persons to whom the Software is furnished to do so, subject to
 ! the following conditions:
-! 
+!
 ! The above copyright notice and this permission notice shall be included
 ! in all copies or substantial portions of the Software.
 !
@@ -37,11 +37,11 @@ CONTAINS
 !
 ! Compute Fermi's golden rule
 !
-SUBROUTINE libtetrabz_fermigr(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0,comm) 
+SUBROUTINE libtetrabz_fermigr(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0,comm)
   !
   use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3), ne
   REAL(C_DOUBLE),INTENT(IN) :: bvec(9), e0(ne), eig1(nb,PRODUCT(nge(1:3))), eig2(nb,PRODUCT(nge(1:3)))
@@ -100,7 +100,7 @@ SUBROUTINE libtetrabz_fermigr_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig1
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, ne, &
   &                     ik_global(20,nt_local), ik_local(20,nt_local)
@@ -252,7 +252,7 @@ SUBROUTINE libtetrabz_fermigr2(nb,ne,e0,ei1,ej1,w1)
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nb, ne
   REAL(8),INTENT(IN) :: e0(ne), ei1(4), ej1(4,nb)
@@ -369,7 +369,7 @@ SUBROUTINE libtetrabz_fermigr3(ne,e0,de,w1)
   USE libtetrabz_common, ONLY : libtetrabz_sort, &
   &                             libtetrabz_triangle_a1, libtetrabz_triangle_b1, &
   &                             libtetrabz_triangle_b2, libtetrabz_triangle_c1
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: ne
   REAL(8),INTENT(IN) :: e0(ne), de(4)

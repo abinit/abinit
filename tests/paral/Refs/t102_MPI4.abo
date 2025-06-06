@@ -1,8 +1,8 @@
 
-.Version 10.4.0.1 of ABINIT, released Apr 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.4.0.8 of ABINIT, released Apr 2025.
+.(MPI version, prepared for a x86_64_linux_gnu9.5 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 19 May 2025.
-- ( at 23h52 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/castiel_dmft_triqs/tests/TestBot_MPI4/paral_t102_MPI4/t102.abi
+.Starting date : Mon  5 May 2025.
+- ( at 10h21 )
+
+- input  file    -> t102_MPI4.abi
 - output file    -> t102_MPI4.abo
 - root for input  files -> t102_MPI4i
 - root for output files -> t102_MPI4o
@@ -1977,7 +1977,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.01481   0.00000   0.00000   0.00000   0.00000   0.00463   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00004   0.00000   0.00000   0.00000   0.00000   0.00575
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -3443,7 +3443,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
 -          iomode           3
             acell      5.5000000000E+00  5.5000000000E+00  5.5000000000E+00 Bohr
@@ -3634,7 +3634,7 @@ P           mkmem          51
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3646,12 +3646,12 @@ P           mkmem          51
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3669,7 +3669,7 @@ P           mkmem          51
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

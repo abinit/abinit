@@ -671,9 +671,9 @@ integer :: fout12
 integer :: iw_tgt
 real(dp) :: iw_real
 real(dp) :: ev2ha
-complex(dpc), allocatable :: inter2w_bands(:,:,:), inter2w_bands_ik(:,:,:) 
+complex(dpc), allocatable :: inter2w_bands(:,:,:), inter2w_bands_ik(:,:,:)
 complex(dpc), allocatable :: inter1w_bands(:,:,:), inter1w_bands_ik(:,:,:)
-complex(dpc), allocatable :: intra2w_bands(:,:,:), intra2w_bands_ik(:,:,:) 
+complex(dpc), allocatable :: intra2w_bands(:,:,:), intra2w_bands_ik(:,:,:)
 complex(dpc), allocatable :: intra1w_bands(:,:,:), intra1w_bands_ik(:,:,:)
 complex(dpc), allocatable :: intra1wS_bands(:,:,:), intra1wS_bands_ik(:,:,:)
 ! Addition 2bands interactions decomposition
@@ -681,7 +681,7 @@ character(len=fnlen) :: fnam13
 character(len=fnlen) :: fnam14
 integer :: fout13
 integer :: fout14
-complex(dpc), allocatable :: intra2w_2bands(:,:), intra2w_2bands_ik(:,:) 
+complex(dpc), allocatable :: intra2w_2bands(:,:), intra2w_2bands_ik(:,:)
 complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
 
 ! *********************************************************************
@@ -698,8 +698,8 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
 !calculate the constant
  zi=(0._dp,1._dp)
  idel=zi*brod
- !const_au=-1._dp/(cryst%ucvol*dble(cryst%nsym)) ! VT: 1 instead of 2 bc 2 is unexplained 
- const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym)) 
+ !const_au=-1._dp/(cryst%ucvol*dble(cryst%nsym)) ! VT: 1 instead of 2 bc 2 is unexplained
+ const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym))
  au2esu=5.8300348177d-8
  const_esu=const_au*au2esu
  ha2ev=13.60569172*2._dp
@@ -727,14 +727,14 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  fnam7=trim(fnam)//'-ChiReDec.out'
  ! Addition bands decomposition
  if (do_decompo) then
-   fnam8=trim(fnam)//'-ChiInter2wBands.out' 
-   fnam9=trim(fnam)//'-ChiInter1wBands.out' 
-   fnam10=trim(fnam)//'-ChiIntra2wBands.out' 
-   fnam11=trim(fnam)//'-ChiIntra1wBands.out' 
-   fnam12=trim(fnam)//'-ChiIntra1wSBands.out' 
+   fnam8=trim(fnam)//'-ChiInter2wBands.out'
+   fnam9=trim(fnam)//'-ChiInter1wBands.out'
+   fnam10=trim(fnam)//'-ChiIntra2wBands.out'
+   fnam11=trim(fnam)//'-ChiIntra1wBands.out'
+   fnam12=trim(fnam)//'-ChiIntra1wSBands.out'
    ! Addition 2bands interactions decomposition
-   fnam13=trim(fnam)//'-ChiIntra2w2Bands.out' 
-   fnam14=trim(fnam)//'-ChiIntra1wS2Bands.out' 
+   fnam13=trim(fnam)//'-ChiIntra2w2Bands.out'
+   fnam14=trim(fnam)//'-ChiIntra1wS2Bands.out'
  end if ! do_decompo
 
  if(my_rank == master) then
@@ -811,8 +811,8 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  ABI_MALLOC(delta, (mband, mband, 3))
  ! Addition antiresonant (AR)
  if (.not.do_antiresonant) then
-   ABI_MALLOC(inter2wa, (nmesh)) 
-   ABI_MALLOC(inter1wa, (nmesh)) 
+   ABI_MALLOC(inter2wa, (nmesh))
+   ABI_MALLOC(inter1wa, (nmesh))
    ABI_MALLOC(intra2wa, (nmesh))
    ABI_MALLOC(intra1wa, (nmesh))
    ABI_MALLOC(intra1wSa, (nmesh))
@@ -1038,7 +1038,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                    ! NOTE:: lx to ly m to n in pmat matrices respectively
                    ! Changes are made so that this (b3) term is according to paper
                    ! [[cite:Sipe1993]] (Ref. 4) rather than [[cite:Hughes1996]] (Ref 2) in which this term is incorrect
-                   
+
                    ! Addition AR
                    if (.not.do_antiresonant) then
                      mat2wa_tra=mat2wa_tra+px(istm,istn,lx,ly,lz)*pmat(istn,istm,ik,lz,isp)    &
@@ -1120,7 +1120,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                        mat1w2a=mat1w2a+(pz(istn,istm,lx,ly,lz)*pmat(istl,istn,ik,lz,isp) &
                        *pmat(istm,istl,ik,ly,isp))
                      end if ! if .not.do_antiresonant
-                     
+
                    end do
                  end do
                end do
@@ -1243,7 +1243,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
 
                      mat1w2=mat1w2+(pz(istm,istn,lx,ly,lz)*pmat(istl,istm,ik,lz,isp) &
                      *pmat(istn,istl,ik,ly,isp))
-                
+
                      ! Addition AR
                      if (.not.do_antiresonant) then
                        mat2wa=mat2wa+(px(istm,istn,lx,ly,lz)*pmat(istn,istl,ik,ly,isp)   &
@@ -1255,7 +1255,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                        mat1w2a=mat1w2a+(pz(istn,istm,lx,ly,lz)*pmat(istl,istn,ik,lz,isp) &
                        *pmat(istm,istl,ik,ly,isp))
                      end if ! if .not.do_antiresonant
-                      
+
                    end do
                  end do
                end do
@@ -1373,7 +1373,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                ! Addition bands decomposition
                if (do_decompo) then
                  if (contrib_decompo==0 .or. contrib_decompo==12) then
-                   inter2w_bands_ik(istl, istm, istn)  = 2._dp*b112 
+                   inter2w_bands_ik(istl, istm, istn)  = 2._dp*b112
                  end if
                  if (contrib_decompo==0 .or. contrib_decompo==11) then
                    inter1w_bands_ik(istl, istm, istn)  = -b122+b132
@@ -1551,18 +1551,18 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                  inter1w_bands_ik(:, istm, istn)  = inter1w_bands_ik(:, istm, istn)*zi*(1._dp/wnm)*const_esu
                end if
                if (contrib_decompo==0 .or. contrib_decompo==22) then
-                 intra2w_bands_ik(:, istm, istn)  = intra2w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
+                 intra2w_bands_ik(:, istm, istn)  = intra2w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu
                end if
                if (contrib_decompo==0 .or. contrib_decompo==21) then
-                 intra1w_bands_ik(:, istm, istn)  = intra1w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
+                 intra1w_bands_ik(:, istm, istn)  = intra1w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu
                end if
                if (contrib_decompo==0 .or. contrib_decompo==1) then
-                 intra1wS_bands_ik(:, istm, istn) = intra1wS_bands_ik(:, istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
+                 intra1wS_bands_ik(:, istm, istn) = intra1wS_bands_ik(:, istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp
                end if
                if (contrib_decompo==0 .or. contrib_decompo==2) then
                  ! Addition 2bands interactions decomposition
-                 intra2w_2bands_ik(istm, istn)  = intra2w_2bands_ik(istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
-                 intra1wS_2bands_ik(istm, istn) = -intra1wS_2bands_ik(istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
+                 intra2w_2bands_ik(istm, istn)  = intra2w_2bands_ik(istm, istn)*zi*(1._dp/(wnm**3))*const_esu
+                 intra1wS_2bands_ik(istm, istn) = -intra1wS_2bands_ik(istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp
                end if
              end if ! do_decompo
 
@@ -1594,7 +1594,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                      inter1w_bands(:, istm, istn)  = inter1w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(inter1w_bands_ik(:, istm, istn)/(wmn-w)))
                    end if
                    if (contrib_decompo==0 .or. contrib_decompo==22) then
-                     intra2w_bands(:, istm, istn)  = intra2w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(intra2w_bands_ik(:, istm, istn)/(wmn-2._dp*w))) 
+                     intra2w_bands(:, istm, istn)  = intra2w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(intra2w_bands_ik(:, istm, istn)/(wmn-2._dp*w)))
                    end if
                    if (contrib_decompo==0 .or. contrib_decompo==21) then
                      intra1w_bands(:, istm, istn)  = intra1w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*((intra1w_bands_ik(:, istm, istn))/(wmn-w)))
@@ -1604,7 +1604,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                    end if
                    if (contrib_decompo==0 .or. contrib_decompo==2) then
                      ! Addition 2bands interaction decomposition
-                     intra2w_2bands(istm, istn)  = intra2w_2bands(istm,istn)+(ks_ebands%wtk(ik)*(intra2w_2bands_ik(istm, istn)/(wmn-2._dp*w))) 
+                     intra2w_2bands(istm, istn)  = intra2w_2bands(istm,istn)+(ks_ebands%wtk(ik)*(intra2w_2bands_ik(istm, istn)/(wmn-2._dp*w)))
                      intra1wS_2bands(istm, istn) = intra1wS_2bands(istm,istn)+(ks_ebands%wtk(ik)*((intra1wS_2bands_ik(istm, istn))/(wmn-w)))
                    end if
                  end if ! Chosen frequency for bands decomposition
@@ -1832,7 +1832,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout8, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout8, '(a)')' # '
      end if
-  
+
      if (contrib_decompo==0 .or. contrib_decompo==11) then
        write(fout9, '(a,3i3)') ' #calculated the component:',v1,v2,v3
        write(fout9, '(a,es16.6)') ' #tolerance:',tol
@@ -1844,7 +1844,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout9, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout9, '(a)')' # '
      end if
-  
+
      if (contrib_decompo==0 .or. contrib_decompo==22) then
        write(fout10, '(a,3i3)') ' #calculated the component:',v1,v2,v3
        write(fout10, '(a,es16.6)') ' #tolerance:',tol
@@ -1856,7 +1856,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout10, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout10, '(a)')' # '
      end if
-  
+
      if (contrib_decompo==0 .or. contrib_decompo==21) then
        write(fout11, '(a,3i3)') ' #calculated the component:',v1,v2,v3
        write(fout11, '(a,es16.6)') ' #tolerance:',tol
@@ -1868,7 +1868,7 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout11, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout11, '(a)')' # '
      end if
-  
+
      if (contrib_decompo==0 .or. contrib_decompo==1) then
        write(fout12, '(a,3i3)') ' #calculated the component:',v1,v2,v3
        write(fout12, '(a,es16.6)') ' #tolerance:',tol
@@ -1905,14 +1905,14 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      end if
    end if ! (do_decompo)
 
-   totim=zero              
-   totre=zero              
-   totabs=zero             
+   totim=zero
+   totre=zero
+   totabs=zero
    if (.not.do_antiresonant) then
-     do iw=2,nmesh           
-       ene=(iw-1)*de         
-       ene=ene*ha2ev         
-                             
+     do iw=2,nmesh
+       ene=(iw-1)*de
+       ene=ene*ha2ev
+
        totim=aimag(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw) + &
                    inter2wa(iw)+inter1wa(iw)+intra2wa(iw)+intra1wa(iw)+intra1wSa(iw))/1.d-7
        write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
@@ -1947,10 +1947,10 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        dble(intra1wS(iw)+intra1wSa(iw))/1.d-7
      end do ! iw=2, nmesh
    else
-     do iw=2,nmesh           
-       ene=(iw-1)*de         
-       ene=ene*ha2ev         
-                             
+     do iw=2,nmesh
+       ene=(iw-1)*de
+       ene=ene*ha2ev
+
        totim=aimag(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
        write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
        totim=zero
@@ -1980,43 +1980,43 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    if (do_decompo) then
      do iw=2,nmesh
        if (iw==iw_tgt) then
-         ene=(iw-1)*de         
-         ene=ene*ha2ev         
-         
+         ene=(iw-1)*de
+         ene=ene*ha2ev
+
          do istn=1,nband_sum
            do istm=1,nband_sum
              do istl=1,nband_sum
-  
+
                if (contrib_decompo==0 .or. contrib_decompo==12) then
                  write(fout8,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
                  dble(inter2w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
                  aimag(inter2w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
                end if
-  
+
                if (contrib_decompo==0 .or. contrib_decompo==11) then
                  write(fout9,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
                  dble(inter1w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
                  aimag(inter1w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
                end if
-  
+
                if (contrib_decompo==0 .or. contrib_decompo==22) then
                  write(fout10,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
                  dble(intra2w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),     &
                  aimag(intra2w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
                end if
-  
+
                if (contrib_decompo==0 .or. contrib_decompo==21) then
                  write(fout11,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
                  dble(intra1w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),     &
                  aimag(intra1w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
                end if
-  
+
                if (contrib_decompo==0 .or. contrib_decompo==1) then
                  write(fout12,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
                  dble(intra1wS_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
                  aimag(intra1wS_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
                end if
-  
+
              end do ! istl
              if (contrib_decompo==0 .or. contrib_decompo==2) then
                ! Addition 2bands interactions decomposition
@@ -2029,10 +2029,10 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
                aimag(intra1wS_2bands(istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
              end if
 
-           end do ! istm  
+           end do ! istm
          end do ! istn
        end if ! iw==2
-     end do ! iw   
+     end do ! iw
    end if ! do_decompo
 
 

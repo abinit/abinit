@@ -566,7 +566,7 @@ subroutine abi_mixing_eval_allocate(mix, istep)
     !call memocc_abi(i_stat, mix%f_atm, 'mix%f_atm', subname)
     ABI_MALLOC(mix%f_atm,(3,mix%n_atom,mix%n_fftgr))
  end if
- 
+
  if(.not.associated(mix%f_extfpmd)) then
    if(mix%useextfpmd==1) then
      ABI_MALLOC(mix%f_extfpmd,(mix%n_fftgr))
@@ -574,7 +574,7 @@ subroutine abi_mixing_eval_allocate(mix, istep)
    else
      ABI_MALLOC(mix%f_extfpmd,(0))
    endif
- endif 
+ endif
 
  if(.not.associated(mix%f_rcpaw)) then
    if(mix%use_rcpaw==1) then
@@ -646,7 +646,7 @@ subroutine abi_mixing_eval_allocate(mix, istep)
     end if
     if(associated(mix%f_extfpmd)) then
       ABI_FREE(mix%f_extfpmd)
-      nullify(mix%f_extfpmd) 
+      nullify(mix%f_extfpmd)
     endif
     if(associated(mix%f_rcpaw)) then
       ABI_FREE(mix%f_rcpaw)

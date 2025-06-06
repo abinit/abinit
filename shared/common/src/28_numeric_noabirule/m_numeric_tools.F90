@@ -2204,7 +2204,6 @@ subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
  interface
   function funcs(xx,nf)
   use defs_basis
-  implicit none
   real(dp),intent(in) :: xx
   integer,intent(in) :: nf
   real(dp) :: funcs(nf)

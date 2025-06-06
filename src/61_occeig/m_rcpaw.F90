@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !! This module contains types and subroutines linked to the PAW core relaxation
-!!  approach  
+!!  approach
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2019-2019 ABINIT group (NBrouwer,MT, JBoust)
@@ -40,7 +40,7 @@ module m_rcpaw
  use defs_datatypes,     only : pseudopotential_type
  use m_pawang,           only : pawang_type
  use m_pawrhoij,         only : pawrhoij_type
- use m_paw_an,           only : paw_an_type 
+ use m_paw_an,           only : paw_an_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_paw_finegrid,     only : pawrfgd_fft
 
@@ -256,7 +256,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
    mult(itypat)=mult(itypat)+1
  enddo
 
- ! Allocate arrays 
+ ! Allocate arrays
  if(.not.allocated(rcpaw%val)) then
    ABI_MALLOC(rcpaw%val,(my_natom))
  endif
@@ -289,7 +289,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
 &    int(rcpaw%atm(itypat)%znucl),rcpaw%atm(itypat),dtset%rcpaw_scenergy(itypat))
    endif
  enddo
- 
+
  ! Init val
  do iat=1,my_natom
   iatom=iat;if (paral_atom) iatom=my_atmtab(iat)
@@ -320,7 +320,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
    rcpaw%nelect_core=rcpaw%nelect_core+rcpaw%atm(itypat)%zcore*rcpaw%atm(itypat)%mult
  enddo
  rcpaw%nelect_core_orig=rcpaw%nelect_core
- if(dtset%rcpaw_frocc==1) then 
+ if(dtset%rcpaw_frocc==1) then
    rcpaw%frocc=.true.
  else
    rcpaw%frocc=.false.
@@ -394,7 +394,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  logical :: my_atmtab_allocated,paral_atom,grid_found
  real(dp) :: eigshift,r2_tmp
 !arrays
- integer,pointer :: my_atmtab(:) 
+ integer,pointer :: my_atmtab(:)
  integer,allocatable :: ifftsph(:)
  real(dp), allocatable :: nt1hat0(:)
  real(dp),allocatable :: rfgd(:,:)
@@ -402,7 +402,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
 
 !******************************************************************************************
 
- ! FFT grid 
+ ! FFT grid
  if(.not.rcpaw%all_atoms_relaxed) then
    if(cplex.ne.1) then
      ABI_ERROR('cplex not 1')
@@ -442,7 +442,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
    end if
  endif
 
- ! Loop on typat 
+ ! Loop on typat
  do itypat=1,dtset%ntypat
    if(.not.rcpaw%atm(itypat)%nc_conv) then
      eigshift=zero
@@ -467,7 +467,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
          call pawrad_deducer0(vh_sph,mesh_size,pawrad(itypat))
          ABI_FREE(nt1hat0)
          call pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,0.5_dp,rfgd,rprimd,ucvol,xred(:,iatom),&
-&                        fftn3_distrib,ffti3_local,me_fft) 
+&                        fftn3_distrib,ffti3_local,me_fft)
          ifft=ifftsph(1)
          r2_tmp=norm2(rfgd(:,1))
          do ii=2,nfgd
@@ -475,7 +475,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
              ifft=ifftsph(ii)
              r2_tmp=norm2(rfgd(:,ii))
            endif
-         enddo 
+         enddo
          ABI_FREE(ifftsph)
          ABI_FREE(rfgd)
          eigshift=eigshift+vtrial(ifft,1)-vh_sph(1)-pawtab(itypat)%vhtnzc(1)-paw_an(iat)%vxct1(1,1,1)/sqrt(four_pi)
@@ -503,7 +503,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
 
  ! Update convergence status of cores
  rcpaw%all_atoms_relaxed=.true.
- do itypat=1,dtset%ntypat 
+ do itypat=1,dtset%ntypat
    if(rcpaw%atm(itypat)%zcore_conv.and.rcpaw%atm(itypat)%nc_conv) then
      rcpaw%atm(itypat)%mode(:,:)=ORB_FROZEN
    else
@@ -517,7 +517,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
    do iln=1,rcpaw%atm(itypat)%ln_size
      write(std_out,*) rcpaw%atm(itypat)%eig(iln,1),rcpaw%atm(itypat)%occ(iln,1)
    enddo
- enddo 
+ enddo
 
 end subroutine rcpaw_core_eig
 !!***

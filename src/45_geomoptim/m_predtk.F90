@@ -67,8 +67,6 @@ contains
 
 function fdtion(ab_mover,itime,xcart,fcart,vel)
 
-  implicit none
-
 !Arguments ---------------------------------------------
 !scalars
   type(abimover),intent(in) :: ab_mover
@@ -149,8 +147,6 @@ function fdtion(ab_mover,itime,xcart,fcart,vel)
 !! SOURCE
 
 subroutine prtxvf(fcart,gred,iatfix,iout,natom,prtvel,vel,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

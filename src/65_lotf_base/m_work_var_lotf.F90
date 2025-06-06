@@ -62,7 +62,6 @@ contains
 
  subroutine work_var_set()
 
-  implicit none
   !Local-----------------------------
   integer :: iat
 
@@ -167,7 +166,6 @@ contains
  subroutine smallfit(tau0,ndum)
   use bond_lotf,only : tafit
   USE pbc_lotf,only : dist_pbc,r2
-  implicit none
 
   !Arguments ------------------------
   integer,intent(out) :: ndum

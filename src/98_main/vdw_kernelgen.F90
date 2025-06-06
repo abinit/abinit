@@ -38,12 +38,8 @@ program vdw_kernelgen
  use m_errors
  use m_xc_vdw
  use m_mpinfo
+ USE_MPI
  use m_xmpi
-
-
-#if defined HAVE_MPI2
- use mpi
-#endif
 
  use m_build_info,   only : abinit_version
  use m_specialmsg,   only : specialmsg_getcount, herald
@@ -61,7 +57,7 @@ program vdw_kernelgen
 !no_abirules
 !
  character(len=500) :: message
- 
+
  type(MPI_type) :: mpi_enreg,mpi_enreg_seq
 #if defined DEV_YP_VDWXC
  character(len=24) :: codename
