@@ -100,6 +100,7 @@ module m_respfn_driver
  use m_mkcore,     only : mkcore, dfpt_mkcore
  use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
  use m_d2frnl,     only : d2frnl
+ use m_pstat,      only : pstat_proc
 
 #if defined HAVE_GPU
  use m_alloc_hamilt_gpu
@@ -1181,6 +1182,7 @@ ABI_NVTX_END_RANGE()
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
  call timab(136,2,tsec)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
 !-----3. Initialisation of 1st response, taking into account the q vector.
 
@@ -1444,6 +1446,7 @@ ABI_NVTX_END_RANGE()
  ABI_MALLOC(eigbrd,(2,dtset%mband*dtset%nsppol,dtset%nkpt,3,natom,3,natom*dim_eigbrd))
 
  call timab(137,2,tsec)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
 
 !Check whether exiting was required by the user.

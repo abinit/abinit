@@ -419,7 +419,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 #ifdef FC_NVHPC
                !Silly trick to prevent NVHPC optimization issue
                if(nothing) write(100,*) shift1,shift2,shift3
-#endif                 
+#endif
                shift1=1+n1+(ia-1)*(2*n1+1)
                shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -1296,7 +1296,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 #ifdef FC_NVHPC
                  !Silly trick to prevent NVHPC optimization issue
                  if(nothing) write(100,*) shift1,shift2,shift3
-#endif                 
+#endif
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                  shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)

@@ -76,8 +76,6 @@ subroutine init10(input_path, filnam,comm)
  use m_fstrings,     only : int2char4
  use m_io_tools,     only : open_file
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -124,11 +122,11 @@ subroutine init10(input_path, filnam,comm)
        write(std_out,*)' Give name for training-set file',&
             &                  ' (netcdf file or enter no): '
        read(std_in, '(a)',IOSTAT=io) filnam(5)
-       write(std_out,'(a,a)' )'-   ',trim(filnam(5)) 
+       write(std_out,'(a,a)' )'-   ',trim(filnam(5))
        write(std_out,*)' Give name for test-set file',&
             &                  ' (netcdf file or enter no): '
        read(std_in, '(a)',IOSTAT=io) filnam(6)
-       write(std_out,'(a,a)' )'-   ',trim(filnam(6)) 
+       write(std_out,'(a,a)' )'-   ',trim(filnam(6))
        ii = 7
        do while (io>=0 .and. ii<19)
           write(std_out,*)' Give name for input derivative database (DDB or XML file): '

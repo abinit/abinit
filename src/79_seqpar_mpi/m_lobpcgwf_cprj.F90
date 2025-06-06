@@ -31,6 +31,7 @@
 
 module m_lobpcgwf_cprj
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_lobpcg
@@ -48,6 +49,8 @@ module m_lobpcgwf_cprj
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_getghc,      only : multithreaded_getghc
  use m_pawcprj,     only : pawcprj_type
+
+ implicit none
 
  private
 
@@ -68,8 +71,6 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
 
 
  use m_cgtools, only : dotprod_g
- use iso_c_binding
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
@@ -229,9 +230,6 @@ end subroutine lobpcgwf2_cprj
 !
 subroutine xg_getghc(X,AX)
 
- use iso_c_binding
- implicit none
-
 !Arguments ------------------------------------
  type(xgBlock_t), intent(inout) :: X
  type(xgBlock_t), intent(inout) :: AX
@@ -266,8 +264,6 @@ end subroutine xg_getghc
 
 subroutine build_pcon(pcon,kinpw,npw)
 
-  implicit none
-
   integer,intent(in) :: npw
   real(dp),intent(in) :: kinpw(:)
   real(dp),intent(out) :: pcon(:)
@@ -287,8 +283,6 @@ subroutine build_pcon(pcon,kinpw,npw)
 end subroutine build_pcon
 
 subroutine build_kin(kin,kinpw,npw)
-
-  implicit none
 
   integer,intent(in) :: npw
   real(dp),intent(in) :: kinpw(:)

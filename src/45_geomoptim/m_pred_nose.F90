@@ -79,8 +79,6 @@ contains
 
 subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(abimover),intent(in)       :: ab_mover

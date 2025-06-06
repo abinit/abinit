@@ -61,6 +61,7 @@ module m_extfpmd
     integer :: bcut,mband,nbcut,nbdbuf,nfft,nspden,version
     real(dp) :: ebcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,eshift,ucvol,el_temp,bandshift
+    real(dp) :: nelect_res, nelect_respc
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
     real(dp),allocatable :: bandshiftk(:)
@@ -138,6 +139,8 @@ contains
     this%e_kinetic=zero
     this%entropy=zero
     this%nelect=zero
+    this%nelect_res=zero
+    this%nelect_respc=zero
     ABI_MALLOC(this%nelectarr,(nfft,nspden))
     this%nelectarr(:,:)=zero
     this%bandshift=zero
@@ -199,6 +202,8 @@ contains
     this%e_kinetic=zero
     this%entropy=zero
     this%nelect=zero
+    this%nelect_res=zero
+    this%nelect_respc=zero
     this%bandshift=zero
     this%eshift=zero
     this%ucvol=zero

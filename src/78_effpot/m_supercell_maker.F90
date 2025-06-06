@@ -240,7 +240,7 @@ contains
     do icell = 1, self%ncells
        do ipos=1 , npos
           counter=counter+1
-          scxcart(:, counter) = matmul(primcell, self%rvecs(:, icell)) + xcart(:,ipos)
+          scxcart(:, counter) = matmul(self%rvecs(:, icell), primcell) + xcart(:,ipos)
        end do
     end do
   end subroutine trans_xcart

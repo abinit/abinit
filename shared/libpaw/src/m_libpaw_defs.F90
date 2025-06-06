@@ -45,14 +45,27 @@ module m_libpaw_defs
  real(dp), parameter :: pi=3.141592653589793238462643383279502884197_dp
  real(dp), parameter :: two_pi=two*pi
  real(dp), parameter :: four_pi=four*pi
+ real(dp), parameter :: tol1= 0.1_dp
+ real(dp), parameter :: tol2= 0.01_dp
  real(dp), parameter :: tol3= 0.001_dp
+ real(dp), parameter :: tol4= 0.0001_dp
+ real(dp), parameter :: tol5= 0.00001_dp
  real(dp), parameter :: tol6= 0.000001_dp
+ real(dp), parameter :: tol7= 0.0000001_dp
  real(dp), parameter :: tol8= 0.00000001_dp
  real(dp), parameter :: tol9= 0.000000001_dp
  real(dp), parameter :: tol10=0.0000000001_dp
+ real(dp), parameter :: tol11=0.00000000001_dp
  real(dp), parameter :: tol12=0.000000000001_dp
+ real(dp), parameter :: tol13=0.0000000000001_dp
  real(dp), parameter :: tol14=0.00000000000001_dp
+ real(dp), parameter :: tol15=0.000000000000001_dp
  real(dp), parameter :: tol16=0.0000000000000001_dp
+ real(dp), parameter :: tol17=0.00000000000000001_dp
+ real(dp), parameter :: tol18=0.000000000000000001_dp
+ real(dp), parameter :: tol19=0.0000000000000000001_dp
+ real(dp), parameter :: tol20=0.00000000000000000001_dp
+
 
 !Complex constants
 !-----------------------------------------------
@@ -82,16 +95,16 @@ module m_libpaw_defs
 !A collection of small datatypes for ragged arrays
 !-----------------------------------------------
  type coeffi1_type                    !A small datatype for ragged integer 1D-arrays
-  integer, allocatable :: value(:) 
+  integer, allocatable :: value(:)
  end type coeffi1_type
  type coeff1_type                     !A small datatype for ragged real 1D-arrays
-  real(dp), allocatable :: value(:) 
+  real(dp), allocatable :: value(:)
  end type coeff1_type
  type coeff2_type                     !A small datatype for ragged real 2D-arrays
-  real(dp), allocatable :: value(:,:)  
+  real(dp), allocatable :: value(:,:)
  end type coeff2_type
  type coeff3_type                     !A small datatype for ragged real 3D-arrays
-  real(dp), allocatable :: value(:,:,:) 
+  real(dp), allocatable :: value(:,:,:)
  end type coeff3_type
 
 !Small functions used in cpp macros

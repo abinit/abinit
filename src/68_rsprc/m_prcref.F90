@@ -41,6 +41,8 @@ module m_prcref
  use m_mpinfo,   only : ptabs_fourdp, destroy_mpi_enreg, initmpi_seq
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
+ use m_rcpaw,    only : rcpaw_type
+ use m_extfpmd,  only : extfpmd_type
  use m_fftcore,  only : kgindex
  use m_fft,      only : zerosym, indirect_parallel_fourier, fourdp
  use m_kg,       only : getph
@@ -182,7 +184,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  mgfft,moved_atm_inside,mpi_enreg,my_natom,&
 &  nattyp,nfft,nfftprc,ngfft,ngfftprc,nkxc,npawmix,npwdiel,ntypat,n1xccc,&
 &  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
-&  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred)
+&  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred,rcpaw,extfpmd)
 
 !Arguments-------------------------------
 !scalars
@@ -194,6 +196,9 @@ subroutine prcref(atindx,dielar,dielinv,&
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
  type(wvl_denspot_type), intent(inout) :: wvl_den
+ type(rcpaw_type),intent(inout),pointer :: rcpaw
+ type(extfpmd_type),intent(inout),pointer :: extfpmd
+
 !arrays
  integer,intent(in) :: atindx(dtset%natom),ffttomix(nfft*(1-nfftprc/nfft))
  integer,intent(in) :: kg_diel(3,npwdiel),nattyp(ntypat),ngfft(18),ngfftprc(18)
@@ -451,16 +456,20 @@ subroutine prcref(atindx,dielar,dielinv,&
  end if
 !#######################################################################
 
-!3) PAW only : precondition the rhoij quantities (augmentation
+!3) PAW : precondition the rhoij quantities (augmentation
 !occupancies) residuals. Use a simple preconditionning
 !with the same mixing factor as the model dielectric function.
+! RCPAW : precondition the core occupations residuals
+!with the same mixing factor as the model dielectric function
+! Extfpmd : precondition the extfpmd number of electrons
+!with the same mixing factor as the model dielectric function
 
+ if (istep>=dielstrt.and.dtset%iprcel>=21.and.dtset%iprcel<30) then
+   mixfac=one;mixfacmag=one
+ else
+   mixfac=dielar(4);mixfacmag=abs(dielar(7))
+ end if
  if (psps%usepaw==1.and.my_natom>0) then
-   if (istep>=dielstrt.and.dtset%iprcel>=21.and.dtset%iprcel<30) then
-     mixfac=one;mixfacmag=one
-   else
-     mixfac=dielar(4);mixfacmag=abs(dielar(7))
-   end if
    if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
@@ -491,6 +500,21 @@ subroutine prcref(atindx,dielar,dielinv,&
      end do
    end if
  end if
+
+ if (psps%usepaw==1.and.associated(rcpaw)) then
+   mixfac_eff=mixfac!;if (ispden>1) mixfac_eff=mixfacmag
+   do iatom=1,rcpaw%ntypat
+     if(rcpaw%atm(iatom)%zcore_orig>zero) then
+       rcpaw%atm(iatom)%occ_respc=mixfac_eff*rcpaw%atm(iatom)%occ_res
+     endif
+   enddo
+ endif
+
+ if(associated(extfpmd)) then
+   mixfac_eff=mixfac!;if (ispden>1) mixfac_eff=mixfacmag
+   extfpmd%nelect_respc=mixfac_eff*extfpmd%nelect_res
+ endif
+
 
 !#######################################################################
 

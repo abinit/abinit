@@ -115,8 +115,6 @@ contains
 
 subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zf,zr,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 ! real space input
  integer,intent(in) :: cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,comm_fft
@@ -394,8 +392,6 @@ end subroutine sg2002_back
 
 subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zr,zf,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,comm_fft
@@ -664,8 +660,6 @@ end subroutine sg2002_forw
 
 subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zf,zr,comm_fft)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc
@@ -999,8 +993,6 @@ end subroutine sg2002_mpiback_wf
 subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &        max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zr,zf,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc
@@ -1306,8 +1298,6 @@ end subroutine sg2002_mpiforw_wf
 subroutine sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,isign,nfft,ndat,comm_fft
@@ -1419,8 +1409,6 @@ end subroutine sg2002_mpifourdp
 subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
 &  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
@@ -1833,8 +1821,6 @@ end subroutine sg2002_applypot
 subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
 &  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
@@ -2264,8 +2250,6 @@ end subroutine sg2002_applypot_many
 subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft,zf,rho,weight_r,weight_i)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc
  integer,intent(in) :: max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft
@@ -2512,8 +2496,6 @@ end subroutine sg2002_accrho
 
 subroutine ctrig(n,trig,after,before,now,isign,ic)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n,isign
  integer,intent(inout) :: ic
@@ -2613,8 +2595,6 @@ end subroutine ctrig
 !! SOURCE
 
 subroutine fftstp(mm,n1dfft,m,nn,n,zin,zout,trig,after,now,before,isign)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: after,before,mm,n1dfft,m,nn,n,now,isign
