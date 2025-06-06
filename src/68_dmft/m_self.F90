@@ -782,7 +782,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              call int2char4(iflavor,tag_iflavor)
              unitselfrot(im,ispinor,isppol,iatom) = 3000 + iflavor
              !ABI_CHECK(unitselfrot(im,ispinor,isppol,iatom) > 0, "Cannot find free IO unit for unitselfrot!")
-             tmpfilrot = trim(paw_dmft%filapp)//'_Selfrotformaxent'//&
+             tmpfilrot = trim(paw_dmft%filapp)//'_Selfmxent'//&
                 & trim(tag_at)//'_isppol'//tag_is//'_iflavor'//trim(tag_iflavor)
              write(std_out,*) "Create file  ",trim(tmpfilrot)," unit ",unitselfrot(im,ispinor,isppol,iatom)," for flavor",iflavor
 #ifdef FC_NAG
@@ -1721,7 +1721,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,paw_dmft,filapp)
  if (myproc == 0) then
 
    unt = get_unit()
-   open(unit=unt,file=trim(filapp)//"_DFTDMFT_Self_realaxis_from_maxent_and_kramerskronig.dat",status='unknown',form='formatted')
+   open(unit=unt,file=trim(filapp)//"_DFTDMFT_Self_realaxis.dat",status='unknown',form='formatted')
    rewind(unt)
    write(unt,'(4a)') "# Self-energy on the real axis, with the real part computed using Kramers-Kronig relations.",ch10, &
                      "# Real Frequency (Ha.)         Real part                Imaginary part",ch10
@@ -1925,7 +1925,7 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
 
  if (myproc == 0) then
    unt = get_unit()
-   open(unit=unt,file=trim(filapp)//"_DFTDMFT_Self_forcheck_imagaxis_from_realaxis.dat",status='unknown',form='formatted')
+   open(unit=unt,file=trim(filapp)//"_DFTDMFT_Self_backtransform.dat",status='unknown',form='formatted')
    write(unt,'(6a)') "# Hilbert transform of the analytically continued self-energy. To be compared with the actual",ch10, &
              & "# self-energy on the imaginary axis in the cubic basis.",ch10,"# Matsubara Frequency (Ha.)       Real part                Imaginary part",ch10
    tag_is = ""
