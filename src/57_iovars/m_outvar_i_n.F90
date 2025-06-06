@@ -305,14 +305,15 @@ subroutine outvar_i_n (dtsets,iout,&
 & narrm,ncid,ndtset_alloc,'iatfixz','INT',multi_natfixz)
 
 !iatnd
- if (natnd > 0) then
-   do idtset=0, ndtset_alloc
-     do ii = 1, natnd
-       intarr(ii,idtset) = dtsets(idtset)%iatnd(ii)
-     end do ! end loop over natnd
-   end do ! end loop over datasets
-   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,natnd,narrm,ncid,ndtset_alloc,'iatnd','INT',0)
- end if
+ intarr(:,0)=0
+ narr=natom ! default size for all datasets
+ do idtset=1,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%natnd
+   if (narrm(idtset)>0) then
+     intarr(1:narrm(idtset),idtset)= dtsets(idtset)%iatnd(1:narrm(idtset))
+   end if
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'iatnd','INT',multivals%natom)
 
 !iatsph
  multi_atsph=1

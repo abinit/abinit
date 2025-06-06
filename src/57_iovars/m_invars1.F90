@@ -1428,31 +1428,34 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'jfielddir',tread,'INT')
  if(tread==1) dtset%jfielddir(1:3)=intarr(1:3)
 
- ! read in natnd, iatnd, atndlist helper variables
+ ! read in natnd and initialize iatnd, atndlist helper variables
+ ! these provide a simpler alternative to inputting the full nucdipmom list
  natnd=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natnd',tread,'INT')
  if(tread==1) natnd=intarr(1)
  dtset%natnd=natnd
  ABI_MALLOC(iatnd,(natnd))
  ABI_MALLOC(atndlist,(3,natnd))
- if(natnd > 0) then
-   if(allocated(dtset%iatnd)) then
-     ABI_FREE(dtset%iatnd)
-   end if
-   ABI_MALLOC(dtset%iatnd,(natnd))
-   iatnd=0
-   call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
-   if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
-   dtset%iatnd(1:natnd)=iatnd(1:natnd)
-   atndlist=zero
-   call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
-   if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
-   if(allocated(dtset%atndlist)) then
-     ABI_FREE(dtset%atndlist)
-   end if
-   ABI_MALLOC(dtset%atndlist,(3,natnd))
-   dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
- end if
+ iatnd(:)=0; atndlist(:,:)=zero
+
+! if(natnd > 0) then
+!   if(allocated(dtset%iatnd)) then
+!     ABI_FREE(dtset%iatnd)
+!   end if
+!   ABI_MALLOC(dtset%iatnd,(natnd))
+!   iatnd=0
+!   call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+!   if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+!   dtset%iatnd(1:natnd)=iatnd(1:natnd)
+!   atndlist=zero
+!   call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+!   if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
+!   if(allocated(dtset%atndlist)) then
+!     ABI_FREE(dtset%atndlist)
+!   end if
+!   ABI_MALLOC(dtset%atndlist,(3,natnd))
+!   dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
+! end if
 
  ! We need to know nsppol/nspinor/nspden before calling ingeo
  nsppol=dtset%nsppol
@@ -1647,6 +1650,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%xred_orig(1:3,1:natom,iimage)=xred
    call mkrdim(dtset%acell_orig(1:3,iimage),dtset%rprim_orig(1:3,1:3,iimage),dtset%rprimd_orig(1:3,1:3,iimage))
 
+   if(allocated(dtset%iatnd)) then
+     ABI_FREE(dtset%iatnd)
+   end if
+   ABI_MALLOC(dtset%iatnd,(natnd))
+   dtset%iatnd(1:natnd)=iatnd(1:natnd)
+   if(allocated(dtset%atndlist)) then
+     ABI_FREE(dtset%atndlist)
+   end if
+   ABI_MALLOC(dtset%atndlist,(3,natnd))
+   dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
+   
 !  Read cellcharge for each image, but use it only to initialize cellcharge_min
 !  The old name 'charge' is still tolerated. Will be removed in due time.
    cellcharge=zero
