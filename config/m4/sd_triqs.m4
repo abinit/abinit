@@ -274,7 +274,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
   # Check TRIQS internal C++ API
   AC_MSG_CHECKING([whether you are linked against the internal TRIQS library])
   AC_LANG_PUSH([C++])
-  AC_RUN_IFELSE([AC_LANG_PROGRAM(
+  AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
 #     include <triqs_cthyb/solver_core.hpp>
       using triqs::hilbert_space::gf_struct_t;
@@ -293,7 +293,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
   if test "${sd_triqs_ok}" != "yes"; then
     AC_MSG_CHECKING([whether the TRIQS library works])
     AC_LANG_PUSH([C++])
-    AC_RUN_IFELSE([AC_LANG_PROGRAM(
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
       [[
 #       include <triqs_cthyb/solver_core.hpp>
         using triqs::hilbert_space::gf_struct_t;
