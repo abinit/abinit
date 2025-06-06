@@ -493,9 +493,19 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    case ("minimax")
      ! Nothing to do at this level
      omegap_cplx(:) = epsm1%omega(epsm1%nomega_r+1: epsm1%nomega_r+epsm1%nomega_i)
+     omegap(:) = AIMAG(omegap_cplx(:))
      !write(std_out,*) "omegap_cplx", omegap_cplx
      !omegap2(:) = zero
      !write(std_out,*)"omega_i", Sr%omega_i(:)
+     call coeffs_gausslegint(zero, one, conv_gl_knots, conv_gl_wts, epsm1%nomega_i_conv)
+
+     conv_omegap(:) = one / conv_gl_knots(:) - one
+
+    !  ratio = maxval(omegap) / maxval(conv_omegap)
+     ratio = one
+
+     conv_omegap(:) = ratio * conv_omegap(:)
+     conv_omegap2(:) = conv_omegap(:) ** 2
 
    case default
      ABI_ERROR(sjoin("Invalid iw_mesh_type:" , epsm1%hscr%iw_mesh_type))
@@ -806,7 +816,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
               ac_epsm1cqwz2(:,:,iiw) = epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
 
            case ("minimax")
-             ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
+            !  ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
+             ac_epsm1cqwz2(:,:,iiw) = epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
 
            case default
              ABI_ERROR(sjoin("Invalid iw_mesh_type:", epsm1%hscr%iw_mesh_type))
@@ -989,6 +1000,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                 !               conv_omegapc(iiw))
                 !   end do
                 ! else
+                select case (epsm1%hscr%iw_mesh_type)
+                case ("gauss_legendre")
                   tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,epsm1%nomega_i:1:-1)
                   call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
                                 omegap(epsm1%nomega_i:1:-1), conv_omegap(epsm1%nomega_i_conv:1:-1), &
@@ -998,6 +1011,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                   !                        omegap(epsm1%nomega_i:1:-1), conv_omegap(epsm1%nomega_i_conv:1:-1), &
                   !                        tmp_rhotw_epsm1_rhotw)
                   conv_rhotw_epsm1_rhotw(jb,kb,:) = tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1)
+                case ("minimax")
+                  tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,:)
+                  call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
+                                omegap, conv_omegap(epsm1%nomega_i_conv:1:-1), &
+                                tmp_conv_rhotw_epsm1_rhotw, &
+                                tmp_rhotw_epsm1_rhotw)
+                  conv_rhotw_epsm1_rhotw(jb,kb,:) = tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1)
+                end select
 #ifdef OUTPUT_EPSM1
                   ! Write the result in the file, note that conv_rhotw_epsm1_rhotw is in reverse order
                   ! ib_sum, ib_bz, spin, Wfd%nsppol, Sigp%nbnds, Kmesh%nbz
@@ -1209,12 +1230,18 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                    end do
 
                  case ("minimax")
-                   ! NB: Sigma_c along the imag. axis has a -1/2pi factor.
+                   ! NB: Sigma_c along the im ag. axis has a -1/2pi factor.
                    ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
-                   do iiw=1,epsm1%nomega_i
+                  !  do iiw=1,epsm1%nomega_i
+                  !    sigctmp(io,iab) = sigctmp(io,iab) + &
+                  !      (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
+                  !         (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw))))
+                  !  end do
+                   omegame0i2_ac = omegame0i_ac*omegame0i_ac
+                   do iiw=1,epsm1%nomega_i_conv
+                     z2 = ratio / conv_gl_knots(iiw)**2
                      sigctmp(io,iab) = sigctmp(io,iab) + &
-                       (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
-                          (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw))))
+                       piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) * z2
                    end do
 
                  case default
