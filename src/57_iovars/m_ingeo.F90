@@ -147,9 +147,9 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,&
  real(dp),intent(out) :: slabzbeg,slabzend,tolsym
  character(len=*),intent(in) :: string
 !arrays
- integer,intent(in) :: iatnd(natnd),supercell_lattice(3)
+ integer,intent(in) :: supercell_lattice(3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
- integer,intent(inout) :: symafm(msym) !vz_i
+ integer,intent(inout) :: iatnd(natnd),symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
  integer,intent(out) :: typat(natom)
  real(dp),intent(inout) :: atndlist(3,natnd),chrgat(natom)
@@ -569,6 +569,10 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,&
    ! nucdipmom is read for each irreducible atom, from 1 to natom
    nucdipmom=zero
    if(natnd > 0) then
+     call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+     if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+     call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+     if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
      do ii=1,natnd
        nucdipmom(1:3,iatnd(ii))=atndlist(1:3,ii)
      end do
@@ -576,12 +580,6 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,&
      call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
      if(tread==1)nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
    end if
-
-   !! nucdipmom is read for each atom, from 1 to natom
-   !call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
-   !if(tread==1) then
-   !  nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom), [3, natom])
-   !end if
 
    ! Will use the geometry builder
    if(tnatrd/=1 .and. nobj/=0)then
@@ -619,6 +617,10 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,&
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
    nucdipmom=zero
    if(natnd > 0) then
+     call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+     if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+     call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+     if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
      do ii=1,natnd
        nucdipmom(1:3,iatnd(ii))=atndlist(1:3,ii)
      end do
