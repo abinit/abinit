@@ -8,7 +8,7 @@ add_library(16_hideleave STATIC
 
 set_target_properties(16_hideleave
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(16_hideleave
   PRIVATE
@@ -19,7 +19,7 @@ target_include_directories(16_hideleave
 
 target_include_directories(16_hideleave
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
 
