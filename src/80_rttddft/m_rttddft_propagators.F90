@@ -89,8 +89,6 @@ contains
 !! SOURCE
 subroutine rttddft_propagator_er(dtset, istep, mpi_enreg, psps, tdks, calc_properties)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: istep
@@ -447,8 +445,6 @@ end subroutine rttddft_propagator_er
 !!
 !! SOURCE
 subroutine rttddft_propagator_emr(dtset, istep, mpi_enreg, psps, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

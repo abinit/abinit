@@ -83,8 +83,6 @@ contains
 
 subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(abimover),intent(in)       :: ab_mover
@@ -612,8 +610,6 @@ end subroutine pred_isothermal
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -745,8 +741,6 @@ end subroutine isotemp
 
  subroutine isopress(amass,bmass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,&
    & strten,strtarget,ucvol,vel,vlogv)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -915,7 +909,6 @@ end subroutine isopress
    & qmass,strten,strtarget,ucvol,vel)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars

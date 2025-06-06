@@ -1,5 +1,5 @@
-# DFT+DMFT self-energy for each frequency                                                                                           
-# Columns are ordered this way:                                                                                                     
+# DFT+DMFT self-energy for each frequency
+# Columns are ordered this way:
 # Frequency (Ha)  ((((Re(Sigma(im,im1,ispinor,ispinor1)) Im(Sigma(im,im1,ispinor,ispinor1)),im=1,2*l+1),im1=1,2*l+1),ispinor=1,nspinor),ispinor1=1,nspinor) where the leftmost index varies first
 # natom,nsppol,nspinor,ndim,nw,fermilevel
 ####    1    1    1    5 1248   0.31742914831120389E+000

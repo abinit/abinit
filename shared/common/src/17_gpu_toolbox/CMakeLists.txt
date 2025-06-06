@@ -48,10 +48,10 @@ endif()
 if(ABINIT_ENABLE_GPU_CUDA)
   target_link_libraries(17_gpu_toolbox
     PUBLIC
+    CUDA::cudart
     CUDA::cufft
     CUDA::cublas
     CUDA::cusolver
-    CUDA::nvToolsExt
     )
 endif()
 
@@ -64,7 +64,13 @@ if(ABINIT_ENABLE_GPU_HIP)
     roc::rocblas
     roc::rocfft
     roc::hipsolver
-    ${ROCTX}
+    )
+endif()
+
+if(HAVE_GPU_MARKERS)
+  target_link_libraries(17_gpu_toolbox
+    PUBLIC
+    abinit::gpu_markers
     )
 endif()
 

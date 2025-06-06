@@ -14,7 +14,7 @@
 ! distribute, sublicense, and/or sell copies of the Software, and to
 ! permit persons to whom the Software is furnished to do so, subject to
 ! the following conditions:
-! 
+!
 ! The above copyright notice and this permission notice shall be included
 ! in all copies or substantial portions of the Software.
 !
@@ -37,11 +37,11 @@ CONTAINS
 !
 ! Compute occupation
 !
-SUBROUTINE libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght,comm) 
+SUBROUTINE libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght,comm)
   !
   use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3)
   REAL(C_DOUBLE),INTENT(IN) :: bvec(9), eig(nb,PRODUCT(nge(1:3)))
@@ -93,12 +93,12 @@ END SUBROUTINE libtetrabz_occ
 !
 ! Calculate Fermi energy
 !
-SUBROUTINE libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec,comm) 
+SUBROUTINE libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec,comm)
   !
   use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, &
   &                             libtetrabz_mpisum_d, libtetrabz_mpisum_dv
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3)
   REAL(C_DOUBLE),INTENT(IN) :: bvec(9), nelec, eig(nb,PRODUCT(nge(1:3)))
@@ -138,7 +138,7 @@ SUBROUTINE libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec,comm)
      !
      ef = (eup + elw) / 2.d0
      !
-     ! Calc. # of electrons 
+     ! Calc. # of electrons
      !
      IF(linterpol) THEN
         CALL libtetrabz_occ_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,nk_local,wghtd,ef)
@@ -196,7 +196,7 @@ SUBROUTINE libtetrabz_occ_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,nk_l
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, &
   &                     ik_global(20,nt_local), ik_local(20,nt_local)

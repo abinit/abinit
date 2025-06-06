@@ -90,7 +90,7 @@ def get_parser():
     #copts_parser.add_argument('--loglevel', default="ERROR", type=str,
     #    help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG.")
     copts_parser.add_argument('--no-colors', default=False, action="store_true", help='Disable ASCII colors')
-    copts_parser.add_argument('-j', "--jobs", type=int, default=2,  help="Number of python processes to use.")
+    copts_parser.add_argument('-j', "--jobs", type=int, default=4,  help="Number of python processes to use.")
 
     # Parent parser for commands that operating on pandas dataframes
     pandas_parser = argparse.ArgumentParser(add_help=False)
@@ -266,7 +266,7 @@ def main():
             cprint("Source tree changed. Need to parse source files again to rebuild dependency graph...", "yellow")
 
     if needs_reload:
-	# Parse the source and save new object.
+        # Parse the source and save new object.
         proj = AbinitProject(".", processes=options.jobs, verbose=options.verbose)
         proj.pickle_dump()
 
@@ -278,12 +278,14 @@ def main():
             cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
             return retcode
 
-        #all_mods = proj.find_allmods("dummy_tests.F90")
-        #for mod in all_mods: print(mod.basename)
+        #retcode = proj.check_abirules(verbose=options.verbose)
+        #if retcode != 0:
+        #    cprint("check_abirules returned retcode: %s. Aborting now" % retcode, "red")
+        #    return retcode
 
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)
-        #proj.update_corelibs(verbose=options.verbose, dryrun=False)
+        proj.update_corelibs(verbose=options.verbose, dryrun=False)
 
     elif options.command == "print":
         if options.what is None:

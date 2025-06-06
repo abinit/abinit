@@ -2241,17 +2241,13 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
    do ii=1,order
      trialt(:)=matmul(symrel(:,:),trialt(:))+tnons(:)
    end do
-!  Gives the associated translation, with components in the
-!  interval [-0.5,0.5] .
+!  Gives the associated translation, with components in the interval [-0.5,0.5] .
    reduced(:)=trialt(:)-nint(trialt(:)-tol6)
 
    if(sum(abs(reduced(:)))<tol6)identified=1
-   if( (center==1 .or. center==-3) .and. &
-&   sum(abs(reduced(:)-(/zero,half,half/)))<tol6 )identified=2
-   if( (center==2 .or. center==-3) .and. &
-&   sum(abs(reduced(:)-(/half,zero,half/)))<tol6 )identified=3
-   if( (center==3 .or. center==-3) .and. &
-&   sum(abs(reduced(:)-(/half,half,zero/)))<tol6 )identified=4
+   if( (center==1 .or. center==-3) .and. sum(abs(reduced(:)-(/zero,half,half/)))<tol6 )identified=2
+   if( (center==2 .or. center==-3) .and. sum(abs(reduced(:)-(/half,zero,half/)))<tol6 )identified=3
+   if( (center==3 .or. center==-3) .and. sum(abs(reduced(:)-(/half,half,zero/)))<tol6 )identified=4
    if(center==-1.and. sum(abs(reduced(:)-(/half,half,half/)))<tol6 )identified=5
 
 !  If the symmetry operation has not been identified, there is a problem ...
@@ -2269,12 +2265,9 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
    do ii=1,order
      reduced(:)=ii*trialt(:)-nint(ii*trialt(:)-tol6)
      if(sum(abs(reduced(:)))<tol6)identified=1
-     if( (center==1 .or. center==-3) .and. &
-&     sum(abs(reduced(:)-(/zero,half,half/)))<tol6 )identified=2
-     if( (center==2 .or. center==-3) .and. &
-&     sum(abs(reduced(:)-(/half,zero,half/)))<tol6 )identified=3
-     if( (center==3 .or. center==-3) .and. &
-&     sum(abs(reduced(:)-(/half,half,zero/)))<tol6 )identified=4
+     if( (center==1 .or. center==-3) .and. sum(abs(reduced(:)-(/zero,half,half/)))<tol6 )identified=2
+     if( (center==2 .or. center==-3) .and. sum(abs(reduced(:)-(/half,zero,half/)))<tol6 )identified=3
+     if( (center==3 .or. center==-3) .and. sum(abs(reduced(:)-(/half,half,zero/)))<tol6 )identified=4
      if(center==-1.and. sum(abs(reduced(:)-(/half,half,half/)))<tol6 )identified=5
 
      if(identified/=0)then
@@ -2284,11 +2277,10 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
    end do ! ii
 
 !  Determinant (here=+1, as we are dealing with proper symmetry operations),
-!  order, tnons_order and identified are enough to
-!  determine the kind of symmetry operation
+!  order, tnons_order and identified are enough to determine the kind of symmetry operation
 
    select case(order)
-   case(1)                       ! point symmetry 1
+   case (1)                       ! point symmetry 1
      if(identified==1) then
        type_axis=8                 ! 1
        write(label,'(a)') 'the identity'
@@ -2302,7 +2294,7 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
        call wrtout(std_out,msg)
      end if
 
-   case(2,3,4,6)                 ! point symmetry 2,3,4,6 - rotations
+   case (2,3,4,6)                 ! point symmetry 2,3,4,6 - rotations
      call symaxes(center,iholohedry,isym,symrel,label,order,tnons_order,trialt,type_axis)
    end select
 
@@ -2311,18 +2303,18 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
 !  Now, take care of the improper symmetry operations.
 !  Their treatment is relatively easy, except for the mirror planes
    select case(order)
-   case(1)                       ! point symmetry 1
+   case (1)                       ! point symmetry 1
      type_axis=5                  ! -1
      write(label,'(a)') 'an inversion'
-   case(2)                       ! point symmetry 2 - planes
+   case (2)                       ! point symmetry 2 - planes
      call symplanes(center,iholohedry,isym,symrel,tnons,label,type_axis)
-   case(3)                       ! point symmetry 3
+   case (3)                       ! point symmetry 3
      type_axis=3                  ! -3
      write(label,'(a)') 'a -3 axis '
-   case(4)                       ! point symmetry 1
+   case (4)                       ! point symmetry 1
      type_axis=2                  ! -4
      write(label,'(a)') 'a -4 axis '
-   case(6)                       ! point symmetry 1
+   case (6)                       ! point symmetry 1
      type_axis=1                  ! -6
      write(label,'(a)') 'a -6 axis '
    end select
@@ -2466,18 +2458,16 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
 !write(std_out,*)' symaxes : center, ',center
 
  select case(ordersym)
-
- case(2)                       ! point symmetry 2
+ case (2)                       ! point symmetry 2
 !    Must characterize directiontype for cP, tP, tI, and hP Bravais lattices
    directiontype=1
    if( iholohedry==4 .or. iholohedry==7) then ! tP or cP Bravais lattices
      if(abs(isymrelconv(1,1))+ &
-&     abs(isymrelconv(2,2))+ &
-&     abs(isymrelconv(3,3))  ==1) directiontype=3
+        abs(isymrelconv(2,2))+ &
+        abs(isymrelconv(3,3))  ==1) directiontype=3
    else if(iholohedry==6)then   ! hP Bravais lattice
      if(sum(isymrelconv(:,:))/=-1 )directiontype=2
-     if(sum(isymrelconv(:,:))==0 .or. sum(isymrelconv(:,:))==-3 )&
-&     directiontype=3
+     if(sum(isymrelconv(:,:))==0 .or. sum(isymrelconv(:,:))==-3 ) directiontype=3
 !      directiontype=1 corresponds to a primary axis
 !      directiontype=2 corresponds to a tertiary axis
 !      directiontype=3 corresponds to a secondary axis
@@ -2499,12 +2489,10 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
    else if(directiontype==3 .and. iholohedry==4)then
      type_axis=21                ! tertiary 2
      write(label,'(a)') 'a tertiary 2-axis '
-   else if(directiontype==3 .and. &
-&     center==0 .and. (iholohedry==6.or.iholohedry==7) )then
+   else if(directiontype==3 .and. center==0 .and. (iholohedry==6.or.iholohedry==7) )then
      type_axis=21                ! tertiary 2
      write(label,'(a)') 'a tertiary 2-axis '
-   else if(tnons_order==1 .or. (iholohedry==4 .and. center==-1) .or. &
-&     iholohedry==5)then
+   else if(tnons_order==1 .or. (iholohedry==4 .and. center==-1) .or. iholohedry==5)then
      type_axis=9                 ! 2
      write(label,'(a)') 'a 2-axis '
    else
@@ -2512,7 +2500,7 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
      write(label,'(a)') 'a 2_1-axis '
    end if
 
- case(3)                       ! point symmetry 3
+ case (3)                       ! point symmetry 3
    if(tnons_order==1)then
      type_axis=10                ! 3
      write(label,'(a)') 'a 3-axis '
@@ -2523,10 +2511,8 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
      type_axis=10                ! 3, 3_1 or 3_2, undistinguishable
      write(label,'(a)') 'a 3, 3_1 or 3_2 axis '
    else
-!      DEBUG
 !      write(std_out,*)'isymrelconv=',isymrelconv(:,:)
 !      write(std_out,*)'trialt=',trialt(:)
-!      ENDDEBUG
 !      Must recognize 3_1 or 3_2
      if(isymrelconv(1,1)==0)then  ! 3+
        if(abs(trialt(3)-third)<nzero)type_axis=22   ! 3_1
@@ -2538,7 +2524,7 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
      write(label,'(a)') 'a 3_1 or 3_2-axis '
    end if
 
- case(4)                       ! point symmetry 4
+ case (4)                       ! point symmetry 4
    if(tnons_order==1)then
      type_axis=12                ! 4
      write(label,'(a)') 'a 4-axis '
@@ -2549,21 +2535,19 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
      type_axis=24                ! 4_1 or 4_3
      write(label,'(a)') 'a 4_1 or 4_3-axis '
    else
-!      DEBUG
 !      write(std_out,*)'isymrelconv=',isymrelconv(:,:)
 !      write(std_out,*)'trialt=',trialt(:)
-!      ENDDEBUG
 !      Must recognize 4_1 or 4_3, along the three primary directions
      do direction=1,3
        if(isymrelconv(direction,direction)==1)then  !
          if( (direction==1 .and. isymrelconv(2,3)==-1) .or. &
-&         (direction==2 .and. isymrelconv(3,1)==-1) .or. &
-&         (direction==3 .and. isymrelconv(1,2)==-1)       )then ! 4+
+             (direction==2 .and. isymrelconv(3,1)==-1) .or. &
+             (direction==3 .and. isymrelconv(1,2)==-1)       )then ! 4+
            if(abs(trialt(direction)-quarter)<nzero)type_axis=24    ! 4_1
            if(abs(trialt(direction)+quarter)<nzero)type_axis=26    ! 4_3
          else if( (direction==1 .and. isymrelconv(2,3)==1) .or. &
-&           (direction==2 .and. isymrelconv(3,1)==1) .or. &
-&           (direction==3 .and. isymrelconv(1,2)==1)       )then ! 4-
+                  (direction==2 .and. isymrelconv(3,1)==1) .or. &
+                  (direction==3 .and. isymrelconv(1,2)==1)       )then ! 4-
            if(abs(trialt(direction)-quarter)<nzero)type_axis=26    ! 4_3
            if(abs(trialt(direction)+quarter)<nzero)type_axis=24    ! 4_1
          end if
@@ -2572,7 +2556,7 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
      write(label,'(a)') 'a 4_1 or 4_3-axis '
    end if
 
- case(6)                       ! point symmetry 6
+ case (6)                       ! point symmetry 6
    if(tnons_order==1)then
      type_axis=14                ! 6
      write(label,'(a)') 'a 6-axis '
