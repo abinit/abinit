@@ -49,13 +49,12 @@ contains
   ! interpolator : a0 for n=0
   !                a1 for n=nx
   !                a1 for nx = 0
-  implicit none
 
   !Arguments ------------------------
-  integer,intent(in) :: ndim,nitex,n 
+  integer,intent(in) :: ndim,nitex,n
   real(dp),intent(in) :: a0(ndim),a1(ndim)
   real(dp),intent(out) :: ainterpoled(ndim)
-  !Local --------------------------- 
+  !Local ---------------------------
   character(len=500) :: message
 
 ! *************************************************************************
@@ -66,9 +65,9 @@ contains
     ABI_ERROR(message)
 
   elseif(nitex >= 1) then
-    ainterpoled = a0 + (n/real(nitex,dp))*(a1-a0) 
+    ainterpoled = a0 + (n/real(nitex,dp))*(a1-a0)
   elseif(nitex == 0) then
-    ainterpoled = a1 
+    ainterpoled = a1
   endif
  end subroutine pinterp
  !!***
@@ -86,20 +85,19 @@ contains
   ! interpolator : a0 for n=0
   !                a1 for n=nx
   !                a1 for nx = 0
-  implicit none
 
   !Arguments ------------------------
-  integer,intent(in) :: ndim,nitex,n 
+  integer,intent(in) :: ndim,nitex,n
   real(dp),intent(in) :: a0(ndim),a1(ndim)
   real(dp),intent(out) :: ainterpoled(ndim)
-  !Local --------------------------- 
+  !Local ---------------------------
   real(dp) :: lambda
 
 ! *************************************************************************
 
   !--Control
   lambda = n/real(nitex,dp)
-  ainterpoled = a0 - six*(a1-a0)*(lambda**3/three-lambda**2/two) 
+  ainterpoled = a0 - six*(a1-a0)*(lambda**3/three-lambda**2/two)
  end subroutine pinterp_nolinear
  !!***
 
@@ -115,7 +113,6 @@ contains
  subroutine dlvsum(local_pe,npes,sum_local_pe,ndimve)
   !------------------------------------------------------------
   ! (ADV) GLOBAL VECTOR SUM, REAL 28/5/94
-  implicit none
 
   !Arguments ------------------------
   integer :: local_pe,npes,ndimve
@@ -123,7 +120,7 @@ contains
 
 ! *************************************************************************
 
-  ! do nothing here !!! 
+  ! do nothing here !!!
   ! better remove dlvsum  everywhere in this version.
   return
  end subroutine dlvsum
@@ -138,11 +135,10 @@ contains
  !!
  !! INPUTS
  !! SOURCE
- FUNCTION icf(ix,iy,iz,ic1,ic2,ic3) 
+ FUNCTION icf(ix,iy,iz,ic1,ic2,ic3)
 
-  implicit none
   !Arguments ------------------------
-  integer :: ix,iy,iz,ic1,ic2,ic3,icf  
+  integer :: ix,iy,iz,ic1,ic2,ic3,icf
   icf = 1 &
     + mod( ix - 1 + ic1, ic1 ) &
     + mod( iy - 1 + ic2, ic2 ) * ic1 &

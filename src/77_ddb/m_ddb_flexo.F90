@@ -76,8 +76,6 @@ contains
 
 subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg,prtvol,zeff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ddb_version

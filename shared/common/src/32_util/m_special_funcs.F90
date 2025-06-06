@@ -534,7 +534,6 @@ elemental function gaussian(arg, sigma)
 !Local variables ---------------------------------------
 !scalars
  real(dp) :: xx
-
 ! *********************************************************************
 
  xx = arg / (sqrt2 * sigma)
@@ -1799,7 +1798,7 @@ end function djp32
 !! OUTPUT
 !!  Ax=tilde Ax(t)
 !!  dAx=dAx(t)/dt
-!!  d2Ax=d^2Ax(t)/dt^2 
+!!  d2Ax=d^2Ax(t)/dt^2
 !!
 !! SOURCE
 subroutine tildeAx(t,Ax,dAx,d2Ax)
@@ -1902,7 +1901,7 @@ end subroutine tildeAx
 !! OUTPUT
 !!  Bx=tilde Bx(t)
 !!  dBx=dBx(t)/dt
-!!  d2Bx=d^2Bx(t)/dt^2 
+!!  d2Bx=d^2Bx(t)/dt^2
 !!
 !! SOURCE
 subroutine tildeBx(t,Bx,dBx,d2Bx)
@@ -1948,9 +1947,9 @@ subroutine tildeBx(t,Bx,dBx,d2Bx)
  du = twothird/y**onethird
  d2u = -onethird*du/y
 
- v = u 
- dv = du 
- d2v = d2u 
+ v = u
+ dv = du
+ d2v = d2u
 
  dydt = -1._dp/t**fivehalf
  d2ydt2 = fivehalf/t**sevenhalf
@@ -2072,7 +2071,7 @@ subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
 
 ! *************************************************************************
 
- if(iflag==5.or.iflag==6.or.iflag==7.or.iflag==8) then 
+ if(iflag==5.or.iflag==6.or.iflag==7.or.iflag==8) then
    ! Bc(rs,t) = 1
    Bc = 1._dp
    dBcdrs = 0._dp

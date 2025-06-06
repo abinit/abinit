@@ -1082,6 +1082,10 @@ contains
  intarr(1,:)=dtsets(:)%symv1scf
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symv1scf','INT',0)
 
+ intarr(1,:)=dtsets(:)%scr_wrange(1)
+ intarr(2,:)=dtsets(:)%scr_wrange(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'scr_wrange','INT',0)
+
 !###########################################################
 !### 03. Print all the input variables (T)
 !##

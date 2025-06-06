@@ -253,8 +253,6 @@ CONTAINS  !=====================================================================
 
 subroutine slatang_cshell_init(Slatang3l,l_max,lm2_size,lc_max,klm2lm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: l_max,lc_max,lm2_size
@@ -406,8 +404,6 @@ end subroutine slatang_cshell_init
 
 subroutine slatang_cshell_free(Slatang3l)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(slatang_cshell_t),intent(inout) :: Slatang3l(:)
@@ -418,12 +414,8 @@ subroutine slatang_cshell_free(Slatang3l)
 
  !@slatang_cshell_t
  do ii=1,SIZE(Slatang3l)
-   if (allocated(Slatang3l(ii)%sggselect)) then
-     ABI_FREE(Slatang3l(ii)%sggselect)
-   end if
-   if (allocated(Slatang3l(ii)%sgg)) then
-     ABI_FREE(Slatang3l(ii)%sgg)
-   end if
+   ABI_SFREE(Slatang3l(ii)%sggselect)
+   ABI_SFREE(Slatang3l(ii)%sgg)
  end do
 
 end subroutine slatang_cshell_free
@@ -445,8 +437,6 @@ end subroutine slatang_cshell_free
 
 subroutine slatrad_cshell_free(Slatrad3l)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(slatrad_cshell_t),intent(inout) :: Slatrad3l(:)
@@ -457,12 +447,8 @@ subroutine slatrad_cshell_free(Slatrad3l)
 
  !@slatrad_cshell_t
  do ii=1,SIZE(Slatrad3l)
-   if (allocated(Slatrad3l(ii)%rlphic_select)) then
-     ABI_FREE(Slatrad3l(ii)%rlphic_select)
-   end if
-   if (allocated(Slatrad3l(ii)%rlphic_int)) then
-     ABI_FREE(Slatrad3l(ii)%rlphic_int)
-   end if
+   ABI_SFREE(Slatrad3l(ii)%rlphic_select)
+   ABI_SFREE(Slatrad3l(ii)%rlphic_int)
  end do
 
 end subroutine slatrad_cshell_free
@@ -491,8 +477,6 @@ end subroutine slatrad_cshell_free
 !! SOURCE
 
 subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_mask)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -693,8 +677,6 @@ end subroutine slatrad_cshell_init
 
 subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc_core)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmn2_size,cplex_dij,ndij
@@ -831,8 +813,6 @@ end subroutine paw_sigxcore
 
 subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,dijexc_core,pawprtvol,filpsp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: pawprtvol,ndij,cplex_dij,lmn2_size_max
@@ -923,8 +903,6 @@ end subroutine paw_mkdijexc_core
 
 subroutine slatrad_free_0D(Slatrad)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(slatrad_t),intent(inout) :: Slatrad
@@ -932,12 +910,8 @@ subroutine slatrad_free_0D(Slatrad)
 ! *********************************************************************
 
  !@slatrad_t
- if (allocated(Slatrad%intgl_select)) then
-   ABI_FREE(Slatrad%intgl_select)
- end if
- if (allocated(Slatrad%intgl)) then
-   ABI_FREE(Slatrad%intgl)
- end if
+ ABI_SFREE(Slatrad%intgl_select)
+ ABI_SFREE(Slatrad%intgl)
 
 end subroutine slatrad_free_0D
 !!***
@@ -954,8 +928,6 @@ end subroutine slatrad_free_0D
 !! SOURCE
 
 subroutine slatrad_free_1D(Slatrad)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1014,8 +986,6 @@ end subroutine slatrad_free_1D
 !! SOURCE
 
 subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1266,8 +1236,6 @@ end subroutine slatrad_init
 subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,Pawang,Pawrhoij,&
 &                    sigx_dij,pawprtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: pawprtvol,ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,qphase
@@ -1429,8 +1397,6 @@ end subroutine paw_dijhf
 
 function summ_2gaunt(Pawang,ij_lm,kl_lm,ll_idx)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ij_lm,kl_lm,ll_idx
@@ -1486,8 +1452,6 @@ end function summ_2gaunt
 !! SOURCE
 
 function slat_intg(Slatrad4,Pawtab,Pawang,i_lmn,j_lmn,k_lmn,l_lmn)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

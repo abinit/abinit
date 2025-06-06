@@ -567,7 +567,7 @@ than the tolerance, the calculation will never converge. So if a given
 precision on the total energy is expected, a practical solution is to increase
 the number of Quantum Monte Carlo steps ([[dmftqmc_n]]) in order to lower the
 statistical noise. Also another solution is to do an average over the last
-values of the internal energy. 
+values of the internal energy.
 
 ## 6 Electronic Structure of SrVO3 in DFT+DMFT: Equilibrium volume
 
@@ -609,9 +609,9 @@ Launch the calculation, it might take some time. The calculation takes in few mi
 We are going to create a new directory for the analytical continuation.
 
     mkdir Spectral
-  
+
 We first extract the first Matsubara frequencies (which are not too noisy)
-    
+
     head -n 26 tdmft_5o_DS2Selfrotformaxent0001_isppol1_iflavor0001 > Spectral/self.dat
 
 In this directory, we launch OmegaMaxEnt just to generate the input template:
@@ -623,9 +623,9 @@ Then, you have to edit the input file *OmegaMaxEnt_input_params.dat* of OmegaMax
 that it contains a finite value a infinite frequency. So the first lines should look like this:
 
     data file: self.dat
-    
+
     OPTIONAL PREPROCESSING TIME PARAMETERS
-    
+
     DATA PARAMETERS
     bosonic data (yes/[no]):
     imaginary time data (yes/[no]):
@@ -667,19 +667,19 @@ a different real axis self-energy for each orbitals (and thus do an analytical c
 Copy the file containing the rotation of the self energy in the local basis (useful for non cubic cases, here
 this matrix is just useless):
 
-    cp tdmft_5o_DS2.UnitaryMatrix_iatom0001 tdmft_5i_DS3.UnitaryMatrix_iatom0001 
+    cp tdmft_5o_DS2.UnitaryMatrix_iatom0001 tdmft_5i_DS3.UnitaryMatrix_iatom0001
 
 Copy the Self energy in imaginary frequency for restart also (dmft_nwlo should be the same in the input
 file  tdmft_5.abi and tdmft_2.abi)
 
     cp tdmft_5o_DS2Self-omega_iatom0001_isppol1 tdmft_5o_DS3Self-omega_iatom0001_isppol1
-    
+
 
 Then modify tdmft_5.abi with
 
     ndtset 1
     jdtset 3
-    
+
 and relaunch the calculation.
 
     abinit tdmft_5.abi > log_5_dataset3
@@ -700,17 +700,17 @@ And you can use a gnuplot script to plot it:
 {% dialog tests/tutoparal/Input/tdmft_gnuplot%}
 
     gnuplot
-    
+
     	G N U P L O T
-    	Version 5.2 patchlevel 7    last modified 2019-05-29 
-    
+    	Version 5.2 patchlevel 7    last modified 2019-05-29
+
     	Copyright (C) 1986-1993, 1998, 2004, 2007-2018
     	Thomas Williams, Colin Kelley and many others
-    
+
     	gnuplot home:     http://www.gnuplot.info
     	faq, bugs, etc:   type "help FAQ"
     	immediate help:   type "help"  (plot window: hit 'h')
-    
+
     Terminal type is now 'qt'
     gnuplot> load "../tdmft_gnuplot"
 
@@ -726,7 +726,7 @@ A  more precise description of the Hubbard band would require a more converged c
 
 
 ## 8 Electronic Structure of SrVO3: Conclusion
-  
+
 To sum up, the important physical parameters for DFT+DMFT are the definition
 of correlated orbitals, the choice of U and J (and double counting). The
 important technical parameters are the frequency and time grids as well as the

@@ -673,7 +673,7 @@ end subroutine atompaw_shapebes
 !! atompaw_ehnzc
 !!
 !! FUNCTION
-!! Computes the contribution of nZc to the Hartree energy 
+!! Computes the contribution of nZc to the Hartree energy
 !!
 !! INPUTS
 !! ncore(:) = radial core density
@@ -717,9 +717,9 @@ end subroutine atompaw_shapebes
  call pawrad_deducer0(vhnzc,mesh_size,radmesh_core)
  ff(:)=vhnzc(:)*ncore(:)*(four_pi*radmesh_core%rad(:))
  LIBPAW_DEALLOCATE(vhnzc)
- call simp_gen(ehnzc,ff,radmesh_core) 
+ call simp_gen(ehnzc,ff,radmesh_core)
  LIBPAW_DEALLOCATE(ff)
- 
+
  end subroutine atompaw_ehnzc
 !!***
 

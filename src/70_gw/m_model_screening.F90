@@ -79,8 +79,6 @@ CONTAINS  !=====================================================================
 
 subroutine im_screening(omega,fval,nomega,coeff,ncoeff)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   integer,intent(in)   :: nomega,ncoeff
@@ -147,8 +145,6 @@ end subroutine im_screening
 
 subroutine re_screening(omega,fval,nomega,coeff,ncoeff)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   integer,intent(in)   :: nomega,ncoeff
@@ -214,8 +210,6 @@ end subroutine re_screening
 !! SOURCE
 
 subroutine re_and_im_screening(omega,fval,nomega,coeff,ncoeff)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -285,8 +279,6 @@ end subroutine re_and_im_screening
 !! SOURCE
 
 subroutine re_and_im_screening_with_phase(omega,fval,nomega,coeff,ncoeff)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -363,8 +355,6 @@ end subroutine re_and_im_screening_with_phase
 
 subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
 & ncoeff,prtvol,startcoeff)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -444,8 +434,6 @@ end subroutine sequential_fitting
 !! SOURCE
 
 subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,prtvol)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -563,8 +551,6 @@ end subroutine init_peaks_from_grid
 
 subroutine init_single_peak(omega,refval,imfval,nomega,nfreqre,coeff,prtvol)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   integer,intent(in)   :: nomega,nfreqre,prtvol
@@ -632,8 +618,6 @@ end subroutine init_single_peak
 !! SOURCE
 
 subroutine init_peaks_even_dist(omega,fval,nomega,nfreqre,coeff,ncoeff,prtvol)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -712,8 +696,6 @@ end subroutine init_peaks_even_dist
 !! SOURCE
 
 subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -844,8 +826,6 @@ end subroutine print_peaks
 !! SOURCE
 
 subroutine find_peaks(fval,nomega,nfreqre,nfreqim,ploc,npoles,iline)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1018,8 +998,6 @@ end subroutine find_peaks
 !! SOURCE
 
 subroutine remove_phase(fval,nomega,phase)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
