@@ -670,6 +670,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%algalch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%amu_orig,(mxntypat,mxnimage))
+   ABI_MALLOC(dtsets(idtset)%atndlist,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%cellcharge,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%chrgat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%constraint_kind,(mxntypat))
@@ -680,6 +681,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%dmft_shiftself,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%dynimage,(mxnimage))
    ABI_MALLOC(dtsets(idtset)%iatfix,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%iatnd,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%f4of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
@@ -708,6 +710,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%plowan_nbl,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_frtypat,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_scenergy,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
    ABI_MALLOC(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
@@ -995,6 +999,7 @@ subroutine indefo1(dtset)
 !A
  dtset%acell_orig(:,:)=zero
  dtset%algalch(:)=1
+ dtset%atndlist(:,:)=zero
  dtset%amu_orig(:,:)=-one
  dtset%autoparal=0
 !B
@@ -1024,6 +1029,7 @@ subroutine indefo1(dtset)
  dtset%gwls_n_proj_freq=0
 !I
  dtset%iatfix(:,:)=0
+ dtset%iatnd(:)=0
  dtset%icoulomb=0
  dtset%imgmov=0
  dtset%ivalence=0
@@ -1043,6 +1049,7 @@ subroutine indefo1(dtset)
  dtset%mkqmem=-1
  dtset%mk1mem=-1
 !N
+ dtset%natnd=0
  dtset%natpawu=0
  dtset%natsph=0
  dtset%natsph_extra=0
@@ -1201,7 +1208,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer,parameter :: master = 0
  integer :: chksymbreak,expert_user,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
- integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
+ integer :: natnd,natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
@@ -1212,10 +1219,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  type(atomdata_t) :: atom
 !arrays
  integer :: cond_values(4),vacuum(3)
- integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
+ integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
- real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
- real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
+ real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
+ real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
@@ -1421,6 +1428,32 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'jfielddir',tread,'INT')
  if(tread==1) dtset%jfielddir(1:3)=intarr(1:3)
 
+ ! read in natnd, iatnd, atndlist helper variables
+ natnd=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natnd',tread,'INT')
+ if(tread==1) natnd=intarr(1)
+ dtset%natnd=natnd
+ ABI_MALLOC(iatnd,(natnd))
+ ABI_MALLOC(atndlist,(3,natnd))
+ if(natnd > 0) then
+   if(allocated(dtset%iatnd)) then
+     ABI_FREE(dtset%iatnd)
+   end if
+   ABI_MALLOC(dtset%iatnd,(natnd))
+   iatnd=0
+   call intagm(dprarr,intarr,jdtset,marr,natnd,string(1:lenstr),'iatnd',tread,'INT')
+   if(tread==1) iatnd(1:natnd)=intarr(1:natnd)
+   dtset%iatnd(1:natnd)=iatnd(1:natnd)
+   atndlist=zero
+   call intagm(dprarr,intarr,jdtset,marr,3*natnd,string(1:lenstr),'atndlist',tread,'DPR')
+   if(tread==1) atndlist(1:3,1:natnd)=reshape(dprarr(1:3*natnd),[3,natnd])
+   if(allocated(dtset%atndlist)) then
+     ABI_FREE(dtset%atndlist)
+   end if
+   ABI_MALLOC(dtset%atndlist,(3,natnd))
+   dtset%atndlist(1:3,1:natnd)=atndlist(1:3,1:natnd)
+ end if
+
  ! We need to know nsppol/nspinor/nspden before calling ingeo
  nsppol=dtset%nsppol
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsppol',tread,'INT')
@@ -1580,9 +1613,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !call flush(std_out)
 !ENDDEBUG
 
-   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
-    dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-    msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+   call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
+    iatnd,dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
+    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
     dtset%pawspnorb,dtset%ptgroupma,ratsph,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
@@ -1637,6 +1670,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(cellcharge < cellcharge_min)cellcharge_min=cellcharge
 
  end do
+
+ if(allocated(iatnd)) then
+   ABI_FREE(iatnd)
+ end if
+ if(allocated(atndlist)) then
+   ABI_FREE(atndlist)
+ end if
 
  ABI_FREE(amu)
  ABI_FREE(mixalch)
@@ -2342,6 +2382,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
    dtsets(idtset)%dmft_lambda_yukawa=-1.0_dp
+   dtsets(idtset)%dmft_magnfield=0
+   if (dtsets(idtset)%dmft_magnfield .gt. 0) dtsets(idtset)%dmft_magnfield_b=0.0_dp
    dtsets(idtset)%dmft_mxsf=0.6_dp
    dtsets(idtset)%dmft_nlambda=6
    dtsets(idtset)%dmft_nominal(:)=0
@@ -2768,6 +2810,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%recptrott=0
    dtsets(idtset)%rectesteg=0
    dtsets(idtset)%rectolden=zero
+   dtsets(idtset)%rcpaw_scenergy(:)=-two
+   dtsets(idtset)%rcpaw_frtypat(:)=0
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
 !  dtsets(idtset)%rfasr=0

@@ -274,6 +274,28 @@ See also the variables [[chneut]] and [[chneut@anaddb]], that govern the imposit
 ),
 
 Variable(
+    abivarname="atndlist",
+    varset="gstate",
+    vartype="real",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions=['[[3*natnd]]'],
+    defaultval=MultipleValue(number=None, value=0),
+    mnemonics="ATom Nuclear Dipole moment LIST",
+    requires="[[natnd]] > 0 and [[iatnd]]",
+    added_in_version="v10.5",
+    text=r"""
+Provides an alternative input to [[nucdipmom]] for the atoms carrying explicit 
+nuclear dipole moments. The number of atoms in the cell with explicit
+nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. There are 3*[[natnd]]
+entries in [[atndlist]]: the Cartesian x, y, and z components of the dipole moment to be
+assigned to each of the [[natnd]] atoms in the list. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
+Variable(
     abivarname="atvshift",
     varset="ffield",
     vartype="real",
@@ -1564,7 +1586,7 @@ In some cases, $n_i$ is set to 0:
 
   * if the band $i$ is in the buffer (see [[nbdbuf]])
 
-  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_minocc]]
+  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_min_occ]]
 
 The resulting degree applied to all bands could be 0, for example if the wave-functions are already converged.
 In that case no filter is applied, but the Rayleigh-Ritz procedure is done anyway.
@@ -1680,7 +1702,7 @@ Variable(
 Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
 It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy
 of some parallelism for some [[optdriver]] value was not correct, with a large loss of computing resources.
-Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
+Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of resources might be spend
 when they are booked for a run that cannot use these.
 Accordingly, the user might blame ABINIT for being slow while the user has simply not activated
 the relevant parallelism, or activated an irrelevant parallelism.
@@ -1696,7 +1718,8 @@ The following relevances and adequacies are checked at present if [[chkparal]]=1
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
 the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW).
 
-The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present. The default values should not yield loss of computing power.
+The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present.
+The default values should not yield loss of computing power.
 """,
 ),
 
@@ -3048,6 +3071,44 @@ Number of iterations for the DMFT inner loop.
 ),
 
 Variable(
+    abivarname="dmft_magnfield",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: Magnetic Field",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.4.0",
+    text=r"""
+Apply a magnetic field in Tesla ($B_z = \mu_0 H_z$) in combination with [[dmft_magnfield_b]] to add the Zeeman contribution
+to the energy levels. If the applied field is sufficiently small, it can be used to calculate the uniform magnetic susceptibility.
+The Zeeman contribution in Hartree corresponds to $B_z \mu_B g_e S_z$ when [[nspinor]] == 1.
+
+* 1 --> Add the Zeeman contribution to the calculated Kohn-Sham states to build the green's function.
+Only valid for [[nspinor]] == 1.
+
+* 2 --> Add the Zeeman contribution to the energy levels of the DMFT local impurity Hamiltonian and not in the Weiss-field. This is a strong
+approximation.
+""",
+),
+
+Variable(
+    abivarname="dmft_magnfield_b",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Dynamical Mean Field Theory: Magnetic Field Value of Bz",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.4.0",
+    text=r"""
+Value of the magnetic field $B_z$ (in Tesla) applied when [[dmft_magnfield]] is activated.
+""",
+),
+
+Variable(
     abivarname="dmft_mxsf",
     varset="dmft",
     vartype="real",
@@ -3411,12 +3472,16 @@ Variable(
     added_in_version="9.5.0",
     text=r"""
 Compute properties of the local impurity during the CTQMC calculations.
+
   * 0 --> Nothing done
+
   * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
 gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
-  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$, 
+
+  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$,
 whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
-  * 3 --> Add the Calculation of local charge susceptibility.
+
+  * 3 --> Add the calculation of local charge susceptibility.
 """,
 ),
 
@@ -7708,6 +7773,27 @@ along x, y or z directions, or a combination of these. See the variable
 ),
 
 Variable(
+    abivarname="iatnd",
+    varset="gstate",
+    vartype="integer",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions=['[[natnd]]'],
+    defaultval=0,
+    mnemonics="list of AToms with Nuclear Dipole moment",
+    requires="[[natnd]] > 0",
+    added_in_version="v10.5",
+    text=r"""
+Together with [[natnd]], provides an alternative input to [[nucdipmom]] for 
+the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with 
+explicit nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
+
+Variable(
     abivarname="iatsph",
     varset="gstate",
     vartype="integer",
@@ -11146,6 +11232,26 @@ When [[natfixz]] > 0, [[natfixz]] entries should be provided in array [[iatfixz]
 ),
 
 Variable(
+    abivarname="natnd",
+    varset="gstate",
+    vartype="integer",
+    topics=['NMR_basic','MagField_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Number of AToms with Nuclear Dipole moment",
+    added_in_version="v10.5",
+    text=r"""
+Provides an alternative input to [[nucdipmom]] for the atoms carrying explicit 
+nuclear dipole moments. The number of atoms in the cell with explicit
+nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
+of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
+list is converted internally to the full [[nucdipmom]] list; either input format
+can be used.
+""",
+),
+
+
+Variable(
     abivarname="natom",
     varset="basic",
     vartype="integer",
@@ -11733,7 +11839,7 @@ See [[cite:Henkelman2000a]]
 
 Note that, in all cases, it is possible to define the value of the spring
 constant connecting images with [[neb_spring]], keeping it constant or
-allowing it to vary between 2 values (to have higher resolution close to the saddle point).  
+allowing it to vary between 2 values (to have higher resolution close to the saddle point).
 All these methods are also compatible with the variable cell NEB (evolution of lattice vectors along the path), which can be applied using [[neb_cell_algo]].
 """,
 ),
@@ -11750,16 +11856,16 @@ Variable(
     added_in_version="v10",
     text=r"""
 This variable must be enabled to perform Variable Cell Nudged Elastic Band (NEB) calculations,
-i.e. to allow the primitive cell vectors evolve along the path.  
+i.e. to allow the primitive cell vectors evolve along the path.
 The possible values are:
 
   * 0 --> **No cell evolution** (default value)
 
-  * 1 --> **Generalized Solid-State NEB (GSS-NEB)**  
+  * 1 --> **Generalized Solid-State NEB (GSS-NEB)**
   Implements the method described in [[cite:Sheppard2012]].
 
-  * 2 --> **Variable-Cell NEB (VC-NEB)**  
-  Implements the method described in [[cite:Qian2013]].  
+  * 2 --> **Variable-Cell NEB (VC-NEB)**
+  Implements the method described in [[cite:Qian2013]].
     WARNING: Not yet usable! (to be fixed)
 
 > Note: variable-cell NEB is only compatible with the steepest-descent
@@ -11863,11 +11969,20 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of FREQuencies along the IMaginary axis",
-    requires="[[optdriver]] == 3 and [[gwcalctyp]] in [2,12,22,9,19,29]",
+    requires="[[optdriver]] == 3 and [[gwcalctyp]] in [x1, x2, x9]",
     added_in_version="before_v9",
     text=r"""
 [[nfreqim]] sets the number of pure imaginary frequencies used to calculate
 the dielectric matrix in order to perform the numerical integration of the GW self-energy.
+
+!!! important
+
+    This is the only parameter required to define the frequency mesh along the imaginary axis
+    when computing a SCR file for the AC method i.e. [[gwcalctyp]] = x1.
+    For AC, indeed, one uses Gauss-Legendre quadrature method in the [0, 1] interval
+    as we replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
+
+    Note that the AC grid is not log as required by the CD thus AC and CD cannot use the same SCR file.
 """,
 ),
 
@@ -12593,9 +12708,24 @@ Variable(
     requires="[[optdriver]] == 4 and [[gwcalctyp]] == 1",
     added_in_version="before_v9",
     text=r"""
-[[nomegasi]] defines the number of frequency points used to sample the self-
-energy along the imaginary axis. The frequency mesh is linear and covers the
-interval between `omegasimin`=0.01 Hartree and [[omegasimax]].
+[[nomegasi]] defines the number of frequency points used to sample the self-energy
+along the imaginary axis when the AC method is used.
+
+If [[nomegasi]] > 0, the code uses a linear frequency mesh covering the interval
+between `omegasimin` = 0.01 Hartree and [[omegasimax]].
+
+A negative value, instructs the code to use a minimax mesh automatically computed from [[nomegasi]], [[nband]]
+and the fundamental gap.
+In this case, [[nomegasi]] is similar in spirit to the [[gwr_ntau]] variable used in the GWR code.
+
+!!! important
+
+    The mesh for the self-energy is completely decoupled from the frequency mesh used
+    for the SCR file that is defined by [[nfreqim]].
+    The mesh in the SCR file is used to compute the convolution between G and W along the imaginary axis:
+    i.e. the $\omega'$ variable in Eq. 43 of [[cite:Golze2019]].
+    Conversely, [[nomegasi]] and [[omegasimax]] define the set of imaginary frequencies $\omega$ in $\Sigma$.
+    (cfr. Eq. 43).
 """,
 ),
 
@@ -15134,9 +15264,11 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to
-define the q-path used for phonon band structures and phonon linewidths. It
-gives the number of points used to sample the smallest segment in the q-path
-specified by [[ph_qpath]].
+define the q-path used for phonon band structures and phonon linewidths.
+It gives the number of points used to sample the smallest segment in the q-path specified by [[ph_qpath]].
+
+A negative value activates a specialized mode in which [[ph_nqpath]] and [[ph_qpath]]
+provide the full list of $\qq$-points to be used.
 """,
 ),
 
@@ -22505,9 +22637,11 @@ Variable(
     characteristics=['[[MAGNETIC_FIELD]]'],
     added_in_version="before_v9",
     text=r"""
-Give the value of the Zeeman field, $H$, acting on the spinorial wavefunctions.
-Note that Tesla are admitted. This sets the magnitude of $\mu_0H$, in Tesla,
-with H in Amperes/metre.
+Give the value of the Zeeman field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part).
+As usual, the default is atomic units.
+
+Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
+Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
 """,
 ),
 
@@ -25560,7 +25694,7 @@ This parameter controls the convergence rate of the wave-functions when using th
 ),
 
 Variable(
-    abivarname="oracle_minocc",
+    abivarname="oracle_min_occ",
     varset="gstate",
     vartype="real",
     topics=['TuningSpeedMem_expert'],
@@ -25572,6 +25706,30 @@ Variable(
     requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] > 0 and [[nbdbuf]] = -101",
     text=r"""
 This parameter controls the minimal occupancy when using the oracle in the Chebyshev algorithm. See [[chebfi_oracle]] for more information.
+""",
+),
+
+Variable(
+    abivarname="scr_wrange",
+    varset="gw",
+    vartype="integer",
+    topics=['Susceptibility_useful'],
+    dimensions=[2],
+    defaultval=[0, 0],
+    mnemonics="SCReening frequency RANGE",
+    added_in_version="10.4.0",
+    requires="[[optdriver]] == 6",
+    text=r"""
+This variable can be used to select a subset of frequencies in the Screening to be computed.
+Abinit will produce partial SCR files that can be merged with the mrgscr tool before starting the SIGMA calculation.
+
+Selecting a subset of frequencies allows one to reduce the memory requirements in the SCREENING computation.
+as the size of the polarizability matrix is proportional to the total number of frequencies.
+This is particularly useful when performing CD or AC computations.
+
+Note that in the case of AC, the total SCR file is supposed to contain 1 + [[nfreqim]] frequencies
+with the first point being the static limit.
+As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
 """,
 ),
 

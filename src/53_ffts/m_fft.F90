@@ -29,6 +29,7 @@ MODULE m_fft
  use m_abicore
  use m_errors
  use m_xomp
+ USE_MPI
  use m_xmpi
  use m_cplxtools
  use m_cgtools
@@ -36,9 +37,6 @@ MODULE m_fft
  use m_sg2002
  use m_fftw3
  use m_dfti
-#if defined HAVE_MPI2
- use mpi
-#endif
 
  use defs_abitypes,   only : MPI_type
  use defs_fftdata,    only : mg

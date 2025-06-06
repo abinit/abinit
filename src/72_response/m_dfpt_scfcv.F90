@@ -24,7 +24,7 @@
 module m_dfpt_scfcv
 
  use defs_basis
- use m_ab7_mixing
+ use m_abi_mixing
  use m_efield
  use m_errors
  use m_dtset
@@ -418,7 +418,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  character(len=fnlen) :: fi1o
 !character(len=fnlen) :: fi1o_vtk
  integer  :: prtopt
- type(ab7_mixing_object) :: mix
+ type(abi_mixing_object) :: mix
  type(efield_type) :: dtefield
 !arrays
  integer :: ngfftmix(18)
@@ -634,25 +634,25 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &                     *pawrhoij1(iatom)%cplex_rhoij*pawrhoij1(iatom)%qphase
      end do
    end if
-   denpot = AB7_MIXING_POTENTIAL
-   if (dtset%iscf > 10) denpot = AB7_MIXING_DENSITY
+   denpot = ABI_MIXING_POTENTIAL
+   if (dtset%iscf > 10) denpot = ABI_MIXING_DENSITY
    if (psps%usepaw==1.and.dtset%pawmixdg==0) then
-     ispmix=AB7_MIXING_FOURRIER_SPACE;nfftmix=dtset%nfft;ngfftmix(:)=dtset%ngfft(:)
+     ispmix=ABI_MIXING_FOURRIER_SPACE;nfftmix=dtset%nfft;ngfftmix(:)=dtset%ngfft(:)
    else
-     ispmix=AB7_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
+     ispmix=ABI_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
    end if
    if (iscf10_mod == 5 .or. iscf10_mod == 6) then
-     call ab7_mixing_new(mix, iscf10_mod, denpot, cplex, &
+     call abi_mixing_new(mix, iscf10_mod, denpot, cplex, &
 &     nfftf, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
    else
-     call ab7_mixing_new(mix, iscf10_mod, denpot, max(cplex, ispmix), &
+     call abi_mixing_new(mix, iscf10_mod, denpot, max(cplex, ispmix), &
 &     nfftmix, dtset%nspden, npawmix, errid, msg, dtset%npulayit)
    end if
    if (errid /= AB7_NO_ERROR) then
      ABI_ERROR(msg)
    end if
    if (dtset%mffmem == 0) then
-     call ab7_mixing_use_disk_cache(mix, dtfil%fnametmp_fft)
+     call abi_mixing_use_disk_cache(mix, dtfil%fnametmp_fft)
    end if
  end if ! iscf, nstep
 
@@ -1289,7 +1289,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !Deallocate the no more needed arrays
  if (iscf_mod>0.and.nstep>0) then
-   call ab7_mixing_deallocate(mix)
+   call abi_mixing_deallocate(mix)
  end if
  if( (nstep>0 .and. iscf_mod>0) .or. iscf_mod==-1 ) then
    ABI_FREE(dielinv)
@@ -1963,7 +1963,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  integer,intent(inout) :: dbl_nnsclo !vz_i
  real(dp),intent(in) :: etotal
  type(MPI_type),intent(in) :: mpi_enreg
- type(ab7_mixing_object), intent(inout) :: mix
+ type(abi_mixing_object), intent(inout) :: mix
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ffttomix(nfft*(1-nfftmix/nfft))
@@ -2100,10 +2100,10 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  i_vrespc1=mix%i_vrespc(1)
 
 !Initialise working arrays for the mixing object.
- call ab7_mixing_eval_allocate(mix, istep)
+ call abi_mixing_eval_allocate(mix, istep)
 
 !Copy current step arrays.
- call ab7_mixing_copy_current_step(mix, vresid0, errid, msg, arr_respc = vrespc)
+ call abi_mixing_copy_current_step(mix, vresid0, errid, msg, arr_respc = vrespc)
 
  if (errid /= AB7_NO_ERROR) then
    ABI_ERROR(msg)
@@ -2143,7 +2143,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 
  mpicomm=0;mpi_summarize=.false.
  reset=.false.;if (initialized==0) reset=.true.
- call ab7_mixing_eval(mix, vtrial0, istep, nfftot, ucvol, &
+ call abi_mixing_eval(mix, vtrial0, istep, nfftot, ucvol, &
 & mpicomm, mpi_summarize, errid, msg, &
 & reset = reset, isecur = dtset%isecur, &
 & pawopt = dtset%pawoptmix, response = 1, pawarr = vpaw, &
@@ -2237,7 +2237,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  end if
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
- call ab7_mixing_eval_deallocate(mix)
+ call abi_mixing_eval_deallocate(mix)
 
 !Restore potential
  if (ispmix==1.and.nfft==nfftmix) then
@@ -3136,7 +3136,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      ddkfil(idir1)=20+idir1
      write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk)
      call wrtout([std_out, ab_out], msg)
-     call wfk_open_read(ddks(idir1),fiwfddk,formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
+     call ddks(idir1)%open_read(fiwfddk, formeig1, dtset%iomode, ddkfil(idir1), xmpi_comm_self)
    end if
  end do
 
@@ -3272,12 +3272,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      ABI_FREE(occ_k)
      ABI_FREE(ylm_k)
      ABI_FREE(ylm1_k)
-
-!    End big k point loop
-   end do
-
-!  End loop over spins
- end do
+   end do ! End big k point loop
+ end do !  End loop over spins
 
  call gs_hamkq%free()
 

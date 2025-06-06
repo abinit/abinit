@@ -40,7 +40,6 @@ module m_rta
  use m_xmpi
  use m_errors
  use m_copy
- use m_ebands
  use m_nctk
  use m_wfk
  use m_ephtk
@@ -51,7 +50,7 @@ module m_rta
  use netcdf
 
  use defs_datatypes,   only : pseudopotential_type
- use m_ebands,         only : ebands_t
+ use m_ebands,         only : ebands_t, gaps_t, edos_t, klinterp_t, klinterp_new
  use m_io_tools,       only : flush_unit, open_file
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
@@ -246,14 +245,14 @@ type,public :: rta_t
    ! (3, 3, 2, nsppol, ntemp, nrta)
    ! Conductivity in Siemens * cm-1
    ! computed by summing over k-points rather that by performing an energy integration).
-   
+
    real(dp),allocatable :: resistivity_mu(:,:,:,:)
    ! (3, 3, ntemp, nrta)
    ! Resistivity obtained by inverting conductivity after summing of e- and holes and spins
    ! computed by summing over k-points rather that by performing an energy integration).
 
 
-   
+
  contains
 
    procedure :: compute_rta
@@ -928,17 +927,17 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
 !         call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
 !        ! l0inv_33nw(:,:) = work_33
 !         self%seebeck_mu(:,:,spin,itemp,irta) = - (volt_SI / TKelv) * matmul(work_33, self%l12_mu(:,:,spin,itemp,irta))
-!       
 !
-!       ! kappa = 1/T [L22 - L21 L11^-1 L12] (in RTA L12=L21) 
+!
+!       ! kappa = 1/T [L22 - L21 L11^-1 L12] (in RTA L12=L21)
 !         call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
 !         work_33 = matmul(work_33,self%l12_mu(:, :, spin, itemp, irta))
 !         work_33 = self%l22_mu(:, :, spin, itemp, irta) - matmul(self%l12_mu(:, :, spin, itemp, irta), work_33)
 !         self%kappa_mu(:,:,spin,itemp,irta) = + (volt_SI**2 * fact0 / TKelv) * work_33
-!       
+!
 !
 !         ! Peltier pi = -L12 L11^-1 (in RTA and only in RTA, if TR sym. is not broken)
-!       
+!
 !         call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
 !         self%pi_mu(:,:,spin,itemp,irta) = - volt_SI * matmul(self%l12_mu(:, :, spin, itemp, irta), work_33)
 !
@@ -1494,8 +1493,8 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
 !      end do !spin
 !      call wrtout(units, ch10)
 !    end do
-        
-     !For coefficients calculated at exact mu (i.e for mu calculated at exact temp.): 
+
+     !For coefficients calculated at exact mu (i.e for mu calculated at exact temp.):
      !TODO: do the same for SM and thus mobility
 
      do ii=1,2
@@ -1509,7 +1508,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
            if (nsp == 2) call wrtout(units, sjoin(" For spin:", stoa(spin)), newlines=1)
            write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
            call wrtout(units, msg)
-         
+
            if (ii == 1) then
              mat33 = sum(self%conductivity_mu(:,:,:,spin, itemp, irta), dim=3)
            else
@@ -1522,7 +1521,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
        call wrtout(units, ch10)
      end do
    end if
-     
+
    msg = sjoin(" Seebeck [Volts / Kelvin] using ", rta_type, "approximation")
    call wrtout(units, msg)
    do itemp=1, self%ntemp
@@ -1557,7 +1556,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
      end do !spin
    end do !itemp
    call wrtout(units, ch10)
-   
+
    msg = sjoin(" Peltier [Volts] using ", rta_type, "approximation")
    call wrtout(units, msg)
    do itemp=1, self%ntemp
@@ -1574,7 +1573,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
      end do !spin
    end do !itemp
    call wrtout(units, ch10)
- 
+
 
 
  end do ! irta
@@ -2072,7 +2071,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 ! fact_mob   = fact_sigma * 100.**3 / e_Cb * Bohr_meter**3 ! cm^2 / V / s
  !fact_sbk   = volt_SI * kb_HaK                           ! Volt / Kelvin
   ! sig_p = fact_sigma * sig_p  ! siemens cm^-1
- !  mob_p = fact_mob   * mob_p  ! 
+ !  mob_p = fact_mob   * mob_p  !
 
    ! Print mobility for semiconductors, conductivity for metals.
    if (ibte%assume_gap) then
@@ -2097,7 +2096,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    !if (cnt > 1 ) fkn_in = fkn_out
    fkn_out = zero
 
-   max_et=2 !max_et =1 pour F^E et max_et=2 pour F^E et F^T, iet = 3 pour calculer kappa 
+   max_et=2 !max_et =1 pour F^E et max_et=2 pour F^E et F^T, iet = 3 pour calculer kappa
 
 ! start here with loop over E and T perturbations: once F^Eps is done, init F^T and converge it as well
    electherm_loop: do iet = 1, max_et
@@ -2124,10 +2123,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
      ! Begin iterative solver.
      iter_loop: do iter=1,dtset%ibte_niter
-    
+
        ! call wrtout(std_out," check beginning loop, iter, iet:", pre_newlines=1, newlines=1)
        ! write (std_out,*) iter, iet
-      
+
         ! Loop over the nk index in F_nk.
        do spin=1,nsppol
           do ikcalc=1,nkcalc
@@ -2135,7 +2134,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
             if (sr_p%rank /= my_rank) cycle ! MPI parallelism
             ik_ibz = ibte%kcalc2ebands(1, ikcalc)
             do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
-  
+
               ! Summing over the q-points in the effective IBZ(k) and the m band index.
               ! Results stored in vec3. Integration weights are already included.
               vec3 = zero
@@ -2154,7 +2153,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
                   vec3 = vec3 + sr_p%vals(iq_sum, band_sum, band_k, itemp) * f_kq(:)
                 end do ! iq_sum
               end do ! band_k
-  
+
               ! Symmetrize intermediate results using the operations of the litte group of k.
               sym_vec = zero
               do isym_lgk=1,sr_p%lgk_nsym
@@ -2171,7 +2170,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
             end do ! band_k
           end do ! ikcalc
        end do ! spin
- 
+
 
        call xmpi_sum(fkn_out, comm, ierr)
 
@@ -2216,7 +2215,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
       if(iet==2) call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, onsager, sig_gen, mob_gen, fsum_eh, comm, iet)
 
        !check to find the bug
-! call wrtout(std_out," check 3", pre_newlines=1, newlines=1) 
+! call wrtout(std_out," check 3", pre_newlines=1, newlines=1)
 ! call flush_unit(std_out)
 
        ! Print mobility for semiconductors or conductivity for metals.
@@ -2243,20 +2242,20 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
            end do
          end if
          call wrtout(std_out, msg)
-  
-       else if (iet == 2) then! for Seebeck, Seebeck=1/T sig_p^-1 * sig_gen 
+
+       else if (iet == 2) then! for Seebeck, Seebeck=1/T sig_p^-1 * sig_gen
          ! output sig_p^-1 * sig_gen
          !pay attention when implementing if sigma=zero, bug ! impossible to get S.
          ! use matr3inv to inverse the matrix sigma but verify also that the det is not equal to zero !
          ! maybe type the command use "..." to be able to use the functions, check in the code
-        
+
          !call wrtout(std_out, "check : sig_gen, sig_p")
          !write(std_out,*) sig_gen, sig_p
-        
+
          !TODO: implement for inv_sig_p with two spins
          do spin=1,nsppol
            call inv33(sum(sig_p(:,:,:,spin),dim=3), inv_sig_p)
-           !We divide by 100 because sig_p is in Siemens cm^-1 and we want to retrieve meters 
+           !We divide by 100 because sig_p is in Siemens cm^-1 and we want to retrieve meters
           ! work33 = matmul (inv_sig_p, sum(sig_gen(:,:,:,spin),dim=4))
            mat33 = matmul (inv_sig_p, sum(sig_gen(:,:,:,spin),dim=3)) / (kT)
           ! mat33 = (volt_SI / (ibte%kTmesh(itemp) / kb_HaK)) * matmul (inv_sig_p, sum(sig_gen(:,:,:,spin),dim=3))
@@ -2282,7 +2281,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        if (converged(itemp)) then
          call wrtout(std_out, sjoin(" IBTE solver converged after:", itoa(iter), &
                      "iterations within ibte_abs_tol:", ftoa(abs_tol)), pre_newlines=1)
-            
+
          exit iter_loop
        else
          ! Linear mixing of fkn_in and fkn_out.
@@ -2290,10 +2289,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
          fkn_out = zero
        end if
         !check where is the problem with iter loop
-      
+
         !call wrtout(std_out," check iet:", pre_newlines=1, newlines=1)
         !write (std_out,*) iet
-  
+
      end do iter_loop
 
      if (.not. converged(itemp)) then
@@ -2310,7 +2309,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
                 call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, onsager, sig_l22, mob_22, fsum_eh, comm, 3)
                 do spin=1, nsppol
                 call inv33(sum(sig_p(:,:,:,spin),dim=3), inv_sig_p)
-                kappa_p(:,:,spin)=(1/kT)*(sum(sig_l22(:,:,:,spin), dim=3)-matmul(sum(sig_l21(:,:,:,spin),dim=3),sbk_p(:,:,spin)*kT))                  
+                kappa_p(:,:,spin)=(1/kT)*(sum(sig_l22(:,:,:,spin), dim=3)-matmul(sum(sig_l21(:,:,:,spin),dim=3),sbk_p(:,:,spin)*kT))
                 pi_p(:,:,spin)= matmul (sum(sig_l21(:,:,:,spin),dim=3), inv_sig_p) ! PI=L21/L11 in IBTE
                 end do
         end if
@@ -2464,7 +2463,7 @@ sig_p=sig_p*(siemens_SI / Bohr_meter / cryst%ucvol) / 100
        end do ! spin
        call wrtout(units, ch10)
 
-   
+
 
 
    end if
@@ -2603,7 +2602,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
  !TODO: rewrite this beacause every L (onsager coeff) is given with a minus sign and it's just the case for L11 and L22 normally
  ! Fortunately these minus signs compensate each other in the code or are supressed by putting a -1 factor in front of sbk and PI
- ! It is not because of the sign of e ! 
+ ! It is not because of the sign of e !
  cnt = 0
  do spin=1,nsppol
    do ik_ibz=1,nkibz
@@ -2635,7 +2634,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
            ieh = 2; if (eig_nk >= mu_e) ieh = 1
            sigma_eh(:,:,ieh,spin) = sigma_eh(:,:,ieh,spin) - wtk * vv_tens
            fsum_eh(:,ieh,spin) = fsum_eh(:,ieh,spin) + wtk * cryst%symmetrize_cart_vec3(fk(:, ik_ibz, ib, spin), time_opt)
-         
+
          !Here the tensorial product in order to get L21 and L22 to calculate kappa
          else if (ia==2 .and. iet==3) then
                  ieh = 2; if (eig_nk >= mu_e) ieh = 1
@@ -2656,12 +2655,12 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
    max_occ = two / (self%nspinor * self%nsppol)
    fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
    fact = 100**3 / e_Cb
-         
+
    sigma_eh = fact0 * sigma_eh  ! siemens cm^-1
    fsum_eh = fsum_eh / cryst%ucvol
-        
+
  ! Scale by the carrier concentration.
-   do spin=1,nsppol 
+   do spin=1,nsppol
      do ieh=1,2
        call safe_div(sigma_eh(:,:,ieh,spin) * fact, &
                      self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, mob_eh(:,:,ieh,spin))
@@ -2670,7 +2669,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
    !Here I rescale sigma_eh to output correctly the Onsager coeff L11
    sigma_eh = sigma_eh / fact0
-   end if 
+   end if
  !call xmpi_sum(sigma_eh, comm, ierr)
  !call xmpi_sum(onsager, comm, ierr)
 
@@ -2681,8 +2680,8 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
  max_occ = two / (self%nspinor * self%nsppol)
  !Take into account spin degeneracy for all Onsager coefficient:
  sigma_eh= max_occ * sigma_eh
- 
- 
+
+
 
 ! fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
 ! fact = 100**3 / e_Cb
@@ -2695,7 +2694,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 !   do ieh=1,2
 !     call safe_div(sigma_eh(:,:,ieh,spin) * fact, &
 !                   self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, mob_eh(:,:,ieh,spin))
-    
+
 !check to find the bug
 !call wrtout(std_out, " ieh, shape(sigma_eh) vol shape(mob_eh) ", pre_newlines=1, newlines=1)
 !write (std_out,*)  ieh, shape(sigma_eh), cryst%ucvol, shape(mob_eh)
@@ -2706,7 +2705,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 !        call safe_div(sigma_eh(:,:,ieh,spin), &
 !                   self%n_ehst(ieh, spin, itemp) / cryst%ucvol, zero, mob_eh(:,:,ieh,spin))
 !mob_eh(:,:,ieh,spin) = sigma_eh(:,:,ieh,spin)   / (self%n_ehst(ieh, spin, itemp) / cryst%ucvol)
-           !check to find the bug 
+           !check to find the bug
 !           call wrtout(std_out," check safe_div, mob_eh: ", pre_newlines=1, newlines=1)
 !        write (std_out,*) mob_eh(:,:,ieh,spin)
 ! call flush_unit(std_out)
@@ -2728,7 +2727,7 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 ! fact_mob   = fact_sigma * 100.**3 / e_Cb * Bohr_meter**3 ! cm^2 / V / s
 ! fact_sbk   = volt_SI * kb_HaK                           ! Volt / Kelvin
 !   sigma_eh = fact_sigma * sigma_eh  ! siemens cm^-1
- !  mob_eh = fact_mob   * mob_eh  ! 
+ !  mob_eh = fact_mob   * mob_eh  !
 !call wrtout(std_out, "factors: fact_sigma, fact_mob", pre_newlines=1, newlines=1)
 !   write (std_out,*) fact_sigma, fact_mob
 

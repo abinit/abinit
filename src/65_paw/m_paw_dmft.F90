@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_paw_dmft
+!****m* ABINIT/m_paw_dmft
 !! NAME
 !!  m_paw_dmft
 !!
@@ -153,6 +153,11 @@ MODULE m_paw_dmft
   integer :: dmft_log_freq
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
+
+  integer :: dmft_magnfield
+  ! = 0: do nothing
+  ! = 1: apply a magnetic field Bz via Zeeman Hamiltonian on Kohn-Sham energies
+  ! = 2: apply a magnetic field Bz via Zeeman Hamiltonian on local impurity Hamiltonian
 
   integer :: dmft_nwli
   ! Physical index of the last imaginary frequency (/=dmft_nwlo when dmft_log_freq=1)
@@ -453,6 +458,9 @@ MODULE m_paw_dmft
   real(dp) :: dmft_lcpr
   ! Required precision on local correlated charge in order to stop SCF
   ! DMFT cycle (integrate_green) => ichargeloc_cv
+
+  real(dp) :: dmft_magnfield_b
+  ! Value of the applied magnetic field in Tesla
 
   real(dp) :: dmft_mxsf
   ! Mixing coefficient for Self-Energy during the SCF DMFT cycle.
@@ -1041,6 +1049,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_iter            = dtset%dmft_iter
  paw_dmft%dmft_entropy         = dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc   = dtset%dmft_kspectralfunc
+ paw_dmft%dmft_magnfield       = dtset%dmft_magnfield
+ paw_dmft%dmft_magnfield_b     = dtset%dmft_magnfield_b
  paw_dmft%dmft_dc              = dmft_dc
  paw_dmft%dmft_wanorthnorm     = dtset%dmft_wanorthnorm
  paw_dmft%prtvol               = dtset%prtvol
@@ -1648,7 +1658,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
 !==================
 
  if (dtset%iscf < 0 .and. paw_dmft%dmft_solv >= 5 .and. paw_dmft%dmft_solv <= 8) then
-   tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
+   tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realgrid'
    inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    grid_unt = 2000
    if (.not. lexist) then

@@ -33,8 +33,8 @@ MODULE m_datafordmft
  use m_errors
  use m_fstrings, only : int2char4
  use m_io_tools, only : open_file
- use m_matlu, only : add_matlu,checkdiag_matlu,destroy_matlu,diff_matlu, &
-                   & init_matlu,matlu_type,print_matlu,sym_matlu,xmpi_matlu
+ use m_matlu, only : add_matlu,checkdiag_matlu,destroy_matlu,diff_matlu,copy_matlu, &
+                   & init_matlu,matlu_type,print_matlu,sym_matlu,xmpi_matlu,magnfield_matlu
  use m_matrix, only : invsqrt_matrix
  use m_mpinfo, only : proc_distrb_cycle
  use m_oper, only : copy_oper,destroy_oper,diff_oper,downfold_oper,identity_oper,init_oper,oper_type,prod_oper
@@ -128,7 +128,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  integer :: nproc_band,nproc_spkpt,nproju,npw,nspinor,nsploop,nsppol,nsppol_mem,opt_renorm
  integer :: option,paral_kgb,pawprtvol,siz_buf,siz_buf_psi,siz_paw,siz_proj,siz_wan,unt
  logical :: prt_wan,t2g,use_full_chipsi,verif_band,x2my2d
- real(dp) :: rint
+ real(dp) :: rint,bfield
  character(len=500) :: message
  type(oper_type) :: loc_norm_check
  integer, allocatable :: displs(:),recvcounts(:)
@@ -269,6 +269,21 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    close(unt)
  end if ! proc=me
 
+!== Setup Zeeman Contributios -mu_b.ge.Sz.Bz to Kohn-Sham energies for nspinor==1
+ if(paw_dmft%dmft_magnfield .eq. 1) then
+   if(nspinor .eq. 2) then
+     write(message,'(a,a,2a)') ch10,&
+&    'Applying Zeeman contributions to Kohn-Sham energies  is only implemented for nspinor = 1.'
+     ABI_ERROR(message)
+   else
+     bfield=paw_dmft%dmft_magnfield_b
+     write(message,'(2a)') ch10,'Adding Zeeman contribution to DFT eigenvalues'
+     call wrtout(std_out,message,'COLL')
+  endif
+ else
+   bfield=0.0
+ endif
+
 !==   put eigen into eigen_dft
  paw_dmft%eigen => eigen(:)
  band_index = 0
@@ -279,8 +294,13 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
      do iband=1,mband
        if (paw_dmft%band_in(iband)) then
          ibandc = ibandc + 1
-         paw_dmft%eigen_dft(ibandc,ikpt,isppol) = eigen(iband+band_index) ! in Ha
+        ! paw_dmft%eigen_dft(ibandc,ikpt,isppol) = eigen(iband+band_index) ! in Ha
         ! paw_dmft%eigen_dft(isppol,ikpt,ibandc)=fermie
+         if (isppol .eq. 1) then
+           paw_dmft%eigen_dft(ibandc,ikpt,isppol) = eigen(iband+band_index)-half*bfield ! in Ha
+         elseif(isppol .eq. 2) then
+           paw_dmft%eigen_dft(ibandc,ikpt,isppol) = eigen(iband+band_index)+half*bfield ! in Ha
+         endif
        end if
      end do ! iband
      band_index = band_index + nband_k
@@ -870,12 +890,16 @@ subroutine chipsi_print(paw_dmft,pawtab)
  type(oper_type), intent(inout) :: energy_level
  logical, optional, intent(out) :: nondiag
 !Local variables ------------------------------
- integer :: iatom,im,isppol,lpawu,natom,ndim
+ integer :: iatom,im,isppol,lpawu,natom,ndim,nspinor,nsppol
  character(len=13) :: tag
  character(len=500) :: message
+!type
+ type(matlu_type), allocatable :: levels_temp(:),magnfield(:)
 !************************************************************************
 
  natom = paw_dmft%natom
+ nspinor = paw_dmft%nspinor
+ nsppol = paw_dmft%nsppol
  if (present(nondiag)) nondiag = .false.
 
 !======================================================================
@@ -911,6 +935,32 @@ subroutine chipsi_print(paw_dmft,pawtab)
  call wrtout(std_out,message,'COLL')
 !call print_oper(energy_level,1,paw_dmft,1)
  call print_matlu(energy_level%matlu(:),natom,1)
+
+!========================================================
+!Add Zeeman contibutions to local energy levels in slm
+!========================================================
+ if(paw_dmft%dmft_magnfield .eq. 2 .and. nspinor .eq. 1) then
+   ABI_MALLOC(magnfield,(natom))
+   ABI_MALLOC(levels_temp,(natom))
+
+   write(message,'(a,2x,2a)') ch10, " == Adding Zeeman contribution to local energy levels"
+   call wrtout(std_out,message,'COLL')
+
+   !Apply-m.bz only in the local Hamiltonian
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,magnfield)
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,levels_temp)
+   call copy_matlu(energy_level%matlu,levels_temp,natom)
+
+   call magnfield_matlu(magnfield,natom,paw_dmft%dmft_magnfield_b,1)
+   !call print_matlu(magnfield,natom,1)
+   call add_matlu(levels_temp,magnfield,energy_level%matlu,natom,-1)
+   call print_matlu(energy_level%matlu,natom,1)
+   call destroy_matlu(magnfield,natom)
+   call destroy_matlu(levels_temp,natom)
+
+  ABI_FREE(magnfield)
+  ABI_FREE(levels_temp)
+ endif
 
  end subroutine compute_levels
 !!***

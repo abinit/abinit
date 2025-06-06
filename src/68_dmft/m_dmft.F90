@@ -188,8 +188,13 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  write(message,'(2a)') ch10," == Compare local occupations from DFT Green's function &
                         &with the downfold of the Fermi-Dirac occupations =="
  call wrtout(std_out,message,'COLL')
- call diff_oper("occupations from DFT Green's function","Fermi-Dirac occupations", &
+ if(paw_dmft%dmft_magnfield .gt. 0) then
+   write(message, '(2a,a)') ch10, 'Warning: Check in local occupation is removed due to applied magnetic field'
+   call wrtout(std_out,message,'COLL')
+ else
+   call diff_oper("occupations from DFT Green's function","Fermi-Dirac occupations", &
               & greendft%occup,dft_occup,1,paw_dmft%dmft_tolfreq)
+ endif
 ! write(message,'(2a)') ch10,&
 !& '  ***** => Warning : diff_oper is suppressed for test'
 ! call wrtout(std_out,message,'COLL')

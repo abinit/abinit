@@ -172,8 +172,6 @@ contains !===========================================================
 
  subroutine glue_pair_devs(alpha_dum,RD,r_au,epot_2,fdum,dfdum)
 
-  implicit none
-
   !Arguments ------------------------
   real(dp),intent(in) ::  alpha_dum(3),RD(3)
   real(dp),intent(in) ::  r_au
@@ -247,8 +245,6 @@ contains !===========================================================
 
  subroutine glue_pair(RD,r_au,epot_2,fdum)
 
-  implicit none
-
   !Arguments ------------------------
   real(dp) ::  RD(3), fdum(3), r_au, epot_2
   !Local ---------------------------
@@ -303,8 +299,6 @@ contains !===========================================================
 
  subroutine calc_coord(r_au,coordatom_dum)
 
-  implicit none
-
   !Arguments ------------------------
   real(dp) :: r_au,coordatom_dum
   !Local ---------------------------
@@ -345,8 +339,6 @@ contains !===========================================================
 
      subroutine calc_rhop(r_st,rhop_dum)
 
-     implicit none
-
 !    Arguments ------------------------
      real(dp),intent(in) :: r_st
      real(dp),intent(out) :: rhop_dum
@@ -384,8 +376,6 @@ contains !===========================================================
 !! SOURCE
 
  subroutine calc_coord_new_d(r_au,alpha_d,coordatom_dum)
-
-  implicit none
 
   !Arguments ------------------------
   real(dp),intent(in) :: r_au,alpha_d
@@ -477,8 +467,6 @@ contains !===========================================================
 
  subroutine rhop_value(rst,alpha_d,rhop_dum)
 
-  implicit none
-
   !Arguments ------------------------
   real(dp),intent(in) :: rst,alpha_d
   real(dp),intent(out) :: rhop_dum
@@ -514,8 +502,6 @@ contains !===========================================================
 !! SOURCE
 
  subroutine eval_U_n(coordatom_i,epot_dum2,up_dum)
-
-  implicit none
 
   !Arguments ------------------------
   real(dp),intent(in) :: coordatom_i
@@ -580,8 +566,6 @@ contains !===========================================================
 !! SOURCE
 
  subroutine eval_Upp_n(coordatom_i,up_dum,upp_dum)
-
-  implicit none
 
   !Arguments ------------------------
   real(dp),intent(in) :: coordatom_i

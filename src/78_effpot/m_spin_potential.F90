@@ -143,7 +143,6 @@ contains
        &     external_hfield, &
        & bilinear_i, bilinear_j, bilinear_val)
 
-    implicit none
     !Arguments ------------------------------------
     !scalars
     !arrays

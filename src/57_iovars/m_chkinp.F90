@@ -681,6 +681,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call chkint_eq(0,1,cond_string,cond_values,ierr,'iscf',dt%iscf,2,(/-2,-3/),iout)
        endif
 
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_magnfield',dt%dmft_magnfield,3,(/0,1,2/),iout)
+
+       if(dt%dmft_magnfield .gt. 0) then
+         cond_string(1)='dmft_magnfield' ; cond_values(1)=dt%dmft_magnfield
+         call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_magnfield_b',dt%dmft_magnfield_b,1,0.0_dp,iout)
+       endif
+
        if(dt%ucrpa==0.and.dt%dmft_solv/=9.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
@@ -2694,7 +2701,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires PAW
      if(usepaw/=1)then
        write(msg, '(3a)' )&
-        'Nuclear dipole moments (variable nucdipmom) input as nonzero but PAW not activated => stop',ch10,&
+        'Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but PAW not activated => stop',ch10,&
         'Action: re-run with PAW '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -2702,7 +2709,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires complex rhoij
      if(dt%pawcpxocc/=2)then
        write(msg, '(3a)' )&
-       'Nuclear dipole moments (variable nucdipmom) require complex rhoij => stop',ch10,&
+       'Nuclear dipole moments (variable nucdipmom or atndlist) require complex rhoij => stop',ch10,&
        'Action: re-run with pawcpxocc = 2 '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -2710,7 +2717,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires no force or stress calculation
      if(dt%optforces/=0 .OR. dt%optstress/=0)then
        write(msg, '(3a)' )&
-       'Nuclear dipole moments (variable nucdipmom) cannot be used with force or stress calculations => stop',ch10,&
+       'Nuclear dipole moments (variable nucdipmom or atndlist) cannot be used with force or stress calculations => stop',ch10,&
        'Action: re-run with optforces = 0 and optstress = 0 '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -2718,7 +2725,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires kptopt 0, 3, or 4 (no time reversal symmetry allowed)
      if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
-       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
+       ' Nuclear dipole moments (variable nucdipmom or atndlist) break time reveral symmetry but kptopt = ',dt%kptopt,&
        ' => stop ',ch10,&
        'Action: re-run with kptopt of 0, 3 or 4'
        ABI_ERROR_NOSTOP(msg, ierr)
@@ -2727,7 +2734,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ! nucdipmom is not currently compatible with spinat (this is necessary because both are used in symfind)
      if( any(abs(dt%spinat) > tol8) ) then
        write(msg, '(3a)' )&
-        ' Nuclear dipole moments (variable nucdipmom) input as nonzero but spinat is also nonzero => stop',ch10,&
+        ' Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but spinat is also nonzero => stop',ch10,&
         'Action: re-run with spinat zero '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -3719,6 +3726,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end do
    end if
 
+!  rcpaw_frocc
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frocc',dt%rcpaw_frocc,2,(/0,1/),iout)
+
+!  rcpaw_frtypat
+   do itypat=1,dt%ntypat
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frtypat',dt%rcpaw_frtypat(itypat),2,(/0,1/),iout)
+   enddo
 
 !  recgratio
    if (dt%tfkinfunc==2) then
@@ -4177,6 +4191,17 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
    end if
+
+!  usercpaw
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
+   if(dt%use_rcpaw==1) then
+     if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
+       &(dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
+       &(dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
+       &(dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
+       ABI_ERROR('RCPAW: work in progress')
+     endif
+   endif
 
 !  usexcnhat
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,3,(/-1,0,1/),iout)

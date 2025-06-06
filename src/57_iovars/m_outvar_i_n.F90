@@ -118,7 +118,7 @@ subroutine outvar_i_n (dtsets,iout,&
  integer :: allowed,allowed_sum,iatom,idtset,ii,iimage,ikpt,kptopt,narr
  integer :: multival,multi_natfix,multi_natfixx,multi_natfixy,multi_natfixz
  integer :: multi_atsph,multi_occopt
- integer :: natfix,natfixx,natfixy,natfixz,natom
+ integer :: natfix,natfixx,natfixy,natfixz,natnd,natom
  integer :: ndtset_kptopt,nimage,nqpt,nkpt_eff
  integer :: ntypalch,ntypat,size1,size2,tnkpt
  real(dp) :: kpoint
@@ -161,6 +161,8 @@ subroutine outvar_i_n (dtsets,iout,&
  ntypalch=dtsets(1)%ntypalch
 !if(multivals%ntypat==0)ntypat=dtsets(1)%ntypat
  ntypat=dtsets(1)%ntypat
+
+ natnd=dtsets(1)%natnd
 
 !###########################################################
 !### 02. Specific treatment for partially fixed atoms. Also compute multi_occopt for nband
@@ -301,6 +303,16 @@ subroutine outvar_i_n (dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
 & narrm,ncid,ndtset_alloc,'iatfixz','INT',multi_natfixz)
+
+!iatnd
+ if (natnd > 0) then
+   do idtset=0, ndtset_alloc
+     do ii = 1, natnd
+       intarr(ii,idtset) = dtsets(idtset)%iatnd(ii)
+     end do ! end loop over natnd
+   end do ! end loop over datasets
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,natnd,narrm,ncid,ndtset_alloc,'iatnd','INT',0)
+ end if
 
 !iatsph
  multi_atsph=1
@@ -858,6 +870,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=natfixz_(:)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'natfixz','INT',0)
+ 
+ intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%natnd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'natnd','INT',0)
 
  intarr(1,:)=dtsets(0:ndtset_alloc)%natom
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'natom','INT',0,forceprint=2)
@@ -924,6 +939,12 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nberry
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nberry','INT',0)
+
+ intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_protected
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_protected','INT',0)
+
+ intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_per_slice
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_per_slice','INT',0)
 
  intarr(1,:)=dtsets(:)%nc_xccc_gspace
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nc_xccc_gspace','INT',0)
