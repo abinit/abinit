@@ -1,7 +1,7 @@
 /* timing_cuda.cpp */
 
 /*
- * Copyright (C) 2008-2024 ABINIT Group (MMancini)
+ * Copyright (C) 2008-2025 ABINIT Group (MMancini)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -17,7 +17,7 @@
 /*_________________________TIMING IN CUDA ROUTINES_________________________*/
 /*=========================================================================*/
 /* This file contains some basic utils from the time measuration in
- * cuda subroutines. A more particular version is contained in 
+ * cuda subroutines. A more particular version is contained in
  * prt_utils_rec.cu (to put together)
 */
 
