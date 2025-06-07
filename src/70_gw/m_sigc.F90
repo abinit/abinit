@@ -221,6 +221,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
 !  complex(dpc) :: omegapc(epsm1%nomega_i), conv_omegapc(epsm1%nomega_i_conv)
  complex(dpc) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
+ complex(dpc) :: tmp_array(epsm1%nomega_i_conv)
 #ifdef OUTPUT_EPSM1
  integer :: file_epsm1, comm_size_dpc, comm_size_int, comm_size_dp
  integer(kind=MPI_OFFSET_KIND) :: offset
@@ -1029,7 +1030,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                            (ik_bz-1)*Sigp%nbnds*(maxbnd-minbnd+1)*(maxbnd-minbnd+1) + &
                            (ib_sum-1)*(maxbnd-minbnd+1)*(maxbnd-minbnd+1) + &
                            (jb-minbnd)*(maxbnd-minbnd+1) + &
-                           (kb-minbnd)) * (epsm1%nomega_i + epsm1%nomega_i_conv) * comm_size_dpc
+                           (kb-minbnd)) * (epsm1%nomega_i + epsm1%nomega_i_conv + epsm1%nomega_i_conv) * comm_size_dpc
                   ! if (spin==1.and.ik_bz==1.and.ib_sum==1.and.jb==minbnd.and.kb==minbnd) then
                   !   write(*,*) tmp_conv_rhotw_epsm1_rhotw(:)
                   ! end if
@@ -1227,8 +1228,26 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                      z2 = ratio / conv_gl_knots(iiw)**2
                      sigctmp(io,iab) = sigctmp(io,iab) + &
                        piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) * z2
+                       tmp_array(iiw) = omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) * z2
                    end do
-
+#ifdef OUTPUT_EPSM1
+                  offset = 7 * comm_size_int + &
+                           epsm1%nomega_i * comm_size_dp + &
+                           epsm1%nomega_i_conv * comm_size_dp + &
+                           ((spin-1)*Sigp%nbnds*Kmesh%nbz*(maxbnd-minbnd+1)*(maxbnd-minbnd+1) + &
+                           (ik_bz-1)*Sigp%nbnds*(maxbnd-minbnd+1)*(maxbnd-minbnd+1) + &
+                           (ib_sum-1)*(maxbnd-minbnd+1)*(maxbnd-minbnd+1) + &
+                           (jb-minbnd)*(maxbnd-minbnd+1) + &
+                           (kb-minbnd)) * (epsm1%nomega_i + epsm1%nomega_i_conv + epsm1%nomega_i_conv) * comm_size_dpc + &
+                           (epsm1%nomega_i + epsm1%nomega_i_conv) * comm_size_dpc
+                  call MPI_FILE_WRITE_AT(file_epsm1, &
+                                         offset, &
+                                         tmp_array, &
+                                         epsm1%nomega_i_conv, &
+                                         MPI_DOUBLE_COMPLEX, &
+                                         MPI_STATUS_IGNORE, &
+                                         ierr)
+#endif
                  case ("minimax")
                    ! NB: Sigma_c along the im ag. axis has a -1/2pi factor.
                    ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
