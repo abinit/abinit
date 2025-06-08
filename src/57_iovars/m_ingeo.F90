@@ -278,16 +278,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,field_red_axial,&
      field_red(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
      if(dtset%jfielddir(ii)==2) field_red(ii)=dtset%red_dfield(ii)
    end do
- else if (dtset%berryopt == -1) then
-   do ii=1,3
-     if (norm2(dtset%efield) > tol8) then
-        field_red(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
-     end if
-     if (norm2(dtset%zeemanfield) > tol8) then  
-        field_red_axial(ii)=dot_product(dtset%zeemanfield(:),gprimd(:,ii)) 
-     end if
-   end do
 end if
+
+do ii = 1, 3
+  if (norm2(dtset%zeemanfield) > tol8) then
+    field_red_axial(ii) = dot_product(dtset%zeemanfield(:), gprimd(:, ii))
+  end if
+end do
 
 !tolsym = tol8
 !XG20200801 New default value for tolsym. This default value is also defined in m_invars1.F90
