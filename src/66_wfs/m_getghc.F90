@@ -1578,8 +1578,14 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        gcwavef1 = gcwavef1*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
        do idir=1,3
-         call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+         if (usezora) then
+           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+         else
+           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+         end if
+         call fourwf(1,vectornd_dir,gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            & tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
@@ -1589,6 +1595,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
              &  ghc1(1:2,iv1:iv2)
          end do
        end do ! idir
+       ABI_FREE(vectornd_dir)
        ABI_FREE(gcwavef1)
        ABI_FREE(ghc1)
 
@@ -1613,8 +1620,14 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        gcwavef2 = gcwavef2*two_pi
 
        !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
        do idir=1,3
-         call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
+         if (usezora) then
+           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+         else
+           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+         end if
+         call fourwf(1,vectornd_dir,gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
            & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
            & tim_fourwf,weight,weight,gpu_option=gpu_option)
 !!$OMP PARALLEL DO
@@ -1624,6 +1637,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
              & ghc2(1:2,iv1:iv2)
          end do
        end do ! idir
+       ABI_FREE(vectornd_dir)
        ABI_FREE(gcwavef2)
        ABI_FREE(ghc2)
 
