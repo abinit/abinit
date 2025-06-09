@@ -16326,6 +16326,8 @@ for the additional input variables to be specified.
 
 If [[prtdos]] = 5, delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
 tetrahedron method (as [[prtdos]] = 2).
+
+Note that in the case [[nsppol]]=1 and [[nspden]]=2, only the spin up DOS is delivered, for all values of [[prtdos]].
 """,
 ),
 
@@ -16348,6 +16350,8 @@ spherical harmonics basis.
 If set to 2, the m-decomposed LDOS is delivered in DOS file.
 In this case, [[prtdosm]] computes the M-resolved partial dos for real
 spherical harmonics in the same basis as the DFT+U occupation matrix.
+
+Note that in the case [[nsppol]]=1 and [[nspden]]=2, only the spin up DOS is delivered, for all values of [[prtdos]].
 """,
 ),
 
