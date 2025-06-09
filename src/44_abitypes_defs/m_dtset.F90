@@ -742,6 +742,8 @@ type, public :: dataset_type
  integer :: xclevel
  integer :: xg_nonlop_option = 0
  integer :: x1rdm  = 0
+!Z
+ integer :: zora = 0
 
 !Integer arrays
  integer :: bdberry(4)
@@ -2251,6 +2253,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%xc_denpos          = dtin%xc_denpos
  dtout%xc_taupos          = dtin%xc_taupos
  dtout%x1rdm              = dtin%x1rdm
+ dtout%zora               = dtin%zora
 
 !Copy allocated integer arrays from dtin to dtout
  dtout%bdberry(:)         = dtin%bdberry(:)
@@ -3835,7 +3838,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' xyzfile x1rdm'
 !Y
 !Z
- list_vars=trim(list_vars)//' zcut zeemanfield znucl'
+ list_vars=trim(list_vars)//' zcut zeemanfield znucl zora'
 
 !List of input variables for which the image index can be added
  list_vars_img=' acell amu angdeg cellcharge dmatpawu jpawu mixalch occ rprim scalecart'

@@ -1130,6 +1130,7 @@ subroutine indefo1(dtset)
 !Y
 !Z
  dtset%zeemanfield(:)=zero
+ dtset%zora=0
 
  DBG_EXIT("COLL")
 

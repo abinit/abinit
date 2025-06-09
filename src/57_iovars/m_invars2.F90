@@ -2870,6 +2870,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nloalg(3)=abs(intarr(1))-1
  end if
 
+! flag for ZORA (zeroth order regularized approximation for relativistic terms)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zora',tread,'INT')
+ if (tread == 1) dtset%zora = intarr(1)
+
  ! LOOP variables
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mdeg_filter',tread_alt,'INT')
