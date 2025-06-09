@@ -10,9 +10,8 @@ from abirules_tools import find_src_dirs
 IGNORED_DIRS = ["libpaw"]
 
 # Init
-re_srcfile = re.compile("\.(F|F90)$")
-re_config  = re.compile(\
-  "#if defined HAVE_CONFIG_H\n#include .config\.h.\n#endif\n",re.MULTILINE)
+re_srcfile = re.compile(r"\.(F|F90)$")
+re_config  = re.compile("#if defined HAVE_CONFIG_H\n#include .config\.h.\n#endif\n",re.MULTILINE)
 
 
 def main():
