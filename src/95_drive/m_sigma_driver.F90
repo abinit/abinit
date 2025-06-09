@@ -3477,9 +3477,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    else if (Dtset%nfreqim_conv < epsm1%nomega_i) then
      ! If the requested number of frequencies is less than the number in the file,
      ! give an error
-     ABI_ERROR(sjoin("Requested number of frequencies for convolution", &
-                     " is less than the number in the file: ", itoa(Dtset%nfreqim_conv), &
-                     " < ", itoa(epsm1%nomega_i)))
+     ABI_ERROR(sjoin("Requested number of frequencies for convolution", " is less than the number in the file: ", itoa(Dtset%nfreqim_conv)," < ", itoa(epsm1%nomega_i)))
    end if
 
    epsm1%npwe=Sigp%npwc
