@@ -920,7 +920,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
      if (paw_ij(iatom)%has_dijnd/=2) then
        call pawdijnd(paw_ij(iatom)%dijnd,cplex_dij,ndij,nspden,nucdipmom(:,iatom),&
          & pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,paw_an(iatom)%vh1,&
-         & paw_an(iatom)%vxc1,znucl(itypat))
+         & paw_an(iatom)%vxc1,znucl(itypat),paw_ij(iatom)%zora)
        paw_ij(iatom)%has_dijnd=2
      end if
 

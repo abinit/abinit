@@ -165,14 +165,14 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,eijkl_is_sym,&
-&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
+&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr,zora)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,enunit,ipert,my_natom,natom,nfft,nfftot
  integer,intent(in) :: nspden,ntypat,pawprtvol,pawspnorb,pawxcdev
  integer,optional,intent(in) :: electronpositron_calctype
- integer,optional,intent(in) :: comm_atom,mpi_comm_grid,natvshift
+ integer,optional,intent(in) :: comm_atom,mpi_comm_grid,natvshift,zora
  real(dp),intent(in) :: spnorbscl,ucvol,charge
  real(dp),intent(in),optional ::fatvshift,hyb_mixing,hyb_mixing_sr
  type(pawang_type),intent(in) :: pawang
@@ -200,7 +200,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer, parameter :: PAWU_FLL=1,PAWU_AMF=2
  integer :: cplex_dij,iatom,iatom_tot,idij,ipositron,itypat,klmn,klmn1,lm_size,lmn2_size
  integer :: lpawu,my_comm_atom,my_comm_grid,natvshift_,ndij,nsploop,nsppol
- integer :: pawu_algo,pawu_dblec,qphase,usekden,usepawu,usexcnhat
+ integer :: pawu_algo,pawu_dblec,qphase,usekden,usepawu,usexcnhat,zora_
  logical :: dij_available,dij_need,dij_prereq
  logical :: dij0_available,dij0_need,dij0_prereq
  logical :: dijexxc_available,dijexxc_need,dijexxc_prereq
@@ -215,7 +215,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijxcval_available,dijxcval_need,dijxcval_prereq
  logical :: dijU_available,dijU_need,dijU_prereq
  logical :: has_nucdipmom,my_atmtab_allocated,is_sym
- logical :: need_to_print,paral_atom,v_dijhat_allocated
+ logical :: need_to_print,paral_atom,v_dijhat_allocated,usezora
  real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
 !arrays
@@ -237,6 +237,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
  hyb_mixing_   =zero ; if(present(hyb_mixing))    hyb_mixing_   =hyb_mixing
  hyb_mixing_sr_=zero ; if(present(hyb_mixing_sr)) hyb_mixing_sr_=hyb_mixing_sr
+
+ zora_ = 0; if(present(zora)) zora_ = zora
+ usezora=(zora_.GT.0)
 
  natvshift_=0;if (present(natvshift)) natvshift_=natvshift
  if (natvshift_>0) then
@@ -807,7 +810,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_ALLOCATE(dijnd,(cplex_dij*lmn2_size,ndij))
        call pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom(:,iatom),&
          & pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,&
-         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat))
+         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora)
        if (dijnd_need) paw_ij(iatom)%dijnd(:,:)=dijnd(:,:)
        if (dij_need) then
          paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
@@ -2411,11 +2414,11 @@ end subroutine pawdijhat
 !! SOURCE
 
 subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
-    & pawxcdev,qphase,vh1,vxc1,znuc)
+    & pawxcdev,qphase,vh1,vxc1,znuc,zora)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
+ integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase,zora
  real(dp),intent(in) :: znuc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
@@ -2432,6 +2435,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
  real(dp) :: rc,rr,rt
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  complex(dpc) :: cmatrixelement,lms
+ logical :: usezora
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp),allocatable :: ff(:),intgr3(:),v1(:),zk1(:)
@@ -2447,6 +2451,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
  ij_size=pawtab%ij_size
  lm_size=pawtab%lcut_size**2
  lmn2_size=pawtab%lmn2_size
+ usezora=(zora.GT.0)
 
 !Check data consistency
  if (cplex_dij/=2) then
@@ -2458,39 +2463,40 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    LIBPAW_BUG(msg)
  end if
 
- if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
-   msg='invalid sizes for vh1!'
-   LIBPAW_BUG(msg)
- end if
- if (size(vxc1,1)/=qphase*mesh_size.or.size(vxc1,3)/=nspden.or.&
-&   (size(vxc1,2)/=angl_size.and.pawxcdev==0).or.&
-&   (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
-   msg='invalid sizes for vxc1!'
-   LIBPAW_BUG(msg)
- end if
- 
- LIBPAW_ALLOCATE(v1,(mesh_size))
- call pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
  LIBPAW_ALLOCATE(zk1,(mesh_size))
- zk1 = one/(one - HalfFineStruct2*v1)
- LIBPAW_DEALLOCATE(v1)
- 
- !! replace v1 potential with -Z/r for distances < r_c, the
- !! classical electron radius. This is an accurate replacement
- !! with better analytic properties at r=0.
- rc=two*HalfFineStruct2
- rt=znuc*rc
-
- ! replace k at short range with Coulomb potential version
- do ii=1,mesh_size
-   rr=pawrad%rad(ii)
-   if (rr>rc) exit
-   if (rr<tol8) then
-     zk1(ii)=zero
-   else
-     zk1(ii)=one/(one+rt/(two*rr))
+ if(usezora) then
+   if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
+     msg='invalid sizes for vh1!'
+     LIBPAW_BUG(msg)
    end if
- end do
+   if (size(vxc1,1)/=qphase*mesh_size.or.size(vxc1,3)/=nspden.or.&
+&     (size(vxc1,2)/=angl_size.and.pawxcdev==0).or.&
+&     (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
+     msg='invalid sizes for vxc1!'
+     LIBPAW_BUG(msg)
+   end if 
+   
+   LIBPAW_ALLOCATE(v1,(mesh_size))
+   call pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
+   zk1 = one/(one - HalfFineStruct2*v1)
+   LIBPAW_DEALLOCATE(v1)
+   !! replace v1 potential with -Z/r for distances < r_c, the
+   !! classical electron radius. This is an accurate replacement
+   !! with better analytic properties at r=0.
+   rc=two*HalfFineStruct2
+   rt=znuc*rc
+  
+   ! replace k at short range with Coulomb potential version
+   do ii=1,mesh_size
+     rr=pawrad%rad(ii)
+     if (rr>rc) exit
+     if (rr<tol8) then
+       zk1(ii)=zero
+     else
+       zk1(ii)=one/(one+rt/(two*rr))
+     end if
+   end do
+ end if
  
  dijnd = zero
 
@@ -2504,8 +2510,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
  do kln=1,ij_size
    do imesh = 2, mesh_size
      rr = pawrad%rad(imesh)
-     ff(imesh)=zk1(imesh)*(pawtab%phiphj(imesh,kln)- pawtab%tphitphj(imesh,kln))/(rr**3)
+     ff(imesh)=(pawtab%phiphj(imesh,kln)- pawtab%tphitphj(imesh,kln))/(rr**3)
    end do !imesh
+   if (usezora) ff(2:mesh_size)=ff(2:mesh_size)*zk1(2:mesh_size)
    call pawrad_deducer0(ff,mesh_size,pawrad)
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
