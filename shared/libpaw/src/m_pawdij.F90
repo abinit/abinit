@@ -805,7 +805,9 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute Dijnd
        LIBPAW_ALLOCATE(dijnd,(cplex_dij*lmn2_size,ndij))
-       call pawdijnd(dijnd,cplex_dij,ndij,nucdipmom(:,iatom),pawrad(itypat),pawtab(itypat))
+       call pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom(:,iatom),&
+         & pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,&
+         & paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat))
        if (dijnd_need) paw_ij(iatom)%dijnd(:,:)=dijnd(:,:)
        if (dij_need) then
          paw_ij(iatom)%dij(1:cplex_dij*lmn2_size,:)= &
@@ -2408,34 +2410,42 @@ end subroutine pawdijhat
 !!
 !! SOURCE
 
-subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
+subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
+    & pawxcdev,qphase,vh1,vxc1,znuc)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex_dij,ndij
+ integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
+ real(dp),intent(in) :: znuc
+ type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),target,intent(in) :: pawtab
 !arrays
  real(dp),intent(out) :: dijnd(:,:)
  real(dp),intent(in) :: nucdipmom(3)
+ real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ij_size,il,ilmn,im,imesh,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
- real(dp) :: rr
+ integer :: angl_size,idir,ii,ij_size,il,ilmn,im,imesh
+ integer :: jl,jlmn,jm,klmn,kln,lm_size,lmn2_size,mesh_size
+ real(dp) :: rc,rr,rt
+ real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  complex(dpc) :: cmatrixelement,lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
- real(dp),allocatable :: ff(:),intgr3(:)
+ real(dp),allocatable :: ff(:),intgr3(:),v1(:),zk1(:)
  character(len=500) :: msg
 
 ! *************************************************************************
 
 !Useful data
+ angl_size=pawang%angl_size
  indklmn => pawtab%indklmn
  indlmn => pawtab%indlmn
  mesh_size=pawtab%mesh_size
  ij_size=pawtab%ij_size
+ lm_size=pawtab%lcut_size**2
  lmn2_size=pawtab%lmn2_size
 
 !Check data consistency
@@ -2448,6 +2458,40 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
    LIBPAW_BUG(msg)
  end if
 
+ if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
+   msg='invalid sizes for vh1!'
+   LIBPAW_BUG(msg)
+ end if
+ if (size(vxc1,1)/=qphase*mesh_size.or.size(vxc1,3)/=nspden.or.&
+&   (size(vxc1,2)/=angl_size.and.pawxcdev==0).or.&
+&   (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
+   msg='invalid sizes for vxc1!'
+   LIBPAW_BUG(msg)
+ end if
+ 
+ LIBPAW_ALLOCATE(v1,(mesh_size))
+ call pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
+ LIBPAW_ALLOCATE(zk1,(mesh_size))
+ zk1 = one/(one - HalfFineStruct2*v1)
+ LIBPAW_DEALLOCATE(v1)
+ 
+ !! replace v1 potential with -Z/r for distances < r_c, the
+ !! classical electron radius. This is an accurate replacement
+ !! with better analytic properties at r=0.
+ rc=two*HalfFineStruct2
+ rt=znuc*rc
+
+ ! replace k at short range with Coulomb potential version
+ do ii=1,mesh_size
+   rr=pawrad%rad(ii)
+   if (rr>rc) exit
+   if (rr<tol8) then
+     zk1(ii)=zero
+   else
+     zk1(ii)=one/(one+rt/(two*rr))
+   end if
+ end do
+ 
  dijnd = zero
 
  !-------------------------------------------------------------------
@@ -2460,12 +2504,13 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
  do kln=1,ij_size
    do imesh = 2, mesh_size
      rr = pawrad%rad(imesh)
-     ff(imesh)=(pawtab%phiphj(imesh,kln)- pawtab%tphitphj(imesh,kln))/(rr**3)
+     ff(imesh)=zk1(imesh)*(pawtab%phiphj(imesh,kln)- pawtab%tphitphj(imesh,kln))/(rr**3)
    end do !imesh
    call pawrad_deducer0(ff,mesh_size,pawrad)
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
  LIBPAW_DEALLOCATE(ff)
+ LIBPAW_DEALLOCATE(zk1)
 
  !---------------------------
  ! accumulate matrix elements
@@ -2567,12 +2612,12 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
  real(dp), intent(in) :: spnorbscl,znuc
  type(pawang_type),intent(in) :: pawang
+ type(pawrad_type),intent(in) :: pawrad
+ type(pawtab_type),target,intent(in) :: pawtab
 !arrays
  real(dp),intent(out) :: dijso(:,:)
  real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
  real(dp),optional,intent(in) :: nucdipmom(3)
- type(pawrad_type),intent(in) :: pawrad
- type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,jlm,ispden
