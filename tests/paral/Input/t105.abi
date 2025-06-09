@@ -1,0 +1,112 @@
+# _== Convergency and starting
+# DATASET 1: LDA
+# DATASET 2: LDA+DMFT
+ndtset 2
+jdtset 1 2
+
+prtvol    4
+pawprtvol 3
+getden -1
+
+##### CONVERGENCE PARAMETERS
+nstep1   30
+nstep2  1
+nline2 5
+nnsclo2 5
+ecut      16 # low cutoff !
+pawecutdg 60
+tolvrs 1.0d-12
+nband     22
+nbdbuf 4
+occopt 3 tsmear 2000 K
+
+##### PHYSICAL PARAMETERS
+nspinor 2
+nsppol  1
+nspden  4
+pawspnorb 1
+natom 1 ntypat 1 typat 1
+znucl  23.0
+xred 0.00 0.00 0.00
+acell   3*7.00 # not physical
+pawovlp -1
+rprim 0.5 0.5 0.0
+      0.0 0.5 0.5
+      0.5 0.0 0.5
+
+# == Points k and symetries
+kptopt 4
+kptrlatt 3 0 0 0 3 0 0 0 3 # insufficient nb of k-points.
+nshiftk 4
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+istwfk *1
+
+# == LDA+DMFT
+usedmft1 0
+usedmft2 1
+dmftbandi 9
+dmftbandf 20
+dmft_nwli 200
+dmft_iter 1
+dmft_mxsf 0.7
+dmft_dc 8
+dmft_yukawa_param 1
+dmft_prtwan 1
+dmft_wanrad 3.0
+
+# == CTQMC
+dmft_solv 7 # TRIQS CTQMC
+dmftqmc_l 150
+dmftqmc_n 1.d5
+dmftqmc_therm 1000
+dmft_triqs_move_double 0
+
+dmftctqmc_basis 4
+dmftctqmc_meas 10
+dmft_triqs_off_diag 1
+dmft_triqs_wmax 1.0
+dmft_triqs_epsilon 1.d-2
+
+# == DFT+U
+usepawu1    4
+usepawu     14
+dmatpuopt  1   # The density matrix: the simplest expression.
+lpawu  2
+upawu1  0.0  eV
+upawu2  4.1   eV
+f4of2_sla3    0.0
+jpawu2  0.5   eV
+
+# == Parallelism
+paral_kgb 1
+np_spkpt 4
+npband 2
+npfft 1
+bandpp 11
+
+prtwf 0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "23v.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
+#%% files_to_test = t105_MPI8.abo, tolnlines = 35, tolabs = 2.0, tolrel = 1.1, fld_options=-easy;
+#%%                 t105_MPI8o_DS2_Wannier_functions_iatom0001_001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t105_MPI8o_DS2_DMFTOCCND, tolnlines = 688, tolabs = 0.1, tolrel = 1.1, fld_options=-easy;
+#%% [extra_info]
+#%% authors = B. Amadon, T. Cavignac, E. Castiel
+#%% keywords = DMFT, TRIQS
+#%% description = DFT+DMFT for V : test TRIQS interface with KGB parallelization, spinors and off-diagonal elements in the JmJ basis
+#%% topics = DMFT
+#%%<END TEST_INFO>
