@@ -707,7 +707,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
 &   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,&
-&   nucdipmom=dtset%nucdipmom,&
+&   nucdipmom=dtset%nucdipmom,zora=dtset%zora,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
