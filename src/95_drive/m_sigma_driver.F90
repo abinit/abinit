@@ -3469,15 +3469,14 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    end if
 
    if (Dtset%nfreqim_conv==0) then
-     ! If no extra frequencies is requested, use the number of frequencies in the file.
-     epsm1%nomega_i_conv = epsm1%nomega_i
+     ! If no extra frequencies is requested, keep the orginal grids.
+     epsm1%nomega_i_conv = 0
    else if (Dtset%nfreqim_conv >= epsm1%nomega_i) then
      ! If the requested number of frequencies is larger than the number in the file, use input value.
      epsm1%nomega_i_conv = Dtset%nfreqim_conv
    else if (Dtset%nfreqim_conv < epsm1%nomega_i) then
-     ! If the requested number of frequencies is less than the number in the file,
-     ! give an error
-     ABI_ERROR(sjoin("Requested number of frequencies for convolution", " is less than the number in the file: ", itoa(Dtset%nfreqim_conv)," < ", itoa(epsm1%nomega_i)))
+     ! If the requested number of frequencies is less than the number in the file, give an error
+     ABI_ERROR(sjoin("Requested number of frequencies for convolution is non-zero and less than nfreqim in the file: ", itoa(Dtset%nfreqim_conv)," < ", itoa(epsm1%nomega_i)))
    end if
 
    epsm1%npwe=Sigp%npwc
