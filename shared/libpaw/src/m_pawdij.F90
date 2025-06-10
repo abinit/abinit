@@ -2451,7 +2451,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
  ij_size=pawtab%ij_size
  lm_size=pawtab%lcut_size**2
  lmn2_size=pawtab%lmn2_size
- usezora=(zora.GT.0)
+ usezora=((zora.EQ.1).OR.(zora.EQ.3))
 
 !Check data consistency
  if (cplex_dij/=2) then

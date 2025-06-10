@@ -1485,7 +1485,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
 
- usezora=(zora.EQ.1)
+ usezora=((zora.EQ.1).OR.(zora.EQ.3))
  if(usezora) then
    ABI_MALLOC(zk,(n4,n5,n6))
    zk(1:n4,1:1:n5,1:n6)=1.0/(1.0-HalfFineStruct2*vlocal(1:n4,1:n5,1:n6,nvloc))
