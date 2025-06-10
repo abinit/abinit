@@ -216,6 +216,7 @@ subroutine destroy_energy(energies_dmft,paw_dmft)
  paw_dmft%e_dc  = energies_dmft%e_dc_tot
  paw_dmft%e_hu  = energies_dmft%e_hu_tot
  paw_dmft%sdmft = energies_dmft%sdmft
+ paw_dmft%simp  = energies_dmft%simp
 
  energies_dmft%e_hu => null()
  ABI_SFREE(energies_dmft%e_dc)
@@ -959,6 +960,7 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
      ! Initialize noccmmp
      do im1=1,ndim
        ims1 = im1
+       ! Correct bug in computation of DFT+U energy in the t2g/x2my2d case with TRIQS
        if (x2my2d .and. dmft_optim == 1) ims1 = 5
        if (t2g .and. dmft_optim == 1) ims1 = mt2g(im1)
        do im=1,ndim

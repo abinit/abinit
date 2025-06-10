@@ -10,12 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -143,11 +137,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
-!!
-!! PARENTS
-!!      m_longwave
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -828,22 +817,7 @@ end subroutine dfptlw_loop
 !!  t_typeII(2,3,mpert,3,mpert,3,mpert)= type-II tensor converted to the mixed
 !!       coordinates.
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine dfptlw_typeIproc(blkflg,gprimd,optgeom,mpert,natom,rfpert,rprimd,t_typeI,&
  & t_typeII)
@@ -1013,22 +987,7 @@ end subroutine dfptlw_typeIproc
 !! OUTPUT
 !!  eigen(2*mband*mband*nkpt*nsppol)=matrix of eigenvalues
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine read_1eig(eigen,formeig,mband,nkpt,nsppol,wffnm)
 

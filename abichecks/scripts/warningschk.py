@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import division, print_function, absolute_import #unicode_literals, 
+from __future__ import division, print_function, absolute_import #unicode_literals,
 
 import sys
 import os
@@ -20,7 +20,7 @@ gnu_warnings = { # ( warning_string, warno, src_excluded )
     3  : ( 'Unused variable', [] ),
     4  : ( 'Unused dummy argument',  [] ),
     5  : ( 'Nonstandard type declaration',  ['interfaces','28_numeric_noabirule','01_macroavnew_ext','01_linalg_ext','11_memory_mpi'] ),
-    6  : ( 'Same actual argument associated with INTENT', []),  
+    6  : ( 'Same actual argument associated with INTENT', []),
     7  : ( 'CHARACTER expression will be truncated in assignment',  [] ),
     8  : ( 'Limit of 39 continuations exceeded',  [] ),
     9  : ( 'DOUBLE COMPLEX at (1) does not conform to the Fortran 95 standard',  ['interfaces','01_linalg_ext'] ),
@@ -51,7 +51,7 @@ def main(warno, home_dir=""):
 
   else:
     inp_dir = os.path.join(home_dir, "abichecks", "abirules", "Input")
-  
+
   assert os.path.isdir(inp_dir)
   warno = int(warno)
   Warning      = gnu_warnings[warno][0]

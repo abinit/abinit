@@ -45,7 +45,7 @@ dep_levels = {
   "netcdf":5,
   "netcdf_fortran":6,
   "papi":3,
-  "triqs":3, 
+  "triqs":3,
   "wannier90":9,
   "xmlf90":3,
 }

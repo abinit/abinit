@@ -923,14 +923,13 @@ end subroutine print_matlu
 
        do irot=1,nsym
          do isppol=1,nsppol
-         do nu=2,4
-           do mu=2,4
-             glocsym_mat(:,:,mu+(isppol-1)*4) = glocsym_mat(:,:,mu+(isppol-1)*4) + &
-             &    symrec_cart(mu-1,nu-1,irot)*gloc_tmp4(:,:,nu+(isppol-1)*4,irot)
-           end do ! mu
-         end do ! nu
+           do nu=2,4
+             do mu=2,4
+               glocsym_mat(:,:,mu+(isppol-1)*4) = glocsym_mat(:,:,mu+(isppol-1)*4) + &
+                 &    symrec_cart(mu-1,nu-1,irot)*gloc_tmp4(:,:,nu+(isppol-1)*4,irot)
+             end do ! mu
+           end do ! nu
          end do ! isppol
-
        end do ! irot
 
     !  ==  Normalize sum
@@ -1433,22 +1432,22 @@ subroutine add_matlu(matlu1,matlu2,matlu3,natom,sign_matlu2,idat,ndat)
      lpawu = matlu1(iatom)%lpawu
      if (lpawu == -1) cycle
      do isppol=1,matlu1(iatom)%nsppol
-     if (sign_matlu2 == 1) then
-       matlu3(iatom)%mat(:,:,(isppol-1)*ndat+idat) = matlu1(iatom)%mat(:,:,isppol) + matlu2(iatom)%mat(:,:,isppol)
-     else if (sign_matlu2 == -1) then
-       matlu3(iatom)%mat(:,:,(isppol-1)*ndat+idat) = matlu1(iatom)%mat(:,:,isppol) - matlu2(iatom)%mat(:,:,isppol)
-     end if
-     end do
+       if (sign_matlu2 == 1) then
+         matlu3(iatom)%mat(:,:,(isppol-1)*ndat+idat) = matlu1(iatom)%mat(:,:,isppol) + matlu2(iatom)%mat(:,:,isppol)
+       else if (sign_matlu2 == -1) then
+         matlu3(iatom)%mat(:,:,(isppol-1)*ndat+idat) = matlu1(iatom)%mat(:,:,isppol) - matlu2(iatom)%mat(:,:,isppol)
+       end if
+     end do ! isppol
    end do ! iatom
  else
    do iatom=1,natom
      lpawu = matlu1(iatom)%lpawu
      if (lpawu == -1) cycle
-       if (sign_matlu2 == 1) then
-         matlu3(iatom)%mat(:,:,:) = matlu1(iatom)%mat(:,:,:) + matlu2(iatom)%mat(:,:,:)
-       else if (sign_matlu2 == -1) then
-         matlu3(iatom)%mat(:,:,:) = matlu1(iatom)%mat(:,:,:) - matlu2(iatom)%mat(:,:,:)
-       end if
+     if (sign_matlu2 == 1) then
+       matlu3(iatom)%mat(:,:,:) = matlu1(iatom)%mat(:,:,:) + matlu2(iatom)%mat(:,:,:)
+     else if (sign_matlu2 == -1) then
+       matlu3(iatom)%mat(:,:,:) = matlu1(iatom)%mat(:,:,:) - matlu2(iatom)%mat(:,:,:)
+     end if
    end do ! iatom
  end if
 
