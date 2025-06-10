@@ -67,4 +67,10 @@ if(OpenMP_FOUND)
     OpenMP::OpenMP_Fortran)
 endif()
 
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(12_hide_mpi
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
+endif()
+
 add_library(abinit::12_hide_mpi ALIAS 12_hide_mpi)
