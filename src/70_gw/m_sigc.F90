@@ -54,13 +54,7 @@ module m_sigc
  use m_hide_lapack,   only : xheev
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
-!  use m_numeric_tools, only : pade, interpol1d_c
  use m_pstat,         only : pstat_proc
-
-! #define OUTPUT_EPSM1
-#ifdef OUTPUT_EPSM1
-  use mpi
-#endif
 
  implicit none
 
@@ -219,7 +213,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: neig(epsm1%nomega_i)
  real(gwp),allocatable :: epsm1_eig(:)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
-!  complex(dpc) :: omegapc(epsm1%nomega_i), conv_omegapc(epsm1%nomega_i_conv)
  complex(dpc) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
 !************************************************************************
 
@@ -587,41 +580,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
  if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
 
-#ifdef OUTPUT_EPSM1
- call MPI_FILE_OPEN(Wfd%comm, &
-                    trim(epsm1%fname)//"_rhotw_epsm1_rhotw_"//itoa(sigmak_ibz), &
-                    MPI_MODE_WRONLY+MPI_MODE_CREATE, &
-                    MPI_INFO_NULL, &
-                    file_epsm1, &
-                    ierr)
- call MPI_FILE_SET_SIZE(file_epsm1, 0_MPI_OFFSET_KIND, ierr)
- call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX, comm_size_dpc, ierr)
- call MPI_TYPE_SIZE(MPI_INTEGER, comm_size_int, ierr)
- call MPI_TYPE_SIZE(MPI_DOUBLE_PRECISION, comm_size_dp, ierr)
- if (Wfd%my_rank == Wfd%master) then
-    call MPI_FILE_WRITE_AT(file_epsm1, &
-                           0_MPI_OFFSET_KIND, &
-                           [Wfd%nsppol, Kmesh%nbz, Sr%nbnds, maxbnd, minbnd, epsm1%nomega_i, epsm1%nomega_i_conv], &
-                           7, &
-                           MPI_INTEGER, &
-                           MPI_STATUS_IGNORE, &
-                           ierr)
-    call MPI_FILE_WRITE_AT(file_epsm1, &
-                           INT(7*comm_size_int,kind=MPI_OFFSET_KIND), &
-                           omegap(epsm1%nomega_i:1:-1), &
-                           epsm1%nomega_i, &
-                           MPI_DOUBLE_PRECISION, &
-                           MPI_STATUS_IGNORE, &
-                           ierr)
-    call MPI_FILE_WRITE_AT(file_epsm1, &
-                           INT(7 * comm_size_int + epsm1%nomega_i * comm_size_dp,kind=MPI_OFFSET_KIND), &
-                           conv_omegap(epsm1%nomega_i_conv:1:-1), &
-                           epsm1%nomega_i_conv, &
-                           MPI_DOUBLE_PRECISION, &
-                           MPI_STATUS_IGNORE, &
-                           ierr)
- end if
-#endif
  ! ==========================================
  ! ==== Fat loop over k_i in the full BZ ====
  ! ==========================================
@@ -1292,10 +1250,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end if
    end if
  end do ! spin
-
-#ifdef OUTPUT_EPSM1
- call MPI_FILE_CLOSE(file_epsm1, ierr)
-#endif
 
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
  if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOSUCCEED, epsm1%epsm1_win, ierr)
