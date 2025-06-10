@@ -1459,11 +1459,16 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
  dtset%nsppol=nsppol
 
+! here are ZORA, nspinor, pawspnorb flags
+! flag for ZORA (zeroth order regularized approximation for relativistic terms)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zora',tread,'INT')
+ if (tread == 1) dtset%zora = intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nspinor',tread,'INT')
  if(tread==1) dtset%nspinor=intarr(1)
 
 !Has to read pawspnorb now, in order to adjust nspinor
-!Also, if nspinor=1, turn on spin-orbit coupling by default, here for the PAW case. NC case is treated elsewhere.
+!Also, if nspinor=2, turn on spin-orbit coupling by default, here for the PAW case. NC case is treated elsewhere.
  if (dtset%usepaw>0)then
 !  Change the default value
    if(dtset%nspinor==2)dtset%pawspnorb=1
@@ -1479,6 +1484,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        call wrtout(iout, msg,'COLL')
      end if
    end if
+ end if
+ if (dtset%zora .GT. 1) then
+   dtset%nspinor=2
+   dtset%pawspnorb=1
  end if
  nspinor=dtset%nspinor
 

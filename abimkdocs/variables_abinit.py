@@ -15054,8 +15054,10 @@ When PAW is activated, the **spin-orbit coupling** as derived from the
 zero-order regular approximation to relativistic effects (ZORA)
 can be added without the
 use of specific PAW datasets (pseudopotentials).  If in addition, a
-nuclear magnetic dipole moment (see [[nucdipmom]]) is present, ZORA terms due
-to the electron-nuclear spin interactions are added as well.
+nuclear magnetic dipole moment (see [[nucdipmom]]) is present, onsite ZORA terms due
+to the electron-nuclear spin interactions are added as well. See also the [[zora]] 
+input keyword.
+
 If [[pawspnorb]] = 1, spin-orbit (and nuclear-electron spin) interactions will be added.
 If the wavefunction is spinorial (that is, if [[nspinor]] = 2), there is no
 reason not to include the spin-orbit interaction, so that the default value of
@@ -15074,7 +15076,7 @@ magnetization [[nspden]] = 4, the time-reversal symmetry is broken.
 The use of [[kptopt]] = 1 or [[kptopt]] = 2 is thus forbidden. It is advised to
 use [[kptopt]] = 3 (no symmetry used to generate k-points) or [[kptopt]] = 4 (only
 spatial symmetries used to generate k-points).
-Be careful if you choose to use [[kptopt]] = 0 (k-points given by hand); Time-
+Be careful if you choose [[kptopt]] = 0 (k-points given by hand); Time-
 reversal symmetry has to be avoided.
 An artificial scaling of the spin-orbit can be introduced thanks to the [[spnorbscl]] input variable.
 """,
@@ -22662,6 +22664,32 @@ screen exactly the pseudopotential).
 ),
 
 Variable(
+    abivarname="zora",
+    varset="paw",
+    vartype="integer",
+    topics=['PAW_useful', 'spinpolarisation_useful'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="Zeroth Order Regularized Approximation",
+    requires="[[usepaw]] == 1",
+    added_in_version="v10.5",
+    text=r"""
+ZORA is an effective approximation to the full Dirac equation, which
+delivers reasonable values for relativistic effects at modest 
+cost [[cite:Autschbach2013]].
+The ZORA Hamiltonian includes kinetic energy couplings that are
+independent of electron spin, and additional terms depending explcitly
+on electron spin. The default, [[zora]] 0, provides the usual nonrelativistic calculation.
+[[zora]] 1 activates kinetic energy terms, which currently include only those
+due to nuclear magnetic dipoles (see [[nucdipmom]]).
+[[zora]] 2 activates the spin-dependent terms, which include both spin-orbit couplings
+(so identical to [[pawspnorb]] 1) and terms arising from nuclear magnetic dipoles.
+[[zora]] 3 activates both kinetic energy and electron spin terms.
+""",
+),
+
+
+Variable(
     abivarname="znucl",
     varset="basic",
     vartype="real",
@@ -25733,4 +25761,4 @@ As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
 """,
 ),
 
-]
+
