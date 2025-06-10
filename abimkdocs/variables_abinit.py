@@ -11924,6 +11924,26 @@ the dielectric matrix in order to perform the numerical integration of the GW se
 ),
 
 Variable(
+    abivarname="nfreqim_conv",
+    varset="gw",
+    vartype="integer",
+    topics=['FrequencyMeshMBPT_basic'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="Number of FREQuencies along the IMaginary axis for CONVolution",
+    requires="[[optdriver]] == 4 and [[gwcalctyp]] in [x1]",
+    added_in_version="10",
+    text=r"""
+[[nfreqim_conv]] sets the number of pure imaginary frequencies used to interpolate the dielectric 
+matrix when calculating the self-energy using the AC method (i.e., [[gwcalctyp]] = x1). This allows
+for a more accurate self-energy calculation by computing the dielectric matrix at a few pure
+imaginary frequency points for the SCR file.
+	*	[[nfreqim_conv]] = 0: No interpolation is performed; the self-energy is calculated using the dielectric matrix directly on the pure imaginary frequency mesh.
+	*	[[nfreqim_conv]] > [[nfreqim]]: The self-energy is calculated using an interpolated dielectric matrix on a Gauss-Legendre grid with spline interpolation.
+""",
+),
+
+Variable(
     abivarname="nfreqmidm",
     varset="gw",
     vartype="integer",
