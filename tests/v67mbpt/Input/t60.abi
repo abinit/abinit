@@ -54,9 +54,9 @@ nband1   4
 #################
 ### DATASET 2 ###
 #################
-optdriver2 6
-gwr_task2 "HDIAGO"
+iscf2   -2
 nband2   35
+tolwfr2   1e-12
 getden2   1
 
 #################
