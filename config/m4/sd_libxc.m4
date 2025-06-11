@@ -116,6 +116,27 @@ AC_DEFUN([SD_LIBXC_INIT], [
     fi
   fi
 
+    # if mode is def and pkg_config exists and no prefix -> use pkg_config
+    #
+    if test "${sd_libxc_enable}" = "yes" -a \( "${sd_libxc_init}" = "def" -o "${sd_libxc_init}" = "yon" \) -a "${sd_libxc_prefix}" = ""; then
+       #check if PKG_CONFIG exists (if not keep default mode)
+       AC_MSG_NOTICE([setting for ${sd_libxc_init} potential move to pkg])
+       AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+ 
+       AC_MSG_NOTICE([setting for ${sd_libxc_init} potential move to pkg, PKG=${PKG_CONFIG}])
+       if test "$PKG_CONFIG" != "no"; then
+          AC_MSG_CHECKING([for libxc via pkg-config])
+           AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+           if "$PKG_CONFIG" --exists libxc; then
+                 AC_MSG_RESULT([yes])
+                 sd_libxc_init="pkg"
+          else
+                 AC_MSG_RESULT([no])
+                 sd_libxc_init="def"
+          fi
+       fi
+    fi
+
   # Make sure configuration is correct
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_LIBXC_CHECK_CONFIG
@@ -161,6 +182,29 @@ AC_DEFUN([SD_LIBXC_INIT], [
         test ! -z "${LIBXC_LDFLAGS}" && sd_libxc_ldflags="${LIBXC_LDFLAGS}"
         test ! -z "${LIBXC_LIBS}" && sd_libxc_libs="${LIBXC_LIBS}"
         ;;
+
+       pkg)
+          TMP_LIBXC_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags libxc`
+          TMP_LIBXC_FFFLAGS="${TMP_HDF5_CPPFLAGS}"
+          TMP_LIBXC_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxc`
+	  if "$PKG_CONFIG" --exists libxcf03; then
+               TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf03`
+          elif "$PKG_CONFIG" --exists libxcf90; then
+               TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf90`
+	  else
+ 		AC_MSG_ERROR([invalid PKG-CONFIG  for LibXC: neither fortran90 nor fortran03 interface available])  
+	  fi
+
+          sd_libxc_cppflags="${TMP_LIBXC_CPPFLAGS} "
+          sd_libxc_cflags="${TMP_LIBXC_CPPFLAGS}"
+          sd_libxc_cxxflags="${TMP_LIBXC_CPPFLAGS}"
+          test "${sd_libxc_enable_fc}" = "yes" && \
+               sd_libxc_fcflags="${TMP_LIBXC_FFLAGS}"
+          sd_libxc_ldflags="${TMP_LIBXC_LIBS} ${TMP_LIBXC04OR90_LIBS}"
+          sd_libxc_libs="${TMP_LIBXC_LIBS} ${TMP_LIBXC04OR90_LIBS}"
+          ;;
+
+
 
       *)
         AC_MSG_ERROR([invalid init type for LibXC: '${sd_libxc_init}'])
@@ -496,7 +540,7 @@ AC_DEFUN([_SD_LIBXC_CHECK_CONFIG], [
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_libxc_vars}"; then
+  if test -n "${tmp_libxc_vars}" -a ! "${sd_netcdf_fortran_init}" = "pkg" ; then
     sd_libxc_enable="yes"
     sd_libxc_init="env"
     if test "${tmp_libxc_invalid}" = "yes"; then
