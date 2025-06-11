@@ -97,7 +97,7 @@ kptgw4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t60.abo, tolnlines = 20, tolabs = 2.0e-2, tolrel = 5.0e-1, fld_options = -ridiculous;
+#%%   t60.abo, tolnlines = 20, tolabs = 2.0e-2, tolrel = 5.0e-1, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
