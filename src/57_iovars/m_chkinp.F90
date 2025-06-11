@@ -2004,6 +2004,23 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end do
    end if
 
+!  kptopt
+   if (dt%kptopt>=0) then 
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'kptopt',dt%kptopt,5,(/0,1,2,3,4/),iout)
+     if (any(dt%zeemanfield(:)/=0)) then ! check for the zeemanfield
+        if (.not. any(dt%kptopt == (/0, 3, 4/))) then
+           write(msg, '(4a)') &
+        'Zeeman field is only compatible with kptopt values 0, 3, or 4.', ch10, &
+        'Action: set kptopt to 0, 3 or 4 when using a Zeeman field.'
+          ABI_ERROR_NOSTOP(msg, ierr)
+        end if 
+     end if
+   end if
+   if (dt%kptopt<0) then
+     call wrtout(std_out, &
+  "kptopt < 0: band structure mode using kptbounds and ndivsm (or ndivk), allowed only if iscf = -2." // ch10)
+   end if
+
 !  kssform
    call chkint_eq(0,0,cond_string,cond_values,ierr,'kssform',dt%kssform,3,(/0,1,3/),iout)
 
