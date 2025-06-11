@@ -522,7 +522,7 @@ end subroutine spline_bicubic
 !!
 !! SOURCE
 
-subroutine spline_r( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo)
+subroutine spline_r( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo, extrapolate)
 
 !Arguments --------------------------------------------
 !scalars
@@ -531,6 +531,7 @@ subroutine spline_r( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  real(dp), intent(in) :: omega_li(nomega_li)
  real(dp), intent(in) :: tospline_lo(nomega_lo)
  real(dp), intent(out) :: splined_li(nomega_li)
+ logical, intent(in), optional :: extrapolate
 
 !Local variables---------------------------------------
 !scalars
@@ -541,17 +542,25 @@ subroutine spline_r( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  ybcbeg=zero
  ybcend=zero
 
+ begin = 1
+ end = nomega_li
+
  call spline(omega_lo, tospline_lo, nomega_lo, ybcbeg, ybcend, ysplin2_lo)
- do begin = 1, nomega_li
-   if (omega_li(begin) >= omega_lo(1)) exit
- end do
- do end = nomega_li, 1, -1
-   if (omega_li(end) <= omega_lo(nomega_lo)) exit
- end do
+ if (present(extrapolate) .and. extrapolate) then
+  do begin = 1, nomega_li
+    if (omega_li(begin) >= omega_lo(1)) exit
+  end do
+  do end = nomega_li, 1, -1
+    if (omega_li(end) <= omega_lo(nomega_lo)) exit
+  end do
+  ABI_CHECK(begin <= end, 'spline_c: omega_li not properly ordered')
+ end if
  ABI_CHECK(begin <= end, 'spline_r: omega_li not properly ordered')
  call splint(nomega_lo, omega_lo, tospline_lo, ysplin2_lo, end-begin+1, omega_li(begin:end), splined_li(begin:end))
- splined_li(1:begin-1) = tospline_lo(1)
- splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
+ if (present(extrapolate) .and. extrapolate) then
+  splined_li(1:begin-1) = tospline_lo(1)
+  splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
+ end if
 
 end subroutine spline_r
 
@@ -576,7 +585,7 @@ end subroutine spline_r
 !!
 !! SOURCE
 
-subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo)
+subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo, extrapolate)
 
 !Arguments --------------------------------------------
 !scalars
@@ -585,6 +594,7 @@ subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  real(dp), intent(in) :: omega_li(nomega_li)
  complex(dpc), intent(in) :: tospline_lo(nomega_lo)
  complex(dpc), intent(out) :: splined_li(nomega_li)
+ logical, intent(in), optional :: extrapolate
 
 !Local variables---------------------------------------
 !scalars
@@ -595,17 +605,24 @@ subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  ybcbeg=czero
  ybcend=czero
 
+ begin = 1
+ end = nomega_li
+
  call spline_complex(omega_lo, tospline_lo, nomega_lo, ybcbeg, ybcend, ysplin2_lo)
- do begin = 1, nomega_li
-   if (omega_li(begin) >= omega_lo(1)) exit
- end do
- do end = nomega_li, 1, -1
-   if (omega_li(end) <= omega_lo(nomega_lo)) exit
- end do
- ABI_CHECK(begin <= end, 'spline_r: omega_li not properly ordered')
+ if (present(extrapolate) .and. extrapolate) then
+  do begin = 1, nomega_li
+    if (omega_li(begin) >= omega_lo(1)) exit
+  end do
+  do end = nomega_li, 1, -1
+    if (omega_li(end) <= omega_lo(nomega_lo)) exit
+  end do
+  ABI_CHECK(begin <= end, 'spline_c: omega_li not properly ordered')
+ end if
  call splint_complex( nomega_lo, omega_lo, tospline_lo,ysplin2_lo, end-begin+1, omega_li(begin:end), splined_li(begin:end))
- splined_li(1:begin-1) = tospline_lo(1)
- splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
+ if (present(extrapolate) .and. extrapolate) then
+  splined_li(1:begin-1) = tospline_lo(1)
+  splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
+ end if
 
 end subroutine spline_c
 !!***

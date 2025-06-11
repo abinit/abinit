@@ -936,13 +936,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                      call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
                                     omegap(epsm1%nomega_i:1:-1), conv_omegap(epsm1%nomega_i_conv:1:-1), &
                                     tmp_conv_rhotw_epsm1_rhotw, &
-                                    tmp_rhotw_epsm1_rhotw)
+                                    tmp_rhotw_epsm1_rhotw, &
+                                    extrapolate=.TRUE.)
                   case ("minimax")
                      tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,:)
                      call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
                                     omegap, conv_omegap(epsm1%nomega_i_conv:1:-1), &
                                     tmp_conv_rhotw_epsm1_rhotw, &
-                                    tmp_rhotw_epsm1_rhotw)
+                                    tmp_rhotw_epsm1_rhotw, &
+                                    extrapolate=.TRUE.)
                   end select
                   conv_rhotw_epsm1_rhotw(jb,kb,:) = tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1)
                end do
