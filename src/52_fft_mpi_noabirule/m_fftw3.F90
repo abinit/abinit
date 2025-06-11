@@ -29,7 +29,17 @@
 #undef DEV_RC_BUG
 
 #define FFTLIB "FFTW3"
-#define FFT_PREF(name) CONCAT(fftw3_,name)
+! do not use FFT_PREF(name) since not working with NAG compiler
+#define FFT_PREF_fftrisc fftw3_fftrisc
+#define FFT_PREF_fftrisc_mixprec fftw3_fftrisc_mixprec
+#define FFT_PREF_fftpad fftw3_fftpad
+#define FFT_PREF_fftug_dp fftw3_fftug_dp
+#define FFT_PREF_fftur_dp fftw3_fftur_dp
+#define FFT_PREF_fftug fftw3_fftug
+#define FFT_PREF_fftur fftw3_fftur
+
+
+
 #define SPAWN_THREADS_HERE(ndat, nthreads) fftw3_spawn_threads_here(ndat, nthreads)
 #define FFT_DOUBLE 1
 #define FFT_SINGLE 2
@@ -1049,6 +1059,10 @@ subroutine fftw3_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cg_box2gsph 
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cg_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1111,6 +1125,10 @@ subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph 
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_SINGLE
@@ -1173,6 +1191,10 @@ subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph 
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1252,6 +1274,10 @@ subroutine fftw3_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cg_box2gsph 
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cg_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1315,6 +1341,10 @@ subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph 
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_SINGLE
@@ -1378,6 +1408,10 @@ subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph 
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
