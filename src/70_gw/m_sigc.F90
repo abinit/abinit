@@ -187,8 +187,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer,allocatable :: igfftfcg0(:),gboundf(:,:),ktabrf(:,:),npoles_missing(:)
  real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),q0(3),tsec(2),qbz(3)
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
- real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i), omegap(epsm1%nomega_i), omegap2(epsm1%nomega_i)
- real(dp) :: conv_gl_knots(epsm1%nomega_i_conv),conv_gl_wts(epsm1%nomega_i_conv),conv_omegap(epsm1%nomega_i_conv),conv_omegap2(epsm1%nomega_i_conv)
+ real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i), omegap(epsm1%nomega_i), omegap2(epsm1%nomega_i), tmp_omegap(epsm1%nomega_i)
+ real(dp) :: conv_gl_knots(epsm1%nomega_i_conv),conv_gl_wts(epsm1%nomega_i_conv),conv_omegap(epsm1%nomega_i_conv),conv_omegap2(epsm1%nomega_i_conv), tmp_conv_omegap(epsm1%nomega_i_conv)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
  complex(gwpc) :: sigcohme(Sigp%nsig_ab), omegap_cplx(epsm1%nomega_i)
@@ -933,15 +933,19 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                   select case (epsm1%hscr%iw_mesh_type)
                   case ("gauss_legendre")
                      tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,epsm1%nomega_i:1:-1)
+                     tmp_omegap = omegap(epsm1%nomega_i:1:-1)
+                     tmp_conv_omegap = conv_omegap(epsm1%nomega_i_conv:1:-1)
                      call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
-                                    omegap(epsm1%nomega_i:1:-1), conv_omegap(epsm1%nomega_i_conv:1:-1), &
+                                    tmp_omegap, tmp_conv_omegap, &
                                     tmp_conv_rhotw_epsm1_rhotw, &
                                     tmp_rhotw_epsm1_rhotw, &
                                     extrapolate=.TRUE.)
                   case ("minimax")
                      tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,:)
+                     tmp_omegap = omegap(:)
+                     tmp_conv_omegap = conv_omegap(epsm1%nomega_i_conv:1:-1)
                      call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
-                                    omegap, conv_omegap(epsm1%nomega_i_conv:1:-1), &
+                                    tmp_omegap, tmp_conv_omegap, &
                                     tmp_conv_rhotw_epsm1_rhotw, &
                                     tmp_rhotw_epsm1_rhotw, &
                                     extrapolate=.TRUE.)
