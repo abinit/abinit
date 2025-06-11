@@ -68,7 +68,7 @@ ecutwfn3  6
 nband3   25
 optdriver3   3
 ecuteps3   6
-nfreqim3 30
+nfreqim3 20
 
 #################
 ### DATASET 4 ###
@@ -77,7 +77,7 @@ gwcalctyp4 1
 getwfk4   2
 ecutwfn4     6
 nomegasi4 -20
-nfreqim_conv4 100
+nfreqim_conv4 40
 nband4   30
 optdriver4   4
 ecutsigx4   6.0
