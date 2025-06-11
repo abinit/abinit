@@ -3471,6 +3471,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    if (Dtset%nfreqim_conv==0) then
      ! If no extra frequencies is requested, keep the orginal grids.
      epsm1%nomega_i_conv = 0
+   else if (Dtset%nfreqim_conv < 0) then
+      ! If negative number of frequencies is requested, multiply the number of frequencies in the file by the absolute value.
+     epsm1%nomega_i_conv = abs(Dtset%nfreqim_conv) * epsm1%nomega_i
+     Dtset%nfreqim_conv = epsm1%nomega_i_conv
    else if (Dtset%nfreqim_conv >= epsm1%nomega_i) then
      ! If the requested number of frequencies is larger than the number in the file, use input value.
      epsm1%nomega_i_conv = Dtset%nfreqim_conv
