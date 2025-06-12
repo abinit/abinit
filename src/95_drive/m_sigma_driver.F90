@@ -3494,6 +3494,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    call qmesh%find_qmesh(Cryst,Kmesh)
    ABI_MALLOC(epsm1%gvec,(3,1))
    epsm1%gvec(:,1) = [0, 0, 0]
+   epsm1%nomega = 0
  end if
 
  call Qmesh%print(units, header="Q-mesh for screening function", prtvol=Dtset%prtvol)
