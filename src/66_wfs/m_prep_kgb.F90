@@ -26,8 +26,10 @@ module m_prep_kgb
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_xomp
  use m_abi_linalg
 
+ use, intrinsic :: iso_c_binding, only: c_loc, c_size_t
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt, bandfft_kpt_type
@@ -653,8 +655,11 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !scalars
  integer :: bandpp,ier,ikpt_this_proc,my_nspinor,ndatarecv,nproc_band,npw,nspinortot
  integer :: spaceComm=0,tim_nonlop
- logical :: do_transpose
+ logical :: do_transpose,transfer_cwavef
  integer :: l_gpu_option
+#ifdef HAVE_OPENMP_OFFLOAD
+ integer :: ipw,ind,iibandpp
+#endif
  !character(len=500) :: msg
 !arrays
  integer,  allocatable :: index_wavef_band(:)
@@ -739,6 +744,14 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    end if
  end if
 
+ transfer_cwavef=.false.
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(.not. xomp_target_is_present(c_loc(cwavef)) .and. hamk%gpu_option==ABI_GPU_OPENMP) then
+   transfer_cwavef=.true.
+ end if
+ !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(transfer_cwavef)
+#endif
+
  ABI_MALLOC(sendcountsloc,(nproc_band))
  ABI_MALLOC(sdisplsloc   ,(nproc_band))
  ABI_MALLOC(recvcountsloc,(nproc_band))
@@ -774,8 +787,15 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    ABI_MALLOC(gvnlc_alltoall2,  (2,ndatarecv*my_nspinor*bandpp))
  end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:cwavef_alltoall2) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
    ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:cwavef_alltoall1) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
    if(signs==2)then
      if (paw_opt/=3) then
        ABI_MALLOC(gvnlc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
@@ -812,13 +832,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 #endif
    else
      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall1,&
-         &     recvcountsloc,rdisplsloc,spaceComm,ier)
+         &     recvcountsloc,rdisplsloc,spaceComm,ier,use_omp_map=(hamk%gpu_option==ABI_GPU_OPENMP))
    end if
 
 
    else
-      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
-           &     recvcountsloc,rdisplsloc,spaceComm,ier)
+     call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
+           &     recvcountsloc,rdisplsloc,spaceComm,ier,use_omp_map=(hamk%gpu_option==ABI_GPU_OPENMP))
    end if
    call timab(581,2,tsec)
  else
@@ -828,10 +848,16 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
        call copy_gpu_to_gpu(C_LOC(cwavef_alltoall2), C_LOC(cwavef), INT(2, c_size_t) * ndatarecv * my_nspinor * bandpp * dp)
 #endif
+    else if (hamk%gpu_option == ABI_GPU_OPENMP) then
+      call gpu_copy(cwavef_alltoall2, cwavef, int(2,c_size_t)*ndatarecv*my_nspinor*bandpp)
     else
-       call DCOPY(2*ndatarecv*my_nspinor*bandpp,cwavef,1,cwavef_alltoall2,1)
+      call DCOPY(2*ndatarecv*my_nspinor*bandpp,cwavef,1,cwavef_alltoall2,1)
     end if
  end if
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(transfer_cwavef)
+#endif
 
 !=====================================================================
  if (bandpp==1) then
@@ -839,7 +865,22 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.nspinortot==2) then !Sort WF by spin
      call prep_sort_wavef_spin(nproc_band,my_nspinor,ndatarecv,recvcounts,rdispls,index_wavef_band)
-     cwavef_alltoall2(:, :) = cwavef_alltoall1(:,index_wavef_band)
+     if(hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE &
+       !$OMP& PRIVATE(iibandpp) MAP(to:cwavef_alltoall1,cwavef_alltoall2,index_wavef_band)
+       do iibandpp=1,bandpp*my_nspinor
+         !$OMP PARALLEL DO PRIVATE(ind,ipw)
+         do ipw = 1 ,ndatarecv
+           ind=index_wavef_band(ipw + ndatarecv*(iibandpp-1))
+           cwavef_alltoall2(1,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall1(1,ind)
+           cwavef_alltoall2(2,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall1(2,ind)
+         end do
+       end do
+#endif
+     else
+       cwavef_alltoall2(:, :) = cwavef_alltoall1(:,index_wavef_band)
+     end if
    end if
 
    if (paw_opt==2) then
@@ -871,7 +912,22 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !  -------------------------------------------------------
 !  Sorting of the waves functions below bandpp
 !  -------------------------------------------------------
-     cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
+     if(hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE &
+       !$OMP& PRIVATE(iibandpp) MAP(to:cwavef_alltoall1,cwavef_alltoall2,index_wavef_band)
+       do iibandpp=1,bandpp*my_nspinor
+         !$OMP PARALLEL DO PRIVATE(ind,ipw)
+         do ipw = 1 ,ndatarecv
+           ind=index_wavef_band(ipw + ndatarecv*(iibandpp-1))
+           cwavef_alltoall2(1,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall1(1,ind)
+           cwavef_alltoall2(2,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall1(2,ind)
+         end do
+       end do
+#endif
+     else
+       cwavef_alltoall2(:,:) = cwavef_alltoall1(:,index_wavef_band)
+     end if
    end if
 
 !  -------------------------------------------------------
@@ -955,6 +1011,10 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  ABI_FREE(recvcountsloc)
  ABI_FREE(rdisplsloc)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef_alltoall2) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  if(hamk%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_FREE_MANAGED(cwavef_alltoall2)
@@ -970,6 +1030,9 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  end if
 
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:cwavef_alltoall1) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_FREE(cwavef_alltoall1)
    if(signs==2)then
      if (paw_opt/=3) then
@@ -1054,7 +1117,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  integer :: istwf_k_,jjbandpp,me_fft,nd3,nproc_band,nproc_fft,npw_fft
  integer :: spaceComm=0,tim_fourwf,gpu_option_
  integer,pointer :: idatarecv0,ndatarecv,ndatarecv_tot,ndatasend_sym
- logical :: flag_inv_sym,have_to_reequilibrate
+ logical :: flag_inv_sym,have_to_reequilibrate,transfer_cwavef
  real(dp) :: weight,weight1,weight2
  type(bandfft_kpt_type),pointer :: bandfft_kpt_ptr
 !arrays
@@ -1114,6 +1177,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
    bandfft_kpt_ptr => bandfft_kpt(ikpt_this_proc)
  end if
 
+ have_to_reequilibrate = bandfft_kpt_ptr%have_to_reequilibrate
  istwf_k_=istwf_k
  flag_inv_sym = (istwf_k_==2 .and. any(ngfft(7) == [401,402,312,512]))
  if (option_fourwf==0) flag_inv_sym=((flag_inv_sym).and.(gpu_option_==ABI_GPU_DISABLED))
@@ -1125,6 +1189,10 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
    else
      bandpp_sym   = bandpp
    end if
+ end if
+
+ if(have_to_reequilibrate .and. gpu_option_==ABI_GPU_OPENMP) then
+   ABI_BUG("Reequilibrating FFT isn't supported with OpenMP GPU yet !")
  end if
 
 !====================================================================================
@@ -1172,6 +1240,19 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  sendcountsloc(:)=sendcounts(:)*2
  sdisplsloc(:)=sdispls(:)*2
 
+ transfer_cwavef=.false.
+ if(.not. xomp_target_is_present(c_loc(cwavef)) .and. gpu_option_==ABI_GPU_OPENMP) then
+   transfer_cwavef=.true.
+ end if
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(transfer_cwavef)
+ !$OMP TARGET ENTER DATA MAP(alloc:cwavef_alltoall2) IF(gpu_option_==ABI_GPU_OPENMP)
+ if ( ((.not.flag_inv_sym) .and. (bandpp>1) ) .or. flag_inv_sym )then
+   !$OMP TARGET ENTER DATA MAP(alloc:cwavef_alltoall1) IF(gpu_option_==ABI_GPU_OPENMP)
+ end if
+#endif
+
  call timab(547,1,tsec)
  if(gpu_option_==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -1188,14 +1269,17 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 #endif
  else
    call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
-        & recvcountsloc,rdisplsloc,spaceComm,ier)
+        & recvcountsloc,rdisplsloc,spaceComm,ier,use_omp_map=(gpu_option_==ABI_GPU_OPENMP))
  end if
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(transfer_cwavef)
+#endif
  call timab(547,2,tsec)
 
  tim_fourwf=16
 
 !Eventually adjust load balancing for FFT (by changing FFT distrib)
- have_to_reequilibrate = bandfft_kpt_ptr%have_to_reequilibrate
  if(have_to_reequilibrate) then
    npw_fft =  bandfft_kpt_ptr%npw_fft
    sendcount_fft  => bandfft_kpt_ptr%sendcount_fft(:)
@@ -1265,7 +1349,13 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  -------------------------------------------------------
 !  Sorting of the wave functions below bandpp
 !  -------------------------------------------------------
-   cwavef_alltoall1(:,:) = cwavef_alltoall2(:,index_wavef_band)
+   if(gpu_option_==ABI_GPU_OPENMP) then
+     !FIXME Having this OpenMP kernel here cause a seg fault, so I put it in a separate routine
+     !      I can't figure what cause the issue...
+     call omp_copy_sort_wf(bandpp,ndatarecv,cwavef_alltoall1,cwavef_alltoall2,index_wavef_band,flag_inv_sym)
+   else
+     cwavef_alltoall1(:,:) = cwavef_alltoall2(:,index_wavef_band)
+   end if
 
    if(have_to_reequilibrate) then
 !    filling of sorted send buffers before exchange
@@ -1390,7 +1480,13 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  -------------------------------------------------------
 !  Sorting the wave functions below bandpp
 !  -------------------------------------------------------
-   cwavef_alltoall1(:,:) = cwavef_alltoall2(:,index_wavef_band)
+   if(gpu_option_==ABI_GPU_OPENMP) then
+     !FIXME Having this OpenMP kernel here cause a seg fault, so I put it in a separate routine
+     !      I can't figure what cause the issue...
+     call omp_copy_sort_wf(bandpp,ndatarecv,cwavef_alltoall1,cwavef_alltoall2,index_wavef_band,flag_inv_sym)
+   else
+     cwavef_alltoall1(:,:) = cwavef_alltoall2(:,index_wavef_band)
+   end if
 
 !  ------------------------------------------------------------
 !  We associate the waves functions by two
@@ -1535,6 +1631,12 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
      ABI_FREE(cwavef_fft_tr)
    end if
  end if
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef_alltoall2) IF(gpu_option_==ABI_GPU_OPENMP)
+ if ( ((.not.flag_inv_sym) .and. (bandpp>1) ) .or. flag_inv_sym ) then
+   !$OMP TARGET EXIT DATA MAP(delete:cwavef_alltoall1) IF(gpu_option_==ABI_GPU_OPENMP)
+ end if
+#endif
  ABI_FREE(sendcountsloc)
  ABI_FREE(sdisplsloc)
  ABI_FREE(recvcountsloc)
@@ -1549,6 +1651,50 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
      ABI_FREE(cwavef_alltoall1)
    end if
  end if
+
+contains
+  subroutine omp_copy_sort_wf(bandpp,ndatarecv,cwavef_alltoall_out,cwavef_alltoall_in,index_wavef_band,flag_inv_sym)
+   !Arguments ------------------------------------
+   !scalars
+   integer,intent(in) :: bandpp,ndatarecv
+   logical,intent(in) :: flag_inv_sym
+   !arrays
+   integer,intent(in) :: index_wavef_band(bandpp*ndatarecv)
+   real(dp),intent(in)  :: cwavef_alltoall_in(2,bandpp*ndatarecv)
+   real(dp),intent(out) :: cwavef_alltoall_out(2,bandpp*ndatarecv)
+
+   !Locals ---------------------------------------
+   integer :: ind,iibandpp,ipw
+
+   ! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !FIXME This doesn't run fine when flag_invsym is on, why !!???
+   !$OMP TARGET UPDATE FROM(cwavef_alltoall_in) IF(flag_inv_sym)
+
+   !$OMP TARGET TEAMS DISTRIBUTE &
+   !$OMP& PRIVATE(iibandpp) MAP(to:cwavef_alltoall_out,cwavef_alltoall_in,index_wavef_band) &
+   !$OMP& IF(.not. flag_inv_sym)
+   do iibandpp=1,bandpp
+     !$OMP PARALLEL DO PRIVATE(ind,ipw)
+     do ipw = 1 ,ndatarecv
+       ind=index_wavef_band(ipw + ndatarecv*(iibandpp-1))
+       cwavef_alltoall_out(1,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall_in(1,ind)
+       cwavef_alltoall_out(2,ipw + ndatarecv*(iibandpp-1)) = cwavef_alltoall_in(2,ind)
+     end do
+   end do
+
+   !$OMP TARGET UPDATE TO(cwavef_alltoall_out) IF(flag_inv_sym)
+
+#else
+  ABI_UNUSED((/ind,iibandpp,ipw/))
+  ABI_UNUSED((/bandpp,ndatarecv/))
+  ABI_UNUSED(flag_inv_sym)
+  ABI_UNUSED(cwavef_alltoall_in)
+  ABI_UNUSED(cwavef_alltoall_out)
+  ABI_UNUSED(index_wavef_band)
+#endif
+  end subroutine omp_copy_sort_wf
 
 end subroutine prep_fourwf
 !!***
