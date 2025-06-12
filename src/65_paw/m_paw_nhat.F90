@@ -1268,7 +1268,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        case (ABI_GPU_OPENMP)
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET DATA USE_DEVICE_ADDR(nhat12_atm,nhat12)
-         call abi_gpu_xaxpy(2, nfft*ndat2*ndat1*(nspinor**2),&
+         call abi_gpu_xaxpy(1, 2*nfft*ndat2*ndat1*nspinor*nspinor,&
          &    cone,c_loc(nhat12_atm(:,:,:,:,:,ia)),1,c_loc(nhat12),1)
          !$OMP END TARGET DATA
 #endif
