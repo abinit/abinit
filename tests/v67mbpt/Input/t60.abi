@@ -77,7 +77,7 @@ gwcalctyp4 1
 getwfk4   2
 ecutwfn4     6
 nomegasi4 -20
-nfreqim_conv4 40
+nfreqim_conv4 30
 nband4   30
 optdriver4   4
 ecutsigx4   6.0
