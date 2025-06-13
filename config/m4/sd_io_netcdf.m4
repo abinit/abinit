@@ -118,7 +118,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
             AC_PATH_TOOL(PKG_CONFIG,pkg-config)
             if "$PKG_CONFIG" --exists netcdf; then
                   AC_MSG_RESULT([yes])
-                  sd_netcdf_init="pkg"
+                  #sd_netcdf_init="pkg"
            else
                   AC_MSG_RESULT([no])
                   sd_netcdf_init="def"
