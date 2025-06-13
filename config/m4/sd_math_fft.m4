@@ -341,6 +341,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
                     will abort. Otherwise, your FFTW3 settings will be ignored.
 
 ])
+  sd_fftw3_enable="no"
   fi 
 
   # Clean-up the mess
