@@ -157,7 +157,7 @@ AC_DEFUN([SD_HDF5_INIT], [
                 sd_hdf5_init="pkg"
          else
                 AC_MSG_RESULT([no])
-                sd_hdf5_init="def"
+                #sd_hdf5_init="def" or yon keep it
          fi
       fi
    fi
