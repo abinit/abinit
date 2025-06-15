@@ -2778,47 +2778,43 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
-on-the-flight enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
-Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[geoopt]] = "bfgs" or "lbfgs" ([[ionmov]] == 2 or 22).
+on-the-fly enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
+Useful only when doing cell optimization, e.g. [[optcell]] /= 0, usually with [[geoopt]] = "bfgs" or "lbfgs" ([[ionmov]] == 2 or 22).
 Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large),
 then the recommended value of [[dilatmx]] is 1.05.
-When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
-you need an accurate estimation of the geometry, then make a first
-run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using
-the newly estimated geometry, with [[chkdilatmx]]=1 (the default) and [[dilatmx]] set to 1.05.
-If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
+When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible,
+while you need an accurate estimation of the geometry, then make a first
+run with [[chkdilatmx]] = 0, producing an inaccurate, but much better estimation, followed by a second run using
+the newly estimated geometry, with [[chkdilatmx]] = 1 (the default) and [[dilatmx]] set to 1.05.
+If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]] = 0 only once.
 
-In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
-ABINIT will rescale uniformly the
-tentative new primitive vectors to a value that leads at most to 90% of the
-maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
-prevent the geometry optimization algorithms to have taken a too large trial
+In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded, ABINIT will rescale uniformly the
+tentative new primitive vectors to a value that leads at most to 90% of the maximal allowed [[dilatmx]] deviation from 1.
+It will do this three times (to prevent the geometry optimization algorithms to have taken a too large trial
 step), but afterwards will stop and exit.
 
-Setting [[chkdilatmx]] == 0 allows one to
-book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1), but will not rescale the tentative new primitive vectors
-nor lead to an exit when the [[dilatmx]] threshold is exceeded.
+Setting [[chkdilatmx]] == 0 allows one to book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1),
+but will not rescale the tentative new primitive vectors nor lead to an exit when the [[dilatmx]] threshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
 determined using [[ecut]] at the latter primitive vectors. Still, as an intermediate step in a geometry search
-this might be sufficiently accurate. In such case, [[dilatmx]] might even be let at its default value 1.0.
+this might be sufficiently accurate.
+In such case, [[dilatmx]] might even be let at its default value 1.0.
 
 Detailed explanation: The memory space for the planewave basis set is defined
-by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called
-internally "ecut_eff"). Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
+by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called internally "ecut_eff").
+Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
 Still, operations (like scalar products) are done by taking into account these fake (non-used) planewaves,
 even if their coefficients are set to zero, thus slowing down the ABINIT execution.
-Using [[dilatmx]]<1.0 is equivalent to changing [[ecut]] in all its uses. This
-is allowed, although its meaning is no longer related to a maximal expected scaling.
+Using [[dilatmx]] < 1.0 is equivalent to changing [[ecut]] in all its uses.
+This is allowed, although its meaning is no longer related to a maximal expected scaling.
 
 Setting [[dilatmx]] to a large value leads to waste of CPU time and memory.
 By default, ABINIT will not accept that you define [[dilatmx]] bigger than 1.15.
 This behaviour will be overcome by using [[chkdilatmx]] == 0.
-Supposing you think that the optimized [[acell]] values might be 5% larger
-than your input values, use simply [[dilatmx]] 1.05. This will lead to
-an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$, and a
-corresponding increase in CPU time and memory.
-It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
-1.0 will be a waste.
+Supposing you think that the optimized [[acell]] values might be 5% larger than your input values, use simply [[dilatmx]] 1.05.
+This will lead to an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$,
+and a corresponding increase in CPU time and memory.
+It is possible to use [[dilatmx]] when [[optcell]] = 0, but a value larger than 1.0 will be a waste.
 """,
 ),
 
