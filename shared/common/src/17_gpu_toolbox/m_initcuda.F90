@@ -70,7 +70,6 @@ module m_initcuda
 
  private ::            &
    prt_device_info !, &    ! To print information about GPU
- !  get_fastest_devices   ! Get fastest GPU devices
 
  public ::             &
    InitGPU,            & ! Initialise GPU
@@ -317,15 +316,16 @@ end subroutine Get_Mem_Dev
 #if defined HAVE_GPU
  device=-1
  call c_get_ndevice(nb_devices)
+ write(msg,'(a,i2,a)') ch10,nb_devices,' GPU device(s) have been detected on the current node'
+ call wrtout(std_out,msg,'PERS')
+
  !nb_devices=min(nb_devices,20)
  if(nb_devices>0) then
    if(nb_devices==1) then
      device=0
    else if(all(gpu_devices_node(1:nb_devices)==-1)) then
-     ABI_MALLOC(fastest_devices,(0:nproc-1))
-     call get_fastest_devices(fastest_devices,nb_devices)
-     device=fastest_devices(me)
-     ABI_FREE(fastest_devices)
+     nprocs_per_gpu=max(1,nproc/nb_devices)
+     device=me/nprocs_per_gpu
    else
      jj=nb_devices
      do ii=jj,2,-1
@@ -470,7 +470,6 @@ end subroutine Get_Mem_Dev
 #endif
  end subroutine unsetdevice_cuda
 !!***
-
 
 !!****f* m_initcuda/get_fastest_devices
 !! NAME
