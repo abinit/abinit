@@ -738,12 +738,12 @@ end subroutine symfind
 !! SOURCE
 
  subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
-&  prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,xred,&
+&  pawspnorb,prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,usepaw,xred,&
 &  chrgat,nucdipmom,invardir_red,invar_z)  ! Optional - although for the time being all are required ...
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: msym,natom,nptsym,nspden
+ integer,intent(in) :: msym,natom,nptsym,nspden,pawspnorb,usepaw
  integer,intent(in) :: prtvol
  integer,optional,intent(in) :: invar_z
  integer,intent(out) :: nsym
@@ -775,6 +775,11 @@ end subroutine symfind
 !ENDDEBUG
 
   use_inversion=1
+  ! It is no longer needed to deactivate the inversion, normally
+  ! if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+  !   ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+  !   use_inversion=0
+  ! end if
 
 !DEBUG
 ! write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
