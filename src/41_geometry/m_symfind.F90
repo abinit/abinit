@@ -775,11 +775,11 @@ end subroutine symfind
 !ENDDEBUG
 
   use_inversion=1
-  ! It is no longer needed to deactivate the inversion, normally
-  ! if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
-  !   ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
-  !   use_inversion=0
-  ! end if
+  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+    ! MMignolet: PAW can be used with inversion, however it results in seg faults in the dmft code. To enable when this is fixed...
+    use_inversion=0
+  end if
 
 !DEBUG
 ! write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
