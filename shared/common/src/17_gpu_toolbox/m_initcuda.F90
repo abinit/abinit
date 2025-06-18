@@ -32,7 +32,7 @@ module m_initcuda
  use defs_basis
  use m_abicore
  use m_xomp
- use m_xmpi, only: xmpi_world,xmpi_comm_rank,xmpi_comm_size,xmpi_abort
+ use m_xmpi, only: xmpi_world,xmpi_comm_rank,xmpi_comm_size,xmpi_abort,xmpi_sum
 
 #ifdef HAVE_KOKKOS
  use m_kokkos_utils
@@ -70,7 +70,6 @@ module m_initcuda
 
  private ::            &
    prt_device_info !, &    ! To print information about GPU
- !  get_fastest_devices   ! Get fastest GPU devices
 
  public ::             &
    InitGPU,            & ! Initialise GPU
@@ -102,8 +101,9 @@ CONTAINS !===========================================================
 !Local variables ------------------------------
 !scalars
  integer :: gflops,constmem,sharemem
- integer :: ii,regist,lenname,ncores,nprocs
+ integer :: ii,regist,lenname,ncores,nprocs,nprocs_per_gpu
  real(sp) :: globalmem,clockRate
+ integer  :: uuid(4)
  character(20)  :: name
  character(20)  :: formatdev
  character(60)  :: gflops_stg
@@ -118,7 +118,8 @@ CONTAINS !===========================================================
 &  ' Graphic Card Properties ','_______________________________' ,ch10
  call wrtout(std_out,msg,'PERS')
 
- call get_dev_info(device,name,lenname,vers,globalmem,clockRate,gflops,constmem,sharemem,regist,nprocs,ncores)
+ call get_dev_info(device,name,lenname,vers,globalmem,clockRate,gflops,constmem,sharemem,regist,nprocs,ncores,uuid)
+ call gpu_get_nprocs_per_gpu(nprocs_per_gpu);
  if (gflops<0) then
    gflops_stg="undefined (add new def. in version_2_cores function)"
  else
@@ -129,7 +130,7 @@ CONTAINS !===========================================================
  write (msg,formatdev)&
        & '  Device             ',device,' : ',name(1:lenname)
  call wrtout(std_out,msg,'PERS')
- write (msg,'(a,2(i1,a),a,i9,a,a,a,f7.1,a,a,a,i9,a,i9,4a,2(a,i9,2a),a,i9,a)')&
+ write (msg,'(a,2(i1,a),a,i9,a,a,a,f7.1,a,a,a,i9,a,i9,4a,2(a,i9,2a),a,i9,a,a,4(z8,a1),a)')&
        & ' Revision number:                   ',vers(0),'.',vers(1),ch10, &
        & ' Total amount of global memory: ',nint(globalmem),' Mbytes',ch10, &
        & ' Clock rate:                    ',clockRate,' GHz',ch10, &
@@ -137,8 +138,14 @@ CONTAINS !===========================================================
        & ' Max FP64 GFLOPS:               ',trim(gflops_stg),ch10, &
        & ' Total  constant memory:        ',constmem,' bytes',ch10, &
        & ' Shared memory per block:       ',sharemem,' bytes',ch10, &
-       & ' Number of registers per block: ',regist,ch10
+       & ' Number of registers per block: ',regist,ch10,&
+       & ' UUID:                              ',uuid(1),'-',uuid(2),'-',uuid(3),'-',uuid(4),' ',ch10
  call wrtout(std_out,msg,'PERS')
+ if(nprocs_per_gpu > 1) then
+   write (msg,'(a,i9,a,a)')&
+       & ' Global memory per task:        ',nint(globalmem)/nprocs_per_gpu,' Mbytes',ch10
+   call wrtout(std_out,msg,'PERS')
+ end if
  if(device == -1)then
    write(msg,'(a)')' no cuda-GPU devices found'
    call wrtout(std_out,msg,'PERS')
@@ -293,12 +300,12 @@ end subroutine Get_Mem_Dev
  integer, intent(in) :: gpu_devices_node(12)
 !Local variables ------------------------------
 !scalars
- integer :: device,ii,jj,me,nb_devices,nproc
+ integer :: device,ii,jj,me,nb_devices,nproc,ierr,nprocs_per_gpu
  logical :: testopen
  character(len=500) :: msg
  type(devGPU_type) :: gpuinfo
 !arrays
- integer,allocatable :: fastest_devices(:)
+ integer,allocatable :: fastest_devices(:),uuid_array(:,:)
 ! *********************************************************************
 
  if (gpu_option==ABI_GPU_DISABLED) return
@@ -309,15 +316,16 @@ end subroutine Get_Mem_Dev
 #if defined HAVE_GPU
  device=-1
  call c_get_ndevice(nb_devices)
+ write(msg,'(a,i2,a)') ch10,nb_devices,' GPU device(s) have been detected on the current node'
+ call wrtout(std_out,msg,'PERS')
+
  !nb_devices=min(nb_devices,20)
  if(nb_devices>0) then
    if(nb_devices==1) then
      device=0
    else if(all(gpu_devices_node(1:nb_devices)==-1)) then
-     ABI_MALLOC(fastest_devices,(0:nproc-1))
-     call get_fastest_devices(fastest_devices,nb_devices)
-     device=fastest_devices(me)
-     ABI_FREE(fastest_devices)
+     nprocs_per_gpu=max(1,nproc/nb_devices)
+     device=me/nprocs_per_gpu
    else
      jj=nb_devices
      do ii=jj,2,-1
@@ -348,6 +356,14 @@ end subroutine Get_Mem_Dev
 
    call set_dev(device)
    call check_context(nb_devices,msg)
+   ABI_MALLOC(uuid_array,(4,nproc))
+   uuid_array(:,:) = 0; nprocs_per_gpu = 0
+   call get_gpu_uuid(device,uuid_array(:,me+1))
+   call xmpi_sum(uuid_array,xmpi_world,ierr)
+   do ii=1,nproc
+     if(all(uuid_array(:,ii) == uuid_array(:,me+1))) nprocs_per_gpu = nprocs_per_gpu + 1
+   end do
+   call gpu_set_nprocs_per_gpu(nprocs_per_gpu)
    if(gpu_option==ABI_GPU_OPENMP) then
      call xomp_set_default_device(device)
    end if
@@ -356,6 +372,32 @@ end subroutine Get_Mem_Dev
 &     ' setdevice_cuda : COMMENT -',ch10,&
 &     '  GPU ',device,' has been properly initialized, continuing...',ch10
      call wrtout(std_out,msg,'PERS')
+     !Advertise when there are more than one GPU per task
+     !When running on NVIDIA GPU, warn if MPS isn't used
+     if(nprocs_per_gpu > 1) then
+       write(msg, '(4a,i1,2a)' ) ch10,&
+&       ' setdevice_cuda : COMMENT -',ch10,&
+&       '  There are ',nprocs_per_gpu,' MPI tasks assigned per GPU.',ch10
+       call wrtout(std_out,msg,'PERS')
+#ifdef HAVE_GPU_CUDA
+       call gpu_get_mps_status(device, ierr);
+       if(ierr==0) then
+         write(msg, '(10a,i3,3a)' ) ch10,&
+&         ' setdevice_cuda : WARNING -',ch10,&
+&         "  NVIDIA MPS doesn't seem to be enabled while multiple MPI tasks were assigned per GPU.", ch10,&
+&         "  This won't break the code but will harm performance.",ch10,&
+&         "  In most environments, MPS is disabled by default and must be requested or enabled by user.",ch10,&
+&         "  A GPU percent-share should be given to MPS for further tuning, which would be ideally ", 100/nprocs_per_gpu,&
+&         "%", ch10, "  in current MPI tasks per GPU configuration."
+         call wrtout(std_out,msg,'PERS')
+       else if(ierr==-1) then ! unknow status (when CUDA < 12.3)
+         write(msg, '(4a)' ) ch10,&
+&         ' setdevice_cuda : WARNING -',ch10,&
+&         "  Multiple MPI tasks were assigned per GPU. Make sure NVIDIA MPS has been enabled for best performance !"
+         call wrtout(std_out,msg,'PERS')
+       end if
+#endif
+     end if
    else !gpu allocation failed we print error message returned and exit
      device=-1
      call wrtout(std_out,msg,'COLL')
@@ -429,7 +471,6 @@ end subroutine Get_Mem_Dev
  end subroutine unsetdevice_cuda
 !!***
 
-
 !!****f* m_initcuda/get_fastest_devices
 !! NAME
 !! get_fastest_devices
@@ -458,6 +499,7 @@ end subroutine Get_Mem_Dev
 !arrays
 #if defined HAVE_GPU
  integer :: vers(0:1)
+ integer :: uuid(4)
  integer,allocatable :: isort(:)
  real(dp),allocatable :: flops(:),mem(:)
 #endif
@@ -483,7 +525,7 @@ end subroutine Get_Mem_Dev
  do ii=0,nb_devices-1
    call set_dev(ii)
    call get_dev_info(ii,name,lenname,vers,globalmem,clockRate,gflops,constmem,&
-&                    sharemem,regist,nprocs,ncores)
+&                    sharemem,regist,nprocs,ncores,uuid)
    flops(ii+1)=dble(gflops) ; mem(ii+1)=dble(globalmem)
    call unset_dev()
    write(msg,'(a,i2,3a,i1,a,i1,a,i6,a,f7.1,a,i7,a,i4,a,i4,a)') &

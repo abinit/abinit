@@ -1038,7 +1038,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(gemm_nonlop_use_gemm .and. istep <= 1 .and. isppol < 2 .and. dtset%gpu_option==ABI_GPU_OPENMP) then
          gemm_nonlop_block_size = dtset%gpu_nl_splitsize
          call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
-         &                        dtset%nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+         &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
          &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
