@@ -137,8 +137,8 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
      invar_z=0 ; if(dtsets(idtset)%jellslab/=0 .or. dtsets(idtset)%nzchempot/=0)invar_z=2
 
      call symfind_expert(gprimd,msym,natom,nptsym,dtsets(idtset)%nspden,nsym,&
-       dtsets(idtset)%prtvol,ptsymrel,dtsets(idtset)%spinat,symafm,symrel,&
-       tnons,tolsym,dtsets(idtset)%typat,results_out(idtset)%xred(1:3,1:natom,iimage),&
+       dtsets(idtset)%pawspnorb,dtsets(idtset)%prtvol,ptsymrel,dtsets(idtset)%spinat,symafm,symrel,&
+       tnons,tolsym,dtsets(idtset)%typat,dtsets(idtset)%usepaw,results_out(idtset)%xred(1:3,1:natom,iimage),&
        chrgat=dtsets(idtset)%chrgat,nucdipmom=dtsets(idtset)%nucdipmom,&
        invardir_red=dtsets(idtset)%field_red,invar_z=invar_z)
 
