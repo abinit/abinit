@@ -181,8 +181,6 @@ subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
 
 
  call InitGPU(gpuinfo,gpudevice)
- !-- look if it is possible to set devices CUDA compatible
- call set_dev(gpudevice)
  if(gpudevice>-1)then
    !--Take the approximate use of memory to compute the number of points on any GPU
    if(rset%tronc)then
@@ -363,7 +361,6 @@ subroutine CleanRecGPU(recgpu,load)
      ABI_FREE(recgpu%par%vcount)
    end if
  endif
- call unset_dev()
 
 end subroutine CleanRecGPU
 !!***
