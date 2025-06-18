@@ -132,7 +132,7 @@ contains
 subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
   genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
   msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
-  nucdipmom,nzchempot,&
+  nucdipmom,nzchempot,pawspnorb,&
   ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
   symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
 
@@ -140,7 +140,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
  integer,intent(in) :: nimage,npsp,npspalch,nspden,nsppol
- integer,intent(in) :: ntypalch,ntypat,nzchempot,comm
+ integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb,comm
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i
  integer,intent(inout) :: nsym !vz_i
@@ -854,6 +854,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
      noncoll=0; if (nspden == 4) noncoll=1
 
      use_inversion=1
+     if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+       ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+       use_inversion=0
+     end if
 
      ! Get field in reduced coordinates (reduced e/d field)
 

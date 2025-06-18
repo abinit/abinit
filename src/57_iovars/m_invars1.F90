@@ -1584,7 +1584,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
     dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
     msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
-    dtset%ptgroupma,ratsph,&
+    dtset%pawspnorb,dtset%ptgroupma,ratsph,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
     string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
     typat,vel,vel_cell,xred,znucl, comm)
