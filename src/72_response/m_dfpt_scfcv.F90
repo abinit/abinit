@@ -1426,7 +1426,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !Use of NSTPAW3 for NCPP (instead of DFPT_NSELT/DFPT_NSTDY) can be forced with userie=919
 !MT oct. 2015: this works perfectly on all automatic tests
- if(ipert<=dtset%natom+4)then
+! if(ipert<=dtset%natom+4)then
    if (psps%usepaw==1.or.dtset%userie==919) then
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
@@ -1489,7 +1489,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      end if
    end if
- end if
+! end if
 
  call timab(150,2,tsec)
  call timab(160,1,tsec)
@@ -3231,7 +3231,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    msg='This routine cannot be used for PAW (use dfpt_nstpaw instead) !'
    ABI_BUG(msg)
  end if
-
 
 !Keep track of total time spent in dfpt_nstdy
  call timab(101,1,tsec)
