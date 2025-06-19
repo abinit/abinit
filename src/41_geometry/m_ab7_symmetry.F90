@@ -726,7 +726,7 @@ contains
        call symfind(sym%gprimd, AB7_MAX_SYMMETRIES, &
             & sym%nAtoms, sym%nBravSym, sym%withSpin, sym%nSym, 0, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
-            & use_inversion, sym%xRed, invardir_red=sym%field, invar_z=invar_z)
+            & use_inversion, sym%xRed, invardir_red=sym%field, invaraxial_red=sym%field, invar_z=invar_z)
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
        if (AB_DBG) write(std_err, "(A,I3)") "  nSym:", sym%nSym
        if (associated(sym%sym))  then
