@@ -11925,22 +11925,32 @@ Variable(
     vartype="integer",
     topics=['FrequencyMeshMBPT_basic'],
     dimensions="scalar",
-    defaultval="0",
+    defaultval=0,
     mnemonics="Number of FREQuencies along the IMaginary axis for CONVolution",
     requires="[[optdriver]] == 4 and [[gwcalctyp]] in [x1]",
-    added_in_version="10",
+    added_in_version="10.5.1",
     text=r"""
-[[nfreqim_conv]] sets the number of pure imaginary frequencies used to interpolate the dielectric 
-matrix when calculating the self-energy using the AC method (i.e., [[gwcalctyp]] = x1). This allows
-for a more accurate self-energy calculation by computing the dielectric matrix at a few pure
-imaginary frequency points for the SCR file.
-	*	[[nfreqim_conv]] = 0: No interpolation is performed; the self-energy is calculated using the dielectric matrix directly on the pure imaginary frequency mesh.
-	*	[[nfreqim_conv]] > 0: The self-energy is calculated using an interpolated dielectric matrix on a Gauss-Legendre grid with spline interpolation. Note that it must be greater than or equal to [[nfreqim]]; otherwise, it is invalid.
-  * [[nfreqim_conv]] < 0: The multiple of nfreqim is used to define the number of interpolation points, i.e. [[nfreqim_conv]] = -n will lead to n * [[nfreqim]] interpolation points.
+[[nfreqim_conv]] defines the number of imaginary frequency points used to interpolate the convolution between G and W
+when computing the self-energy with the analytic continuation (AC) method (i.e., when [[gwcalctyp]] = x1).
+This setting enables a more accurate evaluation of the self-energy for a given SCR file containing [[nfreqim]] imaginary frequencies.
 
- !!! important
+* [[nfreqim_conv]] = 0: No interpolation is performed; the self-energy is calculated using the inverse dielectric matrix
+  directly on the input imaginary frequency mesh read from the SCR file.
+* [[nfreqim_conv]] > 0: The self-energy is calculated using an interpolated inverse dielectric matrix on a Gauss-Legendre grid
+  with spline interpolation.
+  Note that [[nfreqim_conv]]  must be greater than or equal to [[nfreqim]]; otherwise, it is invalid.
+* [[nfreqim_conv]] < 0: The multiple of [[nfreqim]] is used to define the number of interpolation points,
+  i.e. [[nfreqim_conv]] = -n will lead to n * [[nfreqim]] interpolation points.
 
-    This parameter can significantly accelerate the computation, but it still has drawbacks: the value of [[nfreqim_conv]] is not the larger the better. Excessive interpolation points can lead to numerical instability. For an example, if the user sets [[nfreqim_conv]] = 1000, they should be aware that the final result (QP gap) may have errors on the order of several meV. Therefore, it is necessary to test the stability of this parameter, but fortunately, the computational time does not increase significantly with its growth.
+!!! important
+
+    This parameter can significantly improve convergence speed, but it also has limitations:
+    a larger value of [[nfreqim_conv]] is not necessarily better.
+    Using too many interpolation points may introduce numerical instabilities.
+    For example, if the user sets [[nfreqim_conv]] = 1000, the resulting quasiparticle (QP) gap could differ
+    by several meV due to such instabilities.
+    Therefore, it is important to test the stability of the results with respect to this parameter.
+    Fortunately, increasing [[nfreqim_conv]] does not substantially increase the computational cost.
 """,
 ),
 
@@ -11954,7 +11964,7 @@ Variable(
     requires="[[optdriver]] == 4",
     added_in_version="before_v9",
     text=r"""
-depending on the value of [[nfreqmidm]] will calculate the frequency moment of
+Depending on the value of [[nfreqmidm]] will calculate the frequency moment of
 the dielectric matrix or its inverse,
 
   * if [[nfreqmidm]] is positive: calculate (nth=[[nfreqmidm]]) frequency moment of the dielectric matrix.
