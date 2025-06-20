@@ -81,47 +81,51 @@ repos:
         name: Run check-build-config
         entry: python abichecks/scripts/check-build-config.py
         language: python
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/check-config-h.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/check-forbidden-flags.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/check_ascii.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
+      - id: run-check-config-h
+        name: Run run-check-config-h
+        entry: python abichecks/scripts/check-config-h.py
+        language: python
+      - id: run-check-forbidden-flags
+        name: Run run-check-forbidden-flags
+        entry: python abichecks/scripts/check-forbidden-flags.py
+        language: python
+      - id: run-check-ascii
+        name: Run run-check_ascii
+        entry: python abichecks/scripts/check_ascii.py
+        language: python
+      #- id: run-warningschk
+      #  name: Run run-warningschk
       #  entry: python abichecks/scripts/warningschk.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/abirules_tools.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
+      #  language: python
+      #- id: check-build-examples
+      #  name: Run check-build-examples
       #  entry: python abichecks/scripts/check-build-examples.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/check-conflict-markers.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
+      #  language: python
+      #- id: check-libpaw
+      #  name: Run check-libpaw
       #  entry: python abichecks/scripts/check-libpaw.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/check_forbidden.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/check-binaries-conf.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
+      #  language: python
+      - id: check-forbidden
+        name: Run check-forbidden
+        entry: python abichecks/scripts/check_forbidden.py
+        language: python
+      - id: check-binaries-conf
+        name: Run check-binaries-conf
+        entry: python abichecks/scripts/check-binaries-conf.py
+        language: python
+      #- id: check-build-refs
+      #  name: Run check-build-refs
       #  entry: python abichecks/scripts/check-build-refs.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/check-cpp-options.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
+      #  language: python
+      - id: check-cpp-options
+        name: Run check-cpp-options
+        entry: python abichecks/scripts/check-cpp-options.py
+        language: python
+      #- id: check-line-lengths
+      #  name: Run check-line-lengths
       #  entry: python abichecks/scripts/check-line-lengths.py
-      #- id: run-modified-tests
-      #  name: Run pytest on modified files
-      #  entry: python abichecks/scripts/check_inlined_macros.py
+      #  language: python
+      - id: checl-inlined-macros
+        name: Run check-inlined-macros
+        entry: python abichecks/scripts/check_inlined_macros.py
+        language: python
