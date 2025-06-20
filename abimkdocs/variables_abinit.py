@@ -11920,6 +11920,31 @@ the dielectric matrix in order to perform the numerical integration of the GW se
 ),
 
 Variable(
+    abivarname="nfreqim_conv",
+    varset="gw",
+    vartype="integer",
+    topics=['FrequencyMeshMBPT_basic'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="Number of FREQuencies along the IMaginary axis for CONVolution",
+    requires="[[optdriver]] == 4 and [[gwcalctyp]] in [x1]",
+    added_in_version="10",
+    text=r"""
+[[nfreqim_conv]] sets the number of pure imaginary frequencies used to interpolate the dielectric 
+matrix when calculating the self-energy using the AC method (i.e., [[gwcalctyp]] = x1). This allows
+for a more accurate self-energy calculation by computing the dielectric matrix at a few pure
+imaginary frequency points for the SCR file.
+	*	[[nfreqim_conv]] = 0: No interpolation is performed; the self-energy is calculated using the dielectric matrix directly on the pure imaginary frequency mesh.
+	*	[[nfreqim_conv]] > 0: The self-energy is calculated using an interpolated dielectric matrix on a Gauss-Legendre grid with spline interpolation. Note that it must be greater than or equal to [[nfreqim]]; otherwise, it is invalid.
+  * [[nfreqim_conv]] < 0: The multiple of nfreqim is used to define the number of interpolation points, i.e. [[nfreqim_conv]] = -n will lead to n * [[nfreqim]] interpolation points.
+
+ !!! important
+
+    This parameter can significantly accelerate the computation, but it still has drawbacks: the value of [[nfreqim_conv]] is not the larger the better. Excessive interpolation points can lead to numerical instability. For an example, if the user sets [[nfreqim_conv]] = 1000, they should be aware that the final result (QP gap) may have errors on the order of several meV. Therefore, it is necessary to test the stability of this parameter, but fortunately, the computational time does not increase significantly with its growth.
+""",
+),
+
+Variable(
     abivarname="nfreqmidm",
     varset="gw",
     vartype="integer",
