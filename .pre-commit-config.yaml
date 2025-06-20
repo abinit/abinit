@@ -1,0 +1,116 @@
+#exclude: ^(docs|tests/files|tasks.py)
+
+ci:
+  autoupdate_schedule: monthly
+  #skip: [mypy, pyright]
+  autofix_commit_msg: pre-commit auto-fixes
+  autoupdate_commit_msg: pre-commit autoupdate
+
+repos:
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-ast
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+        args: ['--maxkb=100']  # 1000 KB = 1 MB
+
+  #- repo: https://github.com/astral-sh/ruff-pre-commit
+  #  rev: v0.11.12
+  #  hooks:
+  #    - id: ruff
+  #      args: [--fix, --unsafe-fixes]
+  #    - id: ruff-format
+
+  #- repo: https://github.com/pre-commit/mirrors-mypy
+  #  rev: v1.16.0
+  #  hooks:
+  #    - id: mypy
+  #      #additional_dependencies: [numpy>=1.2.5]
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        stages: [pre-commit, commit-msg]
+        exclude_types: [html]
+        args: [--ignore-words=.codespell.ignore]
+        additional_dependencies: [tomli] # needed to read pyproject.toml below py3.11
+        #exclude: src/pymatgen/analysis/aflow_prototypes.json
+
+  #- repo: https://github.com/adamchainz/blacken-docs
+  #  rev: 1.19.1
+  #  hooks:
+  #    - id: blacken-docs
+
+  #- repo: https://github.com/pycqa/flake8
+  #  rev: 7.1.0
+  #  hooks:
+  #  -   id: flake8
+  #  additional_dependencies: ['flake8-docstrings']
+
+  #- repo: https://github.com/igorshubovych/markdownlint-cli
+  #  rev: v0.45.0
+  #  hooks:
+  #    - id: markdownlint
+  #      # MD013: line too long
+  #      # MD024: Multiple headings with the same content
+  #      # MD033: no inline HTML
+  #      # MD041: first line in a file should be a top-level heading
+  #      # MD025: single title
+  #      args: [--disable, MD013, MD024, MD025, MD033, MD041, "--"]
+
+  #- repo: https://github.com/kynan/nbstripout
+  #  rev: 0.8.1
+  #  hooks:
+  #    - id: nbstripout
+  #      args: [--drop-empty-cells, --keep-output]
+
+  #- repo: https://github.com/RobertCraigie/pyright-python
+  #  rev: v1.1.401
+  #  hooks:
+  #    - id: pyright
+
+  #- repo: https://github.com/PyCQA/doc8
+  #  rev: 2.0.0
+  #  hooks:
+  #    - id: doc8
+  #      args: [--max-line-length=120]
+
+  #- repo: https://github.com/myint/rstcheck
+  #  #rev: 6.1.1  # Check for latest
+  #  hooks:
+  #    - id: rstcheck
+  #      name: rstcheck
+  #      entry: rstcheck
+  #      language: python
+  #      types: [text]
+  #      files: \.rst$
+
+  #- repo: https://github.com/rstcheck/rstcheck
+  #  rev: v6.2.5
+  #  hooks:
+  #    - id: rstcheck
+  #      additional_dependencies: ['rstcheck[sphinx,toml]']
+
+  #- repo: https://github.com/twolfson/restructuredtext-lint
+  #  #rev: v1.4.0
+  #  hooks:
+  #    - id: restructuredtext-lint
+  #      name: rst-lint
+  #      entry: rst-lint
+  #      language: python
+  #      types: [text]
+  #      files: \.rst$
+
+  #- repo: local
+  #  hooks:
+  #    - id: run-modified-tests
+  #      name: Run pytest on modified files
+  #      entry: python dev_scripts/run_tests_on_changed.py
+  #      language: python
+  #      files: \.py$
