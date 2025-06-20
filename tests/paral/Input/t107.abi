@@ -1,0 +1,100 @@
+# Testing CTQMC options
+#
+# == Convergency and starting
+# DATASET 1: LDA
+# DATASET 2: DMFT
+ndtset 2
+jdtset 1 2
+prtvol    4
+pawprtvol 3
+getden  -1
+
+##### CONVERGENCE PARAMETERS
+nstep1   30
+nstep2   2
+ecut      10
+pawecutdg 40
+tolvrs  1.0d-10
+nband     17
+occopt 3 tsmear 700 K
+diemix 0.1
+nline2 5
+nnsclo2 10
+fftalg 112
+
+##### PHYSICAL PARAMETERS
+natom 1 ntypat  1 typat  1
+znucl  58.0
+xred  0.d0   0.d0   0.d0
+acell   3*9.1274
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1/2 1/2 0.0
+
+# == Points k and symetries
+paral_kgb 0
+kptopt 4
+kptrlatt 4 0 0 0 4 0 0 0 4
+nshiftk 4
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+
+# == LDA+DMFT
+usedmft1 0
+usedmft2 1
+dmftbandi 5
+dmftbandf 17
+dmft_nwli 500
+dmft_iter 1
+
+# == CTQMC
+dmft_solv 7 # CTQMC
+dmftqmc_l 200
+dmftqmc_n 1.d6
+dmftqmc_therm 5000
+dmftctqmc_basis 2
+dmftctqmc_meas 10
+
+dmft_mxsf 0.1
+dmft_dc 8
+dmft_yukawa_param 2
+
+dmft_triqs_off_diag 0
+dmft_triqs_wmax 1.0
+dmft_triqs_loc_n_max 2
+
+# == DFT+U
+usepawu1    4
+usepawu     14
+dmatpuopt  1   # choose expression of the density matrix
+lpawu   3   # U on d-orbitals of Ni, no U on oxygen
+upawu1  0.00     # values in Hartree
+upawu2  6 eV     # values in Hartree
+jpawu  0.0000  # values in Hartree
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "58ce.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 4, 8
+#%% max_nprocs = 8
+#%% [NCPU_4]
+#%% files_to_test = t107_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t107_MPI4o_DS2_DMFTORBITAL_itypat0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t107_MPI4o_DS2_DMFTOVERLAP_iatom0001_isppol1, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t107_MPI4o_DS2_Gtau_diag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t107_MPI4o_DS2_Gtau_diag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%% [NCPU_8]
+#%% files_to_test = t107_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%% [extra_info]
+#%% authors = J. Bieder, B. Amadon, E. Castiel
+#%% keywords = DMFT, TRIQS
+#%% description = DFT+DMFT for Ce : test parallelism of TRIQS interface with self-consistency and off-diagonal elements in the cubic basis
+#%%<END TEST_INFO>

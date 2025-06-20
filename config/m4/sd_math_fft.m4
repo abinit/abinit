@@ -103,8 +103,8 @@ AC_DEFUN([SD_FFT_DETECT], [
           sd_fftw3_libs="${sd_fftw3_libs} -Mnvpl=fft"
         fi
         SD_FFTW3_DETECT
-        if test "${sd_fft_flavor}" = "fftw3-threads" -a "${sd_fftw3_threads_ok}" != "yes"; then
-          AC_MSG_ERROR([invalid FFT configuration
+         if test "${sd_fft_flavor}" = "fftw3-threads" -a "${sd_fftw3_threads_ok}" != "yes" -a "${sd_fftw3_enable}" = "yes"; then
+           AC_MSG_ERROR([invalid FFT configuration
                   Selected FFT flavor is fftw3-threads but FFTW3 implementation
                   does not provide multi-threading!
                   Check your environment.])
@@ -298,7 +298,7 @@ AC_DEFUN([_SD_FFT_DUMP_CONFIG], [
 # FIXME: compiler vendors should be managed by Steredeg
 # FIXME: linear algebra should be managed by Steredeg
 AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
-  AC_MSG_CHECKING([which FFT flavors to enable])
+  AC_MSG_CHECKING([which FFT flavors to enable for ${sd_linalg_flavor}])
 
   # Start from the internal implementation
   sd_fft_selected_flavors="goedecker"
@@ -315,7 +315,12 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
   # Prepend FFTW3 if available
   if test "${sd_fftw3_init}" != "" -a "${sd_fftw3_enable}" != "no"; then
     if test "${tmp_linalg_has_mkl}" = ""; then
-      sd_fft_selected_flavors="fftw3-threads fftw3 aocl AOCL nvpl ${sd_fft_selected_flavors}"
+      if test "${abi_openmp_enable}" = "yes"; then
+          sd_fft_selected_flavors="fftw3-threads fftw3 aocl AOCL nvpl ${sd_fft_selected_flavors}"
+      else
+    
+          sd_fft_selected_flavors="fftw3 aocl AOCL nvpl ${sd_fft_selected_flavors}"
+      fi
     fi
   fi
 
@@ -324,9 +329,9 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
     sd_fft_selected_flavors="dfti ${sd_fft_selected_flavors}"
   fi
 
-  AC_MSG_RESULT([${sd_fft_selected_flavors}])
-
+  AC_MSG_RESULT([ ${sd_fft_selected_flavors}])
   # Warn about incompatibilities
+  if test "${tmp_linalg_has_mkl}" != ""; then
   AC_MSG_WARN([MKL is incompatible with FFTW3
 
                     Please use DFTI instead and consult
@@ -336,6 +341,8 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
                     will abort. Otherwise, your FFTW3 settings will be ignored.
 
 ])
+  sd_fftw3_enable="no"
+  fi 
 
   # Clean-up the mess
   unset tmp_fft_has_fftw3

@@ -31,7 +31,7 @@ block
      do dat=1,ndat
        ug_ptr = 1 + (dat-1)*npw_k
        ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
-       call FFT_PREF(fftrisc) (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
+       call FFT_PREF_fftrisc (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
          gbound,gbound,istwf_k,kg_kin0,kg_k,mgfft,ngfft,npwin0,npw_k,ldx,ldy,ldz,option3,weight_r,weight_i)
      end do
    else
@@ -41,10 +41,10 @@ block
        ug_ptr = 1 + (dat-1)*npw_k
        ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
 #if FFT_PRECISION == FFT_DOUBLE
-       call FFT_PREF(fftrisc_mixprec) (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
+       call FFT_PREF_fftrisc_mixprec (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
          gbound,gbound,istwf_k,kg_kin0,kg_k,mgfft,ngfft,npwin0,npw_k,ldx,ldy,ldz,option3,weight_r,weight_i)
 #elif FFT_PRECISION == FFT_SINGLE
-       call FFT_PREF(fftrisc) (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
+       call FFT_PREF_fftrisc (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
          gbound,gbound,istwf_k,kg_kin0,kg_k,mgfft,ngfft,npwin0,npw_k,ldx,ldy,ldz,option3,weight_r,weight_i)
 #else
 #error "Wrong FFT precision"
@@ -59,10 +59,10 @@ block
 
    if (.not. SPAWN_THREADS_HERE(ndat,nthreads)) then
      ! Inplace ur --> ug 
-     call FFT_PREF(fftpad) (ur,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
+     call FFT_PREF_fftpad (ur,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
 
      ! Copy data in ug
-     call TK_PREF(box2gsph) (nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,ur,ug)
+     call TK_PREF_box2gsph (nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,ur,ug)
 
    else ! Spawn OMP threads here.
 
@@ -71,9 +71,9 @@ block
        gsp_pt = 1 + dist * npw_k * (dat-1)
        box_pt = 1 + dist * ldxyz * (dat-1)
 
-       call FFT_PREF(fftpad) (ur(box_pt:),nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gbound)
+       call FFT_PREF_fftpad (ur(box_pt:),nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gbound)
 
-       call TK_PREF(box2gsph) (nx,ny,nz,ldx,ldy,ldz,ndat1,npw_k,kg_k,ur(box_pt:),ug(gsp_pt:))
+       call TK_PREF_box2gsph (nx,ny,nz,ldx,ldy,ldz,ndat1,npw_k,kg_k,ur(box_pt:),ug(gsp_pt:))
      end do
    end if
  end if

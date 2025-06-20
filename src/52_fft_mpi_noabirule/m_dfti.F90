@@ -31,7 +31,13 @@
 
 ! Macros for template files.
 #define FFTLIB "DFTI"
-#define FFT_PREF(name) CONCAT(dfti_,name)
+#define FFT_PREF_fftrisc dfti_fftrisc
+#define FFT_PREF_fftrisc_mixprec dfti_fftrisc_mixprec
+#define FFT_PREF_fftpad dfti_fftpad
+#define FFT_PREF_fftug_dp dfti_fftug_dp
+#define FFT_PREF_fftur_dp dfti_fftur_dp
+#define FFT_PREF_fftug dfti_fftug
+#define FFT_PREF_fftur dfti_fftur
 #define SPAWN_THREADS_HERE(ndat, nthreads) dfti_spawn_threads_here(ndat, nthreads)
 
 #define FFT_DOUBLE 1
@@ -867,6 +873,10 @@ subroutine dfti_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nda
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
+#undef TK_PREF_box2gsph 
+#define TK_PREF_box2gsph cg_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cg_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -943,6 +953,10 @@ subroutine dfti_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph 
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_SINGLE
@@ -1020,6 +1034,10 @@ subroutine dfti_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph 
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1099,6 +1117,10 @@ subroutine dfti_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nda
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
+#undef TK_PREF_box2gsph 
+#define TK_PREF_box2gsph cg_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cg_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1180,6 +1202,10 @@ subroutine dfti_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph 
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_SINGLE
@@ -1260,6 +1286,10 @@ subroutine dfti_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph 
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
