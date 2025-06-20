@@ -39,8 +39,6 @@ repos:
         stages: [pre-commit, commit-msg]
         exclude_types: [html]
         args: [--ignore-words=.codespell.ignore]
-        #additional_dependencies: [tomli] # needed to read pyproject.toml below py3.11
-        #exclude: src/pymatgen/analysis/aflow_prototypes.json
 
   #- repo: https://github.com/adamchainz/blacken-docs
   #  rev: 1.19.1
