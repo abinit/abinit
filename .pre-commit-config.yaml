@@ -75,10 +75,53 @@ repos:
   #    - id: doc8
   #      args: [--max-line-length=120]
 
-  #- repo: local
-  #  hooks:
-  #    - id: run-modified-tests
-  #      name: Run pytest on modified files
-  #      entry: python dev_scripts/run_tests_on_changed.py
-  #      language: python
-  #      files: \.py$
+  - repo: local
+    hooks:
+      - id: check-build-config
+        name: Run check-build-config
+        entry: python abichecks/scripts/check-build-config.py
+        language: python
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-config-h.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-forbidden-flags.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check_ascii.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/warningschk.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/abirules_tools.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-build-examples.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-conflict-markers.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-libpaw.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check_forbidden.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-binaries-conf.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-build-refs.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-cpp-options.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check-line-lengths.py
+      #- id: run-modified-tests
+      #  name: Run pytest on modified files
+      #  entry: python abichecks/scripts/check_inlined_macros.py
