@@ -105,6 +105,28 @@ AC_DEFUN([SD_NETCDF_INIT], [
     fi
   fi
 
+     # if mode is def and pkg_config exists and no prefix -> use pkg_config
+     #
+     if test "${sd_netcdf_enable}" = "yes" -a \( "${sd_netcdf_init}" = "def" -o "${sd_netcdf_init}" = "yon" \) -a "${sd_netcdf_prefix}" = ""; then
+        #check if PKG_CONFIG exists (if not keep default mode)
+        AC_MSG_NOTICE([setting for ${sd_netcdf_init} potential move to pkg])
+        AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+ 
+        AC_MSG_NOTICE([setting for ${sd_netcdf_init} potential move to pkg, PKG=${PKG_CONFIG}])
+        if test "$PKG_CONFIG" != "no"; then
+           AC_MSG_CHECKING([for netcdf via pkg-config])
+            AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+            if "$PKG_CONFIG" --exists netcdf; then
+                  AC_MSG_RESULT([yes])
+                  #sd_netcdf_init="pkg"
+           else
+                  AC_MSG_RESULT([no])
+                  sd_netcdf_init="def"
+           fi
+        fi
+     fi
+
+
   # Make sure configuration is correct
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_NETCDF_CHECK_CONFIG
@@ -148,6 +170,18 @@ AC_DEFUN([SD_NETCDF_INIT], [
         test ! -z "${NETCDF_FCFLAGS}" && sd_netcdf_fcflags="${NETCDF_FCFLAGS}"
         test ! -z "${NETCDF_LDFLAGS}" && sd_netcdf_ldflags="${NETCDF_LDFLAGS}"
         test ! -z "${NETCDF_LIBS}" && sd_netcdf_libs="${NETCDF_LIBS}"
+        ;;
+
+      pkg)
+        TMP_netcdf_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf`
+        TMP_netcdf_FFFLAGS="${TMP_netcdf_CPPFLAGS}"
+        TMP_netcdf_LIBS=`$PKG_CONFIG --libs  --keep-system-libs netcdf`
+        sd_netcdf_cppflags="${TMP_netcdf_CPPFLAGS} "
+        sd_netcdf_cflags="${TMP_netcdf_CPPFLAGS}"
+        sd_netcdf_cxxflags="${TMP_netcdf_CPPFLAGS}"
+        sd_netcdf_fcflags="${TMP_netcdf_FFLAGS}"
+        sd_netcdf_ldflags="${TMP_netcdf_LIBS}"
+        sd_netcdf_libs="${TMP_netcdf_LIBS}"
         ;;
 
       *)

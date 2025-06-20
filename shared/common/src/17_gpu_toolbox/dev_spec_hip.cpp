@@ -1,7 +1,7 @@
 /* dev_spec_hip.cpp*/
 
 /*
- * Copyright (C) 2008-2024 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.
@@ -14,6 +14,10 @@
 #include "hip_api_error_check.h"
 
 static int version_2_cores(int major, int minor);
+
+// Static variable to keep track of the amound of MPI tasks assigned per GPU.
+// Used mainly to assert GPU memory usage.
+static int s__nprocs_per_gpu = 1;
 
 /*=========================================================================*/
 /*________________________ GPU_function called by HOST_____________________*/
@@ -34,12 +38,15 @@ static void  prt_dev_info()
       printf("\n  Device %d: \"%s\"\n", dev, deviceProp.name);
       printf("  Revision number:                               %d.%d\n", deviceProp.major,deviceProp.minor);
       printf("  Total amount of global memory:                 %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576.);
+      if(s__nprocs_per_gpu > 1) {
+        printf("  Amount of global memory per MPI task:          %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576./s__nprocs_per_gpu);
+      }
       printf("  Clock rate:                                    %3.1f GHz\n", deviceProp.clockRate/1000000.);
       printf("  Number of processors/cores:                    %d/%d\n", NProcs,NCores);
       if (NCores<0) {
-        printf("  Max GFLOPS:                                    undefined (add new def. in version_2_cores function)\n");
+        //printf("  Max FP64 GFLOPS:                                    undefined (add new def. in version_2_cores function)\n");
       } else {
-        printf("  Max GFLOPS:                                    %d GFP\n", NCores*deviceProp.multiProcessorCount * deviceProp.clockRate/1000000);
+        printf("  Max FP64 GFLOPS:                                    %d GFP\n", NCores*deviceProp.multiProcessorCount * deviceProp.clockRate/1000000);
       }
       printf("  Total amount of constant memory:               %d bytes\n",(int) deviceProp.totalConstMem);
       printf("  Total amount of shared memory per block:       %d bytes\n",(int) deviceProp.sharedMemPerBlock);
@@ -87,12 +94,39 @@ void get_gpu_max_mem_(int* device, float* max_mem)
    return;
 }
 
+// Gives the max memory available for a GPU device ---------
+extern "C"
+void get_gpu_uuid_(int* device, char* uuid)
+{
+   hipDeviceProp_t deviceProp;
+   HIP_API_CHECK(hipGetDeviceProperties(&deviceProp, *device));
+   strncpy(uuid, deviceProp.uuid.bytes, 16);
+   return;
+}
+
+// Set new value for #MPI tasks being assigned per GPU ---------
+extern "C"
+void gpu_set_nprocs_per_gpu_(int* nprocs_per_gpu)
+{
+   s__nprocs_per_gpu=*nprocs_per_gpu;
+   return;
+}
+
+// Get current value for #MPI tasks being assigned per GPU ---------
+extern "C"
+void gpu_get_nprocs_per_gpu_(int* nprocs_per_gpu)
+{
+   *nprocs_per_gpu=s__nprocs_per_gpu;
+   return;
+}
+
 // Gives max available memory available for current GPU device ---------
 extern "C"
 void gpu_get_max_mem_cpp(size_t* max_mem)
 {
    size_t free_mem;
    HIP_API_CHECK(hipMemGetInfo(&free_mem, max_mem));
+   *max_mem/=s__nprocs_per_gpu;
    return;
 }
 
@@ -102,6 +136,7 @@ void gpu_get_free_mem_cpp(size_t* free_mem)
 {
    size_t max_mem;
    HIP_API_CHECK(hipMemGetInfo(free_mem, &max_mem));
+   *free_mem/=s__nprocs_per_gpu;
    return;
 }
 
@@ -207,7 +242,8 @@ void  get_dev_info_(int* device,
 		    int* sharemem,
 		    int* regist,
 		    int* nprocs,
-		    int* ncores
+		    int* ncores,
+		    char* uuid
 		    )
 {
   hipDeviceProp_t deviceProp;
@@ -224,6 +260,7 @@ void  get_dev_info_(int* device,
   *constmem = deviceProp.totalConstMem;
   *sharemem =  deviceProp.sharedMemPerBlock;
   *regist = deviceProp.regsPerBlock;
+  strncpy(uuid,deviceProp.uuid.bytes,16);
 }
 
 
@@ -251,8 +288,12 @@ void c_get_ndevice_(int* ndev)
 
 
 // Get number of cores of device  --------------
-//This function is present in hip SDK: see ${HIPROOT}/common/inc/helper_hip_drvapi.h
-//To be completed for new card versions
+//This is for matching the way we do with CUDA, but we can't do the same for old AMD GPU.
+//All server grade GPUs prior Instinct MI300 series share the same GFXIP version value and
+//and feature different amounts of FPU per Compute Unit.
+//Therefore, the only models for which we can reliably provide accurate values are
+//Instinct MI300 onwards and consumer grade Radeon GPUs.
+//Computed from advertised FLOPS values.
 static
 int version_2_cores(int major, int minor)
 {
@@ -260,43 +301,32 @@ int version_2_cores(int major, int minor)
     typedef struct
     {
         int SM; // 0xMm (hexidecimal notation), M = SM Major version, and m = SM minor version
-        int Cores;
+        int Cores_fp32; // Number of cores~ALU running 32bits floating point operations (FP32)
+        int Cores_fp64; // Number of cores~ALU running 32bits floating point operations (FP64)
     } sSMtoCores;
     sSMtoCores nGpuArchCoresPerSM[] =
     {
-        { 0x10,  8 }, // Tesla Generation (SM 1.0) G80 class
-        { 0x11,  8 }, // Tesla Generation (SM 1.1) G8x class
-        { 0x12,  8 }, // Tesla Generation (SM 1.2) G9x class
-        { 0x13,  8 }, // Tesla Generation (SM 1.3) GT200 class
-        { 0x20, 32 }, // Fermi Generation (SM 2.0) GF100 class
-        { 0x21, 48 }, // Fermi Generation (SM 2.1) GF10x class
-        { 0x30, 192}, // Kepler Generation (SM 3.0) GK10x class
-        { 0x32, 192}, // Kepler Generation (SM 3.2) GK10x class
-        { 0x35, 192}, // Kepler Generation (SM 3.5) GK11x class
-        { 0x50, 128}, // Maxwell Generation (SM 5.0) GM10x class
-        { 0x60, 64 }, // Pascal Generation (SM 6.0) GP100 class
-        { 0x61, 128}, // Pascal Generation (SM 6.1) GP10x class
-        { 0x62, 128}, // Pascal Generation (SM 6.2) GP10x class
-        { 0x70, 64 }, // Volta Generation (SM 7.0) GV100 class
-        { 0x72, 64 }, // Volta Generation (SM 7.2) AGX class
-        { 0x75, 64 }, // Turing Generation (SM 7.5) RTX class
-        { 0x80, 64 }, // Ampere Generation (SM 8.0) A100 class
-        { 0x86, 128}, // Ampere Generation (SM 8.6)
-        { 0x87, 128}, // Ampere Generation (SM 8.7)
-        {   -1, -1 }
+        { 0x80, -1, -1 },  // Instinct MI6 -> MI8 (GFXIP 8.0)
+        { 0x90, -1, -1},   // Radeon VII, Instinct MI25 -> MI250 (GFXIP 9.0)
+        { 0x94, 256, 128}, // Instinct MI300 (GFXIP 9.4)
+        { 0xa1, 128, 8},   // Radeon W5000 (GFXIP 10.1)
+        { 0xa3, 128, 8},   // Radeon 6000 (GFXIP 10.3)
+        { 0xb0, 256, 4},   // Radeon 7000 (GFXIP 11.0)
+        { 0xc0, 256, 4},   // Radeon 9000 (GFXIP 12.0)
+        {   -1, -1, -1 }
     };
     int index = 0;
     while (nGpuArchCoresPerSM[index].SM != -1)
     {
         if (nGpuArchCoresPerSM[index].SM == ((major << 4) + minor))
         {
-            return nGpuArchCoresPerSM[index].Cores;
+            return nGpuArchCoresPerSM[index].Cores_fp64;
         }
         index++;
     }
 
 //  printf("MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n", major, minor, nGpuArchCoresPerSM[7].Cores);
-    return nGpuArchCoresPerSM[10].Cores;
+    return nGpuArchCoresPerSM[5].Cores_fp64;
 }
 
 

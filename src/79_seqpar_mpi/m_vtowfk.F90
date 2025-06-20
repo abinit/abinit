@@ -230,7 +230,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp) :: max_resid,weight,cpu,wall,gflops
  character(len=50) :: iter_name
  character(len=500) :: msg
- real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
+ real(dp) :: dummy(2,1),nonlop_dum(1,1),nonlop_dum2(1,1),tsec(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -805,7 +805,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    blksize_gemm_nonlop_tmp = gemm_nonlop_block_size; is_distrib_tmp = gemm_nonlop_is_distributed
    gemm_nonlop_block_size = dtset%gpu_nl_splitsize
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
-   &                        dtset%nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+   &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
    &                        optforces,0,-1,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
    &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
    gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
@@ -815,10 +815,30 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+
 !Loop over bands or blocks of bands. Note that in sequential mode iblock=iband, nblockbd=nband_k and blocksize=1
  do iblock=1,nblockbd
    occblock=maxval(occ_k(1+(iblock-1)*blocksize:iblock*blocksize))
-   cwavef(:,:)=cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
+   !cwavef(:,:)=cg(:,1+(iblock-1)*npw_k*my_nspinor*blocksize+icg:iblock*npw_k*my_nspinor*blocksize+icg)
+   if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cg_k,cwavef) PRIVATE(iblocksize)
+     do iblocksize=1,blocksize*my_nspinor
+       !$OMP PARALLEL DO PRIVATE(ipw)
+       do ipw=1,npw_k
+         cwavef(1,ipw+(iblocksize-1)*npw_k)=cg_k(1,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+         cwavef(2,ipw+(iblocksize-1)*npw_k)=cg_k(2,ipw+(iblocksize-1)*npw_k+(iblock-1)*npw_k*blocksize*my_nspinor)
+       end do
+     end do
+#endif
+   else
+     call DCOPY(2*npw_k*my_nspinor*blocksize, &
+     &    cg_k(:,1+(iblock-1)*npw_k*my_nspinor*blocksize:iblock*npw_k*my_nspinor*blocksize), 1, &
+     &    cwavef, 1)
+   end if
 
 !  Compute kinetic energy of each band
    do iblocksize=1,blocksize
@@ -881,11 +901,28 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            &    gpu_option=dtset%gpu_option)
          else if(dtset%nspinor==2) then
            ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
-           ibs=(iblock-1)*npw_k*my_nspinor*blocksize+icg
-           do iband=1,blocksize
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,1)=cg(:,1+(2*iband-2)*npw_k+ibs:(iband*2-1)*npw_k+ibs)
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,2)=cg(:,1+(2*iband-1)*npw_k+ibs:iband*2*npw_k+ibs)
-           end do
+           ibs=(iblock-1)*npw_k*my_nspinor*blocksize
+           if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavefb)
+             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb,cwavef) PRIVATE(iband)
+             do iband=1,blocksize
+               !$OMP PARALLEL DO PRIVATE(ipw)
+               do ipw=1,npw_k
+                 cwavefb(1,(iband-1)*npw_k+ipw,1)=cwavef(1,ipw+(2*iband-2)*npw_k)
+                 cwavefb(2,(iband-1)*npw_k+ipw,1)=cwavef(2,ipw+(2*iband-2)*npw_k)
+
+                 cwavefb(1,(iband-1)*npw_k+ipw,2)=cwavef(1,ipw+(2*iband-1)*npw_k)
+                 cwavefb(2,(iband-1)*npw_k+ipw,2)=cwavef(2,ipw+(2*iband-1)*npw_k)
+               end do
+             end do
+#endif
+           else
+             do iband=1,blocksize
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,1)=cwavef(:,1+(2*iband-2)*npw_k:(iband*2-1)*npw_k)
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,2)=cwavef(:,1+(2*iband-1)*npw_k:iband*2*npw_k)
+             end do
+           end if
 
            call fourwf(1,rhoaug(:,:,:,1),cwavefb(:,:,1),dummy,wfraug,&
            &    gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
@@ -908,11 +945,29 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
              ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
 
-             !$(\Psi^{1}+\Psi^{2})$
-             cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,1:npw_k*blocksize,2)
-             !$(\Psi^{1}-i \Psi^{2})$
-             cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,1:npw_k*blocksize,2)
-             cwavef_y(2,:)=cwavefb(2,1:npw_k*blocksize,1)-cwavefb(1,1:npw_k*blocksize,2)
+             if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+               !$OMP TARGET ENTER DATA MAP(alloc:cwavef_x,cwavef_y)
+               !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavef_x,cwavef_y,cwavefb) PRIVATE(iband)
+               do iband=1,blocksize
+                 !$OMP PARALLEL DO PRIVATE(ipw)
+                 do ipw=1,npw_k
+                   !$(\Psi^{1}+\Psi^{2})$
+                   cwavef_x(1,(iband-1)*npw_k+ipw)=cwavefb(1,(iband-1)*npw_k+ipw,1)+cwavefb(1,(iband-1)*npw_k+ipw,2)
+                   cwavef_x(2,(iband-1)*npw_k+ipw)=cwavefb(2,(iband-1)*npw_k+ipw,1)+cwavefb(2,(iband-1)*npw_k+ipw,2)
+                   !$(\Psi^{1}-i \Psi^{2})$
+                   cwavef_y(1,(iband-1)*npw_k+ipw)=cwavefb(1,(iband-1)*npw_k+ipw,1)+cwavefb(2,(iband-1)*npw_k+ipw,2)
+                   cwavef_y(2,(iband-1)*npw_k+ipw)=cwavefb(2,(iband-1)*npw_k+ipw,1)-cwavefb(1,(iband-1)*npw_k+ipw,2)
+                 end do
+               end do
+#endif
+             else
+               !$(\Psi^{1}+\Psi^{2})$
+               cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,1:npw_k*blocksize,2)
+               !$(\Psi^{1}-i \Psi^{2})$
+               cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,1:npw_k*blocksize,2)
+               cwavef_y(2,:)=cwavefb(2,1:npw_k*blocksize,1)-cwavefb(1,1:npw_k*blocksize,2)
+             end if
 
              ! z component
              call fourwf(1,rhoaug(:,:,:,4),cwavefb(:,:,2),dummy,wfraug,&
@@ -935,10 +990,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              &    npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
              &    weight_array_r=weight_t,weight_array_i=weight_t,&
              &    gpu_option=dtset%gpu_option)
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET EXIT DATA MAP(delete:cwavef_x,cwavef_y) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
              ABI_FREE(cwavef_x)
              ABI_FREE(cwavef_y)
            end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET EXIT DATA MAP(delete:cwavefb) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
            ABI_FREE(cwavefb)
          end if
 
@@ -1026,22 +1087,43 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          call timab(537,2,tsec)
        else if (dtset%nspinor==2) then
          ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
-         ibs=(iblock-1)*npw_k*my_nspinor*blocksize+icg
-!        --- No parallelization over spinors ---
-         if (mpi_enreg%paral_spinor==0) then
-           do iband=1,blocksize
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,1)=cg(:,1+(2*iband-2)*npw_k+ibs:(iband*2-1)*npw_k+ibs)
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,2)=cg(:,1+(2*iband-1)*npw_k+ibs:iband*2*npw_k+ibs)
-           end do
+         if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+!          --- No parallelization over spinors ---
+           if (mpi_enreg%paral_spinor==0) then
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavefb)
+             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavefb,cwavef) PRIVATE(iband)
+             do iband=1,blocksize
+               !$OMP PARALLEL DO PRIVATE(ipw)
+               do ipw=1,npw_k
+                 cwavefb(1,(iband-1)*npw_k+ipw,1)=cwavef(1,ipw+(2*iband-2)*npw_k)
+                 cwavefb(2,(iband-1)*npw_k+ipw,1)=cwavef(2,ipw+(2*iband-2)*npw_k)
+
+                 cwavefb(1,(iband-1)*npw_k+ipw,2)=cwavef(1,ipw+(2*iband-1)*npw_k)
+                 cwavefb(2,(iband-1)*npw_k+ipw,2)=cwavef(2,ipw+(2*iband-1)*npw_k)
+               end do
+             end do
+#endif
+           else
+             ABI_BUG("Parallelisation on spinor isn't supported with OpenMP GPU")
+           end if
          else
-!          --- Parallelization over spinors ---
-!          (split the work between 2 procs)
-           cwavefb(:,:,3-ispinor_index)=zero
-           do iband=1,blocksize
-             cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,ispinor_index) = cg(:,1+(iband-1)*npw_k+ibs:iband*npw_k+ibs)
-           end do
-           call xmpi_sum(cwavefb,mpi_enreg%comm_spinor,ierr)
-         end if
+!          --- No parallelization over spinors ---
+           if (mpi_enreg%paral_spinor==0) then
+             do iband=1,blocksize
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,1)=cwavef(:,1+(2*iband-2)*npw_k:(iband*2-1)*npw_k)
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,2)=cwavef(:,1+(2*iband-1)*npw_k:iband*2*npw_k)
+             end do
+           else
+!            --- Parallelization over spinors ---
+!            (split the work between 2 procs)
+             cwavefb(:,:,3-ispinor_index)=zero
+             do iband=1,blocksize
+               cwavefb(:,(iband-1)*npw_k+1:iband*npw_k,ispinor_index) = cwavef(:,1+(iband-1)*npw_k:iband*npw_k)
+             end do
+             call xmpi_sum(cwavefb,mpi_enreg%comm_spinor,ierr)
+           end if
+         end if !gpu_option
 
          call timab(537,1,tsec) !"prep_fourwf%vtow"
          if (nspinor1TreatedByThisProc) then
@@ -1060,9 +1142,27 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          else if(dtset%nspden==4) then
            ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
            ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
-           cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,:,2)
-           cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,:,2)
-           cwavef_y(2,:)=cwavefb(2,:,1)-cwavefb(1,:,2)
+           if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET ENTER DATA MAP(alloc:cwavef_x,cwavef_y)
+             !$OMP TARGET TEAMS DISTRIBUTE MAP(to:cwavef_x,cwavef_y,cwavefb) PRIVATE(iband)
+             do iband=1,blocksize
+               !$OMP PARALLEL DO PRIVATE(ipw)
+               do ipw=1,npw_k
+                 !$(\Psi^{1}+\Psi^{2})$
+                 cwavef_x(1,(iband-1)*npw_k+ipw)=cwavefb(1,(iband-1)*npw_k+ipw,1)+cwavefb(1,(iband-1)*npw_k+ipw,2)
+                 cwavef_x(2,(iband-1)*npw_k+ipw)=cwavefb(2,(iband-1)*npw_k+ipw,1)+cwavefb(2,(iband-1)*npw_k+ipw,2)
+                 !$(\Psi^{1}-i \Psi^{2})$
+                 cwavef_y(1,(iband-1)*npw_k+ipw)=cwavefb(1,(iband-1)*npw_k+ipw,1)+cwavefb(2,(iband-1)*npw_k+ipw,2)
+                 cwavef_y(2,(iband-1)*npw_k+ipw)=cwavefb(2,(iband-1)*npw_k+ipw,1)-cwavefb(1,(iband-1)*npw_k+ipw,2)
+               end do
+             end do
+#endif
+           else
+             cwavef_x(:,:)=cwavefb(:,1:npw_k*blocksize,1)+cwavefb(:,:,2)
+             cwavef_y(1,:)=cwavefb(1,1:npw_k*blocksize,1)+cwavefb(2,:,2)
+             cwavef_y(2,:)=cwavefb(2,:,1)-cwavefb(1,:,2)
+           end if
            if (nspinor1TreatedByThisProc) then
              call prep_fourwf(rhoaug(:,:,:,4),blocksize,cwavefb(:,:,2),wfraug,&
 &             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
@@ -1079,10 +1179,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
 &             gpu_option=dtset%gpu_option)
            end if
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET EXIT DATA MAP(delete:cwavef_x,cwavef_y) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
            ABI_FREE(cwavef_x)
            ABI_FREE(cwavef_y)
          end if
          call timab(537,2,tsec)
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET EXIT DATA MAP(delete:cwavefb) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
          ABI_FREE(cwavefb)
        end if
      end if
@@ -1102,7 +1208,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        cwaveprj => cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg)
        call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k_block,&
 &       mpi_enreg,blocksize,nnlout,&
-&       paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
+&       paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,nonlop_dum2)
 !      Acccumulate forces
        iband=(iblock-1)*blocksize
        do iblocksize=1,blocksize
@@ -1133,7 +1239,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                call timab(572,1,tsec) ! 'prep_nonlop%vtowfk'
                call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir, &
   &             eig_k_block,blocksize,&
-  &             mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,already_transposed=.false.)
+  &             mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,nonlop_dum2,already_transposed=.false.)
                call timab(572,2,tsec)
              else
                call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k_block,&
@@ -1205,6 +1311,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
 
  ! restore safe value related to GEMM nonlop slicing and GPU in case of forces compute
  if(optforces==1 .and. gpu_option_tmp==ABI_GPU_OPENMP) then
