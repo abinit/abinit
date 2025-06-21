@@ -1619,6 +1619,9 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
    end if
  end do ! isym
 
+ paw_dmft%nsym = cryst_struc%nsym ! very important to update it here
+ nsym = paw_dmft%nsym
+
  ! TODO: this really should be done in init_sc_dmft
  paw_dmft%indsym => cryst_struc%indsym(4,1:nsym,1:paw_dmft%natom)
  if (paw_dmft%nspinor == 2) then
