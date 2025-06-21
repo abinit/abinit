@@ -128,7 +128,7 @@ Other options available, see:
         (High-performance data management and storage suite)
 
       - [NetCDF](https://www.unidata.ucar.edu/software/netcdf/)
-        (Network Common Data Form) 
+        (Network Common Data Form)
       - [libXC](https://tddft.org/programs/libxc/download/) (library of exchange-correlation functionals)
 
 5. A MPI library installed (if you want to benefit from parallelism; recommended).
@@ -141,7 +141,7 @@ Other options available, see:
    By default the `accelerate` Framework is installed on macOS and the ABINIT build system should find it.
    But you might want to install a parallel library: `scalapack`, `atlas`, `mkl`, etc.
    If ABINIT is linked with the accelerate library, make sure the code is configured with
-   `--enable-zdot-bugfix="yes"`. 
+   `--enable-zdot-bugfix="yes"`.
    Use `otool -L abinit` to print the shared libraries required by the program.
 
 ### Installing ABINIT from source
@@ -182,12 +182,12 @@ Remember that on MacOs, the environment variant LD_LIBRARY_PATH should be replac
 
 We give an example of using ABINIT sources (to get the latest ABINIT version) combined with the ease of installation of Macports.
 Indeed, the libraries (mandatory or optional) used by ABINIT are available from the MacPorts project.
-The procedure has been tested with Mac OS X v11.5 (Big Sur) 
+The procedure has been tested with Mac OS X v11.5 (Big Sur)
 
 Start with the prerequisite of the macports approach, as explained in the section [using macports](#using-macports). Then,
 install the libraries needed by ABINIT. There are different choices for the linear algebra and mpi,
 as mentioned in the section [Compiling from source](#compiling-from-source-under-macos). Focusing on the choice
-of OpenBLAS and openmpi, and supposing that GNU compiler version 11 is to be used, one might issue 
+of OpenBLAS and openmpi, and supposing that GNU compiler version 11 is to be used, one might issue
 
      sudo port install gcc11
      sudo port install OpenBLAS +gcc11+fortran
@@ -196,8 +196,8 @@ of OpenBLAS and openmpi, and supposing that GNU compiler version 11 is to be use
      sudo port install fftw-3-single +gfortran
      sudo port install fftw-3-long +gfortran
      sudo port install hdf5 +cxx+gcc11+hl+openmpi
-     sudo port install netcdf +cdf5+dap+x+gcc11+netcdf4+openmpi 
-     sudo port install netcdf-fortran +gcc11+openmpi 
+     sudo port install netcdf +cdf5+dap+x+gcc11+netcdf4+openmpi
+     sudo port install netcdf-fortran +gcc11+openmpi
      sudo port install libxc4 +gcc11
 
 and optionally
@@ -219,7 +219,7 @@ To do this, use
     sudo xcode-select --install
 
 You might have to accept the licence on the screen. Also, possibly first using
- 
+
     sudo xcodebuild -license
 
 
