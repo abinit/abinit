@@ -1532,7 +1532,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp) :: tsec(2)
  real(dp),allocatable :: magngx(:,:),magngy(:,:),magngz(:,:)
  real(dp),allocatable :: rhosu1_arr(:),rhosu2_arr(:),work(:)
- real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:),tnons_used(:,:)
+ real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:),tnons_used(:,:),sym_det(:)
 
 !*************************************************************************
 !
@@ -1735,6 +1735,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
        ABI_MALLOC(symrel_cart,(3,3,nsym_used))
        ABI_MALLOC(symafm_used,(nsym_used))
        ABI_MALLOC(tnons_used,(3,nsym_used))
+       ABI_MALLOC(sym_det,(nsym_used))
        jsym=0
        do isym=1,nsym
          if (symafm(isym)/=1.and.(.not.afm_noncoll)) cycle
@@ -1743,6 +1744,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
          symafm_used(jsym)=dble(symafm(isym))
          call symredcart(rprimd,gprimd,symrel_cart(:,:,jsym),symrel(:,:,isym))
          call matr3inv(symrel_cart(:,:,jsym),symrec_cart(:,:,jsym))
+         sym_det(jsym) = symrel_cart(1,1,isym)*symrel_cart(2,2,isym)*symrel_cart(3,3,isym)+&
+                   &     symrel_cart(2,1,isym)*symrel_cart(3,2,isym)*symrel_cart(1,3,isym)+&
+                   &     symrel_cart(1,2,isym)*symrel_cart(2,3,isym)*symrel_cart(3,1,isym) - &
+                   &    (symrel_cart(3,1,isym)*symrel_cart(2,2,isym)*symrel_cart(1,3,isym)+&
+                   &     symrel_cart(2,1,isym)*symrel_cart(1,2,isym)*symrel_cart(3,3,isym)+&
+                   &     symrel_cart(3,2,isym)*symrel_cart(2,3,isym)*symrel_cart(1,1,isym))
        end do
 
        numpt=count(irrzon(:,1,imagn)>0)
@@ -1814,12 +1821,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            The magnetization should transform as a vector in real space
 !            However, one acts with the INVERSE of the symmetry operation.
 !            => Inverse[symrel_cart] = Transpose[symrel_cart] because symrel_cart is unitary   ?!?!?
-             mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
-             mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy)
-             myr=symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy)
-             myi=symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy)
-             mzr=symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
-             mzi=symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
+             mxr=sym_det(jsym)*(symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy))
+             mxi=sym_det(jsym)*(symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy))
+             myr=sym_det(jsym)*(symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy))
+             myi=sym_det(jsym)*(symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy))
+             mzr=sym_det(jsym)*(symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy))
+             mzi=sym_det(jsym)*(symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy))
 
 !            mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(2,1,jsym)*magngy(1,indsy)+symrel_cart(3,1,jsym)*magngz(1,indsy)
 !            mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(2,1,jsym)*magngy(2,indsy)+symrel_cart(3,1,jsym)*magngz(2,indsy)
@@ -1894,12 +1901,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
 !            The magnetization should transform as a vector in real space
 !            => symrel_cart  ?!?
-             mxr=symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1
-             mxi=symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2
-             myr=symrec_cart(1,2,jsym)*magxsu1+symrec_cart(2,2,jsym)*magysu1+symrec_cart(3,2,jsym)*magzsu1
-             myi=symrec_cart(1,2,jsym)*magxsu2+symrec_cart(2,2,jsym)*magysu2+symrec_cart(3,2,jsym)*magzsu2
-             mzr=symrec_cart(1,3,jsym)*magxsu1+symrec_cart(2,3,jsym)*magysu1+symrec_cart(3,3,jsym)*magzsu1
-             mzi=symrec_cart(1,3,jsym)*magxsu2+symrec_cart(2,3,jsym)*magysu2+symrec_cart(3,3,jsym)*magzsu2
+             mxr=sym_det(jsym)*(symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1)
+             mxi=sym_det(jsym)*(symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2)
+             myr=sym_det(jsym)*(symrec_cart(1,2,jsym)*magxsu1+symrec_cart(2,2,jsym)*magysu1+symrec_cart(3,2,jsym)*magzsu1)
+             myi=sym_det(jsym)*(symrec_cart(1,2,jsym)*magxsu2+symrec_cart(2,2,jsym)*magysu2+symrec_cart(3,2,jsym)*magzsu2)
+             mzr=sym_det(jsym)*(symrec_cart(1,3,jsym)*magxsu1+symrec_cart(2,3,jsym)*magysu1+symrec_cart(3,3,jsym)*magzsu1)
+             mzi=sym_det(jsym)*(symrec_cart(1,3,jsym)*magxsu2+symrec_cart(2,3,jsym)*magysu2+symrec_cart(3,3,jsym)*magzsu2)
 !            mxr=symrel_cart(1,1,jsym)*magxsu1+symrel_cart(1,2,jsym)*magysu1+symrel_cart(1,3,jsym)*magzsu1
 !            mxi=symrel_cart(1,1,jsym)*magxsu2+symrel_cart(1,2,jsym)*magysu2+symrel_cart(1,3,jsym)*magzsu2
 !            myr=symrel_cart(2,1,jsym)*magxsu1+symrel_cart(2,2,jsym)*magysu1+symrel_cart(2,3,jsym)*magzsu1
@@ -1921,6 +1928,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
        ABI_FREE(rhosu2_arr)
        ABI_FREE(symrec_cart)
        ABI_FREE(symrel_cart)
+       ABI_FREE(sym_det)
        ABI_FREE(symafm_used)
        ABI_FREE(tnons_used)
 
