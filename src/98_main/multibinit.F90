@@ -187,7 +187,7 @@ program multibinit
 &   ('=',ii=1,80),ch10,ch10,&
 &   '+Total cpu time',tsec(1),&
 &   '  and wall time',tsec(2),' sec',ch10,ch10,&
-&   ' multibinit : the run completed succesfully.'
+&   ' multibinit : the run completed successfully.'
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
