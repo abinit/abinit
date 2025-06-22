@@ -8,7 +8,6 @@ block
 !arrays
  integer :: ngfft(18),kg_kin0(3,0)
  real(dp) :: denpot(0,0,0)
-
 ! *************************************************************************
 
  ldxyz = ldx*ldy*ldz
