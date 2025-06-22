@@ -140,7 +140,7 @@
 
  The interatomic forces have been obtained
  Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere.
- Maximum nuber of atom-centered spheres: 6150
+ Maximum number of atom-centered spheres: 6150
  Using Lebedev-Laikov grid with npts: 434, qrad: 0.010
 
  <adiff>: Average difference between ab-initio frequencies and frequencies with cutoff.
