@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h13 )
-  
+
 
 ================================================================================
 
@@ -65,8 +65,8 @@ Elphon: extra electrons per unit cell =     0.100000E+00
                      5.00000000E-01  0.00000000E+00  0.00000000E+00    1.000E+00
 Phonon displacements will be output, frozen into supercells
  Chosen amplitude of frozen displacements =     0.1000000000E+02
-Phonon band structure files, with atomic projections, will be output 
- Chosen atoms for projection = 
+Phonon band structure files, with atomic projections, will be output
+ Chosen atoms for projection =
      1
 
 ================================================================================
@@ -89,7 +89,7 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.056  and twall      0.056 sec
        Homogeneous q point set in the B.Z.
@@ -107,7 +107,7 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
- Properties based on electron-phonon coupling 
+ Properties based on electron-phonon coupling
 
  Found     6 symmetries that leave the perturbation invariant.
  Found     6 symmetries that leave the perturbation invariant.
@@ -166,7 +166,7 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -175,7 +175,7 @@ Phonon band structure files, with atomic projections, will be output
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -210,7 +210,7 @@ Phonon band structure files, with atomic projections, will be output
  Phonon frequencies in cm-1    :
 - -5.553627E+02 -4.255974E+02  2.066262E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -234,4 +234,4 @@ Phonon band structure files, with atomic projections, will be output
 
 +Total cpu time    110.431  and wall time    112.071 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.
