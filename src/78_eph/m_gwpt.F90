@@ -875,9 +875,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      qq_ibz = gstore%qibz(:, iq_ibz)
      mapc_qq = gqk%my_q2ibz(:, my_iq)
 
-     iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
-     iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
-
      print_time_qq = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
      if (print_time_qq) then
        call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
@@ -946,6 +943,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! =============================================================
      do my_ik=1,gqk%my_nk
        ! NB: All procs in gqk%pert_comm and gqk%bsum_com and gqk%pp_sum_comm enter this section.
+
+       iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
+       iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
 
        ! Set entry to zero. Important as there are cycle instructions inside these loops
        ! and we don't want random numbers written to disk.
