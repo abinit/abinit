@@ -1,8 +1,8 @@
 
-.Version 10.3.4.3 of MRGDV, released Nov 2024.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
+.Version 10.1.2.3 of MRGDV, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  MRGDV comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 23 Jan 2025.
-- ( at 11h45 )
-
-->> Enter name of output file:
-->> Enter total number of DFPT POT files:
-->> Enter name of POT file 1 :
-->> Enter name of POT file 2 :
-->> Enter name of POT file 3 :
-->> Enter name of POT file 4 :
+.Starting date : Sat 21 Jun 2025.
+- ( at 14h17 )
+  
+->> Enter name of output file: 
+->> Enter total number of DFPT POT files: 
+->> Enter name of POT file 1 : 
+->> Enter name of POT file 2 : 
+->> Enter name of POT file 3 : 
+->> Enter name of POT file 4 : 
 - Reading header of file [1]: diamond_eph_gwpt/dfpto_DS1_DEN1.nc
 - Merging file [1]: diamond_eph_gwpt/dfpto_DS1_DEN1.nc
 - Reading header of file [2]: diamond_eph_gwpt/dfpto_DS2_DEN1.nc
