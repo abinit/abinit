@@ -1122,7 +1122,23 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call sphereboundary(gbound_c, istwfk1, kg_c, mgfft, npw_c)
          call sphereboundary(gbound_x, istwfk1, kg_x, mgfft, npw_x)
 
-         !ABI_CHECK(all(kg_c(:,1:min_npw_xc) == kg_x(:,1:min_npw_xc)), "different g-vectors")
+#if 0
+         ! DEBUG
+         ABI_CHECK(all(kg_c(:,1:min_npw_xc) == kg_x(:,1:min_npw_xc)), "different g-vectors")
+
+         do ig=1,npw_x
+          if (any(kg_x(:,ig) > ngfft(1:3)/2) .or. any(kg_x(:,ig) < -(ngfft(1:3)-1)/2) ) then
+            ABI_ERROR(sjoin(" The G-vector: ",ltoa(kg_x(:, ig))," falls outside the FFT box. Increase boxcutmin (?)"))
+          end if
+         end do
+
+         do ig=1,npw_c
+           if (any(kg_c(:,ig) > ngfft(1:3)/2) .or. any(kg_c(:,ig) < -(ngfft(1:3)-1)/2) ) then
+             ABI_ERROR(sjoin(" The G-vector: ",ltoa(kg_c(:, ig))," falls outside the FFT box. Increase boxcutmin (?)"))
+           end if
+         end do
+         ! END DEBUG
+#endif
 
          ABI_MALLOC(rhotwg_c, (npw_c*nspinor))
          ABI_MALLOC(rhotwg_x, (npw_x*nspinor))
