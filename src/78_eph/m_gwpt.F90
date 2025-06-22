@@ -745,6 +745,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  w_info%mat_type = MAT_INV_EPSILON
  w_info%wint_method = WINT_PPMODEL
 
+ ! possible memory leak here
+ !   === STACK OF LEN 3 ===
+ !   {'A:botsq@m_ppmodel.F90:255': [<var=botsq, A@m_ppmodel.F90:255, addr=0x60000370d3c0, size_mb=0.000>],
+ !    'A:eig@m_ppmodel.F90:257': [<var=eig, A@m_ppmodel.F90:257, addr=0x60000370d410, size_mb=0.000>],
+ !    'A:otq@m_ppmodel.F90:256': [<var=otq, A@m_ppmodel.F90:256, addr=0x60000370d490, size_mb=0.000>]}
+
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, screen_filepath, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
  ABI_FREE(qlwl)

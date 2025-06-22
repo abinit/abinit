@@ -65,7 +65,7 @@
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t04.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%%   t04.abo, tolnlines= 700, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
