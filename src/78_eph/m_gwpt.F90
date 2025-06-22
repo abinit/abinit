@@ -172,7 +172,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(hdr_type),intent(in) :: wfk_hdr
  type(mpi_type),intent(inout) :: mpi_enreg
 !arrays
- integer,intent(in) :: ngfft(18),ngfftf(18)
+ integer,intent(inout) :: ngfft(18),ngfftf(18)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -472,6 +472,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
  ! FFT meshes from input file, not necessarily equal to the ones found in the external files.
+
+ ! NB: fft_ur with FFTW3/DFTI is buggy when ngfft(4:6) != ngfft(1:3)
+ ! also ur arrays are always allocated with nfft and not with product(ngfft(4:6)).
+ ! Let's see if this fixes the problem with the double free
+ ngfft(4:6) = ngfft(1:3)
+ ngfftf(4:6) = ngfftf(1:3)
+
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
