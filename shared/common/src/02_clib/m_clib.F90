@@ -287,5 +287,24 @@ integer function clib_setenv(name, value, overwrite) result(ierr)
 end function clib_setenv
 !!***
 
+!integer(c_long) function cache_size()
+!  interface
+!     function sysconf(name) bind(C, name="sysconf")
+!       import :: c_int, c_long
+!       integer(c_int), value :: name
+!       integer(c_long) :: sysconf
+!     end function sysconf
+!  end interface
+!
+!  integer(c_int), parameter :: SC_LEVEL1_DCACHE_SIZE = 190  ! POSIX macro on Linux not portable. should use C directly
+!
+!  cache_size = sysconf(SC_LEVEL1_DCACHE_SIZE)
+!  if (cache_size > 0) then
+!     print *, "L1 Data Cache Size:", cache_size, "bytes"
+!  else
+!     print *, "Could not determine cache size."
+!  end if
+!end function cache_size
+
 END MODULE m_clib
 !!***
