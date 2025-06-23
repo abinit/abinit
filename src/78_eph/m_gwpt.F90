@@ -413,6 +413,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  if (my_rank == master) call vcp%print([std_out], prtvol=dtset%prtvol)
  call kmesh%free()
 
+ call gsph_x%print(unit=std_out, prtvol=dtset%prtvol)
+ call gsph_c%print(unit=std_out, prtvol=dtset%prtvol)
+ ABI_CHECK_IGE(npw_x, 1, "npw_x <= 1")
+ ABI_CHECK_IGE(npw_c, 1, "npw_c <= 1")
+
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
  ! TODO: One can exploit qq, kk and pp parallelism to find the wavevectors in the IBZ
