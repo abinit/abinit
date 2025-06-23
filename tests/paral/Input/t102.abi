@@ -126,13 +126,12 @@ kptbounds3               # The four segments of the band structure are
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = alps_gnu_14.2_cov, alps_intel_2025_elpa, eos_intel_2023_cmake, eos_nvhpc_23.9_elpa
 #%% [shell]
 #%% pre_commands = iw_cp t102_MPI4o_DS2_DEN t102_MPI4o_DS2_DEN;
-#%%   iw_cp t102_MPI4i_DS3Self_ra-omega_iatom0001_isppol1 t102_MPI4i_DS3Self_ra-omega_iatom0001_isppol1;
-#%%   iw_cp t102_MPI4i_DS3.UnitaryMatrix_iatom0001 t102_MPI4i_DS3.UnitaryMatrix_iatom0001;
-#%%   iw_cp t102_MPI4o_DS3_Self-omega_iatom0001_isppol1 t102_MPI4o_DS3_Self-omega_iatom0001_isppol1;
-#%%   iw_cp t102_MPI4o_DS3_spectralfunction_realgrid t102_MPI4o_DS3_spectralfunction_realgrid;
+#%%   iw_cp t102_MPI4i_DS3_Self_ra-omega_iatom0001_isppol1 .;
+#%%   iw_cp t102_MPI4i_DS3_UnitaryMatrix_iatom0001 .;
+#%%   iw_cp t102_MPI4o_DS3_Self-omega_iatom0001_isppol1 .;
+#%%   iw_cp t102_MPI4o_DS3_spectralfunction_realgrid .;
 #%% [NCPU_4]
 #%% files_to_test =
 #%%   t102_MPI4.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.1;
@@ -142,7 +141,7 @@ kptbounds3               # The four segments of the band structure are
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Gendron
-#%% keywords = dmft_kspectralfunc
+#%% keywords = dmft_kspectralfunc, DMFT
 #%% description = Test for the k-resolved spectral function with self-energy in real frequency
 #%%<END TEST_INFO>
 

@@ -141,6 +141,28 @@ AC_DEFUN([SD_HDF5_INIT], [
     fi
   fi
 
+   # if mode is def and pkg_config exists and no prefix -> use pkg_config
+   #
+   if test "${sd_hdf5_enable}" = "yes" -a \( "${sd_hdf5_init}" = "def" -o "${sd_hdf5_init}" = "yon" \) -a "${sd_hdf5_prefix}" = ""; then
+      #check if PKG_CONFIG exists (if not keep default mode)
+      AC_MSG_NOTICE([setting for ${sd_hdf5_init} potential move to pkg])
+      AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
+ 
+      AC_MSG_NOTICE([setting for ${sd_hdf5_init} potential move to pkg, PKG=${PKG_CONFIG}])
+      if test "$PKG_CONFIG" != "no"; then
+         AC_MSG_CHECKING([for hdf5 via pkg-config])
+          AC_PATH_TOOL(PKG_CONFIG,pkg-config)
+          if "$PKG_CONFIG" --exists hdf5; then
+                AC_MSG_RESULT([yes])
+                sd_hdf5_init="pkg"
+         else
+                AC_MSG_RESULT([no])
+                #sd_hdf5_init="def" or yon keep it
+         fi
+      fi
+   fi
+
+
   # Make sure configuration is correct
   if test "${STEREDEG_BYPASS_CONSISTENCY}" != "yes"; then
     _SD_HDF5_CHECK_CONFIG
@@ -175,6 +197,19 @@ AC_DEFUN([SD_HDF5_INIT], [
       env)
         _SD_HDF5_SET_ENV
         ;;
+
+      pkg)
+         TMP_HDF5_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags hdf5`
+         TMP_HDF5_FFFLAGS="${TMP_HDF5_CPPFLAGS}"
+         TMP_HDF5_LIBS=`$PKG_CONFIG --libs  --keep-system-libs hdf5`
+         sd_hdf5_cppflags="${TMP_HDF5_CPPFLAGS} "
+         sd_hdf5_cflags="${TMP_HDF5_CPPFLAGS}"
+         sd_hdf5_cxxflags="${TMP_HDF5_CPPFLAGS}"
+         test "${sd_hdf5_enable_fc}" = "yes" && \
+              sd_hdf5_fcflags="${TMP_HDF5_FFLAGS}"
+         sd_hdf5_ldflags="${TMP_HDF5_LIBS}"
+         sd_hdf5_libs="${TMP_HDF5_LIBS}"
+         ;;
 
       *)
         AC_MSG_ERROR([invalid init type for HDF5: '${sd_hdf5_init}'])

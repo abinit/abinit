@@ -17,14 +17,14 @@ add_library(41_geometry STATIC
 
 set_target_properties(41_geometry
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(41_geometry
   PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(41_geometry
