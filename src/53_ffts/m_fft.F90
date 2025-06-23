@@ -1355,7 +1355,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      ABI_MALLOC(fofr,     (cplex*ldxyz*ndat))
 
      call RANDOM_NUMBER(fofr_ref)
-     !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
+     call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
      fofr = fofr_ref
 
      select case (fftalga)
@@ -1372,7 +1372,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
        continue
      end select
 
-     !call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
+     call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
 
      ierr = COUNT(ABS(fofr - fofr_ref) > ATOL_DP)
      nfailed = nfailed + ierr

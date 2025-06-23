@@ -220,7 +220,7 @@ subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,gr
 !arrays
  integer :: gbase(3),grot(3)
 !************************************************************************
- !
+
  ! === Set up G-rotation table ===
  do ig1=1,npw
    ish1=g2sh(ig1) ; ss=shlim(ish1) ; ee=shlim(ish1+1)-1
@@ -962,7 +962,6 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
  integer,allocatable :: npwarr(:)
  real(dp) :: kpoint(3),gmet(3,3)
  real(dp),allocatable :: cnorm(:),cnormk(:,:),ctmp(:)
-
 ! *********************************************************************
 
  ! * Fake MPI_type for the sequential part.
@@ -1974,7 +1973,6 @@ pure subroutine table_gbig2kg(npw_k,kg_k,maxpw,gbig,gamma2k,ierr)
  logical :: found
 !arrays
  integer :: gcur(3)
-
 ! *********************************************************************
 
  ierr=0
@@ -2027,7 +2025,6 @@ subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
  integer :: new_ng,in_ng,ig,ierr,sh
 !arrays
  integer,allocatable :: new_gvec(:,:)
-
 ! *********************************************************************
 
  call new_Gsph%init(Cryst, 0, ecut=new_ecut)
