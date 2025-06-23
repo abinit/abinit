@@ -22,10 +22,10 @@
  ddb_ngqpt 2 2 2          # The code expects to find in the DDB
                           # all the IBZ q-points corresponding to a 4x4x4 q-mesh
 
- ecuteps 1
- ecutsigx 1
+ ecuteps 2
+ ecutsigx 2
  boxcutmin 1.1
- tolwfr 1e-8
+ tolwfr 1e-4
 
  mdf_epsinf 12    # For model dielectric function
  ppmodel 2
