@@ -16,7 +16,7 @@ configure_file(m_optim_dumper.F90.cmake.in m_optim_dumper.F90 @ONLY)
 # CPP opts dumper
 #
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
-message(status "Generating CPP option dumper")
+message(STATUS "Generating CPP option dumper")
 execute_process(
   COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/config/scripts/make-cppopts-dumper
   COMMAND mv ${CMAKE_SOURCE_DIR}/shared/common/src/14_hidewrite/m_cppopts_dumper.F90 ${CMAKE_CURRENT_BINARY_DIR}
@@ -36,7 +36,7 @@ add_library(14_hidewrite STATIC
 
 set_target_properties(14_hidewrite
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(14_hidewrite
   PRIVATE
@@ -46,7 +46,7 @@ target_include_directories(14_hidewrite
 
 target_include_directories(14_hidewrite
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
 

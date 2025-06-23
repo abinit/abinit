@@ -121,7 +121,7 @@ AC_DEFUN([SD_YAKL_INIT], [
         sd_yakl_cppflags="-I${with_yakl}/include"
         sd_yakl_fcflags="${sd_yakl_fcflags_def} -I${with_yakl}/include"
         sd_yakl_ldflags="${sd_yakl_ldflags_def}"
-        sd_yakl_libs="-L${sd_yakl_libdir} ${sd_yakl_libs_def} -lstdc++ -ldl -L${with_gpu}/lib64 -lcudart"
+        sd_yakl_libs="-L${sd_yakl_libdir} ${sd_yakl_libs_def} -lstdc++ -ldl -L${abi_gpu_prefix}/lib64 -lcudart"
         ;;
 
       env)

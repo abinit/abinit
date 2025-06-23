@@ -16130,22 +16130,6 @@ the [BoltzTraP code](https://www.imc.tuwien.ac.at/forschungsbereich_theoretische
 ),
 
 Variable(
-    abivarname="prtcif",
-    varset="dev",
-    vartype="integer",
-    topics=['printing_prgeo'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="PRinT Crystallographic Information File",
-    characteristics=['[[DEVELOP]]'],
-    added_in_version="before_v9",
-    text=r"""
-If set to 1, a CIF file is output with the crystallographic data for the
-present run (cell size shape and atomic positions).
-""",
-),
-
-Variable(
     abivarname="prtchkprdm",
     varset="files",
     vartype="integer",
@@ -16158,6 +16142,37 @@ Variable(
     text=r"""
 [[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
 It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
+""",
+),
+
+Variable(
+    abivarname="prtcif",
+    varset="dev",
+    vartype="integer",
+    topics=['printing_prgeo'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT Crystallographic Information File",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="before_v9",
+    text=r""" 
+If set to 1, a CIF file is output with the crystallographic data for the
+present run (cell size shape and atomic positions).
+""",
+),
+
+Variable(
+    abivarname="prtcurrent",
+    varset="rttddft",
+    vartype="integer",
+    topics=['RTTDDFT_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT macroscopic CURRENT density",
+    added_in_version="10",
+    text=r""" 
+If set to 1, prints the time-dependent macroscopic current density 
+computed in real-time TDDFT calculations ([[optdriver]] 9).
 """,
 ),
 
@@ -16381,6 +16396,8 @@ for the additional input variables to be specified.
 
 If [[prtdos]] = 5, delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
 tetrahedron method (as [[prtdos]] = 2).
+
+Note that in the case [[nsppol]]=1 and [[nspden]]=2, only the spin up DOS is delivered, for all values of [[prtdos]].
 """,
 ),
 
@@ -16403,6 +16420,8 @@ spherical harmonics basis.
 If set to 2, the m-decomposed LDOS is delivered in DOS file.
 In this case, [[prtdosm]] computes the M-resolved partial dos for real
 spherical harmonics in the same basis as the DFT+U occupation matrix.
+
+Note that in the case [[nsppol]]=1 and [[nspden]]=2, only the spin up DOS is delivered, for all values of [[prtdos]].
 """,
 ),
 

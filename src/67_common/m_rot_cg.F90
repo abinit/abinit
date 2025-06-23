@@ -202,6 +202,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 !! Compute the corresponding wave functions if nothing wrong happened
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
 
+  ! Correct a bug in the formula when using TRIQS
   if (dmft_optim == 1) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
 
   do ispinor=1,nspinor

@@ -88,7 +88,11 @@ AC_DEFUN([SD_TRIQS_INIT], [
   AC_ARG_ENABLE([triqs-complex],
     [AS_HELP_STRING([--enable-triqs-complex],
       [Activate support for complex version of TRIQS (default: no)])],
-    [sd_triqs_complex="${enableval}"],
+    [sd_triqs_complex="${enableval}";
+     if test "${enableval}" = "yes"; then
+       AC_DEFINE([HYBRIDISATION_IS_COMPLEX], 1, [Variable to activate complex hybridization functions in TRIQS.])
+       AC_DEFINE([LOCAL_HAMILTONIAN_IS_COMPLEX], 1, [Variable to activate complex Hamiltonians in TRIQS.])
+     fi],
     [sd_triqs_complex="no"])
 
   # Declare environment variables
@@ -277,7 +281,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
     ]],
     [[
       gf_struct_t gf_struct;
-      triqs_cthyb::solver_core solver({1.,gf_struct,1,1,1,true});
+      triqs_cthyb::solver_core solver({1.,gf_struct,1,2,1,true});
       triqs_cthyb::many_body_op_t H;
       auto paramCTQMC = triqs_cthyb::solve_parameters_t(H,1);
       paramCTQMC.time_invariance = true;
@@ -297,7 +301,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
       [[
         auto omega = cppdlr::build_dlr_rf(1.,1.e-6);
         gf_struct_t gf_struct;
-        triqs_cthyb::solver_core solver({1.,gf_struct,1,1,1,true});
+        triqs_cthyb::solver_core solver({1.,gf_struct,1,2,1,true});
       ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="3.2"], [sd_triqs_ok="no"])
     AC_LANG_POP([C++])
     AC_MSG_RESULT([${sd_triqs_ok}])
@@ -317,27 +321,6 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
       [[
         std::vector<std::pair<std::string, indices_type>> gf_struct;
       ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="2.0"], [sd_triqs_ok="no"])
-    AC_LANG_POP([C++])
-    AC_MSG_RESULT([${sd_triqs_ok}])
-  fi
-
-  # Check even older TRIQS C++ API
-  if test "${sd_triqs_ok}" != "yes"; then
-    AC_MSG_CHECKING([whether the TRIQS library has an even older API])
-    AC_LANG_PUSH([C++])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM(
-      [[
-#       include <triqs/gfs.hpp>
-        using namespace triqs::gfs;
-        using triqs::clef::placeholder;
-      ]],
-      [[
-        double beta = 1;
-        int nw      = 100;
-        auto g      = gf<imfreq>{{beta, Fermion, nw}, {1, 1}};
-        placeholder<0> w_;
-        g(w_) << 1 / (w_ - 3);
-      ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="1.4"], [sd_triqs_ok="no"])
     AC_LANG_POP([C++])
     AC_MSG_RESULT([${sd_triqs_ok}])
   fi

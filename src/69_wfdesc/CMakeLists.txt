@@ -9,7 +9,7 @@ add_library(69_wfdesc STATIC
 
 set_target_properties(69_wfdesc
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(69_wfdesc
   PRIVATE
@@ -17,7 +17,7 @@ target_include_directories(69_wfdesc
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(69_wfdesc
