@@ -20,15 +20,11 @@
 #include "abi_common.h"
 
 !Include and generate MKL_RCI module
-#if defined HAVE_LINALG_MKL_OMATCOPY
-#include "mkl_rci.f90"
-#endif
+!#if defined HAVE_LINALG_MKL_OMATCOPY
+!#include "mkl_rci.f90"
+!#endif
 
 module m_prcref
-
-#if defined HAVE_LINALG_MKL_OMATCOPY
-use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
-#endif
 
  use iso_c_binding
  use defs_basis
@@ -2387,165 +2383,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 end subroutine dieltcel
 !!***
 
-!!****f* ABINIT/apply_adjdielmat
-!! NAME
-!!  apply_adjdielmat
-!!
-!! FUNCTION
-!!  Apply the adjoint dielectric matrix I-chi0*vc to the density rho_g (given in the Fourier space)
-!!  with a model chi0 operator (contained in precon).
-!!
-!! INPUTS
-!!  precon      = precon_object that contain the model chi0 operator.
-!!  g_vectors   = Coordinates of the G-vectors (should not be distributed over the processors).
-!!  mpi_enreg   = Information about MPI parallelization.
-!!  nfft        = Number of fft grid points.
-!!  ngfft       = Contains all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
-!!  nspden      = Number of spin-density components.
-!!  ispden      = Index of spin-density component.
-!!  rho_g       = Density vector (in G-space).
-!!
-!! OUTPUT
-!!  adjdielmat_v_g = adjdielmat * rho_g
-!!
-!! NOTES
-!!  rho_g and adjdielmat_v_g are 1D arrays corresponding to some flattened (2,n)-dimensional arrays where
-!!  the coordinates (1,:) contain the real part and (2,:) contain the imaginary part.
-!!
-!! SOURCE
-
-subroutine chi0diel_apply_adjdielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, nspden, rho_g, adjdielmat_rho_g)
-
-!Arguments ------------------------------------
-!scalars
- type(precon_object) :: precon
- type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(in) :: mpi_enreg
- integer :: mgfft, nfft, nspden
-!arrays
- integer, intent(in) :: ngfft(:)
- real(dp), intent(in) :: rho_g(2, nfft, nspden)
- real(dp), intent(out) :: adjdielmat_rho_g(2, nfft, nspden)
-!Local variables-------------------------------
- integer :: ispden
- !real(dp) :: temp(2, nfft, nspden)                                                         !DEBUG
-
-! *************************************************************************
- write(6,*)'chi0diel apply_adjdielmat'; flush(6) !DEBUG
-
- adjdielmat_rho_g = rho_g
-
-!Components G=0 set to 0
- do ispden=1,nspden
-   adjdielmat_rho_g(:, 1, ispden) = 0
- end do
-
-!0.1) Basis change : Changing to the Pauli basis for collinear and non-collinear magnetism
- call precon%to_pauli(1, adjdielmat_rho_g)
-
-!1) Applying the Kernel (vc or vc + Kxc depending on iprcel)
- call precon%apply_kernel(dtset, mpi_enreg, ngfft, adjdielmat_rho_g)
- !call precon%save_applied_op_g(ngfft, rho_g, adjdielmat_rho_g, "applied_vc.txt")          !DEBUG
-
-!2) Applying the model chi0 operator
- !temp = adjdielmat_rho_g                                                                   !DEBUG
- call precon%apply_chi0(dtset, mgfft, mpi_enreg, ngfft, adjdielmat_rho_g)
- !call precon%save_applied_op_g(ngfft, temp, adjdielmat_rho_g, "applied_chi0.txt")         !DEBUG
-
-!0.2) Basis change : Changing back to the default spin-basis
- call precon%from_pauli(1, adjdielmat_rho_g)
-
-!3) adjdielmat_rho_g = rho_g - chi0 * vc * rho_g = adjdielmat * rho_g
- adjdielmat_rho_g = rho_g - adjdielmat_rho_g
-
-!Components G=0 unchanged
- do ispden=1,nspden
-   adjdielmat_rho_g(:, 1, ispden) = rho_g(:, 1, ispden)
- end do
-
-!For code validation only
- !call precon%save_applied_op_g(ngfft, rho_g, adjdielmat_rho_g, "applied_adjdielmat.txt")  !DEBUG
-
-end subroutine chi0diel_apply_adjdielmat
-!!***
-
-!!****f* ABINIT/apply_dielmat
-!! NAME
-!!  apply_dielmat
-!!
-!! FUNCTION
-!!  Apply the dielectric matrix I-vc*chi0 to the potential v_g (given in the Fourier space) 
-!!  with a model chi0 operator (contained in precon).
-!!
-!! INPUTS
-!!  precon      = precon_object that contain the modl chi0 operator.
-!!  mpi_enreg   = Information about MPI parallelization.
-!!  nfft        = Number of fft grid points.
-!!  ngfft       = Contains all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
-!!  nspden      = Number of spin-density components.
-!!  v_g         = Potential vector (in G-space)
-!!
-!! OUTPUT
-!!  dielmat_v_g = dielmat * v_g
-!!
-!! NOTES
-!!  v_g and dielmat_v_g are 1D arrays corresponding to some flattened (2,n)-dimensional arrays where
-!!  the coordinates (1,:) contain the real part and (2,:) contain the imaginary part.
-!!
-!! SOURCE
-
-subroutine chi0diel_apply_dielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, nspden, v_g, dielmat_v_g)
-
-!Arguments ------------------------------------
-!scalars
- type(precon_object) :: precon
- type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(in) :: mpi_enreg
- integer :: mgfft, nfft, nspden
-!arrays
- integer, intent(in) :: ngfft(:)
- real(dp), intent(in) ::  v_g(2, nfft, nspden)
- !TODO : remove nspden and nfft as parameters and replace them with precon%nspden and precon%nfft
- real(dp), intent(out) :: dielmat_v_g(2, nfft, nspden)
-!Local variables-------------------------------
- integer :: ispden
-
-! *************************************************************************
- write(6,*)'chi0diel apply_dielmat'; flush(6) !DEBUG
- 
- dielmat_v_g = v_g
-
-!Components G=0 set to 0
- do ispden=1,nspden
-   dielmat_v_g(:, 1, ispden) = 0
- end do
-
-!0.1) Basis change : Changing to the Pauli basis for collinear and non-collinear magnetism
- call precon%to_pauli(0, dielmat_v_g)
-
-!1) Applying the model chi0 operator
- call precon%apply_chi0(dtset, mgfft, mpi_enreg, ngfft, dielmat_v_g)
-
-!2) Applying the Kernel (vc or vc + Kxc depending on iprcel)
- call precon%apply_kernel(dtset, mpi_enreg, ngfft, dielmat_v_g)
-
-!0.2) Basis change : Changing back to the default spin-basis
- call precon%from_pauli(0, dielmat_v_g)
-
-!3) dielmat_v_g = v_g - vc * chi0 * v_g = dielmat * v_g
- dielmat_v_g = v_g - dielmat_v_g
-
-!Components G=0 unchanged
- do ispden=1,nspden
-   dielmat_v_g(:, 1, ispden) = v_g(:, 1, ispden)
- end do
-
- !For code validation only 
- !call precon%save_applied_op_g(ngfft, v_g, dielmat_v_g, "applied_dielmat.txt") !DEBUG
-
-end subroutine chi0diel_apply_dielmat
-!!***
-
 !!****f* ABINIT/chi0diel
 !! NAME
 !! chi0diel
@@ -2656,6 +2493,12 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
 !Resolution with GMRES :
  call linsolve(nspden*2*nfft, matvec, rhs, est, gmres_maxiter, gmres_rtol)
 
+ ! Pseudo-inversion for non positive definite preconditioners
+ !if (dtset%iprcel==203) then
+ !  call treshold_schur_decomposition(matvec, treshold, eigensolver_maxiter, eigensolver_rtol, D, Y, Q)  !TODO
+ !  call linsolve()
+ !end if
+
 !Reshaping the final result :
  do ispden = 1, nspden
    !Indices of the ispden component in the flattened (2, nfft, nspden)-array 'est'.
@@ -2676,8 +2519,8 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
  ABI_FREE(est)
 
 !Simple mixing : TODO diemixmag
- !vrespc = precon%diemix * vrespc
- vrespc = precon%diemix * vresid  !DEBUG
+ vrespc = precon%diemix * vrespc
+ !vrespc = precon%diemix * vresid  !DEBUG
 
  contains
 
@@ -2691,7 +2534,7 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
 ! ******************************************************************************************
 
    !C pointers to match the flattened arrays x and y to their 3D versions needed by
-   !chi0diel_apply_adjdielmat and chi0diel_apply_dielmat
+   !precon%apply_adjdielmat and precon%apply_dielmat
    x_c = c_loc(x)
    call c_f_pointer(x_c, x_3d, shape=[2, nfft, nspden])
    y_c = c_loc(y)
@@ -2699,10 +2542,10 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
 
    if (optres==1) then
    ! We are preconditioning density residual so P = (I-chi0*vc) = adjoint dielectric matrix.
-     call chi0diel_apply_adjdielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
+     call precon%apply_adjdielmat(dtset, mpi_enreg, x_3d, y_3d)
    else if (optres==0) then
    ! We are preconditioning potential residual so P = (I-vc*chi0) = dielectric matrix.
-     call chi0diel_apply_dielmat(precon, dtset, mgfft, mpi_enreg, nfft, ngfft, nspden, x_3d, y_3d)
+     call precon%apply_dielmat(dtset, mpi_enreg, x_3d, y_3d)
    end if
 
  end subroutine matvec ! -------------------------------------------------------------------
