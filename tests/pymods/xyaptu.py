@@ -1,5 +1,4 @@
 """XYAPTU: Lightweight XML/HTML Document Template Engine for Python. Taken from http://code.activestate.com/recipes/162292/"""
-from __future__ import print_function, division, absolute_import #, unicode_literals
 
 __version__ = '1.0.0'
 __author__= [

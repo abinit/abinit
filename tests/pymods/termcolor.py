@@ -25,7 +25,6 @@ Copyright (C) 2008-2011 Volvox Development Team
 
 ANSII Color formatting for output in terminal.
 """
-from __future__ import print_function, unicode_literals, absolute_import
 
 import os
 

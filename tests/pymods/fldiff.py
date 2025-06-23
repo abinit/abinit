@@ -39,7 +39,6 @@ The tolerance option set the tolerance for comparison of floats, the default
 is 1.01e-10.  This modifications do not apply to the tolerance determined by
 the '%',and '.' first-column special signs.
 """
-from __future__ import print_function, division, unicode_literals
 
 import re
 from math import floor
