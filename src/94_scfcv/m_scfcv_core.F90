@@ -864,8 +864,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  end if ! iscf>0
 
 ! Initializing precon-object for chi0 based preconditioning
+ write(6,*)'chi0diel init : dimcprj, mcprj, cprj :', dimcprj, mcprj; flush(6) ! DEBUG
  call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, gprimd, indsym, &
- &  irrzon, kg, mband_cprj, nattyp, nfftmix, npwarr, pawang, pawfgr, pawfgrtab, &
+ &  irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, pawang, pawfgr, pawfgrtab, &
  &  pawtab, phnons, psps, rhor, rprimd, symrec, ucvol, vxc, xred)
  
 ! Here initialize the datastructure constrained_dft, for constrained DFT calculations
@@ -1877,6 +1878,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      endif
 
 !    Updating precon-object for chi0-based preconditioning
+ write(6,*)'chi0diel update : dimcprj, mcprj, cprj :', dimcprj, mcprj; flush(6) ! DEBUG
+ write(6,*)'chi0diel update : precon%dimcprj, precon%mcprj, precon%cprj :', precon%dimcprj, precon%mcprj; flush(6) ! DEBUG
      call precon%update(dtset, istep, mpi_enreg)
 
      ABI_NVTX_START_RANGE(NVTX_SCFCV_NEWRHO)

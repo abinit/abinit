@@ -26,7 +26,7 @@ module m_precon
     use m_mkrho
     use m_mpinfo,           only : proc_distrb_cycle
     use m_paw_dmft
-    use m_pawrhoij,         only : pawrhoij_type
+    use m_pawrhoij,         only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free
     use m_pawcprj,          only : pawcprj_type
     use m_pawang,           only : pawang_type
     use m_pawfgr,           only : pawfgr_type
@@ -36,9 +36,9 @@ module m_precon
     use m_paw_mkrho,        only : pawmkrho
     use m_spacepar,         only : symrhg
 
-#if defined HAVE_LINALG_MKL_OMATCOPY
-    use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
-#endif
+!#if defined HAVE_LINALG_MKL_OMATCOPY
+!    use mkl_rci, only : dfgmres, dfgmres_check, dfgmres_get, dfgmres_init
+!#endif
     
     implicit none
     private
@@ -54,8 +54,7 @@ module m_precon
         real(dp) :: ucvol, dvol
         !PAW :
         type(pseudopotential_type), pointer :: psps
-        integer :: mband_cprj
-        integer, pointer :: dimcprj(:)
+        integer, pointer :: dimcprj(:), mcprj
         integer :: unpaw
         type(pawcprj_type), pointer :: cprj(:, :)
         type(pawang_type), pointer :: pawang
@@ -70,7 +69,8 @@ module m_precon
         integer, pointer :: symrec(:, :, :), indsym(:, :, :)
         real(dp), pointer :: xred(:, :)
         !For ffts :
-        integer :: nfftprc  ! Number of fft grid points for preconditioned densities and/or potentials.
+        integer :: nfftprc      ! Number of fft grid points for preconditioned quantities (densities and/or potentials).
+        integer :: ngfftprc(18) ! All needed information about the 3D FFT for preconditioned quantities.
         !For Kxc :
         integer :: nkxc
         logical :: need_kxc
@@ -81,23 +81,24 @@ module m_precon
         !For LDOS preconditioner :
         real(dp) :: tdos
         real(dp), allocatable :: ldos(:, :)
-        !For local polarizability preconditioner :
-        real(dp) :: gc
-        real(dp), allocatable :: loc_pola(:, :)
 
     contains
-        procedure :: init => precon_init            ! Initialize the precon_object.
-        procedure :: init_kxc => precon_init_kxc    ! Initialize kxc in the precon_object.
-        procedure :: update => precon_update        ! Update the precon_object according to iprcel.
-        procedure :: free => precon_free            ! Dealocate arrays that are allocated in precon_init.
-        procedure :: save => precon_save            ! Save the LDOS or local polarizability contained in the precon_object in a file.
-        procedure :: to_pauli => to_pauli           ! Basis change from the default abinit spin basis to the Pauli basis 
-                                                    ! for density and potentials.
-        procedure :: from_pauli => from_pauli       ! Basis change from the Pauli basis to the default abinit spin basis 
-                                                    ! for density and potentials.
-        procedure :: apply_kernel => apply_kernel   ! Apply the Coulomb kernel (and exchange and correlation kernel depending on iprcel) 
-                                                    ! to an input vector.
-        procedure :: apply_chi0 => apply_chi0       ! Apply the model chi0 operator to an input vector.
+        procedure :: init => precon_init                    ! Initialize the precon_object.
+        procedure :: init_kxc => precon_init_kxc            ! Initialize kxc in the precon_object.
+        procedure :: update => precon_update                ! Update the precon_object according to iprcel.
+        procedure :: free => precon_free                    ! Dealocate arrays that are allocated in precon_init.
+        procedure :: save => precon_save                    ! Save the LDOS or local polarizability contained in the precon_object in a file.
+        procedure :: to_pauli => to_pauli                   ! Basis change from the default abinit spin basis to the Pauli basis 
+                                                            ! for density and potentials.
+        procedure :: from_pauli => from_pauli               ! Basis change from the Pauli basis to the default abinit spin basis 
+                                                            ! for density and potentials.
+        procedure :: apply_kernel => apply_kernel           ! Apply the Coulomb kernel (and exchange and correlation kernel depending on iprcel) 
+                                                            ! to an input vector.
+        procedure :: apply_chi0 => apply_chi0               ! Apply the model chi0 operator to an input vector.
+        procedure :: apply_dielmat => apply_dielmat         ! Apply the dielectric matrix to an input vector.
+        procedure :: apply_adjdielmat => apply_adjdielmat   ! Apply the adjoint dielectric matrix to an input vector.
+        
+        ! For code validation :
         procedure :: save_applied_op_g => save_applied_op_g ! Save the application of an operator in reciprocal space (for code validation).
         procedure :: save_applied_op_r => save_applied_op_r ! Save the application of an operator in direct space (for code validation).
 
@@ -114,32 +115,33 @@ contains
     !!
     !! INPUTS
     !!  dtset   = all input variables for this dataset
-    !!  atindx  =
+    !!  atindx  = index table for atoms (see gstate.f)
     !!  atindx1 = index table for atoms, inverse of atindx (see gstate.f)
     !!  cg      = wf in G space
     !!  cprj    =
-    !!  dimcprj =
+    !!  dimcprj = dimension of the cprj array
     !!  eigen   = array of eigenvalues
     !!  fermie  = fermi energie
     !!  gprimd  = dimensional reciprocal space primitive translations
     !!  irrzon  = irreducible zone data
     !!  kg      = reduced planewave coordinates
     !!  nattyp  = number of atoms of each type.
-    !!  nfftmix = 
+    !!  nfftmix = number of planewaves in the mixing/preconditioning grid
+    !!  ngfftmix = 
     !!  npwarr  = number of planewaves and boundary planewaves at each k
-    !!  pawang  =
+    !!  pawang  = paw angular mesh and related data
     !!  pawfgr  =
-    !!  pawfgrtab =
-    !!  pawtab  =
+    !!  pawfgrtab = 
+    !!  pawtab  = 
     !!  phnons  = nonsymmorphic translation phases
-    !!  psps    =
+    !!  psps    = pseudopotential data
     !!  rprimd  = dimensional real space primitive translations
     !!  ucvol   = unit cell volume
     !!  xred    = reduced dimensionless atomic coordinates
     !!
     !! SOURCE
     subroutine precon_init(this, dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, &
-        &   gprimd, indsym, irrzon, kg, mband_cprj, nattyp, nfftmix, npwarr, pawang, pawfgr, pawfgrtab, &
+        &   gprimd, indsym, irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, pawang, pawfgr, pawfgrtab, &
         &   pawtab, phnons, psps, rhor, rprimd, symrec, ucvol, vxc, xred)
 
         !Arguments ------------------------------------
@@ -148,9 +150,11 @@ contains
         type(dataset_type),intent(in) :: dtset
         real(dp), intent(in) :: ucvol
         real(dp), intent(in), target :: fermie
-        integer, intent(in) :: nfftmix, mband_cprj
+        integer, intent(in) :: nfftmix
+        integer, intent(in), target :: mcprj
         !arrays
         real(dp), intent(in) :: gprimd(:, :), rprimd(:, :)
+        integer, intent(in) :: ngfftmix(:)
         integer, intent(in), target  :: irrzon(:, :, :), kg(:, :), npwarr(:)
         integer, intent(in), target :: atindx(:), atindx1(:), nattyp(:)
         integer, intent(in), target :: symrec(:, :, :), indsym(:, :, :)
@@ -167,14 +171,16 @@ contains
         type(pawtab_type), intent(in), target :: pawtab(:)
 
         ! *************************************************************************
+        write(6,*)'chi0diel precon%init'; flush(6) !DEBUG
+        
         !Constant data from dtset
         this%dielng = dtset%dielng
         this%diemix = dtset%diemix
         this%iprcel = dtset%iprcel
-        this%nfftprc = nfftmix 
-        !dtset%nspden = dtset%nspden
+        this%nfftprc = nfftmix          ! FFT grid for preconditioned densities and/or potentials :
+        this%ngfftprc = ngfftmix        ! same grid as the one used for mixing.
         !Other constants
-        this%dvol   = ucvol/dtset%nfft ! factor for integrals in real space: sum(f) * dvol ~ integral f
+        this%dvol   = ucvol/dtset%nfft  ! factor for integrals in real space: sum(f) * dvol ~ integral f
         this%gprimd = gprimd
         this%rprimd = rprimd
         this%ucvol  = ucvol
@@ -199,10 +205,11 @@ contains
         
         !PAW :
         if (psps%usepaw==1) then
+            write(6,*)'chi0diel init : allocating PAW var '; flush(6) ! DEBUG
             this%unpaw      = dtfil%unpaw
-            this%mband_cprj = mband_cprj
+            this%cprj       => cprj     ! TODO : when cprj_in_memory = 0 the cprj array is computed on the fly and not allocated (or allocated with 0 size maybe)...
             this%dimcprj    => dimcprj
-            this%cprj       => cprj
+            this%mcprj      => mcprj
             this%pawang     => pawang
             this%pawfgr     => pawfgr
             this%pawfgrtab  => pawfgrtab
@@ -212,6 +219,10 @@ contains
         !Initializing LDOS specific variables
         if (this%iprcel == 202) then
             !Allocating the array containing ldos
+            !write(6,*)'chi0diel precon%init this%ldos : ', this%ldos; flush(6) !DEBUG
+            write(6,*)'Is this%ldos allocated? ', allocated(this%ldos); flush(6) ! DEBUG
+            write(6,*)'size%ldos allocated? ', size(this%ldos); flush(6) ! DEBUG
+
             ABI_MALLOC(this%ldos, (this%nfftprc, dtset%nspden)) ! TODO
         end if
         
@@ -251,6 +262,7 @@ contains
         real(dp), intent(in), target :: kxc(:, :)
 
         ! *************************************************************************
+        write(6,*)'chi0diel precon%init_kxc'; flush(6) !DEBUG
 
         if (this%need_kxc) then
             this%kxc => kxc
@@ -286,6 +298,7 @@ contains
         integer :: ispden
 
         ! *************************************************************************
+        write(6,*)'chi0diel precon%update'; flush(6) !DEBUG
 
         !LDOS
         if (this%iprcel == 202) then 
@@ -294,10 +307,6 @@ contains
             !update tdos
             this%tdos = sum(this%ldos(:, 1)) * this%dvol
             ! TODO : More options to control when the ldos is updated
-        end if
-
-        !Local polarizability
-        if (this%iprcel == 204) then
         end if
        
     end subroutine precon_update
@@ -316,6 +325,7 @@ contains
         class(precon_object), intent(inout) :: this
         
         ! *************************************************************************
+        write(6,*)'chi0diel precon%free'; flush(6) !DEBUG
        
         if (this%iprcel == 202) then
             !Deallocating the array containing ldos and tdos
@@ -447,7 +457,6 @@ contains
     !!
     !! FUNCTION
     !!  Saves the LDOS contained in the precon_object in a file named ldos.txt.
-    !!      "     locale polarizability                "              loc_pola.txt. 
     !!  (For code validation)
     !!
     !! INPUTS
@@ -475,16 +484,6 @@ contains
             open(newunit=io, file="ldos.txt", status="replace", action="write")
                 do i=1,n
                     write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%ldos(i, ispden)
-                end do
-            close(io)
-        end if 
-
-        if (this%iprcel==204) then
-            n = size(this%loc_pola(:, ispden))
-            ! Writing the file
-            open(newunit=io, file="loc_pola.txt", status="replace", action="write")
-                do i=1,n
-                    write (io, '(*(G0.6,:,","))') matmul(this%rprimd, get_r_vector(i, ngfft)), this%loc_pola(i, ispden)
                 end do
             close(io)
         end if 
@@ -666,19 +665,17 @@ contains
     !!  Apply the Coulomb kernel vc to a vector (in place).
     !!
     !! INPUTS
-    !!  ngfftprc   = All needed informations about the 3D FFT for preconditioned quantities.
     !!
     !! SIDE EFFECTS
     !!  vec_g (2, nfftprc, nspden) = Vector (in G-space) to which the Coulomb kernel vc is applied (in place).
     !!                               When nspden > 1 vec_g is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_vc(this, dtset, ngfftprc, vec_g)
+    subroutine apply_vc(this, dtset, vec_g)
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         type(dataset_type),intent(in) :: dtset
         !arrays
-        integer, intent(in) :: ngfftprc(:)
         real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
         
         !Local variables-------------------------------
@@ -692,7 +689,7 @@ contains
         !   and the rest is 0.
         ispden = 1
         do ifft = 2, this%nfftprc
-            g_cart_2 = norm2(two_pi * matmul(this%gprimd, get_g_vector(ifft, ngfftprc)))**2
+            g_cart_2 = norm2(two_pi * matmul(this%gprimd, get_g_vector(ifft, this%ngfftprc)))**2
             vec_g(:, ifft, ispden) = (2*two_pi/g_cart_2) * vec_g(:, ifft, ispden)
         end do
 
@@ -712,21 +709,19 @@ contains
     !! INPUTS
     !!  dtset       = All input variables for this dataset.
     !!  mpi_enreg   = Informations about MPI parallelization.
-    !!  ngfftprc    = All needed informations about the 3D FFT for preconditioned quantities.
     !!
     !! SIDE EFFECTS
     !!  vec_g (2, nfftprc, nspden) = Vector (in G-space) to which the exchange and correlation kernel Kxc is applied (in place).
     !!                               When nspden > 1 vec_g is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_kxc(this, dtset, mpi_enreg, ngfftprc, vec_g)
+    subroutine apply_kxc(this, dtset, mpi_enreg, vec_g)
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
         type(MPI_type),intent(in) :: mpi_enreg
         !arrays
-        integer, intent(in) :: ngfftprc(:)
         real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
         
         !Local variables-------------------------------
@@ -752,7 +747,7 @@ contains
 
         !ifft to get vec_g in the real-space basis required by dfpt_mkvxc
         ABI_MALLOC(vec_r, (this%nfftprc, dtset%nspden))
-        call fourdp(1, vec_g, vec_r, 1, mpi_enreg, this%nfftprc, dtset%nspden, ngfftprc, 0)
+        call fourdp(1, vec_g, vec_r, 1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
 
         !Applying Kxc : 
         cplex = 1   ! Input vector is real in real (direct) space.
@@ -771,7 +766,7 @@ contains
         ABI_MALLOC(Kxc_vec_r, (this%nfftprc, dtset%nspden))
 
         if (dtset%nspden==1 .or. dtset%nspden==2) then
-            call dfpt_mkvxc(cplex, dtset%ixc ,this%kxc, mpi_enreg, this%nfftprc, ngfftprc, nhat1, nhat1dim, &
+            call dfpt_mkvxc(cplex, dtset%ixc ,this%kxc, mpi_enreg, this%nfftprc, this%ngfftprc, nhat1, nhat1dim, &
             &               nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, dtset%nspden, n3xccc, option, &
             &               dummy_qphon, vec_r, this%rprimd, usexcnhat, Kxc_vec_r, dummy_xccc3d1)
         end if
@@ -780,7 +775,7 @@ contains
             nhatdim = 0
             ABI_MALLOC(nhat, (this%nfftprc, dtset%nspden*nhatdim)) ! TODO : PAW
             optnc = 1   ! Compute the whole 2x2 Vres matrix
-            call dfpt_mkvxc_noncoll(cplex, dtset%ixc ,this%kxc, mpi_enreg, this%nfftprc, ngfftprc, nhat, nhatdim, &
+            call dfpt_mkvxc_noncoll(cplex, dtset%ixc ,this%kxc, mpi_enreg, this%nfftprc, this%ngfftprc, nhat, nhatdim, &
             &               nhat1, nhat1dim, nhat1gr, nhat1grdim, nkxc, non_magnetic_xc, dtset%nspden,      &
             &               n3xccc, optnc, option, dummy_qphon, this%rhor, vec_r, this%rprimd, usexcnhat,        &
             &               this%vxc, Kxc_vec_r, dummy_xccc3d1)
@@ -791,13 +786,13 @@ contains
         ABI_FREE(nhat1gr)
 
         !fft to return the result Kxc_vec_r in the plane-wave basis.
-        call fourdp(1, vec_g, Kxc_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, ngfftprc, 0)
-        !call this%save_applied_op_r(dtset, ngfftprc, vec_r, Kxc_vec_r, "applied_kxc_r.txt")  !DEBUG
+        call fourdp(1, vec_g, Kxc_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
+        !call this%save_applied_op_r(dtset, this%ngfftprc, vec_r, Kxc_vec_r, "applied_kxc_r.txt")  !DEBUG
 
         ABI_FREE(Kxc_vec_r)
         ABI_FREE(vec_r)
 
-        !call this%save_applied_op_g(dtset, ngfftprc, vec_g_old, vec_g, "applied_kxc.txt")  !DEBUG
+        !call this%save_applied_op_g(dtset, this%ngfftprc, vec_g_old, vec_g, "applied_kxc.txt")  !DEBUG
         !ABI_FREE(vec_g_old)                                    !DEBUG
 
         !Basis change to get the resulting vector in the Pauli basis used in the rest of the preconditioning routines.
@@ -815,21 +810,19 @@ contains
     !! INPUTS
     !!  dtset       = All input variables for this dataset.
     !!  mpi_enreg   = Informations about MPI parallelization.
-    !!  ngfftprc    = All needed informations about the 3D FFT for preconditioned quantities.
     !!
     !! SIDE EFFECTS
     !!  vec_g (2, nfftprc, nspden) = Vector (in G-space) to which the kernel is applied (in place).
     !!                               When nspden > 1 vec_g is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_kernel(this, dtset, mpi_enreg, ngfftprc, vec_g)
+    subroutine apply_kernel(this, dtset, mpi_enreg, vec_g)
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
         type(MPI_type),intent(in) :: mpi_enreg
         !arrays
-        integer, intent(in) :: ngfftprc(:)
         real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
         
         !Local variables-------------------------------
@@ -840,15 +833,15 @@ contains
         
         ! RPA : LDOS/Kerker model - only vc
         if (this%iprcel == 201 .or. this%iprcel == 202) then
-            call apply_vc(this, dtset, ngfftprc, vec_g)
+            call apply_vc(this, dtset, vec_g)
         end if
 
         ! No RPA : vc and Kxc
         if (this%iprcel == 203) then
             ABI_MALLOC(Kxc_vec_g, (2, this%nfftprc, dtset%nspden))
             Kxc_vec_g = vec_g   !Copy ?
-            call apply_vc(this, dtset, ngfftprc, vec_g)    ! Apply vc in place
-            call apply_Kxc(this, dtset, mpi_enreg, ngfftprc, Kxc_vec_g)
+            call apply_vc(this, dtset, vec_g)    ! Apply vc in place
+            call apply_Kxc(this, dtset, mpi_enreg, Kxc_vec_g)
             vec_g = vec_g + Kxc_vec_g
             ABI_FREE(Kxc_vec_g)
         end if
@@ -958,8 +951,8 @@ contains
         !Local variables-------------------------------
         !scalars
         type(pawrhoij_type) :: pawrhoij(mpi_enreg%my_natom*this%psps%usepaw)
-        integer :: dummy_int
-        integer :: mcg, cplex, nfftot, mcprj
+        integer :: dummy_int, mband_cprj
+        integer :: mcg, cplex, nfftot, cplex_rhoij
         real(dp) :: compch_fft
         !arrays
         real(dp) :: qphon(3)
@@ -977,6 +970,8 @@ contains
             ABI_MALLOC(w_rhowfr, (this%pawfgr%nfftc, dtset%nspden))
             ABI_MALLOC(w_rhowfg, (2, this%pawfgr%nfftc))
         end if
+
+        !write(6,*)'chi0diel compute_weighted_density dtset%nfft, this%nfftprc, this%pawfgr%nfft: ', dtset%nfft, this%nfftprc, this%pawfgr%nfft; flush(6) !DEBUG
 
         ! Compute the weighted density (w_rhor) using mkrho with weights in place of the occupations.
         mcg = size(this%cg)
@@ -1002,19 +997,28 @@ contains
             if (this%nfftprc == this%pawfgr%nfft) then
                 !Compute the rhoij equivalent for the weighted density.
                 !   Sum_{n,k} {weight(n,k)*<Cnk|p_i><p_j|Cnk>}.
-                mcprj = size(this%cprj)
-                call pawmkrhoij(this%atindx, this%atindx1, this%cprj, this%dimcprj, dtset%istwfk, dtset%kptopt, dtset%mband, this%mband_cprj, &
-                &       mcprj, dtset%mkmem, mpi_enreg, dtset%natom, dtset%nband, dtset%nkpt, dtset%nspden, dtset%nspinor, &
+                !mcprj = size(this%cprj, dim=2) ! TODO : delete line
+                mband_cprj = dtset%mband / mpi_enreg%nproc_band     ! TODO : should I add this to precon_object ?
+                write(6,*)'chi0diel compute_weighted_density : this%mcprj, mband_cprj, mpi_enreg%nproc_spinor, dtset%mkmem, dtset%nsppol', this%mcprj, mband_cprj, mpi_enreg%nproc_spinor, dtset%mkmem, dtset%nsppol; flush(6) !DEBUG
+                !Initialize pawrhoij
+                cplex_rhoij = 1
+                call pawrhoij_alloc(pawrhoij, cplex_rhoij, dtset%nspden, dtset%nspinor, dtset%nsppol, dtset%typat, pawtab=this%pawtab)  ! TODO : should i use more of the optional arguments ??
+                !Compute pawrhoij
+                call pawmkrhoij(this%atindx, this%atindx1, this%cprj, this%dimcprj, dtset%istwfk, dtset%kptopt, dtset%mband, mband_cprj, &
+                &       this%mcprj, dtset%mkmem, mpi_enreg, dtset%natom, dtset%nband, dtset%nkpt, dtset%nspden, dtset%nspinor, &
                 &       dtset%nsppol, weights, dtset%paral_kgb, dummy_paw_dmft, pawrhoij, this%unpaw, dtset%usewvl, dtset%wtk)
 
                 !Compute the total weighted density.
                 cplex = 1
                 dummy_int=0
                 qphon = 0
+                write(6,*)'chi0diel compute_weighted_density : pawrhoij(1)%cplex_rhoij, pawrhoij(1)%qphase', pawrhoij(1)%cplex_rhoij, pawrhoij(1)%qphase; flush(6) !DEBUG
                 call pawmkrho(1, compch_fft, cplex, this%gprimd, dummy_int, this%indsym, dummy_int, mpi_enreg, &
                 &       mpi_enreg%my_natom, dtset%natom, dtset%nspden, dtset%nsym, dtset%ntypat, dtset%paral_kgb, this%pawang, this%pawfgr, this%pawfgrtab, &
                 &       dtset%pawprtvol, pawrhoij, pawrhoij, this%pawtab, qphon, w_rhowfg, w_rhowfr, w_rhor, this%rprimd, dtset%symafm, &
                 &       this%symrec, dtset%typat, this%ucvol, dtset%usewvl, this%xred)
+
+                call pawrhoij_free(pawrhoij)
             else
                 ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft not implemented. TODO")
             end if
@@ -1190,7 +1194,6 @@ contains
     !!
     !! INPUTS
     !!  mpi_enreg    = Information about MPI parallelization.
-    !!  ngfftprc     = Contain all needed information about 3D FFT, see ~abinit/doc/variables/gstate/#ngfft.
     !!  ispden       = Index of spin-density component.
     !!
     !! SIDE EFFECTS
@@ -1198,7 +1201,7 @@ contains
     !!                             When nspden > 1 vec_g is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_chi0_ldos(this, dtset, mpi_enreg, ngfftprc, vec_g)
+    subroutine apply_chi0_ldos(this, dtset, mpi_enreg, vec_g)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
@@ -1206,7 +1209,6 @@ contains
         !scalars
         type(MPI_type), intent(in) :: mpi_enreg
         !arrays
-        integer, intent(in) :: ngfftprc(:)
         real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
        
         !Local variables-------------------------------
@@ -1226,7 +1228,7 @@ contains
             
             !1) ifft to get (the sigma_0 component of) vec in the real space
             ispden = 1
-            call fourdp(cplex, vec_g(:, :, ispden), vec_r_1, 1, mpi_enreg, this%nfftprc, 1, ngfftprc, 0)
+            call fourdp(cplex, vec_g(:, :, ispden), vec_r_1, 1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
 
             do ispden = 1, dtset%nspden
                 !2) chi0(v)(r)_ispden = -ldos_ispden(r)*v_1(r) + 1/dos * ldos_ispden(r)*integral(ldos_1(r')*v_1(r')*dr')
@@ -1234,7 +1236,7 @@ contains
                                 + 1/this%tdos * dot_product(this%ldos(:, 1), vec_r_1)*this%dvol * this%ldos(:, ispden)
 
                 !3) fft to get vec back in the reciprocal space
-                call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfftprc, 1, ngfftprc, 0)
+                call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
             end do
 
             ABI_FREE(work_r)
@@ -1300,18 +1302,17 @@ contains
         ! *************************************************************************
         write(6,*)'chi0diel apply_chi0_mag'; flush(6) !DEBUG
         vec_g_old = vec_g   !DEBUG
-       
         n1 = dtset%ngfft(1)
         n2 = dtset%ngfft(2)
         n3 = dtset%ngfft(3)
         n4 = dtset%ngfft(4)
         n5 = dtset%ngfft(5)
         n6 = dtset%ngfft(6)
-        if (this%nfftprc /= n1*n2*n3) then      ! TODO :  Incorrect for PAW
-            ABI_BUG("Mismatch nfft /= n1*n2*n3")
-        end if
+        !if (this%nfftprc /= n1*n2*n3) then      ! TODO :  delete
+        !    ABI_BUG("Mismatch nfft /= n1*n2*n3")
+        !end if
 
-        !1) Computing vec_r = input vector in real space
+        !1) Compute vec_r = input vector in real space
         !   - in the up/down basis if nspinor = 1
         !   - in the Pauli basis if nspinor = 2
         if (dtset%nspinor == 1) then
@@ -1319,17 +1320,19 @@ contains
         end if
         ABI_MALLOC(vec_r, (this%nfftprc, dtset%nspden))
         write(6,*)'chi0diel apply_chi0_mag before fourdp vec_g(1, 1:10, 2): ', vec_g(1, 1:10, 2); flush(6) !DEBUG
-        call fourdp(1, vec_g, vec_r, 1, mpi_enreg, this%nfftprc, 2, dtset%ngfft, 0)
+        call fourdp(1, vec_g, vec_r, 1, mpi_enreg, this%nfftprc, 2, this%ngfftprc, 0)
         
-        !2) Computing the weights = fi' * <rhoii, vec_spin> TODO
-        !   vec_spin is the spin component (in basis {tot, spin}) of the input vector vec_g
+        !2) Compute the weights = fi' * <rhoii, vec> 
         weights = 0
+
+        !2.1) Compute fi'
         maxocc = two / (dtset%nsppol * dtset%nspinor)   !Maximum number of occupations (1 or 2)
         write(6,*)'chi0diel apply_chi0_mag maxocc, this%dvol: ', maxocc, this%dvol; flush(6) !DEBUG
         
+        !2.2) Compute <rhoii, vec>
         !Allocating the arrays that will contain rho_ii
         if (dtset%nspinor==1) then
-            nspin = 1   ! Number of spin components in the orbital densities.
+            nspin = 1   ! Number of spin components in the orbital densities (rhoii).
         else if (dtset%nspinor==2) then
             nspin = 4
             ABI_MALLOC(psi_r_i_up, (2, n4, n5, n6))
@@ -1345,12 +1348,17 @@ contains
         ABI_MALLOC(dummy_fofgout, (2, 0))
         ABI_MALLOC(dummy_fofrout, (2, n4, n5, n6))
 
-        i_cg = 0    ! Starting index for (ikpt, isppol) in cg array.
         my_nspinor = max(1, dtset%nspinor/mpi_enreg%nproc_spinor)
         if (my_nspinor /= dtset%nspinor) then
             ABI_BUG("SCF preconditioner 'chi0_diag' incompatible with spinor parallelisation")  ! TODO ?
         end if
 
+        write(6,*)'chi0diel compute_weights_chi0_diag: dtset%nspinor, dtset%nspden, dtset%nsppol', dtset%nspinor, dtset%nspden, dtset%nsppol; flush(6) !DEBUG
+        write(6,*)'chi0diel compute_weights_chi0_diag: size(vec_g), size(vec_r), size(rhoaug_r_ii), size(rho_r_ii)', size(vec_g), size(vec_r), size(rhoaug_r_ii), size(rho_r_ii); flush(6) !DEBUG
+
+        i_cg = 0    ! Starting index for (ikpt, isppol) in cg array.
+
+        !Loop over spins and kpoints
         do isppol =1, dtset%nsppol
             ikg = 0 ! Starting index for ikpt in kg.
             
@@ -1408,8 +1416,17 @@ contains
                             !b) Compute the dot product between the input vector and the orbital density and update the weights :
                             ! Transfer rhoaug_r_ii defined on the large fft-grid to the smaller density/potential fft-grid.
                             call fftpac(1, mpi_enreg, 1, n1, n2, n3, n4, n5, n6, dtset%ngfft, rho_r_ii, rhoaug_r_ii(:, :, :, 1), 1)   ! DEBUG : weights for nspinor=1, nsppol=2 ok (factor from fft?)
-                            rho_r_ii(:, 1) = rho_r_ii(:, 1) / (sum(rho_r_ii(:, 1)) * this%dvol) !Normalizing rho_ii_r.   [ sqrnorm_v, meanfft_r, dotprod_vn in cg_tools/ cgtools? ]
+                            rho_r_ii(:, 1) = rho_r_ii(:, 1) / (sum(rho_r_ii(:, 1)) * this%dvol) !Normalizing rho_ii_r.   [ sqrnorm_v, meanfft_r, dotprod_vn in src/44_abitools/m_cgtools/F90]
                             ! dot product:
+                            ! TODO : correction for rho_ii in PAW ...
+                            ! We might need to transfer rho_r_ii to from the coarse grid to the fine grid used for preconditioned quantities.
+                            !if (this%nfftprc /= n1*n2*n3) then
+                            !    if (this%nfftprc == this%pawfgr%nfft) then
+                            !        transgrid(cplex, mpi_enreg, nspden, optgrid, optin, optout, paral_kgb, pawfgr, rhog, rhogf, rhor, rhorf)
+                            !    else
+                            !        ABI_BUG("iprcel=2** : nfftprc /= nfft not implemented. TODO")
+                            !    end if
+                            !end if
                             weights(i_eigen) = fp * maxocc * dot_product(rho_r_ii(:, 1), vec_r(:, isppol)) * this%dvol  ! dot-product in the up/down basis
                         end if
 
@@ -1509,10 +1526,7 @@ contains
     !!
     !! INPUTS
     !!  dtset       = All input variables for this dataset.
-    !!  mgfft       = Maximum size of 1D FFTs for the "coarse" grid.
     !!  mpi_enreg   = Information about MPI parallelization.
-    !!  ngfftprc    = Contain all needed information about 3D FFTfor preconditioned quantities.
-    !!                See ~abinit/doc/variables/gstate/#ngfft
     !!
     !! SIDE EFFECTS
     !!  vec_g (2, nfftprc, nspden) = Vector (in G-space) to which the model chi0 operator is applied (in place).
@@ -1520,16 +1534,14 @@ contains
     !!
     !! SOURCE
     ! TODO : Name 
-    subroutine apply_chi0_diag(this, dtset, mgfft, mpi_enreg, ngfftprc, vec_g)
+    subroutine apply_chi0_diag(this, dtset, mpi_enreg, vec_g)
 
         !Arguments ------------------------------------
         class(precon_object), intent(in) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
         type(MPI_type), intent(in) :: mpi_enreg
-        integer,intent(in) :: mgfft
         !arrays
-        integer, intent(in) :: ngfftprc(:) 
         real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
        
         !Local variables-------------------------------
@@ -1561,14 +1573,14 @@ contains
         !2) Computing chi0 * vec using mkrho with custom weights in place of the occupations.
         ABI_MALLOC(chi0_vec_r, (this%nfftprc, dtset%nspden))
         call compute_weighted_density(this, dtset, mpi_enreg, weights, chi0_vec_r) ! TODO : change compute_weighted_density to return the vector directly in G-space.
-        call fourdp(1, vec_g, chi0_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, ngfftprc, 0)
+        call fourdp(1, vec_g, chi0_vec_r, -1, mpi_enreg, this%nfftprc, dtset%nspden, this%ngfftprc, 0)
         ABI_FREE(chi0_vec_r)
         ABI_FREE(weights)
 
         !Basis change : With collinear spins vec_g is not returned in the Pauli (tot/spin) basis by symrhg.
         call to_pauli(this, 1, vec_g)
 
-        call this%save_applied_op_g(dtset, ngfftprc, vec_g_old, vec_g, "applied_chi0_mag.txt")  !DEBUG
+        call this%save_applied_op_g(dtset, this%ngfftprc, vec_g_old, vec_g, "applied_chi0_mag.txt")  !DEBUG
 
     end subroutine apply_chi0_diag
 
@@ -1581,10 +1593,7 @@ contains
     !!
     !! INPUTS
     !!  dtset       = All input variables for this dataset.
-    !!  mgfft       = Maximum size of 1D FFTs for the "coarse" grid.
     !!  mpi_enreg   = Information about MPI parallelization.
-    !!  ngfftprc    = Contain all needed information about 3D FFTfor preconditioned quantities.
-    !!                See ~abinit/doc/variables/gstate/#ngfft 
     !!  ispden      = Index of spin-density component.
     !!
     !! SIDE EFFECTS
@@ -1592,16 +1601,14 @@ contains
     !!                         When nspden > 1 vec_g is in the Pauli basis.
     !!
     !! SOURCE
-    subroutine apply_chi0(this, dtset, mgfft, mpi_enreg, ngfftprc, vec_g)
+    subroutine apply_chi0(this, dtset, mpi_enreg, vec_g)
 
         !Arguments ------------------------------------
-        class(precon_object), intent(in) :: this
+        class(precon_object) :: this
         !scalars
         type(dataset_type),intent(in) :: dtset
         type(MPI_type), intent(in) :: mpi_enreg
-        integer, intent(in) :: mgfft
         !arrays
-        integer, intent(in) :: ngfftprc(:)
         real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
        
         !Local variables-------------------------------
@@ -1628,19 +1635,310 @@ contains
         
         !LDOS model
         if (this%iprcel == 202) then
-            call apply_chi0_ldos(this, dtset, mpi_enreg, ngfftprc, vec_g)
+            call apply_chi0_ldos(this, dtset, mpi_enreg, vec_g)
         end if
 
         !Diagonal chi0 model
         if (this%iprcel == 203) then
-            call apply_chi0_diag(this, dtset, mgfft, mpi_enreg, ngfftprc, vec_g)
+            call apply_chi0_diag(this, dtset, mpi_enreg, vec_g)
         end if
 
     end subroutine apply_chi0
 
+    !!****f* ABINIT/apply_adjdielmat
+    !! NAME
+    !!  apply_adjdielmat
+    !!
+    !! FUNCTION
+    !!  Apply the adjoint dielectric matrix I-chi0*vc to the density rho_g (given in the Fourier space)
+    !!  with a model chi0 operator.
+    !!
+    !! INPUTS
+    !!  dtset       = All input variables for this dataset.
+    !!  mpi_enreg   = Information about MPI parallelization.
+    !!  rho_g       = Density vector (in G-space).
+    !!
+    !! OUTPUT
+    !!  adjdielmat_rho_g = adjdielmat * rho_g
+    !!
+    !! NOTES
+    !!
+    !! SOURCE
+    subroutine apply_adjdielmat(this, dtset, mpi_enreg, rho_g, adjdielmat_rho_g)
+
+        !Arguments ------------------------------------
+        class(precon_object) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type),intent(in) :: mpi_enreg
+        !arrays
+        real(dp), intent(in) :: rho_g(2, this%nfftprc, dtset%nspden)
+        real(dp), intent(out) :: adjdielmat_rho_g(2, this%nfftprc, dtset%nspden)
+        !Local variables-------------------------------
+        integer :: ispden
+        
+        ! *************************************************************************
+        write(6,*)'chi0diel apply_adjdielmat'; flush(6) !DEBUG
+        
+        adjdielmat_rho_g = rho_g
+        
+        !Components G=0 set to 0
+        do ispden=1,dtset%nspden
+            adjdielmat_rho_g(:, 1, ispden) = 0
+        end do
+        
+        !0.1) Basis change : Changing to the Pauli basis for collinear and non-collinear magnetism
+        call to_pauli(this, 1, adjdielmat_rho_g)
+        
+        !1) Applying the Kernel (vc or vc + Kxc depending on iprcel)
+        call apply_kernel(this, dtset, mpi_enreg, adjdielmat_rho_g)
+        
+        !2) Applying the model chi0 operator
+        call apply_chi0(this, dtset, mpi_enreg, adjdielmat_rho_g)
+        
+        !0.2) Basis change : Changing back to the default spin-basis
+        call from_pauli(this, 1, adjdielmat_rho_g)
+        
+        !3) adjdielmat_rho_g = rho_g - chi0 * vc * rho_g = adjdielmat * rho_g
+        adjdielmat_rho_g = rho_g - adjdielmat_rho_g
+        
+        !Components G=0 unchanged
+        do ispden=1,dtset%nspden
+            adjdielmat_rho_g(:, 1, ispden) = rho_g(:, 1, ispden)
+        end do
+        
+    end subroutine apply_adjdielmat
+    !!***
+    
+    !!****f* ABINIT/apply_dielmat
+    !! NAME
+    !!  apply_dielmat
+    !!
+    !! FUNCTION
+    !!  Apply the dielectric matrix I-vc*chi0 to the potential v_g (given in the Fourier space) 
+    !!  with a model chi0 operator (contained in precon).
+    !!
+    !! INPUTS
+    !!  dtset       = All input variables for this dataset.
+    !!  mpi_enreg   = Information about MPI parallelization.
+    !!  v_g         = Potential vector (in G-space)
+    !!
+    !! OUTPUT
+    !!  dielmat_v_g = dielmat * v_g
+    !!
+    !! NOTES
+    !!
+    !! SOURCE
+    subroutine apply_dielmat(this, dtset, mpi_enreg, v_g, dielmat_v_g)
+    
+        !Arguments ------------------------------------
+        class(precon_object) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type),intent(in) :: mpi_enreg
+        !arrays
+        real(dp), intent(in) ::  v_g(2, this%nfftprc, dtset%nspden)
+        real(dp), intent(out) :: dielmat_v_g(2, this%nfftprc, dtset%nspden)
+        !Local variables-------------------------------
+        integer :: ispden
+        
+        ! *************************************************************************
+        write(6,*)'chi0diel apply_dielmat'; flush(6) !DEBUG
+        
+        dielmat_v_g = v_g
+        
+        !Components G=0 set to 0
+        do ispden = 1, dtset%nspden
+            dielmat_v_g(:, 1, ispden) = 0
+        end do
+        
+        !0.1) Basis change : Changing to the Pauli basis for collinear and non-collinear magnetism
+        call to_pauli(this, 0, dielmat_v_g)
+        
+        !1) Applying the model chi0 operator
+        call apply_chi0(this, dtset, mpi_enreg, dielmat_v_g)
+        
+        !2) Applying the Kernel (vc or vc + Kxc depending on iprcel)
+        call apply_kernel(this, dtset, mpi_enreg, dielmat_v_g)
+        
+        !0.2) Basis change : Changing back to the default spin-basis
+        call from_pauli(this, 0, dielmat_v_g)
+        
+        !3) dielmat_v_g = v_g - vc * chi0 * v_g = dielmat * v_g
+        dielmat_v_g = v_g - dielmat_v_g
+        
+        !Components G=0 unchanged
+        do ispden=1,dtset%nspden
+            dielmat_v_g(:, 1, ispden) = v_g(:, 1, ispden)
+        end do
+        
+    end subroutine apply_dielmat
+    !!***
+
 !-------------------------------------------------------------------------------------------
 !This should be moved to a specific file
 !-------------------------------------------------------------------------------------------
+
+    !****f* m_precon/cg_eigen_solver
+    !! NAME
+    !!  cg_eigen_solver
+    !!
+    !! FUNCTION
+    !!  Compute the smallest eigenvalues and corresponding eigenvectors of a matrix using
+    !!  the Conjugate Gradient method to minimize the Rayleigh quotient.
+    !!
+    !! INPUTS
+    !!  n              = Size of the matrix.
+    !!  matvec         = Subroutine that performs matrix-vector multiplication.
+    !!  x0             = Initial guess for the eigenvector.
+    !!  tol            = Convergence tolerance for the residual norm.
+    !!  max_iter       = Maximum number of iterations for the Conjugate Gradient method.
+    !!  max_neig       = Maximum number of eigenvalues to compute.
+    !!  eigenvalue_threshold = Threshold below which to stop computing further eigenvalues.
+    !!
+    !! OUTPUTS
+    !!  eigenvalues    = Array of computed smallest eigenvalues.
+    !!  eigenvectors   = Matrix of corresponding eigenvectors.
+    !!  n_eig          = Number of computed eigenvalues.
+    !!
+    !! SOURCE
+    subroutine cg_eigen_solver(n, matvec, x0, tol, max_iter, max_neig, eigenvalue_threshold, eigenvalues, eigenvectors, n_eig)
+        ! Input parameters
+        integer, intent(in) :: n, max_iter, max_neig
+        real(dp), intent(in) :: tol, eigenvalue_threshold
+        real(dp), intent(in) :: x0(n)
+        interface
+            subroutine matvec(n_, x, y)
+                integer, intent(in) :: n_
+                double precision, intent(inout), target :: x(n_), y(n_)
+            end subroutine matvec
+        end interface
+
+        ! Output parameters
+        real(dp), intent(out) :: eigenvalues(max_neig)
+        real(dp), intent(out) :: eigenvectors(n, max_neig)
+        integer, intent(out) :: n_eig
+
+        ! Local variables
+        real(dp) :: r(n), p(n), Ap(n), x(n)
+        real(dp) :: residual_norm, rayleigh_quotient
+        integer :: i, j, iter
+        
+        ! *************************************************************************
+        
+        ! Initialize variables
+        x = x0 / sqrt(sum(x0**2))   ! Normalize the initial guess
+        r = x                       ! Residual vector
+        p = r                       ! Search direction
+        residual_norm = sqrt(sum(r**2))
+
+        ! Conjugate Gradient iterations to minimize Rayleigh quotient
+        do iter = 1, max_iter
+            call cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
+            if (residual_norm < tol) exit
+        end do
+
+        ! Store the computed eigenvalue and eigenvector
+        eigenvalues(1) = rayleigh_quotient
+        eigenvectors(:, 1) = x
+        n_eig = 1
+
+        ! If more eigenvalues are required, use deflation to compute subsequent eigenvalues
+        do j = 2, max_neig
+            ! Check if the eigenvalue is below the threshold
+            if (eigenvalues(j-1) < eigenvalue_threshold) exit
+
+            ! If it is not, we need to compute more eigenvalues
+            ! Orthogonalize the initial guess against previously computed eigenvectors
+            x = x0
+            do i = 1, j - 1
+                x = x - dot_product(x, eigenvectors(:, i)) * eigenvectors(:, i)
+            end do
+            x = x / sqrt(sum(x**2))
+
+            ! Reset residual and search direction for the next eigenvalue
+            r = x
+            p = r
+            residual_norm = sqrt(sum(r**2))
+
+            do iter = 1, max_iter
+                call cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
+                if (residual_norm < tol) exit
+            end do
+
+            eigenvalues(j) = rayleigh_quotient
+            eigenvectors(:, j) = x
+            n_eig = n_eig + 1
+        end do
+
+    end subroutine cg_eigen_solver
+
+    !****f* m_precon/cg_update
+    !! NAME
+    !!  cg_update
+    !!
+    !! FUNCTION
+    !!  Perform a single Conjugate Gradient update step to minimize the Rayleigh quotient.
+    !!
+    !! INPUTS
+    !!  n              = Size of the matrix.
+    !!  matvec         = Subroutine that performs matrix-vector multiplication.
+    !!
+    !! INPUT/OUTPUTS
+    !!  x              = Current solution vector (eigenvector approximation).
+    !!  r              = Residual vector.
+    !!  p              = Search direction vector.
+    !!  Ap             = Result of matrix-vector multiplication (A * p).
+    !!
+    !! OUTPUTS
+    !!  rayleigh_quotient = Current approximation of the eigenvalue.
+    !!  residual_norm     = Norm of the residual vector.
+    !!
+    !! SOURCE
+    subroutine cg_update(n, matvec, x, r, p, Ap, rayleigh_quotient, residual_norm)
+        ! Arguments
+        integer, intent(in) :: n
+        interface
+            subroutine matvec(n_, x, y)
+                integer, intent(in) :: n_
+                double precision, intent(inout), target :: x(n_), y(n_)
+            end subroutine matvec
+        end interface
+        real(dp), intent(inout) :: x(n), r(n), p(n), Ap(n)
+        real(dp), intent(out) :: rayleigh_quotient, residual_norm
+
+        ! Local variables
+        real(dp) :: alpha, beta
+
+        ! *************************************************************************
+
+        ! Apply the matrix-vector multiplication
+        call matvec(n, p, Ap)
+
+        ! Compute Rayleigh quotient (approximation of eigenvalue)
+        rayleigh_quotient = dot_product(x, Ap) / dot_product(x, x)
+
+        ! Compute alpha (step size)
+        alpha = dot_product(r, r) / dot_product(p, Ap)
+
+        ! Update the solution vector
+        x = x + alpha * p
+
+        ! Update the residual vector
+        r = r - alpha * Ap
+
+        ! Compute residual norm
+        residual_norm = sqrt(sum(r**2))
+
+        ! Compute beta (update factor for search direction)
+        beta = dot_product(r, r) / dot_product(r - alpha * Ap, r - alpha * Ap)
+
+        ! Update the search direction
+        p = r + beta * p
+
+    end subroutine cg_update
+
+! Linear solvers (GMRES)
 
     subroutine call_FGMRES(n, matvec, rhs, est, gmres_maxiter, gmres_rtol)
         !Arguments ------------------------------------
