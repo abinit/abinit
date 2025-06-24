@@ -865,9 +865,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
 ! Initializing precon-object for chi0 based preconditioning
  write(6,*)'chi0diel init : dimcprj, mcprj, cprj :', dimcprj, mcprj; flush(6) ! DEBUG
- call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, gprimd, indsym, &
- &  irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, pawang, pawfgr, pawfgrtab, &
- &  pawtab, phnons, psps, rhor, rprimd, symrec, ucvol, vxc, xred)
+ call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, gmet, gprimd, indsym,  &
+ &  irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, pawang, pawfgr, pawfgrtab,                &
+ &  pawtab, ph1d, phnons, psps, rhor, rmet, rprimd, symrec, ucvol, usecprj, vxc, xred, ylm)
  
 ! Here initialize the datastructure constrained_dft, for constrained DFT calculations
 ! as well as penalty function constrained magnetization

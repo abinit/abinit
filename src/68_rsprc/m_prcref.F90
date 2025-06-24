@@ -2519,8 +2519,8 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
  ABI_FREE(est)
 
 !Simple mixing : TODO diemixmag
- vrespc = precon%diemix * vrespc
- !vrespc = precon%diemix * vresid  !DEBUG
+ !vrespc = precon%diemix * vrespc
+ vrespc = precon%diemix * vresid  !DEBUG
 
  contains
 
