@@ -52,10 +52,10 @@ will show the location of the gfortran executable provided the binary is in $PAT
 Other packages of interest when compiling code from source
 are the so-called develop packages (denoted by the `-dev` suffix) that contain among others:
 
-  - header files (extension `.h`) providing the declaration of prototypes and named constants.
-    These files are usually installed in an include folder (e.g. /usr/include).
-  - shared library files (extension `.so`).
-    that are usually installed in a lib folder (e.g. /usr/lib).
+- header files (extension `.h`) providing the declaration of prototypes and named constants.
+  These files are usually installed in an include folder (e.g. /usr/include).
+- shared library files (extension `.so`).
+  that are usually installed in a lib folder (e.g. /usr/lib).
 
 To obtain the location of such files, use the command
 
@@ -100,11 +100,11 @@ A possible list of prerequisites (tested for Ubuntu 19.10) is:
 
 5. Some mandatory libraries:
 
-      - HDF5, NetCDF and NetCDF-Fortran, libraries to write/read binary files in netcdf4 format.
-       These libraries are available via the `libhdf5-dev`, `libnetcdf-dev` and `libnetcdff-dev` packages from apt.
-       For parallel IO, the `libpnetcdf-dev` is required.
+   - HDF5, NetCDF and NetCDF-Fortran, libraries to write/read binary files in netcdf4 format.
+    These libraries are available via the `libhdf5-dev`, `libnetcdf-dev` and `libnetcdff-dev` packages from apt.
+    For parallel IO, the `libpnetcdf-dev` is required.
 
-      - LIBXC, a library containing exchange-correlation potentials, from the `libxc-dev` package.
+   - LIBXC, a library containing exchange-correlation potentials, from the `libxc-dev` package.
 
    Note that it is also possible to generate these libraries via the ABINIT fallbacks:
 
@@ -115,7 +115,7 @@ A possible list of prerequisites (tested for Ubuntu 19.10) is:
 
    In the latter case, the ABINIT configuration file (see later) should contain `with_fallbacks="yes"`.
 
-These are the commands required to install the required packages from apt 
+These are the commands required to install the required packages from apt
 assuming a relatively simple ABINIT build with MPI support.
 The list of commands may change depending on your linux distribution,
 the exact ABINIT version you want to compile and the libraries you want to use.
@@ -134,11 +134,10 @@ sudo apt install liblapack-dev libblas-dev
 sudo apt install libhdf5-dev libnetcdf-dev libnetcdff-dev libpnetcdf-dev libxc-dev
 ```
 
-Note that if you prefer to compile hdf5 and netcdf4 from source, you will neeed
+Note that if you prefer to compile hdf5 and netcdf4 from source, you will need
 the zlib library that can be installed with:
 
     sudo apt-get install -y libz-dev
-
 
 ### Compiling ABINIT
 
@@ -163,7 +162,7 @@ To configure, use:
 ../configure --with-config-file='my_config_file.ac9'
 ```
 
-where 'my_config_file.ac9' is a configuration file that is discussed in more details in the next section.
+where `my_config_file.ac9` is a configuration file that is discussed in more details in the next section.
 
 Compile with:
 
@@ -196,7 +195,7 @@ To obtain the documentation for the different variables and flags, use:
 Most configuration options are detected automatically by configure.
 For example, if `with_mpi` is set to 'yes', configure will try to use the parallel fortran compiler (mpifort)
 and automatically detect the MPI installation with libraries (.so) and header (.h) files.
-When you install the Open MPI package via apt, these directories can be printed to terminal 
+When you install the Open MPI package via apt, these directories can be printed to terminal
 by using `dpkg -L 'libopenmpi-dev'`.
 
 When a lot of options must be passed to configure, it is advised to use an external configuration file with
@@ -206,7 +205,7 @@ the syntax:
 ../configure --with-config-file='my_config_file.ac9'
 ```
 
-An example of configuration file to build abinit with MPI, lapack and blas and automatic 
+An example of configuration file to build abinit with MPI, lapack and blas and automatic
 detection for libxc, hdf5, and netcdf:
 
 ```sh
@@ -227,19 +226,17 @@ with_netcdf_fortran="yes"
 
 Note that:
 
-  - one uses '-' when typing a flag but '_' inside the config file, e.g. `--with-mpi="yes"` becomes `with_mpi="yes"`.
-
-  - the LINALG_LIBS variable was explicitly set for this linux distrubution.
-    The directory was extracted via `dpkg -L liblapack-dev` and `dpkg -L libblas-dev`.
-
-  - when fine tuning variables and flags for a particular linux distribution, it is advised to
-    take a look at the template file `~abinit/doc/build/config-template.ac9`.
-    For example, the setting of `LINALG_LIBS` in this template file is given
-    by the line `#LINALG_LIBS="-L/usr/local/lib -llapack -lblas"`.
+- one uses '-' when typing a flag but '_' inside the config file, e.g. `--with-mpi="yes"` becomes `with_mpi="yes"`.
+- the `LINALG_LIBS` variable was explicitly set for this linux distribution.
+  The directory was extracted via `dpkg -L liblapack-dev` and `dpkg -L libblas-dev`.
+- when fine tuning variables and flags for a particular linux distribution, it is advised to
+  take a look at the template file `~abinit/doc/build/config-template.ac9`.
+  For example, the setting of `LINALG_LIBS` in this template file is given
+  by the line `#LINALG_LIBS="-L/usr/local/lib -llapack -lblas"`.
 
 More specialized libraries might be harder to detect.
 For example, the following section was added to the config file to detect customized FFT and XML libraries.
-These libraries are available via apt (`libfftw3-dev `and `libxml2-dev`).
+These libraries are available via apt (`libfftw3-dev` and `libxml2-dev`).
 The directories for the corresponding library and header files can be found by using `dpkg -L [package]`
 and other flags can be extracted from the `~abinit/doc/build/config-template.ac9` template
 

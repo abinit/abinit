@@ -1,0 +1,110 @@
+# == Convergency and starting
+# DATASET 1: LDA
+# DATASET 2: DMFT
+ndtset 5
+jdtset 1 2 3 4 5
+prtvol    4
+pawprtvol 3
+getden1 0
+getden  1
+
+##### CONVERGENCE PARAMETERS
+nstep1   30
+nstep     1
+ecut      10
+pawecutdg 40
+tolvrs  1.0d-10
+nband     34
+occopt 3 tsmear 700 K
+diemix 0.1
+nline    5
+nnsclo1  0
+nnsclo   10
+fftalg   112
+
+nspinor 2
+nspden  4
+nsppol  1
+pawspnorb 1
+
+##### PHYSICAL PARAMETERS
+natom 1 ntypat  1 typat  1
+znucl  58.0
+xred  0.d0   0.d0   0.d0
+acell   3*9.1274
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1/2 1/2 0.0
+
+# == Points k and symetries
+paral_kgb 0
+kptopt 4
+kptrlatt 4 0 0 0 4 0 0 0 4
+nshiftk 4
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+
+# == LDA+DMFT
+usedmft1 0
+usedmft  1
+dmftbandi 9
+dmftbandf 33
+dmft_nwli 2000
+dmft_iter 1
+
+# == CTQMC
+dmft_solv 7 # CTQMC
+dmftqmc_l 200
+dmftqmc_n 1.d6
+dmftqmc_therm 5000
+dmftctqmc_basis2 1
+dmftctqmc_basis3 2
+dmftctqmc_basis4 3
+dmftctqmc_basis5 4
+dmftctqmc_meas 10
+
+dmft_mxsf 0.1
+dmft_dc  7
+dmft_nominal 1
+dmft_dc2 8
+dmft_yukawa_param 4
+dmft_epsilon_yukawa 1.2
+dmft_lambda_yukawa 1.62
+
+dmft_triqs_off_diag 1
+dmft_triqs_wmax 1.0
+dmft_triqs_loc_n_max 2
+dmft_triqs_epsilon 1.d-2
+dmft_triqs_tol_block5 1.0d-15
+
+# == DFT+U
+usepawu1    4
+usepawu     14
+dmatpuopt  1   # choose expression of the density matrix
+lpawu   3   # U on d-orbitals of Ni, no U on oxygen
+upawu1  0.00     # values in Hartree
+upawu  6 eV     # values in Hartree
+jpawu  0.0000  # values in Hartree
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "58ce.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
+#%% files_to_test = t110_MPI8.abo, tolnlines = 126, tolabs = 1.0e-4, tolrel = 1.1, fld_options=-easy;
+#%%                 t110_MPI8o_DS5_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t110_MPI8o_DS5_Gtau_offdiag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%% [extra_info]
+#%% authors = J. Bieder, B. Amadon, E. Castiel
+#%% keywords = DMFT, TRIQS
+#%% description = DFT+DMFT for Ce : test TRIQS interface with different basis and spinors
+#%%<END TEST_INFO>

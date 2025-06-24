@@ -179,7 +179,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
 ! Init parallelism
  paral_kgb = mpi_enreg%paral_kgb
- comm_kpt = merge(mpi_enreg%comm_kpt,mpi_enreg%comm_cell,paral_kgb==1)
+ comm_kpt  = merge(mpi_enreg%comm_kpt,mpi_enreg%comm_cell,paral_kgb==1)
  comm_band = mpi_enreg%comm_band
  me_kpt  = mpi_enreg%me_kpt
  me_band = mpi_enreg%me_band
@@ -212,7 +212,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 !if(mpi_enreg%me==0) write(7886,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
 !if(mpi_enreg%me==1) write(7887,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
 !if(mpi_enreg%me==2) write(7888,*) "in datafordmft", mpi_enreg%me, mpi_enreg%nproc
- write(message,'(2a)') ch10,' == Prepare data for DMFT calculation'
+ write(message,'(2a)') ch10,' == Prepare data for DFT+DMFT calculation'
  call wrtout(std_out,message,'COLL')
  if (abs(pawprtvol) >= 3) then
    write(message,'(2a)') ch10,'---------------------------------------------------------------'
@@ -463,7 +463,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
 
                  end do ! ir
 
-               end if
+               end if ! prt_wan
 
                if (verif_band) then
                  do iproj=1,nproju
@@ -697,6 +697,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
    if ((me_kpt == 0 .and. nbandkss /= 0) .or. (paw_dmft%dmft_kspectralfunc == 1)) then
 !     opt_renorm=1 ! if ucrpa==1, no need for individual orthonormalization
      opt_renorm = merge(2,3,dtset%ucrpa>=1.or.paw_dmft%dmft_kspectralfunc==1)
+     if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) opt_renorm = paw_dmft%dmft_wanorthnorm
      call chipsi_renormalization(paw_dmft,opt=opt_renorm)
      if (paw_dmft%myproc == 0) then
        call chipsi_print(paw_dmft,pawtab(:))
@@ -860,6 +861,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
 !   write(unt,*) "Fermi level (in Ryd)="
 !   write(unt,*) fermie*two
    close(unt)
+
  end subroutine chipsi_print
 !!***
 
@@ -897,9 +899,9 @@ subroutine chipsi_print(paw_dmft,pawtab)
  type(matlu_type), allocatable :: levels_temp(:),magnfield(:)
 !************************************************************************
 
- natom = paw_dmft%natom
+ natom   = paw_dmft%natom
  nspinor = paw_dmft%nspinor
- nsppol = paw_dmft%nsppol
+ nsppol  = paw_dmft%nsppol
  if (present(nondiag)) nondiag = .false.
 
 !======================================================================
@@ -931,7 +933,7 @@ subroutine chipsi_print(paw_dmft,pawtab)
  end if
 
  write(tag,'(f13.5)') paw_dmft%fermie
- write(message,'(a,2x,2a)') ch10," == Print Energy levels in cubic basis for Fermi Level= ",adjustl(tag)
+ write(message,'(a,2x,2a)') ch10," == Print Energy levels in cubic basis for Fermi Level = ",adjustl(tag)
  call wrtout(std_out,message,'COLL')
 !call print_oper(energy_level,1,paw_dmft,1)
  call print_matlu(energy_level%matlu(:),natom,1)
@@ -955,6 +957,8 @@ subroutine chipsi_print(paw_dmft,pawtab)
    !call print_matlu(magnfield,natom,1)
    call add_matlu(levels_temp,magnfield,energy_level%matlu,natom,-1)
    call print_matlu(energy_level%matlu,natom,1)
+   call destroy_matlu(magnfield,natom)
+   call destroy_matlu(levels_temp,natom)
 
   ABI_FREE(magnfield)
   ABI_FREE(levels_temp)
@@ -996,6 +1000,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  type(oper_type) :: norm,oper_temp
  character(len=500) :: message
  real(dp), allocatable :: wtk_tmp(:)
+ character(len=5) :: tag
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
 !************************************************************************
 
@@ -1049,15 +1054,17 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !  == renormalize k-point after k-point
 !  ====================================
 
-   write(message,'(2a,i5)') ch10,' Nb of K-point',nkpt
+   write(tag,'(i5)') nkpt
+   write(message,'(3a)') ch10,' Number of k-points: ',adjustl(tag)
    call wrtout(std_out,message,'COLL')
    do jkpt=1,nkpt  ! jkpt
-     write(message,'(2a,i5)') ch10,'  == Renormalization for K-point',jkpt
+     write(tag,'(i5)') jkpt
+     write(message,'(3a)') ch10,'  == Orthonormalization for k-point: ',adjustl(tag)
      call wrtout(std_out,message,'COLL')
      if (paw_dmft%distrib%procb(jkpt) /= paw_dmft%distrib%me_kpt) cycle
      call normalizechipsi(1,paw_dmft,jkpt=jkpt)
    end do ! jkpt
-   write(message,'(2a)') ch10,'  ===== K-points all renormalized'
+   write(message,'(2a)') ch10,'  ===== Every k-point has been orthonormalized'
    call wrtout(std_out,message,'COLL')
 
  else if (option == 3) then  ! option==3
@@ -1066,7 +1073,7 @@ subroutine chipsi_renormalization(paw_dmft,opt)
 !  ====================================
    write(message,'(6a)') ch10, &
      &      '  ====================================== ',&
-     & ch10,'  == Renormalization for all K-points == ',&
+     & ch10,'  == Orthonormalization for all k-points == ',&
      & ch10,'  ====================================== '
    call wrtout(std_out,message,'COLL')
    call normalizechipsi(nkpt,paw_dmft)
@@ -1087,19 +1094,21 @@ subroutine chipsi_renormalization(paw_dmft,opt)
  call init_oper(paw_dmft,oper_temp,opt_ksloc=2)
  call identity_oper(oper_temp,2)
 
- if (paw_dmft%dmft_kspectralfunc == 1) then
+ if (paw_dmft%dmft_kspectralfunc == 1 .and. &
+   & ((paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7) .or. paw_dmft%kptopt < 0)) then
    ABI_MALLOC(wtk_tmp,(nkpt))
    wtk_tmp(:) = one
    call init_oper(paw_dmft,norm,nkpt=1,wtk=wtk_tmp(:),opt_ksloc=2)
    do jkpt=1,nkpt ! jkpt
      norm%shiftk = jkpt - 1
      call downfold_oper(norm,paw_dmft,option=2)
-     write(message,'(2a,i5)') &
-       & ch10,"  == Check: Overlap after renormalization for k-point",jkpt
+     write(tag,'(i5)') jkpt
+     write(message,'(3a)') &
+       & ch10,"  == Check: Overlap after orthonormalization for k-point ",adjustl(tag)
      call wrtout(std_out,message,'COLL')
      call print_matlu(norm%matlu(:),natom,prtopt=1)
 !== Check that norm is now the identity
-     call diff_matlu('Overlap after renormalization','Identity',&
+     call diff_matlu('Overlap after orthonormalization','Identity',&
        & norm%matlu(:),oper_temp%matlu(:),natom,1,tol6,zero_or_one=1)
    end do ! jkpt
    ABI_FREE(wtk_tmp)
@@ -1170,11 +1179,17 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
  integer, optional, intent(in) :: jkpt
  type(paw_dmft_type), intent(inout) :: paw_dmft
 !Local variables ------------------------------
- integer :: dimoverlap,dum,iatom,ib,ikpt,isppol,itot,itot1,lpawu,mbandc
- integer :: natom,ndim,ndim_max,nspinor,nsppol,pawprtvol
+ integer :: dimoverlap,dum,iatom,ib,ikpt,im,im1,isppol,itot,itot1,lpawu,mbandc
+ integer :: natom,ndim,ndim_max,nspinor,nsppol,pawprtvol,unt
+ logical :: lexist
  type(oper_type) :: norm1,norm2,norm3
+ real(dp), allocatable :: si(:),sr(:)
  complex(dpc), allocatable :: chipsivect(:,:),largeoverlap(:,:),mat_tmp(:,:)
+ character(len=1) :: tag_is
+ character(len=4) :: tag_at
+ character(len=5) :: tag
  character(len=500) :: message
+ character(len=fnlen) :: tmpfil
 ! real(dp),allocatable :: e0pde(:,:,:),omegame0i(:)
  !complex(dpc), allocatable :: wan(:,:,:),sqrtmatinv(:,:),wanall(:)
  !type(coeff2c_type), allocatable :: overlap(:)
@@ -1200,11 +1215,40 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
 
    call init_oper(paw_dmft,norm1,opt_ksloc=2)
 
-   call downfold_oper(norm1,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
-   call xmpi_matlu(norm1%matlu(:),natom,paw_dmft%distrib%comm_kpt)
-   if (nkpt > 1) then
-     call sym_matlu(norm1%matlu(:),paw_dmft)
-   end if
+   if (paw_dmft%dmft_kspectralfunc == 1 .and. paw_dmft%kptopt < 0) then ! Read overlap from file
+     if (paw_dmft%myproc == 0) then
+       ABI_MALLOC(sr,(ndim_max))
+       ABI_MALLOC(si,(ndim_max))
+       do iatom=1,natom
+         lpawu = paw_dmft%lpawu(iatom)
+         if (lpawu == -1) cycle
+         ndim = nspinor * (2*lpawu+1)
+         call int2char4(iatom,tag_at)
+         ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+         do isppol=1,nsppol
+           write(tag_is,'(i1)') isppol
+           tmpfil = trim(paw_dmft%filnamei)//"_DMFTOVERLAP_iatom"//tag_at//"_isppol"//tag_is
+           inquire(file=trim(tmpfil),exist=lexist)
+           if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
+           if (open_file(trim(tmpfil),message,newunit=unt) /= 0) ABI_ERROR(message)
+           do im=1,ndim
+             read(unt,'(60(2x,e25.17e3))') (sr(im1),si(im1),im1=1,ndim)
+             norm1%matlu(iatom)%mat(im,:,isppol) = cmplx(sr(1:ndim),si(1:ndim),kind=dp)
+           end do ! im
+           close(unt)
+         end do ! isppol
+       end do ! iatom
+       ABI_FREE(sr)
+       ABI_FREE(si)
+     end if ! myproc=0
+     call xmpi_matlu(norm1%matlu(:),natom,paw_dmft%spacecomm,0,2)
+   else  ! Compute overlap
+     call downfold_oper(norm1,paw_dmft,procb=paw_dmft%distrib%procb(:),iproc=paw_dmft%distrib%me_kpt,option=2)
+     call xmpi_matlu(norm1%matlu(:),natom,paw_dmft%distrib%comm_kpt)
+     if (nkpt > 1) then
+       call sym_matlu(norm1%matlu(:),paw_dmft)
+     end if
+   end if ! kspectralfunc
 
    if (pawprtvol > 2) then
      write(message,'(2a)') ch10,'  - Print current norm and overlap (before orthonormalization)'
@@ -1256,6 +1300,19 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
          !call invsqrt_matrix(overlap(iatom)%value,tndim,dum)
          !sqrtmatinv=overlap(iatom)%value
      do isppol=1,nsppol
+
+       if ((paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) .and. paw_dmft%dmft_prt_maxent == 1 .and. paw_dmft%myproc == 0 &
+         & .and. paw_dmft%dmft_kspectralfunc == 0) then
+         call int2char4(iatom,tag_at)
+         ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+         write(tag_is,'(i1)') isppol
+         if (open_file(trim(paw_dmft%filapp)//"_DMFTOVERLAP_iatom"//tag_at//"_isppol"//tag_is,message,newunit=unt) /= 0) ABI_ERROR(message)
+         do im=1,ndim
+           write(unt,'(60(2x,e25.17e3))') (norm1%matlu(iatom)%mat(im,im1,isppol),im1=1,ndim)
+         end do ! im
+         close(unt)
+       end if ! triqs and dmft_prt_maxent
+
        ! if(diag==0) then
        call invsqrt_matrix(norm1%matlu(iatom)%mat(:,:,isppol),ndim,dum)
        !else
@@ -1416,16 +1473,17 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
     !   enddo ! ib
 
 !    Math: orthogonalization of overlap
-     write(std_out,*) "jkpt=",jkpt
+     write(tag,'(i5)') jkpt
+     write(std_out,'(a,5x,2a)') ch10,"Overlap for ikpt = ",adjustl(tag)
      do itot=1,dimoverlap
        write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
      call invsqrt_matrix(largeoverlap(:,:),dimoverlap,dum)
-     write(std_out,*) "jkpt=",jkpt
+     write(std_out,'(a,5x,2a)') ch10,"Inverse square root of overlap for ikpt = ",adjustl(tag)
      do itot=1,dimoverlap
        write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
-     write(std_out,*) "jkpt=",jkpt
+     write(std_out,'(a,5x,2a)') ch10,"Inverse square root of overlap for ikpt = ",adjustl(tag)
      do itot=1,dimoverlap
        write(std_out,'(100e9.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do
@@ -1473,7 +1531,7 @@ subroutine normalizechipsi(nkpt,paw_dmft,jkpt)
       !   enddo ! itot
       ! enddo ! ib
 
-     write(std_out,*) "jkpt=",jkpt
+     write(std_out,'(a,5x,2a)') ch10,"New overlap for ikpt = ",adjustl(tag)
      do itot=1,dimoverlap
        write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
      end do

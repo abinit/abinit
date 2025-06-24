@@ -1,0 +1,108 @@
+
+########################
+### GLOBAL VARIABLES ###
+########################
+
+ndtset   4
+acell      1.0    1.0    1.0
+
+xred  
+    0.0    0.0    0.0
+    0.25    0.25    0.25
+
+typat   1 1
+
+ntypat   1
+rprim  
+    6.3285005521    0.0    3.6537614973
+    2.1095001840    5.9665675402    3.6537614973
+    0.0    0.0    7.3075229946
+
+natom   2
+znucl   14
+
+ecut   6
+timopt   -1
+istwfk   *1
+kptopt   1
+shiftk  
+    0.0    0.0    0.0
+    0.0    0.5    0.5
+    0.5    0.0    0.5
+    0.5    0.5    0.0
+
+ngkpt   2 2 2
+
+nshiftk   4
+
+#################
+### DATASET 1 ###
+#################
+kptopt1   1
+shiftk1  
+    0.5    0.5    0.5
+    0.5    0.0    0.0
+    0.0    0.5    0.0
+    0.0    0.0    0.5
+
+ngkpt1   2 2 2
+
+nshiftk1   4
+tolvrs1   1e-06
+nband1   4
+
+#################
+### DATASET 2 ###
+#################
+iscf2   -2
+nband2   35
+tolwfr2   1e-12
+getden2   1
+
+#################
+### DATASET 3 ###
+#################
+gwcalctyp3 1
+getwfk3   2
+ecutwfn3  6
+nband3   25
+optdriver3   3
+ecuteps3   6
+nfreqim3 20
+
+#################
+### DATASET 4 ###
+#################
+gwcalctyp4 1
+getwfk4   2
+ecutwfn4     6
+nomegasi4 -20
+nfreqim_conv4 30
+nband4   30
+optdriver4   4
+ecutsigx4   6.0
+getscr4   3
+nkptgw4   1
+bdgw4  
+ 1 8
+
+kptgw4 
+    0.0    0.0    0.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.psp"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t60.abo, tolnlines = 20, tolabs = 2.0e-2, tolrel = 5.0e-1, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = H. Tsai, M. Giantomassi
+#%% keywords = GW
+#%% description =
+#%%   Testing interpolation method for convolution.
+#%%<END TEST_INFO>

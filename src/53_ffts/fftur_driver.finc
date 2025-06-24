@@ -9,7 +9,6 @@ block
  integer :: kg_kin0(3,0)
  real(dp) :: dum_denpot(0,0,0),dum_fofgin(0,0)
  real(dp),allocatable :: fofgout(:,:),fofr(:,:,:,:),fg_box(:,:,:,:)
-
 ! *************************************************************************
 
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10); fftcache=ngfft(8)
@@ -42,7 +41,7 @@ block
      rspad = (idat-1)*nfft
      !
      ! Fill fofr from input ur array.
-     do iz=1,nz  
+     do iz=1,nz
        do iy=1,ny
          do ix=1,nx
            ifft = ix + (iy-1)*nx + (iz-1)*nx*ny + rspad
@@ -55,7 +54,7 @@ block
      if (istwf_k==1) then
        !
        ! option=3 --> real space to reciprocal space.
-       ! NOTE that in this case, istwf_k=1 must be used. 
+       ! NOTE that in this case, istwf_k=1 must be used.
        ! this is not thread-safe! use ndat1
        call sg_fftrisc(cplex0,dum_denpot,dum_fofgin,fofgout,fofr,&
                        gbound_k,gbound_k,istwf_k,kg_kin0,kg_k,mgfft,ndat1,ngfft,npwin0,npw_k,ldx,ldy,ldz,&
