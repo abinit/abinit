@@ -177,77 +177,77 @@ contains
         ! *************************************************************************
         write(6,*)'chi0diel precon%init'; flush(6) !DEBUG
         
-        !Constant data from dtset
-        this%dielng = dtset%dielng
-        this%diemix = dtset%diemix
-        this%iprcel = dtset%iprcel
-        this%nfftprc = nfftmix          ! FFT grid for preconditioned densities and/or potentials :
-        this%ngfftprc = ngfftmix        ! same grid as the one used for mixing.
-        !Other constants
-        this%dvol   = ucvol/dtset%nfft  ! factor for integrals in real space: sum(f) * dvol ~ integral f
-        this%gprimd = gprimd
-        this%rprimd = rprimd
-        this%gmet   = gmet
-        this%rmet  = rmet
-        this%ucvol  = ucvol
-        this%need_kxc = .false.
-        !Pointers
-        this%atindx => atindx 
-        this%atindx1 => atindx1 
-        this%cg     => cg
-        this%eigen  => eigen
-        this%fermie => fermie
-        this%indsym => indsym
-        this%irrzon => irrzon
-        this%kg     => kg
-        this%nattyp => nattyp
-        this%npwarr => npwarr
-        this%ph1d   => ph1d
-        this%phnons => phnons
-        this%psps   => psps
-        this%rhor   => rhor
-        this%symrec => symrec
-        this%vxc    => vxc
-        this%xred   => xred
-        
-        !PAW :
-        if (psps%usepaw==1) then
-            write(6,*)'chi0diel init : allocating PAW var '; flush(6) ! DEBUG
-            this%unpaw      = dtfil%unpaw
-            this%cprj       => cprj     ! TODO : when cprj_in_memory = 0 the cprj array is computed on the fly and not allocated (or allocated with 0 size maybe)...
-            this%usecprj    => usecprj
-            this%dimcprj    => dimcprj
-            this%mcprj      => mcprj
-            this%pawang     => pawang
-            this%pawfgr     => pawfgr
-            this%pawfgrtab  => pawfgrtab
-            this%pawtab     => pawtab
-            this%ylm        => ylm
-        end if
-        
-        !Initializing LDOS specific variables
-        if (this%iprcel == 202) then
-            !Allocating the array containing ldos
-            !write(6,*)'chi0diel precon%init this%ldos : ', this%ldos; flush(6) !DEBUG
-            write(6,*)'Is this%ldos allocated? ', allocated(this%ldos); flush(6) ! DEBUG
-            write(6,*)'size%ldos allocated? ', size(this%ldos); flush(6) ! DEBUG
+        if (dtset%iprcel >= 200 .and. dtset%iprcel < 300) then
 
-            ABI_MALLOC(this%ldos, (this%nfftprc, dtset%nspden)) ! TODO
-        end if
-        
-        !Initializing chi0_diag specific variables
-        if (this%iprcel == 203) then
-            !Preparing the allocation of Kxc
-            this%need_kxc = .true.
-            if (dtset%xclevel==1) then  !LDA
-                this%nkxc = 2*min(dtset%nspden,2)-1
-            else if (dtset%xclevel==2)then  !GGA
-                if (dtset%nspden==1) then
-                    this%nkxc = 7
-                else if (dtset%nspden==2) then
-                    this%nkxc = 19
+            !Constant data from dtset
+            this%dielng = dtset%dielng
+            this%diemix = dtset%diemix
+            this%iprcel = dtset%iprcel
+            this%nfftprc = nfftmix          ! FFT grid for preconditioned densities and/or potentials :
+            this%ngfftprc = ngfftmix        ! same grid as the one used for mixing.
+            !Other constants
+            this%dvol   = ucvol/dtset%nfft  ! factor for integrals in real space: sum(f) * dvol ~ integral f
+            this%gprimd = gprimd
+            this%rprimd = rprimd
+            this%gmet   = gmet
+            this%rmet  = rmet
+            this%ucvol  = ucvol
+            this%need_kxc = .false.
+            !Pointers
+            this%atindx => atindx 
+            this%atindx1 => atindx1 
+            this%cg     => cg
+            this%eigen  => eigen
+            this%fermie => fermie
+            this%indsym => indsym
+            this%irrzon => irrzon
+            this%kg     => kg
+            this%nattyp => nattyp
+            this%npwarr => npwarr
+            this%ph1d   => ph1d
+            this%phnons => phnons
+            this%psps   => psps
+            this%rhor   => rhor
+            this%symrec => symrec
+            this%vxc    => vxc
+            this%xred   => xred
+            
+            !PAW :
+            if (psps%usepaw==1) then
+                write(6,*)'chi0diel init : allocating PAW var '; flush(6) ! DEBUG
+                this%unpaw      = dtfil%unpaw
+                this%cprj       => cprj     ! TODO : when cprj_in_memory = 0 the cprj array is computed on the fly and not allocated (or allocated with 0 size maybe)...
+                this%usecprj    => usecprj
+                this%dimcprj    => dimcprj
+                this%mcprj      => mcprj
+                this%pawang     => pawang
+                this%pawfgr     => pawfgr
+                this%pawfgrtab  => pawfgrtab
+                this%pawtab     => pawtab
+                this%ylm        => ylm
+            end if
+            
+            !Initializing LDOS specific variables
+            if (this%iprcel == 202) then
+                !Allocating the array containing ldos
+                ABI_MALLOC(this%ldos, (this%nfftprc, dtset%nspden)) ! TODO
+            end if
+            
+            !Initializing chi0_diag specific variables
+            if (this%iprcel == 203) then
+                !Preparing the allocation of Kxc
+                this%need_kxc = .true.
+                if (dtset%xclevel==1) then  !LDA
+                    this%nkxc = 2*min(dtset%nspden,2)-1
+                else if (dtset%xclevel==2)then  !GGA
+                    if (dtset%nspden==1) then
+                        this%nkxc = 7
+                    else if (dtset%nspden==2) then
+                        this%nkxc = 19
+                    end if
                 end if
             end if
+
         end if
         
     end subroutine precon_init

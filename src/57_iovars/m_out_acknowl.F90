@@ -562,8 +562,11 @@ ref(1)=trim(ref(1))//&
 !  If usepawu/=0, cite Amadon2008
    if(dtsets(idtset)%usepawu/=0.and.dtsets(idtset)%usedmft==0) cite(15)=1
 
-!  If iprcel/=0, cite Anglade2008
-   if(dtsets(idtset)%iprcel/=0)cite(16)=1
+!  If 21 <= iprcel <= 169, cite Anglade2008
+   if(dtsets(idtset)%iprcel>=21.and.dtsets(idtset)%iprcel<=169)cite(16)=1
+
+!  If iprcel=202, cite Herbst2020
+   if(dtsets(idtset)%iprcel==202)cite(47)=1
 
 !  If iomode==IO_MODE_ETSF, cite Gonze2008
    if(dtsets(idtset)%iomode==IO_MODE_ETSF)cite(17)=1
