@@ -1991,7 +1991,6 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 
- call wrtout(iout,msg)
  write(msg,'(4(3(a,i12),a))') &
 & '-    mband =',mband  ,'        mffmem =',mffmem,&
 & '         mkmem =',mkmem  ,ch10,&
