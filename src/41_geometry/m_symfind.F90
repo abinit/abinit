@@ -370,15 +370,13 @@ contains
 
 !write(std_out,'(a,i4)')' m_symfind%symfind : 1'; call flush(std_out)
 
-   if (use_inversion==0) then
-     det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
+   det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
 &     ptsymrel(2,1,isym)*ptsymrel(3,2,isym)*ptsymrel(1,3,isym)+&
 &     ptsymrel(1,2,isym)*ptsymrel(2,3,isym)*ptsymrel(3,1,isym) - &
 &     (ptsymrel(3,1,isym)*ptsymrel(2,2,isym)*ptsymrel(1,3,isym)+&
 &     ptsymrel(2,1,isym)*ptsymrel(1,2,isym)*ptsymrel(3,3,isym)+&
 &     ptsymrel(3,2,isym)*ptsymrel(2,3,isym)*ptsymrel(1,1,isym))
-     if(det==-1) cycle
-   end if
+   if(use_inversion==0 .and. det==-1) cycle
 
 !write(std_out,'(a,i4)')' m_symfind%symfind : 2'; call flush(std_out)
 
@@ -417,9 +415,12 @@ contains
    if (nspden/=4) then
      spinat0(:)=spinat(:,iatom0)
    else
-     spinat0(:)=ptsymrel(:,1,isym)*spinatred(1,iatom0)+ &
-                ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
-                ptsymrel(:,3,isym)*spinatred(3,iatom0)
+     spinat0(:)=det*(&
+            ptsymrel(:,1,isym)*spinatred(1,iatom0)+ &
+&           ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
+&           ptsymrel(:,3,isym)*spinatred(3,iatom0))
+     ! spinat should be treated as an axial vector
+     ! i.e. the improper part of a symm. op. has no effect on spinat
    endif
 
 !write(std_out,'(a,i4)')' m_symfind%symfind : 5'; call flush(std_out)
@@ -479,7 +480,7 @@ contains
          if (nspden/=4) then
            symspinat2(:)=trialafm*spinat(:,iatom2)
          else
-           symspinat2(:)=trialafm*(ptsymrel(:,1,isym)*spinatred(1,iatom2)+ &
+           symspinat2(:)=trialafm*det*(ptsymrel(:,1,isym)*spinatred(1,iatom2)+ &
 &           ptsymrel(:,2,isym)*spinatred(2,iatom2)+ &
 &           ptsymrel(:,3,isym)*spinatred(3,iatom2))
          end if
@@ -704,11 +705,20 @@ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
 
 ! write(std_out,*)' m_symfind%symfind_expert : enter '
 
+<<<<<<< HEAD
  use_inversion=1
  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
    use_inversion=0
  end if
+=======
+  use_inversion=1
+  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+    ! MMignolet: PAW can be used with inversion, however it results in seg faults in the dmft code. To enable when this is fixed...
+    use_inversion=0
+  end if
+>>>>>>> release-10.4
 
  ! write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
 
