@@ -846,18 +846,7 @@ end subroutine longwave
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,ucvol)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
 
 !Arguments ------------------------------------
 !scalars

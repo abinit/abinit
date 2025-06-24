@@ -25,7 +25,7 @@ exclude_exts = set([
 exclude_bins = set([
   "abinit", "anaddb", "mrgddb", "aim", "fftprof", "mrgdv", "mrgddb", "mrggkk", "lruj",
   "band2eps", "abitk", "cut3d", "fold2Bloch", "conducti", "ioprof", "lapackprof",
-  "macroave", "optic", "vdw_kernelgen", "vdw_kernelgen", "mrgscr",
+  "macroave", "optic", "vdw_kernelgen", "vdw_kernelgen", "mrgscr", "multibinit",
 ])
 
 def check_item(item):
@@ -67,10 +67,11 @@ def main():
     for item in files:
       path = os.path.join(root, item)
       if not check_item(item): continue
+      #print("Checking path:", path)
 
       try:
           if sys.version_info >= (3, 0):
-            with open(os.path.join(root, item), "rt", encoding="ISO-8859-1") as fh:
+            with open(path, "rt", encoding="ISO-8859-1") as fh:
               chk_data = fh.readlines()
           else:
             with open(path, "r") as fh:
