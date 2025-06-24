@@ -80,7 +80,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=49
+ nrefs=50
  ABI_MALLOC(cite,(nrefs))
  ABI_MALLOC(ref,(nrefs))
  ABI_MALLOC(comment,(nrefs))
@@ -527,6 +527,12 @@ ref(1)=trim(ref(1))//&
  comment(49)=' Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005'
  priority(49)=18
+
+ ref(50)= ' Black-box inhomogeneous preconditioning for self-consistent field iterations in density functional theory.'//ch10//&
+  ' M.F. Herbst and A. Levitt, Journal of Physics: Condensed Matter, 33(8) 085503 (2020).'
+ comment(50)=' Comment: to be cited in case the LDOS-preconditioner is used (iprcel=202).'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#herbst2020'
+ priority(50)=20
 
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
