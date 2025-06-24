@@ -1383,10 +1383,10 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
        write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
 
-       write(std_out, *)"abs_diff fofr fofr_ref"
-       do ii=1,cplex*ldxyz*ndat
-         write(std_out, *)abs(fofr(ii) - fofr_ref(ii), fofr(ii), fofr_ref(ii)
-       end do
+       !write(std_out, *)"abs_diff fofr fofr_ref"
+       !do ifft=1,cplex*ldxyz*ndat
+       !  write(std_out, *)abs(fofr(ifft) - fofr_ref(ifft)), fofr(ifft), fofr_ref(ifft)
+       !end do
      else
        write(msg,"(a)")" OK"
      end if
