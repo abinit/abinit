@@ -705,20 +705,12 @@ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
 
 ! write(std_out,*)' m_symfind%symfind_expert : enter '
 
-<<<<<<< HEAD
  use_inversion=1
  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+   ! MMignolet: PAW can be used with inversion, however it results in seg faults in the dmft code. To enable when this is fixed...
    use_inversion=0
  end if
-=======
-  use_inversion=1
-  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
-    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
-    ! MMignolet: PAW can be used with inversion, however it results in seg faults in the dmft code. To enable when this is fixed...
-    use_inversion=0
-  end if
->>>>>>> release-10.4
 
  ! write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
 
