@@ -271,6 +271,15 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
  case (1)
    ! Real case.
 
+   ! MG: June 24. 2025
+   ! dfti_seqfourdp does not work as expected when cplex= 1 and ngfft(1:3) != ngfft(4:6)
+   ! very likely do the use of r->c, c->r transforms.
+   ! I don't know if it's a bug as the error seems to depend on the mkl version.
+   ! To bypass this problem, we change the params on the fly so that ngfft(1:3) == ngfft(4:6)
+   ! when FFT_DFTI is used.
+   ! Note however that we never call fourdp with ngfft(1:3) != ngftt(4:6) so this is not a serious problem.
+   ! An additional check is done inside dfti_seqfourdp
+
    if (nx /= ldx .or. ny /= ldy .or. nz /= ldz) then
      ABI_ERROR("dfti_seqfourdp is buggy/not portable when nx /= ldx .or. ny /= ldy .or. nz /= ldz")
    end if
