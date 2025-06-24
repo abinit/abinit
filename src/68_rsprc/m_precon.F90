@@ -20,6 +20,7 @@ module m_precon
     use defs_datatypes,     only : pseudopotential_type
     use defs_wvltypes
     use m_atomdata,         only : atom_length
+    use m_cgprj,            only : ctocprj
     use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
     use m_fft,              only : fourdp, fourwf, fftpac
     use m_fftcore,          only : sphereboundary
@@ -27,7 +28,7 @@ module m_precon
     use m_mpinfo,           only : proc_distrb_cycle
     use m_paw_dmft
     use m_pawrhoij,         only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free
-    use m_pawcprj,          only : pawcprj_type
+    use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free
     use m_pawang,           only : pawang_type
     use m_pawfgr,           only : pawfgr_type
     use m_pawtab,           only : pawtab_type
@@ -47,23 +48,24 @@ module m_precon
 
     type, public :: precon_object
         integer  :: iprcel
-        !integer  :: nspden
         real(dp) :: dielng, diemix
         !Geometry :
-        real(dp) :: gprimd(3, 3), rprimd(3, 3)
+        real(dp) :: gprimd(3, 3), rprimd(3, 3), gmet(3, 3), rmet(3, 3)
         real(dp) :: ucvol, dvol
         !PAW :
         type(pseudopotential_type), pointer :: psps
-        integer, pointer :: dimcprj(:), mcprj
         integer :: unpaw
+        integer, pointer :: dimcprj(:), mcprj, usecprj
         type(pawcprj_type), pointer :: cprj(:, :)
         type(pawang_type), pointer :: pawang
         type(pawfgr_type), pointer :: pawfgr
         type(pawfgrtab_type), pointer :: pawfgrtab(:)
         type(pawtab_type), pointer :: pawtab(:)
+        real(dp), pointer :: ylm(:, :)
+        real(dp), pointer :: ylmgr(:, :, :)
         !To compute (weighted) densities and other quantities :
         real(dp), pointer :: fermie
-        real(dp), pointer :: cg(:, :), eigen(:), phnons(:, :, :)
+        real(dp), pointer :: cg(:, :), eigen(:), ph1d(:, :), phnons(:, :, :)
         integer, pointer  :: kg(:, :), npwarr(:), irrzon(:, :, :)
         integer, pointer :: atindx(:), atindx1(:), nattyp(:)
         integer, pointer :: symrec(:, :, :), indsym(:, :, :)
@@ -141,8 +143,8 @@ contains
     !!
     !! SOURCE
     subroutine precon_init(this, dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, &
-        &   gprimd, indsym, irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, pawang, pawfgr, pawfgrtab, &
-        &   pawtab, phnons, psps, rhor, rprimd, symrec, ucvol, vxc, xred)
+        &   gmet, gprimd, indsym, irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, pawang, pawfgr, pawfgrtab, &
+        &   pawtab, ph1d, phnons, psps, rhor, rmet, rprimd, symrec, ucvol, usecprj, vxc, xred, ylm)
 
         !Arguments ------------------------------------
         class(precon_object), intent(inout) :: this
@@ -152,13 +154,14 @@ contains
         real(dp), intent(in), target :: fermie
         integer, intent(in) :: nfftmix
         integer, intent(in), target :: mcprj
+        integer, intent(in), target :: usecprj
         !arrays
-        real(dp), intent(in) :: gprimd(:, :), rprimd(:, :)
+        real(dp), intent(in) :: gprimd(:, :), rprimd(:, :), gmet(:, :), rmet(:, :)
         integer, intent(in) :: ngfftmix(:)
         integer, intent(in), target  :: irrzon(:, :, :), kg(:, :), npwarr(:)
         integer, intent(in), target :: atindx(:), atindx1(:), nattyp(:)
         integer, intent(in), target :: symrec(:, :, :), indsym(:, :, :)
-        real(dp), intent(in), target :: cg(:, :), eigen(:), phnons(:, :, :)
+        real(dp), intent(in), target :: cg(:, :), eigen(:), phnons(:, :, :), ph1d(:, :)
         real(dp), intent(in), target :: rhor(:, :), vxc(:, :)
         real(dp), intent(in), target :: xred(:, :)
         type(datafiles_type),intent(in) :: dtfil
@@ -169,6 +172,7 @@ contains
         type(pawfgr_type), intent(in), target :: pawfgr
         type(pawfgrtab_type), intent(in), target :: pawfgrtab(:)
         type(pawtab_type), intent(in), target :: pawtab(:)
+        real(dp), intent(in), target :: ylm(:, :)
 
         ! *************************************************************************
         write(6,*)'chi0diel precon%init'; flush(6) !DEBUG
@@ -183,6 +187,8 @@ contains
         this%dvol   = ucvol/dtset%nfft  ! factor for integrals in real space: sum(f) * dvol ~ integral f
         this%gprimd = gprimd
         this%rprimd = rprimd
+        this%gmet   = gmet
+        this%rmet  = rmet
         this%ucvol  = ucvol
         this%need_kxc = .false.
         !Pointers
@@ -196,6 +202,7 @@ contains
         this%kg     => kg
         this%nattyp => nattyp
         this%npwarr => npwarr
+        this%ph1d   => ph1d
         this%phnons => phnons
         this%psps   => psps
         this%rhor   => rhor
@@ -208,12 +215,14 @@ contains
             write(6,*)'chi0diel init : allocating PAW var '; flush(6) ! DEBUG
             this%unpaw      = dtfil%unpaw
             this%cprj       => cprj     ! TODO : when cprj_in_memory = 0 the cprj array is computed on the fly and not allocated (or allocated with 0 size maybe)...
+            this%usecprj    => usecprj
             this%dimcprj    => dimcprj
             this%mcprj      => mcprj
             this%pawang     => pawang
             this%pawfgr     => pawfgr
             this%pawfgrtab  => pawfgrtab
             this%pawtab     => pawtab
+            this%ylm        => ylm
         end if
         
         !Initializing LDOS specific variables
@@ -951,15 +960,17 @@ contains
         !Local variables-------------------------------
         !scalars
         type(pawrhoij_type) :: pawrhoij(mpi_enreg%my_natom*this%psps%usepaw)
-        integer :: dummy_int, mband_cprj
+        integer :: dummy_int, mband_cprj, my_nspinor, mcprj_tmp
         integer :: mcg, cplex, nfftot, cplex_rhoij
         real(dp) :: compch_fft
         !arrays
         real(dp) :: qphon(3)
         real(dp), allocatable :: w_rhowfg(:, :), w_rhowfr(:, :)
+        type(pawcprj_type),allocatable :: cprj_tmp(:,:)
         type(paw_dmft_type)     :: dummy_paw_dmft
         type(wvl_wf_type)       :: dummy_wvl_wfs
         type(wvl_denspot_type)  :: dummy_wvl_den
+        real(dp)                :: dummy_ylmgr(0, 0, 0)
 
         ! *************************************************************************
 
@@ -995,33 +1006,58 @@ contains
         else
         ! In PAW : Add rhoij terms to  w_rhowfr.
             if (this%nfftprc == this%pawfgr%nfft) then
+                
                 !Compute the rhoij equivalent for the weighted density.
                 !   Sum_{n,k} {weight(n,k)*<Cnk|p_i><p_j|Cnk>}.
-                !mcprj = size(this%cprj, dim=2) ! TODO : delete line
+                
+                my_nspinor = max(1, dtset%nspinor/mpi_enreg%nproc_spinor)
                 mband_cprj = dtset%mband / mpi_enreg%nproc_band     ! TODO : should I add this to precon_object ?
                 write(6,*)'chi0diel compute_weighted_density : this%mcprj, mband_cprj, mpi_enreg%nproc_spinor, dtset%mkmem, dtset%nsppol', this%mcprj, mband_cprj, mpi_enreg%nproc_spinor, dtset%mkmem, dtset%nsppol; flush(6) !DEBUG
+                
                 !Initialize pawrhoij
                 cplex_rhoij = 1
-                call pawrhoij_alloc(pawrhoij, cplex_rhoij, dtset%nspden, dtset%nspinor, dtset%nsppol, dtset%typat, pawtab=this%pawtab)  ! TODO : should i use more of the optional arguments ??
+                call pawrhoij_alloc(pawrhoij, cplex_rhoij, dtset%nspden, dtset%nspinor, &
+                &       dtset%nsppol, dtset%typat, pawtab=this%pawtab)  ! TODO : should i use more of the optional arguments ??
+                
                 !Compute pawrhoij
-                call pawmkrhoij(this%atindx, this%atindx1, this%cprj, this%dimcprj, dtset%istwfk, dtset%kptopt, dtset%mband, mband_cprj, &
-                &       this%mcprj, dtset%mkmem, mpi_enreg, dtset%natom, dtset%nband, dtset%nkpt, dtset%nspden, dtset%nspinor, &
-                &       dtset%nsppol, weights, dtset%paral_kgb, dummy_paw_dmft, pawrhoij, this%unpaw, dtset%usewvl, dtset%wtk)
+                if (this%usecprj == 1) then ! cprj is saved in memory
+                    call pawmkrhoij(this%atindx, this%atindx1, this%cprj, this%dimcprj, dtset%istwfk, dtset%kptopt, dtset%mband,&
+                    &       mband_cprj, this%mcprj, dtset%mkmem, mpi_enreg, dtset%natom, dtset%nband, dtset%nkpt, dtset%nspden, &
+                    &       dtset%nspinor, dtset%nsppol, weights, dtset%paral_kgb, dummy_paw_dmft, pawrhoij, this%unpaw,        &
+                    &       dtset%usewvl, dtset%wtk)
+                else                        ! cprj is computed on the fly
+                    mcprj_tmp = my_nspinor * mband_cprj * dtset%mkmem * dtset%nsppol
+                    ABI_MALLOC(cprj_tmp, (dtset%natom, mcprj_tmp))
+                    call pawcprj_alloc(cprj_tmp, 0, this%dimcprj)
+                    call ctocprj(this%atindx, this%cg, 1, cprj_tmp, this%gmet, this%gprimd, 0, 0, 0, dtset%istwfk, this%kg,     &
+                    &       dtset%kptns, mcg, mcprj_tmp, dtset%mgfft, dtset%mkmem, mpi_enreg, this%psps%mpsang, dtset%mpw,      &
+                    &       dtset%natom, this%nattyp, dtset%nband, dtset%natom, dtset%ngfft, dtset%nkpt, dtset%nloalg,          &
+                    &       this%npwarr, dtset%nspinor, dtset%nsppol, dtset%nsppol, dtset%ntypat, dtset%paral_kgb, this%ph1d,   &
+                    &       this%psps, this%rmet, dtset%typat, this%ucvol, this%unpaw, this%xred, this%ylm, dummy_ylmgr)
+                    call pawmkrhoij(this%atindx, this%atindx1, cprj_tmp, this%dimcprj, dtset%istwfk, dtset%kptopt,              &
+                    &       dtset%mband, mband_cprj, mcprj_tmp, dtset%mkmem, mpi_enreg, dtset%natom, dtset%nband, dtset%nkpt,   &
+                    &       dtset%nspden, dtset%nspinor, dtset%nsppol, weights, dtset%paral_kgb, dummy_paw_dmft, pawrhoij,      &
+                    &       this%unpaw, dtset%usewvl, dtset%wtk)
+                    call pawcprj_free(cprj_tmp)
+                    ABI_FREE(cprj_tmp)
+                end if
 
-                !Compute the total weighted density.
+                !Compute the total weighted density (adding PAW-correction).
                 cplex = 1
                 dummy_int=0
                 qphon = 0
                 write(6,*)'chi0diel compute_weighted_density : pawrhoij(1)%cplex_rhoij, pawrhoij(1)%qphase', pawrhoij(1)%cplex_rhoij, pawrhoij(1)%qphase; flush(6) !DEBUG
-                call pawmkrho(1, compch_fft, cplex, this%gprimd, dummy_int, this%indsym, dummy_int, mpi_enreg, &
-                &       mpi_enreg%my_natom, dtset%natom, dtset%nspden, dtset%nsym, dtset%ntypat, dtset%paral_kgb, this%pawang, this%pawfgr, this%pawfgrtab, &
-                &       dtset%pawprtvol, pawrhoij, pawrhoij, this%pawtab, qphon, w_rhowfg, w_rhowfr, w_rhor, this%rprimd, dtset%symafm, &
-                &       this%symrec, dtset%typat, this%ucvol, dtset%usewvl, this%xred)
+                call pawmkrho(1, compch_fft, cplex, this%gprimd, dummy_int, this%indsym, dummy_int, mpi_enreg,                  &
+                &       mpi_enreg%my_natom, dtset%natom, dtset%nspden, dtset%nsym, dtset%ntypat, dtset%paral_kgb, this%pawang,  & 
+                &       this%pawfgr, this%pawfgrtab, dtset%pawprtvol, pawrhoij, pawrhoij, this%pawtab, qphon, w_rhowfg,         &
+                &       w_rhowfr, w_rhor, this%rprimd, dtset%symafm, this%symrec, dtset%typat, this%ucvol, dtset%usewvl, this%xred)
 
                 call pawrhoij_free(pawrhoij)
+
             else
                 ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft not implemented. TODO")
             end if
+
         end if
 
         ABI_FREE(w_rhowfr)
