@@ -9735,6 +9735,11 @@ The possible values of [[iprcel]] correspond to:
   * Between 71 and 78 --> STILL UNDER DEVELOPMENT -- NOT USABLE; Use the modified Kerker preconditioner with a real-space formulation (basic formulation is shown at [[dielng]]). The dielectric matrix is approximated thanks to [[diemac]] and [[dielng]]. Note that [[diemix]] is also used.
   * 79 --> STILL UNDER DEVELOPMENT -- NOT USABLE; same as previous but with an alternate algorithm.
   * 141 to 169 --> same as Between 41 and 69 (but, the dielectric matrix is also recomputed every iprcel modulo 10 step).
+  * Between 201 and 202 --> model dielectric operator $\varepsilon^\mathrm{model}$ based of a model non-interacting susceptibility $\chi_0^\mathrm{model}$:
+    $$ \varepsilon^\mathrm{model} = I - K \chi_0^\mathrm{model} $$
+    where $K$ is a potential kernel. the preconditioner $P = (\varepsilon^\mathrm{model})^{-1}$ for potential mixing or $P = (\varepsilon^\mathrm{model}^\dagger)^{-1}$ for density mixing is then applied using an iterative linear solver.
+  * 201 --> DOS-preconditioner: $\varepsilon^\mathrm{DOS} = I - v_c DOS(\varepsilon_F)$ which is similar to [[iprcel]] = 0 with [[diemac]] = $\infty$ and [[dielng]] computed from the density of states at the Fermi-level.
+  * 202 --> LDOS-preconditioner described in [[cite:Herbst2020]], well suited for metallic system in large homogeneous or inhomogeneous systems. This preconditioner requires a smooth smearing function ([[occopt]] = 3 to 7).
 
 The computation of the dielectric matrix (for 0 [100]< [[iprcel]] < 70 [100])
 is based on the **extrapolar** approximation, see [[cite:Anglade2008]]. This approximation can be tuned
