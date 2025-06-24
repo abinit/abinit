@@ -1350,6 +1350,12 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      !  call wrtout(ount,"Warning: fourdp with FFTW3-wrappers, cplex=2 and ndat>1, might crash if MKL is used")
      !  !CYCLE
      !end if
+
+     if (fftalga == FFT_DFTI) then
+       ldx=nx; ldy=ny; ldz=nz
+       ldxyz = ldx*ldy*ldz
+     endif
+
      ABI_MALLOC(fofg,     (2*ldxyz*ndat))
      ABI_MALLOC(fofr_ref, (cplex*ldxyz*ndat))
      ABI_MALLOC(fofr,     (cplex*ldxyz*ndat))
@@ -1395,6 +1401,12 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      ABI_FREE(fofg)
      ABI_FREE(fofr_ref)
      ABI_FREE(fofr)
+
+    if (fftalga == FFT_DFTI) then
+      ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
+      ldxyz = ldx*ldy*ldz
+    endif
+
    end do
  end do
 
