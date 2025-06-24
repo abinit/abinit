@@ -108,7 +108,7 @@ def number_of_gpus():
 
     num_gpus = 0
     for gpu_cmd in [nvidia_cmd, amdgpu_cmd]:
-        if shutil.which(gpu_com[0]) is None:
+        if shutil.which(gpu_cmd[0]) is None:
             continue
 
         try:

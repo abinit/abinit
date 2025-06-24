@@ -1351,6 +1351,16 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      !  !CYCLE
      !end if
 
+     ! MG: June 24. 2025
+     ! dfti_seqfourdp does not work as expected when cplex= 1 and ngfft(1:3) != ngfft(4:6)
+     ! very likely do the use of r->c, c->r transforms.
+     ! I don't know if it's a bug as the error seems to depend on the mkl version.
+     ! To bypass this problem, we change the params on the fly so that ngfft(1:3) == ngfft(4:6)
+     ! when FFT_DFTI is used.
+     ! Note however that we never call fourdp with ngfft(1:3) != ngftt(4:6) so this is not a serious problem.
+     ! An additional check is done inside dfti_seqfourdp
+
+     !
      if (fftalga == FFT_DFTI) then
        ldx=nx; ldy=ny; ldz=nz
        ldxyz = ldx*ldy*ldz
@@ -1403,6 +1413,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      ABI_FREE(fofr)
 
     if (fftalga == FFT_DFTI) then
+      ! Revert changes. See comment above.
       ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
       ldxyz = ldx*ldy*ldz
     endif
