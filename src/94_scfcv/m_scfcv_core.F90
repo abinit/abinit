@@ -864,7 +864,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  end if ! iscf>0
 
 ! Initializing precon-object for chi0 based preconditioning
- write(6,*)'chi0diel init : dimcprj, mcprj, cprj :', dimcprj, mcprj; flush(6) ! DEBUG
  call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, gmet, gprimd, indsym,  &
  &  irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, pawang, pawfgr, pawfgrtab,                &
  &  pawtab, ph1d, phnons, psps, rhor, rmet, rprimd, symrec, ucvol, usecprj, vxc, xred, ylm)
@@ -1878,8 +1877,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      endif
 
 !    Updating precon-object for chi0-based preconditioning
- write(6,*)'chi0diel update : dimcprj, mcprj, cprj :', dimcprj, mcprj; flush(6) ! DEBUG
- write(6,*)'chi0diel update : precon%dimcprj, precon%mcprj, precon%cprj :', precon%dimcprj, precon%mcprj; flush(6) ! DEBUG
      call precon%update(dtset, istep, mpi_enreg)
 
      ABI_NVTX_START_RANGE(NVTX_SCFCV_NEWRHO)
