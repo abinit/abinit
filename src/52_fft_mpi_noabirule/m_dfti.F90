@@ -268,7 +268,12 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
      end select
    end if
 
- case (1) ! Real case.
+ case (1)
+   ! Real case.
+
+   if (nx /= ldx .or. ny /= ldy .or. nz /= ldz) then
+     ABI_ERROR("dfti_seqfourdp is buggy/not portable when nx /= ldx .or. ny /= ldy .or. nz /= ldz")
+   end if
 
    select case (isign)
    case (+1) ! G --> R
