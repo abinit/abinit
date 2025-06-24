@@ -1972,7 +1972,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  mkqmem=mkmems(2)
  mk1mem=mkmems(3)
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
- my_mband = CEILING(dble(mband)/ max(mpi_enreg%nproc_atom,1))
+ my_mband = CEILING(dble(mband)/ max(mpi_enreg%nproc_band,1))
 
  write(msg,'( 4(a,i8),a,4(a,i8) )' ) &
 & '     intxc =',intxc   ,'      iscf =',iscf,&
@@ -2002,7 +2002,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  call wrtout(std_out,msg)
 
  write(msg,'(4(3(a,i12),a))') &
-& '-    my_mband =',my_mband 
+& '- my_mband =',my_mband 
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 
