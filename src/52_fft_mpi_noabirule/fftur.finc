@@ -7,8 +7,7 @@ block
  logical :: use_fftrisc
 !arrays
  integer :: ngfft(18),kg_kin0(3,0)
- real(dp) :: denpot(0,0,0) 
-
+ real(dp) :: denpot(0,0,0)
 ! *************************************************************************
 
  ldxyz = ldx*ldy*ldz
@@ -58,7 +57,7 @@ block
    nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
    if (.not. SPAWN_THREADS_HERE(ndat,nthreads)) then
-     ! Inplace ur --> ug 
+     ! Inplace ur --> ug
      call FFT_PREF_fftpad (ur,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
 
      ! Copy data in ug

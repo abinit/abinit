@@ -705,7 +705,7 @@ class FortranKissParser(HasRegex):
         self.all_includes, self.all_uses  = [], []
         self.ancestor = None
 
-        # Invokations of Fortran functions are difficult to handle
+        # Invocations of Fortran functions are difficult to handle
         # without inspecting local variables so we only handle explicit calls to routines.
         # in principle I may re-read the source and use regex for val = foo() where foo is
         # one of the functions in the project but it's gonna be costly.

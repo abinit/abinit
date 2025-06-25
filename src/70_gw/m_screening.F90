@@ -106,6 +106,9 @@ module m_screening
   integer :: nomega_i
   ! Number of purely imaginary frequencies used.
 
+  integer :: nomega_i_conv
+  ! Number of purely imaginary frequencies used for convolution.
+
   integer :: nomega_r
   ! Number of real frequencies used.
 

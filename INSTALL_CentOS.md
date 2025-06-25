@@ -2,10 +2,10 @@
 authors: J-M Beuken
 ---
 
-# How to install ABINIT v9 on CentOS
+# How to install ABINIT on CentOS
 
 This step-by-step recipe describes how to build ABINIT on Fedora/RHEL/CentOS *nix distributions.
-Tested with __CentOS 8.2__
+Tested with CentOS 8.2
 
 [Quick Guide for the Impatient](#quick-guide-for-the-impatient)
 
@@ -13,45 +13,39 @@ Tested with __CentOS 8.2__
 
 ## Prerequisites
 
-1.  __Fortran compiler__
-
-    Possible options:
+1. Fortran compiler. Possible options:
 
     - gfortran, the GNU compiler. ([https://gcc.gnu.org/](https://gcc.gnu.org))
     - ifort, the intel compiler. This is a commercial compiler, slightly more complicated
       to use but more optimized for intel architecture.
 
-2.  __Python interpreter__ (**v3.7+ recommended**)
+2. Python interpreter
 
-3.  __MPI library__ (if you want to benefit from parallelism; **recommended**).
+3. MPI library (if you want to benefit from parallelism; **recommended**). Possible options:
 
-     Possible options:
+- [Open MPI](http://www.open-mpi.org)
+- [MPICH](http://www.mpich.org)
 
-     - [Open MPI](http://www.open-mpi.org)
-     - [MPICH](http://www.mpich.org)
+4.  Linear Algebra library. Possible options:
 
-4.  __Linear Algebra library__
+- MKL (Intel® Math Kernel Library): [Free Download](https://software.intel.com/content/www/us/en/develop/tools/math-kernel-library/choose-download/linux.html), **recommended** for performance
+- [OpenBLAS](https://www.openblas.net): An optimized BLAS library, **recommended with GNU**.
+- [Netlib](https://www.netlib.org): blas, lapack, scalapack
+- [ATLAS](http://math-atlas.sourceforge.net/): Automatically Tuned Linear Algebra Software
 
-    Possible options:
+5. Mandatory libraries:
 
-    - MKL (Intel® Math Kernel Library): [Free Download](https://software.intel.com/content/www/us/en/develop/tools/math-kernel-library/choose-download/linux.html), **recommended** for performance
-    - [OpenBLAS](https://www.openblas.net): An optimized BLAS library, **recommended with GNU**.
-    - [Netlib](https://www.netlib.org): blas, lapack, scalapack
-    - [ATLAS](http://math-atlas.sourceforge.net/): Automatically Tuned Linear Algebra Software
+- [HDF5](https://www.hdfgroup.org/solutions/hdf5/): High-performance data management and storage suite
+- [NetCDF](https://www.unidata.ucar.edu/software/netcdf): Network Common Data Form
+- [libXC](https://tddft.org/programs/libxc/download/): Library of exchange-correlation functionals
 
-5.  __Mandatory libraries:__
+6.  Optional libraries:
 
-    - [HDF5](https://www.hdfgroup.org/solutions/hdf5/): High-performance data management and storage suite
-    - [NetCDF](https://www.unidata.ucar.edu/software/netcdf): Network Common Data Form
-    - [libXC](https://tddft.org/programs/libxc/download/): Library of exchange-correlation functionals
-
-6.  __Optional libraries:__
-
-    - [FFTW3](http://www.fftw.org/): Library for computing the discrete Fourier transform, **recommended with GNU**
-    - [libxml2](http://xmlsoft.org/downloads.html): XML C parser, recommended for multibinit
-    - [Wannier90](http://www.wannier.org)
-    - [LibPSML](https://esl.cecam.org/PSML) + [xmlf90](https://gitlab.com/siesta-project/libraries/xmlf90)
-      to read pseudopotentials in psml format
+- [FFTW3](http://www.fftw.org/): Library for computing the discrete Fourier transform, **recommended with GNU**
+- [libxml2](http://xmlsoft.org/downloads.html): XML C parser, recommended for multibinit
+- [Wannier90](http://www.wannier.org)
+- [LibPSML](https://esl.cecam.org/PSML) + [xmlf90](https://gitlab.com/siesta-project/libraries/xmlf90)
+  to read pseudopotentials in psml format
 
 ## Installation of tools and libraries
 
@@ -59,21 +53,21 @@ All mandatory libraries are installed through the DNF package manager.
 For other optional libraries, compilation from source is needed.
 
 The steps required to install MPICH, fftw3 and OpenBLAS with dnf and compile
-__a relatively simple parallel version of ABINIT__ are summarized below:
+a relatively simple parallel version of ABINIT are summarized below:
 
-1. __Install the compiler__
+1. Install the compiler
 
     `sudo dnf install gcc-gfortran`
 
-2. __Install the MPI library__ (MPICH)
+2. Install the MPI library (MPICH)
 
     `sudo dnf install mpich mpich-devel`
 
-3. __Install the linear algebra library__  (OpenBLAS)
+3. Install the linear algebra library  (OpenBLAS)
 
     `sudo dnf install openblas`
 
-4. __Install other mandatory libraries__  (use hdf5 with support for parallel MPI-IO)
+4. Install other mandatory libraries (use hdf5 with support for parallel MPI-IO)
 
     `sudo dnf install hdf5-mpich hdf5-mpich-devel`
 
@@ -81,11 +75,11 @@ __a relatively simple parallel version of ABINIT__ are summarized below:
 
     `sudo dnf install libxc libxc-devel`
 
-5. __Install fftw3__
+5. Install fftw3
 
     `sudo dnf install fftw fftw-devel`
 
-6. __Install the python interpreter__
+6. Install the python interpreter
 
     `sudo dnf install python3`
 
@@ -131,10 +125,10 @@ __a relatively simple parallel version of ABINIT__ are summarized below:
 
 ## Compiling, testing and installing ABINIT
 
-__Download ABINIT__.
+Download ABINIT.
 
 For normal users, it is advised to get the latest stable version
-from our [website](https://www.abinit.org/packages) (replace 9.0.4 by the newest version available).
+from our [website](https://www.abinit.org/packages) (replace 9.0.4 by the latest version available).
 
 ```sh
 wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
@@ -142,13 +136,13 @@ tar xzf abinit-9.0.4.tar.gz
 cd abinit-9.0.4
 ```
 
-__Create a working directory__:
+Create a working directory:
 
 ```sh
 mkdir build && cd build
 ```
 
-__Configure with__:
+Configure with:
 
 ```sh
 ../configure --with-config-file='my_config_file.ac'
@@ -157,7 +151,7 @@ __Configure with__:
 where `my_config_file.ac` is an external file providing all the configuration flags and options.
 More on the configure options is presented in [next section](#the-configuration-file).
 
-__Compile with__:
+Compile with:
 
 ```
 make -j 4
@@ -185,9 +179,9 @@ cd tests
     Summary: failed=0, succeeded=11, passed=0, skipped=0, disabled=0
     ```
 
-otherwise there is a __problem__ with the compilation. 
+otherwise there is a **problem** with the compilation.
 
-__Install__ (optional):
+Install (optional):
 
     make install
 
@@ -249,14 +243,6 @@ enable_netcdf_default="yes"
     in the string are replaced by an underscore `_`.
     Following these simple rules, the configure option `--with-mpi` becomes `with_mpi`
     in the ac file.
-
-<!--
-## To go further
-
-- compiling optional libraries with the fallback project: Wannier90, libPSML/XMLF90.
-- enabling OpenMP
-- using libxml2
--->
 
 ## Quick Guide for the impatient
 

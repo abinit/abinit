@@ -83,7 +83,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([libxc],
     [AS_HELP_STRING([--with-libxc],
       [Install prefix of the LibXC library (e.g. /usr/local).])],
@@ -122,7 +122,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
        #check if PKG_CONFIG exists (if not keep default mode)
        AC_MSG_NOTICE([setting for ${sd_libxc_init} potential move to pkg])
        AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
- 
+
        AC_MSG_NOTICE([setting for ${sd_libxc_init} potential move to pkg, PKG=${PKG_CONFIG}])
        if test "$PKG_CONFIG" != "no"; then
           AC_MSG_CHECKING([for libxc via pkg-config])
@@ -192,7 +192,7 @@ AC_DEFUN([SD_LIBXC_INIT], [
           elif "$PKG_CONFIG" --exists libxcf90; then
                TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf90`
 	  else
- 		AC_MSG_ERROR([invalid PKG-CONFIG  for LibXC: neither fortran90 nor fortran03 interface available])  
+ 		AC_MSG_ERROR([invalid PKG-CONFIG  for LibXC: neither fortran90 nor fortran03 interface available])
 	  fi
 
           sd_libxc_cppflags="${TMP_LIBXC_CPPFLAGS} "
@@ -391,7 +391,7 @@ AC_DEFUN([_SD_LIBXC_CHECK_USE], [
       ]])], [sd_libxc_c_ok="yes"], [sd_libxc_c_ok="no"])
     AC_LANG_POP([C])
     AC_MSG_RESULT([${sd_libxc_c_ok}])
-  fi 
+  fi
 
   # Check if LibXC was compiled with KXC
   AC_MSG_CHECKING([whether the LibXC was compiled with Kxc derivatives])
