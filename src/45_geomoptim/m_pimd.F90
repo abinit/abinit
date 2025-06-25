@@ -552,7 +552,7 @@ end function pimd_temperature
 !!  prtvolimg=printing volume
 !!  rprim(3,3)=dimensionless real space primitive translations
 !!  stress(3,3,3)=stress tensor (first dimension corresponds to 3 different estimators)
-!!  temperature1,temperature2=temperatures at t and t+dt
+!!  temperature= temperature at present time step
 !!  traj_unit=flag activating printing of the trajectory in an external file\
 !!            if >0, indicates the unit number of the trajectory file
 !!  trotter=Trotter number
@@ -570,14 +570,14 @@ end function pimd_temperature
 
 subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 &          forces,inertmass,irestart,itimimage,kt,natom,optcell,prtstress,&
-&          prtvolimg,rprimd,stress,temperature1,temperature2,traj_unit,&
+&          prtvolimg,rprimd,stress,temperature,traj_unit,&
 &          trotter,vel,vel_cell,xcart,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: constraint,irestart,itimimage,natom,optcell
  integer,intent(in) :: prtstress,prtvolimg,traj_unit,trotter
- real(dp),intent(in) :: eharm,eharm_virial,epot,kt,temperature1,temperature2
+ real(dp),intent(in) :: eharm,eharm_virial,epot,kt,temperature
 !arrays
  real(dp),intent(in) :: constraint_output(2)
  real(dp),intent(in) :: forces(3,natom,trotter),inertmass(natom)
@@ -610,7 +610,7 @@ if(itimimage==1)then
 !   call wrtout(std_out,msg,'COLL')
  end if
  write(msg,'(2a,i5,a,f12.5,a)') ch10,&
-&  ' At PIMD time step ',itimimage,', the temperature is',temperature2,' K'
+&  ' At PIMD time step ',itimimage,', the temperature is',temperature,' K'
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 

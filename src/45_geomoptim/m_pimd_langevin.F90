@@ -453,7 +453,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  call pimd_print(constraint,constraint_output,&
 & eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
 & itimimage,kt,natom,pimd_param%optcell,prtstress,prtvolimg,rprimd,&
-& stress_pimd,temperature1,temperature2,&
+& stress_pimd,temperature2,&
 & pimd_param%traj_unit,trotter,vel,ddh,xcart,xred)
 
 !Compute cartesian coordinates
@@ -728,7 +728,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  call pimd_print(pimd_param%constraint,constraint_output,&
 & eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
 & itimimage,kt_,natom,pimd_param%optcell,prtstress,prtvolimg,rprimd,&
-& stress_pimd,temperature1,temperature2,&
+& stress_pimd,temperature2,&
 & pimd_param%traj_unit,trotter,vel,vel_cell,xcart,xred)
 
 !If possible, estimate the (transformed) velocities at t+dt
