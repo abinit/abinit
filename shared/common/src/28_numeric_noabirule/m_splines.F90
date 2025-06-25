@@ -501,6 +501,75 @@ end subroutine spline_bicubic
 
 !----------------------------------------------------------------------
 
+!!****f* m_splines/spline_r
+!! NAME
+!!  spline_r
+!!
+!! FUNCTION
+!!  Computes the spline of a real function.
+!!  If point lies outside the range of original grids, assign the extremal
+!!  point values to either head or tail.
+!!
+!! INPUTS
+!!  nomega_lo   = number of point in the non regular grid (e.g.  !logarithmic)
+!!  nomega_li   = number of point in the regular grid on which the  spline is computed
+!!  omega_lo    = value of freq on the 1st grid
+!!  omega_li    = value of freq on the 2nd grid
+!!  tospline_lo = function on the 1st grid
+!!
+!! OUTPUT
+!!  splined_lo  = spline  (on the 2nd grid)
+!!
+!! SOURCE
+
+subroutine spline_r( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo, extrapolate)
+
+!Arguments --------------------------------------------
+!scalars
+ integer, intent(in) :: nomega_lo, nomega_li
+ real(dp), intent(in) :: omega_lo(nomega_lo)
+ real(dp), intent(in) :: omega_li(nomega_li)
+ real(dp), intent(in) :: tospline_lo(nomega_lo)
+ real(dp), intent(out) :: splined_li(nomega_li)
+ logical, intent(in), optional :: extrapolate
+
+!Local variables---------------------------------------
+!scalars
+ integer :: begin, end
+ real(dp) :: ybcbeg, ybcend
+ real(dp) :: ysplin2_lo(nomega_lo)
+
+ ybcbeg=zero
+ ybcend=zero
+
+ begin = 1
+ end = nomega_li
+
+ call spline(omega_lo, tospline_lo, nomega_lo, ybcbeg, ybcend, ysplin2_lo)
+ if (present(extrapolate)) then
+  if (extrapolate) then
+    do begin = 1, nomega_li
+      if (omega_li(begin) >= omega_lo(1)) exit
+    end do
+    do end = nomega_li, 1, -1
+      if (omega_li(end) <= omega_lo(nomega_lo)) exit
+    end do
+    ABI_CHECK(begin <= end, 'spline_c: omega_li not properly ordered')
+  end if
+ end if
+ ABI_CHECK(begin <= end, 'spline_r: omega_li not properly ordered')
+ call splint(nomega_lo, omega_lo, tospline_lo, ysplin2_lo, end-begin+1, omega_li(begin:end), splined_li(begin:end))
+ if (present(extrapolate)) then
+  if (extrapolate) then
+    splined_li(1:begin-1) = tospline_lo(1)
+    splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
+  end if
+ end if
+
+end subroutine spline_r
+
+!----------------------------------------------------------------------
+
 !!****f* m_splines/spline_c
 !! NAME
 !!  spline_c
@@ -520,7 +589,7 @@ end subroutine spline_bicubic
 !!
 !! SOURCE
 
-subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo)
+subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo, extrapolate)
 
 !Arguments --------------------------------------------
 !scalars
@@ -529,19 +598,39 @@ subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospl
  real(dp), intent(in) :: omega_li(nomega_li)
  complex(dpc), intent(in) :: tospline_lo(nomega_lo)
  complex(dpc), intent(out) :: splined_li(nomega_li)
+ logical, intent(in), optional :: extrapolate
 
 !Local variables---------------------------------------
 !scalars
+ integer :: begin, end
  complex(dpc) :: ybcbeg, ybcend
- complex(dpc), allocatable :: ysplin2_lo(:)
+ complex(dpc) :: ysplin2_lo(nomega_lo)
 
  ybcbeg=czero
  ybcend=czero
 
- ABI_MALLOC(ysplin2_lo,(nomega_lo))
+ begin = 1
+ end = nomega_li
+
  call spline_complex(omega_lo, tospline_lo, nomega_lo, ybcbeg, ybcend, ysplin2_lo)
- call splint_complex( nomega_lo, omega_lo, tospline_lo,ysplin2_lo, nomega_li, omega_li, splined_li)
- ABI_FREE(ysplin2_lo)
+ if (present(extrapolate)) then
+  if (extrapolate) then
+    do begin = 1, nomega_li
+      if (omega_li(begin) >= omega_lo(1)) exit
+    end do
+    do end = nomega_li, 1, -1
+      if (omega_li(end) <= omega_lo(nomega_lo)) exit
+    end do
+    ABI_CHECK(begin <= end, 'spline_c: omega_li not properly ordered')
+  end if
+ end if
+ call splint_complex( nomega_lo, omega_lo, tospline_lo,ysplin2_lo, end-begin+1, omega_li(begin:end), splined_li(begin:end))
+ if (present(extrapolate)) then
+  if (extrapolate) then
+    splined_li(1:begin-1) = tospline_lo(1)
+    splined_li(end+1:nomega_li) = tospline_lo(nomega_lo)
+  end if
+ end if
 
 end subroutine spline_c
 !!***

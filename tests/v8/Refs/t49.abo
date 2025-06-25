@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h14 )
-  
+
 
 ================================================================================
 
@@ -69,11 +69,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -89,7 +89,7 @@
        3               2       -0.000000        0.000000
        3               3       -1.429236        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -100,13 +100,13 @@
          2         2   -7.735737E-18   -1.992108E+00    7.760440E-18
          2         3    7.735737E-18    7.735737E-18   -1.992108E+00
  Now, the imaginary part of the dynamical matrix is zeroed
- 
+
 
  Non-linear optical coefficients d (pm/V)
     0.000000    0.000000    0.000000   32.723426    0.000000    0.000000
     0.000000   -0.000000    0.000000    0.000000   32.723426    0.000000
     0.000000    0.000000    0.000000    0.000000    0.000000   32.723426
- 
+
 
  The violation of the Raman sum rule
  by the first-order electronic dielectric tensors is as follows
@@ -124,9 +124,9 @@
                -0.005004057        0.000000000        0.000000000
                 0.000000000        0.000000000        0.000000000
 
- 
 
-  First-order change in the electronic dielectric 
+
+  First-order change in the electronic dielectric
   susceptibility tensor (Bohr^-1)
   induced by an atomic displacement
   (after imposing the sum over all atoms to vanish)
@@ -154,7 +154,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -165,7 +165,7 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  3.556426E+02  3.556426E+02
 -  3.556426E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -222,16 +222,16 @@
 
  The alphon input variable is non-zero, will mix the degenerate phonon modes
  in order to align the mode effective charges with the cartesian axes.
-  
- Mode effective charges 
- Mode number.    x            y            z            length 
+
+ Mode effective charges
+ Mode number.    x            y            z            length
 -     1         -0.000000    -0.000000    -0.000000     0.000000
 -     2          0.000000    -0.000000     0.000000     0.000000
 -     3         -0.000000     0.000000     0.000000     0.000000
 -     4         -0.000000     0.000000     2.549253     2.549253
 -     5          0.000000     2.549253    -0.000000     2.549253
 -     6          2.549253     0.000000    -0.000000     2.549253
-  
+
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
 -   1     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
@@ -263,9 +263,9 @@
 
  ddb_diel : the number of frequencies is larger than 10 => I will consider only
  the three principal directions, assume that the tensor
- is diagonalized, and give dielectric constant and 
+ is diagonalized, and give dielectric constant and
  reflectivities.
- Frequency(Hartree)    Dielectric constant                Reflectivity    
+ Frequency(Hartree)    Dielectric constant                Reflectivity
                      x           y          z          x        y        z
   0.0000E+00  1.6663E+01  1.6663E+01  1.6663E+01  3.6779E-01  3.6779E-01  3.6779E-01
   2.0202E-05  1.6664E+01  1.6664E+01  1.6664E+01  3.6780E-01  3.6780E-01  3.6780E-01
@@ -370,7 +370,7 @@
 
 ================================================================================
 
- Treat the second list of vectors 
+ Treat the second list of vectors
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -382,7 +382,7 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  3.556426E+02  3.556426E+02
 -  3.760017E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -432,7 +432,7 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  3.556426E+02  3.556426E+02
 -  3.760017E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -482,7 +482,7 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  3.556426E+02  3.556426E+02
 -  3.760017E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -535,4 +535,4 @@
 
 +Total cpu time      0.147  and wall time      0.147 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.
