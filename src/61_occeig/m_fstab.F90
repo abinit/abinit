@@ -56,35 +56,35 @@ module m_fstab
 
  type,public :: fstab_t
 
-   integer :: spin
+   integer :: spin = -1
     ! Spin index
 
-   integer :: nkfs
+   integer :: nkfs = -1
     ! Number of k-points on the Fermi-surface in the full BZ.
 
-   integer :: nktot
+   integer :: nktot = -1
     ! Total number of k-points in the initial mesh. Used to compute integrals in the BZ.
 
-   integer :: nkibz
+   integer :: nkibz = -1
     ! Number of points in the IBZ
 
-   integer :: bmin, bmax
+   integer :: bmin = -1, bmax = -1
     ! Min and max band index included in the calculation.
     ! Note that these values are obtained by taking the union over the k-points in the FS
     ! For each k-point, we usually have a different number of states crossing eF given by bstart_cnt_ibz
 
-   integer :: maxnb
+   integer :: maxnb = -1
    ! Max number of bands on the FS (bmax - bmin + 1)
 
-   integer :: eph_intmeth
+   integer :: eph_intmeth = 1
    ! Integration method.
-   ! 1 for gaussian (incuding adaptive broadening)
+   ! 1 for gaussian (including adaptive broadening)
    ! |2| for tetrahedra.
    !     2 for the optimized tetrahedron method.
    !    -2 for the linear tetrahedron method.
    !
 
-   integer :: nene
+   integer :: nene = -1
    ! Number of chemical potential values used for inelastic integration
 
    real(dp) :: eph_fsmear
@@ -96,10 +96,10 @@ module m_fstab
    ! is smaller than this value to avoid divergences in the gaussian
 
    real(dp) :: enemin
-   ! Minimal chemical potential value used for inelastic integration
+   ! Minimal chemical potential value used for inelastic integration.
 
    real(dp) :: deltaene
-   ! Chemical potential increment for inelastic integration
+   ! Chemical potential increment for inelastic integration.
 
    type(krank_t) :: krank
    ! rank/inverse_rank pair for the k-points on the FS (kpts).
@@ -112,6 +112,9 @@ module m_fstab
    !   indkk_fs(2,:)      The index of the symmetry S such that kfs = tim_sign * S(k_ibz) + G0
    !   indkk_fs(3:5,:)    The reduced components of G0.
    !   indkk_fs(6,:)      1 if time-reversal was used to generate the k-point, 0 otherwise
+   !
+   ! NB: The table is generated using the symrel convention and can therefore be used to
+   ! symmetrize wavefunctions in k-space.
 
    integer,allocatable :: bstart_cnt_ibz(:,:)
     ! (2, nkibz)
@@ -271,7 +274,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  integer,allocatable :: full2ebands(:,:),bz2ibz(:), fs2bz(:),indkk(:,:) !,fs2ibz(:)
  real(dp),allocatable :: kbz(:,:), tmp_eigen(:),bdelta(:,:),btheta(:,:)
  real(dp) :: rlatt(3,3), klatt(3,3)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -541,7 +543,6 @@ integer function fstab_findkg0(fstab, kpt, g0) result(ik_fs)
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: kpt(3)
-
 ! *************************************************************************
 
  ik_fs = fstab%krank%get_index(kpt)
@@ -579,9 +580,9 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ik_fs, ik_ibz, ikq_ibz, spin, nesting
  class(fstab_t),intent(in) :: fs
- type(ebands_t),intent(in) :: ebands
+ class(ebands_t),intent(in) :: ebands
+ integer,intent(in) :: ik_fs, ik_ibz, ikq_ibz, spin, nesting
 !arrays
  real(dp),intent(out) :: wtk(fs%maxnb, fs%maxnb)
 
@@ -591,7 +592,6 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
  logical :: use_adaptive
  real(dp) :: g1, g2, sigma
  real(dp) :: abc(3)
-
 ! *************************************************************************
 
  bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
@@ -683,7 +683,6 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  integer :: my_unt,my_prtvol,spin
  class(fstab_t),pointer :: fs
  character(len=5000) :: msg
-
 ! *************************************************************************
 
  my_unt = std_out; if (present(unit)) my_unt = unit
