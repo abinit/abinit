@@ -32,9 +32,7 @@ module m_inwffil
  use m_nctk
  use m_hdr
  use m_dtset
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 
  use defs_abitypes, only : MPI_type
  use m_fstrings, only : sjoin, itoa

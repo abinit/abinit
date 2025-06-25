@@ -76,10 +76,20 @@ if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(DO_BUILD_67_PYTHON_INVOCATION_EXT ON)
 endif()
 
-option (ABINIT_ENFORCE_CUDA_AWARE_MPI "Some MPI cuda-aware implementation are not well detected; use this variable to enforce if you that your MPI implementation is Cuda-aware." OFF)
+option (ABINIT_ENFORCE_GPU_AWARE_MPI "Some MPI GPU-aware implementations are not well detected; use this variable to enforce if you know that your MPI implementation is GPU-aware." OFF)
 
 option(ABINIT_ENABLE_GPU_CUDA "Enable GPU build (using Nvidia CUDA backend, default OFF)" OFF)
 if(ABINIT_ENABLE_GPU_CUDA)
+
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    message(FATAL_ERROR
+      "When using CUDA, you need to provide -DCMAKE_CUDA_ARCHITECTURES "
+      "with the NVIDIA GPU compute capability matching your environment.\n"
+      "For example, if targetting NVIDIA GPU A100:\n"
+      "-DCMAKE_CUDA_ARCHITECTURES=80 \n"
+    )
+  endif()
+
   include(CheckLanguage)
   check_language(CUDA)
   if (CMAKE_CUDA_COMPILER)
@@ -112,6 +122,18 @@ endif()
 option(ABINIT_ENABLE_GPU_HIP "Enable GPU build (using AMD HIP backend, default OFF)" OFF)
 if(ABINIT_ENABLE_GPU_HIP)
 
+  if(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
+    message(FATAL_ERROR
+      "When using HIP, you need to provide -DCMAKE_HIP_ARCHITECTURES "
+      "with the AMD GPU target matching your environment.\n"
+      "For example, if targetting AMD GPU Instinct MI250:\n"
+      "-DCMAKE_HIP_ARCHITECTURES=gfx90a \n"
+    )
+  endif()
+
+  # For shutting annoying warning from ROCM Cmake module
+  set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
+
   find_package(HIP)
   find_package(hipfft)
   find_package(rocfft)
@@ -129,34 +151,31 @@ if(ABINIT_ENABLE_GPU_HIP)
 endif()
 
 option(ABINIT_ENABLE_GPU_MARKERS "Enable GPU markers for profiling (requires NVTX3 or ROCM/HIP, default OFF)" OFF)
-if(ABINIT_ENABLE_GPU_MARKERS)
+option(ABINIT_ENABLE_NVTX  "Enable NVTX markers for profiling (requires CUDA install, default OFF)" OFF)
+option(ABINIT_ENABLE_ROCTX "Enable ROCTX markers for profiling (requires ROCM install, default OFF)" OFF)
+if(ABINIT_ENABLE_GPU_MARKERS AND (ABINIT_ENABLE_NVTX OR ABINIT_ENABLE_ROCTX) OR (ABINIT_ENABLE_NVTX AND ABINIT_ENABLE_ROCTX))
+  message(FATAL_ERROR "Please, activate only one of ABINIT_ENABLE_GPU_MARKERS, ABINIT_ENABLE_NVTX or ABINIT_ENABLE_ROCTX.")
+endif()
+if(ABINIT_ENABLE_GPU_MARKERS AND NOT (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP))
+  message(FATAL_ERROR "Please, activate ABINIT_ENABLE_GPU_MARKERS only along ABINIT_ENABLE_CUDA or ABINIT_ENABLE_HIP.")
+endif()
+if(ABINIT_ENABLE_NVTX OR (ABINIT_ENABLE_GPU_MARKERS AND ABINIT_ENABLE_GPU_CUDA))
 
-  # check NVtx library is available
-  if(ABINIT_ENABLE_GPU_CUDA)
-    # check nvtx library is available
-    if (TARGET CUDA::nvToolsExt)
-      set(HAVE_GPU_CUDA10 1)
-      set(HAVE_GPU_MARKERS 1)
-      set(HAVE_GPU_MARKERS_NVTX 1)
-    endif()
+  if(NOT ABINIT_ENABLE_GPU_CUDA)
+    find_package(CUDAToolkit REQUIRED)
+  endif()
+  # check if NVTX library is available from imported CUDA install
+  if (TARGET CUDA::nvToolsExt)
+    set(HAVE_GPU_CUDA10 1)
+    set(HAVE_GPU_MARKERS 1)
+    set(HAVE_GPU_MARKERS_NVTX 1)
+    add_library(abinit::gpu_markers ALIAS CUDA::nvToolsExt)
   else()
-    find_library(NVTX_LIBRARY
-      NAMES nvToolsExt
-      PATHS ${CUDA_ROOT}/lib64 ${CUDA_ROOT}/lib ${CUDA_HOME}/lib64 ${CUDA_HOME}/lib /opt/cuda/lib64 /usr/lib /usr/local/lib
-      DOC "Location of the NVTX library"
-    )
-    if(NVTX_LIBRARY)
-      message(STATUS "NVTX found: ${NVTX_LIBRARY}")
-      target_link_libraries(abinit ${NVTX_LIBRARY})
-      set(HAVE_GPU_MARKERS 1)
-      set(HAVE_GPU_MARKERS_NVTX 1)
-    else()
-      message(STATUS "NVTX not found")
-    endif()
+    message(SEND_ERROR "NVTX (GPU markers for NVIDIA tools) required but not found")
   endif()
 
+elseif(ABINIT_ENABLE_ROCTX OR (ABINIT_ENABLE_GPU_MARKERS AND ABINIT_ENABLE_GPU_HIP))
   # check ROCtx library is available
-  # ROCTX: ROC tracer library similar in use to NVTX for CUDA
   find_library(ROCTX_LIBRARY
     NAMES libroctx64.so
     PATHS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
@@ -164,15 +183,13 @@ if(ABINIT_ENABLE_GPU_MARKERS)
   )
   if (ROCTX_LIBRARY)
     message(STATUS "ROCTX found: ${ROCTX_LIBRARY}")
-    target_link_libraries(abinit ${ROCTX_LIBRARY})
+    add_library(roctx64 UNKNOWN IMPORTED ${ROCTX_LIBRARY})
+    set_target_properties(roctx64 PROPERTIES IMPORTED_LOCATION ${ROCTX_LIBRARY})
+    add_library(abinit::gpu_markers ALIAS roctx64)
     set(HAVE_GPU_MARKERS 1)
     set(HAVE_GPU_MARKERS_ROCTX 1)
   else()
-      message(STATUS "ROCTX not found")
-  endif()
-  
-  if (NOT(NVTX_LIBRARY OR ROCTX_LIBRARY))
-    message(SEND_ERROR "ABINIT_ENABLE_GPU_MARKERS activated but Neither NVTX or ROCTX have been found!")
+    message(SEND_ERROR "ROCTX (GPU markers for AMD tools) required but not found")
   endif()
 
 endif()
@@ -182,6 +199,10 @@ if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP OR ABINIT_ENABLE_GPU_MARKERS
 else()
   set(DO_BUILD_17_GPU_TOOLBOX FALSE)
 endif()
+
+option(ABINIT_ENABLE_NVIDIA_UNIFIED_MEM
+  "Enable Unified Memory for NVIDIA GPU (requires OpenMP Offload & NVHPC compiler, default OFF)" OFF)
+# Checks for this option occurs after compiler and OpenMP offload settings in root CMakeLists.txt
 
 if (ABINIT_ENABLE_GPU_CUDA)
   set(DO_BUILD_46_MANAGE_CUDA TRUE)
@@ -208,6 +229,6 @@ set(ABI_DEBUG_FLAVOR "basic" CACHE STRING
   "Abinit C compiler debug flavor : basic, verbose, enhanced, paranoid, naughty")
 set_property(CACHE ABI_DEBUG_FLAVOR PROPERTY STRINGS basic verbose enhanced paranoid naughty)
 
-set(ABI_OPTIM_FLAVOR "safe" CACHE STRING
+set(ABI_OPTIM_FLAVOR "standard" CACHE STRING
   "Abinit C/Fortran compiler optim flavor : safe, standard, aggressive")
 set_property(CACHE ABI_OPTIM_FLAVOR PROPERTY STRINGS safe standard aggressive)

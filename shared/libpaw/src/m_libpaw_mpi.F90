@@ -24,12 +24,9 @@
 #include "libpaw.h"
 
 module m_libpaw_mpi
-    
- USE_DEFS
 
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_DEFS
+ USE_MPI
 
  implicit none
 
@@ -796,7 +793,7 @@ subroutine xpaw_mpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,spaceCo
 
 !Local variables--------------
  integer :: cc,dd,sz1
- 
+
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
@@ -952,7 +949,7 @@ subroutine xpaw_mpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,
  integer, intent(out) :: ier
 
 !Local variables-------------------
- integer :: cc,dd,sz1 
+ integer :: cc,dd,sz1
 
 ! *************************************************************************
  ier=0
@@ -1123,7 +1120,7 @@ end subroutine xpaw_mpi_alltoall_dp2d
 !!  xval= buffer array
 !!  sendcnts= number of elements to send to each processor
 !!  sdispls= displacements from which to take the outgoing data
-!!  recvcnts= number of elements that can be received from each processor 
+!!  recvcnts= number of elements that can be received from each processor
 !!  rdispls= displacement at which to place the incoming data from each processor
 !!  comm= MPI communicator
 !!
@@ -1179,7 +1176,7 @@ end subroutine xpaw_mpi_alltoallv_int1d
 !!  xval= buffer array
 !!  sendcnts= number of elements to send to each processor
 !!  sdispls= displacements from which to take the outgoing data
-!!  recvcnts= number of elements that can be received from each processor 
+!!  recvcnts= number of elements that can be received from each processor
 !!  rdispls= displacement at which to place the incoming data from each processor
 !!  comm= MPI communicator
 !!
@@ -1232,7 +1229,7 @@ end subroutine xpaw_mpi_alltoallv_dp1d
 !!  xval= buffer array
 !!  sendcnts= number of elements to send to each processor
 !!  sdispls= displacements from which to take the outgoing data
-!!  recvcnts= number of elements that can be received from each processor 
+!!  recvcnts= number of elements that can be received from each processor
 !!  rdispls= displacement at which to place the incoming data from each processor
 !!  comm= MPI communicator
 !!
@@ -1255,7 +1252,7 @@ subroutine xpaw_mpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispl
 
 !Local variables-------------------
  integer :: sc,sds,sdr,sz1
- 
+
 ! *********************************************************************
  ier=0
 #if defined HAVE_MPI

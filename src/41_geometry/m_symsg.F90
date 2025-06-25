@@ -69,8 +69,6 @@ contains
 
 subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: msym,shubnikov,spgaxor,spgorig,spgroup,spgroupma
@@ -550,8 +548,6 @@ end subroutine symsgcube
 
 subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma
@@ -593,7 +589,7 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 !reshape((/0,-1,0,-1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )  ! x -> -y; y -> -x; z -> +z
 
  genswp(:,:)=0 ; genswp(2,1)=1 ; genswp(1,2)=1 ; genswp(3,3)=1            ! mirror plane perpendicular to x-y, hex setting
-!reshape((/0,1,0,1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )    ! x -> +y; y -> +x; z -> +z 
+!reshape((/0,1,0,1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )    ! x -> +y; y -> +x; z -> +z
  genswp_r(:,:)=0 ; genswp_r(1,3)=1 ; genswp_r(2,2)=1 ; genswp_r(3,1)=1    ! mirror plane perpendicular to z-x, rhombo setting
 
  genmmp(:,:)=0 ; genmmp(1,1)=-1 ; genmmp(2,2)=-1 ; genmmp(3,3)=1          ! 2 fold axis along z
@@ -674,7 +670,7 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
      case (157,162)                    !P31m, PB31m
        symrel(:,:,3) = genswp(:,:)     ! mirror plane perpendicular to x-y
        nogen=3
-       ! 162 also has 2 and -3 axes 
+       ! 162 also has 2 and -3 axes
      case (158,161,165,167)            !P3c1, R3c, PB3c1, RB3c
        symrel(:,:,3) = genswmmp(:,:)   ! mirror plane perpendicular to x+y
        tnons(:,3)=(/0.d0,0.d0,0.5d0/)
@@ -686,7 +682,7 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
        symrel(:,:,3) = genswp(:,:)     ! mirror plane perpendicular to x-y
        tnons(:,3)=(/0.d0,0.d0,0.5d0/)
        nogen=3
-       ! 163 also has 2 and -3 axes 
+       ! 163 also has 2 and -3 axes
      end select
 
      select case (spgroup)
@@ -905,8 +901,6 @@ end subroutine symsghexa
 !! SOURCE
 
 subroutine symsgmono(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1446,8 +1440,6 @@ end subroutine symsgmono
 subroutine symsgortho(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
 &   spgroupma,symafm,symrel,tnons)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: msym,nsym,shubnikov,spgaxor,spgorig,spgroup
@@ -1934,8 +1926,6 @@ end subroutine symsgortho
 
 subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: msym,nsym,shubnikov,spgaxor,spgorig,spgroup
@@ -2381,8 +2371,6 @@ end subroutine symsgtetra
 !! SOURCE
 
 subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

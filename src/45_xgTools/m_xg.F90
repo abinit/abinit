@@ -39,13 +39,10 @@ module m_xg
   use m_abicore
   use defs_basis
   use m_time, only : timab
+  USE_MPI
   use m_xmpi
   use m_xomp
   use m_abi_linalg
-
-#if defined HAVE_MPI2
- use mpi
-#endif
 
 #if defined(HAVE_GPU)
   use m_gpu_toolbox

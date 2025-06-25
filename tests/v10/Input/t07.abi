@@ -7,6 +7,8 @@ ndtset 7
 
 wfoptalg 111
 
+cprj_in_memory 0
+
 nline  8
 tolwfr_diago 1e-15
 

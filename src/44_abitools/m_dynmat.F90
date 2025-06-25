@@ -5493,7 +5493,6 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 !arrays
  real(dp) :: vecti(3),vectr(3)
  character(len=1) :: metacharacter(3*natom)
-
 ! *********************************************************************
 
 !Check the value of eivec

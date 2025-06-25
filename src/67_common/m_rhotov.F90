@@ -24,7 +24,7 @@ module m_rhotov
  use defs_wvltypes
  use m_errors
  use m_abicore
- use m_ab7_mixing
+ use m_abi_mixing
  use m_abi2big
  use m_xmpi
  use m_cgtools
@@ -310,7 +310,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 &       strsxc=strsxc,taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
-     
+
      call timab(941,2,tsec)
    elseif (.not. wvlbigdft) then
 !    Use the free boundary solver.

@@ -105,7 +105,6 @@ subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : KS_POTENTIAL
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: opt
@@ -187,7 +186,6 @@ subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)  :: opt
@@ -264,7 +262,6 @@ subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : HARTREE_POTENTIAL
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)  :: opt
@@ -341,7 +338,6 @@ end subroutine wvl_vhartr_abi2big
 
 subroutine wvl_vxc_abi2big(opt,vxc,wvl_den)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: opt
@@ -397,7 +393,6 @@ end subroutine wvl_vxc_abi2big
 
 subroutine wvl_occ_abi2big(mband,nkpt,nsppol,occ,opt,wvl_wfs)
 
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)  :: mband,nkpt,nsppol,opt
@@ -477,7 +472,6 @@ end subroutine wvl_occ_abi2big
 
 subroutine wvl_eigen_abi2big(mband,nkpt,nsppol,eigen,opt,wvl_wfs)
 
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(in)  :: mband,nkpt,nsppol,opt
@@ -562,7 +556,6 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
 &  SMEARING_DIST_FERMI, SMEARING_DIST_COLD1, SMEARING_DIST_COLD2,&
 &  SMEARING_DIST_METPX
 #endif
- implicit none
 
 !Arguments ------------------------------------
  integer , intent(inout)  :: occopt_abi,occopt_big
@@ -648,7 +641,6 @@ end subroutine wvl_occopt_abi2big
 
 subroutine wvl_rhov_abi2big_2D_4D(opt,rhov_abi,rhov_big,shift)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: opt
@@ -703,7 +695,6 @@ end subroutine wvl_rhov_abi2big_2D_4D
 
 subroutine wvl_rhov_abi2big_1D_4D(opt,rhov_abi,rhov_big,shift)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: opt
@@ -757,7 +748,6 @@ end subroutine wvl_rhov_abi2big_1D_4D
 
 subroutine wvl_rhov_abi2big_2D_2D(opt,rhov_abi,rhov_big,shift)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: opt
@@ -812,7 +802,6 @@ end subroutine wvl_rhov_abi2big_2D_2D
 
 subroutine wvl_rhov_abi2big_1D_2D(opt,rhov_abi,rhov_big,shift)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: opt
@@ -866,7 +855,6 @@ end subroutine wvl_rhov_abi2big_1D_2D
 
 subroutine wvl_rhov_abi2big_2D_1D(opt,rhov_abi,rhov_big,shift)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: opt
@@ -916,7 +904,6 @@ end subroutine wvl_rhov_abi2big_2D_1D
 
 subroutine wvl_rhov_abi2big_1D_1D(opt,rhov_abi,rhov_big,shift)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: opt
@@ -977,7 +964,6 @@ end subroutine wvl_rhov_abi2big_1D_1D
 
 subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,shift)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nfft_abi,nfft_big,nspden,opt,shift
@@ -1121,7 +1107,6 @@ end subroutine wvl_rhov_abi2big_gen
 
 subroutine wvl_setngfft(me_wvl, mgfft, nfft, ngfft, nproc_wvl, n1i, n2i, n3i,n3d)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1220,7 +1205,6 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: system_size,nullify_locreg_descriptors
 #endif
- implicit none
 
 !Arguments ------------------------------------
 !scalars

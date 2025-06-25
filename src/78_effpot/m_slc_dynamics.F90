@@ -37,11 +37,13 @@ module  m_slc_dynamics
   use m_hashtable_strval, only: hash_table_t
   use m_slc_potential, only: slc_potential_t
 
+  implicit none
+
   private
 
   type, public, extends(abstract_mover_t) :: slc_mover_t
     class(spin_mover_t),    pointer :: spin_mover
-    class(lattice_mover_t), pointer :: lattice_mover    
+    class(lattice_mover_t), pointer :: lattice_mover
 
   CONTAINS
     procedure :: initialize
@@ -67,7 +69,7 @@ module  m_slc_dynamics
   subroutine finalize(self)
 
     class(slc_mover_t) :: self
-  
+
     nullify(self%spin_mover)
     nullify(self%lattice_mover)
 
@@ -88,7 +90,7 @@ module  m_slc_dynamics
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
 
    !if(self%spin_mover%total_time .ne. self%lattice_mover%total_time) then
@@ -98,7 +100,7 @@ module  m_slc_dynamics
    !if(self%spin_mover%dt .ne. self%lattice_mover%dt) then
    !  ABI_ERROR("Different time steps for spin and lattice dynamics not yet implemented, check your input file.")
    !endif
-     
+
 
   t=0.0
   counter=0
@@ -141,7 +143,7 @@ module  m_slc_dynamics
         call self%spin_mover%hist%set_vars( time=t,  inc=.True.)
         if(mod(counter, self%spin_mover%hist%spin_nctime)==0) then
           call self%spin_mover%spin_ob%get_observables( self%spin_mover%hist%S(:,:, self%spin_mover%hist%ihist_prev), &
-             self%spin_mover%hist%Snorm(:,self%spin_mover%hist%ihist_prev), & 
+             self%spin_mover%hist%Snorm(:,self%spin_mover%hist%ihist_prev), &
              self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev))
           etotal = energy_table%sum_val()
           espin = energy_table%sum_val(label='SpinPotential')
@@ -162,7 +164,7 @@ module  m_slc_dynamics
   if (iam_master) then
     call self%spin_mover%hist%reset(array_to_zero=.False.)
   end if
-  
+
   if(iam_master) then
     call self%spin_mover%spin_ob%reset()
     msg="Measurement run:"

@@ -50,8 +50,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_sym(Invar,Lattice,MPIdata,Sym)
 
-  implicit none
-
   type(Symetries_type),intent(out) :: Sym
   type(Input_type),intent(inout) :: Invar
   type(Lattice_type),intent(in) :: Lattice
@@ -118,7 +116,7 @@ contains
       write(Invar%stdlog,*) Sym%symrel(1,:,isym)
       write(Invar%stdlog,*) Sym%symrel(2,:,isym)
       write(Invar%stdlog,*) Sym%symrel(3,:,isym)
-    end do  
+    end do
     write(Invar%stdlog,'(a)') ' Ptsymrel='
     do isym=1,Sym%nptsym
       write(Invar%stdlog,*) ' For sym=',isym
@@ -172,7 +170,7 @@ contains
       write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
       write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
       write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
-    end if  
+    end if
   end do
   if (MPIdata%iam_master) close(75)
   write(Invar%stdout,'(a)') ' See the sym.dat file'
@@ -199,8 +197,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_SearchS_1at(Invar,MPIdata,Sym,xred_ideal)
-
-  implicit none
 
   type(Input_type), intent(in) :: Invar
   type(Symetries_type), intent(inout) :: Sym
@@ -257,7 +253,7 @@ contains
   tmpi(:,:)=0.d0
   tmpj(:,:)=0.d0
   do iatom=1,Invar%natom
-!   For a single iatom 
+!   For a single iatom
     call DGEMV('T',3,3,1.d0,Invar%multiplicity(:,:),3,xred_ideal(:,iatom),1,0.d0,tmpi(:,iatom),1)
     iatom_unitcell=mod(iatom-1,Invar%natom_unitcell)+1
     vecti(:)=nint(tmpi(:,iatom)-tmp_store(:,iatom_unitcell))
@@ -284,7 +280,7 @@ contains
       write(40,'(a,i4)') ' '
     end do
     close(40)
-  end if  
+  end if
 
 ! For a couple of (iatom,jatom). The (iatom,jatom) vector depends on the position of iatom (due to PBC)
   do iatom=1,Invar%natom
@@ -321,7 +317,7 @@ contains
       write(40,'(a,i4)') ' '
     end do
     close(40)
-  end if  
+  end if
   ABI_FREE(indsym2)
   write(Invar%stdout,'(a)') ' See the Indsym*.dat files (if debug)'
 
@@ -329,8 +325,6 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_SearchS_2at(Invar,iatom,jatom,eatom,fatom,Isym2at,Sym,xred_ideal)
-
-  implicit none
 
   integer, intent(in) :: iatom,jatom,eatom,fatom
   type(Input_type),intent(in) :: Invar
@@ -404,8 +398,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_SearchS_3at(Invar,iatom,jatom,katom,eatom,fatom,gatom,Isym3at,Sym,xred_ideal)
 
-  implicit none
-
   integer, intent(in) :: iatom,jatom,katom,eatom,fatom,gatom
   type(Input_type),intent(in) :: Invar
   type(Symetries_type),intent(in) :: Sym
@@ -462,7 +454,7 @@ contains
 ! To understand the meaning of "latt", see SearchS_1at
   ok=.false.
   do isym=1,Sym%nsym
-!   TODO : A CHECKER!!!!!!!!!!!!!!!!!  
+!   TODO : A CHECKER!!!!!!!!!!!!!!!!!
     indsym2(:)=zero
     call tdep_calc_indsym2(Invar,eatom,fatom,indsym2,isym,Sym,xred_ideal)
     ee=indsym2(4)
@@ -511,8 +503,6 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_SearchS_4at(Invar,iatom,jatom,katom,latom,eatom,fatom,gatom,hatom,Isym4at,Sym,xred_ideal)
-
-  implicit none
 
   integer, intent(in) :: iatom,jatom,katom,latom,eatom,fatom,gatom,hatom
   type(Input_type),intent(in) :: Invar
@@ -585,7 +575,7 @@ contains
 ! To understand the meaning of "latt", see SearchS_1at
   ok=.false.
   do isym=1,Sym%nsym
-!   TODO : A CHECKER!!!!!!!!!!!!!!!!!  
+!   TODO : A CHECKER!!!!!!!!!!!!!!!!!
     indsym2(:)=zero
     call tdep_calc_indsym2(Invar,eatom,fatom,indsym2,isym,Sym,xred_ideal)
     ee=indsym2(4)
@@ -655,8 +645,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_calc_indsym2(Invar,iatom,jatom,indsym2,isym,Sym,xred_ideal)
 
-  implicit none
-
   integer, intent(in) :: iatom,jatom
   type(Input_type),intent(in) :: Invar
   type(Symetries_type),intent(in) :: Sym
@@ -712,7 +700,6 @@ contains
 
  subroutine tdep_destroy_sym(Sym)
 
-  implicit none
   type(Symetries_type),intent(inout) :: Sym
 
   ABI_FREE(Sym%ptsymrel)

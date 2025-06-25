@@ -37,11 +37,11 @@ CONTAINS
 !
 ! Compute Polarization of imaginary frequency
 !
-SUBROUTINE libtetrabz_polcmplx(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0,comm) 
+SUBROUTINE libtetrabz_polcmplx(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0,comm)
   !
   use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_zv
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3), ne
   REAL(C_DOUBLE),INTENT(IN) :: bvec(9), eig1(nb,PRODUCT(nge(1:3))), eig2(nb,PRODUCT(nge(1:3)))
@@ -102,7 +102,7 @@ SUBROUTINE libtetrabz_polcmplx_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, ne, &
   &                     ik_global(20,nt_local), ik_local(20,nt_local)
@@ -260,7 +260,7 @@ SUBROUTINE libtetrabz_polcmplx2(nb,ne,e0,ei1,ej1,w1)
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nb, ne
   COMPLEX(8),INTENT(IN) :: e0(ne)
@@ -377,7 +377,7 @@ END SUBROUTINE libtetrabz_polcmplx2
 SUBROUTINE libtetrabz_polcmplx3(ne,e0,de,w1)
   !
   USE libtetrabz_common, ONLY : libtetrabz_sort
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: ne
   COMPLEX(8),INTENT(IN) :: e0(ne)
@@ -548,7 +548,7 @@ END SUBROUTINE libtetrabz_polcmplx3
 !
 FUNCTION libtetrabz_polcmplx_1234(g1,g2,g3,g4)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2, g3, g4
   REAL(8) :: w(2), libtetrabz_polcmplx_1234(2)
@@ -599,9 +599,9 @@ END FUNCTION libtetrabz_polcmplx_1234
 !
 ! 2, g4 = g1
 !
-FUNCTION libtetrabz_polcmplx_1231(g1,g2,g3) 
+FUNCTION libtetrabz_polcmplx_1231(g1,g2,g3)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2, g3
   REAL(8) :: w(2), libtetrabz_polcmplx_1231(2)
@@ -646,7 +646,7 @@ END FUNCTION libtetrabz_polcmplx_1231
 !
 FUNCTION libtetrabz_polcmplx_1233(g1, g2, g3)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2, g3
   REAL(8) :: w(2), libtetrabz_polcmplx_1233(2)
@@ -700,7 +700,7 @@ END FUNCTION libtetrabz_polcmplx_1233
 !
 FUNCTION libtetrabz_polcmplx_1221(g1,g2)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2
   REAL(8) :: w(2),libtetrabz_polcmplx_1221(2)
@@ -732,7 +732,7 @@ END FUNCTION libtetrabz_polcmplx_1221
 !
 FUNCTION libtetrabz_polcmplx_1222(g1,g2)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2
   REAL(8) :: w(2), libtetrabz_polcmplx_1222(2)
@@ -762,7 +762,7 @@ END FUNCTION libtetrabz_polcmplx_1222
 !
 FUNCTION libtetrabz_polcmplx_1211(g1,g2)
   !
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2
   REAL(8) :: w(2), libtetrabz_polcmplx_1211(2)

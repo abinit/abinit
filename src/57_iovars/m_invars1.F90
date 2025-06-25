@@ -708,6 +708,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%plowan_nbl,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_frtypat,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_scenergy,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
    ABI_MALLOC(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
@@ -2342,6 +2344,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
    dtsets(idtset)%dmft_lambda_yukawa=-1.0_dp
+   dtsets(idtset)%dmft_magnfield=0
+   if (dtsets(idtset)%dmft_magnfield .gt. 0) dtsets(idtset)%dmft_magnfield_b=0.0_dp
    dtsets(idtset)%dmft_mxsf=0.6_dp
    dtsets(idtset)%dmft_nlambda=6
    dtsets(idtset)%dmft_nominal(:)=0
@@ -2768,6 +2772,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%recptrott=0
    dtsets(idtset)%rectesteg=0
    dtsets(idtset)%rectolden=zero
+   dtsets(idtset)%rcpaw_scenergy(:)=-two
+   dtsets(idtset)%rcpaw_frtypat(:)=0
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
 !  dtsets(idtset)%rfasr=0

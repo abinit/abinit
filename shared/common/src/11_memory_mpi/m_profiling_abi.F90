@@ -30,9 +30,7 @@ module m_profiling_abi
  use, intrinsic :: iso_c_binding
  use defs_basis
  use m_clib
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 
  implicit none
 

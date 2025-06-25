@@ -28,7 +28,7 @@ module m_fit_data
  use m_abicore
 
  use m_geometry,     only : metric
- 
+
  implicit none
 !!***
 
@@ -45,17 +45,17 @@ module m_fit_data
 !!   - strain
 !!   - sqomega
 !!   - ucvol
-!! 
+!!
 !! SOURCE
 
  type, public :: training_set_type
 
    integer :: ntime
 !    Number of time in the training set
-   
+
    integer :: natom
 !    Number of atoms in the training set
-   
+
    real(dp), allocatable :: displacement(:,:,:)
 !    displacement(3,natom,ntime)
 !    displacement array, difference of the position in cartisian coordinates
@@ -78,27 +78,27 @@ module m_fit_data
 !    ucvol array, volume of the cell in the training set
 
  end type training_set_type
- 
+
 !routine for training_set
  public :: training_set_init
- public :: training_set_free 
+ public :: training_set_free
 !!***
 
 !----------------------------------------------------------------------
- 
+
 !!****t* m_fit_data/fit_data_type
 !! NAME
 !! fit_data_type
 !!
 !! FUNCTION
-!! 
+!!
 !! SOURCE
 
  type, public :: fit_data_type
 
    integer :: ntime
 !   Number of time in the training set
-   
+
    integer :: natom
 !   Number of atoms in the training set
 
@@ -119,13 +119,13 @@ module m_fit_data
 
    type(training_set_type) :: training_set
 !    datatype with the information of the training set
-   
+
  end type fit_data_type
 
 !routine for fit_data
  public :: fit_data_compute
  public :: fit_data_init
- public :: fit_data_free 
+ public :: fit_data_free
 !!***
 
 CONTAINS  !===========================================================================================
@@ -139,13 +139,13 @@ CONTAINS  !=====================================================================
 !! Initialize fit_data datatype
 !!
 !! INPUTS
-!! energy_diff(3,natom,ntime) = Difference of energy between DFT calculation and 
+!! energy_diff(3,natom,ntime) = Difference of energy between DFT calculation and
 !!                             fixed part of the model (more often harmonic part)
-!! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and 
+!! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and
 !!                             fixed part of the model (more often harmonic part)
 !! natom = Number of atoms
 !! ntime = Number of time (number of snapshot, number of md step...)
-!! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and 
+!! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
 !!                        fixed part of the model (more often harmonic part)
 !! sqomega(ntime) =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !! ucvol(ntime) = Volume of the system for each time
@@ -183,27 +183,27 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
 &      ' The number of time does not correspond to the training set'
    ABI_BUG(message)
  end if
- 
-!Free the output 
+
+!Free the output
  call fit_data_free(fit_data)
 
-!Set integer values 
+!Set integer values
  fit_data%ntime = ntime
  fit_data%natom = natom
 
 !allocate arrays
  ABI_MALLOC(fit_data%fcart_diff,(3,natom,ntime))
  fit_data%fcart_diff(:,:,:) = fcart_diff(:,:,:)
- 
+
  ABI_MALLOC(fit_data%strten_diff,(6,ntime))
  fit_data%strten_diff(:,:) = strten_diff(:,:)
 
  ABI_MALLOC(fit_data%energy_diff,(ntime))
  fit_data%energy_diff(:) = energy_diff
- 
+
  call training_set_init(fit_data%training_set,ts%displacement,ts%du_delta,&
 &                       natom,ntime,ts%strain,ts%sqomega,ts%ucvol)
- 
+
 end subroutine fit_data_init
 !!***
 
@@ -223,8 +223,6 @@ end subroutine fit_data_init
 
 subroutine fit_data_free(fit_data)
 
- implicit none
-  
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -238,7 +236,7 @@ subroutine fit_data_free(fit_data)
   fit_data%ntime = 0
   fit_data%natom = 0
 
-! Deallocate arrays  
+! Deallocate arrays
   if(allocated(fit_data%energy_diff)) then
     ABI_FREE(fit_data%energy_diff)
   end if
@@ -249,7 +247,7 @@ subroutine fit_data_free(fit_data)
     ABI_FREE(fit_data%strten_diff)
   end if
   call training_set_free(fit_data%training_set)
-   
+
 end subroutine fit_data_free
 !!***
 
@@ -283,8 +281,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  use m_effective_potential,only : effective_potential_getDisp
  use m_abihist, only : abihist
  use m_strain,only : strain_type,strain_get
- implicit none
-  
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -337,15 +334,15 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  ABI_MALLOC(sqomega,(ntime))
  ABI_MALLOC(ucvol,(ntime))
 
- displacement = zero 
- du_delta = zero 
- strain = zero; 
- fcart_fixed  = zero 
+ displacement = zero
+ du_delta = zero
+ strain = zero;
+ fcart_fixed  = zero
  gred_fixed  = zero
- strain = zero 
- strten_fixed = zero 
+ strain = zero
+ strten_fixed = zero
  strten_diff = zero
- sqomega = zero 
+ sqomega = zero
  ucvol = zero
 
  do itime=1,ntime
@@ -369,13 +366,13 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 &                                   xred_hist=hist%xred(:,:,itime),xcart_ref=eff_pot%supercell%xcart,&
 &                                   compute_displacement=.TRUE.,compute_duDelta=.TRUE.)
 
-!  Get forces and stresses from harmonic part (fixed part)     
+!  Get forces and stresses from harmonic part (fixed part)
    call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),gred_fixed(:,:,itime),&
 &                                    strten_fixed(:,itime),natom,hist%rprimd(:,:,itime),&
 &                                    displacement=displacement(:,:,itime),&
 &                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&
 &                                    compute_anharmonic=.true.,verbose=.FALSE.)
-   
+
 !  Compute \Omega^{2} and ucvol for each time
    call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
 !  Formula: sqomega(itime) = (((ucvol(itime)**(-2.))* ((natom)**(0.5)))**(-1.0/3.0))**2
@@ -386,8 +383,8 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
- end do ! End Loop itime 
-   
+ end do ! End Loop itime
+
 !Set the training set
  call training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega,ucvol)
 !Set the fit_data
@@ -443,35 +440,35 @@ subroutine training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega
 !arrays
  real(dp),intent(in) :: displacement(3,natom,ntime),du_delta(6,3,natom,ntime)
  real(dp),intent(in) :: strain(6,ntime),sqomega(ntime),ucvol(ntime)
- type(training_set_type),intent(inout) :: ts  
+ type(training_set_type),intent(inout) :: ts
 !Local variables-------------------------------
 !scalar
 !arrays
 ! *************************************************************************
 
-!Free the output 
+!Free the output
  call training_set_free(ts)
 
-!Set integer values 
+!Set integer values
  ts%ntime = ntime
  ts%natom = natom
 
 !allocate arrays
  ABI_MALLOC(ts%displacement,(3,natom,ntime))
  ts%displacement(:,:,:) = displacement(:,:,:)
- 
+
  ABI_MALLOC(ts%du_delta,(6,3,natom,ntime))
  ts%du_delta(:,:,:,:) = du_delta(:,:,:,:)
- 
+
  ABI_MALLOC(ts%strain,(6,ntime))
  ts%strain(:,:) = strain(:,:)
- 
+
  ABI_MALLOC(ts%sqomega,(ntime))
  ts%sqomega(:) = sqomega(:)
- 
+
  ABI_MALLOC(ts%ucvol,(ntime))
  ts%ucvol(:) = ucvol(:)
- 
+
 end subroutine training_set_init
 !!***
 
@@ -491,12 +488,10 @@ end subroutine training_set_init
 
 subroutine training_set_free(ts)
 
- implicit none
-  
 !Arguments ------------------------------------
 !scalars
 !arrays
- type(training_set_type),intent(inout) :: ts  
+ type(training_set_type),intent(inout) :: ts
 !Local variables-------------------------------
 !scalar
 !arrays
@@ -506,7 +501,7 @@ subroutine training_set_free(ts)
   ts%ntime = 0
   ts%natom = 0
 
-! Deallocate arrays  
+! Deallocate arrays
   if(allocated(ts%displacement)) then
     ABI_FREE(ts%displacement)
   end if
@@ -522,7 +517,7 @@ subroutine training_set_free(ts)
   if(allocated(ts%ucvol)) then
     ABI_FREE(ts%ucvol)
   end if
-   
+
 end subroutine training_set_free
 !!***
 

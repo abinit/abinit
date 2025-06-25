@@ -48,7 +48,7 @@ module m_phpi
  use m_fftcore,         only : get_kg
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : findqg0
- use m_wfd,             only : wfd_init, wfd_t
+ use m_wfd,             only : wfd_t
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type
@@ -212,7 +212,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(wfd_istwfk, (nkpt))
  wfd_istwfk = 1
 
- call wfd_init(wfd_k,cryst,pawtab,psps,keep_ur,mband,nband,nkpt,nsppol,bks_mask,&
+ call wfd_k%init(cryst,pawtab,psps,keep_ur,mband,nband,nkpt,nsppol,bks_mask,&
    nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_k%kptns,ngfft,&
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
@@ -222,7 +222,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
 
- call wfd_init(wfd_kq,cryst,pawtab,psps,keep_ur_kq,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
+ call wfd_kq%init(cryst,pawtab,psps,keep_ur_kq,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
    nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands_kq%kptns,ngfft,&
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
 

@@ -148,6 +148,8 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
     # Try to compile a MPI-2 Fortran program
     AC_MSG_CHECKING([which level of MPI is supported by the Fortran compiler])
     AC_LANG_PUSH([Fortran])
+
+    # Try to compile a MPI-2 Fortran program
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
               use mpi
@@ -155,6 +157,7 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
               call mpi_init(ierr)
               call mpi_finalize(ierr)
       ]])], [abi_mpi_fc_level="2"], [abi_mpi_fc_level="1"])
+
     AC_LANG_POP([Fortran])
     AC_MSG_RESULT([${abi_mpi_fc_level}])
 
@@ -281,7 +284,7 @@ AC_DEFUN([_ABI_MPI_CHECK_INTEGER16], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_INTEGER16])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: ii = MPI_INTEGER16
@@ -449,7 +452,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
 
   dnl Back-up build environment
   ABI_ENV_BACKUP
-                                                                                            
+
   dnl Prepare build environment
   CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
@@ -457,7 +460,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer,parameter :: siz=5
@@ -473,11 +476,11 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
       !  IN comm	communicator (handle)
       !  OUT request	communication request (handle)
 
-      call MPI_IBCAST(buffer, siz, MPI_INTEGER, root, comm, request, ierr) 
+      call MPI_IBCAST(buffer, siz, MPI_INTEGER, root, comm, request, ierr)
 
     ]])], [abi_mpi_ibcast_ok="yes"], [abi_mpi_ibcast_ok="no"])
   AC_LANG_POP
-                                                                                            
+
   dnl Restore build environment
   ABI_ENV_RESTORE
 
@@ -490,7 +493,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
-]) # _ABI_MPI_CHECK_IBCAST     
+]) # _ABI_MPI_CHECK_IBCAST
 
 
                     ########################################
@@ -518,7 +521,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLGATHER], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLGATHER (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5
@@ -550,7 +553,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLGATHER], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLGATHER     
+]) # _ABI_MPI_CHECK_IALLGATHER
 
 
                     # ------------------------------------ #
@@ -578,7 +581,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLTOALL (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5
@@ -608,7 +611,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLTOALL     
+]) # _ABI_MPI_CHECK_IALLTOALL
 
 
                     # ------------------------------------ #
@@ -636,7 +639,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALLV], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLTOALLV (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: siz=5, group_size=3
@@ -689,7 +692,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
   # Back-up build environment
   ABI_ENV_BACKUP
-                                                                                            
+
   # Prepare build environment
   CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
   LDFLAGS="${FC_LDFLAGS}"
@@ -697,7 +700,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer,parameter :: siz=5,group_size=3
@@ -715,7 +718,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
 
     ]])], [abi_mpi_igatherv_ok="yes"], [abi_mpi_igatherv_ok="no"])
   AC_LANG_POP
-                                                                                            
+
   # Restore build environment
   ABI_ENV_RESTORE
 
@@ -756,7 +759,7 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE], [
   AC_MSG_CHECKING([whether the MPI library supports MPI_IALLREDUCE (MPI3)])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-    [[  
+    [[
       use mpi
 
       integer, parameter :: count=5
@@ -782,11 +785,69 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE], [
   else
     AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
-]) # _ABI_MPI_CHECK_IALLREDUCE     
+]) # _ABI_MPI_CHECK_IALLREDUCE
 
 
                     # ------------------------------------ #
 
+# _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR()
+# ---------------------------
+#
+# Checks whether the MPI library supports MPI_WIN_ALLOCATE_SHARED with C_PTR
+#
+
+AC_DEFUN([_ABI_MPI_CHECK_ALLOCATE_SHARED_PTR], [
+  # Set default values
+  abi_mpi_allocate_shared_ok="no"
+
+  # Back-up build environment
+  ABI_ENV_BACKUP
+
+  # Prepare build environment
+  CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+  LDFLAGS="${FC_LDFLAGS}"
+  LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+  # Try to compile a Fortran MPI program
+  # Note: we assume a MPI implementation that provides the mpi module
+  AC_MSG_CHECKING([whether the MPI library supports MPI_ALLOCATE_SHARED with C_PTR)])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+       use mpi
+       use iso_c_binding
+
+       integer :: win, disp_unit, ierr, comm
+       type(c_ptr) :: baseptr
+       integer(kind=MPI_ADDRESS_KIND) :: my_size
+
+       ! Here we pass a c_ptr although the "standard" API defined in mpi module expects integer(MPI_ADDRESS_KIND).
+       ! For real world applications we need an API that supports C_PTR so that we can convert to a Fortran pointer.
+       ! This problem was fixed in mpi_f08 but Abinit is not ready for that.
+       ! See also https://github.com/pmodels/mpich/issues/2659
+
+       my_size = 0; my_size =  disp_unit
+       call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, MPI_INFO_NULL, comm, baseptr, win, ierr)
+       call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
+    ]])], [abi_mpi_allocate_shared_ok="yes"], [abi_mpi_allocate_shared_ok="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${abi_mpi_allocate_shared_ok}])
+
+  # Restore build environment
+  ABI_ENV_RESTORE
+
+  # Forward information to the compiler
+  if test "${abi_mpi_allocate_shared_ok}" = "yes"; then
+    AC_DEFINE([HAVE_MPI_ALLOCATE_SHARED_CPTR], 1,
+      [Define to 1 if your MPI library supports MPI_ALLOCATE_SHARE with C_PTR.])
+  else
+    AC_MSG_WARN([Your MPI library does not support MPI_ALLOCATE_SHARE with C_PTR.])
+  fi
+
+]) # _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR
+
+
+                    # ------------------------------------ #
 
 # _ABI_MPI_CREATE_WRAPPER(COMPILER_TYPE, SERIAL_COMPILER, MPI_COMPILER)
 # ---------------------------------------------------------------------
@@ -977,7 +1038,7 @@ AC_DEFUN([ABI_MPI_DETECT], [
       else
         AC_MSG_NOTICE([forcing MPI-${abi_mpi_level} standard level support])
         if test "${abi_mpi_level}" != "${abi_mpi_fc_level}"; then
-        AC_MSG_WARN([detected MPI-${abi_mpi_fc_level} support but using MPI-${abi_mpi_level} instructions])
+          AC_MSG_WARN([detected MPI-${abi_mpi_fc_level} support but using MPI-${abi_mpi_level} instructions])
         fi
       fi
 
@@ -1054,6 +1115,7 @@ AC_DEFUN([ABI_MPI_DETECT], [
       _ABI_MPI_CHECK_IALLTOALLV()
       _ABI_MPI_CHECK_IGATHERV()
       _ABI_MPI_CHECK_IALLREDUCE()
+      _ABI_MPI_CHECK_ALLOCATE_SHARED_PTR()
 
     fi # sd_mpi_ok
 

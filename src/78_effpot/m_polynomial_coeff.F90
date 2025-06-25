@@ -31,10 +31,8 @@ module m_polynomial_coeff
  use m_errors
  use m_abicore
  use m_polynomial_term
+ USE_MPI
  use m_xmpi
-#ifdef HAVE_MPI2
- use mpi
-#endif
 
  use m_sort,      only : sort_dp
  use m_io_tools,  only : open_file, get_unit
@@ -224,8 +222,6 @@ CONTAINS  !=====================================================================
 
 subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, check, debug_str)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nterm
@@ -333,8 +329,6 @@ end subroutine polynomial_coeff_init
 
 subroutine polynomial_coeff_free(polynomial_coeff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -394,8 +388,6 @@ end subroutine polynomial_coeff_free
 
 subroutine polynomial_coeff_list_free(polynomial_coeff_list)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -439,8 +431,6 @@ end subroutine polynomial_coeff_list_free
 
 subroutine polynomial_coeff_setCoefficient(coefficient,polynomial_coeff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: coefficient
@@ -473,8 +463,6 @@ end subroutine polynomial_coeff_setCoefficient
 !! SOURCE
 
 subroutine polynomial_coeff_setName(name,polynomial_coeff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -513,8 +501,6 @@ end subroutine polynomial_coeff_setName
 !! SOURCE
 
 subroutine polynomial_coeff_getName(name,polynomial_coeff,symbols,recompute,iterm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -647,8 +633,6 @@ end subroutine polynomial_coeff_getName
 
 subroutine polynomial_coeff_broadcast(coefficients, source, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !array
  type(polynomial_coeff_type),intent(inout) :: coefficients
@@ -739,8 +723,6 @@ end subroutine polynomial_coeff_broadcast
 
 subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !array
  type(polynomial_coeff_type),intent(inout) :: coefficients
@@ -803,8 +785,6 @@ end subroutine polynomial_coeff_MPIsend
 !! SOURCE
 
 subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !array
@@ -906,8 +886,6 @@ end subroutine polynomial_coeff_MPIrecv
 !! SOURCE
 
 subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1483,8 +1461,6 @@ end subroutine prepare_for_getList
 subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
 &                                   natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,cutoff,sc_size,&
 &                                   fit_iatom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2207,8 +2183,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 &                                     max_power_strain,option,sc_size,comm,anharmstr,spcoupling,&
 &                                     distributed,only_odd_power,only_even_power,fit_iatom,&
 &                                     compute_symmetric,dispterms,verbose, max_nbody)
-
- implicit none
 
  !FIXME: There is a bug that the onebody term are duplicated.
  ! e.g. (Bx-O1x)^6 and (O1x-Bx)^6 both appears
@@ -2980,8 +2954,6 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 &                                  nrpt,nsym,power_disp,power_disp_min,power_disp_max,symbols,nbody,&
 &                                  compute,anharmstr,spcoupling,distributed)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalar
  integer,intent(in) :: natom,ncoeff,power_disp,power_disp_min,power_disp_max,ncoeff_out,nsym,nrpt,nstr,icoeff
@@ -3227,8 +3199,6 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 &                                  natom,ncoeff,ncoeff_sym,iirred_comb,nirred_comb,nstr,nmodel,nrpt,nsym,power_disp,power_disp_min,&
 &                                  power_disp_max,symbols,comm,nbody,only_odd_power,only_even_power,&
 &                                  compute,anharmstr,spcoupling,disp)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalar
@@ -3670,8 +3640,6 @@ end subroutine computeSymmetricCombinations
 
 function getCoeffFromList(list_coeff,ia,ib,irpt,mu,ncoeff) result(coeff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalar
  integer,intent(in) :: ia,ib,irpt,mu,ncoeff
@@ -3735,8 +3703,6 @@ end function getCoeffFromList
 
 subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndisp_max,&
 &                                nrpt,nstr,nsym,nterm,terms, reverse)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalar
@@ -3844,8 +3810,6 @@ end subroutine generateTermsFromList
 subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
 &                                     natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                     symbols)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4027,8 +3991,6 @@ end subroutine polynomial_coeff_getOrder1
 !! SOURCE
 subroutine polynomial_coeff_getEvenAnhaStrain(strain_terms,crystal,irred_ncoeff,power_strain,comm, max_nbody)
 
- implicit none
-
 !Arguments ------------------------------------
 type(polynomial_coeff_type),allocatable,intent(inout) :: strain_terms(:)
 type(crystal_t), intent(inout) :: crystal
@@ -4120,7 +4082,6 @@ end subroutine polynomial_coeff_getEvenAnhaStrain
 
 function coeffs_compare(c1,c2) result (res)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
   type(polynomial_coeff_type), intent(in) :: c1,c2
@@ -4166,7 +4127,6 @@ end function coeffs_compare
 
 function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
   type(polynomial_coeff_type), intent(in) :: coeff_list1(:),coeff_list2(:)
@@ -4233,7 +4193,6 @@ end function coeffs_list_conc
 !! SOURCE
 subroutine coeffs_list_conc_onsite(coeff_list1,coeff_list2)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
  type(polynomial_coeff_type), allocatable, intent(inout) :: coeff_list1(:)
@@ -4282,7 +4241,6 @@ end subroutine coeffs_list_conc_onsite
 !! SOURCE
 subroutine coeffs_list_append(coeff_list,coeff, check)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
  type(polynomial_coeff_type), allocatable, intent(inout) ::coeff_list(:)
@@ -4348,7 +4306,6 @@ end subroutine coeffs_list_append
 
 subroutine coeffs_list_truncate(coeff_list, n)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
  type(polynomial_coeff_type), allocatable, intent(inout) :: coeff_list(:)
@@ -4457,7 +4414,6 @@ end subroutine coeffs_list_reduce_duplicate
 
 subroutine coeffs_list_copy(coeff_list_out,coeff_list_in)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
   type(polynomial_coeff_type), intent(in) :: coeff_list_in(:)
@@ -4512,7 +4468,6 @@ end subroutine coeffs_list_copy
 
 subroutine sort_combination(combination,n_int)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
  !scalar
@@ -4562,7 +4517,6 @@ end subroutine sort_combination
 
 subroutine sort_combination_list(combination_list,n_int,n_list)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
  !scalar
@@ -4599,7 +4553,6 @@ end subroutine sort_combination_list
 
 subroutine reduce_zero_combinations(combination_list)
 !Arguments ------------------------------------
- implicit none
 
 !Arguments ------------------------------------
  !scalar

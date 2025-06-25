@@ -498,12 +498,6 @@ end subroutine dfptlw_pert
 !!  third-order energy derivative for a couple of perturbations and a gradient
 !!  direction.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2022-2025 ABINIT group (MR)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!          if 2, COMPLEX
@@ -525,18 +519,7 @@ end subroutine dfptlw_pert
 !! OUTPUT
 !!  d3etot_telec(2)= Electrostatic term of the third-order energy derivative
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
 & i3dir,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
@@ -623,12 +606,6 @@ end subroutine lw_elecstic
 !!  Calculates the nonlocal form factors and derivatives for all the atoms
 !!  and k points.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2022-2025 ABINIT group (MR)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  dimffnl= second dimension of ffnl
 !!  gmet(3,3)= reciprocal-space metric tensor
@@ -660,13 +637,6 @@ end subroutine lw_elecstic
 !! NOTES
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,mpi_enreg,mpw,nkpt, &
 & npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)

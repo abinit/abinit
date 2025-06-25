@@ -85,8 +85,6 @@ CONTAINS
 
 subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm, fit_weight_T, print_anh)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: comm,opt_ncoeff
@@ -375,8 +373,6 @@ end subroutine opt_effpot
 !! SOURCE
 
 subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_penalty,comm, fit_weight_T,bound_option, print_anh)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -885,8 +881,6 @@ end subroutine opt_effpotbound
 
 subroutine opt_getHOforterm(term,order_range,order_start,order_stop)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   type(polynomial_coeff_type),intent(in) :: term
@@ -973,8 +967,6 @@ end subroutine opt_getHOforterm
 !! SOURCE
 
 subroutine opt_getCombisforterm(order_start,order_end,ndisp,ncombi,ncombi_order)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1068,8 +1060,6 @@ end subroutine opt_getCombisforterm
 !! SOURCE
 
 subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1302,8 +1292,6 @@ end subroutine opt_getHoTerms
 
 subroutine opt_filterdisp(term,nterm_of_term)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   type(polynomial_coeff_type),intent(inout) :: term
@@ -1382,8 +1370,6 @@ end subroutine opt_filterdisp
 !! SOURCE
 
 subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, max_nbody)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1484,8 +1470,6 @@ end subroutine opt_getHOstrain
 !! SOURCE
 
 subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1665,8 +1649,6 @@ end subroutine opt_getHOcrossdisp
 !! SOURCE
 
 subroutine opt_getSingleDispTerms(terms,crystal, sc_size,comm)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1862,8 +1844,6 @@ end subroutine opt_getSingleDispTerms
 
 subroutine opt_getHOSingleDispTerms(term_in,terms_out,symbols,single_disp_terms,power_disp,ncoeff)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(out) :: ncoeff
@@ -1979,7 +1959,6 @@ end subroutine opt_getHOSingleDispTerms
 
 function opt_boundcoeff(yvalues,cvalues,penalty_in) result (coeff)
   !Arguments ------------------------------------
-  implicit none
 
   !Arguments ------------------------------------
   real(dp),intent(in) :: yvalues(2),cvalues(2),penalty_in
@@ -2040,7 +2019,6 @@ end function opt_boundcoeff
 
 function check_to_skip(term) result (to_skip)
   !Arguments ------------------------------------
-  implicit none
   type(polynomial_coeff_type),intent(in) :: term
   logical :: to_skip
   ! ------------------------------------

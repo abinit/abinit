@@ -34,6 +34,7 @@ module m_dtfil
  use m_io_tools,     only : open_file, file_exists
  use m_libpaw_tools, only : libpaw_log_flag_set
  use m_parser,       only : parsefile, intagm
+ use m_pstat,        only : pstat_proc
 
  implicit none
 
@@ -1373,7 +1374,6 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
  character(len=4) :: appen
  character(len=500) :: msg
  character(len=fnlen) :: filnam_appen
-
 ! *************************************************************************
 
  ! Here, defaults if no get variable
@@ -1500,7 +1500,6 @@ subroutine isfile(filnam, status)
  integer :: ii,ios, ioserr
  character(len=500) :: msg
  character(len=fnlen) :: filnam_tmp, trialnam
-
 ! *************************************************************************
 
  filnam_tmp=filnam
@@ -1866,6 +1865,9 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      end if
    end if
  end if
+
+ ! Init pstat_proc.
+ call pstat_proc%from_pid()
 
  call xmpi_barrier(comm)
  return

@@ -28,10 +28,8 @@ MODULE m_exc_itdiago
  use m_abicore
  use m_linalg_interfaces
  use m_hdr
+ USE_MPI
  use m_xmpi
-#ifdef HAVE_MPI2
- use mpi
-#endif
 
  use m_io_tools,      only : open_file
  use m_time,          only : cwtime

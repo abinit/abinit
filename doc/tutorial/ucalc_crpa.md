@@ -47,7 +47,9 @@ of this method using Projected Local Orbitals Wannier orbitals in ABINIT (The
 implementation of cRPA in ABINIT is described in [[cite:Amadon2014]] and projected
 local orbitals Wannier functions are presented in [[cite:Amadon2008]]). The
 discussion about the localization of Wannier orbitals has some similarities
-with the beginning of the DMFT tutorial (see [here](dmft.md#1) and [there](dmft.md#2))
+with the beginning of the DMFT tutorial 
+(see [here](dmft.md#1-the-dftdmft-method-summary-and-key-parameters) 
+and [there](dmft.md#2-electronic-structure-of-srvo3-in-lda)
 
 Several parameters (both physical and technical) are important for the cRPA calculation:
 
@@ -191,7 +193,7 @@ interactions is carried out, the choice of models is discussed in [[cite:Amadon2
 In this section, we will present the input variables and discuss how to
 extract useful information in the log file in the case of the _d-d_ model. The
 input file for a typical cRPA calculation (*tucalc_crpa_2.abi*) contains four datasets
-(as usual _GW_ calculations, see the [GW tutorial](gw1.md#1a)): the
+(as usual _GW_ calculations, see the [GW tutorial](gw1.md#1a-the-four-steps-of-a-gw-calculation)): the
 first one is a well converged LDA calculation, the second is non self-consistent calculation
 to compute accurately full and empty states, the third
 computes the constrained non interacting polarizability, and the fourth

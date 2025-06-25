@@ -1,5 +1,7 @@
 #Test chebfi
 
+ cprj_in_memory 0
+
  ndtset 2
  wfoptalg1   1  npband1 2 npfft1 2
  wfoptalg2 111  npband2 4 npfft2 1

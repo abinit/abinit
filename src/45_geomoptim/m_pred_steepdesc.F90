@@ -80,8 +80,6 @@ contains
 
 subroutine pred_steepdesc(ab_mover,forstr,hist,itime,zDEBUG,iexit)
 
-implicit none
-
 !Arguments ------------------------------------
 !scalars
 type(abimover),intent(in)       :: ab_mover

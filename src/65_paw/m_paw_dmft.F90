@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_paw_dmft
+!****m* ABINIT/m_paw_dmft
 !! NAME
 !!  m_paw_dmft
 !!
@@ -153,6 +153,11 @@ MODULE m_paw_dmft
   integer :: dmft_log_freq
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
+
+  integer :: dmft_magnfield
+  ! = 0: do nothing
+  ! = 1: apply a magnetic field Bz via Zeeman Hamiltonian on Kohn-Sham energies
+  ! = 2: apply a magnetic field Bz via Zeeman Hamiltonian on local impurity Hamiltonian
 
   integer :: dmft_nwli
   ! Physical index of the last imaginary frequency (/=dmft_nwlo when dmft_log_freq=1)
@@ -337,6 +342,9 @@ MODULE m_paw_dmft
   integer :: ireadself
   ! Internal flag to indicate if an input self file must be read
 
+  integer :: kptopt
+  ! Option to generate kpts
+
   integer :: lchipsiortho
   ! Internal flag
   ! =0 <Chi|Psi> is not orthonormalized
@@ -454,6 +462,9 @@ MODULE m_paw_dmft
   ! Required precision on local correlated charge in order to stop SCF
   ! DMFT cycle (integrate_green) => ichargeloc_cv
 
+  real(dp) :: dmft_magnfield_b
+  ! Value of the applied magnetic field in Tesla
+
   real(dp) :: dmft_mxsf
   ! Mixing coefficient for Self-Energy during the SCF DMFT cycle.
 
@@ -512,7 +523,10 @@ MODULE m_paw_dmft
   ! Number of valence electrons
 
   real(dp) :: sdmft
-  ! DMFT correction to the entropy
+  ! DFT+DMFT total entropy
+
+  real(dp) :: simp
+  ! DFT+DMFT entropy of the impurity electrons
 
   real(dp) :: temp
   ! Temperature (Ha)
@@ -886,9 +900,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  ! paw_dmft%idmftloop=0
  ! paw_dmft%mbandc  = 0
 
- icb=0
+ icb = 0
  mbandc = 0
- do iband=1, mband
+ do iband=1,mband
   if (iband >= dmftbandi .and. iband <= dmftbandf) then
    paw_dmft%band_in(iband)=.true.
    mbandc = mbandc + 1
@@ -1041,6 +1055,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_iter            = dtset%dmft_iter
  paw_dmft%dmft_entropy         = dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc   = dtset%dmft_kspectralfunc
+ paw_dmft%dmft_magnfield       = dtset%dmft_magnfield
+ paw_dmft%dmft_magnfield_b     = dtset%dmft_magnfield_b
  paw_dmft%dmft_dc              = dmft_dc
  paw_dmft%dmft_wanorthnorm     = dtset%dmft_wanorthnorm
  paw_dmft%prtvol               = dtset%prtvol
@@ -1063,6 +1079,8 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%ientropy = 0
  paw_dmft%u_for_s  = 4.1_dp
  paw_dmft%j_for_s  = 0.5_dp
+
+ paw_dmft%kptopt = dtset%kptopt
 
 !=======================
 !==  Choose solver
@@ -1157,9 +1175,11 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 !==============================
 
  paw_dmft%wtk => dtset%wtk(:)
- if (dtset%iscf < 0) paw_dmft%wtk(:) = one / dble(nkpt)
+ ! In the case where we sample the full BZ, don't overwrite the wtk with 1/nkpt when we use TRIQS
+ if (dtset%iscf < 0 .and. (dtset%kptopt < 0 .or. &
+   & (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7))) paw_dmft%wtk(:) = one / dble(nkpt)
  sumwtk = sum(paw_dmft%wtk(1:nkpt))
- if (abs(sumwtk-one) > tol11 .and. dtset%iscf >= 0) then
+ if (abs(sumwtk-one) > tol11) then
    write(message,'(a,f15.11)') ' sum of k-point is incorrect',sumwtk
    ABI_BUG(message)
  end if
@@ -1599,6 +1619,9 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
    end if
  end do ! isym
 
+ paw_dmft%nsym = cryst_struc%nsym ! very important to update it here
+ nsym = paw_dmft%nsym
+
  ! TODO: this really should be done in init_sc_dmft
  paw_dmft%indsym => cryst_struc%indsym(4,1:nsym,1:paw_dmft%natom)
  if (paw_dmft%nspinor == 2) then
@@ -1648,7 +1671,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
 !==================
 
  if (dtset%iscf < 0 .and. paw_dmft%dmft_solv >= 5 .and. paw_dmft%dmft_solv <= 8) then
-   tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
+   tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realgrid'
    inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    grid_unt = 2000
    if (.not. lexist) then
@@ -1665,9 +1688,9 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
      open(unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted')
 #endif
      rewind(grid_unt)
-     write(message,'(3a)') ch10,"  == Read grid frequency in file ",trim(tmpfil)
+     write(message,'(3a)') ch10,"  == Read real frequency grid from file ",trim(tmpfil)
      call wrtout(std_out,message,'COLL')
-     write(message,'(3a,i4)') 'opened file : ',trim(tmpfil),' unit ',grid_unt
+     write(message,'(5x,3a,i4)') 'Opened file : ',trim(tmpfil),' on unit ',grid_unt
      call wrtout(std_out,message,'COLL')
      read(grid_unt,*,iostat=ioerr) ngrid
      ABI_MALLOC(paw_dmft%omega_r,(ngrid))
@@ -1706,7 +1729,7 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
 !   enddo
 ! enddo
 
- paw_dmft%gpu_option=dtset%gpu_option
+ paw_dmft%gpu_option = dtset%gpu_option
  paw_dmft%fermie_dft = fermie_dft ! in Ha
  paw_dmft%fermie = fermie_dft
 

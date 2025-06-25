@@ -29,10 +29,8 @@ MODULE m_wffile
  use defs_basis
  use m_errors
  use m_abicore
+ USE_MPI
  use m_xmpi
-#ifdef HAVE_MPI2
- use mpi
-#endif
  use m_nctk
  use netcdf
 

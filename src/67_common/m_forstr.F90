@@ -1030,7 +1030,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
          gemm_nonlop_block_size = gpu_nl_splitsize
          call get_gemm_nonlop_ompgpu_blocksize(my_ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
-         &                        nspinor,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
+         &                        nspinor,1,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        optfor,stress_needed,-1,gs_hamk%gpu_option,(gpu_nl_distrib/=0),&
          &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
          gemm_nonlop_is_distributed = (gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
