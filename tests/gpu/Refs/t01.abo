@@ -79,6 +79,7 @@ _ WF disk file :      0.918 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
       nsym =      24    n1xccc =    2501    ntypat =       2    occopt =       1
    xclevel =       1
 -    mband =           4        mffmem =           1         mkmem =         125
+- my_mband =           4
 -   mkqmem =         125        mk1mem =         125           mpw =         120
       nfft =        3375          nkpt =         125
 ================================================================================
