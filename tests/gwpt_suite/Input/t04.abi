@@ -1,11 +1,10 @@
  #gwpt_np_wpqbks 1 1 8 1 1 1
 
-# ZPR computation at the Gamma point for MgO.
  nband 9
  ecut 45.0
  #prtvol 10
 
- ngkpt 4 4 4
+ ngkpt 2 2 2
  nshiftk 1
  shiftk 0 0 0
 
