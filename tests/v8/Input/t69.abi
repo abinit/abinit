@@ -69,7 +69,7 @@
 #%% [extra_info]
 #%% authors = S. PROKHORENKO
 #%% keywords = DFPT
-#%% description = 
+#%% description =
 #%%   Response of magnetic metal to external magnetic field at q/=0.
 #%%   First, ground state wfs are computed, then dfpt calculation is performed.
 #%% topics = DFPT

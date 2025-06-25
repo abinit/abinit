@@ -421,7 +421,7 @@ end do
    !TODO: Might initialize xred from getxred/xcart: NOT POSSIBLE YET. NEEDS INTER DTSET COMMUNICATION AT INVARS1 TIME
 !   if (txred+txcart+txrandom==0) then
 !     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getxred',txred,'INT')
-!     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = 
+!     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) =
 !
 !     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getxcart',txcart,'INT')
 !     if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) =
@@ -864,6 +864,7 @@ end do
      use_inversion=1
      if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
        ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+       ! MMignolet: PAW can be used with inversion, however it results in seg faults in the dmft code. To enable when this is fixed...
        use_inversion=0
      end if
 
@@ -895,8 +896,8 @@ end do
      end if
 
      ! Loop on trials to generate better point symmetries by relying on a primitive cell instead (possibly) of a non-primitive one,
-     ! This loop has been disactivated, because it is not clear that one can generate a more complete set of point symmetries 
-     ! WITH INTEGER components of symrel from a primitive cell. One should allow non-integer components, but this would 
+     ! This loop has been disactivated, because it is not clear that one can generate a more complete set of point symmetries
+     ! WITH INTEGER components of symrel from a primitive cell. One should allow non-integer components, but this would
      ! be a large departure from the current implementation. Still, the detection of the existence of the primitive cell
      ! and the corresponding Bravais lattice is activated.
      do try_primitive=1,1
@@ -906,15 +907,15 @@ end do
        pawspnorb,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,xred,&
        chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_red,invaraxial_red=dtset%field_red_axial,invar_z=invar_z)
 
-       chkprim_fake=-1 
+       chkprim_fake=-1
        ABI_MALLOC(is_translation,(nsym))
-       call chkprimit(chkprim_fake, multi, nsym, symafm, symrel, is_translation) 
+       call chkprimit(chkprim_fake, multi, nsym, symafm, symrel, is_translation)
 
        if(multi/=1)then ! The cell is not primitive, get the point symmetries from a primitive cell.
          ntranslat=multi
          ABI_MALLOC(translations,(3,ntranslat))
          itranslat=0
-         do isym=1,nsym 
+         do isym=1,nsym
            if(is_translation(isym)==1)then
              itranslat=itranslat+1
              translations(:,itranslat)=tnons(:,isym)
@@ -935,7 +936,7 @@ end do
 &          '                          bravais(3:5) =',bravais(3:5),ch10,&
 &          '                          bravais(6:8) =',bravais(6:8),ch10,&
 &          '                          bravais(9:11)=',bravais(9:11),ch10,&
-&          ' The number of point symmetries would be nptsym=',nptsym           
+&          ' The number of point symmetries would be nptsym=',nptsym
          ABI_COMMENT(msg)
 
          !Convert the point symmetries to the non-primitive reduced coordinates
@@ -1033,7 +1034,7 @@ end do
         'symmetrized before storing them in the dataset internal variable.',ch10,&
         'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
         'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-&       'This is not a problem per se.',ch10,& 
+&       'This is not a problem per se.',ch10,&
 &       'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
 &       ' decrease tolsym to 1.0e-8 or lower.',ch10,&
         'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.'

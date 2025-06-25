@@ -4,7 +4,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 2001-2025 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
@@ -1233,19 +1232,8 @@ end subroutine dfpt_mkvxcgga_n0met
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gprimd,kxc,mpi_enreg,nfft, &
 & ngfft,nkxc,nspden,qphon,rprimd,vxccc1dq,xccc3d1,xccc3d2dq)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
 
 !Arguments ------------------------------------
  !scalars

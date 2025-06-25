@@ -492,7 +492,7 @@ class AbinitProject(NotebookWriter):
         "ABI_ASYNC": ",asynchronous",
         "ABI_PRIVATE": ",private",
         "ABI_PROTECTED": ",protected",
-        "ABI_CONTIGUOUS": "contigous,",
+        "ABI_CONTIGUOUS": "contiguous,",
         # Libpaw.
         "USE_DEFS": "use defs_basis",
         "USE_MPI_WRAPPERS": "use m_xmpi",
@@ -1208,7 +1208,7 @@ class AbinitProject(NotebookWriter):
 
     def update_corelibs(self, dryrun=False, verbose=0):
         """
-        Update corelibs.conf file taking into account the external dependecies.
+        Update corelibs.conf file taking into account the external dependencies.
 
         Args:
             dryrun: True to operate in dryrun mode.
