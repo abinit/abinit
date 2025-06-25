@@ -338,64 +338,55 @@ contains
 !!  Printout object
 !!
 !! INPUTS
-!!  [header]=String to be printed as header for additional info.
-!!  [unit]=Unit number for output
-!!  [prtvol]=Verbosity level
-!!  [mode_paral]=Either "COLL" or "PERS"
+!!  units=Unit numbers for output
+!!  header=String to be printed as header for additional info.
 !!
 !! SOURCE
 
-subroutine screen_info_print(W_info, header, unit, mode_paral, prtvol)
+subroutine screen_info_print(W_info, units, header)
 
 !Arguments ------------------------------------
 !scalars
  class(screen_info_t),intent(in) :: W_info
- integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol
- character(len=4) :: my_mode
+ integer :: my_prtvol
  character(len=500) :: msg
 ! *********************************************************************
 
- !@screen_info_t
- my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
-
  msg=' ==== Info on the screen_info_t% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
 !integer
  write(msg,'(a,i3)')" mat_type    ",W_info%mat_type
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" vtx_family  ",W_info%vtx_family
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" invalid_freq",W_info%invalid_freq
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" ixc         ",W_info%ixc
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" use_ada     ",W_info%use_ada
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" use_mdf     ",W_info%use_mdf
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" use_ppm     ",W_info%use_ppm
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" vtx_test    ",W_info%vtx_test
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" wint_method ",W_info%wint_method
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
 !real
  write(msg,'(a,f8.3)')" ada_kappa   ",W_info%ada_kappa
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,f8.3)')" eps_inf     ",W_info%eps_inf
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,f8.3)')" drude_plsmf ",W_info%drude_plsmf
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
 end subroutine screen_info_print
 !!***
@@ -528,7 +519,8 @@ subroutine screen_fgg_qbz_set(screen, iq_bz, nqlwl, how)
  !character(len=500) :: msg
 !************************************************************************
 
- screen%fgg_qbz_idx = iq_bz ! Save the index of the q-point in the BZ.
+ ! Save the index of the q-point in the BZ.
+ screen%fgg_qbz_idx = iq_bz
 
  if (firstchar(how, (/"P"/)) ) then
    ! We want a pointer.
@@ -824,7 +816,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
  ! Initialize basic parameters
  screen%info = w_info
- call screen%info%print(header="W info", unit=std_out)
+ call screen%info%print([std_out], header="W info")
 
  id_required  = W_Info%mat_type
  approx_type  = W_Info%vtx_family
