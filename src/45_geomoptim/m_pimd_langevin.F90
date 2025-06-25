@@ -77,12 +77,14 @@ contains
 !!  forces(3,natom,trotter)=forces over atoms for all images
 !!    at input,  electronic forces
 !!    at output, electronic forces + quantum spring contribution
-!!  vel(3,natom,trotter)=velocies of atoms for all images
-!!    at input,  values at time t
-!!    at output, values at time t+dt
-!!  vel_cell(3,3)=time derivative of cell parameters
-!!    at input,  values at time t
-!!    at output, values at time t+dt
+!!  vel(3,natom,trotter)/vel_next(3,natom,trotter)/=velocies of atoms for all images
+!!    at input,  vel(itimimage) = values of the estimated vel at t
+!!    at output, vel(itimimage) = values of the exact vel at t
+!!               vel_next(itimimage) = values of the estimated vel at t+dt
+!!  vel_cell(3,3)/vel_cell_next(3,3)=time derivative of cell parameters
+!!    at input,  vel_cell(itimimage) = values of the estimated cell vel at t
+!!    at output, vel_cell(itimimage) = values of the exact cell vel at t
+!!               vel_cell_next(itimimage) = values of the estimated cell vel at t+dt
 !!
 !! NOTES
 !!  Here follows PIMD in the NPT ensemble within the Langevin barostat algorithm
@@ -92,8 +94,8 @@ contains
 !! SOURCE
 
 subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
-&          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
-&          volume,xred,xred_next,xred_prev)
+&          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_next,vel_cell,&
+&          vel_cell_next,volume,xred,xred_next,xred_prev)
 
  implicit none
 
@@ -106,6 +108,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  real(dp),intent(in) :: etotal(trotter),rprimd(3,3),rprimd_prev(3,3),stressin(3,3,trotter)
  real(dp),intent(in),target :: xred(3,natom,trotter),xred_prev(3,natom,trotter)
  real(dp),intent(out) :: rprimd_next(3,3),xred_next(3,natom,trotter)
+ real(dp),intent(out) :: vel_next(3,natom,trotter),vel_cell_next(3,3)
  real(dp),intent(inout) :: forces(3,natom,trotter),vel(3,natom,trotter),vel_cell(3,3)
 
 !Local variables-------------------------------
@@ -283,7 +286,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
    end do
    do iimage=1,trotter
      do iatom=1,natom
-       vel(:,iatom,iimage)=hxredpoint(:,iatom,iimage)+matmul(ddh(:,:),xred(:,iatom,iimage))
+       vel_next(:,iatom,iimage)=hxredpoint(:,iatom,iimage)+matmul(ddh(:,:),xred(:,iatom,iimage))
      end do
    end do
 
@@ -460,14 +463,14 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
    call xred2xcart(natom,rprimd_next,xcart_next(:,:,iimage),xred_next(:,:,iimage))
  end do
 
+!If possible, estimate the velocities at t+dt
  if (itimimage>1) then
-!  Estimation of ds/dt and ddh at t+dt
-   vel = (three*xcart_next  - four*xcart  + xcart_prev )/(two * dtion)
-   ddh = (three*rprimd_next - four*rprimd + rprimd_prev)/(two * dtion)
+   call pimd_predict_vel(dtion,itimimage,natom,trotter,0,xcart,xcart_next,xcart_prev,vel_next)
+   call pimd_predict_velcell(dtion,itimimage,rprimd,rprimd_next,rprimd_prev,ddh)
  end if
 
 !Return cell velocities (does not depend on Trotter)
- vel_cell(:,:)=ddh(:,:)
+ vel_cell_next(:,:)=ddh(:,:)
 
 !Free memory
  ABI_FREE(xcart)
@@ -517,9 +520,10 @@ end subroutine pimd_langevin_npt
 !!  forces(3,natom,trotter)=forces over atoms for all images
 !!    at input,  electronic forces
 !!    at output, electronic forces + quantum spring contribution
-!!  vel(3,natom,trotter)=velocies of atoms for all images
-!!    at input,  values at time t
-!!    at output, values at time t+dt
+!!  vel(3,natom,trotter)/vel_next(3,natom,trotter)/=velocies of atoms for all images
+!!    at input,  vel(itimimage) = values of the estimated vel at t
+!!    at output, vel(itimimage) = values of the exact vel at t
+!!               vel_next(itimimage) = values of the estimated vel at t+dt
 !!
 !! NOTES
 !!   See Quigley,Probert, JCP 120, 11432 (2004) [[cite:Quigley2004]], part III
@@ -527,7 +531,7 @@ end subroutine pimd_langevin_npt
 !! SOURCE
 
 subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
-&                            rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
+&               rprimd,stressin,trotter,vel,vel_next,volume,xred,xred_next,xred_prev)
 
  implicit none
 
@@ -539,7 +543,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !arrays
  real(dp),intent(in) :: etotal(trotter),rprimd(3,3),stressin(3,3,trotter)
  real(dp),intent(in),target :: xred(3,natom,trotter),xred_prev(3,natom,trotter)
- real(dp),intent(out) :: xred_next(3,natom,trotter)
+ real(dp),intent(out) :: xred_next(3,natom,trotter),vel_next(3,natom,trotter)
  real(dp),intent(inout) :: forces(3,natom,trotter),vel(3,natom,trotter)
 
 !Local variables-------------------------------
@@ -671,9 +675,6 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
    call pimd_predict_taylor(dtion,forces_pimd,mass,natom,trotter,&
 &   vel,xcart,xcart_next)
 
-!  Estimate the velocities at t+dt/2
-   vel=(xcart_next-xcart)/dtion
-
 !  Compute new temperature
    temperature2=pimd_temperature(mass,vel)*rescale_temp
 
@@ -735,15 +736,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 & pimd_param%traj_unit,trotter,vel,vel_cell,xcart,xred)
 
 !If possible, estimate the (transformed) velocities at t+dt
- if (itimimage>1) then
-   call pimd_coord_transform(xcart_next,1,natom,pitransform,trotter)
-   call pimd_coord_transform(xcart,1,natom,pitransform,trotter)
-   call pimd_coord_transform(xcart_prev,1,natom,pitransform,trotter)
-   vel = (three*xcart_next - four*xcart + xcart_prev)/(two * dtion)
-   call pimd_coord_transform(xcart_next,-1,natom,pitransform,trotter)
-   call pimd_coord_transform(xcart,-1,natom,pitransform,trotter)
-   call pimd_coord_transform(xcart_prev,-1,natom,pitransform,trotter)
- end if
+ call pimd_predict_vel(dtion,itimimage,natom,trotter,pitransform,xcart,xcart_next,xcart_prev,vel_next)
 
 !Come back to reduced coordinates
  do iimage=1,trotter

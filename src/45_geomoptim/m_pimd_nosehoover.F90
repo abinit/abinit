@@ -74,18 +74,20 @@ contains
 !!  forces(3,natom,trotter)=forces over atoms for all images
 !!    at input,  electronic forces
 !!    at output, electronic forces + Langevin contribution
-!!  vel(3,natom,trotter)=velocies of atoms for all images
-!!    at input,  values at time t
-!!    at output, values at time t+dt
-!!  vel_cell(3,3)=time derivative of cell parameters
-!!    at input,  values at time t
-!!    at output, values at time t+dt
+!!  vel(3,natom,trotter)/vel_next(3,natom,trotter)/=velocies of atoms for all images
+!!    at input,  vel(itimimage) = values of the estimated vel at t
+!!    at output, vel(itimimage) = values of the exact vel at t
+!!               vel_next(itimimage) = values of the estimated vel at t+dt
+!!  vel_cell(3,3)/vel_cell_next(3,3)=time derivative of cell parameters
+!!    at input,  vel_cell(itimimage) = values of the estimated cell vel at t
+!!    at output, vel_cell(itimimage) = values of the exact cell vel at t
+!!               vel_cell_next(itimimage) = values of the estimated cell vel at t+dt
 !!
 !! SOURCE
 
 subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
-&          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
-&          volume,xred,xred_next,xred_prev)
+&          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_next,vel_cell,&
+&          vel_cell_next,volume,xred,xred_next,xred_prev)
 
  implicit none
 
@@ -98,6 +100,7 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
  real(dp),intent(in) :: etotal(trotter),rprimd(3,3),rprimd_prev(3,3),stressin(3,3,trotter)
  real(dp),intent(in),target :: xred(3,natom,trotter),xred_prev(3,natom,trotter)
  real(dp),intent(out) :: rprimd_next(3,3),xred_next(3,natom,trotter)
+ real(dp),intent(out) :: vel_next(3,natom,trotter),vel_cell_next(3,3)
  real(dp),intent(inout) :: forces(3,natom,trotter),vel(3,natom,trotter),vel_cell(3,3)
 
 !Local variables-------------------------------
@@ -250,9 +253,10 @@ end subroutine pimd_nosehoover_npt
 !!  forces(3,natom,trotter)=forces over atoms for all images
 !!    at input,  electronic forces
 !!    at output, electronic forces + quantum spring contribution
-!!  vel(3,natom,trotter)=velocies of atoms for all images
-!!    at input,  values at time t
-!!    at output, values at time t+dt
+!!  vel(3,natom,trotter)/vel_next(3,natom,trotter)/=velocies of atoms for all images
+!!    at input,  vel(itimimage) = values of the estimated vel at t
+!!    at output, vel(itimimage) = values of the exact vel at t
+!!               vel_next(itimimage) = values of the estimated vel at t+dt
 !!
 !! NOTES
 !!  Thermization by Nose-Hoover chains according to
@@ -262,7 +266,7 @@ end subroutine pimd_nosehoover_npt
 !! SOURCE
 
 subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
-&                              rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
+&               rprimd,stressin,trotter,vel,vel_next,volume,xred,xred_next,xred_prev)
 
  implicit none
 
@@ -274,7 +278,7 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !arrays
  real(dp),intent(in) :: etotal(trotter),rprimd(3,3),stressin(3,3,trotter)
  real(dp),intent(in),target :: xred(3,natom,trotter),xred_prev(3,natom,trotter)
- real(dp),intent(out) :: xred_next(3,natom,trotter)
+ real(dp),intent(out) :: xred_next(3,natom,trotter),vel_next(3,natom,trotter)
  real(dp),intent(inout) :: forces(3,natom,trotter),vel(3,natom,trotter)
 
 !Local variables-------------------------------
@@ -390,9 +394,6 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
    call pimd_predict_taylor(dtion,forces_pimd,mass,natom,trotter,&
 &   vel,xcart,xcart_next)
 
-!  Estimate the velocities at t+dt/2
-   vel=(xcart_next-xcart)/dtion
-
 !  Compute new temperature
    temperature2=pimd_temperature(mass,vel)
 
@@ -459,15 +460,9 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 & stress_pimd,temperature1,temperature2,&
 & pimd_param%traj_unit,trotter,vel,vel_cell,xcart,xred)
 
-!If possible, estimate the (transformed) velocities at t+dt
+!If possible, estimate the velocities at t+dt
  if (itimimage>1) then
-   call pimd_coord_transform(xcart_next,1,natom,pitransform,trotter)
-   call pimd_coord_transform(xcart,1,natom,pitransform,trotter)
-   call pimd_coord_transform(xcart_prev,1,natom,pitransform,trotter)
-   vel = (three*xcart_next - four*xcart + xcart_prev)/(two * dtion)
-   call pimd_coord_transform(xcart_next,-1,natom,pitransform,trotter)
-   call pimd_coord_transform(xcart,-1,natom,pitransform,trotter)
-   call pimd_coord_transform(xcart_prev,-1,natom,pitransform,trotter)
+   call pimd_predict_vel(dtion,itimimage,natom,trotter,0,xcart,xcart_next,xcart_prev,vel_next) 
  end if
 
 !Come back to reduced coordinates

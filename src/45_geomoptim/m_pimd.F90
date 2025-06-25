@@ -47,6 +47,7 @@ MODULE m_pimd
  public :: pimd_is_restart
  public :: pimd_temperature
  public :: pimd_initvel
+ public :: pimd_initvel_from_scratch
  public :: pimd_langevin_random
  public :: pimd_langevin_random_qtb
  public :: pimd_langevin_random_bar
@@ -59,6 +60,8 @@ MODULE m_pimd
  public :: pimd_diff_stress
  public :: pimd_predict_taylor
  public :: pimd_predict_verlet
+ public :: pimd_predict_vel
+ public :: pimd_predict_velcell
  public :: pimd_nosehoover_propagate
  public :: pimd_coord_transform
  public :: pimd_force_transform
@@ -609,10 +612,10 @@ if(itimimage==1)then
    end if
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'COLL')
-   write(msg,'(a,f12.5,a)') &
-&   ' In the initial configuration, the temperature is ',temperature1,' K'
-   call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+!   write(msg,'(a,f12.5,a)') &
+!&   ' In the initial configuration, the temperature is ',temperature1,' K'
+!   call wrtout(ab_out,msg,'COLL')
+!   call wrtout(std_out,msg,'COLL')
  end if
  write(msg,'(2a,i5,a,f12.5,a)') ch10,&
 &  ' At PIMD time step ',itimimage,', the temperature is',temperature2,' K'
@@ -927,6 +930,66 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtat
  vel(:,:,:)=vel(:,:,:)*rescale_vel
 
 end subroutine pimd_initvel
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pimd/pimd_initvel_from_scratch
+!! NAME
+!!  pimd_initvel_from_scratch
+!!
+!! FUNCTION
+!!  Initialize velocities for PIMD with a gaussian distribution
+!!  at start of the calculation (with initial temperature)
+!!
+!! INPUTS
+!!  pimd_temperature=temperature (from all images of the cell)
+!!  natom=number of atoms
+!!  trotter=Trotter number
+!!  vel_cell(3,3)=cell velocities
+!!
+!! OUTPUT
+!!  vel(3,natom,nimage)=velocities for each image of the cell
+!!
+!! SOURCE
+
+subroutine pimd_initvel_from_scratch(pimd_param,natom,trotter,vel,vel_cell)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,trotter
+ real(dp),intent(in) :: vel_cell(3,3)
+ real(dp),intent(out) :: vel(3,natom,trotter)
+ type(pimd_type),intent(inout) :: pimd_param
+!Local variables-------------------------------
+!scalars
+ integer :: iseed=-5,iimage,irestart,ndof,zeroforce
+ real(dp) :: initemp,rescale_temp
+!arrays
+ real(dp),allocatable :: inertmass(:,:)
+
+!************************************************************************
+
+ ABI_MALLOC(inertmass,(natom,trotter))
+ do iimage=1,trotter
+   inertmass(1:natom,iimage)=pimd_param%pimass(pimd_param%typat(1:natom))*amu_emass
+ end do
+ 
+ irestart=pimd_is_restart(inertmass,vel,vel_cell)
+
+!Initialize derivatives
+ if (mod(irestart,10)==0) then
+   ndof=3*natom*trotter
+   rescale_temp=one ; if(zeroforce==1) rescale_temp=dble(ndof)/dble(ndof-3)
+   zeroforce=1 ; if(pimd_param%pitransform==1.or.pimd_param%pitransform==2) zeroforce=0
+   if(pimd_param%constraint==1) zeroforce=0
+   initemp=pimd_param%mdtemp(1)/rescale_temp
+   call pimd_initvel(iseed,inertmass,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
+ end if
+
+ ABI_FREE(inertmass)
+
+end subroutine pimd_initvel_from_scratch
 !!***
 
 !----------------------------------------------------------------------
@@ -1854,6 +1917,145 @@ subroutine pimd_predict_verlet(dtion,forces,mass,natom,trotter,xcart,xcart_next,
  end do
 
 end subroutine pimd_predict_verlet
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pimd/pimd_predict_vel
+!! NAME
+!!  pimd_predict_vel
+!!
+!! FUNCTION
+!!  Predict an estimation of the velocities at next time time step
+!!    from the positions of 3 consecutive time steps
+!!
+!! INPUTS
+!!  dtion=time step
+!!  itime=time step index
+!!  natom=number of atoms
+!!  trotter=Trotter number
+!!  pitransform=integer selecting the transformation of coordinates
+!!  xcart(3,natom,trotter)=cartesian coordinates of atoms in each cell at t
+!!  xcart_next(3,natom,trotter)=cartesian coordinates of atoms in each cell at t+dt
+!!  xcart_prev(3,natom,trotter)=cartesian coordinates of atoms in each cell at t-dt
+!!
+!! OUTPUT
+!!  vel(3,natom,trotter)=estimation of velocities at t+dt
+!!
+!! SIDE EFFECTS
+!!
+!! SOURCE
+
+subroutine pimd_predict_vel(dtion,itime,natom,trotter,pitransform,xcart,xcart_next,xcart_prev,vel)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: itime,natom,pitransform,trotter
+ real(dp),intent(in) :: dtion
+!arrays
+ real(dp),intent(inout) :: xcart(3,natom,trotter),xcart_next(3,natom,trotter),xcart_prev(3,natom,trotter)
+ real(dp),intent(out) :: vel(3,natom,trotter)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,ii,iimage
+
+!************************************************************************
+
+!Set the coordinates in the transformed representation
+ if (pitransform>0) then
+   call pimd_coord_transform(xcart_next,1,natom,pitransform,trotter)
+   call pimd_coord_transform(xcart,1,natom,pitransform,trotter)
+   call pimd_coord_transform(xcart_prev,1,natom,pitransform,trotter)
+ end if
+
+ if (itime>1) then
+   do iimage=1,trotter
+     do iatom=1,natom
+       do ii=1,3
+         vel(ii,iatom,iimage)= &
+&           (three*xcart_next(ii,iatom,iimage) &
+&           -four*xcart(ii,iatom,iimage) &
+&           +xcart_prev(ii,iatom,iimage)) &
+&           / (two*dtion)
+       end do
+     end do
+   end do
+ else
+   do iimage=1,trotter
+     do iatom=1,natom
+       do ii=1,3
+         vel(ii,iatom,iimage)=(xcart_next(ii,iatom,iimage)-xcart(ii,iatom,iimage))/dtion
+       end do
+     end do
+   end do
+ end if
+
+!Set back the coordinates
+ if (pitransform>0) then
+   call pimd_coord_transform(xcart_next,-1,natom,pitransform,trotter)
+   call pimd_coord_transform(xcart,-1,natom,pitransform,trotter)
+   call pimd_coord_transform(xcart_prev,-1,natom,pitransform,trotter)
+ end if
+
+end subroutine pimd_predict_vel
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pimd/pimd_predict_velcell
+!! NAME
+!!  pimd_predict_velcell
+!!
+!! FUNCTION
+!!  Predict an estimation of the cell velocities at next time time step
+!!    from the cell at 3 consecutive time steps
+!!
+!! INPUTS
+!!  dtion=time step
+!!  itime=time step index
+!!  pitransform=integer selecting the transformation of coordinates
+!!  rprimd(3,3)=cell coordinates at t
+!!  rprimd_next(3,3)=cell coordinates at t+dt
+!!  rprimd_prev(3,3)=cell coordinates at t-dt
+!!
+!! OUTPUT
+!!  vel_cell(3,3)=estimation of cell velocities at t+dt
+!!
+!! SIDE EFFECTS
+!!
+!! SOURCE
+
+subroutine pimd_predict_velcell(dtion,itime,rprimd,rprimd_next,rprimd_prev,vel_cell)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: itime
+ real(dp),intent(in) :: dtion
+!arrays
+ real(dp),intent(in) :: rprimd(3,3),rprimd_next(3,3),rprimd_prev(3,3)
+ real(dp),intent(out) :: vel_cell(3,3)
+!Local variables-------------------------------
+!scalars
+ integer :: ii,jj
+
+!************************************************************************
+
+ if (itime>1) then
+   do jj=1,3
+     do ii=1,3
+       vel_cell(ii,jj)= &
+&           (three*rprimd_next(ii,jj)-four*rprimd(ii,jj)+rprimd_prev(ii,jj))/(two*dtion)
+     end do
+   end do
+ else
+   do jj=1,3
+     do ii=1,3
+       vel_cell(ii,jj)=(rprimd_next(ii,jj)-rprimd(ii,jj))/dtion
+     end do
+   end do
+ end if
+
+end subroutine pimd_predict_velcell
 !!***
 
 !----------------------------------------------------------------------
