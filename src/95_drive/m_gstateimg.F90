@@ -262,6 +262,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   'ORDER 4 RUNGE-KUTTA '/) ! 4
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),tsec(2),vel_cell(3,3)
  real(dp),allocatable :: amass(:,:),occ(:),vel(:,:),xred(:,:)
+!real(dp),pointer :: vel_prev(:,:)
  type(abihist),allocatable :: hist(:),hist_prev(:)
  type(results_img_type),pointer :: results_img(:,:),res_img(:)
  type(scf_history_type),allocatable :: scf_history(:)
@@ -333,26 +334,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    call abihist_init(hist,dtset%natom,ntimimage,isVused,isARused)
  end if ! imgmov/=0
 
-!Allocations
+!Various allocations
  ABI_MALLOC(occ,(nocc))
  ABI_MALLOC(vel,(3,dtset%natom))
  ABI_MALLOC(xred,(3,dtset%natom))
- ABI_MALLOC(results_img,(nimage,ntimimage_stored))
+
+!Select dynamical images
  ABI_MALLOC(list_dynimage,(dtset%ndynimage))
- do itimimage=1,ntimimage_stored
-   res_img => results_img(:,itimimage)
-   call init_results_img(dtset%natom,dtset%npspalch,dtset%nspden,dtset%nsppol,dtset%ntypalch,&
-&   dtset%ntypat,res_img)
-   do iimage=1,nimage
-     res_img(iimage)%acell(:)     =acell_img(:,iimage)
-     res_img(iimage)%amu(:)       =amu_img(:,iimage)
-     res_img(iimage)%mixalch(:,:) =mixalch_img(:,:,iimage)
-     res_img(iimage)%rprim(:,:)   =rprim_img(:,:,iimage)
-     res_img(iimage)%xred(:,:)    =xred_img(:,:,iimage)
-     res_img(iimage)%vel(:,:)     =vel_img(:,:,iimage)
-     res_img(iimage)%vel_cell(:,:)=vel_cell_img(:,:,iimage)
-   end do
- end do
  ndynimage=0
  do iimage=1,nimage
    ii=mpi_enreg%my_imgtab(iimage)
@@ -411,9 +399,26 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !Move 1GEO approach: fill the data structure m1geo_param
  call m1geo_init(dtfil,dtset,m1geo_param)
 
-!PIMD: fill in eventually the data structure pimd_param
+!PIMD: fill in the data structure pimd_param and init velocities
  call pimd_init(dtset,pimd_param,is_master)
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
+
+!Initialization of main variables
+ ABI_MALLOC(results_img,(nimage,ntimimage_stored))
+ do itimimage=1,ntimimage_stored
+   res_img => results_img(:,itimimage)
+   call init_results_img(dtset%natom,dtset%npspalch,dtset%nspden,dtset%nsppol,dtset%ntypalch,&
+&   dtset%ntypat,res_img)
+   do iimage=1,nimage
+     res_img(iimage)%acell(:)     =acell_img(:,iimage)
+     res_img(iimage)%amu(:)       =amu_img(:,iimage)
+     res_img(iimage)%mixalch(:,:) =mixalch_img(:,:,iimage)
+     res_img(iimage)%rprim(:,:)   =rprim_img(:,:,iimage)
+     res_img(iimage)%xred(:,:)    =xred_img(:,:,iimage)
+     res_img(iimage)%vel(:,:)     =vel_img(:,:,iimage)
+     res_img(iimage)%vel_cell(:,:)=vel_cell_img(:,:,iimage)
+   end do
+ end do
 
 !Set Number of degrees Of Freedom for PIMD algorithms
  if(use_hist) then
@@ -585,8 +590,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call timab(1206,2,tsec)
 
      else if (itimimage>1) then ! For static images, simply copy one time step to the other
-       itimimage_prev=itimimage_eff-1
-       if (itimimage_prev<1) itimimage_prev=ntimimage_stored
+       itimimage_prev=itimimage_eff-1;if (itimimage_prev<1) itimimage_prev=ntimimage_stored
        call copy_results_img(results_img(iimage,itimimage_prev), &
 &       results_img(iimage,itimimage_eff ))
      end if
@@ -597,8 +601,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call mkrdim(res_img(iimage)%acell(:),res_img(iimage)%rprim(:,:),rprimd)
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
 &       rprimd,res_img(iimage)%xred(:,:),.FALSE.)
-       call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:),&
-&       res_img(iimage)%vel_cell(:,:))
+       call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:),res_img(iimage)%vel_cell(:,:))
        hist(iimage)%fcart(:,:,ih)=res_img(iimage)%results_gs%fcart(:,:)
        hist(iimage)%strten(:,ih)=res_img(iimage)%results_gs%strten(:)
        hist(iimage)%etot(ih)=res_img(iimage)%results_gs%etotal
@@ -630,8 +633,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg,dyn=dtset%dynimage)
 
 !  Write hist datastructure in HIST file
+!   Note: for PIMD, writing is done later
 #if defined HAVE_NETCDF
-   if (use_hist.and.mpi_enreg%me_cell==0) then
+!   if (use_hist.and.mpi_enreg%me_cell==0) then
+   if (use_hist.and.mpi_enreg%me_cell==0.and.(.not.is_pimd)) then
      ifirst=merge(0,1,itimimage>1)
      call write_md_hist_img(hist,hist_filename,ifirst,itimimage,dtset%natom,dtset%ntypat,&
 &     dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
@@ -684,7 +689,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !Temporary statement
    110 continue
 
-!  Dont call the predictor at last time step
+!  Dont call the predictor at last time step (except for PIMD)
    if (itimimage>=ntimimage_max) call_predictor=(call_predictor.and.is_pimd)
 
 !  Predict the next value of the images
@@ -693,6 +698,25 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &     itimimage_eff,list_dynimage,ga_param,mep_param,mpi_enreg,m1geo_param,dtset%natom,ndynimage,&
 &     nimage,dtset%nimage,ntimimage_stored,pimd_param,dtset%prtvolimg,results_img)
    end if
+
+!  Write hist datastructure in HIST file in case of PIMD
+!   Note : velocities have been updated
+#if defined HAVE_NETCDF
+   if (use_hist.and.is_pimd) then
+     do iimage=1,nimage
+       ih=hist(iimage)%ihist
+       call vel2hist(amass(:,iimage),hist(iimage),results_img(iimage,itimimage_eff)%vel(:,:),&
+&                    results_img(iimage,itimimage_eff)%vel_cell(:,:))
+     end do
+     if (mpi_enreg%me_cell==0) then
+       ifirst=merge(0,1,itimimage>1)
+       call write_md_hist_img(hist,hist_filename,ifirst,itimimage,dtset%natom,dtset%ntypat,&
+&        dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
+&        nimage=dtset%nimage,imgmov=dtset%imgmov,mdtemp=dtset%mdtemp,comm_img=mpi_enreg%comm_img,&
+&        imgtab=mpi_enreg%my_imgtab)
+     end if
+   end if
+#endif
 
 !  Increment indexes
    if (itimimage>=ntimimage_max) exit
