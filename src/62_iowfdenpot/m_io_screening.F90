@@ -2612,7 +2612,12 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, dtset%kptopt)
 
  ! The G-sphere for W and Sigma_c is initialized from the g-vectors found in the SCR file.
- call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
+ if (dtset%npweps /= 0) then
+  call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
+ else
+  ! The G-sphere for W and Sigma_c is initialized from ecuteps.
+  call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
+ end if
 
 end subroutine get_hscr_qmesh_gsph
 !!***
