@@ -1,9 +1,7 @@
 # NSCF computation of WFK file with empty states
  nband  70 nbdbuf -10 # A negative value means 10% of nband
 
-# Three Gamma-centered k-meshes:
-# 4x4x4 with 70 bands, then 8x8x8 and 12x12x12 with 25 bands.
- ngkpt 4 4 4
+ ngkpt 2 2 2
  nshiftk 1
  shiftk 0 0 0
 
