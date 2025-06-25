@@ -174,7 +174,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer(kind=XMPI_ADDRESS_KIND) :: ad_count
  type(c_ptr) :: void_ptr
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
- real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in, z2,en_high,gw_gsq,w_localmax,w_max
+ real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in,en_high,gw_gsq,w_localmax,w_max
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT, q_is_gamma, print_time
  character(len=500) :: msg
@@ -187,7 +187,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer,allocatable :: igfftfcg0(:),gboundf(:,:),ktabrf(:,:),npoles_missing(:)
  real(dp) :: ksum(3),kgw(3),kgw_m_ksum(3),q0(3),tsec(2),qbz(3)
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
- real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i), omegap(epsm1%nomega_i), omegap2(epsm1%nomega_i)
+ real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i), omegap(epsm1%nomega_i), omegap2(epsm1%nomega_i), tmp_omegap(epsm1%nomega_i)
+ real(dp) :: conv_gl_knots(epsm1%nomega_i_conv),conv_gl_wts(epsm1%nomega_i_conv),conv_omegap(epsm1%nomega_i_conv),conv_omegap2(epsm1%nomega_i_conv), tmp_conv_omegap(epsm1%nomega_i_conv)
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
  complex(gwpc) :: sigcohme(Sigp%nsig_ab), omegap_cplx(epsm1%nomega_i)
@@ -211,7 +212,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(esymm_t),pointer :: QP_sym(:)
  integer :: neig(epsm1%nomega_i)
  real(gwp),allocatable :: epsm1_eig(:)
- complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:)
+ complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
+ complex(dpc) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -434,6 +436,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if (mod10 == SIG_GW_AC) then
    ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation.
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i))
+   ABI_MALLOC(conv_rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, epsm1%nomega_i_conv))
 
    select case (epsm1%hscr%iw_mesh_type)
    case ("gauss_legendre")
@@ -446,11 +449,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ierr = 0
      do io=1,epsm1%nomega_i
        ! First frequencies are always real
-       if (ABS(AIMAG(one*epsm1%omega(epsm1%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
+       if (ABS(AIMAG(one*epsm1%omega(epsm1%nomega_r+io))-omegap(io)) > 0.0001) then
          ierr = ierr + 1
          if (Wfd%my_rank == Wfd%master) then
            if (io == 1) write(std_out, "(a)")"omega_file, gauss_legendre_omega (ev)"
-           write(std_out,*)io, AIMAG(epsm1%omega(epsm1%nomega_r+io)) * Ha_eV, (one/gl_knots(io)-one) * Ha_eV
+           write(std_out,*)io, AIMAG(epsm1%omega(epsm1%nomega_r+io)) * Ha_eV, omegap(io) * Ha_eV
          end if
        end if
      end do
@@ -466,6 +469,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    case ("minimax")
      ! Nothing to do at this level
      omegap_cplx(:) = epsm1%omega(epsm1%nomega_r+1: epsm1%nomega_r+epsm1%nomega_i)
+     omegap(:) = AIMAG(omegap_cplx(:))
      !write(std_out,*) "omegap_cplx", omegap_cplx
      !omegap2(:) = zero
      !write(std_out,*)"omega_i", Sr%omega_i(:)
@@ -473,6 +477,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    case default
      ABI_ERROR(sjoin("Invalid iw_mesh_type:" , epsm1%hscr%iw_mesh_type))
    end select
+
+   if (epsm1%nomega_i_conv > 0) then
+      call coeffs_gausslegint(zero, one, conv_gl_knots, conv_gl_wts, epsm1%nomega_i_conv)
+      conv_omegap(:) = one / conv_gl_knots(:) - one
+      conv_omegap2(:) = conv_omegap(:) ** 2
+   end if
 
    if (epsm1%use_mpi_shared_win) then
 #define _MOK(integer) int(integer, kind=XMPI_OFFSET_KIND)
@@ -741,11 +751,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            case ("gauss_legendre")
              ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
              ! The first frequencies are always real, skip them.
-             z2 = gl_knots(iiw)*gl_knots(iiw)
-             ac_epsm1cqwz2(:,:,iiw) = gl_wts(iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw) / z2
+              ac_epsm1cqwz2(:,:,iiw) = epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
 
            case ("minimax")
-             ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
+            !  ac_epsm1cqwz2(:,:,iiw) = epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw) * epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
+             ac_epsm1cqwz2(:,:,iiw) = epsm1%epsm1_qbz(:,:,epsm1%nomega_r+iiw)
 
            case default
              ABI_ERROR(sjoin("Invalid iw_mesh_type:", epsm1%hscr%iw_mesh_type))
@@ -917,6 +927,33 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            end do
            ABI_FREE(epsm1_sqrt_rhotw)
          end do
+         if (epsm1%nomega_i_conv > 0) then
+            do jb=minbnd,maxbnd
+               do kb=minbnd,maxbnd
+                  select case (epsm1%hscr%iw_mesh_type)
+                  case ("gauss_legendre")
+                     tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,epsm1%nomega_i:1:-1)
+                     tmp_omegap = omegap(epsm1%nomega_i:1:-1)
+                     tmp_conv_omegap = conv_omegap(epsm1%nomega_i_conv:1:-1)
+                     call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
+                                    tmp_omegap, tmp_conv_omegap, &
+                                    tmp_conv_rhotw_epsm1_rhotw, &
+                                    tmp_rhotw_epsm1_rhotw, &
+                                    extrapolate=.TRUE.)
+                  case ("minimax")
+                     tmp_rhotw_epsm1_rhotw = rhotw_epsm1_rhotw(jb,kb,:)
+                     tmp_omegap = omegap(:)
+                     tmp_conv_omegap = conv_omegap(epsm1%nomega_i_conv:1:-1)
+                     call spline_c(epsm1%nomega_i, epsm1%nomega_i_conv, &
+                                    tmp_omegap, tmp_conv_omegap, &
+                                    tmp_conv_rhotw_epsm1_rhotw, &
+                                    tmp_rhotw_epsm1_rhotw, &
+                                    extrapolate=.TRUE.)
+                  end select
+                  conv_rhotw_epsm1_rhotw(jb,kb,:) = tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv:1:-1)
+               end do
+            end do
+         end if
          call timab(443,2,tsec) ! ac_lrk_appl
        end if
 
@@ -1081,27 +1118,32 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              do iab=1,Sigp%nsig_ab
                do io=1,nomega_sigc
                  omegame0i_ac  = Sr%omega_i(io) - qp_ene(ib_sum,ik_ibz,spin)
-
-                 select case (epsm1%hscr%iw_mesh_type)
-                 case ("gauss_legendre")
-                   omegame0i2_ac = omegame0i_ac*omegame0i_ac
-                   do iiw=1,epsm1%nomega_i
-                     sigctmp(io,iab) = sigctmp(io,iab) + &
-                       piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + omegap2(iiw))
-                   end do
-
-                 case ("minimax")
-                   ! NB: Sigma_c along the imag. axis has a -1/2pi factor.
-                   ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
-                   do iiw=1,epsm1%nomega_i
-                     sigctmp(io,iab) = sigctmp(io,iab) + &
-                       (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
-                          (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw))))
-                   end do
-
-                 case default
-                   ABI_ERROR(sjoin("Invalid iw_mesh_type:", epsm1%hscr%iw_mesh_type))
-                 end select
+                  if (epsm1%nomega_i_conv > 0) then
+                     omegame0i2_ac = omegame0i_ac*omegame0i_ac
+                     do iiw=1,epsm1%nomega_i_conv
+                        sigctmp(io,iab) = sigctmp(io,iab) + &
+                        piinv * conv_rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + conv_omegap2(iiw)) * conv_gl_wts(iiw) / conv_gl_knots(iiw)**2
+                     end do
+                  else
+                     select case (epsm1%hscr%iw_mesh_type)
+                     case ("gauss_legendre")
+                        omegame0i2_ac = omegame0i_ac*omegame0i_ac
+                        do iiw=1,epsm1%nomega_i
+                           sigctmp(io,iab) = sigctmp(io,iab) + &
+                           piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac / (omegame0i2_ac + omegap2(iiw)) * gl_wts(iiw) / gl_knots(iiw)**2
+                        end do
+                     case ("minimax")
+                        ! NB: Sigma_c along the im ag. axis has a -1/2pi factor.
+                        ! Here the -1 factor disappears because we have performed an EIGEN decomposition of -(epsm1-1).
+                         do iiw=1,epsm1%nomega_i
+                           sigctmp(io,iab) = sigctmp(io,iab) + &
+                             (piinv / two) * rhotw_epsm1_rhotw(jb,kb,iiw) * ( &
+                                (one / (omegame0i_ac + omegap_cplx(iiw))) + (one / (omegame0i_ac - omegap_cplx(iiw)))) * epsm1%hscr%omega_wgs(epsm1%nomega_r+iiw)
+                         end do
+                     case default
+                        ABI_ERROR(sjoin("Invalid iw_mesh_type:", epsm1%hscr%iw_mesh_type))
+                     end select
+                  end if
                end do
              end do
 
@@ -1367,6 +1409,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_SFREE(epsm1_tmp)
  ABI_SFREE(degtab)
  ABI_SFREE(rhotw_epsm1_rhotw)
+ ABI_SFREE(conv_rhotw_epsm1_rhotw)
  ABI_SFREE(aherm_sigc_ket)
  ABI_SFREE(herm_sigc_ket)
  ABI_SFREE(wf1swf2_g)

@@ -1,12 +1,12 @@
 ******************************************************************************************
-                                Welcome to MULTIBINIT,                         
+                                Welcome to MULTIBINIT,
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 10.0.0.3 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.0.0.3 of MULTIBINIT
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -17,7 +17,7 @@
 
 -----------------------------------------------------------------------------------------
 
-                          MULTIBINIT - LATTICE MODELS                   
+                          MULTIBINIT - LATTICE MODELS
 
  Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege
    (Philippe.Ghosez@uliege.be).
@@ -34,7 +34,7 @@
 
 .Starting date : Fri 21 Mar 2025.
 - ( at 11h26 )
-  
+
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
 - Note that the use beyond 3 years after the release will not be supported.
@@ -44,7 +44,7 @@
 
 ================================================================================
 
- Read the information in the reference structure in 
+ Read the information in the reference structure in
 -/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t80_sys.xml
  to initialize the multibinit input
 
@@ -52,7 +52,7 @@
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags : 
+ Flags :
      ifcflag         1
    prt_model         2
      strcpli        -1
@@ -66,7 +66,7 @@
      optcell         2
        bmass         0.0
         nnos         0
-        qmass  
+        qmass
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -180,7 +180,7 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
--Monte Carlo / Molecular Dynamics 
+-Monte Carlo / Molecular Dynamics
 
 
 === [ionmov=13] Isothermal/isenthalpic ensemble molecular dynamics with effective potential
@@ -1647,4 +1647,4 @@
 
 +Total cpu time      2.850  and wall time      2.852 sec
 
- multibinit : the run completed succesfully.
+ multibinit : the run completed successfully.
