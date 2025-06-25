@@ -365,7 +365,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
    ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with model dielectric function")
  end if
- !call screen%ppm%print(units)
+
+
  call pstat_proc%print(_PSTAT_ARGS_)
 
  if (nqlwl == 0) then
@@ -761,7 +762,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, screen_filepath, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
  ABI_FREE(qlwl)
- call pstat_proc%print(_PSTAT_ARGS_)
+ !call screen%print(units)
+ !call screen%ppm%print(units)
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p
  ABI_MALLOC(kg_k, (3, mpw))
@@ -792,6 +794,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  stern_use_cache = .False.
 
  if (my_rank == master) call gstore%print([std_out])
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! This parameter defines the size of the q-buffer used to store the g(k, q) e-ph matrix elements
  ! for all the k-point treated by this MPI rank.
@@ -1006,7 +1009,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
 
-
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
 
@@ -1133,7 +1135,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ABI_MALLOC(rhotwg_c, (npw_c*nspinor))
          ABI_MALLOC(rhotwg_x, (npw_x*nspinor))
          ABI_MALLOC(vc_sqrt_gx, (npw_x))
-
 
          ! We need two stern_t objects to compute the first order change of the wavefunctions at k-p and k+q-p.
          ! Clearly, we should not duplicate the work when pp = 0.
@@ -1314,7 +1315,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !       multiple instances.
 
            do imyp=1,gqk%my_npert
-             ! NB: Only one proc enters this section. No MPI parallelism allowed here, only OpenMP threads.
+             ! NB: Only one proc enters this section. No MPI parallelism allowed here.
 
              idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
              !print *, "For kk, ", kk, "pp:", pp, "idir, ipert", idir, ipert
@@ -1329,11 +1330,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              call rf_ham_kqmp%load_spin(spin, vlocal1=vlocal1_qq(:,:,:,:,imyp), with_nonlocal=.true.)
 
              ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
+             ! TODO: Replace this call with low-level operations
              call getgh1c_setup(gs_ham_kqmp, rf_ham_kqmp, dtset, psps, kmp, kqmp, idir, ipert, &           ! In
-               natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &                             ! In
+               natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &                                   ! In
                npw_kmp, npw_kqmp, useylmgr1, kg_kmp, ylm_kmp, kg_kqmp, ylm_kqmp, ylmgr_kqmp, &             ! In
                dkinpw, nkpg_kmp, nkpg_kqmp, kpg_kmp, kpg_kqmp, kinpw1, ffnl_kmp, ffnl_kqmp, ph3d_kmp, ph3d1_kqmp , & ! InOut
                reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                                ! Reuse some arrays
+
+             !call gs_hamkq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &       ! in
+             !                          nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)   ! out
 
              ! =====================
              ! NSCF Sternheimer at q
@@ -1412,11 +1417,15 @@ if (.not. qq_is_gamma) then
              call rf_ham_kmp%init(cplex, gs_ham_kmp, ipert, has_e1kbsc=.true.)
              call rf_ham_kmp%load_spin(spin, vlocal1=vlocal1_mqq(:,:,:,:,imyp), with_nonlocal=.true.)
 
+             ! TODO: Replace this call with low-level operations
              call getgh1c_setup(gs_ham_kmp, rf_ham_kmp, dtset, psps, kqmp, kmp, idir, ipert, &             ! In
                natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &                                   ! In
                npw_kqmp, npw_kmp, useylmgr1, kg_kqmp, ylm_kqmp, kg_kmp, ylm_kmp, ylmgr_kmp, &              ! In
                dkinpw, nkpg_kqmp, nkpg_kmp, kpg_kqmp, kpg_kmp, kinpw1, ffnl_kqmp, ffnl_kmp, ph3d_kqmp, ph3d1_kmp, & ! InOut
                reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                                ! Reuse some arrays
+
+             !call gs_hamkq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &       ! in
+             !                          nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)   ! out
 
              ! ======================
              ! NSCF Sternheimer at -q
