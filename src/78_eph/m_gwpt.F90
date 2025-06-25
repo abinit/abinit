@@ -195,7 +195,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
  integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl
- !!integer :: ffnl_kmp_request, ffnl_kqmp_request  ! ffnl_k_request, ffnl_kq_request,
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  !real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
@@ -234,7 +233,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: my_pp_inds(:) ! bands_treated_now(:),
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_c(:,:), gbound_x(:,:)
- !integer,allocatable :: rank_band(:), root_bcalc(:)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), count_bk(:,:)
  integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:) !, my_iqibz_inds(:) !, iperm(:)
@@ -261,7 +259,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
- complex(dp),pointer :: cvxc1_qq_ptr(:,:,:)
+ complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:)
  complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:) !, rhotwgp(:)
  complex(gwpc),allocatable :: full_ur1_kqmp(:), full_ur1_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwpc),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
@@ -477,13 +475,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
  ! FFT meshes from input file, not necessarily equal to the ones found in the external files.
-
- ! NB: fft_ur with FFTW3/DFTI is buggy when ngfft(4:6) != ngfft(1:3)
- ! also ur arrays are always allocated with nfft and not with product(ngfft(4:6)).
- ! Let's see if this fixes the problem with the double free
- !ngfft(4:6) = ngfft(1:3)
- !ngfftf(4:6) = ngfftf(1:3)
-
+ ! NB: ur arrays are always allocated with nfft and not with product(ngfft(4:6)).
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
@@ -596,7 +588,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CHECK(drhodb%has_fields("den1", msg), msg)
 
  ! Make sure that dvdb and drhodb have the same q-points
- ! TODO: Method of dvdb_t?
  ABI_CHECK_IEQ(dvdb%nqpt, drhodb%nqpt, "Different number of q-points in DVDB and DRHODB")
  ierr = 0
  do ii=1,dvdb%nqpt
@@ -963,6 +954,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! =============================================================
      ! Loop over k-points in the e-ph matrix elements (gqk%kpt_comm)
      ! =============================================================
+
      do my_ik=1,gqk%my_nk
        ! NB: All procs in gqk%pert_comm and gqk%bsum_com and gqk%pp_sum_comm enter this section.
 
@@ -1013,6 +1005,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Get npw_kq, kg_kq for k+q.
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
+
 
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
@@ -1103,6 +1096,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call mkffnl_objs(cryst, psps, 1, ffnl_kmp, ider0, idir0, kg_kmp, kpg_kmp, kmp, nkpg_kmp, &
                           npw_kmp, ylm_kmp, ylmgr_dum) !, comm=gqk%pert_comm%value, request=ffnl_kmp_request)
 
+
          ! Symmetry tables and g-sphere centered on k+q-p.
          kqmp = kq - pp
          if (kpts_map("symrel", ebands%kptopt, cryst, gstore%krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
@@ -1136,27 +1130,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call sphereboundary(gbound_c, istwfk1, kg_c, mgfft, npw_c)
          call sphereboundary(gbound_x, istwfk1, kg_x, mgfft, npw_x)
 
-#if 0
-         ! DEBUG
-         ABI_CHECK(all(kg_c(:,1:min_npw_xc) == kg_x(:,1:min_npw_xc)), "different g-vectors")
-
-         do ig=1,npw_x
-          if (any(kg_x(:,ig) > ngfft(1:3)/2) .or. any(kg_x(:,ig) < -(ngfft(1:3)-1)/2) ) then
-            ABI_ERROR(sjoin(" The G-vector: ",ltoa(kg_x(:, ig))," falls outside the FFT box. Increase boxcutmin (?)"))
-          end if
-         end do
-
-         do ig=1,npw_c
-           if (any(kg_c(:,ig) > ngfft(1:3)/2) .or. any(kg_c(:,ig) < -(ngfft(1:3)-1)/2) ) then
-             ABI_ERROR(sjoin(" The G-vector: ",ltoa(kg_c(:, ig))," falls outside the FFT box. Increase boxcutmin (?)"))
-           end if
-         end do
-         ! END DEBUG
-#endif
-
          ABI_MALLOC(rhotwg_c, (npw_c*nspinor))
          ABI_MALLOC(rhotwg_x, (npw_x*nspinor))
          ABI_MALLOC(vc_sqrt_gx, (npw_x))
+
 
          ! We need two stern_t objects to compute the first order change of the wavefunctions at k-p and k+q-p.
          ! Clearly, we should not duplicate the work when pp = 0.
@@ -1201,6 +1178,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            stern_kqmp%cgq(:,:,ii) = cg_kmp(:,1:npw_kmp*nspinor)
          end do ! ib_sum
 
+#if 0
          ! Prepare the object for applying W(pp_bz).
          ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
          call screen%rotate_iqbz(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
@@ -1216,11 +1194,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          do ig=1,npw_x
            vc_sqrt_gx(gsph_x%rottb(ig, itim_pp, isym_pp)) = vcp%vc_sqrt(ig, ipp_ibz)
          end do
-
-         !if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
-         !if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
-         !if (ffnl_kmp_request /= xmpi_request_null) call xmpi_wait(ffnl_kmp_request, ierr)
-         !if (ffnl_kqmp_request /= xmpi_request_null) call xmpi_wait(ffnl_kqmp_request, ierr)
 
          !e_nk = qp_ene(n_k, ik_ibz, spin)
          !e_mkq = qp_ene(m_kq, ikq_ibz, spin)
@@ -1440,7 +1413,7 @@ if (.not. qq_is_gamma) then
              call rf_ham_kmp%load_spin(spin, vlocal1=vlocal1_mqq(:,:,:,:,imyp), with_nonlocal=.true.)
 
              call getgh1c_setup(gs_ham_kmp, rf_ham_kmp, dtset, psps, kqmp, kmp, idir, ipert, &             ! In
-               natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &                             ! In
+               natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &                                   ! In
                npw_kqmp, npw_kmp, useylmgr1, kg_kqmp, ylm_kqmp, kg_kmp, ylm_kmp, ylmgr_kmp, &              ! In
                dkinpw, nkpg_kqmp, nkpg_kmp, kpg_kqmp, kpg_kmp, kinpw1, ffnl_kqmp, ffnl_kmp, ph3d_kqmp, ph3d1_kmp, & ! InOut
                reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                                ! Reuse some arrays
@@ -1509,12 +1482,15 @@ end if ! .not qq_is_gamma.
            end do  ! imyp (my perturbations)
            call rf_ham_kqmp%free(); call rf_ham_kmp%free()
          end do ! ib_sum (sum over bands)
+#endif
 
          if (print_time_pp) then
            call inds2str(1, " My pp-point:", my_ipp, my_npp(spin), pp_mesh%nbz, msg)
            call cwtime_report(msg, cpu_pp, wall_pp, gflops_pp); if (my_ipp == LOG_MODP) call wrtout(std_out, "...", do_flush=.True.)
          end if
 
+         ABI_FREE(kpg_kmp)
+         ABI_FREE(kpg_kqmp)
          ABI_FREE(ffnl_kmp)
          ABI_FREE(ffnl_kqmp)
          ABI_FREE(full_cg1_kqmp)
@@ -1625,13 +1601,9 @@ end if ! .not qq_is_gamma.
 
  ! Free memory
  ABI_FREE(kg_k)
- ABI_SFREE(kpg_k)
  ABI_FREE(kg_kq)
- ABI_SFREE(kpg_kq)
  ABI_FREE(kg_kmp)
- ABI_SFREE(kpg_kmp)
  ABI_FREE(kg_kqmp)
- ABI_SFREE(kpg_kqmp)
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
  ABI_FREE(ylm_kmp)
@@ -1706,6 +1678,7 @@ subroutine dump_my_gbuf()
  ! as all the local buffers store results for all natom3 perturbations.
 
  integer :: ii, iq_bz, iq_glob, my_iq
+ return
 
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  ! FIXME: Recheck this part as we have way more levels of parallelism in GWPT
