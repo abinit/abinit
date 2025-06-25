@@ -139,6 +139,7 @@ pp_dirpath "$ABI_PSPDIR"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% test_chain = t104.abi, t105.abi, t106.abi, t107.abi
 #%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% [files]

@@ -681,6 +681,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          call chkint_eq(0,1,cond_string,cond_values,ierr,'iscf',dt%iscf,2,(/-2,-3/),iout)
        endif
 
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_magnfield',dt%dmft_magnfield,3,(/0,1,2/),iout)
+
+       if(dt%dmft_magnfield .gt. 0) then
+         cond_string(1)='dmft_magnfield' ; cond_values(1)=dt%dmft_magnfield
+         call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_magnfield_b',dt%dmft_magnfield_b,1,0.0_dp,iout)
+       endif
+
        if(dt%ucrpa==0.and.dt%dmft_solv/=9.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
@@ -845,7 +852,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          end if
        end if
        if (dt%nspinor==2.and.dt%nspden==1) ABI_ERROR(' nspinor=2, nspden=1 and usedmft=1 is not implemented')
-       if (maxval(abs(dt%nband-dt%nband(1)))>0) ABI_ERROR("Every kpt needs to have the same number of bands in DMFT")
+       if (maxval(abs(dt%nband(1:dt%nkpt)-dt%nband(1)))>0) ABI_ERROR("Every kpt needs to have the same number of bands in DMFT")
        do iatom=1,natom
          lpawu = dt%lpawu(dt%typat(iatom))
          if (lpawu==-1) cycle
@@ -3719,6 +3726,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end do
    end if
 
+!  rcpaw_frocc
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frocc',dt%rcpaw_frocc,2,(/0,1/),iout)
+
+!  rcpaw_frtypat
+   do itypat=1,dt%ntypat
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frtypat',dt%rcpaw_frtypat(itypat),2,(/0,1/),iout)
+   enddo
 
 !  recgratio
    if (dt%tfkinfunc==2) then
@@ -4177,6 +4191,17 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
    end if
+
+!  usercpaw
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
+   if(dt%use_rcpaw==1) then
+     if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
+       &(dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
+       &(dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
+       &(dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
+       ABI_ERROR('RCPAW: work in progress')
+     endif
+   endif
 
 !  usexcnhat
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,3,(/-1,0,1/),iout)

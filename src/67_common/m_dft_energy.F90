@@ -54,6 +54,7 @@ module m_dft_energy
  use m_paw_dmft,         only : paw_dmft_type
  use m_paw_nhat,         only : pawmknhat
  use m_paw_occupancies,  only : pawaccrhoij
+ use m_rcpaw,            only : rcpaw_type
  use m_fft,              only : fftpac, fourdp
  use m_spacepar,         only : meanvalue_g, hartre
  use m_dens,             only : constrained_dft_t,mag_penalty
@@ -222,7 +223,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
-& add_tfw,vxctau,xcctau3d) ! optional argument
+& add_tfw,vxctau,xcctau3d,rcpaw) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -244,6 +245,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  type(wvl_wf_type),intent(inout) :: wfs
  type(wvl_denspot_type), intent(inout) :: wvl_den
  type(wvl_energy_terms),intent(inout) ::wvl_e
+ type(rcpaw_type),pointer,intent(in),optional :: rcpaw
 !arrays
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  integer, intent(in) :: indsym(4,dtset%nsym,dtset%natom)
@@ -844,6 +846,16 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
  end if
 
+ ! Add the contribution from cores
+ if(present(rcpaw)) then
+   if(associated(rcpaw)) then
+     energies%e_cpaw=rcpaw%ehnzc+rcpaw%ekinc
+     energies%e_cpawdc=rcpaw%eeigc-rcpaw%edcc+rcpaw%ehnzc
+     if(optene==0.or.optene==2) etotal=etotal+energies%e_cpaw
+     if(optene==1.or.optene==3) etotal=etotal+energies%e_cpawdc
+   endif
+ endif
+
  call entropy(dtset,energies)
  etotal=etotal+energies%e_entropy
 
@@ -1104,9 +1116,8 @@ end subroutine mkresi
 !!  common case, at finite temperature, the electronic entropy is mainly constitued
 !!  of the non-interacting entropy (entropy_ks). Finite-temperature exchange-correlation
 !!  functionals or other methods may introduce additional entropy terms.
-!! 
+!!
 !! NOTE
-!!  (A. Blanchet): Should DMFT entropy be also added here?
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -1116,8 +1127,9 @@ end subroutine mkresi
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy_ks(IN)=non-interacting entropy of the kohn-sham states
 !!   | entropy_paw(IN)=entropy due to paw corrections (for finite-temperature xc functionals)
-!!   | entropy_xc(IN)=exchange-correlation entropy (fro finite-temperature xc functionals)
+!!   | entropy_xc(IN)=exchange-correlation entropy (for finite-temperature xc functionals)
 !!   | entropy_extfpmd(IN)=entropy of extfpmd model
+!!   | entropy_imp(IN)=entropy of impurity electrons (for DFT+DMFT)
 !!
 !! OUTPUT
 !!  energies <type(energies_type)>=all part of total energy.
@@ -1140,6 +1152,7 @@ subroutine entropy(dtset,energies)
  if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
  if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
  if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
+ if(abs(energies%entropy_imp)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_imp
 
 !When the finite-temperature VG broadening scheme is used,
 !the total entropy contribution "tsmear*entropy" has a meaning,

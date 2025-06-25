@@ -21,9 +21,6 @@ else:
     import pickle
     from io import StringIO
 
-
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +28,7 @@ __all__ = [
 ]
 
 
-class AbinitEnvironment(object):
+class AbinitEnvironment:
     """
     Container with information on the abinit source tree.
     Provide helper functions to construct the absolute path of directories.
@@ -159,7 +156,7 @@ _tsuite_dirs = [
     "hpc_gpu_omp",
     "gpu_omp",
     "gpu_kokkos",
-    "rttddft",
+    "rttddft_suite",
     "seq",
     "tutoatdep",
     "tutomultibinit",
@@ -196,7 +193,7 @@ def load_mod(filepath):
         return SourceFileLoader(filepath, filepath).load_module()
 
 
-class Suite(object):
+class Suite:
     """Information on one test suite"""
 
     def __init__(self, suite_path):
@@ -263,7 +260,7 @@ class Suite(object):
         return subsuite_name in self.subsuites
 
     def inputs_of_subsuite(self, subsuite_name):
-        """Return the absolut path of the input files in the subsuite."""
+        """Return the absolute path of the input files in the subsuite."""
         return self.subsuites[subsuite_name]
 
     def __str__(self):
@@ -541,7 +538,7 @@ def path2str(path):
     return "["+dirname+"]["+fname+"]"
 
 
-class AbinitTests(object):
+class AbinitTests:
     """
     Object describing the collection of automatic tests
     """
@@ -993,7 +990,7 @@ KNOWN_KEYWORDS = {
     "LWF": "Lattice Wannier function tests",
     "RTTDDFT": "Real-time time-dependent DFT",
     "MINIMAL": "Quick set of tests covering all abinit optdriver and executables",
-    'CC4S': "Interface betwee Abinit and CC4S code",
+    'CC4S': "Interface between Abinit and CC4S code",
     'CRPA': "Tests related to Constrained RPA",
     'ConstrainedDFT': "Tests related to constrained DFT",
     'EPH_OLD': "Legacy python-based EPH code for the ZPR",
@@ -1030,7 +1027,7 @@ KNOWN_KEYWORDS = {
     'effpot': "Effective potentila with multibinit",
     'Effective potential': "Effective potentila with multibinit",
     'linear-electro-optical': "Computation of linear electro-optical coefficients",
-    'DDB_TO_NC': "Conversion of DDB file from text to netcdf and viceversa",
+    'DDB_TO_NC': "Conversion of DDB file from text to netcdf and vice-versa",
     'ddb_interpolation': "Interpolation of DDB files in q-space.",
     'pSIC': "Tests related to the polaron self-interaction correction method.",
     'POLARON': "Tests related to the variational polaron equations."

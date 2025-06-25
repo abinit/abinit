@@ -36,6 +36,8 @@ module m_mkcore_wvl
  use m_pawtab,      only : pawtab_type
  use m_drivexc,     only : mkdenpos
 
+ implicit none
+
  private
 !!***
 

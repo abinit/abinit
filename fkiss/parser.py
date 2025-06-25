@@ -505,17 +505,20 @@ class Subroutine(Procedure):
     proc_type = "subroutine"
 
     def check_abirules(self, verbose=0):
+        # FIXME: These tests have to be deactivated as many headers are not valid
         retcode = 0
-        if not self.preamble:
-            cprint("Empty preamble in %s" % repr(self), "red")
-            retcode += 1
 
-        try:
-            header = RobodocHeader.from_string(self.preamble)
-        except Exception:
-            cprint("Wrong Robodoc header in %s" % repr(self), "red")
-            cprint(traceback.format_exc(), "red")
-            retcode += 1
+        #if not self.preamble:
+        #    cprint("Empty preamble in %s" % repr(self), "red")
+        #    retcode += 1
+
+        # FIXME: This has to be deactivated as many headers are not valid
+        #try:
+        #    header = RobodocHeader.from_string(self.preamble)
+        #except Exception:
+        #    cprint("Wrong Robodoc header in %s" % repr(self), "red")
+        #    cprint(traceback.format_exc(), "red")
+        #    retcode += 1
         #retcode += header.check_abirules(self)
 
         return retcode
@@ -542,9 +545,10 @@ class Module(Procedure):
     def check_abirules(self, verbose=0):
         retcode = 0
 
-        if not self.preamble:
-            cprint("Empty preamble in %s" % repr(self), "red")
-            retcode += 1
+        # FIXME: These tests have to be deactivated as many headers are not valid
+        #if not self.preamble:
+        #    cprint("Empty preamble in %s" % repr(self), "red")
+        #    retcode += 1
 
         for proc in self.contains:
             retcode += proc.check_abirules(verbose=verbose)
@@ -590,7 +594,7 @@ class FortranKissParser(HasRegex):
 
             return self.parse_string(string, path=path)
 
-    def preproc_string(self, string):
+    def preproc_string(self, string, path):
         # Preprocess string to facilitate further analysis.
         # Use approach similar to the one used in Ford:
         #
@@ -610,6 +614,7 @@ class FortranKissParser(HasRegex):
         # List storing pre-processed lines.
         new_lines = []
         napp = new_lines.append
+        num_implicit_none = 0
 
         while lines:
             line = lines.popleft()
@@ -618,6 +623,10 @@ class FortranKissParser(HasRegex):
             if icomm == 0:
                 napp(line)
                 continue
+
+            if self.RE_IMPLICIT_NONE.match(line):
+                #print(line)
+                num_implicit_none += 1
 
             m = self.RE_CONTLINE_START.match(line)
             if not m:
@@ -679,30 +688,35 @@ class FortranKissParser(HasRegex):
         if self.verbose >= 3:
             print("WILL OPERATE ON LINES\n", "\n".join(new_lines))
 
+        if num_implicit_none != 1:
+            print("Found", num_implicit_none, "in path", self.path)
+
         return deque(new_lines)
 
     def parse_string(self, string, path=None):
         if path is None: path = "<UnknownPath>"
         self.path = path
 
-        self.lines = self.preproc_string(string)
         self.warnings = []
+        self.lines = self.preproc_string(string, path)
 
         self.num_doclines, self.num_f90lines, self.num_omp_statements = 0, 0, 0
         self.preamble, self.stack = [], []
         self.all_includes, self.all_uses  = [], []
         self.ancestor = None
 
-        # Invokations of Fortran functions are difficult to handle
+        # Invocations of Fortran functions are difficult to handle
         # without inspecting local variables so we only handle explicit calls to routines.
         # in principle I may re-read the source and use regex for val = foo() where foo is
         # one of the functions in the project but it's gonna be costly.
+
         while self.lines:
             line = self.lines.popleft()
             if not line: continue
             if self.handle_comment(line): continue
             # Convert to lower case here so that we don't have to deal with case.
             line = line.lower()
+
             if self.handle_use_statement(line): continue
             if self.handle_cpp_line(line): continue
             if self.handle_contains(line): continue

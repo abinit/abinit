@@ -1166,10 +1166,8 @@ end subroutine libpaw_libxc_set_c_tb09
  function libpaw_libxc_needs_tau(xc_functionals)
 
 !Arguments ------------------------------------
- implicit none
  logical :: libpaw_libxc_needs_tau
  type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
-
 ! *************************************************************************
 
  libpaw_libxc_needs_tau = .false.
@@ -1202,10 +1200,8 @@ end subroutine libpaw_libxc_set_c_tb09
  function libpaw_libxc_needs_laplacian(xc_functionals)
 
 !Arguments ------------------------------------
- implicit none
  logical :: libpaw_libxc_needs_laplacian
  type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
-
 ! *************************************************************************
 
  libpaw_libxc_needs_laplacian = .false.
@@ -1238,10 +1234,8 @@ end subroutine libpaw_libxc_set_c_tb09
  function libpaw_libxc_needs_temperature(xc_functionals)
 
 !Arguments ------------------------------------
- implicit none
  logical :: libpaw_libxc_needs_temperature
  type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
-
 ! *************************************************************************
 
  libpaw_libxc_needs_temperature = .false.

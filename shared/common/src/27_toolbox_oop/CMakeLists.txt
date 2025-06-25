@@ -10,7 +10,7 @@ add_library(27_toolbox_oop STATIC
 
 set_target_properties(27_toolbox_oop
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(27_toolbox_oop
   PRIVATE
@@ -20,7 +20,7 @@ target_include_directories(27_toolbox_oop
 
 target_include_directories(27_toolbox_oop
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
 

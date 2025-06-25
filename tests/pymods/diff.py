@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-""" Command line interface to difflib.py providing diffs in four formats:
+"""
+Command line interface to difflib.py providing diffs in four formats:
 
 * ndiff:    lists every line and highlights interline changes.
 * context:  highlights clusters of changes in a before/after format.
@@ -52,7 +53,7 @@ def main():
                         help='Write diff to file FILE. stdout is used if not specified', metavar='FILE')
 
     parser.add_argument('-j', '--abinit-junk', action='store_true', default=False,
-                        help='Use Abinit output specific heuristic instead of builtin heuristic to syncronise lines.')
+                        help='Use Abinit output specific heuristic instead of builtin heuristic to synchronise lines.')
 
     parser.add_argument('fromfile', help='Reference file')
     parser.add_argument('tofile', help='Compared file')

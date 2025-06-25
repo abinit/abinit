@@ -76,8 +76,6 @@ contains
 !! SOURCE
 subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: istep
@@ -244,8 +242,6 @@ end subroutine rttddft_output
 !! SOURCE
 subroutine prt_eig(dtfil, dtset, istep, mpi_enreg, tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: istep
@@ -306,8 +302,6 @@ end subroutine prt_eig
 !!
 !! SOURCE
 subroutine prt_occ(dtfil, dtset, istep, mpi_enreg, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -412,8 +406,6 @@ end subroutine prt_occ
 !!
 !! SOURCE
 subroutine prt_den(dtfil, dtset, istep, mpi_enreg, psps, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -523,8 +515,6 @@ end subroutine prt_den
 !!
 !! SOURCE
 subroutine prt_dos(dtfil, dtset, istep, mpi_enreg, psps, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -659,8 +649,6 @@ end subroutine prt_dos
 !! SOURCE
 subroutine prt_wfk(dtfil, dtset, istep, mpi_enreg, psps, tdks, force_write)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                    intent(in)    :: istep
@@ -723,8 +711,6 @@ end subroutine prt_wfk
 !!
 !! SOURCE
 subroutine prt_restart(dtfil, dtset, istep, mpi_enreg, tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

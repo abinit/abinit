@@ -89,8 +89,6 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 &          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_next,vel_cell,&
 &          vel_cell_next,volume,xred,xred_next,xred_prev)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage,natom,prtvolimg,trotter
@@ -267,8 +265,6 @@ end subroutine pimd_nosehoover_npt
 
 subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &               rprimd,stressin,trotter,vel,vel_next,volume,xred,xred_next,xred_prev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

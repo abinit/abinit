@@ -164,7 +164,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          paw_an,paw_ij,pawang,pawfgrtab,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,&
 &          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
-&          atvshift,fatvshift,natvshift,nucdipmom,&
+&          atvshift,fatvshift,natvshift,nucdipmom,eijkl_is_sym,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
 
 !Arguments ---------------------------------------------
@@ -179,6 +179,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  logical,optional,intent(in) :: electronpositron_lmselect(:,:)
+ logical,optional,intent(in) :: eijkl_is_sym(ntypat)
  real(dp),intent(in) :: gprimd(3,3),qphon(3)
  real(dp),intent(in) ::  vxc(:,:),xred(3,natom),znuc(ntypat)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
@@ -213,7 +214,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijxchat_available,dijxchat_need,dijxchat_prereq
  logical :: dijxcval_available,dijxcval_need,dijxcval_prereq
  logical :: dijU_available,dijU_need,dijU_prereq
- logical :: has_nucdipmom,my_atmtab_allocated
+ logical :: has_nucdipmom,my_atmtab_allocated,is_sym
  logical :: need_to_print,paral_atom,v_dijhat_allocated
  real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
@@ -690,8 +691,10 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        dijhartree(:)=paw_ij(iatom)%dijhartree(:)
      else
 !    ===== Need to compute DijHartree
+       is_sym=.true.
+       if(present(eijkl_is_sym)) is_sym=eijkl_is_sym(itypat)
        if (ipositron/=1) then
-         call pawdijhartree(dijhartree,qphase,nspden,pawrhoij(iatom),pawtab(itypat))
+         call pawdijhartree(dijhartree,qphase,nspden,pawrhoij(iatom),pawtab(itypat),is_sym=is_sym)
        else
          dijhartree(:)=zero
        end if
@@ -1095,11 +1098,13 @@ end subroutine pawdij
 !!
 !! SOURCE
 
-subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
+subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab,&
+&                        is_sym)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: nspden,qphase
+ logical,intent(in),optional :: is_sym
 !arrays
  real(dp),intent(out) :: dijhartree(:)
  type(pawrhoij_type),intent(in) :: pawrhoij
@@ -1107,6 +1112,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
+ logical :: eijkl_is_sym
  integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,irhoij,ispden,jrhoij,klmn,klmn1,lmn2_size,nspdiag
  real(dp) :: ro
  character(len=500) :: msg
@@ -1128,6 +1134,8 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
  dijhartree=zero
  lmn2_size=pawrhoij%lmn2_size
  cplex_rhoij=pawrhoij%cplex_rhoij
+ eijkl_is_sym=.true.
+ if(present(is_sym)) eijkl_is_sym=is_sym
 
 !Loop over (diagonal) spin-components
  nspdiag=1;if (nspden==2) nspdiag=2
@@ -1158,7 +1166,11 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 
        !k>l
        do klmn1=klmn+1,lmn2_size
-         dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn,klmn1)
+         if(eijkl_is_sym) then
+           dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn,klmn1)
+         else
+           dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn1,klmn)
+         endif
        end do
 
        jrhoij=jrhoij+cplex_rhoij
@@ -4714,12 +4726,14 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  logical,parameter :: lsymnew=.false.
 !DEBUG_ALTERNATE_ALGO
  real(dp) :: arg,factafm,zarot2
+ real(dp) :: det
  character(len=6) :: pertstrg,wrt_mode
  character(len=500) :: msg
 !arrays
  integer :: nsym_used(2)
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
+ integer,allocatable :: symrec_det(:)
  real(dp) :: dijc(2),fact(2),factsym(2),phase(2)
  real(dp) :: rotdij(2,2,2),rotmag(2,3,2),sumdij(2,2,2),summag(2,3,2)
  real(dp),allocatable :: dijnew(:,:,:),dijtmp(:,:),symrec_cart(:,:,:)
@@ -4891,8 +4905,19 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
    if (noncoll) then
      LIBPAW_ALLOCATE(symrec_cart,(3,3,nsym))
+     LIBPAW_ALLOCATE(symrec_det,(nsym))
      do irot=1,nsym
        symrec_cart(:,:,irot)=symdij_symcart(gprimd,rprimd,symrec(:,:,irot))
+       ! compute the sign of the determinant of the symmetries
+       ! to be able to apply only the proper part of the symmetries to the magn. components
+       ! (magnetization == pseudo-vector)
+       det = symrec_cart(1,1,irot)*symrec_cart(2,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(3,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(1,2,irot)*symrec_cart(2,3,irot)*symrec_cart(3,1,irot) - &
+         &  (symrec_cart(3,1,irot)*symrec_cart(2,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(1,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(3,2,irot)*symrec_cart(2,3,irot)*symrec_cart(1,1,irot))
+       symrec_det(irot) = nint(det) ! should return 1 or -1
      end do
 !DEBUG_ALTERNATE_ALGO
 !    if(lsymnew) then
@@ -5130,7 +5155,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                    do mu=1,3
                      !We need the transpose ?
                      rotmag(1:cplex_dij,mu,iq)=rotmag(1:cplex_dij,mu,iq) &
-&                       +symrec_cart(mu,nu,irot)*summag(1:cplex_dij,nu,iq)
+&                       +symrec_det(irot)*symrec_cart(mu,nu,irot)*summag(1:cplex_dij,nu,iq)
                    end do
                  end do
                end do
@@ -5242,6 +5267,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    LIBPAW_DEALLOCATE(dijnew)
    if (noncoll)  then
      LIBPAW_DEALLOCATE(symrec_cart)
+     LIBPAW_DEALLOCATE(symrec_det)
 !DEBUG_ALTERNATE_ALGO
 !    if (lsymnew) then
 !      LIBPAW_DEALLOCATE(sumrhoso)

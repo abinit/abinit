@@ -861,14 +861,19 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
    write(message,'(2a)') ch10,"  == About to print spectral function"
    call wrtout(std_out,message,'COLL')
    if (option == 4) then
-     tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
+     tmpfil = trim(paw_dmft%filapp)//'_SpFunc-'//trim(char1)
      if (open_file(tmpfil,message,newunit=spf_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
+     write(spf_unt,'(3a)') "# This is the total spectral function (DOS).",ch10, &
+                         & "#    Real frequency (Ha)        Spectral function"
+
    end if ! option=4
    if (option == 5) then
-     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
+     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kres' !//trim(char1)
      if (open_file(tmpfil,message,newunit=spfkresolved_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
+     write(spfkresolved_unt,'(3a)') "# This is the k-resolved spectral function.",ch10, &
+                                & "#  Real frequency (eV)       Spectral function (eV^-1)   ikpt"
      ABI_MALLOC(sf,(nkpt,green%nw))
      sf(:,:) = czero
      do ifreq=1,green%nw
@@ -882,7 +887,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
      end do ! ifreq
      do ikpt=1,nkpt
        do ifreq=1,green%nw
-         write(message,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ikpt,ifreq)))/pi/Ha_eV,ikpt
+         write(message,'(2x,2(es24.16e3,2x),i5)') green%omega(ifreq)*Ha_eV,(-aimag(sf(ikpt,ifreq)))/pi/Ha_eV,ikpt
          call wrtout(spfkresolved_unt,message,'COLL')
        end do ! ifreq
        write(message,*)
@@ -921,7 +926,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
        end do ! isppol
      end do ! ifreq
      do ifreq=1,green%nw
-       write(message,*) green%omega(ifreq),(-aimag(sf2(ifreq)))/pi
+       write(message,'(2x,2(es24.16e3,2x))') green%omega(ifreq),(-aimag(sf2(ifreq)))/pi
        call wrtout(spf_unt,message,'COLL')
      end do ! ifreq
      ABI_FREE(sf2)
@@ -936,13 +941,12 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
        sf_corr(:) = czero
        call int2char4(iatom,tag_at)
        ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpFunloc_iatom'//trim(tag_at)
        if (open_file(tmpfil,message,newunit=spcorb_unt,status='unknown',form='formatted') /= 0) &
          & ABI_ERROR(message)
        ndim = 2*lpawu + 1
-       write(message,*) "#",nspinor,nsppol,ndim,green%nw
-       call wrtout(spcorb_unt,message,'COLL')
-       write(message,*) "#",lpawu
+       write(message,'(3a,3(i3),i6,2a,i2,2a)') "# nspinor,nsppol,ndim,nw",ch10,"#",nspinor,nsppol,ndim,green%nw,ch10, &
+                                          & "# lpawu",lpawu,ch10,"#       Frequency (Ha.)        Spectral function"
        call wrtout(spcorb_unt,message,'COLL')
        ndim = nspinor * ndim
        do ifreq=1,green%nw
@@ -953,7 +957,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
          end do ! isppol
        end do ! ifreq
        do ifreq=1,green%nw
-         write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/pi
+         write(message,'(2x,2(es24.16e3,2x))') green%omega(ifreq),(-aimag(sf_corr(ifreq)))/pi
          call wrtout(spcorb_unt,message,'COLL')
        end do ! ifreq
        close(spcorb_unt)

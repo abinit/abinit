@@ -22,6 +22,7 @@
 
 module m_abi_linalg
 
+ USE_MPI
  use defs_basis
  use m_errors
  use m_abicore
@@ -46,10 +47,6 @@ module m_abi_linalg
 
 #if defined HAVE_MPI1
  include 'mpif.h'
-#endif
-
-#if defined HAVE_MPI2
- use mpi
 #endif
 
  use m_time,  only : timab
@@ -104,7 +101,7 @@ module m_abi_linalg
  integer,save,public :: slk_communicator=xmpi_comm_null
  integer,save,public :: slk_complement_communicator=xmpi_comm_null
 #ifdef HAVE_LINALG_SCALAPACK
- type(processor_scalapack),save,public :: slk_processor
+ type(slk_processor_t),save,public :: slk_processor
 #endif
 
 !Plasma can be activated via command line

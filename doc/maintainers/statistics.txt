@@ -2,7 +2,7 @@ Date released : date mentioned in the release notes
 
 Then, the other indicators should refer to the first production version
 
-Size of tar.gz      : ls -l *tar.gz    (on abiref)
+Size of tar.gz      : ls -l *tar.gz    (currently alps_gnu_9.5_sdebug)
 Number of F90 files : ls src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
 Number of F90 lines : cat src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
 Number of tests     : ls tests/*/Input/t*abi tests/*/Input/t*in | wc
@@ -14,18 +14,18 @@ in Bruyeres-le-Chatel, in Nov 2011, whose new files have been included in the
 package at the end of v6.
 
 =====================================================================
-Version  Date       Size         Number        Number        Number 
+Version  Date       Size         Number        Number        Number
          released   tar.gz       of F90 files  of F90 lines  of tests
                     (10e6Bytes)
 =====================================================================
-4.3      2004 Feb   14.5          726          252602        432 
-4.4      2004 Aug   15.3          764          267715        439 
-4.5      2005 Feb   17.9          836          292978        455 
+4.3      2004 Feb   14.5          726          252602        432
+4.4      2004 Aug   15.3          764          267715        439
+4.5      2005 Feb   17.9          836          292978        455
 4.6      2005 Jul   21.0          849          300656        511
-5.1      2006 Feb   20.7          887          302500        523 
+5.1      2006 Feb   20.7          887          302500        523
 5.2      2006 Aug   21.1         1013          365109        530
 5.3      2007 Jan   23.8         1046          383515        553
-5.4      2007 Jun   34.1         1106          394748        578 
+5.4      2007 Jun   34.1         1106          394748        578
 5.5      2007 Nov   37.3         1130          407768        596
 5.6      2008 Sep   30.6         1210          448138        635
 5.7      2009 Jan   32.2         1254          496054        642
@@ -45,9 +45,9 @@ Version  Date       Size         Number        Number        Number
 7.10     2014 Nov   70.0         1389          831335       1019
 8.0      2016 May   71.9         1313          836387       1059
 8.2      2017 Feb   73.9         1312          860989       1078
-8.4      2017 May   76.4         1321          878539       1102 
-8.6      2017 Nov   81.6         1253          863564       1151 
-8.8      2018 Apr   82.5         1150          879137       1187 
+8.4      2017 May   76.4         1321          878539       1102
+8.6      2017 Nov   81.6         1253          863564       1151
+8.8      2018 Apr   82.5         1150          879137       1187
 8.10     2018 Oct   89.0          644          900113       1217
 9.0      2020 Mar   87.4          712          927158       1281
 9.2      2020 Sep   96.5          716          934287       1318
@@ -57,3 +57,4 @@ Version  Date       Size         Number        Number        Number
 9.10     2023 Jun  127.9          770          968108       1442
 10.0     2024 Apr  129.5          788          999302       1480
 10.2     2024 Oct  131.3          802         1026056       1556
+10.4     2025 May  144.2          811         1063959       1657

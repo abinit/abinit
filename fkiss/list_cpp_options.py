@@ -31,8 +31,8 @@ def list_cpp_options(top):
               else:
                 cppopts[item] = 1
 
-  print ("Option                             Occurences")
-  print ("--------------------------------   ----------")
+  print ("Option                             Occurrences")
+  print ("--------------------------------   -----------")
   names = sorted(cppopts.keys())
   for opt in names:
     print ("%-32s   %10d" % (opt,cppopts[opt]))

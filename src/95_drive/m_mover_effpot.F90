@@ -64,6 +64,7 @@ module m_mover_effpot
  use m_symfind
  use m_matrix,           only: matr3inv,mati3inv
  use m_symtk,            only: symatm
+
  implicit none
 
  private
@@ -1066,8 +1067,6 @@ end subroutine mover_effpot
 !! SOURCE
 
 subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,symrel_out,tnons_out,nsym,tolsym)
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
