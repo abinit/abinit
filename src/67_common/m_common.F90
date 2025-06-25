@@ -2202,11 +2202,6 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    if(associated(gs_hamk%ph3d_k)) gs_ham_smem = gs_ham_smem + int(2,c_size_t) * npw_fft * gs_hamk%matblk
    gs_ham_smem = gs_ham_smem*dp
 
-<<<<<<< HEAD
-   if(wfoptalg==111 .or. wfoptalg==112) then
-||||||| dccec48a07
-   if(wfoptalg==111) then
-=======
    ! Mapped arrays used in mkrho or vtowfk
    updrho_wmem = int(2,c_size_t)*npw_fft*ndat*nspinor ! cwavef
    if(nspden==4) updrho_wmem = updrho_wmem + int(2,c_size_t)*npw_fft*ndat*2 ! cwavef_x + cwavef_y
@@ -2216,8 +2211,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    prep_nonlop_wmem = 0
    if(paral_kgb==1) prep_nonlop_wmem = int(2,c_size_t)*npw_fft*ndat*nspinor*3*dp ! cwavef_alltoall{1,2} + cwavef
 
-   if(wfoptalg==111) then
->>>>>>> 65e62095dbcfb81c17c6701632a9c5e27ad17a29
+   if(wfoptalg==111 .or. wfoptalg==112) then
      chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,blockdim)
      invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
      invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
