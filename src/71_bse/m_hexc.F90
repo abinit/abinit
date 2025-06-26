@@ -140,6 +140,7 @@ MODULE m_hexc
 !!  Store information about interpolation of excitonic hamiltonian
 !!
 !! SOURCE
+
  type,public :: hexc_interp_t
 
  !scalars
@@ -257,14 +258,12 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  !character(len=500) :: msg
 !arrays
  complex(dpc),allocatable :: test(:,:)
-
 !*****************************************************************************
 
  hexc%bsp => BSp
  hexc%bs_files => BS_files
  hexc%crystal => Cryst
  hexc%kmesh_coarse => Kmesh_coarse
-
 
  hexc%comm = comm
  hsize = SUM(BSp%nreh)
@@ -444,7 +443,6 @@ subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_den
  logical :: is_resonant, diago_is_real, use_mpio
 !arrays
  character(len=fnlen) :: tmpfname, hreso_fname
-
 !*****************************************************************************
 
  BSp = hexc%bsp
@@ -570,7 +568,6 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
 !Local variables ---------------------
  integer :: ierr,ncerr,ncid
  character(len=500) :: msg
-
 !*****************************************************************************
 
  write(msg,"(a,f8.1,a)")"Memory needed for hinterp = ",one*(hexc_i%hsize_dense**2)*2*dpc*b2Mb," Mb"
@@ -1137,18 +1134,17 @@ subroutine hexc_free(hexc)
 
 !Arguments ---------------------------
  type(hexc_t),intent(inout) :: hexc
-
 !*****************************************************************************
 
- if( associated(hexc%bsp) ) then
+ if (associated(hexc%bsp)) then
    nullify(hexc%bsp)
  end if
 
- if( associated(hexc%crystal) ) then
+ if (associated(hexc%crystal)) then
    nullify(hexc%crystal)
  end if
 
- if( associated(hexc%kmesh_coarse) ) then
+ if (associated(hexc%kmesh_coarse)) then
    nullify(hexc%kmesh_coarse)
  end if
 
@@ -1174,7 +1170,6 @@ subroutine hexc_interp_free(hexc_i)
 
 !Arguments ---------------------------
  type(hexc_interp_t),intent(inout) :: hexc_i
-
 !*****************************************************************************
 
  ABI_SFREE(hexc_i%kdense2div)
@@ -1543,7 +1538,6 @@ subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 !Local variables ---------------------
  integer :: ierr
  real(dp) :: tsec(2)
-
 !*****************************************************************************
 
  call timab(697,1,tsec)
@@ -1605,7 +1599,6 @@ subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 !Local variables ---------------------
  integer :: ierr
  real(dp) :: tsec(2)
-
 !*****************************************************************************
 
  call timab(697,1,tsec)
@@ -1661,7 +1654,6 @@ subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
 
 !Local variables ---------------------
  real(dp) :: tsec(2)
-
 !*****************************************************************************
 
  call timab(697,1,tsec)

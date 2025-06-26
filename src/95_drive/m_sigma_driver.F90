@@ -381,7 +381,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! ==================================================
  ! ==== Initialize Sigp, epsm1 and basic objects ====
  ! ==================================================
- ! Sigp is completetly initialized here.
+ ! Sigp is completely initialized here.
  ! epsm1 is only initialized with dimensions, (SCR|SUSC) file is read in epsm1%mkdump
  call timab(403,1,tsec) ! setup_sigma
 
@@ -789,7 +789,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  call wfd%mkrho(cryst, psps, ks_ebands, ngfftf, nfftf, ks_rhor)
  if ((rdm_update .and. Dtset%prtden /= 0) .and. Wfd%my_rank == master) then
-   ! Print initial (KS) density file as read (usefull to compare DEN files, cubes, etc.)
+   ! Print initial (KS) density file as read (useful to compare DEN files, cubes, etc.)
    gw1rdm_fname = trim(dtfil%fnameabo_ks_den)  ! and used on Sigma grids
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
                        Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=ks_ebands)
@@ -1038,7 +1038,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! Do not break this coding!
  ! When gwcalctyp>10, the order of the bands can be interexchanged after
  ! the diagonalization. Therefore, we have to correctly assign the matrix elements to the corresponding
- ! bands and we cannot skip the following even though it looks unuseful.
+ ! bands and we cannot skip the following even though it looks useless.
  if (gwcalctyp >= 10) call wrtout(std_out, ch10//' *************** KS Energies *******************')
 
  !=== qp_ebands stores energies and occ. used for the calculation ===
@@ -1384,7 +1384,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Setup bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
  !
- ! * The representation depends wheter we are updating the wfs or not.
+ ! * The representation depends whether we are updating the wfs or not.
  ! * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  ! * Note that vH matrix elements are calculated using the true uncutted interaction
  !   This should be changed if the cutoff is also used in the GS run.
@@ -1890,10 +1890,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_CHECK_MPI(ierr, "")
    end if
 
-   my_plsmf=drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf=Dtset%ppmfrq
-   call PPm%init(epsm1%mqmem,epsm1%nqibz,epsm1%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
-
-   ! PPm%force_plsmf= force_ppmfrq  ! this line to change the plasme frequency in HL expression.
+   my_plsmf = drude_plsmf; if (Dtset%ppmfrq > tol6) my_plsmf = Dtset%ppmfrq
+   call PPm%init(epsm1%mqmem, epsm1%nqibz, epsm1%npwe, Sigp%ppmodel, my_plsmf, Dtset%gw_invalid_freq)
+   ! PPm%force_plsmf= force_ppmfrq  ! this line to change the plasma frequency in the HL expression.
 
    if (Wfd%usepaw==1 .and. Ppm%userho==1) then
      ! For PAW and ppmodel 2-3-4 we need the AE rho(G) without compensation charge.
@@ -1945,7 +1944,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! NC or PAW with PPmodel 1.
      if (epsm1%mqmem /= 0) then
        ! Calculate ppmodel parameters for all q-points
-       call PPm%setup(Cryst,Qmesh,epsm1%npwe,epsm1%nomega,epsm1%omega,epsm1%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
+       call PPm%setup(Cryst, Qmesh, epsm1%npwe, epsm1%nomega, epsm1%omega, epsm1%epsm1, nfftf, Gsph_c%gvec, ngfftf, ks_rhor(:,1))
      end if
    end if ! PAW or NC PPm and/or needs density
 
@@ -2156,7 +2155,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nkcalc=Kmesh%nbz
    !if(1==1)then!DEBUG
    !open(67,file="test.rhot1",status="REPLACE")
-   do ikcalc=1,nkcalc ! for the oscillator strengh, spins are identical without SOC
+   do ikcalc=1,nkcalc ! for the oscillator strength, spins are identical without SOC
 !    if(Sigp%nkptgw/=Kmesh%nbz) then
 !      write(msg,'(6a)')ch10,&
 !&      ' nkptgw and nbz differs: this is not allowed to compute U in cRPA '
@@ -3100,7 +3099,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  end if
 
  if (Sigp%npwx>ng_kss) then
-   ! Have to recalcuate the (large) sphere for Sigma_x.
+   ! Have to recalculate the (large) sphere for Sigma_x.
    pinv=1; if (remove_inv.and.Cryst%timrev==2) pinv=-1
    gamma_point(:,1) = (/zero,zero,zero/); nullify(gsphere_sigx_p)
 
@@ -3217,7 +3216,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  !
  if (dtset%nkptgw == 0) then
    !
-   ! Use qp_range to select the interesting k-points and the corresponing bands.
+   ! Use qp_range to select the interesting k-points and the corresponding bands.
    !
    !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
    ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
@@ -3469,7 +3468,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    end if
 
    if (Dtset%nfreqim_conv==0) then
-     ! If no extra frequencies is requested, keep the orginal grids.
+     ! If no extra frequencies is requested, keep the original grids.
      epsm1%nomega_i_conv = 0
    else if (Dtset%nfreqim_conv < 0) then
       ! If negative number of frequencies is requested, multiply the number of frequencies in the file by the absolute value.
@@ -3516,9 +3515,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  end do
  !stop
  !
- ! === Find optimal value for G-sphere enlargment due to oscillator matrix elements ===
+ ! === Find optimal value for G-sphere enlargement due to oscillator matrix elements ===
  ! * Here I have to be sure that Qmesh%bz is always inside the BZ, not always true size bz is buggy
- ! * -one is used because we loop over all the possibile differences, unlike screening
+ ! * -one is used because we loop over all the possible differences, unlike screening
 
  call get_ng0sh(Sigp%nkptgw,Sigp%kptgw,Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
  call wrtout(std_out, sjoin(' Optimal value for ng0sh ', ltoa(ng0sh_opt)))
@@ -3664,7 +3663,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%ecutwfn = Dtset%ecutwfn
  Sigp%ecutsigx = Dtset%ecutsigx
 
- ! === Setup of the FFT mesh for the oscilator strengths ===
+ ! === Setup of the FFT mesh for the oscillator strengths ===
  ! * Init gwc_ngfft(7:18) and gwx_ngfft(7:18) with Dtset%ngfft(7:18)
  ! * Here we redefine gwc_ngfft(1:6) according to the following options:
  !
@@ -3674,7 +3673,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  ! method == 3 --> Doubled FFT grid, same as the the FFT for the density,
  !
  ! enforce_sym == 1 --> Enforce a FFT mesh compatible with all the symmetry operation and FFT library
- ! enforce_sym == 0 --> Find the smallest FFT grid compatbile with the library, do not care about symmetries
+ ! enforce_sym == 0 --> Find the smallest FFT grid compatible with the library, do not care about symmetries
  !
  gwc_ngfft(1:18) = Dtset%ngfft(1:18)
  gwx_ngfft(1:18) = Dtset%ngfft(1:18)
@@ -4042,7 +4041,7 @@ subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_
    my_nspins=1
    my_spins(1)=1
    if (my_rank+1>nprocs/2) then
-     ! I will treate spin=2, compute shifted rank.
+     ! I will treat spin=2, compute shifted rank.
      my_spins(1)=2
      rank_spin = my_rank - nprocs/2
    end if

@@ -521,7 +521,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
  case (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
    ppm%dm2_botsq = ppm%npwc
    ppm%dm2_otq   = ppm%npwc
-   ppm%dm_eig    = 1 ! Should be set to 0, but g95 doesnt like zero-sized arrays
+   ppm%dm_eig    = 1 ! Should be set to 0, but g95 does not like zero-sized arrays
 
  case (PPM_LINDEN_HORSH)
    ppm%dm2_botsq = 1
@@ -531,7 +531,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
  case (PPM_ENGEL_FARID)
    ppm%dm2_botsq = ppm%npwc
    ppm%dm2_otq   = 1
-   ppm%dm_eig    = 1 ! Should be set to 0, but g95 doesnt like zero-sized arrays
+   ppm%dm_eig    = 1 ! Should be set to 0, but g95 does not like zero-sized arrays
 
  case default
    ABI_BUG(sjoin('Wrong ppm%model:', itoa(ppm%model)))
@@ -1283,7 +1283,7 @@ subroutine cppm2par(qpt, npwc, epsm1, ngfftf, gvec, gprimd, rhor, nfftf, gmet, b
  ! MG it turns out that using the symmetrized inverse DM in the plasmon-pole
  ! equations give the same results for the squared plasmon frequencies omegatwsq while the
  ! squared bare plasma frequencies bigomegatwsq related to the symmetrized dielectric matrix
- ! are obtained multipling by |q+G1|/|q+G2|
+ ! are obtained multiplying by |q+G1|/|q+G2|.
  !
  if (.not.use_symmetrized) then
    qlist(:,1) = qpt
@@ -2153,7 +2153,7 @@ end subroutine ppm_calc_sigc
 !! SOURCE
 
 subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, epsm1_ggw, &
-                            nfftf, ngfftf, rhor_tot)
+                           nfftf, ngfftf, rhor_tot)
 
 !Arguments ------------------------------------
 !scalars
@@ -2317,10 +2317,10 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
                  ppm%bigomegatwsq(iq_ibz)%vals, ppm%omegatw(iq_ibz)%vals, ppm%invalid_freq)
 
    ! Quick-and-dirty change of the plasma frequency. Never executed in standard runs.
-   if (ppm%force_plsmf>tol6) then ! Integrate the real-space density
+   if (ppm%force_plsmf > tol6) then ! Integrate the real-space density
       n_at_G_zero = SUM(rhor_tot(:))/nfftf
       ! Change the prefactor
-      write(msg,'(2(a,es16.8))') 'Forced ppmfreq:',ppm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero
+      write(msg,'(2(a,es16.8))') 'Forced ppmfreq: ',ppm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero
       ABI_WARNING(msg)
       ppm%force_plsmf = (ppm%force_plsmf**2)/(four_pi*n_at_G_zero)
       ppm%bigomegatwsq(iq_ibz)%vals = ppm%force_plsmf * ppm%bigomegatwsq(iq_ibz)%vals
