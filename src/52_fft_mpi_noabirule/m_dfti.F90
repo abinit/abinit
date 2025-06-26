@@ -221,14 +221,13 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
  integer,parameter :: iscale1 = 1
  integer :: ii,jj
  complex(spc), allocatable :: work_sp(:)
-
 ! *************************************************************************
 
  select case (cplex)
  case (2)
    ! Complex to Complex.
    if (fftcore_mixprec == 1) then
-     ! Mixed precision: copyin + in-place + copyout
+     ! Mixed precision: copy in + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
      if (isign == +1) then
        work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
@@ -372,7 +371,6 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
  integer :: nx,ny,nz,fftalg,fftalga,fftalgc,fftcache,dat,ptg,ptr,ptgin,ptgout,nthreads
  logical :: use_fftrisc
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if (all(option /= [0, 1, 2, 3])) then
@@ -422,7 +420,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
            ptg = 1 + (dat-1)*npwin
            ptr = 1 + (dat-1)*ldx*ldy*ldz
            call dfti_fftrisc_dp(cplex,denpot,fofgin(1,ptg),fofgout,fofr(1,ptr),gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        else
 !$OMP PARALLEL DO PRIVATE(ptg,ptr)
@@ -441,7 +439,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
          ptg = 1 + (dat-1)*npwin
          ptr = 1 + (dat-1)*ldx*ldy*ldz
          call dfti_fftrisc_dp(cplex,denpot,fofgin(1,ptg),fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
        end do
 
      CASE (2)
@@ -464,7 +462,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
            ptgin  = 1 + (dat-1)*npwin
            ptgout = 1 + (dat-1)*npwout
            call dfti_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        end if
 
@@ -475,7 +473,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
            ptr    = 1 + (dat-1)*ldx*ldy*ldz
            ptgout = 1 + (dat-1)*npwout
            call dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout(1,ptgout),fofr(1,ptr),gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        else
 !$OMP PARALLEL DO PRIVATE(ptr,ptgout)
@@ -483,7 +481,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
            ptr    = 1 + (dat-1)*ldx*ldy*ldz
            ptgout = 1 + (dat-1)*npwout
            call dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout(1,ptgout),fofr(1,ptr),gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+             mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
          end do
        end if
 
@@ -600,7 +598,6 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  real(sp),intent(inout) :: fofgout(2,npwout)    !vz_i
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_DFTI
@@ -720,7 +717,6 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  real(dp),intent(inout) :: fofgout(2,npwout)    !vz_i
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_DFTI
@@ -782,7 +778,6 @@ subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gbound
  real(dp),intent(inout) :: fofgout(2,npwout)    !vz_i
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_DFTI
@@ -828,7 +823,7 @@ end subroutine dfti_fftrisc_mixprec
 !! TARGET: dp arrays with real and imaginary part
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -865,7 +860,6 @@ subroutine dfti_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nda
  integer :: iscale__, isign__
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -873,7 +867,7 @@ subroutine dfti_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nda
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
-#undef TK_PREF_box2gsph 
+#undef TK_PREF_box2gsph
 #define TK_PREF_box2gsph cg_box2gsph
 #undef TK_PREF_gsph2box
 #define TK_PREF_gsph2box cg_gsph2box
@@ -907,7 +901,7 @@ end subroutine dfti_fftug_dp
 !! TARGET: spc arrays
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -945,7 +939,6 @@ subroutine dfti_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer :: iscale__, isign__
  real(sp) :: fofgout(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -953,7 +946,7 @@ subroutine dfti_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
-#undef TK_PREF_box2gsph 
+#undef TK_PREF_box2gsph
 #define TK_PREF_box2gsph cplx_box2gsph
 #undef TK_PREF_gsph2box
 #define TK_PREF_gsph2box cplx_gsph2box
@@ -987,7 +980,7 @@ end subroutine dfti_fftug_spc
 !! TARGET: DPC arrays
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -1026,7 +1019,6 @@ subroutine dfti_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 !arrays
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1034,7 +1026,7 @@ subroutine dfti_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
-#undef TK_PREF_box2gsph 
+#undef TK_PREF_box2gsph
 #define TK_PREF_box2gsph cplx_box2gsph
 #undef TK_PREF_gsph2box
 #define TK_PREF_gsph2box cplx_gsph2box
@@ -1068,7 +1060,7 @@ end subroutine dfti_fftug_dpc
 !! TARGET: dp arrays with real and imaginary part.
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -1109,7 +1101,6 @@ subroutine dfti_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nda
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1117,7 +1108,7 @@ subroutine dfti_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nda
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
-#undef TK_PREF_box2gsph 
+#undef TK_PREF_box2gsph
 #define TK_PREF_box2gsph cg_box2gsph
 #undef TK_PREF_gsph2box
 #define TK_PREF_gsph2box cg_gsph2box
@@ -1152,7 +1143,7 @@ end subroutine dfti_fftur_dp
 !! TARGET: spc arrays
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -1194,7 +1185,6 @@ subroutine dfti_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 !arrays
  real(sp) :: dum_ugin(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1202,7 +1192,7 @@ subroutine dfti_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
-#undef TK_PREF_box2gsph 
+#undef TK_PREF_box2gsph
 #define TK_PREF_box2gsph cplx_box2gsph
 #undef TK_PREF_gsph2box
 #define TK_PREF_gsph2box cplx_gsph2box
@@ -1237,7 +1227,7 @@ end subroutine dfti_fftur_spc
 !! TARGET: DPC arrays
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -1278,7 +1268,6 @@ subroutine dfti_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1286,7 +1275,7 @@ subroutine dfti_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
-#undef TK_PREF_box2gsph 
+#undef TK_PREF_box2gsph
 #define TK_PREF_box2gsph cplx_box2gsph
 #undef TK_PREF_gsph2box
 #define TK_PREF_gsph2box cplx_gsph2box
@@ -1338,7 +1327,6 @@ subroutine dfti_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff)
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
 !arrays
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
-
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1380,7 +1368,6 @@ subroutine dfti_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff)
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
 !arrays
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
-
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1423,7 +1410,6 @@ subroutine dfti_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, g
 !arrays
  complex(spc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(spc),intent(out) :: gg(ldx*ldy*ldz*ndat)
-
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1466,7 +1452,6 @@ subroutine dfti_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, g
 !arrays
  complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
-
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1518,7 +1503,6 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
 
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: fin_fptr(:),fout_fptr(:)
-
 ! *************************************************************************
 
  ! Associate complex pointers with real inputs via the C pointers
@@ -1580,7 +1564,6 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
  type(C_ptr) :: finout_cptr
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: finout_fptr(:)
-
 ! *************************************************************************
 
  ! Associate complex finout_fptr with real ffinout via the C pointer
@@ -1613,7 +1596,7 @@ end subroutine dfti_many_dft_ip
 !! INPUTS
 !!   nx,ny,nz=Logical dimensions of the FFT mesh.
 !!   ldx,ldy,ldz=Physical dimension of the f array (to avoid cache conflicts).
-!!   ndat=Numer of FFTs
+!!   ndat=Number of FFTs
 !!   mgfft=MAX(nx,ny,nz), only used to dimension gbound
 !!   isign=The sign of the transform.
 !!   gbound(2*mgfft+8,2)= The boundaries of the basis sphere of G vectors at a given k-point.
@@ -1643,7 +1626,6 @@ subroutine dfti_fftpad_dp(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbo
  integer :: iscale__
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: fptr(:)
-
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -1704,7 +1686,6 @@ subroutine dfti_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
 
 !Local variables-------------------------------
 #ifdef HAVE_DFTI
-
 ! *************************************************************************
 
 ! Include Fortran template
@@ -1817,7 +1798,6 @@ subroutine dfti_r2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 !arrays
  integer,allocatable :: i1inver(:),i2inver(:),i3inver(:)
  complex(dpc),ABI_CONTIGUOUS pointer :: gg_hp(:)
-
 ! *************************************************************************
 
  padx = (nx/2+1)
@@ -1947,7 +1927,6 @@ subroutine dfti_r2c_op_dp(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
  type(C_ptr) :: gg_cptr
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: gg_fptr(:)
-
 ! *************************************************************************
 
  gg_cptr = C_loc(gg)
@@ -2002,7 +1981,6 @@ subroutine dfti_c2r_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
  type(C_PTR) :: cptr
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: ff_hp(:)
-
 ! *************************************************************************
 
  !stride  = 1
@@ -2108,7 +2086,6 @@ subroutine dfti_c2r_op_dp(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
  type(C_ptr) :: ff_cptr
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: ff_fptr(:)
-
 ! *************************************************************************
 
  ff_cptr = C_loc(ff)
@@ -2157,7 +2134,6 @@ subroutine dfti_check_status(status, file, line)
  character(len=500) :: f90name
  character(len=500) :: my_msg
  character(len=DFTI_MAX_MESSAGE_LENGTH+500) :: err_msg
-
 ! *************************************************************************
 
  if (PRESENT(line)) then
@@ -2209,7 +2185,6 @@ function dfti_spawn_threads_here(ndat, nthreads) result(ans)
 !scalars
  integer,intent(in) :: ndat,nthreads
  logical :: ans
-
 ! *************************************************************************
 
  ans = .FALSE.
@@ -2237,9 +2212,7 @@ end function dfti_spawn_threads_here
 subroutine dfti_use_lib_threads(logvar)
 
 !Arguments ------------------------------------
-!scalars
  logical,intent(in) :: logvar
-
 ! *************************************************************************
 
  USE_LIB_THREADS = logvar
@@ -2270,8 +2243,6 @@ subroutine dfti_alloc_real_dp(size, cptr, fptr)
  integer,intent(in) :: size
  real(dp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-!arrays
-
 ! *************************************************************************
 
  cptr = mkl_malloc( INT(size*C_DOUBLE, KIND=C_SIZE_T), DFTI_DEFAULT_ALIGNMENT_DP)
@@ -2309,7 +2280,6 @@ subroutine dfti_alloc_complex_spc(size, cptr, fptr)
  integer,intent(in) :: size
  complex(spc),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = mkl_malloc( INT(2*size*C_FLOAT, KIND=C_SIZE_T), DFTI_DEFAULT_ALIGNMENT_SP)
@@ -2347,8 +2317,6 @@ subroutine dfti_alloc_complex_dpc(size, cptr, fptr)
  integer,intent(in) :: size
  complex(dpc),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-!arrays
-
 ! *************************************************************************
 
  cptr = mkl_malloc( INT(2*size*C_DOUBLE, KIND=C_SIZE_T), DFTI_DEFAULT_ALIGNMENT_DP)

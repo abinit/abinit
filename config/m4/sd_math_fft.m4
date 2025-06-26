@@ -318,7 +318,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
       if test "${abi_openmp_enable}" = "yes"; then
           sd_fft_selected_flavors="fftw3-threads fftw3 aocl AOCL nvpl ${sd_fft_selected_flavors}"
       else
-    
+
           sd_fft_selected_flavors="fftw3 aocl AOCL nvpl ${sd_fft_selected_flavors}"
       fi
     fi
@@ -342,7 +342,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 
 ])
   sd_fftw3_enable="no"
-  fi 
+  fi
 
   # Clean-up the mess
   unset tmp_fft_has_fftw3

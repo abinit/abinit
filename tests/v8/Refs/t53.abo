@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h14 )
-  
+
 
 ================================================================================
 
@@ -75,11 +75,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -95,7 +95,7 @@
        3               2       -0.000000        0.000000
        3               3       -0.001592        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -115,7 +115,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.043  and twall      0.043 sec
        Homogeneous q point set in the B.Z.
@@ -146,7 +146,7 @@
 
 ================================================================================
 
- Calculation of phonon density of states 
+ Calculation of phonon density of states
 
  Average speed of sound partial sums:     0.1486395487E-02 (at units)
 -                                   =           3.2518 [km/s]
@@ -155,17 +155,17 @@
 -                                 =     0.4972012935E+01 (THz)
 -Debye temperature from partial sums:     0.2386187031E+03 (K)
 
- Average speed of sound:     0.2136901345E-02 (at units) 
+ Average speed of sound:     0.2136901345E-02 (at units)
 -                      =           4.6749 [km/s]
 
- Debye frequency from DOS:     0.1086368872E-02 (Ha) 
+ Debye frequency from DOS:     0.1086368872E-02 (Ha)
 -                        =     0.7147963798E+01 (THz)
 -Debye temperature from DOS:     0.3430477503E+03 (K)
 
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -222,7 +222,7 @@
 
 ================================================================================
 
- Treat the second list of vectors 
+ Treat the second list of vectors
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -264,4 +264,4 @@
 
 +Total cpu time     11.424  and wall time     11.429 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

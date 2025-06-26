@@ -1,4 +1,4 @@
-"XYAPTU: Lightweight XML/HTML Document Template Engine for Python. Taken from http://code.activestate.com/recipes/162292/"
+"""XYAPTU: Lightweight XML/HTML Document Template Engine for Python. Taken from http://code.activestate.com/recipes/162292/"""
 from __future__ import print_function, division, absolute_import #, unicode_literals
 
 __version__ = '1.0.0'
@@ -31,7 +31,7 @@ class xcopier(copier):
                  ouf=sys.stdout, dbg=0, dbgOuf=sys.stdout):
         ' set default regular expressions required by yaptu.copier '
 
-        # Default regexps for yaptu delimeters (what xyaptu tags are first converted to)
+        # Default regexps for yaptu delimiters (what xyaptu tags are first converted to)
         # These must be in sync with what is output in self._x2y_translate
         _reExpression = re.compile('_:@([^:@]+)@:_')
         _reOpen       = re.compile(r'\++yaptu ')
@@ -81,7 +81,7 @@ class xcopier(copier):
         yinf.close()
 
     def _x2y_translate(self, xStr):
-        ' Converts xyaptu markup in input string to yaptu delimeters '
+        ' Converts xyaptu markup in input string to yaptu delimiters '
 
         # Define regexps to match xml elements on.
         # The variations (all except for py-expr, py-close) we look for are:

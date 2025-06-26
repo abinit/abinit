@@ -1,12 +1,12 @@
 ******************************************************************************************
-                                Welcome to MULTIBINIT,                         
+                                Welcome to MULTIBINIT,
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 9.8.2 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu12.2 computer) 
+.Version 9.8.2 of MULTIBINIT
+.(MPI version, prepared for a x86_64_linux_gnu12.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -26,7 +26,7 @@
 
 .Starting date : Thu 19 Jan 2023.
 - ( at 15h36 )
-  
+
 -  nproc =    1
 
 ================================================================================
@@ -36,7 +36,7 @@
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags : 
+ Flags :
      ifcflag         1
      strcpli        -1
  Spin Dynamics :
@@ -120,7 +120,7 @@ Measurement run:
 
 +Total cpu time      0.105  and wall time      0.115 sec
 
- multibinit : the run completed succesfully.
+ multibinit : the run completed successfully.
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 0 allocations and 0 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:

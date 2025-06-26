@@ -111,7 +111,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
         #check if PKG_CONFIG exists (if not keep default mode)
         AC_MSG_NOTICE([setting for ${sd_netcdf_init} potential move to pkg])
         AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
- 
+
         AC_MSG_NOTICE([setting for ${sd_netcdf_init} potential move to pkg, PKG=${PKG_CONFIG}])
         if test "$PKG_CONFIG" != "no"; then
            AC_MSG_CHECKING([for netcdf via pkg-config])

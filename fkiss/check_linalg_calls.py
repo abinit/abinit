@@ -2557,7 +2557,7 @@ scalapack_routines = [
   "pslansy",
   "pzgeqr2"]
 
-re_f90 = re.compile("\.[Ff]90")
+re_f90 = re.compile(r"\.[Ff]90")
 
 def main(top):
   sub_calls = list()
@@ -2644,10 +2644,9 @@ def main(top):
 
 if __name__ == "__main__":
 
-  if len(sys.argv) == 1: 
+  if len(sys.argv) == 1:
     top = "src"
   else:
-    top = sys.argv[1] 
+    top = sys.argv[1]
 
   main(top)
-

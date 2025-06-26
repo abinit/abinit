@@ -80,6 +80,8 @@ MODULE m_numeric_tools
  public :: isordered             ! Check the ordering of a sequence.
  public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ ! where 1 is not included (tol12)
  public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] ! where -1/2 is not included (tol12)
+ public :: interpol1d            ! Linear interpolation in 1D
+ public :: interpol1d_c          ! Linear interpolation in 1D for complex data
  public :: interpol3d_0d         ! Linear interpolation in 3D
  public :: interpol3d_1d         ! Linear interpolation in 3D for an array
  public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
@@ -4090,7 +4092,7 @@ subroutine calculate_pade_a(a, n, z, f)
 
  do i=2,n
    do j=i,n
-     if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
+    !  if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
      g(i,j)=(g(i-1,i-1)-g(i-1,j)) / ((z(j)-z(i-1))*g(i-1,j))
      !write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
    end do
@@ -4847,6 +4849,93 @@ end subroutine wrap2_pmhalf
 
 !----------------------------------------------------------------------
 
+!!***
+!!****f* m_numeric_tools/linear_interpolation
+!! NAME
+!! interpol1d
+!!
+!! FUNCTION
+!!  Perform linear interpolation of a set of points pts_o with values val_o
+!!  The points pts_o and pts_i are assumed to be ascending ordered arrays.
+!!
+!! INPUTS
+!!  npts_o=Number of points in the original array.
+!!  npts_i=Number of points in the interpolated array.
+!!  pts_o(npts_o)=Points in the original array.
+!!  pts_i(npts_i)=Points in the interpolated array.
+!!  val_o(npts_o)=Values at the points pts_o.
+!!
+!! OUTPUT
+!!  res(npts_i)=Interpolated values at the points pts_i.
+!!
+!! SOURCE
+pure function interpol1d(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
+!Arguments ------------------------------------
+!arrays
+  integer,intent(in) :: npts_o, npts_i
+  real(dp),intent(in) :: pts_o(npts_o), pts_i(npts_i)
+  real(dp),intent(in) :: val_o(npts_o)
+  real(dp) :: res(npts_i)
+!Local variables-------------------------------
+!scalars
+  integer :: ii, jj
+  real(dp) :: x1, x2, y1, y2, slope
+! *************************************************************************
+  res = zero
+
+  do ii = 1, npts_i
+    do jj = 1, npts_o + 1
+      if (jj == npts_o + 1 .or. pts_i(ii) < pts_o(jj)) exit
+    end do
+    if (jj == 1) then
+      res(ii) = val_o(1)
+    else if (jj == npts_o + 1) then
+      res(ii) = val_o(npts_o)
+    else
+      x1 = pts_o(jj - 1)
+      x2 = pts_o(jj)
+      y1 = val_o(jj - 1)
+      y2 = val_o(jj)
+
+      if (x2 == x1) then
+        res(ii) = (y1 + y2)/2.0_dp
+      else
+        slope = (y2 - y1) / (x2 - x1)
+        res(ii) = y1 + slope * (pts_i(ii) - x1)
+      end if
+    end if
+  end do
+
+end function interpol1d
+! *********************************************************************
+
+pure function interpol1d_c(npts_o,npts_i,pts_o,pts_i,val_o) result(res)
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: npts_o, npts_i
+ real(dp),intent(in) :: pts_o(npts_o), pts_i(npts_i)
+ complex(dpc),intent(in) :: val_o(npts_o)
+ complex(dpc) :: res(npts_i)
+!Local variables-------------------------------
+ real(dp) :: val_o_r(npts_o), val_o_i(npts_o), res_r(npts_i), res_i(npts_i)
+
+! *************************************************************************
+
+  ! Split the complex values into real and imaginary parts.
+  val_o_r = REAL(val_o, kind=dp)
+  val_o_i = AIMAG(val_o)
+
+  ! Interpolate the real part.
+  res_r = interpol1d(npts_o, npts_i, pts_o, pts_i, val_o_r)
+
+  ! Interpolate the imaginary part.
+  res_i = interpol1d(npts_o, npts_i, pts_o, pts_i, val_o_i)
+
+  ! Combine the results back into complex form.
+  res = CMPLX(res_r, res_i, kind=dpc)
+end function interpol1d_c
+
+!!----------------------------------------------------------------------
 !!****f* m_numeric_tools/interpol3d_0d
 !! NAME
 !! interpol3d_0d
