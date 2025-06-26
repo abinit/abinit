@@ -109,7 +109,7 @@ contains
 !!  cpus=cpu time limit in seconds
 !!  deltae=change in energy between the previous and present SCF cycle
 !!  diffor=maximum absolute change in component of fcart between present and previous SCF cycle.
-!!  difmag=maximum absolute change in magnetization between present and previous SCF cycle.
+!!  difmagsph=maximum absolute change in magnetization between present and previous SCF cycle.
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | chkexit= if non-zero, check whether the user wishes to exit
 !!   | enunit=parameter determining units of output energies
@@ -151,7 +151,7 @@ contains
 !!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
-!!  maxmag=maximum absolute value of magnetization among all atoms.
+!!  maxmagsph=maximum absolute value of magnetization among all atoms.
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
 !!  mpi_enreg=information about MPI parallelization
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
@@ -170,7 +170,7 @@ contains
 !!  tollist(12)=tolerance list. Presently, the following are defined :
 !!    tollist(1)=tolmxf ; tollist(2)=tolwfr ; tollist(3)=toldff
 !!    tollist(4)=toldfe ; tollist(5)=toleig ; tollist(6)=tolvrs
-!!    tollist(7)=tolrff
+!!    tollist(7)=tolrff ; tollist(9)=toldmag
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vxcavg=mean of the vxc potential
 !!  wtk(nkpt)=weight assigned to each k point.
@@ -214,14 +214,16 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ !integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ integer,save :: toldfe_ok,toldff_ok,tolrff_ok,toldmag_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr,ttoldmag
  integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank
  integer :: nband_index,nband_k,nnsclohf
  integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
  integer :: ivdw
 #endif
- real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
+ !real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
+ real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold, toldmag
  real(dp) :: diff_e,diff_f,magnet,rhodn,rhoup
  logical :: noquit,use_dpfft
  character(len=500) :: message, message2, message3
@@ -271,12 +273,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
    tolvrs=tollist(6)
    tolrff=tollist(7)
    vdw_df_threshold=tollist(8)
-   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
+   toldmag=tollist(9)
+   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0 ;
    if(abs(tolwfr)>tiny(zero))ttolwfr=1
    if(abs(toldff)>tiny(zero))ttoldff=1
    if(abs(tolrff)>tiny(zero))ttolrff=1
    if(abs(toldfe)>tiny(zero))ttoldfe=1
    if(abs(tolvrs)>tiny(zero))ttolvrs=1
+   if(abs(toldmag)>tiny(zero))ttoldmag=1
    !  If non-scf calculations, tolwfr must be defined
    if(ttolwfr /= 1 .and. (iscf<0 .and. iscf/=-3) )then
      write(message,'(a,a,a,es14.6,a,a)')&
@@ -291,13 +295,16 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
      ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
-   if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) &
-    .and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) then
+   !if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) &
+   if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag>1) &
+    .and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag/=1) ) then
+    !.and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) then
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-&     'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+&     'toldff, tolrff, toldfe, toldmag or tolvrs ','must differ from zero, while they are',ch10,&
 &     'toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
-&     'and tolvrs=',tolvrs,' .',ch10,&
+!&     'and tolvrs=',tolvrs,' .',ch10,&
+&     'toldmag=',toldmag,' and tolvrs=',tolvrs,' .',ch10,&
 &     'Action: change your input file and resubmit the job.'
      ABI_ERROR(message)
    end if
@@ -370,8 +377,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 !    If wfoptalg=1 or 111, we should write mdeg_filter
      call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
                         [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="solver")
-     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
-                        [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
+     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff, toldmag", & ! , vdw_df_threshold", &
+                        [tolwfr, toldff, toldfe, tolvrs, tolrff, toldmag], & !, vdw_df_threshold], &
+     !call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
+     !                   [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
                         real_fmt="(es8.2)", dict_key="tolerances", ignore=zero)
 
      call ydoc%write_and_free(ab_out, newline=.False.)
@@ -387,12 +396,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
    tolvrs=tollist(6)
    tolrff=tollist(7)
    vdw_df_threshold=tollist(8)
-   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
+   toldmag=tollist(9)
+   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0;
+   !ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
    if(abs(tolwfr)>tiny(0.0_dp))ttolwfr=1
    if(abs(toldff)>tiny(0.0_dp))ttoldff=1
    if(abs(tolrff)>tiny(0.0_dp))ttolrff=1
    if(abs(toldfe)>tiny(0.0_dp))ttoldfe=1
    if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
+   if(abs(toldmag)>tiny(0.0_dp))ttoldmag=1
 
    ! Conduct printing. If extra output follows, then put a blank line into the output here
    if (dtset%prtvol>=10) call wrtout([std_out, ab_out], ' ')
@@ -565,7 +577,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
    if (present(electronpositron)) then
      if (associated(electronpositron)) then
        if (electronpositron%istep_scf==1) then
-         toldff_ok=0;tolrff_ok=0;toldfe_ok=0
+         toldff_ok=0;tolrff_ok=0;toldfe_ok=0; toldmag_ok=0;
        end if
      end if
    end if
@@ -583,7 +595,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 #endif
      ! Here treat the tolwfr criterion: if maximum residual is less than
      ! input tolwfr, stop steps (exit loop here)
-     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
+     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff+ttoldmag==0) .and. .not. noquit) then
+     !if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
        if (residm < tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
@@ -630,6 +643,43 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
             ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
             '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+        end if
+       end if
+     end if
+
+     ! HEREEEE
+     if (ttoldmag==1) then
+       if (istep==1) then
+         toldmag_ok=0
+       else if (difmagsph < toldmag) then
+         toldmag_ok=toldmag_ok+1
+         ! add warning for magnetizations which are 0 . Check below that the wave
+         ! functions are relatively converged as well
+         if (difmagsph < tol12) then
+           write (message,'(3a)') ' toldmag criterion is satisfied.', ch10,&
+            ' Check if the magnetizations are 0 : in that case you can not use the toldmag convergence criterion!'
+           ABI_WARNING(message)
+     ! HEREE  ??
+         end if
+         if (res2 > tol9) toldmag_ok=0
+       else
+         toldmag_ok=0
+         use_dpfft = difmagsph < tol6
+       end if
+
+       if(toldmag_ok>=2 .and..not.noquit)then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', forces are converged : ',ch10,&
+            '  for the second time, max diff in mag=',difmagsph,' < toldmag=',toldmag
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr )then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
+            '  for the second time, max diff in force=',diffor,' < toldmag=',toldmag
            call wrtout([std_out, ab_out], message)
            quit=1
         end if
@@ -853,6 +903,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
          write(message, '(a,es11.3,a,es11.3,a)' ) &
          '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
 
+       else if (ttoldmag==1) then
+         write(message, '(a,es11.3,a,es11.3,a)' ) &
+         '  maximum force difference=',diffor,' exceeds toldmag=',toldmag,ch10
+
        else if (ttolrff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
          '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
@@ -895,6 +949,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
            write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
          else
            write(ab_xml_out, "(A)") ' stop-criterion="toldff+tolwfr" />'
+         end if
+       else if (ttoldmag == 1) then
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldmag" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldmag+tolwfr" />'
          end if
        else if (ttolrff == 1) then
          if (ttolwfr==0) then
@@ -1015,6 +1075,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
    end if
    if (ttoldff==1) then
      if (diffor > toldff) loc_conv=.false.
+   end if
+   if (ttoldmag==1) then
+     if (difmagsph > toldmag) loc_conv=.false.
    end if
    if (ttolrff==1) then
      if (diffor > tolrff*maxfor .and. maxfor > tol16) loc_conv=.false.

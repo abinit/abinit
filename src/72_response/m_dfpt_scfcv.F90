@@ -446,7 +446,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  type(pawrhoij_type),allocatable :: pawrhoijfermi(:)
 
 ! *********************************************************************
-
  DBG_ENTER("COLL")
 
  if (dtset%occopt == 9) then
@@ -478,6 +477,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  tollist(1)=dtset%tolmxf;tollist(2)=dtset%tolwfr
  tollist(3)=dtset%toldff;tollist(4)=dtset%toldfe
  tollist(6)=dtset%tolvrs;tollist(7)=dtset%tolrff
+ tollist(9)=dtset%toldmag
  nfftotf=product(ngfftf(1:3))
  nstep=dtset%nstep
  iscf_mod=dtset%iscf
