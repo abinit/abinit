@@ -695,6 +695,7 @@ type, public :: dataset_type
  integer :: useric = 0
  integer :: userid = 0
  integer :: userie = 0
+ integer :: usespinspiral
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
@@ -1019,6 +1020,7 @@ type, public :: dataset_type
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
  real(dp) :: qptn(3)
+ real(dp) :: qspinspiral(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
  real(dp) :: red_efieldbar(3)
@@ -2192,6 +2194,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%useric             = dtin%useric
  dtout%userid             = dtin%userid
  dtout%userie             = dtin%userie
+ dtout%usespinspiral      = dtin%usespinspiral
  dtout%usewvl             = dtin%usewvl
  dtout%usexcnhat_orig     = dtin%usexcnhat_orig
  dtout%useylm             = dtin%useylm
@@ -2406,6 +2409,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%neb_spring(:)      = dtin%neb_spring(:)
  dtout%polcen(:)          = dtin%polcen(:)
  dtout%qptn(:)            = dtin%qptn(:)
+ dtout%qspinspiral(:)     = dtin%qspinspiral(:)
  dtout%pvelmax(:)         = dtin%pvelmax(:)
  dtout%red_efield(:)      = dtin%red_efield(:)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
@@ -3742,7 +3746,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
- list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
+ list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom qspinspiral'
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
@@ -3801,6 +3805,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'
  list_vars=trim(list_vars)//' use_slk useextfpmd use_yaml use_rcpaw'
  list_vars=trim(list_vars)//' use_oldchi'
+ list_vars=trim(list_vars)//' usespinspiral'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vpq_avg_g vpq_aseed vpq_gpr_energy vpq_gpr_length'

@@ -1086,6 +1086,7 @@ subroutine indefo1(dtset)
  dtset%pimass(:)=-one
 !Q
  dtset%qptn=zero
+ dtset%qspinspiral=zero
 !R
  dtset%red_efield(:)=zero
  dtset%red_dfield(:)=zero
@@ -1108,6 +1109,7 @@ subroutine indefo1(dtset)
  dtset%useexexch=0
  dtset%usepawu=0
  dtset%usepotzero=0
+ dtset%usespinspiral=0
  dtset%use_slk=0
  dtset%use_oldchi=1
 !V
