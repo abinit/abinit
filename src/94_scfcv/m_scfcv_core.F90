@@ -464,6 +464,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  tollist(3)=dtset%toldff;tollist(4)=dtset%toldfe
  tollist(6)=dtset%tolvrs;tollist(7)=dtset%tolrff
  tollist(8)=dtset%vdw_df_threshold
+ tollist(9)=dtset%toldmag
  dielstrt=0
  finite_efield_flag=(dtset%berryopt == 4  .or. &
 & dtset%berryopt == 6  .or. &

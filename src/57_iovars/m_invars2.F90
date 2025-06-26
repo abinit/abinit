@@ -244,7 +244,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  logical :: xc_is_mgga,xc_is_pot_only,xc_need_kden,xc_has_kxc
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
- real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
+ real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_, toldmag_
  real(dp) :: tolmxde_, tolmxf_
  character(len=500) :: msg
  character(len=fnlen) :: key_value
@@ -3653,6 +3653,7 @@ if (dtset%usekden==1) then
  tolwfr_=zero
  toldfe_=zero
  toldff_=zero
+ toldmag_=zero
  tolrff_=zero
  tolvrs_=zero
  itol=0
@@ -3692,6 +3693,17 @@ if (dtset%usekden==1) then
    dtset%optforces=1
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'toldmag',tread,'DPR',ds_input)
+ if(tread==1) then
+   if (ds_input == 0) then
+     toldmag_=dprarr(1)
+     if(abs(dprarr(1))>tiny(0._dp))itol_gen=itol_gen+1
+   else
+     dtset%toldmag=dprarr(1)
+     if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
+   end if
+ end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolrff',tread,'DPR',ds_input)
  if(tread==1) then
    if (ds_input == 0) then
@@ -3728,11 +3740,12 @@ if (dtset%usekden==1) then
    end if
  end if
 
+ !write(ab_out,*)"GGGGG", itol_gen,itol
  ! check for multiple definitions of tolXXX for the present dataset
  if (itol > 1 .or. itol_gen > 1) then
    write(msg, '(3a)' )&
    'Only one of the tolXXX variables may be defined at once.',ch10,&
-   'Action: check values of tolvrs, toldfe, tolrff and toldff.'
+   'Action: check values of tolvrs, toldfe, tolrff, toldmag and toldff.'
    ABI_ERROR(msg)
  end if
 
@@ -3747,6 +3760,7 @@ if (dtset%usekden==1) then
  if (itol == 0 .and. itol_wfr == 1) then
    dtset%toldfe=zero
    dtset%toldff=zero
+   dtset%toldmag=zero
    dtset%tolrff=zero
    dtset%tolvrs=zero
  end if
@@ -3759,6 +3773,7 @@ if (dtset%usekden==1) then
    if (itol_gen == 1) then
      dtset%toldfe=toldfe_
      dtset%toldff=toldff_
+     dtset%toldmag=toldmag_
      dtset%tolrff=tolrff_
      dtset%tolvrs=tolvrs_
    end if
