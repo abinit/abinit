@@ -86,6 +86,7 @@ module m_gwpt
  use m_ppmodel,        only : PPM_HYBERTSEN_LOUIE, PPM_GODBY_NEEDS
  use m_ebands,         only : ebands_t
  use m_pstat,          only : pstat_proc
+ use m_ppmodel,       only : ppmodel_t
 
  implicit none
 
@@ -198,6 +199,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  !real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
+ !real(dp) :: drude_plsmf,my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: ecut,weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol,
@@ -222,6 +224,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(gstore_t),target :: gstore
  type(gqk_t),pointer :: gqk
  type(xcdata_type) :: xcdata
+ !type(ppmodel_t) :: PPm
  character(len=fnlen) :: screen_filepath, gstore_filepath
  character(len=5000) :: msg, qkp_string
 !arrays
@@ -366,6 +369,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with model dielectric function")
  end if
 
+#if 0
+ call test_charge(nfftf,ks_ebands%nelect,Dtset%nspden,ks_rhor,Cryst%ucvol,&
+                  Dtset%usepaw,usexcnhat,Pawfgr%usefinegrid,compch_sph,compch_fft,drude_plsmf)
+
+ my_plsmf = drude_plsmf; if (Dtset%ppmfrq > tol6) my_plsmf = Dtset%ppmfrq
+ call PPm%init(epsm1%mqmem, epsm1%nqibz, epsm1%npwe, Sigp%ppmodel, my_plsmf, Dtset%gw_invalid_freq)
+ call ppm%new_setup(iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_ggw, nfftf, gvec, ngfftf, rhor_tot)
+ capp ppm%free()
+#endif
 
  call pstat_proc%print(_PSTAT_ARGS_)
 

@@ -479,7 +479,7 @@ contains  !=====================================================
 !! phgamma_free
 !!
 !! FUNCTION
-!!  Free the dynamic memory in a <phgamma_t> datatype
+!!  Free the dynamic memory
 !!
 !! SOURCE
 
