@@ -30,8 +30,6 @@ module m_rec_tools
 
  use defs_rectypes, only : recparall_type
 
- implicit none
-
  private
 
  public ::            &
@@ -65,8 +63,6 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
-
- implicit none
 
 !Arguments ------------------------------------
   integer,intent(in)        :: gratio
@@ -121,8 +117,6 @@ end subroutine get_pt0_pt1
 !! SOURCE
 
 subroutine reshape_pot(trasl,nfft,nfftrec,ngfft,ngfftrec,pot,potloc)
-
- implicit none
 
  !Arguments ------------------------------------
  integer,  intent(in) :: nfft,nfftrec
@@ -183,8 +177,6 @@ subroutine trottersum(dim_trott,error,&
      &                facrec0,coeef_mu,exp1,&
      &                an,bn2,&
      &                N,D,Nold,Dold)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

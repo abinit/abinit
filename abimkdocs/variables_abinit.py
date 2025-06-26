@@ -1564,7 +1564,7 @@ In some cases, $n_i$ is set to 0:
 
   * if the band $i$ is in the buffer (see [[nbdbuf]])
 
-  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_minocc]]
+  * if [[nbdbuf]] = -101 and the band occupancy is below [[oracle_min_occ]]
 
 The resulting degree applied to all bands could be 0, for example if the wave-functions are already converged.
 In that case no filter is applied, but the Rayleigh-Ritz procedure is done anyway.
@@ -1680,7 +1680,7 @@ Variable(
 Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
 It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy
 of some parallelism for some [[optdriver]] value was not correct, with a large loss of computing resources.
-Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
+Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of resources might be spend
 when they are booked for a run that cannot use these.
 Accordingly, the user might blame ABINIT for being slow while the user has simply not activated
 the relevant parallelism, or activated an irrelevant parallelism.
@@ -1696,7 +1696,8 @@ The following relevances and adequacies are checked at present if [[chkparal]]=1
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
 the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW).
 
-The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present. The default values should not yield loss of computing power.
+The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present.
+The default values should not yield loss of computing power.
 """,
 ),
 
@@ -2777,47 +2778,43 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
-on-the-flight enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
-Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[geoopt]] = "bfgs" or "lbfgs" ([[ionmov]] == 2 or 22).
+on-the-fly enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
+Useful only when doing cell optimization, e.g. [[optcell]] /= 0, usually with [[geoopt]] = "bfgs" or "lbfgs" ([[ionmov]] == 2 or 22).
 Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large),
 then the recommended value of [[dilatmx]] is 1.05.
-When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
-you need an accurate estimation of the geometry, then make a first
-run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using
-the newly estimated geometry, with [[chkdilatmx]]=1 (the default) and [[dilatmx]] set to 1.05.
-If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
+When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible,
+while you need an accurate estimation of the geometry, then make a first
+run with [[chkdilatmx]] = 0, producing an inaccurate, but much better estimation, followed by a second run using
+the newly estimated geometry, with [[chkdilatmx]] = 1 (the default) and [[dilatmx]] set to 1.05.
+If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]] = 0 only once.
 
-In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
-ABINIT will rescale uniformly the
-tentative new primitive vectors to a value that leads at most to 90% of the
-maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
-prevent the geometry optimization algorithms to have taken a too large trial
+In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded, ABINIT will rescale uniformly the
+tentative new primitive vectors to a value that leads at most to 90% of the maximal allowed [[dilatmx]] deviation from 1.
+It will do this three times (to prevent the geometry optimization algorithms to have taken a too large trial
 step), but afterwards will stop and exit.
 
-Setting [[chkdilatmx]] == 0 allows one to
-book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1), but will not rescale the tentative new primitive vectors
-nor lead to an exit when the [[dilatmx]] threshold is exceeded.
+Setting [[chkdilatmx]] == 0 allows one to book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1),
+but will not rescale the tentative new primitive vectors nor lead to an exit when the [[dilatmx]] threshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
 determined using [[ecut]] at the latter primitive vectors. Still, as an intermediate step in a geometry search
-this might be sufficiently accurate. In such case, [[dilatmx]] might even be let at its default value 1.0.
+this might be sufficiently accurate.
+In such case, [[dilatmx]] might even be let at its default value 1.0.
 
 Detailed explanation: The memory space for the planewave basis set is defined
-by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called
-internally "ecut_eff"). Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
+by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called internally "ecut_eff").
+Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
 Still, operations (like scalar products) are done by taking into account these fake (non-used) planewaves,
 even if their coefficients are set to zero, thus slowing down the ABINIT execution.
-Using [[dilatmx]]<1.0 is equivalent to changing [[ecut]] in all its uses. This
-is allowed, although its meaning is no longer related to a maximal expected scaling.
+Using [[dilatmx]] < 1.0 is equivalent to changing [[ecut]] in all its uses.
+This is allowed, although its meaning is no longer related to a maximal expected scaling.
 
 Setting [[dilatmx]] to a large value leads to waste of CPU time and memory.
 By default, ABINIT will not accept that you define [[dilatmx]] bigger than 1.15.
 This behaviour will be overcome by using [[chkdilatmx]] == 0.
-Supposing you think that the optimized [[acell]] values might be 5% larger
-than your input values, use simply [[dilatmx]] 1.05. This will lead to
-an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$, and a
-corresponding increase in CPU time and memory.
-It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
-1.0 will be a waste.
+Supposing you think that the optimized [[acell]] values might be 5% larger than your input values, use simply [[dilatmx]] 1.05.
+This will lead to an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$,
+and a corresponding increase in CPU time and memory.
+It is possible to use [[dilatmx]] when [[optcell]] = 0, but a value larger than 1.0 will be a waste.
 """,
 ),
 
@@ -3051,7 +3048,7 @@ Variable(
     abivarname="dmft_magnfield",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'], 
+    topics=['DMFT_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: Magnetic Field",
@@ -3062,7 +3059,7 @@ Apply a magnetic field in Tesla ($B_z = \mu_0 H_z$) in combination with [[dmft_m
 to the energy levels. If the applied field is sufficiently small, it can be used to calculate the uniform magnetic susceptibility.
 The Zeeman contribution in Hartree corresponds to $B_z \mu_B g_e S_z$ when [[nspinor]] == 1.
 
-* 1 --> Add the Zeeman contribution to the calculated Kohn-Sham states to build the green's function. 
+* 1 --> Add the Zeeman contribution to the calculated Kohn-Sham states to build the green's function.
 Only valid for [[nspinor]] == 1.
 
 * 2 --> Add the Zeeman contribution to the energy levels of the DMFT local impurity Hamiltonian and not in the Weiss-field. This is a strong
@@ -3071,16 +3068,16 @@ approximation.
 ),
 
 Variable(
-    abivarname="dmft_magnfield_b",                                    
-    varset="dmft",                                                  
-    vartype="real",                                              
-    topics=['DMFT_expert'], 
-    dimensions="scalar",                                             
-    defaultval=0.0,                                                   
-    mnemonics="Dynamical Mean Field Theory: Magnetic Field Value of Bz",         
-    characteristics=['[[DEVELOP]]'],                              
-    added_in_version="10.4.0",                                      
-    text=r"""                                                       
+    abivarname="dmft_magnfield_b",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Dynamical Mean Field Theory: Magnetic Field Value of Bz",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="10.4.0",
+    text=r"""
 Value of the magnetic field $B_z$ (in Tesla) applied when [[dmft_magnfield]] is activated.
 """,
 ),
@@ -3453,9 +3450,9 @@ Compute properties of the local impurity during the CTQMC calculations.
   * 0 --> Nothing done
 
   * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
-gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations. 
+gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
 
-  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$, 
+  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$,
 whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
 
   * 3 --> Add the calculation of local charge susceptibility.
@@ -11775,7 +11772,7 @@ See [[cite:Henkelman2000a]]
 
 Note that, in all cases, it is possible to define the value of the spring
 constant connecting images with [[neb_spring]], keeping it constant or
-allowing it to vary between 2 values (to have higher resolution close to the saddle point).  
+allowing it to vary between 2 values (to have higher resolution close to the saddle point).
 All these methods are also compatible with the variable cell NEB (evolution of lattice vectors along the path), which can be applied using [[neb_cell_algo]].
 """,
 ),
@@ -11792,16 +11789,16 @@ Variable(
     added_in_version="v10",
     text=r"""
 This variable must be enabled to perform Variable Cell Nudged Elastic Band (NEB) calculations,
-i.e. to allow the primitive cell vectors evolve along the path.  
+i.e. to allow the primitive cell vectors evolve along the path.
 The possible values are:
 
   * 0 --> **No cell evolution** (default value)
 
-  * 1 --> **Generalized Solid-State NEB (GSS-NEB)**  
+  * 1 --> **Generalized Solid-State NEB (GSS-NEB)**
   Implements the method described in [[cite:Sheppard2012]].
 
-  * 2 --> **Variable-Cell NEB (VC-NEB)**  
-  Implements the method described in [[cite:Qian2013]].  
+  * 2 --> **Variable-Cell NEB (VC-NEB)**
+  Implements the method described in [[cite:Qian2013]].
     WARNING: Not yet usable! (to be fixed)
 
 > Note: variable-cell NEB is only compatible with the steepest-descent
@@ -11905,11 +11902,55 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of FREQuencies along the IMaginary axis",
-    requires="[[optdriver]] == 3 and [[gwcalctyp]] in [2,12,22,9,19,29]",
+    requires="[[optdriver]] == 3 and [[gwcalctyp]] in [x1, x2, x9]",
     added_in_version="before_v9",
     text=r"""
 [[nfreqim]] sets the number of pure imaginary frequencies used to calculate
 the dielectric matrix in order to perform the numerical integration of the GW self-energy.
+
+!!! important
+
+    This is the only parameter required to define the frequency mesh along the imaginary axis
+    when computing a SCR file for the AC method i.e. [[gwcalctyp]] = x1.
+    For AC, indeed, one uses Gauss-Legendre quadrature method in the [0, 1] interval
+    as we replace $ \int_0^\infty dx f(x) $ with $ \int_0^1 dz f(1/z - 1)/z^2 $.
+
+    Note that the AC grid is not log as required by the CD thus AC and CD cannot use the same SCR file.
+""",
+),
+
+Variable(
+    abivarname="nfreqim_conv",
+    varset="gw",
+    vartype="integer",
+    topics=['FrequencyMeshMBPT_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Number of FREQuencies along the IMaginary axis for CONVolution",
+    requires="[[optdriver]] == 4 and [[gwcalctyp]] in [x1]",
+    added_in_version="10.5.1",
+    text=r"""
+[[nfreqim_conv]] defines the number of imaginary frequency points used to interpolate the convolution between G and W
+when computing the self-energy with the analytic continuation (AC) method (i.e., when [[gwcalctyp]] = x1).
+This setting enables a more accurate evaluation of the self-energy for a given SCR file containing [[nfreqim]] imaginary frequencies.
+
+* [[nfreqim_conv]] = 0: No interpolation is performed; the self-energy is calculated using the inverse dielectric matrix
+  directly on the input imaginary frequency mesh read from the SCR file.
+* [[nfreqim_conv]] > 0: The self-energy is calculated using an interpolated inverse dielectric matrix on a Gauss-Legendre grid
+  with spline interpolation.
+  Note that [[nfreqim_conv]]  must be greater than or equal to [[nfreqim]]; otherwise, it is invalid.
+* [[nfreqim_conv]] < 0: The multiple of [[nfreqim]] is used to define the number of interpolation points,
+  i.e. [[nfreqim_conv]] = -n will lead to n * [[nfreqim]] interpolation points.
+
+!!! important
+
+    This parameter can significantly improve convergence speed, but it also has limitations:
+    a larger value of [[nfreqim_conv]] is not necessarily better.
+    Using too many interpolation points may introduce numerical instabilities.
+    For example, if the user sets [[nfreqim_conv]] = 1000, the resulting quasiparticle (QP) gap could differ
+    by several meV due to such instabilities.
+    Therefore, it is important to test the stability of the results with respect to this parameter.
+    Fortunately, increasing [[nfreqim_conv]] does not substantially increase the computational cost.
 """,
 ),
 
@@ -11923,7 +11964,7 @@ Variable(
     requires="[[optdriver]] == 4",
     added_in_version="before_v9",
     text=r"""
-depending on the value of [[nfreqmidm]] will calculate the frequency moment of
+Depending on the value of [[nfreqmidm]] will calculate the frequency moment of
 the dielectric matrix or its inverse,
 
   * if [[nfreqmidm]] is positive: calculate (nth=[[nfreqmidm]]) frequency moment of the dielectric matrix.
@@ -12635,9 +12676,24 @@ Variable(
     requires="[[optdriver]] == 4 and [[gwcalctyp]] == 1",
     added_in_version="before_v9",
     text=r"""
-[[nomegasi]] defines the number of frequency points used to sample the self-
-energy along the imaginary axis. The frequency mesh is linear and covers the
-interval between `omegasimin`=0.01 Hartree and [[omegasimax]].
+[[nomegasi]] defines the number of frequency points used to sample the self-energy
+along the imaginary axis when the AC method is used.
+
+If [[nomegasi]] > 0, the code uses a linear frequency mesh covering the interval
+between `omegasimin` = 0.01 Hartree and [[omegasimax]].
+
+A negative value, instructs the code to use a minimax mesh automatically computed from [[nomegasi]], [[nband]]
+and the fundamental gap.
+In this case, [[nomegasi]] is similar in spirit to the [[gwr_ntau]] variable used in the GWR code.
+
+!!! important
+
+    The mesh for the self-energy is completely decoupled from the frequency mesh used
+    for the SCR file that is defined by [[nfreqim]].
+    The mesh in the SCR file is used to compute the convolution between G and W along the imaginary axis:
+    i.e. the $\omega'$ variable in Eq. 43 of [[cite:Golze2019]].
+    Conversely, [[nomegasi]] and [[omegasimax]] define the set of imaginary frequencies $\omega$ in $\Sigma$.
+    (cfr. Eq. 43).
 """,
 ),
 
@@ -15176,9 +15232,11 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This variable is used in conjunction with [[ph_nqpath]] and [[ph_qpath]] to
-define the q-path used for phonon band structures and phonon linewidths. It
-gives the number of points used to sample the smallest segment in the q-path
-specified by [[ph_qpath]].
+define the q-path used for phonon band structures and phonon linewidths.
+It gives the number of points used to sample the smallest segment in the q-path specified by [[ph_qpath]].
+
+A negative value activates a specialized mode in which [[ph_nqpath]] and [[ph_qpath]]
+provide the full list of $\qq$-points to be used.
 """,
 ),
 
@@ -16103,6 +16161,22 @@ the [BoltzTraP code](https://www.imc.tuwien.ac.at/forschungsbereich_theoretische
 ),
 
 Variable(
+    abivarname="prtchkprdm",
+    varset="files",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM",
+    requires="[[optdriver]] == 4",
+    added_in_version="9.4.0",
+    text=r"""
+[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
+It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
+""",
+),
+
+Variable(
     abivarname="prtcif",
     varset="dev",
     vartype="integer",
@@ -16119,18 +16193,17 @@ present run (cell size shape and atomic positions).
 ),
 
 Variable(
-    abivarname="prtchkprdm",
-    varset="files",
+    abivarname="prtcurrent",
+    varset="rttddft",
     vartype="integer",
-    topics=['GW_expert', 'SelfEnergy_expert'],
+    topics=['RTTDDFT_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM",
-    requires="[[optdriver]] == 4",
-    added_in_version="9.4.0",
+    mnemonics="PRinT macroscopic CURRENT density",
+    added_in_version="10",
     text=r"""
-[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
-It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
+If set to 1, prints the time-dependent macroscopic current density
+computed in real-time TDDFT calculations ([[optdriver]] 9).
 """,
 ),
 
@@ -16354,6 +16427,8 @@ for the additional input variables to be specified.
 
 If [[prtdos]] = 5, delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
 tetrahedron method (as [[prtdos]] = 2).
+
+Note that in the case [[nsppol]]=1 and [[nspden]]=2, only the spin up DOS is delivered, for all values of [[prtdos]].
 """,
 ),
 
@@ -16376,6 +16451,8 @@ spherical harmonics basis.
 If set to 2, the m-decomposed LDOS is delivered in DOS file.
 In this case, [[prtdosm]] computes the M-resolved partial dos for real
 spherical harmonics in the same basis as the DFT+U occupation matrix.
+
+Note that in the case [[nsppol]]=1 and [[nspden]]=2, only the spin up DOS is delivered, for all values of [[prtdos]].
 """,
 ),
 
@@ -22550,7 +22627,7 @@ Variable(
 Give the value of the Zeeman field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part).
 As usual, the default is atomic units.
 
-Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field. 
+Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
 Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
 """,
 ),
@@ -25604,7 +25681,7 @@ This parameter controls the convergence rate of the wave-functions when using th
 ),
 
 Variable(
-    abivarname="oracle_minocc",
+    abivarname="oracle_min_occ",
     varset="gstate",
     vartype="real",
     topics=['TuningSpeedMem_expert'],
@@ -25616,6 +25693,30 @@ Variable(
     requires="[[wfoptalg]] == 111 and [[chebfi_oracle]] > 0 and [[nbdbuf]] = -101",
     text=r"""
 This parameter controls the minimal occupancy when using the oracle in the Chebyshev algorithm. See [[chebfi_oracle]] for more information.
+""",
+),
+
+Variable(
+    abivarname="scr_wrange",
+    varset="gw",
+    vartype="integer",
+    topics=['Susceptibility_useful'],
+    dimensions=[2],
+    defaultval=[0, 0],
+    mnemonics="SCReening frequency RANGE",
+    added_in_version="10.4.0",
+    requires="[[optdriver]] == 6",
+    text=r"""
+This variable can be used to select a subset of frequencies in the Screening to be computed.
+Abinit will produce partial SCR files that can be merged with the mrgscr tool before starting the SIGMA calculation.
+
+Selecting a subset of frequencies allows one to reduce the memory requirements in the SCREENING computation.
+as the size of the polarizability matrix is proportional to the total number of frequencies.
+This is particularly useful when performing CD or AC computations.
+
+Note that in the case of AC, the total SCR file is supposed to contain 1 + [[nfreqim]] frequencies
+with the first point being the static limit.
+As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
 """,
 ),
 

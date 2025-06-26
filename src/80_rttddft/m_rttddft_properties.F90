@@ -85,8 +85,6 @@ contains
 !! SOURCE
 subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  type(tdks_type),            intent(inout) :: tdks
@@ -227,8 +225,6 @@ end subroutine rttddft_calc_density
 !! SOURCE
 subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  type(dataset_type),  intent(in)    :: dtset
@@ -296,8 +292,6 @@ end subroutine rttddft_calc_etot
 !!
 !! SOURCE
 subroutine rttddft_calc_eig(cg,eig,ghc,istwf_k,nband,npw,nspinor,me_g0,comm,gsc)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -369,8 +363,6 @@ end subroutine rttddft_calc_eig
 !!
 !! SOURCE
 subroutine rttddft_calc_kin(kin,cg,dtset,ham_k,nband,npw,nspinor,occ0,wk,mpi_enreg,bandfft)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -456,8 +448,6 @@ end subroutine rttddft_calc_kin
 !! SOURCE
 subroutine rttddft_calc_enl(cg,enl,ham_k,nband,npw,nspinor,mpi_enreg)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,                   intent(in)    :: nband
@@ -531,8 +521,6 @@ end subroutine rttddft_calc_enl
 !!
 !! SOURCE
 subroutine rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg,nband_k,npw_k,nspinor,occ,occ0,tdks)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -694,8 +682,6 @@ end subroutine rttddft_calc_occ
 !! SOURCE
 subroutine rttddft_calc_ent(entropy,dtset,occ)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  real(dp),           intent(out) :: entropy
@@ -759,8 +745,6 @@ end subroutine rttddft_calc_ent
 !!
 !! SOURCE
 subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars

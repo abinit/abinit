@@ -165,7 +165,7 @@ this includes scalars and derived types.""",
 "Miscellaneous": "Miscellaneous Warnings",   # Used to classify warnings that are not documented
 }
 
-class Message(object):
+class Message:
     """
     .. attributes:
 
@@ -255,7 +255,7 @@ Warning: GNU Extension: Nonstandard type declaration REAL*8 at (1)
         super(self.__class__, self).__init__(filepath, kind, text, lineno, colno, info)
 
 
-class WarningsParser(object):
+class WarningsParser:
 
     def __init__(self):
         self.warns = []

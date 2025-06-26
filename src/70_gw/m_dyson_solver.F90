@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_dyson_solver
+module m_dyson_solver
 
  use defs_basis
  use m_xmpi
@@ -33,8 +33,10 @@ MODULE m_dyson_solver
  use m_io_tools,      only : open_file
  use m_fstrings,      only : int2char10
  use m_hide_lapack,   only : xheev
+ use m_dtset,         only : dataset_type
  use m_bz_mesh,       only : kmesh_t
  use m_sigma,         only : sigma_t
+ use m_melemts,       only : melements_t
 
  implicit none
 
@@ -50,8 +52,8 @@ MODULE m_dyson_solver
 !! sigma_pade_t
 !!
 !! FUNCTION
-!!  Small object to perform the analytic continuation with Pade' and
-!!  find the QP solution with Newton-Rapson method
+!!  Object to perform the analytic continuation with Pade' and
+!!  find the QP solution with Newton-Rapson method.
 !!
 !! SOURCE
 
@@ -60,20 +62,26 @@ MODULE m_dyson_solver
     integer :: npts
     ! Number of points
 
-    character(len=1) :: branch_cut
+    real(dp) :: betar_pm(2), zcut_pm(2)
+    complex(dp) :: alphac_pm(2)
+    logical :: do_sigma_fit
 
-    complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
-    ! pointer to input mesh and values.
+    complex(dp),allocatable :: zmesh(:)
+    ! input mesh
 
-    !real(d) :: wmax = -one
+    complex(dp),allocatable :: sigc_cvals(:)
+    ! values on mesh
 
  contains
 
    procedure :: init => sigma_pade_init
    ! Init object
 
+   procedure :: free => sigma_pade_free
+   ! Free memory
+
    procedure :: eval => sigma_pade_eval
-   ! Eval self-energy and derivative
+   ! Evaluate self-energy and derivative along the real axis.
 
    procedure :: qp_solve => sigma_pade_qp_solve
    ! Find the QP solution with Newton-Rapson method
@@ -106,19 +114,8 @@ CONTAINS  !====================================================================
 !!  ikcalc=Index of the considered k-point in the Sigp%kptgw2bz array.
 !!  nomega_sigc=Number of frequencies used to evaluate the correlation part of Sigma.
 !!  Sigp<sigparams_t>=Structure gathering parameters on the calculation of Sigma.
-!!     %minbnd and %maxbnd= min and Max band index for GW correction (for this k-point)
-!!     %gwcalctyp=Type of the GW calculation.
-!!     %mbpt_sciss=Scissor energy
 !!  Sr<sigma_t>=Structure containing the matrix elements of the self-energy INOUT
-!!     %nbnds=Number of bands in G0.
-!!     %nsppol=Number of independent spin polarizations.
-!!     %nsig_ab=Numner of components in the self-energy operator.
-!!     %nomega_r=Number of real frequencies for spectral function.
-!!     %nomega4sd=Number of real frequencies used to evalute the derivative of Sigma.
-!!     %nomega_i=Number of imaginary frequencies for AC.
-!!     %omega_i=Purely imaginary frequencies for AC.
 !!  Kmesh<kmesh_t>=Info on the K-mesh for the wavefunctions.
-!!     %nkibz=Number of points in the IBZ
 !!  sigcme=(nomega_sigc,ib1:ib2,ib1:ib2,nsppol)=Matrix elements of Sigma_c.
 !!  qp_ene(nbnds,nkibz,nsppol)= KS or QP energies, only used in case of calculation with scissor operator.
 !!  comm=MPI communicator.
@@ -140,15 +137,17 @@ CONTAINS  !====================================================================
 !!
 !! SOURCE
 
-subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene,Sr,prtvol,Dtfil,comm)
+subroutine solve_dyson(ikcalc, minbnd, maxbnd, nomega_sigc, dtset, Sigp, Kmesh, sigcme, qp_ene, Sr, ks_me, Dtfil, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ikcalc,nomega_sigc,prtvol,minbnd,maxbnd,comm
+ integer,intent(in) :: ikcalc,nomega_sigc,minbnd,maxbnd,comm
+ type(dataset_type),intent(in) :: dtset
+ type(sigparams_t),intent(in) :: Sigp
  type(kmesh_t),intent(in) :: Kmesh
  type(Datafiles_type),intent(in) :: Dtfil
- type(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(inout) :: Sr
+ type(melements_t),intent(in) :: ks_me
 !arrays
  real(dp),intent(in) :: qp_ene(Sr%nbnds,Sr%nkibz,Sr%nsppol)
  complex(dpc),intent(in) :: sigcme(nomega_sigc,minbnd:maxbnd,minbnd:maxbnd,Sigp%nsppol*Sigp%nsig_ab)
@@ -156,27 +155,29 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iab,ib1,ib2,ikbz_gw,io,spin,is_idx,isym,iter,itim,jb, ie0
- integer :: sk_ibz,kb,ld_matrix,mod10,nsploop,my_rank
- real(dp) :: alpha,beta,smrt
- complex(dpc) :: ctdpc,dct,dsigc,sigc,zz,phase
- logical :: converged,ltest
+ integer :: iab,ib1,ib2,ikbz_gw,io,spin,is_idx,isym,itim,jb, ie0, ierr
+ integer :: ik_ibz,kb,ld_matrix,mod10,nsploop,my_rank, units(2)
+ real(dp) :: alpha, beta, smrt, vxc_val, vu, v_meanf, sigx
+ complex(dpc) :: dsigc, sigc, sigc_zsc, zz, zsc, phase
+ logical :: ltest
  character(len=500) :: msg
- !type(sigma_pade_t) :: spade
+ type(sigma_pade_t) :: spade
 !arrays
- real(dp) :: kbz_gw(3),tsec(2)
+ real(dp) :: kbz_gw(3),tsec(2), betar_pm(2), zcut_pm(2)
  real(dp),allocatable :: e0pde(:),eig(:),scme(:)
+ complex(dp) :: alphac_pm(2)
  complex(dpc),allocatable :: hdp(:,:),tmpcdp(:),hhartree(:,:,:),htotal(:,:,:),h_tmp1(:,:),h_tmp2(:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+
+ units = [std_out, ab_out]
 
  call timab(490,1,tsec) ! csigme(Dyson)
 
  my_rank = xmpi_comm_rank(comm)
 
- mod10=MOD(Sigp%gwcalctyp,10)
+ mod10 = MOD(Sigp%gwcalctyp,10)
 
  ltest=(nomega_sigc==Sr%nomega_r+Sr%nomega4sd)
  if (mod10==1) ltest=(nomega_sigc==Sr%nomega_i)
@@ -186,14 +187,14 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
  !ioe0j=Sr%nomega4sd/2+1
 
  ! min and Max band index for GW corrections (for this k-point).
- ib1=MINVAL(Sigp%minbnd(ikcalc,:))
- ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+ ib1 = MINVAL(Sigp%minbnd(ikcalc,:))
+ ib2 = MAXVAL(Sigp%maxbnd(ikcalc,:))
 
  ! Find the index of the k-point for sigma in the IBZ array.
- ikbz_gw=Sigp%kptgw2bz(ikcalc)
- call kmesh%get_BZ_item(ikbz_gw,kbz_gw,sk_ibz,isym,itim,phase)
+ ikbz_gw = Sigp%kptgw2bz(ikcalc)
+ call kmesh%get_BZ_item(ikbz_gw, kbz_gw, ik_ibz, isym, itim, phase)
 
- sigc=czero; dsigc=czero
+ sigc = czero; dsigc = czero
 
  ! ===========================================================
  ! ==== Solve the Dyson Equation and store results in Sr% ====
@@ -209,16 +210,16 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
 
    do spin=1,Sr%nsppol
      do jb=ib1,ib2
-       ! === Get matrix elements of Sigma_c at energy E0 ===
+       ! Get matrix elements of Sigma_c at energy E0.
        ! SigC(w) is linearly interpolated and the slope alpha is assumed as dSigC/dE
        do iab=1,Sr%nsig_ab
-         is_idx=spin; if (Sr%nsig_ab>1) is_idx=iab
+         is_idx = spin; if (Sr%nsig_ab>1) is_idx=iab
 
-         Sr%sigcmee0(jb,sk_ibz,is_idx) = sigcme(ie0,jb,jb,is_idx)
+         Sr%sigcmee0(jb,ik_ibz,is_idx) = sigcme(ie0,jb,jb,is_idx)
 
-         ABI_MALLOC(scme,(Sr%nomega4sd))
-         ABI_MALLOC(e0pde,(Sr%nomega4sd))
-         e0pde(:) = Sr%omega4sd(jb,sk_ibz,:,spin)
+         ABI_MALLOC(scme, (Sr%nomega4sd))
+         ABI_MALLOC(e0pde, (Sr%nomega4sd))
+         e0pde(:) = Sr%omega4sd(jb,ik_ibz,:,spin)
          scme(:)  = REAL(sigcme(Sr%nomega_r+1:Sr%nomega_r+Sr%nomega4sd,jb,jb,is_idx))
 
          if (Sr%nomega4sd==1) then
@@ -227,17 +228,17 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
            smrt = linfit(Sr%nomega4sd,e0pde(:),scme(:),alpha,beta)
          end if
 
-         if (smrt>0.1/Ha_eV) then
+         if (smrt > 0.1/Ha_eV) then
            write(msg,'(3a,i0,a,i0,2a,2(f22.15,2a))')&
-             'Values of Re Sig_c are not linear ',ch10,&
-             'band index = ',jb,' spin|component = ',is_idx,ch10,&
-             'root mean square= ',smrt,ch10,&
-             'estimated slope = ',alpha,ch10,&
+             'WARNING: Values of Re Sig_c(omega) are not linear ',ch10,&
+             'band index: ',jb,' spin|component: ',is_idx,ch10,&
+             'root mean square: ',smrt,ch10,&
+             'estimated slope: ',alpha,ch10,&
              'Omega [eV] SigC [eV]'
            ABI_WARNING(msg)
            do io=1,Sr%nomega4sd
-             write(msg,'(2f8.4)')e0pde(io)*Ha_eV,scme(io)*Ha_eV
-             call wrtout(std_out,msg)
+             write(msg, '(2f8.4)')e0pde(io)*Ha_eV,scme(io)*Ha_eV
+             call wrtout(std_out, msg)
            end do
          end if
 
@@ -249,48 +250,48 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
          ! * DeltaE_GW=E-E0= (Sigma(E0)-V_xc)/(1-dSigma/domega)
          ! * If nspinor==2, this part is done at the end.
          !
-         Sr%dsigmee0(jb,sk_ibz,is_idx)=CMPLX(alpha,zero)
+         Sr%dsigmee0(jb,ik_ibz,is_idx)=CMPLX(alpha,zero)
 
          if (Sr%nsig_ab==1) then
-           Sr%ze0(jb,sk_ibz,spin)=one/(one-Sr%dsigmee0(jb,sk_ibz,spin))
+           Sr%ze0(jb,ik_ibz,spin)= one / (one-Sr%dsigmee0(jb,ik_ibz,spin))
 
            if (ABS(Sigp%mbpt_sciss) < tol6) then
-             Sr%degw(jb,sk_ibz,spin) = Sr%ze0(jb,sk_ibz,spin) * &
-               (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin) + &
-                Sr%hhartree(jb,jb,sk_ibz,spin))
+             Sr%degw(jb,ik_ibz,spin) = Sr%ze0(jb,ik_ibz,spin) * &
+               (Sr%sigxme(jb,ik_ibz,spin) + Sr%sigcmee0(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin) + &
+                Sr%hhartree(jb,jb,ik_ibz,spin))
 
-             Sr%egw(jb,sk_ibz,spin) = Sr%e0(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
+             Sr%egw(jb,ik_ibz,spin) = Sr%e0(jb,ik_ibz,spin) + Sr%degw(jb,ik_ibz,spin)
 
              ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
-             Sr%sigmee(jb,sk_ibz,spin) = &
-               Sr%sigxme(jb,sk_ibz,spin)+Sr%sigcmee0(jb,sk_ibz,spin)+Sr%degw(jb,sk_ibz,spin)*Sr%dsigmee0(jb,sk_ibz,spin)
+             Sr%sigmee(jb,ik_ibz,spin) = &
+               Sr%sigxme(jb,ik_ibz,spin)+Sr%sigcmee0(jb,ik_ibz,spin)+Sr%degw(jb,ik_ibz,spin)*Sr%dsigmee0(jb,ik_ibz,spin)
 
            else
              ! If GW+scissor: e0 is replaced by qp_ene which contains the updated energy eigenvalue
-             Sr%degw(jb,sk_ibz,spin)= Sr%ze0(jb,sk_ibz,spin) * &
-               (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - qp_ene(jb,sk_ibz,spin) + &
-                Sr%hhartree(jb,jb,sk_ibz,spin))
+             Sr%degw(jb,ik_ibz,spin)= Sr%ze0(jb,ik_ibz,spin) * &
+               (Sr%sigxme(jb,ik_ibz,spin) + Sr%sigcmee0(jb,ik_ibz,spin) - qp_ene(jb,ik_ibz,spin) + &
+                Sr%hhartree(jb,jb,ik_ibz,spin))
 
-             Sr%egw(jb,sk_ibz,spin) = qp_ene(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
+             Sr%egw(jb,ik_ibz,spin) = qp_ene(jb,ik_ibz,spin) + Sr%degw(jb,ik_ibz,spin)
 
              ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
-             Sr%sigmee(jb,sk_ibz,spin)= &
-               Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) + &
-               Sr%degw(jb,sk_ibz,spin) * Sr%dsigmee0(jb,sk_ibz,spin)
+             Sr%sigmee(jb,ik_ibz,spin)= &
+               Sr%sigxme(jb,ik_ibz,spin) + Sr%sigcmee0(jb,ik_ibz,spin) + &
+               Sr%degw(jb,ik_ibz,spin) * Sr%dsigmee0(jb,ik_ibz,spin)
 
              ! RS: In the output, the gw corr with respect to e0 without mbpt_sciss is reported.
-             Sr%degw(jb,sk_ibz,spin) = Sr%egw(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin)
+             Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
            end if
          end if !Sigp%nsig_ab==1
 
          ! Spectrum of Sigma
          do io=1,Sr%nomega_r
-           Sr%sigcme (jb,sk_ibz,io,is_idx)= sigcme(io,jb,jb,is_idx)
-           Sr%sigxcme(jb,sk_ibz,io,is_idx)= Sr%sigxme(jb,sk_ibz,is_idx)+Sr%sigcme(jb,sk_ibz,io,is_idx)
+           Sr%sigcme (jb,ik_ibz,io,is_idx)= sigcme(io,jb,jb,is_idx)
+           Sr%sigxcme(jb,ik_ibz,io,is_idx)= Sr%sigxme(jb,ik_ibz,is_idx)+Sr%sigcme(jb,ik_ibz,io,is_idx)
          end do
          do io=1,Sr%nomega4sd
-           Sr%sigcme4sd (jb,sk_ibz,io,is_idx)= sigcme(Sr%nomega_r+io,jb,jb,is_idx)
-           Sr%sigxcme4sd(jb,sk_ibz,io,is_idx)= Sr%sigxme(jb,sk_ibz,is_idx)+Sr%sigcme4sd(jb,sk_ibz,io,is_idx)
+           Sr%sigcme4sd (jb,ik_ibz,io,is_idx)= sigcme(Sr%nomega_r+io,jb,jb,is_idx)
+           Sr%sigxcme4sd(jb,ik_ibz,io,is_idx)= Sr%sigxme(jb,ik_ibz,is_idx)+Sr%sigcme4sd(jb,ik_ibz,io,is_idx)
          end do
        end do !iab
 
@@ -301,19 +302,19 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
          ! Evaluate renormalization factor and QP correction.
          ! Z=(1-dSigma/domega(E0))^-1
          ! DeltaE_GW=E-E0= (Sigma(E0)-V_xc)/(1-dSigma/domega)
-         !write(std_out,'(a,i2,10f8.3)')' Correlation',jb,Sr%sigcmee0(jb,sk_ibz,:)*Ha_eV,SUM(Sr%sigcmee0(jb,sk_ibz,:))*Ha_eV
+         !write(std_out,'(a,i2,10f8.3)')' Correlation',jb,Sr%sigcmee0(jb,ik_ibz,:)*Ha_eV,SUM(Sr%sigcmee0(jb,ik_ibz,:))*Ha_eV
 
-         Sr%ze0 (jb,sk_ibz,1) = one/(one-SUM(Sr%dsigmee0(jb,sk_ibz,:)))
+         Sr%ze0 (jb,ik_ibz,1) = one/(one-SUM(Sr%dsigmee0(jb,ik_ibz,:)))
 
-         Sr%degw(jb,sk_ibz,1) = Sr%ze0(jb,sk_ibz,1) * &
-           (SUM(Sr%sigxme(jb,sk_ibz,:)+Sr%sigcmee0(jb,sk_ibz,:)+Sr%hhartree(jb,jb,sk_ibz,:))-Sr%e0(jb,sk_ibz,1))
+         Sr%degw(jb,ik_ibz,1) = Sr%ze0(jb,ik_ibz,1) * &
+           (SUM(Sr%sigxme(jb,ik_ibz,:)+Sr%sigcmee0(jb,ik_ibz,:)+Sr%hhartree(jb,jb,ik_ibz,:))-Sr%e0(jb,ik_ibz,1))
 
-         Sr%egw(jb,sk_ibz,1)=Sr%e0(jb,sk_ibz,1)+Sr%degw(jb,sk_ibz,1)
+         Sr%egw(jb,ik_ibz,1)=Sr%e0(jb,ik_ibz,1)+Sr%degw(jb,ik_ibz,1)
 
          ! Estimate Sigma at the QP-energy.
          do iab=1,Sr%nsig_ab
-          Sr%sigmee(jb,sk_ibz,iab)= &
-            Sr%sigxme(jb,sk_ibz,iab)+Sr%sigcmee0(jb,sk_ibz,iab)+Sr%degw(jb,sk_ibz,1)*Sr%dsigmee0(jb,sk_ibz,iab)
+          Sr%sigmee(jb,ik_ibz,iab)= &
+            Sr%sigxme(jb,ik_ibz,iab)+Sr%sigcmee0(jb,ik_ibz,iab)+Sr%degw(jb,ik_ibz,1)*Sr%dsigmee0(jb,ik_ibz,iab)
          end do
        end if
 
@@ -331,211 +332,203 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme,qp_ene
 
    do spin=1,Sr%nsppol
      do jb=ib1,ib2
+       ABI_MALLOC(tmpcdp,(Sr%nomega_i))
+       ! Calculate Sigc(E0), dSigc(E0)
+       zz = CMPLX(Sr%e0(jb,ik_ibz,spin), zero)
 
-      ABI_MALLOC(tmpcdp,(Sr%nomega_i))
-      ! Calculate Sigc(E0), dSigc(E0)
-      zz = CMPLX(Sr%e0(jb,sk_ibz,spin), zero)
+       if (Sigp%mbpt_sciss > 0.1d-4) then
+         ! e0 is replaced by qp_ene which contains the updated energy eigenvalue
+         zz = CMPLX(qp_ene(jb,ik_ibz,spin), zero)
+       end if
 
-      if (Sigp%mbpt_sciss > 0.1d-4) then
-        ! e0 is replaced by qp_ene which contains the updated energy eigenvalue
-        zz = CMPLX(qp_ene(jb,sk_ibz,spin), zero)
-      end if
+       ! Diagonal elements of sigcme
+       do iab=1,Sr%nsig_ab
+         is_idx=spin; if (Sr%nsig_ab>1) is_idx=iab
+         alphac_pm = zero; betar_pm = zero; zcut_pm = zero
+         call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,is_idx), alphac_pm, betar_pm, zcut_pm)
+         call spade%eval(zz, Sr%sigcmee0(jb,ik_ibz,is_idx), dvdz=Sr%dsigmee0(jb,ik_ibz,is_idx))
+         call spade%free()
+       end do !iab
 
-      !call spade%init(sr%nomega_i, sr%omega_i, tmpcdp, branch_cut=">")
-      !call spade%eval(zz, sigc_e0, dzdval=dsigc_de0)
+       ! Z = (1 - dSigma / domega(E0))^{-1}
+       if (Sr%nsig_ab == 1) then
+         Sr%ze0(jb,ik_ibz,spin) = one / (one - Sr%dsigmee0(jb,ik_ibz,spin))
+       else
+         Sr%ze0(jb,ik_ibz,1) = one / (one - SUM(Sr%dsigmee0(jb,ik_ibz,:)))
+       end if
 
-      ! Diagonal elements of sigcme
-      ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
-      do iab=1,Sr%nsig_ab
-        is_idx=spin; if (Sr%nsig_ab>1) is_idx=iab
-        if (real(zz) > zero) then
-          tmpcdp(:)=sigcme(:,jb,jb,is_idx)
-          Sr%sigcmee0(jb,sk_ibz,is_idx) =  pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
-          Sr%dsigmee0(jb,sk_ibz,is_idx) = dpade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
-        else
-          tmpcdp(:) = CONJG(sigcme(:,jb,jb,is_idx))
-          Sr%sigcmee0(jb,sk_ibz,is_idx) =  pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
-          Sr%dsigmee0(jb,sk_ibz,is_idx) = dpade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
-        end if
-      end do !iab
+!#define _DEV_PERTURBATIVE
+!#ifdef _DEV_PERTURBATIVE
+#if 0
+       call wrtout(units, "COMMENT: Using perturbative approach with Z.")
 
-      ! Z = (1 - dSigma / domega(E0))^{-1}
-      if (Sr%nsig_ab == 1) then
-        Sr%ze0(jb,sk_ibz,spin) = one / (one - Sr%dsigmee0(jb,sk_ibz,spin))
-      else
-        Sr%ze0(jb,sk_ibz,1) = one / (one - SUM(Sr%dsigmee0(jb,sk_ibz,:)))
-      end if
+       ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
+       vxc_val = ks_me%vxcval(jb, jb, ik_ibz, spin)
+       vu = zero; if (dtset%usepawu /= 0) vu = ks_me%vu(jb, jb, ik_ibz, spin)
+       v_meanf = vxc_val + vu
 
-      ! MG FIXME: Here we are solving the non-linear QP equation using the Pade' continuation + root finding
-      ! but this is very misleading because in the output file we are still reporting the Z factor
-      ! and there's no mention that the QP energies have been obtained from the non-linear equation!!
-      ! One should change the format used to print the results or at least warn the user!
+       ! qp_ene = e0 + z_e0 * (sigc_e0__ + sigx - v_meanf)
+       Sr%egw(jb,ik_ibz,spin) = Sr%e0(jb,ik_ibz,spin) + Sr%ze0(jb,ik_ibz,spin) * &
+         (Sr%sigcmee0(jb,ik_ibz,spin) + Sr%sigxme(jb,ik_ibz,spin) - v_meanf)
 
-      ! Find roots of E^0-V_xc-V_U+Sig_x+Sig_c(z)-z, i.e E^qp.
-      ! using Newton-Raphson method and starting point E^0
-      zz = CMPLX(Sr%e0(jb,sk_ibz,spin), zero)
+       Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
 
-      if (Sigp%mbpt_sciss>0.1d-4) then
-        ! e0 is replaced by qp_ene which contains the updated energy eigenvalue.
-        zz = CMPLX(qp_ene(jb,sk_ibz,spin),0.0)
-      end if
+       ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
+       Sr%sigmee(jb,ik_ibz,spin) = &
+         Sr%sigxme(jb,ik_ibz,spin)+Sr%sigcmee0(jb,ik_ibz,spin)+Sr%degw(jb,ik_ibz,spin)*Sr%dsigmee0(jb,ik_ibz,spin)
 
-      ! Solve the QP equation with Newton-Rapson starting from e0
-      !call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
-      !qpe_pade_kcalc(ibc, ikcalc, spin) = zsc
-      !qp_solver_ierr(ibc, ikcalc, spin) = ierr
-      !if (ierr /= 0) then
-      !  ABI_WARNING(msg)
-      !end if
+#else
+       ! MG FIXME: Here we are solving the non-linear QP equation using the Pade' continuation + root finding
+       ! but this is very misleading because in the output file we are still reporting the Z factor
+       ! and there's no mention that the QP energies have been obtained from the non-linear equation!!
+       ! One should change the format used to print the results or at least warn the user!
 
-      iter = 0; converged = .FALSE.; ctdpc = cone
-      do while (ABS(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
-        iter = iter + 1
-        sigc = czero; dsigc = czero
-        if (REAL(zz) > tol12) then
-          tmpcdp(:) = sigcme(:,jb,jb,spin)
-          sigc  =  pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
-          dsigc = dpade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
-        else
-          tmpcdp(:) = CONJG(sigcme(:,jb,jb,spin))
-          sigc  =  pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
-          dsigc = dpade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
-        end if
-        ctdpc = Sr%e0(jb,sk_ibz,spin) - Sr%vxcme(jb,sk_ibz,spin) - Sr%vUme(jb,sk_ibz,spin) + Sr%sigxme(jb,sk_ibz,spin) &
-                + sigc - zz
-        if (ABS(ctdpc) < NR_ABS_ROOT_ERR) then
-          converged=.TRUE.; EXIT
-        end if
-        dct = dsigc - one
-        zz = newrap_step(zz, ctdpc, dct)
-      end do
+       zz = CMPLX(Sr%e0(jb,ik_ibz,spin), zero)
 
-      if (.not. converged) then
-        write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
-          'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
-          'Absolute Error = ',ABS(ctdpc),' > ',NR_ABS_ROOT_ERR
-        ABI_WARNING(msg)
-      end if
+       if (Sigp%mbpt_sciss>0.1d-4) then
+         ! e0 is replaced by qp_ene which contains the updated energy eigenvalue.
+         zz = CMPLX(qp_ene(jb,ik_ibz,spin), zero)
+       end if
 
-      ! Store the final result TODO re-shift everything according to efermi
-      Sr%egw(jb,sk_ibz,spin) = zz
-      Sr%degw(jb,sk_ibz,spin) = Sr%egw(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin)
-      Sr%sigmee(jb,sk_ibz,spin) = Sr%sigxme(jb,sk_ibz,spin) + sigc
+       ! Solve the QP equation with Newton-Rapson starting from e0
+       ! Find root of E^0-V_xc-V_U+Sig_x+Sig_c(z)-z, i.e E^qp.
+       alphac_pm = zero; betar_pm = zero; zcut_pm = zero
+       call spade%init(sr%nomega_i, sr%omega_i, sigcme(:,jb,jb,spin), alphac_pm, betar_pm, zcut_pm)
 
-      ! Spectra of Sigma, remember that Sr%nomega_r does not contains the frequencies
-      ! used to evaluate the derivative each frequency is obtained using the pade_expression
-      ! In sigma indeed we have:
-      !     nomega_sigc=Sr%nomega_r+Sr%nomega4sd; if (mod10==SIG_GW_AC) nomega_sigc=Sr%nomega_i
-      do io=1,Sr%nomega_r
-        zz=Sr%omega_r(io)
-        if (REAL(zz) > zero) then
-          tmpcdp(:) = sigcme(:,jb,jb,spin)
-          Sr%sigcme(jb,sk_ibz,io,spin) = pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
-        else
-          tmpcdp(:) = CONJG(sigcme(:,jb,jb,spin))
-          Sr%sigcme(jb,sk_ibz,io,spin) = pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
-        end if
-        Sr%sigxcme(jb,sk_ibz,io,spin) = Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcme(jb,sk_ibz,io,spin)
-      end do
+       ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
+       vxc_val = ks_me%vxcval(jb, jb, ik_ibz, spin)
+       vu = zero; if (dtset%usepawu /= 0) vu = ks_me%vu(jb, jb, ik_ibz, spin)
+       v_meanf = vxc_val + vu
+       sigx = Sr%sigxme(jb,ik_ibz,spin)
 
-      ! Save sigma values along the imaginary axis
-      do iab=1,Sr%nsig_ab
-        is_idx=spin; if (Sr%nsig_ab > 1) is_idx = iab
-        do io=1,Sr%nomega_i
-          Sr%sigcmesi (jb,sk_ibz,io,is_idx) = sigcme(io,jb,jb,is_idx)
-          Sr%sigxcmesi(jb,sk_ibz,io,is_idx) = Sr%sigxme(jb,sk_ibz,is_idx) + Sr%sigcmesi(jb,sk_ibz,io,is_idx)
-        end do
-      end do
+       call spade%qp_solve(sr%e0(jb,ik_ibz,spin), v_meanf, sigx, zz, zsc, sigc_zsc, msg, ierr)
+       call spade%free()
+       !qpe_pade_kcalc(ibc, ikcalc, spin) = zsc
+       !qp_solver_ierr(ibc, ikcalc, spin) = ierr
+       if (ierr /= 0) then
+         ABI_WARNING(msg)
+       end if
 
-      ABI_FREE(tmpcdp)
+       ! Store the final result (self-consistent result for zz and Sigma_c(zz_scf)
+       Sr%egw(jb,ik_ibz,spin) = zsc
+       Sr%degw(jb,ik_ibz,spin) = Sr%egw(jb,ik_ibz,spin) - Sr%e0(jb,ik_ibz,spin)
+       Sr%sigmee(jb,ik_ibz,spin) = Sr%sigxme(jb,ik_ibz,spin) + sigc_zsc
+#endif
 
+       ! Spectra of Sigma, remember that Sr%nomega_r does not contain the frequencies
+       ! used to evaluate the derivative each frequency is obtained using the pade_expression
+       ! In sigma indeed we have:
+       !     nomega_sigc=Sr%nomega_r+Sr%nomega4sd; if (mod10==SIG_GW_AC) nomega_sigc=Sr%nomega_i
+       do io=1,Sr%nomega_r
+         zz=Sr%omega_r(io)
+         if (REAL(zz) > zero) then
+           tmpcdp(:) = sigcme(:,jb,jb,spin)
+           Sr%sigcme(jb,ik_ibz,io,spin) = pade(Sr%nomega_i, Sr%omega_i, tmpcdp, zz)
+         else
+           tmpcdp(:) = CONJG(sigcme(:,jb,jb,spin))
+           Sr%sigcme(jb,ik_ibz,io,spin) = pade(Sr%nomega_i, CONJG(Sr%omega_i), tmpcdp, zz)
+         end if
+         Sr%sigxcme(jb,ik_ibz,io,spin) = Sr%sigxme(jb,ik_ibz,spin) + Sr%sigcme(jb,ik_ibz,io,spin)
+       end do
+
+       ! Save sigma values along the imaginary axis
+       do iab=1,Sr%nsig_ab
+         is_idx=spin; if (Sr%nsig_ab > 1) is_idx = iab
+         do io=1,Sr%nomega_i
+           Sr%sigcmesi (jb,ik_ibz,io,is_idx) = sigcme(io,jb,jb,is_idx)
+           Sr%sigxcmesi(jb,ik_ibz,io,is_idx) = Sr%sigxme(jb,ik_ibz,is_idx) + Sr%sigcmesi(jb,ik_ibz,io,is_idx)
+         end do
+       end do
+
+       ABI_FREE(tmpcdp)
      end do !jb
    end do !is
+
  end if ! Analytic continuation.
 
  ! === Diagonalize the QP Hamiltonian (forced to be Hermitian) ===
  ! Calculate Sr%en_qp_diago and Sr%eigvec_qp to be written in the QPS file.
  ! TODO in case of AC results are wrong.
 
-if (mod10 /= 1) then
+ if (mod10 /= 1) then
+   ABI_MALLOC(hhartree, (ib1:ib2,ib1:ib2,Sr%nsppol*Sr%nsig_ab))
+   hhartree = Sr%hhartree(ib1:ib2,ib1:ib2,ik_ibz,:)
 
- ABI_MALLOC(hhartree, (ib1:ib2,ib1:ib2,Sr%nsppol*Sr%nsig_ab))
- hhartree = Sr%hhartree(ib1:ib2,ib1:ib2,sk_ibz,:)
-
- ! If non self-consistent erase all off-diagonal elements
- if (Sigp%gwcalctyp<20) then
-   do jb=ib1,ib2
-     do kb=ib1,ib2
-      if (jb == kb) CYCLE
-      hhartree(jb,kb,:) = czero
+   ! If non self-consistent erase all off-diagonal elements
+   if (Sigp%gwcalctyp<20) then
+     do jb=ib1,ib2
+       do kb=ib1,ib2
+        if (jb == kb) CYCLE
+        hhartree(jb,kb,:) = czero
+       end do
      end do
-   end do
- end if
-
- ABI_MALLOC(htotal, (ib1:ib2,ib1:ib2,Sr%nsppol*Sr%nsig_ab))
- do spin=1,Sr%nsppol*Sr%nsig_ab
-   do jb=ib1,ib2
-     do kb=ib1,ib2
-      htotal(kb,jb,spin) = hhartree(kb,jb,spin) + Sr%x_mat(kb,jb,sk_ibz,spin) + sigcme(ie0,kb,jb,spin)
-     end do
-   end do
- end do
-
- ! Get the Hermitian part of htotal
- ! In the noncollinear case A_{12}^{ab} = A_{21}^{ba}^* if A is Hermitian.
- ABI_MALLOC(h_tmp1,(ib1:ib2,ib1:ib2))
- ABI_MALLOC(h_tmp2,(ib1:ib2,ib1:ib2))
-
- nsploop=Sr%nsppol; if (Sr%nsig_ab/=1) nsploop=2
- do spin=1,nsploop
-   h_tmp1 = CONJG(htotal(:,:,spin))
-   h_tmp2 = TRANSPOSE(h_tmp1)
-   h_tmp1 = htotal(:,:,spin)
-   htotal(:,:,spin)= half * (h_tmp1 + h_tmp2)
- end do
-
- ! Print the different matrix elements of sigma if QPSC and prtvol>9
- if (Sigp%gwcalctyp >=20 .and. mod10 /= 1 .and. prtvol>9 .and. my_rank==master) then
-   call print_sigma_melems(ikcalc,ib1,ib2,Sr%nsppol*Sr%nsig_ab,htotal,hhartree,&
-                           Sr%x_mat(ib1:ib2,ib1:ib2,sk_ibz,:),sigcme(ie0,:,:,:),Dtfil%filnam_ds(4))
- end if
-
- if (Sr%nsig_ab==4) then
-   h_tmp1 = CONJG(htotal(:,:,4))
-   h_tmp2 = TRANSPOSE(h_tmp1)
-   h_tmp1 = htotal(:,:,3)
-   htotal(:,:,3)= half * (h_tmp1 + h_tmp2)
-
-   h_tmp1 = CONJG(htotal(:,:,3))
-   h_tmp2 = TRANSPOSE(h_tmp1)
-   htotal(:,:,4) = h_tmp2
- end if
-
- ! Solve Herm(htotal)*U = E*U
- ld_matrix = ib2 - ib1 + 1
- ABI_MALLOC(hdp, (ld_matrix,ld_matrix))
- ABI_MALLOC(eig, (ld_matrix))
-
- do spin=1,Sr%nsppol
-   if (Sr%nsig_ab==1) then
-     hdp=htotal(ib1:ib2,ib1:ib2,spin)
-   else
-     hdp = SUM(htotal(ib1:ib2,ib1:ib2,:), DIM=3)
    end if
-   call xheev("Vectors","Upper", ld_matrix, hdp, eig)
 
-   Sr%eigvec_qp(ib1:ib2,ib1:ib2,sk_ibz,spin)=hdp(:,:)
-   Sr%en_qp_diago(ib1:ib2,sk_ibz,spin)=eig(:)
- end do
+   ABI_MALLOC(htotal, (ib1:ib2,ib1:ib2,Sr%nsppol*Sr%nsig_ab))
+   do spin=1,Sr%nsppol*Sr%nsig_ab
+     do jb=ib1,ib2
+       do kb=ib1,ib2
+         htotal(kb,jb,spin) = hhartree(kb,jb,spin) + Sr%x_mat(kb,jb,ik_ibz,spin) + sigcme(ie0,kb,jb,spin)
+       end do
+     end do
+   end do
 
- ABI_FREE(hdp)
- ABI_FREE(eig)
- ABI_FREE(htotal)
- ABI_FREE(hhartree)
- ABI_FREE(h_tmp1)
- ABI_FREE(h_tmp2)
+   ! Get the Hermitian part of htotal
+   ! In the noncollinear case A_{12}^{ab} = A_{21}^{ba}^* if A is Hermitian.
+   ABI_MALLOC(h_tmp1, (ib1:ib2,ib1:ib2))
+   ABI_MALLOC(h_tmp2, (ib1:ib2,ib1:ib2))
 
-end if
+   nsploop=Sr%nsppol; if (Sr%nsig_ab/=1) nsploop=2
+   do spin=1,nsploop
+     h_tmp1 = CONJG(htotal(:,:,spin))
+     h_tmp2 = TRANSPOSE(h_tmp1)
+     h_tmp1 = htotal(:,:,spin)
+     htotal(:,:,spin)= half * (h_tmp1 + h_tmp2)
+   end do
+
+   ! Print the different matrix elements of sigma if QPSC and prtvol>9
+   if (Sigp%gwcalctyp >=20 .and. mod10 /= 1 .and. dtset%prtvol>9 .and. my_rank==master) then
+     call print_sigma_melems(ikcalc,ib1,ib2,Sr%nsppol*Sr%nsig_ab,htotal,hhartree,&
+                             Sr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,:),sigcme(ie0,:,:,:),Dtfil%filnam_ds(4))
+   end if
+
+   if (Sr%nsig_ab==4) then
+     h_tmp1 = CONJG(htotal(:,:,4))
+     h_tmp2 = TRANSPOSE(h_tmp1)
+     h_tmp1 = htotal(:,:,3)
+     htotal(:,:,3)= half * (h_tmp1 + h_tmp2)
+
+     h_tmp1 = CONJG(htotal(:,:,3))
+     h_tmp2 = TRANSPOSE(h_tmp1)
+     htotal(:,:,4) = h_tmp2
+   end if
+
+   ! Solve Herm(htotal)*U = E*U
+   ld_matrix = ib2 - ib1 + 1
+   ABI_MALLOC(hdp, (ld_matrix, ld_matrix))
+   ABI_MALLOC(eig, (ld_matrix))
+
+   do spin=1,Sr%nsppol
+     if (Sr%nsig_ab==1) then
+       hdp=htotal(ib1:ib2,ib1:ib2,spin)
+     else
+       hdp = SUM(htotal(ib1:ib2,ib1:ib2,:), DIM=3)
+     end if
+     call xheev("Vectors","Upper", ld_matrix, hdp, eig)
+
+     if (Sr%needs_eigvec_qp) then
+       Sr%eigvec_qp(ib1:ib2,ib1:ib2,ik_ibz,spin)=hdp(:,:)
+     end if
+     Sr%en_qp_diago(ib1:ib2,ik_ibz,spin)=eig(:)
+   end do
+
+   ABI_FREE(hdp)
+   ABI_FREE(eig)
+   ABI_FREE(htotal)
+   ABI_FREE(hhartree)
+   ABI_FREE(h_tmp1)
+   ABI_FREE(h_tmp2)
+ end if ! (mod10 /= 1)
 
  call timab(490,2,tsec)
 
@@ -565,18 +558,18 @@ end subroutine solve_dyson
 !!  hhartree : Hartree contribution to matrix elements
 !!  sigxme  : Sigma_x contribution to matrix elements
 !!  sigcme  : Sigma_c contribution to matrix elements
-!!  prefil : prefix for output files.
+!!  prefix : prefix for output files.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,prefil)
+subroutine print_sigma_melems(ikcalc, ib1, ib2, nsp, htotal, hhartree, sigxme, sigcme, prefix)
 
 ! Arguments ------------------------------------
  !scalars
  integer,intent(in) :: ikcalc,ib1,ib2,nsp
- character(len=*),intent(in) :: prefil
+ character(len=*),intent(in) :: prefix
  !arrays
  complex(dpc),intent(in) :: htotal(ib1:ib2,ib1:ib2,nsp),hhartree(ib1:ib2,ib1:ib2,nsp)
  complex(dpc),intent(in) :: sigxme(ib1:ib2,ib1:ib2,nsp),sigcme(ib1:ib2,ib1:ib2,nsp)
@@ -588,7 +581,6 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  character(len=500) :: msg
  character(len=100) :: fmth,fmt1,fmt2,fmthh,kpt_index,fmtfile
  character(len=fnlen) :: filename
-
 ! *************************************************************************
 
  if (nsp==3.or.nsp>4) then
@@ -680,7 +672,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  call int2char10(ikcalc,sidx)
  kpt_index = "_KPT"//TRIM(sidx)
 
- filename = TRIM(prefil)//'_HTOTAL'//TRIM(kpt_index)
+ filename = TRIM(prefix)//'_HTOTAL'//TRIM(kpt_index)
 
  if (open_file(filename,msg,newunit=temp_unit,form="formatted",status="replace",action="write") /= 0) then
    ABI_ERROR(msg)
@@ -697,7 +689,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  end do
  close(temp_unit)
 
- filename = TRIM(prefil)//'_HHARTREE'//TRIM(kpt_index)
+ filename = TRIM(prefix)//'_HHARTREE'//TRIM(kpt_index)
  if (open_file(filename,msg,newunit=temp_unit,form="formatted",status="replace",action="write") /= 0) then
    ABI_ERROR(msg)
  end if
@@ -713,7 +705,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  end do
  close(temp_unit)
 
- filename = TRIM(prefil)//'_SIGX'//TRIM(kpt_index)
+ filename = TRIM(prefix)//'_SIGX'//TRIM(kpt_index)
  if (open_file(filename,msg,newunit=temp_unit,form="formatted",status="replace",action="write") /= 0) then
    ABI_ERROR(msg)
  end if
@@ -729,7 +721,7 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  end do
  close(temp_unit)
 
- filename = TRIM(prefil)//'_SIGC'//TRIM(kpt_index)
+ filename = TRIM(prefix)//'_SIGC'//TRIM(kpt_index)
  if (open_file(filename,msg,newunit=temp_unit,form="formatted",status="replace",action="write") /= 0) then
    ABI_ERROR(msg)
  end if
@@ -760,34 +752,38 @@ end subroutine print_sigma_melems
 !!
 !! SOURCE
 
-subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
+subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, alphac_pm, betar_pm, zcut_pm)
 
 !Arguments ------------------------------------
  class(sigma_pade_t),intent(out) :: self
  integer,intent(in) :: npts
- complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts)
- character(len=*),intent(in) :: branch_cut
-
-!Local variables-------------------------------
-!scalars
-! integer :: ii
+ complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts), alphac_pm(2)
+ real(dp),intent(in) :: betar_pm(2), zcut_pm(2)
 ! *************************************************************************
 
  self%npts = npts
+ ABI_MALLOC(self%zmesh, (npts))
+ ABI_MALLOC(self%sigc_cvals, (npts))
+ self%zmesh = zmesh
+ self%sigc_cvals = sigc_cvals
 
- ! Select first points according to wmax.
- !if (wmax > zero) then
- !  do ii=1,npts
- !    if (real(zmesh(ii)) > wmax) exit
- !  end do
- !  self%npts = ii-1
- !end if
-
- self%branch_cut = branch_cut
- self%zmesh => zmesh(1:self%npts)
- self%sigc_cvals => sigc_cvals(1:self%npts)
+ self%alphac_pm = alphac_pm
+ self%betar_pm = betar_pm
+ self%zcut_pm = zcut_pm
+ self%do_sigma_fit = .False.
 
 end subroutine sigma_pade_init
+!!***
+
+subroutine sigma_pade_free(self)
+!Arguments ------------------------------------
+ class(sigma_pade_t),intent(inout) :: self
+! *************************************************************************
+
+ ABI_SFREE(self%zmesh)
+ ABI_SFREE(self%sigc_cvals)
+
+end subroutine sigma_pade_free
 !!***
 
 !----------------------------------------------------------------------
@@ -797,28 +793,47 @@ end subroutine sigma_pade_init
 !!  sigma_pade_eval
 !!
 !! FUNCTION
-!!  Evaluate the Pade' at the complex point `zz`. Return result in val and, optional,
-!!  the derivative at zz in `dzdval`
+!!  Evaluate the Pade' at the complex point `zz`.
+!!  Return result in `val` and, optionally, the derivative at zz in `dvdz`
 !!
 !! SOURCE
 
-subroutine sigma_pade_eval(self, zz, val, dzdval)
+subroutine sigma_pade_eval(self, zz, val, &
+                           dvdz) ! optional
 
 !Arguments ------------------------------------
  class(sigma_pade_t),intent(in) :: self
  complex(dp),intent(in) :: zz
  complex(dp),intent(out) :: val
- complex(dp),optional,intent(out) :: dzdval
+ complex(dp),optional,intent(out) :: dvdz
 ! *************************************************************************
 
  ! if zz in 2 or 3 quadrant, avoid branch cut in the complex plane using Sigma(-iw) = Sigma(iw)*.
  if (real(zz) > zero) then
- !if (real(zz) < zero) then
    val = pade(self%npts, self%zmesh, self%sigc_cvals, zz)
-   if (present(dzdval)) dzdval = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
+
+   if (present(dvdz)) then
+     dvdz = dpade(self%npts, self%zmesh, self%sigc_cvals, zz)
+   end if
+
  else
    val = pade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
-   if (present(dzdval)) dzdval = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+
+   if (present(dvdz)) then
+     dvdz = dpade(self%npts, -self%zmesh, conjg(self%sigc_cvals), zz)
+   end if
+ end if
+
+ if (self%do_sigma_fit) then
+   ! Add analytic expression.
+   val = val + self%alphac_pm(1) / (self%betar_pm(1) + zz) &
+             + self%alphac_pm(2) / (self%betar_pm(2) - zz)
+
+   if (present(dvdz)) then
+     ! Add analytic expression.
+     dvdz = dvdz - self%alphac_pm(1) / ((self%betar_pm(1) + zz) ** 2)  &
+                 - self%alphac_pm(2) / ((self%betar_pm(2) - zz) ** 2)
+   end if
  end if
 
 end subroutine sigma_pade_eval
@@ -831,27 +846,37 @@ end subroutine sigma_pade_eval
 !!  sigma_pade_qp_solve
 !!
 !! FUNCTION
-!!  Use the Pade' approximant and Newton-Rapson method  to solve the QP equation
-!!  in the complex pane starting from the initial guess `z_guess`.
+!!  Use the Pade' approximant and Newton-Rapson method to solve the QP equation
+!!  in the complex plane starting from the initial guess `z_guess`.
 !!
 !! INPUTS
+!!  e0: KS energy
+!!  v_meanf: matrix element of the mean-field Hamiltonian
+!!  sigx: matrix element of the exchange self-energy.
+!!  z_guess: Initial guess for the QP energy
+!!
+!! OUTPUT
+!!  zsc: root.
+!!  sigc: Sigma_c(zsc)
+!!  msg: Error message if ierr /= 0.
+!!  ierr: Exit status.
 !!
 !! SOURCE
 
-subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
+subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, sigc_zsc, msg, ierr)
 
 !Arguments ------------------------------------
  class(sigma_pade_t),intent(in) :: self
  real(dp),intent(in) :: e0, v_meanf, sigx
  complex(dp),intent(in) :: z_guess
- complex(dp),intent(out) :: zsc
+ complex(dp),intent(out) :: zsc, sigc_zsc
  integer,intent(out) :: ierr
 
 !Local variables-------------------------------
 !scalars
  integer :: iter
  logical :: converged
- complex(dpc) :: ctdpc, dct, dsigc, sigc
+ complex(dpc) :: ctdpc, dct, dsigc
  character(len=500) :: msg
 ! *************************************************************************
 
@@ -864,10 +889,10 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  do while (abs(ctdpc) > NR_ABS_ROOT_ERR .or. iter < NR_MAX_NITER)
    iter = iter + 1
 
-   call self%eval(zsc, sigc, dzdval=dsigc)
-   ctdpc = e0 - v_meanf + sigx + sigc - zsc
+   call self%eval(zsc, sigc_zsc, dvdz=dsigc)
+   ctdpc = e0 - v_meanf + sigx + sigc_zsc - zsc
 
-   if (Abs(ctdpc) < NR_ABS_ROOT_ERR) then
+   if (abs(ctdpc) < NR_ABS_ROOT_ERR) then
      converged=.TRUE.; EXIT
    end if
    dct = dsigc - one
@@ -877,8 +902,8 @@ subroutine sigma_pade_qp_solve(self, e0, v_meanf, sigx, z_guess, zsc, msg, ierr)
  ierr = 0; msg = ""
  if (.not. converged) then
    write(msg,'(a,i0,3a,f8.4,a,f8.4)')&
-     'Newton-Raphson method not converged after ',NR_MAX_NITER,' iterations. ',ch10,&
-     'Absolute Error: ',abs(ctdpc),' > ',NR_ABS_ROOT_ERR
+     'Newton-Raphson method did not converge after: ', NR_MAX_NITER,' iterations.',ch10,&
+     'Absolute error: ', abs(ctdpc), ' > ', NR_ABS_ROOT_ERR
    ierr = 1
  end if
 
@@ -887,5 +912,5 @@ end subroutine sigma_pade_qp_solve
 
 !----------------------------------------------------------------------
 
-END MODULE m_dyson_solver
+end module m_dyson_solver
 !!***

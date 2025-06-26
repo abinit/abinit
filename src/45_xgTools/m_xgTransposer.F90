@@ -33,6 +33,7 @@ module m_xgTransposer
   use defs_basis, only : std_err, std_out, dp, ABI_GPU_KOKKOS, ABI_GPU_OPENMP, ABI_GPU_DISABLED
   use m_xomp
   use m_profiling_abi
+  USE_MPI
   use m_xmpi
   use m_errors
   use m_xg
@@ -44,10 +45,6 @@ module m_xgTransposer
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize, gpu_data_prefetch_async
-#endif
-
-#ifdef HAVE_MPI2
-  use mpi
 #endif
 
 #if defined(HAVE_GPU_MARKERS)

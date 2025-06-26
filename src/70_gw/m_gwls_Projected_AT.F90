@@ -32,7 +32,7 @@ use m_gwls_TimingLog
 use m_gwls_hamiltonian
 use m_gwls_lineqsolver
 use m_gwls_GWlanczos
-use m_gwls_LanczosBasis 
+use m_gwls_LanczosBasis
 use m_gwls_LanczosResolvents
 
 use m_gwls_GWanalyticPart, only : get_projection_band_indices
@@ -83,15 +83,13 @@ subroutine compute_AT_shift_Lanczos(nfreq,list_external_omega,model_parameter,lm
 !  The operator PW projects on states of energy lower than W, and QW on states or energy higher than W.
 !
 !
-!  For every l, We seek to compute  AT_l = < l |  A^T | l > = < l^* | A | l^* > 
+!  For every l, We seek to compute  AT_l = < l |  A^T | l > = < l^* | A | l^* >
 !
 !  It will be assumed that the array modified_Lbasis already contains the basis vectors U_m | l^* >.
 !
-!  This function does not use SQMR, but rather shift Lanczos to extract the values of the matrix elements for 
+!  This function does not use SQMR, but rather shift Lanczos to extract the values of the matrix elements for
 !  all external frequencies.
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer,      intent(in) :: nfreq
 real(dp),     intent(in) :: list_external_omega(nfreq)
 real(dp),     intent(in) :: model_parameter
@@ -115,7 +113,7 @@ complex(dpc), allocatable :: list_z_P(:), list_z_Q(:)
 integer,      allocatable :: frequency_indices_array(:,:)
 
 
-real(dp):: external_omega 
+real(dp):: external_omega
 logical :: prec
 integer :: nvec
 integer :: band_index_below, band_index_above, bib0, bia0, bib, bia
@@ -126,7 +124,7 @@ integer :: ierr
 integer :: number_of_frequency_blocks, ifreq_block
 
 integer :: iblk, nbdblock_lanczos
-integer :: mb 
+integer :: mb
 
 integer :: nz
 
@@ -162,8 +160,8 @@ if (mpi_enreg%me == 0 ) then
   write(io_unit,10) "#                                                                                "
   write(io_unit,10) "#  input parameters:                                                             "
   write(io_unit,10) "#                                                                                "
-  write(io_unit,15) "#                      nfreq    : ",nfreq                                                     
-  write(io_unit,17) "#          list_external_omega  : ",list_external_omega  
+  write(io_unit,15) "#                      nfreq    : ",nfreq
+  write(io_unit,17) "#          list_external_omega  : ",list_external_omega
   write(io_unit,17) "#              model_parameter  : ",model_parameter
   write(io_unit,15) "#                       lmax    : ",lmax
   write(io_unit,15) "#                kmax_analytic  : ",kmax_analytic
@@ -199,7 +197,7 @@ external_omega = list_external_omega(iw_ext)
 call get_projection_band_indices(external_omega,bib, bia)
 
 
-if (mpi_enreg%me == 0 ) write(io_unit,20) iw_ext, external_omega, bib, bia, number_of_frequency_blocks 
+if (mpi_enreg%me == 0 ) write(io_unit,20) iw_ext, external_omega, bib, bia, number_of_frequency_blocks
 
 if (bib /= bib0 .or. bia /= bia0) then
 
@@ -262,7 +260,7 @@ if (bib /= bib0 .or. bia /= bia0) then
 
   ifreq_block  = ifreq_block  + 1
   iw_ext_min = iw_ext
-end if 
+end if
 
 end do
 
@@ -280,12 +278,12 @@ if (mpi_enreg%me == 0 ) then
   write(io_unit,10) "#  ifreq_block iw_ext_min     iw_ext_max                                         "
   write(io_unit,10) "#================================================================================"
 
-  do ifreq_block = 1 , number_of_frequency_blocks 
+  do ifreq_block = 1 , number_of_frequency_blocks
 
   write(io_unit,40) ifreq_block, frequency_indices_array(1,ifreq_block), frequency_indices_array(2,ifreq_block)
 
   end do
-end if 
+end if
 
 
 
@@ -327,7 +325,7 @@ do ifreq_block = 1, number_of_frequency_blocks
 !-------------------------------
 ! Build the frequency arrays
 !-------------------------------
-iw_ext_min = frequency_indices_array(1,ifreq_block) 
+iw_ext_min = frequency_indices_array(1,ifreq_block)
 iw_ext_max = frequency_indices_array(2,ifreq_block)
 
 
@@ -354,21 +352,21 @@ end do
 !-----------------------------------------
 do iblk = 1, nbdblock_lanczos
 ! which l is on this row of FFT processors?
-l = (iblk-1)*blocksize + mpi_band_rank + 1 
+l = (iblk-1)*blocksize + mpi_band_rank + 1
 
 ! Change the configuration of the data
 do mb =1, blocksize
 lloc = (iblk-1)*blocksize+mb
-if (lloc <= lmax) then 
+if (lloc <= lmax) then
   psik_wrk(1,:)  = dble ( modified_Lbasis(:,lloc) )
   psik_wrk(2,:)  = dimag( modified_Lbasis(:,lloc) )
 else
   psik_wrk(:,:)  = zero
 end if
 
-psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:) 
+psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:)
 
-end do ! mb 
+end do ! mb
 
 ! change configuration of the data, from LA to FFT
 call wf_block_distribute(psikb_wrk,  psikg_wrk, 1) ! LA -> FFT
@@ -391,9 +389,9 @@ else if ( l <= lmax ) then
 
   !----------------------------------------------------------------------------------
   !
-  ! CAREFUL HERE! PW + QW != I. If the external frequency is exactly equal to a 
+  ! CAREFUL HERE! PW + QW != I. If the external frequency is exactly equal to a
   !               DFT eigenvalue, then the projections PW and QW both project OUT
-  !               of the subspace corresponding to this energy! 
+  !               of the subspace corresponding to this energy!
   !
   !----------------------------------------------------------------------------------
 
@@ -450,7 +448,7 @@ call xmpi_sum(list_AT_Lanczos, mpi_enreg%comm_band,ierr) ! sum on all processors
 
 if (mpi_enreg%me == 0 ) then
   close(io_unit)
-end if 
+end if
 
 ABI_FREE(list_left_vectors)
 ABI_FREE(seed_vector)

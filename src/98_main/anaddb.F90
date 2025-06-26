@@ -478,7 +478,7 @@ program anaddb
        inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, dipquad = inp%dipquad, quadquad = inp%quadquad)
    end if
 
-   call ifc%print(unit = std_out)
+   call ifc%print(unit=std_out)
 
    ! Compute speed of sound.
    if (inp%vs_qrad_tolkms(1) > zero) call ifc%speedofsound(crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
@@ -589,7 +589,6 @@ program anaddb
 !**********************************************************************
  call mkphbs(Ifc, crystal, inp, ddb, asrq0, filnam(8), comm)
 
-
  ! Interpolate the DDB onto the first list of vectors and write the file.
  if (inp%prtddb == 1 .and. inp%ifcflag == 1) then
    call ddb_hdr%open_read(filnam(3), comm)
@@ -628,7 +627,7 @@ program anaddb
 
   !***************************************************************
   ! Generates the dynamical matrix at Gamma
-  ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma becasue
+  ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma because
   ! it is already done before in this routine. (EB)
   ! The problem is that it is done through mkphbs, which has only printing and does not return anything as out... (EB)
 
@@ -940,7 +939,7 @@ end if  ! condition on nlflag
  write(msg, '(a, (80a), a, a, a, f11.3, a, f11.3, a, a, a, a)' ) ch10, &
   ('=',ii = 1, 80), ch10, ch10, &
    '+Total cpu time',tsec(1), '  and wall time',tsec(2), ' sec',ch10, ch10, &
-   ' anaddb : the run completed succesfully.'
+   ' anaddb : the run completed successfully.'
  call wrtout(units, msg)
 
  if (iam_master) then

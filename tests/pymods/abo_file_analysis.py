@@ -2,13 +2,10 @@
 Implement a class used to analyze some data from ABINIT .abo file.
 Can be used to count datasets, extract number of iterations...
 """
-from __future__ import print_function, division, unicode_literals
 from math import ceil, floor
 
-# ---------------------------------------------------------------------
-
-class AboFileAnalysis(object):
-    """Main object containing data from abo file (for furher analysis)."""
+class AboFileAnalysis:
+    """Main object containing data from abo file (for further analysis)."""
 
     def __init__(self,file_name,option):
         """
@@ -22,8 +19,6 @@ class AboFileAnalysis(object):
 
         if option != "":
             self.dtsets = self.extract(option=option)
-
-#   -------------
 
     def extract(self,option):
         """
@@ -98,8 +93,6 @@ class AboFileAnalysis(object):
 
         return dataset_list
 
-#   -------------
-
     def compare_with(self,other_abo_file,option,percent_allowed_small=0,percent_allowed_large=0):
         """
         Compare the current abo file with another one
@@ -159,9 +152,7 @@ class AboFileAnalysis(object):
 
         return status,err_msg,err_msg_short
 
-# ---------------------------------------------------------------------
-
-class AboDataset(object):
+class AboDataset:
     """Object storing data extracted from ABINIT abo file for ONE dataset."""
 
     def __init__(self,number):

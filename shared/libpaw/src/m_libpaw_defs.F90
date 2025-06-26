@@ -95,16 +95,16 @@ module m_libpaw_defs
 !A collection of small datatypes for ragged arrays
 !-----------------------------------------------
  type coeffi1_type                    !A small datatype for ragged integer 1D-arrays
-  integer, allocatable :: value(:) 
+  integer, allocatable :: value(:)
  end type coeffi1_type
  type coeff1_type                     !A small datatype for ragged real 1D-arrays
-  real(dp), allocatable :: value(:) 
+  real(dp), allocatable :: value(:)
  end type coeff1_type
  type coeff2_type                     !A small datatype for ragged real 2D-arrays
-  real(dp), allocatable :: value(:,:)  
+  real(dp), allocatable :: value(:,:)
  end type coeff2_type
  type coeff3_type                     !A small datatype for ragged real 3D-arrays
-  real(dp), allocatable :: value(:,:,:) 
+  real(dp), allocatable :: value(:,:,:)
  end type coeff3_type
 
 !Small functions used in cpp macros
