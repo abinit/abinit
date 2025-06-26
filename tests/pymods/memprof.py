@@ -5,11 +5,7 @@ import time
 from pprint import pprint
 from itertools import groupby
 from collections import namedtuple, deque, defaultdict
-# OrderedDict was added in 2.7. ibm6 still uses python2.6
-try:
-    from collections import OrderedDict
-except ImportError:
-    from .ordereddict import OrderedDict
+from collections import OrderedDict
 
 from .plotting import add_fig_kwargs, get_ax_fig_plt
 from .tools import lazy_property
@@ -149,13 +145,13 @@ class AbimemFile:
 
     def find_small_allocs(self, nbits=160*8):
         """Zero sized allocations are not counted."""
-        smalles = []
+        smallest = []
         for e in self.all_entries:
             if not e.isalloc: continue
-            if 0 < e.size <= nbits: smalles.append(e)
+            if 0 < e.size <= nbits: smallest.append(e)
 
-        pprint(smalles)
-        return smalles
+        pprint(smallest)
+        return smallest
 
     def find_large_allocs(self, nbits=10 *8*1024*1024):
         """Allocations below 10 Mbytes are not counted."""
@@ -250,12 +246,12 @@ class AbimemFile:
         for entry_list in locus_to_entries.values():
             # class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memory")):
             e0 = entry_list[0]
-            args = (e0.vname, 
-                    e0.action, 
-                    e0.ptr, 
+            args = (e0.vname,
+                    e0.action,
+                    e0.ptr,
                     sum(e.size for e in entry_list),
-                    e0.file, 
-                    e0.line, 
+                    e0.file,
+                    e0.line,
                     max(e.tot_memory for e in entry_list),
                    )
             new_entries.append(Entry(*args))
@@ -637,4 +633,3 @@ class MplExpose: # pragma: no cover
             plt.show()
             for fig in self.figures:
                 fig.clear()
-

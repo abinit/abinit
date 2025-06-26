@@ -2778,47 +2778,43 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
-on-the-flight enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
-Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[geoopt]] = "bfgs" or "lbfgs" ([[ionmov]] == 2 or 22).
+on-the-fly enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
+Useful only when doing cell optimization, e.g. [[optcell]] /= 0, usually with [[geoopt]] = "bfgs" or "lbfgs" ([[ionmov]] == 2 or 22).
 Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large),
 then the recommended value of [[dilatmx]] is 1.05.
-When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
-you need an accurate estimation of the geometry, then make a first
-run with [[chkdilatmx]]=0, producing an inaccurate, but much better estimation, followed by a second run using
-the newly estimated geometry, with [[chkdilatmx]]=1 (the default) and [[dilatmx]] set to 1.05.
-If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]]=0 only once.
+When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible,
+while you need an accurate estimation of the geometry, then make a first
+run with [[chkdilatmx]] = 0, producing an inaccurate, but much better estimation, followed by a second run using
+the newly estimated geometry, with [[chkdilatmx]] = 1 (the default) and [[dilatmx]] set to 1.05.
+If you are not in search of an accurate estimation of the lattice parameters anyhow, then run with [[chkdilatmx]] = 0 only once.
 
-In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded,
-ABINIT will rescale uniformly the
-tentative new primitive vectors to a value that leads at most to 90% of the
-maximal allowed [[dilatmx]] deviation from 1. It will do this three times (to
-prevent the geometry optimization algorithms to have taken a too large trial
+In the default mode ([[chkdilatmx]] = 1), when the [[dilatmx]] threshold is exceeded, ABINIT will rescale uniformly the
+tentative new primitive vectors to a value that leads at most to 90% of the maximal allowed [[dilatmx]] deviation from 1.
+It will do this three times (to prevent the geometry optimization algorithms to have taken a too large trial
 step), but afterwards will stop and exit.
 
-Setting [[chkdilatmx]] == 0 allows one to
-book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1), but will not rescale the tentative new primitive vectors
-nor lead to an exit when the [[dilatmx]] threshold is exceeded.
+Setting [[chkdilatmx]] == 0 allows one to book a larger planewave basis (if [[dilatmx]] is set to be bigger than 1),
+but will not rescale the tentative new primitive vectors nor lead to an exit when the [[dilatmx]] threshold is exceeded.
 The obtained optimized primitive vectors will not be exactly the ones corresponding to the planewave basis set
 determined using [[ecut]] at the latter primitive vectors. Still, as an intermediate step in a geometry search
-this might be sufficiently accurate. In such case, [[dilatmx]] might even be let at its default value 1.0.
+this might be sufficiently accurate.
+In such case, [[dilatmx]] might even be let at its default value 1.0.
 
 Detailed explanation: The memory space for the planewave basis set is defined
-by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called
-internally "ecut_eff"). Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
+by multiplying [[ecut]] by [[dilatmx]] squared (the result is an "effective ecut", called internally "ecut_eff").
+Other uses of [[ecut]] are not modified when [[dilatmx]] > 1.0.
 Still, operations (like scalar products) are done by taking into account these fake (non-used) planewaves,
 even if their coefficients are set to zero, thus slowing down the ABINIT execution.
-Using [[dilatmx]]<1.0 is equivalent to changing [[ecut]] in all its uses. This
-is allowed, although its meaning is no longer related to a maximal expected scaling.
+Using [[dilatmx]] < 1.0 is equivalent to changing [[ecut]] in all its uses.
+This is allowed, although its meaning is no longer related to a maximal expected scaling.
 
 Setting [[dilatmx]] to a large value leads to waste of CPU time and memory.
 By default, ABINIT will not accept that you define [[dilatmx]] bigger than 1.15.
 This behaviour will be overcome by using [[chkdilatmx]] == 0.
-Supposing you think that the optimized [[acell]] values might be 5% larger
-than your input values, use simply [[dilatmx]] 1.05. This will lead to
-an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$, and a
-corresponding increase in CPU time and memory.
-It is possible to use [[dilatmx]] when [[optcell]] =0, but a value larger than
-1.0 will be a waste.
+Supposing you think that the optimized [[acell]] values might be 5% larger than your input values, use simply [[dilatmx]] 1.05.
+This will lead to an increase of the number of planewaves by a factor $(1.05)^3$, which is about $1.158$,
+and a corresponding increase in CPU time and memory.
+It is possible to use [[dilatmx]] when [[optcell]] = 0, but a value larger than 1.0 will be a waste.
 """,
 ),
 
@@ -11924,6 +11920,41 @@ the dielectric matrix in order to perform the numerical integration of the GW se
 ),
 
 Variable(
+    abivarname="nfreqim_conv",
+    varset="gw",
+    vartype="integer",
+    topics=['FrequencyMeshMBPT_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Number of FREQuencies along the IMaginary axis for CONVolution",
+    requires="[[optdriver]] == 4 and [[gwcalctyp]] in [x1]",
+    added_in_version="10.5.1",
+    text=r"""
+[[nfreqim_conv]] defines the number of imaginary frequency points used to interpolate the convolution between G and W
+when computing the self-energy with the analytic continuation (AC) method (i.e., when [[gwcalctyp]] = x1).
+This setting enables a more accurate evaluation of the self-energy for a given SCR file containing [[nfreqim]] imaginary frequencies.
+
+* [[nfreqim_conv]] = 0: No interpolation is performed; the self-energy is calculated using the inverse dielectric matrix
+  directly on the input imaginary frequency mesh read from the SCR file.
+* [[nfreqim_conv]] > 0: The self-energy is calculated using an interpolated inverse dielectric matrix on a Gauss-Legendre grid
+  with spline interpolation.
+  Note that [[nfreqim_conv]]  must be greater than or equal to [[nfreqim]]; otherwise, it is invalid.
+* [[nfreqim_conv]] < 0: The multiple of [[nfreqim]] is used to define the number of interpolation points,
+  i.e. [[nfreqim_conv]] = -n will lead to n * [[nfreqim]] interpolation points.
+
+!!! important
+
+    This parameter can significantly improve convergence speed, but it also has limitations:
+    a larger value of [[nfreqim_conv]] is not necessarily better.
+    Using too many interpolation points may introduce numerical instabilities.
+    For example, if the user sets [[nfreqim_conv]] = 1000, the resulting quasiparticle (QP) gap could differ
+    by several meV due to such instabilities.
+    Therefore, it is important to test the stability of the results with respect to this parameter.
+    Fortunately, increasing [[nfreqim_conv]] does not substantially increase the computational cost.
+""",
+),
+
+Variable(
     abivarname="nfreqmidm",
     varset="gw",
     vartype="integer",
@@ -11933,7 +11964,7 @@ Variable(
     requires="[[optdriver]] == 4",
     added_in_version="before_v9",
     text=r"""
-depending on the value of [[nfreqmidm]] will calculate the frequency moment of
+Depending on the value of [[nfreqmidm]] will calculate the frequency moment of
 the dielectric matrix or its inverse,
 
   * if [[nfreqmidm]] is positive: calculate (nth=[[nfreqmidm]]) frequency moment of the dielectric matrix.
@@ -16130,6 +16161,22 @@ the [BoltzTraP code](https://www.imc.tuwien.ac.at/forschungsbereich_theoretische
 ),
 
 Variable(
+    abivarname="prtchkprdm",
+    varset="files",
+    vartype="integer",
+    topics=['GW_expert', 'SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM",
+    requires="[[optdriver]] == 4",
+    added_in_version="9.4.0",
+    text=r"""
+[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
+It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
+""",
+),
+
+Variable(
     abivarname="prtcif",
     varset="dev",
     vartype="integer",
@@ -16146,18 +16193,17 @@ present run (cell size shape and atomic positions).
 ),
 
 Variable(
-    abivarname="prtchkprdm",
-    varset="files",
+    abivarname="prtcurrent",
+    varset="rttddft",
     vartype="integer",
-    topics=['GW_expert', 'SelfEnergy_expert'],
+    topics=['RTTDDFT_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Integer that governs PrinTing of CHecK-Point files for the GW 1-RDM",
-    requires="[[optdriver]] == 4",
-    added_in_version="9.4.0",
+    mnemonics="PRinT macroscopic CURRENT density",
+    added_in_version="10",
     text=r"""
-[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
-It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
+If set to 1, prints the time-dependent macroscopic current density
+computed in real-time TDDFT calculations ([[optdriver]] 9).
 """,
 ),
 
@@ -16381,6 +16427,8 @@ for the additional input variables to be specified.
 
 If [[prtdos]] = 5, delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
 tetrahedron method (as [[prtdos]] = 2).
+
+Note that in the case [[nsppol]]=1 and [[nspden]]=2, only the spin up DOS is delivered, for all values of [[prtdos]].
 """,
 ),
 
@@ -16403,6 +16451,8 @@ spherical harmonics basis.
 If set to 2, the m-decomposed LDOS is delivered in DOS file.
 In this case, [[prtdosm]] computes the M-resolved partial dos for real
 spherical harmonics in the same basis as the DFT+U occupation matrix.
+
+Note that in the case [[nsppol]]=1 and [[nspden]]=2, only the spin up DOS is delivered, for all values of [[prtdos]].
 """,
 ),
 

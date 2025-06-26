@@ -1118,7 +1118,6 @@ end subroutine mkresi
 !!  functionals or other methods may introduce additional entropy terms.
 !!
 !! NOTE
-!!  (A. Blanchet): Should DMFT entropy be also added here?
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -1128,8 +1127,9 @@ end subroutine mkresi
 !!  energies <type(energies_type)>=all part of total energy.
 !!   | entropy_ks(IN)=non-interacting entropy of the kohn-sham states
 !!   | entropy_paw(IN)=entropy due to paw corrections (for finite-temperature xc functionals)
-!!   | entropy_xc(IN)=exchange-correlation entropy (fro finite-temperature xc functionals)
+!!   | entropy_xc(IN)=exchange-correlation entropy (for finite-temperature xc functionals)
 !!   | entropy_extfpmd(IN)=entropy of extfpmd model
+!!   | entropy_imp(IN)=entropy of impurity electrons (for DFT+DMFT)
 !!
 !! OUTPUT
 !!  energies <type(energies_type)>=all part of total energy.
@@ -1152,6 +1152,7 @@ subroutine entropy(dtset,energies)
  if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
  if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
  if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
+ if(abs(energies%entropy_imp)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_imp
 
 !When the finite-temperature VG broadening scheme is used,
 !the total entropy contribution "tsmear*entropy" has a meaning,

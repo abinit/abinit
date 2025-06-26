@@ -124,7 +124,7 @@ More recent *easyconfigs* files can be found in the
     `eb` files typically follow the naming scheme `<name>-<version>[-<toolchain>][<versionsuffix>].eb`.
     The name reflects the fact each easyconfig file is associated to a particular version of the library/application
     and a particular [toolchain](https://easybuild.readthedocs.io/en/latest/Common-toolchains.html).
-    For example, `foss` stands for Free and Open Source Software toolchain based on 
+    For example, `foss` stands for Free and Open Source Software toolchain based on
     GCC, OpenMPI, OpenBLAS/LAPACK, ScaLAPACK, and FFTW3
     whereas the `intel` toolchain is based on the intel compilers, MKL and intel MPI.
 
@@ -186,7 +186,7 @@ The `--robot` option tells `eb` to automatically build and install all dependenc
 while searching for easyconfigs files in a set of pre-defined directories.
 To prepend additional directories to search for eb files (like the current directory $PWD),
 use the syntax `--robot-paths=$PWD`.
-Multiple directories can be specified using `--robot-paths=PATH1:PATH2`
+Multiple directories can be specified using: `--robot-paths=PATH1:PATH2`
 
 On my machine, I get the following results:
 
@@ -538,5 +538,5 @@ provided `releases/2020a` is available on our cluster.
 
 Changing `dependencies` and `configopts` requires some basic understanding of the ABINIT build system
 and of the logic used by EasyBuild to automate the compilation.
-If you need a specialized `eb` file, feel free to contact the ABINIT developers on the forum or the EasyBuild 
+If you need a specialized `eb` file, feel free to contact the ABINIT developers on the forum or the EasyBuild
 developers to ask for support.

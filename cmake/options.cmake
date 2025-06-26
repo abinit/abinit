@@ -200,6 +200,10 @@ else()
   set(DO_BUILD_17_GPU_TOOLBOX FALSE)
 endif()
 
+option(ABINIT_ENABLE_NVIDIA_UNIFIED_MEM
+  "Enable Unified Memory for NVIDIA GPU (requires OpenMP Offload & NVHPC compiler, default OFF)" OFF)
+# Checks for this option occurs after compiler and OpenMP offload settings in root CMakeLists.txt
+
 if (ABINIT_ENABLE_GPU_CUDA)
   set(DO_BUILD_46_MANAGE_CUDA TRUE)
 else()
@@ -225,6 +229,6 @@ set(ABI_DEBUG_FLAVOR "basic" CACHE STRING
   "Abinit C compiler debug flavor : basic, verbose, enhanced, paranoid, naughty")
 set_property(CACHE ABI_DEBUG_FLAVOR PROPERTY STRINGS basic verbose enhanced paranoid naughty)
 
-set(ABI_OPTIM_FLAVOR "safe" CACHE STRING
+set(ABI_OPTIM_FLAVOR "standard" CACHE STRING
   "Abinit C/Fortran compiler optim flavor : safe, standard, aggressive")
 set_property(CACHE ABI_OPTIM_FLAVOR PROPERTY STRINGS safe standard aggressive)

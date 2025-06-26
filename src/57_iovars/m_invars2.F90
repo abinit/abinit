@@ -482,6 +482,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nfreqim = dtset%cd_customnimfrqs
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nfreqim_conv',tread,'INT')
+ if(tread==1) dtset%nfreqim_conv=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqim_alpha',tread,'DPR')
  if(tread==1) dtset%freqim_alpha=dprarr(1)
 

@@ -846,7 +846,7 @@ CONTAINS  !=====================================================================
        else  ! read orbital from file
          call int2char4(itypat,tag2)
          tmpfil = trim(adjustl(dmft_orbital_filepath)) // '_' // tag2
-         write(message,'(2a)') " Using wavefunction from file ",trim(tmpfil)
+         write(message,'(3a)') ch10," Using wavefunction from file ",trim(tmpfil)
          call wrtout(std_out,message,"COLL")
          inquire(file=trim(tmpfil),exist=lexist)
          if (.not. lexist) ABI_ERROR("File "//trim(tmpfil)//" does not exist !")
@@ -920,7 +920,7 @@ CONTAINS  !=====================================================================
            call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))
          end if
 
-         write(message,'(2a)') " Yukawa parameters for atom type: ",adjustl(tag)
+         write(message,'(3a)') ch10," Yukawa parameters for atom type: ",adjustl(tag)
          call wrtout(std_out,message,"COLL")
          write(message,'(a,f9.4)') " Lambda: ",lambda
          call wrtout(std_out,message,"COLL")
@@ -932,7 +932,9 @@ CONTAINS  !=====================================================================
          f6of2 = - one
          uh = fk(1)
 
-         if (lcur == 1) then
+         if (lcur == 0) then
+           jh = zero
+         else if (lcur == 1) then
            jh = fk(2) / dble(5.)
          else if (lcur == 2) then
            f4of2 = fk(3) / fk(2)
@@ -956,6 +958,8 @@ CONTAINS  !=====================================================================
          pawtab(itypat)%jpawu = jh
 
          call calc_vee(f4of2,f6of2,jh,lcur,pawang,uh,pawtab(itypat)%vee(:,:,:,:),Loc_prtvol)
+
+         ABI_FREE(fk)
 
        end if ! dmft_dc=8
 

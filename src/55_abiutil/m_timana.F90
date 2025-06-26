@@ -486,8 +486,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(533)='xmpi_sum%lobpcg                 '
  names(535)='xorthon-xtrsm                   '
  names(536)='xprecon%lobpcg                  '
- names(537)='prep_fourwf%vtow                '
- names(538)='prep_fourwf%mkrh                '
+ names(537)='prep_fourwf%vtowfk              '
+ names(538)='prep_fourwf%mkrho               '
  names(539)='prep_fourwf                     '
 
  names(540)='sg_fourwf%fourwf                '
