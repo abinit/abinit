@@ -1209,7 +1209,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
+ integer :: usespinspiral
  real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
+ real(dp) :: qr, mx0, my0, mz0, mx, my, mz
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
@@ -1221,6 +1223,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
+ real(dp) :: qspinspiral(3)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
  character(len=len(string)) :: geo_string
@@ -1474,6 +1477,32 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  else
    dtset%nspden=dtset%nsppol
  end if
+
+ ! Spin-spiral
+!if (dtset%usespinspiral == 1) then
+!  if (dtset%nspden /= 4) then
+!     msg = 'when calculating spin spiral, nspden must be 4'
+!     ABI_ERROR_NOSTOP(msg, leave)
+!  else
+!    write(msg,'(a,3f12.6)') ' [SpinSpiral] q = ', dtset%qspinspiral
+!    call wrtout(std_out, msg, 'COLL')
+!    do iatom = 1, dtset%natom
+!      qr = two_pi * (dtset%qspinspiral(1) * xred(1, iatom) &
+!         + dtset%qspinspiral(2) * xred(2, iatom) &
+!         + dtset%qspinspiral(3) * xred(3, iatom))
+   
+!      mx0 = dtset%spinat(1, iatom)
+!      my0 = dtset%spinat(2, iatom)
+!      mz0 = dtset%spinat(3, iatom)
+!      mx = mx0 * cos(qr) - my0 * sin(qr)
+!      my = my0 * cos(qr) + mx0 * sin(qr)
+!      mz = mz0
+!      dtset%spinat(1, iatom) = mx
+!      dtset%spinat(2, iatom) = my
+!      dtset%spinat(3, iatom) = mz
+!    end do
+!  end if
+!end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypalch',tread,'INT')
  if(tread==1) dtset%ntypalch=intarr(1)
