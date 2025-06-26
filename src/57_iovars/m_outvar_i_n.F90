@@ -969,6 +969,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%nfreqim
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nfreqim','INT',0)
 
+ intarr(1,:)=dtsets(:)%nfreqim_conv
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nfreqim_conv','INT',0)
+
  intarr(1,:)=dtsets(:)%nfreqre
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nfreqre','INT',0)
 

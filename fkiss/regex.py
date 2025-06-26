@@ -5,7 +5,7 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 
 import re
 
-# This one is problematic. The firs one is stricter but it does not play well with the other code!!
+# This one is problematic. The first one is stricter but it does not play well with the other code!!
 # I use the old one used by abilint
 #RE_FUNC_END = re.compile('^[ \t]*end[ \t]*(function\n)',re.I).match
 
@@ -53,7 +53,7 @@ import re
 #CALL_RE = re.compile("(?:^|[^a-zA-Z0-9_% ]\s*)(\w+)(?=\s*\(\s*(?:.*?)\s*\))",re.I)
 
 
-class HasRegex(object):
+class HasRegex:
     """
     Mixin class providing regular expressions used to analyze Fortran code.
     Many regexs use `^` so we assume source lines have been already stripped.

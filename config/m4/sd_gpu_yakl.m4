@@ -68,7 +68,7 @@ AC_DEFUN([SD_YAKL_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([yakl],
     [AS_HELP_STRING([--with-yakl],
       [Install prefix of the YAKL library (e.g. /usr/local).])],

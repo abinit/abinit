@@ -119,7 +119,7 @@ def add_fig_kwargs(func):
     return wrapper
 
 
-class MplExpose(object): # pragma: no cover
+class MplExpose: # pragma: no cover
     """
     Example:
 
@@ -196,4 +196,3 @@ class MplExpose(object): # pragma: no cover
             plt.show()
             for fig in self.figures:
                 fig.clear()
-

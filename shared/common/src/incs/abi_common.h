@@ -96,13 +96,6 @@
 
 #define BYTE_SIZE(array)  PRODUCT(SHAPE(array)) * DBLE(KIND(array))
 
-/* var = var + increment
- * Because Fortran does not provide inplace add.
- * but NAG does not like this CPP macro so we cannot use it!
- *
-#define IADD(var, increment) var = var + increment
-*/
-
 /*
  * ABI_  abinit macros.
  * DBG_  macros for debugging. Defined only if abinit is compiled in DEBUG_MODE.

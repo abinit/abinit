@@ -402,9 +402,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  mpert = ddb%mpert
  iout = ab_out
  prtout_ = .true.
- if (present(prtout)) then
-    prtout_ = prtout
- end if
+ if (present(prtout)) prtout_ = prtout
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
@@ -570,6 +568,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
    call xmpi_sum(ifc%dynmat, comm, ierr)
    ABI_FREE(dyew)
+   !if (prtout_) call wrtout(std_out, " Done")
  end if
 
  ! OmegaSRLR: Store the short-range dynmat and compute long-range as difference
@@ -1091,7 +1090,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
 
  if (ifc%dipdip == 1.or.ifc%dipquad == 1.or.ifc%quadquad == 1) then
    ! Add the gradient of the non-analytical part.
-   ! Note that dddq is in cartesian cordinates.
+   ! Note that dddq is in cartesian coordinates.
    ! For the time being, the gradient is computed with finite difference and step hh.
    ! TODO: should generalize ewald9 to compute dq.
    !enough = enough + 1
@@ -1395,7 +1394,7 @@ end subroutine ifc_speedofsound
 !! FUNCTION
 !! Find the value of nsphere that gives non-negative frequencies around Gamma
 !! in a small sphere of radius qrad.
-!! Use bisection to reduce the number of attemps although there's no guarantee
+!! Use bisection to reduce the number of attempts although there's no guarantee
 !! that the number of negative frequencies is monotonic.
 !!
 !! INPUTS
@@ -1453,7 +1452,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 
  if (my_rank == master) then
    write(ab_out, "(a)")" Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere."
-   write(ab_out, "(a,i0)")" Maximum nuber of atom-centered spheres: ",natom * nrpt
+   write(ab_out, "(a,i0)")" Maximum number of atom-centered spheres: ",natom * nrpt
    write(ab_out, "(a,i0,a,f5.3)")" Using Lebedev-Laikov grid with npts: ",lgrid%npts, ", qrad: ",qrad
    write(ab_out, "(/,a)")" <adiff>: Average difference between ab-initio frequencies and frequencies with cutoff."
    write(ab_out, "(a)")" num_negw: Number of negative freqs detected in small sphere around Gamma."
@@ -1482,7 +1481,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
    end do
    call xmpi_sum(cut_phfrq, comm, ierr)
 
-   ! Test wether there are negative frequencies around gamma, including reciprocal lattice vectors.
+   ! Test whether there are negative frequencies around gamma, including reciprocal lattice vectors.
    num_negw = 0; min_negw = zero
    do ii=1,lgrid%npts+3
      if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
@@ -2968,7 +2967,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
   ABI_MALLOC(ddb%qpt,(9,nqibz))      ; ddb%qpt = zero
   ABI_MALLOC(ddb%val,(2,msize,nqibz)); ddb%val = zero
   ABI_MALLOC(ddb%typ,(nqibz))
-  
+
   do iqpt=1,nqibz
     ddb%typ(iqpt) = BLKTYP_d2E_ns
     do jj = 1,3

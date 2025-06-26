@@ -41,7 +41,7 @@ def list_strings(arg):
         return arg
 
 
-class WildCard(object):
+class WildCard:
     """
     This object provides an easy-to-use interface for
     filename matching with shell patterns (fnmatch).
