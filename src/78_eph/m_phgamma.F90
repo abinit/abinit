@@ -56,7 +56,6 @@ module m_phgamma
  use m_pawcprj
  use m_dtset
  use m_dtfil
-
  use m_ephtk
  use m_mkffnl
 
@@ -100,7 +99,7 @@ module m_phgamma
 !!
 !! FUNCTION
 !! Provides methods for computing phonon linewidths, interpolating the results
-!! in q-space and evaluate superconducting properties withing the isotropic formalism.
+!! in q-space and evaluate superconducting properties within the isotropic formalism.
 !!
 !! SOURCE
 
@@ -480,7 +479,7 @@ contains  !=====================================================
 !! phgamma_free
 !!
 !! FUNCTION
-!!  Free the dynamic memory in a <phgamma_t> datatype
+!!  Free the dynamic memory
 !!
 !! SOURCE
 
@@ -792,7 +791,7 @@ end subroutine tgamma_symm
 !!
 !! NOTES
 !!  If nsppol == 1 and nspinor == 1, lambda and gamma are already summed over the two equivalent spin channels.
-!!  If nsppol == 2, lambda and gamma are the particual contributions given by the input spin index.
+!!  If nsppol == 2, lambda and gamma are the particular contributions given by the input spin index.
 !!  Client code is responsible for assembling the final observables by summing over spins.
 !!
 !! SOURCE
@@ -3046,17 +3045,15 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, qptopt1 = 1
- integer,parameter :: master = 0, ndat1 = 1, eph_scalprod0 = 0
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, qptopt1 = 1, master = 0, ndat1 = 1, eph_scalprod0 = 0
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, band_kq, ib_k, ib_kq !ib1,ib2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
- integer :: ik_fs, my_ik, my_is
- integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
+ integer :: ik_fs, my_ik, my_is, spin, istwf_k, istwf_kq, npw_k, npw_kq
  integer :: ii,jj,ipw,mpw,my_mpw,mnb,ierr,cnt,ncid
- integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q, ltetra
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
+ integer :: n1, n2, n3, n4, n5, n6, nspden, do_ftv1q, ltetra
+ integer :: sij_opt, usecprj, usevnl, optlocal, optnl, opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kq_count,nkpg
  integer :: jene, iene, comm_rpt, nesting, my_npert, my_ip, my_iq, ncerr, edos_intmeth
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
@@ -3077,15 +3074,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  character(len=fnlen) :: path
 !arrays
  integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym)
- integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
- integer :: indkk_kq(6,1)
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:)
- integer,allocatable :: my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2), vk(3), vkq(3)
- real(dp) :: wminmax(2), n0(ebands%nsppol)
- real(dp) :: resvv_in(2,9), resvv_out(2,9), phfrq(3*cryst%natom)
- real(dp),allocatable :: kinpw_k(:), kinpw_kq(:)
- real(dp),allocatable :: displ_cart(:,:,:,:), displ_red(:,:,:,:)
+ integer :: indkk_kq(6,1), work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:), my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
+ real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2), vk(3), vkq(3), wminmax(2), n0(ebands%nsppol)
+ real(dp) :: resvv_in(2,9), resvv_out(2,9), phfrq(3*cryst%natom), abc(3)
+ real(dp),allocatable :: kinpw_k(:), kinpw_kq(:), displ_cart(:,:,:,:), displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:) !,gkq_nu(:,:,:,:)
@@ -3094,13 +3087,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c_kq(:,:), v1_work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
- real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
- real(dp), allocatable :: tmp_vals_ee(:,:,:,:,:), emesh(:)
+ real(dp),allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:), tmp_vals_ee(:,:,:,:,:), emesh(:)
  !real(dp) :: ylmgr_k_dum(1,1,1), ylmgr_kq_dum(1,1,1), ylmgr_dum(1,1,1)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
- real(dp) :: abc(3)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart, coords(5)
  logical :: reorder
@@ -4272,7 +4263,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  if (fs%eph_intmeth == 1 .or. nesting == 1) then
    ! Gaussian method:
    ! Distribute k-points within the FS window inside comm.
-   ! 1) Select k-points such that k+q is stil inside the FS window
+   ! 1) Select k-points such that k+q is still inside the FS window
    ! 2) Distribute effective k-points assuming all procs in comm have all FS k-points (no filtering)
    ABI_MALLOC(select_ikfs, (fs%nkfs))
    nkfs_q = 0

@@ -261,9 +261,6 @@ end type screen_info_t
   ! (3,nqibz)
   ! q-points in reduced coordinates
 
-  !type(kmesh_t) :: Qmesh
-  ! Info the q-point sampling.
-
   real(dp),allocatable :: qlwl(:,:)
   ! (3,nqlwl)
   ! q-points used for the long wave-length limit treatment.
@@ -276,16 +273,11 @@ end type screen_info_t
   ! (3,npw)
   ! G-vectors used to describe the two-point function (r.l.u.).
 
-  !type(gsphere_t) :: Gsphere
-  ! Info on the G-sphere. Note that the basis set does not depend on q.
-  ! The G-vectors are ordered in shells to facilitate the application of symmetry operations.
-  ! See m_gsphere.F90.
-
   logical,allocatable :: keep_qibz(:)
    ! (nqibz)
    ! Storage strategy: keep or not keep Em1(q) in memory.
 
-  type(fgg_t),pointer :: Fgg(:)
+  type(fgg_t),pointer :: Fgg(:) => null()
   ! (nqibz)
   ! F_{G,G'}(q,w) for q in the IBZ.
 
@@ -303,7 +295,7 @@ end type screen_info_t
   type(ppmodel_t) :: ppm
   ! Structure storing the plasmon-pole parameters.
 
-  type(screen_info_t) :: Info
+  type(screen_info_t) :: info
   ! Parameters used to construct the screening.
 
 contains
@@ -346,64 +338,55 @@ contains
 !!  Printout object
 !!
 !! INPUTS
-!!  [header]=String to be printed as header for additional info.
-!!  [unit]=Unit number for output
-!!  [prtvol]=Verbosity level
-!!  [mode_paral]=Either "COLL" or "PERS"
+!!  units=Unit numbers for output
+!!  header=String to be printed as header for additional info.
 !!
 !! SOURCE
 
-subroutine screen_info_print(W_info, header, unit, mode_paral, prtvol)
+subroutine screen_info_print(W_info, units, header)
 
 !Arguments ------------------------------------
 !scalars
  class(screen_info_t),intent(in) :: W_info
- integer,optional,intent(in) :: unit,prtvol
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol
- character(len=4) :: my_mode
+ integer :: my_prtvol
  character(len=500) :: msg
 ! *********************************************************************
 
- !@screen_info_t
- my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
-
  msg=' ==== Info on the screen_info_t% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
 !integer
  write(msg,'(a,i3)')" mat_type    ",W_info%mat_type
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" vtx_family  ",W_info%vtx_family
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" invalid_freq",W_info%invalid_freq
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" ixc         ",W_info%ixc
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" use_ada     ",W_info%use_ada
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" use_mdf     ",W_info%use_mdf
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" use_ppm     ",W_info%use_ppm
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" vtx_test    ",W_info%vtx_test
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,i3)')" wint_method ",W_info%wint_method
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
 !real
  write(msg,'(a,f8.3)')" ada_kappa   ",W_info%ada_kappa
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,f8.3)')" eps_inf     ",W_info%eps_inf
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
  write(msg,'(a,f8.3)')" drude_plsmf ",W_info%drude_plsmf
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
 end subroutine screen_info_print
 !!***
@@ -536,7 +519,8 @@ subroutine screen_fgg_qbz_set(screen, iq_bz, nqlwl, how)
  !character(len=500) :: msg
 !************************************************************************
 
- screen%fgg_qbz_idx = iq_bz ! Save the index of the q-point in the BZ.
+ ! Save the index of the q-point in the BZ.
+ screen%fgg_qbz_idx = iq_bz
 
  if (firstchar(how, (/"P"/)) ) then
    ! We want a pointer.
@@ -781,7 +765,7 @@ end subroutine screen_print
 !!  npw_asked=Number of G-vector to be used in the calculation, if <=0 use Max allowed number.
 !!  ngfftf(18)=Info on the (fine) mesh used for the density.
 !!  nfftf_tot=Total number of point in the FFT mesh for ae_rhor
-!!  nsppol=Numer of independent spin polarizations.
+!!  nsppol=Number of independent spin polarizations.
 !!  nspden=Number of spin density components in ae_rhor
 !!  ae_rhor(nfftf_tot,nspden)
 !!  prtvol=Verbosity level.
@@ -831,8 +815,8 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  call screen%nullify()
 
  ! Initialize basic parameters
- screen%Info = W_info
- call screen%Info%print(header="W info", unit=std_out)
+ screen%info = w_info
+ call screen%info%print([std_out], header="W info")
 
  id_required  = W_Info%mat_type
  approx_type  = W_Info%vtx_family
@@ -847,7 +831,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  ! This part must be rationalized.
  remove_dgg = (id_required == MAT_W_M1)
 
- if (screen%Info%use_mdf == MDL_NONE) screen%fname = ifname
+ if (screen%info%use_mdf == MDL_NONE) screen%fname = ifname
  screen%nI = 1; screen%nJ = 1
 
  ! The q-point sampling is initialized from qmesh.
@@ -874,7 +858,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  screen%fgg_qbz_idx = 0
  screen%iomode = iomode
  screen%prtvol = prtvol
- screen%has_ppmodel = 0; if (screen%Info%use_ppm /= PPM_NONE) screen%has_ppmodel = 1
+ screen%has_ppmodel = 0; if (screen%info%use_ppm /= PPM_NONE) screen%has_ppmodel = 1
 
  ! Copy the AE density for the model dielectric function or for the vertex corrections.
  screen%nspden     = nspden
@@ -886,7 +870,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
  free_Fgg = .FALSE.
 
- screen%has_fgg = 0; if (ANY(screen%Info%wint_method == [WINT_CONTOUR, WINT_AC])) screen%has_fgg = 1
+ screen%has_fgg = 0; if (ANY(screen%info%wint_method == [WINT_CONTOUR, WINT_AC])) screen%has_fgg = 1
 
  if (screen%has_fgg > 0 .and. screen%has_ppmodel > 0) then
    ABI_WARNING("Both PPmodel tables and F_(GG')(q,w) are stored in memory")
@@ -897,7 +881,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  screen%npw = npw_asked
 
  ! Model dielectric function does not require any external file.
- from_file = (screen%Info%use_mdf == MDL_NONE)
+ from_file = (screen%info%use_mdf == MDL_NONE)
 
  if (from_file) then
    ! Open file and check its content.
@@ -1045,8 +1029,8 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
      ! Allocate F_{GG'}(w).
      call screen%Fgg(iq_ibz)%init(npw, nomega, nqlwl)
 
-     eps_inf  =  screen%Info%eps_inf
-     mdf_type =  screen%Info%use_mdf
+     eps_inf  =  screen%info%eps_inf
+     mdf_type =  screen%info%use_mdf
      !em1_ggw  => screen%Fgg(iq_ibz)%mat
 
      ! Construct W TODO check the new implementation.
@@ -1068,8 +1052,8 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  ! Init plasmon-pole parameters from em1.
  if (screen%has_ppmodel > 0) then
    call wrtout(std_out, " Calling ppm_init ...")
-   ppmodel = screen%Info%use_ppm; drude_plsmf = screen%Info%drude_plsmf
-   call screen%ppm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%Info%invalid_freq)
+   ppmodel = screen%info%use_ppm; drude_plsmf = screen%info%drude_plsmf
+   call screen%ppm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%info%invalid_freq)
    !call screen%ppm%print(units)
 
    do iq_ibz=1,nqibz
@@ -1191,10 +1175,10 @@ subroutine screen_rotate_iqbz(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
      ! Allocate the BZ buffer.
      call screen_fgg_qbz_set(screen, iq_bz, nqlwl0, "Allocate")
 
-     if (screen%Info%use_mdf /= MDL_NONE) then
+     if (screen%info%use_mdf /= MDL_NONE) then
        ! Compute the model-dielectric function at qbz on-the fly and in sequential
        !call wrtout(std_out,"Will compute MDF on the fly")
-       call screen_mdielf(iq_bz,npw,nomega,screen%Info%use_mdf,screen%Info%eps_inf,Cryst,Qmesh,Vcp,Gsph,&
+       call screen_mdielf(iq_bz,npw,nomega,screen%info%use_mdf,screen%info%eps_inf,Cryst,Qmesh,Vcp,Gsph,&
                           screen%nspden,screen%nfftf_tot,screen%ngfftf,screen%ae_rhor,"EM1", &
                           screen%Fgg_qbz%mat,xmpi_comm_self)
 
@@ -1226,7 +1210,7 @@ subroutine screen_rotate_iqbz(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
  end if
 
  ! Calculate model dielectric function for this q-point in the BZ.
- eps_inf = screen%Info%eps_inf; mdf_type = screen%Info%use_mdf
+ eps_inf = screen%info%eps_inf; mdf_type = screen%info%use_mdf
 
  ! Model dielectric function. Only epsm-1 is supported here.
  !call wrtout(std_out," Calculating model dielectric function... ")
@@ -1430,7 +1414,7 @@ end subroutine screen_calc_sigc
 !!
 !! FUNCTION
 !!  Symmetrizes the two-point function in G-space. Symmetrization is done
-!!  inplace thorugh an auxiliary work array of dimension (npw_c,npw_c)
+!!  inplace through an auxiliary work array of dimension (npw_c,npw_c)
 !!
 !! INPUTS
 !!  nomega=All frequencies from 1 up to nomega are symmetrized.
