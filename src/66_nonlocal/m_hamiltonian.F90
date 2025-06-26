@@ -209,6 +209,10 @@ module m_hamiltonian
    ! governs the way the nonlocal operator is to be applied:
    !   1=using Ylm, 0=using Legendre polynomials
 
+   integer :: usespinspiral
+   ! if usespinspiral=0, use normal non-collinear calculation
+   ! if usespinspiral=1, use spin spiral calculation
+
 ! ===== Integer arrays
 
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -729,7 +733,7 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                     xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                     electronpositron,fock,nucdipmom,gpu_option)         ! optional
+&                     electronpositron,fock,nucdipmom,gpu_option,usespinspiral)         ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -739,6 +743,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
+ integer,optional,intent(in) :: usespinspiral
 !arrays
  integer,intent(in) :: ngfft(18),nloalg(3),typat(natom)
  integer,optional,intent(in)  :: mpi_atmtab(:),mpi_spintab(2)
@@ -876,7 +881,6 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 ! ==== Non-local factors ====
 ! ===========================
 
-
  if (ham%usepaw==0) then ! Norm-conserving: use constant Kleimann-Bylander energies.
    ham%dimekb1=psps%dimekb
    ham%dimekb2=psps%ntypat
@@ -957,6 +961,9 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    nullify(ham%ekb)
  end if
 
+ ham%usespinspiral = .false.
+ if (present(usespinspiral)) ham%usespinspiral = (usespinspiral == 1)
+ 
  DBG_EXIT("COLL")
 
 end subroutine gsham_init
