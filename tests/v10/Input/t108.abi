@@ -62,19 +62,19 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t108.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. BOUST
 #%% keywords = PAW
-#%% description = 
+#%% description =
 #%%   Test for RCPAW.
 #%%   Ground state calculation for 2 Al atoms
 #%%   The number of bands and k-points are unrealistic.
 #%%   It tests the following parts of the code:
 #%%     rcpaw_relax, atompaw_solve
-#%%   Note that, in addition to the psp file, the core wave functions file is needed 
+#%%   Note that, in addition to the psp file, the core wave functions file is needed
 #%%   as well as the atomapw input file.
 #%%<END TEST_INFO>

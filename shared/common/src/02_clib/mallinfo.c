@@ -31,7 +31,7 @@ void clib_mallinfo
   *uordblks = info.uordblks;
   *fordblks = info.fordblks;
 #else
-  *arena    = -1.0; 
+  *arena    = -1.0;
   *hblkhd   = -1.0;
   *usmblks  = -1.0;
   *fsmblks  = -1.0;

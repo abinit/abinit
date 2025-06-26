@@ -27,9 +27,7 @@ MODULE m_mpinfo
  use defs_basis
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_sort
  use m_distribfft
@@ -122,9 +120,7 @@ CONTAINS  !=====================================================================
 subroutine init_mpi_enreg(mpi_enreg)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(inout) :: MPI_enreg
-
+ class(MPI_type),intent(inout) :: MPI_enreg
 ! *********************************************************************
 
 !Default for sequential use
@@ -156,9 +152,7 @@ end subroutine init_mpi_enreg
 subroutine nullify_mpi_enreg(MPI_enreg)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(inout) :: MPI_enreg
-
+ class(MPI_type),intent(inout) :: MPI_enreg
 ! *********************************************************************
 
  nullify(mpi_enreg%nscatterarr)
@@ -186,9 +180,7 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 subroutine destroy_mpi_enreg(MPI_enreg)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(inout) :: MPI_enreg
-
+ class(MPI_type),intent(inout) :: MPI_enreg
 ! *********************************************************************
 
  if (associated(mpi_enreg%distribfft)) then
@@ -238,14 +230,12 @@ end subroutine destroy_mpi_enreg
 subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(in) :: mpi_enreg1
- type(MPI_type),intent(out) :: MPI_enreg2
+ class(MPI_type),intent(in) :: mpi_enreg1
+ class(MPI_type),intent(out) :: MPI_enreg2
 
 !Local variables-------------------------------
 !scalars
  integer :: sz1,sz2,sz3
-
 ! *********************************************************************
 
 !scalars
@@ -406,11 +396,9 @@ end subroutine copy_mpi_enreg
 subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
 
 !Arguments ------------------------------------
-!scalars
+ class(MPI_type),intent(inout) :: MPI_enreg
  integer,intent(in) :: me_g0,comm_fft,paral_kgb
  type(distribfft_type),intent(in),target :: distribfft
- type(MPI_type),intent(inout) :: MPI_enreg
-
 ! *********************************************************************
 
  mpi_enreg%comm_fft=comm_fft
@@ -451,9 +439,7 @@ end subroutine set_mpi_enreg_fft
 subroutine unset_mpi_enreg_fft(MPI_enreg)
 
 !Arguments ------------------------------------
-!scalars
- type(MPI_type),intent(inout) :: MPI_enreg
-
+ class(MPI_type),intent(inout) :: MPI_enreg
 ! *********************************************************************
 
  mpi_enreg%me_g0=1
@@ -498,16 +484,14 @@ end subroutine unset_mpi_enreg_fft
 subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
 !Arguments ------------------------------------
-!scalars
+ class(MPI_type),intent(in) :: MPI_enreg
  integer,intent(in) :: n2,n3
- type(MPI_type),intent(in) :: MPI_enreg
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 
 !Local variables-------------------------------
 !scalars
  logical :: grid_found
-
 ! *********************************************************************
 
  grid_found=.false.
@@ -573,15 +557,14 @@ subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,
 
 !Arguments ------------------------------------
 !scalars
+ class(MPI_type),intent(in) :: MPI_enreg
  integer,intent(in) :: n2,n3
- type(MPI_type),intent(in) :: MPI_enreg
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 
 !Local variables-------------------------------
 !scalars
  logical :: grid_found
-
 ! *********************************************************************
 
  grid_found=.false.
@@ -642,10 +625,9 @@ logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol
 
 !Arguments ------------------------------------
 !scalars
+ class(MPI_type),intent(in) :: MPI_enreg
  integer,intent(in) :: nband,nkpt,nkpt_current_proc,nsppol
- type(MPI_type),intent(in) :: MPI_enreg
  character(len=*),optional,intent(out) :: msg
-
 ! *********************************************************************
 
  mpi_distrib_is_ok=.true.
@@ -697,7 +679,6 @@ function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
  integer,intent(in) :: ikpt,iband1,iband2,isppol,me
  integer,allocatable,intent(in) :: distrb(:,:,:)
  logical :: proc_distrb_cycle
-
 ! *************************************************************************
 
  proc_distrb_cycle=.false.
@@ -733,7 +714,6 @@ function proc_distrb_nband(distrb,ikpt,nband_k,isppol,me)
  integer,intent(in) :: ikpt,isppol,me,nband_k
  integer,allocatable,intent(in) :: distrb(:,:,:)
  integer :: proc_distrb_nband
-
 ! *************************************************************************
 
  proc_distrb_nband=0
@@ -768,7 +748,6 @@ subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
  integer,allocatable,intent(in) :: distrb(:,:,:)
  logical,allocatable,intent(out) :: cycle_bands(:)
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ABI_REMALLOC (cycle_bands, (size(distrb, 2)))
@@ -807,7 +786,6 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
  integer,allocatable,intent(in) :: distrb(:,:,:)
  integer,allocatable,intent(out) :: kpt_band_procs(:)
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ABI_REMALLOC(kpt_band_procs, (size(distrb, 2)))
@@ -847,7 +825,6 @@ subroutine proc_distrb_band(rank_band,distrib,ikpt,isppol,nband,me_band,me_kpt,c
  integer,intent(out) :: rank_band(nband)
 
  integer :: ierr, iband
-
 ! *************************************************************************
 
  rank_band = 0
@@ -883,15 +860,14 @@ end subroutine proc_distrb_band
 subroutine initmpi_world(mpi_enreg,nproc)
 
 !Arguments ------------------------------------
+ class(MPI_type),intent(inout) :: mpi_enreg
  integer, intent(in)::nproc
- type(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
  integer :: ii
 !arrays
  integer,allocatable :: ranks(:)
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -934,8 +910,7 @@ end subroutine initmpi_world
 subroutine initmpi_seq(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type),intent(out) :: mpi_enreg
-
+ class(MPI_type),intent(out) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1034,14 +1009,13 @@ subroutine initmpi_atom(dtset,mpi_enreg)
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
  logical :: my_atmtab_allocated,paral_atom
  character(len=500) :: msg
  integer :: iatom
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1135,8 +1109,7 @@ end subroutine initmpi_atom
 subroutine clnmpi_atom(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type), intent(inout) :: mpi_enreg
-
+ class(MPI_type), intent(inout) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1179,7 +1152,7 @@ end subroutine clnmpi_atom
 subroutine initmpi_grid(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
@@ -1193,7 +1166,6 @@ subroutine initmpi_grid(mpi_enreg)
  integer,allocatable :: coords(:),sizecart(:)
  logical,allocatable :: periode(:), keepdim(:)
 #endif
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1456,8 +1428,7 @@ end subroutine initmpi_grid
 subroutine clnmpi_grid(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type), intent(inout) :: mpi_enreg
-
+ class(MPI_type), intent(inout) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1547,7 +1518,7 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
 !Arguments ------------------------------------
  integer,intent(in) :: option
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
  integer :: imod,irank,iprocmax,iprocmin,jrank
@@ -1557,7 +1528,6 @@ subroutine initmpi_img(dtset,mpi_enreg,option)
  character(len=500) :: msg
 
 !integer :: group_cell,ierr
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1844,8 +1814,7 @@ end subroutine initmpi_img
 subroutine clnmpi_img(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type), intent(inout) :: mpi_enreg
-
+ class(MPI_type), intent(inout) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1898,7 +1867,7 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 
 !Arguments ------------------------------------
 !scalars
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
@@ -1909,7 +1878,6 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 !arrays
  integer,pointer :: nkpt_rbz(:)
  real(dp),pointer :: nband_rbz(:,:)
-
 ! ***********************************************************************
 
  if (mpi_enreg%me_pert<0) then
@@ -1999,8 +1967,7 @@ end subroutine initmpi_pert
 subroutine clnmpi_pert(mpi_enreg)
 
 !Arguments ------------------------------------
- type(MPI_type),intent(inout) :: mpi_enreg
-
+ class(MPI_type),intent(inout) :: mpi_enreg
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -2054,7 +2021,7 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
  integer,intent(in) :: mkmem
  integer,intent(in) :: nkpt,nsppol
  integer,intent(in) :: nband(nkpt*nsppol)
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
@@ -2064,7 +2031,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ranks(:)
-
 ! ***********************************************************************
 
 ! reinstate default just to be sure - can be switched inside a previous part of the same dtset!
@@ -2184,11 +2150,10 @@ subroutine pre_gather(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
  integer,intent(in) :: n1,n2,n3,n4
  real(dp),intent(in) :: array(n1,n2,n4,1)
  real(dp),intent(inout) :: array_allgather(n1,n2,n3,1)
- type(mpi_type),intent(in) :: mpi_enreg
+ class(mpi_type),intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
  integer :: ier
-
 ! *********************************************************************
 
 !Gather the array on all procs
@@ -2223,8 +2188,7 @@ subroutine pre_scatter(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
  integer,intent(in) :: n1,n2,n3,n4
  real(dp),intent(out) :: array(n1,n2,n4,1)
  real(dp),intent(in) :: array_allgather(n1,n2,n3,1)
- type(mpi_type),intent(in) :: mpi_enreg
-
+ class(mpi_type),intent(in) :: mpi_enreg
 ! *********************************************************************
 
 !Perform the reverse operation
@@ -2251,8 +2215,7 @@ logical function iwrite_fftdatar(mpi_enreg) result(ans)
 
 !Arguments ------------------------------------
 !scalars
- type(MPI_type),intent(in) :: mpi_enreg
-
+ class(MPI_type),intent(in) :: mpi_enreg
 ! *********************************************************************
 
  ans = (xmpi_paral==0 .or. &                                  ! No MPI
@@ -2302,7 +2265,7 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
  integer,intent(in) :: mband,nkpt,nproc,nsppol
  integer,intent(in) :: nband(nkpt*nsppol)
  integer,intent(out) :: mband_mem_out
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
  integer :: maxproc_bandpool
@@ -2313,7 +2276,6 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
  integer :: kpt_distrb(nkpt)
  logical,save :: first=.true.,has_file
  character(len=500) :: msg
-
 !******************************************************************
 
  nproc_spkpt=mpi_enreg%nproc_spkpt
@@ -2607,12 +2569,11 @@ subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbandhf,nkpthf,nproc,nsppol
- type(MPI_type),intent(inout) :: mpi_enreg
+ class(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
  integer :: ind,iiband,iikpt,iistep,nproc_hf
  character(len=500) :: msg
-
 !******************************************************************
 
  nproc_hf=mpi_enreg%nproc_hf

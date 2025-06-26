@@ -27,20 +27,20 @@ getwfk1     0
 getwfk      1        # Obtain WFK file from previous dataset
 ecutwfn     11.5     # Planewaves to be used to represent the wavefunctions
 ecutsigx    11.5     # Planewaves to be used to represent the exchange operator
-nkptgw      1           
-bdgw        1  8  
+nkptgw      1
+bdgw        1  8
 kptgw       0.0 0.0 0.0
 symsigma    1
 
 # Dataset2: Calculation of the HSE06 band gap
-optdriver2  4 
+optdriver2  4
 gwcalctyp2  15
 ixc_sigma2  -428  # HSE06
 
 # Dataset3: Calculation of the PBE0  band gap
 optdriver3  4
 gwcalctyp3  15
-ixc_sigma3  -406  # PBE0 
+ixc_sigma3  -406  # PBE0
 
 # Dataset4: Calculation of the B3LYP band gap
 optdriver4  4
@@ -69,7 +69,7 @@ xred              # Reduced coordinate of atoms
 ecut 12.0          # Maximal kinetic energy cut-off, in Hartree
 
 # Definition of the SCF procedure
-nstep   250        # Maximal number of SCF cycles
+nstep   250       # Maximal number of SCF cycles
 diemac  12.0      # Although this is not mandatory, it is worth to
                   # precondition the SCF cycle. The model dielectric
                   # function used as the standard preconditioner
@@ -84,15 +84,15 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t41.abo, tolnlines = 18, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 19
 #%% [extra_info]
 #%% authors = F. Bruneval
 #%% keywords = GW
-#%% description = 
+#%% description =
 #%%  Diamond: hybrid functional calculation with the GW code
 #%%  Perturbative approach to the HSE06, PBE0, and B3LYP band gaps
-#%%  HSE06 and PBE0 tests temporarily disabled, waiting for the next version of the libxc)
+#%%  HSE06 and PBE0 tests temporarily disabled, waiting for the next version of the libxc.
 #%%<END TEST_INFO>

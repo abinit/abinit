@@ -56,7 +56,7 @@ module m_abstract_wf
  use m_pawtab,       only : pawtab_type
  use m_pawrhoij,     only : pawrhoij_copy
  use m_pawcprj,      only : pawcprj_type
- use m_wfd,          only : wfd_t, wfd_init, wave_t, WFD_STORED
+ use m_wfd,          only : wfd_t, wave_t, WFD_STORED
 
  implicit none
 
@@ -935,7 +935,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       call self%kset%get_bks_mask( bks_mask=self%bks_mask, keep_ur=self%keep_ur, &
         & nband=self%hdr_bz%mband, nsppol=hdr%nsppol, keep_ur_value=.False.)
       self%bks_mask(:,:,:)=.True.
-      call wfd_init(wfd=self%wfd_bz,Cryst=cryst,Pawtab=pawtab,Psps=psps, &
+      call self%wfd_bz%init(Cryst=cryst,Pawtab=pawtab,Psps=psps, &
         & keep_ur=self%keep_ur,mband=self%hdr_bz%mband,nband=self%ebands_bz%nband, &
         &nkibz=self%ebands_bz%nkpt,nsppol=dtset%nsppol,bks_mask=self%bks_mask,&
         &nspden=dtset%nspden,nspinor=hdr%nspinor,ecut=dtset%ecut, &

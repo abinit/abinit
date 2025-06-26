@@ -179,7 +179,6 @@ module m_effective_potential_file
    subroutine effpot_xml_getValue(filename,name_value,value_result) &
  &                          bind(C,name="effpot_xml_getValue")
       use, intrinsic :: iso_c_binding, only : C_CHAR
-      implicit none
       character(kind=C_CHAR) :: filename(*),name_value(*)
       character(kind=C_CHAR) :: value_result
     end subroutine effpot_xml_getValue

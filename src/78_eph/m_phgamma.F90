@@ -56,11 +56,12 @@ module m_phgamma
  use m_pawcprj
  use m_dtset
  use m_dtfil
- use m_wfd
+
  use m_ephtk
  use m_mkffnl
 
  use defs_abitypes,    only : mpi_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, mkherm, get_diag, isdiagmat
@@ -72,7 +73,6 @@ module m_phgamma
  use m_cgtools,        only : cg_zdotc
  use m_kg,             only : getph, mkkpg
  use m_dynmat,         only : symdyma, ftgam_init, ftgam, asrif9
- use defs_datatypes,   only : pseudopotential_type
  use m_bz_mesh,        only : kpath_t, kpath_new
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt, kpts_map
@@ -82,6 +82,7 @@ module m_phgamma
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
+ use m_wfd,            only : wfd_t
 
  implicit none
 
@@ -487,7 +488,6 @@ subroutine phgamma_free(gams)
 
 !Arguments ------------------------------------
  class(phgamma_t),intent(inout) :: gams
-
 ! *************************************************************************
 
  !real
@@ -3454,7 +3454,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  wfd_istwfk = 1
 
  ecut = dtset%ecut ! dtset%dilatmx
- call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
+ call wfd%init(cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
    nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
    dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 

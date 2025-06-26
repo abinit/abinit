@@ -1575,19 +1575,6 @@ meta: {optdriver: 4, gwcalctyp: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
-
- setup_sigma : calculating Sigma(iw) at imaginary frequencies [eV] (Fermi Level set to 0)
-
-     0.000       0.000
-     0.000       4.444
-     0.000       8.889
-     0.000      13.333
-     0.000      17.778
-     0.000      22.222
-     0.000      26.667
-     0.000      31.111
-     0.000      35.556
-     0.000      40.000
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
  Reduced coordinates and weights :
@@ -1623,6 +1610,27 @@ meta: {optdriver: 4, gwcalctyp: 1, }
      1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
+
+
+ Parameters for the analytic continuation of Sigma_c(i omega):
+  Mesh type:                      = linear
+  Number of imaginary frequencies =  10
+  Min frequency on imag axis (eV) =    0.000
+  Max frequency on imag axis (eV) =   40.000
+
+
+ setup_sigma: calculating Sigma(iw) at imaginary frequencies (eV) (Fermi Level set to 0)
+
+     0.000       0.000
+     0.000       4.444
+     0.000       8.889
+     0.000      13.333
+     0.000      17.778
+     0.000      22.222
+     0.000      26.667
+     0.000      31.111
+     0.000      35.556
+     0.000      40.000
 
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
@@ -1760,19 +1768,6 @@ meta: {optdriver: 4, gwcalctyp: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 --------------------------------------------------------------------------------
 
-
- setup_sigma : calculating Sigma(iw) at imaginary frequencies [eV] (Fermi Level set to 0)
-
-     0.000       0.000
-     0.000       4.444
-     0.000       8.889
-     0.000      13.333
-     0.000      17.778
-     0.000      22.222
-     0.000      26.667
-     0.000      31.111
-     0.000      35.556
-     0.000      40.000
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
  Reduced coordinates and weights :
@@ -1810,6 +1805,26 @@ meta: {optdriver: 4, gwcalctyp: 1, }
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
+
+ Parameters for the analytic continuation of Sigma_c(i omega):
+  Mesh type:                      = linear
+  Number of imaginary frequencies =  10
+  Min frequency on imag axis (eV) =    0.000
+  Max frequency on imag axis (eV) =   40.000
+
+
+ setup_sigma: calculating Sigma(iw) at imaginary frequencies (eV) (Fermi Level set to 0)
+
+     0.000       0.000
+     0.000       4.444
+     0.000       8.889
+     0.000      13.333
+     0.000      17.778
+     0.000      22.222
+     0.000      26.667
+     0.000      31.111
+     0.000      35.556
+     0.000      40.000
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
  r_s =    1.9964

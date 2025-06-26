@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h08 )
-  
+
 
 ================================================================================
 
@@ -60,11 +60,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -80,7 +80,7 @@
        3               2       -0.000000        0.000000
        3               3        0.012174        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -103,7 +103,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -116,7 +116,7 @@
 -  0.000000E+00  1.656650E+02  1.656650E+02  1.656650E+02  2.810929E+02
 -  2.810929E+02  2.810929E+02  4.533533E+02  4.533533E+02  4.533533E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -338,7 +338,7 @@
 
 ================================================================================
 
- Treat the second list of vectors 
+ Treat the second list of vectors
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -352,7 +352,7 @@
 -  1.588304E+02  1.656650E+02  1.656650E+02  2.810929E+02  2.810929E+02
 -  2.810929E+02  4.452209E+02  4.533533E+02  4.533533E+02  6.311288E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -538,4 +538,4 @@
 
 +Total cpu time      0.051  and wall time      0.109 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

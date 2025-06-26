@@ -14,13 +14,14 @@ restartxf = -3
 strprecon = 0.1
 efield_type 6
 efield_background 0.0 0.0 -0.5
-efield 0.0 1.0 0.0
-efield_lambda 29.4 0.0 0.0
-efield_phase 3.14159
-efield2 1.0 0.0 0.0
-efield_lambda2 0.0 29.4 0.0
-efield_phase2 1.570
 
+nefield = 2
+efield 0.0 1.0 0.0 
+       1.0 0.0 0.0
+efield_lambda 29.4 0.0 0.0 
+              0.0 29.4 0.0
+
+efield_phase 3.14159 1.570
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
@@ -36,6 +37,6 @@ efield_phase2 1.570
 #%% authors = F. Gomez-Ortiz
 #%% keywords =  multibinit
 #%% description = 
-#%%        New implementation of electric fields in Multibinit
+#%%        New implementation of electric fields in Multibinit, efieldtype6.
 #%%<END TEST_INFO>
 

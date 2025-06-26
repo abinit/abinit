@@ -126,7 +126,7 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
 !  Taken from http://www.netlib.org/specfun/j0y0
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: I,JINT
 !CS    REAL
        DOUBLE PRECISION :: &
@@ -448,7 +448,7 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
 !   (see comments heading CALJY0).
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: JINT
 !S    REAL  X, RESULT
       DOUBLE PRECISION :: X, RESULT
@@ -468,7 +468,7 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
 !C   (see comments heading CALJY0).
 !C
 !C--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER JINT
 !CS    REAL  X, RESULT
       DOUBLE PRECISION :: X, RESULT
@@ -573,7 +573,7 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
 !  Taken from http://www.netlib.org/specfun/j1y1
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: I,JINT
       DIMENSION :: PJ0(7),PJ1(8),PLG(4),PY0(7),PY1(9),P0(6),P1(6),&
 &                  QJ0(5),QJ1(7),QLG(4),QY0(6),QY1(8),Q0(6),Q1(6)
@@ -868,7 +868,7 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
 !   (see comments heading CALJY1).
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: JINT
 !CS    REAL
      DOUBLE PRECISION :: &
@@ -890,7 +890,7 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
 !   (see comments heading CALJY1).
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: JINT
 !CS    REAL
      DOUBLE PRECISION :: &
@@ -1033,7 +1033,7 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
 !  Slightly modified by MG to follow f90 rules and double precision arithmetic
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: I,JINT
 !CS    REAL
       DOUBLE PRECISION :: ARG,RESULT,SUMF,SUMG,SUMP,SUMQ,TEMP
@@ -1170,7 +1170,7 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
 !  Latest Modification: January 19, 1988
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: JINT
 !S    REAL
       DOUBLE PRECISION :: X, RESULT
@@ -1197,7 +1197,7 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
 !  Latest Modification: January 19, 1988
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER JINT
 !S    REAL
       DOUBLE PRECISION :: X,RESULT
@@ -1340,7 +1340,7 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
 !  Taken from http://www.netlib.org/specfun/k1
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: I,JINT
 !CS    REAL
       DOUBLE PRECISION :: &
@@ -1470,7 +1470,7 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
 !   for arguments  XLEAST .LE. ARG .LE. XMAX.
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER :: JINT
 !CS    REAL
       DOUBLE PRECISION :: &
@@ -1494,7 +1494,7 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
 !   XLEAST .LE. ARG .LE. XMAX.
 !
 !--------------------------------------------------------------------
-      IMPLICIT NONE
+      !IMPLICIT NONE
       INTEGER JINT
 !CS    REAL
       DOUBLE PRECISION :: &

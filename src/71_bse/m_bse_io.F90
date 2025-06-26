@@ -22,12 +22,10 @@
 MODULE m_bse_io
 
  use defs_basis
+ USE_MPI
  use m_xmpi
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
  use netcdf
  use m_nctk
  use, intrinsic :: iso_c_binding

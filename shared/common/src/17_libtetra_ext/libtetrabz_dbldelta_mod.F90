@@ -32,7 +32,7 @@ MODULE libtetrabz_dbldelta_mod
   use m_abicore
   use m_errors
 
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   PRIVATE
   PUBLIC :: libtetrabz_dbldelta
@@ -45,7 +45,7 @@ SUBROUTINE libtetrabz_dbldelta(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
   !
   use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3)
   REAL(C_DOUBLE),INTENT(IN) :: bvec(9), eig1(nb,PRODUCT(nge(1:3))), eig2(nb,PRODUCT(nge(1:3)))
@@ -102,7 +102,7 @@ SUBROUTINE libtetrabz_dbldelta_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig
   USE libtetrabz_common, ONLY : libtetrabz_sort, &
   &                             libtetrabz_triangle_a1, libtetrabz_triangle_b1, &
   &                             libtetrabz_triangle_b2, libtetrabz_triangle_c1
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, &
   &                     ik_global(20,nt_local), ik_local(20,nt_local)
@@ -204,7 +204,7 @@ END SUBROUTINE libtetrabz_dbldelta_main
 SUBROUTINE libtetrabz_dbldelta2(nb,ej,w)
   !
   USE libtetrabz_common, ONLY : libtetrabz_sort
-  IMPLICIT NONE
+  !IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nb
   REAL(8),INTENT(IN) :: ej(3,nb)

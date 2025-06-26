@@ -15,7 +15,7 @@ option(ABINIT_WANNIER90_BUILD_FORCE "Enforce building libwannier90 ? (default: O
 #
 # Option to enable / disable wannier90 detection
 #
-option(ABINIT_WANNIER90_WANTED "Turn OFF if you don't want libwannier90 (default: ON)" ON)
+option(ABINIT_WANNIER90_WANTED "Turn OFF if you don't want libwannier90 (default: OFF)" OFF)
 
 if(ABINIT_WANNIER90_WANTED)
 

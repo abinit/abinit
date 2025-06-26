@@ -83,8 +83,6 @@ contains
 !! SOURCE
 subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  character(len=8),           intent(in)    :: codvsn

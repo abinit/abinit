@@ -67,7 +67,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi, tgwr_5.abi
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
-#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% exclude_builders = eos_nvhpc_23.9_elpa ,eos_nvhpc_24.9_openmpi
 #%% [shell]
 #%% pre_commands = iw_cp gwr_include.abi gwr_include.abi
 #%% [files]

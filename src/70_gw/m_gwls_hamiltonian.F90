@@ -45,7 +45,7 @@ use m_hamiltonian,      only : gs_hamiltonian_type
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t
 use m_gsphere,          only : gsphere_t
-use m_bz_mesh,          only : kmesh_t, find_qmesh
+use m_bz_mesh,          only : kmesh_t
 use m_fft,              only : fftpac, fourwf
 use m_getghc,           only : getghc
 use m_io_kss,           only : make_gvec_kss
@@ -1817,7 +1817,7 @@ if(dtset%optdriver==66) then
   !Set up of the k-points and tables in the whole BZ
   call Kmesh%init(Cryst,dtset%nkpt,dtset%kptns,dtset%kptopt,wrap_1zone=.false.)
   call Kmesh%print([std_out], header="K-mesh for the wavefunctions")
-  call find_qmesh(Qmesh,Cryst,Kmesh)
+  call Qmesh%find_qmesh(Cryst,Kmesh)
   call Qmesh%print([std_out], header="Q-mesh for the screening function")
 
   !------------------------------

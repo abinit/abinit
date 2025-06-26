@@ -398,7 +398,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  nfftotf=product(ngfftf(1:3))
- 
+
  call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,dtset%natom,dtset%npsp,&
 & psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 & dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&

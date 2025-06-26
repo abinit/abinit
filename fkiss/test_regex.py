@@ -1,8 +1,6 @@
 """
 Units Tests for regular expressions.
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
-
 from unittest import TestCase
 
 from .regex import HasRegex

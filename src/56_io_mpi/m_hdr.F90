@@ -39,9 +39,7 @@ module m_hdr
  use m_crystal
  use m_wffile
  use m_sort
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use netcdf
  use m_nctk
  use m_dtset
@@ -3251,7 +3249,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
  write(unit,err=10, iomsg=errmsg) hdr%residm, hdr%xred(:,:), hdr%etot, hdr%fermie, hdr%amu(:)
  write(unit,err=10, iomsg=errmsg) &
     hdr%kptopt, hdr%pawcpxocc, hdr%nelect, hdr%cellcharge, hdr%icoulomb,&
-   hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig(:,1:hdr%nshiftk_orig),hdr%shiftk(:,1:hdr%nshiftk)
+    hdr%kptrlatt,hdr%kptrlatt_orig, hdr%shiftk_orig(:,1:hdr%nshiftk_orig),hdr%shiftk(:,1:hdr%nshiftk)
 
  ! Write record for occopt 9 option if needed
  if (hdr%occopt == 9) then

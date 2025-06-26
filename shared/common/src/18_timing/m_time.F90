@@ -25,9 +25,7 @@ module m_time
  use m_abicore
  use m_errors
  use, intrinsic :: iso_c_binding
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_xmpi
  use m_clib
 
@@ -116,7 +114,6 @@ function asctime()
  character(len=3),parameter :: day_names(7)=(/'Mon','Tue','Wed','Thu','Fri','Sat','Sun'/)
  character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
 &                                                'Jul','Aug','Sep','Oct','Nov','Dec'/)
-
 ! *************************************************************************
 
 !Get year, month and day
@@ -173,7 +170,6 @@ pure function sec2str(time_s) result(str)
 
 !Local variables-------------------------------
  integer :: days,hours,minutes,seconds
-
 ! *************************************************************************
 
  days    = time_s / 86400
@@ -221,7 +217,6 @@ real(dp) pure function str2sec(str) result(time)
 
 !Local variables-------------------------------
  integer :: days,hours,minutes,seconds,dash,i,j
-
 ! *************************************************************************
 
  days = 0; hours = 0; minutes = 0; seconds = 0
@@ -316,7 +311,6 @@ function abi_cpu_time() result(cpu)
 #else
  integer :: count_now,count_max,count_rate
 #endif
-
 ! *************************************************************************
 
 !Machine-dependent timers
@@ -381,7 +375,6 @@ function abi_wtime() result(wall)
 !arrays
  integer :: values(8)
 #endif
-
 ! *************************************************************************
 
 #ifndef HAVE_MPI
@@ -485,7 +478,6 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
  integer(C_LONG_LONG) :: flops
  real(C_FLOAT) :: real_time,proc_time,mflops
  real(dp) :: vals(3)
-
 ! *************************************************************************
 
  if (present(msg)) call wrtout(std_out, msg)
@@ -555,7 +547,6 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, com
  real(dp),optional,intent(out) :: out_wall
 
 !Local variables-------------------------------
-!scalars
  character(len=500) :: avg_type
 ! *************************************************************************
 
@@ -609,7 +600,6 @@ end subroutine cwtime_report
 subroutine timein(cpu,wall)
 
 !Arguments ------------------------------------
-!scalars
  real(dp),intent(out) :: cpu,wall
 ! *************************************************************************
 
@@ -653,12 +643,11 @@ subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-
 ! *************************************************************************
 
-!Check that nn lies in sensible bounds
+! Check that nn lies in sensible bounds
  if (nn<0.or.nn>TIMER_SIZE) then
-   write(msg,'(a,i6,a,i8,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
+   write(msg,'(a,i0,a,i0,a)')' dim TIMER_SIZE=',TIMER_SIZE,' but input nn=',nn,'.'
    ABI_BUG(msg)
  end if
 
@@ -689,9 +678,7 @@ end subroutine time_accu
 subroutine time_set_papiopt(opt)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: opt
-
 ! *************************************************************************
 
  papiopt = opt
@@ -713,9 +700,7 @@ end subroutine time_set_papiopt
 function time_get_papiopt()
 
 !Arguments ------------------------------------
-!scalars
  integer :: time_get_papiopt
-
 ! *************************************************************************
 
  time_get_papiopt = papiopt

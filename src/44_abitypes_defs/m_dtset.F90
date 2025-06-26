@@ -439,6 +439,8 @@ type, public :: dataset_type
  integer :: nbdblock
  integer :: nbdbuf
  integer :: nberry
+ integer :: nb_protected = 0
+ integer :: nb_per_slice = 2
  integer :: nc_xccc_gspace = 0
  integer :: nconeq
  integer :: ncout = 1
@@ -451,6 +453,7 @@ type, public :: dataset_type
  integer :: nfft
  integer :: nfftdg
  integer :: nfreqim = -1
+ integer :: nfreqim_conv = 0
  integer :: nfreqre = -1
  integer :: nfreqsp = 0
  integer :: nimage
@@ -659,6 +662,7 @@ type, public :: dataset_type
  integer :: symdynmat = 1
  integer :: symsigma = 1
  integer :: symv1scf = 0
+ integer :: scr_wrange(2) = 0
 !T
  integer :: td_exp_order
  integer :: td_mexcit
@@ -1670,6 +1674,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ph_intmeth        = dtin%ph_intmeth
  dtout%symdynmat         = dtin%symdynmat
  dtout%symv1scf          = dtin%symv1scf
+ dtout%scr_wrange        = dtin%scr_wrange
  dtout%ph_nqshift        = dtin%ph_nqshift
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
@@ -1933,6 +1938,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nbdbuf             = dtin%nbdbuf
  dtout%nbandhf            = dtin%nbandhf
  dtout%nberry             = dtin%nberry
+ dtout%nb_protected       = dtin%nb_protected
+ dtout%nb_per_slice       = dtin%nb_per_slice
  dtout%nc_xccc_gspace     = dtin%nc_xccc_gspace
  dtout%nbandkss           = dtin%nbandkss
  dtout%nconeq             = dtin%nconeq
@@ -1945,6 +1952,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nfft               = dtin%nfft
  dtout%nfftdg             = dtin%nfftdg
  dtout%nfreqim            = dtin%nfreqim
+ dtout%nfreqim_conv       = dtin%nfreqim_conv
  dtout%nfreqre            = dtin%nfreqre
  dtout%nfreqsp            = dtin%nfreqsp
  dtout%nimage             = dtin%nimage
@@ -3551,7 +3559,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chebfi_oracle'
  list_vars=trim(list_vars)//' chkdilatmx chkexit chkparal chkprim'
- list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind coeff_file_rw'
+ list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
  list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
@@ -3579,7 +3587,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_optim dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm' 
+ list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm'
  list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dmft_yukawa_param dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
@@ -3591,8 +3599,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass_free efmas'
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
- list_vars=trim(list_vars)//' efield efield2 efield_background efield_gmean efield_gvel efield_lambda efield_lambda2 efield_period'
- list_vars=trim(list_vars)//' efield_phase efield_phase2 efield_sigma efield_type einterp elph2_imagden energy_reference enunit'
+ list_vars=trim(list_vars)//' efield efield_background efield_gmean efield_gvel efield_lambda  efield_period'
+ list_vars=trim(list_vars)//' efield_phase efield_sigma efield_type einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_frohl_ntheta'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type eph_path_brange'
@@ -3698,9 +3706,9 @@ subroutine chkvars(string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq ncout nc_xccc_gspace'
- list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring'
- list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
+ list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nb_protected nb_per_slice nconeq ncout'
+ list_vars=trim(list_vars)//' nc_xccc_gspace nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring nefield'
+ list_vars=trim(list_vars)//' nfreqim nfreqim_conv nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nblock_lobpcg nloc_alg nloc_mem nnos nnsclo nnsclohf'
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info nonlop_ylm_count noseinert npband'
@@ -3755,7 +3763,7 @@ subroutine chkvars(string)
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'
- list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk'
+ list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk scr_wrange'
 !MS Variables for SCALE-UP
 !This is only for the developer version, not for the production version. So, was commented.
 ! @Marcus: simply uncomment these lines in v9.1 (not v9.0 !), and continue to develop without worrying.

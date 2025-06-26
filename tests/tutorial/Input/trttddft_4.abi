@@ -81,9 +81,9 @@ prtcurrent 1      # Print current
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   trttddft_4.abo, tolnlines=  0, tolabs=  0.0, tolrel=  0.0 ;
-#%%   trttddft_4o_DS2_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0 ;
-#%%   trttddft_4o_DS2_TDCURRENT, tolnlines=  0, tolabs=  0.0, tolrel=  0.0
+#%%   trttddft_4.abo, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium ;
+#%%   trttddft_4o_DS2_TDENER, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options= -medium ;
+#%%   trttddft_4o_DS2_TDCURRENT, tolnlines=  0, tolabs=  0.0, tolrel=  0.0, fld_options -=medium ;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

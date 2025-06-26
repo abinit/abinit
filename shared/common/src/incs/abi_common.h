@@ -13,6 +13,18 @@
 #define _ABINIT_COMMON_H
 
 /*
+#define _GMATTEO_WHISH_LIST
+*/
+
+#if defined HAVE_MPI2
+#define USE_MPI use mpi
+#elif defined HAVE_MPI3
+#define USE_MPI use mpi_f08
+#else
+#define USE_MPI
+#endif
+
+/*
  * Language standards requires the existance of pre-defined macros
  * Microsoft Visual C++ does not define __STDC__,
  * Sun Workshop 4.2 supports C94 without setting __STDC_VERSION__ to the proper value
@@ -45,10 +57,23 @@
 #ifdef HAVE_FC_LONG_LINES
 #define _FILE_LINE_ARGS_    ,file=__FILE__, line=__LINE__
 #define _FILE_ABIFUNC_LINE_ARGS_    ,file=__FILE__, line=__LINE__
+#define _PSTAT_ARGS_    file=__FILE__, line=__LINE__
 #else
 #define _FILE_LINE_ARGS_
 #define _FILE_ABIFUNC_LINE_ARGS_
+#define _PSTAT_ARGS_
 #endif
+
+/**
+  Macro used for pstat memory logging.
+  Since eos_nvhpc_23.9_elpa crashes (likely due to optional arguments), we disable it if FC_NVHP
+
+#ifndef FC_NVHPC
+#define call pstat_proc%print(_PSTAT_ARGS_) call pstat_proc%print(_PSTAT_ARGS_)
+#else
+#define call pstat_proc%print(_PSTAT_ARGS_)
+#endif
+**/
 
 /** this does not work with gfort, pgi, **/
 #if defined (FC_GNU) || defined (FC_PGI)
@@ -70,13 +95,6 @@
 #endif
 
 #define BYTE_SIZE(array)  PRODUCT(SHAPE(array)) * DBLE(KIND(array))
-
-/* var = var + increment
- * Because Fortran does not provide inplace add.
- * but NAG does not like this CPP macro so we cannot use it!
- *
-#define IADD(var, increment) var = var + increment
-*/
 
 /*
  * ABI_  abinit macros.
@@ -405,7 +423,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #ifdef HAVE_GW_DPC
 #  define GWPC_CONJG(cvar)  DCONJG(cvar)
 #  define GWPC_CMPLX(re,im) DCMPLX(re,im)
-#  define __slkmat_t matrix_scalapack
+#  define __slkmat_t slkmat_dp_t
 #else
 #  define GWPC_CONJG(cvar)  CONJG(cvar)
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)

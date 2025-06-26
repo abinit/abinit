@@ -209,7 +209,7 @@ contains
 
     !  Read the model (from DDB or XML)
     call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-
+      ! TODO: coeff_file_rw is currently set to 0 as this functionality needs more testing. 
        if (inp%coeff_file_rw==2) then
           read_effective_potential=reference_effective_potential
           !call effective_potential_file_read(filnam(3),read_effective_potential,inp,comm)

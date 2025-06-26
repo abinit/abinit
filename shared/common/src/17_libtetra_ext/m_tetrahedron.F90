@@ -35,9 +35,7 @@ module m_tetrahedron
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
  use m_krank
-#ifdef HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 #ifdef HAVE_LIBTETRA_ABINIT
  use m_io_tools, only : open_file
  use m_xmpi

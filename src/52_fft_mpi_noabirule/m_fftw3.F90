@@ -29,7 +29,17 @@
 #undef DEV_RC_BUG
 
 #define FFTLIB "FFTW3"
-#define FFT_PREF(name) CONCAT(fftw3_,name)
+! do not use FFT_PREF(name) since not working with NAG compiler
+#define FFT_PREF_fftrisc fftw3_fftrisc
+#define FFT_PREF_fftrisc_mixprec fftw3_fftrisc_mixprec
+#define FFT_PREF_fftpad fftw3_fftpad
+#define FFT_PREF_fftug_dp fftw3_fftug_dp
+#define FFT_PREF_fftur_dp fftw3_fftur_dp
+#define FFT_PREF_fftug fftw3_fftug
+#define FFT_PREF_fftur fftw3_fftur
+
+
+
 #define SPAWN_THREADS_HERE(ndat, nthreads) fftw3_spawn_threads_here(ndat, nthreads)
 #define FFT_DOUBLE 1
 #define FFT_SINGLE 2
@@ -306,7 +316,6 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
  integer,parameter :: iscale1 = 1
  integer :: my_flags,ii,jj
  complex(spc), allocatable :: work_sp(:)
-
 ! *************************************************************************
 
  my_flags = ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -315,7 +324,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
  case (2)
    ! Complex to Complex.
    if (fftcore_mixprec == 1) then
-     ! Mixed precision: copyin + in-place + copyout
+     ! Mixed precision: copy in + in-place + copyout
      ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
      if (isign == ABI_FFTW_BACKWARD) then ! +1
        work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
@@ -468,7 +477,6 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  integer,parameter :: shiftg(3)=(/0,0,0/)
  integer :: symm(3,3)
 #endif
-
 ! *************************************************************************
 
  if (all(option /= [0, 1, 2, 3])) then
@@ -787,7 +795,6 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
  real(sp),intent(inout) :: fofgout(2,npwout)
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3
@@ -905,7 +912,6 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
  real(dp),intent(inout) :: fofgout(2,npwout)
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3
@@ -962,7 +968,6 @@ subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboun
  real(dp),intent(inout) :: fofgout(2,npwout)
  logical,optional,intent(in) :: abi_convention
  integer,optional,intent(in) :: iscale
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3
@@ -1003,7 +1008,7 @@ end subroutine fftw3_fftrisc_mixprec
 !! TARGET: dp arrays with real and imaginary part
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -1041,7 +1046,6 @@ subroutine fftw3_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer :: iscale__, isign__
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1049,6 +1053,10 @@ subroutine fftw3_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cg_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cg_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1103,7 +1111,6 @@ subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 !arrays
  real(sp) :: fofgout(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1111,6 +1118,10 @@ subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_SINGLE
@@ -1165,7 +1176,6 @@ subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 !arrays
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1173,6 +1183,10 @@ subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1203,7 +1217,7 @@ end subroutine fftw3_fftug_dpc
 !! TARGET: dp arrays
 !!
 !! INPUTS
-!! fftalg=FFT algorith (see input variable)
+!! fftalg=FFT algorithm (see input variable)
 !! fftcache=size of the cache (kB)
 !! npw_k=number of plane waves for this k-point.
 !! nx,ny,nz=Number of point along the three directions.
@@ -1244,7 +1258,6 @@ subroutine fftw3_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1252,6 +1265,10 @@ subroutine fftw3_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cg_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cg_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1307,7 +1324,6 @@ subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 !arrays
  real(sp) :: dum_ugin(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1315,6 +1331,10 @@ subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_SINGLE
@@ -1370,7 +1390,6 @@ subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
-
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1378,6 +1397,10 @@ subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
+#undef TK_PREF_box2gsph
+#define TK_PREF_box2gsph cplx_box2gsph
+#undef TK_PREF_gsph2box
+#define TK_PREF_gsph2box cplx_gsph2box
 
 #undef  FFT_PRECISION
 #define FFT_PRECISION FFT_DOUBLE
@@ -1440,7 +1463,6 @@ subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags=fftw_flags
@@ -1516,7 +1538,6 @@ subroutine fftw3_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, g
  integer,parameter :: dst=1
  integer :: iscale__
  real(sp) :: fact
-
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -1575,7 +1596,6 @@ subroutine fftw3_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags=fftw_flags
@@ -1652,7 +1672,6 @@ subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -1729,7 +1748,6 @@ subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, 
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -1810,7 +1828,6 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  integer :: inembed(rank3),onembed(rank3),n(rank3)
  integer,allocatable :: i1inver(:),i2inver(:),i3inver(:)
  real(dp),allocatable :: gg_hp(:,:)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -1959,7 +1976,6 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 !arrays
  integer :: inembed(rank3),onembed(rank3),n(rank3)
  real(dp),allocatable :: ff_hp(:,:)
-
 ! *************************************************************************
 
 #ifdef DEV_RC_BUG
@@ -2068,7 +2084,6 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -2146,7 +2161,6 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
  integer(KIND_FFTW_PLAN) :: my_plan
 !arrays
  integer :: embed(rank3),n(rank3)
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -2203,8 +2217,6 @@ end subroutine fftw3_many_dft_ip
 
 subroutine fftw3_cleanup()
 
-! *************************************************************************
-
 #ifdef HAVE_FFTW3_MPI
  call fftw_mpi_cleanup()
 #endif
@@ -2240,7 +2252,6 @@ subroutine fftw3_destroy_plan(plan)
 !Arguments ------------------------------------
 !scalars
  integer(KIND_FFTW_PLAN),intent(in) :: plan
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3
@@ -2280,7 +2291,6 @@ subroutine fftw3_init_threads()
 #ifdef HAVE_FFTW3_THREADS
  integer :: iret
 #endif
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3_THREADS
@@ -2339,7 +2349,6 @@ subroutine fftw3_set_nthreads(nthreads)
  integer,parameter :: enough=1
  integer,save :: nwarns=0
 #endif
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3_THREADS
@@ -2419,7 +2428,6 @@ subroutine fftw3_fftpad_dp(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
  integer,parameter :: dst=2
  integer :: iscale__
  real(dp) :: fact
-
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -2479,7 +2487,6 @@ subroutine fftw3_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, g
  integer,parameter :: dst=1
  integer :: iscale__
  real(dp) :: fact
-
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -2523,7 +2530,6 @@ function dplan_many_dft_1D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
 !$OMP CRITICAL (OMPC_dfftw_plan_many_dft_1D)
@@ -2572,7 +2578,6 @@ function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
 !$OMP CRITICAL (OMPC_dfftw_plan_many_dft_2D)
@@ -2622,7 +2627,6 @@ function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
 !$OMP CRITICAL (OMPC_cplan_many_dft)
@@ -2672,7 +2676,6 @@ function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,os
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
 !$OMP CRITICAL (OMPC_zplan_many_dft)
@@ -2723,7 +2726,6 @@ function dplan_many_dft_r2c(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
 !$OMP CRITICAL (OMPC_dplan_many_dft_r2c)
@@ -2772,7 +2774,6 @@ function dplan_many_dft_c2r(rank,n,howmany,fin,inembed,istride,idist,fout,onembe
 
 !Local variables-------------------------------
  character(len=500) :: msg,frmt
-
 ! *************************************************************************
 
 !$OMP CRITICAL (OMPC_dplan_many_dft_c2r)
@@ -2826,7 +2827,6 @@ subroutine fftw3_execute_dft_dp(plan, in, out)
  integer(KIND_FFTW_PLAN),intent(in) :: plan
  real(C_DOUBLE),intent(inout) :: in(*)
  real(C_DOUBLE),intent(out) :: out(*)
-
 ! *************************************************************************
 
  call dfftw_execute_dft(plan, in, out)
@@ -2853,7 +2853,6 @@ subroutine fftw3_execute_dft_spc(plan, in, out)
  integer(KIND_FFTW_PLAN),intent(in) :: plan
  complex(C_FLOAT_COMPLEX),intent(inout) :: in(*)
  complex(C_FLOAT_COMPLEX),intent(out) :: out(*)
-
 ! *************************************************************************
 
  call sfftw_execute_dft(plan, in, out)
@@ -2880,7 +2879,6 @@ subroutine fftw3_execute_dft_dpc(plan, in, out)
  integer(KIND_FFTW_PLAN),intent(in) :: plan
  complex(C_DOUBLE_COMPLEX),intent(inout) :: in(*)
  complex(C_DOUBLE_COMPLEX),intent(out) :: out(*)
-
 ! *************************************************************************
 
  call dfftw_execute_dft(plan, in, out)
@@ -2909,7 +2907,6 @@ subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
  integer,intent(in) :: size
  real(dp),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = fftw_malloc( INT(size*C_DOUBLE, KIND=C_SIZE_T))
@@ -2941,7 +2938,6 @@ subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
  integer,intent(in) :: shape(2)
  real(dp),ABI_CONTIGUOUS pointer :: fptr(:,:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = fftw_malloc( INT(product(shape)*C_DOUBLE, KIND=C_SIZE_T))
@@ -2973,7 +2969,6 @@ subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
  integer,intent(in) :: size
  complex(spc),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = fftw_malloc( INT(2*size*C_FLOAT, KIND=C_SIZE_T))
@@ -3005,7 +3000,6 @@ subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
  integer,intent(in) :: size
  complex(dpc),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-
 ! *************************************************************************
 
  cptr = fftw_malloc( INT(2*size*C_DOUBLE, KIND=C_SIZE_T))
@@ -3042,7 +3036,6 @@ function fftw3_spawn_threads_here(ndat,nthreads) result(ans)
 !scalars
  integer,intent(in) :: ndat,nthreads
  logical :: ans
-
 ! *************************************************************************
 
  ans = .FALSE.
@@ -3070,9 +3063,7 @@ end function fftw3_spawn_threads_here
 subroutine fftw3_use_lib_threads(logvar)
 
 !Arguments ------------------------------------
-!scalars
  logical,intent(in) :: logvar
-
 ! *************************************************************************
 
  USE_LIB_THREADS = logvar
@@ -3087,7 +3078,7 @@ end subroutine fftw3_use_lib_threads
 !!  fftwmpi_get_work_array
 !!
 !! FUNCTION
-!! Driver routine for allocate fftw work arrray for 3D complex-to-complex FFTs of lengths nx, ny, nz.
+!! Driver routine for allocate fftw work array for 3D complex-to-complex FFTs of lengths nx, ny, nz.
 !!
 !! INPUTS
 !! nx,ny,nz=Number of points along the three directions.
@@ -3115,7 +3106,6 @@ subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0
  integer(C_INTPTR_T) :: alloc_local
 !arrays
  integer(C_INTPTR_T) :: fft_sizes(4)
-
 ! *************************************************************************
 
  ! Dimensions are inverted here (C interface).
@@ -3149,7 +3139,7 @@ end subroutine fftwmpi_get_work_array
 !!  fftwmpi_free_work_array
 !!
 !! FUNCTION
-!!  routine for freeing fftw work arrray
+!!  routine for freeing fftw work array
 !!
 !! INPUTS
 !!
@@ -3163,7 +3153,6 @@ subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
 !Arguments ------------------------------------
 !scalars
  type(C_PTR), intent(inout) :: cdata_f,cdata_r
-
 ! *************************************************************************
 
 #ifdef HAVE_FFTW3_MPI
@@ -3228,7 +3217,6 @@ subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_ff
  type(C_PTR) :: plan, cdata
  complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data(:,:,:)
  integer(C_INTPTR_T) :: i, j, k, alloc_local, local_n0, local_0_start,fft_sizes(4)
-
 !*************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3336,7 +3324,6 @@ subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags
  !FFTWMPI stuff
  type(C_PTR) :: plan
  integer(C_INTPTR_T) :: fft_sizes(4)
-
 !*************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3420,7 +3407,6 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
 !arrays
  complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data_cplx(:,:,:)
  real(C_DOUBLE), ABI_CONTIGUOUS pointer :: data_real(:,:,:)
-
 ! *************************************************************************
 
  !ABI_CHECK(ndat==1, "ndat > 1 not implemented yet")
@@ -3531,12 +3517,11 @@ end subroutine fftw3_mpifourdp_c2r
 !! LOCAL DATA FOR FOURIER TRANSFORMS : TRANSPOSED ORDER AND DISTRIBUTED
 !! real space     --> dim = [  nx  | ny | nz/np_fft ]
 !! fourier  space --> dim = [  nx | nz | ny/np_fft ]
-!! we can't take in account the symetric of the real case because after
-!! fft have been computed, the symetric data needed are dispatched over
+!! we can't take in account the symmetric of the real case because after
+!! fft have been computed, the symmetric data needed are dispatched over
 !! other process in parallel
 !!
 !! SOURCE
-
 
 subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
@@ -3564,7 +3549,6 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
 !arrays
  complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data_cplx(:,:,:),data_real(:,:,:)
  integer(C_INTPTR_T) :: fft_sizes(4)
-
 ! *************************************************************************
 
  nproc_fft = xmpi_comm_size(comm_fft)
@@ -3699,7 +3683,6 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 !Local variables-------------------------------
 !scalars
  integer :: nx,ny,nz,my_flags
-
 ! *************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3815,7 +3798,6 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
 !arrays
  integer(C_INTPTR_T) :: fft_sizes(4)
  complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: f03_cdata(:)
-
 !*************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3994,7 +3976,6 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  !real(dp),ABI_CONTIGUOUS pointer :: zw(:,:),zt(:,:,:)
 ! FFT work arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  !call wrtout(std_out,"mpiback standard ALLTOALL + FFTW3")
@@ -4097,7 +4078,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
     ! transform along z axis
     ! input: G1,G3,G2,(Gp2)
 
-    ! Loop over the y planes treated by this node and trasform n1ddft G_z lines.
+    ! Loop over the y planes treated by this node and transform n1ddft G_z lines.
     do j2=1,md2proc
       ! if (me_fft*md2proc+j2<=m2eff) then !a faire plus tard
       do i1=1,m1,lot3
@@ -4342,7 +4323,6 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
 ! FFT work arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  ! FIXME must provide a default value but which one?
@@ -4681,7 +4661,6 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 !arrays
  real(dp), allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
-
 ! *************************************************************************
 
  nproc_fft = xmpi_comm_size(comm_fft); me_fft = xmpi_comm_rank(comm_fft)
@@ -4976,7 +4955,6 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 !arrays
  real(dp), allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
-
 ! *************************************************************************
 
  nproc_fft = xmpi_comm_size(comm_fft); me_fft = xmpi_comm_rank(comm_fft)
@@ -5198,7 +5176,7 @@ end subroutine fftw3_mpiforw
 !! cplex=1 if fofr is real, 2 if fofr is complex
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! ndat=Numbre of FFT transforms
+!! ndat=Number of FFT transforms
 !! isign=sign of Fourier transform exponent: current convention uses
 !!    +1 for transforming from G to r
 !!    -1 for transforming from r to G.
@@ -5230,7 +5208,6 @@ subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
  integer :: n1,n2,n3,n4,n5,n6,nd2proc,nd3proc,nproc_fft,me_fft
 !arrays
  real(dp),allocatable :: workf(:,:,:,:,:),workr(:,:,:,:,:)
-
 ! *************************************************************************
 
  ! Note the only c2c is supported in parallel.
@@ -5356,7 +5333,6 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  real(dp), allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
 ! FFT work arrays
-
 ! *************************************************************************
 
  !ioption=0 ! This was in the old version.
@@ -5815,7 +5791,6 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  real(dp), allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  !ioption=0 ! This was in the old version.
@@ -5902,9 +5877,9 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
    ! input: I1,I3,J2,(Jp2)
    !lot=ncache/(4*n3)
 
-   ! Loop over the y planes treated by this node and trasform n1ddft G_z lines.
+   ! Loop over the y planes treated by this node and transform n1ddft G_z lines.
    do j2=1,md2proc
-     if (me_fft*md2proc+j2 <= m2eff) then ! MG REMOVED TO BE COSISTENT WITH BACK_WF
+     if (me_fft*md2proc+j2 <= m2eff) then ! MG REMOVED TO BE CONSISTENT WITH BACK_WF
        do i1=1,m1,lot3
          ma=i1
          mb=min(i1+(lot3-1),m1)
@@ -6141,7 +6116,6 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  !real(dp),ABI_CONTIGUOUS pointer :: zw(:,:),zt(:,:,:)
 ! FFT work arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  !call wrtout(std_out,"mpiback with non-blocking IALLTOALL + FFTW3")
@@ -6236,7 +6210,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
     ! transform along z axis
     ! input: G1,G3,G2,(Gp2)
 
-    ! Loop over the y planes treated by this node and trasform n1ddft G_z lines.
+    ! Loop over the y planes treated by this node and transform n1ddft G_z lines.
     do j2=1,md2proc
       ! if (me_fft*md2proc+j2<=m2eff) then !a faire plus tard
       do i1=1,m1,lot3
@@ -6486,7 +6460,6 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
 ! FFT work arrays
  real(dp) :: tsec(2)
-
 ! *************************************************************************
 
  ! FIXME must provide a default value but which one?
@@ -6827,7 +6800,6 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
  real(dp) ABI_ASYNC, allocatable :: zmpi1(:,:,:,:,:),zmpi2(:,:,:,:,:) ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
 ! FFT work arrays
-
 ! *************************************************************************
 
  !ioption=0 ! This was in the old version.
@@ -7265,7 +7237,6 @@ subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
  integer(KIND_FFTW_PLAN) :: bw_plan_xy,bw_plan3
  integer(KIND_FFTW_PLAN) :: fw_plan_xy,fw_plan3
  real(dp) :: fft_fact,vg_fftfact
-
 ! *************************************************************************
 
  !write(std_out,*)"in poisson"

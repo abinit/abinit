@@ -40,13 +40,10 @@ module m_chebfiwf_cprj
  use m_xg
  use m_xg_nonlop
  use m_chebfi2_cprj
- use m_dtset
-
  use m_chebfi
  use m_invovl
 
  use m_dtset,       only : dataset_type
-
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_getghc,      only : multithreaded_getghc
@@ -107,8 +104,6 @@ module m_chebfiwf_cprj
 
 subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid,xg_nonlop)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
@@ -262,7 +257,6 @@ end subroutine chebfiwf2_cprj
 subroutine xg_getghc(X,AX)
 
  use iso_c_binding
- implicit none
 
 !Arguments ------------------------------------
  type(xgBlock_t), intent(inout) :: X
@@ -297,8 +291,6 @@ end subroutine xg_getghc
 !!***
 
 subroutine build_kin(kin,kinpw,npw)
-
-  implicit none
 
   integer,intent(in) :: npw
   real(dp),intent(in) :: kinpw(:)

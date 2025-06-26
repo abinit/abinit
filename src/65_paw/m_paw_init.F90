@@ -216,13 +216,13 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
   !Immediately set the value of usepotzero
   !it will be used later on in this subroutine
    pawtab%usepotzero=usepotzero
-  
+
   !==================================================
   !1- INITIALIZE DATA RELATED TO ANGULAR MESH
   !* ANGULAR GRID
   !* REAL SPHERICAL HARMONICS
   !* REAL GAUNT COEFFICIENTS
-  
+
    usekden=pawxc_get_usekden(ixc)
    nabgnt_option=0;if (usekden>0) nabgnt_option=1 ! If kin. ene. density is used, need nabla Gaunt coeffs
    use_angular_grid=0;if (pawxcdev==0) use_angular_grid=1
@@ -233,7 +233,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
    call pawang_free(pawang)
    call pawang_init(pawang,gnt_option,nabgnt_option,mpsang-1,nphi,ntheta,nsym,ngrad2_ylm,&
   &                 use_angular_grid,use_ylm,use_ls_ylm)
- endif  
+ endif
 
 !*******************
 !Loop on atom types
@@ -262,7 +262,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 &     '        or use usexcnhat keyword in input file.'
      ABI_ERROR(message)
    end if
-   
+
    if(rcpaw_update_) then
      ABI_MALLOC(old_phiphj,(mesh_size,ij_size))
      ABI_MALLOC(old_tphitphj,(mesh_size,ij_size))
@@ -528,7 +528,7 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
      if (klm_diag(klmn)==1) pawtab(itypat)%sij(klmn)= &
 &     pawtab(itypat)%qijl(1,klmn)*sqrt(four_pi)
    end do
-  
+
    if(rcpaw_update_) goto 7
 
 !  ==================================================

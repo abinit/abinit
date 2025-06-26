@@ -10,14 +10,14 @@ add_library(48_diago STATIC
 
 set_target_properties(48_diago
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(48_diago
   PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   ${CMAKE_SOURCE_DIR}/src/incs
   )
 

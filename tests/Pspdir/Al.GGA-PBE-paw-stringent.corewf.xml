@@ -3364,7 +3364,7 @@
   6.5512031602856582E-78  2.2449203495946297E-78  7.6429013734955162E-79
   2.5851622002672043E-79  8.6892673295793654E-80  2.9088384644857523E-80
 </ae_core_wavefunction>
-<!-- Program:  atompaw - input data follows: 
+<!-- Program:  atompaw - input data follows:
 Al 13
 GGA-PBE loggrid 2001  logderivrange -20 20
 3 3 0 0 0 0

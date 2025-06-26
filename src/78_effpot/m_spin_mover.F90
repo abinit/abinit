@@ -360,7 +360,7 @@ contains
            call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
 
-           ABI_FREE(SPrim)
+           ABI_SFREE(SPrim)
 
          case (4)
           ! read from last step of hist file
