@@ -1191,7 +1191,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            stern_kqmp%cgq(:,:,ii) = cg_kmp(:,1:npw_kmp*nspinor)
          end do ! ib_sum
 
-#if 0
+#if 1
          ! Prepare the object for applying W(pp_bz).
          ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
          call screen%rotate_iqbz(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
@@ -1699,7 +1699,7 @@ subroutine dump_my_gbuf()
  ! as all the local buffers store results for all natom3 perturbations.
 
  integer :: ii, iq_bz, iq_glob, my_iq
- return
+ !return
 
  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  ! FIXME: Recheck this part as we have way more levels of parallelism in GWPT
