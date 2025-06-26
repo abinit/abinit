@@ -19779,7 +19779,7 @@ the default Pulay mixing is used).
 
 Since the convergence of the self-consistent cycle is determined directly by
 the convergence of the density: [[toldfe]], [[toldff]], [[tolrff]],
-[[tolvrs]], [[tolwfr]] are not used, and are replaced by [[rectolden]]; the
+[[tolvrs]], [[tolwfr]] , [[toldmag]]are not used, and are replaced by [[rectolden]]; the
 energetic values, except for the fermi energy, are only computed during the
 latest SFC cycle: the output file will show a jump of the total energy at the
 end, but it is not because of a bad convergence behavior. Computational speed
@@ -19949,8 +19949,8 @@ Variable(
     defaultval=0.0,
     mnemonics="TOLerance on the DiFference of total Energy",
     characteristics=['[[ENERGY]]'],
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
-    excludes="[[toldff]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]], [[toldmag]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldff]] or [[tolrff]] or [[tolvrs]] or [[toldmag]]",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for absolute differences of total energy that, reached TWICE
@@ -19970,7 +19970,7 @@ characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to
 1.0d-12, or use (better) [[tolvrs]].
 
-Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
@@ -20021,6 +20021,38 @@ See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
+Variable(
+    abivarname="toldmag",
+    varset="basic",
+    vartype="real",
+    topics=['SCFControl_basic', 'ForcesStresses_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="TOLerance on the DiFference of MAGnetizations",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]], [[toldmag]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[tolrff]] or [[tolvrs]]",
+    added_in_version="before_v...",
+    text=r"""
+Sets a tolerance for differences of magnetization (in ???? ) that, reached
+TWICE successively, will cause one SCF cycle to stop (and ions to be moved).
+If set to zero, this stopping condition is ignored.
+Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
+to any particular cartesian component of any atom. 
+
+This stopping criterion is not allowed for RF calculations.
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
+at the same goal (causing the SCF cycle to stop), they are seen as a unique
+input variable at reading. Hence, it is forbidden that two of these input
+variables have non-zero values for the same dataset, or generically (for all
+datasets). However, a non-zero value for one such variable for one dataset
+will have precedence on the non-zero value for another input variable defined generically.
+
+**toldmag** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
+""",
+),
 Variable(
     abivarname="tolimg",
     varset="rlx",
@@ -20178,8 +20210,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the potential V(r) ReSidual",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
-    excludes="[[toldfe]] or [[toldff]] or [[tolrff]]'",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] or [[toldmag]] can differ from zero.",
+    excludes="[[toldfe]] or [[toldff]] or [[tolrff]] or [[toldmag]]'",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for potential residual that, when reached, will cause one SCF
@@ -20200,7 +20232,7 @@ tolerance on the potential residual is imposed by first subtracting the mean
 of the residual of the potential (or the trace of the potential matrix, if the
 system is spin-polarized), then summing the square of this function over all
 FFT grid points. The result should be lower than [[tolvrs]].
-Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
@@ -20252,7 +20284,7 @@ Note that **tolwfr** is often used in the test cases, but this is
 purely for historical reasons: except when [[iscf]] < 0, **other criteria should be used**.
 Indeed, the squared residual can be small even with non self-consistent density and potential.
 
-**tolwfr** alone should not be used as SCF criterion, but it can be coupled with [[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]].
+**tolwfr** alone should not be used as SCF criterion, but it can be coupled with [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] or [[tolvrs]].
 In that case, SCF cycle is stopped when both criteria are satisfied.
 That way one can insure that physical properties are converged (=SCF converged) while insuring that wavefunctions are converged.
 For example, a ground state computations done before DFPT can use stringent values of **tolwfr** in addition to a desired criterion on self-consistency.
