@@ -557,7 +557,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
    if (iomode==IO_MODE_FORTRAN .or. iomode==IO_MODE_MPI) then
      ! Write the abinit header.
      call hscr%hdr%fort_write(unt, fform, ierr)
-     ABI_CHECK(ierr == 0, "hdr_fort_write retured ierr != 0")
+     ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr != 0")
 
      write(unt, err=10, iomsg=errmsg)hscr%titles
 
@@ -596,7 +596,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 
      ! Define dimensions
      ! Part 2) of etsf-io specifications
-     ! FIXME: Spin is only used in particular cases, We usuall get the trace of W in spin space
+     ! FIXME: Spin is only used in particular cases, We usually get the trace of W in spin space
      ! and I'm not gonna allocate extra memory just to have up up, down down
      ! Besides number_of_spins should be replaced by `number_of_spins_dielectric_function`
      ! Should add spin_dependent attribute.
@@ -850,7 +850,7 @@ end subroutine hscr_print
 !!
 !! INPUTS
 !!  varname=Name of the netcdf variable (used to get fform and ID).
-!!  ikxc=Integer flag definining the type of XC kernel (0 if None i.e RPA)
+!!  ikxc=Integer flag defining the type of XC kernel (0 if None i.e RPA)
 !!  test_type=Integer flag defining the type of probing charge (0 for None)
 !!  tordering=The time-ordering of the Response function.
 !!  gvec(3,Ep%npwe)=The G-vectors used.
@@ -1444,7 +1444,7 @@ end subroutine write_screening
 !!
 !! SOURCE
 
-subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, &
+subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode, comm, &
                           iqiA) ! Optional
 
 !Arguments ------------------------------------
@@ -1835,7 +1835,7 @@ end subroutine hscr_mpio_skip
 !! INPUTS
 !!  nfiles=Number of files to be merged.
 !!  filenames(nfiles)=Paths of files to be merged.
-!!  hscr_files(nfiles)<hscr_t>=Heades of the files to be merged.
+!!  hscr_files(nfiles)<hscr_t>=Headers of the files to be merged.
 !!  fname_out=Name of the file to be produced.
 !!
 !! OUTPUT
@@ -1931,8 +1931,8 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  do iq_ibz=1,ohscr%nqibz
    ifile = merge_table(iq_ibz,1)
    iqiA  = merge_table(iq_ibz,2)
-   call read_screening(varname,filenames(ifile),npwe4m,1,nomega4m,epsm1,iomode,comm,iqiA=iqiA)
-   call write_screening(varname,ount,iomode,npwe4m,nomega4m,iq_ibz,epsm1)
+   call read_screening(varname, filenames(ifile), npwe4m, 1, nomega4m,epsm1, iomode, comm, iqiA=iqiA)
+   call write_screening(varname, ount, iomode, npwe4m, nomega4m, iq_ibz, epsm1)
  end do
 
  ABI_FREE(epsm1)
@@ -2075,7 +2075,7 @@ end subroutine ioscr_qrecover
 !! INPUTS
 !!  nfiles=Number of files to be merged.
 !!  filenames(nfiles)=Paths of files to be merged.
-!!  hscr_files(nfiles)<hscr_t>=Heades of the files to be merged.
+!!  hscr_files(nfiles)<hscr_t>=Headers of the files to be merged.
 !!  fname_out=Name of the file to be produced.
 !!
 !! OUTPUT
@@ -2157,7 +2157,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      end if
    end do
 
-   ! Check gwcalctyp and other bacic parameters.
+   ! Check gwcalctyp and other basic parameters.
    ABI_CHECK_IEQ(hscr_file(ifile)%gwcalctyp, hscr_file(1)%gwcalctyp, "Different gwcalctyp")
    ABI_CHECK_IEQ(hscr_file(ifile)%npwe, hscr_file(1)%npwe, "Different npwe")
    ABI_CHECK_IEQ(hscr_file(ifile)%id, hscr_file(1)%id, "Different IDs")
