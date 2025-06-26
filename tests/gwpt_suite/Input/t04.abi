@@ -1,4 +1,5 @@
- #gwpt_np_wpqbks 1 1 8 1 1 1
+# GWPT calculation with SCR file
+#gwpt_np_wpqbks 1 1 8 1 1 1
 
  nband 9
  ecut 45.0
@@ -26,14 +27,16 @@
  boxcutmin 1.1
  tolwfr 1e-4
 
- mdf_epsinf 12    # For model dielectric function
  ppmodel 2
+ mdf_epsinf 12    # For model dielectric function TODO: To be removed
 
  getdvdb_filepath "t01_DVDB"
  getdrhodb_filepath "t02_DRHODB"
  getwfk_filepath "t03o_WFK"     # 4x4x4 k-mesh with 70 bands
  getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
  getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
+ getscr_filepath "diamond_eph_gwpt/gwo_SCR.nc"
+
 
  #gstore_kzone "bz"; gstore_qzone "ibz"
  gstore_kzone "ibz"; gstore_qzone "bz"; gstore_kfilter "qprange"
@@ -60,7 +63,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
