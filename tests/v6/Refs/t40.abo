@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h11 )
-  
+
 
 ================================================================================
 
@@ -64,7 +64,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
@@ -104,9 +104,9 @@
        351      5.740469E-03      0.000000E+00
        401      6.560536E-03      0.000000E+00
        451      7.380603E-03      5.813550E+00
- 
+
 --------------------------------------------------------------------------------
- 
+
  Electron-phonon change of electronic structure.
  The temperature-dependent values are written in the _TBS file.
  Here follows, for each electronic wavevector and band :
@@ -198,4 +198,4 @@
 
 +Total cpu time      0.104  and wall time      0.108 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

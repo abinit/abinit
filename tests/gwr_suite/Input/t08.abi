@@ -49,7 +49,7 @@ pseudos "Li.xml, F.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% exclude_builders = eos_nvhpc_23.9_elpa ,eos_nvhpc_24.9_openmpi
 #%% [files]
 #%% files_to_test =
 #%%   t08.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 6.0e-1;

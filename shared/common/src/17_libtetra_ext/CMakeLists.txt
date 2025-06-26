@@ -19,14 +19,14 @@ add_library(17_libtetra_ext STATIC
 
 set_target_properties(17_libtetra_ext
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(17_libtetra_ext
   PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
 
