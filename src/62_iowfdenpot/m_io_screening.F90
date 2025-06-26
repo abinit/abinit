@@ -2590,7 +2590,7 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
       "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
      ABI_WARNING(msg)
      dtset%npweps = npwe_file
-   else if (Dtset%npweps < npwe_file) then
+   else if (dtset%npweps < npwe_file) then
      write(msg,'(2(a,i0),2a,i0)')&
       "The number of G-vectors stored on file (",npwe_file,") is larger than dtset%npweps: ",dtset%npweps,ch10,&
       "Calculation will proceed with dtset%npweps: ",dtset%npweps
@@ -2609,10 +2609,15 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  end if
 
  ! Init qmesh from the SCR file.
- call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, Dtset%kptopt)
+ call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, dtset%kptopt)
 
  ! The G-sphere for W and Sigma_c is initialized from the g-vectors found in the SCR file.
- call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
+ if (dtset%npweps /= 0) then
+  call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
+ else
+  ! The G-sphere for W and Sigma_c is initialized from ecuteps.
+  call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
+ end if
 
 end subroutine get_hscr_qmesh_gsph
 !!***
