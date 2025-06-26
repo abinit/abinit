@@ -1134,7 +1134,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab,&
  dijhartree=zero
  lmn2_size=pawrhoij%lmn2_size
  cplex_rhoij=pawrhoij%cplex_rhoij
- eijkl_is_sym=.true. 
+ eijkl_is_sym=.true.
  if(present(is_sym)) eijkl_is_sym=is_sym
 
 !Loop over (diagonal) spin-components
@@ -4726,12 +4726,14 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  logical,parameter :: lsymnew=.false.
 !DEBUG_ALTERNATE_ALGO
  real(dp) :: arg,factafm,zarot2
+ real(dp) :: det
  character(len=6) :: pertstrg,wrt_mode
  character(len=500) :: msg
 !arrays
  integer :: nsym_used(2)
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
+ integer,allocatable :: symrec_det(:)
  real(dp) :: dijc(2),fact(2),factsym(2),phase(2)
  real(dp) :: rotdij(2,2,2),rotmag(2,3,2),sumdij(2,2,2),summag(2,3,2)
  real(dp),allocatable :: dijnew(:,:,:),dijtmp(:,:),symrec_cart(:,:,:)
@@ -4903,8 +4905,19 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
    if (noncoll) then
      LIBPAW_ALLOCATE(symrec_cart,(3,3,nsym))
+     LIBPAW_ALLOCATE(symrec_det,(nsym))
      do irot=1,nsym
        symrec_cart(:,:,irot)=symdij_symcart(gprimd,rprimd,symrec(:,:,irot))
+       ! compute the sign of the determinant of the symmetries
+       ! to be able to apply only the proper part of the symmetries to the magn. components
+       ! (magnetization == pseudo-vector)
+       det = symrec_cart(1,1,irot)*symrec_cart(2,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(3,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(1,2,irot)*symrec_cart(2,3,irot)*symrec_cart(3,1,irot) - &
+         &  (symrec_cart(3,1,irot)*symrec_cart(2,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(1,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(3,2,irot)*symrec_cart(2,3,irot)*symrec_cart(1,1,irot))
+       symrec_det(irot) = nint(det) ! should return 1 or -1
      end do
 !DEBUG_ALTERNATE_ALGO
 !    if(lsymnew) then
@@ -5142,7 +5155,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                    do mu=1,3
                      !We need the transpose ?
                      rotmag(1:cplex_dij,mu,iq)=rotmag(1:cplex_dij,mu,iq) &
-&                       +symrec_cart(mu,nu,irot)*summag(1:cplex_dij,nu,iq)
+&                       +symrec_det(irot)*symrec_cart(mu,nu,irot)*summag(1:cplex_dij,nu,iq)
                    end do
                  end do
                end do
@@ -5254,6 +5267,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    LIBPAW_DEALLOCATE(dijnew)
    if (noncoll)  then
      LIBPAW_DEALLOCATE(symrec_cart)
+     LIBPAW_DEALLOCATE(symrec_det)
 !DEBUG_ALTERNATE_ALGO
 !    if (lsymnew) then
 !      LIBPAW_DEALLOCATE(sumrhoso)

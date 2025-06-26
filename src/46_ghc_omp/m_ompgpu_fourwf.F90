@@ -77,8 +77,6 @@ contains
 
 function ompgpu_fourwf_work_mem(ngfft, ndat) result(req_mem)
 
- implicit none
-
  integer, intent(in) :: ngfft(:), ndat
  integer(kind=c_size_t) :: req_mem
 
@@ -591,7 +589,6 @@ end subroutine ompgpu_fourwf
 
 ! Memory allocation routine
 subroutine alloc_ompgpu_fourdp(ngfft, ndat)
- implicit none
  integer, intent(in) :: ngfft(18), ndat
 
  integer :: n1,n2,n3, ldx, ldy, ldz
@@ -631,7 +628,6 @@ subroutine free_ompgpu_fourdp()
 end subroutine free_ompgpu_fourdp
 
 subroutine alloc_ompgpu_fourwf(ngfft, ndat)
- implicit none
  integer, intent(in) :: ngfft(18), ndat
 
  integer :: n1,n2,n3, ldx, ldy, ldz
@@ -699,7 +695,6 @@ end subroutine ompgpu_fourdp
 
 subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -723,7 +718,6 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 end subroutine ompgpu_fourwf
 
 subroutine alloc_ompgpu_fourwf(ngfft, ndat)
- implicit none
 !Arguments ------------------------------------
  integer, intent(in) :: ngfft(6), ndat
 

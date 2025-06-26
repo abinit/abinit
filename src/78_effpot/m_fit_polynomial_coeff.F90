@@ -661,6 +661,7 @@ contains
         end if  !need_verbose
 
           max_nbody_tmp(:) = 20
+          max_nbody_tmp(1: size(max_nbody)) = max_nbody
         call polynomial_coeff_getNorder(coeffs_iatom,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot_tmp,power_disps,&
           &                                  max_power_strain_in,0,sc_size,comm,anharmstr=(ii==1 .and. need_anharmstr),&
           &                                  spcoupling=need_spcoupling,distributed=.true.,&
@@ -744,7 +745,11 @@ contains
   !>
   !> Handles MPI distribution of coefficients when reading from file
   subroutine read_or_write_coeffs_to_xml()
+
     if(present(coeff_file_rw)) then
+        ! TODO hexu: This functionality needs more test and is now temporarily disabled
+        ! If test ok, remove setting it to 0. 
+
       if (coeff_file_rw==1 .and. generateterm_in == 1 ) then
         write (filename, "(A9,I2,I2,A4)") "TEST_TERMS", my_rank+1,fit_iatom_in,".xml"
         call polynomial_coeff_writeXML(coeffs_tmp,my_ncoeff,filename=filename)

@@ -47,7 +47,7 @@ bdgw       # calculate GW corrections for bands from 4 to 5
 #%% executable = abinit
 #%% test_chain = tgwr_1.abi, tgwr_2.abi, tgwr_3.abi, tgwr_4.abi, tgwr_5.abi
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
-#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% exclude_builders = eos_nvhpc_23.9_elpa ,eos_nvhpc_24.9_openmpi
 #%% [files]
 #%% files_to_test =
 #%%   tgwr_3.abo, tolnlines = 50, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium;

@@ -48,7 +48,7 @@ pseudos "Li.psp8, F.upf"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% exclude_builders = eos_nvhpc_23.9_elpa ,eos_nvhpc_24.9_openmpi
 #%% [files]
 #%% files_to_test =
 #%%   t07.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 5.0e-1;

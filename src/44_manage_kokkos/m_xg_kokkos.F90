@@ -35,7 +35,6 @@ module m_xg_kokkos
     subroutine computeBatchedDotProduct_scalar(x_ptr, y_ptr, res_ptr, nx, ny, ldim) &
       & bind(c, name='computeBatchedDotProduct_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value             :: x_ptr
       type(c_ptr)            , value             :: y_ptr
       type(c_ptr)            , value             :: res_ptr
@@ -47,7 +46,6 @@ module m_xg_kokkos
     subroutine computeBatchedDotProduct_cplx(x_ptr, y_ptr, res_ptr, nx, ny, ldim) &
       & bind(c, name='computeBatchedDotProduct_cplx_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value             :: x_ptr
       type(c_ptr)            , value             :: y_ptr
       type(c_ptr)            , value             :: res_ptr
@@ -59,7 +57,6 @@ module m_xg_kokkos
     subroutine computeBatchedDotProduct_cplx_scalar(x_ptr, y_ptr, res_ptr, nx, ny, ldim) &
       & bind(c, name='computeBatchedDotProduct_cplx_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value             :: x_ptr
       type(c_ptr)            , value             :: y_ptr
       type(c_ptr)            , value             :: res_ptr
@@ -73,7 +70,6 @@ module m_xg_kokkos
     subroutine computeMax_scalar(x_ptr, size, res) &
       & bind(c, name='computeMax_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
       real(c_double),                 intent(inout) :: res
@@ -82,7 +78,6 @@ module m_xg_kokkos
     subroutine computeMax_complex(x_ptr, size, res) &
       & bind(c, name='computeMax_complex_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
       real(c_double),                 intent(inout) :: res
@@ -93,7 +88,6 @@ module m_xg_kokkos
     subroutine computeMin_scalar(x_ptr, size, res) &
       & bind(c, name='computeMin_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
       real(c_double),                 intent(inout) :: res
@@ -102,7 +96,6 @@ module m_xg_kokkos
     subroutine computeMin_complex(x_ptr, size, res) &
       & bind(c, name='computeMin_complex_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
       real(c_double),                 intent(inout) :: res
@@ -113,7 +106,6 @@ module m_xg_kokkos
     subroutine computeMaxloc_scalar(x_ptr, size, res) &
       & bind(c, name='computeMaxloc_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
       integer(c_int32_t),             intent(inout) :: res
@@ -122,7 +114,6 @@ module m_xg_kokkos
     subroutine computeMaxloc_complex(x_ptr, size, res) &
       & bind(c, name='computeMaxloc_complex_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
       integer(c_int32_t),             intent(inout) :: res
@@ -131,7 +122,6 @@ module m_xg_kokkos
     subroutine computeMaxloc_scalar_2d(x_ptr, nx, ny, res_ptr) &
       & bind(c, name='computeMaxloc_scalar_2d_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr    ! double
       integer(kind=c_int32_t), value, intent(in)    :: nx
       integer(kind=c_int32_t), value, intent(in)    :: ny
@@ -141,7 +131,6 @@ module m_xg_kokkos
     subroutine computeMaxloc_complex_2d(x_ptr, nx, ny, res_ptr) &
       & bind(c, name='computeMaxloc_complex_2d_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr    ! cplx_t
       integer(kind=c_int32_t), value, intent(in)    :: nx
       integer(kind=c_int32_t), value, intent(in)    :: ny
@@ -153,7 +142,6 @@ module m_xg_kokkos
     subroutine computeMinloc_scalar(x_ptr, size, res) &
       & bind(c, name='computeMinloc_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
       integer(c_int32_t),             intent(inout) :: res
@@ -162,7 +150,6 @@ module m_xg_kokkos
     subroutine computeMinloc_complex(x_ptr, size, res) &
       & bind(c, name='computeMinloc_complex_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
       integer(c_int32_t),             intent(inout) :: res
@@ -171,7 +158,6 @@ module m_xg_kokkos
     subroutine computeMinloc_scalar_2d(x_ptr, nx, ny, res_ptr) &
       & bind(c, name='computeMinloc_scalar_2d_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr    ! double
       integer(kind=c_int32_t), value, intent(in)    :: nx
       integer(kind=c_int32_t), value, intent(in)    :: ny
@@ -181,7 +167,6 @@ module m_xg_kokkos
     subroutine computeMinloc_complex_2d(x_ptr, nx, ny, res_ptr) &
       & bind(c, name='computeMinloc_complex_2d_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr    ! cplx_t
       integer(kind=c_int32_t), value, intent(in)    :: nx
       integer(kind=c_int32_t), value, intent(in)    :: ny
@@ -193,7 +178,6 @@ module m_xg_kokkos
     subroutine computeColwiseDivision_scalar(x_ptr, y_ptr, size, res_ptr) &
       & bind(c, name='computeColwiseDivision_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       type(c_ptr)            , value                :: y_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
@@ -203,7 +187,6 @@ module m_xg_kokkos
     subroutine computeColwiseDivision_complex(x_ptr, y_ptr, size, res_ptr) &
       & bind(c, name='computeColwiseDivision_complex_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value                :: x_ptr
       type(c_ptr)            , value                :: y_ptr
       integer(kind=c_int32_t), value, intent(in)    :: size
@@ -215,7 +198,6 @@ module m_xg_kokkos
     subroutine compute_colwiseCymax_scalar(A_ptr, da_ptr, B_ptr, W_ptr, rows, cols, ldim) &
       & bind(c, name='compute_colwiseCymax_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value             :: A_ptr
       type(c_ptr)            , value             :: da_ptr
       type(c_ptr)            , value             :: B_ptr
@@ -226,7 +208,6 @@ module m_xg_kokkos
     subroutine compute_colwiseCymax_cplx(A_ptr, da_ptr, B_ptr, W_ptr, rows, cols, ldim) &
       & bind(c, name='compute_colwiseCymax_cplx_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value             :: A_ptr
       type(c_ptr)            , value             :: da_ptr
       type(c_ptr)            , value             :: B_ptr
@@ -239,7 +220,6 @@ module m_xg_kokkos
     subroutine compute_colwiseMul_scalar_scalar(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size) &
       & bind(c, name='compute_colwiseMul_scalar_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value             :: data_ptr
       type(c_ptr)            , value             :: vec_ptr
       integer(kind=c_int32_t), value, intent(in) :: shift, rows, cols, ldim, vec_size
@@ -248,7 +228,6 @@ module m_xg_kokkos
     subroutine compute_colwiseMul_cplx_scalar(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size) &
       & bind(c, name='compute_colwiseMul_cplx_scalar_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value             :: data_ptr
       type(c_ptr)            , value             :: vec_ptr
       integer(kind=c_int32_t), value, intent(in) :: shift, rows, cols, ldim, vec_size
@@ -257,7 +236,6 @@ module m_xg_kokkos
     subroutine compute_colwiseMul_cplx_cplx(data_ptr, vec_ptr, shift, rows, cols, ldim, vec_size) &
       & bind(c, name='compute_colwiseMul_cplx_cplx_kokkos_cpp')
       use, intrinsic :: iso_c_binding
-      implicit none
       type(c_ptr)            , value             :: data_ptr
       type(c_ptr)            , value             :: vec_ptr
       integer(kind=c_int32_t), value, intent(in) :: shift, rows, cols, ldim, vec_size

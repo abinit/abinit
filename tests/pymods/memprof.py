@@ -4,12 +4,8 @@ import time
 
 from pprint import pprint
 from itertools import groupby
-from collections import namedtuple, deque
-# OrderedDict was added in 2.7. ibm6 still uses python2.6
-try:
-    from collections import OrderedDict
-except ImportError:
-    from .ordereddict import OrderedDict
+from collections import namedtuple, deque, defaultdict
+from collections import OrderedDict
 
 from .plotting import add_fig_kwargs, get_ax_fig_plt
 from .tools import lazy_property
@@ -133,7 +129,7 @@ def entries_to_dataframe(entries):
     return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
 
 
-class AbimemFile(object):
+class AbimemFile:
     def __init__(self, path):
         self.path = path
 
@@ -149,13 +145,13 @@ class AbimemFile(object):
 
     def find_small_allocs(self, nbits=160*8):
         """Zero sized allocations are not counted."""
-        smalles = []
+        smallest = []
         for e in self.all_entries:
             if not e.isalloc: continue
-            if 0 < e.size <= nbits: smalles.append(e)
+            if 0 < e.size <= nbits: smallest.append(e)
 
-        pprint(smalles)
-        return smalles
+        pprint(smallest)
+        return smallest
 
     def find_large_allocs(self, nbits=10 *8*1024*1024):
         """Allocations below 10 Mbytes are not counted."""
@@ -235,17 +231,47 @@ class AbimemFile(object):
 
         return all_entries
 
-    def get_peaks(self, maxlen=30, as_dataframe=False):
+    @lazy_property
+    def accumulated_entries(self):
+        """
+        We may have "small" allocations/deallocations inside loops
+        This function groups entries by locus and creates a new entry with the total size.
+        Return list of Entries.
+        """
+        locus_to_entries = defaultdict(list)
+        for entry in self.all_entries:
+            locus_to_entries[entry.locus].append(entry)
+
+        new_entries = []
+        for entry_list in locus_to_entries.values():
+            # class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memory")):
+            e0 = entry_list[0]
+            args = (e0.vname,
+                    e0.action,
+                    e0.ptr,
+                    sum(e.size for e in entry_list),
+                    e0.file,
+                    e0.line,
+                    max(e.tot_memory for e in entry_list),
+                   )
+            new_entries.append(Entry(*args))
+
+        return new_entries
+
+    def get_peaks(self, accumulated=True, maxlen=30, as_dataframe=False):
         """
         Find peaks in the allocation with the corresponding variable.
 
         Args:
+            accumulated: True to use accumulated entries instead of raw ones.
             maxlen: Maximum number of peaks
             as_dataframe: True to return a pandas dataframe instead of a deque.
         """
         # The deque is bounded to the specified maximum length. Once a bounded length deque is full,
         # when new items are added, a corresponding number of items are discarded from the opposite end.
         peaks = deque(maxlen=maxlen)
+
+        entries =  self.accumulated_entries if accumulated else self.all_entries
 
         visited = set()
         for e in self.all_entries:
@@ -274,24 +300,38 @@ class AbimemFile(object):
         """
         return entries_to_dataframe(self.all_entries)
 
+    @lazy_property
+    def dataframe_accumulated(self):
+        """
+        Return a |pandas-DataFrame| with accumulated entries.
+        """
+        return entries_to_dataframe(self.accumulated_entries)
+
     @add_fig_kwargs
-    def plot_memory_usage(self, ax=None, **kwargs):
+    def plot_memory_usage(self, accumulated=True, ax=None, **kwargs):
         """
         Plot total allocated memory in Mb on axis `ax`.
+
+        Args:
+            accumulated: True to use accumulated entries instead of raw ones.
         """
-        memory = [e.tot_memory_mb for e in self.all_entries]
+        entries =  self.accumulated_entries if accumulated else self.all_entries
+
+        memory = [e.tot_memory_mb for e in entries]
         ax, fig, plt = get_ax_fig_plt(ax=ax)
         ax.plot(memory)
         ax.grid(True)
         ax.set_ylabel("Total Memory (Mb)")
+        ax.set_title("Accumulated: %s" % str(accumulated))
         return fig
 
     @add_fig_kwargs
-    def plot_peaks(self, ax=None, maxlen=20, fontsize=4, rotation=25, **kwargs):
+    def plot_peaks(self, accumulated=True, ax=None, maxlen=20, fontsize=4, rotation=25, **kwargs):
         """
         Plot memory peaks as vertical bars.
 
         Args:
+            accumulated: True to use accumulated entries instead of raw ones.
             ax: |matplotlib-Axes| or None if a new figure should be created.
             maxlen: Maximum number of peaks
             fontsize: fontsize for legends and titles
@@ -300,7 +340,7 @@ class AbimemFile(object):
         Returns: |matplotlib-Figure|
         """
         ax, fig, plt = get_ax_fig_plt(ax=ax)
-        peaks = self.get_peaks(maxlen=maxlen)
+        peaks = self.get_peaks(accumulated=accumulated, maxlen=maxlen)
         data = [e.size_mb for e in peaks]
         names = ["%s\n%s" % (e.vname, e.locus) for e in peaks]
         xs = list(range(len(data)))
@@ -309,32 +349,42 @@ class AbimemFile(object):
         ax.set_xticks(xs)
         ax.set_xticklabels(names, fontsize=fontsize, rotation=rotation)
         ax.set_ylabel("Memory (Mb)")
+        ax.set_title("Accumulated: %s" % str(accumulated))
         return fig
 
     @add_fig_kwargs
-    def plot_hist(self, ax=None, **kwargs):
+    def plot_hist(self, accumulated=True, ax=None, **kwargs):
         """
         Plot histogram with the number of arrays allocated for a given size
 
         Args:
+            accumulated: True to use accumulated entries instead of raw ones.
             ax: |matplotlib-Axes| or None if a new figure should be created.
 
         Returns: |matplotlib-Figure|
         """
+        entries =  self.accumulated_entries if accumulated else self.all_entries
+
         ax, fig, plt = get_ax_fig_plt(ax=ax)
-        data = [e.size_mb for e in self.all_entries]
+        data = [e.size_mb for e in entries]
         ax.hist(data) #, bins=n_bins)
         ax.grid(True)
         ax.set_ylabel("Number of arrays")
         ax.set_xlabel("Memory (Mb)")
+        ax.set_title("Accumulated: %s" % str(accumulated))
         return fig
 
-    def get_hotspots_dataframe(self):
+    def get_hotspots_dataframe(self, accumulated=True):
         """
         Return DataFrame with total memory allocated per Fortran file.
+
+        Args:
+            accumulated: True to use accumulated entries instead of raw ones.
         """
+        df = self.dataframe_accumulated if accumulated else self.dataframe
+
         index, rows = [], []
-        for filename, g in self.dataframe.groupby(by="file"):
+        for filename, g in df.groupby(by="file"):
             malloc_mb = g[g["action"] == "A"].size_mb.sum()
             free_mb = g[g["action"] == "D"].size_mb.sum()
             nalloc = len(g["action"] == "A")
@@ -404,8 +454,8 @@ class AbimemFile(object):
                     #
                     #    In this case, p2 != p0
                     if verbose:
-                        print("WARN:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
-                              " sizes = ", heap[p][0].size, newe.size)
+                        print("WARNING:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
+                              " sizes: ", heap[p][0].size, newe.size)
                     #print("HEAP:", heap[newe.ptr])
 
                     locus = newe.locus
@@ -506,7 +556,7 @@ class Stack(dict):
 
 
 # Copied  from abipy.tools.plotting
-class MplExpose(object): # pragma: no cover
+class MplExpose: # pragma: no cover
     """
     Example:
 
@@ -583,4 +633,3 @@ class MplExpose(object): # pragma: no cover
             plt.show()
             for fig in self.figures:
                 fig.clear()
-

@@ -89,7 +89,7 @@ def mpicfg_parser(fname, defaults=None):
 # because we never catch JobRunner Exceptions. This object is mainly
 # used to store info about the exception in JobRunner exceptions (see run method)
 
-class JobRunnerError(object):
+class JobRunnerError:
 #class JobRunnerError(Exception):
     """Exceptions raised by `Jobrunner`."""
 
@@ -130,7 +130,7 @@ class JobRunnerError(object):
     #    self.prev_errmsg = state["prev_errmsg"]
 
 
-class JobRunner(object):
+class JobRunner:
     """Base Class used to manage the execution of jobs in an MPI environment."""
     #Error = JobRunnerError
 
@@ -378,7 +378,7 @@ class JobRunner(object):
         return run_etime
 
 
-class BaseValgrindParser(object):
+class BaseValgrindParser:
     """
     Base class for parsers used to analyze the output of Valgrind
     Concrete classes must implement the methods:
@@ -461,7 +461,7 @@ class MemcheckParser(BaseValgrindParser):
         if errors: self._error_report = str(errors)
 
 
-class TimeBomb(object):
+class TimeBomb:
 
     def __init__(self, timeout, delay=.05, exec_path=None):
         self.timeout = int(timeout)

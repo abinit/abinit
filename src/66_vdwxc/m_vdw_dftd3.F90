@@ -4,7 +4,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 2015-2025 ABINIT group (BVT)
 !!  This file is distributed under the terms of the
@@ -107,8 +106,6 @@ contains
 subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
 &          vdw_tol,vdw_tol_3bt,xred,znucl,dyn_vdw_dftd3,elt_vdw_dftd3,&
 &          gred_vdw_dftd3,str_vdw_dftd3,qphon)
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -496,7 +493,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    case(-456)
      vdw_sr6=vdw_sr6_revpbe0; vdw_s8=vdw_s8_revpbe0
    case(-30108, -108030)
-     vdw_sr6=vdw_sr6_rpw86pbe; vdw_s8=vdw_s8_rpw86pbe     
+     vdw_sr6=vdw_sr6_rpw86pbe; vdw_s8=vdw_s8_rpw86pbe
    case default
      write(msg,'(a,i8,a)')'  Van der Waals DFT-D3 correction not compatible with ixc=',ixc,' !'
      ABI_ERROR(msg)
@@ -1338,7 +1335,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                do ia=1,natom
 !TODO: avoid stupid if clauses inside the loops
                  d2cn_tmp = zero
-                 if (ia==la) then 
+                 if (ia==la) then
                    if (ia==ka) then    ! iii
                      d2cn_tmp(:) = d2cn_iii(:,alpha,beta,ia)
                    else                ! jii
@@ -1348,7 +1345,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                    d2cn_tmp(:) = d2cn_iji(:,alpha,beta,la,ia)
                  else if (ka==la) then    ! jji
                    d2cn_tmp(:) = d2cn_jji(:,alpha,beta,ka,ia)
-                 end if 
+                 end if
 !                 Add the second derivative of C6 contribution to the dynamical matrix
 !                 First, add the second derivative of CN-related term
                  dyn_vdw_dftd3(:,alpha,ka,beta,la)=dyn_vdw_dftd3(:,alpha,ka,beta,la)+&
@@ -1791,7 +1788,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 
    subroutine comp_prod(a,b,c)
 
-   implicit none
  !Arguments ----------------------
    real(dp),intent(in) :: a(2),b(2)
    real(dp),intent(out) :: c(2)
@@ -1815,8 +1811,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !! SOURCE
 
 subroutine d3_cart2red(grad)
-
-implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(inout) :: grad(3)

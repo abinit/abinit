@@ -89,6 +89,7 @@ module m_dfpt_loopert
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,      only : ctocprj
  use m_symkpt,     only : symkpt
+ use m_pstat,      only : pstat_proc
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -1126,6 +1127,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ABI_MALLOC(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
+   call pstat_proc%print(_PSTAT_ARGS_)
 
 ! Initialize the wave function type and read GS WFK
    call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
@@ -1298,6 +1300,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
      ABI_MALLOC(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
    end if
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    !if (sum(dtset%qptn(1:3)**2)>=1.d-14) then ! non-zero q
 !TODO: for many other q this should be avoidable, in principle all if qptrlatt is a subgrid of kprtlatt
@@ -1477,7 +1480,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    ! space for all 3 ddk wavefunctions if call to orbmag will be needed
-   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. (.NOT. ALLOCATED(cg1_3)) ) then
+   if ( (dtset%orbmag .NE. 0) .AND. &
+     & ( (dtset%rfddk .EQ. 1) .OR. (dtset%rfelfd .EQ. 2) ) &
+     &  .AND. (.NOT. ALLOCATED(cg1_3)) ) then
      ABI_MALLOC(cg1_3,(2,mcg1,3))
      has_cg1_3(:) = .FALSE.
    end if
@@ -1609,7 +1614,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        write(msg,'(2a)')'- dfpt_looppert: read the DDK wavefunctions from file: ',trim(fiwfddk)
        call wrtout([std_out, ab_out],msg)
        ! Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-       call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1), spacecomm) !xmpi_comm_self)
+       call ddk_f(ii)%open_read(fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1), spacecomm) !xmpi_comm_self)
      end do
    end if
 
@@ -1869,6 +1874,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  If immediate exit, and wavefunctions were not read, must zero eigenvalues
    if (iexit/=0) eigen1(:)=zero
    if (iexit/=0.and.(.not.kramers_deg)) eigen1_mq(:)=zero
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    if (iexit==0) then
 
@@ -1996,6 +2002,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    end if ! End of the check of hasty exit
 
+   call pstat_proc%print(_PSTAT_ARGS_)
    call timab(146,1,tsec)
 
 !  Print out message at the end of the iterations
@@ -2106,7 +2113,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      has_cg1_3(idir) = .TRUE.
    end if
 
-
    call outresid(dtset,kpt_rbz,dtset%mband, nband_rbz,nkpt_rbz,dtset%nsppol,resid)
 
    if (write_1wfk) then
@@ -2179,7 +2185,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
 
    ! call orbmag if needed
-   if ( (dtset%orbmag .NE. 0) .AND. (dtset%rfddk .EQ. 1) .AND. &
+   if ( (dtset%orbmag .NE. 0) .AND. &
+     & ( (dtset%rfddk .EQ. 1) .OR. (dtset%rfelfd .EQ. 2) ) .AND. &
      & (COUNT(has_cg1_3) .EQ. 3) ) then
 
      if ( .NOT. ALLOCATED(vtrial_local)) then

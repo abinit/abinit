@@ -925,6 +925,12 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nberry
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nberry','INT',0)
 
+ intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_protected
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_protected','INT',0)
+
+ intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_per_slice
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_per_slice','INT',0)
+
  intarr(1,:)=dtsets(:)%nc_xccc_gspace
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nc_xccc_gspace','INT',0)
 
@@ -962,6 +968,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%nfreqim
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nfreqim','INT',0)
+
+ intarr(1,:)=dtsets(:)%nfreqim_conv
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nfreqim_conv','INT',0)
 
  intarr(1,:)=dtsets(:)%nfreqre
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nfreqre','INT',0)

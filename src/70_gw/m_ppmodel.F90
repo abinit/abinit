@@ -41,6 +41,7 @@ module m_ppmodel
  use m_fft_mesh,       only : g2ifft
  use m_fft,            only : fourdp
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
+ use m_pstat,          only : pstat_proc
 
  implicit none
 
@@ -238,7 +239,7 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
  integer,intent(in) :: iq_bz
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
- complex(gwpc),intent(out) :: botsq(:,:),otq(:,:),eig(:,:)
+ complex(gwpc),allocatable,intent(out) :: botsq(:,:),otq(:,:),eig(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -250,6 +251,10 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
 
  ! Save the index of the q-point for checking purpose.
  ppm%iq_bz = iq_bz
+
+ ABI_MALLOC(botsq, (ppm%npwc, ppm%dm2_botsq))
+ ABI_MALLOC(otq, (ppm%npwc, ppm%dm2_otq))
+ ABI_MALLOC(eig, (ppm%dm_eig, ppm%dm_eig))
 
  ! Here there is a problem with the small q, still cannot use BZ methods
  iq_ibz = Qmesh%tab(iq_bz); isym_q = Qmesh%tabo(iq_bz); itim_q = (3-Qmesh%tabi(iq_bz))/2
@@ -340,7 +345,6 @@ subroutine ppm_free(ppm)
 
 !Local variables-------------------------------
  integer :: dim_q,iq_ibz
-
 ! *********************************************************************
 
  ABI_SFREE(ppm%bigomegatwsq_qbz_vals)
@@ -397,7 +401,6 @@ subroutine ppm_malloc_iqibz(ppm, iq_ibz)
 
 !Local variables-------------------------------
  integer :: ierr
-
 ! *********************************************************************
 
  ABI_CHECK(allocated(ppm%bigomegatwsq), "bigomegatwsq is not allocated")
@@ -441,7 +444,6 @@ subroutine ppm_table_free_iqibz(ppm, iq_ibz)
 !Arguments ------------------------------------
  class(ppmodel_t),intent(inout) :: ppm
  integer,intent(in) :: iq_ibz
-
 ! *********************************************************************
 
  if (allocated(ppm%bigomegatwsq)) call array_free(ppm%bigomegatwsq(iq_ibz))
@@ -539,6 +541,8 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
  do iq_ibz=1,dim_q
    call ppm%malloc_iqibz(iq_ibz)
  end do
+
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  DBG_EXIT("COLL")
 
@@ -718,7 +722,6 @@ subroutine ppm_getem1(ppm, mpwc, iqibz, zcut, nomega, omega, Vcp, em1q, &
  complex(dpc) :: qpg1,qpg2,ug1,ug2
  complex(dpc) :: delta,em1ggp,otw,zzpq,yg1,yg2,bot1,bot2,chig1g2
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  ABI_CHECK(ppm%mqmem/=0,'mqmem==0 not implemented')
@@ -854,7 +857,6 @@ subroutine ppm_getem1_one_ggp(ppm, iqibz, zcut, nomega, omega, Vcp, em1q, ig1, i
  complex(dpc) :: qpg1,qpg2,ug1,ug2
  complex(dpc) :: delta,em1ggp,otw,zzpq,yg1,yg2,bot1,bot2,chig1g2
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  ABI_CHECK(ppm%mqmem /= 0, 'mqmem==0 not implemented')
@@ -964,7 +966,6 @@ subroutine ppm_get_eigenvalues(ppm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
  complex(dpc),allocatable :: em1q(:,:,:)
  logical,allocatable :: bwork(:)
  logical :: sortcplx !BUG in abilint
-
 ! *************************************************************************
 
  ABI_CHECK(ppm%mqmem/=0,'mqmem==0 not implemented')
@@ -1090,7 +1091,6 @@ subroutine cppm1par(npwc, nomega, omega, omegaplasma, epsm1, omegatw, bigomegatw
  real(dp) :: e0,minomega
  character(len=500) :: msg
  complex(gwpc) :: AA,omegatwsq,diff,ratio,epsm1_io0,epsm1_ioe0
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1419,7 +1419,6 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  real(dp),allocatable :: eigval(:),qplusg(:),rhog_dp(:,:),zhpev2(:),tmp_rhor(:)
  complex(dpc),allocatable :: eigvec(:,:),matr(:),mm(:,:),rhog(:),rhogg(:,:)
  complex(dpc),allocatable :: zhpev1(:),zz(:)
-
 !*************************************************************************
 
  ! Fake MPI_type for the sequential part.
@@ -1665,7 +1664,6 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  real(dp),allocatable :: eigval(:),qplusg(:),rhog_dp(:,:),tmp_rhor(:)
  complex(dpc),allocatable :: chi(:,:),chitmp(:,:),chitmps(:,:),eigvec(:,:)
  complex(dpc),allocatable :: mm(:,:),mtemp(:,:),rhog(:), rhogg(:,:),tmp1(:),zz2(:,:)
-
 !*************************************************************************
 
  DBG_ENTER("COLL")
@@ -1895,7 +1893,6 @@ subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
  real(dp) :: qpg_dot_qpgp
 !arrays
  real(dp) :: b1(3),b2(3),b3(3),gppq(3),gpq(3),norm(npwc)
-
 !************************************************************************
 
  b1=two_pi*gprimd(:,1); b2=two_pi*gprimd(:,2); b3=two_pi*gprimd(:,3)
@@ -2002,7 +1999,6 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
  !character(len=500) :: msg
 !arrays
  complex(gwpc),allocatable :: rhotwgdpcc(:)
-
 !*************************************************************************
 
  select case (ppm%model)
@@ -2373,7 +2369,6 @@ subroutine ppm_print(ppm, units, header)
 !scalars
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
-
 !*************************************************************************
 
  msg = ' ==== Info on the ppm_t object ==== '; if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '

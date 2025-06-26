@@ -3157,7 +3157,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      ddkfil(idir1)=20+idir1
      write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk)
      call wrtout([std_out, ab_out], msg)
-     call wfk_open_read(ddks(idir1),fiwfddk,formeig1,dtset%iomode,ddkfil(idir1), xmpi_comm_self)
+     call ddks(idir1)%open_read(fiwfddk, formeig1, dtset%iomode, ddkfil(idir1), xmpi_comm_self)
    end if
  end do
 
@@ -3293,12 +3293,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      ABI_FREE(occ_k)
      ABI_FREE(ylm_k)
      ABI_FREE(ylm1_k)
-
-!    End big k point loop
-   end do
-
-!  End loop over spins
- end do
+   end do ! End big k point loop
+ end do !  End loop over spins
 
  call gs_hamkq%free()
 

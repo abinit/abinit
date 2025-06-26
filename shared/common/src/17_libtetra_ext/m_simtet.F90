@@ -16,8 +16,8 @@
 
 module m_simtet
 
-  use defs_basis
-  use m_errors, only: unused_var
+ use defs_basis
+ use m_errors, only: unused_var
 
  implicit none
 
@@ -43,7 +43,7 @@ module m_simtet
 !C ------------------------------------------------------------
 SUBROUTINE SIM0ONEI(SIM0, SIM0I, VERM)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       INTEGER        iuerr
       PARAMETER     (iuerr=6)
       DOUBLE COMPLEX SIM0, SIM0I
@@ -141,7 +141,7 @@ SUBROUTINE SIM0ONEI(SIM0, SIM0I, VERM)
 !C -----------------------------------------------------------------
 SUBROUTINE   SIM0TWOI(VERL, VERLI, VERM)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       INTEGER        iuerr
       PARAMETER     (iuerr=6)
       DOUBLE COMPLEX VERL(4), VERLI(4), VERM(4)
@@ -252,7 +252,7 @@ END SUBROUTINE SIM0TWOI
 !C what: R0(U)= 1 + U^2/3 + U^4/5 + ...
       DOUBLE COMPLEX FUNCTION SIM0UR0(U)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX U
 !c
 !c      DOUBLE PRECISION DLAMCH
@@ -302,7 +302,7 @@ END FUNCTION SIM0UR0
 !C       R0(U)=Arth(w)/w=Log((1+U)/(1-U))/(2*U)
       DOUBLE COMPLEX FUNCTION SIM0UX0(U)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX U
 !c
 !c      DOUBLE PRECISION DLAMCH
@@ -348,7 +348,7 @@ END FUNCTION SIM0UR0
 !C what: Complex version of DX0(u)=dX0/du
       SUBROUTINE SIM0UDX0(U, X0, DX0)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX U, X0, DX0(4)
 !c
       INTEGER          I
@@ -398,7 +398,7 @@ END SUBROUTINE SIM0UDX0
 !C            [|w1-w2|>e,|w3-w2|<e]
 SUBROUTINE SIM1ONEI(U, AS, LEPS, SIM1, SIM1I)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   U(3)
       DOUBLE PRECISION AS(3)
       LOGICAL          LEPS(3)
@@ -490,7 +490,7 @@ END SUBROUTINE SIM1ONEI
 !C            [|w1-w2|>e,|w3-w2|<e]
 SUBROUTINE SIM1TWOI(U, AS, LEPS, SIM, SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(3)
       DOUBLE PRECISION AS(3)
       LOGICAL          LEPS(3)
@@ -591,7 +591,7 @@ END SUBROUTINE SIM1TWOI
 !C            [|w1-w2|>e,|w3-w2|<e]
       SUBROUTINE  SIM2ONEI(U,AS,LEPS, SIM2, SIM2I)
 
-      IMPLICIT         NONE
+      !IMPLICIT         NONE
       DOUBLE COMPLEX   U(3)
       DOUBLE PRECISION AS(3)
       LOGICAL          LEPS(3)
@@ -667,7 +667,7 @@ END SUBROUTINE SIM2ONEI
 !C            [|w1-w2|>e,|w3-w2|<e]
 SUBROUTINE SIM2TWOI(U,AS,LEPS, SIM, SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(3)
       DOUBLE PRECISION AS(3)
       LOGICAL          LEPS(3)
@@ -752,7 +752,7 @@ END SUBROUTINE SIM2TWOI
 !C            [|w1-w2|>e,|w3-w2|<e]
       SUBROUTINE SIM3ONEI(U,AS,LEPS,SIM3,SIM3I)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   U(3)
       DOUBLE PRECISION AS(3)
       LOGICAL          LEPS(3)
@@ -835,7 +835,7 @@ END SUBROUTINE SIM3ONEI
 !C            [|w1-w2|>e,|w3-w2|<e]
 SUBROUTINE SIM3TWOI(U,AS,LEPS,SIM,SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(3)
       DOUBLE PRECISION AS(3)
       LOGICAL          LEPS(3)
@@ -925,7 +925,7 @@ SUBROUTINE SIM3TWOI(U,AS,LEPS,SIM,SIMI)
 !C            [|w1-w2|>e,|w3-w2|<e]
 SUBROUTINE  SIM4ONEI(U,AS,LEPS,SIM4,SIM4I)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   U(3)
       DOUBLE PRECISION AS(3)
       LOGICAL          LEPS(3)
@@ -1029,7 +1029,7 @@ END SUBROUTINE SIM4ONEI
 !C            [|w1-w2|>e,|w3-w2|<e]
 SUBROUTINE SIM4TWOI(U,AS,LEPS,SIM,SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(3)
       DOUBLE PRECISION AS(3)
       LOGICAL          LEPS(3)
@@ -1150,7 +1150,7 @@ END SUBROUTINE SIM4TWOI
 !C            [|w1-w2|>e,|w3-w2|<e]
 SUBROUTINE  SIM0LEPS(VERM, N, W, AS, LONE, EPS, LEPS, iuerr)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   VERM(4)
       INTEGER          N
       DOUBLE COMPLEX   W(3)
@@ -1296,7 +1296,7 @@ END SUBROUTINE SIM0LEPS
 !C ----------------------------------------------------
 SUBROUTINE S2D0ONEI(SIM0, SIM0I, VERM)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       INTEGER        iuerr
       PARAMETER     (iuerr=6)
       DOUBLE COMPLEX SIM0, SIM0I
@@ -1386,7 +1386,7 @@ END SUBROUTINE S2D0ONEI
 !C -----------------------------------------------------------------
 SUBROUTINE   S2D0TWOI(VERL, VERLI, VERM)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       INTEGER        iuerr
       PARAMETER     (iuerr=6)
       DOUBLE COMPLEX VERL(3), VERLI(3), VERM(3)
@@ -1478,7 +1478,7 @@ END SUBROUTINE S2D0TWOI
 !C LEPS(1)  [|w1-w2|<e]
 SUBROUTINE S2D1ONEI(U,AS,LEPS, SIM1, SIM1I)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   U(2)
       DOUBLE PRECISION AS(2)
       LOGICAL          LEPS(1)
@@ -1548,7 +1548,7 @@ END SUBROUTINE S2D1ONEI
 !C LEPS(1)  [|w1-w2|<e]
 SUBROUTINE S2D1TWOI(U,AS,LEPS, SIM, SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(2)
       DOUBLE PRECISION AS(2)
       LOGICAL          LEPS(2)
@@ -1627,7 +1627,7 @@ END SUBROUTINE S2D1TWOI
 !C LEPS(1) [|w1-w2|<e]
 SUBROUTINE  S2D2ONEI(U,AS,LEPS, SIM2, SIM2I)
 
-      IMPLICIT         NONE
+      !IMPLICIT         NONE
       DOUBLE COMPLEX   U(2)
       DOUBLE PRECISION AS(2)
       LOGICAL          LEPS(1)
@@ -1678,7 +1678,7 @@ END SUBROUTINE S2D2ONEI
 !C LEPS(1) [|w1-w2|<e]
       SUBROUTINE S2D2TWOI(U,AS,LEPS, SIM, SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(2)
       DOUBLE PRECISION AS(2)
       LOGICAL          LEPS(1)
@@ -1730,7 +1730,7 @@ END SUBROUTINE S2D2TWOI
 !C LEPS(1) [|w1-w2|<e]
 SUBROUTINE  S2D3ONEI(U,AS,LEPS,SIM3,SIM3I)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   U(2)
       DOUBLE PRECISION AS(2)
       LOGICAL          LEPS(1)
@@ -1804,7 +1804,7 @@ END SUBROUTINE S2D3ONEI
 !C LEPS(1) [|w1-w2|<e]
 SUBROUTINE S2D3TWOI(U,AS,LEPS,SIM,SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(2)
       DOUBLE PRECISION AS(2)
       LOGICAL          LEPS(1)
@@ -1892,7 +1892,7 @@ END SUBROUTINE S2D3TWOI
 !C LEPS(1) [|w1-w2|<eps]
       SUBROUTINE  S2D0LEPS(VERM, N, W, AS, LONE, EPS, LEPS, iuerr)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   VERM(3)
       INTEGER          N
       DOUBLE COMPLEX   W(2)
@@ -2005,7 +2005,7 @@ END SUBROUTINE S2D0LEPS
 !C ----------------------------------------------------
 SUBROUTINE S1D0ONEI(SIM0, SIM0I, VERM)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       INTEGER        iuerr
       PARAMETER     (iuerr=6)
       DOUBLE COMPLEX SIM0, SIM0I
@@ -2076,7 +2076,7 @@ END SUBROUTINE S1D0ONEI
 !C -------------------------------------------------------------
 SUBROUTINE   S1D0TWOI(VERL, VERLI, VERM)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       INTEGER        iuerr
       PARAMETER     (iuerr=6)
       DOUBLE COMPLEX VERL(*), VERLI(*), VERM(*)
@@ -2132,7 +2132,7 @@ END SUBROUTINE S1D0TWOI
 !C LEPS() null
       SUBROUTINE S1D1ONEI(U,AS,LEPS, SIM1, SIM1I)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   U(1)
       DOUBLE PRECISION AS(1)
       LOGICAL          LEPS(1)
@@ -2168,7 +2168,7 @@ END SUBROUTINE S1D0TWOI
 !C LEPS() null
 SUBROUTINE S1D1TWOI(U,AS,LEPS, SIM, SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(1)
       DOUBLE PRECISION AS(1)
       LOGICAL          LEPS(1)
@@ -2213,7 +2213,7 @@ END SUBROUTINE S1D1TWOI
 !C LEPS(1) null
 SUBROUTINE  S1D2ONEI(U,AS,LEPS,SIM2,SIM2I)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   U(1)
       DOUBLE PRECISION AS(1)
       LOGICAL          LEPS(1)
@@ -2251,7 +2251,7 @@ END SUBROUTINE S1D2ONEI
 !C LEPS(1) null
 SUBROUTINE S1D2TWOI(U,AS,LEPS, SIM, SIMI)
 
-      IMPLICIT   NONE
+      !IMPLICIT   NONE
       DOUBLE COMPLEX   U(1)
       DOUBLE PRECISION AS(1)
       LOGICAL          LEPS(1)
@@ -2305,7 +2305,7 @@ END SUBROUTINE S1D2TWOI
 !C LEPS(1) null
       SUBROUTINE  S1D0LEPS(VERM, N, W, AS, LONE, EPS, LEPS, iuerr)
 
-      IMPLICIT       NONE
+      !IMPLICIT       NONE
       DOUBLE COMPLEX   VERM(2)
       INTEGER          N
       DOUBLE COMPLEX   W(1)

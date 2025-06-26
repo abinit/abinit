@@ -1162,7 +1162,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
 ! ************************************************************************
 
-!Compute bantot
+ ! Compute bantot
  bantot=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
@@ -1742,7 +1742,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    end if
    if (usepaw==1) then
      call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
-     if(abs(energies%e_cpawdc)>tiny(0.0_dp)) then 
+     if(abs(energies%e_cpawdc)>tiny(0.0_dp)) then
        call dc_edoc%add_real('cpaw_dc', energies%e_cpawdc)
      endif
    end if
@@ -1842,6 +1842,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
      if(usepaw==1.and.abs(energies%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
      if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
+     if(abs(energies%entropy_imp)>tiny(zero)) call sdoc%add_real('impurity',energies%entropy_imp)
      call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
    end if
  end if
@@ -1932,7 +1933,6 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
  real(dp) :: ecut_tmp(3,2,10),tsec(2)
  real(dp),allocatable :: zionpsp(:)
  character(len=fnlen), allocatable :: pspfilnam_(:), pseudo_paths(:)
-
 !************************************************************************
 
  me = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -2214,19 +2214,18 @@ end function crystal_from_file
 !!  nblocks          :  Number of MPI blocks to be used in GEMM nonlop
 !!
 !! SOURCE
-subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,paral_kgb,&
+subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspden,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
 &                                           blocksize,nblocks,warn_on_fail)
-   implicit none
 
-   integer,intent(in)     :: ikpt,ndat,nband,nspinor,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
+   integer,intent(in)     :: ikpt,ndat,nband,nspinor,nspden,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib
    logical,intent(in),optional  :: warn_on_fail
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
    integer,intent(inout)  :: blocksize
    integer,intent(out)    :: nblocks
 
-   integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem
+   integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem,updrho_wmem,prep_nonlop_wmem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
    integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs
    logical  :: print_and_exit,l_warn_on_fail
@@ -2286,6 +2285,15 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
    if(associated(gs_hamk%ph3d_k)) gs_ham_smem = gs_ham_smem + int(2,c_size_t) * npw_fft * gs_hamk%matblk
    gs_ham_smem = gs_ham_smem*dp
 
+   ! Mapped arrays used in mkrho or vtowfk
+   updrho_wmem = int(2,c_size_t)*npw_fft*ndat*nspinor ! cwavef
+   if(nspden==4) updrho_wmem = updrho_wmem + int(2,c_size_t)*npw_fft*ndat*2 ! cwavef_x + cwavef_y
+   updrho_wmem = updrho_wmem*dp
+
+   ! Mapped arrays used in prep_nonlop (only paral_kgb==1)
+   prep_nonlop_wmem = 0
+   if(paral_kgb==1) prep_nonlop_wmem = int(2,c_size_t)*npw_fft*ndat*nspinor*3*dp ! cwavef_alltoall{1,2} + cwavef
+
    if(wfoptalg==111) then
      chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,blockdim)
      invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
@@ -2330,9 +2338,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
      sum_other_mem    = nonlop_smem + gs_ham_smem
 
      if(wfoptalg>=0) then
-       sum_mem          = sum_mem+getghc_wmem
+       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem
      else
-       sum_mem          = sum_mem+nonlop_wmem
+       sum_mem          = sum_mem+nonlop_wmem+prep_nonlop_wmem
      end if
 
      if(wfoptalg==111) then
@@ -2386,8 +2394,12 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,para
    ! getghc (any diago algorithm)
    if(wfoptalg>=0) then
      write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   mkrho~vtowfk_extra             )      : ",  real(updrho_wmem,dp)/(1024*1024), "MiB"
    else
      write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
+   end if
+   if(paral_kgb==1) then
+     write(std_out,'(A,F10.3,1x,A)') "   prep_nonlop                           : ",  real(prep_nonlop_wmem,dp)/(1024*1024), "MiB"
    end if
 
    ! CHEBFI2
