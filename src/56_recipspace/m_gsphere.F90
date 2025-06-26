@@ -631,64 +631,57 @@ end subroutine gsph_in_fftbox
 !! gsph_print
 !!
 !! FUNCTION
-!!  Print the content of a gvectors data type
+!!  Print info on object.
 !!
 !! INPUTS
 !!  unit=the unit number for output
 !!  prtvol = verbosity level
-!!  mode_paral =either "COLL" or "PERS"
 !!
 !! OUTPUT
 !!  Only writing.
 !!
 !! SOURCE
 
-subroutine gsph_print(Gsph, unit, prtvol, mode_paral)
+subroutine gsph_print(Gsph, units, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  class(gsphere_t),intent(in) :: Gsph
- integer,intent(in),optional :: prtvol,unit
- character(len=4),intent(in),optional :: mode_paral
+ integer,intent(in) :: units(:), prtvol
 
 !Local variables-------------------------------
 !scalars
- integer :: ish,nsc,my_unt,my_prtvol
- real(dp) :: fact,kin
- character(len=4) :: my_mode
+ integer :: ish, nsc
+ real(dp) :: fact, kin
  character(len=500) :: msg
 ! *************************************************************************
-
- my_unt    =std_out; if (PRESENT(unit      )) my_unt    =unit
- my_prtvol=0       ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode   ='COLL' ; if (PRESENT(mode_paral)) my_mode   =mode_paral
 
  write(msg,'(3a,2(a,i8,a))')ch10,&
    ' ==== Info on the G-sphere ==== ',ch10,&
    '  Number of G vectors ... ',Gsph%ng,ch10,&
    '  Number of shells ...... ',Gsph%nsh,ch10
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
- SELECT CASE (Gsph%timrev)
- CASE (1)
-   call wrtout(my_unt,' Time reversal symmetry cannot be used',my_mode)
- CASE (2)
-   call wrtout(my_unt,' Time reversal symmetry is used',my_mode)
- CASE DEFAULT
+ select case (Gsph%timrev)
+ case (1)
+   call wrtout(units, ' Time reversal symmetry cannot be used')
+ case (2)
+   call wrtout(units, ' Time reversal symmetry is used')
+ case default
    ABI_BUG("Wrong timrev")
- END SELECT
+ end select
 
- if (my_prtvol/=0) then
-   fact=half*two_pi**2
+ if (prtvol /= 0) then
+   fact = half*two_pi**2
    write(msg,'(a)')
-   call wrtout(my_unt,' Shell   Tot no. of Gs   Cutoff [Ha]',my_mode)
+   call wrtout(units, ' Shell   Tot no. of Gs   Cutoff [Ha]')
    do ish=1,Gsph%nsh
      nsc=Gsph%shlim(ish+1)-1
      kin=half*Gsph%shlen(ish)**2
-     write(msg,'(2x,i4,10x,i6,5x,f8.3)')ish,nsc,kin
-     call wrtout(my_unt,msg,'COLL')
+     write(msg, '(2x,i4,10x,i6,5x,f8.3)')ish,nsc,kin
+     call wrtout(units, msg)
    end do
-   call wrtout(my_unt,ch10,my_mode)
+   call wrtout(units, ch10)
  end if
 
 end subroutine gsph_print
@@ -702,9 +695,6 @@ end subroutine gsph_print
 !!
 !! FUNCTION
 !!  Deallocate the memory in a gsphere_t data type.
-!!
-!! INPUTS
-!!   Gsph = datatype to be freed
 !!
 !! SOURCE
 
