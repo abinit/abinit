@@ -327,7 +327,7 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
    ABI_MALLOC(Gsph%gvec,(3,ng))
    Gsph%gvec=gvec
    !
-   ! Calculate cutoff energy.of the sphere.
+   ! Calculate cutoff energy of the sphere.
    max_ecut=-one
    do ig=1,ng
      g1=gvec(1,ig)

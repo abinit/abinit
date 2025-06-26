@@ -34,6 +34,8 @@
  getwfk_filepath "t03o_WFK"     # 4x4x4 k-mesh with 70 bands
  getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
  getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
+ getscr_filepath "diamond_eph_gwpt/gwo_SCR.nc"
+
 
  #gstore_kzone "bz"; gstore_qzone "ibz"
  gstore_kzone "ibz"; gstore_qzone "bz"; gstore_kfilter "qprange"
@@ -64,7 +66,7 @@
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
-#%%   t04.abo, tolnlines= 700, tolabs= 1.0e+5, tolrel= 10.0
+#%%   t05.abo, tolnlines= 700, tolabs= 1.0e+5, tolrel= 10.0
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

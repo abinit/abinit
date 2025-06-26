@@ -11,7 +11,7 @@ diamond_eph_gwpt/dfpto_DS3_POT1.nc
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =
