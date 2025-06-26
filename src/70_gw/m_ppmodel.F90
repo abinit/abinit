@@ -2252,7 +2252,7 @@ end subroutine ppm_rotate_iqbz
 !!  epsm1_ggw(npwe,npwe,nomega)=the inverse dielctric matrix
 !!  nfftf=the number of points in the FFT mesh (for this processor)
 !!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  rhor_tot(nfftf)=the total charge in real space
+!!  rhor(nfftf)=the total charge in real space.
 !!
 !! SIDE EFFECTS
 !!  ppm<ppmodel_t>:

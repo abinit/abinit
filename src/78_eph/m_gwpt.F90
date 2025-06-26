@@ -77,7 +77,7 @@ module m_gwpt
  use m_pawfgr,         only : pawfgr_type
  use m_dfpt_cgwf,      only : stern_t
  use m_phonons,        only : phstore_t, phstore_new
- use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
+ use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph, read_screening
  use m_vcoul,          only : vcoul_t
  use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart, GSTORE_GMODE_ATOM, GSTORE_GMODE_PHONON
  use m_rhotoxc,        only : rhotoxc
@@ -86,7 +86,7 @@ module m_gwpt
  use m_ppmodel,        only : PPM_HYBERTSEN_LOUIE, PPM_GODBY_NEEDS
  use m_ebands,         only : ebands_t
  use m_pstat,          only : pstat_proc
- use m_ppmodel,       only : ppmodel_t
+ use m_ppmodel,        only : ppmodel_t
 
  implicit none
 
@@ -195,11 +195,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz, mpw,ierr,nqbz,ncerr !,spad
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid, usecprj !,sij_opt
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc, iw_nk, iw_mkq, ndone, nmiss
- integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl
+ integer :: my_ipp, ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, scr_iomode
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk, cpu_pp, wall_pp, gflops_pp
  !real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
- !real(dp) :: drude_plsmf,my_plsmf
+ real(dp) :: drude_plsmf, my_plsmf
  real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: ecut,weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol,
@@ -217,14 +217,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(kmesh_t) :: pp_mesh, kmesh
  type(gsphere_t) :: gsph_c
  type(gsphere_t),target :: gsph_x
- type(hscr_t) :: hscr
+ type(hscr_t),target :: hscr
  type(vcoul_t) :: vcp
  type(screen_t),target :: screen
  type(screen_info_t) :: w_info
  type(gstore_t),target :: gstore
  type(gqk_t),pointer :: gqk
  type(xcdata_type) :: xcdata
- !type(ppmodel_t) :: PPm
+ type(ppmodel_t) :: ppm
  character(len=fnlen) :: screen_filepath, gstore_filepath
  character(len=5000) :: msg, qkp_string
 !arrays
@@ -266,6 +266,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:) !, rhotwgp(:)
  complex(gwpc),allocatable :: full_ur1_kqmp(:), full_ur1_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwpc),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
+ complex(gwpc),allocatable :: botsq(:,:), otq(:,:), eig(:,:), epsm1_ggw(:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
@@ -353,10 +354,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  if (screen_filepath /= ABI_NOFILE) then
    ! Read g-sphere and pp_mesh from SCR file.
    call get_hscr_qmesh_gsph(screen_filepath, dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
-   call hscr%free()
+
    nqlwl = size(qlwl, dim=2)
    w_info%use_mdf = MDL_NONE
  else
+   ABI_ERROR("Now we require SCR file")
    ! Init pp_mesh from the K-mesh reported in the WFK file.
    call pp_mesh%find_qmesh(cryst, kmesh)
    ! The G-sphere for W and Sigma_c is initialized from ecuteps.
@@ -368,16 +370,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
    ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with model dielectric function")
  end if
-
-#if 0
- call test_charge(nfftf,ks_ebands%nelect,Dtset%nspden,ks_rhor,Cryst%ucvol,&
-                  Dtset%usepaw,usexcnhat,Pawfgr%usefinegrid,compch_sph,compch_fft,drude_plsmf)
-
- my_plsmf = drude_plsmf; if (Dtset%ppmfrq > tol6) my_plsmf = Dtset%ppmfrq
- call PPm%init(epsm1%mqmem, epsm1%nqibz, epsm1%npwe, Sigp%ppmodel, my_plsmf, Dtset%gw_invalid_freq)
- call ppm%new_setup(iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_ggw, nfftf, gvec, ngfftf, rhor_tot)
- capp ppm%free()
-#endif
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -759,7 +751,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call den_cryst%free(); call den_hdr%free()
 
  ! Init Wc. In-core or out-of-core solution?
- !mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = pp_mesh%nibz
  mqmem = pp_mesh%nibz
  w_info%invalid_freq = dtset%gw_invalid_freq
  w_info%mat_type = MAT_INV_EPSILON
@@ -774,8 +765,24 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, screen_filepath, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
  ABI_FREE(qlwl)
- !call screen%print(units)
- !call screen%ppm%print(units)
+
+ drude_plsmf = sqrt(four_pi * ebands%nelect / cryst%ucvol)
+ my_plsmf = drude_plsmf; if (dtset%ppmfrq > tol6) my_plsmf = dtset%ppmfrq
+ call ppm%init(mqmem, pp_mesh%nibz, npw_c, dtset%ppmodel, my_plsmf, dtset%gw_invalid_freq)
+ call ppm%print(units)
+
+ ABI_MALLOC(epsm1_ggw, (npw_c, npw_c, hscr%nomega))
+ scr_iomode = iomode_from_fname(screen_filepath)
+ do iq_ibz=1,pp_mesh%nibz
+   call read_screening("inverse_dielectric_function", screen_filepath, &
+                       npw_c, 1, hscr%nomega, epsm1_ggw, scr_iomode, comm, iqiA=iq_ibz)
+
+   kg_c => hscr%gvec(:, 1:npw_c)
+   call ppm%new_setup(iq_ibz, cryst, pp_mesh, npw_c, hscr%nomega, hscr%omega, epsm1_ggw, nfftf, kg_c, ngfftf, rhor(:,1))
+ end do ! iq_ibz
+
+ ABI_FREE(epsm1_ggw)
+ call hscr%free()
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p
  ABI_MALLOC(kg_k, (3, mpw))
@@ -1196,6 +1203,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
          call screen%rotate_iqbz(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
 
+         call ppm%get_qbz(gsph_c, pp_mesh, ipp_bz, botsq, otq, eig)
+
          ! Find the corresponding irred pp-point in the pp_mesh.
          call pp_mesh%get_bz_item(ipp_bz, pp, ipp_ibz, isym_pp, itim_pp)
 
@@ -1266,6 +1275,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              call screen%calc_sigc("N", nw_nk, omegame0i_nk, theta_mu_minus_e0i, dtset%zcut, &
                                    nspinor, npw_c, npw_c, rhotwg_c, vec_gwc_nk(:,:,n_k), sigcme_nk)
+
+             !call ppm%calc_sigc(nspinor, npw_c, nw_nk, rhotwg_c, botsq, otq, &
+             !                   omegame0i_nk, dtset%zcut, theta_mu_minus_e0i, eig, npw_c, vec_gwc_nk(:,:,n_k), sigcme_nk)
            end do ! n_k
 
            ! TODO: this is an all_gatherv but oh well.
@@ -1519,6 +1531,9 @@ end if ! .not qq_is_gamma.
          ABI_FREE(rhotwg_c)
          ABI_FREE(rhotwg_x)
          ABI_FREE(vc_sqrt_gx)
+         ABI_FREE(botsq)
+         ABI_FREE(otq)
+         ABI_FREE(eig)
          call stern_kmp%free(); call stern_kqmp%free()
        end do ! ipp_bz
 
@@ -1662,6 +1677,7 @@ end if ! .not qq_is_gamma.
  call gs_ham_kqmp%free(); call gs_ham_kmp%free(); call wfd%free(); call vcp%free()
  call screen%free(); call pp_mesh%free(); call gsph_c%free(); call gsph_x%free(); call gstore%free()
  call pawcprj_free(cwaveprj0); call pawcprj_free(cwaveprj)
+ call ppm%free()
  ABI_FREE(cwaveprj0)
  ABI_FREE(cwaveprj)
 
