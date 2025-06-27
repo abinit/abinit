@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h08 )
-  
+
 
 ================================================================================
 
@@ -81,11 +81,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -101,7 +101,7 @@
        3               2       -0.000000        0.000000
        3               3        0.012174        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -124,7 +124,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.036  and twall      0.082 sec
        Homogeneous q point set in the B.Z.
@@ -148,22 +148,22 @@
 
  The interatomic forces have been obtained
 
- Analysis of interatomic force constants 
+ Analysis of interatomic force constants
 
  Are given : column(1-3), the total force constant
        then  column(4-6), the Ewald part
        then  column(7-9), the short-range part
  Column 1, 4 and 7 are related to the displacement
-       of the generic atom along x,               
+       of the generic atom along x,
  column 2, 5 and 8 are related to the displacement
-       of the generic atom along y,               
+       of the generic atom along y,
  column 3, 6 and 9 are related to the displacement
-       of the generic atom along z.               
+       of the generic atom along z.
 
  generic atom number   2
  with cartesian coordinates  3.77945000E+00  3.77945000E+00  3.77945000E+00
 
- Third atom defining local coordinates : 
+ Third atom defining local coordinates :
      ib =    4   irpt =   32
 
    1 interaction with atom     2 cell      32
@@ -175,7 +175,7 @@
  Traces (and ratios) :
   0.45644                  -0.82618                   1.28262
   1.00000                  -1.81006                   2.81006
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -0.707107        0.707107
  Second local vector :        0.000000       -0.707107       -0.707107
  Third  local vector :        1.000000        0.000000        0.000000
@@ -196,7 +196,7 @@
  Traces (and ratios) :
  -0.03292                   0.14648                  -0.17940
   1.00000                  -4.44942                   5.44942
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.000000       -1.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000       -1.000000        0.000000
@@ -217,7 +217,7 @@
  Traces (and ratios) :
  -0.03292                   0.14648                  -0.17940
   1.00000                  -4.44942                   5.44942
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :       -0.000000        0.000000        1.000000
@@ -238,7 +238,7 @@
  Traces (and ratios) :
  -0.03292                   0.14648                  -0.17940
   1.00000                  -4.44942                   5.44942
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -1.000000        0.000000        0.000000
  Second local vector :        0.000000        1.000000        0.000000
  Third  local vector :        0.000000        0.000000       -1.000000
@@ -259,7 +259,7 @@
  Traces (and ratios) :
  -0.03292                   0.14648                  -0.17940
   1.00000                  -4.44942                   5.44942
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.000000        1.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000        1.000000        0.000000
@@ -280,7 +280,7 @@
  Traces (and ratios) :
  -0.03292                   0.14648                  -0.17940
   1.00000                  -4.44942                   5.44942
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000        0.000000       -1.000000
@@ -301,7 +301,7 @@
  Traces (and ratios) :
  -0.03292                   0.14648                  -0.17940
   1.00000                  -4.44942                   5.44942
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        1.000000        0.000000        0.000000
  Second local vector :        0.000000        1.000000        0.000000
  Third  local vector :        0.000000        0.000000        1.000000
@@ -322,7 +322,7 @@
  Traces (and ratios) :
  -0.00188                   0.00000                  -0.00188
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.577350       -0.577350       -0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
  Third  local vector :       -0.000000       -0.707107        0.707107
@@ -343,7 +343,7 @@
  Traces (and ratios) :
  -0.00188                   0.00000                  -0.00188
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.577350       -0.577350        0.577350
  Second local vector :        0.816497       -0.408248        0.408248
  Third  local vector :        0.000000        0.707107        0.707107
@@ -364,7 +364,7 @@
  Traces (and ratios) :
  -0.00188                   0.00000                  -0.00188
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
  Third  local vector :        0.000000       -0.707107       -0.707107
@@ -385,7 +385,7 @@
  Traces (and ratios) :
  -0.00188                   0.00000                  -0.00188
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.577350        0.577350        0.577350
  Second local vector :        0.816497        0.408248        0.408248
  Third  local vector :       -0.000000        0.707107       -0.707107
@@ -406,7 +406,7 @@
  Traces (and ratios) :
  -0.00188                   0.00000                  -0.00188
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.577350       -0.577350       -0.577350
  Second local vector :        0.816497        0.408248        0.408248
  Third  local vector :        0.000000       -0.707107        0.707107
@@ -427,7 +427,7 @@
  Traces (and ratios) :
  -0.00188                   0.00000                  -0.00188
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.577350       -0.577350        0.577350
  Second local vector :        0.816497        0.408248       -0.408248
  Third  local vector :       -0.000000        0.707107        0.707107
@@ -448,7 +448,7 @@
  Traces (and ratios) :
  -0.00188                   0.00000                  -0.00188
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.577350        0.577350       -0.577350
  Second local vector :        0.816497       -0.408248        0.408248
  Third  local vector :       -0.000000       -0.707107       -0.707107
@@ -469,7 +469,7 @@
  Traces (and ratios) :
  -0.00188                   0.00000                  -0.00188
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
  Third  local vector :        0.000000        0.707107       -0.707107
@@ -490,7 +490,7 @@
  Traces (and ratios) :
  -0.05220                   0.00000                  -0.05220
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -1.000000        0.000000        0.000000
  Second local vector :        0.000000        1.000000        0.000000
  Third  local vector :        0.000000        0.000000       -1.000000
@@ -511,7 +511,7 @@
  Traces (and ratios) :
  -0.05220                   0.00000                  -0.05220
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :       -0.000000        0.000000        1.000000
@@ -532,7 +532,7 @@
  Traces (and ratios) :
  -0.05220                   0.00000                  -0.05220
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.000000       -1.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000       -1.000000        0.000000
@@ -553,7 +553,7 @@
  Traces (and ratios) :
  -0.05220                   0.00000                  -0.05220
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.000000        1.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000        1.000000        0.000000
@@ -574,7 +574,7 @@
  Traces (and ratios) :
  -0.05220                   0.00000                  -0.05220
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000        0.000000       -1.000000
@@ -595,7 +595,7 @@
  Traces (and ratios) :
  -0.05220                   0.00000                  -0.05220
   1.00000                  -0.00000                   1.00000
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        1.000000        0.000000        0.000000
  Second local vector :        0.000000        1.000000        0.000000
  Third  local vector :        0.000000        0.000000        1.000000
@@ -610,7 +610,7 @@
  generic atom number   3
  with cartesian coordinates  3.77945000E+00  3.77945000E+00  0.00000000E+00
 
- Third atom defining local coordinates : 
+ Third atom defining local coordinates :
      ib =    4   irpt =   31
 
    1 interaction with atom     3 cell      32
@@ -622,7 +622,7 @@
  Traces (and ratios) :
   0.26354                  -0.19939                   0.46293
   1.00000                  -0.75658                   1.75658
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -1.000000        0.000000
  Second local vector :        0.000000        0.000000       -1.000000
  Third  local vector :        1.000000        0.000000        0.000000
@@ -643,7 +643,7 @@
  Traces (and ratios) :
  -0.03292                   0.14648                  -0.17940
   1.00000                  -4.44942                   5.44942
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.000000       -1.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000       -1.000000        0.000000
@@ -664,7 +664,7 @@
  Traces (and ratios) :
  -0.03292                   0.14648                  -0.17940
   1.00000                  -4.44942                   5.44942
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.000000        1.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000        1.000000        0.000000
@@ -685,7 +685,7 @@
  Traces (and ratios) :
  -0.01367                  -0.00756                  -0.00611
   1.00000                   0.55321                   0.44679
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -0.707107       -0.707107
  Second local vector :        0.000000       -0.707107        0.707107
  Third  local vector :       -1.000000       -0.000000        0.000000
@@ -706,7 +706,7 @@
  Traces (and ratios) :
  -0.01367                  -0.00756                  -0.00611
   1.00000                   0.55321                   0.44679
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.707107        0.000000       -0.707107
  Second local vector :       -0.707107        0.000000        0.707107
  Third  local vector :        0.000000        1.000000       -0.000000
@@ -727,7 +727,7 @@
  Traces (and ratios) :
  -0.01555                  -0.00968                  -0.00587
   1.00000                   0.62258                   0.37742
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.707107       -0.707107        0.000000
  Second local vector :        0.707107       -0.707107        0.000000
  Third  local vector :        0.000000        0.000000        1.000000
@@ -748,7 +748,7 @@
  Traces (and ratios) :
  -0.01367                  -0.00756                  -0.00611
   1.00000                   0.55321                   0.44679
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -0.707107        0.707107
  Second local vector :       -0.000000       -0.707107       -0.707107
  Third  local vector :        1.000000       -0.000000       -0.000000
@@ -769,7 +769,7 @@
  Traces (and ratios) :
  -0.01367                  -0.00756                  -0.00611
   1.00000                   0.55321                   0.44679
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.707107        0.000000        0.707107
  Second local vector :       -0.707107       -0.000000       -0.707107
  Third  local vector :        0.000000       -1.000000        0.000000
@@ -790,7 +790,7 @@
  Traces (and ratios) :
  -0.01367                  -0.00756                  -0.00611
   1.00000                   0.55321                   0.44679
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.707107       -0.707107
  Second local vector :       -0.000000        0.707107        0.707107
  Third  local vector :        1.000000        0.000000        0.000000
@@ -811,7 +811,7 @@
  Traces (and ratios) :
  -0.01555                  -0.00968                  -0.00587
   1.00000                   0.62258                   0.37742
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.707107        0.707107        0.000000
  Second local vector :        0.707107        0.707107        0.000000
  Third  local vector :        0.000000        0.000000       -1.000000
@@ -832,7 +832,7 @@
  Traces (and ratios) :
  -0.01367                  -0.00756                  -0.00611
   1.00000                   0.55321                   0.44679
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.707107        0.707107
  Second local vector :       -0.000000        0.707107       -0.707107
  Third  local vector :       -1.000000       -0.000000        0.000000
@@ -853,7 +853,7 @@
  Traces (and ratios) :
  -0.01367                  -0.00756                  -0.00611
   1.00000                   0.55321                   0.44679
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.707107        0.000000       -0.707107
  Second local vector :        0.707107       -0.000000        0.707107
  Third  local vector :       -0.000000       -1.000000       -0.000000
@@ -874,7 +874,7 @@
  Traces (and ratios) :
  -0.01555                  -0.00968                  -0.00587
   1.00000                   0.62258                   0.37742
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.707107       -0.707107        0.000000
  Second local vector :        0.707107        0.707107        0.000000
  Third  local vector :       -0.000000        0.000000        1.000000
@@ -895,7 +895,7 @@
  Traces (and ratios) :
  -0.01367                  -0.00756                  -0.00611
   1.00000                   0.55321                   0.44679
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.707107        0.000000        0.707107
  Second local vector :        0.707107       -0.000000       -0.707107
  Third  local vector :        0.000000        1.000000       -0.000000
@@ -916,7 +916,7 @@
  Traces (and ratios) :
  -0.01555                  -0.00968                  -0.00587
   1.00000                   0.62258                   0.37742
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.707107        0.707107        0.000000
  Second local vector :        0.707107       -0.707107        0.000000
  Third  local vector :        0.000000        0.000000       -1.000000
@@ -937,7 +937,7 @@
  Traces (and ratios) :
   0.00896                   0.00990                  -0.00095
   1.00000                   1.10565                  -0.10565
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -1.000000        0.000000        0.000000
  Second local vector :        0.000000        1.000000        0.000000
  Third  local vector :        0.000000        0.000000       -1.000000
@@ -958,7 +958,7 @@
  Traces (and ratios) :
   0.00896                   0.00990                  -0.00095
   1.00000                   1.10565                  -0.10565
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :       -0.000000        0.000000        1.000000
@@ -979,7 +979,7 @@
  Traces (and ratios) :
  -0.03272                  -0.01981                  -0.01291
   1.00000                   0.60537                   0.39463
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.000000       -1.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000       -1.000000        0.000000
@@ -1000,7 +1000,7 @@
  Traces (and ratios) :
  -0.03272                  -0.01981                  -0.01291
   1.00000                   0.60537                   0.39463
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.000000        1.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000        1.000000        0.000000
@@ -1021,7 +1021,7 @@
  Traces (and ratios) :
   0.00896                   0.00990                  -0.00095
   1.00000                   1.10565                  -0.10565
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
  Third  local vector :        0.000000        0.000000       -1.000000
@@ -1042,7 +1042,7 @@
  Traces (and ratios) :
   0.00896                   0.00990                  -0.00095
   1.00000                   1.10565                  -0.10565
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        1.000000        0.000000        0.000000
  Second local vector :        0.000000        1.000000        0.000000
  Third  local vector :        0.000000        0.000000        1.000000
@@ -1056,7 +1056,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -1190,7 +1190,7 @@
 
 ================================================================================
 
- Treat the second list of vectors 
+ Treat the second list of vectors
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -1210,4 +1210,4 @@
 
 +Total cpu time      0.186  and wall time      0.232 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

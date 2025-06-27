@@ -134,7 +134,7 @@ class FileLockException(Exception):
     """Exception raised by FileLock."""
 
 
-class FileLock(object):
+class FileLock:
     """ A file locking mechanism that has context-manager support so
         you can use it in a with statement. This should be relatively cross
         compatible as it doesn't rely on msvcrt or fcntl for the locking.
@@ -185,7 +185,7 @@ class FileLock(object):
                 if e.errno != errno.EEXIST:
                     raise
                 if (time.time() - start_time) >= self.timeout:
-                    raise FileLockException("Timeout occured.")
+                    raise FileLockException("Timeout occurred.")
                 time.sleep(self.delay)
 
         self.is_locked = True
@@ -223,7 +223,7 @@ class FileLock(object):
 class NoErrorFileLock(FileLock):
     '''
     A file locker that never raise a FileLockErrorin call of __enter__ but
-    return a boolean to tell wether the lock.
+    return a boolean to tell whether the lock.
     '''
 
     def __enter__(self):
@@ -237,7 +237,7 @@ class NoErrorFileLock(FileLock):
 
 def makeunique(gen):
     '''
-    gen have to be random enought not to produce too often the same thing
+    gen have to be random enough not to produce too often the same thing
     '''
     cache = set()
 
