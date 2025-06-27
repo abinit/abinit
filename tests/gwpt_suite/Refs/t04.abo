@@ -266,6 +266,32 @@ P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ ==== Header of the SCR file ====
+ SCR file: epsilon^-1 , calculated using inclvkb = 2
+ TESTPARTICLE RPA
+ Identifier                       4
+ Kxc kernel                       0
+ Treatment of q-->0 limit         2
+- headform                        81
+ fform                         1004
+ gwcalctyp                        0
+ Number of components             1       1
+ Number of q-points               3
+ Number of q-directions           1
+ Number of frequencies            2
+ Number of bands used            60
+ Dimension of matrix             15
+ Number of planewaves used     1067
+ Spectral method                  0
+ Test_type                        0
+ Time-ordering                    1
+ Scissor Energy                 0.000000E+00
+ Spectral smearing              1.000000E-01
+ Complex Imaginary Shift        3.674933E-03
+ rw_mesh_type    None
+ iw_mesh_type    None
+ cw_mesh_type    None
+ The header contains additional records.
 
  vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
  q-points for optical limit:   1

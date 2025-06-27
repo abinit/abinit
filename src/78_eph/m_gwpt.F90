@@ -349,9 +349,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Read g-sphere for correlation and pp_mesh from SCR file.
  call get_hscr_qmesh_gsph(screen_filepath , dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
+ call hscr%print(units, dtset%prtvol, header="Header of the SCR file")
 
-
- call pstat_proc%print(_PSTAT_ARGS_)
+ !call pstat_proc%print(_PSTAT_ARGS_)
 
  nqlwl = size(qlwl, dim=2)
  if (nqlwl == 0) then
