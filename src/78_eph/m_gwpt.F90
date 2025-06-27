@@ -383,7 +383,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_SFREE(my_pp_inds)
  end do ! my_is
 
- ! Initialize Coulomb term on the IBZ of the pp_mesh. Use the largest G-sphere.
+ ! Initialize Coulomb term on the IBZ of the pp_mesh. Use largest G-sphere.
  npw_x = gsph_x%ng; npw_c = gsph_c%ng
  min_npw_xc = min(npw_x, npw_c)
  max_npw_xc = max(npw_x, npw_c)
@@ -451,7 +451,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print([std_out], header="Wavefunctions for GWPT calculation.")
  call pstat_proc%print(_PSTAT_ARGS_)
 
  ABI_FREE(nband)
@@ -476,6 +475,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Set the FFT mesh
  call wfd%change_ngfft(cryst, psps, ngfft)
+ call wfd%print(units, header="Wavefunctions for GWPT calculation.")
 
  usecprj = dtset%usepaw
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
@@ -706,11 +706,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
    call drhodb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
- else
  end if
 
- call dvdb%print(prtvol=dtset%prtvol)
- call drhodb%print(prtvol=dtset%prtvol)
+ call dvdb%print([std_out], "DVDB file", dtset%prtvol)
+ call drhodb%print([std_out], "DRHODB file", dtset%prtvol)
 
  if (.not. use_ftinterp) then
    ! Need to translate itreat_qibz into itreatq_dvdb.
@@ -756,14 +755,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Initialize plasmon-pole object.
  call ppm%init(mqmem, pp_mesh%nibz, npw_c, dtset%ppmodel, my_plsmf, dtset%gw_invalid_freq)
- call ppm%print([std_out])
+ call ppm%print(units)
  !stop
 
  ! Read symmetrized em1 from file and build ppmodel parameters.
+ ! TODO: MPI-shared memory + compute my set of pp-vectors on ppm%new_setup
  scr_iomode = iomode_from_fname(screen_filepath)
  ABI_MALLOC(epsm1_ggw, (npw_c, npw_c, hscr%nomega))
 
- ! TODO: MPI-shared memory + compute my set of pp-vectors on ppm%new_setup
  do iq_ibz=1,pp_mesh%nibz
    call read_screening("inverse_dielectric_function", screen_filepath, &
                        npw_c, 1, hscr%nomega, epsm1_ggw, scr_iomode, comm, iqiA=iq_ibz)
@@ -843,7 +842,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
    ! TODO: Should introduce the possibility of specifying different nb states
-   ! for the incoming and the intermediates states.
+   ! for the incoming and the intermediate states.
    nb = gqk%nb
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gsig_atm, (2, nb, nb, natom3))
@@ -1211,13 +1210,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          !e_nk = qp_ene(n_k, ik_ibz, spin)
          !e_mkq = qp_ene(m_kq, ikq_ibz, spin)
 
-         ! =====================================
-         ! Sum over bands (n' in the equations)
-         ! =====================================
+         ! ======================================
+         ! Sum over bands (n' index in equations)
+         ! ======================================
+         ! NB: All procs in gqk%pert_comm enter this part.
          do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
-           !if (ib_sum > 8) cycle
-           ! NB: All procs in gqk%pert_comm enter this part.
-
            ! Get u_{n',k-p}(r), stored in ur_kmp
            call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
                               cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_kmp)
@@ -1234,14 +1231,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            need_x_kmp = (abs(theta_mu_minus_e0i / fact_spin) >= tol_empty) ! allow negative occ numbers
            !need_x_kmp = .True.
 
-           ! Contract immediately over g' with the frequency convolution: \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e')
-           ! Store results in vec_gwc_nk(:,:,n_k)
+           ! Contract immediately over g' with the frequency convolution:
+           !
+           !    \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e')
+           !
+           ! Store results in vec_gwc_nk(:,:,n_k).
            if (gqk%pert_comm%nproc > 1) vec_gwc_nk = zero
 
            do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
              !if gqk%pert_comm%skip(n_k) cycle ! MPI parallelism inside pert_comm
 
-             ! <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
+             ! Compute <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
              cwork_ur = ur_kmp * ur_nk(:,n_k)
 
              if (need_x_kmp) then
@@ -1285,14 +1285,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            need_x_kqmp = (abs(theta_mu_minus_e0i / fact_spin) >= tol_empty) ! allow negative occ numbers
            !need_x_kqmp = .True.
 
-           ! Contract immediately over g with the frequency convolution: \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kqmp) - e')
+           ! Contract immediately over g with the frequency convolution:
+           !
+           !    \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kqmp) - e')
+           !
            ! Store results in vec_gwc_mkq(:,:,m_kq),
            if (gqk%pert_comm%nproc > 1) vec_gwc_mkq = zero
 
            do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
              !if (gqk%pert_sumcomm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm
 
-             ! <m,k+q|e^{i(p+G)}r|bsum,k+q-p> * vc_sqrt(p,G) -> Exchange bra and ket and take CC of the FFT in sigtk_multiply_by_vc_sqrt
+             ! <m,k+q|e^{i(p+G)}r|bsum,k+q-p> * vc_sqrt(p,G)
+             ! Exchange bra and ket and take CC of the FFT in sigtk_multiply_by_vc_sqrt
              cwork_ur = ur_kqmp * ur_mkq(:,m_kq)
 
              if (need_x_kqmp) then
@@ -1330,13 +1334,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !       multiple instances.
 
            do imyp=1,gqk%my_npert
-             ! NB: Only one proc enters this section. No MPI parallelism allowed here.
+             ! NB: Only one proc enters this section. No MPI parallelism is allowed here.
 
              idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
              !print *, "For kk, ", kk, "pp:", pp, "idir, ipert", idir, ipert
 
              ! Set up local potential vlocal1_qq with proper dimensioning, from vtrial1 taking into account the spin
-             ! and prepare application of the NL part. Each CPU prepares its own potentials.
+             ! and prepare application of the NL part. Each MPI rank prepares its own potentials.
              call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, nvloc, &
                                         pawfgr, mpi_enreg, vtrial, v1scf_qq(:,:,:,imyp), vlocal, vlocal1_qq(:,:,:,:,imyp))
 
@@ -1391,7 +1395,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                gks_atm(:,:,ib,ipc) = stern_kmp%eig1_k(:, gqk%bstart:gqk%bstop, ib_sum)
              end if
 
-             ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}> --> exchange bra and ket and take the CC of the FFT.
+             ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}>
+             ! Exchange bra and ket and take the CC of the FFT.
              full_ur1_kqmp = GWPC_CONJG(full_ur1_kqmp)
 
              do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
