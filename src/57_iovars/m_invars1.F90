@@ -1211,7 +1211,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
  integer :: usespinspiral
  real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
- real(dp) :: qr, mx0, my0, mz0, mx, my, mz
+! real(dp) :: qr, mx0, my0, mz0, mx, my, mz
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
