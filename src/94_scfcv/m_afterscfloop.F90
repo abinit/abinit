@@ -277,11 +277,11 @@ contains
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,difmag,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,extfpmd,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
-& kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& kg,kxc,lrhor,maxfor,maxmag,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
@@ -333,6 +333,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(in) :: maxmag, difmag
  real(dp),intent(inout) :: cg(2,mcg)
  real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(inout) :: forold(3,dtset%natom)
@@ -367,7 +368,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  logical :: save_cg1_3,test_gylmgr,test_nfgd,test_rfgd
  logical :: remove_inv=.false.,wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
- real(dp) :: maxmag, difmag
  character(len=500) :: message
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands_k
@@ -394,7 +394,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(250,1,tsec)
  call timab(251,1,tsec)
 
- maxmag=zero;difmag=zero
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  nfftotf=product(ngfftf(1:3))
