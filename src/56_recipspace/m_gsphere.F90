@@ -637,17 +637,15 @@ end subroutine gsph_in_fftbox
 !!  unit=the unit number for output
 !!  prtvol = verbosity level
 !!
-!! OUTPUT
-!!  Only writing.
-!!
 !! SOURCE
 
-subroutine gsph_print(Gsph, units, prtvol)
+subroutine gsph_print(Gsph, units, prtvol, header)
 
 !Arguments ------------------------------------
 !scalars
  class(gsphere_t),intent(in) :: Gsph
  integer,intent(in) :: units(:), prtvol
+ character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
 !scalars
@@ -656,8 +654,11 @@ subroutine gsph_print(Gsph, units, prtvol)
  character(len=500) :: msg
 ! *************************************************************************
 
- write(msg,'(3a,2(a,i8,a))')ch10,&
-   ' ==== Info on the G-sphere ==== ',ch10,&
+ msg = ch10 // ' ==== Info on the G-sphere ==== ' // ch10
+ if (present(header)) msg = ' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(units, msg)
+
+ write(msg,'(2(a,i8,a))')&
    '  Number of G vectors ... ',Gsph%ng,ch10,&
    '  Number of shells ...... ',Gsph%nsh,ch10
  call wrtout(units, msg)
@@ -761,7 +762,7 @@ pure function gsph_g_idx(Gsph, gg) result(g_idx)
  logical :: found
 ! *************************************************************************
 
- ! * Use shells and bisect to find the star and stop index thus avoiding the storage of a table (ig1,ig2)
+ ! Use shells and bisection to find the star and stop index thus avoiding the storage of a table (ig1,ig2)
  glen = two_pi*SQRT(DOT_PRODUCT(gg,MATMUL(Gsph%gmet,gg)))
 
  ishbsc = bisect(Gsph%shlen,glen)
@@ -819,7 +820,7 @@ pure function gsph_gmg_idx(Gsph, ig1, ig2) result(ig1mg2)
 
  g1mg2 = Gsph%gvec(:,ig1)-Gsph%gvec(:,ig2)
 
- ! * Use shells and bisect to find the star and stop index thus avoiding the storage of a table (ig1,ig2)
+ ! Use shells and bisect to find the star and stop index thus avoiding the storage of a table (ig1,ig2)
  difflen = two_pi*SQRT(DOT_PRODUCT(g1mg2,MATMUL(Gsph%gmet,g1mg2)))
 
  ! FIXME It seems bisect is not portable, on my laptop test v5/t72 the number of skipped G-vectors is > 0
@@ -943,18 +944,15 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
- integer :: gcur(3),geq(3)
- integer :: symrec2t(3,3,nsym2)
- integer :: dum_kg(3,0)
+ integer :: gcur(3),geq(3),dum_kg(3,0),symrec2t(3,3,nsym2)
  integer,allocatable :: gbase(:,:),gbasek(:,:,:)
  integer,allocatable :: gcurr(:,:),gshell(:,:),insort(:),gtmp(:,:)
- integer,allocatable :: nbasek(:),nshell(:),shlim(:)
- integer,allocatable :: npwarr(:)
+ integer,allocatable :: nbasek(:),nshell(:),shlim(:), npwarr(:)
  real(dp) :: kpoint(3),gmet(3,3)
  real(dp),allocatable :: cnorm(:),cnormk(:,:),ctmp(:)
 ! *********************************************************************
 
- ! * Fake MPI_type for the sequential part.
+ ! Fake MPI_type for the sequential part.
  ! This routine should not be parallelized as communicating gbig and other
  ! tables takes more time than recalculating them in sequential.
  call initmpi_seq(MPI_enreg_seq)
@@ -1135,12 +1133,12 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
    write(msg,'(3a)')&
 &    ' Shells found:',ch10,&
 &    ' number of shell    number of G vectors      cut-off energy [Ha} '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    do in=1,nbase
      write(msg,'(12x,i4,17x,i6,12x,f8.3)')in,shlim(in),2*pi**2*cnorm(in)
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
    end do
-   call wrtout(std_out,ch10,'COLL')
+   call wrtout(std_out,ch10)
  end if
 
  ABI_FREE(gshell)
@@ -1284,14 +1282,14 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
  write(msg,'(3a)')&
 & ' Shells found:',ch10,&
 & ' number of shell    number of G vectors      cut-off energy [Ha] '
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  do ibase=1,nbase
    write(msg,'(12x,i4,17x,i6,12x,f8.3)')ibase,shlim(ibase),two*pi**2*cnorm(ibase)
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end do
  write(msg,'(a)')ch10
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
  ABI_FREE(gshell)
  ABI_FREE(insort)
  ABI_FREE(nshell)

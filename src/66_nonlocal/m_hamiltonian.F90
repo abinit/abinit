@@ -756,7 +756,6 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  integer :: my_spintab(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable,target :: ekb_tmp(:,:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1014,7 +1013,6 @@ subroutine gsham_load_k(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  logical :: compute_gbound_
  real(dp) :: arg
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1181,7 +1179,6 @@ subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
  logical :: compute_gbound_
  real(dp) :: arg
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1369,10 +1366,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
 
 !Local variables-------------------------------
  integer :: tmp2i(5)
-#if defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: ham_ptr
-#endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1545,9 +1539,7 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: jsppol
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1603,9 +1595,7 @@ end subroutine gsham_load_spin
 subroutine rfham_free(rf_Ham)
 
 !Arguments ------------------------------------
-!scalars
  class(rf_hamiltonian_type),intent(inout) :: rf_Ham
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1685,7 +1675,6 @@ subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
 !arrays
  integer :: my_spintab(2)
  real(dp),allocatable,target :: e1kb_tmp(:,:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1823,9 +1812,7 @@ subroutine rfham_load_spin(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlo
  real(dp),optional,target,intent(in) :: vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: jsppol
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1953,7 +1940,6 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -2032,7 +2018,6 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -2149,7 +2134,6 @@ subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nff
  integer :: n1,n2,n3,n4,n5,n6,ispden,ic
  real(dp) :: rhodum(1)
  real(dp),allocatable :: cgrvtrial(:,:), vlocal_tmp(:,:,:)
-
 ! *************************************************************************
 
  ! Coarse mesh.

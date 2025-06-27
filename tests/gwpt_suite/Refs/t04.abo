@@ -270,6 +270,32 @@ P Number of CPUs for parallelism over k-points: 1
  vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
+ ==== K-mesh for wavefunctions ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights :
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== G-sphere for exchange ====
+  Number of G vectors ...       15
+  Number of shells ......        3
+
+ Time reversal symmetry is used
+ ==== G-sphere for correlation ====
+  Number of G vectors ...       15
+  Number of shells ......        3
+
+ Time reversal symmetry is used
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  Reading KS GS potential for Sternheimer from: diamond_eph_gwpt/gso_POT.nc
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 

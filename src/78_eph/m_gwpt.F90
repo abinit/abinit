@@ -340,17 +340,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! ================
  ! HANDLE SCREENING
  ! ================
- ! Init gpsh_c for the correlated part.
+ ! Init gsph_c for the correlated part.
  nqlwl = 0; screen_filepath = ABI_NOFILE
  screen_filepath = dtfil%fnameabi_scr
  ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified")
 
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
- !call kmesh%print(units, header="", prtvol=dtset%prtvol)
 
  ! Read g-sphere for correlation and pp_mesh from SCR file.
  call get_hscr_qmesh_gsph(screen_filepath , dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
- !call pp_mesh%print(units, header="", prtvol=dtset%prtvol)
+
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -395,13 +394,19 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
                  nqlwl, qlwl, comm)
  end if
- if (my_rank == master) call vcp%print([std_out], prtvol=dtset%prtvol)
- call kmesh%free()
+ ABI_FREE(qlwl)
 
- call gsph_x%print([std_out], prtvol=dtset%prtvol)
- call gsph_c%print([std_out], prtvol=dtset%prtvol)
+ if (my_rank == master)  then
+   call kmesh%print(units, header="K-mesh for wavefunctions", prtvol=dtset%prtvol)
+   !call pp_mesh%print(units, header="", prtvol=dtset%prtvol)
+   call gsph_x%print(units, dtset%prtvol, header="G-sphere for exchange")
+   call gsph_c%print(units, dtset%prtvol, header="G-sphere for correlation")
+   call vcp%print(units, prtvol=dtset%prtvol)
+ end if
+
  ABI_CHECK_IGE(npw_x, 1, "npw_x <= 1")
  ABI_CHECK_IGE(npw_c, 1, "npw_c <= 1")
+ call kmesh%free()
 
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
@@ -734,7 +739,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Init Wc. In-core or out-of-core solution?
  mqmem = pp_mesh%nibz
+ drude_plsmf = sqrt(four_pi * ebands%nelect / cryst%ucvol)
+ my_plsmf = drude_plsmf; if (dtset%ppmfrq > tol6) my_plsmf = dtset%ppmfrq
 
+ w_info%drude_plsmf = my_plsmf
  w_info%use_ppm = dtset%ppmodel
  w_info%use_mdf = MDL_NONE
  w_info%invalid_freq = dtset%gw_invalid_freq
@@ -743,24 +751,24 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, screen_filepath, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
- ABI_FREE(qlwl)
+
+ call screen%ppm%print([std_out])
 
  ! Initialize plasmon-pole object.
- drude_plsmf = sqrt(four_pi * ebands%nelect / cryst%ucvol)
- my_plsmf = drude_plsmf; if (dtset%ppmfrq > tol6) my_plsmf = dtset%ppmfrq
  call ppm%init(mqmem, pp_mesh%nibz, npw_c, dtset%ppmodel, my_plsmf, dtset%gw_invalid_freq)
  call ppm%print([std_out])
+ !stop
 
  ! Read symmetrized em1 from file and build ppmodel parameters.
  scr_iomode = iomode_from_fname(screen_filepath)
  ABI_MALLOC(epsm1_ggw, (npw_c, npw_c, hscr%nomega))
 
+ ! TODO: MPI-shared memory + compute my set of pp-vectors on ppm%new_setup
  do iq_ibz=1,pp_mesh%nibz
    call read_screening("inverse_dielectric_function", screen_filepath, &
                        npw_c, 1, hscr%nomega, epsm1_ggw, scr_iomode, comm, iqiA=iq_ibz)
 
-   kg_c => hscr%gvec(:, 1:npw_c)
-   call ppm%new_setup(iq_ibz, cryst, pp_mesh, npw_c, hscr%nomega, hscr%omega, epsm1_ggw, nfftf, kg_c, ngfftf, rhor(:,1))
+   call ppm%new_setup(iq_ibz, cryst, pp_mesh, npw_c, hscr%nomega, hscr%omega, epsm1_ggw, nfftf, gsph_c%gvec, ngfftf, rhor(:,1))
  end do ! iq_ibz
 
  ABI_FREE(epsm1_ggw)
@@ -1185,6 +1193,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
          call screen%rotate_iqbz(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
 
+         ! Get PPM parameters for pp_bz  the object for applying W(pp_bz).
          call ppm%get_qbz(gsph_c, pp_mesh, ipp_bz, botsq, otq, eig)
 
          ! Find the corresponding irred pp-point in the pp_mesh.
