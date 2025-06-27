@@ -1302,6 +1302,27 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2165) = 'sliceX_diago                  '
  names(2166) = 'slice(other)                  '
 
+ ! slice_cprj
+ names(2170) = 'slicewf_cprj                  '
+ names(2171) = 'slice_init                    '
+ names(2172) = 'slice_free                    '
+ names(2173) = 'slice_cprj                    '
+ names(2174) = 'slice_invovl                  '
+ names(2175) = 'slice_residu                  '
+ names(2176) = 'slice_RayleighRitz            '
+ names(2177) = 'slice_transpose               '
+ names(2178) = 'slice_RR_q                    '
+ names(2179) = 'slice_postinvovl              '
+ names(2180) = 'slice_swap                    '
+ names(2181) = 'slice_amp_f                   '
+ names(2182) = 'slice_barrier                 '
+ names(2183) = 'slice_copy                    '
+ names(2184) = 'slice_AX(kin)                 '
+ names(2185) = 'slice_AX(loc)                 '
+ names(2186) = 'slice_AX(nl)                  '
+ names(2187) = 'slice_enl                     '
+ names(2188) = 'slice(other)                  '
+
  ! TIMER_SIZE is 2199. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
@@ -1584,6 +1605,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(61)
 !      Estimate the complement of slice
      tslots(:7)=(/2166,2160,-2161,-2162,-2163,-2164,-2165/)
+   case(62)
+!      Estimate the complement of slice_cprj
+     tslots(:19)=(/2188,2170,(ii,ii=-2171,-2187,-1)/)
 
    case default
      cycle
@@ -1999,6 +2023,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
        case(91)
          list(:7)=(/ 2160,2161,2162,2163,2164,2165,2166 /); msg='slicewf core engine '
+       case(92)
+         list(:19)=(/ (ii,ii=2170,2188,1) /) ; msg='slicewf_cprj core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
