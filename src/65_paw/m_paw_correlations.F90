@@ -915,6 +915,12 @@ CONTAINS  !=====================================================================
          pawtab(itypat)%lambda = lambda
          pawtab(itypat)%eps = eps
 
+         if (eps /= one .and. lambda > three) then
+           write(message,'(2a)') 'You are using a value of lambda > 3, for which the fit of the correlation energy in the exact DC is not stable !', &
+                              & 'Continue at your own risks !'
+           ABI_WARNING(message)
+         end if
+
          ! Recompute Slater integrals
          if (dmft_yukawa_param /= 3) then
            call compute_slater(lcur,pawrad_tmp,pawtab(itypat)%proj2(:),meshsz,lambda,eps,fk(:))

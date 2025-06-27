@@ -173,7 +173,17 @@ CONTAINS  !=====================================================================
        exc(i,j,ir) = exx(1) * half / pawtab%eps ! convert from Rydberg to Hartree
        vxc(i,j,ir) = vxx(1) * half / pawtab%eps
        rs1s(1) = one / max(rs1,epsilon(one))
-       call CorrLDA_2(ecc(:),vcc(:),rs1s(:),pawtab%lambda,pawtab%eps,1)
+       ! In his code, K. Haule has two fits for the correlation energy: an old
+       ! one with only lambda, and a more recent one with lambda and epsilon.
+       ! The more recent one seems much less reliable, is not guaranteed to have
+       ! the correct asymptotic behavior for high values of lambda, and overall
+       ! seems to be stable only on a very small window of [rs,lambda,epsilon].
+       ! So I prefer to use the old fit when possible.
+       if (pawtab%eps == one) then
+         call CorrLDA(ecc(:),vcc(:),rs1s(:),pawtab%lambda,1)
+       else
+         call CorrLDA_2(ecc(:),vcc(:),rs1s(:),pawtab%lambda,pawtab%eps,1)
+       end if ! eps
        exc(i,j,ir) = exc(i,j,ir) + ecc(1)*half
        vxc(i,j,ir) = vxc(i,j,ir) + vcc(1)*half
      end do ! i
@@ -511,6 +521,88 @@ subroutine EcVc_reduce_di_2(rs,eps,fn,qn,N)
   ! Ec = Ev * fn
   ! Vc = Vc * fn + Ec * qn
 end subroutine EcVc_reduce_di_2
+
+subroutine CorrLDA(Ec, Vc, rsi, lambda, N)
+  IMPLICIT NONE
+  INTEGER, intent(in):: N
+  REAL*8, intent(in) :: rsi(N)
+  REAL*8, intent(in) :: lambda
+  REAL*8, intent(out):: Ec(N), Vc(N)
+  !locals
+  INTEGER :: i
+  REAL*8 :: A(N), C(N)
+
+  do i=1,N
+     CALL CorLDA(Ec(i),Vc(i),rsi(i))
+  enddo
+
+  CALL EcVc_reduce(rsi,lambda,A,C,N)
+  Vc(:) = Vc(:)/A(:)+Ec(:)/C(:)
+  Ec(:) = Ec(:)/A(:)
+end subroutine CorrLDA
+
+REAL*8 Function f1(coef,x,x2,x4,x6)
+  IMPLICIT NONE
+  REAL*8, intent(in) :: x, x2, x4, x6, coef(5)
+  f1 = (x*coef(1)+x2*coef(2))/(1+x2*coef(3)+x4*coef(4)+x6*coef(5))
+  return
+END Function f1
+REAL*8 Function f2(coef,x2,x3,x4)
+  IMPLICIT NONE
+  REAL*8, intent(in) :: x2, x3, x4, coef(4)
+  ! locals
+  f2 = (x2*coef(1)+x3*coef(2))/(1+x2*coef(3)+x4*coef(4))
+  return
+END Function f2
+REAL*8 Function f3(coef,x2,x3,x4)
+  IMPLICIT NONE
+  REAL*8, intent(in) :: x2, x3, x4, coef(3)
+  f3 = (x3*coef(1)+x4*coef(2))/(1+coef(3)*x2)
+  return
+END Function f3
+REAL*8 Function f4(coef,x2,x4)
+  IMPLICIT NONE
+  REAL*8, intent(in) :: x2, x4, coef(2)
+  f4 = x4*(coef(1)+coef(2)*x2)
+  return
+END Function f4
+
+subroutine EcVc_reduce(rsi,lambda,A,C,N)
+  IMPLICIT NONE
+  INTEGER, intent(in):: N
+  REAL*8, intent(in) :: rsi(N)
+  REAL*8, intent(in) :: lambda
+  REAL*8, intent(out):: A(N), C(N)
+  !
+  ! locals
+  INTEGER:: i
+  REAL*8 :: coef1(5), coef2(4), coef3(3), coef4(2)
+  REAL*8 :: cfs(4)
+  REAL*8 :: x, x2, x3, x4, x6, rs, Br
+  coef1 = (/0.12238912,  0.73648662,  0.96044695, -0.07501634,  0.00207808/)
+  coef2 = (/0.05839362,  0.11969474,  0.10156124,  0.01594125/)
+  coef3 = (/0.00827519,  0.00557133,  0.01725079/)
+  coef4 = (/5.29134419e-04, 4.49628225e-06/)
+
+  x=lambda
+  x2=x*x
+  x3=x*x2
+  x4=x2*x2
+  x6=x4*x2
+
+  cfs(1)=exp(f1(coef1,x,x2,x4,x6))-1.
+  cfs(2)=exp(f2(coef2,x2,x3,x4))-1.
+  cfs(3)=exp(f3(coef3,x2,x3,x4))-1.
+  cfs(4)=exp(f4(coef4,x2,x4))-1.
+
+  !print *, 'cfs=', cfs
+  do i=1,N
+     rs=rsi(i)
+     A(i)  = 1.0+rs*(cfs(1)+rs*(cfs(2)+rs*(cfs(3)+rs*cfs(4))))
+     Br = rs*(cfs(1)+rs*(2*cfs(2)+rs*(3*cfs(3)+rs*4*cfs(4))))
+     C(i) = 3*A(i)**2/Br
+  enddo
+end subroutine EcVc_reduce
 
 END MODULE m_paw_exactDC
 !!***
