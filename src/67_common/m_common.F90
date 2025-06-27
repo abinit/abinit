@@ -672,14 +672,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
        if(toldmag_ok>=2 .and..not.noquit)then
          if (ttolwfr==0) then
            write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-            ' At SCF step',istep,', forces are converged : ',ch10,&
-            '  for the second time, max diff in mag=',difmagsph,' < toldmag=',toldmag
+            ' At SCF step',istep,', magnetizations are converged : ',ch10,&
+            '  for the second time, max diff in magnetization=',difmagsph,' < toldmag=',toldmag
            call wrtout([std_out, ab_out], message)
            quit=1
          else if (ttolwfr==1 .and. residm < tolwfr )then
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
-            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
-            '  for the second time, max diff in force=',diffor,' < toldmag=',toldmag
+            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND magnetizations are converged : ',ch10,&
+            '  for the second time, max diff in magnetization=',difmagsph,' < toldmag=',toldmag
            call wrtout([std_out, ab_out], message)
            quit=1
         end if
@@ -849,6 +849,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 
  case (3)
    ! If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
+   
    conv_retcode = 0
    if(nstep>0) then
      if (.not. converged()) then
@@ -905,7 +906,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 
        else if (ttoldmag==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-         '  maximum force difference=',diffor,' exceeds toldmag=',toldmag,ch10
+         '  maximum magnetization difference=',difmagsph,' exceeds toldmag=',toldmag,ch10
 
        else if (ttolrff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
