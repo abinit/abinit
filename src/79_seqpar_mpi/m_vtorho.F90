@@ -1084,7 +1084,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        if (dtset%cprj_in_memory==1) then
-         do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
+         do_invS=xg_nonlop%paw.and.(dtset%wfoptalg==111.or.dtset%wfoptalg==112)
          call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,&
            & istep<=1,compute_invS_approx=do_invS,compute_gram=do_invS)
        end if
