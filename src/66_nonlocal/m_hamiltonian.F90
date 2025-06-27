@@ -267,7 +267,7 @@ module m_hamiltonian
    ! pspso(ntypat)
    ! For each type of psp, 1 if no spin-orbit component is taken
    ! into account, 2 if a spin-orbit component is used
-   ! Revelant for NC-psps and PAW
+   ! Relevant for NC-psps and PAW.
 
 #if defined HAVE_GPU && defined HAVE_YAKL
   integer(c_int32_t), ABI_CONTIGUOUS pointer :: typat(:) => null()
@@ -720,7 +720,7 @@ end subroutine gsham_free
 !!
 !! SIDE EFFECTS
 !!  Ham<gs_hamiltonian_type>=Structured datatype almost completely initialized:
-!!   * Basic variables and dimensions are transfered to the structure.
+!!   * Basic variables and dimensions are transferred to the structure.
 !!   * All pointers are allocated with correct dimensions.
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
@@ -756,7 +756,6 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  integer :: my_spintab(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable,target :: ekb_tmp(:,:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -865,7 +864,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  if (ham%usepaw==1) then
    ham%usecprj=0;if (present(usecprj)) ham%usecprj=usecprj
    ABI_MALLOC(ham%dimcprj,(natom))
-   !Be carefull cprj are ordered by atom type (used in non-local operator)
+   !Be careful cprj are ordered by atom type (used in non-local operator)
    call pawcprj_getdim(ham%dimcprj,natom,ham%nattyp,ham%ntypat,ham%typat,pawtab,'O')
  else
    ham%usecprj=0
@@ -984,7 +983,7 @@ end subroutine gsham_init
 !!  [ph3d_k]=3-dim structure factors, for each atom and plane wave
 !!
 !! SIDE EFFECTS
-!!  ham<gs_hamiltonian_type>=structured datatype completed with k-dependent quantitites.
+!!  ham<gs_hamiltonian_type>=structured datatype completed with k-dependent quantities.
 !!          Quantities at k^prime are set equal to quantities at k.
 !!    k-dependent scalars and pointers associated
 !!    phkxred=exp(.k.xred) for each atom
@@ -1014,7 +1013,6 @@ subroutine gsham_load_k(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
  logical :: compute_gbound_
  real(dp) :: arg
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1042,7 +1040,7 @@ subroutine gsham_load_k(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%npw_fft_kp = npw_k
  end if
 
-!Pointers to k-dependent quantitites
+!Pointers to k-dependent quantities
  if (present(kinpw_k)) then
    ham%kinpw_k  => kinpw_k
    ham%kinpw_kp => kinpw_k
@@ -1153,7 +1151,7 @@ end subroutine gsham_load_k
 !!  [ph3d_kp]=3-dim structure factors, for each atom and plane wave
 !!
 !! SIDE EFFECTS
-!!  ham<gs_hamiltonian_type>=structured datatype completed with k^prime-dependent quantitites.
+!!  ham<gs_hamiltonian_type>=structured datatype completed with k^prime-dependent quantities.
 !!    k^prime-dependent scalars and pointers associated
 !!    phkpxred=exp(.k^prime.xred) for each atom
 !!    [ham%gbound_kp]=G sphere boundary, for each plane wave
@@ -1181,7 +1179,6 @@ subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
  logical :: compute_gbound_
  real(dp) :: arg
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1198,7 +1195,7 @@ subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
     ham%npw_fft_kp = npw_kp
  end if
 
-!Pointers to k-dependent quantitites
+!Pointers to k-dependent quantities
  if (present(kinpw_kp)) ham%kinpw_kp => kinpw_kp
  if (present(kg_kp))    ham%kg_kp    => kg_kp
  if (present(kpg_kp))   ham%kpg_kp   => kpg_kp
@@ -1275,7 +1272,7 @@ end subroutine gsham_load_kprime
 !! SOURCE
 
 subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
-                            nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                   ! out
+                             nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                   ! out
 
 !Arguments ------------------------------------
 !scalars
@@ -1369,10 +1366,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
 
 !Local variables-------------------------------
  integer :: tmp2i(5)
-#if defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: ham_ptr
-#endif
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1545,9 +1539,7 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: jsppol
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1603,9 +1595,7 @@ end subroutine gsham_load_spin
 subroutine rfham_free(rf_Ham)
 
 !Arguments ------------------------------------
-!scalars
  class(rf_hamiltonian_type),intent(inout) :: rf_Ham
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1658,7 +1648,7 @@ end subroutine rfham_free
 !!
 !! SIDE EFFECTS
 !!  rf_Ham<rf_hamiltonian_type>=Structured datatype almost completely initialized:
-!!   * Basic variables and dimensions are transfered to the structure.
+!!   * Basic variables and dimensions are transferred to the structure.
 !!   * All pointers are allocated with correct dimensions.
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
@@ -1685,7 +1675,6 @@ subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
 !arrays
  integer :: my_spintab(2)
  real(dp),allocatable,target :: e1kb_tmp(:,:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1823,9 +1812,7 @@ subroutine rfham_load_spin(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlo
  real(dp),optional,target,intent(in) :: vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: jsppol
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1881,7 +1868,7 @@ end subroutine rfham_load_spin
 !!  [npw_k]=number of plane waves
 !!
 !! SIDE EFFECTS
-!!  rf_Ham<rf_hamiltonian_type>=structured datatype completed with k-dependent quantitites.
+!!  rf_Ham<rf_hamiltonian_type>=structured datatype completed with k-dependent quantities.
 !!          Quantities at k^prime are set equal to quantities at k.
 !!
 !! SOURCE
@@ -1906,7 +1893,7 @@ subroutine rfham_load_k(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
    rf_Ham%npw_kp = npw_k
  end if
 
-!Pointers to k-dependent quantitites
+!Pointers to k-dependent quantities
  if (present(dkinpw_k)) then
    rf_Ham%dkinpw_k  => dkinpw_k
    rf_Ham%dkinpw_kp => dkinpw_k
@@ -1953,7 +1940,6 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -2032,7 +2018,6 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer,pointer :: my_atmtab(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -2149,7 +2134,6 @@ subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nff
  integer :: n1,n2,n3,n4,n5,n6,ispden,ic
  real(dp) :: rhodum(1)
  real(dp),allocatable :: cgrvtrial(:,:), vlocal_tmp(:,:,:)
-
 ! *************************************************************************
 
  ! Coarse mesh.

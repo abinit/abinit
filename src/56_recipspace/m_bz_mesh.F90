@@ -280,13 +280,13 @@ module m_bz_mesh
 !! including the operations such as
 !!  -Sq = q+ G0.
 !!
-!! The operations belongin to the little group define an irriducible wedge in the Brillouin zone
+!! The operations belonging to the little group define an irriducible wedge in the Brillouin zone
 !! that is, usually, larger than the irredubile zone defined by the space group.
 !! The two zone coincide when q=0
 !!
 !! TODO
 !! Rationalize most of the arrays, in particular the tables
-!! This structure shoud be rewritten almost from scratch, thus avoid using it
+!! This structure should be rewritten almost from scratch, thus avoid using it
 !! for your developments.
 !!
 !! SOURCE
@@ -318,7 +318,7 @@ module m_bz_mesh
 
   integer,allocatable :: ibz2bz(:)
   ! ibz2bz(nibz_ltg)
-  ! The correspondind index in the BZ array
+  ! The corresponding index in the BZ array
 
   integer,allocatable :: igmG0(:,:,:)
   ! iumklp(npw,2,nsym_sg)
@@ -582,7 +582,6 @@ end subroutine kmesh_free
 !! units: unit numbers
 !! [header]=optional header
 !! [prtvol]=verbosity level
-!! [mode_paral]=either "COLL" or "PERS"
 !!
 !! OUTPUT
 !!  Only printing.
@@ -1189,7 +1188,7 @@ end function has_IBZ_item
 !!  ik_bz=Index of the k-point in the BZ.
 !!
 !! OUTPUT
-!! Returm TRUE. if the k-point is in the IBZ (NB: a non-zero umklapp is not allowed)
+!! Return TRUE. if the k-point is in the IBZ (NB: a non-zero umklapp is not allowed)
 !!
 !! SOURCE
 

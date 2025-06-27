@@ -266,12 +266,105 @@ P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
+ ==== Header of the SCR file ====
+ SCR file: epsilon^-1 , calculated using inclvkb = 2
+ TESTPARTICLE RPA
+ Identifier                       4
+ Kxc kernel                       0
+ Treatment of q-->0 limit         2
+- headform                        81
+ fform                         1004
+ gwcalctyp                        0
+ Number of components             1       1
+ Number of q-points               3
+ Number of q-directions           1
+ Number of frequencies            2
+ Number of bands used            60
+ Dimension of matrix             15
+ Number of planewaves used     1067
+ Spectral method                  0
+ Test_type                        0
+ Time-ordering                    1
+ Scissor Energy                 0.000000E+00
+ Spectral smearing              1.000000E-01
+ Complex Imaginary Shift        3.674933E-03
+ rw_mesh_type    None
+ iw_mesh_type    None
+ cw_mesh_type    None
+ The header contains additional records.
 
  vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
+ ==== K-mesh for wavefunctions ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights :
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== G-sphere for exchange ====
+  Number of G vectors ...       15
+  Number of shells ......        3
+
+ Time reversal symmetry is used
+ ==== G-sphere for correlation ====
+  Number of G vectors ...       15
+  Number of shells ......        3
+
+ Time reversal symmetry is used
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+ ==== Wavefunctions for GWPT calculation. ====
+  Number of irreducible k-points ........ 3
+  Number of spinorial components ........ 1
+  Number of spin-density components ..... 1
+  Number of spin polarizations .......... 1
+  Plane wave cutoff energy ..............  45.0
+  Max number of G-vectors ............... 1106
+  Total number of FFT points ............ 4096
+-  Number of FFT points treated by me .... 4096
+
+
+ ==== FFT mesh for wavefunctions ====
+  FFT mesh divisions ........................    16   16   16
+  Augmented FFT divisions ...................    17   17   16
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
+
+P Total number of (b,k,s) states stored by this rank: 27
+P Memory allocated for Fourier components u(G):      0.5 [Mb] <<< MEM
+P Memory needed for wfd%s datastructure:      0.0 [Mb] <<< MEM
+P Memory needed for wfd%s(0)%k datastructure:      0.0 [Mb] <<< MEM
+P Memory allocated for Kdata array:      0.0 [Mb] <<< MEM
+
  Reading KS GS potential for Sternheimer from: diamond_eph_gwpt/gso_POT.nc
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
+ ==== Info on the ppm_t object ====
+
+--- !Plasmonpole_params
+iteration_state: {dtset: 1, }
+dm2_botsq: 15
+dm_eig: 1
+dm2_otq: 15
+invalid_freq: 0
+model: 2
+mqmem: 3
+nqibz: 3
+npwc: 15
+userho: 1
+iq_bz: 0
+drude_plsmf:   1.14321459E+00
+force_plsmf:   0.00000000E+00
+...
+
 
  gstore_completed: 1
  gstore_done_qbz_spin: 8

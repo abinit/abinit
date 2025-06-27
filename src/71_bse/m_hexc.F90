@@ -3,7 +3,7 @@
 !! m_hexc
 !!
 !! FUNCTION
-!! module for excitonic hamiltonian for Haydock
+!! Module for excitonic hamiltonian for Haydock
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2014-2025 ABINIT group (M.Giantomassi, Y. Gillet)
@@ -61,7 +61,7 @@ MODULE m_hexc
 !!
 !! SOURCE
 
- type,public :: hexc_t
+ type, public :: hexc_t
 
  !scalars
     integer :: comm
@@ -237,22 +237,18 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
 
 !Arguments ---------------------------
 !scalars
+ class(hexc_t),intent(inout) :: hexc
  integer,intent(in) :: comm
- type(hexc_t),intent(inout) :: hexc
  type(excparam),intent(in),target :: BSp
  type(excfiles),intent(in),target :: BS_files
  type(crystal_t),intent(in),target :: Cryst
  type(kmesh_t),intent(in),target :: Kmesh_coarse
  type(wfdgw_t),intent(in),target :: Wfd_coarse
  type(ebands_t),intent(in),target :: KS_BSt, QP_BSt
-!arrays
 
 !Local variables ---------------------
 !scalars
- integer :: ierr,ncid,ncerr
- integer :: max_r, max_c
- integer :: hsize
- integer :: spin, spad, itt ! For diagonal !
+ integer :: ierr,ncid,ncerr, max_r, max_c, hsize, spin, spad, itt ! For diagonal !
  logical :: is_resonant, diago_is_real, use_mpio=.FALSE.
  character(len=fnlen) :: hreso_fname, hcoup_fname
  !character(len=500) :: msg
@@ -413,18 +409,17 @@ end subroutine hexc_init
 !! Wfd, Wfd_dense
 !!   The memory might be modified by computing wavefunctions
 !!
-!!
 !! SOURCE
 
 subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_dense, &
-&    double_grid, Wfd_dense, KS_BSt_dense, QP_BSt_dense, Psps, Pawtab)
+                            double_grid, Wfd_dense, KS_BSt_dense, QP_BSt_dense, Psps, Pawtab)
 
 !Arguments ---------------------------
 !scalars
+ class(hexc_interp_t),intent(inout) :: hexc_i
  integer,intent(in) :: method
  real(dp),intent(in) :: m3_width
  type(hexc_t),intent(inout) :: hexc
- type(hexc_interp_t),intent(inout) :: hexc_i
  type(double_grid_t),intent(in),target :: double_grid
  type(wfdgw_t),intent(inout),target :: Wfd_dense !, Wfd
  type(kmesh_t),intent(in),target :: Kmesh_dense
@@ -503,17 +498,17 @@ subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_den
    tmpfname(ii-2:ii+1) = 'ABSR'
    ABI_MALLOC_OR_DIE(hexc_i%all_acoeffs,(hsize,hsize), ierr)
    call exc_read_rcblock(tmpfname,Bsp,is_resonant,diago_is_real,nsppol,BSp%nreh,hsize,1,hsize,&
-&     hexc_i%all_acoeffs,use_mpio,hexc%comm)
+                         hexc_i%all_acoeffs,use_mpio,hexc%comm)
 
    tmpfname(ii-2:ii+1) = 'BBSR'
    ABI_MALLOC_OR_DIE(hexc_i%all_bcoeffs,(hsize,hsize), ierr)
    call exc_read_rcblock(tmpfname,Bsp,is_resonant,diago_is_real,nsppol,BSp%nreh,hsize,1,hsize,&
-&     hexc_i%all_bcoeffs,use_mpio,hexc%comm)
+                         hexc_i%all_bcoeffs,use_mpio,hexc%comm)
 
    tmpfname(ii-2:ii+1) = 'CBSR'
    ABI_MALLOC_OR_DIE(hexc_i%all_ccoeffs,(hsize,hsize), ierr)
    call exc_read_rcblock(tmpfname,Bsp,is_resonant,diago_is_real,nsppol,BSp%nreh,hsize,1,hsize,&
-&     hexc_i%all_ccoeffs,use_mpio,hexc%comm)
+                         hexc_i%all_ccoeffs,use_mpio,hexc%comm)
  end if
 
  ! Compute overlaps & compute all hmat
@@ -546,12 +541,6 @@ end subroutine hexc_interp_init
 !! FUNCTION
 !! Pre-compute interpolated hamiltonian and store it in memory
 !!
-!! INPUTS
-!!
-!!
-!! OUTPUT
-!!
-!!
 !! SIDE EFFECTS
 !! hexc, hexc_i
 !!   Pre-compute info to save CPU time when computing matmul
@@ -559,11 +548,11 @@ end subroutine hexc_interp_init
 !!
 !! SOURCE
 
-subroutine hexc_build_hinterp(hexc,hexc_i)
+subroutine hexc_build_hinterp(hexc, hexc_i)
 
 !Arguments ---------------------------
- type(hexc_t),intent(inout) :: hexc
- type(hexc_interp_t),intent(inout) :: hexc_i
+ class(hexc_t),intent(inout) :: hexc
+ class(hexc_interp_t),intent(inout) :: hexc_i
 
 !Local variables ---------------------
  integer :: ierr,ncerr,ncid
@@ -576,9 +565,9 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
  ABI_MALLOC_OR_DIE(hexc_i%hinterp,(hexc_i%hsize_dense,hexc_i%hsize_dense), ierr)
 
  call hexc_compute_hinterp(hexc%BSp, hexc%hsize_coarse, hexc_i%hsize_dense, hexc_i%all_hmat, &
-&  hexc_i%interpolator%double_grid,hexc%nbnd_coarse, hexc_i%interpolator, &
-&  hexc_i%kdense2div, hexc_i%all_acoeffs,hexc_i%all_bcoeffs, hexc_i%all_ccoeffs, &
-&  hexc_i%Kmesh_dense, hexc_i%Vcp_dense, hexc%crystal%gmet, hexc_i%hinterp, hexc_i%m3_width)
+   hexc_i%interpolator%double_grid,hexc%nbnd_coarse, hexc_i%interpolator, &
+   hexc_i%kdense2div, hexc_i%all_acoeffs,hexc_i%all_bcoeffs, hexc_i%all_ccoeffs, &
+   hexc_i%Kmesh_dense, hexc_i%Vcp_dense, hexc%crystal%gmet, hexc_i%hinterp, hexc_i%m3_width)
 
  ABI_SFREE(hexc_i%all_acoeffs)
  ABI_SFREE(hexc_i%all_bcoeffs)
@@ -590,7 +579,7 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
    ncerr = nctk_open_create(ncid, trim(hexc%BS_files%out_basename)//"_HEXC_I.nc", xmpi_comm_self)
    NCF_CHECK_MSG(ncerr, "Creating HEXC_I file")
    call exc_ham_ncwrite(ncid, hexc_i%Kmesh_dense, hexc%BSp, hexc_i%hsize_dense, hexc%BSp%nreh_interp, &
-&       hexc%BSp%vcks2t_interp, hexc_i%hinterp, hexc_i%diag_dense)
+                        hexc%BSp%vcks2t_interp, hexc_i%hinterp, hexc_i%diag_dense)
    NCF_CHECK(nf90_close(ncid))
  end if
 
@@ -622,13 +611,13 @@ end subroutine hexc_build_hinterp
 !! SOURCE
 
 subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
-&  interpolator,kdense2div,work_coeffs,Cmat,ikp_dense,overlaps)
+  interpolator,kdense2div,work_coeffs,Cmat,ikp_dense,overlaps)
 
 !Arguments ------------------------------------
 !scalars
+ type(excparam),intent(in) :: BSp
  integer,intent(in) :: nbnd_coarse
  integer,intent(in) :: ikp_dense
- type(excparam),intent(in) :: BSp
  type(double_grid_t),intent(in) :: grid
  type(interpolator_t),target,intent(inout) :: interpolator
 !arrays
@@ -647,7 +636,6 @@ subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
  complex(dpc) :: tmp_val, tmp2, tmp4
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: btemp(:),ctemp(:)
-
 !*********************************************************************
 
  btemp => interpolator%btemp
@@ -668,7 +656,7 @@ subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
  do ineighbourp = 1,interpolator%nvert
 
    btemp(((ineighbourp-1)*nbnd_coarse+1):(ineighbourp*nbnd_coarse)) = &
-&       interpolator%interp_factors(ineighbourp,idivp)*work_coeffs(:,ineighbourp)
+           interpolator%interp_factors(ineighbourp,idivp)*work_coeffs(:,ineighbourp)
 
  end do !ineighbourp
 
@@ -680,10 +668,8 @@ subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
      ! Now we now it_dense, and itp_dense
 
      do ineighbourp = 1,interpolator%nvert
-
        do iv1 = lomo2, homo2
          ! BSp%lumo_spin(spin2),BSp%humo_spin(spin2)
-
          tmp4 = overlaps(iv1,ivp,ineighbourp)
 
          do ic1 = lumo2,humo2
@@ -693,14 +679,10 @@ subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
            ibndp_coarse1 = (iv1-lomo2)*BSp%maxnbndc+(ic1-lumo2+1)
            indwithnb = (ineighbourp-1)*nbnd_coarse+ibndp_coarse1
 
-           ctemp(indwithnb) = &
-&             tmp4 &
-&            *tmp2
-
+           ctemp(indwithnb) = tmp4 * tmp2
          end do ! iv1
-       end do !ic1
-
-     end do !ineighbourp
+       end do ! ic1
+     end do ! ineighbourp
 
      tmp_val = xdotc(interpolator%nvert*nbnd_coarse,ctemp,1,btemp,1)
      !tmp_val = DOT_PRODUCT(ctemp,btemp)
@@ -770,8 +752,7 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
  integer,parameter :: spin1=1, spin2=1
  integer :: ic,iv,iv1,ic1,ik_dense,ik_coarse,it_coarse,it_dense,idiv,ibnd_coarse,ibnd_coarse1,ineighbour
  integer :: icp,ivp,ikp_dense,ikp_coarse,itp_coarse,itp_dense,idivp,ibndp_coarse,ibndp_coarse1,ineighbourp,itp_coarse1
- integer :: itc,it_dense1,indwithnb, corresp_ind
- integer :: limitnbz, inb,ierr
+ integer :: itc,it_dense1,indwithnb, corresp_ind, limitnbz, inb,ierr
  real(dp) :: factor,vc_sqrt_qbz,qnorm
  complex(dpc) :: term
  logical :: newway, use_herm
@@ -791,13 +772,13 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
  use_herm = .True.
 
  if (any(BSp%interp_mode == [2,3])) then
-   if(Vcp_dense%mode /= 'CRYSTAL' .and. Vcp_dense%mode /= 'AUXILIARY_FUNCTION') then
-     ABI_BUG('Vcp_dense%mode not implemented yet !')
+   if (Vcp_dense%mode /= 'CRYSTAL' .and. Vcp_dense%mode /= 'AUXILIARY_FUNCTION') then
+     ABI_ERROR('Vcp_dense%mode not implemented yet !')
    end if
  end if
 
- if(BSp%nsppol > 1) then
-   ABI_BUG("nsppol > 1 not yet implemented")
+ if (BSp%nsppol > 1) then
+   ABI_ERROR("nsppol > 1 not yet implemented")
  end if
 
  factor = one/grid%ndiv
@@ -1162,14 +1143,14 @@ end subroutine hexc_free
 !! hexc_interp_free
 !!
 !! FUNCTION
-!!  Destroy the interpolator object in memory
+!!  Free dynamic memory.
 !!
 !! SOURCE
 
 subroutine hexc_interp_free(hexc_i)
 
 !Arguments ---------------------------
- type(hexc_interp_t),intent(inout) :: hexc_i
+ class(hexc_interp_t),intent(inout) :: hexc_i
 !*****************************************************************************
 
  ABI_SFREE(hexc_i%kdense2div)
@@ -1181,11 +1162,11 @@ subroutine hexc_interp_free(hexc_i)
  ABI_SFREE(hexc_i%all_bcoeffs)
  ABI_SFREE(hexc_i%all_ccoeffs)
 
- if( associated(hexc_i%kmesh_dense) ) then
+ if (associated(hexc_i%kmesh_dense)) then
    nullify(hexc_i%kmesh_dense)
  end if
 
- if( associated(hexc_i%vcp_dense) ) then
+ if (associated(hexc_i%vcp_dense)) then
    nullify(hexc_i%vcp_dense)
  end if
 
@@ -1237,10 +1218,8 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 
 !Local variables ------------------------------
 !scalars
- integer :: itt,ik_dense,ik_coarse,it_coarse
- integer :: ic,iv,iv1,ic1, ibnd_coarse
- integer :: ibnd_coarse1
- integer :: ineighbour,idense,ikpt
+ integer :: itt,ik_dense,ik_coarse,it_coarse, ic,iv,iv1,ic1, ibnd_coarse
+ integer :: ibnd_coarse1, ineighbour,idense,ikpt
  integer :: my_k1,my_k2,ind_with_nb,is, is1
  real(dp) :: factor
  complex(dpc) :: tmp
@@ -1249,9 +1228,7 @@ subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
  integer :: allindices(nbnd_coarse)
  complex(dpc) :: allp(hsize_coarse,interpolator%nvert), test(hsize_coarse)
  complex(dpc) :: ophi(grid%nbz_dense,interpolator%nvert,nbnd_coarse)
- complex(dpc),allocatable :: b(:), c(:),A(:,:)
- complex(dpc),allocatable :: tmp_array(:), tmp_array2(:,:)
-
+ complex(dpc),allocatable :: b(:), c(:),A(:,:), tmp_array(:), tmp_array2(:,:)
 !************************************************************************
 
  factor = one/grid%ndiv
@@ -1515,7 +1492,7 @@ end subroutine hexc_interp_matmul
 !! hexc_matmul_tda
 !!
 !! FUNCTION
-!! Compute H | \psi >
+!! Compute H |\psi>
 !!
 !! INPUTS
 !! hexc<hexc_t> = Excitonic hamiltonian
@@ -1530,7 +1507,7 @@ end subroutine hexc_interp_matmul
 subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 
 !Arguments ---------------------------
- type(hexc_t),intent(in) :: hexc
+ class(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
  complex(dpc),intent(in) :: phi(hexc%hsize)
  complex(dpc),intent(out) :: hphi(hexc%hsize)
@@ -1555,7 +1532,7 @@ subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
    end if
 
    call hexc_interp_matmul(hexc%bsp, hexc%hsize_coarse, hexc_i%hsize_dense, hexc_i%all_hmat, phi, hphi, &
-&     hexc_i%interpolator%double_grid,hexc%nbnd_coarse, hexc_i%interpolator, hexc_i%div2kdense, hexc_i%kdense2div)
+     hexc_i%interpolator%double_grid,hexc%nbnd_coarse, hexc_i%interpolator, hexc_i%div2kdense, hexc_i%kdense2div)
 
  else ! No interpolation
    call xgemv('N',hexc%hsize,hexc%my_nt,cone,hexc%hreso,hexc%hsize,phi,1,czero,hphi,1)
@@ -1590,7 +1567,7 @@ end subroutine hexc_matmul_tda
 subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 
 !Arguments ---------------------------
- type(hexc_t),intent(in) :: hexc
+ class(hexc_t),intent(in) :: hexc
  character,intent(in) :: op
  complex(dpc),intent(in) :: phi(hexc%my_nt)
  complex(dpc),intent(out) :: hphi(hexc%hsize)
@@ -1646,11 +1623,11 @@ end subroutine hexc_matmul_elphon
 subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
 
 !Arguments ---------------------------
- integer,intent(in) :: parity
- type(hexc_t),intent(in) :: hexc
+ class(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
  complex(dpc),intent(in) :: phi(hexc%hsize)
  complex(dpc),intent(out) :: hphi(hexc%hsize)
+ integer,intent(in) :: parity
 
 !Local variables ---------------------
  real(dp) :: tsec(2)
@@ -1662,7 +1639,8 @@ subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
 
  if(hexc%BSp%use_interp) then
    ABI_ERROR("Coupling is not yet implemented with interpolation")
- else ! No interpolation
+ else
+   ! No interpolation
    hphi = MATMUL(hexc%hreso,phi) + parity * MATMUL(hexc%hcoup,CONJG(phi))
  end if
 

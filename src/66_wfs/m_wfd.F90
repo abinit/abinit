@@ -118,7 +118,7 @@ module m_wfd
 
    integer,allocatable :: kg_k(:,:)
    ! kg_k(3,npw)
-   ! G vector coordinates in reduced cordinates.
+   ! G vector coordinates in reduced coordinates.
 
    integer,allocatable :: gbound(:,:)
    ! gbound(2*mgfft+8,2))
@@ -1646,7 +1646,7 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
 
 !Local variables ------------------------------
 !scalars
- integer :: siz
+ integer :: csiz
  type(wave_t),pointer :: wave
  character(len=500) :: msg
 !************************************************************************
@@ -1658,12 +1658,12 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
    ABI_ERROR(msg)
  end if
 
- siz = wfd%npwarr(ik_ibz) * wfd%nspinor
+ csiz = wfd%npwarr(ik_ibz) * wfd%nspinor
 #ifdef HAVE_GW_DPC
- call zcopy(siz, wave%ug, 1, cg, 1)
+ call zcopy(csiz, wave%ug, 1, cg, 1)
 #else
- cg(1,1:siz) = dble(wave%ug)
- cg(2,1:siz) = aimag(wave%ug)
+ cg(1,1:csiz) = dble(wave%ug)
+ cg(2,1:csiz) = aimag(wave%ug)
 #endif
 
 end subroutine wfd_copy_cg
@@ -1804,7 +1804,7 @@ subroutine wfd_print(Wfd, units, header, prtvol)
  write(msg,'(3(a,i0,a))')&
    '  Max number of G-vectors ............... ',mpw,ch10,&
    '  Total number of FFT points ............ ',Wfd%nfftot,ch10,&
-   '  Number of FFT points treated by me .... ',Wfd%nfft,ch10
+   '-  Number of FFT points treated by me .... ',Wfd%nfft,ch10
  call wrtout(units, msg)
 
  call print_ngfft(units, Wfd%ngfft, 'FFT mesh for wavefunctions', prtvol=my_prtvol)
@@ -2094,7 +2094,7 @@ subroutine wave_free(Wave, what)
  my_what="ALL"; if (present(what)) my_what=toupper(what)
 
  if (.not.firstchar(my_what, ["A", "G", "R", "C"] )) then
-   ABI_ERROR(sjoin("Unknow what:", what))
+   ABI_ERROR(sjoin("Unknown what:", what))
  end if
 
  if (firstchar(my_what, ["A", "G"])) then
@@ -3217,7 +3217,7 @@ end function wfdgw_iterator_bks
 !!
 !! INPUTS
 !!  Wfd<wfd_t>=
-!!  [bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)]=Mask used to skip selecter (b,k,s) entries.
+!!  [bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)]=Mask used to skip selected (b,k,s) entries.
 !!  [got(Wfd%nproc)]=The number of tasks already assigned to the nodes.
 !!
 !! OUTPUT
@@ -4380,7 +4380,7 @@ end subroutine wfd_sym_ug_kg
 !!  All the wavefunction are stored on each node, only the spin is distributed.
 !!
 !! INPUTS
-!!  Wfd<wfd_t>=Initialized wavefunction descritptor.
+!!  Wfd<wfd_t>=Initialized wavefunction descriptor.
 !!  wfk_fname=Name of the WFK file.
 !!
 !! OUTPUT
