@@ -50,23 +50,24 @@ module m_slice_cprj
 !Several (private) parameters
 !-------------------------------------------------
 
- integer, parameter :: tim_init         = 2171
- integer, parameter :: tim_free         = 2172
- integer, parameter :: tim_cprj         = 2173
- integer, parameter :: tim_invovl       = 2174
- integer, parameter :: tim_residu       = 2175
- integer, parameter :: tim_RR           = 2176
- integer, parameter :: tim_transpose    = 2177
- integer, parameter :: tim_RR_q         = 2178
- integer, parameter :: tim_postinvovl   = 2179
- integer, parameter :: tim_swap         = 2180
- integer, parameter :: tim_amp_f        = 2181
- integer, parameter :: tim_barrier      = 2182
- integer, parameter :: tim_copy         = 2183
- integer, parameter :: tim_ax_k         = 2184
- integer, parameter :: tim_ax_v         = 2185
- integer, parameter :: tim_ax_nl        = 2186
- integer, parameter :: tim_enl          = 2187
+ integer, parameter :: tim_init         = 2061
+ integer, parameter :: tim_free         = 2062
+ integer, parameter :: tim_cprj         = 2063
+ integer, parameter :: tim_invovl       = 2065
+ integer, parameter :: tim_residu       = 2066
+ integer, parameter :: tim_RR           = 2067
+ integer, parameter :: tim_transpose    = 2068
+ integer, parameter :: tim_RR_q         = 2069
+ integer, parameter :: tim_postinvovl   = 2070
+ integer, parameter :: tim_swap         = 2071
+ integer, parameter :: tim_amp_f        = 2072
+ integer, parameter :: tim_oracle       = 2073
+ integer, parameter :: tim_barrier      = 2074
+ integer, parameter :: tim_copy         = 2075
+ integer, parameter :: tim_ax_k         = 2076
+ integer, parameter :: tim_ax_v         = 2077
+ integer, parameter :: tim_ax_nl        = 2078
+ integer, parameter :: tim_enl          = 2079
 
 !Public 'slice' datatype
 !-------------------------------------------------
@@ -227,6 +228,7 @@ subroutine slice_init(slice,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp, 
 
  call slice_allocateAll(slice)
 
+ ! TODO add timers for slicing
  call timab(tim_init,2,tsec)
 
 end subroutine slice_init
@@ -559,11 +561,21 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call timab(tim_RR_q, 2, tsec)
 
  lambda_minus = maxeig_global
- ndeg_filter = slice%ndeg_filter
 
- ! TODO oracle must be replaced by the bandpass filter degree computation...
- call slice_set_ndeg_from_residu(slice,lambda_minus,lambda_plus,occ,DivResults%self,ndeg_filter_max,ndeg_filter)
+ ! TODO oracle must be replaced by the bandpass filter computation...
+
+ call timab(tim_oracle,1,tsec)
+
+ ! ndeg_filter_max limits the reduction of the residual of the smallest eigenvalue (i.e. the most amplified one by the filter) by a factor 1e8.
+ ! Also, the maximal value of ndeg_filter_max is 40.
+ ndeg_filter_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
+ ndeg_filter = MIN(ndeg_filter_max,slice%ndeg_filter)
+ if (chebfi%oracle>0) then
+   call chebfi_set_ndeg_from_residu(slice,lambda_minus,lambda_plus,occ,DivResults%self,ndeg_filter_max,ndeg_filter)
+ end if
  ndeg_filter_bands(:) = ndeg_filter
+
+ call timab(tim_oracle,2,tsec)
 
  center = (lambda_plus + lambda_minus)*0.5
  radius = (lambda_plus - lambda_minus)*0.5
@@ -574,89 +586,89 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  do ideg = 0, ndeg_filter - 1
 
    call timab(tim_cprj,1,tsec)
-   call xg_nonlop_getcprj(xg_nonlop,slice%xAXcolsrows,slice%cprjX,slice%proj_work%self)
+   call xg_nonlop_getcprj(xg_nonlop,chebfi%xAXcolsrows,chebfi%cprjX,chebfi%proj_work%self)
    call timab(tim_cprj,2,tsec)
-   call slice_computeNextOrderChebfiPolynom(slice, ideg, center, one_over_r, two_over_r)
+   call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r)
 
    call timab(tim_swap,1,tsec)
-   call slice_swapInnerBuffers(slice, slice%total_spacedim, slice%bandpp)
+   call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
    call timab(tim_swap,2,tsec)
 
    !A * Psi
    call timab(tim_AX_v,1,tsec)
-   call getAX(slice%xXColsRows,slice%xAXColsRows)
+   call getAX(chebfi%xXColsRows,chebfi%xAXColsRows)
    call timab(tim_AX_v,2,tsec)
    call timab(tim_AX_k,1,tsec)
-   call xgBlock_add_diag(slice%xXColsRows,kin,nspinor,slice%xAXColsRows)
+   call xgBlock_add_diag(chebfi%xXColsRows,kin,nspinor,chebfi%xAXColsRows)
    call timab(tim_AX_k,2,tsec)
    call timab(tim_cprj,1,tsec)
-   call xg_nonlop_getcprj(xg_nonlop,slice%xXColsRows,slice%cprjX,slice%proj_work%self)
+   call xg_nonlop_getcprj(xg_nonlop,chebfi%xXColsRows,chebfi%cprjX,chebfi%proj_work%self)
    call timab(tim_cprj,2,tsec)
    call timab(tim_AX_nl,1,tsec)
-   call xg_nonlop_getHX(xg_nonlop,slice%xAXcolsRows,slice%cprjX,slice%cprj_work%self,slice%proj_work%self)
+   call xg_nonlop_getHX(xg_nonlop,chebfi%xAXcolsRows,chebfi%cprjX,chebfi%cprj_work%self,chebfi%proj_work%self)
    call timab(tim_AX_nl,2,tsec)
 
  end do
 
  call timab(tim_barrier,1,tsec)
- call xmpi_barrier(slice%spacecom)
+ call xmpi_barrier(chebfi%spacecom)
  call timab(tim_barrier,2,tsec)
 
  call timab(tim_amp_f,1,tsec)
- call slice_ampfactor(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
+ call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  call timab(tim_amp_f,2,tsec)
 
  call xg_free(DivResults)
  ABI_FREE(ndeg_filter_bands)
 
  call timab(tim_transpose,1,tsec)
- call xmpi_barrier(slice%spacecom)
+ call xmpi_barrier(chebfi%spacecom)
 
- call xgTransposer_transpose(slice%xgTransposerX,STATE_LINALG)
- call xgTransposer_transpose(slice%xgTransposerAX,STATE_LINALG)
+ call xgTransposer_transpose(chebfi%xgTransposerX,STATE_LINALG)
+ call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
 
- if (xmpi_comm_size(slice%spacecom) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-   call xgBlock_setBlock(slice%xXColsRows , slice%X      , spacedim, neigenpairs)
-   call xgBlock_setBlock(slice%xAXColsRows, slice%AX%self, spacedim, neigenpairs)
+ if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
+   call xgBlock_setBlock(chebfi%xXColsRows , chebfi%X      , spacedim, neigenpairs)
+   call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
  end if
  call timab(tim_transpose,2,tsec)
 
  call timab(tim_cprj,1,tsec)
- call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%cprj_work%self)
+ call xg_nonlop_getcprj(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%cprj_work%self)
  call timab(tim_cprj,2,tsec)
- call xg_RayleighRitz_cprj(slice%xg_nonlop,slice%X,slice%cprjX,slice%AX%self,slice%eigenvalues,slice%blockdim_cprj,ierr,0,&
+ call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,&
    tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
- if (slice%paw) then
+ if (chebfi%paw) then
    call timab(tim_AX_nl,1,tsec)
-   call xg_nonlop_getHmeSX(xg_nonlop,slice%X,slice%cprjX,slice%AX%self,slice%eigenvalues,slice%cprj_work%self,&
-   & slice%cprj_work2%self,no_H=.True.)
+   call xg_nonlop_getHmeSX(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%cprj_work%self,&
+   & chebfi%cprj_work2%self,no_H=.True.)
    call timab(tim_AX_nl,2,tsec)
  end if
 
  call timab(tim_residu, 1, tsec)
 
- if (.not.slice%paw) then
-   call xgBlock_yxmax(slice%AX%self,slice%eigenvalues,slice%X)
+ if (.not.chebfi%paw) then
+   call xgBlock_yxmax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X)
  end if
 
- call xgBlock_colwiseNorm2(slice%AX%self, residu)
+ call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
 
  call timab(tim_copy, 1, tsec)
- call xgBlock_copy(slice%X,X0)
+ call xgBlock_copy(chebfi%X,X0)
  call timab(tim_copy, 2, tsec)
 
- call xgTransposer_free(slice%xgTransposerX)
- call xgTransposer_free(slice%xgTransposerAX)
+ call xgTransposer_free(chebfi%xgTransposerX)
+ call xgTransposer_free(chebfi%xgTransposerAX)
 
- if (.not.slice%paw) then
+ if (.not.chebfi%paw) then
    call timab(tim_enl,1,tsec)
-   call xg_nonlop_colwiseXHX(slice%xg_nonlop,slice%cprjX,slice%cprj_work%self,enl)
+   call xg_nonlop_colwiseXHX(chebfi%xg_nonlop,chebfi%cprjX,chebfi%cprj_work%self,enl)
    call timab(tim_enl,2,tsec)
  end if
 
-end subroutine slice_run_cprj
+end subroutine chebfi_run_cprj
 !!***
 
 !----------------------------------------------------------------------
@@ -673,7 +685,7 @@ end subroutine slice_run_cprj
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  chebfi <type(chebfi_t)>=all data used to apply Spectrum Slicing algorithm
+!!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
 !!  maxeig= highest eigenvalue
 !!  mineig= lowest eigenvalue
 !!  DivResults= Rayleigh-Ritz quotients

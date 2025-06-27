@@ -132,14 +132,14 @@ subroutine slicewf_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  integer :: space, space_cprj, blockdim, cprjdim, nband_cprj
  integer :: me_g0,me_g0_fft
 
- integer, parameter :: tim_chebfiwf2 = 2060
+ integer, parameter :: tim_slicewf = 2170
  double precision :: tsec(2)
 
  real(dp), allocatable :: kin(:),occ_tmp(:)
 
 ! *********************************************************************
 
- call timab(tim_chebfiwf2,1,tsec)
+ call timab(tim_slicewf,1,tsec)
 
  paw = gs_hamk%usepaw==1
 
@@ -205,14 +205,13 @@ subroutine slicewf_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,comm=l_mpi_enreg%comm_band)
 
  call slice_init(slice,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
-&                 mpi_enreg%bandpp, dtset%nline, dtset%nbdbuf, space,space_cprj,1, &
+&                 mpi_enreg%bandpp, dtset%nline, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
-&                 dtset%chebfi_oracle,dtset%oracle_factor,dtset%oracle_min_occ,&
+&                 dtset%nslice,dtset%tolfilter,dtset%paral_slice,dtset%spectral_cut,&
 &                 xg_nonlop,me_g0_fft)
 
-
- ! Run chebfi
- call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xgeigen,xgocc,xgresidu,xgenl,nspinor)
+ ! Run slice
+ call slice_run_cprj(slice,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xgeigen,xgocc,xgresidu,xgenl,nspinor)
 
  if (allocated(occ_tmp)) then
    ABI_FREE(occ_tmp)
@@ -223,17 +222,17 @@ subroutine slicewf_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 !   & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_FREE)
  call xg_free(cprj_xgx0)
 
- ! Free chebfi
- call chebfi_free(chebfi)
+ ! Free slice
+ call slice_free(slice)
 
- call timab(tim_chebfiwf2,2,tsec)
+ call timab(tim_slicewf,2,tsec)
 
  DBG_EXIT("COLL")
 
-end subroutine chebfiwf2_cprj
+end subroutine slicewf_cprj
 !!***
 
-!!****f* m_chebfi/xg_getghc
+!!****f* m_slice/xg_getghc
 !! NAME
 !! xg_getghc
 !!
@@ -308,5 +307,5 @@ subroutine build_kin(kin,kinpw,npw)
 
 end subroutine build_kin
 
-end module m_chebfiwf_cprj
+end module m_slicewf_cprj
 !!***
