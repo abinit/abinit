@@ -28,7 +28,6 @@ module m_slice_cprj
  use defs_abitypes
  use m_abicore
  use m_errors
- use m_chebfi2_cprj
  use m_time, only : timab
 
  use m_cgtools
@@ -80,7 +79,6 @@ module m_slice_cprj
    integer :: total_spacedim                ! Maybe not needed
    integer :: neigenpairs                   ! Number of eigen values/vectors we want
    integer :: ndeg_filter                   ! Degree of the polynomial filter
-   integer :: nbdbuf                        ! Number of bands in the buffer
    integer :: spacecom                      ! Communicator for MPI
    integer :: nslice                        ! Number of spectral slices
    integer :: paral_slice                   ! slice parallelization strategy
@@ -661,9 +659,9 @@ end subroutine slice_run_cprj
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2_cprj/chebfi_rayleighRitzQuotients
+!!****f* m_slice_cprj/slice_rayleighRitzQuotients
 !! NAME
-!! chebfi_rayleighRitzQuotients
+!! slice_rayleighRitzQuotients
 !!
 !! FUNCTION
 !! Compute the Rayleigh-Ritz quotients.
@@ -673,19 +671,19 @@ end subroutine slice_run_cprj
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  chebfi <type(chebfi_t)>=all data used to apply Spectrum Slicing algorithm
+!!  slice <type(slice_t)>=all data used to apply Spectrum Slicing algorithm
 !!  maxeig= highest eigenvalue
 !!  mineig= lowest eigenvalue
 !!  DivResults= Rayleigh-Ritz quotients
 !!
 !! SOURCE
 
-subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
+subroutine slice_rayleighRitzQuotients(slice,maxeig,mineig,DivResults)
 
 !Arguments ------------------------------------
  real(dp), intent(inout) :: maxeig
  real(dp), intent(inout) :: mineig
- type(chebfi_t), intent(inout) :: chebfi
+ type(slice_t), intent(inout) :: slice
  type(xgBlock_t), intent(inout) :: DivResults
 
 !Local variables-------------------------------
@@ -700,22 +698,22 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 
 ! *********************************************************************
 
- if (space(chebfi%xXcolsRows)==SPACE_C) then
+ if (space(slice%xXcolsRows)==SPACE_C) then
    space_res = SPACE_C
- else if (space(chebfi%xXcolsRows)==SPACE_CR) then
+ else if (space(slice%xXcolsRows)==SPACE_CR) then
    space_res = SPACE_R
  else
    ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
  end if
- call xg_init(Results1, space_res, chebfi%bandpp, 1)
- call xg_init(Results2, space_res, chebfi%bandpp, 1)
+ call xg_init(Results1, space_res, slice%bandpp, 1)
+ call xg_init(Results2, space_res, slice%bandpp, 1)
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xAXColsRows,Results1%self,comm_loc=xmpi_comm_null)
+ call xgBlock_colwiseDotProduct(slice%xXColsRows,slice%xAXColsRows,Results1%self,comm_loc=xmpi_comm_null)
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xXColsRows,Results2%self,comm_loc=xmpi_comm_null)
- if (chebfi%xg_nonlop%paw) then
-   call xg_init(Results_work, space_res, chebfi%bandpp, 1)
-   call xg_nonlop_colwiseXAX(chebfi%xg_nonlop,chebfi%xg_nonlop%Sij%self,chebfi%cprjX,chebfi%cprj_work%self,Results_work%self)
+ call xgBlock_colwiseDotProduct(slice%xXColsRows,slice%xXColsRows,Results2%self,comm_loc=xmpi_comm_null)
+ if (slice%xg_nonlop%paw) then
+   call xg_init(Results_work, space_res, slice%bandpp, 1)
+   call xg_nonlop_colwiseXAX(slice%xg_nonlop,slice%xg_nonlop%Sij%self,slice%cprjX,slice%cprj_work%self,Results_work%self)
    call xgBlock_add(Results2%self,Results_work%self)
    call xg_free(Results_work)
  end if
@@ -725,14 +723,14 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
  call xg_free(Results1)
  call xg_free(Results2)
 
-end subroutine chebfi_rayleighRitzQuotients
+end subroutine slice_rayleighRitzQuotients
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2_cprj/chebfi_computeNextOrderChebfiPolynom
+!!****f* m_slice_cprj/slice_computeNextOrderChebfiPolynom
 !! NAME
-!! chebfi_computeNextOrderChebfiPolynom
+!! slice_computeNextOrderChebfiPolynom
 !!
 !! FUNCTION
 !! From P_n(B-^1.A)|X> (where P_n is the Chebyshev polynom of order n),
@@ -748,18 +746,18 @@ end subroutine chebfi_rayleighRitzQuotients
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
+!!  slice <type(slice_t)>=all data used to apply Spectrum Slicing algorithm
 !!
 !! SOURCE
 
-subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,ideg,center,one_over_r,two_over_r)
+subroutine slice_computeNextOrderChebfiPolynom(slice,ideg,center,one_over_r,two_over_r)
 
 !Arguments ------------------------------------
  real(dp)       , intent(in) :: center
  integer        , intent(in) :: ideg
  real(dp)       , intent(in) :: one_over_r
  real(dp)       , intent(in) :: two_over_r
- type(chebfi_t) , intent(inout) :: chebfi
+ type(slice_t) , intent(inout) :: slice
 
  !Local variables-------------------------------
  real(dp) :: tsec(2)
@@ -767,50 +765,50 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,ideg,center,one_over_r,tw
  ! *********************************************************************
 
  call timab(tim_copy, 1, tsec)
- call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next)
+ call xgBlock_copy(slice%xAXColsRows,slice%X_next)
  call timab(tim_copy, 2, tsec)
 
- if (chebfi%paw) then
+ if (slice%paw) then
    call timab(tim_invovl, 1, tsec)
-   call xg_nonlop_getSm1X(chebfi%xg_nonlop,chebfi%X_next,chebfi%cprjX,&
-     & chebfi%cprj_work%self,chebfi%cprj_work2%self,chebfi%proj_work%self)
+   call xg_nonlop_getSm1X(slice%xg_nonlop,slice%X_next,slice%cprjX,&
+     & slice%cprj_work%self,slice%cprj_work2%self,slice%proj_work%self)
    call timab(tim_invovl, 2, tsec)
  else
    call timab(tim_copy, 1, tsec)
-   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next)
+   call xgBlock_copy(slice%xAXColsRows,slice%X_next)
    call timab(tim_copy, 2, tsec)
  end if
 
  call timab(tim_postinvovl, 1, tsec)
- call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by center
+ call xgBlock_scale(slice%xXColsRows, center, 1) !scale by center
 
  !(B-1 * A * Psi^i-1 - c * Psi^i-1)
- call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows)
+ call xgBlock_saxpy(slice%X_next, dble(-1.0), slice%xXColsRows)
 
  !Psi^i-1  = 1/c * Psi^i-1
- call xgBlock_scale(chebfi%xXColsRows, 1/center, 1) !counter scale by 1/center
+ call xgBlock_scale(slice%xXColsRows, 1/center, 1) !counter scale by 1/center
 
  if (ideg == 0) then
-   call xgBlock_scale(chebfi%X_next, one_over_r, 1)
+   call xgBlock_scale(slice%X_next, one_over_r, 1)
  else
-   call xgBlock_scale(chebfi%X_next, two_over_r, 1)
+   call xgBlock_scale(slice%X_next, two_over_r, 1)
 
-   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev)
+   call xgBlock_saxpy(slice%X_next, dble(-1.0), slice%X_prev)
  end if
 
  call timab(tim_postinvovl, 2, tsec)
 
-end subroutine chebfi_computeNextOrderChebfiPolynom
+end subroutine slice_computeNextOrderChebfiPolynom
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2_cprj/chebfi_swapInnerBuffers
+!!****f* m_slice_cprj/slice_swapInnerBuffers
 !! NAME
-!! chebfi_swapInnerBuffers
+!! slice_swapInnerBuffers
 !!
 !! FUNCTION
-!! Swap buffers inside a 'chebfi' datastructure.
+!! Swap buffers inside a 'slice' datastructure.
 !!
 !! INPUTS
 !!  neigenpairs= number of requested eigenvectors/eigenvalues
@@ -819,32 +817,32 @@ end subroutine chebfi_computeNextOrderChebfiPolynom
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
+!!  slice <type(slice_t)>=all data used to apply Spectrum Slicing algorithm
 !!
 !! SOURCE
 
-subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
+subroutine slice_swapInnerBuffers(slice,spacedim,neigenpairs)
 
   ! Arguments ------------------------------------
   integer        , intent(in   ) :: spacedim
   integer        , intent(in   ) :: neigenpairs
-  type(chebfi_t) , intent(inout) :: chebfi
+  type(slice_t) , intent(inout) :: slice
 
   ! *********************************************************************
 
-  call xgBlock_setBlock(chebfi%X_prev,     chebfi%X_swap,     spacedim, neigenpairs) !X_swap = X_prev
-  call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X_prev,     spacedim, neigenpairs) !X_prev = xXColsRows
-  call xgBlock_setBlock(chebfi%X_next,     chebfi%xXColsRows, spacedim, neigenpairs) !xXColsRows = X_next
-  call xgBlock_setBlock(chebfi%X_swap,     chebfi%X_next,     spacedim, neigenpairs) !X_next = X_swap
+  call xgBlock_setBlock(slice%X_prev,     slice%X_swap,     spacedim, neigenpairs) !X_swap = X_prev
+  call xgBlock_setBlock(slice%xXColsRows, slice%X_prev,     spacedim, neigenpairs) !X_prev = xXColsRows
+  call xgBlock_setBlock(slice%X_next,     slice%xXColsRows, spacedim, neigenpairs) !xXColsRows = X_next
+  call xgBlock_setBlock(slice%X_swap,     slice%X_next,     spacedim, neigenpairs) !X_next = X_swap
 
-end subroutine chebfi_swapInnerBuffers
+end subroutine slice_swapInnerBuffers
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2_cprj/chebfi_ampfactor
+!!****f* m_slice_cprj/slice_ampfactor
 !! NAME
-!! chebfi_ampfactor
+!! slice_ampfactor
 !!
 !! FUNCTION
 !! Compute amplification factor
@@ -852,24 +850,24 @@ end subroutine chebfi_swapInnerBuffers
 !! INPUTS
 !! eig (:,:)= eigenvalues
 !! lambda_minus,lambda_plus=
-!! ndeg_filter_bands(:)= degree of Chebyshev polynomial filter for each band
+!! ndeg_filter_bands(:)= degree of Spectrum Slicing filter for each band
 !!
 !! OUTPUT
 !!
 !! SIDE EFFECTS
 !!  residu<type(xgBlock_t)>= vector of residuals
-!!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
+!!  slice <type(slice_t)>=all data used to apply Spectrum Slicing algorithm
 !!
 !! SOURCE
 
-subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filter_bands)
+subroutine slice_ampfactor(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter_bands)
 
   ! Arguments ------------------------------------
   integer,           intent(in   ) :: ndeg_filter_bands(:)
   type(xgBlock_t),   intent(in   ) :: DivResults
   real(dp),          intent(in   ) :: lambda_minus
   real(dp),          intent(in   ) :: lambda_plus
-  type(chebfi_t),    intent(inout) :: chebfi
+  type(slice_t),    intent(inout) :: slice
 
   ! Local variables-------------------------------
   ! scalars
@@ -882,9 +880,9 @@ subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filt
 
   ! *********************************************************************
 
-  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=chebfi%bandpp)
+  call xgBlock_reverseMap(DivResults,eig,rows=1,cols=slice%bandpp)
 
-  do iband = 1, chebfi%bandpp
+  do iband = 1, slice%bandpp
 
     eig_per_band = eig(1,iband)
 
@@ -893,22 +891,22 @@ subroutine chebfi_ampfactor(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_filt
 
     if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
 
-    call xgBlock_setBlock(chebfi%xXColsRows, X_part, chebfi%total_spacedim, 1, fcol=iband)
-    call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, chebfi%total_spacedim, 1, fcol=iband)
+    call xgBlock_setBlock(slice%xXColsRows, X_part, slice%total_spacedim, 1, fcol=iband)
+    call xgBlock_setBlock(slice%xAXColsRows, AX_part, slice%total_spacedim, 1, fcol=iband)
 
     call xgBlock_scale(X_part, 1/ampfactor, 1)
     call xgBlock_scale(AX_part, 1/ampfactor, 1)
 
   end do
 
-end subroutine chebfi_ampfactor
+end subroutine slice_ampfactor
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2_cprj/chebfi_oracle1
+!!****f* m_slice_cprj/slice_oracle1
 !! NAME
-!! chebfi_oracle1
+!! slice_oracle1
 !!
 !! FUNCTION
 !! Compute order of Chebyshev polynom necessary to converge to a given tol
@@ -964,9 +962,9 @@ end function cheb_oracle1
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2_cprj/chebfi_poly1
+!!****f* m_slice_cprj/cheb_poly1
 !! NAME
-!! chebfi_poly1
+!! cheb_poly1
 !!
 !! FUNCTION
 !! Compute Chebyshev polynomial???
@@ -1008,9 +1006,9 @@ function cheb_poly1(xx,nn,aa,bb) result(yy)
 end function cheb_poly1
 !!***
 
-!!****f* m_chebfi2/chebfi_set_ndeg_from_residu
+!!****f* m_slice/slice_set_ndeg_from_residu
 !! NAME
-!! chebfi_set_ndeg_from_residu
+!! slice_set_ndeg_from_residu
 !!
 !! FUNCTION
 !! Compute ndeg_filter using the oracle and residuals.
@@ -1023,18 +1021,18 @@ end function cheb_poly1
 !!
 !! SOURCE
 
-subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivResults,ndeg_filter_max,ndeg_filter)
+subroutine slice_set_ndeg_from_residu(slice,lambda_minus,lambda_plus,occ,DivResults,ndeg_filter_max,ndeg_filter)
 
  integer,intent(in) :: ndeg_filter_max
  integer,intent(out) :: ndeg_filter
- type(chebfi_t), intent(inout) :: chebfi
+ type(slice_t), intent(inout) :: slice
  type(xgBlock_t), intent(in)    :: occ
  type(xgBlock_t), intent(in)    :: DivResults
  real(dp), intent(in) :: lambda_minus, lambda_plus
 
  logical :: test1,test2,test3
  integer :: iband_tot,iband
- integer :: bandpp,ierr,ndeg_filter_tolwfr,ndeg_filter_decrease,nbdbuf,ndeg_filter_all,shift
+ integer :: bandpp,ierr,ndeg_filter_tolwfr,ndeg_filter_decrease,ndeg_filter_all,shift
  integer,allocatable :: ndeg_filter_bands(:)
  type(xgBlock_t) :: occBlock,occ_reshaped
  type(xg_t) :: residu
@@ -1042,30 +1040,30 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
  real(dp) :: eig_iband,res_iband,occ_iband
  real(dp),pointer :: eig(:,:)
 
- bandpp = chebfi%bandpp
+ bandpp = slice%bandpp
 
  !Compute residu here for oracle, use X_next as a work space
  ! X_next = S|Psi>
- call xgBlock_copy(chebfi%xXColsRows,chebfi%X_next)
- if (chebfi%paw) then
-   call xg_nonlop_getSX(chebfi%xg_nonlop,chebfi%X_next,chebfi%cprjX,chebfi%cprj_work%self,chebfi%proj_work%self)
+ call xgBlock_copy(slice%xXColsRows,slice%X_next)
+ if (slice%paw) then
+   call xg_nonlop_getSX(slice%xg_nonlop,slice%X_next,slice%cprjX,slice%cprj_work%self,slice%proj_work%self)
  end if
  ! X_next = - eig * S|Psi>
- call xgBlock_ymax(chebfi%X_next,DivResults,0,1)
+ call xgBlock_ymax(slice%X_next,DivResults,0,1)
  ! X_next = H|Psi> - eig * S|Psi>
- call xgBlock_add(chebfi%X_next,chebfi%xAXColsRows)
+ call xgBlock_add(slice%X_next,slice%xAXColsRows)
  ! resid = |X_next|^2
  call xg_init(residu,SPACE_R,bandpp,1)
- call xgBlock_colwiseNorm2(chebfi%X_next, residu%self,comm_loc=xmpi_comm_null)
+ call xgBlock_colwiseNorm2(slice%X_next, residu%self,comm_loc=xmpi_comm_null)
 
  occ_reshaped = occ
- shift=xmpi_comm_rank(chebfi%spacecom)*bandpp
- call xgBlock_reshape(occ_reshaped,1,chebfi%neigenpairs)
+ shift=xmpi_comm_rank(slice%spacecom)*bandpp
+ call xgBlock_reshape(occ_reshaped,1,slice%neigenpairs)
  call xgBlock_setBlock(occ_reshaped,occBlock,1,bandpp,fcol=1+shift)
  call xgBlock_reshape(occBlock,bandpp,1)
- if (chebfi%nbdbuf==-101) then
-   call xgBlock_apply_diag(residu%self,occBlock,1)
- end if
+ !if (slice%nbdbuf==-101) then
+ !  call xgBlock_apply_diag(residu%self,occBlock,1)
+ !end if
 
  ABI_MALLOC(ndeg_filter_bands,(bandpp))
 
@@ -1074,45 +1072,32 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
  call xgBlock_reverseMap(residu%self,residu_,rows=1,cols=bandpp)
  call xgBlock_reverseMap(occBlock,occ_,rows=1,cols=bandpp)
 
- if (chebfi%nbdbuf>0) then
-   nbdbuf = chebfi%nbdbuf
- else if (chebfi%nbdbuf==-101) then
-   nbdbuf = 0
- end if
-
  do iband=1, bandpp
    eig_iband = eig(1,iband)
    res_iband = residu_(1,iband)
    occ_iband = occ_(1,iband)
    iband_tot = iband + shift
-   test1 = res_iband<chebfi%tolerance ! band already converged
-   test2 = iband_tot>chebfi%neigenpairs-nbdbuf ! band in the buffer
-   test3 = chebfi%nbdbuf==-101.and.occ_iband<chebfi%oracle_min_occ ! occupancy is too low
-   if (test1.or.test2.or.test3) then
-     ndeg_filter_bands(iband) = 0
+   !ndeg_filter necessary to converge to tolerance
+   ndeg_filter_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, slice%tolerance / res_iband, 1000)
+   if (slice%tolfilter<0) then
+     ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, slice%ndeg_filter)
+   else if (slice%tolfilter>0) then
+     !ndeg_filter necessary to decrease residual by a constant factor
+     ndeg_filter_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, slice%tolfilter, 15)
+     ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, ndeg_filter_decrease)
    else
-     !ndeg_filter necessary to converge to tolerance
-     ndeg_filter_tolwfr = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%tolerance / res_iband, 1000)
-     if (chebfi%oracle==1) then
-       ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, chebfi%ndeg_filter)
-     else if (chebfi%oracle==2) then
-       !ndeg_filter necessary to decrease residual by a constant factor
-       ndeg_filter_decrease = cheb_oracle1(eig_iband, lambda_minus, lambda_plus, chebfi%oracle_factor, 15)
-       ndeg_filter_bands(iband) = MIN(ndeg_filter_max, ndeg_filter_tolwfr, ndeg_filter_decrease)
-     else
-       ABI_ERROR('Wrong value for chebfi%oracle')
-     end if
+     ABI_ERROR('Wrong value for slice%tolfilter')
    end if
  end do
  ndeg_filter = MAXVAL(ndeg_filter_bands)
- call xmpi_max(ndeg_filter,ndeg_filter_all,chebfi%spacecom,ierr)
+ call xmpi_max(ndeg_filter,ndeg_filter_all,slice%spacecom,ierr)
  ndeg_filter=ndeg_filter_all
 
  call xg_free(residu)
  ABI_FREE(ndeg_filter_bands)
 
-end subroutine chebfi_set_ndeg_from_residu
+end subroutine slice_set_ndeg_from_residu
 !!***
 
-end module m_chebfi2_cprj
+end module m_slice_cprj
 !!***
