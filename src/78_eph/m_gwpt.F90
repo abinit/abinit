@@ -1135,7 +1135,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! ====================================
          ! Note that in this case, the sphere is always Gamma-centered i.e. it does not depend on the pp wavevector
          ABI_CHECK_IEQ(npw_c, screen%npw, "npw_c == screen%npw")
-         !kg_c => screen%gvec(:, 1:npw_c)
          kg_c => gsph_c%gvec(:, 1:npw_c)
          kg_x => gsph_x%gvec(:, 1:npw_x)
          call sphereboundary(gbound_c, istwfk1, kg_c, mgfft, npw_c)
@@ -1194,6 +1193,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Get PPM parameters for pp_bz  the object for applying W(pp_bz).
          call ppm%get_qbz(gsph_c, pp_mesh, ipp_bz, botsq, otq, eig)
+
+         ABI_CHECK(all(botsq == screen%ppm%bigomegatwsq_qbz_vals), "botq")
+         ABI_CHECK(all(otq == screen%ppm%omegatw_qbz_vals), "otq")
 
          ! Find the corresponding irred pp-point in the pp_mesh.
          call pp_mesh%get_bz_item(ipp_bz, pp, ipp_ibz, isym_pp, itim_pp)
@@ -1318,6 +1320,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              call screen%calc_sigc("T", nw_mkq, omegame0i_mkq, theta_mu_minus_e0i, dtset%zcut, &
                                    nspinor, npw_c, npw_c, rhotwg_c, vec_gwc_mkq(:,:,m_kq), sigcme_mkq)
+
+             ! FIXME: T option is not coded here
+             !call ppm%calc_sigc(nspinor, npw_c, nw_nk, rhotwg_c, botsq, otq, &
+             !                   omegame0i_nk, dtset%zcut, theta_mu_minus_e0i, eig, npw_c, vec_gwc_nk(:,:,n_k), sigcme_nk)
            end do ! m_kq
            ! TODO: this is an all_gatherv but oh well.
            !call xmpi_sum(vec_gwc_mkq, gqk%pert_comm, ierr)
