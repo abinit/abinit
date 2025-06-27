@@ -553,8 +553,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_CHECK(dt%gpu_option==0,"cprj_in_memory/=0 is not implemented for GPUs. Change cprj_in_memory or gpu_option.")
        write(msg,'(a)') "cprj_in_memory/=0 is not compatible with use_gemm_nonlop/=0. Change cprj_in_memory or use_gemm_nonlop."
        ABI_CHECK(dt%use_gemm_nonlop==0,msg)
-       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111
-       write(msg,'(a)') "With cprj_in_memory/=0, only wfoptalg==10,114 or 111 are implemented. Change cprj_in_memory or wfoptalg."
+       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111 .or. dt%wfoptalg==112
+       write(msg,'(a)') "With cprj_in_memory/=0, only wfoptalg==10,114,112 or 111 are implemented. Change cprj_in_memory or wfoptalg."
        ABI_CHECK(test,msg)
        ABI_CHECK(dt%rmm_diis==0, "With cprj_in_memory/=0, rmm_diis/=0 is not implemented. Change cprj_in_memory or rmm_diis.")
        ABI_CHECK(dt%berryopt==0, "With cprj_in_memory/=0, berryopt/=0 is not implemented. Change cprj_in_memory or berryopt.")
@@ -4322,7 +4322,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_ERROR_NOSTOP(msg,ierr)
    end if
 
-   ! Chebyshev
+   ! Chebyshev and Spectrum Slicing
    if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111 .or. dt%wfoptalg == 112) then
      if(dt%nspinor > 1 .and. dt%wfoptalg == 1) then
        msg='Nspinor > 1 not yet compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).'

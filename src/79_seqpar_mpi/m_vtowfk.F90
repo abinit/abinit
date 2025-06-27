@@ -57,6 +57,7 @@ module m_vtowfk
  use m_chebfiwf_cprj,only : chebfiwf2_cprj
  use m_lobpcgwf_cprj,only : lobpcgwf2_cprj
  use m_slicewf,     only : slicewf
+ use m_slicewf_cprj,  only : slicewf_cprj
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
@@ -528,7 +529,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        else if (wfopta10 == 2) then
          nstep_mixed = dtset%nstep_mixed ! below which perform chebfi
          write(std_out,'(a,i0)') 'running vtowfk for nstep_mixed=', nstep_mixed
-         if ( xg_diago .and. dtset%cprj_in_memory /= 1 ) then
+         if ( xg_diago .and. dtset%cprj_in_memory == 0 ) then
             if (istep > nstep_mixed) then
                 write(std_out,'(a,i0)') 'entering slicewf'
                 !ABI_NVTX_START_RANGE(NVTX_SPESLI)
@@ -542,8 +543,18 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &                              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
                 ABI_NVTX_END_RANGE()
             end if
-         else
-            ABI_ERROR("(not xg_diago and dtset%cprj_in_memory=1) not implemented for slicewf")
+         else            
+             if (istep > nstep_mixed) then
+                write(std_out,'(a,i0)') 'entering slicewf_cprj'
+                !ABI_NVTX_START_RANGE(NVTX_SPESLI)
+                call slicewf_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,mpi_enreg,&
+&                             nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+                !ABI_NVTX_END_RANGE()
+            else
+                write(std_out,'(a,i0)') 'entering chebfiwf2_cprj'
+                call chebfiwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
+                    mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+            end if
          end if
      
 !      =========================================================================
@@ -670,7 +681,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ortalgo = mpi_enreg%paral_kgb
    ! The orthogonalization is completely disabled with ortalg<=-10.
    ! This option is usefull for testing only and is not documented.
-   do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
+   do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 12 .and. wfoptalg /= 11 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
    if (xg_diago) do_ortho = .false.
    if (use_rmm_diis) do_ortho = .False.
 
