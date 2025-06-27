@@ -898,8 +898,11 @@ subroutine dvdb_print(db, units, header, prtvol)
  character(len=5000) :: msg
 ! *************************************************************************
 
- !msg=' ==== Info on the dvdb% object ==== '
- msg=' ==== '//trim(adjustl(header))//' ==== '
+ if (len_trim(header) == 0) then
+   msg = ' ==== Info on the dvdb% object ==== '
+ else
+   msg = ' ==== '//trim(adjustl(header))//' ==== '
+ end if
  call wrtout(units, msg)
 
  call wrtout(units, sjoin(" DVDB version:", itoa(db%version)))
@@ -924,9 +927,9 @@ subroutine dvdb_print(db, units, header, prtvol)
  call wrtout(units, msg)
 
  if (db%has_dielt) then
-   write(msg, '(a,3(/,3es16.6))') ' Dielectric tensor in Cart coords:', &
-     db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), &
-     db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), &
+   write(msg, '(a,3(a,3es16.6))') ' Dielectric tensor in Cart coords:', ch10, &
+     db%dielt(1,1), db%dielt(1,2), db%dielt(1,3), ch10, &
+     db%dielt(2,1), db%dielt(2,2), db%dielt(2,3), ch10, &
      db%dielt(3,1), db%dielt(3,2), db%dielt(3,3)
    call wrtout(units, msg)
  end if
@@ -940,9 +943,9 @@ subroutine dvdb_print(db, units, header, prtvol)
    call wrtout(units, ' Dynamical Quadrupoles in Cartesian Coordinates:')
    do iatom=1,db%natom
      do idir=1,3
-       write(msg,'(2(a,i0),3(/,3es16.6))')' Q* for iatom: ', iatom, ' idir: ', idir, &
-         db%qstar(1,1,idir,iatom), db%qstar(1,2,idir,iatom), db%qstar(1,3,idir,iatom), &
-         db%qstar(2,1,idir,iatom), db%qstar(2,2,idir,iatom), db%qstar(2,3,idir,iatom), &
+       write(msg,'(2(a,i0), 3(a,3es16.6))')' Q* for iatom: ', iatom, ' idir: ', idir,  ch10, &
+         db%qstar(1,1,idir,iatom), db%qstar(1,2,idir,iatom), db%qstar(1,3,idir,iatom), ch10, &
+         db%qstar(2,1,idir,iatom), db%qstar(2,2,idir,iatom), db%qstar(2,3,idir,iatom), ch10, &
          db%qstar(3,1,idir,iatom), db%qstar(3,2,idir,iatom), db%qstar(3,3,idir,iatom)
        call wrtout(units, msg)
      end do
@@ -950,9 +953,9 @@ subroutine dvdb_print(db, units, header, prtvol)
 
    call wrtout(units, " Dynamical quadrupoles sum rule: \sum_\iatom Q_{beta,gamma}{iatom,idir} = 0 for nonpolar materials")
    do idir=1,3
-     write(msg,'(a,i0,/,3(/,3es16.6))')" Sum rule for idir: ", idir, &
-       sum(db%qstar(1,1,idir,:)), sum(db%qstar(1,2,idir,:)), sum(db%qstar(1,3,idir,:)), &
-       sum(db%qstar(2,1,idir,:)), sum(db%qstar(2,2,idir,:)), sum(db%qstar(2,3,idir,:)), &
+     write(msg,'(a,i0,a,3(a,3es16.6))')" Sum rule for idir: ", idir, ch10, ch10, &
+       sum(db%qstar(1,1,idir,:)), sum(db%qstar(1,2,idir,:)), sum(db%qstar(1,3,idir,:)), ch10, &
+       sum(db%qstar(2,1,idir,:)), sum(db%qstar(2,2,idir,:)), sum(db%qstar(2,3,idir,:)), ch10, &
        sum(db%qstar(3,1,idir,:)), sum(db%qstar(3,2,idir,:)), sum(db%qstar(3,3,idir,:))
      call wrtout(units, msg)
    end do
@@ -991,16 +994,16 @@ subroutine print_zeff(units, cryst, zeff, title)
  end if
 
  do iatom=1,cryst%natom
-   write(msg, '(a,i0,1x,2a,3(/,3es16.6),a)')' iatom: ', iatom, ", type: ", cryst%symbol_iatom(iatom), &
-     zeff(1,1,iatom), zeff(1,2,iatom), zeff(1,3,iatom), &
-     zeff(2,1,iatom), zeff(2,2,iatom), zeff(2,3,iatom), &
+   write(msg, '(a,i0,1x,2a,3(a,3es16.6),a)')' iatom: ', iatom, ", type: ", cryst%symbol_iatom(iatom), ch10, &
+     zeff(1,1,iatom), zeff(1,2,iatom), zeff(1,3,iatom), ch10, &
+     zeff(2,1,iatom), zeff(2,2,iatom), zeff(2,3,iatom), ch10, &
      zeff(3,1,iatom), zeff(3,2,iatom), zeff(3,3,iatom), ch10
    call wrtout(units, msg)
  end do
 
- write(msg,'(2a,3(/,3es16.6),a)')ch10,' Fulfillment of charge neutrality, \sum_{atom} Z^*_{ij,atom} = 0', &
-   sum(zeff(1,1,:)), sum(zeff(1,2,:)), sum(zeff(1,3,:)), &
-   sum(zeff(2,1,:)), sum(zeff(2,2,:)), sum(zeff(2,3,:)), &
+ write(msg,'(2a,3(a,3es16.6),a)')ch10,' Fulfillment of charge neutrality, \sum_{atom} Z^*_{ij,atom} = 0', ch10, &
+   sum(zeff(1,1,:)), sum(zeff(1,2,:)), sum(zeff(1,3,:)), ch10, &
+   sum(zeff(2,1,:)), sum(zeff(2,2,:)), sum(zeff(2,3,:)), ch10, &
    sum(zeff(3,1,:)), sum(zeff(3,2,:)), sum(zeff(3,3,:)), ch10
  call wrtout(units, msg)
 
