@@ -969,7 +969,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    ! Read ab-initio em1 from file.
    select case (mat_type_read)
    case (MAT_INV_EPSILON)
-     call wrtout(std_out, strcat("Em1 will be initialized from SCR file: ", screen%fname))
+     call wrtout(std_out, strcat(" Em1 will be initialized from SCR file: ", screen%fname))
 
    case (MAT_CHI0)
      ! Should Write new SCR file.
@@ -1023,7 +1023,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
      ! Calculate the model. Note that mdielf awaits an index in the BZ.
      found = qmesh%has_bz_item(Qmesh%ibz(:,iq_ibz),iq_bz,g0)
      if (.not.found .or. any(g0 /= 0)) then
-       ABI_ERROR("Problem in retrieving ibz point")
+       ABI_ERROR("Problem in retrieving ibz points")
      end if
 
      ! Allocate F_{GG'}(w).
