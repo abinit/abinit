@@ -306,7 +306,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 
    ! Init the largest G-sphere contained in the FFT box for the wavefunctions.
    call Gsph_FFT%in_fftbox(Cryst,Wfd%ngfft)
-   call Gsph_FFT%print(unit=std_out, prtvol=10)
+   call Gsph_FFT%print([std_out], dtset%prtvol)
 
    ABI_MALLOC(gspfft_igfft,(Gsph_FFT%ng))
    ABI_MALLOC(dummy_gbound,(2*gw_mgfft+8,2))
@@ -366,9 +366,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  call wrtout(std_out, msg)
 
  if (use_tr) then
-   call wrtout(std_out,' Using faster algorithm based on time reversal symmetry.')
+   call wrtout(std_out, ' Using faster algorithm based on time reversal symmetry.')
  else
-   call wrtout(std_out,' Using slow algorithm without time reversal symmetry.')
+   call wrtout(std_out, ' Using slow algorithm without time reversal symmetry.')
  end if
 
  ! Evaluate oscillator matrix elements btw partial waves. Note q=Gamma
@@ -411,7 +411,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  ABI_MALLOC(igffteps0,(Gsph_epsG0%ng))
  ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
  call Gsph_epsG0%fft_tabs([0, 0, 0], gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igffteps0)
- if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+ if (ANY(gw_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
  !use_padfft = 0
  if (use_padfft==0) then
    ABI_FREE(gw_gbound)
@@ -1132,7 +1132,7 @@ end subroutine cchi0q0
 !!
 !! OUTPUT
 !!  chi0(Ep%npwe,Ep%npwe,Ep%nomega)=independent-particle susceptibility matrix at wavevector qpoint and
-!!   each frequeny defined by Ep%omega and Ep%nomega
+!!      each frequency defined by Ep%omega and Ep%nomega.
 !!
 !! SOURCE
 
@@ -1626,7 +1626,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
              end do !io
 
              if (Ep%gwcomp==1.and.band1==band2) then
-               ! Add the "delta part" of the extrapolar method. TODO doesnt work for spinor
+               ! Add the "delta part" of the extrapolar method. TODO does not work for spinor
                call calc_wfwfg(tabr_k,itim_k,spinrot_k,nfft,nspinor,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
 
                if (Psps%usepaw==1) then

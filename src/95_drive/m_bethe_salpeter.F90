@@ -179,23 +179,16 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !scalars
  integer,parameter :: tim_fourdp0=0,level=40,ipert0=0,idir0=0,cplex1=1,master=0,option1=1
  integer :: band,cplex_rhoij,spin,ik_ibz,mqmem,iwarn
- integer :: has_dijU,has_dijso,gnt_option
- integer :: ik_bz,mband
- integer :: choice
- integer :: ider
- integer :: usexcnhat,nfft_osc,mgfft_osc
- integer :: isym,izero
+ integer :: has_dijU,has_dijso,gnt_option, ik_bz,mband, choice, ider
+ integer :: usexcnhat,nfft_osc,mgfft_osc, isym,izero
  integer :: optcut,optgr0,optgr1,optgr2,option,optrad,optrhoij,psp_gencond
  integer :: ngrvdw,nhatgrdim,nkxc1,nprocs,nspden_rhoij,nzlmopt,ifft
- integer :: my_rank,rhoxsp_method,comm
- integer :: mgfftf,spin_opt,which_fixed
- integer :: nscf,nbsc,nkxc,n3xccc
- integer :: nfftf,nfftf_tot,nfftot_osc,my_minb,my_maxb
+ integer :: my_rank,rhoxsp_method,comm, mgfftf,spin_opt,which_fixed
+ integer :: nscf,nbsc,nkxc,n3xccc, nfftf,nfftf_tot,nfftot_osc,my_minb,my_maxb
  integer :: optene,moved_atm_inside,moved_rhor,initialized,istep,ierr
  real(dp) :: ucvol,drude_plsmf,ecore,ecut_eff,ecutdg_eff,norm
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp
- real(dp) :: compch_fft,compch_sph,gsq_osc
- real(dp) :: vxcavg,el_temp
+ real(dp) :: compch_fft,compch_sph,gsq_osc, vxcavg,el_temp
  logical :: iscompatibleFFT,is_dfpt=.false.,paw_add_onsite,call_pawinit
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,w_fname
@@ -222,9 +215,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !arrays
  integer :: ngfft_osc(18),ngfftc(18),ngfftf(18),nrcell(3)
  integer,allocatable :: ktabr(:,:),l_size_atm(:)
- integer,allocatable :: nband(:,:),nq_spl(:),irottb(:,:)
- integer,allocatable :: qp_vbik(:,:)
- integer,allocatable :: gfft_osc(:,:)
+ integer,allocatable :: nband(:,:),nq_spl(:),irottb(:,:), qp_vbik(:,:), gfft_osc(:,:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: tsec(2),gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3),rprimd(3,3),eh_rcoord(3),strsxc(6)
  real(dp),allocatable :: ph1df(:,:),prev_rhor(:,:),ph1d(:,:)
@@ -232,9 +223,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  real(dp),allocatable :: qp_rhor(:,:),qp_rhog(:,:) !,qp_vhartr(:),qp_vtrial(:,:),qp_vxc(:,:)
  real(dp),allocatable :: qp_rhor_paw(:,:),qp_rhor_n_one(:,:),qp_rhor_nt_one(:,:),qp_nhat(:,:)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
- real(dp),allocatable :: vpsp(:),xccc3d(:)
- real(dp),allocatable :: ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
- real(dp),allocatable :: kxc(:,:) !,qp_kxc(:,:)
+ real(dp),allocatable :: vpsp(:),xccc3d(:), ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:), kxc(:,:) !,qp_kxc(:,:)
  complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:)
@@ -492,7 +481,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(651,2,tsec) ! bse(Init1)
  call timab(653,1,tsec) ! bse(rdkss)
 
- call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
+ call wfd%read_wfk(wfk_fname, iomode_from_fname(wfk_fname))
 
  ! This test has been disabled (too expensive!)
  if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
@@ -500,7 +489,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(653,2,tsec) ! bse(rdkss)
  call timab(655,1,tsec) ! bse(mkrho)
 
- !TODO : check the consistency of Wfd with Wfd_dense !!!
+ !TODO: check the consistency of Wfd with Wfd_dense !!!
  if (BSp%use_interp) then
    ! Initialize wave function handler, allocate wavefunctions.
    my_minb=1; my_maxb=BSp%nbnds; mband=BSp%nbnds
@@ -784,28 +773,27 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    end if
    ABI_FREE(prev_pawrhoij)
    !
-   !  if (nscf>0.and.wfd_iam_master(Wfd)) then ! Print the unitary transformation on std_out.
-   !  call show_QP(qp_ebands,m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
-   !  end if
+   !if (nscf>0.and.wfd_iam_master(Wfd)) then ! Print the unitary transformation on std_out.
+   !call show_QP(qp_ebands,m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
+   !end if
    !
-   !  === Compute QP wfg as linear combination of KS states ===
-   !  * Wfd%ug is modified inside calc_wf_qp
-   !  * For PAW, update also the on-site projections.
-   !  * WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
-   !  TODO here we should use nbsc instead of nbnds
+   !=== Compute QP wfg as linear combination of KS states ===
+   !* Wfd%ug is modified inside calc_wf_qp
+   !* For PAW, update also the on-site projections.
+   !* WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
+   !TODO here we should use nbsc instead of nbnds
 
    call wfd%rotate(Cryst,m_ks_to_qp)
-
    ABI_FREE(m_ks_to_qp)
    !
-   !  === Reinit the storage mode of Wfd as ug have been changed ===
-   !  * Update also the wavefunctions for GW corrections on each processor
+   ! === Reinit the storage mode of Wfd as ug have been changed ===
+   ! * Update also the wavefunctions for GW corrections on each processor
    call wfd%reset_ur_cprj()
 
-   call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
+   !call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
    ! Compute QP occupation numbers.
-   call wrtout(std_out,'bethe_salpeter: calculating QP occupation numbers')
+   call wrtout(std_out, 'bethe_salpeter: calculating QP occupation numbers')
 
    call qp_ebands%update_occ(Dtset%spinmagntarget,prtvol=0)
    ABI_MALLOC(qp_vbik,(qp_ebands%nkpt,qp_ebands%nsppol))
@@ -962,12 +950,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call ks_ebands%free()
  call qp_ebands%free()
  call Vcp%free()
- call pawhur_free(Hur)
- ABI_FREE(Hur)
  call BSp%free()
  call wfd%free()
  call pawfgr_destroy(Pawfgr)
  call eprenorms_free(Epren)
+ call pawhur_free(Hur)
+ ABI_FREE(Hur)
 
  ! Free memory used for interpolation.
  if (BSp%use_interp) then
@@ -1073,12 +1061,9 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  integer,parameter :: pertcase0=0, master=0
  integer(i8b) :: work_size,tot_nreh,neh_per_proc,il
  integer :: bantot,enforce_sym,ib,ibtot,ik_ibz,isppol,jj,method,iat,ount !ii,
- integer :: mband,io,nfftot_osc,spin,hexc_size,nqlwl,iq
- integer :: timrev,iq_bz,isym,iq_ibz,itim
- integer :: my_rank,nprocs,ierr,my_k1, my_k2,my_nbks
- integer :: first_dig,second_dig,it
- real(dp) :: ucvol,qnorm
- real(dp):: eff,mempercpu_mb,wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
+ integer :: mband,io,nfftot_osc,spin,hexc_size,nqlwl,iq, timrev,iq_bz,isym,iq_ibz,itim
+ integer :: my_rank,nprocs,ierr,my_k1, my_k2,my_nbks, first_dig,second_dig,it
+ real(dp) :: ucvol,qnorm, eff,mempercpu_mb,wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  logical,parameter :: remove_inv=.FALSE.
  logical :: ltest,occ_from_dtset
  character(len=500) :: msg
@@ -1405,7 +1390,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  ! === Build enlarged G-sphere for the exchange part ===
  call Gsph_c%extend(Cryst, Dtset%ecutwfn, Gsph_x)
- call Gsph_x%print(unit=std_out,prtvol=Dtset%prtvol)
+ call Gsph_x%print([std_out], prtvol=Dtset%prtvol)
 
  ! NPWVEC as the biggest between npweps and npwwfn. MG RECHECK this part.
  !BSp%npwwfn = Dtset%npwwfn
@@ -1425,10 +1410,9 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  ABI_FREE(qlwl)
 
  bantot=SUM(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol))
- ABI_MALLOC(doccde,(bantot))
- ABI_MALLOC(eigen,(bantot))
- ABI_MALLOC(occfact,(bantot))
- doccde=zero; eigen=zero; occfact=zero
+ ABI_CALLOC(doccde,(bantot))
+ ABI_CALLOC(eigen,(bantot))
+ ABI_CALLOC(occfact,(bantot))
 
  ! Get occupation from input if occopt == 2
  occ_from_dtset = (Dtset%occopt == 2)
@@ -1509,7 +1493,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  if (Dtset%usepaw==1) call pawrhoij_free(Pawrhoij)
  ABI_FREE(Pawrhoij)
 
- ! Find optimal value for G-sphere enlargment due to oscillator matrix elements
+ ! Find optimal value for G-sphere enlargement due to oscillator matrix elements
  ! We will split k-points over processors
  call xmpi_split_work(Kmesh%nbz, comm, my_k1, my_k2)
 
@@ -1518,7 +1502,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
    ng0sh_opt(:)=(/zero,zero,zero/)
  else
    ! * Here I have to be sure that Qmesh%bz is always inside the BZ, not always true since bz is buggy
-   ! * -one is used because we loop over all the possibile differences, unlike screening
+   ! * -one is used because we loop over all the possible differences, unlike screening
    call get_ng0sh(my_k2-my_k1+1,Kmesh%bz(:,my_k1:my_k2),Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
  end if
 
@@ -1527,7 +1511,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  write(msg,'(a,3(i0,1x))') ' optimal value for ng0sh = ',BSp%mg0
  call wrtout(std_out,msg)
 
- ! === Setup of the FFT mesh for the oscilator strengths ===
+ ! === Setup of the FFT mesh for the oscillator strengths ===
  ! * ngfft_osc(7:18)==Dtset%ngfft(7:18) which is initialized before entering screening.
  ! * Here we redefine ngfft_osc(1:6) according to the following options :
  !
@@ -1537,7 +1521,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  ! method==3 --> Doubled FFT grid, same as the the FFT for the density,
  !
  ! enforce_sym==1 ==> Enforce a FFT mesh compatible with all the symmetry operation and FFT library
- ! enforce_sym==0 ==> Find the smallest FFT grid compatbile with the library, do not care about symmetries
+ ! enforce_sym==0 ==> Find the smallest FFT grid compatible with the library, do not care about symmetries
  !
  ngfft_osc(1:18)=Dtset%ngfft(1:18); method=2
  if (Dtset%fftgw==00 .or. Dtset%fftgw==01) method=0
@@ -2014,7 +1998,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  end do
 
  call Gsph_c%extend(Cryst, Dtset%ecutwfn, Gsph_x)
- call Gsph_x%print(unit=std_out,prtvol=Dtset%prtvol)
+ call Gsph_x%print([std_out], prtvol=Dtset%prtvol)
 
  nqlwl=1
  ABI_MALLOC(qlwl,(3,nqlwl))
