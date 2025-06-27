@@ -60,17 +60,17 @@ AC_DEFUN([SD_FFTW3_INIT], [
   # Set reasonable defaults if not provided
   if test -z "${sd_fftw3_libs_def}"; then
     sd_fftw3_libs_def="-lfftw3"
-    if test "${abi_openmp_enable}" = "yes"; then 
+    if test "${abi_openmp_enable}" = "yes"; then
       sd_fftw3_libs_def="-lfftw3_threads ${sd_fftw3_libs_def}"
     fi
-    if test "${sd_mpi_enable}" = "yes"; then 
+    if test "${sd_mpi_enable}" = "yes"; then
       sd_fftw3_libs_def="-lfftw3_mpi ${sd_fftw3_libs_def}"
     fi
   fi
   test -z "${sd_fftw3_policy}" && sd_fftw3_policy="fail"
   test -z "${sd_fftw3_status}" && sd_fftw3_status="optional"
   test -z "${sd_fftw3_enable_def}" && sd_fftw3_enable_def="no"
-  case "${sd_fftw3_status}" in 
+  case "${sd_fftw3_status}" in
          implicit|required|optional)
       sd_fftw3_enable_def="yes"
       ;;
@@ -78,7 +78,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
 
   AC_MSG_NOTICE([status for fftw3 TMP '${sd_fftw3_status}'])
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([fftw3],
     [AS_HELP_STRING([--with-fftw3],
       [Install prefix of the FFTW3 library (e.g. /usr/local).])],
@@ -115,7 +115,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
      #check if PKG_CONFIG exists (if not keep default mode)
      AC_MSG_NOTICE([setting for ${sd_fftw3_init} potential move to pkg])
      AC_CHECK_PROG([PKG_CONFIG], [pkg-config], [pkg-config], [no])
-     
+
      AC_MSG_NOTICE([setting for ${sd_fftw3_init} potential move to pkg, PKG=${PKG_CONFIG}])
      if test "$PKG_CONFIG" != "no"; then
 	 AC_MSG_CHECKING([for fftw3 via pkg-config])

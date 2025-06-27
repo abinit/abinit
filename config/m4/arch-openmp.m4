@@ -250,13 +250,13 @@ AC_DEFUN([ABI_OPENMP_INIT], [
     abi_openmp_libs="${sd_openmp_libs}"
     if test "${sd_openmp_cc_ok}" = "yes"; then
       abi_openmp_cflags="${sd_openmp_cflags}"
-    fi    
+    fi
     if test "${sd_openmp_cxx_ok}" = "yes"; then
       abi_openmp_cxxflags="${sd_openmp_cxxflags}"
-    fi    
+    fi
     if test "${sd_openmp_fc_ok}" = "yes"; then
       abi_openmp_fcflags="${sd_openmp_fcflags}"
-    fi    
+    fi
   else
     if test "${abi_openmp_init}" != "def"; then
       AC_MSG_NOTICE([openMP support disabled from command-line])
@@ -311,7 +311,7 @@ AC_DEFUN([ABI_OPENMP_DETECT], [
       # Check whether OpenMP has a working implementation of COLLAPSE
       _ABI_OMP_CHECK_COLLAPSE
 
-      # Check if openMP offload is available 
+      # Check if openMP offload is available
       abi_omp_has_gpu_offload="no"
       if test "${abi_openmp_offload_enable}" = "yes"; then
         _ABI_OMP_CHECK_GPU_OFFLOAD

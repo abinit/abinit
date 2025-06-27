@@ -17,7 +17,7 @@
 /*_________________________TIMING IN CUDA ROUTINES_________________________*/
 /*=========================================================================*/
 /* This file contains some basic utils from the time measuration in
- * cuda subroutines. A more particular version is contained in 
+ * cuda subroutines. A more particular version is contained in
  * prt_utils_rec.cu (to put together)
 */
 

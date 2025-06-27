@@ -11,7 +11,7 @@ from .termcolor import cprint
 
 
 # Helper functions (coming from AbiPy)
-class lazy_property(object):
+class lazy_property:
     """
     lazy_property descriptor
 
@@ -64,7 +64,7 @@ class lazy_property(object):
             del inst.__dict__[name]
 
 
-class Editor(object):
+class Editor:
     """Python interface to text editors."""
     def __init__(self, editor=None):
         if editor is None:
@@ -196,7 +196,7 @@ def print_dataframe(frame, title=None, precision=6, sortby=None, file=sys.stdout
 
 # Here metaclass is needed for abc but then I should import six --> leave it at it is without metaclass
 #@six.add_metaclass(abc.ABCMeta)
-class NotebookWriter(object): #metaclass=abc.ABCMeta):
+class NotebookWriter: #metaclass=abc.ABCMeta):
     """
     Mixin class for objects that are able to generate jupyter_ notebooks.
     Subclasses must provide a concrete implementation of `write_notebook`.
@@ -206,7 +206,7 @@ class NotebookWriter(object): #metaclass=abc.ABCMeta):
         Generate an jupyter_ notebook and open it in the browser.
 
         Args:
-            nbpath: If nbpath is None, a temporay file is created.
+            nbpath: If nbpath is None, a temporary file is created.
             foreground: By default, jupyter is executed in background and stdout, stderr are redirected
             to devnull. Use foreground to run the process in foreground
 
@@ -268,7 +268,7 @@ class NotebookWriter(object): #metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def write_notebook(self, nbpath=None):
         """
-        Write a jupyter notebook to nbpath. If nbpath is None, a temporay file is created.
+        Write a jupyter notebook to nbpath. If nbpath is None, a temporary file is created.
         Return path to the notebook. A typical template:
 
         .. code-block:: python

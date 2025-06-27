@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h14 )
-  
+
 
 ================================================================================
 
@@ -54,13 +54,13 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -71,7 +71,7 @@
          2         2    1.152021E-17   -3.241280E+00   -1.154788E-17
          2         3   -1.152021E-17   -1.152021E-17   -3.241280E+00
  Now, the imaginary part of the dynamical matrix is zeroed
- 
+
 
  Non-linear optical coefficients d (pm/V)
     0.000000    0.000000    0.000000   32.723426    0.000000    0.000000
@@ -84,4 +84,4 @@
 
 +Total cpu time      0.126  and wall time      0.126 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.
