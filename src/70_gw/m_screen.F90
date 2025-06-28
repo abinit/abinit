@@ -352,7 +352,6 @@ subroutine screen_info_print(W_info, units, header)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
- integer :: my_prtvol
  character(len=500) :: msg
 ! *********************************************************************
 

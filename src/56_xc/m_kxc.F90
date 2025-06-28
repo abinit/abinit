@@ -930,7 +930,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master
  logical :: non_magnetic_xc
  real(dp) :: el_temp,bigexc,bigsxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
- character(len=500) :: msg,fname
+ character(len=500) :: fname ! msg,
  type(xcdata_type) :: xcdata
  type(MPI_type) :: MPI_enreg_seq
 !arrays

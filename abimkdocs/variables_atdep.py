@@ -508,7 +508,7 @@ Variable(
     mnemonics="DEBUG MODE",
     added_in_version="10.4",
     text="""
-OPTIONAL: A non-zero value activates debug mode for atdep. 
+OPTIONAL: A non-zero value activates debug mode for atdep.
 """,
 ),
 
