@@ -1515,9 +1515,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==0) then
     call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
     if (tread == 1) then
-    write(msg, '(3a)') 'The input variable "zeemanfield" is deprecated.', ch10, &
-      'Action: please use hspinfield instead.'
-    call wrtout(std_out, msg, 'COLL')
+       write(msg, '(3a)')&
+       'Input variable "zeemanfield" is deprecated.', ch10, &
+       'Its value has been assigned to "hspinfield", please update your input.'   
+       ABI_COMMENT(msg)
   end if
 end if
 
