@@ -1,5 +1,5 @@
 # Crystalline Cr2O3 : computation of the total energy under zeeman field (axial symmetry)
-# Test axial vector symmetry for the zeemanfield
+# Test axial vector symmetry for the hspinfield
 # 8 datasets = 4 field directions \times 2 symmetry settings (full/nsym=1)
 
  ndtset 8
@@ -41,9 +41,9 @@
 nsym?2 1
 
 # Zeeman field definition
-zeemanfield2?   1   0   0
-zeemanfield3?   0   1   0
-zeemanfield4?   0   0   1
+hspinfield2?   1   0   0
+hspinfield3?   0   1   0
+hspinfield4?   0   0   1
 
 
 #Definition of the planewave basis set

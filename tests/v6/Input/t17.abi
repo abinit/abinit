@@ -1,6 +1,6 @@
 #  Isolated Bi atom. Spin-polarized, collinear.
 
-  zeemanfield 0.0 0.0 1.0
+  hspinfield 0.0 0.0 1.0
 
   ndtset   6
   udtset   3 2
