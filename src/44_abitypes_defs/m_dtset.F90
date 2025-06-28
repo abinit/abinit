@@ -3830,7 +3830,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' xyzfile x1rdm'
 !Y
 !Z
- list_vars=trim(list_vars)//' zcut znucl'
+ list_vars=trim(list_vars)//' zcut zeemanfield znucl'
 
 !List of input variables for which the image index can be added
  list_vars_img=' acell amu angdeg cellcharge dmatpawu jpawu mixalch occ rprim scalecart'
