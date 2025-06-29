@@ -1556,7 +1556,7 @@ end if ! .not qq_is_gamma.
        call xmpi_sum_master(gsig_atm, master, gqk%pert_ppsum_bsum_comm%value, ierr)
        call xmpi_sum_master(gks_atm , master, gqk%pert_ppsum_bsum_comm%value, ierr)
 
-       ! TODO gks_atm and gks_nu
+       ! TODO gks_atm and gks_nsu
        !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
        gsig_atm = gsig_atm + gks_atm - gxc_atm
 

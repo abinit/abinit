@@ -539,7 +539,7 @@ class Variable(object):
             parent_names.extend(
                 [m.group(1) for m in re.finditer(WIKILINK_RE, self.requires) if m])
 
-        # Convert to set and remove possibile self-reference.
+        # Convert to set and remove possible self-reference.
         parent_names = set(parent_names)
         parent_names.discard(self.name)
         return parent_names
@@ -709,7 +709,7 @@ class Variable(object):
         #        print('The field varset of %s should be one of the valid varsets' % str(self))
 
         if len(self.name) > 25:
-            eapp("Lenght of `%s` is longer than 25 characters." % self.name)
+            eapp("Length of `%s` is longer than 25 characters." % self.name)
 
         if errors:
             raise ValueError("\n".join(errors))
