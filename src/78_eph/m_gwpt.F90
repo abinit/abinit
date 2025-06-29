@@ -1558,7 +1558,12 @@ end if ! .not qq_is_gamma.
 
        ! TODO gks_atm and gks_nsu
        !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
+       !gsig_atm = gsig_atm / (pp_mesh%nbz)
        gsig_atm = gsig_atm + gks_atm - gxc_atm
+
+       ! DEBUG
+       !print *, "gsig_average", sum(abs(gsig_atm)) / size(gsig_atm) / two
+       !print *, "gks_average", sum(abs(gks_atm)) / size(gks_atm) / two
 
        select case (gstore%gmode)
        case (GSTORE_GMODE_PHONON)

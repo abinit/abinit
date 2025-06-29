@@ -63,7 +63,7 @@ module m_dfpt_cgwf
 !! stern_t
 !!
 !! FUNCTION
-!!  Simplied interface to the Sternheimer solver.
+!!  Simplified interface to the Sternheimer solver.
 !!  Wrapper around the dfpt_cgwf routine.
 !!
 !! SOURCE
@@ -197,7 +197,7 @@ contains
 !!            1: used as an input: - used only for ipert=natom+2
 !!                 NCPP: contains the ddk 1-st order WF
 !!                 PAW: contains frozen part of 1st-order hamiltonian
-!!            2: used as input/ouput: - used only for PAW and ipert=natom+2
+!!            2: used as input/output: - used only for PAW and ipert=natom+2
 !!                 At input: contains the ddk 1-st order WF (times i)
 !!                 At output: contains frozen part of 1st-order hamiltonian
 !!  prtvol=control print volume and debugging output
@@ -311,9 +311,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  call timab(122,1,tsec)
 
- !======================================================================
- !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ================
- !====================================================================
+ !==================================================================
+ !========= LOCAL VARIABLES DEFINITIONS AND ALLOCATIONS ============
+ !==================================================================
 
  u1_band = abs(u1_band_)
 
@@ -1129,7 +1129,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    dedt=-two*two*dedt
 
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) then
-     call wrtout(std_out,' DFPT_CGWF WARNING: dedt > 0')
+     call wrtout(std_out, ' DFPT_CGWF WARNING: dedt > 0')
    end if
    ABI_MALLOC(gvnlx_direc,(2,npw1*nspinor))
    ABI_MALLOC(gh_direc,(2,npw1*nspinor))
@@ -1202,7 +1202,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      !write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
 
    else
-     if (u1_band_ > 0) call wrtout(std_out, "DFPT_CGWF WARNING: d2edt2 is zero, skipping update")
+     if (u1_band_ > 0) call wrtout(std_out, " DFPT_CGWF WARNING: d2edt2 is zero, skipping update")
      theta=zero
    end if
 
