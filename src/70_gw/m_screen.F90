@@ -1361,6 +1361,7 @@ subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i
  select case (screen%info%wint_method)
 
  case (WINT_PPMODEL)
+   !call wrtout(std_out, "screen in WINT_PPMODEL")
    ABI_CHECK_IGE(screen%has_ppmodel, 0, "has_ppmodel should be > 0")
 
    select case (trans)

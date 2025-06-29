@@ -1957,6 +1957,9 @@ end subroutine cqratio
 !!
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
 !!
+!! TODO:
+!!  Use BLAS for better efficiency
+!!
 !! SOURCE
 
 subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
