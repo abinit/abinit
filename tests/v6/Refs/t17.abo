@@ -145,8 +145,8 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
-           istwfk11      2
          hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
+           istwfk11      2
            istwfk12      2
            istwfk21      1
            istwfk22      1
