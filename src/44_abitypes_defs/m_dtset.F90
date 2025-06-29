@@ -67,7 +67,7 @@ module m_dtset
 !! creation/destruction/copy routines, declared in another part of ABINIT,
 !! that might need to take into account your modification.
 !!
-!! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
+!! Variables should be declared on separated lines in order to reduce the occurrence of git conflicts.
 !! The name of the variable can exceed 16 characters
 !!
 !! Since all these input variables are described in the abinit_help.html and
@@ -324,7 +324,7 @@ type, public :: dataset_type
  integer :: gw_icutcoul
  integer :: gw_invalid_freq
  integer :: gw_nqlwl
- integer :: gw_qprange
+ integer :: gw_qprange = 0
  integer :: gw_sigxcore = 0
 
  integer :: gwr_nstep = 50
@@ -1012,6 +1012,7 @@ type, public :: dataset_type
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  real(dp) :: eph_fix_wavevec(3) = zero
  real(dp) :: field_red(3)
+ real(dp) :: field_red_axial(3)
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
  real(dp) :: neb_spring(2)
@@ -1129,10 +1130,10 @@ type, public :: dataset_type
    ! Free arrays that depend on input nkpt (used in EPH code)
 
  procedure :: get_npert_rbz => dtset_get_npert_rbz
-   ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+   ! Get the number of effective perturbation done in looper3, nkpt_rbz, nband_rbz
 
  procedure :: testsusmat => dtset_testsusmat
-   ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+   ! Test whether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
  procedure :: get_crystal => dtset_get_crystal
    ! Build crystal_t object from dtset and image index.
@@ -2400,6 +2401,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dfield(:)          = dtin%dfield(:)
  dtout%efield(:)          = dtin%efield(:)
  dtout%field_red(:)       = dtin%field_red(:)
+ dtout%field_red_axial(:) = dtin%field_red_axial(:)
  dtout%genafm(:)          = dtin%genafm(:)
  dtout%goprecprm(:)       = dtin%goprecprm(:)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
@@ -2738,13 +2740,13 @@ end subroutine find_getdtset
 !! dtset_get_npert_rbz
 !!
 !! FUNCTION
-!! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+!! Get the number of effective perturbation done in looper3, nkpt_rbz, nband_rbz
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!
 !! OUTPUT
-!!  npert=number of effective pertubation done in looper3
+!!  npert=number of effective perturbation done in looper3
 !!  nkpt_rbz= nkpt in the reduced brillouin zone
 !!  nband_rbz= nband in the reduced brillouin zone
 !!
@@ -3073,7 +3075,7 @@ end subroutine dtset_get_npert_rbz
 !! dtset_testsusmat
 !!
 !! FUNCTION
-!! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+!! Test whether a new susceptibility matrix and/or a new dielectric matrix must be computed
 !! and return the logical result
 !!
 !! INPUTS
@@ -3244,7 +3246,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
      dtsets(idtset)%tolvrs   = 10d-8    ! convergence on the potential; 10d-8^= 10d-5 on occupation
      dtsets(idtset)%diemix   = 0.45_dp  ! fastest convergence: dn= E^(-istep * 0.229 )
      dtsets(idtset)%dmatpuopt= 3        ! normalization of the occupation operator
-!    dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally suficient
+!    dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally sufficient
 !    dtsets(idtset)%iscf     = 17       ! mixing on potential, 17: default for PAW
    end if ! macro_uj
 
