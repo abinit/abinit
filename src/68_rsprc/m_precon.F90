@@ -24,17 +24,21 @@ module m_precon
     use m_dfpt_mkvxc,       only : dfpt_mkvxc, dfpt_mkvxc_noncoll
     use m_fft,              only : fourdp, fourwf, fftpac
     use m_fftcore,          only : sphereboundary
+    use m_fourier_interpol, only : transgrid
+    use m_kg,               only : ph1d3d
     use m_mkrho
     use m_mpinfo,           only : proc_distrb_cycle
     use m_paw_dmft
     use m_pawrhoij,         only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free
-    use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free
+    use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, pawcprj_free
     use m_pawang,           only : pawang_type
     use m_pawfgr,           only : pawfgr_type
     use m_pawtab,           only : pawtab_type
     use m_pawfgrtab,        only : pawfgrtab_type
+    use m_paw_finegrid,     only : pawgylmg
     use m_paw_occupancies,  only : pawmkrhoij
     use m_paw_mkrho,        only : pawmkrho
+    use m_paw_nhat,         only : pawsushat
     use m_spacepar,         only : symrhg
 
 !#if defined HAVE_LINALG_MKL_OMATCOPY
@@ -43,7 +47,6 @@ module m_precon
     
     implicit none
     private
-    public :: precon_object
     public :: linsolve
 
     type, public :: precon_object
@@ -186,7 +189,7 @@ contains
             this%nfftprc = nfftmix          ! FFT grid for preconditioned densities and/or potentials :
             this%ngfftprc = ngfftmix        ! same grid as the one used for mixing.
             !Other constants
-            this%dvol   = ucvol/dtset%nfft  ! factor for integrals in real space: sum(f) * dvol ~ integral f
+            this%dvol   = ucvol/this%nfftprc  ! factor for integrals in real space (on the preconditioning FFT grid) : sum(f) * dvol ~ integral f
             this%gprimd = gprimd
             this%rprimd = rprimd
             this%gmet   = gmet
@@ -966,7 +969,7 @@ contains
         !arrays
         real(dp) :: qphon(3)
         real(dp), allocatable :: w_rhowfg(:, :), w_rhowfr(:, :)
-        type(pawcprj_type),allocatable :: cprj_tmp(:,:)
+        type(pawcprj_type), allocatable :: cprj_tmp(:,:)
         type(paw_dmft_type)     :: dummy_paw_dmft
         type(wvl_wf_type)       :: dummy_wvl_wfs
         type(wvl_denspot_type)  :: dummy_wvl_den
@@ -1001,7 +1004,7 @@ contains
             if (this%nfftprc == dtset%nfft) then
                 w_rhor = w_rhowfr
             else
-                ABI_BUG("iprcel=2** : nfftprc /= nfft not implemented. TODO")
+                ABI_BUG("iprcel=2** : nfftprc /= nfft in Norm-conserving not implemented. TODO")
             end if
         else
         ! In PAW : Add rhoij terms to  w_rhowfr.
@@ -1055,7 +1058,7 @@ contains
                 call pawrhoij_free(pawrhoij)
 
             else
-                ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft not implemented. TODO")
+                ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft in PAW not implemented. TODO")
             end if
 
         end if
@@ -1283,6 +1286,332 @@ contains
 
     end subroutine apply_chi0_ldos
 
+    !****f* m_precon/compute_rhoii_coll
+    !! NAME
+    !!  compute_rhoii_coll
+    !!
+    !! FUNCTION
+    !!  Compute the orbital density rho_ii = |psi_i|^2 in real space, including PAW corrections if applicable,
+    !!  where the index i correspond to iband, isppol, j_cg, ikpt ...
+    !!
+    !! INPUTS
+    !!  this        = Object containing preconditioning data.
+    !!  dtset       = All input variables for this dataset.
+    !!  mpi_enreg   = Information about MPI parallelization.
+    !!  n1, n2, n3  = Dimensions of the (coarse) FFT grid.
+    !!  n4, n5, n6  = Dimensions of the augmented FFT grid.
+    !!  iband       = Band index.
+    !!  ibg         = Band group index.
+    !!  isppol      = Spin polarization index.
+    !!  j_cg        = Index of the wavefunction in cg.
+    !!  gbound      = Boundary conditions for FFT grid.
+    !!  ikpt        = K-point index.
+    !!  istwf_k     = Wavefunction index for this k-point.
+    !!  kg_k        = Reciprocal lattice vectors for this k-point.
+    !!  nband_k     = Number of bands for this k-point.
+    !!  npw_k       = Number of plane waves for this k-point.
+    !!
+    !! OUTPUTS
+    !!  rho_r_ii    = Orbital density in real space on the preconditioning FFT grid.
+    !!
+    !! SOURCE
+    subroutine compute_rhoii_coll(this, dtset, mpi_enreg, n1, n2, n3, n4, n5, n6, iband, ibg, isppol, j_cg, gbound, ikpt, istwf_k, kg_k, nband_k, npw_k, rho_r_ii)
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
+        integer, intent(in) :: iband, ibg, isppol, j_cg, ikpt, istwf_k, nband_k, npw_k
+        integer, intent(in) :: n1, n2, n3, n4, n5, n6
+        !arrays
+        integer, intent(in) :: gbound(2*dtset%mgfft+8,2)
+        integer, intent(in) :: kg_k(:, :)
+        real(dp), intent(inout) :: rho_r_ii(this%nfftprc, 1)
+       
+        !Local variables-------------------------------
+        !scalars
+        integer :: cplex, lmax, optreal, optin, optout, nband_loc, optgrid
+        integer :: ispden, ndat, option, tim_fourwf
+        integer :: ispinor, nspinor, my_nspinor
+        integer :: ierr
+        integer :: dummy_int
+        real(dp) :: dummy_real
+        real(dp) :: weight_r, weight_i
+        !arrays
+        real(dp), allocatable :: rhoaug_r_ii(:, :, :, :), rho_r_ii_coarse(:, :)
+        type(pawcprj_type), allocatable :: cprj_k(:, :), cprj_loc(:, :)
+        real(dp), allocatable :: gylmg(:,:,:)
+        real(dp), allocatable :: ph3d(:,:,:), phkxred(:, :)
+        !dummy arguments
+        real(dp) ::  dummy_denpot(0, n5, n6), dummy_fofgout(2, 0), dummy_fofrout(2, n4, n5, n6)
+        real(dp), allocatable :: dummy_wfprod(:, :)
+        real(dp) :: dummy_kpg(0, 0)
+        real(dp), allocatable :: dummy_rhog(:, :), dummy_rhogf(:, :)
+        
+        ! *************************************************************************
+                        
+        ! No spin or collinear spins - Wafefunctions have one spin component.
+        if (dtset%nspinor == 1) then
+
+            ispinor = 1
+            nspinor = 1
+            my_nspinor = max(1, nspinor/mpi_enreg%nproc_spinor)
+                            
+            ! 1) Compute orbital density in real space (augmented basis) :
+            
+            !Input parameters for fourwf :
+            option = 1          ! Computes the density.
+            ndat = 1            ! Only one FFT.
+            tim_fourwf = 0
+            rhoaug_r_ii = zero  ! Initialization for fourwf (accumulation).
+            weight_r = 1
+            weight_i = 1
+            ABI_MALLOC(rhoaug_r_ii, (2, n4, n5, n6))
+
+            call fourwf(1, rhoaug_r_ii(1, :, :, :), this%cg(:, j_cg+1:j_cg+npw_k), dummy_fofgout, dummy_fofrout,  &
+            &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
+            &           dummy_int, n4, n5, n6, option, tim_fourwf, weight_r, weight_i)
+
+            ! In PAW : We need to add the correction (hat) term.
+            if (this%psps%usepaw==1) then
+
+                ! Compute cprj_k, gylmg and ph3d.
+                lmax = this%pawtab%lcut_size    ! maximal value of the angular moment (no additional cutoff)
+                ! gylmg :
+                ABI_MALLOC(gylmg, (npw_k, lmax**2, dtset%ntypat))
+                call pawgylmg(this%gprimd, gylmg, kg_k, dummy_kpg, dtset%kpt(:, ikpt), lmax, 0, npw_k, &
+                &           dtset%ntypat, this%pawtab, this%ylm)
+                ! ph3d :
+                ABI_MALLOC(ph3d, (2, npw_k, dtset%natom))
+                ABI_MALLOC(phkxred, (2, dtset%natom))
+                phkxred(1,:) = one
+                phkxred(2,:) = zero
+                call ph1d3d(1, dtset%natom, kg_k, dtset%natom, dtset%natom, npw_k, n1, n2, n3, phkxred, this%ph1d, ph3d)
+                ABI_FREE(phkxred)
+                ! cprj_k :
+                ABI_MALLOC(cprj_k, (dtset%natom, my_nspinor*nband_k))
+                call pawcprj_alloc(cprj_k, 0, this%dimcprj)
+                if (mpi_enreg%nproc_band==1) then
+                    call pawcprj_get(this%atindx1, cprj_k, this%cprj, dtset%natom, 1, ibg, ikpt, 0, isppol,                     &
+                    &           dtset%mband, dtset%mkmem, dtset%natom, nband_k ,nband_k, my_nspinor, dtset%nsppol, this%unpaw,  &
+                    &           mpicomm=mpi_enreg%comm_kpt, proc_distrb=mpi_enreg%proc_distrb)
+                else
+                    nband_loc=nband_k/mpi_enreg%nproc_band
+                    ABI_MALLOC(cprj_loc, (dtset%natom, my_nspinor*nband_loc))
+                    call pawcprj_alloc(cprj_loc, 0, this%dimcprj)
+                    call pawcprj_get(this%atindx1, cprj_loc, this%cprj, dtset%natom, 1, ibg, ikpt, 0, isppol,       &
+                    &           dtset%mband/mpi_enreg%nproc_band, dtset%mkmem, dtset%natom, nband_loc ,nband_loc,   &
+                    &           my_nspinor, dtset%nsppol, this%unpaw, mpicomm=mpi_enreg%comm_kpt, proc_distrb=mpi_enreg%proc_distrb)
+                    call pawcprj_mpi_allgather(cprj_loc, cprj_k, dtset%natom, my_nspinor*nband_loc, mpi_enreg%bandpp, &
+                    &           this%dimcprj, 0, mpi_enreg%nproc_band, mpi_enreg%comm_band, ierr, rank_ordered=.true.)
+                    call pawcprj_free(cprj_loc)
+                    ABI_FREE(cprj_loc)
+                end if
+
+                ! Add the PAW correction to rhoaug_r_ii.
+                optreal = 1 ! Output in real space (rhaug_r_ii)
+                ABI_MALLOC(dummy_wfprod, (2, npw_k))
+                call pawsushat(this%atindx, cprj_k, gbound, gylmg, iband, iband, ispinor, ispinor, istwf_k, kg_k,   &
+                &       lmax, dtset%mgfft, dtset%natom, dtset%nband, n4, n5, n6, dtset%ngfft, npw_k, nspinor,       &
+                &       dtset%ntypat, optreal, this%pawang, this%pawtab, ph3d, dtset%typat, dummy_wfprod, rhoaug_r_ii)
+
+                ! Deallocate.
+                ABI_FREE(dummy_wfprod)
+                call pawcprj_free(cprj_k)
+                ABI_FREE(cprj_k)
+                ABI_FREE(gylmg)
+                ABI_FREE(ph3d)
+            end if
+            
+            ! 2) Transfer rhoaug_r_ii defined on the augmented (wavefunction) fft-grid to the preconditioning fft-grid.
+            if (this%psps%usepaw==1) then
+                ! In NC, the preconditioning grid should be the density/potential grid.
+                if (this%nfftprc == n1*n2*n3) then
+                    call fftpac(1, mpi_enreg, 1, n1, n2, n3, n4, n5, n6, dtset%ngfft, rho_r_ii, rhoaug_r_ii(1, :, :, :), 1)   ! DEBUG : weights for nspinor=1, nsppol=2 ok (factor from fft?)
+                else
+                    ABI_BUG("iprcel=2** : nfftprc /= nfft in norm-conserving not implemented. TODO")
+                end if
+            else
+                ! In PAW, the preconditioning grid should be the fine grid.
+                if (this%nfftprc == this%pawfgr%nfft) then
+                    ABI_MALLOC(rho_r_ii_coarse, (dtset%nfft, 1))
+                    ! Augmented grid to coarse grid :
+                    call fftpac(1, mpi_enreg, 1, n1, n2, n3, n4, n5, n6, dtset%ngfft, rho_r_ii_coarse, rhoaug_r_ii(1, :, :, :), 1)
+                    ! Coarse grid to fine grid :
+                    cplex = 1
+                    optgrid = 1 ! coarse to fine
+                    optin = 0   ! real space
+                    optout = 0  !
+                    ABI_MALLOC(dummy_rhog, (2, this%pawfgr%nfftc))
+                    ABI_MALLOC(dummy_rhogf, (2, this%pawfgr%nfft))
+                    call transgrid(cplex, mpi_enreg, 1, optgrid, optin, optout, dtset%paral_kgb, this%pawfgr, dummy_rhog, dummy_rhogf, rho_r_ii_coarse, rho_r_ii)
+                    ABI_FREE(dummy_rhog)
+                    ABI_FREE(dummy_rhogf)
+                    ABI_FREE(rho_r_ii_coarse)
+                else
+                    ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft in PAW not implemented. TODO")
+                end if
+
+            end if
+            ABI_FREE(rhoaug_r_ii)
+
+            !3) Normalize rho_r_ii.
+            rho_r_ii(:, 1) = rho_r_ii(:, 1) / (sum(rho_r_ii(:, 1)) * this%dvol) !Normalizing rho_ii_r.   [See sqrnorm_v, meanfft_r, dotprod_vn in src/44_abitools/m_cgtools/F90]
+
+        else
+            ABI_BUG("compute_rhoii_coll called with non-collinear magnetism")
+        end if
+
+    end subroutine compute_rhoii_coll
+
+    !****f* m_precon/compute_rhoii_noncoll
+    !! NAME
+    !!  compute_rhoii_coll
+    !!
+    !! FUNCTION
+    !!  Compute the orbital density rho_ii = |psi_i|^2 in real space, including PAW corrections if applicable,
+    !!  where the index i correspond to iband, isppol, j_cg, ikpt ...
+    !!
+    !! INPUTS
+    !!  this        = Object containing preconditioning data.
+    !!  dtset       = All input variables for this dataset.
+    !!  mpi_enreg   = Information about MPI parallelization.
+    !!  n1, n2, n3  = Dimensions of the (coarse) FFT grid.
+    !!  n4, n5, n6  = Dimensions of the augmented FFT grid.
+    !!  iband       = Band index.
+    !!  ibg         = Band group index.
+    !!  isppol      = Spin polarization index.
+    !!  j_cg        = Index of the wavefunction in cg.
+    !!  gbound      = Boundary conditions for FFT grid.
+    !!  ikpt        = K-point index.
+    !!  istwf_k     = Wavefunction index for this k-point.
+    !!  kg_k        = Reciprocal lattice vectors for this k-point.
+    !!  nband_k     = Number of bands for this k-point.
+    !!  npw_k       = Number of plane waves for this k-point.
+    !!
+    !! OUTPUTS
+    !!  rho_r_ii    = Orbital density in real space on the preconditioning FFT grid.
+    !!
+    !! SOURCE
+    subroutine compute_rhoii_noncoll(this, dtset, mpi_enreg, n1, n2, n3, n4, n5, n6, iband, ibg, isppol, j_cg, gbound, ikpt, istwf_k, kg_k, nband_k, npw_k, rho_r_ii)
+        !Arguments ------------------------------------
+        class(precon_object), intent(in) :: this
+        !scalars
+        type(dataset_type),intent(in) :: dtset
+        type(MPI_type), intent(in) :: mpi_enreg
+        integer, intent(in) :: iband, ibg, isppol, j_cg, ikpt, istwf_k, nband_k, npw_k
+        integer, intent(in) :: n1, n2, n3, n4, n5, n6
+        !arrays
+        integer, intent(in) :: gbound(2*dtset%mgfft+8,2)
+        integer, intent(in) :: kg_k(:, :)
+        real(dp), intent(inout) :: rho_r_ii(this%nfftprc, 4)
+       
+        !Local variables-------------------------------
+        !scalars
+        integer :: cplex, optgrid, optin, optout
+        integer :: ispden, ndat, option, tim_fourwf
+        integer :: dummy_int
+        real(dp) :: dummy_real
+        real(dp) :: weight_r, weight_i
+        !arrays
+        real(dp), allocatable :: psi_r_i_up(:, :, :, :), psi_r_i_down(:, :, :, :)
+        real(dp), allocatable :: rhoaug_r_ii(:, :, :, :), rho_r_ii_coarse(:, :)
+        !dummy arguments
+        real(dp) ::  dummy_denpot(0, n5, n6), dummy_fofgout(2, 0), dummy_fofrout(2, n4, n5, n6)
+        real(dp), allocatable :: dummy_rhog(:, :), dummy_rhogf(:, :)
+        
+        ! *************************************************************************
+
+        ! Non collinear spins - Wavefunctions have two spins components.
+        if (dtset%nspinor == 2) Then
+
+            !1) Compute psi_up and psi_down in real space :
+            ABI_MALLOC(psi_r_i_up, (2, n4, n5, n6))
+            ABI_MALLOC(psi_r_i_down, (2, n4, n5, n6))
+            ! Input parameters for fourwf :
+            option = 0          ! Only do the FFT.
+            ndat = 1
+            tim_fourwf = 0
+            !FFT for psi_up
+            call fourwf(dummy_int, dummy_denpot, this%cg(:, j_cg+1:j_cg+npw_k), dummy_fofgout, psi_r_i_up,  &
+            &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
+            &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
+            !FFT for psi_down
+            call fourwf(dummy_int, dummy_denpot, this%cg(:, j_cg+npw_k+1:j_cg+2*npw_k), dummy_fofgout, psi_r_i_down,  &
+            &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
+            &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
+            !   (done separately for convenience & readability)
+            
+            !2) Compute the 4 components of the orbital density rhoaug_r_ii :
+            !   (in the Pauli basis for spins and real augmented basis for space)
+            ABI_MALLOC(rhoaug_r_ii, (n4, n5, n6, 4))
+            ispden = 1  ! rho_sigma0 = |psi_up|^2 + |psi_down|^2
+            rhoaug_r_ii(:, :, :, ispden) = psi_r_i_up(1, :, :, :)**2 + psi_r_i_up(2, :, :, :)**2 + psi_r_i_down(1, :, :, :)**2 + psi_r_i_down(2, :, :, :)**2
+            ispden = 2  ! rho_sigma1 = psi_up* psi_down + psi_down* psi_up
+            rhoaug_r_ii(:, :, :, ispden) = 2*( psi_r_i_up(1, :, :, :)*psi_r_i_down(1, :, :, :) + psi_r_i_up(2, :, :, :)*psi_r_i_down(2, :, :, :) )
+            ispden = 3  ! rho_sigma2 = i*(psi_down* psi_up - psi_up* psi_down)
+            rhoaug_r_ii(:, :, :, ispden) = 2*( psi_r_i_up(2, :, :, :)*psi_r_i_down(1, :, :, :) - psi_r_i_up(1, :, :, :)*psi_r_i_down(2, :, :, :) )
+            ispden = 4  ! rho_sigma3 = |psi_up|^2 - |psi_down|^2
+            rhoaug_r_ii(:, :, :, ispden) = psi_r_i_up(1, :, :, :)**2 + psi_r_i_up(2, :, :, :)**2 - psi_r_i_down(1, :, :, :)**2 + psi_r_i_down(2, :, :, :)**2
+
+            ABI_FREE(psi_r_i_up)
+            ABI_FREE(psi_r_i_down)
+
+            ! In PAW : We need to add the correction (hat) term.
+            if (this%psps%usepaw==1) then
+                ! TODO
+            end if
+
+            !3) Transfer rhoaug_r_ii defined on the augmented (wavefunction) fft-grid to the preconditioning fft-grid.
+            if (this%psps%usepaw==1) then
+                ! In NC, the preconditioning grid should be the density/potential grid.
+                if (this%nfftprc == n1*n2*n3) then
+                    do ispden= 1, 4
+                        call fftpac(ispden, mpi_enreg, 4, n1, n2, n3, n4, n5, n6, dtset%ngfft, &
+                        &       rho_r_ii(:, ispden), rhoaug_r_ii(:, :, :, ispden), 1)
+                    end do
+                else
+                    ABI_BUG("iprcel=2** : nfftprc /= nfft in norm-conserving not implemented. TODO")
+                end if
+            else
+                ! In PAW, the preconditioning grid should be the fine grid.
+                if (this%nfftprc == this%pawfgr%nfft) then
+                    ! Augmented grid to coarse grid :
+                    ABI_MALLOC(rho_r_ii_coarse, (dtset%nfft, 4))
+                    do ispden = 1, 4
+                        call fftpac(ispden, mpi_enreg, 4, n1, n2, n3, n4, n5, n6, dtset%ngfft, &
+                        &       rho_r_ii_coarse(:, ispden), rhoaug_r_ii(:, :, :, ispden), 1)
+                    end do
+                    ! Coarse grid to fine grid :
+                    cplex = 1
+                    optgrid = 1 ! coarse to fine
+                    optin = 0   ! real space
+                    optout = 0  !
+                    ABI_MALLOC(dummy_rhog, (2, this%pawfgr%nfftc))
+                    ABI_MALLOC(dummy_rhogf, (2, this%pawfgr%nfft))
+                    call transgrid(cplex, mpi_enreg, 1, optgrid, optin, optout, dtset%paral_kgb, this%pawfgr, dummy_rhog, dummy_rhogf, rho_r_ii_coarse, rho_r_ii)
+                    ABI_FREE(dummy_rhog)
+                    ABI_FREE(dummy_rhogf)
+                    ABI_FREE(rho_r_ii_coarse)
+
+                else
+                    ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft in PAW not implemented. TODO")
+                end if
+
+            end if
+            ABI_FREE(rhoaug_r_ii)
+
+            !4) Normalize rho_r_ii.
+            do ispden = 1, 4
+                rho_r_ii(:, ispden) = rho_r_ii(:, ispden) / (sum(rho_r_ii(:, ispden)) * this%dvol) !Normalizing rho_ii_r. TODO : check that normalizing each component make sense.
+            end do
+
+        else
+            ABI_BUG("compute_rhoii_noncoll called with collinear magnetism")
+        end if
+
+    end subroutine compute_rhoii_noncoll
+
     !****f* m_precon/compute_weights_chi0_diag
     !! NAME
     !!  compute_weights_chi0_diag
@@ -1318,7 +1647,7 @@ contains
         !scalars
         integer :: cplex
         integer :: ispden, istwf_k, maxocc, mcg, my_nspinor, mband_mem, nband_k, ndat, nfftot, npw_k, nspin, option, tim_fourwf
-        integer :: i_eigen, i_cg, j_cg, ikg, ikpt, iband, isppol, ier
+        integer :: i_eigen, icg, j_cg, ibg, ikg, ikpt, iband, isppol, ier
         integer :: n1, n2, n3, n4, n5, n6
         real(dp) :: fp, eigenval
         integer :: dummy_int
@@ -1334,6 +1663,7 @@ contains
 
         !dummy fourwfk arguments
         real(dp), allocatable ::  dummy_denpot(:, :, :), dummy_fofgout(:, :), dummy_fofrout(:, :, :, :)
+        
         
         ! *************************************************************************
         write(6,*)'chi0diel apply_chi0_mag'; flush(6) !DEBUG
@@ -1371,18 +1701,10 @@ contains
             nspin = 1   ! Number of spin components in the orbital densities (rhoii).
         else if (dtset%nspinor==2) then
             nspin = 4
-            ABI_MALLOC(psi_r_i_up, (2, n4, n5, n6))
-            ABI_MALLOC(psi_r_i_down, (2, n4, n5, n6))
         else
             ABI_BUG("nspinor /= 1 or 2")
         end if
-        ABI_MALLOC(rhoaug_r_ii, (n4, n5, n6, nspin))
-        ABI_MALLOC(rho_r_ii, (n1*n2*n3, nspin))
-
-        !Allocating dummy arrays
-        ABI_MALLOC(dummy_denpot, (0, n5, n6))
-        ABI_MALLOC(dummy_fofgout, (2, 0))
-        ABI_MALLOC(dummy_fofrout, (2, n4, n5, n6))
+        ABI_MALLOC(rho_r_ii, (this%nfftprc, nspin))
 
         my_nspinor = max(1, dtset%nspinor/mpi_enreg%nproc_spinor)
         if (my_nspinor /= dtset%nspinor) then
@@ -1392,7 +1714,8 @@ contains
         write(6,*)'chi0diel compute_weights_chi0_diag: dtset%nspinor, dtset%nspden, dtset%nsppol', dtset%nspinor, dtset%nspden, dtset%nsppol; flush(6) !DEBUG
         write(6,*)'chi0diel compute_weights_chi0_diag: size(vec_g), size(vec_r), size(rhoaug_r_ii), size(rho_r_ii)', size(vec_g), size(vec_r), size(rhoaug_r_ii), size(rho_r_ii); flush(6) !DEBUG
 
-        i_cg = 0    ! Starting index for (ikpt, isppol) in cg array.
+        icg = 0    ! Starting index for (ikpt, isppol) in cg array.
+        ibg = 0     ! Starting index for Band group index (not used here, but needed for the loop).
 
         !Loop over spins and kpoints
         do isppol =1, dtset%nsppol
@@ -1423,7 +1746,7 @@ contains
                     !Indices
                     !TODO : verifier mband = nbandk ? + verifier si eigen est distribué pour paral
                     i_eigen = iband + (ikpt-1)*dtset%mband + (isppol-1)*dtset%mband*dtset%nkpt  ! Index of (iband, ikpt, isppol) in eigen array.
-                    j_cg = i_cg + (iband-1) * npw_k * my_nspinor    ! Index of (iband, ikpt, isppol) in cg array.                    
+                    j_cg = icg + (iband-1) * npw_k * my_nspinor    ! Index of (iband, ikpt, isppol) in cg array.                    
                     
                     !2.1) Computing f'(eig_i - fermie).
                     eigenval = this%eigen(i_eigen)
@@ -1434,75 +1757,27 @@ contains
                         !2.2) Computing rho_ii = |psi_i|^2 using fourwf (if fp is not 0).
                         
                         ! No spin or collinear spins - Wafefunctions have one spin component.
-                        if (dtset%nspinor == 1) then
+                        if (dtset%nspinor == 1) then    
                             
-                            !a) Compute orbital density in real space (augmented basis) :
-                            !Input parameters for fourwf :
-                            option = 1          ! Computes the density.
-                            ndat = 1            ! Only one FFT.
-                            tim_fourwf = 0
-                            rhoaug_r_ii = zero  ! Initialization for fourwf (accumulation).
-                            weight_r = 1
-                            weight_i = 1
+                            call compute_rhoii_coll(this, dtset, mpi_enreg, n1, n2, n3, n4, n5, n6, iband, ibg, isppol, &
+                            &       j_cg, gbound, ikpt, istwf_k, kg_k, nband_k, npw_k, rho_r_ii)
+                            
+                            ! dot-product in the up/down basis :
+                            weights(i_eigen) = fp * maxocc * dot_product(rho_r_ii(:, 1), vec_r(:, isppol)) * this%dvol  
 
-                            call fourwf(1, rhoaug_r_ii, this%cg(:, j_cg+1:j_cg+npw_k), dummy_fofgout, dummy_fofrout,  &
-                            &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
-                            &           dummy_int, n4, n5, n6, option, tim_fourwf, weight_r, weight_i)
-
-                            !b) Compute the dot product between the input vector and the orbital density and update the weights :
-                            ! Transfer rhoaug_r_ii defined on the large fft-grid to the smaller density/potential fft-grid.
-                            call fftpac(1, mpi_enreg, 1, n1, n2, n3, n4, n5, n6, dtset%ngfft, rho_r_ii, rhoaug_r_ii(:, :, :, 1), 1)   ! DEBUG : weights for nspinor=1, nsppol=2 ok (factor from fft?)
-                            rho_r_ii(:, 1) = rho_r_ii(:, 1) / (sum(rho_r_ii(:, 1)) * this%dvol) !Normalizing rho_ii_r.   [ sqrnorm_v, meanfft_r, dotprod_vn in src/44_abitools/m_cgtools/F90]
-                            ! dot product:
-                            ! TODO : correction for rho_ii in PAW ...
-                            ! We might need to transfer rho_r_ii to from the coarse grid to the fine grid used for preconditioned quantities.
-                            !if (this%nfftprc /= n1*n2*n3) then
-                            !    if (this%nfftprc == this%pawfgr%nfft) then
-                            !        transgrid(cplex, mpi_enreg, nspden, optgrid, optin, optout, paral_kgb, pawfgr, rhog, rhogf, rhor, rhorf)
-                            !    else
-                            !        ABI_BUG("iprcel=2** : nfftprc /= nfft not implemented. TODO")
-                            !    end if
-                            !end if
-                            weights(i_eigen) = fp * maxocc * dot_product(rho_r_ii(:, 1), vec_r(:, isppol)) * this%dvol  ! dot-product in the up/down basis
                         end if
 
                         ! Non collinear spins - Wavefunctions have two spins components.
-                        if (dtset%nspinor == 2) Then
+                        if (dtset%nspinor == 2) then
 
-                            !a) Compute psi_up and psi_down in real space :
-                            ! Input parameters for fourwf :
-                            option = 0          ! Only do the FFT.
-                            ndat = 1
-                            tim_fourwf = 0
-                            !FFT for psi_up
-                            call fourwf(dummy_int, dummy_denpot, this%cg(:, j_cg+1:j_cg+npw_k), dummy_fofgout, psi_r_i_up,  &
-                            &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
-                            &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
-                            !FFT for psi_down
-                            call fourwf(dummy_int, dummy_denpot, this%cg(:, j_cg+npw_k+1:j_cg+2*npw_k), dummy_fofgout, psi_r_i_down,  &
-                            &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
-                            &           dummy_int, n4, n5, n6, option, tim_fourwf, dummy_real, dummy_real)
-                            !   (done separately for convenience & readability)
-                            
-                            !b) Compute the 4 components of the orbital density rhoaug_r_ii :
-                            !   (in the Pauli basis for spins and real augmented basis for space)
-                            ispden = 1  ! rho_sigma0 = |psi_up|^2 + |psi_down|^2
-                            rhoaug_r_ii(:, :, :, ispden) = psi_r_i_up(1, :, :, :)**2 + psi_r_i_up(2, :, :, :)**2 + psi_r_i_down(1, :, :, :)**2 + psi_r_i_down(2, :, :, :)**2
-                            ispden = 2  ! rho_sigma1 = psi_up* psi_down + psi_down* psi_up
-                            rhoaug_r_ii(:, :, :, ispden) = 2*( psi_r_i_up(1, :, :, :)*psi_r_i_down(1, :, :, :) + psi_r_i_up(2, :, :, :)*psi_r_i_down(2, :, :, :) )
-                            ispden = 3  ! rho_sigma2 = i*(psi_down* psi_up - psi_up* psi_down)
-                            rhoaug_r_ii(:, :, :, ispden) = 2*( psi_r_i_up(2, :, :, :)*psi_r_i_down(1, :, :, :) - psi_r_i_up(1, :, :, :)*psi_r_i_down(2, :, :, :) )
-                            ispden = 4  ! rho_sigma3 = |psi_up|^2 - |psi_down|^2
-                            rhoaug_r_ii(:, :, :, ispden) = psi_r_i_up(1, :, :, :)**2 + psi_r_i_up(2, :, :, :)**2 - psi_r_i_down(1, :, :, :)**2 + psi_r_i_down(2, :, :, :)**2
-                       
-                            !c) Compute the dot product between the input vector and the orbital density and update the weights :
+                            call compute_rhoii_noncoll(this, dtset, mpi_enreg, n1, n2, n3, n4, n5, n6, iband, ibg, isppol, &
+                            &       j_cg, gbound, ikpt, istwf_k, kg_k, nband_k, npw_k, rho_r_ii)
+
+                            ! dot product in Pauli basis :
                             do ispden=1, 4
-                                ! Transfer rhoaug_r_ii defined on the large fft-grid to the smaller density/potential fft-grid.
-                                call fftpac(ispden, mpi_enreg, 4, n1, n2, n3, n4, n5, n6, dtset%ngfft, rho_r_ii(:, ispden), rhoaug_r_ii(:, :, :, ispden), 1)
-                                rho_r_ii(:, ispden) = rho_r_ii(:, ispden) / (sum(rho_r_ii(:, ispden)) * this%dvol) !Normalizing rho_ii_r. TODO : check that normalizing each component make sense.
-                                ! dot product in Pauli basis :
                                 weights(i_eigen) = weights(i_eigen) + fp * maxocc * dot_product(rho_r_ii(:, ispden), vec_r(:, ispden)) * this%dvol  ! dotprod_vn
                             end do
+
                         end if
 
                         ! TODO use accumulation option of fourdp to make the computation more efficient ? Impossible IMO
@@ -1523,8 +1798,9 @@ contains
                 end do
 
                 if (dtset%mkmem /= 0) then
-                    i_cg = i_cg + npw_k * dtset%nspinor * mband_mem
-                    !i_cg = i_cg + npw_k * my_nspinor * mband_mem
+                    icg = icg + npw_k * dtset%nspinor * mband_mem
+                    !icg = icg + npw_k * my_nspinor * mband_mem
+                    ibg = ibg ! + ? TODO
                     ikg = ikg + npw_k
                 end if
                 ABI_FREE(kg_k)
@@ -1581,23 +1857,11 @@ contains
         real(dp), intent(inout) :: vec_g(2, this%nfftprc, dtset%nspden)
        
         !Local variables-------------------------------
-        !scalars
-        integer :: cplex
-        integer :: ispden, istwf_k, maxocc, mcg, my_nspinor, mband_mem, nband_k, ndat, nfftot, npw_k, option, tim_fourwf
-        integer :: i_eigen, i_cg, j_cg, ikg, ikpt, iband, isppol, ier, sign_isppol
-        integer :: n1, n2, n3, n4, n5, n6
-        real(dp) :: fp, eigenval
-        real(dp) :: dummy_real
         !arrays
         real(dp), allocatable :: chi0_vec_r(:, :)
         real(dp), allocatable :: weights(:)
         real(dp) :: vec_g_old(2, this%nfftprc, dtset%nspden)   !DEBUG
 
-        !dummy mkrho arguments
-        type(paw_dmft_type)     :: paw_dmft
-        type(wvl_wf_type)       :: wvl_wfs
-        type(wvl_denspot_type)  :: wvl_den
-        
         ! *************************************************************************
         write(6,*)'chi0diel apply_chi0_mag'; flush(6) !DEBUG
         vec_g_old = vec_g   !DEBUG
