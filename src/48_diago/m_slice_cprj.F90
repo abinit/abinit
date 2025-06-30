@@ -516,13 +516,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! ITEST 
  write(901,*) 'inside slice_run'
- write(901,*) 'nslice=', nslice
+ write(901,*) 'nslice=', slice%nslice
  flush(901)
  ! ITEST
 
  ! Warning; the entire code assumes this for simplicity and debugging purposes
  ABI_CHECK(slice%bandpp == slice%neigenpairs, "slice_cprj not implemented in MPI")
- ABI_CHECK(.not.slice%paw, "slice_cprj not implemented outside PAW")
 
  ! Read scalar variables
  nslice = slice%nslice
@@ -778,13 +777,18 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ABI_FREE(ndeg_filter_slice)
 
  ! Compute H-eSX
- call timab(tim_AX_nl,1,tsec)
- call xg_nonlop_getHmeSX(xg_nonlop,slice%X,slice%cprjX,slice%AX%self,slice%eigenvalues,slice%cprj_work%self,&
-     slice%cprj_work2%self,no_H=.True.)
- call timab(tim_AX_nl,2,tsec)
+ if (slice%paw) then
+    call timab(tim_AX_nl,1,tsec)
+    call xg_nonlop_getHmeSX(xg_nonlop,slice%X,slice%cprjX,slice%AX%self,slice%eigenvalues,&
+        slice%cprj_work%self,slice%cprj_work2%self,no_H=.True.)
+    call timab(tim_AX_nl,2,tsec)
+ end if
 
  ! Compute residual norm squared
  call timab(tim_residu, 1, tsec)
+ if (.not.slice%paw) then
+   call xgBlock_yxmax(slice%AX%self,slice%eigenvalues,slice%X)
+ end if
  call xgBlock_colwiseNorm2(slice%AX%self, residu)
  call timab(tim_residu, 2, tsec)
 
@@ -792,6 +796,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call timab(tim_copy, 1, tsec)
  call xgBlock_copy(slice%X,X0)
  call timab(tim_copy, 2, tsec)
+
+ if (.not.slice%paw) then
+   call timab(tim_enl,1,tsec)
+   call xg_nonlop_colwiseXHX(xg_nonlop,slice%cprjX,slice%cprj_work%self,enl)
+   call timab(tim_enl,2,tsec)
+ end if
 
 end subroutine slice_run_cprj
 !!***
