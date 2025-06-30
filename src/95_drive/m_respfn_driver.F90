@@ -311,6 +311,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  rfphon=dtset%rfphon ; rfstrs=dtset%rfstrs
  rfuser=dtset%rfuser ; rf2_dkdk=dtset%rf2_dkdk ; rf2_dkde=dtset%rf2_dkde
 
+!Scalar potential has no idir.
+ if (rfmagn==3) then
+   rfdir(:)= 0
+   rfdir(1)= 1
+ end if 
+
  pawbec=0  ; if(psps%usepaw==1.and.(rfphon==1.or.(rfelfd==1.or.rfelfd==3))) pawbec=1
  pawpiezo=0; if(psps%usepaw==1.and.(rfstrs/=0.or.(rfelfd==1.or.rfelfd==3))) pawpiezo=1
 !AM 10152015 -- WARNING --- the full calculation of the piezoelectric tensor
@@ -371,6 +377,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  if(rfmagn==1) rfpert(natom+5)=1
  if(rfmagn==2) rfpert(natom+11+dtset%rfatpol(1):natom+11+dtset%rfatpol(2))=1
+ if(rfmagn==3) rfpert(natom+6)=1
 
  qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 
