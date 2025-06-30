@@ -243,6 +243,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
  dtsets(:)%macro_uj=0
  dtsets(:)%maxnsym=384
+ dtsets(:)%usegbt=0
  dtsets(:)%useria=0
  dtsets(:)%userib=0
  dtsets(:)%useric=0
@@ -383,6 +384,11 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read extfpmd calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
+
+   ! Read usegbt
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usegbt',tread,'INT')
+   if (tread==1) dtsets(idtset)%usegbt=intarr(1)
+   write(std_out,*) "usegbt = ", dtsets(idtset)%usegbt
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -1086,7 +1092,6 @@ subroutine indefo1(dtset)
  dtset%pimass(:)=-one
 !Q
  dtset%qptn=zero
- dtset%qspinspiral=zero
 !R
  dtset%red_efield(:)=zero
  dtset%red_dfield(:)=zero
@@ -1109,7 +1114,6 @@ subroutine indefo1(dtset)
  dtset%useexexch=0
  dtset%usepawu=0
  dtset%usepotzero=0
- dtset%usespinspiral=0
  dtset%use_slk=0
  dtset%use_oldchi=1
 !V
@@ -1209,9 +1213,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
- integer :: usespinspiral
  real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
-! real(dp) :: qr, mx0, my0, mz0, mx, my, mz
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
@@ -1223,7 +1225,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
- real(dp) :: qspinspiral(3)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
  character(len=len(string)) :: geo_string
@@ -1477,32 +1478,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  else
    dtset%nspden=dtset%nsppol
  end if
-
- ! Spin-spiral
-!if (dtset%usespinspiral == 1) then
-!  if (dtset%nspden /= 4) then
-!     msg = 'when calculating spin spiral, nspden must be 4'
-!     ABI_ERROR_NOSTOP(msg, leave)
-!  else
-!    write(msg,'(a,3f12.6)') ' [SpinSpiral] q = ', dtset%qspinspiral
-!    call wrtout(std_out, msg, 'COLL')
-!    do iatom = 1, dtset%natom
-!      qr = two_pi * (dtset%qspinspiral(1) * xred(1, iatom) &
-!         + dtset%qspinspiral(2) * xred(2, iatom) &
-!         + dtset%qspinspiral(3) * xred(3, iatom))
-   
-!      mx0 = dtset%spinat(1, iatom)
-!      my0 = dtset%spinat(2, iatom)
-!      mz0 = dtset%spinat(3, iatom)
-!      mx = mx0 * cos(qr) - my0 * sin(qr)
-!      my = my0 * cos(qr) + mx0 * sin(qr)
-!      mz = mz0
-!      dtset%spinat(1, iatom) = mx
-!      dtset%spinat(2, iatom) = my
-!      dtset%spinat(3, iatom) = mz
-!    end do
-!  end if
-!end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypalch',tread,'INT')
  if(tread==1) dtset%ntypalch=intarr(1)
@@ -2027,6 +2002,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      do iatom=1,natom
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
        sum_spinat=sum_spinat+dtset%spinat(3,iatom)
+       write(std_out,*) 'spinat=',dtset%spinat(3,iatom)
      end do
      zelect=zval-cellcharge_min
      mband_upper=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
@@ -2787,6 +2763,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
    dtsets(idtset)%qmass(:)=ten
+   dtsets(idtset)%qgbt(3)=zero
    dtsets(idtset)%qprtrb(1:3)=0
    dtsets(idtset)%qptdm(:,:)=zero
    dtsets(idtset)%quadmom(:) = zero
