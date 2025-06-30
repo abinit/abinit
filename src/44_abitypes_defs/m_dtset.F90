@@ -695,7 +695,7 @@ type, public :: dataset_type
  integer :: useric = 0
  integer :: userid = 0
  integer :: userie = 0
- integer :: usespinspiral
+ integer :: usegbt
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
@@ -1019,8 +1019,8 @@ type, public :: dataset_type
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
+ real(dp) :: qgbt(3)=[0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: qptn(3)
- real(dp) :: qspinspiral(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
  real(dp) :: red_efieldbar(3)
@@ -2181,6 +2181,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%usedmft            = dtin%usedmft
  dtout%useexexch          = dtin%useexexch
  dtout%usefock            = dtin%usefock
+ dtout%usegbt             = dtin%usegbt
  dtout%usekden            = dtin%usekden
  dtout%use_nonscf_gkk     = dtin%use_nonscf_gkk
  dtout%usepaw             = dtin%usepaw
@@ -2194,7 +2195,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%useric             = dtin%useric
  dtout%userid             = dtin%userid
  dtout%userie             = dtin%userie
- dtout%usespinspiral      = dtin%usespinspiral
  dtout%usewvl             = dtin%usewvl
  dtout%usexcnhat_orig     = dtin%usexcnhat_orig
  dtout%useylm             = dtin%useylm
@@ -2408,9 +2408,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
  dtout%neb_spring(:)      = dtin%neb_spring(:)
  dtout%polcen(:)          = dtin%polcen(:)
- dtout%qptn(:)            = dtin%qptn(:)
- dtout%qspinspiral(:)     = dtin%qspinspiral(:)
  dtout%pvelmax(:)         = dtin%pvelmax(:)
+ dtout%qgbt(:)            = dtin%qgbt(:)
+ dtout%qptn(:)            = dtin%qptn(:)
  dtout%red_efield(:)      = dtin%red_efield(:)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
  dtout%red_efieldbar(:)   = dtin%red_efieldbar(:)
@@ -3745,8 +3745,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
- list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
- list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom qspinspiral'
+ list_vars=trim(list_vars)//' q1shft qgbt qmass qprtrb qpt qptdm qptnrm qph1l'
+ list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
@@ -3799,13 +3799,12 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
- list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
+ list_vars=trim(list_vars)//' usedmft useexexch usegbt usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'
  list_vars=trim(list_vars)//' use_slk useextfpmd use_yaml use_rcpaw'
  list_vars=trim(list_vars)//' use_oldchi'
- list_vars=trim(list_vars)//' usespinspiral'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vpq_avg_g vpq_aseed vpq_gpr_energy vpq_gpr_length'
