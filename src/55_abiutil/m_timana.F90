@@ -1321,7 +1321,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2185) = 'slice_AX(loc)                 '
  names(2186) = 'slice_AX(nl)                  '
  names(2187) = 'slice_enl                     '
- names(2188) = 'slice(other)                  '
+ names(2188) = 'slice_ortho                   '
+ names(2189) = 'slice(other)                  '
 
  ! TIMER_SIZE is 2199. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
@@ -1607,7 +1608,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/2166,2160,-2161,-2162,-2163,-2164,-2165/)
    case(62)
 !      Estimate the complement of slice_cprj
-     tslots(:19)=(/2188,2170,(ii,ii=-2171,-2187,-1)/)
+     tslots(:20)=(/2189,2170,(ii,ii=-2171,-2188,-1)/)
 
    case default
      cycle
@@ -2024,7 +2025,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(91)
          list(:7)=(/ 2160,2161,2162,2163,2164,2165,2166 /); msg='slicewf core engine '
        case(92)
-         list(:19)=(/ (ii,ii=2170,2188,1) /) ; msg='slicewf_cprj core engine '
+         list(:20)=(/ (ii,ii=2170,2189,1) /) ; msg='slicewf_cprj core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
