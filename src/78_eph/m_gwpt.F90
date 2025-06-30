@@ -247,16 +247,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ph3d_kmp(:,:,:), ph3d1_kqmp(:,:,:), ph3d_kqmp(:,:,:), ph3d1_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),allocatable :: gsig_atm(:,:,:,:),gsig_nu(:,:,:,:), gxc_atm(:,:,:,:), gxc_nu(:,:,:,:), gks_atm(:,:,:,:), gks_nu(:,:,:,:)
- real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:) !,kets_k(:,:,:),h1kets_kq(:,:,:,:)
+ real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mqq(:,:,:,:,:), v1scf_mq(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:), ylm_kmp(:,:), ylm_kqmp(:,:)
  real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:)
  real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
- real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
+ real(dp),allocatable :: my_gbuf(:,:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
  complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:)
- complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:) !, rhotwgp(:)
+ complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
  complex(gwpc),allocatable :: full_ur1_kqmp(:), full_ur1_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwpc),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
  complex(gwpc),allocatable :: botsq_pbz(:,:), otq_pbz(:,:), dmeig_pbz(:,:), epsm1_ggw(:,:,:)
@@ -330,8 +330,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
- !if (my_rank == master) call gwpt%print(dtset, std_out)
-
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
  !call wrtout(units, sjoin("- Number of q-points/spin completed:", itoa(count(done_qbz_spin == 1)), "/", itoa(sigma%nkcalc)))
 
@@ -339,7 +337,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! HANDLE SCREENING
  ! ================
  ! Init gsph_c for the correlated part.
- nqlwl = 0; screen_filepath = ABI_NOFILE
  screen_filepath = dtfil%fnameabi_scr
  ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified")
 
@@ -401,10 +398,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call gsph_c%print(units, dtset%prtvol, header="G-sphere for correlation")
    call vcp%print(units, prtvol=dtset%prtvol)
  end if
+ call kmesh%free()
 
  ABI_CHECK_IGE(npw_x, 1, "npw_x <= 1")
  ABI_CHECK_IGE(npw_c, 1, "npw_c <= 1")
- call kmesh%free()
 
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
@@ -436,7 +433,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  gmax = 2*gmax + 1
 
  if (dtset%userie == 124) then
-   ! Uncomment this line to have all states on each MPI rank.
+   ! Debugging section have all states on each MPI rank.
    bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
  end if
 
@@ -577,7 +574,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CHECK(dvdb%has_fields("pot1", msg), msg)
  ABI_CHECK(drhodb%has_fields("den1", msg), msg)
 
- ! Make sure that dvdb and drhodb have the same q-points
+ ! Make sure that dvdb and drhodb have the same q-points.
  ABI_CHECK_IEQ(dvdb%nqpt, drhodb%nqpt, "Different number of q-points in DVDB and DRHODB")
  ierr = 0
  do ii=1,dvdb%nqpt
@@ -630,7 +627,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab, &
    usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
 
- ! Allocate work space arrays.
+ ! Allocate workspace arrays.
  ! vtrial and vlocal are required for Sternheimer (H0). DFPT routines do not need it.
  ! Note nvloc in vlocal (we will select one/four spin components afterwards)
  nvloc = gs_ham_kqmp%nvloc
@@ -724,7 +721,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(itreat_qibz)
  ABI_FREE(qibz2dvdb)
 
- ! The GS density is needed for vxc1_qq and the model dielectric function
+ ! The GS density is needed to compute vxc1_qq
  ABI_CALLOC(rhor, (nfftf, nspden))
  call read_rhor(dtfil%fildensin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, rhor, den_hdr, den_pawrhoij, comm, &
                 allow_interp=.True., want_varname="density")
@@ -734,12 +731,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end if
  call den_cryst%free(); call den_hdr%free()
 
- ! Init Wc. In-core or out-of-core solution?
+ ! Initialize plasmon-pole object.
  mqmem = pp_mesh%nibz
  drude_plsmf = sqrt(four_pi * ebands%nelect / cryst%ucvol)
  my_plsmf = drude_plsmf; if (dtset%ppmfrq > tol6) my_plsmf = dtset%ppmfrq
-
- ! Initialize plasmon-pole object.
  call ppm%init(mqmem, pp_mesh%nibz, npw_c, dtset%ppmodel, my_plsmf, dtset%gw_invalid_freq)
  call ppm%print(units)
 
@@ -864,7 +859,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Loop over MPI distributed q-points in Sigma_q (gqk%qpt_comm)
    ! ============================================================
    do my_iq=1,gqk%my_nq
-     !if (my_iq <= 4) cycle
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
      qq_is_gamma = sum(qpt**2) < tol14
 
@@ -954,7 +948,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      do my_ik=1,gqk%my_nk
        ! NB: All procs in gqk%pert_comm and gqk%bsum_com and gqk%pp_sum_comm enter this section.
-
        iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
        iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
 
@@ -1176,7 +1169,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Get PPM parameters for pp_bz  the object for applying W(pp_bz).
          call ppm%get_qbz(gsph_c, pp_mesh, ipp_bz, botsq_pbz, otq_pbz, dmeig_pbz)
-
          !ABI_CHECK_IEQ(npw_c, ppm%npwc, "npwc")
 
          ! Need transpose of PPM matrices.
@@ -1386,7 +1378,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! TODO: The last states may fail to converge and we have to decide how to handle this.
              if (ierr /= 0) then
                ABI_WARNING(sjoin("Stern at +q", qkp_string, msg))
-               !full_cg1_kqmp = zero; full_ur1_kqmp = zero
+               full_cg1_kqmp = zero; full_ur1_kqmp = zero
                !cycle
              end if
 
@@ -1478,7 +1470,7 @@ if (.not. qq_is_gamma) then
              ! TODO: The last states may fail to converge and we have to decide how to handle this.
              if (ierr /= 0) then
                ABI_WARNING(sjoin("Stern at -q:", qkp_string, msg))
-               !full_cg1_kmp = zero; full_ur1=full_ur1_kmp = zero
+               full_cg1_kmp = zero; full_ur1_kmp = zero
                !cycle
              end if
 
@@ -1557,8 +1549,12 @@ end if ! .not qq_is_gamma.
        call xmpi_sum_master(gks_atm , master, gqk%pert_ppsum_bsum_comm%value, ierr)
 
        ! TODO gks_atm and gks_nsu
-       !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
        !gsig_atm = gsig_atm / (pp_mesh%nbz)
+       !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
+
+       !print *, "gsig_atm:", gsig_atm(:, 1, 1, :)
+       !print *, "gks_atm:", gks_atm(:, 1, 1, :)
+
        gsig_atm = gsig_atm + gks_atm - gxc_atm
 
        ! DEBUG
@@ -1688,10 +1684,9 @@ end if ! .not qq_is_gamma.
  ABI_FREE(kxc)
  ABI_FREE(vxc)
 
- call gs_ham_kqmp%free(); call gs_ham_kmp%free(); call wfd%free(); call vcp%free()
+ call gs_ham_kqmp%free(); call gs_ham_kmp%free(); call wfd%free(); call vcp%free(); call ppm%free()
  call pp_mesh%free(); call gsph_c%free(); call gsph_x%free(); call gstore%free()
  call pawcprj_free(cwaveprj0); call pawcprj_free(cwaveprj)
- call ppm%free()
  ABI_FREE(cwaveprj0)
  ABI_FREE(cwaveprj)
 
