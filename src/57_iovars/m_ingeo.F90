@@ -624,7 +624,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
              xcart(:,iatom_supercell) = xcart_read(:,iatom) + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
              chrgat(iatom_supercell) = chrgat(iatom)
              spinat(1:3,iatom_supercell) = spinat(1:3,iatom)
-             write(std_out,*) "spinat = ", spinat
              typat(iatom_supercell) = typat_read(iatom)
            end do
          end do
