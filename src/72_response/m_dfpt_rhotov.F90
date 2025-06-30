@@ -155,7 +155,7 @@ contains
 
 !Local variables-------------------------------
 !scalars
- integer :: ifft,ispden,nfftot,option
+ integer :: idir_eff,ifft,ispden,nfftot,option
  integer :: optnc,nkxc_cur,prtopt
  logical :: vhartr1_allocated,vxc1_allocated
  real(dp) :: doti,elpsp10
@@ -203,11 +203,13 @@ contains
    rhor1_ => rhor1
  end if
 
- if(ipert==natom+5)then
+!Uniform Zeeman or scalar potential
+ if(ipert==natom+5.or.ipert==natom+6)then
+   if (ipert==natom+5) idir_eff= idir
+   if (ipert==natom+6) idir_eff= 4
    ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
-   call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
+   call dfpt_v1zeeman(nspden,nfft,cplex,idir_eff,v1zeeman)
  end if
-
 
 !Preconditioned DFPT
  if((ipert>natom+11.and.ipert<=2*natom+11).or.abs(magpen)>tol6) then
@@ -289,7 +291,7 @@ contains
    if (usepaw==0) then
      call dotprod_vn(cplex,rhor1,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
-     if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
+     if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
        call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
        elmag1=two*elmag1
      end if
@@ -370,7 +372,7 @@ contains
      end do
    end if
 
-   if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
+   if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
      vresid1 = vresid1 + v1zeeman
    end if
 
@@ -401,7 +403,7 @@ contains
      end do
    end if
 
-   if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
+   if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
      vtrial1 = vtrial1 + v1zeeman
    end if
 
@@ -419,7 +421,7 @@ contains
    ABI_FREE(vxc1_)
  end if
 
- if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
+ if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
    ABI_FREE(v1zeeman)
  end if
 
@@ -509,26 +511,45 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
        v1zeeman(:,2)= 0.0d0
        v1zeeman(:,3)= 0.0d0
        v1zeeman(:,4)=+1.0d0
-     else                  ! Zeeman field along the 1st axis (x)
+     else if(idir==1)then  ! Zeeman field along the 1st axis (x)
        v1zeeman(:,1)= 0.0d0
        v1zeeman(:,2)= 0.0d0
        v1zeeman(:,3)=-1.0d0
        v1zeeman(:,4)= 0.0d0
+     else if(idir==4)then  ! Scalar potential
+       v1zeeman(:,1)=-1.0d0
+       v1zeeman(:,2)=-1.0d0
+       v1zeeman(:,3)= 0.0d0
+       v1zeeman(:,4)= 0.0d0
      end if
    else if (nspden==2) then
-     v1zeeman(:,1)=-1.0e0
-     v1zeeman(:,2)= 1.0e0
+     if (idir==4) then
+       v1zeeman(:,1)=-1.0d0
+       v1zeeman(:,2)=-1.0d0
+     else
+       v1zeeman(:,1)=-1.0d0
+       v1zeeman(:,2)= 1.0d0
+     end if
    else
-     v1zeeman(:,1)= 0.0e0
+     v1zeeman(:,1)= 0.0d0
    end if
  case(2)
    if (nspden==2) then
-     do ifft=1,nfft
-       v1zeeman(2*ifft-1,1)  =-1.0e0
-       v1zeeman(2*ifft  ,1)  = 0.0e0
-       v1zeeman(2*ifft-1,2)  = 1.0e0
-       v1zeeman(2*ifft  ,2)  = 0.0e0
-     end do
+     if (idir==4) then
+       do ifft=1,nfft
+         v1zeeman(2*ifft-1,1)  =-1.0e0
+         v1zeeman(2*ifft  ,1)  = 0.0e0
+         v1zeeman(2*ifft-1,2)  =-1.0e0
+         v1zeeman(2*ifft  ,2)  = 0.0e0
+       end do
+     else
+       do ifft=1,nfft
+         v1zeeman(2*ifft-1,1)  =-1.0e0
+         v1zeeman(2*ifft  ,1)  = 0.0e0
+         v1zeeman(2*ifft-1,2)  = 1.0e0
+         v1zeeman(2*ifft  ,2)  = 0.0e0
+       end do
+     end if
    else if (nspden==4) then
      select case(idir)
      case(1) !along x, v1=-sigma_x
@@ -558,6 +579,17 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
          v1zeeman(2*ifft-1,1)=-1.0e0 !Re[V^11]
          v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
          v1zeeman(2*ifft-1,2)= 1.0e0 !Re[V^22]
+         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
+         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
+         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
+       end do
+     case(4)
+       do ifft=1,nfft
+         v1zeeman(2*ifft-1,1)=-1.0e0 !Re[V^11]
+         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1zeeman(2*ifft-1,2)=-1.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]

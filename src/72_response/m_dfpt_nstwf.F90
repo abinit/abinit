@@ -462,7 +462,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (ipert1/=ipert.and.&
 &     (ipert1<=dtset%natom.or.&
 &     (ipert1==dtset%natom+2.and.has_ddk_file).or.&
-&     ((ipert>dtset%natom.and.ipert/=dtset%natom+5).and.(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
+&     ((ipert>dtset%natom.and.ipert/=dtset%natom+5.and.ipert/=dtset%natom+6).and.&
+&     (ipert1==dtset%natom+3.or.ipert1==dtset%natom+4)).or. &
 &     ((ipert1==dtset%natom+2).and.has_ddk_file))) then
        mpert1=mpert1+1;jpert1(mpert1)=ipert1
      end if

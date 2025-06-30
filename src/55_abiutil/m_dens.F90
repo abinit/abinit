@@ -2953,12 +2953,18 @@ integer :: iatom
 
 ! *************************************************************************
 
- ! Incorporate total magnetic moments
+ ! Incorporate total charge and magnetic moments
  if (nspden==2) then
+   blkflg(1,natom+6,idir,ipert)= 1
+   d2lo(1,1,natom+6,idir,ipert)= rhomag(1,1)
+   if (cplex==2) d2lo(2,1,natom+6,idir,ipert)= rhomag(2,1)
    blkflg(3,natom+5,idir,ipert)= 1
    d2lo(1,3,natom+5,idir,ipert)= rhomag(1,2)
    if (cplex==2) d2lo(2,3,natom+5,idir,ipert)= rhomag(2,2)
  else if (nspden==4) then
+   blkflg(1,natom+6,idir,ipert)=1
+   d2lo(1,1,natom+6,idir,ipert)= rhomag(1,1)
+   if (cplex==2) d2lo(2,1,natom+6,idir,ipert)= rhomag(2,1)
    blkflg(1:3,natom+5,idir,ipert)=1
    d2lo(1,1:3,natom+5,idir,ipert)= rhomag(1,2:4)
    if (cplex==2) d2lo(2,1:3,natom+5,idir,ipert)= rhomag(2,2:4)

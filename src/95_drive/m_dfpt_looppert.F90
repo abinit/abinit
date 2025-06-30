@@ -518,6 +518,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      maxidir = 9
      rfdir(1:9) = rf2dir(:)
    end if
+   !Scalar potential case
+   if (ipert==dtset%natom+6) then
+     maxidir = 1
+     rfdir(:) = 0
+     rfdir(1) = 1
+   end if
    do idir=1,maxidir
      to_compute_this_pert = 0
      if(ipert<dtset%natom+10.and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
@@ -774,6 +780,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    else if(ipert==dtset%natom+5)then
      write(msg, '(a,i4)' )' Perturbation : homogeneous Zeeman magnetic field along direction',idir
      call wrtout([std_out, ab_out], msg)
+   else if(ipert==dtset%natom+6)then
+     write(msg, '(a)' )' Perturbation : homogeneous scalar potential'
+     call wrtout([std_out, ab_out], msg)
    else if(ipert==dtset%natom+10.or.ipert==dtset%natom+11)then
      call rf2_getidirs(idir,idir1,idir2)
      if(ipert==dtset%natom+10)then
@@ -928,13 +937,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     1,symrc1,timrev_pert,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    else
 !    For the time being, the time reversal symmetry is not used
-!    for ddk, elfd, mgfd perturbations.
+!    for ddk, elfd, mgfd, sclrpt perturbations.
      timrev_pert=timrev
      if(ipert==dtset%natom+1.or.ipert==dtset%natom+2.or.&
 &      ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
 &      dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
 &      dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
-&      ipert==dtset%natom+5.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11).or. &
+&      ipert==dtset%natom+5.or.ipert==dtset%natom+6.or. &
+&      (ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11).or. &
 &      dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
 
@@ -944,7 +954,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (dtset%kptopt==3) timrev_pert=0
        timrev_kpt = timrev_pert
        !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are
-       !implemented in the quadrupole and flexoelectrics routines
+       !implemented in the spatial-dispersion routines
        nsym1=1
 
        if (dtset%rfstrs/=0.and.dtset%rfstrs_ref==0) then
@@ -1786,7 +1796,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !    PAW: rhoij have been set to zero in call to pawrhoij_alloc above
 
      init_rhor1 = ((ipert>=1 .and. ipert<=dtset%natom).or.ipert==dtset%natom+5 &
-&    .or.ipert==dtset%natom+7)
+&    .or.ipert==dtset%natom+6.or.ipert==dtset%natom+7)
      ! This section is needed in order to maintain the old behavior and pass the automatic tests
      if (psps%usepaw == 0) then
        init_rhor1 = init_rhor1 .and. all(psps%nctab(:ntypat)%has_tvale)
@@ -1829,9 +1839,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else
          ! Magnetic field perturbation
          call wrtout(std_out," Initializing rhor1 guess based on the ground state XC magnetic field")
-
+  
          call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-
+  
          if(.not.kramers_deg) then
            rhor1_pq=rhor1
            call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
@@ -2930,7 +2940,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  berry_activated=(berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. &
 & berryopt==14.or.berryopt==16.or.berryopt==17)
  if (ipert==natom+1) nn=8
- if (ipert==natom+5) nn=7
+ if (ipert==natom+5.or.ipert==natom+6) nn=7
  if (ipert==natom+7) nn=8
  if (ipert==natom+2) nn=7
  if (ipert>=1.and.ipert<=natom) nn=13
@@ -2967,7 +2977,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 & ' ',trim(numb),': 1st-order hamiltonian combined with 1st and 0th-order wfs'
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
- if(ipert/=natom+1.and.ipert/=natom+2.and.ipert/=natom+5.and.ipert<natom+11)then
+ if(ipert/=natom+1.and.ipert/=natom+2.and.ipert/=natom+5.and.ipert/=natom+6.and.ipert<natom+11)then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a)' ) &
 &   ' loc psp =',elpsp1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
 &   ' note that "loc psp" includes a xc core correction that could be resolved'
@@ -2982,7 +2992,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  else if(ipert==natom+2) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &   '    dotwf=',enl1,  '  Hartree=',ehart1,'     xc=',exc1
- else if(ipert==natom+5.or.(ipert>natom+1.and.ipert<=2*natom+11)) then
+ else if(ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+1.and.ipert<=2*natom+11)) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a)' ) &
 &   '    Zeeman=',elmag1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
 &   ' note that "loc psp" includes a xc core correction that could be resolved'
@@ -3026,7 +3036,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
      erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+end1
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
-   else if(ipert==natom+5)then
+   else if(ipert==natom+5.or.ipert==natom+6)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
    else if(ipert>natom+11.and.ipert<=2*natom+11)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
