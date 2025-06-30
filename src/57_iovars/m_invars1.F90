@@ -388,7 +388,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read usegbt
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usegbt',tread,'INT')
    if (tread==1) dtsets(idtset)%usegbt=intarr(1)
-   write(std_out,*) "usegbt = ", dtsets(idtset)%usegbt
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -2002,7 +2001,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      do iatom=1,natom
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
        sum_spinat=sum_spinat+dtset%spinat(3,iatom)
-       write(std_out,*) 'spinat=',dtset%spinat(3,iatom)
      end do
      zelect=zval-cellcharge_min
      mband_upper=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
