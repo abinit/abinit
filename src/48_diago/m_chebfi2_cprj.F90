@@ -562,6 +562,11 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  one_over_r = 1/radius
  two_over_r = 2/radius
 
+ ! ITEST
+ write(900,*) 'chebfi%xXColsRows (before filter)=', xgBlock_getid(chebfi%xXColsRows) 
+ flush(900)
+ ! ITEST
+
  do ideg = 0, ndeg_filter - 1
 
    call timab(tim_cprj,1,tsec)
@@ -593,6 +598,11 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  call xmpi_barrier(chebfi%spacecom)
  call timab(tim_barrier,2,tsec)
 
+ ! ITEST
+ write(900,*) 'chebfi%xXColsRows (after filter)=', xgBlock_getid(chebfi%xXColsRows) 
+ flush(900)
+ ! ITEST
+
  call timab(tim_amp_f,1,tsec)
  call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  call timab(tim_amp_f,2,tsec)
@@ -612,11 +622,21 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  end if
  call timab(tim_transpose,2,tsec)
 
+ ! ITEST
+ write(900,*) 'chebfi%X(before RR)=', xgBlock_getid(chebfi%X) 
+ flush(900)
+
+ ! ITEST
  call timab(tim_cprj,1,tsec)
  call xg_nonlop_getcprj(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%cprj_work%self)
  call timab(tim_cprj,2,tsec)
  call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,&
    tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+
+ ! ITEST
+ write(900,*) 'chebfi%X(after RR)=', xgBlock_getid(chebfi%X) 
+ flush(900)
+ ! ITEST
 
  if (chebfi%paw) then
    call timab(tim_AX_nl,1,tsec)
