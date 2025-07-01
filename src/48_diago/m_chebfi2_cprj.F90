@@ -541,6 +541,12 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  call xmpi_min(mineig,mineig_global,chebfi%spacecom,ierr)
  call timab(tim_RR_q, 2, tsec)
 
+ ! ITEST
+ write(900,*) 'rayleigh quotients='
+ call xgBlock_print(DivResults%self, 900)
+ flush(900)
+ ! ITEST
+
  lambda_minus = maxeig_global
 
  call timab(tim_oracle,1,tsec)

@@ -546,6 +546,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          else            
              if (istep > nstep_mixed) then
                 write(std_out,'(a,i0)') 'entering slicewf_cprj'
+                ! ITEST
+                write(901,*)
+                write(901,*) '**'
+                write(901,*) 'SCF iteration=', istep
+                write(901,*) '**'
+                write(901,*)
+                flush(901)
+                ! ITEST
                 !ABI_NVTX_START_RANGE(NVTX_SPESLI)
                 call slicewf_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,mpi_enreg,&
 &                             nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
