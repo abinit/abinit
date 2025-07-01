@@ -864,7 +864,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  end if ! iscf>0
 
 ! Initializing precon-object for chi0 based preconditioning
- call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, fermie, gmet, gprimd, indsym,  &
+ call precon%init(dtset, atindx, atindx1, cg, cprj, dimcprj, dtfil, eigen, energies%e_fermie, gmet, gprimd, indsym,  &
  &  irrzon, kg, mcprj, nattyp, nfftmix, ngfftmix, npwarr, pawang, pawfgr, pawfgrtab,                &
  &  pawtab, ph1d, phnons, psps, rhor, rmet, rprimd, symrec, ucvol, usecprj, vxc, xred, ylm)
  

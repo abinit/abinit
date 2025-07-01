@@ -186,10 +186,10 @@ contains
             this%dielng = dtset%dielng
             this%diemix = dtset%diemix
             this%iprcel = dtset%iprcel
-            this%nfftprc = nfftmix          ! FFT grid for preconditioned densities and/or potentials :
-            this%ngfftprc = ngfftmix        ! same grid as the one used for mixing.
+            this%nfftprc = nfftmix              ! FFT grid for preconditioned densities and/or potentials :
+            this%ngfftprc = ngfftmix            ! same grid as the one used for mixing.
             !Other constants
-            this%dvol   = ucvol/this%nfftprc  ! factor for integrals in real space (on the preconditioning FFT grid) : sum(f) * dvol ~ integral f
+            this%dvol   = ucvol/this%nfftprc    ! factor for integrals in real space (on the preconditioning FFT grid) : sum(f) * dvol ~ integral f
             this%gprimd = gprimd
             this%rprimd = rprimd
             this%gmet   = gmet
@@ -217,7 +217,6 @@ contains
             
             !PAW :
             if (psps%usepaw==1) then
-                write(6,*)'chi0diel init : allocating PAW var '; flush(6) ! DEBUG
                 this%unpaw      = dtfil%unpaw
                 this%cprj       => cprj     ! TODO : when cprj_in_memory = 0 the cprj array is computed on the fly and not allocated (or allocated with 0 size maybe)...
                 this%usecprj    => usecprj
@@ -344,6 +343,7 @@ contains
             ABI_FREE(this%ldos)
         end if
 
+        write(6,*)'chi0diel precon%free : done'; flush(6) !DEBUG
     end subroutine precon_free
 
     !****f* m_precon/compute_r
@@ -594,7 +594,7 @@ contains
 
         !sigma_0, ... , sigma_3 are the Pauli matrices.
         if (opt == 0) then      !v is a potential
-            ABI_BUG("to_pauli in realspace TODO")
+            ABI_BUG("iprcel=2** : to_pauli in realspace TODO")
 
         else if (opt == 1) then !v is a density
             if (nspden == 2) then
@@ -899,7 +899,7 @@ contains
         x = (eigenval - fermie)/tsmear
     
         if (occopt<=2) then
-            ABI_BUG("Non-metallic occupation")
+            ABI_BUG("iprcel=201 : Non-metallic occupation")
         else if (occopt==3) then
         !Fermi-Dirac smearing
             delta = exp(-abs(x))/(1+exp(-abs(x)))**2    !To avoid overflow of exp.
@@ -920,10 +920,10 @@ contains
             delta = exp(-x**2)/sqrt(pi)
         else if (occopt==8) then
         !Uniform smearing
-            ABI_BUG("LDOS preconditioning needs a smooth smearing function")
+            ABI_BUG("iprcel=201 : LDOS preconditioning needs a smooth smearing function")
         else if (occopt==9) then
         !Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels
-            ABI_BUG("LDOS preconditioning not implemented for this smearing function")
+            ABI_BUG("iprcel=201 : LDOS preconditioning not implemented for this smearing function")
         end if
     
         fprim = -1/tsmear * delta
@@ -984,8 +984,8 @@ contains
             ABI_MALLOC(w_rhowfr, (this%pawfgr%nfftc, dtset%nspden))
             ABI_MALLOC(w_rhowfg, (2, this%pawfgr%nfftc))
         end if
-
-        !write(6,*)'chi0diel compute_weighted_density dtset%nfft, this%nfftprc, this%pawfgr%nfft: ', dtset%nfft, this%nfftprc, this%pawfgr%nfft; flush(6) !DEBUG
+        !w_rhowfr = zero
+        !w_rhowfg = zero
 
         ! Compute the weighted density (w_rhor) using mkrho with weights in place of the occupations.
         mcg = size(this%cg)
@@ -993,11 +993,14 @@ contains
         dummy_paw_dmft%use_sc_dmft = 0
         call mkrho(this%cg, dtset, this%gprimd, this%irrzon, this%kg, mcg, mpi_enreg, this%npwarr, weights, &
         &   dummy_paw_dmft, this%phnons, w_rhowfg, w_rhowfr, this%rprimd, 0, this%ucvol, dummy_wvl_den, dummy_wvl_wfs, option=0)
+        write(6,*)'chi0diel compute_weighted_density : after mkrho w_rhowfg(:, 1:10) ', w_rhowfg(:, 1:10); flush(6) !DEBUG
+        write(6,*)'chi0diel compute_weighted_density : after mkrho w_rhowfr(1:10, :) ', w_rhowfr(1:10, :); flush(6) !DEBUG
         
         ! Symmetrize the weighted density (w_rhor)
         nfftot = dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
         call symrhg(1, this%gprimd, this%irrzon, mpi_enreg, dtset%nfft, nfftot, dtset%ngfft, dtset%nspden, dtset%nsppol, &
         &   dtset%nsym, this%phnons, w_rhowfg, w_rhowfr, this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
+        write(6,*)'chi0diel compute_weighted_density : after symrhg w_rhowfr(1:10, :) ', w_rhowfr(1:10, :); flush(6) !DEBUG
 
         if (this%psps%usepaw==0) then
         ! In NC : the weighted density is directly w_rhowfr.
@@ -1015,7 +1018,6 @@ contains
                 
                 my_nspinor = max(1, dtset%nspinor/mpi_enreg%nproc_spinor)
                 mband_cprj = dtset%mband / mpi_enreg%nproc_band     ! TODO : should I add this to precon_object ?
-                write(6,*)'chi0diel compute_weighted_density : this%mcprj, mband_cprj, mpi_enreg%nproc_spinor, dtset%mkmem, dtset%nsppol', this%mcprj, mband_cprj, mpi_enreg%nproc_spinor, dtset%mkmem, dtset%nsppol; flush(6) !DEBUG
                 
                 !Initialize pawrhoij
                 cplex_rhoij = 1
@@ -1049,7 +1051,6 @@ contains
                 cplex = 1
                 dummy_int=0
                 qphon = 0
-                write(6,*)'chi0diel compute_weighted_density : pawrhoij(1)%cplex_rhoij, pawrhoij(1)%qphase', pawrhoij(1)%cplex_rhoij, pawrhoij(1)%qphase; flush(6) !DEBUG
                 call pawmkrho(1, compch_fft, cplex, this%gprimd, dummy_int, this%indsym, dummy_int, mpi_enreg,                  &
                 &       mpi_enreg%my_natom, dtset%natom, dtset%nspden, dtset%nsym, dtset%ntypat, dtset%paral_kgb, this%pawang,  & 
                 &       this%pawfgr, this%pawfgrtab, dtset%pawprtvol, pawrhoij, pawrhoij, this%pawtab, qphon, w_rhowfg,         &
@@ -1098,19 +1099,44 @@ contains
 
         !Local variables-------------------------------
         !scalars
-        integer :: mband, i, maxocc
+        integer :: maxocc, ier, i_eigen
+        !integer :: ikpt, iband, isppol, nband_k, i_eigen
         !arrays
         real(dp), allocatable :: ldos_weights(:)
 
         ! *************************************************************************
 
         !compute weights
-        mband = size(this%eigen)
-        ABI_MALLOC(ldos_weights, (mband))
+        ABI_MALLOC(ldos_weights, (dtset%mband*dtset%nkpt*dtset%nsppol))
         maxocc = two / (dtset%nsppol * dtset%nspinor)   !Maximum number of occupations (1 or 2)
-        do i=1, mband
-            ldos_weights(i) = -derivative_occ(dtset%occopt, this%eigen(i), this%fermie, dtset%tsmear) * maxocc
+        ldos_weights = 0
+        !Loop over spins and kpoints
+        write(6,*)'chi0diel compute_ldos : this%fermie ', this%fermie; flush(6) !DEBUG
+        write(6,*)'chi0diel compute_ldos : this%eigen(:) ', this%eigen(:); flush(6) !DEBUG
+        !do isppol =1, dtset%nsppol
+        !    do ikpt = 1, dtset%nkpt
+        !        
+        !        nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+        !        !MPI parallelization over kpoints : cycle if kpt does not belong to current processor.
+        !        if (proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, 1, nband_k, isppol, mpi_enreg%me_kpt)) then
+        !            cycle
+        !        end if
+        !
+        !        do iband = 1, nband_k
+        !            i_eigen = iband + (ikpt-1)*dtset%mband + (isppol-1)*dtset%mband*dtset%nkpt  ! Index of (iband, ikpt, isppol) in eigen array.
+        !            ldos_weights(i_eigen) = -derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, dtset%tsmear) * maxocc
+        !        end do
+        !
+        !    end do
+        !end do
+        !call xmpi_sum(ldos_weights, mpi_enreg%comm_kpt, ier)
+        ! TODO : this is useless as eigen does not seem to be distributed in memory.
+
+        do i_eigen = 1, dtset%mband*dtset%nkpt*dtset%nsppol
+            ldos_weights(i_eigen) = -derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, dtset%tsmear) * maxocc
         end do
+
+        write(6,*)'chi0diel compute_ldos : ldos_weights(:) ', ldos_weights(:); flush(6) !DEBUG
 
         !Compute ldos using mkrho with ldos_weights in place of the occupations
         call compute_weighted_density(this, dtset, mpi_enreg, ldos_weights, ldos)
@@ -1259,6 +1285,8 @@ contains
         real(dp), allocatable :: work_g(:, :)
         
         ! *************************************************************************
+        write(6,*)'chi0diel apply_chi0_ldos'; flush(6) !DEBUG
+        write(6,*)'chi0diel apply_chi0_ldos : this%ldos(1:10, :)', this%ldos(1:10, :); flush(6) !DEBUG
        
         if (abs(this%tdos) > epsilon(this%tdos)) then   !Checking that tdos is not 0.
             cplex = 1
@@ -1277,6 +1305,7 @@ contains
                 !3) fft to get vec back in the reciprocal space
                 call fourdp(cplex, vec_g(:, :, ispden), work_r, -1, mpi_enreg, this%nfftprc, 1, this%ngfftprc, 0)
             end do
+            write(6,*)'chi0diel apply_chi0_ldos : vec_g(1, 1:10, :)', vec_g(1, 1:10, :); flush(6) !DEBUG
 
             ABI_FREE(work_r)
             ABI_FREE(vec_r_1)
@@ -1330,7 +1359,7 @@ contains
        
         !Local variables-------------------------------
         !scalars
-        integer :: cplex, lmax, optreal, optin, optout, nband_loc, optgrid
+        integer :: cplex, lmax, optreal, optin, optout, nband_loc, optgrid, iat
         integer :: ispden, ndat, option, tim_fourwf
         integer :: ispinor, nspinor, my_nspinor
         integer :: ierr
@@ -1372,11 +1401,14 @@ contains
             &           gbound, gbound, istwf_k, kg_k, kg_k, dtset%mgfft, mpi_enreg, ndat, dtset%ngfft, npw_k, &
             &           dummy_int, n4, n5, n6, option, tim_fourwf, weight_r, weight_i)
 
-            ! In PAW : We need to add the correction (hat) term.
-            if (this%psps%usepaw==1) then
+            ! In PAW : We need to add the correction (hat) term if pawsushat=1.
+            if (this%psps%usepaw==1 .and. dtset%pawsushat==1) then
 
                 ! Compute cprj_k, gylmg and ph3d.
-                lmax = this%pawtab%lcut_size    ! maximal value of the angular moment (no additional cutoff)
+                lmax = 0    ! maximal value of the angular moment (no additional cutoff)
+                do iat = 1, dtset%ntypat
+                    lmax=max(lmax, this%pawtab(iat)%lcut_size)
+                end do
                 ! gylmg :
                 ABI_MALLOC(gylmg, (npw_k, lmax**2, dtset%ntypat))
                 call pawgylmg(this%gprimd, gylmg, kg_k, dummy_kpg, dtset%kpt(:, ikpt), lmax, 0, npw_k, &
@@ -1412,7 +1444,7 @@ contains
                 optreal = 1 ! Output in real space (rhaug_r_ii)
                 ABI_MALLOC(dummy_wfprod, (2, npw_k))
                 call pawsushat(this%atindx, cprj_k, gbound, gylmg, iband, iband, ispinor, ispinor, istwf_k, kg_k,   &
-                &       lmax, dtset%mgfft, dtset%natom, dtset%nband, n4, n5, n6, dtset%ngfft, npw_k, nspinor,       &
+                &       lmax, dtset%mgfft, dtset%natom, nband_k, n4, n5, n6, dtset%ngfft, npw_k, nspinor,       &
                 &       dtset%ntypat, optreal, this%pawang, this%pawtab, ph3d, dtset%typat, dummy_wfprod, rhoaug_r_ii)
 
                 ! Deallocate.
@@ -1429,7 +1461,7 @@ contains
                 if (this%nfftprc == n1*n2*n3) then
                     call fftpac(1, mpi_enreg, 1, n1, n2, n3, n4, n5, n6, dtset%ngfft, rho_r_ii, rhoaug_r_ii(1, :, :, :), 1)   ! DEBUG : weights for nspinor=1, nsppol=2 ok (factor from fft?)
                 else
-                    ABI_BUG("iprcel=2** : nfftprc /= nfft in norm-conserving not implemented. TODO")
+                    ABI_BUG("iprcel=203 : nfftprc /= nfft in norm-conserving not implemented. TODO")
                 end if
             else
                 ! In PAW, the preconditioning grid should be the fine grid.
@@ -1449,7 +1481,7 @@ contains
                     ABI_FREE(dummy_rhogf)
                     ABI_FREE(rho_r_ii_coarse)
                 else
-                    ABI_BUG("iprcel=2** : nfftprc /= pawfgr%nfft in PAW not implemented. TODO")
+                    ABI_BUG("iprcel=203 : nfftprc /= pawfgr%nfft in PAW not implemented. TODO")
                 end if
 
             end if
@@ -1459,7 +1491,7 @@ contains
             rho_r_ii(:, 1) = rho_r_ii(:, 1) / (sum(rho_r_ii(:, 1)) * this%dvol) !Normalizing rho_ii_r.   [See sqrnorm_v, meanfft_r, dotprod_vn in src/44_abitools/m_cgtools/F90]
 
         else
-            ABI_BUG("compute_rhoii_coll called with non-collinear magnetism")
+            ABI_BUG("iprcel=203 : compute_rhoii_coll called with non-collinear magnetism")
         end if
 
     end subroutine compute_rhoii_coll
@@ -1557,9 +1589,9 @@ contains
             ABI_FREE(psi_r_i_up)
             ABI_FREE(psi_r_i_down)
 
-            ! In PAW : We need to add the correction (hat) term.
-            if (this%psps%usepaw==1) then
-                ! TODO
+            ! In PAW : We need to add the correction (hat) term if pawsushat=1.
+            if (this%psps%usepaw==1 .and. dtset%pawsushat==1) then
+                ABI_BUG("iprcel=203 : pawsushat = 1 not available with non collinear magnetism.")
             end if
 
             !3) Transfer rhoaug_r_ii defined on the augmented (wavefunction) fft-grid to the preconditioning fft-grid.
@@ -1571,7 +1603,7 @@ contains
                         &       rho_r_ii(:, ispden), rhoaug_r_ii(:, :, :, ispden), 1)
                     end do
                 else
-                    ABI_BUG("iprcel=2** : nfftprc /= nfft in norm-conserving not implemented. TODO")
+                    ABI_BUG("iprcel=203 : nfftprc /= nfft in norm-conserving not implemented. TODO")
                 end if
             else
                 ! In PAW, the preconditioning grid should be the fine grid.
@@ -1607,7 +1639,7 @@ contains
             end do
 
         else
-            ABI_BUG("compute_rhoii_noncoll called with collinear magnetism")
+            ABI_BUG("iprcel=203 : compute_rhoii_noncoll called with collinear magnetism")
         end if
 
     end subroutine compute_rhoii_noncoll
@@ -1666,7 +1698,7 @@ contains
         
         
         ! *************************************************************************
-        write(6,*)'chi0diel apply_chi0_mag'; flush(6) !DEBUG
+        write(6,*)'chi0diel apply_chi0_diag'; flush(6) !DEBUG
         vec_g_old = vec_g   !DEBUG
         n1 = dtset%ngfft(1)
         n2 = dtset%ngfft(2)
@@ -1708,7 +1740,7 @@ contains
 
         my_nspinor = max(1, dtset%nspinor/mpi_enreg%nproc_spinor)
         if (my_nspinor /= dtset%nspinor) then
-            ABI_BUG("SCF preconditioner 'chi0_diag' incompatible with spinor parallelisation")  ! TODO ?
+            ABI_BUG("iprcel=203 : SCF preconditioner 'chi0_diag' incompatible with spinor parallelisation")  ! TODO ?
         end if
 
         write(6,*)'chi0diel compute_weights_chi0_diag: dtset%nspinor, dtset%nspden, dtset%nsppol', dtset%nspinor, dtset%nspden, dtset%nsppol; flush(6) !DEBUG
@@ -1780,19 +1812,6 @@ contains
 
                         end if
 
-                        ! TODO use accumulation option of fourdp to make the computation more efficient ? Impossible IMO
-
-                        !if (ikpt==1) then
-                        !write(6,*)'--- chi0diel apply_chi0_mag:  i_eigen, iband, ikpt, isppol', i_eigen, iband, ikpt, isppol; flush(6) !DEBUG
-                        !write(6,*)'chi0diel apply_chi0_mag: eigenval', eigenval; flush(6) !DEBUG
-                        !write(6,*)'chi0diel apply_chi0_mag: fp', fp; flush(6) !DEBUG
-                        !write(6,*)'chi0diel apply_chi0_mag: rhoaug_r_ii( 1:5, 5, 5)', rhoaug_r_ii(1:5, 5, 5); flush(6) !DEBUG
-                        !write(6,*)'chi0diel apply_chi0_mag: rho_r_ii(1:5, 1)', rho_r_ii(1:5, 1); flush(6) !DEBUG
-                        !write(6,*)'chi0diel apply_chi0_mag: sum(rho_r_ii(:, 1))', sum(rho_r_ii(:, 1)); flush(6) !DEBUG
-                        !write(6,*)'chi0diel apply_chi0_mag: dot_product(rho_r_ii(:, 1), vec_r(:, 2))*this%dvol', dot_product(rho_r_ii(:, 1), vec_r(:, 2))*this%dvol; flush(6) !DEBUG
-                        !write(6,*)'chi0diel apply_chi0_mag: weights(i_eigen)', weights(i_eigen); flush(6) !DEBUG
-                        !end if
-
                     end if
                     
                 end do
@@ -1823,10 +1842,6 @@ contains
         ier = 0
         call xmpi_sum(weights, mpi_enreg%comm_kpt, ier)
         
-        !write(6,*)'chi0diel apply_chi0_mag weights(16:17)', weights(16:17); flush(6) !DEBUG
-        !write(6,*)'chi0diel apply_chi0_mag weights(48:49)', weights(48:49); flush(6) !DEBUG
-        !write(6,*)'chi0diel apply_chi0_mag weights', weights; flush(6) !DEBUG
-
     end subroutine compute_weights_chi0_diag
 
     !****f* m_precon/apply_chi0_diag
@@ -1863,7 +1878,7 @@ contains
         real(dp) :: vec_g_old(2, this%nfftprc, dtset%nspden)   !DEBUG
 
         ! *************************************************************************
-        write(6,*)'chi0diel apply_chi0_mag'; flush(6) !DEBUG
+        write(6,*)'chi0diel apply_chi0_diag'; flush(6) !DEBUG
         vec_g_old = vec_g   !DEBUG
 
         !1) Computing the weights : weight_i = sum_i fi' * <rhoii, vec>
