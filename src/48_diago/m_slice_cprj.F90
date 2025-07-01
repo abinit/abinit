@@ -286,13 +286,13 @@ subroutine slice_allocateAll(slice)
  call xg_setBlock(slice%X_NP,slice%X_next,total_spacedim,slice%slicedim)
  call xg_setBlock(slice%X_NP,slice%X_prev,total_spacedim,slice%slicedim,fcol=slice%slicedim+1)
 
- call xg_init(slice%AllAX,space,spacedim,neigenpairs,slice%spacecom,me_g0=slice%me_g0)
-
  call xg_init(slice%cprj_work ,space_cprj,slice%cprjdim,slice%blockdim_cprj_slice,slice%spacecom)
- call xg_init(slice%cprj_work2,space_cprj,slice%cprjdim,slice%blockdim_cprj_slice,slice%spacecom)
- call xg_init(slice%Allcprj_work ,space_cprj,slice%cprjdim,slice%blockdim_cprj,slice%spacecom)
+ call xg_init(slice%cprj_work2,space_cprj,slice%cprjdim,slice%blockdim_cprj_slice,slice%spacecom) 
 
  call xg_init(slice%proj_work,space,slice%xg_nonlop%max_npw_k,slice%xg_nonlop%cprjdim,slice%spacecom,me_g0=slice%me_g0)
+
+ call xg_init(slice%AllAX,space,spacedim,neigenpairs,slice%spacecom,me_g0=slice%me_g0)
+ call xg_init(slice%Allcprj_work ,space_cprj,slice%cprjdim,slice%blockdim_cprj,slice%spacecom)
 
 end subroutine slice_allocateAll
 !!***
@@ -324,10 +324,11 @@ subroutine slice_free(slice)
 ! *********************************************************************
 
  call xg_free(slice%X_NP)
- call xg_free(slice%AllAX)
  call xg_free(slice%cprj_work)
  call xg_free(slice%cprj_work2)
  call xg_free(slice%proj_work)
+ call xg_free(slice%AllAX)
+ call xg_free(slice%Allcprj_work)
 
 end subroutine slice_free
 !!***
@@ -725,7 +726,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
         call timab(tim_cprj,2,tsec)
         call timab(tim_AX_nl,1,tsec)
-        call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprjXwork,slice%proj_work%self)
+        call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work%self,slice%proj_work%self)
         call timab(tim_AX_nl,2,tsec)
 
     end do
@@ -741,7 +742,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     end if
 
     call timab(tim_cprj,1,tsec)
-    call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%cprjXwork)
+    call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%cprj_work%self)
     call timab(tim_cprj,2,tsec)
 
     ! ITEST
@@ -935,9 +936,9 @@ subroutine slice_rayleighRitzQuotients(slice,maxeig,mineig,DivResults)
 
 ! *********************************************************************
 
- if (space(slice%xXcolsRows)==SPACE_C) then
+ if (space(slice%X)==SPACE_C) then
    space_res = SPACE_C
- else if (space(slice%xXcolsRows)==SPACE_CR) then
+ else if (space(slice%X)==SPACE_CR) then
    space_res = SPACE_R
  else
    ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
