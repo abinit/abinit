@@ -255,7 +255,8 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
 
  ! Test if the matrix contains high values if required
  if (test_value>zero) then
-   testval=test_value;if (Ha_or_eV==2) testval=testval*Ha_eV
+   testval=test_value
+   !;if (Ha_or_eV==2) testval=testval*Ha_eV
    nhigh=0;nhigh=count(abs(prtab(:,:,:))>=testval)
  end if
 
@@ -325,6 +326,7 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
    ! Print warning if the matrix has high values
    if (test_value>zero) then
       if (nhigh>0) then
+         if (Ha_or_eV==2) testval=testval*Ha_eV
          write(msg,'(5a,i3,a,f6.1,7a)')&
 &        ' pawio_print_ij: WARNING -',ch10,&
 &        '  The matrix seems to have high value(s) !',ch10,&
