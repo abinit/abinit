@@ -290,7 +290,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! 2)
  ! We need to solve the NSCF Sternheimer for q and -q. In principle one can solve the equation only at q
  ! and then use spatial inversion or TR to get the solution at -q but this requires solving the Sternheimer
- ! for all the pp wavevectors in the BZ (or better in the IBZ_{q,k,alpha). The use of symmetries is rendered complicated
+ ! for all the pp wavevectors in the BZ (or better in the IBZ_{q,k,alpha}. The use of symmetries is rendered complicated
  ! by the parallelism over pp but perhaps one can precompute \Delta psi with all MPI procs and write the results to temporary files.
 
  if (psps%usepaw == 1) then
@@ -1556,9 +1556,9 @@ end if ! .not qq_is_gamma.
        call xmpi_sum_master(gsig_atm, master, gqk%pert_ppsum_bsum_comm%value, ierr)
        call xmpi_sum_master(gks_atm , master, gqk%pert_ppsum_bsum_comm%value, ierr)
 
-       ! TODO gks_atm and gks_nsu
-       !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
-       gsig_atm = gsig_atm + gks_atm - gxc_atm
+       ! TODO gks_atm and gks_nu
+       gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
+       ! gsig_atm = gsig_atm + gks_atm - gxc_atm
 
        select case (gstore%gmode)
        case (GSTORE_GMODE_PHONON)
