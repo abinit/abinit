@@ -2492,6 +2492,7 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
 
 !Resolution with GMRES :
  call linsolve(nspden*2*nfft, matvec, rhs, est, gmres_maxiter, gmres_rtol)
+ write(6,*)'chi0diel : est(10:20) ', est(10:20); flush(6) !DEBUG
 
  ! Pseudo-inversion for non positive definite preconditioners
  !if (dtset%iprcel==203) then
@@ -2507,10 +2508,10 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
 
    if (optreal==1) then
      !vrespc must be returned in the real space : We need to do a ifft. 
-     call fourdp(cplex, est(start_ispden: end_ispden), vrespc(:, ispden), 1, mpi_enreg, nfft, 1, ngfft, 0)
+     call fourdp(cplex, est(start_ispden:end_ispden), vrespc(:, ispden), 1, mpi_enreg, nfft, 1, ngfft, 0)
    else
      !vrespc must be returned in the fourier space.
-     vrespc(:, ispden) = est(start_ispden: end_ispden)
+     vrespc(:, ispden) = est(start_ispden:end_ispden)
    end if
 
  end do
@@ -2519,8 +2520,8 @@ subroutine chi0diel(precon, dtset, cplex, mgfft, mpi_enreg, nfft, ngfft, nspden,
  ABI_FREE(est)
 
 !Simple mixing : TODO diemixmag
- !vrespc = precon%diemix * vrespc
- vrespc = precon%diemix * vresid  !DEBUG
+ vrespc = precon%diemix * vrespc
+ !vrespc = precon%diemix * vresid  !DEBUG
 
  contains
 
