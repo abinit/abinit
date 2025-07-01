@@ -10,7 +10,7 @@
  real(dp) :: fraction,arg
  complex(MYKIND) :: vloc,phase
  character(len=500) :: msg
- type(DFTI_DESCRIPTOR),pointer :: bw_plan,fw_plan 
+ type(DFTI_DESCRIPTOR),pointer :: bw_plan,fw_plan
  type(DFTI_DESCRIPTOR),pointer :: fw_plan_xg2pos,fw_plan_xg2neg,fw_plan_y
  type(DFTI_DESCRIPTOR),pointer :: bw_plan_xg2pos,bw_plan_xg2neg,bw_plan_y
  type(C_PTR) :: cptr_cuboid,cptr_sa,cptr_sb,cptr_sc,cptr_sd
@@ -18,11 +18,10 @@
  integer,allocatable :: indpw_kin(:,:),indpw_kout(:,:)
  complex(MYKIND),allocatable :: pha1(:),pha2(:),pha3(:)
  complex(MYKIND),ABI_CONTIGUOUS pointer :: cuboid(:),slice_a(:),slice_b(:),slice_c(:),slice_d(:)
-
 ! *************************************************************************
 
 ! gcc does not like C-pointers in OMP clauses
-#if defined HAVE_OPENMP && defined __GFORTRAN__ 
+#if defined HAVE_OPENMP && defined __GFORTRAN__
 #define DEV_USE_ABIMALLOC
 #endif
 
@@ -107,7 +106,7 @@ if (istwf_k==1) then
 
  if (option/=3) then
 
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
    do cidx=1,mgb*nz
      cuboid(cidx) = MYCZERO
    end do
@@ -115,7 +114,7 @@ if (istwf_k==1) then
    ! Insert fofgin into the work array
 !$OMP PARALLEL DO PRIVATE(igb,iz,cidx)
    do ig=1,npwin
-     igb =indpw_kin(4,ig) 
+     igb =indpw_kin(4,ig)
      iz  =indpw_kin(3,ig)
      cidx = igb + (iz-1)*mgb
      cuboid(cidx) = CMPLX(fofgin(1,ig),fofgin(2,ig), KIND=MYKIND)
@@ -131,7 +130,7 @@ if (istwf_k==1) then
    status = DftiSetValue(bw_plan, DFTI_INPUT_DISTANCE,  1)
    status = DftiSetValue(bw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
    DFTI_CHECK(status)
-                                                                            
+
    status = DftiCommitDescriptor(bw_plan)
    DFTI_CHECK(status)
 
@@ -173,10 +172,10 @@ if (istwf_k==1) then
  g2min_in = gboundin(3,1)
  g2max_in = gboundin(4,1)
 
- g2min_out = gboundout(3,1) 
+ g2min_out = gboundout(3,1)
  g2max_out = gboundout(4,1)
 
- ! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx for Gy >= 0 
+ ! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx for Gy >= 0
  ng2_pos = g2max_in + 1
  status = DftiCreateDescriptor(bw_plan_xg2pos , FFT_PRECISION, DFTI_COMPLEX, 1, nx)
  DFTI_CHECK(status)
@@ -190,7 +189,7 @@ if (istwf_k==1) then
  status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_DISTANCE,  ldx)
  status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_STRIDES,  arr)
  status = DftiSetValue(bw_plan_xg2pos, DFTI_NUMBER_OF_USER_THREADS, nthreads)
-                                                                 
+
  status = DftiCommitDescriptor(bw_plan_xg2pos)
  DFTI_CHECK(status)
 
@@ -230,11 +229,11 @@ if (istwf_k==1) then
  status = DftiCommitDescriptor(bw_plan_y)
  DFTI_CHECK(status)
 
- if (option==2 .or. option==3) then  
+ if (option==2 .or. option==3) then
    ! nx 1D transforms of f(x,y,Gz) along y.
    status = DftiCreateDescriptor(fw_plan_y , FFT_PRECISION, DFTI_COMPLEX, 1, ny)
    DFTI_CHECK(status)
-                                                                                    
+
    status = DftiSetValue(fw_plan_y, DFTI_NUMBER_OF_TRANSFORMS, nx)
    status = DftiSetValue(fw_plan_y, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(fw_plan_y, DFTI_INPUT_DISTANCE,  1)
@@ -245,7 +244,7 @@ if (istwf_k==1) then
    status = DftiSetValue(fw_plan_y, DFTI_OUTPUT_STRIDES,  arr)
    status = DftiSetValue(fw_plan_y, DFTI_NUMBER_OF_USER_THREADS, nthreads)
    DFTI_CHECK(status)
-                                                                   
+
    status = DftiCommitDescriptor(fw_plan_y)
    DFTI_CHECK(status)
 
@@ -253,7 +252,7 @@ if (istwf_k==1) then
    ng2_pos = g2max_out + 1
    status = DftiCreateDescriptor(fw_plan_xg2pos , FFT_PRECISION, DFTI_COMPLEX, 1, nx)
    DFTI_CHECK(status)
-                                                                                    
+
    status = DftiSetValue(fw_plan_xg2pos, DFTI_NUMBER_OF_TRANSFORMS, ng2_pos)
    status = DftiSetValue(fw_plan_xg2pos, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(fw_plan_xg2pos, DFTI_INPUT_DISTANCE,  ldx)
@@ -269,7 +268,7 @@ if (istwf_k==1) then
    ng2_neg = -g2min_out
    status = DftiCreateDescriptor(fw_plan_xg2neg , FFT_PRECISION, DFTI_COMPLEX, 1, nx)
    DFTI_CHECK(status)
-                                                                                    
+
    status = DftiSetValue(fw_plan_xg2neg, DFTI_NUMBER_OF_TRANSFORMS, ng2_neg)
    status = DftiSetValue(fw_plan_xg2neg, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(fw_plan_xg2neg, DFTI_INPUT_DISTANCE,  ldx)
@@ -305,7 +304,7 @@ if (istwf_k==1) then
      slice_a(:) = MYCZERO
      ! Copy the data in the current plane
      do igb=1,ngbin
-       ix   = indpw_kin(1,igb) 
+       ix   = indpw_kin(1,igb)
        iy   = indpw_kin(2,igb)
        cidx = igb + (iz-1)*mgb
        sidx = ix + (iy-1)*ldx
@@ -401,7 +400,7 @@ end if
      end if
 
    CASE (3)
-     ! Copy the function to be tranformed at the right place
+     ! Copy the function to be transformed at the right place
      xyplane = 1 + (iz-1)*ldx*ldy
 #ifndef HAVE_DFTI_MIXED_PRECISION
      if (MYKIND==dpc) then
@@ -418,7 +417,7 @@ end if
 #endif
    END SELECT
 
-   if (option==2 .or. option==3) then  
+   if (option==2 .or. option==3) then
      ! Go back to G space.
      !
      ! 1) Perform y transform
@@ -438,7 +437,7 @@ end if
 
      ! Copy the data from the current plane to cuboid
      do igb=1,ngbout
-       ix=indpw_kout(1,igb) 
+       ix=indpw_kout(1,igb)
        iy=indpw_kout(2,igb)
        sidx = ix + (iy-1)*ldx
        cidx = igb + (iz-1)*mgb
@@ -463,7 +462,7 @@ end if
  status = DftiFreeDescriptor(bw_plan_xg2neg)
  status = DftiFreeDescriptor(bw_plan_y)
 
- if (option==2 .or. option==3)then  
+ if (option==2 .or. option==3)then
    status = DftiFreeDescriptor(fw_plan_y)
    status = DftiFreeDescriptor(fw_plan_xg2pos)
    status = DftiFreeDescriptor(fw_plan_xg2neg)
@@ -518,13 +517,13 @@ end if
    status = DftiFreeDescriptor(fw_plan)
 
    ! Transfer the data in the output array, after normalization
-!$OMP PARALLEL DO PRIVATE(igb,iz,cidx) 
+!$OMP PARALLEL DO PRIVATE(igb,iz,cidx)
    do ig=1,npwout
-     igb = indpw_kout(4,ig) 
+     igb = indpw_kout(4,ig)
      iz  = indpw_kout(3,ig)
      cidx = igb + (iz-1)*mgb
-     fofgout(1,ig) = REAL (cuboid(cidx)) 
-     fofgout(2,ig) = AIMAG(cuboid(cidx)) 
+     fofgout(1,ig) = REAL (cuboid(cidx))
+     fofgout(2,ig) = AIMAG(cuboid(cidx))
    end do
  end if
 
@@ -561,7 +560,7 @@ else if (istwf_k>=2) then
 
    if (option/=3) then
      ! Zero the components of cuboid
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
      do cidx=1,mgb*nz
        cuboid(cidx) = MYCZERO
      end do
@@ -569,7 +568,7 @@ else if (istwf_k>=2) then
      ! Insert fofgin into the work array cuboid
 !$OMP PARALLEL DO PRIVATE(igb,iz,cidx)
      do ig=1,npwin
-       igb = indpw_kin(4,ig) 
+       igb = indpw_kin(4,ig)
        iz  = indpw_kin(3,ig)
        cidx = igb + (iz-1)*mgb
        cuboid(cidx) = MYCMPLX(fofgin(1,ig), fofgin(2,ig))
@@ -664,8 +663,8 @@ else if (istwf_k>=2) then
      !
      ! Perform in-place 1D FFTs on the z direction
      ! ngbin 1D in-place transforms of cuboid(Gx,Gy,Gz) along Gz.
-!     bw_plan = fftw3_plan_many_dft(1, (/nz/), ngbin, &  
-!&      cuboid, (/mgb, nz/), mgb, 1,                  &      
+!     bw_plan = fftw3_plan_many_dft(1, (/nz/), ngbin, &
+!&      cuboid, (/mgb, nz/), mgb, 1,                  &
 !&      cuboid, (/mgb, nz/), mgb, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
 
      status = DftiCreateDescriptor(bw_plan, FFT_PRECISION, DFTI_COMPLEX, 1, nz)
@@ -676,7 +675,7 @@ else if (istwf_k>=2) then
      status = DftiSetValue(bw_plan, DFTI_INPUT_DISTANCE,  1)
      status = DftiSetValue(bw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
      DFTI_CHECK(status)
-                                                                              
+
      status = DftiCommitDescriptor(bw_plan)
      DFTI_CHECK(status)
 
@@ -692,7 +691,7 @@ else if (istwf_k>=2) then
 
      ! Change the phase if $k_z \neq 0$
      if (istwf_k==4 .or. istwf_k==5 .or. istwf_k==8 .or. istwf_k==9) then
-!$OMP PARALLEL DO PRIVATE(phase,padz,cidx) 
+!$OMP PARALLEL DO PRIVATE(phase,padz,cidx)
        do iz=1,nz
          phase = pha3(iz)
          padz  = (iz-1)*mgb
@@ -709,12 +708,12 @@ else if (istwf_k>=2) then
    ng2_pos = g2max_in + 1
 
 !   bw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos,  &  ! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx
-!&    slice_a, (/ldx, ldy/), 1, ldx,                          &  ! for Gy >= 0 
+!&    slice_a, (/ldx, ldy/), 1, ldx,                          &  ! for Gy >= 0
 !&    slice_b, (/ldx, ldy/), 1, ldx, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
 
    status = DftiCreateDescriptor(bw_plan_xg2pos , FFT_PRECISION, DFTI_COMPLEX, 1, nx)
    DFTI_CHECK(status)
-                                                                                      
+
    status = DftiSetValue(bw_plan_xg2pos, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
    status = DftiSetValue(bw_plan_xg2pos, DFTI_NUMBER_OF_TRANSFORMS, ng2_pos)
    status = DftiSetValue(bw_plan_xg2pos, DFTI_INPUT_DISTANCE,  ldx)
@@ -724,13 +723,13 @@ else if (istwf_k>=2) then
    status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_DISTANCE,  ldx)
    status = DftiSetValue(bw_plan_xg2pos, DFTI_OUTPUT_STRIDES,  arr)
    status = DftiSetValue(bw_plan_xg2pos, DFTI_NUMBER_OF_USER_THREADS, nthreads)
-                                                                   
+
    status = DftiCommitDescriptor(bw_plan_xg2pos)
    DFTI_CHECK(status)
 
    ! TODO clarify this point. why nxhalfm?
 !   bw_plan_y = fftw3_plan_many_dft(1, (/ny/), nxhalf1, &  ! nx 1D transforms of f(x,Gy,z) along Gy.
-!&    slice_a, (/ldx, ldy/), ldx, 1,                    &  
+!&    slice_a, (/ldx, ldy/), ldx, 1,                    &
 !&    slice_b, (/ldx, ldy/), ldx, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
 
    status = DftiCreateDescriptor(bw_plan_y, FFT_PRECISION, DFTI_COMPLEX, 1, ny)
@@ -750,15 +749,15 @@ else if (istwf_k>=2) then
    status = DftiCommitDescriptor(bw_plan_y)
    DFTI_CHECK(status)
 
-   if (option==2 .or. option==3)then  
+   if (option==2 .or. option==3)then
      ! TODO clarify this point. why nxhalfm?
 !     fw_plan_y = fftw3_plan_many_dft(1, (/ny/), nxhalf1, &  ! nx 1D transforms of f(x,y,Gz) along y.
-!&      slice_a, (/ldx, ldy/), ldx, 1,                    &   
+!&      slice_a, (/ldx, ldy/), ldx, 1,                    &
 !&      slice_b, (/ldx, ldy/), ldx, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
 
      status = DftiCreateDescriptor(fw_plan_y , FFT_PRECISION, DFTI_COMPLEX, 1, ny)
      DFTI_CHECK(status)
-                                                                                      
+
      status = DftiSetValue(fw_plan_y, DFTI_NUMBER_OF_TRANSFORMS, nxhalf1)
      status = DftiSetValue(fw_plan_y, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
      status = DftiSetValue(fw_plan_y, DFTI_INPUT_DISTANCE,  1)
@@ -769,7 +768,7 @@ else if (istwf_k>=2) then
      status = DftiSetValue(fw_plan_y, DFTI_OUTPUT_STRIDES,  arr)
      status = DftiSetValue(fw_plan_y, DFTI_NUMBER_OF_USER_THREADS, nthreads)
      DFTI_CHECK(status)
-                                                                     
+
      status = DftiCommitDescriptor(fw_plan_y)
      DFTI_CHECK(status)
 
@@ -777,12 +776,12 @@ else if (istwf_k>=2) then
      ! TODO clarify this point. why nxhalfm?
      ng2_pos = g2max_in + 1
 !     fw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos, &  ! ng2_pos 1D transforms of f(x,y,Gz) along x.
-!&      slice_c, (/2*nxhalfm, ldy/), 1, 2*nxhalfm,        &  
+!&      slice_c, (/2*nxhalfm, ldy/), 1, 2*nxhalfm,        &
 !&      slice_d, (/2*nxhalfm, ldy/), 1, 2*nxhalfm, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
 
      status = DftiCreateDescriptor(fw_plan_xg2pos , FFT_PRECISION, DFTI_COMPLEX, 1, nx)
      DFTI_CHECK(status)
-                                                                                      
+
      status = DftiSetValue(fw_plan_xg2pos, DFTI_NUMBER_OF_TRANSFORMS, ng2_pos)
      status = DftiSetValue(fw_plan_xg2pos, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
      status = DftiSetValue(fw_plan_xg2pos, DFTI_INPUT_DISTANCE, 2*nxhalfm)
@@ -792,7 +791,7 @@ else if (istwf_k>=2) then
      status = DftiSetValue(fw_plan_xg2pos, DFTI_OUTPUT_DISTANCE, 2*nxhalfm)
      status = DftiSetValue(fw_plan_xg2pos, DFTI_NUMBER_OF_USER_THREADS, nthreads)
      DFTI_CHECK(status)
-                                                                                        
+
      status = DftiCommitDescriptor(fw_plan_xg2pos)
      DFTI_CHECK(status)
    end if
@@ -880,8 +879,8 @@ else if (istwf_k>=2) then
            !
            padx = (iy-1)*ldx
            do ix=1,nxhalf1-1
-             sidx = ix     + padx 
-             cidx = 2*ix-1 + padx 
+             sidx = ix     + padx
+             cidx = 2*ix-1 + padx
 
              slice_a(sidx) = MYCMPLX( REAL(slice_b(cidx)) - AIMAG(slice_b(cidx+1)),&
 &                                    AIMAG(slice_b(cidx)) + REAL (slice_b(cidx+1)) )
@@ -892,8 +891,8 @@ else if (istwf_k>=2) then
            end do
            !
            if ((2*nxhalf1-2)/=nx) then
-             sidx = nxhalf1 + padx 
-             cidx = nx + padx 
+             sidx = nxhalf1 + padx
+             cidx = nx + padx
              slice_a(sidx) = slice_b(cidx)
 
              sidx = nxhalf1 + (ny+iiy-iy-1)*ldx
@@ -936,7 +935,7 @@ else if (istwf_k>=2) then
            padx = (iy-1)*ldx
            do ix=1,nxhalfm
              sidx = ix + padx
-             slice_b(sidx) = slice_b(sidx) * phase 
+             slice_b(sidx) = slice_b(sidx) * phase
            end do
          end do
        end if
@@ -975,7 +974,7 @@ else if (istwf_k>=2) then
        do iy=1,ny
          padx = (iy-1)*ldx
          do ix=1,nxhalf1-1
-           sidx = ix + padx 
+           sidx = ix + padx
            denpot(2*ix-1,iy,iz) = denpot(2*ix-1,iy,iz) + weight_r* REAL(slice_b(sidx))**2
            denpot(2*ix  ,iy,iz) = denpot(2*ix  ,iy,iz) + weight_i*AIMAG(slice_b(sidx))**2
          end do
@@ -991,13 +990,13 @@ else if (istwf_k>=2) then
        do iy=1,ny
          padx = (iy-1)*ldx
          do ix=1,nxhalf1-1
-           sidx = ix + padx 
+           sidx = ix + padx
            slice_a(sidx) = MYCMPLX( denpot(2*ix-1,iy,iz)* REAL(slice_b(sidx)), &
                                     denpot(2*ix  ,iy,iz)*AIMAG(slice_b(sidx)) )
          end do
          ! If nx odd, must add last data
          if ((2*nxhalf1-2)/=nx) then
-           sidx = nxhalf1 + padx 
+           sidx = nxhalf1 + padx
            slice_a(sidx) = MYCMPLX( denpot(nx,iy,iz)*REAL(slice_b(sidx)), zero)
          end if
        end do
@@ -1009,7 +1008,7 @@ else if (istwf_k>=2) then
        do iy=1,ny
          padx = (iy-1)*ldx
          do ix=1,nxhalf1-1
-           sidx = ix + padx 
+           sidx = ix + padx
            fidx = 2*ix-1 + padx + (iz-1)*ldx*ldy
            slice_b(sidx) = MYCMPLX( fofr(1,fidx), fofr(1,fidx+1) )
          end do
@@ -1022,7 +1021,7 @@ else if (istwf_k>=2) then
        end do
      end if
 
-     if (option==2 .or. option==3) then  
+     if (option==2 .or. option==3) then
        !
        ! Change the phase if $k_y \neq 0$
        if (istwf_k>=6 .and. istwf_k<=9) then
@@ -1048,7 +1047,7 @@ else if (istwf_k>=2) then
        ! Decompose symmetric and antisymmetric parts
        if (istwf_k>=2 .and. istwf_k<=5) then
          do ix=1,nxhalfm
-           pidx = 2*ix-1 
+           pidx = 2*ix-1
            slice_c(pidx)   = MYCMPLX(  REAL(slice_b(ix)), zero)
            slice_c(pidx+1) = MYCMPLX( AIMAG(slice_b(ix)), zero)
          end do
@@ -1149,12 +1148,12 @@ else if (istwf_k>=2) then
 
      ! 1D FFTs on the z direction
 !     fw_plan = fftw3_plan_many_dft(1, (/nz/), ngbout, & ! ngbout 1D transforms of f(x,y,Gz) along Gz.
-!&      cuboid, (/mgb, nz, 1/), mgb, 1,                & 
+!&      cuboid, (/mgb, nz, 1/), mgb, 1,                &
 !&      cuboid, (/mgb, nz, 1/), mgb, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
 
      status = DftiCreateDescriptor(fw_plan, FFT_PRECISION, DFTI_COMPLEX, 1, nz)
      DFTI_CHECK(status)
-                                                                                        
+
      status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_TRANSFORMS, ngbout)
      arr(1) = 0
      arr(2) = mgb
@@ -1164,10 +1163,10 @@ else if (istwf_k>=2) then
      if (iscale__ == 1) then
         status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
      end if
-                                                                                        
+
      status = DftiCommitDescriptor(fw_plan)
      DFTI_CHECK(status)
-                                                                                        
+
      !status = DftiComputeForward(fw_plan, cuboid)
      !DFTI_CHECK(status)
      DFTI_CHECK(compute_ip(fw_plan, R_TO_G, cuboid))
@@ -1211,7 +1210,7 @@ end if ! End time-reversal symmetry
 contains
 
 integer function compute_ip(desc, isign, io_data) result(istat)
-  type(DFTI_DESCRIPTOR),pointer :: desc 
+  type(DFTI_DESCRIPTOR),pointer :: desc
   integer,intent(in) :: isign
   complex(MYKIND),intent(inout) :: io_data(*)
 
@@ -1227,7 +1226,7 @@ integer function compute_ip(desc, isign, io_data) result(istat)
 end function compute_ip
 
 integer function compute_op(desc, isign, in_data, out_data) result(istat)
-  type(DFTI_DESCRIPTOR),pointer :: desc 
+  type(DFTI_DESCRIPTOR),pointer :: desc
   integer,intent(in) :: isign
   complex(MYKIND),intent(in) :: in_data(*)
   complex(MYKIND),intent(out) :: out_data(*)
@@ -1242,4 +1241,3 @@ integer function compute_op(desc, isign, in_data, out_data) result(istat)
     istat = DFTI_INVALID_CONFIGURATION
   end select
 end function compute_op
-

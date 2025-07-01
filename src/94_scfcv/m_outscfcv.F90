@@ -1141,7 +1141,7 @@ if (dtset%prt_lorbmag==1) then
    ! Use DMFT to compute wannier function for cRPA calculation.
    if(dtset%usedmft==1) then
      write(msg,'(2a,i3)') ch10,&
-&     '  Warning: Chipsi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
+&     '  Warning: Chipsi are orthonormalized in the DMFT code because nbandkss is used, with the value ',dtset%nbandkss
      call wrtout(std_out, msg)
      call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filctqmcdatain,dtfil%filselfin, &
                   & dtfil%filnam_ds(3),dtfil%fnameabo_app,dtfil%ireadctqmcdata,dtfil%ireadself,paw_dmft,pawtab(:))
@@ -1171,8 +1171,7 @@ if (dtset%prt_lorbmag==1) then
       ! Initialize green on real axis
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
 
-      ! Read self energy in imag. Matsubara freq (for double counting
-      ! and limit at high frequency)
+      ! Read self energy in imag. Matsubara freq (for double counting and asymptotic value)
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
 
        ABI_MALLOC(opt_selflimit,(paw_dmft%natom))

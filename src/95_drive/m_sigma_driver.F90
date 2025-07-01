@@ -3468,6 +3468,21 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ! rhotwgp and rhotwgp: we need to define a max size and we opt for Sigp%npwx.
    end if
 
+   if (Dtset%nfreqim_conv==0) then
+     ! If no extra frequencies is requested, keep the orginal grids.
+     epsm1%nomega_i_conv = 0
+   else if (Dtset%nfreqim_conv < 0) then
+      ! If negative number of frequencies is requested, multiply the number of frequencies in the file by the absolute value.
+     epsm1%nomega_i_conv = abs(Dtset%nfreqim_conv) * epsm1%nomega_i
+     Dtset%nfreqim_conv = epsm1%nomega_i_conv
+   else if (Dtset%nfreqim_conv >= epsm1%nomega_i) then
+     ! If the requested number of frequencies is larger than the number in the file, use input value.
+     epsm1%nomega_i_conv = Dtset%nfreqim_conv
+   else if (Dtset%nfreqim_conv < epsm1%nomega_i) then
+     ! If the requested number of frequencies is less than the number in the file, give an error
+     ABI_ERROR(sjoin("Requested number of frequencies for convolution is non-zero and less than nfreqim in the file: ", itoa(Dtset%nfreqim_conv)," < ", itoa(epsm1%nomega_i)))
+   end if
+
    epsm1%npwe=Sigp%npwc
    Dtset%npweps=epsm1%npwe
    call Qmesh%init(Cryst,epsm1%nqibz,epsm1%qibz,Dtset%kptopt)
@@ -3479,6 +3494,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
    call qmesh%find_qmesh(Cryst,Kmesh)
    ABI_MALLOC(epsm1%gvec,(3,1))
    epsm1%gvec(:,1) = [0, 0, 0]
+   epsm1%nomega = 0
  end if
 
  call Qmesh%print(units, header="Q-mesh for screening function", prtvol=Dtset%prtvol)

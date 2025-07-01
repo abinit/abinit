@@ -1022,6 +1022,7 @@ subroutine indefo1(dtset)
  dtset%efmas_n_dirs=0
 !F
  dtset%field_red(:)=zero
+ dtset%field_red_axial(:)=zero
 !G
  dtset%ga_n_rules=1
  dtset%gw_customnfreqsp=0

@@ -25,8 +25,9 @@ module m_symfind
  use m_errors
  use m_abicore
  use m_symlist
+  
 
- use m_matrix,    only : mati3inv, matr3inv
+ use m_matrix,    only : mati3inv, matr3inv, mati3det
  use m_symtk,     only : chkprimit, symrelrot, symdet, symcharac, holocell, symatm, &
                          smallprim, print_symmetries, sg_multable, symmetrize_tnons, symmetrize_xred
  use m_geometry,  only : acrossb, xred2xcart
@@ -64,6 +65,8 @@ contains
 !! INPUTS
 !! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! invardir_red (optional)=reduced coordinates of an invariant direction (only acting with symrel - not tnons)
+!! invaraxial_red (optional)=reduced coordinates of an axial vector, similar to invardir_red, but transforms with an additional
+!!                           deteminant factor under symrel operations
 !! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ;
 !!                     if 2, z must stay invariant and also there cannot be any associated tnons along z.
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
@@ -95,7 +98,7 @@ contains
 
  subroutine symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
                     prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-                    chrgat,ierr,nucdipmom,invardir_red,invar_z)  ! Optional
+                    chrgat,ierr,nucdipmom,invardir_red,invaraxial_red,invar_z)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -109,7 +112,7 @@ contains
  integer,intent(in) :: ptsymrel(3,3,msym),typat(natom)
  integer,intent(inout) :: symafm(msym),symrel(3,3,msym) !vz_i
  real(dp),intent(in) :: gprimd(3,3),spinat(3,natom),xred(3,natom)
- real(dp),optional,intent(in) :: invardir_red(3),chrgat(natom)
+ real(dp),optional,intent(in) :: invardir_red(3),invaraxial_red(3),chrgat(natom)
  real(dp),optional, intent(in) :: nucdipmom(3,natom)
  real(dp),intent(inout) :: tnons(3,msym) !vz_i
 
@@ -117,6 +120,7 @@ contains
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ierr_,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
+ integer :: mm(3,3), detR
  real(dp) :: det,diff1,diff2,diff3,diffr1,diffr2,diffr3,ndnorm,nucdipmomcl2,nucdipmomcl20
  real(dp) :: spinat2,spinatcl2,spinatcl20,tolsym2
 ! TRUE if antiferro symmetries are used with non-collinear magnetism.
@@ -128,7 +132,7 @@ contains
  character(len=500) :: msg
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
- real(dp) :: diff(3),invardir_red_rot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),spinat0(3),xred0(3)
+ real(dp) :: diff(3),invardir_red_rot(3),invaraxial_red_rot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),spinat0(3),xred0(3)
  !real(dp) :: symnucdipmom2(3)
  real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3)
  real(dp) :: symspinat1(3),symspinat2(3),symxred2(3),trialnons(3)
@@ -368,17 +372,29 @@ contains
      if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
    endif
 
+! check whether symmetry operation leaves invaraxial_red invariant (axial vector)
+  if(present(invaraxial_red))then
+!!    CALL MatrixHyb_getDet(symref_hyb(isym), detR)
+    mm(:,:) = ptsymrel(:,:,isym)
+    call mati3det(mm,detR)
+    invaraxial_red_rot(:) = detR * (&
+      ptsymrel(:,1,isym)*invaraxial_red(1) +  &
+&     ptsymrel(:,2,isym)*invaraxial_red(2) +  &
+&     ptsymrel(:,3,isym)*invaraxial_red(3) )
+    diff(:)=invaraxial_red(:)-invaraxial_red_rot(:)
+
+    if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
+   endif
+
 !write(std_out,'(a,i4)')' m_symfind%symfind : 1'; call flush(std_out)
 
-   if (use_inversion==0) then
-     det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
+   det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
 &     ptsymrel(2,1,isym)*ptsymrel(3,2,isym)*ptsymrel(1,3,isym)+&
 &     ptsymrel(1,2,isym)*ptsymrel(2,3,isym)*ptsymrel(3,1,isym) - &
 &     (ptsymrel(3,1,isym)*ptsymrel(2,2,isym)*ptsymrel(1,3,isym)+&
 &     ptsymrel(2,1,isym)*ptsymrel(1,2,isym)*ptsymrel(3,3,isym)+&
 &     ptsymrel(3,2,isym)*ptsymrel(2,3,isym)*ptsymrel(1,1,isym))
-     if(det==-1) cycle
-   end if
+   if(use_inversion==0 .and. det==-1) cycle
 
 !write(std_out,'(a,i4)')' m_symfind%symfind : 2'; call flush(std_out)
 
@@ -417,9 +433,12 @@ contains
    if (nspden/=4) then
      spinat0(:)=spinat(:,iatom0)
    else
-     spinat0(:)=ptsymrel(:,1,isym)*spinatred(1,iatom0)+ &
-                ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
-                ptsymrel(:,3,isym)*spinatred(3,iatom0)
+     spinat0(:)=det*(&
+            ptsymrel(:,1,isym)*spinatred(1,iatom0)+ &
+&           ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
+&           ptsymrel(:,3,isym)*spinatred(3,iatom0))
+     ! spinat should be treated as an axial vector
+     ! i.e. the improper part of a symm. op. has no effect on spinat
    endif
 
 !write(std_out,'(a,i4)')' m_symfind%symfind : 5'; call flush(std_out)
@@ -479,7 +498,7 @@ contains
          if (nspden/=4) then
            symspinat2(:)=trialafm*spinat(:,iatom2)
          else
-           symspinat2(:)=trialafm*(ptsymrel(:,1,isym)*spinatred(1,iatom2)+ &
+           symspinat2(:)=trialafm*det*(ptsymrel(:,1,isym)*spinatred(1,iatom2)+ &
 &           ptsymrel(:,2,isym)*spinatred(2,iatom2)+ &
 &           ptsymrel(:,3,isym)*spinatred(3,iatom2))
          end if
@@ -643,6 +662,8 @@ end subroutine symfind
 !! INPUTS
 !! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! invardir_red (optional)=reduced coordinates of an invariant direction (only acting with symrel - not tnons)
+!! invaraxial_red (optional)=reduced coordinates of an axial vector, similar to invardir_red, but transforms with an additional
+!!                           deteminant factor under symrel operations
 !! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ;
 !!                     if 2, z must stay invariant and also there cannot be any associated tnons along z.
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
@@ -673,7 +694,7 @@ end subroutine symfind
 
 subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
   pawspnorb,prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,usepaw,xred,&
-  chrgat,nucdipmom,invardir_red,invar_z)  ! Optional - although for the time being all are required ...
+  chrgat,nucdipmom,invardir_red,invaraxial_red,invar_z)  ! Optional - although for the time being all are required ...
 
 !Arguments ------------------------------------
 !scalars
@@ -687,7 +708,7 @@ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
  integer,intent(inout) :: symafm(msym),symrel(3,3,msym) !vz_i
  real(dp),intent(in) :: gprimd(3,3),spinat(3,natom)
  real(dp),intent(inout) :: xred(3,natom)
- real(dp),optional,intent(in) :: invardir_red(3),chrgat(natom)
+ real(dp),optional,intent(in) :: invardir_red(3),invaraxial_red(3),chrgat(natom)
  real(dp),optional, intent(in) :: nucdipmom(3,natom)
  real(dp),intent(inout) :: tnons(3,msym) !vz_i
 
@@ -707,6 +728,7 @@ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
  use_inversion=1
  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+   ! MMignolet: PAW can be used with inversion, however it results in seg faults in the dmft code. To enable when this is fixed...
    use_inversion=0
  end if
 
@@ -714,7 +736,7 @@ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
 
  call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
    prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-   chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
+   chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invaraxial_red=invaraxial_red,invar_z=invar_z)
 
   ! write(std_out,*)' m_symfind%symfind_expert : after call symfind (1) '
 
@@ -723,7 +745,7 @@ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
     ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
       prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
-      chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
+      chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invaraxial_red=invaraxial_red,invar_z=invar_z)
     ABI_CHECK(ierr==0,"Error in group closure")
     ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
   endif
@@ -763,7 +785,7 @@ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
 
     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
       prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-      chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=invardir_red,invar_z=invar_z)
+      chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=invardir_red,invaraxial_red=invaraxial_red,invar_z=invar_z)
 
 ! write(std_out,*)' m_symfind%symfind_expert : after call symfind (3) '
 

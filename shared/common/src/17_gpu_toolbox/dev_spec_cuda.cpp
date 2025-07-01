@@ -1,7 +1,7 @@
 /* dev_spec_cuda.cpp*/
 
 /*
- * Copyright (C) 2008-2024 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.
@@ -16,6 +16,10 @@
 #include "cuda_api_error_check.h"
 
 static int version_2_cores(int major, int minor);
+
+// Static variable to keep track of the amound of MPI tasks assigned per GPU.
+// Used mainly to assert GPU memory usage.
+static int s__nprocs_per_gpu = 1;
 
 /*=========================================================================*/
 /*________________________ GPU_function called by HOST_____________________*/
@@ -36,6 +40,9 @@ static void prt_dev_info()
       printf("\n  Device %d: \"%s\"\n", dev, deviceProp.name);
       printf("  Revision number:                               %d.%d\n", deviceProp.major,deviceProp.minor);
       printf("  Total amount of global memory:                 %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576.);
+      if(s__nprocs_per_gpu > 1) {
+        printf("  Amount of global memory per MPI task:          %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576./s__nprocs_per_gpu);
+      }
       printf("  Clock rate:                                    %3.1f GHz\n", deviceProp.clockRate/1000000.);
       printf("  Number of processors/cores:                    %d/%d\n", NProcs,NCores);
       if (NCores<0) {
@@ -90,12 +97,39 @@ void get_gpu_max_mem_(int* device, float* max_mem)
    return;
 }
 
+// Gives the max memory available for a GPU device ---------
+extern "C"
+void get_gpu_uuid_(int* device, char* uuid)
+{
+   cudaDeviceProp deviceProp;
+   cudaGetDeviceProperties(&deviceProp, *device);
+   strncpy(uuid, deviceProp.uuid.bytes, 16);
+   return;
+}
+
+// Set new value for #MPI tasks being assigned per GPU ---------
+extern "C"
+void gpu_set_nprocs_per_gpu_(int* nprocs_per_gpu)
+{
+   s__nprocs_per_gpu=*nprocs_per_gpu;
+   return;
+}
+
+// Get current value for #MPI tasks being assigned per GPU ---------
+extern "C"
+void gpu_get_nprocs_per_gpu_(int* nprocs_per_gpu)
+{
+   *nprocs_per_gpu=s__nprocs_per_gpu;
+   return;
+}
+
 // Gives max available memory available for current GPU device ---------
 extern "C"
 void gpu_get_max_mem_cpp(size_t* max_mem)
 {
    size_t free_mem;
    CUDA_API_CHECK(cudaMemGetInfo(&free_mem, max_mem));
+   *max_mem/=s__nprocs_per_gpu;
    return;
 }
 
@@ -105,6 +139,19 @@ void gpu_get_free_mem_cpp(size_t* free_mem)
 {
    size_t max_mem;
    cudaMemGetInfo(free_mem, &max_mem);
+   *free_mem/=s__nprocs_per_gpu;
+   return;
+}
+
+// Gives status of NVIDIA Multi-Process Service - MPS - activation for given GPU device ---------
+extern "C"
+void gpu_get_mps_status_(int* device, int* mps_enabled)
+{
+#if CUDA_VERSION >= 12030
+   cudaDeviceGetAttribute (mps_enabled, cudaDevAttrMpsEnabled, *device);
+#else
+   *mps_enabled = -1; // Unknown status
+#endif
    return;
 }
 
@@ -214,7 +261,8 @@ void  get_dev_info_(int* device,
 		    int* sharemem,
 		    int* regist,
 		    int* nprocs,
-		    int* ncores
+		    int* ncores,
+		    char* uuid
 		    )
 {
   cudaDeviceProp deviceProp;
@@ -231,6 +279,7 @@ void  get_dev_info_(int* device,
   *constmem = deviceProp.totalConstMem;
   *sharemem =  deviceProp.sharedMemPerBlock;
   *regist = deviceProp.regsPerBlock;
+  strncpy(uuid,deviceProp.uuid.bytes,16);
 }
 
 
@@ -262,6 +311,7 @@ void c_get_ndevice_(int* ndev)
 //To be completed for new card versions
 //Values for FP64 cores:
 //https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#arithmetic-instructions
+//https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capability-12-0
 static
 int version_2_cores(int major, int minor)
 {
@@ -296,6 +346,8 @@ int version_2_cores(int major, int minor)
         { 0x87, 128, 2 }, // Ampere Generation (SM 8.7) AGX class
         { 0x89, 128, 2 }, // Ada Lovelace Generation (SM 8.9) RTX class
         { 0x90, 128, 64}, // Hooper Generation (SM 9.0) H100 class
+        { 0xa0, 128, 64}, // Blackwell Generation (SM 10.0) B100 class
+        { 0xc0, 128, 2 }, // Blackwell Generation (SM 12.0) RTX class
         {   -1, -1, -1 }
     };
     int index = 0;
@@ -309,7 +361,7 @@ int version_2_cores(int major, int minor)
     }
 
 //  printf("MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n", major, minor, nGpuArchCoresPerSM[7].Cores);
-    return nGpuArchCoresPerSM[10].Cores_fp64;
+    return nGpuArchCoresPerSM[24].Cores_fp64;
 }
 
 

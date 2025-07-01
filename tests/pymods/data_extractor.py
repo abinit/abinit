@@ -16,7 +16,7 @@ doc_start_re = re.compile(r'---(?: !(\w+))?\n?$')
 doc_end_re = re.compile(r'\.\.\.\n?$')
 
 
-class DataExtractor(object):
+class DataExtractor:
     """Setup extraction of formatted documents and significant lines."""
 
     IGNORE_LINES_STARTING_WITH = [

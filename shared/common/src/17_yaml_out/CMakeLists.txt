@@ -11,7 +11,7 @@ add_library(17_yaml_out STATIC
 
 set_target_properties(17_yaml_out
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(17_yaml_out
   PRIVATE
@@ -21,7 +21,7 @@ target_include_directories(17_yaml_out
 
 target_include_directories(17_yaml_out
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
 
