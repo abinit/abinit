@@ -16,8 +16,8 @@
  gstore_gmode "atom"
 
  ecut 45.0          # Cutoff energy for wavefunctions.
- ecuteps  4         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
- ecutsigx 4         # Cutoff energy for exchange part.
+ ecuteps  2         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
+ ecutsigx 2         # Cutoff energy for exchange part.
  boxcutmin 1.1
  tolwfr 1e-4
 
