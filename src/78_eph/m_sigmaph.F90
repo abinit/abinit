@@ -702,7 +702,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: cgq_buf(:)
  real(dp),pointer :: cgq_ptr(:)
 #endif
-
 !************************************************************************
 
  if (psps%usepaw == 1) then
@@ -2594,7 +2593,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer :: dims(ndims)
  logical :: periods(ndims), keepdim(ndims)
 #endif
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -3397,7 +3395,6 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  real(dp) :: edos_broad, edos_step,  cpu_all, wall_all, gflops_all, cpu, wall, gflops
  character(len=fnlen) :: path
  type(edos_t) :: edos
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -3659,7 +3656,6 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
 !arrays
  integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), my_sigma_ngkpt(3)
  real(dp) :: my_sigma_erange(2)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -3837,7 +3833,6 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
  character(len=5000) :: msg
 !arrays
  !integer,allocatable :: kcalc2ebands(:,:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -3938,8 +3933,6 @@ end function sigmaph_get_ebands
 !! FUNCTION
 !!  Compare the headers of two sigmaph_t instances
 !!
-!! INPUTS
-!!
 !! SOURCE
 
 subroutine sigmaph_compare(self, other)
@@ -3949,7 +3942,6 @@ subroutine sigmaph_compare(self, other)
 
 !Local variables-------------------------------
  integer :: ierr
-
 ! *************************************************************************
  ierr = 0
 
@@ -3993,18 +3985,12 @@ end subroutine sigmaph_compare
 !! FUNCTION
 !!  Deallocate dynamic memory
 !!
-!! INPUTS
-!!
 !! SOURCE
 
 subroutine sigmaph_free(self)
 
 !Arguments ------------------------------------
  class(sigmaph_t),intent(inout) :: self
-
-!Local variables-------------------------------
- !integer :: ii, jj
-
 ! *************************************************************************
 
  ! integer
@@ -4132,7 +4118,6 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  integer,allocatable :: iqk2dvdb(:,:)
  real(dp) :: kk(3)
  real(dp),allocatable :: kq_list(:,:)
-
 ! *************************************************************************
 
  ABI_SFREE(self%qibz_k)
@@ -4363,7 +4348,6 @@ pure logical function sigmaph_skip_phmode(self, nu, wqnu, eph_phrange_w) result(
  class(sigmaph_t),intent(in) :: self
  integer,intent(in) :: nu
  real(dp),intent(in) :: wqnu, eph_phrange_w(2)
-
 ! *************************************************************************
 
  skip = wqnu < EPHTK_WTOL .or. self%phmodes_skip(nu) == 1
@@ -4620,7 +4604,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  real(dp) :: ks_enes(self%max_nbcalc), ze0_vals(self%ntemp, self%max_nbcalc)
  real(dp) :: gfw_avg(self%phmesh_size, 3)
  complex(dpc) :: qpoms_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
-
 ! *************************************************************************
 
  ! Could use non-blocking communications and double buffer technique to reduce synchronisation cost...
@@ -5075,7 +5058,6 @@ subroutine sigmaph_print(self, dtset, unt)
 !Local variables-------------------------------
  integer :: ikc, is, ndiv
  character(len=5000) :: msg
-
 ! *************************************************************************
 
  if (unt == dev_null) return
@@ -5204,7 +5186,6 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
  real(dp) :: kk(3), kq(3), qpt(3), dpm(2)
  real(dp),allocatable :: tmp_deltaw_pm(:,:,:)
  complex(dpc),allocatable :: zvals(:,:), tmp_cweights(:,:,:,:)
-
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -5382,7 +5363,6 @@ subroutine qpoints_oracle(sigma, dtset, cryst, ebands, qpts, nqpt, nqbz, qbz, qs
  integer,allocatable :: qbz_count(:), qbz2qpt(:,:), bz2ibz(:,:)
  real(dp) :: kq(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)

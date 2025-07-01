@@ -1957,6 +1957,9 @@ end subroutine cqratio
 !!
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
 !!
+!! TODO:
+!!  Use BLAS for better efficiency
+!!
 !! SOURCE
 
 subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
@@ -2239,7 +2242,6 @@ end subroutine ppm_rotate_iqbz
 !!  rhor(nfftf)=the total charge in real space.
 !!
 !! SIDE EFFECTS
-!!  ppm<ppmodel_t>:
 !!  == if ppmodel 1 or 2 ==
 !!   %omegatw and %bigomegatwsq
 !!  == if ppmodel 3 ==
@@ -2279,7 +2281,6 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
 
  if (ppm%has_qibz(iq_ibz) /= PPM_TAB_ALLOCATED) then
    ABI_ERROR(sjoin("ppmodel tables for iq_ibz:", itoa(iq_ibz), "are not allocated! has_qibz=", itoa(ppm%has_qibz(iq_ibz))))
-   !call ppm%malloc_iqibz(iq_ibz)
  end if
 
  qpt = Qmesh%ibz(:,iq_ibz)
@@ -2290,7 +2291,7 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
  select case (ppm%model)
 
  case (PPM_NONE)
-   ABI_COMMENT('Skipping Plasmonpole model calculation')
+   ABI_COMMENT('Skipping plasmonpole model calculation')
 
  case (PPM_GODBY_NEEDS)
    ! Note: the q-dependency enters only through epsilon^-1.
@@ -2305,13 +2306,13 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
       ! Integrate the real-space density
       n_at_G_zero = SUM(rhor_tot(:))/nfftf
       ! Change the prefactor
-      write(msg,'(2(a,es16.8))') 'Forced ppmfreq: ',ppm%force_plsmf*Ha_eV,' nelec/ucvol:',n_at_G_zero
+      write(msg,'(2(a,es16.8))') 'Forced ppmfreq: ',ppm%force_plsmf*Ha_eV,' nelect/ucvol: ',n_at_G_zero
       ABI_WARNING(msg)
 
       ppm%force_plsmf = (ppm%force_plsmf**2)/(four_pi*n_at_G_zero)
       ppm%bigomegatwsq(iq_ibz)%vals = ppm%force_plsmf * ppm%bigomegatwsq(iq_ibz)%vals
       ppm%omegatw(iq_ibz)%vals      = ppm%force_plsmf * ppm%omegatw(iq_ibz)%vals
-      write(msg,'(a,es16.8)') 'Plasma frequency forced in HL ppmodel, new prefactor is:',ppm%force_plsmf
+      write(msg,'(a,es16.8)') 'Plasma frequency forced in HL ppmodel, new prefactor is: ',ppm%force_plsmf
       ABI_WARNING(msg)
    end if
 
