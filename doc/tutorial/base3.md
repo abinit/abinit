@@ -451,11 +451,11 @@ You will observe that the representation of the band structure up to +12 eV obta
 is indeed incomplete: more conduction bands connect
 to the four ones initially represented, and they fill the energy range up to +12 eV, and much beyond.
 There is no gap between the four conduction bands that had already been computed and the additional higher ones.
-AbiPy by default chooses a range larger than all the bands that have been computed. So, this pitfall is present by default !
+AbiPy by default chooses a range larger than all the bands that have been computed. So, this pitfall is present by default with Abipy !
 
 The aim of the user
 might be to have a quick look at the band structure, in which case the default representation by AbiPy is fine.
-However, if the user wants to place a band structure in a report, he/she would better cut the band structure from above
+However, if the user wants to place a band structure in a publication or a report, he/she would better cut the band structure from above
 in order to avoid showing an incomplete set of bands, falsely picturing a gap between the represented conduction bands
 and those not represented.
 
