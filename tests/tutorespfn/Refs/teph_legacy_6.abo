@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h03 )
-  
+
 
 ================================================================================
 
@@ -92,7 +92,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.030  and twall      0.030 sec
        Homogeneous q point set in the B.Z.
@@ -110,7 +110,7 @@
 
 ================================================================================
 
- Properties based on electron-phonon coupling 
+ Properties based on electron-phonon coupling
 
  Found     4 symmetries that leave the perturbation invariant.
  Found     4 symmetries that leave the perturbation invariant.
@@ -181,7 +181,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -190,7 +190,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -225,4 +225,4 @@
 
 +Total cpu time      1.745  and wall time      1.943 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

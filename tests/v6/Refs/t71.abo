@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h11 )
-  
+
 
 ================================================================================
 
@@ -73,7 +73,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.031  and twall      0.031 sec
        Homogeneous q point set in the B.Z.
@@ -104,7 +104,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -163,7 +163,7 @@
 
 ================================================================================
 
- Treat the second list of vectors 
+ Treat the second list of vectors
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -181,4 +181,4 @@
 
 +Total cpu time      0.062  and wall time      0.062 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

@@ -665,7 +665,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !&               (real(oper%ks(isppol,ikpt,ib,ib1)),imag(oper%ks(isppol,ikpt,ib,ib1)),ib1=iband1,iband2)
 !             call wrtout(std_out,message,'COLL')
            end if ! prtopt>=20
-           if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then ! only need to check diagonal elements
+           if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then ! no sense to perform this check on off-diagonal elements
              if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) > max(tol10,maximag)) then
                ximag   = .true.
                maximag = aimag(oper%ks(ib,ib,ikpt,isppol))
@@ -937,13 +937,13 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
 
            if(l_gpu_option == ABI_GPU_DISABLED) then
              do idat=1,ndat
-             do ib=1,mbandc
-               if (present(op_ks_diag)) then
-                 mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
-               else
-                 mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib+(idat-1)*mbandc,ikpt,isppol)
-               end if ! present(op_ks_diag)
-             end do ! ib
+               do ib=1,mbandc
+                 if (present(op_ks_diag)) then
+                   mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
+                 else
+                   mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib+(idat-1)*mbandc,ikpt,isppol)
+                 end if ! present(op_ks_diag)
+               end do ! ib
              end do ! ndat
            else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -975,8 +975,8 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
 
          if(l_gpu_option == ABI_GPU_DISABLED) then
            do idat=1,ndat
-           call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:,idat),ndim,&
-           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
+             call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:,idat),ndim,&
+             &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
            end do ! ndat
          else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1170,12 +1170,12 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
        if(l_gpu_option == ABI_GPU_DISABLED) then
 
          call abi_zgemm_2dd("c","n",mbandc,ndat*ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                      & ndim,oper%matlu(iatom)%mat(:,:,(isppol-1)*ndat+1:isppol*ndat),ndim,czero,mat_temp(:,:),mbandc)
+                      & ndim_max,oper%matlu(iatom)%mat(:,:,(isppol-1)*ndat+1:isppol*ndat),ndim,czero,mat_temp(:,:),mbandc)
 
          do idat=1,ndat
 
            call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1+(idat-1)*ndim:idat*ndim),mbandc,&
-                        & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim,czero,mat_temp2(:,1+(idat-1)*mbandc:idat*mbandc),mbandc)
+                        & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,1+(idat-1)*mbandc:idat*mbandc),mbandc)
 
          end do ! idat
 
@@ -1186,7 +1186,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET DATA USE_DEVICE_ADDR(mat_temp,chipsi,mat)
          call abi_gpu_xgemm(2,"c","n",mbandc,ndat*ndim,ndim,cone,c_loc(chipsi(:,:,ik,isppol,iatom)),&
-         &    ndim,c_loc(mat(:,:,(isppol-1)*ndat+1:isppol*ndat)),ndim,czero,c_loc(mat_temp(:,:)),mbandc)
+         &    ndim_max,c_loc(mat(:,:,(isppol-1)*ndat+1:isppol*ndat)),ndim,czero,c_loc(mat_temp(:,:)),mbandc)
          !$OMP END TARGET DATA
 
          !$OMP TARGET DATA USE_DEVICE_ADDR(mat_temp,chipsi,mat_temp2)

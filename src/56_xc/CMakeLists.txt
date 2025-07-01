@@ -16,7 +16,7 @@ add_library(56_xc STATIC
 
 set_target_properties(56_xc
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(56_xc
   PRIVATE
@@ -24,7 +24,7 @@ target_include_directories(56_xc
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(56_xc

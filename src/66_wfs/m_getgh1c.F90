@@ -446,11 +446,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      end do
    else
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET PARALLEL DO &
-     !$OMP& MAP(to:gh1c)
-     do ipw=1,npw1*my_nspinor*ndat
-       gh1c(:,ipw)=zero
-     end do
+     call gpu_set_to_zero(gh1c,int(2,c_size_t)*npw1*my_nspinor*ndat)
 #endif
    end if
 
@@ -513,10 +509,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
        else
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET PARALLEL DO MAP(to:nonlop_out,gvnlx1_)
-         do ipw=1,npw1*my_nspinor*ndat
-           gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
-         end do
+         !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1_,nonlop_out)
+         call abi_gpu_xaxpy(1, 2*npw1*my_nspinor*ndat, cone, &
+         &    c_loc(nonlop_out), 1, c_loc(gvnlx1_), 1)
+         !$OMP END TARGET DATA
 #endif
        end if
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -556,12 +552,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gs1c(:,ipw)=zero
          end do
        else
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET PARALLEL DO MAP(to:gs1c)
-         do ipw=1,npw1*my_nspinor*ndat
-           gs1c(:,ipw)=zero
-         end do
-#endif
+         call gpu_set_to_zero(gs1c,int(2,c_size_t)*npw1*my_nspinor*ndat)
        end if
      end if
    end if
@@ -633,10 +624,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
        else
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
-         do ipw=1,npw1*my_nspinor*ndat
-           gvnlx1_(:,ipw)=nonlop_out(:,ipw)
-         end do
+         call gpu_copy(gvnlx1_, nonlop_out, int(2,c_size_t)*npw1*my_nspinor*ndat)
 #endif
        end if
 
@@ -691,10 +679,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
        else
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
-         do ipw=1,npw1*my_nspinor*ndat
-           gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
-         end do
+         !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1_,nonlop_out)
+         call abi_gpu_xaxpy(1, 2*npw1*my_nspinor*ndat, cone, &
+         &    c_loc(nonlop_out), 1, c_loc(gvnlx1_), 1)
+         !$OMP END TARGET DATA
 #endif
        end if
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -723,12 +711,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gs1c(:,ipw)=zero
          end do
        else
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET PARALLEL DO MAP(to:gs1c)
-         do ipw=1,npw1*my_nspinor*ndat
-           gs1c(:,ipw)=zero
-         end do
-#endif
+         call gpu_set_to_zero(gs1c,int(2,c_size_t)*npw1*my_nspinor*ndat)
        end if
      end if
      if (usecprj==0) then
@@ -802,10 +785,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
        else
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_,nonlop_out)
-         do ipw=1,npw1*my_nspinor*ndat
-           gvnlx1_(:,ipw)=gvnlx1_(:,ipw)+nonlop_out(:,ipw)
-         end do
+         !$OMP TARGET DATA USE_DEVICE_ADDR(gvnlx1_,nonlop_out)
+         call abi_gpu_xaxpy(1, 2*npw1*my_nspinor*ndat, cone, &
+         &    c_loc(nonlop_out), 1, c_loc(gvnlx1_), 1)
+         !$OMP END TARGET DATA
 #endif
        end if
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -845,12 +828,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            gs1c(:,ipw)=zero
          end do
        else
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET PARALLEL DO MAP(to:gs1c)
-         do ipw=1,npw1*my_nspinor*ndat
-           gs1c(:,ipw)=zero
-         end do
-#endif
+         call gpu_set_to_zero(gs1c,int(2,c_size_t)*npw1*my_nspinor*ndat)
        end if
      end if
    end if
@@ -866,12 +844,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          gvnlx1_(:,ipw)=zero
        end do
      else
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET PARALLEL DO MAP(to:gvnlx1_)
-       do ipw=1,npw1*my_nspinor*ndat
-         gvnlx1_(:,ipw)=zero
-       end do
-#endif
+       call gpu_set_to_zero(gvnlx1_,int(2,c_size_t)*npw1*my_nspinor*ndat)
      end if
    end if
    if (sij_opt/=0) then
@@ -881,12 +854,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          gs1c(:,ipw)=zero
        end do
      else
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET PARALLEL DO MAP(to:gs1c)
-       do ipw=1,npw1*my_nspinor*ndat
-         gs1c(:,ipw)=zero
-       end do
-#endif
+       call gpu_set_to_zero(gs1c,int(2,c_size_t)*npw1*my_nspinor*ndat)
      end if
    end if
 
