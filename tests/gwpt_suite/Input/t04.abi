@@ -17,6 +17,8 @@
 
  ecut 45.0          # Cutoff energy for wavefunctions.
  ecuteps  2         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
+                    # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
+
  ecutsigx 2         # Cutoff energy for exchange part.
  boxcutmin 1.1
  tolwfr 1e-4
