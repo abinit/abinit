@@ -15947,14 +15947,17 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Plasmon Pole MODEL",
-    requires="[[optdriver]] in [3,4]",
+    requires="[[optdriver]] in [4, 7]",
     added_in_version="before_v9",
     text=r"""
-  * **ppmodel** = 1: PP model of Godby and Needs [[cite:Godby1989]].
-  * **ppmodel** = 2: PP model of Hybertsen and Louie [[cite:Hybertsen1986]].
-  * **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:VonDerLinden1988]].
-  * **ppmodel** = 4: PP model of Farid and Engel [[cite:Engel1993]].
-  * **ppmodel** = 0: no PP model, numerical integration (contour deformation method [[cite:Lebegue2003]]).
+This variable defines the plasmon-pole model used to compute the convolution between G and W
+either in the SIGMA code ([[optdriver]] 4) or in the EPH code ([[optdriver]] 7) when GWPT is used (see [[eph_task]]).
+
+* **ppmodel** = 1: PP model of Godby and Needs [[cite:Godby1989]].
+* **ppmodel** = 2: PP model of Hybertsen and Louie [[cite:Hybertsen1986]].
+* **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:VonDerLinden1988]].
+* **ppmodel** = 4: PP model of Farid and Engel [[cite:Engel1993]].
+* **ppmodel** = 0: no PP model, numerical integration (contour deformation method [[cite:Lebegue2003]]).
 
 Please note the difference between **ppmodel** 1 and **ppmodel** 2,3,4. In the
 first case (**ppmodel** = 1), the plasmon-pole parameters are determined in

@@ -124,7 +124,11 @@ repos:
       #  name: Run check-line-lengths
       #  entry: python abichecks/scripts/check-line-lengths.py
       #  language: python
-      - id: checl-inlined-macros
-        name: Run check-inlined-macros
+      - id: check-inlined-macros
+        name: run check-inlined-macros
         entry: python abichecks/scripts/check_inlined_macros.py
+        language: python
+      - id: check-unprotected-omp-target
+        name: run check-unprotected-omp-target.py
+        entry: python abichecks/scripts/check-unprotected-omp-target.py
         language: python
