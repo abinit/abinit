@@ -82,7 +82,6 @@ module m_gwpt
  use m_rhotoxc,        only : rhotoxc
  use m_drivexc,        only : check_kxc
  use m_occ,            only : get_fact_spin_tol_empty
- use m_ppmodel,        only : PPM_HYBERTSEN_LOUIE, PPM_GODBY_NEEDS
  use m_ebands,         only : ebands_t
  use m_pstat,          only : pstat_proc
  use m_ppmodel,        only : ppmodel_t
@@ -246,7 +245,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
  real(dp),allocatable :: ph3d_kmp(:,:,:), ph3d1_kqmp(:,:,:), ph3d_kqmp(:,:,:), ph3d1_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
- real(dp),allocatable :: gsig_atm(:,:,:,:),gsig_nu(:,:,:,:), gxc_atm(:,:,:,:), gxc_nu(:,:,:,:), gks_atm(:,:,:,:), gks_nu(:,:,:,:)
+ real(dp),target,allocatable :: gsig_atm(:,:,:,:)
+ real(dp),allocatable :: gsig_nu(:,:,:,:), gxc_atm(:,:,:,:), gxc_nu(:,:,:,:), gks_atm(:,:,:,:), gks_nu(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mqq(:,:,:,:,:), v1scf_mq(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:), ylm_kmp(:,:), ylm_kqmp(:,:)
@@ -255,7 +255,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
- complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:)
+ complex(dp), contiguous, pointer :: cvxc1_qq_ptr(:,:,:), gsig_atm_cplx(:,:,:)
  complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:), rhotwg_c(:), rhotwg_x(:), vc_sqrt_gx(:)
  complex(gwpc),allocatable :: full_ur1_kqmp(:), full_ur1_kmp(:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
  complex(gwpc),allocatable :: vec_gwc_nk(:,:,:), vec_gwc_mkq(:,:,:), vec_gx_nk(:,:), vec_gx_mkq(:,:)
@@ -1549,15 +1549,15 @@ end if ! .not qq_is_gamma.
        call xmpi_sum_master(gks_atm , master, gqk%pert_ppsum_bsum_comm%value, ierr)
 
        ! TODO gks_atm and gks_nsu
-       !gsig_atm = gsig_atm / (pp_mesh%nbz)
+       call c_f_pointer(c_loc(gsig_atm), gsig_atm_cplx, [nb, nb, natom3])
+       gsig_atm_cplx = gsig_atm_cplx * (j_dpc / (two_pi * pp_mesh%nbz))
        !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
-
-       !print *, "gsig_atm:", gsig_atm(:, 1, 1, :)
-       !print *, "gks_atm:", gks_atm(:, 1, 1, :)
 
        gsig_atm = gsig_atm + gks_atm - gxc_atm
 
        ! DEBUG
+       !print *, "gsig_atm:", gsig_atm(:, 1, 1, :)
+       !print *, "gks_atm:", gks_atm(:, 1, 1, :)
        !print *, "gsig_average", sum(abs(gsig_atm)) / size(gsig_atm) / two
        !print *, "gks_average", sum(abs(gks_atm)) / size(gks_atm) / two
 
