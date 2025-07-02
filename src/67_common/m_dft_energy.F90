@@ -288,7 +288,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
- real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vzeeman(4)
+ real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vhspinfield(4)
  real(dp) :: magvec(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
  real(dp),allocatable :: buffer(:)
@@ -421,22 +421,22 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    end do
  end if
 
-!Add the vzeeman pot in the trial pot
-!Vzeeman might have to be allocated correctly --> to be checked
+!Add the vhspinfield pot in the trial pot
+!Vhspinfield might have to be allocated correctly --> to be checked
  if (any(abs(dtset%hspinfield(:))>tol8)) then
-   vzeeman(:) = zero
+   vhspinfield(:) = zero
    if(dtset%nspden==2)then
 !TODO: check this against rhotov and setvtr, where the potential is -1/2 and +1/2 for the 2 spin components.
 ! see comment by SPr in rhotov
 ! TODO: check this 1/2 factor is for the electron spin magnetic moment.
-     vzeeman(1) = -half*dtset%hspinfield(3) ! For collinear ispden=1 potential is v_upup
-     vzeeman(2) = +half*dtset%hspinfield(3) ! For collinear ispden=2 potential is v_dndn
+     vhspinfield(1) = -half*dtset%hspinfield(3) ! For collinear ispden=1 potential is v_upup
+     vhspinfield(2) = +half*dtset%hspinfield(3) ! For collinear ispden=2 potential is v_dndn
    end if
    if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%hspinfield(3)
-     vzeeman(2)= half*dtset%hspinfield(3)
-     vzeeman(3)=-half*dtset%hspinfield(1)
-     vzeeman(4)= half*dtset%hspinfield(2)
+     vhspinfield(1)=-half*dtset%hspinfield(3)
+     vhspinfield(2)= half*dtset%hspinfield(3)
+     vhspinfield(3)=-half*dtset%hspinfield(1)
+     vhspinfield(4)= half*dtset%hspinfield(2)
    end if
    magvec = zero
    do ispden=1,dtset%nspden
@@ -444,7 +444,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !TODO: the full cell magnetization will need extra PAW terms, and is certainly calculated elsewhere.
 !The calculation of the zeeman energy can be moved there
        magvec(ispden) = magvec(ispden) + rhor(ifft,ispden)
-       vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeeman(ispden)
+       vtrial(ifft,ispden)=vtrial(ifft,ispden)+vhspinfield(ispden)
      end do
    end do
    if(dtset%nspden==2)then
