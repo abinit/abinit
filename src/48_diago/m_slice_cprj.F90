@@ -760,7 +760,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         ! wanted second slice
         lambda_minus = rayleigh_quotients(slicedim) ! largest eigenvalue from previous slice
-        lambda_plus = maxeig
+        lambda_plus = maxeig-0.3
         center = (slice%ecut + rayleigh_quotients(1))*0.5
         radius = (slice%ecut - rayleigh_quotients(1))*0.5
         ls = (lambda_minus - center) / radius
@@ -791,6 +791,16 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         ! Initialize Chebyshev expansion
         if (islice>1) then
+   
+            if (niter>1) then
+                ! adapt limits of wanted interval
+                ! TODO lambda_plus should take into account occupancies. Put to last occupied state
+                lambda_minus = rayleigh_quotients(shift_x+1) ! smalles eigenvalue in slice
+                lambda_plus = rayleigh_quotients(shift_x+slicedim) ! largest eigenvalue in slice
+                ls = (lambda_minus - center) / radius
+                us = (lambda_plus - center) / radius
+            end if
+
             if (niter==1) then
                 call xg_init(Xsum,slice%space,slice%total_spacedim,slice%slicedim,slice%spacecom,&
                     gpu_option=gpu_option)
@@ -802,6 +812,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
             damp = 1.d0 ! Jackson damping
             call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
         end if
+
+        ! ITEST
+        write(901,*) 'restarted interval=', lambda_minus, lambda_plus
+        flush(901)
+        ! ITEST
 
         do ideg = 0, ndeg_filter - 1
 
@@ -933,6 +948,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         ! Apply Rayleigh Ritz on slice (refinement)
         call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eig_part,&
             slice%blockdim_cprj,ierr,0,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+
+        ! Extract eigenvalues to array
+        call xgBlock_reverseMap(eig_part, theta_, rows=1, cols=slicedim)
+        rayleigh_quotients(shift_x+1:shift_x+slicedim) = theta_(1,1:slicedim)
 
         write(901,*) 'converged slice eigenvalues='
         call xgBlock_print(eig_part, 901)
