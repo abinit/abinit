@@ -423,20 +423,20 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !Add the vzeeman pot in the trial pot
 !Vzeeman might have to be allocated correctly --> to be checked
- if (any(abs(dtset%zeemanfield(:))>tol8)) then
+ if (any(abs(dtset%hspinfield(:))>tol8)) then
    vzeeman(:) = zero
    if(dtset%nspden==2)then
 !TODO: check this against rhotov and setvtr, where the potential is -1/2 and +1/2 for the 2 spin components.
 ! see comment by SPr in rhotov
 ! TODO: check this 1/2 factor is for the electron spin magnetic moment.
-     vzeeman(1) = -half*dtset%zeemanfield(3) ! For collinear ispden=1 potential is v_upup
-     vzeeman(2) = +half*dtset%zeemanfield(3) ! For collinear ispden=2 potential is v_dndn
+     vzeeman(1) = -half*dtset%hspinfield(3) ! For collinear ispden=1 potential is v_upup
+     vzeeman(2) = +half*dtset%hspinfield(3) ! For collinear ispden=2 potential is v_dndn
    end if
    if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)
-     vzeeman(2)= half*dtset%zeemanfield(3)
-     vzeeman(3)=-half*dtset%zeemanfield(1)
-     vzeeman(4)= half*dtset%zeemanfield(2)
+     vzeeman(1)=-half*dtset%hspinfield(3)
+     vzeeman(2)= half*dtset%hspinfield(3)
+     vzeeman(3)=-half*dtset%hspinfield(1)
+     vzeeman(4)= half*dtset%hspinfield(2)
    end if
    magvec = zero
    do ispden=1,dtset%nspden
@@ -448,11 +448,11 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      end do
    end do
    if(dtset%nspden==2)then
-     energies%e_zeeman = -half*dtset%zeemanfield(3)*(two*magvec(2)-magvec(1)) !  diff rho = rhoup-rhodown = 2 rhoup - rho
+     energies%e_zeeman = -half*dtset%hspinfield(3)*(two*magvec(2)-magvec(1)) !  diff rho = rhoup-rhodown = 2 rhoup - rho
    else if(dtset%nspden==4)then
-     energies%e_zeeman = -half * (dtset%zeemanfield(1)*magvec(2)& ! x
-&                                +dtset%zeemanfield(2)*magvec(3)& ! y
-&                                +dtset%zeemanfield(3)*magvec(4)) ! z
+     energies%e_zeeman = -half * (dtset%hspinfield(1)*magvec(2)& ! x
+&                                +dtset%hspinfield(2)*magvec(3)& ! y
+&                                +dtset%hspinfield(3)*magvec(4)) ! z
    end if
  end if
 

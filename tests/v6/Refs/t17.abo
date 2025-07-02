@@ -145,6 +145,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
+         hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk11      2
            istwfk12      2
            istwfk21      1
@@ -256,7 +257,6 @@ P           mkmem           1
            tsmear32    2.00000000E-02 Hartree
             typat      1
           usekden           1
-      zeemanfield      0.00000000E+00  0.00000000E+00  1.00000000E+00
             znucl       83.00000
 
 ================================================================================
@@ -1401,6 +1401,7 @@ band_energy         : -3.81141886083962E+00
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
+         hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk11      2
            istwfk12      2
            istwfk21      1
@@ -1524,7 +1525,6 @@ P           mkmem           1
            tsmear32    2.00000000E-02 Hartree
             typat      1
           usekden           1
-      zeemanfield      0.00000000E+00  0.00000000E+00  1.00000000E+00
             znucl       83.00000
 
 ================================================================================

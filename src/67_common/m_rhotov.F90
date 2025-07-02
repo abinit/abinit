@@ -408,7 +408,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  vzeeman(:) = zero
 ! ABI_MALLOC(vzeemanHarm,(nfft,dtset%nspden))  ! SPr: debug stuff
 ! vzeemanHarm(:,:) = zero                        !
- if (any(abs(dtset%zeemanfield(:))>tol8)) then
+ if (any(abs(dtset%hspinfield(:))>tol8)) then
    if(dtset%nspden==2)then
 !    EB The collinear case has to be checked :
 !    EB Is it vzeeman(1) or (2) that has to be added here? to be checked in setvtr and energy as well
@@ -419,8 +419,8 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !                                     v(2)    => v_dndn
 !         verified by comparing collinear and non-collinear calculations
 
-     vzeeman(1) =-half*dtset%zeemanfield(3)  ! v_upup
-     vzeeman(2) = half*dtset%zeemanfield(3)  ! v_dndn
+     vzeeman(1) =-half*dtset%hspinfield(3)  ! v_upup
+     vzeeman(2) = half*dtset%hspinfield(3)  ! v_dndn
 
      !vzeeman(1) = zero  ! v_upup
      !vzeeman(2) = zero  ! v_dndn
@@ -433,18 +433,18 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      !      !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
      !      !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
      !      !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
-     !      vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
-     !      vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,1)= -half*dtset%hspinfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,2)=  half*dtset%hspinfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
      !    end do
      !  end do
      !end do
 
    else if(dtset%nspden==4)then
 
-     vzeeman(1)=-half*dtset%zeemanfield(3)    ! v_upup
-     vzeeman(2)= half*dtset%zeemanfield(3)    ! v_dndn
-     vzeeman(3)=-half*dtset%zeemanfield(1)    ! Re(v_updn)
-     vzeeman(4)= half*dtset%zeemanfield(2)    ! Im(v_updn)
+     vzeeman(1)=-half*dtset%hspinfield(3)    ! v_upup
+     vzeeman(2)= half*dtset%hspinfield(3)    ! v_dndn
+     vzeeman(3)=-half*dtset%hspinfield(1)    ! Re(v_updn)
+     vzeeman(4)= half*dtset%hspinfield(2)    ! Im(v_updn)
 
      !vzeeman(1)=0.0
      !vzeeman(2)=0.0
@@ -459,10 +459,10 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      !      !rx=(dble(ii)/nx)*rprimd(1,1)+(dble(jj)/ny)*rprimd(1,2)+(dble(kk)/nz)*rprimd(1,3)
      !      !ry=(dble(ii)/nx)*rprimd(2,1)+(dble(jj)/ny)*rprimd(2,2)+(dble(kk)/nz)*rprimd(2,3)
      !      !rz=(dble(ii)/nx)*rprimd(3,1)+(dble(jj)/ny)*rprimd(3,2)+(dble(kk)/nz)*rprimd(3,3)
-     !      vzeemanHarm(ipt,1)= -half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
-     !      vzeemanHarm(ipt,2)=  half*dtset%zeemanfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
-     !      vzeemanHarm(ipt,3)= -half*dtset%zeemanfield(1)*cos(2*PI*(dble(ii)/dble(nx)))
-     !      vzeemanHarm(ipt,4)=  half*dtset%zeemanfield(2)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,1)= -half*dtset%hspinfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,2)=  half*dtset%hspinfield(3)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,3)= -half*dtset%hspinfield(1)*cos(2*PI*(dble(ii)/dble(nx)))
+     !      vzeemanHarm(ipt,4)=  half*dtset%hspinfield(2)*cos(2*PI*(dble(ii)/dble(nx)))
      !    end do
      !  end do
      !end do
