@@ -1253,6 +1253,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                cnt = cnt + 1; omegas_nk(cnt) = qp_ene(m_kq, ikq_ibz, spin)
              end do
              omegame0i_nk = omegas_nk - qp_ene(ib_sum, ikmp_ibz, spin)
+             !print *, "omegame0i_nk:", omegame0i_nk
 
              vec_gwc_nk(:,:,n_k) = zero
              call ppm%calc_sigc(nspinor, npw_c, nw_nk, rhotwg_c, botsq_pbz, otq_pbz, &
@@ -1268,7 +1269,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
            ur_kqmp = GWPC_CONJG(ur_kqmp)
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikqmp_ibz, spin)
-           omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
+           !omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
 
            need_x_kqmp = (abs(theta_mu_minus_e0i / fact_spin) >= tol_empty) ! allow negative occ numbers
            !need_x_kqmp = .True.
@@ -1303,11 +1304,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
                cnt = cnt + 1; omegas_mkq(cnt) = qp_ene(n_k, ik_ibz, spin)
              end do
+             omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
 
              ! Note that here we sum over G instead of G' so we have to pass the transpose
              ! of the PPM matrix elements.
              ! TODO: Generalize ppm%calc_sigc with BLAS-like API.
              vec_gwc_mkq(:,:,m_kq) = zero
+             !print *, "omegame0i_mkq:", omegame0i_mkq
              call ppm%calc_sigc(nspinor, npw_c, nw_mkq, rhotwg_c, trans_botsq_pbz, trans_otq_pbz, &
                                 omegame0i_mkq, dtset%zcut, theta_mu_minus_e0i, trans_dmeig_pbz, npw_c, vec_gwc_mkq(:,:,m_kq), sigcme_mkq)
            end do ! m_kq
@@ -1554,7 +1557,6 @@ end if ! .not qq_is_gamma.
        !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
 
        gsig_atm = gsig_atm + gks_atm - gxc_atm
-
 
        ! DEBUG
        !print *, "gsig_atm:", gsig_atm(:, 1, 1, :)
