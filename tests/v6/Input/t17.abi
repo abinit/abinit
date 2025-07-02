@@ -68,6 +68,6 @@
 #%% keywords = 
 #%% description = 
 #%%   Bi atom in a big supercell.
-#%%   Test the application of a Zeeman field.
+#%%   Test the application of hspinfield.
 #%% topics = MagField
 #%%<END TEST_INFO>
