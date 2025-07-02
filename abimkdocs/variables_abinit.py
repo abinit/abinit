@@ -284,7 +284,7 @@ Variable(
     requires="[[natnd]] > 0 and [[iatnd]]",
     added_in_version="v10.5",
     text=r"""
-Provides an alternative input to [[nucdipmom]] for the atoms carrying explicit 
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit 
 nuclear dipole moments. The number of atoms in the cell with explicit
 nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. There are 3*[[natnd]]
@@ -7779,7 +7779,7 @@ Variable(
     requires="[[natnd]] > 0",
     added_in_version="v10.5",
     text=r"""
-Together with [[natnd]], provides an alternative input to [[nucdipmom]] for 
+Together with [[natnd]], provides a simplified, alternative input to [[nucdipmom]] for 
 the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with 
 explicit nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
@@ -11237,7 +11237,7 @@ Variable(
     mnemonics="Number of AToms with Nuclear Dipole moment",
     added_in_version="v10.5",
     text=r"""
-Provides an alternative input to [[nucdipmom]] for the atoms carrying explicit 
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit 
 nuclear dipole moments. The number of atoms in the cell with explicit
 nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
@@ -13660,6 +13660,8 @@ moment values are entered in atomic units, as vectors in the Cartesian (not crys
 coordinate frame. For reference, note that
 one Bohr magneton has value $1/2$ in atomic units, while one nuclear
 Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
+
+A simplified input to these values is provided by the variables [[natnd]], [[iatnd]], and [[atndlist]].
 """,
 ),
 
