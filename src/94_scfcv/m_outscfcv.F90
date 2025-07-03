@@ -272,7 +272,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated
- real(dp) :: e_zeeman
+ real(dp) :: e_hspinfield
  real(dp) :: dmatdum(0,0,0,0)
  real(dp) :: e_fermie, e_fermih
  type(oper_type) :: dft_occup
@@ -976,12 +976,12 @@ if (dtset%prt_lorbmag==1) then
 
    if (sum(abs(dtset%hspinfield)) > tol10) then
      if(nspden==2)then
-       e_zeeman = -half*rhomag(1,2)*dtset%hspinfield(3)
+       e_hspinfield = -half*rhomag(1,2)*dtset%hspinfield(3)
        write (msg, "(a,E20.10,a)") " Collinear magnetization ", rhomag(1,2), &
            " (in # of spins, without 1/2 for magnetic moment) "
        call wrtout(units, msg)
      else if(nspden==4)then
-       e_zeeman = -half * (dtset%hspinfield(1)*rhomag(1,2)& ! x
+       e_hspinfield = -half * (dtset%hspinfield(1)*rhomag(1,2)& ! x
 &                         +dtset%hspinfield(2)*rhomag(1,3)& ! y
 &                         +dtset%hspinfield(3)*rhomag(1,4)) ! z
        write (msg, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), &
@@ -989,8 +989,8 @@ if (dtset%prt_lorbmag==1) then
        call wrtout(units, msg)
      end if
 !TODO: this quantity should also be calculated in rhotov, and stored in
-!    results_gs%energies%e_zeeman, but for the moment it comes out 0
-     write (msg, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_zeeman, " Ha"
+!    results_gs%energies%e_hspinfield, but for the moment it comes out 0
+     write (msg, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_hspinfield, " Ha"
      call wrtout(units, msg)
    end if
  end if ! end if prtdensph or magnetic field
