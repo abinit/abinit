@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h16 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t79.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h06 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t79.abi
 - output file    -> t79.abo
 - root for input  files -> t79i
 - root for output files -> t79o
@@ -161,8 +161,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -179,8 +179,8 @@ meta: {optdriver: 1, rfphon: 1, }
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -201,7 +201,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -227,24 +227,35 @@ solver: {iscf: 7, nstep: 12, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-08, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   246.44103238007     -1.406E+03 1.082E-01 1.451E+05
- ETOT  2   24.567167586834     -2.219E+02 1.028E-01 2.110E+03
- ETOT  3   21.188681279190     -3.378E+00 1.914E-02 5.172E+01
- ETOT  4   20.971354778583     -2.173E-01 7.960E-03 7.711E+00
- ETOT  5   20.894450799412     -7.690E-02 4.043E-03 1.116E+00
- ETOT  6   20.864399991760     -3.005E-02 2.051E-03 1.123E-01
- ETOT  7   20.850389072470     -1.401E-02 1.200E-03 3.044E-01
- ETOT  8   20.842710062909     -7.679E-03 6.180E-04 5.486E-03
- ETOT  9   20.839032759080     -3.677E-03 3.638E-04 9.963E-02
- ETOT 10   20.836858895213     -2.174E-03 1.943E-04 3.673E-03
- ETOT 11   20.835818342902     -1.041E-03 1.158E-04 4.826E-02
- ETOT 12   20.835170399410     -6.479E-04 6.172E-05 8.308E-03
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   246.44103238007     -1.406E+03 1.082E-01 1.451E+05 2.701E-03 2.701E-03
+ ETOT  2   24.567167586834     -2.219E+02 1.028E-01 2.110E+03 8.110E-03 5.409E-03
+ ETOT  3   21.188681279190     -3.378E+00 1.914E-02 5.172E+01 3.932E-03 1.477E-03
+ ETOT  4   20.971354778583     -2.173E-01 7.960E-03 7.711E+00 5.481E-04 2.025E-03
+ ETOT  5   20.894450799412     -7.690E-02 4.043E-03 1.116E+00 2.032E-03 6.115E-05
+ ETOT  6   20.864399991760     -3.005E-02 2.051E-03 1.123E-01 9.347E-05 1.009E-04
+ ETOT  7   20.850389072470     -1.401E-02 1.200E-03 3.044E-01 1.743E-03 1.844E-03
+ ETOT  8   20.842710062909     -7.679E-03 6.180E-04 5.486E-03 8.173E-05 1.762E-03
+ ETOT  9   20.839032759080     -3.677E-03 3.638E-04 9.963E-02 1.421E-03 3.183E-03
+ ETOT 10   20.836858895213     -2.174E-03 1.943E-04 3.673E-03 2.532E-04 2.930E-03
+ ETOT 11   20.835818342902     -1.041E-03 1.158E-04 4.826E-02 6.997E-04 3.630E-03
+ ETOT 12   20.835170399410     -6.479E-04 6.172E-05 8.308E-03 2.139E-04 3.416E-03
 
  scprqt:  WARNING -
   nstep=   12 was not enough SCF cycles to converge;
   potential residual=  8.308E-03 exceeds tolvrs=  1.000E-08
 
+ Integrated electronic and magnetization densities in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
+    1   2.00000        0.000028     -0.000001    0.000000    0.000000
+    2   2.00000       -0.000028      0.000001    0.000000   -0.000000
+    3   2.00000        0.112706      0.003416   -0.001866   -0.001067
+    4   2.00000       -0.112707     -0.003415    0.001866    0.001067
+ ---------------------------------------------------------------------
+ Total magnetization (spheres)       0.000000    0.000000   -0.000000
+ Total magnetization (exact)         0.000000    0.000000   -0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -276,12 +287,12 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        20.8831096752         0.0000000000
    1    1   2    1        13.2361866118         0.0000000000
    1    1   3    1        19.7907633013         0.0000000000
@@ -294,35 +305,35 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   1    4        -7.8923108366        -0.0000000000
    1    1   2    4        -5.2089761019         0.0000000000
    1    1   3    4        -7.9884909161        -0.0000000000
-
+  
    2    1   1    1        13.2361866118         0.0000000000
-
+  
    3    1   1    1        19.7907633013         0.0000000000
-
+  
    1    2   1    1        -4.1191786171         0.0000000000
-
+  
    2    2   1    1        -2.5574429662         0.0000000000
-
+  
    3    2   1    1        -2.9572019570         0.0000000000
-
+  
    1    3   1    1        -7.8923077418        -0.0000000000
-
+  
    2    3   1    1        -5.2089735314        -0.0000000000
-
+  
    3    3   1    1        -7.9876305637         0.0000000000
-
+  
    1    4   1    1        -7.8923108366         0.0000000000
-
+  
    2    4   1    1        -5.2089761019        -0.0000000000
-
+  
    3    4   1    1        -7.9884909161         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -338,7 +349,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      8.5037675980E+00  8.5037675980E+00  8.5037675980E+00 Bohr
               amu      5.49380500E+01  1.59994000E+01
@@ -463,7 +474,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -491,12 +502,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -514,15 +525,15 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.3  wall=         13.3
+- Proc.   0 individual time (sec): cpu=         13.7  wall=         13.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.3  wall=         13.3
++Overall time at end (sec) : cpu=         13.7  wall=         13.8

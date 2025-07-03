@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h12 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t10/t10.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h02 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v7_t10/t10.abi
 - output file    -> t10.abo
 - root for input  files -> t10i
 - root for output files -> t10o
@@ -295,8 +295,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Ni-psval-icmod3.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Ni-psval-icmod3.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Ni-psval-icmod3.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Ni-psval-icmod3.psp8
 - Ni    ONCVPSP  r_core=  1.20  1.26  1.56
 - 28.00000  18.00000    150616                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -317,7 +317,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     466.324     466.302
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: (1/2) Internal Cycle: (1/1)
@@ -331,18 +331,18 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -167.53454150242    -1.68E+02 4.24E-01 1.08E+03 1.474
- ETOT  2  -167.05687711639     4.78E-01 6.16E-02 3.02E+03 0.206
- ETOT  3  -167.94325313354    -8.86E-01 1.61E-02 7.87E+00 0.738
- ETOT  4  -167.94424737618    -9.94E-04 2.60E-03 3.15E-01 0.688
- ETOT  5  -167.94445092138    -2.04E-04 2.94E-04 4.83E-02 0.638
- ETOT  6  -167.94452472961    -7.38E-05 7.56E-04 7.91E-03 0.603
- ETOT  7  -167.94455048074    -2.58E-05 3.70E-04 1.74E-04 0.566
- ETOT  8  -167.94455067255    -1.92E-07 3.66E-04 5.12E-06 0.562
- ETOT  9  -167.94455067519    -2.65E-09 1.29E-03 2.02E-07 0.563
- ETOT 10  -167.94455067538    -1.87E-10 3.64E-04 1.21E-08 0.563
- ETOT 11  -167.94455067539    -5.49E-12 1.42E-03 1.52E-10 0.563
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -167.53454150242    -1.675E+02 4.241E-01 1.080E+03 1.517E+00 1.517E+00
+ ETOT  2  -167.05687711639     4.777E-01 6.158E-02 3.024E+03 1.246E+00 2.703E-01
+ ETOT  3  -167.94325313354    -8.864E-01 1.614E-02 7.869E+00 5.450E-01 8.153E-01
+ ETOT  4  -167.94424737618    -9.942E-04 2.603E-03 3.149E-01 5.773E-02 7.576E-01
+ ETOT  5  -167.94445092138    -2.035E-04 2.935E-04 4.835E-02 5.929E-02 6.983E-01
+ ETOT  6  -167.94452472961    -7.381E-05 7.559E-04 7.907E-03 4.263E-02 6.556E-01
+ ETOT  7  -167.94455048074    -2.575E-05 3.696E-04 1.738E-04 4.378E-02 6.119E-01
+ ETOT  8  -167.94455067255    -1.918E-07 3.661E-04 5.115E-06 4.057E-03 6.078E-01
+ ETOT  9  -167.94455067519    -2.647E-09 1.286E-03 2.023E-07 5.354E-04 6.083E-01
+ ETOT 10  -167.94455067538    -1.870E-10 3.637E-04 1.205E-08 1.003E-04 6.082E-01
+ ETOT 11  -167.94455067539    -5.485E-12 1.418E-03 1.517E-10 2.120E-05 6.082E-01
 
  At SCF step   11       vres2   =  1.52E-10 < tolvrs=  1.00E-09 =>converged.
 
@@ -388,6 +388,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (from the atomic spheres):             0.608225
  Total magnetization (exact up - dn):                       0.562604
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -426,17 +427,17 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -167.44512320582    -1.67E+02 4.25E-03 2.30E+01 0.729
- ETOT  2  -167.44412348938     1.00E-03 8.19E-04 5.90E+00 0.717
- ETOT  3  -167.44247157400     1.65E-03 1.69E-03 1.11E+01 0.761
- ETOT  4  -167.44604927698    -3.58E-03 1.37E-03 4.76E-04 0.740
- ETOT  5  -167.44604988419    -6.07E-07 1.27E-03 4.52E-05 0.741
- ETOT  6  -167.44604992410    -3.99E-08 5.13E-04 8.22E-06 0.742
- ETOT  7  -167.44604993169    -7.59E-09 3.49E-04 1.20E-06 0.742
- ETOT  8  -167.44604993258    -8.89E-10 1.19E-04 5.47E-08 0.742
- ETOT  9  -167.44604993261    -2.70E-11 7.37E-05 1.02E-09 0.742
- ETOT 10  -167.44604993261    -4.18E-12 2.45E-05 5.08E-11 0.742
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -167.44512320582    -1.674E+02 4.249E-03 2.299E+01 7.749E-01 7.749E-01
+ ETOT  2  -167.44412348938     9.997E-04 8.191E-04 5.899E+00 9.514E-03 7.653E-01
+ ETOT  3  -167.44247157400     1.652E-03 1.686E-03 1.109E+01 4.085E-02 8.062E-01
+ ETOT  4  -167.44604927698    -3.578E-03 1.373E-03 4.758E-04 1.914E-02 7.871E-01
+ ETOT  5  -167.44604988419    -6.072E-07 1.267E-03 4.518E-05 1.265E-03 7.883E-01
+ ETOT  6  -167.44604992410    -3.991E-08 5.135E-04 8.220E-06 7.084E-04 7.890E-01
+ ETOT  7  -167.44604993169    -7.590E-09 3.495E-04 1.204E-06 3.687E-04 7.894E-01
+ ETOT  8  -167.44604993258    -8.889E-10 1.187E-04 5.468E-08 1.275E-04 7.895E-01
+ ETOT  9  -167.44604993261    -2.700E-11 7.370E-05 1.018E-09 2.060E-05 7.895E-01
+ ETOT 10  -167.44604993261    -4.178E-12 2.446E-05 5.076E-11 5.174E-06 7.896E-01
 
  At SCF step   10       vres2   =  5.08E-11 < tolvrs=  1.00E-09 =>converged.
 
@@ -482,6 +483,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (from the atomic spheres):             0.789551
  Total magnetization (exact up - dn):                       0.742044
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -514,7 +516,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
            Relative     = 2.97266E-03
 
  fconv : WARNING -
-  ntime=    2 was not enough Broyd/MD steps to converge gradients:
+  ntime=    2 was not enough Broyd/MD steps to converge gradients: 
   max grad (force/stress) = 6.4002E+00 > tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -592,7 +594,7 @@ band_energy         : -1.83397698719691E+01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      4.9820669431E+00  4.9820669431E+00  4.9820669431E+00 Bohr
               amu      5.86900000E+01
@@ -838,7 +840,7 @@ P           mkmem          28
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -855,12 +857,12 @@ P           mkmem          28
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -878,7 +880,7 @@ P           mkmem          28
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -893,15 +895,15 @@ P           mkmem          28
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.3  wall=         17.6
+- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.3  wall=         17.6
++Overall time at end (sec) : cpu=         17.4  wall=         17.5

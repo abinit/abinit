@@ -1,5 +1,5 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 9.11.6.5 of ABINIT, released May 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 26 Jan 2025.
-- ( at 10h00 )
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h12 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI4/paral_t30_MPI4/t30.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t30_MPI4/t30.abi
 - output file    -> t30_MPI4.abo
 - root for input  files -> t30_MPI4i
 - root for output files -> t30_MPI4o
@@ -200,8 +200,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/6c_lda.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -235,11 +235,11 @@ solver: {iscf: 17, nstep: 4, nline: 6, wfoptalg: 1, }
 tolerances: {toldfe: 1.00E-10, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -10.528832089054    -1.053E+01 3.362E-02 9.521E+01
- ETOT  2  -10.429248475348     9.958E-02 2.312E-03 9.378E+00
- ETOT  3  -10.417978453882     1.127E-02 2.137E-03 1.510E-01
- ETOT  4  -10.417942550517     3.590E-05 6.726E-04 2.440E-03
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -10.528832089054    -1.053E+01 3.362E-02 9.521E+01 2.220E-16 2.220E-16
+ ETOT  2  -10.429248475348     9.958E-02 2.312E-03 9.378E+00 4.827E-13 4.829E-13
+ ETOT  3  -10.417978453882     1.127E-02 2.137E-03 1.510E-01 7.188E-12 7.671E-12
+ ETOT  4  -10.417942550517     3.590E-05 6.726E-04 2.440E-03 8.698E-12 1.027E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.13362923E-03  sigma(3 2)= -1.74300096E-03
@@ -290,6 +290,7 @@ force_length_stats: {min:   4.07811661E-01, max:   4.07811661E-01, mean:   4.078
   Sum:              1.436413     1.436413      2.872826    -0.000000
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -552,11 +553,11 @@ solver: {iscf: 17, nstep: 4, nline: 6, wfoptalg: 111, }
 tolerances: {toldfe: 1.00E-10, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -10.528832089054    -1.053E+01 1.600E-01 9.521E+01
- ETOT  2  -10.429248476066     9.958E-02 7.345E-03 9.378E+00
- ETOT  3  -10.417978451732     1.127E-02 7.408E-03 1.510E-01
- ETOT  4  -10.417942550302     3.590E-05 2.524E-03 2.440E-03
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -10.528832089054    -1.053E+01 1.600E-01 9.521E+01 6.661E-16 6.661E-16
+ ETOT  2  -10.429248476066     9.958E-02 7.345E-03 9.378E+00 5.480E-13 5.473E-13
+ ETOT  3  -10.417978451732     1.127E-02 7.408E-03 1.510E-01 6.155E-13 6.817E-14
+ ETOT  4  -10.417942550302     3.590E-05 2.524E-03 2.440E-03 2.538E-12 2.469E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.13362928E-03  sigma(3 2)= -1.74300093E-03
@@ -607,6 +608,7 @@ force_length_stats: {min:   4.07811659E-01, max:   4.07811659E-01, mean:   4.078
   Sum:              1.436413     1.436413      2.872826     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -985,10 +987,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.9  wall=          2.9
++Overall time at end (sec) : cpu=          3.4  wall=          3.4

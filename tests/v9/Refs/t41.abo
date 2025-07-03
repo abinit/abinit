@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h15 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t41/t41.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h05 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t41/t41.abi
 - output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -465,9 +465,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -498,27 +498,27 @@ solver: {iscf: 17, nstep: 20, nline: 6, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-18, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    nres2    magn
- ETOT  1  -123.85179772267    -1.24E+02 1.61E+01 9.70E+01 1.337
- ETOT  2  -124.78117903634    -9.29E-01 3.35E-02 9.59E+01 2.187
- ETOT  3  -124.35458556441     4.27E-01 2.48E-01 6.22E-01 1.644
- ETOT  4  -124.34945726929     5.13E-03 1.62E-01 5.01E-01 1.671
- ETOT  5  -124.34835833632     1.10E-03 2.06E-02 3.06E-01 1.502
- ETOT  6  -124.34855015760    -1.92E-04 2.98E-03 2.25E-01 1.424
- ETOT  7  -124.34835898568     1.91E-04 3.83E-04 2.71E-02 1.274
- ETOT  8  -124.34830272913     5.63E-05 1.44E-05 5.57E-03 1.291
- ETOT  9  -124.34827252308     3.02E-05 5.59E-06 1.38E-03 1.300
- ETOT 10  -124.34826997288     2.55E-06 3.33E-06 9.02E-05 1.289
- ETOT 11  -124.34826954953     4.23E-07 1.45E-07 3.56E-05 1.289
- ETOT 12  -124.34826855639     9.93E-07 2.25E-07 1.81E-05 1.296
- ETOT 13  -124.34826924207    -6.86E-07 2.85E-08 3.07E-08 1.293
- ETOT 14  -124.34826928352    -4.15E-08 2.62E-10 4.06E-08 1.293
- ETOT 15  -124.34826926956     1.40E-08 2.04E-10 1.28E-08 1.293
- ETOT 16  -124.34826926815     1.42E-09 3.89E-11 1.62E-10 1.293
- ETOT 17  -124.34826926844    -2.96E-10 5.88E-13 8.54E-12 1.293
- ETOT 18  -124.34826926830     1.42E-10 1.01E-14 1.11E-12 1.293
- ETOT 19  -124.34826926822     7.81E-11 5.89E-16 1.22E-13 1.293
- ETOT 20  -124.34826926821     9.75E-12 2.55E-16 3.78E-15 1.293
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -123.85179772267    -1.239E+02 1.610E+01 9.704E+01 1.304E+00 1.304E+00
+ ETOT  2  -124.78117903634    -9.294E-01 3.354E-02 9.595E+01 9.132E-01 2.217E+00
+ ETOT  3  -124.35458556441     4.266E-01 2.479E-01 6.221E-01 5.242E-01 1.693E+00
+ ETOT  4  -124.34945726929     5.128E-03 1.623E-01 5.007E-01 2.277E-02 1.715E+00
+ ETOT  5  -124.34835833632     1.099E-03 2.058E-02 3.060E-01 1.769E-01 1.539E+00
+ ETOT  6  -124.34855015760    -1.918E-04 2.980E-03 2.247E-01 8.097E-02 1.458E+00
+ ETOT  7  -124.34835898568     1.912E-04 3.825E-04 2.714E-02 1.564E-01 1.301E+00
+ ETOT  8  -124.34830272913     5.626E-05 1.439E-05 5.571E-03 1.611E-02 1.317E+00
+ ETOT  9  -124.34827252308     3.021E-05 5.589E-06 1.377E-03 8.752E-03 1.326E+00
+ ETOT 10  -124.34826997288     2.550E-06 3.331E-06 9.023E-05 1.138E-02 1.315E+00
+ ETOT 11  -124.34826954953     4.234E-07 1.453E-07 3.563E-05 3.922E-04 1.314E+00
+ ETOT 12  -124.34826855639     9.931E-07 2.252E-07 1.812E-05 7.740E-03 1.322E+00
+ ETOT 13  -124.34826924207    -6.857E-07 2.848E-08 3.066E-08 3.172E-03 1.319E+00
+ ETOT 14  -124.34826928352    -4.145E-08 2.623E-10 4.061E-08 3.822E-05 1.319E+00
+ ETOT 15  -124.34826926956     1.396E-08 2.043E-10 1.277E-08 2.755E-06 1.319E+00
+ ETOT 16  -124.34826926815     1.417E-09 3.890E-11 1.617E-10 1.784E-05 1.319E+00
+ ETOT 17  -124.34826926844    -2.963E-10 5.884E-13 8.545E-12 2.366E-06 1.319E+00
+ ETOT 18  -124.34826926830     1.417E-10 1.010E-14 1.111E-12 6.324E-07 1.319E+00
+ ETOT 19  -124.34826926822     7.812E-11 5.891E-16 1.217E-13 1.926E-07 1.319E+00
+ ETOT 20  -124.34826926821     9.763E-12 2.546E-16 3.782E-15 2.184E-08 1.319E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.51703996E-03  sigma(3 2)=  0.00000000E+00
@@ -541,7 +541,7 @@ lattice_vectors:
 lattice_lengths: [   4.15692,    4.15692,    4.15692, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   5.5296000E+01
-convergence: {deltae:  9.749E-12, res2:  3.782E-15, residm:  2.546E-16, diffor: null, }
+convergence: {deltae:  9.763E-12, res2:  3.782E-15, residm:  2.546E-16, diffor: null, }
 etotal    :  -1.24348269E+02
 entropy   :   0.00000000E+00
 fermie    :   5.33955515E-01
@@ -567,11 +567,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (from the atomic spheres):             1.318801
  Total magnetization (exact up - dn):                       1.292940
 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.550629707745417
- Compensation charge over fine fft grid    =      8.550228879350986
+ Compensation charge over spherical meshes =      8.550629707745420
+ Compensation charge over fine fft grid    =      8.550228879350914
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -685,30 +686,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.28692117506085E+01
+kinetic             :  1.28692117506084E+01
 hartree             :  1.86228243872031E+01
-xc                  : -3.59602985618661E+00
+xc                  : -3.59602985618659E+00
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  8.99300246551396E+00
-local_psp           : -5.26757319771043E+01
-spherical_terms     : -1.15138125174553E+01
+local_psp           : -5.26757319771044E+01
+spherical_terms     : -1.15138125174552E+01
 internal            : -1.24346761067678E+02
-'-kT*entropy'       : -1.50816510095117E-03
+'-kT*entropy'       : -1.50816510095134E-03
 total_energy        : -1.24348269232779E+02
-total_energy_eV     : -3.38368848641977E+03
+total_energy_eV     : -3.38368848641978E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.07550436536095E+01
+band_energy         : -1.07550436536094E+01
 Ewald energy        : -9.70462253202573E+01
 psp_core            :  8.99300246551396E+00
 xc_dc               : -1.75261742160779E+01
-spherical_terms     : -8.01232037868180E+00
+spherical_terms     : -8.01232037868183E+00
 internal            : -1.24346761103112E+02
-'-kT*entropy'       : -1.50816510095117E-03
+'-kT*entropy'       : -1.50816510095134E-03
 total_energy_dc     : -1.24348269268213E+02
 total_energy_dc_eV  : -3.38368848738400E+03
 ...
@@ -773,7 +774,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -807,14 +808,34 @@ solver: {iscf: 7, nstep: 3, nline: 8, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   325.80330676290      2.153E+02 8.075E-03 7.595E+05
- ETOT  2   19.616264207331     -3.062E+02 5.807E-04 4.819E+04
- ETOT  3   1.1588379513480     -1.846E+01 8.319E-05 7.476E+02
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   325.80330735575      2.153E+02 8.075E-03 7.595E+05 9.751E-05 2.981E-04
+ ETOT  2   19.616264551773     -3.062E+02 5.807E-04 4.819E+04 1.927E-03 1.478E-04
+ ETOT  3   1.1588386494459     -1.846E+01 8.319E-05 7.476E+02 2.591E-02 1.450E-05
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  7.476E+02 exceeds tolvrs=  1.000E-05
+
+ Integrated electronic and magnetization densities in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Real part of magnetization:
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1   2.11532    -0.000155    -0.000157     -0.000312     0.000002
+ ---------------------------------------------------------------------
+  Sum:             -0.000155    -0.000157     -0.000312     0.000002
+ Total magnetization (from the atomic spheres):             0.000002
+ Total magnetization (exact up - dn):                       0.000003
+
+----------------------------
+ Imaginary part of magnetization:
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1   2.11532    -0.023904    -0.023889     -0.047793    -0.000014
+ ---------------------------------------------------------------------
+  Sum:             -0.023904    -0.023889     -0.047793    -0.000014
+ Total magnetization (from the atomic spheres):            -0.000014
+ Total magnetization (exact up - dn):                       0.000149
 
 ================================================================================
 
@@ -824,25 +845,25 @@ tolerances: {tolvrs: 1.00E-05, }
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.41438328E+02 eigvalue=   1.43729950E+02  local=  -7.43154061E+01
+     kin0=   3.41438329E+02 eigvalue=   1.43729951E+02  local=  -7.43154062E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -5.74353386E+02  Hartree=   8.85132523E+02     xc=  -1.92698453E+01
+ loc psp =  -5.74353386E+02  Hartree=   8.85132524E+02     xc=  -1.92698453E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   3.65341389E+02     enl0=  -3.24420441E+01   enl1=  -1.14465463E+03
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.05631335E-02
+    edocc=   3.65341389E+02     enl0=  -3.24420439E+01   enl1=  -1.14465463E+03
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.05632311E-02
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -1.09382553E+02
+   erelax=  -1.09382552E+02
  11,12,13 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=   1.17784264E+03 fr.nonlo=  -1.11919187E+03  Ewald=   5.18906191E+01
  14,15 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  16 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =   7.39955405E+02
+ eovl1 =   7.39955406E+02
  Resulting in :
- 2DEtotal=    0.1158837951E+01 Ha. Also 2DEtotal=    0.315335843257E+02 eV
-    (2DErelax=   -1.0938255293E+02 Ha. 2DEnonrelax=    1.1054139088E+02 Ha)
-    (  non-var. 2DEtotal :   -9.0072096714E+00 Ha)
+ 2DEtotal=    0.1158838649E+01 Ha. Also 2DEtotal=    0.315336033219E+02 eV
+    (2DErelax=   -1.0938255223E+02 Ha. 2DEnonrelax=    1.1054139088E+02 Ha)
+    (  non-var. 2DEtotal :   -9.0072091988E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -867,14 +888,34 @@ solver: {iscf: 7, nstep: 3, nline: 8, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   3315.9512824845      3.226E+03 1.300E-02 1.424E+07
- ETOT  2   59.411015956515     -3.257E+03 6.541E-03 1.988E+05
- ETOT  3   7.6803978746198     -5.173E+01 7.580E-05 1.615E+03
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   3315.9512795054      3.226E+03 1.300E-02 1.424E+07 3.985E+01 2.455E+00
+ ETOT  2   59.411016210138     -3.257E+03 6.540E-03 1.988E+05 2.070E+01 3.338E+00
+ ETOT  3   7.6803976277947     -5.173E+01 7.580E-05 1.615E+03 2.321E+00 3.128E+00
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  1.615E+03 exceeds tolvrs=  1.000E-05
+
+ Integrated electronic and magnetization densities in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Real part of magnetization:
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1   2.11532     0.000028     0.000027      0.000055     0.000000
+ ---------------------------------------------------------------------
+  Sum:              0.000028     0.000027      0.000055     0.000000
+ Total magnetization (from the atomic spheres):             0.000000
+ Total magnetization (exact up - dn):                      -0.000000
+
+----------------------------
+ Imaginary part of magnetization:
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1   2.11532   -19.957859   -16.829980    -36.787839    -3.127879
+ ---------------------------------------------------------------------
+  Sum:            -19.957859   -16.829980    -36.787839    -3.127879
+ Total magnetization (from the atomic spheres):            -3.127879
+ Total magnetization (exact up - dn):                      -3.116869
 
 ================================================================================
 
@@ -884,15 +925,15 @@ tolerances: {tolvrs: 1.00E-05, }
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.63556286E+02 eigvalue=   1.38433577E+02  local=  -7.91914422E+01
+     kin0=   3.63556287E+02 eigvalue=   1.38433577E+02  local=  -7.91914424E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
  loc psp =  -1.09003611E+03  Hartree=   1.41794208E+03     xc=  -2.57333848E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   3.65901500E+02     enl0=  -2.93197807E+01   enl1=  -1.14362438E+03
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.56434803E-02
+    edocc=   3.65901500E+02     enl0=  -2.93197803E+01   enl1=  -1.14362439E+03
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.56434415E-02
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -8.20560176E+01
+   erelax=  -8.20560179E+01
  11,12,13 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=   1.17784264E+03 fr.nonlo=  -1.70642204E+03  Ewald=   6.18315814E+02
  14,15 Frozen wf xc core corrections (1) and (2)
@@ -900,9 +941,9 @@ tolerances: {tolvrs: 1.00E-05, }
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =   1.02585621E+03
  Resulting in :
- 2DEtotal=    0.7680397875E+01 Ha. Also 2DEtotal=    0.208994254764E+03 eV
-    (2DErelax=   -8.2056017605E+01 Ha. 2DEnonrelax=    8.9736415479E+01 Ha)
-    (  non-var. 2DEtotal :   -1.2376195637E+00 Ha)
+ 2DEtotal=    0.7680397628E+01 Ha. Also 2DEtotal=    0.208994248047E+03 eV
+    (2DErelax=   -8.2056017852E+01 Ha. 2DEnonrelax=    8.9736415479E+01 Ha)
+    (  non-var. 2DEtotal :   -1.2376204112E+00 Ha)
 
 ================================================================================
 
@@ -910,57 +951,57 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
-   1    1   1    1        -9.0072096714         0.0000000000
-   1    1   2    1         4.4318284938         0.0000000000
-   1    1   3    1         2.2876905888         0.0000000000
-
-   2    1   1    1         4.4318284938         0.0000000000
-   2    1   2    1        -9.0072096714         0.0000000000
-   2    1   3    1         2.2876905888         0.0000000000
-
-   3    1   1    1         2.2876905888         0.0000000000
-   3    1   2    1         2.2876905888        -0.0000000000
-   3    1   3    1         4.3143943422         0.0002110179
-
-
+  
+   1    1   1    1        -9.0072091988         0.0000000000
+   1    1   2    1         4.4318269335         0.0000000000
+   1    1   3    1         2.2876911326         0.0000000000
+  
+   2    1   1    1         4.4318269335         0.0000000000
+   2    1   2    1        -9.0072091988         0.0000000000
+   2    1   3    1         2.2876911326         0.0000000000
+  
+   3    1   1    1         2.2876911326         0.0000000000
+   3    1   2    1         2.2876911326         0.0000000000
+   3    1   3    1         4.3143940713         0.0002109808
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
-   1    1   1    1        -0.0050969684         0.0000091588
-   1    1   2    1         0.5781946186         0.0000091588
-   1    1   3    1         0.0000000000        -0.0000000000
-
-   2    1   1    1         0.5781946186         0.0000091588
-   2    1   2    1        -0.0050969684         0.0000091588
-   2    1   3    1         0.0000000000        -0.0000000000
-
+  
+   1    1   1    1        -0.0050969124         0.0000091572
+   1    1   2    1         0.5781945864         0.0000091572
+   1    1   3    1         0.0000000000         0.0000000000
+  
+   2    1   1    1         0.5781945864         0.0000091572
+   2    1   2    1        -0.0050969124         0.0000091572
+   2    1   3    1         0.0000000000         0.0000000000
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1        -0.3971685050         0.0000000000
+   3    1   3    1        -0.3971685994         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
-  -2.393662E-03 -1.975183E-03  2.372654E-03
+  -2.393662E-03 -1.975184E-03  2.372654E-03
  Phonon frequencies in cm-1    :
-- -5.253482E+02 -4.335026E+02  5.207373E+02
+- -5.253481E+02 -4.335027E+02  5.207373E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      4.8000000000E+00  4.8000000000E+00  4.8000000000E+00 Bohr
               amu      5.58470000E+01
              ecut      1.00000000E+01 Hartree
            etotal1    -1.2434826927E+02
-           etotal2     7.6803978746E+00
+           etotal2     7.6803976278E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
@@ -1366,7 +1407,7 @@ P          mk1mem          64
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1389,12 +1430,12 @@ P          mk1mem          64
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1412,15 +1453,15 @@ P          mk1mem          64
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         15.8  wall=         15.8
+- Proc.   0 individual time (sec): cpu=         16.3  wall=         16.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.8  wall=         15.8
++Overall time at end (sec) : cpu=         16.3  wall=         16.4

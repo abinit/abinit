@@ -48,4 +48,5 @@ inp_files = [
     "t106.abi" , # Test Si spectral function and mobilities :step 3 merge DVDB
     "t107.abi" , # Test Si spectral function and mobilities :step 4 mobilities cumulant and DM with positive doping correction
     "t108.abi",  # Test for rcpaw
+    "t110.abi",  # Test for toldmag
 ]

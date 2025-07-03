@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t25/t25.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h03 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t25/t25.abi
 - output file    -> t25.abo
 - root for input  files -> t25i
 - root for output files -> t25o
@@ -217,8 +217,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11938
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -243,22 +243,22 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.0540328253132    -1.054E+00 6.640E-06 7.940E+00
- ETOT  2  -1.0543435936346    -3.108E-04 1.630E-09 2.913E+00
- ETOT  3  -1.0544541616672    -1.106E-04 2.220E-07 1.392E+00
- ETOT  4  -1.0544663218060    -1.216E-05 7.805E-08 6.608E-01
- ETOT  5  -1.0544695549923    -3.233E-06 6.150E-09 3.195E-01
- ETOT  6  -1.0544722762883    -2.721E-06 8.095E-09 7.100E-02
- ETOT  7  -1.0544729976674    -7.214E-07 1.551E-09 6.352E-03
- ETOT  8  -1.0544730763756    -7.871E-08 2.731E-10 7.563E-04
- ETOT  9  -1.0544730864293    -1.005E-08 3.330E-11 1.186E-04
- ETOT 10  -1.0544730894300    -3.001E-09 1.826E-11 7.482E-06
- ETOT 11  -1.0544730895822    -1.522E-10 4.937E-13 1.396E-06
- ETOT 12  -1.0544730895903    -8.099E-12 1.114E-14 1.994E-07
- ETOT 13  -1.0544730896104    -2.003E-11 4.186E-14 4.667E-08
- ETOT 14  -1.0544730896189    -8.494E-12 1.157E-14 2.397E-08
- ETOT 15  -1.0544730896238    -4.903E-12 8.459E-15 1.187E-08
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -1.0540328253132    -1.054E+00 6.640E-06 7.940E+00 1.030E-02 1.030E-02
+ ETOT  2  -1.0543435936346    -3.108E-04 1.630E-09 2.913E+00 3.685E-03 6.613E-03
+ ETOT  3  -1.0544541616672    -1.106E-04 2.220E-07 1.392E+00 2.912E-03 3.701E-03
+ ETOT  4  -1.0544663218060    -1.216E-05 7.805E-08 6.608E-01 2.074E-03 1.627E-03
+ ETOT  5  -1.0544695549923    -3.233E-06 6.150E-09 3.195E-01 8.642E-04 7.623E-04
+ ETOT  6  -1.0544722762883    -2.721E-06 8.095E-09 7.100E-02 7.453E-04 1.702E-05
+ ETOT  7  -1.0544729976674    -7.214E-07 1.551E-09 6.352E-03 1.881E-04 1.710E-04
+ ETOT  8  -1.0544730763756    -7.871E-08 2.731E-10 7.563E-04 8.784E-05 8.320E-05
+ ETOT  9  -1.0544730864293    -1.005E-08 3.330E-11 1.186E-04 4.330E-05 3.990E-05
+ ETOT 10  -1.0544730894300    -3.001E-09 1.826E-11 7.482E-06 4.018E-05 2.849E-07
+ ETOT 11  -1.0544730895822    -1.522E-10 4.937E-13 1.396E-06 5.164E-06 5.449E-06
+ ETOT 12  -1.0544730895903    -8.099E-12 1.114E-14 1.994E-07 5.533E-07 6.002E-06
+ ETOT 13  -1.0544730896104    -2.003E-11 4.186E-14 4.667E-08 1.675E-06 4.327E-06
+ ETOT 14  -1.0544730896189    -8.494E-12 1.157E-14 2.397E-08 1.268E-06 3.059E-06
+ ETOT 15  -1.0544730896238    -4.903E-12 8.459E-15 1.187E-08 1.092E-06 1.967E-06
 
  At SCF step   15   max residual=  8.46E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -306,6 +306,7 @@ force_length_stats: {min:   7.27856721E-02, max:   7.27856721E-02, mean:   7.278
   Sum:              0.306833     0.306833      0.613667    -0.000000
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -404,20 +405,20 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.0534626812783    -1.053E+00 6.640E-06 1.190E+01
- ETOT  2  -1.0497740406752     3.689E-03 2.714E-10 3.311E+00
- ETOT  3  -1.0496209007933     1.531E-04 3.383E-07 1.819E+00
- ETOT  4  -1.0495742843312     4.662E-05 4.261E-07 9.041E-01
- ETOT  5  -1.0495616577042     1.263E-05 1.986E-08 4.912E-01
- ETOT  6  -1.0495626696200    -1.012E-06 2.756E-10 1.815E-01
- ETOT  7  -1.0495643699811    -1.700E-06 3.200E-09 1.772E-02
- ETOT  8  -1.0495644953549    -1.254E-07 3.278E-10 1.754E-03
- ETOT  9  -1.0495645118998    -1.654E-08 9.303E-11 1.304E-04
- ETOT 10  -1.0495645122357    -3.359E-10 4.797E-12 1.581E-05
- ETOT 11  -1.0495645124899    -2.542E-10 4.311E-13 1.384E-06
- ETOT 12  -1.0495645125285    -3.864E-11 7.118E-14 1.144E-07
- ETOT 13  -1.0495645125303    -1.821E-12 3.993E-15 1.878E-08
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -1.0534626812783    -1.053E+00 6.640E-06 1.190E+01 1.030E-02 1.030E-02
+ ETOT  2  -1.0497740406752     3.689E-03 2.714E-10 3.311E+00 7.946E-02 8.976E-02
+ ETOT  3  -1.0496209007933     1.531E-04 3.383E-07 1.819E+00 3.415E-03 8.634E-02
+ ETOT  4  -1.0495742843312     4.662E-05 4.261E-07 9.041E-01 9.657E-03 7.669E-02
+ ETOT  5  -1.0495616577042     1.263E-05 1.986E-08 4.912E-01 3.515E-03 8.020E-02
+ ETOT  6  -1.0495626696200    -1.012E-06 2.756E-10 1.815E-01 1.623E-05 8.019E-02
+ ETOT  7  -1.0495643699811    -1.700E-06 3.200E-09 1.772E-02 3.350E-04 7.985E-02
+ ETOT  8  -1.0495644953549    -1.254E-07 3.278E-10 1.754E-03 1.043E-04 7.995E-02
+ ETOT  9  -1.0495645118998    -1.654E-08 9.303E-11 1.304E-04 7.229E-05 8.003E-02
+ ETOT 10  -1.0495645122357    -3.359E-10 4.797E-12 1.581E-05 3.090E-05 8.000E-02
+ ETOT 11  -1.0495645124899    -2.542E-10 4.311E-13 1.384E-06 3.743E-06 8.000E-02
+ ETOT 12  -1.0495645125285    -3.864E-11 7.118E-14 1.144E-07 1.244E-07 8.000E-02
+ ETOT 13  -1.0495645125303    -1.821E-12 3.993E-15 1.878E-08 1.643E-07 8.000E-02
 
  At SCF step   13   max residual=  3.99E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -466,6 +467,7 @@ force_length_stats: {min:   5.58654130E-02, max:   5.58654130E-02, mean:   5.586
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                       0.000000
 
+
  Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
@@ -474,6 +476,7 @@ force_length_stats: {min:   5.58654130E-02, max:   5.58654130E-02, mean:   5.586
     2   1.00000    -0.000000    -0.062628     -0.062628     0.062628
  ---------------------------------------------------------------------
   Sum:              0.000000     0.000000      0.000000    -0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -572,23 +575,23 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.0535023378600    -1.054E+00 6.640E-06 1.208E+01
- ETOT  2  -1.0497734603442     3.729E-03 3.945E-09 3.357E+00
- ETOT  3  -1.0496612262220     1.122E-04 8.167E-08 1.852E+00
- ETOT  4  -1.0496323514951     2.887E-05 4.659E-07 9.200E-01
- ETOT  5  -1.0496064668581     2.588E-05 1.654E-08 5.277E-01
- ETOT  6  -1.0496061903324     2.765E-07 4.848E-09 2.116E-01
- ETOT  7  -1.0495859935446     2.020E-05 5.994E-09 4.348E-02
- ETOT  8  -1.0495664466070     1.955E-05 4.635E-09 5.927E-03
- ETOT  9  -1.0495632646757     3.182E-06 1.265E-08 1.483E-04
- ETOT 10  -1.0495633244517    -5.978E-08 2.140E-10 4.735E-05
- ETOT 11  -1.0495632761324     4.832E-08 5.224E-11 3.230E-05
- ETOT 12  -1.0495632538181     2.231E-08 3.838E-11 8.535E-06
- ETOT 13  -1.0495632539892    -1.711E-10 9.942E-13 2.115E-07
- ETOT 14  -1.0495632538332     1.560E-10 2.267E-13 7.352E-08
- ETOT 15  -1.0495632538294     3.815E-12 1.755E-14 4.024E-08
- ETOT 16  -1.0495632538299    -5.160E-13 2.860E-15 1.493E-08
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -1.0535023378600    -1.054E+00 6.640E-06 1.208E+01 1.030E-02 1.030E-02
+ ETOT  2  -1.0497734603442     3.729E-03 3.945E-09 3.357E+00 7.762E-02 8.791E-02
+ ETOT  3  -1.0496612262220     1.122E-04 8.167E-08 1.852E+00 1.056E-03 8.686E-02
+ ETOT  4  -1.0496323514951     2.887E-05 4.659E-07 9.200E-01 1.066E-02 7.620E-02
+ ETOT  5  -1.0496064668581     2.588E-05 1.654E-08 5.277E-01 3.776E-03 7.997E-02
+ ETOT  6  -1.0496061903324     2.765E-07 4.848E-09 2.116E-01 3.121E-04 8.029E-02
+ ETOT  7  -1.0495859935446     2.020E-05 5.994E-09 4.348E-02 2.662E-04 8.002E-02
+ ETOT  8  -1.0495664466070     1.955E-05 4.635E-09 5.927E-03 2.693E-05 7.999E-02
+ ETOT  9  -1.0495632646757     3.182E-06 1.265E-08 1.483E-04 5.129E-05 8.004E-02
+ ETOT 10  -1.0495633244517    -5.978E-08 2.140E-10 4.735E-05 9.757E-05 7.995E-02
+ ETOT 11  -1.0495632761324     4.832E-08 5.224E-11 3.230E-05 4.427E-05 7.999E-02
+ ETOT 12  -1.0495632538181     2.231E-08 3.838E-11 8.535E-06 1.503E-05 8.000E-02
+ ETOT 13  -1.0495632539892    -1.711E-10 9.942E-13 2.115E-07 5.778E-06 8.000E-02
+ ETOT 14  -1.0495632538332     1.560E-10 2.267E-13 7.352E-08 9.042E-07 8.000E-02
+ ETOT 15  -1.0495632538294     3.815E-12 1.755E-14 4.024E-08 2.236E-07 8.000E-02
+ ETOT 16  -1.0495632538299    -5.160E-13 2.860E-15 1.493E-08 4.816E-07 8.000E-02
 
  At SCF step   16   max residual=  2.86E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -637,6 +640,7 @@ force_length_stats: {min:   5.72612621E-02, max:   5.72612621E-02, mean:   5.726
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
 
+
  Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
@@ -645,6 +649,7 @@ force_length_stats: {min:   5.72612621E-02, max:   5.72612621E-02, mean:   5.726
     2   1.00000     0.002588    -0.062871     -0.065459     0.060282
  ---------------------------------------------------------------------
   Sum:             -0.005176     0.000000     -0.005176    -0.005176
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -743,20 +748,20 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.0534626812783    -1.053E+00 6.640E-06 1.190E+01
- ETOT  2  -1.0497740406752     3.689E-03 2.714E-10 3.311E+00
- ETOT  3  -1.0496209007933     1.531E-04 3.383E-07 1.819E+00
- ETOT  4  -1.0495742843312     4.662E-05 4.261E-07 9.041E-01
- ETOT  5  -1.0495616577042     1.263E-05 1.986E-08 4.912E-01
- ETOT  6  -1.0495626696200    -1.012E-06 2.756E-10 1.815E-01
- ETOT  7  -1.0495643699811    -1.700E-06 3.200E-09 1.772E-02
- ETOT  8  -1.0495644953549    -1.254E-07 3.278E-10 1.754E-03
- ETOT  9  -1.0495645118998    -1.654E-08 9.303E-11 1.304E-04
- ETOT 10  -1.0495645122357    -3.359E-10 4.797E-12 1.581E-05
- ETOT 11  -1.0495645124899    -2.542E-10 4.311E-13 1.384E-06
- ETOT 12  -1.0495645125285    -3.864E-11 7.118E-14 1.144E-07
- ETOT 13  -1.0495645125303    -1.824E-12 3.993E-15 1.878E-08
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -1.0534626812783    -1.053E+00 6.640E-06 1.190E+01 1.030E-02 1.030E-02
+ ETOT  2  -1.0497740406752     3.689E-03 2.714E-10 3.311E+00 7.946E-02 8.976E-02
+ ETOT  3  -1.0496209007933     1.531E-04 3.383E-07 1.819E+00 3.415E-03 8.634E-02
+ ETOT  4  -1.0495742843312     4.662E-05 4.261E-07 9.041E-01 9.657E-03 7.669E-02
+ ETOT  5  -1.0495616577042     1.263E-05 1.986E-08 4.912E-01 3.515E-03 8.020E-02
+ ETOT  6  -1.0495626696200    -1.012E-06 2.756E-10 1.815E-01 1.623E-05 8.019E-02
+ ETOT  7  -1.0495643699811    -1.700E-06 3.200E-09 1.772E-02 3.350E-04 7.985E-02
+ ETOT  8  -1.0495644953549    -1.254E-07 3.278E-10 1.754E-03 1.043E-04 7.995E-02
+ ETOT  9  -1.0495645118998    -1.654E-08 9.303E-11 1.304E-04 7.229E-05 8.003E-02
+ ETOT 10  -1.0495645122357    -3.359E-10 4.797E-12 1.581E-05 3.090E-05 8.000E-02
+ ETOT 11  -1.0495645124899    -2.542E-10 4.311E-13 1.384E-06 3.743E-06 8.000E-02
+ ETOT 12  -1.0495645125285    -3.864E-11 7.118E-14 1.144E-07 1.244E-07 8.000E-02
+ ETOT 13  -1.0495645125303    -1.824E-12 3.993E-15 1.878E-08 1.643E-07 8.000E-02
 
  At SCF step   13   max residual=  3.99E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -805,6 +810,7 @@ force_length_stats: {min:   5.58654130E-02, max:   5.58654130E-02, mean:   5.586
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
 
+
  Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
@@ -813,6 +819,7 @@ force_length_stats: {min:   5.58654130E-02, max:   5.58654130E-02, mean:   5.586
     2   1.00000    -0.000000    -0.062628     -0.062628     0.062628
  ---------------------------------------------------------------------
   Sum:              0.000000     0.000000      0.000000    -0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -911,22 +918,22 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.0540328253132    -1.054E+00 6.640E-06 7.940E+00
- ETOT  2  -1.0543435936346    -3.108E-04 1.630E-09 2.913E+00
- ETOT  3  -1.0544541616672    -1.106E-04 2.220E-07 1.392E+00
- ETOT  4  -1.0544663218060    -1.216E-05 7.805E-08 6.608E-01
- ETOT  5  -1.0544695549923    -3.233E-06 6.150E-09 3.195E-01
- ETOT  6  -1.0544722762883    -2.721E-06 8.095E-09 7.100E-02
- ETOT  7  -1.0544729976674    -7.214E-07 1.551E-09 6.352E-03
- ETOT  8  -1.0544730763756    -7.871E-08 2.731E-10 7.563E-04
- ETOT  9  -1.0544730864293    -1.005E-08 3.330E-11 1.186E-04
- ETOT 10  -1.0544730894300    -3.001E-09 1.826E-11 7.482E-06
- ETOT 11  -1.0544730895822    -1.522E-10 4.937E-13 1.396E-06
- ETOT 12  -1.0544730895903    -8.099E-12 1.114E-14 1.994E-07
- ETOT 13  -1.0544730896104    -2.003E-11 4.186E-14 4.667E-08
- ETOT 14  -1.0544730896189    -8.494E-12 1.157E-14 2.397E-08
- ETOT 15  -1.0544730896238    -4.903E-12 8.459E-15 1.187E-08
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -1.0540328253132    -1.054E+00 6.640E-06 7.940E+00 1.030E-02 1.030E-02
+ ETOT  2  -1.0543435936346    -3.108E-04 1.630E-09 2.913E+00 3.685E-03 6.613E-03
+ ETOT  3  -1.0544541616672    -1.106E-04 2.220E-07 1.392E+00 2.912E-03 3.701E-03
+ ETOT  4  -1.0544663218060    -1.216E-05 7.805E-08 6.608E-01 2.074E-03 1.627E-03
+ ETOT  5  -1.0544695549923    -3.233E-06 6.150E-09 3.195E-01 8.642E-04 7.623E-04
+ ETOT  6  -1.0544722762883    -2.721E-06 8.095E-09 7.100E-02 7.453E-04 1.702E-05
+ ETOT  7  -1.0544729976674    -7.214E-07 1.551E-09 6.352E-03 1.881E-04 1.710E-04
+ ETOT  8  -1.0544730763756    -7.871E-08 2.731E-10 7.563E-04 8.784E-05 8.320E-05
+ ETOT  9  -1.0544730864293    -1.005E-08 3.330E-11 1.186E-04 4.330E-05 3.990E-05
+ ETOT 10  -1.0544730894300    -3.001E-09 1.826E-11 7.482E-06 4.018E-05 2.849E-07
+ ETOT 11  -1.0544730895822    -1.522E-10 4.937E-13 1.396E-06 5.164E-06 5.449E-06
+ ETOT 12  -1.0544730895903    -8.099E-12 1.114E-14 1.994E-07 5.533E-07 6.002E-06
+ ETOT 13  -1.0544730896104    -2.003E-11 4.186E-14 4.667E-08 1.675E-06 4.327E-06
+ ETOT 14  -1.0544730896189    -8.494E-12 1.157E-14 2.397E-08 1.268E-06 3.059E-06
+ ETOT 15  -1.0544730896238    -4.903E-12 8.459E-15 1.187E-08 1.092E-06 1.967E-06
 
  At SCF step   15   max residual=  8.46E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -975,6 +982,7 @@ force_length_stats: {min:   7.27856721E-02, max:   7.27856721E-02, mean:   7.278
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
 
+
  Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
@@ -983,6 +991,7 @@ force_length_stats: {min:   7.27856721E-02, max:   7.27856721E-02, mean:   7.278
     2   1.00000    -0.000000    -0.000001     -0.000001     0.000001
  ---------------------------------------------------------------------
   Sum:              0.000000     0.000000      0.000000    -0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1044,7 +1053,7 @@ band_energy         : -6.19509458433896E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.5000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
@@ -1173,7 +1182,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1185,12 +1194,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1208,7 +1217,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1223,15 +1232,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  77 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.5  wall=          1.5
++Overall time at end (sec) : cpu=          1.4  wall=          1.5

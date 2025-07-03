@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h31 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI4/paral_t94_MPI4/t94.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h13 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI4/paral_t94_MPI4/t94.abi
 - output file    -> t94_MPI4.abo
 - root for input  files -> t94_MPI4i
 - root for output files -> t94_MPI4o
@@ -241,8 +241,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.07387
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -269,15 +269,15 @@ solver: {iscf: 7, nstep: 8, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.810681028667    -1.181E+01 5.283E-03 1.086E+01
- ETOT  2  -11.816468213261    -5.787E-03 1.369E-04 3.856E-02
- ETOT  3  -11.816477033361    -8.820E-06 2.560E-04 9.138E-04
- ETOT  4  -11.816477240769    -2.074E-07 1.112E-05 9.571E-07
- ETOT  5  -11.816477240955    -1.868E-10 2.207E-05 5.133E-10
- ETOT  6  -11.816477240955    -1.457E-13 1.035E-06 3.856E-13
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -11.810681028667    -1.181E+01 5.283E-03 1.086E+01 0.000E+00 0.000E+00
+ ETOT  2  -11.816468213261    -5.787E-03 1.369E-04 3.856E-02 0.000E+00 0.000E+00
+ ETOT  3  -11.816477033361    -8.820E-06 2.560E-04 9.138E-04 0.000E+00 0.000E+00
+ ETOT  4  -11.816477240769    -2.074E-07 1.112E-05 9.571E-07 0.000E+00 0.000E+00
+ ETOT  5  -11.816477240955    -1.868E-10 2.207E-05 5.133E-10 0.000E+00 0.000E+00
+ ETOT  6  -11.816477240955    -1.457E-13 1.035E-06 3.856E-13 0.000E+00 0.000E+00
 
- At SCF step    6, etot is converged :
+ At SCF step    6, etot is converged : 
   for the second time, diff in etot=  1.457E-13 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -324,6 +324,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              4.743290     4.743290      9.486579     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -419,8 +420,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.07387
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -447,15 +448,15 @@ solver: {iscf: 7, nstep: 8, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.853297426537    -1.185E+01 1.974E-08 1.490E-02
- ETOT  2  -11.853550330758    -2.529E-04 1.363E-09 1.276E-03
- ETOT  3  -11.853555917167    -5.586E-06 1.067E-07 3.355E-05
- ETOT  4  -11.853556091958    -1.748E-07 6.864E-09 3.704E-07
- ETOT  5  -11.853556109296    -1.734E-08 2.676E-09 3.243E-08
- ETOT  6  -11.853556111663    -2.367E-09 1.639E-09 2.134E-08
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -11.853297426537    -1.185E+01 1.974E-08 1.490E-02 0.000E+00 0.000E+00
+ ETOT  2  -11.853550330758    -2.529E-04 1.363E-09 1.276E-03 0.000E+00 0.000E+00
+ ETOT  3  -11.853555917167    -5.586E-06 1.067E-07 3.355E-05 0.000E+00 0.000E+00
+ ETOT  4  -11.853556091958    -1.748E-07 6.864E-09 3.704E-07 0.000E+00 0.000E+00
+ ETOT  5  -11.853556109296    -1.734E-08 2.676E-09 3.243E-08 0.000E+00 0.000E+00
+ ETOT  6  -11.853556111663    -2.367E-09 1.639E-09 2.134E-08 0.000E+00 0.000E+00
 
- At SCF step    6, etot is converged :
+ At SCF step    6, etot is converged : 
   for the second time, diff in etot=  2.367E-09 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -487,9 +488,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [  4.31957546E-23,  -1.43985849E-23,  -9.16273582E-24, ]
-- [ -4.31957546E-23,   1.43985849E-23,   9.16273582E-24, ]
-force_length_stats: {min:   4.64451094E-23, max:   4.64451094E-23, mean:   4.64451094E-23, }
+- [  2.87971697E-23,  -5.75943395E-23,   3.66509433E-23, ]
+- [ -2.87971697E-23,   5.75943395E-23,  -3.66509433E-23, ]
+force_length_stats: {min:   7.40923516E-23, max:   7.40923516E-23, mean:   7.40923516E-23, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -502,6 +503,7 @@ force_length_stats: {min:   4.64451094E-23, max:   4.64451094E-23, mean:   4.644
   Sum:              4.769069     4.769069      9.538137     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -510,23 +512,23 @@ force_length_stats: {min:   4.64451094E-23, max:   4.64451094E-23, mean:   4.644
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.1683E-22; max dE/dt=  1.9411E-22; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000     -0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  1.5418E-22; max dE/dt=  1.9411E-22; dE/dt below (all hartree)
+    1       0.000000000000     -0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.89174993186803     0.89174993186803     0.89174993186803
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 2.6815096E-23 4.3195755E-23   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 4.2777239E-23 5.7594339E-23   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 1.3788876E-21 2.2212148E-21   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 2.1996939E-21 2.9616198E-21   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740652601000  6.740652601000  6.740652601000 bohr
               =  3.566999727472  3.566999727472  3.566999727472 angstroms
  prteigrs : about to open file t94_MPI4o_DS2_EIG
@@ -547,7 +549,7 @@ iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.81077351914123E+00
 hartree             :  9.23930232041878E-01
-xc                  : -3.27121974280689E+00
+xc                  : -3.27121974280690E+00
 Ewald energy        : -1.27864130979666E+01
 psp_core            :  1.93481692770424E-01
 local_psp           : -5.06231749226026E+00
@@ -559,10 +561,10 @@ total_energy        : -1.18535561116631E+01
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  5.16301148183174E-01
+band_energy         :  5.16301148183173E-01
 Ewald energy        : -1.27864130979666E+01
 psp_core            :  1.93481692770424E-01
-xc_dc               :  2.23064064045665E-01
+xc_dc               :  2.23064064045659E-01
 total_energy_dc     : -1.18535661929674E+01
 ...
 
@@ -579,7 +581,7 @@ total_energy_dc     : -1.18535661929674E+01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.7406526010E+00  6.7406526010E+00  6.7406526010E+00 Bohr
               amu      1.20110000E+01
@@ -589,8 +591,8 @@ total_energy_dc     : -1.18535661929674E+01
            etotal2    -1.1853556112E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart2     4.3195754603E-23 -1.4398584868E-23 -9.1627358249E-24
-                      -4.3195754603E-23  1.4398584868E-23  9.1627358249E-24
+            fcart2     2.8797169736E-23 -5.7594339471E-23  3.6650943300E-23
+                      -2.8797169736E-23  5.7594339471E-23 -3.6650943300E-23
 -          fftalg         512
            getwfk1          0
            getwfk2         -1
@@ -756,7 +758,7 @@ P           mkmem2          4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -768,12 +770,12 @@ P           mkmem2          4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -791,7 +793,7 @@ P           mkmem2          4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -806,15 +808,15 @@ P           mkmem2          4
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.8  wall=          8.0
++Overall time at end (sec) : cpu=          6.2  wall=          6.5

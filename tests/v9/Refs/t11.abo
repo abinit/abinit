@@ -1,5 +1,5 @@
 
-.Version 10.3.4.1 of ABINIT, released Feb 2025.
+.Version 9.11.6.5 of ABINIT, released May 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 31 Mar 2025.
-- ( at 18h27 )
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h05 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/TestBot_MPI1/v9_t11-t12/t11.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t11-t12/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Psdj_paw_pbe_std/As.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/As.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -496,9 +496,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.17791
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ga.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10359248
@@ -516,9 +516,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Psdj_paw_pbe_std/As.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Psdj_paw_pbe_std/As.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Psdj_paw_pbe_std/As.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/As.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/As.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/As.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10391912
@@ -549,18 +549,18 @@ solver: {iscf: 17, nstep: 100, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -191.29622772688    -1.913E+02 2.168E-01 2.882E+01
- ETOT  2  -191.41504238913    -1.188E-01 5.334E-05 1.346E+00
- ETOT  3  -191.40324005523     1.180E-02 2.790E-04 1.899E-01
- ETOT  4  -191.40286574969     3.743E-04 1.265E-05 1.248E-02
- ETOT  5  -191.40293684377    -7.109E-05 1.628E-06 2.851E-03
- ETOT  6  -191.40298119128    -4.435E-05 8.236E-08 1.802E-04
- ETOT  7  -191.40298664216    -5.451E-06 1.303E-08 7.931E-06
- ETOT  8  -191.40298664979    -7.630E-09 8.051E-10 3.400E-07
- ETOT  9  -191.40298665613    -6.335E-09 3.143E-11 4.324E-08
- ETOT 10  -191.40298665634    -2.158E-10 3.643E-12 2.286E-09
- ETOT 11  -191.40298665640    -6.227E-11 9.410E-13 8.974E-11
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -191.29622772688    -1.913E+02 2.168E-01 2.882E+01 0.000E+00 0.000E+00
+ ETOT  2  -191.41504238913    -1.188E-01 5.334E-05 1.346E+00 3.180E-13 3.180E-13
+ ETOT  3  -191.40324005523     1.180E-02 2.790E-04 1.899E-01 6.541E-12 6.480E-12
+ ETOT  4  -191.40286574969     3.743E-04 1.265E-05 1.248E-02 4.277E-12 1.076E-11
+ ETOT  5  -191.40293684377    -7.109E-05 1.628E-06 2.851E-03 2.302E-12 1.077E-11
+ ETOT  6  -191.40298119128    -4.435E-05 8.236E-08 1.802E-04 1.111E-11 2.081E-11
+ ETOT  7  -191.40298664216    -5.451E-06 1.303E-08 7.931E-06 4.542E-11 2.461E-11
+ ETOT  8  -191.40298664979    -7.630E-09 8.051E-10 3.400E-07 1.863E-12 2.466E-11
+ ETOT  9  -191.40298665613    -6.335E-09 3.143E-11 4.324E-08 2.663E-11 7.224E-12
+ ETOT 10  -191.40298665634    -2.158E-10 3.643E-12 2.286E-09 3.655E-11 3.458E-11
+ ETOT 11  -191.40298665640    -6.227E-11 9.410E-13 8.974E-11 1.342E-11 2.860E-11
 
  At SCF step   11   max residual=  9.41E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -608,6 +608,7 @@ force_length_stats: {min:   1.01609254E-28, max:   1.01609254E-28, mean:   1.016
   Sum:             12.009228    12.009228     24.018456     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                      -0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -924,6 +925,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                      -0.000000
 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  Compensation charge over spherical meshes =     16.386021787783914
@@ -1188,6 +1190,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:             12.009228    12.009228     24.018456     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                      -0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2098,10 +2101,10 @@ P          mk1mem6         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  38 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.0  wall=          6.1
++Overall time at end (sec) : cpu=          6.1  wall=          6.2

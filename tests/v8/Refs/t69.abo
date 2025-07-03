@@ -1,8 +1,8 @@
 
-.Version 10.2.4.2 of ABINIT, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 19 Nov 2024.
-- ( at 19h54 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t69.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h05 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t69.abi
 - output file    -> t69.abo
 - root for input  files -> t69i
 - root for output files -> t69o
@@ -160,8 +160,8 @@ meta: {optdriver: 1, rfmagn: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -182,7 +182,7 @@ meta: {optdriver: 1, rfmagn: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   6
@@ -211,24 +211,24 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-02, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.6318746779055      2.632E+00 1.809E-01 1.532E+03
- ETOT  2   4.2923230724136      1.660E+00 6.229E-01 2.087E+03
- ETOT  3   4.8886630119082      5.963E-01 6.244E-02 2.349E+03
- ETOT  4   9.9773858888613      5.089E+00 8.385E-01 7.586E+02
- ETOT  5   21.981835965836      1.200E+01 4.972E-01 3.805E+02
- ETOT  6   42.203920992120      2.022E+01 2.449E+00 1.254E+02
- ETOT  7   64.368418811837      2.216E+01 9.070E-01 3.868E+01
- ETOT  8   68.714452454552      4.346E+00 6.662E-01 5.640E-01
- ETOT  9   69.186211216877      4.718E-01 3.571E-01 5.352E-01
- ETOT 10   69.198232647635      1.202E-02 2.990E-01 1.854E-01
- ETOT 11   69.195108822536     -3.124E-03 2.725E-01 1.015E-01
- ETOT 12   69.205384598137      1.028E-02 1.419E-01 3.292E-02
- ETOT 13   69.224071579790      1.869E-02 6.022E-01 3.301E-03
- ETOT 14   69.229425345483      5.354E-03 6.846E-02 7.904E-04
- ETOT 15   69.235320555459      5.895E-03 3.469E-02 2.608E-04
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   2.6318746779055      2.632E+00 1.809E-01 1.532E+03 1.703E+01 1.703E+01
+ ETOT  2   4.2923230724136      1.660E+00 6.229E-01 2.087E+03 7.751E+00 2.478E+01
+ ETOT  3   4.8886630119082      5.963E-01 6.244E-02 2.349E+03 2.304E+00 2.708E+01
+ ETOT  4   9.9773858888613      5.089E+00 8.385E-01 7.586E+02 1.730E+01 4.438E+01
+ ETOT  5   21.981835965836      1.200E+01 4.972E-01 3.805E+02 2.545E+01 6.983E+01
+ ETOT  6   42.203920992120      2.022E+01 2.449E+00 1.254E+02 2.957E+01 9.940E+01
+ ETOT  7   64.368418811837      2.216E+01 9.070E-01 3.868E+01 2.497E+01 1.244E+02
+ ETOT  8   68.714452454552      4.346E+00 6.662E-01 5.640E-01 4.380E+00 1.288E+02
+ ETOT  9   69.186211216877      4.718E-01 3.571E-01 5.352E-01 4.771E-01 1.292E+02
+ ETOT 10   69.198232647635      1.202E-02 2.990E-01 1.854E-01 1.682E-02 1.292E+02
+ ETOT 11   69.195108822536     -3.124E-03 2.725E-01 1.015E-01 1.010E-02 1.292E+02
+ ETOT 12   69.205384598137      1.028E-02 1.419E-01 3.292E-02 9.642E-03 1.292E+02
+ ETOT 13   69.224071579790      1.869E-02 6.022E-01 3.301E-03 1.814E-02 1.293E+02
+ ETOT 14   69.229425345483      5.354E-03 6.846E-02 7.904E-04 5.294E-03 1.293E+02
+ ETOT 15   69.235320555459      5.895E-03 3.469E-02 2.608E-04 5.838E-03 1.293E+02
 
- At SCF step   15, etot is converged :
+ At SCF step   15, etot is converged : 
   for the second time, diff in etot=  5.895E-03 < toldfe=  1.000E-02
 
  ------------------------------------------------------------------------
@@ -242,6 +242,22 @@ tolerances: {toldfe: 1.00E-02, }
 
  ------------------------------------------------------------------------
 
+ Integrated electronic and magnetization densities in atomic spheres:
+ ---------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
+ Real part of magnetization:
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
+    1   2.00000       -0.004200      0.282041  129.278902   -7.915693
+ ---------------------------------------------------------------------
+ Total magnetization (spheres)       0.282041  129.278902   -7.915693
+ Total magnetization (exact)         0.294186  138.431779   -8.256556
+----------------------------
+ Imaginary part of magnetization:
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
+    1   2.00000       -0.000016     -0.000000    0.000000    0.000001
+ ---------------------------------------------------------------------
+ Total magnetization (spheres)      -0.000000    0.000000    0.000001
+ Total magnetization (exact)        -0.000000    0.000000    0.000001
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -264,16 +280,16 @@ tolerances: {toldfe: 1.00E-02, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
@@ -394,7 +410,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -406,12 +422,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -429,7 +445,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -444,7 +460,7 @@ P          mk1mem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h05 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tbase2_2/tbase2_2.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 12h55 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tbase2_2/tbase2_2.abi
 - output file    -> tbase2_2.abo
 - root for input  files -> tbase2_2i
 - root for output files -> tbase2_2o
@@ -999,8 +999,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1020,7 +1020,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -1043,7 +1043,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1171843463486    -6.490E-10 1.734E-12 3.695E-07 1.013E-05 2.690E-02
  ETOT  7  -1.1171843463515    -2.882E-12 1.164E-14 2.496E-09 5.222E-07 2.690E-02
 
- At SCF step    7, forces are converged :
+ At SCF step    7, forces are converged : 
   for the second time, max diff in force=  5.222E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1120,7 +1120,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1181409608961    -1.692E-08 9.303E-11 2.737E-06 3.907E-05 9.213E-03
  ETOT  5  -1.1181409610935    -1.975E-10 1.625E-13 4.362E-08 2.128E-06 9.215E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  2.128E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1201,7 +1201,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1182855312527    -4.258E-09 2.342E-11 7.280E-07 1.912E-05 1.227E-03
  ETOT  5  -1.1182855313061    -5.335E-11 4.435E-14 1.155E-08 1.119E-06 1.228E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.119E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1280,7 +1280,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  2  -1.1182883127611    -4.061E-08 8.582E-15 4.242E-06 1.532E-05 5.700E-05
  ETOT  3  -1.1182883136634    -9.023E-10 7.671E-12 7.623E-07 1.190E-05 6.890E-05
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  1.190E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1343,7 +1343,7 @@ force_length_stats: {min:   6.88974574E-05, max:   6.88974574E-05, mean:   6.889
            Absolute (Ha)=-2.78236E-06
            Relative     =-2.48805E-06
 
- At Broyd/MD step   4, gradients are converged :
+ At Broyd/MD step   4, gradients are converged : 
   max grad (force/stress) = 6.8897E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -1443,14 +1443,14 @@ solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.47392512431104    -4.739E-01 6.747E-06 4.683E+00
- ETOT  2 -0.47392965590756    -4.532E-06 8.633E-13 1.597E-01
- ETOT  3 -0.47393081420014    -1.158E-06 6.509E-09 1.777E-02
- ETOT  4 -0.47393103574282    -2.215E-07 1.198E-09 4.999E-05
- ETOT  5 -0.47393103688359    -1.141E-09 1.856E-12 2.009E-07
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1 -0.47392512431104    -4.739E-01 6.747E-06 4.683E+00 7.069E-01 7.069E-01
+ ETOT  2 -0.47392965590756    -4.532E-06 8.633E-13 1.597E-01 2.393E-05 7.069E-01
+ ETOT  3 -0.47393081420014    -1.158E-06 6.509E-09 1.777E-02 5.409E-04 7.064E-01
+ ETOT  4 -0.47393103574282    -2.215E-07 1.198E-09 4.999E-05 4.030E-04 7.060E-01
+ ETOT  5 -0.47393103688359    -1.141E-09 1.856E-12 2.009E-07 3.471E-05 7.059E-01
 
- At SCF step    5, etot is converged :
+ At SCF step    5, etot is converged : 
   for the second time, diff in etot=  1.141E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1494,6 +1494,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              0.705948     0.000000      0.705948     0.705948
  Total magnetization (from the atomic spheres):             0.705948
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1575,8 +1576,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.06487
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1596,7 +1597,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2777.000    2777.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -1619,7 +1620,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1316329579580    -2.066E-10 2.212E-12 3.184E-07 8.833E-06 2.497E-02
  ETOT  7  -1.1316329579895    -3.155E-11 2.187E-13 3.713E-09 2.497E-06 2.497E-02
 
- At SCF step    7, forces are converged :
+ At SCF step    7, forces are converged : 
   for the second time, max diff in force=  2.497E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1696,7 +1697,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1324326717414    -1.560E-08 1.062E-10 4.123E-06 3.721E-05 7.487E-03
  ETOT  5  -1.1324326719444    -2.030E-10 1.992E-13 6.382E-08 1.970E-06 7.489E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.970E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1777,7 +1778,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1325201691774    -2.683E-09 1.838E-11 7.473E-07 1.525E-05 7.602E-04
  ETOT  5  -1.1325201692165    -3.910E-11 3.872E-14 1.155E-08 9.101E-07 7.611E-04
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  9.101E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1856,7 +1857,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  2  -1.1325211208436    -1.359E-08 2.681E-15 2.308E-06 9.900E-06 2.079E-05
  ETOT  3  -1.1325211211479    -3.043E-10 3.186E-12 4.285E-07 7.228E-06 2.802E-05
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  7.228E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1919,7 +1920,7 @@ force_length_stats: {min:   2.80176545E-05, max:   2.80176545E-05, mean:   2.801
            Absolute (Ha)=-9.51931E-07
            Relative     =-8.40542E-07
 
- At Broyd/MD step   4, gradients are converged :
+ At Broyd/MD step   4, gradients are converged : 
   max grad (force/stress) = 2.8018E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -2019,14 +2020,14 @@ solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.47859993910316    -4.786E-01 1.997E-05 1.510E+00
- ETOT  2 -0.47860738401733    -7.445E-06 9.128E-13 1.590E-01
- ETOT  3 -0.47860852886011    -1.145E-06 1.158E-08 3.545E-03
- ETOT  4 -0.47860857519418    -4.633E-08 3.419E-10 3.307E-05
- ETOT  5 -0.47860857538780    -1.936E-10 2.878E-12 2.503E-07
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1 -0.47859993910316    -4.786E-01 1.997E-05 1.510E+00 7.113E-01 7.113E-01
+ ETOT  2 -0.47860738401733    -7.445E-06 9.128E-13 1.590E-01 1.570E-03 7.098E-01
+ ETOT  3 -0.47860852886011    -1.145E-06 1.158E-08 3.545E-03 7.405E-04 7.090E-01
+ ETOT  4 -0.47860857519418    -4.633E-08 3.419E-10 3.307E-05 2.034E-04 7.088E-01
+ ETOT  5 -0.47860857538780    -1.936E-10 2.878E-12 2.503E-07 1.420E-05 7.088E-01
 
- At SCF step    5, etot is converged :
+ At SCF step    5, etot is converged : 
   for the second time, diff in etot=  1.936E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2070,6 +2071,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              0.708807     0.000000      0.708807     0.708807
  Total magnetization (from the atomic spheres):             0.708807
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2151,8 +2153,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.18561
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2172,7 +2174,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4337.000    4337.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -2195,7 +2197,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1368127130629    -4.108E-10 4.389E-12 7.111E-07 1.141E-05 2.136E-02
  ETOT  7  -1.1368127130999    -3.704E-11 2.838E-13 9.136E-09 2.655E-06 2.137E-02
 
- At SCF step    7, forces are converged :
+ At SCF step    7, forces are converged : 
   for the second time, max diff in force=  2.655E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2272,7 +2274,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1373863349769    -1.210E-08 9.222E-11 6.027E-06 3.261E-05 5.825E-03
  ETOT  5  -1.1373863351488    -1.720E-10 1.846E-13 9.422E-08 1.570E-06 5.827E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.570E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2353,7 +2355,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1374367541632    -1.607E-09 1.230E-11 8.290E-07 1.179E-05 5.104E-04
  ETOT  5  -1.1374367541878    -2.464E-11 2.673E-14 1.296E-08 6.209E-07 5.110E-04
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  6.209E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2432,7 +2434,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  2  -1.1374371579483    -5.972E-09 1.842E-15 1.851E-06 1.900E-05 1.002E-05
  ETOT  3  -1.1374371580794    -1.310E-10 1.598E-12 3.521E-07 4.874E-06 1.489E-05
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  4.874E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2495,7 +2497,7 @@ force_length_stats: {min:   1.48901717E-05, max:   1.48901717E-05, mean:   1.489
            Absolute (Ha)=-4.03892E-07
            Relative     =-3.55089E-07
 
- At Broyd/MD step   4, gradients are converged :
+ At Broyd/MD step   4, gradients are converged : 
   max grad (force/stress) = 1.4890E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -2595,14 +2597,14 @@ solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.48026078058733    -4.803E-01 3.488E-05 3.050E+00
- ETOT  2 -0.48027056646551    -9.786E-06 2.024E-12 3.205E-01
- ETOT  3 -0.48027182553473    -1.259E-06 1.591E-08 5.737E-03
- ETOT  4 -0.48027186419577    -3.866E-08 1.123E-10 4.790E-05
- ETOT  5 -0.48027186428858    -9.281E-11 3.626E-12 4.704E-07
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1 -0.48026078058733    -4.803E-01 3.488E-05 3.050E+00 7.163E-01 7.163E-01
+ ETOT  2 -0.48027056646551    -9.786E-06 2.024E-12 3.205E-01 2.057E-03 7.142E-01
+ ETOT  3 -0.48027182553473    -1.259E-06 1.591E-08 5.737E-03 8.179E-04 7.134E-01
+ ETOT  4 -0.48027186419577    -3.866E-08 1.123E-10 4.790E-05 1.895E-04 7.132E-01
+ ETOT  5 -0.48027186428858    -9.281E-11 3.626E-12 4.704E-07 9.268E-06 7.132E-01
 
- At SCF step    5, etot is converged :
+ At SCF step    5, etot is converged : 
   for the second time, diff in etot=  9.281E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2646,6 +2648,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              0.713208     0.000000      0.713208     0.713208
  Total magnetization (from the atomic spheres):             0.713208
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2727,8 +2730,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.13258
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2748,7 +2751,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    6031.000    6031.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -2771,7 +2774,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1384532381378    -1.086E-09 9.553E-12 1.144E-06 1.661E-05 1.916E-02
  ETOT  7  -1.1384532381753    -3.754E-11 2.859E-13 1.475E-08 2.576E-06 1.916E-02
 
- At SCF step    7, forces are converged :
+ At SCF step    7, forces are converged : 
   for the second time, max diff in force=  2.576E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2848,7 +2851,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1389157969807    -1.016E-08 8.042E-11 6.005E-06 2.983E-05 5.267E-03
  ETOT  5  -1.1389157971129    -1.322E-10 1.501E-13 9.240E-08 1.176E-06 5.268E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.176E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2928,7 +2931,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  3  -1.1389569540951    -1.232E-08 1.643E-10 3.903E-05 4.850E-05 4.463E-04
  ETOT  4  -1.1389569554867    -1.392E-09 1.099E-11 8.355E-07 1.093E-05 4.353E-04
 
- At SCF step    4, forces are converged :
+ At SCF step    4, forces are converged : 
   for the second time, max diff in force=  1.093E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2991,7 +2994,7 @@ force_length_stats: {min:   4.35338084E-04, max:   4.35338084E-04, mean:   4.353
            Absolute (Ha)=-4.11584E-05
            Relative     =-3.61376E-05
 
- At Broyd/MD step   3, gradients are converged :
+ At Broyd/MD step   3, gradients are converged : 
   max grad (force/stress) = 4.3534E-04 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -3091,14 +3094,14 @@ solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.48082096286830    -4.808E-01 8.170E-05 3.912E+00
- ETOT  2 -0.48083200924205    -1.105E-05 3.282E-12 4.027E-01
- ETOT  3 -0.48083330263794    -1.293E-06 1.712E-08 9.352E-03
- ETOT  4 -0.48083335129079    -4.865E-08 4.282E-10 7.606E-05
- ETOT  5 -0.48083335144063    -1.498E-10 5.124E-12 5.603E-07
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1 -0.48082096286830    -4.808E-01 8.170E-05 3.912E+00 7.178E-01 7.178E-01
+ ETOT  2 -0.48083200924205    -1.105E-05 3.282E-12 4.027E-01 2.258E-03 7.155E-01
+ ETOT  3 -0.48083330263794    -1.293E-06 1.712E-08 9.352E-03 8.153E-04 7.147E-01
+ ETOT  4 -0.48083335129079    -4.865E-08 4.282E-10 7.606E-05 2.087E-04 7.145E-01
+ ETOT  5 -0.48083335144063    -1.498E-10 5.124E-12 5.603E-07 1.203E-05 7.145E-01
 
- At SCF step    5, etot is converged :
+ At SCF step    5, etot is converged : 
   for the second time, diff in etot=  1.498E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3142,6 +3145,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              0.714497     0.000000      0.714497     0.714497
  Total magnetization (from the atomic spheres):             0.714497
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3223,8 +3227,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3244,7 +3248,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    7809.000    7809.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -3267,7 +3271,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1389515584798    -9.160E-10 8.597E-12 1.222E-06 1.567E-05 1.850E-02
  ETOT  7  -1.1389515585194    -3.968E-11 3.163E-13 1.773E-08 2.726E-06 1.850E-02
 
- At SCF step    7, forces are converged :
+ At SCF step    7, forces are converged : 
   for the second time, max diff in force=  2.726E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3344,7 +3348,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1393840547123    -9.507E-09 7.752E-11 6.695E-06 2.911E-05 5.146E-03
  ETOT  5  -1.1393840548508    -1.384E-10 1.642E-13 9.886E-08 1.332E-06 5.148E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.332E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3424,7 +3428,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  3  -1.1394234868286    -1.229E-08 1.686E-10 4.312E-05 4.884E-05 4.285E-04
  ETOT  4  -1.1394234881709    -1.342E-09 1.099E-11 9.753E-07 1.088E-05 4.177E-04
 
- At SCF step    4, forces are converged :
+ At SCF step    4, forces are converged : 
   for the second time, max diff in force=  1.088E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3487,7 +3491,7 @@ force_length_stats: {min:   4.17665929E-04, max:   4.17665929E-04, mean:   4.176
            Absolute (Ha)=-3.94333E-05
            Relative     =-3.46087E-05
 
- At Broyd/MD step   3, gradients are converged :
+ At Broyd/MD step   3, gradients are converged : 
   max grad (force/stress) = 4.1767E-04 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -3587,14 +3591,14 @@ solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.48100148044708    -4.810E-01 9.262E-05 4.311E+00
- ETOT  2 -0.48101343491964    -1.195E-05 3.761E-12 4.487E-01
- ETOT  3 -0.48101473912425    -1.304E-06 1.834E-08 8.394E-03
- ETOT  4 -0.48101478040603    -4.128E-08 1.984E-10 6.664E-05
- ETOT  5 -0.48101478048448    -7.845E-11 5.386E-12 6.366E-07
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1 -0.48100148044708    -4.810E-01 9.262E-05 4.311E+00 7.153E-01 7.153E-01
+ ETOT  2 -0.48101343491964    -1.195E-05 3.761E-12 4.487E-01 2.380E-03 7.129E-01
+ ETOT  3 -0.48101473912425    -1.304E-06 1.834E-08 8.394E-03 8.263E-04 7.121E-01
+ ETOT  4 -0.48101478040603    -4.128E-08 1.984E-10 6.664E-05 1.978E-04 7.119E-01
+ ETOT  5 -0.48101478048448    -7.845E-11 5.386E-12 6.366E-07 7.632E-06 7.119E-01
 
- At SCF step    5, etot is converged :
+ At SCF step    5, etot is converged : 
   for the second time, diff in etot=  7.845E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3638,6 +3642,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              0.711854     0.000000      0.711854     0.711854
  Total magnetization (from the atomic spheres):             0.711854
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -3719,8 +3724,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     35.000   => boxcut(ratio)=   2.02766
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3740,7 +3745,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    9843.000    9843.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -3763,7 +3768,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1390836338159    -1.389E-09 1.231E-11 1.712E-06 1.870E-05 1.839E-02
  ETOT  7  -1.1390836338623    -4.640E-11 3.764E-13 3.043E-08 2.940E-06 1.839E-02
 
- At SCF step    7, forces are converged :
+ At SCF step    7, forces are converged : 
   for the second time, max diff in force=  2.940E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3840,7 +3845,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1395116378954    -9.523E-09 7.803E-11 8.591E-06 2.898E-05 5.149E-03
  ETOT  5  -1.1395116380334    -1.379E-10 1.661E-13 1.236E-07 1.228E-06 5.150E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.228E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3920,7 +3925,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  3  -1.1395511928210    -1.260E-08 1.754E-10 5.497E-05 4.984E-05 4.273E-04
  ETOT  4  -1.1395511941898    -1.369E-09 1.125E-11 1.270E-06 1.092E-05 4.164E-04
 
- At SCF step    4, forces are converged :
+ At SCF step    4, forces are converged : 
   for the second time, max diff in force=  1.092E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3983,7 +3988,7 @@ force_length_stats: {min:   4.16382859E-04, max:   4.16382859E-04, mean:   4.163
            Absolute (Ha)=-3.95562E-05
            Relative     =-3.47127E-05
 
- At Broyd/MD step   3, gradients are converged :
+ At Broyd/MD step   3, gradients are converged : 
   max grad (force/stress) = 4.1638E-04 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -4083,14 +4088,14 @@ solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.48105328211632    -4.811E-01 1.677E-04 5.198E+00
- ETOT  2 -0.48106928512414    -1.600E-05 4.627E-12 5.821E-01
- ETOT  3 -0.48107059478024    -1.310E-06 1.897E-08 8.625E-03
- ETOT  4 -0.48107063405748    -3.928E-08 1.468E-10 7.770E-05
- ETOT  5 -0.48107063411573    -5.825E-11 5.864E-12 1.004E-06
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1 -0.48105328211632    -4.811E-01 1.677E-04 5.198E+00 7.159E-01 7.159E-01
+ ETOT  2 -0.48106928512414    -1.600E-05 4.627E-12 5.821E-01 2.565E-03 7.133E-01
+ ETOT  3 -0.48107059478024    -1.310E-06 1.897E-08 8.625E-03 8.034E-04 7.125E-01
+ ETOT  4 -0.48107063405748    -3.928E-08 1.468E-10 7.770E-05 2.028E-04 7.123E-01
+ ETOT  5 -0.48107063411573    -5.825E-11 5.864E-12 1.004E-06 4.746E-06 7.123E-01
 
- At SCF step    5, etot is converged :
+ At SCF step    5, etot is converged : 
   for the second time, diff in etot=  5.825E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4134,6 +4139,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              0.712276     0.000000      0.712276     0.712276
  Total magnetization (from the atomic spheres):             0.712276
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -4193,7 +4199,7 @@ band_energy         : -2.70027436293498E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
@@ -5013,7 +5019,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -5030,12 +5036,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -5053,15 +5059,15 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         10.1  wall=         10.9
+- Proc.   0 individual time (sec): cpu=          9.7  wall=          9.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered 148 WARNINGs and  29 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.1  wall=         10.9
++Overall time at end (sec) : cpu=          9.7  wall=          9.8

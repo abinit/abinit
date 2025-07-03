@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t17/t17.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h01 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v6_t17/t17.abi
 - output file    -> t17.abo
 - root for input  files -> t17i
 - root for output files -> t17o
@@ -390,8 +390,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -406,8 +406,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -429,18 +429,18 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.3467030993134    -5.347E+00 1.080E-03 4.114E+01
- ETOT  2  -5.4641040820062    -1.174E-01 1.048E-04 1.215E+01
- ETOT  3  -5.4660705134398    -1.966E-03 1.846E-06 4.472E+00
- ETOT  4  -5.4668801093025    -8.096E-04 4.801E-07 4.015E-01
- ETOT  5  -5.4668954563596    -1.535E-05 3.888E-08 3.115E-02
- ETOT  6  -5.4668959236760    -4.673E-07 3.181E-09 2.316E-03
- ETOT  7  -5.4668961554604    -2.318E-07 3.563E-10 4.952E-05
- ETOT  8  -5.4668961646171    -9.157E-09 2.814E-11 9.541E-07
- ETOT  9  -5.4668961646368    -1.977E-11 1.539E-13 2.140E-07
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.3467030993134    -5.347E+00 1.080E-03 4.114E+01 4.796E-01 4.796E-01
+ ETOT  2  -5.4641040820062    -1.174E-01 1.048E-04 1.215E+01 1.799E-01 6.595E-01
+ ETOT  3  -5.4660705134398    -1.966E-03 1.846E-06 4.472E+00 2.625E-02 6.333E-01
+ ETOT  4  -5.4668801093025    -8.096E-04 4.801E-07 4.015E-01 2.752E-02 6.057E-01
+ ETOT  5  -5.4668954563596    -1.535E-05 3.888E-08 3.115E-02 3.867E-03 6.019E-01
+ ETOT  6  -5.4668959236760    -4.673E-07 3.181E-09 2.316E-03 1.313E-03 6.032E-01
+ ETOT  7  -5.4668961554604    -2.318E-07 3.563E-10 4.952E-05 1.749E-04 6.030E-01
+ ETOT  8  -5.4668961646171    -9.157E-09 2.814E-11 9.541E-07 7.427E-05 6.029E-01
+ ETOT  9  -5.4668961646368    -1.977E-11 1.539E-13 2.140E-07 5.368E-06 6.029E-01
 
- At SCF step    9, etot is converged :
+ At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.977E-11 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -508,6 +508,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              1.060851     0.457904      1.518755     0.602947
  Total magnetization (from the atomic spheres):             0.602947
  Total magnetization (exact up - dn):                       3.000000
+
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Zeeman energy -m.B =    -0.1500000000E+01 Ha
 ================================================================================
@@ -609,12 +610,12 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -5.4668961646486    -5.47E+00 3.39E-17 3.48E-09 3.000
- ETOT  2  -5.4668961646492    -5.96E-13 8.74E-20 4.71E-10 3.000
- ETOT  3  -5.4668961646494    -1.83E-13 6.09E-17 5.55E-11 3.000
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.4668961646486    -5.467E+00 3.391E-17 3.482E-09 6.029E-01 6.029E-01
+ ETOT  2  -5.4668961646492    -5.960E-13 8.743E-20 4.710E-10 3.657E-07 6.029E-01
+ ETOT  3  -5.4668961646494    -1.830E-13 6.092E-17 5.553E-11 1.051E-07 6.029E-01
 
- At SCF step    3, etot is converged :
+ At SCF step    3, etot is converged : 
   for the second time, diff in etot=  1.830E-13 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -682,6 +683,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              1.060848     0.457904      1.518753     0.602944
  Total magnetization (from the atomic spheres):             0.602944
  Total magnetization (exact up - dn):                       3.000000
+
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Zeeman energy -m.B =    -0.1500000000E+01 Ha
 ================================================================================
@@ -788,17 +790,17 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01
- ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00
- ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00
- ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01
- ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02
- ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03
- ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05
- ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01 1.072E+00 1.072E+00
+ ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00 1.491E-01 1.221E+00
+ ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00 4.463E-02 1.266E+00
+ ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01 1.004E-02 1.276E+00
+ ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02 2.698E-04 1.276E+00
+ ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03 5.301E-04 1.275E+00
+ ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05 1.038E-04 1.275E+00
+ ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06 7.970E-06 1.275E+00
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.378E-10 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -967,12 +969,12 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08
- ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09
- ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08 1.275E+00 1.275E+00
+ ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09 3.278E-07 1.275E+00
+ ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10 3.940E-07 1.275E+00
 
- At SCF step    3, etot is converged :
+ At SCF step    3, etot is converged : 
   for the second time, diff in etot=  3.118E-13 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -1142,17 +1144,17 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01
- ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00
- ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00
- ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01
- ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02
- ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03
- ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05
- ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01 1.072E+00 1.072E+00
+ ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00 1.491E-01 1.221E+00
+ ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00 4.463E-02 1.266E+00
+ ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01 1.004E-02 1.276E+00
+ ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02 2.698E-04 1.276E+00
+ ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03 5.301E-04 1.275E+00
+ ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05 1.038E-04 1.275E+00
+ ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06 7.970E-06 1.275E+00
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.378E-10 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -1321,12 +1323,12 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08
- ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09
- ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08 1.275E+00 1.275E+00
+ ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09 3.278E-07 1.275E+00
+ ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10 3.940E-07 1.275E+00
 
- At SCF step    3, etot is converged :
+ At SCF step    3, etot is converged : 
   for the second time, diff in etot=  3.118E-13 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -1459,7 +1461,7 @@ band_energy         : -3.81141886083962E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      2.08980370E+02
@@ -1742,7 +1744,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1754,12 +1756,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1777,7 +1779,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1792,15 +1794,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          5.7
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  25 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.8  wall=          5.7
++Overall time at end (sec) : cpu=          3.3  wall=          3.3
