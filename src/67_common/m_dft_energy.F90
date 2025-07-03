@@ -97,7 +97,7 @@ contains
 !!  energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
 !!  ehart, enxc, and eei from provided density and potential,
 !!  energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
-!!  energies%e_zeeman=Zeeman spin energy from applied magnetic field -m.B
+!!  energies%e_hspinfield=Zeeman spin energy from applied magnetic field -m.B
 !!  ek=kinetic energy, ehart=Hartree electron-electron energy,
 !!  enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
 !!  enl=nonlocal pseudopotential energy
@@ -448,9 +448,9 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      end do
    end do
    if(dtset%nspden==2)then
-     energies%e_zeeman = -half*dtset%hspinfield(3)*(two*magvec(2)-magvec(1)) !  diff rho = rhoup-rhodown = 2 rhoup - rho
+     energies%e_hspinfield = -half*dtset%hspinfield(3)*(two*magvec(2)-magvec(1)) !  diff rho = rhoup-rhodown = 2 rhoup - rho
    else if(dtset%nspden==4)then
-     energies%e_zeeman = -half * (dtset%hspinfield(1)*magvec(2)& ! x
+     energies%e_hspinfield = -half * (dtset%hspinfield(1)*magvec(2)& ! x
 &                                +dtset%hspinfield(2)*magvec(3)& ! y
 &                                +dtset%hspinfield(3)*magvec(4)) ! z
    end if
