@@ -212,7 +212,7 @@ module m_hamiltonian
 ! ===== Integer arrays
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: atindx(:) => null()
+  integer(c_int32_t), contiguous, pointer :: atindx(:) => null()
 #else
   integer, allocatable :: atindx(:)
 #endif
@@ -220,7 +220,7 @@ module m_hamiltonian
    ! index table for atoms (see gstate.f)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: atindx1(:) => null()
+  integer(c_int32_t), contiguous, pointer :: atindx1(:) => null()
 #else
   integer, allocatable :: atindx1(:)
 #endif
@@ -237,7 +237,7 @@ module m_hamiltonian
    ! G sphere boundary, for each plane wave at k
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: indlmn(:,:,:) => null()
+  integer(c_int32_t), contiguous, pointer :: indlmn(:,:,:) => null()
 #else
   integer(c_int32_t), allocatable :: indlmn(:,:,:)
 #endif
@@ -247,7 +247,7 @@ module m_hamiltonian
    !                                or i=lmn (if useylm=1)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: nattyp(:) => null()
+  integer(c_int32_t), contiguous, pointer :: nattyp(:) => null()
 #else
   integer, allocatable :: nattyp(:)
 #endif
@@ -270,7 +270,7 @@ module m_hamiltonian
    ! Relevant for NC-psps and PAW.
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: typat(:) => null()
+  integer(c_int32_t), contiguous, pointer :: typat(:) => null()
 #else
   integer, allocatable :: typat(:)
 #endif
@@ -283,20 +283,20 @@ module m_hamiltonian
 
 ! Integer pointers
 
-  integer, ABI_CONTIGUOUS pointer :: gbound_kp(:,:) => null()
+  integer, contiguous, pointer :: gbound_kp(:,:) => null()
    ! gbound_kp(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k^prime
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
+  integer(int32), contiguous, pointer :: kg_k(:,:) => null()
 #else
-  integer, pointer :: kg_k(:,:) => null()
+  integer, contiguous, pointer :: kg_k(:,:) => null()
 #endif
    ! kg_k(3,npw_fft_k)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k
 
-  integer, pointer :: kg_kp(:,:) => null()
+  integer, contiguous, pointer :: kg_kp(:,:) => null()
    ! kg_kp(3,npw_fft_kp)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k^prime
@@ -333,7 +333,7 @@ module m_hamiltonian
    ! nuclear dipole moments at each atomic position
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  real(c_double), ABI_CONTIGUOUS pointer :: ph1d(:,:) => null()
+  real(c_double), contiguous, pointer :: ph1d(:,:) => null()
 #else
   real(dp), allocatable :: ph1d(:,:)
 #endif
@@ -346,7 +346,7 @@ module m_hamiltonian
 
 ! ===== Real pointers
 
-  real(dp), ABI_CONTIGUOUS pointer :: ekb(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: ekb(:,:,:,:) => null()
    ! ekb(dimekb1,dimekb2,nspinor**2,dimekbq)
    !  ->Norm conserving : (Real) Kleinman-Bylander energies (hartree)
    !          for number of basis functions (l,n) (lnmax)
@@ -365,58 +365,58 @@ module m_hamiltonian
    !     with the following relation: D^s2s1_ji = (D^s1s2_ij)^*
    !     where s1,s2 are spinor components
 
-  real(dp), pointer :: ffnl_k(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: ffnl_k(:,:,:,:) => null()
    ! ffnl_k(npw_fft_k,2,dimffnl_k,ntypat)
    ! nonlocal form factors at k
 
-  real(dp), pointer :: ffnl_kp(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: ffnl_kp(:,:,:,:) => null()
    ! ffnl_kp(npw_fft_kp,2,dimffnl_kp,ntypat)
    ! nonlocal form factors at k_prime
 
-  real(dp), pointer :: kinpw_k(:) => null()
+  real(dp), contiguous, pointer :: kinpw_k(:) => null()
    ! kinpw_k(npw_fft_k)
    ! (modified) kinetic energy for each plane wave at k
    ! CAVEAT: In band mode, this array is NOT EQUIVALENT to kinpw(npw_k)
 
-  real(dp), pointer :: kinpw_kp(:) => null()
+  real(dp), contiguous, pointer :: kinpw_kp(:) => null()
    ! kinpw_kp(npw_fft_kp)
    ! (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), pointer :: kpg_k(:,:) => null()
+  real(dp), contiguous, pointer :: kpg_k(:,:) => null()
    ! kpg_k(3,npw_fft_k)
    ! k+G vector coordinates at k
 
-  real(dp), pointer :: kpg_kp(:,:) => null()
+  real(dp), contiguous, pointer :: kpg_kp(:,:) => null()
    ! kpg_kp(3,npw_fft_kp)
    ! k^prime+G vector coordinates at k^prime
 
-  real(dp), ABI_CONTIGUOUS pointer :: phkpxred(:,:) => null()
+  real(dp), contiguous, pointer :: phkpxred(:,:) => null()
    ! phkpxred(2,natom)
    ! phase factors exp(2 pi k^prime.xred) at k^prime
 
-  real(dp), pointer :: ph3d_k(:,:,:) => null()
+  real(dp), contiguous, pointer :: ph3d_k(:,:,:) => null()
    ! ph3d_k(2,npw_fft_k,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k
 
-  real(dp), pointer :: ph3d_kp(:,:,:) => null()
+  real(dp), contiguous, pointer :: ph3d_kp(:,:,:) => null()
    ! ph3d_kp(2,npw_fft_kp,matblk)
    ! 3-dim structure factors, for each atom and plane wave at k^prime
 
-  real(dp), pointer :: vectornd(:,:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vectornd(:,:,:,:,:) => null()
    ! vectornd(n4,n5,n6,nvloc,3)
    ! vector potential of nuclear magnetic dipoles
    ! in real space, on the augmented fft grid
 
-  real(dp), pointer :: vlocal(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vlocal(:,:,:,:) => null()
    ! vlocal(n4,n5,n6,nvloc)
    ! local potential in real space, on the augmented fft grid
 
-  real(dp), pointer :: vxctaulocal(:,:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vxctaulocal(:,:,:,:,:) => null()
    ! vxctaulocal(n4,n5,n6,nvloc,4)
    ! derivative of XC energy density with respect to kinetic energy density,
    ! in real space, on the augmented fft grid
 
-  real(dp), ABI_CONTIGUOUS pointer :: xred(:,:) => null()
+  real(dp), contiguous, pointer :: xred(:,:) => null()
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
 
@@ -517,45 +517,45 @@ module m_hamiltonian
 
 ! ===== Real pointers
 
-  real(dp), pointer :: dkinpw_k(:) => null()
+  real(dp), contiguous, pointer :: dkinpw_k(:) => null()
    ! dkinpw_k(npw_k)
    ! 1st derivative of the (modified) kinetic energy for each plane wave at k
 
-  real(dp), pointer :: dkinpw_kp(:) => null()
+  real(dp), contiguous, pointer :: dkinpw_kp(:) => null()
    ! dkinpw_kp(npw_kp)
    ! 1st derivative of the (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), pointer :: ddkinpw_k(:) => null()
+  real(dp), contiguous, pointer :: ddkinpw_k(:) => null()
    ! ddkinpw_k(npw_k)
    ! 2nd derivative of the (modified) kinetic energy for each plane wave at k
 
-  real(dp), pointer :: ddkinpw_kp(:) => null()
+  real(dp), contiguous, pointer :: ddkinpw_kp(:) => null()
    ! ddkinpw_kp(npw_kp)
    ! 2nd derivative of the (modified) kinetic energy for each plane wave at k^prime
 
-  real(dp), pointer :: e1kbfr(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: e1kbfr(:,:,:,:) => null()
    ! Frozen part of 1st derivative of ekb for the considered perturbation
    ! (part not depending on VHxc^(1))
    ! e1kbfr(dime1kb1,dime1kb2,nspinor**2,cplex)
    ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,:,my_isppol)
 
-  real(dp), ABI_CONTIGUOUS pointer :: e1kbsc(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: e1kbsc(:,:,:,:) => null()
    ! Self-consistent 1st derivative of ekb for the considered perturbation
    ! (part depending only on self-consistent VHxc^(1))
    ! e1kbsc(dime1kb1,dime1kb2,nspinor**2,cplex)
    ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,:,my_isppol)
 
-  real(dp), pointer :: vectornd(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vectornd(:,:,:,:) => null()
    ! vectornd(n4,n5,n6,nvloc)
    ! vector potential of nuclear magnetic dipoles
    ! in real space, on the augmented fft grid, in direction idir
    ! (the ddk pert direction)
 
-  real(dp), pointer :: vlocal1(:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vlocal1(:,:,:,:) => null()
    ! vlocal1(cplex*n4,n5,n6,nvloc)
    ! 1st-order local potential in real space, on the augmented fft grid
 
-  real(dp), pointer :: vxctaulocal(:,:,:,:,:) => null()
+  real(dp), contiguous, pointer :: vxctaulocal(:,:,:,:,:) => null()
    ! vxctaulocal(n4,n5,n6,nvloc,4)
    ! derivative of XC energy density with respect to kinetic energy density,
    ! in real space, on the augmented fft grid
