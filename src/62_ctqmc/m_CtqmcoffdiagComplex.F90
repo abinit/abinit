@@ -229,7 +229,6 @@ TYPE CtqmcoffdiagComplex
 
   DOUBLE PRECISION :: U
 
-!  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: mu
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: mu
 ! levels
 
@@ -1002,7 +1001,6 @@ SUBROUTINE CtqmcoffdiagComplex_setU(op,matU)
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagComplex), INTENT(INOUT) ::op
 !Local variables ------------------------------
-!!  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: matU
  COMPLEX(KIND=8), DIMENSION(:,:), INTENT(IN) :: matU
 
   IF ( SIZE(matU) .NE. op%flavors*op%flavors ) &
@@ -1276,7 +1274,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
   INTEGER                                         :: iomega
   INTEGER                                         :: itau
   DOUBLE PRECISION                                :: pi_invBeta
-  DOUBLE PRECISION                                :: K
+  COMPLEX(KIND=8)                                 :: K
   !DOUBLE PRECISION                                :: re
   !DOUBLE PRECISION                                :: im
   !DOUBLE PRECISION                                :: det
@@ -1494,12 +1492,13 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
         IF ( op%opt_levels .EQ. 1 ) THEN
           K = op%mu(iflavor)
         ELSE
-          K = -REAL(F_omega(op%Wmax, iflavor,iflavor))
+!          K = -REAL(F_omega(op%Wmax, iflavor,iflavor))
+           K = -(F_omega(op%Wmax,iflavor,iflavor)) 
 !        op%mu = K
           op%mu(iflavor) = K 
         END IF
       ELSE
-        K=0.d0
+        K=cmplx(0.d0,0.d0,8)
       ENDIF
       !IF ( op%rank .EQ. 0 ) &
       !WRITE(9876,'(I4,2E22.14)') iflavor, K, REAL(-F_omega(op%Wmax, iflavor))
@@ -1534,8 +1533,8 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk)
     !    END DO
     !  END IF
   ! --- compute residual K (?)
-      K = REAL(CMPLX(0,(2.d0*DBLE(op%Wmax)-1.d0)*pi_invBeta,8)*F_omega(op%Wmax,iflavor,iflavor2))
-      CALL GreenHyboffdiagComplex_setMuD1(op%Greens,iflavor,iflavor2,real(op%mu(iflavor)),K)
+      K = CMPLX(0,(2.d0*DBLE(op%Wmax)-1.d0)*pi_invBeta,8)*F_omega(op%Wmax,iflavor,iflavor2)
+      CALL GreenHyboffdiagComplex_setMuD1(op%Greens,iflavor,iflavor2,op%mu(iflavor),K)
     END DO
   END DO
 
@@ -3824,20 +3823,21 @@ SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
   INTEGER                            :: iflavor3
   INTEGER                            :: flavors,tail
   INTEGER                            :: ifreq,itime
-  DOUBLE PRECISION :: u1 
-  DOUBLE PRECISION :: u2
-  DOUBLE PRECISION :: u3
-  DOUBLE PRECISION :: Un
-  DOUBLE PRECISION :: UUnn,iw !omega,
+  COMPLEX(KIND=8) :: u1 
+  COMPLEX(KIND=8) :: u2
+  COMPLEX(KIND=8) :: u3
+  COMPLEX(KIND=8) :: Un
+  COMPLEX(KIND=8) :: UUnn
+  DOUBLE PRECISION :: iw !omega,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
   TYPE(GreenHyboffdiagComplex)       :: F_tmp
 
   flavors = op%flavors
   DO iflavor1 = 1, flavors
-    u1 = 0.d0
-    u2 = 0.d0
-    u3 = 0.d0
+    u1 = cmplx(0.d0,0.d0,8)
+    u2 = cmplx(0.d0,0.d0,8)
+    u3 = cmplx(0.d0,0.d0,8)
     DO iflavor2 = 1, flavors
       IF ( iflavor2 .EQ. iflavor1 ) CYCLE
       Un = op%Impurity%mat_U(iflavor2,iflavor1) * op%measN(1,iflavor2)

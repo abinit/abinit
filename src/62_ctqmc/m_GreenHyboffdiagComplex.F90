@@ -136,7 +136,7 @@ MODULE m_GreenHyboffdiagComplex
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omega
    ! omega(Wmax) 
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: Mk
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:,:) :: Mk
    ! Moments for FT
 
   COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:,:,:) :: oper_w 
@@ -286,7 +286,7 @@ include 'mpif.h'
   op%set        = .TRUE.
   op%factor     = 1
   op%setMk      = 0
-  op%Mk         = 0.d0
+  op%Mk         = cmplx(0.d0,0.d0)
 END SUBROUTINE GreenHyboffdiagComplex_init
 !!***
 
@@ -321,7 +321,7 @@ SUBROUTINE GreenHyboffdiagComplex_reset(op)
 
   CALL GreenHyboffdiagComplex_clear(op)
   op%setMk        = 0
-  op%Mk           = 0.d0
+  op%Mk           = cmplx(0.d0,0.d0)
   op%setT         = .FALSE.
   op%setW         = .FALSE.
 END SUBROUTINE GreenHyboffdiagComplex_reset
@@ -939,8 +939,8 @@ SUBROUTINE GreenHyboffdiagComplex_setMuD1(op,iflavor,iflavor2,mu,d1)
 !Arguments ------------------------------------
 !Arguments ------------------------------------
 !scalars
-  DOUBLE PRECISION, INTENT(IN   ) :: mu
-  DOUBLE PRECISION, INTENT(IN   ) :: d1
+  COMPLEX(KIND=8), INTENT(IN   ) :: mu
+  COMPLEX(KIND=8), INTENT(IN   ) :: d1
   INTEGER         , INTENT(IN   ) :: iflavor
   INTEGER         , INTENT(IN   ) :: iflavor2
 !type
@@ -960,8 +960,8 @@ SUBROUTINE GreenHyboffdiagComplex_setMuD1(op,iflavor,iflavor2,mu,d1)
     op%Mk(iflavor,iflavor2,2) = -mu
  !sui!write(6,*) "setmud1",iflavor,iflavor2, op%Mk(iflavor,iflavor2,2), op%Mk(iflavor,iflavor2,3)
   else
-    op%Mk(iflavor,iflavor2,3) = 0.d0
-    op%Mk(iflavor,iflavor2,2) = 0.d0
+    op%Mk(iflavor,iflavor2,3) = cmplx(0.d0,0.d0,8)
+    op%Mk(iflavor,iflavor2,2) = cmplx(0.d0,0.d0,8)
   endif
   op%setMk = op%setMk + 1
 !write(6,*) "mom1",op%Mk(iflavor,iflavor2,:)
@@ -1002,16 +1002,16 @@ SUBROUTINE GreenHyboffdiagComplex_setMoments(op,iflavor1,iflavor1b,u1,u2,u3)
 
 !Arguments ------------------------------------
   TYPE(GreenHyboffdiagComplex)  , INTENT(INOUT) :: op
-  DOUBLE PRECISION, INTENT(IN   ) :: u1
-  DOUBLE PRECISION, INTENT(IN   ) :: u2
-  DOUBLE PRECISION, INTENT(IN   ) :: u3
+  COMPLEX(KIND=8), INTENT(IN   ) :: u1
+  COMPLEX(KIND=8), INTENT(IN   ) :: u2
+  COMPLEX(KIND=8), INTENT(IN   ) :: u3
   INTEGER         , INTENT(IN   ) :: iflavor1
   INTEGER         , INTENT(IN   ) :: iflavor1b
   
   if(iflavor1==iflavor1b) then
-    op%Mk(iflavor1,iflavor1b,1) = -1.d0
+    op%Mk(iflavor1,iflavor1b,1) = cmplx(-1.d0,0.d0,8)
 !   c_a(3)=-d1-mu*mu-2(-mu)(\sum_{b.ne.a} Uab nb) 
-    op%Mk(iflavor1,iflavor1b,3) = op%Mk(iflavor1,iflavor1b,3) - 2.d0*(op%Mk(iflavor1,iflavor1b,2)*u1)
+    op%Mk(iflavor1,iflavor1b,3) = op%Mk(iflavor1,iflavor1b,3) - cmplx(2.d0,0.d0,8)*(op%Mk(iflavor1,iflavor1b,2)*u1)
 
 !   c_a(2)=-mu+\sum_{b.ne.a} Uab n_b
     op%Mk(iflavor1,iflavor1b,2) = op%Mk(iflavor1,iflavor1b,2) + u1
@@ -1021,9 +1021,9 @@ SUBROUTINE GreenHyboffdiagComplex_setMoments(op,iflavor1,iflavor1b,u1,u2,u3)
 !   ie c_a(3)=-d1+mu*mu-2mu*\sumb Uab nb + \sum Uab^2 nb + \sum Uba Uca <nbnc> 
     op%Mk(iflavor1,iflavor1b,3) = op%Mk(iflavor1,iflavor1b,3) - u2
   else
-    op%Mk(iflavor1,iflavor1b,1) = 0.d0
+    op%Mk(iflavor1,iflavor1b,1) = cmplx(0.d0,0.d0,8)
     op%Mk(iflavor1,iflavor1b,2) = u3
-    op%Mk(iflavor1,iflavor1b,3) = 0.d0
+    op%Mk(iflavor1,iflavor1b,3) = cmplx(0.d0,0.d0,8)
   endif
 !write(6,*) "mom",iflavor1,iflavor1b, op%Mk(iflavor1,iflavor1b,:)
 
@@ -1484,7 +1484,8 @@ include 'mpif.h'
   xpi=acos(-1.d0)                !!! XPI=PI
   beta = op%beta
   Nom  = op%Wmax
-  IF ( PRESENT(Gomega) ) THEN
+  
+IF ( PRESENT(Gomega) ) THEN
     Nom = SIZE(Gomega,1)    
     !IF ( op%rank .EQ. 0 ) &
       !!write(6,*) "size Gomega", Nom
@@ -1531,6 +1532,7 @@ include 'mpif.h'
 !A=(2.4.2.11) of Stoer&Bulirsch + 2 limit conditions
 !The LU decomposition of A is known explicitly; 
 
+  !Construction of LU matrix elements (see Appendix Thesis J. Bieder)
   diag (1) = 4.d0 ! 1.d0 *4.d0 factor 4 added for conditionning
   diagL(1) = 0.25d0 !1.d0/4.d0
   lastR(1) = -0.5d0 ! -2.d0/4.d0
@@ -1564,6 +1566,7 @@ include 'mpif.h'
   END DO
   diag (L  ) = diag (L  ) - tmp
   lastC(L-1) = lastC(L-1)-1.d0 ! 1 is removed for the u.XM=q resolution
+  !end construction of LU matrix elements
 
   MALLOC(XM,(L))
   MALLOC(Gwtmp,(1:Nom))
@@ -1608,22 +1611,20 @@ include 'mpif.h'
     omegatmp(omegaBegin:omegaEnd) = (/ ((((2.d0*DBLE(i)-1.d0)*xpi)/Beta), i=omegaBegin,omegaEnd) /)
   END IF
 
+!! For the Real part of local green's function
   DO iflavor1 = 1, nflavors
     DO iflavor2 = 1, nflavors
    ! write(6,*) "   Moments:",op%Mk(iflavor1,iflavor2,:),iflavor1,iflavor2
-  
 ! construct the B vector from A.Xm=B
-      XM(1) = 4.d0*op%Mk(iflavor1,iflavor2,3)
-      XM(L) = (6.d0 * inv_delta) * ( op%Mk(iflavor1,iflavor2,2) - ( &
-        (op%oper(2,iflavor1,iflavor2)-op%oper(1,iflavor1,iflavor2)) + &
-        (op%oper(L,iflavor1,iflavor2)-op%oper(L-1,iflavor1,iflavor2)) ) * inv_delta )
-!    built generic second derivative of oper
-!sui!write(6,*)  "XM 1 L",XM(1),XM(L),op%Mk(iflavor1,iflavor2,2),op%Mk(iflavor1,iflavor2,3)
+      XM(1) = 4.d0*real(op%Mk(iflavor1,iflavor2,3))
+      XM(L) = (6.d0 * inv_delta) * ( real(op%Mk(iflavor1,iflavor2,2)) - ( &
+        (real(op%oper(2,iflavor1,iflavor2))-real(op%oper(1,iflavor1,iflavor2))) + &
+        real(op%oper(L,iflavor1,iflavor2)-real(op%oper(L-1,iflavor1,iflavor2))) ) * inv_delta )
+      ! build d_ni terms of B 
       DO i = 2, L-1
-        XM(i) = (6.d0 * inv_delta2) * ( (op%oper(i+1,iflavor1,iflavor2) &
-          - 2.d0 * op%oper(i,iflavor1,iflavor2)) &
-          +        op%oper(i-1,iflavor1,iflavor2) )
-    !sui!write(6,*) "XM",i,XM(i),op%oper(i,iflavor1,iflavor2)
+        XM(i) = (6.d0 * inv_delta2) * ( (real(op%oper(i+1,iflavor1,iflavor2)) &
+          - 2.d0 * real(op%oper(i,iflavor1,iflavor2))) &
+          +        real(op%oper(i-1,iflavor1,iflavor2)) )
       END DO
 
 ! Find second derivatives XM: Solve the system
@@ -1666,8 +1667,14 @@ include 'mpif.h'
            !write(6,*) "ww",i,j,Gwtmp(i),X2(j),iwtau
          END DO
          Gwtmp(i) = Gwtmp(i)/CMPLX(((iw*iw)*(iw*iw)*deltabis),0.d0,8) &
-         + CMPLX( ( ((X2(2)-X2(1))+(X2(Lspline+1)-X2(Lspline)))/((iw*iw)*deltabis) -op%Mk(iflavor1,iflavor2,2) ) &
-         /(iw*iw) , (op%Mk(iflavor1,iflavor2,1)-op%Mk(iflavor1,iflavor2,3)/(iw*iw))/iw , 8) 
+!          + CMPLX( ( ((X2(2)-X2(1))+(X2(Lspline+1)-X2(Lspline)))/((iw*iw)*deltabis) -op%Mk(iflavor1,iflavor2,2) ) &   
+!          /(iw*iw) , (op%Mk(iflavor1,iflavor2,1)-op%Mk(iflavor1,iflavor2,3)/(iw*iw))/iw , 8)                          
+!%
+         + CMPLX( ( ((X2(2)-X2(1))+(X2(Lspline+1)-X2(Lspline)))/((iw*iw*iw*iw)*deltabis)),0.d0,8) &  !C4/iomega^4 
+         -cmplx(real(op%Mk(iflavor1,iflavor2,2))/(iw*iw),0.d0,8) &                                   !C2/iomega^2
+         +cmplx(0.d0,(real(op%Mk(iflavor1,iflavor2,1))-real(op%Mk(iflavor1,iflavor2,3))/(iw*iw))/iw,8)   !C3/iomega^3
+         ! +cmplx(0.d0,-op%Mk(iflavor1,iflavor2,1)/(iw),8) &
+         ! +cmplx(0.d0,-op%Mk(iflavor1,iflavor2,3)/(iw*iw*iw))
                    !+ CMPLX( (X2(2)-X2(1))+(X2(Lspline+1)-X2(Lspline)), 0.d0, 8 ) ) &
                    !   / (((iw*iw)*(iw*iw))*CMPLX(deltabis,0.d0,8)) &
                    !- CMPLX(op%Mk(1),0.d0,8)/iw  &
@@ -1699,13 +1706,7 @@ include 'mpif.h'
       op%setW = .TRUE.
     ENDDO ! iflavor1
   ENDDO ! iflavor2
-  !!op%oper_w=Gomega
-  do iflavor1=1,nflavors
-    !sui!write(6,*)  iflavor1
-      do i=1,Nom
-      !write(6,*) "w",i,op%oper_w(i,iflavor1,iflavor1)
-      enddo
-  enddo
+  
   FREE(Gwtmp)
   FREE(diagL)
   FREE(lastR)
