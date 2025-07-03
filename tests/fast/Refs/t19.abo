@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h00 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/fast_t17-t19-t20-t21-t23/t19.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 12h51 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/fast_t17-t19-t20-t21-t23/t19.abi
 - output file    -> t19.abo
 - root for input  files -> t17o
 - root for output files -> t19o
@@ -118,8 +118,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -150,18 +150,18 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.2372816026852    -8.237E+00 3.020E-04 1.256E+03
- ETOT  2  -8.6024810995345    -3.652E-01 8.995E-06 1.833E+02
- ETOT  3  -8.6690227099594    -6.654E-02 1.141E-03 4.685E+00
- ETOT  4  -8.6715174520285    -2.495E-03 5.687E-05 5.520E-01
- ETOT  5  -8.6716179589938    -1.005E-04 1.066E-06 8.137E-02
- ETOT  6  -8.6716307935691    -1.283E-05 8.122E-08 1.643E-03
- ETOT  7  -8.6716311807934    -3.872E-07 2.734E-08 1.417E-03
- ETOT  8  -8.6716316085718    -4.278E-07 6.326E-10 5.884E-06
- ETOT  9  -8.6716316102921    -1.720E-09 3.756E-11 4.737E-06
- ETOT 10  -8.6716316122205    -1.928E-09 2.843E-11 1.563E-08
- ETOT 11  -8.6716316122297    -9.246E-12 9.800E-13 1.523E-09
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -8.2372816026852    -8.237E+00 3.020E-04 1.256E+03 4.010E-01 4.010E-01
+ ETOT  2  -8.6024810995345    -3.652E-01 8.995E-06 1.833E+02 2.942E-02 3.716E-01
+ ETOT  3  -8.6690227099594    -6.654E-02 1.141E-03 4.685E+00 2.609E-02 3.455E-01
+ ETOT  4  -8.6715174520285    -2.495E-03 5.687E-05 5.520E-01 3.814E-03 3.417E-01
+ ETOT  5  -8.6716179589938    -1.005E-04 1.066E-06 8.137E-02 7.841E-04 3.409E-01
+ ETOT  6  -8.6716307935691    -1.283E-05 8.122E-08 1.643E-03 5.701E-04 3.415E-01
+ ETOT  7  -8.6716311807934    -3.872E-07 2.734E-08 1.417E-03 1.158E-04 3.414E-01
+ ETOT  8  -8.6716316085718    -4.278E-07 6.326E-10 5.884E-06 7.390E-05 3.414E-01
+ ETOT  9  -8.6716316102921    -1.720E-09 3.756E-11 4.737E-06 1.696E-06 3.414E-01
+ ETOT 10  -8.6716316122205    -1.928E-09 2.843E-11 1.563E-08 7.465E-06 3.415E-01
+ ETOT 11  -8.6716316122297    -9.246E-12 9.800E-13 1.523E-09 3.882E-07 3.415E-01
 
  At SCF step   11   max residual=  9.80E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -209,6 +209,7 @@ force_length_stats: {min:   1.77516724E-02, max:   1.77516724E-02, mean:   1.775
   Sum:              1.903168     1.220261      3.123429     0.682907
  Total magnetization (from the atomic spheres):             0.682907
  Total magnetization (exact up - dn):                       2.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -280,7 +281,7 @@ band_energy         : -1.38440898403221E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  8.0000000000E+00  8.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -362,7 +363,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -374,12 +375,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -397,7 +398,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -412,15 +413,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
+- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  26 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.5  wall=          0.5
+.Delivered  15 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.5  wall=          0.6

@@ -1,5 +1,5 @@
 
-.Version 10.3.4.1 of ABINIT, released May 2025.
+.Version 9.11.6.5 of ABINIT, released May 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Jun 2025.
-- ( at 13h02 )
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h05 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/TestBot_MPI1/v9_t13/t13.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t13/t13.abi
 - output file    -> t13.abo
 - root for input  files -> t13i
 - root for output files -> t13o
@@ -431,8 +431,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -462,17 +462,17 @@ solver: {iscf: 7, nstep: 12, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -21.526864709304    -2.15E+01 3.96E-02 1.52E+01 0.500
- ETOT  2  -21.535159270403    -8.29E-03 1.14E-04 4.01E-01 0.460
- ETOT  3  -21.535564224176    -4.05E-04 8.67E-05 2.22E-02 0.480
- ETOT  4  -21.535598097866    -3.39E-05 4.90E-06 6.80E-04 0.489
- ETOT  5  -21.535601076096    -2.98E-06 2.65E-07 5.14E-06 0.493
- ETOT  6  -21.535601083398    -7.30E-09 5.69E-09 1.06E-08 0.493
- ETOT  7  -21.535601083418    -1.99E-11 1.32E-09 3.29E-11 0.493
- ETOT  8  -21.535601083418    -6.39E-14 6.03E-11 1.39E-13 0.493
- ETOT  9  -21.535601083418    -1.03E-13 1.50E-11 6.11E-16 0.493
- ETOT 10  -21.535601083418     4.62E-14 9.66E-13 1.46E-18 0.493
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -21.526864709304    -2.153E+01 3.961E-02 1.522E+01 4.531E-01 4.531E-01
+ ETOT  2  -21.535159270403    -8.295E-03 1.144E-04 4.007E-01 1.270E-02 4.405E-01
+ ETOT  3  -21.535564224176    -4.050E-04 8.665E-05 2.224E-02 2.690E-02 4.674E-01
+ ETOT  4  -21.535598097866    -3.387E-05 4.897E-06 6.797E-04 1.063E-02 4.780E-01
+ ETOT  5  -21.535601076096    -2.978E-06 2.652E-07 5.141E-06 6.342E-03 4.843E-01
+ ETOT  6  -21.535601083398    -7.301E-09 5.694E-09 1.059E-08 2.177E-04 4.845E-01
+ ETOT  7  -21.535601083418    -1.989E-11 1.322E-09 3.288E-11 1.603E-05 4.846E-01
+ ETOT  8  -21.535601083418    -6.395E-14 6.030E-11 1.393E-13 1.010E-06 4.846E-01
+ ETOT  9  -21.535601083418    -1.030E-13 1.497E-11 6.111E-16 7.571E-08 4.846E-01
+ ETOT 10  -21.535601083418     4.619E-14 9.664E-13 1.463E-18 3.919E-09 4.846E-01
 
  At SCF step   10   max residual=  9.66E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -517,6 +517,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              3.262554     2.777995      6.040548     0.484559
  Total magnetization (from the atomic spheres):             0.484559
  Total magnetization (exact up - dn):                       0.493492
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -629,19 +630,19 @@ solver: {iscf: 7, nstep: 12, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -21.527286566319    -2.153E+01 3.226E-02 5.858E+00
- ETOT  2  -21.535195880679    -7.909E-03 6.753E-03 3.569E-01
- ETOT  3  -21.535570980062    -3.751E-04 2.758E-04 1.162E-02
- ETOT  4  -21.535598477188    -2.750E-05 4.982E-06 5.853E-04
- ETOT  5  -21.535601080955    -2.604E-06 5.979E-07 2.028E-06
- ETOT  6  -21.535601083278    -2.323E-09 3.179E-08 8.612E-08
- ETOT  7  -21.535601083414    -1.362E-10 6.686E-09 2.741E-09
- ETOT  8  -21.535601083417    -2.998E-12 4.335E-10 1.916E-11
- ETOT  9  -21.535601083417     1.421E-14 9.848E-11 1.843E-13
- ETOT 10  -21.535601083417     0.000E+00 6.774E-12 8.949E-16
- ETOT 11  -21.535601083417     2.842E-14 1.651E-12 4.564E-18
- ETOT 12  -21.535601083417     3.553E-15 9.706E-13 1.688E-19
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -21.527286566319    -2.153E+01 3.226E-02 5.858E+00 4.517E-01 4.517E-01
+ ETOT  2  -21.535195880679    -7.909E-03 6.753E-03 3.569E-01 1.228E-02 4.394E-01
+ ETOT  3  -21.535570980062    -3.751E-04 2.758E-04 1.162E-02 2.476E-02 4.642E-01
+ ETOT  4  -21.535598477188    -2.750E-05 4.982E-06 5.853E-04 1.422E-02 4.784E-01
+ ETOT  5  -21.535601080955    -2.604E-06 5.979E-07 2.028E-06 6.169E-03 4.846E-01
+ ETOT  6  -21.535601083278    -2.323E-09 3.179E-08 8.612E-08 2.830E-05 4.846E-01
+ ETOT  7  -21.535601083414    -1.362E-10 6.686E-09 2.741E-09 1.020E-06 4.846E-01
+ ETOT  8  -21.535601083417    -2.998E-12 4.335E-10 1.916E-11 3.471E-06 4.846E-01
+ ETOT  9  -21.535601083417     1.421E-14 9.848E-11 1.843E-13 7.153E-08 4.846E-01
+ ETOT 10  -21.535601083417     0.000E+00 6.774E-12 8.949E-16 3.796E-08 4.846E-01
+ ETOT 11  -21.535601083417     2.842E-14 1.651E-12 4.564E-18 3.942E-09 4.846E-01
+ ETOT 12  -21.535601083417     3.553E-15 9.706E-13 1.688E-19 2.038E-10 4.846E-01
 
  At SCF step   12   max residual=  9.71E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -788,19 +789,19 @@ solver: {iscf: 7, nstep: 12, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -21.526837175200    -2.153E+01 4.543E-02 5.879E+00
- ETOT  2  -21.535190687757    -8.354E-03 1.192E-02 3.663E-01
- ETOT  3  -21.535571896205    -3.812E-04 3.076E-03 1.144E-02
- ETOT  4  -21.535598595728    -2.670E-05 6.122E-04 5.608E-04
- ETOT  5  -21.535601082555    -2.487E-06 7.239E-05 6.645E-07
- ETOT  6  -21.535601083380    -8.245E-10 1.239E-05 2.955E-08
- ETOT  7  -21.535601083416    -3.578E-11 1.460E-06 1.271E-09
- ETOT  8  -21.535601083418    -1.858E-12 2.546E-07 4.497E-12
- ETOT  9  -21.535601083418    -3.553E-15 3.023E-08 2.510E-13
- ETOT 10  -21.535601083418     1.066E-14 5.315E-09 1.283E-15
- ETOT 11  -21.535601083418    -1.776E-14 6.398E-10 4.527E-17
- ETOT 12  -21.535601083418     3.553E-14 1.068E-10 1.082E-18
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -21.526837175200    -2.153E+01 4.543E-02 5.879E+00 4.533E-01 4.533E-01
+ ETOT  2  -21.535190687757    -8.354E-03 1.192E-02 3.663E-01 1.265E-02 4.407E-01
+ ETOT  3  -21.535571896205    -3.812E-04 3.076E-03 1.144E-02 2.405E-02 4.647E-01
+ ETOT  4  -21.535598595728    -2.670E-05 6.122E-04 5.608E-04 1.386E-02 4.786E-01
+ ETOT  5  -21.535601082555    -2.487E-06 7.239E-05 6.645E-07 6.028E-03 4.846E-01
+ ETOT  6  -21.535601083380    -8.245E-10 1.239E-05 2.955E-08 5.999E-05 4.845E-01
+ ETOT  7  -21.535601083416    -3.578E-11 1.460E-06 1.271E-09 1.003E-05 4.846E-01
+ ETOT  8  -21.535601083418    -1.858E-12 2.546E-07 4.497E-12 1.668E-06 4.846E-01
+ ETOT  9  -21.535601083418    -3.553E-15 3.023E-08 2.510E-13 3.282E-08 4.846E-01
+ ETOT 10  -21.535601083418     1.066E-14 5.315E-09 1.283E-15 2.669E-08 4.846E-01
+ ETOT 11  -21.535601083418    -1.776E-14 6.398E-10 4.527E-17 4.533E-09 4.846E-01
+ ETOT 12  -21.535601083418     3.553E-14 1.068E-10 1.082E-18 8.914E-10 4.846E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  7.63053860E-02  sigma(3 2)=  0.00000000E+00
@@ -950,19 +951,19 @@ solver: {iscf: 7, nstep: 12, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -21.526658791774    -2.153E+01 3.179E-02 5.922E+00
- ETOT  2  -21.535167999180    -8.509E-03 1.744E-03 3.897E-01
- ETOT  3  -21.535572009786    -4.040E-04 2.915E-04 1.136E-02
- ETOT  4  -21.535598611479    -2.660E-05 5.899E-06 5.591E-04
- ETOT  5  -21.535601082154    -2.471E-06 8.282E-07 9.125E-07
- ETOT  6  -21.535601083361    -1.207E-09 4.808E-08 4.223E-08
- ETOT  7  -21.535601083415    -5.422E-11 7.802E-09 1.636E-09
- ETOT  8  -21.535601083418    -2.196E-12 5.535E-10 2.709E-12
- ETOT  9  -21.535601083418     2.842E-14 1.202E-10 8.235E-14
- ETOT 10  -21.535601083418     1.421E-14 8.152E-12 9.732E-16
- ETOT 11  -21.535601083418    -4.263E-14 1.786E-12 3.553E-17
- ETOT 12  -21.535601083418     4.974E-14 9.105E-13 5.692E-19
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -21.526658791774    -2.153E+01 3.179E-02 5.922E+00 4.540E-01 4.540E-01
+ ETOT  2  -21.535167999180    -8.509E-03 1.744E-03 3.897E-01 1.313E-02 4.409E-01
+ ETOT  3  -21.535572009786    -4.040E-04 2.915E-04 1.136E-02 2.376E-02 4.647E-01
+ ETOT  4  -21.535598611479    -2.660E-05 5.899E-06 5.591E-04 1.393E-02 4.786E-01
+ ETOT  5  -21.535601082154    -2.471E-06 8.282E-07 9.125E-07 6.033E-03 4.846E-01
+ ETOT  6  -21.535601083361    -1.207E-09 4.808E-08 4.223E-08 6.919E-05 4.846E-01
+ ETOT  7  -21.535601083415    -5.422E-11 7.802E-09 1.636E-09 3.130E-06 4.846E-01
+ ETOT  8  -21.535601083418    -2.196E-12 5.535E-10 2.709E-12 2.565E-06 4.846E-01
+ ETOT  9  -21.535601083418     2.842E-14 1.202E-10 8.235E-14 4.683E-08 4.846E-01
+ ETOT 10  -21.535601083418     1.421E-14 8.152E-12 9.732E-16 2.867E-08 4.846E-01
+ ETOT 11  -21.535601083418    -4.263E-14 1.786E-12 3.553E-17 4.309E-09 4.846E-01
+ ETOT 12  -21.535601083418     4.974E-14 9.105E-13 5.692E-19 6.752E-10 4.846E-01
 
  At SCF step   12   max residual=  9.10E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -1109,19 +1110,19 @@ solver: {iscf: 7, nstep: 12, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -21.527913992699    -2.153E+01 3.755E-02 5.913E+00
- ETOT  2  -21.535176612552    -7.263E-03 6.467E-03 3.819E-01
- ETOT  3  -21.535572540925    -3.959E-04 1.617E-03 1.131E-02
- ETOT  4  -21.535598674922    -2.613E-05 2.127E-04 5.461E-04
- ETOT  5  -21.535601082626    -2.408E-06 3.665E-05 5.751E-07
- ETOT  6  -21.535601083384    -7.572E-10 4.427E-06 1.594E-08
- ETOT  7  -21.535601083415    -3.118E-11 7.774E-07 3.746E-10
- ETOT  8  -21.535601083417    -2.153E-12 9.700E-08 5.737E-11
- ETOT  9  -21.535601083418    -5.507E-13 1.690E-08 3.159E-12
- ETOT 10  -21.535601083418    -7.105E-14 2.145E-09 2.080E-14
- ETOT 11  -21.535601083418     1.066E-14 3.737E-10 1.900E-16
- ETOT 12  -21.535601083418     0.000E+00 4.643E-11 6.834E-18
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -21.527913992699    -2.153E+01 3.755E-02 5.913E+00 3.217E-01 3.217E-01
+ ETOT  2  -21.535176612552    -7.263E-03 6.467E-03 3.819E-01 9.642E-03 3.121E-01
+ ETOT  3  -21.535572540925    -3.959E-04 1.617E-03 1.131E-02 1.673E-02 3.288E-01
+ ETOT  4  -21.535598674922    -2.613E-05 2.127E-04 5.461E-04 9.662E-03 3.385E-01
+ ETOT  5  -21.535601082626    -2.408E-06 3.665E-05 5.751E-07 4.200E-03 3.427E-01
+ ETOT  6  -21.535601083384    -7.572E-10 4.427E-06 1.594E-08 5.156E-05 3.426E-01
+ ETOT  7  -21.535601083415    -3.118E-11 7.774E-07 3.746E-10 8.635E-06 3.426E-01
+ ETOT  8  -21.535601083417    -2.153E-12 9.700E-08 5.737E-11 2.480E-07 3.426E-01
+ ETOT  9  -21.535601083418    -5.507E-13 1.690E-08 3.159E-12 2.413E-08 3.426E-01
+ ETOT 10  -21.535601083418    -7.105E-14 2.145E-09 2.080E-14 9.241E-09 3.426E-01
+ ETOT 11  -21.535601083418     1.066E-14 3.737E-10 1.900E-16 6.289E-09 3.426E-01
+ ETOT 12  -21.535601083418     0.000E+00 4.643E-11 6.834E-18 3.548E-10 3.426E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  7.63054038E-02  sigma(3 2)=  0.00000000E+00
@@ -1614,10 +1615,10 @@ P           mkmem5          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.3
+- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.3  wall=          4.3
++Overall time at end (sec) : cpu=          4.3  wall=          4.4

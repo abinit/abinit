@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t71.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h04 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t71.abi
 - output file    -> t71.abo
 - root for input  files -> t71i
 - root for output files -> t71o
@@ -150,8 +150,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -168,8 +168,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -199,37 +199,37 @@ solver: {iscf: 7, nstep: 30, nline: 8, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-16, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -211.62661957880    -2.116E+02 1.510E-02 6.759E+03
- ETOT  2  -215.42603590687    -3.799E+00 2.453E-03 2.462E+02
- ETOT  3  -215.53184212667    -1.058E-01 6.478E-03 4.350E+01
- ETOT  4  -215.58024330868    -4.840E-02 2.696E-03 2.238E+00
- ETOT  5  -215.58514540308    -4.902E-03 5.779E-04 1.226E+00
- ETOT  6  -215.58678420879    -1.639E-03 3.108E-05 2.248E+00
- ETOT  7  -215.58893213670    -2.148E-03 1.393E-05 6.184E-01
- ETOT  8  -215.59041148679    -1.479E-03 6.513E-06 3.233E-01
- ETOT  9  -215.59211434619    -1.703E-03 1.909E-05 1.441E-01
- ETOT 10  -215.59308356154    -9.692E-04 2.378E-05 4.098E-02
- ETOT 11  -215.59319295450    -1.094E-04 1.073E-06 6.557E-02
- ETOT 12  -215.59335060286    -1.576E-04 2.235E-06 5.403E-03
- ETOT 13  -215.59340289791    -5.230E-05 5.171E-07 4.369E-03
- ETOT 14  -215.59344086138    -3.796E-05 5.310E-07 1.540E-03
- ETOT 15  -215.59346704110    -2.618E-05 6.751E-07 2.327E-04
- ETOT 16  -215.59347523563    -8.195E-06 1.902E-07 1.954E-04
- ETOT 17  -215.59348228090    -7.045E-06 2.598E-07 7.657E-05
- ETOT 18  -215.59348540280    -3.122E-06 9.932E-08 3.079E-05
- ETOT 19  -215.59348778695    -2.384E-06 9.385E-08 2.025E-05
- ETOT 20  -215.59348880362    -1.017E-06 2.639E-08 2.285E-05
- ETOT 21  -215.59348972392    -9.203E-07 2.913E-08 1.223E-05
- ETOT 22  -215.59349050931    -7.854E-07 3.080E-08 8.376E-06
- ETOT 23  -215.59349165618    -1.147E-06 1.303E-07 4.132E-06
- ETOT 24  -215.59349202871    -3.725E-07 3.646E-08 1.998E-06
- ETOT 25  -215.59349222629    -1.976E-07 2.545E-08 1.026E-06
- ETOT 26  -215.59349231009    -8.380E-08 1.448E-08 2.774E-07
- ETOT 27  -215.59349233674    -2.665E-08 1.076E-08 9.989E-08
- ETOT 28  -215.59349233775    -1.016E-09 1.188E-10 5.119E-08
- ETOT 29  -215.59349233830    -5.477E-10 1.293E-11 4.666E-08
- ETOT 30  -215.59349233882    -5.236E-10 7.439E-12 3.585E-08
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -211.62661957880    -2.116E+02 1.510E-02 6.759E+03 2.379E-01 2.379E-01
+ ETOT  2  -215.42603590687    -3.799E+00 2.453E-03 2.462E+02 2.654E-01 4.893E-01
+ ETOT  3  -215.53184212667    -1.058E-01 6.478E-03 4.350E+01 4.672E-02 4.429E-01
+ ETOT  4  -215.58024330868    -4.840E-02 2.696E-03 2.238E+00 2.358E-02 4.217E-01
+ ETOT  5  -215.58514540308    -4.902E-03 5.779E-04 1.226E+00 5.901E-02 3.627E-01
+ ETOT  6  -215.58678420879    -1.639E-03 3.108E-05 2.248E+00 7.068E-02 3.417E-01
+ ETOT  7  -215.58893213670    -2.148E-03 1.393E-05 6.184E-01 8.661E-02 3.730E-01
+ ETOT  8  -215.59041148679    -1.479E-03 6.513E-06 3.233E-01 7.405E-02 3.916E-01
+ ETOT  9  -215.59211434619    -1.703E-03 1.909E-05 1.441E-01 8.904E-02 3.720E-01
+ ETOT 10  -215.59308356154    -9.692E-04 2.378E-05 4.098E-02 8.207E-02 3.196E-01
+ ETOT 11  -215.59319295450    -1.094E-04 1.073E-06 6.557E-02 2.066E-02 2.989E-01
+ ETOT 12  -215.59335060286    -1.576E-04 2.235E-06 5.403E-03 3.683E-02 2.621E-01
+ ETOT 13  -215.59340289791    -5.230E-05 5.171E-07 4.369E-03 2.165E-02 2.405E-01
+ ETOT 14  -215.59344086138    -3.796E-05 5.310E-07 1.540E-03 2.002E-02 2.204E-01
+ ETOT 15  -215.59346704110    -2.618E-05 6.751E-07 2.327E-04 2.207E-02 1.984E-01
+ ETOT 16  -215.59347523563    -8.195E-06 1.902E-07 1.954E-04 1.064E-02 1.877E-01
+ ETOT 17  -215.59348228090    -7.045E-06 2.598E-07 7.657E-05 1.238E-02 1.754E-01
+ ETOT 18  -215.59348540280    -3.122E-06 9.932E-08 3.079E-05 7.006E-03 1.683E-01
+ ETOT 19  -215.59348778695    -2.384E-06 9.385E-08 2.025E-05 6.620E-03 1.619E-01
+ ETOT 20  -215.59348880362    -1.017E-06 2.639E-08 2.285E-05 3.529E-03 1.586E-01
+ ETOT 21  -215.59348972392    -9.203E-07 2.913E-08 1.223E-05 3.741E-03 1.552E-01
+ ETOT 22  -215.59349050931    -7.854E-07 3.080E-08 8.376E-06 3.878E-03 1.517E-01
+ ETOT 23  -215.59349165618    -1.147E-06 1.303E-07 4.132E-06 7.945E-03 1.448E-01
+ ETOT 24  -215.59349202871    -3.725E-07 3.646E-08 1.998E-06 4.173E-03 1.413E-01
+ ETOT 25  -215.59349222629    -1.976E-07 2.545E-08 1.026E-06 3.478E-03 1.384E-01
+ ETOT 26  -215.59349231009    -8.380E-08 1.448E-08 2.774E-07 2.618E-03 1.397E-01
+ ETOT 27  -215.59349233674    -2.665E-08 1.076E-08 9.989E-08 2.260E-03 1.414E-01
+ ETOT 28  -215.59349233775    -1.016E-09 1.188E-10 5.119E-08 2.618E-04 1.415E-01
+ ETOT 29  -215.59349233830    -5.477E-10 1.293E-11 4.666E-08 9.366E-05 1.415E-01
+ ETOT 30  -215.59349233882    -5.236E-10 7.439E-12 3.585E-08 6.654E-05 1.415E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  8.82176813E-02  sigma(3 2)= -2.53930774E-04
@@ -362,7 +362,7 @@ band_energy         : -3.23714096433087E+01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      8.5037675980E+00  8.5037675980E+00  8.5037675980E+00 Bohr
               amu      5.49380500E+01  1.59994000E+01
@@ -478,7 +478,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -495,12 +495,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -518,7 +518,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -533,15 +533,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         36.8  wall=         36.9
+- Proc.   0 individual time (sec): cpu=         37.0  wall=         37.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         36.8  wall=         36.9
++Overall time at end (sec) : cpu=         37.0  wall=         37.1

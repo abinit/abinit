@@ -1,5 +1,5 @@
 
-.Version 10.3.4.1 of ABINIT, released Feb 2025.
+.Version 9.11.6.5 of ABINIT, released May 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 31 Mar 2025.
-- ( at 18h27 )
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h05 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/TestBot_MPI1/v9_t07-t08/t07.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t07-t08/t07.abi
 - output file    -> t07.abo
 - root for input  files -> t07i
 - root for output files -> t07o
@@ -471,8 +471,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18463
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Ga-low_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/Ga-low_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Ga-low_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Ga-low_r.psp8
 - Ga    ONCVPSP-3.3.0  r_core=   1.85767   1.81388   2.62545
 - 31.00000   3.00000    170607                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -495,8 +495,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/As_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_develop/tests/Pspdir/As_r.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/As_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/As_r.psp8
 - As    ONCVPSP-3.3.0  r_core=   1.85233   1.80867   2.40819
 - 33.00000   5.00000    170607                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -532,14 +532,14 @@ solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.247173154483    -1.125E+01 9.545E-04 4.051E+00
- ETOT  2  -11.250405530405    -3.232E-03 3.906E-08 2.711E-01
- ETOT  3  -11.250577848936    -1.723E-04 1.938E-06 6.223E-03
- ETOT  4  -11.250579211526    -1.363E-06 6.892E-09 5.749E-04
- ETOT  5  -11.250579342469    -1.309E-07 5.498E-10 3.115E-06
- ETOT  6  -11.250579343470    -1.001E-09 1.675E-12 3.491E-08
- ETOT  7  -11.250579343476    -6.208E-12 9.109E-13 1.485E-09
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -11.247173154483    -1.125E+01 9.545E-04 4.051E+00 0.000E+00 0.000E+00
+ ETOT  2  -11.250405530405    -3.232E-03 3.906E-08 2.711E-01 0.000E+00 0.000E+00
+ ETOT  3  -11.250577848936    -1.723E-04 1.938E-06 6.223E-03 0.000E+00 0.000E+00
+ ETOT  4  -11.250579211526    -1.363E-06 6.892E-09 5.749E-04 0.000E+00 0.000E+00
+ ETOT  5  -11.250579342469    -1.309E-07 5.498E-10 3.115E-06 0.000E+00 0.000E+00
+ ETOT  6  -11.250579343470    -1.001E-09 1.675E-12 3.491E-08 0.000E+00 0.000E+00
+ ETOT  7  -11.250579343476    -6.208E-12 9.109E-13 1.485E-09 0.000E+00 0.000E+00
 
  At SCF step    7   max residual=  9.11E-13 < tolwfr=  1.00E-12 =>converged.
 
@@ -587,6 +587,7 @@ force_length_stats: {min:   4.41712338E-23, max:   4.41712338E-23, mean:   4.417
   Sum:              1.779880     1.779880      3.559760     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -749,6 +750,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:              1.779880     1.779880      3.559760     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -875,6 +877,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:              1.779880     1.779880      3.559760     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----

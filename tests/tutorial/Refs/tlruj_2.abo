@@ -1,5 +1,5 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 9.11.6.5 of ABINIT, released May 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,20 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 26 Jan 2025.
-- ( at 09h47 )
+.Starting date : Fri 27 Jun 2025.
+- ( at 12h58 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abi
-- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abo
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abi
+- output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tlruj_1-tlruj_2-tlruj_3/tlruj_2.abo
 - root for input  files -> tlruj_2i
 - root for output files -> tlruj_2.o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/O.xml
  DATASET    1 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -307,9 +307,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.06006
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -327,9 +327,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -347,9 +347,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_paw_pbe_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -386,25 +386,25 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -363.75876619050    -3.638E+02 1.102E-07 4.793E-01
- ETOT  2  -363.76534980008    -6.584E-03 1.367E-06 1.057E+01
- ETOT  3  -363.75845928174     6.891E-03 4.526E-04 2.860E-02
- ETOT  4  -363.75846309245    -3.811E-06 1.401E-06 6.914E-04
- ETOT  5  -363.75846322059    -1.281E-07 6.874E-07 3.264E-04
- ETOT  6  -363.75846373294    -5.124E-07 1.876E-07 5.345E-04
- ETOT  7  -363.75846369933     3.361E-08 5.981E-08 6.174E-05
- ETOT  8  -363.75846382840    -1.291E-07 3.339E-08 2.851E-05
- ETOT  9  -363.75846387180    -4.339E-08 1.489E-08 2.469E-05
- ETOT 10  -363.75846394356    -7.176E-08 2.713E-08 1.216E-05
- ETOT 11  -363.75846396989    -2.633E-08 6.301E-09 1.492E-06
- ETOT 12  -363.75846397999    -1.010E-08 4.373E-09 4.494E-07
- ETOT 13  -363.75846399065    -1.067E-08 1.511E-09 1.080E-07
- ETOT 14  -363.75846399160    -9.419E-10 9.340E-10 1.567E-08
- ETOT 15  -363.75846399193    -3.313E-10 2.789E-10 2.751E-09
- ETOT 16  -363.75846399199    -6.145E-11 1.391E-10 1.580E-09
- ETOT 17  -363.75846399200    -1.000E-11 4.821E-11 2.593E-09
- ETOT 18  -363.75846399200    -7.958E-13 1.902E-11 3.907E-11
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -363.75876619050    -3.638E+02 1.102E-07 4.793E-01 1.354E-01 1.354E-01
+ ETOT  2  -363.76534980008    -6.584E-03 1.367E-06 1.057E+01 7.889E-02 7.194E-02
+ ETOT  3  -363.75845928174     6.891E-03 4.526E-04 2.860E-02 9.334E-02 1.498E-01
+ ETOT  4  -363.75846309245    -3.811E-06 1.401E-06 6.914E-04 1.627E-03 1.514E-01
+ ETOT  5  -363.75846322059    -1.281E-07 6.874E-07 3.264E-04 3.514E-04 1.518E-01
+ ETOT  6  -363.75846373294    -5.124E-07 1.876E-07 5.345E-04 5.812E-04 1.524E-01
+ ETOT  7  -363.75846369933     3.361E-08 5.981E-08 6.174E-05 4.975E-04 1.529E-01
+ ETOT  8  -363.75846382840    -1.291E-07 3.339E-08 2.851E-05 5.767E-04 1.534E-01
+ ETOT  9  -363.75846387180    -4.339E-08 1.489E-08 2.469E-05 3.138E-04 1.538E-01
+ ETOT 10  -363.75846394356    -7.176E-08 2.713E-08 1.216E-05 1.097E-03 1.549E-01
+ ETOT 11  -363.75846396989    -2.633E-08 6.301E-09 1.492E-06 7.186E-04 1.556E-01
+ ETOT 12  -363.75846397999    -1.010E-08 4.373E-09 4.494E-07 2.040E-04 1.558E-01
+ ETOT 13  -363.75846399065    -1.067E-08 1.511E-09 1.080E-07 1.406E-04 1.559E-01
+ ETOT 14  -363.75846399160    -9.419E-10 9.340E-10 1.567E-08 4.955E-05 1.560E-01
+ ETOT 15  -363.75846399193    -3.313E-10 2.789E-10 2.751E-09 2.491E-05 1.560E-01
+ ETOT 16  -363.75846399199    -6.145E-11 1.391E-10 1.580E-09 5.269E-06 1.560E-01
+ ETOT 17  -363.75846399200    -1.000E-11 4.821E-11 2.593E-09 1.480E-06 1.560E-01
+ ETOT 18  -363.75846399200    -7.958E-13 1.902E-11 3.907E-11 2.911E-06 1.560E-01
 
  At SCF step   18       nres2   =  3.91E-11 < tolvrs=  1.00E-09 =>converged.
 
@@ -458,6 +458,7 @@ force_length_stats: {min:   3.83323354E-20, max:   6.65438880E-04, mean:   3.327
   Sum:             20.478383    20.478278     40.956660     0.000105
  Total magnetization (from the atomic spheres):             0.000105
  Total magnetization (exact up - dn):                      -0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -912,24 +913,24 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -363.74270119921    -3.637E+02 5.081E-08 1.911E-01
- ETOT  2  -363.74528981786    -2.589E-03 5.358E-07 5.178E+00
- ETOT  3  -363.74256595609     2.724E-03 1.722E-04 6.078E-03
- ETOT  4  -363.74257000372    -4.048E-06 4.625E-07 1.327E-04
- ETOT  5  -363.74257043000    -4.263E-07 2.689E-07 5.670E-04
- ETOT  6  -363.74257028143     1.486E-07 1.144E-08 1.175E-04
- ETOT  7  -363.74257030307    -2.164E-08 4.786E-09 4.089E-05
- ETOT  8  -363.74257031228    -9.208E-09 1.397E-10 3.213E-05
- ETOT  9  -363.74257033178    -1.950E-08 1.594E-09 1.635E-05
- ETOT 10  -363.74257034028    -8.499E-09 1.391E-10 1.577E-05
- ETOT 11  -363.74257035047    -1.019E-08 5.506E-09 1.591E-06
- ETOT 12  -363.74257035664    -6.171E-09 3.843E-11 5.786E-07
- ETOT 13  -363.74257036049    -3.845E-09 1.397E-10 1.316E-07
- ETOT 14  -363.74257036259    -2.098E-09 6.484E-11 1.431E-08
- ETOT 15  -363.74257036288    -2.916E-10 2.729E-11 1.282E-08
- ETOT 16  -363.74257036294    -5.895E-11 1.121E-11 4.242E-09
- ETOT 17  -363.74257036294     2.842E-13 1.076E-12 4.351E-10
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -363.74270119921    -3.637E+02 5.081E-08 1.911E-01 1.495E-01 1.495E-01
+ ETOT  2  -363.74528981786    -2.589E-03 5.358E-07 5.178E+00 8.012E-02 7.859E-02
+ ETOT  3  -363.74256595609     2.724E-03 1.722E-04 6.078E-03 8.394E-02 1.533E-01
+ ETOT  4  -363.74257000372    -4.048E-06 4.625E-07 1.327E-04 6.249E-04 1.540E-01
+ ETOT  5  -363.74257043000    -4.263E-07 2.689E-07 5.670E-04 2.840E-04 1.542E-01
+ ETOT  6  -363.74257028143     1.486E-07 1.144E-08 1.175E-04 2.498E-04 1.545E-01
+ ETOT  7  -363.74257030307    -2.164E-08 4.786E-09 4.089E-05 2.776E-04 1.548E-01
+ ETOT  8  -363.74257031228    -9.208E-09 1.397E-10 3.213E-05 9.506E-05 1.549E-01
+ ETOT  9  -363.74257033178    -1.950E-08 1.594E-09 1.635E-05 3.114E-04 1.552E-01
+ ETOT 10  -363.74257034028    -8.499E-09 1.391E-10 1.577E-05 1.386E-04 1.553E-01
+ ETOT 11  -363.74257035047    -1.019E-08 5.506E-09 1.591E-06 7.876E-04 1.561E-01
+ ETOT 12  -363.74257035664    -6.171E-09 3.843E-11 5.786E-07 7.569E-05 1.562E-01
+ ETOT 13  -363.74257036049    -3.845E-09 1.397E-10 1.316E-07 8.459E-05 1.563E-01
+ ETOT 14  -363.74257036259    -2.098E-09 6.484E-11 1.431E-08 7.525E-05 1.563E-01
+ ETOT 15  -363.74257036288    -2.916E-10 2.729E-11 1.282E-08 1.358E-05 1.563E-01
+ ETOT 16  -363.74257036294    -5.895E-11 1.121E-11 4.242E-09 7.339E-06 1.564E-01
+ ETOT 17  -363.74257036294     2.842E-13 1.076E-12 4.351E-10 2.755E-06 1.564E-01
 
  At SCF step   17       nres2   =  4.35E-10 < tolvrs=  1.00E-09 =>converged.
 
@@ -983,6 +984,7 @@ force_length_stats: {min:   0.00000000E+00, max:   4.45604782E-04, mean:   2.228
   Sum:             20.477154    20.477113     40.954267     0.000041
  Total magnetization (from the atomic spheres):             0.000041
  Total magnetization (exact up - dn):                      -0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1437,22 +1439,22 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -363.72671779804    -3.637E+02 1.318E-08 4.640E-02
- ETOT  2  -363.72727648049    -5.587E-04 1.276E-07 1.331E+00
- ETOT  3  -363.72668375826     5.927E-04 4.331E-05 4.581E-04
- ETOT  4  -363.72668525412    -1.496E-06 8.870E-08 3.588E-05
- ETOT  5  -363.72668532504    -7.092E-08 1.599E-08 1.232E-04
- ETOT  6  -363.72668529167     3.337E-08 1.532E-09 3.746E-05
- ETOT  7  -363.72668528521     6.452E-09 1.557E-09 9.362E-06
- ETOT  8  -363.72668528953    -4.313E-09 1.007E-10 6.943E-06
- ETOT  9  -363.72668529286    -3.337E-09 4.035E-10 3.772E-06
- ETOT 10  -363.72668529549    -2.625E-09 2.279E-10 1.804E-06
- ETOT 11  -363.72668529607    -5.768E-10 8.386E-10 1.256E-07
- ETOT 12  -363.72668529729    -1.222E-09 8.604E-11 2.855E-08
- ETOT 13  -363.72668529776    -4.771E-10 1.252E-10 2.086E-08
- ETOT 14  -363.72668529788    -1.166E-10 1.225E-11 1.654E-09
- ETOT 15  -363.72668529791    -2.461E-11 1.272E-11 3.676E-10
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -363.72671779804    -3.637E+02 1.318E-08 4.640E-02 1.555E-01 1.555E-01
+ ETOT  2  -363.72727648049    -5.587E-04 1.276E-07 1.331E+00 4.058E-02 1.166E-01
+ ETOT  3  -363.72668375826     5.927E-04 4.331E-05 4.581E-04 4.078E-02 1.557E-01
+ ETOT  4  -363.72668525412    -1.496E-06 8.870E-08 3.588E-05 1.214E-04 1.558E-01
+ ETOT  5  -363.72668532504    -7.092E-08 1.599E-08 1.232E-04 1.129E-04 1.559E-01
+ ETOT  6  -363.72668529167     3.337E-08 1.532E-09 3.746E-05 6.651E-05 1.560E-01
+ ETOT  7  -363.72668528521     6.452E-09 1.557E-09 9.362E-06 6.721E-05 1.561E-01
+ ETOT  8  -363.72668528953    -4.313E-09 1.007E-10 6.943E-06 6.646E-05 1.561E-01
+ ETOT  9  -363.72668529286    -3.337E-09 4.035E-10 3.772E-06 1.090E-04 1.562E-01
+ ETOT 10  -363.72668529549    -2.625E-09 2.279E-10 1.804E-06 1.540E-04 1.564E-01
+ ETOT 11  -363.72668529607    -5.768E-10 8.386E-10 1.256E-07 2.173E-04 1.566E-01
+ ETOT 12  -363.72668529729    -1.222E-09 8.604E-11 2.855E-08 7.026E-05 1.567E-01
+ ETOT 13  -363.72668529776    -4.771E-10 1.252E-10 2.086E-08 1.949E-05 1.567E-01
+ ETOT 14  -363.72668529788    -1.166E-10 1.225E-11 1.654E-09 1.729E-05 1.567E-01
+ ETOT 15  -363.72668529791    -2.461E-11 1.272E-11 3.676E-10 6.833E-06 1.567E-01
 
  At SCF step   15       nres2   =  3.68E-10 < tolvrs=  1.00E-09 =>converged.
 
@@ -1506,6 +1508,7 @@ force_length_stats: {min:   4.83922014E-20, max:   2.25570015E-04, mean:   1.127
   Sum:             20.475920    20.475919     40.951839     0.000001
  Total magnetization (from the atomic spheres):             0.000001
  Total magnetization (exact up - dn):                      -0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1960,24 +1963,24 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -363.69497467037    -3.637E+02 1.422E-08 5.078E-02
- ETOT  2  -363.69557245531    -5.978E-04 1.316E-07 1.168E+00
- ETOT  3  -363.69494015886     6.323E-04 4.555E-05 1.072E-03
- ETOT  4  -363.69494111039    -9.515E-07 9.840E-08 3.917E-05
- ETOT  5  -363.69494117247    -6.208E-08 3.071E-08 6.117E-05
- ETOT  6  -363.69494118720    -1.473E-08 1.711E-09 3.891E-05
- ETOT  7  -363.69494117653     1.067E-08 2.341E-09 7.586E-06
- ETOT  8  -363.69494117635     1.783E-10 3.761E-11 7.713E-06
- ETOT  9  -363.69494118032    -3.972E-09 9.976E-11 8.342E-06
- ETOT 10  -363.69494119081    -1.049E-08 9.396E-10 3.229E-06
- ETOT 11  -363.69494119855    -7.741E-09 1.473E-09 7.513E-07
- ETOT 12  -363.69494120048    -1.932E-09 1.153E-10 1.973E-07
- ETOT 13  -363.69494120328    -2.799E-09 4.707E-10 1.220E-07
- ETOT 14  -363.69494120364    -3.575E-10 3.801E-11 9.369E-08
- ETOT 15  -363.69494120392    -2.802E-10 2.797E-11 1.454E-08
- ETOT 16  -363.69494120404    -1.176E-10 1.072E-11 9.968E-09
- ETOT 17  -363.69494120409    -4.792E-11 5.400E-12 3.730E-10
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -363.69497467037    -3.637E+02 1.422E-08 5.078E-02 1.564E-01 1.564E-01
+ ETOT  2  -363.69557245531    -5.978E-04 1.316E-07 1.168E+00 4.392E-02 1.154E-01
+ ETOT  3  -363.69494015886     6.323E-04 4.555E-05 1.072E-03 4.345E-02 1.560E-01
+ ETOT  4  -363.69494111039    -9.515E-07 9.840E-08 3.917E-05 3.746E-04 1.563E-01
+ ETOT  5  -363.69494117247    -6.208E-08 3.071E-08 6.117E-05 1.002E-04 1.564E-01
+ ETOT  6  -363.69494118720    -1.473E-08 1.711E-09 3.891E-05 1.983E-04 1.566E-01
+ ETOT  7  -363.69494117653     1.067E-08 2.341E-09 7.586E-06 1.577E-04 1.568E-01
+ ETOT  8  -363.69494117635     1.783E-10 3.761E-11 7.713E-06 5.512E-06 1.568E-01
+ ETOT  9  -363.69494118032    -3.972E-09 9.976E-11 8.342E-06 5.029E-05 1.568E-01
+ ETOT 10  -363.69494119081    -1.049E-08 9.396E-10 3.229E-06 3.026E-04 1.571E-01
+ ETOT 11  -363.69494119855    -7.741E-09 1.473E-09 7.513E-07 5.147E-04 1.576E-01
+ ETOT 12  -363.69494120048    -1.932E-09 1.153E-10 1.973E-07 1.125E-04 1.577E-01
+ ETOT 13  -363.69494120328    -2.799E-09 4.707E-10 1.220E-07 1.358E-04 1.579E-01
+ ETOT 14  -363.69494120364    -3.575E-10 3.801E-11 9.369E-08 1.010E-05 1.579E-01
+ ETOT 15  -363.69494120392    -2.802E-10 2.797E-11 1.454E-08 1.106E-05 1.579E-01
+ ETOT 16  -363.69494120404    -1.176E-10 1.072E-11 9.968E-09 1.306E-05 1.579E-01
+ ETOT 17  -363.69494120409    -4.792E-11 5.400E-12 3.730E-10 9.799E-06 1.579E-01
 
  At SCF step   17       nres2   =  3.73E-10 < tolvrs=  1.00E-09 =>converged.
 
@@ -2031,6 +2034,7 @@ force_length_stats: {min:   0.00000000E+00, max:   2.29493729E-04, mean:   1.147
   Sum:             20.473436    20.473377     40.946813     0.000059
  Total magnetization (from the atomic spheres):             0.000059
  Total magnetization (exact up - dn):                       0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2485,24 +2489,24 @@ solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -363.67922154433    -3.637E+02 5.914E-08 2.311E-01
- ETOT  2  -363.68213345792    -2.912E-03 5.813E-07 4.661E+00
- ETOT  3  -363.67908298788     3.050E-03 1.930E-04 1.244E-02
- ETOT  4  -363.67908195238     1.035E-06 5.630E-07 6.073E-04
- ETOT  5  -363.67908203699    -8.462E-08 3.281E-07 1.308E-04
- ETOT  6  -363.67908228985    -2.529E-07 2.570E-08 1.486E-04
- ETOT  7  -363.67908227737     1.248E-08 1.661E-08 3.523E-05
- ETOT  8  -363.67908229015    -1.278E-08 2.671E-09 3.097E-05
- ETOT  9  -363.67908231464    -2.449E-08 2.988E-09 2.349E-05
- ETOT 10  -363.67908238539    -7.075E-08 5.235E-09 2.201E-05
- ETOT 11  -363.67908241952    -3.413E-08 1.977E-08 1.513E-06
- ETOT 12  -363.67908243720    -1.769E-08 1.259E-09 2.766E-07
- ETOT 13  -363.67908244056    -3.361E-09 1.427E-09 1.039E-07
- ETOT 14  -363.67908244288    -2.319E-09 2.806E-10 1.292E-08
- ETOT 15  -363.67908244305    -1.688E-10 2.330E-10 5.457E-09
- ETOT 16  -363.67908244312    -7.310E-11 5.206E-11 1.050E-09
- ETOT 17  -363.67908244313    -8.640E-12 3.529E-11 6.782E-10
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -363.67922154433    -3.637E+02 5.914E-08 2.311E-01 1.524E-01 1.524E-01
+ ETOT  2  -363.68213345792    -2.912E-03 5.813E-07 4.661E+00 8.463E-02 8.109E-02
+ ETOT  3  -363.67908298788     3.050E-03 1.930E-04 1.244E-02 8.597E-02 1.538E-01
+ ETOT  4  -363.67908195238     1.035E-06 5.630E-07 6.073E-04 1.256E-03 1.550E-01
+ ETOT  5  -363.67908203699    -8.462E-08 3.281E-07 1.308E-04 2.456E-04 1.553E-01
+ ETOT  6  -363.67908228985    -2.529E-07 2.570E-08 1.486E-04 5.307E-04 1.558E-01
+ ETOT  7  -363.67908227737     1.248E-08 1.661E-08 3.523E-05 3.568E-04 1.562E-01
+ ETOT  8  -363.67908229015    -1.278E-08 2.671E-09 3.097E-05 1.001E-04 1.563E-01
+ ETOT  9  -363.67908231464    -2.449E-08 2.988E-09 2.349E-05 2.421E-04 1.565E-01
+ ETOT 10  -363.67908238539    -7.075E-08 5.235E-09 2.201E-05 7.100E-04 1.572E-01
+ ETOT 11  -363.67908241952    -3.413E-08 1.977E-08 1.513E-06 1.316E-03 1.585E-01
+ ETOT 12  -363.67908243720    -1.769E-08 1.259E-09 2.766E-07 1.839E-04 1.587E-01
+ ETOT 13  -363.67908244056    -3.361E-09 1.427E-09 1.039E-07 1.405E-04 1.588E-01
+ ETOT 14  -363.67908244288    -2.319E-09 2.806E-10 1.292E-08 4.331E-05 1.589E-01
+ ETOT 15  -363.67908244305    -1.688E-10 2.330E-10 5.457E-09 9.295E-06 1.589E-01
+ ETOT 16  -363.67908244312    -7.310E-11 5.206E-11 1.050E-09 2.303E-05 1.589E-01
+ ETOT 17  -363.67908244313    -8.640E-12 3.529E-11 6.782E-10 1.947E-06 1.589E-01
 
  At SCF step   17       nres2   =  6.78E-10 < tolvrs=  1.00E-09 =>converged.
 
@@ -2556,6 +2560,7 @@ force_length_stats: {min:   6.06087440E-20, max:   4.60337577E-04, mean:   2.301
   Sum:             20.472184    20.471975     40.944159     0.000208
  Total magnetization (from the atomic spheres):             0.000208
  Total magnetization (exact up - dn):                       0.000000
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3229,10 +3234,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        105.4  wall=        105.4
+- Proc.   0 individual time (sec): cpu=        105.4  wall=        105.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  20 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        105.4  wall=        105.4
++Overall time at end (sec) : cpu=        105.4  wall=        105.5

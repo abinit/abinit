@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t67.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h04 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t67.abi
 - output file    -> t67.abo
 - root for input  files -> t67i
 - root for output files -> t67o
@@ -147,8 +147,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -186,48 +186,48 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-17, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -23.691357947634    -2.369E+01 5.871E-01 5.977E+03
- ETOT  2  -24.319577711062    -6.282E-01 2.721E-02 2.937E+03
- ETOT  3  -24.894467098751    -5.749E-01 1.724E-02 7.913E+01
- ETOT  4  -24.859296753596     3.517E-02 5.134E-04 2.057E+02
- ETOT  5  -24.903509581176    -4.421E-02 1.679E-04 8.113E+01
- ETOT  6  -24.930422735857    -2.691E-02 1.286E-04 8.977E+00
- ETOT  7  -24.930058423971     3.643E-04 2.590E-02 1.211E+01
- ETOT  8  -24.930524780651    -4.664E-04 1.457E-03 1.131E+01
- ETOT  9  -24.932674265103    -2.149E-03 6.649E-04 4.159E+00
- ETOT 10  -24.933454900937    -7.806E-04 1.570E-04 1.467E+00
- ETOT 11  -24.933906714046    -4.518E-04 3.278E-04 1.490E-02
- ETOT 12  -24.933832539242     7.417E-05 1.294E-04 3.088E-01
- ETOT 13  -24.933805152759     2.739E-05 2.416E-04 3.787E-01
- ETOT 14  -24.933912931331    -1.078E-04 8.953E-05 1.017E-03
- ETOT 15  -24.933901945992     1.099E-05 3.633E-04 5.336E-02
- ETOT 16  -24.933895222649     6.723E-06 8.796E-05 7.708E-02
- ETOT 17  -24.933884570996     1.065E-05 2.654E-04 1.124E-01
- ETOT 18  -24.933795512842     8.906E-05 4.898E-05 4.231E-01
- ETOT 19  -24.933891239148    -9.573E-05 1.201E-04 8.014E-02
- ETOT 20  -24.933904832852    -1.359E-05 1.755E-05 3.791E-02
- ETOT 21  -24.933916521215    -1.169E-05 4.017E-05 7.724E-04
- ETOT 22  -24.933917055024    -5.338E-07 5.796E-06 7.429E-04
- ETOT 23  -24.933917236297    -1.813E-07 1.465E-05 3.177E-04
- ETOT 24  -24.933917325945    -8.965E-08 2.162E-06 1.360E-08
- ETOT 25  -24.933917321449     4.496E-09 5.737E-06 1.621E-05
- ETOT 26  -24.933917325909    -4.460E-09 8.308E-07 1.964E-07
- ETOT 27  -24.933917325905     4.526E-12 2.214E-06 3.248E-07
- ETOT 28  -24.933917325995    -9.051E-11 3.182E-07 5.527E-08
- ETOT 29  -24.933917326013    -1.790E-11 8.533E-07 1.106E-09
- ETOT 30  -24.933917326013     3.304E-13 1.220E-07 2.511E-09
- ETOT 31  -24.933917326014    -6.537E-13 3.289E-07 1.765E-11
- ETOT 32  -24.933917326014    -7.105E-14 4.684E-08 2.399E-11
- ETOT 33  -24.933917326014     6.040E-14 1.267E-07 5.843E-12
- ETOT 34  -24.933917326014     2.842E-14 1.800E-08 1.808E-15
- ETOT 35  -24.933917326014    -1.386E-13 4.885E-08 1.685E-14
- ETOT 36  -24.933917326014     6.750E-14 6.920E-09 5.242E-16
- ETOT 37  -24.933917326014    -5.329E-14 1.884E-08 1.639E-15
- ETOT 38  -24.933917326014     7.105E-15 2.663E-09 7.548E-16
- ETOT 39  -24.933917326014     1.030E-13 7.265E-09 1.741E-17
- ETOT 40  -24.933917326014    -2.487E-14 1.025E-09 4.310E-17
- ETOT 41  -24.933917326014    -9.237E-14 2.803E-09 5.600E-18
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -23.691357947634    -2.369E+01 5.871E-01 5.977E+03 1.355E+00 1.355E+00
+ ETOT  2  -24.319577711062    -6.282E-01 2.721E-02 2.937E+03 3.152E-01 1.040E+00
+ ETOT  3  -24.894467098751    -5.749E-01 1.724E-02 7.913E+01 5.819E-01 1.622E+00
+ ETOT  4  -24.859296753596     3.517E-02 5.134E-04 2.057E+02 3.117E-01 1.934E+00
+ ETOT  5  -24.903509581176    -4.421E-02 1.679E-04 8.113E+01 4.257E-01 2.360E+00
+ ETOT  6  -24.930422735857    -2.691E-02 1.286E-04 8.977E+00 2.853E-01 2.645E+00
+ ETOT  7  -24.930058423971     3.643E-04 2.590E-02 1.211E+01 9.011E-02 2.735E+00
+ ETOT  8  -24.930524780651    -4.664E-04 1.457E-03 1.131E+01 6.695E-02 2.802E+00
+ ETOT  9  -24.932674265103    -2.149E-03 6.649E-04 4.159E+00 7.153E-02 2.873E+00
+ ETOT 10  -24.933454900937    -7.806E-04 1.570E-04 1.467E+00 3.810E-02 2.912E+00
+ ETOT 11  -24.933906714046    -4.518E-04 3.278E-04 1.490E-02 3.878E-02 2.873E+00
+ ETOT 12  -24.933832539242     7.417E-05 1.294E-04 3.088E-01 1.410E-03 2.871E+00
+ ETOT 13  -24.933805152759     2.739E-05 2.416E-04 3.787E-01 1.465E-02 2.857E+00
+ ETOT 14  -24.933912931331    -1.078E-04 8.953E-05 1.017E-03 1.125E-03 2.858E+00
+ ETOT 15  -24.933901945992     1.099E-05 3.633E-04 5.336E-02 1.017E-02 2.868E+00
+ ETOT 16  -24.933895222649     6.723E-06 8.796E-05 7.708E-02 6.435E-03 2.874E+00
+ ETOT 17  -24.933884570996     1.065E-05 2.654E-04 1.124E-01 3.650E-03 2.878E+00
+ ETOT 18  -24.933795512842     8.906E-05 4.898E-05 4.231E-01 4.771E-03 2.883E+00
+ ETOT 19  -24.933891239148    -9.573E-05 1.201E-04 8.014E-02 2.419E-03 2.885E+00
+ ETOT 20  -24.933904832852    -1.359E-05 1.755E-05 3.791E-02 3.051E-03 2.882E+00
+ ETOT 21  -24.933916521215    -1.169E-05 4.017E-05 7.724E-04 2.806E-03 2.879E+00
+ ETOT 22  -24.933917055024    -5.338E-07 5.796E-06 7.429E-04 3.300E-03 2.876E+00
+ ETOT 23  -24.933917236297    -1.813E-07 1.465E-05 3.177E-04 1.738E-03 2.874E+00
+ ETOT 24  -24.933917325945    -8.965E-08 2.162E-06 1.360E-08 4.468E-04 2.874E+00
+ ETOT 25  -24.933917321449     4.496E-09 5.737E-06 1.621E-05 5.348E-05 2.874E+00
+ ETOT 26  -24.933917325909    -4.460E-09 8.308E-07 1.964E-07 4.790E-05 2.874E+00
+ ETOT 27  -24.933917325905     4.526E-12 2.214E-06 3.248E-07 2.160E-05 2.874E+00
+ ETOT 28  -24.933917325995    -9.051E-11 3.182E-07 5.527E-08 1.191E-05 2.874E+00
+ ETOT 29  -24.933917326013    -1.790E-11 8.533E-07 1.106E-09 1.241E-05 2.874E+00
+ ETOT 30  -24.933917326013     3.304E-13 1.220E-07 2.511E-09 1.707E-06 2.874E+00
+ ETOT 31  -24.933917326014    -6.537E-13 3.289E-07 1.765E-11 9.191E-08 2.874E+00
+ ETOT 32  -24.933917326014    -7.105E-14 4.684E-08 2.399E-11 6.157E-07 2.874E+00
+ ETOT 33  -24.933917326014     6.040E-14 1.267E-07 5.843E-12 2.216E-07 2.874E+00
+ ETOT 34  -24.933917326014     2.842E-14 1.800E-08 1.808E-15 3.864E-08 2.874E+00
+ ETOT 35  -24.933917326014    -1.386E-13 4.885E-08 1.685E-14 1.358E-08 2.874E+00
+ ETOT 36  -24.933917326014     6.750E-14 6.920E-09 5.242E-16 4.963E-09 2.874E+00
+ ETOT 37  -24.933917326014    -5.329E-14 1.884E-08 1.639E-15 5.946E-10 2.874E+00
+ ETOT 38  -24.933917326014     7.105E-15 2.663E-09 7.548E-16 7.992E-10 2.874E+00
+ ETOT 39  -24.933917326014     1.030E-13 7.265E-09 1.741E-17 2.797E-10 2.874E+00
+ ETOT 40  -24.933917326014    -2.487E-14 1.025E-09 4.310E-17 3.789E-10 2.874E+00
+ ETOT 41  -24.933917326014    -9.237E-14 2.803E-09 5.600E-18 1.069E-10 2.874E+00
 
  At SCF step   41       vres2   =  5.60E-18 < tolvrs=  1.00E-17 =>converged.
 
@@ -335,7 +335,7 @@ band_energy         : -2.89895967197854E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
@@ -445,7 +445,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -457,12 +457,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -480,7 +480,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -495,15 +495,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.1  wall=         25.1
+- Proc.   0 individual time (sec): cpu=         25.7  wall=         25.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.1  wall=         25.1
++Overall time at end (sec) : cpu=         25.7  wall=         25.7

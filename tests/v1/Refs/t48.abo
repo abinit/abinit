@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t48/t48.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 12h58 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v1_t48/t48.abi
 - output file    -> t48.abo
 - root for input  files -> t48i
 - root for output files -> t48o
@@ -139,8 +139,8 @@ meta: {optdriver: 0, ionmov: 4, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -180,9 +180,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {toldff: 1.00E-05, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
+     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor   difmagsph maxmagsph
 
- ETOT  1  -8.6426609862881    -8.643E+00 9.683E-03 1.793E+01 9.812E-03 9.812E-03
+ ETOT  1  -8.6426609862881    -8.643E+00 9.683E-03 1.793E+01 9.812E-03 9.812E-03 4.352E-01 4.352E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  3.22E-03  2.38E-03 -3.12E-05
     1     6.37057077564E-03   -4.66970327838E-03   -9.81215197977E-03
@@ -203,7 +203,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.36994   -5.78127   -2.61295
 
- ETOT  2  -8.6689911792905    -2.633E-02 4.935E-05 5.462E+00 1.077E-02 4.397E-03
+ ETOT  2  -8.6689911792905    -2.633E-02 4.935E-05 5.462E+00 1.077E-02 4.397E-03 9.021E-02 3.450E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  2.02E-04  2.70E-06 -1.21E-04
     1    -4.39725201373E-03   -6.22726369858E-05   -8.43801989306E-05
@@ -224,7 +224,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.51013   -5.32605   -2.50026
 
- ETOT  3  -8.6707821519898    -1.791E-03 2.185E-05 2.002E+00 6.512E-03 1.091E-02
+ ETOT  3  -8.6707821519898    -1.791E-03 2.185E-05 2.002E+00 6.512E-03 1.091E-02 3.255E-03 3.417E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -4.81E-05 -1.13E-05 -2.97E-05
     1    -1.09090353869E-02   -1.98330446084E-05   -4.40059307742E-05
@@ -245,7 +245,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.29494   -5.24606   -2.33999
 
- ETOT  4  -8.6713263797414    -5.442E-04 5.324E-06 7.740E-01 3.071E-03 1.398E-02
+ ETOT  4  -8.6713263797414    -5.442E-04 5.324E-06 7.740E-01 3.071E-03 1.398E-02 1.214E-03 3.412E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -2.57E-05 -6.67E-06 -1.38E-05
     1    -1.39803836069E-02   -2.44522410339E-05   -4.90822564238E-05
@@ -266,7 +266,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.21039   -5.22477   -2.27661
 
- ETOT  5  -8.6715111991922    -1.848E-04 1.581E-06 3.157E-01 1.651E-03 1.563E-02
+ ETOT  5  -8.6715111991922    -1.848E-04 1.581E-06 3.157E-01 1.651E-03 1.563E-02 7.890E-04 3.412E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -6.85E-06 -2.34E-06 -6.28E-06
     1    -1.56318323274E-02   -2.39745027478E-05   -4.42785359693E-05
@@ -287,7 +287,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.16070   -5.21087   -2.24202
 
- ETOT  6  -8.6715812775210    -7.008E-05 5.632E-07 1.351E-01 9.261E-04 1.656E-02
+ ETOT  6  -8.6715812775210    -7.008E-05 5.632E-07 1.351E-01 9.261E-04 1.656E-02 6.344E-04 3.413E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -4.22E-06 -7.06E-08 -2.98E-06
     1    -1.65579390859E-02   -2.26609263660E-05   -3.92922119295E-05
@@ -308,7 +308,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.12884   -5.20098   -2.22275
 
- ETOT  7  -8.6716095311298    -2.825E-05 2.365E-07 6.015E-02 5.204E-04 1.708E-02
+ ETOT  7  -8.6716095311298    -2.825E-05 2.365E-07 6.015E-02 5.204E-04 1.708E-02 5.276E-04 3.414E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -3.65E-06  3.94E-07 -1.77E-06
     1    -1.70783561360E-02   -1.91916231259E-05   -3.21234210502E-05
@@ -329,7 +329,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.10794   -5.19408   -2.21228
 
- ETOT  8  -8.6716215429912    -1.201E-05 1.046E-07 2.760E-02 2.957E-04 1.737E-02
+ ETOT  8  -8.6716215429912    -1.201E-05 1.046E-07 2.760E-02 2.957E-04 1.737E-02 3.985E-04 3.414E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -3.50E-06  2.14E-07 -1.39E-06
     1    -1.73740894363E-02   -1.53124009589E-05   -2.50673887280E-05
@@ -350,7 +350,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.09392   -5.18916   -2.20662
 
- ETOT  9  -8.6716268793207    -5.336E-06 4.776E-08 1.293E-02 1.685E-04 1.754E-02
+ ETOT  9  -8.6716268793207    -5.336E-06 4.776E-08 1.293E-02 1.685E-04 1.754E-02 2.877E-04 3.415E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -2.02E-06  4.84E-09 -1.16E-06
     1    -1.75426354895E-02   -1.18724580654E-05   -1.91526223377E-05
@@ -371,7 +371,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.08438   -5.18564   -2.20362
 
- ETOT 10  -8.6716293368771    -2.458E-06 2.220E-08 6.144E-03 9.504E-05 1.764E-02
+ ETOT 10  -8.6716293368771    -2.458E-06 2.220E-08 6.144E-03 9.504E-05 1.764E-02 2.026E-04 3.415E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.63E-06 -7.96E-08 -8.94E-07
     1    -1.76376798698E-02   -9.13731350964E-06   -1.45622223414E-05
@@ -392,7 +392,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.07785   -5.18312   -2.20206
 
- ETOT 11  -8.6716304990539    -1.162E-06 1.048E-08 2.947E-03 5.280E-05 1.769E-02
+ ETOT 11  -8.6716304990539    -1.162E-06 1.048E-08 2.947E-03 5.280E-05 1.769E-02 1.450E-04 3.415E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.01E-06 -9.16E-08 -6.59E-07
     1    -1.76904753463E-02   -6.99592278250E-06   -1.10304866950E-05
@@ -413,7 +413,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.07335   -5.18131   -2.20129
 
- ETOT 12  -8.6716310602587    -5.612E-07 5.011E-09 1.423E-03 2.929E-05 1.772E-02
+ ETOT 12  -8.6716310602587    -5.612E-07 5.011E-09 1.423E-03 2.929E-05 1.772E-02 1.020E-04 3.415E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -8.23E-07 -9.03E-08 -4.90E-07
     1    -1.77197647263E-02   -5.33508309755E-06   -8.33151234478E-06
@@ -434,7 +434,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.07025   -5.18003   -2.20094
 
- ETOT 13  -8.6716313355339    -2.753E-07 2.424E-09 6.901E-04 1.601E-05 1.774E-02
+ ETOT 13  -8.6716313355339    -2.753E-07 2.424E-09 6.901E-04 1.601E-05 1.774E-02 7.217E-05 3.415E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -5.03E-07 -8.42E-08 -3.69E-07
     1    -1.77357789458E-02   -4.05057503577E-06   -6.27225851366E-06
@@ -455,7 +455,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06810   -5.17912   -2.20082
 
- ETOT 14  -8.6716314723143    -1.368E-07 1.185E-09 3.357E-04 8.624E-06 1.774E-02
+ ETOT 14  -8.6716314723143    -1.368E-07 1.185E-09 3.357E-04 8.624E-06 1.774E-02 5.041E-05 3.415E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -3.98E-07 -7.86E-08 -2.83E-07
     1    -1.77444025046E-02   -3.06801193043E-06   -4.71450855899E-06
@@ -476,7 +476,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06661   -5.17848   -2.20080
 
- ETOT 15  -8.6716315409417    -6.863E-08 5.848E-10 1.638E-04 4.464E-06 1.775E-02
+ ETOT 15  -8.6716315409417    -6.863E-08 5.848E-10 1.638E-04 4.464E-06 1.775E-02 3.555E-05 3.415E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -2.44E-07 -6.96E-08 -2.17E-07
     1    -1.77488665747E-02   -2.31900113770E-06   -3.53916270472E-06
@@ -497,7 +497,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06558   -5.17804   -2.20083
 
- At SCF step   15, forces are converged :
+ At SCF step   15, forces are converged : 
   for the second time, max diff in force=  4.464E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -545,6 +545,7 @@ force_length_stats: {min:   1.77488671E-02, max:   1.77488671E-02, mean:   1.774
  Total magnetization (from the atomic spheres):             0.682845
  Total magnetization (exact up - dn):                       2.000000
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -572,9 +573,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {toldff: 1.00E-05, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
+     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor   difmagsph maxmagsph
 
- ETOT  1  -8.6716316100602    -8.672E+00 1.748E-11 2.237E-06 6.299E-06 1.776E-02
+ ETOT  1  -8.6716316100602    -8.672E+00 1.748E-11 2.237E-06 6.299E-06 1.776E-02 3.415E-01 3.415E-01
 
  reduced coordinates :
     1    -1.76833333333E-01    0.00000000000E+00    0.00000000000E+00
@@ -598,7 +599,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06334   -5.17703   -2.20090
 
- ETOT  2  -8.6725907504880    -9.591E-04 6.946E-08 4.591E-02 6.959E-03 1.080E-02
+ ETOT  2  -8.6725907504880    -9.591E-04 6.946E-08 4.591E-02 6.959E-03 1.080E-02 2.581E-03 3.440E-01
 
  reduced coordinates :
     1    -1.79792527652E-01   -1.51434098405E-07   -2.17008342598E-07
@@ -622,7 +623,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.92632   -5.21520   -2.18685
 
- ETOT  3  -8.6729389767383    -3.482E-04 1.252E-05 4.982E-02 4.177E-03 6.619E-03
+ ETOT  3  -8.6729389767383    -3.482E-04 1.252E-05 4.982E-02 4.177E-03 6.619E-03 6.609E-04 3.447E-01
 
  reduced coordinates :
     1    -1.81591914894E-01   -2.59213538487E-07   -3.73237031639E-07
@@ -646,7 +647,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.86854   -5.23818   -2.18994
 
- ETOT  4  -8.6730750360260    -1.361E-04 4.219E-06 3.917E-02 2.421E-03 4.198E-03
+ ETOT  4  -8.6730750360260    -1.361E-04 4.219E-06 3.917E-02 2.421E-03 4.198E-03 1.133E-02 3.334E-01
 
  reduced coordinates :
     1    -1.82695144832E-01   -3.26756641901E-07   -4.71092337549E-07
@@ -670,7 +671,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.83693   -5.24854   -2.19490
 
- ETOT  5  -8.6731318425027    -5.681E-05 1.579E-06 2.650E-02 1.548E-03 2.650E-03
+ ETOT  5  -8.6731318425027    -5.681E-05 1.579E-06 2.650E-02 1.548E-03 2.650E-03 2.807E-04 3.336E-01
 
  reduced coordinates :
     1    -1.83394829854E-01   -3.69283349926E-07   -5.32620822502E-07
@@ -694,7 +695,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81868   -5.25379   -2.20025
 
- ETOT  6  -8.6731559332590    -2.409E-05 6.279E-07 1.637E-02 9.521E-04 1.698E-03
+ ETOT  6  -8.6731559332590    -2.409E-05 6.279E-07 1.637E-02 9.521E-04 1.698E-03 1.494E-04 3.338E-01
 
  reduced coordinates :
     1    -1.83836435121E-01   -3.90060020250E-07   -5.62632263305E-07
@@ -718,7 +719,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.80768   -5.25620   -2.20485
 
- ETOT  7  -8.6731664866917    -1.055E-05 2.592E-07 9.516E-03 5.958E-04 1.102E-03
+ ETOT  7  -8.6731664866917    -1.055E-05 2.592E-07 9.516E-03 5.958E-04 1.102E-03 8.561E-05 3.339E-01
 
  reduced coordinates :
     1    -1.84119353961E-01   -3.97535716679E-07   -5.73392505783E-07
@@ -742,7 +743,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.80101   -5.25731   -2.20850
 
- ETOT  8  -8.6731712453225    -4.759E-06 1.110E-07 5.307E-03 3.769E-04 7.248E-04
+ ETOT  8  -8.6731712453225    -4.759E-06 1.110E-07 5.307E-03 3.769E-04 7.248E-04 3.949E-04 3.343E-01
 
  reduced coordinates :
     1    -1.84302968639E-01   -3.94649932375E-07   -5.69173016172E-07
@@ -766,7 +767,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79686   -5.25774   -2.21120
 
- ETOT  9  -8.6731734340822    -2.189E-06 4.881E-08 2.881E-03 2.410E-04 4.838E-04
+ ETOT  9  -8.6731734340822    -2.189E-06 4.881E-08 2.881E-03 2.410E-04 4.838E-04 2.932E-05 3.343E-01
 
  reduced coordinates :
     1    -1.84423770423E-01   -3.85342223943E-07   -5.55685853594E-07
@@ -790,7 +791,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79429   -5.25789   -2.21317
 
- ETOT 10  -8.6731744655915    -1.032E-06 2.226E-08 1.536E-03 1.561E-04 3.277E-04
+ ETOT 10  -8.6731744655915    -1.032E-06 2.226E-08 1.536E-03 1.561E-04 3.277E-04 1.600E-05 3.343E-01
 
  reduced coordinates :
     1    -1.84504404283E-01   -3.71441434322E-07   -5.35577104766E-07
@@ -814,7 +815,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79265   -5.25792   -2.21456
 
- ETOT 11  -8.6731749604679    -4.949E-07 1.046E-08 8.096E-04 1.022E-04 2.254E-04
+ ETOT 11  -8.6731749604679    -4.949E-07 1.046E-08 8.096E-04 1.022E-04 2.254E-04 2.242E-03 3.366E-01
 
  reduced coordinates :
     1    -1.84559017191E-01   -3.54846780147E-07   -5.11593582221E-07
@@ -838,7 +839,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79161   -5.25790   -2.21554
 
- ETOT 12  -8.6731752035278    -2.431E-07 5.095E-09 4.239E-04 6.803E-05 1.574E-04
+ ETOT 12  -8.6731752035278    -2.431E-07 5.095E-09 4.239E-04 6.803E-05 1.574E-04 7.672E-06 3.366E-01
 
  reduced coordinates :
     1    -1.84596592070E-01   -3.36609765958E-07   -4.85251882511E-07
@@ -862,7 +863,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79092   -5.25787   -2.21623
 
- ETOT 13  -8.6731753250983    -1.216E-07 2.554E-09 2.213E-04 4.587E-05 1.116E-04
+ ETOT 13  -8.6731753250983    -1.216E-07 2.554E-09 2.213E-04 4.587E-05 1.116E-04 4.715E-06 3.366E-01
 
  reduced coordinates :
     1    -1.84622828839E-01   -3.17654639581E-07   -4.57885339238E-07
@@ -886,7 +887,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79046   -5.25784   -2.21671
 
- ETOT 14  -8.6731753872520    -6.215E-08 1.320E-09 1.155E-04 3.150E-05 8.006E-05
+ ETOT 14  -8.6731753872520    -6.215E-08 1.320E-09 1.155E-04 3.150E-05 8.006E-05 2.876E-06 3.366E-01
 
  reduced coordinates :
     1    -1.84641420836E-01   -2.98538467255E-07   -4.30295809786E-07
@@ -910,7 +911,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79015   -5.25783   -2.21704
 
- ETOT 15  -8.6731754195605    -3.231E-08 6.974E-10 6.033E-05 2.194E-05 5.812E-05
+ ETOT 15  -8.6731754195605    -3.231E-08 6.974E-10 6.033E-05 2.194E-05 5.812E-05 1.848E-06 3.366E-01
 
  reduced coordinates :
     1    -1.84654763440E-01   -2.79692128147E-07   -4.03103490100E-07
@@ -934,7 +935,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78993   -5.25782   -2.21727
 
- ETOT 16  -8.6731754366605    -1.710E-08 3.765E-10 3.162E-05 1.555E-05 4.257E-05
+ ETOT 16  -8.6731754366605    -1.710E-08 3.765E-10 3.162E-05 1.555E-05 4.257E-05 1.184E-06 3.366E-01
 
  reduced coordinates :
     1    -1.84664449647E-01   -2.61384797002E-07   -3.76695089234E-07
@@ -958,7 +959,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78977   -5.25781   -2.21744
 
- ETOT 17  -8.6731754458266    -9.166E-09 2.061E-10 1.663E-05 1.115E-05 3.142E-05
+ ETOT 17  -8.6731754458266    -9.166E-09 2.061E-10 1.663E-05 1.115E-05 3.142E-05 8.060E-07 3.366E-01
 
  reduced coordinates :
     1    -1.84671545018E-01   -2.43797027051E-07   -3.51329702947E-07
@@ -1032,6 +1033,7 @@ force_length_stats: {min:   3.14191033E-05, max:   3.14191033E-05, mean:   3.141
  Total magnetization (from the atomic spheres):             0.673149
  Total magnetization (exact up - dn):                       2.000000
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -1063,9 +1065,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {toldff: 1.00E-05, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
+     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor   difmagsph maxmagsph
 
- ETOT  1  -8.6731754475510    -8.673E+00 3.070E-13 1.584E-05 1.300E-06 3.012E-05
+ ETOT  1  -8.6731754475510    -8.673E+00 3.070E-13 1.584E-05 1.300E-06 3.012E-05 3.366E-01 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.65E-11 -1.17E-10 -2.01E-10
     1    -3.01189011596E-05    7.09973104035E-08    1.02340346681E-07
@@ -1086,7 +1088,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78945   -5.25765   -2.21785
 
- ETOT  2  -8.6731754516365    -4.085E-09 2.241E-14 1.280E-06 3.159E-06 2.696E-05
+ ETOT  2  -8.6731754516365    -4.085E-09 2.241E-14 1.280E-06 3.159E-06 2.696E-05 8.295E-08 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.80E-11 -3.62E-11 -6.04E-11
     1    -2.69594785636E-05    7.19670217033E-08    1.03726995511E-07
@@ -1107,7 +1109,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78975   -5.25770   -2.21787
 
- ETOT  3  -8.6731754519041    -2.677E-10 7.489E-12 1.443E-07 6.074E-07 2.635E-05
+ ETOT  3  -8.6731754519041    -2.677E-10 7.489E-12 1.443E-07 6.074E-07 2.635E-05 2.881E-07 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  2.15E-11 -5.73E-11 -8.80E-11
     1    -2.63520430757E-05    7.21605402798E-08    1.03999882824E-07
@@ -1128,7 +1130,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78980   -5.25769   -2.21784
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  6.074E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1176,6 +1178,7 @@ force_length_stats: {min:   2.63523471E-05, max:   2.63523471E-05, mean:   2.635
  Total magnetization (from the atomic spheres):             0.673141
  Total magnetization (exact up - dn):                       2.000000
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -1207,9 +1210,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {toldff: 1.00E-05, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
+     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor   difmagsph maxmagsph
 
- ETOT  1  -8.6731754519112    -8.673E+00 2.299E-15 8.561E-08 3.606E-07 2.671E-05
+ ETOT  1  -8.6731754519112    -8.673E+00 2.299E-15 8.561E-08 3.606E-07 2.671E-05 3.366E-01 3.366E-01
 
  reduced coordinates :
     1    -1.84676781498E-01   -2.27041208898E-07   -3.27168256890E-07
@@ -1233,7 +1236,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78986   -5.25769   -2.21782
 
- ETOT  2  -8.6731754543718    -2.461E-09 9.638E-14 7.278E-08 7.058E-06 1.965E-05
+ ETOT  2  -8.6731754543718    -2.461E-09 9.638E-14 7.278E-08 7.058E-06 1.965E-05 2.023E-06 3.366E-01
 
  reduced coordinates :
     1    -1.84681233601E-01   -2.08789736345E-07   -3.00866585686E-07
@@ -1257,7 +1260,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78966   -5.25774   -2.21780
 
- ETOT  3  -8.6731754556335    -1.262E-09 4.745E-11 1.251E-07 5.661E-06 1.399E-05
+ ETOT  3  -8.6731754556335    -1.262E-09 4.745E-11 1.251E-07 5.661E-06 1.399E-05 1.734E-06 3.366E-01
 
  reduced coordinates :
     1    -1.84684509388E-01   -1.92415298761E-07   -2.77270009579E-07
@@ -1281,7 +1284,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78954   -5.25778   -2.21780
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  5.661E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1329,6 +1332,7 @@ force_length_stats: {min:   1.39943787E-05, max:   1.39943787E-05, mean:   1.399
  Total magnetization (from the atomic spheres):             0.673147
  Total magnetization (exact up - dn):                       2.000000
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -1360,9 +1364,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {toldff: 1.00E-05, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
+     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor   difmagsph maxmagsph
 
- ETOT  1  -8.6731754556549    -8.673E+00 9.870E-15 4.895E-08 1.358E-06 1.264E-05
+ ETOT  1  -8.6731754556549    -8.673E+00 9.870E-15 4.895E-08 1.358E-06 1.264E-05 3.366E-01 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.07E-12 -2.83E-12 -4.61E-12
     1    -1.26358487374E-05    6.20331151205E-08    8.93904441214E-08
@@ -1383,7 +1387,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78961   -5.25777   -2.21785
 
- ETOT  2  -8.6731754556764    -2.154E-11 3.331E-16 2.730E-09 4.376E-07 1.307E-05
+ ETOT  2  -8.6731754556764    -2.154E-11 3.331E-16 2.730E-09 4.376E-07 1.307E-05 1.088E-07 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  4.14E-13 -5.08E-13 -8.79E-13
     1    -1.30734510879E-05    6.20875309413E-08    8.94686730100E-08
@@ -1404,7 +1408,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78959   -5.25776   -2.21784
 
- ETOT  3  -8.6731754556781    -1.688E-12 3.706E-14 4.066E-10 1.666E-07 1.324E-05
+ ETOT  3  -8.6731754556781    -1.688E-12 3.706E-14 4.066E-10 1.666E-07 1.324E-05 4.226E-08 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00 -1.59E-12 -2.36E-12
     1    -1.32400170321E-05    6.21249583571E-08    8.95224217207E-08
@@ -1425,7 +1429,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78958   -5.25776   -2.21784
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  1.666E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1473,6 +1477,7 @@ force_length_stats: {min:   1.32404654E-05, max:   1.32404654E-05, mean:   1.324
  Total magnetization (from the atomic spheres):             0.673146
  Total magnetization (exact up - dn):                       2.000000
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -1504,9 +1509,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {toldff: 1.00E-05, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
+     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor   difmagsph maxmagsph
 
- ETOT  1  -8.6731754556783    -8.673E+00 1.216E-16 2.815E-10 2.034E-07 1.344E-05
+ ETOT  1  -8.6731754556783    -8.673E+00 1.216E-16 2.815E-10 2.034E-07 1.344E-05 3.366E-01 3.366E-01
 
  reduced coordinates :
     1    -1.84684509388E-01   -1.92415298761E-07   -2.77270009579E-07
@@ -1530,7 +1535,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78958   -5.25776   -2.21784
 
- ETOT  2  -8.6731754562837    -6.055E-10 2.308E-14 2.092E-08 3.704E-06 9.739E-06
+ ETOT  2  -8.6731754562837    -6.055E-10 2.308E-14 2.092E-08 3.704E-06 9.739E-06 1.057E-06 3.366E-01
 
  reduced coordinates :
     1    -1.84686749953E-01   -1.76865741527E-07   -2.54863096481E-07
@@ -1554,7 +1559,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78949   -5.25779   -2.21783
 
- ETOT  3  -8.6731754565937    -3.100E-10 1.094E-11 3.096E-08 2.842E-06 6.897E-06
+ ETOT  3  -8.6731754565937    -3.100E-10 1.094E-11 3.096E-08 2.842E-06 6.897E-06 8.720E-07 3.366E-01
 
  reduced coordinates :
     1    -1.84688373146E-01   -1.62922825224E-07   -2.34771361865E-07
@@ -1578,7 +1583,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78944   -5.25781   -2.21783
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  2.842E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1626,6 +1631,7 @@ force_length_stats: {min:   6.89766509E-06, max:   6.89766509E-06, mean:   6.897
  Total magnetization (from the atomic spheres):             0.673150
  Total magnetization (exact up - dn):                       2.000000
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -1657,9 +1663,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {toldff: 1.00E-05, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
+     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor   difmagsph maxmagsph
 
- ETOT  1  -8.6731754565981    -8.673E+00 2.250E-15 1.465E-08 6.863E-07 6.211E-06
+ ETOT  1  -8.6731754565981    -8.673E+00 2.250E-15 1.465E-08 6.863E-07 6.211E-06 3.366E-01 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00 -1.21E-13
     1    -6.21081661206E-06    5.25660717884E-08    7.57475938413E-08
@@ -1680,7 +1686,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78947   -5.25780   -2.21785
 
- ETOT  2  -8.6731754566043    -6.160E-12 8.629E-17 7.757E-10 2.276E-07 6.438E-06
+ ETOT  2  -8.6731754566043    -6.160E-12 8.629E-17 7.757E-10 2.276E-07 6.438E-06 5.300E-08 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00  0.00E+00
     1    -6.43839421700E-06    5.26033294307E-08    7.58012770869E-08
@@ -1701,7 +1707,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78946   -5.25780   -2.21785
 
- ETOT  3  -8.6731754566048    -5.098E-13 1.009E-14 9.335E-11 8.451E-08 6.523E-06
+ ETOT  3  -8.6731754566048    -5.098E-13 1.009E-14 9.335E-11 8.451E-08 6.523E-06 1.962E-08 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00  0.00E+00
     1    -6.52290391278E-06    5.26302483636E-08    7.58400618570E-08
@@ -1722,7 +1728,7 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78946   -5.25780   -2.21785
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  8.451E-08 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1770,6 +1776,7 @@ force_length_stats: {min:   6.52355709E-06, max:   6.52355709E-06, mean:   6.523
  Total magnetization (from the atomic spheres):             0.673150
  Total magnetization (exact up - dn):                       2.000000
 
+
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
@@ -1790,7 +1797,7 @@ force_length_stats: {min:   6.52355709E-06, max:   6.52355709E-06, mean:   6.523
            Absolute (Ha)=-1.10436E-11
            Relative     =-1.27331E-12
 
- At Broyd/MD step   7, gradients are converged :
+ At Broyd/MD step   7, gradients are converged : 
   max grad (force/stress) = 6.5229E-06 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1917,7 +1924,7 @@ band_energy         : -1.35344908770405E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  8.0000000000E+00  8.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -2005,7 +2012,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2017,12 +2024,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2040,7 +2047,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -2055,15 +2062,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.1
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  95 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.1
+.Delivered  48 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.1  wall=          3.2

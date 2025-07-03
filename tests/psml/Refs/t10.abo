@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h02 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/psml_t10/t10.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 12h52 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/psml_t10/t10.abi
 - output file    -> t10.abo
 - root for input  files -> t10i
 - root for output files -> t10o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/26_Fe_atom.psml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/26_Fe_atom.psml
 - psxml2ab: ps_Number_of_Projectors not relativistic     0
 - psxml2ab: ps_Number_of_Projectors scalar relativistic     4
 - psxml2ab: ps_Projector_L     0
@@ -282,8 +282,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10453
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/26_Fe_atom.psml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/26_Fe_atom.psml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/26_Fe_atom.psml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/26_Fe_atom.psml
 - Fe    ATM4.2.6
 - 26.00000   8.00000         0                znucl, zion, pspdat
     9 -101130    3   -1        -1   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -321,7 +321,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  7  -24.301228945417    -1.920E-10 1.314E-05 1.075E-09
  ETOT  8  -24.301228945473    -5.609E-11 2.639E-05 1.407E-10
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  5.609E-11 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -456,17 +456,17 @@ solver: {iscf: 7, nstep: 40, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-05, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -23.309047667266    -2.33E+01 2.44E-02 1.86E+03 1.056
- ETOT  2  -24.150296657643    -8.41E-01 3.89E-02 1.77E+02 0.852
- ETOT  3  -24.291577822410    -1.41E-01 2.21E-02 9.08E+00 0.467
- ETOT  4  -24.300372399703    -8.79E-03 1.87E-03 2.33E-01 0.148
- ETOT  5  -24.301004885104    -6.32E-04 1.87E-03 4.77E-02 0.056
- ETOT  6  -24.301227786065    -2.23E-04 7.43E-04 3.20E-03 0.001
- ETOT  7  -24.301228444902    -6.59E-07 3.89E-05 6.33E-04 0.003
- ETOT  8  -24.301228917142    -4.72E-07 6.88E-05 1.52E-05 0.001
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -23.309047667266    -2.331E+01 2.440E-02 1.863E+03 5.973E-01 5.973E-01
+ ETOT  2  -24.150296657643    -8.412E-01 3.893E-02 1.773E+02 1.172E-01 7.144E-01
+ ETOT  3  -24.291577822410    -1.413E-01 2.208E-02 9.076E+00 3.272E-01 3.872E-01
+ ETOT  4  -24.300372399703    -8.795E-03 1.868E-03 2.325E-01 2.508E-01 1.364E-01
+ ETOT  5  -24.301004885104    -6.325E-04 1.872E-03 4.771E-02 7.691E-02 5.948E-02
+ ETOT  6  -24.301227786065    -2.229E-04 7.430E-04 3.200E-03 5.664E-02 2.837E-03
+ ETOT  7  -24.301228444902    -6.588E-07 3.892E-05 6.333E-04 1.155E-03 3.992E-03
+ ETOT  8  -24.301228917142    -4.722E-07 6.876E-05 1.523E-05 5.318E-03 1.326E-03
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  4.722E-07 < toldfe=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -510,6 +510,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              2.412693     2.414019      4.826712    -0.001326
  Total magnetization (from the atomic spheres):            -0.001326
  Total magnetization (exact up - dn):                      -0.001482
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -585,7 +586,7 @@ band_energy         :  1.54390400125472E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      5.4235140014E+00  5.4235140014E+00  5.4235140014E+00 Bohr
               amu      5.58470000E+01
@@ -799,7 +800,7 @@ P           mkmem          14
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -811,12 +812,12 @@ P           mkmem          14
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -834,7 +835,7 @@ P           mkmem          14
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -849,15 +850,15 @@ P           mkmem          14
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.5  wall=          2.6
++Overall time at end (sec) : cpu=          2.7  wall=          2.7

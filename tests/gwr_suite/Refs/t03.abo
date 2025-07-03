@@ -1,5 +1,5 @@
 
-.Version 10.3.4.1 of ABINIT, released May 2025.
+.Version 9.11.6.5 of ABINIT, released May 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Jun 2025.
-- ( at 12h49 )
+.Starting date : Fri 27 Jun 2025.
+- ( at 12h51 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/TestBot_MPI1/gwr_suite_t03/t03.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/gwr_suite_t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -215,8 +215,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/Pspdir/Si_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/Pspdir/Si_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Si_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -246,14 +246,14 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-08, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.3029410300507    -8.303E+00 3.939E-03 2.481E+00
- ETOT  2  -8.3062716743496    -3.331E-03 1.273E-05 3.733E-02
- ETOT  3  -8.3062966263957    -2.495E-05 5.580E-06 7.724E-04
- ETOT  4  -8.3062966834266    -5.703E-08 7.110E-06 2.325E-05
- ETOT  5  -8.3062966896585    -6.232E-09 4.577E-06 7.205E-07
- ETOT  6  -8.3062966899075    -2.489E-10 6.380E-06 1.329E-08
- ETOT  7  -8.3062966899122    -4.798E-12 4.424E-06 2.920E-11
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -8.3029410300507    -8.303E+00 3.939E-03 2.481E+00 4.340E-19 4.340E-19
+ ETOT  2  -8.3062716743496    -3.331E-03 1.273E-05 3.733E-02 7.311E-19 2.971E-19
+ ETOT  3  -8.3062966263957    -2.495E-05 5.580E-06 7.724E-04 1.918E-19 2.125E-19
+ ETOT  4  -8.3062966834266    -5.703E-08 7.110E-06 2.325E-05 7.859E-19 6.222E-19
+ ETOT  5  -8.3062966896585    -6.232E-09 4.577E-06 7.205E-07 4.354E-19 1.868E-19
+ ETOT  6  -8.3062966899075    -2.489E-10 6.380E-06 1.329E-08 2.709E-19 1.741E-19
+ ETOT  7  -8.3062966899122    -4.798E-12 4.424E-06 2.920E-11 5.661E-19 5.274E-19
 
  At SCF step    7       vres2   =  2.92E-11 < tolvrs=  1.00E-08 =>converged.
 
@@ -567,28 +567,28 @@ P           mkmem           3
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- fourwf%(pot)                              0.366  28.4         0.439  32.1           6364      -1.00        0.83       0.83
-- pspini                                    0.217  16.8         0.217  15.9              2      -1.00        1.00       1.00
-- ugb_from_diago                            0.193  15.0         0.193  14.2              3      -1.00        1.00       1.00
-- nonlop(apply)                             0.140  10.9         0.141  10.3           1591      -1.00        1.00       1.00
-- timing timab                              0.117   9.1         0.117   8.6             12      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.087   6.7         0.087   6.4              1      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.085   6.6         0.084   6.2             -1      -1.00        1.01       1.01
-- abinit(chkinp,chkvars)                    0.027   2.1         0.027   2.0              1      -1.00        1.00       1.00
-- abinit(outvars)                           0.023   1.8         0.025   1.8              1      -1.00        0.91       0.91
-- abinit(after driver)                      0.021   1.7         0.021   1.6              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.364  27.4         0.424  30.5           6364      -1.00        0.86       0.86
+- pspini                                    0.219  16.5         0.219  15.8              2      -1.00        1.00       1.00
+- ugb_from_diago                            0.192  14.4         0.192  13.8              3      -1.00        1.00       1.00
+- nonlop(apply)                             0.139  10.5         0.139  10.0           1591      -1.00        1.00       1.00
+- timing timab                              0.116   8.7         0.116   8.3             12      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.112   8.4         0.113   8.1              1      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.085   6.4         0.084   6.1             -1      -1.00        1.01       1.01
+- abinit(chkinp,chkvars)                    0.029   2.2         0.029   2.1              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.022   1.7         0.022   1.6              1      -1.00        1.00       1.00
+- abinit(after driver)                      0.020   1.5         0.020   1.5              1      -1.00        1.00       1.00
 - ewald                                     0.018   1.4         0.018   1.3              2      -1.00        1.00       1.00
-- fourwf%(den)                              0.016   1.3         0.016   1.2            672      -1.00        0.99       0.99
-- projbd                                    0.014   1.1         0.014   1.0           2368      -1.00        0.99       0.99
-- xc:pot/=fourdp                            0.012   0.9         0.012   0.9              9      -1.00        1.00       1.00
-- fourdp                                    0.011   0.8         0.011   0.8            336      -1.00        0.99       0.99
-- stress                                    0.008   0.6         0.008   0.6              1      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.007   0.6         0.007   0.5              1      -1.00        0.96       0.96
+- fourwf%(den)                              0.016   1.2         0.016   1.2            672      -1.00        0.99       0.99
+- projbd                                    0.014   1.0         0.014   1.0           2368      -1.00        0.99       0.99
+- xc:pot/=fourdp                            0.013   1.0         0.013   0.9              9      -1.00        1.00       1.00
+- fourdp                                    0.012   0.9         0.012   0.9            336      -1.00        0.99       0.99
+- abinit(init,iofn1,herald)                 0.010   0.8         0.010   0.8              1      -1.00        0.98       0.98
+- stress                                    0.008   0.6         0.008   0.5              1      -1.00        1.00       1.00
 - ewald2 (+vdw_dftd)                        0.007   0.5         0.007   0.5              1      -1.00        1.00       1.00
-- others (141)                              0.020   1.6         0.020   1.5             -1      -1.00        1.00       1.00
+- others (141)                              0.021   1.6         0.021   1.5             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                                  1.388 107.7         1.463 107.2                                  0.95       0.95
+- subtotal                                  1.419 106.8         1.479 106.4                                  0.96       0.96
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -598,28 +598,28 @@ P           mkmem           3
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- fourwf%(pot)                              0.366  28.4         0.439  32.1           6364      -1.00        0.83       0.83
-- pspini                                    0.217  16.8         0.217  15.9              2      -1.00        1.00       1.00
-- ugb_from_diago                            0.193  15.0         0.193  14.2              3      -1.00        1.00       1.00
-- nonlop(apply)                             0.140  10.9         0.141  10.3           1591      -1.00        1.00       1.00
-- timing timab                              0.117   9.1         0.117   8.6             12      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.087   6.7         0.087   6.4              1      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.085   6.6         0.084   6.2             -1      -1.00        1.01       1.01
-- abinit(chkinp,chkvars)                    0.027   2.1         0.027   2.0              1      -1.00        1.00       1.00
-- abinit(outvars)                           0.023   1.8         0.025   1.8              1      -1.00        0.91       0.91
-- abinit(after driver)                      0.021   1.7         0.021   1.6              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.364  27.4         0.424  30.5           6364      -1.00        0.86       0.86
+- pspini                                    0.219  16.5         0.219  15.8              2      -1.00        1.00       1.00
+- ugb_from_diago                            0.192  14.4         0.192  13.8              3      -1.00        1.00       1.00
+- nonlop(apply)                             0.139  10.5         0.139  10.0           1591      -1.00        1.00       1.00
+- timing timab                              0.116   8.7         0.116   8.3             12      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.112   8.4         0.113   8.1              1      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.085   6.4         0.084   6.1             -1      -1.00        1.01       1.01
+- abinit(chkinp,chkvars)                    0.029   2.2         0.029   2.1              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.022   1.7         0.022   1.6              1      -1.00        1.00       1.00
+- abinit(after driver)                      0.020   1.5         0.020   1.5              1      -1.00        1.00       1.00
 - ewald                                     0.018   1.4         0.018   1.3              2      -1.00        1.00       1.00
-- fourwf%(den)                              0.016   1.3         0.016   1.2            672      -1.00        0.99       0.99
-- projbd                                    0.014   1.1         0.014   1.0           2368      -1.00        0.99       0.99
-- xc:pot/=fourdp                            0.012   0.9         0.012   0.9              9      -1.00        1.00       1.00
-- fourdp                                    0.011   0.8         0.011   0.8            336      -1.00        0.99       0.99
-- stress                                    0.008   0.6         0.008   0.6              1      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.007   0.6         0.007   0.5              1      -1.00        0.96       0.96
+- fourwf%(den)                              0.016   1.2         0.016   1.2            672      -1.00        0.99       0.99
+- projbd                                    0.014   1.0         0.014   1.0           2368      -1.00        0.99       0.99
+- xc:pot/=fourdp                            0.013   1.0         0.013   0.9              9      -1.00        1.00       1.00
+- fourdp                                    0.012   0.9         0.012   0.9            336      -1.00        0.99       0.99
+- abinit(init,iofn1,herald)                 0.010   0.8         0.010   0.8              1      -1.00        0.98       0.98
+- stress                                    0.008   0.6         0.008   0.5              1      -1.00        1.00       1.00
 - ewald2 (+vdw_dftd)                        0.007   0.5         0.007   0.5              1      -1.00        1.00       1.00
-- others (141)                              0.020   1.6         0.020   1.5             -1      -1.00        1.00       1.00
+- others (141)                              0.021   1.6         0.021   1.5             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                                  1.388 107.7         1.463 107.2                                  0.95       0.95
+- subtotal                                  1.419 106.8         1.479 106.4                                  0.96       0.96
 
 ================================================================================
 

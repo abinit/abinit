@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h10 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t62/t62.abi
+.Starting date : Fri 27 Jun 2025.
+- ( at 13h01 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t62/t62.abi
 - output file    -> t62.abo
 - root for input  files -> t62i
 - root for output files -> t62o
@@ -225,8 +225,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.01960
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -238,8 +238,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/4be.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/4be.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/4be.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/4be.pspnc
 -  Troullier-Martins psp for element  Be        Thu Oct 27 17:29:14 EDT 1994
 -  4.00000   2.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -266,20 +266,20 @@ solver: {iscf: 7, nstep: 14, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-15, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.6301529711239    -1.630E+00 4.557E-03 1.026E+02
- ETOT  2  -1.6514507526956    -2.130E-02 2.207E-06 1.968E+01
- ETOT  3  -1.6534804439551    -2.030E-03 5.396E-05 1.528E+00
- ETOT  4  -1.6535120640572    -3.162E-05 1.816E-06 1.282E-01
- ETOT  5  -1.6535313580988    -1.929E-05 1.155E-06 4.756E-03
- ETOT  6  -1.6535319701136    -6.120E-07 2.903E-08 1.820E-04
- ETOT  7  -1.6535320139121    -4.380E-08 1.287E-09 2.310E-05
- ETOT  8  -1.6535320193126    -5.400E-09 4.238E-10 1.633E-06
- ETOT  9  -1.6535320200987    -7.862E-10 2.151E-11 3.560E-08
- ETOT 10  -1.6535320201127    -1.395E-11 3.447E-13 8.245E-09
- ETOT 11  -1.6535320201141    -1.413E-12 6.133E-14 2.698E-10
- ETOT 12  -1.6535320201142    -6.684E-14 2.497E-15 6.145E-11
- ETOT 13  -1.6535320201141     2.354E-14 8.609E-16 1.482E-12
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -1.6301529711239    -1.630E+00 4.557E-03 1.026E+02 3.450E-01 3.450E-01
+ ETOT  2  -1.6514507526956    -2.130E-02 2.207E-06 1.968E+01 2.644E-02 3.186E-01
+ ETOT  3  -1.6534804439551    -2.030E-03 5.396E-05 1.528E+00 1.097E-02 3.076E-01
+ ETOT  4  -1.6535120640572    -3.162E-05 1.816E-06 1.282E-01 1.733E-03 3.059E-01
+ ETOT  5  -1.6535313580988    -1.929E-05 1.155E-06 4.756E-03 1.678E-03 3.069E-01
+ ETOT  6  -1.6535319701136    -6.120E-07 2.903E-08 1.820E-04 6.421E-04 3.076E-01
+ ETOT  7  -1.6535320139121    -4.380E-08 1.287E-09 2.310E-05 1.722E-04 3.077E-01
+ ETOT  8  -1.6535320193126    -5.400E-09 4.238E-10 1.633E-06 5.373E-05 3.077E-01
+ ETOT  9  -1.6535320200987    -7.862E-10 2.151E-11 3.560E-08 3.058E-05 3.078E-01
+ ETOT 10  -1.6535320201127    -1.395E-11 3.447E-13 8.245E-09 3.691E-06 3.078E-01
+ ETOT 11  -1.6535320201141    -1.413E-12 6.133E-14 2.698E-10 1.325E-06 3.078E-01
+ ETOT 12  -1.6535320201142    -6.684E-14 2.497E-15 6.145E-11 1.019E-07 3.078E-01
+ ETOT 13  -1.6535320201141     2.354E-14 8.609E-16 1.482E-12 7.341E-08 3.078E-01
 
  At SCF step   13   max residual=  8.61E-16 < tolwfr=  1.00E-15 =>converged.
 
@@ -327,6 +327,7 @@ force_length_stats: {min:   3.28689725E-03, max:   3.28689725E-03, mean:   3.286
   Sum:              1.282711     0.883344      2.166055     0.399367
  Total magnetization (from the atomic spheres):             0.399367
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -478,6 +479,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:              1.282711     0.883344      2.166055     0.399367
  Total magnetization (from the atomic spheres):             0.399367
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -563,7 +565,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   1.6974E-01  2.0912E-01
 
 
- *** TDDFT : computation of excited states ***
+ *** TDDFT : computation of excited states *** 
  Splitting of  40 states in   3 occupied states, and  37 unoccupied states,
  giving    55 excitations. Note that spin flip is not possible actually.
  So the number of excitation is the half of the product of the number of state
@@ -632,7 +634,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     1.794293E+00
 
   TDDFT   mixed excitation energies (at most 40 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    8.85536E-02   2.40967E+00   -1.564978E+00    0.92(  2->  3)(1)    0.07(  2->  4)(1)
                                                      0.00(  1->  3)(2)    0.00(  1->  4)(2)
@@ -767,6 +769,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:              1.282711     0.883344      2.166055     0.399367
  Total magnetization (from the atomic spheres):             0.399367
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -852,7 +855,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   1.6974E-01  2.0912E-01
 
 
- *** TDDFT : computation of excited states ***
+ *** TDDFT : computation of excited states *** 
  Splitting of  40 states in   3 occupied states, and  37 unoccupied states,
  giving    55 excitations. Note that spin flip is not possible actually.
  So the number of excitation is the half of the product of the number of state
@@ -921,7 +924,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     1.794293E+00
 
   TDDFT   mixed excitation energies (at most 40 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    8.85536E-02   2.40967E+00   -1.564978E+00    0.92(  2->  3)(1)    0.07(  2->  4)(1)
                                                      0.00(  1->  3)(2)    0.00(  1->  4)(2)
@@ -1056,6 +1059,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:              1.282711     0.883344      2.166055     0.399367
  Total magnetization (from the atomic spheres):             0.399367
  Total magnetization (exact up - dn):                       1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1084,7 +1088,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.4000000000E+01  1.4000000000E+01  1.4000000000E+01 Bohr
               amu      1.00794000E+00  9.01218200E+00
@@ -1210,7 +1214,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1222,12 +1226,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1245,7 +1249,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1260,7 +1264,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
