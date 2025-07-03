@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t45-t46-t47/t47.abi
+.Starting date : Thu  3 Jul 2025.
+- ( at 14h06 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v1_t45-t46-t47/t47.abi
 - output file    -> t47.abo
 - root for input  files -> t46o
 - root for output files -> t47o
@@ -135,8 +135,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 1, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -169,9 +169,9 @@ solver: {iscf: 1, nstep: 15, nline: 3, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
 
- ETOT  1  -8.6731754560742    -8.673E+00 2.550E-18 3.601E-12
+ ETOT  1  -8.6731754560742    -8.673E+00 2.550E-18 3.601E-12 3.366E-01 3.366E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -189,7 +189,7 @@ tolerances: {toldfe: 1.00E-12, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78954   -5.25777   -2.21784
 
- ETOT  2  -8.6731752244948     2.316E-07 1.346E-11 2.772E-04
+ ETOT  2  -8.6731752244948     2.316E-07 1.346E-11 2.772E-04 5.343E-05 3.366E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03853   Average Vxc (hartree)=  -0.22385
@@ -210,7 +210,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -6.7918E-01
  scfeig : Convergence criterion value (->0 at convergency)  -2.3614E-02
 
- ETOT  3  -8.6731751864806     3.801E-08 4.037E-10 3.709E-04
+ ETOT  3  -8.6731751864806     3.801E-08 4.037E-10 3.709E-04 9.426E-05 3.367E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03852   Average Vxc (hartree)=  -0.22385
@@ -231,7 +231,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -1.0262E+00
  scfeig : Convergence criterion value (->0 at convergency)  -1.9809E-01
 
- ETOT  4  -8.6731749033325     2.831E-07 2.985E-09 1.323E-03
+ ETOT  4  -8.6731749033325     2.831E-07 2.985E-09 1.323E-03 3.148E-04 3.370E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03851   Average Vxc (hartree)=  -0.22385
@@ -252,7 +252,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -2.7542E+00
  scfeig : Convergence criterion value (->0 at convergency)  -4.2961E-01
 
- ETOT  5  -8.6731746604867     2.428E-07 2.526E-09 2.140E-03
+ ETOT  5  -8.6731746604867     2.428E-07 2.526E-09 2.140E-03 1.570E-04 3.371E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
@@ -273,7 +273,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.6365E+00
  scfeig : Convergence criterion value (->0 at convergency)  -4.6239E-02
 
- ETOT  6  -8.6731746181169     4.237E-08 1.774E-10 2.257E-03
+ ETOT  6  -8.6731746181169     4.237E-08 1.774E-10 2.257E-03 2.437E-05 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
@@ -294,7 +294,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7516E+00
  scfeig : Convergence criterion value (->0 at convergency)  -3.1319E-03
 
- ETOT  7  -8.6731746132928     4.824E-09 7.584E-12 2.269E-03
+ ETOT  7  -8.6731746132928     4.824E-09 7.584E-12 2.269E-03 2.951E-06 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -315,7 +315,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7635E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.2517E-04
 
- ETOT  8  -8.6731746119130     1.380E-09 6.937E-13 2.272E-03
+ ETOT  8  -8.6731746119130     1.380E-09 6.937E-13 2.272E-03 7.823E-07 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -336,7 +336,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7667E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.0435E-05
 
- ETOT  9  -8.6731746115349     3.781E-10 6.904E-14 2.273E-03
+ ETOT  9  -8.6731746115349     3.781E-10 6.904E-14 2.273E-03 2.081E-07 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -357,7 +357,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7675E+00
  scfeig : Convergence criterion value (->0 at convergency)  -1.9607E-06
 
- ETOT 10  -8.6731746114350     9.994E-11 6.958E-15 2.273E-03
+ ETOT 10  -8.6731746114350     9.994E-11 6.958E-15 2.273E-03 5.735E-08 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -378,7 +378,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7678E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.0558E-07
 
- ETOT 11  -8.6731746114054     2.963E-11 7.373E-16 2.273E-03
+ ETOT 11  -8.6731746114054     2.963E-11 7.373E-16 2.273E-03 1.635E-08 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -399,7 +399,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7678E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.1984E-08
 
- ETOT 12  -8.6731746113971     8.235E-12 7.994E-17 2.273E-03
+ ETOT 12  -8.6731746113971     8.235E-12 7.994E-17 2.273E-03 4.911E-09 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -420,7 +420,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7679E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.4329E-09
 
- ETOT 13  -8.6731746113946     2.556E-12 8.855E-18 2.273E-03
+ ETOT 13  -8.6731746113946     2.556E-12 8.855E-18 2.273E-03 1.472E-09 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -441,7 +441,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7679E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.6976E-10
 
- ETOT 14  -8.6731746113938     7.869E-13 9.891E-19 2.273E-03
+ ETOT 14  -8.6731746113938     7.869E-13 9.891E-19 2.273E-03 4.587E-10 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -462,7 +462,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7679E+00
  scfeig : Convergence criterion value (->0 at convergency)  -3.0475E-11
 
- ETOT 15  -8.6731746113935     2.434E-13 1.115E-19 2.273E-03
+ ETOT 15  -8.6731746113935     2.434E-13 1.115E-19 2.273E-03 1.410E-10 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -527,6 +527,7 @@ force_length_stats: {min:   1.10897030E-05, max:   1.10897030E-05, mean:   1.108
   Sum:              1.883646     1.210498      3.094143     0.673148
  Total magnetization (from the atomic spheres):             0.673148
  Total magnetization (exact up - dn):                       2.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -648,7 +649,7 @@ band_energy         : -1.35345828356958E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  8.0000000000E+00  8.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -732,7 +733,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -744,12 +745,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -767,7 +768,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -782,7 +783,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
@@ -792,5 +793,5 @@ P           mkmem           1
 ================================================================================
 
  Calculation completed.
-.Delivered  31 WARNINGs and   4 COMMENTs to log file.
+.Delivered  16 WARNINGs and   4 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          0.5  wall=          0.6
