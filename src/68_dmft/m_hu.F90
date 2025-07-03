@@ -860,8 +860,12 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
          end do ! ms
        end do ! ms1
      end if ! rot_type /= 0 and jpawu /= zero
-
-     call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=1)
+     
+     if (paw_dmft%dmft_solv .eq. 10) then
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=2)
+     else 
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=1)
+     endif
 
    end do ! iatom
    !ABI_ERROR("Aborting now!")
@@ -1550,7 +1554,7 @@ end subroutine printvee_hu
 !!  basis = basis of the interaction tensor
 !!  prtonly = 0 (default) : compute and print udens_atoms
 !!          = 1 : only print udens_atoms
-!!
+!!          = 2 : print also complex part
 !! OUTPUT
 !!
 !! SOURCE
@@ -1606,12 +1610,21 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
 
  write(message,'(4a)') ch10,"-------- Interactions in the ",trim(basis)," basis "
  call wrtout(std_out,message,'COLL')
- write(message,'(1x,14(2x,i5))') (m,m=1,tndim)
- call wrtout(std_out,message,'COLL')
- do ms=1,tndim
-   write(message,'(i3,14f7.3)') ms,(dble(udens_atoms(ms,ms1)),ms1=1,tndim)
+ if (prtonly .eq. 2) then
+   write(message,'(1x,14(10x,i5))') (m,m=1,tndim) 
    call wrtout(std_out,message,'COLL')
- end do ! ms
+   do ms=1,tndim
+     write(message,'(i3,1x(14f7.3","14f7.3))') ms,((udens_atoms(ms,ms1)),ms1=1,tndim)
+     call wrtout(std_out,message,'COLL')
+   enddo
+ else
+   write(message,'(1x,14(2x,i5))') (m,m=1,tndim)
+   call wrtout(std_out,message,'COLL')
+   do ms=1,tndim
+     write(message,'(i3,14f7.3)') ms,(dble(udens_atoms(ms,ms1)),ms1=1,tndim)               
+     call wrtout(std_out,message,'COLL')                                                   
+   enddo !ms
+ endif
  write(message,'(5x,a)') "--------------------------------------------------------"
  call wrtout(std_out,message,'COLL')
 

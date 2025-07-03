@@ -417,8 +417,8 @@ SUBROUTINE ImpurityOperator_setUmatComplex(this, matU)
                                                                          
   DO iflavor1 = 1, this%flavors                                          
     DO iflavor2 = iflavor1+1, this%flavors                               
-      this%mat_U(iflavor1,iflavor2) = REAL(matU(iflavor1,iflavor2))      
-      this%mat_U(iflavor2,iflavor1) = REAL(matU(iflavor2,iflavor1))      
+      this%mat_U(iflavor1,iflavor2) = matU(iflavor1,iflavor2)      
+      this%mat_U(iflavor2,iflavor1) = matU(iflavor2,iflavor1)      
     END DO                                                               
   END DO                                                                 
 END SUBROUTINE ImpurityOperator_setUmatComplex                                  
