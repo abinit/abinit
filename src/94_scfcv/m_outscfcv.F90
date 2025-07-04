@@ -928,7 +928,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(1166,1,tsec)
 
 !Output of integrated density inside atomic spheres
- if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%zeemanfield)) > tol10) then
+ if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%hspinfield)) > tol10) then
    ABI_MALLOC(intgden, (nspden, natom))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
                       ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
@@ -974,16 +974,16 @@ if (dtset%prt_lorbmag==1) then
      endif
    end if
 
-   if (sum(abs(dtset%zeemanfield)) > tol10) then
+   if (sum(abs(dtset%hspinfield)) > tol10) then
      if(nspden==2)then
-       e_zeeman = -half*rhomag(1,2)*dtset%zeemanfield(3)
+       e_zeeman = -half*rhomag(1,2)*dtset%hspinfield(3)
        write (msg, "(a,E20.10,a)") " Collinear magnetization ", rhomag(1,2), &
            " (in # of spins, without 1/2 for magnetic moment) "
        call wrtout(units, msg)
      else if(nspden==4)then
-       e_zeeman = -half * (dtset%zeemanfield(1)*rhomag(1,2)& ! x
-&                         +dtset%zeemanfield(2)*rhomag(1,3)& ! y
-&                         +dtset%zeemanfield(3)*rhomag(1,4)) ! z
+       e_zeeman = -half * (dtset%hspinfield(1)*rhomag(1,2)& ! x
+&                         +dtset%hspinfield(2)*rhomag(1,3)& ! y
+&                         +dtset%hspinfield(3)*rhomag(1,4)) ! z
        write (msg, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), &
 &            " (in # of spins, without 1/2 for magnetic moment) "
        call wrtout(units, msg)
