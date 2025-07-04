@@ -586,9 +586,6 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !!  Clean and destroy gs_hamiltonian_type datastructure
 !!
-!! SIDE EFFECTS
-!!  Ham<gs_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
-!!
 !! SOURCE
 
 subroutine gsham_free(Ham)
@@ -727,9 +724,9 @@ end subroutine gsham_free
 !! SOURCE
 
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
-&                     xred,nfft,mgfft,ngfft,rprimd,nloalg,&
-&                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                     electronpositron,fock,nucdipmom,gpu_option)         ! optional
+                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
+                      ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
+                      electronpositron,fock,nucdipmom,gpu_option)         ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -993,14 +990,14 @@ end subroutine gsham_init
 !! SOURCE
 
 subroutine gsham_load_k(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
-                              kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
-                              compute_gbound,compute_ph3d)
+                        kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
+                        compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
 !scalars
+ class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in),optional :: npw_k,npw_fft_k,istwf_k
  logical,intent(in),optional :: compute_gbound,compute_ph3d
- class(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_k(:,:),kg_k(:,:)
  real(dp),intent(in),optional :: kpt_k(3)
@@ -1160,14 +1157,14 @@ end subroutine gsham_load_k
 !! SOURCE
 
 subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
-                                   kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
-                                   ph3d_kp,compute_gbound,compute_ph3d)
+                             kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
+                             ph3d_kp,compute_gbound,compute_ph3d)
 
 !Arguments ------------------------------------
 !scalars
+ class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in),optional :: npw_kp,npw_fft_kp,istwf_kp
  logical,intent(in),optional :: compute_gbound,compute_ph3d
- class(gs_hamiltonian_type),intent(inout),target :: ham
 !arrays
  integer,intent(in),optional,target :: gbound_kp(:,:),kg_kp(:,:)
  real(dp),intent(in),optional :: kpt_kp(3)
@@ -1272,7 +1269,7 @@ end subroutine gsham_load_kprime
 !! SOURCE
 
 subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
-                             nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                   ! out
+                             nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                  ! out
 
 !Arguments ------------------------------------
 !scalars
@@ -1531,9 +1528,9 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
+ class(gs_hamiltonian_type),intent(inout),target :: Ham
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- class(gs_hamiltonian_type),intent(inout),target :: Ham
 !arrays
  real(dp),optional,intent(in),target :: vectornd(:,:,:,:,:)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
@@ -1803,9 +1800,9 @@ subroutine rfham_load_spin(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlo
 
 !Arguments ------------------------------------
 !scalars
+ class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
  integer,intent(in) :: isppol
  logical,optional,intent(in) :: with_nonlocal
- class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)
  real(dp),optional,target,intent(in) :: vectornd(:,:,:,:)
@@ -1877,8 +1874,8 @@ subroutine rfham_load_k(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in),optional :: npw_k
  class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
+ integer,intent(in),optional :: npw_k
 !arrays
  real(dp),intent(in),optional,target :: dkinpw_k(:),ddkinpw_k(:)
 ! *************************************************************************
