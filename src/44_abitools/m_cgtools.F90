@@ -4824,11 +4824,9 @@ subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
  integer :: iband,ii,ierr,vectsize,use_slk
  character(len=500) :: message
  ! real(dp) :: tsec(2)
- real(dp),allocatable :: evec_tmp(:,:),subham_tmp(:)
- real(dp),allocatable :: work(:,:)
+ real(dp),allocatable :: evec_tmp(:,:),subham_tmp(:), work(:,:)
  real(dp),allocatable :: blockvectora(:,:),blockvectorb(:,:),blockvectorc(:,:)
- real(dp),pointer :: cg_block(:,:)
-
+ real(dp), contiguous, pointer :: cg_block(:,:)
 ! *********************************************************************
 
  if (paral_kgb<0) then
