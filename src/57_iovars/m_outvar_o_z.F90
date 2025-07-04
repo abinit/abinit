@@ -680,6 +680,12 @@ contains
 !### 03. Print all the input variables (Q)
 !##
 
+!qgbt
+ dprarr(1,:)=dtsets(:)%qgbt(1)
+ dprarr(2,:)=dtsets(:)%qgbt(2)
+ dprarr(3,:)=dtsets(:)%qgbt(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
+
 !qmass
  narr=nnos ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
@@ -1247,6 +1253,9 @@ contains
 
  intarr(1,:)=dtsets(:)%use_nonscf_gkk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_nonscf_gkk','INT',0)
+
+ intarr(1,:)=dtsets(:)%usegbt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usegbt','INT',0)
 
  intarr(1,:)=dtsets(:)%usepawu
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'usepawu','INT',0)

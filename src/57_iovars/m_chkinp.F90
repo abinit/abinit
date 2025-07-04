@@ -4218,6 +4218,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      endif
    endif
 
+! usegbt
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'usegbt',dt%usegbt,2,(/0,1/),iout)
+
 !  usexcnhat
    call chkint_eq(0,0,cond_string,cond_values,ierr,'usexcnhat',dt%usexcnhat_orig,3,(/-1,0,1/),iout)
 

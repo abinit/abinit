@@ -576,6 +576,8 @@ end do
      ABI_ERROR(msg)
    end if
 
+   
+
    ! nucdipmom is read for each atom, from 1 to natom
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
    if(tread==1) then
