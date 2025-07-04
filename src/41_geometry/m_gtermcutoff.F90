@@ -204,6 +204,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
  if (icutcoul==4) mode='ERF'
  if (icutcoul==5) mode='ERFC'
  if (icutcoul==22) mode='SLAB_SR'
+ if (icutcoul==55) mode='PCM'
 
  !Print in log info about the cut-off method at every call:
  enough = enough + 1
@@ -212,6 +213,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
    call wrtout(std_out,msg)
  end if
  !!!
+ !The Pick-Cohen-Martin cutoff is not a single factor on 1/G**2. 
+ !It is therefore externally applied, not in this routine.
+ if (icutcoul==55) mode='CRYSTAL' 
 
   do i3=1,n3
    ! Precompute some products that do not depend on i2 and i1

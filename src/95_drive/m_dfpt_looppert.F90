@@ -1689,7 +1689,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      else
        call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
 &       nattyp,nfftf,ngfftf,nkpt,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&
-&       dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
+&       dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred,&
+&       zion=dtset%ziontypat)
      end if
 
      if(psps%n1xccc/=0)then

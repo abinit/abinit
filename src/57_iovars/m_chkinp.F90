@@ -1239,7 +1239,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    ! icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,12,[0,1,2,3,4,5,6,7,14,15,16,22],iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,13,[0,1,2,3,4,5,6,7,14,15,16,22,55],iout)
+
+   if(optdriver/=RUNL_RESPFN.and.dt%icutcoul==55)then
+     write(msg, '(3a)' ) &
+     'The PCM short-circuit Coulomb cutoff is only available for linear-esponse calculations',ch10,&
+     'Action: set icutcoul /= 55 .'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then

@@ -3545,7 +3545,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !        Get first-order local potential and first-order pseudo core density
          call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir1,ipert1,mpi_enreg,psps%mqgrid_ff,dtset%natom,&
 &         nattyp,nfft,ngfft,dtset%nkpt,dtset%ntypat,n1,n2,n3,ph1d,psps%qgrid_ff,&
-&         qphon,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
+&         qphon,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred,&
+&         zion=dtset%ziontypat)
          if(psps%n1xccc/=0)then
            call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,n1,psps%n1xccc,&
 &           n2,n3,qphon,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)
