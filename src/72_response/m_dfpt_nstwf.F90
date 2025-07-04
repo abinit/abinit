@@ -640,7 +640,8 @@ has_vectornd = (with_vectornd .EQ. 1)
            else
              call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
 &             dtset%natom,nattyp,nfftf,ngfftf,dtset%nkpt,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
-&             ph1df,psps%qgrid_vl,dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1_idir1,xred)
+&             ph1df,psps%qgrid_vl,dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1_idir1,xred,&
+&             zion=dtset%ziontypat)
            end if
            if(psps%n1xccc/=0)then
              call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,ngfftf(1),psps%n1xccc,&

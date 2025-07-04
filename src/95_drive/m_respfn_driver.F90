@@ -223,7 +223,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
  integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
- integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
+ integer :: spaceworld,sumg0,sumg0_save,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
@@ -1274,9 +1274,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Contribution to the dynamical matrix from ion-ion energy
  if(rfphon==1)then
+   sumg0_save= sumg0
+   if (dtset%icutcoul==55) sumg0= 0
    call dfpt_ewald(dyew,gmet,gsqcut,dtset%icutcoul,my_natom,natom,ngfftf,dtset%nkpt,qphon,dtset%rcut,rmet,&
 &   rprimd,sumg0,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+   sumg0= sumg0_save
    call q0dy3_apply(natom,dyewq0,dyew)
  end if
 
