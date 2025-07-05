@@ -243,7 +243,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
  real(dp) :: tolmxde_, tolmxf_
- real(dp) :: qr
  character(len=500) :: msg
  character(len=fnlen) :: key_value
  type(crystal_t) :: cryst
@@ -251,8 +250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
- real(dp) :: tsec(2)
- real(dp) :: ref_pos(3), delta_r(3), seed_spinat(3), qgbt(3)
+ real(dp) :: qgbt(3), tsec(2)
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
  type(libxc_functional_type) :: xcfunc(2)
 
@@ -4355,27 +4353,27 @@ if (dtset%usekden==1) then
   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
   dtset%qgbt(1:3) = dprarr(1:3)
   
-  write(std_out,*) "==== GBT SPIN STRUCTURE INITIALIZATION ===="
-  write(std_out,*) "qgbt = ", dtset%qgbt(1:3)
-  write(std_out,*) "usegbt = ", dtset%usegbt
-  
-  ref_pos(:) = dtset%xred_orig(:,1,1)
-  seed_spinat(:) = dtset%spinat(:,1)
-
-  write(std_out,*) "ref_pos = ", ref_pos(:)
-  write(std_out,*) "seed_spinat = ", seed_spinat(:)
-
-  do iatom = 1, dtset%natom
-    delta_r(:) = dtset%xred_orig(:,iatom,1) - ref_pos(:)
-    qr = two_pi * dot_product(dtset%qgbt(:), delta_r(:))
-    dtset%spinat(1,iatom) = seed_spinat(1) * cos(qr) - seed_spinat(2) * sin(qr)
-    dtset%spinat(2,iatom) = seed_spinat(1) * sin(qr) + seed_spinat(2) * cos(qr)
-    dtset%spinat(3,iatom) = seed_spinat(3)
-
-    write(std_out,'(a,i4,a,3f12.6)') "iatom = ", iatom, " delta_r = ", delta_r(:)
-    write(std_out,'(a,f12.6)') "qr = ", qr
-    write(std_out,'(a,i4,a,3f12.6)') "spinat(:,", iatom, ") = ", dtset%spinat(:,iatom)
-  end do
+!  write(std_out,*) "==== GBT SPIN STRUCTURE INITIALIZATION ===="
+!  write(std_out,*) "qgbt = ", dtset%qgbt(1:3)
+!  write(std_out,*) "usegbt = ", dtset%usegbt
+!  
+!  ref_pos(:) = dtset%xred_orig(:,1,1)
+!  seed_spinat(:) = dtset%spinat(:,1)
+!
+!  write(std_out,*) "ref_pos = ", ref_pos(:)
+!  write(std_out,*) "seed_spinat = ", seed_spinat(:)
+!
+!  do iatom = 1, dtset%natom
+!    delta_r(:) = dtset%xred_orig(:,iatom,1) - ref_pos(:)
+!    qr = two_pi * dot_product(dtset%qgbt(:), delta_r(:))
+!    dtset%spinat(1,iatom) = seed_spinat(1) * cos(qr) - seed_spinat(2) * sin(qr)
+!    dtset%spinat(2,iatom) = seed_spinat(1) * sin(qr) + seed_spinat(2) * cos(qr)
+!    dtset%spinat(3,iatom) = seed_spinat(3)
+!
+!    write(std_out,'(a,i4,a,3f12.6)') "iatom = ", iatom, " delta_r = ", delta_r(:)
+!    write(std_out,'(a,f12.6)') "qr = ", qr
+!    write(std_out,'(a,i4,a,3f12.6)') "spinat(:,", iatom, ") = ", dtset%spinat(:,iatom)
+!  end do
 
  endif
 
