@@ -16,7 +16,7 @@ The present revision ABINITv10.4.4 is for bug fixes and release
 ================================================================
 0. Platforms
 
-For ABINITv10.4.3, list closed on 2025 06 XX
+For ABINITv10.4.3, list closed on 2025 07 05
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
@@ -32,14 +32,14 @@ The compiler nvhpc has been specifically added for tests of GPUs.
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v8.5, v9.5, v10.2, v12.2, v13.2, v14.2)
+GNU Fortran compiler (presently tested : v9.5, v10.2, v12.2, v13.2, v14.2)
 All are mostly OK
 GNU 10.2 : tutoparal/timages_04 disactivated
 GNU 12.2 : tutorespfn/tlwX are disactivated (in parallel only).
 GNU 13.2 : paral 78 (GWR) is  disactivated on the reference bot eos_gnu_13.2_mpich
 GNU 13.2 with OpenMP : several atdep tests are disactivated (24,25,27,30,31,34,36), as well as teph_tdep_legacy_4
 
-Intel Ifort compiler (presently tested : 16.0, 2023-OneAPI, 2025-OneAPI)
+Intel Ifort compiler (presently tested : 2023-OneAPI, 2025-OneAPI)
 Ifort 16.0 is mostly OK, except for tests v4#32,33,34, that are disactivated.
 2025-oneAPI is mostly OK, except : 
    many atdep tests are disactivated (atdep#1,16,21,28,35,38, tutoatdep#atdep1_1);  
@@ -50,10 +50,11 @@ Ifort 16.0 is mostly OK, except for tests v4#32,33,34, that are disactivated.
 NAG Compiler (presently tested : 7.2 - sequential only)
 NAG 7.2, ABINIT sequential : tmulti6_1, teph_tdep_legacy_4 and v9#83-87 are disactivated.
 
-nvhpc compiler (presently tested : 23.9)
+nvhpc compiler (presently tested : 23.9, 24.9)
 nvhpc 23.9 : OK, but there are many exceptions,
   tutorespfn/teph4isotc#1-7, tutorespfn/teph4mob#1-7, tutorespfn/teph4mob#1-8, v7#83,85-89, paral#78,79
   also not with all tests gwr, and with gpu_01-05, v8_41-44, v9_50-65, gpu_omp_31,39,40.
+nvphc 24.9 : OK, with the same exceptions as nvhpc 23.9 ... except gpu_omp_31,39,40 .
 
 
 =============================================================
