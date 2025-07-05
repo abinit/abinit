@@ -66,7 +66,7 @@ module m_wfk_analyze
  use m_iowf,            only : prtkbff
  use m_wfd_wannier,     only : wfd_run_wannier
  use m_wfk,             only : wfk_to_bz, wfk_t, wfk_read_eigenvalues, wfk_check_symtab
- use m_vkk,             only : vkk_run
+ use m_wkk,             only : wkk_run
 
  implicit none
 
@@ -134,7 +134,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 !scalars
  character(len=8),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),intent(inout) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
 !arrays
@@ -407,10 +407,9 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !  call wfd%plot_ur(Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
  !  ABI_FREE(bks_mask)
 
- !case (WFK_TASK_VKK)
- !  call vkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
- !               pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
-
+ case (WFK_TASK_WKK)
+   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
+                pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (WFK_TASK_PSEUDOBANDS)
    if (my_rank /= master) goto 100 ! NO MPI parallelism here
