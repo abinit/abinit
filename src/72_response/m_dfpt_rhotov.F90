@@ -376,7 +376,7 @@ end subroutine dfpt_rhotov
 !!  dfpt_v1hspinfield
 !!
 !! FUNCTION
-!!  Calculate 1st order Zeeman spin (hspinfield) potential = -vec{\sigma}.\vec{b}, where
+!!  Calculate 1st order spin magnetic (hspinfield) potential = -vec{\sigma}.\vec{b}, where
 !!  sigma is the vector of Pauli matrices and \vec{b} is the unit
 !!  vector indicating the perturbing field direction.
 !!
@@ -391,7 +391,7 @@ end subroutine dfpt_rhotov
 !!           4: identity matrix at each fft point is returned (for density-density response)
 !!
 !! OUTPUT
-!!  v1hspinfield(nfft*cplex,nspden)= 1st order Zeeman spin (hspinfield) potential, or Identity matrix (electrostatic potential) for idir=4
+!!  v1hspinfield(nfft*cplex,nspden)= 1st order spin magnetic (hspinfield) potential, or Identity matrix (electrostatic potential) for idir=4
 !!
 !! SIDE EFFECTS
 !!

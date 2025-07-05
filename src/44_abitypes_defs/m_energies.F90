@@ -205,7 +205,7 @@ module m_energies
    ! h0=e_kinetic+e_localpsp+e_nlpsp_vfock
 
   real(dp) :: e_hspinfield=zero
-   ! Zeeman spin times magnetic field contribution to the XC energy
+   ! Spin  magnetic field contribution to the XC energy
 
   real(dp) :: e_cpaw=zero
    ! PAW core energy
