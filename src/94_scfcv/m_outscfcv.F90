@@ -990,7 +990,7 @@ if (dtset%prt_lorbmag==1) then
      end if
 !TODO: this quantity should also be calculated in rhotov, and stored in
 !    results_gs%energies%e_hspinfield, but for the moment it comes out 0
-     write (msg, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_hspinfield, " Ha"
+     write (msg, "(a,E20.10,a)") " Spin magnetic energy -m.B = ", e_hspinfield, " Ha"
      call wrtout(units, msg)
    end if
  end if ! end if prtdensph or magnetic field

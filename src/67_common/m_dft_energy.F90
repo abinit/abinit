@@ -97,7 +97,7 @@ contains
 !!  energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
 !!  ehart, enxc, and eei from provided density and potential,
 !!  energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
-!!  energies%e_hspinfield=Zeeman spin energy from applied magnetic field -m.B
+!!  energies%e_hspinfield=Spin magnetic energy from applied magnetic field -m.B
 !!  ek=kinetic energy, ehart=Hartree electron-electron energy,
 !!  enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
 !!  enl=nonlocal pseudopotential energy
@@ -442,7 +442,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    do ispden=1,dtset%nspden
      do ifft=1,nfftf
 !TODO: the full cell magnetization will need extra PAW terms, and is certainly calculated elsewhere.
-!The calculation of the zeeman energy can be moved there
+!The calculation of the spin magnetic energy can be moved there
        magvec(ispden) = magvec(ispden) + rhor(ifft,ispden)
        vtrial(ifft,ispden)=vtrial(ifft,ispden)+vhspinfield(ispden)
      end do
