@@ -17,7 +17,7 @@ add_library(78_eph STATIC
   m_rta.F90
   m_sigmaph.F90
   m_varpeq.F90
-  m_wkk.F90
+  m_wqk.F90
   )
 
 set_target_properties(78_eph
