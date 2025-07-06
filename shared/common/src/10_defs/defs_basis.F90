@@ -86,7 +86,7 @@ module defs_basis
  ! It will be added to the netcdf files in ntck_open_create
  character(len=:), allocatable, save :: INPUT_STRING
 
- integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
+ integer, parameter :: md5_slen = 32 ! length of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
 
  integer, parameter :: abi_slen=80 ! maximum length of string variables
@@ -123,7 +123,7 @@ module defs_basis
  integer,public,parameter :: ABI_RECL=524288  ! 2**19
 
  integer,public,parameter :: MAX_NSHIFTK = 210
- ! Maximun number of shifts in input k-mesh.
+ ! Maximum number of shifts in input k-mesh.
 
 !Real dp constants
  real(dp), parameter :: zero=0._dp
@@ -287,7 +287,7 @@ module defs_basis
 
  ! File used to dump the error message in m_error.
  ! Extremely useful when we run on many CPUs since logging, in this case, is automatically disabled
- ! As a consequence, we get error messages in the main log only if the problem is encoutered by the master node!
+ ! As a consequence, we get error messages in the main log only if the problem is encountered by the master node!
  ! Note that the file is removed in xmpi_init (if present).
  character(len=fnlen),parameter :: ABI_MPIABORTFILE="__ABI_MPIABORTFILE__"
 
@@ -332,7 +332,6 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
  integer,public,parameter :: WFK_TASK_WANNIER = 10
  integer,public,parameter :: WFK_TASK_PSEUDOBANDS = 11
- integer,public,parameter :: WFK_TASK_WKK = 12
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -361,7 +360,7 @@ module defs_basis
  integer,parameter,public :: ABI_GPU_UNKNOWN  =-1
  ! Not using any GPU implementation, implies running on CPU
  integer,parameter,public :: ABI_GPU_DISABLED = 0
- ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not prefered
+ ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not preferred
  integer,parameter,public :: ABI_GPU_LEGACY   = 1
  ! GPU implementation relying on OpenMP v5 "TARGET" construct
  integer,parameter,public :: ABI_GPU_OPENMP   = 2
@@ -587,8 +586,6 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_WANNIER
  case ("pseudobands")
    wfk_task = WFK_TASK_PSEUDOBANDS
- case ("wkk")
-   wfk_task = WFK_TASK_WKK
  case default
    wfk_task = WFK_TASK_NONE
  end select

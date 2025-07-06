@@ -66,7 +66,6 @@ module m_wfk_analyze
  use m_iowf,            only : prtkbff
  use m_wfd_wannier,     only : wfd_run_wannier
  use m_wfk,             only : wfk_to_bz, wfk_t, wfk_read_eigenvalues, wfk_check_symtab
- use m_wkk,             only : wkk_run
 
  implicit none
 
@@ -358,7 +357,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
    if (dtset%wfk_task == WFK_TASK_OPTICS_FULLBZ) then
      ! Calculate the DDK matrix elements from the WFK file in the full BZ.
-     ! This is needed fo computing non-linear properties in optics as symmetries are not
+     ! This is needed for computing non-linear properties in optics as symmetries are not
      ! implemented correctly.
      ds%only_diago = .False.
      call ds%compute_ddk(outwfk_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
@@ -406,10 +405,6 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !  bks_mask=.False.; bks_mask(1:4,1,1)=.True.
  !  call wfd%plot_ur(Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
  !  ABI_FREE(bks_mask)
-
- case (WFK_TASK_WKK)
-   call wkk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
-                pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (WFK_TASK_PSEUDOBANDS)
    if (my_rank /= master) goto 100 ! NO MPI parallelism here
