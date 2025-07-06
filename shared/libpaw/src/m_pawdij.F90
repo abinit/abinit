@@ -5917,7 +5917,7 @@ subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,&
     test_value_eff=-one;if(my_test_value>zero.and.idij==1) test_value_eff=my_test_value
     call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
 &                       my_prtvol,idum,test_value_eff,my_Ha_or_eV,&
-&                       opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
+&                       opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode,force_print=.true.)
 
   end do !idij
 
