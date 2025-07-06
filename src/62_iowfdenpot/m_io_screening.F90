@@ -1570,7 +1570,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
  case (IO_MODE_MPI)
 #ifdef HAVE_MPI_IO
    if (read_qslice) then
-      call wrtout(std_out, "calling mpiotk to read_qslice")
+      !call wrtout(std_out, "calling mpiotk to read_qslice")
       buf_dim = (npweA)**2 * nomegaA
       offset = offset_wq(1,iqiA)
       sc_mode = xmpio_collective
@@ -1596,7 +1596,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
 
    else
      ! Full matrix (G,G',w,q) is needed.
-     call wrtout(std_out, "calling mpiotk: Full matrix (G,G',w,q) is needed.")
+     !call wrtout(std_out, "calling mpiotk: Full matrix (G,G',w,q) is needed.")
 
 #ifdef HAVE_GW_DPC
      ! Can read all data at once.
@@ -1779,7 +1779,7 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 
  call hdr_mpio_skip(mpio_fh,fform,offset)
 
- call wrtout(std_out, sjoin("in hdr_mpio_skip with fform = ",itoa(fform)))
+ !call wrtout(std_out, sjoin("in hdr_mpio_skip with fform = ",itoa(fform)))
 
 #ifdef HAVE_MPI_IO
  select case (fform)
@@ -1790,12 +1790,12 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
    ! read headform from the 2d record.
    positloc  = offset + bsize_frm + 3*xmpi_bsize_int
    call MPI_FILE_READ_AT(mpio_fh,positloc,headform,1,MPI_INTEGER,statux,ierr)
-   call wrtout(std_out, sjoin("headform = ",itoa(headform)))
+   !call wrtout(std_out, sjoin("headform = ",itoa(headform)))
 
    ! read nqlwl from the 2d record.
    positloc  = offset + bsize_frm + 9*xmpi_bsize_int
    call MPI_FILE_READ_AT(mpio_fh,positloc,nqlwl,1,MPI_INTEGER,statux,ierr)
-   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
+   !call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
 
    do isk=1,5
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
