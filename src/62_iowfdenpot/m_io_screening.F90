@@ -2567,7 +2567,7 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  character(len=500) :: msg
 ! *************************************************************************
 
- my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm)
 
  if (my_rank == master) then
    ! Read dimensions from the external file.
@@ -2578,7 +2578,6 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
    ! Master reads npw and nqlwl from the SCR file.
    call wrtout(std_out, sjoin('Testing file: ', w_fname))
    call hscr%from_file(w_fname, fform, xmpi_comm_self)
-   if (dtset%prtvol > 0) call Hscr%print([std_out], dtset%prtvol)
 
    ! Have to change %npweps if it was larger than dim on disk.
    npwe_file = Hscr%npwe

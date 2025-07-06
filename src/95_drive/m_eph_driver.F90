@@ -73,6 +73,7 @@ module m_eph_driver
  use m_gwpt,            only : gwpt_run
  use m_varpeq,          only : varpeq_run, varpeq_plot
  use m_eph_path,        only : eph_path_run
+ use m_wqk,             only : wqk_run
 
  implicit none
 
@@ -846,6 +847,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (18)
    ! Compute e-ph matrix elements along a q-path
    call eph_path_run(dtfil, dtset, cryst, ebands, dvdb, ifc, pawfgr, pawang, pawrad, pawtab, psps, comm)
+
+ case (19)
+   ! Compute matrix elements of W_qk
+   call wqk_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, wfk0_hdr, &
+                pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
