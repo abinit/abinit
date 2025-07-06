@@ -278,7 +278,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! while taking the w-dependence of the screening into account.
  ! Fortunately, all the operations can be restricted to a small G-sphere of kinetic energy ecuteps that can be handled
  ! with a coarser FFT mesh.
- ! Another distinct advantage of such splitting is that one can handle the divergence in vc(q,g) for |q+g| --> 0
+ ! Another distinct advantage of such splitting is that one can handle the divergence in v(q,G) for |q+G| --> 0
  ! using well know techniques from GW and the anisotropic behavior of eps-1(q) for q --> 0 in low-dimensional systems.
  ! The disavantage is that one needs to compute the GWPT e-ph matrix in two steps, first Sigma_c and then Sigma_x,
  ! so certain operations such as the k-point mapping, and the computation of the form factors are performed twice
@@ -361,6 +361,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Init g-sphere for the exchange part from ecutsigx.
  call gsph_c%extend(cryst, dtset%ecutsigx, gsph_x)
+
+ call gsph_c%print(units, dtset%prtvol, header="Header of the correlation g-sphere")
+ call gsph_x%print(units, dtset%prtvol, header="Header of the exchange g-sphere")
 
  ! TODO:
  ! Here we sort the pp_mesh by stars so that we can split the pp wavevectors in blocks and therefore
@@ -1556,7 +1559,12 @@ end if ! .not qq_is_gamma.
        gsig_atm_cplx = gsig_atm_cplx * (j_dpc / (two_pi * pp_mesh%nbz))
        !gsig_atm = gsig_atm / (cryst%ucvol * pp_mesh%nbz)
 
-       gsig_atm = gsig_atm + gks_atm - gxc_atm
+       if (dtset%useria == 0) then
+        gsig_atm = gsig_atm + gks_atm - gxc_atm
+       else if (dtset%useria /= 0) then
+        print *, "get free gks_atm"
+        gsig_atm = gks_atm
+       end if
 
        ! DEBUG
        !print *, "gsig_atm:", gsig_atm(:, 1, 1, :)
