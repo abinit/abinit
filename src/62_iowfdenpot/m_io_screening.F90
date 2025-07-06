@@ -2589,11 +2589,28 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
       "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
      ABI_WARNING(msg)
      dtset%npweps = npwe_file
-   else if (dtset%npweps < npwe_file) then
+   else if (dtset%npweps < npwe_file .and. dtset%npweps /= 0) then
      write(msg,'(2(a,i0),2a,i0)')&
       "The number of G-vectors stored on file (",npwe_file,") is larger than dtset%npweps: ",dtset%npweps,ch10,&
       "Calculation will proceed with dtset%npweps: ",dtset%npweps
      ABI_COMMENT(msg)
+   else
+    call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
+    if (Gsph_c%ng > npwe_file) then
+      dtset%npweps = npwe_file
+      write(msg,'(2a,f4.1,a,i0,a,a,i0)')&
+      "dtset%npweps was not set",&
+      achar(10)//"The number of G-vectors generated according to dtset%ecuteps (",dtset%ecuteps,") is larger than that stored on file (",npwe_file,")",&
+      achar(10)//"Calculation will proceed with the maximum available set: ",npwe_file
+      ABI_COMMENT(msg)
+    else
+      dtset%npweps = Gsph_c%ng
+      write(msg,'(2a,f4.1,a,i0,a,a,f3.1)')&
+      "dtset%npweps was not set",&
+      achar(10)//"The number of G-vectors generated according to dtset%ecuteps (",dtset%ecuteps,") is smaller than that stored on file (",npwe_file,")",&
+      achar(10)//"Calculation will proceed with dtset%ecuteps: ",dtset%ecuteps
+      ABI_COMMENT(msg)
+    end if
    end if
  end if
 
@@ -2610,13 +2627,7 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  ! Init qmesh from the SCR file.
  call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, dtset%kptopt)
 
- ! The G-sphere for W and Sigma_c is initialized from the g-vectors found in the SCR file.
- if (dtset%npweps /= 0) then
-  call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
- else
-  ! The G-sphere for W and Sigma_c is initialized from ecuteps.
-  call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
- end if
+ call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
 
 end subroutine get_hscr_qmesh_gsph
 !!***
