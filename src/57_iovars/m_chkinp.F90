@@ -578,7 +578,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        end if
        if (dt%wfoptalg/=111.and.dt%xg_nonlop_option/=0) then
          dt%xg_nonlop_option=0
-         ABI_ERROR_NOSTOP('xg_nonlop_option/=0 is usefull only for Chebfi (wfoptalg=111).',ierr)
+         ABI_ERROR_NOSTOP('xg_nonlop_option/=0 is useful only for Chebfi (wfoptalg=111).',ierr)
        end if
      end if
    end if
@@ -1161,7 +1161,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  effmass_free
    if(abs(dt%effmass_free-one)>tol8.and.dt%ixc/=31.and.dt%ixc/=35.and.xc_is_mgga)then
      write(msg, '(5a)' )&
-      'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
+      'A modified electronic effective mass is not usable with a meta-GGA XC functional!',ch10,&
       'Except with some fake metaGGAs (ixc=31 or ixc=35).',ch10,&
       'effmass should be included in kinetic energy density (tau).'
      ABI_ERROR_NOSTOP(msg, ierr)
@@ -1194,7 +1194,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
      call chkint_ge(0,0,cond_string,cond_values,ierr,'efmas_ntheta',dt%efmas_ntheta,1,iout)
 
-     ABI_CHECK_NOSTOP(all_nprocs == 1, "efmas 1 is not compabitle with MPI. Use 1 processor", ierr)
+     ABI_CHECK_NOSTOP(all_nprocs == 1, "efmas 1 is not compatible with MPI. Use 1 processor", ierr)
    end if
 
 !  enable_mpi_io
@@ -1209,7 +1209,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       25, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18], iout)
+       26, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 8, 9, 10, 11, -12, 13, -13, 14, 15, -15, 16, 17, 18, 19], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        ABI_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -2006,12 +2006,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  kptopt
    call chkint_le(0,0,cond_string,cond_values,ierr,'kptopt',dt%kptopt,4,iout)
-  ! If kptopt < 0, it is only valid when iscf = -2 
+  ! If kptopt < 0, it is only valid when iscf = -2
    if (dt%iscf/=-2) then
-      cond_string(1)='iscf' ; cond_values(1)=dt%iscf 
+      cond_string(1)='iscf' ; cond_values(1)=dt%iscf
       call chkint_ge(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,0,iout)
-   end if   
-  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed 
+   end if
+  ! If hspinfield is applied, only kptopt = 0, 3, 4 are allowed
    if (any(abs(dt%hspinfield)>tol8)) then
       cond_string(1) = 'hspinfield(x)' ; cond_values(1) = dt%hspinfield(1)
       cond_string(2) = 'hspinfield(y)' ; cond_values(2) = dt%hspinfield(2)
@@ -2408,7 +2408,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%pitransform==1.and.(mod(dt%nimage,2)/=0)) then
        write(msg,'(6a)')ch10,&
         'Path-Integral Molecular Dynamics (imgmov=9,13)',ch10,&
-        'in normal mode tranformation (pitransform=1).',ch10,&
+        'in normal mode transformation (pitransform=1).',ch10,&
         'requires nimage to be even!'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -2740,7 +2740,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !    nucdipmom requires kptopt 0, 3, or 4 (no time reversal symmetry allowed)
      if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
-       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
+       ' Nuclear dipole moments (variable nucdipmom) break time reversal symmetry but kptopt: ',dt%kptopt,&
        ' => stop ',ch10,&
        'Action: re-run with kptopt of 0, 3 or 4'
        ABI_ERROR_NOSTOP(msg, ierr)
@@ -3551,7 +3551,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  prtevk
-!  Not compatible with parallelization over perturbations if netcdf doesnt have MPI
+!  Not compatible with parallelization over perturbations if netcdf doesn't have MPI
    if (dt%prtevk==1.and.dt%paral_rf==1) then
 #ifndef HAVE_NETCDF_MPI
      write(msg,'(8a)')ch10,&
@@ -4470,7 +4470,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%nsym /= 1 .and. dt%icoulomb == 1) then
        write(msg,'(a,i0,a,a,a,a)')&
         'The value of nsym is found to be ',dt%nsym,ch10,&
-        'No symetry operations are allowed for isolated systems.',ch10,&
+        'No symmetry operations are allowed for isolated systems.',ch10,&
         'Action: put nsym = 1 in your input file'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
@@ -4656,7 +4656,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      write(msg,'(5a)') &
       'Restart files from wavelets in non ETSF format does not follow', ch10, &
       'the ABINIT standards.', ch10, &
-      'Set iomode to 3 to use ETSF retart files.'
+      'Set iomode to 3 to use ETSF restart files.'
      ABI_WARNING(msg)
    end if
  end if
