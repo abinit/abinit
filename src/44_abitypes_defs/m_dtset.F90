@@ -1019,6 +1019,7 @@ type, public :: dataset_type
  real(dp) :: field_red_axial(3)
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
+ real(dp) :: hspinfield(3)
  real(dp) :: neb_spring(2)
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
@@ -1034,7 +1035,6 @@ type, public :: dataset_type
  real(dp) :: ucrpa_window(2)
  real(dp) :: vcutgeo(3) = [0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: vprtrb(2)
- real(dp) :: zeemanfield(3)
  real(dp) :: mdtemp(2)
 
 !Real allocatables
@@ -2411,6 +2411,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%field_red_axial(:) = dtin%field_red_axial(:)
  dtout%genafm(:)          = dtin%genafm(:)
  dtout%goprecprm(:)       = dtin%goprecprm(:)
+ dtout%hspinfield(:)      = dtin%hspinfield(:)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
  dtout%neb_spring(:)      = dtin%neb_spring(:)
  dtout%polcen(:)          = dtin%polcen(:)
@@ -2424,7 +2425,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ucrpa_window(:)    = dtin%ucrpa_window(:)
  dtout%vcutgeo(:)         = dtin%vcutgeo(:)
  dtout%vprtrb(:)          = dtin%vprtrb(:)
- dtout%zeemanfield(:)     = dtin%zeemanfield(:)
 
 !Use alloc_copy to allocate and copy the allocatable arrays
 
@@ -3665,7 +3665,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_regterm gwr_np_kgts gwr_nstep gwr_ntau gwr_fit'
  list_vars=trim(list_vars)//' gwr_rpa_ncut gwr_sigma_algo gwr_task gwr_tolqpe gwr_ucsc_batch'
 !H
- list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
+ list_vars=trim(list_vars)//' hmcsst hmctt hspinfield hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatnd iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '

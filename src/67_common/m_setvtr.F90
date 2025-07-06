@@ -707,21 +707,21 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  end if
 
 !Add the zeeman field to vtrial
- if (any(abs(dtset%zeemanfield(:))>tol8)) then
+ if (any(abs(dtset%hspinfield(:))>tol8)) then
    vzeeman(:) = zero                            ! vzeeman_ij = -1/2*sigma_ij^alpha*B_alpha
    if(dtset%nspden==2)then
-     vzeeman(1) = -half*dtset%zeemanfield(3)   ! v_dwndwn = -1/2*B_z
-     vzeeman(2) =  half*dtset%zeemanfield(3)   ! v_upup   =  1/2*B_z
+     vzeeman(1) = -half*dtset%hspinfield(3)   ! v_dwndwn = -1/2*B_z
+     vzeeman(2) =  half*dtset%hspinfield(3)   ! v_upup   =  1/2*B_z
      do ifft=1,nfft
        vtrial(ifft,1) = vtrial(ifft,1) + vzeeman(1) !SPr: added 1st component
        vtrial(ifft,2) = vtrial(ifft,2) + vzeeman(2)
      end do !ifft
    end if
    if(dtset%nspden==4)then
-     vzeeman(1)=-half*dtset%zeemanfield(3)     ! v_dwndwn                  => v_11
-     vzeeman(2)= half*dtset%zeemanfield(3)     ! v_upup                    => v_22
-     vzeeman(3)=-half*dtset%zeemanfield(1)     ! Re(v_dwnup) = Re(v_updwn) => Re(v_12)
-     vzeeman(4)= half*dtset%zeemanfield(2)     ! Im(v_dwnup) =-Im(v_dwnup) => Im(v_12)
+     vzeeman(1)=-half*dtset%hspinfield(3)     ! v_dwndwn                  => v_11
+     vzeeman(2)= half*dtset%hspinfield(3)     ! v_upup                    => v_22
+     vzeeman(3)=-half*dtset%hspinfield(1)     ! Re(v_dwnup) = Re(v_updwn) => Re(v_12)
+     vzeeman(4)= half*dtset%hspinfield(2)     ! Im(v_dwnup) =-Im(v_dwnup) => Im(v_12)
      do ispden=1,dtset%nspden
        do ifft=1,nfft
          vtrial(ifft,ispden) = vtrial(ifft,ispden) + vzeeman(ispden)
