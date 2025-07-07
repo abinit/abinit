@@ -2357,13 +2357,13 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
 !scalars
  integer,parameter :: im=2,ng=10,nr=6,re=1
  integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,ir1,ir2,ir3,mu,my_comm_atom,nu
- logical :: my_atmtab_allocated,paral_atom
+ logical :: my_atmtab_allocated,paral_atom,computeit
  real(dp) :: arg,arga,argb,c1i,c1r,da1,da2,da3,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
  real(dp) :: eta,fac,gdot12,gdot13,gdot23,gsq,gsum,norm1
  real(dp) :: r1,r2,r3,rdot12,rdot13,rdot23,recip,reta
  real(dp) :: reta3m,rmagn,rsq,term,term1,term2
- real(dp) :: term3
+ real(dp) :: term3,facg0
  character(len=500) :: message
 !arrays
  real(dp) :: tsec(2)
@@ -2415,8 +2415,11 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
        dot2=gmet(2,2)*gpq(2)**2+gdot12+gdot23
        dot3=gmet(3,3)*gpq(3)**2+gdot13+gdot23
        gsq=dot1+dot2+dot3
+       facg0= zero
+       computeit= .true.
 !      Skip q=0:
        if (gsq<1.0d-20) then
+         if (icutcoul==55) computeit= .false.
          if (sumg0==1) then
            write(message,'(5a)')&
 &           'The phonon wavelength should not be zero : ',ch10,&
@@ -2425,10 +2428,17 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
            ABI_ERROR(message)
          end if
        else
+         if (icutcoul==55.and.(ig1==0 .and. ig2==0 .and. ig3==0).and. sumg0==0) then
+           facg0= one
+         end if
+!        Endif g/=0 :
+       end if
+
+       if (computeit) then
          arg=fac*gsq
 !        Larger arg gives 0 contribution:
          if (arg <= 80._dp) then
-           term=exp(-arg)/gsq * gcutoff(ii)
+           term=exp(-arg-facg0)/gsq * gcutoff(ii)
            do ia0=1,my_natom
              ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
              arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
@@ -2448,7 +2458,7 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
              end do
            end do
          end if
-!        Endif g/=0 :
+!        Endif computeit:
        end if
 !      End triple loop over G s:
      end do

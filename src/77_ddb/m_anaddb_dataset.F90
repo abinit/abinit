@@ -2260,10 +2260,10 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
 !magnetic penalty
  if (abs(anaddb_dtset%magpen) > tol8) then
    write(nunit, '(a)') ' Second-order quantities calculated with the magnetic penalty will be corrected'
-   write(nunit, '(3x, a9, 7x, 1es16.8)')'    magpen',anaddb_dtset%magpen
-   write(nunit, '(3x, a9, 2i3)') '   mpatpol',anaddb_dtset%mpatpol(1:2)
-   write(nunit, '(3x, a9, 3i3)') '   mpdir',anaddb_dtset%mpdir(1:3)
-   write(nunit, '(3x, a9,  i3)') '   mpopt',anaddb_dtset%mpopt
+   write(nunit, '(3x, a9, 7x, 1es16.8)')'   magpen',anaddb_dtset%magpen
+   write(nunit, '(3x, a9, 2i3)')        '  mpatpol',anaddb_dtset%mpatpol(1:2)
+   write(nunit, '(3x, a9, 3i3)')        '    mpdir',anaddb_dtset%mpdir(1:3)
+   write(nunit, '(3x, a9,  i3)')        '    mpopt',anaddb_dtset%mpopt
    if (anaddb_dtset%timdisp == 1) then 
      write(nunit, '(a)') ' Third-order frequency derivatives calculated with the penalized response functions will be corrected'
    write(nunit, '(3x, a9,  i3)') '   timdisp',anaddb_dtset%timdisp
@@ -2272,7 +2272,7 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
 
 !Omega interpolation
- if (abs(anaddb_dtset%magpen) > tol8 .and. anaddb_dtset%freqflag==1) then
+ if (abs(anaddb_dtset%magpen) > tol8 .and. anaddb_dtset%freqflag/=0) then
    write(nunit, '(a)') ' Omega interpolation of second-order quantities calculated with the magnetic penalty and the corrected ones'
    write(nunit, '(3x, a9, i10)')       '   nfreq',anaddb_dtset%nfreq
    write(nunit, '(3x, a9, 7x, es16.8)')' frmin',anaddb_dtset%frmin

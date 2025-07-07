@@ -478,7 +478,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end if
    end if
 
-   if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then !SPr deb, in case of magnetic field perturbation, no non-local
+   if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then !SPr deb, in case of magnetic field perturbation, no non-local
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1)
    end if
 
@@ -530,7 +530,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
      kpoint(:)=kpt_rbz(:,ikpt)
      kpq(:)=kpoint(:)
-     if (ipert<natom+3.or.ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) kpq(:)=kpq(:)+qphon(1:3)
+     if (ipert<natom+3.or.ipert==natom+5.or.ipert==natom+6.or.&
+    &(ipert>natom+11.and.ipert<=2*natom+11)) kpq(:)=kpq(:)+qphon(1:3)
      ABI_MALLOC(kg_k,(3,npw_k))
      ABI_MALLOC(kg1_k,(3,npw1_k))
      ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
