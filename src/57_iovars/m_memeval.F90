@@ -1972,6 +1972,8 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  mkqmem=mkmems(2)
  mk1mem=mkmems(3)
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
+ ! TODO: this does not work yet, as nproc_band is not initialized in the DFPT case (paralkgb is 0)
+ ! solution:  around src/57_iovars/m_mpi_setup.F90 line 1341, update to give nproc_band a value
  my_mband = CEILING(dble(mband)/ max(mpi_enreg%nproc_band,1))
 
  write(msg,'( 4(a,i8),a,4(a,i8) )' ) &
