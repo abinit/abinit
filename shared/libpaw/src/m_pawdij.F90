@@ -2632,9 +2632,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
  real(dp) :: fact,me1,me2,rc,rr,rt,sme
- real(dp) :: local_spnorbscl
  logical :: has_nucdipmom
- logical :: use_so,use_sd,use_fc,use_fc0
  character(len=500) :: msg
 !arrays
  integer,pointer :: indklmn(:,:)
@@ -2650,22 +2648,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  angl_size=pawang%angl_size
  mesh_size=pawtab%mesh_size
  indklmn => pawtab%indklmn
-
- use_so=.TRUE.; use_sd=.TRUE.; use_fc=.TRUE.; use_fc0=.FALSE.
- local_spnorbscl=1.0
-
- if ( (spnorbscl > 10.0) .and. (spnorbscl < 11.0) ) then
-   use_so=.TRUE.; use_sd=.FALSE.; use_fc=.FALSE.; use_fc0=.FALSE.
- end if
- if ( (spnorbscl > 11.0) .and. (spnorbscl < 12.0) ) then
-   use_so=.FALSE.; use_sd=.TRUE.; use_fc=.FALSE.; use_fc0=.FALSE.
- end if
- if ( (spnorbscl > 12.0) .and. (spnorbscl < 13.0) ) then
-   use_so=.FALSE.; use_sd=.FALSE.; use_fc=.TRUE.; use_fc0=.FALSE.
- end if
- if ( (spnorbscl > 13.0) .and. (spnorbscl < 14.0) ) then
-   use_so=.FALSE.; use_sd=.FALSE.; use_fc=.TRUE.; use_fc0=.TRUE.
- end if
 
 !Check data consistency
  if (qphase/=1) then
@@ -2756,7 +2738,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
    call simp_gen(dijso_rad(kln),z_intgd,pawrad)
  end do
- dijso_rad(:)=local_spnorbscl*dijso_rad(:)
+ dijso_rad(:)=spnorbscl*dijso_rad(:)
 
  ! nuclear dipole kernels
  if (has_nucdipmom) then
@@ -2796,14 +2778,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    ! dyadic(:,:,:,2) : (1 - \hat{r}\hat{r})
    call make_dyadic(one,three,dyadic(1:3,1:3,1:gs2,1),pawang%gntselect,&
            gs1,gs2,gs2,ngnt,pawang%realgnt)
-
-   if (use_fc0) then
-     call make_dyadic(one,zero,dyadic(1:3,1:3,1:gs2,2),pawang%gntselect,&
-             gs1,gs2,gs2,ngnt,pawang%realgnt)
-   else
-     call make_dyadic(one,one,dyadic(1:3,1:3,1:gs2,2),pawang%gntselect,&
-             gs1,gs2,gs2,ngnt,pawang%realgnt)
-   end if
+   call make_dyadic(one,one,dyadic(1:3,1:3,1:gs2,2),pawang%gntselect,&
+           gs1,gs2,gs2,ngnt,pawang%realgnt)
  end if
 
 !------------------------------------------------------------------------
@@ -2846,7 +2822,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
      end do
    end if
  end do !  ----- End loop over idij
- if ( .NOT. use_so ) dijso=zero
  LIBPAW_DEALLOCATE(dijso_rad)
 
  ! add nucdipmom terms if present
@@ -2857,9 +2832,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
      do mdir=1,3
        if (abs(nucdipmom(mdir))<tol8) cycle
        do sdir=1,3
-         me1=zero; me2=zero
-         if (use_sd) me1=nucdipmom(mdir)*dijnd_rad(1,kln)*dyadic(mdir,sdir,klm,1)
-         if (use_fc) me2=nucdipmom(mdir)*dijnd_rad(2,kln)*dyadic(mdir,sdir,klm,2)
+         me1=nucdipmom(mdir)*dijnd_rad(1,kln)*dyadic(mdir,sdir,klm,1)
+         me2=nucdipmom(mdir)*dijnd_rad(2,kln)*dyadic(mdir,sdir,klm,2)
          sme = half*(me1+me2)
          select case(sdir)
          case(1) !Sx operator
