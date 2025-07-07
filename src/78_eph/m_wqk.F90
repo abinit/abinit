@@ -146,8 +146,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  logical :: isirr_k, isirr_kq, qq_is_gamma, isirr_q
  logical :: print_time_qq, print_time_kk
  type(wfd_t) :: wfd
- type(crystal_t) :: den_cryst
- type(hdr_type) :: den_hdr
  type(kmesh_t) :: qmesh, kmesh
  type(gsphere_t),target :: gsph_c
  type(hscr_t),target :: hscr
@@ -202,11 +200,10 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  screen_filepath = dtfil%fnameabi_scr
  ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified")
 
- call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
-
  ! Read g-sphere for correlation and qmesh from SCR file.
- call get_hscr_qmesh_gsph(screen_filepath , dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
+ call get_hscr_qmesh_gsph(screen_filepath, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
  call hscr%print(units, dtset%prtvol, header="Header of the SCR file")
+ !goto 100
 
  nqlwl = size(qlwl, dim=2)
  if (nqlwl == 0) then
@@ -236,6 +233,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  !end do ! my_is
 
  ! Initialize Coulomb term on the IBZ of the qmesh. Use largest G-sphere.
+ call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
  npw_c = gsph_c%ng
  call vcp%init(gsph_c, cryst, qmesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
                  nqlwl, qlwl, comm)
@@ -249,6 +247,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  call kmesh%free()
 
  ABI_CHECK_IGE(npw_c, 1, "npw_c <= 1")
+
 
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
@@ -273,6 +272,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  !                                  my_bsum_start, my_bsum_stop, bks_mask, mpw, gmax)
 
  !mpw ??
+ mpw = 1
 
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, should also consider Gamma-only and istwfk
@@ -321,7 +321,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ABI_MALLOC(gbound_k, (2*mgfft+8, 2))
  ABI_MALLOC(gbound_kq, (2*mgfft+8, 2))
  ABI_MALLOC(gbound_c, (2*mgfft+8, 2))
- ABI_MALLOC(cg_work, (2, mpw*nspinor))
+ !ABI_MALLOC(cg_work, (2, mpw*nspinor))
 
  ! Allocate workspace arrays.
  ! Find correspondence IBZ --> set of q-points in DVDB.
@@ -345,7 +345,6 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  end do ! iq_ibz
 
  ABI_FREE(epsm1_ggw)
- call hscr%free()
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p.
  ABI_MALLOC(kg_k, (3, mpw))
@@ -354,7 +353,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! FIXME: These arrays should be allocated with npw_k, npw_kq
  ! but should recheck the API used to symmetrized wavefunctions.
  ! GS wavefunctions
- ABI_MALLOC(cwork_ur, (nfft*nspinor))
+ !ABI_MALLOC(cwork_ur, (nfft*nspinor))
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
@@ -365,7 +364,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! TODO: Should compute it on the basis of my_nkpt and my_nqpt
  qbuf_size = 1
  !qbuf_size = 16
- call wrtout(std_out, sjoin(" Begin computation of GWPT e-ph matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
+ call wrtout(std_out, sjoin(" Begin computation of Wqk matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
 
  !do my_is=1,gstore%my_nspins
  !NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
@@ -374,9 +373,9 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! for the incoming and the intermediate states.
  !nb = gqk%nb
  nb = 1
- ABI_MALLOC(iq_buf, (2, qbuf_size))
+ !ABI_MALLOC(iq_buf, (2, qbuf_size))
 
-#if 0
+
  !ABI_MALLOC_OR_DIE(ur_nk,  (nfft*nspinor, gqk%bstart:gqk%bstop), ierr)
  !ABI_MALLOC_OR_DIE(ur_mkq, (nfft*nspinor, gqk%bstart:gqk%bstop), ierr)
  !ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
@@ -385,6 +384,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  ! Loop over k-points
  ! ==================
 
+#if 0
  do my_ik=1,gqk%my_nk
    ! NB: All procs in gqk%pert_comm and gqk%bsum_com and gqk%pp_sum_comm enter this section.
    !iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
@@ -508,12 +508,14 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  end do ! my_ik
 #endif
 
+100 continue
+
  ! Dump the remainder.
  !if (iqbuf_cnt /= 0) call dump_my_gbuf()
 
  !ABI_FREE(ur_nk)
  !ABI_FREE(ur_mkq)
- ABI_FREE(iq_buf)
+ !ABI_FREE(iq_buf)
  !ABI_FREE(my_gbuf)
  !end do ! my_is
 
@@ -532,18 +534,17 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  !call gstore%print_for_abitests(dtset)
 
  ! Free memory
- ABI_FREE(kg_k)
- ABI_FREE(kg_kq)
- ABI_FREE(cg_work)
- ABI_FREE(cwork_ur)
- ABI_FREE(work)
- ABI_FREE(gbound_k)
- ABI_FREE(gbound_kq)
- ABI_FREE(gbound_c)
+ ABI_SFREE(kg_k)
+ ABI_SFREE(kg_kq)
+ !ABI_FREE(cg_work)
+ !ABI_FREE(cwork_ur)
+ ABI_SFREE(work)
+ ABI_SFREE(gbound_k)
+ ABI_SFREE(gbound_kq)
+ ABI_SFREE(gbound_c)
  !ABI_FREE(done_qbz_spin)
 
- call wfd%free(); call vcp%free()
- call qmesh%free(); call gsph_c%free()
+ call wfd%free(); call vcp%free(); call qmesh%free(); call gsph_c%free(); call hscr%free()
 
  call xmpi_barrier(comm) ! This to make sure that the parallel output of GSTORE is completed
  call cwtime_report(" wqk_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
