@@ -2595,22 +2595,23 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
       "Calculation will proceed with dtset%npweps: ",dtset%npweps
      ABI_COMMENT(msg)
    else
-    call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
-    if (Gsph_c%ng > npwe_file) then
-      dtset%npweps = npwe_file
-      write(msg,'(2a,f4.1,a,i0,a,a,i0)')&
-      "dtset%npweps was not set",&
-      achar(10)//"The number of G-vectors generated according to dtset%ecuteps (",dtset%ecuteps,") is larger than that stored on file (",npwe_file,")",&
-      achar(10)//"Calculation will proceed with the maximum available set: ",npwe_file
-      ABI_COMMENT(msg)
-    else
-      dtset%npweps = Gsph_c%ng
-      write(msg,'(2a,f4.1,a,i0,a,a,f3.1)')&
-      "dtset%npweps was not set",&
-      achar(10)//"The number of G-vectors generated according to dtset%ecuteps (",dtset%ecuteps,") is smaller than that stored on file (",npwe_file,")",&
-      achar(10)//"Calculation will proceed with dtset%ecuteps: ",dtset%ecuteps
-      ABI_COMMENT(msg)
-    end if
+     call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
+     if (Gsph_c%ng > npwe_file) then
+        dtset%npweps = npwe_file
+        write(msg,'(2a,f4.1,a,i0,a,a,i0)')&
+        "npweps was not set in input",&
+        ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is larger than that stored on file (",npwe_file,")",&
+        ch10//"Calculation will proceed with the maximum available set: ",npwe_file
+        ABI_COMMENT(msg)
+     else
+        dtset%npweps = Gsph_c%ng
+        write(msg,'(2a,f4.1,a,i0,a,a,f3.1)')&
+        "npweps was not set in input",&
+        ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is smaller than that stored on file (",npwe_file,")",&
+        ch10//"Calculation will proceed with ecuteps: ",dtset%ecuteps
+        ABI_COMMENT(msg)
+     end if
+     call Gsph_c%free()
    end if
  end if
 
