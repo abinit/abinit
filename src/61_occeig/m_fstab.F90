@@ -82,10 +82,9 @@ module m_fstab
    ! |2| for tetrahedra.
    !     2 for the optimized tetrahedron method.
    !    -2 for the linear tetrahedron method.
-   !
 
    integer :: nene = -1
-   ! Number of chemical potential values used for inelastic integration
+   ! Number of chemical potential values used for inelastic integration.
 
    real(dp) :: eph_fsmear
    ! Gaussian broadening. Negative value activates adaptive gaussian broadening.

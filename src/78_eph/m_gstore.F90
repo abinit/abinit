@@ -88,7 +88,7 @@
 !! TODO
 !!  1) Introduce new communicator to distribute (band_1, band_2)
 !!  2) Implement possibility of reading a subset of data from a larger gstore ?
-!!  2) Optimize v^1_loc|psi_nk> by precomputing <r|psi_nk> before the looop over my_npert
+!!  2) Optimize v^1_loc|psi_nk> by precomputing <r|psi_nk> before the loop over my_npert
 !!     Big speedup is expected, especially if one loops first over k and then q, provided
 !!     the interpolation of v^1_q does not start to dominate
 !!  3) Use similar trick in dfpt_cgw for H^0 |psi_nk>
@@ -350,7 +350,7 @@ type, public :: gqk_t
   ! Compute MPI-distributed & global mask for electronic states allowed by energy filtering
 
   procedure :: filter_erange => gqk_filter_erange
-  ! Nullify all matrix elements connecting electronic states outside of specfied erange
+  ! Nullify all matrix elements connecting electronic states outside of specified erange
 
   procedure :: myqpt => gqk_myqpt
   ! Return the q-point and the weight from my local index my_iq
@@ -421,7 +421,7 @@ type, public :: gstore_t
    ! Note that the combination ("ibz", "ibz") is not allowed.
 
   character(len=abi_slen) :: kfilter = "none"
-  ! Specifies the tecnique used to filter k-points.
+  ! Specifies the technique used to filter k-points.
   ! Possible values: "none", "fs_tetra", "erange", "qprange"
 
   character(len=abi_slen) :: gmode = "none"
@@ -437,7 +437,7 @@ type, public :: gstore_t
   ! Electron bands
 
   logical :: ebands_owns_memory = .False.
-  ! True if ebands pointer owns mememory and should therefore be deallocated in gstore_free
+  ! True if ebands pointer owns memory and should therefore be deallocated in gstore_free
 
   type(ifc_type), pointer :: ifc => null()
   ! interatomic force constants.
@@ -2947,7 +2947,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    ! Call libtetra routine to compute weights for double delta integration.
    ! Note that libtetra assumes Ef set to zero.
    ! TODO: Average weights over degenerate states?
-   ! NB: This is a bootleneck, can pass comm_kp
+   ! NB: This is a botleneck, can pass comm_kp
 
    ! Select option for double delta with tetra.
    !  2 for the optimized tetrahedron method.
@@ -3225,7 +3225,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    if (nproc > nproc_lim) then
       write(msg, "(a,i0,a,i0,4a)") "gstore%compute: nproc=", nproc, " > min(nkibz, nqibz)=", &
         nproc_lim, ch10, "This will lead to idle processes, which are not supported.", ch10, &
-        "Please decrese the total number of CPUs."
+        "Please decrease the total number of CPUs."
       ABI_ERROR(msg)
    endif
  enddo
@@ -3552,7 +3552,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      if (print_time) call cwtime(cpu_q, wall_q, gflops_q, "start")
      iq_bz = gqk%my_q2bz(my_iq)
 
-     ! Handle possibile restart.
+     ! Handle possible restart.
      if (done_qbz_spin(iq_bz, spin) == 1) then
        call wrtout(std_out, sjoin(" iq_bz:", itoa(iq_bz), ", spin: ", itoa(spin), " already computed --> skipping iteration"))
        cycle
@@ -3841,9 +3841,9 @@ subroutine dump_my_gbuf()
  !
  !      my_gbuf(2, nb, nb, natom3, gqk%my_nk, qbuf_size)
 
- ! If parallelism over pertubation is activated, only the procs treating the first perturbation
+ ! If parallelism over perturbation is activated, only the procs treating the first perturbation
  ! i.e. the procs treating different k-points for this q are involved in IO
- ! as all the local buffers store results for all natom3 pertubations.
+ ! as all the local buffers store results for all natom3 perturbations.
 
  integer :: ii, iq_bz, iq_glob, my_iq
 
@@ -3912,9 +3912,9 @@ subroutine new_dump_my_gbuf(gqk, spin, iq_buf, iqbuf_cnt, my_gbuf, root_ncid, sp
  !
  !      my_gbuf(2, nb, nb, natom3, gqk%my_nk, qbuf_size)
 
- ! If parallelism over pertubation is activated, only the procs treating the first perturbation
+ ! If parallelism over perturbation is activated, only the procs treating the first perturbation
  ! i.e. the procs treating different k-points for this q are involved in IO
- ! as all the local buffers store results for all natom3 pertubations.
+ ! as all the local buffers store results for all natom3 perturbations.
 
  integer :: ii, iq_bz, iq_glob, my_iq, ncerr
 
@@ -4382,7 +4382,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
        end if
        NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vkmat_cart_ibz"), gqk%vkmat_cart_ibz))
 
-       ! Tranfer diagonal terms to vk_cart_ibz.
+       ! Transfer diagonal terms to vk_cart_ibz.
        do ib=1,gqk%nb
          gqk%vk_cart_ibz(:, ib, :) = gqk%vkmat_cart_ibz(1, :, ib, ib, :)
        end do
@@ -4834,7 +4834,7 @@ subroutine gstore_wannierize_and_write_gwan(gstore, dvdb, dtfil)
 
          ! the two zgemm calls perform: epmats  = [ cu(ikq)^\dagger * epmatk ] * cu(ikk)
          ! [here we have a size-reduction from nbnd*nbnd to nwan*nwan]
-         ! ouput stored in gww_pk(:,:, my_ip, my_ik)
+         ! output stored in gww_pk(:,:, my_ip, my_ik)
 
          !gww_pk(:,:, my_ip, my_ik) = MATMUL(CONJG(TRANSPOSE(u_kq)), MATMUL(g_bb, u_k))
          call ZGEMM('N', 'N', nwan, nwin_k, nwin_kq, cone, g_bb, nwin_kq, u_k, nwin_k, czero, tmp_mat, nwan)
@@ -4972,7 +4972,7 @@ end subroutine gstore_wannierize_and_write_gwan
 !!  gqk_get_erange_mask
 !!
 !! FUNCTION
-!!  Compute MPI-distributed and global masks for electronic states alllowed by erange
+!!  Compute MPI-distributed and global masks for electronic states allowed by erange.
 !!
 !! INPUTS
 !!  gstore<gstore_t>=Electron-phonon object containing dimensions and related quantities.
@@ -5116,8 +5116,7 @@ subroutine gqk_filter_erange(gqk, gstore, erange)
    kpts(:, ik_glob) = gqk%my_kpts(:, my_ik)
  enddo
  call xmpi_sum(kpts, gqk%kpt_comm%value, ierr)
- krank_kpts = krank_from_kptrlatt(gqk%glob_nk, kpts, ebands%kptrlatt, &
-   compute_invrank=.True.)
+ krank_kpts = krank_from_kptrlatt(gqk%glob_nk, kpts, ebands%kptrlatt, compute_invrank=.True.)
 
  ! Get all q-points for this proc
  do my_iq=1,gqk%my_nq
