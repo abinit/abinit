@@ -783,7 +783,7 @@ subroutine rw_self(self,paw_dmft,prtopt,opt_rw,istep_iter,opt_char,opt_imagonly,
              unitselfrot(im,ispinor,isppol,iatom) = 3000 + iflavor
              !ABI_CHECK(unitselfrot(im,ispinor,isppol,iatom) > 0, "Cannot find free IO unit for unitselfrot!")
              tmpfilrot = trim(paw_dmft%filapp)//'_Selfmxent'//&
-                & trim(tag_at)//'_isppol'//tag_is//'_iflavor'//trim(tag_iflavor)
+                & trim(tag_at)//'_is'//tag_is//'_iflav'//trim(tag_iflavor)
              write(std_out,*) "Create file  ",trim(tmpfilrot)," unit ",unitselfrot(im,ispinor,isppol,iatom)," for flavor",iflavor
 #ifdef FC_NAG
              open(unit=unitselfrot(im,ispinor,isppol,iatom),file=trim(tmpfilrot),status='unknown',form='formatted',recl=ABI_RECL)

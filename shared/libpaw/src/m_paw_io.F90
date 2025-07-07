@@ -64,8 +64,10 @@ CONTAINS !===========================================================
 !!  opt_pack= 0 if a_ij is given as A(j(j-1)/2+i), i<=j
 !!           +1 if a_ij is given as A(j(j-1)/2+i) and is in "packed storage"
 !!                                  (i.e. only non-zero values are stored)
-!!  opt_prtvol= >=0 if up to 12 components of _ij matrix have to be printed
-!!               <0 if all components of ij_ matrix have to be printed
+!!  opt_prtvol= >0 if up to 12 components of _ij matrix have to be printed
+!!              <0 if all components of ij_ matrix have to be printed
+!!              =0 if _ij matrix is not to be printed
+!!                 (except if the warning on high values is raised - see test_value)
 !!  opt_sym= -OPTIONAL ARGUMENT- (default if not present: opt_sym=2)
 !!          Define the symmetry of a_ij matrix:
 !!            opt_sym=1 : A(j,i)= A(i,j)
@@ -78,6 +80,8 @@ CONTAINS !===========================================================
 !!  test_value= (real number) if positive, print a warning when the
 !!              magnitude of a_ij is greater than opt_test
 !!              No test when test_value<0
+!!  title = if given then print this string before the matrix
+!!  force_print = if puts to true prints in any case even if opt_prtvol is 0
 !!  unit=the unit number for output
 !!  Ha_or_eV= 1: output in hartrees, 2: output in eV
 !!
@@ -85,7 +89,7 @@ CONTAINS !===========================================================
 
 subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
 &                         opt_pack,opt_prtvol,pack2ij,test_value,Ha_or_eV, &
-&                         mode_paral,opt_sym,asym_ij) ! Optional arguments
+&                         mode_paral,opt_sym,asym_ij,title,force_print) ! Optional arguments
 
 !Arguments ---------------------------------------------
 !scalars
@@ -93,6 +97,8 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
  integer,intent(in),optional :: opt_sym
  character(len=*),optional,intent(in) :: mode_paral
  real(dp),intent(in) :: test_value
+ character(len=2000),optional,intent(in) :: title
+ logical,optional,intent(in) :: force_print
 !arrays
  integer,intent(in) :: opt_l_index(ndim*min(1+opt_l,1)),pack2ij(adim*opt_pack)
  real(dp),intent(in) :: a_ij(cplex*adim)
@@ -108,6 +114,7 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
  logical :: use_asym
  character(len=4) :: mode_paral_
  character(len=500) :: msg=''
+ logical :: l_force_print
 !arrays
  real(dp),parameter :: fact_re(4)=(/one,one,-one,-one/),fact_im(4)=(/one,-one,-one,one/)
  real(dp) :: tabmax(cplex),tabmin(cplex)
@@ -131,6 +138,7 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
  else
    optsym=2
  end if
+ l_force_print=.false.; if (present(force_print)) l_force_print=.true.
 
 !Define size of square matrix
  if (opt_prtvol>=0) then
@@ -245,52 +253,40 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
    LIBPAW_DEALLOCATE(bsym_ij)
  end if
 
- if (Ha_or_eV==2) then
-   prtab=prtab*Ha_eV
-   if (opt_prtvol<0.and.opt_l<0) then
-     tabmax=tabmax*Ha_eV
-     tabmin=tabmin*Ha_eV
+ ! Test if the matrix contains high values if required
+ if (test_value>zero) then
+   testval=test_value
+   !;if (Ha_or_eV==2) testval=testval*Ha_eV
+   nhigh=0;nhigh=count(abs(prtab(:,:,:))>=testval)
+ end if
+
+ if (opt_prtvol/=0 .or. nhigh>0 .or. l_force_print) then
+
+   if (present(title)) call wrtout(unit,title,mode_paral_)
+
+   if (Ha_or_eV==2) then
+     prtab=prtab*Ha_eV
+     if (opt_prtvol<0.and.opt_l<0) then
+       tabmax=tabmax*Ha_eV
+       tabmin=tabmin*Ha_eV
+     end if
    end if
- end if
 
- if (cplex==2) then
-   write(msg,'(3x,a)') '=== REAL PART:'
-   call wrtout(unit,msg,mode_paral_)
- end if
-
- LIBPAW_ALLOCATE(out_arr,(nmin))
- if (ndim<=maxprt.or.opt_l>=0) then
-   do ilmn=1,nmin
-     out_arr = prtab(1,1:nmin,ilmn)
-     write(msg,fmt=10) out_arr
+   if (cplex==2) then
+     write(msg,'(3x,a)') '=== REAL PART:'
      call wrtout(unit,msg,mode_paral_)
-   end do
- else
-   do ilmn=1,nmin
-     out_arr = prtab(1,1:nmin,ilmn)
-     write(msg,fmt=11) out_arr,' ...'
-     call wrtout(unit,msg,mode_paral_)
-   end do
-   write(msg,'(3x,a,i2,a)') '...  only ',maxprt,'  components have been written...'
-   call wrtout(unit,msg,mode_paral_)
- end if
- if (opt_prtvol<0.and.opt_l<0) then
-   write(msg,'(3x,2(a,es9.2))') 'max. value= ',tabmax(1),', min. value= ',tabmin(1)
-   call wrtout(unit,msg,mode_paral_)
- end if
+   end if
 
- if (cplex==2) then
-   write(msg,'(3x,a)') '=== IMAGINARY PART:'
-   call wrtout(unit,msg,mode_paral_)
+   LIBPAW_ALLOCATE(out_arr,(nmin))
    if (ndim<=maxprt.or.opt_l>=0) then
      do ilmn=1,nmin
-       out_arr = prtab(2,1:nmin,ilmn)
+       out_arr = prtab(1,1:nmin,ilmn)
        write(msg,fmt=10) out_arr
        call wrtout(unit,msg,mode_paral_)
      end do
    else
      do ilmn=1,nmin
-       out_arr = prtab(2,1:nmin,ilmn)
+       out_arr = prtab(1,1:nmin,ilmn)
        write(msg,fmt=11) out_arr,' ...'
        call wrtout(unit,msg,mode_paral_)
      end do
@@ -298,25 +294,50 @@ subroutine pawio_print_ij(unit,a_ij,adim,cplex,ndim,opt_l,opt_l_index, &
      call wrtout(unit,msg,mode_paral_)
    end if
    if (opt_prtvol<0.and.opt_l<0) then
-     write(msg,'(3x,2(a,es9.2))') 'max. value= ',tabmax(2),', min. value= ',tabmin(2)
+     write(msg,'(3x,2(a,es9.2))') 'max. value= ',tabmax(1),', min. value= ',tabmin(1)
      call wrtout(unit,msg,mode_paral_)
    end if
- end if
- LIBPAW_DEALLOCATE(out_arr)
 
- if (test_value>zero) then
-   testval=test_value;if (Ha_or_eV==2) testval=testval*Ha_eV
-   nhigh=0;nhigh=count(abs(prtab(:,:,:))>=testval)
-   if (nhigh>0) then
-     write(msg,'(5a,i3,a,f6.1,7a)')&
-&     ' pawio_print_ij: WARNING -',ch10,&
-&     '  The matrix seems to have high value(s) !',ch10,&
-&     '  (',nhigh,' components have a value greater than ',testval,').',ch10,&
-&     '  It can cause instabilities during SCF convergence.',ch10,&
-&     '  Action: you should check your atomic dataset (psp file)',ch10,&
-&     '          and look for "high" projector functions...'
+   if (cplex==2) then
+     write(msg,'(3x,a)') '=== IMAGINARY PART:'
      call wrtout(unit,msg,mode_paral_)
+     if (ndim<=maxprt.or.opt_l>=0) then
+       do ilmn=1,nmin
+         out_arr = prtab(2,1:nmin,ilmn)
+         write(msg,fmt=10) out_arr
+         call wrtout(unit,msg,mode_paral_)
+       end do
+     else
+       do ilmn=1,nmin
+         out_arr = prtab(2,1:nmin,ilmn)
+         write(msg,fmt=11) out_arr,' ...'
+         call wrtout(unit,msg,mode_paral_)
+       end do
+       write(msg,'(3x,a,i2,a)') '...  only ',maxprt,'  components have been written...'
+       call wrtout(unit,msg,mode_paral_)
+     end if
+     if (opt_prtvol<0.and.opt_l<0) then
+       write(msg,'(3x,2(a,es9.2))') 'max. value= ',tabmax(2),', min. value= ',tabmin(2)
+       call wrtout(unit,msg,mode_paral_)
+     end if
    end if
+   LIBPAW_DEALLOCATE(out_arr)
+
+   ! Print warning if the matrix has high values
+   if (test_value>zero) then
+      if (nhigh>0) then
+         if (Ha_or_eV==2) testval=testval*Ha_eV
+         write(msg,'(5a,i3,a,f6.1,7a)')&
+&        ' pawio_print_ij: WARNING -',ch10,&
+&        '  The matrix seems to have high value(s) !',ch10,&
+&        '  (',nhigh,' components have a value greater than ',testval,').',ch10,&
+&        '  It can cause instabilities during SCF convergence.',ch10,&
+&        '  Action: you should check your atomic dataset (psp file)',ch10,&
+&        '          and look for "high" projector functions...'
+         call wrtout(unit,msg,mode_paral_)
+      end if
+   end if
+
  end if
 
  LIBPAW_DEALLOCATE(prtab)
