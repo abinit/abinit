@@ -798,7 +798,7 @@ fix compilation with NVHPC 23.11-24.7 by switching mkrho optionals positions.
 By M. Sarraute (MR1056, MR1060, MR1061)
 
 
-**D.2** Tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available,  [[test:gpu_kokkos_01]] and [[test:gpu_kokkos_02]], nonlop with BLAS, chebycheff.
+**D.2** Tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available,  gpu_kokkos_01 (disabled for sporadic failure in v10.4) and [[test:gpu_kokkos_02]], nonlop with BLAS, chebycheff.
 See input variable [[gpu_option]]=3.
 
 By M. Sarraute and M. Torrent (b3b2ce14ca1)
