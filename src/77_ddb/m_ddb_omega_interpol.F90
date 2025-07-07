@@ -127,9 +127,10 @@ contains
  complex(dpc), allocatable :: ci_localpha(:,:,:),lm_localpha(:,:,:)
  complex(dpc), allocatable :: ci_epsilon(:,:,:),lm_epsilon(:,:,:)
  complex(dpc), allocatable :: ci_mchi(:,:,:),lm_mchi(:,:,:)
- complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
+ complex(dpc), allocatable :: modemm(:,:,:),modevec(:,:,:),modezf(:,:,:)
+ complex(dpc), allocatable :: zeff(:,:),zeff_tr(:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
- complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),magphongreen(:,:),phongreen(:,:),phongreen_fm(:,:)
+ complex(dpc), allocatable :: magphongreen(:,:),phongreen(:,:),phongreen_fm(:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
  complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
 
@@ -170,11 +171,11 @@ contains
  ABI_MALLOC(phongreen,(3*natom,3*natom))
  ABI_MALLOC(phongreen_fm,(3*natom,3*natom))
  ABI_MALLOC(mode_phonspec,(3*natom,nomega))
- ABI_MALLOC(zeffspec,(3,nomega))
- ABI_MALLOC(mmomspec,(ndim,nomega))
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
  ABI_MALLOC(eigvec_fm,(2,3,natom,3,natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
+ ABI_MALLOC(modevec,(3*natom,3*natom,nomega))
+ ABI_MALLOC(modezf,(ndim,3*natom,nomega))
  ABI_MALLOC(fmzeff_tr,(3*natom,3))
  ABI_MALLOC(zeff,(3,3*natom))
  ABI_MALLOC(zeff_tr,(3*natom,3))
@@ -254,6 +255,7 @@ contains
 !Loop over the frequency
  do iw=1,nomega
    omega(iw)=omegamin+omegastp*(iw-1)
+   if (nomega==1) omega(iw)=omegamin
 
    !Perform the different interpolations
    !Lineal (with analytic Berry curvature) with dissipation if eta/=0
@@ -329,7 +331,7 @@ contains
 
      call ri_d2etot(int_fsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_localpha(:,:,iw),ci_mchi(:,:,iw),&
    & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),magsus(:,:,iw),mpert,mmom(:,:,iw),&
-   & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
+   & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
    else if (mpopt==2) then
      call phonon_green(amu,eigvec,eta,int_rsddb,& 
    & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
@@ -337,17 +339,14 @@ contains
 
      call ri_d2etot(int_rsddb,ci_alpha(:,:,iw),ci_epsilon(:,:,iw),ci_localpha(:,:,iw),ci_mchi(:,:,iw),&
    & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),magsus(:,:,iw),mpert,mmom(:,:,iw),&
-   & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
+   & mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
    end if
 
+   !Calculate the mode-resolved magnetic moments and zeeman field
+   call mode_mmom(amu,eigvec,mmom(:,:,iw),modemm(:,:,iw),modevec(:,:,iw),modezf(:,:,iw),natom,ndim,ntypat,typat,zfield(:,:,iw))
 
-!   if (omegaflag==2.or.omegaflag==3) then
-     !Calculate the mode-resolved magnetic moments
-!     call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
-
-     !Calculate the mode-resolved Born effective charges
-!     call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
-!   & typat,zeff(:,:,iw),zeffspec(:,iw))
+   !Calculate the mode-resolved Born effective charges
+   call mode_zeff(amu,eigvec,modezeff(:,:,iw),natom,ntypat,typat,zeff)
 
 !     !Calculate here the phonons contribution to the spin susceptibility
 !     if (dissip==0) then
@@ -547,12 +546,37 @@ contains
  close (spin_unit)
 
 !Zfields
- write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim*3
  zfield_filename=trim(outfilename_radix)//"_ZFIELDS"
  if (open_file(zfield_filename, msg, newunit=zfield_unit) /= 0) then
    ABI_ERROR(msg)
  end if
 
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+ do imode= 1, 3*natom
+   write(zfield_unit,*) ' '
+   write(zfield_unit,'(a,i3)') '#  Real part of Zeeman fields (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a,a)') ch10,&
+ &           ' # At  hw     Z_{mat_1,1}     Z_{mat_1,2}     ...     Z_{mat_2,1}     Z_{mat_2,2}'
+   call wrtout(zfield_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (real(modezf(i,imode,iw)),i=1,ndim)
+     call wrtout(zfield_unit,msg,'COLL')
+   end do
+   write(zfield_unit,*) ' '
+   write(zfield_unit,'(a,i3)') '#  Imaginary part of Zeeman fields (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a,a)') ch10,&
+ &           ' # At  hw     Z_{mat_1,1}     Z_{mat_1,2}     ...     Z_{mat_2,1}     Z_{mat_2,2}'
+   call wrtout(zfield_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (aimag(modezf(i,imode,iw)),i=1,ndim)
+     call wrtout(zfield_unit,msg,'COLL')
+   end do
+ end do
+
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim*3
+ write(zfield_unit,*) ' '
  write(zfield_unit,*) '#  Real part of clamped-ion local Zeeman fields induced by electric field (at. units)'
  write(msg,'(a,a)') ch10,&
 &           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
@@ -572,7 +596,7 @@ contains
    call wrtout(zfield_unit,msg,'COLL')
  end do
 
- write(zfield_unit,*) ' '
+! write(zfield_unit,*) ' '
 ! write(zfield_unit,*) '#  Real part of lattice-mediated local Zeeman fields induced by electric field (at. units)'
 ! write(msg,'(a,a)') ch10,&
 !&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
@@ -592,6 +616,25 @@ contains
 !   call wrtout(zfield_unit,msg,'COLL')
 ! end do
 ! 
+ write(zfield_unit,*) ' '
+ write(zfield_unit,*) '#  Real part of clamped-ion local Zeeman fields induced by macroscopic Zeeman field (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
+ call wrtout(zfield_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), ((real(zfield(i,(natom+4)*3+j,iw)),j=1,3),i=1,ndim)
+   call wrtout(zfield_unit,msg,'COLL')
+ end do
+
+ write(zfield_unit,*) ' '
+ write(zfield_unit,*) '#  Imag part of clamped-ion local Zeeman fields induced by macroscopic Zeeman field (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
+ call wrtout(zfield_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), ((aimag(zfield(i,(natom+4)*3+j,iw)),j=1,3),i=1,ndim)
+   call wrtout(zfield_unit,msg,'COLL')
+ end do
  close (zfield_unit)
 
 !Magnetic moments
@@ -604,29 +647,29 @@ contains
  write(mmom_unit,*) '#  Magnetic moments calculated and interpolated by ANADDB'
  write(mmom_unit,*) '#'
 
-! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
-! do imode= 1, 3*natom
-!   write(mmom_unit,*) ' '
-!   write(mmom_unit,'(a,i3)') '#  Real part of magnetic moments (at. units) induced by phonon mode:', imode
-!   write(msg,'(a,a,a)') ch10,&
-! &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
-!   call wrtout(mmom_unit,msg,'COLL')
-!   do iw=1,nomega
-!     write(msg,pfmt) &
-!   & omega(iw), (real(modemm(i,imode,iw)),i=1,ndim)
-!     call wrtout(mmom_unit,msg,'COLL')
-!   end do
-!   write(mmom_unit,*) ' '
-!   write(mmom_unit,'(a,i3)') '#  Imaginary part of magnetic moments (at. units) induced by phonon mode:', imode
-!   write(msg,'(a,a,a)') ch10,&
-! &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
-!   call wrtout(mmom_unit,msg,'COLL')
-!   do iw=1,nomega
-!     write(msg,pfmt) &
-!   & omega(iw), (aimag(modemm(i,imode,iw)),i=1,ndim)
-!     call wrtout(mmom_unit,msg,'COLL')
-!   end do
-! end do
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+ do imode= 1, 3*natom
+   write(mmom_unit,*) ' '
+   write(mmom_unit,'(a,i3)') '#  Real part of magnetic moments (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a,a)') ch10,&
+ &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (real(modemm(i,imode,iw)),i=1,ndim)
+     call wrtout(mmom_unit,msg,'COLL')
+   end do
+   write(mmom_unit,*) ' '
+   write(mmom_unit,'(a,i3)') '#  Imaginary part of magnetic moments (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a,a)') ch10,&
+ &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (aimag(modemm(i,imode,iw)),i=1,ndim)
+     call wrtout(mmom_unit,msg,'COLL')
+   end do
+ end do
 
  write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
  write(mmom_unit,*) ' '
@@ -942,9 +985,9 @@ contains
 
  write(phon_unit,*) '#'
  if (mpopt==1) then
-   write(phon_unit,*) '#  Frozen-magnetic phonon frequencies calculated and interpolated by ANADDB'
+   write(phon_unit,*) '#  Frozen-spin phonon frequencies calculated and interpolated by ANADDB'
  else if (mpopt==2) then
-   write(phon_unit,*) '#  Spin-relaxed phonon frequencies calculated and interpolated by ANADDB'
+   write(phon_unit,*) '#  Relaxed-Spin phonon frequencies calculated and interpolated by ANADDB'
  else
    write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
    ABI_ERROR(msg)
@@ -961,69 +1004,77 @@ contains
  
  close(phon_unit)
 
-!!!Born effective charges
-!! zeff_filename=trim(outfilename_radix)//"_ZEFF"
-!! if (open_file(zeff_filename, msg, newunit=zeff_unit) /= 0) then
-!!   ABI_ERROR(msg)
-!! end if
-!!
-!! write(zeff_unit,*) '#'
-!! write(zeff_unit,*) '#  Born effective charges calculated and interpolated by ANADDB'
-!! write(zeff_unit,*) '#'
-!!
-!! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' ) 3 
-!! do imode= 1, 3*natom
-!!   write(zeff_unit,*) ' '
-!!   write(zeff_unit,'(a,i3)') '#  Real part of Born charge (at. units) induced by phonon mode:', imode
-!!   write(msg,'(a,a)') ch10,&
-!! &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
-!!   call wrtout(zeff_unit,msg,'COLL')
-!!   do iw=1,nomega
-!!     write(msg,pfmt) &
-!!   & omega(iw), (real(modezeff(i,imode,iw)),i=1,3)
-!!     call wrtout(zeff_unit,msg,'COLL')
-!!   end do
-!!   write(zeff_unit,*) ' '
-!!   write(zeff_unit,'(a,i3)') '#  Imaginary part of Born charge (at. units) induced by phonon mode:', imode
-!!   write(msg,'(a,a)') ch10,&
-!! &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
-!!   call wrtout(zeff_unit,msg,'COLL')
-!!   do iw=1,nomega
-!!     write(msg,pfmt) &
-!!   & omega(iw), (aimag(modezeff(i,imode,iw)),i=1,3)
-!!     call wrtout(zeff_unit,msg,'COLL')
-!!   end do
-!! end do
-!!
-!! close(zeff_unit)
-!
-!! zeffspec_filename=trim(outfilename_radix)//"_SPECTRAL_ZEFF"
-!! if (open_file(zeffspec_filename, msg, newunit=zeffspec_unit) /= 0) then
-!!   ABI_ERROR(msg)
-!! end if
-!! write(zeffspec_unit,*) ' '
-!! write(zeffspec_unit,'(a)') '#  Real part of Born charges spectral function:'
-!! write(zeffspec_unit,*) ' '
-!! write(msg,'(a,a)') ch10,&
-!! &           ' # At  hw     Z^x     Z^y     Z^z'
-!! call wrtout(zeffspec_unit,msg,'COLL')
-!! do iw=1,nomega
-!!   write(msg,'(4es15.7)') omega(iw), real(zeffspec(:,iw))
-!!   call wrtout(zeffspec_unit,msg,'COLL')
-!! end do
-!!
-!! write(zeffspec_unit,*) ' '
-!! write(zeffspec_unit,'(a)') '#  Imaginary part of Born charges spectral function:'
-!! write(zeffspec_unit,*) ' '
-!! write(msg,'(a,a)') ch10,&
-!! &           ' # At  hw     Z^x     Z^y     Z^z'
-!! call wrtout(zeffspec_unit,msg,'COLL')
-!! do iw=1,nomega
-!!   write(msg,'(4es15.7)') omega(iw), aimag(zeffspec(:,iw))
-!!   call wrtout(zeffspec_unit,msg,'COLL')
-!! end do
-!!
-!! close(zeffspec_unit)
+!Phonon eigenvectors
+ phon_filename=trim(outfilename_radix)//"_PHVEC"
+ if (open_file(phon_filename, msg, newunit=phon_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(phon_unit,*) '#'
+ if (mpopt==1) then
+   write(phon_unit,*) '#  Frozen-spin phonon eigenvectors calculated and interpolated by ANADDB'
+ else if (mpopt==2) then
+   write(phon_unit,*) '#  Relaxed-Spin phonon eigenvectors calculated and interpolated by ANADDB'
+ else
+   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+   ABI_ERROR(msg)
+ end if
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  3*natom
+ do imode= 1, 3*natom
+   write(phon_unit,*) ' '
+   write(phon_unit,'(a,i3)') '#  Real part of phonon eigenmode:', imode
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (real(modevec(i,imode,iw)),i=1,3*natom)
+     call wrtout(phon_unit,msg,'COLL')
+   end do
+
+   write(phon_unit,*) ' '
+   write(phon_unit,'(a,i3)') '#  Imaginary part of phonon eigenmode:', imode
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (aimag(modevec(i,imode,iw)),i=1,3*natom)
+     call wrtout(phon_unit,msg,'COLL')
+   end do
+ end do
+
+
+!Born effective charges
+ zeff_filename=trim(outfilename_radix)//"_ZEFF"
+ if (open_file(zeff_filename, msg, newunit=zeff_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(zeff_unit,*) '#'
+ write(zeff_unit,*) '#  Born effective charges calculated and interpolated by ANADDB'
+ write(zeff_unit,*) '#'
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' ) 3 
+ do imode= 1, 3*natom
+   write(zeff_unit,*) ' '
+   write(zeff_unit,'(a,i3)') '#  Real part of Born charge (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
+   call wrtout(zeff_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (real(modezeff(i,imode,iw)),i=1,3)
+     call wrtout(zeff_unit,msg,'COLL')
+   end do
+   write(zeff_unit,*) ' '
+   write(zeff_unit,'(a,i3)') '#  Imaginary part of Born charge (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
+   call wrtout(zeff_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (aimag(modezeff(i,imode,iw)),i=1,3)
+     call wrtout(zeff_unit,msg,'COLL')
+   end do
+ end do
+
+ close(zeff_unit)
 
  ABI_FREE(dint_fsddb)
  ABI_FREE(int_fsddb)
@@ -1051,12 +1102,12 @@ contains
  ABI_FREE(phongreen)
  ABI_FREE(phongreen_fm)
  ABI_FREE(phonspec)
- ABI_FREE(zeffspec)
- ABI_FREE(mmomspec)
  ABI_FREE(mode_phonspec)
  ABI_FREE(eigvec)
  ABI_FREE(eigvec_fm)
  ABI_FREE(modemm)
+ ABI_FREE(modevec)
+ ABI_FREE(modezf)
  ABI_FREE(fmzeff_tr)
  ABI_FREE(zeff)
  ABI_FREE(zeff_tr)
@@ -1181,12 +1232,12 @@ subroutine phonon_green(amu,eigvec,eta,blkval,&
 
 !Apply ASR: it has weird consequences on the intensities of the spectral function
 !better not applied.
- ABI_MALLOC_IFNOT(delta_asrw0,(3*natom,3))
- if (omega < tol14) then
-   call asrw0(delta_asrw0,ifc,natom,0) 
- else 
-   call asrw0(delta_asrw0,ifc,natom,1) 
- end if
+! ABI_MALLOC_IFNOT(delta_asrw0,(3*natom,3))
+! if (omega < tol14) then
+!   call asrw0(delta_asrw0,ifc,natom,0) 
+! else 
+!   call asrw0(delta_asrw0,ifc,natom,1) 
+! end if
 
 !Build an array with the inverse mass factors
  ABI_MALLOC(invmassfac,(natom,natom))
@@ -1310,8 +1361,8 @@ end subroutine phonon_green
 !!  mode_mmom
 !!
 !! FUNCTION
-!!  Projects the magnetic moments on the eigenmodes of the dynamical 
-!!  matrix calculated at each value of omega
+!!  Projects the magnetic moments and Zeeman fields on the eigenmodes 
+!!  of the dynamical matrix calculated at each value of omega
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2024 ABINIT group (FIXME: add author)
@@ -1330,6 +1381,7 @@ end subroutine phonon_green
 !!
 !! OUTPUT
 !!  modemm(ndim,3*natom)= mode-resolved magnetic moments
+!!  modezf(ndim,3*natom)= mode-resolved Zeeman fields
 !!
 !! SIDE EFFECTS
 !!
@@ -1348,7 +1400,7 @@ end subroutine phonon_green
 #include "abi_common.h"
 
 
-subroutine mode_mmom(amu,eigvec,mmom,mmomspec,modemm,mode_phonspec,natom,ndim,ntypat,typat)
+subroutine mode_mmom(amu,eigvec,mmom,modemm,modevec,modezf,natom,ndim,ntypat,typat,zfield)
 
  use defs_basis
  use m_errors
@@ -1363,10 +1415,11 @@ subroutine mode_mmom(amu,eigvec,mmom,mmomspec,modemm,mode_phonspec,natom,ndim,nt
  integer, intent(in) :: typat(natom)
  real(dp), intent(in) :: amu(ntypat)
  real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
- real(dp), intent(in) :: mode_phonspec(3*natom)
- complex(dpc), intent(in) :: mmom(ndim,(natom+2)*3)
+ complex(dpc), intent(in) :: mmom(ndim,(natom+5)*3)
+ complex(dpc), intent(in) :: zfield(ndim,(natom+5)*3)
  complex(dpc), intent(out) :: modemm(ndim,3*natom)
- complex(dpc), intent(out) :: mmomspec(ndim)
+ complex(dpc), intent(out) :: modevec(3*natom,3*natom)
+ complex(dpc), intent(out) :: modezf(ndim,3*natom)
 
 !Local variables-------------------------------
 !scalars
@@ -1374,7 +1427,6 @@ subroutine mode_mmom(amu,eigvec,mmom,mmomspec,modemm,mode_phonspec,natom,ndim,nt
  real(dp) :: mcell
 !arrays
  real(dp), allocatable :: mass(:)
- complex(dpc), allocatable :: mode_mmomspec(:,:)
 !character(len=500) :: msg                   
 
 ! *************************************************************************
@@ -1390,8 +1442,22 @@ subroutine mode_mmom(amu,eigvec,mmom,mmomspec,modemm,mode_phonspec,natom,ndim,nt
  end do
  mass(:)=sqrt(mcell/mass(:))
 
+!Reshape the eigenvector array
+ do iat2= 1, natom
+   do idir2= 1, 3
+     imode= (iat2-1)*3 + idir2
+     do iat1= 1, natom
+       do idir1= 1, 3
+         irow= (iat1-1)*3 + idir1
+         modevec(irow,imode)= cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+       end do
+     end do
+   end do
+ end do
+
 !Compute the mode-resolved moments
  modemm(:,:)=(zero,zero)
+ modezf(:,:)=(zero,zero)
  do im= 1, ndim
    do iat2= 1, natom
      do idir2= 1, 3
@@ -1399,8 +1465,8 @@ subroutine mode_mmom(amu,eigvec,mmom,mmomspec,modemm,mode_phonspec,natom,ndim,nt
        do iat1= 1, natom
          do idir1= 1, 3
            irow= (iat1-1)*3 + idir1
-           modemm(im,imode)= modemm(im,imode) +  mass(iat1)*mmom(im,irow)* &
-         & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+           modemm(im,imode)= modemm(im,imode) +  mass(iat1)*mmom(im,irow)*modevec(irow,imode)
+           modezf(im,imode)= modezf(im,imode) +  mass(iat1)*zfield(im,irow)*modevec(irow,imode)
          end do
        end do
      end do
@@ -1409,16 +1475,6 @@ subroutine mode_mmom(amu,eigvec,mmom,mmomspec,modemm,mode_phonspec,natom,ndim,nt
 
  ABI_FREE(mass)
 
-!Compute the magnetic moments weighted by the phonon spectral function
- ABI_MALLOC(mode_mmomspec,(ndim,3*natom))
- do irow= 1, 3*natom
-   mode_mmomspec(:,irow)= modemm(:,irow)*mode_phonspec(irow)
- end do
- do im= 1, ndim
-   mmomspec(im)=sum(mode_mmomspec(im,:))
- end do 
- ABI_FREE(mode_mmomspec)
- 
 
  DBG_EXIT("COLL")
 
@@ -1468,7 +1524,7 @@ end subroutine mode_mmom
 #include "abi_common.h"
 
 
-subroutine mode_zeff(amu,eigvec,mode_phonspec,modezeff,natom,ntypat,typat,zeff,zeffspec)
+subroutine mode_zeff(amu,eigvec,modezeff,natom,ntypat,typat,zeff)
 
  use defs_basis
  use m_errors
@@ -1483,10 +1539,8 @@ subroutine mode_zeff(amu,eigvec,mode_phonspec,modezeff,natom,ntypat,typat,zeff,z
  integer, intent(in) :: typat(natom)
  real(dp), intent(in) :: amu(ntypat)
  real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
- real(dp), intent(in) :: mode_phonspec(3*natom)
  complex(dpc), intent(in) :: zeff(3,natom*3)
  complex(dpc), intent(out) :: modezeff(3,3*natom)
- complex(dpc), intent(out) :: zeffspec(3)
 
 !Local variables-------------------------------
 !scalars
@@ -1528,17 +1582,6 @@ subroutine mode_zeff(amu,eigvec,mode_phonspec,modezeff,natom,ntypat,typat,zeff,z
  end do
 
  ABI_FREE(mass)
-
-!Compute the Born charges weighted by the phonon spectral function
- ABI_MALLOC(mode_zeffspec,(3,3*natom))
- do irow= 1, 3*natom
-   mode_zeffspec(:,irow)= modezeff(:,irow)*mode_phonspec(irow)
- end do
- zeffspec(1)=sum(mode_zeffspec(1,:))
- zeffspec(2)=sum(mode_zeffspec(2,:))
- zeffspec(3)=sum(mode_zeffspec(3,:))
-
- ABI_FREE(mode_zeffspec)
 
  DBG_EXIT("COLL")
 
@@ -1815,7 +1858,7 @@ end subroutine me_altcalc
 
  subroutine ri_d2etot(blkval,ci_alpha,ci_epsilon,ci_localpha,ci_mchi,&
 & lm_alpha,lm_epsilon,lm_localpha,lm_magsus,lm_mchi,magsus,mpert,mcoup, &
-& mcoup_tr,natom,ndim,phongreen,ucvol)
+& mcoup_tr,natom,ndim,phongreen,ucvol,zeff)
 
 !Arguments ------------------------------------
 !scalars
@@ -1836,6 +1879,7 @@ end subroutine me_altcalc
  complex(dpc), intent(in) :: mcoup(ndim,(natom+5)*3)
  complex(dpc), intent(in) :: mcoup_tr((natom+5)*3,ndim)
  complex(dpc), intent(in) :: phongreen(3*natom,3*natom)
+ complex(dpc), intent(out) :: zeff(3,3*natom)
 
 !Local variables-------------------------------
 !scalars
@@ -1866,6 +1910,7 @@ end subroutine me_altcalc
        icol= (ipert2-1)*3 + idir2
        coup(irow,icol)= c_blkval(idir1,ipert1,idir2,ipert2)
        coup_tr(icol,irow)= c_blkval(idir2,ipert2,idir1,ipert1)
+       zeff(irow,icol)= coup(irow,icol)
      end do
    end do
  end do
@@ -1902,13 +1947,13 @@ end subroutine me_altcalc
    end do
  end do
 
- lm_alpha= fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
+ lm_alpha= -fac*matmul(coup(:,:),matmul(phongreen,coup_tr(:,:)))
  
  ipert1= natom + 5
  ipert2= natom + 2
  do idir1= 1, 3
    do idir2= 1, 3
-     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)/ucvol
+     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)*fac
    end do
  end do 
 
