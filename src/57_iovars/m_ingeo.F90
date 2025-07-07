@@ -131,7 +131,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,&
+subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_axial,&
   genafm,iatfix,iatnd,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
   msym,natnd,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
