@@ -36431,11 +36431,10 @@ fi
             if "$PKG_CONFIG" --exists netcdf; then
                   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-                  #sd_netcdf_init="pkg"
+                  sd_netcdf_init="pkg"
            else
                   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-                  sd_netcdf_init="def"
            fi
         fi
      fi
@@ -36647,9 +36646,9 @@ $as_echo "$as_me: resetting NetCDF library flags (implicit package)" >&6;}
         ;;
 
       pkg)
-        TMP_netcdf_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags netcdf`
+        TMP_netcdf_CPPFLAGS=`$PKG_CONFIG --cflags netcdf`
         TMP_netcdf_FFFLAGS="${TMP_netcdf_CPPFLAGS}"
-        TMP_netcdf_LIBS=`$PKG_CONFIG --libs  --keep-system-libs netcdf`
+        TMP_netcdf_LIBS=`$PKG_CONFIG --libs netcdf`
         sd_netcdf_cppflags="${TMP_netcdf_CPPFLAGS} "
         sd_netcdf_cflags="${TMP_netcdf_CPPFLAGS}"
         sd_netcdf_cxxflags="${TMP_netcdf_CPPFLAGS}"
@@ -42100,10 +42099,6 @@ $as_echo "#define HAVE_LINALG_SCALAPACK 1" >>confdefs.h
     fi
   fi
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: status of sd_linalg_mpi_ok ${sd_linalg_mpi_ok}" >&5
-$as_echo "$as_me: status of sd_linalg_mpi_ok ${sd_linalg_mpi_ok}" >&6;}
-  { $as_echo "$as_me:${as_lineno-$LINENO}: detail: blac: ${sd_linalg_has_blacs}, scalapack ${sd_linalg_has_scalapack}, plasma ${sd_linalg_has_plasma}" >&5
-$as_echo "$as_me: detail: blac: ${sd_linalg_has_blacs}, scalapack ${sd_linalg_has_scalapack}, plasma ${sd_linalg_has_plasma}" >&6;}
   # Look for MPI acceleration linear algebra support
   if test "${sd_linalg_mpi_ok}" = "yes"; then
     for tmp_linalg_vendor in ${sd_linalg_chk_mpiacc}; do
@@ -45292,35 +45287,26 @@ $as_echo_n "checking which FFT flavors to enable for ${sd_linalg_flavor}... " >&
   fi
 
   # Prepend DFTI if linear algebra is MKL
-  if test "${tmp_linalg_has_mkl}" != ""; then
-    sd_fft_selected_flavors="dfti ${sd_fft_selected_flavors}"
-  fi
+  #if test "${tmp_linalg_has_mkl}" != ""; then
+  #  sd_fft_selected_flavors="dfti ${sd_fft_selected_flavors}"
+  #fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${sd_fft_selected_flavors}" >&5
 $as_echo "${sd_fft_selected_flavors}" >&6; }
 
   # Warn about incompatibilities
-  if test "${tmp_linalg_has_mkl}" != ""; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: MKL is incompatible with FFTW3
-
-                    Please use DFTI instead and consult
-                    https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-fortran/top/fourier-transform-functions.html
-
-                    If you set the FFT flavor to fftw3, the configure script
-                    will abort. Otherwise, your FFTW3 settings will be ignored.
-
-" >&5
-$as_echo "$as_me: WARNING: MKL is incompatible with FFTW3
-
-                    Please use DFTI instead and consult
-                    https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-fortran/top/fourier-transform-functions.html
-
-                    If you set the FFT flavor to fftw3, the configure script
-                    will abort. Otherwise, your FFTW3 settings will be ignored.
-
-" >&2;}
-  sd_fftw3_enable="no"
-  fi
+  #if test "${tmp_linalg_has_mkl}" != ""; then
+  #AC_MSG_WARN([MKL is incompatible with FFTW3
+  #
+  #                  Please use DFTI instead and consult
+  #                  https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-fortran/top/fourier-transform-functions.html
+  #
+  #                  If you set the FFT flavor to fftw3, the configure script
+  #                  will abort. Otherwise, your FFTW3 settings will be ignored.
+  #
+  #])
+  #sd_fftw3_enable="no"
+  #fi
 
   # Clean-up the mess
   unset tmp_fft_has_fftw3
