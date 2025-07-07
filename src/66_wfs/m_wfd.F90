@@ -1477,9 +1477,9 @@ end function wfd_xdotc
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_get_gvec_kq
+!!****f* m_wfd/wfd_get_gvec_gbound
 !! NAME
-!! wfd_get_gvec_kq
+!! wfd_get_gvec_gbound
 !!
 !! FUNCTION
 !! Return the g-sphere centered on kq and gbound_kq,

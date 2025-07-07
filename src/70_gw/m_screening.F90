@@ -645,7 +645,7 @@ end subroutine Epsm1_rotate_iqbz
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz_inplace(epsm1,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange)
+subroutine Epsm1_rotate_iqbz_inplace(epsm1, iq_bz, nomega, npwc, Gsph, Qmesh, remove_exchange)
 
 !Arguments ------------------------------------
 !scalars
@@ -764,8 +764,8 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
  epsm1%fform      = fform
  epsm1%Tordering  = epsm1%Hscr%Tordering
 
- !TODO these quantitities should be checked and initiliazed in epsm1_mkdump
- !BEGIN HARCODED
+ !TODO these quantitities should be checked and initialized in epsm1_mkdump
+ !BEGIN HARDCODED
  epsm1%nI       = 1
  epsm1%nJ       = 1
  epsm1%ikxc     = 0
@@ -1520,7 +1520,7 @@ subroutine make_epsm1_driver(iq_ibz, dim_wing, npwe, nI, nJ, nomega, omega,&
  use_MPI = .FALSE.
  use_MPI = nprocs >= nomega  ! Parallelism is not used
 
- ! FIXME: MPI mode is termporarly disabled here because we need to know if
+ ! FIXME: MPI mode is temporarily disabled here because we need to know if
  ! screening is allocated in shared memory or not.
  ! Perhaps now it makes mores sense to use Scalapack/ELPA instead of parallelizing the loop over frequencies
  !use_MPI = .FALSE.
@@ -2360,7 +2360,7 @@ end subroutine atddft_symepsm1
 !!  npwe=Number of G-vectors in chi0.
 !!  nI,nJ=Number of rows/columns in chi0_ij (1,1 in collinear case)
 !!  dim_wing=Dimension of the wings (0 or 3 if q-->0)
-!!  kxcg_mat_sr=Short-range fxc kernel used in the TE epsilon^-1
+!!  kxcg_mat_sr=Short-range fxc kernel used in the test-electron epsilon^-1
 !!  option_test=Only for TDDFT:
 !!   == 0 for TESTPARTICLE ==
 !!   == 1 for TESTELECTRON ==
@@ -2548,7 +2548,7 @@ end subroutine atddft_hyb_symepsm1
 !! chi0_uwing(npwe*n2,nomega,3)  Input:  the lower and upper wings of the polarizability
 !!                               Output: the "lower" and "upper" wings of the inverse dieletric matrix. See notes below.
 !! chi0_head(3,3,nomega)= Input: the polarizability tensor in Cartesian coordinates.
-!!                        Ouput: The "head" of the inverse dieletric matrix. See notes below.
+!!                        Output: The "head" of the inverse dieletric matrix. See notes below.
 !!
 !! NOTES
 !!  Matrix inversion in block form.
@@ -2773,7 +2773,7 @@ subroutine lebedev_laikov_int()
  do ll=0,lmax,2
    !allocate(tmp_momenta(-ll:ll))
    do mm=-ll,ll
-     ! MG: Commented becase it causes problems with the new version of abilint
+     ! MG: Commented because it causes problems with the new version of abilint
      !call lebedev_quadrature(ylmstar_over_qTq,(/ll,mm/),real_pars,cplx_pars,ang_int,ierr,accuracy)
      write(std_out,*)ll,mm,ang_int
      !tmp_momenta(mm) = ang_int
