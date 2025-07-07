@@ -786,7 +786,8 @@ end subroutine mklocl_recipspace
 
 subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,&
-& ntypat,n1,n2,n3,ph1d,qgrid,qphon,rcut,rprimd,ucvol,vcutgeo,vlspl,vpsp1,xred)
+& ntypat,n1,n2,n3,ph1d,qgrid,qphon,rcut,rprimd,ucvol,vcutgeo,vlspl,vpsp1,xred,&
+& zion) !Optional
 
 !Arguments -------------------------------
 !scalars
@@ -798,6 +799,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
  real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
  real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rprimd(3,3),vcutgeo(3),vlspl(mqgrid,2,ntypat)
  real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(in),optional :: zion(ntypat)
  real(dp),intent(out) :: vpsp1(cplex*nfft)
 
 !Local variables -------------------------
@@ -805,7 +807,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
  integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
  integer :: itypat,jj,re=1
  real(dp),parameter :: tolfix=1.000000001_dp
- real(dp) :: aa,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,gmag,gq1
+ real(dp) :: aa,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,facg0,gmag,gq1
  real(dp) :: gq2,gq3,gsquar,phqim,phqre
  real(dp) :: qxred2pi,sfi,sfr,vion1,xnorm
  logical :: qeq0
@@ -821,7 +823,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
  iatom=ipert
 
  if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 & 
-& .or. iatom==natom+5 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
+& .or. iatom==natom+5 .or. iatom==natom+6 .or. iatom==natom+6 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1(1:cplex*nfft)=zero
@@ -879,9 +881,13 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
 
 !        Note the lower limit of the next loop
          ii1=1
+         facg0=zero
          if(i3==1 .and. i2==1 .and. qeq0 .and. ig2==0 .and. ig3==0)then
            ii1=2
            ii=ii+1
+         end if
+         if(i3==1 .and. i2==1 .and. (.not.qeq0) .and. icutcoul==55 .and. ig2==0 .and. ig3==0)then
+           facg0 = four_pi * zion(itypat) / (two_pi)**2
          end if
          do i1=ii1,n1
            ig1=i1-(i1/id1)*n1-1
@@ -907,7 +913,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
              cc = aa*(aa**2-1.0_dp)*dq2div6
              dd = bb*(bb**2-1.0_dp)*dq2div6
              vion1 = (aa*vlspl(jj,1,itypat)+bb*vlspl(jj+1,1,itypat) + &
-&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) &
+&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) + facg0 ) &
 &             / gsquar*gcutoff(ii)
 
 !            Phase   G*xred  (complex conjugate) * -i *2pi*(g+q)*vion
@@ -917,6 +923,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
 !            Phase   q*xred  (complex conjugate)
              work1(re,ii)=sfr*phqre+sfi*phqim
              work1(im,ii)=-sfr*phqim+sfi*phqre
+
+             facg0=zero
            end if
 
          end do
@@ -1426,7 +1434,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  iatom=ipert
 
  if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 &
-& .or. iatom==natom+5 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
+& .or. iatom==natom+5 .or. iatom==natom+6 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1dq(1:cplex*nfft)=zero
@@ -1685,7 +1693,7 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  iatom=ipert
 
  if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 &
-& .or. iatom==natom+5 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
+& .or. iatom==natom+5 .or. iatom==natom+6 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1dqdq(1:cplex*nfft)=zero

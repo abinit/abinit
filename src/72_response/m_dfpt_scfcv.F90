@@ -272,7 +272,7 @@ contains
 subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &  dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset,&
 &  d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elmag1,elpsp1,emagpen1,&
+&  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,&
 &  end0,end1,enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,indkpt1,&
 &  indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
 &  kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem,mkqmem,mk1mem,&
@@ -407,7 +407,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq
  real(dp) :: end0_mq,end1_mq,enl0_mq,enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
- real(dp) :: etotal_mq,evar_mq,omega_mq,zeemfac
+ real(dp) :: etotal_mq,evar_mq,omega_mq
  character(len=500) :: msg
  character(len=500),parameter :: MY_NAME="dfpt_scfcv"
  character(len=fnlen) :: fi1o
@@ -486,7 +486,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  need_fermie1=((qzero==1.and.dtset%frzfermi==0.and.nstep>0).and.&
 & (dtset%occopt>=3.and.dtset%occopt<=8).and. &
 & (ipert<=dtset%natom.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4.or.&
-& ipert==dtset%natom+5.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11)))
+& ipert==dtset%natom+5.or.ipert==dtset%natom+6.or.&
+& (ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11)))
 
 !The value of iscf must be modified if ddk perturbation, see dfpt_looppert.f
  if (ipert==dtset%natom+1.or.ipert==dtset%natom+10.or.ipert==dtset%natom+11) iscf_mod=-3
@@ -1133,11 +1134,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    if (ipert/=dtset%natom+1.and.dtset%prt1mag==2) then
      prtopt=1
-     zeemfac=half
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
    & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
    & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
-   & qphon=qphon,zeemfac=zeemfac)
+   & qphon=qphon)
      call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
    & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
    end if
@@ -1428,7 +1428,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !Use of NSTPAW3 for NCPP (instead of DFPT_NSELT/DFPT_NSTDY) can be forced with userie=919
 !MT oct. 2015: this works perfectly on all automatic tests
- if(ipert<=dtset%natom+4)then
+! if(ipert<=dtset%natom+4)then
+  if (ipert<dtset%natom+10.or.ipert>dtset%natom+11) then
    if (psps%usepaw==1.or.dtset%userie==919) then
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
@@ -1554,11 +1555,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
    prtopt=1
-   zeemfac=half
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
  & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
- & qphon=qphon,zeemfac=zeemfac)
+ & qphon=qphon)
    call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
  & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
 
@@ -1813,8 +1813,8 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
      else if ( ipert==natom+3 .or. ipert==natom+4 ) then
        evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1+elpsp1
 
-!    terms for Zeeman perturbation, SPr 2deb
-     else if ( ipert==natom+5 ) then
+!    terms for Zeeman or scalar potential perturbation, SPr 2deb
+     else if ( ipert==natom+5 .or. ipert==natom+6 ) then
        evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1+elmag1
 
 !    terms for atomic-spheres local Zeeman perturbation
@@ -3235,7 +3235,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    ABI_BUG(msg)
  end if
 
-
 !Keep track of total time spent in dfpt_nstdy
  call timab(101,1,tsec)
 
@@ -3547,7 +3546,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !        Get first-order local potential and first-order pseudo core density
          call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir1,ipert1,mpi_enreg,psps%mqgrid_ff,dtset%natom,&
 &         nattyp,nfft,ngfft,dtset%nkpt,dtset%ntypat,n1,n2,n3,ph1d,psps%qgrid_ff,&
-&         qphon,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
+&         qphon,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred,&
+&         zion=dtset%ziontypat)
          if(psps%n1xccc/=0)then
            call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,n1,psps%n1xccc,&
 &           n2,n3,qphon,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)
@@ -3826,7 +3826,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Check arguments validity
  if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4.and.ipert/=natom+5.and. &
-&    (ipert>natom+11.and.ipert<2*natom+11)) then
+& ipert/=natom+6.and.(ipert>natom+11.and.ipert<2*natom+11)) then
    ABI_BUG('wrong ipert argument!')
  end if
  if (cplex/=1) then
@@ -4047,7 +4047,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
        if (ipert==natom+3) istr=idir
        if (ipert==natom+4) istr=idir+3
        ider=1;idir0=-istr
-     else if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then !SPr deb rfmagn
+     else if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then !SPr deb rfmagn
        ider=0;idir0=0
      end if
      dimffnl1=1+ider;if (ider==1.and.idir0==0) dimffnl1=dimffnl1+2*psps%useylm
@@ -4457,7 +4457,8 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Check arguments validity
  if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4 & 
-& .and.ipert/=gs_hamkq%natom+5 .and. (ipert>gs_hamkq%natom+11.and.ipert<=2*gs_hamkq%natom+11)) then !SPr rfmagn deb
+& .and.ipert/=gs_hamkq%natom+5.and.ipert/=gs_hamkq%natom+6 .and. &
+& (ipert>gs_hamkq%natom+11.and.ipert<=2*gs_hamkq%natom+11)) then !SPr rfmagn deb
    ABI_BUG('wrong ipert argument !')
  end if
  if (cplex/=1) then
@@ -4498,6 +4499,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  berryopt=0;usevnl=0;sij_opt=-gs_hamkq%usepaw;tim_getgh1c=3
  optlocal=0;optnl=1;opt_gvnlx1=0
  if(ipert==gs_hamkq%natom+5) optnl=0;    ! no 1st order NL in H(1), also no kin, but this will be taken into account later
+ if(ipert==gs_hamkq%natom+6) optnl=0;    ! no 1st order NL in H(1), also no kin, but this will be taken into account later
  if(ipert>gs_hamkq%natom+11.and.ipert<=2*gs_hamkq%natom+11) optnl=0;
 !if(ipert==gs_hamkq%natom+5) optlocal=0; ! 1st order LOCAL potential present
 

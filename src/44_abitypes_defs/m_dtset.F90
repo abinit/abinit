@@ -2570,7 +2570,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
 !Define the set of admitted perturbations
  mpert=dtset%natom+7
- if(dtset%natom+10/=0.or.dtset%natom+11/=0) mpert=dtset%natom+11
+ if(dtset%rf2_dkdk/=0.or.dtset%rf2_dkde/=0) mpert=dtset%natom+11
  if(dtset%rfmagn==2.or.dtset%prt1mag==1) mpert=2*dtset%natom+11
 
  ABI_MALLOC(symrec,(3,3,dtset%nsym))
@@ -2610,6 +2610,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
  if(dtset%rfmagn==2) rfpert(dtset%natom+11+dtset%rfatpol(1):dtset%natom+11+dtset%rfatpol(2))=1
+ if(dtset%rfmagn==3) rfpert(dtset%natom+6)=1
 
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)

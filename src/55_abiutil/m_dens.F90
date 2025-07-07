@@ -1505,7 +1505,6 @@ end subroutine mag_penalty_e
 !!  typat(natom)=type of each atom
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  [qphon(3)]= perturbation wave vector.
-!!  [zeemfac]= -0.5 factor to apply in order to get magnetic moments consistent with the Zeeman field perturbation.
 !!
 !! OUTPUT
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol. Optional argument
@@ -1525,7 +1524,7 @@ end subroutine mag_penalty_e
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
 &    ratopt,option,cplex, &
-&     dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon,taumr,zeemfac)
+&     dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon,taumr)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1535,7 +1534,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer,intent(in)        :: ratopt
  integer,intent(in)        :: option
  integer,intent(in)        :: cplex
- real(dp),optional,intent(in) :: zeemfac 
 !arrays
  integer,intent(in)  :: ngfft(18),typat(natom)
  real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
@@ -1559,7 +1557,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: arg,phr1d_im,phr1d_re
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
- real(dp) :: dfsm,fact,fsm,ratsm2,ucvol,zeemfac_
+ real(dp) :: dfsm,fact,fsm,ratsm2,ucvol
  logical   :: grid_found
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
@@ -1597,10 +1595,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  endif
  fatsph_=zero
  taumr_=zero
- zeemfac_=one
- if(present(zeemfac))then
-   zeemfac_=zeemfac
- end if
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1735,10 +1729,10 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            endif
 !          Integral of density or potential residual
            if (cplex==1) then
-             intg(1,1:nspden)=intg(1,1:nspden)+zeemfac_*fsm*rhor(ifft_local,1:nspden)
+             intg(1,1:nspden)=intg(1,1:nspden)+fsm*rhor(ifft_local,1:nspden)
            else if (cplex==2) then
-             intg_re(1:nspden)=zeemfac_*fsm*rhor(2*ifft_local-1,1:nspden)
-             intg_im(1:nspden)=zeemfac_*fsm*rhor(2*ifft_local  ,1:nspden)
+             intg_re(1:nspden)=fsm*rhor(2*ifft_local-1,1:nspden)
+             intg_im(1:nspden)=fsm*rhor(2*ifft_local  ,1:nspden)
              if (sum(qphon_(:)**2)<tol8) then 
                intg(1,1:nspden)=intg(1,1:nspden)+intg_re(1:nspden)
                intg(2,1:nspden)=intg(2,1:nspden)+intg_im(1:nspden)
@@ -1969,7 +1963,7 @@ if(present(strs_intgden) .and. option<10 .and. ratsm2>tol12) then
      end do
    end if
 
-   rhomag_(1:cplex,1:nspden)=rhomag_(1:cplex,1:nspden)*ucvol/dble(nfftot)*zeemfac_
+   rhomag_(1:cplex,1:nspden)=rhomag_(1:cplex,1:nspden)*ucvol/dble(nfftot)
 
   !MPI parallelization
    if(mpi_enreg%nproc_fft>1)then
@@ -2959,12 +2953,18 @@ integer :: iatom
 
 ! *************************************************************************
 
- ! Incorporate total magnetic moments
+ ! Incorporate total charge and magnetic moments
  if (nspden==2) then
+   blkflg(1,natom+6,idir,ipert)= 1
+   d2lo(1,1,natom+6,idir,ipert)= rhomag(1,1)
+   if (cplex==2) d2lo(2,1,natom+6,idir,ipert)= rhomag(2,1)
    blkflg(3,natom+5,idir,ipert)= 1
    d2lo(1,3,natom+5,idir,ipert)= rhomag(1,2)
    if (cplex==2) d2lo(2,3,natom+5,idir,ipert)= rhomag(2,2)
  else if (nspden==4) then
+   blkflg(1,natom+6,idir,ipert)=1
+   d2lo(1,1,natom+6,idir,ipert)= rhomag(1,1)
+   if (cplex==2) d2lo(2,1,natom+6,idir,ipert)= rhomag(2,1)
    blkflg(1:3,natom+5,idir,ipert)=1
    d2lo(1,1:3,natom+5,idir,ipert)= rhomag(1,2:4)
    if (cplex==2) d2lo(2,1:3,natom+5,idir,ipert)= rhomag(2,2:4)
