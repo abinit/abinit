@@ -795,6 +795,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
        end if
      end if
+
 !    PAW only: we sometimes have to compute 1st-order compensation density
 !    and eventually add it to density from 1st-order WFs
 !    ----------------------------------------------------------------------
