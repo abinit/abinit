@@ -318,7 +318,7 @@ contains
  & fs2rs=fs2rs,blkval_fs=int_fsddb,blkval_rs=int_rsddb)
 
    call ddb%to_d2etot(int_fsddb,1,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega(iw))
-   if (mpopt==2) call ddb%to_d2etot(int_rsddb,1,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
+   if (mpopt==2) call ddb%to_d2etot(int_rsddb,1,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega(iw))
 
    !Calculate the phonon propagator (Green's function) and spectral function
    !and the lattice-mediated contributions to the different susceptibilities.
@@ -1879,7 +1879,7 @@ end subroutine me_altcalc
  end do 
 
  !Magnetoelectric susceptibility
- fac= one/ucvol
+ fac= -one/ucvol
  ipert1= natom + 5
  do idir1= 1, 3
    irow= idir1
