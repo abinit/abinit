@@ -1028,6 +1028,8 @@ subroutine indefo1(dtset)
  dtset%gw_customnfreqsp=0
  dtset%gw_nqlwl=0
  dtset%gwls_n_proj_freq=0
+!H
+ dtset%hspinfield(:)=zero
 !I
  dtset%iatfix(:,:)=0
  dtset%iatnd(:)=0
@@ -1130,7 +1132,6 @@ subroutine indefo1(dtset)
  dtset%xred_orig(:,:,:)=zero
 !Y
 !Z
- dtset%zeemanfield(:)=zero
  dtset%zora=0
 
  DBG_EXIT("COLL")
@@ -1534,22 +1535,32 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
-!Read the Zeeman field
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+!Read the hspinfield
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield',tread,'BFI')
+ if(tread==0) then
+    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+    if (tread == 1) then
+       write(msg, '(3a)')&
+       'Input variable "zeemanfield" is deprecated.', ch10, &
+       'Its value has been assigned to "hspinfield", please update your input.'   
+       ABI_COMMENT(msg)
+  end if
+end if
+
  if(tread==1) then
    if(dtset%nspden == 2)then
      write(msg,'(7a)')&
-      'A Zeeman field has been specified without noncollinear spins.',ch10,&
+      'A spin magnetic field (hspinfield) has been specified without noncollinear spins.',ch10,&
       'Only the z-component of the magnetic field will be used.'
      ABI_WARNING(msg)
    else if (dtset%nspden == 1)then
      write(msg, '(a,a,a)' )&
-      'A Zeeman field has been specified for a non-spin-polarized calculation.',ch10,&
+      'A spin magnetic field (hspinfield) has been specified for a non-spin-polarized calculation.',ch10,&
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
 
-   dtset%zeemanfield(1:3) = dprarr(1:3)
+   dtset%hspinfield(1:3) = dprarr(1:3)
  end if
 
 !Initialize geometry of the system, for different images. Also initialize cellcharge_min to be used later for estimating mband_upper..
