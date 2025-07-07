@@ -6288,8 +6288,7 @@ end if
 
          ! This to detect a possible band inversion and compute qp_gaps accordingly.
          band_inversion = .False.
-         call sort_rvals(nbc, real(qpz_ene(ib1:, ikcalc, spin)), iperm, sorted_qpe, tol=tol12)
-
+         call sort_rvals(nbc, real(qpz_ene(ib1:, ikcalc, spin)), iperm, sorted_qpe, tol=tol6)
          if (iperm(ibv) /= ibv .or. iperm(ibv + 1) /= ibv + 1) then
            band_inversion = .True.
            call ydoc%add_int('QP_VBM_band', iperm(ibv) + gwr%bstart_ks(ikcalc, spin) - 1)
