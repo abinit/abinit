@@ -1,20 +1,19 @@
 ## v10.4
 
 Version 10.4, released on May 15, 2025.
-<!-- Release notes updated on June 4, 2025. -->
+<!-- Release notes updated on July 6, 2025. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.4 with respect to v10.2.
-<!--
-Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175,
-EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had alreacy been included in v10.2,
-and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .
-For release v10.3, also MR1176 to 1182 are included, as well as MR1184-1186, MR1188 and MR1190. MR1183 and MR1187 will be included in v10.6.
-For later releases v10.4, the list of MR is to be completed.
+<!-- Initially, beta-release v10.4.1, merge requests from MR1063, 1068, 1077, 1079, 1081, then 1083 to 1175, 
+EXCEPT MR1087, 1088, 1090, 1091, 1092, 1095, 1097, 1100, 1104, 1106, 1114, 1115, that had already been included in v10.2,
+and EXCEPT MR1160, 1165, 1168, 1170, 1172 and 1173  that will be included in v10.6 .  
+For release v10.4.3, also MR1176 to 1182 are included, as well as MR1184-1186, MR1188 and MR1190. However, MR1183 and MR1187 will be included in v10.6.
+For release v10.4.5, also MR1188 to 1190, MR1193, MR1195, MR1197-1199, MR1203 are included. However, MR1191-1192, MR1194, MR1196, MR1200-1202, MR1205-12010 will be included in v10.6.
 -->
 <!-- (with some late contributions until XXX 2024). -->
 
-Many thanks to the contributors to the ABINIT project between October 2024 and May 2025 !
+Many thanks to the contributors to the ABINIT project between October 2024 and July 2025 !
 The list of contributors includes:
 
 G. Allemand, B. Amadon, G. Antonius, M. Azizi, L. Baguet, S. Bandyopadhyay, L. Bastogne,
@@ -803,7 +802,7 @@ fix compilation with NVHPC 23.11-24.7 by switching mkrho optionals positions.
 By M. Sarraute (MR1056, MR1060, MR1061)
 
 
-**D.2** Tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available,  [[test:gpu_kokkos_01]] and [[test:gpu_kokkos_02]], nonlop with BLAS, chebycheff.
+**D.2** Tests of the GPU (KOKKOS+CUDA) porting of ABINIT are available,  gpu_kokkos_01 (disabled for sporadic failure in v10.4) and [[test:gpu_kokkos_02]], nonlop with BLAS, chebycheff.
 See input variable [[gpu_option]]=3.
 
 By M. Sarraute and M. Torrent (b3b2ce14ca1)
