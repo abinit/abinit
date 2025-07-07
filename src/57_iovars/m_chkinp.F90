@@ -32,7 +32,6 @@ module m_chkinp
 
  use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
- use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
  use m_fstrings,       only : string_in, sjoin, itoa
@@ -501,7 +500,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
           '   Better solution: you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
          call wrtout(std_out,msg)
          if(fixed_mismatch==1)then
-           call flush_unit(std_out)
            write(msg, '(a)' )&
            '   ABINIT has detected such a possible shift. See the suggestion given in the COMMENT above (or in output or log file).'
            call wrtout(std_out,msg)
@@ -2115,7 +2113,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        'pawujv and/or atvshift found to be 0.0d0.',ch10,&
        'When engaging the linear response procedure, the perturbation strength',ch10,&
        'must be non-zero. Action: change pawujv and/or atvshift to a non-zero value.'
-       call flush_unit(std_out)
        ABI_ERROR(msg)
      end if
    end if
@@ -4675,7 +4672,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above (or in output or log file).',ch10,&
    'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
-   call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
  if (ierr>1) then
@@ -4683,7 +4679,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
    'The details of the problems can be found above (or in output or log file), in an earlier WARNING.',ch10,&
    'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
-   call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
 
