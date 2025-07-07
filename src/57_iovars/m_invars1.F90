@@ -1132,7 +1132,6 @@ subroutine indefo1(dtset)
  dtset%xred_orig(:,:,:)=zero
 !Y
 !Z
- dtset%zeemanfield(:)=zero
  dtset%zora=0
 
  DBG_EXIT("COLL")
@@ -1620,7 +1619,8 @@ end if
 !call flush(std_out)
 !ENDDEBUG
 
-   call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
+   call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%field_red_axial(1:3),&
+    dtset%genafm(1:3),iatfix,&
     iatnd,dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
     msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
