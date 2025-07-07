@@ -2902,6 +2902,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   integer,intent(in) :: sc_desc(9)
   integer,intent(in) :: comm
   integer,optional,intent(in) :: use_gpu_elpa
+  integer ::  indxl2g, numroc
   real*8 :: ev(na)
   real*8 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   real*8::tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)

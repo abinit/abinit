@@ -329,7 +329,8 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
     sd_fft_selected_flavors="dfti ${sd_fft_selected_flavors}"
   fi
 
-  AC_MSG_RESULT([ ${sd_fft_selected_flavors}])
+  AC_MSG_RESULT([${sd_fft_selected_flavors}])
+
   # Warn about incompatibilities
   if test "${tmp_linalg_has_mkl}" != ""; then
   AC_MSG_WARN([MKL is incompatible with FFTW3
