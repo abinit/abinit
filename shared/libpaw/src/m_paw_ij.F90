@@ -982,7 +982,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
  integer :: nsploop,nsppol,my_unt,ndij,qphase,tmp_cplex_dij,my_ipert,my_enunit,my_prtvol,size_paw_ij
  logical :: my_atmtab_allocated,paral_atom
  character(len=4) :: my_mode
- character(len=2000) :: msg
+ character(len=4000) :: msg
 !arrays
  integer :: idum(0)
  integer,pointer :: my_atmtab(:)
@@ -1221,18 +1221,17 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
        if (nspden==2.and.nsppol==1) then
          write(msg,'(4a)') trim(msg),') *****',ch10,' (antiferromagnetism case: only one spin component)'
        end if
-       call wrtout(my_unt,msg,my_mode)
      end if
      if (paw_ij(iatom)%ndij/=1) then
-       write(msg,'(3a)') ' Component ',trim(dspin(idij+2*(nsploop/4))),':'
-       call wrtout(my_unt,msg,my_mode)
+       write(msg,'(4a)') trim(msg),' Component ',trim(dspin(idij+2*(nsploop/4))),':'
      end if
 
      !Dij TOTAL
      if (Paw_ij(iatom)%has_dij/=0) then
        call get_dij_parts(cplex_dij,qphase,Paw_ij(iatom)%dij,dij2p,dij2p_,always_img=.true.)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
-&           my_prtvol,idum,50.d0*dble(3-2*idij),1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
+&           my_prtvol,idum,50.d0*dble(3-2*idij),1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode,&
+            title=msg)
      end if
 
    end if

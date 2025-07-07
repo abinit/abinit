@@ -1519,11 +1519,24 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%gwr_tolqpe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gwr_tolqpe','ENE',0)
 
+
+!###########################################################
+!### 03. Print all the input variables (H)
+!##
+
  intarr(1,:)=dtsets(:)%hmcsst
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmcsst','INT',0)
 
  intarr(1,:)=dtsets(:)%hmctt
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmctt','INT',0)
+
+!hspinfield
+ dprarr(1,:)=dtsets(:)%hspinfield(1)
+ dprarr(2,:)=dtsets(:)%hspinfield(2)
+ dprarr(3,:)=dtsets(:)%hspinfield(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield','BFI',0)
+
+
 
  intarr(1,:)=dtsets(:)%extfpmd_nbcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_nbcut','INT',0)

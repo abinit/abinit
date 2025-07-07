@@ -1631,12 +1631,6 @@ contains
  dprarr(1,:)=dtsets(:)%zcut
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'zcut','ENE',0)
 
-!zeemanfield
- dprarr(1,:)=dtsets(:)%zeemanfield(1)
- dprarr(2,:)=dtsets(:)%zeemanfield(2)
- dprarr(3,:)=dtsets(:)%zeemanfield(3)
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'zeemanfield','BFI',0)
-
 !ziontypat   ! After all, should always echo this value
  if(sum(dtsets(:)%ntypalch)>0)then
    narr=ntypat                    ! default size for all datasets

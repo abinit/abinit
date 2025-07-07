@@ -32,7 +32,7 @@ prtwf1 1
 tolwfr2 1.0D-20
 getwfk2 -1
 rfddk2 1
-rfdir2 1 1 1
+rfdir2 1 0 0
 iscf2 -3
 orbmag2 2
 
