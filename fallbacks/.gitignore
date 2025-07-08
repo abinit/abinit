@@ -1,4 +1,4 @@
-abinit-fallbacks-9.8.tar.gz
+!abinit-fallbacks-9.8.tar.gz
 /abinit-fallbacks-*.tar.gz
 !/build-abinit-fallbacks.sh.in
 !/README
