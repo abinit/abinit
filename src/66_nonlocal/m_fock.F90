@@ -2065,7 +2065,7 @@ end subroutine bare_vqg
 
 subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
                    nkpt_bz,ndat,rhog,ucvol,qphon,&
-                   rhog2,gpu_option) ! optional argument
+                   rhog2,gpu_option) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -2112,19 +2112,14 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
  !else(gpu_option==ABI_GPU_OPENMP) then
  !  gpu_set_to_zero(fockstr, 6*ndat)
  !end if
- write(*,*) '- FBFB FIXME rcut is set here'
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  irho2=0;if (present(rhog2)) irho2=1
-
- write(*,*) 'qphon',qphon(:)
- write(*,*) 'vqg',vqg(1)
- write(*,*) 'rcut',rcut
- write(*,*) '================='
 
 !Conduct looping over all fft grid points to find G vecs inside fockcommon%gsqcut
 !Include G**2 on surface of cutoff sphere as well as inside:
  !FBruneval: cutoff is never used.
  !cutoff=fockcommon%gsqcut*tolfix
+
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
@@ -2158,9 +2153,6 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
 !        Compute |G+q|^2
          gsquar=gcart(1)**2+gcart(2)**2+gcart(3)**2
 
-
-         write(*,*) 'FBFB',i1,i2,i3,gsquar,4.0d0*pi/gsquar,vqg(1:10)
-         if( ii > 100 ) stop "NOUEFH is ZENOI"
 
 
 !        take |rho(G)|^2 for complex rhog
