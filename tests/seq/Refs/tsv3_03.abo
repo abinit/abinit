@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 9.11.6.5 of ABINIT, released May 2025.
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 14 Sep 2024.
-- ( at 19h24 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/TestBot_MPI1/seq_tsv3_03/tsv3_03.abi
+.Starting date : Mon  7 Jul 2025.
+- ( at 11h29 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/TestBot_MPI1/seq_tsv3_03/tsv3_03.abi
 - output file    -> tsv3_03.abo
 - root for input  files -> tsv3_03i
 - root for output files -> tsv3_03o
@@ -525,8 +525,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998)
 - 31.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -541,8 +541,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    5.91122074
          --- l  ekb(1:nproj) -->
@@ -551,8 +551,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    0.945855
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for As,  from PRB58, 3641 (1998)
 - 33.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -567,8 +567,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    8.49486654
          --- l  ekb(1:nproj) -->
@@ -601,7 +601,7 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT  8  -7.9253286638163    -3.464E-14 2.301E-15 1.107E-14
  ETOT  9  -7.9253286638163     9.770E-15 1.958E-18 1.283E-16
 
- At SCF step    9, etot is converged :
+ At SCF step    9, etot is converged : 
   for the second time, diff in etot=  9.770E-15 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1198,18 +1198,18 @@ solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.9100523247053    -7.910E+00 5.008E-05 3.290E+00
- ETOT  2  -7.9247963264216    -1.474E-02 2.183E-07 1.593E-01
- ETOT  3  -7.9253177148074    -5.214E-04 6.213E-05 4.225E-03
- ETOT  4  -7.9253286533530    -1.094E-05 5.851E-07 1.166E-05
- ETOT  5  -7.9253286632920    -9.939E-09 6.302E-10 2.927E-07
- ETOT  6  -7.9253286638091    -5.171E-10 2.510E-11 6.076E-09
- ETOT  7  -7.9253286638163    -7.153E-12 3.110E-13 2.242E-11
- ETOT  8  -7.9253286638163    -3.464E-14 2.301E-15 2.214E-14
- ETOT  9  -7.9253286638163     1.066E-14 1.958E-18 2.566E-16
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -7.9100523247053    -7.910E+00 5.008E-05 3.290E+00 0.000E+00 0.000E+00
+ ETOT  2  -7.9247963264216    -1.474E-02 2.183E-07 1.593E-01 0.000E+00 0.000E+00
+ ETOT  3  -7.9253177148074    -5.214E-04 6.213E-05 4.225E-03 0.000E+00 0.000E+00
+ ETOT  4  -7.9253286533530    -1.094E-05 5.851E-07 1.166E-05 0.000E+00 0.000E+00
+ ETOT  5  -7.9253286632920    -9.939E-09 6.302E-10 2.927E-07 0.000E+00 0.000E+00
+ ETOT  6  -7.9253286638091    -5.171E-10 2.510E-11 6.076E-09 0.000E+00 0.000E+00
+ ETOT  7  -7.9253286638163    -7.153E-12 3.110E-13 2.242E-11 0.000E+00 0.000E+00
+ ETOT  8  -7.9253286638163    -3.464E-14 2.301E-15 2.214E-14 0.000E+00 0.000E+00
+ ETOT  9  -7.9253286638163     1.066E-14 1.958E-18 2.566E-16 0.000E+00 0.000E+00
 
- At SCF step    9, etot is converged :
+ At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1256,6 +1256,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   Sum:              1.316589     1.316589      2.633177     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1428,6 +1429,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:              1.316589     1.316589      2.633177     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1560,6 +1562,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   Sum:              1.316589     1.316589      2.633177     0.000000
  Total magnetization (from the atomic spheres):             0.000000
  Total magnetization (exact up - dn):                       0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1588,7 +1591,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0676956860E+01  1.0676956860E+01  1.0676956860E+01 Bohr
               amu      6.97230000E+01  7.49215900E+01
@@ -1897,60 +1900,60 @@ P           mkmem8         16
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          1.6        0.03      0.000
-- Total wall clock time (s,m,h):          1.6        0.03      0.000
+- Total cpu        time (s,m,h):          1.9        0.03      0.001
+- Total wall clock time (s,m,h):          2.0        0.03      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.6, wall_time =            1.6
+- cpu_time =            1.9, wall_time =            2.0
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.473  29.6         0.473  29.0              1      -1.00        1.00       1.00
-- fourwf%(pot)                              0.162  10.1         0.197  12.1           9250      -1.00        0.82       0.82
-- timing timab                              0.114   7.1         0.114   7.0             10      -1.00        1.00       1.00
-- abinit(outvars)                           0.100   6.2         0.100   6.1              1      -1.00        1.00       1.00
-- nonlop(apply)                             0.082   5.1         0.076   4.7           9250      -1.00        1.08       1.08
-- abinit(after driver)                      0.080   5.0         0.080   4.9              1      -1.00        1.00       1.00
-- ewald                                     0.073   4.6         0.074   4.5              8      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.053   3.3         0.039   2.4             -1      -1.00        1.36       1.36
-- vtowfk(ssdiag)                            0.037   2.3         0.040   2.5             -1      -1.00        0.93       0.93
-- abinit(chkinp,chkvars)                    0.035   2.2         0.035   2.1              1      -1.00        1.01       1.01
-- projbd                                    0.029   1.8         0.026   1.6          13670      -1.00        1.11       1.11
-- stress                                    0.014   0.9         0.016   1.0              2      -1.00        0.90       0.90
-- ewald2 (+vdw_dftd)                        0.014   0.9         0.015   0.9              2      -1.00        0.95       0.95
-- others (147)                              0.037   2.3         0.045   2.8             -1      -1.00        0.83       0.83
+- get_dtsets_pspheads                       0.530  28.1         0.530  26.7              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.229  12.1         0.332  16.7           9250      -1.00        0.69       0.69
+- timing timab                              0.145   7.7         0.145   7.3             10      -1.00        1.00       1.00
+- nonlop(apply)                             0.113   6.0         0.107   5.4           9250      -1.00        1.05       1.05
+- abinit(outvars)                           0.103   5.5         0.104   5.2              1      -1.00        0.99       0.99
+- ewald                                     0.090   4.8         0.088   4.4              8      -1.00        1.03       1.03
+- abinit(after driver)                      0.079   4.2         0.079   4.0              1      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.069   3.7         0.064   3.2             -1      -1.00        1.08       1.08
+- vtowfk(ssdiag)                            0.049   2.6         0.051   2.6             -1      -1.00        0.96       0.96
+- projbd                                    0.038   2.0         0.049   2.5          13670      -1.00        0.78       0.78
+- abinit(chkinp,chkvars)                    0.037   1.9         0.036   1.8              1      -1.00        1.02       1.02
+- stress                                    0.019   1.0         0.019   1.0              2      -1.00        0.98       0.98
+- ewald2 (+vdw_dftd)                        0.018   1.0         0.019   1.0              2      -1.00        0.97       0.97
+- others (146)                              0.049   2.6         0.053   2.7             -1      -1.00        0.92       0.92
 -<END_TIMER>
 -
-- subtotal                                  1.303  81.6         1.330  81.6                                  0.98       0.98
+- subtotal                                  1.569  83.1         1.676  84.3                                  0.94       0.94
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls
+- as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           1.6, wall_time =           1.6
+- cpu_time =           1.9, wall_time =           2.0
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.473  29.6         0.473  29.0              1      -1.00        1.00       1.00
-- fourwf%(pot)                              0.162  10.1         0.197  12.1           9250      -1.00        0.82       0.82
-- timing timab                              0.114   7.1         0.114   7.0             10      -1.00        1.00       1.00
-- abinit(outvars)                           0.100   6.2         0.100   6.1              1      -1.00        1.00       1.00
-- nonlop(apply)                             0.082   5.1         0.076   4.7           9250      -1.00        1.08       1.08
-- abinit(after driver)                      0.080   5.0         0.080   4.9              1      -1.00        1.00       1.00
-- ewald                                     0.073   4.6         0.074   4.5              8      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.053   3.3         0.039   2.4             -1      -1.00        1.36       1.36
-- vtowfk(ssdiag)                            0.037   2.3         0.040   2.5             -1      -1.00        0.93       0.93
-- abinit(chkinp,chkvars)                    0.035   2.2         0.035   2.1              1      -1.00        1.01       1.01
-- projbd                                    0.029   1.8         0.026   1.6          13670      -1.00        1.11       1.11
-- stress                                    0.014   0.9         0.016   1.0              2      -1.00        0.90       0.90
-- ewald2 (+vdw_dftd)                        0.014   0.9         0.015   0.9              2      -1.00        0.95       0.95
-- others (147)                              0.037   2.3         0.045   2.8             -1      -1.00        0.83       0.83
+- get_dtsets_pspheads                       0.530  28.1         0.530  26.7              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.229  12.1         0.332  16.7           9250      -1.00        0.69       0.69
+- timing timab                              0.145   7.7         0.145   7.3             10      -1.00        1.00       1.00
+- nonlop(apply)                             0.113   6.0         0.107   5.4           9250      -1.00        1.05       1.05
+- abinit(outvars)                           0.103   5.5         0.104   5.2              1      -1.00        0.99       0.99
+- ewald                                     0.090   4.8         0.088   4.4              8      -1.00        1.03       1.03
+- abinit(after driver)                      0.079   4.2         0.079   4.0              1      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.069   3.7         0.064   3.2             -1      -1.00        1.08       1.08
+- vtowfk(ssdiag)                            0.049   2.6         0.051   2.6             -1      -1.00        0.96       0.96
+- projbd                                    0.038   2.0         0.049   2.5          13670      -1.00        0.78       0.78
+- abinit(chkinp,chkvars)                    0.037   1.9         0.036   1.8              1      -1.00        1.02       1.02
+- stress                                    0.019   1.0         0.019   1.0              2      -1.00        0.98       0.98
+- ewald2 (+vdw_dftd)                        0.018   1.0         0.019   1.0              2      -1.00        0.97       0.97
+- others (146)                              0.049   2.6         0.053   2.7             -1      -1.00        0.92       0.92
 -<END_TIMER>
 
-- subtotal                                  1.303  81.6         1.330  81.6                                  0.98       0.98
+- subtotal                                  1.569  83.1         1.676  84.3                                  0.94       0.94
 
 ================================================================================
 
@@ -1979,7 +1982,7 @@ P           mkmem8         16
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1991,12 +1994,12 @@ P           mkmem8         16
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2014,7 +2017,7 @@ P           mkmem8         16
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -2029,15 +2032,15 @@ P           mkmem8         16
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  39 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.6  wall=          1.6
++Overall time at end (sec) : cpu=          1.9  wall=          2.0
