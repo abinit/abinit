@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of MRGSCR, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,18 +16,18 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 06h44 )
-  
-->>  Enter the number of files to merge: 
-->>  Enter the prefix for the final output file: 
-->>  Enter the name for the partial screening file no.   1 
-->>  Enter the name for the partial screening file no.   2 
-->>  Enter the name for the partial screening file no.   3 
+
+->>  Enter the number of files to merge:
+->>  Enter the prefix for the final output file:
+->>  Enter the name for the partial screening file no.   1
+->>  Enter the name for the partial screening file no.   2
+->>  Enter the name for the partial screening file no.   3
  CHI0 file: chi0      , calculated using inclvkb = 2
 
  Identifier                       1
  Kxc kernel                       0
  Treatment of q-->0 limit         2
- headform                        80
+- headform                        80
  fform                         1003
  gwcalctyp                        0
  Number of components             1       1
@@ -43,6 +43,9 @@
  Scissor Energy                 0.000000E+00
  Spectral smearing              1.000000E-01
  Complex Imaginary Shift        3.674933E-03
+ rw_mesh_type    None
+ iw_mesh_type    None
+ cw_mesh_type    None
 
  q-points [r.l.u.]:
     1    0.000010    0.000020    0.000030
@@ -55,7 +58,7 @@
  Identifier                       1
  Kxc kernel                       0
  Treatment of q-->0 limit         2
- headform                        80
+- headform                        80
  fform                         1003
  gwcalctyp                        0
  Number of components             1       1
@@ -71,6 +74,9 @@
  Scissor Energy                 0.000000E+00
  Spectral smearing              1.000000E-01
  Complex Imaginary Shift        3.674933E-03
+ rw_mesh_type    None
+ iw_mesh_type    None
+ cw_mesh_type    None
 
  q-points [r.l.u.]:
     1   -0.250000    0.000000    0.250000
@@ -84,7 +90,7 @@
  Identifier                       1
  Kxc kernel                       0
  Treatment of q-->0 limit         2
- headform                        80
+- headform                        80
  fform                         1003
  gwcalctyp                        0
  Number of components             1       1
@@ -100,6 +106,9 @@
  Scissor Energy                 0.000000E+00
  Spectral smearing              1.000000E-01
  Complex Imaginary Shift        3.674933E-03
+ rw_mesh_type    None
+ iw_mesh_type    None
+ cw_mesh_type    None
 
  q-points [r.l.u.]:
     1    0.500000    0.000000    0.000000
@@ -419,7 +428,7 @@
  Identifier                       1
  Kxc kernel                       0
  Treatment of q-->0 limit         2
- headform                        80
+- headform                        80
  fform                         1003
  gwcalctyp                        0
  Number of components             1       1
@@ -435,6 +444,9 @@
  Scissor Energy                 0.000000E+00
  Spectral smearing              1.000000E-01
  Complex Imaginary Shift        3.674933E-03
+ rw_mesh_type    None
+ iw_mesh_type    None
+ cw_mesh_type    None
 
  q-points [r.l.u.]:
     1    0.000010    0.000020    0.000030
@@ -454,25 +466,25 @@
 . q-point:   -0.250000    0.000000   -0.250000 will be taken from t87o_DS4_SUS
 . q-point:   -0.250000    0.500000    0.250000 will be taken from t87o_DS4_SUS
 
- ==== Files have been merged successfully === 
+ ==== Files have been merged successfully ===
 
 
- Checking if the list of q-points is complete. 
+ Checking if the list of q-points is complete.
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     2
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01  5.00000000E-01  0.00000000E+00       0.75000
      2)    -2.50000000E-01  0.00000000E+00  0.00000000E+00       0.25000
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -481,12 +493,12 @@
      5)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00  5.00000000E-01  5.00000000E-01       0.09375
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
 
-.File t91o_SUS contains a complete list of q-points 
+.File t91o_SUS contains a complete list of q-points
 
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0

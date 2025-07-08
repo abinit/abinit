@@ -28,14 +28,19 @@
 
 MODULE m_oper
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use defs_basis
  use m_abicore
  use m_errors
  use m_xomp
  use m_abi_linalg
- use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
 
- use m_matlu, only : matlu_type
+ !use m_abi_linalg, only : abi_xgemm
+ use m_hide_lapack, only : xginv
+ use m_matlu, only : copy_matlu,destroy_matlu,diff_matlu,identity_matlu,init_matlu, &
+               & inverse_matlu,matlu_type,print_matlu,prod_matlu,trace_matlu,zero_matlu
+ use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
+ use m_xmpi, only : xmpi_allgatherv,xmpi_gatherv,xmpi_sum,xmpi_sum_master
 
 #ifdef HAVE_GPU_MARKERS
  use m_nvtx_data
@@ -156,9 +161,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine init_oper(paw_dmft,oper,nkpt,wtk,shiftk,opt_ksloc)
-
- use m_matlu, only : init_matlu
- use m_paw_dmft, only : paw_dmft_type
 
 !Arguments ------------------------------------
  integer, optional, intent(in) :: nkpt,opt_ksloc,shiftk
@@ -349,8 +351,6 @@ end subroutine init_oper_ndat
 
 subroutine destroy_oper(oper)
 
- use m_matlu, only : destroy_matlu
-
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper
 !Local variables-------------------------------
@@ -402,8 +402,6 @@ end subroutine destroy_oper
 !! SOURCE
 
 subroutine copy_oper(oper1,oper2)
-
- use m_matlu, only : copy_matlu
 
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: oper1
@@ -589,16 +587,13 @@ end subroutine copy_oper_to_ndat
 
 subroutine print_oper(oper,option,paw_dmft,prtopt)
 
- use m_matlu, only : print_matlu
- use m_paw_dmft, only : paw_dmft_type
-
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(oper_type), intent(in) :: oper
  integer, intent(in) :: option,prtopt
 !Local variables-------------------------------
  integer :: ib,ib1,iband1,iband2,ikpt,isppol,mbandc,nkpt,nkptr
- character(len=100000) :: message
+ character(len=50000) :: message
  logical  :: ximag
  real(dp) :: maximag
 ! *********************************************************************
@@ -670,7 +665,7 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
 !&               (real(oper%ks(isppol,ikpt,ib,ib1)),imag(oper%ks(isppol,ikpt,ib,ib1)),ib1=iband1,iband2)
 !             call wrtout(std_out,message,'COLL')
            end if ! prtopt>=20
-           if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then ! only need to check diagonal elements
+           if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then ! no sense to perform this check on off-diagonal elements
              if (abs(aimag(oper%ks(ib,ib,ikpt,isppol))) > max(tol10,maximag)) then
                ximag   = .true.
                maximag = aimag(oper%ks(ib,ib,ikpt,isppol))
@@ -729,9 +724,6 @@ end subroutine print_oper
 !! SOURCE
 
 subroutine inverse_oper(oper,option,procb,iproc,gpu_option)
-
- use m_matlu, only : inverse_matlu
- use m_hide_lapack, only : xginv
 
 !Arguments ------------------------------------
  integer, intent(in) :: option
@@ -843,9 +835,6 @@ end subroutine inverse_oper
 
 subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
 
- use m_paw_dmft, only : paw_dmft_type
- use m_abi_linalg, only : abi_xgemm
-
 !Arguments ------------------------------------
  type(oper_type),target,intent(inout) :: oper
  type(paw_dmft_type),target,intent(in) :: paw_dmft
@@ -948,13 +937,13 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
 
            if(l_gpu_option == ABI_GPU_DISABLED) then
              do idat=1,ndat
-             do ib=1,mbandc
-               if (present(op_ks_diag)) then
-                 mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
-               else
-                 mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib+(idat-1)*mbandc,ikpt,isppol)
-               end if ! present(op_ks_diag)
-             end do ! ib
+               do ib=1,mbandc
+                 if (present(op_ks_diag)) then
+                   mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * op_ks_diag(ib,ikpt,isppol)
+                 else
+                   mat_temp(:,ib,idat) = paw_dmft%chipsi(1:ndim,ib,ik,isppol,iatom) * oper%ks(ib,ib+(idat-1)*mbandc,ikpt,isppol)
+                 end if ! present(op_ks_diag)
+               end do ! ib
              end do ! ndat
            else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -986,8 +975,8 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
 
          if(l_gpu_option == ABI_GPU_DISABLED) then
            do idat=1,ndat
-           call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:,idat),ndim,&
-           &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
+             call abi_xgemm("n","c",ndim,ndim,mbandc,cone,mat_temp(:,:,idat),ndim,&
+             &    paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,:,idat),ndim)
            end do ! ndat
          else if(l_gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1114,9 +1103,6 @@ end subroutine downfold_oper
 
 subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 
- use m_paw_dmft, only : paw_dmft_type
- use m_abi_linalg, only : abi_xgemm
-
 !Arguments ------------------------------------
  type(oper_type),target, intent(inout)  :: oper
  type(paw_dmft_type),target, intent(in) :: paw_dmft
@@ -1184,12 +1170,12 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
        if(l_gpu_option == ABI_GPU_DISABLED) then
 
          call abi_zgemm_2dd("c","n",mbandc,ndat*ndim,ndim,cone,paw_dmft%chipsi(:,:,ik,isppol,iatom),&
-                      & ndim,oper%matlu(iatom)%mat(:,:,(isppol-1)*ndat+1:isppol*ndat),ndim,czero,mat_temp(:,:),mbandc)
+                      & ndim_max,oper%matlu(iatom)%mat(:,:,(isppol-1)*ndat+1:isppol*ndat),ndim,czero,mat_temp(:,:),mbandc)
 
          do idat=1,ndat
 
            call abi_xgemm("n","n",mbandc,mbandc,ndim,cone,mat_temp(:,1+(idat-1)*ndim:idat*ndim),mbandc,&
-                        & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim,czero,mat_temp2(:,1+(idat-1)*mbandc:idat*mbandc),mbandc)
+                        & paw_dmft%chipsi(:,:,ik,isppol,iatom),ndim_max,czero,mat_temp2(:,1+(idat-1)*mbandc:idat*mbandc),mbandc)
 
          end do ! idat
 
@@ -1200,7 +1186,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET DATA USE_DEVICE_ADDR(mat_temp,chipsi,mat)
          call abi_gpu_xgemm(2,"c","n",mbandc,ndat*ndim,ndim,cone,c_loc(chipsi(:,:,ik,isppol,iatom)),&
-         &    ndim,c_loc(mat(:,:,(isppol-1)*ndat+1:isppol*ndat)),ndim,czero,c_loc(mat_temp(:,:)),mbandc)
+         &    ndim_max,c_loc(mat(:,:,(isppol-1)*ndat+1:isppol*ndat)),ndim,czero,c_loc(mat_temp(:,:)),mbandc)
          !$OMP END TARGET DATA
 
          !$OMP TARGET DATA USE_DEVICE_ADDR(mat_temp,chipsi,mat_temp2)
@@ -1253,8 +1239,6 @@ end subroutine upfold_oper
 !! SOURCE
 
 subroutine identity_oper(oper,option)
-
- use m_matlu, only : identity_matlu,zero_matlu
 
 !Arguments ------------------------------------
  integer, intent(in) :: option
@@ -1312,8 +1296,6 @@ end subroutine identity_oper
 !! SOURCE
 
 subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
-
- use m_matlu, only : diff_matlu
 
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: occup1,occup2
@@ -1381,8 +1363,6 @@ end subroutine diff_oper
 
 subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc,trace_ks_cmplx)
 
- use m_matlu, only : trace_matlu
-
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: oper
  real(dp), intent(out) :: trace_ks  !vz_i
@@ -1448,9 +1428,6 @@ end subroutine trace_oper
 !! SOURCE
 
 subroutine prod_oper(oper1,oper2,oper3,opt_ksloc,opt_diag)
-
- use m_matlu, only : prod_matlu
- use m_abi_linalg, only : abi_xgemm
 
 !Arguments ------------------------------------
  type(oper_type), intent(in) :: oper1,oper2
@@ -1570,9 +1547,6 @@ end subroutine trace_prod_oper
 
 subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commkpt)
 
- use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
- use m_xmpi, only : xmpi_allgatherv,xmpi_gatherv,xmpi_sum,xmpi_sum_master
-
 !Arguments ------------------------------------
  type(mpi_distrib_dmft_type), target, intent(in) :: distrib
  type(oper_type), intent(inout) :: oper(distrib%nw)
@@ -1625,8 +1599,7 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    end do ! irank
    if (nproc > nproc_freq*nproc_kpt) recvcounts(nproc_freq*nproc_kpt+1:nproc) = 0
 
-   recvcounts(:) = mbandc * recvcounts(:)
-   if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc
+   recvcounts(:) = recvcounts(:) * merge(mbandc,mbandc**2,diag)
    displs(1) = 0
    do irank=2,nproc
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
@@ -1680,14 +1653,8 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
  else if (opt_ksloc == 2) then
 
    nproc_freq = nproc / nkpt
-
-   if (optcommkpt == 1) then
-     myproc2 = distrib%me_freq
-     nproc2  = nproc_freq + 1
-   else
-     myproc2 = myproc
-     nproc2  = nproc
-   end if
+   myproc2 = merge(distrib%me_freq,myproc,optcommkpt==1)
+   nproc2  = merge(nproc_freq+1,nproc,optcommkpt==1)
 
    ABI_MALLOC(recvcounts,(nproc2))
    ABI_MALLOC(displs,(nproc2))
@@ -1703,20 +1670,16 @@ subroutine gather_oper(oper,distrib,paw_dmft,opt_ksloc,master,opt_diag,opt_commk
    siz_buf = siz_buf * (nspinor**2) * nsppol
    if (optcommkpt == 1) then
      recvcounts(:) = siz_buf * distrib%nw_mem_kptparal(:)
-   else if (optcommkpt == 0) then
+   else
      recvcounts(:) = siz_buf * distrib%nw_mem(:)
-   end if ! optcommkpt
+   end if
    displs(1) = 0
    do irank=2,nproc2
      displs(irank) = displs(irank-1) + recvcounts(irank-1)
    end do ! irank
 
    if (optcommkpt == 1 .and. recvcounts(myproc2+1) == 0) then
-     if (nproc_freq > 1) then
-       siz_buf = siz_buf * distrib%nw_mem_kptparal(mod(paw_dmft%myproc,nproc_freq)+1)
-     else
-       siz_buf = siz_buf * nw
-     end if
+     siz_buf = siz_buf * merge(nw,distrib%nw_mem_kptparal(mod(paw_dmft%myproc,nproc_freq)+1),nproc_freq<=1)
    else
      siz_buf = recvcounts(myproc2+1)
    end if
@@ -1803,9 +1766,6 @@ end subroutine gather_oper
 
 subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
 
- use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
- use m_xmpi, only : xmpi_allgatherv,xmpi_sum
-
 !Arguments ------------------------------------
  type(oper_type), intent(inout) :: oper
  type(mpi_distrib_dmft_type), intent(in) :: distrib
@@ -1835,8 +1795,7 @@ subroutine gather_oper_ks(oper,distrib,paw_dmft,opt_diag)
  ABI_MALLOC(recvcounts,(nproc))
  ABI_MALLOC(displs,(nproc))
 
- recvcounts(:) = mbandc * distrib%nkpt_mem(:)
- if (.not. diag) recvcounts(:) = recvcounts(:) * mbandc
+ recvcounts(:) = distrib%nkpt_mem(:) * merge(mbandc,mbandc**2,diag)
 
  displs(1) = 0
  do irank=2,nproc

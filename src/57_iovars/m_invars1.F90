@@ -708,6 +708,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%plowan_nbl,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_frtypat,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_scenergy,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
    ABI_MALLOC(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
@@ -1017,11 +1019,14 @@ subroutine indefo1(dtset)
  dtset%efmas_n_dirs=0
 !F
  dtset%field_red(:)=zero
+ dtset%field_red_axial(:)=zero
 !G
  dtset%ga_n_rules=1
  dtset%gw_customnfreqsp=0
  dtset%gw_nqlwl=0
  dtset%gwls_n_proj_freq=0
+!H
+ dtset%hspinfield(:)=zero
 !I
  dtset%iatfix(:,:)=0
  dtset%icoulomb=0
@@ -1122,7 +1127,6 @@ subroutine indefo1(dtset)
  dtset%xred_orig(:,:,:)=zero
 !Y
 !Z
- dtset%zeemanfield(:)=zero
 
  DBG_EXIT("COLL")
 
@@ -1506,22 +1510,32 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
-!Read the Zeeman field
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+!Read the hspinfield
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield',tread,'BFI')
+ if(tread==0) then
+    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
+    if (tread == 1) then
+       write(msg, '(3a)')&
+       'Input variable "zeemanfield" is deprecated.', ch10, &
+       'Its value has been assigned to "hspinfield", please update your input.'   
+       ABI_COMMENT(msg)
+  end if
+end if
+
  if(tread==1) then
    if(dtset%nspden == 2)then
      write(msg,'(7a)')&
-      'A Zeeman field has been specified without noncollinear spins.',ch10,&
+      'A spin magnetic field (hspinfield) has been specified without noncollinear spins.',ch10,&
       'Only the z-component of the magnetic field will be used.'
      ABI_WARNING(msg)
    else if (dtset%nspden == 1)then
      write(msg, '(a,a,a)' )&
-      'A Zeeman field has been specified for a non-spin-polarized calculation.',ch10,&
+      'A spin magnetic field (hspinfield) has been specified for a non-spin-polarized calculation.',ch10,&
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
 
-   dtset%zeemanfield(1:3) = dprarr(1:3)
+   dtset%hspinfield(1:3) = dprarr(1:3)
  end if
 
 !Initialize geometry of the system, for different images. Also initialize cellcharge_min to be used later for estimating mband_upper..
@@ -1580,7 +1594,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !call flush(std_out)
 !ENDDEBUG
 
-   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
+   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%field_red_axial(1:3),dtset%genafm(1:3),iatfix,&
     dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
     msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
@@ -2337,17 +2351,23 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_charge_prec=tol6
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
+   dtsets(idtset)%dmft_epsilon_yukawa=-1.0_dp
    dtsets(idtset)%dmft_fermi_step=0.02_dp
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
+   dtsets(idtset)%dmft_lambda_yukawa=-1.0_dp
+   dtsets(idtset)%dmft_magnfield=0
+   if (dtsets(idtset)%dmft_magnfield .gt. 0) dtsets(idtset)%dmft_magnfield_b=0.0_dp
    dtsets(idtset)%dmft_mxsf=0.6_dp
    dtsets(idtset)%dmft_nlambda=6
    dtsets(idtset)%dmft_nominal(:)=0
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
    dtsets(idtset)%dmft_occnd_imag=1
+   dtsets(idtset)%dmft_optim=0
    dtsets(idtset)%dmft_orbital(:)=1
    dtsets(idtset)%dmft_prt_maxent=1
+   dtsets(idtset)%dmft_prtself=1
    dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=1
@@ -2355,7 +2375,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-   dtsets(idtset)%dmft_test=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_triqs_compute_integral=1
@@ -2373,34 +2392,34 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_loc_n_max=huge(0)
    dtsets(idtset)%dmft_triqs_measure_density_matrix=1
    dtsets(idtset)%dmft_triqs_move_double=0
-   dtsets(idtset)%dmft_triqs_move_global_prob=0.0_dp
    dtsets(idtset)%dmft_triqs_move_shift=1
-   dtsets(idtset)%dmft_triqs_nbins_histo=100
    dtsets(idtset)%dmft_triqs_nleg=0
    dtsets(idtset)%dmft_triqs_nsubdivisions=1
-   dtsets(idtset)%dmft_triqs_ntau_delta=0
    dtsets(idtset)%dmft_triqs_off_diag=-1
+   dtsets(idtset)%dmft_triqs_pauli_prob=0.8
+   dtsets(idtset)%dmft_triqs_read_ctqmcdata=1
    dtsets(idtset)%dmft_triqs_seed_a=34788
    dtsets(idtset)%dmft_triqs_seed_b=928374
-   dtsets(idtset)%dmft_triqs_therm_restart=1000
+   dtsets(idtset)%dmft_triqs_therm_restart=0
    dtsets(idtset)%dmft_triqs_time_invariance=1
-   dtsets(idtset)%dmft_triqs_tol_block=tol15
-   dtsets(idtset)%dmft_triqs_use_norm_as_weight=0
+   dtsets(idtset)%dmft_triqs_tol_block=tol12
+   dtsets(idtset)%dmft_triqs_use_norm_as_weight=1
    dtsets(idtset)%dmft_triqs_wmax=-1.0_dp
    dtsets(idtset)%dmft_use_all_bands=0
    dtsets(idtset)%dmft_use_full_chipsi=0
    dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0
+   dtsets(idtset)%dmft_yukawa_param=1
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
    dtsets(idtset)%dmftcheck=0
    dtsets(idtset)%dmftctqmc_basis=1
    dtsets(idtset)%dmftctqmc_check=0
-   dtsets(idtset)%dmftctqmc_config=0
    dtsets(idtset)%dmftctqmc_correl=0
    dtsets(idtset)%dmftctqmc_gmove=0
    dtsets(idtset)%dmftctqmc_grnns=0
+   dtsets(idtset)%dmftctqmc_localprop=0
    dtsets(idtset)%dmftctqmc_meas=1
    dtsets(idtset)%dmftctqmc_mrka=0
    dtsets(idtset)%dmftctqmc_mov=0
@@ -2765,6 +2784,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%recptrott=0
    dtsets(idtset)%rectesteg=0
    dtsets(idtset)%rectolden=zero
+   dtsets(idtset)%rcpaw_scenergy(:)=-two
+   dtsets(idtset)%rcpaw_frtypat(:)=0
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
 !  dtsets(idtset)%rfasr=0

@@ -106,9 +106,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  type(pawtab_type), intent(inout) :: pawtab(paw_dmft%ntypat)
  type(oper_type), intent(in) :: dft_occup
 !Local variables ------------------------------
- integer :: check,dmft_iter,dmft_test,idmftloop,istep_iter,itypat,myproc,natom
- integer :: ntypat,opt_diff,opt_fill_occnd,opt_log,opt_maxent,opt_moments
- integer :: opt_renorm,prtopt
+ integer :: check,dmft_iter,dmft_optim,idmftloop,istep_iter,itypat,myproc,natom
+ integer :: ntypat,opt_diff,opt_maxent,opt_moments,opt_renorm,prtopt
  !logical :: etot_var
  logical :: t2g,x2my2d
  real(dp) :: tsec(2)
@@ -134,7 +133,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  ntypat = paw_dmft%ntypat
  dmft_iter  = paw_dmft%dmft_iter
  opt_maxent = paw_dmft%dmft_prt_maxent
- dmft_test  = paw_dmft%dmft_test
+ dmft_optim  = paw_dmft%dmft_optim ! skip some unneeded calls to compute_green with TRIQS
  !paw_dmft%dmft_fermi_prec=tol5
  !paw_dmft%dmft_fermi_prec = paw_dmft%dmft_charge_prec * ten
 !paw_dmft%dmft_charge_prec=20_dp ! total number of electron.
@@ -151,15 +150,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  !  part3 = "band"
  !end if
 
- opt_moments = 0
- if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) opt_moments = 1
- if (dmft_test == 1) then
-   prtopt = 2
-   opt_diff = 1
- else
-   prtopt = 0
-   opt_diff = 0
- end if
+ opt_moments = merge(1,0,paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7)
+ prtopt = merge(2,0,dmft_optim==1)
+ opt_diff = merge(1,0,dmft_optim==1)
 
  if (check == 1) then
    write(message,'(2a)') ch10,' DMFT Checks are enabled '
@@ -195,8 +188,13 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  write(message,'(2a)') ch10," == Compare local occupations from DFT Green's function &
                         &with the downfold of the Fermi-Dirac occupations =="
  call wrtout(std_out,message,'COLL')
- call diff_oper("occupations from DFT Green's function","Fermi-Dirac occupations", &
+ if(paw_dmft%dmft_magnfield .gt. 0) then
+   write(message, '(2a,a)') ch10, 'Warning: Check in local occupation is removed due to applied magnetic field'
+   call wrtout(std_out,message,'COLL')
+ else
+   call diff_oper("occupations from DFT Green's function","Fermi-Dirac occupations", &
               & greendft%occup,dft_occup,1,paw_dmft%dmft_tolfreq)
+ endif
 ! write(message,'(2a)') ch10,&
 !& '  ***** => Warning : diff_oper is suppressed for test'
 ! call wrtout(std_out,message,'COLL')
@@ -213,10 +211,8 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  !    natomcor=natomcor+1
  !  end if
  !end do
- opt_renorm = paw_dmft%dmft_wanorthnorm
-!if(natomcor>1) opt_renorm=2 ! if number of atoms is larger than one, one must use a new orthogonalization scheme.
- if (paw_dmft%nspinor == 2 .and. (paw_dmft%dmft_solv == 8 .or. paw_dmft%dmft_solv == 9)) opt_renorm = 2 ! necessary to use hybri_limit in qmc_prep_ctqmc
-                                                                ! ought to be  generalized  in the  future
+ opt_renorm = merge(2,paw_dmft%dmft_wanorthnorm,paw_dmft%nspinor==2.and.(paw_dmft%dmft_solv==8.or.paw_dmft%dmft_solv==9))
+
  if (paw_dmft%dmft_solv /= -1) then
    call chipsi_renormalization(paw_dmft,opt=opt_renorm)
    if (paw_dmft%dmft_prtwan == 1) then
@@ -252,8 +248,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  call timab(621,2,tsec(:))
  call wrtout(std_out,message,'COLL')
 
- opt_log = paw_dmft%dmft_triqs_entropy
- call icip_green("DFT renormalized",greendft,paw_dmft,pawprtvol,self,opt_moments=opt_moments,opt_log=opt_log)
+ call icip_green("DFT renormalized",greendft,paw_dmft,pawprtvol,self,opt_moments=opt_moments,opt_log=paw_dmft%dmft_triqs_entropy)
  !call print_green('DFT_renormalized',greendft,1,paw_dmft,pawprtvol=1,opt_wt=1)
 
 !== Define Interaction from input upawu and jpawu
@@ -324,7 +319,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    & ch10," =====  Green's Function Calculation with input self-energy ========", &
    & ch10," ==================================================================="
  call wrtout(std_out,message,'COLL')
- if (dmft_test == 1) then
+ if (dmft_optim == 1) then
    call init_green(green,paw_dmft,opt_moments=opt_moments)
  else
    call icip_green("DFT+DMFT",green,paw_dmft,pawprtvol,self,opt_self=1,opt_moments=opt_moments)
@@ -335,14 +330,12 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !== Find fermi level
 !---------------------------------------------------------------------
 !write(message,'(2a,i3,13x,a)') ch10,'   ===  Compute green function from self-energy'
- opt_fill_occnd = 0
- if (paw_dmft%dmft_triqs_entropy == 1 .and. dmft_iter == 1) opt_fill_occnd = 1
 
  call fermi_green(green,paw_dmft,self)
- call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
- call integrate_green(green,paw_dmft,prtopt,opt_fill_occnd=opt_fill_occnd)
+ call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_restart_moments=1)
+ call integrate_green(green,paw_dmft,prtopt)
 
- if (dmft_test == 1) then
+ if (dmft_optim == 1) then
    call printocc_green(green,5,paw_dmft,3,chtype="DFT+DMFT")
  end if
 
@@ -397,10 +390,6 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    if (abs(pawprtvol) > 3 .and. opt_moments == 0) then
      call integrate_green(weiss,paw_dmft,2,opt_ksloc=2)
      call printocc_green(weiss,5,paw_dmft,3,opt_weissgreen=1)
-   end if
-
-   if (paw_dmft%dmft_triqs_entropy == 1) then
-     call compute_free_energy(energies_dmft,paw_dmft,green,"main",self=self,weiss=weiss)
    end if
 
 !  ===  Prepare data, solve Impurity problem: weiss(w) -> G(w)
@@ -460,7 +449,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !  green= ks green function and occupations comes from old_self
    call compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab(:),self_new,occ_type="nlda",part=part2)
    if (paw_dmft%dmft_triqs_entropy == 1) then
-     call compute_free_energy(energies_dmft,paw_dmft,green,"impu",self=self_new,weiss=weiss)
+     call compute_free_energy(energies_dmft,paw_dmft,green,"impu",self_new,weiss=weiss)
    end if
 
 !  ==  Mix new and old self_energies and double countings
@@ -474,13 +463,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
    call print_self(self,"print_dc",paw_dmft,2) ! print self and DC
    call destroy_self(self_new)
 
-   opt_fill_occnd = 0
-   if ((idmftloop == dmft_iter .and. paw_dmft%dmft_triqs_entropy == 0) &
-     & .or. (paw_dmft%dmft_triqs_entropy == 1 .and. idmftloop == dmft_iter-1)) opt_fill_occnd = 1
-
 !  ==  Compute green function self -> G(k)
 !  ---------------------------------------------------------------------
-   if (dmft_test == 0) then
+   if (dmft_optim == 0) then
      call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1)
      call integrate_green(green,paw_dmft,3,opt_diff=1) !,opt_nonxsum=1)
 
@@ -489,18 +474,15 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
      if(paw_dmft%lchipsiortho == 1 .and. paw_dmft%dmft_prgn == 1) then
        call local_ks_green(green,paw_dmft,prtopt=1)
      end if
-   end if ! dmft_test=0
+   end if ! dmft_optim=0
 
 !  ==  Find fermi level
 !  ---------------------------------------------------------------------
    call fermi_green(green,paw_dmft,self)
+   call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=paw_dmft%dmft_triqs_entropy,opt_restart_moments=1)
+   call integrate_green(green,paw_dmft,prtopt,opt_diff=opt_diff,opt_ksloc=3,opt_fill_occnd=1)
 
-   if (idmftloop == dmft_iter) opt_log = 0
-
-   call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_log=opt_log,opt_restart_moments=1)
-   call integrate_green(green,paw_dmft,prtopt,opt_diff=opt_diff,opt_ksloc=3,opt_fill_occnd=opt_fill_occnd)
-
-   if (dmft_test == 1) then
+   if (dmft_optim == 1) then
      call printocc_green(green,5,paw_dmft,3,chtype="DFT+DMFT")
    end if
 
@@ -536,7 +518,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 
 !== Save self on disk
 !-------------------------------------------------------------------------
- if (dmft_test == 0) then
+ if (dmft_optim == 0) then
    call timab(627,1,tsec(:))
    call rw_self(self,paw_dmft,prtopt=2,opt_rw=2)
    call timab(627,2,tsec(:))
@@ -560,7 +542,7 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
 !--------------------------------------------------------------------------------
 !Do not compute here, because, one want a energy computed after the
 !solver (for Hubbard I and DFT+U).
- if (dmft_test == 0) then
+ if (dmft_optim == 0) then
    call compute_green(green,paw_dmft,1,self,opt_self=1,opt_nonxsum=1)
    call integrate_green(green,paw_dmft,2,opt_fill_occnd=1) !,opt_nonxsum=1)
  end if
@@ -569,6 +551,9 @@ subroutine dmft_solve(cryst_struc,istep,dft_occup,mpi_enreg,paw_dmft,pawang,pawt
  paw_dmft%idmftloop = 0
  call compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab(:),self,occ_type="nlda",part="band")
  paw_dmft%idmftloop = idmftloop
+ if (paw_dmft%dmft_triqs_entropy == 1) then
+   call compute_free_energy(energies_dmft,paw_dmft,green,"main",self)
+ end if
 
 !write(message,'(2a,13x,a)') ch10,' =====  DMFT Loop is finished'
 !call wrtout(ab_out,message,'COLL')
@@ -920,7 +905,7 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  nsppol   = paw_dmft%nsppol
  nspinor  = paw_dmft%nspinor
  triqs    = (paw_dmft%dmft_solv == 6) .or. (paw_dmft%dmft_solv == 7)
- weissinv = 1
+ weissinv = merge(0,1,paw_dmft%dmft_solv==2.or.triqs)
 
  if (opt_weissself == 1) then
    write(message,'(2a)') ch10,"  ===  Use Dyson's Equation => weiss"
@@ -931,7 +916,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  end if ! opt_weisself
 
 !call xmpi_barrier(spaceComm)
- if (paw_dmft%dmft_solv == 2 .or. triqs) weissinv = 0
 
  ABI_MALLOC(greeninv,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),greeninv(:))

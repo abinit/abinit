@@ -40,7 +40,7 @@ if(OpenMP_FOUND)
     OpenMP::OpenMP_Fortran)
 endif()
 
-if (ABINIT_FFT_FLAVOR MATCHES "GOEDECKER")
+if (ABINIT_FFT_FLAVOR MATCHES "GOEDECKER" OR ABINIT_FFT_FLAVOR MATCHES "MKL_DFTI")
   # no linking required
 else()
   target_link_libraries(52_fft_mpi_noabirule

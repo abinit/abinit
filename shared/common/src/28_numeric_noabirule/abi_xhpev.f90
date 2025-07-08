@@ -43,7 +43,7 @@
 !Local variables-------------------------------
  integer :: info,use_slk_,use_gpu_elpa_,istwf_k_
 #ifdef HAVE_LINALG_SCALAPACK
- type(matrix_scalapack) :: sca_a,sca_ev
+ type(slkmat_dp_t) :: sca_a,sca_ev
  real(dp),allocatable :: tmp_evec(:,:)
  integer :: dim_evec1,ierr
 #endif
@@ -73,14 +73,14 @@
    call sca_a%init(n,n,slk_processor,istwf_k_)
    call sca_ev%init(n,n,slk_processor,istwf_k_)
 #ifdef HAVE_LINALG_ELPA
-   call matrix_from_global_sym(sca_a,a,istwf_k_)
+   call sca_a%from_global_sym(a,istwf_k_)
 #else
-   call matrix_from_global(sca_a,a,istwf_k_)
+   call sca_a%from_global_pack(a,istwf_k_)
 #endif
    call compute_eigen_problem(slk_processor,sca_a,sca_ev,w,slk_communicator,istwf_k_,&
 &                             use_gpu_elpa=use_gpu_elpa_)
-   call matrix_to_global(sca_a,a,istwf_k_)
-   call matrix_to_reference(sca_ev,tmp_evec,istwf_k_)
+   call sca_a%to_global_pack(a,istwf_k_)
+   call sca_ev%to_global(tmp_evec, istwf_k_)
    call xmpi_sum(tmp_evec,z,dim_evec1*n,slk_communicator,ierr)
    call sca_a%free()
    call sca_ev%free()

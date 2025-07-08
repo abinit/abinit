@@ -75,8 +75,8 @@ complex(dpc),public, allocatable :: eps_model_m1_minus_one_DISTR(:,:,:)
 
 
 ! dimensions of blocks in the model dielectric matrix
-integer,public :: nbdblock_epsilon 
-integer,public :: blocksize_epsilon 
+integer,public :: nbdblock_epsilon
+integer,public :: blocksize_epsilon
 logical,public, allocatable :: model_lanczos_vector_belongs_to_this_node(:)
 integer,public, allocatable :: model_lanczos_vector_index(:)
 
@@ -120,8 +120,6 @@ subroutine generate_frequencies_and_weights(npt_gauss)
 ! quadrature, and stores the results in module arrays.
 !
 !--------------------------------------------------------------------------------
-implicit none
-
 integer, intent(in)  :: npt_gauss
 
 
@@ -178,14 +176,12 @@ end subroutine generate_frequencies_and_weights
 subroutine compute_eps_m1_minus_eps_model_m1(lmax, npt_gauss)
 !----------------------------------------------------------------------------------------------------
 !
-! This subroutine computes the array 
+! This subroutine computes the array
 !
-!                eps^{-1}(iw) - eps_model^{-1}(iw), 
+!                eps^{-1}(iw) - eps_model^{-1}(iw),
 !
 ! for all relevant frequencies in the Lanczos basis.
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer ,     intent(in)  :: lmax, npt_gauss
 
 character(256) :: timing_string
@@ -283,14 +279,12 @@ end subroutine compute_eps_m1_minus_eps_model_m1
 subroutine compute_eps_m1_minus_one(lmax, npt_gauss)
 !----------------------------------------------------------------------------------------------------
 !
-! This subroutine computes the array 
+! This subroutine computes the array
 !
 !                eps^{-1}(iw) - I
 !
 ! for all relevant frequencies in the Lanczos basis.
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer ,     intent(in)  :: lmax, npt_gauss
 
 character(256) :: timing_string
@@ -371,13 +365,13 @@ end subroutine compute_eps_m1_minus_one
 subroutine compute_eps_model_m1_minus_one(lmax_model, npt_gauss, second_model_parameter, epsilon_model_eigenvalues_0)
 !----------------------------------------------------------------------------------------------------
 !
-! This subroutine computes the array 
+! This subroutine computes the array
 !
 !                eps_model^{-1}(iw) - 1
 !
 ! for all relevant frequencies in the model Lanczos basis.
 !
-! This array can potentially get very large, as the complementary basis gets big to achieve 
+! This array can potentially get very large, as the complementary basis gets big to achieve
 ! convergence. Correspondingly, it makes sense to DISTRIBUTE this array on all processors.
 !
 ! The algorithm will go as follows:
@@ -403,19 +397,17 @@ subroutine compute_eps_model_m1_minus_one(lmax_model, npt_gauss, second_model_pa
 !               - invert eps_m^{-1}
 !               - subtract identity eps_m^{-1} - 1
 !               - redistribute, block by block
-!        
+!
 !               Doing this frequency by frequency will reduce the RAM weight on the head node.
 !
 !
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 integer,  intent(in) :: lmax_model, npt_gauss
 real(dp), intent(in) :: second_model_parameter
 real(dp), intent(in) :: epsilon_model_eigenvalues_0(lmax_model)
 
 integer  :: l, l1, l2
-integer  :: iw 
+integer  :: iw
 integer  :: v
 integer  :: ierr
 
@@ -432,7 +424,7 @@ complex(dpc),allocatable :: local_Lbasis_conjugated(:,:)
 
 
 complex(dpc),allocatable :: VPV(:,:,:)
-real(dp),    allocatable :: re_buffer(:,:), im_buffer(:,:) 
+real(dp),    allocatable :: re_buffer(:,:), im_buffer(:,:)
 
 complex(dpc),allocatable :: vpv_row(:)
 
@@ -499,7 +491,7 @@ nbdblock_lanczos = lmax_model/blocksize
 if (modulo(lmax_model,blocksize) /= 0) nbdblock_lanczos = nbdblock_lanczos + 1
 
 
-! communicator 
+! communicator
 mpi_communicator = mpi_enreg%comm_bandfft
 
 ! total number of processors in the communicator
@@ -537,7 +529,7 @@ end if
 end do
 
 !write(100+mpi_rank,*) "model_lanczos_vector_belongs_to_this_node = ",model_lanczos_vector_belongs_to_this_node(:)
-!write(100+mpi_rank,*) "model_lanczos_vector_index                = ",model_lanczos_vector_index(:)                
+!write(100+mpi_rank,*) "model_lanczos_vector_index                = ",model_lanczos_vector_index(:)
 !flush(100+mpi_rank)
 
 ! Prepare the array that will contain the matrix elements of the model operator
@@ -584,12 +576,12 @@ do v = 1, nbandv
 psikg_valence(:,:) = kernel_wavefunctions_FFT(:,:,v)
 
 ! compute fourier transform of valence state, and conjugate
-call g_to_r(psir_valence,psikg_valence) 
-psir_valence(2,:,:,:) = -psir_valence(2,:,:,:) 
+call g_to_r(psir_valence,psikg_valence)
+psir_valence(2,:,:,:) = -psir_valence(2,:,:,:)
 
 !--------------------------------------------------------------------------
 !
-! Step 1: build the modified basis Pc . [ (V^{1/2} l) . psi_v^*]. 
+! Step 1: build the modified basis Pc . [ (V^{1/2} l) . psi_v^*].
 !
 !--------------------------------------------------------------------------
 GWLS_TIMAB   = 1543
@@ -622,7 +614,7 @@ end do ! mb
 call cpu_time(fft_time1)
 
 ! Transform to FFT representation
-call wf_block_distribute(psikb_wrk,  psikg_wrk,1) ! LA -> FFT 
+call wf_block_distribute(psikb_wrk,  psikg_wrk,1) ! LA -> FFT
 
 
 !  generate the vector  Pc [ (sqrt_V_c.l) psi_v^*]
@@ -649,14 +641,14 @@ l = (iblk_lanczos-1)*blocksize + mb
 
 
 if ( l <= lmax_model) then
-  psik_wrk(:,:) = psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) 
+  psik_wrk(:,:) = psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k)
   local_Lbasis_conjugated(:,l) = cmplx_1*psik_wrk(1,:)+cmplx_i*psik_wrk(2,:)
 end if
 
 
 end do ! mb
 
-end do !iblk_lanczos 
+end do !iblk_lanczos
 OPTION_TIMAB = 2
 call timab(GWLS_TIMAB,OPTION_TIMAB,tsec)
 
@@ -679,14 +671,14 @@ call cpu_time(prod_time1)
 do l1 = 1, lmax_model
 
 ! Apply core function Y to left-vector; conjugate
-do ik = 1, npw_k         
+do ik = 1, npw_k
 YL(ik) = model_Y_LA(ik)*conjg(local_Lbasis_conjugated(ik,l1))
 end do
 
 ! Only compute lower diagonal part of matrix; epsilon is hermitian conjugate!
 vpv_row = cmplx_0
 do l2 = 1, l1
-do ik = 1, npw_k         
+do ik = 1, npw_k
 vpv_row(l2) = vpv_row(l2) + YL(ik)*local_Lbasis_conjugated(ik,l2)
 end do
 end do
@@ -786,7 +778,7 @@ recvcount = lmax_model*blocksize_epsilon
 
 ABI_MALLOC(sendcounts,(mpi_nproc))
 ABI_MALLOC(displs    ,(mpi_nproc))
-sendcounts(:) = sendcount 
+sendcounts(:) = sendcount
 
 do l =1, mpi_nproc
 displs(l) = (l-1)*sendcount
@@ -799,8 +791,8 @@ if (head) then
   ABI_MALLOC(im_BUFFER_head, (lmax_model, blocksize_epsilon*nbdblock_epsilon))
   ABI_MALLOC(epsilon_head, (lmax_model, lmax_model))
 else
-  !This looks superfluous and it is on large number of systems, but sending these 
-  !unallocated in xmpi_scatterv caused 'cannot allocate memory' cryptic errors on 
+  !This looks superfluous and it is on large number of systems, but sending these
+  !unallocated in xmpi_scatterv caused 'cannot allocate memory' cryptic errors on
   !several parallel test farm computers (cronos_gcc46_paral, petrus_nag, inca_gcc44_sdebug)
   ABI_MALLOC(re_BUFFER_head, (1,1))
   ABI_MALLOC(im_BUFFER_head, (1,1))
@@ -844,7 +836,7 @@ if ( head ) then
     ! subtract identity
     do l =1, lmax_model
     epsilon_head(l,l) = epsilon_head(l,l) - cmplx_1
-    end do 
+    end do
   end if
 
   ! copy in head buffer
@@ -853,12 +845,12 @@ if ( head ) then
   do l1 =1, lmax_model
   do l2 =1, lmax_model
   z = epsilon_head(l1,l2)
-  re_BUFFER_head(l1,l2) = dble(z) 
-  im_BUFFER_head(l1,l2) = dimag(z) 
-  end do 
-  end do 
+  re_BUFFER_head(l1,l2) = dble(z)
+  im_BUFFER_head(l1,l2) = dimag(z)
+  end do
+  end do
 
-end if 
+end if
 
 ! Scatter back the data on the head to all processors
 call xmpi_scatterv(re_BUFFER_head, sendcounts, displs, re_buffer, recvcount, mpi_head_rank, mpi_communicator, ierr)
@@ -876,14 +868,14 @@ ABI_FREE(epsilon_head)
 
 !================================================================================
 !
-! For debugging purposes, store distributed dielectric matrix back in the 
+! For debugging purposes, store distributed dielectric matrix back in the
 ! complete local copies, to insure the rest of the code works.
 !
 !================================================================================
 
 if (.false.) then
   ! Prepare the array that will contain the matrix elements of the model operator
-  ! THIS IS ONLY FOR THE REST OF THE CODE TO WORK; WE WILL REMOVE THIS 
+  ! THIS IS ONLY FOR THE REST OF THE CODE TO WORK; WE WILL REMOVE THIS
   ! TO SAVE RAM LATER
   ABI_MALLOC(eps_model_m1_minus_one, (lmax_model,lmax_model,npt_gauss+1))
 
@@ -962,38 +954,17 @@ end subroutine compute_eps_model_m1_minus_one
 
 subroutine cleanup_projected_Sternheimer_epsilon
 
-implicit none
-
 ! *************************************************************************
 
-if(allocated(projected_epsilon_M_matrix)) then
-  ABI_FREE(projected_epsilon_M_matrix)
-end if
-if(allocated(projected_epsilon_B_matrix)) then
-  ABI_FREE(projected_epsilon_B_matrix)
-end if
-if(allocated(projected_epsilon_G_matrix)) then
-  ABI_FREE(projected_epsilon_G_matrix)
-end if
-if(allocated(eps_m1_minus_eps_model_m1)) then
-  ABI_FREE(eps_m1_minus_eps_model_m1)
-end if
-if(allocated(list_omega)) then
-  ABI_FREE(list_omega)
-end if
-if(allocated(list_weights)) then
-  ABI_FREE(list_weights)
-end if
-if(allocated(eps_model_m1_minus_one_DISTR)) then
-  ABI_FREE(eps_model_m1_minus_one_DISTR)
-end if
-if(allocated(model_lanczos_vector_belongs_to_this_node)) then
-  ABI_FREE(model_lanczos_vector_belongs_to_this_node)
-end if
-if(allocated(model_lanczos_vector_index)) then
-  ABI_FREE(model_lanczos_vector_index)
-end if
-
+ABI_SFREE(projected_epsilon_M_matrix)
+ABI_SFREE(projected_epsilon_B_matrix)
+ABI_SFREE(projected_epsilon_G_matrix)
+ABI_SFREE(eps_m1_minus_eps_model_m1)
+ABI_SFREE(list_omega)
+ABI_SFREE(list_weights)
+ABI_SFREE(eps_model_m1_minus_one_DISTR)
+ABI_SFREE(model_lanczos_vector_belongs_to_this_node)
+ABI_SFREE(model_lanczos_vector_index)
 
 end subroutine cleanup_projected_Sternheimer_epsilon
 !!***
@@ -1021,14 +992,14 @@ epsilon_eigenvalues_0,debug,use_model)
 !               - setup_projected_Sternheimer_epsilon
 !               - compute_projected_Sternheimer_epsilon
 !
-! The purpose of this combination is to avoid independent loops on nbandv, requiring the 
+! The purpose of this combination is to avoid independent loops on nbandv, requiring the
 ! arrays
 !               projected_epsilon_M_matrix
 !               projected_epsilon_B_matrix
 !               projected_epsilon_G_matrix
 !
 ! from scaling like N^3, which grows very large with problem size.
-! 
+!
 ! Thus, this routine:
 !
 !       -  Computes the frequency-dependent dielectric matrix in the Lanczos basis, using
@@ -1043,8 +1014,6 @@ epsilon_eigenvalues_0,debug,use_model)
 ! The subroutine also computes the matrix elements on epsilon_model(iw) in the Lanczos basis;
 ! this is done here to avoid preforming direct products with the valence states again later.
 !----------------------------------------------------------------------------------------------------
-implicit none
-
 real(dp), parameter     :: svd_tolerance = 1.0e-16_dp
 
 integer,     intent(in) :: lmax, npt_gauss
@@ -1171,7 +1140,7 @@ write(io_unit_log,10) '#========================================================
 write(io_unit_log,10) "#                     ProjectedSternheimerEpsilon: log file                                          "
 write(io_unit_log,10) "#                     -------------------------------------------------------------------            "
 write(io_unit_log,10) "#                                                                                                    "
-write(io_unit_log,10) "# This file tracks the algorithm in the routine ProjectedSternheimerEpsilon. The goal is to          " 
+write(io_unit_log,10) "# This file tracks the algorithm in the routine ProjectedSternheimerEpsilon. The goal is to          "
 write(io_unit_log,10) "# establish where the algorithm crashes if it does, and/or  to track are far along the code is.      "
 write(io_unit_log,10) '#'
 write(io_unit_log,10) '#  MPI data for this process:'
@@ -1220,7 +1189,7 @@ time_exact = zero
 
 
 !================================================================================
-! Parallelisation of the code is subtle; Hamiltonian must act over 
+! Parallelisation of the code is subtle; Hamiltonian must act over
 ! FFT rows, we must be careful with memory, etc...
 !
 ! We will parallelise in block of Lanczos vectors, not over bands.
@@ -1364,16 +1333,16 @@ flush(io_unit_log)
 psikg_valence(:,:) = kernel_wavefunctions_FFT(:,:,v)
 
 ! compute fourier transform of valence state, and conjugate
-call g_to_r(psir_valence,psikg_valence) 
-psir_valence(2,:,:,:) = -psir_valence(2,:,:,:) 
+call g_to_r(psir_valence,psikg_valence)
+psir_valence(2,:,:,:) = -psir_valence(2,:,:,:)
 
 ! loop on all blocks of lanczos vectors
 write(io_unit_log,10) '   - Loop on all lanczos blocks to generate modified basis and Sternheimer RHS:'
 flush(io_unit_log)
 do iblk_lanczos = 1, nbdblock_lanczos
 !--------------------------------------------------------------------------
-! Below, we build the modified basis, [ (V^{1/2} l)^* . psi_v], 
-! as well as conjugated, projected form, Pc . [ (V^{1/2} l) . psi_v^*]. 
+! Below, we build the modified basis, [ (V^{1/2} l)^* . psi_v],
+! as well as conjugated, projected form, Pc . [ (V^{1/2} l) . psi_v^*].
 !
 ! It is very irritating to have to do it this way, but I don't
 ! see an alternative; see discussion below.
@@ -1413,7 +1382,7 @@ psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:)
 end do ! mb
 
 ! Transform to FFT representation
-call wf_block_distribute(psikb_wrk,  psikg_VL,1) ! LA -> FFT 
+call wf_block_distribute(psikb_wrk,  psikg_VL,1) ! LA -> FFT
 
 ! psikg_VL now contains | V^1/2 . l >, in FFT configuration
 
@@ -1427,7 +1396,7 @@ flush(io_unit_log)
 
 
 ! Fourier transform to real space, and conjugate (psir1 is a global work array)
-call g_to_r(psir1,psikg_VL) 
+call g_to_r(psir1,psikg_VL)
 psir1(2,:,:,:) = -psir1(2,:,:,:) ! IS THIS STACK-DANGEROUS?
 
 ! Compute the real space product, and return to k space, in FFT configuration
@@ -1436,7 +1405,7 @@ call gr_to_g(psikg_wrk,psir1,psikg_valence)
 ! psikg_wrk contains | (V^1/2 . l)^* phi_v >, in FFT configuration
 
 ! return to LA representation
-call wf_block_distribute(psikb_wrk,  psikg_wrk,2) ! FFT -> LA 
+call wf_block_distribute(psikb_wrk,  psikg_wrk,2) ! FFT -> LA
 
 ! store data, in LA representation
 do mb = 1, blocksize
@@ -1448,7 +1417,7 @@ if ( l <= lmax) then
   local_Lbasis(:,l) = cmplx_1*psik_wrk(1,:)+cmplx_i*psik_wrk(2,:)
 end if
 
-end do !mb 
+end do !mb
 
 !--------------------------------------------------------------------------
 ! ii) Build the Sternheimer coefficients, at various frequencies,
@@ -1466,8 +1435,8 @@ call Hpsik(psikg_in,psikg_wrk,eig(v))
 call pc_k_valence_kernel(psikg_in)
 psikg_in(:,:) = -psikg_in(:,:) ! IS THIS STACK-DANGEROUS?
 
-! return RHS  to LA representation, for explicit storage 
-call wf_block_distribute(psikb_wrk,  psikg_in,2) ! FFT -> LA 
+! return RHS  to LA representation, for explicit storage
+call wf_block_distribute(psikb_wrk,  psikg_in,2) ! FFT -> LA
 
 ! store data, in LA representation
 do mb = 1, blocksize
@@ -1478,7 +1447,7 @@ if ( l <= lmax) then
   psi_rhs(:,:,l)    = psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k)
 end if
 
-end do !mb 
+end do !mb
 
 !----------------------------------------------------------
 ! iii) extract solutions for all projection frequencies
@@ -1499,8 +1468,8 @@ if(omega0 < 1d-12) projection=1
 ! solve A x = b, over the whole lanczos block
 call sqmr(psikg_in, psikg_out, eig(v), projection, omega0, omega_is_imaginary)
 
-! return LA representation, for explicit storage 
-call wf_block_distribute(psikb_wrk,  psikg_out, 2) ! FFT -> LA 
+! return LA representation, for explicit storage
+call wf_block_distribute(psikb_wrk,  psikg_out, 2) ! FFT -> LA
 
 do mb = 1, blocksize
 l = (iblk_lanczos-1)*blocksize + mb
@@ -1534,7 +1503,7 @@ call gr_to_g(psikg_wrk, psir_valence, psikg_VL)
 call pc_k_valence_kernel(psikg_wrk)
 
 ! return to LA representation
-call wf_block_distribute(psikb_wrk,  psikg_wrk,2) ! FFT -> LA 
+call wf_block_distribute(psikb_wrk,  psikg_wrk,2) ! FFT -> LA
 
 ! store back, in LA configuration
 do mb = 1, blocksize
@@ -1545,7 +1514,7 @@ if ( l <= lmax) then
   local_Lbasis_conjugated(:,l) = cmplx_1*psik_wrk(1,:)+cmplx_i*psik_wrk(2,:)
 end if
 
-end do !mb 
+end do !mb
 
 end do ! iblk_lanczos
 
@@ -1555,13 +1524,13 @@ write(io_unit_log,10) '   - Read in solutions at w=0 and/or w = infinity, if app
 flush(io_unit_log)
 
 ! Begin with the storage of the solutions at $\omega = 0.$, which are free.
-if(dtset%gwls_recycle == 1) then 
+if(dtset%gwls_recycle == 1) then
   c_sternheimer_solutions(:,lsolutions_max-2*lmax+1:lsolutions_max-lmax) = cmplx_1*Sternheimer_solutions_zero(1,:,:,v) + &
   &                                                                             cmplx_i*Sternheimer_solutions_zero(2,:,:,v)
 end if
 if(dtset%gwls_recycle == 2) then
   do i=1,lmax
-  recy_i = (i-1)*nbandv + v       
+  recy_i = (i-1)*nbandv + v
   !BUG : On petrus, NAG 5.3.1 + OpenMPI 1.6.2 cause read(...,rec=i) to read the data written by write(...,rec=i+1).
   read(recy_unit,rec=recy_i) psik_wrk
   c_sternheimer_solutions(:,lsolutions_max-2*lmax+i) = cmplx_1*psik_wrk(1,:) + cmplx_i*psik_wrk(2,:)
@@ -1571,7 +1540,7 @@ end if
 ! and then continue with the storage of the vectors on which the Sternheimer solutions will be projected.
 c_sternheimer_solutions(:,lsolutions_max-lmax+1:lsolutions_max) = cmplx_1*psi_rhs(1,:,:) + cmplx_i*psi_rhs(2,:,:)
 ! Previously was = local_Lbasis; but analysis in the Lanczos article reveals psi_rhs should be better.
-! Furthermore, tests show that, with psi_rhs, silane@1Ha has Sigma_c 0.01mHa away from the result with 
+! Furthermore, tests show that, with psi_rhs, silane@1Ha has Sigma_c 0.01mHa away from the result with
 ! gwls_list_proj_freq 0.0 1.0, in contrast with local_Lbasis, which has Sigma_c 0.3mHa away from the same result.
 
 if ( model ) then
@@ -1587,13 +1556,13 @@ if ( model ) then
   !
   ! CAREFUL!
   !
-  !        The model is given by 
+  !        The model is given by
   !
   !                P_model(iw) = sum_{v} phi_v(r) P_c.Y(iw).P_c phi_v^*(r')
   !
-  !    such that        
+  !    such that
   !
-  !    <l1 | eps_model(iw) | l2 >  = delta_{l1,l2} 
+  !    <l1 | eps_model(iw) | l2 >  = delta_{l1,l2}
   !    - sum_{v} < (V^{1/2}.l1).phi_v^*| Pc . Y . Pc | (V^{1/2}.l2).phi_v^* >
   !
   ! But local_Lbasis defined above corresponds to
@@ -1665,7 +1634,7 @@ if ( debug ) then
   end do ! mb
 
   ! Transform to FFT representation
-  call wf_block_distribute(psikb_wrk,  psikg_wrk, 1) ! LA -> FFT 
+  call wf_block_distribute(psikb_wrk,  psikg_wrk, 1) ! LA -> FFT
 
   !  Create right-hand-side of Sternheimer equation
   call pc_k_valence_kernel(psikg_wrk)
@@ -1693,7 +1662,7 @@ if ( debug ) then
   end do
 
   ! Transform to FFT representation
-  call wf_block_distribute(psikb_wrk,  psikg_wrk, 1) ! LA -> FFT 
+  call wf_block_distribute(psikb_wrk,  psikg_wrk, 1) ! LA -> FFT
 
 
   omega0 = list_projection_frequencies(iw)
@@ -1710,7 +1679,7 @@ if ( debug ) then
   ! bring it back to LA configuration
 
   ! Transform to FFT representation
-  call wf_block_distribute(psikb_wrk,  psikg_out, 2) ! FFT -> LA 
+  call wf_block_distribute(psikb_wrk,  psikg_out, 2) ! FFT -> LA
 
   do mb = 1, blocksize
   l = (iblk_lanczos-1)*blocksize + mb
@@ -1726,7 +1695,7 @@ if ( debug ) then
   end do ! mb
 
   end do ! iw
-  end do ! iblk_lanczos 
+  end do ! iblk_lanczos
 
 end if
 
@@ -1811,8 +1780,8 @@ if (debug)  then
   psi_gamma_l2(1,:) = dble (QR_orthonormal_basis(:,l2))
   psi_gamma_l2(2,:) = dimag(QR_orthonormal_basis(:,l2))
 
-  z(:) = cg_zdotc(npw_k, psi_gamma_l1,  psi_gamma_l2)  
-  call xmpi_sum(z, mpi_communicator,ierr) ! sum on all processors 
+  z(:) = cg_zdotc(npw_k, psi_gamma_l1,  psi_gamma_l2)
+  call xmpi_sum(z, mpi_communicator,ierr) ! sum on all processors
 
   check_matrix(l1,l2) = check_matrix(l1,l2) + cmplx_1*z(1)+cmplx_i*z(2)
 end if
@@ -1831,7 +1800,7 @@ write(io_unit_log,10) '   - Compute the A0 matrix...'
 flush(io_unit_log)
 
 ! Compute the A matrix
-do iblk_solutions =1, nbdblock_solutions 
+do iblk_solutions =1, nbdblock_solutions
 
 do mb = 1, blocksize
 l2 = (iblk_solutions-1)*blocksize + mb
@@ -1848,7 +1817,7 @@ psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:)
 end do
 
 ! Transform to FFT representation
-call wf_block_distribute(psikb_wrk,  psikg_wrk,1) ! LA -> FFT 
+call wf_block_distribute(psikb_wrk,  psikg_wrk,1) ! LA -> FFT
 
 ! act twice with the Hamiltonian operator
 call Hpsik(psikg_out,psikg_wrk,eig(v))
@@ -1882,7 +1851,7 @@ end if
 
 end do ! l1
 end do ! mb
-end do ! iblk_solutions 
+end do ! iblk_solutions
 
 
 if (debug) then
@@ -1963,13 +1932,13 @@ flush(io_unit_log)
 
 omega = list_omega(iw)
 
-sternheimer_A(:,:) = sternheimer_A0(:,:) 
+sternheimer_A(:,:) = sternheimer_A0(:,:)
 
 do l = 1, lsolutions
 sternheimer_A(l,l) = sternheimer_A(l,l) + omega**2
 end do
 
-sternheimer_X(:,:) = sternheimer_B(:,:) 
+sternheimer_X(:,:) = sternheimer_B(:,:)
 
 !--------------------------------------------------------------------------
 ! Step 2:  solve A*X = B, a projected form of the Sternheimer equation
@@ -2093,8 +2062,8 @@ if ( write_debug ) then
 
   do l =1, lmax
   write(io_unit,30)  projected_dielectric_Lanczos_basis(l,:,iw)
-  end do 
-  end do 
+  end do
+  end do
 
 end if
 
@@ -2110,7 +2079,7 @@ if ( model ) then
   do l= 1, lmax
   model_dielectric_Lanczos_basis(l,l,iw) = model_dielectric_Lanczos_basis(l,l,iw) + cmplx_1
   end do
-  end do 
+  end do
 
   ! hermitian the operator
   do iw = 1, npt_gauss+1

@@ -30,9 +30,7 @@ module m_xredistribute
  use defs_basis
  use m_errors
  use m_abicore
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
 
  implicit none
 

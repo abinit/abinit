@@ -1966,6 +1966,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
                    ddb%mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
                    crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
+
    ! Calculation of the phonon angular momentum
    ! maybe add it in dpft_phfrq directly ?
    call phangmom_from_eigvec(natom, eigvec, phangmom)
@@ -3140,12 +3141,15 @@ subroutine dfpt_symph(iout, acell, eigvec, indsym, natom, nsym, phfrq, rprim, sy
    if(sum(integer_characters(:))==3*natom)exit
  end do !itol
 
-!write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
+ !write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
 
  write(msg,'(a,a,es8.2,5a)')ch10,' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)',ch10,&
   ' For each vibration mode, or group of modes if degenerate,',ch10,&
   ' the characters are given for each symmetry operation (see the list in the log file).'
  call wrtout(units, msg)
+
+ !use m_ptgroups, only : get_classes
+ !call get_classes(nsym, sym, nclass, nelements, elements_idx)
 
  do imode=1,3*natom
    if(degeneracy(imode)/=0)then
@@ -3374,12 +3378,10 @@ type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, com
 
  new%natom = cryst%natom; natom3 = cryst%natom * 3; new%natom3 = natom3
  new%comm = comm; new%nprocs = xmpi_comm_size(comm); new%my_rank = xmpi_comm_rank(comm)
-
  new%use_ifc_fourq = use_ifc_fourq
 
  ABI_MALLOC(new%displ_cart, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(new%phfrq, (3*cryst%natom))
-
  if (new%use_ifc_fourq) return
 
  ! Split qibz in blocks inside comm

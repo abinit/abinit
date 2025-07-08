@@ -100,8 +100,6 @@ contains
 !! req_mem=amount in bytes of required memory for getghc_ompgpu
 function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
 
- implicit none
-
  type(gs_hamiltonian_type),intent(in),target :: gs_ham
  integer, intent(in) :: ndat
  integer(kind=c_size_t) :: req_mem, ghc_mem, nonlop_mem
@@ -112,7 +110,7 @@ function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
  !   - the amount of memory required by gemm_nonlop_ompgpu work buffers
  ghc_mem = 0
  ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * ndat
- ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
+ !ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
 
  nonlop_mem = gemm_nonlop_ompgpu_work_mem(gs_ham%istwf_k, ndat, 0, gs_ham%npw_fft_k,&
  &               gs_ham%indlmn, gs_ham%nattyp, gs_ham%ntypat, gs_ham%lmnmax, 2, 11)

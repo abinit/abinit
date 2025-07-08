@@ -272,7 +272,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated
- real(dp) :: e_zeeman
+ real(dp) :: e_hspinfield
  real(dp) :: dmatdum(0,0,0,0)
  real(dp) :: e_fermie, e_fermih
  type(oper_type) :: dft_occup
@@ -928,8 +928,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(1166,1,tsec)
 
 !Output of integrated density inside atomic spheres
- if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%zeemanfield)) > tol10) then
-   ABI_MALLOC(intgden,(nspden,natom))
+ if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%hspinfield)) > tol10) then
+   ABI_MALLOC(intgden, (nspden, natom))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
                       ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
    !  for rhomag:
@@ -974,23 +974,23 @@ if (dtset%prt_lorbmag==1) then
      endif
    end if
 
-   if (sum(abs(dtset%zeemanfield)) > tol10) then
+   if (sum(abs(dtset%hspinfield)) > tol10) then
      if(nspden==2)then
-       e_zeeman = -half*rhomag(1,2)*dtset%zeemanfield(3)
+       e_hspinfield = -half*rhomag(1,2)*dtset%hspinfield(3)
        write (msg, "(a,E20.10,a)") " Collinear magnetization ", rhomag(1,2), &
            " (in # of spins, without 1/2 for magnetic moment) "
        call wrtout(units, msg)
      else if(nspden==4)then
-       e_zeeman = -half * (dtset%zeemanfield(1)*rhomag(1,2)& ! x
-&                         +dtset%zeemanfield(2)*rhomag(1,3)& ! y
-&                         +dtset%zeemanfield(3)*rhomag(1,4)) ! z
+       e_hspinfield = -half * (dtset%hspinfield(1)*rhomag(1,2)& ! x
+&                         +dtset%hspinfield(2)*rhomag(1,3)& ! y
+&                         +dtset%hspinfield(3)*rhomag(1,4)) ! z
        write (msg, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), &
 &            " (in # of spins, without 1/2 for magnetic moment) "
        call wrtout(units, msg)
      end if
 !TODO: this quantity should also be calculated in rhotov, and stored in
-!    results_gs%energies%e_zeeman, but for the moment it comes out 0
-     write (msg, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_zeeman, " Ha"
+!    results_gs%energies%e_hspinfield, but for the moment it comes out 0
+     write (msg, "(a,E20.10,a)") " Spin magnetic energy -m.B = ", e_hspinfield, " Ha"
      call wrtout(units, msg)
    end if
  end if ! end if prtdensph or magnetic field
@@ -1141,9 +1141,10 @@ if (dtset%prt_lorbmag==1) then
    ! Use DMFT to compute wannier function for cRPA calculation.
    if(dtset%usedmft==1) then
      write(msg,'(2a,i3)') ch10,&
-&     '  Warning: Chipsi are renormalized in datafordmft because nbandkss is used',dtset%nbandkss
+&     '  Warning: Chipsi are orthonormalized in the DMFT code because nbandkss is used, with the value ',dtset%nbandkss
      call wrtout(std_out, msg)
-     call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filnam_ds(3),dtfil%fnameabo_app,paw_dmft)
+     call init_dmft(crystal,dmatpawu(:,:,:,:),dtset,e_fermie,dtfil%filctqmcdatain,dtfil%filselfin, &
+                  & dtfil%filnam_ds(3),dtfil%fnameabo_app,dtfil%ireadctqmcdata,dtfil%ireadself,paw_dmft,pawtab(:))
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute chipsi
@@ -1170,8 +1171,7 @@ if (dtset%prt_lorbmag==1) then
       ! Initialize green on real axis
        call init_green(greenr,paw_dmft,opt_oper_ksloc=3,wtype='real')
 
-      ! Read self energy in imag. Matsubara freq (for double counting
-      ! and limit at high frequency)
+      ! Read self energy in imag. Matsubara freq (for double counting and asymptotic value)
        call rw_self(self,paw_dmft,prtopt=5,opt_rw=1,opt_stop=1)
 
        ABI_MALLOC(opt_selflimit,(paw_dmft%natom))
@@ -1343,7 +1343,6 @@ if (dtset%prt_lorbmag==1) then
  call timab(1154,1,tsec)
 
  ! Output of the GSR file (except when we are inside mover)
- ! Temporarily disable for CRAY
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
@@ -1359,12 +1358,14 @@ if (dtset%prt_lorbmag==1) then
      ! Write integrated density inside atomic spheres and ratsph(ntypat)=radius of spheres around atoms
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t("intgden", "dp", "number_of_components, number_of_atoms"), &
-       nctkarr_t("ratsph", "dp", "number_of_atom_species") &
+       nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
+       nctkarr_t("rhomag", "dp", "two, number_of_components") &
      ], defmode=.True.)
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "intgden"), intgden))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ratsph"), dtset%ratsph))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rhomag"), rhomag))
    end if
 
    if(allocated(efg)) then
@@ -1373,7 +1374,7 @@ if (dtset%prt_lorbmag==1) then
        nctkdim_t("ndir",3),&
        nctkdim_t("natom",dtset%natom),&
        nctkdim_t("ntypat",dtset%ntypat)],defmode=.True.)
-     NCF_CHECK(ncerr) 
+     NCF_CHECK(ncerr)
      ncerr = nctk_def_arrays(ncid, [&
        nctkarr_t("quadmom", "dp", "ntypat"),&
        nctkarr_t("efg", "dp", "ndir, ndir, natom")])

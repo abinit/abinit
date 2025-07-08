@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h14 )
-  
+
 
 ================================================================================
 
@@ -79,11 +79,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -99,7 +99,7 @@
        3               2        0.000000        0.000000
        3               3        0.000103        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -134,7 +134,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.071  and twall      0.071 sec
        Homogeneous q point set in the B.Z.
@@ -165,7 +165,7 @@
 
 ================================================================================
 
- Calculation of phonon density of states 
+ Calculation of phonon density of states
 
  Average speed of sound partial sums:     0.2090212568E-02 (at units)
 -                                   =           4.5727 [km/s]
@@ -174,17 +174,17 @@
 -                                 =     0.5825706802E+01 (THz)
 -Debye temperature from partial sums:     0.2795894983E+03 (K)
 
- Average speed of sound:     0.1827915833E-02 (at units) 
+ Average speed of sound:     0.1827915833E-02 (at units)
 -                      =           3.9989 [km/s]
 
- Debye frequency from DOS:     0.7743001300E-03 (Ha) 
+ Debye frequency from DOS:     0.7743001300E-03 (Ha)
 -                        =     0.5094650115E+01 (THz)
 -Debye temperature from DOS:     0.2445043526E+03 (K)
 
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -895,9 +895,9 @@
 
 ================================================================================
 
-  
- Mode effective charges 
- Mode number.    x            y            z            length 
+
+ Mode effective charges
+ Mode number.    x            y            z            length
 -     1         -0.000000    -0.000001    -0.000000     0.000001
 -     2         -0.000000    -0.000000     0.000005     0.000005
 -     3         -0.000001     0.000000    -0.000000     0.000001
@@ -925,7 +925,7 @@
 ;    25         -0.000000     0.000000     0.000000     0.000000
 -    26         -0.228464     0.582928    -0.000000     0.626100
 -    27          0.582928     0.228464    -0.000000     0.626100
-  
+
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
 -   1     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
@@ -1001,7 +1001,7 @@
       4.56421303      0.00000000     -0.00000000
       0.00000000      4.56421303      0.00000000
      -0.00000000      0.00000000      4.78376787
- 
+
 -
 - Proc.   0 individual time (sec): cpu=         11.8  wall=         11.8
 
@@ -1009,4 +1009,4 @@
 
 +Total cpu time     11.776  and wall time     11.810 sec
 
- anaddb : the run completed succesfully.
+ anaddb : the run completed successfully.

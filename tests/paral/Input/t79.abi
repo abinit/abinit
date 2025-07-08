@@ -52,7 +52,7 @@ getwfk3 2            # WFK file with empty states
 
 prtvol3 1            # Write additional stuff to abo file for testing purposes.
                      # DO NOT USE this option for production runs!
-prtsuscep3 1         # Write TCHI file.
+#prtsuscep3 1         # Write TCHI file.
                      # DO NOT USE this option for production runs unless you really need a TCHI file.
 
 gwr_ntau3   6        # Number of imaginary-time points

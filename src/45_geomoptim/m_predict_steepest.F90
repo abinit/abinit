@@ -83,8 +83,6 @@ contains
 subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,natom,&
 &                           ndynimage,nimage,ntimimage_stored,results_img)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage,itimimage_eff,natom,ndynimage
