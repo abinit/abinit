@@ -3,16 +3,15 @@
 #
 add_library(65_paw STATIC
   m_fourier_interpol.F90
-  m_paw_atomorb.F90
   m_paw_correlations.F90
   m_paw_denpot.F90
   m_paw_dfpt.F90
   m_paw_dfptnl.F90
   m_paw_dmft.F90
   m_paw_efield.F90
+  m_paw_exactDC.F90
   m_paw_hr.F90
   m_paw_init.F90
-  m_paw_lmn.F90
   m_paw_mkaewf.F90
   m_paw_mkrho.F90
   m_paw_nhat.F90
@@ -25,13 +24,14 @@ add_library(65_paw STATIC
   m_paw_sym.F90
   m_paw_tools.F90
   m_paw_uj.F90
+  m_paw_yukawa.F90
   m_pawfgr.F90
   m_pawpwij.F90
   )
 
 set_target_properties(65_paw
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(65_paw
   PRIVATE
@@ -39,7 +39,7 @@ target_include_directories(65_paw
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(65_paw
@@ -47,7 +47,7 @@ target_compile_definitions(65_paw
   HAVE_CONFIG_H)
 
 if(HAVE_OPENMP_OFFLOAD)
-  target_compile_options(66_nonlocal
+  target_compile_options(65_paw
     PRIVATE
     $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
 endif()
@@ -57,6 +57,7 @@ target_link_libraries(65_paw
   abinit::10_defs
   abinit::16_hideleave
   abinit::27_toolbox_oop
+  abinit::28_numeric_noabirule
   abinit::43_wvl_wrappers
   abinit::44_abitypes_defs
   abinit::56_io_mpi

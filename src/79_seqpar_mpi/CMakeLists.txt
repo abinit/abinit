@@ -3,10 +3,12 @@
 #
 add_library(79_seqpar_mpi STATIC
   m_chebfiwf.F90
-  m_lobpcgwf_old.F90
+  m_chebfiwf_cprj.F90
   m_inwffil.F90
-  m_lobpcgwf.F90
   m_lobpcg.F90
+  m_lobpcgwf.F90
+  m_lobpcgwf_cprj.F90
+  m_lobpcgwf_old.F90
   m_tddft.F90
   m_vtowfk.F90
   m_vtorho.F90
@@ -15,7 +17,7 @@ add_library(79_seqpar_mpi STATIC
 
 set_target_properties(79_seqpar_mpi
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(79_seqpar_mpi
   PRIVATE
@@ -23,7 +25,7 @@ target_include_directories(79_seqpar_mpi
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(79_seqpar_mpi
@@ -42,9 +44,16 @@ target_link_libraries(79_seqpar_mpi
   abinit::67_common
   abinit::68_dmft
   abinit::70_gw
+  abinit::71_wannier
   abinit::72_response
   abinit::77_suscep
   )
+
+if(DO_BUILD_67_PYTHON_INVOCATION_EXT)
+  target_link_libraries(79_seqpar_mpi
+    PUBLIC
+    abinit::67_python_invocation_ext)
+endif()
 
 if(OpenMP_FOUND)
   target_link_libraries(79_seqpar_mpi

@@ -32,17 +32,18 @@ pawecutdg 10
 
 nstep 15
 nline  8
+mdeg_filter 8
 
 # bands and spinors
 nband  8
-nbdbuf 2
+nbdbuf 4
 
 tolvrs 1.0D-20
 
 kptopt 3
 
 # severely unconverged
-ngkpt 3*2 
+ngkpt 3*2
 nshiftk 1
 shiftk 3*0
 
@@ -58,25 +59,25 @@ prtwf 0
 prteig 0
 prtden 0
 
-# change cell parameter to increase the stress tensor 
-#acell    3*10.3008969711  
+# change cell parameter to increase the stress tensor
+#acell    3*10.3008969711
 acell    3*10
 
-rprim    0.000000000000000   0.500000000000000   0.500000000000000 
-         0.500000000000000   0.000000000000000   0.500000000000000 
-         0.500000000000000   0.500000000000000   0.000000000000000 
-       
-natom    2  
-ntypat   2  
-typat    1 2  
-znucl    15 13  
-# change atomic positions in order to have non-zero forces (so we can test them)
-xred     0.240000000000000   0.255000000000000   0.249000000000000 
-         0.000000000000000   0.000000000000000   0.000000000000000 
-#xred     0.250000000000000   0.250000000000000   0.250000000000000 
-#         0.000000000000000   0.000000000000000   0.000000000000000 
+rprim    0.000000000000000   0.500000000000000   0.500000000000000
+         0.500000000000000   0.000000000000000   0.500000000000000
+         0.500000000000000   0.500000000000000   0.000000000000000
 
-pp_dirpath="$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8/"
+natom    2
+ntypat   2
+typat    1 2
+znucl    15 13
+# change atomic positions in order to have non-zero forces (so we can test them)
+xred     0.240000000000000   0.255000000000000   0.249000000000000
+         0.000000000000000   0.000000000000000   0.000000000000000
+#xred     0.250000000000000   0.250000000000000   0.250000000000000
+#         0.000000000000000   0.000000000000000   0.000000000000000
+
+pp_dirpath="$ABI_PSPDIR/Psdj_nc_sr_04_pbe_std_psp8/"
 pseudos="P.psp8, Al.psp8"
 
 ##############################################################
@@ -85,10 +86,9 @@ pseudos="P.psp8, Al.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp
-#%% need_cpp_vars = !HAVE_DFTI
+#%% need_cpp_vars = HAVE_FFTW3
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t18.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -97,4 +97,4 @@ pseudos="P.psp8, Al.psp8"
 #%% keywords = NC,CPRJ
 #%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). NC,istwfk>1
 #%%<END TEST_INFO>
- 
+

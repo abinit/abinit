@@ -7,7 +7,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2025 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,13 +29,11 @@ module m_psps
  use m_nctk
  use m_copy
  use m_dtset
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,      only : itoa, sjoin, yesno, atoi
  use m_io_tools,      only : open_file
- use m_symtk,         only : matr3inv
+ use m_matrix,        only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
  use m_paw_numeric,   only : paw_spline
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
@@ -787,7 +785,7 @@ subroutine psps_print(psps, unit, prtvol, mode_paral)
     '   Radius for pseudo-core charge for each type ..... ',ch10
    call wrtout(unt,msg,mode)
    do itypat=1,psps%ntypat
-     write(msg,'(a,i4,a,f7.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
+     write(msg,'(a,i4,a,f12.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
      call wrtout(unt,msg,mode)
    end do
  end if
@@ -884,16 +882,9 @@ subroutine psps_ncwrite_path(psps, path)
 
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
  NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-
  call psps_ncwrite(psps, ncid)
-
  NCF_CHECK(nf90_close(ncid))
-
-#else
- ABI_WARNING("netcdf support not activated. psps file cannot be created!")
-#endif
 
 end subroutine psps_ncwrite_path
 !!***
@@ -931,8 +922,6 @@ subroutine psps_ncwrite(psps, ncid)
  !real(dp), allocatable :: dummy1(:)
 
 ! *************************************************************************
-
-#ifdef HAVE_NETCDF
 
  with_alch = 0  ! Alchemical IO not supported at the moment.
  !psps%mtypalch = zero
@@ -1107,10 +1096,6 @@ subroutine psps_ncwrite(psps, ncid)
    end do
  end if
 
-#else
- ABI_WARNING("netcdf support not activated. psps file cannot be created!")
-#endif
-
 contains
  integer function vid(vname)
    character(len=*),intent(in) :: vname
@@ -1180,8 +1165,6 @@ subroutine psps_ncread(psps, ncid)
  psps%useylm         = zero
  psps%nc_xccc_gspace = zero
  psps%vlspl_recipSpace = .false.
-
-#ifdef HAVE_NETCDF
 
  ! Read dimensions
  NCF_CHECK(nctk_get_dim(ncid, "ntypat", psps%ntypat))
@@ -1315,10 +1298,6 @@ subroutine psps_ncread(psps, ncid)
    end if
 
  end if
-
-#else
- ABI_WARNING("netcdf support not activated. psps file cannot be read!")
-#endif
 
 end subroutine psps_ncread
 !!***
@@ -1647,7 +1626,7 @@ end subroutine nctab_eval_tvalespl
 !!  nctabl%tcorespl(mqgrid_vl,2)
 !!  nctab%d2ncdq0
 !!  nctab%dncdq0
-!!  
+!!
 !!  nctabl%ttaucorespl(mqgrid_vl,2)
 !!  nctab%d2taucdq0
 !!  nctab%dtaucdq0

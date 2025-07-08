@@ -1,11 +1,6 @@
-# Added by runtests.py
-output_file = "t30_MPI4.abo"
-indata_prefix = "t30_MPI4i"
-outdata_prefix = "t30_MPI4o"
-tmpdata_prefix = "t30_MPI4t"
-# end runtests.py section
-
 #Test chebfi
+
+ cprj_in_memory 0
 
  ndtset 2
  wfoptalg1   1  npband1 2 npfft1 2
@@ -49,7 +44,6 @@ tmpdata_prefix = "t30_MPI4t"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_16.0_mpich
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

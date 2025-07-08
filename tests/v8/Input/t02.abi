@@ -21,8 +21,8 @@ optforces 2
 nstep 30            #number of steps in SCF
 
 # k-point sampling
-istwfk   *1           
-kptopt    1         #Automatically get k-points in a Monkhorst-Pack scheme 
+istwfk   *1
+kptopt    1         #Automatically get k-points in a Monkhorst-Pack scheme
 ngkpt     1 1 1     #Grid-size of k-points
 nshiftk   1         #Apply one shift
 shiftk  0.5 0.5 0.5    #Shift
@@ -34,7 +34,7 @@ ecut   12.0 #hartrees
 ecutsm  0.5
 
 #Definition of the lattice parameters:
-acell 3*10.261200 
+acell 3*10.261200
 rprim   1.01  0.01 0.01
        -0.02  1.02 0.01
         0.00  0.01 0.99
@@ -65,8 +65,8 @@ xred
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%    t02.abo,  tolnlines =0, tolabs =1.1e-11, tolrel = 2.0e-12, fld_options=-medium ;
+#%% files_to_test =
+#%%    t02.abo,  tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium ;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

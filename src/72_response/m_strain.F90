@@ -8,7 +8,7 @@
 !! Container type is defined
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (AM)
+!! Copyright (C) 2010-2025 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_strain
  use m_abicore
  use m_xmpi
 
- use m_symtk,         only : matr3inv
+ use m_matrix,        only : matr3inv
 
  implicit none
 

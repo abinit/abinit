@@ -26,7 +26,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = optic
-#%% test_chain = toptic_3.abi,toptic_4.abi,toptic_5.abi 
+#%% test_chain = toptic_3.abi,toptic_4.abi,toptic_5.abi
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
 #%% files_to_test =
@@ -39,7 +39,7 @@
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = S. Sharma, X. Gonze, N. A. Pike
-#%% keywords = linear electro-optical coefficient
+#%% keywords = linear-electro-optical
 #%% description = Input file for optic code to calculate the linear electro-optical coefficient
 #%%<END TEST_INFO>
 

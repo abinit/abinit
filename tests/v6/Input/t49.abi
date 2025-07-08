@@ -54,7 +54,7 @@ diemac 2.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t49.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -medium
+#%%   t49.abo, tolnlines = 2, tolabs = 1.1e-5, tolrel = 5.0e-7, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

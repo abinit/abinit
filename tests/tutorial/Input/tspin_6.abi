@@ -7,14 +7,14 @@
 
     nsym   1
 
-# cutoff, k-points: 
+# cutoff, k-points:
   kptopt   4
     ecut   8
  pawecutdg 15
 
 # Crystal cell definition:
     natom  1
-   ntypat  1 
+   ntypat  1
     typat  1
    znucl   83.d0
     xred   3*0.0
@@ -28,13 +28,13 @@
    nband1  12
    nband2  24 # 2 times more band with SOC
 
-# SCF: 
+# SCF:
    nstep   20
   toldfe   1.0d-7
 
 # Pseudo:
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Bi.xml"
+ pseudos "Psdj_paw_pw_std/Bi.xml"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -43,13 +43,13 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tspin_6.abo, tolnlines=  5, tolabs=  3.000e-08, tolrel=  3.000e-03
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = PAW 
-#%% description = 
+#%% keywords = PAW
+#%% description =
 #%%   Bismuth atom, isolated, in a supercell - with and without spin-orbit coupling.
 #%%<END TEST_INFO>

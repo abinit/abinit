@@ -155,7 +155,7 @@ optdriver7    5 # for nonlinear calculation
   d3e_pert3_elfd7   1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
+ pseudos "Psdj_paw_pw_std/Al.xml, As.LDA_PW-JTH_sp.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -187,14 +187,14 @@ optdriver7    5 # for nonlinear calculation
 #%%   ww_mv t88o_DS4_1WF11 t89o_DS4_1WF11;
 #%%   ww_mv t88o_DS4_1WF12 t89o_DS4_1WF12
 #%% [files]
-#%% files_to_test = 
-#%%    t88.abo, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
+#%% files_to_test =
+#%%    t88.abo, tolnlines = 0 , tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW, DFPT, NONLINEAR
-#%% description = 
+#%% description =
 #%%   'Full' DFPT computation of third derivatives in Nonlinear (dataset 7).
 #%%   Preceded by resolution of Second-order Sternheimer equations (dataset 5 and 6).
 #%%   Give same results than t84.in if tolwfr is increased and the Monkhorst-Pack k-grid is used.

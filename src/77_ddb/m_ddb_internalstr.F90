@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XW)
+!!  Copyright (C) 1999-2025 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,7 +96,7 @@ natom,nblok,prt_internalstr)
 
 !Local variables------------------------------------
 !scalars
- integer :: idirA,idirB,ier,ii1,ii2,ipertA,ipertB,ivarA,ivarB
+ integer :: idirA,idirB,ier,ii1,ipertA,ipertB,ivarA,ivarB
  character(len=500) :: direction,message
 !arrays
  real(dp) :: Amatr(3*natom-3,3*natom-3),Apmatr(3*natom,3*natom)
@@ -212,18 +212,8 @@ natom,nblok,prt_internalstr)
 
 !Try to get the displacement response internal strain tensor
 !first need the inverse of force constant matrix
- d2cart = zero
- do ipertA=1,natom
-   do ii1=1,3
-     ivarA=ii1+3*(ipertA-1)
-     do ipertB=1,natom
-       do ii2=1,3
-         ivarB=ii2+3*(ipertB-1)
-         d2cart(1,ivarA,ivarB)=blkval(1,ii1,ipertA,ii2,ipertB,iblok)
-       end do
-     end do
-   end do
- end do
+ d2cart(1,:,:) = RESHAPE(blkval(1,1:3,1:natom,1:3,1:natom,iblok), SHAPE=[3*natom,3*natom])
+ d2cart(2,:,:) = zero
 
 !Eventually impose the acoustic sum rule
 !FIXME: this might depend on ifcflag: impose that it is 0 or generalize
@@ -278,12 +268,12 @@ natom,nblok,prt_internalstr)
        ii1=ii1+1
      end do
    end do
-  
+
   !Bpmatr(2,:) is the imaginary part of the force matrix
   !then call the subroutines CHPEV and ZHPEV to get the eigenvectors
    call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
    ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
-  
+
   !DEBUG
   !the eigenval and eigenvec
   !write(std_out,'(/,a,/)')'the eigenvalues and eigenvectors'
@@ -298,7 +288,7 @@ natom,nblok,prt_internalstr)
   !end do
   !end do
   !ENDDEBUG
-  
+
   !Then do the multiplication to get the reduced matrix,in two steps
   !After this the force constant matrix is decouple in two bloks,
   !acoustic and optical ones
@@ -310,7 +300,7 @@ natom,nblok,prt_internalstr)
        end do
      end do
    end do
-  
+
    Apmatr(:,:)=0.0_dp
    do ivarA=1,3*natom
      do ivarB=1,3*natom
@@ -319,7 +309,7 @@ natom,nblok,prt_internalstr)
        end do
      end do
    end do
-  
+
   !DEBUG
   !the blok diago
   !write(std_out,'(/,a,/)')'matrixAp'
@@ -330,7 +320,7 @@ natom,nblok,prt_internalstr)
   !end do
   !end do
   !ENDDEBUG
-  
+
   !Check the last three eigenvalues whether too large or not
    ivarB=0
    do ivarA=3*natom-2,3*natom
@@ -338,7 +328,7 @@ natom,nblok,prt_internalstr)
        ivarB=1
      end if
    end do
-  
+
    if(ivarB==1)then
      write(message,'(a,a,a,a,a,a,a,a,3es16.6)')ch10,&
   &   '  Acoustic sum rule violation met : the eigenvalues of accoustic mode',ch10,&
@@ -348,14 +338,14 @@ natom,nblok,prt_internalstr)
      ABI_WARNING(message)
      call wrtout(iout,message,'COLL')
    end if
-  
+
   !Give the value of reduced matrix form Apmatr to Amatr
    do ivarA=1,3*natom-3
      do ivarB=1,3*natom-3
        Amatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)
      end do
    end do
-  
+
   !Now the reduced matrix is in the matrixA, the convert it
   !first give the give the value of matixB from matrixA
    ii1=1
@@ -366,11 +356,11 @@ natom,nblok,prt_internalstr)
      end do
    end do
    Bmatr(2,:)=0.0_dp
-  
+
   !Call the subroutines CHPEV and ZHPEV to get the eigenvectors and the eigenvalues
    call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,zhpev1,zhpev2,ier)
    ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
-  
+
   !Check the unstable phonon modes, if the first is negative then print
   !warning message
    if(eigval(1)<-1.0*tol8)then
@@ -381,14 +371,14 @@ natom,nblok,prt_internalstr)
   &   ' ---',ch10
      call wrtout(std_out,message,'COLL')
    end if
-  
+
   !Do the matrix mutiplication to get pseudoinverse inverse matrix
    Cmatr(:,:)=0.0_dp
    Amatr(:,:)=0.0_dp
    do ivarA=1,3*natom-3
      Cmatr(ivarA,ivarA)=1.0_dp/eigval(ivarA)
    end do
-  
+
    do ivarA=1,3*natom-3
      do ivarB=1,3*natom-3
        do ii1=1,3*natom-3
@@ -396,8 +386,8 @@ natom,nblok,prt_internalstr)
        end do
      end do
    end do
-  
-  
+
+
   !The second multiplication
    Cmatr(:,:)=0.0_dp
    do ivarA=1,3*natom-3
@@ -407,7 +397,7 @@ natom,nblok,prt_internalstr)
        end do
      end do
    end do
-  
+
   !DEBUG
   !write(std_out,'(/,a,/)')'the pseudo inverse of the force matrix'
   !do ivarA=1,3*natom
@@ -417,7 +407,7 @@ natom,nblok,prt_internalstr)
   !end do
   !end do
   !ENDDEBUG
-  
+
   !So now the inverse of the reduced matrix is in the matrixC
   !now do another mutilplication to get the pseudoinverse of the original
    Cpmatr(:,:)=0.0_dp
@@ -427,7 +417,7 @@ natom,nblok,prt_internalstr)
        Cpmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)
      end do
    end do
-  
+
   !Now times the eigvecp
    do ivarA=1,3*natom
      do ivarB=1,3*natom
@@ -445,13 +435,13 @@ natom,nblok,prt_internalstr)
        end do
      end do
    end do
-  
+
   !Now the inverse is in Cpmatr
    kmatrix(:,:)=Cpmatr(:,:)
   !transfer the inverse of k-matrix back to the k matrix
   !so now the inverse of k matrix is in the kmatrix
   !ending the part for pseudoinversing the K matrix
-  
+
   !Now do simple mulplication to obtain the displacement response
   !internal strain tensor
    instrain_dis(:,:)=0.0_dp
@@ -464,7 +454,7 @@ natom,nblok,prt_internalstr)
      end do
    end do
 
- else 
+ else
    instrain_dis(:,:)=0.0_dp
  end if
 

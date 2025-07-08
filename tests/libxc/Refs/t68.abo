@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h01 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t68/t68.abi
 - output file    -> t68.abo
 - root for input  files -> t68i
@@ -176,8 +176,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.08662
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -190,8 +190,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -3.489168   -1.040664
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -211,7 +211,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/15) Internal Cycle: (1/1)
@@ -233,7 +233,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  5  -6.3300302932062    -1.688E-05 9.119E-07 7.627E-02 2.165E-05 8.300E-03
  ETOT  6  -6.3300320259938    -1.733E-06 1.517E-07 7.533E-03 2.748E-05 8.327E-03
 
- At SCF step    6, forces are sufficiently converged : 
+ At SCF step    6, forces are sufficiently converged :
   for the second time, max diff in force=  2.748E-05 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -315,7 +315,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  4  -6.3301287795920    -1.170E-08 1.574E-09 1.473E-03 3.246E-05 3.282E-03
  ETOT  5  -6.3301287797429    -1.509E-10 1.638E-11 9.062E-06 1.144E-05 3.293E-03
 
- At SCF step    5, forces are sufficiently converged : 
+ At SCF step    5, forces are sufficiently converged :
   for the second time, max diff in force=  1.144E-05 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -404,7 +404,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  7  -6.3301471404447    -4.814E-13 3.962E-15 8.528E-09 1.814E-07 9.659E-05
  ETOT  8  -6.3301471404448    -1.101E-13 9.158E-15 3.382E-10 1.860E-08 9.660E-05
 
- At SCF step    8, forces are sufficiently converged : 
+ At SCF step    8, forces are sufficiently converged :
   for the second time, max diff in force=  1.860E-08 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -493,7 +493,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  7  -6.3301471565996    -1.936E-13 5.897E-18 6.059E-12 5.191E-09 1.481E-06
  ETOT  8  -6.3301471565994     1.963E-13 4.253E-18 2.066E-13 3.388E-10 1.481E-06
 
- At SCF step    8, forces are sufficiently converged : 
+ At SCF step    8, forces are sufficiently converged :
   for the second time, max diff in force=  3.388E-10 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -561,7 +561,7 @@ force_length_stats: {min:   1.48120909E-06, max:   1.48120909E-06, mean:   1.481
            Absolute (Ha)=-1.61546E-08
            Relative     =-2.55201E-09
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.4812E-06 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -660,8 +660,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.08662
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -674,8 +674,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -3.489168   -1.040664
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -695,7 +695,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/15) Internal Cycle: (1/1)
@@ -719,7 +719,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  7  -6.3484972462944    -7.878E-08 1.785E-10 1.847E-04 3.318E-05 4.644E-03
  ETOT  8  -6.3484972861528    -3.986E-08 5.063E-10 2.745E-05 6.125E-05 4.583E-03
 
- At SCF step    8, forces are sufficiently converged : 
+ At SCF step    8, forces are sufficiently converged :
   for the second time, max diff in force=  6.125E-05 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -803,7 +803,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  6  -6.3485270155254    -9.298E-09 8.140E-11 7.987E-06 1.353E-05 1.905E-03
  ETOT  7  -6.3485270158878    -3.624E-10 2.191E-11 1.692E-06 6.043E-06 1.899E-03
 
- At SCF step    7, forces are sufficiently converged : 
+ At SCF step    7, forces are sufficiently converged :
   for the second time, max diff in force=  6.043E-06 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -895,7 +895,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT 10  -6.3485331081421    -5.986E-13 1.324E-13 1.264E-08 2.425E-07 2.867E-05
  ETOT 11  -6.3485331081412     9.042E-13 3.629E-15 1.592E-08 6.234E-08 2.874E-05
 
- At SCF step   11, forces are sufficiently converged : 
+ At SCF step   11, forces are sufficiently converged :
   for the second time, max diff in force=  6.234E-08 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -963,7 +963,7 @@ force_length_stats: {min:   2.87351277E-05, max:   2.87351277E-05, mean:   2.873
            Absolute (Ha)=-6.09225E-06
            Relative     =-9.59632E-07
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 2.8735E-05 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1068,8 +1068,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.08662
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1082,8 +1082,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -3.489168   -1.040664
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1103,7 +1103,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/15) Internal Cycle: (1/1)
@@ -1129,7 +1129,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  9  -6.5134989430887    -1.923E-09 6.965E-12 2.398E-05 5.455E-06 5.586E-04
  ETOT 10  -6.5134989431891    -1.003E-10 2.268E-12 1.253E-05 6.252E-06 5.523E-04
 
- At SCF step   10, forces are sufficiently converged : 
+ At SCF step   10, forces are sufficiently converged :
   for the second time, max diff in force=  6.252E-06 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1213,7 +1213,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  6  -6.5134993767098    -1.109E-10 3.266E-12 1.954E-07 3.906E-06 2.272E-04
  ETOT  7  -6.5134993767209    -1.108E-11 6.831E-15 1.309E-08 9.765E-08 2.271E-04
 
- At SCF step    7, forces are sufficiently converged : 
+ At SCF step    7, forces are sufficiently converged :
   for the second time, max diff in force=  9.765E-08 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1307,7 +1307,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT 12  -6.5134994640982     2.442E-13 8.561E-17 4.307E-11 1.279E-08 1.572E-06
  ETOT 13  -6.5134994640982     1.155E-14 2.157E-17 1.153E-10 7.155E-09 1.579E-06
 
- At SCF step   13, forces are sufficiently converged : 
+ At SCF step   13, forces are sufficiently converged :
   for the second time, max diff in force=  7.155E-09 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1375,7 +1375,7 @@ force_length_stats: {min:   1.57873495E-06, max:   1.57873495E-06, mean:   1.578
            Absolute (Ha)=-8.73773E-08
            Relative     =-1.34148E-08
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 1.5787E-06 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1454,7 +1454,7 @@ total_energy_dc     : -6.51349973237108E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      9.4486306644E+00  7.5589045315E+00  7.5589045315E+00 Bohr
               amu      1.20110000E+01  1.00794000E+00
@@ -1581,7 +1581,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1598,12 +1598,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1621,7 +1621,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

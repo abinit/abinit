@@ -16,14 +16,14 @@
 !! * spin_potential_t_initialize
 !! * spin_potential_t_finalize
 !! * spin_potential_t_total_Heff : calculate total Heff (no Langevin term)
-!! * spin_potential_t_Heff_to_dSdt: 
+!! * spin_potential_t_Heff_to_dSdt:
 !!  * spin_potential_t_get_dSdt : dSdt, Langevin term is an input.
 !!  * spin_potential_t_get_Langevin_Heff
 
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (TO, hexu)
+!! Copyright (C) 2001-2025 ABINIT group (TO, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,12 +64,14 @@ module  m_spin_potential
      ! Exchange/DMI/dipdip stored like COO sparse matrix form.
      type(lil_mat_t) :: coeff_coo
      logical :: csr_mat_ready= .False.
+     logical :: has_onsite = .False.
      type(CSR_mat_t) :: bilinear_csr_mat
      ! 3, 3, ninit
 
      ! vector for calculating effective field
      real(dp), allocatable :: Htmp(:, :)
      real(dp), allocatable :: ms(:)
+     real(dp), allocatable :: onsite_bilinear_term(:, :, :)
      type(mb_mpi_info_t) :: mpiinfo
      type(mpi_scheduler_t) :: mps
    CONTAINS
@@ -121,6 +123,8 @@ contains
 
     self%has_external_hfield=.False.
     self%has_dipdip=.False.
+    ABI_MALLOC(self%onsite_bilinear_term, (3, 3, self%nspin))
+    self%onsite_bilinear_term = 0.0_dp
   end subroutine initialize
 
   subroutine set_supercell(self, supercell)
@@ -128,8 +132,8 @@ contains
     type(mbsupercell_t), target, intent(inout) :: supercell
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
- 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+
     self%supercell=>supercell
     self%ms(:)=supercell%spin%ms(:)
     call xmpi_bcast(self%ms, master, comm, ierr)
@@ -174,7 +178,7 @@ contains
     integer :: i
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        do i=1, self%nspin
           tmp(:, i)=params%spin_mag_field(:)
@@ -189,7 +193,7 @@ contains
     real(dp), intent(in) :: external_hfield(:,:)
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     self%has_external_hfield = .true.
     self%external_hfield = external_hfield
     call xmpi_bcast(self%has_external_hfield, master, comm, ierr)
@@ -211,7 +215,7 @@ contains
     real(dp), intent(in) :: val
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
     if(iam_master) then
        call self%coeff_coo%add_entry(ind=[i,j],val=val)
     endif
@@ -224,7 +228,7 @@ contains
     integer :: i
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if (iam_master) then
        do i = 1, size(ilist)
@@ -243,7 +247,7 @@ contains
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if(iam_master) then
        do ia = 1, 3, 1
@@ -252,6 +256,10 @@ contains
                   (jspin-1)*3+ib], val=val(ia,ib))
           end do
        end do
+       if(ispin==jspin) then
+           self%has_onsite = .True.
+           self%onsite_bilinear_term(:, :, ispin) = val(:, :)
+       end if
     endif
   end subroutine add_bilinear_term_spin_block
 
@@ -259,16 +267,27 @@ contains
     class(spin_potential_t), intent(inout) :: self
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
+    integer :: ispin
 
     if (.not. self%csr_mat_ready) then
-       call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+       call init_mpi_info(master, iam_master, my_rank, comm, nproc)
        if(iam_master) then
           call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
-          call self%coeff_coo%finalize()
        endif
+       call self%coeff_coo%finalize()
        call self%bilinear_csr_mat%sync(master=master, comm=comm, nblock=1)
        self%csr_mat_ready=.True.
        call xmpi_bcast(self%csr_mat_ready, master, comm, ierr)
+       ! also broadcast the onsite terms.
+       do ispin=1, self%nspin
+           call self%bilinear_csr_mat%get_block(ispin*3-2, ispin*3-2, 3, 3, self%onsite_bilinear_term(:, :, ispin))
+           !print *, "ispin:", ispin
+           !print *, "oniste",  self%onsite_bilinear_term(:, :, ispin)
+       end do
+       self%has_onsite=.True.
+
+       call xmpi_bcast(self%has_onsite, master, comm, ierr)
+       call xmpi_bcast(self%onsite_bilinear_term, master, comm, ierr)
     endif
   end subroutine prepare_csr_matrix
 
@@ -334,7 +353,7 @@ contains
     integer :: i, j
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     self%Htmp(:,:)=0.0_dp
     etmp=0.0_dp
@@ -380,7 +399,7 @@ contains
 !    integer :: i, j
 !    integer :: master, my_rank, comm, nproc, ierr
 !    logical :: iam_master
-!    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+!    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 !
 !
 !    if (.not. self%csr_mat_ready) then
@@ -412,7 +431,9 @@ contains
     real(dp), intent(inout) ::deltaE
     !real(dp) ::  Eold, Enew
     real(dp) :: tmp(3), dS(3)
+
     ! naive implementation, for test only
+    !real(dp) :: Stmp(3,self%nspin), Enew, Eold
     !call self%get_Heff(S, self%Htmp, Eold)
     !call self%bilinear_csr_mat%mv(S, self%Htmp)
     !Eold=-sum(sum(self%Htmp(:,:)*S(:,:), dim=1))
@@ -421,17 +442,30 @@ contains
     !Stmp(:, ispin)= Snew(:)
     !call self%get_Heff(Stmp, self%Htmp, Enew)
     !deltaE=Enew-Eold
+    !print *, "naive deltaE", deltaE
 
-    ! test
+    ! more efficient one
     dS(:)=Snew(:)-S(:, ispin)
-    S(:, ispin)= S(:, ispin)+ dS
+    !S(:, ispin)= S(:, ispin)+ dS
+
+    deltaE=0.0_dp
+
     call self%prepare_csr_matrix()
     call self%bilinear_csr_mat%mv_select_row(3, [3*ispin-2, 3*ispin-1, 3*ispin], S, tmp)
     deltaE=deltaE-dot_product(tmp, dS ) *2.0
+    if (self%has_onsite) then
+       tmp=matmul(self%onsite_bilinear_term(:, :, ispin), dS)
+       deltaE = deltaE -  dot_product(tmp, dS)
+       !print *, "dS K dS:", dot_product(tmp, dS)
+    end if
+    !print *, "smart deltaE", deltaE
+    !S(:, ispin)=S(:,ispin)-dS
+    !print *, "diff for ispin:", ispin, Enew-Eold-deltaE
+
+
     if(self%has_external_hfield) then
        deltaE=deltaE - dot_product(self%external_hfield(:, ispin), dS)*self%ms(ispin)
     end if
-    S(:, ispin)=S(:,ispin)-dS
   end subroutine spin_potential_t_get_delta_E
 
 
@@ -440,6 +474,8 @@ contains
     if (allocated(self%ms)) then
        ABI_FREE(self%ms)
     end if
+
+    ABI_SFREE(self%onsite_bilinear_term)
 
     if (allocated(self%Htmp)) then
        ABI_FREE(self%Htmp)

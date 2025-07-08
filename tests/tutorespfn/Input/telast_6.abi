@@ -6,7 +6,7 @@
 # Set 1 : Initial self-consistent and lattice optimization run
 
   getwfk?1   0
-  ionmov?1   2        # Broyden lattice optimization scheme
+  geoopt?1   "bfgs"   # Broyden lattice optimization scheme
    ntime?1   5        # Maximim lattice optimization steps
  optcell?1   1        # Optimize cell volume only
  strfact?1   100      # Test convergence of stresses (Hartree/bohr^3) by
@@ -25,7 +25,7 @@
   getden?3   -1       # Use density from previout set
   tolwfr?3   5.0d-19  # Only wave function convergence can be used with
                       # non-self-consistent calculation
-  tolwfr23   1.0d-30  # This is simply for a reason of portability of automatic tests 
+  tolwfr23   1.0d-30  # This is simply for a reason of portability of automatic tests
   nstep23    6        # This is simply for a reason of portability of automatic tests
   nstep33    20       # This is simply for a reason of portability of automatic tests
 
@@ -55,7 +55,7 @@ dilatmx   1.05       # Allow for optimization
           0.5  0.5  0.0
 
 #Definition of the atom types and atoms
- ntypat   1 
+ ntypat   1
   znucl   13
   natom   1
   typat   1
@@ -71,8 +71,8 @@ dilatmx   1.05       # Allow for optimization
 
 #Definition of the k-point grid - loop over 3 k-point densities
 
-ngkpt1?   6  6  6          
-ngkpt2?   8  8  8          
+ngkpt1?   6  6  6
+ngkpt2?   8  8  8
 ngkpt3?   10 10 10
 
 nshiftk   4              # Use one copy of grid only (default)
@@ -95,7 +95,7 @@ nshiftk   4              # Use one copy of grid only (default)
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Al.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -104,7 +104,7 @@ nshiftk   4              # Use one copy of grid only (default)
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   telast_6.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2

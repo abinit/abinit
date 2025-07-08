@@ -7,7 +7,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
+!! Copyright (C) 2008-2025 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,6 +57,9 @@ module m_special_funcs
  public :: dip32             ! Complete Fermi integral of order 3/2
  public :: djp12             ! Incomplete Fermi integral of order 1/2
  public :: djp32             ! Incomplete Fermi integral of order 3/2
+ public :: tildeAx           ! tilde Ax Pade fit and first and second derivatives
+ public :: tildeBx           ! tilde Bx Pade fit and first and second derivatives
+ public :: tildeBc           ! tilde Bc Pade fit and first and second derivatives
 !!***
 
 !!****t* m_special_funcs/jlspline_t
@@ -1776,6 +1779,334 @@ function djp32(xcut,gamma)
  end if
  djp32=dip32(gamma)-xcut*xcut*DSQRT(xcut)/2.5D+0
 end function djp32
+!!***
+
+!!****f* m_special_funcs/tildeAx
+!! NAME
+!!  tildeAx
+!!
+!! FUNCTION
+!!  Returns tilde Ax Pade fit and first and second derivatives
+!!  w.r.t. reduced temperature t.
+!!
+!! NOTES
+!!  Karasiev-Sjostrom-Dufty-Trickey (KSDT) TLDA xc-functional
+!!  V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014) [[cite:Karasiev2014]]
+!!
+!! INPUTS
+!!  t=reduced temperature, t=T/T_F
+!!
+!! OUTPUT
+!!  Ax=tilde Ax(t)
+!!  dAx=dAx(t)/dt
+!!  d2Ax=d^2Ax(t)/dt^2 
+!!
+!! SOURCE
+subroutine tildeAx(t,Ax,dAx,d2Ax)
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: t
+ real(dp),intent(out) :: Ax,dAx,d2Ax
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: aln= -0.0475410604245741_dp
+ real(dp),parameter :: a52= -0.1065378473507800_dp
+ real(dp),parameter :: a1 =  0.5823869764908659_dp
+ real(dp),parameter :: a2 = -0.0068339509356661_dp
+ real(dp),parameter :: a3 = 11.5469239288490009_dp
+ real(dp),parameter :: a4 = -0.8465428870889800_dp
+ real(dp),parameter :: a5 = -0.1212525366470300_dp
+ real(dp),parameter :: a6 =  1.9902818786101000_dp
+ real(dp),parameter :: a7 =  0.0000000000000000_dp
+ real(dp),parameter :: a8 =  0.0744389046707120_dp
+ real(dp),parameter :: b1 = 19.9256144707979992_dp
+ real(dp),parameter :: b2 =  5.1663994545590004_dp
+ real(dp),parameter :: b3 =  2.0463164858237000_dp
+ real(dp),parameter :: b4 =  0.0744389046707120_dp
+ real(dp),parameter :: onethird = 1._dp/3._dp
+ real(dp),parameter :: twothird = 2._dp/3._dp
+ real(dp),parameter :: fourthird = 4._dp/3._dp
+ real(dp),parameter :: threehalf = 3._dp/2._dp
+ real(dp),parameter :: fivehalf = 5._dp/2._dp
+ real(dp),parameter :: sevenhalf = 7._dp/2._dp
+ real(dp) :: y,u,du,d2u
+ real(dp) :: v,dv,d2v
+ real(dp) :: dydt,d2ydt2
+ real(dp) :: num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
+
+! *************************************************************************
+
+ y = twothird/t**threehalf
+ u = y**twothird
+ du = twothird/y**onethird
+ d2u = -onethird*du/y
+
+ v = y**fourthird
+ dv = fourthird *y**onethird
+ d2v = onethird*dv/y
+
+ dydt = -1._dp/t**fivehalf
+ d2ydt2 = fivehalf/t**sevenhalf
+
+ num = a52*u**fivehalf &
+       +a1*u+a2*u**2+a3*u**3+a4*u**4 &
+       +a5*u**5+a6*u**6+a7*u**7+a8*u**8 &
+       +aln*log(y)*y**4
+ den = 1._dp+b1*v+b2*v**2+b3*v**3+b4*v**4
+ fit = num/den
+ dnum = du*(fivehalf*a52*u**threehalf &
+        +a1+2._dp*a2*u+3._dp*a3*u**2+4._dp*a4*u**3 &
+        +5._dp*a5*u**4+6._dp*a6*u**5+7._dp*a7*u**6+8._dp*a8*u**7) &
+        +aln*y**3+4._dp*aln*log(y)*y**3
+ d2num = d2u*(fivehalf*a52*u**threehalf &
+         +a1+2._dp*a2*u+3._dp*a3*u**2+4._dp*a4*u**3 &
+         +5._dp*a5*u**4+6._dp*a6*u**5+7._dp*a7*u**6+8._dp*a8*u**7) &
+         +du*du*(fivehalf*threehalf*a52*u**half &
+         +2._dp*a2+2._dp*3._dp*a3*u+3._dp*4._dp*a4*u**2 &
+         +4._dp*5._dp*a5*u**3+5._dp*6._dp*a6*u**4 &
+         +6._dp*7._dp*a7*u**5+7._dp*8._dp*a8*u**6) &
+         +7._dp*aln*y**2+12._dp*aln*log(y)*y**2
+ dden = dv*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3)
+ d2den = d2v*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3) &
+         +dv*dv*(2._dp*b2+2._dp*3._dp*b3*v+3._dp*4._dp*b4*v**2)
+! derivatives w.r.t. y
+ dfit = dnum/den - (num/den)*(dden/den)
+ d2fit = d2num/den - (dnum/den)*(dden/den) &
+         - (dnum/den)*(dden/den) + 2._dp*(num/den)*(dden/den)*(dden/den) &
+         - (num/den)*(d2den/den)
+! Ax, and derivatives w.r.t. t
+ Ax = fit
+ dAx = dfit * dydt
+ d2Ax = d2fit*dydt**2 + dfit*d2ydt2
+ if(Ax/=Ax) Ax=zero
+ if(dAx/=dAx) dAx=zero
+ if(d2Ax/=d2Ax) d2Ax=zero
+end subroutine tildeAx
+!!***
+
+!!****f* m_special_funcs/tildeBx
+!! NAME
+!!  tildeBx
+!!
+!! FUNCTION
+!!  Returns tilde Bx Pade fit and first and second derivatives
+!!  w.r.t. reduced temperature t.
+!!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  t=reduced temperature, t=T/T_F
+!!
+!! OUTPUT
+!!  Bx=tilde Bx(t)
+!!  dBx=dBx(t)/dt
+!!  d2Bx=d^2Bx(t)/dt^2 
+!!
+!! SOURCE
+subroutine tildeBx(t,Bx,dBx,d2Bx)
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: t
+ real(dp),intent(out) :: Bx,dBx,d2Bx
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: a2 = -3.4341427276599950_dp
+ real(dp),parameter :: a3 = -0.9066069544311700_dp
+ real(dp),parameter :: a4 =  2.2386316137237001_dp
+ real(dp),parameter :: a5 =  2.4232553178542000_dp
+ real(dp),parameter :: a6 = -0.1339278564306200_dp
+ real(dp),parameter :: a7 =  0.4392739633708200_dp
+ real(dp),parameter :: a8 = -0.0497109675177910_dp
+ real(dp),parameter :: a9 =  0.0000000000000000_dp
+ real(dp),parameter :: a10=  0.0028609701106953_dp
+ real(dp),parameter :: b1 =  0.7098198258073800_dp
+ real(dp),parameter :: b2 =  4.6311326377185997_dp
+ real(dp),parameter :: b3 = -2.9243190977647000_dp
+ real(dp),parameter :: b4 =  6.1688157841895004_dp
+ real(dp),parameter :: b5 = -1.3435764191535999_dp
+ real(dp),parameter :: b6 =  0.1576046383295400_dp
+ real(dp),parameter :: b7 =  0.4365792821186800_dp
+ real(dp),parameter :: b8 = -0.0620444574606262_dp
+ real(dp),parameter :: b9 =  0.0000000000000000_dp
+ real(dp),parameter :: b10=  0.0028609701106953_dp
+ real(dp),parameter :: onethird = 1._dp/3._dp
+ real(dp),parameter :: twothird = 2._dp/3._dp
+ real(dp),parameter :: threehalf = 3._dp/2._dp
+ real(dp),parameter :: fivehalf = 5._dp/2._dp
+ real(dp),parameter :: sevenhalf = 7._dp/2._dp
+ real(dp) :: y,u,du,d2u
+ real(dp) :: v,dv,d2v
+ real(dp) :: dydt,d2ydt2
+ real(dp) :: num,den,fit,dnum,d2num,dden,d2den,dfit,d2fit
+
+! *************************************************************************
+
+ y = twothird/t**threehalf
+ u = y**twothird
+ du = twothird/y**onethird
+ d2u = -onethird*du/y
+
+ v = u 
+ dv = du 
+ d2v = d2u 
+
+ dydt = -1._dp/t**fivehalf
+ d2ydt2 = fivehalf/t**sevenhalf
+
+ num = a2*u**2+a3*u**3+a4*u**4 &
+       +a5*u**5+a6*u**6+a7*u**7+a8*u**8 &
+       +a9*u**9+a10*u**10
+ den = 1._dp+b1*v+b2*v**2+b3*v**3+b4*v**4 &
+       +b5*v**5+b6*v**6+b7*v**7+b8*v**8+b9*v**9+b10*v**10
+ fit = num/den
+
+ dnum = du*(2._dp*a2*u+3._dp*a3*u**2+4._dp*a4*u**3 &
+        +5._dp*a5*u**4+6._dp*a6*u**5+7._dp*a7*u**6+8._dp*a8*u**7 &
+        +9._dp*a9*u**8+10._dp*a10*u**9)
+
+ d2num = d2u*(2._dp*a2*u+3._dp*a3*u**2+4._dp*a4*u**3 &
+         +5._dp*a5*u**4+6._dp*a6*u**5+7._dp*a7*u**6+8._dp*a8*u**7 &
+         +9._dp*a9*u**8+10._dp*a10*u**9) &
+         +du*du*(2._dp*a2+2._dp*3._dp*a3*u+3._dp*4._dp*a4*u**2 &
+         +4._dp*5._dp*a5*u**3+5._dp*6._dp*a6*u**4 &
+         +6._dp*7._dp*a7*u**5+7._dp*8._dp*a8*u**6 &
+         +8._dp*9._dp*a9*u**7+9._dp*10._dp*a10*u**8)
+
+ dden = dv*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3 &
+        +5._dp*b5*v**4+6._dp*b6*v**5+7._dp*b7*v**6+8._dp*b8*v**7 &
+        +9._dp*b9*v**8+10._dp*b10*v**9)
+
+ d2den = d2v*(b1+2._dp*b2*v+3._dp*b3*v**2+4._dp*b4*v**3 &
+         +5._dp*b5*v**4+6._dp*b6*v**5+7._dp*b7*v**6+8._dp*b8*v**7 &
+         +9._dp*b9*v**8+10._dp*b10*v**9) &
+         + dv*dv*(2._dp*b2+2._dp*3._dp*b3*v+3._dp*4._dp*b4*v**2 &
+         +4._dp*5._dp*b5*v**3+5._dp*6._dp*b6*v**4+6._dp*7._dp*b7*v**5+7._dp*8._dp*b8*v**6 &
+         +8._dp*9._dp*b9*v**7+9._dp*10._dp*b10*v**8)
+
+! derivatives w.r.t. y
+ dfit = dnum/den - (num/den)*(dden/den)
+ d2fit = d2num/den - (dnum/den)*(dden/den) &
+         - (dnum/den)*(dden/den) + 2._dp*(num/den)*(dden/den)*(dden/den) &
+         - (num/den)*(d2den/den)
+
+! Bx, and derivatives w.r.t. t
+ Bx = fit
+ dBx = dfit * dydt
+ d2Bx = d2fit*dydt**2 + dfit*d2ydt2
+ if(Bx/=Bx) Bx=zero
+ if(dBx/=dBx) dBx=zero
+ if(d2Bx/=d2Bx) d2Bx=zero
+end subroutine tildeBx
+!!***
+
+!!****f* m_special_funcs/tildeBc
+!! NAME
+!!  tildeBc
+!!
+!! FUNCTION
+!!  Returns tilde Bc Pade fit and first and second derivatives
+!!  w.r.t. reduced temperature t.
+!!
+!! NOTES
+!!  Karasiev-Dufty-Trickey (KDT16) TGGA xc-functional
+!!  V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018) [[cite:Karasiev2018]]
+!!
+!! INPUTS
+!!  iflag=flag selector integer
+!!  rs=Wigner-Seitz radius (bohr)
+!!  t=reduced temperature, t=T/T_F
+!!
+!! OUTPUT
+!!  Bc=tilde Bc(t)
+!!  dBcdrs=dBxc(rs,t)/drs
+!!  dBcdt=dBc(rs,t)/dt
+!!
+!! SOURCE
+subroutine tildeBc(iflag,rs,t,Bc,dBcdrs,dBcdt)
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iflag
+ real(dp),intent(in) :: rs,t
+ real(dp),intent(out) :: Bc,dBcdrs,dBcdt
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: alpha_n = 0.50000000000000D+00
+ real(dp),parameter :: alpha_d = 0.15000000000000D+01
+ real(dp),parameter :: alpha_t = 0.32500000000000D+01
+ real(dp),parameter :: a1 =  0.30047772904141D+03
+ real(dp),parameter :: b1 = -0.11166043894641D+03
+ real(dp),parameter :: a2 = -0.38706401119284D+03
+ real(dp),parameter :: b2 = -0.45327974938936D+02
+ real(dp),parameter :: a3 =  0.25112236519758D+04
+ real(dp),parameter :: b3 = -0.14507109325068D+04
+ real(dp),parameter :: a4 =  0.52243427453456D+03
+ real(dp),parameter :: b4 = -0.30665095324907D+02
+ real(dp),parameter :: c1 =  0.11077393333429D+03
+ real(dp),parameter :: d1 =  0.12854960224127D+01
+ real(dp),parameter :: c2 =  0.32355494275181D+03
+ real(dp),parameter :: d2 =  0.13482659120012D+02
+ real(dp),parameter :: c3 =  0.45509212104516D+03
+ real(dp),parameter :: d3 =  0.23416017878226D+02
+ real(dp),parameter :: c4 =  0.10884351801356D+04
+ real(dp),parameter :: d4 =  0.24480831491950D+02
+ real(dp),parameter :: c5 =  0.36112604933128D+00
+ real(dp),parameter :: d5 =  0.32161372287131D-08
+ real(dp),parameter :: e1 =  0.32175261286726D+02
+ real(dp),parameter :: e2 =  0.61853047558212D+02
+ real(dp),parameter :: e3 =  0.33585054134674D+03
+ real(dp),parameter :: e4 =  0.12874240529185D+03
+ real(dp),parameter :: f1 =  0.41006056761680D-02
+ real(dp),parameter :: f2 =  0.18933118065366D-01
+ real(dp),parameter :: f3 =  0.24295412676204D-04
+ real(dp),parameter :: f4 =  0.18369775992299D-07
+ real(dp),parameter :: f5 =  0.69274680951701D-10
+ real(dp),parameter :: onethird = 1.d0/3.d0
+ real(dp),parameter :: twothird = 2.d0/3.d0
+ real(dp),parameter :: threehalf = 3.d0/2.d0
+ real(dp),parameter :: fivehalf = 5.d0/2.d0
+ real(dp),parameter :: sevenhalf = 7.d0/2.d0
+ real(dp) :: rsn,rsd,u,du
+ real(dp) :: num,den,dnumdrs,dnumdt,ddendrs,ddendt
+
+! *************************************************************************
+
+ if(iflag==5.or.iflag==6.or.iflag==7.or.iflag==8) then 
+   ! Bc(rs,t) = 1
+   Bc = 1._dp
+   dBcdrs = 0._dp
+   dBcdt = 0._dp
+ elseif(iflag==1.or.iflag==2.or.iflag==3.or.iflag==4) then
+   !
+   ! Bc(rs,t) = Pade Fit
+   !
+   rsn = rs**alpha_n
+   rsd = rs**alpha_d
+   u = t**alpha_t
+   du = alpha_t*t**(alpha_t-1.d0)
+   !
+   num = 1.d0+(a1+b1*rsn+e1*rsn**2)*u+(a2+b2*rsn+e2*rsn**2)*u**2+(a3+b3*rsn+e3*rsn**2)*u**3+(a4+b4*rsn+e4*rsn**2)*u**4
+   dnumdrs = (b1+2.d0*e1*rsn)*u+(b2+2.d0*e2*rsn)*u**2+(b3+2.d0*e3*rsn)*u**3+(b4+2.d0*e4*rsn)*u**4
+   dnumdrs = dnumdrs * alpha_n*rs**(alpha_n-1.d0)
+   dnumdt = (a1+b1*rsn+e1*rsn**2)+2.d0*(a2+b2*rsn+e2*rsn**2)*u+3.d0*(a3+b3*rsn+e3*rsn**2)*u**2+4.d0*(a4+b4*rsn+e4*rsn**2)*u**3
+   dnumdt = dnumdt * du
+   !
+   den = 1.d0+(c1+d1*rsd+f1*rsd**2)*u+(c2+d2*rsd+f2*rsd**2)*u**2+(c3+d3*rsd+f3*rsd**2)*u**3+(c4+d4*rsd+f4*rsd**2)*u**4+(c5+d5*rsd+f5*rsd**2)*u**5
+   ddendrs = (d1+2.d0*f1*rsd)*u+(d2+2.d0*f2*rsd)*u**2+(d3+2.d0*f3*rsd)*u**3+(d4+2.d0*f4*rsd)*u**4+(d5+2.d0*f5*rsd)*u**5
+   ddendrs = ddendrs * alpha_d*rs**(alpha_d-1.d0)
+   ddendt = (c1+d1*rsd+f1*rsd**2)+2.d0*(c2+d2*rsd+f2*rsd**2)*u+3.d0*(c3+d3*rsd+f3*rsd**2)*u**2+4.d0*(c4+d4*rsd+f4*rsd**2)*u**3+5.d0*(c5+d5*rsd+f5*rsd**2)*u**4
+   ddendt = ddendt * du
+   !
+   Bc = num/den
+   dBcdrs = dnumdrs/den - (num/den)*ddendrs/den
+   dBcdt = dnumdt/den - (num/den)*ddendt/den
+   if(Bc/=Bc) Bc=zero
+   if(dBcdrs/=dBcdrs) dBcdrs=zero
+   if(dBcdt/=dBcdt) dBcdt=zero
+   !
+ endif
+end subroutine tildeBc
 !!***
 
 !----------------------------------------------------------------------

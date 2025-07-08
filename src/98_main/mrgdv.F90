@@ -6,7 +6,7 @@
 !! This program merges DFPT potentials for different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group (MG)
+!! Copyright (C) 2004-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,7 +122,6 @@ program mrgdv
        write(std_out,*)"                                    [--symv1scf] [--coarse-ngqpt 2 2 2]"
        write(std_out,*)"                           Test Fourier interpolation of DFPT potentials."
        write(std_out,*)"downsample in_DVDB out_DVDB [n1, n2, n3] Produce new DVDB with q-subsmesh"
-       !write(std_out,*)"convert in_old_DVDB out_DVDB.nc  Convert old DVDB format to new DVDB in netcdf format"
        goto 100
      end if
    end do
@@ -199,11 +198,6 @@ program mrgdv
      call dvdb%list_perts([-1,-1,-1], npert_miss, unit=std_out)
      call dvdb%qdownsample(dump_file, qptopt, ngqpt, comm)
      call dvdb%free()
-
-   !case ("convert")
-   !  call get_command_argument(2, dvdb_filepath)
-   !  call get_command_argument(3, dump_file)
-   !  call dvdb_convert_fort2nc(dvdb_filepath, dump_file, comm)
 
    case default
      ABI_ERROR(sjoin("Unknown command:", command))

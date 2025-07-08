@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 "check test farm build examples"
 #
-# Copyright (C) 2010-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2010-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -126,7 +126,7 @@ def main():
   dbex_files = list()
   for acf in os.listdir( os.path.join(home_dir, "doc/build/config-examples") ):
     if ( re.match("bb_",acf) ):
-      acf_section = re.sub("\.ac","",acf)
+      acf_section = re.sub(r"\.ac","",acf)
       if ( cnf_bex.has_section(acf_section) ):
         with open(os.path.join(home_dir, "doc/build/config-examples/"+acf), "r") as fh:
           acf_data = fh.readlines()

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2024 ABINIT group (BXU, MVer)
+!!  Copyright (C) 2012-2025 ABINIT group (BXU, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_epweights
  !use m_htetra
  use m_xmpi
 
- use m_symtk,           only : matr3inv
+ use m_matrix,          only : matr3inv
 
  implicit none
 

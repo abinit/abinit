@@ -6,7 +6,7 @@
 !!  Initialize pseudopotential datastructures from files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +77,7 @@ contains
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -588,10 +588,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_FREE(vlspl)
    ABI_FREE(xccc1d)
    ABI_FREE(xcctau1d)
-
-   if (.not.psps%vlspl_recipSpace) then
-     ABI_FREE(dvlspl)
-   end if
+   ABI_FREE(dvlspl)
 
  end if !  End condition of new computation needed
 
@@ -844,7 +841,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !scalars
  integer :: ii,il,ilmn,iln,iln0,lloc,lmax,me,mmax
  integer :: paral_mode,pspcod,pspdat,pspxc,useupf,usexml,xmlpaw,unt
- real(dp) :: maxrad,qchrg,r2well,zion,znucl
+ real(dp) :: maxrad,qchrg,r2well,zion,znucl,el_temp
  logical,parameter :: nc_debug = .False.
  !logical,parameter :: nc_debug = .True.
  character(len=500) :: msg,errmsg
@@ -880,6 +877,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
  nctab%has_tvale = .False.; nctab%has_tcore = .False.
  pspcod = -1
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
  if (me==0) then
 !  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
@@ -1161,7 +1160,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &      lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
 &      pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
 &      dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
-&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),xc_taupos=dtset%xc_taupos)
+&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),&
+&      xc_taupos=dtset%xc_taupos,el_temp=el_temp)
 
    else if (pspcod==8)then
 
@@ -1209,7 +1209,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &     dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
 &     dtset%usexcnhat_orig,vlspl,xcccrc,&
 &     dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp),&
-&     xc_taupos=dtset%xc_taupos)
+&     xc_taupos=dtset%xc_taupos,el_temp=el_temp)
      call paw_setup_free(paw_setuploc)
    end if
 

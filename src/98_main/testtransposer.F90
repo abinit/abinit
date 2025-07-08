@@ -7,7 +7,7 @@
 !! It includes testing of complex and real numbers, and all2all and gatherv
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,7 +139,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -236,7 +236,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -307,7 +307,7 @@ program testTransposer
 
     write(std_out,*) "Compare"
     call xgBlock_saxpy(dotLinalg%self, -1.0d0, dotColsRows%self)
-    call xgBlock_reshape(dotLinalg%self, (/1,nband/))
+    call xgBlock_reshape(dotLinalg%self,1,nband)
     call xgBlock_colwiseNorm2(dotLinalg%self,dotColsRows%self,max_val=maxdiff)
     write(std_out,"(a,f20.4)") " Difference: ",sqrt(maxdiff)
 
@@ -334,7 +334,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -379,7 +379,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -431,7 +431,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (JB)
+!! Copyright (C) 1998-2025 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

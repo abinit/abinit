@@ -8,7 +8,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2024 ABINIT group (VRecoules, PGhosh, SMazevet, SM, SVinko, NBrouwer)
+!!  Copyright (C) 2002-2025 ABINIT group (VRecoules, PGhosh, SMazevet, SM, SVinko, NBrouwer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,18 +30,16 @@ module m_conducti
  use m_wfk
  use m_hdr
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, close_unit, get_unit
  use m_fstrings,     only : sjoin
- use m_symtk,        only : matr3inv
+ use m_matrix,        only : matr3inv
  use m_hide_lapack,  only : jacobi
  use m_occ,          only : getnel
  use m_geometry,     only : metric
- use m_splines,      only : intrpl,splint,spline
+ use m_splines,      only : splint,spline
  use m_mpinfo,       only : distrb2,init_mpi_enreg,destroy_mpi_enreg,proc_distrb_cycle,initmpi_band
 
  implicit none
@@ -134,23 +132,24 @@ contains
 !scalars
  integer,parameter :: master=0
  integer :: bsize,bd_stride,dimid,iomode,bantot,bdtot_index,ncid,varid,nb_per_proc,etiq
- integer :: comm,fform1,headform,iband,ijband,ierr,ikpt,master_band
+ integer :: comm,fform1,headform,iband,ijband,ierr,ikpt,master_band,idum,iproc,num_tasks_max
  integer :: iom,isppol,jband,l1,l2,mband,me,mpierr,mom
- integer :: natom,nband_k,nkpt,nproc,nspinor,nsppol,ntypat
- integer :: occopt,iunt,opt_unt,occ_unt,iocc,my_iband,pnp_size
- integer :: lij_unt,sig_unt,kth_unt,ocond_unt,occunit,occnpt
- logical :: nc_unlimited,mykpt,myband,iomode_estf_mpiio,read_half_dipoles
+ integer :: natom,nband_k,nkpt,nproc,nspinor,nsppol,ntypat,broad_mode
+ integer :: occopt,iunt,opt_unt,occ_unt,iocc,my_iband,pnp_size,add_drude
+ integer :: lij_unt,sig_unt,sigd_unt,kth_unt,ocond_unt,occunit,occnpt,au_units
+ logical :: nc_unlimited,mykpt,myband,iomode_estf_mpiio,read_half_dipoles,omega0
  real(dp) :: dirac,del,deltae,deltae_min,deltae_min_tmp,dhdk2_g,diff_eig,diff_occ
- real(dp) :: dosdeltae,ecut,entropy,fact_diag,fermie,fermih,kin_fact,maxocc
- real(dp) :: np_sum,np_sum_k1,np_sum_k2,omin,omax,dom,oml,sig,socc,socc_k
- real(dp) :: Tatm,tphysel,tsmear,ucvol,eig_in_max,eig_in_min
+ real(dp) :: dosdeltae,ecut,entropy,fermie,fermih,kin_fact,maxocc,docc_deig
+ real(dp) :: np_sum,np_sum_k1,np_sum_2,omin,omax,dom,oml,sig,socc,socc_k,fact_omega0
+ real(dp) :: Tatm,tphysel,tsmear,ucvol,eig_in_max,eig_in_min,phi
  character(len=fnlen) :: filnam1,filnam_gen,occfile
  character(len=500) :: msg
  type(hdr_type) :: hdr
  type(MPI_type) :: mpi_enreg
 !arrays
  integer :: nc_count_5(5),nc_count_6(6),nc_start_5(5),nc_start_6(6),nc_stride_5(5),nc_stride_6(6)
- integer,allocatable :: nband(:)
+ integer :: dummy(0,0,0)
+ integer,allocatable :: nband(:),num_tasks(:)
  real(dp) :: dhdk2_r(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: cond_nd(:,:,:),cond_nd_k(:,:,:)
  real(dp),allocatable :: doccde(:),doccde_k(:),eig0_k(:),eigen0(:),eig0nc(:,:,:)
@@ -180,6 +179,10 @@ contains
    filnam1=trim(filnam_gen)//'_OPT'
 !  Read frequency range
    read(iunt,*) dom,omin,omax,mom
+   read(iunt,err=13,end=13,fmt=*) broad_mode,au_units,phi,add_drude
+   goto 14
+13 backspace(iunt) ; broad_mode=1 ; au_units=0; phi=zero; add_drude=0
+14 continue
 !  In case of varocc read filename of occupation datafile
    if (present(varocc)) then
      if (me==master) then
@@ -190,12 +193,18 @@ contains
    end if
    close(iunt)
  end if
+ phi=phi*pi/180.0_dp
 
 !Send data to all procs
  call xmpi_bcast(dom,master,comm,mpierr)
  call xmpi_bcast(omin,master,comm,mpierr)
  call xmpi_bcast(omax,master,comm,mpierr)
  call xmpi_bcast(mom,master,comm,mpierr)
+ call xmpi_bcast(broad_mode,master,comm,mpierr)
+ call xmpi_bcast(au_units,master,comm,mpierr)
+ call xmpi_bcast(phi,master,comm,mpierr)
+ call xmpi_bcast(add_drude,master,comm,mpierr)
+
 
 ! ---------------------------------------------------------------------------------
 ! Read OPT file
@@ -212,12 +221,12 @@ contains
  if (me==master) then
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nctk_open_read(ncid,filnam1,xmpi_comm_self))
-     call hdr_ncread(hdr,ncid,fform1)
+     call hdr%ncread(ncid,fform1)
    else
      if (open_file(filnam1,msg,newunit=opt_unt,form="unformatted",status="old")/=0) then
        ABI_ERROR(msg)
      end if
-     call hdr_fort_read(hdr,opt_unt,fform1,rewind=.true.)
+     call hdr%fort_read(opt_unt,fform1,rewind=.true.)
    end if 
    ABI_CHECK(fform1/=0,sjoin("Error while reading ",filnam1))
    ABI_CHECK(fform1==610.or.fform1==620,"Conducti requires an OPT file with fform=610 or 620!")
@@ -253,15 +262,11 @@ contains
    if (iomode==IO_MODE_ETSF) then
      varid=nctk_idname(ncid,"eigenvalues")
      ABI_MALLOC(eig0nc,(mband,nkpt,nsppol))
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_get_var(ncid,varid,eig0nc))
-#endif
      eigen0 = reshape(eig0nc,[mband*nkpt*nsppol])
      ABI_FREE(eig0nc)
      !Close file here because the rest will possibly be read with collective I/O
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    else
      read(opt_unt)(eigen0(iband),iband=1,mband*nkpt*nsppol)
    end if
@@ -352,7 +357,7 @@ contains
 ! Compute derivative of occupations wrt the energy
 
  ABI_MALLOC(doccde,(mband*nkpt*nsppol))
- if (occopt==1) then
+ if (occopt<=2) then
    if (me==master) then
      write(std_out,'(a,i4)')  ' occopt            =',occopt
    end if
@@ -360,14 +365,6 @@ contains
  else
    tphysel=zero
    maxocc=two/(nsppol*nspinor)
- end if
- if (occopt==2) then
-   tsmear=one
-   entropy=one
-   if (me==master) then
-     write(std_out,'(a)') ' occopt=2 fixed occupation case'
-   end if
- else
    call getnel(doccde,dosdeltae,eigen0,entropy,fermie,fermih,maxocc,mband,nband,&
 &   socc,nkpt,nsppol,occ,occopt,1,tphysel,tsmear,12,wtk)
    entropy=tsmear*entropy
@@ -418,11 +415,14 @@ contains
      varid=nctk_idname(ncid,"dipole_valence_valence")
      if (nproc>1) then
        NCF_CHECK(nctk_set_collective(ncid,varid))
+       ABI_MALLOC(num_tasks,(nproc))
+       do iproc=1,nproc
+         num_tasks(iproc)=count(mpi_enreg%proc_distrb==iproc-1)
+       enddo
+       num_tasks_max=maxval(num_tasks)
      end if
-#ifdef HAVE_NETCDF
      nc_unlimited=(nf90_inq_dimid(ncid,"unlimited_bands",dimid)==NF90_NOERR)
      read_half_dipoles=(nf90_inq_dimid(ncid,"max_number_of_state_pairs",dimid)==NF90_NOERR)
-#endif
    else
      if (me==master) then
        NCF_CHECK(nctk_open_read(ncid,filnam1,xmpi_comm_self))
@@ -430,10 +430,8 @@ contains
        !if (nctk_has_mpiio.and.(.not.use_netcdf_mpiio)) then
        !  NCF_CHECK(nctk_set_collective(ncid,varid))
        !end if
-#ifdef HAVE_NETCDF
        nc_unlimited=(nf90_inq_dimid(ncid,"unlimited_bands",dimid)==NF90_NOERR)
        read_half_dipoles=(nf90_inq_dimid(ncid,"max_number_of_state_pairs",dimid)==NF90_NOERR)
-#endif
      end if
      call xmpi_bcast(nc_unlimited,master,comm,ierr)
      call xmpi_bcast(read_half_dipoles,master,comm,ierr)
@@ -487,7 +485,6 @@ contains
      if (.not.iomode_estf_mpiio.and.me==master) then
        if (iomode==IO_MODE_ETSF) then
          psinablapsi=zero
-#ifdef HAVE_NETCDF
          if (nc_unlimited) then
            nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -498,7 +495,6 @@ contains
            nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
            NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
          end if
-#endif
        else
          psinablapsi=zero
          bsize=nband_k**2;if (read_half_dipoles) bsize=(nband_k*(nband_k+1))/2
@@ -524,7 +520,6 @@ contains
        kin21_k   = zero
        kin22_k   = zero
        np_sum_k1 = zero
-       np_sum_k2 = zero
        socc_k    = zero
 
 !      k-dependent data
@@ -554,7 +549,6 @@ contains
        
 !          In case of MPI-IO, read valence-valence dipoles for band n
            if (iomode_estf_mpiio) then
-#ifdef HAVE_NETCDF
              if (nc_unlimited) then
                nc_start_6=[1,1,iband,ikpt,isppol,1] ; nc_count_6=[2,3,1,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
@@ -565,70 +559,83 @@ contains
                nc_start_5=[1,1,(iband*(iband-1))/2+1,ikpt,isppol] ; nc_count_5=[2,3,iband,1,1] ; nc_stride_5=[1,1,1,1,1] 
                NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
              end if
-#endif
            end if
 
 !          LOOP OVER BANDS m
-           do jband=1,iband-1
+           do jband=1,iband
              diff_occ = occ_k(iband)-occ_k(jband)
              diff_eig = eig0_k(iband)-eig0_k(jband)
-             if (dabs(diff_occ)>=tol8) then
 
-               dhdk2_r = zero
-               dhdk2_g = zero
+             dhdk2_r = zero
+             dhdk2_g = zero
 
-               if (read_half_dipoles) then
-                 ijband=(my_iband*(my_iband-1))/2+jband
+             if (read_half_dipoles) then
+               ijband=(my_iband*(my_iband-1))/2+jband
+             else
+               !psinablapsi size is mband for netCDF I/O, nband_k for Fortran I/O
+               bd_stride=merge(mband,nband_k,iomode==IO_MODE_ETSF)
+               ijband=(my_iband-1)*bd_stride+jband
+             end if
+               
+             do l2=1,3
+               do l1=1,3
+                 dhdk2_r(l1,l2)=dhdk2_r(l1,l2)+(&
+&                  psinablapsi(1,l1,ijband)*psinablapsi(1,l2,ijband)&
+&                 +psinablapsi(2,l1,ijband)*psinablapsi(2,l2,ijband))
+               end do
+             end do
+             do l1=1,3
+               dhdk2_g=dhdk2_g &
+&                +(psinablapsi(1,l1,ijband)*psinablapsi(1,l1,ijband) &
+&                 +psinablapsi(2,l1,ijband)*psinablapsi(2,l1,ijband))*third ! Average over directions
+             end do
+
+
+             !Minimal validity limit
+             deltae_min_tmp=dabs(diff_eig)
+             if ((deltae_min_tmp>=tol5).and.(deltae_min_tmp<=deltae_min)) deltae_min=deltae_min_tmp
+
+             !Conductivity for each omega - Apply KG formula
+             kin_fact=(eig0_k(iband)+eig0_k(jband))*half-(fermie+entropy)
+             omega0=dabs(diff_occ)<tol12
+             fact_omega0=merge(two,one,omega0)
+             !Evaluate sumrule
+             if (.not.omega0) then
+               docc_deig=dabs(diff_occ/diff_eig)
+             else if(add_drude==1) then
+               docc_deig=dabs(doccde_k(iband))
+             else
+               docc_deig=zero
+             endif
+             np_sum_k1=np_sum_k1 + two*dhdk2_g*docc_deig/fact_omega0
+             !
+             do iom=1,mom
+               oml=oml1(iom)
+               if (.not.omega0) then
+                 docc_deig=dabs(diff_occ/oml)
+               else if(add_drude==1) then
+                 docc_deig=dabs(doccde_k(iband))
                else
-                 !psinablapsi size is mband for netCDF I/O, nband_k for Fortran I/O
-                 bd_stride=merge(mband,nband_k,iomode==IO_MODE_ETSF)
-                 ijband=(my_iband-1)*bd_stride+jband
-               end if
-                 
+                 docc_deig=zero
+               endif
+               if(broad_mode==0) then
+                 dirac=dexp(-((abs(diff_eig)-oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(pi*two))-& ! Take into account (n,m) and (m,n)
+&                      dexp(-((abs(diff_eig)+oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(pi*two))
+               else
+                 dirac=dom/((abs(diff_eig)-oml)**2+dom**2)/pi-dom/((abs(diff_eig)+oml)**2+dom**2)/pi
+               endif
+               sig=dhdk2_g*docc_deig*dirac*pi/(ucvol)
+               kin11_k(iom)=kin11_k(iom)+sig
+               kin12_k(iom)=kin12_k(iom)-sig*kin_fact
+               kin21_k(iom)=kin21_k(iom)-sig*kin_fact
+               kin22_k(iom)=kin22_k(iom)+sig*kin_fact**2
                do l2=1,3
                  do l1=1,3
-                   dhdk2_r(l1,l2)=dhdk2_r(l1,l2)+(&
-&                    psinablapsi(1,l1,ijband)*psinablapsi(1,l2,ijband)&
-&                   +psinablapsi(2,l1,ijband)*psinablapsi(2,l2,ijband))
+                   cond_nd_k(l1,l2,iom)=cond_nd_k(l1,l2,iom)+dhdk2_r(l1,l2)*docc_deig*dirac*pi/ucvol
                  end do
                end do
-               do l1=1,3
-                 dhdk2_g=dhdk2_g &
-&                  +(psinablapsi(1,l1,ijband)*psinablapsi(1,l1,ijband) &
-&                   +psinablapsi(2,l1,ijband)*psinablapsi(2,l1,ijband))
-               end do
+             end do
 
-
-               !Minimal validity limit
-               deltae_min_tmp=dabs(diff_eig)
-               if ((deltae_min_tmp>=tol5).and.(deltae_min_tmp<=deltae_min)) deltae_min=deltae_min_tmp
-
-               !Conductivity for each omega - Apply KG formula
-               kin_fact=(eig0_k(iband)+eig0_k(jband))*half-(fermie+entropy)
-               do iom=1,mom
-                 oml=oml1(iom)
-                 dirac=(dexp(-((diff_eig+oml)/dom)**2)-dexp(-((diff_eig-oml)/dom)**2))/oml ! Take into account (n,m) and (m,n)
-                 sig=dhdk2_g*diff_occ*dirac
-                 kin11_k(iom)=kin11_k(iom)+sig
-                 kin12_k(iom)=kin12_k(iom)-sig*kin_fact
-                 kin21_k(iom)=kin21_k(iom)-sig*kin_fact
-                 kin22_k(iom)=kin22_k(iom)+sig*kin_fact**2
-                 do l2=1,3
-                   do l1=1,3
-                     cond_nd_k(l1,l2,iom)=cond_nd_k(l1,l2,iom)+dhdk2_r(l1,l2)*diff_occ*dirac
-                   end do
-                 end do
-               end do
-
-               !Evaluate sumrule
-               fact_diag=merge(one,two,iband==jband)
-               if (dabs(diff_eig)>=tol10) then
-                 np_sum_k1=np_sum_k1 - fact_diag*dhdk2_g*diff_occ/diff_eig
-               else
-                 np_sum_k2=np_sum_k2 - fact_diag*doccde_k(iband)*dhdk2_g
-               end if
-
-             end if ! diff_occ>tol8
            end do !jband
 
            socc_k=socc_k+occ_k(iband)
@@ -644,7 +651,7 @@ contains
          kin22(iom)=kin22(iom)+wtk(ikpt)*kin22_k(iom)
          cond_nd(:,:,iom)=cond_nd(:,:,iom)+wtk(ikpt)*cond_nd_k(:,:,iom)
        end do
-       np_sum=np_sum+wtk(ikpt)*(np_sum_k1+np_sum_k2)
+       np_sum=np_sum+wtk(ikpt)*np_sum_k1
        socc=socc+wtk(ikpt)*socc_k
 
 !      Validity limit
@@ -660,6 +667,24 @@ contains
    end do ! ikpt
  end do ! isppol
 
+ if (iomode == IO_MODE_ETSF) then
+   if(iomode_estf_mpiio.and.nproc>1) then
+     do idum=num_tasks(me+1)+1,num_tasks_max
+        if (nc_unlimited) then
+          nc_start_6=[1,1,1,1,1,1] ; nc_count_6=[0,0,0,0,0,0] ; nc_stride_6=[1,1,1,1,1,1]
+          NCF_CHECK(nf90_get_var(ncid,varid,dummy,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+        else if (.not.read_half_dipoles) then
+          nc_start_6=[1,1,1,1,1,1] ; nc_count_6=[0,0,0,0,0,0] ; nc_stride_6=[1,1,1,1,1,1]
+          NCF_CHECK(nf90_get_var(ncid,varid,dummy,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+        else
+          nc_start_5=[1,1,1,1,1] ; nc_count_5=[0,0,0,0,0] ; nc_stride_5=[1,1,1,1,1]
+          NCF_CHECK(nf90_get_var(ncid,varid,dummy,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
+        end if
+     enddo
+     ABI_FREE(num_tasks)
+   endif
+ endif
+
 !Accumulate kpt/band contributions over processors
  call xmpi_sum(kin11,comm,mpierr)
  call xmpi_sum(kin12,comm,mpierr)
@@ -669,6 +694,7 @@ contains
  call xmpi_sum(socc,comm,mpierr)
  call xmpi_sum(deltae,comm,mpierr)
  call xmpi_min(deltae_min,comm,mpierr)
+ call xmpi_sum(cond_nd,comm,mpierr)
  deltae=deltae/mpi_enreg%nproc_band
  
  ABI_FREE(psinablapsi)
@@ -678,9 +704,7 @@ contains
 
 !Print file headers (only master node)
  if (me==master) then
-
 !  Standard output
-   write(std_out,'(a,3f10.5)')' sumrule           =',np_sum/socc/three/dble(nsppol),socc
    write(std_out,'(a,f10.5,a,f10.5,a)')&
 &   ' Emax-Efermi       =',deltae/dble(nkpt*nsppol),' Ha', &
 &                          deltae/dble(nkpt*nsppol)*Ha_eV,' eV'
@@ -691,18 +715,32 @@ contains
    if (open_file(trim(filnam_out)//'_Lij',msg, newunit=lij_unt, form='formatted', action="write") /= 0) then
      ABI_ERROR(msg)
    end if
-   write(lij_unt,'(a)')' # omega(ua) L12 L22 L22'
+   write(lij_unt,'(a)')' # omega(ua) L11 L12 L22'
 
-!  _sig file
-   if (open_file(trim(filnam_out)//'_sig', msg, newunit=sig_unt, form='formatted', action="write") /= 0) then
+!  _sig_up_dn file
+   if(nsppol==2) then
+     if (open_file(trim(filnam_out)//'_sig_up_dn', msg, newunit=sig_unt, form='formatted', action="write") /= 0) then
+       ABI_ERROR(msg)
+     end if
+     if(au_units>0) then
+       write(sig_unt,'(2a)')' # omega(ua) cond(ua)  ',&
+&                           '      cond(ua) UP      cond(ua) DN'
+     else
+       write(sig_unt,'(2a)')' # hbar*omega(eV)      cond(ohm.cm)-1',&
+&                           '      cond(ohm.cm)-1 UP      cond(ohm.cm)-1 DN'
+     endif
+   end if
+
+! sig_dir file
+  if (open_file(trim(filnam_out)//'_sig_tensor', msg, newunit=sigd_unt,form='formatted', action="write") /= 0) then
      ABI_ERROR(msg)
-   end if
-   if (nsppol==1) then
-     write(sig_unt,'(a)')' # omega(ua) hbar*omega(eV)    cond(ua)             cond(ohm.cm)-1'
-   else
-     write(sig_unt,'(2a)')' # omega(ua) hbar*omega(eV)      cond(ua)            cond(ohm.cm)-1',&
-&     '      cond(ohm.cm)-1 UP      cond(ohm.cm)-1 DN'
-   end if
+  end if
+  if(au_units>0) then
+    write(sigd_unt,'(a)')' # omega(ua) cond_xx(ua) cond_yy(ua) cond_zz(ua) cond_xy(ua) cond_xz(ua) cond_yz(ua)'
+  else
+    write(sigd_unt,'(a)')' # hbar*omega(eV) cond_xx(ohm.cm)-1 cond_yy(ohm.cm)-1 cond_zz(ohm.cm)-1 &
+&           cond_xy(ohm.cm)-1 cond_xz(ohm.cm)-1 cond_yz(ohm.cm)-1'
+  endif
 
 !  _Kth file
    if (open_file(trim(filnam_out)//'_Kth', msg, newunit=kth_unt, form='formatted', action="write") /=0) then
@@ -710,8 +748,11 @@ contains
    end if
    write(kth_unt,'(a)')&
 &   " #Thermal conductivity following B. Holst et al Phys. Rev. B 83 (2011) 235120"
-   write(kth_unt,'(a)')&
-&   ' #omega(ua) hbar*omega(eV)  thermal cond(ua)   Kth(W/m/K)   thermopower(ua)   Stp(microohm/K)'
+   if(au_units>0) then
+     write(kth_unt,'(a)')' # omega(ua)  thermal cond(ua) thermopower(ua)'
+   else
+     write(kth_unt,'(a)')' # hbar*omega(eV)  thermal cond (W/m/K)   thermopower(microohm/K)'
+   endif
 
 !  Output file
    if (open_file(trim(filnam_out)//'.out', msg, newunit=ocond_unt, form='formatted', action="write") /= 0) then
@@ -730,11 +771,16 @@ contains
    write(ocond_unt,'(a,f10.5,a,f10.5,a)' )'# fermie            =',fermie,' Ha ',fermie*Ha_eV,' eV'
 
    write(ocond_unt,'(a,f12.5,a,f12.5,a)') '# Temp              =',tsmear,' Ha ',Tatm,' Kelvin'
-   write(ocond_unt,'(a,f15.5,2x,f15.5)' )'# sumrule           =',np_sum/socc/three/dble(nsppol),socc
+   write(ocond_unt,'(a,f15.5)' )'# Number of electrons           = ',socc
+   write(ocond_unt,'(a,f15.5)' )'# sumrule           = ',np_sum/socc
    write(ocond_unt,'(a,f10.5,a,f10.5,a)' )&
 &   '# Emax-Efermi       =',deltae/dble(nkpt*nsppol),' Ha',deltae/dble(nkpt*nsppol)*Ha_eV,' eV'
    write(ocond_unt,'(a)' )'# '
-   write(ocond_unt,'(a)')'# omega(ua)       cond(ua)             thermal cond(ua)       thermopower(ua)'
+   if(au_units>0) then
+     write(ocond_unt,'(a)')'# omega(ua)       cond(ua)             thermal cond(ua)       thermopower(ua)'
+   else
+     write(ocond_unt,'(a)')'# hbar*omega(eV) cond(ohm.cm)-1 thermal cond(W/m/K)   thermopower(microvolt/K) '
+   endif   
 
  end if ! me==master?
 
@@ -743,49 +789,78 @@ contains
    oml=oml1(iom)
 
    do isppol=1,nsppol
-     kin11(iom,isppol)=kin11(iom,isppol)*two_pi*third/(dom*ucvol)*half/dsqrt(pi)
      if (dabs(kin11(iom,isppol))<tol19) kin11(iom,isppol)=zero
      sig_abs(iom)=sig_abs(iom)+kin11(iom,isppol)
    end do
 
-   kin21(iom)=kin21(iom)*two_pi*third/(dom*ucvol)*half/dsqrt(pi)
-   kin12(iom)=kin12(iom)*two_pi*third/(dom*ucvol)*half/dsqrt(pi)
-   kin22(iom)=kin22(iom)*two_pi*third/(dom*ucvol)*half/dsqrt(pi)
-
-   Kth(iom)=kin22(iom)
+   Kth(iom)=kin22(iom)/tsmear
    Stp(iom)=zero
    if (sig_abs(iom)/=zero)  then
-     Kth(iom)=Kth(iom)-(kin12(iom)*kin21(iom)/sig_abs(iom))
+     Kth(iom)=Kth(iom)-(kin12(iom)*kin21(iom)/sig_abs(iom))/tsmear
      Stp(iom)=kin12(iom)/(sig_abs(iom)*tsmear)
-   end if
-
+   else
+     Kth(iom)=Kth(iom-1)
+     Stp(iom)=Stp(iom-1)
+   endif
    if (dabs(Kth(iom))<tol19) Kth(iom)=zero
    if (dabs(Stp(iom))<tol19) Stp(iom)=zero
-   if (abs(kin12(iom))<1.d-80) kin12=zero
-   if (abs(kin21(iom))<1.d-80) kin21=zero
-   if (abs(kin22(iom))<1.d-80) kin22=zero
-
-   if (me==master) then
-     write(lij_unt,'(f12.5,4es22.12)')oml,kin12(iom),kin22(iom),kin22(iom)/Tatm*3.4057d9
-     if (nsppol==1) then
-       write(sig_unt,'(2f12.5,2es22.12)') oml,oml*Ha_eV,sig_abs(iom),sig_abs(iom)*Ohmcm
-     else
-       write(sig_unt,'(2f12.5,4es22.12)') oml,oml*Ha_eV,sig_abs(iom),sig_abs(iom)*Ohmcm, &
-&        kin11(iom,1)*Ohmcm,kin11(iom,2)*Ohmcm
-     end if
-     write(kth_unt,'(2f12.5,4es22.12)') oml,oml*Ha_eV,Kth(iom),Kth(iom)*3.4057d9/Tatm, &
-&     Stp(iom),Stp(iom)*3.6753d-2
-     write(ocond_unt,'(1f12.5,3es22.12)') oml,sig_abs(iom),Kth(iom),Stp(iom)
-   end if
-
+   if (abs(kin12(iom))<10.0_dp**(-80)) kin12(iom)=zero
+   if (abs(kin21(iom))<10.0_dp**(-80)) kin21(iom)=zero
+   if (abs(kin22(iom))<10.0_dp**(-80)) kin22(iom)=zero
  end do
 
-!Compute the imaginary part of the conductivity (principal value)
+ !Compute the imaginary part of the conductivity (principal value)
 !  +derived optical properties.
  if (me==master) then
-   call msig(sig_abs,mom,oml1,filnam_out)
+   call msig(sig_abs,mom,oml1,filnam_out,phi,au_units)
  end if
+
+ ! Units
+ if (me==master) then
+   do iom=1,mom
+     oml=oml1(iom)
+      write(lij_unt,'(f12.5,3es22.12)') oml,sig_abs(iom),kin12(iom),kin22(iom)
+   enddo
+ endif
  
+ np_sum_2=zero
+ do iom=1,mom-1
+   np_sum_2=np_sum_2+(sig_abs(iom)+sig_abs(iom+1))*(oml1(iom+1)-oml1(iom))/2.0_dp
+ enddo
+ np_sum_2=2.0_dp*np_sum_2*ucvol/pi
+ if(au_units==0) oml1=oml1*Ha_eV
+ if(au_units==0) cond_nd=cond_nd*Ohmcm
+ if(au_units==0) sig_abs=sig_abs*Ohmcm
+ if(au_units==0) kin11=kin11*Ohmcm
+ if(au_units==0) Kth=Kth*3.4057d9/Ha_K
+ if(au_units==0) Stp=Stp*Ha_J/(Ha_K*e_CB)*10.0_dp**6
+
+
+ if (me==master) then
+   write(std_out,'(a,f15.5)' )'# Number of electrons           = ',socc
+   write(std_out,'(a,f15.5)' )'# sumrule           = ',np_sum/socc
+   write(std_out,'(a,f15.5)' )'# sumrule (integration) = ',np_sum_2/socc
+   if(au_units==0) then
+     write(std_out,'(a,f15.5)' ) '# Estimated DC conductivity (Ohm.cm)-1 =',&
+&    sig_abs(1)-(sig_abs(1)-sig_abs(2))/(oml1(1)-oml1(2))*oml1(1)
+   else
+      write(std_out,'(a,f15.5)' ) '# Estimated DC conductivity (au) =',&
+&    sig_abs(1)-(sig_abs(1)-sig_abs(2))/(oml1(1)-oml1(2))*oml1(1)
+   endif
+   do iom=1,mom
+     oml=oml1(iom)
+     write(sigd_unt,'(f12.5,6es22.12)') oml,cond_nd(1,1,iom),cond_nd(2,2,iom),cond_nd(3,3,iom),&
+&      cond_nd(1,2,iom),cond_nd(1,3,iom),cond_nd(2,3,iom)
+     if (nsppol==2) then
+       write(sig_unt,'(f12.5,3es22.12)') oml,sig_abs(iom), &
+&        kin11(iom,1),kin11(iom,2)
+     end if
+     write(kth_unt,'(f12.5,3es22.12)') oml,Kth(iom),Stp(iom)
+     write(ocond_unt,'(1f12.5,3es22.12)') oml,sig_abs(iom),Kth(iom),Stp(iom)
+   enddo
+ end if
+
+
 !---------------------------------------------------------------------------------
 ! End
 
@@ -793,20 +868,19 @@ contains
  if (me==master) then
    write(std_out,'(2a)')ch10,'OUTPUT'
    write(std_out,'(a)')trim(filnam_out)//'_Lij : Onsager kinetic coefficients'
-   write(std_out,'(a)')trim(filnam_out)//'_sig : Optical conductivity'
+   write(std_out,'(a)')trim(filnam_out)//'_eps : Optical conductivity and dielectric function'
+   write(std_out,'(a)')trim(filnam_out)//'_sig_tensor : Optical conductivity tensor'
    write(std_out,'(a)')trim(filnam_out)//'_Kth : Thermal conductivity and thermopower'
-   write(std_out,'(a)')trim(filnam_out)//'_eps : Dielectric function'
    write(std_out,'(a)')trim(filnam_out)//'_abs : n, k, reflectivity, absorption'
    close(lij_unt)
-   close(sig_unt)
+   if(nsppol==2) close(sig_unt)
    close(kth_unt)
    close(ocond_unt)
+   close(sigd_unt)
  end if
  if (iomode == IO_MODE_ETSF) then
    if (iomode_estf_mpiio.or.me==master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    end if
  else if (me==master) then
    ierr=close_unit(opt_unt,msg)
@@ -892,34 +966,34 @@ end subroutine conducti_paw
 !scalars
  character(len=fnlen) :: filnam,filnam_out
  logical,intent(in),optional :: with_absorption,with_emissivity
-
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iomode,atnbr,bantot,bdtot_index,comm,my_iband
- integer :: fform2,headform,iatom,iband,icor,ierr,ikpt
- integer :: iom,isppol,l1,mband,me,mom,mpierr,j2,etiq,pnp_size
- integer :: natom,nband_k,nkpt,nphicor,nproc,nspinor,nsppol,ntypat
- integer :: occopt,iunt,opt2_unt,ncid,varid,master_band,nb_per_proc
- integer :: sigx1_unt,sigx1_s_unt,sigx1_tot_unt,ems_unt,ems_s_unt,ems_tot_unt
+ integer :: iomode,atnbr,bantot,bdtot_index,comm,my_iband,input_atm,itask,num_tasks_max,au_units
+ integer :: fform2,headform,iatom,iband,icor,ierr,ikpt,iatom_atnbr,itypat,itypat_atnbr
+ integer :: iom,isppol,l1,mband,me,mom,mpierr,j2,etiq,pnp_size,iproc,broad_mode,absx_unt
+ integer :: natom,nband_k,nkpt,nphicor,nproc,nspinor,nsppol,ntypat,nphicor_max,natom_atnbr
+ integer :: occopt,iunt,opt2_unt,ncid,varid,master_band,nb_per_proc,idum
+ integer :: sigx1_unt,sigx1_up_unt,sigx1_dn_unt,ems_unt,ems_up_unt,ems_dn_unt
  logical :: iomode_estf_mpiio,myband,mykpt,need_absorption,need_emissivity
  real(dp) :: del_sig,del_emis,deltae,diff_occ,ecut,fermie
  real(dp) :: omin,omax,omin_sig,omax_sig,omin_emis,omax_emis
- real(dp) :: oml,dom,dom_ctr,dom_max,dom_tan1,dom_tan2
- real(dp) :: Tatm,tsmear,ucvol
+ real(dp) :: oml,dom,dom_ctr,dom_max,dom_tan1,dom_tan2,docc_deig
+ real(dp) :: Tatm,tsmear,ucvol,dirac,diff_eig
  character(len=fnlen) :: filnam2,filnam_gen
  character(len=500) :: msg
+ character(len=20) :: str_atm
  type(hdr_type) :: hdr
  type(MPI_type) :: mpi_enreg
 !arrays
  integer :: nc_count(7),nc_start(7),nc_stride(7)
- integer,allocatable :: nband(:),ncor(:),lcor(:),kappacor(:)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
+ integer,allocatable :: nband(:),ncor(:,:),lcor(:,:),kappacor(:,:),typat(:),num_tasks(:)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),dummy(0,0,0,0,0)
  real(dp),allocatable :: dom_var1(:,:),dhdk2_g(:)
  real(dp),allocatable :: eig0_k(:),eigen0(:),eig0nc(:,:,:)
- real(dp),allocatable :: energy_cor(:),edge(:)
+ real(dp),allocatable :: energy_cor(:,:),edge(:),nphicor_arr(:)
  real(dp),allocatable :: occ(:),occ_k(:),wtk(:)
- real(dp),allocatable :: oml_edge(:,:),oml_emis(:)
+ real(dp),allocatable :: oml_edge(:,:),oml_emis(:,:) 
  real(dp),allocatable :: psinablapsi2(:,:,:,:,:)
  real(dp),allocatable :: sigx1(:,:,:,:),sigx1_av(:,:,:),sigx1_k(:,:,:)
  real(dp),allocatable :: sum_spin_sigx1(:,:,:),sum_spin_sigx1_av(:,:)
@@ -927,7 +1001,6 @@ end subroutine conducti_paw
  real(dp),allocatable :: sum_spin_emisx(:,:,:),sum_spin_emisx_av(:,:)
 
 ! *********************************************************************************
-
 !optional flags
  need_absorption=.true. ;if (present(with_absorption)) need_absorption=with_absorption
  need_emissivity=.false.;if (present(with_emissivity)) need_emissivity=with_emissivity
@@ -952,29 +1025,36 @@ end subroutine conducti_paw
    filnam2=trim(filnam_gen)//'_OPT2'
 !  Read frequency range
    if (need_absorption) then
-     read(iunt,err=11,end=11,fmt=*) dom,omin,omax,mom,atnbr,dom_max,dom_ctr
+     read(iunt,err=11,end=11,fmt=*) dom,omin,omax,mom,input_atm,dom_max,dom_ctr
      goto 12
-11   backspace(iunt) ; read(iunt,*) dom,omin,omax,mom,atnbr ; dom_max=zero ; dom_ctr=zero
+11   backspace(iunt) ; read(iunt,*) dom,omin,omax,mom,input_atm ; dom_max=zero ; dom_ctr=zero
 12   continue
-else if (need_emissivity) then
-     read(iunt,*) dom,omin,omax,mom,atnbr
+   else if (need_emissivity) then
+     read(iunt,*) dom,omin,omax,mom,input_atm
      dom_max=zero;dom_ctr=zero
    end if
+   read(iunt,err=13,end=13,fmt=*) broad_mode,au_units
+   goto 14
+13 backspace(iunt) ; broad_mode=1 ; au_units=0
+14 continue
    close(iunt)
    if (abs(dom_max)>tol10.and.dom_max<dom) then
      msg = 'dom_max must be higher than dom!'
      ABI_ERROR(msg)
    end if
  end if
-   
+
 !Send data to all procs
  call xmpi_bcast(dom,master,comm,mpierr)
  call xmpi_bcast(omin,master,comm,mpierr)
  call xmpi_bcast(omax,master,comm,mpierr)
  call xmpi_bcast(mom,master,comm,mpierr)
- call xmpi_bcast(atnbr,master,comm,mpierr)
+ call xmpi_bcast(input_atm,master,comm,mpierr)
  call xmpi_bcast(dom_max,master,comm,mpierr)
  call xmpi_bcast(dom_ctr,master,comm,mpierr)
+ call xmpi_bcast(broad_mode,master,comm,mpierr)
+ call xmpi_bcast(au_units,master,comm,mpierr)
+
 
 ! ---------------------------------------------------------------------------------
 ! Read OPT2 file
@@ -991,12 +1071,12 @@ else if (need_emissivity) then
  if (me==master) then
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nctk_open_read(ncid,filnam2,xmpi_comm_self))
-     call hdr_ncread(hdr,ncid,fform2)
+     call hdr%ncread(ncid,fform2)
    else
      if (open_file(filnam2,msg,newunit=opt2_unt,form="unformatted",status="old")/=0) then
        ABI_ERROR(msg)
      end if
-     call hdr_fort_read(hdr,opt2_unt,fform2,rewind=.true.)
+     call hdr%fort_read(opt2_unt,fform2,rewind=.true.)
    end if 
    ABI_CHECK(fform2/=0,sjoin("Error while reading ",filnam2))
    ABI_CHECK(fform2==611.or.fform2==612.or.fform2==613,"OPT2 file format should be fform=611/612/613!")
@@ -1013,6 +1093,8 @@ else if (need_emissivity) then
  nspinor=hdr%nspinor
  nsppol=hdr%nsppol
  ntypat=hdr%ntypat
+ ABI_MALLOC(typat,(natom))
+ typat = hdr%typat
  occopt=hdr%occopt
  rprimd(:,:)=hdr%rprimd(:,:)
  fermie=hdr%fermie
@@ -1025,6 +1107,12 @@ else if (need_emissivity) then
  nband(1:nkpt*nsppol)=hdr%nband(1:nkpt*nsppol)
  mband=maxval(nband(:))  ! Get mband, as the maximum value of nband(nkpt)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol) ! Get metrics of simulation cell
+ itypat_atnbr=typat(input_atm)
+ natom_atnbr=0
+ do iatom=1,natom
+   if(typat(iatom)==itypat_atnbr) natom_atnbr=natom_atnbr+1
+   if(iatom==input_atm) atnbr=natom_atnbr
+ enddo
 
 !Read eigenvalues
  ABI_MALLOC(eigen0,(mband*nkpt*nsppol))
@@ -1032,9 +1120,7 @@ else if (need_emissivity) then
    if (iomode==IO_MODE_ETSF) then
      varid=nctk_idname(ncid,"eigenvalues")
      ABI_MALLOC(eig0nc,(mband,nkpt,nsppol))
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_get_var(ncid,varid,eig0nc))
-#endif
      eigen0 = reshape(eig0nc,[mband*nkpt*nsppol])
      ABI_FREE(eig0nc)
    else
@@ -1046,24 +1132,21 @@ else if (need_emissivity) then
 !Read core states
  if (me==master) then
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_get_dim(ncid,"number_of_core_states",nphicor))
-#endif
+     NCF_CHECK(nctk_get_dim(ncid,"max_number_of_core_states",nphicor_max))
    else
-     read(opt2_unt) nphicor
+     read(opt2_unt) nphicor_max
    end if
   end if
- call xmpi_bcast(nphicor,master,comm,mpierr)
+ call xmpi_bcast(nphicor_max,master,comm,mpierr)
 
- ABI_MALLOC(ncor,(nphicor))
- ABI_MALLOC(lcor,(nphicor))
- ABI_MALLOC(kappacor,(nphicor))
- ABI_MALLOC(energy_cor,(nphicor))
- ABI_MALLOC(edge,(nphicor))
+ ABI_MALLOC(ncor,(nphicor_max,ntypat))
+ ABI_MALLOC(lcor,(nphicor_max,ntypat))
+ ABI_MALLOC(kappacor,(nphicor_max,ntypat))
+ ABI_MALLOC(energy_cor,(nphicor_max,ntypat))
 
  if (me==master) then
+   ABI_MALLOC(nphicor_arr,(ntypat))
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      varid=nctk_idname(ncid,"n_quantum_number_core")
      NCF_CHECK(nf90_get_var(ncid,varid,ncor))
      varid=nctk_idname(ncid,"l_quantum_number_core")
@@ -1072,26 +1155,32 @@ else if (need_emissivity) then
      NCF_CHECK(nf90_get_var(ncid,varid,kappacor))
      varid=nctk_idname(ncid,"eigenvalues_core")
      NCF_CHECK(nf90_get_var(ncid,varid,energy_cor))
+     varid=nctk_idname(ncid,"number_of_core_states")
+     NCF_CHECK(nf90_get_var(ncid,varid,nphicor_arr))
 !Close here netcdf file here because the rest has to be read with collective I/O
      NCF_CHECK(nf90_close(ncid))
-#endif
    else
-     do icor=1,nphicor
-       read(unit=opt2_unt,err=23,end=23) ncor(icor),lcor(icor),kappacor(icor),energy_cor(icor)
-       goto 24
-23     backspace(opt2_unt) ; read(unit=opt2_unt) ncor(icor),lcor(icor),energy_cor(icor)
-       kappacor(icor)=0
-24     continue
+     do itypat=1,ntypat
+       read(unit=opt2_unt) nphicor_arr(itypat)
+       do icor=1,nphicor_max
+         read(unit=opt2_unt,err=23,end=23) ncor(icor,itypat),lcor(icor,itypat),kappacor(icor,itypat),energy_cor(icor,itypat)
+         goto 24
+23       backspace(opt2_unt) ; read(unit=opt2_unt) ncor(icor,itypat),lcor(icor,itypat),energy_cor(icor,itypat)
+         kappacor(icor,itypat)=0
+24       continue
+       enddo
      end do
    end if
+   nphicor=nphicor_arr(itypat_atnbr)
+   ABI_FREE(nphicor_arr)
  end if ! master
- call xmpi_bcast(nphicor,master,comm,mpierr)
  call xmpi_bcast(ncor,master,comm,mpierr)
  call xmpi_bcast(lcor,master,comm,mpierr)
  call xmpi_bcast(kappacor,master,comm,mpierr)
  call xmpi_bcast(energy_cor,master,comm,mpierr)
- edge(1:nphicor)=fermie-energy_cor(1:nphicor)
-
+ call xmpi_bcast(nphicor,master,comm,mpierr)
+ ABI_MALLOC(edge,(nphicor))
+ edge(1:nphicor)=fermie-energy_cor(1:nphicor,itypat_atnbr)
 !---------------------------------------------------------------------------------
 ! Prepare kpt/band parallelization
 
@@ -1104,15 +1193,13 @@ else if (need_emissivity) then
  ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt))
  call distrb2(mband,nb_per_proc,nband,nkpt,nproc,nsppol,mpi_enreg)
  call initmpi_band(nkpt,mpi_enreg,nband,nkpt,nsppol)
-
 !---------------------------------------------------------------------------------
 !Print some data
-
  Tatm=tsmear*Ha_K
  if (me==master) then
    write(std_out,*)
    write(std_out,'(a)')'--------------------------------------------'
-   write(std_out,'(a,i4)') 'selected atom for X ray emission',atnbr
+   write(std_out,'(a,i4)') 'selected atom for X ray emission',input_atm
    write(std_out,'(a)')'--------------------------------------------'
    if (need_absorption) then
      if (abs(dom_max)>tol10) then
@@ -1138,22 +1225,26 @@ else if (need_emissivity) then
    write(std_out,'(a)')'--------------------------------------------'
    write(std_out,'(a,i4)') ' Number of core orbitals nc=',nphicor
    do icor=1,nphicor
-     if (kappacor(icor)==0) then
-       write(std_out,'(a,2i4,2f10.5)') ' n, l, Energy(Ha), Edge(Ha): ', &
-         ncor(icor),lcor(icor),energy_cor(icor),edge(icor)
+     if (kappacor(icor,itypat_atnbr)==0) then
+       write(std_out,'(a,2i4,4f15.5)') ' n, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ', &
+         ncor(icor,itypat_atnbr),lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+&          energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
      else
-       if (kappacor(icor)>0) then
-         j2=2*lcor(icor)-1
-         write(std_out,'(a,i4,i4,a,i4,2f10.5)') ' n, j, l, Energy(Ha), Edge(Ha): ',&
-&          ncor(icor),j2,' / 2',lcor(icor),energy_cor(icor),edge(icor)
+       if (kappacor(icor,itypat_atnbr)>0) then
+         j2=2*lcor(icor,itypat_atnbr)-1
+         write(std_out,'(a,i4,i4,a,i4,4f15.5)') ' n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&          ncor(icor,itypat_atnbr),j2,' / 2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+&          energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
        else
-         if (kappacor(icor)<-1) then
-           j2=2*lcor(icor)+1
-           write(std_out,'(a,i4,i4,a,i4,2f10.5)') ' n, j, l, Energy(Ha), Edge(Ha): ',&
-&            ncor(icor),j2,'/2',lcor(icor),energy_cor(icor),edge(icor)
+         if (kappacor(icor,itypat_atnbr)<-1) then
+           j2=2*lcor(icor,itypat_atnbr)+1
+           write(std_out,'(a,i4,i4,a,i4,4f15.5)') ' n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&            ncor(icor,itypat_atnbr),j2,'/2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+&            energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
          else
-           write(std_out,'(a,i4,a,i4,2f10.5)') ' n, j, l, Energy(Ha), Edge(Ha): ',&
-&            ncor(icor),'   1/2',lcor(icor),energy_cor(icor),edge(icor)
+           write(std_out,'(a,i4,a,i4,4f15.5)') ' n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&            ncor(icor,itypat_atnbr),'   1/2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+&            energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
          end if
        end if
      end if
@@ -1163,7 +1254,6 @@ else if (need_emissivity) then
 
 !---------------------------------------------------------------------------------
 ! Determine the frequency range and allocate frequency-dependent arrays
-
  if (need_absorption) then
    ABI_MALLOC(oml_edge,(nphicor,mom))
    ABI_MALLOC(dom_var1,(nphicor,mom))
@@ -1171,7 +1261,7 @@ else if (need_emissivity) then
    del_sig=(omax_sig-omin_sig)/(mom-1)
    do iom=1,mom
      do icor=1,nphicor
-       oml_edge(icor,iom)=-energy_cor(icor)+ dble(iom-1)*del_sig + omin_sig - one
+       oml_edge(icor,iom)=-energy_cor(icor,itypat_atnbr)+ dble(iom-1)*del_sig + omin_sig -one 
        if ((oml_edge(icor,iom)<=edge(icor)).or.(abs(dom_max)<=tol10)) then
          dom_var1(icor,iom)= dom
        else
@@ -1181,22 +1271,24 @@ else if (need_emissivity) then
        endif
      enddo
    enddo
-   ABI_MALLOC(sigx1,(nphicor,mom,natom,nsppol))
+   ABI_MALLOC(sigx1,(nphicor,mom,natom_atnbr,nsppol))
    sigx1=zero
  end if
  
  if (need_emissivity) then
-   ABI_MALLOC(oml_emis,(mom))
+   ABI_MALLOC(oml_emis,(nphicor,mom))
    omin_emis=minval(eigen0)
    omax_emis=maxval(eigen0)
    del_emis=(omax_emis-omin_emis)/(mom-1)
    do iom=1,mom
-     oml_emis(iom)=omin_emis+dble(iom-1)*del_emis
+     do icor=1,nphicor
+       oml_emis(icor,iom)=omin_emis+dble(iom-1)*del_emis!-energy_cor(icor,itypat_atnbr)
+     enddo
    end do
-   ABI_MALLOC(emisx,(nphicor,mom,natom,nsppol))
+   ABI_MALLOC(emisx,(nphicor,mom,natom_atnbr,nsppol))
    emisx=zero
  end if
-
+ 
 !---------------------------------------------------------------------------------
 ! Prepare core-valence dipoles reading
 
@@ -1209,6 +1301,11 @@ else if (need_emissivity) then
      varid=nctk_idname(ncid,"dipole_core_valence")
      if (nproc>1) then
        NCF_CHECK(nctk_set_collective(ncid,varid))
+       ABI_MALLOC(num_tasks,(nproc))
+       do iproc=1,nproc
+         num_tasks(iproc)=count(mpi_enreg%proc_distrb==iproc-1)
+       enddo
+       num_tasks_max=maxval(num_tasks)
      end if
    else if (me==master) then
      NCF_CHECK(nctk_open_read(ncid,filnam2,xmpi_comm_self))
@@ -1218,24 +1315,23 @@ else if (need_emissivity) then
      !end if
    end if
  end if
-
+ 
  if (iomode_estf_mpiio) then
    !If MPI-IO, store only elements for one band
-   ABI_MALLOC(psinablapsi2,(2,3,nphicor,natom,1))
+   ABI_MALLOC(psinablapsi2,(2,3,nphicor_max,natom,1))
  else
    !If not, store the elements for all bands
-   ABI_MALLOC(psinablapsi2,(2,3,nphicor,natom,mband))
+   ABI_MALLOC(psinablapsi2,(2,3,nphicor_max,natom,mband))
  end if
  pnp_size=size(psinablapsi2)
-
 !---------------------------------------------------------------------------------
 ! Compute X absorption coefficient and/or X emissivity
 
  if (need_absorption) then
-   ABI_MALLOC(sigx1_k,(nphicor,mom,natom))
+   ABI_MALLOC(sigx1_k,(nphicor,mom,natom_atnbr))
  end if
  if (need_emissivity) then
-   ABI_MALLOC(emisx_k,(nphicor,mom,natom))
+   ABI_MALLOC(emisx_k,(nphicor,mom,natom_atnbr))
  end if
  ABI_MALLOC(dhdk2_g,(nphicor))
 
@@ -1243,40 +1339,38 @@ else if (need_emissivity) then
 
 !LOOP OVER SPINS/K
  bdtot_index = 0
+ itask=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
      etiq=ikpt+(isppol-1)*nkpt
      nband_k=nband(ikpt+(isppol-1)*nkpt)
      mykpt=.not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me))
      master_band=minval(mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol))
-
 !    In case of non MPI-IO, has to read all (n,m) dipoles for this k-point
 !      Master node reads and send to relevant processor
      if (.not.iomode_estf_mpiio.and.me==master) then
        if (iomode==IO_MODE_ETSF) then
          nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
-         nc_count=[2,3,nphicor,natom,mband,1,1]
-#ifdef HAVE_NETCDF
+         nc_count=[2,3,nphicor_max,natom,mband,1,1]
          NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
        else
          psinablapsi2=zero
          if (fform2==612) then ! New OPT2 file format
-           read(opt2_unt) (((psinablapsi2(1:2,1,icor,iatom,iband),icor=1,nphicor),iatom=1,natom),iband=1,nband_k)
-           read(opt2_unt) (((psinablapsi2(1:2,2,icor,iatom,iband),icor=1,nphicor),iatom=1,natom),iband=1,nband_k)
-           read(opt2_unt) (((psinablapsi2(1:2,3,icor,iatom,iband),icor=1,nphicor),iatom=1,natom),iband=1,nband_k)
+           read(opt2_unt) (((psinablapsi2(1:2,1,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
+           read(opt2_unt) (((psinablapsi2(1:2,2,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
+           read(opt2_unt) (((psinablapsi2(1:2,3,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom),iband=1,nband_k)
          else if (fform2==613) then ! Large OPT2 file format
            do iband=1,nband_k
-             read(opt2_unt) ((psinablapsi2(1:2,1,icor,iatom,iband),icor=1,nphicor),iatom=1,natom)
-             read(opt2_unt) ((psinablapsi2(1:2,2,icor,iatom,iband),icor=1,nphicor),iatom=1,natom)
-             read(opt2_unt) ((psinablapsi2(1:2,3,icor,iatom,iband),icor=1,nphicor),iatom=1,natom)
+             read(opt2_unt) ((psinablapsi2(1:2,1,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
+             read(opt2_unt) ((psinablapsi2(1:2,2,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
+             read(opt2_unt) ((psinablapsi2(1:2,3,icor,iatom,iband),icor=1,nphicor_max),iatom=1,natom)
            end do
          else
            !The old writing was not efficient (indexes order is bad)
            do iatom=1,natom
-             read(opt2_unt) ((psinablapsi2(1:2,1,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor)
-             read(opt2_unt) ((psinablapsi2(1:2,2,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor)
-             read(opt2_unt) ((psinablapsi2(1:2,3,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor)
+             read(opt2_unt) ((psinablapsi2(1:2,1,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
+             read(opt2_unt) ((psinablapsi2(1:2,2,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
+             read(opt2_unt) ((psinablapsi2(1:2,3,icor,iatom,iband),iband=1,nband_k),icor=1,nphicor_max)
            end do
          end if
        end if
@@ -1284,10 +1378,9 @@ else if (need_emissivity) then
          call xmpi_exch(psinablapsi2,pnp_size,master,psinablapsi2,master_band,comm,etiq,ierr)
        end if
      end if
-
-!    Select k-points for current proc
+!!    Select k-points for current proc
      if (mykpt) then
-
+       
        ABI_MALLOC(eig0_k,(nband_k))
        ABI_MALLOC(occ_k,(nband_k))
        
@@ -1297,7 +1390,7 @@ else if (need_emissivity) then
 !      k-dependent data
        eig0_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
-
+      
 !      In case of non MPI-IO, receive all (n,m) dipoles from master proc
 !        Then broadcast them to all band processors
        if (.not.iomode_estf_mpiio) then
@@ -1306,8 +1399,9 @@ else if (need_emissivity) then
          end if
          call xmpi_bcast(psinablapsi2,master,mpi_enreg%comm_band,mpierr)
        end if  
-
+        
 !      LOOP OVER BANDS
+       
        do iband=1,nband_k
 
          !If MPI-IO, store only ib elements for each iband
@@ -1320,66 +1414,66 @@ else if (need_emissivity) then
          if (myband) then
 
            diff_occ = (two/dble(nsppol*nspinor))-occ_k(iband)
-
 !          In case of MPI-IO, read core-valence dipoles for band n
            if (iomode_estf_mpiio) then
+            itask=itask+1
              nc_start=[1,1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
-             nc_count=[2,3,nphicor,natom,1,1,1]
-#ifdef HAVE_NETCDF
-             NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
+             nc_count=[2,3,nphicor_max,natom,1,1,1]
+             NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count)) 
            end if
 
 !          LOOP OVER ATOMS
+           iatom_atnbr=0
            do iatom=1,natom
-
-             dhdk2_g = zero
-             do icor=1,nphicor
-               do l1=1,3
-                 dhdk2_g(icor)=dhdk2_g(icor) &
-&                 +(psinablapsi2(1,l1,icor,iatom,my_iband)*psinablapsi2(1,l1,icor,iatom,my_iband) &
-&                  +psinablapsi2(2,l1,icor,iatom,my_iband)*psinablapsi2(2,l1,icor,iatom,my_iband))
-               end do
-             end do
-
-!            Absoption for each omega
-             if (need_absorption) then
-               do iom=1,mom
-                 do icor=1,nphicor
-                   !Lorentzian var arctan
-                   sigx1_k(icor,iom,iatom)=sigx1_k(icor,iom,iatom) &
-&                     +dhdk2_g(icor)*diff_occ*oml_edge(icor,iom) &
-&                     *(dom_var1(icor,iom)/((-energy_cor(icor)+eig0_k(iband) &
-&                      -oml_edge(icor,iom))**2+(dom_var1(icor,iom)/two)**2))
+             if(typat(iatom)==itypat_atnbr) then
+               iatom_atnbr=iatom_atnbr+1
+               dhdk2_g = zero
+               do icor=1,nphicor
+                 do l1=1,3
+                   dhdk2_g(icor)=dhdk2_g(icor) &
+&                   +(psinablapsi2(1,l1,icor,iatom,my_iband)*psinablapsi2(1,l1,icor,iatom,my_iband) &
+&                    +psinablapsi2(2,l1,icor,iatom,my_iband)*psinablapsi2(2,l1,icor,iatom,my_iband))*third 
                  end do
                end do
-             end if
-
-!            Emissivity for each omega
-             if (need_emissivity) then
                do iom=1,mom
                  do icor=1,nphicor
-                   oml=-energy_cor(icor)-oml_emis(iom)
-                   emisx_k(icor,iom,iatom)=emisx_k(icor,iom,iatom) &
-&                     +dhdk2_g(icor)*occ_k(iband)/oml &
-&                     *dexp(-((-energy_cor(icor)+eig0_k(iband)-oml)/dom)**2)
-                 end do
+                   diff_eig=eig0_k(iband)-energy_cor(icor,itypat_atnbr)
+                   oml=oml_edge(icor,iom)
+                   if(need_absorption) then
+                     docc_deig=abs(diff_occ/oml)
+                     if(broad_mode==1) then
+                       dirac=dom_var1(icor,iom)/((diff_eig-oml)**2+(dom_var1(icor,iom))**2)/pi 
+                     else
+                       dirac=dexp(-((diff_eig-oml)/(sqrt(two)*dom))**2)/(dom*dsqrt(two*pi))
+                     endif
+                     if(dirac<1d-20) dirac=zero
+                     sigx1_k(icor,iom,iatom_atnbr)=sigx1_k(icor,iom,iatom_atnbr)+dhdk2_g(icor)*docc_deig*dirac*pi/ucvol
+                   endif      
+                   if (need_emissivity) then
+                     docc_deig=abs(occ_k(iband)/oml)
+                     if(broad_mode==1) then
+                       dirac=dom/((diff_eig-oml)**2+dom**2)/pi
+                     else
+                       dirac=dexp(-((diff_eig-oml)/(dom*sqrt(two)))**2)/(dom*dsqrt(two*pi))
+                     endif
+                     if(dirac<1d-20) dirac=zero
+                     emisx_k(icor,iom,iatom_atnbr)=emisx_k(icor,iom,iatom_atnbr)+dhdk2_g(icor)*docc_deig*dirac*pi/ucvol
+                   endif
+                end do
                end do
-             end if
-
+             endif
            end do ! iatom
-
          end if ! my band?
        end do ! iband
-
+       
 !      Accumulate k-point contribution
        if (need_absorption) then
-         sigx1(1:nphicor,1:mom,1:natom,isppol)=sigx1(1:nphicor,1:mom,1:natom,isppol) &
-&                                              +wtk(ikpt)*sigx1_k(1:nphicor,1:mom,1:natom)   
+         sigx1(1:nphicor,1:mom,1:natom_atnbr,isppol)=sigx1(1:nphicor,1:mom,1:natom_atnbr,isppol) &
+&                                              +wtk(ikpt)*sigx1_k(1:nphicor,1:mom,1:natom_atnbr)   
        end if
        if (need_emissivity) then
-         emisx(1:nphicor,1:mom,1:natom,isppol)=emisx(1:nphicor,1:mom,1:natom,isppol) &
-&                                              +wtk(ikpt)*emisx_k(1:nphicor,1:mom,1:natom)   
+         emisx(1:nphicor,1:mom,1:natom_atnbr,isppol)=emisx(1:nphicor,1:mom,1:natom_atnbr,isppol) &
+&                                              +wtk(ikpt)*emisx_k(1:nphicor,1:mom,1:natom_atnbr)   
        end if
 
 !      Validity limit
@@ -1387,13 +1481,23 @@ else if (need_emissivity) then
 
        ABI_FREE(eig0_k)
        ABI_FREE(occ_k)
-
 !    End loop over kpt/spin
      end if ! My kpt?
      bdtot_index=bdtot_index+nband_k
    end do ! ikpt
  end do ! isppol
 
+ if (iomode == IO_MODE_ETSF) then
+   if(iomode_estf_mpiio.and.nproc>1) then
+     do idum=num_tasks(me+1)+1,num_tasks_max
+       nc_start=[1,1,1,1,1,1,1];nc_stride=[1,1,1,1,1,1,1]
+       nc_count=[0,0,0,0,0,0,0]
+       NCF_CHECK(nf90_get_var(ncid,varid,dummy,start=nc_start,stride=nc_stride,count=nc_count))
+     enddo
+     ABI_FREE(num_tasks)
+   endif 
+ endif
+ 
 !Accumulate kpt/band contributions over processors
  if (need_absorption) then
    call xmpi_sum(sigx1,comm,mpierr)
@@ -1403,6 +1507,7 @@ else if (need_emissivity) then
  end if
  call xmpi_sum(deltae,comm,mpierr)
  deltae=deltae/mpi_enreg%nproc_band
+
 
 !Release some memory
  ABI_FREE(dhdk2_g)
@@ -1417,9 +1522,7 @@ else if (need_emissivity) then
  !Close core-valence dipoles file
  if (iomode == IO_MODE_ETSF) then
    if (iomode_estf_mpiio.or.me==master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    end if
  else if (me==master) then
    ierr=close_unit(opt2_unt,msg)
@@ -1429,117 +1532,99 @@ else if (need_emissivity) then
 !---------------------------------------------------------------------------------
 ! Post-processing
 
-!Absorption: post-processing
  if (need_absorption) then
-
-!  Absorption: apply scaling factor
-   do isppol=1,nsppol
-     do iatom=1,natom
-       do iom=1,mom
-         do icor=1,nphicor
-           sigx1(icor,iom,iatom,isppol)=sigx1(icor,iom,iatom,isppol)*two_pi*dble(natom)/ucvol/two/(dabs(energy_cor(icor)))
-         end do
-       end do
-     end do
-   end do
-
-!  Absorption: average over atoms
+   sigx1=sigx1*dble(natom_atnbr)
    ABI_MALLOC(sigx1_av,(nphicor,mom,nsppol))
    sigx1_av=zero
-   do isppol=1,nsppol
-     do iatom=1,natom
-       do iom=1,mom
-         do icor=1,nphicor
-           sigx1_av(icor,iom,isppol)=sigx1_av(icor,iom,isppol)+sigx1(icor,iom,iatom,isppol)
-         end do
-       end do
-     end do
-   end do
-
-!  Absorption: spin treatment
-   if(nsppol==2) then
-     ABI_MALLOC(sum_spin_sigx1,(nphicor,mom,natom))
-     ABI_MALLOC(sum_spin_sigx1_av,(nphicor,mom))
-     sum_spin_sigx1=zero ; sum_spin_sigx1_av=zero
-     do isppol=1,nsppol
-       do iatom=1,natom
-         do iom=1,mom
-           do icor=1,nphicor
-             sum_spin_sigx1(icor,iom,iatom)=sum_spin_sigx1(icor,iom,iatom) &
-&                                          +sigx1(icor,iom,iatom,isppol)
-           end do
-         end do
-       end do
-     end do
-     do isppol=1,nsppol
-       do icor=1,nphicor
-         do iom=1,mom
-           sum_spin_sigx1_av(icor,iom)=sum_spin_sigx1_av(icor,iom)+sigx1_av(icor,iom,isppol)
-         end do
-       end do
-     end do
-   endif
- end if
-   
-!Emissivity: post-processing
+ endif
  if (need_emissivity) then
-
-!  Emissivity: filter low values
+   ! Filter low values
    do isppol=1,nsppol
-     do iatom=1,natom
+     do iatom_atnbr=1,natom_atnbr
        do iom=1,mom
          do icor=1,nphicor
-           if (emisx(icor,iom,iatom,isppol)<=tol16) emisx(icor,iom,iatom,isppol)=zero
+           if (emisx(icor,iom,iatom_atnbr,isppol)<=tol16) emisx(icor,iom,iatom_atnbr,isppol)=zero
          end do
        end do
      end do
    end do
-
-!  Emissivity: apply scaling factor
-   emisx=emisx*two_pi*third*dble(natom)/(dom*ucvol)*half/dsqrt(pi)
-
-!  Emissivity: average over atoms
+   emisx=emisx*dble(natom_atnbr)
    ABI_MALLOC(emisx_av,(nphicor,mom,nsppol))
    emisx_av=zero
+ endif
+
+ do isppol=1,nsppol
+   do iatom_atnbr=1,natom_atnbr
+     do iom=1,mom
+       do icor=1,nphicor
+         if(need_absorption) sigx1_av(icor,iom,isppol)=sigx1_av(icor,iom,isppol)+sigx1(icor,iom,iatom_atnbr,isppol)/dble(natom_atnbr)
+         if(need_emissivity) emisx_av(icor,iom,isppol)=emisx_av(icor,iom,isppol)+emisx(icor,iom,iatom_atnbr,isppol)/dble(natom_atnbr)
+       end do
+     end do
+   end do
+ end do
+
+!  Spin treatment
+ if(nsppol==2) then
+   if(need_absorption) then
+     ABI_MALLOC(sum_spin_sigx1,(nphicor,mom,natom_atnbr))
+     ABI_MALLOC(sum_spin_sigx1_av,(nphicor,mom))
+     sum_spin_sigx1=zero ; sum_spin_sigx1_av=zero
+   endif
+   if(need_emissivity) then
+     ABI_MALLOC(sum_spin_emisx,(nphicor,mom,natom_atnbr))
+     ABI_MALLOC(sum_spin_emisx_av,(nphicor,mom))
+     sum_spin_emisx=zero ; sum_spin_emisx_av=zero
+   endif
    do isppol=1,nsppol
-     do iatom=1,natom
+     do iatom_atnbr=1,natom_atnbr
        do iom=1,mom
          do icor=1,nphicor
-           emisx_av(icor,iom,isppol)=emisx_av(icor,iom,isppol)+emisx(icor,iom,iatom,isppol)
+           if(need_absorption) sum_spin_sigx1(icor,iom,iatom_atnbr)=sum_spin_sigx1(icor,iom,iatom_atnbr) &
+& +sigx1(icor,iom,iatom_atnbr,isppol)/dble(natom_atnbr)
+           if(need_emissivity) sum_spin_emisx(icor,iom,iatom_atnbr)=sum_spin_emisx(icor,iom,iatom_atnbr) &
+& +emisx(icor,iom,iatom_atnbr,isppol)/dble(natom_atnbr)
          end do
        end do
      end do
    end do
-  emisx_av=emisx_av/dble(natom)
-
-!  Emissivity: spin treatment
-   if(nsppol==2) then
-     ABI_MALLOC(sum_spin_emisx,(nphicor,mom,natom))
-     ABI_MALLOC(sum_spin_emisx_av,(nphicor,mom))
-     sum_spin_emisx=zero ; sum_spin_emisx_av=zero
-     do isppol=1,nsppol
-       do iatom=1,natom
-         do iom=1,mom
-           do icor=1,nphicor
-             sum_spin_emisx(icor,iom,iatom)=sum_spin_emisx(icor,iom,iatom) &
-&                                          +emisx(icor,iom,iatom,isppol)
-           end do
-         end do
-       end do
-     end do
-     do isppol=1,nsppol
+   do isppol=1,nsppol
+     do iom=1,mom
        do icor=1,nphicor
-         do iom=1,mom
-           sum_spin_emisx_av(icor,iom)=sum_spin_emisx_av(icor,iom)+emisx_av(icor,iom,isppol)
-         end do
+         if(need_absorption) sum_spin_sigx1_av(icor,iom)=sum_spin_sigx1_av(icor,iom)+sigx1_av(icor,iom,isppol)
+         if(need_emissivity) sum_spin_emisx_av(icor,iom)=sum_spin_emisx_av(icor,iom)+emisx_av(icor,iom,isppol)
        end do
      end do
-   endif
- end if
+   end do
+ endif
   
+ ! Units
+ if(au_units==0) then
+   oml_edge=oml_edge*Ha_eV
+   if(need_absorption) then
+     sigx1_av=sigx1_av*Ohmcm
+     sigx1=sigx1*Ohmcm
+     if(nsppol==2) then
+       sum_spin_sigx1_av=sum_spin_sigx1_av*Ohmcm
+       sum_spin_sigx1=sum_spin_sigx1*Ohmcm 
+     endif
+   endif
+   if(need_emissivity) then
+     emisx_av=emisx_av*Ohmcm
+     emisx=emisx*Ohmcm
+     if(nsppol==2) then
+       sum_spin_emisx_av=sum_spin_emisx_av*Ohmcm
+       sum_spin_emisx=sum_spin_emisx*Ohmcm 
+     endif
+   endif
+ endif
+ 
 !---------------------------------------------------------------------------------
 ! Output results
-   
+ write(str_atm,*) input_atm
+ str_atm=adjustl(str_atm)
+ str_atm=trim(str_atm) 
+ 
 !Only master node outputs results in files (only master node)
  if (me==master) then
 
@@ -1557,7 +1642,7 @@ else if (need_emissivity) then
 
 !  _sigX file
    if (need_absorption) then
-     if (open_file(trim(filnam_out)//'_sigX',msg,newunit=sigx1_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_sigX_at'//str_atm,msg,newunit=sigx1_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
      if (abs(dom_max)>tol10) then
@@ -1579,21 +1664,26 @@ else if (need_emissivity) then
      write(sigx1_unt,'(a)')'#----------------------------------------------------------------------------'
      write(sigx1_unt,'(a,i4)') '# Number of core orbitals nc=',nphicor
      do icor=1,nphicor
-       if (kappacor(icor)==0) then
-         write(sigx1_unt,'(a,2i4,2f10.5)') '# n, l, Energy(Ha), Edge(Ha): ',ncor(icor),lcor(icor),energy_cor(icor),edge(icor)
+       if (kappacor(icor,itypat_atnbr)==0) then
+         write(sigx1_unt,'(a,2i4,4f15.5)') '# n, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ', &
+           ncor(icor,itypat_atnbr),lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+&            energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
        else
-         if (kappacor(icor)>0) then
-           j2=2*lcor(icor)-1
-           write(sigx1_unt,'(a,i4,i4,a,i4,2f10.5)') '# n, j, l, Energy(Ha), Edge(Ha): ', &
-&            ncor(icor),j2,' / 2',lcor(icor),energy_cor(icor),edge(icor)
+         if (kappacor(icor,itypat_atnbr)>0) then
+           j2=2*lcor(icor,itypat_atnbr)-1
+           write(sigx1_unt,'(a,i4,i4,a,i4,4f15.5)') '# n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&            ncor(icor,itypat_atnbr),j2,' /2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+&            energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
          else
-           if (kappacor(icor)<-1) then
-             j2=2*lcor(icor)+1
-             write(sigx1_unt,'(a,i4,i4,a,i4,2f10.5)') '# n, j, l, Energy(Ha), Edge(Ha): ', &
-&              ncor(icor),j2,' / 2',lcor(icor),energy_cor(icor),edge(icor)
+           if (kappacor(icor,itypat_atnbr)<-1) then
+             j2=2*lcor(icor,itypat_atnbr)+1
+             write(sigx1_unt,'(a,i4,i4,a,i4,4f15.5)') '# n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&   ncor(icor,itypat_atnbr),j2,'/2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+&              energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
            else
-             write(sigx1_unt,'(a,i4,a,i4,2f10.5)') '# n, j, l, Energy(Ha), Edge(Ha): ', &
-&              ncor(icor),'   1 / 2',lcor(icor),energy_cor(icor),edge(icor)
+             write(sigx1_unt,'(a,i4,a,i4,4f15.5)') '# n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&              ncor(icor,itypat_atnbr),'1/2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+&              energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
            end if
          end if
        end if
@@ -1602,62 +1692,98 @@ else if (need_emissivity) then
      write(sigx1_unt,'(a,f10.5,a,f10.5,a)')&
 &     '# Emax       =',deltae/dble(nkpt*nsppol),' Ha',deltae/dble(nkpt*nsppol)*Ha_eV,' eV'
      write(sigx1_unt,'(a)')'#----------------------------------------------------------------------------'
+     if(au_units>0) then
+       write(sigx1_unt,'(a)')'#  om(au),sig1_av(au),sig1(au)  for each orbital'
+     else
+       write(sigx1_unt,'(a)')'#  om(eV),sig1_av(Ohm.cm)-1,sig1(Ohm.cm)-1  for each orbital'
+     endif
      do iom=1,mom
-       write(sigx1_unt,'(100(1x,e15.8))') &
-&      (oml_edge(icor,iom),sigx1_av(icor,iom,1)/dble(natom),sigx1(icor,iom,atnbr,1),icor=1,nphicor)
+       if(nsppol==1) then
+         write(sigx1_unt,'(100(1x,e15.8))') &
+&        (oml_edge(icor,iom),sigx1_av(icor,iom,1),sigx1(icor,iom,atnbr,1),icor=1,nphicor)
+       else
+         write(sigx1_unt,'(100(1x,e15.8))') &
+&        (oml_edge(icor,iom),sum_spin_sigx1_av(icor,iom),sum_spin_sigx1(icor,iom,atnbr),icor=1,nphicor)
+       endif
      end do
      close(sigx1_unt)
+     ! absX file
+     if(au_units==0) then
+       if(open_file(trim(filnam_out)//'_absX_at'//str_atm,msg,newunit=absx_unt,form='formatted',action="write")/=0) then
+         ABI_ERROR(msg)
+       end if
+       write(absx_unt,'(a)') '# om(eV), abso X average (cm-1), abso X(cm-1)'
+       do iom=1,mom
+         if(nsppol==1) then
+           write(absx_unt,'(100(1x,e15.8))') &
+&          (oml_edge(icor,iom),sigx1_av(icor,iom,1)/(Sp_Lt_SI*eps0),&
+&          sigx1(icor,iom,atnbr,1)/(Sp_Lt_SI*eps0),icor=1,nphicor)
+         else
+           write(absx_unt,'(100(1x,e15.8))') &
+&          (oml_edge(icor,iom),sum_spin_sigx1_av(icor,iom)/(Sp_Lt_SI*eps0),&
+&          sum_spin_sigx1(icor,iom,atnbr)/(Sp_Lt_SI*eps0),icor=1,nphicor)
+         endif
+       end do
+       close(absx_unt)
+     endif
    end if
 
-!    _s_sigX and tot_sigX files
+!    _s_sigX
    if (need_absorption.and.nsppol==2) then
-     if (open_file(trim(filnam_out)//'_s_sigX',msg,newunit=sigx1_s_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_sigX_up_at'//str_atm,msg,newunit=sigx1_up_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
-     if (open_file(trim(filnam_out)//'_tot_sigX',msg,newunit=sigx1_tot_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_sigX_dn_at'//str_atm,msg,newunit=sigx1_dn_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
      do iom=1,mom
-       write(sigx1_s_unt,'(100(1x,e15.8))') &
-&        (oml_edge(icor,iom),sigx1_av(icor,iom,nsppol)/dble(natom),sigx1(icor,iom,atnbr,nsppol),icor=1,nphicor)
-       write(sigx1_tot_unt,'(100(1x,e15.8))') &
-&          (oml_edge(icor,iom),sum_spin_sigx1_av(icor,iom)/dble(natom),sum_spin_sigx1(icor,iom,atnbr),icor=1,nphicor)
+       write(sigx1_up_unt,'(100(1x,e15.8))') &
+&      (oml_edge(icor,iom),sigx1_av(icor,iom,1),sigx1(icor,iom,atnbr,1),icor=1,nphicor) 
+       write(sigx1_dn_unt,'(100(1x,e15.8))') &
+&      (oml_edge(icor,iom),sigx1_av(icor,iom,2),sigx1(icor,iom,atnbr,2),icor=1,nphicor)      
      end do
-     close(sigx1_s_unt)
-     close(sigx1_tot_unt)
+     close(sigx1_up_unt)
+     close(sigx1_dn_unt)
    end if
 
 !  _emisX file
    if (need_emissivity) then
-     if (open_file(trim(filnam_out)//'_emisX',msg,newunit=ems_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_emisX_at'//str_atm,msg,newunit=ems_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
-     write(ems_unt,*) '# conducti: Xray emission spectrum, all in atomic units by default '
-     write(ems_unt,*) '# One block of 3 columns per core wavefunction'
-     write(ems_unt,*) '# energy, sigx_av, sigx, etc... '
+     if(au_units>0) then
+       write(ems_unt,'(a)')'#  om(au),sig1_av(au),sig1(au)  for each orbital'
+     else
+       write(ems_unt,'(a)')'#  om(eV),sig1_av(Ohm.cm)-1,sig1(Ohm.cm)-1  for each orbital'
+     endif
      do iom=1,mom
-       write(ems_unt,'(3(3(1x,e15.8),2x))') &
-&       ((-energy_cor(icor)+oml_emis(iom)),emisx_av(icor,iom,1),emisx(icor,iom,atnbr,1),icor=1,nphicor)
+       if(nsppol==1) then
+         write(ems_unt,'(3(3(1x,e15.8),2x))') &
+&        (oml_edge(icor,iom),emisx_av(icor,iom,1),emisx(icor,iom,atnbr,1),icor=1,nphicor)
+       else
+         write(ems_unt,'(3(3(1x,e15.8),2x))') &
+&        (oml_edge(icor,iom),sum_spin_emisx_av(icor,iom)/dble(natom_atnbr),sum_spin_emisx(icor,iom,atnbr),icor=1,nphicor)
+       endif
      end do
     close(ems_unt)
   end if
     
-!    _s_emisX and tot_emisX files
+!    _s_emisX
    if (need_emissivity.and.nsppol==2) then
-     if (open_file(trim(filnam_out)//'_s_emisX',msg,newunit=ems_s_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_emisX_up_at'//str_atm,msg,newunit=ems_up_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
-     if (open_file(trim(filnam_out)//'_tot_emisX',msg,newunit=ems_tot_unt,form='formatted',action="write")/=0) then
+     if (open_file(trim(filnam_out)//'_emisX_dn_at'//str_atm,msg,newunit=ems_dn_unt,form='formatted',action="write")/=0) then
        ABI_ERROR(msg)
      end if
      do iom=1,mom
-       write(ems_s_unt,'(3(3(1x,e15.8),2x))') &
-&        ((-energy_cor(icor)+oml_emis(iom)),emisx_av(icor,iom,nsppol)/dble(natom),emisx(icor,iom,atnbr,nsppol),icor=1,nphicor)
-       write(ems_tot_unt,'(3(3(1x,e15.8),2x))') &
-&       ((-energy_cor(icor)+oml_emis(iom)),sum_spin_emisx_av(icor,iom)/dble(natom),sum_spin_emisx(icor,iom,atnbr),icor=1,nphicor)
+       write(ems_up_unt,'(3(3(1x,e15.8),2x))') &
+&        (oml_edge(icor,iom),emisx_av(icor,iom,1)/dble(natom_atnbr),emisx(icor,iom,atnbr,1),icor=1,nphicor)
+       write(ems_dn_unt,'(3(3(1x,e15.8),2x))') &
+         (oml_edge(icor,iom),emisx_av(icor,iom,2)/dble(natom_atnbr),emisx(icor,iom,atnbr,2),icor=1,nphicor)
      end do
-     close(ems_s_unt)
-     close(ems_tot_unt)
+     close(ems_up_unt)
+     close(ems_dn_unt)
    end if
    
  endif ! master node
@@ -1771,7 +1897,6 @@ subroutine conducti_nc(filnam,filnam_out)
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
-
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0=0,formeig1=1
@@ -2298,7 +2423,7 @@ subroutine conducti_nc(filnam,filnam_out)
 
 !Calculate the imaginary part of the conductivity (principal value)
 !+derived optical properties.
- call msig(kin11,mom,oml1,filnam_out)
+ call msig(kin11,mom,oml1,filnam_out,zero,0)
 
  close(tens_unt)
  close(lij_unt)
@@ -2360,147 +2485,82 @@ subroutine conducti_nc(filnam,filnam_out)
 !! NOTES
 !!     this program calculates the imaginary part of the conductivity (principal value)
 !!     +derived optical properties.
-!!     the calculation is performed on the same grid as the initial input
-!!     to calculate the principal value, a trapezoidale integration +taylor expansion to
-!!     third order is used (W.J. Thomson computer in physics vol 12 p94 1998)
-!!    two input files are needed inppv.dat (parameters) and sigma.dat (energy,sigma_1)
-!!     two output files ppsigma.dat (energy,sigma_1,sigma_2,epsilon_1,epsilon_2)
-!!                      abs.dat     (energy,nomega,komega,romega,absomega)
-!!     march 2002 s.mazevet
 !!
 !! SOURCE
 
-subroutine msig(fcti,npti,xi,filnam_out_sig)
+subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
 
 !Arguments -----------------------------------
 !scalars
- integer,intent(in) :: npti
+ integer,intent(in) :: npti, au_units
 !arrays
  real(dp),intent(in) :: fcti(npti),xi(npti)
  character(len=fnlen),intent(in) :: filnam_out_sig
-
+ real(dp),intent(in) :: phi
 !Local variables-------------------------------
 !scalars
- integer :: npt = 10000
- integer :: ii,ip,npt1,npt2,eps_unt,abs_unt
- real(dp),parameter :: del=0.001_dp,ohmtosec=9.d11
- real(dp) :: dx,dx1,dx2,eps1,eps2,idel,komega,pole,refl,sigma2,xsum
+ integer :: ii,ip,eps_unt,abs_unt
+ real(dp),parameter :: del=0.001_dp
+ real(dp) :: dx,eps1,eps2,komega,pole,refl_s,refl_p,sigma2,xsum,ff,ffp,ffpp,abso,sigma1
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: abso(:),fct(:),fct1(:),fct2(:),fct3(:),fct4(:),fct5(:)
- real(dp),allocatable :: fctii(:),fp(:),fpp(:),fppp(:),nomega(:),ppsig(:)
- real(dp),allocatable :: x1(:),x2(:)
-
+ real(dp),allocatable :: fct(:)
+ real(dp) :: xx1,xx2,xx,nomega
+ complex(dp) :: epsc,cos_phi,sin_phi,sqroot,crefl_s,crefl_p
 ! *********************************************************************************
 
- if (npti > 12000) then
-   msg = "Sorry - the interpolator INTRPL is hard coded for maximum 12000 points." // &
-&        ch10 // " Reduce the conducti input npti, or implement a better interpolator!"
-   ABI_ERROR(msg)
- end if
 
  write(std_out,'(2a)')ch10,'Calculate the principal value and related optical properties'
- write(std_out,'(a)')'following W.J. Thomson computer in physics vol 12 p94 1998 for '
- write(std_out,'(a)')'the principal value.'
- write(std_out,'(a)')'OPTIONS'
- write(std_out,'(a)')'use default number of integration pts: npt=10000'
  write(std_out,'(a)')'Use default value for delta interval: del=1e-3'
 
  if (open_file(trim(filnam_out_sig)//'_eps',msg,newunit=eps_unt,status='replace',action="write")/=0) then
    ABI_ERROR(msg)
  end if
- write(eps_unt,'(a)')'#energy (eV),sigma_1(Ohm-1cm-1),sigma_2(Ohm-1cm-1),epsilon_1,epsilon_2'
+ if(au_units==0) then
+   write(eps_unt,'(a)')'#energy (eV),sigma_1(Ohm-1cm-1),sigma_2(Ohm-1cm-1),epsilon_1(cgs),epsilon_2(cgs)'
+ else
+   write(eps_unt,'(a)')'#energy (Ha),sigma_1(au),sigma_2(au),epsilon_1(au),epsilon_2(au)'
+ endif
 
  if (open_file(trim(filnam_out_sig)//'_abs',msg,newunit=abs_unt,status='replace',action="write")/=0) then
    ABI_ERROR(msg)
  end if
- write(abs_unt,'(a)')'#energy(eV),nomega,komega,refl.,abso.(cm-1)'
+ if(au_units==0) then
+   write(abs_unt,'(a)')'#energy(eV),nomega,komega,refl. s,refl. p,abso.(cm-1)'
+ else
+   write(abs_unt,'(a)')'#energy(Ha),nomega,komega,refl. s,refl. p,abso.(au)'
+ endif
 
- ABI_MALLOC(fct,(npt))
- ABI_MALLOC(fct2,(npt))
- ABI_MALLOC(fct3,(npt))
- ABI_MALLOC(fct4,(npt))
- ABI_MALLOC(fct5,(npt))
- ABI_MALLOC(fp,(npt))
- ABI_MALLOC(fpp,(npt))
- ABI_MALLOC(fppp,(npt))
- ABI_MALLOC(x1,(npt))
- ABI_MALLOC(x2,(npt))
- ABI_MALLOC(fct1,(npt))
- ABI_MALLOC(ppsig,(npt))
- ABI_MALLOC(fctii,(npt))
- ABI_MALLOC(abso,(npt))
- ABI_MALLOC(nomega,(npt))
+ ABI_MALLOC(fct,(npti))
 
 !loop on the initial energy grid
  do ip=1,npti
-
-!  adjust the interval before and after the pole to reflect range/npt interval
-   xsum=zero
-   dx=(xi(npti)-xi(1))/dble(npt-1)
+   !!! Taylor expansion up to second order of fcti at xx=xi(ii) for each ii
+   !!! Then, in each discretization interval, the integral can be performed analytically   
    pole=xi(ip)
-   npt1=int((pole-del)/dx)
-   dx1=zero
-   if(npt1/=1) dx1=(pole-del)/(npt1-1)
-   npt2=int((xi(npti)-pole-del)/dx)
-   dx2=(xi(npti)-pole-del)/(npt2-1)
-
-!  for the moment skip the pp calculation when the pole if too close to the end of the range
-   if (npt1<=1.or.npt2<=1) then
-
-     xsum=zero
-     ppsig(ip)=zero
-
-   else
-
-!    define the fct for which the pp calculation is needed using xi^2-pole^2 factorization
-     fctii(1:npti) = zero
-     fctii(1:npti)=fcti(1:npti)*pole/(xi(1:npti)+pole)
-
-!    define the grid on each side of the pole x1 before x2 after
-     do ii=1,npt1
-       x1(ii)=dx1*dble(ii-1)
-     end do
-     do ii=1,npt2
-       x2(ii)=pole+del+dx2*dble(ii-1)
-     end do
-
-!    interpolate the initial fct fii on the new grids x1 and x2 (cubic spline)
-!    write(std_out,*) npti,npt1
-
-!    MJV 6/12/2008:
-!    For each use of fctii should ensure that npt1 npt2 etc... are less than
-!    npt=len(fctii)
-!    TODO: move to spline/splint routines with no memory limitation
-     call intrpl(npti,xi,fctii,npt1,x1,fct4,fct1,fct5,1)
-     call intrpl(npti,xi,fctii,npt2,x2,fct3,fct2,fct5,1)
-
-!    calculate the two integrals from 0-->pole-lamda and pole+lamda--> end range
-!    trapezoidal integration
-     do ii=1,npt1
-       fct1(ii)=fct4(ii)/(x1(ii)-pole)
-     end do
-     do ii=1,npt2
-       fct2(ii)=fct3(ii)/(x2(ii)-pole)
-     end do
-
-     do ii=2,npt1-1
-       xsum=xsum+fct1(ii)*dx1
-     end do
-     do ii=2,npt2-1
-       xsum=xsum+fct2(ii)*dx2
-     end do
-     xsum=xsum+half*(fct1(1)+fct1(npt1))*dx1+half*(fct2(1)+fct2(npt2))*dx2
-
-!    Calculate the first and third derivative at the pole and add the taylor expansion
-!    TODO: move to spline/splint routines with no memory limitation
-     call intrpl(npti,xi,fctii,npti,xi,fct3,fct4,fct5,1)
-     call intrpl(npti,xi,fct4,1,(/pole/),fp,fpp,fppp,1)
-
-     idel=two*fp(1)*(del)+fppp(1)*(del**3)/nine
-     xsum=xsum+idel
-
-   end if
+   dx=(xi(npti)-xi(1))/dble(npti-1)
+   xsum=zero
+   do ii=1,npti
+     xx=xi(ii)
+     fct(ii)=fcti(ii)*pole/(xx+pole)
+   enddo
+   do ii=1,npti
+     xx=xi(ii)
+     ff=fct(ii)
+     ffp=zero
+     ffpp=zero
+     if(ii<=npti-3) then 
+       ffp=(four*fct(ii+1)-three*fct(ii)-fct(ii+2))/dx/two
+       ffpp=(-fct(ii+3)+four*fct(ii+2)-five*fct(ii+1)+&
+&          two*fct(ii))/dx/dx
+     endif
+     xx2=xx+half*dx
+     xx1=zero
+     if(ii>1) xx1=xx-half*dx
+     xsum=xsum+ff*log(abs((xx2-pole)/(xx1-pole)))+ffp*(xx2-xx1+(pole-xx)*log(abs((xx2-pole)/(xx1-pole))))+&
+& half*ffpp*((xx-pole)**2*log(abs((xx2-pole)/(xx1-pole)))+(xx2**2-xx1**2+(two*pole-four*xx)*(xx2-xx1))/two)
+   enddo
+   if(pole<tol3) xsum=zero
 
 !  Calculate the derivated optical quantities and output the value
    sigma2=(-two/pi)*xsum
@@ -2509,24 +2569,38 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 
 !  A special treatment of the case where eps2 is very small compared to eps1 is needed
    if(eps2**2 > eps1**2 * tol12)then
-     nomega(ip)=sqrt(half*(eps1 + sqrt(eps1**2 + eps2**2)))
+     nomega=sqrt(half*(eps1 + sqrt(eps1**2 + eps2**2)))
      komega=sqrt(half*(-eps1 + sqrt(eps1**2 + eps2**2)))
-     abso(ip)=four_pi*fcti(ip)*ohmtosec*Ohmcm/nomega(ip)/(Sp_Lt_SI*100._dp)
+     abso=four_pi*fcti(ip)/(nomega*Sp_Lt)
    else if(eps1>zero)then
-     nomega(ip)=sqrt(half*(eps1 + sqrt(eps1**2 + eps2**2)))
+     nomega=sqrt(half*(eps1 + sqrt(eps1**2 + eps2**2)))
      komega=half*abs(eps2/sqrt(eps1))
-     abso(ip)=four_pi*fcti(ip)*ohmtosec*Ohmcm/nomega(ip)/(Sp_Lt_SI*100._dp)
+     abso=four_pi*fcti(ip)/(nomega*Sp_Lt)
    else if(eps1<zero)then
-     nomega(ip)=half*abs(eps2/sqrt(-eps1))
+     nomega=half*abs(eps2/sqrt(-eps1))
      komega=sqrt(half*(-eps1 + sqrt(eps1**2 + eps2**2)))
-     abso(ip)=two*sqrt(-eps1)*pole*ohmtosec*Ohmcm/(Sp_Lt_SI*100._dp)
+     abso=two*sqrt(-eps1)*pole/(Sp_Lt)
    end if
 
-   refl=((one-nomega(ip))**2 + komega**2)/ &
-&   ((one+nomega(ip))**2 + komega**2)
+   epsc=cmplx(eps1,eps2,kind=dp)
+   cos_phi=cmplx(cos(phi),kind=dp)
+   sin_phi=cmplx(sin(phi),kind=dp) 
+   sqroot=sqrt(epsc-sin_phi*sin_phi)
+   crefl_s=(cos_phi-sqroot)/(cos_phi+sqroot)
+   crefl_p=(epsc*cos_phi-sqroot)/(epsc*cos_phi+sqroot)
 
-   write(eps_unt,'(5e18.10)') Ha_eV*pole,fcti(ip)*Ohmcm,sigma2*Ohmcm,eps1,eps2
-   write(abs_unt,'(5e18.10)') Ha_eV*pole,nomega(ip),komega,refl,abso(ip)
+   refl_s=real(crefl_s*conjg(crefl_s))
+   refl_p=real(crefl_p*conjg(crefl_p))
+
+   sigma1=fcti(ip)
+   if(au_units==0) then
+     pole=pole*Ha_eV
+     sigma1=sigma1*Ohmcm
+     sigma2=sigma2*Ohmcm
+     abso=abso*Ohmcm*Sp_Lt/(Sp_Lt_SI*four_pi*eps0)
+   endif
+   write(eps_unt,'(5e18.10)') pole,sigma1,sigma2,eps1,eps2
+   write(abs_unt,'(6e18.10)') pole,nomega,komega,refl_s,refl_p,abso
 
  end do
 
@@ -2534,20 +2608,6 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  close(abs_unt)
 
  ABI_FREE(fct)
- ABI_FREE(x1)
- ABI_FREE(x2)
- ABI_FREE(fct2)
- ABI_FREE(fct3)
- ABI_FREE(fct4)
- ABI_FREE(fct5)
- ABI_FREE(fp)
- ABI_FREE(fpp)
- ABI_FREE(fppp)
- ABI_FREE(fct1)
- ABI_FREE(ppsig)
- ABI_FREE(fctii)
- ABI_FREE(abso)
- ABI_FREE(nomega)
 
 end subroutine msig
 !!***

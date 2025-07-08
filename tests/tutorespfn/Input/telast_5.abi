@@ -1,6 +1,6 @@
 #AlP in hypothetical wurzite (hexagonal) structure
 
-#Alternative response function calculation for some rigid-atom 
+#Alternative response function calculation for some rigid-atom
 #piezoelectric tensor elements.
 
    ndtset   3
@@ -48,7 +48,7 @@ berryopt2   -2       #specifies ddk wave functions wanted
                                         #process
 
 #Definition of the atom types and atoms
- ntypat   2 
+ ntypat   2
   znucl   13 15
   natom   4
   typat   1 1 2 2
@@ -62,7 +62,7 @@ berryopt2   -2       #specifies ddk wave functions wanted
          2/3  1/3  8.7517446813E-01
 
 #Gives the number of bands, explicitely (do not take the default)
-  nband   8              # For an insulator (if described correctly as an 
+  nband   8              # For an insulator (if described correctly as an
                          # insulator by DFT), conduction bands should not
                          # be included in response-function calculations
 
@@ -88,7 +88,7 @@ nshiftk   1              # Use one copy of grid only (default)
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Al.psp8, Psdj_nc_sr_04_pw_std_psp8/P.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -98,14 +98,14 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   telast_5.abo, tolnlines=  5, tolabs=  3.000e-09, tolrel= 0.0004
+#%%   telast_5.abo, tolnlines=  5, tolabs=  1.100e-08, tolrel= 0.0004
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = D. Hamann
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   AlP in hypothetical wurzite (hexagonal) structure
-#%%   Alternative response function calculation for some rigid-atom 
+#%%   Alternative response function calculation for some rigid-atom
 #%%   piezoelectric tensor elements.
 #%%<END TEST_INFO>

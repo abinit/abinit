@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h09 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t77/t77.abi
 - output file    -> t77.abo
 - root for input  files -> t77i
@@ -322,8 +322,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/56ba.psp_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/56ba.psp_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/56ba.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/56ba.psp_mod
 - Barium.ion 5s2.5p6.6s0.5d0 rcs=rcp=rcd=1.7 ecut=22/28
 - 56.00000  10.00000    940000                znucl, zion, pspdat
     4    3    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -340,8 +340,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -6.938476   21.148499
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/8o.psp_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/8o.psp_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/8o.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/8o.psp_mod
 - 1.65bohr 35 hartree exncc psp for oxygen with core 19 june 1992
 -  8.00000   6.00000    920619                znucl, zion, pspdat
     4    3    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -379,7 +379,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  8  -39.297056234480    -6.397E-11 3.550E-11 7.183E-09
  ETOT  9  -39.297056234499    -1.892E-11 2.410E-12 1.055E-10
 
- At SCF step    9, etot is converged : 
+ At SCF step    9, etot is converged :
   for the second time, diff in etot=  1.892E-11 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -607,7 +607,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1691,7 +1691,7 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1762,7 +1762,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  9   4.7111666189323     -1.228E-11 1.086E-13 6.323E-12
  ETOT 10   4.7111666189325      1.137E-13 8.238E-16 2.452E-13
 
- At SCF step   10, etot is converged : 
+ At SCF step   10, etot is converged :
   for the second time, diff in etot=  1.137E-13 < toldfe=  1.000E-10
 -open ddk wf file :t77o_DS3_1WF7
 -open ddk wf file :t77o_DS3_1WF8
@@ -1825,7 +1825,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  9   75.051379182528     -2.296E-11 1.596E-13 8.293E-11
  ETOT 10   75.051379182527     -1.023E-12 3.109E-15 4.704E-12
 
- At SCF step   10, etot is converged : 
+ At SCF step   10, etot is converged :
   for the second time, diff in etot=  1.023E-12 < toldfe=  1.000E-10
 -open ddk wf file :t77o_DS3_1WF7
 -open ddk wf file :t77o_DS3_1WF8
@@ -1887,7 +1887,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  8  -72.417283664001     -4.393E-11 5.246E-13 1.523E-10
  ETOT  9  -72.417283664002     -1.009E-12 1.203E-14 2.013E-12
 
- At SCF step    9, etot is converged : 
+ At SCF step    9, etot is converged :
   for the second time, diff in etot=  1.009E-12 < toldfe=  1.000E-10
 -open ddk wf file :t77o_DS3_1WF7
 -open ddk wf file :t77o_DS3_1WF8
@@ -1916,12 +1916,12 @@ tolerances: {toldfe: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         4.7111667321         0.0000000000
    1    1   2    1         2.3555833660         0.0000000000
    1    1   3    1         2.3555833660         0.0000000000
@@ -1931,7 +1931,7 @@ tolerances: {toldfe: 1.00E-10, }
    1    1   1    4       -40.8852961424         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4        -0.0000000000         0.0000000000
-  
+
    2    1   1    1         2.3555833660         0.0000000000
    2    1   2    1         4.7111667321         0.0000000000
    2    1   3    1         2.3555833660         0.0000000000
@@ -1941,7 +1941,7 @@ tolerances: {toldfe: 1.00E-10, }
    2    1   1    4         0.0000000000         0.0000000000
    2    1   2    4       -40.8852961424         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
-  
+
    3    1   1    1         2.3555833660         0.0000000000
    3    1   2    1         2.3555833660         0.0000000000
    3    1   3    1         4.7111667321         0.0000000000
@@ -1951,7 +1951,7 @@ tolerances: {toldfe: 1.00E-10, }
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
    3    1   3    4       -40.8852961424         0.0000000000
-  
+
    1    2   1    1        -4.6516661673         0.0000000000
    1    2   2    1        -2.3258330837         0.0000000000
    1    2   3    1        -2.3258330837         0.0000000000
@@ -1961,7 +1961,7 @@ tolerances: {toldfe: 1.00E-10, }
    1    2   1    4       -41.8247013980         0.0000000000
    1    2   2    4        -0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
-  
+
    2    2   1    1        -2.3258330837         0.0000000000
    2    2   2    1        -4.6516661673         0.0000000000
    2    2   3    1        -2.3258330837         0.0000000000
@@ -1971,7 +1971,7 @@ tolerances: {toldfe: 1.00E-10, }
    2    2   1    4        -0.0000000000         0.0000000000
    2    2   2    4       -41.8247013980         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-  
+
    3    2   1    1        -2.3258330837         0.0000000000
    3    2   2    1        -2.3258330837         0.0000000000
    3    2   3    1        -4.6516661673         0.0000000000
@@ -1981,7 +1981,7 @@ tolerances: {toldfe: 1.00E-10, }
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
    3    2   3    4       -41.8247013980         0.0000000000
-  
+
    1    4   1    1       -40.8852953390         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
@@ -1991,7 +1991,7 @@ tolerances: {toldfe: 1.00E-10, }
    1    4   1    4       -72.4172839898         0.0000000000
    1    4   2    4        24.1390946633         0.0000000000
    1    4   3    4        24.1390946633         0.0000000000
-  
+
    2    4   1    1        -0.0000000000         0.0000000000
    2    4   2    1       -40.8852953390         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
@@ -2001,7 +2001,7 @@ tolerances: {toldfe: 1.00E-10, }
    2    4   1    4        24.1390946633         0.0000000000
    2    4   2    4       -72.4172839898         0.0000000000
    2    4   3    4        24.1390946633         0.0000000000
-  
+
    3    4   1    1        -0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   3    1       -40.8852953390         0.0000000000
@@ -2011,542 +2011,542 @@ tolerances: {toldfe: 1.00E-10, }
    3    4   1    4        24.1390946633         0.0000000000
    3    4   2    4        24.1390946633         0.0000000000
    3    4   3    4       -72.4172839898         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0882232929         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2        -0.0871090553         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2        -0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0882232929         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.0871090553         0.0000000000
    2    1   3    2        -0.0000000000         0.0000000000
-  
+
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0882232929         0.0000000000
    3    1   1    2        -0.0000000000         0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.0871090553         0.0000000000
-  
+
    1    2   1    1        -0.0871090603         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
    1    2   1    2         1.4054437722         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
-  
+
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1        -0.0871090603         0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         1.4054437722         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-  
+
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.0871090603         0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         1.4054437722         0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         3.9740173191        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4        -0.0000000000        -0.0000000000
    2    4   2    4         3.9740173191        -0.0000000000
    2    4   3    4        -0.0000000000        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
    3    4   3    4         3.9740173191        -0.0000000000
 
  Band by band decomposition of the dielectric tensor
-  
+
   Vacuum polarization
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         1.0000000000         0.0000000000
    1    4   2    4         0.0000000000         0.0000000000
    1    4   3    4         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.0000000000         0.0000000000
    2    4   2    4         1.0000000000         0.0000000000
    2    4   3    4         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.0000000000         0.0000000000
    3    4   2    4         0.0000000000         0.0000000000
    3    4   3    4         1.0000000000         0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates, for band           1
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4        -0.0405762218        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4        -0.0000000000        -0.0000000000
    2    4   2    4        -0.0405762218        -0.0000000000
    2    4   3    4        -0.0000000000        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
    3    4   3    4        -0.0405762218        -0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates, for band           2
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4        -0.1417375696        -0.0000000000
    1    4   2    4         0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4         0.0000000000        -0.0000000000
    2    4   2    4        -0.1417375696        -0.0000000000
    2    4   3    4        -0.0000000000        -0.0000000000
-  
+
    3    4   1    4         0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
    3    4   3    4        -0.1417375696        -0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates, for band           3
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.1290074752        -0.0000000000
    1    4   2    4         0.0000000000        -0.0000000000
    1    4   3    4         0.0000000000        -0.0000000000
-  
+
    2    4   1    4         0.0000000000        -0.0000000000
    2    4   2    4         0.1290074752        -0.0000000000
    2    4   3    4         0.0000000000        -0.0000000000
-  
+
    3    4   1    4         0.0000000000        -0.0000000000
    3    4   2    4         0.0000000000        -0.0000000000
    3    4   3    4         0.1290074752        -0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates, for band           4
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.0996829105        -0.0000000000
    1    4   2    4         0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4         0.0000000000        -0.0000000000
    2    4   2    4         0.0996829105        -0.0000000000
    2    4   3    4        -0.0000000000        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
    3    4   3    4         0.0996829105        -0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates, for band           5
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.4095990468        -0.0000000000
    1    4   2    4         0.0000000000        -0.0000000000
    1    4   3    4         0.0000000000        -0.0000000000
-  
+
    2    4   1    4         0.0000000000        -0.0000000000
    2    4   2    4         0.4095990468        -0.0000000000
    2    4   3    4         0.0000000000        -0.0000000000
-  
+
    3    4   1    4         0.0000000000        -0.0000000000
    3    4   2    4         0.0000000000        -0.0000000000
    3    4   3    4         0.4095990468        -0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates, for band           6
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.1415514756        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4        -0.0000000000        -0.0000000000
    2    4   2    4         0.1415514756        -0.0000000000
    2    4   3    4        -0.0000000000        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
    3    4   3    4         0.1415514756        -0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates, for band           7
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         2.1363201201        -0.0000000000
    1    4   2    4         0.0000000000        -0.0000000000
    1    4   3    4         0.0000000000        -0.0000000000
-  
+
    2    4   1    4         0.0000000000        -0.0000000000
    2    4   2    4         2.1363201201        -0.0000000000
    2    4   3    4         0.0000000000        -0.0000000000
-  
+
    3    4   1    4         0.0000000000        -0.0000000000
    3    4   2    4         0.0000000000        -0.0000000000
    3    4   3    4         2.1363201201        -0.0000000000
-  
+
   Dielectric tensor, in cartesian coordinates, for band           8
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.2401700824        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4        -0.0000000000        -0.0000000000
    2    4   2    4         0.2401700824        -0.0000000000
    2    4   3    4        -0.0000000000        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
    3    4   3    4         0.2401700824        -0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from electric field response) 
+  (from electric field response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4         3.4929030192         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    3    1   1    4        -0.0000000000         0.0000000000
    1    2   1    4        -0.6566079708         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    3    2   1    4        -0.0000000000         0.0000000000
-  
+
    1    1   2    4         0.0000000000         0.0000000000
    2    1   2    4         3.4929030192         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    2    2   2    4        -0.6566079708         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
-  
+
    1    1   3    4         0.0000000000         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
    3    1   3    4         3.4929030192         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
    3    2   3    4        -0.6566079708         0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1         3.4929031470         0.0000000000
    2    4   1    1        -0.0000000000         0.0000000000
    3    4   1    1        -0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1         3.4929031470         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1         3.4929031470         0.0000000000
-  
+
    1    4   1    2        -0.6566079606         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2        -0.6566079606         0.0000000000
    3    4   2    2        -0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2        -0.0000000000         0.0000000000
    3    4   3    2        -0.6566079606         0.0000000000
-  
-  
-  
+
+
+
  Band by band decomposition of the Born effective charges
-  
+
  Ionic charges in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1        10.0000000000         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1        10.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1        10.0000000000         0.0000000000
-  
+
    1    4   1    2         6.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2         6.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2         6.0000000000         0.0000000000
-  
+
   Effective charges, in cartesian coordinates, for band           1
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1         0.1004258939         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1         0.1004258939         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1         0.1004258939         0.0000000000
-  
+
    1    4   1    2        -1.9244308354         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2        -1.9244308354         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2        -1.9244308354         0.0000000000
-  
+
   Effective charges, in cartesian coordinates, for band           2
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1        -1.9152498564         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1        -1.9152498564         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1        -1.9152498564         0.0000000000
-  
+
    1    4   1    2         0.1369076177         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2         0.1369076177         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2         0.1369076177         0.0000000000
-  
+
   Effective charges, in cartesian coordinates, for band           3
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1        -1.1105666820         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1        -1.1105666820         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1        -1.1105666820         0.0000000000
-  
+
    1    4   1    2        -0.7165496085         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2        -0.7165496085         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2        -0.7165496085         0.0000000000
-  
+
   Effective charges, in cartesian coordinates, for band           4
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1        -2.4345259088         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1        -2.4345259088         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1        -2.4345259088         0.0000000000
-  
+
    1    4   1    2        -0.3242345736         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2        -0.3242345736         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2        -0.3242345736         0.0000000000
-  
+
   Effective charges, in cartesian coordinates, for band           5
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1        -2.8863071869         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1        -2.8863071869         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1        -2.8863071869         0.0000000000
-  
+
    1    4   1    2         1.5932952891         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2         1.5932952891         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2         1.5932952891         0.0000000000
-  
+
   Effective charges, in cartesian coordinates, for band           6
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1       176.5298821916         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1       176.5298821916         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1       176.5298821916         0.0000000000
-  
+
    1    4   1    2      -185.8842816832         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2      -185.8842816832         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2      -185.8842816832         0.0000000000
-  
+
   Effective charges, in cartesian coordinates, for band           7
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1       -95.6134209352         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1       -95.6134209352         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1       -95.6134209352         0.0000000000
-  
+
    1    4   1    2        99.5292621092         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2        99.5292621092         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2        99.5292621092         0.0000000000
-  
+
   Effective charges, in cartesian coordinates, for band           8
-  (from phonon response) 
+  (from phonon response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    1       -79.1773343549         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1       -79.1773343549         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-  
+
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1       -79.1773343549         0.0000000000
-  
+
    1    4   1    2        80.9334237114         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-  
+
    1    4   2    2         0.0000000000         0.0000000000
    2    4   2    2        80.9334237114         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-  
+
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    3    4   3    2        80.9334237114         0.0000000000
@@ -2588,7 +2588,7 @@ tolerances: {toldfe: 1.00E-10, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0334455587E+01  1.0334455587E+01  1.0334455587E+01 Bohr
               amu      1.37327000E+02  1.59994000E+01
@@ -2825,7 +2825,7 @@ P          mk1mem4         16
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2848,12 +2848,12 @@ P          mk1mem4         16
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2871,7 +2871,7 @@ P          mk1mem4         16
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

@@ -3,6 +3,7 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 import os
 import time
 import errno
+import subprocess
 from functools import wraps
 
 
@@ -92,6 +93,41 @@ def number_of_cpus():
 
     return -1
     #raise Exception('Cannot determine number of CPUs on this system')
+
+def number_of_gpus():
+    """
+    Get the number of GPU from NVIDIA "nvidia-smi" or AMD "roc-smi".
+
+    Return:
+        Integer containing number of GPUs, 0 if none is available.
+    """
+
+    # Look for NVIDIA GPU first, then AMD GPU...
+    nvidia_cmd=['nvidia-smi', '--query-gpu=name', '--format=csv,noheader']
+    amdgpu_cmd=['roc-smi', '--listgpu']
+
+    num_gpus = 0
+    for gpu_cmd in [ nvidia_cmd, amdgpu_cmd ]:
+        try:
+            result = subprocess.run(gpu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            # The text argument was introduced in Python 3.7 as an alias for universal_newlines=True.
+            #result = subprocess.run(gpu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            # Check if command failed (meaning it exists)
+            if result.returncode != 0:
+                print("Error while executing {}:\n{}".format(gpu_cmd[1], result.stderr))
+                num_gpus = 0
+
+            # Command was successful, count the lines (one per GPU) and exit
+            gpu_lines = result.stdout.strip().split('\n')
+            num_gpus = len(gpu_lines)
+            break
+
+        except FileNotFoundError:
+            # Command doesn't exist, continue the loop and try another
+            continue
+
+    return num_gpus
 
 
 class FileLockException(Exception):

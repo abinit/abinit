@@ -55,14 +55,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t94.abo, tolnlines = 0, tolabs = 2.089e-10, tolrel = 2.000e-02
+#%% files_to_test =
+#%%   t94.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = PAW 
-#%% description = 
+#%% keywords = PAW
+#%% description =
 #%%   Test of Ca, simple cubic , 2  k-point.
 #%%   Testing GS  PAW  energy and lobpcg algorithm.
 #%% topics = PAW

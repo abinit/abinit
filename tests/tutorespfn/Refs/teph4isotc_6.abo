@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h04 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_6.abi
 - output file    -> teph4isotc_6.abo
 - root for input  files -> teph4isotc_6i
@@ -388,8 +388,8 @@ meta: {optdriver: 7, eph_task: 11, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
 - Mg    ONCVPSP-3.3.0  r_core=   2.31813   2.10714
 - 12.00000   2.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -402,8 +402,8 @@ meta: {optdriver: 7, eph_task: 11, }
              1    4.197993    0.757155
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
 - B     ONCVPSP-3.3.0  r_core=   1.20849   1.20849
 -  5.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -448,9 +448,105 @@ P Number of CPUs for parallelism over q-points: 1
 P Number of CPUs for parallelism over k-points: 1
  Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
 
+ gstore_completed: 1
+ gstore_done_qbz_spin: 216
+ gqk%nb: 3
+ gqk%glob_nq: 216
+ gqk%glob_nk: 173
+ E-PH matrix elements:
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     4     1     1     2.241263E-16
+     1     1     4     1     2     8.421036E-08
+     1     1     4     1     3     6.545278E-07
+     1     1     4     2     1     8.421064E-08
+     1     1     4     2     2     2.606757E-18
+     1     1     4     2     3     1.605018E-07
+     1     1     4     3     1     6.545269E-07
+     1     1     4     3     2     1.605012E-07
+     1     1     4     3     3     2.463975E-18
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 9
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     9     1     1     1.875706E-15
+     1     1     9     1     2     9.023131E-21
+     1     1     9     1     3     1.281739E-18
+     1     1     9     2     1     6.779171E-21
+     1     1     9     2     2     1.897460E-15
+     1     1     9     2     3     3.104989E-20
+     1     1     9     3     1     1.550354E-18
+     1     1     9     3     2     2.162949E-21
+     1     1     9     3     3     6.888101E-18
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 173 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1   173     4     1     1     2.350413E-18
+     1   173     4     1     2     1.321788E-19
+     1   173     4     1     3     1.076972E-06
+     1   173     4     2     1     3.821329E-19
+     1   173     4     2     2     1.492172E-16
+     1   173     4     2     3     2.470305E-19
+     1   173     4     3     1     1.076971E-06
+     1   173     4     3     2     1.182950E-18
+     1   173     4     3     3     1.889767E-17
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 173 mode: 9
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1   173     9     1     1     5.944903E-16
+     1   173     9     1     2     1.152216E-08
+     1   173     9     1     3     7.394323E-22
+     1   173     9     2     1     1.152222E-08
+     1   173     9     2     2     1.039402E-15
+     1   173     9     2     3     4.441483E-08
+     1   173     9     3     1     1.509668E-18
+     1   173     9     3     2     4.441497E-08
+     1   173     9     3     3     7.963591E-16
+ |g(k,q)|^2 in Ha^2 for iq: 216 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+   216     1     4     1     1     0.000000E+00
+   216     1     4     1     2     0.000000E+00
+   216     1     4     1     3     0.000000E+00
+   216     1     4     2     1     0.000000E+00
+   216     1     4     2     2     0.000000E+00
+   216     1     4     2     3     0.000000E+00
+   216     1     4     3     1     0.000000E+00
+   216     1     4     3     2     0.000000E+00
+   216     1     4     3     3     0.000000E+00
+ |g(k,q)|^2 in Ha^2 for iq: 216 ik: 1 mode: 9
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+   216     1     9     1     1     0.000000E+00
+   216     1     9     1     2     0.000000E+00
+   216     1     9     1     3     0.000000E+00
+   216     1     9     2     1     0.000000E+00
+   216     1     9     2     2     0.000000E+00
+   216     1     9     2     3     0.000000E+00
+   216     1     9     3     1     0.000000E+00
+   216     1     9     3     2     0.000000E+00
+   216     1     9     3     3     0.000000E+00
+ |g(k,q)|^2 in Ha^2 for iq: 216 ik: 173 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+   216   173     4     1     1     0.000000E+00
+   216   173     4     1     2     0.000000E+00
+   216   173     4     1     3     0.000000E+00
+   216   173     4     2     1     0.000000E+00
+   216   173     4     2     2     0.000000E+00
+   216   173     4     2     3     0.000000E+00
+   216   173     4     3     1     0.000000E+00
+   216   173     4     3     2     0.000000E+00
+   216   173     4     3     3     0.000000E+00
+ |g(k,q)|^2 in Ha^2 for iq: 216 ik: 173 mode: 9
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+   216   173     9     1     1     0.000000E+00
+   216   173     9     1     2     0.000000E+00
+   216   173     9     1     3     0.000000E+00
+   216   173     9     2     1     0.000000E+00
+   216   173     9     2     2     0.000000E+00
+   216   173     9     2     3     0.000000E+00
+   216   173     9     3     1     0.000000E+00
+   216   173     9     3     2     0.000000E+00
+   216   173     9     3     3     0.000000E+00
+
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      2.43050000E+01  1.08110000E+01
@@ -652,7 +748,7 @@ P           mkmem         370
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -669,12 +765,12 @@ P           mkmem         370
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -692,7 +788,7 @@ P           mkmem         370
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

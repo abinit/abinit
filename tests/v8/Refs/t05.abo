@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.2.2.4 of ABINIT, released Sep 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h13 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t05/t05.abi
+.Starting date : Thu 17 Oct 2024.
+- ( at 15h26 )
+
+- input  file    -> /home/blancheta/git/abinit/build/tests/Test_suite/v8_t05/t05.abi
 - output file    -> t05.abo
 - root for input  files -> t05i
 - root for output files -> t05o
@@ -46,17 +46,18 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.477 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
             acell      8.0000000000E+00  8.0000000000E+00  1.1000000000E+01 Bohr
               amu      1.00000000E+00
             dtion      1.00000000E+01
              ecut      1.00000000E+01 Hartree
--          fftalg         512
+-          fftalg         312
+         friction      2.00000000E-04
            imgmov           9
           irandom           1
            istwfk        2
@@ -93,7 +94,6 @@ P           mkmem           1
            toldff      5.00000000E-06
             typat      1  1  1  1  1  1
            useylm           1
-              vis      2.00000000E-04
           wtatcon      1.00000000E-01 -3.00000000E+00  5.50000000E-01
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -126,7 +126,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -596,10 +596,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     1   -3.36903529E+00  -3.68638E-09   2.21391E-06   4.14447E-11   2.81677E-09
-    2   -3.37032648E+00  -6.90698E-09   2.83300E-06   1.02393E-10   4.66236E-08
+    2   -3.37032648E+00  -6.90697E-09   2.83300E-06   1.02393E-10   4.66236E-08
     3   -3.37039789E+00  -7.44437E-09   3.72782E-06   7.25000E-11   1.60599E-08
     4   -3.36910266E+00  -1.47199E-09   2.51540E-06   1.97858E-11   7.99732E-09
-    5   -3.37003952E+00  -1.53651E-09   1.72778E-06   1.08393E-11   6.63157E-09
+    5   -3.37003952E+00  -1.53650E-09   1.72778E-06   1.08393E-11   6.63157E-09
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -696,9 +696,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     1   -3.36836466E+00  -2.31498E-10   1.43730E-06   1.61938E-11   7.06856E-10
     2   -3.36985664E+00  -1.47132E-09   3.78077E-06   8.36460E-12   7.22829E-09
-    3   -3.37028257E+00  -5.13229E-11   1.80268E-06   7.48587E-12   5.33399E-10
+    3   -3.37028257E+00  -5.13189E-11   1.80268E-06   7.48587E-12   5.33399E-10
     4   -3.36821804E+00  -7.45619E-09   1.11034E-06   2.18655E-11   6.37212E-09
-    5   -3.36943062E+00  -3.80187E-10   2.71125E-06   2.48805E-12   8.70262E-09
+    5   -3.36943062E+00  -3.80186E-10   2.71125E-06   2.48805E-12   8.70262E-09
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -794,10 +794,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
     1   -3.36762573E+00  -2.30173E-10   1.48604E-06   1.54471E-11   6.50414E-10
-    2   -3.36931825E+00  -1.70632E-09   4.46177E-06   2.42712E-11   1.00069E-08
-    3   -3.37014103E+00  -4.11511E-11   1.62339E-06   7.93807E-12   3.69911E-10
+    2   -3.36931825E+00  -1.70633E-09   4.46177E-06   2.42712E-11   1.00069E-08
+    3   -3.37014103E+00  -4.11466E-11   1.62339E-06   7.93807E-12   3.69911E-10
     4   -3.36718071E+00  -7.30973E-09   9.91421E-07   1.87234E-11   6.20251E-09
-    5   -3.36874226E+00  -3.64428E-10   7.69989E-07   2.49603E-12   4.54159E-09
+    5   -3.36874226E+00  -3.64433E-10   7.69989E-07   2.49603E-12   4.54159E-09
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -892,11 +892,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  PATH-INTEGRAL MOLECULAR DYNAMICS (LANGEVIN) - TIME STEP     9
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
-    1   -3.36685599E+00  -2.13685E-10   1.40117E-06   1.81392E-11   7.04400E-10
+    1   -3.36685599E+00  -2.13687E-10   1.40117E-06   1.81392E-11   7.04400E-10
     2   -3.36872669E+00  -1.68673E-09   4.36918E-06   2.32581E-11   1.02508E-08
-    3   -3.36998188E+00  -3.85518E-11   1.60611E-06   9.31728E-12   3.55943E-10
+    3   -3.36998188E+00  -3.85549E-11   1.60611E-06   9.31728E-12   3.55943E-10
     4   -3.36603162E+00  -7.83031E-09   9.31660E-07   1.41315E-11   4.72847E-09
-    5   -3.36795810E+00  -9.21327E-10   3.76313E-06   3.40049E-11   1.51599E-08
+    5   -3.36795810E+00  -9.21330E-10   3.76313E-06   3.40049E-11   1.51599E-08
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -991,11 +991,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  PATH-INTEGRAL MOLECULAR DYNAMICS (LANGEVIN) - TIME STEP    10
 
  Cell   Total_energy[Ha]     deltae       diffor       residm         res2
-    1   -3.36603584E+00  -1.96147E-10   1.34857E-06   2.29466E-11   9.16166E-10
-    2   -3.36807290E+00  -1.27662E-09   3.54784E-06   8.02111E-12   7.19267E-09
+    1   -3.36603584E+00  -1.96149E-10   1.34857E-06   2.29466E-11   9.16166E-10
+    2   -3.36807290E+00  -1.27661E-09   3.54784E-06   8.02111E-12   7.19267E-09
     3   -3.36981729E+00  -6.29528E-10   4.82819E-06   1.33027E-13   1.88075E-08
     4   -3.36478677E+00  -8.19514E-09   1.00738E-06   9.45657E-12   3.16500E-09
-    5   -3.36708404E+00  -5.58121E-10   4.55015E-06   6.87187E-12   1.52404E-08
+    5   -3.36708404E+00  -5.58119E-10   4.55015E-06   6.87187E-12   1.52404E-08
 
 ------------------------------------------------------------
  Moving images of the cell...
@@ -1088,7 +1088,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      8.0000000000E+00  8.0000000000E+00  1.1000000000E+01 Bohr
               amu      1.00000000E+00
@@ -1129,7 +1129,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
                       -1.7186572168E-03 -4.0726397874E-04 -2.0222089052E-03
                        2.9713404555E-02  3.7045676607E-03 -7.3113845825E-04
                       -2.9179173763E-02 -3.3727318013E-03 -1.2287196539E-04
--          fftalg         512
+-          fftalg         312
+         friction      2.00000000E-04
            imgmov           9
           irandom           1
            istwfk        2
@@ -1168,7 +1169,7 @@ P           mkmem           1
       strten_2img      4.0866520708E-04  2.1139265878E-04 -1.7021322109E-04
                        2.8109394701E-07 -4.9629911149E-06 -1.2226622102E-05
       strten_3img      3.1904224159E-04  2.0862296210E-04 -1.6858291699E-04
-                       3.5821395091E-07  7.3532514640E-07  8.4539113415E-09
+                       3.5821395091E-07  7.3532514640E-07  8.4539113406E-09
       strten_4img      3.7670322235E-04  2.1167404445E-04 -1.6808974104E-04
                        1.6613767378E-06  1.1855180441E-05  1.3955764626E-06
       strten_5img      2.4981615392E-04  2.1004193327E-04 -1.5356003049E-04
@@ -1197,7 +1198,7 @@ P           mkmem           1
          vel_4img      3.9906039635E-05 -6.8863208237E-05  5.6243045569E-05
                       -6.1322732163E-04  5.2793337365E-05  4.1370689546E-04
                       -1.2963961558E-03  1.3677876144E-03 -1.9922125576E-03
-                      -6.4978298136E-05 -2.7591085469E-04 -1.7294484479E-04
+                      -6.4978298135E-05 -2.7591085469E-04 -1.7294484479E-04
                       -1.8077606265E-03  3.3444846995E-04 -1.3486850950E-03
                       -3.3981534284E-04  1.7968648619E-03  1.5788108654E-03
          vel_5img     -2.1492842352E-05 -3.7137332355E-05  1.8121220888E-04
@@ -1206,7 +1207,6 @@ P           mkmem           1
                        6.4566329848E-05  8.6075769009E-05 -1.0204689971E-04
                       -1.2417388930E-04 -8.3860463894E-04 -1.1741047526E-03
                        1.1865425083E-03  1.4276049158E-03 -1.5225301226E-03
-              vis      2.00000000E-04
           wtatcon      1.00000000E-01 -3.00000000E+00  5.50000000E-01
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
                        0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1344,7 +1344,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1356,12 +1356,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1379,7 +1379,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1394,15 +1394,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.0
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered 297 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=         10.0
++Overall time at end (sec) : cpu=          4.8  wall=          4.8

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2004-2024 ABINIT group (JPC, MJV, BXU)
+!!   Copyright (C) 2004-2025 ABINIT group (JPC, MJV, BXU)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,6 @@ module m_a2ftr
  use m_splines
  use m_ebands
 
- use defs_datatypes,    only : ebands_t
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : simpson_int
  use m_hide_lapack,     only : matrginv
@@ -1888,7 +1887,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
    Bst%occopt = 3
    Bst%tsmear = Temp*kb_HaK
-   call ebands_update_occ(Bst,-99.99_dp)
+   call Bst%update_occ(-99.99_dp)
    write(message,'(a,f12.6,a,E20.12)')'At T=',Temp,' Fermi level is:',Bst%fermie
    call wrtout(std_out,message,'COLL')
 

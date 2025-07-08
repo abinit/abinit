@@ -1,15 +1,15 @@
 from __future__ import print_function, division, absolute_import  # , unicode_literals
-import logging
-from tests.pymods.devtools import FileLock
-from tests.pymods.testsuite import ChainOfTests, AbinitTestSuite
-from pprint import pprint
-from socket import gethostname
 
+import logging
 import sys
 import os
 import platform
 import re
 
+from tests.pymods.devtools import FileLock
+from tests.pymods.testsuite import ChainOfTests, AbinitTestSuite
+from pprint import pprint
+from socket import gethostname
 from tests.pymods.termcolor import cprint
 
 # Handle py2, py3k differences.
@@ -22,7 +22,7 @@ else:
     from io import StringIO
 
 
-#from tests.pymods.tools import pprint_table
+
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class AbinitEnvironment(object):
         self.home_dir, tail = os.path.split(self.tests_dir)
 
         self.src_dir = os.path.join(self.home_dir, "src")
-        self.psps_dir = os.path.join(self.tests_dir, "Psps_for_tests")
+        self.psps_dir = os.path.join(self.tests_dir, "Pspdir")
         self.fldiff_path = os.path.join(self.tests_dir, "Scripts", "fldiff.pl")
 
     def __str__(self):
@@ -140,28 +140,26 @@ database_path = os.path.join(abenv.tests_dir, "test_suite.cpkl")
 
 
 _tsuite_dirs = [
-    # "abirules",
     "atompaw",
     "atdep",
     "bigdft",
     "bigdft_paral",
-    # "buildsys",
     "built-in",
-    # "cpu",      This directory is disabled
+    #"cpu",      This directory is disabled
     "etsf_io",
     "fast",
-    "gwr",
-    #"gwpt",
+    "gwr_suite",
+    #"gwpt_suite",
     "psml",
     "gpu",
     "libxc",
     "mpiio",
     "paral",
-    # "hpc",
+    #"hpc",
     "hpc_gpu_omp",
     "gpu_omp",
     "gpu_kokkos",
-    # "physics",
+    "rttddft_suite",
     "seq",
     "tutoatdep",
     "tutomultibinit",
@@ -186,8 +184,7 @@ _tsuite_dirs = [
 ]
 
 _tsuite_dirs.sort()
-_tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name)
-                      for dir_name in _tsuite_dirs])
+_tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name) for dir_name in _tsuite_dirs])
 
 
 def load_mod(filepath):
@@ -211,25 +208,19 @@ class Suite(object):
 
         module_name = os.path.join(suite_path, "__init__.py")
         module = load_mod(os.path.join(suite_path, "__init__.py"))
-        #module = imp.load_source(
-        #    module_name, os.path.join(suite_path, "__init__.py"))
 
         self.keywords = set(module.keywords)
         self.need_cpp_vars = set(module.need_cpp_vars)
 
         # Divide tests into (active|disabled).
         self.inp_paths = [p for p in module.inp_files if not p.startswith("-")]
-        self.disabled_inp_paths = [p[1:]
-                                   for p in module.inp_files if p.startswith("-")]
+        self.disabled_inp_paths = [p[1:] for p in module.inp_files if p.startswith("-")]
 
         # Use absolute paths
-        self.inp_paths = [os.path.join(suite_path, "Input", p)
-                          for p in self.inp_paths]
-        self.disabled_inp_paths = [os.path.join(
-            suite_path, "Input", p) for p in self.disabled_inp_paths]
+        self.inp_paths = [os.path.join(suite_path, "Input", p) for p in self.inp_paths]
+        self.disabled_inp_paths = [os.path.join(suite_path, "Input", p) for p in self.disabled_inp_paths]
 
-        # True if the suite contains tests that should be executed with
-        # different numbers of MPI processes
+        # True if the suite contains tests that should be executed with different numbers of MPI processes
         self.is_multi_parallel = False
         if hasattr(module, "is_multi_parallel"):
             self.is_multi_parallel = module.is_multi_parallel
@@ -241,8 +232,7 @@ class Suite(object):
                 self.subsuites[k] = []
 
             for name in subsuite_names:
-                #pattern = re.compile("-?t" + name + "_\d+\.in")
-                pattern = re.compile("-?t" + name + "_\d+\.abi")
+                pattern = re.compile("-?t" + name + r"_\d+\.abi")
                 for inp in module.inp_files:
                     if pattern.match(inp):
                         #print(inp, "--> subsuite: ", name)
@@ -345,8 +335,7 @@ class AbinitTestsDatabase(dict):
                     other = res_table[suite_name][test.id]
                     print("test\n:", test)
                     print("other:\n", other)
-                    raise ValueError(
-                        "Replicated test.id %s in suite %s" % (test.id, suite_name))
+                    raise ValueError("Replicated test.id %s in suite %s" % (test.id, suite_name))
 
                 res_table[suite_name][test.id] = {}
 
@@ -366,8 +355,7 @@ class AbinitTestsDatabase(dict):
             suite = self._suites[suite_name]
 
             if not suite.has_subsuite(subsuite_name):
-                raise ValueError("suite %s does not have subsuite %s" %
-                                 (suite_name, subsuite_name))
+                raise ValueError("suite %s does not have subsuite %s" % (suite_name, subsuite_name))
 
             sub_inputs = suite.inputs_of_subsuite(subsuite_name)
 
@@ -380,8 +368,7 @@ class AbinitTestsDatabase(dict):
         if slice_obj is None:
             return test_suite
         else:
-            logger.debug(
-                "will slice test_suite with slice_obj= %s " % slice_obj)
+            logger.debug("will slice test_suite with slice_obj= %s " % slice_obj)
             return test_suite[slice_obj]
 
     def find_unknown_wrong_keywords(self):
@@ -393,7 +380,6 @@ class AbinitTestsDatabase(dict):
         for suite_name, suite in self.items():
             for test in suite:
                 for key in test.keywords:
-                    # if not key: continue
                     if key not in KNOWN_KEYWORDS:
                         unknowns.add(key)
                     if " " in key:
@@ -425,8 +411,7 @@ class AbinitTestsDatabase(dict):
             for test in suite:
                 for ius in test.inputs_used:
                     if ius not in inp2test:
-                        raise ValueError(
-                            "Input [%s] [%s] does not appear in Input2keys!" % (suite_name, ius))
+                        raise ValueError("Input [%s] [%s] does not appear in Input2keys!" % (suite_name, ius))
                     else:
                         inp2test[ius] += 1
 
@@ -443,6 +428,7 @@ class AbinitTestsDatabase(dict):
                 else:
                     ntest = inp2test[fname]
                     assert ntest == 0
+
             # inp2test = {k: inp2test[k] for k in keys} # requires py2.7
             inp2test = dict([(k, inp2test[k]) for k in keys])
 
@@ -450,8 +436,7 @@ class AbinitTestsDatabase(dict):
             for fname, ntimes in inp2test.items():
                 # if ntimes != 1:
                 if ntimes == 0:
-                    err.write("Input file %s is used %s time(s)\n" %
-                              (path2str(fname), ntimes))
+                    err.write("Input file %s is used %s time(s)\n" % (path2str(fname), ntimes))
 
         return err.getvalue()
 
@@ -490,16 +475,14 @@ class AbinitTestsDatabase(dict):
                     if o.endswith(".stdout"):
                         o = o[:-7] + ".out"
                     if o not in ref2test:
-                        err.write(
-                            "files_to_test %s does not appear in Refs!\n" % o)
+                        err.write("files_to_test %s does not appear in Refs!\n" % o)
                     else:
                         ref2test[o] += 1
 
             # At this point ref2test should contain only ones.
             for ref_fname, ntimes in ref2test.items():
                 if ntimes != 1:
-                    err.write("Ref file %s is tested %s time(s)\n" %
-                              (path2str(ref_fname), ntimes))
+                    err.write("Reference file %s is tested %s time(s)\n" % (path2str(ref_fname), ntimes))
 
         return err.getvalue()
 
@@ -565,8 +548,7 @@ class AbinitTests(object):
 
     def __init__(self):
         self.suite_names = tuple([os.path.basename(d) for d in _tsuite_dirs])
-        self.suite_paths = tuple(
-            [os.path.join(abenv.tests_dir, d) for d in _tsuite_dirs])
+        self.suite_paths = tuple([os.path.join(abenv.tests_dir, d) for d in _tsuite_dirs])
 
         self._suites = dict()
         for (suite_name, suite_path) in self.walk_suites():
@@ -576,8 +558,7 @@ class AbinitTests(object):
         all_subsuite_names = self.all_subsuite_names
         for suite_name, suite_path in self.walk_suites():
             if suite_name in all_subsuite_names:
-                print("Found suite and subsuite with the same name: %s" %
-                      suite_name)
+                print("Found suite and subsuite with the same name: %s" % suite_name)
 
     def walk_suites(self):
         """return list of (suite_name, suite_paths)"""
@@ -594,16 +575,15 @@ class AbinitTests(object):
         return self._suites.values()
 
     def multi_parallel_suites(self):
-        suites = self.suites
-        return [s for s in suites if s.is_multi_parallel]
+        return [s for s in self.suites if s.is_multi_parallel]
 
     def suite_of_subsuite(self, subsuite_name):
         """Return the suite corresponding to the given subsuite."""
         for suite in self.suites:
             if suite.has_subsuite(subsuite_name):
                 return suite
-        else:
-            raise ValueError("subsuite %s not found" % subsuite_name)
+
+        raise ValueError("subsuite %s not found" % subsuite_name)
 
     @property
     def all_subsuite_names(self):
@@ -632,7 +612,7 @@ class AbinitTests(object):
 
     def build_database(self, with_disabled=False):
         """
-        Return an instance of TestsDatabase containing all the ABINIT automatic tests.
+        Return an instance of AbinitTestsDatabase containing all the ABINIT automatic tests.
         with_disabled specifies whether disabled tests should be included in the database.
         """
         database = AbinitTestsDatabase(self._suites)
@@ -655,7 +635,7 @@ class AbinitTests(object):
 
     def get_database(self, regenerate=False, with_pickle=False):
         """
-        Return an instance of TestsDatabase initialized from an external pickle file.
+        Return an instance of AbinitTestsDatabase initialized from an external pickle file.
 
         Args:
             regenerate:
@@ -672,28 +652,18 @@ class AbinitTests(object):
             # Use file locking mechanism to prevent IO from other processes.
             if with_pickle:
                 print("Saving database to %s" % database_path)
-                lock = FileLock(database_path)
-
-                lock.acquire()
-
-                with open(database_path, "wb") as fh:
-                    pickle.dump(database, fh, protocol=-1)
-
-                lock.release()
+                with FileLock(database_path):
+                    with open(database_path, "wb") as fh:
+                        pickle.dump(database, fh, protocol=-1)
 
         else:
             cprint("Loading database from: %s" % database_path, "yellow")
 
             # Read the database from the cpickle file.
             # Use file locking mechanism to prevent IO from other processes.
-            lock = FileLock(database_path)
-
-            lock.acquire()
-
-            with open(database_path, "rb") as fh:
-                database = pickle.load(fh)
-
-            lock.release()
+            with FileLock(database_path):
+                with open(database_path, "rb") as fh:
+                    database = pickle.load(fh)
 
         return database
 
@@ -726,15 +696,14 @@ class AbinitTests(object):
                         d.pop((arg, None))  # v4- --> Remove v4
                     else:
                         # TODO
-                        raise NotImplementedError(
-                            "exclude_mode does not support subsuites")
+                        raise NotImplementedError("exclude_mode does not support subsuites")
                         suite = self.suite_of_subsuite(arg)
                         d.pop((suite.name, arg))  # gw1- --> skip tutorial/gw1
 
         else:
             import re
-            re_slice = re.compile("^\[(\d*):(\d*)\]$")
-            re_single = re.compile("^\[(\d*)\]$")
+            re_slice = re.compile(r"^\[(\d*):(\d*)\]$")
+            re_single = re.compile(r"^\[(\d*)\]$")
 
             d = {}
             for arg in args:
@@ -760,8 +729,7 @@ class AbinitTests(object):
                             start = int(match.group(1))
                             start_stop = slice(start, start+1)
                         else:
-                            raise ValueError(
-                                "Wrong or unknown argument: %s" % arg)
+                            raise ValueError("Wrong or unknown argument: %s" % arg)
 
                 if arg in self.suite_names:
                     tp = (arg, None)
@@ -769,8 +737,7 @@ class AbinitTests(object):
                     suite = self.suite_of_subsuite(arg)
                     tp = (suite.name, arg)
                 else:
-                    raise ValueError(
-                        "Wrong (suite_name|subsuite_name) : %s" % arg)
+                    raise ValueError("Wrong (suite_name|subsuite_name): `%s`. Did you remove the initial `t`?" % arg)
 
                 if tp not in d:
                     d[tp] = [start_stop]
@@ -792,8 +759,7 @@ class AbinitTests(object):
         tests_todo = self._suite_args_parser(suite_args)
 
         # Load the full database.
-        database = self.get_database(
-            regenerate=regenerate, with_pickle=with_pickle)
+        database = self.get_database(regenerate=regenerate, with_pickle=with_pickle)
 
         # Extract the tests to run as specified by suite_args i.e by the string "v1[1:4] v3 ..."
         # TODO waiting for changes in the naming scheme
@@ -822,8 +788,7 @@ class AbinitTests(object):
 
         if keys or authors or ivars:
             # Create new suite whose tests contain the specified keywords.
-            with_keys, exclude_keys, with_authors, exclude_authors = 4 * \
-                (None,)
+            with_keys, exclude_keys, with_authors, exclude_authors = 4 * (None,)
 
             if keys:
                 with_keys = [k for k in keys if not k.endswith("-")]
@@ -840,15 +805,14 @@ class AbinitTests(object):
                 if "PGI" in with_keys:
                     from pymods.tools import ascii_scream
                     print(ascii_scream())
-                    print(
-                        "I really can't imagine how PGI could pass the ABINIT test suite!")
+                    print("I really can't imagine how PGI could pass the ABINIT test suite!")
                     sys.exit(1)
 
             if authors:
                 with_authors = [a for a in authors if not a.endswith("-")]
                 exclude_authors = [a[:-1] for a in authors if a.endswith("-")]
                 print("Extracting tests with authors = %s, without authors %s" % (
-                    with_authors, exclude_authors))
+                       with_authors, exclude_authors))
 
             tests = tests.select_tests(with_keys=with_keys,
                                        exclude_keys=exclude_keys,
@@ -858,17 +822,17 @@ class AbinitTests(object):
                                        )
         if not flat_list:
             return tests
-        else:
-            # Build flat list of tests.
-            flat = []
-            for t in tests:
-                if isinstance(t, ChainOfTests):
-                    # DO NOT use isinstance to check if ChainOfTests but rely on duck typing.
-                    # if hasattr(t, "tests"):
-                    flat.extend(t.tests)
-                else:
-                    flat.append(t)
-            return flat
+
+        # Build flat list of tests.
+        flat = []
+        for t in tests:
+            if isinstance(t, ChainOfTests):
+                # DO NOT use isinstance to check if ChainOfTests but rely on duck typing.
+                # if hasattr(t, "tests"):
+                flat.extend(t.tests)
+            else:
+                flat.append(t)
+        return flat
 
     def generate_html_listoftests(self):
         """Generate the ListOfTests files"""
@@ -879,53 +843,73 @@ class AbinitTests(object):
 
             fname = os.path.join(suite_path, "ListOfTests.html")
             print("Writing ListOfTests HTML file: ", fname)
-            with open(fname, "w") as fh:
+            with open(fname, "wt") as fh:
                 fh.write(suite.make_listoftests(width=160, html=True))
 
             fname = os.path.join(suite_path, "ListOfTests.txt")
             print("Writing ListOfTests text file: ", fname)
-            with open(fname, "w") as fh:
+            with open(fname, "wt") as fh:
                 fh.write(suite.make_listoftests(width=100, html=False))
 
-    def show_info(self):
+    def show_info(self, verbose=0):
+        """
+        Print info on the test suite.
+        """
         table = [["Suite",  "# Activated Tests", "# Disabled Tests"]]
         for suite_name in self.suite_names:
             active_tests = self.inputs_of_suite(suite_name, active=True)
             disabled_tests = self.inputs_of_suite(suite_name, active=False)
-            table.append([suite_name, str(len(active_tests)),
-                          str(len(disabled_tests))])
+            table.append([suite_name, str(len(active_tests)), str(len(disabled_tests))])
+        from tests.pymods.tools import pprint_table
+        print("")
+        pprint_table(table)
+        print("")
 
-        # pprint_table(table)
-
-        skeys = sorted(KNOWN_KEYWORDS.keys())
         print(8 * "=" + " KEYWORDS " + 8 * "=")
         width = max([len(k) for k in KNOWN_KEYWORDS]) + 5
-        for skey in skeys:
-            desc = KNOWN_KEYWORDS[skey]
-            print(skey.ljust(width), desc)
+        for skey in sorted(KNOWN_KEYWORDS.keys()):
+            info = KNOWN_KEYWORDS[skey]
+            print(skey.ljust(width), info)
+        print("")
 
-        # for suite_name in self.suite_names:
-        #  suite = self.get_suite(suite_name)
-        #  print(suite_name, suite.need_cpp_vars)
+        if verbose:
+            for suite_name in self.suite_names:
+               suite = self.get_suite(suite_name)
+               if not suite.need_cpp_vars: continue
+               print("suite:", suite_name, "needs CPP variables:", suite.need_cpp_vars)
 
-        # for subsuite_name in self.all_subsuite_names:
-        #  print(subsuite_name)
+            #if verbose > 1:
+            #    # list authors
+            #    database = self.get_database(regenerate=True)
+            #    pprint(database.authors_snames)
 
-        # for suite in self.multi_parallel_suites():
-        #  print(suite.name)
-        # sys.exit(0)
-
-        # list authors
-        database = self.get_database(regenerate=True)
-        pprint(database.authors_snames)
-
-        # TODO: add this test to chec_test_suite
+        # TODO: add this test to check_test_suite
         #chains = database.test_chains()
-        # for c in chains:
-        #    string, nlinks = c.info_on_chain()
-        #    if nlinks == 0:
-        #        print(15 * "*" + " Warning: found 0 explicit links " + 15 * "*")
-        # print(string)
+        #for c in chains:
+        #   string, nlinks = c.info_on_chain()
+        #   if nlinks == 0:
+        #       print(15 * "*" + " Warning: found 0 explicit links " + 15 * "*")
+        #print(string)
+
+        print("\nUse verbose > 0 to print more info.")
+
+        # This to print tests with keywords
+        """
+        database = self.get_database(regenerate=False)
+        key = 'linear electro-optical coefficient'
+        key = "UJDET"
+
+        print("Reporting tests with key:", key)
+        for suite_name, tests in database.items():
+            #print(suite_name)
+            for test in tests:
+                if key in test.keywords:
+                    try:
+                        print(test, test.inp_fname)
+                    except AttributeError:
+                        print(test, [t.inp_fname for t in test])
+        """
+
 
 
 abitests = AbinitTests()
@@ -934,26 +918,31 @@ abitests = AbinitTests()
 # Dictionary mapping test keywords to string with human-readable description.
 KNOWN_KEYWORDS = {
     # Main executables
-    "abinit": "Test abinit code.",
-    "anaddb": "Test anaddb code",
-    "atompaw": "Atompaw tests",
-    "band2eps": "Test band2eps code",
-    "cut3d": "Test cut3d code",
-    "mrgscr": "Test mrgscr code",
-    "mrggkk": "Test mrggkk code",
-    "mrgddb": "Test mrgddb code",
-    'mrgdv': "Test mrgdv code",
-    "optic": "Test optic code",
-    "lruj": "Test lruj code",
-    "aim": "Test aim code",
-    "conducti": "Test conducti code",
-    "fftprof": "Test fftprof code and low-level FFT routines",
-    "wannier90": "Test the interface with Wannier90",
-    "macroave": "Test macroave code",
-    "bigdft": "The the interface with Bigdft",
+    "abinit": "Tests related to abinit code.",
+    "anaddb": "Tests related to anaddb code",
+    "atompaw": "Tests related to atompaw code",
+    "band2eps": "Tests related to band2eps code ",
+    "cut3d": "Tests related to cut3d code",
+    "mrgscr": "Tests related to mrgscr",
+    "mrggkk": "Tests related to mrggkk code",
+    "mrgddb": "Tests related to mrgddb code",
+    'mrgdv': "Tests related to mrgdv code",
+    "optic": "Tests related to optic code",
+    "lruj": "Tests related to lruj code",
+    "aim": "Tests related to aim code",
+    "conducti": "Tests related to conducti code",
+    "fftprof": "Tests related to fftprof code and low-level FFT routines",
+    "wannier90": "Tests related to the interface with Wannier90",
+    "macroave": "Tests related to macroave code",
+    "bigdft": "Tests the interface with Bigdft",
+    'atdep': "Tests for atdep code",
+    'testtransposer': "Unit tests for transposer",
+    'ujdet': "Computation of U (legacy code)",
+    'fold2Bloch': "Tests related to fold2Bloch code.",
+    'multibinit': "Tests related to multibinit code",
     # Keywords describing the test.
     "NC": "Calculations with norm-conserving pseudos",
-    "PAW": "Calculations with PAW datasets",
+    "PAW": "PAW calculations",
     "GW": "GW calculations",
     "GWGamma": "GW calculations with vertex corrections",
     "BSE": "Bethe-Salpeter calculations",
@@ -975,7 +964,7 @@ KNOWN_KEYWORDS = {
     "IMAGES": "Parallelization over images",
     "PARTIAL_DOS": "Partial DOS",
     "RTA": "Relaxation-time approximation",
-    "DOS": "electronic DOS calculations",
+    "DOS": "Electronic DOS calculations",
     "STS": "STS calculations",
     "CTQMC": "CTQMC method for DMFT",
     "ETSF_IO": "Tests using ETSF-IO library",
@@ -988,7 +977,7 @@ KNOWN_KEYWORDS = {
     "PBE0": "PBE0 calculations",
     "cRPA": "RPA for correlated electrons.",
     "FAILS_IFMPI": "Tests failing if MPI is used",
-    'NVT': "(N,V,T) enseble",
+    'NVT': "MD calculations with (N,V,T) ensemble",
     'ELASTIC': "Calculations of elastic constants",
     'INTERNAL_STRAIN': "Calculations of internal strain",
     'DFT-D3(BJ)': "DFT-D3 dispersion correction",
@@ -1002,5 +991,47 @@ KNOWN_KEYWORDS = {
     'magnetic_constraint': "Tests employing magnetic constraints",
     "FOLD2BLOCH": "Fold2Bloch tests.",
     "LWF": "Lattice Wannier function tests",
+    "RTTDDFT": "Real-time time-dependent DFT",
     "MINIMAL": "Quick set of tests covering all abinit optdriver and executables",
+    'CC4S': "Interface betwee Abinit and CC4S code",
+    'CRPA': "Tests related to Constrained RPA",
+    'ConstrainedDFT': "Tests related to constrained DFT",
+    'EPH_OLD': "Legacy python-based EPH code for the ZPR",
+    'FATBANDS': "Computation of FATBANDS",
+    'GWR': "GW in real space and imaginary time.",
+    'Gruneisen': "Computation of Gruneisen parameters",
+    'HPC': "High-performance computing",
+    'IBTE': "Iterative Boltzmann Transport Equation",
+    'LONGWAVE': "Tests related to the longwave driver",
+    'LRUJ': "Computation of U/J with linear response",
+    'POSCAR': "Tests showing how to read POSCAR files in Abinit",
+    'POSITRON': "Positron calculation",
+    'PSML': "Tests using pseudos in PSML format",
+    'PSP8': "Tests using pseudos in PSP8 format",
+    'RMM-DIIS': "Tests using the RMM-DIIS eigenvalue solver.",
+    'TRIQS': "Interface between Abinit and TRIQS",
+    'UPF2': "Tests using pseudos in UPF2 format",
+    'Wannier90': "Interface between Abinit and Wannier90",
+    '2d-cutoff': "Coulomb cutoff for 2d materials",
+    'non-collinear': "Non-collinear magnetism",
+    'metaGGA': "Tests using metaGGA functionals",
+    'ext-fpmd': "Extended FPMD for high temperature calculations",
+    'z2pack': "Interface with z2pack",
+    'libxc': "Tests using libxc functionals",
+    'MD': "Molecular dynamics",
+    'NEB': "Nudged Elastic Band Method",
+    'CPRJ': "Tests related to the internal treatment of CPRJ projections.",
+    'LDA': "Tests using LDA",
+    "MD-MonteCarlo": "Hybrid Monte Carlo Sampling for NPT ensemble",
+    "LWF": "Lattice Wannier functions.",
+    'NONLINEAR': "Nonlinear response function calculations",
+    'spinpot': "Spin dynamics with multibinit",
+    'lattpot': "Lattice dynamics with multibinit",
+    'effpot': "Effective potentila with multibinit",
+    'Effective potential': "Effective potentila with multibinit",
+    'linear-electro-optical': "Computation of linear electro-optical coefficients",
+    'DDB_TO_NC': "Conversion of DDB file from text to netcdf and viceversa",
+    'ddb_interpolation': "Interpolation of DDB files in q-space.",
+    'pSIC': "Tests related to the polaron self-interaction correction method.",
+    'POLARON': "Tests related to the variational polaron equations."
 }

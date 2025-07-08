@@ -7,7 +7,7 @@
 !!    optical conductivity, X spectroscopy, linear susceptibility, ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2024 ABINIT group (SM,VR,FJ,MT,NB,PGhosh)
+!! Copyright (C) 2018-2025 ABINIT group (SM,VR,FJ,MT,NB,PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,15 +31,14 @@ MODULE m_paw_optics
  use m_dtset
  use m_dtfil
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_io_tools,     only : open_file,get_unit,close_unit
- use m_pawpsp,       only : pawpsp_read_corewf
+ use m_pawpsp,       only : pawpsp_init_core
+ use m_paw_atomorb,  only : atomorb_type,destroy_atomorb
  use m_pawrad,       only : pawrad_type,pawrad_deducer0,simp_gen,nderiv_gen,poisson
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_get, &
@@ -122,7 +121,10 @@ CONTAINS  !=====================================================================
 !!  znucl(ntypat)=atomic number of atom type
 !!
 !! OUTPUT
-!!  (only writing in a file)
+!!  psinablapsi_out=contains the matrix elements
+!!   (The size of the psinablapsi_out decide wehter we compute the full matrix or
+!!    only the diagonal part)
+!!   (if not present only writing in a file)
 !!
 !! SIDE EFFECTS
 !!
@@ -132,7 +134,7 @@ CONTAINS  !=====================================================================
 
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
 &               mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,&
-&               pawang,pawrad,pawrhoij,pawtab,znucl)
+&               pawang,pawrad,pawrhoij,pawtab,znucl,psinablapsi_out)
 
 !Arguments ------------------------------------
 !scalars
@@ -142,6 +144,7 @@ CONTAINS  !=====================================================================
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
+ real(dp),optional,target,intent(out) :: psinablapsi_out(:,:,:,:)
 !arrays
  integer,intent(in) :: atindx1(natom),dimcprj(natom),npwarr(nkpt)
  integer,intent(in),target :: kg(3,mpw*mkmem)
@@ -156,16 +159,18 @@ CONTAINS  !=====================================================================
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: bsize,iomode,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibmax,ibg,ibsp
+ integer :: bsize,iomode,bdtot_index,cplex,etiq,fformopt,iatom,ib,ibmax,ibmin,ibg,ibsp
  integer :: ibshift,icg,ierr,ikg,ikpt,ilmn,ount,ncid,varid,idir
  integer :: iorder_cprj,ipw,ispinor,isppol,istwf_k,itypat,iwavef
  integer :: jb,jbshift,jbsp,my_jb,jlmn,jwavef,lmn_size,mband_cprj,option_core
  integer :: my_nspinor,nband_k,nband_cprj_k,npw_k,sender,me,master_spfftband,pnp_size
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
+ integer, parameter :: NO_FILE_OUT=-1
  logical :: already_has_nabla,cprj_paral_band,myband,mykpt,iomode_etsf_mpiio
  logical :: i_am_master,i_am_master_kpt,i_am_master_band,i_am_master_spfft,nc_unlimited,store_half_dipoles
- real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2,cpnm11,cpnm22,cpnm12,cpnm21,cpnm_11m22,cpnm_21p12,cpnm_21m12
+ logical :: diag_only
+ real(dp) :: cgnm1,cgnm2,cpnm1,cpnm2,cpnm11,cpnm22,cpnm12,cpnm21,cpnm_11m22,cpnm_21p12,cpnm_21m12,el_temp
  character(len=500) :: msg
  type(nctkdim_t) :: nctkdim
 !arrays
@@ -173,7 +178,7 @@ CONTAINS  !=====================================================================
  integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
  real(dp) :: kpoint(3),tsec(2),nabla_ij(3)
  real(dp),allocatable :: kpg_k(:,:)
- real(dp),allocatable :: psinablapsi(:,:,:),psinablapsi_paw(:,:,:),psinablapsi_soc(:,:,:)
+ real(dp),pointer :: psinablapsi(:,:,:),psinablapsi_paw(:,:,:),psinablapsi_soc(:,:,:)
  real(dp),pointer :: soc_ij(:,:,:)
  type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
@@ -220,22 +225,45 @@ CONTAINS  !=====================================================================
  i_am_master_spfft=(xmpi_comm_rank(spaceComm_spinorfft)==master)
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
+!Check wether we write in file or save the matrix elements in psinablapsi_out
+!and if we need to compute the full matrix or only the diagonal part
+ diag_only = .false.
+ store_half_dipoles = .false.
+ if (present(psinablapsi_out)) then
+   iomode = NO_FILE_OUT
+   iomode_etsf_mpiio = .false.
+   nc_unlimited = .false.
+   bsize = size(psinablapsi_out(1,1,:,1))
+   if (bsize ==  mband) then
+      diag_only = .true.
+      store_half_dipoles = .true. !FB ??
+   else if (bsize == mband*(mband+1)/2) then
+      diag_only = .false.
+      store_half_dipoles = .true.
+   else if (bsize == mband**2) then
+      diag_only = .false.
+      store_half_dipoles = .false.
+   else
+      msg = "Wrong dimensions of psinablapsi_out!"
+      ABI_ERROR(msg)
+   end if
+   psinablapsi_out = zero
+ end if
+
 !----------------------------------------------------------------------------------
 !1- Opening of OPT file and header writing
 !----------------------------------------------------------------------------------
 
-!I/O mode is netCDF or Fortran
- iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
-#ifdef HAVE_NETCDF
- if (use_netcdf_forced) iomode=IO_MODE_ETSF
-#endif
+ if (iomode /= NO_FILE_OUT) then
+!  I/O mode is netCDF or Fortran
+   iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
+   if (use_netcdf_forced) iomode=IO_MODE_ETSF
 
- !(master proc only)
- if (i_am_master) then
-   fformopt=610 ; if (compute_half_dipoles) fformopt=620
+ !  (master proc only)
+   if (i_am_master) then
+     fformopt=610 ; if (compute_half_dipoles) fformopt=620
 !  ====> NETCDF format
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
 !    Open/create nc file
      NCF_CHECK(nctk_open_create(ncid,nctk_ncify(dtfil%fnameabo_app_opt),xmpi_comm_self))
 !    Write header data
@@ -268,26 +296,23 @@ CONTAINS  !=====================================================================
      NCF_CHECK(nf90_put_var(ncid,varid,reshape(eigen0,[mband,nkpt,nsppol])))
      !Close file here because the rest has possibly to be written with collective I/O
      NCF_CHECK(nf90_close(ncid))
-#else
-     msg = "In order to use iomode=3 and prtnabla>0 together, NetCDF support must be enabled!"
-     ABI_ERROR(msg)
-#endif
 !  ====> Standard FORTRAN binary format
-   else if (iomode==IO_MODE_FORTRAN_MASTER) then
-     if (open_file(dtfil%fnameabo_app_opt,msg,newunit=ount,form="unformatted",status="unknown")/= 0) then
-       ABI_ERROR(msg)
-     end if
-     call hdr%fort_write(ount,fformopt,ierr,rewind=.true.)
-     write(ount)(eigen0(ib),ib=1,mband*nkpt*nsppol)
-   else
-     msg = "Wrong OPT file format!"
-     ABI_BUG(msg)
-   end if ! File format
- end if ! master node
- call xmpi_bcast(iomode,master,spaceComm_w,ierr)  ! Seems mandatory; why ?
- iomode_etsf_mpiio=(iomode==IO_MODE_ETSF.and.nctk_has_mpiio.and.use_netcdf_mpiio)
- nc_unlimited=(iomode==IO_MODE_ETSF.and.use_netcdf_unlimited.and.(.not.iomode_etsf_mpiio)) ! UNLIMITED not compatible with mpi-io
- store_half_dipoles=(compute_half_dipoles.and.(.not.nc_unlimited))
+     else if (iomode==IO_MODE_FORTRAN_MASTER) then
+       if (open_file(dtfil%fnameabo_app_opt,msg,newunit=ount,form="unformatted",status="unknown")/= 0) then
+         ABI_ERROR(msg)
+       end if
+       call hdr%fort_write(ount,fformopt,ierr,rewind=.true.)
+       write(ount)(eigen0(ib),ib=1,mband*nkpt*nsppol)
+     else
+       msg = "Wrong OPT file format!"
+       ABI_BUG(msg)
+     end if ! File format
+   end if ! master node
+   call xmpi_bcast(iomode,master,spaceComm_w,ierr)  ! Seems mandatory; why ?
+   iomode_etsf_mpiio=(iomode==IO_MODE_ETSF.and.nctk_has_mpiio.and.use_netcdf_mpiio)
+   nc_unlimited=(iomode==IO_MODE_ETSF.and.use_netcdf_unlimited.and.(.not.iomode_etsf_mpiio)) ! UNLIMITED not compatible with mpi-io
+   store_half_dipoles=(compute_half_dipoles.and.(.not.nc_unlimited))
+ end if
 
 !----------------------------------------------------------------------------------
 !2- Computation of on-site contribution: <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j>
@@ -295,11 +320,14 @@ CONTAINS  !=====================================================================
 
  already_has_nabla=all(pawtab(:)%has_nabla==2)
  call pawnabla_init(mpsang,dtset%ntypat,pawrad,pawtab)
- 
+
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
 !Compute spin-orbit contributions if necessary
  if (dtset%pawspnorb==1) then
    option_core=0
-   call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
+   call pawnabla_soc_init(el_temp,phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
 &       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,dtset%xc_taupos,znucl,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -328,27 +356,42 @@ CONTAINS  !=====================================================================
        NCF_CHECK(nctk_set_collective(ncid,varid))
      end if
      NCF_CHECK(nctk_set_datamode(ncid))
-   end if     
- end if
- if (iomode_etsf_mpiio) then
-   !If MPI-IO, store only ib elements for each jb
-   ABI_MALLOC(psinablapsi,(2,3,mband))
-   ABI_MALLOC(psinablapsi_paw,(2,3,mband))
-   if (dtset%pawspnorb==1) then
-     ABI_MALLOC(psinablapsi_soc,(2,3,mband))
    end if
+ end if
+ if (iomode /= NO_FILE_OUT) then
+   if (iomode_etsf_mpiio) then
+     !If MPI-IO, store only ib elements for each jb
+     ABI_MALLOC(psinablapsi,(2,3,mband))
+     ABI_MALLOC(psinablapsi_paw,(2,3,mband))
+     if (dtset%pawspnorb==1) then
+       ABI_MALLOC(psinablapsi_soc,(2,3,mband))
+     end if
+   else
+     !If not, store all (ib,jb) pairs (or half)
+     bsize=mband**2 ; if (store_half_dipoles) bsize=(mband*(mband+1))/2
+     ABI_MALLOC(psinablapsi,(2,3,bsize))
+     ABI_MALLOC(psinablapsi_paw,(2,3,bsize))
+     if (dtset%pawspnorb==1) then
+       ABI_MALLOC(psinablapsi_soc,(2,3,bsize))
+     end if
+     psinablapsi=zero
+   end if
+   pnp_size=size(psinablapsi)
  else
-   !If not, store all (ib,jb) pairs (or half)
-   bsize=mband**2 ; if (store_half_dipoles) bsize=(mband*(mband+1))/2
-   ABI_MALLOC(psinablapsi,(2,3,bsize))
+   if (diag_only) then
+      bsize = mband
+   else if (store_half_dipoles) then
+      bsize=(mband*(mband+1))/2
+   else
+      bsize=mband**2
+   end if
    ABI_MALLOC(psinablapsi_paw,(2,3,bsize))
    if (dtset%pawspnorb==1) then
      ABI_MALLOC(psinablapsi_soc,(2,3,bsize))
    end if
-   psinablapsi=zero
+   pnp_size=size(psinablapsi_paw)
  end if
- pnp_size=size(psinablapsi)
- 
+
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
  cprj_paral_band=(mband_cprj<mband)
@@ -361,6 +404,8 @@ CONTAINS  !=====================================================================
 !  LOOP OVER k POINTS
    ikg=0
    do ikpt=1,nkpt
+
+     if (iomode == NO_FILE_OUT) psinablapsi => psinablapsi_out(:,:,:,ikpt)
 
      etiq=ikpt+(isppol-1)*nkpt
      nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
@@ -423,7 +468,10 @@ CONTAINS  !=====================================================================
          !If MPI-IO, compute all (ib,jb) pairs ; if not, compute only ib<=jb
          ibmax=merge(nband_k,jb,iomode_etsf_mpiio)
          !If MPI-IO, store only ib elements for each jb ; if not, store all (ib,jb) pairs
-         my_jb=merge(1,jb,iomode_etsf_mpiio)
+         my_jb=merge(1,jb,(iomode_etsf_mpiio .or. diag_only))
+         !If diag_only then ibmin = ibmax = jb
+         ibmax=merge(jb,ibmax,diag_only)
+         ibmin=merge(jb,1,diag_only)
 
 !        Fill output arrays with zeros
          if (store_half_dipoles) then
@@ -431,10 +479,12 @@ CONTAINS  !=====================================================================
          else
            jbshift=(my_jb-1)*mband ; bsize=mband
          end if
-         psinablapsi(:,:,jbshift+1:jbshift+bsize)=zero
-         psinablapsi_paw(:,:,jbshift+1:jbshift+bsize)=zero
-         if (dtset%pawspnorb==1) psinablapsi_soc(:,:,jbshift+1:jbshift+bsize)=zero
-           
+         if ((.not. diag_only) .or. jb == 1) then
+            psinablapsi(:,:,jbshift+1:jbshift+bsize)=zero
+            psinablapsi_paw(:,:,jbshift+1:jbshift+bsize)=zero
+            if (dtset%pawspnorb==1) psinablapsi_soc(:,:,jbshift+1:jbshift+bsize)=zero
+         end if
+
 !        2-A Computation of <psi_tild_n|-i.nabla|psi_tild_m>
 !        ----------------------------------------------------------------------------------
 !        Note: <psi_nk|-i.nabla|psi_mk> => Sum_g[ <G|Psi_nk>^* <G|Psi_mk> G ]
@@ -446,7 +496,7 @@ CONTAINS  !=====================================================================
          end if
          if (myband) then
 
-           do ib=1,ibmax
+           do ib=ibmin,ibmax
              iwavef=(ib-1)*npw_k*my_nspinor+icg
 
 !            (C_nk^*)*C_mk*(k+g) is expressed in cartesian coordinates
@@ -489,7 +539,7 @@ CONTAINS  !=====================================================================
 
          end if ! myband
 
-       
+
 !        2-B Computation of <psi_n|p_i><p_j|psi_m>(<phi_i|-i.nabla|phi_j>-<tphi_i|-i.nabla|tphi_j>)
 !        ----------------------------------------------------------------------------------
 !        Non relativistic contribution
@@ -505,7 +555,7 @@ CONTAINS  !=====================================================================
          end if
          if (myband) then
 
-           do ib=1,ibmax          
+           do ib=ibmin,ibmax
 
              ibsp=(ib-1)*my_nspinor ; jbsp=(jb-1)*my_nspinor
              do ispinor=1,my_nspinor
@@ -515,7 +565,7 @@ CONTAINS  !=====================================================================
                    itypat=dtset%typat(iatom)
                    lmn_size=pawtab(itypat)%lmn_size
                    do jlmn=1,lmn_size
-                     do ilmn=1,lmn_size                  
+                     do ilmn=1,lmn_size
                        nabla_ij(:)=pawtab(itypat)%nabla_ij(:,ilmn,jlmn)
                        if (ib>jb) nabla_ij(:)=-pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
                        cpnm1=cprj_k(iatom,ibsp)%cp(1,ilmn)*cprj_k(iatom,jbsp)%cp(1,jlmn)
@@ -631,19 +681,15 @@ CONTAINS  !=====================================================================
            if (myband) then
              psinablapsi=psinablapsi+psinablapsi_paw
              if (dtset%pawspnorb==1) psinablapsi=psinablapsi+psinablapsi_soc
-           end if       
+           end if
            if (store_half_dipoles) then
              nc_start_5=[1,1,(jb*(jb-1))/2+1,ikpt,isppol];nc_stride_5=[1,1,1,1,1]
-             nc_count_5=[0,0,0,0,0];if (myband) nc_count_5=[2,3,jb,1,1] 
-#ifdef HAVE_NETCDF
+             nc_count_5=[0,0,0,0,0];if (myband) nc_count_5=[2,3,jb,1,1]
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
-#endif
            else
-             nc_start_6=[1,1,1,jb,ikpt,isppol];nc_stride_6=[1,1,1,1,1,1]           
+             nc_start_6=[1,1,1,jb,ikpt,isppol];nc_stride_6=[1,1,1,1,1,1]
              nc_count_6=[0,0,0,0,0,0];if (myband) nc_count_6=[2,3,mband,1,1,1]
-#ifdef HAVE_NETCDF
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
-#endif
            end if
          end if
 
@@ -666,69 +712,79 @@ CONTAINS  !=====================================================================
        ABI_FREE(kpg_k)
 
 !      Write to OPT file if not MPI-IO
+       if (iomode /= NO_FILE_OUT) then
+!        >>> Reduction in case of parallelism
+         if (.not.iomode_etsf_mpiio) then
+           call timab(48,1,tsec)
+           call xmpi_sum_master(psinablapsi,master,spaceComm_bandspinorfft,ierr)
+           call xmpi_sum_master(psinablapsi_paw,master,spaceComm_bandspinor,ierr)
+           call timab(48,2,tsec)
+           psinablapsi=psinablapsi+psinablapsi_paw
+           if (dtset%pawspnorb==1) then
+             call xmpi_sum_master(psinablapsi_soc,master,spaceComm_band,ierr)
+             psinablapsi=psinablapsi+psinablapsi_soc
+           end if
+         end if
 
-!      >>> Reduction in case of parallelism
-       if (.not.iomode_etsf_mpiio) then
+!        >>> This my kpt and I am the master node: I write the data
+         if (.not.iomode_etsf_mpiio) then
+           if (i_am_master) then
+             if (iomode==IO_MODE_ETSF) then
+#ifdef HAVE_NETCDF
+               if (nc_unlimited) then
+                 nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
+                 NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+               else if (.not.store_half_dipoles) then
+                 nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
+                 NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
+               else
+                 nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
+                 NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
+               end if
+#endif
+             else
+               bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
+               write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
+               write(ount)(psinablapsi(1:2,2,ib),ib=1,bsize)
+               write(ount)(psinablapsi(1:2,3,ib),ib=1,bsize)
+             end if
+
+!          >>> This my kpt and I am not the master node: I send the data
+           else if (i_am_master_band.and.i_am_master_spfft) then
+             if (mpi_enreg%me_kpt/=master_spfftband) then
+               ABI_BUG('Problem with band communicator!')
+             end if
+             call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
+           end if
+         end if
+       else
+!        >>> Reduction in case of parallelism
          call timab(48,1,tsec)
-         call xmpi_sum_master(psinablapsi,master,spaceComm_bandspinorfft,ierr)
-         call xmpi_sum_master(psinablapsi_paw,master,spaceComm_bandspinor,ierr)
+         call xmpi_sum(psinablapsi,spaceComm_bandspinorfft,ierr)
+         call xmpi_sum(psinablapsi_paw,spaceComm_bandspinor,ierr)
          call timab(48,2,tsec)
          psinablapsi=psinablapsi+psinablapsi_paw
          if (dtset%pawspnorb==1) then
-           call xmpi_sum_master(psinablapsi_soc,master,spaceComm_band,ierr)
+           call xmpi_sum(psinablapsi_soc,spaceComm_band,ierr)
            psinablapsi=psinablapsi+psinablapsi_soc
          end if
-       end if
+       end if ! no_file_out
 
-!      >>> This my kpt and I am the master node: I write the data    
-       if (.not.iomode_etsf_mpiio) then
-         if (i_am_master) then
-           if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
-             if (nc_unlimited) then
-               nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
-               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
-             else if (.not.store_half_dipoles) then
-               nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
-               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
-             else
-               nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
-               NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
-             end if
-#endif
-           else
-             bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
-             write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
-             write(ount)(psinablapsi(1:2,2,ib),ib=1,bsize)
-             write(ount)(psinablapsi(1:2,3,ib),ib=1,bsize)
-           end if
-
-!        >>> This my kpt and I am not the master node: I send the data    
-         else if (i_am_master_band.and.i_am_master_spfft) then
-           if (mpi_enreg%me_kpt/=master_spfftband) then
-             ABI_BUG('Problem with band communicator!')
-           end if
-           call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
-         end if
-       end if  
-
-!    >>> This is not my kpt and I am the master node: I receive the data and I write    
-     elseif ((.not.iomode_etsf_mpiio).and.i_am_master) then ! mykpt
+!    >>> This is not my kpt and I am the master node: I receive the data and I write
+     elseif ((.not.iomode_etsf_mpiio).and.i_am_master.and.(iomode/=NO_FILE_OUT)) then ! mykpt
        sender=master_spfftband
        call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
          if (nc_unlimited) then
-           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1] 
+           nc_start_6=[1,1,1,ikpt,isppol,1] ; nc_count_6=[2,3,mband,1,1,mband] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
          else if (.not.store_half_dipoles) then
-           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1] 
+           nc_start_6=[1,1,1,1,ikpt,isppol] ; nc_count_6=[2,3,mband,mband,1,1] ; nc_stride_6=[1,1,1,1,1,1]
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_6,stride=nc_stride_6,count=nc_count_6))
          else
-           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1] 
+           nc_start_5=[1,1,1,ikpt,isppol] ; nc_count_5=[2,3,(mband*(mband+1))/2,1,1] ; nc_stride_5=[1,1,1,1,1]
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start_5,stride=nc_stride_5,count=nc_count_5))
          end if
-#endif
        else
          bsize=nband_k**2;if (store_half_dipoles) bsize=(nband_k*(nband_k+1))/2
          write(ount)(psinablapsi(1:2,1,ib),ib=1,bsize)
@@ -743,12 +799,16 @@ CONTAINS  !=====================================================================
    end do ! ikpt
  end do !isppol
 
+! >>> Last reduction over k-points in case of parallelism
+! >>> if no output to file
+if (iomode == NO_FILE_OUT) then
+  call xmpi_sum(psinablapsi_out,spaceComm_kpt,ierr)
+end if
+
 !Close file
- if (i_am_master.or.(iomode_etsf_mpiio.and.i_am_master_spfft)) then
+ if ((i_am_master.or.(iomode_etsf_mpiio.and.i_am_master_spfft)).and.iomode /= NO_FILE_OUT) then
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    else
      ierr=close_unit(ount,msg)
      ABI_CHECK(ierr==0,"Error while closing OPT file")
@@ -756,7 +816,9 @@ CONTAINS  !=====================================================================
  end if
 
 !Datastructures deallocations
- ABI_FREE(psinablapsi)
+ if (iomode /= NO_FILE_OUT) then
+    ABI_FREE(psinablapsi)
+ end if
  ABI_FREE(psinablapsi_paw)
  if (dtset%pawspnorb==1) then
    ABI_FREE(psinablapsi_soc)
@@ -790,7 +852,7 @@ CONTAINS  !=====================================================================
 !!  Matrix elements = <Phi_core|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (SM,MT,NB)
+!! Copyright (C) 2005-2025 ABINIT group (SM,MT,NB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -853,23 +915,23 @@ CONTAINS  !=====================================================================
  integer :: nband_k,nphicor,ncorespinor,sender,iomode,fformopt,master_spfftband
  integer :: spaceComm_band,spaceComm_bandspinorfft,spaceComm_fft,spaceComm_kpt
  integer :: spaceComm_spinor,spaceComm_bandspinor,spaceComm_spinorfft,spaceComm_w
- logical :: already_has_nabla,cprj_paral_band,ex,mykpt,myband
- logical :: iomode_etsf_mpiio,abinitcorewf,use_spinorbit,xmlcorewf
+ logical :: already_has_nabla,cprj_paral_band,mykpt,myband,use_rcpaw_data
+ logical :: iomode_etsf_mpiio,use_spinorbit
  logical :: i_am_master,i_am_master_band,i_am_master_spfft
- character(len=fnlen) :: filecore
- real(dp) :: cpnm1,cpnm2
+ real(dp) :: cpnm1,cpnm2,el_temp
  character(len=500) :: msg
 !arrays
  integer :: nc_count(7),nc_start(7),nc_stride(7),tmp_shape(3)
- integer,allocatable :: indlmn_cor(:,:),lcor(:),ncor(:),kappacor(:)
+ integer,allocatable :: lcor(:,:),ncor(:,:),kappacor(:,:),nphicor_arr(:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: energy_cor(:),phi_cor(:,:)
+ real(dp),allocatable :: energy_cor(:,:)
  real(dp),allocatable :: psinablapsi(:,:,:,:,:),psinablapsi_soc(:,:,:,:,:)
  real(dp),pointer :: soc_ij(:,:,:)
  type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(nctkdim_t) :: ncdims(3)
- type(nctkarr_t) :: nctk_arrays(5)
+ type(nctkarr_t) :: nctk_arrays(7)
+ type(atomorb_type), allocatable :: atm(:)
 
 ! ************************************************************************
 
@@ -917,66 +979,43 @@ CONTAINS  !=====================================================================
 !------------------------------------------------------------------------------------------------
 !1- Reading of core wavefunctions
 !------------------------------------------------------------------------------------------------
-
-!Note: core WF is read for itypat=1
-!At present, impose 2-spinor simulataneously for core anf valence WF
- ncorespinor=merge(2,1,dtset%pawspnorb==1.or.dtset%nspinor==2)
- filecore=trim(filpsp(1)) ; iln=len(trim(filecore))
- abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filecore(iln-6:iln)=='.abinit')
- xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filecore(iln-3:iln)=='.xml')
- if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filecore=filecore(1:iln)//'.corewf'
- if (abinitcorewf) filecore=filecore(1:iln-6)//'corewf.abinit'
- if (xmlcorewf) filecore=filecore(1:iln-3)//'corewf.xml'
- inquire(file=filecore,exist=ex)
-
-!Relativistic case
- if (ncorespinor==2) then
-   if (ex) then
-     !Use <filepsp>.corewf.xml or <filepsp>.corewf.abinit
-     call pawpsp_read_corewf(energy_cor,indlmn_cor,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&                            filename=filecore,kappacor=kappacor)
-   else
-     !Use default name
-     call pawpsp_read_corewf(energy_cor,indlmn_cor,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&                            kappacor=kappacor)
-   end if
-
-!Non-relativistic case
- else
-   if (ex) then
-     !Use <filepsp>.corewf.xml or <filepsp>.corewf.abinit
-     call pawpsp_read_corewf(energy_cor,indlmn_cor,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&                            filename=filecore)
-   else
-     !Use default name
-     call pawpsp_read_corewf(energy_cor,indlmn_cor,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor)
-   end if
-   ABI_MALLOC(kappacor,(nphicor))
-   kappacor(:)=zero
+ !TODO At present, impose 2-spinor simulataneously for core and valence WF
+ ABI_MALLOC(atm,(dtset%ntypat))
+ use_rcpaw_data=.false.
+ if(.not.(use_rcpaw_data)) then
+   do itypat=1,dtset%ntypat
+     call pawpsp_init_core(atm(itypat),filpsp(itypat),radmesh=pawrad(itypat))
+   enddo
  endif
 
+ nphicor=0
+ ncorespinor=0
+ do itypat=1,dtset%ntypat
+   nphicor=max(nphicor,atm(itypat)%ln_size)
+   if(atm(itypat)%nsppol>1) ABI_ERROR("nsppol>1 is work in progress for optics_paw_core")
+   if(atm(itypat)%nspinor/=dtset%nspinor) ABI_ERROR("Core and valence not same number of spinors")
+   ncorespinor=max(ncorespinor,atm(itypat)%nspinor)
+ enddo
 !----------------------------------------------------------------------------------
 !2- Computation of phipphj=<phi_i|nabla|phi_core>
 !----------------------------------------------------------------------------------
 
  already_has_nabla=all(pawtab(:)%has_nabla==3)
- if (ncorespinor==2) then
-   already_has_nabla=all(pawtab(:)%has_nabla==4)
+ if (ncorespinor==2) already_has_nabla=all(pawtab(:)%has_nabla==4)
 !  Should check whether this would work with spinor parallelism
-   call pawnabla_core_init(mpsang,dtset%ntypat,pawrad,pawtab,phi_cor,indlmn_cor,diracflag=1)
- else
-   call pawnabla_core_init(mpsang,dtset%ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
- endif
+ call pawnabla_core_init(mpsang,dtset%ntypat,pawrad,pawtab,atm)
+
+!Get electronic temperature from dtset
+ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
 !Compute spin-orbit contributions if necessary
  use_spinorbit=(dtset%pawspnorb==1.and.dtset%userie/=111) ! For testing purpose
  if (use_spinorbit) then
    option_core=1
-   call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
+   call pawnabla_soc_init(el_temp,phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
 &       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,dtset%xc_taupos,znucl,&
-&       phi_cor=phi_cor,indlmn_cor=indlmn_cor,&
-&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&       atm=atm,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
 !----------------------------------------------------------------------------------
@@ -985,46 +1024,73 @@ CONTAINS  !=====================================================================
 
 !I/O mode is netCDF or Fortran
  iomode=merge(IO_MODE_ETSF,IO_MODE_FORTRAN_MASTER,dtset%iomode==IO_MODE_ETSF)
-#ifdef HAVE_NETCDF
  if (use_netcdf_forced) iomode=IO_MODE_ETSF
-#endif
+
+ ABI_MALLOC(energy_cor,(nphicor,dtset%ntypat))
+ ABI_MALLOC(ncor,(nphicor,dtset%ntypat))
+ ABI_MALLOC(lcor,(nphicor,dtset%ntypat))
+ ABI_MALLOC(kappacor,(nphicor,dtset%ntypat))
+ energy_cor=zero
+ ncor=0
+ lcor=0
+ kappacor=0
+ do itypat=1,dtset%ntypat
+   do iln=1,atm(itypat)%ln_size
+     energy_cor(iln,itypat)=atm(itypat)%eig(iln,1)
+     ncor(iln,itypat)=atm(itypat)%indln(2,iln)
+     lcor(iln,itypat)=atm(itypat)%indln(1,iln)
+     if(atm(itypat)%dirac) then
+       kappacor(iln,itypat)=atm(itypat)%kappa(iln)
+     else
+       kappacor(iln,itypat)=zero
+     endif
+   enddo
+ enddo
 
  !(master proc only)
  if (i_am_master) then
 !  ====> NETCDF format
    if (iomode==IO_MODE_ETSF) then
-     fformopt=611 
-#ifdef HAVE_NETCDF
+     fformopt=611
+     ABI_MALLOC(nphicor_arr,(dtset%ntypat))
+     do itypat=1,dtset%ntypat
+       nphicor_arr(itypat)=atm(itypat)%ln_size
+     enddo
 !    Open/create nc file
      NCF_CHECK(nctk_open_create(ncid,nctk_ncify(dtfil%fnameabo_app_opt2),xmpi_comm_self))
 !    Write header data
      NCF_CHECK(hdr%ncwrite(ncid,fformopt,nc_define=.true.))
 !    Define additional dimensions
-     ncdims(1)%name="number_of_core_states"
-     ncdims(1)%value=nphicor
-     ncdims(2)%name="number_of_core_spinor_components"
-     ncdims(2)%value=ncorespinor
-     ncdims(3)%name="number_of_core_spins"
-     ncdims(3)%value=3-ncorespinor
+     ncdims(1)%name="number_of_atom_types"
+     ncdims(1)%value=dtset%ntypat
+     ncdims(2)%name="max_number_of_core_states"
+     ncdims(2)%value=nphicor
+     ncdims(3)%name="number_of_core_spinor_components"
+     ncdims(3)%value=ncorespinor
      NCF_CHECK(nctk_def_dims(ncid,ncdims))
-!    Define additional variables
-     nctk_arrays(1)%name="eigenvalues_core"
-     nctk_arrays(1)%dtype="dp"
-     nctk_arrays(1)%shape_str="number_of_core_states"
-     nctk_arrays(2)%name="dipole_core_valence"
+     nctk_arrays(1)%name="number_of_core_states"
+     nctk_arrays(1)%dtype="int"
+     nctk_arrays(1)%shape_str="number_of_atom_types"
+     nctk_arrays(2)%name="eigenvalues_core"
      nctk_arrays(2)%dtype="dp"
-     nctk_arrays(2)%shape_str=&
-&     "complex, number_of_cartesian_directions,number_of_core_states,"// &
+     nctk_arrays(2)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(3)%name="dipole_core_valence"
+     nctk_arrays(3)%dtype="dp"
+     nctk_arrays(3)%shape_str=&
+&     "complex, number_of_cartesian_directions,max_number_of_core_states,"// &
 &     "number_of_atoms,max_number_of_states,number_of_kpoints,number_of_spins"
-     nctk_arrays(3)%name="n_quantum_number_core"
-     nctk_arrays(3)%dtype="int"
-     nctk_arrays(3)%shape_str="number_of_core_states"
-     nctk_arrays(4)%name="l_quantum_number_core"
+     nctk_arrays(4)%name="n_quantum_number_core"
      nctk_arrays(4)%dtype="int"
-     nctk_arrays(4)%shape_str="number_of_core_states"
-     nctk_arrays(5)%name="kappa_core"
+     nctk_arrays(4)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(5)%name="l_quantum_number_core"
      nctk_arrays(5)%dtype="int"
-     nctk_arrays(5)%shape_str="number_of_core_states"
+     nctk_arrays(5)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(6)%name="kappa_core"
+     nctk_arrays(6)%dtype="int"
+     nctk_arrays(6)%shape_str="max_number_of_core_states,number_of_atom_types"
+     nctk_arrays(7)%name="number_of_core_states"
+     nctk_arrays(7)%dtype="int"
+     nctk_arrays(7)%shape_str="number_of_atom_types"
      NCF_CHECK(nctk_def_arrays(ncid, nctk_arrays))
      NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues_core"))
      NCF_CHECK(nctk_set_atomic_units(ncid, "dipole_core_valence"))
@@ -1038,15 +1104,14 @@ CONTAINS  !=====================================================================
      NCF_CHECK(nf90_put_var(ncid,varid,lcor))
      varid=nctk_idname(ncid,"kappa_core")
      NCF_CHECK(nf90_put_var(ncid,varid,kappacor))
+     varid=nctk_idname(ncid,"number_of_core_states")
+     NCF_CHECK(nf90_put_var(ncid,varid,nphicor_arr))
 !    Write eigenvalues
      varid=nctk_idname(ncid,"eigenvalues")
      NCF_CHECK(nf90_put_var(ncid,varid,reshape(eigen0,[mband,nkpt,nsppol])))
      !Close file here because the rest has possibly to be written with collective I/O
      NCF_CHECK(nf90_close(ncid))
-#else
-     msg = "In order to use iomode=3 and prtnabla>0 together, NetCDF support must be enabled!"
-     ABI_ERROR(msg)
-#endif
+     ABI_FREE(nphicor_arr)
 !  ====> Standard FORTRAN binary file format
    else if (iomode==IO_MODE_FORTRAN_MASTER) then
      fformopt=612  ! MT 12sept21: change the OPT2 Fortran file format
@@ -1057,9 +1122,12 @@ CONTAINS  !=====================================================================
      call hdr%fort_write(ount,fformopt,ierr,rewind=.true.)
      write(ount)(eigen0(jb),jb=1,mband*nkpt*nsppol)
      write(ount) nphicor
-     do iln=1,nphicor
-       write(ount) ncor(iln),lcor(iln),kappacor(iln),energy_cor(iln)
-     end do
+     do itypat=1,dtset%ntypat
+       write(ount) atm(itypat)%ln_size
+       do iln=1,nphicor
+         write(ount) ncor(iln,itypat),lcor(iln,itypat),kappacor(iln,itypat),energy_cor(iln,itypat)
+       end do
+     enddo
    else
      msg = "Wrong OPT2 file format!"
      ABI_BUG(msg)
@@ -1072,7 +1140,6 @@ CONTAINS  !=====================================================================
  ABI_FREE(ncor)
  ABI_FREE(lcor)
  ABI_FREE(kappacor)
- ABI_FREE(phi_cor)
  ABI_FREE(energy_cor)
 
 !----------------------------------------------------------------------------------
@@ -1098,7 +1165,7 @@ CONTAINS  !=====================================================================
        NCF_CHECK(nctk_set_collective(ncid,varid))
      end if
      NCF_CHECK(nctk_set_datamode(ncid))
-   end if     
+   end if
  end if
  if (iomode_etsf_mpiio) then
    !If MPI-IO, store only elements for one band
@@ -1114,7 +1181,7 @@ CONTAINS  !=====================================================================
    end if
  end if
  pnp_size=size(psinablapsi)
- 
+
 !Determine if cprj datastructure is distributed over bands
  mband_cprj=mcprj/(my_nspinor*mkmem*nsppol)
  cprj_paral_band=(mband_cprj<mband)
@@ -1192,9 +1259,10 @@ CONTAINS  !=====================================================================
                do iatom=1,natom
                  itypat=dtset%typat(iatom)
                  lmn_size=pawtab(itypat)%lmn_size
+                 lmncmax=atm(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmncmax
-                     ic=indlmn_cor(5,ilmn)
+                     ic=atm(itypat)%indlmn(5,ilmn)
                      cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                      psinablapsi(2,:,ic,iatom,my_jb)=psinablapsi(2,:,ic,iatom,my_jb) &
 &                        -cpnm1*pawtab(itypat)%nabla_ij(:,jlmn,ilmn)
@@ -1205,9 +1273,10 @@ CONTAINS  !=====================================================================
                do iatom=1,natom
                  itypat=dtset%typat(iatom)
                  lmn_size=pawtab(itypat)%lmn_size
+                 lmncmax=atm(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmncmax
-                     ic=indlmn_cor(5,ilmn)
+                     ic=atm(itypat)%indlmn(5,ilmn)
                      cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                      cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
                      psinablapsi(1,:,ic,iatom,my_jb)=psinablapsi(1,:,ic,iatom,my_jb) &
@@ -1226,11 +1295,12 @@ CONTAINS  !=====================================================================
                do iatom=1,natom
                  itypat=dtset%typat(iatom)
                  lmn_size=pawtab(itypat)%lmn_size
+                 lmncmax=atm(itypat)%lmn_size
                  do jlmn=1,lmn_size
                    do ilmn=1,lmncmax
-                     is=indlmn_cor(6,ilmn)
+                     is=atm(itypat)%indlmn(6,ilmn)
                      if (modulo(jbsp,2)==modulo(is,2)) then ! Nabla is a spin-diagonal operator
-                       ic=indlmn_cor(5,ilmn)
+                       ic=atm(itypat)%indlmn(5,ilmn)
                        if (ic>0) then
                          cpnm1=cprj_k(iatom,jbsp)%cp(1,jlmn)
                          cpnm2=cprj_k(iatom,jbsp)%cp(2,jlmn)
@@ -1282,9 +1352,10 @@ CONTAINS  !=====================================================================
              do iatom=1,natom
                itypat=dtset%typat(iatom)
                lmn_size=pawtab(itypat)%lmn_size
+               lmncmax=atm(itypat)%lmn_size
                do jlmn=1,lmn_size
                  do ilmn=1,lmncmax
-                   ic=indlmn_cor(5,ilmn)
+                   ic=atm(itypat)%indlmn(5,ilmn)
                    if (ic>0) then
                      soc_ij => phisocphj(iatom)%value(:,:,:,jlmn,ilmn)
                      !Contribution from real part of <Psi^s_n|p_i>
@@ -1321,20 +1392,18 @@ CONTAINS  !=====================================================================
 
 !        Write to OPT2 file in case of MPI-IO
          if (iomode_etsf_mpiio.and.i_am_master_spfft) then
-           nc_start=[1,1,1,1,jb,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+           nc_start=[1,1,1,1,jb,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
            if (myband) then
              if (use_spinorbit) psinablapsi=psinablapsi+psinablapsi_soc
              nc_count=[2,3,nphicor,natom,1,1,1]
            else
              nc_count=[0,0,0,0,0,0,0]
            end if
-#ifdef HAVE_NETCDF
            NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
          end if
 
        end do ! jb
-       
+
        if (mkmem/=0) then
          ibg = ibg +  my_nspinor*nband_cprj_k
        end if
@@ -1361,15 +1430,13 @@ CONTAINS  !=====================================================================
          end if
        end if
 
-!      >>> This my kpt and I am the master node: I write the data    
+!      >>> This my kpt and I am the master node: I write the data
        if (.not.iomode_etsf_mpiio) then
          if (i_am_master) then
            if (iomode==IO_MODE_ETSF) then
-             nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+             nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
              nc_count=[2,3,nphicor,natom,mband,1,1]
-#ifdef HAVE_NETCDF
              NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
            else
              if (fformopt==612) then ! New OPT2 file format
                write(ount) (((psinablapsi(1:2,1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
@@ -1391,25 +1458,23 @@ CONTAINS  !=====================================================================
              end if
            end if
 
-!        >>> This my kpt and I am not the master node: I send the data    
+!        >>> This my kpt and I am not the master node: I send the data
          else if (i_am_master_band.and.i_am_master_spfft) then
            if (mpi_enreg%me_kpt/=master_spfftband) then
              ABI_BUG('Problem with band communicator!')
            end if
            call xmpi_exch(psinablapsi,pnp_size,mpi_enreg%me_kpt,psinablapsi,master,spaceComm_kpt,etiq,ierr)
          end if
-       end if  
+       end if
 
-!    >>> This is not my kpt and I am the master node: I receive the data and I write    
+!    >>> This is not my kpt and I am the master node: I receive the data and I write
      elseif ((.not.iomode_etsf_mpiio).and.i_am_master) then ! mykpt
        sender=master_spfftband
        call xmpi_exch(psinablapsi,pnp_size,sender,psinablapsi,master,spaceComm_kpt,etiq,ierr)
        if (iomode==IO_MODE_ETSF) then
-         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1] 
+         nc_start=[1,1,1,1,1,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
          nc_count=[2,3,nphicor,natom,mband,1,1]
-#ifdef HAVE_NETCDF
          NCF_CHECK(nf90_put_var(ncid,varid,psinablapsi,start=nc_start,stride=nc_stride,count=nc_count))
-#endif
        else
          if (fformopt==612) then ! New OPT2 file format
            write(ount) (((psinablapsi(1:2,1,ic,iatom,jb),ic=1,nphicor),iatom=1,natom),jb=1,nband_k)
@@ -1441,9 +1506,7 @@ CONTAINS  !=====================================================================
 !Close file
  if (i_am_master.or.(iomode_etsf_mpiio.and.i_am_master_spfft)) then
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(ncid))
-#endif
    else
      ierr=close_unit(ount,msg)
      ABI_CHECK(ierr==0,"Error while closing OPT2 file")
@@ -1451,7 +1514,10 @@ CONTAINS  !=====================================================================
  end if
 
 !Datastructures deallocations
- ABI_FREE(indlmn_cor)
+ do itypat=1,dtset%ntypat
+   call destroy_atomorb(atm(itypat))
+ enddo
+ ABI_FREE(atm)
  ABI_FREE(psinablapsi)
  if (use_spinorbit) then
    ABI_FREE(psinablapsi_soc)
@@ -1553,7 +1619,7 @@ CONTAINS  !=====================================================================
  iomode=IO_MODE_FORTRAN ; spaceComm=xmpi_comm_self; me=0
 
 ! Read the header of the optic files
- call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
+ call hdr%from_fname(filnam1, fform1, spaceComm)
  call hdr%free()
  if (fform1 /= 610) then
    ABI_ERROR("Abinit8 requires an OPT file with fform = 610")
@@ -1778,12 +1844,13 @@ CONTAINS  !=====================================================================
 !!        and Gvec_ij= Int[S_limi S_ljmj vec(r)/r dOmega] (Gaunt coefficients)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2021-2024 ABINIT group (NBrouwer,MT)
+!! Copyright (C) 2021-2025 ABINIT group (NBrouwer,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
+!!  el_temp=electronic temperature (hartree)
 !!  ixc= choice of exchange-correlation scheme (see above, and below)
 !!  my_natom=number of atoms treated by current processor
 !!  natom=total number of atoms in cell
@@ -1800,10 +1867,7 @@ CONTAINS  !=====================================================================
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!  xc_taupos= lowest allowed kinetic energy density (for mGGA XC functionals)
 !!  znucl(ntypat)=gives the nuclear charge for all types of atoms
-!!  [phi_cor(mesh_size,nphicor)]=--optional-- core wave-functions for the current type of atoms;
-!!                               only needed when option_core=1
-!!  [indlmn_cor(6,nlmn_core)]=--optional-- array giving l,m,n,lm,ln,s for i=lmn, for the core wave functions;
-!!                            only needed when option_core=1
+!!  [atm <type(paw_atomorb_type)>]=--optional-- structure containing core info
 !!  [mpi_atmtab(:)]=--optional-- indexes of the atoms treated by current proc
 !!  [comm_atom]=--optional-- MPI communicator over atoms
 !!
@@ -1837,26 +1901,25 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine pawnabla_soc_init(phisocphj,option_core,ixc,my_natom,natom,nspden,ntypat,pawang, &
+ subroutine pawnabla_soc_init(el_temp,phisocphj,option_core,ixc,my_natom,natom,nspden,ntypat,pawang, &
 &           pawrad,pawrhoij,pawtab,pawxcdev,spnorbscl,typat,xc_denpos,xc_taupos,znucl, &
-&           phi_cor,indlmn_cor,mpi_atmtab,comm_atom) ! Optional arguments
+&           atm,mpi_atmtab,comm_atom) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,my_natom,natom,nspden,ntypat,option_core,pawxcdev
  integer,optional,intent(in) :: comm_atom
- real(dp),intent(in) :: spnorbscl,xc_denpos,xc_taupos
+ real(dp),intent(in) :: el_temp,spnorbscl,xc_denpos,xc_taupos
  type(pawang_type),intent(in) :: pawang
 !arrays
- integer,intent(in),target,optional :: indlmn_cor(:,:)
  integer,intent(in) :: typat(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in),target,optional :: phi_cor(:,:)
  real(dp),intent(in) :: znucl(ntypat)
  type(coeff5_type),allocatable,target,intent(inout) :: phisocphj(:)
  type(pawrad_type),target,intent(in) :: pawrad(ntypat)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom)
  type(pawtab_type),target,intent(in) :: pawtab(ntypat)
+ type(atomorb_type), intent(in), target, optional :: atm(ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -1866,11 +1929,11 @@ CONTAINS  !=====================================================================
  real(dp),parameter :: hyb_mixing_ = 0.0_dp   ! Fake value to be updated in the future
  integer :: iatom,iatom_tot,itypat,ii,jj,ierr,ipts,ignt,sgnkappa
  integer :: idum,option,usenhat,usekden,usecore,xclevel,nkxc,my_comm_atom
- integer :: mesh_size,mesh_size_cor,lmn_size,lmn2_size,lmn_size_j,lmn_size_cor
- integer :: lm_size,ln_size,ln_size_j,ln_size_cor,nspinor_cor
+ integer :: mesh_size,lmn_size,lmn2_size,lmn_size_j,lmn_size_cor
+ integer :: lm_size,ln_size,ln_size_j
  integer :: ilmn,ilm,iln,jl,jm,jm_re,jm_im,jlmn,jlm,jlm_re,jlm_im,jln,js,klm_re,klm_im
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: avg,cgc,compch_sph_dum,eexc_dum,eexcdc_dum,jmj
+ real(dp) :: avg,cgc,compch_sph_dum,eexc_dum,ssxc_dum,eexcdc_dum,jmj
  real(dp) :: fact_re,fact_im,gx_re,gx_im,gy_re,gy_im,gz_re,gz_im,if3
  character(len=500) :: msg
 !arrays
@@ -1892,15 +1955,17 @@ CONTAINS  !=====================================================================
  end if
  if (option_core==1) then
 !  Check if we have the optional arguments
-   if ((.not.present(phi_cor)).or.(.not.present(indlmn_cor))) then
-     msg='For core-valence calculation, need phi_cor and indlmn_cor!'
+   if (.not.present(atm)) then
+     msg='For core-valence calculation, need atm data!'
      ABI_BUG(msg)
    end if
+   do itypat=1,ntypat
 !  Check if we have relativistic core wave functions
-   if (size(indlmn_cor,1)<8) then
-     write(msg,'(a)') 'Wrong 1st dim. of indlmn_cor in pawnabla_soc_init (need spinors)!'
-     ABI_BUG(msg)
-   end if
+     if (size(atm(itypat)%indlmn,1)<8) then
+       write(msg,'(a)') 'Wrong 1st dim. of indlmn_cor in pawnabla_soc_init (need spinors)!'
+       ABI_BUG(msg)
+     end if
+   enddo
  endif
 
 !Some useful variables
@@ -1908,10 +1973,10 @@ CONTAINS  !=====================================================================
  usecore=1 ; nkxc=0 ; usenhat=0
  xclevel=pawxc_get_xclevel(ixc)
  if (option_core==1) then
-   mesh_size_cor=size(phi_cor,1)
-   lmn_size_cor=size(indlmn_cor,2) !Includes spinors
-   ln_size_cor=size(phi_cor,2)
-   nspinor_cor=maxval(indlmn_cor(6,1:lmn_size_cor))
+   lmn_size_cor=0
+   do itypat=1,ntypat
+     lmn_size_cor=max(lmn_size_cor,atm(itypat)%lmn_size) !Includes spinors
+   enddo
  end if
 
 !Prepare output arrays
@@ -1967,11 +2032,11 @@ CONTAINS  !=====================================================================
      indlmn_j => pawtb%indlmn
      phi_j => pawtb%phi
    else
-     ln_size_j=ln_size_cor
-     lmn_size_j=lmn_size_cor
-     indlmn_j => indlmn_cor
-     phi_j => phi_cor
-     if (mesh_size_cor<mesh_size) then
+     ln_size_j=atm(itypat)%ln_size
+     lmn_size_j=atm(itypat)%lmn_size
+     indlmn_j => atm(itypat)%indlmn
+     phi_j => atm(itypat)%phi(:,:,1)
+     if (atm(itypat)%mesh_size<mesh_size) then
        msg='mesh_size and mesh_size_cor not compatible!'
        ABI_BUG(msg)
      end if
@@ -2008,16 +2073,16 @@ CONTAINS  !=====================================================================
    if (pawxcdev/=0) then
      ABI_MALLOC(vxc,(mesh_size,lm_size,nspden))
      vxc=zero
-     call pawxcm(pawtb%coredens,eexc_dum,eexcdc_dum,idum,hyb_mixing_,ixc,kxc_dum,lm_size,&
+     call pawxcm(pawtb%coredens,eexc_dum,eexcdc_dum,ssxc_dum,idum,hyb_mixing_,ixc,kxc_dum,lm_size,&
 &         lmselect,nhat_dum,nkxc,.false.,mesh_size,nspden,option,pawang,pawrd,&
-&         pawxcdev,rho1,usecore,usenhat,vxc,xclevel,xc_denpos)
+&         pawxcdev,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,el_temp)
      potsph(1:mesh_size)=half*(vxc(1:mesh_size,1,1)+vxc(1:mesh_size,1,nspden))
    else
      ABI_MALLOC(vxc,(mesh_size,pawang%angl_size,nspden))
      vxc=zero
-     call pawxc(pawtb%coredens,eexc_dum,eexcdc_dum,hyb_mixing_,ixc,kxc_dum,k3xc_dum,&
+     call pawxc(pawtb%coredens,eexc_dum,eexcdc_dum,ssxc_dum,hyb_mixing_,ixc,kxc_dum,k3xc_dum,&
 &         lm_size,lmselect,nhat_dum,nkxc,nkxc,.false.,mesh_size,nspden,option,pawang,&
-&         pawrd,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,&
+&         pawrd,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,el_temp,&
 &         coretau=pawtb%coretau,taur=tau1,xc_taupos=xc_taupos)
      potsph(1:mesh_size)=zero
      do ipts=1,pawang%angl_size
@@ -2093,7 +2158,7 @@ CONTAINS  !=====================================================================
 !      Calculate spinor dependent coefficients
        sgnkappa=indlmn_j(3,jlmn)   !sign of kappa
        jmj=half*indlmn_j(8,jlmn)   !2mj is stored in indlmn_cor
-       js=indlmn_cor(6,jlmn)       !1 is up, 2 is down
+       js=indlmn_j(6,jlmn)       !1 is up, 2 is down
        if (sgnkappa==1) then
          if(js==1) then
            cgc= sqrt((dble(jl)-jmj+half)/dble(2*jl+1))
@@ -2133,13 +2198,13 @@ CONTAINS  !=====================================================================
 
 !      >>>> Calculate g_ij=(g_x,g_y,g_z) = sqrt(4pi/3) int dOmega Ylm Ylm' S1-1,0,1
 !              using real Gaunt coefficients
-       gx_re=zero;gy_re=zero;gz_re=zero         
+       gx_re=zero;gy_re=zero;gz_re=zero
        gx_im=zero;gy_im=zero;gz_im=zero
        if3=zero
 
 !      jl was set as a flag for invalid combinations
 !        i.e. m=-(l+1) or m=(l+1)
-!      In these cases, cgc=0 ; so gx=gy=gz=0 
+!      In these cases, cgc=0 ; so gx=gy=gz=0
        if (jl/=-1) then
          if3=intf3(iln,jln)
          klm_re=merge((jlm_re*(jlm_re-1))/2+ilm,(ilm*(ilm-1))/2+jlm_re,ilm<=jlm_re)
@@ -2217,7 +2282,7 @@ CONTAINS  !=====================================================================
 
      end do ! ilmn
    end do ! jlmn
-     
+
 !  Symetrization
    if (option_core==0.and.lmn_size>1) then
      do jlmn=2,lmn_size
@@ -2229,7 +2294,7 @@ CONTAINS  !=====================================================================
              avg=half*(soc_ij(2,jj,ii,ilmn,jlmn)+soc_ij(2,jj,ii,ilmn,jlmn))
              soc_ij(2,jj,ii,ilmn,jlmn)=avg ; soc_ij(2,jj,ii,jlmn,ilmn)=avg
            end do
-         end do           
+         end do
        end do
      end do
    end if
@@ -2238,12 +2303,12 @@ CONTAINS  !=====================================================================
    ABI_FREE(intf3)
 
  end do  ! iatom
- 
+
 !Reduction in case of parallelism
  if (paral_atom) then
    call xmpi_sum(phisocphj,my_comm_atom,ierr)
  end if
- 
+
 !Destroy atom table(s) used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 

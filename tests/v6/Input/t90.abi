@@ -145,7 +145,6 @@ znucl 22
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% test_chain = t90.abi, t91.abi, t92.abi, t93.abi, t94.abi
 #%% no_check = yes
 #%% [files]

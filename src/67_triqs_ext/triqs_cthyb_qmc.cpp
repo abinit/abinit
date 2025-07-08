@@ -2,420 +2,498 @@
 #include "config.h"
 #endif
 
-#include <solver_core.hpp>
-#include <triqs/operators/many_body_operator.hpp>
-#include <triqs/hilbert_space/fundamental_operator_set.hpp>
-#include <triqs/utility/real_or_complex.hpp>
-#include <triqs/gfs.hpp>
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
+#include <bitset>
 #include <iomanip>
-
-#if defined HAVE_TRIQS_v1_4
-#include <triqs/mpi/boost.hpp>
-#elif defined HAVE_TRIQS_v2_0
-#include <triqs/h5.hpp>
-#endif
-
-#include "triqs_cthyb_qmc.hpp"
-
-using namespace std;
-#if defined HAVE_TRIQS_v2_0
-using namespace triqs_cthyb;
-#elif defined HAVE_TRIQS_v1_4
-using namespace cthyb;
-#endif
-using namespace triqs::gfs;
-using triqs::operators::many_body_operator_generic;
-using triqs::operators::c;
-using triqs::operators::c_dag;
-using triqs::operators::n;
-
+#include <iostream>
 #include <mpi.h>
+#include <triqs_cthyb/solver_core.hpp>
+#include <triqs_cthyb_qmc.hpp>
 
+using namespace h5;
+using namespace mpi;
+using namespace triqs::gfs;
 
-void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
-                     bool wrt_files, bool tot_not,                  /*boolean*/	      
-                     int n_orbitals, int n_freq, int n_tau,         /*integer*/
-                     int n_l, int n_cycles_, int cycle_length,      /*integer*/
-                     int ntherm, int verbo, int seed,               /*integer*/
-		     double beta_,                                  /*double*/
-                     double *epsi, double *umat_ij,                 /*pointers*/
-                     double *umat_ijkl,                             /*pointers*/
-                     std::complex<double> *f_iw_ptr,                /*pointers*/
-                     std::complex<double> *g_iw_ptr,                /*pointers*/
-                     double *g_tau, double *gl,                     /*pointers*/
-#if defined HAVE_TRIQS_v1_4
-                     MPI_Fint *MPI_world_ptr ){                     /*pointers*/
+void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool off_diag, bool move_shift, bool move_double,
+                     bool measure_density_matrix, bool time_invariance, bool use_norm_as_weight,
+                     int loc_n_min, int loc_n_max, int seed_a, int seed_b, int num_orbitals, int n_tau,
+                     int n_l, int n_cycles, int cycle_length, int ntherm, int ntherm_restart, int det_init_size,
+                     int det_n_operations_before_check, int ntau_delta, int nbins_histo, int rank,
+                     int nspinor, int iatom, int ilam, int nblocks, double beta, double move_global_prob, double imag_threshold,
+                     double det_precision_warning, double det_precision_error, double det_singular_threshold,
+                     double lam, int *block_list, int *flavor_list, int *inner_list, int *siz_list, complex<double> *ftau,
+                     complex<double> *gtau, complex<double> *gl, complex<double> *udens_cmplx, complex<double> *vee_cmplx,
+                     complex<double> *levels_cmplx, complex<double> *moments_self_1, complex<double> *moments_self_2,
+                     complex<double> *occ, complex<double> *eu) {
+
+  int verbo = 1;
+  int ndim = num_orbitals / 2;
+  string lam_fname = "";
+  if (ilam != 0) lam_fname = "_ilam_" + to_string(ilam);
+  string qmc_data_fname = "qmc_data_iatom_" + to_string(iatom) + lam_fname + ".h5";
+  auto comm = MPI_COMM_WORLD;
+  int nproc;
+  MPI_Comm_size(comm,&nproc);
+  int itask = 0;
+  int iflavor,iflavor1;
+
+  int therm = ntherm;
+  if (exists(qmc_data_fname)) therm = ntherm_restart;
+
+  // Print information about the Solver Parameters
+  if (rank == 0 && verbo > 0) {
+
+    cout << endl << "   == Key Input Parameters for the TRIQS CTHYB solver ==" << endl << endl;
+    cout << "   Beta                  = " << fixed << beta << endl;
+    cout << "   Nflavor               = " << num_orbitals << endl;
+    cout << "   Ntau                  = " << n_tau << endl;
+    cout << "   Nl                    = " << n_l << endl;
+    cout << "   Legendre measurement  = " << leg_measure << endl;
+    cout << "   Ncycles               = " << n_cycles << endl;
+    cout << "   Cycle length          = " << cycle_length << endl;
+    cout << "   Ntherm                = " << therm << endl;
+    cout << "   Seed                  = " << seed_a << " + " << seed_b << " * rank" << endl;
+    cout << "   Move shift            = " << move_shift << endl;
+    cout << "   Move double           = " << move_double << endl;
+    cout << "   Meas. density mat.    = " << measure_density_matrix << endl;
+    cout << "   Use norm as weight    = " << use_norm_as_weight << endl;
+    cout << "   N min                 = " << loc_n_min << endl;
+    cout << "   N max                 = " << loc_n_max << endl;
+    cout << "   Det init size         = " << det_init_size << endl;
+    cout << "   Det N ops. bef. check = " << det_n_operations_before_check << endl;
+    cout << "   Global moves prob.    = " << scientific << move_global_prob << endl;
+    cout << "   Imaginary Threshold   = " << imag_threshold << endl;
+    cout << "   Det Precision warning = " << det_precision_warning << endl;
+    cout << "   Det Precision error   = " << det_precision_error << endl;
+    cout << "   Det sing. threshold   = " << det_singular_threshold << endl;
+    cout << "   Time invariance       = " << time_invariance << endl;
+    cout << "   Ntau delta            = " << ntau_delta << endl;
+    cout << "   Nbins histo           = " << nbins_histo << endl;
+    cout << "   Lambda                = " << lam << endl << endl;
+  }
+
+  // Hamiltonian definition
+  many_body_op_t H;
+  many_body_operator Hint;
+  h_scalar_t *levels,*udens,*vee;
+
+#ifdef HAVE_TRIQS_COMPLEX
+  levels = levels_cmplx;
+  udens  = udens_cmplx;
+  vee    = vee_cmplx;
 #else
-                     int rank ){                     /*pointers*/
+  double levels_real [num_orbitals*num_orbitals] = {};
+  double udens_real [num_orbitals*num_orbitals] = {};
+  double vee_real [num_orbitals*num_orbitals*num_orbitals*num_orbitals] = {};
+  for (int i = 0; i < num_orbitals*num_orbitals; ++i) {
+    levels_real[i] = levels_cmplx[i].real();
+    udens_real[i]  = udens_cmplx[i].real();
+  }
+  for (int i = 0; i < num_orbitals*num_orbitals*num_orbitals*num_orbitals; ++i)
+    vee_real[i] = vee_cmplx[i].real();
+  levels = levels_real;
+  udens  = udens_real;
+  vee    = vee_real;
 #endif
 
-    cout.setf(ios::fixed);
-#if defined HAVE_TRIQS_v1_4
-    //Initialize Boost mpi environment
-    int rank, nprocs;
-    boost::mpi::environment env;
-    {
-	boost::mpi::communicator comm;
-	comm << MPI_Comm_f2c( *MPI_world_ptr );
-        rank=comm.rank();
+  h_scalar_t levels_zero [num_orbitals*num_orbitals] = {0};
 
-        MPI_Comm_size(comm, &nprocs);
-        std::cout << "Number of processors: " << nprocs << endl;
-    }
-#else
-    std::cout << "Rank: "<< rank << endl;
-#endif
+  gf_struct_t gf_struct;
 
-    // Parameters relay from Fortran and default values affectation
-    double beta = beta_;                //Temperature inverse 
-    int num_orbitals = n_orbitals;
-    //double U = U_;                    //Impurity site Interaction term
-    double mu = 0.0;                    //Chemical Potential Functionality avail but not used here
-    //bool n_n_only = !(rot_inv);       //density-density?
-  
-    int Nfreq = n_freq;                 //Number of Matsubara frequencies 
-    int Ntau = n_tau;                   //Number of imaginary times  
-    int Nl = n_l;                       //Number of Legendre measures 30
-    int n_cycles = n_cycles_;
-    int nspin = 2;                      //always it's Nature
-    
-    //Print information about the Solver Parameters 
-    if(rank==0 && verbo>0){
-        std::cout << endl <<"   == Key Input Parameters for the TRIQS CTHYB solver ==	"<<endl<<endl;
-    
-        std::cout <<"	Beta               = "<< beta <<" [eV]^(-1) "<<endl;
-        std::cout <<"	Mu                 = "<< mu <<" [eV]"<<endl;
-        std::cout <<"	Nflavour           = "<< num_orbitals <<endl;
-        std::cout <<"	Nfreq              = "<< Nfreq << endl;
-        std::cout <<"	Ntau               = "<< Ntau << endl;
-        std::cout <<"	Nl                 = "<< Nl << endl;
-        std::cout <<"	Ncycles            = "<< n_cycles << endl;
-        std::cout <<"	Cycle length       = "<< cycle_length << endl;
-        std::cout <<"	Ntherm             = "<< ntherm << endl;
-        std::cout <<"	Verbosity (0->3)   = "<< verbo << endl;
-        std::cout <<"	Abinit Seed        = "<< seed << endl <<endl;
-    
-        for(int o = 0; o < num_orbitals; ++o)
-	        std::cout << "	e- level["<< o+1 <<"] = "<< setprecision(17) << epsi[o] <<" [eV]"<< endl; //ed != cste => vecteur a parcourir ensuite
-    
-        std::cout << endl;
-        std::cout <<"	U(i,j) [eV] = "  <<endl<< endl<<"\t";
-    
-        for(int o = 0; o < num_orbitals; ++o){
-            for(int oo = 0; oo < num_orbitals; ++oo)
-	            std::cout << setprecision(17) << fixed <<umat_ij[o+oo*num_orbitals] << "\t"; //ed != cste => vecteur a parcourir ensuite
-            std::cout << endl<<"\t";
+  for (int i = 0; i < nblocks; ++i)
+    gf_struct.emplace_back(to_string(i),siz_list[i]);
+
+  if (rank == 0 && verbo > 0) cout << "   == Green's Function Structure Initialized ==" << endl << endl;
+
+  // Init Hamiltonian Basic terms
+  if (!rot_inv) {
+    if (rank == 0 && verbo > 0) cout << "   == Density-Density Terms Included == " << endl << endl;
+    H    = init_Hamiltonian(levels,num_orbitals,udens,block_list,inner_list,lam);
+    Hint = init_Hamiltonian(levels_zero,num_orbitals,udens,block_list,inner_list,double(1));
+  }
+  else {
+    if (rank == 0 && verbo > 0) cout << "   == Rotationally Invariant Terms Included ==  " << endl << endl;
+    H    = init_fullHamiltonian(levels,num_orbitals,vee,block_list,inner_list,lam);
+    Hint = init_fullHamiltonian(levels_zero,num_orbitals,vee,block_list,inner_list,double(1));
+  }
+
+  // Construct CTQMC solver with mesh parameters
+  solver_core solver({beta,gf_struct,(n_tau-1)/2,n_tau,n_l,ntau_delta,true});
+  if (rank == 0 && verbo > 0) cout << "   == Solver Core Initialized ==" << endl << endl;
+
+  for (int iblock = 0; iblock < nblocks; ++iblock) {
+    for (int tau = 0; tau < ntau_delta; ++tau) {
+      for (int o = 0; o < siz_list[iblock]; ++o) {
+        iflavor = flavor_list[o+iblock*num_orbitals];
+        for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+          iflavor1 = flavor_list[oo+iblock*num_orbitals];
+          solver.Delta_tau()[iblock][tau](o,oo) = ftau[iflavor+iflavor1*num_orbitals+tau*num_orbitals*num_orbitals];
         }
+      }
+    }
+  }
+
+  if (rank == 0 && verbo > 0) cout << "   == F(tau) Initialized ==      " << endl << endl;
+
+  // Solver parameters
+  if (rank == 0 && verbo > 0) cout << "   == Solver Parametrization ==	" << endl << endl;
+  auto paramCTQMC = solve_parameters_t(H,n_cycles);
+
+  many_body_op_t hloc0;
+  paramCTQMC.h_loc0 = hloc0;
+  paramCTQMC.max_time = -1;
+  paramCTQMC.measure_weight_ratio = true;
+  paramCTQMC.random_name = "";
+  paramCTQMC.random_seed = seed_b * rank + seed_a;
+  paramCTQMC.length_cycle = cycle_length;
+  paramCTQMC.n_warmup_cycles = therm;
+  paramCTQMC.time_invariance = time_invariance;
+  paramCTQMC.nbins_histo = nbins_histo;
+
+  if (exists(qmc_data_fname)) {
+
+    // Read initial configuration
+    if (rank == 0 && verbo > 0) cout << "   == Reading previous configuration == " << endl;
+    std::vector<int> sendcounts(nproc);
+    file qmc_data_hfile(qmc_data_fname,'r');
+    group grp = qmc_data_hfile;
+    group gr  = grp.open_group("config");
+    if (rank == 0) {
+      int ncpus;
+      h5_read(gr,"ncpus",ncpus);
+      if (ncpus != nproc) TRIQS_RUNTIME_ERROR << "You are trying to read a configuration file generated with a different number of CPUs";
+      h5_read(gr,"size",sendcounts);
+    }
+    MPI_Bcast(&sendcounts[0],nproc,MPI_INTEGER,0,comm);
+    int length = sendcounts[rank];
+    std::vector<uint64_t> tau_list(length);
+    std::vector<int> block_index_list(length);
+    std::vector<int> inner_index_list(length);
+    std::vector<int> is_dagger_list(length);
+    int displs [nproc] = {0};
+    for (int i = 1; i < nproc; ++i) displs[i] = displs[i-1] + sendcounts[i-1];
+    int tot_size = displs[nproc-1] + sendcounts[nproc-1];
+    std::vector<uint64_t> tau_list_tot(tot_size);
+    std::vector<int> block_index_list_tot(tot_size);
+    std::vector<int> inner_index_list_tot(tot_size);
+    std::vector<int> is_dagger_list_tot(tot_size);
+    if (rank == 0) {
+      h5_read(gr,"tau",tau_list_tot);
+      h5_read(gr,"block",block_index_list_tot);
+      h5_read(gr,"inner",inner_index_list_tot);
+      h5_read(gr,"dagger",is_dagger_list_tot);
+    }
+    MPI_Scatterv(&tau_list_tot[0],&sendcounts[0],displs,MPI_UNSIGNED_LONG_LONG,&tau_list[0],length,MPI_UNSIGNED_LONG_LONG,0,comm);
+    MPI_Scatterv(&block_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&block_index_list[0],length,MPI_INTEGER,0,comm);
+    MPI_Scatterv(&inner_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&inner_index_list[0],length,MPI_INTEGER,0,comm);
+    MPI_Scatterv(&is_dagger_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&is_dagger_list[0],length,MPI_INTEGER,0,comm);
+    for (int i = 0; i < length; ++i) {
+      bool is_dagger = (is_dagger_list[i] == 1 ? true : false);
+      auto op = op_desc{block_index_list[i],inner_index_list[i],is_dagger,0}; // linear index will be set later, within TRIQS
+      time_pt tau = time_pt(tau_list[i],beta);
+      paramCTQMC.initial_configuration.insert(tau,op);
     }
 
-    // Hamiltonian definition
-    many_body_operator_generic<double> H;
-    
-    // Spin Orbit general case num_orbitals*2=Nflavour
-   
-    // Init Hamiltonian Basic terms
-    if(!rot_inv){
-	    if(rank==0 && verbo>0) std::cout <<endl<<"   == Density-Density Terms Included ==	"<<endl<<endl;  
-        H = init_Hamiltonian( epsi, num_orbitals, umat_ij );
-
-        // Include density-density term (J != 0) spin flips and pair hopping => density-density term case
-    }else{ // if(rot_inv){
-	    if(rank==0 && verbo>0)std::cout <<"   == Rotationnaly Invariant Terms Included ==	"<< endl << endl;
-	
-	    if(tot_not)
-            H = init_fullHamiltonian( epsi, num_orbitals, umat_ijkl );
-	    else // up and down separation
-	        H = init_fullHamiltonianUpDown( epsi, num_orbitals, umat_ijkl );
-    }// else if(rank==0 && verbo>0) std::cout <<endl<<"   == Density-Density Terms Not Included ==	"<<endl<<endl;  
-
-#if defined HAVE_TRIQS_v2_0
-    std::vector<std::pair<std::string, indices_type>> gf_struct;
-
-    auto idx_vec = indices_type{};
-    for(int o = 0; o < num_orbitals; ++o)
-        idx_vec.push_back(o);
-  
-    if( tot_not )
-        gf_struct.emplace_back("tot", idx_vec);
-    else{// spin orb case: general case
-        gf_struct.emplace_back("up", idx_vec);
-        gf_struct.emplace_back("down", idx_vec);
-    }
-#elif defined HAVE_TRIQS_v1_4
-    std::map<std::string, indices_type> gf_struct;
-
-    if( tot_not ){
-        std::map<std::string, indices_type> gf_struct_tmp{{"tot", indices_type{}}};
-
-        for(int o = 0; o < num_orbitals; ++o)
-            gf_struct_tmp["tot"].push_back(o);
-    
-        gf_struct = gf_struct_tmp;
-    }else{ // spin orb case: general case:
-        std::map<std::string, indices_type> gf_struct_tmp{{"up", indices_type{}}, {"down", indices_type{}}};
-
-        for(int o = 0; o < num_orbitals; ++o){
-            gf_struct_tmp["up"].push_back(o);
-            gf_struct_tmp["down"].push_back(o);
+    // Read binned time histogram
+    if (rank == 0 && verbo > 0) cout << "   == Reading previous histogram == " << endl;
+    gr = grp.open_group("histo");
+    int nbins_file;
+    h5_read(gr,"nbins",nbins_file);
+    if (nbins_file != nbins_histo) TRIQS_RUNTIME_ERROR << "You are trying to read a configuration file generated with a different number of time bins";
+    std::vector<double> *hist;
+    string tag_move;
+    for (int i = 0; i < nblocks; ++i) {
+      for (int j = 0; j < 2; ++j) {
+        if (j == 0) {
+          tag_move = "insert";
+          hist = &paramCTQMC.hist_insert[to_string(i)];
         }
-
-        gf_struct = gf_struct_tmp;
-    }
-#endif
-
-    if(rank==0 && verbo>0) std::cout <<"   == Green Function Structure Initialized ==	"<< endl << endl;
-
-    // Construct CTQMC solver with mesh parameters
-#if defined HAVE_TRIQS_v2_0
-    solver_core solver({beta, gf_struct, Nfreq, Ntau, Nl});
-#elif defined HAVE_TRIQS_v1_4
-    solver_core solver(beta, gf_struct, Nfreq, Ntau, Nl);
-#endif
-    if(rank==0 && verbo>0) std::cout <<"   == Solver Core Initialized ==	"<< endl << endl;
-
-    //Fill in "hybridation+eps"=F(iw)~Delta(iw) coming from fortran inside delta_iw term RHS
-    gf<imfreq> delta_iw = gf<imfreq>{{beta, Fermion, Nfreq}, {num_orbitals,num_orbitals}};
-    auto w_mesh = delta_iw.mesh();
- 
-    for(std::size_t w1 = 0; w1 < w_mesh.size(); ++w1){
-        int w_index = w1 - w_mesh.size()/2;
-        int w = w_index;
-        if(w_index < 0) w = -1*w_index - 1; //Maps negative w to correct positive w
-
-        auto iw = w_mesh.index_to_point(w_index);
-        auto cell = delta_iw[w_index];
-
-        for(int o = 0; o < num_orbitals; ++o){
-	        for(int oo = 0; oo < num_orbitals; ++oo){
-                auto f_iw = f_iw_ptr[o+oo*num_orbitals+w*num_orbitals*num_orbitals];
-                if(w_index < 0) f_iw = std::conj(f_iw);
-                cell(o,oo) = f_iw;
-	        }
-	    }
-    }
-    if(rank==0 && verbo>0) std::cout <<"   == F(iw) Initialized ==	"<< endl << endl;
-
-    triqs::clef::placeholder<0> om_;
-
-    auto g0_iw = gf<imfreq>{{beta, Fermion, Nfreq}, {num_orbitals,num_orbitals}};
-
-    g0_iw(om_) <<  om_  + mu - delta_iw(om_); //calculate G0(iw)^-1 matrix
-
-    if(rank==0 && verbo>0) std::cout <<"   == G0(iw)^-1 Initialized ==	"<< endl << endl;
-  
-    if(tot_not)
-        solver.G0_iw()[0] = triqs::gfs::inverse( g0_iw ); //inverse G0(iw) matrix and affect to solver
-    else{
-        for (int i = 0; i < nspin; ++i)
-            solver.G0_iw()[i] = triqs::gfs::inverse( g0_iw );
-    }
-  
-    if(rank==0 && verbo>0) std::cout <<"   == G0(iw)^-1 Inverted => G0(iw) Constructed ==	"<< endl << endl;
-  
-    std::cout << setprecision(17) << fixed;
-
-    // Solver parameters
-    if(rank==0 && verbo>0) std::cout <<"   == Solver Parametrization ==	"<< endl << endl;
-    auto paramCTQMC = solve_parameters_t(H, n_cycles);
-    paramCTQMC.max_time = -1;
-    paramCTQMC.random_name = "";
-    paramCTQMC.random_seed = 123 * rank + 567;// seed;
-    paramCTQMC.length_cycle = cycle_length;
-    paramCTQMC.n_warmup_cycles = ntherm;
-    paramCTQMC.verbosity=verbo;
-#if defined HAVE_TRIQS_v2_0
-    paramCTQMC.measure_G_l = leg_measure;
-#elif defined HAVE_TRIQS_v1_4
-    paramCTQMC.measure_g_l = leg_measure;
-#endif
-    // paramCTQMC.move_double = true; 
-    // paramCTQMC.make_histograms=hist;
-  
-    if(rank==0 && verbo>0) std::cout <<"   == Starting Solver [node "<< rank <<"] ==	"<< endl << endl;
-    //Solve!
-    solver.solve(paramCTQMC);
-  
-    if(rank==0 && verbo>0) std::cout <<"   == Reporting ==	"<< endl << endl;
-    //Report some stuff
-    int compteur = 0;
-
-    std::cout << endl <<" === solver.G0_iw === "<< endl;
-
-    for(int oo = 0; oo < num_orbitals; ++oo){      
-        for(int o = 0; o < num_orbitals; ++o){ 
-            for(std::size_t w_index = w_mesh.size()/2; w_index < w_mesh.size(); ++w_index){
-	            g_iw_ptr[compteur] = solver.G0_iw()[0].data()(w_index,o,oo);
-	            compteur++;
-	        }
+        else {
+          tag_move = "remove";
+          hist = &paramCTQMC.hist_remove[to_string(i)];
         }
+        *hist = std::vector<double>(nbins_histo);
+        if (rank == 0) h5_read(gr,tag_move+"_"+to_string(i),*hist);
+        mpi_broadcast(*hist,comm,0);
+      }
     }
-  
-    // Report G_tau
-    compteur = 0;
+    qmc_data_hfile.close();
+  }
 
-    for(int oo = 0; oo < num_orbitals; ++oo){ 
-        for(int o = 0; o < num_orbitals; ++o){ 
-            for(int tau = 0; tau < n_tau; ++tau){
-#if defined HAVE_TRIQS_v2_0
-                g_tau[compteur]= (*solver.G_tau)[0].data()(tau,o,oo).real();
-#elif defined HAVE_TRIQS_v1_4
-                g_tau[compteur]= solver.G_tau()[0].data()(tau,o,oo).real();
-#endif
-                compteur++;
-            }
-        }  
-    }
+  paramCTQMC.move_shift = move_shift;
+  paramCTQMC.move_double = move_double;
+  paramCTQMC.measure_density_matrix = measure_density_matrix;
+  paramCTQMC.use_norm_as_weight = use_norm_as_weight;
+  paramCTQMC.det_init_size = det_init_size;
+  paramCTQMC.det_n_operations_before_check = det_n_operations_before_check;
+  paramCTQMC.move_global_prob = move_global_prob;
+  paramCTQMC.imag_threshold = imag_threshold;
+  paramCTQMC.det_precision_warning = det_precision_warning;
+  paramCTQMC.det_precision_error = det_precision_error;
+  paramCTQMC.det_singular_threshold = det_singular_threshold;
+  paramCTQMC.loc_n_min = loc_n_min;
+  paramCTQMC.loc_n_max = loc_n_max;
+  paramCTQMC.measure_G_l = leg_measure;
 
-    // Report G(l)
-    if( leg_measure ){
-        compteur = 0;
-        for(int oo = 0; oo < num_orbitals; ++oo){ 
-            for(int o = 0; o < num_orbitals; ++o){ 
-                for(int l = 0; l < n_l; ++l){
-#if defined HAVE_TRIQS_v2_0
-        	        gl[compteur]= (*solver.G_l)[0].data()(l,o,oo).real();
-#elif defined HAVE_TRIQS_v1_4
-        	        gl[compteur]= solver.G_l()[0].data()(l,o,oo).real();
-#endif
-        	        compteur++;
-                }
-            }
+  if (rank == 0 && verbo > 0) cout << "   == Starting Solver [node " << rank << "] ==" << endl << endl;
+  solver.solve(paramCTQMC);
+
+  if (rank == 0 && verbo > 0) cout << endl << "   == Reporting ==" << endl << endl;
+
+  if (rank == 0 && verbo > 0) cout << "   == Writing final configuration ==      " << endl << endl;
+
+  // Write all final configurations
+  auto config = solver.get_configuration();
+  auto tau_0 = time_pt(1,beta);
+  int length = config.size();
+  std::vector<uint64_t> tau_list(length);
+  std::vector<int> block_index_list(length);
+  std::vector<int> inner_index_list(length);
+  std::vector<int> is_dagger_list(length);
+  int count = 0;
+  for (auto const &o : config) {
+    uint64_t tau = floor_div(o.first,tau_0);   // trick to get the value of the integer representing the time_pt
+    auto op = o.second;
+    int block_index = op.block_index;
+    int inner_index = op.inner_index;
+    int is_dagger = (op.dagger ? 1 : 0);
+    tau_list[count] = tau;
+    block_index_list[count] = block_index;
+    inner_index_list[count] = inner_index;
+    is_dagger_list[count] = is_dagger;
+    ++count;
+  }
+  std::vector<int> recvcounts(nproc);
+  MPI_Allgather(&length,1,MPI_INTEGER,&recvcounts[0],1,MPI_INTEGER,comm);
+  int displs [nproc] = {0};
+  for (int i = 1; i < nproc; ++i) displs[i] = displs[i-1] + recvcounts[i-1];
+  int tot_size = displs[nproc-1] + recvcounts[nproc-1];
+  std::vector<uint64_t> tau_list_tot(tot_size);
+  std::vector<int> block_index_list_tot(tot_size);
+  std::vector<int> inner_index_list_tot(tot_size);
+  std::vector<int> is_dagger_list_tot(tot_size);
+  MPI_Gatherv(&tau_list[0],length,MPI_UNSIGNED_LONG_LONG,&tau_list_tot[0],&recvcounts[0],displs,MPI_UNSIGNED_LONG_LONG,0,comm);
+  MPI_Gatherv(&block_index_list[0],length,MPI_INTEGER,&block_index_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
+  MPI_Gatherv(&inner_index_list[0],length,MPI_INTEGER,&inner_index_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
+  MPI_Gatherv(&is_dagger_list[0],length,MPI_INTEGER,&is_dagger_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
+
+  if (rank == 0) {
+
+    file qmc_data_hfile(qmc_data_fname,'w');   // very important to open in write mode, so that previous data is erased
+    group grp = qmc_data_hfile;
+    group gr  = grp.create_group("config");
+
+    h5_write(gr,"ncpus",nproc);
+    h5_write(gr,"size",recvcounts);
+    h5_write(gr,"tau",tau_list_tot);
+    h5_write(gr,"block",block_index_list_tot);
+    h5_write(gr,"inner",inner_index_list_tot);
+    h5_write(gr,"dagger",is_dagger_list_tot);
+
+    // Write all histograms
+
+    gr = grp.create_group("histo");
+    h5_write(gr,"nbins",nbins_histo);
+
+    auto hist_insert = solver.get_weight_ratio_insert();
+    auto hist_remove = solver.get_weight_ratio_remove();
+    double step = beta / nbins_histo;
+    std::vector<double> *hist;
+    double p_local = 0.9;
+    string tag_move;
+
+    for (int i = 0; i < nblocks; ++i) {
+      for (int j = 0; j < 2; j++) {
+
+        std::vector<int> ind_vec; // indices of unsampled bins
+        ind_vec.reserve(nbins_histo);
+
+        if (j == 0) {
+          hist = &hist_insert[to_string(i)];
+          tag_move = "insert";
         }
-    }
-
-  
-    // Write G(tau)
-    if( rank==0 && wrt_files ){
-    
-        ofstream gtau;
-        gtau.open("Gtau_triqs.dat");
-        double _tau_=0.0;
-  
-        std::cout <<" gtau "<<endl;
-        for(int tau = 0; tau < n_tau; ++tau){
-            _tau_=((tau*beta)/n_tau)*27.2113845; //in Harthree
-            gtau << fixed << setprecision(17) <<_tau_ << "\t";
-
-            for(int o = 0; o < num_orbitals; ++o){ 	    
-	            for(int oo = 0; oo < num_orbitals; ++oo)
-#if defined HAVE_TRIQS_v2_0
- 	                gtau << fixed<< setprecision(17) << (*solver.G_tau)[0].data()(tau,o,oo) <<"\t";
-#elif defined HAVE_TRIQS_v1_4
- 	                gtau << fixed<< setprecision(17) << solver.G_tau()[0].data()(tau,o,oo) <<"\t";
-#endif
-	        }	  
- 	        gtau << endl;
-	  
+        else {
+          tag_move = "remove";
+          hist = &hist_remove[to_string(i)];
         }
 
-        ofstream g_iw;
-        g_iw.open("giw");
-        for(std::size_t w_index = 0; w_index < w_mesh.size(); ++w_index){
-            auto iw = w_mesh.index_to_point(w_index);
-            for(int o = 0; o < num_orbitals; ++o){
-                for(int oo = 0; oo < num_orbitals; ++oo)
-	                g_iw << fixed << setprecision(17) << solver.G0_iw()[0].data()(w_index,o,oo);
-            }
-            g_iw << endl;
+        double s = 0.;
+        for (int k = 0; k < nbins_histo; ++k) {
+          if ((*hist)[k] < 1.e-15)
+            ind_vec.push_back(k);
+          else
+            s += (*hist)[k];
         }
-    }
-  
-    // Write U(i,j)
-    if( rank==0 && wrt_files ){
-        ofstream umat;
-        umat.open("umat");
+        s *= step;
 
-        for(int o = 0; o < num_orbitals; ++o){ 	    
-	        for(int oo = 0; oo < num_orbitals; ++oo)
- 	            umat <<"U( "<< o+1 <<" , "<< oo+1 <<" )= "<< fixed << setprecision(17) << umat_ij[o+(oo*num_orbitals)] <<endl;
-	    }	  
-    } 
+        double x = s * (1. / p_local - 1.) / (step * double(ind_vec.size()));
+        for (auto const &ind : ind_vec) (*hist)[ind] = x;
 
-    if( leg_measure && rank==0 && wrt_files ){
-        ofstream g_l;
-        g_l.open("gl");
-  
-        for(int l = 0; l < n_l; ++l){
-            for(int o = 0; o < num_orbitals; ++o){ 
-                for(int oo = 0; oo < num_orbitals; ++oo)
-#if defined HAVE_TRIQS_v2_0
-                    g_l << fixed << setprecision(17) << (*solver.G_l)[0].data()(l,o,oo) <<"\t";	      
-#elif defined HAVE_TRIQS_v1_4
-                    g_l << fixed << setprecision(17) << solver.G_l()[0].data()(l,o,oo) <<"\t";	      
-#endif
-            }	  
-            g_l << endl;
-        }
+        h5_write(gr,tag_move+"_"+to_string(i),*hist);
+      }
     }
 
-    if(rank==0 && verbo>0) std::cout <<"   == CTHYB-QMC Process Finished [node "<< rank <<"] ==	"<< endl << endl;
+    qmc_data_hfile.close();
+  }
+
+  for (int iblock = 0; iblock < nblocks; ++iblock) {
+    for (int tau = 0; tau < n_tau; ++tau) {
+      for (int o = 0; o < siz_list[iblock]; ++o) {
+        iflavor = flavor_list[o+iblock*num_orbitals];
+        for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+          iflavor1 = flavor_list[oo+iblock*num_orbitals];
+          gtau[tau+iflavor*n_tau+iflavor1*num_orbitals*n_tau] = (*solver.G_tau)[iblock].data()(tau,o,oo);
+        }
+      }
+    }
+  }
+
+  // Report G(l)
+  if (leg_measure) {
+    for (int iblock = 0; iblock < nblocks; ++iblock) {
+      for (int l = 0; l < n_l; ++l) {
+        for (int o = 0; o < siz_list[iblock]; ++o) {
+          iflavor = flavor_list[o+iblock*num_orbitals];
+          for (int oo = 0; oo < siz_list[iblock]; ++oo) {
+            iflavor1 = flavor_list[oo+iblock*num_orbitals];
+            gl[l+iflavor*n_l+iflavor1*num_orbitals*n_l] = (*solver.G_l)[iblock].data()(l,o,oo);
+          }
+        }
+      }
+    }
+  }
+
+  if (measure_density_matrix) {
+
+    auto h_loc_diag = solver.h_loc_diagonalization();
+    many_body_operator n_op;
+    auto subspaces = h_loc_diag.n_subspaces();
+    auto rho = solver.density_matrix();
+
+    complex<double> occ_tmp [num_orbitals] = {0};
+
+    for (int iblock = 0; iblock < nblocks; ++iblock) {
+      for (int o = 0; o < siz_list[iblock]; ++o) {
+        iflavor = flavor_list[o+iblock*num_orbitals];
+        n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
+        if (itask == rank) occ_tmp[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
+        itask = (itask+1)%nproc;
+      }
+    }
+
+    MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
+
+    if (rank == 0) {
+      ofstream occ_file;
+      occ_file.open("Occupation_numbers_triqs");
+
+      for (int sub : range(subspaces)) {
+        auto fock_states = h_loc_diag.get_fock_states(sub);
+        int sub_dim = h_loc_diag.get_subspace_dim(sub);
+        auto unit_mat = h_loc_diag.get_unitary_matrix(sub);
+        auto rho_tmp = unit_mat * rho[sub] * dagger(unit_mat);  // transform density matrix to Fock basis
+        for (int ind : range(sub_dim)) {
+          auto f_state = fock_states[ind];
+          auto prob = rho_tmp(ind,ind);
+          occ_file << bitset<64>(f_state).to_string().substr(64-num_orbitals) << "\t" << scientific << setprecision(17) << prob << endl;
+        }
+      }
+    }
+
+    if (itask == rank) *eu = trace_rho_op(rho,Hint,h_loc_diag);
+    mpi_broadcast(*eu,comm,itask);
+    itask = (itask+1)%nproc;
+
+    if (!leg_measure) { // Get moments of the self-energy
+
+      many_body_operator commut,commut2,Sinf_op,S1_op;
+
+      complex<double> mself2 [num_orbitals] = {0};
+      auto Sinf_mat = matrix_t(num_orbitals,num_orbitals);
+      Sinf_mat = h_scalar_t{0};
+
+      for (int iblock = 0; iblock < nblocks; ++iblock) {
+        for (int o = 0; o < siz_list[iblock]; ++o) {
+          iflavor = flavor_list[o+iblock*num_orbitals];
+          commut = Hint*c(to_string(iblock),o) - c(to_string(iblock),o)*Hint;
+          Sinf_op = - commut*c_dag(to_string(iblock),o) - c_dag(to_string(iblock),o)*commut;
+          commut2 = c_dag(to_string(iblock),o)*Hint - Hint*c_dag(to_string(iblock),o);
+          S1_op = commut2*commut + commut*commut2;
+          if (itask == rank) Sinf_mat(iflavor,iflavor) = trace_rho_op(rho,Sinf_op,h_loc_diag);
+          itask = (itask+1)%nproc;
+          if (itask == rank) mself2[iflavor] = trace_rho_op(rho,S1_op,h_loc_diag);
+          itask = (itask+1)%nproc;
+        }
+      }
+
+      Sinf_mat = all_reduce(Sinf_mat,comm);
+      MPI_Allreduce(mself2,moments_self_2,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
+
+      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor)
+        moments_self_1[iflavor] = Sinf_mat(iflavor,iflavor);
+
+      Sinf_mat = Sinf_mat * Sinf_mat;
+
+      for (int iflavor = 0; iflavor < num_orbitals; ++iflavor)
+        moments_self_2[iflavor] -= Sinf_mat(iflavor,iflavor);
+
+    }   // not legendre
+
+  }   // measure_density_matrix
+  if (rank == 0 && verbo > 0) cout << "   == CTHYB-QMC Process Finished [node "<< rank <<"] =="<< endl << endl;
 }
 
 /********************************************************/
 /****************** Functions Used **********************/
 /********************************************************/
 
-// Hamiltonian Initialization with precalculate coeff  (J=0 and U(i,j))
-many_body_operator_generic<double> init_Hamiltonian( double *eps, int nflavor, double *U){
-    many_body_operator_generic<double> H; double coeff;
-  
-    for(int i = 0; i < nflavor; ++i)
-        for(int j = 0; j < nflavor; ++j){
-  
-    	    //cas diago principale:
-	        if(i==j)
-	            H += eps[i] * n("tot",i);
-    	    else{
-	    	    coeff = double(U[i+j*nflavor])*0.5;
-		        H += coeff * n("tot",i) * n("tot",j);
-    	    }
-        }
-    return H;
-}
+// Build density-density Hamiltonian
+many_body_op_t init_Hamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *udens,
+                                int *block_list, int *inner_list, double lambda) {
 
-// Hamiltonian Initialization with precalculated coeff U(i,j,k,l) in "tot" notation
-many_body_operator_generic<double> init_fullHamiltonian( double *eps, int nflavor, double *U){
-    many_body_operator_generic<double> H; double coeff;
-  
-    for(int i = 0; i < nflavor; ++i)
-        for(int j = 0; j < nflavor; ++j){
-      
-            if(i==j)
-	            H += eps[i] * n("tot",i) ; //Levels On diagonal Hamiltonian Matrix
-      
-            for(int k = 0; k < nflavor; ++k)
-                for(int l = 0; l < nflavor; ++l){ 
-                    //cas diago principale:
-		            coeff = 0.5 * double( U[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor] );
-		            H += coeff * c_dag("tot",i)*c_dag("tot",j)*c("tot",l)*c("tot",k); //changing l <-> k order index to be in accordance with the Abinit definition
-	            }
-        }
-    return H;
-}
+  many_body_op_t H;
+  int iblock,iblock1,o,oo;
 
-// Hamiltonian Initialization with precalculated coeff U(i,j,k,l) in "up" and "down" notation
-many_body_operator_generic<double> init_fullHamiltonianUpDown( double *eps, int nflavor, double *U ){
-    many_body_operator_generic<double> H; double coeff;
-  
-    for(int i = 0; i < nflavor; ++i)
-        for(int j = 0; j < nflavor; ++j){
-      
-            if(i==j)
-	            H += eps[i] * ( n("up",i) + n("down",i) ); //Levels On diagonal Hamiltonian Matrix
-      
-            for(int k = 0; k < nflavor; ++k)
-                for(int l = 0; l < nflavor; ++l){
-                    coeff = 0.5 * double(U[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor]);
- 
-//            for(int s = 0; s < nspin; ++s)
-//              for(int s1 = 0; s1 < nspin; ++s1){ 
-		            H += coeff * c_dag("up",i)   * c_dag("down",j) * c("up",l)   * c("down",k);
-		            H += coeff * c_dag("down",i) * c_dag("up",j)   * c("down",l) * c("up",k);
-	        }
+  for (int i = 0; i < nflavor; ++i) {
+    iblock = block_list[i]; o = inner_list[i];
+    for (int j = 0; j < nflavor; ++j) {
+      iblock1 = block_list[j]; oo = inner_list[j];
+      H += 0.5 * lambda * udens[i+j*nflavor] * n(to_string(iblock),o) * n(to_string(iblock1),oo);
+      H += eps[i+j*nflavor] * c_dag(to_string(iblock),o) * c(to_string(iblock1),oo);
     }
-    return H;
+  }
+  return H;
 }
+
+// Build full Hamiltonian
+many_body_op_t init_fullHamiltonian(h_scalar_t *eps, int nflavor, h_scalar_t *vee,
+                                    int *block_list, int *inner_list, double lambda) {
+
+  many_body_op_t H;
+  int iblock,iblock1,iblock2,iblock3,o,oo,ooo,oooo;
+
+  for (int i = 0; i < nflavor; ++i) {
+    iblock = block_list[i]; o = inner_list[i];
+    for (int j = 0; j < nflavor; ++j) {
+      iblock1 = block_list[j]; oo = inner_list[j];
+      H += eps[i+j*nflavor] * c_dag(to_string(iblock),o) * c(to_string(iblock1),oo);
+      for (int k = 0; k < nflavor; ++k) {
+        iblock2 = block_list[k]; ooo = inner_list[k];
+        for (int l = 0; l < nflavor; ++l) {
+          iblock3 = block_list[l]; oooo = inner_list[l];
+          H += 0.5 * lambda * vee[i+j*nflavor+k*nflavor*nflavor+l*nflavor*nflavor*nflavor] * c_dag(to_string(iblock),o) *
+               c_dag(to_string(iblock1),oo) * c(to_string(iblock3),oooo) * c(to_string(iblock2),ooo);
+        }
+      }
+    }
+  }
+  return H;
+}
+
+// Build DLR frequencies
+void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps) {
+  auto omega = cppdlr::build_dlr_rf(lam,eps);
+  *ndlr = omega.size();
+  if (*ndlr > wdlr_size) return;
+  for (int i = 0; i < (*ndlr); ++i) wdlr[i] = omega[i];
+}
+

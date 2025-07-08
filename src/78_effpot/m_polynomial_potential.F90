@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,9 +82,7 @@ contains
 
   subroutine finalize(self)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
-    if (allocated(self%nature)) then
-       ABI_FREE(self%nature)
-    end if
+    ABI_SFREE(self%nature)
     !call self%coeff%finalize()
     self%order=0
     call self%abstract_potential_t%finalize()

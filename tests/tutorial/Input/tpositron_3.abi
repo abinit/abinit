@@ -37,8 +37,8 @@ ntypat 1          # There is only one type of atom
 znucl 14          # Atomic number of the possible type(s) of atom. Here silicon.
 pp_dirpath "$ABI_PSPDIR"              # Path to the directory were
                                       #   pseudopotentials for tests are stored
-pseudos "Pseudodojo_paw_pw_standard/Si.xml" # Name and location of the pseudopotential
-                         
+pseudos "Psdj_paw_pw_std/Si.xml" # Name and location of the pseudopotential
+
 #Definition of the atoms
 natom 15          # There are 15 atoms
 typat 15*1        # They all are of type 1, that is, Silicon
@@ -74,7 +74,7 @@ shiftk 0. 0. 0.
 
 #Parameters for the SCF procedure
 nstep 500         # Maximal number of SCF cycles. We increase it!
-toldfe 1.0d-8     # Will stop when, twice in a row, the difference 
+toldfe 1.0d-8     # Will stop when, twice in a row, the difference
                   # between two consecutive evaluations of energy
                   # differ by less than toldfe
 
@@ -94,7 +94,7 @@ optstress 0       # Stress tensor computation is not relevant here
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tpositron_3.abo, tolnlines= 30, tolabs= 1.6e-3, tolrel= 7.0e-1, fld_options= -easy
+#%%   tpositron_3.abo, tolnlines= 30, tolabs= 3.0e-3, tolrel= 8.0e-1, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

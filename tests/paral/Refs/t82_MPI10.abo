@@ -3,10 +3,10 @@
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 10.1.4.5 of MULTIBINIT 
+.Version 10.0.0.3 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -32,8 +32,8 @@
 
 
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h36 )
+.Starting date : Sat 22 Mar 2025.
+- ( at 06h41 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -45,7 +45,7 @@
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_sys.xml
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -61,6 +61,7 @@
  fit_generateCoeff  1
  fit_initializeDat  0
         fit_cutoff  3.80000000E+00
+       fit_droprat  0.00000000E+00
         fit_option  0
          fit_iatom  -1
         fit_ncoeff  2
@@ -71,6 +72,7 @@
     fit_anhaStrain  0
     fit_SPCoupling  1
       fit_SPC_maxS  1
+     fit_max_nbody        999
      fit_nfixcoeff  2
       fit_fixcoeff          1      2
  Miscellaneous information :
@@ -96,8 +98,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_sys.xml
--Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_sys.xml with Fortran
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml with Fortran
 
  Bound for ifc SR:
 
@@ -184,13 +186,13 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_coeffs.xml
--Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t82_coeffs.xml with Fortran
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_coeffs.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_coeffs.xml with Fortran
 
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/paral/Input/t81_HIST
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t81_HIST
 
 
 --------------------------------------------------------------------------------
@@ -203,31 +205,31 @@ dipdip_range         1         1         1
 
  The coefficients for the fit will be generated with all cross terms
 
- 60 coefficients generated 
+ 48 coefficients generated 
 
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372993354979415E-05
-   Forces+Stresses :   7.4805078532501797E-03
+   Forces+Stresses :   7.5067033726555418E-03
    Forces          :   7.3678370383271812E-03
-   Stresses        :   1.1267081492299897E-04
+   Stresses        :   1.3886633432835989E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     3           9.8269214433E-06  3.9567592281E-03  3.8455245457E-03  1.1123468238E-04
- 4     4           1.0210073957E-05  3.7452864193E-03  3.6335882956E-03  1.1169812362E-04
+ 3     3           9.8851791905E-06  4.0004273293E-03  3.8455525640E-03  1.5487476525E-04
+ 4     4           1.0270958345E-05  3.7876615934E-03  3.6336166528E-03  1.5404494059E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.8804979988E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2571058361E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8288686787E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0098977360E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1 =>   1.8768470385E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.2509409318E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.8315773504E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
+ 4 =>   9.0373985824E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   1.0210073957240299E-05
-   Forces+Stresses :   3.7452864192510358E-03
-   Forces          :   3.6335882956341505E-03
-   Stresses        :   1.1169812361688500E-04
+   Energy          :   1.0270958344973537E-05
+   Forces+Stresses :   3.7876615934242233E-03
+   Forces          :   3.6336166528331505E-03
+   Stresses        :   1.5404494059107258E-04
 
 
 ================================================================================
@@ -237,10 +239,10 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
 
 ================================================================================
 
-+Total cpu time     14.071  and wall time     14.072 sec
++Total cpu time      6.823  and wall time      6.823 sec
 
  multibinit : the run completed succesfully.

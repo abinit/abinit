@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XW, DW)
+!!  Copyright (C) 1999-2025 ABINIT group (XW, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,9 +27,7 @@ module m_ddb_elast
  use m_crystal
  use m_ddb
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,       only : itoa, sjoin
  use m_hide_lapack,    only : matrginv
@@ -75,9 +73,9 @@ contains
 !! ncid=NC file handle (open in the caller)
 !!
 !! OUTPUT
-!! elast=relaxed-ion elastic tensor(without stress correction) (6*6) in Voigt notation
-!! elast_clamped=clamped-ion elastic tensor(without stress correction) (6*6) in Voigt notation
-!! elast_stress=relaxed-ion elastic tensor(with stress correction) (6*6) in Voigt notation
+!! elast=relaxed-ion elastic tensor (without stress correction) (6*6) in Voigt notation
+!! elast_clamped=clamped-ion elastic tensor (without stress correction) (6*6) in Voigt notation
+!! elast_stress=relaxed-ion elastic tensor (with stress correction) (6*6) in Voigt notation
 !!
 !! NOTES
 !! The elastic (compliance) tensors calculated here are under boundary conditions of
@@ -116,7 +114,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
  real(dp) :: compl_relaxed(6,6),eigval(3*natom-3)
  real(dp) :: eigvalp(3*natom),eigvec(2,3*natom-3,3*natom-3)
  real(dp) :: eigvecp(2,3*natom,3*natom),elast_relaxed(6,6)
- real(dp) :: kmatrix(3*natom,3*natom),new1(6,3*natom)
+ real(dp) :: kmatrix(3*natom,3*natom)
  real(dp) :: new2(6,6),stress(6),zhpev1(2,2*3*natom-4),zhpev1p(2,2*3*natom-1)
  real(dp) :: zhpev2(3*3*natom-5),zhpev2p(3*3*natom-2)
  real(dp) :: d2cart(2,3*natom,3*natom)
@@ -154,7 +152,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 
 !then consider the volume, because the unit above is in
 !Hartree, in fact the elastic constant should be in
-!the units of presure, the energy/volume
+!the units of pressure, the energy/volume
 !And then transform the unit to si unit using GPa
 !from Hartree/Bohr^3
 
@@ -175,18 +173,8 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
  if( (inp%elaflag==2 .or. inp%elaflag==3&
 & .or. inp%elaflag==4 .or. inp%elaflag==5) .and. natom/=1 )then
 !  extracting force matrix at gamma
-   d2cart = zero
-   do ipert1=1,natom
-     do ii1=1,3
-       ivarA=ii1+3*(ipert1-1)
-       do ipert2=1,natom
-         do ii2=1,3
-           ivarB=ii2+3*(ipert2-1)
-           d2cart(1,ivarA,ivarB)=blkval(1,ii1,ipert1,ii2,ipert2,iblok)
-         end do
-       end do
-     end do
-   end do
+   d2cart(1,:,:) = RESHAPE(blkval(1,1:3,1:natom,1:3,1:natom,iblok), (/3*natom,3*natom/))
+   d2cart(2,:,:) = zero
 
 !  Eventually impose the acoustic sum rule
 !  FIXME: this might depend on ifcflag: impose that it is 0 or generalize
@@ -203,15 +191,14 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  ENDDEBUG
 
 !  according to formula, invert the kmatrix(3natom,3natom)
-   Apmatr(:,:)=kmatrix(:,:)
 
 !  NOTE: MJV 13/3/2011 This is just the 3x3 unit matrix copied throughout the dynamical matrix
    Nmatr(:,:)=zero
-   do ivarA=1,3*natom
-     do ivarB=1,3*natom
-       if (mod(ivarA,3)==0 .and. mod(ivarB,3)==0) Nmatr(ivarA,ivarB)=one
-       if (mod(ivarA,3)==1 .and. mod(ivarB,3)==1) Nmatr(ivarA,ivarB)=one
-       if (mod(ivarA,3)==2 .and. mod(ivarB,3)==2) Nmatr(ivarA,ivarB)=one
+   do ivarB=0,natom-1
+     do ivarA=0,natom-1
+       Nmatr(3*ivarA+1, 3*ivarB+1) = one
+       Nmatr(3*ivarA+2, 3*ivarB+2) = one
+       Nmatr(3*ivarA+3, 3*ivarB+3) = one
      end do
    end do
 
@@ -264,25 +251,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 
 !  do the multiplication to get the reduced matrix,in two steps
 !  rotate to eigenbasis constructed above to isolate acoustic modes
-   Cpmatr(:,:)=zero
-   do ivarA=1,3*natom
-     do ivarB=1,3*natom
-       do ii1=1,3*natom
-         Cpmatr(ivarA,ivarB)=Cpmatr(ivarA,ivarB)+eigvecp(1,ii1,ivarA)*&
-&         Apmatr(ii1,ivarB)
-       end do
-     end do
-   end do
-
-   Apmatr(:,:)=zero
-   do ivarA=1,3*natom
-     do ivarB=1,3*natom
-       do ii1=1,3*natom
-         Apmatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)+Cpmatr(ivarA,ii1)*&
-&         eigvecp(1,ii1,ivarB)
-       end do
-     end do
-   end do
+   Apmatr(:,:) = MATMUL(TRANSPOSE(eigvecp(1,:,:)), MATMUL(kmatrix(:,:), eigvecp(1,:,:)))
 
 !  DEBUG
 !  the blok diagonal parts
@@ -312,11 +281,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
      call wrtout(iout,message,'COLL')
    end if
 !  then give the value of reduced matrix form Apmatr to Amatr
-   do ivarA=1,3*natom-3
-     do ivarB=1,3*natom-3
-       Amatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)
-     end do
-   end do
+   Amatr(:,:) = Apmatr(1:3*natom-3, 1:3*natom-3)
 
 !  now the reduced matrix is in the Amatr, the convert it
 !  first give the give the value of Bmatr from Amatr
@@ -343,29 +308,10 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 
 !  the do the matrix muplication to get pseudoinverse inverse matrix
    Cmatr(:,:)=zero
-   Amatr(:,:)=zero
    do ivarA=1,3*natom-3
      Cmatr(ivarA,ivarA)=1.0_dp/eigval(ivarA)
    end do
-   do ivarA=1,3*natom-3
-     do ivarB=1,3*natom-3
-       do ii1=1,3*natom-3
-         Amatr(ivarA,ivarB)=Amatr(ivarA,ivarB)+eigvec(1,ivarA,ii1)*&
-&         Cmatr(ii1,ivarB)
-       end do
-     end do
-   end do
-
-!  then the second mulplication
-   Cmatr(:,:)=zero
-   do ivarA=1,3*natom-3
-     do ivarB=1,3*natom-3
-       do ii1=1,3*natom-3
-         Cmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)+&
-&         Amatr(ivarA,ii1)*eigvec(1,ivarB,ii1)
-       end do
-     end do
-   end do
+   Amatr(:,:) = MATMUL(MATMUL(eigvec(1,:,:), Cmatr(:,:)), TRANSPOSE(eigvec(1,:,:)))
 
 !  DEBUG
 !  write(std_out,'(/,a,/)')'the pseudo inverse of the force matrix'
@@ -377,13 +323,13 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  end do
 !  ENDDEBUG
 
-!  so now the inverse of the reduced matrix is in the matrixC
+!  so now the inverse of the reduced matrix is in the matrixA
 !  now do another mulplication to get the pseudoinverse of the original
    Cpmatr(:,:)=zero
    Apmatr(:,:)=zero
    do ivarA=1,3*natom-3
      do ivarB=1,3*natom-3
-       Cpmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)
+       Cpmatr(ivarA,ivarB)=Amatr(ivarA,ivarB)
      end do
    end do
 
@@ -411,40 +357,15 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  transfer the inverse of k-matrix back to the k matrix
 !  so now the inverse of k matrix is in the kmatrix
 !  ending the part for pseudoinversing the K matrix
-!  then do the first matrix mulplication
-   new1(:,:)=zero
-   do ii1=1,6
-     do ii2=1,3*natom
-       do ivarA=1,3*natom
-         new1(ii1,ii2)=new1(ii1,ii2)+instrain(ivarA,ii1)*&
-&         kmatrix(ivarA,ii2)
-       end do
-     end do
-   end do
-!  then do the second matrix mulplication, and change the value of kmatrix
-   new2(:,:)=zero
-   do ii1=1,6
-     do ii2=1,6
-       do ivarB=1,3*natom
-         new2(ii1,ii2)=new2(ii1,ii2)+new1(ii1,ivarB)*&
-&         instrain(ivarB,ii2)
-       end do
-     end do
-   end do
+   new2(:,:) = MATMUL(MATMUL(TRANSPOSE(instrain), kmatrix), instrain(:,:))
+
+
 !  then finish the matrix mupl., consider the unit cellvolume
 !  and the unit change next step
-   do ivarA=1,6
-     do ivarB=1,6
-       new2(ivarA,ivarB)=(new2(ivarA,ivarB)/ucvol)*HaBohr3_GPa
-     end do
-   end do
+   new2(:,:)=(new2(:,:)/ucvol)*HaBohr3_GPa
+
 !  then the relaxed one should be the previous one minus the new2 element
-   do ivarA=1,6
-     do ivarB=1,6
-       elast_relaxed(ivarA,ivarB)=elast_relaxed(ivarA,ivarB)-&
-&       new2(ivarA,ivarB)
-     end do
-   end do
+   elast_relaxed(:,:)=elast_relaxed(:,:)-new2(:,:)
  end if
 !the above end if end if for elaflag=2 or elafalg=3 or elafalg=4,
 !or elafalg=5 in line 125
@@ -650,7 +571,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
      end do
    end if
 
-!  then the complinace tensors with stress correction
+!  then the compliance tensors with stress correction
    write(message,'(5a)')ch10,&
 &   ' Compliance Tensor (relaxed ion with stress correction) (unit: 10^-2(GP)^-1):',ch10,&
 &   '  (at fixed electric field boundary condition)',ch10
@@ -689,7 +610,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
  ! Units are GPa for elastic constants and GPa^-1 for compliance constants
 
  if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
    ! Define dimensions
    NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
@@ -719,10 +639,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion'), elast))
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_clamped_ion'), elast_clamped))
    NCF_CHECK(nf90_put_var(ncid, vid('elastic_constants_relaxed_ion_stress_corrected'), elast_stress))
-
-#else
-   ABI_ERROR("Netcdf support not enabled")
-#endif
  end if
 
 contains

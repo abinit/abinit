@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,16 +16,16 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h01 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t69/t69.abi
 - output file    -> t69.abo
 - root for input  files -> t69i
 - root for output files -> t69o
 
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
  DATASET    1 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -198,9 +198,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     35.000   => boxcut(ratio)=   2.14598
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -218,9 +218,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  2 (lmn_size=  2), orbitals=   0   0
  Spheres core radius: rc_sph= 0.89889493
@@ -245,7 +245,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/15) Internal Cycle: (1/1)
@@ -271,7 +271,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  9  -6.0806417449372     1.430E-08 4.730E-10 2.901E-07 2.023E-06 3.379E-03
  ETOT 10  -6.0806417385917     6.346E-09 6.208E-11 1.072E-08 1.504E-06 3.378E-03
 
- At SCF step   10, forces are sufficiently converged : 
+ At SCF step   10, forces are sufficiently converged :
   for the second time, max diff in force=  1.504E-06 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -416,7 +416,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  4  -6.0806577828864     1.370E-08 1.410E-10 3.436E-07 2.390E-06 1.430E-03
  ETOT  5  -6.0806577792893     3.597E-09 1.837E-11 7.316E-08 1.459E-06 1.431E-03
 
- At SCF step    5, forces are sufficiently converged : 
+ At SCF step    5, forces are sufficiently converged :
   for the second time, max diff in force=  1.459E-06 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -569,7 +569,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  8  -6.0806612686267     9.394E-11 1.426E-14 1.273E-10 2.545E-08 2.978E-05
  ETOT  9  -6.0806612685950     3.173E-11 4.761E-16 3.153E-11 2.682E-08 2.981E-05
 
- At SCF step    9, forces are sufficiently converged : 
+ At SCF step    9, forces are sufficiently converged :
   for the second time, max diff in force=  2.682E-08 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -700,7 +700,7 @@ force_length_stats: {min:   2.98086120E-05, max:   2.98086120E-05, mean:   2.980
            Absolute (Ha)=-3.48931E-06
            Relative     =-5.73837E-07
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 2.9809E-05 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -818,9 +818,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     35.000   => boxcut(ratio)=   2.14598
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -838,9 +838,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  2 (lmn_size=  2), orbitals=   0   0
  Spheres core radius: rc_sph= 0.89889493
@@ -865,7 +865,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/15) Internal Cycle: (1/1)
@@ -886,7 +886,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  4  -6.0887144996179    -2.349E-07 2.593E-08 1.145E-04 2.547E-05 5.172E-03
  ETOT  5  -6.0887142552116     2.444E-07 1.252E-09 2.076E-05 1.760E-05 5.155E-03
 
- At SCF step    5, forces are sufficiently converged : 
+ At SCF step    5, forces are sufficiently converged :
   for the second time, max diff in force=  1.760E-05 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1032,7 +1032,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  5  -6.0887527902623    -1.678E-08 2.384E-10 5.309E-07 5.376E-06 2.248E-03
  ETOT  6  -6.0887527985554    -8.293E-09 6.451E-11 2.123E-07 7.617E-06 2.240E-03
 
- At SCF step    6, forces are sufficiently converged : 
+ At SCF step    6, forces are sufficiently converged :
   for the second time, max diff in force=  7.617E-06 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1183,7 +1183,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  6  -6.0887615526683    -5.870E-09 3.103E-12 6.674E-08 3.104E-07 8.991E-05
  ETOT  7  -6.0887615542250    -1.557E-09 2.858E-11 2.215E-08 2.728E-08 8.993E-05
 
- At SCF step    7, forces are sufficiently converged : 
+ At SCF step    7, forces are sufficiently converged :
   for the second time, max diff in force=  2.728E-08 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1465,7 +1465,7 @@ force_length_stats: {min:   4.12044620E-06, max:   4.12044620E-06, mean:   4.120
            Absolute (Ha)=-6.47753E-09
            Relative     =-1.06385E-09
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 4.1204E-06 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1580,9 +1580,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     35.000   => boxcut(ratio)=   2.14598
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/C.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -1600,9 +1600,9 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  2 (lmn_size=  2), orbitals=   0   0
  Spheres core radius: rc_sph= 0.89889493
@@ -1627,7 +1627,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/15) Internal Cycle: (1/1)
@@ -2109,7 +2109,7 @@ force_length_stats: {min:   3.26889767E-07, max:   3.26889767E-07, mean:   3.268
            Absolute (Ha)=-5.08990E-08
            Relative     =-8.13849E-09
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 3.2689E-07 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -2191,7 +2191,7 @@ total_energy_dc_eV  : -1.70182929633401E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      9.4486306644E+00  7.5589045315E+00  7.5589045315E+00 Bohr
               amu      1.20110000E+01  1.00794000E+00
@@ -2333,7 +2333,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2345,12 +2345,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2368,7 +2368,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

@@ -9,7 +9,6 @@ t72o_DS5_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% test_chain = t72.abi, t73.abi, t74.abi, t75.abi, t76.abi
 #%% [files]
 #%% files_to_test = 

@@ -26,7 +26,6 @@ blue 0 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = band2eps
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% no_check = yes
 #%% [files]

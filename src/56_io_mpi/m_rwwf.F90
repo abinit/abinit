@@ -6,7 +6,7 @@
 !!   Read/Write wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,9 +30,7 @@ module m_rwwf
  use mpi
 #endif
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes, only : mpi_type
  use m_time,   only : timab
@@ -309,12 +307,9 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
  character(len=fnlen) :: fname
  integer :: ikpt_this_proc,ispinor
  integer,allocatable :: ind_cg_mpi_to_seq(:)
-#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,h1_varid,mband_varid,ncerr,ii,mband_file
  integer,allocatable :: gall(:,:)
  real(dp),allocatable :: cg_all(:,:,:),h1mat(:,:,:)
-#endif
-
 ! *********************************************************************
 
  !write(std_out,*)"rwwf with ikpt, isppol, option, etsf",ikpt, isppol, option, wff%iomode == IO_MODE_ETSF
@@ -447,7 +442,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        end if
        call xderiveRRecEnd(wff,ios)
 
-#ifdef HAVE_NETCDF
      else if (wff%iomode == IO_MODE_ETSF) then
        ! Read reduced_coordinates_of_plane_waves for this k point (npw1 is npw_disk).
        ! TODO: spinor parallelism
@@ -465,7 +459,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
          end do
          ABI_FREE(gall)
        end if
-#endif
      end if
 
    else ! option
@@ -516,7 +509,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
      ABI_ERROR(msg)
    end if
 
-#ifdef HAVE_NETCDF
    if (wff%iomode == IO_MODE_ETSF) then
      ! get eigenvalues and occupations
      NCF_CHECK(nf90_inq_varid(wff%unwff, "eigenvalues", eig_varid))
@@ -527,7 +519,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
      ncerr = nf90_get_var(wff%unwff, occ_varid, occ, start=[1,ikpt,isppol], count=[nband1,1,1])
      NCF_CHECK_MSG(ncerr, "getting occ_k")
    end if
-#endif
 
 !  ===== Case formeig=1: read matrix of eigenvalues =====
 !  Will be written later (together with wave-functions)
@@ -573,7 +564,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        ABI_ERROR(msg)
      end if
 
-#ifdef HAVE_NETCDF
      if (wff%iomode == IO_MODE_ETSF) then
        ! The coefficients_of_wavefunctions on file have shape [cplex, mpw, nspinor, mband, nkpt, nsppol]
        NCF_CHECK(nf90_inq_varid(wff%unwff, "coefficients_of_wavefunctions", cg_varid))
@@ -597,7 +587,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
          ABI_FREE(cg_all)
        end if
      end if
-#endif
 
 !    ===== Case formeig=1: read eigenvalues, occupations and wave-functions =====
    else if(formeig==1)then
@@ -659,7 +648,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        end do ! iband
 
      else
-#ifdef HAVE_NETCDF
         ! ETSF-IO
        if (any(option == [1, 3, -4])) then
           ! Read eigen. Remember that the matrix on file has shape [2, mband, mband, nkpt, nspin]
@@ -692,7 +680,6 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
          count=[2,npw,nspinor,nband1,1,1])
          NCF_CHECK_MSG(ncerr, "getting cg_k")
        end if
-#endif
      end if
 
    end if ! formeig == 1
@@ -781,14 +768,11 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  integer :: ikpt_this_proc,ispinor,me_cart_3d
  integer,allocatable :: ind_cg_mpi_to_seq(:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_ptr(:,:)
-#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
-#endif
 #ifdef HAVE_MPI
  integer(kind=MPI_OFFSET_KIND) :: off(1)
 #endif
-
 ! *********************************************************************
 
 !Check the options
@@ -881,7 +865,6 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        call xderiveWRecEnd(wff,ios)
      end if
 
-#ifdef HAVE_NETCDF
    else if (wff%iomode == IO_MODE_ETSF) then
      ! Write the reduced_coordinates_of_plane_waves for this k point.
      NCF_CHECK(nf90_inq_varid(wff%unwff, "reduced_coordinates_of_plane_waves", kg_varid))
@@ -892,7 +875,6 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        ncerr = nf90_put_var(wff%unwff, kg_varid, kg_k, start=[1,1,ikpt], count=[3,npw,1])
      end if
      NCF_CHECK_MSG(ncerr, "putting kg_k")
-#endif
    end if ! end if wff%iomode
  else ! Still skip the record
    if (use_f90==1) then
@@ -923,7 +905,6 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
      call MPI_BCAST(off,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ios)
      wff%offwff=off(1)
 #endif
-#ifdef HAVE_NETCDF
    else if (wff%iomode == IO_MODE_ETSF) then
      ! Write eigenvalues and occupation factors.
      NCF_CHECK(nf90_inq_varid(wff%unwff, "eigenvalues", eig_varid))
@@ -933,7 +914,6 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
      NCF_CHECK(nf90_inq_varid(wff%unwff, "occupations", occ_varid))
      ncerr = nf90_put_var(wff%unwff, occ_varid, occ, start=[1,ikpt,isppol], count=[mband,1,1])
      NCF_CHECK_MSG(ncerr, "putting occ_k")
-#endif
    end if
 
 !  ===== Case formeig=1: write matrix of eigenvalues =====
@@ -962,7 +942,6 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        cg_ptr => cg ! Need pointer to bypass "inout" intent attribute
        call WffReadWrite_mpio(wff,2,cg_ptr,mcg,icg,nband_disk,npwso,npwsotot,ind_cg_mpi_to_seq,ios)
        nullify(cg_ptr)
-#ifdef HAVE_NETCDF
      else if (wff%iomode == IO_MODE_ETSF .and. option/=5) then
 
        NCF_CHECK(nf90_inq_varid(wff%unwff, "reduced_coordinates_of_plane_waves", kg_varid))
@@ -975,7 +954,6 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        count=[2,npw,nspinor,nband,1,1])
        NCF_CHECK_MSG(ncerr, "putting cg_k")
        !write(std_out,*)"after cg"
-#endif
      end if
    end if ! option/=4
 

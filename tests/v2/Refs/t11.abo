@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h08 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t11/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
@@ -665,8 +665,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1203,7 +1203,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1242,7 +1242,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  7  -3.8125771968302     -9.233E-10 2.208E-13 9.992E-09
  ETOT  8  -3.8125771968494     -1.918E-11 6.922E-15 1.070E-10
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  1.918E-11 < toldfe=  1.000E-08
 ================================================================================
 
@@ -1275,35 +1275,35 @@ tolerances: {toldfe: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        -3.8125790017         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
-  
+
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1        -0.1409977441         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
-  
+
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
 
@@ -1380,7 +1380,7 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT  9  -4.0348726563519    -3.730E-14 4.298E-17 4.204E-13
  ETOT 10  -4.0348726563518     2.309E-14 1.400E-18 2.043E-16
 
- At SCF step   10, etot is converged : 
+ At SCF step   10, etot is converged :
   for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1548,7 +1548,7 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT  7  -4.0348764685815    -3.553E-13 2.606E-15 1.145E-12
  ETOT  8  -4.0348764685817    -1.688E-13 1.383E-17 1.389E-14
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  1.688E-13 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1704,7 +1704,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1741,7 +1741,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  7   5.4318069974498     -4.047E-09 1.809E-12 2.414E-08
  ETOT  8   5.4318069974086     -4.124E-11 1.125E-14 2.551E-11
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  4.124E-11 < toldfe=  1.000E-08
 ================================================================================
 
@@ -1774,35 +1774,35 @@ tolerances: {toldfe: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         5.4318079469         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000        -0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.2008804714         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000        -0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
 
@@ -1877,7 +1877,7 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT  2  -3.9967361676017    -4.441E-15 3.872E-25 2.642E-17
  ETOT  3  -3.9967361676017     3.997E-15 3.956E-22 5.156E-17
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.997E-15 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2042,7 +2042,7 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT  6  -3.9967307356242    -1.332E-14 1.413E-16 2.050E-13
  ETOT  7  -3.9967307356242     1.332E-15 4.969E-18 9.126E-16
 
- At SCF step    7, etot is converged : 
+ At SCF step    7, etot is converged :
   for the second time, diff in etot=  1.332E-15 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2149,7 +2149,7 @@ band_energy         :  5.20501095060243E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell1     5.2000000000E+00  5.0500000000E+00  5.0500000000E+00 Bohr
             acell2     5.2000000000E+00  5.0500000000E+00  5.0500000000E+00 Bohr
@@ -2638,7 +2638,7 @@ P          mk1mem10         1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2654,7 +2654,7 @@ P          mk1mem10         1
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -2667,12 +2667,12 @@ P          mk1mem10         1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2690,7 +2690,7 @@ P          mk1mem10         1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

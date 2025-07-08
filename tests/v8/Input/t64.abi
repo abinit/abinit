@@ -1,4 +1,4 @@
-# General informations
+# General information
 #**********************
    rfmeth  1
    enunit  0
@@ -45,7 +45,7 @@
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors =  G. Antonius
-#%% keywords = ddb
+#%% keywords = ddb_interpolation
 #%% description =
 #%%   Diamond structure.
 #%%   Interpolation of the DDB from a 2x2x2 q-points grid

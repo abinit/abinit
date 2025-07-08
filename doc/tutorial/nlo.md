@@ -135,7 +135,7 @@ Only the *full DFPT* implementation is available for PAW pseudopotentials.
 
 **Responses to electric fields, atomic displacements, and strains (with PEAD)**
 
-Let us examine the file *tnlo_2.abi*. 
+Let us examine the file *tnlo_2.abi*.
 
 {% dialog tests/tutorespfn/Input/tnlo_2.abi %}
 
@@ -188,18 +188,18 @@ optdriver5    5
   d3e_pert3_elfd5    1
 ```
 The first three lines retrieve the ground state and first-order densities and wavefunctions.
-[[optdriver]] 5 triggers the 3rd-order energy calculation. 
+[[optdriver]] 5 triggers the 3rd-order energy calculation.
 
 The `d3e` input
 variables determine the 3 perturbations of the 3rd order derivatives, and their
 directions. Notice that we compute three derivatives with respect to electric field:
 [[d3e_pert1_elfd]], [[d3e_pert2_elfd]], and [[d3e_pert3_elfd]]. These will be combined
 to give the necessary data for the nonlinear optical susceptibility. We also
-include [[d3e_pert1_phon]], for both atoms in the unit cell (see [[d3e_pert1_atpol]], for which we stick to the default).  
+include [[d3e_pert1_phon]], for both atoms in the unit cell (see [[d3e_pert1_atpol]], for which we stick to the default).
 When combined
 later with the electric field perturbations 2 and 3, this will yield the necessary
 information for the Raman tensor. Finally, for all three perturbation classes, we compute
-the perturbations in all three spatial directions 
+the perturbations in all three spatial directions
 (see [[d3e_pert1_dir]], [[d3e_pert2_dir]] and [[d3e_pert3_dir]], for which we stick to the default).
 
 If it was not done at the beginning of this tutorial, you can now make the
@@ -260,7 +260,7 @@ and the first-order change in the electronic dielectric susceptibility tensor di
 These differences come from convergence effects which can be reduced increasing the cutoff energy and most importantly the number of k-points.
 
 !!! note
-    With the same set of parameters, the *full DFPT* method takes obviously more CPU times than *PEAD*, 
+    With the same set of parameters, the *full DFPT* method takes obviously more CPU times than *PEAD*,
     as we have to compute second-order WF derivatives.
     However, it is expected that the *full DFPT* method converges faster with the number of k-points,
     so one could actually save CPU time and memory using *full DFPT* to get a converged result.
@@ -278,7 +278,7 @@ The individual databases must be combined with the
 [[help:mrgddb|MRGDDB]] merge
 utility in order to get a complete database *tnlo_3.ddb.out*. Explicitly, you
 should merge the files *tnlo_2o_DS4_DDB* and *tnlo_2o_DS5_DDB*.
-An input file that can be piped into MRGDDB is provided as *tnlo_3.abi*. 
+An input file that can be piped into MRGDDB is provided as *tnlo_3.abi*.
 
 {% dialog tests/tutorespfn/Input/tnlo_3.abi %}
 You
@@ -288,7 +288,7 @@ can use it to perform the merge via *\$ABI_HOME/src/98_main/mrgddb < tnlo_3.abi*
 
 We are now ready for the analysis of the results using [[help:anaddb|ANADDB]]. You can copy
 the files *\$ABI_TESTS/tutorespfn/Input/tnlo_4.abi* and
-*\$ABI_TESTS/tutorespfn/Input/tnlo_4.files* to *Work-NLO*. 
+*\$ABI_TESTS/tutorespfn/Input/tnlo_4.files* to *Work_NLO*.
 
 {% dialog tests/tutorespfn/Input/tnlo_4.files tests/tutorespfn/Input/tnlo_4.abi %}
 
@@ -428,7 +428,7 @@ a(LO) (Unit: Ang^2)= 4.9983 (5.4234) [7.46]
 For comparison with the DFPT calculation, we can compute $\frac{d \chi}{d \tau}$ for the Al
 nucleus from finite differences. In practice, this is achieved by computing
 the linear optical susceptibility for 3 different positions of the Al nucleus.
-This is done with the file *\$ABI_TESTS/tutorespfn/Input/tnlo_5.abi*. 
+This is done with the file *\$ABI_TESTS/tutorespfn/Input/tnlo_5.abi*.
 
 {% dialog tests/tutorespfn/Input/tnlo_5.abi %}
 
@@ -588,7 +588,7 @@ temp 298.0
 # number frequencies (default is 1000)
 n_freq 400
 
-# min and max frequencies 
+# min and max frequencies
 # (default is 0.95 and 1.05 of bands found; default unit is cm^-1, user can instead specify Ha or Hz)
 min_freq 200.0
 max_freq 800.0

@@ -1,0 +1,14 @@
+
+==============================================================================
+Keywords to use with the make command to run quick tests,
+  possibly with -j x option:
+
+check              Launch a small set of tests that cover most of the main features
+                   For these tests, only a comparison of the main physical results
+                   in the output is performed.
+
+test_fast          Launch 3 very small tests
+
+tests_in           Launch test_fast, followed by other internal tests
+
+==============================================================================

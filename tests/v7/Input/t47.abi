@@ -31,6 +31,7 @@
  rfelfd4  2
  getwfk4  3
   nband4  20
+ prtevk4  1
 
 # ddk response function
    iscf5 -3
@@ -40,6 +41,7 @@
  rfelfd5  2
  getwfk5  3
   nband5  20
+ prtevk5  1
 
 
 # ddk response function
@@ -50,6 +52,7 @@
  rfelfd6  2
  getwfk6  3
   nband6  20
+ prtevk6  1
 
 
 #Common data

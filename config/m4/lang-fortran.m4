@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -1563,7 +1563,7 @@ AC_DEFUN([ABI_PROG_FC],[
       fi
     fi
   fi
-  AC_PROG_FC([ ftn mpiifort mpifort mpif90 nagfor ifort gfortran ])
+  AC_PROG_FC([ ftn mpiifx mpiifort mpifort mpif90 nagfor ifort gfortran ])
 
   # Fail if no Fortran compiler is available
   if test "${FC}" = ""; then

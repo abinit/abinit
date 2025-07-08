@@ -7,7 +7,7 @@
 !! Can use either FoX or pure Fortran routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (MT, FJ)
+!! Copyright (C) 2005-2025 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +32,8 @@ module m_pawxmlps
 
  use m_pawrad     , only : pawrad_type, pawrad_init, pawrad_free, pawrad_ifromr, bound_deriv
  use m_paw_numeric, only : paw_spline, paw_splint
+ use m_paw_atomorb, only : atomorb_type, ORB_FROZEN
+ use m_paw_lmn
 
  implicit none
 
@@ -376,7 +378,7 @@ select case(name)
          end if
          paw_setuploc%atom%symbol = trim(value)
 
-         value = getValue(attributes,"Z") 
+         value = getValue(attributes,"Z")
          if (value == "" ) then
            msg="Cannot determine znucl"
            LIBPAW_ERROR(msg)
@@ -444,12 +446,12 @@ select case(name)
          ival=ival+1
 
          value = getValue(attributes,"n")
-         if (value == "" ) then 
-           valstate(ival)%nn=-1    
+         if (value == "" ) then
+           valstate(ival)%nn=-1
          else
            read(unit=value,fmt=*) valstate(ival)%nn
          end if
- 
+
          value = getValue(attributes,"l")
          if (value == "" ) then
            msg="Cannot determine l"
@@ -459,7 +461,7 @@ select case(name)
          if(valstate(ival)%ll>lmax) lmax=valstate(ival)%ll
 
          value = getValue(attributes,"f")
-         if (value == "" ) then 
+         if (value == "" ) then
            valstate(ival)%ff=-1.d0
          else
            read(unit=value,fmt=*) valstate(ival)%ff
@@ -547,7 +549,7 @@ select case(name)
          value = getValue(attributes,"grid")
          paw_setuploc%shape_function%grid=trim(value)
          if (value /= "" ) then
-           paw_setuploc%shape_function%gtype ="num" 
+           paw_setuploc%shape_function%gtype ="num"
            do ii=1,igrid
              if(trim(paw_setuploc%shape_function%grid)==trim(grids(ii)%id)) then
                mesh_size=grids(ii)%iend-grids(ii)%istart+1
@@ -914,10 +916,10 @@ subroutine paw_end_element1(namespaceURI,localName,name)
 character(len=*),intent(in) :: namespaceURI,localName,name
 character(len=100) :: msg,value
 
-!Just to fool abirules 
+!Just to fool abirules
  value=localName
  value=namespaceURI
- 
+
 select case(name)
 
       case ("generator")
@@ -1081,7 +1083,7 @@ if (in_data) then
     end if
   end do
 
-  if ((ndata+ntokens)>size(x)) then 
+  if ((ndata+ntokens)>size(x)) then
     msg="data array full"
     LIBPAW_ERROR(msg)
   end if
@@ -1129,7 +1131,7 @@ subroutine paw_setup_free(paw_setupin)
  integer :: ii
 
 ! *********************************************************************
- 
+
  paw_setupin%tread=.false.
  paw_setupin%atom%tread=.false.
  paw_setupin%xc_functional%tread=.false.
@@ -1231,7 +1233,7 @@ end subroutine paw_setup_free
 !!  Copy a paw_setup datastructure into another
 !!
 !! INPUTS
-!!  
+!!
 !!  paw_setupin<paw_setup_type>=input paw_setup datastructure
 !!
 !! OUTPUT
@@ -1408,7 +1410,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
        paw_setupout%ae_partial_wave(ii)%data=paw_setupin%ae_partial_wave(ii)%data
      end if
    end do
- end if 
+ end if
  if (allocated( paw_setupin%pseudo_partial_wave)) then
    sz1=size(paw_setupin%pseudo_partial_wave,1)
    LIBPAW_DATATYPE_ALLOCATE(paw_setupout%pseudo_partial_wave,(sz1))
@@ -1422,7 +1424,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
        paw_setupout%pseudo_partial_wave(ii)%data=paw_setupin%pseudo_partial_wave(ii)%data
      end if
    end do
- end if 
+ end if
   if (allocated( paw_setupin%projector_function)) then
    sz1=size(paw_setupin%projector_function,1)
    LIBPAW_DATATYPE_ALLOCATE(paw_setupout%projector_function,(sz1))
@@ -1436,7 +1438,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
        paw_setupout%projector_function(ii)%data=paw_setupin%projector_function(ii)%data
      end if
    end do
- end if 
+ end if
   if (allocated( paw_setupin%projector_fit)) then
    sz1=size(paw_setupin%projector_fit,1)
    LIBPAW_DATATYPE_ALLOCATE(paw_setupout%projector_fit,(sz1))
@@ -1447,7 +1449,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
      paw_setupout%projector_fit(ii)%factors=paw_setupin%projector_fit(ii)%factors
      paw_setupout%projector_fit(ii)%expos=paw_setupin%projector_fit(ii)%expos
    end do
- end if 
+ end if
 
 end subroutine paw_setup_copy
 !!***
@@ -1519,7 +1521,7 @@ end subroutine paw_setup_copy
  subroutine rdpawpsxml_header(ecut_tmp,filename,paw_setup)
 
 !Arguments ---------------------------------------------
- 
+
  character (len=fnlen),intent(in) :: filename
  real(dp), intent(inout) :: ecut_tmp(3,2)
  type(paw_setup_t),intent(inout) :: paw_setup
@@ -1676,8 +1678,8 @@ end subroutine paw_setup_copy
            LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
-         if (strg == "" ) then 
-           valstate(ival)%nn=-1    
+         if (strg == "" ) then
+           valstate(ival)%nn=-1
          else
            if (len(trim(strg))<=30) then
              strg1=trim(strg)
@@ -1695,7 +1697,7 @@ end subroutine paw_setup_copy
          end if
          if(valstate(ival)%ll>lmax) lmax=valstate(ival)%ll
          call paw_rdfromline(" f",line,strg,ierr)
-         if (strg == "" ) then 
+         if (strg == "" ) then
            valstate(ival)%ff=-1.d0
          else
            if (len(trim(strg))<=30) then
@@ -1828,7 +1830,7 @@ end subroutine paw_setup_copy
      call paw_rdfromline("grid",line,strg,ierr)
      paw_setup%shape_function%grid=trim(strg)
      if (strg /= "" ) then
-       paw_setup%shape_function%gtype ="num" 
+       paw_setup%shape_function%gtype ="num"
        do ii=1,igrid
          if(trim(paw_setup%shape_function%grid)==trim(grids(ii)%id)) then
            mesh_size=grids(ii)%iend-grids(ii)%istart+1
@@ -2030,8 +2032,8 @@ end subroutine paw_setup_copy
            LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
-         if (strg == "" ) then 
-           valstate(ival)%nn=-1    
+         if (strg == "" ) then
+           valstate(ival)%nn=-1
          else
            if (len(trim(strg))<=30) then
              strg1=trim(strg)
@@ -2049,7 +2051,7 @@ end subroutine paw_setup_copy
          end if
          if(valstate(ival)%ll>lmax) lmax=valstate(ival)%ll
          call paw_rdfromline(" f",line,strg,ierr)
-         if (strg == "" ) then 
+         if (strg == "" ) then
            valstate(ival)%ff=-1.d0
          else
            if (len(trim(strg))<=30) then
@@ -2182,7 +2184,7 @@ end subroutine paw_setup_copy
      call paw_rdfromline("grid",line,strg,ierr)
      paw_setup%shape_function%grid=trim(strg)
      if (strg /= "" ) then
-       paw_setup%shape_function%gtype ="num" 
+       paw_setup%shape_function%gtype ="num"
        do ii=1,igrid
          if(trim(paw_setup%shape_function%grid)==trim(grids(ii)%id)) then
            mesh_size=grids(ii)%iend-grids(ii)%istart+1
@@ -2284,9 +2286,9 @@ end subroutine paw_setup_copy
      end if
      LIBPAW_ALLOCATE(paw_setup%ae_core_density%data,(mesh_size))
      !MGNAG v7[62]
-     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657: 
-     ! Record too long for input bufferProgram terminated by I/O error on unit 9 
-     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Psps_for_tests/Al.LDA",Formatted,Sequential)
+     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657:
+     ! Record too long for input bufferProgram terminated by I/O error on unit 9
+     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Pspdir/Al.LDA",Formatted,Sequential)
      read(funit,*) (paw_setup%ae_core_density%data(ir),ir=1,mesh_size)
      cycle
    end if
@@ -2340,9 +2342,9 @@ end subroutine paw_setup_copy
      end if
      LIBPAW_ALLOCATE(paw_setup%ae_core_kinetic_energy_density%data,(mesh_size))
      !MGNAG v7[62]
-     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657: 
-     ! Record too long for input bufferProgram terminated by I/O error on unit 9 
-     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Psps_for_tests/Al.LDA",Formatted,Sequential)
+     ! Runtime Error: m_pawxmlps_cpp.f90, line 1657:
+     ! Record too long for input bufferProgram terminated by I/O error on unit 9
+     ! (File="/home/buildbot/ABINIT_OD/petrus_nag/gmatteo_7.7.1-training/tests/Pspdir/Al.LDA",Formatted,Sequential)
      read(funit,*) (paw_setup%ae_core_kinetic_energy_density%data(ir),ir=1,mesh_size)
      cycle
    end if
@@ -2659,9 +2661,9 @@ end subroutine paw_setup_copy
      do while ((msg(1:9)/=' Program:').and.(msg(1:8)/='Program:'))
        read(funit,'(a)') msg
        write(ab_out,'(a)') trim(msg)
-     end do   
+     end do
      cycle
-   end if 
+   end if
 
 !  End of reading loop
  end do
@@ -2694,7 +2696,7 @@ end subroutine paw_setup_copy
    msg="Aborting now"
    LIBPAW_ERROR(msg)
  end if
- 
+
  end subroutine rdpawpsxml
 !!***
 
@@ -2709,30 +2711,26 @@ end subroutine paw_setup_copy
 !!
 !! INPUTS
 !!  filename= input file name (atomicdata XML)
-!!  funit= input unit number
 !!
 !! OUTPUT
-!!  paw_setup=pseudopotential data structure
+!!  Atm<paw_atomorb_type>= Structure defining the set of core orbitals
 !!
 !! SOURCE
 
- subroutine rdpawpsxml_core(energy_cor,filename, &
-&           lcor,ncor,nphicor,pawrad,phi_cor,kappacor)
+ subroutine rdpawpsxml_core(atm,filename,rcut,pawrad)
 
 !Arguments ---------------------------------------------
  character (len=*),intent(in) :: filename
- integer,intent(out) :: nphicor
-!arrays
- integer,allocatable,intent(inout) :: lcor(:),ncor(:)
- integer,allocatable,intent(inout),optional :: kappacor(:)
- real(dp),allocatable,intent(inout) :: phi_cor(:,:),energy_cor(:)
- type(pawrad_type),intent(in) :: pawrad
-
+ real(dp), intent(in) :: rcut
+ type(atomorb_type), intent(inout) :: atm
+ type(pawrad_type),intent(in),optional :: pawrad
 
 !Local variables ---------------------------------------
- integer :: funit,iaewf,ii,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh,shft
+ integer :: funit,iaewf,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh
+ integer :: ilmn,jl,jlmn,k0lmn,klmn
+ integer :: iln,imainmesh,isppol,ms,msz_cut,i2j,il
  logical :: endfile,found,tread,diracrel
- real(dp) :: yp1,ypn
+ real(dp) :: yp1,ypn,znucl
  character(len=100) :: msg,version
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg
@@ -2745,6 +2743,7 @@ end subroutine paw_setup_copy
  type(pawrad_type),allocatable :: radmesh(:)
 
 ! *************************************************************************
+
 
 !Open the atomicdata XML file for reading
  funit=100
@@ -2772,17 +2771,25 @@ end subroutine paw_setup_copy
      cycle
    end if
 
+!  --read atom type
+   if (line(1:5)=='<atom') then
+     tread=.true.
+     call paw_rdfromline(" Z",line,strg,ierr)
+     strg1=trim(strg)
+     read(unit=strg1,fmt=*) znucl
+     call paw_rdfromline(" core",line,strg,ierr)
+     strg1=trim(strg)
+     read(unit=strg1,fmt=*) Atm%zcore
+     cycle
+   end if
+
+
 !  --Read GENERATOR
    if (line(1:10)=='<generator') then
      tread=.true.
      call paw_rdfromline(" type",line,strg,ierr)
      if(strg=="dirac-relativistic") then
        diracrel=.true.
-     else
-       if(present(kappacor)) then
-         write(msg,'(a)') 'Error in pawpsp_read_core: To read kappa a diracrelativistic corewf file has to be provided!'
-         LIBPAW_ERROR(msg)
-       endif
      endif
      cycle
    end if
@@ -2821,14 +2828,12 @@ end subroutine paw_setup_copy
          end if
          if(diracrel) then!does not work if xml file is in the wrong order, which is bad xml, alternatives?
            call paw_rdfromline(" kappa",line,strg,ierr)
-           if(present(kappacor)) then
-             if (len(trim(strg))<=30) then
-               strg1=trim(strg)
-               read(unit=strg1,fmt=*) corestate(icor)%kk
-             else
-               read(unit=strg,fmt=*) corestate(icor)%kk
-             end if
-           endif
+           if (len(trim(strg))<=30) then
+             strg1=trim(strg)
+             read(unit=strg1,fmt=*) corestate(icor)%kk
+           else
+             read(unit=strg,fmt=*) corestate(icor)%kk
+           end if
          endif
          call paw_rdfromline(" f",line,strg,ierr)
          if (strg == "" ) then
@@ -2943,7 +2948,27 @@ end subroutine paw_setup_copy
 !  End of reading loop
  end do
 
- nphicor=icor
+ Atm%fname = filename
+ Atm%l_max=0
+ Atm%ixc=0
+ Atm%method=0
+ Atm%l_size=0
+ Atm%ln_size=0
+ Atm%ln2_size=0
+ Atm%lmn_size=0
+ Atm%lmn2_size=0
+ Atm%rcore=0.0_dp
+ Atm%nspden=1
+ Atm%nsppol=1
+ Atm%ln_size=icor
+ Atm%dirac=diracrel
+ Atm%mesh_size=0
+ Atm%nspinor=1
+ Atm%znucl=znucl
+ Atm%mult=1
+ Atm%lmn2_size = 0
+ Atm%zion=Atm%znucl-Atm%zcore
+ if(Atm%dirac) Atm%nspinor=2
  nmesh=igrid
  if(nmesh>0)then
    LIBPAW_DATATYPE_ALLOCATE(radmesh,(nmesh))
@@ -2999,9 +3024,9 @@ end subroutine paw_setup_copy
  end do
 
  maxmeshz=maxval(radmesh(:)%mesh_size)
- LIBPAW_DATATYPE_ALLOCATE(gridwf,(nphicor))
- LIBPAW_DATATYPE_ALLOCATE(statewf,(nphicor))
- LIBPAW_ALLOCATE(phitmp,(maxmeshz,nphicor))
+ LIBPAW_DATATYPE_ALLOCATE(gridwf,(Atm%ln_size))
+ LIBPAW_DATATYPE_ALLOCATE(statewf,(Atm%ln_size))
+ LIBPAW_ALLOCATE(phitmp,(maxmeshz,Atm%ln_size))
  phitmp(:,:)=zero
 
 !Start of reading loop
@@ -3021,9 +3046,9 @@ end subroutine paw_setup_copy
      gridwf(iaewf)=trim(strg)
      call paw_rdfromline(" state",line,strg,ierr)
      statewf(iaewf)=trim(strg)
-     do ii=1,nmesh
-       if(trim(gridwf(iaewf))==trim(grids(ii)%id)) then
-         mesh_size=grids(ii)%iend-grids(ii)%istart+1
+     do imsh=1,nmesh
+       if(trim(gridwf(iaewf))==trim(grids(imsh)%id)) then
+         mesh_size=grids(imsh)%iend-grids(imsh)%istart+1
          exit
        end if
      end do
@@ -3033,44 +3058,123 @@ end subroutine paw_setup_copy
 !  End of reading loop
  end do
 
- if(nphicor>0)then
-   LIBPAW_ALLOCATE(ncor,(nphicor))
-   LIBPAW_ALLOCATE(lcor,(nphicor))
-   LIBPAW_ALLOCATE(energy_cor,(nphicor))
-   LIBPAW_ALLOCATE(phi_cor,(pawrad%mesh_size,nphicor))
-   if (present(kappacor)) then
-     LIBPAW_ALLOCATE(kappacor,(nphicor))
+ if(Atm%ln_size>0)then
+   LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
+   LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
+   LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
+   if (Atm%dirac) then
+     LIBPAW_ALLOCATE(Atm%kappa,(Atm%ln_size))
    endif
-   phi_cor(:,:)=zero
-   do ii=1,nphicor
-     ncor(ii)=corestate(ii)%nn
-     lcor(ii)=corestate(ii)%ll
-     if(present(kappacor)) kappacor(ii)=corestate(ii)%kk
-     energy_cor(ii)=corestate(ii)%ee
-     do imsh=1,nmesh
-       if(trim(gridwf(ii))==trim(grids(imsh)%id)) imeshae=imsh
+   do isppol=1,Atm%nsppol
+     do iln=1,Atm%ln_size
+       do imsh=1,nmesh
+         if(trim(gridwf(iln))==trim(grids(imsh)%id)) imeshae=imsh
+       end do
+       if (iln==1.and.isppol==1) then
+         imainmesh=imeshae
+         if(present(pawrad)) then
+           Atm%mesh_size = pawrad%mesh_size
+           Atm%rcore=pawrad%rad(pawrad%mesh_size)
+           Atm%radmesh=pawrad
+         elseif(rcut>tol16) then
+           msz_cut =min(pawrad_ifromr(radmesh(imeshae),rcut)+6,radmesh(imeshae)%mesh_size) ! add six more points six more points
+           Atm%mesh_size = msz_cut
+           Atm%rcore = radmesh(imeshae)%rad(msz_cut)
+           call pawrad_init(Atm%radmesh,Atm%mesh_size,radmesh(imeshae)%mesh_type,radmesh(imeshae)%rstep,radmesh(imeshae)%lstep,-one)
+         else
+           Atm%mesh_size= radmesh(imeshae)%mesh_size
+           Atm%rcore=corestate(iln)%rc
+           call pawrad_init(Atm%radmesh,radmesh(imeshae)%mesh_size,radmesh(imeshae)%mesh_type,radmesh(imeshae)%rstep,radmesh(imeshae)%lstep,-one)
+         endif
+         LIBPAW_ALLOCATE(Atm%phi,(Atm%mesh_size,Atm%ln_size,Atm%nsppol))
+       else if ((imeshae/=imainmesh).and.(.not.present(pawrad))) then
+         write(msg,'(3a)')&
+&        ' All Phi core must be given on the same radial mesh !',ch10,&
+&        ' Action: check your pseudopotential file.'
+         ABI_ERROR(msg)
+       end if
+       Atm%indln(2,iln)=corestate(iln)%nn
+       Atm%indln(1,iln)=corestate(iln)%ll
+       if(Atm%dirac) Atm%kappa(iln)=corestate(iln)%kk
+       Atm%eig(iln,isppol)=corestate(iln)%ee
+       Atm%occ(iln,isppol)=corestate(iln)%ff
+       if(present(pawrad)) then
+         if ((pawrad%mesh_type/=radmesh(imeshae)%mesh_type) &
+&        .or.(pawrad%rstep/=radmesh(imeshae)%rstep) &
+&        .or.(pawrad%lstep/=radmesh(imeshae)%lstep)) then
+           ms=pawrad%mesh_size
+           if (radmesh(imeshae)%rmax<pawrad%rmax+tol8) ms=pawrad_ifromr(pawrad,radmesh(imeshae)%rmax)-1
+           mesh_size=radmesh(imeshae)%mesh_size
+           LIBPAW_ALLOCATE(work,(mesh_size))
+           call bound_deriv(phitmp(1:mesh_size,iln),radmesh(imeshae),mesh_size,yp1,ypn)
+           call paw_spline(radmesh(imeshae)%rad(1:mesh_size),phitmp(1:mesh_size,iln),mesh_size,yp1,ypn,work(1:mesh_size))
+           call paw_splint(mesh_size,radmesh(imeshae)%rad(1:mesh_size),phitmp(1:mesh_size,iln),work(1:mesh_size),&
+&                          ms,pawrad%rad(1:ms),Atm%phi(1:ms,iln,isppol))
+           LIBPAW_DEALLOCATE(work)
+           Atm%phi(1:ms,iln,isppol)=Atm%phi(1:ms,iln,isppol)*pawrad%rad(1:ms)
+         else
+ !          shft=mesh_shift(imeshae)
+           mesh_size=min(radmesh(imeshae)%mesh_size,pawrad%mesh_size)
+           Atm%phi(1:mesh_size,iln,isppol)=phitmp(1:mesh_size,iln)*radmesh(imeshae)%rad(1:mesh_size)
+           if (mesh_size<pawrad%mesh_size) Atm%phi(mesh_size+1:pawrad%mesh_size,iln,isppol)=zero
+!           phi_cor(1+shft:mesh_size,iln)=phitmp(1:mesh_size-shft,iln)*radmesh(imeshae)%rad(1:mesh_size-shft)
+!           if (shft==1) phi_cor(1,iln)=zero
+         end if
+       else
+         Atm%phi(:,iln,isppol) = phitmp(1:Atm%mesh_size,iln)*radmesh(imeshae)%rad(1:Atm%mesh_size)
+       endif
      end do
-     if ((pawrad%mesh_type/=radmesh(imeshae)%mesh_type) &
-&    .or.(pawrad%rstep/=radmesh(imeshae)%rstep) &
-&    .or.(pawrad%lstep/=radmesh(imeshae)%lstep)) then
-       mesh_size=radmesh(imeshae)%mesh_size
-       LIBPAW_ALLOCATE(work,(mesh_size))
-       call bound_deriv(phitmp(1:mesh_size,ii),radmesh(imeshae),mesh_size,yp1,ypn)
-       call paw_spline(radmesh(imeshae)%rad(1:mesh_size),phitmp(1:mesh_size,ii),mesh_size,yp1,ypn,work(1:mesh_size))
-       ir=pawrad%mesh_size
-       if (radmesh(imeshae)%rmax<pawrad%rmax+tol8) ir=pawrad_ifromr(pawrad,radmesh(imeshae)%rmax)-1
-       call paw_splint(mesh_size,radmesh(imeshae)%rad(1:mesh_size),phitmp(1:mesh_size,ii),work(1:mesh_size),&
-&                      ir,pawrad%rad(1:ir),phi_cor(1:ir,ii))
-       phi_cor(1:ir,ii)=phi_cor(1:ir,ii)*pawrad%rad(1:ir)
-       LIBPAW_DEALLOCATE(work)
-     else
-       shft=mesh_shift(imeshae)
-       mesh_size=min(radmesh(imeshae)%mesh_size,pawrad%mesh_size)
-       phi_cor(1+shft:mesh_size,ii)=phitmp(1:mesh_size-shft,ii)*radmesh(imeshae)%rad(1:mesh_size-shft)
-       if (shft==1) phi_cor(1,ii)=zero
-     end if
+   enddo
+   if(Atm%dirac) then
+     Atm%lmn_size=0
+     do iln=1,Atm%ln_size
+       il=Atm%indln(1,iln)
+       i2j=2*il-sign(1,Atm%kappa(iln))
+       Atm%lmn_size=Atm%lmn_size+i2j+1
+     end do
+     Atm%lmn_size=Atm%lmn_size*2
+     call make_indlmn(Atm%ln_size,Atm%lmn_size,Atm%indln(1,:),Atm%indlmn,kappa=Atm%kappa)
+   else
+     Atm%lmn_size=0
+     do iln=1,Atm%ln_size
+       il=Atm%indln(1,iln)
+       Atm%lmn_size=Atm%lmn_size+2*il+1
+     end do
+     call make_indlmn(Atm%ln_size, Atm%lmn_size, Atm%indln(1,:), Atm%indlmn)
+   endif
+   Atm%l_max=maxval(Atm%indln(1,:))+1
+   Atm%ln2_size  = Atm%ln_size *(Atm%ln_size +1)/2
+   Atm%lmn2_size = Atm%lmn_size*(Atm%lmn_size+1)/2
+   ! * Setup of indklmn and klm_diag.
+   LIBPAW_ALLOCATE(Atm%indklmn,(8,Atm%lmn2_size))
+   LIBPAW_ALLOCATE(Atm%klm_diag,(Atm%lmn2_size))
+   call make_indklmn(HUGE(1), Atm%lmn_size, Atm%lmn2_size,Atm%indlmn,Atm%indklmn, Atm%klm_diag)
+
+   ! * Setup of klmntomn.
+   LIBPAW_ALLOCATE(Atm%klmntomn,(4,Atm%lmn2_size))
+   do jlmn=1,Atm%lmn_size
+     jl= Atm%indlmn(1,jlmn)
+     k0lmn=jlmn*(jlmn-1)/2
+     do ilmn=1,jlmn
+       il= Atm%indlmn(1,ilmn)
+       klmn=k0lmn+ilmn
+       Atm%klmntomn(1,klmn) = Atm%indlmn(2,ilmn)+il+1 ! im
+       Atm%klmntomn(2,klmn) = Atm%indlmn(2,jlmn)+jl+1 ! jm
+       Atm%klmntomn(3,klmn) = Atm%indlmn(3,ilmn)      ! in
+       Atm%klmntomn(4,klmn) = Atm%indlmn(3,jlmn)      ! jn
+     end do
    end do
+
+   Atm%l_size =2*Atm%l_max-1
+   LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
+   Atm%mode = ORB_FROZEN
+
+!   ! * Setup of kln2ln.
+!   !TODO this has to be tested
+!   LIBPAW_ALLOCATE(Atm%kln2ln,(6,Atm%ln2_size))
+!   call make_kln2ln(Atm%lmn_size,Atm%lmn2_size,Atm%ln2_size,Atm%indlmn,Atm%indklmn,Atm%kln2ln)
  end if
+
 
  if (allocated(radmesh)) then
    call pawrad_free(radmesh)

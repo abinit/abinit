@@ -21,7 +21,8 @@ prtwf1  1 getwfk 1 getwfk1 0
 # === Structure and cell
 natom 2 ntypat 1 typat 2*1
 znucl  83.
-spinat 0 0 1.2   0 1.1 0
+spinat   *0.0
+spinat3  0 0 1.2   0 1.1 0
 xred   3*0.231d0
        3*-0.231d0
 acell  3*9.
@@ -29,7 +30,7 @@ angdeg 3*57.25
 nband 32 nband1 16
 
 # === SCF cycle options
-nstep 20  tolvrs 1.d-7
+nstep 20  tolvrs 1.d-7 nstep3  7
 ecut 5. pawecutdg 10.
 
 # === K-points and syms
@@ -48,7 +49,7 @@ prtden 0  prteig 0  prtwf 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t17.abo, tolnlines = 8, tolabs = 1.100e-02, tolrel = 1.001e+00, fld_options = -easy
+#%%   t17.abo, tolnlines = 137, tolabs = 2.0e-1, tolrel = 1.1, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

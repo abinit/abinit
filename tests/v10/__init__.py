@@ -16,6 +16,9 @@ inp_files = [
     "t04.abi" ,  # same as v9[206] but with istwfk>1 (with DFTI)
     "t05.abi" ,  # same as v10[04] but with norm-conserving pseudos (without DFTI)
     "t06.abi" ,  # same as v9[206] but with istwfk>1 (without DFTI)
+    "t07.abi" ,  # test oracle and nbdbuf in chebfi (cprj_in_memory=0 and 1).
+    "t08.abi" ,  # same as v10[07] but with istwfk>1 (with less datasets)
+    "t09.abi" ,  # same as v10[07] but with nspinor=2 (with less datasets)
     "t10.abi" ,  # compare cprj_in_memory=1 with cprj_in_memory=0. PAW, istwfk=1.
     "t11.abi" ,  # same as v10[10], with nsppol=2.
     "t12.abi" ,  # same as v10[10], with nspinor=2.
@@ -26,7 +29,22 @@ inp_files = [
     "t17.abi" ,  # same as v10[10], with istwfk>1 (without DFTI).
     "t18.abi" ,  # same as v10[10] but with NC pseudos, istwfk>1 (without DFTI)
     "t19.abi" ,  # compare cprj_in_memory=1 with cprj_in_memory=0 for cell optimization.
-    "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole 
+    "t20.abi" ,  # test nvt_langevin MD algorithm (PIMD implementation)
+    "t21.abi" ,  # test npt_langevin MD algorithm (PIMD implementation)
+    "t22.abi" ,  # test finite-temperature exchange-correlation functionals, and calculation of Sxc (NC case)
+    "t23.abi" ,  # test finite-temperature exchange-correlation functionals, and calculation of Sxc (PAW case)
+    "t24.abi" ,  # same as v10[10], with dilatxm>1, istwfk>1 (with DFTI).
+    "t25.abi" ,  # same as v10[10], with dilatxm>1, istwfk>1 (without DFTI).
+    "t26.abi" ,  # test cprj_in_memory when atoms are not ordered by type.
+    "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole
+    "t41.abi" ,  # test orbmag calculation using R2SCAN mGGA
+    "t42.abi" ,  # test orbmag calculation using R2SCAN mGGA, nspinor 2, zora
+    "t43.abi" ,  # test quadrupoles calculation with xcnlcc
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
+    "t83.abi" ,  # Test variable cell nudged elastic band method
+    "t104.abi" , # Test Si spectral function and mobilities :step 1 WFK
+    "t105.abi" , # Test Si spectral function and mobilities :step 2 merge DDB
+    "t106.abi" , # Test Si spectral function and mobilities :step 3 merge DVDB
+    "t107.abi" , # Test Si spectral function and mobilities :step 4 mobilities cumulant and DM with positive doping correction
 ]

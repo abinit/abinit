@@ -174,7 +174,7 @@ class FailDetail(object):
 
 class BaseArray(np.ndarray):
     """
-    Define a base class for YAML tags converted to numpy compatible objects. 
+    Define a base class for YAML tags converted to numpy compatible objects.
     Can be used for converting any YAML array of number of any
     dimension into a numpy compatible array.
     """

@@ -1,0 +1,80 @@
+#################################################################
+# Test of the NEB method with variable primitive vectors        #
+# Cubic cristal of berrylium                                    #
+# Moving an atom from one unit cell to another                  #
+#                                                      MT 2025  #
+#################################################################
+
+#Definition of the PATH to explore
+xred_img1    0.0 0.0 0.0          # Starting point
+             1/2 1/2 1/2
+xred_lastimg 0.0 0.0 0.0          # End point (distorded positions)
+             3/2 1/2 1/2          # Atom 2 has moved
+
+# Nudged Elastic Band parameters
+imgmov 5                          # Select NEB method
+neb_algo 1                        # Improved-tangent NEB
+neb_cell_algo 1                   # Generalized Solid-State NEB
+mep_solver 0                      # Use steepest-descent as diff. equation solver
+fxcartfactor 0.8                  # Scaling factor for the steepest-descent algo
+nsym 1                            # For NEB to work properly
+nimage 7                          # 7 images along the PATH
+dynimage 0 5*1 0                  # First and last images are fixed
+ntimimage 10                      # Max. number of NEB steps
+tolimg 5.0e-04                    # Tolerance on energy to converge NEB
+
+#Definition of the unit cell
+acell 4.0 4.0 4.0                 # Unit cell (at start of the NEB)
+rprim  1.0 0.0 0.0                # Cubic cell
+       0.0 1.0 0.0
+       0.0 0.0 1.0
+
+chkprim 0
+chksymbreak 0
+chksymtnons 0
+
+#Definition of the atom types and pseudopotentials
+ntypat 1                          # One atom type
+znucl 4                           # Atomic number of Be
+pp_dirpath "$ABI_PSPDIR"          # Path to the pseudopotential directory
+pseudos "Psdj_paw_pw_std/Be.xml"  # Name and location of the pseudopotential
+
+#Definition of the atoms
+natom 2                           # Two atoms
+typat 2*1                         # of same type (=Be)
+xred 0.0 0.0 0.0                  # Default atomic positions
+     1/2 1/2 1/2
+occopt 7                          # Occupations are metallic
+nband 7                           # Number of bands
+
+#Numerical parameters of the calculation : planewave basis set and k point grid
+ecut 20                           # Plane wave cut-off energy
+pawecutdg 60                      # PAW PW cut-off energy for densities
+kptopt 1                          # K points autmatically generated
+ngkpt 2 2 2                       # K point density
+ecutsm 0.5                        # Smearing for plane waves; requested by cell optimization
+
+#Parameters for the SCF procedure
+nstep 50                          # Max. number of SCF cycles
+toldfe 1.0d-6                     # Tolerance on energy
+diemac 12.0                       # Adapt preconditioning to insulators
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t83.abo, tolnlines = 205, tolabs = 1.5e-5, tolrel = 3.0e-2, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 20
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = NEB
+#%% description = 
+#%%   Test the GSS-NEB method (Nudged Elastic Band with variable cell)
+#%%   Cubic cristal of beryllium
+#%%   7 images, exploring the distortion of a cell when moving an atom
+#%% topics = TransPath
+#%%<END TEST_INFO>
+

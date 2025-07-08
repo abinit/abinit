@@ -50,7 +50,7 @@ if(ABINIT_YAKL_WANTED)
   # use carefully, it may strongly increase build time
   if(ABINIT_YAKL_BUILD)
 
-    message("[abinit / yakl] Building yakl from source")
+    message(STATUS "[abinit / yakl] Building yakl from source")
 
     add_compile_definitions(YAKL_ARCH=${YAKL_ARCH_REQUIRED})
 
@@ -66,7 +66,7 @@ if(ABINIT_YAKL_WANTED)
     endif()
 
     set(YAKL_ARCH ${YAKL_ARCH_REQUIRED})
-    message("[abinit / YAKL] Building yakl from source for YAKL_ARCH=${YAKL_ARCH}")
+    message(STATUS "[abinit / YAKL] Building yakl from source for YAKL_ARCH=${YAKL_ARCH}")
 
     set_property(DIRECTORY PROPERTY EP_BASE ${CMAKE_BINARY_DIR}/external)
 
@@ -111,7 +111,7 @@ if(ABINIT_YAKL_WANTED)
         message(FATAL_ERROR "Kokkos and YAKL target architecture don't match !")
       endif()
 
-      message("[abinit / yakl] Yakl found via find_package with YAKL_ARCH=${YAKL_ARCH}")
+      message(STATUS "[abinit / yakl] Yakl found via find_package with YAKL_ARCH=${YAKL_ARCH}")
       set(ABINIT_YAKL_FOUND True)
       set(HAVE_YAKL 1)
 

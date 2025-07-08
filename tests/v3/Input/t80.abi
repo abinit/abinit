@@ -56,31 +56,31 @@ getxcart3     -2
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t80.abo, tolnlines = 0, tolabs = 1.289e-10, tolrel = 3.000e-10, fld_options =  -medium
+#%% files_to_test =
+#%%   t80.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   H2 molecule : examine the rotational freedom.
-#%%   The present test produces the following 
+#%%   The present test produces the following
 #%%   vibrational frequencies (with degeneracies indicated):
 #%%   56.89 i cm-1 (2)
 #%%   0.41   cm-1 (2)
 #%%   1.05   cm-1
-#%%   3800    cm-1 
+#%%   3800    cm-1
 #%%   The large frequency corresponds to the stretching
 #%%   mode, and has the right order of magnitude.
 #%%   The frequencies close to 1 cm-1 corresponds
 #%%   to translation modes, and are small enough
 #%%   for usual applications.
-#%%   The  56.89 i cm-1 mode corresponds to rotation of 
+#%%   The  56.89 i cm-1 mode corresponds to rotation of
 #%%   the H2 molecule. The magnitude of this
 #%%   frequency might seem quite
 #%%   large. Here are the results of tests made to understand
-#%%   this phenomenon. First, note that  
+#%%   this phenomenon. First, note that
 #%%   ecut 12  acell 3*14
 #%%   Increasing the value of ecut to 25 decreases
 #%%   the magnitude of the frequency to 36.8 cm-1 .
@@ -94,7 +94,7 @@ getxcart3     -2
 #%%   3*24   13.7   cm-1
 #%%   Many other tests have been set up. In particular,
 #%%   it was observed that the frequency of the oscillatory
-#%%   behaviour changes with the ecut, and also that 
+#%%   behaviour changes with the ecut, and also that
 #%%   using the Gamma point, instead of the 1/4 1/4 1/4 k point
 #%%   (used in this test) degrades the convergence.
 #%%   The overall picture is as follows.
@@ -108,7 +108,7 @@ getxcart3     -2
 #%%   - alignement of dipole or quadrupoles
 #%%   - interaction between tails of wavefunctions, accross cells
 #%%   Since the convergence in supercell size is oscillatory, we infer
-#%%   that the breaking of the rotational invariance is mostly 
+#%%   that the breaking of the rotational invariance is mostly
 #%%   due to interaction between wavefunction tails.
 #%%   This will be checked by confining the system in a spherical
 #%%   well, in a forthcoming test.

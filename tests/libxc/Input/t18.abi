@@ -6,7 +6,7 @@ jdtset 1  2  3  4  5  6  7  8  9
    10 11 12 13 14 15 16    18
 
 # (S)LDAs X + different correlations
-ixc1  -1003
+#ixc1 -1003 ! Not portable from libxc v6 to v7 (LDA_C_RPA modified)
 ixc2  -1012
 ixc3  -1024
 
@@ -70,14 +70,14 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t18.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Isolated Bismuth atom
 #%%   Test functionals from libXC that were untested before ABINIT v6.12 (libxc 1.0.0.1 was used).
 #%%   Spin-polarized case.

@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2024 ABINIT Group (MG)
+ * Copyright (C) 2008-2025 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -131,8 +131,8 @@
  * and abipy can detect the problem.
  *
  *   ABI_MALLOC    --> Allocate memory for intrinsic datatypes (real, integer, complex).
- *   ABI_CALLOC     --> Clear alloc: same as ABI_MALLOC but initializes memory with zeros
- *   ABI_FREE --> Free memory allocated by ABI_MALLOC
+ *   ABI_CALLOC    --> Clear alloc: same as ABI_MALLOC but initializes memory with zeros
+ *   ABI_FREE      --> Free memory allocated by ABI_MALLOC
  *
  * To allocate scalars, use:
  *
@@ -192,9 +192,9 @@
 
 
 /* Allocate a polymophic scalar that is: allocate(datatype:: scalar) */
-#  define ABI_MALLOC_TYPE_SCALAR(type, scalar)                    \
-  allocate(type::scalar) NEWLINE                                        \
-    call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
+#  define ABI_MALLOC_TYPE_SCALAR(type, scalar) \
+   allocate(type::scalar) NEWLINE \
+   call abimem_record(0, QUOTE(scalar), _LOC(scalar), "A", storage_size(scalar, kind=8),  __FILE__, __LINE__)
 
 #else
 /* macros used in production */
@@ -208,11 +208,11 @@
 #  define ABI_FREE_SCALAR(scalar) deallocate(scalar)
 #  define ABI_MOVE_ALLOC(from, to) call move_alloc(from, to)
 
-#  define ABI_MALLOC_TYPE_SCALAR(type,scalar)  allocate(type::scalar)
+#  define ABI_MALLOC_TYPE_SCALAR(type, scalar)  allocate(type::scalar)
 
 #endif
 
-#define ABI_MALLOC_CUDA(array,size) call alloc_on_gpu(array,size)
+#define ABI_MALLOC_CUDA(array, size) call alloc_on_gpu(array,size)
 #define ABI_FREE_CUDA(array) call dealloc_on_gpu(array)
 
 /* these routine should only be use when HAVE_YAKL is defined.
@@ -223,8 +223,8 @@
 /* gator_allocate can have 2 or 3 args, here is a trick to define a macro
  * that make sure gator_allocate have 2 or 3 arguments */
 
-#define ABI_MALLOC_MANAGED(array,size) call gator_allocate(array,size)
-#define ABI_MALLOC_MANAGED_BOUNDS(array,size,lbounds) call gator_allocate(array,size,lbounds)
+#define ABI_MALLOC_MANAGED(array, size) call gator_allocate(array, size)
+#define ABI_MALLOC_MANAGED_BOUNDS(array, size, lbounds) call gator_allocate(array, size, lbounds)
 
 #define ABI_FREE_MANAGED(array) call gator_deallocate(array)
 #define ABI_SFREE_MANAGED(array) if (associated(array)) then NEWLINE ABI_FREE_MANAGED(array) NEWLINE endif
@@ -265,8 +265,8 @@
 #  define ASSERT_IF(condition, expr) if (condition) call assert((expr), "Assertion failed" _FILE_LINE_ARGS_)
 
 #  define DBG_CHECK(expr,str) if (.not.expr) call assert((expr), str  _FILE_LINE_ARGS_)
-#  define DBG_ENTER(mode) call sentinel(1,mode _FILE_ABIFUNC_LINE_ARGS_)
-#  define DBG_EXIT(mode)  call sentinel(2,mode _FILE_ABIFUNC_LINE_ARGS_)
+#  define DBG_ENTER(mode) call sentinel(1, mode _FILE_ABIFUNC_LINE_ARGS_)
+#  define DBG_EXIT(mode)  call sentinel(2, mode _FILE_ABIFUNC_LINE_ARGS_)
 /* Stop if two arrays have different shape */
 #  define DBG_EQSHAPE(arr1, arr2) if (any(shape(arr1)/=shape(arr2))) ABI_ERROR("Different shape")
 
@@ -322,7 +322,7 @@
  * Does not work for character(*) with gfortran <=5.x (>7.x is fine. No 6.x data)
  * character with fixed length is fine.
  * */
-#define ABI_UNUSED_A(var) associate( var => var ) NEWLINE end associate
+#define ABI_UNUSED_A(var) associate(var => var) NEWLINE end associate
 
 /* Macro to set the default the value of a local variable when optional arguments are used.
 Use if statement instead of Fortran merge. See https://software.intel.com/en-us/forums/intel-fortran-compiler/topic/640598
@@ -345,7 +345,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 
 
 /* F2003 support  */
-#define ABI_CHECK_CNULL(cptr,msg) if (.not.C_ASSOCIATED(cptr)) ABI_ERROR(msg)
+#define ABI_CHECK_CNULL(cptr, msg) if (.not. C_ASSOCIATED(cptr)) ABI_ERROR(msg)
 
 #ifdef HAVE_FC_ASYNC
 #define ABI_ASYNC ,asynchronous
@@ -385,11 +385,23 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define COLLAPSE(x)
 #endif
 
+/* Legacy OpenMP 4.5 compliance from NVHPC
+ * Before 25.1, USE_DEVICE_PTR was the sole clause supported for
+ * hinting GPU addresses in OMP TARGET DATA directives, complying with OpenMP 4.5.
+ * Starting from NVHPC 25.1, the compiler :
+ *   - honors USE_DEVICE_ADDR following OpenMP 5 norm
+ *   - emit deprecation warnings at USE_DEVICE_PTR, while still supporting it
+ * This macro exists to keep support for older NVHPC versions.
+ */
+#if __NVCOMPILER_MAJOR__ < 25
+#define USE_DEVICE_ADDR USE_DEVICE_PTR
+#endif
+
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */
 #define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
 
-/* Macros used in the GW/GWR code */
+/* Macros used in the GW/GWR code to support single/double precision */
 #ifdef HAVE_GW_DPC
 #  define GWPC_CONJG(cvar)  DCONJG(cvar)
 #  define GWPC_CMPLX(re,im) DCMPLX(re,im)

@@ -15,7 +15,7 @@ nbdbuf 6
 tolvrs 2.15e-8
 #tolwfr  1.e-12
 
-ecut 12.0  
+ecut 12.0
 pawecutdg 24.00
 diemac 10.0
 
@@ -33,7 +33,7 @@ typat  1 2
 znucl  31 33
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_paw_pbe_standard/Ga.xml, Pseudodojo_paw_pbe_standard/As.xml"
+pseudos "Psdj_paw_pbe_std/Ga.xml, Psdj_paw_pbe_std/As.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

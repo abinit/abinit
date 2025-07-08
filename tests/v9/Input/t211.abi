@@ -1,0 +1,38 @@
+##############################################################################
+#Test for multibinit. Spatially modulated electric field
+##############################################################################
+
+ngqpt = 8 8 8
+dipdip = 1
+dynamics = 13
+optcell = 0
+ncell = 4 4 1
+ntime = 10
+dtion = 40
+temperature= 1
+restartxf = -3
+strprecon = 0.1
+efield_type 2
+efield 1.0 1.0 1.0
+efield_background 0.0 0.0 -0.5
+efield_period 5000
+efield_phase 3.14159
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% input_ddb = ddbSTO.DDB
+#%% coeff_xml = modelSTO.xml
+#%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
+#%% [files]
+#%% files_to_test = 
+#%%   t211.abo
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = F. Gomez-Ortiz
+#%% keywords =  multibinit
+#%% description = 
+#%%        New implementation of electric fields in Multibinit
+#%%<END TEST_INFO>
+

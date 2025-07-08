@@ -316,7 +316,7 @@ foreach(_libtype "ST" "DYN")
                     set_target_properties(${_mkl_tgt} PROPERTIES
                       INTERFACE_INCLUDE_DIRECTORIES "${MKL_INCLUDE_DIR}"
                       INTERFACE_LINK_LIBRARIES "${_mkl_libs}")
-                    message("Create target for ${_mkl_tgt}")
+                    message(STATUS "Create target for ${_mkl_tgt}")
                 endif()
 
                 foreach(_mpi_impl "MPICH" "OMPI")
@@ -343,7 +343,7 @@ foreach(_libtype "ST" "DYN")
                        set_target_properties(${_blacs_tgt} PROPERTIES
                          INTERFACE_INCLUDE_DIRECTORIES "${MKL_INCLUDE_DIR}"
                          INTERFACE_LINK_LIBRARIES "${_blacs_libs}")
-                       message("Create target for ${_blacs_tgt}")
+                       message(STATUS "Create target for ${_blacs_tgt}")
                     endif()
 
                     if(_mkl_scalapack_lib
@@ -354,7 +354,7 @@ foreach(_libtype "ST" "DYN")
                       add_library(${_scalapack_tgt} INTERFACE IMPORTED)
                       set_target_properties(${_scalapack_tgt} PROPERTIES
                         INTERFACE_LINK_LIBRARIES "${_scalapack_libs}")
-                      message("Create target for ${_scalapack_tgt}")
+                      message(STATUS "Create target for ${_scalapack_tgt}")
                     endif()
                 endforeach()
             endforeach()
@@ -367,9 +367,9 @@ endforeach()
 #
 if (NOT DEFINED MKL_SCALAPACK_FLAVOR)
   set(MKL_SCALAPACK_FLAVOR "${MKL_SCALAPACK_FLAVOR_DEFAULT}" CACHE STRING "MKL_SCALAPACK_FLAVOR, default : ${MKL_SCALAPACK_FLAVOR_DEFAULT}")
-  message("[mkl_setup] setting MKL_SCALAPACK_FLAVOR to default value : ${MKL_SCALAPACK_FLAVOR_DEFAULT}")
+  message(STATUS "[mkl_setup] setting MKL_SCALAPACK_FLAVOR to default value : ${MKL_SCALAPACK_FLAVOR_DEFAULT}")
 else()
-  message("[mkl_setup] MKL_SCALAPACK_FLAVOR already defined, value is ${MKL_SCALAPACK_FLAVOR}")
+  message(STATUS "[mkl_setup] MKL_SCALAPACK_FLAVOR already defined, value is ${MKL_SCALAPACK_FLAVOR}")
 endif()
 
 # list of valid value for MKL_SCALAPACK_FLAVOR
@@ -447,7 +447,7 @@ if(TARGET mkl::${MKL_BLAS_FLAVOR})
   set(MKL_BLAS_FLAVOR_FOUND TRUE)
 else()
   set(MKL_BLAS_FLAVOR_FOUND FALSE)
-  message("Warning: MKL_BLAS_FLAVOR = ${MKL_BLAS_FLAVOR} not found")
+  message(STATUS "Warning: MKL_BLAS_FLAVOR = ${MKL_BLAS_FLAVOR} not found")
 endif()
 
 

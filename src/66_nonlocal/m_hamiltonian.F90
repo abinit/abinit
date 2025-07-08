@@ -9,12 +9,12 @@
 !!  Methods to initialize or destroy the objects are defined here.
 !!
 !! TODO
-!!  All array pointers in H datatypes should be declared as contiguous for efficient reasons
+!!  All array pointers in H datatypes should be declared as contiguous for efficiency reasons
 !!  (well, here performance is critical)
 !!  Client code should make sure they always point contiguous targets.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG, MT)
+!! Copyright (C) 2009-2025 ABINIT group (MG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,9 +36,12 @@ module m_hamiltonian
  use m_errors
  use m_xmpi
 
+ use m_fstrings,          only : sjoin
  use defs_datatypes,      only : pseudopotential_type
  use defs_abitypes,       only : MPI_type
+ use m_dtset,             only : dataset_type
  use m_copy,              only : addr_copy
+ use m_crystal,           only : crystal_t
  use m_geometry,          only : metric
  use m_pawtab,            only : pawtab_type
  use m_pawfgr,            only : pawfgr_type
@@ -49,8 +52,10 @@ module m_hamiltonian
  use m_paw_ij,            only : paw_ij_type
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype
- use m_kg,                only : ph1d3d, getph
+ use m_kg,                only : ph1d3d, getph, mkkin, mkkpg
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
+ use m_mkffnl,            only : mkffnl_objs
+ use m_initylmg,          only : initylmg_k
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -84,7 +89,7 @@ module m_hamiltonian
 !!
 !! FUNCTION
 !! This datastructure contains the information about one Hamiltonian,
-!! needed in the "getghc" routine, that apply the Hamiltonian on a wavefunction.
+!! needed in the "getghc" routine, that applies the Hamiltonian on a wavefunction.
 !! The Hamiltonian is expressed in reciprocal space:
 !!
 !!       H_k^prime,k = exp(-i.k^prime.r^prime) H exp(i.k.r)
@@ -427,24 +432,29 @@ module m_hamiltonian
    ! ACE quantities needed to calculate Fock exact exchange in the ACE context
 
  contains
-   procedure :: free => destroy_hamiltonian
+
+   procedure :: init => gsham_init
+    ! Initialize the GS Hamiltonian
+
+   procedure :: free => gsham_free
     ! Free the memory in the GS Hamiltonian
 
-   procedure :: load_spin => load_spin_hamiltonian
+   procedure :: load_spin => gsham_load_spin
     ! Setup of the spin-dependent part of the GS Hamiltonian
 
-   procedure :: load_k => load_k_hamiltonian
+   procedure :: load_k => gsham_load_k
     ! Setup of the k-dependent part of the GS Hamiltonian
 
-   procedure :: load_kprime => load_kprime_hamiltonian
+   procedure :: load_kprime => gsham_load_kprime
     ! Setup of the k^prime-dependent part of the GS Hamiltonian
 
-   !procedure :: copy => copy_hamiltonian
+   procedure :: eph_setup_k => gsham_eph_setup_k
+    ! Simplified interface to load either k or kprime in the case of e-ph calculations.
+
+   procedure :: copy => gsham_copy
+    ! Copy the object
 
  end type gs_hamiltonian_type
-
- public :: init_hamiltonian         ! Initialize the GS Hamiltonian
- public :: copy_hamiltonian         ! Copy the object
 !!***
 
 !----------------------------------------------------------------------
@@ -551,27 +561,27 @@ module m_hamiltonian
    ! in real space, on the augmented fft grid
 
  contains
-   procedure :: free => destroy_rf_hamiltonian
+   procedure :: init => rfham_init      ! Initialize the RF Hamiltonian
+
+   procedure :: free => rfham_free
     ! Free the memory in the RF Hamiltonian
 
-   procedure :: load_spin => load_spin_rf_hamiltonian
+   procedure :: load_spin => rfham_load_spin
     ! Setup of the spin-dependent part of the RF Hamiltonian.
 
-   procedure :: load_k => load_k_rf_hamiltonian
+   procedure :: load_k => rfham_load_k
     ! Setup of the k-dependent part of the RF Hamiltonian
 
  end type rf_hamiltonian_type
-
- public :: init_rf_hamiltonian      ! Initialize the RF Hamiltonian
 !!***
 
 CONTAINS  !===========================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/destroy_hamiltonian
+!!****f* m_hamiltonian/gsham_free
 !! NAME
-!!  destroy_hamiltonian
+!!  gsham_free
 !!
 !! FUNCTION
 !!  Clean and destroy gs_hamiltonian_type datastructure
@@ -581,12 +591,10 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine destroy_hamiltonian(Ham)
+subroutine gsham_free(Ham)
 
 !Arguments ------------------------------------
-!scalars
  class(gs_hamiltonian_type),intent(inout),target :: Ham
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -668,14 +676,14 @@ subroutine destroy_hamiltonian(Ham)
 
  DBG_EXIT("COLL")
 
-end subroutine destroy_hamiltonian
+end subroutine gsham_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/init_hamiltonian
+!!****f* m_hamiltonian/gsham_init
 !! NAME
-!!  init_hamiltonian
+!!  gsham_init
 !!
 !! FUNCTION
 !!  Creation method for the gs_hamiltonian_type structure.
@@ -718,16 +726,16 @@ end subroutine destroy_hamiltonian
 !!
 !! SOURCE
 
-subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
-&                           xred,nfft,mgfft,ngfft,rprimd,nloalg,&
-&                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                           electronpositron,fock,nucdipmom,gpu_option)         ! optional
+subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
+&                     xred,nfft,mgfft,ngfft,rprimd,nloalg,&
+&                     ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
+&                     electronpositron,fock,nucdipmom,gpu_option)         ! optional
 
 !Arguments ------------------------------------
 !scalars
+ class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
  integer,optional,intent(in) :: comm_atom,usecprj,gpu_option
- class(gs_hamiltonian_type),intent(inout),target :: ham
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -951,14 +959,12 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
  DBG_EXIT("COLL")
 
-end subroutine init_hamiltonian
+end subroutine gsham_init
 !!***
 
-!----------------------------------------------------------------------
-
-!!****f* m_hamiltonian/load_k_hamiltonian
+!!****f* m_hamiltonian/gsham_load_k
 !! NAME
-!!  load_k_hamiltonian
+!!  gsham_load_k
 !!
 !! FUNCTION
 !!  Setup of the k-dependent part of the Hamiltonian H_k_k^prime
@@ -987,7 +993,7 @@ end subroutine init_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
+subroutine gsham_load_k(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
                               kg_k,kpg_k,kpt_k,npw_k,npw_fft_k,ph3d_k,&
                               compute_gbound,compute_ph3d)
 
@@ -1076,7 +1082,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%phkpxred => ham%phkxred
  end if
 
-!Compute or copy G sphere boundary at k+g
+ ! Compute or copy G sphere boundary at k+g
  compute_gbound_=.false.;if (present(compute_gbound)) compute_gbound_=compute_gbound
  if (present(gbound_k)) compute_gbound_=.true.
  if (compute_gbound_) then
@@ -1106,7 +1112,7 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
    ham%gbound_kp => ham%gbound_k
  end if
 
-!Compute 3D structure factors for each atom at k+g
+ ! Compute 3D structure factors for each atom at k+g
  if (present(compute_ph3d).and.present(ph3d_k)) then
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.allocated(ham%phkxred)).or.(.not.associated(ham%kg_k)).or.&
@@ -1120,14 +1126,14 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 
  DBG_EXIT("COLL")
 
-end subroutine load_k_hamiltonian
+end subroutine gsham_load_k
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/load_kprime_hamiltonian
+!!****f* m_hamiltonian/gsham_load_kprime
 !! NAME
-!!  load_kprime_hamiltonian
+!!  gsham_load_kprime
 !!
 !! FUNCTION
 !!  Setup of the k^prime-dependent part of the Hamiltonian H_k_k^prime
@@ -1155,7 +1161,7 @@ end subroutine load_k_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
+subroutine gsham_load_kprime(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
                                    kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
                                    ph3d_kp,compute_gbound,compute_ph3d)
 
@@ -1250,18 +1256,92 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
 
  DBG_EXIT("COLL")
 
-end subroutine load_kprime_hamiltonian
+end subroutine gsham_load_kprime
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/copy_hamiltonian
+!!****f* m_hamiltonian/gsham_eph_setup_k
 !! NAME
-!!  copy_hamiltonian
+!!  gsham_eph_setup_k
+!!
+!! FUNCTION
+!!  Simplified interface to load either k or kprime in the case of e-ph calculations.
 !!
 !! INPUTS
-!!  gs_hamk_in<gs_hamiltonian_type>=Structured datatype completely initialized,
-!!                                  to be copied.
+!!  which_k= "k" to load k, "kq" to load kprime
+!!  See load_k or load_kprime for the meaning of arguments.
+!!
+!! SOURCE
+
+subroutine gsham_eph_setup_k(ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
+                            nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                   ! out
+
+!Arguments ------------------------------------
+!scalars
+ class(gs_hamiltonian_type),intent(inout) :: ham
+ character(len=*),intent(in) :: which_k
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: istwf_k, npw_k, comm
+ integer,intent(out) :: nkpg_k
+!arrays
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: kg_k(3,npw_k)
+ real(dp),allocatable,intent(out) :: kpg_k(:,:), ffnl_k(:,:,:,:), kinpw_k(:), ph3d_k(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: ider0 = 0, idir0 = 0, optder0 = 0
+!arrays
+ real(dp) :: ylmgr_k_dum(1,1,1)
+ real(dp),allocatable :: ylm_k(:,:)
+! *************************************************************************
+
+ ! Compute k+G vectors
+ nkpg_k = 3 * dtset%nloalg(3)
+ ABI_MALLOC(kpg_k, (npw_k, nkpg_k))
+ if (nkpg_k > 0) call mkkpg(kg_k, kpg_k, kk, nkpg_k, npw_k)
+
+ ! Spherical Harmonics at k for useylm == 1.
+ ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
+ if (psps%useylm == 1) call initylmg_k(npw_k, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kk, kg_k, ylm_k, ylmgr_k_dum)
+
+ ! Compute nonlocal form factors ffnl_k at (k+G)
+ ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
+ call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg_k, npw_k, ylm_k, ylmgr_k_dum, comm=comm)
+ ABI_FREE(ylm_k)
+
+ ! Compute (1/2) (2 Pi)**2 (kG)**2:
+ ABI_CALLOC(kinpw_k, (npw_k))
+ call mkkin(dtset%ecut, dtset%ecutsm, dtset%effmass_free, cryst%gmet, kg_k, kinpw_k, kk, npw_k, 0, 0)
+
+ ABI_MALLOC(ph3d_k, (2, npw_k, ham%matblk))
+
+ ! Load the k dependent parts of the Hamiltonian
+ select case (which_k)
+ case ("k")
+   call ham%load_k(kpt_k=kk, npw_k=npw_k, istwf_k=istwf_k, kg_k=kg_k, kpg_k=kpg_k, kinpw_k=kinpw_k, &
+                   ph3d_k=ph3d_k, ffnl_k=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+ case ("kq")
+   call ham%load_kprime(kpt_kp=kk, npw_kp=npw_k, istwf_kp=istwf_k, kg_kp=kg_k, kpg_kp=kpg_k, kinpw_kp=kinpw_k, &
+                        ph3d_kp=ph3d_k, ffnl_kp=ffnl_k, compute_ph3d=.true., compute_gbound=.true.)
+ case default
+   ABI_ERROR(sjoin("Invalid value for which_k:", which_k))
+ end select
+
+end subroutine gsham_eph_setup_k
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_hamiltonian/gsham_copy
+!! NAME
+!!  gsham_copy
+!!
+!! INPUTS
+!!  gs_hamk_in<gs_hamiltonian_type>=Structured datatype completely initialized, to be copied.
 !!
 !! FUNCTION
 !!  Copy a gs_hamiltonian_type variable (gs_hamk_in) in another (gs_hamk_out).
@@ -1281,11 +1361,11 @@ end subroutine load_kprime_hamiltonian
 !!
 !! SOURCE
 
-subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
+subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
 
 !Arguments ------------------------------------
- type(gs_hamiltonian_type),intent(in),target :: gs_hamk_in
- type(gs_hamiltonian_type),intent(out),target :: gs_hamk_out
+ class(gs_hamiltonian_type),intent(in),target :: gs_hamk_in
+ class(gs_hamiltonian_type),intent(out),target :: gs_hamk_out
 
 !Local variables-------------------------------
  integer :: tmp2i(5)
@@ -1427,14 +1507,14 @@ subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
 
  DBG_EXIT("COLL")
 
-end subroutine copy_hamiltonian
+end subroutine gsham_copy
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/load_spin_hamiltonian
+!!****f* m_hamiltonian/gsham_load_spin
 !! NAME
-!!  load_spin_hamiltonian
+!!  gsham_load_spin
 !!
 !! INPUTS
 !!  isppol=index of current spin
@@ -1453,7 +1533,7 @@ end subroutine copy_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
+subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
@@ -1506,24 +1586,21 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
 
  DBG_EXIT("COLL")
 
-end subroutine load_spin_hamiltonian
+end subroutine gsham_load_spin
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/destroy_rf_hamiltonian
+!!****f* m_hamiltonian/rfham_free
 !! NAME
-!!  destroy_rf_hamiltonian
+!!  rfham_free
 !!
 !! FUNCTION
 !!  Clean and destroy rf_hamiltonian_type datastructure
 !!
-!! SIDE EFFECTS
-!!  rf_Ham<rf_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
-!!
 !! SOURCE
 
-subroutine destroy_rf_hamiltonian(rf_Ham)
+subroutine rfham_free(rf_Ham)
 
 !Arguments ------------------------------------
 !scalars
@@ -1552,14 +1629,14 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
 
  DBG_EXIT("COLL")
 
-end subroutine destroy_rf_hamiltonian
+end subroutine rfham_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/init_rf_hamiltonian
+!!****f* m_hamiltonian/rfham_init
 !! NAME
-!!  init_rf_hamiltonian
+!!  rfham_init
 !!
 !! FUNCTION
 !!  Creation method for the rf_hamiltonian_type structure.
@@ -1587,16 +1664,16 @@ end subroutine destroy_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
+subroutine rfham_init(rf_ham, cplex,gs_Ham,ipert,&
 &          comm_atom,mpi_atmtab,mpi_spintab,paw_ij1,has_e1kbsc) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
+ class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
  integer,intent(in) :: cplex,ipert
  integer,intent(in),optional :: comm_atom
  logical,intent(in),optional :: has_e1kbsc
  type(gs_hamiltonian_type),intent(in) :: gs_Ham
- type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  integer,optional,intent(in)  :: mpi_atmtab(:),mpi_spintab(2)
  type(paw_ij_type),optional,intent(in) :: paw_ij1(:)
@@ -1707,14 +1784,14 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 
  DBG_EXIT("COLL")
 
-end subroutine init_rf_hamiltonian
+end subroutine rfham_init
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/load_spin_rf_hamiltonian
+!!****f* m_hamiltonian/rfham_load_spin
 !! NAME
-!!  load_spin_rf_hamiltonian
+!!  rfham_load_spin
 !!
 !! FUNCTION
 !!  Setup of the spin-dependent part of the 1st- and 2nd- order Hamiltonian.
@@ -1733,7 +1810,7 @@ end subroutine init_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlocal)
+subroutine rfham_load_spin(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
@@ -1786,14 +1863,14 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,w
 
  DBG_EXIT("COLL")
 
-end subroutine load_spin_rf_hamiltonian
+end subroutine rfham_load_spin
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_hamiltonian/load_k_rf_hamiltonian
+!!****f* m_hamiltonian/rfham_load_k
 !! NAME
-!!  load_k_rf_hamiltonian
+!!  rfham_load_k
 !!
 !! FUNCTION
 !!  Setup of the k-dependent part of the 1st- and 2nd- order Hamiltonian
@@ -1809,7 +1886,7 @@ end subroutine load_spin_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
+subroutine rfham_load_k(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -1817,9 +1894,6 @@ subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
  class(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
  real(dp),intent(in),optional,target :: dkinpw_k(:),ddkinpw_k(:)
-
-!Local variables-------------------------------
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1844,7 +1918,7 @@ subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 
  DBG_EXIT("COLL")
 
-end subroutine load_k_rf_hamiltonian
+end subroutine rfham_load_k
 !!***
 
 !----------------------------------------------------------------------
@@ -2055,8 +2129,6 @@ end subroutine pawdij2e1kb
 !! OUTPUT
 !!  vlocal(n4,n5,n6,nvloc,ncomp): Potential on the coarse grid.
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nfftf, &
@@ -2096,10 +2168,8 @@ subroutine gspot_transgrid_and_pack(isppol, usepaw, paral_kgb,  nfft, ngfft, nff
      ! Transfer from fine mesh to coarse and then pack data
      ABI_MALLOC(cgrvtrial,(nfft,nspden))
      do ic=1,ncomp
-       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,&
-                      rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
-       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,&
-                   cgrvtrial,vlocal(:,:,:,:,ic),2)
+       call transgrid(1,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr, rhodum,rhodum,cgrvtrial,vtrial(:,:,ic))
+       call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft, cgrvtrial,vlocal(:,:,:,:,ic),2)
      end do
      ABI_FREE(cgrvtrial)
    end if

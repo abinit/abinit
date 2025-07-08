@@ -31,7 +31,6 @@ xred 3*0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp
 #%% [files]
 #%% files_to_test = 
 #%%   t34.abo, tolnlines = 38, tolabs = 1.1e-2, tolrel = 8.0e-6, fld_options = -medium

@@ -1,0 +1,51 @@
+# Test finite-temperature exchange-correlation functionals
+# on the hydrogen atom: PAW case
+# jdtset1: corrKSDT TLDA functional
+# jdtset2: KDT16 TGGA functional
+# Refs of these functionals: [[cite:Karasiev2014]] and [[cite:Karasiev2018]]
+ndtset 2
+ixc1 51
+ixc2 60
+
+nband 30
+dipdip 0
+occopt 3
+tsmear 1e5 K
+
+acell 3*3.000
+rprim  1.0 0.0 0.0
+       0.0 1.0 0.0
+       0.0 0.0 1.0
+ntypat 1
+znucl 1
+natom 1
+typat 1
+xred 0.0  0.0  0.0
+
+ecut 10.0
+pawecutdg 10.0
+chksymbreak 0
+ngkpt 2 2 2
+nstep 20
+toldfe 1.0d-10
+tolsym 1.0d-8
+
+# Pseudopotential file
+pp_dirpath = "$ABI_PSPDIR"
+pseudos = "H.LDA-PW-paw.abinit"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t23.abo, tolnlines = 55, tolabs = 1.0E-5, tolrel = 1.0E-2;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = A. Blanchet
+#%% keywords = finite, temperature, exchange, correlation, functional, ftxc, plasma, WDM
+#%% description =
+#%%   Test finite-temperature exchange-correlation functionals (corrKSDT and KDT16)
+#%%   and calculation of entropy and internal energy, on the hydrogen atom: PAW case
+#%%<END TEST_INFO>

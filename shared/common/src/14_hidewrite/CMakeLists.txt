@@ -12,19 +12,31 @@ generate_build_info()
 # "COMPILE_FLAGS"
 configure_file(m_optim_dumper.F90.cmake.in m_optim_dumper.F90 @ONLY)
 
+#
+# CPP opts dumper
+#
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+message(STATUS "Generating CPP option dumper")
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/config/scripts/make-cppopts-dumper
+  COMMAND mv ${CMAKE_SOURCE_DIR}/shared/common/src/14_hidewrite/m_cppopts_dumper.F90 ${CMAKE_CURRENT_BINARY_DIR}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 add_library(14_hidewrite STATIC
   m_abicore.F90
-  m_cppopts_dumper.F90
   m_fstrings.F90
   m_io_tools.F90
   m_specialmsg.F90
   # generated sources
+  ${CMAKE_CURRENT_BINARY_DIR}/m_cppopts_dumper.F90
   ${CMAKE_CURRENT_BINARY_DIR}/m_build_info.F90
-  ${CMAKE_CURRENT_BINARY_DIR}/m_optim_dumper.F90)
+  ${CMAKE_CURRENT_BINARY_DIR}/m_optim_dumper.F90
+)
 
 set_target_properties(14_hidewrite
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(14_hidewrite
   PRIVATE
@@ -34,7 +46,7 @@ target_include_directories(14_hidewrite
 
 target_include_directories(14_hidewrite
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules>
   $<INSTALL_INTERFACE:include/libpaw>
   )
 
@@ -47,6 +59,7 @@ target_link_libraries(14_hidewrite
   abinit::10_defs
   abinit::11_memory_mpi
   abinit::12_hide_mpi
-  MPI::MPI_Fortran)
+  MPI::MPI_Fortran
+)
 
 add_library(abinit::14_hidewrite ALIAS 14_hidewrite)

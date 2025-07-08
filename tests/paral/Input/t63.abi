@@ -1,4 +1,4 @@
-# Crystalline alpha-quartz. 
+# Crystalline alpha-quartz.
 # Ground state with LOBPCG + RMM-DIIS eigensolver and paral_kgb parallelism with 4 MPI procs
 ndtset 2
 
@@ -13,7 +13,7 @@ rmm_diis1  1
 npband1 4 bandpp1 8 npfft1 1
 tolvrs1    1.0d-6
 
-# Dataset 1: band + FFT parallelism. 
+# Dataset 1: band + FFT parallelism.
 # Read previous WFK, decrease tolvrs and reconverge with RMM-DIIS only.
 rmm_diis2 -3
 npband2 2 bandpp2 16 npfft2 2
@@ -26,8 +26,8 @@ getwfk2 -1
 
 #################### COMMON PART #########################
 nband      32   # nelect: 48. Include more bands to make RMM-DIIS more stable.
-nbdbuf     8    # Because RMM-DIIS performs less iterations 
-                # for empty states --> residuals won't decrease that much and we want 
+nbdbuf     8    # Because RMM-DIIS performs less iterations
+                # for empty states --> residuals won't decrease that much and we want
                 # to avoid oscillations in the reference file.
 
 diemac       4.0
@@ -67,7 +67,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/O.psp8"
+pseudos "Psdj_nc_sr_04_pw_std_psp8/Si.psp8, Psdj_nc_sr_04_pw_std_psp8/O.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -81,6 +81,6 @@ pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8, Pseudodojo_nc_sr_04_pw_st
 #%% authors = M. Giantomassi
 #%% keywords = NC, RMM-DIIS
 #%% description =
-#%%   Crystalline alpha-quartz. 
+#%%   Crystalline alpha-quartz.
 #%%   Ground state with LOBPCG + RMM-DIIS eigensolver and paral_kgb parallelism with 4 MPI procs.
 #%%<END TEST_INFO>

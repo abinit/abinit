@@ -5,7 +5,7 @@
 prt_model = 0
 
 dynamics = 101  # Velocity Verlet NVE
-ncell = 6 6 6 
+ncell = 6 6 6
 temperature = 50
 ntime = 1000
 nctime = 10
@@ -16,18 +16,18 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = .*_nag_7.[01]_.*
+#%% exclude_builders = alps_nag_7.2_serial
 #%% latt_pot = t83.nc
 #%% exec_args = --F03
 #%% [files]
-#%% files_to_test = 
-#%%   t85.abo, tolnlines = 0, tolabs = 0.2, tolrel = 0.05, fld_options = -medium;
+#%% files_to_test =
+#%%   t85.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = X. He 
+#%% authors = X. He
 #%% keywords = Effective potential, multibinit, lattpot
-#%% description = 
+#%% description =
 #%%   Read netcdf and run lattice dynamics using Velocity Verlet NVE (dynamics=101)
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.

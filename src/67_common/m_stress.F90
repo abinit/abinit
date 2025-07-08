@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FJ, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,6 +18,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_stress
 
@@ -44,6 +47,10 @@ module m_stress
  use m_atm2fft,          only : atm2fft
  use m_mklocl,           only : mklocl_recipspace
  use m_mkcore,           only : mkcore, mkcore_alt
+
+#if defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -87,6 +94,8 @@ contains
 !!                       gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2)
 !!  ixc = choice of exchange-correlation functional
 !!  kinstr(6)=kinetic energy part of stress tensor
+!!  mggastr(6)=meta-GGA part of stress tensor (hartree/bohr^3)
+!!             Only non-local contribution from Div(V_tau.Grad(Psi))
 !!  mgfft=maximum size of 1D FFTs
 !!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimensioned number of q grid points for local psp spline
@@ -116,13 +125,14 @@ contains
 !!  usefock=1 if fock operator is used; 0 otherwise.
 !!  usekden=1 is kinetic energy density has to be taken into account, 0 otherwise
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  usevxctau=1 if if XC functional depends on kinetic energy density
 !!  vdw_tol= Van der Waals tolerance
 !!  vdw_tol_3bt= Van der Waals tolerance on the 3-body term (only effective
 !!               vdw_xc=6)
 !!  vdw_xc= Van der Waals correction flag
 !!  vlspl(mqgrid,2,ntypat)=local psp spline
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree) in real space
-!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!  vxctau(nfft,nspden,4*usevxctau)=(only for meta-GGA) derivative of XC energy density
 !!                                wrt kinetic energy density (depsxcdtau)
 !!  vxc_hf(nfft,nspden)=exchange-correlation potential (hartree) in real space for Hartree-Fock corrections
 !!  xccc1d(n1xccc*(1-usepaw),6,ntypat)=1D core charge function and five derivatives,
@@ -166,17 +176,17 @@ contains
 !! SOURCE
 
  subroutine stress(atindx1,berryopt,dtefield,eei,efield,ehart,eii,fock,gsqcut,extfpmd,&
-&                  ixc,kinstr,mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
+&                  ixc,kinstr,mggastr,mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strscondft,strsxc,symrec,&
-&                  typat,usefock,usekden,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
+&                  typat,usefock,usekden,usepaw,usevxctau,vdw_tol,vdw_tol_3bt,vdw_xc,&
 &                  vlspl,vxc,vxctau,vxc_hf,xccc1d,xccc3d,xcctau3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ixc,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
- integer,intent(in) :: nsym,ntypat,prtvol,usefock,usekden,usepaw,vdw_xc
+ integer,intent(in) :: nsym,ntypat,prtvol,usefock,usekden,usepaw,usevxctau,vdw_xc
  real(dp),intent(in) :: eei,ehart,eii,gsqcut,vdw_tol,vdw_tol_3bt,qvpotzero
  type(efield_type),intent(in) :: dtefield
  type(extfpmd_type),pointer,intent(inout) :: extfpmd
@@ -187,10 +197,10 @@ contains
 !arrays
  integer,intent(in) :: atindx1(natom),nattyp(ntypat),ngfft(18),symrec(3,3,nsym)
  integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: efield(3),kinstr(6),nlstr(6)
+ real(dp),intent(in) :: efield(3),kinstr(6),mggastr(6),nlstr(6)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
  real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),strscondft(6),strsxc(6)
- real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden),vxctau(nfft,nspden,4*usekden)
+ real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden),vxctau(nfft,nspden,4*usevxctau)
  real(dp),allocatable,intent(in) :: vxc_hf(:,:)
  real(dp),intent(in) :: xccc1d(n1xccc*(1-usepaw),6,ntypat),xcccrc(ntypat)
  real(dp),intent(in) :: xred(3,natom),zion(ntypat),znucl(ntypat)
@@ -222,6 +232,7 @@ contains
 ! *************************************************************************
 
  call timab(37,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_STRESS)
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -281,7 +292,7 @@ contains
    end if
    if (n3xccc==0.and.coredens_method==1) corstr=zero
    ABI_FREE(vxctotg)
-   if (usekden==1.and.coretau_method==1..and.n3xccc>0) then
+   if (usekden==1.and.usevxctau==1.and.coretau_method==1..and.n3xccc>0) then
 !    Compute contribution to stresses from pseudo kinetic energy core density
      optv=0;optn=1;optn2=4
      ABI_MALLOC(v_dum,(nfft))
@@ -342,12 +353,11 @@ contains
 &         ucvol,vxc,xcccrc,xccc1d,xccc3d,xred,pawrad,pawtab,usepaw)
        end if
      end if
-     if (usekden==1.and.coretau_method==2) then
+     if (usekden==1.and.usevxctau==1.and.coretau_method==2) then
        call mkcore_alt(atindx1,taustr,dyfr_dum,gr_dum,icoulomb,mpi_enreg,natom,nfft,&
 &       nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
 &       ucvol,vxctau(:,:,1),xcccrc,xccc1d,xcctau3d,xred,pawrad,pawtab,usepaw,&
 &       usekden=.true.)
-
      end if
      ABI_FREE(dyfr_dum)
      ABI_FREE(gr_dum)
@@ -526,7 +536,7 @@ contains
 !=======================================================================
 !In cartesian coordinates (symmetric storage)
 
- strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strscondft(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
+ strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strscondft(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)+mggastr(:)
 
  if (usefock==1 .and. associated(fock)) then
    if (fock%fock_common%optstr) then
@@ -615,6 +625,16 @@ contains
 &     ' of kinetic stress is',kinstr(mu)
      call wrtout(std_out,message,'COLL')
    end do
+   if (usekden>0) then
+     write(message, '(a)' ) ' '
+     call wrtout(std_out,message,'COLL')
+     do mu=1,6
+       write(message, '(a,i5,a,1p,e22.12)' )&
+&       ' stress: component',mu,&
+&       ' of metaGGA stress is',mggastr(mu)
+       call wrtout(std_out,message,'COLL')
+     end do
+   end if
    write(message, '(a)' ) ' '
    call wrtout(std_out,message,'COLL')
    do mu=1,6
@@ -714,6 +734,7 @@ contains
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
+ ABI_NVTX_END_RANGE()
  call timab(37,2,tsec)
 
 end subroutine stress

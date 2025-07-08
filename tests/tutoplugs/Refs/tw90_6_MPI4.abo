@@ -1,8 +1,8 @@
 
-.Version 9.7.5 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu11.2 computer) 
+.Version 9.7.5 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu11.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,18 +16,18 @@
 
 .Starting date : Mon  4 Jul 2022.
 - ( at 15h38 )
-  
+
 - input  file    -> /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/BUILDS/develop_pyinv2/tests/Test_suite/tutoplugs_tw90_6_MPI4/tw90_6.abi
 - output file    -> tw90_6_MPI4.abo
 - root for input  files -> tw90_6_MPI4i
 - root for output files -> tw90_6_MPI4o
 
-- inpspheads : Reading pseudopotential header in XML form from 
--   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/La.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Cu.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/La.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/Cu.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/O.xml
 
  DATASET    1 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
@@ -112,10 +112,10 @@ _ WF disk file :     96.830 Mbytes ; DEN or POT disk file :      1.203 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -1264,9 +1264,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.09757
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/La.xml
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/La.xml
-- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/La.xml
+- pspini: atom type   1  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/La.xml
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/La.xml
+- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/La.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  8 (lmn_size= 32), orbitals=   0   0   1   1   2   2   3   3
  Spheres core radius: rc_sph= 2.51647158
@@ -1284,9 +1284,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Cu.xml
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Cu.xml
-- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Cu.xml
+- pspini: atom type   2  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/Cu.xml
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/Cu.xml
+- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/Cu.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.02226371
@@ -1304,9 +1304,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -1927,8 +1927,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-  Calculation of overlap and call to wannier90 library 
-  to obtain maximally localized wannier functions 
+  Calculation of overlap and call to wannier90 library
+  to obtain maximally localized wannier functions
 
   - tw90_6_MPI4o_DS3_w90.win is a mandatory secondary input
   - tw90_6_MPI4o_DS3_w90.wout is the output for the library
@@ -1939,7 +1939,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-   mlwfovlp:  you should give k-point in the full brillouin zone 
+   mlwfovlp:  you should give k-point in the full brillouin zone
    with explicit k-points (or kptopt=3) and istwfk 1
 
    mlwfovlp :  mlwfovlp_setup done -
@@ -5447,7 +5447,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.38905500E+02  6.35460000E+01  1.59994000E+01
@@ -6616,7 +6616,7 @@ P           mkmem4         42
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -6628,12 +6628,12 @@ P           mkmem4         42
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -6651,7 +6651,7 @@ P           mkmem4         42
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

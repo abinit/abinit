@@ -18,7 +18,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,8 +37,8 @@ module m_supercell_maker
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_symtk,    only : matr3inv
-  use m_mathfuncs , only: mat33det, binsearch_left_integerlist, rotate_by_angle_around_axis
+  use m_mathfuncs,     only: binsearch_left_integerlist, rotate_by_angle_around_axis
+  use m_matrix,        only: matr3inv, mat33det
   use m_mpi_scheduler, only: init_mpi_info
   use m_supercell
   implicit none
@@ -240,7 +240,7 @@ contains
     do icell = 1, self%ncells
        do ipos=1 , npos
           counter=counter+1
-          scxcart(:, counter) = matmul(primcell, self%rvecs(:, icell)) + xcart(:,ipos)
+          scxcart(:, counter) = matmul(self%rvecs(:, icell), primcell) + xcart(:,ipos)
        end do
     end do
   end subroutine trans_xcart

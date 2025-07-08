@@ -10,10 +10,11 @@ module m_tdep_latt
  use defs_basis
  use m_abicore
  use m_errors
+ use m_xmpi
 
- use m_symtk,            only : matr3inv
+ use m_matrix,           only : matr3inv, mat33det
  use m_geometry,         only : metric
- use m_tdep_readwrite,   only : Input_type
+ use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
 
  implicit none
 
@@ -54,12 +55,13 @@ module m_tdep_latt
 
   public :: tdep_make_inbox
   public :: tdep_make_latt
+  public :: tdep_shift_xred
 
 contains
 
 !=====================================================================================================
 subroutine tdep_make_inbox(tab,natom,tol,&
-&                temp) !Optional
+&                          temp) !Optional
 
   implicit none
   integer :: natom,ii,jj,iatom
@@ -89,14 +91,17 @@ end subroutine tdep_make_inbox
 
   implicit none
 
-  integer :: brav,ii,jj,kk,INFO,line
-  integer, allocatable :: IPIV(:)
-  double precision :: acell_unitcell(3),multiplicity(3,3),multiplicitym1(3,3),temp2(3,3)
-  double precision :: rprimd(3,3),rprimdt(3,3),rprimd_md(3,3),rprim_tmp(3,3),rprimdm1(3,3)
-  double precision :: rprim(3,3),temp(3,3),rprimm1(3,3),rprimt(3,3),rprimdtm1(3,3)
+  integer :: brav,ii,jj,line
+  double precision :: acell_unitcell(3),multiplicity(3,3),multiplicitym1(3,3)
+  double precision :: rprimd(3,3),rprimdt(3,3),rprimd_md(3,3),rprimdm1(3,3)
+  double precision :: rprim(3,3),rprimm1(3,3),rprimt(3,3),rprimdtm1(3,3)
+  double precision :: rprimd_unitcell(3,3)
+  double precision :: rprimd_tmp(3,3), rprimdm1_tmp(3,3)
+  double precision :: RAmat(3,3),Amat2(3,3),Rmat(3,3)
+  double precision :: rotation(3,3), rotation_cart(3,3)
   double precision :: xi,hh
-  double precision, allocatable :: WORK(:)
-  type(Input_type) :: Invar
+  character(len=500) :: msg
+  type(Input_type),intent(inout) :: Invar
   type(Lattice_type),intent(out) :: Lattice
 
 ! For bravais(1):
@@ -122,35 +127,13 @@ end subroutine tdep_make_inbox
 ! Correspondency between brav and bravais: brav=1-S.C., 2-F.C., 3-B.C., 4-Hex.)
 
 ! Initialize some local variables
-  acell_unitcell(:)=zero; multiplicity(:,:)=zero; multiplicitym1(:,:)=zero; temp2(:,:)=zero
-  rprimd(:,:)=zero; rprimdm1(:,:)=zero; rprimdt(:,:)=zero; rprimd_md(:,:)=zero; rprim_tmp(:,:)=zero
-  rprim(:,:)=zero; temp(:,:)=zero; rprimm1(:,:)=zero; rprimt(:,:)=zero; rprimdtm1(:,:)=zero
+  acell_unitcell(:)=zero; multiplicity(:,:)=zero; multiplicitym1(:,:)=zero
+  rprimd(:,:)=zero; rprimdm1(:,:)=zero; rprimdt(:,:)=zero; rprimd_md(:,:)=zero
+  rprim(:,:)=zero; rprimm1(:,:)=zero; rprimt(:,:)=zero; rprimdtm1(:,:)=zero
+  rprimd_unitcell(:,:)=zero; RAmat(:,:)=zero; Amat2(:,:)=zero; Rmat(:,:)=zero
 
-! Echo some (re)computed quantities
-  write(Invar%stdout,*) ' '
-  write(Invar%stdout,*) '#############################################################################'
-  write(Invar%stdout,*) '########################## Computed quantities ##############################'
-  write(Invar%stdout,*) '#############################################################################'
 
-! Define inverse of the multiplicity tab
-  ABI_MALLOC(IPIV,(3)); IPIV(:)=0
-  ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
-  multiplicitym1(:,:)=Invar%multiplicity(:,:)
-  call DGETRF(3,3,multiplicitym1,3,IPIV,INFO)
-  call DGETRI(3,multiplicitym1,3,IPIV,WORK,3,INFO)
-  ABI_FREE(IPIV)
-  ABI_FREE(WORK)
-
-  do ii=1,3
-    do jj=1,3
-      do kk=1,3
-        temp(ii,jj)=temp(ii,jj)+multiplicitym1(ii,kk)*Invar%rprimd_md(kk,jj)
-      end do
-    end do
-!FB    write(Invar%stdout,'(a,x,3(f16.10,x))') 'temp=',(temp(ii,jj),jj=1,3)
-  end do
-
-!=============================================================================================
+! ---------------------------------------------------------------------------- !
 ! Here, rprim defines a Primitive Lattice and NOT a Conventional lattice
 ! The lattice parameters have to multiply rprim on:
 ! 0/ line or column         --> line 0
@@ -161,16 +144,12 @@ end subroutine tdep_make_inbox
 !                               Bct, Face-centered-Ortho, Body-centered-Ortho, C-centered-Ortho
 ! 3/ neither line or column --> line=3 (rprim has to be directly dimensioned in ABINIT) :
 !                               C-centered-Mono
-!=============================================================================================
+! ---------------------------------------------------------------------------- !
   line=0
 ! For monoclinic: bravais(1)=2
   if (Invar%bravais(1).eq.2.and.Invar%bravais(2).eq.0) then !monoclinic
     brav=1
     line=1
-!FB See the m_tdep_qpt.F90 routine for the other modifications
-!FB    rprim(1,1)= 1.0d0 ; rprim(1,2)= 0.0d0                             ; rprim(1,3)= 0.0d0
-!FB    rprim(2,1)= 0.0d0 ; rprim(2,2)= 1.0d0                             ; rprim(2,3)= 0.0d0
-!FB    rprim(3,1)= 0.0d0 ; rprim(3,2)= dcos(Invar%angle_alpha*pi/180.d0) ; rprim(3,3)= dsin(Invar%angle_alpha*pi/180.d0)
     rprim(1,1)= 1.0d0                             ; rprim(1,2)= 0.0d0 ; rprim(1,3)= 0.0d0
     rprim(2,1)= 0.0d0                             ; rprim(2,2)= 1.0d0 ; rprim(2,3)= 0.0d0
     rprim(3,1)= dcos(Invar%angle_alpha*pi/180.d0) ; rprim(3,2)= 0.0d0 ; rprim(3,3)= dsin(Invar%angle_alpha*pi/180.d0)
@@ -262,53 +241,100 @@ end subroutine tdep_make_inbox
   else
     ABI_ERROR('THIS BRAVAIS IS NOT DEFINED')
   end if
-! Compute gprim and (transpose of gprim) gprimt
-  call matr3inv(rprim,Lattice%gprimt)
-  do ii=1,3
-    do jj=1,3
-      Lattice%gprim(ii,jj)=Lattice%gprimt(jj,ii)
-    end do
-  end do
-! Define transpose and inverse of rprim
-  do ii=1,3
-    do jj=1,3
-      rprimt(ii,jj)=rprim(jj,ii)
-    end do
-  end do
-  ABI_MALLOC(IPIV,(3)); IPIV(:)=0
-  ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
-  rprimm1(:,:)=rprim(:,:)
-  call DGETRF(3,3,rprimm1,3,IPIV,INFO)
-  call DGETRI(3,rprimm1,3,IPIV,WORK,3,INFO)
-  ABI_FREE(IPIV)
-  ABI_FREE(WORK)
 
-! Compute the acell_unitcell according to the definition of
-! the unitcell and multiplicity
+! ---------------------------------------------------------------------------- !
+
+! Define inverse of the multiplicity
+  multiplicity = Invar%multiplicity
+  call matr3inv(multiplicity,multiplicitym1)
+  multiplicitym1 = TRANSPOSE(multiplicitym1)
+
+! Compute gprim and (transpose of gprim) gprimt
+  call matr3inv(rprim, Lattice%gprimt)
+  Lattice%gprim = TRANSPOSE(Lattice%gprimt)
+
+! Define transpose and inverse of rprim
+  rprimt = TRANSPOSE(rprim)
+  call matr3inv(rprimt, rprimm1)
+
+! Compute acell_unitcell and a rotation matrix, given that
+! the supercell rprimd is related to the unitcell rprim according to
+!     rprimd  = R * A * multiplicity * rprim
+! where R is unitary and A is a diagonal matrix containing acell.
+  RAmat = MATMUL(MATMUL(Invar%rprimd_md, rprimm1), multiplicitym1)
+
+! This matrix should be diagonal
+  Amat2 = MATMUL(TRANSPOSE(RAmat), RAmat)
+  do ii=1,3
+    acell_unitcell(ii) = sqrt(Amat2(ii,ii))
+  end do
   do ii=1,3
     do jj=1,3
-      do kk=1,3
-        temp2(ii,jj)=temp2(ii,jj)+rprimm1(ii,kk)*temp(kk,jj)
+      Rmat(ii,jj) = RAmat(ii,jj) / acell_unitcell(jj)
+    end do
+  end do
+  rotation = TRANSPOSE(Rmat)
+
+! Compute rotation matrix in cartesian coordinates
+  call matr3inv(Invar%rprimd_md, rprimdm1_tmp)
+  rprimdm1_tmp = TRANSPOSE(rprimdm1_tmp)
+  rotation_cart = MATMUL(rotation, Invar%rprimd_md)
+  rotation_cart = MATMUL(rprimdm1_tmp, rotation_cart)
+  rotation_cart = TRANSPOSE(rotation_cart)
+  
+  ! Perform some checks
+  if ((mat33det(rotation) - 1) .gt. tol8) then
+     rprimd_tmp = MATMUL(multiplicitym1, Invar%rprimd_md) 
+     write(msg, '(6a,3(3f16.10,1x,a),2a,3(3f16.10,1x,a))')&
+      'The input primitive vectors cannot be aligned',ch10,&
+      'with the expected primitive vectors through rotation.',ch10,&
+      'Input unitcell primitive vectors:',ch10,&
+      (rprimd_tmp(1,jj),jj=1,3),ch10,&
+      (rprimd_tmp(2,jj),jj=1,3),ch10,&
+      (rprimd_tmp(3,jj),jj=1,3),ch10,&
+      'Expected primitive vectors:',ch10,&
+      (rprim(1,jj),jj=1,3),ch10,&
+      (rprim(2,jj),jj=1,3),ch10,&
+      (rprim(3,jj),jj=1,3),ch10
+    ABI_ERROR(msg)
+  end if
+
+! Apply rotation to rprim_md
+  Invar%rprimd_md = MATMUL(rotation, Invar%rprimd_md)
+
+! Apply rotation to fcart
+  do jj=1,Invar%my_nstep
+    do ii=1,Invar%natom
+      Invar%fcart(:,ii,jj) = MATMUL(rotation_cart, Invar%fcart(:,ii,jj))
+    end do
+  end do
+
+! ---------------------------------------------------------------------------- !
+
+! Recompute dimensioned primitive vectors
+  rprimd_md = MATMUL(multiplicity, rprim)
+  if (line==0.or.line==1) then
+    do ii=1,3
+      do jj=1,3
+        rprimd_md(ii,jj) = acell_unitcell(ii) * rprimd_md(ii,jj)
       end do
     end do
-    acell_unitcell(ii)=temp2(ii,ii)
-  end do
+  else if (line==2) then
+    do ii=1,3
+      do jj=1,3
+        rprimd_md(ii,jj) = acell_unitcell(jj) * rprimd_md(ii,jj)
+      end do
+    end do
+  end if
+
+! Echo some (re)computed quantities
+  write(Invar%stdout,*) ' '
+  write(Invar%stdout,*) '#############################################################################'
+  write(Invar%stdout,*) '########################## Computed quantities ##############################'
+  write(Invar%stdout,*) '#############################################################################'
 
 ! Check the off-diagonal elements
-  rprimd_md(:,:)=0.d0
-  rprim_tmp(:,:)=rprim(:,:)
   do ii=1,3
-    do jj=1,3
-      do kk=1,3
-        if (line==2) then
-          rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(jj)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
-        else if (line==0.or.line==1) then
-          rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(ii)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
-        else
-          ABI_ERROR(' THE CALCULATION OF RPRIMD IS NOT IMPLEMENTED')
-        end if
-      end do
-    end do
     write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'The rprimd_md (computed)=',(rprimd_md(ii,jj),jj=1,3)
   end do
   if((abs(rprimd_md(1,2)-Invar%rprimd_md(1,2)).gt.tol5).or.(abs(rprimd_md(1,3)-Invar%rprimd_md(1,3)).gt.tol5).or.&
@@ -322,7 +348,7 @@ end subroutine tdep_make_inbox
     end do  
     do ii=1,3
       write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'However, using multiplicity (from the input file)=',&
-&                                             (Invar%multiplicity(ii,jj),jj=1,3)
+&                                             (multiplicity(ii,jj),jj=1,3)
     end do  
     do ii=1,3
       write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'rprim (from the aTDEP code)=',(rprim(ii,jj),jj=1,3)
@@ -333,12 +359,6 @@ end subroutine tdep_make_inbox
 
 ! Check the diagonal elements 
   if ((Invar%bravais(1).eq.2).and.(Invar%bravais(2).eq.0)) then !monoclinic
-!FB    if ((acell_unitcell(1).gt.acell_unitcell(3)).or.&
-!FB&       (acell_unitcell(2).gt.acell_unitcell(3)).or.&
-!FB&       (Invar%angle_alpha.ge.90)) then
-!FB      write(Invar%stdout,*) ' STOP: You must set a,b <= c and alpha<90 in the conventional lattice'
-!FB      stop -1
-!FB    end if
     if ((acell_unitcell(1).gt.acell_unitcell(3)).or.&
 &       (acell_unitcell(2).gt.acell_unitcell(3))) then
       ABI_ERROR('You must set a,b <= c in the conventional lattice')
@@ -362,21 +382,23 @@ end subroutine tdep_make_inbox
   end if
   write(Invar%stdout,'(a,1x,3(f16.10,1x))') ' acell_unitcell=',acell_unitcell(:)
 
-! Redefine rprimd_md (in order to have a precision higher than 1.d-8)
-  rprimd_md(:,:)=0.d0
-  rprim_tmp(:,:)=rprim(:,:)
-  do ii=1,3
-    do jj=1,3
-      do kk=1,3
-        if (line==2) then
-          rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(jj)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
-        else if (line==0.or.line==1) then
-          rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(ii)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
-        else
-          ABI_ERROR(' THE CALCULATION OF RPRIMD IS NOT IMPLEMENTED')
-        end if
+! Recompute rprimd_md with the symmetrized acell,
+! in order to have a precision higher than 1.d-8.
+  rprimd_md = MATMUL(multiplicity, rprim)
+  if (line==0.or.line==1) then
+    do ii=1,3
+      do jj=1,3
+        rprimd_md(ii,jj) = acell_unitcell(ii) * rprimd_md(ii,jj)
       end do
     end do
+  else if (line==2) then
+    do ii=1,3
+      do jj=1,3
+        rprimd_md(ii,jj) = acell_unitcell(jj) * rprimd_md(ii,jj)
+      end do
+    end do
+  end if
+  do ii=1,3
     write(Invar%stdout,'(a,1x,3(f16.10,1x))') ' rprimd_md=',(rprimd_md(ii,jj),jj=1,3)
   end do
 
@@ -389,35 +411,16 @@ end subroutine tdep_make_inbox
     rprimd(1,1)=rprim(1,1)*acell_unitcell(1) ; rprimd(1,2)=rprim(1,2)*acell_unitcell(1) ; rprimd(1,3)=rprim(1,3)*acell_unitcell(1)
     rprimd(2,1)=rprim(2,1)*acell_unitcell(2) ; rprimd(2,2)=rprim(2,2)*acell_unitcell(2) ; rprimd(2,3)=rprim(2,3)*acell_unitcell(2)
     rprimd(3,1)=rprim(3,1)*acell_unitcell(3) ; rprimd(3,2)=rprim(3,2)*acell_unitcell(3) ; rprimd(3,3)=rprim(3,3)*acell_unitcell(3)
-  else
-    ABI_ERROR(' THE CALCULATION OF RPRIMD IS NOT IMPLEMENTED')
   end if
 
-! Starting from rprimd, compute gmet, rmet, gprimd  
-!FB  call metric(Lattice%gmet,Lattice%gprimd,Invar%stdlog,Lattice%rmet,rprimd,Lattice%ucvol)
-
 ! Define transpose and inverse of rprimd
-  do ii=1,3
-    do jj=1,3
-      rprimdt(ii,jj)=rprimd(jj,ii)
-    end do
-  end do  
-  call metric(Lattice%gmet,Lattice%gprimd,Invar%stdlog,Lattice%rmet,rprimdt,Lattice%ucvol)
-  ABI_MALLOC(IPIV,(3)); IPIV(:)=0
-  ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
-  rprimdtm1(:,:)=rprimdt(:,:)
-  call DGETRF(3,3,rprimdtm1,3,IPIV,INFO)
-  call DGETRI(3,rprimdtm1,3,IPIV,WORK,3,INFO)
-  ABI_FREE(IPIV)
-  ABI_FREE(WORK)
+  rprimdt = TRANSPOSE(rprimd)
 
-  ABI_MALLOC(IPIV,(3)); IPIV(:)=0
-  ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
-  rprimdm1(:,:)=rprimd(:,:)
-  call DGETRF(3,3,rprimdm1,3,IPIV,INFO)
-  call DGETRI(3,rprimdm1,3,IPIV,WORK,3,INFO)
-  ABI_FREE(IPIV)
-  ABI_FREE(WORK)
+  ! Compute gmet, rmet, gprimd  
+  call metric(Lattice%gmet,Lattice%gprimd,Invar%stdlog,Lattice%rmet,rprimdt,Lattice%ucvol)
+
+  call matr3inv(rprimd, rprimdtm1)
+  call matr3inv(rprimdt, rprimdm1)
 
 ! Store all these values in the 'Lattice' datatype
   Lattice%acell_unitcell(:)  =acell_unitcell(:)
@@ -425,7 +428,7 @@ end subroutine tdep_make_inbox
   Lattice%brav               =brav
   Lattice%bravais(:)         =Invar%bravais(:)
   Lattice%line               =line
-  Lattice%multiplicity  (:,:)=Invar%multiplicity(:,:)
+  Lattice%multiplicity  (:,:)=multiplicity(:,:)
   Lattice%multiplicitym1(:,:)=multiplicitym1(:,:)
   Lattice%rprim         (:,:)=rprim         (:,:)
   Lattice%rprimt        (:,:)=rprimt        (:,:)
@@ -437,6 +440,53 @@ end subroutine tdep_make_inbox
   Lattice%rprimd_md     (:,:)=rprimd_md     (:,:)
 
  end subroutine tdep_make_latt
+
+!=====================================================================================================
+
+! Shift xred to keep atoms in the same unit cell at each step.
+subroutine tdep_shift_xred(Invar,MPIdata)
+
+  implicit none
+  type(Input_type), intent(inout) :: Invar
+  type(MPI_enreg_type), intent(in) :: MPIdata
+  integer :: natom,ii,iatom,istep,ierr
+  integer :: shift, best_shift
+  double precision :: xi, dist, best_dist
+  double precision, allocatable :: x0(:,:)
+
+  natom = Invar%natom
+  ABI_MALLOC(x0,(3,natom))
+
+  ! Communicate xred at the first step
+  x0(:,:) = zero
+  if (MPIdata%my_step(1)) then
+    x0(:,:) = Invar%xred(:,:,1)
+  end if
+  call xmpi_sum(x0,MPIdata%comm_step,ierr)
+
+  ! Shift xred from all steps in the same unitcell as the first step
+  do istep=1, Invar%my_nstep
+    do iatom=1,natom
+      do ii=1,3
+        best_dist = abs(Invar%xred(ii,iatom,istep) - x0(ii,iatom))
+        best_shift = 0
+        do shift=-1,1
+          xi = Invar%xred(ii,iatom,istep) + shift
+          dist = abs(xi - x0(ii,iatom))
+          if (dist < best_dist) then
+            best_dist = dist
+            best_shift = shift
+          end if
+        end do
+        Invar%xred(ii,iatom,istep) = Invar%xred(ii,iatom,istep) + best_shift
+      end do
+    end do
+  end do
+
+  ABI_FREE(x0)
+
+end subroutine tdep_shift_xred
+
 !=====================================================================================================
 
 end module m_tdep_latt

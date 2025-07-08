@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-## Copyright (C) 2017-2024 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
+## Copyright (C) 2017-2025 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 #
 # IMPORTANT NOTE:

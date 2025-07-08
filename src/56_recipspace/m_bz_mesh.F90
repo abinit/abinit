@@ -11,7 +11,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -250,6 +250,9 @@ module m_bz_mesh
   procedure :: free => kpath_free
    ! Free memory
 
+  procedure :: get_versors => kpath_get_versors
+   ! Return all the versors emanating from the Gamma point.
+
   procedure :: print => kpath_print
    ! Print the path.
 
@@ -394,13 +397,13 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine kmesh_init(Kmesh, Cryst, nkibz, kibz, kptopt, &
+subroutine kmesh_init(Kmesh, cryst, nkibz, kibz, kptopt, &
                       wrap_1zone, ref_bz, break_symmetry) ! Optional
 
 !Arguments ------------------------------------
 !scalars
  class(kmesh_t),intent(inout) :: Kmesh
- integer,intent(in) :: nkibz,kptopt
+ integer,intent(in) :: nkibz, kptopt
  logical,optional,intent(in) :: wrap_1zone,break_symmetry
  type(crystal_t),intent(in) :: Cryst
 !arrays
@@ -410,7 +413,7 @@ subroutine kmesh_init(Kmesh, Cryst, nkibz, kibz, kptopt, &
 !Local variables-------------------------------
 !scalars
  integer :: ik_bz,ik_ibz,isym,nkbz,nkbzX,nsym,timrev,itim
- real(dp) :: shift1,shift2,shift3
+ real(dp) :: shift(3)
  logical :: ltest,do_wrap,do_hack
 !arrays
  integer,allocatable :: ktab(:),ktabi(:),ktabo(:)
@@ -451,9 +454,7 @@ subroutine kmesh_init(Kmesh, Cryst, nkibz, kibz, kptopt, &
 
  if (do_wrap) then ! Wrap the BZ points in the interval ]-1/2,1/2]
    do ik_bz=1,nkbz
-     call wrap2_pmhalf(kbz(1,ik_bz),kbz_wrap(1),shift1)
-     call wrap2_pmhalf(kbz(2,ik_bz),kbz_wrap(2),shift2)
-     call wrap2_pmhalf(kbz(3,ik_bz),kbz_wrap(3),shift3)
+     call wrap2_pmhalf(kbz(:,ik_bz),kbz_wrap,shift)
      kbz(:,ik_bz) = kbz_wrap
    end do
  end if
@@ -579,8 +580,8 @@ end subroutine kmesh_free
 !! Print the content of a kmesh_t datatype
 !!
 !! INPUTS
+!! units: unit numbers
 !! [header]=optional header
-!! [unit]=the unit number for output
 !! [prtvol]=verbosity level
 !! [mode_paral]=either "COLL" or "PERS"
 !!
@@ -589,70 +590,64 @@ end subroutine kmesh_free
 !!
 !! SOURCE
 
-subroutine kmesh_print(Kmesh, header, unit, prtvol, mode_paral)
+subroutine kmesh_print(Kmesh, units, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  class(kmesh_t),intent(in) :: Kmesh
- integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
+ integer,optional,intent(in) :: prtvol
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nmaxk=50
- integer :: ii,ik,my_unt,my_prtvol
- character(len=100) :: fmt
- character(len=4) :: my_mode
- character(len=500) :: msg
-
+ integer :: ii, ik, my_prtvol
+ character(len=500) :: msg, fmt
 ! *************************************************************************
 
- my_unt =std_out; if (PRESENT(unit      )) my_unt   =unit
  my_prtvol=0    ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  msg=' ==== Info on the Kmesh% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  write(msg,'(a,i5,3a)')&
   ' Number of points in the irreducible wedge : ',Kmesh%nibz,ch10,&
   ' Reduced coordinates and weights : ',ch10
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  write(fmt,*)'(1x,i5,a,2x,3es16.8,3x,f11.5)'
  do ik=1,Kmesh%nibz ! Add tol8 for portability reasons.
    write(msg,fmt) ik,') ',(Kmesh%ibz(ii,ik),ii=1,3),Kmesh%wt(ik)+tol8
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(units, msg)
  end do
 
- SELECT CASE (Kmesh%timrev)
- CASE (1)
+ select case (Kmesh%timrev)
+ case (1)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
     ' Together with ',Kmesh%nsym,' symmetry operations (time-reversal symmetry not used) ',ch10,&
     ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
- CASE (2)
+ case (2)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
     ' Together with ',Kmesh%nsym,' symmetry operations and time-reversal symmetry ',ch10,&
     ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
- CASE DEFAULT
+ case default
    ABI_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
- END SELECT
+ end select
 
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  if (my_prtvol > 0) then
    write(fmt,*)'(1x,i5,a,2x,3es16.8)'
    do ik=1,Kmesh%nbz
      if (my_prtvol==1 .and. ik>nmaxk) then
-       write(msg,'(a)')' prtvol=1, do not print more points.'
-       call wrtout(my_unt,msg,my_mode); EXIT
+       call wrtout(units, ' prtvol=1, do not print more points.'); EXIT
      end if
      write(msg,fmt)ik,') ',(Kmesh%bz(ii,ik),ii=1,3)
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    end do
  end if
 
@@ -660,16 +655,16 @@ subroutine kmesh_print(Kmesh, header, unit, prtvol, mode_paral)
  if (my_prtvol >= 10) then
    write(msg,'(2a)')ch10,&
    '                  Full point  ------->    Irred point -->            through:  Symrec  Time-Rev (1=No,-1=Yes) G0(1:3) '
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(units, msg)
    write(fmt,*)'(2x,i5,2x,2(3(f7.4,2x)),i3,2x,i2,3(i3))'
    do ik=1,Kmesh%nbz
-     write(msg,fmt)ik,Kmesh%bz(:,ik),Kmesh%ibz(:,Kmesh%tab(ik)),Kmesh%tabo(ik),Kmesh%tabi(ik),Kmesh%umklp(:,ik)
-     call wrtout(my_unt,msg,my_mode)
+     write(msg,fmt) ik,Kmesh%bz(:,ik),Kmesh%ibz(:,Kmesh%tab(ik)),Kmesh%tabo(ik),Kmesh%tabi(ik),Kmesh%umklp(:,ik)
+     call wrtout(units, msg)
    end do
  end if
 
  write(msg,'(a)')ch10
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
 end subroutine kmesh_print
 !!***
@@ -725,9 +720,7 @@ subroutine setup_k_rotation(nsym, timrev, symrec, nbz, kbz, gmet, krottb, krottb
 
  ! Sort the k-points according to their norm to speed up the search below.
  do ik=1,nbz
-   call wrap2_pmhalf(kbz(1,ik),kwrap(1),shift(1))
-   call wrap2_pmhalf(kbz(2,ik),kwrap(2),shift(2))
-   call wrap2_pmhalf(kbz(3,ik),kwrap(3),shift(3))
+   call wrap2_pmhalf(kbz(:,ik), kwrap, shift)
    knorm(ik) = normv(kwrap,gmet,"G")
    iperm(ik)= ik
  end do
@@ -774,11 +767,8 @@ subroutine setup_k_rotation(nsym, timrev, symrec, nbz, kbz, gmet, krottb, krottb
          end if
        end do
 #else
-       !
        ! Locate the shell index with bisection.
-       call wrap2_pmhalf(krot(1),kwrap(1),shift(1))
-       call wrap2_pmhalf(krot(2),kwrap(2),shift(2))
-       call wrap2_pmhalf(krot(3),kwrap(3),shift(3))
+       call wrap2_pmhalf(krot(:),kwrap,shift)
        norm_rot = normv(kwrap,gmet,"G")
        sh_start = bisect(shlen(1:nsh+1),norm_rot)
 
@@ -1156,7 +1146,7 @@ end function has_BZ_item
 !!
 !! SOURCE
 
-logical function has_IBZ_item(Kmesh,item,ikibz,g0)
+logical function has_IBZ_item(Kmesh, item, ikibz, g0)
 
 !Arguments ------------------------------------
 !scalars
@@ -1172,7 +1162,6 @@ logical function has_IBZ_item(Kmesh,item,ikibz,g0)
  !character(len=500) :: msg
 !arrays
  integer :: g0_tmp(3)
-
 ! *************************************************************************
 
  has_IBZ_item=.FALSE.; ikibz=0; g0=0; yetfound=0
@@ -1710,11 +1699,9 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
-
 ! *************************************************************************
 
- ! Checking the factor is large enough
- !(skipping zero components, since in this case the product will be 0)
+ ! Checking the factor is large enough (skipping zero components, since in this case the product will be 0)
  if(ANY(vect(:)*factor < 1.0 .and. vect(:) > tol7)) then
     write(msg,'(a,a,a,a,a,a,a,a)') ' Not able to give unique norm to order vectors',ch10,&
        'This is likely related to a truncation error for a k-point in the input file',ch10,&
@@ -2537,10 +2524,8 @@ subroutine littlegroup_free_0D(Ltg)
 
 !Arguments ------------------------------------
  class(littlegroup_t),intent(inout) :: Ltg
-
 ! *********************************************************************
 
- !@littlegroup_t
  ABI_SFREE(Ltg%g0)
  ABI_SFREE(Ltg%ibzq)
  ABI_SFREE(Ltg%bz2ibz)
@@ -2595,42 +2580,37 @@ end subroutine littlegroup_free_1D
 !!
 !! INPUTS
 !!  Ltg=the datatype to be printed
-!!  [unit]=the unit number for output
+!!  units=unit numbers for output
 !!  [prtvol]=verbosity level
-!!  [mode_paral]=either "COLL" or "PERS"
 !!
 !! OUTPUT
 !!  Only printing
 !!
 !! SOURCE
 
-subroutine littlegroup_print(Ltg, unit, prtvol, mode_paral)
+subroutine littlegroup_print(Ltg, units, prtvol)
 
 !Arguments ------------------------------------
  class(littlegroup_t),intent(in) :: Ltg
- integer,optional,intent(in) :: prtvol,unit
- character(len=4),optional,intent(in) :: mode_paral
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: prtvol
 
 !Local variables-------------------------------
 !scalars
- integer :: itim,my_unt,my_prtvol
- character(len=4) :: my_mode
+ integer :: itim, my_prtvol
  character(len=500) :: msg
 !arrays
  integer :: nop(Ltg%timrev),nopg0(Ltg%timrev)
-
 ! *********************************************************************
 
- my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
+ my_prtvol=0; if (PRESENT(prtvol)) my_prtvol=prtvol
 
  write(msg,'(7a,i0,a,i0,2a,i0,a,i0)')ch10, &
   ' ==== Little Group Info ==== ', ch10, &
   '  External point: ',trim(ktoa(Ltg%ext_pt)), ch10, &
   '  Number of points in the IBZ defined by little group:  ', Ltg%nibz_Ltg, '/', Ltg%nbz,ch10, &
   '  Number of operations in the little group: ',Ltg%nsym_Ltg,'/',Ltg%nsym_sg
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  nop=0 ; nopg0=0
  do itim=1,Ltg%timrev
@@ -2643,12 +2623,12 @@ subroutine littlegroup_print(Ltg, unit, prtvol, mode_paral)
      write(msg,'(2(a,i2,a))') &
        '  No time-reversal symmetry with zero umklapp: ',nop(1)-nopg0(1),ch10,&
        '  No time-reversal symmetry with non-zero umklapp: ',nopg0(1),ch10
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    else if (itim==2) then
      write(msg,'(2(a,i2,a))') &
        '  time-reversal symmetry with zero umklapp: ',nop(2)-nopg0(2),ch10,&
        '  time-reversal symmetry with non-zero umklapp: ',nopg0(2),ch10
-     call wrtout(my_unt,msg,my_mode)
+     call wrtout(units, msg)
    end if
  end do
 
@@ -2686,7 +2666,6 @@ function box_len(qpt, gprimd)
  real(dp) :: x1,x2,x3
 !arrays
  real(dp) :: my_qpt(3),gmet(3,3),q0box(3)
-
 ! *************************************************************************
 
  ! Compute reciprocal space metric
@@ -2767,7 +2746,6 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
  integer :: ii
 !arrays
  real(dp) :: dk(3)
-
 ! *************************************************************************
 
  ABI_CHECK(size(bounds, dim=1) == 3, "Wrong dim1 in bounds")
@@ -2812,6 +2790,89 @@ end function kpath_new
 
 !----------------------------------------------------------------------
 
+!!****f* m_bz_mesh/kpath_get_versors
+!! NAME
+!! kpath_get_versors
+!!
+!! FUNCTION
+!!  Return all the versors emanating from the Gamma point.
+
+!! OUTPUT
+!!  nvers=number of versors
+!!  red_versors(3,nvers)=versors in reduced coords
+!!  cart_versors(3,nvers)=versors in reduced coords
+!!
+!! SOURCE
+
+subroutine kpath_get_versors(kpath, nvers, red_versors, cart_versors)
+
+!Arguments ------------------------------------
+!scalars
+ class(kpath_t),intent(in) :: kpath
+ integer,intent(out) :: nvers
+ real(dp),allocatable,intent(out) :: red_versors(:,:), cart_versors(:,:)
+
+! local variables
+ integer :: ii, ipt, ipt_list(kpath%npts), cnt
+ !real(dp) :: norm
+ real(dp),allocatable :: tmp_versors(:,:)
+! *************************************************************************
+
+ ! Quick return if just one point.
+ if (kpath%npts == 1) then
+   nvers = 0
+   ABI_MALLOC(red_versors, (0, 0))
+   ABI_MALLOC(cart_versors, (0, 0))
+   return
+ end if
+
+ cnt = 0
+ do ipt=1,kpath%npts
+   if (sum(kpath%points(:,ipt)**2) < tol14) then
+     cnt = cnt + 1
+     ipt_list(cnt) = ipt
+   end if
+ end do
+
+ ABI_MALLOC(tmp_versors, (3, 2*cnt))
+ nvers = 0
+ do ii=1,cnt
+   ipt = ipt_list(ii)
+   nvers = nvers + 1
+   ! Different logic depending whether Gamma is at the beginning/end of the path or in the middle.
+   if (ipt == 1) then
+     tmp_versors(:, nvers) = kpath%points(:, ipt+1) - kpath%points(:, ipt)
+   else if (ipt == kpath%npts) then
+     tmp_versors(:, nvers) = kpath%points(:, ipt-1) - kpath%points(:, ipt)
+   else
+     tmp_versors(:, nvers) = kpath%points(:, ipt-1) - kpath%points(:, ipt)
+     nvers = nvers + 1
+     tmp_versors(:, nvers) = kpath%points(:, ipt+1) - kpath%points(:, ipt)
+   end if
+ end do
+
+ ! Allocate output results
+ ABI_MALLOC(red_versors, (3, nvers))
+ red_versors = tmp_versors(:,1:nvers)
+ ABI_FREE(tmp_versors)
+
+ ! Normalize
+ !do ii=1,nvers
+ !  norm = dot_product(red_versors(:,ii), matmul(kpath%gmet, red_versors(:,ii)))
+ !  red_versors(:,ii) = red_versors(:,ii) / sqrt(norm)
+ !end do
+
+ ! Convert to Cartesian coordinates.
+ ABI_MALLOC(cart_versors, (3, nvers))
+ do ii=1, nvers
+   cart_versors(:,ii) = matmul(kpath%gprimd, red_versors(:,ii))
+ end do
+
+end subroutine kpath_get_versors
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_bz_mesh/kpath_free
 !! NAME
 !! kpath_free
@@ -2826,7 +2887,6 @@ subroutine kpath_free(Kpath)
 !Arguments ------------------------------------
 !scalars
  class(kpath_t),intent(inout) :: Kpath
-
 ! *************************************************************************
 
  ABI_SFREE(Kpath%ndivs)
@@ -2848,7 +2908,7 @@ end subroutine kpath_free
 !!  Print info on the path.
 !!
 !! INPUTS
-!!  [unit]=Unit number for output. Defaults to std_out
+!!  units=Unit numbers
 !!  [prtvol]=Verbosity level.
 !!  [header]=String to be printed as header for additional info.
 !!  [pre]=Optional string prepended to output e.g. #. Default: " "
@@ -2858,36 +2918,35 @@ end subroutine kpath_free
 !!
 !! SOURCE
 
-subroutine kpath_print(kpath, header, unit, prtvol, pre)
+subroutine kpath_print(kpath, units, header,prtvol, pre)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,prtvol
- character(len=*),optional,intent(in) :: header,pre
  class(kpath_t),intent(in) :: kpath
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: prtvol
+ character(len=*),optional,intent(in) :: header,pre
 
 !Local variables-------------------------------
- integer :: unt,my_prtvol,ii
- character(len=500) :: my_pre
-
+ integer :: my_prtvol,ii
+ character(len=500) :: my_pre !, msg
 ! *************************************************************************
 
- unt = std_out; if (present(unit)) unt = unit
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
  my_pre = " "; if (present(pre)) my_pre = pre
- if (unt <= 0) return
 
- if (present(header)) write(unt,"(a)") sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== ')
- write(unt, "(a)") sjoin(my_pre, " Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
- write(unt, "(a)") sjoin(my_pre, " Boundaries and corresponding index in the k-points array:")
+ if (present(header)) call wrtout(units, sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== '))
+
+ call wrtout(units, sjoin(my_pre, " Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm)))
+ call wrtout(units, sjoin(my_pre, " Boundaries and corresponding index in the k-points array:"))
  do ii=1,kpath%nbounds
-   write(unt, "(a)") sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
+   call wrtout(units, sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii))))
  end do
- write(unt, "(a)") sjoin(my_pre, " ")
+ call wrtout(units, " ")
 
  if (my_prtvol > 10) then
    do ii=1,kpath%npts
-     write(unt, "(a)") sjoin(my_pre, ktoa(kpath%points(:,ii)))
+     call wrtout(units, sjoin(my_pre, ktoa(kpath%points(:,ii))))
    end do
  end if
 

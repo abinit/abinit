@@ -5,7 +5,7 @@ need_cpp_vars = [
 "HAVE_LIBPSML",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 "PSML"
 ]

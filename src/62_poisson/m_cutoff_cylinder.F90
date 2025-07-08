@@ -162,8 +162,8 @@ subroutine cutoff_cylinder(qpt, ng, gvec, rcut, hcyl, pdir, boxcenter, rprimd, v
      ABI_ERROR('Bravais lattice should be orthorombic and parallel to the Cartesian versors')
    end if
 
-   ha_ = half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
-   hb_ = half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
+   ha_ = half*NORM2(rprimd(:,1))
+   hb_ = half*NORM2(rprimd(:,2))
    r0_ = MIN(ha_,hb_)/N0
 
    ! For each (q,G) pair evaluate the integral defining the Coulomb cutoff.

@@ -10,7 +10,7 @@
 !!  MPI-IO primitives are used when the FFT arrays are MPI distributed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,6 @@ MODULE m_ioarr
  use netcdf
 
  use defs_abitypes,   only : mpi_type
- use defs_datatypes,  only : ebands_t
  use defs_wvltypes,   only : wvl_denspot_type
  use m_time,          only : cwtime, cwtime_report, timab
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit
@@ -407,8 +406,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      ! Read the header and broadcast it in comm_cell
      ! FIXME: Use xmpi_comm_self for the time-being because, in loper, ioarr
      ! is called by me==0
-     call hdr_read_from_fname(hdr0, file_etsf, fform_dum, comm_cell)
-     !call hdr_read_from_fname(hdr0, file_etsf, fform_dum, xmpi_comm_self)
+     call hdr0%from_fname(file_etsf, fform_dum, comm_cell)
      ABI_CHECK(fform_dum/=0, "hdr_read_from_fname returned fform 0")
 
      ! Compare the internal header and the header from the file
@@ -820,7 +818,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
      ! Add information on the crystalline structure.
      NCF_CHECK(crystal%ncwrite(ncid))
      if (present(ebands)) then
-       NCF_CHECK(ebands_ncwrite(ebands, ncid))
+       NCF_CHECK(ebands%ncwrite(ncid))
      end if
 
      ! Add full pawrhoij datastructure.
@@ -898,11 +896,11 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
      ABI_CHECK(size(eigen) ==  mband * hdr%nkpt * hdr%nsppol, "Wrong size(eigen)")
      ABI_MALLOC(ene3d, (mband, hdr%nkpt, hdr%nsppol))
      call unpack_eneocc(hdr%nkpt, hdr%nsppol, mband, hdr%nband, eigen, ene3d)
-     ebands = ebands_from_hdr(hdr, mband, ene3d)
+     call ebands%from_hdr(hdr, mband, ene3d)
      ABI_FREE(ene3d)
 
     call fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg,ebands=ebands)
-    call ebands_free(ebands)
+    call ebands%free()
  else
     call fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg)
  end if
@@ -940,6 +938,7 @@ end subroutine fftdatar_write_from_hdr
 !! [allow_interp]=If True, the density read from file will be interpolated if the mesh differs from the one
 !!   expected by the caller. This option is usually used in **self-consistent** calculations.
 !!   If False (default), the code stops if the two meshes are different.
+!! [varname]=If present, check whether file contains varname
 !!
 !! OUTPUT
 !! orhor(cplex*nfft,nspden)=The density on the real space mesh.
@@ -963,7 +962,7 @@ end subroutine fftdatar_write_from_hdr
 !! SOURCE
 
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
-                     check_hdr, allow_interp) ! Optional
+                     check_hdr, allow_interp, want_varname) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -973,6 +972,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  type(hdr_type),intent(out) :: ohdr
  type(hdr_type),optional,intent(in) :: check_hdr
  logical,optional,intent(in) :: allow_interp
+ character(len=*),optional,intent(in) :: want_varname
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(out) :: orhor(cplex*nfft,nspden)
@@ -1024,14 +1024,14 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
        ABI_ERROR(msg)
      end if
 
-     call hdr_fort_read(ohdr, unt, fform)
+     call ohdr%fort_read(unt, fform)
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     !if (fform /= fform_den) then
-     !  write(msg, "(3a, 2(a, i0))")' File: ',trim(my_fname),ch10,' is not a density file. fform: ',fform,", expecting: ", fform_den
-     !  ABI_WARNING(msg)
-     !end if
+     if (present(want_varname)) then
+       ABI_CHECK(fform_contains(fform, want_varname, msg), msg)
+     end if
+
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
        cplex_file = 2; if (ohdr%qptn(1)**2 + ohdr%qptn(2)**2 + ohdr%qptn(3)**2 <1.d-14) cplex_file= 1
@@ -1048,7 +1048,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
    case (IO_MODE_ETSF)
      NCF_CHECK(nctk_open_read(unt, my_fname, xmpi_comm_self))
-     call hdr_ncread(ohdr, unt, fform)
+     call ohdr%ncread(unt, fform)
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
@@ -1263,9 +1263,9 @@ integer function fort_denpot_skip(unit, msg) result(ierr)
 ! *********************************************************************
 
  ierr = 1
- call hdr_fort_read(hdr, unit, fform)
+ call hdr%fort_read(unit, fform)
  if (fform == 0) then
-    msg = "hdr_fort_read returned fform == 0"; return
+   msg = "hdr_fort_read returned fform == 0"; return
  end if
 
  nspden = hdr%nspden

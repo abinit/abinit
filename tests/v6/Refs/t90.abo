@@ -1,8 +1,8 @@
 
-.Version 7.7.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.7 computer) 
+.Version 7.7.1 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu4.7 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 24 Feb 2014.
 - ( at 00h49 )
-  
+
 - input  file    -> t90.in
 - output file    -> t90.out
 - root for input  files -> t90i
@@ -228,10 +228,10 @@ _ WF disk file :      1.018 Mbytes ; DEN or POT disk file :      0.014 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -2028,8 +2028,8 @@ P          mk1mem12        64
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.00513
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2333,7 +2333,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      90.578      90.463
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3560,12 +3560,12 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.4951632407         0.0000000000
    1    1   2    1        -0.7475815470         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
@@ -3574,7 +3574,7 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
    1    1   3    2         0.0000000000         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.7475815551         0.0000000000
    2    1   2    1         1.4951632365         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
@@ -3583,7 +3583,7 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
    2    1   3    2         0.0000000000         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
-  
+
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1        26.4134223196         0.0000000000
@@ -3592,7 +3592,7 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
    3    1   3    2       -26.4134216200         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-  
+
    1    2   1    1        -1.4951619689        -0.0000000000
    1    2   2    1         0.7475809035         0.0000000000
    1    2   3    1         0.0000000000        -0.0000000000
@@ -3601,7 +3601,7 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
    1    2   3    2        -0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
-  
+
    2    2   1    1         0.7475809091         0.0000000000
    2    2   2    1        -1.4951619541         0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
@@ -3610,7 +3610,7 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
    2    2   3    2        -0.0000000000         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-  
+
    3    2   1    1        -0.0000000000        -0.0000000000
    3    2   2    1        -0.0000000000        -0.0000000000
    3    2   3    1       -26.4134216225        -0.0000000000
@@ -3619,74 +3619,74 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
    3    2   3    2        26.4134243355         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-  
+
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
    1    4   3    4         0.0000000000         0.0000000000
-  
+
    2    4   1    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    2    4   3    4         0.0000000000         0.0000000000
-  
+
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
    3    4   1    4         0.0000000000         0.0000000000
    3    4   2    4         0.0000000000         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0480851886         0.0000000000
    1    1   2    1         0.0000000027         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.0480851469         0.0000000000
    1    1   2    2        -0.0000000029         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000024         0.0000000000
    2    1   2    1         0.0480851914         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000028         0.0000000000
    2    1   2    2        -0.0480851498        -0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.3369108931         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.3369108842         0.0000000000
-  
+
    1    2   1    1        -0.0480851477        -0.0000000000
    1    2   2    1        -0.0000000030        -0.0000000000
    1    2   3    1         0.0000000000        -0.0000000000
    1    2   1    2         0.0480851937         0.0000000000
    1    2   2    2         0.0000000026         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
-  
+
    2    2   1    1        -0.0000000028        -0.0000000000
    2    2   2    1        -0.0480851504         0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
    2    2   1    2         0.0000000029         0.0000000000
    2    2   2    2         0.0480851966         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-  
+
    3    2   1    1        -0.0000000000        -0.0000000000
    3    2   2    1        -0.0000000000        -0.0000000000
    3    2   3    1        -0.3369108842        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         0.3369109188         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    4.993624E-07  7.071536E-07  7.109833E-07  1.049696E-03  1.049696E-03
@@ -3718,8 +3718,8 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.79639
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3792,7 +3792,7 @@ P newkpt: treating     10 bands with npw=      90 for ikpt=  13 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -5784,102 +5784,102 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        11.6095643620         0.0000000000
    1    1   2    1        -2.5432009120        -0.0000182559
    1    1   3    1         0.0000061595        -0.0000005880
    1    1   1    2         0.3515160313        -0.0000308329
    1    1   2    2         1.1980836133         0.0000283416
    1    1   3    2        -0.0000069938        -0.0000006472
-  
+
    2    1   1    1        -2.5432148347         0.0000004552
    2    1   2    1         5.0865671558         0.0000000000
    2    1   3    1        -0.0000000000        -0.0000000000
    2    1   1    2         1.1980796484         0.0000199735
    2    1   2    2        -2.3961717594        -0.0000144268
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1        20.8499742042         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -8.7450845622        -0.0000024944
-  
+
    1    2   1    1         0.3515160313         0.0000308947
    1    2   2    1         1.1980835591        -0.0000283805
    1    2   3    1         0.0000059250        -0.0000005089
    1    2   1    2        11.6095645389         0.0000000000
    1    2   2    2        -2.5432011885         0.0000181102
    1    2   3    2        -0.0000073849        -0.0000006903
-  
+
    2    2   1    1         1.1980796605        -0.0000199733
    2    2   2    1        -2.3961717621         0.0000144272
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2        -2.5432149521        -0.0000004561
    2    2   2    2         5.0865673700         0.0000000000
    2    2   3    2         0.0000000000        -0.0000000000
-  
+
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000        -0.0000000000
    3    2   3    1        -8.7450845722         0.0000024926
    3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2        20.8499761141         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.3733693263         0.0000000000
    1    1   2    1         0.1211212335        -0.0000006779
    1    1   3    1         0.0000001248        -0.0000000119
    1    1   1    2         0.0113049293        -0.0000009916
    1    1   2    2         0.0510186253         0.0000004800
    1    1   3    2        -0.0000001417        -0.0000000131
-  
+
    2    1   1    1         0.1211207165         0.0000000169
    2    1   2    1         0.2335173637        -0.0000003817
    2    1   3    1         0.0000000720        -0.0000000069
    2    1   1    2         0.0510184781         0.0000001692
    2    1   2    2        -0.0476065843         0.0000000867
    2    1   3    2        -0.0000000818        -0.0000000076
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.2659474924         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.1115461001        -0.0000000318
-  
+
    1    2   1    1         0.0113049293         0.0000009936
    1    2   2    1         0.0510186233        -0.0000004803
    1    2   3    1         0.0000001200        -0.0000000103
    1    2   1    2         0.3733693320         0.0000000000
    1    2   2    2         0.1211212266         0.0000006725
    1    2   3    2        -0.0000001496        -0.0000000140
-  
+
    2    2   1    1         0.0510184786        -0.0000001681
    2    2   2    1        -0.0476065853        -0.0000000869
    2    2   3    1         0.0000000693        -0.0000000060
    2    2   1    2         0.1211207154        -0.0000000169
    2    2   2    2         0.2335173663         0.0000003785
    2    2   3    2        -0.0000000864        -0.0000000081
-  
+
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1115461002         0.0000000318
    3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         0.2659475167         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    9.956628E-04  1.330052E-03  1.660483E-03  2.079686E-03  2.147570E-03
@@ -5911,8 +5911,8 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.88166
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5985,7 +5985,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -7802,102 +7802,102 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  20 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.3813294736         0.0000000000
    1    1   2    1        -0.6906647335         0.0000000046
    1    1   3    1         0.0000000000        -0.0000000000
    1    1   1    2        -0.0000000009        -0.0000020081
    1    1   2    2        -0.0000000009         0.0000010034
    1    1   3    2        -0.0000000000        -0.0000000000
-  
+
    2    1   1    1        -0.6906647355         0.0000000001
    2    1   2    1         1.3813294675         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000015         0.0000010029
    2    1   2    2        -0.0000000024        -0.0000020077
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1        -0.0000007230        -0.0000004624
    3    1   2    1         0.0000007268         0.0000002601
    3    1   3    1        22.1135416481         0.0000000000
    3    1   1    2        -0.0000014537        -0.0000042174
    3    1   2    2         0.0000000823         0.0000141305
    3    1   3    2         0.0000006953         0.0000613588
-  
+
    1    2   1    1         0.0000000032         0.0000020059
    1    2   2    1        -0.0000000017        -0.0000010035
    1    2   3    1        -0.0000000000        -0.0000000000
    1    2   1    2         1.3813296712         0.0000000000
    1    2   2    2        -0.6906648278         0.0000000045
    1    2   3    2         0.0000000000        -0.0000000000
-  
+
    2    2   1    1        -0.0000000009        -0.0000010037
    2    2   2    1        -0.0000000013         0.0000020058
    2    2   3    1        -0.0000000000        -0.0000000000
    2    2   1    2        -0.6906648309         0.0000000001
    2    2   2    2         1.3813296598         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-  
+
    3    2   1    1         0.0000008552        -0.0000042186
    3    2   2    1         0.0000000556         0.0000142296
    3    2   3    1        -0.0000001748        -0.0000662185
    3    2   1    2        -0.0000007605        -0.0000004777
    3    2   2    2         0.0000002517         0.0000002678
    3    2   3    2        22.1135433649         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0444242384         0.0000000000
    1    1   2    1         0.0000000001         0.0000000002
    1    1   3    1         0.0000000000        -0.0000000000
    1    1   1    2        -0.0000000000        -0.0000000646
    1    1   2    2        -0.0000000001        -0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
-  
+
    2    1   1    1         0.0000000001         0.0000000000
    2    1   2    1         0.0444242382         0.0000000001
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000        -0.0000000000
    2    1   2    2        -0.0000000001        -0.0000000646
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1        -0.0000000146        -0.0000000094
    3    1   2    1         0.0000000085         0.0000000007
    3    1   3    1         0.2820646631         0.0000000000
    3    1   1    2        -0.0000000294        -0.0000000854
    3    1   2    2        -0.0000000151         0.0000002812
    3    1   3    2         0.0000000089         0.0000007826
-  
+
    1    2   1    1         0.0000000001         0.0000000645
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1        -0.0000000000        -0.0000000000
    1    2   1    2         0.0444242448         0.0000000000
    1    2   2    2         0.0000000003         0.0000000002
    1    2   3    2         0.0000000000        -0.0000000000
-  
+
    2    2   1    1         0.0000000000        -0.0000000000
    2    2   2    1        -0.0000000001         0.0000000645
    2    2   3    1        -0.0000000000        -0.0000000000
    2    2   1    2         0.0000000002         0.0000000000
    2    2   2    2         0.0444242445         0.0000000001
    2    2   3    2        -0.0000000000         0.0000000000
-  
+
    3    2   1    1         0.0000000173        -0.0000000854
    3    2   2    1         0.0000000113         0.0000002835
    3    2   3    1        -0.0000000022        -0.0000008446
    3    2   1    2        -0.0000000154        -0.0000000097
    3    2   2    2        -0.0000000030         0.0000000007
    3    2   3    2         0.2820646850         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
    7.134320E-04  7.134320E-04  7.134330E-04  7.134330E-04  1.797697E-03
@@ -7929,8 +7929,8 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  20 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.80076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8003,7 +8003,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  20 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -10063,102 +10063,102 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        10.5396370403         0.0000000000
    1    1   2    1        -1.7543974889         0.0000411261
    1    1   3    1         0.0000034861         0.0000008405
    1    1   1    2        -0.0000010809         0.0000031113
    1    1   2    2         0.0000000233        -0.0000021009
    1    1   3    2        -8.2649211236        -0.0000120440
-  
+
    2    1   1    1        -1.7543709711         0.0000015593
    2    1   2    1         3.5089037475         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000037        -0.0000021239
    2    1   2    2         0.0000000038         0.0000042429
    2    1   3    2         0.0000097925         0.0000036364
-  
+
    3    1   1    1         0.0000000211         0.0000174250
    3    1   2    1         0.0000000420        -0.0000000069
    3    1   3    1        22.0529557329         0.0000000000
    3    1   1    2        -8.2651610764        -0.0000098991
    3    1   2    2         0.0000115026         0.0000078206
    3    1   3    2        -0.0000010859         0.0000080047
-  
+
    1    2   1    1        -0.0000001574        -0.0000027327
    1    2   2    1        -0.0000000283         0.0000021227
    1    2   3    1        -8.2649211258         0.0000120347
    1    2   1    2        10.5396372657         0.0000000000
    1    2   2    2        -1.7543976529        -0.0000404261
    1    2   3    2         0.0000028508         0.0000001313
-  
+
    2    2   1    1        -0.0000000009         0.0000021193
    2    2   2    1         0.0000000036        -0.0000042435
    2    2   3    1         0.0000097925        -0.0000036364
    2    2   1    2        -1.7543710693        -0.0000015606
    2    2   2    2         3.5089039645         0.0000000000
    2    2   3    2        -0.0000000000        -0.0000000000
-  
+
    3    2   1    1        -8.2651611299         0.0000095032
    3    2   2    1         0.0000113737        -0.0000094637
    3    2   3    1        -0.0000013992        -0.0000084321
    3    2   1    2         0.0000004450        -0.0000175425
    3    2   2    2        -0.0000000411        -0.0000000150
    3    2   3    2        22.0529577004         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.3389599349         0.0000000000
    1    1   2    1         0.1305477609         0.0000015272
    1    1   3    1         0.0000000706         0.0000000170
    1    1   1    2        -0.0000000348         0.0000001001
    1    1   2    2        -0.0000000192        -0.0000000203
    1    1   3    2        -0.1673960702        -0.0000002439
-  
+
    2    1   1    1         0.1305487457         0.0000000579
    2    1   2    1         0.1882215978         0.0000009152
    2    1   3    1         0.0000000408         0.0000000098
    2    1   1    2        -0.0000000199        -0.0000000211
    2    1   2    2        -0.0000000108         0.0000001247
    2    1   3    2        -0.0966459372        -0.0000000558
-  
+
    3    1   1    1         0.0000000004         0.0000003529
    3    1   2    1         0.0000000012         0.0000002036
    3    1   3    1         0.2812918721         0.0000000000
    3    1   1    2        -0.1674009302        -0.0000002005
    3    1   2    2        -0.0966487031         0.0000000671
    3    1   3    2        -0.0000000139         0.0000001021
-  
+
    1    2   1    1        -0.0000000051        -0.0000000879
    1    2   2    1        -0.0000000040         0.0000000281
    1    2   3    1        -0.1673960703         0.0000002437
    1    2   1    2         0.3389599422         0.0000000000
    1    2   2    2         0.1305477590        -0.0000015013
    1    2   3    2         0.0000000577         0.0000000027
-  
+
    2    2   1    1        -0.0000000030         0.0000000280
    2    2   2    1        -0.0000000022        -0.0000001203
    2    2   3    1        -0.0966459372         0.0000000557
    2    2   1    2         0.1305487462        -0.0000000580
    2    2   2    2         0.1882216039        -0.0000009002
    2    2   3    2         0.0000000333         0.0000000015
-  
+
    3    2   1    1        -0.1674009313         0.0000001925
    3    2   2    1        -0.0966487067        -0.0000001102
    3    2   3    1        -0.0000000178        -0.0000001076
    3    2   1    2         0.0000000090        -0.0000003553
    3    2   2    2         0.0000000042        -0.0000002055
    3    2   3    2         0.2812918972         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
  Phonon energies in Hartree :
    1.137077E-03  1.137078E-03  1.281753E-03  1.281755E-03  2.515384E-03
@@ -10190,8 +10190,8 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.00513
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -10264,7 +10264,7 @@ P newkpt: treating     10 bands with npw=      91 for ikpt=  40 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -12496,7 +12496,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      90.578      90.463
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -14115,102 +14115,102 @@ P newkpt: treating     10 bands with npw=      84 for ikpt=  36 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.5383393711         0.0000000000
    1    1   2    1        -0.7692920496         0.0000000000
    1    1   3    1        -0.0000003020         0.0000000000
    1    1   1    2        -1.5719939709         0.0000000000
    1    1   2    2         0.7861221661        -0.0000000000
    1    1   3    2        -0.0000003439         0.0000000000
-  
+
    2    1   1    1        -0.7692945713         0.0000000000
    2    1   2    1         1.5383417005         0.0000000000
    2    1   3    1         0.0000003342         0.0000000000
    2    1   1    2         0.7861218532        -0.0000000000
    2    1   2    2        -1.5720019472        -0.0000000000
    2    1   3    2         0.0000003454         0.0000000000
-  
+
    3    1   1    1         0.0000001351         0.0000000000
    3    1   2    1        -0.0000001182         0.0000000000
    3    1   3    1        26.0249482435         0.0000000000
    3    1   1    2        -0.0000001198         0.0000000000
    3    1   2    2         0.0000001025         0.0000000000
    3    1   3    2       -26.4538020388         0.0000000000
-  
+
    1    2   1    1        -1.5719940081        -0.0000000000
    1    2   2    1         0.7861221738         0.0000000000
    1    2   3    1         0.0000003430        -0.0000000000
    1    2   1    2         1.5383395036         0.0000000000
    1    2   2    2        -0.7692921273         0.0000000000
    1    2   3    2         0.0000002974         0.0000000000
-  
+
    2    2   1    1         0.7861218737         0.0000000000
    2    2   2    1        -1.5720019652         0.0000000000
    2    2   3    1        -0.0000003425        -0.0000000000
    2    2   1    2        -0.7692946238         0.0000000000
    2    2   2    2         1.5383418429         0.0000000000
    2    2   3    2        -0.0000003323         0.0000000000
-  
+
    3    2   1    1         0.0000001303        -0.0000000000
    3    2   2    1        -0.0000001340        -0.0000000000
    3    2   3    1       -26.4538020139        -0.0000000000
    3    2   1    2        -0.0000001084         0.0000000000
    3    2   2    2         0.0000000961         0.0000000000
    3    2   3    2        26.0249502656         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0494737543         0.0000000000
    1    1   2    1        -0.0000045441         0.0000000000
    1    1   3    1        -0.0000000061         0.0000000000
    1    1   1    2        -0.0505561028         0.0000000000
    1    1   2    2         0.0000046487         0.0000000000
    1    1   3    2        -0.0000000070         0.0000000000
-  
+
    2    1   1    1        -0.0000046377         0.0000000000
    2    1   2    1         0.0494685530         0.0000000000
    2    1   3    1         0.0000000043         0.0000000000
    2    1   1    2         0.0000046371         0.0000000000
    2    1   2    2        -0.0505510837        -0.0000000000
    2    1   3    2         0.0000000041         0.0000000000
-  
+
    3    1   1    1         0.0000000027         0.0000000000
    3    1   2    1        -0.0000000012         0.0000000000
    3    1   3    1         0.3319557932         0.0000000000
    3    1   1    2        -0.0000000024         0.0000000000
    3    1   2    2         0.0000000010         0.0000000000
    3    1   3    2        -0.3374259482         0.0000000000
-  
+
    1    2   1    1        -0.0505561040        -0.0000000000
    1    2   2    1         0.0000046483        -0.0000000000
    1    2   3    1         0.0000000069        -0.0000000000
    1    2   1    2         0.0494737585         0.0000000000
    1    2   2    2        -0.0000045445         0.0000000000
    1    2   3    2         0.0000000060         0.0000000000
-  
+
    2    2   1    1         0.0000046371        -0.0000000000
    2    2   2    1        -0.0505510843         0.0000000000
    2    2   3    1        -0.0000000040        -0.0000000000
    2    2   1    2        -0.0000046372         0.0000000000
    2    2   2    2         0.0494685578         0.0000000000
    2    2   3    2        -0.0000000043         0.0000000000
-  
+
    3    2   1    1         0.0000000026        -0.0000000000
    3    2   2    1        -0.0000000016        -0.0000000000
    3    2   3    1        -0.3374259479        -0.0000000000
    3    2   1    2        -0.0000000022         0.0000000000
    3    2   2    2         0.0000000010         0.0000000000
    3    2   3    2         0.3319558190         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.503469E-04 -1.113693E-04 -1.113585E-04  1.070468E-03  1.070581E-03
@@ -14244,8 +14244,8 @@ P newkpt: treating     10 bands with npw=      84 for ikpt=  36 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.79639
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -14318,7 +14318,7 @@ P newkpt: treating     10 bands with npw=      84 for ikpt=  36 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -16465,102 +16465,102 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        11.4756273596         0.0000000000
    1    1   2    1        -2.5443458076        -0.0000168686
    1    1   3    1         0.0000035102        -0.0000003874
    1    1   1    2         0.3546968998         0.0000036848
    1    1   2    2         1.1927434677         0.0000123736
    1    1   3    2        -0.0000045397        -0.0000004203
-  
+
    2    1   1    1        -2.5276944455         0.0000006628
    2    1   2    1         5.0889275199         0.0000000000
    2    1   3    1         0.0000007004         0.0000000019
    2    1   1    2         1.1889304669         0.0000054592
    2    1   2    2        -2.3850303922        -0.0000081994
    2    1   3    2         0.0000006638        -0.0000000028
-  
+
    3    1   1    1        -0.0000006673        -0.0000000077
    3    1   2    1        -0.0000000051         0.0000000101
    3    1   3    1        20.7884412604         0.0000000000
    3    1   1    2         0.0000000310        -0.0000000054
    3    1   2    2         0.0000004633         0.0000000162
    3    1   3    2        -8.7307119116        -0.0000025011
-  
+
    1    2   1    1         0.3546969114        -0.0000036484
    1    2   2    1         1.1927434071        -0.0000124039
    1    2   3    1         0.0000038862        -0.0000003280
    1    2   1    2        11.4756275855         0.0000000000
    1    2   2    2        -2.5443460596         0.0000167702
    1    2   3    2        -0.0000044014        -0.0000004510
-  
+
    2    2   1    1         1.1889304835        -0.0000054346
    2    2   2    1        -2.3850303933         0.0000082025
    2    2   3    1        -0.0000006597        -0.0000000028
    2    2   1    2        -2.5276945793        -0.0000006861
    2    2   2    2         5.0889277299         0.0000000000
    2    2   3    2        -0.0000006997         0.0000000019
-  
+
    3    2   1    1         0.0000002046        -0.0000000054
    3    2   2    1        -0.0000004153         0.0000000162
    3    2   3    1        -8.7307118780         0.0000024845
    3    2   1    2         0.0000005424        -0.0000000077
    3    2   2    2         0.0000000405         0.0000000101
    3    2   3    2        20.7884431830         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.3690618461         0.0000000000
    1    1   2    1         0.1185917922        -0.0000006264
    1    1   3    1         0.0000000711        -0.0000000078
    1    1   1    2         0.0114072276         0.0000001185
    1    1   2    2         0.0508793770         0.0000005279
    1    1   3    2        -0.0000000919        -0.0000000085
-  
+
    2    1   1    1         0.1192101528         0.0000000246
    2    1   2    1         0.2324909663        -0.0000003475
    2    1   3    1         0.0000000574        -0.0000000045
    2    1   1    2         0.0507377784         0.0000002711
    2    1   2    2        -0.0474053916         0.0000000702
    2    1   3    2        -0.0000000376        -0.0000000050
-  
+
    3    1   1    1        -0.0000000135        -0.0000000002
    3    1   2    1        -0.0000000079         0.0000000001
    3    1   3    1         0.2651626218         0.0000000000
    3    1   1    2         0.0000000006        -0.0000000001
    3    1   2    2         0.0000000112         0.0000000003
    3    1   3    2        -0.1113627728        -0.0000000319
-  
+
    1    2   1    1         0.0114072279        -0.0000001173
    1    2   2    1         0.0508793750        -0.0000005284
    1    2   3    1         0.0000000787        -0.0000000066
    1    2   1    2         0.3690618534         0.0000000000
    1    2   2    2         0.1185917870         0.0000006228
    1    2   3    2        -0.0000000891        -0.0000000091
-  
+
    2    2   1    1         0.0507377793        -0.0000002696
    2    2   2    1        -0.0474053925        -0.0000000698
    2    2   3    1         0.0000000300        -0.0000000039
    2    2   1    2         0.1192101520        -0.0000000255
    2    2   2    2         0.2324909694         0.0000003448
    2    2   3    2        -0.0000000678        -0.0000000052
-  
+
    3    2   1    1         0.0000000041        -0.0000000001
    3    2   2    1        -0.0000000073         0.0000000003
    3    2   3    1        -0.1113627723         0.0000000317
    3    2   1    2         0.0000000110        -0.0000000002
    3    2   2    2         0.0000000073         0.0000000001
    3    2   3    2         0.2651626463         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    9.981572E-04  1.327458E-03  1.659506E-03  2.077017E-03  2.133240E-03
@@ -16594,8 +16594,8 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.88166
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -16668,7 +16668,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -18815,102 +18815,102 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.3846320129         0.0000000000
    1    1   2    1        -0.6923304111         0.0000000087
    1    1   3    1        -0.0000000710        -0.0000000042
    1    1   1    2        -0.0000000020        -0.0000020080
    1    1   2    2        -0.0000000010         0.0000010038
    1    1   3    2        -0.0000000279        -0.0000000047
-  
+
    2    1   1    1        -0.6923310068        -0.0000000018
    2    1   2    1         1.3846317081         0.0000000000
    2    1   3    1         0.0000001062         0.0000000013
    2    1   1    2         0.0000000024         0.0000010022
    2    1   2    2        -0.0000000024        -0.0000020073
    2    1   3    2         0.0000000093         0.0000000137
-  
+
    3    1   1    1        -0.0000004756        -0.0000003193
    3    1   2    1         0.0000004733         0.0000001742
    3    1   3    1        21.6970362101         0.0000000000
    3    1   1    2        -0.0000009940        -0.0000018772
    3    1   2    2         0.0000000692         0.0000047514
    3    1   3    2         0.0000001616         0.0000625696
-  
+
    1    2   1    1         0.0000000026         0.0000020059
    1    2   2    1        -0.0000000021        -0.0000010032
    1    2   3    1        -0.0000000274        -0.0000000047
    1    2   1    2         1.3819886717         0.0000000000
    1    2   2    2        -0.6910059329         0.0000000087
    1    2   3    2         0.0000000183        -0.0000000043
-  
+
    2    2   1    1        -0.0000000003        -0.0000010048
    2    2   2    1        -0.0000000013         0.0000020062
    2    2   3    1         0.0000000096         0.0000000137
    2    2   1    2        -0.6910067120        -0.0000000019
    2    2   2    2         1.3819877979         0.0000000000
    2    2   3    2        -0.0000000469         0.0000000020
-  
+
    3    2   1    1         0.0000005782        -0.0000018797
    3    2   2    1         0.0000000397         0.0000047954
    3    2   3    1        -0.0000002660        -0.0000648621
    3    2   1    2        -0.0000005305        -0.0000003297
    3    2   2    2         0.0000002141         0.0000001800
    3    2   3    2        21.6970883355         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0445304497         0.0000000000
    1    1   2    1        -0.0000005349         0.0000000003
    1    1   3    1        -0.0000000014        -0.0000000001
    1    1   1    2        -0.0000000001        -0.0000000646
    1    1   2    2        -0.0000000001        -0.0000000000
    1    1   3    2        -0.0000000006        -0.0000000001
-  
+
    2    1   1    1        -0.0000005570        -0.0000000001
    2    1   2    1         0.0445298062         0.0000000001
    2    1   3    1         0.0000000017        -0.0000000000
    2    1   1    2         0.0000000001        -0.0000000001
    2    1   2    2        -0.0000000001        -0.0000000646
    2    1   3    2        -0.0000000001         0.0000000003
-  
+
    3    1   1    1        -0.0000000096        -0.0000000065
    3    1   2    1         0.0000000055         0.0000000003
    3    1   3    1         0.2767520149         0.0000000000
    3    1   1    2        -0.0000000201        -0.0000000380
    3    1   2    2        -0.0000000100         0.0000000892
    3    1   3    2         0.0000000021         0.0000007981
-  
+
    1    2   1    1         0.0000000001         0.0000000645
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1        -0.0000000006        -0.0000000001
    1    2   1    2         0.0444454385         0.0000000000
    1    2   2    2        -0.0000004307         0.0000000003
    1    2   3    2         0.0000000004        -0.0000000001
-  
+
    2    2   1    1         0.0000000000        -0.0000000001
    2    2   2    1        -0.0000000001         0.0000000645
    2    2   3    1        -0.0000000001         0.0000000003
    2    2   1    2        -0.0000004596        -0.0000000001
    2    2   2    2         0.0444448871         0.0000000001
    2    2   3    2        -0.0000000009        -0.0000000000
-  
+
    3    2   1    1         0.0000000117        -0.0000000381
    3    2   2    1         0.0000000077         0.0000000902
    3    2   3    1        -0.0000000034        -0.0000008273
    3    2   1    2        -0.0000000107        -0.0000000067
    3    2   2    2        -0.0000000012         0.0000000004
    3    2   3    2         0.2767526798         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
    7.135963E-04  7.136047E-04  7.142772E-04  7.142873E-04  1.780688E-03
@@ -18944,8 +18944,8 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.80076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -19018,7 +19018,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -21165,102 +21165,102 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        10.4233402785         0.0000000000
    1    1   2    1        -1.7848265555         0.0000409202
    1    1   3    1         0.0000027391         0.0000008373
    1    1   1    2        -0.0000010142         0.0000030282
    1    1   2    2        -0.0000000328        -0.0000021089
    1    1   3    2        -8.2412301373        -0.0000051381
-  
+
    2    1   1    1        -1.7723662454         0.0000007476
    2    1   2    1         3.5696173129         0.0000000000
    2    1   3    1        -0.0000000967         0.0000000009
    2    1   1    2         0.0000003788        -0.0000021191
    2    1   2    2         0.0000000074         0.0000042430
    2    1   3    2         0.0003823805         0.0000070850
-  
+
    3    1   1    1        -0.0000002009         0.0000174176
    3    1   2    1        -0.0000000399        -0.0000000089
    3    1   3    1        21.9951065964         0.0000000000
    3    1   1    2        -8.1919391855        -0.0000069827
    3    1   2    2        -0.0001688103         0.0000067744
    3    1   3    2        -0.0000010546         0.0000080159
-  
+
    1    2   1    1        -0.0000000313        -0.0000027290
    1    2   2    1         0.0000000338         0.0000021167
    1    2   3    1        -8.2315808557         0.0000051351
    1    2   1    2        10.4211482658         0.0000000000
    1    2   2    2        -1.7859318256        -0.0000404005
    1    2   3    2         0.0000022490        -0.0000000808
-  
+
    2    2   1    1        -0.0000002975         0.0000021220
    2    2   2    1         0.0000000022        -0.0000042422
    2    2   3    1         0.0003807556        -0.0000070880
    2    2   1    2        -1.7735564251        -0.0000007420
    2    2   2    2         3.5718474629         0.0000000000
    2    2   3    2         0.0000000940         0.0000000019
-  
+
    3    2   1    1        -8.2006721230         0.0000066620
    3    2   2    1        -0.0001744487        -0.0000080162
    3    2   3    1        -0.0000013104        -0.0000084201
    3    2   1    2         0.0000008439        -0.0000175424
    3    2   2    2         0.0000000072        -0.0000000164
    3    2   3    2        21.9867092735         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.3352197736         0.0000000000
    1    1   2    1         0.1272583719         0.0000015196
    1    1   3    1         0.0000000555         0.0000000170
    1    1   1    2        -0.0000000326         0.0000000974
    1    1   2    2        -0.0000000201        -0.0000000221
    1    1   3    2        -0.1669162377        -0.0000001041
-  
+
    2    1   1    1         0.1277210947         0.0000000278
    2    1   2    1         0.1885400812         0.0000008934
    2    1   3    1         0.0000000298         0.0000000098
    2    1   1    2        -0.0000000048        -0.0000000225
    2    1   2    2        -0.0000000031         0.0000001238
    2    1   3    2        -0.0963601920         0.0000001056
-  
+
    3    1   1    1        -0.0000000041         0.0000003528
    3    1   2    1        -0.0000000033         0.0000002035
    3    1   3    1         0.2805539895         0.0000000000
    3    1   1    2        -0.1659179086        -0.0000001414
    3    1   2    2        -0.0957966972         0.0000000768
    3    1   3    2        -0.0000000135         0.0000001022
-  
+
    1    2   1    1        -0.0000000010        -0.0000000878
    1    2   2    1         0.0000000007         0.0000000279
    1    2   3    1        -0.1667208031         0.0000001040
    1    2   1    2         0.3351492774         0.0000000000
    1    2   2    2         0.1271766258        -0.0000015003
    1    2   3    2         0.0000000456        -0.0000000016
-  
+
    2    2   1    1        -0.0000000116         0.0000000281
    2    2   2    1        -0.0000000059        -0.0000001203
    2    2   3    1        -0.0962473958        -0.0000001057
    2    2   1    2         0.1276361955        -0.0000000276
    2    2   2    2         0.1885629976        -0.0000008821
    2    2   3    2         0.0000000285        -0.0000000009
-  
+
    3    2   1    1        -0.1660947837         0.0000001349
    3    2   2    1        -0.0958989480        -0.0000001096
    3    2   3    1        -0.0000000167        -0.0000001074
    3    2   1    2         0.0000000171        -0.0000003553
    3    2   2    2         0.0000000100        -0.0000002055
    3    2   3    2         0.2804468792         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
  Phonon energies in Hartree :
    1.146868E-03  1.147227E-03  1.275464E-03  1.276513E-03  2.503833E-03
@@ -21294,8 +21294,8 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.00513
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/testf_gcc47/mverstra_7.7.1-public/tests/Pspdir/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -21368,7 +21368,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
 - newkpt : prtvol=0 or 1, do not print more k-points.
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -22909,7 +22909,7 @@ P newkpt: treating     10 bands with npw=      95 for ikpt=  50 by node    0
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.5762038729E+00  5.5762038729E+00  8.8543117956E+00 Bohr
               amu      4.78800000E+01
@@ -24729,7 +24729,7 @@ P          mk1mem12        64
  M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
  Computer Phys. Comm. 180, 2582-2615 (2009).
  Comment : the third generic paper describing the ABINIT project.
- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+ Note that a version of this paper, that is not formatted for Computer Phys. Comm.
  is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
  The licence allows the authors to put it on the Web.
 
@@ -24748,7 +24748,7 @@ P          mk1mem12        64
 
  And optionally :
 
- [5] First-principles computation of material properties : the ABINIT software project. 
+ [5] First-principles computation of material properties : the ABINIT software project.
  X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
  M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
  Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7

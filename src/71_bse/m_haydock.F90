@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
+!!  Copyright (C) 2008-2025 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@ MODULE m_haydock
  use m_time,              only : timab
  use m_fstrings,          only : strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
- use defs_datatypes,      only : ebands_t, pseudopotential_type
+ use defs_datatypes,      only : pseudopotential_type
  use m_geometry,          only : normv
  use m_hide_blas,         only : xdotc, xgemv
  use m_hide_lapack,       only : matrginv
@@ -50,7 +50,7 @@ MODULE m_haydock
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
  use m_hexc,              only : hexc_init, hexc_interp_init, hexc_free, hexc_interp_free, &
-&                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
+                                 hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
  use m_eprenorms,         only : eprenorms_t, renorm_bst
  use m_wfd_optic,         only : calc_optical_mels
@@ -304,8 +304,8 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  prefix = ""
  do itemp = 1, ntemp
 
-   call ebands_copy(hexc%KS_BSt, EPBSt)
-   call ebands_copy(hexc%QP_BSt, EP_QPBSt)
+   call hexc%KS_BSt%copy(EPBSt)
+   call hexc%QP_BSt%copy(EP_QPBSt)
 
    ! =================================================
    ! == Calculate elphon vector in transition space ==
@@ -535,7 +535,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      path = strcat(BS_files%out_basename,strcat(prefix,"_MDF.nc"))
      NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
      NCF_CHECK(cryst%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
+     NCF_CHECK(QP_bst%ncwrite(ncid))
      call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
      NCF_CHECK(nf90_close(ncid))
    end if
@@ -546,13 +546,12 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    ABI_FREE(dos_ks)
    ABI_FREE(dos_gw)
 
-   call ebands_free(EPBSt)
-   call ebands_free(EP_QPBst)
+   call EPBSt%free()
+   call EP_QPBst%free()
 
  end do ! itemp loop
 
  ABI_FREE(opt_cvk)
-
  ABI_FREE(kets)
 
  call timab(694,2,tsec) ! exc_haydock_driver(apply

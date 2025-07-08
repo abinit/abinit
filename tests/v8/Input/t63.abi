@@ -1,7 +1,7 @@
 t63o_DVDB
 4
-t61o_DS3_POT1 
-t61o_DS4_POT1    
+t61o_DS3_POT1
+t61o_DS4_POT1
 t61o_DS4_POT2
 t61o_DS5_POT1
 
@@ -12,7 +12,7 @@ t61o_DS5_POT1
 #%% [shell]
 #%% post_commands = ww_cp t63o_DVDB t65i_DVDB
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t63.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 1

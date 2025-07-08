@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Sep 2024.
-- ( at 17h32 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t69.abi
+.Starting date : Tue 19 Nov 2024.
+- ( at 19h54 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t69.abi
 - output file    -> t69.abo
 - root for input  files -> t69i
 - root for output files -> t69o
@@ -160,8 +160,8 @@ meta: {optdriver: 1, rfmagn: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -182,7 +182,7 @@ meta: {optdriver: 1, rfmagn: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   6
@@ -212,33 +212,33 @@ tolerances: {toldfe: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.6318740927846      2.632E+00 1.809E-01 1.532E+03
- ETOT  2   4.2923245269563      1.660E+00 6.229E-01 2.087E+03
- ETOT  3   4.8886611470588      5.963E-01 6.244E-02 2.349E+03
- ETOT  4   9.9774337721984      5.089E+00 8.385E-01 7.586E+02
- ETOT  5   21.982063926205      1.200E+01 4.973E-01 3.805E+02
- ETOT  6   42.203158584519      2.022E+01 2.449E+00 1.254E+02
- ETOT  7   64.365965373738      2.216E+01 9.069E-01 3.869E+01
- ETOT  8   68.713578345387      4.348E+00 6.663E-01 5.641E-01
- ETOT  9   69.186212778999      4.726E-01 3.571E-01 5.353E-01
- ETOT 10   69.198335108946      1.212E-02 2.990E-01 1.854E-01
- ETOT 11   69.195109433064     -3.226E-03 2.726E-01 1.015E-01
- ETOT 12   69.205425807592      1.032E-02 1.420E-01 3.292E-02
- ETOT 13   69.224038998065      1.861E-02 6.022E-01 3.307E-03
- ETOT 14   69.229438283978      5.399E-03 6.846E-02 7.901E-04
- ETOT 15   69.235338406111      5.900E-03 3.470E-02 2.608E-04
+-ETOT  1   2.6318746779055      2.632E+00 1.809E-01 1.532E+03
+ ETOT  2   4.2923230724136      1.660E+00 6.229E-01 2.087E+03
+ ETOT  3   4.8886630119082      5.963E-01 6.244E-02 2.349E+03
+ ETOT  4   9.9773858888613      5.089E+00 8.385E-01 7.586E+02
+ ETOT  5   21.981835965836      1.200E+01 4.972E-01 3.805E+02
+ ETOT  6   42.203920992120      2.022E+01 2.449E+00 1.254E+02
+ ETOT  7   64.368418811837      2.216E+01 9.070E-01 3.868E+01
+ ETOT  8   68.714452454552      4.346E+00 6.662E-01 5.640E-01
+ ETOT  9   69.186211216877      4.718E-01 3.571E-01 5.352E-01
+ ETOT 10   69.198232647635      1.202E-02 2.990E-01 1.854E-01
+ ETOT 11   69.195108822536     -3.124E-03 2.725E-01 1.015E-01
+ ETOT 12   69.205384598137      1.028E-02 1.419E-01 3.292E-02
+ ETOT 13   69.224071579790      1.869E-02 6.022E-01 3.301E-03
+ ETOT 14   69.229425345483      5.354E-03 6.846E-02 7.904E-04
+ ETOT 15   69.235320555459      5.895E-03 3.469E-02 2.608E-04
 
- At SCF step   15, etot is converged : 
-  for the second time, diff in etot=  5.900E-03 < toldfe=  1.000E-02
+ At SCF step   15, etot is converged :
+  for the second time, diff in etot=  5.895E-03 < toldfe=  1.000E-02
 
  ------------------------------------------------------------------------
  Integrals of the first order density n^(1) and magnetization m^(1):
  ------------------------------------------------------------------------
 
-  Re[n^(1)] =  -0.62736963E-01   Im[n^(1)] =  -0.17310131E-04
-  Re[mx^(1)]=   0.29418638E+00   Im[mx^(1)]=  -0.26146227E-06
-  Re[my^(1)]=   0.13843180E+03   Im[my^(1)]=   0.19332138E-06
-  Re[mz^(1)]=  -0.82565584E+01   Im[mz^(1)]=   0.11161472E-05
+  Re[n^(1)] =  -0.62736876E-01   Im[n^(1)] =  -0.17282710E-04
+  Re[mx^(1)]=   0.29418629E+00   Im[mx^(1)]=  -0.26128918E-06
+  Re[my^(1)]=   0.13843178E+03   Im[my^(1)]=   0.19298469E-06
+  Re[mz^(1)]=  -0.82565558E+01   Im[mz^(1)]=   0.11112941E-05
 
  ------------------------------------------------------------------------
 
@@ -246,39 +246,39 @@ tolerances: {toldfe: 1.00E-02, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -61.027E-03; max=  34.695E-03
+ Mean square residual over all n,k,spin=  -61.027E-03; max=  34.692E-03
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   3.22995902E+01 eigvalue=   4.05684408E+00  local=  -2.99408743E+00
+     kin0=   3.22995815E+01 eigvalue=   4.05684303E+00  local=  -2.99408670E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =   0.00000000E+00  Hartree=   4.88449957E-03     xc=  -4.77223714E+02
+ loc psp =   0.00000000E+00  Hartree=   4.88450859E-03     xc=  -4.77223587E+02
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   5.33270931E+02     enl0=  -2.01791102E+01   enl1=   0.00000000E+00
+    edocc=   5.33270789E+02     enl0=  -2.01791046E+01   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=   6.92353384E+01
+   erelax=   6.92353206E+01
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      3.00000000E+01 Hartree
-           etotal      6.9235338406E+01
+           etotal      6.9235320555E+01
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
            irdwfk           1
@@ -394,7 +394,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -406,12 +406,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -429,7 +429,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -444,15 +444,15 @@ P          mk1mem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         21.5  wall=         21.6
+- Proc.   0 individual time (sec): cpu=         21.7  wall=         21.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.5  wall=         21.6
++Overall time at end (sec) : cpu=         21.7  wall=         21.8

@@ -79,15 +79,15 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%  t75.abo, tolnlines = 0, tolabs = 3.811e-12, tolrel = 5.000e-08
+#%% files_to_test =
+#%%  t75.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% keywords = 
+#%% keywords =
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Same as test 66, H2 molecule with 1 k points, but uses the restartxf=-1 option
-#%%   to test the output of the HIST.nc file. Note that HIST.nc is not read since 
+#%%   to test the output of the HIST.nc file. Note that HIST.nc is not read since
 #%%   one should introduce a getrestartxf variable.
 #%%<END TEST_INFO>

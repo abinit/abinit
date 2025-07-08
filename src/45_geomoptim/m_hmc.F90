@@ -6,7 +6,7 @@
 !!  Auxiliary hmc functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2024 ABINIT group (SPr)
+!!  Copyright (C) 2018-2025 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@
 #include "abi_common.h"
 
 module m_hmc
-    
+
  use defs_basis
  use m_abicore
  use m_errors
@@ -37,11 +37,11 @@ module m_hmc
  private
 
 ! *************************************************************************
- public :: compute_kinetic_energy 
+ public :: compute_kinetic_energy
  public :: generate_random_velocities
  public :: metropolis_check
 
-contains 
+contains
 !!***
 
 !!****f* ABINIT/m_hmc/compute_kinetic_energy
@@ -62,24 +62,22 @@ contains
 !! SOURCE
 
 subroutine compute_kinetic_energy(ab_mover,vel,ekin)
-    
+
 !Arguments ------------------------------------
- type(abimover),intent(in)   :: ab_mover              
+ type(abimover),intent(in)   :: ab_mover
  real(dp),      intent(in)   :: vel(3,ab_mover%natom) ! velocities
- real(dp),      intent(out)  :: ekin                  ! output kinetic energy     
+ real(dp),      intent(out)  :: ekin                  ! output kinetic energy
 
 !Local variables-------------------------------
- integer :: ii,jj                                
-!character(len=500) :: msg                   
- 
+ integer :: ii
+!character(len=500) :: msg
+
 ! *************************************************************************
 
  ekin=0.0
- do ii=1,ab_mover%natom
-   do jj=1,3
-     ekin=ekin+half*ab_mover%amass(ii)*vel(jj,ii)**2
-   end do
- end do
+do ii = 1, ab_mover%natom
+  ekin = ekin + half * ab_mover%amass(ii) * DOT_PRODUCT(vel(:, ii), vel(:, ii))
+end do
 
 end subroutine compute_kinetic_energy
 !!***
@@ -107,21 +105,22 @@ end subroutine compute_kinetic_energy
 !! SOURCE
 
 subroutine generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)
-    
+
 !Arguments ------------------------------------
- type(abimover),intent(in)   :: ab_mover              
+ type(abimover),intent(in)   :: ab_mover
  integer,       intent(inout):: seed
  real(dp),      intent(in)   :: kbtemp
  real(dp),      intent(inout):: vel(3,ab_mover%natom) ! velocities
- real(dp),      intent(out)  :: ekin                  ! output kinetic energy     
+ real(dp),      intent(out)  :: ekin                  ! output kinetic energy
 !Local variables-------------------------------
- integer :: ii,jj
- real(dp):: mtot,mvtot(3),mv2tot,factor                                
-!character(len=500) :: msg                   
- 
+ integer :: ii,jj,natom
+ real(dp):: mtot,mvtot(3),mv2tot,factor
+!character(len=500) :: msg
+
 ! *************************************************************************
 
 
+ natom = ab_mover%natom
  mtot=sum(ab_mover%amass(:))         ! total mass to eventually get rid of total center of mass (CoM) momentum
  !generate velocities from normal distribution with zero mean and correct standard deviation
  do ii=1,ab_mover%natom
@@ -132,23 +131,15 @@ subroutine generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)
  end do
  !since number of atoms is most probably not big enough to obtain overall zero CoM momentum, shift the velocities
  !and then renormalize
- mvtot=zero ! total momentum
+ ! mvtot -> total momentum
+ mvtot(:) = MATMUL(vel(1:3,1:natom), ab_mover%amass(1:natom))
  do ii=1,ab_mover%natom
-   do jj=1,3
-     mvtot(jj)=mvtot(jj)+ab_mover%amass(ii)*vel(jj,ii)
-   end do
- end do
- do ii=1,ab_mover%natom
-   do jj=1,3
-     vel(jj,ii)=vel(jj,ii)-(mvtot(jj)/mtot)
-   end do
+   vel(:,ii)=vel(1:3,ii)-(mvtot(1:3)/mtot)
  end do
  !now the total cell momentum is zero
  mv2tot=0.0
  do ii=1,ab_mover%natom
-   do jj=1,3
-     mv2tot=mv2tot+ab_mover%amass(ii)*vel(jj,ii)**2
-   end do
+   mv2tot=mv2tot+ab_mover%amass(ii)* DOT_PRODUCT(vel(:,ii), vel(:,ii))
  end do
  factor = mv2tot/(dble(3*ab_mover%natom))
  factor = sqrt(kbtemp/factor)
@@ -162,9 +153,9 @@ end subroutine generate_random_velocities
 
 
 
-!!****f* ABINIT/m_hmc/metropolis_check      
+!!****f* ABINIT/m_hmc/metropolis_check
 !! NAME
-!!  metropolis_check      
+!!  metropolis_check
 !!
 !! FUNCTION
 !!  Make an acceptance decision based on the energy differences
@@ -180,17 +171,17 @@ end subroutine generate_random_velocities
 !! SOURCE
 
 subroutine metropolis_check(seed,de,kbtemp,iacc)
-    
+
 !Arguments ------------------------------------
  integer,       intent(inout):: seed
- real(dp),      intent(in)   :: de         
- real(dp),      intent(in)   :: kbtemp         
- integer,       intent(inout):: iacc    
+ real(dp),      intent(in)   :: de
+ real(dp),      intent(in)   :: kbtemp
+ integer,       intent(inout):: iacc
 
 !Local variables-------------------------------
  real(dp)   :: rnd
-!character(len=500) :: msg                   
- 
+!character(len=500) :: msg
+
 ! *************************************************************************
 
  iacc=0

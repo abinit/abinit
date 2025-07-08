@@ -30,7 +30,7 @@ module m_gwrdm
  use m_fstrings,       only : sjoin, itoa
  use m_melemts,        only : melements_t
  use m_bz_mesh,        only : kmesh_t
- use defs_datatypes,   only : ebands_t
+ use m_ebands,         only : ebands_t
  use m_sigma,          only : sigma_t
  use m_xctk,           only : xcden
  use m_gaussian_quadrature, only: cgqf

@@ -7,7 +7,7 @@
 !! Solve Anderson model with the density/density Hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,10 +25,17 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 MODULE m_hubbard_one
 
 
  use defs_basis
+
+#ifdef HAVE_GPU_MARKERS
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -47,7 +54,7 @@ contains
 !! Solve the hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +66,6 @@ contains
 !!  dft_occup
 !!  mpi_enreg=information about MPI parallelization
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
@@ -68,21 +74,21 @@ contains
 !!
 !! SOURCE
 
-subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
+subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawprtvol,hdc,weiss)
 
  use defs_basis
  use m_errors
  use m_abicore
 
- use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
  use m_green, only : green_type,init_green,destroy_green
  use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : oper_type,init_oper,destroy_oper,loc_oper,print_oper
+ use m_oper, only : oper_type,init_oper,destroy_oper,print_oper
  use m_matlu, only : matlu_type,sym_matlu, print_matlu, gather_matlu,&
 & diag_matlu,init_matlu,destroy_matlu,rotate_matlu,copy_matlu,slm2ylm_matlu
- use m_hu, only : hu_type,rotatevee_hu
+ use m_hu, only : destroy_vee,hu_type,init_vee,rotatevee_hu,vee_type
  use m_datafordmft, only : compute_levels
+
  implicit none
 
 !Arguments ------------------------------------
@@ -92,7 +98,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  type(green_type), intent(inout) :: green
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(hu_type), intent(inout) :: hu(cryst_struc%ntypat)
- type(pawang_type), intent(in) :: pawang
  type(oper_type), intent(inout) :: hdc
  integer, intent(in) :: pawprtvol
  type(green_type), intent(inout) :: weiss
@@ -100,9 +105,9 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !Local variables ------------------------------
  type  :: level2_type
   integer, pointer :: repart(:,:) => null()
-  integer, pointer :: ocp(:,:) => null()
-  integer, pointer :: transition(:,:) => null()
-  integer, pointer :: transition_m(:,:) => null()
+  integer, ABI_CONTIGUOUS pointer :: ocp(:,:) => null()
+  integer, ABI_CONTIGUOUS pointer :: transition(:,:) => null()
+  integer, ABI_CONTIGUOUS pointer :: transition_m(:,:) => null()
  end type level2_type
  type  :: level1_type
   real(dp), pointer :: config(:) => null()
@@ -110,16 +115,17 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 ! scalars
  character(len=500) :: message
  integer :: iatom,ifreq,im,im1,isppol,ispinor,ispinor1
- integer :: lpawu,mbandc,natom,nkpt,nspinor,nsppol,nsppol_imp,testblock,tndim,useylm
+ integer :: lpawu,mbandc,natom,ndim,nkpt,nspinor,nsppol,nsppol_imp,testblock,useylm
 ! complex(dpc) :: g,g0,w
 ! arrays
  complex(dp), allocatable :: Id(:,:,:,:)
- type(coeff2c_type), allocatable :: eigvectmatlu(:,:)
- type(coeff2_type), allocatable :: udens_atoms(:)
+ type(matlu_type), allocatable :: eigvectmatlu(:)
+ type(matlu_type), allocatable :: udens_atoms(:)
  type(oper_type)  :: energy_level
  type(green_type) :: green_hubbard
  type(matlu_type), allocatable :: level_diag(:)
  complex(dpc) :: omega_current
+ type(vee_type), allocatable :: vee_rotated(:)
 ! ************************************************************************
  mbandc=paw_dmft%mbandc
  nkpt=paw_dmft%nkpt
@@ -135,23 +141,20 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !Allocations: levels and eigenvectors
 !======================================
  ABI_MALLOC(level_diag,(natom))
- ABI_MALLOC(eigvectmatlu,(natom,nsppol))
+ ABI_MALLOC(eigvectmatlu,(natom))
  ABI_MALLOC(udens_atoms,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,level_diag)
+ call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,eigvectmatlu)
+ call init_matlu(natom,2,1,paw_dmft%lpawu,udens_atoms)
  do iatom=1,cryst_struc%natom
    lpawu=paw_dmft%lpawu(iatom)
    if(lpawu/=-1) then
-     tndim=nspinor*(2*lpawu+1)
-     do isppol=1,nsppol
-       ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
-     end do
-     ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
      level_diag(iatom)%mat=czero
    end if
  end do
 
  call init_oper(paw_dmft,energy_level,opt_ksloc=3)
- call compute_levels(cryst_struc,energy_level,hdc,pawang,paw_dmft)
+ call compute_levels(energy_level,hdc,paw_dmft)
 !!========================
 !!Get KS eigenvalues
 !!========================
@@ -209,6 +212,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
          Id(im,im,ispinor,ispinor)=cone
        end do
      end do ! ib
+     ndim = 2*lpawu+1
      do ifreq=1,weiss%nw
        if(weiss%w_type=="imag") then
          omega_current=cmplx(zero,weiss%omega(ifreq),kind=dp)
@@ -220,9 +224,9 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
            do isppol=1,nsppol
              do ispinor=1,nspinor
                do ispinor1=1,nspinor
-                 weiss%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=&
+                 weiss%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol)=&
 &                 ( omega_current*Id(im,im1,ispinor,ispinor1) - &
-&                 energy_level%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
+&                 energy_level%matlu(iatom)%mat(im+(ispinor-1)*ndim,im1+(ispinor1-1)*ndim,isppol))
                end do ! ispinor1
              end do ! ispinor
            end do ! isppol
@@ -243,18 +247,22 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  if(.not.hu(1)%jpawu_zero.or.nsppol/=2) nsppol_imp=1
 !  Diagonalize energy levels
  useylm=paw_dmft%dmft_blockdiag
- if(useylm==1) call slm2ylm_matlu(energy_level%matlu,natom,1,pawprtvol)
+ if(useylm==1) call slm2ylm_matlu(energy_level%matlu,natom,paw_dmft,1,pawprtvol)
  testblock=1
  if(useylm==1) testblock=8
- call diag_matlu(energy_level%matlu,level_diag,natom,&
-& prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1,test=testblock)
+ call diag_matlu(energy_level%matlu,level_diag,natom,prtopt=pawprtvol,eigvectmatlu=eigvectmatlu, &
+               & nsppol_imp=nsppol_imp,opt_real=1,test=testblock)
 
 !  Use rotation matrix to rotate interaction
- if(useylm==1) then 
-   call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,4)
+ ABI_MALLOC(vee_rotated,(natom))
+ call init_vee(paw_dmft,vee_rotated)
+ if(useylm==1) then
+   call rotatevee_hu(hu,paw_dmft,pawprtvol,eigvectmatlu,4,udens_atoms,vee_rotated)
  else
-   call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,1)
- endif 
+   call rotatevee_hu(hu,paw_dmft,pawprtvol,eigvectmatlu,1,udens_atoms,vee_rotated)
+ endif
+ call destroy_vee(paw_dmft,vee_rotated)
+ ABI_FREE(vee_rotated)
 !write(std_out,*)"udens after rotatevee", udens_atoms(1)%value
  write(message,'(a,2x,a,f13.5)') ch10,&
 & " == Print Diagonalized Energy levels for Fermi Level=",paw_dmft%fermie
@@ -293,8 +301,8 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  call wrtout(std_out,message,'COLL')
  call print_matlu(green_hubbard%oper(1)%matlu,natom,1)
  do ifreq=1,green_hubbard%nw
-   call rotate_matlu(green_hubbard%oper(ifreq)%matlu,eigvectmatlu,natom,3,0)
-   if(useylm==1) call slm2ylm_matlu(green_hubbard%oper(ifreq)%matlu,natom,2,0)
+   call rotate_matlu(green_hubbard%oper(ifreq)%matlu,eigvectmatlu,natom,0)
+   if(useylm==1) call slm2ylm_matlu(green_hubbard%oper(ifreq)%matlu,natom,paw_dmft,2,0)
    call copy_matlu(green_hubbard%oper(ifreq)%matlu,green%oper(ifreq)%matlu,natom)
  end do
  write(message,'(2a,f13.5)') ch10," == Green function after rotation"
@@ -340,16 +348,9 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  call destroy_green(green_hubbard)
  call destroy_oper(energy_level)
  call destroy_matlu(level_diag,natom)
+ call destroy_matlu(udens_atoms,natom)
+ call destroy_matlu(eigvectmatlu,natom)
  ABI_FREE(level_diag)
- do iatom=1,cryst_struc%natom
-   lpawu=paw_dmft%lpawu(iatom)
-   if(lpawu/=-1) then
-     ABI_FREE(udens_atoms(iatom)%value)
-     do isppol=1,nsppol
-       ABI_FREE(eigvectmatlu(iatom,isppol)%value)
-     end do
-   end if
- end do
  ABI_FREE(eigvectmatlu)
  ABI_FREE(udens_atoms)
 !!***
@@ -364,7 +365,7 @@ contains
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -406,14 +407,16 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(matlu_type),intent(in) :: level_diag(cryst_struc%natom)
  type(hu_type), intent(inout) :: hu(cryst_struc%ntypat)
- type(coeff2_type),intent(in) :: udens_atoms(cryst_struc%natom)
+ type(matlu_type),intent(in) :: udens_atoms(cryst_struc%natom)
 
 !Local variables ------------------------------
 ! scalars
  integer :: cnk,iacc,iatom,iconfig,ielec,ifreq,ilevel,im,im1,isppol,ispinor,itrans,jconfig,jelec
- integer :: lpawu,m_temp,nconfig,nelec,nlevels,nspinor,nsppol,occupied_level,sum_test
+ integer :: lpawu,m_temp,nconfig,ndim,nelec,nlevels,nspinor,nsppol,occupied_level,sum_test,gpu_option
+ integer :: nconfig_next
  integer, allocatable :: occup(:,:),nconfig_nelec(:)
  character(len=500) :: message
+ integer, ABI_CONTIGUOUS pointer :: ocp(:,:),ocp_next(:,:),transition(:,:),transition_m(:,:)
 ! arrays
  type(green_type) :: green_hubbard_realw
  type(level2_type), allocatable :: occ_level(:)
@@ -425,6 +428,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  real(dp), allocatable :: elevels(:)
  real(dp) :: emax,emin,eshift,prtopt, Ej_np1, Ei_n,beta,maxarg_exp,tmp
 !************************************************************************
+   ABI_NVTX_START_RANGE(NVTX_DMFT_HUBBARD_ONE)
    maxarg_exp=300
 
 !  hu is not used anymore.
@@ -438,6 +442,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
    prtopt=1
    beta=one/paw_dmft%temp
    call init_green(green_hubbard_realw,paw_dmft,opt_oper_ksloc=2,wtype=green_hubbard%w_type) ! initialize only matlu
+   gpu_option=paw_dmft%gpu_option
 
    do iatom=1,cryst_struc%natom
      lpawu=paw_dmft%lpawu(iatom)
@@ -482,18 +487,19 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
        occup(0,:)=0
        iacc=0
        elevels=zero
+       ndim=2*lpawu+1
        do isppol=1,nsppol
          do ispinor=1,nspinor
            do im1=1,(2*lpawu+1)
              iacc=iacc+1
-             elevels(iacc)=level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)
-             if(abs(aimag(level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)))>tol8) then
+             elevels(iacc)=level_diag(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol)
+             if(abs(aimag(level_diag(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol)))>tol8) then
                message = " Hubbard I: levels are imaginary"
-               write(std_out,*) level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)
+               write(std_out,*) level_diag(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol)
                ABI_BUG(message)
              end if
              if(nsppol==1.and.nspinor==1) then
-               elevels(nspinor*(2*lpawu+1)+iacc)=level_diag(iatom)%mat(im1,im1,isppol,ispinor,ispinor)
+               elevels(nspinor*(2*lpawu+1)+iacc)=level_diag(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol)
              end if
 !            ! change it by: real(level_diag) with warning
            end do
@@ -568,8 +574,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
              do jelec=1,nelec
                e_nelec(nelec)%config(iconfig)= e_nelec(nelec)%config(iconfig)   &
 !              &               + hu(cryst_struc%typat(iatom))%udens(occ_level(nelec)%repart(iconfig,ielec), &
-&               + udens_atoms(iatom)%value(occ_level(nelec)%repart(iconfig,ielec), &
-&               occ_level(nelec)%repart(iconfig,jelec))/2.d0 ! udens(i,i)=0
+&               + dble(udens_atoms(iatom)%mat(occ_level(nelec)%repart(iconfig,ielec), &
+&               occ_level(nelec)%repart(iconfig,jelec),1))/2.d0 ! udens(i,i)=0
 !              write(std_out,*) ielec,occ_level(nelec)%repart(iconfig,ielec)
 !              write(std_out,*) jelec,occ_level(nelec)%repart(iconfig,jelec)
 !              write(std_out,*)hu(cryst_struc%typat(iatom))%udens(occ_level(nelec)%repart(iconfig,ielec), &
@@ -628,36 +634,84 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !      Built transitions between configurations
 !      ===================================
        do nelec=0,nlevels-1
-         do iconfig=1,nconfig_nelec(nelec)
-           itrans=0 ! transition from iconfig
-           do jconfig=1, nconfig_nelec(nelec+1)
-             sum_test=0
-             do ilevel=1,nlevels
-!              test if their is one electron added to the starting configuration
-               sum_test=sum_test + &
-&               (occ_level(nelec+1)%ocp(jconfig,ilevel)- occ_level(nelec)%ocp(iconfig,ilevel))**2
-!              save the level for the electron added
-               if(occ_level(nelec+1)%ocp(jconfig,ilevel)==1.and.occ_level(nelec)%ocp(iconfig,ilevel)==0) then
-                 m_temp=ilevel
+
+
+
+         nconfig      = nconfig_nelec(nelec)
+         nconfig_next = nconfig_nelec(nelec+1)
+         transition   => occ_level(nelec)%transition
+         transition_m => occ_level(nelec)%transition_m
+         ocp          => occ_level(nelec)%ocp
+         ocp_next     => occ_level(nelec+1)%ocp
+
+         if(gpu_option==ABI_GPU_DISABLED) then
+           !$OMP PARALLEL DO PRIVATE(iconfig,jconfig,itrans,sum_test,m_temp)
+           do iconfig=1,nconfig
+             itrans=0 ! transition from iconfig
+             do jconfig=1, nconfig_next
+               sum_test=0
+               do ilevel=1,nlevels
+  !              test if their is one electron added to the starting configuration
+                 sum_test=sum_test + &
+  &               (ocp_next(jconfig,ilevel)-ocp(iconfig,ilevel))**2
+  !              save the level for the electron added
+                 if(ocp_next(jconfig,ilevel)==1.and.ocp(iconfig,ilevel)==0) then
+                   m_temp=ilevel
+                 end if
+               end do ! ilevel
+               if(sum_test==1) then
+                 itrans=itrans+1
+                 !if(itrans>nlevels-nelec) then
+                 !  write(message,'(a,4i4)') "BUG: itrans is to big in hubbard_one",itrans,iconfig,jconfig,ilevel
+                 !  call wrtout(std_out,message,'COLL')
+                 !end if
+                 transition(iconfig,itrans)=jconfig  ! jconfig=config(n+1) obtained after transition
+                 transition_m(iconfig,itrans)=m_temp  !  level to fill to do the transition
                end if
-             end do ! ilevel
-             if(sum_test==1) then
-               itrans=itrans+1
-               if(itrans>nlevels-nelec) then
-                 write(message,'(a,4i4)') "BUG: itrans is to big in hubbard_one",itrans,iconfig,jconfig,ilevel
-                 call wrtout(std_out,message,'COLL')
+             end do ! jconfig
+           end do ! iconfig
+         else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET PARALLEL DO PRIVATE(iconfig,jconfig,itrans,sum_test,m_temp) &
+           !$OMP MAP(tofrom:transition,transition_m) MAP(to:ocp,ocp_next)
+           do iconfig=1,nconfig
+             itrans=0 ! transition from iconfig
+             do jconfig=1, nconfig_next
+               sum_test=0
+               do ilevel=1,nlevels
+  !              test if their is one electron added to the starting configuration
+                 sum_test=sum_test + &
+  &               (ocp_next(jconfig,ilevel)-ocp(iconfig,ilevel))**2
+  !              save the level for the electron added
+                 if(ocp_next(jconfig,ilevel)==1.and.ocp(iconfig,ilevel)==0) then
+                   m_temp=ilevel
+                 end if
+               end do ! ilevel
+               if(sum_test==1) then
+                 itrans=itrans+1
+                 !if(itrans>nlevels-nelec) then
+                 !  write(message,'(a,4i4)') "BUG: itrans is to big in hubbard_one",itrans,iconfig,jconfig,ilevel
+                 !  call wrtout(std_out,message,'COLL')
+                 !end if
+                 transition(iconfig,itrans)=jconfig  ! jconfig=config(n+1) obtained after transition
+                 transition_m(iconfig,itrans)=m_temp  !  level to fill to do the transition
                end if
-               occ_level(nelec)%transition(iconfig,itrans)=jconfig  ! jconfig=config(n+1) obtained after transition
-               occ_level(nelec)%transition_m(iconfig,itrans)=m_temp  !  level to fill to do the transition
-             end if
-           end do ! jconfig
-           if(prtopt>3) then
+             end do ! jconfig
+           end do ! iconfig
+#endif
+         end if
+
+
+
+         if(prtopt>3) then
+           do iconfig=1,nconfig
              write(std_out,'(a,2i5,a,18i5)') "occ_level", nelec,&
-&             iconfig,"  :",(occ_level(nelec)%transition(iconfig,itrans),itrans=1,nlevels-nelec)
+&             iconfig,"  :",(transition(iconfig,itrans),itrans=1,nlevels-nelec)
              write(std_out,'(a,2i5,a,18i5)') "electron added", nelec,iconfig,&
-&             "  :",(occ_level(nelec)%transition_m(iconfig,itrans),itrans=1,nlevels-nelec)
-           end if
-         end do ! iconfig
+&             "  :",(transition_m(iconfig,itrans),itrans=1,nlevels-nelec)
+           end do
+         end if
+
        end do ! nelec
 
 !      ===================================
@@ -725,8 +779,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
              ilevel=ilevel+1
 !            write(std_out,'(16e15.6)') paw_dmft%omega_lo(ifreq),(real(green_temp_realw(ilevel)/Z_part),ilevel=1,nlevels)
              do ifreq=1,green_hubbard%nw
-               green_hubbard%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=green_temp(ifreq,ilevel)/Z_part
-               green_hubbard_realw%oper(ifreq)%matlu(iatom)%mat(im,im,isppol,ispinor,ispinor)=green_temp_realw(ifreq,ilevel)/Z_part
+               green_hubbard%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol)=green_temp(ifreq,ilevel)/Z_part
+               green_hubbard_realw%oper(ifreq)%matlu(iatom)%mat(im+(ispinor-1)*ndim,im+(ispinor-1)*ndim,isppol)=green_temp_realw(ifreq,ilevel)/Z_part
              end do
            end do
          end do
@@ -757,6 +811,8 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
    end do
    call destroy_green(green_hubbard_realw)
 
+   ABI_NVTX_END_RANGE()
+
  end subroutine green_atomic_hubbard
 !!***
 
@@ -768,7 +824,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

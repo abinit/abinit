@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h08 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t07/t07.abi
 - output file    -> t07.abo
 - root for input  files -> t07i
@@ -369,8 +369,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05336
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -388,8 +388,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1053,8 +1053,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.89001
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1072,8 +1072,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1094,7 +1094,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1613,417 +1613,417 @@ tolerances: {tolwfr: 2.00E-15, }
 
 
  ==> Compute Derivative Database <==
-  
+
   Ewald part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    1        15.2884093206         0.0000000000
    1    1   2    1         7.6442046603        -0.0000000000
    1    1   3    1         7.6442046603         0.0000000000
    1    1   1    2       -30.0579407530        -0.0000000000
    1    1   2    2       -15.0289703765        -0.0000000000
    1    1   3    2       -15.0289703765        -0.0000000000
-  
+
    2    1   1    1         7.6442046603        -0.0000000000
    2    1   2    1        20.8079552213         0.0000000000
    2    1   3    1        13.1637505609        -0.0000000000
    2    1   1    2       -15.0289703765        -0.0000000000
    2    1   2    2        -0.0000000000         0.0000000000
    2    1   3    2       -15.0289703765        -0.0000000000
-  
+
    3    1   1    1         7.6442046603         0.0000000000
    3    1   2    1        13.1637505609        -0.0000000000
    3    1   3    1        20.8079552213         0.0000000000
    3    1   1    2       -15.0289703765        -0.0000000000
    3    1   2    2       -15.0289703765        -0.0000000000
    3    1   3    2        -0.0000000000         0.0000000000
-  
+
    1    2   1    1       -30.0579407530         0.0000000000
    1    2   2    1       -15.0289703765         0.0000000000
    1    2   3    1       -15.0289703765         0.0000000000
    1    2   1    2        21.3921296821         0.0000000000
    1    2   2    2        10.6960648410        -0.0000000000
    1    2   3    2        10.6960648410         0.0000000000
-  
+
    2    2   1    1       -15.0289703765         0.0000000000
    2    2   2    1        -0.0000000000        -0.0000000000
    2    2   3    1       -15.0289703765         0.0000000000
    2    2   1    2        10.6960648410        -0.0000000000
    2    2   2    2        36.7242016282         0.0000000000
    2    2   3    2        26.0281367872        -0.0000000000
-  
+
    3    2   1    1       -15.0289703765         0.0000000000
    3    2   2    1       -15.0289703765         0.0000000000
    3    2   3    1        -0.0000000000        -0.0000000000
    3    2   1    2        10.6960648410         0.0000000000
    3    2   2    2        26.0281367872        -0.0000000000
    3    2   3    2        36.7242016282         0.0000000000
-  
+
   Frozen wf local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    1         4.5812505265         0.0000000000
    1    1   2    1         2.2906252632         0.0000000000
    1    1   3    1         2.2906252632         0.0000000000
    1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1         2.2906252632         0.0000000000
    2    1   2    1         4.5812505265         0.0000000000
    2    1   3    1         2.2906252632         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1         2.2906252632         0.0000000000
    3    1   2    1         2.2906252632         0.0000000000
    3    1   3    1         4.5812505265         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2         0.0000000000         0.0000000000
-  
+
    1    2   1    1         0.0000000000         0.0000000000
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2        52.9045402239         0.0000000000
    1    2   2    2        26.4522701119         0.0000000000
    1    2   3    2        26.4522701119         0.0000000000
-  
+
    2    2   1    1         0.0000000000         0.0000000000
    2    2   2    1         0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        26.4522701119         0.0000000000
    2    2   2    2        52.9045402239         0.0000000000
    2    2   3    2        26.4522701119         0.0000000000
-  
+
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000         0.0000000000
    3    2   1    2        26.4522701119         0.0000000000
    3    2   2    2        26.4522701119         0.0000000000
    3    2   3    2        52.9045402239         0.0000000000
-  
+
   Frozen wf non-local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    1        19.4710987888         0.0000000000
    1    1   2    1         9.7355493944         0.0000000000
    1    1   3    1         9.7355493944         0.0000000000
    1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1         9.7355493944         0.0000000000
    2    1   2    1        19.4710987888         0.0000000000
    2    1   3    1         9.7355493944         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1         9.7355493944         0.0000000000
    3    1   2    1         9.7355493944         0.0000000000
    3    1   3    1        19.4710987888         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2         0.0000000000         0.0000000000
-  
+
    1    2   1    1         0.0000000000         0.0000000000
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2        82.8553251335         0.0000000000
    1    2   2    2        41.4276625668         0.0000000000
    1    2   3    2        41.4276625668         0.0000000000
-  
+
    2    2   1    1         0.0000000000         0.0000000000
    2    2   2    1         0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        41.4276625668         0.0000000000
    2    2   2    2        82.8553251335         0.0000000000
    2    2   3    2        41.4276625668         0.0000000000
-  
+
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000         0.0000000000
    3    2   1    2        41.4276625668         0.0000000000
    3    2   2    2        41.4276625668         0.0000000000
    3    2   3    2        82.8553251335         0.0000000000
-  
+
   Frozen wf xc core (1) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    1         0.0000000000         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2         0.0000000000         0.0000000000
-  
+
    1    2   1    1         0.0000000000         0.0000000000
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.0000000000         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
-  
+
    2    2   1    1         0.0000000000         0.0000000000
    2    2   2    1         0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.0000000000         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
-  
+
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000         0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2         0.0000000000         0.0000000000
-  
+
   Frozen wf xc core (2) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    1         0.0000000000         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2         0.0000000000         0.0000000000
-  
+
    1    2   1    1         0.0000000000         0.0000000000
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.0000000000         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
-  
+
    2    2   1    1         0.0000000000         0.0000000000
    2    2   2    1         0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.0000000000         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
-  
+
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000         0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2         0.0000000000         0.0000000000
-  
+
   Non-stationary local part of the 2-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    1       -17.0271408873        -0.0000029649
    1    1   2    1        -8.5135687378        -0.0000013439
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2        26.8002020543         0.0000136692
    1    1   2    2        13.4001047124         0.0000183755
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1        -8.5135686220        -0.0000041242
    2    1   2    1       -20.1257165143        -0.0000012522
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        13.4001004390         0.0000242499
    2    1   2    2         0.0000014922         0.0000363373
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1        -8.5135686220        -0.0000041242
    3    1   2    1       -11.6121461195        -0.0000027337
    3    1   3    1         0.0000000000         0.0000000000
    3    1   1    2        13.4001004390         0.0000242499
    3    1   2    2        13.4001023318         0.0000295047
    3    1   3    2         0.0000000000         0.0000000000
-  
+
    1    2   1    1        24.3412197829         0.0000118978
    1    2   2    1        12.1706079487         0.0000075071
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2       -70.1174880587         0.0000036330
    1    2   2    2       -35.0588243185         0.0000090302
    1    2   3    2         0.0000000000         0.0000000000
-  
+
    2    2   1    1        12.1706237558         0.0000173860
    2    2   2    1         0.0000057876         0.0000140639
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2       -35.0588339005        -0.0000024527
    2    2   2    2       -85.1774891019         0.0000014655
    2    2   3    2         0.0000000000         0.0000000000
-  
+
    3    2   1    1        12.1706237558         0.0000173860
    3    2   2    1        12.1706156747         0.0000081170
    3    2   3    1         0.0000000000         0.0000000000
    3    2   1    2       -35.0588339005        -0.0000024527
    3    2   2    2       -50.1187454449         0.0000032805
    3    2   3    2         0.0000000000         0.0000000000
-  
+
   Non-stationary non-local part of the 2nd-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    1       -17.9363274049         0.0000005476
    1    1   2    1        -8.9681645610         0.0000007283
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2         0.3322981649         0.0000051225
    1    1   2    2         0.1661514932         0.0000068347
    1    1   3    2         0.0000000000         0.0000000000
-  
+
    2    1   1    1        -8.9681645155         0.0000002732
    2    1   2    1       -18.3129324532         0.0000002276
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2         0.1661491110         0.0000066972
    2    1   2    2         0.0000012095         0.0000101977
    2    1   3    2         0.0000000000         0.0000000000
-  
+
    3    1   1    1        -8.9681645155         0.0000002732
    3    1   2    1        -9.3447687148         0.0000005007
    3    1   3    1         0.0000000000         0.0000000000
    3    1   1    2         0.1661491110         0.0000066972
    3    1   2    2         0.1661503112         0.0000076346
    3    1   3    2         0.0000000000         0.0000000000
-  
+
    1    2   1    1         2.7913688390        -0.0000116495
    1    2   2    1         1.3956851216        -0.0000155376
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2       -81.2370521423        -0.0000044542
    1    2   2    2       -40.6185769439        -0.0000059386
    1    2   3    2         0.0000000000         0.0000000000
-  
+
    2    2   1    1         1.3956845181        -0.0000148983
    2    2   2    1         0.0000003633        -0.0000227838
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2       -40.6185735428        -0.0000022224
    2    2   2    2       -80.5773310000        -0.0000018565
    2    2   3    2         0.0000000000         0.0000000000
-  
+
    3    2   1    1         1.3956845181        -0.0000148983
    3    2   2    1         1.3956847740        -0.0000169588
    3    2   3    1         0.0000000000         0.0000000000
    3    2   1    2       -40.6185735428        -0.0000022224
    3    2   2    2       -39.9588048757        -0.0000040841
    3    2   3    2         0.0000000000         0.0000000000
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         4.3772894287         0.0000022333
    1    1   2    1         2.1886447143         0.0000011166
    1    1   3    1         2.1886447143         0.0000011166
    1    1   1    2        -2.9254154483         0.0000091189
    1    1   2    2        -1.4627077242         0.0000045595
    1    1   3    2        -1.4627077242         0.0000045595
-  
+
    2    1   1    1         2.1886447143         0.0000011166
    2    1   2    1         6.4216536728         0.0000033499
    2    1   3    1         4.2330089585         0.0000022333
    2    1   1    2        -1.4627077242         0.0000045595
    2    1   2    2        -0.0000000000         0.0000000000
    2    1   3    2        -1.4627077242         0.0000045595
-  
+
    3    1   1    1         2.1886447143         0.0000011166
    3    1   2    1         4.2330089585         0.0000022333
    3    1   3    1         6.4216536728         0.0000033499
    3    1   1    2        -1.4627077242         0.0000045595
    3    1   2    2        -1.4627077242         0.0000045595
    3    1   3    2        -0.0000000000         0.0000000000
-  
+
    1    2   1    1        -2.9253729716        -0.0000185065
    1    2   2    1        -1.4626864858        -0.0000092533
    1    2   3    1        -1.4626864858        -0.0000092533
    1    2   1    2         5.7975894101         0.0000007918
    1    2   2    2         2.8987947050         0.0000003959
    1    2   3    2         2.8987947050         0.0000003959
-  
+
    2    2   1    1        -1.4626864858        -0.0000092533
    2    2   2    1        -0.0000000000        -0.0000000000
    2    2   3    1        -1.4626864858        -0.0000092533
    2    2   1    2         2.8987947050         0.0000003959
    2    2   2    2         6.7295169336         0.0000011876
    2    2   3    2         3.8307222286         0.0000007918
-  
+
    3    2   1    1        -1.4626864858        -0.0000092533
    3    2   2    1        -1.4626864858        -0.0000092533
    3    2   3    1        -0.0000000000        -0.0000000000
    3    2   1    2         2.8987947050         0.0000003959
    3    2   2    2         3.8307222286         0.0000007918
    3    2   3    2         6.7295169336         0.0000011876
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1506945161         0.0000000795
    1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000        -0.0000000000
    1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2        -0.0000000000        -0.0000000000
    1    1   3    2        -0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0779154402         0.0000000398
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000        -0.0000000000
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2        -0.0520721867         0.0000001623
-  
+
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0779154402         0.0000000398
    3    1   1    2        -0.0000000000         0.0000000000
    3    1   2    2        -0.0520721867         0.0000001623
    3    1   3    2        -0.0000000000         0.0000000000
-  
+
    1    2   1    1         0.0000000000        -0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1        -0.0000000000        -0.0000000000
    1    2   1    2         0.1363731658         0.0000000282
    1    2   2    2        -0.0000000000        -0.0000000000
    1    2   3    2        -0.0000000000        -0.0000000000
-  
+
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1         0.0000000000        -0.0000000000
    2    2   3    1        -0.0520714306        -0.0000003294
    2    2   1    2        -0.0000000000        -0.0000000000
    2    2   2    2         0.1031966787         0.0000000141
    2    2   3    2         0.0000000000         0.0000000000
-  
+
    3    2   1    1        -0.0000000000        -0.0000000000
    3    2   2    1        -0.0520714306        -0.0000003294
    3    2   3    1         0.0000000000        -0.0000000000
@@ -2041,7 +2041,7 @@ tolerances: {tolwfr: 2.00E-15, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
@@ -2310,7 +2310,7 @@ P          mk1mem4         32
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2333,12 +2333,12 @@ P          mk1mem4         32
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2356,7 +2356,7 @@ P          mk1mem4         32
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

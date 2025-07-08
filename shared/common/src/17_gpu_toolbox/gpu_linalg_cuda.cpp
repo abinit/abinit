@@ -1,7 +1,7 @@
 /* gpu_linalg.cu */
 
 /*
- * Copyright (C) 2008-2024 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,6 +17,11 @@
 cublasHandle_t cublas_handle;
 cusolverDnHandle_t cusolverDn_handle;
 static cudaStream_t stream_compute;
+
+static bool linalg_multi_init;
+static cudaStream_t multi_stream_compute[32];
+cublasHandle_t      multi_cublas_handle[32];
+cusolverDnHandle_t  multi_cusolverDn_handle[32];
 
 //! utility function for compatiblity between cublas v1/v2 API
 cublasOperation_t select_cublas_op(const char *c)
@@ -127,6 +132,20 @@ extern "C" void gpu_linalg_init_()
   CUDA_API_CHECK( cudaStreamCreate(&stream_compute) );
   CUDA_API_CHECK( cusolverDnSetStream(cusolverDn_handle,stream_compute) );
   CUDA_API_CHECK( cublasSetStream(cublas_handle,stream_compute) );
+  linalg_multi_init = false;
+}
+
+extern "C" void gpu_linalg_init_multi_()
+{
+  int i;
+  for(i=0; i<32; ++i) {
+    CUDA_API_CHECK( cublasCreate(&multi_cublas_handle[i]) );
+    CUDA_API_CHECK( cusolverDnCreate(&multi_cusolverDn_handle[i]) );
+    CUDA_API_CHECK( cudaStreamCreate(&multi_stream_compute[i]) );
+    CUDA_API_CHECK( cusolverDnSetStream(multi_cusolverDn_handle[i],multi_stream_compute[i]) );
+    CUDA_API_CHECK( cublasSetStream(multi_cublas_handle[i],multi_stream_compute[i]) );
+  }
+  linalg_multi_init = true;
 }
 
 /*=========================================================================*/
@@ -143,6 +162,15 @@ extern "C" void gpu_linalg_shutdown_()
   CUDA_API_CHECK( cublasDestroy(cublas_handle) );
   CUDA_API_CHECK( cusolverDnDestroy(cusolverDn_handle) );
   CUDA_API_CHECK( cudaStreamDestroy(stream_compute) );
+  if(linalg_multi_init) {
+    int i;
+    for(i=0; i<32; ++i) {
+      CUDA_API_CHECK( cublasDestroy(multi_cublas_handle[i]) );
+      CUDA_API_CHECK( cusolverDnDestroy(multi_cusolverDn_handle[i]) );
+      CUDA_API_CHECK( cudaStreamDestroy(multi_stream_compute[i]) );
+    }
+    linalg_multi_init = false;
+  }
 }
 
 /*=========================================================================*/
@@ -251,26 +279,157 @@ extern "C" void gpu_xgemm_strided_batched_(int* cplx, char *transA, char *transB
                            void **A_ptr, int *lda, int *strideA,
                            void** B_ptr, int *ldb, int *strideB,
                            cuDoubleComplex *beta,
-                           void** C_ptr, int *ldc, int *strideC, int *batchCount)
+                           void** C_ptr, int *ldc, int *strideC, int *batchCount,
+                           int *stream_id)
 {
 
   cublasOperation_t opA = select_cublas_op(transA);
   cublasOperation_t opB = select_cublas_op(transB);
+  cublasHandle_t* handle_ptr = &cublas_handle;
+  if(*stream_id != -1) {
+    if(!linalg_multi_init) gpu_linalg_init_multi_();
+    handle_ptr = &(multi_cublas_handle[*stream_id]);
+  }
 
   (*cplx==1)?
-    CUDA_API_CHECK( cublasDgemmStridedBatched(cublas_handle, opA, opB,
+    CUDA_API_CHECK( cublasDgemmStridedBatched(*handle_ptr, opA, opB,
                 *N, *M, *K, &((*alpha).x),
                 (double *)(*A_ptr), *lda, *strideA,
                 (double *)(*B_ptr), *ldb, *strideB,
                 &((*beta).x),
                 (double *)(*C_ptr), *ldc, *strideC, *batchCount)) :
-    CUDA_API_CHECK( cublasZgemmStridedBatched(cublas_handle, opA, opB,
+    CUDA_API_CHECK( cublasZgemmStridedBatched(*handle_ptr, opA, opB,
                 *N, *M, *K, alpha,
                 (cuDoubleComplex *)(*A_ptr), *lda, *strideA,
                 (cuDoubleComplex *)(*B_ptr), *ldb, *strideB,
                 beta,
                 (cuDoubleComplex *)(*C_ptr), *ldc, *strideC, *batchCount));
 } // gpu_xgemm_strided_batched
+
+
+/*=========================================================================*/
+// NAME
+//  gpu_xginv_strided_
+//
+// FUNCTION
+//  Compute many matrixes inverses on GPU in batch on GPU.
+//
+// INPUTS
+//  cplx       = 1 if real 2 if complex
+//  n          = number of rows of the matrix op(b) and the number of columns of the matrix c
+//  A_ptr      = pointer to gpu memory location of  matrixes a
+//  lda        = first dimension of a
+//  strideA    = stride between each matrix a
+//  batchCount = number of batches in any matrix
+//  W_ptr      = pointer to gpu memory locatiion for a work buffer, sized after A
+//
+// OUTPUT
+//  A_ptr     = inverted matrixes pointers
+//
+/*=========================================================================*/
+
+extern "C" void gpu_xginv_strided_(int* cplx,
+                           int *N,
+                           void **A_ptr, int *lda, int *strideA,
+                           int *batchCount, void **W_ptr)
+{
+  int *infoArray, *pivotArray, *info;
+  int i;
+  cuDoubleComplex *cwork;
+  cuDoubleComplex **A_array, **C_array;
+  cuDoubleComplex **A_arrayd, **C_arrayd;
+
+  info = (int*) malloc(*batchCount*sizeof(int));
+  CUDA_API_CHECK( cudaMalloc( (void**) &infoArray, *batchCount *sizeof(int)) );
+  CUDA_API_CHECK( cudaMalloc( (void**) &pivotArray,*N * (*batchCount) *sizeof(int)) );
+
+  if(*cplx==1) {
+  /*  CUDA_API_CHECK( cublasDgetrfBatched(cublas_handle,
+                *N,
+                A_array, *lda,
+                pivotArray, infoArray, *batchCount));
+    CUDA_API_CHECK( cublasDgetriBatched(cublas_handle,
+                *N,
+                (double *)(*A_ptr), *lda,
+                pivotArray,
+                (double *)(*A_ptr), *lda,
+                infoArray, *batchCount));
+  */
+  } else {
+    //CUDA_API_CHECK( cudaMalloc( (void**) &cwork,      *N * (*N) *(*batchCount) *sizeof(cuDoubleComplex)));
+    A_array = (cuDoubleComplex**) malloc(*batchCount*sizeof(cuDoubleComplex*));
+    C_array = (cuDoubleComplex**) malloc(*batchCount*sizeof(cuDoubleComplex*));
+    for(i=0; i<*batchCount; ++i) {
+      A_array[i]=((cuDoubleComplex *)A_ptr)+i*(*strideA) ;
+      C_array[i]=((cuDoubleComplex *)W_ptr)+i*(*strideA) ;
+    }
+    CUDA_API_CHECK( cudaMalloc( (void**) &A_arrayd, *batchCount *sizeof(cuDoubleComplex*)) );
+    CUDA_API_CHECK( cudaMalloc( (void**) &C_arrayd, *batchCount *sizeof(cuDoubleComplex*)) );
+    CUDA_API_CHECK( cudaMemcpy(A_arrayd, A_array, *batchCount*sizeof(cuDoubleComplex*), cudaMemcpyDefault) );
+    CUDA_API_CHECK( cudaMemcpy(C_arrayd, C_array, *batchCount*sizeof(cuDoubleComplex*), cudaMemcpyDefault) );
+    CUDA_API_CHECK( cublasZgetrfBatched(cublas_handle,
+                *N,
+                A_arrayd, *lda,
+                pivotArray, infoArray, *batchCount));
+    //gpu_linalg_stream_synchronize_();
+    CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
+
+    for(i=0; i<*batchCount; ++i) {
+      if (info[i] < 0) {
+        fprintf(stderr, " The %d-th argument of ZGETRF had an illegal value.", info[i]);
+        fflush(stderr);
+        abi_cabort();
+      } else if (info[i] > 0) {
+         fprintf(stderr,
+             "The matrix that has been passed in argument is probably either \
+             singular or nearly singular.\n\
+             U(i,i) in the P*L*U factorization is exactly zero for i = %d \n\
+             The factorization has been completed but the factor U is exactly singular.\n\
+             Division by zero will occur if it is used to solve a system of equations.", info[i]);
+         fflush(stderr);
+         abi_cabort();
+      }
+    }
+
+    CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
+
+    CUDA_API_CHECK( cublasZgetriBatched(cublas_handle,
+                *N,
+                A_arrayd, *lda,
+                pivotArray,
+                C_arrayd, *lda,
+                infoArray, *batchCount));
+    CUDA_API_CHECK( cudaMemcpy(info, infoArray, *batchCount*sizeof(int), cudaMemcpyDefault) );
+
+    for(i=0; i<*batchCount; ++i) {
+      if (info[i] < 0) {
+        fprintf(stderr, " The %d-th argument of ZGETRI had an illegal value.", info[i]);
+        fflush(stderr);
+        abi_cabort();
+      } else if (info[i] > 0) {
+         fprintf(stderr,
+             "The matrix that has been passed in argument is probably either singular \
+             or nearly singular.\n\
+             U(i,i) for i =%d is exactly zero; the matrix is singular and \
+             its inverse could not be computed. \n", info[i]);
+         fflush(stderr);
+         abi_cabort();
+      }
+    }
+    CUDA_API_CHECK( cudaMemcpy(A_ptr, W_ptr, *batchCount * (*N) * (*N) *sizeof(cuDoubleComplex), cudaMemcpyDefault) );
+    //CUDA_API_CHECK( cudaFree(cwork) );
+    CUDA_API_CHECK( cudaFree(A_arrayd) );
+    CUDA_API_CHECK( cudaFree(C_arrayd) );
+    free(A_array);
+    free(C_array);
+  }
+
+
+  CUDA_API_CHECK( cudaFree(infoArray) );
+  CUDA_API_CHECK( cudaFree(pivotArray) );
+  free(info);
+
+} // gpu_xginv_strided_
 
 /*=========================================================================*/
 // NAME

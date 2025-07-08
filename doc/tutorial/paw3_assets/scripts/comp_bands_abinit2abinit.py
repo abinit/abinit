@@ -46,7 +46,7 @@ while iarg < len(sys.argv):
 
 # Parse abinit file 1
 input_file1_name = str(sys.argv[1]) # name of first input file (first argument)
-input_file1_r = open(input_file1_name,'r')  # open it as read file       
+input_file1_r = open(input_file1_name,'r')  # open it as read file
 abinit_file1_data = input_file1_r.readlines()
 input_file1_r.close()
 # Read in k-point data as a list of numbers, by k-point
@@ -82,7 +82,7 @@ nbands1 = len(abinit_band1_data[0])
 
 # Parse abinit file 2
 input_file2_name = str(sys.argv[2]) # name of second input file (second argument)
-input_file2_r = open(input_file2_name,'r')  # open it as read file       
+input_file2_r = open(input_file2_name,'r')  # open it as read file
 abinit_file2_data = input_file2_r.readlines()
 input_file2_r.close()
 # Read in k-point data as a list of numbers, by k-point
@@ -119,9 +119,9 @@ shift1 = 0.0
 shift2 = 0.0
 # If there is alignment at a certain k-pooint
 if align_values:
-    if align_ikpt>nkpt1:    
+    if align_ikpt>nkpt1:
         print ('ERROR: index of kpt for alignment is larger than nkpt in data!')
-    if align_iband>(nbands1-nbdbuf):    
+    if align_iband>(nbands1-nbdbuf):
         print ('ERROR: index of band for alignment is larger than nbands in data!')
     shift1 = abinit_band1_data[align_ikpt][align_iband]
     shift2 = abinit_band2_data[align_ikpt][align_iband]

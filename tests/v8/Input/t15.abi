@@ -38,6 +38,7 @@ bound_step = 100
 #%% system_xml = t14_sys.xml
 #%% coeff_xml = t14_coeffs.xml
 #%% md_hist = t13_HIST
+#%% need_cpp_vars = !HAVE_GPU  , !FC_INTEL
 #%% [files]
 #%% files_to_test = 
 #%%   t15.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;

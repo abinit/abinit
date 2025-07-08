@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h13 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t50-t51-t52-t53-t54/t51.abi
 - output file    -> t51.abo
 - root for input  files -> t51i
@@ -145,8 +145,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99384
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -164,7 +164,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -572,7 +572,7 @@ tolerances: {tolwfr: 1.00E-16, }
    3   1   1   1   -1.1077859930E+00    1.7180135601E-06
    3   1   2   1   -1.0839974902E+00    2.2666109036E-06
    3   1   3   1   -2.1917853236E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -590,95 +590,95 @@ tolerances: {tolwfr: 1.00E-16, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        11.7604379807         0.0000000000
    1    1   2    1         7.5020804604         0.0000073446
    1    1   3    1         4.2583642793        -0.0000040309
    1    1   1    2         0.0000057895         0.0000013129
    1    1   2    2        -2.2183698210        -0.0000036132
    1    1   3    2        -2.2183663285        -0.0000045545
-  
+
    2    1   1    1         7.5020804624        -0.0000073446
    2    1   2    1        11.7604595653         0.0000000000
    2    1   3    1         4.2583724107        -0.0000139257
    2    1   1    2        -2.2183742484         0.0000037850
    2    1   2    2        -0.0000100329         0.0000043901
    2    1   3    2        -2.2183692988        -0.0000036787
-  
+
    3    1   1    1         4.2583642765         0.0000040300
    3    1   2    1         4.2583724049         0.0000139247
    3    1   3    1         8.5167351644         0.0000000000
    3    1   1    2        -2.2183744628         0.0000016158
    3    1   2    2        -2.2183787570        -0.0000079534
    3    1   3    2        -4.4367382095        -0.0000063484
-  
+
    1    2   1    1         0.0000057913        -0.0000013129
    1    2   2    1        -2.2183742471        -0.0000037850
    1    2   3    1        -2.2183744723        -0.0000016152
    1    2   1    2        11.7604345333         0.0000000000
    1    2   2    2         7.5020798426         0.0000051262
    1    2   3    2         4.2583634997        -0.0000011420
-  
+
    2    2   1    1        -2.2183698188         0.0000036132
    2    2   2    1        -0.0000100356        -0.0000043901
    2    2   3    1        -2.2183787719         0.0000079540
    2    2   1    2         7.5020798490        -0.0000051262
    2    2   2    2        11.7604521037         0.0000000000
    2    2   3    2         4.2583733888        -0.0000087640
-  
+
    3    2   1    1        -2.2183663194         0.0000045544
    3    2   2    1        -2.2183692834         0.0000036786
    3    2   3    1        -4.4367382096         0.0000063485
    3    2   1    2         4.2583634945         0.0000011421
    3    2   2    2         4.2583733813         0.0000087641
    3    2   3    2         8.5167369572         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.3790569838        -0.0000000000
    1    1   2    1        -0.0000000324        -0.0000004404
    1    1   3    1         0.0000003332         0.0000002929
    1    1   1    2        -0.0000001257        -0.0000002116
    1    1   2    2        -0.1974670900        -0.0000000319
    1    1   3    2        -0.0000007186         0.0000002139
-  
+
    2    1   1    1        -0.0000000325         0.0000004404
    2    1   2    1         0.3790562601        -0.0000000000
    2    1   3    1        -0.0000002657         0.0000005063
    2    1   1    2        -0.1974671490        -0.0000004968
    2    1   2    2         0.0000001976         0.0000001753
    2    1   3    2         0.0000000505        -0.0000002134
-  
+
    3    1   1    1         0.0000003334        -0.0000002929
    3    1   2    1        -0.0000002655        -0.0000005063
    3    1   3    1         0.6677941321         0.0000000000
    3    1   1    2        -0.0000001006         0.0000000748
    3    1   2    2         0.0000002155        -0.0000001587
    3    1   3    2         0.0000000517         0.0000003137
-  
+
    1    2   1    1        -0.0000001258         0.0000002116
    1    2   2    1        -0.1974671491         0.0000004968
    1    2   3    1        -0.0000001000        -0.0000000749
    1    2   1    2         0.3790568865         0.0000000000
    1    2   2    2         0.0000002229        -0.0000003392
    1    2   3    2         0.0000001693         0.0000001619
-  
+
    2    2   1    1        -0.1974670897         0.0000000319
    2    2   2    1         0.0000001975        -0.0000001753
    2    2   3    1         0.0000002160         0.0000001587
    2    2   1    2         0.0000002228         0.0000003392
    2    2   2    2         0.3790560064         0.0000000000
    2    2   3    2        -0.0000001729         0.0000002790
-  
+
    3    2   1    1        -0.0000007194        -0.0000002138
    3    2   2    1         0.0000000502         0.0000002134
    3    2   3    1         0.0000000518        -0.0000003137
@@ -704,9 +704,9 @@ tolerances: {tolwfr: 1.00E-16, }
 -  1.743930E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -735,7 +735,7 @@ tolerances: {tolwfr: 1.00E-16, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
@@ -835,7 +835,7 @@ P          mk1mem           8
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#ponce2014
 -
-- [2] Temperature dependence of the electronic structure of semiconductors and insulators 
+- [2] Temperature dependence of the electronic structure of semiconductors and insulators
 - S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)
 - Comment: the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
 - Strong suggestion to cite this paper in your publications.
@@ -853,7 +853,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -876,12 +876,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -899,7 +899,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

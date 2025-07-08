@@ -6,7 +6,7 @@
 !!  Collection of routines useful for leveraging OpenMP GPU offload capabilities.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2024 ABINIT group (MT)
+!!  Copyright (C) 2000-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2024 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2025 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,11 +39,12 @@ MODULE m_pawdij
  use m_pawfgrtab,    only : pawfgrtab_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
- use m_paw_sphharm,  only : slxyzs
+ use m_paw_sphharm,  only : slxyzs,make_dyadic
 
  implicit none
 
  private
+
 
 !public procedures.
  public :: pawdij           ! Dij total
@@ -64,6 +65,7 @@ MODULE m_pawdij
  public :: symdij_all       ! Symmetrize all contributions to Dij
  public :: pawdij_gather    ! Perform a allgather operation on Dij
  public :: pawdij_print_dij ! Print out a Dij matrix
+ public :: pawv1            ! On-site V1 potential
 !!***
 
 CONTAINS
@@ -115,6 +117,7 @@ CONTAINS
 !!  vtrial(cplex*nfft,nspden)=GS potential on real space grid
 !!  vxc(cplex*nfft,nspden)=XC potential (Hartree) on real space grid
 !!  xred(3,my_natom)= reduced atomic coordinates
+!!  znuc(ntypat)=nuclear charges
 !!  ======== Optional arguments ==============
 !!  Parallelism over atomic sites:
 !!    mpi_atmtab(:)=indexes of the atoms treated by current proc
@@ -159,7 +162,7 @@ CONTAINS
 
 subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,ntypat,&
 &          paw_an,paw_ij,pawang,pawfgrtab,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,&
-&          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,&
+&          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
@@ -177,7 +180,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  logical,optional,intent(in) :: electronpositron_lmselect(:,:)
  real(dp),intent(in) :: gprimd(3,3),qphon(3)
- real(dp),intent(in) ::  vxc(:,:),xred(3,natom)
+ real(dp),intent(in) ::  vxc(:,:),xred(3,natom),znuc(ntypat)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
  real(dp),intent(in),optional :: atvshift(:,:,:)
  real(dp),intent(in),optional :: nucdipmom(3,natom)
@@ -826,7 +829,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        LIBPAW_ALLOCATE(dijso,(cplex_dij*qphase*lmn2_size,ndij))
        call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 &                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
-&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1)
+&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),&
+&                    nucdipmom=nucdipmom(1:3,iatom))
        if (dijso_need) paw_ij(iatom)%dijso(:,:)=dijso(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijso(:,:)
        LIBPAW_DEALLOCATE(dijso)
@@ -2522,6 +2526,7 @@ end subroutine pawdijnd
 !!  vxc1(qphase*mesh_size,v_size,nspden)=all-electron on-site XC potential for current atom
 !!                                given on a (r,theta,phi) grid (v_size=angl_size)
 !!                                or on (l,m) spherical moments (v_size=lm_size)
+!!  znuc=nuclear charge
 !!
 !! OUTPUT
 !!  dijso(cplex_dij*qphase*lmn2_size,ndij)= spin-orbit Dij terms
@@ -2542,28 +2547,32 @@ end subroutine pawdijnd
 !! SOURCE
 
 subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
-&                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1)
+&                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1,znuc,&
+&                   nucdipmom)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
- real(dp), intent(in) :: spnorbscl
+ real(dp), intent(in) :: spnorbscl,znuc
  type(pawang_type),intent(in) :: pawang
 !arrays
  real(dp),intent(out) :: dijso(:,:)
  real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
+ real(dp),optional,intent(in) :: nucdipmom(3)
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,idij,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
- integer :: lm_size,lmn2_size,mesh_size,nsploop
+ integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,ispden,jlm,klm,klmn,klmn1,kln
+ integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- real(dp) :: fact
+ real(dp) :: fact,me1,me2,rc,rr,rt,sme
+ logical :: has_nucdipmom
  character(len=500) :: msg
 !arrays
  integer, pointer :: indklmn(:,:)
- real(dp),allocatable :: dijso_rad(:),dv1dr(:),ff(:)
+ real(dp),allocatable :: dijnd_rad(:,:),dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:)
+ real(dp),allocatable :: v1(:),zk1(:),z_intgd(:),z_kernel(:)
 
 ! *************************************************************************
 
@@ -2574,7 +2583,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  angl_size=pawang%angl_size
  mesh_size=pawtab%mesh_size
  indklmn => pawtab%indklmn
- nsploop=4
 
 !Check data consistency
  if (qphase/=1) then
@@ -2607,55 +2615,111 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    msg='invalid sizes for vxc1!'
    LIBPAW_BUG(msg)
  end if
+ if (present(nucdipmom)) then
+   has_nucdipmom = ANY(ABS(nucdipmom(:))>tol8)
+ else
+   has_nucdipmom=.FALSE.
+ end if
 
 !------------------------------------------------------------------------
 !----------- Allocations and initializations
 !------------------------------------------------------------------------
 
-!Eventually compute <Phi_i|1/r.dV/dr|Phi_j>*alpha2/2*Y_00 (for spin-orbit)
+ ! classical electron radius \alpha^2
+ rc=two*HalfFineStruct2
+
+ LIBPAW_ALLOCATE(v1,(mesh_size))
+ call pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
+
  LIBPAW_ALLOCATE(dv1dr,(mesh_size))
- LIBPAW_ALLOCATE(dijso_rad,(ij_size))
- LIBPAW_ALLOCATE(ff,(mesh_size))
- fact=one/sqrt(four_pi) ! Y_00
- if (pawxcdev/=0) then
-   if (nspden==1) then
-     ff(1:mesh_size)=vxc1(1:mesh_size,1,1)
-   else
-     ff(1:mesh_size)=half*(vxc1(1:mesh_size,1,1)+vxc1(1:mesh_size,1,2))
-   end if
- else
-   ff(1:mesh_size)=zero
-   if (nspden==1) then
-     do ipts=1,angl_size
-       ff(1:mesh_size)=ff(1:mesh_size) &
-&          +vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
-     end do
-   else
-     do ipts=1,angl_size
-       ff(1:mesh_size)=ff(1:mesh_size) &
-&       +half*(vxc1(1:mesh_size,ipts,1)+vxc1(1:mesh_size,ipts,2)) &
-&       *pawang%angwgth(ipts)
-     end do
-   end if
-   ff(1:mesh_size)=sqrt(four_pi)*ff(1:mesh_size)
- end if
- ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
- call nderiv_gen(dv1dr,ff,pawrad)
- dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
-& *dv1dr(2:mesh_size)/pawrad%rad(2:mesh_size)
- call pawrad_deducer0(dv1dr,mesh_size,pawrad)
- do kln=1,ij_size
-   ff(1:mesh_size)= dv1dr(1:mesh_size)*pawtab%phiphj(1:mesh_size,kln)
-   call simp_gen(dijso_rad(kln),ff,pawrad)
- end do
+ call nderiv_gen(dv1dr,v1,pawrad)
+
+ LIBPAW_ALLOCATE(zk1,(mesh_size))
+ zk1 = one/(one - HalfFineStruct2*v1)
+ LIBPAW_DEALLOCATE(v1)
+
+ LIBPAW_ALLOCATE(dkdr,(mesh_size))
+ dkdr = HalfFineStruct2*zk1*zk1*dv1dr
  LIBPAW_DEALLOCATE(dv1dr)
- LIBPAW_DEALLOCATE(ff)
+
+ !! replace v1 potential with -Z/r for distances < r_c, the
+ !! classical electron radius. This is an accurate replacement
+ !! with better analytic properties at r=0.
+ rt=znuc*rc
+ ! replace k and dk/dr at short range with Coulomb potential version
+ do ii=1,mesh_size
+   rr=pawrad%rad(ii)
+   if (rr>rc) exit
+   if (rr<tol8) then
+     zk1(ii)=zero; dkdr(ii)=two/rt
+   else
+     zk1(ii)=one/(one+rt/(two*rr))
+     dkdr(ii)=two*rt/(two*rr+rt)**2
+   end if
+ end do
+
+!------------------------------------------------------------------------
+!----- radial integrals
+!------------------------------------------------------------------------
+
+ LIBPAW_ALLOCATE(z_kernel,(mesh_size))
+ LIBPAW_ALLOCATE(z_intgd,(mesh_size))
+ LIBPAW_ALLOCATE(dijso_rad,(ij_size))
+
+ ! spin-orbit kernel
+ z_kernel(2:mesh_size) = dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)
+ call pawrad_deducer0(z_kernel,mesh_size,pawrad)
+ do kln=1,ij_size
+   z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+   call simp_gen(dijso_rad(kln),z_intgd,pawrad)
+ end do
  dijso_rad(:)=spnorbscl*dijso_rad(:)
+
+ ! nuclear dipole kernels
+ if (has_nucdipmom) then
+   LIBPAW_ALLOCATE(dijnd_rad,(2,ij_size))
+   ! -\alpha^2 K(r)/r^3
+   z_kernel(2:mesh_size) = -rc*zk1(2:mesh_size)/pawrad%rad(2:mesh_size)**3
+   call pawrad_deducer0(z_kernel,mesh_size,pawrad)
+   do kln=1,ij_size
+     z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+     call simp_gen(dijnd_rad(1,kln),z_intgd,pawrad)
+   end do
+   ! \alpha^2 K'(r)/r^2
+   z_kernel(2:mesh_size) = rc*dkdr(2:mesh_size)/pawrad%rad(2:mesh_size)**2
+   call pawrad_deducer0(z_kernel,mesh_size,pawrad)
+   do kln=1,ij_size
+     z_intgd = z_kernel*pawtab%phiphj(1:mesh_size,kln)
+     call simp_gen(dijnd_rad(2,kln),z_intgd,pawrad)
+   end do
+   dijnd_rad(:,:)=spnorbscl*dijnd_rad(:,:)
+ end if ! nuclear dipole radial integrals
+
+ LIBPAW_DEALLOCATE(z_kernel)
+ LIBPAW_DEALLOCATE(z_intgd)
+ LIBPAW_DEALLOCATE(zk1)
+ LIBPAW_DEALLOCATE(dkdr)
+
+!------------------------------------------------------------------------
+!----- compute dyadics if necessary
+!------------------------------------------------------------------------
+ if (has_nucdipmom) then
+   gs1=size(pawang%gntselect,1)
+   gs2=size(pawang%gntselect,2)
+   ngnt=size(pawang%realgnt)
+   LIBPAW_ALLOCATE(dyadic,(3,3,gs2,2))
+   ! dyadic(:,:,:,1) : (1 - 3\hat{r}\hat{r})
+   ! dyadic(:,:,:,2) : (1 - \hat{r}\hat{r})
+   call make_dyadic(one,three,dyadic(1:3,1:3,1:gs2,1),pawang%gntselect,&
+           gs1,gs2,gs2,ngnt,pawang%realgnt)
+   call make_dyadic(one,one,dyadic(1:3,1:3,1:gs2,2),pawang%gntselect,&
+           gs1,gs2,gs2,ngnt,pawang%realgnt)
+ end if
 
 !------------------------------------------------------------------------
 !----- Loop over density components
 !------------------------------------------------------------------------
- do idij=1,nsploop
+ do idij=1,ndij
 
 !  ------------------------------------------------------------------------
 !  ----- Computation of Dij_so
@@ -2691,11 +2755,38 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
        klmn1=klmn1+cplex_dij
      end do
    end if
-
-!  ----- End loop over idij
- end do
-
+ end do !  ----- End loop over idij
  LIBPAW_DEALLOCATE(dijso_rad)
+
+ ! add nucdipmom terms if present
+ if(has_nucdipmom) then
+   klmn1=1
+   do klmn=1,lmn2_size
+     klm=indklmn(1,klmn); kln=indklmn(2,klmn)
+     do mdir=1,3
+       if (abs(nucdipmom(mdir))<tol8) cycle
+       do sdir=1,3
+         me1=nucdipmom(mdir)*dijnd_rad(1,kln)*dyadic(mdir,sdir,klm,1)
+         me2=nucdipmom(mdir)*dijnd_rad(2,kln)*dyadic(mdir,sdir,klm,2)
+         sme = half*(me1+me2)
+         select case(sdir)
+         case(1) !Sx operator
+           dijso(klmn1,3)=dijso(klmn1,3)+sme
+           dijso(klmn1,4)=dijso(klmn1,4)+sme
+         case(2) !Sy operator
+           dijso(klmn1+1,3)=dijso(klmn1+1,3)-sme
+           dijso(klmn1+1,4)=dijso(klmn1+1,4)+sme
+         case(3) !Sz operator
+           dijso(klmn1,1)=dijso(klmn1,1)+sme
+           dijso(klmn1,2)=dijso(klmn1,2)-sme
+         end select
+       end do ! loop on sdir
+     end do ! loop on mdir
+     klmn1=klmn1+cplex_dij
+   end do !loop on klmn
+   LIBPAW_DEALLOCATE(dyadic)
+   LIBPAW_DEALLOCATE(dijnd_rad)
+ end if
 
 end subroutine pawdijso
 
@@ -4623,12 +4714,14 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  logical,parameter :: lsymnew=.false.
 !DEBUG_ALTERNATE_ALGO
  real(dp) :: arg,factafm,zarot2
+ real(dp) :: det
  character(len=6) :: pertstrg,wrt_mode
  character(len=500) :: msg
 !arrays
  integer :: nsym_used(2)
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
+ integer,allocatable :: symrec_det(:)
  real(dp) :: dijc(2),fact(2),factsym(2),phase(2)
  real(dp) :: rotdij(2,2,2),rotmag(2,3,2),sumdij(2,2,2),summag(2,3,2)
  real(dp),allocatable :: dijnew(:,:,:),dijtmp(:,:),symrec_cart(:,:,:)
@@ -4800,8 +4893,19 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 
    if (noncoll) then
      LIBPAW_ALLOCATE(symrec_cart,(3,3,nsym))
+     LIBPAW_ALLOCATE(symrec_det,(nsym))
      do irot=1,nsym
        symrec_cart(:,:,irot)=symdij_symcart(gprimd,rprimd,symrec(:,:,irot))
+       ! compute the sign of the determinant of the symmetries
+       ! to be able to apply only the proper part of the symmetries to the magn. components
+       ! (magnetization == pseudo-vector)
+       det = symrec_cart(1,1,irot)*symrec_cart(2,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(3,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(1,2,irot)*symrec_cart(2,3,irot)*symrec_cart(3,1,irot) - &
+         &  (symrec_cart(3,1,irot)*symrec_cart(2,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(1,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(3,2,irot)*symrec_cart(2,3,irot)*symrec_cart(1,1,irot))
+       symrec_det(irot) = nint(det) ! should return 1 or -1
      end do
 !DEBUG_ALTERNATE_ALGO
 !    if(lsymnew) then
@@ -5039,7 +5143,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
                    do mu=1,3
                      !We need the transpose ?
                      rotmag(1:cplex_dij,mu,iq)=rotmag(1:cplex_dij,mu,iq) &
-&                       +symrec_cart(mu,nu,irot)*summag(1:cplex_dij,nu,iq)
+&                       +symrec_det(irot)*symrec_cart(mu,nu,irot)*summag(1:cplex_dij,nu,iq)
                    end do
                  end do
                end do
@@ -5151,6 +5255,7 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
    LIBPAW_DEALLOCATE(dijnew)
    if (noncoll)  then
      LIBPAW_DEALLOCATE(symrec_cart)
+     LIBPAW_DEALLOCATE(symrec_det)
 !DEBUG_ALTERNATE_ALGO
 !    if (lsymnew) then
 !      LIBPAW_DEALLOCATE(sumrhoso)
@@ -5733,6 +5838,79 @@ end subroutine pawdij_print_dij
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_pawdij/pawv1
+!! NAME
+!! pawv1
+!!
+!! FUNCTION
+!! On-site all-electron potential V1
+!!
+!! INPUTS
+!!  mesh_size=radial mesh size
+!!  nspden=number of spin density components
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
+!!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
+!!  vh1(qphase*mesh_size,v_size,nspden)=all-electron on-site Hartree potential for current atom
+!!                     only spherical moment is used
+!!  vxc1(qphase*mesh_size,v_size,nspden)=all-electron on-site XC potential for current atom
+!!                                given on a (r,theta,phi) grid (v_size=angl_size)
+!!                                or on (l,m) spherical moments (v_size=lm_size)
+!!
+!! OUTPUT
+!! v1(mesh_size)=V1 on-site potential
+!!
+!! SOURCE
+
+subroutine pawv1(mesh_size,nspden,pawang,pawxcdev,v1,vh1,vxc1)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: mesh_size,nspden,pawxcdev
+ type(pawang_type),intent(in) :: pawang
+!arrays
+ real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
+ real(dp),intent(out) :: v1(mesh_size)
+!Local variables ---------------------------------------
+!scalars
+ integer :: angl_size,ipts
+ real(dp) :: fact
+!arrays
+
+! *************************************************************************
+
+ angl_size=pawang%angl_size
+
+ fact=one/sqrt(four_pi) ! Y_00
+ if (pawxcdev/=0) then
+   if (nspden==1) then
+     v1(1:mesh_size)=vxc1(1:mesh_size,1,1)
+   else
+     v1(1:mesh_size)=half*(vxc1(1:mesh_size,1,1)+vxc1(1:mesh_size,1,2))
+   end if
+ else
+   v1(1:mesh_size)=zero
+   if (nspden==1) then
+     do ipts=1,angl_size
+       v1(1:mesh_size)=v1(1:mesh_size) &
+&          +vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
+     end do
+   else
+     do ipts=1,angl_size
+       v1(1:mesh_size)=v1(1:mesh_size) &
+&       +half*(vxc1(1:mesh_size,ipts,1)+vxc1(1:mesh_size,ipts,2)) &
+&       *pawang%angwgth(ipts)
+     end do
+   end if
+   v1(1:mesh_size)=sqrt(four_pi)*v1(1:mesh_size)
+ end if
+ v1(1:mesh_size)=fact*(v1(1:mesh_size)+vh1(1:mesh_size,1,1))
+
+end subroutine pawv1
+
+!!***
+
 
 END MODULE m_pawdij
 !!***

@@ -7,21 +7,21 @@ import numpy as N
 import sgmllib
 from pprint import pprint
 
-PTG_NUMS=[1, 2, 3, 6, 10, 16, 25, 47, 75, 81, 83, 89, 99, 111, 
+PTG_NUMS=[1, 2, 3, 6, 10, 16, 25, 47, 75, 81, 83, 89, 99, 111,
         123, 143, 147, 149, 156, 162, 168, 174, 175, 177, 183, 189, 191, 195, 200, 207, 215, 221]
 
 ptg_names =  [
-["C1"  , "1"],   
+["C1"  , "1"],
 ["Ci"  , "-1"],
 ["C2"  , "2"],
 ["Cs"  , "m"],
-["C2h" , "2/m"],	
-["D2"  , "222"],	
+["C2h" , "2/m"],
+["D2"  , "222"],
 ["C2v" , "mm2"],
 ["D2h" , "mmm"],
 ["C4"  , "4"],
 ["S4"  , "-4"],
-["C4h" , "4/m"],	
+["C4h" , "4/m"],
 ["D4"  , "422"],
 ["C4v" , "4mm"],
 ["D2d" , "-42m"],
@@ -33,10 +33,10 @@ ptg_names =  [
 ["D3d" , "-3m"],
 ["C6"  , "6"],
 ["C3h" , "-6"],
-["C6h" , "6/m"], 
+["C6h" , "6/m"],
 ["D6"  , "622"],
-["C6v" , "6mm"],	
-["D3h" , "-62m"],	
+["C6v" , "6mm"],
+["D3h" , "-62m"],
 ["D6h" , "6/mmm"],
 ["T"   , "23"],
 ["Th"  , "m-3"],
@@ -55,20 +55,20 @@ def dotc(v1, v2):
 def rflat(iterables):
     """Iterator over all elements of a nested iterable. It's recursive!"""
     for item in iterables:
-        if not hasattr(item, "__iter__"): 
+        if not hasattr(item, "__iter__"):
             yield item
         else: # iterable object.
             for it in rflat(item): yield it
 
 def npymat2Fmat(npymat):
     """Return a string with the F90 declaration of a numpy matrix."""
-                                                                    
+
     shape = str(npymat.shape)
     shape = shape.replace("(","(/").replace(")","/)")
 
     fmat = npymat.T # From C to F ordering.
     vect = ""
-    for idx, ele in enumerate(fmat.flat): 
+    for idx, ele in enumerate(fmat.flat):
         #print ele
         tk = str(ele)
         tk = tk.replace("+-","-")  # Have to Fix weird output of str when imag part is negative (+-)
@@ -76,7 +76,7 @@ def npymat2Fmat(npymat):
         tk = tk.replace("(","")
         tk = tk.replace(")","")
         vect += tk
-        if idx != (fmat.size-1): vect += ", " 
+        if idx != (fmat.size-1): vect += ", "
 
     vect = vect.replace("j","*j") # For complex numbers, j has to be defined in F source.
     vect = "(/" + vect + "/)"
@@ -102,15 +102,15 @@ class Rotation(object):
         else:
             self.versor = versor
 
-        dd = {0:"x",1:"y",2:"z"} 
+        dd = {0:"x",1:"y",2:"z"}
         self.my_trcoords = ""
         for ridx, row in enumerate(self.rotation):
             for cidx, el in enumerate(row.flat):
-                ax = dd[cidx] 
+                ax = dd[cidx]
                 if   el == -1: self.my_trcoords += "-" + ax
                 elif el ==  0: pass
                 elif el == +1: self.my_trcoords += "+" + ax
-                else: 
+                else:
                     raise RotationException("wrong element value" + str(el))
             if ridx < 2: self.my_trcoords += ", "
 
@@ -119,11 +119,11 @@ class Rotation(object):
     def __eq__(self, other):
         return N.allclose(self.rotation, other.rotation)
     def __neq__(self, other):
-        return not self == other 
+        return not self == other
 
     # Implement the unary arithmetic operations (+, -)
     def __pos__(self): return self
-    def __neg__(self): return Rotation(-self.rotation) 
+    def __neg__(self): return Rotation(-self.rotation)
 
     def __mul__(self, other):
         return Rotation(self.rotation * other.rotation)
@@ -141,7 +141,7 @@ class Rotation(object):
               - mat[0,1]* ( mat[1,0]*mat[2,2] - mat[1,2]*mat[2,0] )\
               + mat[0,2]* ( mat[1,0]*mat[2,1] - mat[1,1]*mat[2,0] )
 
-        if abs(det) != 1: 
+        if abs(det) != 1:
             raise RotationException("abs(det) must be 1 while it is " + str(abs(det)))
         else:
             return det
@@ -156,7 +156,7 @@ class Rotation(object):
         return bool(self.det+1)
     isproper = property(_isproper, doc="True if proper rotation")
 
-    def invert(self): 
+    def invert(self):
         """
         Invert an orthogonal 3x3 matrix of INTEGER elements.
         Note use of integer arithmetic. Raise RotationException if not invertible.
@@ -167,21 +167,21 @@ class Rotation(object):
         inv= N.matrix(N.zeros((3,3), N.int))
 
         inv[0,0] = mm[1,1] * mm[2,2] - mm[1,2] * mm[2,1]
-        inv[0,1] = mm[0,2] * mm[2,1] - mm[0,1] * mm[2,2] 
+        inv[0,1] = mm[0,2] * mm[2,1] - mm[0,1] * mm[2,2]
         inv[0,2] = mm[0,1] * mm[1,2] - mm[0,2] * mm[1,1]
 
         inv[1,0] = mm[1,2] * mm[2,0] - mm[1,0] * mm[2,2]
         inv[1,1] = mm[0,0] * mm[2,2] - mm[0,2] * mm[2,0]
-        inv[1,2] = mm[0,2] * mm[1,0] - mm[0,0] * mm[1,2] 
+        inv[1,2] = mm[0,2] * mm[1,0] - mm[0,0] * mm[1,2]
 
         inv[2,0] = mm[1,0] * mm[2,1] - mm[1,1] * mm[2,0]
-        inv[2,1] = mm[0,1] * mm[2,0] - mm[0,0] * mm[2,1] 
+        inv[2,1] = mm[0,1] * mm[2,0] - mm[0,0] * mm[2,1]
         inv[2,2] = mm[0,0] * mm[1,1] - mm[0,1] * mm[1,0]
 
         # Make sure matrix is not singular
-        if det != 0: 
+        if det != 0:
             return Rotation(inv/det)
-        else: 
+        else:
             raise RotationException("Attempting to invert singular matrix")
 
     def _rottype(self):
@@ -194,14 +194,14 @@ class Rotation(object):
          5 Mirror symmetry
          6 Improper rotation
         """
-        rot = self.rotation # Just an alias. 
+        rot = self.rotation # Just an alias.
 
         # Treat identity and inversion first
         #identity  = Rotation(_E3D)
 
         if self.isE: return 1
         if self.isI: return 2
-    
+
         if self.isproper: # Proper rotation
             t = 3 # try angle != 180
             #det180 = get_sym_det(rot+_E3D)
@@ -238,7 +238,7 @@ class Rotation(object):
                 order = ior
                 break
             if rn.isI: root_invers = ior
-        if order is None: 
+        if order is None:
             raise RotationException("symmetry is not a root of unit!")
         return (order, root_invers)
 
@@ -251,7 +251,7 @@ class Rotation(object):
         if self.det == -1: name = "-"
 
         name += str(order) # FIXME this one doesn't work yet.
-        if root_invers != 0: 
+        if root_invers != 0:
             name += "-"
         else:
             name += "+"
@@ -261,7 +261,7 @@ class Rotation(object):
 
     def __str__(self):
         string  = "Rotation: " + str(self.order) + ", versor: " + str(self.versor) + ", " + str(self.trcoords) + "\n"
-        string += str(self.rotation) 
+        string += str(self.rotation)
         return string
 
     def toFortran(self, varname):
@@ -276,7 +276,7 @@ class Rotation(object):
 
 #########################################################################################
 class IrreducibleRepr(object):
-    """Class defining an irreducible representation"""  
+    """Class defining an irreducible representation"""
 
     def __init__(self, name, dim, matrices):
         self.name = name
@@ -286,7 +286,7 @@ class IrreducibleRepr(object):
 
     def __str__(self):
         string = " Irred repr: " + self.name + " dimension= " + str(self.dim) + "\n"
-        for mat in self.matrices: string +=  str(mat) + "\n" 
+        for mat in self.matrices: string +=  str(mat) + "\n"
         return string
 
     def traces(self):
@@ -296,16 +296,16 @@ def mk_classes(rotations):
     """
     Find the classes of a group. Return a list containing the indeces
     of the operations in each class sorted in ascending order.
-                                                                       
-    A class is defined as the set of distinct items obtained by 
-    considering for each element, S, of the group all its conjugate 
+
+    A class is defined as the set of distinct items obtained by
+    considering for each element, S, of the group all its conjugate
     X^-1 S X where X is one of the elements of the group.
     """
 
     class_ids = list()
     seen = [ 0 for i in range(len(rotations)) ]
-    nclass = -1 
-                                                                        
+    nclass = -1
+
     for idx, m in enumerate(rotations):
         if seen[idx]: continue
         seen[idx] = 1
@@ -322,10 +322,10 @@ def mk_classes(rotations):
                     idx_found = idx_search
                     break
             if (idx_found == -1): sys.stderr.write("idx_found == -1")
-            if not seen[idx_found]: 
+            if not seen[idx_found]:
                 seen[idx_found] = 1
                 class_ids[nclass].append(idx_found)
-                                                                        
+
     # Now sort the indeces.
     sort_class_ids = list()
     for ids in class_ids:
@@ -345,7 +345,7 @@ class RotationNotFound(PointGroupException):
     pass
 
 class PointGroup(list):
-    """A PointGroup is a list of Rotations and it has irreducible representations""" 
+    """A PointGroup is a list of Rotations and it has irreducible representations"""
 
     def __init__(self, rotations, name=None, irreprs=None):
 
@@ -354,11 +354,11 @@ class PointGroup(list):
         # Always reorder rotations and irreprs according to class indeces.
         ord_rotations = [ None for ii in range(len(rotations)) ]
         idx = -1
-        for ord_idx in rflat(class_ids): 
+        for ord_idx in rflat(class_ids):
             idx += 1
             ord_rotations[idx] = rotations[ord_idx]
 
-        ord_irreprs  = list() 
+        ord_irreprs  = list()
         for irr in irreprs:
             ord_matrices = [ None for ii in range(len(irr.matrices)) ]
             idx = -1
@@ -372,7 +372,7 @@ class PointGroup(list):
         for orot in ord_rotations: self.append(orot)
 
         if __debug__ and False:
-            for rot in self: 
+            for rot in self:
                 print "info", rot.det, rot.info
                 print "name",  rot.name
                 print "order", rot.order
@@ -418,7 +418,7 @@ class PointGroup(list):
 
     def isgroup(self):
         try:
-            self.findE() 
+            self.findE()
             for rot in self: self.find_inverse(rot)
             return True
         except RotationNotFound:
@@ -431,7 +431,7 @@ class PointGroup(list):
         # Check if r1 * r2 is in group and build the multiplication table.
         mtable = dict()
         for idx1, r1 in enumerate(self):
-            for idx2, r2 in enumerate(self): 
+            for idx2, r2 in enumerate(self):
 
                 try:
                     ij = (idx1, idx2)
@@ -443,8 +443,8 @@ class PointGroup(list):
 
     def show_mtable(self):
         """Print out multiplication table."""
-                                                                                     
-        mtable = self.mk_mtable() 
+
+        mtable = self.mk_mtable()
 
         print 4*" " + (2*" ").join([str(i) for i in xrange(self.nsym)]) + "\n"
         for i in xrange(self.nsym):
@@ -453,29 +453,29 @@ class PointGroup(list):
 
     def show_character_table(self):
         vlen = 10
-                                                
+
         print 100*"*"
         print ("Point Group" + self.name)
         cln = ""
         for clname in self.class_names:
             cln += str(clname).center(vlen)
-        print "Class" + cln 
-                                                
-        mult = "Mult" 
+        print "Class" + cln
+
+        mult = "Mult"
         for cls in self.class_ids:
             mult += str(len(cls)).center(vlen)
         print mult
-                                                
+
         for irrepr in self.irreprs:
             #print "irrepr ", irrepr
             row = irrepr.name.ljust(5)
-            for icls in range(self.nclass): 
-               sym_id = self.class_ids[icls][0] 
+            for icls in range(self.nclass):
+               sym_id = self.class_ids[icls][0]
                mat = irrepr.matrices[sym_id]
                char = mat.trace()[0,0]
                row += str(char).center(vlen)
             print row
-                                                
+
         print 100*"*"
         print 100*"*"
 
@@ -495,7 +495,7 @@ class PointGroup(list):
         for idx1 in range(len(self)):
             for idx2 in range(len(self)):
                 ij = (idx1, idx2)
-                idx_prod = mtable[ij] 
+                idx_prod = mtable[ij]
 
                 for irr in self.irreprs:
                     mat_prod = irr.matrices[idx1] * irr.matrices[idx2]
@@ -507,20 +507,20 @@ class PointGroup(list):
         character_of = dict()
         for irr in self.irreprs:
             traces = irr.traces()
-            #character = [ traces[ii] 
+            #character = [ traces[ii]
             chr = list()
             for clids in self.class_ids:
                 idx = clids[0]
                 chr.append(traces[idx])
             #character_of[irr.name] = N.array(chr)
             character_of[irr.name] = traces
-            #irr.name 
+            #irr.name
 
         err_otrace = 0.0
         for k1, v1 in character_of.iteritems():
             for k2, v2 in character_of.iteritems():
                 my_err = dotc(v1, v2) / self.nsym
-                if k2 == k1: my_err -= 1.0 
+                if k2 == k1: my_err -= 1.0
                 err_otrace = max(err_otrace, abs(my_err))
         print "Error in orthogonality relation of traces ", err
 
@@ -528,16 +528,16 @@ class PointGroup(list):
 
         subname = "ptg_"  + self.name.split()[0].strip()
 
-        fh.write("!{\src2tex{textfont=tt}}\n") 
-        fh.write("!!****f* ABINIT/%s\n" % subname) 
-        fh.write("!!\n") 
-        fh.write("!! NAME\n") 
-        fh.write("!! %s\n" % subname) 
-        fh.write("!!\n") 
-        fh.write("!! FUNCTION\n") 
-        fh.write("!!\n") 
-        fh.write("!! COPYRIGHT\n") 
-        fh.write("!! Copyright (C) 2010-2024 ABINIT group (MG)\n")
+        fh.write("!{\src2tex{textfont=tt}}\n")
+        fh.write("!!****f* ABINIT/%s\n" % subname)
+        fh.write("!!\n")
+        fh.write("!! NAME\n")
+        fh.write("!! %s\n" % subname)
+        fh.write("!!\n")
+        fh.write("!! FUNCTION\n")
+        fh.write("!!\n")
+        fh.write("!! COPYRIGHT\n")
+        fh.write("!! Copyright (C) 2010-2025 ABINIT group (MG)\n")
         fh.write("!! This file is distributed under the terms of the\n")
         fh.write("!! GNU General Public License, see ~abinit/COPYING\n")
         fh.write("!! or http://www.gnu.org/copyleft/gpl.txt .\n")
@@ -555,7 +555,7 @@ class PointGroup(list):
         fh.write("!!\n")
         fh.write("!" + 80*"*" + "\n")
         fh.write("! This include file has been automatically generated by the script " + os.path.basename(__file__) +"\n")
-        fh.write("! Do not edit! Change the script source instead.\n") 
+        fh.write("! Do not edit! Change the script source instead.\n")
         fh.write("!" + 80*"*" + "\n")
         fh.write("\n")
         fh.write("! Point group name " + self.name + "\n")
@@ -604,7 +604,7 @@ class PointGroup(list):
         fh.write(" nclass = %s\n" % nclass)
         fh.write(" ABI_MALLOC(class_ids, (2,nclass))\n")
 
-        for iclas in range(self.nclass): 
+        for iclas in range(self.nclass):
             first = self.class_ids[iclas][0]  +1  # From C to Fortran
             last  = self.class_ids[iclas][-1] +1
             idx = iclas + 1
@@ -664,7 +664,7 @@ class PointGroup(list):
 
         #fh.write(" allocate(class_ids(2,nclass))\n")
         class_range = []
-        for iclas in range(self.nclass): 
+        for iclas in range(self.nclass):
             first = self.class_ids[iclas][0]  #+1  # From C to Fortran
             last  = self.class_ids[iclas][-1] #+1
             #fh.write(" class_ids(1,%(idx)s) = %(first)s\n" % locals())
@@ -726,9 +726,9 @@ class PtGroupParser(object):
 
         for line in self.sym_field:
             m = re_symheader.match(line)
-            if m: 
+            if m:
                 #print "match ", line
-                idx      = m.group(1) 
+                idx      = m.group(1)
                 trcoords = m.group(2).rstrip()
                 order    = m.group(3)
                 strversor   = m.group(4)
@@ -741,10 +741,10 @@ class PtGroupParser(object):
                 row = 0
             else:
                 if row in (0,1): strmat += line + ","
-                if row == 2: strmat += line 
+                if row == 2: strmat += line
                 row += 1
 
-            if row == 3: 
+            if row == 3:
                 #print strmat
                 #matrix = strmat.replace(".",".,")
                 matrix = strmat.replace(".",",")
@@ -777,7 +777,7 @@ class PtGroupParser(object):
 
             matrices = [ None for x in range(self.nsym) ]
 
-            for line in newtext: 
+            for line in newtext:
                 #print name, line, self.nsym
                 tokens = line.split(":")
                 idx = int(tokens[0]) -1
@@ -787,10 +787,10 @@ class PtGroupParser(object):
                     #print "before eval: ",val
                     val = val.replace("] ","], ")
                     if "j" not in val:
-                        val = val.replace(". ","., ") 
+                        val = val.replace(". ","., ")
                     else:
                         #print "before eval: ",val
-                        val = val.replace("j ","j, ") # Dirty but it works 
+                        val = val.replace("j ","j, ") # Dirty but it works
                         #print "after eval : ", val
 
                 val = eval(val)
@@ -813,16 +813,16 @@ class PtGroupParser(object):
         # Extract the group name from the first string.
         title = self.text.pop(0)
         substr = "Symmetry operations for the point group"
-        if substr not in title: 
+        if substr not in title:
             raise PtGroupParser("Read wrong title " + title)
 
         self.pgroup_name = title.replace(substr, "",1).rstrip()
 
-        # Separate the symmetry field from the one with the irred. representations. 
+        # Separate the symmetry field from the one with the irred. representations.
 
         # 1) Consume text until we reach the files with the irreducible repr.
         self.sym_field = []
-        substr = "Irreducible representations for the point group" 
+        substr = "Irreducible representations for the point group"
         line = self.text.pop(0)
         while substr not in line:
            if line.lstrip(): self.sym_field.append(line.rstrip())
@@ -841,14 +841,14 @@ class PtGroupParser(object):
         self.irrepr_dims  = list()
         self.nirrepr = 0
 
-        # Now extract the Irreducible representations. 
+        # Now extract the Irreducible representations.
         # Each representation is signaled by a line of the form
         #Irrep A ( dimension  1 )
         re_irrep = re.compile("\s*Irrep(.*)\(\s+dimension\s+(\d)\s+\)")
 
         #line = self.text(0)
         #nlines = len(self.text)
-        for line in self.text: 
+        for line in self.text:
            m = re_irrep.match(line)
            #print line
            if m:
@@ -884,11 +884,11 @@ class HTMLStripper(sgmllib.SGMLParser):
 
     def handle_data(self, data):
         self.plain_text.append(data)
-                                            
+
     def parse(self, input):
-        """Remove HTML tags from input. Return string.""" 
+        """Remove HTML tags from input. Return string."""
         self.plain_text = list()
-        for item in input: self.feed(item) 
+        for item in input: self.feed(item)
         return "".join(self.plain_text)
 
 def download_ptgroup_tables(ptgnames=None, stripHTML=False):
@@ -899,7 +899,7 @@ def download_ptgroup_tables(ptgnames=None, stripHTML=False):
     import telnetlib
     HOST = "www.cryst.ehu.es"
 
-    if stripHTML: 
+    if stripHTML:
        html_parser = HTMLStripper()
 
     fnames = list()
@@ -909,9 +909,9 @@ def download_ptgroup_tables(ptgnames=None, stripHTML=False):
         ii += 1
         doublename = ptg_names[ii]
 
-        if ptgnames and doublename[0] not in ptgnames:        
+        if ptgnames and doublename[0] not in ptgnames:
             continue
-        
+
         print "Downloading table for point group: " + str(pg) + str(doublename) + "..."
         tn = telnetlib.Telnet(HOST, 80)
         command = "GET /cgi-bin/rep/programs/sam/point.py?sg=" + str(pg) + "&what=irreps\n"
@@ -919,11 +919,11 @@ def download_ptgroup_tables(ptgnames=None, stripHTML=False):
         tn.write(command)
         table = tn.read_all()
 
-        fname = "ptgroup_" + doublename[0] + ".html" 
-        if stripHTML: 
+        fname = "ptgroup_" + doublename[0] + ".html"
+        if stripHTML:
             table = html_parser.parse(table)
             print table
-            fname = "ptgroup_" + doublename[0] + ".txt" 
+            fname = "ptgroup_" + doublename[0] + ".txt"
 
         # Write table on file.
         fh = open(fname,"w")
@@ -941,14 +941,14 @@ def download_klgroup_table(ita_spgnum, basis, kcoords, label=None):
     import telnetlib
     HOST = "www.cryst.ehu.es"
 
-    # To obtain the representations for a given k-vector and given space group in text form you have to give the command 
+    # To obtain the representations for a given k-vector and given space group in text form you have to give the command
     # GET /cgi-bin/cryst/text/nph-repr?g=[gn]&b=[p|c|a]&x=[number]&y=[number]&z=[number]&l=[label]
-    # where 
-    # [gn] is the group number in ITA, 
-    # b corresponds to the basis in which the k-vector coordinates will be given. 
-    # The choices are: p - primitive, c - centered dual, a - adjusted coefficients. 
-    # x,y,z are the values for the three coordinates of the k-vector, 
-    # l is the label for the k-vector. 
+    # where
+    # [gn] is the group number in ITA,
+    # b corresponds to the basis in which the k-vector coordinates will be given.
+    # The choices are: p - primitive, c - centered dual, a - adjusted coefficients.
+    # x,y,z are the values for the three coordinates of the k-vector,
+    # l is the label for the k-vector.
     # NOTE: By now the program uses the default choice for the group setting when there is more than one conventional setting.
 
     #print "Downloading table for point group: " + str(pg) + str(doublename) + "..."
@@ -1011,7 +1011,7 @@ def parse_klgroup_table(text_lines, fh=None):
 
     nsym_ltgk = int(line.replace(search_str, ""))
     write(str(nsym_ltgk).ljust(WIDTH) + " # Symmetries of the little group of k\n")
-    text.pop(0) # Remove next lines 
+    text.pop(0) # Remove next lines
 
     # Read the rows of symmetries of the little group (C-ordering).
     nfields = nsym_ltgk/5 + 1
@@ -1022,7 +1022,7 @@ def parse_klgroup_table(text_lines, fh=None):
         # coy this field in sym_mats because we are going to read the matrices by colums
         sym_mats = list()
         for il in xrange(3): sym_mats.append(text.pop(0).lstrip())
-        
+
         # Extract the columns
         nmats = 4
         if ifield == (nfields-1) and (nsym_ltgk % 4 > 0):
@@ -1035,8 +1035,8 @@ def parse_klgroup_table(text_lines, fh=None):
             eval_tnons = "" # Fractional translations (e.g. 3/4) have to be evaluated and converted to float
             for tk in cols[3].split(): eval_tnons += str(eval("1.*"+tk)) + " "
             print eval_tnons
-            write("".join([ c for c in cols[:3]]) + "\n") 
-            write(eval_tnons + "\n") 
+            write("".join([ c for c in cols[:3]]) + "\n")
+            write(eval_tnons + "\n")
 
     #####################################
     # Parse the section with the irreps #
@@ -1067,7 +1067,7 @@ def parse_klgroup_table(text_lines, fh=None):
         #print line
         if str_end in line: break
         m = re_irrep_header.match(line)
-        if m: 
+        if m:
             if txt_buf: irrep_field.append(txt_buf)
             irrep_name.append   (m.group(1))
             irrep_num.append(int(m.group(2)))
@@ -1080,7 +1080,7 @@ def parse_klgroup_table(text_lines, fh=None):
     assert nirreps == irrep_num[-1]
 
     for irp in range(nirreps):
-        st = str(irrep_num[irp]) + " " + str(irrep_dim[irp]) + " " + str(irrep_name[irp]) 
+        st = str(irrep_num[irp]) + " " + str(irrep_dim[irp]) + " " + str(irrep_name[irp])
         write(st.ljust(WIDTH) + " # irrep_index, irrep_dim, irrep_name\n")
         #for line in irrep_field[irp]: print line
         irreps_k = parse_irrep_k(nsym_ltgk, irrep_dim[irp], irrep_field[irp])
@@ -1092,15 +1092,15 @@ def parse_klgroup_table(text_lines, fh=None):
 
 def parse_irrep_k(nsym, dim, text):
     """This function parses text in the form
-                 1                             2                
-    (1.000,  0.0) (0.000,  0.0)   (1.000,120.0) (0.000,  0.0)   
-    (0.000,  0.0) (1.000,  0.0)   (0.000,  0.0) (1.000,240.0)   
+                 1                             2
+    (1.000,  0.0) (0.000,  0.0)   (1.000,120.0) (0.000,  0.0)
+    (0.000,  0.0) (1.000,  0.0)   (0.000,  0.0) (1.000,240.0)
     """
 
     irreps_k = [ None for isym in range(nsym) ]
 
     while len(text)>0:
-        sym_ids = [ int(idx) for idx in text.pop(0).split()] # Read the indices of the symmetries 
+        sym_ids = [ int(idx) for idx in text.pop(0).split()] # Read the indices of the symmetries
         nsym_in_row = len(sym_ids)
         #print sym_ids
 
@@ -1126,9 +1126,9 @@ def cut_cols(rows, separator=None, ncols=1):
             line = rows[il]
             #print line
             tokens =  line.split(separator, 1)
-            head = tokens[0] 
-            if len(tokens) > 1: 
-                tail= tokens[1] 
+            head = tokens[0]
+            if len(tokens) > 1:
+                tail= tokens[1]
             else:
                 tail = ""  # separator might not be in line.
             rows[il] = tail
@@ -1151,7 +1151,7 @@ def write_ltgroup_file(fname, ita_spgnum, basis, kpoints, labels):
 
     # Header (two rows)
     fvers = 1
-    write("# Little group file generated by " + os.path.basename(__file__) + "\n") 
+    write("# Little group file generated by " + os.path.basename(__file__) + "\n")
     write(str(fvers).ljust(WIDTH)      + " # Version\n")
     write(str(ita_spgnum).ljust(WIDTH) + " # ITA space group\n")
     write(str(basis).ljust(WIDTH)      + " # Basis\n")
@@ -1161,7 +1161,7 @@ def write_ltgroup_file(fname, ita_spgnum, basis, kpoints, labels):
     for kpt, kname in zip(kpoints, labels):
         str_kname = ""
         for kc in kpt: str_kname += str(kc) + " "
-        str_kname += kname 
+        str_kname += kname
         write(str_kname.ljust(WIDTH) + "\n")
 
     for kpt, kname in zip(kpoints, labels):
@@ -1175,8 +1175,8 @@ def write_ltgroup_file(fname, ita_spgnum, basis, kpoints, labels):
 ###############################################################################
 if __name__ == "__main__":
 
-    #if True: 
-    if False: 
+    #if True:
+    if False:
         # Little group tables
         ita_spgnum = 227
         basis = "p"
@@ -1184,11 +1184,11 @@ if __name__ == "__main__":
         label = "M"
 
         #ktable_text = download_klgroup_table(ita_spgnum, basis, kcoords, label)
-        #parse_klgroup_table(ktable_text) 
+        #parse_klgroup_table(ktable_text)
         kpoints = [kcoords]
         labels = [label]
 
-        lgroup_fname = "lgroup_" + str(ita_spgnum)        
+        lgroup_fname = "lgroup_" + str(ita_spgnum)
 
         write_ltgroup_file(lgroup_fname, ita_spgnum, basis, kpoints, labels)
         sys.exit(2)
@@ -1197,7 +1197,7 @@ if __name__ == "__main__":
         fnames = download_ptgroup_tables(["C2v"], stripHTML=True)
         sys.exit(2)
 
-    p = PtGroupParser() 
+    p = PtGroupParser()
 
     #fcheck  = "pgroup_T"
     #fcheck  = "pgroup_O"
@@ -1205,7 +1205,7 @@ if __name__ == "__main__":
     #fcheck = None
     #for ii, pg in enumerate(PTG_NUMS):
     #  doublename = ptg_names[ii]
-    ##                                    
+    ##
     #  fname = "ptgroup_" + doublename[0] + ".txt"
     #  fname_new = "ptg_" + doublename[0] + ".txt"
     #  print "renaming " + fname + "into" + fname_new
@@ -1225,7 +1225,7 @@ if __name__ == "__main__":
 
       fname = dirname + "ptg_" + doublename[0] + ".txt"
       #if fcheck and fname not in fcheck: continue
-      #print "analysing " + str(doublename) 
+      #print "analysing " + str(doublename)
 
       pgroup = p.parse(fname)
       #pgroup.check()
@@ -1239,7 +1239,7 @@ if __name__ == "__main__":
       #pprint(d)
       all_irreps[key] = d
 
-      #import json 
+      #import json
       #s = json.dumps(d)
       #print(s)
 
@@ -1249,11 +1249,11 @@ if __name__ == "__main__":
       #fh = open(finc_name,"w")
       #fh = sys.stdout
       #pgroup.dump_Fortran_sub(fh)
-      fh.close 
+      fh.close
 
       #ttt.write(" CASE ('" + doublename[1] + "')\n")
       #subname = "ptg_"  + doublename[0].strip()
       #ttt.write("   call %s (ptg_name,nsym,nclass,sym,class_ids,class_names,Irr)\n" % subname )
 
     pprint(all_irreps)
-    
+

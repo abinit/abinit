@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.4.4 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
+.Starting date : Sun 26 Jan 2025.
+- ( at 09h46 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tpositron_7/tpositron_7.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/tutorial_tpositron_7/tpositron_7.abi
 - output file    -> tpositron_7.abo
 - root for input  files -> tpositron_7i
 - root for output files -> tpositron_7o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si_paw_pw_12el.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Si_paw_pw_12el.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -191,9 +191,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.05836
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si_paw_pw_12el.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si_paw_pw_12el.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Si_paw_pw_12el.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Si_paw_pw_12el.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Si_paw_pw_12el.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Si_paw_pw_12el.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 12), orbitals=   0   0   0   1   1   1
  Spheres core radius: rc_sph= 1.60149249
@@ -234,22 +234,22 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
  ETOT  6  -204.31753223052     6.604E-05 6.813E-10 5.683E-05
  ETOT  7  -204.31753176360     4.669E-07 7.079E-12 3.966E-06
  ETOT  8  -204.31753171918     4.442E-08 2.368E-13 4.067E-09
- ETOT  9  -204.31753171921    -2.521E-11 3.965E-17 1.127E-09
- ETOT 10  -204.31753171920     4.803E-12 3.295E-17 5.333E-12
+ ETOT  9  -204.31753171921    -2.566E-11 3.965E-17 1.127E-09
+ ETOT 10  -204.31753171920     4.633E-12 3.293E-17 5.332E-12
 
  At SCF step   10       nres2   =  5.33E-12 < tolvrs=  1.00E-10 =>converged.
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 11  -204.66259201381    -3.451E-01 6.067E+00 8.805E-02
- ETOT 12  -204.67754184476    -1.495E-02 3.743E-02 4.664E-02
- ETOT 13  -204.67768089389    -1.390E-04 8.904E-04 1.902E-04
- ETOT 14  -204.67756281547     1.181E-04 3.918E-06 7.537E-05
- ETOT 15  -204.67755540962     7.406E-06 7.813E-07 2.955E-07
- ETOT 16  -204.67755540969    -7.503E-11 3.303E-09 7.999E-09
- ETOT 17  -204.67755540969    -1.137E-13 4.494E-12 1.041E-09
- ETOT 18  -204.67755540969     0.000E+00 2.137E-17 3.143E-13
+ ETOT 11  -204.66259201316    -3.451E-01 6.067E+00 8.805E-02
+ ETOT 12  -204.67754183982    -1.495E-02 3.742E-02 4.664E-02
+ ETOT 13  -204.67768088833    -1.390E-04 3.297E-04 1.902E-04
+ ETOT 14  -204.67756281363     1.181E-04 4.161E-06 7.534E-05
+ ETOT 15  -204.67755540967     7.404E-06 2.667E-07 2.992E-07
+ ETOT 16  -204.67755540970    -2.416E-11 1.487E-10 8.592E-09
+ ETOT 17  -204.67755540970    -2.842E-14 6.833E-14 1.116E-09
+ ETOT 18  -204.67755540970     2.842E-14 1.769E-16 3.456E-13
 
- At SCF step   18       nres2   =  3.14E-13 < tolvrs=  1.00E-10 =>converged.
+ At SCF step   18       nres2   =  3.46E-13 < tolvrs=  1.00E-10 =>converged.
 
  scprqt:  WARNING -
   posnstep=    2 was not enough SCF cycles to converge difference between
@@ -266,7 +266,7 @@ lattice_vectors:
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7010716E+02
-convergence: {deltae:  0.000E+00, res2:  3.143E-13, residm:  2.137E-17, diffor:  0.000E+00, }
+convergence: {deltae:  2.842E-14, res2:  3.456E-13, residm:  1.769E-16, diffor:  0.000E+00, }
 etotal    :  -2.04677555E+02
 entropy   :   0.00000000E+00
 fermie    :  -3.04042705E-01
@@ -288,8 +288,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.000117701038129
- Compensation charge over fine fft grid    =      0.000117752054080
+ Compensation charge over spherical meshes =      0.000117700341331
+ Compensation charge over fine fft grid    =      0.000117752054094
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -418,13 +418,13 @@ force_length_stats: {min: null, max: null, mean: null, }
 -Use ~abinit/scripts/post_processing/posdopspectra.F90 to process it.
 
  Annihilation rate obtained from integration of e-p pairs momentum distribution:
-   lambda=    5.083152757831E+00 ns-1
+   lambda=    5.083152757795E+00 ns-1
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   38.649E-19; max=  21.374E-18
+ Mean square residual over all n,k,spin=   22.666E-18; max=  17.690E-17
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -448,18 +448,18 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.02123796794049E+00
-hartree             :  5.84369300553778E+01
-xc                  : -3.25227044366889E+00
+kinetic             :  7.02123796794702E+00
+hartree             :  5.84369300553643E+01
+xc                  : -3.25227044366891E+00
 Ewald energy        : -7.55952464681649E+01
 psp_core            :  1.70689274860386E+00
-local_psp           : -1.71891659492373E+02
-spherical_terms     : -2.07434168667375E+01
-electronic          : -2.04317532499022E+02
-positronic          : -9.45390895243861E-01
-electron_positron_interaction:  5.85367204753163E-01
-total_energy        : -2.04677556189513E+02
-total_energy_eV     : -5.56955954899955E+03
+local_psp           : -1.71891659492353E+02
+spherical_terms     : -2.07434168667314E+01
+electronic          : -2.04317532499003E+02
+positronic          : -9.45390828556896E-01
+electron_positron_interaction:  5.85367138065968E-01
+total_energy        : -2.04677556189494E+02
+total_energy_eV     : -5.56955954899904E+03
 ...
 
 
@@ -667,10 +667,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         58.8  wall=         59.0
+- Proc.   0 individual time (sec): cpu=         59.2  wall=         59.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         58.8  wall=         59.0
++Overall time at end (sec) : cpu=         59.2  wall=         59.3

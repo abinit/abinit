@@ -1,18 +1,18 @@
 # Test for the calculation of Frohlich ZPR in CaO. Really underconverged calculation, for testing purposes.
-  
+
   ndtset 6
-  
+
     kptopt   1
 #   ngkpt    4 4 4   # for testing purposes
    kptrlatt -2  2  2      # In cartesian coordinates, this grid is simple cubic
-             2 -2  2      
+             2 -2  2
              2  2 -2
 #   nshiftk  1
 #   shiftk   0. 0. 0.
     tolvrs   1.0d-16
      nqpt    1
       qpt    3*0.0
-  
+
   # Ground state calculation
     #Restore the default parameters for the ground state part,
     #i.e. override the common parameters defined for the effective mass datasets.
@@ -39,7 +39,7 @@
     getddk3  2
      nband3   8
     nbdbuf3   0
-  
+
   # Non-SCF at the specific points where we want to have the effective mass, including the conduction bands
     iscf4    -2
     getden4   1
@@ -49,31 +49,31 @@
               0.00 0.50 0.50   # X
     tolwfr4   1.0d-16  # Must use tolwfr for non-self-consistent calculations.
       nqpt4   0
-                                                                                                          
+
   # Response Function calculation : d/dk  at the specific points, with added bands.
     rfelfd5   2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
     iscf5    -2
     nstep5    10
-  
+
     getden5   1
     getwfk5   4
     get1wf5   2
-  
+
     kptopt5   0        # Here one perform a GS calculation for the K-points for which the effective mass is sought.
-    nkpt5     2        
-    kpt5      0.00 0.00 0.00   # Gamma                                                                      
+    nkpt5     2
+    kpt5      0.00 0.00 0.00   # Gamma
               0.00 0.50 0.50   # X
-              
-                                                                                                          
+
+
     tolwfr5   1.0d-13  # Must use tolwfr for non-self-consistent calculations.
-  
+
     efmas5       1     # Triggers the calculation of effective mass tensors for the specified k-points.
     efmas_bands5 6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
-                 7 9   
+                 7 9
     efmas_calc_dirs5 1
     efmas_n_dirs5 7
     efmas_ntheta5 100
-    efmas_dirs5 
+    efmas_dirs5
               1 0 0
               0 1 0
               0 0 1
@@ -102,7 +102,7 @@
     prtphdos6 0
     chneut6   0  # Don't enforce ASR on BECS (not a good idea, just for testing purposes)
 
-#######################################################################   
+#######################################################################
 acell 3*9.136
 xred
    0.0000000000    0.0000000000    0.0000000000
@@ -110,7 +110,7 @@ xred
 rprim
   0   0.5 0.5
   0.5 0   0.5
-  0.5 0.5 0  
+  0.5 0.5 0
 typat 1 2
 natom 2
 ntypat 2
@@ -118,12 +118,12 @@ znucl 20 8
 nband 12
 nbdbuf 2
 diemac 6
- ecut 30               # Underconverged ecut. 
+ ecut 30               # Underconverged ecut.
 #ecut 15
 nstep 100
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8, O.psp8"
+ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Ca.psp8, O.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -139,7 +139,7 @@ nstep 100
 #%% authors = X. Gonze
 #%% keywords = DFPT, EPH
 #%% description =
-#%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass 
+#%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass
 #%%  and also the Frohlich ZPR from the general formula.
 #%% topics = EffectiveMass
 #%%<END TEST_INFO>

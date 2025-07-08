@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -22,7 +22,6 @@ sources = [
  "m_cgprj.F90",
  "m_contract.F90",
  "m_fock.F90",
- "m_gemm_nonlop_ompgpu.F90",
  "m_gemm_nonlop_gpu.F90",
  "m_gemm_nonlop_projectors.F90",
  "m_gemm_nonlop.F90",
@@ -43,8 +42,7 @@ sources = [
  "m_opernlb_ylm.F90",
  "m_opernlb_ylm_mv.F90",
  "m_opernlc_ylm.F90",
- "m_opernlc_ylm_allwf_cpu.F90",
- "m_opernlc_ylm_ompgpu.F90",
+ "m_opernlc_ylm_allwf.F90",
  "m_opernld_ylm.F90",
  "m_opernld_ylm_allwf.F90",
 ]

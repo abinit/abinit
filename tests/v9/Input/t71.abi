@@ -75,7 +75,7 @@
    kptopt   1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
+ pseudos "Psdj_paw_pw_std/Al.xml, As.LDA_PW-JTH_sp.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

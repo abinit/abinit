@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2024 ABINIT Group
+ * Copyright (C) 2008-2025 ABINIT Group
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -9,7 +9,9 @@
 #ifndef ABINIT_NVTX_MACRO_H
 #define ABINIT_NVTX_MACRO_H
 
+#if defined HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 /*
  * Note:
@@ -22,7 +24,7 @@
  * only exists when GPU markers are enabled.
  */
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
 #define ABI_NVTX_START_RANGE(id) call abi_nvtx_start_range(id)
 #define ABI_NVTX_END_RANGE() call abi_nvtx_end_range()
 #define NVTX_INIT() call nvtx_init()

@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h12 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t15/t15.abi
 - output file    -> t15.abo
 - root for input  files -> t15i
@@ -301,8 +301,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -314,8 +314,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
@@ -323,8 +323,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.169080
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -336,8 +336,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -372,7 +372,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT 13  -5.2557005544733    -9.840E-11 7.060E-05 1.168E-08
  ETOT 14  -5.2557005544793    -6.048E-12 2.523E-08 2.075E-09
 
- At SCF step   14, etot is converged : 
+ At SCF step   14, etot is converged :
   for the second time, diff in etot=  6.048E-12 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -650,9 +650,9 @@ meta: {optdriver: 66, }
 
 ================================================================================
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     9.0000 [Bohr] 
+  Cutoff radius .........     9.0000 [Bohr]
   Volume of the sphere ..    3053.63 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000000    0.000000    0.000000
@@ -723,14 +723,14 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
-                               
- GWLS RESULTS                  
- ----------------------------- 
+
+ GWLS RESULTS
+ -----------------------------
  For orbital |psi_e>, with e :      4
  DFT eigenenergy             :  -2.9600051597562249E-01 Ha =      -8.05458366 eV
  <psi_e |   V_xc  | psi_e>   :  -3.2512360905328386E-01 Ha =      -8.84706333 eV
  <psi_e | Sigma_x | psi_e>   :  -4.2242965911486108E-01 Ha =     -11.49489561 eV
-                               
+
  For omega                   :  -5.5581505040000001E-01 Ha =     -15.12449669 eV
    <psi_e | Sigma_c  | psi_e>:   8.5598281006482299E-02 Ha =       2.32924768 eV
    eps_e + <Sigma_xc - V_xc> :  -3.0770828503071740E-01 Ha =      -8.37316826 eV
@@ -779,9 +779,9 @@ meta: {optdriver: 66, }
 
 ================================================================================
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     9.0000 [Bohr] 
+  Cutoff radius .........     9.0000 [Bohr]
   Volume of the sphere ..    3053.63 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000000    0.000000    0.000000
@@ -852,14 +852,14 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
-                               
- GWLS RESULTS                  
- ----------------------------- 
+
+ GWLS RESULTS
+ -----------------------------
  For orbital |psi_e>, with e :      4
  DFT eigenenergy             :  -2.9600051597562249E-01 Ha =      -8.05458366 eV
  <psi_e |   V_xc  | psi_e>   :  -3.2512360905328386E-01 Ha =      -8.84706333 eV
  <psi_e | Sigma_x | psi_e>   :  -4.2242965911486108E-01 Ha =     -11.49489561 eV
-                               
+
  For omega                   :  -5.5581505040000001E-01 Ha =     -15.12449669 eV
    <psi_e | Sigma_c  | psi_e>:   8.5370845435632059E-02 Ha =       2.32305885 eV
    eps_e + <Sigma_xc - V_xc> :  -3.0793572060156765E-01 Ha =      -8.37935710 eV
@@ -908,9 +908,9 @@ meta: {optdriver: 66, }
 
 ================================================================================
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     9.0000 [Bohr] 
+  Cutoff radius .........     9.0000 [Bohr]
   Volume of the sphere ..    3053.63 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000000    0.000000    0.000000
@@ -981,9 +981,9 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
-                               
- GWLS RESULTS                  
- ----------------------------- 
+
+ GWLS RESULTS
+ -----------------------------
  For orbital |psi_e>, with e :      4
  DFT eigenenergy             :  -2.9600051597562249E-01 Ha =      -8.05458366 eV
  <psi_e |   V_xc  | psi_e>   :  -3.2512360905328386E-01 Ha =      -8.84706333 eV
@@ -1033,9 +1033,9 @@ meta: {optdriver: 66, }
 
 ================================================================================
 
- === Spherical cutoff === 
+ === Spherical cutoff ===
 
-  Cutoff radius .........     9.0000 [Bohr] 
+  Cutoff radius .........     9.0000 [Bohr]
   Volume of the sphere ..    3053.63 [Bohr^3]
  q-points for optical limit:   1
      1)      0.000000    0.000000    0.000000
@@ -1106,21 +1106,21 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
-                               
- GWLS RESULTS                  
- ----------------------------- 
+
+ GWLS RESULTS
+ -----------------------------
  For orbital |psi_e>, with e :      4
  DFT eigenenergy             :  -2.9600051597562249E-01 Ha =      -8.05458366 eV
  <psi_e |   V_xc  | psi_e>   :  -3.2512360905328386E-01 Ha =      -8.84706333 eV
  <psi_e | Sigma_x | psi_e>   :  -4.2242965911486108E-01 Ha =     -11.49489561 eV
-                               
+
  For omega                   :  -5.5581505040000001E-01 Ha =     -15.12449669 eV
    <psi_e | Sigma_c  | psi_e>:   8.5598277083045307E-02 Ha =       2.32924758 eV
    eps_e + <Sigma_xc - V_xc> :  -3.0770828895415442E-01 Ha =      -8.37316837 eV
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.8000000000E+01  1.8000000000E+01  1.8000000000E+01 Bohr
               amu      2.80855000E+01  1.00794000E+00
@@ -1292,7 +1292,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1304,12 +1304,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1327,7 +1327,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1342,7 +1342,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

@@ -6,7 +6,7 @@
 !!  LDA or LDA-like XC functionals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, LG, MF, JFD, LK)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA,XG,GMR,LG,MF,JFD,LK,AB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@ module m_xclda
  use defs_basis
  use m_errors
  use m_abicore
-
+ use m_special_funcs,      only : tildeAx
  use m_numeric_tools,      only : invcb
 
  implicit none
@@ -40,6 +40,9 @@ module m_xclda
  public :: xcxalp     ! X$\alpha$ method.
  public :: xclb       ! GGA like part (vx_lb) of the Leeuwen-Baerends XC potential.
  public :: xctfw      ! Thomas-Fermi-Weizsacker functional
+ public :: xcksdt     ! corrKSDT finite-temperature xc functional
+ public :: fec_ksdt   ! corrKSDT finite-temperature xc functional (exchange energies)
+ public :: fxc_ksdt   ! corrKSDT finite-temperature xc functional (exchange-correlation energies)
 !!***
 
 contains
@@ -1238,41 +1241,42 @@ end subroutine xclb
 !!     only used if gradient corrected functional (option=2,-2,-4 and 4 or beyond)
 !!  rho_updn(npts,nspden)=spin-up and spin-down density (Hartree/bohr**3)
 !!  temp= electronic temperature
-!!  usefxc=1 if free energy fxc is used
 !!
 !! SIDE EFFECTS
 !!  The following arrays are modified (gradient correction added):
 !!  dvxcdgr(npts,3)=partial derivative of the XC energy divided by the norm of the gradient
-!!  exci(npts)=exchange-correlation energy density
 !!  fxci(npts)=free energy energy density
+!!  tsxci(npts)=entropy energy density
 !!  vxci(npts,nspden)=exchange-correlation potential
 !!
 !! SOURCE
 
-subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn)
+subroutine xctfw(temp,fxci,tsxci,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndvxcdgr,npts,nspden,usefxc
+ integer,intent(in) :: ndvxcdgr,npts,nspden
  real(dp),intent(in) :: temp
 !arrays
  real(dp),intent(in) :: grho2_updn(npts,2*nspden-1),rho_updn(npts,nspden)
- real(dp),intent(inout) :: dvxcdgr(npts,ndvxcdgr),fxci(npts*usefxc),exci(npts),vxci(npts,nspden)
+ real(dp),intent(inout) :: dvxcdgr(npts,ndvxcdgr),fxci(npts),tsxci(npts),vxci(npts,nspden)
 
 !Local variables-------------------------------
 !scalars
  integer :: iperrot,ipts
- logical :: has_fxc,has_dvxcdgr
+ logical :: has_dvxcdgr
  real(dp) :: etfw,rho,rho_inv,rhomot,yperrot0,vtfw
  real(dp) :: yperrot,uperrot,dyperrotdn,duperrotdyperrot
  real(dp) :: hperrot,dhperrotdyperrot,dhperrotdn,dhperrotduperrot
 !arrays
  real(dp) :: wpy(0:7), wpu(0:7)
- real(dp),allocatable :: rho_updnm1_3(:,:)
+ real(dp),allocatable :: rho_updnm1_3(:,:),exci(:)
 
 ! *************************************************************************
 
- has_fxc=(usefxc/=0)
+!We would rather work with exc than with tsxc
+ ABI_MALLOC(exci,(npts))
+ exci=fxci+tsxci
  has_dvxcdgr=(ndvxcdgr/=0)
 
  yperrot0=1.666081101_dp
@@ -1292,7 +1296,6 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
  call invcb(rho_updn(:,1),rho_updnm1_3(:,1),npts)
 
  do ipts=1,npts
-
    rho   =rho_updn(ipts,1)
    rhomot=rho_updnm1_3(ipts,1)
    rho_inv=rhomot*rhomot*rhomot
@@ -1333,14 +1336,393 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
      exci(ipts)   = exci(ipts) + etfw + uperrot*dhperrotduperrot*grho2_updn(ipts,1)*rho_inv*rho_inv
    end if
    vxci(ipts,1) = vxci(ipts,1)  + vtfw
-   if (has_fxc) fxci(ipts)   = fxci(ipts) + etfw
+   fxci(ipts)   = fxci(ipts)    + etfw
    if (has_dvxcdgr) dvxcdgr(ipts,1)= dvxcdgr(ipts,1)+two*hperrot*rho_inv
-
  end do
 
+ tsxci=exci-fxci
  ABI_FREE(rho_updnm1_3)
+ ABI_FREE(exci)
 
 end subroutine xctfw
+!!***
+
+!!****f* ABINIT/xcksdt
+!! NAME
+!!  xcksdt
+!!
+!! FUNCTION
+!!  Returns exc, vxc, and eventually d(vxc)/d($\rho$) from input rho.
+!!
+!! NOTES
+!!  Karasiev-Sjostrom-Dufty-Trickey (KSDT) TLDA xc-functional
+!!  V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014) [[cite:Karasiev2014]]
+!!  Copyright (C) 2014 Orbital-free DFT group at University of Florida (V.V. Karasiev)
+!!
+!! INPUTS
+!!  npt=number of real space points on which density is provided
+!!  order=gives the maximal derivative of Exc computed.
+!!  rhor=value of electronic density at each point
+!!  rspts(npt)=Wigner-Seitz radii at each point
+!!  el_temp=electronic temperature (hartree)
+!!
+!! OUTPUT
+!!  exc(npt)=exchange-correlation free energy density (hartree)
+!!  tsxc(npt)=exchange-correlation entropy energy density (hartree)
+!!  vxc(npt)=xc potential (d($\rho$*exc)/d($\rho$)) (hartree)
+!!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
+!!
+!! SOURCE
+subroutine xcksdt(exc,tsxc,npt,order,rhor,rspts,el_temp,vxc,&
+&                 dvxc) ! optional arguments
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npt,order
+ real(dp),intent(in) :: el_temp
+!arrays
+ real(dp),intent(in) :: rhor(npt),rspts(npt)
+ real(dp),intent(out) :: exc(npt),tsxc(npt),vxc(npt)
+ real(dp),intent(out),optional :: dvxc(npt)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ipt
+ real(dp) :: tfac,rs,rho,tempf,tred,fxc,einxc,tsxctmp
+ real(dp) :: drho
+ integer :: i
+ character(len=500) :: message
+!arrays
+ real(dp) :: vxctmp(5)
+
+! *************************************************************************
+
+ tfac=(3._dp*pi**2)**(2._dp/3._dp)/2._dp
+!Checks the values of order
+ if(order<0.or.order>2)then
+   write(message,'(a,a,a,i0)')&
+&   'With Karasiev-Sjostrom-Dufty-Trickey xc functional, the only',ch10,&
+&   'allowed values for order are 0, 1 or 2, while it is found to be',order
+   ABI_BUG(message)
+ end if
+
+!Checks the compatibility between the order and the presence of the optional arguments
+ if(order<=1.and.present(dvxc))then
+   write(message,'(a,a,a,i0)')&
+&   'The order chosen does not need the presence',ch10,&
+&   'of the vector dvxc, that is needed only with order=2, while we have',order
+   ABI_BUG(message)
+ end if
+
+!calculate exc=fxc, vxc, and tsxc (orders 1 and 2)
+!Loop over grid points
+ do ipt=1,npt
+   rs=rspts(ipt)
+   rho=rhor(ipt) !0.75_dp/pi/(rs**3)
+   tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
+   tred=el_temp/tempf
+   call fxc_ksdt(fxc,vxc(ipt),einxc,tsxctmp,rs,tred,0)
+   exc(ipt)=fxc
+   tsxc(ipt)=tsxctmp
+   if( (exc(ipt)/=exc(ipt)).or.(vxc(ipt)/=vxc(ipt)) ) then
+     exc(ipt)=0._dp
+     vxc(ipt)=0._dp
+     write(message, '(a,2d12.5)' )&
+&    'fxc or vxc = NaN: rs,tred=',rs,tred
+     ABI_BUG(message)
+   endif
+ end do
+!for order==2, use numerical derivative
+ if(order==2) then
+!  Loop over grid points
+   do ipt=1,npt
+     drho=0.01_dp*rhor(ipt)
+     do i=1,5
+       rho=rhor(ipt)+drho*dble(i-3)
+       rs=(0.75_dp/pi/rho)**(1._dp/3._dp) ! density
+       tempf=tfac*rho**(2._dp/3._dp) !(3._dp*pi**2*rho)**(2._dp/3._dp)/2._dp
+       tred=el_temp/tempf
+       call fxc_ksdt(fxc,vxctmp(i),einxc,tsxctmp,rs,tred,0)
+     enddo
+     dvxc(ipt)=vxctmp(1)-8._dp*vxctmp(2)+8._dp*vxctmp(4)-vxctmp(5)
+     dvxc(ipt)=dvxc(ipt)/(12._dp*drho)
+     if( dvxc(ipt)/=dvxc(ipt) ) then
+       dvxc(ipt)=0._dp
+       write(message, '(a,2d12.5)' )&
+&      'dvxc = NaN: rs,tred=',rs,tred
+       ABI_BUG(message)
+     elseif(dvxc(ipt)>huge(1._dp)) then
+       dvxc(ipt)=0._dp
+       write(message, '(a,2d12.5)' )&
+&      'dvxc = Inf: rs,tred=',rs,tred
+       ABI_BUG(message)
+     endif
+   enddo
+ endif
+end subroutine xcksdt
+!!***
+
+!!****f* ABINIT/fxc_ksdt
+!! NAME
+!!  fxc_ksdt
+!!
+!! FUNCTION
+!!  LDA XC free-energy parameterization from Monte Carlo data (unpol/pol)
+!!
+!! NOTES
+!!  Karasiev-Sjostrom-Dufty-Trickey (KSDT) TLDA xc-functional
+!!  V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014) [[cite:Karasiev2014]]
+!!  Copyright (C) 2014 Orbital-free DFT group at University of Florida (V.V. Karasiev)
+!!
+!! INPUTS
+!!  rs=Wigner-Seitz radius (bohr)
+!!  t=reduced temperature
+!!  iz=spin polarization (0 - spin-unpolarized, 1 - fully polarized)
+!!
+!! OUTPUT
+!!  fxc=exchange-correlation free energy per particle (hartree)
+!!  vxc=xc potential (d($\rho$*exc)/d($\rho$)) (hartree)
+!!  exc=exchange-correlation internal energy per particle (hartree)
+!!  tsxc=exchange-correlation entropy energy per particle (hartree)
+!!
+!! SOURCE
+subroutine fxc_ksdt(fxc,vxc,exc,tsxc,rs,t,iz)
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iz
+ real(dp),intent(out) :: fxc,vxc,exc,tsxc
+ real(dp),intent(in) :: rs,t
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: onethird=1._dp/3._dp
+ real(dp),parameter :: threehalf=1.5_dp
+ real(dp),parameter :: lambda=(4._dp/9._dp/pi)**onethird
+ real(dp),parameter :: a0=1._dp/(pi*lambda)
+ real(dp) :: aa,daa,bb,dbb,cc,dcc,dd,ddd,ee,dee,tempF,sxc
+ real(dp) :: dtdn,tanht,dtanht,tanhsqrt,dtanhsqrt,f1
+ real(dp) :: num,dnum,den,dden,dnumdrs,ddendrs,n,drsdn,omega
+!arrays
+ real(dp) :: a(6),b(0:1,4),c(0:1,3),d(0:1,5),e(0:1,5)
+
+! *************************************************************************
+
+ data a/0.75_dp,3.04363_dp,-0.092270_dp,1.70350_dp,8.31051_dp,5.1105_dp/
+!
+ data b(0,:)/0.342554_dp,9.141315_dp,0.448483_dp,18.553096_dp/
+ data c(0,:)/0.875130_dp,-0.256320_dp,0.953988_dp/
+ data d(0,:)/0.725917_dp,2.237347_dp,0.280748_dp,4.185911_dp,0.692183_dp/
+ data e(0,:)/0.255415_dp,0.931933_dp,0.115398_dp,17.234117_dp,0.451437_dp/
+!
+ data b(1,:)/0.329001_dp,111.598308_dp,0.537053_dp,105.086663_dp/
+ data c(1,:)/0.848930_dp,0.167952_dp,0.088820_dp/
+ data d(1,:)/0.551330_dp,180.213159_dp,134.486231_dp,103.861695_dp,17.750710_dp/
+ data e(1,:)/0.153124_dp,19.543945_dp,43.400337_dp,120.255145_dp,15.662836_dp/
+!
+ if(iz==0) then
+   omega=1._dp
+ elseif(iz==1) then
+   omega=2._dp**onethird
+ endif
+!
+ if(t==0._dp) then
+!fxc
+   f1=-1._dp/rs
+   num=omega*a0*a(1)+b(iz,1)*sqrt(rs)+c(iz,1)*e(iz,1)*rs
+   den=1._dp+d(iz,1)*sqrt(rs)+e(iz,1)*rs
+   fxc=f1*num/den
+!
+   dnumdrs=b(iz,1)/sqrt(rs)/2._dp+c(iz,1)*e(iz,1)
+   ddendrs=d(iz,1)/sqrt(rs)/2._dp+e(iz,1)
+
+   n=3._dp/(4._dp*pi*rs**3) ! density
+   drsdn=-onethird*rs/n ! (drs/dn)
+   !Fxc=n*fxc=n*f1*num/den=n*A*B*C
+   !dFxc/dn=fxc+n*(dA/dn)*B*C+n*a*(dB/dn)*C+n*a*B*(dC/dn)
+   vxc=fxc+(onethird*f1)*num/den &   ! fxc+n*(dA/dn)*B*C
+&         + n*f1*(dnumdrs*drsdn)/den &  ! n*a*(dB/dn)*C
+&         - n*f1*num*(ddendrs*drsdn)/den**2 ! n*a*B*(dC/dn)
+   exc=fxc
+   tsxc=zero
+ else
+   tanht=tanh(1._dp/t)
+   tanhsqrt=tanh(1._dp/sqrt(t))
+   dtanht=(tanht**2-1._dp)/t**2 !d/dt tanh(1/t)
+   dtanhsqrt=(tanhsqrt**2-1._dp)/t**threehalf/2._dp !d/dt tanh(1/sqrt(t))
+!
+! a(t)
+   num=a(1)+a(2)*t**2+a(3)*t**3+a(4)*t**4
+   den=1._dp+a(5)*t**2+a(6)*t**4
+!
+   dnum=a(2)*2._dp*t+a(3)*3._dp*t**2+a(4)*4._dp*t**3
+   dden=a(5)*2._dp*t+a(6)*4._dp*t**3
+!
+   aa=a0*tanht*num/den
+   daa=a0*(dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2)
+!
+! b(t)
+   num=b(iz,1)+b(iz,2)*t**2+b(iz,3)*t**4
+   den=1._dp+b(iz,4)*t**2+omega*sqrt(3._dp)*b(iz,3)/sqrt(2._dp*lambda**2)*t**4
+!
+   dnum=b(iz,2)*2._dp*t+b(iz,3)*4._dp*t**3
+   dden=b(iz,4)*2._dp*t+omega*sqrt(3._dp)*b(iz,3)/sqrt(2._dp*lambda**2)*4._dp*t**3
+!
+   bb=tanhsqrt*num/den
+   dbb=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
+!
+! d(t)
+   num=d(iz,1)+d(iz,2)*t**2+d(iz,3)*t**4
+   den=1._dp+d(iz,4)*t**2+d(iz,5)*t**4
+!
+   dnum=d(iz,2)*2._dp*t+d(iz,3)*4._dp*t**3
+   dden=d(iz,4)*2._dp*t+d(iz,5)*4._dp*t**3
+!
+   dd=tanhsqrt*num/den
+   ddd=dtanhsqrt*num/den+tanhsqrt*dnum/den-tanhsqrt*num*dden/den**2
+!
+! e(t)
+   num=e(iz,1)+e(iz,2)*t**2+e(iz,3)*t**4
+   den=1._dp+e(iz,4)*t**2+e(iz,5)*t**4
+!
+   dnum=e(iz,2)*2._dp*t+e(iz,3)*4._dp*t**3
+   dden=e(iz,4)*2._dp*t+e(iz,5)*4._dp*t**3
+!
+   ee=tanht*num/den
+   dee=dtanht*num/den+tanht*dnum/den-tanht*num*dden/den**2
+!
+! c(t)
+   num=c(iz,1)+c(iz,2)*exp(-c(iz,3)/t)
+   dnum=c(iz,2)*c(iz,3)*exp(-c(iz,3)/t)/t**2
+   cc=num*ee
+   dcc=dnum*ee+num*dee
+!
+!fxc
+   f1=-1._dp/rs
+   num=omega*aa+bb*sqrt(rs)+cc*rs
+   den=1._dp+dd*sqrt(rs)+ee*rs
+   fxc=f1*num/den
+!
+   dnum=omega*daa+dbb*sqrt(rs)+dcc*rs
+   dnumdrs=bb/sqrt(rs)/2._dp+cc
+   dden=ddd*sqrt(rs)+dee*rs
+   ddendrs=dd/sqrt(rs)/2._dp+ee
+
+   n=3._dp/(4._dp*pi*rs**3) ! density
+   tempF = (3._dp*pi**2*n)**(2._dp/3._dp)/2._dp*omega**2
+   dtdn = -2._dp/3._dp*t/n ! (dt/dn)
+   drsdn=-onethird*rs/n ! (drs/dn)
+   !Fxc=n*fxc=n*f1*num/den=n*A*B*C
+   !dFxc/dn=fxc+n*(dA/dn)*B*C+n*a*(dB/dn)*C+n*a*B*(dC/dn)
+   vxc=fxc+(onethird*f1)*num/den &   ! fxc+n*(dA/dn)*B*C
+&    + n*f1*(dnum*dtdn+dnumdrs*drsdn)/den &  ! n*a*(dB/dn)*C
+&    - n*f1*num*(dden*dtdn+ddendrs*drsdn)/den**2 ! n*a*B*(dC/dn)
+   sxc=f1*(dnum)/den &       ! A*(dB/dn)*C
+&      -f1*num*(dden)/den**2 ! A*B*(dC/dn)
+   sxc=-sxc/tempF !sxc=-(t/T)*dfxc/dt=-(1/tempF)*dfxc/dt
+   exc=fxc+t*tempF*sxc !exc=fxc+T*sxc=fxc+(t*tempF)*sxc
+   tsxc=t*tempF*sxc
+ endif
+end subroutine fxc_ksdt
+!!***
+
+!!****f* ABINIT/fex_ksdt
+!! NAME
+!!  fex_ksdt
+!!
+!! FUNCTION
+!!  Returns exchange energy per electron from KSDT xc functional
+!!
+!! NOTES
+!!  Karasiev-Sjostrom-Dufty-Trickey (KSDT) TLDA xc-functional
+!!  V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014) [[cite:Karasiev2014]]
+!!  Copyright (C) 2014 Orbital-free DFT group at University of Florida (V.V. Karasiev)
+!!
+!! INPUTS
+!!  rs=Wigner-Seitz radius (Bohr)
+!!  degauss=setup temperature (Rydberg)
+!!
+!! OUTPUT
+!!  fx=exchange free energy per particle (hartree)
+!!  einx=exchange internal energy per particle (hartree)
+!!  tsx=exchange entropy energy per particle (hartree)
+!!  vx=exchange potential
+!!
+!! SOURCE
+subroutine fex_ksdt(rs,fx,einx,tsx,vx,degauss)
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: rs,degauss
+ real(dp),intent(out) :: fx,einx,tsx,vx
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: twothird=two/three
+ real(dp) :: ex0,vx0,tF,t,dtdn,rho,sx,Ax,dAx,d2Ax,f_slater,alpha_slater
+
+! *************************************************************************
+
+ rho=3._dp/(4._dp*pi*rs**3)
+ tF=(3._dp*pi**2*rho)**twothird/2._dp !tF=Fermi temperature for spin-unpol case
+ t = degauss/2.0_dp/tF
+ !ef=1.841584276_dp/rs/rs
+ !tred=degauss/2.0_dp/ef
+ dtdn = -twothird*t/rho ! (dt/dn)
+
+ f_slater=-0.687247939924714d0
+ alpha_slater=twothird
+ ex0=f_slater*alpha_slater/rs
+ vx0=four/three*f_slater*alpha_slater/rs
+
+ call tildeAx(t,Ax,dAx,d2Ax)
+ fx = ex0*Ax         ! exchange free-energy per electron
+ vx = vx0*Ax + rho*ex0*dAx*dtdn ! d(n*ex0*Ax)/dn = d(n*ex0)/dn + n*ex0*(dAx/dtred)*(dtred/dn)
+ sx = -ex0*dAx/tF    ! entropy per electron
+ einx = fx + t*tF*sx ! internal energy per electron
+ tsx = t*tF*sx       ! T*entropy per electron
+end subroutine fex_ksdt
+!!***
+
+!!****f* ABINIT/fec_ksdt
+!! NAME
+!!  fec_ksdt
+!!
+!! FUNCTION
+!!  Returns correlation energy per electron from KSDT xc functional
+!!
+!! NOTES
+!!  Karasiev-Sjostrom-Dufty-Trickey (KSDT) TLDA xc-functional
+!!  V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014) [[cite:Karasiev2014]]
+!!  Copyright (C) 2014 Orbital-free DFT group at University of Florida (V.V. Karasiev)
+!!
+!! INPUTS
+!!  rs=Wigner-Seitz radius (Bohr)
+!!  degauss=setup temperature (Rydberg)
+!!
+!! OUTPUT
+!!  fc=correlation free energy per particle (hartree)
+!!  einc=correlation internal energy per particle (hartree)
+!!  tsc=correlation entropy energy per particle (hartree)
+!!  vc=correlation potential
+!!
+!! SOURCE
+subroutine fec_ksdt(rs,fc,einc,tsc,vc,degauss)
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: rs,degauss
+ real(dp),intent(out) :: fc,einc,tsc,vc
+!Local variables ------------------------------
+!scalars
+ real(dp),parameter :: twothird=two/three
+ real(dp) :: fxc,vxc,einxc,tsxc,fx,einx,tsx,vx,t,ef
+
+! *************************************************************************
+
+ ef=1.841584276_dp/rs/rs*1.d0**(2.d0/3.d0)
+ t=degauss/2.0_dp/ef
+ call fxc_ksdt(fxc,vxc,einxc,tsxc,rs,t,0)
+ call fex_ksdt(rs,fx,einx,tsx,vx,degauss)
+ fc=fxc-fx
+ einc=einxc-einx
+ tsc=tsxc-tsx
+ vc=vxc-vx
+end subroutine fec_ksdt
 !!***
 
 end module m_xclda

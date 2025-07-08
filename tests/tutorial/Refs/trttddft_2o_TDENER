@@ -1,0 +1,3 @@
+# RT-TDDFT -- Energy file. All quantities are in Hartree atomic units.
+# step  time  E_total  E_kinetic  E_hartree  E_xc  E_ewald   E_corepsp  E_localpsp  E_nonlocalpsp  E_paw  E_entropy  E_vdw
+0         0.00000  -11.52756068     6.98215163     0.94720194    -4.31664098   -12.92043400     0.94904208    -4.60689073     0.00000000     1.43800938    -0.00000000     0.00000000

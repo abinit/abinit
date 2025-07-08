@@ -194,7 +194,7 @@ then
     v_from_git=1
 elif test "x$fallback" = x || git --version >/dev/null 2>&1; then
     # In the next line, the value is the current default
-    v=$(<.current_version)
+    v=$(cat .current_version)
 else
     v=$fallback
 fi

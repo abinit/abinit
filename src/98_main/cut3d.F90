@@ -7,7 +7,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2025 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,9 +41,7 @@ program cut3d
  use m_xmpi
  use m_nctk
  use m_abicore
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 #if defined FC_NAG
  use f90_unix_proc
 #endif
@@ -157,7 +155,7 @@ program cut3d
 
    ! Read the header and extract dimensions.
    write(std_out,*)
-   call hdr_read_from_fname(hdr, filrho, fform0, comm)
+   call hdr%from_fname(filrho, fform0, comm)
    ABI_CHECK(fform0 /= 0, "hdr_read returned fform = 0")
    abifile = abifile_from_fform(fform0)
    ABI_CHECK(abifile%fform /= 0, "Cannot detect abifile from fform")

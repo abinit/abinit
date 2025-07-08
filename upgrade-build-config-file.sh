@@ -408,6 +408,7 @@ abinit_options = {
     "enable_openmp": "${enable_openmp}",
     "enable_stdin": "${enable_stdin}",
     "enable_timer": "${enable_timer}",
+    "enable_triqs_complex": "${enable_triqs_complex}",
     "enable_triqs_v1_4": "${enable_triqs_v1_4}",
     "enable_triqs_v2_0": "${enable_triqs_v2_0}",
     "enable_wannier90_v1": "${enable_wannier90_v1}",

@@ -8,11 +8,17 @@ from __future__ import print_function, division, unicode_literals, absolute_impo
 import sys
 import os
 import argparse
+import platform
 
+from socket import gethostname
 from fkiss import termcolor
 from fkiss.tools import print_dataframe
 from fkiss.project import FortranFile, AbinitProject
 from fkiss.termcolor import cprint
+
+
+__version__ = "0.2.0"
+_my_name = os.path.basename(__file__) + "-" + __version__
 
 
 def get_epilog():
@@ -207,6 +213,13 @@ def main():
         cprint("py2.x CANNOT USE jobs > 1. Setting jobs to 1. Use py3k", "yellow")
         options.jobs = 1
 
+    ncpus_detected = os.cpu_count()
+    system, node, release, version, machine, processor = platform.uname()
+
+    cprint("Running on %s -- system %s -- ncpus %s -- Python %s -- %s" % (
+          gethostname(), system, ncpus_detected, platform.python_version(), _my_name),
+          color='green', attrs=['underline'])
+
     #if options.command == "robodoc":
     #    from fkiss.mkrobodoc_dirs import mkrobodoc_files
     #    return mkrobodoc_files(".")
@@ -270,6 +283,7 @@ def main():
 
         proj.write_binaries_conf(verbose=options.verbose, dryrun=False)
         proj.write_buildsys_files(verbose=options.verbose, dryrun=False)
+        #proj.update_corelibs(verbose=options.verbose, dryrun=False)
 
     elif options.command == "print":
         if options.what is None:

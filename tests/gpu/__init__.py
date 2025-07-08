@@ -5,7 +5,7 @@ need_cpp_vars = [
 "HAVE_GPU",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -19,4 +19,5 @@ inp_files = [
 "t03.abi",
 "t04.abi",
 "t05.abi",
+"t06.abi",
 ]

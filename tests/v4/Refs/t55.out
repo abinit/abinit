@@ -1,8 +1,8 @@
 
-.Version 5.8.2  of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu4.3 computer) 
+.Version 5.8.2  of ABINIT
+.(sequential version, prepared for a x86_64_linux_gnu4.3 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 13 May 2009.
-  
+
 - input  file    -> /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/v4/Input/t55.in
 - output file    -> t55.out
 - root for input  files -> t55i
@@ -171,8 +171,8 @@ P    mkmem2        3
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.00793
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Psps_for_tests/41nb_001023.pspfhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Psps_for_tests/41nb_001023.pspfhi
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Pspdir/41nb_001023.pspfhi
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Pspdir/41nb_001023.pspfhi
 - Nb, fhi98PP: TM-type, LDA Perdew/Wang, l = 2 local
   41.00000  13.00000      1023                znucl, zion, pspdat
     6    7    2    2       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -184,8 +184,8 @@ P    mkmem2        3
              1    9.959063
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Psps_for_tests/03li.pspfhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Psps_for_tests/03li.pspfhi
+- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Pspdir/03li.pspfhi
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Pspdir/03li.pspfhi
 - Li, fhi98PP: TM-type, LDA PedewWang, l = 2 local
    3.00000   3.00000      1023                znucl, zion, pspdat
     6    7    2    2       433   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -197,8 +197,8 @@ P    mkmem2        3
              1   -1.038282
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Psps_for_tests/08o_001023.pspfhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Psps_for_tests/08o_001023.pspfhi
+- pspini: atom type   3  psp file is /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Pspdir/08o_001023.pspfhi
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.8.2/5.8.2-private/tests/Pspdir/08o_001023.pspfhi
 - O, fhi98PP: TM-type, LDA PerdewWang, l=2 local
    8.00000   6.00000      1023                znucl, zion, pspdat
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -239,7 +239,7 @@ P newkpt: treating     34 bands with npw=     172 for ikpt=   2
  ETOT 13  -193.41773908224    -2.558E-12 3.737E-14 1.631E-09 7.272E-07 1.090E-01
  ETOT 14  -193.41773908224    -3.268E-12 5.350E-14 1.694E-10 6.488E-07 1.090E-01
 
- At SCF step   14, etot is converged : 
+ At SCF step   14, etot is converged :
   for the second time, diff in etot=  3.268E-12 < toldfe=  1.000E-10
 
  Computing the polarization (Berry phase) for reciprocal vector:
@@ -292,16 +292,16 @@ P newkpt: treating     34 bands with npw=     172 for ikpt=   2
 
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been fold into [-1, 1])
-     Electronic berry phase:        0.771439446E-12  -0.826810694E-12   0.356406184E-01  
-     Expectation value (PAW only):  0.000000000E+00   0.000000000E+00   0.000000000E+00  
-     Ionic:                        -0.452929247E-17   0.388225069E-17   0.377748285E-01  
+     Electronic berry phase:        0.771439446E-12  -0.826810694E-12   0.356406184E-01
+     Expectation value (PAW only):  0.000000000E+00   0.000000000E+00   0.000000000E+00
+     Ionic:                        -0.452929247E-17   0.388225069E-17   0.377748285E-01
      Total:                         0.771435766E-12  -0.826808591E-12  -0.214501499E-02
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been fold into [-1, 1])
-     Electronic berry phase:        0.441377239E-10  -0.473057766E-10   0.203916948E+01  
-     Expectation value (PAW only):  0.000000000E+00   0.000000000E+00   0.000000000E+00  
-     Ionic:                        -0.259142388E-15   0.222122047E-15   0.216127780E+01  
+     Electronic berry phase:        0.441377239E-10  -0.473057766E-10   0.203916948E+01
+     Expectation value (PAW only):  0.000000000E+00   0.000000000E+00   0.000000000E+00
+     Ionic:                        -0.259142388E-15   0.222122047E-15   0.216127780E+01
      Total:                         0.441375134E-10  -0.473056563E-10  -0.122726521E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -461,7 +461,7 @@ P newkpt: treating     34 bands with npw=     172 for ikpt=   2
   initberry: for direction 2, nkstr =   2, nstr =   4
   initberry: for direction 3, nkstr =   2, nstr =   4
 
- initberry: COMMENT - 
+ initberry: COMMENT -
   As a rough estimate,
   to be below the critical field, the bandgap of your system
   should be larger than    0.03 eV.
@@ -483,7 +483,7 @@ P newkpt: treating     34 bands with npw=     172 for ikpt=   2
  ETOT 11  -193.41774164394    -1.288E-11 5.304E-08 1.112E-10 8.297E-08 1.090E-01
  ETOT 12  -193.41774164394     5.684E-14 5.304E-08 8.306E-11 1.949E-07 1.090E-01
 
- At SCF step   12, etot is converged : 
+ At SCF step   12, etot is converged :
   for the second time, diff in etot=  5.684E-14 < toldfe=  1.000E-10
 
  Computing the polarization (Berry phase) for reciprocal vector:
@@ -536,16 +536,16 @@ P newkpt: treating     34 bands with npw=     172 for ikpt=   2
 
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been fold into [-1, 1])
-     Electronic berry phase:        0.746467875E-04   0.810159720E-12   0.356406193E-01  
-     Expectation value (PAW only):  0.000000000E+00   0.000000000E+00   0.000000000E+00  
-     Ionic:                        -0.452929247E-17   0.258816713E-17   0.377748285E-01  
+     Electronic berry phase:        0.746467875E-04   0.810159720E-12   0.356406193E-01
+     Expectation value (PAW only):  0.000000000E+00   0.000000000E+00   0.000000000E+00
+     Ionic:                        -0.452929247E-17   0.258816713E-17   0.377748285E-01
      Total:                         0.746467875E-04   0.810162066E-12  -0.214501414E-02
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been fold into [-1, 1])
-     Electronic berry phase:        0.427089814E-02   0.463530952E-10   0.203916953E+01  
-     Expectation value (PAW only):  0.000000000E+00   0.000000000E+00   0.000000000E+00  
-     Ionic:                        -0.259142388E-15   0.148081365E-15   0.216127780E+01  
+     Electronic berry phase:        0.427089814E-02   0.463530952E-10   0.203916953E+01
+     Expectation value (PAW only):  0.000000000E+00   0.000000000E+00   0.000000000E+00
+     Ionic:                        -0.259142388E-15   0.148081365E-15   0.216127780E+01
      Total:                         0.427089814E-02   0.463532294E-10  -0.122726472E+00
 
  Stress tensor imposing a constant electric field:
@@ -704,7 +704,7 @@ P newkpt: treating     34 bands with npw=     172 for ikpt=   2
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
      acell    1.0260157145E+01  1.0260157145E+01  1.0260157145E+01 Bohr
        amu    9.29063800E+01  6.94100000E+00  1.59994000E+01
@@ -835,9 +835,9 @@ P    mkmem2        3
 - Total wall clock time (s,m,h):         40.0        0.67      0.011
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
-- routine                 cpu     %       wall     %      number of calls 
+- routine                 cpu     %       wall     %      number of calls
 -                                                          (-1=no count)
 - fourwf(pot)            2.394   6.0      2.380   5.9          11929
 - projbd                 0.954   2.4      0.943   2.4          18826
@@ -865,7 +865,7 @@ P    mkmem2        3
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 
- [1] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+ [1] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
  using density-functional theory.
  M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
  Comment : Some pseudopotential generated using the FHI code were used.
@@ -882,7 +882,7 @@ P    mkmem2        3
  Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
  the licence allows the authors to put it on the Web).
 
- [3] First-principles computation of material properties : the ABINIT software project. 
+ [3] First-principles computation of material properties : the ABINIT software project.
  X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
  M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
  Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7

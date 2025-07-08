@@ -6,7 +6,7 @@
 !!  Interface with Wannier90
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2024 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH, hexu)
+!!  Copyright (C) 2005-2025 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH, hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,7 @@ module m_mlwfovlp
  use m_dtfil
  use m_krank
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_io_tools, only : delete_file, get_unit, open_file
  use m_hide_lapack,     only : matrginv, xheev
@@ -49,7 +49,7 @@ module m_mlwfovlp
  use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
  use m_crystal,  only : crystal_t
  use m_fftcore,  only : sphereboundary
- use m_ebands,   only : ebands_ncwrite, ebands_interp_kmesh
+ use m_ebands,   only : ebands_t
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type, simp_gen
  use m_pawtab,   only : pawtab_type
@@ -57,7 +57,6 @@ module m_mlwfovlp
  use m_paw_sphharm, only : ylm_cmplx, initylmr
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
- !use m_fft,         only : fourwf
  use m_abstract_wf, only: abstract_wf,  wann_ksetting_t, cg_cprj, wfd_wf
  use m_wannier_io,  only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn
 
@@ -168,9 +167,10 @@ module m_mlwfovlp
    complex(dp),allocatable :: u_mat_opt(:,:,:)
    complex(dp),allocatable :: u_mat(:,:,:)
 
-   complex(dp),allocatable :: u_kc(:,:,:)
+   complex(dp),allocatable :: u_k(:,:,:)
    ! (max_dimwin, nwan, nkbz)
    ! total rotation matrix: the product of the optimal subspace x the rotation among the nwan Wannier functions.
+   ! on the coarse ab-initio k-mesh
 
    complex(dp),allocatable :: hwan_r(:,:,:)
    ! (nr_h, nwan, nwan)
@@ -282,7 +282,7 @@ contains
      &dtset,dtfil,eigen,gprimd,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+& pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred, exclude_bands)
 
 !Arguments ------------------------------------
 !scalars
@@ -310,6 +310,7 @@ class(abstract_wf), pointer :: mywfc
  !type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(:)
  type(pawtab_type),intent(in) :: pawtab(:)
+ integer, intent(inout) :: exclude_bands(:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -337,7 +338,7 @@ class(abstract_wf), pointer :: mywfc
  integer,allocatable :: g1(:,:,:)
  integer,allocatable:: ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
- integer,allocatable :: proj_s_loc(:), exclude_bands(:,:)
+ integer,allocatable :: proj_s_loc(:)
  real(dp) :: real_lattice(3,3), recip_lattice(3,3)
  real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:)
  real(dp),allocatable :: eigenvalues_w(:,:,:)
@@ -438,7 +439,7 @@ class(abstract_wf), pointer :: mywfc
  ABI_MALLOC(proj_s_qaxis_loc,(3,mband))
  ABI_MALLOC(proj_z,(3,mband,nsppol))
  ABI_MALLOC(proj_zona,(mband,nsppol))
- ABI_MALLOC(exclude_bands, (mband,nsppol))
+ ! ABI_MALLOC(exclude_bands, (mband,nsppol))
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !2) Call to  Wannier setup
@@ -801,7 +802,7 @@ class(abstract_wf), pointer :: mywfc
      NCF_CHECK(nctk_open_create(ncid, abiwan_fname, xmpi_comm_self))
      NCF_CHECK(hdr%ncwrite(ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
      NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(ebands, ncid))
+     NCF_CHECK(ebands%ncwrite(ncid))
 
      ncerr = nctk_def_dims(ncid, [ &
        nctkdim_t("mwan", mwan), &
@@ -881,7 +882,7 @@ class(abstract_wf), pointer :: mywfc
  ABI_FREE(eigenvalues_w)
  ABI_FREE(M_matrix)
  ABI_FREE(A_matrix)
- ABI_FREE(exclude_bands)
+ ! ABI_FREE(exclude_bands)
 
  call mywfc%free()
  ABI_FREE_SCALAR(mywfc)
@@ -3345,9 +3346,9 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
 
  ! Get total rotation matrix: the product of the optimal subspace x the rotation among the nwan Wannier functions.
  ii = maxval(wan%dimwin)
- ABI_CALLOC(wan%u_kc, (ii, nwan, nkbz))
+ ABI_CALLOC(wan%u_k, (ii, nwan, nkbz))
  do ik=1,nkbz
-   wan%u_kc(1:wan%dimwin(ik), 1:nwan, ik) = matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
+   wan%u_k(1:wan%dimwin(ik), 1:nwan, ik) = matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
  end do
 
  wan%keep_umats = keep_umats
@@ -3400,7 +3401,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
      do ib=1,jb
        ctmp = czero
        do mb=1,wan%dimwin(ik)
-         ctmp = ctmp + conjg(wan%u_kc(mb, ib, ik)) * et_opt(mb, ik) * wan%u_kc(mb, jb, ik)
+         ctmp = ctmp + conjg(wan%u_k(mb, ib, ik)) * et_opt(mb, ik) * wan%u_k(mb, jb, ik)
        end do
        chs(ib, jb, ik) = ctmp
        chs(jb, ib, ik) = conjg(ctmp)
@@ -3561,7 +3562,7 @@ subroutine wan_free(wan)
  ! Complex
  ABI_SFREE(wan%u_mat)
  ABI_SFREE(wan%u_mat_opt)
- ABI_SFREE(wan%u_kc)
+ ABI_SFREE(wan%u_k)
  ABI_SFREE(wan%hwan_r)
  ABI_SFREE(wan%grpe_wwp)
 
@@ -3595,6 +3596,7 @@ subroutine wan_setup_eph_ws_kq(wan, cryst, shiftk, kptrlatt, qptrlatt, my_pert_s
 
  ABI_UNUSED(shiftk)
 
+ ! See Appendix A of Phys. Rev. Research 3, 043022 for possible improvements.
  if (.not. allocated(wan%r_h)) then
    call wigner_seitz(center, lmax, kptrlatt, cryst%rmet, wan%nr_h, wan%r_h, wan%ndegen_h, wan%rmod_h)
  end if
@@ -3723,7 +3725,7 @@ end subroutine wan_interp_eph_manyq
 !! wan_ncwrite_gwan
 !!
 !! FUNCTION
-!!  Write the e-ph matrix elements in the Wannier representation g(R_e, R_ph) to the GWAN.nc netcdf file.
+!!  Write the e-ph matrix elements in the Wannier representation g(R_e,R_ph) to the GWAN.nc netcdf file.
 !!
 !! SOURCE
 
@@ -3749,13 +3751,13 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
  spin = wan%spin; natom3 = 3 * cryst%natom
 
  gwan_filepath = strcat(dtfil%filnam_ds(4), "_GWAN.nc")
- call wrtout(units, sjoin("- Writing e-ph vertex in the Wannier representation to file:", gwan_filepath))
+ call wrtout(units, sjoin("- Writing e-ph matrix elements in the Wannier representation to file:", gwan_filepath))
 
  if (spin == 1) then
    NCF_CHECK(nctk_open_create(root_ncid, gwan_filepath, pert_comm%value))
    NCF_CHECK(cryst%ncwrite(root_ncid))
    !NCF_CHECK(hdr%ncwrite(root_ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, root_ncid))
+   NCF_CHECK(ebands%ncwrite(root_ncid))
  else
    NCF_CHECK(nctk_open_modify(root_ncid, gwan_filepath, pert_comm%value))
  end if
@@ -3983,8 +3985,8 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 
  ! Build new ebands object with memory to be filled.
  band_block(:) = [1, wan_spin(1)%max_nwan]
- out_ebands = ebands_interp_kmesh(in_ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
-                                  band_block, comm, malloc_only=.True.)
+ out_ebands = in_ebands%interp_kmesh(cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
+                                     band_block, comm, malloc_only=.True.)
  out_ebands%eig = zero
 
  do spin=1,in_ebands%nsppol

@@ -1,6 +1,6 @@
 # Crystalline silicon
 # Calculation of the GW corrections
-# Dataset 1: ground state calculation 
+# Dataset 1: ground state calculation
 # Dataset 2: calculation of the WFK file for only Gamma point
 # Dataset 3: calculation of the screening (epsilon^-1 matrix for W)
 
@@ -10,7 +10,7 @@ ndtset   3
 ngkpt   2 2 2
 nshiftk 1
 shiftk  0.0 0.0 0.0
-istwfk  *1            # Option needed for special k-points like Gamma 
+istwfk  *1            # Option needed for special k-points like Gamma
 
 # Dataset1: usual self-consistent ground-state calculation
 nband1  6
@@ -29,7 +29,7 @@ optdriver3  3
 getwfk3     -1
 nband3      60
 ecuteps3    6.0
-ppmfrq3    16.7 eV     # It is easier (and safer) to let ABINIT compute and use the Drude plasma frequency, 
+ppmfrq3    16.7 eV     # It is easier (and safer) to let ABINIT compute and use the Drude plasma frequency,
                        # instead of selecting a value by hand. This would be done thanks to the default value ppmfrq 0.0 .
 
 
@@ -46,7 +46,7 @@ znucl 14          # The keyword "znucl" refers to the atomic number of the
                   # mentioned in the "files" file must correspond
                   # to the type(s) of atom. Here, the only type is Silicon.
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
+pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 
 # Definition of the atoms
 natom 2           # There are two atoms
@@ -74,10 +74,10 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% test_chain = tgw1_2.abi, tgw1_3.abi, tgw1_4.abi, tgw1_5.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tgw1_2.abo, tolnlines= 70, tolabs=  1.010e-03, tolrel=  1.000e+00
-#%% [shell] 
-#%% post_commands = 
+#%% [shell]
+#%% post_commands =
 #%%   ww_cp tgw1_2o_DS2_WFK tgw1_3o_DS2_WFK;
 #%%   ww_cp tgw1_2o_DS3_SCR tgw1_3o_DS3_SCR;
 #%%   ww_cp tgw1_2o_DS2_WFK tgw1_4o_DS2_WFK;
@@ -87,10 +87,10 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% [extra_info]
 #%% authors = V. Olevano, F. Bruneval, M. Giantomassi
 #%% keywords =  GW
-#%% description = 
+#%% description =
 #%%    Crystalline silicon
 #%%    Calculation of the GW corrections
-#%%    Dataset 1: ground state calculation 
+#%%    Dataset 1: ground state calculation
 #%%    Dataset 2: calculation of the WFK file for only Gamma point
 #%%    Dataset 3: calculation of the screening (epsilon^-1 matrix for W)
 #%%<END TEST_INFO>

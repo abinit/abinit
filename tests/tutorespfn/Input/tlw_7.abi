@@ -8,13 +8,13 @@ cunit 1
     #Number of lines :
 nlines 7
     #Description of the points in q space :
-qpoint_name gamma  K  X  gamma  L  X  W  L  
+qpoint_name gamma  K  X  gamma  L  X  W  L
     #Number of q points for each line :
 nqline 10  10  10  10  10  10  11
     #Scale factor for each line :
 scale 1.06066017  0.35355339  1.0  0.86602540  0.86602540  0.5  0.70710678
     #COLOR DEFINITION :
-    #put 1 in place of the atom you want to be colored in 
+    #put 1 in place of the atom you want to be colored in
     #red
 red 0 0
     #green
@@ -29,17 +29,17 @@ blue 0 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = band2eps
-#%% exclude_builders = bob_gnu_13.2_openmp, scope_gnu_10.2_paral
+#%% exclude_builders = scope_gnu_10.2_paral, bob_gnu_13.2_openmp
 #%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% no_check = yes
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tlw_7.out.eps, tolnlines=  5, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Royo
-#%% keywords = 
+#%% keywords =
 #%% description = Input file for 'band2eps.' This data layout must be used, line-by-line.
 #%% topics = longwave
 #%%<END TEST_INFO>

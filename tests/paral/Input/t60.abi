@@ -75,6 +75,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% [shell] 
 #%% post_commands = 
 #%% [files]

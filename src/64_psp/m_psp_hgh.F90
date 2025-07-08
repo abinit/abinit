@@ -6,7 +6,7 @@
 !! Initialize pspcod=2, 3, 10 pseudopotentials (GTH)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT, FD, PT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT, FD, PT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,7 +124,7 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
  integer :: iln,index,ipsang,kk,ll,mm
  real(dp) :: cc1,cc2,cc3,cc4,h1p,h1s,h2s,rloc,rrp,rrs
  real(dp) :: yp1,ypn
- character(len=500) :: message,errmsg
+ character(len=500) :: msg,errmsg
 !arrays
  real(dp),allocatable :: work_space(:),work_spl(:)
  real(dp),allocatable :: dvloc(:)
@@ -147,22 +147,22 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 
 !Read and write different lines of the pseudopotential file
  read (tmp_unit,*, err=10, iomsg=errmsg) rloc,cc1,cc2,cc3,cc4
- write(message, '(a,f12.7)' ) ' rloc=',rloc
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
- write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )'  cc1=',cc1,'; cc2=',cc2,'; cc3=',cc3,'; cc4=',cc4
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ write(msg, '(a,f12.7)' ) ' rloc=',rloc
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
+ write(msg, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )'  cc1=',cc1,'; cc2=',cc2,'; cc3=',cc3,'; cc4=',cc4
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
 
  read (tmp_unit,*, err=10, iomsg=errmsg) rrs,h1s,h2s
- write(message, '(a,f12.7,a,f12.7,a,f12.7)' )'  rrs=',rrs,'; h1s=',h1s,'; h2s=',h2s
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ write(msg, '(a,f12.7,a,f12.7,a,f12.7)' )'  rrs=',rrs,'; h1s=',h1s,'; h2s=',h2s
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
 
  read (tmp_unit,*, err=10, iomsg=errmsg) rrp,h1p
- write(message, '(a,f12.7,a,f12.7)' )'  rrp=',rrp,'; h1p=',h1p
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ write(msg, '(a,f12.7,a,f12.7)' )'  rrp=',rrp,'; h1p=',h1p
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
 
 !Store the coefficients.
  psps%gth_params%set(ipsp)          = .true.
@@ -178,18 +178,18 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 
  if (abs(h1p)>1.d-08) then
    if(psps%mpsang<2)then
-     write(message, '(a,es12.4,a,a,a,i2,a)' )&
+     write(msg, '(a,es12.4,a,a,a,i2,a)' )&
 &     'With non-zero h1p (=',h1p,'), mpsang should be at least 2,',ch10,&
 &     'while mpsang=',psps%mpsang,'.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
    nproj(2)=1
    if (lmax<1) then
-     write(message, '(a,i5,a,e12.4,a,a,a,a)' )&
+     write(msg, '(a,i5,a,e12.4,a,a,a,a)' )&
 &     'Input lmax=',lmax,' disagree with input h1p=',h1p,'.',&
 &     'Your pseudopotential is incoherent.',ch10,&
 &     'Action: correct your pseudopotential file.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
  end if
 
@@ -434,7 +434,7 @@ subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
 !scalars
  integer :: iqgrid
  real(dp) :: erfValue,gaussValue,polyValue,qmax,rq,rq2
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -445,9 +445,9 @@ subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
 !If vlspl_recipSpace is .true., we compute V(q)*q^2 in reciprocal space,
 !else we compute V(r) in real space.
  if (vlspl_recipSpace) then
-   write(message, '(a)' ) '-  Local part computed in reciprocal space.'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(a)' ) '-  Local part computed in reciprocal space.'
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
 
 !  d(q^2*V(q))/d(q) at q=0 and q=qmax
    qmax=qgrid(mqgrid)
@@ -468,9 +468,9 @@ subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
 &     cc4*(105.d0-rq2*(105.d0-rq2*(21.d0-rq2)))  ))
    end do
  else
-   write(message, '(a)' ) '-  Local part computed in real space.'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(a)' ) '-  Local part computed in real space.'
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
 
 !  Compute derivatives for splines computations
    yp1 = 0.d0
@@ -507,12 +507,12 @@ subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
 &     6.0d0 * cc4 * rq ** 5 / rloc)
    end do
 
-   write(message, '(a,f12.7,a,a,f12.7,a,a,a,f12.7)' ) &
+   write(msg, '(a,f12.7,a,a,f12.7,a,a,a,f12.7)' ) &
 &   '  | dr spline step is : ', qgrid(2), ch10, &
 &   '  | r > ', qgrid(mqgrid) ,' is set to 0.', ch10, &
 &   '  | last non-nul potential value is : ', q2vq(mqgrid)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
  end if
 
 end subroutine psp2lo
@@ -593,7 +593,7 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  real(dp) :: cc1,cc2,cc3,cc4,h11d,h11f,h11p,h11s,h22d,h22p,h22s,h33d,h33p,h33s
  real(dp) :: k11d,k11f,k11p,k22d,k22p,k33d,k33p,rloc
  real(dp) :: rrd,rrf,rrp,rrs,yp1,ypn
- character(len=500) :: message,errmsg
+ character(len=500) :: msg,errmsg
 !arrays
  real(dp),allocatable :: dvlspl(:),ekb_so(:,:),ekb_sr(:,:),ffspl_so(:,:,:,:)
  real(dp),allocatable :: ffspl_sr(:,:,:,:),work_space(:),work_spl(:)
@@ -613,56 +613,56 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
 !Read and write different lines of the pseudopotential file
 
  read (tmp_unit,*,err=10,iomsg=errmsg) rloc,cc1,cc2,cc3,cc4
- write(message, '(a,f12.7)' ) ' rloc=',rloc
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
- write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' cc1 =',cc1,'; cc2 =',cc2,'; cc3 =',cc3,'; cc4 =',cc4
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ write(msg, '(a,f12.7)' ) ' rloc=',rloc
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
+ write(msg, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' cc1 =',cc1,'; cc2 =',cc2,'; cc3 =',cc3,'; cc4 =',cc4
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
 
 !For the time being, the s state line must be present and is read,
 !even for local pseudopotentials (zero must appear)
  read (tmp_unit,*,err=10,iomsg=errmsg) rrs,h11s,h22s,h33s
- write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrs =',rrs,'; h11s=',h11s,'; h22s=',h22s,'; h33s=',h33s
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ write(msg, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrs =',rrs,'; h11s=',h11s,'; h22s=',h22s,'; h33s=',h33s
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
 
  if (lmax > 0) then
 
    read (tmp_unit,*,err=10,iomsg=errmsg) rrp,h11p,h22p,h33p
-   write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrp =',rrp,'; h11p=',h11p,'; h22p=',h22p,'; h33p=',h33p
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrp =',rrp,'; h11p=',h11p,'; h22p=',h22p,'; h33p=',h33p
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
 
    read (tmp_unit,*,err=10,iomsg=errmsg) k11p,k22p,k33p
-   write(message, '(a,f12.7,a,f12.7,a,f12.7)' )'                    k11p=',k11p,'; k22p=',k22p,'; k33p=',k33p
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(a,f12.7,a,f12.7,a,f12.7)' )'                    k11p=',k11p,'; k22p=',k22p,'; k33p=',k33p
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
 
  end if
 
  if (lmax > 1) then
    read (tmp_unit,*,err=10,iomsg=errmsg) rrd,h11d,h22d,h33d
-   write(message, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrd =',rrd,'; h11d=',h11d,'; h22d=',h22d,'; h33d=',h33d
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(a,f12.7,a,f12.7,a,f12.7,a,f12.7)' )' rrd =',rrd,'; h11d=',h11d,'; h22d=',h22d,'; h33d=',h33d
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
 
    read (tmp_unit,*,err=10,iomsg=errmsg) k11d,k22d,k33d
-   write(message, '(a,f12.7,a,f12.7,a,f12.7)' )'                    k11d=',k11d,'; k22d=',k22d,'; k33d=',k33d
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(a,f12.7,a,f12.7,a,f12.7)' )'                    k11d=',k11d,'; k22d=',k22d,'; k33d=',k33d
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
  end if
 
  if (lmax > 2) then
    read (tmp_unit,*,err=10,iomsg=errmsg) rrf,h11f
-   write(message, '(a,f12.7,a,f12.7)' )' rrf =',rrf,'; h11f=',h11f
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(a,f12.7,a,f12.7)' )' rrf =',rrf,'; h11f=',h11f
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
 
    read (tmp_unit,*,err=10,iomsg=errmsg) k11f
-   write(message, '(a,f12.7)' )'                    k11f=',k11f
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg, '(a,f12.7)' )'                    k11f=',k11f
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
  end if
 
  if (abs(h11s)>1.d-08) nproj(1)=1
@@ -672,12 +672,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  if (abs(h11p)>1.d-08) then
    nproj(2)=1
    if (lmax<1) then
-     write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+     write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &     ' psp3in : COMMENT -',ch10,&
 &     '  input lmax=',lmax,'  does not agree with input h11p=',h11p,ch10,&
 &     '  setting lmax to 1'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,  msg,'COLL')
      lmax=1
    end if
  end if
@@ -685,12 +685,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  if (abs(h22p)>1.d-08) then
    nproj(2)=2
    if (lmax<1) then
-     write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+     write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &     ' psp3in : COMMENT -',ch10,&
 &     '  input lmax=',lmax,' does not agree with input h22p=',h22p,ch10,&
 &     '  setting lmax to 1'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,  msg,'COLL')
      lmax=1
    end if
  end if
@@ -698,12 +698,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  if (abs(h33p)>1.d-08) then
    nproj(2)=3
    if (lmax<1) then
-     write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+     write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &     ' psp3in : COMMENT -',ch10,&
 &     '  input lmax=',lmax,' does not agree with input h33p=',h33p,ch10,&
 &     '  setting lmax to 1'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,  msg,'COLL')
      lmax=1
    end if
  end if
@@ -711,12 +711,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  if (abs(h11d)>1.d-08) then
    nproj(3)=1
    if (lmax<2) then
-     write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+     write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &     ' psp3in : COMMENT -',ch10,&
 &     '  input lmax=',lmax,'  does not agree with input h11d=',h11d,ch10,&
 &     '  setting lmax to 2'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,  msg,'COLL')
      lmax=2
    end if
  end if
@@ -724,12 +724,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  if (abs(h22d)>1.d-08) then
    nproj(3)=2
    if (lmax<2) then
-     write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+     write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &     ' psp3in : COMMENT -',ch10,&
 &     '  input lmax=',lmax,'  does not agree with input h22d=',h22d,ch10,&
 &     '  setting lmax to 2'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,  msg,'COLL')
      lmax=2
    end if
  end if
@@ -737,12 +737,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  if (abs(h33d)>1.d-08) then
    nproj(3)=3
    if (lmax<2) then
-     write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+     write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &     ' psp3in : COMMENT -',ch10,&
 &     '  input lmax=',lmax,' does not agree with input h33d=',h33d,ch10,&
 &     '  setting lmax to 2'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,  msg,'COLL')
      lmax=2
    end if
  end if
@@ -750,12 +750,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  if (abs(h11f)>1.d-08) then
    nproj(4)=1
    if (lmax<3) then
-     write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+     write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &     ' psp3in : COMMENT -',ch10,&
 &     '  input lmax=',lmax,' does not agree with input h11f=',h11f,ch10,&
 &     '  setting lmax to 3'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wrtout(std_out,  msg,'COLL')
      lmax=3
    end if
  end if
@@ -765,12 +765,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    if (abs(k11p)>1.d-08) then
      nproj(psps%mpsang+1)=1
      if (lmax<1) then
-       write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+       write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &       ' psp3in : COMMENT -',ch10,&
 &       '  input lmax=',lmax,'  does not agree with input k11p=',k11p,ch10,&
 &       '  setting lmax to 1'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,  msg,'COLL')
        lmax=1
      end if
    end if
@@ -778,12 +778,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    if (abs(k22p)>1.d-08) then
      nproj(psps%mpsang+1)=2
      if (lmax<1) then
-       write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+       write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &       ' psp3in : COMMENT -',ch10,&
 &       '  input lmax=',lmax,' does not agree with input k22p=',k22p,ch10,&
 &       '  setting lmax to 1'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,  msg,'COLL')
        lmax=1
      end if
    end if
@@ -792,12 +792,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    if (abs(k33p)>1.d-08) then
      nproj(psps%mpsang+1)=3
      if (lmax<1) then
-       write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+       write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &       ' psp3in : COMMENT -',ch10,&
 &       '  input lmax=',lmax,' does not agree with input k33p=',k33p,ch10,&
 &       '  setting lmax to 1'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,  msg,'COLL')
        lmax=1
      end if
    end if
@@ -805,12 +805,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    if (abs(k11d)>1.d-08) then
      nproj(psps%mpsang+2)=1
      if (lmax<2) then
-       write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+       write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &       ' psp3in : COMMENT -',ch10,&
 &       '  input lmax=',lmax,'  does not agree with input k11d=',k11d,ch10,&
 &       '  setting lmax to 2'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,  msg,'COLL')
        lmax=2
      end if
    end if
@@ -818,12 +818,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    if (abs(k22d)>1.d-08) then
      nproj(psps%mpsang+2)=2
      if (lmax<2) then
-       write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+       write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &       ' psp3in : COMMENT -',ch10,&
 &       '  input lmax=',lmax,'  does not agree with input k22d=',k22d,ch10,&
 &       '  setting lmax to 2'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,  msg,'COLL')
        lmax=2
      end if
    end if
@@ -831,12 +831,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    if (abs(k33d)>1.d-08) then
      nproj(psps%mpsang+2)=3
      if (lmax<2) then
-       write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+       write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &       ' psp3in : COMMENT -',ch10,&
 &       '  input lmax=',lmax,' does not agree with input k33d=',k33d,ch10,&
 &       '  setting lmax to 2'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,  msg,'COLL')
        lmax=2
      end if
    end if
@@ -844,12 +844,12 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
    if (abs(k11f)>1.d-08) then
      nproj(psps%mpsang+3)=1
      if (lmax<3) then
-       write(message, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
+       write(msg, '(a,a,a,a,i5,a,e12.4,a,a)' ) ch10,&
 &       ' psp3in : COMMENT -',ch10,&
 &       '  input lmax=',lmax,' does not agree with input k11f=',k11f,ch10,&
 &       '  setting lmax to 3'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,  msg,'COLL')
        lmax=3
      end if
    end if
@@ -1018,7 +1018,7 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 !scalars
  integer :: info,iproj,iqgrid,ldz,mu,nproj,nu
  real(dp) :: qmax
- character(len=500) :: message
+ character(len=500) :: msg
  character :: jobz,uplo
 !arrays
  real(dp) :: ap(2,9),rwork1(9),work1(2,9),ww(3),yp1j(3),ypnj(3)
@@ -1218,10 +1218,10 @@ subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
  end if
 !If there is a third projector. Warning : only two projectors are allowed.
  if ( abs(h33d) >= 1.0d-8 ) then
-   write(message, '(a,a,a)' )&
+   write(msg, '(a,a,a)' )&
 &   '  only two d-projectors are allowed ',ch10,&
 &   '  Action: check your pseudopotential file.'
-   ABI_ERROR(message)
+   ABI_ERROR(msg)
 !  nproj=3 ; ldz=3 ; ap(1,6)=h33d
 !  ap(1,4)= 0.5d0*sqrt(63.d0/143.d0)*h33d
 !  ap(1,5)= -0.5d0*(18.d0/sqrt(143.d0))*h33d
@@ -1383,7 +1383,7 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
 !scalars
  integer :: ii,iln,iln0,index,ipsang,jj,kk,ll,mm,mproj,nn,nnonloc,nprl,nso
  real(dp) :: rloc,yp1,ypn
- character(len=500) :: message,errmsg
+ character(len=500) :: msg,errmsg
 !arrays
  integer,allocatable :: dummy_nproj(:)
  real(dp) :: cc(4)
@@ -1401,23 +1401,23 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
 !Read and write different lines of the pseudopotential file
 
  read (tmp_unit,*,err=10,iomsg=errmsg) rloc,nn,(cc(jj),jj=1,nn)
- write(message, '(a,f12.7)' ) ' rloc=',rloc
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
- write(message, '(a,i1,a,4f12.7)' )' cc(1:',nn,')=',(cc(jj),jj=1,nn)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ write(msg, '(a,f12.7)' ) ' rloc=',rloc
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
+ write(msg, '(a,i1,a,4f12.7)' )' cc(1:',nn,')=',(cc(jj),jj=1,nn)
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,  msg,'COLL')
 
 !Read the number of the non-local projectors
  read (tmp_unit,*,err=10,iomsg=errmsg) nnonloc
  if (nnonloc/=lmax+1) then
-   write(message, '(a,a,a,a,i5,a,i5,a,a,a,a,i5)' ) ch10,&
+   write(msg, '(a,a,a,a,i5,a,i5,a,a,a,a,i5)' ) ch10,&
 &   ' psp10in : COMMENT -',ch10,&
 &   '  input lmax=',lmax,'  does not agree with input nnonloc=',nnonloc,ch10,&
 &   '  which has to be lmax+1.',ch10,&
 &   '  Setting lmax to ',nnonloc-1
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
    lmax=1
  end if
  ABI_MALLOC(rr,(0:lmax))
@@ -1432,23 +1432,23 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
      read (tmp_unit,*,err=10,iomsg=errmsg) (hij(ll,ii,jj),jj=ii,nprl)
    end do
    nproj(ll+1)=nprl
-   write(message, '(a,i3,a,f12.7,2a,3f12.7,2a,12x,2f12.7,2a,24x,f12.7)' )&
+   write(msg, '(a,i3,a,f12.7,2a,3f12.7,2a,12x,2f12.7,2a,24x,f12.7)' )&
 &   ' for angular momentum l =',ll,' r(l) =',rr(ll),ch10,&
 &   '   h11, h12, h13 =', (hij(ll,1,jj),jj=1,3),ch10,&
 &   '        h22, h23 =', (hij(ll,2,jj),jj=2,3),ch10,&
 &   '             h33 =', (hij(ll,3,jj),jj=3,3)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
    if (ll==0) cycle
    do ii=1,nprl
      read (tmp_unit,*,err=10,iomsg=errmsg) (kij(ll,ii,jj),jj=ii,nprl)
    end do
-   write(message, '(a,3f12.7,2a,12x,2f12.7,2a,24x,f12.7)' )&
+   write(msg, '(a,3f12.7,2a,12x,2f12.7,2a,24x,f12.7)' )&
 &   '   k11, k12, k13 =', (kij(ll,1,jj),jj=1,3),ch10,&
 &   '        k22, k23 =', (kij(ll,2,jj),jj=2,3),ch10,&
 &   '             k33 =', (kij(ll,3,jj),jj=3,3)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,  msg,'COLL')
  end do prjloop
 
  if(pspso/=0) then
@@ -1618,7 +1618,7 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 !scalars
  integer :: info,ipack,iproj,iqgrid,jproj,ll,numproj
  real(dp) :: qmax,rrl
- character(len=500) :: message
+ character(len=500) :: msg
  character :: jobz,uplo
 !arrays
  real(dp) :: ap(2,9),rwork1(9),work1(2,9),ww(3),yp1j(3),ypnj(3)
@@ -1741,10 +1741,10 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 
 !      If there is a third projector. Warning : only two projectors are allowed.
        if ( numproj>2 ) then
-         write(message, '(3a)' )&
+         write(msg, '(3a)' )&
 &         ' only two d-projectors are allowed ',ch10,&
 &         ' Action: check your pseudopotential file.'
-         ABI_ERROR(message)
+         ABI_ERROR(msg)
        end if
 
        rrl=rr(2)
@@ -1776,10 +1776,10 @@ subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
 
 !      If there is a second projector. Warning : only one projector is allowed.
        if ( numproj>1 ) then
-         write(message, '(a,a,a)' )&
+         write(msg, '(a,a,a)' )&
 &         'only one f-projector is allowed ',ch10,&
 &         'Action: check your pseudopotential file.'
-         ABI_ERROR(message)
+         ABI_ERROR(msg)
        end if
 
        rrl=rr(3)

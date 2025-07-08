@@ -809,7 +809,7 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
 !FB  ABI_FREE(vect)
   CoeffMoore%ntotconst=iconst_new
   if (MPIdata%iam_master) then
-    open(unit=16,file=trim(Invar%output_prefix)//'constraints.dat')
+    open(unit=16,file=trim(Invar%output_prefix)//'_constraints.dat')
     write(16,*) ' ======== Constraints at the 1st order (Rotational Invariances) ========'
     write(16,*) ' Number of constraints =',CoeffMoore%nconst_1st
     write(16,*) ' ======== Constraints at the 2nd order (Rotational Invariances) ========'

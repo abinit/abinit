@@ -60,8 +60,8 @@ znucl 6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi, t54.abi, t55.abi, t56.abi
-#%% exclude_builders = eos_nvhpc_*, eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
 #%%   t54.abo, tolnlines = 30, tolabs = 550, tolrel = 2.0e-2

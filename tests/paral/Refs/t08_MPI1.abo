@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h01 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/paral_t08_MPI1/t08.abi
 - output file    -> t08_MPI1.abo
 - root for input  files -> t08_MPI1i
@@ -332,8 +332,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -345,8 +345,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -379,7 +379,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0614840094725    -4.391E-12 1.464E-14 6.182E-12 6.648E-07 2.370E-06
  ETOT  6  -1.0614840094725    -2.442E-15 7.939E-18 6.132E-15 6.945E-09 2.363E-06
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.945E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -522,7 +522,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0586712492436    -2.604E-12 9.779E-15 3.046E-12 6.128E-07 1.999E-02
  ETOT  6  -1.0586712492436     0.000E+00 5.524E-18 1.992E-15 6.239E-09 1.999E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.239E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -665,7 +665,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0535178432638    -2.591E-12 1.522E-14 2.098E-12 5.727E-07 1.883E-02
  ETOT  6  -1.0535178432638     1.110E-15 6.374E-18 2.229E-15 6.372E-09 1.883E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.372E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -807,7 +807,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0510607165070    -1.509E-09 1.467E-11 2.380E-09 1.647E-06 1.834E-02
  ETOT  5  -1.0510607165075    -5.418E-13 1.033E-15 1.272E-12 3.856E-07 1.834E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  3.856E-07 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -950,7 +950,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0535178432638    -2.587E-12 1.522E-14 2.102E-12 5.727E-07 1.883E-02
  ETOT  6  -1.0535178432638     4.441E-16 6.452E-18 2.272E-15 6.338E-09 1.883E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.338E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1093,7 +1093,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0586712492436    -2.604E-12 9.738E-15 3.036E-12 6.130E-07 1.999E-02
  ETOT  6  -1.0586712492436    -2.220E-16 5.520E-18 1.934E-15 6.214E-09 1.999E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.214E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1236,7 +1236,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0614840094725    -4.397E-12 1.468E-14 6.193E-12 6.643E-07 2.370E-06
  ETOT  6  -1.0614840094725     1.998E-15 8.010E-18 6.166E-15 6.970E-09 2.363E-06
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.970E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1388,7 +1388,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0574963815701    -9.366E-12 7.694E-14 5.574E-11 3.682E-07 4.440E-02
  ETOT  6  -1.0574963815702    -1.199E-14 4.929E-17 2.020E-13 1.051E-08 4.440E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.051E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1531,7 +1531,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0596627788257    -1.164E-11 1.297E-13 6.625E-11 2.273E-07 1.447E-02
  ETOT  6  -1.0596627788257    -3.086E-14 3.102E-16 3.436E-13 1.314E-08 1.447E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.314E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1674,7 +1674,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0565609612887    -1.109E-11 1.269E-13 5.841E-11 1.897E-07 1.109E-02
  ETOT  6  -1.0565609612887    -4.108E-14 4.515E-16 3.894E-13 1.558E-08 1.109E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.558E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1817,7 +1817,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0596627788279    -1.174E-11 1.301E-13 6.694E-11 2.289E-07 1.447E-02
  ETOT  6  -1.0596627788279    -2.887E-14 3.116E-16 3.441E-13 1.316E-08 1.447E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.316E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1960,7 +1960,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0574963815654    -9.428E-12 7.761E-14 5.614E-11 3.681E-07 4.440E-02
  ETOT  6  -1.0574963815654    -1.132E-14 4.990E-17 2.029E-13 1.044E-08 4.440E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.044E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2113,7 +2113,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0463325721996    -7.188E-11 1.004E-12 5.525E-10 5.806E-07 2.157E-02
  ETOT  6  -1.0463325722001    -4.514E-13 3.938E-15 7.959E-13 3.405E-08 2.157E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  3.405E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2256,7 +2256,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0609121465408    -2.284E-12 1.135E-14 1.886E-11 1.183E-07 3.766E-03
  ETOT  6  -1.0609121465408    -9.104E-15 7.303E-17 4.484E-14 8.948E-09 3.766E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  8.948E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2399,7 +2399,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0584361523072    -2.911E-12 2.745E-14 2.187E-11 1.333E-07 5.848E-03
  ETOT  6  -1.0584361523072    -6.661E-15 4.571E-17 7.916E-14 1.272E-08 5.848E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.272E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2542,7 +2542,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0609121465436    -2.313E-12 1.155E-14 1.933E-11 1.185E-07 3.766E-03
  ETOT  6  -1.0609121465436    -1.266E-14 7.479E-17 4.527E-14 9.031E-09 3.766E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  9.031E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2685,7 +2685,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0463325721873    -7.199E-11 1.005E-12 5.528E-10 5.808E-07 2.157E-02
  ETOT  6  -1.0463325721877    -4.530E-13 3.940E-15 7.964E-13 3.405E-08 2.157E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  3.405E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2838,7 +2838,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0566625824107    -2.201E-11 2.356E-13 9.213E-11 1.724E-07 2.088E-02
  ETOT  6  -1.0566625824108    -5.507E-14 5.385E-16 3.573E-13 1.044E-08 2.088E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.044E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2981,7 +2981,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0606431028581    -8.260E-13 6.229E-15 8.910E-12 1.855E-08 5.433E-03
  ETOT  6  -1.0606431028581    -5.329E-15 2.313E-17 1.413E-14 1.171E-08 5.433E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.171E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3124,7 +3124,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0589682922537    -7.594E-13 6.896E-15 6.737E-12 5.051E-08 3.300E-03
  ETOT  6  -1.0589682922537    -3.553E-15 1.638E-17 1.907E-14 8.258E-09 3.300E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  8.258E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3267,7 +3267,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0606431028577    -8.489E-13 6.388E-15 9.124E-12 1.994E-08 5.433E-03
  ETOT  6  -1.0606431028577    -5.995E-15 2.352E-17 1.424E-14 1.180E-08 5.433E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.180E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3410,7 +3410,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0566625823964    -2.214E-11 2.363E-13 9.254E-11 1.727E-07 2.088E-02
  ETOT  6  -1.0566625823965    -5.795E-14 5.410E-16 3.575E-13 1.049E-08 2.088E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.049E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3563,7 +3563,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0590972256775    -9.153E-12 6.496E-14 4.479E-11 2.545E-07 3.079E-02
  ETOT  6  -1.0590972256775    -8.660E-15 6.600E-17 2.068E-13 6.218E-09 3.079E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.218E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3706,7 +3706,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0595804426580    -2.369E-12 2.455E-14 1.163E-11 7.259E-08 1.255E-02
  ETOT  6  -1.0595804426580    -4.441E-16 7.651E-17 3.011E-14 3.385E-09 1.255E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  3.385E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3849,7 +3849,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0591429971002    -2.032E-13 1.771E-15 1.947E-12 1.154E-08 2.017E-03
  ETOT  6  -1.0591429971002     2.220E-15 4.598E-18 4.491E-15 5.510E-09 2.017E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  5.510E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3992,7 +3992,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0595804426490    -2.398E-12 2.488E-14 1.208E-11 7.130E-08 1.255E-02
  ETOT  6  -1.0595804426490    -9.992E-15 7.809E-17 3.072E-14 3.446E-09 1.255E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  3.446E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4135,7 +4135,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0590972256799    -9.232E-12 6.601E-14 4.511E-11 2.537E-07 3.079E-02
  ETOT  6  -1.0590972256799    -9.548E-15 6.746E-17 2.090E-13 6.160E-09 3.079E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.160E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4288,7 +4288,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0527461323593    -1.809E-11 2.311E-13 2.604E-10 4.979E-07 1.977E-02
  ETOT  6  -1.0527461323595    -1.912E-13 1.629E-15 4.306E-13 1.494E-08 1.977E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.494E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4431,7 +4431,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0605746661442    -1.706E-12 1.096E-14 2.096E-11 1.448E-07 4.362E-03
  ETOT  6  -1.0605746661442    -8.882E-15 8.076E-17 4.430E-14 5.206E-09 4.362E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  5.206E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4573,7 +4573,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0592098154972    -3.786E-11 1.566E-13 2.465E-10 1.877E-06 1.305E-03
  ETOT  5  -1.0592098154973    -7.150E-14 6.028E-16 6.908E-13 3.698E-09 1.305E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  3.698E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4716,7 +4716,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0605746661395    -1.736E-12 1.118E-14 2.144E-11 1.459E-07 4.362E-03
  ETOT  6  -1.0605746661395    -7.994E-15 8.269E-17 4.473E-14 5.244E-09 4.362E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  5.244E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4859,7 +4859,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0527461323736    -1.802E-11 2.306E-13 2.598E-10 4.972E-07 1.977E-02
  ETOT  6  -1.0527461323738    -1.865E-13 1.624E-15 4.305E-13 1.488E-08 1.977E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.488E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5012,7 +5012,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0611820105304    -1.175E-11 9.688E-14 4.711E-11 1.873E-07 1.616E-03
  ETOT  6  -1.0611820105304    -1.288E-14 1.575E-16 3.028E-13 4.142E-09 1.616E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  4.142E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5155,7 +5155,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0600251182512    -2.471E-12 2.425E-14 1.769E-11 6.295E-08 8.228E-03
  ETOT  6  -1.0600251182512    -7.772E-15 8.696E-17 3.159E-14 5.832E-09 8.228E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  5.832E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5297,7 +5297,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0592382136960    -1.702E-11 6.888E-14 1.052E-10 1.217E-06 8.762E-04
  ETOT  5  -1.0592382136961    -2.864E-14 2.286E-16 2.792E-13 5.785E-09 8.762E-04
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  5.785E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5440,7 +5440,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0600251182293    -2.507E-12 2.334E-14 1.808E-11 6.324E-08 8.228E-03
  ETOT  6  -1.0600251182293    -8.660E-15 8.874E-17 3.164E-14 5.815E-09 8.228E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  5.815E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5583,7 +5583,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0611820105287    -1.184E-11 9.781E-14 4.758E-11 1.883E-07 1.616E-03
  ETOT  6  -1.0611820105287    -2.132E-14 1.591E-16 3.048E-13 4.116E-09 1.616E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  4.116E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5735,7 +5735,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0611672395306    -6.104E-12 5.179E-14 6.543E-11 4.270E-07 2.581E-03
  ETOT  5  -1.0611672395307    -2.309E-14 2.049E-16 2.024E-13 1.469E-08 2.581E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.469E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5878,7 +5878,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0601807481700    -5.107E-13 5.830E-15 7.864E-12 1.342E-07 3.893E-03
  ETOT  6  -1.0601807481700    -4.663E-15 2.858E-17 1.463E-14 3.155E-09 3.893E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  3.155E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6020,7 +6020,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0592511610807    -7.940E-12 2.804E-14 4.809E-11 8.211E-07 6.035E-04
  ETOT  5  -1.0592511610807    -1.066E-14 8.529E-17 1.195E-13 5.244E-09 6.035E-04
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  5.244E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6163,7 +6163,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0601807481674    -5.185E-13 6.008E-15 8.005E-12 1.371E-07 3.893E-03
  ETOT  6  -1.0601807481674    -3.553E-15 2.902E-17 1.478E-14 3.214E-09 3.893E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  3.214E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6305,7 +6305,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0611672395277    -6.417E-12 5.586E-14 7.460E-11 4.154E-07 2.581E-03
  ETOT  5  -1.0611672395277    -3.597E-14 3.238E-16 2.212E-13 1.608E-08 2.581E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.608E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6457,7 +6457,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0611635285737    -9.342E-12 8.333E-14 1.076E-10 5.686E-07 2.468E-03
  ETOT  5  -1.0611635285738    -4.086E-14 2.851E-16 5.452E-13 2.435E-08 2.468E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.435E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6600,7 +6600,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0601988482872    -4.139E-13 3.203E-15 3.971E-12 5.479E-08 5.564E-03
  ETOT  6  -1.0601988482872     5.551E-15 1.449E-17 4.151E-15 4.055E-09 5.564E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  4.055E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6742,7 +6742,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0592573508172    -3.852E-12 1.403E-14 2.303E-11 5.675E-07 4.230E-04
  ETOT  5  -1.0592573508172    -2.887E-15 3.713E-17 5.564E-14 4.303E-09 4.230E-04
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  4.303E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -6885,7 +6885,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  5  -1.0601988482813    -4.288E-13 3.343E-15 4.099E-12 5.762E-08 5.564E-03
  ETOT  6  -1.0601988482813     0.000E+00 1.488E-17 4.170E-15 4.141E-09 5.564E-03
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  4.141E-09 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -7027,7 +7027,7 @@ tolerances: {toldff: 2.00E-06, }
  ETOT  4  -1.0611635285636    -9.677E-12 8.540E-14 1.147E-10 5.701E-07 2.468E-03
  ETOT  5  -1.0611635285636    -4.663E-14 3.101E-16 5.698E-13 2.564E-08 2.468E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.564E-08 < toldff=  2.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -7165,7 +7165,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061484009473E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.44249065E-15
     Maximal forces difference      =  6.94482633E-09
     Max. residual of wave-functions=  7.93862501E-18
@@ -7200,7 +7200,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.058671249244E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  0.00000000E+00
     Maximal forces difference      =  6.23869854E-09
     Max. residual of wave-functions=  5.52371749E-18
@@ -7235,7 +7235,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.053517843264E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  1.11022302E-15
     Maximal forces difference      =  6.37182284E-09
     Max. residual of wave-functions=  6.37407431E-18
@@ -7270,7 +7270,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.051060716508E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.41788836E-13
     Maximal forces difference      =  3.85587867E-07
     Max. residual of wave-functions=  1.03333133E-15
@@ -7305,7 +7305,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.053517843264E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  4.44089210E-16
     Maximal forces difference      =  6.33814632E-09
     Max. residual of wave-functions=  6.45178712E-18
@@ -7340,7 +7340,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.058671249244E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.22044605E-16
     Maximal forces difference      =  6.21365046E-09
     Max. residual of wave-functions=  5.51980203E-18
@@ -7375,7 +7375,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061484009473E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  1.99840144E-15
     Maximal forces difference      =  6.96996705E-09
     Max. residual of wave-functions=  8.01046267E-18
@@ -7419,7 +7419,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.057496381570E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.19904087E-14
     Maximal forces difference      =  1.05129399E-08
     Max. residual of wave-functions=  4.92869345E-17
@@ -7454,7 +7454,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059662778826E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.08642001E-14
     Maximal forces difference      =  1.31399793E-08
     Max. residual of wave-functions=  3.10208224E-16
@@ -7489,7 +7489,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.056560961289E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.10782519E-14
     Maximal forces difference      =  1.55848321E-08
     Max. residual of wave-functions=  4.51486459E-16
@@ -7524,7 +7524,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059662778828E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.88657986E-14
     Maximal forces difference      =  1.31635033E-08
     Max. residual of wave-functions=  3.11620531E-16
@@ -7559,7 +7559,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.057496381565E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.13242749E-14
     Maximal forces difference      =  1.04447717E-08
     Max. residual of wave-functions=  4.99038537E-17
@@ -7604,7 +7604,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.046332572200E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.51416682E-13
     Maximal forces difference      =  3.40538598E-08
     Max. residual of wave-functions=  3.93773942E-15
@@ -7639,7 +7639,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060912146541E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -9.10382880E-15
     Maximal forces difference      =  8.94771959E-09
     Max. residual of wave-functions=  7.30318659E-17
@@ -7674,7 +7674,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.058436152307E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -6.66133815E-15
     Maximal forces difference      =  1.27229666E-08
     Max. residual of wave-functions=  4.57102788E-17
@@ -7709,7 +7709,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060912146544E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.26565425E-14
     Maximal forces difference      =  9.03055769E-09
     Max. residual of wave-functions=  7.47853924E-17
@@ -7744,7 +7744,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.046332572188E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.52970994E-13
     Maximal forces difference      =  3.40512009E-08
     Max. residual of wave-functions=  3.93989432E-15
@@ -7789,7 +7789,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.056662582411E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.50670620E-14
     Maximal forces difference      =  1.04426631E-08
     Max. residual of wave-functions=  5.38481561E-16
@@ -7824,7 +7824,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060643102858E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.32907052E-15
     Maximal forces difference      =  1.17063985E-08
     Max. residual of wave-functions=  2.31336185E-17
@@ -7859,7 +7859,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.058968292254E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.55271368E-15
     Maximal forces difference      =  8.25837840E-09
     Max. residual of wave-functions=  1.63759617E-17
@@ -7894,7 +7894,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060643102858E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.99520433E-15
     Maximal forces difference      =  1.18007539E-08
     Max. residual of wave-functions=  2.35172534E-17
@@ -7929,7 +7929,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.056662582397E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -5.79536419E-14
     Maximal forces difference      =  1.04851480E-08
     Max. residual of wave-functions=  5.41027473E-16
@@ -7974,7 +7974,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059097225677E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -8.65973959E-15
     Maximal forces difference      =  6.21801268E-09
     Max. residual of wave-functions=  6.60002086E-17
@@ -8009,7 +8009,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059580442658E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.44089210E-16
     Maximal forces difference      =  3.38458992E-09
     Max. residual of wave-functions=  7.65112976E-17
@@ -8044,7 +8044,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059142997100E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  2.22044605E-15
     Maximal forces difference      =  5.51035407E-09
     Max. residual of wave-functions=  4.59812629E-18
@@ -8079,7 +8079,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059580442649E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -9.99200722E-15
     Maximal forces difference      =  3.44605649E-09
     Max. residual of wave-functions=  7.80912741E-17
@@ -8114,7 +8114,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059097225680E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -9.54791801E-15
     Maximal forces difference      =  6.16029910E-09
     Max. residual of wave-functions=  6.74649681E-17
@@ -8159,7 +8159,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.052746132360E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.91180405E-13
     Maximal forces difference      =  1.49406128E-08
     Max. residual of wave-functions=  1.62860707E-15
@@ -8194,7 +8194,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060574666144E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -8.88178420E-15
     Maximal forces difference      =  5.20593262E-09
     Max. residual of wave-functions=  8.07620534E-17
@@ -8229,7 +8229,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059209815497E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -7.14983628E-14
     Maximal forces difference      =  3.69770043E-09
     Max. residual of wave-functions=  6.02825950E-16
@@ -8264,7 +8264,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060574666139E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -7.99360578E-15
     Maximal forces difference      =  5.24386781E-09
     Max. residual of wave-functions=  8.26949794E-17
@@ -8299,7 +8299,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.052746132374E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.86517468E-13
     Maximal forces difference      =  1.48819624E-08
     Max. residual of wave-functions=  1.62352721E-15
@@ -8344,7 +8344,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061182010530E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.28785871E-14
     Maximal forces difference      =  4.14244914E-09
     Max. residual of wave-functions=  1.57517096E-16
@@ -8379,7 +8379,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060025118251E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -7.77156117E-15
     Maximal forces difference      =  5.83211241E-09
     Max. residual of wave-functions=  8.69565973E-17
@@ -8414,7 +8414,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059238213696E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.86437540E-14
     Maximal forces difference      =  5.78515659E-09
     Max. residual of wave-functions=  2.28646085E-16
@@ -8449,7 +8449,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060025118229E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -8.65973959E-15
     Maximal forces difference      =  5.81521732E-09
     Max. residual of wave-functions=  8.87385327E-17
@@ -8484,7 +8484,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061182010529E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.13162821E-14
     Maximal forces difference      =  4.11629366E-09
     Max. residual of wave-functions=  1.59111941E-16
@@ -8529,7 +8529,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061167239531E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.30926389E-14
     Maximal forces difference      =  1.46878988E-08
     Max. residual of wave-functions=  2.04874957E-16
@@ -8564,7 +8564,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060180748170E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.66293670E-15
     Maximal forces difference      =  3.15469669E-09
     Max. residual of wave-functions=  2.85754089E-17
@@ -8599,7 +8599,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059251161081E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -1.06581410E-14
     Maximal forces difference      =  5.24355475E-09
     Max. residual of wave-functions=  8.52867511E-17
@@ -8634,7 +8634,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060180748167E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.55271368E-15
     Maximal forces difference      =  3.21355040E-09
     Max. residual of wave-functions=  2.90231741E-17
@@ -8669,7 +8669,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061167239528E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -3.59712260E-14
     Maximal forces difference      =  1.60808446E-08
     Max. residual of wave-functions=  3.23840601E-16
@@ -8714,7 +8714,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061163528574E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.08562073E-14
     Maximal forces difference      =  2.43513184E-08
     Max. residual of wave-functions=  2.85134385E-16
@@ -8749,7 +8749,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060198848287E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  5.55111512E-15
     Maximal forces difference      =  4.05532859E-09
     Max. residual of wave-functions=  1.44910861E-17
@@ -8784,7 +8784,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.059257350817E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -2.88657986E-15
     Maximal forces difference      =  4.30252051E-09
     Max. residual of wave-functions=  3.71339626E-17
@@ -8819,7 +8819,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.060198848281E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        =  0.00000000E+00
     Maximal forces difference      =  4.14137050E-09
     Max. residual of wave-functions=  1.48827695E-17
@@ -8854,7 +8854,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  Total energy for the cell [Ha]:  -1.061163528564E+00
 
- Residuals from SCF cycle: 
+ Residuals from SCF cycle:
     Total energy difference        = -4.66293670E-14
     Maximal forces difference      =  2.56418552E-08
     Max. residual of wave-functions=  3.10143780E-16
@@ -9038,7 +9038,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      3.0000000000E+00  3.0000000000E+00  3.0000000000E+00 Bohr
               amu      1.00794000E+00  1.00794000E+00
@@ -9379,7 +9379,7 @@ P           mkmem          20
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -9391,12 +9391,12 @@ P           mkmem          20
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -9414,7 +9414,7 @@ P           mkmem          20
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -9429,7 +9429,7 @@ P           mkmem          20
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

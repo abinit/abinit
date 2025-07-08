@@ -16,24 +16,24 @@
 #**********************************
 acell 3*10.53
 rprim
-0 1/2 1/2 
+0 1/2 1/2
 1/2 0 1/2
 1/2 1/2 0
 
 #Definition of the atom types and pseudopotentials
- ntypat 2 # two types of atoms 
+ ntypat 2 # two types of atoms
  znucl 15 13 # the atom types are Phosphorous and Aluminum
 
 # the following norm-conserving pseudopotentials are stored in the abinit distribution, but are freely
 # available through www.pseudo-dojo.org
 # this set uses the Perdew-Wang parameterization of LDA for the xc model
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/P.psp8, Psdj_nc_sr_04_pw_std_psp8/Al.psp8"
 
 #Definition of the atoms
  natom 2 # two atoms in the cell
  typat 1 2 # type 1 is Phosphorous, type 2 is Aluminum (order defined by znucl above and pseudos list)
- nband 4 # nband is restricted here to the number of filled bands only, no empty bands. 
+ nband 4 # nband is restricted here to the number of filled bands only, no empty bands.
  nbdbuf 0
 
 # atomic positions in units of cell vectors
@@ -56,10 +56,10 @@ shiftk 0.5 0.5 0.5
        0.0 0.0 0.5
 
 # scf parameters
-nstep 8  # limit number of steps for the tutorial, in general this should be set to its 
+nstep 8  # limit number of steps for the tutorial, in general this should be set to its
          # default (30) or higher
 
-# suppress printing of density, wavefunctions, etc except what is 
+# suppress printing of density, wavefunctions, etc except what is
 # explicitly requested above in the ndtset section
 prtwf 0
 prtden 0
@@ -67,7 +67,7 @@ prteig 0
 
 #Structural relaxation
 #*********************
-   ionmov 2
+   geoopt "bfgs"
    optcell 2
    tolvrs 1.0d-15
    tolmxf 5.0d-6
@@ -80,12 +80,12 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tnlo_1.abo, tolnlines=  1, tolabs=  4.192e-06, tolrel=  8.000e-05, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Zwanziger, M. Veithen, P. Ghosez
-#%% keywords = 
+#%% keywords =
 #%% description = Structural optimisation
 #%%<END TEST_INFO>

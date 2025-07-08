@@ -6,7 +6,7 @@
 !!  Procedures for computing densities from KS orbitals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -211,11 +211,14 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    ioption=option
  end if
 
- if(ioption/=0.and.paw_dmft%use_sc_dmft==1) then
-   ABI_ERROR('option argument value of this routines should be 0 if usedmft=1.')
+! Not sure what to do for Wannier90 DMFT
+ if(ioption/=0.and.(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10)) then
+   ABI_ERROR('option argument value of this routines should be 0 if usedmft=1 or 10.')
  end if
- if(paw_dmft%use_sc_dmft/=0) then
+ if(paw_dmft%use_sc_dmft/=0.and.paw_dmft%use_sc_dmft/=10) then
    nbandc1=(paw_dmft%mbandc-1)*paw_dmft%use_sc_dmft+1
+ else if(paw_dmft%use_sc_dmft==10) then
+   nbandc1=paw_dmft%mbandc
  else
    nbandc1=1
  end if
@@ -402,21 +405,21 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            !$OMP TARGET ENTER DATA MAP(to:kg_k) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
-           if (gpu_option /= ABI_GPU_DISABLED) then
+           if (gpu_option /= ABI_GPU_DISABLED .and. paw_dmft%use_sc_dmft/=1) then
              !On GPU, treat all bands at once
              ABI_MALLOC(weight_t,(nband_k))
              nband_occ = 0
              do iband=1,nband_k
                ipwsp = (iband-1)*npw_k*my_nspinor + icg
-               weight_t(iband) = occ(iband+bdtot_index) * dtset%wtk(ikpt)/ucvol
                locc_test = abs(occ(iband+bdtot_index))>tol8
                if (locc_test) then
                  nband_occ = nband_occ +1
                  ipwbd = (nband_occ-1) * npw_k
+                 weight_t(nband_occ) = occ(iband+bdtot_index) * dtset%wtk(ikpt)/ucvol
                  cwavef(:,ipwbd+1:ipwbd+npw_k,1) = cg(:,ipwsp+1:ipwsp+npw_k)
                  if (my_nspinor==2) cwavef(:,ipwbd+1:ipwbd+npw_k,2) = cg(:,ipwsp+npw_k+1:ipwsp+npw_k+npw_k)
                  if (ioption==1) then ! Multiplication by 2pi i (k+G)_alpha
-                   gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi3 = gprimd(alpha,3)*two_pi
+                   gp2pi1 = gprimd(alpha,1)*two_pi ; gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi3 = gprimd(alpha,3)*two_pi
                    kpt_cart = gp2pi1*dtset%kptns(1,ikpt) + gp2pi2*dtset%kptns(2,ikpt) + gp2pi3*dtset%kptns(3,ikpt)
                    do ispinor=1,my_nspinor
                      do ipw=1,npw_k
@@ -437,6 +440,81 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 &                npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
 &                gpu_option=gpu_option)
+               if(dtset%nspinor==2)then
+                 if(dtset%nspden==1) then
+                   ! We need only the total density : accumulation continues on top of rhoaug
+                   call fourwf(1,rhoaug,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug(:,:,:,1:n6*nband_occ),&
+&                      gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+&                      npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+&                      weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+&                      gpu_option=gpu_option)
+                 else if(dtset%nspden==4) then
+                   ! Build the four components of rho. We use only norm quantities and, so fourwf.
+                   ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+                   ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+                   ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+                   if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                     ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k*ndat/))
+                     ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k*ndat/))
+                     ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*ndat*paw_dmft%use_sc_dmft/))
+                     ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*ndat*paw_dmft%use_sc_dmft/))
+#endif
+                   else
+                     ABI_MALLOC(cwavef_x,(2,npw_k*ndat))
+                     ABI_MALLOC(cwavef_y,(2,npw_k*ndat))
+                     ABI_MALLOC(cwavefb_x,(2,npw_k*ndat*paw_dmft%use_sc_dmft))
+                     ABI_MALLOC(cwavefb_y,(2,npw_k*ndat*paw_dmft%use_sc_dmft))
+                   end if
+                   ! $(\Psi^{1}+\Psi^{2})$
+                   cwavef_x(:,:)=cwavef(:,1:npw_k*nband_occ,1)+cwavef(:,1:npw_k*nband_occ,2)
+                   ! $(\Psi^{1}-i \Psi^{2})$
+                   cwavef_y(1,:)=cwavef(1,1:npw_k*nband_occ,1)+cwavef(2,1:npw_k*nband_occ,2)
+                   cwavef_y(2,:)=cwavef(2,1:npw_k*nband_occ,1)-cwavef(1,1:npw_k*nband_occ,2)
+                   if(use_nondiag_occup_dmft==1) then
+                     cwavefb_x(:,:)=cwavefb(:,1:npw_k*nband_occ,1)+cwavefb(:,1:npw_k*nband_occ,2)
+                     cwavefb_y(1,:)=cwavefb(1,1:npw_k*nband_occ,1)+cwavefb(2,1:npw_k*nband_occ,2)
+                     cwavefb_y(2,:)=cwavefb(2,1:npw_k*nband_occ,1)-cwavefb(1,1:npw_k*nband_occ,2)
+                   end if
+#ifdef HAVE_OPENMP_OFFLOAD
+                   !$OMP TARGET UPDATE FROM(rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+                   rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
+                   call fourwf(1,rhoaug_down,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug,gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                     &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                     &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+                     &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,1:nband_occ*npw_k,2),&
+                     &                     gpu_option=gpu_option)
+
+                   call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                     &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                     &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+                     &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,&
+                     &                     gpu_option=gpu_option)
+
+                   call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                     &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                     &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+                     &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,&
+                     &                     gpu_option=gpu_option)
+                   if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                     ABI_FREE_MANAGED(cwavef_x)
+                     ABI_FREE_MANAGED(cwavef_y)
+                     ABI_FREE_MANAGED(cwavefb_x)
+                     ABI_FREE_MANAGED(cwavefb_y)
+#endif
+                   else
+                     ABI_FREE(cwavef_x)
+                     ABI_FREE(cwavef_y)
+                     ABI_FREE(cwavefb_x)
+                     ABI_FREE(cwavefb_y)
+                   end if
+                 end if
+               end if
              end if
              ABI_FREE(weight_t)
 
@@ -450,7 +528,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                iband_me = iband_me + 1
                do ibandc1=1,nbandc1 ! in case of DMFT
                  ! Check if DMFT and only treat occupied states (check on occ.)
-                 if(paw_dmft%use_sc_dmft == 1) then
+                 if(paw_dmft%use_sc_dmft == 1 .or. paw_dmft%use_sc_dmft == 10) then
                    iband1 = paw_dmft%include_bands(ibandc1)
                    if(paw_dmft%band_in(iband)) then
                      if(.not. paw_dmft%band_in(iband1))  stop
@@ -544,6 +622,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                          cwavefb_y(1,:)=cwavefb(1,1:npw_k,1)+cwavefb(2,1:npw_k,2)
                          cwavefb_y(2,:)=cwavefb(2,1:npw_k,1)-cwavefb(1,1:npw_k,2)
                        end if
+#ifdef HAVE_OPENMP_OFFLOAD
+                       !$OMP TARGET UPDATE FROM(rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
                        rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
                        call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
                          &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
@@ -586,6 +667,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
            end if ! gpu_option
 
+
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET EXIT DATA MAP(delete:kg_k) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -622,7 +704,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              ABI_FREE(occ_diag)
              ! ABI_FREE(occ_nd)
            end if
-           if(paw_dmft%use_sc_dmft==1) then
+           if(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10) then
              ! Allocation of DMFT temporaries arrays
              ABI_MALLOC(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
              ABI_MALLOC(occ_diag,(blocksize))
@@ -673,7 +755,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              end if
 
 ! ---------- DMFT
-             if(paw_dmft%use_sc_dmft==1) then
+             if(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10) then
                ! initialisation of DMFT arrays
                cwavef_rot(:,:,:,:) = zero
                occ_diag(:) = zero
@@ -684,7 +766,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                end do
 
                call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
-&                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag)
+&                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag,&
+&                          paw_dmft%dmft_test)
                do ib=1,blocksize
                  cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
                end do
@@ -1141,9 +1224,9 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
        ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
-       ii=0
-       jtemp=0
 
+       !$OMP PARALLEL DO &
+       !$OMP& PRIVATE(i3,i2,i1,ig3,ig2,ig1,ii,jj,gsquar,fact,sfr,sfi,fact0,rhoat,aa,bb,cc,dd,gmag,diff)
        do i3=1,n3
          ig3=i3-(i3/id3)*n3-1
          do i2=1,n2
@@ -1152,7 +1235,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
              do i1=1,n1
 
                ig1=i1-(i1/id1)*n1-1
-               ii=ii+1
+               ii=i1+n1*(ffti2_local(i2)-1+(n2/nproc_fft)*(i3-1))
                gsquar=dble(ig1*ig1)*gmet(1,1)+dble(ig2*ig2)*gmet(2,2)+&
                       dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
                       dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
@@ -1211,8 +1294,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                    rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                  end if
 
-               else
-                 jtemp=jtemp+1
                end if
 
              end do ! i1
@@ -1253,7 +1334,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
        ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
        ii=0
-       jtemp=0
        do i3=1,n3
          ig3=i3-(i3/id3)*n3-1
          do i2=1,n2
@@ -1317,8 +1397,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                  rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                  rhog(im,ii)=rhog(im,ii)+sfi*rhoat
-               else
-                 jtemp=jtemp+1
                end if
 
              end do ! i1
@@ -2312,9 +2390,9 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  master=0
 
 !initialise variables and vectors
- a_norm = sqrt(dot_product(a,a))
- b_norm = sqrt(dot_product(b,b))
- c_norm = sqrt(dot_product(c,c))
+ a_norm = norm2(a)
+ b_norm = norm2(b)
+ c_norm = norm2(c)
  center = (a+b+c)*half
  dp_dummy = dot_product(a,b)/(b_norm*b_norm)
  dp_vec_dummy = dp_dummy*b
@@ -2340,11 +2418,11 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 !Should be most important for very oblique cells
  do itypat=1,ntypat
    R_sphere_max = atomrgrid(natomgr(itypat),itypat)
-   l_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_a,delta_a)))
+   l_min(itypat) = -ceiling(R_sphere_max/norm2(delta_a))
    l_max(itypat) = -l_min(itypat)
-   m_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_b,delta_b)))
+   m_min(itypat) = -ceiling(R_sphere_max/norm2(delta_b))
    m_max(itypat) = -m_min(itypat)
-   n_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_c,delta_c)))
+   n_min(itypat) = -ceiling(R_sphere_max/norm2(delta_c))
    n_max(itypat) = -n_min(itypat)
    ncells = (l_max(itypat)-l_min(itypat)+1) &
 &   *(m_max(itypat)-m_min(itypat)+1) &
@@ -2393,8 +2471,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
 &             + (atom_pos(2,iatom)+dble(m))*b &
 &             + (atom_pos(3,iatom)+dble(n))*c
              dp_vec_dummy = equiv_atom_pos(:,i,itypat)-center
-             equiv_atom_dist(i,itypat) = &
-&             sqrt(dot_product(dp_vec_dummy,dp_vec_dummy))
+             equiv_atom_dist(i,itypat) = norm2(dp_vec_dummy)
              i = i + 1
            end if
          end do
@@ -2519,7 +2596,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
      grid_index = 0
      do igrid=1,ngrid
        dp_vec_dummy(:) = r_vec_grid(:,igrid) - r_atom(:)
-       dp_dummy = sqrt(dot_product(dp_vec_dummy,dp_vec_dummy))
+       dp_dummy = norm2(dp_vec_dummy)
        if (dp_dummy <= r_max) then
          grid_distances(i) = dp_dummy
          grid_index(i) = igrid

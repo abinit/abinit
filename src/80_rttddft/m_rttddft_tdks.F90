@@ -7,7 +7,7 @@
 !!  the time-dependent Kohn-Sham equations in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FB)
+!!  Copyright (C) 2021-2025 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,23 +24,21 @@ module m_rttddft_tdks
 
  use defs_basis
  use defs_abitypes,      only: MPI_type
- use defs_datatypes,     only: pseudopotential_type, ebands_t
+ use defs_datatypes,     only: pseudopotential_type
  use defs_wvltypes,      only: wvl_data, nullify_wvl_data
-
  use libxc_functionals,  only: libxc_functionals_get_hybridparams
- use m_bandfft_kpt,      only: bandfft_kpt, bandfft_kpt_init1, &
-                             & bandfft_kpt_destroy_array
+ use m_bandfft_kpt,      only: bandfft_kpt, bandfft_kpt_init1, bandfft_kpt_destroy_array
  use m_cgprj,            only: ctocprj
  use m_common,           only: setup1
  use m_dtfil,            only: datafiles_type
  use m_dtset,            only: dataset_type
- use m_ebands,           only: ebands_from_dtset, ebands_free, unpack_eneocc
+ use m_ebands,           only: ebands_t, unpack_eneocc
  use m_energies,         only: energies_type, energies_init
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type
  use m_gemm_nonlop_projectors, only: init_gemm_nonlop, destroy_gemm_nonlop
  use m_geometry,         only: fixsym
- use m_hdr,              only: hdr_type, hdr_init
+ use m_hdr,              only: hdr_type
  use m_initylmg,         only: initylmg
  use m_invovl,           only: init_invovl, destroy_invovl
  use m_io_tools,         only: open_file
@@ -65,13 +63,16 @@ module m_rttddft_tdks
  use m_paw_sphharm,      only: setsym_ylm
  use m_pawtab,           only: pawtab_type, pawtab_get_lsize
  use m_paw_tools,        only: chkpawovlp
+ use m_pawxc,            only: pawxc_get_usekden
  use m_pspini,           only: pspini
  use m_profiling_abi,    only: abimem_record
+ use m_rttddft_tdef,     only: tdef_type
  use m_spacepar,         only: setsym
  use m_specialmsg,       only: wrtout
  use m_symtk,            only: symmetrize_xred
  use m_wffile,           only: wffile_type, WffClose
  use m_xmpi,             only: xmpi_bcast, xmpi_sum
+ use m_drivexc,          only: xc_need_kden
 
  implicit none
 
@@ -97,11 +98,12 @@ module m_rttddft_tdks
    integer                          :: nhatgrdim   !dimension of nhatgr array
    integer                          :: ngrvdw      !dimension of grvdw array
    integer                          :: ntime       !max nb of time steps
+   integer                          :: current_unit!unit nb of the current density file
    integer                          :: tdener_unit !unit nb of the energy file
+   integer                          :: tdef_unit   !unit nb of the efield file
    integer                          :: tdrestart_unit !unit nb of the restart file
    integer                          :: unpaw       !paw data tmp file unit
    integer                          :: usexcnhat   !use nhat in the computation of the XC term
-   real(dp)                         :: boxcut      !boxcut ratio (gcut(box)/gcut(sphere))
    real(dp)                         :: dt          !propagation time step
    real(dp)                         :: ecore       !core energy
    real(dp)                         :: etot        !total energy
@@ -116,35 +118,40 @@ module m_rttddft_tdks
                                                    !required by various routines)
    type(pawfgr_type)                :: pawfgr      !FFT fine grid in PAW sphere
    type(pawang_type),pointer        :: pawang => NULL() !angular grid in PAW sphere
+   type(tdef_type)                  :: tdef        !Object containing variables related to TD electric field
    type(wvl_data)                   :: wvl         !wavelets ojects (unused but
                                                    !required by various routines)
+   character(len=fnlen)             :: fname_current!Name of the TDCURRENT file
    character(len=fnlen)             :: fname_tdener!Name of the TDENER file
+   character(len=fnlen)             :: fname_tdef  !Name of the TDEFIELD file
    character(len=fnlen)             :: fname_wfk0  !Name of the input WFK file containing
                                                    !the intial (t=0) wfs
    !arrays
    integer,allocatable              :: atindx(:)   !index table of atom ordered by type
    integer,allocatable              :: atindx1(:)  !nb of the atom for each index in atindx
    integer,allocatable              :: dimcprj(:)  !Contains dimension for cprj array
+   integer,allocatable              :: dimcprj_srt(:) !Contains dimension for cprj array ordered by atom type
    integer,allocatable              :: indsym(:,:,:) !atom indexing for symmetries
    integer,allocatable              :: irrzon(:,:,:) !irreducible Brillouin zone
    integer,allocatable              :: kg(:,:)     !red. coord. of G vecs
    integer,allocatable              :: nattyp(:)   !nb of atoms of different types
    integer,allocatable              :: npwarr(:)   !number of PW at each k-point
    integer,allocatable              :: symrec(:,:,:) !sym. operations in recip space
-   real(dp)                         :: gprimd(3,3) !prim cell vectors in recip space
+   real(dp)                         :: gprimd(3,3) !primitive cell vectors in recip space
    real(dp)                         :: gmet(3,3)   !metric tensor in recip space
    real(dp)                         :: rprimd(3,3) !prim cell vectors in direct space
    real(dp)                         :: rmet(3,3)   !metric tensor in direct space
    real(dp),allocatable             :: cg(:,:)     !WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: cg0(:,:)    !Initial WF coefficients in PW basis <k+G|psi_nk>
+   real(dp),allocatable             :: current(:,:)!Current density
    real(dp),allocatable             :: eigen(:)    !eigen-energies
    real(dp),allocatable             :: eigen0(:)   !Initial eigen-energies (at t=0)
    real(dp),allocatable             :: grvdw(:,:)  !Gradient of the total energy coming
                                                    !from VDW dispersion correction             !FB: Needed?
-   real(dp),allocatable             :: occ(:)      !occupation numbers
-   real(dp),allocatable             :: occ0(:)     !Initial occupation numbers
    real(dp),allocatable             :: nhat(:,:)   !compensation charge density
    real(dp),allocatable             :: nhatgr(:,:,:) !gradient of nhat
+   real(dp),allocatable             :: occ(:)      !occupation numbers
+   real(dp),allocatable             :: occ0(:)     !Initial occupation numbers
    real(dp),allocatable             :: phnons(:,:,:) !For symmetries (nonsymmorphic translation phases)
    real(dp),allocatable             :: ph1d(:,:)   !Structure factor phase: exp(2Pi i G.xred)
                                                    !on coarse grid
@@ -168,14 +175,14 @@ module m_rttddft_tdks
                                                    !for XC core correction
    real(dp),allocatable             :: ylm(:,:)    !real spherical harmonics for each k+G
    real(dp),allocatable             :: ylmgr(:,:,:)!real spherical harmonics gradients         !FB: Needed?
-   type(pawcprj_type),allocatable   :: cprj(:,:)   !projectors applied on WF <p_lmn|C_nk>
-   type(pawcprj_type),allocatable   :: cprj0(:,:)  !projectors applied on WF <p_lmn|C_nk>
-   type(paw_an_type),allocatable    :: paw_an(:)   !various arrays on angular mesh
+   type(pawcprj_type),  allocatable :: cprj(:,:)   !projectors applied on WF <p_lmn|C_nk>
+   type(pawcprj_type),  allocatable :: cprj0(:,:)  !projectors applied on WF <p_lmn|C_nk>
+   type(paw_an_type),   allocatable :: paw_an(:)   !various arrays on angular mesh
    type(pawfgrtab_type),allocatable :: pawfgrtab(:) !PAW atomic data on fine grid
-   type(paw_ij_type),allocatable    :: paw_ij(:)   !various arrays on partial waves (i,j channels)
-   type(pawrad_type),pointer        :: pawrad(:) => NULL() !radial grid in PAW sphere
-   type(pawrhoij_type),pointer      :: pawrhoij(:) !operator rho_ij= <psi|p_i><p_j|psi>
-   type(pawtab_type),pointer        :: pawtab(:) => NULL() !tabulated PAW atomic data
+   type(paw_ij_type),   allocatable :: paw_ij(:)   !various arrays on partial waves (i,j channels)
+   type(pawrad_type),   pointer     :: pawrad(:)   => NULL() !radial grid in PAW sphere
+   type(pawrhoij_type), pointer     :: pawrhoij(:) => NULL() !operator rho_ij= <psi|p_i><p_j|psi>
+   type(pawtab_type),   pointer     :: pawtab(:)   => NULL() !tabulated PAW atomic data
 
     contains
 
@@ -245,12 +252,13 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !1) Various initializations & checks (MPI, PW, FFT, PSP, Symmetry ...)
  call first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
 
- !2) Deals with restart
- !FB: @MT Is this the proper way to read a file in abinit..?
+ !2) Deals with restart and setup some basic variables and filenames
  tdks%first_step = 1
  tdks%fname_tdener = dtfil%fnameabo_td_ener
  tdks%fname_wfk0 = dtfil%fnamewffk
  fname_wfk = dtfil%fnamewffk
+ tdks%fname_tdef = dtfil%fnameabo_td_ef
+ tdks%fname_current = dtfil%fnameabo_td_current
  if (dtset%td_restart > 0) then
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='old', form='formatted') /= 0) then
@@ -259,18 +267,26 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
       end if
       read(tdks%tdrestart_unit,*) tdks%first_step
       tdks%first_step = tdks%first_step + 1
-      read(tdks%tdrestart_unit,*) tdks%fname_tdener
       read(tdks%tdrestart_unit,*) tdks%fname_wfk0
       read(tdks%tdrestart_unit,*) fname_wfk
+      read(tdks%tdrestart_unit,*) tdks%fname_tdener
+      if (dtset%td_ef_type /= 0) then
+         read(tdks%tdrestart_unit,*) tdks%fname_tdef
+      end if
+      if (dtset%prtcurrent /= 0) then
+         read(tdks%tdrestart_unit,*) tdks%fname_current
+      end if
    end if
    !Send to all procs
    call xmpi_bcast(tdks%first_step,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(tdks%fname_tdener,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(tdks%fname_wfk0,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(fname_wfk,0,mpi_enreg%comm_world,ierr)
+   call xmpi_bcast(tdks%fname_tdef,0,mpi_enreg%comm_world,ierr)
+   call xmpi_bcast(tdks%fname_current,0,mpi_enreg%comm_world,ierr)
  else
    if (mpi_enreg%me == 0) then
-      if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
+      if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='replace', form='formatted') /= 0) then
          write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART.'
          ABI_ERROR(msg)
       end if
@@ -286,17 +302,37 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !calc occupation number with metallic occupation using the previously read WF
  if (dtset%occopt>=3.and.dtset%occopt<=9) then  ! allowing for occopt 9
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-   call newocc(doccde,tdks%eigen0,tdks%energies%entropy,tdks%energies%e_fermie, &
-             & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
-             & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
-             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,   &
+   call newocc(doccde,tdks%eigen0,tdks%energies%entropy_ks,tdks%energies%e_fermie, &
+             & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,      &
+             & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,  &
+             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,    &
              & dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd=extfpmd)
    ABI_FREE(doccde)
  end if
 
- !5) Some further initialization (Mainly for PAW)
+ !5) Some further initialization (Mainly for PAW and allocation of arrays for Hamiltonian and densities)
  call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
+ !6) TD external elec. field perturbation
+ if (dtset%td_ef_type/=0 .and. psps%useylm/=1) ABI_ERROR("TD Electric field only works with spherical harmonics (useylm=1)")
+ if (dtset%td_ef_type/=0 .and. psps%usepaw/=1) ABI_ERROR("TD Electric field only works with PAW")
+ !Init vector potential and associated constants
+ if (dtset%td_ef_type/=0 .or. dtset%prtcurrent/=0) then
+    ABI_MALLOC(tdks%current,(3,dtset%nsppol))
+    tdks%current = zero
+ end if
+ call tdks%tdef%init(dtset%td_ef_type,dtset%td_ef_pol,dtset%td_ef_ezero,dtset%td_ef_tzero, &
+                   & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%td_ef_induced_vecpot,dtset%nkpt,dtset%kptns)
+ if (dtset%td_restart /=0) then
+    call tdks%tdef%restart(mpi_enreg, tdks%tdrestart_unit)
+    call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                        & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current,update_vecpot_ind=.false.)
+ else
+    call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                        & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr,tdks%current)
+ end if
+
+ !7) Keep initial cg and cproj in memory for occupations
  !Keep initial wavefunction in memory
  if (dtset%td_restart == 0) then
    ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
@@ -308,7 +344,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
     ABI_MALLOC(tdks%cprj0,(dtset%natom,tdks%mcprj))
     call pawcprj_alloc(tdks%cprj0,ncpgr,tdks%dimcprj)
     call ctocprj(tdks%atindx,tdks%cg0,1,tdks%cprj0,tdks%gmet,tdks%gprimd,0,0,0,         &
-               & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
+               & dtset%istwfk,tdks%kg,tdks%tdef%kpa,tdks%mcg,tdks%mcprj,dtset%mgfft,    &
                & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
                & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
                & tdks%npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,psps%ntypat,       &
@@ -316,10 +352,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
                & tdks%unpaw,tdks%xred,tdks%ylm,tdks%ylmgr)
  end if
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
-
- !FB: That should be all for now but there were few more initializations in
- !g_state.F90 in particular related to electric field, might want to check it out
- !once we reach the point of including external electric field
 
  !Keep some additional stuff in memory within the tdks object
  tdks%unpaw  = dtfil%unpaw
@@ -379,14 +411,15 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(associated(tdks%pawang)) tdks%pawang => null()
    if(associated(tdks%pawrad)) tdks%pawrad => null()
    if(associated(tdks%pawtab)) tdks%pawtab => null()
-   if(associated(tdks%pawrhoij)) call pawrhoij_free(tdks%pawrhoij)
 
    !Deallocate allocatables
    ABI_SFREE(tdks%atindx)
    ABI_SFREE(tdks%atindx1)
    ABI_SFREE(tdks%cg)
    ABI_SFREE(tdks%cg0)
+   ABI_SFREE(tdks%current)
    ABI_SFREE(tdks%dimcprj)
+   ABI_SFREE(tdks%dimcprj_srt)
    ABI_SFREE(tdks%eigen)
    ABI_SFREE(tdks%eigen0)
    ABI_SFREE(tdks%grvdw)
@@ -418,6 +451,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    ABI_SFREE(tdks%xcctau3d)
    ABI_SFREE(tdks%ylm)
    ABI_SFREE(tdks%ylmgr)
+   ABI_SFREE(tdks%tdef%kpa)
 
    if(allocated(tdks%cprj)) then
       call pawcprj_free(tdks%cprj)
@@ -438,6 +472,10 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if(allocated(tdks%paw_ij)) then
       call paw_ij_free(tdks%paw_ij)
       ABI_FREE(tdks%paw_ij)
+   end if
+   if(associated(tdks%pawrhoij)) then
+      call pawrhoij_free(tdks%pawrhoij)
+      ABI_FREE(tdks%pawrhoij)
    end if
 
 end subroutine tdks_free
@@ -466,6 +504,37 @@ end subroutine tdks_free
 !!  psp_gencond <integer> = store conditions for generating psp
 !!  ecut_eff <real(dp)> = effective PW cutoff energy
 !!
+!! NOTES
+!! USE OF FFT GRIDS:
+!! =================
+!! In case of PAW:
+!! ---------------
+!!    Two FFT grids are used:
+!!    - A "coarse" FFT grid (defined by ecut)
+!!      for the application of the Hamiltonian on the plane waves basis.
+!!      It is defined by nfft, ngfft, mgfft, ...
+!!      Hamiltonian, wave-functions, density related to WFs (rhor here), ...
+!!      are expressed on this grid.
+!!    - A "fine" FFT grid (defined) by ecutdg)
+!!      for the computation of the density inside PAW spheres.
+!!      It is defined by nfftf, ngfftf, mgfftf, ...
+!!      Total density, potentials, ...
+!!      are expressed on this grid.
+!! In case of norm-conserving:
+!! ---------------------------
+!!    - Only the usual FFT grid (defined by ecut) is used.
+!!      It is defined by nfft, ngfft, mgfft, ...
+!!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
+!!      are set equal to (nfft,ngfft,mgfft) in that case.
+!! In case of wavelets:
+!! --------------------
+!!    - Only the usual FFT grid (defined by wvl_crmult) is used.
+!!      It is defined by nfft, ngfft, mgfft, ... This is strictly not
+!!      an FFT grid since its dimensions are not suited for FFTs. They are
+!!      defined by wvl_setngfft().
+!!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
+!!      are set equal to (nfft,ngfft,mgfft) in that case.
+!!
 !! SOURCE
 subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
 
@@ -491,7 +560,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  integer              :: iatom, ierr, itypat, indx
  integer              :: mgfftf, my_natom
  integer              :: npwmin, nfftot
- integer              :: ylm_option
  real(dp)             :: gsqcut_eff, gsqcutc_eff
  real(dp)             :: ecutdg_eff
  type(ebands_t)       :: bstruct
@@ -507,7 +575,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  my_natom=mpi_enreg%my_natom
 
  !** Init FFT grid(s) sizes (be careful !)
- !See NOTES in the comments at the beginning of this file.
+ !See NOTES in the comments at the beginning of this subroutine.
  tdks%nfft = dtset%nfft
  call pawfgr_init(tdks%pawfgr,dtset,mgfftf,tdks%nfftf,ecut_eff,ecutdg_eff, &
                 & ngfft,ngfftf)
@@ -522,14 +590,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
            & tdks%gprimd,gsqcut_eff,gsqcutc_eff,ngfftf,ngfft,dtset%nkpt,       &
            & dtset%nsppol,response,tdks%rmet,dtset%rprim_orig,tdks%rprimd,     &
            & tdks%ucvol,psps%usepaw)
-
-!FB: @MT Needed?
-!!In some cases (e.g. getcell/=0), the plane wave vectors have
-!! to be generated from the original simulation cell
-!rprimd_for_kg=rprimd
-!if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=args_gs%rprimd_orig
-!call matr3inv(rprimd_for_kg,gprimd_for_kg)
-!gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
  !** Set up the basis sphere of planewaves
  ABI_MALLOC(tdks%npwarr,(dtset%nkpt))
@@ -550,23 +610,24 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%gemm_nonlop_use_gemm = .false.
  end if
 
- !** Setup the Ylm for each k point
- if (psps%useylm==1) then
-   ABI_MALLOC(tdks%ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
-   ABI_MALLOC(tdks%ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
-   ylm_option=0
-   if ((dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) .or. &
-   &   (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) .or. &
-   &   (dtset%orbmag<0 .and. psps%usepaw==1)) then
-      ylm_option = 1 ! gradients of YLM
-   end if
-   call initylmg(tdks%gprimd,tdks%kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
-   & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
-   & tdks%npwarr,dtset%nsppol,ylm_option,tdks%rprimd,tdks%ylm,tdks%ylmgr)
- else
-   ABI_MALLOC(tdks%ylm,(0,0))
-   ABI_MALLOC(tdks%ylmgr,(0,0,0))
+ !** TODO: uncomment when gemm_nonlop can be used on GPU
+ ! if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option/=ABI_GPU_DISABLED) then
+ !   ! set global variable
+ !   tdks%gemm_nonlop_use_gemm_gpu = .true.
+ !   !call init_gemm_nonlop_gpu(dtset%nkpt)
+ ! else
+ !   tdks%gemm_nonlop_use_gemm_gpu = .false.
+ ! end if
+
+ !** Initialize band structure datatype
+ ABI_MALLOC(npwarr_,(dtset%nkpt))
+ npwarr_(:)=tdks%npwarr(:)
+ if (dtset%paral_kgb/=0) then
+   call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
  end if
+ call bstruct%from_dtset(dtset, npwarr_)
+ ABI_FREE(npwarr_)
+ call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
 
  !** Open and read pseudopotential files
  comm_psp=mpi_enreg%comm_cell
@@ -589,16 +650,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%energies%e_corepspdc = zero
  end select
 
- !** Initialize band structure datatype
- ABI_MALLOC(npwarr_,(dtset%nkpt))
- npwarr_(:)=tdks%npwarr(:)
- if (dtset%paral_kgb/=0) then
-   call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
- end if
- bstruct = ebands_from_dtset(dtset, npwarr_)
- ABI_FREE(npwarr_)
- call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
-
  !** Initialize PAW atomic occupancies
  ABI_MALLOC(tdks%pawrhoij,(my_natom*psps%usepaw))
  if (psps%usepaw == 1) then
@@ -615,11 +666,11 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
 
  !** Initialize header
  gscase=0
- call hdr_init(bstruct,codvsn,dtset,tdks%hdr,pawtab,gscase,psps,tdks%wvl%descr,&
-             & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ call tdks%hdr%init(bstruct,codvsn,dtset,pawtab,gscase,psps,tdks%wvl%descr,&
+                    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
  !Clean band structure datatype
- call ebands_free(bstruct)
+ call bstruct%free()
 
  !** PW basis set: test if the problem is ill-defined.
  npwmin=minval(tdks%hdr%npwarr(:))
@@ -655,7 +706,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  tdks%indsym(:,:,:)=0
  tdks%symrec(:,:,:)=0
 
- !FB TODO: Should symmetry be used when ions are moving? Modify if Ehrenfest dynamics
  !Do symmetry stuff if nsym>1
  if (dtset%nsym>1) then
    call setsym(tdks%indsym,tdks%irrzon,dtset%iscf,dtset%natom, &
@@ -666,7 +716,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    !Make sure dtset%iatfix does not break symmetry
    call fixsym(dtset%iatfix,tdks%indsym,dtset%natom,dtset%nsym)
  else
-   !The symrec array is used by initberry even in case nsym = 1 - FB: @MT Needed ?
+   !The symrec array is used by initberry even in case nsym = 1
    tdks%symrec(:,:,1) = 0
    tdks%symrec(1,1,1) = 1 ; tdks%symrec(2,2,1) = 1 ; tdks%symrec(3,3,1) = 1
  end if
@@ -674,7 +724,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  !** Initialize and eventually symmetrize reduced atomic coordinates
  ABI_MALLOC(tdks%xred,(3,dtset%natom,dtset%nimage))
  tdks%xred = dtset%xred_orig
- !FB: Should we?
  !Eventually symmetrize atomic coordinates over space group elements
  call symmetrize_xred(dtset%natom,dtset%nsym,dtset%symrel,dtset%tnons,tdks%xred, &
                     & indsym=tdks%indsym)
@@ -702,10 +751,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  do iatom=1,dtset%natom
    tdks%zion=tdks%zion+psps%ziontypat(dtset%typat(iatom))
  end do
-
- !FB: probably not needed
- !Further setup
- !call setup2(dtset,npwtot,start,tdks%wvl%wfs,tdks%xred)
 
 end subroutine first_setup
 !!***
@@ -758,7 +803,9 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  integer             :: ncpgr
  integer             :: optcut, optgr0, optgr1, optgr2, optrad
  integer             :: stress_needed
- integer             :: use_hybcomp
+ integer             :: ylm_option
+ integer             :: use_hybcomp, usevxctau
+ real(dp)            :: boxcut
  real(dp)            :: gsqcut_shp
  real(dp)            :: hyb_range_fock
  real(dp),parameter  :: k0(3)=(/zero,zero,zero/)
@@ -779,12 +826,24 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  !FB: Needed because paw_dmft is required in mkrho
  !PAW related operations
  !Initialize paw_dmft, even if neither dmft not paw are used
- call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,                 &
-                 & dtset%dmft_read_occnd,dtset%mband,dtset%nband,dtset%nkpt,       &
-                 & dtset%nspden,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%usedmft,&
-                 & tdks%paw_dmft,dtset%usedmft,dtset%dmft_solv,mpi_enreg)
+ call init_sc_dmft(dtset,psps%mpsang,tdks%paw_dmft,mpi_enreg=mpi_enreg,use_sc_dmft=0)
+
 
  !*** Main PAW initialization ***
+
+ !** Setup the Ylm for each k point
+ if (psps%useylm==1) then
+   ABI_MALLOC(tdks%ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
+   ABI_MALLOC(tdks%ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
+   ylm_option=0
+   call initylmg(tdks%gprimd,tdks%kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
+   & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
+   & tdks%npwarr,dtset%nsppol,ylm_option,tdks%rprimd,tdks%ylm,tdks%ylmgr)
+ else
+   ABI_MALLOC(tdks%ylm,(0,0))
+   ABI_MALLOC(tdks%ylmgr,(0,0,0))
+ end if
+
  tdks%mcprj=0;tdks%mband_cprj=0
  if(psps%usepaw==1) then
    gnt_option=1
@@ -820,11 +879,11 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
    ncpgr=0
    !FB: @MT dimcprj_srt needed?
    ABI_MALLOC(tdks%dimcprj,(dtset%natom))
-   !ABI_MALLOC(dimcprj_srt,(dtset%natom))
+   ABI_MALLOC(tdks%dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(tdks%dimcprj,dtset%natom,tdks%nattyp,dtset%ntypat, &
                      & dtset%typat,pawtab,'R')
-   !call pawcprj_getdim(dimcprj_srt,dtset%natom,tdks%nattyp,dtset%ntypat,  &
-   !                  & dtset%typat,pawtab,'O')
+   call pawcprj_getdim(tdks%dimcprj_srt,dtset%natom,tdks%nattyp,dtset%ntypat,  &
+                     & dtset%typat,pawtab,'O')
    !call pawcprj_alloc(tdks%cprj,ncpgr,dimcprj_srt)
    call pawcprj_alloc(tdks%cprj,ncpgr,tdks%dimcprj)
    !ABI_FREE(dimcprj_srt)
@@ -850,7 +909,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_dijfock=0
    has_dijU=merge(0,1,dtset%usepawu>0) !Be careful on this!
-   has_vxctau=dtset%usekden
+   has_vxctau=pawxc_get_usekden(dtset%ixc)
    call paw_an_init(tdks%paw_an,dtset%natom,dtset%ntypat,0,0,dtset%nspden,        &
                   & cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,     &
                   & has_vxctau=has_vxctau,has_vxc_ex=1,has_vhartree=has_vhartree, &
@@ -922,7 +981,8 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
     tdks%xcctau3d=zero
  endif
  !For mGGA
- ABI_MALLOC(tdks%vxctau,(tdks%nfftf,dtset%nspden,4*dtset%usekden))
+ usevxctau=merge(1,0,xc_need_kden(dtset%ixc))
+ ABI_MALLOC(tdks%vxctau,(tdks%nfftf,dtset%nspden,4*usevxctau))
  tdks%vxctau=zero
  !For hybrid functionals
  use_hybcomp=0
@@ -939,10 +999,10 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
 
  !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
  if (psps%usepaw==1) then
-   call getcut(tdks%boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
+   call getcut(boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
              & std_out,k0,tdks%pawfgr%ngfft)
  else
-   call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
+   call getcut(boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
              & std_out,k0,tdks%pawfgr%ngfft)
  end if
 
@@ -957,25 +1017,6 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  else
    tdks%ph1df(:,:)=tdks%ph1d(:,:)
  end if
-
-!!FB: @MT Needed? If yes, then don't forget to put it back in the begining of
-!! propagate_ele as well
-!!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
-!!atomic position so should be done for nstep = 1 and for updated ion positions
-!if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
-!   with_vectornd = 1
-!else
-!   with_vectornd = 0
-!end if
-!if(allocated(vectornd)) then
-!   ABI_FREE(vectornd)
-!end if
-!ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
-!vectornd=zero
-!if(with_vectornd .EQ. 1) then
-!   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
-!        & rprimd,vectornd,xred)
-!endif
 
  !Allocate memory for density
  ABI_MALLOC(tdks%rhor,(tdks%nfftf,dtset%nspden))
@@ -1075,13 +1116,13 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
  ABI_MALLOC(tdks%eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
 
  tdks%eigen(:) = zero
- ask_accurate=0
+ ask_accurate=1
 
  !Actually read the intial KS orbitals here
  if (dtset%td_restart /= 1) then
-   write(msg,'(3a)') ch10,'-------------   Reading initial wavefunctions   -------------',ch10
+   write(msg,'(3a)') ch10,'-------------------    Reading initial wavefunctions    -------------------',ch10
  else
-   write(msg,'(3a)') ch10,'-------------   Reading wavefunctions for restart  -------------',ch10
+   write(msg,'(3a)') ch10,'-------------------   Reading wavefunctions for restart  ------------------',ch10
  end if
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
@@ -1097,7 +1138,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
             & dtset%symafm,dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,  &
             & dtfil%unwff1,fname_wfk,tdks%wvl)
 
- !Close wff1
+ !Close file
  call WffClose(wff1,ierr)
 
  !Keep initial eigenvalues in memory
@@ -1105,7 +1146,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
 
  !In case of restart also read wfk file containing wave functions at t=0
  if (dtset%td_restart == 1 .and. tdks%fname_wfk0 /= fname_wfk) then
-   write(msg,'(3a)') ch10,'-------------   Reading initial wavefunctions   -------------',ch10
+   write(msg,'(3a)') ch10,'-------------------    Reading initial wavefunctions    -------------------',ch10
    ABI_MALLOC_OR_DIE(tdks%cg0,(2,tdks%mcg),ierr)
    call wrtout(ab_out,msg)
    if (do_write_log) call wrtout(std_out,msg)
@@ -1117,6 +1158,10 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
               & tdks%npwarr,dtset%nsppol,dtset%nsym,dtset%occ_orig,optorth,    &
               & dtset%symafm,dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,  &
               & dtfil%unwff1,tdks%fname_wfk0,tdks%wvl)
+
+   !Close file
+   call WffClose(wff1,ierr)
+
  end if
 
 end subroutine read_wfk

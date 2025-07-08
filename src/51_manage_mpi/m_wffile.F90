@@ -7,7 +7,7 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2025 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,9 +34,7 @@ MODULE m_wffile
  use mpi
 #endif
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes, only : MPI_Type
  use m_io_tools,   only : mvrecord, open_file
@@ -1095,14 +1093,12 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
    end if
 #endif
 
-#ifdef HAVE_NETCDF
  else if (wff%iomode==IO_MODE_ETSF)then
    fildata = nctk_ncify(filename)
    NCF_CHECK(nctk_open_modify(wff%unwff, fildata, xmpi_comm_self))
    wff%fname = fildata
    !write(message,'(3A,I0)')'WffOpen: opening ', trim(wff%fname)," on unit ", wff%unwff
    !call wrtout(std_out, message, 'COLL')
-#endif
  else
    write(message, '(7a,i0,3a)' )&
 &   'For the time being the input variable iomode is restricted ',ch10,&
@@ -1145,10 +1141,8 @@ subroutine WffClose(wff,ier)
  if(wff%iomode==IO_MODE_FORTRAN) then ! All processors see a local file
    close(unit=wff%unwff)
 
-#ifdef HAVE_NETCDF
  else if(wff%iomode == IO_MODE_ETSF)then
    NCF_CHECK(nf90_close(wff%unwff))
-#endif
 
  else if(wff%iomode==IO_MODE_FORTRAN_MASTER)then !  Only the master processor see a local file
    if(wff%master==wff%me) close (unit=wff%unwff)    ! VALGRIND complains buf points to uninitialized bytes
@@ -1453,10 +1447,7 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
 
 !Local variables-------------------------------
  !character(len=500) :: msg
-#if defined HAVE_NETCDF
  integer :: vid
-#endif
-
 ! *************************************************************************
 
  ierr=0
@@ -1475,14 +1466,12 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
 
  else if (wff%iomode == IO_MODE_ETSF) then
 
-#if defined HAVE_NETCDF
    !write(std_out,*)"readnpwrec: ikpt, spin", ikpt, spin
    NCF_CHECK(nctk_get_dim(wff%unwff, "number_of_spinor_components", nspinor))
    vid = nctk_idname(wff%unwff, "number_of_coefficients")
    NCF_CHECK(nf90_get_var(wff%unwff, vid, npw, start=[ikpt]))
    vid = nctk_idname(wff%unwff, "number_of_states")
    NCF_CHECK(nf90_get_var(wff%unwff, vid, nband_disk, start=[ikpt, isppol]))
-#endif
 
  else
    ! MG: I don't understand why we have to use this ugly code!!!!!!!!
@@ -3005,14 +2994,15 @@ subroutine xderiveWrite_int(wff,xval,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer :: statux(MPI_STATUS_SIZE)
+ integer :: statux(MPI_STATUS_SIZE),arr_xval(1)
 #endif
 ! *********************************************************************
 
  ierr=0
  if(.false.)write(std_out,*)wff%me,xval
 #if defined HAVE_MPI_IO
- call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,[xval],1,MPI_INTEGER,statux,ierr)
+ arr_xval(1) = xval
+ call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,arr_xval,1,MPI_INTEGER,statux,ierr)
  wff%offwff = wff%offwff+wff%nbOct_int
 #endif
 

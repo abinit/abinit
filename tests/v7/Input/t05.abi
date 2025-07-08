@@ -28,7 +28,7 @@ magconon3 1
 spinat3 0 3 0
 toldfe3 1.e-14
 prtvol3 1   # Turn off printing of minimum magnetization location, because not portable
-nstep3 51
+nstep3 49
 
 # DS 4 constrained direction and amplitude, non collinear spin
 magconon4 2
@@ -94,7 +94,6 @@ rprim
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test = 
 #%%   t05.abo,      tolnlines = 58, tolabs = 1.1e+1, tolrel = 1.1e+0, fld_options = -easy

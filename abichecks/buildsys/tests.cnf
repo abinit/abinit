@@ -1,7 +1,7 @@
 # Title:
 Build-system consistency checks
 #
-# Copyright (C) 2010-2024 ABINIT group (Yann Pouillon)
+# Copyright (C) 2010-2025 ABINIT group (Yann Pouillon)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,6 +50,7 @@ Build-system consistency checks
 01 statchk abichecks/scripts/check-conflict-markers.py
 #02 statchk abichecks/scripts/check-line-lengths.py
 03 statchk abichecks/scripts/check-config-h.py
+04 statchk abichecks/scripts/check-unprotected-omp-target.py
 10 statchk abichecks/scripts/check-build-config.py
 12 statchk abichecks/scripts/check-cpp-options.py
 14 statchk abichecks/scripts/check-binaries-conf.py

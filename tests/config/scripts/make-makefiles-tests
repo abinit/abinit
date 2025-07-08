@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -189,13 +189,13 @@ import glob
 top_level_files = glob.glob('*.py') + glob.glob('*.rst')
 
 string = "# Files from %s\n%s =" % ("top_level_dir","top_level_files")
-for fname in top_level_files:          
+for fname in top_level_files:
    string += " \\\n\t%s" % fname
 string += "\n\n"
 mf.write(string)
 
 mf.write(file_list("tests_scripts","Scripts"))
-mf.write(file_list("psps_for_tests","Psps_for_tests"))
+mf.write(file_list("pspdir","Pspdir"))
 mf.write(file_list("doc_files","doc"))
 mf.write(file_list("tests_in_inps","built-in"))
 mf.write(file_list("pymods","pymods"))

@@ -1,11 +1,11 @@
-# Crystalline silicon 
+# Crystalline silicon
 # Preparatory run for BS calculations
 #
 # There are four datasets specified in this input:
 # 1) Ground-state calculation to get the density.
-# 2) NSCF run to generate the WFK file on a symmetric k-mesh (4x4x4, gamma-centered) 
+# 2) NSCF run to generate the WFK file on a symmetric k-mesh (4x4x4, gamma-centered)
 # 3) NSCF run to generate another WFK file on a shifted 4x4x4 k-mesh that breaks the symmetry of the BZ sampling
-# 4) SCR calculation with the WFK file generated in the second dataset 
+# 4) SCR calculation with the WFK file generated in the second dataset
 #
 ndtset 4
 
@@ -24,19 +24,19 @@ prtden1 1
 #
 iscf2    -2       # NSCF run
 getden2  1        # Read previous density file
-tolwfr2  1.0d-8  
+tolwfr2  1.0d-8
 nband2    105     # bands treated in the CG algorithm
 nbdbuf2    5      # The last five states are excluded from the converge check
-                  # to facilitate the convergence 
+                  # to facilitate the convergence
 
 # Dataset3: calculation of the WFK file on the shifted k-mesh to break the symmetry.
 #
-iscf3    -2                
+iscf3    -2
 getden3   1
-tolwfr3  1.0d-8  
-nband3    15               # Here we can reduce the number of bands since this WFK file 
-                           # will be used to construct the transition space 
-nbdbuf3    5               
+tolwfr3  1.0d-8
+nband3    15               # Here we can reduce the number of bands since this WFK file
+                           # will be used to construct the transition space
+nbdbuf3    5
 chksymbreak3 0             # To skip the check on the k-mesh.
 shiftk3    0.11 0.21 0.31  # This shift breaks the symmetry of the k-mesh.
 
@@ -76,7 +76,7 @@ xred              # Reduced coordinate of atoms
    0.0  0.0  0.0
    0.25 0.25 0.25
 
-# Definition of the planewave basis set 
+# Definition of the planewave basis set
 ecut 12         # Maximal kinetic energy cut-off, in Hartree
 
 istwfk *1
@@ -85,7 +85,7 @@ diemac 12.0
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Si.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -95,7 +95,7 @@ diemac 12.0
 #%% executable = abinit
 #%% test_chain = tbs_1.abi, tbs_2.abi, tbs_3.abi, tbs_4.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tbs_1.abo,  tolnlines= 20, tolabs=  1.1e-2,    tolrel=  4.0e-2
 #%% [shell]
 #%% post_commands =
@@ -118,19 +118,19 @@ diemac 12.0
 #%%  ww_cp tbs_1o_DS3_WFK tbs_4i_DS3_WFK;
 #%%  ww_cp tbs_1o_DS4_SCR tbs_4i_DS3_SCR;
 #%%  ww_cp tbs_1o_DS3_WFK tbs_4i_DS4_WFK;
-#%%  ww_cp tbs_1o_DS4_SCR tbs_4i_DS4_SCR; 
+#%%  ww_cp tbs_1o_DS4_SCR tbs_4i_DS4_SCR;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = GW, BSE
-#%% description = 
-#%%  Crystalline silicon 
+#%% description =
+#%%  Crystalline silicon
 #%%  Preparatory run for BS calculations
-#%% 
+#%%
 #%%  There are four datasets specified in this input:
 #%%  1) Ground-state calculation to get the density.
-#%%  2) NSCF run to generate the WFK file on a symmetric k-mesh (4x4x4, gamma-centered) 
+#%%  2) NSCF run to generate the WFK file on a symmetric k-mesh (4x4x4, gamma-centered)
 #%%  3) NSCF run to generate another WFK file on a shifted 4x4x4 k-mesh that breaks the symmetry of the BZ sampling
-#%%  4) SCR calculation with the WFK file generated in the second dataset 
+#%%  4) SCR calculation with the WFK file generated in the second dataset
 #%%<END TEST_INFO>

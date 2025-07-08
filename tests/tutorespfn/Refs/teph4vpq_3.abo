@@ -1,0 +1,1181 @@
+
+.Version 10.3.4.7 of ABINIT, released Dec 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+
+.Copyright (C) 1998-2025 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Sun 23 Feb 2025.
+- ( at 16h06 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_3.abi
+- output file    -> teph4vpq_3.abo
+- root for input  files -> teph4vpq_3i
+- root for output files -> teph4vpq_3o
+
+ DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       5
+     lnmax =       5     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       2
+-    mband =           6        mffmem =           1         mkmem =           4
+       mpw =         896          nfft =        4096          nkpt =           4
+================================================================================
+P This job should need less than                       2.929 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.330 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+ DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       5
+     lnmax =       5     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       2
+-    mband =           6        mffmem =           1         mkmem =           8
+       mpw =         896          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       3.302 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.658 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+ DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       5
+     lnmax =       5     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       1   xclevel =       2
+-    mband =           6        mffmem =           1         mkmem =          10
+       mpw =         899          nfft =        4096          nkpt =          10
+================================================================================
+P This job should need less than                       3.492 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.825 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      7.6750000000E+00  7.6750000000E+00  7.6750000000E+00 Bohr
+              amu      6.94100000E+00  1.89984032E+01
+        boxcutmin      1.10000000E+00
+        ddb_ngqpt        3    3    3
+             ecut      3.00000000E+01 Hartree
+   eph_ngqpt_fine1       3    3    3
+   eph_ngqpt_fine2       4    4    4
+   eph_ngqpt_fine3       5    5    5
+         eph_task          11
+-          fftalg         512
+           istwfk1       2    0    0    0
+           istwfk2       2    0    3    0    0    0    7    0
+           istwfk3       2    0    0    0    0    0    0    0    0    0
+              ixc          11
+           jdtset        1    2    3
+              kpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       3.33333333E-01  0.00000000E+00  0.00000000E+00
+                       3.33333333E-01  3.33333333E-01  0.00000000E+00
+                      -3.33333333E-01  3.33333333E-01  0.00000000E+00
+              kpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  2.50000000E-01
+              kpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       2.00000000E-01  0.00000000E+00  0.00000000E+00
+                       4.00000000E-01  0.00000000E+00  0.00000000E+00
+                       2.00000000E-01  2.00000000E-01  0.00000000E+00
+                       4.00000000E-01  2.00000000E-01  0.00000000E+00
+                      -4.00000000E-01  2.00000000E-01  0.00000000E+00
+                      -2.00000000E-01  2.00000000E-01  0.00000000E+00
+                       4.00000000E-01  4.00000000E-01  0.00000000E+00
+                      -4.00000000E-01  4.00000000E-01  0.00000000E+00
+                      -4.00000000E-01  4.00000000E-01  2.00000000E-01
+         kptrlatt1       3    0    0      0    3    0      0    0    3
+         kptrlatt2       4    0    0      0    4    0      0    0    4
+         kptrlatt3       5    0    0      0    5    0      0    0    5
+          kptrlen1     1.62811336E+01
+          kptrlen2     2.17081782E+01
+          kptrlen3     2.71352227E+01
+P           mkmem1          4
+P           mkmem2          8
+P           mkmem3         10
+            natom           2
+            nband1          6
+            nband2          6
+            nband3          6
+           ndtset           3
+            ngfft          16      16      16
+             nkpt1          4
+             nkpt2          8
+             nkpt3         10
+             nsym          48
+           ntypat           2
+              occ1     2.000000  2.000000  2.000000  2.000000  2.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  2.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  2.000000  0.000000
+        optdriver           7
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         225
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            typat      1  2
+              wtk1       0.03704    0.29630    0.22222    0.44444
+              wtk2       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
+                         0.04688    0.09375
+              wtk3       0.00800    0.06400    0.06400    0.04800    0.19200    0.19200
+                         0.09600    0.04800    0.09600    0.19200
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+            znucl        3.00000    9.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 4, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 896, }
+cutoff_energies: {ecut:  30.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: 11, }
+...
+
+ mkfilename: getwfk from: teph4vpq_2o_DS1_WFK
+
+ mkfilename: getddb from: LiF_eph_varpeq/out_DDB
+
+ mkfilename: getdvdb from: teph4vpq_1_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
+ Citation for XC functional:
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+- Reading GS states from WFK file: teph4vpq_2o_DS1_WFK
+- Reading DDB from file: LiF_eph_varpeq/out_DDB
+- Reading DVDB from file: teph4vpq_1_DVDB
+
+
+
+
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8375000  3.8375000  G(1)= -0.1302932  0.1302932  0.1302932
+ R(2)=  3.8375000  0.0000000  3.8375000  G(2)=  0.1302932 -0.1302932  0.1302932
+ R(3)=  3.8375000  3.8375000  0.0000000  G(3)=  0.1302932  0.1302932 -0.1302932
+ Unit cell volume ucvol=  1.1302517E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 4 blocks has been read.
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.065315        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.065315        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.065315        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.092224E+00   -9.389407E-16   -9.386159E-16
+         1         2   -5.076227E-17    1.092224E+00    9.392655E-16
+         1         3    5.076227E-17    9.389407E-16    1.092224E+00
+         2         1   -1.092224E+00    9.389407E-16    9.386159E-16
+         2         2    5.076227E-17   -1.092224E+00   -9.392655E-16
+         2         3   -5.076227E-17   -9.389407E-16   -1.092224E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: LiF_eph_varpeq/out_DDB
+- Cannot find quadrupole tensor in DDB file: LiF_eph_varpeq/out_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       27
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   3.33333333E-01  0.00000000E+00  0.00000000E+00
+  3)  -3.33333333E-01  0.00000000E+00  0.00000000E+00
+  4)   0.00000000E+00  3.33333333E-01  0.00000000E+00
+  5)   3.33333333E-01  3.33333333E-01  0.00000000E+00
+  6)  -3.33333333E-01  3.33333333E-01  0.00000000E+00
+  7)   0.00000000E+00 -3.33333333E-01  0.00000000E+00
+  8)   3.33333333E-01 -3.33333333E-01  0.00000000E+00
+  9)  -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+ 10)   0.00000000E+00  0.00000000E+00  3.33333333E-01
+ 11)   3.33333333E-01  0.00000000E+00  3.33333333E-01
+ 12)  -3.33333333E-01  0.00000000E+00  3.33333333E-01
+ 13)   0.00000000E+00  3.33333333E-01  3.33333333E-01
+ 14)   3.33333333E-01  3.33333333E-01  3.33333333E-01
+ 15)  -3.33333333E-01  3.33333333E-01  3.33333333E-01
+ 16)   0.00000000E+00 -3.33333333E-01  3.33333333E-01
+ 17)   3.33333333E-01 -3.33333333E-01  3.33333333E-01
+ 18)  -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+ 19)   0.00000000E+00  0.00000000E+00 -3.33333333E-01
+ 20)   3.33333333E-01  0.00000000E+00 -3.33333333E-01
+ 21)  -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+ 22)   0.00000000E+00  3.33333333E-01 -3.33333333E-01
+ 23)   3.33333333E-01  3.33333333E-01 -3.33333333E-01
+ 24)  -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+ 25)   0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+ 26)   3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+ 27)  -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.2234217387E-02 (at units)
+-                                   =           4.8878 [km/s]
+
+ Debye frequency from partial sums:     0.1801153402E-02 (Ha)
+-                                 =     0.1185102008E+02 (THz)
+-Debye temperature from partial sums:     0.5687585851E+03 (K)
+
+ Average speed of sound partial sums:     0.2234217387E-02 (at units)
+-                                   =           4.8878 [km/s]
+
+ Debye frequency from partial sums:     0.1801153402E-02 (Ha)
+-                                 =     0.1185102008E+02 (THz)
+-Debye temperature from partial sums:     0.5687585851E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4vpq_3o_DS1_PHDOS.nc
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- Li    ONCVPSP-3.2.3.1  r_core=   1.40824   1.10935
+-  3.00000   3.00000    170503                znucl, zion, pspdat
+    8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    3.99000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2
+     extension_switch     1
+  pspatm : epsatm=    2.74345787
+         --- l  ekb(1:nproj) -->
+             0   -4.951544   -1.544797
+             1   -2.250662   -0.474685
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
+-  9.00000   7.00000    170504                znucl, zion, pspdat
+    8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    5.99000000000000    2.50000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2     1
+     extension_switch     1
+  pspatm : epsatm=    4.87626060
+         --- l  ekb(1:nproj) -->
+             0    6.519403    1.070094
+             1   -3.955629   -1.291931
+             2   -2.441503
+ pspatm: atomic psp has been read  and splines computed
+
+   7.61971847E+01                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+ === Gstore parameters ===
+ kzone: bz
+ kfilter: none
+ nkibz: 4
+ nkbz: 27
+ glob_nk_spin: [27]
+ qzone: bz
+ nqibz: 4
+ nqbz: 27
+ glob_nq_spin: [27]
+ kptopt: 1
+ qptopt: 1
+ with_vk: 1
+
+ gqk_cplex: 2
+ gqk_bstart: 3
+ gqk_bstop: 5
+ gqk_nb: 3
+ gqk_my_npert: 6
+ gqk_my_nk: -1
+ gqk_my_nq: -1
+
+  === MPI distribution ===
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of CPUs for parallelism over k-points: 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
+ 
+ gstore_completed: 1
+ gstore_done_qbz_spin: 27
+ gqk%nb: 3
+ gqk%glob_nq: 27
+ gqk%glob_nk: 27
+ E-PH matrix elements:
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     4     1     1     1.458413E-24
+     1     1     4     1     2     1.209049E-26
+     1     1     4     1     3     1.720504E-27
+     1     1     4     2     1     1.208968E-26
+     1     1     4     2     2     4.975231E-25
+     1     1     4     2     3     6.307039E-27
+     1     1     4     3     1     1.720573E-27
+     1     1     4     3     2     6.307222E-27
+     1     1     4     3     3     2.061652E-25
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     6     1     1     7.169195E-28
+     1     1     6     1     2     3.297664E-25
+     1     1     6     1     3     5.025685E-25
+     1     1     6     2     1     3.297641E-25
+     1     1     6     2     2     7.923151E-25
+     1     1     6     2     3     6.757426E-25
+     1     1     6     3     1     5.025618E-25
+     1     1     6     3     2     6.757428E-25
+     1     1     6     3     3     1.066013E-24
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 27 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1    27     4     1     1     3.093068E-27
+     1    27     4     1     2     3.427028E-07
+     1    27     4     1     3     1.031266E-06
+     1    27     4     2     1     3.427028E-07
+     1    27     4     2     2     1.842703E-25
+     1    27     4     2     3     1.825717E-16
+     1    27     4     3     1     1.031266E-06
+     1    27     4     3     2     1.825717E-16
+     1    27     4     3     3     6.768395E-26
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 27 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1    27     6     1     1     2.761310E-25
+     1    27     6     1     2     1.374298E-06
+     1    27     6     1     3     1.318098E-12
+     1    27     6     2     1     1.374298E-06
+     1    27     6     2     2     6.876552E-26
+     1    27     6     2     3     1.931274E-16
+     1    27     6     3     1     1.318098E-12
+     1    27     6     3     2     1.931274E-16
+     1    27     6     3     3     2.986686E-25
+ |g(k,q)|^2 in Ha^2 for iq: 27 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+    27     1     4     1     1     2.419844E-06
+    27     1     4     1     2     4.614318E-06
+    27     1     4     1     3     3.500912E-07
+    27     1     4     2     1     3.225681E-10
+    27     1     4     2     2     1.248483E-06
+    27     1     4     2     3     1.712025E-05
+    27     1     4     3     1     3.377259E-08
+    27     1     4     3     2     1.088504E-08
+    27     1     4     3     3     1.532463E-09
+ |g(k,q)|^2 in Ha^2 for iq: 27 ik: 1 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+    27     1     6     1     1     2.310794E-05
+    27     1     6     1     2     4.329633E-05
+    27     1     6     1     3     3.155267E-06
+    27     1     6     2     1     6.329838E-13
+    27     1     6     2     2     3.423089E-06
+    27     1     6     2     3     4.756787E-05
+    27     1     6     3     1     9.306980E-05
+    27     1     6     3     2     4.327594E-05
+    27     1     6     3     3     3.104917E-06
+ |g(k,q)|^2 in Ha^2 for iq: 27 ik: 27 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+    27    27     4     1     1     1.080256E-06
+    27    27     4     1     2     6.731334E-06
+    27    27     4     1     3     5.904215E-06
+    27    27     4     2     1     6.604648E-07
+    27    27     4     2     2     3.512644E-06
+    27    27     4     2     3     4.372777E-09
+    27    27     4     3     1     2.807049E-06
+    27    27     4     3     2     2.249460E-07
+    27    27     4     3     3     2.020157E-06
+ |g(k,q)|^2 in Ha^2 for iq: 27 ik: 27 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+    27    27     6     1     1     3.100464E-05
+    27    27     6     1     2     6.417471E-05
+    27    27     6     1     3     2.295926E-06
+    27    27     6     2     1     9.446407E-07
+    27    27     6     2     2     5.275272E-07
+    27    27     6     2     3     8.719953E-05
+    27    27     6     3     1     5.596086E-05
+    27    27     6     3     2     2.159868E-05
+    27    27     6     3     3     1.107545E-06
+
+================================================================================
+== DATASET  2 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 8, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 896, }
+cutoff_energies: {ecut:  30.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: 11, }
+...
+
+ mkfilename: getwfk from: teph4vpq_2o_DS2_WFK
+
+ mkfilename: getddb from: LiF_eph_varpeq/out_DDB
+
+ mkfilename: getdvdb from: teph4vpq_1_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
+ Citation for XC functional:
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+- Reading GS states from WFK file: teph4vpq_2o_DS2_WFK
+- Reading DDB from file: LiF_eph_varpeq/out_DDB
+- Reading DVDB from file: teph4vpq_1_DVDB
+
+
+
+
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8375000  3.8375000  G(1)= -0.1302932  0.1302932  0.1302932
+ R(2)=  3.8375000  0.0000000  3.8375000  G(2)=  0.1302932 -0.1302932  0.1302932
+ R(3)=  3.8375000  3.8375000  0.0000000  G(3)=  0.1302932  0.1302932 -0.1302932
+ Unit cell volume ucvol=  1.1302517E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 4 blocks has been read.
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.065315        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.065315        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.065315        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.092224E+00   -9.389407E-16   -9.386159E-16
+         1         2   -5.076227E-17    1.092224E+00    9.392655E-16
+         1         3    5.076227E-17    9.389407E-16    1.092224E+00
+         2         1   -1.092224E+00    9.389407E-16    9.386159E-16
+         2         2    5.076227E-17   -1.092224E+00   -9.392655E-16
+         2         3   -5.076227E-17   -9.389407E-16   -1.092224E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: LiF_eph_varpeq/out_DDB
+- Cannot find quadrupole tensor in DDB file: LiF_eph_varpeq/out_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       27
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   3.33333333E-01  0.00000000E+00  0.00000000E+00
+  3)  -3.33333333E-01  0.00000000E+00  0.00000000E+00
+  4)   0.00000000E+00  3.33333333E-01  0.00000000E+00
+  5)   3.33333333E-01  3.33333333E-01  0.00000000E+00
+  6)  -3.33333333E-01  3.33333333E-01  0.00000000E+00
+  7)   0.00000000E+00 -3.33333333E-01  0.00000000E+00
+  8)   3.33333333E-01 -3.33333333E-01  0.00000000E+00
+  9)  -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+ 10)   0.00000000E+00  0.00000000E+00  3.33333333E-01
+ 11)   3.33333333E-01  0.00000000E+00  3.33333333E-01
+ 12)  -3.33333333E-01  0.00000000E+00  3.33333333E-01
+ 13)   0.00000000E+00  3.33333333E-01  3.33333333E-01
+ 14)   3.33333333E-01  3.33333333E-01  3.33333333E-01
+ 15)  -3.33333333E-01  3.33333333E-01  3.33333333E-01
+ 16)   0.00000000E+00 -3.33333333E-01  3.33333333E-01
+ 17)   3.33333333E-01 -3.33333333E-01  3.33333333E-01
+ 18)  -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+ 19)   0.00000000E+00  0.00000000E+00 -3.33333333E-01
+ 20)   3.33333333E-01  0.00000000E+00 -3.33333333E-01
+ 21)  -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+ 22)   0.00000000E+00  3.33333333E-01 -3.33333333E-01
+ 23)   3.33333333E-01  3.33333333E-01 -3.33333333E-01
+ 24)  -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+ 25)   0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+ 26)   3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+ 27)  -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.2234217387E-02 (at units)
+-                                   =           4.8878 [km/s]
+
+ Debye frequency from partial sums:     0.1801153402E-02 (Ha)
+-                                 =     0.1185102008E+02 (THz)
+-Debye temperature from partial sums:     0.5687585851E+03 (K)
+
+ Average speed of sound partial sums:     0.2234217387E-02 (at units)
+-                                   =           4.8878 [km/s]
+
+ Debye frequency from partial sums:     0.1801153402E-02 (Ha)
+-                                 =     0.1185102008E+02 (THz)
+-Debye temperature from partial sums:     0.5687585851E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4vpq_3o_DS2_PHDOS.nc
+--------------------------------------------------------------------------------
+
+ === Gstore parameters ===
+ kzone: bz
+ kfilter: none
+ nkibz: 8
+ nkbz: 64
+ glob_nk_spin: [64]
+ qzone: bz
+ nqibz: 8
+ nqbz: 64
+ glob_nq_spin: [64]
+ kptopt: 1
+ qptopt: 1
+ with_vk: 1
+
+ gqk_cplex: 2
+ gqk_bstart: 3
+ gqk_bstop: 5
+ gqk_nb: 3
+ gqk_my_npert: 6
+ gqk_my_nk: -1
+ gqk_my_nq: -1
+
+  === MPI distribution ===
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of CPUs for parallelism over k-points: 1
+ Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
+ 
+ gstore_completed: 1
+ gstore_done_qbz_spin: 64
+ gqk%nb: 3
+ gqk%glob_nq: 64
+ gqk%glob_nk: 64
+ E-PH matrix elements:
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     4     1     1     1.887083E-18
+     1     1     4     1     2     1.061234E-19
+     1     1     4     1     3     4.213120E-20
+     1     1     4     2     1     1.061234E-19
+     1     1     4     2     2     9.068487E-19
+     1     1     4     2     3     1.186030E-18
+     1     1     4     3     1     4.213120E-20
+     1     1     4     3     2     1.186030E-18
+     1     1     4     3     3     3.692817E-18
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     6     1     1     1.390373E-19
+     1     1     6     1     2     2.528168E-19
+     1     1     6     1     3     9.706093E-19
+     1     1     6     2     1     2.528168E-19
+     1     1     6     2     2     7.301823E-24
+     1     1     6     2     3     4.601545E-19
+     1     1     6     3     1     9.706093E-19
+     1     1     6     3     2     4.601545E-19
+     1     1     6     3     3     3.883247E-19
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 64 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1    64     4     1     1     1.269541E-18
+     1    64     4     1     2     4.401124E-07
+     1    64     4     1     3     1.323776E-06
+     1    64     4     2     1     4.401124E-07
+     1    64     4     2     2     1.386140E-18
+     1    64     4     2     3     1.656144E-16
+     1    64     4     3     1     1.323776E-06
+     1    64     4     3     2     1.656144E-16
+     1    64     4     3     3     4.681217E-20
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 64 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1    64     6     1     1     9.493234E-20
+     1    64     6     1     2     1.764353E-06
+     1    64     6     1     3     1.518634E-12
+     1    64     6     2     1     1.764353E-06
+     1    64     6     2     2     8.317445E-19
+     1    64     6     2     3     1.269487E-16
+     1    64     6     3     1     1.518634E-12
+     1    64     6     3     2     1.269487E-16
+     1    64     6     3     3     8.585589E-20
+ |g(k,q)|^2 in Ha^2 for iq: 64 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+    64     1     4     1     1     2.982377E-05
+    64     1     4     1     2     1.431632E-05
+    64     1     4     1     3     1.035617E-06
+    64     1     4     2     1     1.036712E-09
+    64     1     4     2     2     3.052294E-06
+    64     1     4     2     3     4.210955E-05
+    64     1     4     3     1     3.364558E-05
+    64     1     4     3     2     6.437515E-05
+    64     1     4     3     3     4.669669E-06
+ |g(k,q)|^2 in Ha^2 for iq: 64 ik: 1 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+    64     1     6     1     1     6.623853E-07
+    64     1     6     1     2     1.247714E-06
+    64     1     6     1     3     6.734387E-08
+    64     1     6     2     1     5.962298E-07
+    64     1     6     2     2     1.239352E-06
+    64     1     6     2     3     1.390384E-07
+    64     1     6     3     1     2.357498E-06
+    64     1     6     3     2     2.408679E-06
+    64     1     6     3     3     2.362200E-06
+ |g(k,q)|^2 in Ha^2 for iq: 64 ik: 64 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+    64    64     4     1     1     1.386566E-05
+    64    64     4     1     2     3.299095E-05
+    64    64     4     1     3     4.674019E-06
+    64    64     4     2     1     2.365866E-06
+    64    64     4     2     2     2.202858E-05
+    64    64     4     2     3     5.250504E-05
+    64    64     4     3     1     3.789930E-05
+    64    64     4     3     2     5.476404E-07
+    64    64     4     3     3     3.292718E-05
+ |g(k,q)|^2 in Ha^2 for iq: 64 ik: 64 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+    64    64     6     1     1     9.987052E-08
+    64    64     6     1     2     2.348186E-06
+    64    64     6     1     3     5.611412E-08
+    64    64     6     2     1     1.347810E-06
+    64    64     6     2     2     6.182848E-09
+    64    64     6     2     3     2.155357E-06
+    64    64     6     3     1     1.661450E-07
+    64    64     6     3     2     8.584110E-08
+    64    64     6     3     3     3.633013E-07
+
+================================================================================
+== DATASET  3 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 10, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 899, }
+cutoff_energies: {ecut:  30.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: 11, }
+...
+
+ mkfilename: getwfk from: teph4vpq_2o_DS3_WFK
+
+ mkfilename: getddb from: LiF_eph_varpeq/out_DDB
+
+ mkfilename: getdvdb from: teph4vpq_1_DVDB
+
+ Exchange-correlation functional for the present dataset will be:
+  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
+ Citation for XC functional:
+  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
+
+- Reading GS states from WFK file: teph4vpq_2o_DS3_WFK
+- Reading DDB from file: LiF_eph_varpeq/out_DDB
+- Reading DVDB from file: teph4vpq_1_DVDB
+
+
+
+
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8375000  3.8375000  G(1)= -0.1302932  0.1302932  0.1302932
+ R(2)=  3.8375000  0.0000000  3.8375000  G(2)=  0.1302932 -0.1302932  0.1302932
+ R(3)=  3.8375000  3.8375000  0.0000000  G(3)=  0.1302932  0.1302932 -0.1302932
+ Unit cell volume ucvol=  1.1302517E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 4 blocks has been read.
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.065315        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.065315        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -0.065315        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.092224E+00   -9.389407E-16   -9.386159E-16
+         1         2   -5.076227E-17    1.092224E+00    9.392655E-16
+         1         3    5.076227E-17    9.389407E-16    1.092224E+00
+         2         1   -1.092224E+00    9.389407E-16    9.386159E-16
+         2         2    5.076227E-17   -1.092224E+00   -9.392655E-16
+         2         3   -5.076227E-17   -9.389407E-16   -1.092224E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: LiF_eph_varpeq/out_DDB
+- Cannot find quadrupole tensor in DDB file: LiF_eph_varpeq/out_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       27
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   3.33333333E-01  0.00000000E+00  0.00000000E+00
+  3)  -3.33333333E-01  0.00000000E+00  0.00000000E+00
+  4)   0.00000000E+00  3.33333333E-01  0.00000000E+00
+  5)   3.33333333E-01  3.33333333E-01  0.00000000E+00
+  6)  -3.33333333E-01  3.33333333E-01  0.00000000E+00
+  7)   0.00000000E+00 -3.33333333E-01  0.00000000E+00
+  8)   3.33333333E-01 -3.33333333E-01  0.00000000E+00
+  9)  -3.33333333E-01 -3.33333333E-01  0.00000000E+00
+ 10)   0.00000000E+00  0.00000000E+00  3.33333333E-01
+ 11)   3.33333333E-01  0.00000000E+00  3.33333333E-01
+ 12)  -3.33333333E-01  0.00000000E+00  3.33333333E-01
+ 13)   0.00000000E+00  3.33333333E-01  3.33333333E-01
+ 14)   3.33333333E-01  3.33333333E-01  3.33333333E-01
+ 15)  -3.33333333E-01  3.33333333E-01  3.33333333E-01
+ 16)   0.00000000E+00 -3.33333333E-01  3.33333333E-01
+ 17)   3.33333333E-01 -3.33333333E-01  3.33333333E-01
+ 18)  -3.33333333E-01 -3.33333333E-01  3.33333333E-01
+ 19)   0.00000000E+00  0.00000000E+00 -3.33333333E-01
+ 20)   3.33333333E-01  0.00000000E+00 -3.33333333E-01
+ 21)  -3.33333333E-01  0.00000000E+00 -3.33333333E-01
+ 22)   0.00000000E+00  3.33333333E-01 -3.33333333E-01
+ 23)   3.33333333E-01  3.33333333E-01 -3.33333333E-01
+ 24)  -3.33333333E-01  3.33333333E-01 -3.33333333E-01
+ 25)   0.00000000E+00 -3.33333333E-01 -3.33333333E-01
+ 26)   3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+ 27)  -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.2234217387E-02 (at units)
+-                                   =           4.8878 [km/s]
+
+ Debye frequency from partial sums:     0.1801153402E-02 (Ha)
+-                                 =     0.1185102008E+02 (THz)
+-Debye temperature from partial sums:     0.5687585851E+03 (K)
+
+ Average speed of sound partial sums:     0.2234217387E-02 (at units)
+-                                   =           4.8878 [km/s]
+
+ Debye frequency from partial sums:     0.1801153402E-02 (Ha)
+-                                 =     0.1185102008E+02 (THz)
+-Debye temperature from partial sums:     0.5687585851E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4vpq_3o_DS3_PHDOS.nc
+--------------------------------------------------------------------------------
+
+ === Gstore parameters ===
+ kzone: bz
+ kfilter: none
+ nkibz: 10
+ nkbz: 125
+ glob_nk_spin: [125]
+ qzone: bz
+ nqibz: 10
+ nqbz: 125
+ glob_nq_spin: [125]
+ kptopt: 1
+ qptopt: 1
+ with_vk: 1
+
+ gqk_cplex: 2
+ gqk_bstart: 3
+ gqk_bstop: 5
+ gqk_nb: 3
+ gqk_my_npert: 6
+ gqk_my_nk: -1
+ gqk_my_nq: -1
+
+  === MPI distribution ===
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of CPUs for parallelism over k-points: 1
+ Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
+ 
+ gstore_completed: 1
+ gstore_done_qbz_spin: 125
+ gqk%nb: 3
+ gqk%glob_nq: 125
+ gqk%glob_nk: 125
+ E-PH matrix elements:
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     4     1     1     1.887083E-18
+     1     1     4     1     2     1.061234E-19
+     1     1     4     1     3     4.213120E-20
+     1     1     4     2     1     1.061234E-19
+     1     1     4     2     2     9.068487E-19
+     1     1     4     2     3     1.186030E-18
+     1     1     4     3     1     4.213120E-20
+     1     1     4     3     2     1.186030E-18
+     1     1     4     3     3     3.692817E-18
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 1 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1     1     6     1     1     1.390373E-19
+     1     1     6     1     2     2.528168E-19
+     1     1     6     1     3     9.706093E-19
+     1     1     6     2     1     2.528168E-19
+     1     1     6     2     2     7.301823E-24
+     1     1     6     2     3     4.601545E-19
+     1     1     6     3     1     9.706093E-19
+     1     1     6     3     2     4.601545E-19
+     1     1     6     3     3     3.883247E-19
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 125 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1   125     4     1     1     1.409119E-18
+     1   125     4     1     2     3.946299E-07
+     1   125     4     1     3     1.187000E-06
+     1   125     4     2     1     3.946299E-07
+     1   125     4     2     2     1.394985E-18
+     1   125     4     2     3     1.340972E-16
+     1   125     4     3     1     1.187000E-06
+     1   125     4     3     2     1.340972E-16
+     1   125     4     3     3     4.722798E-20
+ |g(k,q)|^2 in Ha^2 for iq: 1 ik: 125 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+     1   125     6     1     1     1.050033E-19
+     1   125     6     1     2     1.582043E-06
+     1   125     6     1     3     1.378220E-12
+     1   125     6     2     1     1.582043E-06
+     1   125     6     2     2     8.372807E-19
+     1   125     6     2     3     8.509998E-17
+     1   125     6     3     1     1.378220E-12
+     1   125     6     3     2     8.509998E-17
+     1   125     6     3     3     8.646705E-20
+ |g(k,q)|^2 in Ha^2 for iq: 125 ik: 1 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+   125     1     4     1     1     1.103929E-05
+   125     1     4     1     2     2.047513E-06
+   125     1     4     1     3     3.613695E-06
+   125     1     4     2     1     4.319360E-08
+   125     1     4     2     2     4.085236E-08
+   125     1     4     2     3     5.073040E-08
+   125     1     4     3     1     5.122438E-06
+   125     1     4     3     2     7.001263E-06
+   125     1     4     3     3     1.572293E-07
+ |g(k,q)|^2 in Ha^2 for iq: 125 ik: 1 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+   125     1     6     1     1     1.942357E-05
+   125     1     6     1     2     1.143083E-06
+   125     1     6     1     3     3.074398E-05
+   125     1     6     2     1     2.181144E-05
+   125     1     6     2     2     2.203688E-05
+   125     1     6     2     3     2.233980E-05
+   125     1     6     3     1     7.042868E-06
+   125     1     6     3     2     6.802283E-05
+   125     1     6     3     3     3.137934E-05
+ |g(k,q)|^2 in Ha^2 for iq: 125 ik: 125 mode: 4
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+   125   125     4     1     1     1.434705E-06
+   125   125     4     1     2     1.901380E-06
+   125   125     4     1     3     1.017364E-06
+   125   125     4     2     1     1.679023E-07
+   125   125     4     2     2     2.563437E-06
+   125   125     4     2     3     4.110854E-07
+   125   125     4     3     1     1.058963E-07
+   125   125     4     3     2     4.381606E-06
+   125   125     4     3     3     2.095600E-06
+ |g(k,q)|^2 in Ha^2 for iq: 125 ik: 125 mode: 6
+    iq    ik  mode im_kq  in_k    |g|^2 in Ha^2
+   125   125     6     1     1     9.057477E-06
+   125   125     6     1     2     2.903150E-05
+   125   125     6     1     3     1.204815E-05
+   125   125     6     2     1     9.384370E-06
+   125   125     6     2     2     2.679433E-05
+   125   125     6     2     3     6.694344E-05
+   125   125     6     3     1     3.921016E-05
+   125   125     6     3     2     3.282964E-05
+   125   125     6     3     3     6.657912E-07
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      7.6750000000E+00  7.6750000000E+00  7.6750000000E+00 Bohr
+              amu      6.94100000E+00  1.89984032E+01
+        boxcutmin      1.10000000E+00
+        ddb_ngqpt        3    3    3
+             ecut      3.00000000E+01 Hartree
+   eph_ngqpt_fine1       3    3    3
+   eph_ngqpt_fine2       4    4    4
+   eph_ngqpt_fine3       5    5    5
+         eph_task          11
+           etotal1     0.0000000000E+00
+           etotal2     0.0000000000E+00
+           etotal3     0.0000000000E+00
+            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         512
+              ixc          11
+           jdtset        1    2    3
+         kptrlatt1       3    0    0      0    3    0      0    0    3
+         kptrlatt2       4    0    0      0    4    0      0    0    4
+         kptrlatt3       5    0    0      0    5    0      0    0    5
+          kptrlen1     1.62811336E+01
+          kptrlen2     2.17081782E+01
+          kptrlen3     2.71352227E+01
+P           mkmem1          4
+P           mkmem2          8
+P           mkmem3         10
+            natom           2
+            nband1          6
+            nband2          6
+            nband3          6
+           ndtset           3
+            ngfft          16      16      16
+             nkpt1          4
+             nkpt2          8
+             nkpt3         10
+             nsym          48
+           ntypat           2
+              occ1     2.000000  2.000000  2.000000  2.000000  2.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  2.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  2.000000  0.000000
+        optdriver           7
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         225
+           strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            typat      1  2
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+            znucl        3.00000    9.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+-
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [4] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- And optionally:
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Comment: the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
+-
+- Proc.   0 individual time (sec): cpu=         92.6  wall=         92.7
+
+================================================================================
+
+ Calculation completed.
+.Delivered   3 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=         92.6  wall=         92.7

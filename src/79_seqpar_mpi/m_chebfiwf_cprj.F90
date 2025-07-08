@@ -10,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2023-2023 ABINIT group (LB)
+!! Copyright (C) 2023-2025 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,7 +88,6 @@ module m_chebfiwf_cprj
 !!
 !! INPUTS
 !!  dtset= input variables for this dataset
-!!  kinpw(npw)= kinetic energy for each plane wave (Hartree)
 !!  mpi_enreg= MPI-parallelisation information
 !!  nband= number of bands at this k point
 !!  npw= number of plane waves at this k point
@@ -106,7 +105,7 @@ module m_chebfiwf_cprj
 !!
 !! SOURCE
 
-subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
+subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid,xg_nonlop)
 
  implicit none
@@ -117,10 +116,10 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(dataset_type)              ,intent(in   ) :: dtset
  type(mpi_type)           ,target,intent(in)    :: mpi_enreg
  real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)
- real(dp)                        ,intent(in   ) :: kinpw(npw)
  real(dp)                 ,target,intent(  out) :: resid(nband)
  real(dp)                        ,intent(  out) :: enl_out(nband)
  real(dp)                 ,target,intent(  out) :: eig(nband)
+ real(dp)                 ,target,intent(in   ) :: occ(nband)
  type(xg_nonlop_t)        ,       intent(in   ) :: xg_nonlop
 
 !Local variables-------------------------------
@@ -128,9 +127,10 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(xgBlock_t) :: xgx0
  type(xg_t) :: cprj_xgx0
  type(xgBlock_t) :: xgeigen
+ type(xgBlock_t) :: xgocc
  type(xgBlock_t) :: xgresidu
  type(xgBlock_t) :: xgenl
- type(xgBlock_t) :: xg_precond,xg_kin
+ type(xgBlock_t) :: xg_kin
  type(chebfi_t) :: chebfi
 
  logical :: paw
@@ -141,8 +141,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  integer, parameter :: tim_chebfiwf2 = 2060
  double precision :: tsec(2)
 
- ! Important things for NC
- real(dp), allocatable :: pcon(:),kin(:)
+ real(dp), allocatable :: kin(:),occ_tmp(:)
 
 ! *********************************************************************
 
@@ -179,10 +178,6 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call build_kin(kin,gs_hamk%kinpw_k,gs_hamk%npw_fft_k)
  call xgBlock_map_1d(xg_kin,kin,SPACE_R,gs_hamk%npw_fft_k)
 
- !For preconditionning
- ABI_MALLOC(pcon,(npw))
- call build_pcon(pcon,kinpw,npw)
-
  ! Local variables for chebfi
  me_g0 = -1
  me_g0_fft = -1
@@ -196,30 +191,38 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
  call xgBlock_map(xgx0,cg,space,npw*nspinor,nband,l_mpi_enreg%comm_band,me_g0=me_g0)
 
- call xgBlock_map_1d(xg_precond,pcon,SPACE_R,npw)
-
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband)
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband)
 
  call xgBlock_map_1d(xgenl,enl_out,SPACE_R,nband)
 
+ ! Occupancies in chebyshev are used for convergence criteria only
+ if (dtset%nbdbuf==-101.and.nspinor==1.and.dtset%nsppol==1) then
+   ABI_MALLOC(occ_tmp,(nband))
+   occ_tmp(:) = half*occ(:)
+   call xgBlock_map_1d(xgocc,occ_tmp,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ else
+   call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ end if
+
  !call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
  !  & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_ALLOC)
  call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,comm=l_mpi_enreg%comm_band)
 
  call chebfi_init(chebfi,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
-&                 mpi_enreg%bandpp, &
-&                 dtset%nline, space,space_cprj,1, &
+&                 mpi_enreg%bandpp, dtset%nline, dtset%nbdbuf, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
+&                 dtset%chebfi_oracle,dtset%oracle_factor,dtset%oracle_min_occ,&
 &                 xg_nonlop,me_g0_fft)
 
 
  ! Run chebfi
- call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,xgenl,nspinor)
+ call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xgeigen,xgocc,xgresidu,xgenl,nspinor)
 
- ! Free preconditionning since not needed anymore
- ABI_FREE(pcon)
+ if (allocated(occ_tmp)) then
+   ABI_FREE(occ_tmp)
+ end if
  ABI_FREE(kin)
 
 ! call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
@@ -292,28 +295,6 @@ subroutine xg_getghc(X,AX)
 
 end subroutine xg_getghc
 !!***
-
-subroutine build_pcon(pcon,kinpw,npw)
-
-  implicit none
-
-  integer,intent(in) :: npw
-  real(dp),intent(in) :: kinpw(:)
-  real(dp),intent(out) :: pcon(:)
-
-  integer :: ipw
-
-  !$omp parallel do schedule(static), shared(pcon,kinpw)
-  do ipw=1,npw
-    if(kinpw(ipw)>huge(0.0_dp)*1.d-11) then
-      pcon(ipw)=0.d0
-    else
-      pcon(ipw) = (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw)))) &
-&     / (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw))) + 16*kinpw(ipw)**4)
-    end if
-  end do
-
-end subroutine build_pcon
 
 subroutine build_kin(kin,kinpw,npw)
 

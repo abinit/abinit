@@ -6,7 +6,7 @@
 !! Procedures used by AIM code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (PCasek,FF,XG)
+!!  Copyright (C) 2008-2025 ABINIT group (PCasek,FF,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,9 +28,7 @@ module m_bader
  use m_sort
  use m_hdr
  use m_splines
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_time,          only : timein
  use m_geometry,      only : metric
@@ -3226,9 +3224,7 @@ subroutine initaim(aim_dtset,znucl_batom)
  integer,parameter :: master=0
  integer :: fform0,id,ierr,ii,info,jj,kk,kod,mm,ndtmax,nn,nsa,nsb,nsc,nsym,me,nproc,npsp
  integer :: unth,comm
-#ifdef HAVE_NETCDF
  integer :: den_id
-#endif
  real(dp) :: ss,ucvol,znucl_batom
  real(dp) :: zz
  type(hdr_type) :: hdr
@@ -3259,9 +3255,9 @@ subroutine initaim(aim_dtset,znucl_batom)
 !Read ABINIT header ----------------------------------------------------------
  if(me==master)then
    if (aim_iomode == IO_MODE_ETSF) then
-     call hdr_ncread(hdr, untad, fform0)
+     call hdr%ncread(untad, fform0)
    else
-     call hdr_fort_read(hdr, untad, fform0)
+     call hdr%fort_read(untad, fform0)
    end if
  end if
  ABI_CHECK(fform0 /= 0, "hdr_read returned fform == 0")
@@ -3301,11 +3297,9 @@ subroutine initaim(aim_dtset,znucl_batom)
 
  if(me==master)then
    if (aim_iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
      ! netcdf array has shape [cplex, n1, n2, n3, nspden]), here we read only the total density.
      NCF_CHECK(nf90_inq_varid(untad, "density", den_id))
      NCF_CHECK(nf90_get_var(untad, den_id, dvl, start=[1,1,1,1], count=[1, ngfft(1), ngfft(2), ngfft(3), 1]))
-#endif
    else
      read(untad,iostat=nn) dvl(1:ngfft(1),1:ngfft(2),1:ngfft(3))
      ABI_CHECK(nn==0,"error of reading !")
@@ -5731,6 +5725,7 @@ function vnorm(vv,dir)
    ABI_ERROR('vnorm calcul')
  end if
  vnorm=sqrt(vnorm)
+
 end function vnorm
 !!***
 

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -414,6 +414,17 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !PIMD: fill in eventually the data structure pimd_param
  call pimd_init(dtset,pimd_param,is_master)
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
+
+!Set Number of degrees Of Freedom for PIMD algorithms
+ if(use_hist) then
+   hist(:)%ndof=3*dtset%natom ! Init ndof to 3N (no iatfix for PIMD)
+   if(dtset%imgmov==9.or.dtset%imgmov==10) then
+     if(pimd_param%pitransform==1.or.pimd_param%pitransform==2.or.&
+&       pimd_param%constraint==1.or.pimd_param%optcell==2) then
+       hist(:)%ndof=hist(:)%ndof-3
+     end if
+   end if
+ end if
 
  call timab(1203,2,tsec)
 
@@ -1096,7 +1107,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 &   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(6)
-   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
+   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,pimd_param,results_img)
 
  case(9, 10, 13)
 !    Path Integral Molecular Dynamics
@@ -1199,8 +1210,9 @@ end subroutine predict_copy
 !! itimimage_eff=time index in the history
 !! nimage=number of images
 !! ntimimage_stored=number of time steps stored in the history
-!!  mpi_enreg=MPI-parallelisation information
+!! mpi_enreg=MPI-parallelisation information
 !! m1geo_param=parameters for the 1geo algorithms
+!! pimd_param=datastructure that contains all the parameters necessary to Path-Integral MD
 !!
 !! OUTPUT
 !!
@@ -1226,13 +1238,14 @@ end subroutine predict_copy
 !!
 !! SOURCE
 
-subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
+subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,pimd_param,results_img)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage_eff,nimage,nimage_tot,ntimimage_stored
  type(MPI_type),intent(in) :: mpi_enreg
  type(m1geo_type),intent(inout) :: m1geo_param
+ type(pimd_type),intent(in) :: pimd_param
 !arrays
  type(results_img_type),target,intent(inout) :: results_img(nimage,ntimimage_stored)
 
@@ -1364,6 +1377,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 & m1geo_param%nerr_dilatmx,&
 & m1geo_param%npsp,&
 & m1geo_param%ntime,&
+& pimd_param,&
 & m1geo_param%rprimd_orig,&
 & m1geo_param%skipcycle,&
 & m1geo_param%usewvl)

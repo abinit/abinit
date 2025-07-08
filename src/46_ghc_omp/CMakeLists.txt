@@ -4,14 +4,15 @@
 set(46_ghc_omp_SRC
   m_ompgpu_utils.F90
   m_ompgpu_fourwf.F90
-  )
+)
 
 add_library(46_ghc_omp STATIC
-  ${46_ghc_omp_SRC})
+  ${46_ghc_omp_SRC}
+)
 
 set_target_properties(46_ghc_omp
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(46_ghc_omp
   PRIVATE
@@ -19,8 +20,8 @@ target_include_directories(46_ghc_omp
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
-  )
+  ${CMAKE_BINARY_DIR}/modules
+)
 
 target_compile_definitions(46_ghc_omp
   PRIVATE

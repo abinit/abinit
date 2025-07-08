@@ -8,7 +8,7 @@
 !!  displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2024 ABINIT group (SP, PB, XG)
+!! Copyright (C) 2014-2025 ABINIT group (SP, PB, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,11 +27,9 @@ MODULE m_eig2d
  use m_errors
  use m_abicore
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_xmpi
- use m_ebands
+ !use m_ebands
  use m_cgtools
  use m_hdr
  use m_dtset
@@ -39,14 +37,15 @@ MODULE m_eig2d
  use m_ddb_hdr
  use m_ddb
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,       only : timab
  use m_fstrings,   only : strcat
- use m_crystal,    only : crystal_init,  crystal_t
+ use m_crystal,    only : crystal_t
  use m_pawtab,     only : pawtab_type
  use m_double_grid,only : kptfine_av
  use m_mpinfo,     only : distrb2, proc_distrb_cycle
+ use m_ebands,     only : ebands_t
 
  implicit none
 
@@ -234,11 +233,9 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  type(eigr2d_t),intent(in) :: eigr2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
  character(len=200) :: temp
-
 ! *************************************************************************
 
  ! ==============================================
@@ -274,11 +271,6 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('current_q_point_weight'), wtq))
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_eigenenergies'), eigr2d%eigr2d))
 
-#else
- ABI_ERROR("ETSF-IO support is not activated. ")
-#endif
-
-
 contains
  integer function vid(vname)
    character(len=*),intent(in) :: vname
@@ -312,13 +304,10 @@ subroutine eigr2d_free(eigr2d)
 !scalars
  type(eigr2d_t),intent(inout) :: eigr2d
 ! *************************************************************************
-DBG_ENTER("COLL")
+ DBG_ENTER("COLL")
 
 !Deallocate all components of bstruct
-
- if (allocated(eigr2d%eigr2d)) then
-   ABI_FREE(eigr2d%eigr2d)
- end if
+ ABI_SFREE(eigr2d%eigr2d)
 
  DBG_EXIT("COLL")
 
@@ -438,12 +427,9 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  type(fan_t),intent(in) :: fan2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
  character(len=200) :: temp
-
-
 ! *************************************************************************
 
  ! ==============================================
@@ -482,10 +468,6 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('current_q_point_weight'), wtq))
  NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_eigenenergies_actif'), fan2d%fan2d))
 
-#else
- ABI_ERROR("netcdf support is not activated. ")
-#endif
-
 contains
  integer function vid(vname)
    character(len=*),intent(in) :: vname
@@ -521,9 +503,7 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
  type(gkk_t),intent(in) :: gkk2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: cplex,one_dim,ncerr,vid_
-
 ! *************************************************************************
 
  ! ==============================================
@@ -563,10 +543,6 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
  vid_=vid('second_derivative_eigenenergies_actif')
  NCF_CHECK(nf90_put_var(ncid, vid_, gkk2d%gkk2d))
 
-#else
- ABI_ERROR("netcdf support is not activated. ")
-#endif
-
 contains
  integer function vid(vname)
    character(len=*),intent(in) :: vname
@@ -604,9 +580,7 @@ DBG_ENTER("COLL")
 
 !Deallocate all components of bstruct
 
- if (allocated(fan2d%fan2d)) then
-   ABI_FREE(fan2d%fan2d)
- end if
+ ABI_SFREE(fan2d%fan2d)
 
  DBG_EXIT("COLL")
 
@@ -641,9 +615,7 @@ DBG_ENTER("COLL")
 
 !Deallocate all components of bstruct
 
- if (allocated(gkk2d%gkk2d)) then
-   ABI_FREE(gkk2d%gkk2d)
- end if
+ ABI_SFREE(gkk2d%gkk2d)
 
  DBG_EXIT("COLL")
 
@@ -843,9 +815,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
  if(xmpi_paral==1) then
    ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt_rbz,mband,nsppol))
    ABI_MALLOC(nband_rbz,(nkpt_rbz*nsppol))
-   if (allocated(mpi_enreg%my_kpttab)) then
-     ABI_FREE(mpi_enreg%my_kpttab)
-   end if
+   ABI_SFREE(mpi_enreg%my_kpttab)
    ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt_rbz))
 !  Assume the number of bands is the same for all k points.
    nband_rbz(:)=mband
@@ -1460,9 +1430,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  if(xmpi_paral==1) then
    ABI_MALLOC(mpi_enreg%proc_distrb,(nkpt_rbz,mband,nsppol))
    ABI_MALLOC(nband_rbz,(nkpt_rbz*nsppol))
-   if (allocated(mpi_enreg%my_kpttab)) then
-     ABI_FREE(mpi_enreg%my_kpttab)
-   end if
+   ABI_SFREE(mpi_enreg%my_kpttab)
    ABI_MALLOC(mpi_enreg%my_kpttab,(nkpt_rbz))
 !  Assume the number of bands is the same for all k points.
    nband_rbz(:)=mband
@@ -1755,13 +1723,13 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !  Initialize crystal structure for FAN.nc and GKK.nc files
    remove_inv=.false.
    if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true.
-   call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
+   call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
 &   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &   dtset%symrel,dtset%tnons,dtset%symafm)
 !  Electronic band energies.
    bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-   call ebands_init(bantot,Bands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+   call bands%init(bantot, dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &   doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
@@ -1770,36 +1738,26 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !
    if(ieig2rf == 4 ) then
 !    Output of the Fan.nc file.
-#ifdef HAVE_NETCDF
      fname = strcat(dtfil%filnam_ds(4),"_FAN.nc")
      call fan_init(fan,fan2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating FAN file")
      NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(Bands, ncid))
+     NCF_CHECK(Bands%ncwrite(ncid))
      call fan_ncwrite(fan2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("Dynamical calculation with ieig2rf 4 only work with NETCDF support.")
-     ABI_UNUSED(ncid)
-#endif
      ABI_FREE(fan)
    end if
 !  print _GKK.nc file for this perturbation. Note that the GKK file will only be produced if
 !  abinit is compiled with netcdf.
    if(ieig2rf == 5 ) then
 !    Output of the GKK.nc file.
-#ifdef HAVE_NETCDF
      fname = strcat(dtfil%filnam_ds(4),"_GKK.nc")
      call gkk_init(gkk,gkk2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom,3)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
      NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(Bands, ncid))
+     NCF_CHECK(bands%ncwrite(ncid))
      call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("Dynamical calculation with ieig2rf 5 only work with NETCDF support.")
-     ABI_UNUSED(ncid)
-#endif
      ABI_FREE(gkk)
    end if
 
@@ -1843,15 +1801,11 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    end if
  !end if  ! master
 
- if (allocated(fan)) then
-   ABI_FREE(fan)
- end if
- if (allocated(gkk)) then
-   ABI_FREE(gkk)
- end if
+ ABI_SFREE(fan)
+ ABI_SFREE(gkk)
 
  call crystal%free()
- call ebands_free(Bands)
+ call Bands%free()
  call fan_free(fan2d)
  call gkk_free(gkk2d)
 

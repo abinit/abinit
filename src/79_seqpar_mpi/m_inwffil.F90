@@ -6,7 +6,7 @@
 !!  Initialization of wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ module m_inwffil
  use m_io_tools, only : file_exists, get_unit
  use m_geometry, only : getspinrot
  use m_pptools,  only : prmat
- use m_symtk,    only : matr3inv, mati3inv
+ use m_matrix,   only : matr3inv, mati3inv
  use m_cgtools,  only : cg_envlop, pw_orthon
  use m_fftcore,  only : kpgsph, sphere, sphereboundary
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_io
@@ -204,7 +204,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  integer :: rdwr,randalg,restart,restartpaw,spaceComm,spaceComm_io,sppoldbl,sppoldbl_eff,squeeze
  logical :: out_of_core
  real(dp) :: dksqmax,ecut0
- character(len=500) :: message
+ character(len=500) :: msg
  type(hdr_type) :: hdr0
  integer :: ngfft0(18)
  integer,allocatable :: indkk0(:,:),indx(:),istwfk0(:),kg0(:,:)
@@ -227,8 +227,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 
 !Check the validity of formeig
  if (formeig/=0.and.formeig/=1) then
-   write(message,'(a,i0,a)')' formeig = ',formeig,', but the only allowed values are 0 or 1.'
-   ABI_BUG(message)
+   write(msg,'(a,i0,a)')' formeig = ',formeig,', but the only allowed values are 0 or 1.'
+   ABI_BUG(msg)
  end if
 
 !Init mpi_comm
@@ -287,18 +287,16 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    rdwr=1
    if ( ANY(wff1%iomode == (/IO_MODE_FORTRAN_MASTER, IO_MODE_FORTRAN, IO_MODE_MPI/) )) then
      call hdr_io(fform_dum,hdr0,rdwr,wff1)
-#ifdef HAVE_NETCDF
    else if (wff1%iomode == IO_MODE_ETSF) then
-     call hdr_ncread(hdr0, wff1%unwff, fform_dum)
-#endif
+     call hdr0%ncread(wff1%unwff, fform_dum)
    end if
 
    ! Handle IO Error.
    if (fform_dum == 0) then
-     write(message,"(4a)")&
-&     "hdr_io returned fform == 0 while trying to read the wavefunctions from file: ",trim(wff1%fname),ch10,&
-&     "This usually means that the file does not exist or that you don't have enough privileges to read it"
-     ABI_ERROR(message)
+     write(msg,"(4a)")&
+     "hdr_io returned fform == 0 while trying to read the wavefunctions from file: ",trim(wff1%fname),ch10,&
+     "This usually means that the file does not exist or that you don't have enough privileges to read it"
+     ABI_ERROR(msg)
    end if
 
    call wrtout(std_out,' inwffil: examining the header of disk file: '//trim(wff1%fname),'COLL')
@@ -320,9 +318,9 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !  Extended plane waves energy shift is required in order to restart from wave function.
    hdr%extfpmd_eshift=hdr0%extfpmd_eshift
 
-   write(message,'(2a)')'-inwffil : will read wavefunctions from disk file ',trim(wff1%fname)
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg,'(2a)')'-inwffil : will read wavefunctions from disk file ',trim(wff1%fname)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
 
  else
    restart=1; restartpaw=0
@@ -364,7 +362,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      call copy_mpi_enreg(mpi_enreg,mpi_enreg0)
      ABI_MALLOC(kg0,(3,mpw0*nkpt0))
      ABI_MALLOC(npwtot0,(nkpt0))
-     message="tmpfil"
+     msg="tmpfil"
      call kpgio(ecut0,dtset%exchn2n3d,gmet0,istwfk0,kg0, &
 &     kptns0,nkpt0,nband0,nkpt0,'PERS',mpi_enreg0,&
 &     mpw0,npwarr0,npwtot0,nsppol0)
@@ -446,40 +444,40 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 
 !  Check whether the accuracy requirements might be fulfilled
    if(ireadwf==0)then
-     write(message,'(9a)')&
+     write(msg,'(9a)')&
 &     'The file ',trim(wff1%fname),' cannot be used to start the ',ch10,&
 &     'present calculation. It was asked that the wavefunctions be accurate,',ch10,&
 &     'but they were not even read.',ch10,&
 &     'Action: use a wf file, with ireadwf/=0.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
    if(dksqmax>tol12)then
-     write(message, '(9a,es16.6,4a)' )&
+     write(msg, '(9a,es16.6,4a)' )&
 &     'The file ',trim(wff1%fname),' cannot be used to start the ',ch10,&
 &     'present calculation. It was asked that the wavefunctions be accurate, but',ch10,&
 &     'at least one of the k points could not be generated from a symmetrical one.',ch10,&
 &     'dksqmax=',dksqmax,ch10,&
 &     'Action: check your wf file and k point input variables',ch10,&
 &     '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
    if(dtset%nspinor/=nspinor0)then
-     write(message,'(a,a, a,a,a,a,a, a,a,2i5,a,a)')&
+     write(msg,'(a,a, a,a,a,a,a, a,a,2i5,a,a)')&
 &     'The file ',trim(wff1%fname),' cannot be used to start the ',ch10,&
 &     'present calculation. It was asked that the wavefunctions be accurate, but',ch10,&
 &     'nspinor differs in the file from the actual nspinor.',ch10,&
 &     'nspinor,nspinor0=',dtset%nspinor,nspinor0,ch10,&
 &     'Action: check your wf file, and nspinor input variables.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
    if((nsppol>nsppol0 .and. sppoldbl==1) .or. nsppol<nsppol0 ) then
-     write(message,'(a,a, a,a,a,a,a, a,a,3i5,a,a)')&
+     write(msg,'(a,a, a,a,a,a,a, a,a,3i5,a,a)')&
 &     'The file ',trim(wff1%fname),' cannot be used to start the ',ch10,&
 &     'present calculation. It was asked that the wavefunctions be accurate, but',ch10,&
 &     'the nsppol variables do not match in the file and in the actual calculation',ch10,&
 &     'nsppol,nsppol,sppoldbl=',dtset%nspinor,nspinor0,sppoldbl,ch10,&
 &     'Action: check your wf file, and nsppol input variables.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
 
 !  Now, check the number of bands
@@ -493,12 +491,12 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      end do
    end do
    if(accurate==0)then
-     write(message,'(a,a, a,a,a,a,a, a,a)')&
+     write(msg,'(a,a, a,a,a,a,a, a,a)')&
 &     'The file ',trim(wff1%fname),' cannot be used to start the ',ch10,&
 &     'present calculation. It was asked that the wavefunctions be accurate,',ch10,&
 &     'but the number of bands differ in the file and in the actual calculation.',ch10,&
 &     'Action: use a wf file with the correct characteristics.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
 
  end if
@@ -581,12 +579,12 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !  2- We transform collinear polarized WF into spinors
 !  or  spinors into collinear polarized WF
    if (nsppol2nspinor/=0.and.out_of_core.and.dtset%usewvl==0) then
-     write(message, '(7a)')&
+     write(msg, '(7a)')&
 &     'When mkmem=0 (out-of-core), the wavefunction translator is unable',ch10,&
 &     'to interchange spin-polarized wfs and spinor wfs.',ch10,&
 &     'Action: use a non-spin-polarized wf to start a spinor wf,',ch10,&
 &     '        and a non-spinor wf to start a spin-polarized wf.'
-     ABI_ERROR(message)
+     ABI_ERROR(msg)
    end if
 
 !  === Fake arguments definition for wfsinp
@@ -615,11 +613,11 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !    => print a warning for the user
 !    NOTE: in that case (nsppol=2), parallelization over spinors is not activated
 
-     write(message,'(5a)')&
+     write(msg,'(5a)')&
 &     'In the case of spinor WF read from disk and converted into',ch10,&
 &     'spin-polarized non-spinor WF, the WF translator is memory',ch10,&
 &     'consuming (a copy of the spinor WF is temporarily stored in memory).'
-     ABI_WARNING(message)
+     ABI_WARNING(msg)
 
      nsppol_eff=1;nspinor_eff=2;sppoldbl_eff=1
      ABI_MALLOC(indkk_eff,(nkpt*sppoldbl_eff,6))
@@ -1134,7 +1132,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
  integer :: nban_dp_k,nban_dp_rdk,nband_k,nband_rdk,nband_trial,nbd,nbd_max
  integer :: ncopy,nkpt_eff,nproc_max,npw0_k,npw_k,npw_ktrial
  integer :: read_cg,read_cg_disk,sender,spaceComm
- character(len=500) :: message
+ character(len=500) :: msg
  integer,allocatable :: band_index_k(:,:),icg_k(:,:),kg0_k(:,:),kg_k(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: eig0_k(:),eig_k(:),occ0_k(:),occ_k(:)
@@ -1181,8 +1179,8 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
 !Check the validity of formeig
  if(formeig/=0.and.formeig/=1)then
-   write(message, '(a,i0,a)' )' formeig=',formeig,' , but the only allowed values are 0 or 1.'
-   ABI_BUG(message)
+   write(msg, '(a,i0,a)' )' formeig=',formeig,' , but the only allowed values are 0 or 1.'
+   ABI_BUG(msg)
  end if
 
  my_nspinor =max(1,nspinor /mpi_enreg%nproc_spinor)
@@ -1265,8 +1263,8 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 
      npw0_k=npwarr0(ikpt0)
      if(ikpt0<=nkpt_eff)then
-       write(message,'(a,a,2i4)')ch10,' wfsinp: inside loop, init ikpt0,isppol0=',ikpt0,isppol0
-       call wrtout(std_out,message)
+       write(msg,'(a,a,2i4)')ch10,' wfsinp: inside loop, init ikpt0,isppol0=',ikpt0,isppol0
+       call wrtout(std_out,msg)
      end if
 
 !    Must know whether this k point is needed, and in which
@@ -1364,9 +1362,9 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
        if (localrdwf==1.or.(localrdwf==0.and.me==0)) then
 
          if(ikpt<=nkpt_eff)then
-           write(message,'(a,i6,a,i8,a,i4,a,i4)') &
+           write(msg,'(a,i6,a,i8,a,i4,a,i4)') &
 &           ' wfsinp: treating ',nband_k,' bands with npw=',npw_k,' for ikpt=',ikpt,' by node ',me
-           call wrtout(std_out,message)
+           call wrtout(std_out,msg)
          else if(ikpt==nkpt_eff+1)then
            call wrtout(std_out,' wfsinp: prtvol=0 or 1, do not print more k-points.')
          end if
@@ -1615,8 +1613,8 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #endif
 
              if(ikpt_trial/=0 .and. ikpt_trial<=nkpt_eff)then
-               write(message,'(2a,2i5)')ch10,' wfsinp: transfer to ikpt_trial,isppol_trial=',ikpt_trial,isppol_trial
-               call wrtout(std_out,message)
+               write(msg,'(2a,2i5)')ch10,' wfsinp: transfer to ikpt_trial,isppol_trial=',ikpt_trial,isppol_trial
+               call wrtout(std_out,msg)
              end if
 
              if(ikpt_trial/=0)then
@@ -1896,7 +1894,7 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
    write(msg,'(3(a,i0))')' initwf: disk file gives npw= ',npw,' nband= ',nband_disk,' for kpt number= ',ikpt
    call wrtout(std_out,msg)
  else if (ikpt==nkpt_max+1) then
-   call wrtout(std_out,' initwf: the number of similar message is sufficient... stop printing them')
+   call wrtout(std_out,' initwf: the number of similar msg is sufficient... stop printing them')
  end if
 
  ! Check the number of bands on disk file against desired number. These are not required to agree)
@@ -2081,7 +2079,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  integer :: nb_band,nbd1,nbd1_rd,nbd2,nkpt_eff,nproc2,npw1,npw2,nsp
  integer :: test_cycle,tim_rwwf
  logical :: out_of_core2
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: kg1(:,:),kg2_k(:,:),kg_dum(:,:)
  real(dp) :: kpoint(3),tsec(2)
@@ -2102,16 +2100,16 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
 
  if((nsppol1==2.and.nspinor2==2).or.(nspinor1==2.and. nsppol2==2))then
-!  This is not yet possible. See later for a message about where to make the needed modifs.
+!  This is not yet possible. See later for a msg about where to make the needed modifs.
 !  EDIT MT 20110707: these modifs are no more needed as they are now done in inwffil
-   write(message, '(5a,i2,a,i2,2a,i2,a,i2,4a)' ) &
+   write(msg, '(5a,i2,a,i2,2a,i2,a,i2,4a)' ) &
 &   'The wavefunction translator is (still) unable to interchange',ch10,&
 &   'spin-polarized wfs and spinor wfs. However,',ch10,&
 &   'the input  variables are nsppol1=',nsppol1,', and nspinor1=',nspinor1,ch10,&
 &   'the output variables are nsppol2=',nsppol2,', and nspinor2=',nspinor2,ch10,&
 &   'Action: use a non-spin-polarized wf to start a spinor wf,',ch10,&
 &   '        and a non-spinor wf to start a spin-polarized wf.'
-   ABI_ERROR(message)
+   ABI_ERROR(msg)
  end if
 
  my_nspinor1=max(1,nspinor1/mpi_enreg1%nproc_spinor)
@@ -2121,14 +2119,14 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  if(mkmem1==0 .and. out_of_core2)then
    mband_rd=min(mband1,(mband2/nspinor2)*nspinor1)
    if(mcg<mpw1*my_nspinor1*mband_rd)then
-     write(message,'(2(a,i0))')' The dimension mcg= ',mcg,', should be larger than mband_rd= ',mband_rd
-     ABI_BUG(message)
+     write(msg,'(2(a,i0))')' The dimension mcg= ',mcg,', should be larger than mband_rd= ',mband_rd
+     ABI_BUG(msg)
    end if
    if(mcg<mband2*mpw2*my_nspinor2)then
-     write(message,'(a,i0,a,a,a,i0,a,i0,a,i2)' )&
+     write(msg,'(a,i0,a,a,a,i0,a,i0,a,i2)' )&
 &     'The dimension mcg= ',mcg,', should be larger than',ch10,&
 &     'the product of mband2= ',mband2,', mpw2= ',mpw2,', and nspinor2= ',my_nspinor2
-     ABI_BUG(message)
+     ABI_BUG(msg)
    end if
  end if
 
@@ -2184,9 +2182,9 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
 !      Announce the treatment of k point ikpt
        if(ikpt2<=nkpt_eff)then
-!        This message might be overwritten in parallel
-         write(message, '(a,i6,a,i8,a,i4)' )'P newkpt: treating ',nbd2,' bands with npw=',npw2,' for ikpt=',ikpt2
-!        This message might be overwritten in parallel
+!        This msg might be overwritten in parallel
+         write(msg, '(a,i6,a,i8,a,i4)' )'P newkpt: treating ',nbd2,' bands with npw=',npw2,' for ikpt=',ikpt2
+!        This msg might be overwritten in parallel
          if(mpi_enreg2%paralbd==1)then
            do iproc=0,nproc2-1
              nb_band=0
@@ -2194,18 +2192,18 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
                if(mpi_enreg2%proc_distrb(ikpt2,iband,isppol2) == iproc)nb_band=nb_band+1
              end do
              if(nb_band/=0)then
-               write(message, '(a,i6,a,i8,a,i4,a,i4)' ) &
+               write(msg, '(a,i6,a,i8,a,i4,a,i4)' ) &
 &               'P newkpt: treating ',nb_band,' bands with npw=',npw2,' for ikpt=',ikpt2,' by node ',iproc
              end if
            end do
          end if
          if(mpi_enreg2%paralbd==0) then
-           write(message, '(a,i6,a,i8,a,i4,a,i4)' )&
+           write(msg, '(a,i6,a,i8,a,i4,a,i4)' )&
 &           'P newkpt: treating ',nbd2,' bands with npw=',npw2,&
 &           ' for ikpt=',ikpt2,' by node ',mpi_enreg2%proc_distrb(ikpt2,1,isppol2)
          end if
          if(prtvol>0)then
-           call wrtout(iout,message,'COLL')
+           call wrtout(iout,msg,'COLL')
          end if
        end if
 
@@ -2267,15 +2265,15 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
      if(restart==2)then
        if(ikpt2<=nkpt_eff)then
-         write(message,'(a,i4,i8,a,i4,i8)')'- newkpt: read input wf with ikpt,npw=',ikpt1,npw1,', make ikpt,npw=',ikpt2,npw2
-         call wrtout(std_out,message)
+         write(msg,'(a,i4,i8,a,i4,i8)')'- newkpt: read input wf with ikpt,npw=',ikpt1,npw1,', make ikpt,npw=',ikpt2,npw2
+         call wrtout(std_out,msg)
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
-           call wrtout(iout,message)
+           call wrtout(iout,msg)
          end if
        else if(ikpt2==nkpt_eff+1)then
          call wrtout(std_out, '- newkpt: prtvol=0 or 1, do not print more k-points.')
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
-           call wrtout(iout,message)
+           call wrtout(iout,msg)
          end if
        end if
      end if
@@ -2288,8 +2286,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 !    print warning and reset new wf file nband2 to only allowed number
      if ( nbd2/nspinor2 > nbd1/nspinor1 .and. fill==0) then
        if(ikpt2<=nkpt_eff)then
-         write(message, '(a,i8,a,i8,a,i8)' )' newkpt: nband2=',nbd2,' < nband1=',nbd1,' => reset nband2 to ',nbd1
-         call wrtout(std_out,message)
+         write(msg, '(a,i8,a,i8,a,i8)' )' newkpt: nband2=',nbd2,' < nband1=',nbd1,' => reset nband2 to ',nbd1
+         call wrtout(std_out,msg)
        end if
        nbd2=nbd1
      end if
@@ -2300,11 +2298,11 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
        ABI_ERROR("mkmem1 == 0 has been removed.")
 
        if(debug>0)then
-         write(message, '(a,a,a,a,i5,a,i5,a,a,i5,a,i5)' ) ch10,&
+         write(msg, '(a,a,a,a,i5,a,i5,a,a,i5,a,i5)' ) ch10,&
          ' newkpt: about to call randac',ch10,&
          '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
          '  and isppol1=',isppol1,', isppol2=',isppol2
-         call wrtout(std_out,message)
+         call wrtout(std_out,msg)
        end if
 
        !call randac(debug,headform1,ikptsp_prev,ikpt1,isppol1,nband1,nkpt1,nsppol1,wffinp)
@@ -2339,10 +2337,10 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
      if(mkmem1/=0 .and. ireadwf==1)then
 !      Checks that nbd1 and nbd1_rd are equal if eig and occ are input
        if(nbd1/=nbd1_rd)then
-         write(message,'(a,a,a,i6,a,i6)')&
+         write(msg,'(a,a,a,i6,a,i6)')&
 &         'When mkmem1/=0, one must have nbd1=nbd1_rd, while',ch10,&
 &         'nbd1 = ',nbd1,', and nbd1_rd = ',nbd1_rd
-         ABI_BUG(message)
+         ABI_BUG(msg)
        end if
 !      Need to put eigenvalues in eig_k, same for occ
 !      Note use of band_index, since it is assumed that eigen and occ
@@ -2363,10 +2361,10 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
      if(mkmem1==0 .and. ireadwf==1)then
 
        if (debug>0 .and. restart==2) then
-         write(message,'(a,i5,a,a,i5,a,i5,a)' ) &
+         write(msg,'(a,i5,a,a,i5,a,i5,a)' ) &
 &         ' newkpt: about to call rwwf with ikpt1=',ikpt1,ch10,&
 &         ' and nband(ikpt1)=',nband1(ikpt1),' nbd2=',nbd2,'.'
-         call wrtout(std_out,message)
+         call wrtout(std_out,msg)
        end if
 
        if(mpi_enreg1%paralbd==0)tim_rwwf=21
@@ -2669,7 +2667,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer :: nbremn,npwtot,nspinor_index,nspinor1_this_proc,nspinor2_this_proc
  integer :: order,ortalgo
  real(dp) :: ai,ar,arg,bi,br,eig_tmp,spinrots,spinrotx,spinroty,spinrotz
- character(len=500) :: message
+ character(len=500) :: msg
  integer, parameter :: int64 = selected_int_kind(18)
  integer(KIND=int64) :: seed
  !arrays
@@ -2687,31 +2685,31 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  if(.false.)write(std_out,*)occ_k1 ! just to keep occ_k1 as an argument before resolving the issue of its transfer
 
  if(nspinor1/=1 .and. nspinor1/=2)then
-   write(message,'(a,i0)')'The argument nspinor1 must be 1 or 2, while it is nspinor1 = ',nspinor1
-   ABI_BUG(message)
+   write(msg,'(a,i0)')'The argument nspinor1 must be 1 or 2, while it is nspinor1 = ',nspinor1
+   ABI_BUG(msg)
  end if
 
  if(nspinor2/=1 .and. nspinor2/=2)then
-   write(message,'(a,i0)')' The argument nspinor2 must be 1 or 2, while it is nspinor2=',nspinor2
-   ABI_BUG(message)
+   write(msg,'(a,i0)')' The argument nspinor2 must be 1 or 2, while it is nspinor2=',nspinor2
+   ABI_BUG(msg)
  end if
 
  if(nspinor1==2 .and. mod(nbd1,2)/=0)then
-   write(message,'(a,i0)')' When nspinor1 is 2, nbd1 must be even, while it is nbd1 = ',nbd1
-   ABI_BUG(message)
+   write(msg,'(a,i0)')' When nspinor1 is 2, nbd1 must be even, while it is nbd1 = ',nbd1
+   ABI_BUG(msg)
  end if
 
  if(nspinor2==2 .and. mod(nbd2,2)/=0)then
-   write(message,'(a,i0)')'  When nspinor2 is 2, nbd2 must be even, while it is nbd2=',nbd2
-   ABI_BUG(message)
+   write(msg,'(a,i0)')'  When nspinor2 is 2, nbd2 must be even, while it is nbd2=',nbd2
+   ABI_BUG(msg)
  end if
 
  if(nbd1/nspinor1>nbd2/nspinor2)then
-   write(message, '(3a,2i6,3a,2i6,a)' )&
+   write(msg, '(3a,2i6,3a,2i6,a)' )&
 &   'In wfconv, the nbd/nspinor ratio cannot decrease. However,',ch10,&
 &   'the initial quantities are nbd1,nspinor1=',nbd1,nspinor1,', and',ch10,&
 &   'the requested final quantities are nbd2,nspinor2=',nbd2,nspinor2,'.'
-   ABI_BUG(message)
+   ABI_BUG(msg)
  end if
 
  ngfft_now(1:3)=ngfft1(1:3)
@@ -2848,7 +2846,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
      call kpgsph (ecut1,exchn2n3d,gmet1,0,ikpt1,istwf1_k,kg1,kpoint1,1,mpi_enreg1,mpw1,npw1)
      if (debug>0) then
-       write(message, '(a,f8.3,a,a,3f8.5,a,a,i3,a,3(a,3es16.8,a),a,3i4,a,i5,a)' )&
+       write(msg, '(a,f8.3,a,a,3f8.5,a,a,i3,a,3(a,3es16.8,a),a,3i4,a,i5,a)' )&
 &       ' wfconv: called kpgsph with ecut1=',ecut1,ch10,&
 &       '  kpt1=',kptns1(1:3,ikpt1),ch10,&
 &       '  istwf1_k=',istwf1_k,ch10,&
@@ -2856,7 +2854,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 &       '         ',gmet1(1:3,2),ch10,&
 &       '         ',gmet1(1:3,3),ch10,&
 &       '  ngfft=',ngfft_now(1:3),' giving npw1=',npw1,'.'
-       call wrtout(std_out,message)
+       call wrtout(std_out,msg)
      end if
      ikpt10 = ikpt1
      istwf10_k=istwf1_k
@@ -3185,8 +3183,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
      call cg_envlop(cg2,ecut2,gmet2,icgmod,kg2,kpoint2_sph,mcg2,nbremn,npw2,nspinor2_this_proc)
 
      if(ikpt2<=nkpt_max)then
-       write(message,'(3(a,i6))')' wfconv:',nbremn,' bands initialized randomly with npw=',npw2,', for ikpt=',ikpt2
-       call wrtout(std_out,message)
+       write(msg,'(3(a,i6))')' wfconv:',nbremn,' bands initialized randomly with npw=',npw2,', for ikpt=',ikpt2
+       call wrtout(std_out,msg)
      end if
 
    else if(formeig==1)then
@@ -3206,8 +3204,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
      if(ikpt2<=nkpt_max)then
        nbremn=nbd2-nbd1
-       write(message,'(3(a,i0))')' wfconv:',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
-       call wrtout(std_out,message)
+       write(msg,'(3(a,i0))')' wfconv:',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
+       call wrtout(std_out,msg)
      end if
 
    end if ! End of initialisation to 0

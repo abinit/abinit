@@ -7,7 +7,7 @@
 !!  character tables of the 32 point groups.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (MG)
+!! Copyright (C) 2010-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,8 @@ module m_ptgroups
  use m_io_tools,       only : open_file
  use m_fstrings,       only : sjoin
  use m_numeric_tools,  only : get_trace, cmplx_sphcart
- use m_symtk,          only : mati3inv, sg_multable
+ use m_matrix,         only : mati3inv
+ use m_symtk,          only : sg_multable
 
 ! Import group tables
  use m_ptg_C1
@@ -111,9 +112,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps)
-
- implicit none
+subroutine get_point_group(ptg_name, nsym, nclass, sym, class_ids, class_names, Irreps)
 
 !Arguments ------------------------------------
 !scalars
@@ -128,7 +127,6 @@ subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps
 !scalars
  integer :: irp,isym
  !character(len=500) :: msg
-
 ! *************************************************************************
 
  SELECT CASE (TRIM(ADJUSTL(ptg_name)))
@@ -242,9 +240,7 @@ end subroutine get_point_group
 !!
 !! SOURCE
 
-subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
-
- implicit none
+subroutine get_classes(nsym, sym, nclass, nelements, elements_idx)
 
 !Arguments ------------------------------------
 !scalars
@@ -259,14 +255,11 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
  integer :: isym,jsym,ksym,identity_idx,ierr
  character(len=500) :: msg
 !arrays
- integer :: cjg(3,3),ss(3,3),xx(3,3),xxm1(3,3),test(3,3)
- integer :: identity(3,3)
- integer :: dummy_symafm(nsym)
+ integer :: cjg(3,3),ss(3,3),xx(3,3),xxm1(3,3),test(3,3), identity(3,3), dummy_symafm(nsym)
  logical :: found(nsym),found_identity
-
 !************************************************************************
 
- ! === Check if identity is present in the first position ===
+ ! Check if identity is present in the first position
  identity=RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/)); found_identity=.FALSE.
 
  do isym=1,nsym
@@ -276,14 +269,14 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
  end do
  if (.not.found_identity.or.identity_idx/=1) then
   write(msg,'(3a)')&
-&  'Either identity is not present or it is not the first operation ',ch10,&
-&  'check set of symmetry operations '
+    'Either identity is not present or it is not the first operation ',ch10,&
+    'check set of symmetry operations '
   ABI_ERROR(msg)
  end if
-  
+
  dummy_symafm=1
- call sg_multable(nsym,dummy_symafm,sym,ierr)
- ABI_CHECK(ierr==0,"Error in group closure")
+ call sg_multable(nsym, dummy_symafm, sym, ierr)
+ ABI_CHECK(ierr == 0, "Error in group closure")
 
  nclass=0; nelements(:)=0; elements_idx(:,:)=0; found(:)=.FALSE.
  do isym=1,nsym
@@ -330,8 +323,6 @@ end subroutine get_classes
 
 subroutine show_character_tables(unit)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit
@@ -342,7 +333,6 @@ subroutine show_character_tables(unit)
  type(point_group_t) :: Ptg
 !arrays
  !integer,allocatable :: elements_idx(:,:),nelements(:)
-
 ! *********************************************************************
 
  my_unt = std_out; if (PRESENT(unit)) my_unt=unit
@@ -373,24 +363,14 @@ end subroutine show_character_tables
 
 subroutine point_group_free(Ptg)
 
- implicit none
-
 !Arguments ------------------------------------
- type(point_group_t),intent(inout) :: Ptg
-
-!Local variables-------------------------------
+ class(point_group_t),intent(inout) :: Ptg
 ! *********************************************************************
 
  !@point_group_t
- if (allocated(Ptg%class_ids))   then
-   ABI_FREE(Ptg%class_ids)
- end if
- if (allocated(Ptg%sym)) then
-   ABI_FREE(Ptg%sym)
- end if
- if (allocated(Ptg%class_names)) then
-   ABI_FREE(Ptg%class_names)
- end if
+ ABI_SFREE(Ptg%class_ids)
+ ABI_SFREE(Ptg%sym)
+ ABI_SFREE(Ptg%class_names)
 
  if (allocated(Ptg%Irreps)) then
    call irrep_free(Ptg%Irreps)
@@ -417,15 +397,11 @@ end subroutine point_group_free
 !!
 !! SOURCE
 
-
-subroutine point_group_init(Ptg,ptg_name)
-
- implicit none
+subroutine point_group_init(Ptg, ptg_name)
 
 !Arguments ------------------------------------
-!scalars
+ class(point_group_t),intent(inout) :: Ptg
  character(len=5),intent(in) :: ptg_name
- type(point_group_t),intent(inout) :: Ptg
 ! *********************************************************************
 
  !@point_group_t
@@ -451,16 +427,14 @@ end subroutine point_group_init
 !!
 !! SOURCE
 
-subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
-
- implicit none
+subroutine point_group_print(Ptg, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
+ class(point_group_t),target,intent(in) :: Ptg
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(point_group_t),target,intent(in) :: Ptg
 
 !Local variables-------------------------------
  integer :: my_unt,my_prtvol,irp,icls,sidx
@@ -536,13 +510,11 @@ end subroutine point_group_print
 
 subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
+ class(point_group_t),intent(in) :: Ptg
  integer,intent(out) :: sym_idx,cls_idx
  integer,optional,intent(out) :: ierr
- type(point_group_t),intent(in) :: Ptg
 !arrays
  integer,intent(in) :: asym(3,3)
 
@@ -550,7 +522,6 @@ subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
 !scalars
  integer :: isym,icls
  character(len=500) :: msg
-
 ! *********************************************************************
 
  sym_idx = 0
@@ -564,7 +535,7 @@ subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
  cls_idx = 0
  do icls=1,Ptg%nclass
    if (sym_idx >= Ptg%class_ids(1,icls) .and. &
-&      sym_idx <= Ptg%class_ids(2,icls) ) then
+       sym_idx <= Ptg%class_ids(2,icls) ) then
      cls_idx = icls
      EXIT
    end if
@@ -573,8 +544,8 @@ subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
  if (PRESENT(ierr)) ierr=0
  if (sym_idx==0 .or. cls_idx==0) then
    write(msg,'(a,9(i0,1x),3a,i1,a,i1)')&
-&    " Symmetry: ",asym," not found in point group table ",ch10,&
-&    " sym_idx= ",sym_idx, " and cls_idx= ",cls_idx
+     " Symmetry: ",asym," not found in point group table ",ch10,&
+     " sym_idx= ",sym_idx, " and cls_idx= ",cls_idx
    if (PRESENT(ierr)) then
      ierr=1
      ABI_WARNING(msg)
@@ -605,9 +576,7 @@ end subroutine locate_sym
 !!
 !! SOURCE
 
-subroutine mult_table(nsym,sym,mtab)
-
- implicit none
+subroutine mult_table(nsym, sym, mtab)
 
 !Arguments ------------------------------------
 !scalars
@@ -622,7 +591,6 @@ subroutine mult_table(nsym,sym,mtab)
  !character(len=500) :: msg
 !arrays
  integer :: prod_ij(3,3),found(nsym)
-
 !************************************************************************
 
  do jsym=1,nsym
@@ -638,7 +606,7 @@ subroutine mult_table(nsym,sym,mtab)
      end do
    end do ! jsym
 
-   if ( ANY(found /= 1)) then
+   if (any(found /= 1)) then
      write(std_out,*)"found = ",found
      ABI_ERROR("Input elements do not form a group")
    end if
@@ -669,9 +637,7 @@ end subroutine mult_table
 !!
 !! SOURCE
 
-subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
-
- implicit none
+subroutine groupk_from_file(Lgrps, spgroup, fname, nkpt, klist, ierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -696,7 +662,6 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
  real(dp) :: kpt(3)
  character(len=10),allocatable :: kname(:)
  type(irrep_t),pointer :: OneIrr
-
 ! *************************************************************************
 
  ierr=0
@@ -714,28 +679,25 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
  read(unt,*,ERR=10) basis
 
  if (spgroup/=ita_spgroup) then
-   write(msg,'(a,2i0)')&
-&   " Input space group does not match with the value reported on file: ",spgroup,ita_spgroup
+   write(msg,'(a,2i0)')" Input space group does not match with the value reported on file: ",spgroup,ita_spgroup
    ABI_ERROR(msg)
  end if
 
  if (basis /= "b") then
-   msg=" Wrong value for basis: "//TRIM(basis)
-   ABI_ERROR(msg)
+   ABI_ERROR(" Wrong value for basis: "//TRIM(basis))
  end if
 
- ! * Read the list of the k-points.
+ ! Read the list of the k-points.
  read(unt,*,ERR=10) nkpt
 
  ABI_MALLOC(Lgrps,(nkpt))
-
  ABI_MALLOC(klist,(3,nkpt))
  ABI_MALLOC(kname,(nkpt))
  do ik=1,nkpt
    read(unt,*,ERR=10) klist(:,ik), kname(ik)
  end do
 
- ! * Read tables for each k-point
+ ! Read tables for each k-point
  do ik=1,nkpt
 
    read(unt,*,ERR=10) kpt
@@ -765,8 +727,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
      do isym=1,nelements(icls)
        now = elements_idx(isym,icls)
        if ( (now-prev) /= 1 ) then
-         write(msg,"(2(a,i0))")&
-&          " Symmetries on file are not ordered in classes. icls= ",icls,", isym= ",isym
+         write(msg,"(2(a,i0))")" Symmetries on file are not ordered in classes. icls= ",icls,", isym= ",isym
          ABI_ERROR(msg)
        else
          prev = now
@@ -789,7 +750,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
    ABI_CHECK(Gk%nclass == nirreps_k,"Gk%nclass /= nirreps_k")
 
    !$$ allocate(Gk%class_names(Gk%nclass))
-   ABI_MALLOC(Gk%Irreps,(nirreps_k))
+   ABI_MALLOC(Gk%Irreps, (nirreps_k))
 
    do irp=1,nirreps_k
      OneIrr =>  Gk%Irreps(irp)
@@ -808,7 +769,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
 
  close(unt)
  RETURN
- !
+
  ! Handle IO-error.
 10 ierr=1
  close(unt)
@@ -830,20 +791,12 @@ end subroutine groupk_from_file
 
 subroutine irrep_free_0d(Irrep)
 
- implicit none
-
 !Arguments ------------------------------------
- type(irrep_t),intent(inout) :: Irrep
-
+ class(irrep_t),intent(inout) :: Irrep
 ! *********************************************************************
 
- !@irrep_t
- if (allocated(Irrep%trace))  then
-   ABI_FREE(Irrep%trace)
- end if
- if (allocated(Irrep%mat))  then
-   ABI_FREE(Irrep%mat)
- end if
+ ABI_SFREE(Irrep%trace)
+ ABI_SFREE(Irrep%mat)
 
 end subroutine irrep_free_0d
 !!***
@@ -861,10 +814,8 @@ end subroutine irrep_free_0d
 
 subroutine irrep_free_1d(Irrep)
 
- implicit none
-
 !Arguments ------------------------------------
- type(irrep_t),intent(inout) :: Irrep(:)
+ class(irrep_t),intent(inout) :: Irrep(:)
 
 !Local variables-------------------------------
  integer :: irp
@@ -889,19 +840,16 @@ end subroutine irrep_free_1d
 !!
 !! SOURCE
 
-subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
-
- implicit none
+subroutine copy_irrep(In_irreps, Out_irreps, phase_fact)
 
 !Arguments ------------------------------------
- type(irrep_t),intent(in) :: In_irreps(:)
- type(irrep_t),intent(inout) :: Out_irreps(:)
+ class(irrep_t),intent(in) :: In_irreps(:)
+ class(irrep_t),intent(inout) :: Out_irreps(:)
  complex(dpc),optional,intent(in) :: phase_fact(:)
 
 !Local variables-------------------------------
 !scalars
  integer :: irp,dim1,dim2,in_nsym,in_dim,isym
- character(len=500) :: msg
 !arrays
  complex(dpc) :: my_phase_fact(In_irreps(1)%nsym)
 ! *********************************************************************
@@ -909,17 +857,15 @@ subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
  !@irrep_t
  dim1 = SIZE( In_irreps)
  dim2 = SIZE(Out_irreps)
- if (dim1/=dim2) then
-   msg = " irreps to be copied have different dimension"
-   ABI_ERROR(msg)
+ if (dim1 /= dim2) then
+   ABI_ERROR("irreps to be copied have different dimension")
  end if
 
  my_phase_fact=cone
  if (PRESENT(phase_fact)) then
    my_phase_fact=phase_fact
    if (SIZE(phase_fact) /= In_irreps(1)%nsym) then
-     msg = " irreps to be copied have different dimension"
-     ABI_ERROR(msg)
+     ABI_ERROR("irreps to be copied have different dimension")
    end if
  end if
 
@@ -956,33 +902,28 @@ end subroutine copy_irrep
 !!
 !! SOURCE
 
-subroutine init_irrep(Irrep,nsym,irr_dim,irr_name)
-
- implicit none
+subroutine init_irrep(Irrep, nsym, irr_dim, irr_name)
 
 !Arguments ------------------------------------
 !scalars
+ class(irrep_t),intent(inout) :: Irrep
  integer,intent(in) :: nsym
 !arrays
  integer,intent(in) :: irr_dim
  character(len=*),optional,intent(in) :: irr_name
- type(irrep_t),intent(inout) :: Irrep
 
 !Local variables-------------------------------
  !character(len=500) :: msg
 ! *********************************************************************
 
  !@irrep_t
- Irrep%dim      = irr_dim
- Irrep%nsym     = nsym
- Irrep%name     = "???"
- if (PRESENT(irr_name)) Irrep%name = irr_name
+ Irrep%dim  = irr_dim
+ Irrep%nsym = nsym
+ Irrep%name = "???"
+ if (present(irr_name)) Irrep%name = irr_name
 
- ABI_MALLOC(Irrep%mat,(irr_dim,irr_dim,nsym))
- Irrep%mat = czero
-
- ABI_MALLOC(Irrep%trace,(nsym))
- Irrep%trace = czero
+ ABI_CALLOC(Irrep%mat,(irr_dim,irr_dim,nsym))
+ ABI_CALLOC(Irrep%trace,(nsym))
 
 end subroutine init_irrep
 !!***
@@ -1003,13 +944,11 @@ end subroutine init_irrep
 
 function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
+ class(irrep_t),intent(in) :: Irrep1,Irrep2
  integer,intent(in) :: ii,jj,kk,ll
 !arrays
- type(irrep_t),intent(in) :: Irrep1,Irrep2
  complex(dpc) :: res
 
 !Local variables-------------------------------
@@ -1031,8 +970,7 @@ function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
    ierr=ierr+1
  end if
 
- if (ii>Irrep2%dim .or. jj>Irrep2%dim .or. &
-&    kk>Irrep1%dim .or. ll>Irrep1%dim) then
+ if (ii > Irrep2%dim .or. jj > Irrep2%dim .or. kk > Irrep1%dim .or. ll > Irrep1%dim) then
    ABI_WARNING("Wrong indices")
    write(std_out,*)ii,Irrep2%dim,jj,Irrep2%dim,kk>Irrep1%dim,ll,Irrep1%dim
    ierr=ierr+1
@@ -1054,17 +992,14 @@ end function sum_irreps
 !!  groupk_free
 !!
 !! FUNCTION
-!!  Deallocate all memory allocate in the group_k_t.
+!!  Deallocate dynamic memory.
 !!
 !! SOURCE
 
 subroutine groupk_free(Gk)
 
- implicit none
-
 !Arguments ------------------------------------
- type(group_k_t),intent(inout) :: Gk
-
+ class(group_k_t),intent(inout) :: Gk
 ! *************************************************************************
 
 ! integer

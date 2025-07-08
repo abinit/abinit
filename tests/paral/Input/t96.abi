@@ -25,7 +25,6 @@ ntime  = 50
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = eos_gnu_13.2_mpich
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10

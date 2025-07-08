@@ -7,7 +7,7 @@
 !!  or to perform the FFT of the wavefunctions when the orbitals are distributed in linalg mode (paral_kgb = 1).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (FBottin,MT,GZ,MD,FDahm)
+!!  Copyright (C) 1998-2025 ABINIT group (FBottin,MT,GZ,MD,FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -419,7 +419,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    call timab(637,3,tsec)
    call multithreaded_getghc(cpopt,ewavef_alltoall_sym,cwaveprj,gwavef_alltoall_sym,swavef_alltoall_sym,gs_hamk,&
 &   gvnlxc_alltoall_sym,lambda,mpi_enreg,bandpp_sym,prtvol,sij_opt,tim_getghc,1,&
-&   kg_fft_k=kg_k_gather_sym)
+&   kg_fft_k=kg_k_gather_sym,filter_dilatmx_loc=.false.)
    call timab(637,2,tsec)
 
    call timab(633,3,tsec)
@@ -1080,7 +1080,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  real(dp),allocatable :: cwavef_alltoall2(:,:)
  real(dp),allocatable :: cwavef_fft(:,:), cwavef_fft_tr(:,:)
  real(dp),allocatable :: weight_t(:),weight1_t(:),weight2_t(:)
- real(dp),pointer :: ewavef_alltoall_sym(:,:),wfraug_ptr(:,:,:,:)
+ real(dp),pointer :: ewavef_alltoall_sym(:,:),ewavef_alltoall_sym_work(:,:),wfraug_ptr(:,:,:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  ! this buffer is necessary to avoid mixing "managed memory" buffer with "regular memory" buffer in MPI calls
@@ -1322,7 +1322,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        call ompgpu_fourwf    (1,rhoaug,&
 &       cwavef_alltoall1,&
 &       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,bandpp,&
+&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg%me_g0_fft,bandpp,&
 &       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,&
 &       weight_t,weight_t)
 #endif
@@ -1446,7 +1446,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        call ompgpu_fourwf(1,rhoaug,&
 &       ewavef_alltoall_sym,&
 &       dummy,wfraug,gbound_,gbound_,&
-&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,bandpp_sym,&
+&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg%me_g0_fft,bandpp_sym,&
 &       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,&
 &       weight1_t,weight2_t)
 #endif
@@ -1472,8 +1472,9 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        end if
        weight1 = occ_k(ind_occ1)*wtk/ucvol
        weight2 = occ_k(ind_occ2)*wtk/ucvol
+       ewavef_alltoall_sym_work => ewavef_alltoall_sym(:,(ndatarecv_tot*(iibandpp-1))+1:(ndatarecv_tot*iibandpp))
        call fourwf(1,rhoaug,&
-&       ewavef_alltoall_sym(:,(ndatarecv_tot*(iibandpp-1))+1:(ndatarecv_tot*iibandpp)),&
+&       ewavef_alltoall_sym_work,&
 &       dummy,wfraug_ptr,gbound_,gbound_,&
 &       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,1,&
 &       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,&

@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel16.0 computer) 
+.Version 9.11.2 of ABINIT
+.(MPI version, prepared for a x86_64_linux_intel16.0 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,12 +16,12 @@
 
 .Starting date : Mon 17 Jul 2023.
 - ( at 11h01 )
-  
+
 - input  file    -> /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/TestBot_MPI1/bigdft_t14/t14.abi
 - output file    -> t14.abo
 - root for input  files -> t14i
 - root for output files -> t14o
- 
+
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1 (WVL).
@@ -30,15 +30,15 @@
       natom =      2     ntypat =      2    nstates =     11     nsppol =      1
 ================================================================================
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -84,16 +84,16 @@
              xred      4.0586591092E-01  5.0000000000E-01  5.0000000000E-01
                        5.9413408908E-01  5.0000000000E-01  5.0000000000E-01
             znucl       22.00000   11.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 -    --> not optimal distribution: autoparal keyword recommended in input file <--
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -107,20 +107,20 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= 25.0000000  0.0000000  0.0000000  G(1)=  0.0400000  0.0000000  0.0000000
  R(2)=  0.0000000 25.0000000  0.0000000  G(2)=  0.0000000  0.0400000  0.0000000
  R(3)=  0.0000000  0.0000000 25.0000000  G(3)=  0.0000000  0.0000000  0.0400000
  Unit cell volume ucvol=  1.5625000E+04 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  54  54  54
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.14587
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/22ti.12.khgh
-- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/22ti.12.khgh
+- pspini: atom type   1  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Pspdir/22ti.12.khgh
+- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Pspdir/22ti.12.khgh
 - Goedecker pseudopotential for Ti
 - 22.00000  12.00000     70301                znucl, zion, pspdat
    10   11    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -146,11 +146,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
              k33 =                           0.0000000
   radii_cf(1)=   1.7297725; radii_cf(2)=   0.2425314; rad_cov=   0.5629513
 -  Local part computed in reciprocal space.
- 
+
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   16.60045163
          --- l  ekb(1:nproj) -->
@@ -158,9 +158,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
              1   -0.100584    0.010589
              2   -0.006735
  pspatm: atomic psp has been read  and splines computed
- 
-- pspini: atom type   2  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/11na.1.hgh
-- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/11na.1.hgh
+
+- pspini: atom type   2  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Pspdir/PseudosHGH_pwteter/11na.1.hgh
+- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Pspdir/PseudosHGH_pwteter/11na.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Na,  from PRB58, 3641 (1998)
 - 11.00000   1.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -171,23 +171,23 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
                     k11p=   0.0026230; k22p=   0.0000000; k33p=   0.0000000
   radii_cf(1)=   2.1988400; radii_cf(2)=   0.0000000; rad_cov=   1.2215778
 -  Local part computed in reciprocal space.
- 
+
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -8.62113488
          --- l  ekb(1:nproj) -->
              0    0.556226    1.932007
              1    1.545198
  pspatm: atomic psp has been read  and splines computed
- 
+
    1.03731118E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
  setup2: nwvl coarse and fine are   64871     474
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -195,15 +195,15 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 2, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-06, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
  ETOT  1  -58.271557620549    -5.827E+01 1.648E-01 3.615E+01
  ETOT  2  -58.439575024299    -1.680E-01 5.511E-02 8.009E-02
- 
+
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum grdnorm=  5.511E-02 exceeds tolwfr=  1.000E-06
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -229,9 +229,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
  reduced coordinates (array xred) for    2 atoms
        0.354896256094      0.500000000000      0.500000000000
@@ -239,7 +239,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      4.56361314637343     5.71511385277200     5.71511385277200
     2      7.05429387091213     5.71511385277200     5.71511385277200
@@ -267,10 +267,10 @@ internal            : -5.84395750242993E+01
 total_energy_dc     : -5.84395750242993E+01
 ...
 
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      2.4300000000E+01  2.1600000000E+01  2.1600000000E+01 Bohr
               amu      4.78800000E+01  2.29897680E+01
@@ -319,9 +319,9 @@ total_energy_dc     : -5.84395750242993E+01
              xred      3.5489625609E-01  5.0000000000E-01  5.0000000000E-01
                        5.4858779740E-01  5.0000000000E-01  5.0000000000E-01
             znucl       22.00000   11.00000
- 
+
 ================================================================================
- 
+
  The spacegroup number, the magnetic point group, and/or the number of symmetries
  have changed between the initial recognition based on the input file
  and a postprocessing based on the final acell, rprim, and xred.
@@ -365,7 +365,7 @@ total_energy_dc     : -5.84395750242993E+01
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -377,12 +377,12 @@ total_energy_dc     : -5.84395750242993E+01
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -400,7 +400,7 @@ total_energy_dc     : -5.84395750242993E+01
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -415,15 +415,15 @@ total_energy_dc     : -5.84395750242993E+01
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - Proc.   0 individual time (sec): cpu=        114.8  wall=        118.0
- 
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   4 WARNINGs and   7 COMMENTs to log file.
 +Overall time at end (sec) : cpu=        114.8  wall=        118.0

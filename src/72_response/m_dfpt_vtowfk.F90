@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2025 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@ module m_dfpt_vtowfk
  use m_getghc,       only : getgsc, getghc_nucdip, getghc_mGGA
  use m_getgh1c,      only : getgh1ndc, getgh1c_mGGA
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -237,7 +237,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer :: option,opt_gvnlx1,quit,test_ddk,ndat
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
- character(len=500) :: message
+ character(len=500) :: msg
  type(rf2_t) :: rf2
 !arrays
  logical,allocatable :: cycle_bands(:)
@@ -262,8 +262,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  nkpt_max=50; if (xmpi_paral==1) nkpt_max=-1
 
  if(prtvol>2 .or. ikpt<=nkpt_max)then
-   write(message,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',gs_hamkq%kpt_k(:),'band residuals:'
-   call wrtout(std_out,message)
+   write(msg,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',gs_hamkq%kpt_k(:),'band residuals:'
+   call wrtout(std_out,msg)
  end if
 
 !Initializations and allocations
@@ -505,7 +505,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        nskip=nskip+1
      else
 !      Compute the 0-order kinetic operator contribution (with cwavef)
-       call meanvalue_g(ar,kinpw1,0,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0)
+       call meanvalue_g(ar,kinpw1,0,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0,&
+&         gpu_thread_limit=dtset%gpu_thread_limit)
 !      There is an additional factor of 2 with respect to the bare matrix element
        ek0_k(iband)=energy_factor*ar
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
@@ -565,8 +566,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(rf_hamkq%vxctaulocal)) ) then
          ABI_MALLOC(ghc_vxctau,(2,npw1_k*nspinor))
          ! ndat hard-coded as 1
-         call getgh1c_mGGA(cwave1,rf_hamkq%dkinpw_k,gs_hamkq%gbound_k,ghc_vxctau,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
-              & gs_hamkq%kg_k,kinpw1,gs_hamkq%mgfft,mpi_enreg,nspinor,gs_hamkq%n4,gs_hamkq%n5,&
+         call getgh1c_mGGA(cwave1,gs_hamkq%gbound_k,ghc_vxctau,gs_hamkq%gmet,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
+              & gs_hamkq%kg_k,gs_hamkq%kpt_k,gs_hamkq%mgfft,mpi_enreg,nspinor,gs_hamkq%n4,gs_hamkq%n5,&
               & gs_hamkq%n6,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,gs_hamkq%gpu_option)
 !        There is an additional factor of 4 with respect to the bare matrix element
          evxctau1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k*nspinor),ghc_vxctau(1,1:npw_k*nspinor))+&
@@ -599,12 +600,12 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          enl1_k(iband)=two*energy_factor*scprod
        end if
 
-       !      Removal of the 1st-order kinetic energy from the 1st-order non-local part.
+       ! Removal of the 1st-order kinetic energy, dipole, and vxctau1 from the 1st-order non-local part.
+       ! note that in getgh1c, the "nonlocal" piece, gvnlx1, contains also first order
+       ! kinetic, nuclear dipole, and vxctau1
        if(ipert==natom+1 .or. ipert==natom+3 .or. ipert==natom+4) then
-         enl1_k(iband)=enl1_k(iband)-ek1_k(iband)
+         enl1_k(iband)=enl1_k(iband)-ek1_k(iband)-end1_k(iband)-evxctau1_k(iband)
        end if
-       ! enl1_k still contains first order nuclear dipole, first order vxctau1 in addition to
-       ! first order nonlocal
 
 !      Accumulate 1st-order density (only at the last inonsc)
 !      Accumulate zero-order potential part of the 2nd-order total energy
@@ -678,8 +679,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  residk=maxval(resid_k(:))
  if (prtvol>2 .or. ikpt<=nkpt_max) then
    do ii=0,(nband_k-1)/8
-     write(message,'(1p,8e10.2)')(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
-     call wrtout(std_out,message)
+     write(msg,'(1p,8e10.2)')(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
+     call wrtout(std_out,msg)
    end do
  end if
 
@@ -717,18 +718,18 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  ! Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers)
  call xmpi_sum(nskip,mpi_enreg%comm_band,ierr)
  if (iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) then
-   write(message,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
-   call wrtout(std_out,message)
+   write(msg,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
+   call wrtout(std_out,msg)
  end if
 
  if (prtvol<=2 .and. ikpt==nkpt_max+1) then
-   write(message,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
-   call wrtout(std_out,message)
+   write(msg,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
+   call wrtout(std_out,msg)
  end if
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
-   write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
-   ABI_WARNING(message)
+   write(msg,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
+   ABI_WARNING(msg)
  end if
 
  call timab(130,2,tsec)

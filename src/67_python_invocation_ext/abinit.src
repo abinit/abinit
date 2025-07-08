@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2024 ABINIT Group (Olivier Gingras)
+# Copyright (C) 2005-2025 ABINIT Group (Olivier Gingras)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -18,7 +18,8 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "invocation_interface.F90",
- "invoke_python.cpp"]
+ "execute_python.cpp",
+ "m_invocation_tools.F90",
+ "m_invoke_python.F90"]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

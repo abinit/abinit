@@ -6,7 +6,7 @@
 !!  Driver to perform electronic or nuclear step
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2024 ABINIT group (FB)
+!!  Copyright (C) 2021-2025 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@ module m_rttddft_propagate
  use defs_basis
  use defs_abitypes,         only: MPI_type
  use defs_datatypes,        only: pseudopotential_type
- 
+
  use m_dtset,               only: dataset_type
  use m_errors,              only: msg_hndl
  use m_hamiltonian,         only: gs_hamiltonian_type
@@ -43,7 +43,7 @@ module m_rttddft_propagate
 !public :: rttddft_propagate_nuc
 !!***
 
-contains 
+contains
 !!***
 
 !!****f* m_rttddft/rttddft_propagate_ele
@@ -75,16 +75,15 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
  type(tdks_type),            intent(inout) :: tdks
- 
+
  !Local variables-------------------------------
  !scalars
  character(len=500)        :: msg
- type(gs_hamiltonian_type) :: gs_hamk
  !arrays
- 
+
 ! ***********************************************************************
 
- write(msg,'(a,a,i0)') ch10, '--- Iteration', istep
+ write(msg,'(a,a,i0)') ch10, '--- Iteration ', istep
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
@@ -92,11 +91,11 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  if (dtset%ionmov /= 0) call rttddft_setup_ele_step(dtset,mpi_enreg,psps,tdks)
 
  ! Propagate cg
- select case (dtset%td_propagator) 
+ select case (dtset%td_propagator)
    case(0)
-      call rttddft_propagator_er(dtset,gs_hamk,istep,mpi_enreg,psps,tdks,calc_properties=.true.)
+      call rttddft_propagator_er(dtset,istep,mpi_enreg,psps,tdks,calc_properties=.true.)
    case(1)
-      call rttddft_propagator_emr(dtset,gs_hamk,istep,mpi_enreg,psps,tdks)  
+      call rttddft_propagator_emr(dtset,istep,mpi_enreg,psps,tdks)
    case default
       write(msg,"(a)") "Unknown Propagator - check the value of td_propagator"
       ABI_ERROR(msg)

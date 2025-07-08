@@ -43,6 +43,7 @@ iatfixz = 6 9 10
 #%% executable = multibinit
 #%% input_ddb = t102.ddb
 #%% coeff_xml = t102_coeffs.xml
+#%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% [shell]
 #%% pre_commands = 
 #%%   iw_cp p4mbm.nc t102.abo_HIST.nc

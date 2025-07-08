@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.4.3 of ABINIT, released Nov 2024.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h17 )
+.Starting date : Tue 17 Dec 2024.
+- ( at 14h37 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t205/t205.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_chebfi-oracle/tests/TestBot_MPI1/v9_t205/t205.abi
 - output file    -> t205.abo
 - root for input  files -> t205i
 - root for output files -> t205o
@@ -199,8 +199,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.800   => boxcut(ratio)=   2.03365
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/14si.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_chebfi-oracle/tests/Pspdir/14si.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_chebfi-oracle/tests/Pspdir/14si.psp
 -   Si  Fri Oct 08 11:18:59 1993
 - 14.00000   4.00000    930920                znucl, zion, pspdat
     1    1    2    2      2001   0.00050      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -231,16 +231,16 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.5848264235362    -8.585E+00 4.998E-04 1.918E+00
- ETOT  2  -8.5877946652609    -2.968E-03 2.250E-06 4.864E-02
- ETOT  3  -8.5878398388394    -4.517E-05 1.970E-07 9.985E-04
- ETOT  4  -8.5878404672824    -6.284E-07 3.004E-08 1.981E-05
- ETOT  5  -8.5878404901607    -2.288E-08 1.881E-09 9.270E-07
- ETOT  6  -8.5878404920539    -1.893E-09 7.551E-11 3.906E-10
- ETOT  7  -8.5878404920565    -2.608E-12 9.863E-12 3.346E-12
- ETOT  8  -8.5878404920565     2.487E-14 7.855E-13 2.700E-13
- ETOT  9  -8.5878404920565     2.132E-14 1.459E-13 2.098E-15
- ETOT 10  -8.5878404920565     2.309E-14 1.500E-14 3.352E-17
+ ETOT  1  -8.5848264235362    -8.585E+00 2.099E-03 1.918E+00
+ ETOT  2  -8.5877946652609    -2.968E-03 1.010E-05 4.864E-02
+ ETOT  3  -8.5878398388394    -4.517E-05 1.234E-06 9.985E-04
+ ETOT  4  -8.5878404672824    -6.284E-07 1.914E-07 1.981E-05
+ ETOT  5  -8.5878404901607    -2.288E-08 1.181E-08 9.270E-07
+ ETOT  6  -8.5878404920539    -1.893E-09 6.725E-10 3.906E-10
+ ETOT  7  -8.5878404920565    -2.608E-12 6.769E-11 3.346E-12
+ ETOT  8  -8.5878404920565     2.487E-14 5.521E-12 2.700E-13
+ ETOT  9  -8.5878404920565     2.132E-14 1.030E-12 2.098E-15
+ ETOT 10  -8.5878404920565    -4.441E-14 1.018E-13 3.321E-17
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.10725751E-05  sigma(3 2)=  0.00000000E+00
@@ -250,7 +250,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
-  maximum residual=  1.500E-14 exceeds tolwfr=  1.000E-20
+  maximum residual=  1.018E-13 exceeds tolwfr=  1.000E-20
 
 
 --- !ResultsGS
@@ -263,7 +263,7 @@ lattice_vectors:
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
-convergence: {deltae:  2.309E-14, res2:  3.352E-17, residm:  1.500E-14, diffor: null, }
+convergence: {deltae: -4.441E-14, res2:  3.321E-17, residm:  1.018E-13, diffor: null, }
 etotal    :  -8.58784049E+00
 entropy   :   0.00000000E+00
 fermie    :   2.37456588E-01
@@ -276,9 +276,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  4.09939888E-31,  -4.09939888E-31,  -1.22981966E-30, ]
-- [ -4.09939888E-31,   4.09939888E-31,   1.22981966E-30, ]
-force_length_stats: {min:   1.35961679E-30, max:   1.35961679E-30, mean:   1.35961679E-30, }
+- [ -8.19879775E-31,   8.19879775E-31,   8.19879775E-31, ]
+- [  8.19879775E-31,  -8.19879775E-31,  -8.19879775E-31, ]
+force_length_stats: {min:   1.42007343E-30, max:   1.42007343E-30, mean:   1.42007343E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -290,12 +290,12 @@ force_length_stats: {min:   1.35961679E-30, max:   1.35961679E-30, mean:   1.359
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   12.700E-16; max=  14.999E-15
+ Mean square residual over all n,k,spin=   85.763E-16; max=  10.178E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  7.6814E-30; max dE/dt=  1.6829E-29; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  6.8704E-30; max dE/dt=  8.4145E-30; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
@@ -303,14 +303,14 @@ force_length_stats: {min:   1.35961679E-30, max:   1.35961679E-30, mean:   1.359
     2      1.35775097531303     1.35775097531303     1.35775097531303
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 7.8497512E-31 1.2298197E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 8.1987978E-31 8.1987978E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 4.0365040E-29 6.3239864E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 4.2159910E-29 4.2159910E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.263110000000 10.263110000000 10.263110000000 bohr
               =  5.431003901252  5.431003901252  5.431003901252 angstroms
  prteigrs : about to open file t205o_DS1_EIG
@@ -330,15 +330,15 @@ force_length_stats: {min:   1.35961679E-30, max:   1.35961679E-30, mean:   1.359
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.96592923308406E+00
-hartree             :  5.19866988507877E-01
-xc                  : -3.30418305371565E+00
+kinetic             :  2.96592923308960E+00
+hartree             :  5.19866988511496E-01
+xc                  : -3.30418305371739E+00
 Ewald energy        : -8.39791921808003E+00
 psp_core            : -2.35213740359409E-01
-local_psp           : -2.03259241327902E+00
-non_local_psp       :  1.89627171178571E+00
-total_energy        : -8.58784049205646E+00
-total_energy_eV     : -2.33687024157800E+02
+local_psp           : -2.03259241329016E+00
+non_local_psp       :  1.89627171178938E+00
+total_energy        : -8.58784049205653E+00
+total_energy_eV     : -2.33687024157801E+02
 band_energy         :  6.07782700497711E-01
 ...
 
@@ -393,16 +393,16 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.5848264235362    -8.585E+00 4.998E-04 1.918E+00
- ETOT  2  -8.5877946652609    -2.968E-03 2.250E-06 4.864E-02
- ETOT  3  -8.5878398388394    -4.517E-05 1.970E-07 9.985E-04
- ETOT  4  -8.5878404672824    -6.284E-07 3.004E-08 1.981E-05
- ETOT  5  -8.5878404901607    -2.288E-08 1.881E-09 9.270E-07
- ETOT  6  -8.5878404920539    -1.893E-09 7.551E-11 3.906E-10
- ETOT  7  -8.5878404920565    -2.608E-12 9.863E-12 3.346E-12
- ETOT  8  -8.5878404920565     2.487E-14 7.855E-13 2.700E-13
- ETOT  9  -8.5878404920565     2.132E-14 1.459E-13 2.098E-15
- ETOT 10  -8.5878404920565     2.309E-14 1.500E-14 3.352E-17
+ ETOT  1  -8.5848264235362    -8.585E+00 2.099E-03 1.918E+00
+ ETOT  2  -8.5877946652609    -2.968E-03 1.010E-05 4.864E-02
+ ETOT  3  -8.5878398388394    -4.517E-05 1.234E-06 9.985E-04
+ ETOT  4  -8.5878404672824    -6.284E-07 1.914E-07 1.981E-05
+ ETOT  5  -8.5878404901607    -2.288E-08 1.181E-08 9.270E-07
+ ETOT  6  -8.5878404920539    -1.893E-09 6.725E-10 3.906E-10
+ ETOT  7  -8.5878404920565    -2.608E-12 6.769E-11 3.346E-12
+ ETOT  8  -8.5878404920565     2.487E-14 5.521E-12 2.700E-13
+ ETOT  9  -8.5878404920565     2.132E-14 1.030E-12 2.098E-15
+ ETOT 10  -8.5878404920565    -4.441E-14 1.018E-13 3.321E-17
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.10725751E-05  sigma(3 2)=  0.00000000E+00
@@ -412,7 +412,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
-  maximum residual=  1.500E-14 exceeds tolwfr=  1.000E-20
+  maximum residual=  1.018E-13 exceeds tolwfr=  1.000E-20
 
 
 --- !ResultsGS
@@ -425,7 +425,7 @@ lattice_vectors:
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
-convergence: {deltae:  2.309E-14, res2:  3.352E-17, residm:  1.500E-14, diffor: null, }
+convergence: {deltae: -4.441E-14, res2:  3.321E-17, residm:  1.018E-13, diffor: null, }
 etotal    :  -8.58784049E+00
 entropy   :   0.00000000E+00
 fermie    :   2.37456588E-01
@@ -438,9 +438,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  4.09939888E-31,  -4.09939888E-31,  -1.22981966E-30, ]
-- [ -4.09939888E-31,   4.09939888E-31,   1.22981966E-30, ]
-force_length_stats: {min:   1.35961679E-30, max:   1.35961679E-30, mean:   1.35961679E-30, }
+- [ -8.19879775E-31,   8.19879775E-31,   8.19879775E-31, ]
+- [  8.19879775E-31,  -8.19879775E-31,  -8.19879775E-31, ]
+force_length_stats: {min:   1.42007343E-30, max:   1.42007343E-30, mean:   1.42007343E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -452,12 +452,12 @@ force_length_stats: {min:   1.35961679E-30, max:   1.35961679E-30, mean:   1.359
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   12.700E-16; max=  14.999E-15
+ Mean square residual over all n,k,spin=   85.763E-16; max=  10.178E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  7.6814E-30; max dE/dt=  1.6829E-29; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  6.8704E-30; max dE/dt=  8.4145E-30; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
@@ -465,14 +465,14 @@ force_length_stats: {min:   1.35961679E-30, max:   1.35961679E-30, mean:   1.359
     2      1.35775097531303     1.35775097531303     1.35775097531303
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 7.8497512E-31 1.2298197E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 8.1987978E-31 8.1987978E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 4.0365040E-29 6.3239864E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 4.2159910E-29 4.2159910E-29   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.263110000000 10.263110000000 10.263110000000 bohr
               =  5.431003901252  5.431003901252  5.431003901252 angstroms
  prteigrs : about to open file t205o_DS2_EIG
@@ -492,15 +492,15 @@ force_length_stats: {min:   1.35961679E-30, max:   1.35961679E-30, mean:   1.359
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.96592923308406E+00
-hartree             :  5.19866988507877E-01
-xc                  : -3.30418305371565E+00
+kinetic             :  2.96592923308960E+00
+hartree             :  5.19866988511496E-01
+xc                  : -3.30418305371739E+00
 Ewald energy        : -8.39791921808003E+00
 psp_core            : -2.35213740359409E-01
-local_psp           : -2.03259241327902E+00
-non_local_psp       :  1.89627171178571E+00
-total_energy        : -8.58784049205646E+00
-total_energy_eV     : -2.33687024157800E+02
+local_psp           : -2.03259241329016E+00
+non_local_psp       :  1.89627171178938E+00
+total_energy        : -8.58784049205653E+00
+total_energy_eV     : -2.33687024157801E+02
 band_energy         :  6.07782700497711E-01
 ...
 
@@ -841,7 +841,7 @@ band_energy         :  6.07782700506451E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0263110000E+01  1.0263110000E+01  1.0263110000E+01 Bohr
               amu      2.80855000E+01
@@ -853,10 +853,10 @@ band_energy         :  6.07782700506451E-01
            etotal2    -8.5878404921E+00
            etotal3    -8.5878404921E+00
            etotal4    -8.5878404921E+00
-            fcart1     4.0993988773E-31 -4.0993988773E-31 -1.2298196632E-30
-                      -4.0993988773E-31  4.0993988773E-31  1.2298196632E-30
-            fcart2     4.0993988773E-31 -4.0993988773E-31 -1.2298196632E-30
-                      -4.0993988773E-31  4.0993988773E-31  1.2298196632E-30
+            fcart1    -8.1987977546E-31  8.1987977546E-31  8.1987977546E-31
+                       8.1987977546E-31 -8.1987977546E-31 -8.1987977546E-31
+            fcart2    -8.1987977546E-31  8.1987977546E-31  8.1987977546E-31
+                       8.1987977546E-31 -8.1987977546E-31 -8.1987977546E-31
             fcart3    -1.2298196632E-30  1.2298196632E-30 -4.0993988773E-31
                        1.2298196632E-30 -1.2298196632E-30  4.0993988773E-31
             fcart4    -1.2298196632E-30  1.2298196632E-30 -4.0993988773E-31
@@ -889,9 +889,9 @@ P           mkmem           2
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         216
-           strten1    -3.1072575128E-05 -3.1072575128E-05 -3.1072575128E-05
+           strten1    -3.1072575148E-05 -3.1072575148E-05 -3.1072575148E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2    -3.1072575128E-05 -3.1072575128E-05 -3.1072575128E-05
+           strten2    -3.1072575148E-05 -3.1072575148E-05 -3.1072575148E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3    -3.1072574481E-05 -3.1072574481E-05 -3.1072574481E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -935,7 +935,7 @@ P           mkmem           2
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    1.4213E-06 sec,    Wall time =    1.4227E-06 sec
+- CPU time =    1.3709E-06 sec,    Wall time =    1.3717E-06 sec
 
 - Total cpu        time (s,m,h):          1.1        0.02      0.000
 - Total wall clock time (s,m,h):          1.2        0.02      0.000
@@ -948,189 +948,187 @@ P           mkmem           2
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.200  17.9         0.202  17.1              1      -1.00        0.99       0.99
-- pspini                                    0.196  17.5         0.196  16.6              4      -1.00        1.00       1.00
-- timing timab                              0.123  11.0         0.123  10.4             12      -1.00        1.00       1.00
-- fourwf%(pot)                              0.095   8.5         0.096   8.1            746      -1.00        1.00       1.00
-- ewald                                     0.037   3.3         0.037   3.1              4      -1.00        1.00       1.00
-- abinit(chkinp,chkvars)                    0.035   3.2         0.035   3.0              1      -1.00        1.00       1.00
-- stress                                    0.030   2.7         0.030   2.5              4      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.200  17.9         0.200  17.2              1      -1.00        1.00       1.00
+- pspini                                    0.194  17.4         0.198  17.0              4      -1.00        0.98       0.98
+- timing timab                              0.119  10.6         0.119  10.2             12      -1.00        1.00       1.00
+- fourwf%(pot)                              0.101   9.1         0.102   8.7            748      -1.00        1.00       1.00
+- ewald                                     0.037   3.3         0.037   3.2              4      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.035   3.1         0.035   3.0              1      -1.00        1.00       1.00
+- stress                                    0.030   2.7         0.030   2.6              4      -1.00        1.00       1.00
 - ewald2 (+vdw_dftd)                        0.028   2.5         0.028   2.4              4      -1.00        1.00       1.00
-- abinit(outvars)                           0.026   2.3         0.026   2.2              1      -1.00        1.00       1.00
-- nonlop(apply)                             0.023   2.1         0.023   2.0            746      -1.00        1.00       1.00
-- fourdp                                    0.023   2.1         0.042   3.6            388      -1.00        0.54       0.54
-- abinit(after driver)                      0.022   2.0         0.022   1.9              1      -1.00        0.99       0.99
+- fourdp                                    0.026   2.4         0.059   5.0            388      -1.00        0.45       0.45
+- abinit(outvars)                           0.024   2.2         0.024   2.1              1      -1.00        1.00       1.00
+- nonlop(apply)                             0.023   2.1         0.023   2.0            748      -1.00        0.99       0.99
+- abinit(after driver)                      0.021   1.9         0.021   1.8              1      -1.00        1.00       1.00
 - xc:pot/=fourdp                            0.014   1.3         0.014   1.2             44      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.011   1.0         0.011   0.9              1      -1.00        0.96       0.96
-- fourwf%(den)                              0.008   0.7         0.008   0.7            320      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.005   0.4         0.005   0.4             -1      -1.00        1.05       1.05
+- abinit(init,iofn1,herald)                 0.010   0.9         0.010   0.9              1      -1.00        0.97       0.97
+- fourwf%(den)                              0.009   0.8         0.009   0.8            320      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.005   0.5         0.005   0.4             -1      -1.00        1.09       1.09
 - vtowfk(ssdiag)                            0.004   0.3         0.004   0.3             -1      -1.00        1.00       1.00
 - symrhg(no FFT)                            0.003   0.3         0.003   0.3             40      -1.00        1.00       1.00
 - mkcore                                    0.003   0.3         0.003   0.3             12      -1.00        1.00       1.00
 - forces                                    0.002   0.2         0.002   0.2              4      -1.00        1.00       1.00
 - nonlop(forces)                            0.002   0.2         0.002   0.2             48      -1.00        0.99       0.99
-- mkffnl                                    0.002   0.1         0.002   0.1             88      -1.00        0.99       0.99
-- scfcv-scprqt                              0.001   0.1         0.001   0.1             40      -1.00        0.99       0.99
 - nonlop(forstr)                            0.001   0.1         0.001   0.1             16      -1.00        1.00       1.00
 - setsym                                    0.001   0.1         0.001   0.1              4      -1.00        1.00       1.00
-- vtowfk(contrib)                           0.001   0.1         0.001   0.1             80      -1.00        1.04       1.04
-- newkpt(excl. rwwf   )                     0.001   0.1         0.001   0.0             -1      -1.00        0.99       0.99
-- vtowfk  (1)                               0.000   0.0         0.000   0.0             80      -1.00        1.06       1.06
-- kpgsph                                    0.000   0.0         0.000   0.0             16      -1.00        1.05       1.05
-- inwffil(excl. calls)                      0.000   0.0         0.000   0.0              4      -1.00        1.06       1.06
-- others (130)                              0.000   0.0         0.000   0.0             -1      -1.00        0.00       0.00
+- mkffnl                                    0.001   0.1         0.001   0.1             88      -1.00        0.99       0.99
+- scfcv-scprqt                              0.001   0.1         0.001   0.1             40      -1.00        0.99       0.99
+- vtowfk(contrib)                           0.001   0.1         0.001   0.1             80      -1.00        1.07       1.07
+- newkpt(excl. rwwf   )                     0.001   0.1         0.001   0.0             -1      -1.00        1.02       1.02
+- vtowfk  (1)                               0.000   0.0         0.000   0.0             80      -1.00        0.99       0.99
+- kpgsph                                    0.000   0.0         0.000   0.0             16      -1.00        1.03       1.03
+- inwffil(excl. calls)                      0.000   0.0         0.000   0.0              4      -1.00        1.00       1.00
+- others (129)                              0.000   0.0         0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 -
-- subtotal                                  0.898  80.3         0.920  77.9                                  0.98       0.98
+- subtotal                                  0.898  80.5         0.935  80.3                                  0.96       0.96
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =           1.1, wall_time =           1.2
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.200  17.9         0.202  17.1              1      -1.00        0.99       0.99
-- pspini                                    0.196  17.5         0.196  16.6              4      -1.00        1.00       1.00
-- timing timab                              0.123  11.0         0.123  10.4             12      -1.00        1.00       1.00
-- fourwf%(pot)                              0.095   8.5         0.096   8.1            746      -1.00        1.00       1.00
-- ewald                                     0.037   3.3         0.037   3.1              4      -1.00        1.00       1.00
-- abinit(chkinp,chkvars)                    0.035   3.2         0.035   3.0              1      -1.00        1.00       1.00
-- stress                                    0.030   2.7         0.030   2.5              4      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.200  17.9         0.200  17.2              1      -1.00        1.00       1.00
+- pspini                                    0.194  17.4         0.198  17.0              4      -1.00        0.98       0.98
+- timing timab                              0.119  10.6         0.119  10.2             12      -1.00        1.00       1.00
+- fourwf%(pot)                              0.101   9.1         0.102   8.7            748      -1.00        1.00       1.00
+- ewald                                     0.037   3.3         0.037   3.2              4      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.035   3.1         0.035   3.0              1      -1.00        1.00       1.00
+- stress                                    0.030   2.7         0.030   2.6              4      -1.00        1.00       1.00
 - ewald2 (+vdw_dftd)                        0.028   2.5         0.028   2.4              4      -1.00        1.00       1.00
-- abinit(outvars)                           0.026   2.3         0.026   2.2              1      -1.00        1.00       1.00
-- nonlop(apply)                             0.023   2.1         0.023   2.0            746      -1.00        1.00       1.00
-- fourdp                                    0.023   2.1         0.042   3.6            388      -1.00        0.54       0.54
-- abinit(after driver)                      0.022   2.0         0.022   1.9              1      -1.00        0.99       0.99
+- fourdp                                    0.026   2.4         0.059   5.0            388      -1.00        0.45       0.45
+- abinit(outvars)                           0.024   2.2         0.024   2.1              1      -1.00        1.00       1.00
+- nonlop(apply)                             0.023   2.1         0.023   2.0            748      -1.00        0.99       0.99
+- abinit(after driver)                      0.021   1.9         0.021   1.8              1      -1.00        1.00       1.00
 - xc:pot/=fourdp                            0.014   1.3         0.014   1.2             44      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.011   1.0         0.011   0.9              1      -1.00        0.96       0.96
-- fourwf%(den)                              0.008   0.7         0.008   0.7            320      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.005   0.4         0.005   0.4             -1      -1.00        1.05       1.05
+- abinit(init,iofn1,herald)                 0.010   0.9         0.010   0.9              1      -1.00        0.97       0.97
+- fourwf%(den)                              0.009   0.8         0.009   0.8            320      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.005   0.5         0.005   0.4             -1      -1.00        1.09       1.09
 - vtowfk(ssdiag)                            0.004   0.3         0.004   0.3             -1      -1.00        1.00       1.00
 - symrhg(no FFT)                            0.003   0.3         0.003   0.3             40      -1.00        1.00       1.00
 - mkcore                                    0.003   0.3         0.003   0.3             12      -1.00        1.00       1.00
 - forces                                    0.002   0.2         0.002   0.2              4      -1.00        1.00       1.00
 - nonlop(forces)                            0.002   0.2         0.002   0.2             48      -1.00        0.99       0.99
-- mkffnl                                    0.002   0.1         0.002   0.1             88      -1.00        0.99       0.99
-- scfcv-scprqt                              0.001   0.1         0.001   0.1             40      -1.00        0.99       0.99
 - nonlop(forstr)                            0.001   0.1         0.001   0.1             16      -1.00        1.00       1.00
 - setsym                                    0.001   0.1         0.001   0.1              4      -1.00        1.00       1.00
-- vtowfk(contrib)                           0.001   0.1         0.001   0.1             80      -1.00        1.04       1.04
-- newkpt(excl. rwwf   )                     0.001   0.1         0.001   0.0             -1      -1.00        0.99       0.99
-- vtowfk  (1)                               0.000   0.0         0.000   0.0             80      -1.00        1.06       1.06
-- kpgsph                                    0.000   0.0         0.000   0.0             16      -1.00        1.05       1.05
-- inwffil(excl. calls)                      0.000   0.0         0.000   0.0              4      -1.00        1.06       1.06
-- others (130)                              0.000   0.0         0.000   0.0             -1      -1.00        0.00       0.00
+- mkffnl                                    0.001   0.1         0.001   0.1             88      -1.00        0.99       0.99
+- scfcv-scprqt                              0.001   0.1         0.001   0.1             40      -1.00        0.99       0.99
+- vtowfk(contrib)                           0.001   0.1         0.001   0.1             80      -1.00        1.07       1.07
+- newkpt(excl. rwwf   )                     0.001   0.1         0.001   0.0             -1      -1.00        1.02       1.02
+- vtowfk  (1)                               0.000   0.0         0.000   0.0             80      -1.00        0.99       0.99
+- kpgsph                                    0.000   0.0         0.000   0.0             16      -1.00        1.03       1.03
+- inwffil(excl. calls)                      0.000   0.0         0.000   0.0              4      -1.00        1.00       1.00
+- others (129)                              0.000   0.0         0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 
-- subtotal                                  0.898  80.3         0.920  77.9                                  0.98       0.98
+- subtotal                                  0.898  80.5         0.935  80.3                                  0.96       0.96
 
  Partitioning of abinit
-- abinit                                    1.117 100.0         1.181 100.0              1                   0.95       0.95
+- abinit                                    1.115 100.0         1.165 100.0              1                   0.96       0.96
  
-- abinit(init,iofn1,herald)                 0.011   1.0         0.011   0.9              1                   0.96       0.96
-- get_dtsets_pspheads                       0.200  17.9         0.202  17.1              1                   0.99       0.99
-- abinit(outvars)                           0.026   2.3         0.026   2.2              1                   1.00       1.00
-- abinit(chkinp,chkvars)                    0.035   3.2         0.035   3.0              1                   1.00       1.00
-- driver                                    0.691  61.8         0.752  63.6              1                   0.92       0.92
-- abinit(after driver)                      0.022   2.0         0.022   1.9              1                   0.99       0.99
-- timing timab                              0.123  11.0         0.123  10.4             12                   1.00       1.00
-- (other)                                   0.010   0.9         0.010   0.8             -1                   1.00       1.00
+- abinit(init,iofn1,herald)                 0.010   0.9         0.010   0.9              1                   0.97       0.97
+- get_dtsets_pspheads                       0.200  17.9         0.200  17.2              1                   1.00       1.00
+- abinit(outvars)                           0.024   2.2         0.024   2.1              1                   1.00       1.00
+- abinit(chkinp,chkvars)                    0.035   3.1         0.035   3.0              1                   1.00       1.00
+- driver                                    0.698  62.6         0.747  64.1              1                   0.93       0.93
+- abinit(after driver)                      0.021   1.9         0.021   1.8              1                   1.00       1.00
+- timing timab                              0.119  10.6         0.119  10.2             12                   1.00       1.00
+- (other)                                   0.009   0.8         0.009   0.8             -1                   1.00       1.00
 
-- subtotal                                  1.117 100.0         1.181 100.0                                  0.95       0.95
+- subtotal                                  1.115 100.0         1.165 100.0                                  0.96       0.96
 
  Partitioning of driver
-- driver                                    0.691  61.8         0.752  63.6              1                   0.92       0.92
+- driver                                    0.698  62.6         0.747  64.1              1                   0.93       0.93
  
-- driver(bef. select case)                  0.001   0.1         0.001   0.1              4                   0.76       0.76
-- (other)                                   0.690  61.7         0.750  63.5             -1                   0.92       0.92
+- driver(bef. select case)                  0.001   0.1         0.001   0.1              4                   1.00       1.00
+- (other)                                   0.697  62.5         0.746  64.1             -1                   0.93       0.93
 
-- subtotal                                  0.691  61.8         0.752  63.6                                  0.92       0.92
+- subtotal                                  0.698  62.6         0.747  64.1                                  0.93       0.93
 
  Partitioning of gstateimg+gstate
-- gstateimg                                 0.689  61.7         0.750  63.5              4                   0.92       0.92
+- gstateimg                                 0.697  62.5         0.746  64.1              4                   0.93       0.93
  
-- gstate(1)                                 0.003   0.2         0.003   0.2              8                   1.00       1.00
-- gstate(pspini)                            0.196  17.5         0.196  16.6              4                   1.00       1.00
-- gstate(init rhor rhog)                    0.012   1.1         0.032   2.7              4                   0.39       0.39
-- gstate(...scfcv)                          0.471  42.1         0.512  43.3              4                   0.92       0.92
+- gstate(1)                                 0.002   0.2         0.002   0.2              8                   1.00       1.00
+- gstate(pspini)                            0.194  17.4         0.198  17.0              4                   0.98       0.98
+- gstate(init rhor rhog)                    0.015   1.4         0.048   4.1              4                   0.32       0.32
+- gstate(...scfcv)                          0.477  42.8         0.490  42.1              4                   0.97       0.97
 - gstate(prt gap)                           0.000   0.0         0.000   0.0              4                   1.00       1.00
 - gstate(prtwf)                             0.001   0.1         0.001   0.1              4                   1.00       1.00
 - gstate(clnup1)                            0.005   0.4         0.005   0.4              4                   1.00       1.00
-- gstate(DDB)                               0.002   0.1         0.002   0.1              4                   1.00       1.00
+- gstate(DDB)                               0.001   0.1         0.001   0.1              4                   1.00       1.00
 
-- subtotal                                  0.689  61.7         0.750  63.5                                  0.92       0.92
+- subtotal                                  0.697  62.5         0.746  64.1                                  0.93       0.93
 
  Partitioning of scfcv_core
-- scfcv_core                                0.471  42.1         0.512  43.3              4                   0.92       0.92
+- scfcv_core                                0.477  42.8         0.490  42.1              4                   0.97       0.97
  
-- scfcv_core(before nstep loop)             0.002   0.1         0.002   0.1              4                   1.00       1.00
 - scfcv_core(setvtr)                        0.041   3.7         0.041   3.5             40                   1.00       1.00
-- scfcv_core(vtorho(f))                     0.241  21.6         0.241  20.4             40                   1.00       1.00
+- scfcv_core(vtorho(f))                     0.252  22.6         0.253  21.7             40                   1.00       1.00
 - scfcv-scprqt                              0.001   0.1         0.001   0.1             40                   0.99       0.99
-- scfcv_core(rhotov)                        0.022   1.9         0.022   1.8             40                   1.00       1.00
+- scfcv_core(rhotov)                        0.022   2.0         0.022   1.9             40                   1.00       1.00
 - scfcv_core(mix pot)                       0.010   0.9         0.010   0.8             40                   1.00       1.00
-- scfcv_core(afterscfloop)                  0.034   3.1         0.034   2.9              4                   1.00       1.00
-- scfcv_core(outscfcv)                      0.118  10.5         0.159  13.4              4                   0.74       0.74
-- (other)                                   0.001   0.1         0.001   0.1             -1                   1.00       1.00
-
-- subtotal                                  0.471  42.1         0.512  43.3                                  0.92       0.92
-
- Partitioning of rhotov
-- rhotov                                    0.022   1.9         0.022   1.8             40                   1.00       1.00
- 
-- rhotov(rhotoxc)                           0.017   1.6         0.017   1.5             40                   1.00       1.00
-- rhotov(other)                             0.001   0.1         0.001   0.1             40                   0.98       0.98
-- (other)                                   0.003   0.2         0.002   0.2             -1                   1.01       1.01
-
-- subtotal                                  0.022   1.9         0.022   1.8                                  1.00       1.00
-
- Partitioning of vtorho
-- vtorho                                    0.241  21.6         0.241  20.4             40                   1.00       1.00
- 
-- vtorho(bef. spin loop)                    0.000   0.0         0.000   0.0             40                   0.97       0.97
-- vtorho(bef. kpt  loop)                    0.000   0.0         0.000   0.0             40                   1.01       1.01
-- vtorho(bef. vtowfk)                       0.002   0.2         0.002   0.2             80                   1.00       1.00
-- vtowfk                                    0.228  20.4         0.228  19.3             80                   1.00       1.00
-- vtorho(aft. kpt loop)                     0.000   0.0         0.000   0.0             40                   0.99       0.99
-- vtorho(mkrho 2)                           0.008   0.7         0.008   0.7             80                   1.00       1.00
+- scfcv_core(afterscfloop)                  0.035   3.1         0.035   3.0              4                   1.00       1.00
+- scfcv_core(outscfcv)                      0.115  10.3         0.128  11.0              4                   0.90       0.90
 - (other)                                   0.001   0.1         0.001   0.1             -1                   1.02       1.02
 
-- subtotal                                  0.241  21.6         0.241  20.4                                  1.00       1.00
+- subtotal                                  0.477  42.8         0.490  42.1                                  0.97       0.97
+
+ Partitioning of rhotov
+- rhotov                                    0.022   2.0         0.022   1.9             40                   1.00       1.00
+ 
+- rhotov(rhotoxc)                           0.018   1.6         0.018   1.5             40                   1.00       1.00
+- rhotov(other)                             0.001   0.1         0.001   0.1             40                   0.99       0.99
+- (other)                                   0.003   0.2         0.003   0.2             -1                   1.00       1.00
+
+- subtotal                                  0.022   2.0         0.022   1.9                                  1.00       1.00
+
+ Partitioning of vtorho
+- vtorho                                    0.252  22.6         0.252  21.7             40                   1.00       1.00
+ 
+- vtorho(bef. kpt  loop)                    0.000   0.0         0.000   0.0             40                   1.00       1.00
+- vtorho(bef. vtowfk)                       0.002   0.2         0.002   0.2             80                   0.99       0.99
+- vtowfk                                    0.240  21.5         0.240  20.6             80                   1.00       1.00
+- vtorho(aft. kpt loop)                     0.001   0.0         0.001   0.0             40                   1.00       1.00
+- vtorho(mkrho 2)                           0.008   0.8         0.008   0.7             80                   1.00       1.00
+- (other)                                   0.001   0.1         0.001   0.1             -1                   1.05       1.05
+
+- subtotal                                  0.252  22.6         0.252  21.7                                  1.00       1.00
 
  Partitioning of vtowfk
-- vtowfk                                    0.228  20.4         0.228  19.3             80                   1.00       1.00
+- vtowfk                                    0.240  21.5         0.240  20.6             80                   1.00       1.00
  
-- lobpcgwf                                  0.084   7.5         0.084   7.1             48                   1.00       1.00
-- vtowfk(subdiago)                          0.000   0.0         0.000   0.0             48                   0.99       0.99
+- lobpcgwf                                  0.088   7.9         0.088   7.6             48                   1.00       1.00
+- vtowfk(subdiago)                          0.001   0.1         0.001   0.1             48                   1.00       1.00
 - vtowfk(pw_orthon)                         0.002   0.2         0.002   0.2             96                   1.00       1.00
-- vtowfk(2)                                 0.132  11.9         0.133  11.2             -1                   1.00       1.00
-- fourwf%vtowfk                             0.008   0.7         0.008   0.7            320                   1.00       1.00
-- vtowfk(3)                                 0.001   0.1         0.001   0.1             -1                   1.05       1.05
+- vtowfk(2)                                 0.139  12.4         0.139  11.9             -1                   1.00       1.00
+- fourwf%vtowfk                             0.009   0.8         0.009   0.8            320                   0.99       0.99
+- vtowfk(3)                                 0.001   0.1         0.001   0.1             -1                   1.09       1.09
 
-- subtotal                                  0.228  20.4         0.228  19.3                                  1.00       1.00
+- subtotal                                  0.240  21.5         0.240  20.6                                  1.00       1.00
 
  Partitioning of getghc
-- getghc                                    0.124  11.1         0.124  10.5            746                   1.00       1.00
+- getghc                                    0.130  11.6         0.130  11.1            748                   1.00       1.00
  
-- fourwf%getghc                             0.095   8.5         0.096   8.1            746                   1.00       1.00
-- nonlop%getghc                             0.023   2.1         0.023   2.0            746                   1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.005   0.4         0.005   0.4             -1                   1.05       1.05
+- fourwf%getghc                             0.101   9.1         0.102   8.7            748                   1.00       1.00
+- nonlop%getghc                             0.023   2.1         0.023   2.0            748                   0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.005   0.5         0.005   0.4             -1                   1.09       1.09
 
-- subtotal                                  0.124  11.1         0.124  10.5                                  1.00       1.00
+- subtotal                                  0.130  11.6         0.130  11.1                                  1.00       1.00
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                                    0.104   9.3         0.104   8.8           1066                   1.00       1.00
+- fourwf                                    0.110   9.9         0.111   9.5           1068                   1.00       1.00
  
-- fourwf%getghc                             0.095   8.5         0.096   8.1            746                   1.00       1.00
-- fourwf%vtowfk                             0.008   0.7         0.008   0.7            320                   1.00       1.00
+- fourwf%getghc                             0.101   9.1         0.102   8.7            748                   1.00       1.00
+- fourwf%vtowfk                             0.009   0.8         0.009   0.8            320                   0.99       0.99
 
-- subtotal                                  0.104   9.3         0.104   8.8                                  1.00       1.00
+- subtotal                                  0.110   9.9         0.111   9.5                                  1.00       1.00
 
  Partitioning of inwffil
 - inwffil                                   0.001   0.1         0.001   0.1              4                   1.00       1.00
- 
+
 - inwffil(call newkpt)                      0.001   0.1         0.001   0.1              4                   1.00       1.00
 
 - subtotal                                  0.001   0.1         0.001   0.1                                  1.00       1.00
@@ -1138,121 +1136,124 @@ P           mkmem           2
  Partitioning of newkpt
 - newkpt                                    0.001   0.1         0.001   0.1              4                   1.00       1.00
  
-- newkpt(call wfconv)                       0.001   0.0         0.001   0.0              8                   1.00       1.00
+- newkpt(call wfconv)                       0.001   0.0         0.000   0.0              8                   1.00       1.00
 
-- subtotal                                  0.001   0.1         0.001   0.0                                  0.99       0.99
+- subtotal                                  0.001   0.1         0.001   0.0                                  1.02       1.02
 
  Partitioning of newvtr
-- newvtr                                    0.010   0.9         0.010   0.8             40                   1.00       1.00
+- newvtr                                    0.009   0.8         0.009   0.8             40                   1.00       1.00
  
 - newvtr(before selection)                  0.000   0.0         0.000   0.0             40                   1.00       1.00
 - newvtr(call prcref_PMA)                   0.003   0.3         0.003   0.3             40                   1.00       1.00
-- newvtr(aft. prcref_PMA)                   0.006   0.5         0.006   0.5             40                   1.00       1.00
-- (other)                                   0.000   0.0         0.000   0.0             -1                   1.08       1.08
+- newvtr(aft. prcref_PMA)                   0.005   0.5         0.005   0.5             40                   1.00       1.00
+- newvtr(mean potential)                    0.000   0.0         0.000   0.0             40                   1.00       1.00
+- (other)                                   0.000   0.0         0.000   0.0             -1                   1.07       1.07
 
-- subtotal                                  0.010   0.9         0.010   0.8                                  1.00       1.00
+- subtotal                                  0.009   0.8         0.009   0.8                                  1.00       1.00
 
  Partitioning of fourdp (upwards partitioning)
-- fourdp                                    0.023   2.1         0.042   3.6            388                   0.54       0.54
+- fourdp                                    0.026   2.4         0.059   5.0            388                   0.45       0.45
  
-- fourdp%(other)                            0.023   2.1         0.042   3.6            388                   0.54       0.54
+- fourdp%(other)                            0.026   2.4         0.059   5.0            388                   0.45       0.45
 
-- subtotal                                  0.023   2.1         0.042   3.6                                  0.54       0.54
+- subtotal                                  0.026   2.4         0.059   5.0                                  0.45       0.45
 
  Partitioning of afterscfloop
-- afterscfloop                              0.034   3.1         0.034   2.9              4                   1.00       1.00
+- afterscfloop                              0.035   3.1         0.035   3.0              4                   1.00       1.00
  
-- afterscfloop(forstr)                      0.034   3.1         0.034   2.9              4                   1.00       1.00
+- afterscfloop(forstr)                      0.034   3.1         0.035   3.0              4                   1.00       1.00
 
-- subtotal                                  0.034   3.1         0.034   2.9                                  1.00       1.00
+- subtotal                                  0.035   3.1         0.035   3.0                                  1.00       1.00
 
  Partitioning of forstr
-- forstr                                    0.034   3.1         0.034   2.9              4                   1.00       1.00
+- forstr                                    0.034   3.1         0.034   3.0              4                   1.00       1.00
  
 - forstr(forstrnps)                         0.002   0.2         0.002   0.2              4                   1.00       1.00
 - forstr(forces)                            0.002   0.2         0.002   0.2              4                   1.00       1.00
-- forstr(stress)                            0.030   2.7         0.030   2.5              4                   1.00       1.00
+- forstr(stress)                            0.030   2.7         0.030   2.6              4                   1.00       1.00
 
-- subtotal                                  0.034   3.1         0.034   2.9                                  1.00       1.00
+- subtotal                                  0.034   3.1         0.034   3.0                                  1.00       1.00
 
  Partitioning of forstrnps
 - forstrnps                                 0.002   0.2         0.002   0.2              4                   1.00       1.00
- 
+
 - forstrnps(nonlop+prep_ba                  0.001   0.1         0.001   0.1             16                   1.00       1.00
 
 - subtotal                                  0.002   0.2         0.002   0.2                                  1.00       1.00
 
  Partitioning of outscfcv
-- outscfcv                                  0.118  10.5         0.159  13.4              4                   0.74       0.74
+- outscfcv                                  0.115  10.3         0.128  11.0              4                   0.90       0.90
  
 - outscfcv(preparation)                     0.000   0.0         0.000   0.0              4                   1.00       1.00
-- outscfcv([PAW]prtden)                     0.001   0.1         0.027   2.3              4                   0.03       0.03
-- outscfcv(output GSR)                      0.116  10.4         0.131  11.1              4                   0.88       0.88
+- outscfcv([PAW]prtden)                     0.001   0.1         0.001   0.1              4                   1.00       1.00
+- outscfcv(output GSR)                      0.113  10.1         0.126  10.8              4                   0.90       0.90
 - outscfcv(prt_ebands)                      0.000   0.0         0.000   0.0              4                   0.99       0.99
 
-- subtotal                                  0.118  10.5         0.159  13.4                                  0.74       0.74
+- subtotal                                  0.115  10.3         0.128  11.0                                  0.90       0.90
 
  Partitioning of lobpcgwf2 core engine
-- lobpcgwf2                                 0.131  11.8         0.131  11.1             48                   1.00       1.00
+- lobpcgwf2                                 0.138  12.3         0.138  11.8             48                   1.00       1.00
  
 - lobpcg_Bortho(X)                          0.002   0.2         0.002   0.2             96                   1.00       1.00
 - lobpcg_Bortho(XW)                         0.003   0.3         0.003   0.3             96                   1.00       1.00
-- lobpcg_Bortho(XWP)                        0.009   0.8         0.009   0.8            188                   1.00       1.00
+- lobpcg_Bortho(XWP)                        0.009   0.9         0.009   0.8            190                   1.00       1.00
 - lobpcg_Bortho(Xall)                       0.002   0.1         0.002   0.1             48                   1.00       1.00
-- lobpcg_RR(X)                              0.004   0.3         0.004   0.3             96                   1.00       1.00
-- lobpcg_RR(XW)                             0.008   0.7         0.008   0.7             96                   1.00       1.00
-- lobpcg_RR(XWP)                            0.020   1.8         0.020   1.7            188                   1.00       1.00
+- lobpcg_RR(X)                              0.004   0.4         0.004   0.3             96                   1.00       1.00
+- lobpcg_RR(XW)                             0.009   0.8         0.009   0.8             96                   1.00       1.00
+- lobpcg_RR(XWP)                            0.022   1.9         0.022   1.9            190                   1.00       1.00
 - lobpcg_RR(Xall)                           0.002   0.2         0.002   0.2             48                   1.00       1.00
-- lobpcg_init                               0.001   0.1         0.001   0.1             48                   1.01       1.01
-- lobpcg_copy                               0.001   0.1         0.001   0.1            384                   1.00       1.00
-- lobpcg_orthoWrtPrev                       0.002   0.2         0.002   0.2            192                   0.99       0.99
-- lobpcg_nbdbuf                             0.001   0.1         0.001   0.1            380                   0.99       0.99
-- lobpcg_nonlop                             0.002   0.2         0.002   0.2             48                   1.00       1.00
-- lobpcg_maxResidu                          0.002   0.2         0.002   0.2            760                   1.00       1.00
-- lobpcg_run@getAX_BX                       0.066   5.9         0.066   5.6            380                   1.00       1.00
-- lobpcg_pcond                              0.002   0.1         0.002   0.1            380                   1.00       1.00
+- lobpcg_init                               0.001   0.1         0.001   0.0             48                   1.00       1.00
+- lobpcg_copy                               0.001   0.1         0.001   0.1            384                   1.01       1.01
+- lobpcg_orthoWrtPrev                       0.002   0.2         0.002   0.2            192                   1.00       1.00
+- lobpcg_nbdbuf                             0.001   0.1         0.001   0.1            382                   1.00       1.00
+- lobpcg_enl                                0.002   0.2         0.002   0.2             48                   1.00       1.00
+- lobpcg_maxResidu                          0.003   0.3         0.003   0.2            764                   1.01       1.01
+- lobpcg_run@getAX_BX                       0.069   6.2         0.069   5.9            382                   1.00       1.00
+- lobpcg_pcond                              0.002   0.2         0.002   0.2            382                   0.99       0.99
+- lobpcg(other)                             0.003   0.3         0.003   0.3             48                   0.99       0.99
 
-- subtotal                                  0.128  11.5         0.128  10.8                                  1.00       1.00
+- subtotal                                  0.138  12.3         0.138  11.8                                  1.00       1.00
 
  Partitioning of low-level xgBlock type
-- xgBlock_gemm(blas)                        0.016   1.4         0.016   1.4           4604                   0.99       0.99
+- xgBlock_gemm(blas)                        0.016   1.5         0.016   1.4           4630                   0.99       0.99
  
-- xgBlock_trsm                              0.007   0.6         0.007   0.6           1284                   1.00       1.00
-- xgBlock_potrf                             0.001   0.0         0.001   0.0            428                   1.00       1.00
-- xgBlock_zero                              0.002   0.2         0.002   0.2           2384                   1.00       1.00
-- xgBlock_zero_im_g0                        0.003   0.3         0.003   0.3           4272                   1.00       1.00
-- xgBlock_heevd                             0.001   0.1         0.001   0.1            144                   0.98       0.98
-- xgBlock_hegvd                             0.003   0.3         0.003   0.3            284                   0.99       0.99
-- xgBlock_copy                              0.003   0.3         0.003   0.3           3376                   1.01       1.01
-- xgBlock_cshift                            0.000   0.0         0.000   0.0            284                   0.99       0.99
-- xgBlock_gemm(mpi)                         0.002   0.2         0.002   0.1           2276                   1.02       1.02
-- xgBlock_apply_diag                        0.001   0.1         0.001   0.1            380                   1.01       1.01
-- xgBlock_colwiseMul                        0.000   0.0         0.000   0.0            380                   0.98       0.98
-- xgBlock_colwiseCymax                      0.000   0.0         0.000   0.0            380                   0.96       0.96
-- xgBlock_colwiseNorm2                      0.000   0.0         0.000   0.0            380                   1.00       1.00
-- xgBlock_minmax                            0.000   0.0         0.000   0.0            380                   0.98       0.98
+- xgBlock_trsm                              0.007   0.6         0.007   0.6           1290                   0.99       0.99
+- xgBlock_potrf                             0.001   0.0         0.001   0.0            430                   1.00       1.00
+- xgBlock_zero                              0.002   0.2         0.002   0.2           2392                   1.01       1.01
+- xgBlock_zero_im_g0                        0.003   0.3         0.003   0.3           4296                   1.00       1.00
+- xgBlock_heevd                             0.001   0.1         0.001   0.1            144                   0.99       0.99
+- xgBlock_hegvd                             0.004   0.4         0.004   0.3            286                   0.99       0.99
+- xgBlock_copy                              0.003   0.3         0.003   0.3           3392                   1.01       1.01
+- xgBlock_cshift                            0.000   0.0         0.000   0.0            286                   0.93       0.93
+- xgBlock_gemm(mpi)                         0.002   0.1         0.002   0.1           2290                   0.99       0.99
+- xgBlock_apply_diag                        0.001   0.1         0.001   0.1            382                   1.00       1.00
+- xgBlock_colwiseMul                        0.001   0.1         0.001   0.1            382                   0.99       0.99
+- xgBlock_colwiseCymax                      0.001   0.1         0.001   0.1            382                   1.00       1.00
+- xgBlock_colwiseNorm2                      0.000   0.0         0.000   0.0            382                   1.00       1.00
+- xgBlock_minmax                            0.000   0.0         0.000   0.0            382                   0.99       0.99
+- xgBlock_add                               0.002   0.2         0.002   0.2            858                   0.96       0.96
 
-- subtotal                                  0.025   2.2         0.025   2.1                                  1.00       1.00
+- subtotal                                  0.029   2.6         0.029   2.5                                  0.99       0.99
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                              0.001   0.1         0.001   0.1           1181                   1.03       1.03
+- communic.MPI                              0.001   0.1         0.001   0.1           1181                   1.02       1.02
 -
-- forstrnps:synchr                          0.000   0.0         0.000   0.0              8                   1.05       1.05
-- subtotal                                  0.000   0.0         0.000   0.0                                  1.05       1.05
+- forstrnps:synchr                          0.000   0.0         0.000   0.0              8                   1.02       1.02
+- subtotal                                  0.000   0.0         0.000   0.0                                  1.02       1.02
 
  Additional information
-- timana(1)                                 0.000   0.0         0.000   0.0              1                   1.01       1.01
-- total timab                               0.171  15.3         0.171  14.5         120071                   1.00       1.00
-- fourwf                                    0.104   9.3         0.104   8.8           1066                   1.00       1.00
-- mklocl(2)                                 0.000   0.0         0.000   0.0              4                   1.00       1.00
+- timana(1)                                 0.000   0.0         0.000   0.0              1                   0.99       0.99
+- total timab                               0.166  14.9         0.166  14.3         121065                   1.00       1.00
+- fourwf                                    0.110   9.9         0.111   9.5           1068                   1.00       1.00
+- mklocl(2)                                 0.000   0.0         0.000   0.0              4                   0.99       0.99
 - nonlop(forstr)                            0.001   0.1         0.001   0.1             16                   1.00       1.00
-- nonlop(total)                             0.027   2.4         0.027   2.3            810                   1.00       1.00
-- xc:fourdp                                 0.005   0.5         0.005   0.4            176                   1.00       1.00
+- nonlop(total)                             0.026   2.4         0.026   2.3            812                   0.99       0.99
+- xc:fourdp                                 0.005   0.5         0.005   0.5            176                   1.01       1.01
 
  Additional information about diagonalization algorithm segments
-- RayleighRitz@diago                        0.005   0.4         0.005   0.4            428                   1.00       1.00
-- RayleighRitz@gemm_1                       0.013   1.2         0.013   1.1            428                   1.00       1.00
-- RayleighRitz@gemm_2                       0.014   1.3         0.014   1.2            428                   1.00       1.00
+- RayleighRitz@diago                        0.006   0.5         0.006   0.5            430                   1.00       1.00
+- RayleighRitz@gemm_1                       0.013   1.2         0.013   1.1            430                   1.00       1.00
+- RayleighRitz@gemm_2                       0.015   1.4         0.015   1.3            430                   1.00       1.00
 
  timana : in multi dataset mode, the more detailed analysis is not done.
 
@@ -1283,7 +1284,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1295,12 +1296,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1318,7 +1319,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1333,7 +1334,7 @@ P           mkmem           2
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

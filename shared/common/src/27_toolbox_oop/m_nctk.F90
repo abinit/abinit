@@ -6,7 +6,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ MODULE m_nctk
  character(len=*),public,parameter :: etsfio_file_format = "ETSF Nanoquanta"
  character(len=*),public,parameter :: etsfio_conventions = "http://www.etsf.eu/fileformats/"
 
- integer,public,parameter :: etsfio_charlen = 80
+ integer,public,parameter :: etsfio_charlen = abi_slen
  ! The value corresponding to character_string_len
 
  real,public,parameter :: etsfio_version = 3.3
@@ -65,7 +65,6 @@ MODULE m_nctk
  integer,public,parameter :: nctk_slen = NF90_MAX_NAME
  ! String length used for the names of dimensions and variables
  ! The maximum allowable number of characters
-
 
  ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
@@ -221,8 +220,7 @@ MODULE m_nctk
  public :: nctk_write_datar
  public :: nctk_read_datar
 
- ! FIXME These routines are specific to anaddb
- !       and should be moved at the level of 77_ddb
+ ! FIXME These routines are specific to anaddb and should be moved at the level of 77_ddb
  public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
                                        ! in the presence of non-analytical behaviour.
  public :: nctk_defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
@@ -585,7 +583,7 @@ subroutine nctk_test_mpiio(print_warning)
  if ((.not. nctk_has_mpiio) .and. my_print_warning) then
    write(msg,"(5a)") &
       "The netcdf library does not support parallel IO, see message above",ch10,&
-      "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
+      "Abinit won't be able to produce files in parallel when e.g. paral_kgb == 1 is used.",ch10,&
       "Action: install a netcdf4+HDF5 library with MPI-IO support."
    ABI_WARNING(msg)
  end if
@@ -758,7 +756,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
- integer :: input_len, cmode !, ii, ich
+ integer :: input_len, cmode
  character(len=strlen) :: my_string
 ! *********************************************************************
 
@@ -767,14 +765,14 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
    write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
-   call wrtout(std_out,my_string)
+   call wrtout(std_out, my_string)
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
    ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, comm=comm, info=xmpio_info)
 #endif
  else
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
-   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
-   call wrtout(std_out,my_string)
+   write(my_string,'(2a)') "- Creating HDf5 file WITHOUT MPI-IO support: ",trim(path)
+   call wrtout(std_out, my_string)
    !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    cmode = def_cmode_for_seq_create
    ncerr = nf90_create(path, cmode=cmode, ncid=ncid)
@@ -796,32 +794,18 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  ! Define the basic dimensions used in ETSF-IO files.
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
- if (len_trim(INPUT_STRING) /= 0) then
+ ! INPUT_STRING is allocated and initialized in parsefile
+ if (allocated(INPUT_STRING)) then
    ! Write string with input.
    my_string = trim(INPUT_STRING)
    if (DTSET_IDX /= -1 .and. index(INPUT_STRING, "jdtset ") == 0) then
      my_string = "jdtset " // trim(itoa(DTSET_IDX)) // "  " // trim(INPUT_STRING)
    end if
 
-   ! Since INPUT_STRING contains many control characters at the end (likely because it's a global var)
-   ! and we want to save space on disk, we cannot use trim_len and we have to find the last alphanum char in my_string.
    input_len = len_trim(my_string)
-#if 0
-   do ii=len(my_string), 1, -1
-     ich = iachar(my_string(ii:ii))
-     select case(ich)
-     case(0:32)  ! space, tab, or control character
-       !write(std_out, *)"space/tab/control at: ",ii, "iachar: ",iachar(my_string(ii:ii)), "char:", my_string(ii:ii)
-       cycle
-     case default
-       input_len = ii !; write(std_out, *)"Exiting at ii: ",ii, "with: ",my_string(ii:ii)
-       exit
-     end select
-   end do
-#endif
-
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", input_len)))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("input_string", "c", "input_len")))
+   !print *, "input_len, strlen:", input_len, strlen
 
    if (xmpi_comm_rank(comm) == 0) then
      NCF_CHECK(nctk_set_datamode(ncid))
@@ -1057,19 +1041,29 @@ end function nctk_set_datamode
 !! INPUTS
 !!  ncid=Netcdf file identifier.
 !!  varid=Netcdf variable identifier.
+!!  [independent]=True of use indepedent mode.
 !!
 !! SOURCE
 
-integer function nctk_set_collective(ncid, varid) result(ncerr)
+integer function nctk_set_collective(ncid, varid, independent) result(ncerr)
 
 !Arguments ------------------------------------
- integer,intent(in) :: ncid,varid
+ integer,intent(in) :: ncid, varid
+ logical,optional,intent(in) :: independent
 
+!Local variables-------------------------------
+ logical :: independent__
 ! *********************************************************************true
 
   ncerr = nf90_einval
+  independent__ = .false.
 #ifdef HAVE_NETCDF_MPI
-  ncerr = nf90_var_par_access(ncid, varid, nf90_collective)
+  if (present(independent)) independent__ = independent
+  if (independent__) then
+    ncerr = nf90_var_par_access(ncid, varid, nf90_independent)
+  else
+    ncerr = nf90_var_par_access(ncid, varid, nf90_collective)
+  end if
 #else
   ABI_ERROR("nctk_set_collective should not be called if NETCDF does not support MPI-IO")
   ABI_UNUSED((/ncid, varid/))
@@ -2529,11 +2523,10 @@ end subroutine var_from_name
 !!
 !! INPUTS
 !!  ncid=netcdf file id.
-!!  iphl2=Index of the q-point to be written to file
-!!  nph2l=Number of qpoints.
-!!  qph2l(3,nph2l)=List of phonon wavevector directions along which the non-analytical correction
-!!    to the Gamma-point phonon frequencies will be calculated
-!!    The direction is in CARTESIAN COORDINATES
+!!  iq_dir=Index of the q-point to be written to file
+!!  ndirs=Number of qpoints.
+!!  qdirs_cart(3,ndirs)=List of phonon wavevector directions along which the non-analytical correction
+!!    to the Gamma-point phonon frequencies will be calculated. The direction is in CARTESIAN COORDINATES
 !!  natom=Number of atoms
 !!  phfrq(3*natom)=Phonon frequencies in Ha
 !!  cart_displ(2,3*natom,3*natom)=displacements in CARTESIAN coordinates.
@@ -2543,27 +2536,23 @@ end subroutine var_from_name
 !!
 !! SOURCE
 
-subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
+subroutine nctk_defwrite_nonana_terms(ncid, iq_dir, ndirs, qdirs_cart, natom, phfrq, cart_displ, mode)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid,iphl2,nph2l,natom
+ integer,intent(in) :: ncid,iq_dir,ndirs,natom
  character(len=*),intent(in) :: mode
 !arrays
- real(dp),intent(in) :: qph2l(3, nph2l)
- real(dp),intent(in) :: phfrq(3*natom)
- real(dp),intent(in) :: cart_displ(2,3*natom,3*natom)
+ real(dp),intent(in) :: qdirs_cart(3, ndirs), phfrq(3*natom), cart_displ(2,3*natom,3*natom)
 
 !Local variables-------------------------------
-!scalars
  integer :: ncerr, na_phmodes_varid, na_phdispl_varid
-
 ! *************************************************************************
 
  select case (mode)
  case ("define")
    !NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
-   ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", nph2l)], defmode=.True.)
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_non_analytical_directions", ndirs)], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [&
@@ -2574,15 +2563,15 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qph2l))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "non_analytical_directions"), qdirs_cart))
 
  case ("write")
 
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phonon_modes", na_phmodes_varid))
-   NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iphl2], count=[3*natom, 1]))
+   NCF_CHECK(nf90_put_var(ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iq_dir], count=[3*natom, 1]))
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
    ncerr = nf90_put_var(ncid,na_phdispl_varid,cart_displ*Bohr_Ang,&
-   start=[1,1,1,iphl2], count=[2,3*natom,3*natom, 1])
+   start=[1,1,1,iq_dir], count=[2,3*natom,3*natom, 1])
    NCF_CHECK(ncerr)
 
  case default
@@ -2601,9 +2590,9 @@ end subroutine nctk_defwrite_nonana_terms
 !!
 !! INPUTS
 !!  ncid=netcdf file id.
-!!  iphl2=Index of the q-point to be written to file.
-!!  nph2l=Number of qpoints.
-!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iphl2.
+!!  iq_dir=Index of the q-point to be written to file.
+!!  ndirs=Number of qpoints.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iq_dir.
 !!  natom=Number of atoms
 !!
 !! OUTPUT
@@ -2611,11 +2600,11 @@ end subroutine nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
-subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mode)
+subroutine nctk_defwrite_nonana_raman_terms(ncid, iq_dir, ndirs, natom, rsus, mode)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ncid,natom,iphl2,nph2l
+ integer,intent(in) :: ncid,natom,iq_dir,ndirs
  character(len=*),intent(in) :: mode
 !arrays
  real(dp),intent(in) :: rsus(3*natom,3,3)
@@ -2626,10 +2615,8 @@ subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mod
 
 ! *************************************************************************
 
-!Fake use of nph2l, to keep it as argument. This should be removed when nph2l will be used.
- if(.false.)then
-  ncerr=nph2l
- end if
+ ! Fake use of ndirs, to keep it as argument. This should be removed when ndirs will be used.
+ if(.false.) ncerr=ndirs
 
  select case (mode)
  case ("define")
@@ -2642,8 +2629,7 @@ subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mod
 
  case ("write")
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
-   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus,&
-     start=[iphl2,1,1,1], count=[1,3*natom,3,3])
+   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus, start=[iq_dir,1,1,1], count=[1,3*natom,3,3])
    NCF_CHECK(ncerr)
 
  case default
@@ -2717,7 +2703,7 @@ end subroutine nctk_defwrite_raman_terms
 !!
 !! SOURCE
 
-subroutine create_nc_file (filename,ncid)
+subroutine create_nc_file(filename, ncid)
 
 !Arguments ------------------------------------
 !scalars

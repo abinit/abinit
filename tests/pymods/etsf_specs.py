@@ -26,14 +26,14 @@ def all_subclasses(cls):
     Given a class `cls`, this recursive function returns a list with
     all subclasses, subclasses of subclasses, and so on.
     """
-    subclasses = cls.__subclasses__() 
+    subclasses = cls.__subclasses__()
     return subclasses + [g for s in subclasses for g in all_subclasses(s)]
 
 
 class EtsfObject(object):
     """
     Base class for netcdf Dimensions, Variables, Attributes.
-    Subclasses implement a `validate` method that receives a nc dataset 
+    Subclasses implement a `validate` method that receives a nc dataset
     and return a list of errors (strings).
     """
     def __str__(self):
@@ -69,7 +69,7 @@ class EtsfDimension(EtsfObject):
 class EtsfAttribute(EtsfObject):
     """A dimension has a name, a type and, optionally, a shape and list of allowed values."""
     def __init__(self, name, xtype, shape=None, allowed=None):
-        self.name = name 
+        self.name = name
         self.allowed = allowed
 
     def validate(self, ncdata):
@@ -84,7 +84,7 @@ class EtsfAttribute(EtsfObject):
 
         # Check if value is allowed.
         if self.allowed is not None:
-            value = nc_attrs[self.name] 
+            value = nc_attrs[self.name]
             if value not in self.allowed:
                 eapp("Value %s is not allowed" % str(value))
 
@@ -147,7 +147,7 @@ class EtsfVariable(EtsfObject):
 
         # Test allowed values.
         if self.allowed is not None:
-            assert not ncvar.shape 
+            assert not ncvar.shape
             try:
                 value = ncvar.getValue()[0] if not ncvar.shape else ncvar[:]
             except IndexError:
@@ -187,7 +187,7 @@ class VariableWithUnits(EtsfVariable):
         ncvar = ncdata.variables[self.name]
         nc_attrs = ncvar.ncattrs()
         if "scale_to_atomic_units" not in nc_attrs:
-            errors.append("scale_to_atomic_units attribute must be specified") 
+            errors.append("scale_to_atomic_units attribute must be specified")
 
         return errors
 
@@ -207,10 +207,10 @@ mandatory_attributes = [file_format, file_format_version, Conventions]
 # Optional attributes
 # This table presents optional attributes for ETSF NetCDF files.
 #################################################################
-history	= EtsfAttribute("history", "char", [1024])	
-title = EtsfAttribute("title", "char", [80])	
+history	= EtsfAttribute("history", "char", [1024])
+title = EtsfAttribute("title", "char", [80])
 
-k_dependent = EtsfAttribute("k_dependent", "char", [80], allowed=["yes", "no"])	
+k_dependent = EtsfAttribute("k_dependent", "char", [80], allowed=["yes", "no"])
 # Attribute of number_of_states, flag-type, see Flag-like attributes.
 
 symmorphic = EtsfAttribute("symmorphic", "char", [80], allowed=["yes", "no"])
@@ -218,8 +218,8 @@ symmorphic = EtsfAttribute("symmorphic", "char", [80], allowed=["yes", "no"])
 
 ##################################################################
 # Generic attributes of variables
-# A few attributes might apply to a large number of variables. 
-# The following table presents the generic attributes that might 
+# A few attributes might apply to a large number of variables.
+# The following table presents the generic attributes that might
 # be mandatory for selected variables in ETSF NetCDF files.
 ##################################################################
 units = EtsfAttribute("units", "char", [80])
@@ -245,8 +245,8 @@ symbol_length = EtsfDimension("symbol_length", "integer", allowed=[2])
 
 ##############################################################################
 # Dimensions that can be split
-# This table list the dimensions that might be used to define a splitting 
-# (e.g. in case of parallelism). 
+# This table list the dimensions that might be used to define a splitting
+# (e.g. in case of parallelism).
 ##############################################################################
 max_number_of_states = EtsfDimension("max_number_of_states", "integer")
 number_of_kpoints = EtsfDimension("number_of_kpoints", "integer")
@@ -269,7 +269,7 @@ pseudopotential_types = EtsfVariable("pseudopotential_types", "char", [number_of
 ######################
 # Electronic structure
 ######################
-number_of_electrons = EtsfVariable("number_of_electrons", "integer", [])	
+number_of_electrons = EtsfVariable("number_of_electrons", "integer", [])
 exchange_functional = EtsfVariable("exchange_functional", "char", [character_string_length])
 correlation_functional = EtsfVariable("correlation_functional", "char", [character_string_length])
 fermi_energy = VariableWithUnits("fermi_energy", "double", [], reqattrs=[units])
@@ -293,16 +293,16 @@ monkhorst_pack_folding = EtsfVariable("monkhorst_pack_folding", "integer", [numb
 ###################################################################################
 primitive_vectors = EtsfVariable("primitive_vectors", "double", [number_of_vectors, number_of_cartesian_directions])
 
-reduced_symmetry_matrices = EtsfVariable("reduced_symmetry_matrices", "integer", 
+reduced_symmetry_matrices = EtsfVariable("reduced_symmetry_matrices", "integer",
   [number_of_symmetry_operations, number_of_reduced_dimensions, number_of_reduced_dimensions],
   reqattrs=[symmorphic]) # The "symmorphic" attribute is needed.
 
-reduced_symmetry_translations = EtsfVariable("reduced_symmetry_translations", "double", 
+reduced_symmetry_translations = EtsfVariable("reduced_symmetry_translations", "double",
     [number_of_symmetry_operations, number_of_reduced_dimensions])
 # The "symmorphic" attribute is needed.
 
 # In principle: allowed=range(1, 233)) but I usually use 0 when the space_group is not avaiable
-space_group = EtsfVariable("space_group", "integer", [], allowed=range(0, 233)) 
+space_group = EtsfVariable("space_group", "integer", [], allowed=range(0, 233))
 atom_species = EtsfVariable("atom_species", "integer", [number_of_atoms]) # Between 1 and number_of_atom_species.
 
 reduced_atom_positions = EtsfVariable("reduced_atom_positions", "double", [number_of_atoms, number_of_reduced_dimensions])
@@ -313,42 +313,42 @@ chemical_symbols = EtsfVariable("chemical_symbol", "char", [number_of_atom_speci
 ##########
 # K-points
 ##########
-reduced_coordinates_of_kpoints = EtsfVariable("reduced_coordinates_of_kpoints", "double", 
+reduced_coordinates_of_kpoints = EtsfVariable("reduced_coordinates_of_kpoints", "double",
     [number_of_kpoints, number_of_reduced_dimensions])
 kpoint_weights = EtsfVariable("kpoint_weights", "double", [number_of_kpoints])
 
 ########
 # States
 ########
-number_of_states = EtsfVariable("number_of_states", "integer", [number_of_spins, number_of_kpoints], 
+number_of_states = EtsfVariable("number_of_states", "integer", [number_of_spins, number_of_kpoints],
     reqattrs=[k_dependent])  # The attribute "k_dependent" must be defined.
 
 eigenvalues = VariableWithUnits("eigenvalues", "double", [number_of_spins, number_of_kpoints, max_number_of_states])
 occupations = EtsfVariable("occupations", "double", [number_of_spins, number_of_kpoints, max_number_of_states])
 
 # Density
-# A density in such a format (represented on a 3D homogeneous grid) is suited for the representation 
+# A density in such a format (represented on a 3D homogeneous grid) is suited for the representation
 # of smooth densities, as obtained naturally from pseudopotential calculations using plane waves.
 # This specification for a density can also accommodate the response densities of Density-Functional Perturbation Theory.
 
-density = VariableWithUnits("density", "double", [number_of_components, number_of_grid_points_vector3, 
+density = VariableWithUnits("density", "double", [number_of_components, number_of_grid_points_vector3,
             number_of_grid_points_vector2, number_of_grid_points_vector1, real_or_complex_density],
             reqattrs=[units])
-# By default, the density is given in atomic units, that is, number of electrons per Bohr3. 
+# By default, the density is given in atomic units, that is, number of electrons per Bohr3.
 # The "units" attribute is required. The attribute "scale_to_atomic_units" might also be mandatory
 
 # Exchange and correlation
-correlation_potential = VariableWithUnits("correlation_potential", "double", [number_of_components, 
+correlation_potential = VariableWithUnits("correlation_potential", "double", [number_of_components,
   number_of_grid_points_vector3, number_of_grid_points_vector2, number_of_grid_points_vector1, real_or_complex_potential],
   reqattrs=[units])
 #Units attribute required. The attribute scale to atomic units might also be mandatory
 
-exchange_potential = VariableWithUnits("exchange_potential", "double", [number_of_components, 
+exchange_potential = VariableWithUnits("exchange_potential", "double", [number_of_components,
   number_of_grid_points_vector3, number_of_grid_points_vector2, number_of_grid_points_vector1, real_or_complex_potential],
   reqattrs=[units])
 # Units attribute required. The attribute scale to atomic units might also be mandatory
 
-exchange_correlation_potential = VariableWithUnits("exchange_correlation_potential", "double", [number_of_components, 
+exchange_correlation_potential = VariableWithUnits("exchange_correlation_potential", "double", [number_of_components,
   number_of_grid_points_vector3, number_of_grid_points_vector2, number_of_grid_points_vector1, real_or_complex_potential],
   reqattrs=[units])
 # Units attribute required. The attribute "scale to atomic units" might also be mandatory
@@ -398,7 +398,7 @@ class EtsfGroup(object):
 
         if not ok:
             errors.extend(elist)
-                                                                                                
+
         # Test subgroups.
         for group in cls.subgroups:
             errors += group.validate(ncdata)
@@ -429,15 +429,15 @@ class CrystalGroup(EtsfGroup):
         atom_species
         reduced_atom_positions
 
-    At least one of the following variables defined in Atomic structure and symmetry operations, 
+    At least one of the following variables defined in Atomic structure and symmetry operations,
     to specify the kind of atoms:
 
         atomic_numbers
         atom_species_names
         chemical_symbols
 
-    The use of atomic_numbers is preferred. If atomic_numbers is not available, atom_species_names 
-    will be preferred over chemical_symbols. In case more than one such variables are present in a file, 
+    The use of atomic_numbers is preferred. If atomic_numbers is not available, atom_species_names
+    will be preferred over chemical_symbols. In case more than one such variables are present in a file,
     the same order of preference should be followed by the reading program.
     """
     attributes = mandatory_attributes
@@ -501,20 +501,20 @@ class DenPotGroup(EtsfGroup):
 
     The primitive vectors of the cell, as defined in Atomic structure and symmetry operations.
 
-    The density or potential, as defined in Density or Exchange and correlation. 
+    The density or potential, as defined in Density or Exchange and correlation.
     This variable must be the last, in order not to be limited to 4 GB.
 
-    As mentioned in General considerations and General specifications, such file might contain 
-    additional information agreed within ETSF, such as any of the variables specified in General specifications. 
-    It might even contain enough information to be declared a ETSF NetCDF file "containing crystallographic data or 
-    "containing the wavefunctions", or both. Such file might also contain additional information specific 
-    to the software that generated the file. It is not expected that this other software-specific information 
+    As mentioned in General considerations and General specifications, such file might contain
+    additional information agreed within ETSF, such as any of the variables specified in General specifications.
+    It might even contain enough information to be declared a ETSF NetCDF file "containing crystallographic data or
+    "containing the wavefunctions", or both. Such file might also contain additional information specific
+    to the software that generated the file. It is not expected that this other software-specific information
     be used by another software.
 
-    A ETSF NetCDF exchange, correlation, or exchange-correlation potential file should contain at least 
-    one variable among the three presented in Exchange and correlation in replacement of the specification 
-    of the density. The type and size of such variables are similar to the one of the density. 
-    The other variables required for a density are also required for a potential file. 
+    A ETSF NetCDF exchange, correlation, or exchange-correlation potential file should contain at least
+    one variable among the three presented in Exchange and correlation in replacement of the specification
+    of the density. The type and size of such variables are similar to the one of the density.
+    The other variables required for a density are also required for a potential file.
     Additional ETSF or software-specific information might be added, as described previously.
     The information might distributed among different files, thanks to the use of splitting of data for variables:
 
@@ -523,9 +523,9 @@ class DenPotGroup(EtsfGroup):
         number_of_grid_points_vector2
         number_of_grid_points_vector3
 
-    In case the splitting related to one of these variables is activated, then the corresponding variables 
-    in Auxiliary variables for splitting must be defined. Accordingly, the dimensions of the variables 
-    in Density and/or Exchange and correlation will be changed, to accommodate only the segment of data 
+    In case the splitting related to one of these variables is activated, then the corresponding variables
+    in Auxiliary variables for splitting must be defined. Accordingly, the dimensions of the variables
+    in Density and/or Exchange and correlation will be changed, to accommodate only the segment of data
     effectively contained in the file.
     """
     attributes = mandatory_attributes
@@ -556,10 +556,10 @@ class WavefunctionGroup(EtsfGroup):
 
     Specification
 
-    A ETSF NetCDF file "containing the wavefunctions" should contain at least the information needed to build 
-    the density from this file. Also, since the eigenvalues are intimately linked to eigenfunctions, 
-    it is expected that such a file contain eigenvalues. Of course, files might contain less information 
-    than the one required, but still follow the naming convention of ETSF. It might also contain more information, 
+    A ETSF NetCDF file "containing the wavefunctions" should contain at least the information needed to build
+    the density from this file. Also, since the eigenvalues are intimately linked to eigenfunctions,
+    it is expected that such a file contain eigenvalues. Of course, files might contain less information
+    than the one required, but still follow the naming convention of ETSF. It might also contain more information,
     of the kind specified in other tables of the present document.
 
     A ETSF NetCDF file "containing the wavefunctions" should contain the following set of mandatory information:
@@ -592,23 +592,23 @@ class WavefunctionGroup(EtsfGroup):
 
         max_number_of_coefficients
 
-    In case of a wavefunction given in terms of a Daubechies wavelet basis set, the following dimensions 
+    In case of a wavefunction given in terms of a Daubechies wavelet basis set, the following dimensions
     from Dimensions that can be split:
 
         max_number_of_basis_grid_points
         number_of_localization_regions
 
-    The primitive vectors of the cell, as defined in Atomic structure and 
+    The primitive vectors of the cell, as defined in Atomic structure and
     symmetry operations (variable primitive_vectors)
 
-    The symmetry operations, as defined in Atomic structure and symmetry operations 
+    The symmetry operations, as defined in Atomic structure and symmetry operations
     (given by the variables reduced_symmetry_translations and reduced_symmetry_matrices)
 
     The information related to each kpoint, as defined in K-points.
 
     The information related to each state (including eigenenergies and occupation numbers), as defined in States.
 
-    In case of basis set representation, the information related to the basis set, and the variable 
+    In case of basis set representation, the information related to the basis set, and the variable
     coefficients_of_wavefunctions, as defined in Wavefunctions.
 
     For basis_set equal to "plane_waves", the following variable is required from Wavefunctions:
@@ -624,11 +624,11 @@ class WavefunctionGroup(EtsfGroup):
 
         real_space_wavefunctions
 
-    As mentioned in General considerations and General specifications, such a file might contain 
-    additional information agreed on within ETSF, such as any of the variables specified in General specifications. 
-    It might even contain enough information to be declared a ETSF NetCDF file "containing crystallographic data" 
-    or "containing the density", or both. Such a file might also contain additional information specific 
-    to the software that generated the file. It is not expected that this other software-specific information 
+    As mentioned in General considerations and General specifications, such a file might contain
+    additional information agreed on within ETSF, such as any of the variables specified in General specifications.
+    It might even contain enough information to be declared a ETSF NetCDF file "containing crystallographic data"
+    or "containing the density", or both. Such a file might also contain additional information specific
+    to the software that generated the file. It is not expected that this other software-specific information
     be used by another software.
 
     The information might be distributed among different files, thanks to the use of splitting of data for variables:
@@ -646,9 +646,9 @@ class WavefunctionGroup(EtsfGroup):
     or
         max_number_of_coefficients
 
-    In case the splitting related to one of these variables is activated, then the corresponding variables 
-    in Split wavefunctions must be defined. Accordingly, the dimensions of the variables in K-points, States, 
-    Wavefunctions, and BSE/GW might have to be changed, to accommodate only the segment of data effectively 
+    In case the splitting related to one of these variables is activated, then the corresponding variables
+    in Split wavefunctions must be defined. Accordingly, the dimensions of the variables in K-points, States,
+    Wavefunctions, and BSE/GW might have to be changed, to accommodate only the segment of data effectively
     contained in the file.
     """
     dimensions = [
@@ -687,7 +687,7 @@ class PotentialGroup(DenPotGroup):
 
 def validate_vars(path):
     """
-    Validate the etsf variables declared in file `path`. 
+    Validate the etsf variables declared in file `path`.
     Return list of errors.
     """
     ncdata = netCDF4.Dataset(path, mode="r")
@@ -718,7 +718,7 @@ def validate_vars(path):
 
     for var, elist in zip(evars, all_errors):
         cprint("%s: Found [%d] error(s):" % (var, len(elist)), "red")
-        for i, e in enumerate(elist): 
+        for i, e in enumerate(elist):
             print("[%d] " % i, e)
 
     return all_errors
@@ -753,7 +753,7 @@ def validate_groups(path, groups):
     egroups, errors = [], []
     for group in groups:
         elist = group.validate(ncdata)
-        if elist: 
+        if elist:
             egroups.append(group)
             errors.append(elist)
     ncdata.close()
@@ -766,7 +766,7 @@ def validate_groups(path, groups):
             # I've seen this kind of error.
             logger.warning("relpath returned %s" % str(exc))
             title = "=== ERRORS IN FILE %s ===" % path
-                                                                        
+
         bar = "=" * len(title)
         cprint(bar, "magenta")
         cprint(title, "magenta")
@@ -774,10 +774,10 @@ def validate_groups(path, groups):
 
         for group, elist in zip(egroups, errors):
             print(group)
-            for i, e in enumerate(elist): 
+            for i, e in enumerate(elist):
                 print("[%d]" % i, e)
 
-        if wrong_datamodel: 
+        if wrong_datamodel:
             errors.append(wrong_datamodel)
             print(wrong_datamodel)
 
@@ -794,7 +794,7 @@ def validate_ncfile(path):
     # Every netcdf file produced by Abinit must be listed in this dictionary.
     # that maps the file extension to the list of Groups contained in the file.
     # Legacy files that do not have etsfio groups are tagged with None and ignored.
-    # New netcdf files introduced in Abinit should try to use the etsfio specs as much 
+    # New netcdf files introduced in Abinit should try to use the etsfio specs as much
     # as possible and extend the format to treat new cases.
     # Remember that gmatteo is watching you so don't try to hack this code.
     ext2groups = {
@@ -827,7 +827,7 @@ def validate_ncfile(path):
         "WFQ.nc": [WavefunctionGroup],
         #"DEN1.nc": [DensityGroup],
         #"POT1.nc": [PotentialGroup],
-        #"EIGR2D.nc": 
+        #"EIGR2D.nc":
         #"EIGI2D.nc":
 
         # Anaddb files
@@ -849,7 +849,7 @@ def validate_ncfile(path):
     groups = None
     fname = os.path.basename(path)
 
-    # DFPT files require regular expressions e.g. 
+    # DFPT files require regular expressions e.g.
     # _DS2_1WF6.nc, _DS2_DEN6, _DEN_POSITRON
     re_1wf = re.compile("(\w+_)1WF(\d+)(\.nc)$")
     re_1den = re.compile("(\w+_)DEN(\d+)(\.nc)$")

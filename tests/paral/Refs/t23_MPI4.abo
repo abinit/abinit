@@ -1,8 +1,8 @@
 
-.Version 5.6.x  of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel9.1 computer) 
+.Version 5.6.x  of ABINIT
+.(MPI version, prepared for a x86_64_linux_intel9.1 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 28 Aug 2008.
-  
+
 - input  file    -> /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/paral/Input/tW.in
 - output file    -> tW4.out
 - root for input  files -> tW.i
@@ -776,8 +776,8 @@ P    mkmem9        1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
    6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -802,7 +802,7 @@ P    mkmem9        1
 --------------------------------------------------------------------------------
 
 P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      63.000      63.000
 
 ================================================================================
@@ -823,7 +823,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
   sigma(1 1)= -8.19976757E-03  sigma(3 2)= -1.74753582E-03
   sigma(2 2)= -8.19976757E-03  sigma(3 1)= -1.74753582E-03
   sigma(3 3)= -8.19976757E-03  sigma(2 1)= -1.74753582E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -832,7 +832,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.475342853848438
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48454   0.58390   0.00004   0.00004   0.00004   0.00007   0.00007   0.00007
@@ -852,7 +852,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
   -0.00007  -0.00006  -0.07756  -0.00012  -0.00012  -0.07195  -0.00014  -0.00014
   -0.00007  -0.00006  -0.00012  -0.07756  -0.00012  -0.00014  -0.07195  -0.00014
   -0.00007  -0.00006  -0.00012  -0.00012  -0.07756  -0.00014  -0.00014  -0.07195
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.18502  15.88875   0.00110   0.00110   0.00110   0.00193   0.00193   0.00193
@@ -872,7 +872,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
   -0.00193  -0.00170  -2.11059  -0.00332  -0.00332  -1.95786  -0.00393  -0.00393
   -0.00193  -0.00170  -0.00332  -2.11059  -0.00332  -0.00393  -1.95786  -0.00393
   -0.00193  -0.00170  -0.00332  -0.00332  -2.11059  -0.00393  -0.00393  -1.95786
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.92840  -0.59362  -0.17140  -0.17140  -0.17140   0.08262   0.08262   0.08262
@@ -892,8 +892,8 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
   -0.08262   0.02116   0.11477  -0.16097  -0.16097   0.07492  -0.02357  -0.02357
   -0.08262   0.02116  -0.16097   0.11477  -0.16097  -0.02357   0.07492  -0.02357
   -0.08262   0.02116  -0.16097  -0.16097   0.11477  -0.02357  -0.02357   0.07492
- 
- 
+
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -908,7 +908,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
  rms dE/dt=  1.6490E+00; max dE/dt=  1.6490E+00; dE/dt below (all hartree)
     1       1.648977625063      1.648977625063      1.648977625063
     2      -1.648977625063     -1.648977625063     -1.648977625063
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
@@ -1004,7 +1004,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
 --------------------------------------------------------------------------------
 
 P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      63.000      63.000
 
 ================================================================================
@@ -1025,7 +1025,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
   sigma(1 1)= -8.19976757E-03  sigma(3 2)= -1.74753582E-03
   sigma(2 2)= -8.19976757E-03  sigma(3 1)= -1.74753582E-03
   sigma(3 3)= -8.19976757E-03  sigma(2 1)= -1.74753582E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1034,7 +1034,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.475342853850098
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48454   0.58390   0.00004   0.00004   0.00004   0.00007   0.00007   0.00007
@@ -1054,7 +1054,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
   -0.00007  -0.00006  -0.07756  -0.00012  -0.00012  -0.07195  -0.00014  -0.00014
   -0.00007  -0.00006  -0.00012  -0.07756  -0.00012  -0.00014  -0.07195  -0.00014
   -0.00007  -0.00006  -0.00012  -0.00012  -0.07756  -0.00014  -0.00014  -0.07195
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.18502  15.88875   0.00110   0.00110   0.00110   0.00193   0.00193   0.00193
@@ -1074,7 +1074,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
   -0.00193  -0.00170  -2.11059  -0.00332  -0.00332  -1.95786  -0.00393  -0.00393
   -0.00193  -0.00170  -0.00332  -2.11059  -0.00332  -0.00393  -1.95786  -0.00393
   -0.00193  -0.00170  -0.00332  -0.00332  -2.11059  -0.00393  -0.00393  -1.95786
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.92840  -0.59362  -0.17140  -0.17140  -0.17140   0.08262   0.08262   0.08262
@@ -1094,8 +1094,8 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
   -0.08262   0.02116   0.11477  -0.16097  -0.16097   0.07492  -0.02357  -0.02357
   -0.08262   0.02116  -0.16097   0.11477  -0.16097  -0.02357   0.07492  -0.02357
   -0.08262   0.02116  -0.16097  -0.16097   0.11477  -0.02357  -0.02357   0.07492
- 
- 
+
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1110,7 +1110,7 @@ P newkpt: treating     12 bands with npw=      32 for ikpt=   1 by node    0
  rms dE/dt=  1.6490E+00; max dE/dt=  1.6490E+00; dE/dt below (all hartree)
     1       1.648977625065      1.648977625065      1.648977625065
     2      -1.648977625065     -1.648977625065     -1.648977625065
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
@@ -1244,7 +1244,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  27 by node    0
 P newkpt: treating     12 bands with npw=      65 for ikpt=  28 by node    0
 P newkpt: treating     12 bands with npw=      65 for ikpt=  29 by node    0
 P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      65.000      64.996
 
 ================================================================================
@@ -1266,7 +1266,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
   sigma(1 1)=  1.20243126E-03  sigma(3 2)= -1.36496552E-04
   sigma(2 2)=  1.20243126E-03  sigma(3 1)= -1.36496552E-04
   sigma(3 3)=  1.20243126E-03  sigma(2 1)= -1.36496552E-04
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1275,7 +1275,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
  Compensation charge over fine fft grid    =      0.224327704307126
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.49094   0.59230   0.00002   0.00002   0.00002   0.00004   0.00004   0.00004
@@ -1295,7 +1295,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
   -0.00004  -0.00003  -0.08640  -0.00013  -0.00013  -0.08251  -0.00015  -0.00015
   -0.00004  -0.00003  -0.00013  -0.08640  -0.00013  -0.00015  -0.08251  -0.00015
   -0.00004  -0.00003  -0.00013  -0.00013  -0.08640  -0.00015  -0.00015  -0.08251
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.35909  16.11733   0.00056   0.00056   0.00056   0.00099   0.00099   0.00099
@@ -1315,7 +1315,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
   -0.00099  -0.00086  -2.35097  -0.00343  -0.00343  -2.24519  -0.00409  -0.00409
   -0.00099  -0.00086  -0.00343  -2.35097  -0.00343  -0.00409  -2.24519  -0.00409
   -0.00099  -0.00086  -0.00343  -0.00343  -2.35097  -0.00409  -0.00409  -2.24519
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.76319  -0.15331  -0.16988  -0.16988  -0.16988   0.08308   0.08308   0.08308
@@ -1335,8 +1335,8 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
   -0.08308   0.01235  -0.40359  -0.10479  -0.10479   0.14153   0.03322   0.03322
   -0.08308   0.01235  -0.10479  -0.40359  -0.10479   0.03322   0.14153   0.03322
   -0.08308   0.01235  -0.10479  -0.10479  -0.40359   0.03322   0.03322   0.14153
- 
- 
+
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1438,7 +1438,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
  rms dE/dt=  5.8434E-01; max dE/dt=  5.8434E-01; dE/dt below (all hartree)
     1       0.584343843932      0.584343843932      0.584343843932
     2      -0.584343843932     -0.584343843932     -0.584343843932
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
@@ -1737,7 +1737,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  27 by node    0
 P newkpt: treating     12 bands with npw=      65 for ikpt=  28 by node    0
 P newkpt: treating     12 bands with npw=      65 for ikpt=  29 by node    0
 P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      65.000      64.996
 
 ================================================================================
@@ -1759,7 +1759,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
   sigma(1 1)=  1.20243125E-03  sigma(3 2)= -1.36496552E-04
   sigma(2 2)=  1.20243125E-03  sigma(3 1)= -1.36496552E-04
   sigma(3 3)=  1.20243125E-03  sigma(2 1)= -1.36496552E-04
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -1768,7 +1768,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
  Compensation charge over fine fft grid    =      0.224327704312063
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.49094   0.59230   0.00002   0.00002   0.00002   0.00004   0.00004   0.00004
@@ -1788,7 +1788,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
   -0.00004  -0.00003  -0.08640  -0.00013  -0.00013  -0.08251  -0.00015  -0.00015
   -0.00004  -0.00003  -0.00013  -0.08640  -0.00013  -0.00015  -0.08251  -0.00015
   -0.00004  -0.00003  -0.00013  -0.00013  -0.08640  -0.00015  -0.00015  -0.08251
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.35909  16.11733   0.00056   0.00056   0.00056   0.00099   0.00099   0.00099
@@ -1808,7 +1808,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
   -0.00099  -0.00086  -2.35097  -0.00343  -0.00343  -2.24519  -0.00409  -0.00409
   -0.00099  -0.00086  -0.00343  -2.35097  -0.00343  -0.00409  -2.24519  -0.00409
   -0.00099  -0.00086  -0.00343  -0.00343  -2.35097  -0.00409  -0.00409  -2.24519
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.76319  -0.15331  -0.16988  -0.16988  -0.16988   0.08308   0.08308   0.08308
@@ -1828,8 +1828,8 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
   -0.08308   0.01235  -0.40359  -0.10479  -0.10479   0.14153   0.03322   0.03322
   -0.08308   0.01235  -0.10479  -0.40359  -0.10479   0.03322   0.14153   0.03322
   -0.08308   0.01235  -0.10479  -0.10479  -0.40359   0.03322   0.03322   0.14153
- 
- 
+
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1931,7 +1931,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
  rms dE/dt=  5.8434E-01; max dE/dt=  5.8434E-01; dE/dt below (all hartree)
     1       0.584343843998      0.584343843998      0.584343843998
     2      -0.584343843998     -0.584343843998     -0.584343843998
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
@@ -2297,7 +2297,7 @@ P newkpt: treating     12 bands with npw=      65 for ikpt=  30 by node    0
 --------------------------------------------------------------------------------
 
 P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      63.000      63.000
 
 ================================================================================
@@ -2320,7 +2320,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   sigma(1 1)= -8.19977408E-03  sigma(3 2)= -1.74753137E-03
   sigma(2 2)= -8.19977408E-03  sigma(3 1)= -1.74753137E-03
   sigma(3 3)= -8.19977408E-03  sigma(2 1)= -1.74753137E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2329,7 +2329,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.475342958232116
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48454   0.58390   0.00004   0.00004   0.00004   0.00007   0.00007   0.00007
@@ -2349,7 +2349,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00007  -0.00006  -0.07756  -0.00012  -0.00012  -0.07195  -0.00014  -0.00014
   -0.00007  -0.00006  -0.00012  -0.07756  -0.00012  -0.00014  -0.07195  -0.00014
   -0.00007  -0.00006  -0.00012  -0.00012  -0.07756  -0.00014  -0.00014  -0.07195
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.18502  15.88875   0.00110   0.00110   0.00110   0.00193   0.00193   0.00193
@@ -2369,7 +2369,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00193  -0.00170  -2.11059  -0.00332  -0.00332  -1.95786  -0.00393  -0.00393
   -0.00193  -0.00170  -0.00332  -2.11059  -0.00332  -0.00393  -1.95786  -0.00393
   -0.00193  -0.00170  -0.00332  -0.00332  -2.11059  -0.00393  -0.00393  -1.95786
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.92840  -0.59362  -0.17140  -0.17140  -0.17140   0.08262   0.08262   0.08262
@@ -2389,15 +2389,15 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.08262   0.02116   0.11477  -0.16097  -0.16097   0.07492  -0.02357  -0.02357
   -0.08262   0.02116  -0.16097   0.11477  -0.16097  -0.02357   0.07492  -0.02357
   -0.08262   0.02116  -0.16097  -0.16097   0.11477  -0.02357  -0.02357   0.07492
- 
- 
+
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   1.54000000000000E+00  1.54000000000000E+00  1.54000000000000E+00
  Cartesian forces (hart/bohr); max,rms= 2.35568E-01 2.35568E-01 (free atoms)
  -2.35568216481029E-01 -2.35568216481029E-01 -2.35568216481029E-01
   2.35568216481029E-01  2.35568216481029E-01  2.35568216481029E-01
- 
+
  At the end of Broyden step  0, total energy= -1.04202713614602E+01 Ha.
 
 
@@ -2423,7 +2423,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   sigma(1 1)= -7.29184061E-03  sigma(3 2)= -9.55626539E-03
   sigma(2 2)= -7.29184061E-03  sigma(3 1)= -9.55626539E-03
   sigma(3 3)= -7.29184061E-03  sigma(2 1)= -9.55626539E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2432,7 +2432,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.468314459878687
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48503   0.58453   0.00003   0.00003   0.00003   0.00006   0.00006   0.00006
@@ -2452,7 +2452,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00006  -0.00005  -0.07822  -0.00018  -0.00018  -0.07273  -0.00021  -0.00021
   -0.00006  -0.00005  -0.00018  -0.07822  -0.00018  -0.00021  -0.07273  -0.00021
   -0.00006  -0.00005  -0.00018  -0.00018  -0.07822  -0.00021  -0.00021  -0.07273
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.19825  15.90591   0.00075   0.00075   0.00075   0.00176   0.00176   0.00176
@@ -2472,7 +2472,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00176  -0.00134  -2.12848  -0.00489  -0.00489  -1.97920  -0.00578  -0.00578
   -0.00176  -0.00134  -0.00489  -2.12848  -0.00489  -0.00578  -1.97920  -0.00578
   -0.00176  -0.00134  -0.00489  -0.00489  -2.12848  -0.00578  -0.00578  -1.97920
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.89023  -0.57196  -0.01785  -0.01785  -0.01785  -0.00477  -0.00477  -0.00477
@@ -2492,15 +2492,15 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
    0.00477   0.02327   0.11259   0.09135   0.09135   0.04723   0.04694   0.04694
    0.00477   0.02327   0.09135   0.11259   0.09135   0.04694   0.04723   0.04694
    0.00477   0.02327   0.09135   0.09135   0.11259   0.04694   0.04694   0.04723
- 
- 
+
+
  Cartesian coordinates (bohr)
  -2.35568216481029E-01 -2.35568216481029E-01 -2.35568216481029E-01
   1.77556821648103E+00  1.77556821648103E+00  1.77556821648103E+00
  Cartesian forces (hart/bohr); max,rms= 3.94479E-01 3.94479E-01 (free atoms)
  -3.94478649874353E-01 -3.94478649874353E-01 -3.94478649874353E-01
   3.94478649874353E-01  3.94478649874353E-01  3.94478649874353E-01
- 
+
  At the end of Broyden step  1, total energy= -1.05079952682767E+01 Ha.
 
 
@@ -2526,7 +2526,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   sigma(1 1)= -6.20856115E-03  sigma(3 2)= -4.65316722E-03
   sigma(2 2)= -6.20856115E-03  sigma(3 1)= -4.65316722E-03
   sigma(3 3)= -6.20856115E-03  sigma(2 1)= -4.65316722E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2535,7 +2535,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.444097513091902
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48492   0.58440  -0.00032  -0.00032  -0.00032  -0.00034  -0.00034  -0.00034
@@ -2555,7 +2555,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
    0.00034   0.00040  -0.07811  -0.00004  -0.00004  -0.07261  -0.00005  -0.00005
    0.00034   0.00040  -0.00004  -0.07811  -0.00004  -0.00005  -0.07261  -0.00005
    0.00034   0.00040  -0.00004  -0.00004  -0.07811  -0.00005  -0.00005  -0.07261
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.19528  15.90240  -0.00859  -0.00859  -0.00859  -0.00916  -0.00916  -0.00916
@@ -2575,7 +2575,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
    0.00916   0.01096  -2.12559  -0.00108  -0.00108  -1.97581  -0.00127  -0.00127
    0.00916   0.01096  -0.00108  -2.12559  -0.00108  -0.00127  -1.97581  -0.00127
    0.00916   0.01096  -0.00108  -0.00108  -2.12559  -0.00127  -0.00127  -1.97581
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.87640  -0.53333  -0.00772  -0.00772  -0.00772   0.08639   0.08639   0.08639
@@ -2595,15 +2595,15 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.08639  -0.00236   0.04016   0.10039   0.10039   0.03013   0.02796   0.02796
   -0.08639  -0.00236   0.10039   0.04016   0.10039   0.02796   0.03013   0.02796
   -0.08639  -0.00236   0.10039   0.10039   0.04016   0.02796   0.02796   0.03013
- 
- 
+
+
  Cartesian coordinates (bohr)
  -5.88920541202572E-01 -5.88920541202572E-01 -5.88920541202572E-01
   2.12892054120257E+00  2.12892054120257E+00  2.12892054120257E+00
  Cartesian forces (hart/bohr); max,rms= 1.95449E-01 1.95449E-01 (free atoms)
   1.95448648493978E-01  1.95448648493978E-01  1.95448648493978E-01
  -1.95448648493978E-01 -1.95448648493978E-01 -1.95448648493978E-01
- 
+
  At the end of Broyden step  2, total energy= -1.06550424791272E+01 Ha.
 
 
@@ -2625,7 +2625,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  rms dE/dt=  1.3681E+00; max dE/dt=  1.3681E+00; dE/dt below (all hartree)
     1      -1.368140539458     -1.368140539458     -1.368140539458
     2       1.368140539458      1.368140539458      1.368140539458
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.31164332807489    -0.31164332807489    -0.31164332807489
     2      1.12657622930349     1.12657622930349     1.12657622930349
@@ -2724,7 +2724,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
 --------------------------------------------------------------------------------
 
 P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      63.000      63.000
 
 ================================================================================
@@ -2748,7 +2748,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   sigma(1 1)= -8.19973776E-03  sigma(3 2)= -1.74753692E-03
   sigma(2 2)= -8.19973776E-03  sigma(3 1)= -1.74753692E-03
   sigma(3 3)= -8.19973776E-03  sigma(2 1)= -1.74753692E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2757,7 +2757,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.475342809338148
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48454   0.58390   0.00004   0.00004   0.00004   0.00007   0.00007   0.00007
@@ -2777,7 +2777,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00007  -0.00006  -0.07756  -0.00012  -0.00012  -0.07195  -0.00014  -0.00014
   -0.00007  -0.00006  -0.00012  -0.07756  -0.00012  -0.00014  -0.07195  -0.00014
   -0.00007  -0.00006  -0.00012  -0.00012  -0.07756  -0.00014  -0.00014  -0.07195
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.18502  15.88875   0.00110   0.00110   0.00110   0.00193   0.00193   0.00193
@@ -2797,7 +2797,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00193  -0.00170  -2.11059  -0.00332  -0.00332  -1.95786  -0.00393  -0.00393
   -0.00193  -0.00170  -0.00332  -2.11059  -0.00332  -0.00393  -1.95786  -0.00393
   -0.00193  -0.00170  -0.00332  -0.00332  -2.11059  -0.00393  -0.00393  -1.95786
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.92840  -0.59362  -0.17140  -0.17140  -0.17140   0.08262   0.08262   0.08262
@@ -2817,15 +2817,15 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.08262   0.02116   0.11477  -0.16097  -0.16097   0.07492  -0.02357  -0.02357
   -0.08262   0.02116  -0.16097   0.11477  -0.16097  -0.02357   0.07492  -0.02357
   -0.08262   0.02116  -0.16097  -0.16097   0.11477  -0.02357  -0.02357   0.07492
- 
- 
+
+
  Cartesian coordinates (bohr)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   1.54000000000000E+00  1.54000000000000E+00  1.54000000000000E+00
  Cartesian forces (hart/bohr); max,rms= 2.35568E-01 2.35568E-01 (free atoms)
  -2.35568235165488E-01 -2.35568235165488E-01 -2.35568235165488E-01
   2.35568235165488E-01  2.35568235165488E-01  2.35568235165488E-01
- 
+
  At the end of Broyden step  0, total energy= -1.04202713614635E+01 Ha.
 
 
@@ -2851,7 +2851,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   sigma(1 1)= -7.27665215E-03  sigma(3 2)= -9.56163557E-03
   sigma(2 2)= -7.27665215E-03  sigma(3 1)= -9.56163557E-03
   sigma(3 3)= -7.27665215E-03  sigma(2 1)= -9.56163557E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2860,7 +2860,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.468604330604378
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48507   0.58459   0.00003   0.00003   0.00003   0.00006   0.00006   0.00006
@@ -2880,7 +2880,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00006  -0.00005  -0.07831  -0.00018  -0.00018  -0.07284  -0.00021  -0.00021
   -0.00006  -0.00005  -0.00018  -0.07831  -0.00018  -0.00021  -0.07284  -0.00021
   -0.00006  -0.00005  -0.00018  -0.00018  -0.07831  -0.00021  -0.00021  -0.07284
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.19933  15.90739   0.00072   0.00072   0.00072   0.00173   0.00173   0.00173
@@ -2900,7 +2900,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00173  -0.00130  -2.13081  -0.00489  -0.00489  -1.98199  -0.00578  -0.00578
   -0.00173  -0.00130  -0.00489  -2.13081  -0.00489  -0.00578  -1.98199  -0.00578
   -0.00173  -0.00130  -0.00489  -0.00489  -2.13081  -0.00578  -0.00578  -1.98199
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.88767  -0.57011  -0.01778  -0.01778  -0.01778  -0.00475  -0.00475  -0.00475
@@ -2920,15 +2920,15 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
    0.00475   0.02360   0.11457   0.09087   0.09087   0.04789   0.04752   0.04752
    0.00475   0.02360   0.09087   0.11457   0.09087   0.04752   0.04789   0.04752
    0.00475   0.02360   0.09087   0.09087   0.11457   0.04752   0.04752   0.04789
- 
- 
+
+
  Cartesian coordinates (bohr)
  -2.35568235165488E-01 -2.35568235165488E-01 -2.35568235165488E-01
   1.77556823516549E+00  1.77556823516549E+00  1.77556823516549E+00
  Cartesian forces (hart/bohr); max,rms= 3.94440E-01 3.94440E-01 (free atoms)
  -3.94440199339677E-01 -3.94440199339677E-01 -3.94440199339677E-01
   3.94440199339677E-01  3.94440199339677E-01  3.94440199339677E-01
- 
+
  At the end of Broyden step  1, total energy= -1.05079974831950E+01 Ha.
 
 
@@ -2953,7 +2953,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   sigma(1 1)= -6.20856388E-03  sigma(3 2)= -4.65316644E-03
   sigma(2 2)= -6.20856388E-03  sigma(3 1)= -4.65316644E-03
   sigma(3 3)= -6.20856388E-03  sigma(2 1)= -4.65316644E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -2962,7 +2962,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.444097511367682
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48492   0.58440  -0.00032  -0.00032  -0.00032  -0.00034  -0.00034  -0.00034
@@ -2982,7 +2982,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
    0.00034   0.00040  -0.07811  -0.00004  -0.00004  -0.07261  -0.00005  -0.00005
    0.00034   0.00040  -0.00004  -0.07811  -0.00004  -0.00005  -0.07261  -0.00005
    0.00034   0.00040  -0.00004  -0.00004  -0.07811  -0.00005  -0.00005  -0.07261
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.19528  15.90240  -0.00859  -0.00859  -0.00859  -0.00916  -0.00916  -0.00916
@@ -3002,7 +3002,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
    0.00916   0.01096  -2.12559  -0.00108  -0.00108  -1.97581  -0.00127  -0.00127
    0.00916   0.01096  -0.00108  -2.12559  -0.00108  -0.00127  -1.97581  -0.00127
    0.00916   0.01096  -0.00108  -0.00108  -2.12559  -0.00127  -0.00127  -1.97581
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.87640  -0.53333  -0.00772  -0.00772  -0.00772   0.08639   0.08639   0.08639
@@ -3022,15 +3022,15 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.08639  -0.00236   0.04016   0.10039   0.10039   0.03013   0.02796   0.02796
   -0.08639  -0.00236   0.10039   0.04016   0.10039   0.02796   0.03013   0.02796
   -0.08639  -0.00236   0.10039   0.10039   0.04016   0.02796   0.02796   0.03013
- 
- 
+
+
  Cartesian coordinates (bohr)
  -5.88920587913720E-01 -5.88920587913720E-01 -5.88920587913720E-01
   2.12892058791372E+00  2.12892058791372E+00  2.12892058791372E+00
  Cartesian forces (hart/bohr); max,rms= 1.95449E-01 1.95449E-01 (free atoms)
   1.95448699616845E-01  1.95448699616845E-01  1.95448699616845E-01
  -1.95448699616845E-01 -1.95448699616845E-01 -1.95448699616845E-01
- 
+
  At the end of Broyden step  2, total energy= -1.06550424243499E+01 Ha.
 
 
@@ -3052,7 +3052,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  rms dE/dt=  1.3681E+00; max dE/dt=  1.3681E+00; dE/dt below (all hartree)
     1      -1.368140897318     -1.368140897318     -1.368140897318
     2       1.368140897318      1.368140897318      1.368140897318
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.31164335279336    -0.31164335279336    -0.31164335279336
     2      1.12657625402196     1.12657625402196     1.12657625402196
@@ -3152,8 +3152,8 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
          ecut(hartree)=     60.500   => boxcut(ratio)=   2.07719
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
    6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3206,7 +3206,7 @@ P newkpt: treating     12 bands with npw=      87 for ikpt=  27 by node    0
 P newkpt: treating     12 bands with npw=      89 for ikpt=  28 by node    0
 P newkpt: treating     12 bands with npw=      87 for ikpt=  29 by node    0
 P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      88.016      88.010
 
 ================================================================================
@@ -3229,7 +3229,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   sigma(1 1)=  1.19435472E-03  sigma(3 2)= -1.35643471E-04
   sigma(2 2)=  1.19435472E-03  sigma(3 1)= -1.35643471E-04
   sigma(3 3)=  1.19435472E-03  sigma(2 1)= -1.35643471E-04
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3238,7 +3238,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Compensation charge over fine fft grid    =      0.224290522462622
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.49094   0.59230   0.00002   0.00002   0.00002   0.00004   0.00004   0.00004
@@ -3258,7 +3258,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00004  -0.00003  -0.08640  -0.00013  -0.00013  -0.08251  -0.00015  -0.00015
   -0.00004  -0.00003  -0.00013  -0.08640  -0.00013  -0.00015  -0.08251  -0.00015
   -0.00004  -0.00003  -0.00013  -0.00013  -0.08640  -0.00015  -0.00015  -0.08251
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.35908  16.11733   0.00056   0.00056   0.00056   0.00099   0.00099   0.00099
@@ -3278,7 +3278,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00099  -0.00086  -2.35100  -0.00343  -0.00343  -2.24522  -0.00409  -0.00409
   -0.00099  -0.00086  -0.00343  -2.35100  -0.00343  -0.00409  -2.24522  -0.00409
   -0.00099  -0.00086  -0.00343  -0.00343  -2.35100  -0.00409  -0.00409  -2.24522
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.76762  -0.15528  -0.17026  -0.17026  -0.17026   0.08309   0.08309   0.08309
@@ -3298,8 +3298,8 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.08309   0.01254  -0.40561  -0.10483  -0.10483   0.14201   0.03334   0.03334
   -0.08309   0.01254  -0.10483  -0.40561  -0.10483   0.03334   0.14201   0.03334
   -0.08309   0.01254  -0.10483  -0.10483  -0.40561   0.03334   0.03334   0.14201
- 
- 
+
+
  Unit cell characteristics :
   acell=  7.0000000000E+00  7.0000000000E+00  7.0000000000E+00
   rprim=  0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -3314,7 +3314,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Cartesian forces (hart/bohr); max,rms= 8.34763E-02 8.34763E-02 (free atoms)
  -8.34763115174309E-02 -8.34763115174309E-02 -8.34763115174309E-02
   8.34763115174309E-02  8.34763115174309E-02  8.34763115174309E-02
- 
+
  At the end of Broyden step  0, total energy= -1.14767792656204E+01 Ha.
 
 
@@ -3346,7 +3346,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   sigma(1 1)= -1.64399941E-03  sigma(3 2)= -2.70991319E-05
   sigma(2 2)= -1.64399941E-03  sigma(3 1)= -2.70991319E-05
   sigma(3 3)= -1.64399941E-03  sigma(2 1)= -2.70991319E-05
- 
+
 
  scprqt:  WARNING -
   nstep=   20 was not enough SCF cycles to converge;
@@ -3360,7 +3360,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Compensation charge over fine fft grid    =      0.244241990804454
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48695   0.58710   0.00000   0.00000   0.00000   0.00001   0.00001   0.00001
@@ -3380,7 +3380,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00001  -0.00001  -0.08063  -0.00003  -0.00003  -0.07563  -0.00003  -0.00003
   -0.00001  -0.00001  -0.00003  -0.08063  -0.00003  -0.00003  -0.07563  -0.00003
   -0.00001  -0.00001  -0.00003  -0.00003  -0.08063  -0.00003  -0.00003  -0.07563
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.25068  15.97574   0.00010   0.00010   0.00010   0.00018   0.00018   0.00018
@@ -3400,7 +3400,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00018  -0.00016  -2.19410  -0.00071  -0.00071  -2.05795  -0.00084  -0.00084
   -0.00018  -0.00016  -0.00071  -2.19410  -0.00071  -0.00084  -2.05795  -0.00084
   -0.00018  -0.00016  -0.00071  -0.00071  -2.19410  -0.00084  -0.00084  -2.05795
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.90777  -0.22013  -0.02830  -0.02830  -0.02830   0.01335   0.01335   0.01335
@@ -3420,8 +3420,8 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.01335   0.00210  -0.49560  -0.02284  -0.02284   0.17181   0.00717   0.00717
   -0.01335   0.00210  -0.02284  -0.49560  -0.02284   0.00717   0.17181   0.00717
   -0.01335   0.00210  -0.02284  -0.02284  -0.49560   0.00717   0.00717   0.17181
- 
- 
+
+
  Unit cell characteristics :
   acell=  6.7491855093E+00  6.7491855093E+00  6.7491855093E+00
   rprim=  0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -3436,7 +3436,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Cartesian forces (hart/bohr); max,rms= 1.66399E-02 1.66399E-02 (free atoms)
  -1.66398845608139E-02 -1.66398845608139E-02 -1.66398845608139E-02
   1.66398845608139E-02  1.66398845608139E-02  1.66398845608139E-02
- 
+
  At the end of Broyden step  1, total energy= -1.14968797868977E+01 Ha.
 
 
@@ -3458,7 +3458,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   sigma(1 1)=  3.26084999E-03  sigma(3 2)= -7.09733094E-06
   sigma(2 2)=  3.26084999E-03  sigma(3 1)= -7.09733094E-06
   sigma(3 3)=  3.26084999E-03  sigma(2 1)= -7.09733094E-06
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3467,7 +3467,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Compensation charge over fine fft grid    =      0.221675987469738
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.49098   0.59238   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -3487,7 +3487,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
    0.00000   0.00000  -0.08666   0.00001   0.00001  -0.08283   0.00001   0.00001
    0.00000   0.00000   0.00001  -0.08666   0.00001   0.00001  -0.08283   0.00001
    0.00000   0.00000   0.00001   0.00001  -0.08666   0.00001   0.00001  -0.08283
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.36033  16.11948  -0.00005  -0.00005  -0.00005  -0.00009  -0.00009  -0.00009
@@ -3507,7 +3507,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
    0.00009   0.00008  -2.35816   0.00031   0.00031  -2.25380   0.00037   0.00037
    0.00009   0.00008   0.00031  -2.35816   0.00031   0.00037  -2.25380   0.00037
    0.00009   0.00008   0.00031   0.00031  -2.35816   0.00037   0.00037  -2.25380
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.76408  -0.16350   0.01580   0.01580   0.01580  -0.00718  -0.00718  -0.00718
@@ -3527,8 +3527,8 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
    0.00718  -0.00097  -0.41238   0.01320   0.01320   0.13820  -0.00377  -0.00377
    0.00718  -0.00097   0.01320  -0.41238   0.01320  -0.00377   0.13820  -0.00377
    0.00718  -0.00097   0.01320   0.01320  -0.41238  -0.00377  -0.00377   0.13820
- 
- 
+
+
  Unit cell characteristics :
   acell=  6.9776383933E+00  6.9776383933E+00  6.9776383933E+00
   rprim=  0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -3543,7 +3543,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Cartesian forces (hart/bohr); max,rms= 8.31900E-03 8.31900E-03 (free atoms)
   8.31900114232213E-03  8.31900114232213E-03  8.31900114232213E-03
  -8.31900114232213E-03 -8.31900114232213E-03 -8.31900114232213E-03
- 
+
  At the end of Broyden step  2, total energy= -1.14928467882833E+01 Ha.
 
 
@@ -3652,7 +3652,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  rms dE/dt=  5.8047E-02; max dE/dt=  5.8047E-02; dE/dt below (all hartree)
     1      -0.058046981765     -0.058046981765     -0.058046981765
     2       0.058046981765      0.058046981765      0.058046981765
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.06310444016174    -0.06310444016174    -0.06310444016174
     2      0.87803734139034     0.87803734139034     0.87803734139034
@@ -3947,7 +3947,7 @@ P newkpt: treating     12 bands with npw=      87 for ikpt=  27 by node    0
 P newkpt: treating     12 bands with npw=      89 for ikpt=  28 by node    0
 P newkpt: treating     12 bands with npw=      87 for ikpt=  29 by node    0
 P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      88.016      88.010
 
 ================================================================================
@@ -3969,7 +3969,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   sigma(1 1)=  1.19436448E-03  sigma(3 2)= -1.35638958E-04
   sigma(2 2)=  1.19436448E-03  sigma(3 1)= -1.35638958E-04
   sigma(3 3)=  1.19436448E-03  sigma(2 1)= -1.35638958E-04
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -3978,7 +3978,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Compensation charge over fine fft grid    =      0.224290342964678
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.49094   0.59230   0.00002   0.00002   0.00002   0.00004   0.00004   0.00004
@@ -3998,7 +3998,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00004  -0.00003  -0.08640  -0.00013  -0.00013  -0.08251  -0.00015  -0.00015
   -0.00004  -0.00003  -0.00013  -0.08640  -0.00013  -0.00015  -0.08251  -0.00015
   -0.00004  -0.00003  -0.00013  -0.00013  -0.08640  -0.00015  -0.00015  -0.08251
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.35908  16.11733   0.00056   0.00056   0.00056   0.00099   0.00099   0.00099
@@ -4018,7 +4018,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00099  -0.00086  -2.35100  -0.00343  -0.00343  -2.24522  -0.00409  -0.00409
   -0.00099  -0.00086  -0.00343  -2.35100  -0.00343  -0.00409  -2.24522  -0.00409
   -0.00099  -0.00086  -0.00343  -0.00343  -2.35100  -0.00409  -0.00409  -2.24522
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.76761  -0.15528  -0.17026  -0.17026  -0.17026   0.08309   0.08309   0.08309
@@ -4038,8 +4038,8 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.08309   0.01254  -0.40561  -0.10483  -0.10483   0.14201   0.03334   0.03334
   -0.08309   0.01254  -0.10483  -0.40561  -0.10483   0.03334   0.14201   0.03334
   -0.08309   0.01254  -0.10483  -0.10483  -0.40561   0.03334   0.03334   0.14201
- 
- 
+
+
  Unit cell characteristics :
   acell=  7.0000000000E+00  7.0000000000E+00  7.0000000000E+00
   rprim=  0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -4054,7 +4054,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Cartesian forces (hart/bohr); max,rms= 8.34764E-02 8.34764E-02 (free atoms)
  -8.34763547709922E-02 -8.34763547709922E-02 -8.34763547709922E-02
   8.34763547709922E-02  8.34763547709922E-02  8.34763547709922E-02
- 
+
  At the end of Broyden step  0, total energy= -1.14767792655810E+01 Ha.
 
 
@@ -4087,7 +4087,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   sigma(1 1)=  3.10045198E-04  sigma(3 2)= -4.50325249E-05
   sigma(2 2)=  3.10045198E-04  sigma(3 1)= -4.50325249E-05
   sigma(3 3)=  3.10045198E-04  sigma(2 1)= -4.50325249E-05
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4096,7 +4096,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Compensation charge over fine fft grid    =      0.241754521492986
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48766   0.58803   0.00000   0.00000   0.00000   0.00001   0.00001   0.00001
@@ -4116,7 +4116,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00001  -0.00001  -0.08171  -0.00003  -0.00003  -0.07691  -0.00003  -0.00003
   -0.00001  -0.00001  -0.00003  -0.08171  -0.00003  -0.00003  -0.07691  -0.00003
   -0.00001  -0.00001  -0.00003  -0.00003  -0.08171  -0.00003  -0.00003  -0.07691
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.26997  16.00103   0.00011   0.00011   0.00011   0.00019   0.00019   0.00019
@@ -4136,7 +4136,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00019  -0.00017  -2.22331  -0.00071  -0.00071  -2.09281  -0.00084  -0.00084
   -0.00019  -0.00017  -0.00071  -2.22331  -0.00071  -0.00084  -2.09281  -0.00084
   -0.00019  -0.00017  -0.00071  -0.00071  -2.22331  -0.00084  -0.00084  -2.09281
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.91134  -0.22705  -0.02834  -0.02834  -0.02834   0.01334   0.01334   0.01334
@@ -4156,8 +4156,8 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.01334   0.00214  -0.50867  -0.02262  -0.02262   0.17718   0.00721   0.00721
   -0.01334   0.00214  -0.02262  -0.50867  -0.02262   0.00721   0.17718   0.00721
   -0.01334   0.00214  -0.02262  -0.02262  -0.50867   0.00721   0.00721   0.17718
- 
- 
+
+
  Unit cell characteristics :
   acell=  6.7491834586E+00  6.7491834586E+00  6.7491834586E+00
   rprim=  0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -4172,7 +4172,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Cartesian forces (hart/bohr); max,rms= 1.67911E-02 1.67911E-02 (free atoms)
  -1.67910535027749E-02 -1.67910535027749E-02 -1.67910535027749E-02
   1.67910535027749E-02  1.67910535027749E-02  1.67910535027749E-02
- 
+
  At the end of Broyden step  1, total energy= -1.15092172595071E+01 Ha.
 
 
@@ -4194,7 +4194,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   sigma(1 1)= -4.76687163E-05  sigma(3 2)= -6.27983224E-06
   sigma(2 2)= -4.76687163E-05  sigma(3 1)= -6.27983224E-06
   sigma(3 3)= -4.76687163E-05  sigma(2 1)= -6.27983224E-06
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4203,7 +4203,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Compensation charge over fine fft grid    =      0.246331701954091
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    0.48696   0.58711   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -4223,7 +4223,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
    0.00000   0.00000  -0.08066   0.00000   0.00000  -0.07566   0.00000   0.00000
    0.00000   0.00000   0.00000  -0.08066   0.00000   0.00000  -0.07566   0.00000
    0.00000   0.00000   0.00000   0.00000  -0.08066   0.00000   0.00000  -0.07566
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1
   13.25090  15.97603   0.00001   0.00001   0.00001   0.00002   0.00002   0.00002
@@ -4243,7 +4243,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00002  -0.00002  -2.19492  -0.00008  -0.00008  -2.05892  -0.00010  -0.00010
   -0.00002  -0.00002  -0.00008  -2.19492  -0.00008  -0.00010  -2.05892  -0.00010
   -0.00002  -0.00002  -0.00008  -0.00008  -2.19492  -0.00010  -0.00010  -2.05892
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    1.95037  -0.24509  -0.00326  -0.00326  -0.00326   0.00153   0.00153   0.00153
@@ -4263,8 +4263,8 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
   -0.00153   0.00024  -0.53674  -0.00280  -0.00280   0.18893   0.00089   0.00089
   -0.00153   0.00024  -0.00280  -0.53674  -0.00280   0.00089   0.18893   0.00089
   -0.00153   0.00024  -0.00280  -0.00280  -0.53674   0.00089   0.00089   0.18893
- 
- 
+
+
  Unit cell characteristics :
   acell=  6.6937836336E+00  6.6937836336E+00  6.6937836336E+00
   rprim=  0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -4279,7 +4279,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  Cartesian forces (hart/bohr); max,rms= 2.01659E-03 2.01659E-03 (free atoms)
  -2.01658511863542E-03 -2.01658511863542E-03 -2.01658511863542E-03
   2.01658511863542E-03  2.01658511863542E-03  2.01658511863542E-03
- 
+
  At the end of Broyden step  2, total energy= -1.15104944787921E+01 Ha.
 
 
@@ -4388,7 +4388,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
  rms dE/dt=  1.3499E-02; max dE/dt=  1.3499E-02; dE/dt below (all hartree)
     1       0.013498584463      0.013498584463      0.013498584463
     2      -0.013498584463     -0.013498584463     -0.013498584463
- 
+
  cartesian coordinates (angstrom) at end:
     1     -0.05417269322405    -0.05417269322405    -0.05417269322405
     2      0.86910559445265     0.86910559445265     0.86910559445265
@@ -4756,8 +4756,8 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv5.6/trunk/devel-private3/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
    6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4782,7 +4782,7 @@ P newkpt: treating     12 bands with npw=      88 for ikpt=  30 by node    0
 
 P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
 P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
- 
+
  setup2: Arith. and geom. avg. npw (full set) are      63.000      63.000
 
 ================================================================================
@@ -4805,7 +4805,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   sigma(1 1)= -8.17911279E-03  sigma(3 2)= -1.74491812E-03
   sigma(2 2)= -8.17911279E-03  sigma(3 1)= -1.74491812E-03
   sigma(3 3)= -8.17911279E-03  sigma(2 1)= -1.74491812E-03
- 
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
@@ -4814,7 +4814,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  Compensation charge over fine fft grid    =      0.475544025109644
 
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Spin component 1
    0.48452   0.58388   0.00004   0.00004   0.00004   0.00007   0.00007   0.00007
@@ -4852,7 +4852,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00007  -0.00006  -0.07761  -0.00012  -0.00012  -0.07200  -0.00014  -0.00014
   -0.00007  -0.00006  -0.00012  -0.07761  -0.00012  -0.00014  -0.07200  -0.00014
   -0.00007  -0.00006  -0.00012  -0.00012  -0.07761  -0.00014  -0.00014  -0.07200
- 
+
  Total pseudopotential strength Dij (eV):
  Atom #  1 - Spin component 1
   13.18459  15.88830   0.00110   0.00110   0.00110   0.00193   0.00193   0.00193
@@ -4890,7 +4890,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.00193  -0.00171  -2.11174  -0.00332  -0.00332  -1.95924  -0.00393  -0.00393
   -0.00193  -0.00171  -0.00332  -2.11174  -0.00332  -0.00393  -1.95924  -0.00393
   -0.00193  -0.00171  -0.00332  -0.00332  -2.11174  -0.00393  -0.00393  -1.95924
- 
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Spin component 1
    0.96350  -0.29625  -0.08563  -0.08563  -0.08563   0.04127   0.04127   0.04127
@@ -4928,8 +4928,8 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
   -0.04127   0.01057   0.05798  -0.08030  -0.08030   0.03770  -0.01199  -0.01199
   -0.04127   0.01057  -0.08030   0.05798  -0.08030  -0.01199   0.03770  -0.01199
   -0.04127   0.01057  -0.08030  -0.08030   0.05798  -0.01199  -0.01199   0.03770
- 
- 
+
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -4947,7 +4947,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
  rms dE/dt=  1.6484E+00; max dE/dt=  1.6484E+00; dE/dt below (all hartree)
     1       1.648435557666      1.648435557666      1.648435557666
     2      -1.648435557666     -1.648435557666     -1.648435557666
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
@@ -5044,7 +5044,7 @@ P newkpt: treating     12 bands with npw=      63 for ikpt=   1 by node    0
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
      acell1   7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
      acell2   7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr

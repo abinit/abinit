@@ -9,6 +9,9 @@ macro(abi_build_exe exe_name)
 
   add_executable(${exe_name} ${exe_name}.F90)
 
+# add name to the list of all executables
+  Set(ALL_EXECUTABLES ${ALL_EXECUTABLES} "${exe_name}" CACHE INTERNAL "ALL_EXECUTABLES")
+
   target_include_directories(${exe_name}
     PRIVATE
     ${CMAKE_BINARY_DIR}
@@ -43,12 +46,25 @@ macro(abi_build_exe exe_name)
       abinit::libxc)
   endif (Libxc_FOUND)
 
+  if (HDF5_FOUND)
+    target_link_libraries(${exe_name}
+      PUBLIC
+      HDF5::HDF5)
+  endif (HDF5_FOUND)
+
   if (ABINIT_NETCDF_FOUND)
     target_link_libraries(${exe_name}
       PUBLIC
       abinit::netcdf-fortran
       abinit::netcdf)
   endif (ABINIT_NETCDF_FOUND)
+
+  if(HAVE_GPU_MARKERS)
+    target_link_libraries(${exe_name}
+      PUBLIC
+      abinit::gpu_markers
+      )
+  endif(HAVE_GPU_MARKERS)
 
   set_target_properties(${exe_name}
     PROPERTIES
@@ -69,6 +85,7 @@ abi_build_exe(fftprof)
 abi_build_exe(fold2Bloch)
 abi_build_exe(ioprof)
 abi_build_exe(lapackprof)
+abi_build_exe(lruj)
 abi_build_exe(macroave)
 abi_build_exe(mrgddb)
 abi_build_exe(mrgdv)

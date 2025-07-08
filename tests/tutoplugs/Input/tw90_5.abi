@@ -72,7 +72,7 @@ kptbounds2       0.00000000  0.00000000  0.00000000     # Paths
                 -0.25000000  0.25000000  0.25000000
 
 pp_dirpath       "$ABI_PSPDIR"
-pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/Cu.xml, Pseudodojo_paw_pw_standard/O.xml"
+pseudos          "Psdj_paw_pw_std/La.xml, Psdj_paw_pw_std/Cu.xml, Psdj_paw_pw_std/O.xml"
 
 
 ##############################################################

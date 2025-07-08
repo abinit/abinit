@@ -27,7 +27,7 @@
  typat  1 2
  znucl  31 33
 
- pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_fr_04_pbe_standard_psp8"
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_fr_04_pbe_std_psp8"
  pseudos "Ga.upf, As.upf"
  #pseudos "Ga.psp8, As.psp8"
 

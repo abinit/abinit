@@ -15,7 +15,7 @@ def isascii(string, verbose=False):
     """False if string contains non-ASCII characters."""
     return all(ord(c) < 128 for c in string)
 
-re_srcfile = re.compile("\.([Ff]|[Ff]90|finc|h|c|cu)$")
+re_srcfile = re.compile(r"\.([Ff]|[Ff]90|finc|h|c|cu)$")
 
 
 def is_srcfile(dirpath, fname):

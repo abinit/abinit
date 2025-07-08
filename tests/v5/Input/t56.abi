@@ -46,14 +46,14 @@ prtden 0   prtwf 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t56.abo, tolnlines = 0, tolabs = 2.994e-13, tolrel = 1.001e+00
+#%% files_to_test =
+#%%   t56.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = S. Caravati
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   Bulk jellium (the slab fills up the entire cell): computation of the total
 #%%   energy. Tested 3 Wigner-Seitz radii: 1.5, 2 (~aluminum), 4. For each
 #%%   Wigner-Seitz radius the energy per particle agrees with that analytically

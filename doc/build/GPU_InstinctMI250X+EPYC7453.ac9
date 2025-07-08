@@ -1,7 +1,7 @@
 # ================================================================
-# Configuration file for ABINIT 9 compilation
+# Configuration file for ABINIT 10.5 compilation
 #
-# CPU: AMD Trendo EPYC 7453
+# CPU: AMD Trento EPYC 7453
 # GPU: AMD Instinct MI250X 64 GB
 # Compilers: Cray Compiling Environment 23.12
 # Libraries: FTTW3, libSCI, HIP+ROCm
@@ -9,33 +9,25 @@
 
 #prefix=${ROOT}/install/${MY_ARCH}/abinit-gpu
 
+ROCM_PREFIX=${ROCM_PATH}
+
 # Compilers + flags
 # ========================================
-OMPGPU_FLAGS="-D__HIP_PLATFORM_AMD__  -h acc_model=auto_async_none:fast_addr:no_deep_copy"
-FCFLAGS_EXTRA="${OMPGPU_FLAGS} -h nofortran_ptr_alias -h nofortran_ptr_overlap -h list=a -O ipa0"
-CFLAGS_EXTRA="-D__HIP_PLATFORM_AMD__"
-CXXFLAGS_EXTRA="-D__HIP_PLATFORM_AMD__"
+with_optim_flavor="standard"
 
 # Parallel compilation
 # ========================================
 with_mpi="yes"
 with_debug_flavor="none"
 enable_mpi_io="yes"
-enable_mpi_inplace="yes"
 enable_openmp="yes"
-enable_openmp_offload="yes"
 
 # AMD GPU
 # ========================================
+with_rocm="${ROCM_PREFIX}"
+enable_openmp_offload="yes"
+enable_mpi_inplace="yes"
 GPU_ARCH=gfx90a
-ROCM_PREFIX=${ROCM_PATH}
-with_gpu="${ROCM_PREFIX}"
-with_gpu_flavor="hip-double"
-GPU_CFLAGS="-D__HIP_PLATFORM_AMD__ -I${ROCM_PREFIX}/include"
-GPU_CXXFLAGS="-D__HIP_PLATFORM_AMD__ -I${ROCM_PREFIX}/include"
-GPU_CPPFLAGS="-D__HIP_PLATFORM_AMD__ -I${ROCM_PREFIX}/include"
-GPU_FCFLAGS="-D__HIP_PLATFORM_AMD__ -I${ROCM_PREFIX}/include -I${HIPFORT_ROOT}/include/amdgcn"
-GPU_LIBS="-L${ROCM_PREFIX}/lib -lrocfft -lamdhip64 -lhipfft -lrocblas -lhipblas -lrocsolver -lhipsolver -lroctx64  -lstdc++ ${OPENMPGPU_FLAGS} "
 
 # Linear Algebra library
 # ========================================

@@ -1,0 +1,79 @@
+# LiF: non-SCF computation of groundstate wavefunctions
+# (preparatory run for VarPEq polaron calculations)
+
+ ndtset 4
+
+# DTSET 1-3: Gamma-centred k-meshes from 3x3x3 to 5x5x5 (for small hole polaron)
+ ngkpt1  3 3 3
+ ngkpt2  4 4 4
+ ngkpt3  5 5 5
+
+# DTSET 4: Gamma-centred k-meshes from 13x13x13 (for large electron polaron)
+ ngkpt4  13 13 13
+
+ nshiftk  1
+ shiftk   0.0  0.0  0.0
+
+################################################################################
+###                          Common input variables                          ###
+################################################################################
+
+# Number of bands
+ nband  6  # NOTE: for subsequent VarPEq runs at least one unnocupied band
+           # has to be included; here, 5 occupied + 1 unnocupied
+
+# Definition of the planewave basis
+ ecut  30
+
+# non-SCF optimization
+ iscf   -2
+ tolwfr  1e-20
+ nstep   100
+
+# Files
+ getden_filepath "LiF_eph_varpeq/gso_DEN.nc" # Read the precomputed DEN stored in git submodule
+                                             # NOTE: for the input parameters used to produce
+                                             # the DEN file, consult the LiF_eph_varpeq/gs.abi
+
+# Pseudopotentials
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_05_pbe_std_psp8"
+ pseudos "Li.psp8, F.psp8"
+
+# Structure
+ natom   2
+ ntypat  2
+ typat   1 2
+ znucl   3 9
+ xred    0.0  0.0  0.0
+         0.5  0.5  0.5
+
+ acell 3*7.675
+ rprim 0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_*
+#%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
+#%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
+#%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,
+#%%              teph4vpq_10.abi
+#%% [files]
+#%% use_git_submodule = LiF_eph_varpeq
+#%% files_to_test =
+#%%   teph4vpq_2.abo, tolnlines = 100, tolabs = 1e-5, tolrel = 1e-3
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = V. Vasilchenko
+#%% keywords = DFPT, EPH, POLARON
+#%% description =
+#%%   LiF, Fm-3m space group.
+#%%   Preparatory run for VarPEq calculations.
+#%%   Non-SCF computation of groundstate wavefunctions.
+#%%<END TEST_INFO>

@@ -11,7 +11,7 @@
 !!  one need the knowledge of several quantities at G-G0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
+!! Copyright (C) 1999-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -219,7 +219,6 @@ subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,gr
  character(len=500) :: msg
 !arrays
  integer :: gbase(3),grot(3)
-
 !************************************************************************
  !
  ! === Set up G-rotation table ===
@@ -302,7 +301,6 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
  real(dp) :: kptns1(3,nkpt1)
  real(dp),allocatable :: shlen(:)
  real(dp),pointer :: tnons(:,:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -569,7 +567,6 @@ subroutine gsph_in_fftbox(Gsph, Cryst, ngfft)
 !arrays
  integer :: n1_max(3),n2_max(3),n3_max(3),vec(3)
  integer,allocatable :: gvec(:,:)
-
 !************************************************************************
 
  ! Find ecut for the largest G-sphere contained in the FFT box.
@@ -1816,7 +1813,6 @@ subroutine kg_map(npw1, kg1, npw2, kg2, g2g1, nmiss)
 !arrays
  integer :: gmax(3),g1_max(3),g2_max(3)
  integer,allocatable :: iwork(:,:,:)
-
 !************************************************************************
 
  g1_max = maxval(abs(kg1))
@@ -1886,7 +1882,6 @@ subroutine make_istwfk_table(istwf_k,ng1,ng2,ng3,ig1_inver,ig2_inver,ig3_inver)
 !scalars
  integer :: i1,i2,i3
  character(len=500) :: msg
-
 !************************************************************************
 
 ! Initialize the inverse coordinates

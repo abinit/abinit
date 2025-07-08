@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h05 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tbase1_3/tbase1_3.abi
 - output file    -> tbase1_3.abo
 - root for input  files -> tbase1_3i
@@ -117,8 +117,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -138,7 +138,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -160,7 +160,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  5  -1.1171843456996    -6.165E-08 2.922E-11 9.525E-06 5.475E-05 2.691E-02
  ETOT  6  -1.1171843463486    -6.490E-10 1.734E-12 3.695E-07 1.013E-05 2.690E-02
 
- At SCF step    6, forces are sufficiently converged : 
+ At SCF step    6, forces are sufficiently converged :
   for the second time, max diff in force=  1.013E-05 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -236,7 +236,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  3  -1.1181409536076    -1.507E-07 1.295E-09 1.267E-04 1.571E-04 9.251E-03
  ETOT  4  -1.1181409705200    -1.691E-08 9.301E-11 2.737E-06 3.907E-05 9.212E-03
 
- At SCF step    4, forces are sufficiently converged : 
+ At SCF step    4, forces are sufficiently converged :
   for the second time, max diff in force=  3.907E-05 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -317,7 +317,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  4  -1.1182855183094    -4.281E-09 2.352E-11 7.304E-07 1.916E-05 1.230E-03
  ETOT  5  -1.1182855183625    -5.313E-11 4.421E-14 1.157E-08 1.112E-06 1.231E-03
 
- At SCF step    5, forces are sufficiently converged : 
+ At SCF step    5, forces are sufficiently converged :
   for the second time, max diff in force=  1.112E-06 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -399,7 +399,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  5  -1.1182883138008    -1.438E-12 1.038E-15 2.642E-10 1.697E-07 6.604E-05
  ETOT  6  -1.1182883138007     1.279E-13 2.667E-18 6.445E-12 7.190E-09 6.603E-05
 
- At SCF step    6, forces are sufficiently converged : 
+ At SCF step    6, forces are sufficiently converged :
   for the second time, max diff in force=  7.190E-09 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -462,7 +462,7 @@ force_length_stats: {min:   6.60322237E-05, max:   6.60322237E-05, mean:   6.603
            Absolute (Ha)=-2.79544E-06
            Relative     =-2.49975E-06
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 6.6032E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -529,7 +529,7 @@ band_energy         : -7.23961912630880E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
@@ -616,7 +616,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -633,12 +633,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -656,7 +656,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

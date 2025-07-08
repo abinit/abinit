@@ -13,7 +13,7 @@ berryopt -1
 # is done to speed the calculations.
 #
 # Note that for a cubic space group as found here, the primitive unit
-# cell is often represented as (0,a/2,a/2); (a/2,0,a/2); (a/2,a/2,0). 
+# cell is often represented as (0,a/2,a/2); (a/2,0,a/2); (a/2,a/2,0).
 # Here abinit uses 1/sqrt(2) as the normalizer and adjusts acell (the cell
 # length scale) accordingly. All this is copied from the output of the relaxation
 # run.
@@ -24,14 +24,14 @@ rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
            7.0710678119E-01  7.0710678119E-01  0.0000000000E+00
 
 #Definition of the atom types and pseudopotentials
- ntypat 2 # two types of atoms 
+ ntypat 2 # two types of atoms
  znucl 15 13 # the atom types are Phosphorous and Aluminum
 
 # the following norm-conserving pseudopotentials are stored in the abinit distribution, but are freely
 # available through www.pseudo-dojo.org
 # this set uses the Perdew-Wang parameterization of LDA for the xc model
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/P.psp8, Psdj_nc_sr_04_pw_std_psp8/Al.psp8"
 
 #Definition of the atoms
  natom 2 # two atoms in the cell
@@ -42,7 +42,7 @@ rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01
          # 4 filled bands.
 
 #atomic positions. Here we do three separate computations, where the Al atom is moved (manually)
-#from its equilibrium position at 0,0,0 in calculation 1, to (+/-0.01,0,0) offsets in calculations 
+#from its equilibrium position at 0,0,0 in calculation 1, to (+/-0.01,0,0) offsets in calculations
 #2 and 3. The P position is again taken from the value in the relaxation calculation done
 #previously.
 ndtset 3
@@ -50,7 +50,7 @@ jdtset 1 2 3
 
             xcart1     2.5713431044E+00  2.5713431044E+00  2.5713431044E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
- 
+
             xcart2     2.5713431044E+00  2.5713431044E+00  2.5713431044E+00
                        1.0000000000E-02  0.0000000000E+00  0.0000000000E+00
 
@@ -88,13 +88,13 @@ prteig 0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tpolarization_1.abo, tolnlines=  10, tolabs=  1.100e-08, tolrel=  3.000e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Zwanziger, M. Veithen
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%  Finite difference calculation of the Born effective charges of AlP
 #%%<END TEST_INFO>

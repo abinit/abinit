@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h09 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t64/t64.abi
 - output file    -> t64.abo
 - root for input  files -> t64i
@@ -262,8 +262,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -275,8 +275,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -5.99108991
          --- l  ekb(1:nproj) -->
@@ -581,7 +581,7 @@ meta: {optdriver: 1, rfstrs: 3, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   4
@@ -742,368 +742,368 @@ tolerances: {tolvrs: 1.00E-12, }
 
 
  ==> Compute Derivative Database <==
-  
+
   Ewald part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    4   1    4        -0.2181091364         0.0000000000
    1    4   1    5        -0.0000000000         0.0000000000
-  
+
    2    4   1    4        -0.3433989260         0.0000000000
    2    4   1    5        -0.0000000000         0.0000000000
-  
+
    3    4   1    4        -0.3433989260         0.0000000000
    3    4   1    5        -0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.5615080623         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5        -0.0000000000         0.0000000000
-  
+
    3    5   1    4        -0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   Ewald part of the internal strain coupling parameters
    (cartesian strain, reduced atomic coordinates)
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    4         0.0000000000         0.0000000000
    1    1   1    5         0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
-  
+
   Frozen wf local part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    4   1    4         0.0345594052         0.0000000000
    1    4   1    5        -0.0000000000         0.0000000000
-  
+
    2    4   1    4        -0.0057430590         0.0000000000
    2    4   1    5        -0.0000000000         0.0000000000
-  
+
    3    4   1    4        -0.0057430590         0.0000000000
    3    4   1    5        -0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5        -0.1202489293         0.0000000000
-  
+
    2    5   1    4        -0.0000000000         0.0000000000
    2    5   1    5        -0.0000000000         0.0000000000
-  
+
    3    5   1    4        -0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
-  Frozen wf local part of the internal strain coupling parameters 
+
+  Frozen wf local part of the internal strain coupling parameters
    (cartesian strain, reduced atomic coordinates)
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    4         0.0000000000         0.0000000000
    1    1   1    5         0.0000000000         0.0000000000
-  
+
    2    1   1    4         0.0000000000         0.0000000000
    2    1   1    5         0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5         0.0000000000         0.0000000000
-  
+
   Frozen wf nonlocal part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    4   1    4         0.9812734267         0.0000000000
    1    4   1    5        -0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.7501941216         0.0000000000
    2    4   1    5        -0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.7501941216         0.0000000000
    3    4   1    5        -0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.1262288288         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5         0.0000000000         0.0000000000
-  
-  Frozen wf nonlocal part of the internal strain coupling parameters 
+
+  Frozen wf nonlocal part of the internal strain coupling parameters
    (cartesian strain, reduced atomic coordinates)
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5        -0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5         0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
-  
+
   Frozen wf xc part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    4   1    4        -0.0761865856         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4        -0.0761865856         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4        -0.0761865856         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4         0.0000000000         0.0000000000
    1    5   1    5         0.0000000000         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5         0.0000000000         0.0000000000
-  
-  Frozen wf xc part of the internal strain coupling parameters 
+
+  Frozen wf xc part of the internal strain coupling parameters
    (cartesian strain, reduced atomic coordinates)
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    4         0.0000000000         0.0000000000
    1    1   1    5         0.0000000000         0.0000000000
-  
+
    2    1   1    4         0.0000000000         0.0000000000
    2    1   1    5         0.0000000000         0.0000000000
-  
+
    3    1   1    4         0.0000000000         0.0000000000
    3    1   1    5         0.0000000000         0.0000000000
-  
+
   Frozen wf kinetic part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    4   1    4         1.1839010235         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.0000000000         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.0000000000         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4         0.0000000000         0.0000000000
    1    5   1    5         0.5919505117         0.0000000000
-  
+
    2    5   1    4        -0.0000000000         0.0000000000
    2    5   1    5        -0.0000000000         0.0000000000
-  
+
    3    5   1    4        -0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   Frozen wf hartree part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    4   1    4         0.0022283313         0.0000000000
    1    4   1    5        -0.0000000000         0.0000000000
-  
+
    2    4   1    4        -0.0004270470         0.0000000000
    2    4   1    5        -0.0000000000         0.0000000000
-  
+
    3    4   1    4        -0.0004270470         0.0000000000
    3    4   1    5        -0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5        -0.0018012843         0.0000000000
-  
+
    2    5   1    4        -0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   Psp core part of the elastic tensor in cartesian coordinates
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    4   1    4        -0.1637745092         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4        -0.1637745092         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4        -0.1637745092         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4         0.0000000000         0.0000000000
    1    5   1    5         0.0000000000         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5         0.0000000000         0.0000000000
-  
+
   Non-stationary local part of the 2-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5         0.0000000000         0.0000000000
-  
+
    2    1   1    4         0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
-  
+
    1    4   1    4         0.1537688559         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.3598277417         0.0000000000
    2    4   1    5        -0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.3598277417         0.0000000000
    3    4   1    5        -0.0000000000         0.0000000000
-  
+
    1    5   1    4         0.0000000000         0.0000000000
    1    5   1    5        -0.4559091318         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5         0.0000000000         0.0000000000
-  
+
   Non-stationary non-local part of the 2nd-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-  
+
    1    1   1    4         0.0000000000         0.0000000000
    1    1   1    5         0.0000000000         0.0000000000
-  
+
    2    1   1    4         0.0000000000         0.0000000000
    2    1   1    5         0.0000000000         0.0000000000
-  
+
    3    1   1    4         0.0000000000         0.0000000000
    3    1   1    5         0.0000000000         0.0000000000
-  
+
    1    4   1    4        -1.2152667052         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4        -0.4209118785         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4        -0.4209118785         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4         0.0000000000         0.0000000000
    1    5   1    5        -0.6045083882         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4        -0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor 
-   for elastic tensor components not included) 
+  cartesian coordinates for strain terms (1/ucvol factor
+   for elastic tensor components not included)
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5        -0.0000000000         0.0000000000
-  
+
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5         0.0000000000         0.0000000000
-  
+
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
+
    1    4   1    4         0.6823941062         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.0995798581         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.0995798581         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.0972196693         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
-  
+
+
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         0.0062180539         0.0000000000
    1    4   1    5         0.0000000000         0.0000000000
-  
+
    2    4   1    4         0.0009073832         0.0000000000
    2    4   1    5         0.0000000000         0.0000000000
-  
+
    3    4   1    4         0.0009073832         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-  
+
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   1    5         0.0008858769         0.0000000000
-  
+
    2    5   1    4         0.0000000000         0.0000000000
    2    5   1    5         0.0000000000         0.0000000000
-  
+
    3    5   1    4         0.0000000000         0.0000000000
    3    5   1    5        -0.0000000000         0.0000000000
-  
+
   Internal strain coupling parameters, in cartesian coordinates,
-   zero average net force deriv. has been imposed  
+   zero average net force deriv. has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4        -0.0000000000         0.0000000000
    1    1   1    5        -0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   1    5        -0.0000000000         0.0000000000
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
               amu      2.69815390E+01
@@ -1269,7 +1269,7 @@ P          mk1mem2         16
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Metric tensor formulation of strain in density-functional perturbation theory, 
+- [1] Metric tensor formulation of strain in density-functional perturbation theory,
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
 - Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005
@@ -1286,7 +1286,7 @@ P          mk1mem2         16
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1298,12 +1298,12 @@ P          mk1mem2         16
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1321,7 +1321,7 @@ P          mk1mem2         16
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1336,7 +1336,7 @@ P          mk1mem2         16
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

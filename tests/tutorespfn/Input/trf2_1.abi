@@ -73,7 +73,6 @@ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% [shell]
 #%% post_commands = ww_cp trf2_1o_DS1_WFK trf2_2o_DS99_WFK; ww_cp trf2_1o_DS2_1WF7 trf2_2o_DS98_1WF7; ww_cp trf2_1o_DS2_1WF8 trf2_2o_DS98_1WF8; ww_cp trf2_1o_DS2_1WF9 trf2_2o_DS98_1WF9; 

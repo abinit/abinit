@@ -32,10 +32,11 @@ set(44_manage_kokkos_SRC
   xg_kokkos.h
   m_manage_kokkos.F90
   m_xg_kokkos.F90
-  )
+)
 
 add_library(44_manage_kokkos STATIC
-  ${44_manage_kokkos_SRC})
+  ${44_manage_kokkos_SRC}
+)
 
 #####################################################################
 # Set paths for integration with autotools buildsystem
@@ -66,7 +67,7 @@ if(NOT USE_AUTOTOOLS_BUILD_COMPAT)
 
   set_target_properties(44_manage_kokkos
     PROPERTIES
-    Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+    Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
   target_include_directories(44_manage_kokkos
     PRIVATE
@@ -74,18 +75,19 @@ if(NOT USE_AUTOTOOLS_BUILD_COMPAT)
     ${CMAKE_SOURCE_DIR}/shared/common/src/incs
     ${CMAKE_SOURCE_DIR}/src/incs
     PUBLIC
-    ${CMAKE_CURRENT_BINARY_DIR}/modules
+    ${CMAKE_BINARY_DIR}/modules
     )
 
 endif()
 
 target_compile_definitions(44_manage_kokkos
   PRIVATE
-  HAVE_CONFIG_H)
+  HAVE_CONFIG_H
+)
 
 target_link_libraries(44_manage_kokkos
   PUBLIC
   Kokkos::kokkos
-  )
+)
 
 add_library(abinit::44_manage_kokkos ALIAS 44_manage_kokkos)

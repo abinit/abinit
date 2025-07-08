@@ -7,7 +7,7 @@
 !!  electric field gradient and Fermi contact
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (MT, JWZ)
+!! Copyright (C) 1998-2025 ABINIT group (MT, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,8 @@ module m_nucprop
   use m_paw_nmr,    only : make_efg_onsite,make_fc_paw
   use m_paral_atom, only : get_my_atmtab,free_my_atmtab
   use m_special_funcs,  only : abi_derfc
-  use m_symtk,          only : matr3inv, matpointsym
+  use m_matrix,         only : matr3inv
+  use m_symtk,         only : matpointsym
   use m_fft,           only : fourdp
 
   implicit none
@@ -97,7 +98,7 @@ contains
 !!
 !! SOURCE
 
-  subroutine calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,nsym,nucefg,ntypat,&
+  subroutine calc_efg(efg,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,nsym,nucefg,ntypat,&
                       paw_an,pawang,pawrad,pawrhoij,pawtab,&
                       ptcharge,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
@@ -116,6 +117,7 @@ contains
     real(dp),intent(in) :: quadmom(ntypat),rhor(nfft,nspden),rprimd(3,3)
     real(dp),intent(in) :: tnons(3,nsym),zion(ntypat)
     real(dp),intent(inout) :: xred(3,natom)
+    real(dp),intent(out) :: efg(3,3,natom)
     type(paw_an_type),intent(in) :: paw_an(my_natom)
     type(pawrad_type),intent(in) :: pawrad(ntypat)
     type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
@@ -131,7 +133,7 @@ contains
     !arrays
     integer,pointer :: my_atmtab(:)
     real(dp) :: eigval(3),matr(3,3),work(8)
-    real(dp),allocatable :: efg(:,:,:),efg_el(:,:,:),efg_ion(:,:,:),efg_paw(:,:,:)
+    real(dp),allocatable :: efg_el(:,:,:),efg_ion(:,:,:),efg_paw(:,:,:)
     real(dp),allocatable :: efg_point_charge(:,:,:)
 
     ! ************************************************************************
@@ -148,7 +150,6 @@ contains
     my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
     call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
-    ABI_MALLOC(efg,(3,3,natom))
     ABI_MALLOC(efg_el,(3,3,natom))
     ABI_MALLOC(efg_ion,(3,3,natom))
     ABI_MALLOC(efg_paw,(3,3,natom))
@@ -299,7 +300,6 @@ contains
     write(message,'(3a)')ch10,ch10,ch10
     call wrtout(ab_out,message,'COLL')
 
-    ABI_FREE(efg)
     ABI_FREE(efg_el)
     ABI_FREE(efg_ion)
     ABI_FREE(efg_paw)

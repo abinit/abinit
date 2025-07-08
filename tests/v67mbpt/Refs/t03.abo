@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h11 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
@@ -292,8 +292,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01533
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/01h_WC.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/01h_WC.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/01h_WC.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/01h_WC.fhi
 - OPIUM generated H potential
 -  1.00000   1.00000     70427                znucl, zion, pspdat
     6   23    0    0      1045   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -481,7 +481,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Citation for XC functional:
   Z. Wu and R. E. Cohen, PRB 73, 235116 (2006)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -497,7 +497,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     5
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     0.00000000E+00  0.00000000E+00  1.25000000E-01       0.25000
@@ -505,13 +505,13 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      4)     0.00000000E+00  0.00000000E+00  3.75000000E-01       0.25000
      5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     5
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     0.00000000E+00  0.00000000E+00  1.25000000E-01       0.25000
@@ -519,7 +519,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      4)     0.00000000E+00  0.00000000E+00  3.75000000E-01       0.25000
      5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -527,7 +527,11 @@ meta: {optdriver: 3, gwcalctyp: 0, }
           total number of points  =         3600
 
 
-- screening: taking advantage of time-reversal symmetry 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000000    0.000000    0.000010
+
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 1
 - Remaining bands to be divided among processors   nbcw = 19
 - Number of bands treated by each node ~19
@@ -567,7 +571,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   dielectric constant without local fields =  14.4879
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     66.58  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -698,7 +702,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Citation for XC functional:
   Z. Wu and R. E. Cohen, PRB 73, 235116 (2006)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -714,7 +718,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     5
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     0.00000000E+00  0.00000000E+00  1.25000000E-01       0.25000
@@ -722,13 +726,13 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      4)     0.00000000E+00  0.00000000E+00  3.75000000E-01       0.25000
      5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     5
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     0.00000000E+00  0.00000000E+00  1.25000000E-01       0.25000
@@ -736,10 +740,14 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      4)     0.00000000E+00  0.00000000E+00  3.75000000E-01       0.25000
      5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x    9
           total number of points  =         3600
 
@@ -823,7 +831,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Citation for XC functional:
   Z. Wu and R. E. Cohen, PRB 73, 235116 (2006)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -839,7 +847,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     5
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     0.00000000E+00  0.00000000E+00  1.25000000E-01       0.25000
@@ -847,13 +855,13 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      4)     0.00000000E+00  0.00000000E+00  3.75000000E-01       0.25000
      5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     5
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     0.00000000E+00  0.00000000E+00  1.25000000E-01       0.25000
@@ -861,17 +869,17 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      4)     0.00000000E+00  0.00000000E+00  3.75000000E-01       0.25000
      5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
 
- === Cylindrical cutoff === 
+ === Cylindrical cutoff ===
 
-  Cutoff radius ...............     0.0000 [Bohr] 
+  Cutoff radius ...............     0.0000 [Bohr]
   Axis parallel to direction...  3
   Passing through point .......       0.00      0.00      0.00 (r.l.u)
-  Infinite length  ....... 
+  Infinite length  .......
 
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -962,7 +970,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
  Citation for XC functional:
   Z. Wu and R. E. Cohen, PRB 73, 235116 (2006)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -978,7 +986,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     5
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     0.00000000E+00  0.00000000E+00  1.25000000E-01       0.25000
@@ -986,13 +994,13 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      4)     0.00000000E+00  0.00000000E+00  3.75000000E-01       0.25000
      5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     5
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     0.00000000E+00  0.00000000E+00  1.25000000E-01       0.25000
@@ -1000,17 +1008,17 @@ meta: {optdriver: 4, gwcalctyp: 0, }
      4)     0.00000000E+00  0.00000000E+00  3.75000000E-01       0.25000
      5)     0.00000000E+00  0.00000000E+00  5.00000000E-01       0.12500
 
- Together with 16 symmetry operations and time-reversal symmetry 
+ Together with 16 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
 
- === Cylindrical cutoff === 
+ === Cylindrical cutoff ===
 
-  Cutoff radius ...............     5.0000 [Bohr] 
+  Cutoff radius ...............     5.0000 [Bohr]
   Axis parallel to direction...  3
   Passing through point .......       0.00      0.00      0.00 (r.l.u)
-  Finite length of ....... 18.00000 [Bohr] 
+  Finite length of ....... 18.00000 [Bohr]
 
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -1081,7 +1089,7 @@ data: !SigmaeeData |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  4.5000000000E+00 Bohr
               amu      1.00794000E+00
@@ -1280,12 +1288,12 @@ P           mkmem           5
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -1298,12 +1306,12 @@ P           mkmem           5
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1321,7 +1329,7 @@ P           mkmem           5
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1336,7 +1344,7 @@ P           mkmem           5
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

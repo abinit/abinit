@@ -29,18 +29,17 @@ randomseed=111111 # for testing purpose only
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% exclude_builders = .*_nag_7.[01]_.*
 #%% spin_pot = t81.xml
 #%% exec_args = --F03
 #%% [files]
-#%% files_to_test = 
-#%%   t81.abo, tolnlines = 0, tolabs = 1e-6, tolrel = 0.000001, fld_options = -medium;
+#%% files_to_test =
+#%%   t81.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = X. He 
+#%% authors = X. He
 #%% keywords = Effective potential, multibinit, spinpot
-#%% description = 
+#%% description =
 #%%   This is to test the spin_init_state 3 option for spin dynamics in Multibinit.
 #%%   The initial spin state is set using three variables spin_init_*.
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)

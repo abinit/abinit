@@ -7,7 +7,7 @@
 !!  (rotation of the magnetization in order to align it)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (EB, MT, FR, SPr)
+!! Copyright (C) 2001-2025 ABINIT group (EB, MT, FR, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

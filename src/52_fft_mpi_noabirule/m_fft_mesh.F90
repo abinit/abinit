@@ -8,7 +8,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
+!! Copyright (C) 2008-2025 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,7 @@ MODULE m_fft_mesh
  use defs_fftdata,     only : size_goed_fft
  use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
- use m_symtk,          only : mati3inv
+ use m_matrix,         only : mati3inv
  use m_geometry,       only : xred2xcart
  use m_crystal,        only : crystal_t
 
@@ -808,51 +808,49 @@ subroutine rotate_fft_mesh(nsym, symrel, tnons, ngfft, irottb, preserve)
 ! *************************************************************************
 
  ! === Precalculate R^-1 and fractional translations in FFT coordinates ===
- ngfft1=ngfft(1)
- ngfft2=ngfft(2)
- ngfft3=ngfft(3)
+ ngfft1 = ngfft(1); ngfft2 = ngfft(2); ngfft3 = ngfft(3)
 
- red2fft=RESHAPE((/ngfft1,0,0,0,ngfft2,0,0,0,ngfft3/),(/3,3/))
- fft2red=RESHAPE((/(one/ngfft1),zero,zero,zero,(one/ngfft2),zero,zero,zero,(one/ngfft3)/),(/3,3/))
- !
- ! === For a fully compatible mesh, each Rm1_FFT should be integer ===
+ red2fft = reshape([ngfft1, 0, 0, 0, ngfft2, 0, 0, 0, ngfft3], [3, 3])
+ fft2red = reshape([(one/ngfft1), zero, zero, zero, one/ngfft2, zero, zero, zero, one/ngfft3], [3, 3])
+
+ ! For a fully compatible mesh, each Rm1_FFT should be integer ===
  do isym=1,nsym
-   call mati3inv(symrel(:,:,isym),Rm1(:,:,isym))
-   Rm1(:,:,isym)=TRANSPOSE(Rm1(:,:,isym))
-   Rm1_FFT(:,:,isym)=MATMUL(MATMUL(red2fft,Rm1(:,:,isym)),fft2red)
-   tnons_FFT(:,isym)=MATMUL(red2fft,tnons(:,isym))
+   call mati3inv(symrel(:,:,isym), Rm1(:,:,isym))
+   Rm1(:,:,isym) = transpose(Rm1(:,:,isym))
+   Rm1_FFT(:,:,isym) = matmul(matmul(red2fft, Rm1(:,:,isym)), fft2red)
+   tnons_FFT(:,isym) = matmul(red2fft, tnons(:,isym))
  end do
 
- err(:,:)=zero
+ err(:,:) = zero
 
 !$OMP PARALLEL DO PRIVATE(R1_FFT,ir1,R2_FFT,jx,jy,jz) reduction(MAX:err)
  do iz=0,ngfft3-1
-   R1_FFT(3)=DBLE(iz)
+   R1_FFT(3) = dble(iz)
    do iy=0,ngfft2-1
-     R1_FFT(2)=DBLE(iy)
+     R1_FFT(2) = dble(iy)
      do ix=0,ngfft1-1
-       R1_FFT(1)=DBLE(ix)
-       ir1=1+ix+iy*ngfft1+iz*ngfft1*ngfft2
+       R1_FFT(1) = dble(ix)
+       ir1 = 1+ix+iy*ngfft1+iz*ngfft1*ngfft2
        do isym=1,nsym
-         ! === Form R^-1 (r-\tau) in the FFT basis ===
-         R2_FFT(:)=MATMUL(Rm1_FFT(:,:,isym),R1_FFT(:)-tnons_FFT(:,isym))
-         jx=NINT(R2_FFT(1)); err(1,isym)=MAX(err(1,isym),ABS(R2_FFT(1)-jx)/ngfft1)
-         jy=NINT(R2_FFT(2)); err(2,isym)=MAX(err(2,isym),ABS(R2_FFT(2)-jy)/ngfft2)
-         jz=NINT(R2_FFT(3)); err(3,isym)=MAX(err(3,isym),ABS(R2_FFT(3)-jz)/ngfft3)
-         jx=MODULO(jx,ngfft1)
-         jy=MODULO(jy,ngfft2)
-         jz=MODULO(jz,ngfft3)
-         irottb(ir1,isym)=1+jx+jy*ngfft1+jz*ngfft1*ngfft2
+         ! Form R^-1 (r-\tau) in the FFT basis.
+         R2_FFT(:) = MATMUL(Rm1_FFT(:,:,isym),R1_FFT(:)-tnons_FFT(:,isym))
+         jx = NINT(R2_FFT(1)); err(1,isym) = MAX(err(1,isym), ABS(R2_FFT(1)-jx)/ngfft1)
+         jy = NINT(R2_FFT(2)); err(2,isym) = MAX(err(2,isym), ABS(R2_FFT(2)-jy)/ngfft2)
+         jz = NINT(R2_FFT(3)); err(3,isym) = MAX(err(3,isym), ABS(R2_FFT(3)-jz)/ngfft3)
+         jx = MODULO(jx, ngfft1)
+         jy = MODULO(jy, ngfft2)
+         jz = MODULO(jz, ngfft3)
+         irottb(ir1,isym) = 1+jx+jy*ngfft1+jz*ngfft1*ngfft2
        end do
      end do
    end do
  end do
 
- preserve=.TRUE.
+ preserve = .TRUE.
  do isym=1,nsym
-   if (ANY(err(:,isym)>tol6)) then
-     preserve=.FALSE.
-     !write(msg,'(a,i3,a,3es14.6)')' symmetry ',isym,') not compatible with FFT grid, error ',err(:,isym)
+   if (any(err(:,isym) > tol6)) then
+     preserve = .FALSE.
+     !write(msg,'(a,i0,a,3es14.6)')' symmetry ',isym,') not compatible with FFT grid, error ',err(:,isym)
      !ABI_WARNING(msg)
    end if
  end do
@@ -1040,7 +1038,7 @@ elemental integer function ig2gfft(ig, ng) result (gc)
  ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
  ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
  !
- if (ig<=0 .or. ig > ng) then
+ if (ig <= 0 .or. ig > ng) then
    ! Wrong ig, returns huge. Parent code will likely crash with SIGSEV.
    gc = huge(1)
    return
@@ -1088,17 +1086,15 @@ pure integer function g2ifft(gg,ngfft) result (gidx)
  ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gg
  ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index
  !
- if ( ANY(gg>ngfft(1:3)/2) .or. ANY(gg<-(ngfft(1:3)-1)/2) ) then ! out of the box.
-   gidx=0
+ if (any(gg > ngfft(1:3)/2) .or. any(gg < -(ngfft(1:3)-1)/2)) then ! out of the box.
+   gidx = 0
  else
-   n1=ngfft(1)
-   n2=ngfft(2)
-   n3=ngfft(3)
-
-   ig1=MODULO(gg(1),n1)
-   ig2=MODULO(gg(2),n2)
-   ig3=MODULO(gg(3),n3)
-
+   n1 = ngfft(1)
+   n2 = ngfft(2)
+   n3 = ngfft(3)
+   ig1 = MODULO(gg(1),n1)
+   ig2 = MODULO(gg(2),n2)
+   ig3 = MODULO(gg(3),n3)
    gidx = 1 + ig1 + n1*(ig2+ig3*n2)
  end if
 
@@ -1199,7 +1195,6 @@ subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
 !scalars
  integer :: ix,iy,iz,fft_idx,base,isp
  real(dp) :: gdotr
-
 ! *************************************************************************
 
  if (ALL(gg==0)) then
@@ -1264,7 +1259,6 @@ subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
 !scalars
  integer :: ix,iy,iz,fft_idx,base,isp
  real(dp) :: gdotr
-
 ! *************************************************************************
 
  if (ALL(gg==0)) then
@@ -1324,10 +1318,8 @@ pure subroutine calc_eigr(gg, nfft, ngfft, eigr)
  real(dp),intent(out) :: eigr(2*nfft)
 
 !Local variables-------------------------------
-!scalars
  integer :: ix,iy,iz,fft_idx
  real(dp) :: gdotr
-
 ! *************************************************************************
 
  if (ALL(gg==0)) then
@@ -1356,22 +1348,22 @@ end subroutine calc_eigr
 !----------------------------------------------------------------------
 
 !!****f* m_fft_mesh/calc_ceikr_dpc
-!! name
+!! NAME
 !! calc_ceikr_dpc
 !!
-!! function
+!! FUNCTION
 !!  calculate e^{ik.r} on the fft mesh.
 !!
-!! inputs
+!! INPUTS
 !!  kk(3)=k-point in reduced coordinates.
 !!  nfft=total number of points in the fft mesh.
 !!  ngfft(18)=information about 3d fft,
 !!  nspinor=number of spinor components.
 !!
-!! output
+!! OUTPUT
 !!  ceikr(nfft*nspinor) = e^{ik.r} on the fft mesh.
 !!
-!! source
+!! SOURCE
 
 pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
 
@@ -1384,10 +1376,8 @@ pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
  complex(dpc),intent(out) :: ceikr(nfft*nspinor)
 
 !local variables-------------------------------
-!scalars
  integer :: ix, iy, iz, fft_idx
  real(dp) :: kdotr
-
 ! *************************************************************************
 
  if (all(abs(kk) < tol12)) then
@@ -1443,10 +1433,8 @@ pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
  complex(spc),intent(out) :: ceikr(nfft*nspinor)
 
 !local variables-------------------------------
-!scalars
  integer :: ix, iy, iz, fft_idx
  real(dp) :: kdotr
-
 ! *************************************************************************
 
  if (all(abs(kk) < tol12)) then
@@ -1507,10 +1495,9 @@ pure subroutine times_eigr(gg, ngfft, nfft, ndat, ur)
  real(dp) :: gr
 !arrays
  real(dp) :: ph(2),val(2)
-
 ! *************************************************************************
 
- if (all(gg==0)) return
+ if (all(gg == 0)) return
 
  do idat=1,ndat
    ifft = 0
@@ -1609,7 +1596,6 @@ subroutine ctimes_eikr(kk, ngfft, nfft, ndat, ur)
 
 !Local variables-------------------------------
  real(dp),contiguous,pointer :: ur_ptr(:,:,:)
-
 ! *************************************************************************
 
  call c_f_pointer(c_loc(ur), ur_ptr, shape=[2, nfft, ndat])
@@ -1651,7 +1637,6 @@ subroutine phase(ngfft, ph)
 !scalars
  integer :: id,ig,nn
  real(dp) :: arg,fac
-
 ! *************************************************************************
 
  id=ngfft/2+2
@@ -1661,8 +1646,8 @@ subroutine phase(ngfft, ph)
    arg=fac*dble(nn)
    ph(2*ig-1)=cos(arg)
    ph(2*ig)  =sin(arg)
-
  end do
+
 !XG 990504 Here zero the corresponding sine
  if((ngfft/2)*2==ngfft) ph(2*(id-1))=zero
 
@@ -1726,17 +1711,19 @@ end subroutine mkgrid_fft
 
 !!****f* ABINIT/supercell_fft
 !! NAME
-!!  supercell_fft
+!! supercell_fft
 !!
 !! FUNCTION
+!!  Build table for supercell calculations
+!!  Note that this version is only used in the BSE code as memory scales badly with the supercell size.
 !!
 !! INPUTS
 !!  ncells(3)= Number of cells along the three reduced directions
 !!
 !! OUTPUT
-!! sc_nfft=The total number of points in the supercell.
-!! sc2uc(sc_fft): The image of the point in the small box.
-!! scred(3,sc_nfft): The reduced coordinates of the point in the supercell in terms of rprimd.
+!!  sc_nfft=The total number of points in the supercell.
+!!  sc2uc(sc_fft): The image of the point in the small box.
+!!  scred(3,sc_nfft): The reduced coordinates of the point in the supercell in terms of rprimd.
 !!
 !! SOURCE
 

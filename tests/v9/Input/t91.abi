@@ -54,15 +54,15 @@ tsmear 0.003
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t91.abo, tolnlines = 0, tolabs = 1.000e-07, tolrel = 1.000e-06;
+#%% files_to_test =
+#%%   t91.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Ch. Paillard
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%   2 Silicon atoms, in a diamond structure.
 #%%   Test the computation of occopt 9.
-#%% topics = PAW 
+#%% topics = PAW
 #%%<END TEST_INFO>

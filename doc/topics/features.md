@@ -2,17 +2,17 @@
 authors: FJ, XG
 ---
 
-# ABINIT features  
+# ABINIT features
 
 ## An overview of ABINIT settings and features, for beginners and more experienced users.
 
 This document gives an overview of the features implemented in the ABINIT
-package, grouped in different topics, for the beginner as well as more experienced user. 
-It might answer the question "How to ... with ABINIT ?", to some extent.  
+package, grouped in different topics, for the beginner as well as more experienced user.
+It might answer the question "How to ... with ABINIT ?", to some extent.
 It also gives a synthetic view on the needed settings.
 
 ## 1 Foreword
-  
+
 Documenting the features of a large scientific code is a complex task. The
 present list of features refers to different "topics". Each topic has a
 dedicated page, which should be quick to read, unlike the
@@ -39,7 +39,7 @@ the subdirectories of ~abinit/doc (work is in progress to make it all available)
 Discussions on the [ABINIT discourse forum](https://discourse.abinit.org) might also allow to get information.
 
 ## 2 ABINIT specifications for static DFT calculations
-  
+
 The topic [[topic:GSintroduction|Building an input file]] briefly explains the
 content of an ABINIT input file. The following topics go more into the
 details, however restricting to **static DFT calculations**, without doing
@@ -51,7 +51,7 @@ beyond the present sec. 2. Also, topics related to global control parameters,
 that apply, generally speaking, to all types of calculations are explained later.
 
 ### 2.1 Settings for atoms: cell, atoms, atomic positions, and symmetries
-  
+
   1. [[topic:UnitCell|Unit cell]]
   2. [[topic:AtomTypes|Types of atoms and alchemy]]
   3. [[topic:crystal|Crystalline structure and symmetries]]
@@ -59,7 +59,7 @@ that apply, generally speaking, to all types of calculations are explained later
   5. [[topic:AtomManipulator|Atom manipulator]] (advanced topic)
 
 ### 2.2 Physical settings for electrons: XC functionals, atomic/pseudo potentials, metal/insulator, spin, Coulomb interaction ...
-  
+
   1. [[topic:xc|Overview of available exchange and correlation functionals]]
   2. [[topic:Hybrids|Hybrid functionals]]
   3. [[topic:vdw|Van der Waals functionals]]
@@ -70,14 +70,14 @@ that apply, generally speaking, to all types of calculations are explained later
   8. [[topic:Coulomb|Coulomb interaction and charged cells]]
 
 ### 2.3 Numerical settings for electrons: basis set, planewaves and real space sampling, Brillouin zone sampling ...
-  
+
   1. [[topic:Planewaves|Planewaves and real space sampling]]
   2. [[topic:PAW|PAW special settings]]
   3. [[topic:Wavelets|Wavelets in ABINIT]]
   4. [[topic:k-points|Wavevector sampling (k point grid)]]
 
 ### 2.4 SCF algorithms, tuning and stopping criteria
-  
+
   1. [[topic:SCFAlgorithms|SCF algorithms]]
   2. [[topic:SCFControl|SCF control, tolerances and stopping criteria]]
   3. [[topic:ForcesStresses|Forces and stresses]]
@@ -85,7 +85,7 @@ that apply, generally speaking, to all types of calculations are explained later
   5. [[topic:Recursion|Recursion methods and orbital free calculations]] (not in production)
 
 ### 2.5 Added electric/magnetic field, other artificial constraints/modifications, and related properties ...
-  
+
   1. [[topic:Berry|Electric polarization and finite electric field]]
   2. [[topic:MagField|External magnetic field]]
   3. [[topic:ConstrainedDFT|Constrained Density-Functional Theory]]
@@ -94,7 +94,7 @@ that apply, generally speaking, to all types of calculations are explained later
   6. [[topic:Artificial|Artificial modifications of the system]]
 
 ## 3 Global control parameters: flow, parallelism, output files, output content, timing and memory control ...
-  
+
   1. [[topic:multidtset|Multi-dataset calculations]]
   2. [[topic:parallelism|Parallelism and ABINIT]]
   3. [[topic:printing|Printing files]]
@@ -102,7 +102,7 @@ that apply, generally speaking, to all types of calculations are explained later
   5. [[topic:Control|Time and memory control]]
 
 ## 4 Molecular dynamics, geometry optimization, transition paths
-  
+
   1. [[topic:GeoOpt|Geometry optimization]]
   2. [[topic:MolecularDynamics|Molecular dynamics]]
   3. [[topic:TransPath|Transition path searches: NEB and string method]]
@@ -112,7 +112,7 @@ that apply, generally speaking, to all types of calculations are explained later
   6. [[topic:LOTF|Learn-on-the-flight (LOTF)]] (not in production)
 
 ## 5 Correlated electrons
-  
+
 When correlated electrons are to be considered (in most cases, when *d* and *f*
 orbitals play an active role), it is necessary to go beyond the standard DFT
 framework. ABINIT enables the following possibilities:
@@ -123,7 +123,7 @@ framework. ABINIT enables the following possibilities:
   4. [[topic:CalcUJ|Calculation of the Hubbard U and Hund J]]
 
 ## 6 Adiabatic response properties (phonons, low-frequency dielectric, Raman, elasticity, temperature dependence ...)
-  
+
 Many properties can be obtained in the approximation that the electrons **stay
 in their ground state** (adiabatic responses). The poweful Density-Functional
 Perturbation Theory (DFPT) framework allows ABINIT to address directly all
@@ -131,26 +131,26 @@ such properties in the case that are connected to derivatives of the total
 energy with respect to some perturbation. This includes all dynamical effects
 due to phonons and their coupling, thus also temperature-dependent properties due to phonons.
 
-  1. [[topic:DFPT|Generalities about DFPT]] 
-  2. [[topic:q-points|Wavevectors for phonons (q-points)]] 
-  3. [[topic:Phonons|Vibrational and dielectric properties 
+  1. [[topic:DFPT|Generalities about DFPT]]
+  2. [[topic:q-points|Wavevectors for phonons (q-points)]]
+  3. [[topic:Phonons|Vibrational and dielectric properties
      (phonon frequencies and modes, IR and Raman spectra, Born effective charges)]]
   4. [[topic:PhononBands|Phonon bands and DOS, interatomic force constants, sound velocity]]
-  5. [[topic:Temperature|Temperature dependent properties (free energy, entropy, specific heat, 
+  5. [[topic:Temperature|Temperature dependent properties (free energy, entropy, specific heat,
      atomic temperature factors, thermal expansion)]]
   6. [[topic:Elastic|Elasticity and piezoelectricity]]
   7. [[topic:longwave|Long wave method: quadrupoles, flexoelectricity, optical activity]]
   8. [[topic:nonlinear|Raman intensities and electro-optic properties]]
   9. [[topic:ElPhonInt|Electron-phonon interaction]]
   10. [[topic:PhononWidth|Phonon linewidth due to the electron-phonon interaction]]
-  11. [[topic:ElPhonTransport|Electronic transport properties from electron-phonon interaction 
+  11. [[topic:ElPhonTransport|Electronic transport properties from electron-phonon interaction
      (resistivity, superconductivity, thermal)]]
   12. [[topic:TDepES|Temperature dependence of the electronic structure from electron-phonon interaction]]
   13. [[topic:ConstrainedPol|Constrained polarization geometry optimization]] (advanced topic)
 
 
 ## 7 Excited state calculations, and frequency-dependent electronic and optical properties
-  
+
 Excited-state calculations and frequency-dependent properties (for frequencies
 that are non-negligible with respect to the electronic gap), can be addressed
 by a variety of methodologies, usually trading accuracy for speed. At the
@@ -173,15 +173,16 @@ for isolated defects in a solid, not for e.g. correcting the band gap.
   8. [[topic:DeltaSCF|DeltaSCF calculations]]
   9. [[topic:RandStopPow|Random electronic stopping power]]
   10. [[topic:GWls|GW- Lanczos-Sternheimer method]] (not in production)
+  11. [[topic:RTTDDFT|Real-time TDDFT calculations]] (experimental - under development)
 
 ## 8 Second-principles calculations with MULTIBINIT: handling millions of atoms with first-principles accuracy
 
 By constructing model Hamiltonians whose linear and selected non-linear characteristics
 are identical to those from first-principles calculations, and simulating millions
-of atoms with these model Hamiltonians, one can study phase transitions, polarization boundaries,  
+of atoms with these model Hamiltonians, one can study phase transitions, polarization boundaries,
 and other properties for large-scale systems that cannot be reached from first-principles algorithms
 implemented in ABINIT and most DFT codes. Even with respect to linear-scaling codes, the prefactor
-is much smaller. 
+is much smaller.
 This is implemented in the MULTIBINIT application.
 
   1. [[topic:LatticeModel|Lattice model at the harmonic level]]
@@ -210,19 +211,19 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
   9. [[topic:AtomCentered|Atom centered properties - Charge, Magnetization, etc]]
 
 ## 10 Other physical properties (e.g. positron)
-  
+
   1. [[topic:positron|Positron calculations]]
-  2. [[topic:LDAminushalf|The LDA-1/2 approach]] 
+  2. [[topic:LDAminushalf|The LDA-1/2 approach]]
 
 ## 11 Analysis/postprocessing tools
-  
+
   1. [[topic:Abipy|Abipy - ABINIT swiss knife]]
   2. [[topic:APPA|Abinit Post-Processor Application (APPA), for molecular-dynamics trajectory analysis]]
   3. [[topic:Band2eps|Band2eps for phonon dispersion curves]]
   4. [[topic:aTDEP|Temperature Dependent Effective Potential, for thermodynamical properties]]
 
 ## 12 Miscellaneous topics
-  
+
   1. [[topic:Verification|Verification of the implementation]]
   2. [[topic:PortabilityNonRegression|Portability and non-regression tests]]
   3. [[topic:Git|Git, gitlab and github for the ABINIT project]]

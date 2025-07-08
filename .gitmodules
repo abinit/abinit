@@ -6,3 +6,11 @@
 	path = tests/modules_with_data/MgB2_eph4isotc
 	url = https://github.com/abinit/MgB2_eph4isotc.git
 	branch = main
+[submodule "tests/modules_with_data/diamond_eph_gwpt"]
+	path = tests/modules_with_data/diamond_eph_gwpt
+	url = https://github.com/abinit/diamond_eph_gwpt.git
+	branch = main
+[submodule "tests/modules_with_data/LiF_eph_varpeq"]
+	path = tests/modules_with_data/LiF_eph_varpeq
+	url = https://github.com/abinit/LiF_eph_varpeq.git
+	branch = main

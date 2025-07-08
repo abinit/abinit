@@ -30,7 +30,6 @@ module m_abstract_wf
 
  use defs_basis
  use defs_wannier90
-
  use m_abicore
  use m_errors
  use m_atomdata
@@ -39,27 +38,25 @@ module m_abstract_wf
 #ifdef FC_NAG
  use f90_unix_dir
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_hdr
  use m_dtset
  use m_dtfil
 
- use m_build_info,      only :  abinit_version
+ use m_build_info,   only : abinit_version
  use defs_wvltypes,  only : wvl_internal_type
- use defs_datatypes, only : pseudopotential_type, ebands_t
- use defs_abitypes, only : MPI_type
- use m_io_tools, only : delete_file
- use m_fstrings,      only : strcat, sjoin, itoa
- use m_fftcore,  only : ngfft_seq, get_kg
- use m_crystal,  only : crystal_t
- use m_ebands,   only : ebands_expandk, ebands_free
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only: pawrhoij_copy
- use m_pawcprj,  only : pawcprj_type
- use m_wfd, only: wfd_t, wfd_init, wave_t, WFD_STORED
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
+ use m_io_tools,     only : delete_file
+ use m_fstrings,     only : strcat, sjoin, itoa
+ use m_fftcore,      only : ngfft_seq, get_kg
+ use m_crystal,      only : crystal_t
+ use m_ebands,       only : ebands_t
+ use m_pawtab,       only : pawtab_type
+ use m_pawrhoij,     only : pawrhoij_copy
+ use m_pawcprj,      only : pawcprj_type
+ use m_wfd,          only : wfd_t, wfd_init, wave_t, WFD_STORED
 
  implicit none
 
@@ -743,7 +740,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     if (self%expanded) then
       call self%wfd_bz%free()
       call self%hdr_bz%free()
-      call ebands_free(self%ebands_bz)
+      call self%ebands_bz%free()
       call self%dtset_bz%free()
       !call self%mpi_enreg_bz%free()
       ABI_FREE(self%bz2ibz)
@@ -860,7 +857,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       character(len=200) :: msg
       ! NOTE: is this OK to assume so?
       ecut_eff = dtset%ecut * dtset%dilatmx **2
-      call ebands_expandk(inb=ebands, cryst=cryst, ecut_eff=ecut_eff, &
+      call ebands%expandk(cryst=cryst, ecut_eff=ecut_eff, &
         & force_istwfk1=.True., dksqmax=dksqmax, &
         & bz2ibz=self%bz2ibz, outb=self%ebands_bz)
   ! Note: test if force_istwfk1 is not set to True, force rotate
@@ -873,7 +870,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
         ABI_ERROR(msg)
       end if
 
-      call hdr_init_lowlvl(self%hdr_bz,self%ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
+      call self%hdr_bz%init_lowlvl(self%ebands_bz,psps,pawtab,dummy_wvl,abinit_version,&
         hdr%pertcase,hdr%natom,hdr%nsym,hdr%nspden,hdr%ecut,dtset%pawecutdg,hdr%ecutsm,dtset%dilatmx,&
         hdr%intxc,hdr%ixc,hdr%stmbias,hdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,hdr%so_psp,&
         hdr%qptn,cryst%rprimd,cryst%xred,hdr%symrel,hdr%tnons,hdr%symafm,hdr%typat,hdr%amu,hdr%icoulomb,&

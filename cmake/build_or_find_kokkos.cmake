@@ -42,7 +42,7 @@ if(ABINIT_KOKKOS_WANTED)
   # use carefully, it may strongly increase build time
   if(ABINIT_KOKKOS_BUILD)
 
-    message("[abinit / kokkos] Building kokkos from source")
+    message(STATUS "[abinit / kokkos] Building kokkos from source")
 
     set_property(DIRECTORY PROPERTY EP_BASE ${CMAKE_BINARY_DIR}/external)
 
@@ -148,11 +148,11 @@ if(ABINIT_KOKKOS_WANTED)
     FetchContent_MakeAvailable(kokkos_external)
 
     if(TARGET Kokkos::kokkos)
-      message("[abinit / kokkos] Kokkos found (using FetchContent)")
+      message(STATUS "[abinit / kokkos] Kokkos found (using FetchContent)")
       set(ABINIT_KOKKOS_FOUND True)
       set(HAVE_KOKKOS 1)
     else()
-      message("[abinit / kokkos] we shouldn't be here. We've just integrated kokkos build into abinit build !")
+      message(STATUS "[abinit / kokkos] we shouldn't be here. We've just integrated kokkos build into abinit build !")
     endif()
 
     set(ABINIT_KOKKOS_BUILTIN TRUE)
@@ -194,7 +194,7 @@ if(ABINIT_KOKKOS_WANTED)
         set(ABINIT_KOKKOS_BACKEND "OpenMP")
       endif()
 
-      message("[abinit / kokkos] Kokkos found via find_package; default backend is ${ABINIT_KOKKOS_BACKEND}")
+      message(STATUS "[abinit / kokkos] Kokkos found via find_package; default backend is ${ABINIT_KOKKOS_BACKEND}")
       set(ABINIT_KOKKOS_FOUND True)
       set(HAVE_KOKKOS 1)
 
@@ -208,6 +208,6 @@ if(ABINIT_KOKKOS_WANTED)
 
 else(ABINIT_KOKKOS_WANTED)
 
-  message(NOTICE "[abinit / kokkos] kokkos is not wanted")
+  message(STATUS "[abinit / kokkos] kokkos is not wanted")
 
 endif(ABINIT_KOKKOS_WANTED)

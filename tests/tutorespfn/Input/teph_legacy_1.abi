@@ -10,7 +10,7 @@ ndtset 10
 
 #
 # DATASET 1 : make ground state wavefunctions and density
-# 
+#
 tolwfr1  1.0d-14
 nline1   8       # This is to expedite the convergence of higher-lying bands
 rfphon1  0       # for DS1 do _not_ do perturbation
@@ -23,7 +23,7 @@ kptopt1  1
 
 #
 # DATASET 2-4 : phonons on a 2x2x2 q-point grid, saving perturbed densities
-# 
+#
 iqpt2   1 # q1 = 0.0 0.0 0.0
 iqpt3   2 # q2 = 0.5 0.0 0.0
 iqpt4   3 # q3 = 0.5 0.5 0.0
@@ -70,7 +70,7 @@ getwfk8      6
 get1den8     3
 prtgkk8      1
 
-iqpt9        3 
+iqpt9        3
 iscf9       -2
 tolwfr9      1.0d-14
 nstep9       1
@@ -100,8 +100,8 @@ prepgkk 1        # flag to calculate all perturbations for el-phon calculations
 use_nonscf_gkk 0 # enforce old default and scf-calculate all perturbations
 
 nqpt 1           # 1 qpoint at a time
-ngqpt 2 2 2      # grid of q-points 
-qptopt 1         # option to use irreducible wedge of q-points 
+ngqpt 2 2 2      # grid of q-points
+qptopt 1         # option to use irreducible wedge of q-points
                  # Indexed by iqpt : Need to check how many there are! Here 3
 tolvrs 1.e-8     # tolerance on 2DTE convergence: potential^(1) is what we need
 
@@ -140,7 +140,7 @@ tsmear       0.001 # with a small smearing
 nstep        800
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8"
+ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Al.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -150,14 +150,14 @@ nstep        800
 #%% executable = abinit
 #%% test_chain =  teph_legacy_1.abi, teph_legacy_2.abi, teph_legacy_3.abi, teph_legacy_4.abi, teph_legacy_5.abi, teph_legacy_6.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   teph_legacy_1.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = M. Verstraete 
+#%% authors = M. Verstraete
 #%% keywords = NC, DFPT, EPH_OLD
-#%% description = 
+#%% description =
 #%%   the sequence of datasets makes the ground states and
 #%%    all of the explicit perturbations of the single
 #%%    Al atom in all directions, for the irreducible

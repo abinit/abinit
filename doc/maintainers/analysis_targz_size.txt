@@ -69,6 +69,6 @@ One should clean the corresponding dirs ...
 In particular, doc/tutorial/theory_mbt contains many large .svg files .
    (doc/tutorial/theory_mbt accounts for 4.0MB in the tar.gz file)
 and
-tests/Psps_for_tests contains many large pseudopotential files
+tests/Pspdir (formerly Psps_for_tests) contains many large pseudopotential files
    (that account for 13.9 MB in the tar.gz file)
 

@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h08 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t84/t84.abi
 - output file    -> t84.abo
 - root for input  files -> t84i
@@ -431,8 +431,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -470,7 +470,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  5  -8.8218867931815    -1.880E-07 1.797E-09 5.810E-07
  ETOT  6  -8.8218867938660    -6.846E-10 4.041E-12 5.515E-10
 
- At SCF step    6, etot is converged : 
+ At SCF step    6, etot is converged :
   for the second time, diff in etot=  6.846E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -635,7 +635,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8238500335137    -1.206E-08 6.642E-11 2.287E-08
  ETOT  5  -8.8238500335243    -1.065E-11 2.398E-14 7.485E-11
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.065E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -800,7 +800,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8247270420791    -1.303E-08 6.954E-11 2.655E-08
  ETOT  5  -8.8247270420913    -1.224E-11 3.499E-14 8.088E-11
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.224E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -965,7 +965,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8246743237355    -1.416E-08 7.428E-11 3.118E-08
  ETOT  5  -8.8246743237501    -1.458E-11 4.865E-14 9.036E-11
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.458E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1112,8 +1112,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1150,7 +1150,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8429341170336    -7.335E-08 4.654E-10 8.196E-08
  ETOT  5  -8.8429341171028    -6.911E-11 1.700E-13 3.541E-10
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  6.911E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1315,7 +1315,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8447749068188    -1.229E-08 7.397E-11 1.817E-08
  ETOT  5  -8.8447749068306    -1.186E-11 3.806E-14 7.569E-11
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.186E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1480,7 +1480,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8456825986726    -1.354E-08 7.939E-11 2.121E-08
  ETOT  5  -8.8456825986864    -1.382E-11 4.624E-14 8.775E-11
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.382E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1638,7 +1638,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8458762187139    -1.501E-08 8.564E-11 2.499E-08
  ETOT  5  -8.8458762187303    -1.637E-11 6.037E-14 1.046E-10
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.637E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1778,8 +1778,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1816,7 +1816,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8551067860580    -8.613E-08 5.908E-10 9.404E-08
  ETOT  5  -8.8551067861498    -9.172E-11 3.060E-13 5.429E-10
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  9.172E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1974,7 +1974,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8569054758151    -1.258E-08 8.227E-11 1.621E-08
  ETOT  5  -8.8569054758285    -1.336E-11 6.588E-14 8.031E-11
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.336E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2132,7 +2132,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8577290972172    -1.375E-08 8.787E-11 1.927E-08
  ETOT  5  -8.8577290972331    -1.588E-11 7.680E-14 9.805E-11
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.588E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2297,7 +2297,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4  -8.8576952710883    -1.503E-08 9.391E-11 3.338E-08
  ETOT  5  -8.8576952711074    -1.908E-11 9.948E-14 1.737E-10
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.908E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2408,7 +2408,7 @@ band_energy         :  1.99969746059067E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell11    1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
             acell12    1.0100000000E+01  1.0100000000E+01  1.0100000000E+01 Bohr
@@ -2653,7 +2653,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2665,12 +2665,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2688,7 +2688,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -2703,7 +2703,7 @@ P           mkmem           2
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

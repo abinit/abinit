@@ -352,10 +352,16 @@
 #cmakedefine MPI_HAS_QUERY_ZE_SUPPORT @MPI_HAS_QUERY_ZE_SUPPORT@
 
 /* Define to 1 if you have a MPI-aware GPU library. */
-/* TODO #cmakedefine HAVE_GPU_MPI */
+#cmakedefine HAVE_GPU_MPI @HAVE_GPU_MPI@
 
-/* Define to 1 if you have library nvtx (v3). */
+/* Define to 1 if you have library for GPU range markers. */
 #cmakedefine HAVE_GPU_MARKERS @HAVE_GPU_MARKERS@
+
+/* Define to 1 if you have CUDA library for GPU range markers. */
+#cmakedefine HAVE_GPU_MARKERS_NVTX @HAVE_GPU_MARKERS_NVTX@
+
+/* Define to 1 if you have ROCTX library for GPU range markers. */
+#cmakedefine HAVE_GPU_MARKERS_ROCTX @HAVE_GPU_MARKERS_ROCTX@
 
 /* Define to 1 if you have a serial GPU library. */
 #cmakedefine HAVE_GPU_SERIAL @HAVE_GPU_SERIAL@

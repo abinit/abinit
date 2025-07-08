@@ -1,0 +1,96 @@
+# LiF: computation of electron-phonon matrix elements for 3x3x3, 4x4x4, 5x5x5
+# k/q-grids in a dataset mode. The results are stored in GSTORE.nc NetCDF file
+# (preparatory run for VarPEq hole polaron calculations)
+
+# NOTE that dataset mode is used only for the tutorial
+# In production, it is advisable to compute each GSTORE file in a separate run
+
+ ndtset 3
+
+ optdriver  7   # Electron-phonon driver
+ eph_task   11  # Activate the e-ph matrix elements computation via GSTORE
+
+# Electron-phonon matrix elements parameters
+ gstore_cplex  2     # Complex e-ph matrix elements   (mandatory for VarPEq)
+ gstore_kzone  "bz"  # Use full BZ for k and q meshes (mandatory for VarPEq)
+ gstore_qzone  "bz"
+ gstore_brange 3 5  # Bands participating in the hole polaron formation:
+                    # from 3 to 5 (triply degenerate valence band maximum)
+
+# Wavefunction
+# Read the WFK file from the preparatory run
+ getwfk_filepath1 "teph4vpq_2o_DS1_WFK"  # 3x3x3 k-mesh
+ getwfk_filepath2 "teph4vpq_2o_DS2_WFK"  # 4x4x4 k-mesh
+ getwfk_filepath3 "teph4vpq_2o_DS3_WFK"  # 5x5x5 k-mesh
+
+ ngkpt1   3 3 3  # These parameters have to consistent with the WFK file
+ ngkpt2   4 4 4
+ ngkpt3   5 5 5
+
+ kptopt   1
+ nshiftk  1
+ shiftk   0 0 0
+ nband    6
+ ecut     30
+
+# Phonons
+ getddb_filepath
+ "LiF_eph_varpeq/out_DDB"  # Read the precomputed DDB stored in git submodule
+                           # NOTE: for the input parameters used to produce
+                           # the DDB file, consult the LiF_eph_varpeq/dfpt.abi
+
+# Scattering potentials
+ getdvdb_filepath
+ "teph4vpq_1_DVDB"  # Read the DVDB file from the preparatory run
+
+# Phonons and scattering potentials interpolation
+ ddb_ngqpt  3 3 3       # This has to be consistent with the DDB/DVDB files
+ boxcutmin  1.1         # Optimal value that speeds up the interpolation
+
+ eph_ngqpt_fine1  3 3 3  # Interpolate to 3x3x3 q-grid
+ eph_ngqpt_fine2  4 4 4  #                4x4x4 q-grid
+ eph_ngqpt_fine3  5 5 5  #                5x5x5 q-grid
+
+# Pseudopotentials
+ pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_05_pbe_std_psp8"
+ pseudos "Li.psp8, F.psp8"
+
+# Structure
+ natom   2
+ ntypat  2
+ typat   1 2
+ znucl   3 9
+ xred    0.0  0.0  0.0
+         0.5  0.5  0.5
+
+ acell 3*7.675
+ rprim 0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_*
+#%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
+#%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
+#%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,
+#%%              teph4vpq_10.abi
+#%% [files]
+#%% use_git_submodule = LiF_eph_varpeq
+#%% files_to_test =
+#%%   teph4vpq_3.abo, tolnlines = 120, tolabs = 5e-6, tolrel = 1
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = V. Vasilchenko
+#%% keywords = DFPT, EPH, POLARON
+#%% description =
+#%%   LiF, Fm-3m space group.
+#%%   Preparatory run for VarPEq calculations (hole polaron).
+#%%   Computation of electron-phonon matrix elements on 3x3x3, 4x4x4, 5x5x5
+#%%   k/q-grids using GSTORE.
+#%%<END TEST_INFO>

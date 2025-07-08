@@ -30,6 +30,7 @@ optcell = 2
 #%% executable = multibinit
 #%% system_xml = t06_sys.xml
 #%% coeff_xml = t06_coeff.xml
+#%% need_cpp_vars = !HAVE_GPU  , !CC_INTEL_ONEAPI
 #%% [files]
 #%% files_to_test = 
 #%%   t06.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;

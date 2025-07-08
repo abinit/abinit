@@ -7,7 +7,7 @@
 !!  (sqrt root)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (BA)
+!! Copyright (C) 2009-2025 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,14 +34,20 @@ MODULE m_matrix
 
  private
 
-! public :: init_matrix         ! Main creation method
- public :: invsqrt_matrix         ! inv of Sqrt of Matrix
- public :: blockdiago_fordsyev         ! inv of Sqrt of Matrix
- public :: blockdiago_forzheev         ! inv of Sqrt of Matrix
-! public :: inverse_matrix      ! Inverse matrix
-! public :: nullify_matrix      ! Nullify the object
-! public :: destroy_matrix      ! Frees the allocated memory
-! public :: print_matrix        ! Printout of the basic info
+ public :: invsqrt_matrix       ! inv of Sqrt of Matrix
+ public :: blockdiago_fordsyev  ! inv of Sqrt of Matrix
+ public :: blockdiago_forzheev  ! inv of Sqrt of Matrix
+ public :: mat33det             ! Determinant of a 3x3 matrix
+ public :: mati3inv             ! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
+ public :: mati3det             ! Compute the determinant of a 3x3 matrix of INTEGER elements.
+ public :: matr3inv             ! Invert and TRANSPOSE general 3x3 matrix of real*8 elements.
+
+
+ ! the determinant of a 3*3 matrix
+ interface mat33det
+    procedure  real_mat33det
+    procedure  int_mat33det
+ end interface mat33det
 
 
 CONTAINS  !===========================================================
@@ -820,5 +826,207 @@ subroutine blockdiago_forzheev(matrix,tndim,eig)
 
 end subroutine blockdiago_forzheev
 !!***
+
+!! FUNCTION
+!!  Compute the determinant of a 3x3 real matrix
+!!
+!! INPUTS
+!!  A = 3x3 matrix
+!!
+!! OUTPUT
+!!  det = The determinant
+!!
+!! SOURCE
+
+function real_mat33det(A) result(det)
+  real(dp), intent(in) :: A(3,3)
+  real(dp) :: det
+  DET =  A(1,1)*A(2,2)*A(3,3)  &
+       - A(1,1)*A(2,3)*A(3,2)  &
+       - A(1,2)*A(2,1)*A(3,3)  &
+       + A(1,2)*A(2,3)*A(3,1)  &
+       + A(1,3)*A(2,1)*A(3,2)  &
+       - A(1,3)*A(2,2)*A(3,1)
+end function real_mat33det
+!!***
+
+!! FUNCTION
+!!  Compute the determinant of a 3x3 integer matrix
+!!
+!! INPUTS
+!!  A = 3x3 matrix
+!!
+!! OUTPUT
+!!  det = The determinant
+!!
+!! SOURCE
+
+function int_mat33det(A) result(det)
+  integer, intent(in) :: A(3,3)
+  integer :: det
+  DET =  A(1,1)*A(2,2)*A(3,3)  &
+       - A(1,1)*A(2,3)*A(3,2)  &
+       - A(1,2)*A(2,1)*A(3,3)  &
+       + A(1,2)*A(2,3)*A(3,1)  &
+       + A(1,3)*A(2,1)*A(3,2)  &
+       - A(1,3)*A(2,2)*A(3,1)
+end function int_mat33det
+!!***
+
+!!****f* m_matrix/mati3inv
+!! NAME
+!! mati3inv
+!!
+!! FUNCTION
+!! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
+!!
+!! INPUTS
+!! mm = integer matrix to be inverted
+!!
+!! OUTPUT
+!! mit = inverse of mm input matrix
+!!
+!! NOTES
+!! Used for symmetry operations.
+!! This routine applies to ORTHOGONAL matrices only.
+!! Since these form a group, inverses are also integer arrays.
+!! Returned array is TRANSPOSE of inverse, as needed.
+!! Note use of integer arithmetic.
+!!
+!! SOURCE
+
+subroutine mati3inv(mm, mit)
+
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: mm(3,3)
+ integer,intent(out) :: mit(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: dd
+ character(len=500) :: msg
+!arrays
+ integer :: tt(3,3)
+
+! *************************************************************************
+
+ tt(1,1) = mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)
+ tt(2,1) = mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)
+ tt(3,1) = mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3)
+ tt(1,2) = mm(3,1) * mm(2,3) - mm(2,1) * mm(3,3)
+ tt(2,2) = mm(1,1) * mm(3,3) - mm(3,1) * mm(1,3)
+ tt(3,2) = mm(2,1) * mm(1,3) - mm(1,1) * mm(2,3)
+ tt(1,3) = mm(2,1) * mm(3,2) - mm(3,1) * mm(2,2)
+ tt(2,3) = mm(3,1) * mm(1,2) - mm(1,1) * mm(3,2)
+ tt(3,3) = mm(1,1) * mm(2,2) - mm(2,1) * mm(1,2)
+ dd = mm(1,1) * tt(1,1) + mm(2,1) * tt(2,1) + mm(3,1) * tt(3,1)
+
+ ! Make sure matrix is not singular
+ if (dd /= 0) then
+   mit(:,:)=tt(:,:)/dd
+ else
+   write(msg, '(2a,2x,9(i0,1x),a)' )'Attempting to invert integer array',ch10,mm,' ==> determinant is zero.'
+   ABI_ERROR(msg)
+ end if
+
+ ! If matrix is orthogonal, determinant must be 1 or -1
+ if (abs(dd) /= 1) then
+   write(msg, '(3a,i0)' )'Absolute value of determinant should be one',ch10,'but determinant= ',dd
+   ABI_ERROR(msg)
+ end if
+
+end subroutine mati3inv
+!!***
+
+!!****f* m_matrix/mati3det
+!! NAME
+!! mati3det
+!!
+!! FUNCTION
+!! Compute the determinant of a 3x3 matrix of INTEGER elements.
+!!
+!! INPUTS
+!! mm = integer matrix
+!!
+!! OUTPUT
+!! det = determinant of the matrix
+!!
+!! SOURCE
+
+subroutine mati3det(mm, det)
+
+!Arguments ------------------------------------
+!arrays
+ integer,intent(in) :: mm(3,3)
+ integer,intent(out) :: det
+
+! *************************************************************************
+ det=mm(1,1)*(mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)) &
+   + mm(2,1)*(mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)) &
+   + mm(3,1)*(mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3))
+
+end subroutine mati3det
+!!***
+
+!!****f* m_matrix/matr3inv
+!! NAME
+!! matr3inv
+!!
+!! FUNCTION
+!! Invert and transpose general 3x3 matrix of real*8 elements.
+!!
+!! INPUTS
+!! aa = 3x3 matrix to be inverted
+!!
+!! OUTPUT
+!! ait = inverse of aa input matrix
+!!
+!! NOTES
+!! Returned array is TRANSPOSE of inverse, as needed to get g from r.
+!!
+!! SOURCE
+
+subroutine matr3inv(aa, ait)
+
+!Arguments ------------------------------------
+!arrays
+ real(dp),intent(in) :: aa(3,3)
+ real(dp),intent(out) :: ait(3,3)
+
+!Local variables-------------------------------
+!scalars
+ real(dp) :: dd,det,t1,t2,t3
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ t1 = aa(2,2) * aa(3,3) - aa(3,2) * aa(2,3)
+ t2 = aa(3,2) * aa(1,3) - aa(1,2) * aa(3,3)
+ t3 = aa(1,2) * aa(2,3) - aa(2,2) * aa(1,3)
+ det  = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
+
+!Make sure matrix is not singular
+ if (abs(det)>tol16) then
+   dd=one/det
+ else
+   write(msg, '(2a,2x,9es16.8,a,a,es16.8,a)' )&
+     'Attempting to invert real(8) 3x3 array',ch10,aa(:,:),ch10,'   ==> determinant=',det,' is zero.'
+   ABI_BUG(msg)
+ end if
+
+ ait(1,1) = t1 * dd
+ ait(2,1) = t2 * dd
+ ait(3,1) = t3 * dd
+ ait(1,2) = (aa(3,1)*aa(2,3)-aa(2,1)*aa(3,3)) * dd
+ ait(2,2) = (aa(1,1)*aa(3,3)-aa(3,1)*aa(1,3)) * dd
+ ait(3,2) = (aa(2,1)*aa(1,3)-aa(1,1)*aa(2,3)) * dd
+ ait(1,3) = (aa(2,1)*aa(3,2)-aa(3,1)*aa(2,2)) * dd
+ ait(2,3) = (aa(3,1)*aa(1,2)-aa(1,1)*aa(3,2)) * dd
+ ait(3,3) = (aa(1,1)*aa(2,2)-aa(2,1)*aa(1,2)) * dd
+
+end subroutine matr3inv
+!!***
+
 
 END MODULE m_matrix

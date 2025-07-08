@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2024 ABINIT group (MT)
+!!  Copyright (C) 2000-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,13 +20,13 @@
 
 module m_nvtx_data
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
   use m_nvtx, only : nvtxStartRange, nvtxEndRange, nvtxProfilerStart, nvtxProfilerStop
 #endif
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 95
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 117
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -125,6 +125,28 @@ module m_nvtx_data
   integer, parameter :: NVTX_GETGSC = 93
   integer, parameter :: NVTX_DFPT_ACCRHO = 94
   integer, parameter :: NVTX_DFPT_MKRHO = 95
+  integer, parameter :: NVTX_MAKE_INVOVL = 96
+  integer, parameter :: NVTX_FORSTR = 97
+  integer, parameter :: NVTX_FORCES = 98
+  integer, parameter :: NVTX_STRESS = 99
+  integer, parameter :: NVTX_DMFT_SOLVE = 100
+  integer, parameter :: NVTX_DMFT_SOLVE_LOOP = 101
+  integer, parameter :: NVTX_DMFT_IMPURITY_SOLVE = 102
+  integer, parameter :: NVTX_DMFT_HUBBARD_ONE = 103
+  integer, parameter :: NVTX_DMFT_DOWNFOLD_OPER = 104
+  integer, parameter :: NVTX_DMFT_UPFOLD_OPER = 105
+  integer, parameter :: NVTX_DMFT_INVERSE_OPER = 106
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN = 107
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN_BATCHED = 108
+  integer, parameter :: NVTX_DMFT_COMPUTE_GREEN_LOOP = 109
+  integer, parameter :: NVTX_DMFT_INTEGRATE_GREEN = 110
+  integer, parameter :: NVTX_DMFT_FERMI_GREEN = 111
+  integer, parameter :: NVTX_DMFT_COMPUTE_NB_ELEC = 112
+  integer, parameter :: NVTX_DMFT_ADD_INT_FCT = 113
+  integer, parameter :: NVTX_DMFT_SYM_MATLU = 114
+  integer, parameter :: NVTX_DMFT_RW_SELF = 115
+  integer, parameter :: NVTX_DMFT_SAVEOCC = 116
+  integer, parameter :: NVTX_TRANSPOSER_MPI_ALL2ALL = 117
 
 contains
 
@@ -229,8 +251,30 @@ contains
          & "DFPT_WFKFERMI", &
          & "GETGSC", &
          & "DFPT_ACCRHO", &
-         & "DFPT_MKRHO" &
-         ]
+         & "DFPT_MKRHO", &
+         & "MAKE_INVOVL", &
+         & "FORSTR", &
+         & "FORCES", &
+         & "STRESS", &
+         & "DMFT_SOLVE", &
+         & "DMFT_SOLVE_LOOP", &
+         & "DMFT_IMPURITY_SOLVE", &
+         & "DMFT_HUBBARD_ONE", &
+         & "DMFT_DOWNFOLD_OPER", &
+         & "DMFT_UPFOLD_OPER", &
+         & "DMFT_INVERSE_OPER", &
+         & "DMFT_COMPUTE_GREEN", &
+         & "DMFT_COMPUTE_GREEN_BATCHED", &
+         & "DMFT_COMPUTE_GREEN_LOOP", &
+         & "DMFT_INTEGRATE_GREEN", &
+         & "DMFT_FERMI_GREEN", &
+         & "DMFT_COMPUTE_NB_ELEC", &
+         & "DMFT_ADD_INT_FCT", &
+         & "DMFT_SYM_MATLU", &
+         & "DMFT_RW_SELF", &
+         & "DMFT_SAVEOCC", &
+         & "TRANSPOSER_MPI_ALL2ALL" &
+         & ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
     nvtx_ids(2) = NVTX_SCF
@@ -327,10 +371,32 @@ contains
     nvtx_ids(93)= NVTX_GETGSC
     nvtx_ids(94)= NVTX_DFPT_ACCRHO
     nvtx_ids(95)= NVTX_DFPT_MKRHO
+    nvtx_ids(96)= NVTX_MAKE_INVOVL
+    nvtx_ids(97)= NVTX_FORSTR
+    nvtx_ids(98)= NVTX_FORCES
+    nvtx_ids(99)= NVTX_STRESS
+    nvtx_ids(100)=NVTX_DMFT_SOLVE
+    nvtx_ids(101)=NVTX_DMFT_SOLVE_LOOP
+    nvtx_ids(102)=NVTX_DMFT_IMPURITY_SOLVE
+    nvtx_ids(103)=NVTX_DMFT_HUBBARD_ONE
+    nvtx_ids(104)=NVTX_DMFT_DOWNFOLD_OPER
+    nvtx_ids(105)=NVTX_DMFT_UPFOLD_OPER
+    nvtx_ids(106)=NVTX_DMFT_INVERSE_OPER
+    nvtx_ids(107)=NVTX_DMFT_COMPUTE_GREEN
+    nvtx_ids(108)=NVTX_DMFT_COMPUTE_GREEN_BATCHED
+    nvtx_ids(109)=NVTX_DMFT_COMPUTE_GREEN_LOOP
+    nvtx_ids(110)=NVTX_DMFT_INTEGRATE_GREEN
+    nvtx_ids(111)=NVTX_DMFT_FERMI_GREEN
+    nvtx_ids(112)=NVTX_DMFT_COMPUTE_NB_ELEC
+    nvtx_ids(113)=NVTX_DMFT_ADD_INT_FCT
+    nvtx_ids(114)=NVTX_DMFT_SYM_MATLU
+    nvtx_ids(115)=NVTX_DMFT_RW_SELF
+    nvtx_ids(116)=NVTX_DMFT_SAVEOCC
+    nvtx_ids(117)=NVTX_TRANSPOSER_MPI_ALL2ALL
 
   end subroutine nvtx_init
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine abi_nvtx_start_range(id)

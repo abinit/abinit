@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h11 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t34/t34.abi
 - output file    -> t34.abo
 - root for input  files -> t34i
@@ -13187,8 +13187,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.16336
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -13226,7 +13226,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  5  -8.7485210251198    -4.687E-09 1.610E-10 1.330E-08
  ETOT  6  -8.7485210251381    -1.827E-11 6.106E-13 4.945E-11
 
- At SCF step    6, etot is converged : 
+ At SCF step    6, etot is converged :
   for the second time, diff in etot=  1.827E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -13473,7 +13473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251385    -7.283E-14 7.712E-20 7.317E-13
  ETOT  3  -8.7485210251385    -8.882E-15 1.662E-17 1.643E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  8.882E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -13723,7 +13723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251382    -1.101E-13 1.075E-19 9.754E-13
  ETOT  3  -8.7485210251382    -2.132E-14 2.492E-17 2.122E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.132E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -13973,7 +13973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251380    -7.105E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251380    -3.553E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.553E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -14223,7 +14223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251378    -8.704E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251378    -1.954E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.954E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -14473,7 +14473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251369    -6.395E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251370    -2.132E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.132E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -14723,7 +14723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251364    -1.066E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251364    -2.665E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.665E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -14973,7 +14973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251348    -8.527E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251348    -3.197E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.197E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -15223,7 +15223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251330    -9.948E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251330    -1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -15473,7 +15473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251324    -6.573E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251325    -1.421E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.421E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -15723,7 +15723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251306    -8.704E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251306     1.599E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.599E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -15973,7 +15973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251299    -1.101E-13 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251299     1.421E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.421E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -16223,7 +16223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251283    -9.592E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251283    -5.329E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  5.329E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -16473,7 +16473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251273    -4.796E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251273    -4.619E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  4.619E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -16723,7 +16723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251273    -9.770E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251273     1.954E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.954E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -16973,7 +16973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251276    -6.040E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251276    -3.553E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.553E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -17223,7 +17223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251276    -1.048E-13 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251277    -4.441E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  4.441E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -17473,7 +17473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251285    -7.461E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251285    -4.086E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  4.086E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -17723,7 +17723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251297    -7.638E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251297    -1.066E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -17973,7 +17973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251312    -1.048E-13 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251312     2.309E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -18223,7 +18223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251318    -1.190E-13 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251318    -8.882E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  8.882E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -18473,7 +18473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251342    -1.048E-13 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251342     1.421E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.421E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -18723,7 +18723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251363    -6.750E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251364    -2.132E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.132E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -18973,7 +18973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251386    -1.101E-13 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251386     1.421E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.421E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -19223,7 +19223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251411    -4.796E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251412    -1.954E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.954E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -19473,7 +19473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251440    -5.507E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251440     5.329E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  5.329E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -19723,7 +19723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251473    -8.349E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251473     0.000E+00 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  0.000E+00 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -19973,7 +19973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251510    -9.948E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251510     1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -20223,7 +20223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251548    -9.237E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251548     1.776E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -20473,7 +20473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251586    -1.119E-13 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251586     3.020E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.020E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -20723,7 +20723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251633    -1.066E-13 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251633     1.421E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.421E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -20973,7 +20973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251676    -6.217E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251676    -1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -21223,7 +21223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251722    -8.171E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251722     3.553E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.553E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -21473,7 +21473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251771    -7.994E-14 1.073E-19 9.751E-13
  ETOT  3  -8.7485210251771    -1.066E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -21723,7 +21723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251827    -6.928E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251827    -1.599E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.599E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -21973,7 +21973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251884    -7.283E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251885    -5.329E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  5.329E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -22223,7 +22223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210251940    -8.704E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210251940     1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -22473,7 +22473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252000    -1.048E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252000     3.553E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.553E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -22723,7 +22723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252057    -9.592E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252057     3.553E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.553E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -22973,7 +22973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252122    -9.592E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252122    -1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -23223,7 +23223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252188    -1.030E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252188     1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -23473,7 +23473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252252    -1.101E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252252    -1.066E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -23723,7 +23723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252321    -8.704E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252321     1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -23973,7 +23973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252388    -7.816E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252388    -3.908E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.908E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -24223,7 +24223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252457    -6.395E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252458    -5.684E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  5.684E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -24473,7 +24473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252527    -9.237E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252527    -1.776E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -24723,7 +24723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252596    -9.237E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252596     1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -24973,7 +24973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252668    -8.171E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252668     1.776E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -25223,7 +25223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252742    -6.395E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252743    -1.954E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.954E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -25473,7 +25473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252825    -5.507E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252825    -2.487E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.487E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -25723,7 +25723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252896    -1.208E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252896    -1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -25973,7 +25973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210252971    -8.349E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210252971     1.776E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -26223,7 +26223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253044    -9.415E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253044     2.309E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -26473,7 +26473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253117    -9.770E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253117    -1.776E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -26723,7 +26723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253192    -9.059E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253191     2.487E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.487E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -26973,7 +26973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253267    -6.928E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253267    -1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -27223,7 +27223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253342    -7.283E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253343    -1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -27473,7 +27473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253412    -8.704E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253412    -2.487E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.487E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -27723,7 +27723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253486    -7.105E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253486     1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -27973,7 +27973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253554    -9.948E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253554     1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -28223,7 +28223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253626    -8.704E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253626    -2.842E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.842E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -28473,7 +28473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253686    -1.208E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253686     3.730E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.730E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -28723,7 +28723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253754    -1.101E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253754     2.309E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -28973,7 +28973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253818    -9.948E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253818    -1.066E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -29223,7 +29223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253871    -1.137E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253871    -2.665E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.665E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -29473,7 +29473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253934    -1.030E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253934     2.665E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.665E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -29723,7 +29723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253986    -1.190E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210253986    -8.882E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  8.882E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -29973,7 +29973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254039    -8.527E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254039    -2.487E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.487E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -30223,7 +30223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254092    -5.684E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254092    -8.882E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  8.882E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -30473,7 +30473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254138    -1.279E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254138     3.553E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.553E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -30723,7 +30723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254185    -9.415E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254185    -1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -30973,7 +30973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254228    -9.415E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254228    -1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -31223,7 +31223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254268    -8.349E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254268     7.105E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  7.105E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -31473,7 +31473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254306    -1.386E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254306     4.086E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  4.086E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -31723,7 +31723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254344    -1.172E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254344    -5.329E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  5.329E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -31973,7 +31973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254371    -1.084E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254371     7.105E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  7.105E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -32223,7 +32223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254400    -8.171E-14 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254400    -1.421E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.421E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -32473,7 +32473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254426    -1.492E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254425     2.665E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.665E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -32723,7 +32723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254446    -1.279E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254445     1.776E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -32973,7 +32973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254458    -1.013E-13 1.074E-19 9.751E-13
  ETOT  3  -8.7485210254458     4.086E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  4.086E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -33223,7 +33223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254467    -7.638E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254467    -1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -33473,7 +33473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254480    -8.527E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254479     2.665E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.665E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -33723,7 +33723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254487    -1.261E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254487     3.553E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.553E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -33973,7 +33973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254494    -1.155E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254494    -1.776E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -34223,7 +34223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254486    -1.048E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254486     1.243E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -34473,7 +34473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254486    -8.171E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254486     7.105E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  7.105E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -34723,7 +34723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254478    -1.119E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254478     3.020E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.020E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -34973,7 +34973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254463    -1.350E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254463     2.309E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -35223,7 +35223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254453    -1.155E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254453     2.309E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.309E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -35473,7 +35473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254437    -9.592E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254437    -5.329E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  5.329E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -35723,7 +35723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254419    -7.816E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254419    -7.105E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  7.105E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -35973,7 +35973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254390    -1.013E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254390     2.132E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.132E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -36223,7 +36223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254361    -1.101E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254361     1.066E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -36473,7 +36473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254331    -8.171E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254331    -2.132E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.132E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -36723,7 +36723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254295    -7.461E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254295    -2.487E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.487E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -36973,7 +36973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254254    -5.862E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254254    -5.329E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  5.329E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -37223,7 +37223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254213    -7.994E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254213    -1.421E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.421E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -37473,7 +37473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254170    -1.066E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254170    -3.553E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  3.553E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -37723,7 +37723,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254123    -1.066E-13 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254122     2.487E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.487E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -37973,7 +37973,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254075    -8.527E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254076    -1.599E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  1.599E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -38223,7 +38223,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210254025    -9.770E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210254024     2.842E-14 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  2.842E-14 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -38473,7 +38473,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  2  -8.7485210253966    -7.816E-14 1.074E-19 9.750E-13
  ETOT  3  -8.7485210253966     5.329E-15 2.491E-17 2.120E-14
 
- At SCF step    3, etot is converged : 
+ At SCF step    3, etot is converged :
   for the second time, diff in etot=  5.329E-15 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -38678,7 +38678,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
@@ -48675,7 +48675,7 @@ P           mkmem1022       3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -48687,12 +48687,12 @@ P           mkmem1022       3
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -48710,7 +48710,7 @@ P           mkmem1022       3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -48725,7 +48725,7 @@ P           mkmem1022       3
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

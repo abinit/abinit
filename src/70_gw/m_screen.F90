@@ -6,7 +6,7 @@
 !!  Screening object used in the BSE code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (MG)
+!!  Copyright (C) 2014-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1062,7 +1062,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
        do iw=1,nomega
          write(msg,'(a,i3,a,i4,a)')'  Model symmetrical e^{-1} (q=',iq_ibz,', omega=',iw,', G,G'')'
          call wrtout(std_out,msg)
-         call print_arr(screen%Fgg(iq_ibz)%mat(:,:,iw))
+         call print_arr([std_out], screen%Fgg(iq_ibz)%mat(:,:,iw))
        end do
      end if
    end do ! iq_ibz
@@ -1077,7 +1077,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
    do iq_ibz=1,nqibz
      if (screen%ihave_fgg(iq_ibz, how="Stored")) then
-       call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
+       !call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
        call screen%ppm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
                                  screen%Fgg(iq_ibz)%mat, nfftf_tot, Gsph%gvec, ngfftf, screen%ae_rhor(:,1))
      end if
@@ -1345,9 +1345,9 @@ end subroutine screen_w0gemv
 !! FUNCTION
 !!
 !! INPUTS
-!!  npwc=Number of G vectors in in_ket
+!!  npw_c=Number of G vectors in in_ket
 !!  nspinor=Number of spinorial components.
-!!  in_ket(npwc)= |\phi> in reciprocal space.
+!!  in_ket(npw_c)= |\phi> in reciprocal space.
 !!  trans= On entry, TRANS specifies the operation to be performed as follows:
 !!      TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
 !!      TRANS = 'T' or 't'   y := alpha*A**T*x + beta*y.
@@ -1358,18 +1358,18 @@ end subroutine screen_w0gemv
 !! SOURCE
 
 subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i, zcut, &
-                            nspinor, npwx, npwc, rhotwgp, out_ket, sigcme)
+                            nspinor, npw_x, npw_c, rhotwgp, out_ket, sigcme)
 
 !Arguments ------------------------------------
 !scalars
  class(screen_t),intent(in) :: screen
  character(len=*),intent(in) ::  trans
- integer,intent(in) :: nomega, nspinor, npwx, npwc
+ integer,intent(in) :: nomega, nspinor, npw_x, npw_c
  real(dp),intent(in) :: theta_mu_minus_e0i, zcut
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
- complex(gwpc),intent(inout) :: out_ket(npwc*nspinor, nomega)
+ complex(gwpc),intent(in) :: rhotwgp(npw_x*nspinor)
+ complex(gwpc),intent(inout) :: out_ket(npw_c*nspinor, nomega)
  complex(gwpc),intent(out) :: sigcme(nomega)
 
 !Local variables-------------------------------
@@ -1390,8 +1390,8 @@ subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i
                 otq   => screen%ppm%omegatw_qbz_vals, &
                 eig   => screen%ppm%eigpot_qbz_vals)
 
-       call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq, otq, &
-                                 omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, out_ket, sigcme)
+       call screen%ppm%calc_sigc(nspinor, npw_c, nomega, rhotwgp, botsq, otq, &
+                                 omegame0i, zcut, theta_mu_minus_e0i, eig, npw_x, out_ket, sigcme)
 
      end associate
 
@@ -1401,14 +1401,14 @@ subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i
                 otq   => screen%ppm%omegatw_qbz_vals, &
                 eig   => screen%ppm%eigpot_qbz_vals)
 
-     ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
+     ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npw_c))
      botsq_conjg_transp=TRANSPOSE(botsq) ! Keep these two lines separated, otherwise gfortran messes up
      !botsq_conjg_transp=CONJG(botsq_conjg_transp)
      ABI_MALLOC(otq_transp,(ppm%dm2_otq, ppm%npwc))
      otq_transp=TRANSPOSE(otq)
 
-     call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq_conjg_transp, otq_transp, &
-                               omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, out_ket, sigcme)
+     call screen%ppm%calc_sigc(nspinor, npw_c, nomega, rhotwgp, botsq_conjg_transp, otq_transp, &
+                               omegame0i, zcut, theta_mu_minus_e0i, eig, npw_x, out_ket, sigcme)
 
      ABI_FREE(botsq_conjg_transp)
      ABI_FREE(otq_transp)
@@ -1434,17 +1434,17 @@ end subroutine screen_calc_sigc
 !!
 !! FUNCTION
 !!  Symmetrizes the two-point function in G-space. Symmetrization is done
-!!  inplace thorugh an auxiliary work array of dimension (npwc,npwc)
+!!  inplace thorugh an auxiliary work array of dimension (npw_c,npw_c)
 !!
 !! INPUTS
 !!  nomega=All frequencies from 1 up to nomega are symmetrized.
-!!  npwc=Number of G vectors in the symmetrized matrix.
+!!  npw_c=Number of G vectors in the symmetrized matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for Er.
 !!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
 !!
 !! SIDE EFFECTS
-!!  epsm1(npwc,npwc,nomega)
+!!  epsm1(npw_c,npw_c,nomega)
 !!   input:  filled with the matrix at the q-point that has to be symmetrized.
 !!   output: symmetrised matrix.
 !!
@@ -1464,15 +1464,15 @@ end subroutine screen_calc_sigc
 !!
 !! SOURCE
 
-subroutine em1_symmetrize_ip(iq_bz, npwc, nomega, Gsph, Qmesh, epsm1)
+subroutine em1_symmetrize_ip(iq_bz, npw_c, nomega, Gsph, Qmesh, epsm1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iq_bz,nomega,npwc
+ integer,intent(in) :: iq_bz,nomega,npw_c
  type(gsphere_t),intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
 !arrays
- complex(gwpc),intent(inout) :: epsm1(npwc,npwc,nomega)
+ complex(gwpc),intent(inout) :: epsm1(npw_c,npw_c,nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -1491,15 +1491,15 @@ subroutine em1_symmetrize_ip(iq_bz, npwc, nomega, Gsph, Qmesh, epsm1)
 
  if (q_isirred) RETURN ! Nothing to do
 
- !write(msg,'(a,f8.2,a)')" out of memory in work , requiring ",npwc**2*gwpc*b2Mb," Mb"
- ABI_MALLOC_OR_DIE(work, (npwc,npwc), ierr)
+ !write(msg,'(a,f8.2,a)')" out of memory in work , requiring ",npw_c**2*gwpc*b2Mb," Mb"
+ ABI_MALLOC_OR_DIE(work, (npw_c,npw_c), ierr)
 
 !$OMP PARALLEL DO PRIVATE(isg2,isg1,phmsg1t,phmsg2t_star,work) IF (nomega > 1)
  do iw=1,nomega
-   do g2=1,npwc
+   do g2=1,npw_c
      isg2 = Gsph%rottb(g2,itim_q,isym_q)
      phmsg2t_star = CONJG(Gsph%phmSGt(g2,isym_q))
-     do g1=1,npwc
+     do g1=1,npw_c
        isg1 = Gsph%rottb(g1,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(g1,isym_q)
        work(isg1,isg2) = epsm1(g1,g2,iw) * phmsg1t * phmsg2t_star
@@ -1514,7 +1514,7 @@ subroutine em1_symmetrize_ip(iq_bz, npwc, nomega, Gsph, Qmesh, epsm1)
  if (itim_q==2) then
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
-     call sqmat_itranspose(npwc,epsm1(:,:,iw))
+     call sqmat_itranspose(npw_c, epsm1(:,:,iw))
    end do
  end if
 
@@ -1532,14 +1532,14 @@ end subroutine em1_symmetrize_ip
 !!
 !! INPUTS
 !!  nomega=All frequencies from 1 up to nomega are symmetrized.
-!!  npwc=Number of G vectors in the symmetrized matrix.
+!!  npw_c=Number of G vectors in the symmetrized matrix.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for Er.
 !!  iq_bz=Index of the q-point in the BZ where epsilon^-1 is required.
-!!  in_epsm1(npwc,npwc,nomega)
+!!  in_epsm1(npw_c,npw_c,nomega)
 !!
 !! OUTPUT
-!!  out_epsm1(npwc,npwc,nomega)
+!!  out_epsm1(npw_c,npw_c,nomega)
 !!
 !! NOTES
 !!  In the present implementation we are not considering a possible umklapp vector G0 in the
@@ -1557,16 +1557,16 @@ end subroutine em1_symmetrize_ip
 !!
 !! SOURCE
 
-subroutine em1_symmetrize_op(iq_bz, npwc, nomega, Gsph, Qmesh, in_epsm1, out_epsm1)
+subroutine em1_symmetrize_op(iq_bz, npw_c, nomega, Gsph, Qmesh, in_epsm1, out_epsm1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iq_bz,nomega,npwc
+ integer,intent(in) :: iq_bz,nomega,npw_c
  type(gsphere_t),target,intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
 !arrays
- complex(gwpc),intent(in) :: in_epsm1(npwc,npwc,nomega)
- complex(gwpc),intent(out) :: out_epsm1(npwc,npwc,nomega)
+ complex(gwpc),intent(in) :: in_epsm1(npw_c,npw_c,nomega)
+ complex(gwpc),intent(out) :: out_epsm1(npw_c,npw_c,nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -1588,10 +1588,10 @@ subroutine em1_symmetrize_op(iq_bz, npwc, nomega, Gsph, Qmesh, in_epsm1, out_eps
 ! grottb is a 1-1 mapping.
 !$OMP PARALLEL DO PRIVATE(isg1,isg2,phmsg1t,phmsg2t_star) COLLAPSE(2) IF (nomega > 1)
  do iw=1,nomega
-   do g2=1,npwc
+   do g2=1,npw_c
      isg2=Gsph%rottb(g2,itim_q,isym_q)
      phmsg2t_star = CONJG(Gsph%phmSGt(g2,isym_q))
-     do g1=1,npwc
+     do g1=1,npw_c
        isg1=Gsph%rottb(g1,itim_q,isym_q)
        phmsg1t = Gsph%phmSGt(g1,isym_q)
        out_epsm1(isg1,isg2,iw) = in_epsm1(g1,g2,iw) * phmsg1t * phmsg2t_star
@@ -1603,7 +1603,7 @@ subroutine em1_symmetrize_op(iq_bz, npwc, nomega, Gsph, Qmesh, in_epsm1, out_eps
  if (itim_q==2) then
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
-     call sqmat_itranspose(npwc, out_epsm1(:,:,iw))
+     call sqmat_itranspose(npw_c, out_epsm1(:,:,iw))
    end do
  end if
 

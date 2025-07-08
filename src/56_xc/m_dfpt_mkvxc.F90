@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2024 ABINIT group (XG, DRH, FR, EB, SPr)
+!!  Copyright (C) 2001-2025 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@ module m_dfpt_mkvxc
 
  use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
- use m_symtk,    only : matr3inv
+ use m_matrix,   only : matr3inv
  use m_xctk,     only : xcden, xcpot, xcpotdq
 
  implicit none
@@ -40,6 +40,7 @@ module m_dfpt_mkvxc
  public :: dfpt_mkvxc_noncoll
  public :: dfpt_mkvxcggadq
  public :: dfpt_mkvxcgga_n0met
+ public :: dfpt_mkvxcccdq
 !!***
 
 contains
@@ -995,7 +996,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,1) contains the first-order density, and
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
- qphon(:)=zero 
+ qphon(:)=zero
  rhor1_ptr => rhor1
  ABI_MALLOC(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
  call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
@@ -1018,7 +1019,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
    if (ii==qdirc) dadgradn_t1(:,1,ii)=dadgradn_t1(:,1,ii)+ar1(:,1)
  end do
 
-!Incorporate the terms that do not need further treatment 
+!Incorporate the terms that do not need further treatment
 !(a -i factor is applied here)
  do ir=1,nfft
    ii=2*ir
@@ -1044,15 +1045,15 @@ end subroutine dfpt_mkvxcggadq
 !! dfpt_mkvxcgga_n0met
 !!
 !! FUNCTION
-!! Compute the contribution to the second q-gradient of the metric 
+!! Compute the contribution to the second q-gradient of the metric
 !! perturbation that comes from gga XC potentials and depends only
 !! on ground state rho
-!! 
+!!
 !! INPUTS
 !!  beta= indicates the Cartesian direction of the metric perturbation
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!    if 2, COMPLEX
-!!  delta= indicates the Cartesian direction of the first q-gradient 
+!!  delta= indicates the Cartesian direction of the first q-gradient
 !!  gamma= indicates the Cartesian direction of the second q-gradient
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
@@ -1142,7 +1143,7 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
    dadgngn_2(ir,1)=delbg*kxc(ir,4)*rhor(ir,1)*r0(delta)
  end do
 
-!Incorporate the terms that do not need further treatment 
+!Incorporate the terms that do not need further treatment
  do ir=1,nfft
    ii=2*ir
    vxc1(ii-1,1)= -dadgg(ir,1)-dadgtgn(ir,1)-gna(ir,1)
@@ -1176,7 +1177,7 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
 !Now the term whose sum over real-space derivatives has to be computed.
 !(Use the same routine as in the q-gradient of the XC kernel. It saves
 ! the gradient sum in the imaginary part of vxc1 and includes an additional
-! two_pi factor. Need to fix this after the call.) 
+! two_pi factor. Need to fix this after the call.)
  ishift=0 ; ngrad=2
  call xcpotdq(sumgrad,cplex,gprimd,ishift,mpi_enreg,nfft, &
 & ngfft,ngrad,nspden,nspgrad,vxc1)
@@ -1185,13 +1186,171 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
    ii=2*ir
    vxc1(ii-1,1)=vxc1(ii-1,1)+vxc1(ii,1)/two_pi
    vxc1(ii,1)=zero
- end do 
+ end do
 
- 
+
  ABI_FREE(sumgrad)
 
 end subroutine dfpt_mkvxcgga_n0met
 !!***
+
+!!****f* ABINIT/dfpt_mkvxcccdq
+!! NAME
+!!  dfpt_mkvxcccdq
+!!
+!! FUNCTION
+!!  Computes the first q-gradient of the first-order exchange-correlation potential
+!!  due to the  pseudocore density.
+!!
+!! INPUTS
+!!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
+!!         if 2, COMPLEX
+!!  i3dir= reduced direction of the q-gradient
+!!  ixc= choice of exchange-correlation scheme
+!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(1:18)=integer array with FFT box dimensions and other
+!!  nspden=number of spin-density components
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
+!!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  xccc3d1(cplex*nfft)=3D change in core charge density
+!!  xccc3d1dq(2*nfft)=q_i3dir-gradient of 3D change in core charge density
+!!
+!! OUTPUT
+!!  vxccc1dq(2*nfft,nspden)= q-gradient of first-order XC potential due to pseudocore charge
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gprimd,kxc,mpi_enreg,nfft, &
+& ngfft,nkxc,nspden,qphon,rprimd,vxccc1dq,xccc3d1,xccc3d2dq)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+ !scalars
+ integer , intent(in)  :: cplex,i3dir,ixc,nfft,nkxc,nspden
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+ !arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp), intent(in)  :: gprimd(3,3)
+ real(dp), intent(in)  :: kxc(nfft,nkxc)
+ real(dp), intent(in)  :: qphon(3),rprimd(3,3)
+ real(dp), intent(in)  :: xccc3d1(cplex*nfft)
+ real(dp), intent(in)  :: xccc3d2dq(2*nfft)
+ real(dp), intent(out) :: vxccc1dq(2*nfft,nspden)
+
+!Local variables-------------------------------
+ !scalars
+ integer :: ii,ispden,ir,jj,nhat1grdim,option,qcar,usexcnhat,usepaw
+ real(dp) :: spin_scale
+ logical :: non_magnetic_xc
+ !arrays
+ real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:)
+ real(dp),allocatable :: rhor1(:,:), rhor1_cplx(:,:)
+ real(dp),allocatable :: vxc1dq_a(:,:),vxc1dq_b(:,:),vxc1dq_car(:,:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ vxccc1dq= zero
+
+!If GGA xc first calculate the contribution from the q gradient of the xc potential
+ if (nkxc == 7) then
+
+   !Adapt the format of xccc3d1
+   ABI_MALLOC(rhor1,(cplex*nfft,nspden))
+   spin_scale=one;if (nspden==2) spin_scale=half
+   do ispden=1,nspden
+     do ir=1,cplex*nfft
+       rhor1(ir,ispden)=xccc3d1(ir)*spin_scale
+     end do
+   end do
+
+   !The gradient of the potential is calculated in Cartesian coordinates
+   ABI_MALLOC(vxc1dq_a,(2*nfft,nspden))
+   ABI_MALLOC(vxc1dq_car,(2*nfft,nspden,3))
+   do qcar=1,3
+     call dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,qcar,rhor1,vxc1dq_a)
+
+     !Here we apply an i factor, to compensate the lake of the -i factor in
+     !vxc1dq_b (see notes in dfpt_vlocaldq).
+     do ir=1,nfft
+       ii=2*ir-1
+       jj=2*ir
+       vxc1dq_car(ii,:,qcar)=-vxc1dq_a(jj,:)
+       vxc1dq_car(jj,:,qcar)= vxc1dq_a(ii,:)
+     end do
+   end do
+   ABI_FREE(rhor1)
+
+   !Convert to reduced coordinate i3dir
+   vxc1dq_a=zero
+   do qcar=1,3
+     vxc1dq_a(:,:)=vxc1dq_a(:,:) + gprimd(qcar,i3dir) * vxc1dq_car(:,:,qcar)
+   end do
+   ABI_FREE(vxc1dq_car)
+
+   !Accumulate this term
+   vxccc1dq= vxc1dq_a
+
+   ABI_FREE(vxc1dq_a)
+ end if
+
+!Calculate the term with the gradient of the first-order pseudocore density
+!Dummy arguments for mkvxc
+ ABI_MALLOC(rhor1_cplx,(2*nfft,nspden))
+ usexcnhat= 0
+ nhat1grdim= 0
+ ABI_MALLOC(nhat1gr,(0,0,0))
+ nhat1gr(:,:,:)= zero
+ usepaw= 0
+ ABI_MALLOC(nhat1,(2*nfft,nspden*usepaw))
+ nhat1= zero
+ non_magnetic_xc= .true.
+ option= 0
+ ABI_MALLOC(vxc1dq_b,(2*nfft,nspden))
+ call dfpt_mkvxc(2,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+& non_magnetic_xc,nspden,nfft,option,qphon,rhor1_cplx,rprimd,usexcnhat,vxc1dq_b,xccc3d2dq)
+
+!Accumulate this term
+ vxccc1dq= vxccc1dq + vxc1dq_b
+
+!Deallocations
+ ABI_FREE(vxc1dq_b)
+ ABI_FREE(rhor1_cplx)
+ ABI_FREE(nhat1)
+ ABI_FREE(nhat1gr)
+
+ DBG_EXIT("COLL")
+
+end subroutine dfpt_mkvxcccdq
+!!***
+
 
 end module m_dfpt_mkvxc
 !!***

@@ -93,7 +93,7 @@ if __name__=='__main__':
     "Test: copy a block of lines, with full processing"
     import re
     rex=re.compile('@([^@]+)@')
-    rbe=re.compile('\+')
+    rbe=re.compile(r'\+')
     ren=re.compile('-')
     rco=re.compile('= ')
     x=23 # just a variable to try substitution

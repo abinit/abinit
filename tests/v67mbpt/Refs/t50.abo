@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h12 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t50/t50.abi
 - output file    -> t50.abo
 - root for input  files -> t50i
@@ -343,8 +343,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -602,7 +602,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -618,25 +618,25 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     3
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     3
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
@@ -644,12 +644,16 @@ meta: {optdriver: 3, gwcalctyp: 0, }
           total number of points  =         8000
 
 
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
+
  The inverse dielectric matrix will be calculated on zero frequency only
- please note that the calculated epsilon^-1 cannot be used 
+ please note that the calculated epsilon^-1 cannot be used
  to calculate QP corrections using plasmonpole model 1
 
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 10
 - Number of bands treated by each node ~10
@@ -680,7 +684,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   dielectric constant without local fields =  58.9251
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     28.20  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -746,10 +750,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
- in frequency domain and reciprocal space on a transitions basis set. 
- Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
+ in frequency domain and reciprocal space on a transitions basis set.
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile,
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -763,28 +767,32 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     3
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     3
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields     8 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
@@ -850,9 +858,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  Last  excitonic eigenvalue=   18.94 [eV]
 
 
- GW  direct gap       3.33  0.00 [eV] 
- EXC direct gap       3.10  0.00 [eV] 
- EXC binding energy   0.23  0.00 [eV] 
+ GW  direct gap       3.33  0.00 [eV]
+ EXC direct gap       3.10  0.00 [eV]
+ EXC binding energy   0.23  0.00 [eV]
 
  Excitonic eigenvalues up to the GW energy gap [eV]
   1 (  3.10  0.00)
@@ -861,9 +869,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
   4 (  3.16  0.00)
   5 (  3.16  0.00)
   6 (  3.16  0.00)
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  58.5659   0.0000  46.3385   0.0000  54.0088  -0.0000
    0.0100  58.5666   0.0000  46.3388   0.0000  54.0093   0.0000
    0.0200  58.5686   0.0000  46.3398   0.0000  54.0109   0.0000
@@ -874,13 +882,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  58.5993   0.0000  46.3543   0.0000  54.0339   0.0000
    0.0800  58.6096   0.0000  46.3591   0.0000  54.0416   0.0000
    0.0900  58.6212   0.0000  46.3646   0.0000  54.0503   0.0000
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  59.5204   0.0000  46.9208   0.0000  54.7583   0.1453
    0.0100  59.5211   0.0043  46.9212   0.0021  54.7588   0.1478
    0.0200  59.5232   0.0086  46.9222   0.0042  54.7605   0.1503
@@ -891,13 +899,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  59.5555   0.0303  46.9373   0.0147  54.7845   0.1631
    0.0800  59.5663   0.0346  46.9423   0.0168  54.7925   0.1657
    0.0900  59.5785   0.0389  46.9480   0.0189  54.8016   0.1683
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0001_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0001_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0001_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  59.6060   0.0000  46.9733   0.0000  54.8262   0.1565
    0.0100  59.6067   0.0048  46.9737   0.0023  54.8267   0.1593
    0.0200  59.6088   0.0095  46.9747   0.0046  54.8284   0.1621
@@ -908,13 +916,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  59.6413   0.0334  46.9899   0.0162  54.8525   0.1765
    0.0800  59.6521   0.0382  46.9949   0.0185  54.8606   0.1794
    0.0900  59.6644   0.0430  47.0007   0.0208  54.8697   0.1823
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0002_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0002_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0002_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  59.9013   0.0000  47.1540   0.0000  55.0586   0.2020
    0.0100  59.9021   0.0063  47.1544   0.0031  55.0591   0.2059
    0.0200  59.9043   0.0127  47.1554   0.0061  55.0607   0.2098
@@ -925,13 +933,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  59.9372   0.0444  47.1707   0.0215  55.0852   0.2295
    0.0800  59.9482   0.0508  47.1758   0.0245  55.0934   0.2335
    0.0900  59.9607   0.0571  47.1816   0.0276  55.1026   0.2375
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0003_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0003_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0003_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  60.2944   0.0000  47.3936   0.0000  55.3669   0.2624
    0.0100  60.2951   0.0086  47.3940   0.0041  55.3674   0.2678
    0.0200  60.2973   0.0171  47.3950   0.0082  55.3691   0.2732
@@ -942,13 +950,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  60.3310   0.0600  47.4106   0.0289  55.3939   0.3004
    0.0800  60.3422   0.0685  47.4158   0.0330  55.4022   0.3059
    0.0900  60.3549   0.0771  47.4217   0.0371  55.4116   0.3114
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0004_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0004_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0004_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  60.7316   0.0000  47.6596   0.0000  55.7103   0.3254
    0.0100  60.7323   0.0112  47.6600   0.0054  55.7108   0.3325
    0.0200  60.7346   0.0223  47.6610   0.0107  55.7125   0.3397
@@ -959,13 +967,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  60.7690   0.0782  47.6769   0.0375  55.7377   0.3759
    0.0800  60.7805   0.0894  47.6822   0.0428  55.7461   0.3832
    0.0900  60.7935   0.1007  47.6882   0.0482  55.7557   0.3905
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0005_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0005_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0005_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  61.1910   0.0000  47.9387   0.0000  56.0734   0.3840
    0.0100  61.1918   0.0141  47.9391   0.0067  56.0739   0.3932
    0.0200  61.1942   0.0281  47.9401   0.0134  56.0756   0.4024
@@ -976,13 +984,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  61.2294   0.0985  47.9563   0.0469  56.1010   0.4486
    0.0800  61.2411   0.1126  47.9617   0.0536  56.1096   0.4579
    0.0900  61.2544   0.1268  47.9678   0.0604  56.1193   0.4673
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0006_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0006_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0006_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  61.6630   0.0000  48.2251   0.0000  56.4457   0.4312
    0.0100  61.6638   0.0172  48.2255   0.0081  56.4461   0.4426
    0.0200  61.6662   0.0344  48.2266   0.0163  56.4477   0.4540
@@ -993,13 +1001,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  61.7022   0.1205  48.2430   0.0570  56.4734   0.5115
    0.0800  61.7142   0.1378  48.2485   0.0652  56.4820   0.5231
    0.0900  61.7279   0.1550  48.2548   0.0734  56.4919   0.5348
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0007_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0007_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0007_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  62.1424   0.0000  48.5160   0.0000  56.8177   0.4670
    0.0100  62.1432   0.0206  48.5163   0.0097  56.8181   0.4808
    0.0200  62.1457   0.0411  48.5174   0.0193  56.8197   0.4947
@@ -1010,13 +1018,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  62.1825   0.1441  48.5342   0.0677  56.8456   0.5645
    0.0800  62.1948   0.1647  48.5398   0.0774  56.8544   0.5786
    0.0900  62.2088   0.1854  48.5461   0.0871  56.8644   0.5927
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0008_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0008_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0008_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  62.6263   0.0000  48.8095   0.0000  57.1872   0.4923
    0.0100  62.6271   0.0241  48.8099   0.0113  57.1876   0.5088
    0.0200  62.6296   0.0483  48.8110   0.0226  57.1892   0.5254
@@ -1027,13 +1035,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  62.6673   0.1692  48.8281   0.0790  57.2156   0.6086
    0.0800  62.6799   0.1935  48.8338   0.0903  57.2245   0.6254
    0.0900  62.6942   0.2177  48.8402   0.1016  57.2346   0.6422
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0009_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0009_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0009_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  63.1126   0.0000  49.1047   0.0000  57.5507   0.5076
    0.0100  63.1134   0.0280  49.1051   0.0130  57.5511   0.5270
    0.0200  63.1160   0.0559  49.1063   0.0259  57.5528   0.5464
@@ -1044,14 +1052,14 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0700  63.1546   0.1959  49.1236   0.0909  57.5797   0.6440
    0.0800  63.1674   0.2240  49.1294   0.1039  57.5889   0.6637
    0.0900  63.1820   0.2521  49.1360   0.1169  57.5992   0.6834
-  
+
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0010_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0010_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0010_EXC_MDF
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
@@ -1309,7 +1317,7 @@ P           mkmem4          3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1321,12 +1329,12 @@ P           mkmem4          3
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1344,7 +1352,7 @@ P           mkmem4          3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1359,7 +1367,7 @@ P           mkmem4          3
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

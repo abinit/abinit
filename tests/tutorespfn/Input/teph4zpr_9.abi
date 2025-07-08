@@ -1,0 +1,99 @@
+# Computation of e-ph matrix g(k,q) along high-symmetry path.
+ ndtset 2
+
+ optdriver 7
+ eph_task 18  # Activate computation of g(k,q) along high-symmetry path.
+
+ eph_path_brange 6 8  # Compute g(k,q) only for this band  range
+
+ # Options governing the NSCF computation of wavefunctions
+ nband 20       # Will compute 20 bands
+ nbdbuf 8       # Exclude last 8 states when checking for convergence IMPORTANT!
+ tolwfr 1e-20   # Stopping criterion for NSCF computation
+ nstep 100      # Max number of NSCF iterations.
+
+ # Need GS potential to start NSCF.
+ getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
+
+ ngkpt 12 12 12 eph_ngqpt_fine 12 12 12 getwfk_filepath "teph4zpr_3o_DS3_WFK"
+
+ getddb_filepath "teph4zpr_1_DDB"
+ ddb_ngqpt 4 4 4
+ getdvdb_filepath "teph4zpr_2_DVDB"
+
+############
+# DATASET 1
+############
+# g(k,q) at fixed k along this q-path.
+ eph_fix_korq1 "k"; eph_fix_wavevec1 0.0 0.0 0.0
+ ph_ndivsm1 5
+ ph_nqpath1 5
+ ph_qpath1
+    +0.00000  +0.00000  +0.00000  # $\Gamma$
+    +0.50000  +0.00000  +0.50000  # X
+    +0.50000  +0.25000  +0.75000  # W
+    +0.37500  +0.37500  +0.75000  # K
+    +0.00000  +0.00000  +0.00000  # $\Gamma$
+    +0.50000  +0.50000  +0.50000  # L
+    +0.62500  +0.25000  +0.62500  # U
+    +0.50000  +0.25000  +0.75000  # W
+    +0.50000  +0.50000  +0.50000  # L
+    +0.37500  +0.37500  +0.75000  # K
+    +0.62500  +0.25000  +0.62500  # U
+    +0.50000  +0.00000  +0.50000  # X
+
+############
+# DATASET 1
+############
+# g(k,q) at fixed q along this k-path.
+ eph_fix_korq2 "q"; eph_fix_wavevec2 0.11 0 0
+ nkpath2 5
+ ndivsm2 5
+ kptbounds2
+    +0.00000  +0.00000  +0.00000  # $\Gamma$
+    +0.50000  +0.00000  +0.50000  # X
+    +0.50000  +0.25000  +0.75000  # W
+    +0.37500  +0.37500  +0.75000  # K
+    +0.00000  +0.00000  +0.00000  # $\Gamma$
+    +0.50000  +0.50000  +0.50000  # L
+    +0.62500  +0.25000  +0.62500  # U
+    +0.50000  +0.25000  +0.75000  # W
+    +0.50000  +0.50000  +0.50000  # L
+    +0.37500  +0.37500  +0.75000  # K
+    +0.62500  +0.25000  +0.62500  # U
+    +0.50000  +0.00000  +0.50000  # X
+
+ useylm2 1 # This just to test useylm 1 with eph_task 18
+
+# Global variables.
+ prtphbands 0
+ prtphdos 0
+ ecut 35.0
+ nshiftk 1
+ shiftk 0 0 0
+
+ pp_dirpath = "$ABI_PSPDIR"
+ pseudos = "O.psp8, Mg-sp-gw.psp8"
+
+ structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% test_chain =  teph4zpr_1.abi, teph4zpr_2.abi, teph4zpr_3.abi, teph4zpr_4.abi,
+#%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi, teph4zpr_9.abi
+#%% [files]
+#%% use_git_submodule = MgO_eph_zpr
+#%% files_to_test =
+#%%   teph4zpr_9.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel= 0.20
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = Computation of e-ph matrix g(k,q) along high-symmetry path.
+#%%<END TEST_INFO>

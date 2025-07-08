@@ -52,7 +52,7 @@ gpu_option 1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% [files]
 #%% files_to_test =
 #%%   t04.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00

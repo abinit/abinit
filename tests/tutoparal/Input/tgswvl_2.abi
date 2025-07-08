@@ -137,7 +137,6 @@ optstress 0       # Stress tensor computation is not relevant here
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = scope_gnu_10.2_paral
 #%% need_cpp_vars = HAVE_BIGDFT
 #%% [files]
 #%% files_to_test =

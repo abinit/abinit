@@ -5,7 +5,7 @@
 !!  Computation of phonon-electron self-energy.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (GKA)
+!!  Copyright (C) 2008-2025 ABINIT group (GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,17 +20,15 @@
 
 module m_phpi
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_xmpi
  use m_errors
  use m_ifc
  use m_ebands
- use, intrinsic :: iso_c_binding
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_wfk
  use m_ddb
  use m_dvdb
@@ -40,7 +38,7 @@ module m_phpi
  use m_dtset
  use m_dtfil
 
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : mpi_type
  use m_time,            only : cwtime
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
@@ -134,13 +132,13 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  type(rf_hamiltonian_type) :: rf_hamkq
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3)
+ integer :: g0_k(3), units(2)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:), wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  real(dp) :: Pi_ph(3*cryst%natom)
- real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
- real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
+ real(dp),allocatable :: grad_berry(:,:),kinpw_kq(:),kpg_kq(:,:),kpg_k(:,:),dkinpw(:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d_k(:,:,:),ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:), gkk_m(:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
@@ -149,12 +147,11 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  real(dp),allocatable ::  gs1c(:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
-
 !************************************************************************
 
+ units = [std_out, ab_out]
  write(msg, '(3a)') ch10, "Computation of the real part of the phonon self-energy", ch10
- call wrtout(ab_out, msg, "COLL", do_flush=.True.)
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
+ call wrtout(units, msg, do_flush=.True.)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -165,11 +162,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  i_am_master = (my_rank == master)
 
  ! Copy important dimensions
- natom = cryst%natom
- natom3 = 3 * natom
- nsppol = ebands_k%nsppol
- nspinor = ebands_k%nspinor
- nspden = dtset%nspden
+ natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands_k%nsppol; nspinor = ebands_k%nspinor; nspden = dtset%nspden
  nkpt = ebands_k%nkpt
  mband = ebands_k%mband
  nkpt_kq = ebands_kq%nkpt
@@ -205,11 +198,9 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  call xmpi_split_work(nkpt,comm,my_kstart,my_kstop)
  do ik=1,nkpt
  if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
-
    kk = ebands_k%kptns(:,ik)
    kq = kk + qpt
    call findqg0(ikq,g0_k,kq,nkpt_kq,ebands_kq%kptns(:,:),(/1,1,1/))  ! Find the index of the k+q point
-
    bks_mask(:,ik,:) = .True.
    bks_mask_kq(:,ikq,:) = .True.
  end do
@@ -226,7 +217,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
  ABI_FREE(wfd_istwfk)
 
- call wfd_k%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call wfd_k%print([std_out], header="Wavefunctions on the k-points grid")
 
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
@@ -237,7 +228,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ABI_FREE(wfd_istwfk)
 
- call wfd_kq%print(header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')
+ call wfd_kq%print([std_out], header="Wavefunctions on the q-shifted k-points grid")
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -287,6 +278,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(kg_kq, (3, mpw))
 
  ! Spherical Harmonics for useylm==1.
+ ! FIXME: These arrays should allocated with npw_k and npw_kq
  ABI_MALLOC(ylm_k,(mpw, psps%mpsang*psps%mpsang*psps%useylm))
  ABI_MALLOC(ylm_kq,(mpw, psps%mpsang*psps%mpsang*psps%useylm))
  ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
@@ -310,10 +302,10 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
  !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,NSPPOL,nspden,natom,&
-&  dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
-&  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-&  usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
+ call gs_hamkq%init(psps,pawtab,nspinor,NSPPOL,nspden,natom,&
+                   dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
+                   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
+                   usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
  ! Allocate vlocal. Note nvloc
  ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
@@ -361,7 +353,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ! Initialize phonon self-energy
  Pi_ph = zero
 
-
  ! Examine the symmetries of the q wavevector
  ! call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dtset%prtvol)
 
@@ -380,7 +371,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    call gs_hamkq%load_spin(spin,vlocal=vlocal,with_nonlocal=.true.)
 
    do ik=1,nkpt
-
      ! Only do a subset a k-points
      if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
 
@@ -390,10 +380,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mband))
 
      kk = ebands_k%kptns(:,ik)
-
      kq = kk + qpt
      call findqg0(ikq,g0_k,kq,nkpt_kq,ebands_kq%kptns(:,:),(/1,1,1/))  ! Find the index of the k+q point
-
 
      ! Copy u_k(G)
      istwf_k = wfd_k%istwfk(ik); npw_k = wfd_k%npwarr(ik)
@@ -425,19 +413,17 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        ipert = (ipc - idir) / 3 + 1
 
        !write(msg, '(a,2i4)')  "Treating ipert, idir = ", ipert, idir
-       !call wrtout(std_out, msg, "COLL", do_flush=.True.)
+       !call wrtout(std_out, msg, do_flush=.True.)
 
        ! Prepare application of the NL part.
-       call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
-           !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-           !&mpi_spintab=mpi_enreg%my_isppoltab)
+       call rf_hamkq%init(cplex,gs_hamkq,ipert,has_e1kbsc=.true.)
        call rf_hamkq%load_spin(spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
        ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
        call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&                   ! In
          cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&                           ! In
          npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&                          ! In
-         dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                      ! Out
+         dkinpw,nkpg,nkpg1,kpg_k,kpg_kq,kinpw_kq,ffnl_k,ffnl_kq,ph3d_k,ph3d_kq)                      ! Out
 
        ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
        ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -451,21 +437,15 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 &                     optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
-       ABI_FREE(kinpw1)
-       ABI_FREE(kpg1_k)
+       ABI_FREE(kinpw_kq)
+       ABI_FREE(kpg_kq)
        ABI_FREE(kpg_k)
        ABI_FREE(dkinpw)
-       ABI_FREE(ffnlk)
-       ABI_FREE(ffnl1)
-       ABI_FREE(ph3d)
-
-       if (allocated(gs1c)) then
-         ABI_FREE(gs1c)
-       end if
-
-       if (allocated(ph3d1)) then
-         ABI_FREE(ph3d1)
-       end if
+       ABI_FREE(ffnl_k)
+       ABI_FREE(ffnl_kq)
+       ABI_FREE(ph3d_k)
+       ABI_SFREE(ph3d_kq)
+       ABI_SFREE(gs1c)
 
        ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
        !The array eig1_k contains:
@@ -475,10 +455,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        do ib2=1,mband
          do ib1=1,mband_kq
            call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(1,1,ib1),h1kets_kq(1,1,ib2),&
-             mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-
-           gkk(1,ib1,ib2,ipert,idir) = dotr
-           gkk(2,ib1,ib2,ipert,idir) =  doti
+                          mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+           gkk(:,ib1,ib2,ipert,idir) = [dotr, doti]
          end do
        end do
 
@@ -486,23 +464,20 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
      ! Loop over 3*natom phonon branches.
      do imode=1,natom3
-
        omega = phfrq(imode)
-
        ! Do not compute Pi for negative or too small frequencies
        if (omega .lt. tol6) cycle
-
        gkk_m = zero
 
        ! Transform the gkk from atom,cart basis to mode basis
        do idir=1,3
          do ipert=1,natom
             gkk_m(1,:,:) = gkk_m(1,:,:) &
-&                          + gkk(1,:,:,ipert,idir) * displ_red(1,idir,ipert,imode) &
-&                          - gkk(2,:,:,ipert,idir) * displ_red(2,idir,ipert,imode)
+                           + gkk(1,:,:,ipert,idir) * displ_red(1,idir,ipert,imode) &
+                           - gkk(2,:,:,ipert,idir) * displ_red(2,idir,ipert,imode)
             gkk_m(2,:,:) = gkk_m(2,:,:) &
-&                          + gkk(1,:,:,ipert,idir) * displ_red(2,idir,ipert,imode) &
-&                          + gkk(2,:,:,ipert,idir) * displ_red(1,idir,ipert,imode)
+                           + gkk(1,:,:,ipert,idir) * displ_red(2,idir,ipert,imode) &
+                           + gkk(2,:,:,ipert,idir) * displ_red(1,idir,ipert,imode)
          end do
        end do
 
@@ -511,10 +486,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        ! sum contribution to phonon self-energy
        do ib2=1,mband
          do ib1=1,mband_kq
-
            f_nk = ebands_k%occ(ib2,ik,spin)
            f_mkq = ebands_kq%occ(ib1,ikq,spin)
-
            if (abs(f_mkq - f_nk) .le. tol12) cycle
 
            eig0nk = ebands_k%eig(ib2,ik,spin)
@@ -526,7 +499,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
            term2 = (f_mkq - f_nk) * (eig0mkq - eig0nk        ) / ((eig0mkq - eig0nk        ) ** 2 + eta ** 2)
 
            Pi_ph(imode) = Pi_ph(imode) + wtk * gkk2 * (term1 - term2)
-
          end do
        end do
 
@@ -549,16 +521,14 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    call out_phpi(std_out, Pi_ph, phfrq, qpt, natom3)
  end if
 
-#ifdef HAVE_NETCDF
  if (i_am_master) call out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
-#endif
 
  ! Free memory
  call cwtime(cpu,wall,gflops,"stop")
 
  write(msg, '(3a)') "Computation of the real part of the phonon self-energy completed", ch10, &
-&                   "--------------------------------------------------------------------------------"
- call wrtout([ab_out, std_out], msg, "COLL", do_flush=.True.)
+                    "--------------------------------------------------------------------------------"
+ call wrtout(units, msg, do_flush=.True.)
 
  ! Free memory
  ABI_FREE(gkk)
@@ -627,7 +597,7 @@ subroutine out_phpi(iout, Pi_ph, phfrq, qpt, natom3)
  write(iout,'(1x,a,10x,a)')'omega','Pi(omega)'
 
  do imode=1,natom3
-    write(iout,'(1x,f12.8,1x,es14.6)') phfrq(imode), Pi_ph(imode)
+   write(iout,'(1x,f12.8,1x,es14.6)') phfrq(imode), Pi_ph(imode)
  end do
 
  write(iout,'(a)')' '
@@ -669,8 +639,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
  integer :: ncid, ncerr
  character(len=fnlen) :: fname
 
-#ifdef HAVE_NETCDF
-
  ! Initialize NetCDF file.
  fname = strcat(dtfil%filnam_ds(4),"_Pi.nc")
  NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
@@ -711,10 +679,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
  ! Close file
  NCF_CHECK(nf90_close(ncid))
-
-#else
- ABI_ERROR("NETCDF support required to write Pi.nc file.")
-#endif
 
 end subroutine out_phpi_nc
 !!***

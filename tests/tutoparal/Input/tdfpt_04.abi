@@ -24,7 +24,7 @@ acell 4.0 4.0 28.0 Angstrom
 #Definition of the atom types and pseudopotentials
 ntypat 3
 znucl 56 22 8
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8"
+pp_dirpath "$ABI_PSPDIR/Psdj_nc_sr_04_pw_std_psp8"
 pseudos "Ba.psp8, Ti.psp8, O.psp8"
 
 #Definition of the atoms
@@ -82,7 +82,7 @@ nband 116    # Only the occupied states - will ease the convergence
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
 #%% files_to_test = tdfpt_04_MPI24.abo, tolnlines = 6, tolabs = 1e-07, tolrel= 0.01
-#%% post_commands = 
+#%% post_commands =
 #%%   ww_mv tdfpt_03_MPI24o_WFK tdfpt_04_MPI24i_WFK
 #%% [extra_info]
 #%% keywords = NC

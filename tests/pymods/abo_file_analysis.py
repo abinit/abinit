@@ -53,7 +53,7 @@ class AboFileAnalysis(object):
                 inDatasetMode = False
                 dataset_list.append(current_dataset)
                 del(current_dataset)
-  
+
             # Read data from current dataset
             else:
 
@@ -71,7 +71,7 @@ class AboFileAnalysis(object):
                     #    ntime= X was not enough Broyd/MD steps to converge gradients
                     if "ntime" in line and "was not enough Broyd/MD steps" in line:
                         current_dataset.MD_niter = int(line.split()[1])
-	
+
                     # Read SCF iteration number
                     # Look for:
                     #    At SCF step X, etot is converged
@@ -94,7 +94,7 @@ class AboFileAnalysis(object):
                         current_dataset.SCF_niter.append(int(line.split()[1]))
 
         # Debug
-        # print([[j.number,j.optdriver,j.MD_niter,j.SCF_niter] for j in dataset_list])            
+        # print([[j.number,j.optdriver,j.MD_niter,j.SCF_niter] for j in dataset_list])
 
         return dataset_list
 
@@ -121,14 +121,14 @@ class AboFileAnalysis(object):
             if other_abo_file is None:
                 status = "failed"
                 raise ValueError("BUG: no abo file provided for the diff!")
-          
+
         if status == "succeeded":
             if len(self.dtsets) != len(other_abo_file.dtsets):
                 status = "failed"
                 raise ValueError("ERROR: the two abo files have different dataset numbers!")
 
         if status == "succeeded":
-            if "iterations" in option and "iterations" in self.option:                
+            if "iterations" in option and "iterations" in self.option:
 
                 for i, dtset1 in enumerate(self.dtsets):
                     dtset2 = other_abo_file.dtsets[i]
@@ -143,8 +143,8 @@ class AboFileAnalysis(object):
                             err_msg_short += "(dtset %d, MD/relax cycle)" % (jdt)
 
                     if len(dtset1.SCF_niter)>0 and len(dtset2.SCF_niter)>0:
-                        ncycle = len(dtset1.SCF_niter)	
-                        for it, niter1 in enumerate(dtset1.SCF_niter): 
+                        ncycle = len(dtset1.SCF_niter)
+                        for it, niter1 in enumerate(dtset1.SCF_niter):
                             niter2 = dtset2.SCF_niter[it]
                             tol = tol_small if niter1<=8 else tol_large
                             if niter2 > ceil(niter1*(1.+tol)) or niter2 < floor(niter1*(1.-tol)):

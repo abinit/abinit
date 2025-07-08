@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------
-#   Tutorial: Computation of U in CRPA for SrVO3 
+#   Tutorial: Computation of U in CRPA for SrVO3
 #   B. Amadon, R. Outerovitch
 # ----------------------------------------------------------------------------------
 ndtset 4
@@ -11,7 +11,7 @@ pawprtvol 3
 ############ Parameters common to all DATASETS
 #==================================================================================
 ##### CONVERGENCE PARAMETERS
-nstep    40 
+nstep    40
 nline     5          #Number of LINE minimisations
 nnsclo    2          #Number of Non-Self Consistent LOops
 tolvrs   1.0d-15
@@ -97,7 +97,7 @@ plowan_projcalc 5  # Projector for the orbitals (see pseudo-potential file)
 ############ THIRD DATASET:  Calculation of the screening (epsilon^-1 matrix)
 #==================================================================================
 optdriver3     3     # Screening calculation
-gwcalctyp3 2         
+gwcalctyp3 2
 awtr3 0
 getwfk3       -1     # Obtain WFK file from previous dataset
 ecuteps3      5.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
@@ -127,10 +127,10 @@ getwfk4     2      # Obtain WFK file from dataset 1
 getscr4     3      # Obtain SCR file from previous dataset
 ecutsigx4   30.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
 plowan_compute4 10 # Read Wannier functions
-# irdscr4     1     
+# irdscr4     1
 # irdwfk4     1
 
-# -- Frequencies for 
+# -- Frequencies for
 nfreqsp4    1
 freqspmax4 10 eV
 freqspmin4  0 eV
@@ -142,7 +142,7 @@ mqgriddg4 300      # Reduced but fine at least for SrVO3
 gwpara4 1        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
+pseudos "Psdj_paw_pw_std/V.xml, Psdj_paw_pw_std/Sr.xml, Psdj_paw_pw_std/O.xml"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -152,9 +152,9 @@ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Ps
 #%% executable = abinit
 #%% test_chain = tucalc_crpa_4.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tucalc_crpa_4.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
-#%% [shell] 
+#%% [shell]
 #%% [paral_info]
 #%% nprocs_to_test = 32
 #%% max_nprocs = 32

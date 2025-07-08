@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, MT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -131,7 +131,7 @@ contains
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  susmat(2,npwdiel,nspden,npwdiel,nspden)=
 !!   the susceptibility (or density-density response) matrix in reciprocal space
-!!  [vtauresid(nfft,nspden*dtset%usekden)]=array for vtau residue (see vtau below))
+!!  [vtauresid(nfft,nspden*usevtau)]=array for vtau residue (see vtau below))
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vhartr(nfft)=array for holding Hartree potential
 !!  vnew_mean(nspden)=constrained mean value of the future trial potential
@@ -140,7 +140,7 @@ contains
 !!  vpsp(nfft)=array for holding local psp
 !!  vresid(nfft,nspden)=array for the residual of the potential
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree)
-!!  [vtau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density
+!!  [vtau(nfftf,dtset%nspden,4*usevtau)]=derivative of XC energy density
 !!      with respect to kinetic energy density (metaGGA cases) (optional)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
@@ -152,7 +152,7 @@ contains
 !!                                          in reduced coordinates
 !!  vtrial(nfft,nspden)= at input, it is the "in" trial potential that gave vresid=(v_out-v_in)
 !!       at output, it is an updated "mixed" trial potential
-!!  ===== if usekden==1 =====
+!!  ===== if size(vtau)>0, i.e. usevtau==1 =====
 !!  [mix_mgga<type(ab7_mixing_object)>]=all data defining the mixing algorithm for
 !!    the kinetic energy potential
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
@@ -239,8 +239,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  real(dp),intent(inout), target :: rhor(nfft,dtset%nspden)
  real(dp),intent(inout) :: vresid(nfft,dtset%nspden),vtrial(nfft,dtset%nspden)
  real(dp),intent(inout), target :: xred(3,dtset%natom)
- real(dp),intent(inout),optional :: vtau(nfft,dtset%nspden,4*dtset%usekden)
- real(dp),intent(inout),optional :: vtauresid(nfft,dtset%nspden*dtset%usekden)
+ real(dp),intent(inout),optional :: vtau(:,:,:)    !vtau(nfft,dtset%nspden,4*usevxctau)
+ real(dp),intent(inout),optional :: vtauresid(:,:) !vtauresid(nfft,dtset%nspden*usevxctau)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
@@ -249,8 +249,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  integer :: cplex,dplex,i_vresid1,i_vrespc1
 ! integer :: i1,i2,i3,ifft2,ifft3,ifft4,ifft5,ii1,ii2,ii3,ii4,ii5
  integer :: errid,iatom,ifft,indx,iq,iq0,irhoij,ispden,jfft,jrhoij,klmn,kklmn,kmix
- integer :: mpicomm,mpi_comm_sphgrid,n1,n2,n3,nfftot,qphase,tim_fourdp
- logical :: mpi_summarize,reset
+ integer :: mpicomm,mpi_comm_sphgrid,n1,n2,n3,nfftot,qphase,tim_fourdp,usevtau
+ logical :: mpi_summarize,reset,with_vtau
  real(dp) :: dielng,diemix,fact,ucvol,ucvol_local,vme
  character(len=500) :: message
 !arrays
@@ -287,18 +287,6 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    ABI_BUG(message)
  end if
 
- if (dtset%usekden==1) then
-   if ((.not.present(vtauresid)).or.(.not.present(vtau)).or.(.not.present(mix_mgga))) then
-      message='Several arrays are mising!'
-      ABI_BUG(message)
-   end if
-   if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
-&      mix_mgga%iscf==AB7_MIXING_EIG) then
-     message='kinetic energy potential cannot be mixed with the selected mixing algorithm!'
-     ABI_ERROR(message)
-   end if
- end if
-
  if(dtset%usewvl==1) then
    if(dtset%wvl_bigdft_comp==1) then
      message = 'newvtr: usewvl == 1 and wvl_bigdft_comp==1 not allowed (use wvl_newtr() instead)!'
@@ -308,6 +296,25 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      ABI_BUG('newvtr: nfftmix/=nfft, ispmix/=1 not allowed for wavelets')
    end if
  end if
+
+!Test size of kinetic energy potential Vtau
+ with_vtau = (present(vtau).and.present(vtauresid))
+ with_vtau = (with_vtau.and.size(vtau)>0)
+ if (with_vtau) then
+   if (size(vtau)/=nfft*dtset%nspden*4.or.size(vtauresid)/=nfft*dtset%nspden) then
+     ABI_BUG("Wrong size for vxctau/vtauresid!")
+   end if
+   if (.not.present(mix_mgga)) then
+      message='mix_gga array missing!'
+      ABI_BUG(message)
+   end if
+   if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
+&      mix_mgga%iscf==AB7_MIXING_EIG) then
+     message='kinetic energy potential cannot be mixed with the selected mixing algorithm!'
+     ABI_ERROR(message)
+   end if
+ end if
+ usevtau=0;if (with_vtau) usevtau=1
 
  if(usepaw==1.and.dtset%nspden==4.and.dtset%pawoptmix==1) then
    message = ' pawoptmix=1 is not compatible with nspden=4 !'
@@ -375,19 +382,19 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !Select components of potential to be mixed
  ABI_MALLOC(vtrial0,(ispmix*nfftmix,dtset%nspden))
  ABI_MALLOC(vresid0,(ispmix*nfftmix,dtset%nspden))
- ABI_MALLOC(vtau0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
- ABI_MALLOC(vtauresid0,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
+ ABI_MALLOC(vtau0,(ispmix*nfftmix,dtset%nspden*usevtau))
+ ABI_MALLOC(vtauresid0,(ispmix*nfftmix,dtset%nspden*usevtau))
  if (ispmix==1.and.nfft==nfftmix) then
    vtrial0=vtrial;vresid0=vresid
-   if (dtset%usekden==1) then
-     vtau0=vtau(:,:,1);vtauresid0=vtauresid
+   if (with_vtau) then
+     vtau0(:,:)=vtau(:,:,1);vtauresid0=vtauresid
    end if
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
      call fourdp(1,vtrial0(:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
      call fourdp(1,vresid0(:,ispden),vresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
-   if (dtset%usekden==1) then
+   if (with_vtau) then
      do ispden=1,dtset%nspden
        call fourdp(1,vtau0(:,ispden),vtau(:,ispden,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
        call fourdp(1,vtauresid0(:,ispden),vtauresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
@@ -412,7 +419,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
        end if
      end do
    end do
-   if (dtset%usekden==1) then
+   if (with_vtau) then
      ABI_MALLOC(vtaug,(2,nfft,dtset%nspden))
      do ispden=1,dtset%nspden
        fact=dielar(4);if (ispden>1) fact=dielar(7)
@@ -435,13 +442,13 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  end if
 
 !Retrieve "input" Vtau from "output" one and potential residual
- if (dtset%usekden==1) then
+ if (with_vtau) then
    vtau0(:,1:dtset%nspden)=vtau0(:,1:dtset%nspden)-vtauresid0(:,1:dtset%nspden)
  end if
 
 !Choice of preconditioner governed by iprcel, densfor_pred and iprcfc
  ABI_MALLOC(vrespc,(ispmix*nfftmix,dtset%nspden))
- ABI_MALLOC(vtaurespc,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
+ ABI_MALLOC(vtaurespc,(ispmix*nfftmix,dtset%nspden*usevtau))
  ABI_MALLOC(vpaw,(npawmix*usepaw))
  if (usepaw==1)  then
    ABI_MALLOC(rhoijrespc,(npawmix))
@@ -465,7 +472,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  end if
 !At present, only a simple precoditionning for vtau
 ! (is Kerker mixing valid for vtau?)
- if (dtset%usekden==1) then
+ if (with_vtau) then
    do ispden=1,dtset%nspden
      fact=dielar(4);if (ispden>1) fact=abs(dielar(7))
      vtaurespc(1:ispmix*nfftmix,ispden)=fact*vtauresid0(1:ispmix*nfftmix,ispden)
@@ -498,7 +505,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  if (errid /= AB7_NO_ERROR) then
    ABI_ERROR(message)
  end if
- if (dtset%usekden==1) then
+ if (with_vtau) then
    call ab7_mixing_eval_allocate(mix_mgga, istep)
    call ab7_mixing_copy_current_step(mix_mgga, vtauresid0, errid, message, &
 &        arr_respc = vtaurespc)
@@ -560,7 +567,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  else if (errid /= AB7_NO_ERROR) then
    ABI_ERROR(message)
  end if
- if (dtset%usekden==1) then
+ if (with_vtau) then
    call ab7_mixing_eval(mix_mgga, vtau0, istep, nfftot, ucvol_local, &
 &   mpicomm, mpi_summarize, errid, message, reset = reset)
    if (errid /= AB7_NO_ERROR) then
@@ -641,19 +648,19 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 
 !Eventually write the data on disk and deallocate f_fftgr_disk
  call ab7_mixing_eval_deallocate(mix)
- if (dtset%usekden==1) call ab7_mixing_eval_deallocate(mix_mgga)
+ if (with_vtau) call ab7_mixing_eval_deallocate(mix_mgga)
 
  call timab(904,2,tsec)
 
 !Restore potential
  if (ispmix==1.and.nfft==nfftmix) then
    vtrial=vtrial0
-   if (dtset%usekden==1) vtau(:,:,1)=vtau0(:,:)
+   if (with_vtau) vtau(:,:,1)=vtau0(:,:)
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
      call fourdp(1,vtrial0(:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
-   if (dtset%usekden==1) then
+   if (with_vtau) then
      do ispden=1,dtset%nspden
        call fourdp(1,vtau0(:,ispden),vtau(:,ispden,1),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
      end do
@@ -668,7 +675,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      call fourdp(1,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
    ABI_FREE(vtrialg)
-   if (dtset%usekden==1) then
+   if (with_vtau) then
      do ispden=1,dtset%nspden
        do ifft=1,nfftmix
          jfft=mixtofft(ifft)
@@ -684,7 +691,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  ABI_FREE(vtau0)
 
 !In case of metaGGA, re-compute vtau gradient
- if (dtset%usekden==1.and.mix_mgga%iscf/=AB7_MIXING_NONE) then
+ if (with_vtau.and.mix_mgga%iscf/=AB7_MIXING_NONE) then
    call xcpot(1,gprimd,0,0,mpi_enreg,nfft,ngfft,2,dtset%nspden,0,[zero,zero,zero],vxctau=vtau)
  end if
 

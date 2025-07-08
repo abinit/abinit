@@ -114,7 +114,6 @@ prtden 0  prteig 0  prtwf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test = 
 #%%   t03.abo, tolnlines = 64, tolabs = 7.0e-4, tolrel = 8.5e-2

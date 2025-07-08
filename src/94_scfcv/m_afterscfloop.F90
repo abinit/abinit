@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG)
+!!  Copyright (C) 2008-2025 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,6 +26,7 @@ module m_afterscfloop
  use m_energies
  use m_errors
  use m_abicore
+ use m_ebands
  use m_efield
  use m_ab7_mixing
  use m_hdr
@@ -39,7 +40,7 @@ module m_afterscfloop
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
  use m_berryphase_new,   only : berryphase_new
  use m_geometry,         only : xred2xcart, metric
- use m_crystal,          only : prtposcar
+ use m_crystal,          only : crystal_t,prtposcar
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype, exchange_electronpositron
  use m_paw_dmft,         only : paw_dmft_type
@@ -190,10 +191,11 @@ contains
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
 !!  usecprj=1 if cprj datastructure has been allocated
+!!  usevxctau=1 if kinetic energy density contribution has to be included (mGGA)
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
-!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!  vxctau(nfft,nspden,4*usevxctau)=(only for meta-GGA) derivative of XC energy density
 !!                                wrt kinetic energy density (depsxcdtau)
 !!  vxcavg=vxc average
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
@@ -285,14 +287,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
+& taur,tollist,usecprj,usevxctau,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,istep_fock_outer,istep_mix
  integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
- integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
+ integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj,usevxctau
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
  real(dp),intent(in) :: qvpotzero
@@ -341,7 +343,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom),pion(3)
  real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),strsxc(6)
- real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),gred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
@@ -363,9 +365,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  integer :: mcg1_3,nfftotf,ngrad,optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
  logical :: save_cg1_3,test_gylmgr,test_nfgd,test_rfgd
- logical :: wvlbigdft=.false.
+ logical :: remove_inv=.false.,wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
  character(len=500) :: message
+ type(crystal_t) :: crystal
+ type(ebands_t) :: ebands_k
  type(paw_dmft_type) :: paw_dmft
 #if defined HAVE_BIGDFT
  integer :: ia,ii,mband_cprj
@@ -375,7 +379,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),ptot(3),red_ptot(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: cg1_3(:,:,:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: cg1_3(:,:,:),doccde(:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
  real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:),vtrial_local(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
@@ -392,6 +396,20 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  nfftotf=product(ngfftf(1:3))
+ 
+ call crystal%init(dtset%amu_orig(:,1),dtset%spgroup,dtset%natom,dtset%npsp,&
+& psps%ntypat,dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+& dtset%nspden==2.and.dtset%nsppol==1,remove_inv,psps%title,&
+& symrel=dtset%symrel,tnons=dtset%tnons,symafm=dtset%symafm)
+
+ ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ doccde=zero
+ call ebands_k%init(hdr%bantot,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+& doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+& hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+& hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+ ABI_FREE(doccde)
 
 !MPI FFT communicator
  spaceComm_fft=mpi_enreg%comm_fft
@@ -555,9 +573,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
    end if
    vtrial_local = vtrial
-   call orbmag(cg,cg1_3,cprj,dtset,eigen,gsqcut,kg,mcg,mcg1_3,mcprj,dtset%mkmem,&
-     & mpi_enreg,dtset%mpw,nfftf,ngfftf,npwarr,occ,paw_an,paw_ij,pawang,pawfgr,&
-     & pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
+   call orbmag(cg,cg1_3,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg1_3,&
+      & mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,nfftf,ngfftf,paw_ij,pawfgr,&
+      & pawrad,pawtab,psps,usevxctau,vtrial_local,vxctau,ylm,ylmgr)
 
    ABI_FREE(vtrial_local)
    ABI_FREE(cg1_3)
@@ -953,7 +971,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
 &   psps,rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,&
-&   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,xg_nonlop)
+&   ucvol,usecprj,usevxctau,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,xg_nonlop)
  end if
 
  ! Init values with MAGIC_UNDEF if not computed.
@@ -1079,7 +1097,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
  if (associated(extfpmd)) then
-   results_gs%entropy_extfpmd=extfpmd%entropy
    results_gs%nelect_extfpmd=extfpmd%nelect
    results_gs%extfpmd_eshift=extfpmd%eshift
  end if
@@ -1103,6 +1120,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,paw_ij,&
 &   pawtab,ph1d,psps,rprimd,dtset%typat,xred)
  end if
+
+ call crystal%free()
+ call ebands_k%free()
 
  call timab(257,2,tsec)
  call timab(250,2,tsec)

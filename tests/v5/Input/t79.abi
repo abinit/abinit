@@ -68,15 +68,15 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t79.abo,      tolnlines = 0, tolabs = 1.000e-09, tolrel = 1.000e-10, fld_options = -medium;
-#%%   t79o_LOG.xml, tolnlines = 0, tolabs = 1.000e-09, tolrel = 1.000e-10, fld_options = -medium
+#%% files_to_test =
+#%%   t79.abo,      tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
+#%%   t79o_LOG.xml, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = NC, XML 
-#%% description = 
+#%% keywords = NC, XML
+#%% description =
 #%%   Make a simple geometry relaxation and validate the XML output (testing prtxml).
 #%% topics = GeoOpt
 #%%<END TEST_INFO>

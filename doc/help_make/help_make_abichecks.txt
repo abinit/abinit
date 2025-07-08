@@ -1,10 +1,21 @@
 ==============================================================================
-Keywords to use with the make command for abichecks tests directory:
+Keywords to use with the make command to run quick tests,
+  possibly with -j x option:
+
+>>> In build directory:
+
+check              Launch a small set of tests that cover most of the main features
+                   For these tests, only a comparison of the main physical results
+                   in the output is performed.
+
+test_fast          Launch 3 very small tests
+
+tests_in           Launch test_fast, followed by other internal tests
+
+>>> In "abichecks" directory (cd abichecks first)
 
 tests_abirules     Launch the abirules tests
-                   Warning: for some of the tests, the file make.log
-                   must be present in the top directory. This means one has
-                   to compile with the command: `make > make.log 2>&1`
+                   Warning: to be run with the command: make > make.log 2>&1`
 
 tests_buildsys     Launch the buildsys tests
 

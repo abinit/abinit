@@ -9,7 +9,7 @@
 !!  xmpi_sum_master is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2024 ABINIT group (AR,XG,MB)
+!!  Copyright (C) 2001-2025 ABINIT group (AR,XG,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +55,7 @@ subroutine xmpi_sum_master_int(xval,master,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: nproc_space_comm
- integer :: arr_xsum(1)
+ integer :: arr_xsum(1),arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -66,7 +66,8 @@ subroutine xmpi_sum_master_int(xval,master,comm,ier)
    call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
    if (nproc_space_comm /= 1) then
 !    Accumulate xval on all proc. in comm
-     call MPI_REDUCE([xval],arr_xsum,1,MPI_INTEGER,MPI_SUM,master,comm,ier)
+     arr_xval(1) = xval
+     call MPI_REDUCE(arr_xval,arr_xsum,1,MPI_INTEGER,MPI_SUM,master,comm,ier)
      xval = arr_xsum(1)
    end if
  end if
@@ -176,7 +177,7 @@ subroutine xmpi_sum_master_int2d(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2,kind=int64)
+     ntot=int(n1,kind=int64)*n2
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -305,7 +306,7 @@ subroutine xmpi_sum_master_dp2d(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2,kind=int64)
+     ntot=int(n1,kind=int64)*n2
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -378,7 +379,7 @@ subroutine xmpi_sum_master_dp3d(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -452,7 +453,7 @@ subroutine xmpi_sum_master_dp4d(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -528,7 +529,7 @@ subroutine xmpi_sum_master_dp5d(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4*n5
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -605,7 +606,7 @@ subroutine xmpi_sum_master_dp6d(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4*n5*n6,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4*n5*n6
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -683,7 +684,7 @@ subroutine xmpi_sum_master_dp7d(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4*n5*n6*n7,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4*n5*n6*n7
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -758,7 +759,7 @@ subroutine xmpi_sum_master_int4d(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -887,7 +888,7 @@ subroutine xmpi_sum_master_c2cplx(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2,kind=int64)
+     ntot=int(n1,kind=int64)*n2
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -961,7 +962,7 @@ subroutine xmpi_sum_master_c3cplx(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -1036,7 +1037,7 @@ subroutine xmpi_sum_master_c4cplx(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -1113,7 +1114,7 @@ subroutine xmpi_sum_master_c5cplx(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4*n5
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -1242,7 +1243,7 @@ subroutine xmpi_sum_master_c2dpc(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2,kind=int64)
+     ntot=int(n1,kind=int64)*n2
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -1316,7 +1317,7 @@ subroutine xmpi_sum_master_c3dpc(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -1390,7 +1391,7 @@ subroutine xmpi_sum_master_c4dpc(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then
@@ -1465,7 +1466,7 @@ subroutine xmpi_sum_master_c5dpc(xval,master,comm,ier)
      !This product of dimensions can be greater than a 32bit integer
      !We use a INT64 to store it. If it is too large, we switch to an
      !alternate routine because MPI<4 doesnt handle 64 bit counts.
-     ntot=int(n1*n2*n3*n4*n5,kind=int64)
+     ntot=int(n1,kind=int64)*n2*n3*n4*n5
 
 !    Accumulate xval on all proc. in comm
      if (ntot<=xmpi_maxint32_64) then

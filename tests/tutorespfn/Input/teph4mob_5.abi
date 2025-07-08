@@ -79,8 +79,8 @@ nband 8
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
 #%% test_chain = teph4mob_1.abi, teph4mob_2.abi, teph4mob_3.abi, teph4mob_4.abi, teph4mob_5.abi, teph4mob_6.abi, teph4mob_7.abi
-#%% exclude_builders = eos_nvhpc_*, eos_gnu_13.2_serial
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_5.abo, tolnlines= 80, tolabs=  600, tolrel=  6.000e-03

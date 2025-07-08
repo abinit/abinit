@@ -1,8 +1,8 @@
 
-.Version 9.1.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
+.Version 9.1.1 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu6.3 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,13 +16,13 @@
 
 .Starting date : Thu 12 Mar 2020.
 - ( at 11h35 )
-  
+
 - input  file    -> tpaw1_2.in
 - output file    -> tpaw1_2.abo
 - root for input  files -> tpaw1_2.i
 - root for output files -> tpaw1_2.o
 
-- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -198,10 +198,10 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
@@ -407,9 +407,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -656,9 +656,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -903,9 +903,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -1157,9 +1157,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -1403,9 +1403,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -1648,9 +1648,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -1893,9 +1893,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -2143,9 +2143,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -2394,9 +2394,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/C.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/C.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    ../../../Pspdir/C.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Pspdir/C.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -2600,7 +2600,7 @@ total_energy_dc_eV  : -3.13671221419307E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.7406531160E+00  6.7406531160E+00  6.7406531160E+00 Bohr
               amu      1.20110000E+01
@@ -2829,7 +2829,7 @@ P           mkmem          28
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2847,7 +2847,7 @@ P           mkmem          28
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -2860,7 +2860,7 @@ P           mkmem          28
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

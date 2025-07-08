@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h04 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8/teph4zpr_6.abi
 - output file    -> teph4zpr_6.abo
 - root for input  files -> teph4zpr_6i
@@ -255,11 +255,11 @@ meta: {optdriver: 7, eph_task: 4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -275,7 +275,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -359,8 +359,8 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/O.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -374,8 +374,8 @@ meta: {optdriver: 7, eph_task: 4, }
              2   -4.371486
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -455,19 +455,19 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.721
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.490    4.571    0.081    0.098   -0.002    0.829   -3.998    4.096    0.000    0.000
    7   4.490    4.571    0.081    0.098   -0.002    0.829   -3.998    4.096    0.000    0.000
    8   4.490    4.571    0.081    0.098   -0.002    0.829   -3.998    4.096    0.000    0.000
    9   8.969    8.888   -0.081   -0.082   -0.000    0.983   -0.054   -0.028    4.479    4.317
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.317 (OTMS:    4.299)
  QP_gap - KS_gap:   -0.162 (OTMS:   -0.180)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.656
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -475,11 +475,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.656
    7   4.490    4.571    0.081    0.098   -0.002    0.827   -4.088    4.186    0.000    0.000
    8   4.490    4.571    0.081    0.098   -0.002    0.827   -4.088    4.186    0.000    0.000
    9   8.969    8.887   -0.082   -0.083   -0.000    0.982   -0.050   -0.033    4.479    4.316
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.316 (OTMS:    4.298)
  QP_gap - KS_gap:   -0.163 (OTMS:   -0.181)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.592
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -487,11 +487,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.592
    7   4.490    4.573    0.084    0.103   -0.002    0.816   -4.735    4.837    0.000    0.000
    8   4.490    4.573    0.084    0.103   -0.002    0.816   -4.735    4.837    0.000    0.000
    9   8.969    8.879   -0.089   -0.091   -0.000    0.980   -0.035   -0.056    4.479    4.306
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.306 (OTMS:    4.285)
  QP_gap - KS_gap:   -0.173 (OTMS:   -0.194)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -499,11 +499,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
    7   4.490    4.581    0.091    0.115   -0.003    0.790   -5.812    5.927    0.000    0.000
    8   4.490    4.581    0.091    0.115   -0.003    0.790   -5.812    5.927    0.000    0.000
    9   8.969    8.864   -0.105   -0.107   -0.000    0.976   -0.023   -0.084    4.479    4.284
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.284 (OTMS:    4.257)
  QP_gap - KS_gap:   -0.195 (OTMS:   -0.222)
- 
+
 ============================================================================================
 
 ================================================================================
@@ -555,11 +555,11 @@ meta: {optdriver: 7, eph_task: 4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -575,7 +575,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -723,19 +723,19 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.721
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.490    4.570    0.080    0.097   -0.002    0.823   -3.999    4.096    0.000    0.000
    7   4.490    4.570    0.080    0.097   -0.002    0.823   -3.999    4.096    0.000    0.000
    8   4.490    4.570    0.080    0.097   -0.002    0.823   -3.999    4.096    0.000    0.000
    9   8.969    8.888   -0.081   -0.083   -0.000    0.981   -0.055   -0.028    4.479    4.318
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.318 (OTMS:    4.299)
  QP_gap - KS_gap:   -0.161 (OTMS:   -0.180)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.656
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -743,11 +743,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.656
    7   4.490    4.570    0.080    0.097   -0.002    0.822   -4.089    4.187    0.000    0.000
    8   4.490    4.570    0.080    0.097   -0.002    0.822   -4.089    4.187    0.000    0.000
    9   8.969    8.887   -0.082   -0.083   -0.000    0.981   -0.051   -0.033    4.479    4.317
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.317 (OTMS:    4.298)
  QP_gap - KS_gap:   -0.162 (OTMS:   -0.181)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.592
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -755,11 +755,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.592
    7   4.490    4.572    0.082    0.102   -0.002    0.809   -4.736    4.837    0.000    0.000
    8   4.490    4.572    0.082    0.102   -0.002    0.809   -4.736    4.837    0.000    0.000
    9   8.969    8.879   -0.090   -0.092   -0.000    0.979   -0.036   -0.055    4.479    4.307
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.307 (OTMS:    4.286)
  QP_gap - KS_gap:   -0.172 (OTMS:   -0.193)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -767,11 +767,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
    7   4.490    4.579    0.089    0.114   -0.003    0.783   -5.813    5.927    0.000    0.000
    8   4.490    4.579    0.089    0.114   -0.003    0.783   -5.813    5.927    0.000    0.000
    9   8.969    8.864   -0.105   -0.108   -0.000    0.974   -0.024   -0.083    4.479    4.285
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.285 (OTMS:    4.258)
  QP_gap - KS_gap:   -0.194 (OTMS:   -0.221)
- 
+
 ============================================================================================
 
 ================================================================================
@@ -823,11 +823,11 @@ meta: {optdriver: 7, eph_task: 4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -843,7 +843,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -991,19 +991,19 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.721
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.490    4.569    0.079    0.097   -0.002    0.820   -4.000    4.097    0.000    0.000
    7   4.490    4.569    0.079    0.097   -0.002    0.820   -4.000    4.097    0.000    0.000
    8   4.490    4.569    0.079    0.097   -0.002    0.820   -4.000    4.097    0.000    0.000
    9   8.969    8.888   -0.081   -0.083   -0.000    0.981   -0.055   -0.028    4.479    4.319
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.319 (OTMS:    4.300)
  QP_gap - KS_gap:   -0.160 (OTMS:   -0.179)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.656
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -1011,11 +1011,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.656
    7   4.490    4.569    0.079    0.097   -0.002    0.818   -4.091    4.188    0.000    0.000
    8   4.490    4.569    0.079    0.097   -0.002    0.818   -4.091    4.188    0.000    0.000
    9   8.969    8.887   -0.082   -0.083   -0.000    0.981   -0.051   -0.032    4.479    4.318
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.318 (OTMS:    4.298)
  QP_gap - KS_gap:   -0.161 (OTMS:   -0.181)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.592
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -1023,11 +1023,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.592
    7   4.490    4.571    0.082    0.101   -0.002    0.806   -4.737    4.839    0.000    0.000
    8   4.490    4.571    0.082    0.101   -0.002    0.806   -4.737    4.839    0.000    0.000
    9   8.969    8.879   -0.090   -0.092   -0.000    0.978   -0.037   -0.055    4.479    4.308
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.308 (OTMS:    4.286)
  QP_gap - KS_gap:   -0.171 (OTMS:   -0.193)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -1035,11 +1035,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
    7   4.490    4.578    0.088    0.113   -0.003    0.779   -5.815    5.928    0.000    0.000
    8   4.490    4.578    0.088    0.113   -0.003    0.779   -5.815    5.928    0.000    0.000
    9   8.969    8.864   -0.105   -0.108   -0.000    0.974   -0.025   -0.083    4.479    4.286
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.286 (OTMS:    4.258)
  QP_gap - KS_gap:   -0.193 (OTMS:   -0.221)
- 
+
 ============================================================================================
 
 ================================================================================
@@ -1091,11 +1091,11 @@ meta: {optdriver: 7, eph_task: 4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -1111,7 +1111,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               2       -0.000000        0.000000
        3               3       -0.085945        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -1259,19 +1259,19 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.721
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.490    4.570    0.080    0.098   -0.002    0.817   -4.002    4.100    0.000    0.000
    7   4.490    4.570    0.080    0.098   -0.002    0.817   -4.002    4.100    0.000    0.000
    8   4.490    4.570    0.080    0.098   -0.002    0.817   -4.002    4.100    0.000    0.000
    9   8.969    8.888   -0.081   -0.082   -0.000    0.981   -0.055   -0.027    4.479    4.318
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.318 (OTMS:    4.298)
  QP_gap - KS_gap:   -0.161 (OTMS:   -0.181)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.656
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -1279,11 +1279,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.656
    7   4.490    4.570    0.080    0.098   -0.002    0.815   -4.092    4.191    0.000    0.000
    8   4.490    4.570    0.080    0.098   -0.002    0.815   -4.092    4.191    0.000    0.000
    9   8.969    8.887   -0.082   -0.083   -0.000    0.980   -0.051   -0.032    4.479    4.317
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.317 (OTMS:    4.297)
  QP_gap - KS_gap:   -0.162 (OTMS:   -0.182)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.592
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -1291,11 +1291,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.592
    7   4.490    4.572    0.082    0.103   -0.002    0.802   -4.739    4.842    0.000    0.000
    8   4.490    4.572    0.082    0.103   -0.002    0.802   -4.739    4.842    0.000    0.000
    9   8.969    8.879   -0.090   -0.092   -0.000    0.978   -0.037   -0.055    4.479    4.307
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.307 (OTMS:    4.285)
  QP_gap - KS_gap:   -0.172 (OTMS:   -0.194)
- 
+
 ============================================================================================
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
@@ -1303,16 +1303,16 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
    7   4.490    4.579    0.089    0.115   -0.003    0.775   -5.817    5.932    0.000    0.000
    8   4.490    4.579    0.089    0.115   -0.003    0.775   -5.817    5.932    0.000    0.000
    9   8.969    8.864   -0.105   -0.108   -0.000    0.973   -0.025   -0.082    4.479    4.285
- 
+
  KS gap:    4.479 (assuming bval:8 ==> bcond:9)
  QP gap:    4.285 (OTMS:    4.256)
  QP_gap - KS_gap:   -0.194 (OTMS:   -0.223)
- 
+
 ============================================================================================
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.59994000E+01  2.43050000E+01
@@ -1456,7 +1456,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1473,12 +1473,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1496,7 +1496,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1511,7 +1511,7 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

@@ -38,7 +38,7 @@ def fort2html(s, full=True):
     return highlight(s, FortranLexer(), HtmlFormatter(full=full))
 
 
-class Node(object):
+class Node:
 
     def __repr__(self):
         if self.ancestor is not None:

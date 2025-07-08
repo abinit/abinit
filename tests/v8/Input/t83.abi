@@ -137,14 +137,14 @@
 #  d3e_pert3_elfd7   1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
+ pseudos "Psdj_paw_pw_std/Al.xml, As.LDA_PW-JTH_sp.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t83.abi, t84.abi
 #%% [shell]
-#%% post_commands = 
+#%% post_commands =
 #%%   ww_mv t83o_DS2_DEN   t84o_DS2_DEN;
 #%%   ww_mv t83o_DS2_WFK   t84o_DS2_WFK;
 #%%   ww_mv t83o_DS3_1WF7  t84o_DS3_1WF7;
@@ -161,13 +161,13 @@
 #%%   ww_mv t83o_DS4_1WF11 t84o_DS4_1WF11;
 #%%   ww_mv t83o_DS4_1WF12 t84o_DS4_1WF12
 #%% [files]
-#%% files_to_test = 
-#%%    t83.abo, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -easy;
+#%% files_to_test =
+#%%    t83.abo, tolnlines = 0 , tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW, DFPT
-#%% description = 
+#%% description =
 #%%   Preparation for a nonlinear calculation : GS + linear response (ddk+phonon+efield).
 #%%<END TEST_INFO>

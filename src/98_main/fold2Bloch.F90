@@ -6,7 +6,7 @@
 !! Main routine for the unfolding of the wavefuntion.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2024 ABINIT group (AB)
+!! Copyright (C) 2014-2025 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,14 +41,12 @@ program fold2Bloch
  use m_crystal
  use m_ebands
  use m_fold2block
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,       only : strcat
  use m_io_tools,       only : get_unit, iomode_from_fname, open_file, prompt
- use defs_datatypes,   only : ebands_t
-implicit none
+
+ implicit none
 
 !Arguments --------------------------------------------------------------
 
@@ -133,14 +131,13 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  mcg=maxval(npwarr)*nspinor*mband
  nfold = product(folds)
 
-#ifdef HAVE_NETCDF
  cryst = wfk%hdr%get_crystal()
 
  NCF_CHECK(nctk_open_create(ncid, strcat(seedname, "_FOLD2BLOCH.nc"), xmpi_comm_self))
  fform = fform_from_ext("FOLD2BLOCH.nc")
  NCF_CHECK(wfk%hdr%ncwrite(ncid, fform, nc_define=.True.))
  NCF_CHECK(cryst%ncwrite(ncid))
- NCF_CHECK(ebands_ncwrite(ebands, ncid))
+ NCF_CHECK(ebands%ncwrite(ncid))
 
  ncerr = nctk_def_dims(ncid, [ &
  nctkdim_t("nk_unfolded", nkpt * nfold), &
@@ -158,10 +155,9 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  NCF_CHECK(nf90_inq_varid(ncid, "spectral_weights", weights_varid))
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fold_matrix"), fold_matrix))
- call cryst%free()
-#endif
 
- call ebands_free(ebands)
+ call cryst%free()
+ call ebands%free()
 
  do csppol=1, nsppol
    if (nsppol==1) then !Determine spin polarization for output file
@@ -205,11 +201,9 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 
      !Determine unfolded K point states
      call newk(kpts(1,ikpt),kpts(2,ikpt),kpts(3,ikpt),folds(1),folds(2),folds(3),nkval)
-#ifdef HAVE_NETCDF
      if (csppol == 1) then
        NCF_CHECK(nf90_put_var(ncid, kunf_varid, nkval, start=[1, 1 + (ikpt-1) * nfold], count=[3, nfold]))
      end if
-#endif
 
      cg_b=1
      do iband=1, nband(ikpt) !Foe each Eigenvalue
@@ -231,7 +225,6 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
            write(outfile,50) nkval(1,count),nkval(2,count),nkval(3,count),eig(iband),weights(count)
            50 format(f11.6, f11.6, f11.6, f11.6, f11.6)
          end do
-#ifdef HAVE_NETCDF
          iss = csppol; if (nspinor == 2) iss = cspinor
          ncerr = nf90_put_var(ncid, weights_varid, weights, start=[iband, 1 + (ikpt-1) * nfold, iss], &
          stride=[mband, 1, 1], count=[1, nfold, 1])
@@ -243,7 +236,6 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
              !count=[1, nfold, 1])
            NCF_CHECK(ncerr)
          end if
-#endif
        end do ! cspinor
        cg_b=cg_b+nspinor*npwarr(ikpt) !shift coefficient pointer for next eigenvalue
      end do ! iband
@@ -281,9 +273,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  end if
  write(std_out,*) '     Data format: KX, KY, KZ, Eigenvalue(Ha), Weight'//achar(27)//'[0m'
 
-#ifdef HAVE_NETCDF
  NCF_CHECK(nf90_close(ncid))
-#endif
 
 !Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor("__fold2bloch")

@@ -864,7 +864,7 @@ The full bibtex file is available [here](../abiref.bib).
     export ABI_HOME=Replace_with_absolute_path_to_abinit_top_level_dir # Change this line
     export PATH=$ABI_HOME/src/98_main/:$PATH      # Do not change this line: path to executable
     export ABI_TESTS=$ABI_HOME/tests/             # Do not change this line: path to tests dir
-    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Do not change this line: path to pseudos dir
+    export ABI_PSPDIR=$ABI_TESTS/Pspdir/  # Do not change this line: path to pseudos dir
     ```
 
     Examples in this tutorial use these shell variables: copy and paste
@@ -1060,8 +1060,8 @@ The full bibtex file is available [here](../abiref.bib).
                 elif name.startswith("tests/") or name.startswith("~abinit/tests/"):
                     assert fragment is None
                     if a.text is None: a.text = name
-                    if "Psps_for_tests" in name:
-                        # Handle [[~abinit/tests/Psps_for_tests/6c.lda.atompaw]]
+                    if "Pspdir" in name:
+                        # Handle [[~abinit/tests/Pspdir/6c.lda.atompaw]]
                         nm = name.replace("~abinit/", "")
                         url = "/" + nm
                     else:

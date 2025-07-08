@@ -6,7 +6,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2025 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_ewald
 
  use m_gtermcutoff,    only : termcutoff
  use m_special_funcs,  only : abi_derfc
- use m_symtk,          only : matr3inv
+ use m_matrix,         only : matr3inv
 
  implicit none
 
@@ -474,6 +474,7 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
          if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng .or. ng==1 ) then
 
 !          Compute Cartesian components of each G
+! TODO : make this a blas call, and batch things up
            g1=gprimd(1,1)*ig1+gprimd(1,2)*ig2+gprimd(1,3)*ig3
            g2=gprimd(2,1)*ig1+gprimd(2,2)*ig2+gprimd(2,3)*ig3
            g3=gprimd(3,1)*ig1+gprimd(3,2)*ig2+gprimd(3,3)*ig3

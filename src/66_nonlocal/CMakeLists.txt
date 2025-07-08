@@ -7,9 +7,8 @@ set(66_nonlocal_SRC
   m_cgprj.F90
   m_contract.F90
   m_fock.F90
-  m_gemm_nonlop_ompgpu.F90
   m_gemm_nonlop_gpu.F90
-	m_gemm_nonlop_projectors.F90
+  m_gemm_nonlop_projectors.F90
   m_gemm_nonlop.F90
   m_hamiltonian.F90
   m_metstr.F90
@@ -28,19 +27,19 @@ set(66_nonlocal_SRC
   m_opernlb_ylm.F90
   m_opernlb_ylm_mv.F90
   m_opernlc_ylm.F90
-  m_opernlc_ylm_allwf_cpu.F90
-  m_opernlc_ylm_ompgpu.F90
+  m_opernlc_ylm_allwf.F90
   m_opernld_ylm.F90
   m_opernld_ylm_allwf.F90
-  )
+)
 
 add_library(66_nonlocal STATIC
-  ${66_nonlocal_SRC})
+  ${66_nonlocal_SRC}
+)
 
 
 set_target_properties(66_nonlocal
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(66_nonlocal
   PRIVATE
@@ -48,7 +47,7 @@ target_include_directories(66_nonlocal
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(66_nonlocal
@@ -66,9 +65,10 @@ target_link_libraries(66_nonlocal
   abinit::10_defs
   abinit::16_hideleave
   abinit::42_nlstrain
+  abinit::45_xgTools
   abinit::62_poisson
   abinit::65_paw
-  )
+)
 
 if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
   target_link_libraries(66_nonlocal

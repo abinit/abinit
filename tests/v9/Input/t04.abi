@@ -58,7 +58,7 @@ nband   8
 #%% exec_args = --dry-run
 #%% [files]
 #%% files_to_test =
-#%%   t04.output, tolnlines = 0, tolabs = 1.1e-06, tolrel = 1.1e-04
+#%%   t04.output, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [shell]

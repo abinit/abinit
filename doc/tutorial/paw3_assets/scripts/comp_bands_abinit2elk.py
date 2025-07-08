@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, string 
+import sys, string
 
 if len(sys.argv)<2 or len(sys.argv)>11:
     print ('Usage: python comp_band_abinit2elk.py [abinit _EIG file] ...')
@@ -46,7 +46,7 @@ while iarg < len(sys.argv):
 
 # Parse abinit file
 input_file1_name = str(sys.argv[1]) # name of first input file (first argument)
-input_file1_r = open(input_file1_name,'r')  # open it as read file       
+input_file1_r = open(input_file1_name,'r')  # open it as read file
 abinit_file_data = input_file1_r.readlines()
 input_file1_r.close()
 # Read in k-point data as a list of numbers, by k-point
@@ -69,7 +69,7 @@ for iline in range(2,len(abinit_file_data)):
         k_point_list = []
         continue
 
-#print 'nkpt:',len(abinit_band_data)       
+#print 'nkpt:',len(abinit_band_data)
 #print 'nbnds:',len(abinit_band_data[0])
 
 nkpt = len(abinit_band_data)
@@ -153,11 +153,11 @@ while input_file2_current_line.endswith('\n'):
     # Calculate difference,average,max,min
     if align_values:
         abinit_band_data[kpt][band] = abinit_band_data[kpt][band] \
-	              - abinit_align_value 
+	              - abinit_align_value
         numbers_list2[1] = numbers_list2[1] - elk_align_value
     if align_values_fermi:
         abinit_band_data[kpt][band] = abinit_band_data[kpt][band] \
-	              - align_abinit_fermi 
+	              - align_abinit_fermi
         numbers_list2[1] = numbers_list2[1] - align_elk_fermi
     if eVconv=='eV':
         abinit_band_data[kpt][band] = abinit_band_data[kpt][band]*Ha_to_eV
@@ -213,8 +213,8 @@ if align_values:
     occ_avg_diff = occ_avg_diff/float(occ_nvals)
     occ_avg_percentage = occ_avg_percentage/float(occ_nvals)
     print ('#')
-    print ('# AVERAGES FOR OCCUPIED STATES:') 
-    print ('#        nvals:','%5i'%occ_nvals) 
+    print ('# AVERAGES FOR OCCUPIED STATES:')
+    print ('#        nvals:','%5i'%occ_nvals)
     print ('# average diff:','%12.6F'%occ_avg_diff,eVconv)
     print ('# minimum diff:','%12.6F'%occ_min_diff,eVconv)
     print ('# maximum diff:','%12.6F'%occ_max_diff,eVconv)

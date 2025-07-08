@@ -10,7 +10,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2025 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@ module m_hdr
  use m_symtk,         only : print_symmetries
  !use m_kpts,          only : kpts_timrev_from_kptopt
  use defs_wvltypes,   only : wvl_internal_type
- use defs_datatypes,  only : ebands_t, pseudopotential_type
+ use defs_datatypes,  only : ebands_base_t, pseudopotential_type
  use m_pawtab,        only : pawtab_type
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
                              pawrhoij_io, pawrhoij_inquire_dim
@@ -125,8 +125,8 @@ module m_hdr
   real(dp) :: tphysel      ! input variable
   real(dp) :: tsmear       ! input variable
   real(dp) :: nelect       ! number of electrons (computed from pseudos and cellcharge)
-  real(dp) :: ne_qFD=zero  ! CP number of excited electrons (input variable)
-  real(dp) :: nh_qFD=zero  ! CP number of excited holes (input variable)
+  real(dp) :: ne_qFD=zero  ! number of excited electrons (input variable)
+  real(dp) :: nh_qFD=zero  ! number of excited holes (input variable)
   real(dp) :: cellcharge   ! input variable (for the first image if more than one)
   real(dp) :: extfpmd_eshift=zero ! Energy shift of the extended for high temperature
 
@@ -237,13 +237,28 @@ module m_hdr
   ! EVOLVING variable, only for paw
   type(pawrhoij_type), allocatable :: pawrhoij(:)
 
-  contains
+contains
+
+  procedure :: init => hdr_init
+   ! Initialize the header and most of its content from dtset and psps.
+
+  procedure :: init_lowlvl => hdr_init_lowlvl
+    ! Low level initialization method for Hdr (no dtset).
 
   procedure :: free => hdr_free
-  ! Deallocates the components of the header.
+   ! Deallocates the components of the header.
 
   procedure :: get_nelect_from_occ => hdr_get_nelect_from_occ
    ! Returns the number of electrons calculated from the occupation factors Hdr%occ
+
+  procedure :: from_fname => hdr_read_from_fname
+   ! Read the header from file. Use Fortran IO or Netcdf depending on the extension of the file
+
+  procedure :: fort_read => hdr_fort_read
+   ! Reads the header from a logical unit associated to a Fortran unformatted file.
+
+  procedure :: ncread => hdr_ncread
+   ! Reads the header from a Netcdf file.
 
   procedure :: ncwrite => hdr_ncwrite
    ! Writes the header and fform to a Netcdf file.
@@ -275,26 +290,23 @@ module m_hdr
   procedure :: echo => hdr_echo
    ! Echo the header.
 
+  procedure :: copy => hdr_copy
+   ! Copy of the Header.
+
  end type hdr_type
 !!***
 
- public :: hdr_init                ! Initialize the header and most of its content from dtset and psps.
- public :: hdr_init_lowlvl         ! Low level initialization method for Hdr (no dtset).
- public :: hdr_copy                ! Deep copy of the Header.
  public :: hdr_mpio_skip           ! Skip the abinit header using MPI-IO routines.
                                    ! Return the offset of the first Fortran record after the header.
  public :: hdr_bsize_frecords      ! Compute the size of the Fortran records from the header and formeig.
- public :: hdr_read_from_fname     ! Read the header (requires a string with the file name).
  public :: hdr_skip                ! Skip the header.
  public :: hdr_io                  ! IO of the header.
- public :: hdr_fort_read           ! Reads the header from a logical unit associated to an unformatted file.
- public :: hdr_ncread              ! Reads the header from a Netcdf file.
  public :: hdr_check               ! Compare two headers.
- public :: hdr_compare             ! Check the consistency of two headers.
 
  public :: abifile_from_varname
  public :: abifile_from_fform
  public :: fform_from_ext          ! Return the value of fform to be used from the file extension.
+ public :: fform_contains          ! Test whether fform provides varname.
  public :: varname_from_fname      ! Return the name of the netcdf variable stored in a file from the file extension.
 
  ! Generic interface of the routines hdr_skip
@@ -313,8 +325,9 @@ module m_hdr
  ! The list of headforms used so far.
 
  integer,private,parameter :: size_hdr_known_headforms = size(HDR_KNOWN_HEADFORMS) ! Need this for Flang
- integer,public,parameter :: HDR_LATEST_HEADFORM = HDR_KNOWN_HEADFORMS(size_hdr_known_headforms)
+
  ! The latest headform to be used for writing.
+ integer,public,parameter :: HDR_LATEST_HEADFORM = HDR_KNOWN_HEADFORMS(size_hdr_known_headforms)
 !!***
 
 !!****t* m_hdr/abifile_t
@@ -374,7 +387,7 @@ module m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(51) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(52) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -452,6 +465,7 @@ module m_hdr
 
    ! Miscellaneous
    abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
+   abifile_t(varname="orbmag_mesh", fform=3100, ext="ORBMAG", class="data"), &
    abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
    abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data"), &
    abifile_t(varname="None", fform=6001, ext="KERANGE", class="data"), &
@@ -528,6 +542,51 @@ integer function fform_from_ext(abiext) result(fform)
 end function fform_from_ext
 !!***
 
+!!****f* m_hdr/fform_contains
+!! NAME
+!!  fform_contains
+!!
+!! FUNCTION
+!!  Test whether fform provides varname.
+!!
+!! SOURCE
+
+logical function fform_contains(fform, varname, msg) result(ok)
+
+!Arguments ---------------------------------------------
+ integer,intent(in) :: fform
+ character(len=*),intent(in) :: varname
+ character(len=*),intent(out) :: msg
+
+!Local variables-------------------------------
+ integer :: ii
+! *********************************************************************
+
+ ok = .False.; msg = ""
+
+ if (fform == 0) then
+    msg = "fform == 0 --> IO errror when reading the header from file"
+    return
+ end if
+
+ do ii=1,size(all_abifiles)
+   if (fform == all_abifiles(ii)%fform .and. varname == all_abifiles(ii)%varname) then
+     ok = .True.; return
+   end if
+ end do
+
+ do ii=1,size(all_abifiles)
+   if (fform == all_abifiles(ii)%fform) then
+     msg = sjoin("fform:", itoa(fform), " contains", all_abifiles(ii)%varname, "instead of: ", varname)
+     return
+   end if
+ end do
+
+ msg = sjoin("Cannot find fform:", itoa(fform), " in all_abifiles")
+
+end function fform_contains
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_hdr/varname_from_fname
@@ -552,7 +611,6 @@ character(len=nctk_slen) function varname_from_fname(filename) result(varname)
  integer :: ind,pertcase,ierr
  logical :: found
  character(len=len(filename)) :: ext
-
 ! *********************************************************************
 
  ! TODO: This should be a recursive function because we have
@@ -748,7 +806,7 @@ subroutine check_fform(fform)
  abifile = abifile_from_fform(fform)
 
  if (abifile%fform == 0) then
-    ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform)))
+   ABI_ERROR(sjoin("Cannot find any abifile object associated to fform:", itoa(fform)))
  end if
  if (abifile%fform /= fform) then
     write(msg,"(2a,2(a,i0))") &
@@ -784,7 +842,6 @@ subroutine test_abifiles()
  integer :: ii,nn,ierr
  integer :: all_fforms(size(all_abifiles)),iperm(size(all_abifiles))
 ! *************************************************************************
-
  nn = size(all_abifiles)
 
  do ii=1,nn
@@ -816,7 +873,7 @@ end subroutine test_abifiles
 !!
 !! FUNCTION
 !!  Allocate memory from dimensions with the exception of pawrhoij.
-!!  This is a private routine. Client code should use hdr_init, hdr_fort_read.
+!!  This is a private routine. Client code should use hdr_init or hdr_fort_read.
 !!
 !! SOURCE
 
@@ -824,8 +881,8 @@ subroutine hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat, nsym, nshi
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: bantot,nkpt,nsppol,npsp,natom,ntypat,nsym,nshiftk,nshiftk_orig
  class(hdr_type),intent(inout) :: hdr
+ integer,intent(in) :: bantot,nkpt,nsppol,npsp,natom,ntypat,nsym,nshiftk,nshiftk_orig
 ! *************************************************************************
 
  !@hdt_type
@@ -867,11 +924,11 @@ end subroutine hdr_malloc
 !! hdr_init
 !!
 !! FUNCTION
-!! This subroutine initializes the header structured datatype
+!! Initialize the header structured datatype
 !! and most of its content from dtset and psps, and put default values for evolving variables.
 !!
 !! INPUTS
-!! ebands <type(ebands_t)>=band structure information including Brillouin zone description
+!! ebands <type(ebands_base_t)>=band structure information including Brillouin zone description
 !! codvsn=code version
 !! dtset <type(dataset_type)>=all input variables for this dataset
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -887,17 +944,17 @@ end subroutine hdr_malloc
 !!
 !! SOURCE
 
-subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps, wvl, &
+subroutine hdr_init(hdr, ebands, codvsn, dtset, pawtab, pertcase, psps, wvl, &
                     mpi_atmtab, comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
+ class(hdr_type),intent(inout) :: hdr !vz_i
+ class(ebands_base_t),intent(in) :: ebands
  integer,intent(in) :: pertcase
  integer,intent(in),optional :: comm_atom
  character(len=8),intent(in) :: codvsn
- type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
- type(hdr_type),intent(inout) :: hdr !vz_i
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type),intent(in) :: wvl
 !arrays
@@ -908,7 +965,6 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps, wvl, &
 !scalars
  integer,parameter :: image=1
  character(len=500) :: msg
-
 ! *************************************************************************
 
 #ifdef DEBUG_MODE
@@ -916,8 +972,7 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps, wvl, &
 #endif
 
  !@hdr_type
-
-! More checking would be needed ...
+ ! More checking would be needed ...
  if (dtset%ntypat/=psps%ntypat) then
    write(msg,'(a,2(i0,2x))')' dtset%ntypat and psps%ntypat differs. They are: ',dtset%ntypat,psps%ntypat
    ABI_ERROR(msg)
@@ -931,7 +986,7 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps, wvl, &
  ! Note: The structure parameters are taken from the first image, also cellcharge !
  if (present(comm_atom)) then
    if (present(mpi_atmtab)) then
-     call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
+     call hdr%init_lowlvl(ebands,psps,pawtab,wvl,codvsn,pertcase,&
        dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
        dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
        dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
@@ -940,7 +995,7 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps, wvl, &
        dtset%kptrlatt_orig,dtset%kptrlatt,dtset%nshiftk_orig,dtset%nshiftk,dtset%shiftk_orig,dtset%shiftk,&
        comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
    else
-     call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
+     call hdr%init_lowlvl(ebands,psps,pawtab,wvl,codvsn,pertcase,&
        dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
        dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
        dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),&
@@ -950,7 +1005,7 @@ subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps, wvl, &
        comm_atom=comm_atom)
    end if
  else
-   call hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,codvsn,pertcase,&
+   call hdr%init_lowlvl(ebands,psps,pawtab,wvl,codvsn,pertcase,&
      dtset%natom,dtset%nsym,dtset%nspden,dtset%ecut,dtset%pawecutdg,dtset%ecutsm,dtset%dilatmx,&
      dtset%intxc,dtset%ixc,dtset%stmbias,dtset%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,&
      dtset%so_psp,dtset%qptn, dtset%rprimd_orig(:,:,image),dtset%xred_orig(:,:,image),dtset%symrel,&
@@ -971,12 +1026,6 @@ end subroutine hdr_init
 !! FUNCTION
 !! This subroutine deallocates the components of the header structured datatype
 !!
-!! INPUTS
-!! hdr <type(hdr_type)>=the header
-!!
-!! OUTPUT
-!!  (only deallocate)
-!!
 !! SOURCE
 
 subroutine hdr_free(hdr)
@@ -986,8 +1035,6 @@ subroutine hdr_free(hdr)
  class(hdr_type),intent(inout) :: hdr
 
 ! *************************************************************************
-
- !@hdr_type
 
  !integer
  ABI_SFREE(hdr%istwfk)
@@ -1037,32 +1084,24 @@ end subroutine hdr_free
 !! FUNCTION
 !! Deep copy of the abinit header.
 !!
-!! INPUTS
-!!  Hdr_in=The header to be copied.
-!!
-!! OUTPUT
-!!  Hdr_cp=The deep copy of Hdr_in.
-!!
 !! NOTES
 !!  The present version deals with versions of the header up to 56.
 !!
 !! SOURCE
 
-subroutine hdr_copy(Hdr_in,Hdr_cp)
+subroutine hdr_copy(Hdr_in, Hdr_cp)
 
 !Arguments ------------------------------------
 !scalars
  class(hdr_type),intent(in) :: Hdr_in
- type(hdr_type),intent(inout) :: Hdr_cp
+ class(hdr_type),intent(out) :: Hdr_cp
 
 !Local variables-------------------------------
 !scalars
  integer :: cplex_rhoij,nspden_rhoij,qphase_rhoij
-
 ! *************************************************************************
 
  !@hdr_type
-
 ! Integer values
  Hdr_cp%bantot   = Hdr_in%bantot
  Hdr_cp%date     = Hdr_in%date
@@ -1221,8 +1260,7 @@ end function hdr_get_nelect_from_occ
 !! This subroutine initializes the header structured datatype
 !! and most of its content from psps and other input variables that
 !! are passed explicitly. It also use default values for evolving variables.
-!! Note that Dtset is not required thus rendering the initialization of the header
-!! much easier.
+!! Note that Dtset is not required thus rendering the initialization of the header much easier.
 !!
 !! INPUTS
 !! ebands <type(ebands_t)>=band structure information including Brillouin zone description
@@ -1250,15 +1288,15 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 
 !Arguments ------------------------------------
 !scalars
+ class(hdr_type),intent(inout) :: hdr
+ class(ebands_base_t),intent(in) :: ebands
  integer,intent(in) :: natom,nsym,nspden,intxc,ixc,usewvl,pawcpxocc,pawspnorb,pertcase
  integer,intent(in) :: ivalence,kptopt,nshiftk_orig,nshiftk,icoulomb
  integer, intent(in),optional :: comm_atom
  real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,ne_qFD,nh_qFD,cellcharge
  character(len=8),intent(in) :: codvsn
- type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type),intent(in) :: wvl
- type(hdr_type),intent(inout) :: hdr
 !arrays
  integer,intent(in) :: typat(natom)
  integer,intent(in) :: so_psp(psps%npsp)
@@ -1435,17 +1473,14 @@ end subroutine hdr_init_lowlvl
 !! hdr_read_from_fname
 !!
 !! FUNCTION
-!!  Read the header from file fname.
-!!  Use Fortran IO or Netcdf depending on the extension of the file
-!!  Only rank0 process reads the header and then broadcast data to the other
-!!  processes inside comm.
+!!  Read the header from file fname. Use Fortran IO or Netcdf depending on the extension of the file
+!!  Only rank0 process reads the header and then broadcast data to the other processes inside comm.
 !!
 !! INPUTS
 !!  fname=String with the name of the file.
 !!  comm = MPI communicator.
 !!
 !! OUTPUT
-!!  Hdr<hdr_type>=The abinit header.
 !!  fform=Kind of the array in the file (0 signals an error)
 !!
 !! SOURCE
@@ -1453,45 +1488,44 @@ end subroutine hdr_init_lowlvl
 subroutine hdr_read_from_fname(Hdr, fname, fform, comm)
 
 !Arguments ------------------------------------
- integer,intent(in) :: comm
- integer,intent(out) :: fform
+ class(hdr_type),intent(out) :: Hdr
  character(len=*),intent(in) :: fname
- type(hdr_type),intent(inout) :: Hdr
+ integer,intent(out) :: fform
+ integer,intent(in) :: comm
 
 !Local variables-------------------------------
  integer,parameter :: rdwr1=1,master=0
  integer :: fh,my_rank,mpierr
  character(len=500) :: msg
  character(len=len(fname)) :: my_fname
-
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
- my_fname = fname
-
- if (nctk_try_fort_or_ncfile(my_fname, msg) /= 0) then
-   ABI_ERROR(msg)
- end if
 
  if (my_rank == master) then
-   if (.not.isncfile(my_fname)) then
+   my_fname = fname
+   if (nctk_try_fort_or_ncfile(my_fname, msg) /= 0) then
+     ABI_ERROR(msg)
+   end if
+
+   if (.not. isncfile(my_fname)) then
      ! Use Fortran IO to open the file and read the header.
-     if (open_file(my_fname,msg,newunit=fh,form="unformatted", status="old") /= 0) then
+     if (open_file(my_fname, msg, newunit=fh, form="unformatted", status="old") /= 0) then
        ABI_ERROR(msg)
      end if
 
-     call hdr_fort_read(Hdr,fh,fform,rewind=(rdwr1==1))
+     call hdr%fort_read(fh,fform,rewind=(rdwr1==1))
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      close(fh)
 
    else
      ! Use Netcdf to open the file and read the header.
      NCF_CHECK(nctk_open_read(fh, my_fname, xmpi_comm_self))
-     call hdr_ncread(Hdr,fh, fform)
+     call hdr%ncread(fh, fform)
      ABI_CHECK(fform /= 0, sjoin("Error while reading:", my_fname))
      NCF_CHECK(nf90_close(fh))
    end if
- end if
+ end if ! my_rank
 
  ! Broadcast fform and the header.
  if (xmpi_comm_size(comm) > 1) then
@@ -1522,17 +1556,16 @@ end subroutine hdr_read_from_fname
 !!
 !! SOURCE
 
-subroutine hdr_write_to_fname(Hdr,fname,fform)
+subroutine hdr_write_to_fname(Hdr, fname, fform)
 
 !Arguments ------------------------------------
- integer,intent(in) :: fform
- character(len=*),intent(in) :: fname
  class(hdr_type),intent(inout) :: Hdr
+ character(len=*),intent(in) :: fname
+ integer,intent(in) :: fform
 
 !Local variables-------------------------------
  integer :: fh,ierr
  character(len=500) :: msg
-
 ! *************************************************************************
 
  if (.not.isncfile(fname)) then
@@ -1604,7 +1637,6 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
  integer :: iread(1),statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
-
 ! *************************************************************************
 
  !@hdr_type
@@ -1699,9 +1731,9 @@ subroutine hdr_bsize_frecords(Hdr, formeig, nfrec, bsize_frecords)
 
 !Arguments ------------------------------------
 !scalars
+ class(hdr_type),intent(in) :: Hdr
  integer,intent(in) :: formeig
  integer,intent(out) :: nfrec
- class(hdr_type),intent(in) :: Hdr
 !arrays
  integer(XMPI_OFFSET_KIND),allocatable,intent(out) :: bsize_frecords(:)
 
@@ -1710,7 +1742,6 @@ subroutine hdr_bsize_frecords(Hdr, formeig, nfrec, bsize_frecords)
  integer :: max_nfrec,ik_ibz,spin,mband,nband_k,npw_k,band
 !arrays
  integer(XMPI_OFFSET_KIND),allocatable :: bsz_frec(:)
-
 !************************************************************************
 
 !@hdr_type
@@ -1940,7 +1971,7 @@ subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
  select case(rdwr)
  case (1, 5)
    ! Reading the header of an unformatted file
-    call hdr_fort_read(Hdr,unitfi,fform,rewind=(rdwr==1))
+    call hdr%fort_read(unitfi,fform,rewind=(rdwr==1))
 
  case (2, 6)
    ! Writing the header of an unformatted file
@@ -1948,7 +1979,7 @@ subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
 
  case (3, 4)
    !  Writing the header of a formatted file
-   call hdr_echo(Hdr,fform,rdwr,unit=unitfi)
+   call hdr%echo(fform,rdwr,unit=unitfi)
  case default
    ABI_ERROR(sjoin("Wrong value for rdwr: ",itoa(rdwr)))
  end select
@@ -1995,7 +2026,6 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
  integer,parameter :: max_ns=6
  integer :: iatom,ii,ikpt,ipsp,isym,ount !,ns
  !character(len=500) :: msg
-
 !*************************************************************************
 
  ount = std_out; if (present(unit)) ount = unit; if (ount == dev_null) return
@@ -2427,8 +2457,8 @@ end subroutine hdr_update
 subroutine hdr_bcast(hdr, master, me, comm)
 
 !Arguments ------------------------------------
- integer, intent(in) :: master,me,comm
  class(hdr_type),intent(inout) :: hdr
+ integer, intent(in) :: master,me,comm
 
 !Local variables-------------------------------
 !scalars
@@ -2439,7 +2469,6 @@ subroutine hdr_bcast(hdr, master, me, comm)
  integer,allocatable :: list_int(:)
  real(dp),allocatable :: list_dpr(:)
  character(len=fnlen),allocatable :: list_char(:)
-
 ! *************************************************************************
 
  !@hdr_type
@@ -2820,17 +2849,16 @@ end function read_first_record
 subroutine hdr_fort_read(Hdr, unit, fform, rewind)
 
 !Arguments ------------------------------------
+ class(hdr_type),intent(out) :: hdr
  integer,intent(out) :: fform
  integer,intent(in) :: unit
  logical,optional,intent(in) :: rewind
- type(hdr_type),intent(out) :: hdr
 
 !Local variables-------------------------------
 !integer :: ierr
  integer :: ipsp
  character(len=500) :: msg,errmsg
  real(dp),allocatable :: occ3d(:,:,:)
-
 !*************************************************************************
 
  !@hdr_type
@@ -2844,10 +2872,7 @@ subroutine hdr_fort_read(Hdr, unit, fform, rewind)
  ! fform is not a record of hdr_type
  ABI_CHECK(read_first_record(unit, hdr%codvsn, hdr%headform, fform, errmsg) == 0, errmsg)
 
- ! CP debug
  !write(std_out,*) 'In hdr_fort_read, l. 3032, headform, fform = ', hdr%headform, ', ', fform
- ! End CP debug
-
 
  if (hdr%headform < 80) then
    write(msg,'(3a,i0,4a)') &
@@ -2956,9 +2981,9 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 
 !Arguments ------------------------------------
 !scalars
+ class(hdr_type),target,intent(out) :: hdr
  integer,intent(in) :: ncid
  integer,intent(out) :: fform
- type(hdr_type),target,intent(out) :: hdr
 
 !Local variables-------------------------------
 !scalars
@@ -2967,7 +2992,6 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 !arrays
  integer,allocatable :: nband2d(:,:)
  real(dp),allocatable :: occ3d(:,:,:)
-
 ! *************************************************************************
 
  !@hdr_type
@@ -3807,10 +3831,10 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 
 !Arguments ------------------------------------
 !scalars
+ class(hdr_type),intent(in) :: hdr,hdr0
  integer,intent(in) :: fform,fform0
  integer,intent(out) :: restart,restartpaw
  character(len=4),intent(in) :: mode_paral
- type(hdr_type),intent(in) :: hdr,hdr0
 
 !Local variables-------------------------------
  character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt, typfmt
@@ -4592,7 +4616,6 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
  call wrtout(std_out,msg,mode_paral)
 
 end subroutine hdr_check
-
 !!***
 
 !----------------------------------------------------------------------
@@ -4619,9 +4642,7 @@ integer function hdr_compare(hdr1, hdr2) result(ierr)
  class(hdr_type),intent(in) :: hdr1, hdr2
 
 !Local variables-------------------------------
-!scalars
  character(len=500) :: msg
-
 !************************************************************************
 
  ierr = 0
@@ -4995,7 +5016,7 @@ type(crystal_t) function hdr_get_crystal(hdr, gw_timrev, remove_inv) result(crys
 
  space_group = 0 ! FIXME not known at this level.
 
- call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
+ call cryst%init(hdr%amu,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
    hdr%zionpsp,hdr%znuclpsp,my_timrev,use_antiferro,rinv,hdr%title,&
    symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
 

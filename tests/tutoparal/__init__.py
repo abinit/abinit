@@ -5,7 +5,7 @@ need_cpp_vars = [
 "HAVE_MPI",
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
@@ -45,21 +45,21 @@ inp_files = [
 "timages_02.abi",
 "timages_03.abi",
 "timages_04.abi",
-"tmbt_1.abi",   # OK     
+"tmbt_1.abi",   # OK
 "tmbt_2.abi",   # OK
 "tmbt_3.abi",   # OK
 #"tmbt_4.abi",   # OK on some machines, but not on S64 .
-#"tmbt_5.abi",  
- "tmoldyn_01.abi",    # Not really tested on all slaves, runs are a bit long. 
+#"tmbt_5.abi",
+ "tmoldyn_01.abi",    # Not really tested on all slaves, runs are a bit long.
 #"tmoldyn_02.abi",
 #"tmoldyn_03.abi",
 #"tmoldyn_04.abi",
 #"tmoldyn_05.abi",    # Run is too long : more than 20 minutes on 64 procs
 #"tmoldyn_06.abi",
 #"tmoldyn_07.abi",    # Run is too long : more than 20 minutes on 2 procs.
-"tpsic_01.abi", 
-"tpsic_02.abi",   
-"tpsic_03.abi", 
+"tpsic_01.abi",
+"tpsic_02.abi",
+"tpsic_03.abi",
 "tucalc_crpa_1.abi",
 "tucalc_crpa_2.abi",
 #"tucalc_crpa_3.abi",

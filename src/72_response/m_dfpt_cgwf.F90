@@ -7,7 +7,7 @@
 !! Uses a conjugate-gradient algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!!  Copyright (C) 1999-2025 ABINIT group (XG,DRH,XW,FJ,MT,LB,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,7 +45,7 @@ module m_dfpt_cgwf
  use m_getgh1c,     only : getgh1c, getdc1
  use m_fft,         only : fft_ug
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -64,7 +64,7 @@ module m_dfpt_cgwf
 !!
 !! FUNCTION
 !!  Simplied interface to the Sternheimer solver.
-!!  Wrapper around dfpt_cgwf routine.
+!!  Wrapper around the dfpt_cgwf routine.
 !!
 !! SOURCE
 
@@ -73,31 +73,47 @@ module m_dfpt_cgwf
    integer :: npw_k  = -1
    integer :: npw_kq = -1
    integer :: nspinor = -1
+   ! Number of plane-waves at k and k+q and number of spinors.
+
    integer :: mcgq = -1
+   ! second dimension of the cgq array.
    integer :: mgscq = -1
+   ! second dimension of gscq, with only mband_mem bands.
    integer :: mcprjq = -1
+   ! second dimension of the cprjq array.
    integer :: nband = -1
+   ! Number of bands.
    integer :: nband_me = -1
+   ! Number of bands treated by this MPI proc.
    integer :: nline_in = -1
+   ! Max number of line minimization.
    integer :: nlines_done = -1
+   ! Number of line minimization in stern_solve.
    integer :: usedcwavef
+   ! flag controlling the use of dcwavef array (PAW only):
    integer :: usepaw
+   ! 1 if PAW is used.
+
    integer :: work_ngfft(18)
    logical :: use_cache
    logical :: has_band_para
 
    type(dataset_type),pointer :: dtset => null()
    type(mpi_type) :: mpi_enreg
-   !type(u1cache_t) :: u1c
+   !type(u1_cache_t) :: u1c
 
    integer,allocatable :: bands_treated_now(:)
    integer,allocatable :: rank_band(:)
 
    real(dp),allocatable :: fermie1_idir_ipert(:,:)
-   real(dp),allocatable :: eig1_k(:)
+   real(dp),allocatable :: eig1_k(:,:,:)
+   ! (2, nband, nband)
+   ! matrix of first-order eigenvalues (hartree)
+   ! eig1_k(:,ii,jj)=<C0 ii|H1|C0 jj> for norm-conserving psps
+   ! eig1_k(:,ii,jj)=<C0 ii|H1-(eig0_k+eig0_k+q)/2.S(1)|C0 jj> for PAW
+
    real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
-   real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:)
-   real(dp),allocatable :: work(:,:,:,:)
+   real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), work(:,:,:,:)
 
    type(pawcprj_type),allocatable :: cprjq(:,:)
    ! (natom, mcprjq)
@@ -138,7 +154,7 @@ contains
 !! by contributions from the active space in the calling routine, if needed.
 !!
 !! As concerns the MPI algorithm: cgq and gscq are distributed inside comm_band and
-!! each proc has nband_me non-overlapping blocks. Each proc in comm_band call dfpt_cgwf
+!! each proc has nband_me non-overlapping blocks. Each proc in comm_band calls dfpt_cgwf
 !! with a different u^1_{band} state (the band index is therefore LOCAL) but then
 !! we need to communicate every time we call projbd to orthogonalize wrt the MPI-distributed cgq.
 !! Other arrays such as rank_band and bands_treated_now are GLOBAL i.e. all procs in comm_band
@@ -156,7 +172,7 @@ contains
 !!  rank_band(nband)=rank of processor in band_comm which have the other bands for cgq below (GLOBAL)
 !!  bands_treated_now(nband)  (GLOBAL)
 !!  eig0_k=0-order eigenvalues for the present wavefunction at k
-!!  eig0_kq(nband)=GS eigenvalues at k+Q (hartree)
+!!  eig0_kq(nband)=GS eigenvalues at k+q (hartree)
 !!  grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!  gscq(2,mgscq)=<g|S|Cnk+q> coefficients for MY bands (PAW) at k+Q
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+Q
@@ -178,10 +194,10 @@ contains
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  opt_gvnlx1=option controlling the use of gvnlx1 array:
 !!            0: used as an output
-!!            1: used as an input:    - used only for ipert=natom+2
+!!            1: used as an input: - used only for ipert=natom+2
 !!                 NCPP: contains the ddk 1-st order WF
 !!                 PAW: contains frozen part of 1st-order hamiltonian
-!!            2: used as input/ouput:    - used only for PAW and ipert=natom+2
+!!            2: used as input/ouput: - used only for PAW and ipert=natom+2
 !!                 At input: contains the ddk 1-st order WF (times i)
 !!                 At output: contains frozen part of 1st-order hamiltonian
 !!  prtvol=control print volume and debugging output
@@ -211,7 +227,7 @@ contains
 !!
 !! SIDE EFFECTS
 !!  Input/Output:
-!!  cwavef(2,npw1*nspinor)=first-order  wavefunction at k,q, in reciprocal space (updated)
+!!  cwavef(2,npw1*nspinor)=first-order wavefunction at k,q, in reciprocal space (updated)
 !!
 !!  === if gs_hamkq%usepaw==1 ===
 !!  cwaveprj(natom,nspinor)= wave functions at k projected with nl projectors
@@ -322,7 +338,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  if (prtvol>=10) then
    !Tell us what is going on:
-   write(msg,'(a,i0,2x,a,i0,a)')' --- dfpt_cgwf is called for band:', u1_band,' for: ',nline,' lines'
+   write(msg,'(a,i0,2x,a,i0,a)')' --- dfpt_cgwf is called for band: ', u1_band,' for: ',nline,' lines'
    call wrtout(std_out,msg)
  end if
 
@@ -680,7 +696,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    ! The array eig1_k contains:
    ! <u_(jband,k+q)^(0)|H_(k+q,k)^(1)|u_(iband,k)^(0)>                              (NC psps)
-   ! or <u_(jband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(iband,k)^(0)> (PAW)
+   ! <u_(jband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(iband,k)^(0)>    (PAW)
    ! so in case of PAW need to add the overlap term below
    !
    ! NB: 2019 11 15: MJV: I swapped the names of jband and iband to be more consistent with other loops above
@@ -711,15 +727,15 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    ! reduce over band procs to fill in the matrix for all jband (distributed over procs)
    ! must only do this once for eig1_k_loc: now have all jband for current ibands on all procs
-   call xmpi_sum(eig1_k_loc,mpi_enreg%comm_band,ierr)
+   call xmpi_sum(eig1_k_loc, mpi_enreg%comm_band, ierr)
 
    ! TODO: I think this is just a reshape
    do iband=1,nband
      if (bands_treated_now(iband) == 0) cycle
      band_off=(iband-1)*2*nband
      do jband=1,nband
-       eig1_k(2*jband-1+band_off)=eig1_k_loc(1,jband,iband)
-       eig1_k(2*jband  +band_off)=eig1_k_loc(2,jband,iband)
+       eig1_k(2*jband-1+band_off) = eig1_k_loc(1,jband,iband)
+       eig1_k(2*jband  +band_off) = eig1_k_loc(2,jband,iband)
      end do
    end do
  end if ! ipert/=natom+10.and.ipert/=natom+11
@@ -1113,7 +1129,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    dedt=-two*two*dedt
 
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) then
-     call wrtout(std_out,' DFPT_CG_WARNING : dedt>0')
+     call wrtout(std_out,' DFPT_CGWF WARNING: dedt > 0')
    end if
    ABI_MALLOC(gvnlx_direc,(2,npw1*nspinor))
    ABI_MALLOC(gh_direc,(2,npw1*nspinor))
@@ -1148,8 +1164,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    d2edt2=two*two*d2edt2
 
    if(prtvol==-level.or.prtvol==-19)then
-     write(msg,'(a,2es14.6)') 'dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
-     call wrtout(std_out,msg)
+     write(msg,'(a,3es14.6)') 'dfpt_cgwf: dedt,d2edt2,resid=',dedt,d2edt2,resid; call wrtout(std_out,msg)
    end if
 
    ! ======================================================================
@@ -1171,18 +1186,21 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      ghc   =zero
      gvnlxc =zero
      if (gen_eigenpb) gsc=zero
-     if (usepaw==1) then
-       call pawcprj_set_zero(cwaveprj)
-     end if
+     if (usepaw==1) call pawcprj_set_zero(cwaveprj)
+
      ! A negative residual will be the signal of this problem ...
+     !write(msg,'(a,3es14.6)') 'dfpt_cgwf: dedt,d2edt2,resid=',dedt,d2edt2,resid; call wrtout(std_out,msg)
+
      resid=-two
      if (prtvol > 0 .and. u1_band_ > 0) then
        call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2')
      end if
+
    else if (d2edt2 > 1.d-40) then
      ! Here, the value of theta that gives the minimum
      theta=-dedt/d2edt2
      !write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
+
    else
      if (u1_band_ > 0) call wrtout(std_out, "DFPT_CGWF WARNING: d2edt2 is zero, skipping update")
      theta=zero
@@ -1505,12 +1523,9 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 !            END DEBUG
 !--------------------------------------------------------------------------
 
- if (allocated(gh_direc))  then
-   ABI_FREE(gh_direc)
- end if
- if (allocated(gvnlx_direc))  then
-   ABI_FREE(gvnlx_direc)
- end if
+ ABI_SFREE(gh_direc)
+ ABI_SFREE(gvnlx_direc)
+
  ABI_FREE(conjgr)
  ABI_FREE(cwaveq)
  ABI_FREE(direc)
@@ -1661,6 +1676,7 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
    end if
    factr = inv_delta_E * gkkr
    facti = inv_delta_E * eig1(index_eig1+1)
+   !print *, "ibandkq, iband, factr, facti:", ibandkq, iband, factr, facti
 
    ! Apply correction to 1st-order WF
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwave1,facti,factr,index_cgq,npw1,nspinor)
@@ -1703,6 +1719,17 @@ end subroutine full_active_wf1
 !!   Initialize the object.
 !!
 !! INPUT
+!! dtset
+!! npw_k
+!! npw_kq
+!! nspinor
+!! nband
+!! nband_me
+!! fermie1_idir_ipert
+!! use_cache
+!! work_ngfft
+!! mpi_enreg
+!! comm_band
 !!
 !! OUTPUT
 !!
@@ -1724,16 +1751,12 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
 !scalars
  integer :: natom, usepaw
 ! *************************************************************************
-
  natom = dtset%natom; usepaw = dtset%usepaw
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset
- stern%usepaw = usepaw
- stern%nband_me = nband_me
- stern%usedcwavef = 0
- stern%use_cache = use_cache
- stern%work_ngfft = work_ngfft
- if (use_cache) then
+ stern%usepaw = usepaw; stern%nband_me = nband_me; stern%usedcwavef = 0
+ stern%use_cache = use_cache; stern%work_ngfft = work_ngfft
+ if (stern%use_cache) then
    ABI_MALLOC(stern%work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
  end if
 
@@ -1747,7 +1770,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
  stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
 
- ABI_CALLOC(stern%eig1_k, (2*nband**2))
+ ABI_CALLOC(stern%eig1_k, (2,nband, nband))
  ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*stern%usedcwavef))
  ABI_MALLOC(stern%gh1c_n, (2, npw_kq*nspinor))
  ABI_MALLOC(stern%ghc, (2, npw_kq*nspinor))
@@ -1818,11 +1841,10 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
  complex(gwpc),allocatable :: cwork_sp(:)
- logical  :: cycle_bands(stern%nband)
+ logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
  complex(gwpc),pointer :: full_ug1_dp_ptr(:)
 #endif
-
 ! *************************************************************************
 
  ! TODO: grad_berry is problematic because in dfpt_cgwf, the array is declared with
@@ -1890,9 +1912,21 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
        " resid:", out_resid, " >= tolwfr: ", stern%dtset%tolwfr, ch10, &
        " after nline: ", stern%nlines_done, " iterations. Increase nline and/or tolwfr."
      ierr = 1
+
    else if (out_resid < zero) then
-     err_msg = sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(stern%nlines_done))
-     ierr = -1
+     write(err_msg, "(a,i0,a, (a,es13.5), a,i0)") &
+       " Sternheimer solver didn't convergence for band: ", u1_band, ch10, &
+       " resid:", out_resid, ", after nline: ", stern%nlines_done
+     ! This may happen when the eigenvalue eig_mk(0) is higher than
+     ! the lowest non-treated eig_mk+q(0). The solution adopted here
+     ! is very crude, and rely upon the fact that occupancies of such
+     ! levels should be smaller and smaller with increasing nband, so that
+     ! a convergence study will give the right result.
+     !write(std_out, *)" eig0_k, eig0_kq, eig0_k - eig0_kq"
+     !do iband=1,stern%nband
+     !  write(std_out, *)iband, eig0_k(iband), eig0_kq(iband), eig0_k(iband) - eig0_kq(iband)
+     !end do
+     ierr = -2
    end if
 
    !if (my_rank == master .and. (enough_stern <= 5 .or. stern%dtset%prtvol > 10)) then
@@ -1920,7 +1954,9 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  ! See need_fermie1 in m_dfpt_scfcv
 
  if (present(full_cg1)) then
-   ! Compute full first order wavefunction.
+   ! =====================================
+   ! Compute full first order wavefunction
+   ! =====================================
 
    ! WARNING: Assuming all bands are on this cpu.
    cycle_bands(:) = .False.
@@ -1933,6 +1969,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
                         eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
                         stern%dtset%natom, stern%nband, stern%npw_kq, stern%nspinor, timcount0, gs_hamkq%usepaw)
+   !print *, "cwavef:", cwavef(:,1); print *, "full_cg1:", full_cg1(:,1)
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.
@@ -1968,7 +2005,6 @@ subroutine stern_free(stern)
 
 !Arguments ------------------------------------
  class(stern_t),intent(inout) :: stern
-
 !************************************************************************
 
  ! integer

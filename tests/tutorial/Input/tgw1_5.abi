@@ -19,11 +19,11 @@ ecutsigx     8.0
 nband?2      100
 nkptgw        1
 kptgw        0.000    0.000    0.000
-bdgw         4  5 
+bdgw         4  5
 
 # GW calculation general parameters
 getwfk       2
-ppmfrq      16.7 eV  # It is easier (and safer) to let ABINIT compute and use the Drude plasma frequency, 
+ppmfrq      16.7 eV  # It is easier (and safer) to let ABINIT compute and use the Drude plasma frequency,
                      # instead of selecting a value by hand. This would be done thanks to the default value ppmfrq 0.0 .
 
 # Definition of the unit cell: fcc
@@ -51,14 +51,14 @@ ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 
 
 # Sampling of the BZ
-ngkpt   2 2 2 
+ngkpt   2 2 2
 nshiftk 1
 shiftk  0.0 0.0 0.0
 istwfk  *1         # This is mandatory in all the GW steps.
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Si.psp8"
+ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -68,14 +68,14 @@ istwfk  *1         # This is mandatory in all the GW steps.
 #%% executable = abinit
 #%% test_chain = tgw1_2.abi, tgw1_3.abi, tgw1_4.abi, tgw1_5.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tgw1_5.abo, tolnlines= 70, tolabs=  7.000e-02, tolrel=  7.000e-02
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = GW
-#%% description = 
+#%% description =
 #%%   Crystalline silicon
 #%%   Calculation of the GW corrections
 #%%<END TEST_INFO>

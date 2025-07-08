@@ -1,8 +1,8 @@
 
-.Version 6.1.2  of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
+.Version 6.1.2  of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu4.4 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue  1 Jun 2010.
-  
+
 - input  file    -> /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/v5/Input/t04.in
 - output file    -> t04.out
 - root for input  files -> t04i
@@ -151,8 +151,8 @@ P           mkmem         1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
-- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Pspdir/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Pspdir/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
    8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -175,7 +175,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
 
 ================================================================================
 
-=== [ionmov= 1] Molecular dynamics with viscosity (vis= 0.10000E+03)        
+=== [ionmov= 1] Molecular dynamics with viscosity (vis= 0.10000E+03)
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: ( 1/ 5)
@@ -251,7 +251,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT 14  -28.776968465149     2.745E-04 1.354E-07 1.184E+01 4.595E-05 1.797E+00
  ETOT 15  -28.777362120657    -3.937E-04 5.822E-06 1.136E+01 1.308E-05 1.797E+00
 
- At SCF step   15, forces are converged : 
+ At SCF step   15, forces are converged :
   for the second time, max diff in force=  1.308E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -346,7 +346,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  9  -29.248851559306    -1.757E-08 1.591E-10 3.751E-07 2.696E-05 1.221E-01
  ETOT 10  -29.248851559632    -3.262E-10 3.428E-11 4.208E-11 3.808E-06 1.221E-01
 
- At SCF step   10, forces are converged : 
+ At SCF step   10, forces are converged :
   for the second time, max diff in force=  3.808E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -387,7 +387,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  6  -29.217106436888    -7.159E-11 3.782E-12 3.040E-09 1.119E-06 4.365E-01
  ETOT  7  -29.217106436889    -7.248E-13 9.482E-14 1.903E-10 3.130E-07 4.365E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  3.130E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -427,7 +427,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  5  -29.225075358413    -4.027E-07 1.946E-08 7.031E-05 3.948E-05 7.901E-02
  ETOT  6  -29.225075387513    -2.910E-08 1.920E-09 6.147E-07 1.129E-05 7.902E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.129E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -468,7 +468,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  6  -29.300085043176    -2.038E-08 6.886E-10 3.385E-07 3.085E-06 6.204E-02
  ETOT  7  -29.300085043288    -1.120E-10 5.386E-12 5.029E-09 3.323E-06 6.205E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  3.323E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -509,7 +509,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  6  -29.267302313657    -1.000E-08 1.458E-11 1.227E-07 8.071E-06 2.495E-02
  ETOT  7  -29.267302313674    -1.690E-11 1.619E-13 1.524E-09 5.386E-07 2.495E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  5.386E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -548,7 +548,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -29.284650815956    -5.116E-07 6.700E-08 8.364E-05 2.912E-05 1.511E-01
  ETOT  5  -29.284650870215    -5.426E-08 5.249E-09 6.487E-06 4.227E-05 1.511E-01
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  4.227E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -589,7 +589,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  6  -29.298048860822    -6.184E-09 7.185E-11 6.768E-08 1.169E-05 1.155E-01
  ETOT  7  -29.298048860829    -7.482E-12 2.709E-14 8.680E-10 1.773E-07 1.155E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.773E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -628,7 +628,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -29.289704792643    -6.118E-08 8.765E-09 1.021E-05 4.894E-05 2.011E-01
  ETOT  5  -29.289704803835    -1.119E-08 4.609E-10 4.966E-07 2.397E-05 2.011E-01
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.397E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -668,7 +668,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  5  -29.297207200513    -8.177E-09 6.513E-10 1.680E-07 8.912E-06 1.273E-01
  ETOT  6  -29.297207200572    -5.958E-11 1.741E-12 2.054E-09 6.923E-07 1.273E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  6.923E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -708,7 +708,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  5  -29.301649000883    -3.045E-08 2.605E-09 6.400E-07 1.587E-05 3.182E-02
  ETOT  6  -29.301649001136    -2.534E-10 9.396E-12 7.535E-09 1.314E-06 3.182E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.314E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -747,7 +747,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -29.298773318075    -7.123E-08 6.846E-09 3.850E-06 4.928E-05 9.122E-02
  ETOT  5  -29.298773324787    -6.712E-09 5.913E-10 1.349E-07 7.154E-06 9.121E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  7.154E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -868,8 +868,8 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
-- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Pspdir/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Pspdir/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
    8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -892,7 +892,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
 
 ================================================================================
 
-=== [ionmov= 1] Molecular dynamics with viscosity (vis= 0.10000E+03)        
+=== [ionmov= 1] Molecular dynamics with viscosity (vis= 0.10000E+03)
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: ( 1/ 5)
@@ -910,7 +910,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  7  -31.151040102420    -3.739E-08 4.719E-09 6.103E-06 3.534E-05 2.956E-02
  ETOT  8  -31.151040106457    -4.037E-09 3.602E-11 6.594E-08 2.424E-06 2.956E-02
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  2.424E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -949,7 +949,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.151340491638    -6.144E-09 1.203E-11 9.832E-08 6.822E-06 2.708E-02
  ETOT  5  -31.151340491677    -3.896E-11 5.022E-12 8.244E-09 2.444E-07 2.708E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.444E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -986,7 +986,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  2  -31.151427032412    -3.648E-07 1.611E-11 1.672E-04 2.081E-05 2.632E-02
  ETOT  3  -31.151427255001    -2.226E-07 2.549E-10 3.457E-07 1.689E-05 2.634E-02
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  1.689E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1025,7 +1025,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.151724885414    -7.765E-09 1.310E-11 1.172E-07 7.408E-06 2.372E-02
  ETOT  5  -31.151724885458    -4.441E-11 5.372E-12 9.155E-09 2.000E-07 2.372E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.000E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1062,7 +1062,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  2  -31.151740981225    -1.625E-08 7.016E-13 7.451E-06 4.726E-06 2.357E-02
  ETOT  3  -31.151740991107    -9.882E-09 1.305E-11 1.535E-08 3.679E-06 2.357E-02
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  3.679E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1101,7 +1101,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.152398277554    -6.034E-08 6.723E-11 6.545E-07 1.859E-05 1.730E-02
  ETOT  5  -31.152398277768    -2.139E-10 2.114E-11 4.069E-08 4.101E-08 1.730E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  4.101E-08 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1140,7 +1140,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.152885344104    -6.164E-08 1.036E-10 5.763E-07 1.762E-05 1.266E-02
  ETOT  5  -31.152885344267    -1.630E-10 1.256E-11 2.943E-08 3.862E-07 1.266E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  3.862E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1179,7 +1179,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.153233974358    -5.329E-08 1.273E-10 4.433E-07 1.522E-05 1.035E-02
  ETOT  5  -31.153233974461    -1.024E-10 5.311E-12 1.951E-08 6.159E-07 1.035E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  6.159E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1218,7 +1218,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.153517433106    -4.343E-08 1.397E-10 3.298E-07 1.266E-05 1.025E-02
  ETOT  5  -31.153517433168    -6.277E-11 1.544E-12 1.417E-08 6.369E-07 1.025E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  6.369E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1257,7 +1257,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.153801894615    -3.656E-08 1.536E-10 2.596E-07 1.066E-05 1.200E-02
  ETOT  5  -31.153801894656    -4.018E-11 1.606E-13 1.204E-08 7.722E-07 1.201E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  7.722E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1296,7 +1296,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.154149115221    -3.450E-08 1.869E-10 2.324E-07 9.405E-06 1.554E-02
  ETOT  5  -31.154149115250    -2.828E-11 2.169E-13 1.288E-08 9.088E-07 1.554E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  9.088E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1335,7 +1335,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.154646964274    -3.856E-08 2.707E-10 2.483E-07 8.800E-06 2.131E-02
  ETOT  5  -31.154646964299    -2.510E-11 1.634E-12 1.725E-08 9.346E-07 2.131E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  9.346E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1374,7 +1374,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.155469262928    -5.199E-08 4.823E-10 3.240E-07 8.506E-06 3.057E-02
  ETOT  5  -31.155469262970    -4.150E-11 7.304E-12 2.795E-08 8.798E-07 3.057E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  8.798E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1413,7 +1413,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -31.157018177784    -8.415E-08 1.067E-09 5.311E-07 7.538E-06 4.588E-02
  ETOT  5  -31.157018177906    -1.221E-10 2.955E-11 5.329E-08 7.898E-07 4.588E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  7.898E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1534,8 +1534,8 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.06487
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
-- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Pspdir/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Pspdir/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
    8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1558,7 +1558,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
 
 ================================================================================
 
-=== [ionmov= 1] Molecular dynamics with viscosity (vis= 0.10000E+03)        
+=== [ionmov= 1] Molecular dynamics with viscosity (vis= 0.10000E+03)
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: ( 1/ 5)
@@ -1575,7 +1575,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  6  -32.166378167710    -5.950E-08 7.329E-09 1.215E-05 4.690E-05 1.506E-01
  ETOT  7  -32.166378175933    -8.224E-09 8.301E-10 1.732E-07 1.404E-05 1.507E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.404E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1614,7 +1614,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -32.169973544013    -3.211E-08 3.527E-10 5.462E-07 1.107E-05 1.525E-01
  ETOT  5  -32.169973544133    -1.198E-10 1.751E-11 7.838E-08 2.924E-07 1.525E-01
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.924E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1653,7 +1653,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -32.173303473064    -2.641E-08 2.510E-10 4.128E-07 1.007E-05 1.535E-01
  ETOT  5  -32.173303473140    -7.520E-11 7.842E-12 5.361E-08 2.431E-07 1.535E-01
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.431E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1692,7 +1692,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -32.179244807904    -8.636E-08 7.294E-10 1.172E-06 1.420E-05 1.538E-01
  ETOT  5  -32.179244808044    -1.394E-10 2.083E-11 1.176E-07 1.341E-06 1.538E-01
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.341E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1730,7 +1730,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  3  -32.179673838224    -2.741E-07 1.771E-10 3.922E-07 3.823E-05 1.537E-01
  ETOT  4  -32.179673838623    -3.989E-10 3.499E-12 6.069E-09 1.399E-06 1.537E-01
 
- At SCF step    4, forces are converged : 
+ At SCF step    4, forces are converged :
   for the second time, max diff in force=  1.399E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1769,7 +1769,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -32.202002989760    -2.089E-06 3.862E-08 1.055E-04 3.161E-05 1.382E-01
  ETOT  5  -32.202003045724    -5.596E-08 7.226E-09 3.579E-06 1.246E-05 1.382E-01
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.246E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1809,7 +1809,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  5  -32.224358586463    -2.838E-07 2.827E-08 1.332E-05 1.969E-05 1.031E-01
  ETOT  6  -32.224358587672    -1.210E-09 4.273E-12 3.387E-07 4.524E-06 1.031E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  4.524E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1848,7 +1848,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -32.241895447162    -5.748E-06 1.103E-07 4.966E-04 1.435E-05 8.871E-02
  ETOT  5  -32.241895774197    -3.270E-07 3.271E-08 1.970E-05 2.989E-05 8.874E-02
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.989E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1889,7 +1889,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  6  -32.260920695973    -3.825E-09 3.197E-10 3.842E-07 1.342E-05 1.198E-01
  ETOT  7  -32.260920696074    -1.005E-10 8.422E-12 9.083E-09 2.001E-06 1.198E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.001E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1929,7 +1929,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  5  -32.290915860636    -1.990E-08 5.711E-10 3.923E-06 7.417E-06 1.618E-01
  ETOT  6  -32.290915861486    -8.502E-10 1.556E-10 2.895E-07 1.355E-05 1.618E-01
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  1.355E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1971,7 +1971,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  7  -32.322750900573    -6.011E-11 9.233E-13 1.720E-08 9.101E-06 6.139E-02
  ETOT  8  -32.322750900575    -1.819E-12 5.075E-14 2.347E-10 3.142E-07 6.139E-02
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  3.142E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2013,7 +2013,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  7  -32.311704772251    -8.480E-11 5.853E-12 1.389E-08 1.239E-05 2.025E-01
  ETOT  8  -32.311704772251     1.208E-13 2.538E-14 3.562E-10 6.660E-07 2.025E-01
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  6.660E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2052,7 +2052,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  4  -32.311006929914    -1.170E-08 5.603E-12 2.788E-07 3.082E-05 2.085E-01
  ETOT  5  -32.311006930165    -2.506E-10 2.270E-11 3.643E-08 2.085E-05 2.085E-01
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.085E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2092,7 +2092,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
  ETOT  5  -32.322858577756    -1.845E-07 1.368E-09 5.831E-05 1.414E-05 6.807E-02
  ETOT  6  -32.322858610703    -3.295E-08 1.309E-09 4.831E-07 4.990E-05 6.812E-02
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  4.990E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2190,7 +2190,7 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell    1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu    1.59994000E+01
@@ -2302,7 +2302,7 @@ P           mkmem         1
  M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
  Computer Phys. Comm. 180, 2582-2615 (2009).
  Comment : the third generic paper describing the ABINIT project.
- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+ Note that a version of this paper, that is not formatted for Computer Phys. Comm.
  is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
  The licence allows the authors to put it on the Web.
 
@@ -2321,7 +2321,7 @@ P           mkmem         1
 
  And optionally :
 
- [3] First-principles computation of material properties : the ABINIT software project. 
+ [3] First-principles computation of material properties : the ABINIT software project.
  X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
  M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
  Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7

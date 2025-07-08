@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
 
 #
 # GPU support for Steredeg
@@ -26,6 +26,12 @@ AC_DEFUN([SD_GPU_INIT], [
   sd_gpu_init="unknown"
   sd_gpu_ok="unknown"
   sd_gpu_prefix=""
+  sd_cuda_prefix=""
+  sd_cuda_enable=""
+  sd_cuda_init=""
+  sd_rocm_prefix=""
+  sd_rocm_enable=""
+  sd_rocm_init=""
 
   # Set adjustable parameters
   sd_gpu_options="$1"
@@ -36,6 +42,7 @@ AC_DEFUN([SD_GPU_INIT], [
   sd_gpu_fcflags_def="$6"
   sd_gpu_ldflags_def="$7"
   sd_gpu_enable_def=""
+  sd_gpu_flavor_def=""
   sd_gpu_markers_enable_def=""
   sd_gpu_policy=""
   sd_gpu_status=""
@@ -60,8 +67,11 @@ AC_DEFUN([SD_GPU_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_gpu_enable_def}" && sd_gpu_enable_def="no"
+  test -z "${sd_gpu_flavor_def}" && sd_gpu_flavor_def="cuda-double"
   test -z "${sd_gpu_markers_enable_def}" && sd_gpu_markers_enable_def="no"
   test -z "${sd_gpu_policy}" && sd_gpu_policy="warn"
+  test -z "${sd_cuda_status}" && sd_gpu_status="${sd_cuda_status}"
+  test -z "${sd_rocm_status}" && sd_gpu_status="${sd_rocm_status}"
   test -z "${sd_gpu_status}" && sd_gpu_status="optional"
   # FIXME: improve the setting mechanism
   #test -z "${sd_gpu_libs_def}" && sd_gpu_libs_def="-lopencl"
@@ -70,7 +80,7 @@ AC_DEFUN([SD_GPU_INIT], [
   AC_ARG_WITH([gpu],
     [AS_HELP_STRING(
       [--with-gpu],
-      [Install prefix of a GPU SDK (e.g. /usr/local). You may use --with-gpu without argument to force GPU detection, in which case detection failures will result in errors, and --without-gpu to disable GPU support completely.])],
+      [ Install prefix of a GPU SDK . You may use --with-gpu without argument to force GPU detection, in which case detection failures will result in errors, and --without-gpu to disable GPU support completely.])],
     [ if test "${withval}" = "no" -o "${withval}" = "yes"; then
         sd_gpu_enable="${withval}"
         sd_gpu_init="yon"
@@ -80,6 +90,52 @@ AC_DEFUN([SD_GPU_INIT], [
         sd_gpu_init="dir"
       fi],
     [ sd_gpu_enable="${sd_gpu_enable_def}"; sd_gpu_init="def"])
+
+  AC_ARG_WITH([cuda],
+    [AS_HELP_STRING(
+      [--with-cuda],
+      [Install prefix of NVIDIA CUDA SDK. You may use --with-cuda without argument to force GPU detection, in which case detection failures will result in errors.])],
+    [ if test "${withval}" = "no" -o "${withval}" = "yes"; then
+        sd_cuda_enable="${withval}"
+        sd_cuda_init="yon"
+        sd_gpu_flavor="cuda-double"
+      else
+        sd_cuda_prefix="${withval}"
+        sd_cuda_enable="yes"
+        sd_cuda_init="dir"
+        sd_gpu_flavor_def="cuda-double"
+        sd_gpu_flavor="${sd_gpu_flavor_def}"
+      fi],
+    [ sd_cuda_enable="${sd_gpu_enable_def}"; sd_cuda_init="def"])
+
+  AC_ARG_WITH([rocm],
+    [AS_HELP_STRING(
+      [--with-rocm],
+      [Install prefix of AMD ROCM SDK. You may use --with-rocm without argument to force GPU detection, in which case detection failures will result in errors.])],
+    [ if test "${withval}" = "no" -o "${withval}" = "yes"; then
+        sd_rocm_enable="${withval}"
+        sd_rocm_init="yon"
+        sd_gpu_flavor="hip-double"
+      else
+        sd_rocm_prefix="${withval}"
+        sd_rocm_enable="yes"
+        sd_rocm_init="dir"
+        sd_gpu_flavor_def="hip-double"
+        sd_gpu_flavor="${sd_gpu_flavor_def}"
+      fi],
+    [ sd_rocm_enable="${sd_gpu_enable_def}"; sd_rocm_init="def"])
+
+  if test "${sd_cuda_enable}" != "${sd_gpu_enable_def}"; then
+    sd_gpu_prefix="${sd_cuda_prefix}"
+    sd_gpu_enable="${sd_cuda_enable}"
+    sd_gpu_init="${sd_cuda_init}"
+  fi
+
+  if test "${sd_rocm_enable}" != "${sd_gpu_enable_def}"; then
+    sd_gpu_prefix="${sd_rocm_prefix}"
+    sd_gpu_enable="${sd_rocm_enable}"
+    sd_gpu_init="${sd_rocm_init}"
+  fi
 
   # Declare main configure option
   AC_ARG_WITH([gpu_markers],
@@ -128,24 +184,38 @@ AC_DEFUN([SD_GPU_INIT], [
           unset tmp_gpu_flavor_ok
           ;;
       esac],
-    [ sd_gpu_flavor=`echo "${sd_gpu_flavors_supported}" | cut -d' ' -f1`
+    [ sd_gpu_flavor="${sd_gpu_flavor_def}"
       sd_gpu_flavor_init="def"])
 
   # Declare environment variables
-  AC_ARG_VAR([GPU_CPPFLAGS], [C preprocessing flags for GPU.])
-  AC_ARG_VAR([GPU_CFLAGS], [C flags for GPU.])
-  AC_ARG_VAR([GPU_CXXFLAGS], [C++ flags for GPU.])
-  AC_ARG_VAR([GPU_FCFLAGS], [Fortran flags for GPU.])
-  AC_ARG_VAR([GPU_FFLAGS], [Fortran flags for GPU (better use GPU_FCFLAGS).])
-  AC_ARG_VAR([GPU_LDFLAGS], [Linker flags for GPU.])
-  AC_ARG_VAR([GPU_LIBS], [Library flags for GPU.])
+  AC_ARG_VAR([GPU_CPPFLAGS], [C preprocessing flags for GPU, deprecated.])
+  AC_ARG_VAR([GPU_CFLAGS], [C flags for GPU, deprecated.])
+  AC_ARG_VAR([GPU_CXXFLAGS], [C++ flags for GPU, deprecated.])
+  AC_ARG_VAR([GPU_FCFLAGS], [Fortran flags for GPU, deprecated.])
+  AC_ARG_VAR([GPU_FFLAGS], [Fortran flags for GPU, deprecated (better use GPU_FCFLAGS).])
+  AC_ARG_VAR([GPU_LDFLAGS], [Linker flags for GPU, deprecated.])
+  AC_ARG_VAR([GPU_LIBS], [Library flags for GPU, deprecated.])
 
   # Detect use of environment variables
   if test "${sd_gpu_enable}" = "yes" -o "${sd_gpu_enable}" = "auto"; then
-    tmp_gpu_vars="${GPU_CPPFLAGS}${GPU_CFLAGS}${GPU_CXXFLAGS}${GPU_FFLAGS}${GPU_FCFLAGS}${GPU_LDFLAGS}${GPU_LIBS}"
-    if test "${sd_gpu_init}" = "def" -a ! -z "${tmp_gpu_vars}"; then
-      sd_gpu_enable="yes"
-      sd_gpu_init="env"
+    if test "${sd_cuda_enable}" = "yes"; then
+      tmp_gpu_vars="${CUDA_CPPFLAGS}${CUDA_CFLAGS}${CUDA_CXXFLAGS}${CUDA_FFLAGS}${CUDA_FCFLAGS}${CUDA_LDFLAGS}${CUDA_LIBS}"
+      if test "${sd_gpu_init}" = "def" -a ! -z "${tmp_gpu_vars}"; then
+        sd_gpu_enable="yes"
+        sd_gpu_init="env"
+      fi
+    elif test "${sd_rocm_enable}" = "yes"; then
+      tmp_gpu_vars="${ROCM_CPPFLAGS}${ROCM_CFLAGS}${ROCM_CXXFLAGS}${ROCM_FFLAGS}${ROCM_FCFLAGS}${ROCM_LDFLAGS}${ROCM_LIBS}"
+      if test "${sd_gpu_init}" = "def" -a ! -z "${tmp_gpu_vars}"; then
+        sd_gpu_enable="yes"
+        sd_gpu_init="env"
+      fi
+    else
+      tmp_gpu_vars="${GPU_CPPFLAGS}${GPU_CFLAGS}${GPU_CXXFLAGS}${GPU_FFLAGS}${GPU_FCFLAGS}${GPU_LDFLAGS}${GPU_LIBS}"
+      if test "${sd_gpu_init}" = "def" -a ! -z "${tmp_gpu_vars}"; then
+        sd_gpu_enable="yes"
+        sd_gpu_init="env"
+      fi
     fi
   fi
 
@@ -170,12 +240,12 @@ AC_DEFUN([SD_GPU_INIT], [
         ;;
 
       dir)
-        sd_gpu_cppflags="-I${with_gpu}/include"
+        sd_gpu_cppflags="-I${sd_gpu_prefix}/include"
         sd_gpu_cflags="${sd_gpu_cflags_def}"
         sd_gpu_cxxflags="${sd_gpu_cxxflags_def}"
-        sd_gpu_fcflags="${sd_gpu_fcflags_def} -I${with_gpu}/include"
+        sd_gpu_fcflags="${sd_gpu_fcflags_def} -I${sd_gpu_prefix}/include"
         sd_gpu_ldflags="${sd_gpu_ldflags_def}"
-        sd_gpu_libs="-L${with_gpu}/lib ${sd_gpu_libs_def}"
+        sd_gpu_libs="-L${sd_gpu_prefix}/lib ${sd_gpu_libs_def}"
         ;;
 
       env)
@@ -193,18 +263,72 @@ AC_DEFUN([SD_GPU_INIT], [
 
     esac
 
-    test ! -z "${GPU_CPPFLAGS}" && sd_gpu_cppflags="${GPU_CPPFLAGS}"
-    test ! -z "${GPU_CFLAGS}" && sd_gpu_cflags="${GPU_CFLAGS}"
-    if test "${sd_gpu_enable_cxx}" = "yes"; then
-      test ! -z "${GPU_CXXFLAGS}" && sd_gpu_cxxflags="${GPU_CXXFLAGS}"
-    fi
-    if test "${sd_gpu_enable_fc}" = "yes"; then
-      test ! -z "${GPU_FFLAGS}" && sd_gpu_fcflags="${GPU_FFLAGS}"
-      test ! -z "${GPU_FCFLAGS}" && sd_gpu_fcflags="${GPU_FCFLAGS}"
-    fi
-    test ! -z "${GPU_LDFLAGS}" && sd_gpu_ldflags="${GPU_LDFLAGS}"
-    test ! -z "${GPU_LIBS}" && sd_gpu_libs="${GPU_LIBS}"
+    if test "${sd_cuda_enable}" = "yes"; then
 
+      test ! -z "${CUDA_CPPFLAGS}" && sd_gpu_cppflags="${CUDA_CPPFLAGS}"
+      test ! -z "${CUDA_CFLAGS}" && sd_gpu_cflags="${CUDA_CFLAGS}"
+      if test "${sd_gpu_enable_cxx}" = "yes"; then
+        test ! -z "${CUDA_CXXFLAGS}" && sd_gpu_cxxflags="${CUDA_CXXFLAGS}"
+      fi
+      if test "${sd_gpu_enable_fc}" = "yes"; then
+        test ! -z "${CUDA_FFLAGS}" && sd_gpu_fcflags="${CUDA_FFLAGS}"
+        test ! -z "${CUDA_FCFLAGS}" && sd_gpu_fcflags="${CUDA_FCFLAGS}"
+      fi
+      test ! -z "${CUDA_LDFLAGS}" && sd_gpu_ldflags="${CUDA_LDFLAGS}"
+      test ! -z "${CUDA_LIBS}" && sd_gpu_libs="${CUDA_LIBS}"
+
+    elif test "${sd_rocm_enable}" = "yes"; then
+
+      test ! -z "${ROCM_CPPFLAGS}" && sd_gpu_cppflags="${ROCM_CPPFLAGS}"
+      test ! -z "${ROCM_CFLAGS}" && sd_gpu_cflags="${ROCM_CFLAGS}"
+      if test "${sd_gpu_enable_cxx}" = "yes"; then
+        test ! -z "${ROCM_CXXFLAGS}" && sd_gpu_cxxflags="${ROCM_CXXFLAGS}"
+      fi
+      if test "${sd_gpu_enable_fc}" = "yes"; then
+        test ! -z "${ROCM_FFLAGS}" && sd_gpu_fcflags="${ROCM_FFLAGS}"
+        test ! -z "${ROCM_FCFLAGS}" && sd_gpu_fcflags="${ROCM_FCFLAGS}"
+      fi
+      test ! -z "${ROCM_LDFLAGS}" && sd_gpu_ldflags="${ROCM_LDFLAGS}"
+      test ! -z "${ROCM_LIBS}" && sd_gpu_libs="${ROCM_LIBS}"
+
+    else
+
+      test ! -z "${GPU_CPPFLAGS}" && sd_gpu_cppflags="${GPU_CPPFLAGS}"
+      test ! -z "${GPU_CFLAGS}" && sd_gpu_cflags="${GPU_CFLAGS}"
+      if test "${sd_gpu_enable_cxx}" = "yes"; then
+        test ! -z "${GPU_CXXFLAGS}" && sd_gpu_cxxflags="${GPU_CXXFLAGS}"
+      fi
+      if test "${sd_gpu_enable_fc}" = "yes"; then
+        test ! -z "${GPU_FFLAGS}" && sd_gpu_fcflags="${GPU_FFLAGS}"
+        test ! -z "${GPU_FCFLAGS}" && sd_gpu_fcflags="${GPU_FCFLAGS}"
+      fi
+      test ! -z "${GPU_LDFLAGS}" && sd_gpu_ldflags="${GPU_LDFLAGS}"
+      test ! -z "${GPU_LIBS}" && sd_gpu_libs="${GPU_LIBS}"
+
+    fi
+
+
+    # Toggle use GPU unified memory feature, specific to NVHPC with OpenMP offload, on NVIDIA GPUs
+    # This flag is supported for OpenMP since NVHPC v24.3
+    # On AMD GPU, this feature seem to be controled using env variables.
+    if test "${sd_gpu_nvidia_unified_memory_enable}" == "yes"; then
+      if test "${abi_fc_vendor}" != "nvhpc" -o "${abi_openmp_offload_enable}" = "yes"; then
+        AC_MSG_ERROR([Unified memory setting is only supported with NVHPC SDK and OpenMP offload enabled !])
+      fi
+      nvhpc_version=`echo ${abi_fc_version} | sed 's/\.//;s/-//'`
+      if test ${nvhpc_version} -lt 2430; then
+        AC_MSG_ERROR([Unified memory setting is only supported since NVHPC SDK version 24.3. Your NVHPC is too old.])
+      fi
+      gpu_unified_flag="-gpu=mem:unified"
+      # Use older flag for NVHPC 24.3, deprecated in newer versions
+      if test ${nvhpc_version} -eq 2430; then
+        gpu_unified_flag="-gpu=unified"
+      fi
+      sd_gpu_cflags="${sd_gpu_cflags} {gpu_unified_flag}"
+      sd_gpu_cxxflags="${sd_gpu_cxxflags} {gpu_unified_flag}"
+      sd_gpu_fcflags="${sd_gpu_fcflags} {gpu_unified_flag}"
+      sd_gpu_ldflags="${sd_gpu_ldflags} {gpu_unified_flag}"
+    fi
   fi
 
   # Display configuration
@@ -228,7 +352,6 @@ AC_DEFUN([SD_GPU_INIT], [
   AC_SUBST(sd_gpu_fcflags)
   AC_SUBST(sd_gpu_ldflags)
   AC_SUBST(sd_gpu_libs)
-  AC_SUBST(with_gpu)
 
   # Clean-up
   unset tmp_gpu_vars

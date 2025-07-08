@@ -62,14 +62,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%  t81.abo, tolnlines = 0, tolabs = 1.050e-11, tolrel = 2.000e-10
+#%% files_to_test =
+#%%  t81.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 16
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Mg crystal, 1 atom per unit cell. Start with deformed FCC lattice,
 #%%   optimize the lattice towards FCC, with conservation of volume (optcell=3).
 #%% topics = GeoOpt

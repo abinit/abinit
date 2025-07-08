@@ -1,6 +1,6 @@
 # In this input file, the location of the information on this or that line
 # is not important : a keyword is located by the parser, and the related
-# information should follow. 
+# information should follow.
 # The "#" symbol indicate the beginning of a comment : the remaining
 # of the line will be skipped.
 
@@ -13,7 +13,7 @@
  spinat2   0.0 0.0 4.0
  nsppol2   2
 
-# cutoff, k-points: 
+# cutoff, k-points:
    ecut   18.0
   ngkpt   4 4 4
 nshiftk   1
@@ -47,7 +47,7 @@ nshiftk   1
 
 # Pseudo:
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Fe.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Fe.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -56,14 +56,14 @@ nshiftk   1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tspin_1.abo, tolnlines=  1, tolabs=  1.010e-09, tolrel=  2.000e-06
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = NC
-#%% description = 
+#%% description =
 #%%  Fe normal bcc structure for test of a ferromagnetic calculation
 #%%  The first dataset is without magnetization for comparison
 #%%<END TEST_INFO>

@@ -7,7 +7,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,8 @@ MODULE m_esymm
  use m_errors
 
  use m_io_tools,       only : file_exists
- use m_symtk,          only : matr3inv, sg_multable, symrelrot, littlegroup_q
+ use m_matrix,         only : matr3inv
+ use m_symtk,          only : sg_multable, symrelrot, littlegroup_q
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
@@ -35,7 +36,7 @@ MODULE m_esymm
  use m_crystal,        only : crystal_t
  use m_defs_ptgroups,  only : point_group_t, irrep_t
  use m_ptgroups,       only : get_classes, point_group_init, irrep_free,&
-&                             copy_irrep, init_irrep, mult_table, sum_irreps
+                              copy_irrep, init_irrep, mult_table, sum_irreps
 
  implicit none
 
@@ -340,15 +341,15 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ! For the time being, AFM symmetries are not treated.
 
  write(msg,'(a,3(1x,f7.4))')" Finding the little group of k-point: ",esymm%kpt
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,msg)
 
  ! Only FM symmetries are used.
  nsym_fm = COUNT(Cryst%symafm==1)
 
  if (nsym_fm /= Cryst%nsym) then
    write(msg,'(4a)')ch10,&
-&    "Band classification in terms of magnetic space groups not coded! ",ch10,&
-&    "Only the ferromagnetic subgroup will be used "
+    "Band classification in terms of magnetic space groups not coded! ",ch10,&
+    "Only the ferromagnetic subgroup will be used "
    ABI_COMMENT(msg)
  end if
 
@@ -556,7 +557,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    select case (ptgroup_name)
 
    case ("3m","-3m")
-     call wrtout(std_out," Changing the conventional cell: rhombohedral --> triple hexagonal","COLL")
+     call wrtout(std_out," Changing the conventional cell: rhombohedral --> triple hexagonal")
      ! Transformation matrices: primitive rhombohedral --> triple hexagonal cell obverse setting. Table 5.1.3.1 ITA page 81.
      pmat1 = RESHAPE( (/ 1,-1, 0, 0, 1,-1, 1, 1, 1/), (/3,3/) ) ! R1
      pmat2 = RESHAPE( (/ 0, 1,-1,-1, 0, 1, 1, 1, 1/), (/3,3/) ) ! R2
@@ -573,7 +574,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
      !write(std_out,*)" New conv_gprimd:", conv_gprimd
 
    case ("mm2")
-     call wrtout(std_out," Changing the conventional cell: unconventional orthorhombic setting --> conventional","COLL")
+     call wrtout(std_out," Changing the conventional cell: unconventional orthorhombic setting --> conventional")
      ! Transformation matrices: unconvential orthorhombic --> conventional orthorhombic. Table 5.1.3.1 ITA page 81.
      pmat1 = RESHAPE( (/ 0, 1, 0, 1, 0, 0, 0, 0,-1/), (/3,3/) )  ! ( b, a,-c) --> (a,b,c)
      pmat2 = RESHAPE( (/ 0, 1, 0, 0, 0, 1, 1, 0, 0/), (/3,3/) )  ! ( c, a, b) --> (a,b,c)
@@ -849,11 +850,11 @@ subroutine esymm_print(esymm,unit,mode_paral,prtvol)
 
  write(fmt,*)'(2a,3f8.4,3a,i4,2a,i3,2a,i2,2a,i2,a,',esymm%nclass,'i2,a)'
  write(msg,fmt)ch10,&
-&  ' ===== Character of bands at k-point: ',esymm%kpt,' ===== ',ch10,&
-&  '   Total number of bands analyzed .................. ',esymm%nbnds,ch10,&
-&  '   Number of degenerate sets detected .............. ',esymm%ndegs,ch10,&
-&  '   Number of operations in the little group of k ... ',esymm%nsym_gk,ch10,&
-&  '   Number of classes (irreps) in the group of k .... ',esymm%nclass,' (',(esymm%nelements(icl),icl=1,esymm%nclass),' )'
+  ' ===== Character of bands at k-point: ',esymm%kpt,' ===== ',ch10,&
+  '   Total number of bands analyzed .................. ',esymm%nbnds,ch10,&
+  '   Number of degenerate sets detected .............. ',esymm%ndegs,ch10,&
+  '   Number of operations in the little group of k ... ',esymm%nsym_gk,ch10,&
+  '   Number of classes (irreps) in the group of k .... ',esymm%nclass,' (',(esymm%nelements(icl),icl=1,esymm%nclass),' )'
  call wrtout(my_unt,msg,my_mode)
 
  if (esymm%nonsymmorphic_at_zoneborder) then
@@ -1085,16 +1086,16 @@ subroutine esymm_finalize(esymm,prtvol)
 
    if (nseen>esymm%nclass) then
      write(msg,'(3a)')&
-&      "The number of different calculated traces is found to be greater than nclasses!",ch10,&
-&      "Heuristic method clearly failed. Symmetry analysis cannot be performed."
+      "The number of different calculated traces is found to be greater than nclasses!",ch10,&
+      "Heuristic method clearly failed. Symmetry analysis cannot be performed."
      ABI_WARNING(msg)
      esymm%err_status = ESYM_HEUR_WRONG_NCLASSES
      esymm%err_msg    = msg
 
      do isn=1,nseen
        write(msg,'(a,i0)')" Representation: ",isn
-       call wrtout(std_out,msg,"COLL")
-       call print_arr(traces_seen(:,isn),max_r=esymm%nsym_gk,unit=std_out,mode_paral="COLL")
+       call wrtout(std_out,msg)
+       call print_arr([std_out], traces_seen(:,isn),max_r=esymm%nsym_gk)
      end do
 
    else  ! It seems that the Heuristic method succeeded.
@@ -1107,8 +1108,8 @@ subroutine esymm_finalize(esymm,prtvol)
            esymm%b2irrep(ib1:ib2)=isn
            if (esymm%Calc_irreps(idg)%dim /= dims_seen(isn)) then
              write(msg,'(3a)')&
-&              "Found two set of degenerate states with same character but different dimension!",ch10,&
-&              "heuristic method clearly failed. Symmetry analysis cannot be performed."
+              "Found two set of degenerate states with same character but different dimension!",ch10,&
+              "heuristic method clearly failed. Symmetry analysis cannot be performed."
              ABI_ERROR(msg)
              esymm%err_status = ESYM_HEUR_WRONG_DIMS
              esymm%err_msg    = msg
@@ -1175,7 +1176,7 @@ subroutine esymm_finalize(esymm,prtvol)
    !
    ! 1) \sum_R \chi^*_a(R)\chi_b(R)= N_R \delta_{ab}
    !
-   !call wrtout(std_out," \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab} ","COLL")
+   !call wrtout(std_out," \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab} ")
    max_err=zero
    do idg2=1,esymm%ndegs
      trace2 => esymm%Calc_irreps(idg2)%trace(1:esymm%nsym_gk)
@@ -1193,8 +1194,8 @@ subroutine esymm_finalize(esymm,prtvol)
        max_err = MAX(max_err,ABS(ctest))
        if (.FALSE..and.ABS(ctest)>tol3) then
          write(msg,'(a,4i3,2es16.8)')&
-&          ' WARNING: should be delta_ij: cx1 cx2, irr1, irr2, ctest: ',idg1,idg2,irr_idx1,irr_idx2,ctest
-         call wrtout(std_out,msg,"COLL")
+          ' WARNING: should be delta_ij: cx1 cx2, irr1, irr2, ctest: ',idg1,idg2,irr_idx1,irr_idx2,ctest
+         call wrtout(std_out,msg)
        end if
      end do
    end do
@@ -1206,7 +1207,7 @@ subroutine esymm_finalize(esymm,prtvol)
      esymm%err_msg    =  msg
    else
      write(msg,'(a,es10.2)')" maximum error on \sum_R \chi^*_a(R)\chi_b(R) = N_R \delta_{ab}: ",max_err
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out,msg)
    end if
 
    if (.not.esymm%only_trace) then
@@ -1227,8 +1228,8 @@ subroutine esymm_finalize(esymm,prtvol)
          ABI_FREE(cidentity)
          if (.FALSE..and.prtvol>=10) then
            write(std_out,'(a,i3,a,i2,a,es16.8,a)')&
-&          " === idg: ",idg1,", isym: ",isym,", Error on U^* U = 1: ",uerr," ==="
-           call print_arr(calc_mat,dim_mat,dim_mat,unit=std_out,mode_paral="COLL")
+           " === idg: ",idg1,", isym: ",isym,", Error on U^* U = 1: ",uerr," ==="
+           call print_arr([std_out], calc_mat,dim_mat,dim_mat)
          end if
        end do
      end do
@@ -1240,7 +1241,7 @@ subroutine esymm_finalize(esymm,prtvol)
        esymm%err_status = ESYM_UNITARY_ERROR
      else
        write(msg,'(a,es10.2)')" maximum error on the unitary of representions matrices: ",max_err
-       call wrtout(std_out,msg,"COLL")
+       call wrtout(std_out,msg)
      end if
 
    end if

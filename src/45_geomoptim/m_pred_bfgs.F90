@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -356,9 +356,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !  New atomic cartesian coordinates are obtained from vin, hessin
 !  and vout
 
-   do ii=1,ndim
-     vin(:)=vin(:)-hessin(:,ii)*vout(ii)
-   end do
+   vin(:) = vin(:) - matmul(hessin(:,:), vout(:))
 
 !Pulay mixing for vin
    nitpul=0

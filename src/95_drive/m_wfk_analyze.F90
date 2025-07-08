@@ -6,7 +6,7 @@
 !!  Post-processing tools for WFK file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ module m_wfk_analyze
  use m_distribfft
 
  use m_io_tools,        only : iomode_from_fname
- use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_datatypes,    only : pseudopotential_type
  use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
@@ -216,17 +216,17 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  end if
  call cryst_dtset%free()
 
- ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
+ call ebands%from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
 
- !call ebands_update_occ(ebands, spinmagntarget)
- call ebands_print(ebands,header="Ground state energies", prtvol=dtset%prtvol)
+ !call ebands%update_occ(spinmagntarget)
+ call ebands%print([std_out], header="Ground state energies", prtvol=dtset%prtvol)
  ABI_FREE(gs_eigen)
 
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
                   gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 
- call print_ngfft(ngfftc, header='Coarse FFT mesh used for the wavefunctions')
- call print_ngfft(ngfftf, header='Dense FFT mesh used for densities and potentials')
+ call print_ngfft([std_out], ngfftc, header='Coarse FFT mesh used for the wavefunctions')
+ call print_ngfft([std_out], ngfftf, header='Dense FFT mesh used for densities and potentials')
 
  ! Fake MPI_type for the sequential part.
  call initmpi_seq(mpi_enreg)
@@ -333,7 +333,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    if (my_rank == master) then
      wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
      call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
-     call ebands_free(ebands_bz)
+     call ebands_bz%free()
 
      ! Write KB form factors.
      if (dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
@@ -365,7 +365,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  case (WFK_TASK_EINTERP)
    ! Band structure interpolation from eigenvalues computed on the k-mesh.
-   call ebands_interpolate_kpath(ebands, dtset, cryst, [0, 0], dtfil%filnam_ds(4), comm)
+   call ebands%interpolate_kpath(dtset, cryst, [0, 0], dtfil%filnam_ds(4), comm)
 
  case (WFK_TASK_CHECK_SYMTAB)
    call wfk_check_symtab(wfk0_path, comm)
@@ -427,7 +427,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    !  if (my_rank == master) then
    !    call wrtout(units, sjoin("- Generating WFK file with kpoints in the full BZ and istwfk == 1", wfkfull_path))
    !    call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
-   !    call ebands_free(ebands_bz); call hdr_bz%free()
+   !    call ebands_bz%free(); call hdr_bz%free()
    !  end if
    !  call xmpi_barrier(comm)
    !  my_dtset = dtset%copy()
@@ -436,7 +436,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    !  my_dtset%kptopt = hdr_bz%kptopt
    !  call hdr_bz%vs_dtset(my_dtset)
    !  call wfd_run_wannier__(wfkfull_path, my_dtset, ebands_bz, hdr_bz)
-   !  call ebands_free(ebands_bz); call hdr_bz%free(); call my_dtset%free()
+   !  call ebands_bz%free(); call hdr_bz%free(); call my_dtset%free()
 
    !else
      call wfk0_hdr%vs_dtset(dtset)
@@ -449,7 +449,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  ! Free memory
  call cryst%free()
- call ebands_free(ebands)
+ call ebands%free()
  call wfd%free()
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)

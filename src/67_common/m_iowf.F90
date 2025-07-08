@@ -6,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,12 +35,12 @@ MODULE m_iowf
  use m_hdr
  use m_ebands
 
- use defs_abitypes, only : MPI_type
  use m_time,           only : cwtime, cwtime_report, timab
  use m_io_tools,       only : get_unit, flush_unit, iomode2str
  use m_fstrings,       only : endswith, sjoin
  use m_numeric_tools,  only : mask2blocks
- use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use defs_abitypes,    only : MPI_type
+ use defs_datatypes,   only : pseudopotential_type
  use m_cgtools,        only : cg_zcopy
  use m_crystal,        only : crystal_t
  use m_rwwf,           only : rwwf
@@ -745,7 +745,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    formeig = 0
    ABI_MALLOC(eigen3d, (mband,nkpt,nsppol))
    call unpack_eneocc(nkpt,nsppol,mband,nband,eigen,eigen3d)
-   gs_ebands = ebands_from_hdr(hdr, mband, eigen3d); gs_ebands%occ = occ3d
+   call gs_ebands%from_hdr(hdr, mband, eigen3d); gs_ebands%occ = occ3d
    ABI_FREE(eigen3d)
  else
    formeig = 1
@@ -804,7 +804,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
        if (response == 0) then
          ! Write Gs bands
-         NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
+         NCF_CHECK(gs_ebands%ncwrite(ncid))
        else
          ! Write H1 matrix elements and occupancies.
          ! Note that GS eigens are not written here.
@@ -986,7 +986,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
        ! Write eigenvalues and occupations (these arrays are not MPI-distributed)
        if (response == 0) then
-         NCF_CHECK(ebands_ncwrite(gs_ebands, wfk%fh))
+         NCF_CHECK(gs_ebands%ncwrite(wfk%fh))
        else
          call ncwrite_eigen1_occ(wfk%fh, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
@@ -1079,7 +1079,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
        ! Write eigenvalues and occupations (these arrays are not MPI-distributed)
        if (response == 0) then
-         NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
+         NCF_CHECK(gs_ebands%ncwrite(ncid))
        else
          call ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
@@ -1230,7 +1230,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  end if
 
  call crystal%free()
- if (response == 0) call ebands_free(gs_ebands)
+ if (response == 0) call gs_ebands%free()
 
  ABI_FREE(occ3d)
 

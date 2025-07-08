@@ -59,6 +59,6 @@ usekden 1
 #%% keywords = 
 #%% description =
 #%%   InN non-primitive cell, doubled wurtzite, rather inaccurate rprimd and xred.
-#%%   Test disabling all checks and fixes of atomic positions or cell parameters. Otherwise, similar to v9#17
+#%%   Test disabling all checks and fixes of atomic positions or cell parameters. Otherwise, similar to v9#192 (previously v9#17)
 #%% topics = crystal
 #%%<END TEST_INFO>

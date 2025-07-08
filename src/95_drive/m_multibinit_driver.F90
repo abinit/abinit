@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (AM, hexu)
+!! Copyright (C) 1999-2025 ABINIT group (AM, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,7 +90,7 @@ contains
     character(len=fnlen), intent(inout) :: filnam(18)
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
-    type(effective_potential_type) :: reference_effective_potential
+    type(effective_potential_type) :: reference_effective_potential, read_effective_potential
     type(abihist) :: hist, hist_tes
 
     !type(spin_model_t) :: spin_model
@@ -209,7 +209,17 @@ contains
 
     !  Read the model (from DDB or XML)
     call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-
+      ! TODO: coeff_file_rw is currently set to 0 as this functionality needs more testing. 
+       if (inp%coeff_file_rw==2) then
+          read_effective_potential=reference_effective_potential
+          !call effective_potential_file_read(filnam(3),read_effective_potential,inp,comm)
+          if(filnam(6)/=''.and.filnam(6)/='no')then
+              call effective_potential_file_getType(filnam(6),filetype)
+              if(filetype==3.or.filetype==23) then
+                  call effective_potential_file_read(filnam(6),read_effective_potential,inp,comm)
+              end if
+          end if
+       end if
 
     if(filnam(4)/=''.and.filnam(4)/='no') then
        call effective_potential_file_getType(filnam(4),filetype)
@@ -314,6 +324,7 @@ elec_eval = .FALSE.
           call wrtout(ab_out,message,'COLL')
           if(filnam(5)/=''.and.filnam(5)/='no')then
              call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
+
              if (hist%mxhist == 0)then
                 write(message, '(5a)' )&
 &           'The trainig-set ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -348,6 +359,7 @@ elec_eval = .FALSE.
        call abihist_bcast(hist,master,comm)
        !  Map the hist in order to be consistent with the supercell into reference_effective_potential
        call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
+
     end if
 
     !TEST_AM
@@ -412,7 +424,10 @@ elec_eval = .FALSE.
                     &         anharmstr=inp%fit_anhaStrain==1,&
                     &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,&
                     &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
-                    &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
+                    &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1,&
+                    &         coeff_file_rw=inp%coeff_file_rw,read_effective_potential=read_effective_potential, &
+                    &         max_nbody=inp%fit_max_nbody,  &
+                    &         drop_rate=inp%fit_drop_rate, ncoeff_per_cycle=inp%fit_ncoeff_per_cycle, fit_weight_T=inp%fit_weight_T)
              else
                 if (inp%fit_ncoeff_per_iatom/=0)then
                    if (mod(inp%fit_ncoeff,inp%fit_ncoeff_per_iatom) /= 0)then
@@ -474,7 +489,10 @@ elec_eval = .FALSE.
                           &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,&
                           &         fit_iatom=reference_effective_potential%crystal%irredatindx(ii),&
                           &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,&
-                          &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1)
+                          &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1, &
+   &                                coeff_file_rw=inp%coeff_file_rw,read_effective_potential=read_effective_potential, &
+   &                      max_nbody=inp%fit_max_nbody,  &
+   &                      drop_rate=inp%fit_drop_rate, ncoeff_per_cycle=inp%fit_ncoeff_per_cycle, fit_weight_T=inp%fit_weight_T)
                   enddo
                 enddo
              endif
@@ -500,7 +518,7 @@ elec_eval = .FALSE.
     call wrtout(ab_out,message,'COLL')
 
     call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist, inp%bound_EFS,&
-&                       inp%bound_factors,inp%bound_penalty,comm)
+&                       inp%bound_factors,inp%bound_penalty,comm, fit_weight_T=inp%fit_weight_T, bound_option=inp%bound_option)
 
     end if
 
@@ -520,7 +538,7 @@ elec_eval = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.
 
     call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,inp%opt_on,&
-&                   inp%opt_factors,comm,print_anh=need_analyze_anh_pot)
+&                   inp%opt_factors,comm,fit_weight_T=inp%fit_weight_T, print_anh=need_analyze_anh_pot)
  end if
 
 

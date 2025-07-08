@@ -10,7 +10,7 @@ pawprtvol 3
 ############ Parameters common to all DATASETS
 #==================================================================================
 ##### CONVERGENCE PARAMETERS
-nstep    40 
+nstep    40
 nline     5          #Number of LINE minimisations
 nnsclo    2          #Number of Non-Self Consistent LOops
 tolvrs   1.0d-15
@@ -98,7 +98,7 @@ plowan_projcalc 5  # Projector for the orbitals (see pseudo-potential file)
 ############ SECOND DATASET:  Calculation of the screening (epsilon^-1 matrix)
 #==================================================================================
 optdriver?3     3     # Screening calculation
-gwcalctyp?3 2         
+gwcalctyp?3 2
 getwfk?3       -1     # Obtain WFK file from previous dataset
 ecuteps:?      3.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
 ecuteps+?      2.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
@@ -141,7 +141,7 @@ gwpara?4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
+pseudos "Psdj_paw_pw_std/V.xml, Psdj_paw_pw_std/Sr.xml, Psdj_paw_pw_std/O.xml"
 
 
 
@@ -153,9 +153,9 @@ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Ps
 #%% executable = abinit
 #%% test_chain = tucalc_crpa_3.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tucalc_crpa_3.abo, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
-#%% [shell] 
+#%% [shell]
 #%% [paral_info]
 #%% nprocs_to_test = 32
 #%% max_nprocs = 32

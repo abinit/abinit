@@ -1,9 +1,0 @@
-version: 100
-type: Tensor
-scalarType: Real64
-dimensions:
-  - length: 59
-    type: Momentum
-elements:
-  type: TextFile
-unit: 1.0     # Atomic units 

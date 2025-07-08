@@ -165,36 +165,63 @@ contains
   end if
   ABI_FREE(fforces_tmp)
 
-  ABI_MALLOC(IPIV,(nconcoef)); IPIV(:)=0
-  ABI_MALLOC(WORK,(nconcoef)); WORK(:)=0.d0
-  !DGETRF doesnt like zeros on the diagonal (MT nov 22)
-  !A_inv(:,:)=A_tot(:,:)
-  A_inv(:,:)=merge(A_tot(:,:),1.d-14,abs(A_tot(:,:))>1.d-14)
-  call DGETRF(nconcoef,nconcoef,A_inv,nconcoef,IPIV,INFO)
-  if (INFO.ne.0) write(Invar%stdout,*) 'INFO (dgetrf)=',INFO
-!FB  write(Invar%stdout,*) ' '
-!FB  write(Invar%stdout,*) ' The inverse matrix is (after dgetrf):'
-!FB  do icoeff=1,nconcoef
-!FB    write(Invar%stdout,*) (A_inv(icoeff,iconst),iconst=1,nconcoef)
-!FB  end do
-  call DGETRI(nconcoef,A_inv,nconcoef,IPIV,WORK,nconcoef,INFO)
-  if (INFO.ne.0) write(Invar%stdout,*) 'INFO (dgetri)=',INFO
-!FB  write(Invar%stdout,*) ' '
-!FB  write(Invar%stdout,*) ' The inverse matrix is (after dgetri):'
-!FB  do icoeff=1,nconcoef
-!FB    write(Invar%stdout,*) (A_inv(icoeff,iconst),iconst=1,nconcoef)
-!FB  end do
-  ABI_FREE(IPIV)
+  ABI_MALLOC(WORK, (5 * nconcoef)); WORK(:) = 0.d0
+  ABI_MALLOC(IPIV, (nconcoef)); IPIV(:) = 0
+  A_inv(:,:) = A_tot(:,:)
+  !DEBUG write(Invar%stdout,*) ' '
+  !DEBUG write(Invar%stdout,*) ' The matrix A_inv is (before DGETRF):'
+  !DEBUG do icoeff=1,nconcoef
+  !DEBUG   write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
+  !DEBUG end do
+
+  ! Check for small pivot elements
+  do icoeff=1,nconcoef
+    if (abs(A_inv(icoeff, icoeff)) < tol12) then
+      write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
+!      A_inv(icoeff, icoeff) = tol14 ! Regularization to avoid numerical issues
+      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol12)
+    end if
+  end do
+
+  ! Perform LU factorization
+  call DGETRF(nconcoef, nconcoef, A_inv, nconcoef, IPIV, INFO)
+  if (INFO.ne.0) then
+    write(Invar%stdout,*) 'ERROR: Singular matrix detected in DGETRF. INFO=', INFO
+    stop
+  end if
+
+  ! Check for small pivot elements
+  do icoeff=1,nconcoef
+    if (abs(A_inv(icoeff, icoeff)) < tol12) then
+      write(Invar%stdlog,*) ' WARNING: Small pivot value at index ', icoeff, ' : ', A_inv(icoeff, icoeff)
+!      A_inv(icoeff, icoeff) = tol14 ! Regularization to avoid numerical issues
+      A_inv(icoeff, icoeff) = max(EPSILON(1.0_dp) * maxval(abs(A_inv)), tol12)
+    end if
+  end do
+
+  ! Compute matrix inverse using LU decomposition
+  call DGETRI(nconcoef, A_inv, nconcoef, IPIV, WORK, 5 * nconcoef, INFO)
+  if (INFO.ne.0) then
+    write(Invar%stdout,*) 'ERROR: Matrix inversion failed in DGETRI. INFO=', INFO
+    stop
+  end if
+  !DEBUG write(Invar%stdout,*) ' '
+  !DEBUG write(Invar%stdout,*) ' The inverse matrix is (after DGETRI):'
+  !DEBUG do icoeff=1,nconcoef
+  !DEBUG   write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
+  !DEBUG end do
+
   ABI_FREE(WORK)
+  ABI_FREE(IPIV)
 
   call DGEMV('N',nconcoef,nconcoef,1.d0,A_inv,nconcoef,b_tot,1,0.d0,x_tot,1)
   write(Invar%stdout,*) ' The problem is solved'
   write(Invar%stdout,*) ' '
-!FB  write(Invar%stdout,*) ' The solutions are:'
-!FB  do icoeff=1,nconcoef
-!FB    write(Invar%stdout,'(1x,i4,1x,f15.10)') icoeff,x_tot(icoeff)
-!FB  end do
-!FB  write(Invar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(x_tot(:))/minval(x_tot(:))
+  !DEBUG write(Invar%stdout,*) ' The solutions are:'
+  !DEBUG do icoeff=1,nconcoef
+  !DEBUG   write(Invar%stdout,'(1x,i4,1x,f15.10)') icoeff,x_tot(icoeff)
+  !DEBUG end do
+  !DEBUG write(Invar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(x_tot(:))/minval(x_tot(:))
 
   IFC_coeff(ncoeff_prev+1:ncoeff_prev+ntotcoeff,1)=x_tot(1:ntotcoeff)
   ABI_FREE(A_tot)
@@ -221,7 +248,8 @@ contains
   double precision, intent(out)  :: ucart(3,Invar%natom,Invar%my_nstep)
 
   integer :: ii,jj,kk,max_ijk,iatcell,jatcell,iatom,jatom,eatom,fatom,istep
-  integer :: foo,foo2,atom_ref,ierr
+  integer :: iatom_ref,ierr
+  integer :: ndir_match,natom_match
   double precision :: tmp(3),tmp1(3),tmp2(3),Rlatt(3),xred_tmp(3),rprimd_md_tmp(3,3),distance_tmp(3)
   double precision, allocatable :: dist_unitcell(:,:,:),xcart_average(:,:)
   double precision, allocatable :: fcart_tmp(:,:,:),ucart_tmp(:,:,:)
@@ -233,7 +261,7 @@ contains
   integer, allocatable  :: FromIdeal2Average(:)
   double precision, allocatable  :: xcart(:,:,:)
   double precision, allocatable  :: xcart_ideal(:,:)
-  logical :: ok,ok1
+  logical :: ok,must_shift
 
   ierr = 0;
 
@@ -241,6 +269,7 @@ contains
   write(Invar%stdout,*) '#############################################################################'
   write(Invar%stdout,*) '###### Find the matching between ideal and average positions  ###############'
   write(Invar%stdout,*) '#############################################################################'
+
 !==========================================================================================
 !======== 1/ Determine ideal positions and distances ======================================
 !==========================================================================================
@@ -296,7 +325,6 @@ contains
       call tdep_make_inbox(tmp,1,1d-4)
       rprimd_md_tmp(:,:)=Lattice%rprimd_md(:,:)
       distance_tmp(:)=distance(eatom,fatom,2:4)
-!     call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,tmp,1,0.d0,distance(eatom,fatom,2:4),1)
       call DGEMV('T',3,3,1.d0,rprimd_md_tmp,3,tmp,1,0.d0,distance_tmp,1)
       distance(eatom,fatom,2:4)=distance_tmp(:)
       do ii=1,3
@@ -305,6 +333,7 @@ contains
         distance(eatom,fatom,1)=distance(eatom,fatom,1)+(distance(eatom,fatom,ii+1))**2
       end do
       distance(eatom,fatom,1)=distance(eatom,fatom,1)**0.5
+      distance(eatom,fatom,1)=tol12 * dint(distance(eatom,fatom,1) / tol12)
     end do
   end do
 
@@ -338,47 +367,40 @@ contains
 
   write(Invar%stdout,*)' Search the unitcell basis of atoms in the MD trajectory...'
 ! Search the basis of atoms in the supercell
-  ok=.true.
+  ok=.false.
   xred_center(:,:)=xred_average(:,:)
+  iatcell=1
   do iatom=1,Invar%natom
-    foo2=0
+    if (Invar%typat(iatom).ne.Invar%typat_unitcell(iatcell)) cycle
+    natom_match = 0
     do jatom=1,Invar%natom
       tmp(:)=xred_center(:,jatom)-xred_center(:,iatom)
       call tdep_make_inbox(tmp,1,1d-4)
-      iatcell=1
       do jatcell=1,Invar%natom_unitcell
-        foo=0
+        if (Invar%typat(jatom).ne.Invar%typat_unitcell(jatcell)) cycle
+        ndir_match = 0
         do ii=1,3
-          if ((abs(tmp(ii)-dist_unitcell(iatcell,jatcell,ii)).le.Invar%tolmotif).and.&
-&               Invar%typat(iatom).eq.Invar%typat_unitcell(iatcell).and.&
-&               Invar%typat(jatom).eq.Invar%typat_unitcell(jatcell)) then
-            foo=foo+1
+          if (abs(tmp(ii)-dist_unitcell(iatcell,jatcell,ii)).le.Invar%tolmotif) then
+            ndir_match=ndir_match+1
           end if
         end do
-        if (foo==3) then
-          foo2=foo2+1
+        if (ndir_match==3) then
+          natom_match = natom_match + 1
           exit
         end if
       end do
     end do
-    if (foo2.eq.Invar%natom_unitcell) then
-      atom_ref=iatom
-!FB      write(Invar%stdlog,*) 'natom_unitcell (ok)=',Invar%natom_unitcell
-!FB      write(Invar%stdlog,*) 'foo2 (ok)=',foo2
-!FB      write(Invar%stdlog,*) 'ATOM REF (ok)=',iatom
-!FB      write(Invar%stdout,*) 'ATOM REF=',atom_ref
-      ok=.false.
+    if (natom_match.eq.Invar%natom_unitcell) then
+      iatom_ref = iatom
+      ok=.true.
       exit
-    else if (foo2.gt.Invar%natom_unitcell) then
-!FB      write(Invar%stdlog,*) 'natom_unitcell (bug)=',Invar%natom_unitcell
-!FB      write(Invar%stdlog,*) 'foo2 (bug)=',foo2
-!FB      write(Invar%stdlog,*) 'ATOM REF (bug)=',iatom
+    else if (natom_match.gt.Invar%natom_unitcell) then
       ABI_BUG(' Something wrong: WTF')
     endif
   end do
-  if (ok) then
+  if (.not.ok) then
     if (MPIdata%iam_master) then
-      open(unit=31,file=trim(Invar%output_prefix)//'xred_average.xyz')
+      open(unit=31,file=trim(Invar%output_prefix)//'_xred_average.xyz')
       do iatom=1,Invar%natom
         write(31,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,iatom)
         write(31,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,iatom)
@@ -395,9 +417,9 @@ contains
 ! For ideal quantities    --> kk=2: Rlatt_red et xred_ideal
   write(Invar%stdout,*)' Compare ideal and average positions using PBC...'
   do kk=1,2
-!   1/ The "atom_ref" (kk=1) or iatom=1 (kk=2) atom is put in (0.0;0.0;0.0)
+!   1/ The "iatom_ref" (kk=1) or iatom=1 (kk=2) atom is put in (0.0;0.0;0.0)
     if (kk==1) then
-      tmp(:)=xred_center(:,atom_ref)
+      tmp(:)=xred_center(:,iatom_ref)
     else if (kk==2) then
       tmp1(:)=xred_ideal(:,1)
       tmp2(:)=Rlatt_red(:,1,1)
@@ -463,76 +485,54 @@ contains
   write(Invar%stdout,*)' Write the xred_average.xyz file with ideal and average positions...'
   ABI_MALLOC(FromIdeal2Average,(Invar%natom))             ; FromIdeal2Average(:)=0
   do iatom=1,Invar%natom
+    ok =.false.
     do jatom=1,Invar%natom
-      ok =.true.
-      ok1=.true.
-      foo=0
+      if (Invar%typat(iatom).ne.Invar%typat_unitcell(mod(jatom-1,Invar%natom_unitcell)+1)) cycle
+      must_shift=.false.
+      ndir_match=0
       do ii=1,3
-        if ((abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)     ).le.Invar%tolmatch.and.&
-&         (Invar%typat(iatom).eq.Invar%typat_unitcell(mod(jatom-1,Invar%natom_unitcell)+1)))) then
-          foo=foo+1
-        else if ((abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.Invar%tolmatch.and.&
-&         (Invar%typat(iatom).eq.Invar%typat_unitcell(mod(jatom-1,Invar%natom_unitcell)+1))).or.&
-&           (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.Invar%tolmatch.and.&
-&           (Invar%typat(iatom).eq.Invar%typat_unitcell(mod(jatom-1,Invar%natom_unitcell)+1)))) then
-          foo=foo+1
-          ok1=.false.
+        if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)).le.Invar%tolmatch) then
+          ndir_match=ndir_match+1
+        else if ((abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.Invar%tolmatch) &
+&            .or.(abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.Invar%tolmatch)) then
+          ndir_match=ndir_match+1
+          must_shift=.true.
         endif
       end do
-      if (foo==3.and.ok1) then
+      if (ndir_match==3.and..not.must_shift) then
         FromIdeal2Average(jatom)=iatom
-        ok=.false.
+        ok=.true.
         exit
-      else if (foo==3.and..not.ok1) then
-!FB        write(Invar%stdout,*) '  THE CODE STOPS'
-!FB        write(Invar%stdout,*) '  Some positions are outside the [-0.5;0.5[ range:'
-!FB        write(Invar%stdout,*) '  xred_center(:,',iatom,')='
-!FB        write(Invar%stdout,*) xred_center(:,iatom)
-!FB        write(Invar%stdout,*) '  xred_ideal(:,',jatom,')='
-!FB        write(Invar%stdout,*) xred_ideal(:,jatom)
-!FB        write(Invar%stdout,*) 'Perhaps, you can adjust the tolerance (tolinbox)'
-!FB        stop -1
+      else if (ndir_match==3.and.must_shift) then
         do ii=1,3
-          if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.Invar%tolmatch.and.&
-&           (Invar%typat(iatom).eq.Invar%typat_unitcell(mod(jatom-1,Invar%natom_unitcell)+1))) then
-!JB            write(*,*) iatom,jatom
-!JB            write(*,*) xred_center(:,iatom)
-!JB            write(*,*) xred_ideal(:,jatom)
+          if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.Invar%tolmatch) then
             xred_center(ii,iatom)=xred_center(ii,iatom)-1d0
             do istep=1,Invar%my_nstep
               Invar%xred(:,iatom,istep)=Invar%xred(:,iatom,istep)-1d0
             end do
-!JB            write(*,*) xred_center(:,iatom)
-!JB            write(*,*) xred_ideal(:,jatom)
             FromIdeal2Average(jatom)=iatom
-          else if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.Invar%tolmatch.and.&
-&           (Invar%typat(iatom).eq.Invar%typat_unitcell(mod(jatom-1,Invar%natom_unitcell)+1))) then
-!jB            write(*,*) iatom,jatom
-!jB            write(*,*) xred_center(:,iatom)
-!jB            write(*,*) xred_ideal(:,jatom)
+          else if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.Invar%tolmatch) then
             xred_center(ii,iatom)=xred_center(ii,iatom)+1d0
             do istep=1,Invar%my_nstep
               Invar%xred(:,iatom,istep)=Invar%xred(:,iatom,istep)+1d0
             end do
-!JB            write(*,*) xred_center(:,iatom)
-!JB            write(*,*) xred_ideal(:,jatom)
             FromIdeal2Average(jatom)=iatom
           end if
         end do
-        ok=.false.
+        ok=.true.
         exit
       end if
     end do
-    if (ok) then
-      write(Invar%stdout,*) 'Problem to find the average position for iatom=',iatom
-      write(Invar%stdout,*) '  Reasons:'
-      write(Invar%stdout,*) '    1/ One atom jump to another equilibrium position'
-      write(Invar%stdout,*) '    2/ The system is no more solid'
-      write(Invar%stdout,*) '    3/ Perhaps, you can adjust the tolerance (tolmatch)'
-      write(Invar%stdout,*) '  xred_center=',(xred_center(ii,iatom),ii=1,3)
+    if (.not.ok) then
+      write(Invar%stdlog,*) 'Problem to find the average position for iatom=',iatom
+      write(Invar%stdlog,*) '  Reasons:'
+      write(Invar%stdlog,*) '    1/ One atom jump to another equilibrium position'
+      write(Invar%stdlog,*) '    2/ The system is no more solid'
+      write(Invar%stdlog,*) '    3/ Perhaps, you can adjust the tolerance (tolmatch)'
+      write(Invar%stdlog,*) '  xred_center=',(xred_center(ii,iatom),ii=1,3)
       do eatom=1,Invar%natom
-        write(Invar%stdout,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,eatom)
-        write(Invar%stdout,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,eatom)
+        write(Invar%stdlog,'(a,1x,3(f10.6,1x))') 'I',xred_ideal (:,eatom)
+        write(Invar%stdlog,'(a,1x,3(f10.6,1x))') 'C',xred_center(:,eatom)
       end do
       ABI_ERROR('Problem to find the average position')
     end if
@@ -541,7 +541,7 @@ contains
 ! WARNING: VERY IMPORTANT: The positions are displayed/sorted (and used in the following)
 ! according to ideal positions xred_ideal.
   if (MPIdata%iam_master) then
-    open(unit=31,file=trim(Invar%output_prefix)//'xred_average.xyz')
+    open(unit=31,file=trim(Invar%output_prefix)//'_xred_average.xyz')
     write(31,'(i4)') Invar%natom*2
     write(31,'(i4)') 1
 !   --> In reduced coordinates
@@ -791,8 +791,8 @@ contains
   write(Invar%stdout,'(a)') ' '
   write(Invar%stdout,'(a)') ' See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files'
   if (MPIdata%iam_master) then
-    open(unit=32,file=trim(Invar%output_prefix)//'etotMDvsTDEP.dat')
-    open(unit=33,file=trim(Invar%output_prefix)//'fcartMDvsTDEP.dat')
+    open(unit=32,file=trim(Invar%output_prefix)//'_etotMDvsTDEP.dat')
+    open(unit=33,file=trim(Invar%output_prefix)//'_fcartMDvsTDEP.dat')
     write(32,'(a)') '#   Istep      U_MD(Ha)         U_TDEP(Ha)'
     write(33,'(a)') '# Forces_MD(Ha/bohr) Forces_TDEP(Ha/bohr)'
     do istep=1,Invar%nstep_tot
@@ -1093,20 +1093,13 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
     end do
 
 !   Write the eigenvalues and eigenvectors
-!   These ones could be complex!!!!
-    ok=.false.
+    ok=.true.
     do ii=1,3
-!FB      write(16,*)'  For eigenvalue number',ii
-!FB      write(16,*)'     The eigenvalue is:',eigenvalues(ii)
-!FB      write(16,*)'     The eigenvector is:'
-!FB      write(16,'(2(f16.12,1x))') eigenvectors(1,ii)
-!FB      write(16,'(2(f16.12,1x))') eigenvectors(2,ii)
-!FB      write(16,'(2(f16.12,1x))') eigenvectors(3,ii)
       if ((aimag(eigenvalues(1)).ne.0).or.(aimag(eigenvalues(2)).ne.0).or.(aimag(eigenvalues(3)).ne.0)) then
-        ok=.true.
+        ok=.false.
       end if
     end do
-    if (ok.and.MPIdata%iam_master) write(16,'(a)') '            WARNING: THERE IS COMPLEX EIGENVALUES'
+    if (.not.ok.and.MPIdata%iam_master) write(16,'(a)') '            WARNING: THERE IS COMPLEX EIGENVALUES'
 
 !   If the transformation matrix keeps the bond invariant:
 !       Phi_{\alpha\beta}=\sum_{\mu\nu} S_{\alpha\mu}.S_{\beta\nu}.Phi_{\mu\nu}
@@ -1694,7 +1687,6 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
       tab_vec(:,kk)=temp(:,kk)
     else
       do jj=1,norder
-!FB        call random_number(drandom)
         drandom=uniformrandom(iseed)
         tab_vec(jj,kk)=dcmplx(drandom,zero)
       end do

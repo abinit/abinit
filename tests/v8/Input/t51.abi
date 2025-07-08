@@ -99,20 +99,20 @@ pawecutdg   9.
  pawxcdev   0    # This a restriction for PAW+DFPT+GGA
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_paw_pbe_standard/Al.xml, As.GGA_PBE-JTH_sp.xml"
+ pseudos "Psdj_paw_pbe_std/Al.xml, As.GGA_PBE-JTH_sp.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t51.abo, tolnlines = 12, tolabs = 1.1e01, tolrel = 1.e-2, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Torrent
 #%% keywords = PAW, DFPT, DDK
-#%% description = 
+#%% description =
 #%%   Computation of phonons and response to electric field within PAW and GGA (both q=0 and q/=0)
 #%%   Test on AlAs structure; Ground state, DDK and Dielectric tensor are computed.
 #%%   Note: Charge neutrality is not achieved with the present dataset,

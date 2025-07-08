@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2025 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -473,9 +473,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
 !  New atomic cartesian coordinates are obtained from vin, hessin
 !  and vout
-   do ii=1,ndim
-     vin(:)=vin(:)-hessin(:,ii)*vout(ii)
-   end do
+   vin = vin - matmul(hessin, vout)
 !  Previous atomic forces
    vout_prev(:)=vout(:)
 
@@ -1065,7 +1063,7 @@ subroutine dang_d1(r1,r2,r3,bb)
  rpt12(:) = r1(:)-r2(:)
  rpt32(:) = r3(:)-r2(:)
 
- cos_ang = (rpt12(1)*rpt32(1)+rpt12(2)*rpt32(2)+rpt12(3)*rpt32(3))/n1/n2
+ cos_ang = dot_product(rpt12,rpt32)/n1/n2
  if (cos_ang > one - epsilon(one)*two) then
    cos_ang = one
  else if(cos_ang < -one + epsilon(one)*two) then
@@ -1082,7 +1080,7 @@ subroutine dang_d1(r1,r2,r3,bb)
 
 !TEST: version from MOLECULAR VIBRATIONS EB Wilson
  call acrossb(rpt12,rpt32,cp1232)
- n1232 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
+ n1232 = norm2(cp1232)
  rpt(:) = (cos_ang*rpt12(:)*n2/n1 - rpt32(:))/n1232
  if (abs(bb(1)-rpt(1))+abs(bb(2)-rpt(2))+abs(bb(3)-rpt(3)) > tol10) then
    write(std_out,*) 'Compare bb ang 1 : '
@@ -1123,7 +1121,7 @@ subroutine dang_d2(r1,r2,r3,bb)
  rpt12(:) = r1(:)-r2(:)
  rpt32(:) = r3(:)-r2(:)
 
- cos_ang = (rpt12(1)*rpt32(1)+rpt12(2)*rpt32(2)+rpt12(3)*rpt32(3))/n1/n2
+ cos_ang = dot_product(rpt12,rpt32)/n1/n2
  if (cos_ang > one - epsilon(one)*two) then
    cos_ang = one
  else if(cos_ang < -one + epsilon(one)*two) then
@@ -1141,7 +1139,7 @@ subroutine dang_d2(r1,r2,r3,bb)
 
 !TEST: version from MOLECULAR VIBRATIONS EB Wilson
  call acrossb(rpt12,rpt32,cp1232)
- n1232 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
+ n1232 = norm2(cp1232)
  rpt(:) = ((n1-n2*cos_ang)*rpt12(:)/n1 + (n2-n1*cos_ang)*rpt32(:)/n2) / n1232
  if (abs(bb(1)-rpt(1))+abs(bb(2)-rpt(2))+abs(bb(3)-rpt(3))  > tol10) then
    write(std_out,*) 'Compare bb ang 2 : '
@@ -1188,10 +1186,10 @@ subroutine ddihedral_d1(r1,r2,r3,r4,bb)
 !write(std_out,*) ' cos_dihedral : cp3432 = ', cp3432
 !ENDDEBUG
 
- n1 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
- n2 = sqrt(cp3432(1)**2+cp3432(2)**2+cp3432(3)**2)
+ n1 = norm2(cp1232)
+ n2 = norm2(cp3432)
 
- cos_dihedral = (cp1232(1)*cp3432(1)+cp1232(2)*cp3432(2)+cp1232(3)*cp3432(3))/n1/n2
+ cos_dihedral = dot_product(cp1232,cp3432)/n1/n2
  if (cos_dihedral > one - epsilon(one)*two) then
    cos_dihedral = one
  else if(cos_dihedral < -one + epsilon(one)*two) then
@@ -1203,8 +1201,7 @@ subroutine ddihedral_d1(r1,r2,r3,r4,bb)
  call acrossb(cp1232,cp3432,cpcp)
  cpcp(:) = cpcp(:)/n1/n2
 !we use complementary of standard angle, but sin is invariant
- sin_dihedral = -(cpcp(1)*rpt32(1)+cpcp(2)*rpt32(2)+cpcp(3)*rpt32(3))&
-& /sqrt(rpt32(1)**2+rpt32(2)**2+rpt32(3)**2)
+ sin_dihedral = -dot_product(cpcp,rpt32)/norm2(rpt32)
  dih_sign = one
  if (sin_dihedral < -epsilon(one)) then
    dih_sign = -one
@@ -1234,13 +1231,12 @@ subroutine ddihedral_d1(r1,r2,r3,r4,bb)
 !  and it appears for the derivative
    bb(:) = -dih_sign * rpt(:) * (-one) / tmp
  else
-   bb(:) = dih_sign * cp32_3432(:) / n1 / n2 / &
-&   sqrt(cp32_3432(1)**2+cp32_3432(2)**2+cp32_3432(3)**2)
+   bb(:) = dih_sign * cp32_3432(:) / n1 / n2 / norm2(cp32_3432)
  end if
 
 !TEST: version from MOLECULAR VIBRATIONS EB Wilson
 
- n23 = sqrt(rpt32(1)*rpt32(1)+rpt32(2)*rpt32(2)+rpt32(3)*rpt32(3))
+ n23 = norm2(rpt32)
  rpt(:) = cp1232(:)*n23/n1/n1
 !if (abs(bb(1)-rpt(1))+abs(bb(2)-rpt(2))+abs(bb(3)-rpt(3))  > tol10) then
 !write(std_out,*) 'Compare bb1 : '
@@ -1288,10 +1284,10 @@ subroutine ddihedral_d2(r1,r2,r3,r4,bb)
 !write(std_out,*) ' cos_dihedral : cp3432 = ', cp3432
 !ENDDEBUG
 
- n1 = sqrt(cp1232(1)**2+cp1232(2)**2+cp1232(3)**2)
- n2 = sqrt(cp3432(1)**2+cp3432(2)**2+cp3432(3)**2)
+ n1 = norm2(cp1232)
+ n2 = norm2(cp3432)
 
- cos_dihedral = (cp1232(1)*cp3432(1)+cp1232(2)*cp3432(2)+cp1232(3)*cp3432(3))/n1/n2
+ cos_dihedral = dot_product(cp1232,cp3432)/n1/n2
  if (cos_dihedral > one - epsilon(one)*two) then
    cos_dihedral = one
  else if(cos_dihedral < -one + epsilon(one)*two) then
@@ -1303,8 +1299,7 @@ subroutine ddihedral_d2(r1,r2,r3,r4,bb)
  call acrossb(cp1232,cp3432,cpcp)
  cpcp(:) = cpcp(:)/n1/n2
 !we use complementary of standard angle, but sin is invariant
- sin_dihedral = -(cpcp(1)*rpt32(1)+cpcp(2)*rpt32(2)+cpcp(3)*rpt32(3))&
-& /sqrt(rpt32(1)**2+rpt32(2)**2+rpt32(3)**2)
+ sin_dihedral = -dot_product(cpcp,rpt32)/norm2(rpt32)
  dih_sign = one
  if (sin_dihedral <  -tol12) then
    dih_sign = -one
@@ -1340,9 +1335,9 @@ subroutine ddihedral_d2(r1,r2,r3,r4,bb)
  end if
 
 !TEST: version from MOLECULAR VIBRATIONS EB Wilson p. 61
- n23 = sqrt(rpt32(1)*rpt32(1)+rpt32(2)*rpt32(2)+rpt32(3)*rpt32(3))
- sp1232 = rpt12(1)*rpt32(1)+rpt12(2)*rpt32(2)+rpt12(3)*rpt32(3)
- sp3432 = rpt34(1)*rpt32(1)+rpt34(2)*rpt32(2)+rpt34(3)*rpt32(3)
+ n23 = norm2(rpt32)
+ sp1232 = dot_product(rpt12,rpt32)
+ sp3432 = dot_product(rpt34,rpt32)
 
  rpt(:) = -cp1232(:)*(n23-sp1232/n23)/n1/n1 - cp3432(:)*sp3432/n23/n2/n2
 !if (abs(bb(1)-rpt(1))+abs(bb(2)-rpt(2))+abs(bb(3)-rpt(3))  > tol10) then

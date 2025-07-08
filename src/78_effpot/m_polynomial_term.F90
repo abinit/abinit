@@ -7,7 +7,7 @@
 !! Module with the datatype polynomial terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (AM)
+!! Copyright (C) 2010-2025 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +32,9 @@ module m_polynomial_term
 
  public :: polynomial_term_init
  public :: polynomial_term_free
+ public :: polynomial_term_copy
+ public :: terms_compare
+ public :: terms_compare_inverse
 !!***
 
 !!****t* m_polynomial_term/polynomial_term_type
@@ -52,6 +55,9 @@ module m_polynomial_term
 
    integer :: nstrain = 0
 !     Number of strain for this terms
+
+   integer :: nindex = -1
+!     Number of index
 
    integer,allocatable :: atindx(:,:)
 !     atindx(2,ndisp)
@@ -80,14 +86,38 @@ module m_polynomial_term
    real(dp) :: weight = zero
 !     weight of the term
 
+   integer,allocatable  ::  index_coeff(:)
+
+   ! a string to identify the term
+    character(len=500) :: debug_str = ''
+
+   contains
+           procedure :: get_nbody
+           procedure :: get_total_power
+           !final :: polynomial_term_finalizer
  end type polynomial_term_type
 !!***
 
-interface operator (==)
+
+ interface  operator (==)
   module procedure terms_compare
 end interface
 
 CONTAINS  !===========================================================================================
+
+
+function get_nbody(self) result(nbody)
+  class(polynomial_term_type), intent(in) :: self
+  integer :: nbody
+  nbody = self%ndisp + self%nstrain
+end function get_nbody
+
+
+function get_total_power(self) result(total_power)
+  class(polynomial_term_type), intent(in) :: self
+  integer :: total_power
+  total_power = sum(self%power_disp) + sum(self%power_strain)
+end function get_total_power
 
 
 !!****f* m_polynomial_term/polynomial_term_init
@@ -120,7 +150,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_term,power_disp,&
-&                               power_strain,strain,weight,check)
+&                               power_strain,strain,weight,check, index_coeff, debug_str)
 
  implicit none
 
@@ -134,6 +164,7 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
  integer, intent(in) :: cell(3,2,ndisp)
  integer, intent(in) :: direction(ndisp),power_disp(ndisp)
  integer, intent(in) :: strain(nstrain),power_strain(nstrain)
+ integer, optional,  intent(in) :: index_coeff(:)
  type(polynomial_term_type), intent(out) :: polynomial_term
 !Local variables-------------------------------
 !scalar
@@ -143,7 +174,15 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
  integer :: power_disp_tmp(ndisp),power_strain_tmp(nstrain)
  character(500) :: msg
 
+character(*), optional :: debug_str
+
 ! *************************************************************************
+
+if (present(debug_str)) then
+  polynomial_term%debug_str = debug_str
+else
+  polynomial_term%debug_str = ' '
+end if
 
 !Do some checks
  if (size(atindx,2) /= ndisp) then
@@ -175,17 +214,6 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
    write(msg,'(a)')' strain and nstrain have not the same size'
    ABI_ERROR(msg)
  end if
-
- ! FIXME: hexu: check why this does not work?
-! if (ndisp>1) then
-!   print *, "atinx(1, 1:ndisp)", atindx(1, 1:ndisp)
-!   if (.not. all(atindx(1, 1:ndisp)-atindx(1,1)==0)) then
-!     write(msg,'(a)')' Not all displacement pairs start with the same atom.'
-!     print *, "atinx(1, 1:ndisp)", atindx(1, 1:ndisp)
-!     ABI_ERROR(msg)
-!   end if
-! end if
-
 !First free datatype before init
  call polynomial_term_free(polynomial_term)
  check_in = .false.
@@ -285,6 +313,18 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_t
    end if
  end do
 
+ if (present(index_coeff)) then
+   polynomial_term%nindex = size(index_coeff)
+   ABI_MALLOC(polynomial_term%index_coeff, (polynomial_term%nindex))
+   polynomial_term%index_coeff(:)=index_coeff(:)
+ else
+   polynomial_term%nindex = -1
+   ABI_MALLOC(polynomial_term%index_coeff, (0))
+ end if
+
+
+
+
 end subroutine polynomial_term_init
 !!***
 
@@ -323,38 +363,46 @@ subroutine polynomial_term_free(polynomial_term)
  polynomial_term%nstrain   = 0
  polynomial_term%weight    = zero
 
- if(allocated(polynomial_term%atindx))then
-   polynomial_term%atindx(:,:) = 0
-   ABI_FREE(polynomial_term%atindx)
- end if
-
- if(allocated(polynomial_term%cell))then
-   polynomial_term%cell(:,:,:) = 0
-   ABI_FREE(polynomial_term%cell)
- end if
-
- if(allocated(polynomial_term%direction))then
-   polynomial_term%direction(:) = 0
-   ABI_FREE(polynomial_term%direction)
- end if
-
- if(allocated(polynomial_term%power_disp))then
-   polynomial_term%power_disp(:) = 0
-   ABI_FREE(polynomial_term%power_disp)
- end if
-
-  if(allocated(polynomial_term%power_strain))then
-   polynomial_term%power_strain(:) = 0
-   ABI_FREE(polynomial_term%power_strain)
- end if
-
-  if(allocated(polynomial_term%strain))then
-   polynomial_term%strain(:) = 0
-   ABI_FREE(polynomial_term%strain)
- end if
-
+ ABI_SFREE(polynomial_term%atindx)
+ ABI_SFREE(polynomial_term%cell)
+ ABI_SFREE(polynomial_term%direction)
+ ABI_SFREE(polynomial_term%power_disp)
+ ABI_SFREE(polynomial_term%power_strain)
+ ABI_SFREE(polynomial_term%strain)
+ ABI_SFREE(polynomial_term%index_coeff)
+ 
 end subroutine polynomial_term_free
 !!***
+
+!!****f* m_polynomial_term/polynomial_term_finalizer
+!!
+!! NAME
+!! polynomial_term_finalizer
+!!
+!! FUNCTION
+!! Finalizer procedure for polynomial_term_type to automatically free allocated memory
+!!
+!! SOURCE
+
+subroutine polynomial_term_finalizer(self)
+  type(polynomial_term_type), intent(inout) :: self
+  !print *, "Warning: polynomial_term_finalizer called. Debug str: ", self%debug_str
+  call polynomial_term_free(self)
+end subroutine polynomial_term_finalizer
+!!***
+
+! function polynomial_term_type_get_index_coeff(term, ndisp, nstrain) result(list)
+!   type(polynomial_term_type),  intent(inout) :: term
+!   integer, intent(in) :: size
+!   integer :: list()
+!   integer :: i, counter, ip
+!   counter=1
+!   do i=1, term%ndisp
+!     do ip=1, term%power_disp
+!       list(counter) = term%
+!     end do
+!   end do
+! end function polynomial_term_type_get_index_coeff
 
 subroutine polynomial_term_list_free(terms)
   type(polynomial_term_type), allocatable, intent(inout) :: terms(:)
@@ -362,7 +410,7 @@ subroutine polynomial_term_list_free(terms)
   do iterm=1, size(terms)
     call polynomial_term_free(terms(iterm))
   end do
-  ABI_FREE(terms)
+  ABI_SFREE(terms)
 end subroutine polynomial_term_list_free
 
 !!****f* m_polynomial_term/terms_compare
@@ -449,10 +497,39 @@ pure function terms_compare(t1,t2) result (res)
   else
     res = .false.
   end if
-
 end function terms_compare
 !!***
 
+
+function terms_compare_inverse(t1, t2) result(res)
+  type(polynomial_term_type), intent(in) :: t1,t2
+  logical :: res
+  type(polynomial_term_type) :: t3
+  call polynomial_term_copy(t2, t3)
+  t3%atindx(1,:) =t2%atindx(2, :)
+  t3%atindx(2,:) =t2%atindx(1, :)
+  t3%cell(1,:, :) = 0
+  t3%cell(2, :, :) = -t2%cell(2,:, : )
+  res=terms_compare(t1, t3)
+  call polynomial_term_free(t3)
+end function terms_compare_inverse
+
+
+subroutine polynomial_term_copy(in, out)
+  type(polynomial_term_type), intent(in) :: in
+  type(polynomial_term_type), intent(out) ::  out
+  if (in%nindex>-1) then
+    call polynomial_term_init(in%atindx,in%cell,in%direction,in%ndisp,&
+      &                              in%nstrain,out,in%power_disp,&
+      &                              in%power_strain,in%strain,in%weight, &
+      &                             check=.True., index_coeff=in%index_coeff)
+  else
+    call polynomial_term_init(in%atindx,in%cell,in%direction,in%ndisp,&
+      &                              in%nstrain,out,in%power_disp,&
+      &                              in%power_strain,in%strain,in%weight, &
+      &                             check=.True.)
+  endif
+end subroutine polynomial_term_copy
 
 end module m_polynomial_term
 !!***

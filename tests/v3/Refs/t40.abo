@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h09 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t40/t40.abi
 - output file    -> t40.abo
 - root for input  files -> t40i
@@ -169,8 +169,8 @@ meta: {optdriver: 0, ionmov: 1, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -195,7 +195,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     175.000     175.000
 
 ================================================================================
 
-=== [ionmov= 1] Molecular dynamics with viscosity (vis= 1.00000E+02)        
+=== [ionmov= 1] Molecular dynamics with viscosity (vis= 1.00000E+02)
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/4)
@@ -533,7 +533,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99444    1.96080    1.67665    1.67665    1.19126    1.19126    1.11815
    0.93783    0.84435    0.84435    0.56464
 
- At SCF step   14, forces are converged : 
+ At SCF step   14, forces are converged :
   for the second time, max diff in force=  9.343E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -772,7 +772,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99444    1.96080    1.67665    1.67665    1.19126    1.19126    1.11815
    0.93783    0.84435    0.84435    0.56464
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.234E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1153,7 +1153,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99421    1.96453    1.67059    1.67059    1.16555    1.16555    1.13938
    0.96052    0.85382    0.85382    0.56181
 
- At SCF step   11, forces are converged : 
+ At SCF step   11, forces are converged :
   for the second time, max diff in force=  1.416E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1511,7 +1511,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99413    1.96564    1.66886    1.66886    1.15796    1.15796    1.14839
    0.96317    0.85737    0.85737    0.56066
 
- At SCF step   10, forces are converged : 
+ At SCF step   10, forces are converged :
   for the second time, max diff in force=  7.905E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1846,7 +1846,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99411    1.96608    1.66823    1.66823    1.15473    1.15473    1.15165
    0.96387    0.85921    0.85921    0.56033
 
- At SCF step    9, forces are converged : 
+ At SCF step    9, forces are converged :
   for the second time, max diff in force=  1.298E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2250,7 +2250,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99971    1.99350    1.97290    1.65784    1.65784    1.21936    1.10459    1.10459
    0.94837    0.89628    0.89628    0.54880
 
- At SCF step   12, forces are converged : 
+ At SCF step   12, forces are converged :
   for the second time, max diff in force=  1.455E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2631,7 +2631,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99362    1.97478    1.65421    1.65421    1.23051    1.07795    1.07795
    0.94636    0.92202    0.92202    0.54672
 
- At SCF step   11, forces are converged : 
+ At SCF step   11, forces are converged :
   for the second time, max diff in force=  5.103E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3012,7 +3012,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99398    1.97499    1.65321    1.65321    1.22581    1.06052    1.06052
    0.95666    0.93528    0.93528    0.55090
 
- At SCF step   11, forces are converged : 
+ At SCF step   11, forces are converged :
   for the second time, max diff in force=  7.359E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3370,7 +3370,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99425    1.97494    1.65359    1.65359    1.21758    1.05089    1.05089
    0.96945    0.93944    0.93944    0.55631
 
- At SCF step   10, forces are converged : 
+ At SCF step   10, forces are converged :
   for the second time, max diff in force=  4.130E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3751,7 +3751,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99970    1.99431    1.97524    1.65414    1.65414    1.21291    1.04635    1.04635
    0.97785    0.93972    0.93972    0.55962
 
- At SCF step   11, forces are converged : 
+ At SCF step   11, forces are converged :
   for the second time, max diff in force=  6.885E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4109,7 +4109,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99971    1.99427    1.97576    1.65454    1.65454    1.21074    1.04432    1.04432
    0.98396    0.93811    0.93811    0.56166
 
- At SCF step   10, forces are converged : 
+ At SCF step   10, forces are converged :
   for the second time, max diff in force=  8.808E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4444,7 +4444,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99971    1.99421    1.97622    1.65478    1.65478    1.20983    1.04326    1.04326
    0.98815    0.93648    0.93648    0.56292
 
- At SCF step    9, forces are converged : 
+ At SCF step    9, forces are converged :
   for the second time, max diff in force=  1.583E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4779,7 +4779,7 @@ tolerances: {toldff: 1.00E-05, }
    1.99971    1.99416    1.97648    1.65491    1.65491    1.20940    1.04261    1.04261
    0.99037    0.93564    0.93564    0.56360
 
- At SCF step    9, forces are converged : 
+ At SCF step    9, forces are converged :
   for the second time, max diff in force=  2.328E-06 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -5058,7 +5058,7 @@ band_energy         :  6.23450730542082E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.0000000000E+00  3.0000000000E+01  5.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -5184,7 +5184,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -5196,12 +5196,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -5219,7 +5219,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -5234,7 +5234,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

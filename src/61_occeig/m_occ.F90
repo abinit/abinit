@@ -6,7 +6,7 @@
 !!  Low-level functions for occupation factors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (XG, AF)
+!!  Copyright (C) 2008-2025 ABINIT group (XG, AF)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -492,12 +492,12 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  DBG_ENTER("COLL")
 
  call timab(74,1,tsec)
- 
+
  ! Here treat the case where occopt does not correspond to a metallic occupation scheme
  if (occopt < 3 .or. occopt > 9) then
    ABI_BUG(sjoin(' occopt= ',itoa(occopt),', a value not allowed in newocc.'))
  end if
- 
+
  ! Check whether nband is a constant for all k point and spin-pol
  do isppol=1,nsppol
    do ikpt=1,nkpt
@@ -609,8 +609,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  ! potential and add to nelect bounds.
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     call extfpmd%compute_nelect(fermie_lo,nband,nelectlo,nkpt,nspinor,nsppol,tsmear,wtk)
-     call extfpmd%compute_nelect(fermie_hi,nband,nelecthi,nkpt,nspinor,nsppol,tsmear,wtk)
+     call extfpmd%compute_nelect(fermie_lo,nband,nelectlo,nkpt,nspinor,nsppol,wtk)
+     call extfpmd%compute_nelect(fermie_hi,nband,nelecthi,nkpt,nspinor,nsppol,wtk)
    end if
  end if
 
@@ -690,7 +690,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        ! with corresponding chemical potential and add to nelect bounds.
        if(present(extfpmd)) then
          if(associated(extfpmd)) then
-           call extfpmd%compute_nelect(fermie_mid,nband,nelectmid,nkpt,nspinor,nsppol,tsmear,wtk)
+           call extfpmd%compute_nelect(fermie_mid,nband,nelectmid,nkpt,nspinor,nsppol,wtk)
          end if
        end if
 

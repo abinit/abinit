@@ -15,7 +15,6 @@ t85o_DS9_1WF3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrggkk
-#%% exclude_builders = eos_gnu_13.2_serial
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi, t90.abi, t91.abi, t92.abi, t93.abi, t94.abi, t95.abi
 #%% [files]
 #%% files_to_test = t87.stdout, tolnlines=  0, tolabs=  0, tolrel=  0

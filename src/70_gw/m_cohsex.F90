@@ -6,7 +6,7 @@
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2024 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2025 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,13 +28,14 @@ module m_cohsex
  use m_errors
  use m_abicore
 
- use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_datatypes,  only : pseudopotential_type
  use m_time,          only : timab
  use m_fstrings,      only : sjoin, itoa
  use m_hide_blas,     only : xdotc, xgemv
  use m_numeric_tools, only : hermitianize, imin_loc
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
+ use m_ebands,        only : ebands_t
  use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t
  use m_gsphere,       only : gsphere_t
  use m_fft_mesh,      only : get_gfft, rotate_fft_mesh, cigfft
@@ -69,7 +70,7 @@ contains
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2025 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,7 +175,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_fourdp=2,ndat1=1
+ integer,parameter :: ndat1=1
  integer :: iab,ib,ib1,ib2,ierr,ig,ii,iik,itim_q,i1,i2,npwc
  integer :: ik_bz,ik_ibz,io,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: band,band1,band2,idle,rank
@@ -183,7 +184,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  integer :: spad,spadc,spadc1,spadc2,irow,my_nbks
  integer :: ndegs,wtqm,wtqp,mod10
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,ifft,npw_k
- real(dp) :: fact_sp,theta_mu_minus_e0i,tol_empty,gw_gsq
+ real(dp) :: fact_spin,theta_mu_minus_e0i,tol_empty,gw_gsq
  complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
@@ -197,10 +198,8 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  complex(gwpc) :: sigcohme(Sigp%nsig_ab)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:),sigsex(:)
- complex(gwpc),allocatable :: epsm1_qbz(:,:,:)
- complex(gwpc),allocatable :: sigc_ket(:,:)
- complex(gwpc),allocatable :: rhotwg_ki(:,:)
- complex(gwpc),allocatable :: sigctmp(:,:)
+ complex(gwpc),allocatable :: epsm1_qbz(:,:,:), sigc_ket(:,:)
+ complex(gwpc),allocatable :: rhotwg_ki(:,:), sigctmp(:,:)
  complex(gwpc),allocatable :: wfr_bdgw(:,:),ur_sum(:),wf1swf2_g(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
  complex(dpc),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
@@ -256,7 +255,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
       can_symmetrize(spin) = .not. esymm_failed(QP_sym(spin))
       if (.not.can_symmetrize(spin)) then
         write(msg,'(a,i0,4a)')" Symmetrization cannot be performed for spin: ",spin,ch10,&
-&         " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
+          " band classification encountered the following problem: ",ch10,TRIM(QP_sym(spin)%err_msg)
         ABI_WARNING(msg)
       end if
     end do
@@ -271,14 +270,15 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 
  ! Normalization of theta_mu_minus_e0i
  ! If nsppol==2, qp_occ $\in [0,1]$
+ !call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
  SELECT CASE (nsppol)
  CASE (1)
-   fact_sp=half; tol_empty=0.01   ! below this value the state is assumed empty
+   fact_spin=half; tol_empty=0.01   ! below this value the state is assumed empty
    if (nspinor==2) then
-    fact_sp=one; tol_empty=0.005  ! below this value the state is assumed empty
+    fact_spin=one; tol_empty=0.005  ! below this value the state is assumed empty
    end if
  CASE (2)
-   fact_sp=one; tol_empty=0.005   ! to be consistent and obtain similar results if a metallic
+   fact_spin=one; tol_empty=0.005   ! to be consistent and obtain similar results if a metallic
  CASE DEFAULT                     ! spin unpolarized system is treated using nsppol==2
    ABI_BUG('Wrong nsppol')
  END SELECT
@@ -326,12 +326,12 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  got=0
  ABI_MALLOC(proc_distrb,(Wfd%mband,Kmesh%nbz,nsppol))
  call sigma_distribute_bks(Wfd,Kmesh,Ltg_k,Qmesh,nsppol,can_symmetrize,kgw,Sigp%mg0,my_nbks,&
-&  proc_distrb,got,bks_mask,global=.TRUE.)
+                           proc_distrb,got,bks_mask,global=.TRUE.)
 
  ABI_FREE(bks_mask)
 
  write(msg,'(a,i0,a)')" Will sum ",my_nbks," (b,k,s) occupied states in (COHSEX|SEX)."
- call wrtout(std_out,msg,'PERS')
+ call wrtout(std_out,msg)
 
  Sigcij_tab => Sigp%Sigcij_tab(ikcalc,1:nsppol)
 
@@ -361,7 +361,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
    end do
 
    write(msg,'(a,i0,a)')" will treat ",COUNT(coh_distrb==Wfd%my_rank)," COH terms."
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out,msg)
  end if
 
  ABI_MALLOC(rhotwg_ki, (npwc * nspinor, minbnd:maxbnd))
@@ -412,7 +412,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ! based on group theory, and it might lead to spurious results in case of accidental degeneracies.
  nq_summed=Kmesh%nbz
  if (Sigp%symsigma > 0) then
-   call Ltg_k%print(std_out, prtvol, mode_paral='COLL')
+   call Ltg_k%print([std_out], prtvol=prtvol)
    nq_summed=SUM(Ltg_k%ibzq(:))
    !
    ! Find number of degenerate states and number of bands in each subspace
@@ -499,7 +499,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      end if
 
      !%write(msg,'(2(a,i4),a,i3)')' csigme : ik_bz ',ik_bz,'/',Kmesh%nbz,' done by processor ',Wfd%my_rank
-     !%call wrtout(std_out,msg,'PERS')
+     !%call wrtout(std_out,msg)
 
      ! Find the corresponding irred q-point.
      call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
@@ -511,10 +511,6 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2))
      call Gsph_c%fft_tabs(g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
      if ( ANY(gwc_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-#ifdef FC_IBM
-     ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
-     use_padfft = 0
-#endif
      if (use_padfft==0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2*use_padfft))
@@ -553,7 +549,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
        ! Skip empty state ib for HF, SEX, and COHSEX.
        if (qp_occ(ib,ik_ibz,spin)<tol_empty) CYCLE
 
-       theta_mu_minus_e0i=fact_sp*qp_occ(ib,ik_ibz,spin)
+       theta_mu_minus_e0i=fact_spin*qp_occ(ib,ik_ibz,spin)
 
        call wfd%get_ur(ib,ik_ibz,spin,ur_sum)
 
@@ -568,9 +564,9 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
        do jb=ib1,ib2
          ! Get all <k-q,ib,s|e^{-i(q+G).r}|s,jb,k>, at once.
          call rho_tw_g(nspinor,npwc,gwc_nfftot,ndat1,gwc_ngfft,1,use_padfft,igfftcg0,gw_gbound,&
-&          ur_sum       ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz,  &
-&          wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw,&
-&          nspinor,rhotwg_ki(:,jb))
+                        ur_sum       ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz,  &
+                        wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw,&
+                        nspinor,rhotwg_ki(:,jb))
 
          if (Psps%usepaw==1) then
            ! Add on-site contribution, projectors are already in BZ !TODO Recheck this!
@@ -662,12 +658,12 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
                coh_distrb(jb,kb,ik_bz,spin) = xmpi_undefined_rank
 
 #if 1
-               call calc_wfwfg(ktabr(:,jk_ibz),jik, spinrot_kgw, & ! TODO why jk_ibz?
-&                gwc_nfftot,nspinor,gwc_ngfft,wfr_bdgw(:,jb),wfr_bdgw(:,kb),wf1swf2_g)
+               call calc_wfwfg(ktabr(:,jk_ibz), jik, spinrot_kgw, & ! TODO why jk_ibz?
+&                gwc_nfftot, nspinor, gwc_ngfft, wfr_bdgw(:,jb), wfr_bdgw(:,kb), wf1swf2_g)
 #else
                ABI_CHECK(jik==1,"jik")
-               call calc_wfwfg(ktabr(:,jk_bz),jik, spinrot_kgw, &
-                 gwc_nfftot,nspinor,gwc_ngfft,wfr_bdgw(:,jb),wfr_bdgw(:,kb),wf1swf2_g)
+               call calc_wfwfg(ktabr(:,jk_bz), jik, spinrot_kgw, &
+                 gwc_nfftot, nspinor, gwc_ngfft, wfr_bdgw(:,jb), wfr_bdgw(:,kb), wf1swf2_g)
 #endif
 
                if (Psps%usepaw==1) then
@@ -695,7 +691,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
              is_idx = spin; if (nspinor==2) is_idx=iab
 
              sigcme_tmp(:,jb,kb,is_idx)=sigcme_tmp(:,jb,kb,is_idx) + &
-&              (wtqp+wtqm)*DBLE(sigctmp(:,iab)) + (wtqp-wtqm)*j_gw*AIMAG(sigctmp(:,iab))
+               (wtqp+wtqm)*DBLE(sigctmp(:,iab)) + (wtqp-wtqm)*j_gw*AIMAG(sigctmp(:,iab))
 
              sigc(1,:,jb,kb,is_idx)=sigc(1,:,jb,kb,is_idx) + wtqp*      sigctmp(:,iab)
              sigc(2,:,jb,kb,is_idx)=sigc(2,:,jb,kb,is_idx) + wtqm*CONJG(sigctmp(:,iab))
@@ -793,9 +789,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ! ==== Deallocate memory ====
  ! ===========================
  if (Psps%usepaw==1) then
-   if (allocated(gw_gfft)) then
-     ABI_FREE(gw_gfft)
-   end if
+   ABI_SFREE(gw_gfft)
    call pawcprj_free(Cprj_ksum)
    ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
@@ -816,14 +810,10 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  ABI_FREE(sigc)
  ABI_FREE(sigsex)
  ABI_FREE(proc_distrb)
- if (mod10==SIG_COHSEX) then
-   ABI_FREE(wf1swf2_g)
-   ABI_FREE(coh_distrb)
- end if
+ ABI_SFREE(wf1swf2_g)
+ ABI_SFREE(coh_distrb)
 
- if (allocated(degtab)) then
-   ABI_FREE(degtab)
- end if
+ ABI_SFREE(degtab)
 
  call timab(495,2,tsec) ! csigme(SigC)
  call timab(491,2,tsec)
@@ -924,14 +914,11 @@ subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_s
       ig4z=MODULO(g2mg1(3),ngfft(3))
       ig4= 1+ig4x+ig4y*ngfft(1)+ig4z*ngfft(1)*ngfft(2)
 
-      sigcohme(ispinor) = sigcohme(ispinor) + &
-&                         half*wfg2_jk(spad+ig4)*epsm1q_o(ig,igp)*vc_sqrt(ig)*vc_sqrt(igp)
+      sigcohme(ispinor) = sigcohme(ispinor) + half*wfg2_jk(spad+ig4)*epsm1q_o(ig,igp)*vc_sqrt(ig)*vc_sqrt(igp)
      end do !ig
    end do !igp
 
-   if (iqibz==1.and.same_band) then
-     sigcohme(ispinor) = sigcohme(ispinor) + half*wfg2_jk(spad+ig4)*epsm1q_o(1,1)*i_sz
-   end if
+   if (iqibz ==1 .and. same_band) sigcohme(ispinor) = sigcohme(ispinor) + half*wfg2_jk(spad+ig4)*epsm1q_o(1,1)*i_sz
  end do !ispinor
 
  if (outofbox/=0) then

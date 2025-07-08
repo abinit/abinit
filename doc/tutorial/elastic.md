@@ -83,7 +83,7 @@ an error message if the grid does not have the proper symmetry.
 The self-consistency procedures follow [tutorial RF1](/tutorial/rf1).
 
 Dataset 1 optimizes the atomic positions keeping the lattice parameters fixed,
-setting [[ionmov]]=2 as in [tutorial 1](/tutorial/base1). The optimization
+setting [[geoopt]] "bfgs" as in [tutorial 1](/tutorial/base1). The optimization
 steps proceed until the maximum force component on any atom is less than
 [[tolmxf]]. It is always advised to relax the forces before beginning the
 lattice parameter optimization. Dataset 2 optimizes the lattice parameters
@@ -237,7 +237,7 @@ These wave functions are used to compute three types of 2DTE's. Derivatives
 with respect to two strain components give us the so-called rigid-ion elastic
 tensor. Derivatives with respect to one strain and one electric field
 component give us the rigid-ion piezoelectric tensor. Finally, derivatives
-with respect to one strain and one atomic displacement yield the internal-strain 
+with respect to one strain and one atomic displacement yield the internal-strain
 force-response tensor, an intermediate quantity that will be necessary
 to compute the atomic relaxation corrections to the rigid-ion quantities. As
 in [tutorial DFPT1](/tutorial/rf1), we specify convergence in terms of the residual of the
@@ -257,13 +257,13 @@ The derivative database DDB files are ascii and
 readable, but primarily for subsequent analysis by anaddb which we will
 undertake in the next section. Finally, the various wave function binary files
 are primarily of use for subsequent calculations, where they could cut the
-number of needed iterations in, for example, convergence testing. 
+number of needed iterations in, for example, convergence testing.
 File names have been generated according to the following convention.
 After the "root" name (which is by default taken from the name of the .abi file),
 follows the number of the dataset producing the file.
 Finally, the first-order wave function 1WF files have a final "pertcase"
 number described in [[help:respfn#1|section 1]] of the [[help:respfn|respfn_help file]].
-While *telast_2.abi* specifies all atomic displacements, only the 
+While *telast_2.abi* specifies all atomic displacements, only the
 symmetry-inequivalent perturbations are treated, so the "pertcase" list is incomplete.
 All cases specified in the input data are treated for the strain perturbation.
 
@@ -326,7 +326,7 @@ with respect to this perturbation as we just saw, the various 2DTE given as
 elastic tensors, etc. in the output and in the DDB file are all computed using
 non-variational expressions. Using the non-variational expressions, mixed
 second derivatives with respect to the present perturbation and all other
-perturbations of interest can be computed directly from the present 
+perturbations of interest can be computed directly from the present
 first-order wave functions. The disadvantage is that the non-variational result
 has errors which are linearly proportional to convergence errors in the GS and
 first-order wave functions. Since errors in the variational 2DEtotal are
@@ -348,7 +348,7 @@ Now let us take a look at the results we want, the various 2DTE's. They begin by
        for elastic tensor components not included)
          j1       j2             matrix element
       dir pert dir pert     real part     imaginary part
- 
+
        1    1   1    1         5.7740048299         0.0000000000
        1    1   2    1        -2.8870024150         0.0000000000
        1    1   3    1         0.0000000000         0.0000000000
@@ -435,7 +435,7 @@ and one uniform electric field component. (Yes, there are non-zero elements.)
 ## 3 ANADDB calculation of atom-relaxation effects
 
 In this section, we will run the program anaddb, which analyzes DDB files
-generated in prior RF calculations. You should copy *telast_3.abi* 
+generated in prior RF calculations. You should copy *telast_3.abi*
 in your *Work_elast* directory. You should now go to the [[help:anaddb|anaddb help file]]
 introduction. The bulk of the material in this help file is contained in the
 description of the variables. You should read the descriptions of
@@ -615,7 +615,7 @@ tight limit, this is still a convergence issue. Look at the following convergenc
     Dataset 2:
      At SCF step    1       vres2   =  5.31E-22 < tolvrs=  1.00E-18 =>converged.
 
-Since dataset 2 has better convergence, we will use it.  Coherently, 
+Since dataset 2 has better convergence, we will use it.  Coherently,
 we will use also the dataset 4 results, choosing those in GPa units,
 
     -Cartesian components of stress tensor (GPa)         [Pressure=  9.1716E-03 GPa]
@@ -681,7 +681,7 @@ a probable source of discrepancy. Since this issue was noted previously in
 connection with the calculation of Born effective charges by  Na Sai, K. M.
 Rabe, and D. Vanderbilt, Phys. Rev. B 66, 104108 (2002) [[cite:Sai2002]], Abinit has
 incorporated the ability to use finite-difference ddk wave functions from GS
-calculations in RF calculations of electric-field-related 2DTE's. 
+calculations in RF calculations of electric-field-related 2DTE's.
 
 Copy
 *telast_5.abi* into *Work_elast*, and edit *telast_5.abi*.
@@ -816,7 +816,7 @@ You should be able to cut-and-paste these into a table like the following,
 
                 C_11        C_12        C_44        acell
     ngkpt=3*6   0.003844    0.002294    0.001377    7.585323
-    ngkpt=3*8   0.004409    0.002088    0.001355    7.583261 
+    ngkpt=3*8   0.004409    0.002088    0.001355    7.583261
     ngkpt=3*10  0.004392    0.002092    0.001354    7.583710
 
 We can immediately see that the lattice constant converges considerably more
@@ -829,7 +829,7 @@ As in [tutorial 4](/tutorial/base4), the [[ngkpt]] convergence is controlled by 
 smaller the broadening, the denser the **k** sample that is needed to get a
 smooth variation of occupancy, and presumably stress, with strain.   While we
 will not explore [[tsmear]] convergence in this tutorial, you may wish to do so
-on your own.  
+on your own.
 
 Also, even more than for the lattice parameter, the type of smearing
 function plays an important role. The preferred smearing, [[occopt]]=7,
@@ -865,7 +865,7 @@ units (Ha/Bohr$^3$ = 2.94210119E+04 GPa) and using zero-temperature extrapolated
 experimental results from P. M. Sutton, Phys. Rev. 91, 816 (1953) [[cite:Sutton1953]], we find
 
                                       C_11(GPa)  C_12(GPa)  C_44(GPa)
-    Calculated (T=6315K)                129.2      61.5       39.8 
+    Calculated (T=6315K)                129.2      61.5       39.8
     Calculated (T=0K, Gaussian 0.02Ha)  125.6      61.8       38.6
     Experiment (T=0K)                   123.0      70.8       30.9
 

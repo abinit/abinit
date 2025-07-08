@@ -155,7 +155,7 @@ __Configure with__:
 ```
 
 where `my_config_file.ac` is an external file providing all the configuration flags and options.
-More on the configure options is presented in [next section](#the-config-file).
+More on the configure options is presented in [next section](#the-configuration-file).
 
 __Compile with__:
 
@@ -185,7 +185,7 @@ cd tests
     Summary: failed=0, succeeded=11, passed=0, skipped=0, disabled=0
     ```
 
-otherwise there is a __problem__ with the compilation: see [Troubleshooting](#troubleshooting)
+otherwise there is a __problem__ with the compilation. 
 
 __Install__ (optional):
 

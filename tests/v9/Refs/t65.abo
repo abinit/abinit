@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.6 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h16 )
+.Starting date : Wed  9 Apr 2025.
+- ( at 00h52 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t65.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t65.abi
 - output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
@@ -468,8 +468,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05308
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -864,30 +864,76 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
  Total number of electrons at eF:    1.0
 
 
- Transport (RTA) calculation results:
+ Transport (RTA) calculation results, chemical potential adjusted with T:
 
  Conductivity [Siemens cm^-1] using SERTA approximation
  Temperature (K)              xx              yy              zz
-            0.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
-          300.00    0.458203E+06    0.458203E+06    0.458203E+06
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00    0.135174E+05    0.135174E+05    0.135174E+05
 
 
  Resistivity [micro-Ohm cm] using SERTA approximation
  Temperature (K)              xx              yy              zz
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
-          300.00    0.218244E+01    0.218244E+01    0.218244E+01
+ Temperature (K)              xx              yy              zz
+          300.00    0.369894E+02    0.369894E+02    0.369894E+02
+
+
+ Seebeck [Volts / Kelvin] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.667757E-03   -0.667757E-03   -0.667757E-03
+
+
+ Kappa [W/m*K] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.307289E-13    0.307289E-13   -0.307289E-13
+
+
+ Peltier [Volts] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.200327E+00   -0.200327E+00   -0.200327E+00
 
 
  Conductivity [Siemens cm^-1] using MRTA approximation
  Temperature (K)              xx              yy              zz
-            0.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
-          300.00    0.372678E+06    0.372678E+06    0.372678E+06
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00    0.109943E+05    0.109943E+05    0.109943E+05
 
 
  Resistivity [micro-Ohm cm] using MRTA approximation
  Temperature (K)              xx              yy              zz
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
-          300.00    0.268328E+01    0.268328E+01    0.268328E+01
+ Temperature (K)              xx              yy              zz
+          300.00    0.454780E+02    0.454780E+02    0.454780E+02
+
+
+ Seebeck [Volts / Kelvin] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.667757E-03   -0.667757E-03   -0.667757E-03
+
+
+ Kappa [W/m*K] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00    0.000000E+00    0.000000E+00    0.000000E+00
+
+
+ Peltier [Volts] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            1.00   -0.000000E+00   -0.000000E+00   -0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.200327E+00   -0.200327E+00   -0.200327E+00
 
 
 
@@ -906,6 +952,32 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
           300.00    0.839254E+02    0.839254E+02    0.839254E+02             yes
 
 
+ Seebeck [Volts / Kelvin] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00   -0.000000E+00   -0.000000E+00   -0.000000E+00             yes
+          300.00   -0.667757E-03   -0.667757E-03   -0.667757E-03             yes
+
+
+ Kappa [W/m*K] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00    0.000000E+00    0.000000E+00    0.000000E+00             yes
+          300.00   -0.614578E-13    0.614578E-13    0.614578E-13             yes
+
+
+ Peltier [Volts] using IBTE
+ Temperature (K)              xx              yy              zz       Converged
+            0.00   -0.000000E+00   -0.000000E+00   -0.000000E+00             yes
+          300.00   -0.200327E+00   -0.200327E+00   -0.200327E+00             yes
+
+
+Carrier density:
+ Temperature [K] chem pot [eV]               e/h density [cm^-3]
+            0.00       -0.55E-02        0.00E+00        0.00E+00
+          300.00       -0.55E-02        0.87E+21        0.93E+20
+
+
+
+- Writing IBTE transport results to: t65o_DS2_RTA.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1296,3 +1368,4 @@ P           mkmem2        145
  Calculation completed.
 .Delivered   3 WARNINGs and  13 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          8.5  wall=          8.6
+

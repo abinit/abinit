@@ -2,7 +2,7 @@
 # DATASET 1 : Sigma calculation
 #
 optdriver   4            # Sigma run.
-irdwfk      1  
+irdwfk      1
 irdscr      1
 gwcalctyp   0 ppmodel 1  # G0W0 calculation with the plasmon-pole approximation.
 #gwcalctyp  2            # Uncomment this line to use the contour-deformation technique but remember to change the SCR file!
@@ -19,7 +19,7 @@ timopt -1
 
 # List of k-points for GW corrections.
 nkptgw     5
-kptgw  
+kptgw
   0.00000000E+00  0.00000000E+00  0.00000000E+00
   2.50000000E-01  0.00000000E+00  0.00000000E+00
   5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -30,7 +30,7 @@ kptgw
  -2.50000000E-01  0.00000000E+00  3.33333333E-01
   2.50000000E-01  2.50000000E-01  3.33333333E-01
 
-bdgw    
+bdgw
   24  25
   24  25
   24  25
@@ -89,7 +89,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8, Pseudodojo_nc_sr_04_pw_standard_psp8/O.psp8"
+ pseudos "Psdj_nc_sr_04_pw_std_psp8/Si.psp8, Psdj_nc_sr_04_pw_std_psp8/O.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -103,7 +103,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% max_nprocs = 64
 #%% nprocs_to_test = 64
 #%% [NCPU_64]
-#%% files_to_test = tmbt_4_MPI64.abo, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%% files_to_test = tmbt_4_MPI64.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords =  GW

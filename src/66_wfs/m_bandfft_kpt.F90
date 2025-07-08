@@ -7,7 +7,7 @@
 !!  used for kgb parallelization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2024 ABINIT group (FJ, FB, MT)
+!! Copyright (C) 2011-2025 ABINIT group (FJ, FB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -693,7 +693,7 @@ subroutine bandfft_kpt_init2(bandfft_kpt_in,dimffnl,ffnl_gather,ikpt_this_proc,k
  if (allocated(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather)) then
    ABI_FREE(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather)
  end if
- if (size(ph3d_gather)>0) then
+ if (size(ph3d_gather,dim=1)>0) then
    ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%ph3d_gather,(2,ndatarecv,matblk))
    bandfft_kpt_in(ikpt_this_proc)%ph3d_gather(:,:,:)  =ph3d_gather(:,:,:)
  else

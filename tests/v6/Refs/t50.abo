@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h11 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t50-t51-t52-t53/t50.abi
 - output file    -> t50.abo
 - root for input  files -> t50i
@@ -364,8 +364,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.13006
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -377,8 +377,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    3.14159265
          --- l  ekb(1:nproj) -->
@@ -534,7 +534,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -709,7 +709,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    1.3314118896E+00    0.0000000000E+00
    3   1   2   1    1.3314118896E+00    0.0000000000E+00
    3   1   3   1   -3.9942356689E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -727,38 +727,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        -0.0000001341         0.0000000000
    1    1   2    1         0.0000000447         0.0000000000
    1    1   3    1         0.0000000447         0.0000000000
-  
+
    2    1   1    1         0.0000000447         0.0000000000
    2    1   2    1        -0.0000001341         0.0000000000
    2    1   3    1         0.0000000447         0.0000000000
-  
+
    3    1   1    1         0.0000000447         0.0000000000
    3    1   2    1         0.0000000447         0.0000000000
    3    1   3    1        -0.0000001341         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0000000000         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-  
+
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
@@ -770,9 +770,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  0.000000E+00  0.000000E+00  0.000000E+00
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
  Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.
 
@@ -838,8 +838,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.91566
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -851,8 +851,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    3.14159265
          --- l  ekb(1:nproj) -->
@@ -861,7 +861,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1039,7 +1039,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    6.8414367684E-01    0.0000000000E+00
    3   1   2   1    1.2419207352E+00    0.0000000000E+00
    3   1   3   1   -2.6102084538E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -1057,38 +1057,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         2.8820388655         0.0000000000
    1    1   2    1        -0.6389772213         0.0000000000
    1    1   3    1        -0.6389772213        -0.0000000000
-  
+
    2    1   1    1        -0.6389777699        -0.0000000000
    2    1   2    1         1.2792063475         0.0000000000
    2    1   3    1        -0.0012519787         0.0000000000
-  
+
    3    1   1    1        -0.6389777700         0.0000000000
    3    1   2    1        -0.0012519787        -0.0000000000
    3    1   3    1         1.2792063476         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1382319490        -0.0000000000
    1    1   2    1        -0.0000000633         0.0000000000
    1    1   3    1        -0.0000000633        -0.0000000000
-  
+
    2    1   1    1        -0.0000000040        -0.0000000000
    2    1   2    1         0.1559378162         0.0000000000
    2    1   3    1         0.0866864194         0.0000000000
-  
+
    3    1   1    1        -0.0000000040         0.0000000000
    3    1   2    1         0.0866864194        -0.0000000000
    3    1   3    1         0.1559378162        -0.0000000000
@@ -1100,9 +1100,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552945E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1168,7 +1168,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1346,7 +1346,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    1.2419207352E+00    0.0000000000E+00
    3   1   2   1    6.8414367687E-01    0.0000000000E+00
    3   1   3   1   -2.6102084539E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -1364,38 +1364,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.2792063474         0.0000000000
    1    1   2    1        -0.6389777699         0.0000000000
    1    1   3    1        -0.0012519787        -0.0000000000
-  
+
    2    1   1    1        -0.6389772212        -0.0000000000
    2    1   2    1         2.8820388655         0.0000000000
    2    1   3    1        -0.6389772213         0.0000000000
-  
+
    3    1   1    1        -0.0012519787         0.0000000000
    3    1   2    1        -0.6389777700        -0.0000000000
    3    1   3    1         1.2792063475         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1559378162         0.0000000000
    1    1   2    1        -0.0000000040         0.0000000000
    1    1   3    1         0.0866864194         0.0000000000
-  
+
    2    1   1    1        -0.0000000633         0.0000000000
    2    1   2    1         0.1382319490        -0.0000000000
    2    1   3    1        -0.0000000633         0.0000000000
-  
+
    3    1   1    1         0.0866864194         0.0000000000
    3    1   2    1        -0.0000000040        -0.0000000000
    3    1   3    1         0.1559378162         0.0000000000
@@ -1407,9 +1407,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552945E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1475,7 +1475,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1653,7 +1653,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    6.8414369402E-01    0.0000000000E+00
    3   1   2   1    6.8414369405E-01    0.0000000000E+00
    3   1   3   1   -2.6102084364E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -1671,38 +1671,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         2.8820388860         0.0000000000
    1    1   2    1        -1.6040833829        -0.0000000000
    1    1   3    1        -0.6389772027        -0.0000000000
-  
+
    2    1   1    1        -1.6040833829         0.0000000000
    2    1   2    1         2.8820388860         0.0000000000
    2    1   3    1        -0.6389772027        -0.0000000000
-  
+
    3    1   1    1        -0.6389777516         0.0000000000
    3    1   2    1        -0.6389777516         0.0000000000
    3    1   3    1         1.2792063685         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1559378205        -0.0000000000
    1    1   2    1        -0.0866864234         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-  
+
    2    1   1    1        -0.0866864234        -0.0000000000
    2    1   2    1         0.1559378205         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
-  
+
    3    1   1    1         0.0000000594        -0.0000000000
    3    1   2    1         0.0000000594         0.0000000000
    3    1   3    1         0.1382320717         0.0000000000
@@ -1714,9 +1714,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552950E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1782,7 +1782,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1960,7 +1960,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    6.8414367692E-01    0.0000000000E+00
    3   1   2   1    6.8414367691E-01    0.0000000000E+00
    3   1   3   1   -3.6318984340E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -1978,38 +1978,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.2792063474         0.0000000000
    1    1   2    1        -0.0012519786        -0.0000000000
    1    1   3    1        -0.6389777699        -0.0000000000
-  
+
    2    1   1    1        -0.0012519786         0.0000000000
    2    1   2    1         1.2792063475         0.0000000000
    2    1   3    1        -0.6389777699        -0.0000000000
-  
+
    3    1   1    1        -0.6389772212         0.0000000000
    3    1   2    1        -0.6389772213         0.0000000000
    3    1   3    1         2.8820388655         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1559378162         0.0000000000
    1    1   2    1         0.0866864195         0.0000000000
    1    1   3    1        -0.0000000040         0.0000000000
-  
+
    2    1   1    1         0.0866864195         0.0000000000
    2    1   2    1         0.1559378162         0.0000000000
    2    1   3    1        -0.0000000040         0.0000000000
-  
+
    3    1   1    1        -0.0000000633        -0.0000000000
    3    1   2    1        -0.0000000633        -0.0000000000
    3    1   3    1         0.1382319490        -0.0000000000
@@ -2021,9 +2021,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552945E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2089,7 +2089,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2267,7 +2267,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    2.2636113289E+00    0.0000000000E+00
    3   1   2   1    6.8414369409E-01    0.0000000000E+00
    3   1   3   1   -3.6318984130E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -2285,38 +2285,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         2.8820388860         0.0000000000
    1    1   2    1        -0.6389772026         0.0000000000
    1    1   3    1        -1.6040833830        -0.0000000000
-  
+
    2    1   1    1        -0.6389777515        -0.0000000000
    2    1   2    1         1.2792063684         0.0000000000
    2    1   3    1        -0.6389777515         0.0000000000
-  
+
    3    1   1    1        -1.6040833830        -0.0000000000
    3    1   2    1        -0.6389772027        -0.0000000000
    3    1   3    1         2.8820388860         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1559378205        -0.0000000000
    1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1        -0.0866864234        -0.0000000000
-  
+
    2    1   1    1         0.0000000594         0.0000000000
    2    1   2    1         0.1382320717        -0.0000000000
    2    1   3    1         0.0000000594         0.0000000000
-  
+
    3    1   1    1        -0.0866864234         0.0000000000
    3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1         0.1559378205         0.0000000000
@@ -2328,9 +2328,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552950E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2396,7 +2396,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2574,7 +2574,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    6.8414369410E-01    0.0000000000E+00
    3   1   2   1    2.2636113289E+00    0.0000000000E+00
    3   1   3   1   -3.6318984130E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -2592,38 +2592,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.2792063683         0.0000000000
    1    1   2    1        -0.6389777515         0.0000000000
    1    1   3    1        -0.6389777515        -0.0000000000
-  
+
    2    1   1    1        -0.6389772026        -0.0000000000
    2    1   2    1         2.8820388860         0.0000000000
    2    1   3    1        -1.6040833830         0.0000000000
-  
+
    3    1   1    1        -0.6389772026         0.0000000000
    3    1   2    1        -1.6040833830        -0.0000000000
    3    1   3    1         2.8820388860         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1382320717         0.0000000000
    1    1   2    1         0.0000000594         0.0000000000
    1    1   3    1         0.0000000594        -0.0000000000
-  
+
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.1559378205         0.0000000000
    2    1   3    1        -0.0866864234        -0.0000000000
-  
+
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0866864234         0.0000000000
    3    1   3    1         0.1559378205        -0.0000000000
@@ -2635,9 +2635,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  6.761567E+02  9.552950E+02  1.265611E+03
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2702,8 +2702,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   1.89816
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.fakesmooth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/02he.fakesmooth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/02he.fakesmooth
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2715,8 +2715,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with 
-  definition in PRB44, 8503 (1991). 
+  so that the KB energies are not consistent with
+  definition in PRB44, 8503 (1991).
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    3.14159265
          --- l  ekb(1:nproj) -->
@@ -2725,7 +2725,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2903,7 +2903,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3   1   1   1    1.7824470935E+00    0.0000000000E+00
    3   1   2   1    1.7824470935E+00    0.0000000000E+00
    3   1   3   1   -5.3473413311E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -2921,38 +2921,38 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         1.1693662696         0.0000000000
    1    1   2    1        -0.3897887804         0.0000000000
    1    1   3    1        -0.3897887805        -0.0000000000
-  
+
    2    1   1    1        -0.3897887804        -0.0000000000
    2    1   2    1         1.1693662696         0.0000000000
    2    1   3    1        -0.3897887805         0.0000000000
-  
+
    3    1   1    1        -0.3897887805         0.0000000000
    3    1   2    1        -0.3897887805        -0.0000000000
    3    1   3    1         1.1693662697         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.0843242281        -0.0000000000
    1    1   2    1        -0.0000000039        -0.0000000000
    1    1   3    1        -0.0000000039        -0.0000000000
-  
+
    2    1   1    1        -0.0000000039         0.0000000000
    2    1   2    1         0.0843242281        -0.0000000000
    2    1   3    1        -0.0000000039         0.0000000000
-  
+
    3    1   1    1        -0.0000000039         0.0000000000
    3    1   2    1        -0.0000000039        -0.0000000000
    3    1   3    1         0.0843242281         0.0000000000
@@ -2964,9 +2964,9 @@ tolerances: {tolvrs: 1.00E-08, }
 -  7.461210E+02  7.461210E+02  7.461210E+02
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -3001,7 +3001,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      4.3000000000E+00  4.3000000000E+00  4.3000000000E+00 Bohr
               amu      4.00260200E+00
@@ -3203,7 +3203,7 @@ P          mk1mem           8
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#ponce2014
 -
-- [2] Temperature dependence of the electronic structure of semiconductors and insulators 
+- [2] Temperature dependence of the electronic structure of semiconductors and insulators
 - S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)
 - Comment: the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
 - Strong suggestion to cite this paper in your publications.
@@ -3221,7 +3221,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3244,12 +3244,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3267,7 +3267,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

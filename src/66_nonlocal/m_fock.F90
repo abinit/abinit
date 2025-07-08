@@ -8,7 +8,7 @@
 !!  and the procedures to perform this calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2024 ABINIT group (CMartins,FJ,FA,MT)
+!!  Copyright (C) 2012-2025 ABINIT group (CMartins,FJ,FA,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +41,7 @@ module m_fock
  use defs_abitypes,     only : MPI_type
  use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
- use m_symtk,           only : mati3inv, matr3inv
+ use m_matrix,          only : mati3inv, matr3inv
  use m_fftcore,         only : sphereboundary
  use m_fft,             only : zerosym, fourwf
  use m_kg,              only : ph1d3d, getph

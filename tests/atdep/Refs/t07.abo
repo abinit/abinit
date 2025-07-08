@@ -1,6 +1,6 @@
   
-.Version    3.0 of PHONONS
-.Copyright (C) 1998-2024 ABINIT group (FB,JB).
+.Version    4.0 of ATDEP
+.Copyright (C) 1998-2025 ABINIT group (FB,JB).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -13,14 +13,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 13 Sep 2024.
+.Starting date :  4 Apr 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
  #############################################################################
  ======================= Define the unitcell =================================
  brav                    2    0
- angle                 102.2833809311
+                angle  102.2833809311
  natom_unitcell         16
  xred_unitcell       
                          0.3412000000    0.2500000000    0.1633000000
@@ -42,6 +42,7 @@
  typat_unitcell          1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1
  ntypat                  1
  amu                   242.0000000000
+ znucl                  94.0000000000
  ======================= Define the supercell ================================
  rprimd              
                         22.3088558000    0.0000000000    0.0000000000
@@ -60,18 +61,18 @@
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1
- temperature           300.0000000000
  ======================= Define computational details ========================
  nstep_max               20
  nstep_min                1
  rcut                    8.4000000000
+ temperature           300.0000000000
  ======================= Optional input variables ============================
- ngqpt2                 10   10   10
  use_ideal_positions     0
+ enunit                  1 (Phonon frequencies in cm-1)
+ ngqpt2                 10   10   10
  tolmotif               0.06000
  tolinbox               0.00900
  tolmatch               0.07000
- enunit                  1 (Phonon frequencies in cm-1)
  USE AVERAGE POSITIONS TO COMPUTE SPECTRUM
 -Number of processors    1    1
  
@@ -243,7 +244,7 @@
    Number of interactions in this shell=           1
  ============================================================================
  Shell number:          15
-  Between atom    2 and     3 the distance is=    4.5183624709
+  Between atom    2 and     3 the distance is=    4.5183624708
    Number of independant coefficients in this shell=           5
    Number of interactions in this shell=           1
  ============================================================================
@@ -3021,9 +3022,9 @@
  
  ========== For an Anisotropic Material =======================================
  Sijkl [in GPa-1]=
- | S11 S12 S13 S14 S15 S16 |      0.003   -0.002    0.000    0.000   -0.001   -0.000
+ | S11 S12 S13 S14 S15 S16 |      0.003   -0.002    0.000   -0.000   -0.001   -0.000
  | S21 S22 S23 S24 S25 S26 |     -0.002    0.008   -0.004   -0.000    0.001   -0.000
- | S31 S32 S33 S34 S35 S36 |      0.000   -0.004    0.006    0.000   -0.001   -0.000
+ | S31 S32 S33 S34 S35 S36 |      0.000   -0.004    0.006   -0.000   -0.001   -0.000
  | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.011   -0.000    0.000
  | S51 S52 S53 S54 S55 S56 |     -0.001    0.001   -0.001    0.000    0.012   -0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.008
@@ -3118,3 +3119,8 @@
  
  [4] Temperature dependent effective potential method for accurate free energy calculations of solids
  O. Hellman, P. Steneteg, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
+-   There were 0 allocations and 0 deallocations in C code
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
+-   There were 15086 allocations and 15086 deallocations in Fortran
+-   Remaining memory at the end of the calculation is 0

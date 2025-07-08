@@ -13,12 +13,6 @@ module m_mathfuncs
   implicit none
 
 
-  ! the determinant of a 3*3 matrix
-  interface mat33det
-     procedure  real_mat33det
-     procedure  int_mat33det
-  end interface mat33det
-
   ! integer/real
   ! change a diagonal (a array) to a matrix
   ! or get the diagonal of a 2D matrix
@@ -317,45 +311,6 @@ contains
   end subroutine rand_normal_builtin
 
   !-------------------------------------------------------------------!
-  ! real_mat33det
-  ! 3*3 real(dp) matrix determinant.
-  ! Input:
-  !  A: 3*3 real matrix
-  ! Output:
-  !  det: the determinant
-  !-------------------------------------------------------------------!
-  function real_mat33det(A) result(det)
-    real(dp), intent(in) :: A(3,3)
-    real(dp) :: det
-    DET =   A(1,1)*A(2,2)*A(3,3)  &
-         - A(1,1)*A(2,3)*A(3,2)  &
-         - A(1,2)*A(2,1)*A(3,3)  &
-         + A(1,2)*A(2,3)*A(3,1)  &
-         + A(1,3)*A(2,1)*A(3,2)  &
-         - A(1,3)*A(2,2)*A(3,1)
-  end function real_mat33det
-
-  !-------------------------------------------------------------------!
-  ! int_mat33det
-  ! 3*3 integer matrix determinant.
-  ! Input:
-  !  A: 3*3 interger matrix
-  ! Output:
-  !  det: the determinant
-  !-------------------------------------------------------------------!
-  function int_mat33det(A) result(det)
-    integer, intent(in) :: A(3,3)
-    integer :: det
-    DET =   A(1,1)*A(2,2)*A(3,3)  &
-         - A(1,1)*A(2,3)*A(3,2)  &
-         - A(1,2)*A(2,1)*A(3,3)  &
-         + A(1,2)*A(2,3)*A(3,1)  &
-         + A(1,3)*A(2,1)*A(3,2)  &
-         - A(1,3)*A(2,2)*A(3,1)
-  end function int_mat33det
-
-
-  !-------------------------------------------------------------------!
   ! Shortcut for Hermitian matrix eigen value and eigen vectors.
   ! Input:
   !   evecs
@@ -403,7 +358,7 @@ contains
     real(dp) :: vec2(3)
     real(dp) :: half_angle, r(3), w, norm
     half_angle=angle/2.0_dp
-    norm=sqrt(axis(1)*axis(1)+axis(2)*axis(2)+axis(3)*axis(3))
+    norm=norm2(axis)
     r(:)=axis(:)/norm * sin(half_angle)
     w=cos(half_angle)
     ! (w, r) is the quaternion

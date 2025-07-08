@@ -6,7 +6,7 @@
 !!  Evaluate the matrix elements of $v_H$ and $v_{xc}$ and $v_U$
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2024 ABINIT group (MG)
+!!  Copyright (C) 2008-2025 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -145,7 +145,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  integer :: itypat,lmn_size,j0lmn,jlmn,ilmn,klmn,klmn1,lmn2_size_max
  integer :: isppol,cplex_dij,npw_k,nspinor,nsppol,nspden,nk_calc,rank
  integer :: iab,isp1,isp2,ixc_sigma,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
- real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
+ real(dp) :: nfftfm1,fact,DijH,bigexc_val,bigsxc_val,bigexc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx,dum
  complex(dpc) :: cdot
  logical :: ltest,nmxc
  character(len=500) :: msg
@@ -160,7 +160,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  real(dp) :: tmp_xc(2,Wfd%nspinor**2),tmp_xcval(2,Wfd%nspinor**2)
  real(dp) :: tmp_H(2,Wfd%nspinor**2),tmp_U(2,Wfd%nspinor**2)
  real(dp) :: tmp_h0ij(2,Wfd%nspinor**2),tmp_sigcx(2,Wfd%nspinor**2)
- real(dp) :: dijU(2),strsxc(6),kpt(3),vxc1ab(2),vxc1ab_val(2)
+ real(dp) :: dijU(2),kpt(3),vxc1ab(2),vxc1ab_val(2)
  real(dp),allocatable :: kxc_(:,:),xccc3d_(:),vxc_val(:,:),vxc_val_hybrid(:,:)
  real(dp),allocatable :: kinpw(:),veffh0(:,:)
  complex(dpc) :: tmp(3)
@@ -227,7 +227,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
    end if
  end do
 
- option = 0 ! Only exc, vxc, strsxc
+ option = 0 ! Only exc, vxc
  nkxc   = 0 ! No computation of XC kernel
  n3xccc_= 0 ! No core
  nk3xc  = 0 ! k3xc not needed
@@ -239,9 +239,9 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
 
  call xcdata_init(xcdata,dtset=Dtset)
 
- call rhotoxc(enxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
+ call rhotoxc(bigexc_val,bigsxc_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
               nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
-              strsxc,usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taur=taur)
+              usexcnhat,vxc_val,vxcval_avg,xccc3d_,xcdata,taur=taur)
 
  ! FABIEN's development
  ! Hybrid functional treatment
@@ -274,14 +274,14 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
    ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 
    if(ixc_sigma<0)then
-     call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
+     call rhotoxc(bigexc_hybrid_val,dum,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
                   nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
-                  strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
+                  usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid,xc_funcs=xc_funcs_hybrid)
      call libxc_functionals_end(xc_functionals=xc_funcs_hybrid)
    else
-     call rhotoxc(enxc_hybrid_val,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
+     call rhotoxc(bigexc_hybrid_val,dum,kxc_,MPI_enreg_seq,nfftf,ngfftf,&
                   nhat,Wfd%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc_,option,rhor,Cryst%rprimd,&
-                  strsxc,usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
+                  usexcnhat,vxc_val_hybrid,vxcval_hybrid_avg,xccc3d_,xcdata_hybrid)
    end if
 
  endif
@@ -289,8 +289,12 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  ABI_FREE(xccc3d_)
  ABI_FREE(kxc_)
 
- write(msg,'(a,f8.4,2a,f8.4,a)')' E_xc[n_val]  = ',enxc_val,  ' [Ha]. ','<V_xc[n_val]> = ',vxcval_avg,' [Ha]. '
+ write(msg,'(a,f8.4,2a,f8.4,a)')' E_xc[n_val]  = ',bigexc_val,  ' [Ha]. ','<V_xc[n_val]> = ',vxcval_avg,' [Ha]. '
  call wrtout(std_out, msg)
+ if(bigsxc_val>zero) then
+   write(msg,'(a,f8.4)')' S_xc[n_val]  = ',bigsxc_val
+   call wrtout(std_out, msg)
+ end if
 
  ! has_hbare uses veffh0. Why only use it with usepaw=1? Let it be available always
  if (Mflags%has_hbare == 1) then

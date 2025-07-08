@@ -6,7 +6,7 @@
 !!  Routines to initialize k-point and q-point sampling from input file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,9 +26,7 @@ module m_inkpts
  use m_errors
  use m_xmpi
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
 
  use m_time,      only : timab
@@ -246,18 +244,14 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    use_kerange = .True.
    ABI_MALLOC(krange2ibz, (nkpt))
    if (my_rank == master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(ncid, getkerange_filepath, xmpi_comm_self))
-     call hdr_ncread(hdr, ncid, fform)
+     call hdr%ncread(ncid, fform)
      ABI_CHECK(fform == fform_from_ext("KERANGE.nc"), sjoin("Error while reading:", getkerange_filepath, ", fform:", itoa(fform)))
      ! TODO Add code for consistency check
      !kptopt, nsym, occopt
      !ABI_CHECK(nkpt == hdr%nkpt, "nkpt from kerange != nkpt")
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("getkerange_filepath requires NETCDF support")
-#endif
    end if
 
    call xmpi_bcast(krange2ibz, master, comm, ierr)
