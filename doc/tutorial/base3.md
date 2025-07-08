@@ -178,7 +178,7 @@ at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
     ABINIT never outputs the value of input variable [[ngkpt]], but instead uses [[kptrlatt]], a 3x3 matrix of integers.
     In the simplest case, with [[nshiftk]]=1, [[kptrlatt]] will simply be a diagonal matrix with diagonal values equal to the
     input [[ngkpt]]. However, if [[nshiftk]] is not 1, but the combination of [[ngkpt]] and [[shiftk]] allows ABINIT
-    to generate an homogeneous k point grid with different basis vercotr in reciprocal space, [[nshiftk]] might
+    to generate an homogeneous k point grid with different basis vectors in reciprocal space, [[nshiftk]] might
     be reduced to 1, and [[kptrlatt]] will not be a simple diagonal matrix. Nevertheless, both the input
     and the echoed grids are equivalent.
 
@@ -188,7 +188,7 @@ The input variable [[optcell]] governs the automatic optimisation of cell shape 
 For the automatic optimisation of cell volume in this cubic crystal, use:
 
     optcell 1
-    ionmov 2
+    geoopt "bfgs"
     ntime 10
     dilatmx 1.05
     ecutsm 0.5
@@ -239,7 +239,7 @@ It is implicit that you should check the sensitivity of the electronic band stru
 with respect to *ecut*. Perhaps you will need to raise the value of *ecut* to obtain the electronic band structure
 at your target precision. In general, however, as Kohn-Sham band structure suffer inherently of the DFT band gap problem
 with usual XC functionals, the common practice is to use the same *ecut* value as the one used for detemining the lattice parameters.
-We fix also the grid of k-points (the 4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid). 
+We fix also the grid of k-points (the 4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid).
 The same sensitivity check of the electronic band structure with respect to the choice of grid of k-points should also be made.
 
 We will ask for 8 bands (4 valence and 4 conduction). Whether this choice of conduction band number is adequate depends on the range of energy
@@ -289,7 +289,7 @@ in which you output the density ([[prtden]] 1), and, for the second dataset:
 * set [[enunit]] to 1, in order to have eigenenergies in eV,
 * the only tolerance criterion admitted for non-self-consistent calculations is [[tolwfr]].
   You should set it to 1.0d-10 (or so), and suppress [[toldfe]].
-* The [[nstep]] parameter was set to 20 to make sure convergence can be reached.  
+* The [[nstep]] parameter was set to 20 to make sure convergence can be reached.
 
 The input file *$ABI_TESTS/tutorial/Input/tbase3_5.abi* is an example,
 
@@ -336,7 +336,7 @@ is obtained at $\Gamma$ (=4.87519 eV). The width of the valence band is 12.1 eV,
 is 0.585 eV higher than the top of the valence band, at $\Gamma$.
 Note that the zero of eigenenergies is not fixed at the top of the valence band.
 Instead, the top of the valence band is by default the expectation value of the corresponding eigenfunction for the Kohn-Sham potential
-with zero average macroscopic Hartree potential (other choices can be made, but this is a topic for experts). 
+with zero average macroscopic Hartree potential (other choices can be made, but this is a topic for experts).
 
 
 The Si is described as an indirect band gap material (this is correct),
@@ -416,7 +416,7 @@ To visualize the band structure stored in the *GSR.nc* file, use the |abiopen| s
 
 ![](base3_assets/abiopen_tbase3_5o_DS2_GSR.png)
 
-You obtain the visualization of the Brillouin Zone (with the notation for several high-symmetry wavevectors), 
+You obtain the visualization of the Brillouin Zone (with the notation for several high-symmetry wavevectors),
 the representation of the primitive cell with location of atoms, and the sought graphical
 representation of the electronic band structure.
 
@@ -429,11 +429,11 @@ The subsequent non-self-consistent calculation of the band eigenenergies, that i
 at $\Gamma$, was not associated with occupation numbers. Hence, the value of the top of the valence band could not be corrected.
 In order to obtain an electronic band structure with the top of the valence band aligned with zero using AbiPy, the
 corresponding k point must belong to the grid used for self-consistent calculations.
-However, this point with the highest occupied state is not known a priori. 
+However, this point with the highest occupied state is not known a priori.
 
 If this is a mandatory target of the electronic structure representation, the user has the choice.
-He/she can make his/her own post-treatment of the data contained in the GSR file.
-Alternatively, for the automatic generation of the correcly aligned band structure using AbiPy, 
+One can make their own post-treatment of the data contained in the GSR file.
+Alternatively, for the automatic generation of the correcly aligned band structure using AbiPy,
 the user should proceed with more steps: after the self-consistent calculation with a particular k point grid,
 the band structure at high symmetry points is scanned, the k point for which the top of the valence band is obtained
 is determined, and, if not included in the initial grid for self-consistent calculation, a new self-consistent
@@ -442,20 +442,20 @@ at $\Gamma$, one might also from the very start decide to make self-consistent c
 $\Gamma$, although such grids are usually not as efficient as the shifted grids.
 
 
-Although the electronic band structure obtained with AbiPy looks nice in the above figure, there is a pitfall. 
+Although the electronic band structure obtained with AbiPy looks nice in the above figure, there is a pitfall.
 Indeed, AbiPy decided to represent
 the energy range from about -13 eV to about +12 eV, while, as given in the input file above, 4 valence bands and 4 conduction bands
 were computed. The representation of valence bands is fine, but apparently, there is no electronic state above +10 eV.
 Is this correct ? Please, perform a calculation of the band structure with many more bands, for example 20 bands.
-You will observe that the representation of the band structure up to +12 eV obtained with 8 bands 
+You will observe that the representation of the band structure up to +12 eV obtained with 8 bands
 is indeed incomplete: more conduction bands connect
-to the four ones initially represented, and they fill the energy range up to +12 eV, and much beyond. 
+to the four ones initially represented, and they fill the energy range up to +12 eV, and much beyond.
 There is no gap between the four conduction bands that had already been computed and the additional higher ones.
-AbiPy by default chooses a range larger than all the bands that have been computed. So, this pitfall is present by default ! 
+AbiPy by default chooses a range larger than all the bands that have been computed. So, this pitfall is present by default with Abipy !
 
-The aim of the user 
+The aim of the user
 might be to have a quick look at the band structure, in which case the default representation by AbiPy is fine.
-However, if the user wants to place a band structure in a report, he/she would better cut the band structure from above
+However, if the user wants to place a band structure in a publication or a report, he/she would better cut the band structure from above
 in order to avoid showing an incomplete set of bands, falsely picturing a gap between the represented conduction bands
 and those not represented.
 

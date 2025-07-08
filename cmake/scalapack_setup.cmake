@@ -35,7 +35,7 @@ if (ABINIT_SCALAPACK_FLAVOR MATCHES "NETLIB")
 
   if(ScalapackPkg_FOUND)
 
-    message("scalapack/netlib found via pkg-config")
+    message(STATUS "scalapack/netlib found via pkg-config")
     set(scalapack_FOUND TRUE)
     set(scalapack_found_using_pkg_config TRUE)
     add_library(abinit::scalapack ALIAS PkgConfig::ScalapackPkg)
@@ -43,16 +43,18 @@ if (ABINIT_SCALAPACK_FLAVOR MATCHES "NETLIB")
 
   else(ScalapackPkg_FOUND)
 
-    message("scalapack/netlib not found via pkg-config")
+    message(STATUS "scalapack/netlib not found via pkg-config")
 
     # if we are here, it means scalapack/netlib was not found by the MODULE mode (pkgconfig)
     # let try CONFIG mode
     find_package(scalapack CONFIG)
     if(scalapack_FOUND)
-      message("scalapack/netlib found via cmake config")
+      message(STATUS "scalapack/netlib found via cmake config")
       set(scalapack_found_using_cmake_target TRUE)
+      add_library(abinit::scalapack ALIAS scalapack)
+      set(USING_SCALAPACK_NETLIB TRUE)
     else()
-      message("scalapack/netlib not found. Please adjust variable scalapack_DIR / scalapack_ROOT")
+      message(STATUS "scalapack/netlib not found. Please adjust variable scalapack_DIR / scalapack_ROOT")
     endif()
 
   endif(ScalapackPkg_FOUND)
@@ -86,7 +88,7 @@ elseif(ABINIT_SCALAPACK_FLAVOR MATCHES "MKL")
 
   else(MKL_FOUND)
 
-    message("MKL not found ! Please provide environment variable MKL_ROOT.")
+    message(STATUS "MKL not found ! Please provide environment variable MKL_ROOT.")
 
   endif(MKL_FOUND)
 

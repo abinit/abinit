@@ -332,15 +332,13 @@ check_fortran_source_runs(
   HAVE_FC_IEEE_EXCEPTIONS
   SRC_EXT f90)
 
-# TODO : not sure of the purpose of this one, if does not compile
-# since -Werror=line-truncation
-# check_fortran_source_runs(
-#   "program test
-#      implicit none
-#      write(*,*) \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" !142
-#    end program test"
-#   HAVE_FC_LONG_LINES
-#   SRC_EXT f90)
+check_fortran_source_runs(
+  "program test
+     implicit none
+     write(*,*) \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" !142
+   end program test"
+  HAVE_FC_LONG_LINES
+  SRC_EXT f90)
 
 check_fortran_source_runs(
   "program test
@@ -494,7 +492,7 @@ if (MPI_FOUND)
 
   set(HAVE_MPI 1)
 
-  message("[MPI] MPI_Fortran_VERSION_MAJOR = ${MPI_Fortran_VERSION_MAJOR}")
+  message(STATUS "[MPI] MPI_Fortran_VERSION_MAJOR = ${MPI_Fortran_VERSION_MAJOR}")
 
   # the following reproduced the behavior existing in m4 macro
   # HAVE_MPI2 is used with the meaning MPI standard version (major) is greater if equal to 2
@@ -538,10 +536,10 @@ if (MPI_FOUND)
     #   LINK_LIBRARIES MPI::MPI_C PkgConfig::ABINIT_NETCDF)
     # #PkgConfig::ABINIT_NETCDF_MPI)
     # if (HAVE_NETCDF_C_MPI_BOOL)
-    #   message("NetCDF C/MPI support checked ok")
+    #   message(STATUS "NetCDF C/MPI support checked ok")
     #   set(HAVE_NETCDF_MPI 1)
     # else()
-    #   message("NetCDF C/MPI not supported")
+    #   message(STATUS "NetCDF C/MPI not supported")
     # endif()
 
     message(STATUS "Check netcdf/fortran support...")
@@ -549,14 +547,14 @@ if (MPI_FOUND)
       try_compile(HAVE_NETCDF_FORTRAN_BOOL
         ${CMAKE_BINARY_DIR}/try_compile_netcdf
         ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_netcdf_fortran.F90
-        LINK_LIBRARIES PkgConfig::ABINIT_NETCDF_FORTRAN PkgConfig::ABINIT_NETCDF MPI::MPI_Fortran)
+        LINK_LIBRARIES HDF5::HDF5 PkgConfig::ABINIT_NETCDF_FORTRAN PkgConfig::ABINIT_NETCDF MPI::MPI_Fortran)
     endif()
     if (HAVE_NETCDF_FORTRAN_BOOL)
-      message("NetCDF Fortran support checked ok")
+      message(STATUS "NetCDF Fortran support checked ok")
       set(HAVE_NETCDF 1)
       set(HAVE_NETCDF_FORTRAN 1)
     else()
-      message("NetCDF Fortran not supported")
+      message(STATUS "NetCDF Fortran not supported")
     endif()
 
     # check NetCDF fortran / MPI
@@ -577,14 +575,14 @@ if (MPI_FOUND)
     endif()
 
     if (HAVE_NETCDF_FORTRAN_BOOL AND HAVE_NETCDF_FORTRAN_MPI_BOOL)
-      message("NetCDF fortran/MPI support checked ok")
+      message(STATUS "NetCDF fortran/MPI support checked ok")
       set(HAVE_NETCDF_FORTRAN_MPI 1)
 
       # TO DO : evaluate if we should also set HAVE_NETCDF_MPI here, because actually
       # only HAVE_NETCDF_MPI is used e.g m_nctk.F90
       set(HAVE_NETCDF_MPI 1)
     else()
-      message("NetCDF fortran/MPI not supported")
+      message(STATUS "NetCDF fortran/MPI not supported")
     endif()
 
   endif()
@@ -638,6 +636,6 @@ endif()
 CHECK_SYMBOL_EXISTS(abort "stdlib.h" HAVE_ABORT)
 CHECK_SYMBOL_EXISTS(clock_gettime "time.h" HAVE_CLOCK_GETTIME)
 
-message(" Generating config.h ...")
+message(STATUS " Generating config.h ...")
 configure_file(config.h.cmake config.h @ONLY)
-message("")
+message(STATUS "")

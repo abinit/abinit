@@ -160,12 +160,12 @@ ABI_EXTERNAL_PARAMS = OrderedDict([
     ("ETSF_IO", "True if NetCDF is enabled (compilation)"),
     ("FFTW3", "True if FFTW3 is enabled (compilation)"),
     ("GPU", "True if ABINIT has been compiled using one of the GPU implementations (CUDA, OPENMP_OFFLOAD, KOKKOS)"),
-    ("KOKKOS", "True if ABINIT has been compiled using KOKKOS performance library (compilation for GPU accelerators)"), 
+    ("KOKKOS", "True if ABINIT has been compiled using KOKKOS performance library (compilation for GPU accelerators)"),
     ("MPI_IO", "True if MPI_IO is enabled (compilation)"),
     ("NPROC", "Number of processors used for Abinit"),
     ("NVTX", "True if ABINIT has been linked to the NVIDIA® Tools Extension SDK (NVTX)"),
     ("OPENMP", "True if ABINIT has been compiled using OPENMP multithreading (compilation for multicore processors)"),
-    ("OPENMP_OFFLOAD", "True if ABINIT has been compiled using OPENMP_OFFLOAD (openMP v5+) (compilation for GPU accelerators)"), 
+    ("OPENMP_OFFLOAD", "True if ABINIT has been compiled using OPENMP_OFFLOAD (openMP v5+) (compilation for GPU accelerators)"),
     ("PARALLEL", "True if the code is compiled with MPI"),
     ("ROCTX", "True if ABINIT has been linked to the AMD ROCm Tools Extension SDK (ROCTX)"),
     ("SEQUENTIAL", "True if the code is compiled without MPI"),
@@ -254,6 +254,7 @@ ABI_TOPICS = [
     "RandStopPow",
     "Recursion",
     "RPACorrEn",
+    "RTTDDFT",
     "SCFControl",
     "SCFAlgorithms",
     "SelfEnergy",
@@ -1023,10 +1024,12 @@ class InputVariables(OrderedDict):
     @classmethod
     def from_pyfile(cls, filepath):
         """Initialize the object from python file."""
-        import imp
-        module = imp.load_source(filepath, filepath)
-        #from importlib.machinery import SourceFileLoader
-        #module = SourceFileLoader(filepath, filepath).load_module()
+        try:
+            import imp
+            module = imp.load_source(filepath, filepath)
+        except ModuleNotFoundError:
+            from importlib.machinery import SourceFileLoader
+            module = SourceFileLoader(filepath, filepath).load_module()
         vlist = [Variable(**d) for d in module.variables]
         new = cls()
         new.executable = module.executable

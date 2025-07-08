@@ -19,7 +19,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -160,7 +160,7 @@ contains
        endif
     end if
     if(params%spin_dynamics==3) then ! Monte carlo
-       call self%spin_mc%initialize(nspin=nspin, angle=1.0_dp, temperature=params%spin_temperature)
+       call self%spin_mc%initialize(nspin=nspin, angle=0.2_dp, temperature=params%spin_temperature)
     end if
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%dt, master, comm, ierr)
@@ -487,7 +487,7 @@ contains
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp2(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
@@ -502,7 +502,7 @@ contains
        Ri = cross(S_in(:,i),Htmp)
        dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp, 3, buffer=self%buffer)
@@ -552,7 +552,7 @@ contains
        !Ri = cross(S_in(:,i),Htmp)
        !dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
        Ri=S_in(:,i)!+dSdt*self%dt
-       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       Ri=Ri/norm2(Ri)
        self%Stmp(:,i)=Ri
     end do
     call self%mps%allgatherv_dp2d(self%Stmp2, 3, buffer=self%buffer)
@@ -956,17 +956,22 @@ contains
           self%params%spin_temperature=T
        endif
        call self%set_temperature(temperature=T)
+
        if(iam_master) then
           call self%hist%set_params(spin_nctime=self%params%spin_nctime, &
                &     spin_temperature=T)
           call self%spin_ob%reset(self%params)
+       endif
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
-          if(i==1) then
-             call self%set_initial_state(mode=self%params%spin_init_state)
-          else
-             call self%hist%inc1()
-          endif
+       if(i==1) then
+          call self%set_initial_state(mode=self%params%spin_init_state)
+       else   
+          if(iam_master) then
+            call self%hist%inc1()
+           endif
+       endif
 
+       if(iam_master) then
           write(post_fname, "(I4.4)") i
           call self%prepare_ncfile( self%params, &
                & trim(ncfile_prefix)//'_T'//post_fname//'_spinhist.nc')

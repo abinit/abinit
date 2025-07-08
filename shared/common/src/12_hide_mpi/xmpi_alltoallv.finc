@@ -8,7 +8,7 @@
 !!  xmpi_alltoallv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2024 ABINIT group (AR,XG)
+!!  Copyright (C) 2001-2025 ABINIT group (AR,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@
 !!
 !! SOURCE
 
-subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
+subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier,use_omp_map)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
@@ -42,29 +42,58 @@ subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,co
  integer , DEV_CONTARRD intent(in) :: sendcnts(:),sdispls(:),rdispls(:),recvcnts(:)
  integer ,intent(in) :: comm
  integer ,intent(out) :: ier
+ logical ,intent(in), optional :: use_omp_map
 
 !Local variables-------------------
+ logical :: l_use_omp_map
  integer :: sc,sds,sdr,sz1
  integer :: i
- 
+
 ! *********************************************************************
 
  ier=0
 #if defined HAVE_MPI
+ l_use_omp_map=.false.
+ if(present(use_omp_map)) l_use_omp_map=use_omp_map
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-!  allgather xval on all proc. in comm
-   call MPI_ALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
-&   recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,ier)
+   if(.not. l_use_omp_map) then
+     call MPI_ALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
+&     recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,ier)
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_GPU_MPI
+     ! Proper GPU-aware call
+     !$OMP TARGET DATA USE_DEVICE_ADDR(xval,recvbuf)
+     call MPI_ALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
+&     recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,ier)
+     !$OMP END TARGET DATA
+#else
+     !$OMP TARGET UPDATE FROM(xval)
+     call MPI_ALLTOALLV(xval,sendcnts,sdispls,MPI_DOUBLE_PRECISION,recvbuf,&
+&     recvcnts,rdispls,MPI_DOUBLE_PRECISION,comm,ier)
+     !$OMP TARGET UPDATE TO(recvbuf)
+#endif
+#endif
+       end if
  else if (comm == MPI_COMM_SELF) then
 #endif
    sz1=size(xval,1)
    sds=0;if (size(sdispls)>0) sds=sdispls(1)/sz1
    sdr=0;if (size(rdispls)>0) sdr=rdispls(1)/sz1
    sc=size(xval,2);if (size(sendcnts)>0) sc=sendcnts(1)/sz1
-!$OMP parallel do
-   do i=1,sc
-     recvbuf(:,sdr+i)=xval(:,sds+i)
-   end do
+   if(.not. l_use_omp_map) then
+     !$OMP parallel do
+     do i=1,sc
+       recvbuf(:,sdr+i)=xval(:,sds+i)
+     end do
+   else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET PARALLEL DO MAP(to:xval,recvbuf) PRIVATE(i)
+     do i=1,sc
+       recvbuf(:,sdr+i)=xval(:,sds+i)
+     end do
+#endif
+   end if
 
 #if defined HAVE_MPI
  end if

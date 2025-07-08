@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (XG, MG, MJV, DRH, DCA, JCC, MM)
+!! Copyright (C) 2008-2025 ABINIT group (XG, MG, MJV, DRH, DCA, JCC, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,8 @@ module m_kpts
  use m_time,           only : timab, cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_0d
- use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
+ use m_matrix,         only : mati3inv, mati3det, matr3inv
+ use m_symtk,          only : smallprim
  use m_fstrings,       only : sjoin, itoa, ftoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
@@ -61,6 +62,32 @@ module m_kpts
  public :: mknormpath
  private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
 !!***
+
+#if 0
+   type, public :: kinds_t
+     integer :: ibz_idx
+     integer :: isym
+     integer :: trev
+     integer :: g0(3)
+     logical :: is_irred
+   contains
+   end type kinds_t
+  !!***
+
+   type, public :: kmap_t
+     integer :: nkpt = -1
+     integer :: kptopt = -1
+     integer :: ierr = -1
+     !character(len=500) :: err_msg
+     character(len=20) :: mode
+     real(dp) :: dksqmax
+     real(dp) :: qpt(3) = zero
+     type(kinds_t),allocatable :: inds(:)
+   contains
+     procedure :: free => kmap_free
+   end type kmap_t
+  !!***
+#endif
 
 !----------------------------------------------------------------------
 
@@ -154,11 +181,10 @@ end function kpts_timrev_from_kptopt
 !!
 !! INPUTS
 !!  cryst<crystal_t> = crystalline structure with info on symmetries and time-reversal.
-!!  kptopt=option for the generation of k points
-!!    (defines whether spatial symmetries and/or time-reversal can be used)
+!!  kptopt=option for the generation of k points (defines whether spatial symmetries and/or time-reversal can be used)
 !!  kptrlatt(3,3)=integer coordinates of the primitive vectors of the
-!!   lattice reciprocal to the k point lattice to be generated here
-!!   If diagonal, the three values are the Monkhorst-Pack usual values, in case of simple cubic.
+!!    lattice reciprocal to the k point lattice to be generated here
+!!    If diagonal, the three values are the Monkhorst-Pack usual values, in case of simple cubic.
 !!  nshiftk= number of shift vectors in the repeated cell
 !!  shiftk(3,nshiftk) = vectors that will be used to determine the shifts from (0. 0. 0.).
 !!
@@ -174,8 +200,9 @@ end function kpts_timrev_from_kptopt
 !!
 !! SOURCE
 
-subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-                                  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
+subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, &  ! in
+                                  nkibz, kibz, wtk, nkbz, kbz, &               ! out
+                                  new_kptrlatt, new_shiftk, bz2ibz)            ! out Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -490,11 +517,7 @@ end function symkchk
 !! kpts_sort
 !!
 !! FUNCTION
-!!  Order list of k-points according to the norm.
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Order list of k-points according to their norm.
 !!
 !! SOURCE
 
@@ -513,7 +536,6 @@ subroutine kpts_sort(gprimd, nkpt, kpts)
 !arrays
  integer,allocatable :: iperm(:)
  real(dp),allocatable :: knorm2(:), kpts_ord(:,:)
-
 ! *************************************************************************
 
  ABI_MALLOC(knorm2, (nkpt))
@@ -543,11 +565,8 @@ end subroutine kpts_sort
 !! kpts_pack_in_stars
 !!
 !! FUNCTION
-!!  Pack k-points in Stars using kmap symmetry table.
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Pack k-points in stars using kmap symmetry table.
+!!  Rearrange kpts as well as kmap.
 !!
 !! SOURCE
 
@@ -569,7 +588,6 @@ subroutine kpts_pack_in_stars(nkpt, kpts, kmap)
  integer,allocatable :: iperm(:), ibz_ids(:), kmap_ord(:,:), star_pos(:,:)
  real(dp) :: swap_kpt(3), swap_kmap(6)
  real(dp),allocatable :: kpts_ord(:,:)
-
 ! *************************************************************************
 
  ! Order according to ik_ibz index
@@ -666,17 +684,16 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
  integer :: timrev, nsym
 !arrays
  real(dp) :: my_qpt(3)
-
 ! *************************************************************************
 
  my_qpt = zero; if (present(qpt)) my_qpt = qpt
  timrev = kpts_timrev_from_kptopt(kptopt)
  ! if no spatial symm. set nsym to 1 to suppress the use of spatial symm.
  ! the first symm. is always the identity
- if(kptopt==2 .or. kptopt==3) then
+ if (kptopt==2 .or. kptopt==3) then
    nsym = 1
  else
-  nsym = cryst%nsym
+   nsym = cryst%nsym
  end if
 
  select case (mode)
@@ -694,7 +711,7 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
    ! wavefunctions should be rewritten almost completely.
 
    call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
-                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)
+                          nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)
 
  case default
    ABI_ERROR(sjoin("Invalid mode:", mode))
@@ -703,7 +720,33 @@ integer function kpts_map(mode, kptopt, cryst, krank, nkpt2, kpt2, map, qpt, dks
  my_tol = tol12; if (present(dksqmax_tol)) my_tol = dksqmax_tol
 
  ierr = merge(1, 0, dksqmax > my_tol)
- if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
+ !if (ierr /= 0) call wrtout(std_out, sjoin(" CRITICAL WARNING: dksqmax ", ftoa(dksqmax), " > ", ftoa(my_tol)))
+
+#if 0
+ !if (present(pack_in_stars)) then
+ !  if (pack_in_stars)
+ !    call kpts_pack_in_stars(nkpt2, kpt2, kmap)
+ !  end if
+ !end if
+
+
+ kmap%nkpt = nkpt2
+ kmap%kptopt = kptopt
+ kmap%ierr = ierr
+ kmap%dksqmax = dksqmax
+ kmap%mode = trim(mode)
+ kmap%qpt = qpt
+ ABI_MALLOC(kmap%inds, (nkpt2))
+ do ii=1,nkpt2
+   kmap(ii)%ibz_idx = indkk_kq(1, ii)
+   kmap(ii)%isym    = indkk_kq(2, ii)
+   kmap(ii)%trev    = indkk_kq(6, ii)
+   kmap(ii)%g0      = indkk_kq(3:5, ii)
+   kmap(ii)%is_irred = (kmap(ii)%isym == 1 .and. kmap(ii)%trev == 0 .and. all(kmap%g0 == 0))
+ end do
+
+ !ABI_FREE(kmap%inds)
+#endif
 
 end function kpts_map
 !!***
@@ -736,7 +779,6 @@ subroutine kpts_map_print(units, header, mode, bz, ibz, bz2ibz, prtvol)
 ! *************************************************************************
 
  call wrtout(units, " "//trim(header))
-
  select case (mode)
  case ("symrec")
    call wrtout(units, &
@@ -2021,6 +2063,7 @@ end subroutine get_kpt_fullbz
 !!  option= Flag defining what will be printed of iout: 0 for k points, anything else for q points.
 !!    Also, for q points, if the Gamma point is present, place it first in the list.
 !!  shiftk(3,nshiftk) = vectors that will be used to determine the shifts from (0. 0. 0.).
+!!  prtout=write info to the output and log files.
 !!
 !! OUTPUT
 !!  nkpt = number of k points
@@ -2042,12 +2085,13 @@ end subroutine get_kpt_fullbz
 !!
 !! SOURCE
 
-subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsampling)
+subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsampling,prtout)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: brav,iout,mkpt,nshiftk,option
  integer,intent(out) :: nkpt
+ logical, optional, intent(in) :: prtout
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
  integer,optional,intent(in) :: downsampling(3)
@@ -2058,6 +2102,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !scalars
  integer,parameter :: prtvol=0
  integer :: dividedown,ii,ikshft,jj,kk,nkpout,nkptlatt,nn,proddown
+ logical :: prtout_
  real(dp) :: shift
  character(len=500) :: msg
 !arrays
@@ -2075,7 +2120,14 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
 !ENDDEBUG
 
- if(option/=0) call wrtout(iout,'       Homogeneous q point set in the B.Z.  ')
+ prtout_ = .true.
+ if (present(prtout)) then
+    prtout_ = prtout
+ end if
+
+ if (option/=0) then
+   if (prtout_) call wrtout(iout,'       Homogeneous q point set in the B.Z.  ')
+ end if
 
  if(abs(brav)/=1)then
 !  Only generate Monkhorst-Pack lattices
@@ -2544,17 +2596,19 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      end do
    end if
 
-   write(msg,'(a,i8)')' Grid q points  : ',nkpt
-   call wrtout(iout,msg)
-   nkpout=nkpt
-   if(nkpt>80)then
-     call wrtout(iout,' greater than 80, so only write 20 of them ')
-     nkpout=20
-   end if
-   do ii=1,nkpout
-     write(msg, '(1x,i2,a2,3es16.8)' )ii,') ',spkpt(1,ii),spkpt(2,ii),spkpt(3,ii)
+   if (prtout_) then
+     write(msg,'(a,i8)')' Grid q points  : ',nkpt
      call wrtout(iout,msg)
-   end do
+     nkpout=nkpt
+     if(nkpt>80)then
+       call wrtout(iout,' greater than 80, so only write 20 of them ')
+       nkpout=20
+     end if
+     do ii=1,nkpout
+       write(msg, '(1x,i2,a2,3es16.8)' )ii,') ',spkpt(1,ii),spkpt(2,ii),spkpt(3,ii)
+       call wrtout(iout,msg)
+     end do
+   end if
  end if
 
 end subroutine smpbz
@@ -2730,11 +2784,9 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
      axes(:,1)=-axes(:,1)
    end if
 !  Prefer symmetry axes on the same side as the primitive axes
-   sca=axes(1,1)*r2d(1,1)+axes(2,1)*r2d(2,1)+axes(3,1)*r2d(3,1)
-   scb=axes(1,2)*r2d(1,2)+axes(2,2)*r2d(2,2)+axes(3,2)*r2d(3,2)
-   scc=axes(1,3)*rprimd(1,dirvacuum)&
-&   +axes(2,3)*rprimd(2,dirvacuum)&
-&   +axes(3,3)*rprimd(3,dirvacuum)
+   sca=DOT_PRODUCT(axes(:,1), r2d(:,1))
+   scb=DOT_PRODUCT(axes(:,2), r2d(:,2))
+   scc=DOT_PRODUCT(axes(:,3), rprimd(:,dirvacuum))
    if(sca<-tol8 .and. scb<-tol8)then
      axes(:,1)=-axes(:,1) ; sca=-sca
      axes(:,2)=-axes(:,2) ; scb=-scb
@@ -2749,8 +2801,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
 !  axes(:,2)=-axes(:,2) ; scb=-scb
 !  axes(:,3)=-axes(:,3) ; scc=-scc
 !  end if
-   length_axis1=sqrt(axes(1,1)**2+axes(2,1)**2+axes(3,1)**2)
-   length_axis2=sqrt(axes(1,2)**2+axes(2,2)**2+axes(3,2)**2)
+   length_axis1=NORM2(axes(:,1))
+   length_axis2=NORM2(axes(:,2))
 
 !  DEBUG
 !  write(std_out,*)' testkgrid: iholohedry, center =',iholohedry,center
@@ -2776,9 +2828,9 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rpri
    do ii=1,3
      axes(:,ii)=rprimd(:,1)*matrix2(ii,1)+rprimd(:,2)*matrix2(ii,2)+rprimd(:,3)*matrix2(ii,3)
    end do
-   length_axis1=sqrt(axes(1,1)**2+axes(2,1)**2+axes(3,1)**2)
-   length_axis2=sqrt(axes(1,2)**2+axes(2,2)**2+axes(3,2)**2)
-   length_axis3=sqrt(axes(1,3)**2+axes(2,3)**2+axes(3,3)**2)
+   length_axis1 = NORM2(axes(:,1))
+   length_axis2 = NORM2(axes(:,2))
+   length_axis3 = NORM2(axes(:,3))
 !  DEBUG
 !  write(std_out,*)' testkgrid: axes=',axes(:,:)
 !  write(std_out,*)' length_axis=',length_axis1,length_axis2,length_axis3
@@ -3372,9 +3424,7 @@ subroutine bzlint_init(self, ngkpt, ndat, nkpt, kpts, values)
 
  self%ngkpt = ngkpt; self%ndat = ndat
  ! The mesh is closed i.e. periodic images are included.
- self%nx = ngkpt(1)
- self%ny = ngkpt(2)
- self%nz = ngkpt(3)
+ self%nx = ngkpt(1); self%ny = ngkpt(2); self%nz = ngkpt(3)
  ABI_CALLOC(self%vals_grid, (self%nx, self%ny, self%nz, ndat))
 
  ! Insert values in the grid.

@@ -1,21 +1,21 @@
 # Linear response function and dynamic quadrupoles calculation for GaP
-# (M. Royo, 7.11.2019) 
+# (M. Royo, 7.11.2019)
 
 ndtset 12
 
 #Set 1 : ground state self-consistency
 #*************************************
-getwfk1   0 
+getwfk1   0
 kptopt1   1
-tolvrs1   1.0d-18 
-nqpt1     0    
+tolvrs1   1.0d-18
+nqpt1     0
 rfphon1   0
 
 #Set 2: Response function calculation of d/dk wave function
 #**********************************************************
 kptopt2   2
-iscf2    -3     
-rfelfd2   2    
+iscf2    -3
+rfelfd2   2
 tolwfr2   1.0d-20
 rfphon2   0
 
@@ -61,10 +61,10 @@ qpt12 -2.50000000E-01  5.00000000E-01  2.50000000E-01
 
 #Common input variables
 #**********************
-getwfk   1     
-kptopt   3    
-rfphon   1   
-rfatpol   1 2 
+getwfk   1
+kptopt   3
+rfphon   1
+rfatpol   1 2
 tolvrs   1.0d-8
 useylm  1
 nqpt   1
@@ -80,11 +80,11 @@ rprim 0.0 5.023016083002 5.023016083002
 
 #Definition of the atom types and positions
 #******************************************
-ntypat 2  
+ntypat 2
 znucl  31 15
 natom 2
 typat 1 2
-xred    
+xred
         0.0000000      0.0000000      0.0000000
         0.2500000      0.2500000      0.2500000
 
@@ -105,7 +105,7 @@ shiftk 0.5 0.5 0.5
        0.5 0.0 0.0
        0.0 0.5 0.0
        0.0 0.0 0.5
-         
+
 
 #Definition of the SCF procedure
 #*******************************
@@ -123,10 +123,10 @@ diemac 12.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = bob_gnu_13.2_openmp, scope_gnu_10.2_paral
+#%% exclude_builders = scope_gnu_10.2_paral, bob_gnu_13.2_openmp
 #%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   tlw_4.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4

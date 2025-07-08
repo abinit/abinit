@@ -1,7 +1,7 @@
 /* dev_spec_cuda.cpp*/
 
 /*
- * Copyright (C) 2008-2024 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.
@@ -262,6 +262,7 @@ void c_get_ndevice_(int* ndev)
 //To be completed for new card versions
 //Values for FP64 cores:
 //https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#arithmetic-instructions
+//https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capability-12-0
 static
 int version_2_cores(int major, int minor)
 {
@@ -296,6 +297,8 @@ int version_2_cores(int major, int minor)
         { 0x87, 128, 2 }, // Ampere Generation (SM 8.7) AGX class
         { 0x89, 128, 2 }, // Ada Lovelace Generation (SM 8.9) RTX class
         { 0x90, 128, 64}, // Hooper Generation (SM 9.0) H100 class
+        { 0xa0, 128, 64}, // Blackwell Generation (SM 10.0) B100 class
+        { 0xc0, 128, 2 }, // Blackwell Generation (SM 12.0) RTX class
         {   -1, -1, -1 }
     };
     int index = 0;
@@ -309,7 +312,7 @@ int version_2_cores(int major, int minor)
     }
 
 //  printf("MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n", major, minor, nGpuArchCoresPerSM[7].Cores);
-    return nGpuArchCoresPerSM[10].Cores_fp64;
+    return nGpuArchCoresPerSM[24].Cores_fp64;
 }
 
 

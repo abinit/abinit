@@ -1,0 +1,602 @@
+******************************************************************************************
+                                Welcome to MULTIBINIT,                         
+ a software platform designed for the construction and use of second-principles models
+                   for lattice, spin and electron degrees of freedom.
+
+.Version 9.11.4 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
+
+.Copyright (C) 1998-2022 ABINIT group . 
+ MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ MULTIBINIT is a software project of the University of Liege
+ (PHYTHEMA & NANOMAT groups), in collaboration with other partners.
+
+-----------------------------------------------------------------------------------------
+
+                          MULTIBINIT - LATTICE MODELS                   
+
+ Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege
+   (Philippe.Ghosez@uliege.be).
+
+ Main contributors: Alexandre MARTIN, Jordan BIEDER, Michael Marcus SCHMITT,
+   Louis BASTOGNE, Xu HE, Alireza SASANI, Huazhang ZHANG, Subhadeep BANDYOPADHYAY,
+   Philippe GHOSEZ.
+
+ Technical support: Xu HE (X.He@uliege.be)
+
+*****************************************************************************************
+
+
+
+.Starting date : Mon 17 Mar 2025.
+- ( at 09h19 )
+  
+- The starting date is more than 2 years after the initial release
+- of this version of ABINIT, namely Jul 2022.
+- Note that the use beyond 3 years after the release will not be supported.
+- Action: please, switch to a more recent version of ABINIT.
+
+-  nproc =    1
+
+================================================================================
+
+ Read the information in the reference structure in 
+-/home/fgo/Trabajo/STO/ddbSTO.DDB
+ to initialize the multibinit input
+
+================================================================================
+
+ -outvars_multibinit: echo values of input variables ----------------------
+
+ Flags : 
+     ifcflag         1
+     strcpli        -1
+ Molecular Dynamics :
+    dynamics        13
+    dyn_chks         0
+        temp       1.0
+       ntime        10
+       ncell         4         4         1
+       dtion        40
+   restartxf        -3
+     optcell         0
+       bmass         0.0
+        nnos         0
+        qmass  
+ Miscellaneous information :
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         1
+dipdip_range         4         4         1
+      ifcana         0
+      ifcout   2000000
+      natifc         5
+       atifc         1   2   3   4   5
+ Description of grid 1 :
+        brav         1
+       ngqpt         8         8         8
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l         1
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    0.000E+00
+
+================================================================================
+
+ Read the DDB information of the reference system and perform some checks
+
+
+  ==== Info on the Cryst% object ====
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  7.3497833  0.0000000  0.0000000  G(1)=  0.1360584  0.0000000  0.0000000
+ R(2)=  0.0000000  7.3497833  0.0000000  G(2)=  0.0000000  0.1360584  0.0000000
+ R(3)=  0.0000000  0.0000000  7.3497833  G(3)=  0.0000000  0.0000000  0.1360584
+ Unit cell volume ucvol=  3.9703025E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Sr
+    2)    0.5000000  0.5000000  0.5000000  Ti
+    3)    0.5000000  0.0000000  0.5000000   O
+    4)    0.5000000  0.5000000  0.0000000   O
+    5)    0.0000000  0.5000000  0.5000000   O
+
+ DDB file with 37 blocks has been read.
+
+================================================================================
+
+ Extraction of the energy of the structure (unit: Hartree)
+
+ Energy  =       -1.433552100863E+02
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.001509        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -0.001509        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
+       3               3       -0.001509        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.556215E+00    0.000000E+00    0.000000E+00
+         1         2    0.000000E+00    2.556215E+00    0.000000E+00
+         1         3    0.000000E+00    0.000000E+00    2.556215E+00
+         2         1    7.284744E+00    0.000000E+00    0.000000E+00
+         2         2    0.000000E+00    7.284744E+00    0.000000E+00
+         2         3    0.000000E+00    0.000000E+00    7.284744E+00
+         3         1   -2.037054E+00    0.000000E+00    0.000000E+00
+         3         2    0.000000E+00   -5.766851E+00    0.000000E+00
+         3         3    0.000000E+00    0.000000E+00   -2.037054E+00
+         4         1   -2.037054E+00    0.000000E+00    0.000000E+00
+         4         2    0.000000E+00   -2.037054E+00    0.000000E+00
+         4         3    0.000000E+00    0.000000E+00   -5.766851E+00
+         5         1   -5.766851E+00    0.000000E+00    0.000000E+00
+         5         2    0.000000E+00   -2.037054E+00    0.000000E+00
+         5         3    0.000000E+00    0.000000E+00   -2.037054E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+
+================================================================================
+
+ Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
+
+ Cartesian components of forces (hartree/bohr)
+
+   1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+   2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+   3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+   4     0.00000000E+00  0.00000000E+00  0.00000000E+00
+   5     0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -1.05404392E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.05404392E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.05404392E-08  sigma(2 1)=  0.00000000E+00
+
+
+================================================================================
+
+ Extraction of the clamped elastic tensor (unit:10^2GPa)
+
+   3.5086538   1.0371759   1.0371759   0.0000000  -0.0000000  -0.0000000
+   1.0371759   3.5086538   1.0371759  -0.0000000  -0.0000000  -0.0000000
+   1.0371759   1.0371759   3.5086538  -0.0000000  -0.0000000  -0.0000000
+   0.0000000   0.0000000  -0.0000000   1.1475249  -0.0000000  -0.0000000
+  -0.0000000   0.0000000  -0.0000000  -0.0000000   1.1475249  -0.0000000
+  -0.0000000  -0.0000000   0.0000000  -0.0000000  -0.0000000   1.1475249
+
+================================================================================
+
+ Calculation of acoustic sum rule
+
+
+================================================================================
+
+ Calculation of the interatomic forces from DDB
+
+       Homogeneous q point set in the B.Z.
+ Grid q points  :      512
+ greater than 80, so only write 20 of them
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   1.25000000E-01  0.00000000E+00  0.00000000E+00
+  3)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  4)   3.75000000E-01  0.00000000E+00  0.00000000E+00
+  5)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  6)  -3.75000000E-01  0.00000000E+00  0.00000000E+00
+  7)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  8)  -1.25000000E-01  0.00000000E+00  0.00000000E+00
+  9)   0.00000000E+00  1.25000000E-01  0.00000000E+00
+ 10)   1.25000000E-01  1.25000000E-01  0.00000000E+00
+ 11)   2.50000000E-01  1.25000000E-01  0.00000000E+00
+ 12)   3.75000000E-01  1.25000000E-01  0.00000000E+00
+ 13)   5.00000000E-01  1.25000000E-01  0.00000000E+00
+ 14)  -3.75000000E-01  1.25000000E-01  0.00000000E+00
+ 15)  -2.50000000E-01  1.25000000E-01  0.00000000E+00
+ 16)  -1.25000000E-01  1.25000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+ 18)   1.25000000E-01  2.50000000E-01  0.00000000E+00
+ 19)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+ 20)   3.75000000E-01  2.50000000E-01  0.00000000E+00
+
+ The interatomic forces have been obtained
+
+================================================================================
+
+ Calculation of dynamical matrix for each ph1l points
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+  -3.188383E-04 -3.188383E-04 -3.188383E-04  0.000000E+00  0.000000E+00
+   0.000000E+00  7.163480E-04  7.163480E-04  7.163480E-04  1.045389E-03
+   1.045389E-03  1.045389E-03  2.437090E-03  2.437090E-03  2.437090E-03
+ Phonon frequencies in cm-1    :
+- -6.997693E+01 -6.997693E+01 -6.997693E+01  0.000000E+00  0.000000E+00
+-  0.000000E+00  1.572202E+02  1.572202E+02  1.572202E+02  2.294363E+02
+-  2.294363E+02  2.294363E+02  5.348794E+02  5.348794E+02  5.348794E+02
+
+================================================================================
+
+ Calculation of the internal-strain  tensor
+
+ Force-response internal strain tensor(Unit:Hartree/bohr)
+
+ Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
+  1  x    -0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000   0.0000000
+  1  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000
+  1  z     0.0000000   0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000
+  2  x     0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000  -0.0000000
+  2  y    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000
+  2  z    -0.0000000  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
+  3  x    -0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000   0.0000000
+  3  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000
+  3  z     0.0000000   0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000
+  4  x    -0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000   0.0000000
+  4  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000
+  4  z     0.0000000   0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000
+  5  x    -0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000   0.0000000
+  5  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000
+  5  z     0.0000000   0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000
+
+
+
+ Bound for ifc SR:
+
+ x=[ -4  4], y=[ -4  4] and z=[ -4  4]
+
+================================================================================
+ Generation of new ifc
+
+ dipdip is set to one, the dipole-dipole interation is recompute.
+
+ Bound for ifc (LR):
+
+ x=[ -1  2], y=[ -1  2] and z=[  0  0]
+
+ Computation of new dipole-dipole interaction.
+
+ Impose acoustic sum rule on total ifc
+
+================================================================================
+
+ Read the coefficients of the polynomial fit from XML and perform some checks
+
+-Opening the file /home/fgo/Trabajo/STO/modelSTO.xml
+-Reading the file /home/fgo/Trabajo/STO/modelSTO.xml with LibXML library
+
+================================================================================
+
+--------------------------------------------------------------------------------
+-Monte Carlo / Molecular Dynamics 
+
+
+=== [ionmov=13] Isothermal/isenthalpic ensemble molecular dynamics with effective potential
+================================================================================
+
+--- Iteration: ( 1/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ The size of the supercell for the fit is   4   4   1
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  0.0000000000000000E+00 Hartree
+ Energy of the fitted coefficient          :  0.0000000000000000E+00 Hartree
+ Energy from electric field is             :  0.0000000000000000E+00 Hartree
+
+    >>>>>>>>> Etotal= -2.29368336138112E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  0.00000000E+00  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  0.00000000E+00  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  0.00000000E+00  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -0.0000E+00 GPa]
+- sigma(1 1)=  0.00000000E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  0.00000000E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  0.00000000E+00  sigma(2 1)=  0.00000000E+00
+--------------------------------------------------------------------------------
+
+
+--- Iteration: ( 2/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  1.6496958879943544E-02 Hartree
+ Energy of the fitted coefficient          :  2.0927060078006830E-03 Hartree
+ Energy from electric field is             : -3.3169769153876565E+01 Hartree
+
+    >>>>>>>>> Etotal= -2.32683454087011E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -2.13606085E-03  sigma(3 2)= -1.74653334E-06
+  sigma(2 2)= -2.13315740E-03  sigma(3 1)=  5.03420938E-07
+  sigma(3 3)= -1.06668392E-03  sigma(2 1)= -8.86003991E-08
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  5.2329E+01 GPa]
+- sigma(1 1)= -6.28450692E+01  sigma(3 2)= -5.13847763E-02
+- sigma(2 2)= -6.27596470E+01  sigma(3 1)=  1.48111529E-02
+- sigma(3 3)= -3.13829190E+01  sigma(2 1)= -2.60671330E-03
+--------------------------------------------------------------------------------
+
+
+--- Iteration: ( 3/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  6.5645822274260635E-02 Hartree
+ Energy of the fitted coefficient          :  4.3170066631348987E-02 Hartree
+ Energy from electric field is             : -6.6301019913088254E+01 Hartree
+
+    >>>>>>>>> Etotal= -2.35987556540530E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -4.34878556E-03  sigma(3 2)= -1.72625247E-06
+  sigma(2 2)= -4.34581471E-03  sigma(3 1)=  4.83976909E-07
+  sigma(3 3)= -2.17299744E-03  sigma(2 1)= -5.41700299E-08
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  1.0658E+02 GPa]
+- sigma(1 1)= -1.27945667E+02  sigma(3 2)= -5.07880926E-02
+- sigma(2 2)= -1.27858262E+02  sigma(3 1)=  1.42390899E-02
+- sigma(3 3)= -6.39317811E+01  sigma(2 1)= -1.59373703E-03
+--------------------------------------------------------------------------------
+
+
+--- Iteration: ( 4/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  1.4676139709382341E-01 Hartree
+ Energy of the fitted coefficient          :  2.9821371682933595E-01 Hartree
+ Energy from electric field is             : -9.9301394106538226E+01 Hartree
+
+    >>>>>>>>> Etotal= -2.39253978037374E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -6.56699124E-03  sigma(3 2)= -1.68792747E-06
+  sigma(2 2)= -6.56412913E-03  sigma(3 1)=  4.65014824E-07
+  sigma(3 3)= -3.30182729E-03  sigma(2 1)= -6.32222032E-09
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  1.6116E+02 GPa]
+- sigma(1 1)= -1.93207520E+02  sigma(3 2)= -4.96605324E-02
+- sigma(2 2)= -1.93123314E+02  sigma(3 1)=  1.36812062E-02
+- sigma(3 3)= -9.71430965E+01  sigma(2 1)= -1.86006112E-04
+--------------------------------------------------------------------------------
+
+
+--- Iteration: ( 5/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  2.5737036597268309E-01 Hartree
+ Energy of the fitted coefficient          :  1.2700426364746933E+00 Hartree
+ Energy from electric field is             : -1.3186217557610411E+02 Hartree
+
+    >>>>>>>>> Etotal= -2.42401812395478E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -8.56030159E-03  sigma(3 2)= -1.60377477E-06
+  sigma(2 2)= -8.55802157E-03  sigma(3 1)=  4.53816423E-07
+  sigma(3 3)= -4.40993927E-03  sigma(2 1)=  7.36558321E-08
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.1113E+02 GPa]
+- sigma(1 1)= -2.51852726E+02  sigma(3 2)= -4.71846750E-02
+- sigma(2 2)= -2.51785645E+02  sigma(3 1)=  1.33517379E-02
+- sigma(3 3)= -1.29744871E+02  sigma(2 1)=  2.16702903E-03
+--------------------------------------------------------------------------------
+
+
+--- Iteration: ( 6/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  3.8916211313247884E-01 Hartree
+ Energy of the fitted coefficient          :  3.9309729029494682E+00 Hartree
+ Energy from electric field is             : -1.6319503274434146E+02 Hartree
+
+    >>>>>>>>> Etotal= -2.45255825910938E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -9.84756492E-03  sigma(3 2)= -1.43658017E-06
+  sigma(2 2)= -9.84666720E-03  sigma(3 1)=  4.57931159E-07
+  sigma(3 3)= -5.41047475E-03  sigma(2 1)=  1.95227376E-07
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.4620E+02 GPa]
+- sigma(1 1)= -2.89725314E+02  sigma(3 2)= -4.22656406E-02
+- sigma(2 2)= -2.89698902E+02  sigma(3 1)=  1.34727976E-02
+- sigma(3 3)= -1.59181636E+02  sigma(2 1)=  5.74378675E-03
+--------------------------------------------------------------------------------
+
+
+--- Iteration: ( 7/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  5.2225045490070432E-01 Hartree
+ Energy of the fitted coefficient          :  9.2955572005147484E+00 Hartree
+ Energy from electric field is             : -1.9181229287514509E+02 Hartree
+
+    >>>>>>>>> Etotal= -2.47567784660085E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -9.85965577E-03  sigma(3 2)= -1.17403819E-06
+  sigma(2 2)= -9.86070129E-03  sigma(3 1)=  4.58120277E-07
+  sigma(3 3)= -6.16647797E-03  sigma(2 1)=  3.13015194E-07
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.5387E+02 GPa]
+- sigma(1 1)= -2.90081039E+02  sigma(3 2)= -3.45413904E-02
+- sigma(2 2)= -2.90111799E+02  sigma(3 1)=  1.34783616E-02
+- sigma(3 3)= -1.81424015E+02  sigma(2 1)=  9.20922339E-03
+--------------------------------------------------------------------------------
+
+
+--- Iteration: ( 8/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  6.2537289348754399E-01 Hartree
+ Energy of the fitted coefficient          :  1.7000254413313975E+01 Hartree
+ Energy from electric field is             : -2.1577302413130516E+02 Hartree
+
+    >>>>>>>>> Etotal= -2.49183075820562E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -8.59719580E-03  sigma(3 2)= -8.76463193E-07
+  sigma(2 2)= -8.59945988E-03  sigma(3 1)=  3.88353267E-07
+  sigma(3 3)= -6.52366105E-03  sigma(2 1)=  3.17804549E-07
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.3263E+02 GPa]
+- sigma(1 1)= -2.52938191E+02  sigma(3 2)= -2.57864331E-02
+- sigma(2 2)= -2.53004802E+02  sigma(3 1)=  1.14257457E-02
+- sigma(3 3)= -1.91932702E+02  sigma(2 1)=  9.35013106E-03
+--------------------------------------------------------------------------------
+
+
+--- Iteration: ( 9/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  6.7312659983547563E-01 Hartree
+ Energy of the fitted coefficient          :  2.4658421212570325E+01 Hartree
+ Energy from electric field is             : -2.3382071333919211E+02 Hartree
+
+    >>>>>>>>> Etotal= -2.50217252690791E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -7.01945932E-03  sigma(3 2)= -6.33012516E-07
+  sigma(2 2)= -7.02134417E-03  sigma(3 1)=  2.24670504E-07
+  sigma(3 3)= -6.39924563E-03  sigma(2 1)=  1.77041667E-07
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  2.0046E+02 GPa]
+- sigma(1 1)= -2.06519588E+02  sigma(3 2)= -1.86238681E-02
+- sigma(2 2)= -2.06575043E+02  sigma(3 1)=  6.61003334E-03
+- sigma(3 3)= -1.88272275E+02  sigma(2 1)=  5.20874480E-03
+--------------------------------------------------------------------------------
+
+
+--- Iteration: (10/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+--------------------------------------------------------------------------------
+ Components of total energy (in Hartree) :
+
+ Energy of the reference structure         : -2.2936833613811200E+03 Hartree
+ Energy of the ifc part                    :  6.6717503003896728E-01 Hartree
+ Energy of the fitted coefficient          :  3.0248162325153437E+01 Hartree
+ Energy from electric field is             : -2.4652701817784094E+02 Hartree
+
+    >>>>>>>>> Etotal= -2.50929504220377E+03
+
+--------------------------------------------------------------------------------
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)= -6.04164422E-03  sigma(3 2)= -4.51150239E-07
+  sigma(2 2)= -6.04253164E-03  sigma(3 1)=  5.81043677E-08
+  sigma(3 3)= -5.87627927E-03  sigma(2 1)=  1.30342003E-08
+
+-Cartesian components of stress tensor (GPa)         [Pressure=  1.7614E+02 GPa]
+- sigma(1 1)= -1.77751280E+02  sigma(3 2)= -1.32732960E-02
+- sigma(2 2)= -1.77777389E+02  sigma(3 1)=  1.70948923E-03
+- sigma(3 3)= -1.72886076E+02  sigma(2 1)=  3.83479347E-04
+--------------------------------------------------------------------------------
+
+
+================================================================================
+
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.0
+
+================================================================================
+
++Total cpu time      2.934  and wall time      3.040 sec
+
+ multibinit : the run completed succesfully.

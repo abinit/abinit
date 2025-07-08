@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DRH, DCA, XG, GM, AR, MB)
+!! Copyright (C) 1998-2025 ABINIT group (DRH, DCA, XG, GM, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -655,7 +655,7 @@ end subroutine dfpt_eltfrxc
 !! over the second strain and over all atomic displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2025 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2596,7 +2596,7 @@ end subroutine dfpt_ewald
 !! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (MR, MS)
+!! Copyright (C) 1998-2025 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2926,7 +2926,7 @@ end subroutine dfpt_ewalddq
 !! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (MR, MS)
+!! Copyright (C) 1998-2025 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2024 ABINIT group (MT,JLJ)
+!!  Copyright (C) 2015-2025 ABINIT group (MT,JLJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,7 +33,7 @@ module m_getgh2c
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
  use m_nonlop,      only : nonlop
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 

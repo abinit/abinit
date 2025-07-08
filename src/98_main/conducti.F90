@@ -8,7 +8,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2024 ABINIT group (FJ,SMazevet)
+!! Copyright (C) 2006-2025 ABINIT group (FJ,SMazevet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,7 +110,6 @@ program conducti
  call xmpi_bcast(incpaw,master,comm,mpierr)
  call xmpi_bcast(filnam,master,comm,mpierr)
  call xmpi_bcast(filnam_out,master,comm,mpierr)
-
 !Call main routine
  if (incpaw==1) then
    if (my_rank==master) then

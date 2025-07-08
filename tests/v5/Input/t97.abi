@@ -16,13 +16,13 @@ t96o_DS10_DDB
 #%% executable = mrgddb
 #%% test_chain = t96.abi, t97.abi, t98.abi, t99.abi
 #%% [files]
-#%% files_to_test = 
-#%%   t97.ddb.out, tolnlines = 0, tolabs = 2.278e-06, tolrel = 2.000e-03, fld_options = -easy
+#%% files_to_test =
+#%%   t97.ddb.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
+#%% keywords =
 #%% description = mrgddb: merge the ddb files from t96
 #%% topics = ElPhonInt
 #%%<END TEST_INFO>

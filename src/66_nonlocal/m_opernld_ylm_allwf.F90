@@ -148,7 +148,7 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  integer :: force_shift, shift, nattyp_i
- integer :: itypat, ilmn, ia, idat, igrad, ii, nlmn, iend, ibeg, iatm, iashift
+ integer :: itypat, ilmn, ia, ispinor, idat, igrad, ii, nlmn, iend, ibeg, iatm, iashift
  integer :: mua, mub, nu, mu, mua1, mua2, muu, mut, mushift, nushift
  real(dp) :: esum,esumi
  real(dp) :: d2gx(cplex)
@@ -173,14 +173,16 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,esum) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
+       do idat=1,ndat
          esum=zero
-         !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ia,ilmn,ii)
-         do ia=1,nattyp_i
-           do ilmn=1,nlmn
-             do ii=1,cplex
-               esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-               &         *gx   (ii,shift+(ia-1)*nlmn+ilmn,idat)
+         !$OMP PARALLEL DO COLLAPSE(4) REDUCTION(+:esum) PRIVATE(ia,ilmn,ii,ispinor)
+         do ispinor=1,nspinor
+           do ia=1,nattyp_i
+             do ilmn=1,nlmn
+               do ii=1,cplex
+                 esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,ispinor+nspinor*(idat-1)) &
+                 &         *gx   (ii,shift+(ia-1)*nlmn+ilmn,ispinor+nspinor*(idat-1))
+               end do
              end do
            end do
          end do
@@ -217,16 +219,18 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,igrad,esum) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
+       do idat=1,ndat
          do igrad=1,6
            esum=zero
-           !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ia,ilmn,ii)
-           do ia=1,nattyp_i
-             !Following loops are a [D][Z]DOT
-             do ilmn=1,nlmn
-               do ii=1,cplex
-                 esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-                 &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + igrad,idat)
+           !$OMP PARALLEL DO COLLAPSE(4) REDUCTION(+:esum) PRIVATE(ispinor,ia,ilmn,ii)
+           do ispinor=1,nspinor
+             do ia=1,nattyp_i
+               !Following loops are a [D][Z]DOT
+               do ilmn=1,nlmn
+                 do ii=1,cplex
+                   esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,ispinor+nspinor*(idat-1)) &
+                   &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + igrad,ispinor+nspinor*(idat-1))
+                 end do
                end do
              end do
            end do
@@ -254,16 +258,18 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,igrad,ia,esum) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
+       do idat=1,ndat
          do ia=1,nattyp_i
            do igrad=1,3
              !Following loops are a [D][Z]DOT
              esum=zero
-             !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum) PRIVATE(ilmn,ii)
-             do ilmn=1,nlmn
-               do ii=1,cplex
-                 esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-                 &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + (igrad+force_shift) ,idat)
+             !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ispinor,ilmn,ii)
+             do ispinor=1,nspinor
+               do ilmn=1,nlmn
+                 do ii=1,cplex
+                   esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,ispinor+nspinor*(idat-1)) &
+                   &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + (igrad+force_shift) ,ispinor+nspinor*(idat-1))
+                 end do
                end do
              end do
              enlout((idat-1)*nnlout + force_shift + (iatm+ia-1)*3 + igrad)= &
@@ -291,18 +297,21 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,ia,esum,mu,mua,mub) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
+       do idat=1,ndat
        do ia=1,nattyp_i
          do mu=1,6
            mua=alpha(mu);mub=beta(mu)
            esum=zero
-           !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum) PRIVATE(ilmn,ii)
-           do ilmn=1,nlmn
-             do ii=1,cplex
-               esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat)*&
-&                 d2gxdt(ii,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat)&
-&                 +dgxdtfac(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mub,idat)&
-&                 *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)
+           !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ispinor,ilmn,ii)
+           do ispinor=1,nspinor
+             do ilmn=1,nlmn
+               do ii=1,cplex
+                 esum=esum&
+                 &    +gxfac(ii,shift+(ia-1)*nlmn+ilmn,ispinor+nspinor*(idat-1))&
+                 &      *d2gxdt(ii, nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu, ispinor+nspinor*(idat-1))&
+                 &    +dgxdtfac(ii, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mub, ispinor+nspinor*(idat-1))&
+                 &      *dgxdt(ii, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))
+               end do
              end do
            end do
            enlout((idat-1)*nnlout + (iatm+ia-1)*6 + mu)= &
@@ -329,20 +338,22 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,ia,esum,mu) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
-       do ia=1,nattyp_i
-         do mu=1,3
-           esum=zero
-           !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum) PRIVATE(ilmn,ii)
-           do ilmn=1,nlmn
-             do ii=1,cplex
-               esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-               &    *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mu+6,idat)
+       do idat=1,ndat
+         do ia=1,nattyp_i
+           do mu=1,3
+             esum=zero
+             !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ispinor,ilmn,ii)
+             do ispinor=1,nspinor
+               do ilmn=1,nlmn
+                 do ii=1,cplex
+                   esum=esum+gxfac(ii, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1)) &
+                   &    *dgxdt(ii, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mu+6, ispinor+nspinor*(idat-1))
+                 end do
+               end do
              end do
+             fnlk((iatm+ia-1)*3+mu,idat)=fnlk((iatm+ia-1)*3+mu,idat)+two*esum
            end do
-           fnlk((iatm+ia-1)*3+mu,idat)=fnlk((iatm+ia-1)*3+mu,idat)+two*esum
          end do
-       end do
        end do
 
        shift = shift + nattyp(itypat)*nlmn
@@ -361,15 +372,17 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,esum,mu) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
+       do idat=1,ndat
          do mu=1,6
            esum=zero
-           !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ilmn,ii,ia)
-           do ia=1,nattyp_i
-             do ilmn=1,nlmn
-               do ii=1,cplex
-                 esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-                 &    *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mu,idat)
+           !$OMP PARALLEL DO COLLAPSE(4) REDUCTION(+:esum) PRIVATE(ispinor,ilmn,ii,ia)
+           do ispinor=1,nspinor
+             do ia=1,nattyp_i
+               do ilmn=1,nlmn
+                 do ii=1,cplex
+                   esum=esum+gxfac(ii, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1)) &
+                   &    *dgxdt(ii, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mu, ispinor+nspinor*(idat-1))
+                 end do
                end do
              end do
            end do
@@ -392,20 +405,22 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,ia,esum,mu,mua,mub,nu,mushift,nushift) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
+       do idat=1,ndat
          do mub=1,6
            do mua=1,6
              mushift=6*(mub-1);nushift=(3*natom+6)*(mub-1)
              mu=mushift+mua;nu=nushift+mua
              esum=zero
-             !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ilmn,ii)
-             do ia=1,nattyp_i
-               do ilmn=1,nlmn
-                 do ii=1,cplex
-                   esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat)&
-                   &    *d2gxdt(ii,nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu,idat)&
-                   &    +dgxdtfac(ii,ndgxdtfac*shift+(ia-1)*nlmn*ndgxdtfac+(ilmn-1)*ndgxdtfac+mua,idat)&
-                   &    *dgxdt(ii,ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mub,idat)
+             !$OMP PARALLEL DO COLLAPSE(4) REDUCTION(+:esum) PRIVATE(ispinor,ia,ilmn,ii)
+             do ispinor=1,nspinor
+               do ia=1,nattyp_i
+                 do ilmn=1,nlmn
+                   do ii=1,cplex
+                     esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,ispinor+nspinor*(idat-1))&
+                     &    *d2gxdt(ii,nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu,ispinor+nspinor*(idat-1))&
+                     &    +dgxdtfac(ii,ndgxdtfac*shift+(ia-1)*nlmn*ndgxdtfac+(ilmn-1)*ndgxdtfac+mua,ispinor+nspinor*(idat-1))&
+                     &    *dgxdt(ii,ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mub,ispinor+nspinor*(idat-1))
+                   end do
                  end do
                end do
              end do
@@ -429,22 +444,24 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,ia,esum,mu,mua,mub,nu,mushift,nushift) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
+       do idat=1,ndat
          do mub=1,6
            do ia=1,nattyp_i
              do mua=1,3
                mushift=36+3*(mub-1);nushift=6+(iatm+ia-1)*3+(3*natom+6)*(mub-1)
                mu=mushift+mua;nu=nushift+mua
                esum=zero
-               !$OMP PARALLEL DO REDUCTION(+:esum) PRIVATE(ilmn,ii)
+               !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) PRIVATE(ispinor,ilmn,ii)
+               do ispinor=1,nspinor
                  do ilmn=1,nlmn
                    do ii=1,cplex
-                     esum=esum+(gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat)&
-                     &    *d2gxdt(ii,nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu,idat)&
-                     &    +dgxdtfac(ii,ndgxdtfac*shift+(ia-1)*nlmn*ndgxdtfac+(ilmn-1)*ndgxdtfac+mub,idat)&
-                     &    *dgxdt(ii,ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua+6,idat))
+                     esum=esum+(gxfac(ii,shift+(ia-1)*nlmn+ilmn,ispinor+nspinor*(idat-1))&
+                     &    *d2gxdt(ii,nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu,ispinor+nspinor*(idat-1))&
+                     &    +dgxdtfac(ii,ndgxdtfac*shift+(ia-1)*nlmn*ndgxdtfac+(ilmn-1)*ndgxdtfac+mub,ispinor+nspinor*(idat-1))&
+                     &    *dgxdt(ii,ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua+6,ispinor+nspinor*(idat-1)))
                    end do
                  end do
+               end do
                enlout((idat-1)*nnlout + nu)=enlout((idat-1)*nnlout + nu)+two*esum
              end do
            end do
@@ -474,7 +491,7 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        !$OMP& PRIVATE(idat,igrad,ia,esum,esumi,mu,nu,mua,mub,iashift) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat*nspinor
+       do idat=1,ndat
        do ia=1,nattyp_i
          iashift=18*(ia+iatm-1)
          if(cplex==2) then
@@ -483,23 +500,29 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
                mu=(mua-1)*3+mub
                nu=(mua-1)*6+mub*2-1
                esum=zero; esumi=zero
-               !$OMP PARALLEL DO REDUCTION(+:esum,esumi) PRIVATE(ilmn)
-               do ilmn=1,nlmn
-                 esum=esum &
-&                 +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
-                    *dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
-&                 +dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
-&                   *dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
-&                 +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(1,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat) &
-&                 +gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(2,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat)
+               !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum,esumi) PRIVATE(ispinor,ilmn)
+               do ispinor=1,nspinor
+                 do ilmn=1,nlmn
+                   esum=esum &
+                   &    +dgxdt(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))&
+                   &      *dgxdtfac_sij(1,ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+3+mub, ispinor+nspinor*(idat-1)) &
+                   &    +dgxdt(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua,ispinor+nspinor*(idat-1))&
+                   &      *dgxdtfac_sij(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+3+mub, ispinor+nspinor*(idat-1)) &
+                   &    +gxfac_sij(1, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *d2gxdt(1,nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu,ispinor+nspinor*(idat-1)) &
+                   &    +gxfac_sij(2, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *d2gxdt(2,nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu,ispinor+nspinor*(idat-1))
 
-                 esumi=esumi &
-&                 +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
-                    *dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
-&                 -dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
-                    *dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
-&                 +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(2,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat) &
-&                 -gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(1,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat)
+                   esumi=esumi &
+                   &    +dgxdt(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))&
+                   &      *dgxdtfac_sij(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+3+mub, ispinor+nspinor*(idat-1)) &
+                   &    -dgxdt(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))&
+                   &      *dgxdtfac_sij(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+3+mub, ispinor+nspinor*(idat-1)) &
+                   &    +gxfac_sij(1, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *d2gxdt(2, nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu, ispinor+nspinor*(idat-1)) &
+                   &    -gxfac_sij(2, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *d2gxdt(1, nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu, ispinor+nspinor*(idat-1))
+                 end do
                end do
                enlout(nnlout*(idat-1)+iashift+nu)=enlout(nnlout*(idat-1)+iashift+nu)+esum
                enlout(nnlout*(idat-1)+iashift+nu+1)=enlout(nnlout*(idat-1)+iashift+nu+1)+esumi
@@ -512,12 +535,15 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
                mu=(mua-1)*3+mub
                nu=(mua-1)*6+mub*2-1
                esumi=zero
-               !$OMP PARALLEL DO REDUCTION(+:esumi) PRIVATE(ilmn)
-               do ilmn=1,nlmn
-                 esumi=esumi &
-&                 +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
-&                   *dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
-&                 +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(1,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat)
+               !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esumi) PRIVATE(ispinor,ilmn)
+               do ispinor=1,nspinor
+                 do ilmn=1,nlmn
+                   esumi=esumi &
+                   &    +dgxdt(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))&
+                   &      *dgxdtfac_sij(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+3+mub, ispinor+nspinor*(idat-1)) &
+                   &    +gxfac_sij(1, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *d2gxdt(1, nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mu, ispinor+nspinor*(idat-1))
+                 end do
                end do
                enlout(nnlout*(idat-1)+iashift+nu+1)=enlout(nnlout*(idat-1)+iashift+nu+1)+esumi
              end do
@@ -559,19 +585,31 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
                mua2=beta(mua)  ! (lambda)
                muu=3*(gamma(mua1,mub)-1)+mua2
                mut=3*(gamma(mua2,mub)-1)+mua1
-               !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum,esumi) PRIVATE(ilmn,d2gx)
-               do ia=1,nattyp_i
-                 do ilmn=1,nlmn
-                   d2gx(1:cplex)=half*(d2gxdt(1:cplex,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + muu,idat) &
-&                   +d2gxdt(1:cplex,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mut,idat))
-                   esum=esum &
-&                   +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
-&                   +dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
-&                   +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gx(1)+gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*d2gx(2)
-                   esumi=esumi &
-&                   +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
-&                   -dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
-&                   +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gx(2)-gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*d2gx(1)
+               !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum,esumi) PRIVATE(ispinor,ia,ilmn,d2gx)
+               do ispinor=1,nspinor
+                 do ia=1,nattyp_i
+                   do ilmn=1,nlmn
+                     d2gx(1:cplex)=half*(&
+                     &    d2gxdt(1:cplex, nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+muu, ispinor+nspinor*(idat-1)) &
+                     &    +d2gxdt(1:cplex, nd2gxdt*shift+(ia-1)*nlmn*nd2gxdt+(ilmn-1)*nd2gxdt+mut, ispinor+nspinor*(idat-1))&
+                     &    )
+
+                     esum=esum &
+                     &    +dgxdt(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))&
+                     &      *dgxdtfac_sij(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+6+mub, ispinor+nspinor*(idat-1)) &
+                     &    +dgxdt(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))&
+                     &      *dgxdtfac_sij(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+6+mub, ispinor+nspinor*(idat-1)) &
+                     &    +gxfac_sij(1, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))*d2gx(1)&
+                     &    +gxfac_sij(2, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))*d2gx(2)
+
+                     esumi=esumi &
+                     &    +dgxdt(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))&
+                     &      *dgxdtfac_sij(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+6+mub, ispinor+nspinor*(idat-1)) &
+                     &    -dgxdt(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+mua, ispinor+nspinor*(idat-1))&
+                     &      *dgxdtfac_sij(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+6+mub, ispinor+nspinor*(idat-1)) &
+                     &    +gxfac_sij(1, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))*d2gx(2)&
+                     &    -gxfac_sij(2, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))*d2gx(1)
+                   end do
                  end do
                end do
                enlout(nnlout*(idat-1)+mu)   = enlout(nnlout*(idat-1)+mu)+esum
@@ -582,13 +620,22 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
            do nu=1,3
              mu=nu*2-1
              esum=zero; esumi=zero
-             !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum,esumi) PRIVATE(ilmn)
-             do ia=1,nattyp_i
-               do ilmn=1,nlmn
-                 esum=esum+gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+nu,idat) &
-&                 +gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+nu,idat)
-                 esumi=esumi+gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+nu,idat) &
-&                 -gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+nu,idat)
+             !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum,esumi) PRIVATE(ispinor,ia,ilmn)
+             do ispinor=1,nspinor
+               do ia=1,nattyp_i
+                 do ilmn=1,nlmn
+                   esum=esum&
+                   &    +gxfac_sij(1, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *dgxdt(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+6+nu, ispinor+nspinor*(idat-1)) &
+                   &    +gxfac_sij(2, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *dgxdt(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+6+nu, ispinor+nspinor*(idat-1))
+
+                   esumi=esumi&
+                   &    +gxfac_sij(1, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *dgxdt(2, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+6+nu, ispinor+nspinor*(idat-1)) &
+                   &    -gxfac_sij(2, shift+(ia-1)*nlmn+ilmn, ispinor+nspinor*(idat-1))&
+                   &      *dgxdt(1, ndgxdt*shift+(ia-1)*nlmn*ndgxdt+(ilmn-1)*ndgxdt+6+nu, ispinor+nspinor*(idat-1))
+                 end do
                end do
              end do
              ddkk(mu,idat)  = ddkk(mu,idat)+esum

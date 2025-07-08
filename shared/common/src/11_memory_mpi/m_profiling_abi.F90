@@ -7,10 +7,10 @@
 !!  when we compile the code with --enable-memory-profiling="yes" that,
 !!  in turn, defines the CPP macro HAVE_MEM_PROFILE in abi_common.h
 !!  The main entry point is abimem_init. abimem_record is interfaced via CPP macros
-!!  defined in abi_common
+!!  defined in abi_common.h
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2024 ABINIT group (MG)
+!! Copyright (C) 2010-2025 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +27,8 @@
 
 module m_profiling_abi
 
- use defs_basis
  use, intrinsic :: iso_c_binding
+ use defs_basis
  use m_clib
 #ifdef HAVE_MPI2
  use mpi
@@ -144,11 +144,11 @@ contains
 !!
 !! INPUT
 !!  level = Integer selecting the operation mode:
-!!       0 -> no file abimem.mocc is created, only memory allocation counters running
+!!       0 -> no file abimem.mocc is created, only memory allocation counters running.
 !!       1 -> light version. Only memory peaks are written.
 !!       2 -> file abimem.mocc is created with full information inside.
 !!       3 -> Write info only if allocation/deallocation is larger or smaller than limit_mb
-!!                depending on of the sign of limit_mb
+!!            depending on of the sign of limit_mb.
 !!    NOTE: By default, only master node writes, use negative values to make all MPI procs write info to disk.
 !!  [delta_time]=Interval in second for snapshots. Will write report to std_out every delta_time seconds.
 !!  [filename] = If present, activate memory logging only inside filename (basename).

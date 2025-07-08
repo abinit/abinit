@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,6 @@ module m_dft_energy
  use m_hamiltonian
  use m_errors
  use m_xmpi
- use m_gemm_nonlop_projectors
  use m_xcdata
  use m_cgtools
  use m_dtset
@@ -67,6 +66,7 @@ module m_dft_energy
  use m_fourier_interpol, only : transgrid
  use m_prep_kgb,         only : prep_getghc, prep_nonlop
  use m_psolver,          only : psolver_rhohxc
+ use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm
 
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_int64_t
@@ -81,7 +81,7 @@ module m_dft_energy
  private
 !!***
 
- public :: energy
+ public :: energy,entropy
 !!***
 
 contains
@@ -89,20 +89,20 @@ contains
 
 !!****f* ABINIT/energy
 !! NAME
-!! energy
+!!  energy
 !!
 !! FUNCTION
-!! Compute electronic energy terms
-!! energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
-!! ehart, enxc, and eei from provided density and potential,
-!! energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
-!! energies%e_zeeman=Zeeman spin energy from applied magnetic field -m.B
-!! ek=kinetic energy, ehart=Hartree electron-electron energy,
-!! enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
-!! enl=nonlocal pseudopotential energy
-!! Also, compute new density from provided wfs, after the evaluation
-!! of ehart, enxc, and eei.
-!! WARNING XG180913 : At present, Fock energy not computed !
+!!  Compute electronic energy terms
+!!  energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
+!!  ehart, enxc, and eei from provided density and potential,
+!!  energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
+!!  energies%e_zeeman=Zeeman spin energy from applied magnetic field -m.B
+!!  ek=kinetic energy, ehart=Hartree electron-electron energy,
+!!  enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
+!!  enl=nonlocal pseudopotential energy
+!!  Also, compute new density from provided wfs, after the evaluation
+!!  of ehart, enxc, and eei.
+!!  WARNING XG180913 : At present, Fock energy not computed !
 !!
 !! NOTE that this routine is callned in m_scfcv_core only when nstep == 0
 !!
@@ -172,7 +172,7 @@ contains
 !!  vhartr(nfftf)=work space to hold Hartree potential in real space (hartree)
 !!  vtrial(nfftf,nspden)=total local potential (hartree)
 !!  vxc(nfftf,nspden)=work space to hold Vxc(r) in real space (hartree)
-!!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
+!!  [vxctau(nfftf,nspden,4*usevxctau)]=(only for meta-GGA): derivative of XC energy density
 !!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
 !!    the gradient of vxctau (gvxctau) in vxctau(:,:,2:4)
 !!
@@ -262,7 +262,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp), intent(in) :: rprimd(3,3),vpsp(nfftf),xccc3d(n3xccc),xred(3,dtset%natom)
  real(dp), intent(in) :: xcctau3d(nfftf*dtset%usekden)
  real(dp), intent(out) :: vhartr(nfftf),vtrial(nfftf,dtset%nspden),vxc(nfftf,dtset%nspden)
- real(dp),intent(out),optional,target :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional,target :: vxctau(:,:,:) ! vxctau(nfftf,dtset%nspden,4*usevxctau)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  type(paw_ij_type), intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -305,8 +305,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
  DBG_ENTER("COLL")
 
-!Check that usekden is not 0 if want to use vxctau
- with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+!Test size of kinetic energy potential Vxctau
+ with_vxctau = (present(vxctau))
+ if (with_vxctau) with_vxctau = (size(vxctau)>0.and.dtset%usekden/=0)
+ if (with_vxctau) then
+   if (size(vxctau)/=nfftf*dtset%nspden*4) then
+     ABI_BUG("Wrong size for vxctau!")
+   end if
+ end if
  vxctau_ => vxctau_dum ; if (with_vxctau) vxctau_ => vxctau
 
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
@@ -351,7 +357,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  ipositron=electronpositron_calctype(electronpositron)
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-
  if (ipositron/=1) then
 
    if (dtset%icoulomb == 0) then
@@ -363,20 +368,20 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !    to be adjusted for the call to rhotoxc
      nk3xc=1
      if (ipositron==0) then
-       call rhotoxc(energies%e_xc,kxc, &
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr, &
-&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_,&
-&       xcctau3d=xcctau3d)
+&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_, &
+&       xcctau3d=xcctau3d,strsxc=strsxc)
      else
-       call rhotoxc(energies%e_xc,kxc, &
+       call rhotoxc(energies%e_xc,energies%entropy_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
-&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
+&       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 &       electronpositron=electronpositron,taur=taur,vhartr=vhartr, &
 &       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_, &
-&       xcctau3d=xcctau3d)
+&       xcctau3d=xcctau3d,strsxc=strsxc)
      end if
      ABI_FREE(kxc)
    else if (dtset%usewvl == 0) then
@@ -526,7 +531,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,&
+ call gs_hamk%init(psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,&
 & dtset%natom,dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,&
@@ -691,13 +696,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
-       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+       call set_gemm_nonlop_ikpt(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%istwf_k,gs_hamk%indlmn,&
+       &    gs_hamk%ntypat,gs_hamk%nattyp,gs_hamk%gpu_option)
      end if
 
 #if defined HAVE_GPU_CUDA
      if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
        call gpu_update_ffnl_ph3d( &
-         & ph3d, INT(size(ph3d),c_int64_t), &
+         & ph3d, INT(size(ph3d,dim=1),c_int64_t)*size(ph3d,dim=2)*size(ph3d,dim=3), &
          & ffnl, INT(size(ffnl),c_int64_t) )
      end if
 #endif
@@ -829,15 +835,17 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+
 !Add the contribution of extfpmd to the entropy
  if(associated(extfpmd)) then
-   energies%entropy=energies%entropy+extfpmd%entropy
    energies%e_extfpmd=extfpmd%e_kinetic
    energies%edc_extfpmd=extfpmd%edc_kinetic
    if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
    if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
  end if
- if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
+
+ call entropy(dtset,energies)
+ etotal=etotal+energies%e_entropy
 
 !Additional stuff for electron-positron
  if (dtset%positron/=0) then
@@ -937,10 +945,10 @@ end subroutine energy
 
 !!****f* ABINIT/mkresi
 !! NAME
-!! mkresi
+!!  mkresi
 !!
 !! FUNCTION
-!! Make residuals from knowledge of wf in G space and application of Hamiltonian.
+!!  Make residuals from knowledge of wf in G space and application of Hamiltonian.
 !!
 !! INPUTS
 !!  cg(2,mcg)=<G|Cnk>=Fourier coefficients of wavefunction
@@ -1085,6 +1093,69 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 
 end subroutine mkresi
 !!***
+
+!!****f* ABINIT/entropy
+!! NAME
+!!  entropy
+!!
+!! FUNCTION
+!!  Compute electronic entropy terms
+!!  This subroutine returns the total entropy and entropy energy. In the most
+!!  common case, at finite temperature, the electronic entropy is mainly constitued
+!!  of the non-interacting entropy (entropy_ks). Finite-temperature exchange-correlation
+!!  functionals or other methods may introduce additional entropy terms.
+!! 
+!! NOTE
+!!  (A. Blanchet): Should DMFT entropy be also added here?
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!   | occopt=option for occupancies
+!!   | tsmear=smearing energy or temperature (if metal)
+!!   | tphysel=electornic temperature for particular values of occopt
+!!  energies <type(energies_type)>=all part of total energy.
+!!   | entropy_ks(IN)=non-interacting entropy of the kohn-sham states
+!!   | entropy_paw(IN)=entropy due to paw corrections (for finite-temperature xc functionals)
+!!   | entropy_xc(IN)=exchange-correlation entropy (fro finite-temperature xc functionals)
+!!   | entropy_extfpmd(IN)=entropy of extfpmd model
+!!
+!! OUTPUT
+!!  energies <type(energies_type)>=all part of total energy.
+!!   | entropy(OUT)=total entropy
+!!   | e_entropy(OUT)=total entropy energy (hartree units)
+!!
+!! SOURCE
+subroutine entropy(dtset,energies)
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),intent(in) :: dtset
+ type(energies_type),intent(inout) :: energies
+
+! *************************************************************************
+
+!In case we have other sources of entropy than kohn-sham states occupation,
+!we sum all entropy terms. %entropy is now total entropy.
+!Examples of other sources of entropy: finite-temperature xc functionals, extfpmd, ...
+ energies%entropy=energies%entropy_ks
+ if(abs(energies%entropy_paw)>tiny(zero))     energies%entropy=energies%entropy+energies%entropy_paw
+ if(abs(energies%entropy_xc)>tiny(zero))      energies%entropy=energies%entropy+energies%entropy_xc
+ if(abs(energies%entropy_extfpmd)>tiny(zero)) energies%entropy=energies%entropy+energies%entropy_extfpmd
+
+!When the finite-temperature VG broadening scheme is used,
+!the total entropy contribution "tsmear*entropy" has a meaning,
+!and gather the two last terms of Eq.8 of VG paper
+!Warning : might have to be changed for fixed moment calculations
+ if(dtset%occopt>=3 .and. dtset%occopt<=8) then
+   if (abs(dtset%tphysel) < tol10) then
+     energies%e_entropy = - dtset%tsmear * energies%entropy
+   else
+     energies%e_entropy = - dtset%tphysel * energies%entropy
+   end if
+ else
+   energies%e_entropy = zero
+ end if
+
+end subroutine entropy
 
 end module m_dft_energy
 !!***

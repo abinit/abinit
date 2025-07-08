@@ -6,7 +6,7 @@
 !!  Thin wrapper for the PAPI library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2024 ABINIT group (MG,DC)
+!! Copyright (C) 2009-2025 ABINIT group (MG,DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

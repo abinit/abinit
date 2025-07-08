@@ -6,7 +6,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
+!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,13 +28,12 @@ module m_mover
  use m_abimover
  use m_abihist
  use m_dtset
+ use m_pimd
  use m_xmpi
  use m_nctk
  use m_dtfil
  use m_yaml
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 #if defined HAVE_LOTF
  use lotfpath
  use m_pred_lotf
@@ -42,7 +41,8 @@ module m_mover
 
  use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : strcat, sjoin, indent, itoa
- use m_symtk,              only : matr3inv, symmetrize_xred
+ use m_matrix,             only : matr3inv
+ use m_symtk,              only : symmetrize_xred
  use m_geometry,           only : fcart2gred, chkdilatmx, xred2xcart, metric
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
@@ -55,22 +55,8 @@ module m_mover
  use m_mkrho,              only : initro
  use m_pawfgr,             only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_precpred_1geo,      only : precpred_1geo
- use m_pred_delocint,      only : pred_delocint
- use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
- use m_pred_fire,          only : pred_fire
- use m_pred_isokinetic,    only : pred_isokinetic
- use m_pred_diisrelax,     only : pred_diisrelax
- use m_pred_nose,          only : pred_nose
- use m_pred_srkhna14,      only : pred_srkna14
- use m_pred_isothermal,    only : pred_isothermal
- use m_pred_verlet,        only : pred_verlet
- use m_pred_velverlet,     only : pred_velverlet
- use m_pred_moldyn,        only : pred_moldyn
- use m_pred_langevin,      only : pred_langevin
- use m_pred_steepdesc,     only : pred_steepdesc
- use m_pred_simple,        only : pred_simple, prec_simple
- use m_pred_hmc,           only : pred_hmc
-!use m_generate_training_set, only : generate_training_set
+ use m_pred_simple,        only : prec_simple
+ !use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
@@ -78,6 +64,7 @@ module m_mover
  use scup_global, only : global_set_parent_iter,global_set_print_parameters
 #endif
  use m_scup_dataset
+ use m_multibinit_dataset
 
  implicit none
 
@@ -189,7 +176,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size,multibinit_dtset)
 
 !Arguments ------------------------------------
 !scalars
@@ -209,6 +196,7 @@ real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
 type(scup_dtset_type),optional, intent(inout) :: scup_dtset
+type(multibinit_dtset_type),optional, intent(inout) ::multibinit_dtset
 integer,optional,intent(in) :: sc_size(3)
 
 !Local variables-------------------------------
@@ -221,6 +209,7 @@ type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(pawfgr_type) :: pawfgr
 type(mttk_type) :: mttk_vars
+type(pimd_type) :: pimd_param
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: ntime,option,comm,mgfftf,nfftf
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
@@ -235,11 +224,14 @@ real(dp) :: gr_avg,ecut_eff,ecutdg_eff,ucvol,boxcut,gsqcut_eff
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: changed,useprtxfase
-logical :: skipcycle
+logical :: skipcycle,force_hist_copy=.FALSE.
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 logical :: file_exists
 logical :: re_init_rho
+#ifdef FC_NVHPC
+logical :: wrong=.false. !Silly trick to prevent NVHPC optimization issue
+#endif
 real(dp) :: minE,wtime_step,now,prev
 !arrays
 integer :: itimes(2),ngfft(18),ngfftf(18)
@@ -317,19 +309,27 @@ real(dp) :: k0(3)
  me=xmpi_comm_rank(comm)
 
 
-#if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
+
 
  if (ab_mover%restartxf<0)then
 !  Read history from file (and broadcast if MPI)
    if (me==master) then
      call read_md_hist(filename,hist_prev,specs%isVused,specs%isARused,ab_mover%restartxf==-3)
-   end if
+     endif
+
+
    call abihist_bcast(hist_prev,master,comm)
+
 
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
+   end if
+
+!  If non deterministic algorithm is used, forcing reading of input hist file
+   if (ab_mover%ionmov==16) then
+     force_hist_copy=.TRUE.
    end if
 
 !  If restartxf specifies to start from the lowest energy
@@ -365,7 +365,6 @@ real(dp) :: k0(3)
    end if
 
  end if !if (ab_mover%restartxf<=0)
-#endif
 
 !###########################################################
 !### 05. Allocate the hist structure
@@ -457,6 +456,7 @@ real(dp) :: k0(3)
    ! Fill history with the values of xred, acell and rprimd
    call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
+
    ! Fill velocities and ionic kinetic energy
    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
    hist%time(hist%ihist)=zero
@@ -473,6 +473,8 @@ real(dp) :: k0(3)
 
 !At beginning no error
  nerr_dilatmx = 0
+!Copy the number of degrees of freedom in hist structure
+ hist%ndof=ab_mover%ndof
 
  ABI_MALLOC(xred_prev,(3,scfcv_args%dtset%natom))
 
@@ -579,7 +581,7 @@ real(dp) :: k0(3)
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
-       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8,specs%nhist==nhisttot)
+       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8,specs%nhist==nhisttot,force_hist_copy)
        hist_prev%ihist=hist_prev%ihist+1
 
        if (hist_prev%ihist==hist_prev%mxhist) re_init_rho=.TRUE.
@@ -678,10 +680,25 @@ real(dp) :: k0(3)
            end if
 #endif
 
-           call effective_potential_evaluate( &
-&           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
-&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
-&           filename=name_file,elec_eval=need_elec_eval)
+            if(present(multibinit_dtset))then
+                !TODO: use multibinit_dtset to set the parameters of the effective potential
+                call effective_potential_evaluate( &
+&               effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
+&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
+&               filename=name_file,elec_eval=need_elec_eval,efield_type=multibinit_dtset%efield_type,efield=multibinit_dtset%efield,&
+&               efield_lambda=multibinit_dtset%efield_lambda,nefield=multibinit_dtset%nefield,&
+&               efield_period=multibinit_dtset%efield_period,efield_phase=multibinit_dtset%efield_phase,&
+&               efield_gmean=multibinit_dtset%efield_gmean,efield_gvel=multibinit_dtset%efield_gvel,efield_sigma=multibinit_dtset%efield_sigma,&
+&               efield_background=multibinit_dtset%efield_background,time=itime*ab_mover%dtion)
+            else
+                call effective_potential_evaluate( &
+&               effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%gred,&
+&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
+&               filename=name_file,elec_eval=need_elec_eval,time=itime*ab_mover%dtion)
+            end if
+
+
+
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then
@@ -780,13 +797,11 @@ real(dp) :: k0(3)
 !    ### 13. Write the history into the _HIST file
 !    ###
 
-#if defined HAVE_NETCDF
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
 &       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
-#endif
 
 !    ###########################################################
 !    ### 14. Output after SCFCV
@@ -836,6 +851,10 @@ real(dp) :: k0(3)
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
+!    Some MOLDYN algorithms require pimd_param to be initialized
+     if(scfcv_args%dtset%ionmov==16) then
+       call pimd_init(scfcv_args%dtset,pimd_param,me==master,force_imgmov=9)
+     end if
 
      call precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,&
 &     scfcv_args%dtset%chkdilatmx,&
@@ -844,8 +863,7 @@ real(dp) :: k0(3)
 &     hist,scfcv_args%dtset%hmctt,&
 &     icycle,iexit,itime,mttk_vars,&
 &     scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,&
-&     scfcv_args%dtset%rprimd_orig,skipcycle,&
-&     scfcv_args%dtset%usewvl)
+&     pimd_param,scfcv_args%dtset%rprimd_orig,skipcycle,scfcv_args%dtset%usewvl)
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
 !    This file is not created for multibinit run
@@ -873,6 +891,10 @@ real(dp) :: k0(3)
      if (ab_mover%optcell/=0) then
        ! Cell may change
 
+#ifdef FC_NVHPC
+       ! Yet another wild NVHPC bug (only on eos_nvhpc_23.9_elpa)
+       if(wrong) write(100,*) xred
+#endif
        call matr3inv(rprimd,gprimd)
 
 !      If metric has changed since the initialization, update the Ylm's
@@ -901,7 +923,7 @@ real(dp) :: k0(3)
 
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
-     vel_cell(:,:)=zero
+     vel_cell(:,:)=hist%vel_cell(:,:,hist%ihist)
      if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)
@@ -1008,7 +1030,9 @@ real(dp) :: k0(3)
  ABI_FREE(xred_prev)
 
  call abihist_free(hist)
- call abihist_free(hist_prev)
+
+
+   call abihist_free(hist_prev)
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
@@ -1669,9 +1693,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  use m_results_gs
  use m_abicore
  use m_errors
-#if defined HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
@@ -1693,7 +1715,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  integer,save :: ipos=0
  integer :: iatom,ii
  character(len=500) :: msg
-#if defined HAVE_NETCDF
  integer :: AtomNumDimid,AtomNumId,CelId,CellVolumeId,DimCoordid,DimScalarid,DimVectorid
  integer :: EkinDimid,EkinId,EpotDimid,EpotId,EntropyDimid,EntropyId,MassDimid,MassId,NbAtomsid
  integer :: ncerr,ncid,PosId,StressDimid,StressId,TensorSymDimid
@@ -1702,30 +1723,22 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  real(dp) :: ekin,ucvol
  character(len=fnlen) :: ficname
  character(len=16) :: chain
-#endif
 !arrays
-#if defined HAVE_NETCDF
  integer :: PrimVectId(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable ::  xcart(:,:)
  real(dp),pointer :: vcart(:,:),vred(:,:),vtmp(:,:)
-#endif
-
 ! *************************************************************************
 
 !Only done by master processor, every nctime step
  if (mpi_enreg%me==0.and.dtset%nctime>0) then
 
 !  Netcdf file name
-#if defined HAVE_NETCDF
    ficname = trim(moldyn_file)//'.nc'
-#endif
 
 !  Xcart from Xred
-#if defined HAVE_NETCDF
    ABI_MALLOC(xcart,(3,dtset%natom))
    call xred2xcart(dtset%natom,rprimd,xcart,xred)
-#endif
 
 !  ==========================================================================
 !  First time step: write header of netcdf file
@@ -1734,7 +1747,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
      ipos=0
 
-#if defined HAVE_NETCDF
 !    Write message
      write(msg,'(4a)')ch10,' Open file ',trim(ficname),' to store molecular dynamics information.'
      call wrtout(std_out,msg,'COLL')
@@ -1839,7 +1851,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
      NCF_CHECK_MSG(ncerr,'nf90_enddef')
      ncerr = nf90_close(ncid)
      NCF_CHECK_MSG(ncerr,'nf90_close')
-#endif
    end if
 
 !  ==========================================================================
@@ -1849,7 +1860,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
      ipos=ipos+1
 
-#if defined HAVE_NETCDF
 !    Write message
      write(msg,'(3a)')ch10,' Store molecular dynamics information in file ',trim(ficname)
      call wrtout(std_out,msg,'COLL')
@@ -1960,7 +1970,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 !    Close file
      ncerr = nf90_close(ncid)
      NCF_CHECK_MSG(ncerr,'nf90_close')
-#endif
    end if
 
 !  ==========================================================================
@@ -1993,18 +2002,11 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
      close(unpos)
    end if
 
-#if defined HAVE_NETCDF
    ABI_FREE(xcart)
-#endif
 
 !  ==========================================================================
 !  End if master proc
  end if
-
-!Fake lines
-#if !defined HAVE_NETCDF
- if (.false.) write(std_out,*) moldyn_file,results_gs%etotal,rprimd(1,1)
-#endif
 
 end subroutine wrt_moldyn_netcdf
 !!***

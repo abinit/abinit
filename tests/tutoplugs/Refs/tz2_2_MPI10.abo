@@ -1,13 +1,13 @@
   ABINIT 9.7.5
-  
-ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests
+
+ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir
 -instrng: 105 lines of input have been read from file /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/BUILDS/develop_pyinv2/tests/Test_suite/tutoplugs_tz2_2_MPI4/tz2_2.abi
 
 
-.Version 9.7.5 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu11.2 computer) 
+.Version 9.7.5 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu11.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -21,36 +21,36 @@ ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abin
 
 .Starting date : Mon  4 Jul 2022.
 - ( at 15h42 )
-  
+
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
- === Build Information === 
+ === Build Information ===
   Version       : 9.7.5
   Build target  : x86_64_linux_gnu11.2
   Build date    : 20220624
 
- === Compiler Suite === 
+ === Compiler Suite ===
   C compiler       : gnu11.2
   C++ compiler     : gnu11.2
   Fortran compiler : gnu11.2
   CFLAGS           : -g -O2 -I/cm/shared/sw/nix/store/ni33b814mwvgjn3l3a1pasd8kd65v0bx-h ...
   CXXFLAGS         : -std=gnu++17 -fconcepts -fno-implicit-templates
   FCFLAGS          : -g -ffree-line-length-none -fallow-argument-mismatch     -I/mnt/hom ...
-  FC_LDFLAGS       : 
+  FC_LDFLAGS       :
 
- === Optimizations === 
+ === Optimizations ===
   Debug level        : basic
   Optimization level : standard
   Architecture       : intel_xeon
 
- === Multicore === 
+ === Multicore ===
   Parallel build : yes
   Parallel I/O   : yes
-  openMP support : 
-  GPU support    : 
+  openMP support :
+  GPU support    :
 
- === Connectors / Fallbacks === 
+ === Connectors / Fallbacks ===
   LINALG flavor  : mkl
   FFT flavor     : dfti
   HDF5           : yes
@@ -59,9 +59,9 @@ ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abin
   LibXC          : yes
   Wannier90      : yes
 
- === Experimental features === 
-  Exports             : 
-  GW double-precision : 
+ === Experimental features ===
+  Exports             :
+  GW double-precision :
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -82,45 +82,45 @@ ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abin
  CPP options activated during the build:
 
                     CC_GNU                   CXX_GNU                    FC_GNU
- 
+
                  HAVE_DFTI HAVE_FC_ALLOCATABLE_DT...             HAVE_FC_ASYNC
- 
+
          HAVE_FC_BACKTRACE  HAVE_FC_COMMAND_ARGUMENT      HAVE_FC_COMMAND_LINE
- 
+
         HAVE_FC_CONTIGUOUS           HAVE_FC_CPUTIME              HAVE_FC_EXIT
- 
+
              HAVE_FC_FLUSH             HAVE_FC_GAMMA            HAVE_FC_GETENV
- 
+
    HAVE_FC_IEEE_ARITHMETIC   HAVE_FC_IEEE_EXCEPTIONS          HAVE_FC_INT_QUAD
- 
+
              HAVE_FC_IOMSG     HAVE_FC_ISO_C_BINDING  HAVE_FC_ISO_FORTRAN_2008
- 
+
         HAVE_FC_LONG_LINES        HAVE_FC_MOVE_ALLOC  HAVE_FC_ON_THE_FLY_SHAPE
- 
+
            HAVE_FC_PRIVATE         HAVE_FC_PROTECTED           HAVE_FC_SHIFTLR
- 
+
          HAVE_FC_STREAM_IO            HAVE_FC_SYSTEM          HAVE_FORTRAN2003
- 
+
                  HAVE_HDF5        HAVE_LIBPAW_ABINIT      HAVE_LIBTETRA_ABINIT
- 
+
                 HAVE_LIBXC         HAVE_LINALG_AXPBY        HAVE_LINALG_GEMM3M
- 
+
          HAVE_LINALG_GEMMT  HAVE_LINALG_MKL_IMATCOPY   HAVE_LINALG_MKL_OMATADD
- 
+
   HAVE_LINALG_MKL_OMATCOPY   HAVE_LINALG_MKL_THREADS     HAVE_LINALG_SCALAPACK
- 
+
                   HAVE_MPI                 HAVE_MPI2       HAVE_MPI_IALLGATHER
- 
+
        HAVE_MPI_IALLREDUCE        HAVE_MPI_IALLTOALL       HAVE_MPI_IALLTOALLV
- 
+
            HAVE_MPI_IBCAST         HAVE_MPI_IGATHERV        HAVE_MPI_INTEGER16
- 
+
                HAVE_MPI_IO HAVE_MPI_TYPE_CREATE_S...               HAVE_NETCDF
- 
+
        HAVE_NETCDF_FORTRAN                HAVE_NUMPY             HAVE_OS_LINUX
- 
+
     HAVE_PYTHON_INVOCATION         HAVE_TIMER_ABINIT            HAVE_WANNIER90
- 
+
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 - input  file    -> /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/BUILDS/develop_pyinv2/tests/Test_suite/tutoplugs_tz2_2_MPI4/tz2_2.abi
@@ -128,19 +128,19 @@ ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abin
 - root for input  files -> tz2_2_MPI4i
 - root for output files -> tz2_2_MPI4o
 
-ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests
+ABI_PSPDIR  found in environment, with value /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir
 -instrng: 105 lines of input have been read from file /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/BUILDS/develop_pyinv2/tests/Test_suite/tutoplugs_tz2_2_MPI4/tz2_2.abi
 
- For atom type 1, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Bi.psp8
- For atom type 2, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Te.psp8
- For atom type 3, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/I.psp8
+ For atom type 1, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Bi.psp8
+ For atom type 2, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Te.psp8
+ For atom type 3, psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/I.psp8
   read the values zionpsp= 15.0 , pspcod=   8 , lmax=   2
   read the values zionpsp= 16.0 , pspcod=   8 , lmax=   2
   read the values zionpsp=  7.0 , pspcod=   8 , lmax=   2
 
  inpspheads: deduce mpsang = 3, n1xccc = 2501.
 
-======================================================= 
+=======================================================
  invars1m : enter jdtset= 11
 
  symlatt: the Bravais lattice is hP (primitive hexagonal)
@@ -170,7 +170,7 @@ message: |
  symspgr: optical characteristics = uniaxial
  Optical axis (in reduced coordinates, real space ) :   0   0   1
 
-======================================================= 
+=======================================================
  invars1m : enter jdtset= 12
 
  symlatt: the Bravais lattice is hP (primitive hexagonal)
@@ -206,7 +206,7 @@ message: |
 
 
 
-======================================================= 
+=======================================================
  invars1m : enter jdtset= 13
 
  symlatt: the Bravais lattice is hP (primitive hexagonal)
@@ -237,7 +237,7 @@ message: |
 
 
 
-======================================================= 
+=======================================================
  invars1m : enter jdtset= 21
 
  symlatt: the Bravais lattice is hP (primitive hexagonal)
@@ -251,7 +251,7 @@ message: |
  symspgr: optical characteristics = uniaxial
  Optical axis (in reduced coordinates, real space ) :   0   0   1
 
-======================================================= 
+=======================================================
  invars1m : enter jdtset= 22
 
  symlatt: the Bravais lattice is hP (primitive hexagonal)
@@ -287,7 +287,7 @@ message: |
 
 
 
-======================================================= 
+=======================================================
  invars1m : enter jdtset= 23
 
  symlatt: the Bravais lattice is hP (primitive hexagonal)
@@ -712,7 +712,7 @@ _ WF disk file :     43.178 Mbytes ; DEN or POT disk file :      0.332 Mbytes.
 
  Biggest array : cg(disk), with     11.5157 MBytes.
  memana : allocated an array of     11.516 Mbytes, for testing purposes.
- memana: allocated      43.657Mbytes, for testing purposes. 
+ memana: allocated      43.657Mbytes, for testing purposes.
  The job will continue.
 
  DATASET   12 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
@@ -737,7 +737,7 @@ _ WF disk file :    112.203 Mbytes ; DEN or POT disk file :      0.332 Mbytes.
 
  Biggest array : cg(disk), with     28.9571 MBytes.
  memana : allocated an array of     28.957 Mbytes, for testing purposes.
- memana: allocated      73.854Mbytes, for testing purposes. 
+ memana: allocated      73.854Mbytes, for testing purposes.
  The job will continue.
 
  DATASET   13 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
@@ -762,7 +762,7 @@ _ WF disk file :     59.722 Mbytes ; DEN or POT disk file :      0.332 Mbytes.
 
  Biggest array : cg(disk), with     16.2892 MBytes.
  memana : allocated an array of     16.289 Mbytes, for testing purposes.
- memana: allocated      48.074Mbytes, for testing purposes. 
+ memana: allocated      48.074Mbytes, for testing purposes.
  The job will continue.
 
  DATASET   21 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
@@ -787,7 +787,7 @@ _ WF disk file :     35.158 Mbytes ; DEN or POT disk file :      0.311 Mbytes.
 
  Biggest array : cg(disk), with      9.3770 MBytes.
  memana : allocated an array of      9.377 Mbytes, for testing purposes.
- memana: allocated      37.997Mbytes, for testing purposes. 
+ memana: allocated      37.997Mbytes, for testing purposes.
  The job will continue.
 
  DATASET   22 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
@@ -812,7 +812,7 @@ _ WF disk file :     86.428 Mbytes ; DEN or POT disk file :      0.311 Mbytes.
 
  Biggest array : cg(disk), with     21.9747 MBytes.
  memana : allocated an array of     21.975 Mbytes, for testing purposes.
- memana: allocated      58.732Mbytes, for testing purposes. 
+ memana: allocated      58.732Mbytes, for testing purposes.
  The job will continue.
 
  DATASET   23 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
@@ -837,20 +837,20 @@ _ WF disk file :     48.090 Mbytes ; DEN or POT disk file :      0.311 Mbytes.
 
  Biggest array : cg(disk), with     13.1169 MBytes.
  memana : allocated an array of     13.117 Mbytes, for testing purposes.
- memana: allocated      40.646Mbytes, for testing purposes. 
+ memana: allocated      40.646Mbytes, for testing purposes.
  The job will continue.
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
- 
+
  These variables are accessible in NetCDF format (tz2_2_MPI4o_OUT.nc)
 
             acell11    8.3956000000E+00  8.3956000000E+00  1.3762700000E+01 Bohr
@@ -1335,24 +1335,24 @@ P           mkmem23         9
  chkinp: Checking input parameters for consistency, jdtset=  22.
 
  chkinp: Checking input parameters for consistency, jdtset=  23.
- DATA TYPE INFORMATION: 
- REAL:      Data type name: REAL(DP) 
+ DATA TYPE INFORMATION:
+ REAL:      Data type name: REAL(DP)
             Kind value:      8
             Precision:      15
             Smallest nonnegligible quantity relative to 1: 0.22204460E-015
             Smallest positive number:                      0.22250739E-307
             Largest representable number:                  0.17976931E+309
- INTEGER:   Data type name: INTEGER(default) 
+ INTEGER:   Data type name: INTEGER(default)
             Kind value: 4
             Bit size:   32
             Largest representable number: 2147483647
- LOGICAL:   Data type name: LOGICAL 
+ LOGICAL:   Data type name: LOGICAL
             Kind value: 4
  CHARACTER: Data type name: CHARACTER             Kind value: 1
 
   ==== OpenMP parallelism is OFF ====
- 
-  ==== Using MPI-2 specifications ==== 
+
+  ==== Using MPI-2 specifications ====
   MPI-IO support is ON
   xmpi_tag_ub ................      8388607
   xmpi_bsize_ch ..............            1
@@ -1391,8 +1391,8 @@ message: |
 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  30  30  48
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.00045
-- pspini: atom type   1  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Bi.psp8
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Bi.psp8
+- pspini: atom type   1  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Bi.psp8
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Bi.psp8
 - Bi    ONCVPSP-3.3.0  r_core=   2.42776   2.51622   2.10397
 - 83.00000  15.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1400,7 +1400,7 @@ message: |
      nproj     2     4     3
      spin-orbit psp, extension_switch     3
         nprojso     4     3
-  valence charge integrates to:    14.918289486152156     
+  valence charge integrates to:    14.918289486152156
   pspatm : epsatm=   43.04582477
          --- l  ekb(1:nproj) -->
              0    0.856470    5.667563
@@ -1410,8 +1410,8 @@ message: |
   spin-orbit 2    0.138319    0.038555   -0.001003
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Te.psp8
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/Te.psp8
+- pspini: atom type   2  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Te.psp8
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Te.psp8
 - Te    ONCVPSP-3.3.0  r_core=   2.26547   1.91704   1.80604
 - 52.00000  16.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1419,7 +1419,7 @@ message: |
      nproj     2     4     2
      spin-orbit psp, extension_switch     3
         nprojso     4     3
-  valence charge integrates to:    15.960173933023427     
+  valence charge integrates to:    15.960173933023427
   pspatm : epsatm=   36.72688010
          --- l  ekb(1:nproj) -->
              0    0.785628    6.374774
@@ -1429,8 +1429,8 @@ message: |
   spin-orbit 2    0.050434    0.021904   -0.000336
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/I.psp8
-- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Psps_for_tests/Pseudodojo_nc_fr_04_pbe_standard_psp8/I.psp8
+- pspini: atom type   3  psp file is /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/I.psp8
+- pspatm: opening atomic psp file    /mnt/home/ogingras/Work/Gitlab/abinit/BUILD/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/I.psp8
 - I     ONCVPSP-3.3.0  r_core=   2.02042   2.17032   2.27639
 - 53.00000   7.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1438,7 +1438,7 @@ message: |
      nproj     2     4     4
      spin-orbit psp, extension_switch     3
         nprojso     4     4
-  valence charge integrates to:    6.9746902464579144     
+  valence charge integrates to:    6.9746902464579144
   pspatm : epsatm=   19.15668632
          --- l  ekb(1:nproj) -->
              0    0.912828    5.952026
@@ -1453,7 +1453,7 @@ message: |
   Norm-conserving pseudopotentials
   Number of pseudopotentials ..    3
   Number of types of atoms   ..    3
-  Calculation with spin-orbit coupling 
+  Calculation with spin-orbit coupling
   Max number of channels (spin-orbit included)   5
   - Atom type    1 has spin-orbit characteristics (pspso=  2)
   - Atom type    2 has spin-orbit characteristics (pspso=  2)
@@ -1464,16 +1464,16 @@ message: |
   Max number of (l,n)   components ..  18
   Max number of (l,m,n) components ..  18
 
- Pseudo-Core Charge Info: 
+ Pseudo-Core Charge Info:
    Number of radial points for pseudo-core charge .. 2501
    XC core-correction treatment (optnlxccc) ........    1
-   Radius for pseudo-core charge for each type ..... 
+   Radius for pseudo-core charge for each type .....
 
   - Atom type    1 has pseudo-core radius ..  5.9900
   - Atom type    2 has pseudo-core radius ..  5.9900
   - Atom type    3 has pseudo-core radius ..  5.9900
 
- Info on the Q-grid used for form factors in spline form: 
+ Info on the Q-grid used for form factors in spline form:
    Number of q-points for radial functions ffspl ..   3001
    Number of q-points for vlspl ...................   3001
    vloc is computed in Reciprocal Space
@@ -1711,7 +1711,7 @@ message: |
  scprqt: <Vxc>= -3.1247650E-01 hartree
 
  At SCF step   15       vres2   =  9.46E-12 < tolvrs=  1.00E-10 =>converged.
- 
+
  -------------------------------------------------------------------------------------------------
  Ekinetic   = :     9.121130E+01 Ha ,    2.481986E+03 eV
  Evext_l    = :    -1.681690E+02 Ha ,   -4.576111E+03 eV
@@ -2274,7 +2274,7 @@ message: |
    Max resid = 3.44828E-03  (exclude nbdbuf bands). One NSCF iteration cpu-time:  1.08 [s] , wall-time:  1.08 [s]
    Printing residuals every mod(20) iterations...
    NSCF loop completed after 7 iterations
- 
+
  -------------------------------------------------------------------------------------------------
  Ekinetic   = :     0.000000E+00 Ha ,    0.000000E+00 eV
  Evext_l    = :     0.000000E+00 Ha ,    0.000000E+00 eV
@@ -3345,7 +3345,7 @@ message: |
    Max resid = 4.35566E-03  (exclude nbdbuf bands). One NSCF iteration cpu-time:  1.09 [s] , wall-time:  1.09 [s]
    Printing residuals every mod(20) iterations...
    NSCF loop completed after 8 iterations
- 
+
  -------------------------------------------------------------------------------------------------
  Ekinetic   = :     0.000000E+00 Ha ,    0.000000E+00 eV
  Evext_l    = :     0.000000E+00 Ha ,    0.000000E+00 eV
@@ -4125,7 +4125,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1901.935    1901.907
  scprqt: <Vxc>= -3.5187349E-01 hartree
 
  At SCF step   13       vres2   =  2.17E-11 < tolvrs=  1.00E-10 =>converged.
- 
+
  -------------------------------------------------------------------------------------------------
  Ekinetic   = :     9.136313E+01 Ha ,    2.486117E+03 eV
  Evext_l    = :    -1.470602E+02 Ha ,   -4.001712E+03 eV
@@ -4687,7 +4687,7 @@ message: |
    Max resid = 3.88583E-03  (exclude nbdbuf bands). One NSCF iteration cpu-time:  0.94 [s] , wall-time:  0.94 [s]
    Printing residuals every mod(20) iterations...
    NSCF loop completed after 11 iterations
- 
+
  -------------------------------------------------------------------------------------------------
  Ekinetic   = :     0.000000E+00 Ha ,    0.000000E+00 eV
  Evext_l    = :     0.000000E+00 Ha ,    0.000000E+00 eV
@@ -5734,7 +5734,7 @@ message: |
    Max resid = 4.10001E-03  (exclude nbdbuf bands). One NSCF iteration cpu-time:  1.02 [s] , wall-time:  1.02 [s]
    Printing residuals every mod(20) iterations...
    NSCF loop completed after 7 iterations
- 
+
  -------------------------------------------------------------------------------------------------
  Ekinetic   = :     0.000000E+00 Ha ,    0.000000E+00 eV
  Evext_l    = :     0.000000E+00 Ha ,    0.000000E+00 eV
@@ -6312,9 +6312,9 @@ message: |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
- 
+
  These variables are accessible in NetCDF format (tz2_2_MPI4o_OUT.nc)
 
             acell11    8.3956000000E+00  8.3956000000E+00  1.3762700000E+01 Bohr
@@ -6799,7 +6799,7 @@ P           mkmem23         9
             znucl       83.00000   52.00000   53.00000
 
 ================================================================================
-  
+
 
 ================================================================================
 
@@ -6828,7 +6828,7 @@ P           mkmem23         9
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -6845,12 +6845,12 @@ P           mkmem23         9
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -6868,7 +6868,7 @@ P           mkmem23         9
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -6883,7 +6883,7 @@ P           mkmem23         9
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
@@ -6899,9 +6899,9 @@ start_datetime: Mon Jul 04 15:42:39 2022
 end_datetime: Mon Jul 04 15:53:19 2022
 overall_cpu_time:        2546.5
 overall_wall_time:        2555.8
-exit_requested_by_user: no 
+exit_requested_by_user: no
 timelimit: 0
-pseudos: 
+pseudos:
     Bi  : cad5f017ceb3213dcf4efd820eba718e
     Te  : 198fb7fcceace28ae22a5dd5a5087a3e
     I   : a66b3a144f87731d94d6a5febf7323e3

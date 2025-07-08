@@ -11,14 +11,14 @@
 !! * spin_mc_t : MCMC. It defines how to move spins in one step,
 !! attempt function: whether to accept move
 !! accecpt/reject method which define what to do if move is
-!! accepted or rejected!! . 
+!! accepted or rejected!! .
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2024 ABINIT group (hexu)
+!! Copyright (C) 2001-2025 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,12 +50,13 @@
        real(dp) ::  Sold(3), Snew(3) ! old and new S for one spin
        real(dp) :: angle   ! an angle to rotate by average
        real(dp) :: energy, deltaE ! energy and the change of energy when change one spin
-       real(dp) :: temperature  
+       real(dp) :: temperature
        real(dp) :: beta  ! 1/(kb T)
        integer :: nspin   ! number of spins
        integer :: nstep  ! number of steps
        integer :: imove ! index of spin to be moved
        integer :: naccept  ! number of accepted steps
+       integer :: nattempt ! number of attempted steps
      contains
        procedure :: initialize
        procedure :: finalize
@@ -87,6 +88,8 @@
       self%beta=1.0/temperature ! Kb in a.u. is 1.
       self%Sold(:)=0.0_dp
       self%Snew(:)=0.0_dp
+      self%naccept=0
+      self%nattempt=0
     end subroutine initialize
 
     !----------------------------------------------------------------------
@@ -118,11 +121,14 @@
      ! try to change spin
      r=self%attempt(rng, effpot)
      ! metropolis-hastings
+     self%nattempt = self%nattempt+1
      if(rng%rand_unif_01()< min(1.0_dp, r) ) then
         self%naccept=self%naccept+1
         call self%accept()
+        !print *, "accepted"
      else
         call self%reject()
+        !print *, "rejected"
      end if
    end subroutine run_one_step
 
@@ -142,7 +148,9 @@
      class(abstract_potential_t), intent(inout) :: effpot
      real(dp), intent(inout) :: S_in(3,self%nspin)
      real(dp), intent(out) ::  etot
-     real(dp), optional, intent(inout) :: bfield(:,:) 
+     real(dp), optional,intent(inout) :: bfield(:,:)
+     real(dp) :: etmp
+
      integer :: i
      self%S(:,:)=S_in(:,:)
      call effpot%calculate(spin=S_in, energy=self%energy, bfield=bfield)
@@ -150,7 +158,11 @@
         call self%run_one_step(rng, effpot)
      end do
      S_in(:, :)=self%S(:,:)
+     !call effpot%calculate(spin=self%S, energy=self%energy, bfield=bfield)
+     !print *, self%energy
      etot=self%energy
+     call effpot%calculate(spin=S_in, energy=etmp, bfield=bfield)
+     !print *, "energy: ", self%energy, etmp, self%energy-etmp
    end subroutine run_MC
 
    !----------------------------------------------------------------------
@@ -185,6 +197,7 @@
      self%deltaE=0.0
      call move_hinzke_nowak(rng, self%Sold, self%Snew, self%angle)
      call effpot%get_delta_E( self%S, self%imove, self%Snew, self%deltaE)
+     !print *, "delta E", self%deltaE
      r=exp(-self%deltaE *self%beta)
    end function attempt
 
@@ -197,7 +210,7 @@
      real(dp), intent(out) :: Snew(3)
      call rng%rand_normal_array(Snew, 3)
      Snew(:)=Sold(:) + Snew(:)*angle
-     Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))
+     Snew(:)=Snew(:)/norm2(Snew)
    end subroutine move_angle
 
    !----------------------------------------------------------------------
@@ -216,7 +229,7 @@
      type(rng_t), intent(inout) :: rng
      real(dp), intent(out) :: Snew(3)
      call rng%rand_normal_array(Snew, 3)
-     Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))
+     Snew(:)=Snew(:)/norm2(Snew)
    end subroutine move_uniform
 
    !----------------------------------------------------------------------

@@ -7,7 +7,7 @@
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2024 ABINIT group (MT, MJV, CE, TD, XG)
+!!  Copyright (C) 2012-2025 ABINIT group (MT, MJV, CE, TD, XG, AB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +26,11 @@ module m_drivexc
  use m_abicore
  use m_errors
  use libxc_functionals
- use m_numeric_tools,    only : invcb
- use m_xciit,            only : xciit
- use m_xcpbe,            only : xcpbe
- use m_xchcth,           only : xchcth
- use m_xclda,  only : xcpzca, xcspol, xctetr, xcwign, xchelu, xcxalp, xclb
+ use m_numeric_tools, only: invcb
+ use m_xciit,         only: xciit
+ use m_xcpbe,         only: xcpbe,xckdt16
+ use m_xchcth,        only: xchcth
+ use m_xclda,         only: xcpzca,xcspol,xctetr,xcwign,xchelu,xcxalp,xclb,xcksdt
 
  implicit none
 
@@ -39,6 +39,7 @@ module m_drivexc
 
  public :: drivexc         ! Driver of XC functionals. Optionally, deliver the XC kernel, or even the derivative
  public :: echo_xc_name    ! Write to log and output the xc functional which will be used for this dataset
+ public :: xc_need_kden    ! Given a XC functional (defined by ixc), return TRUE if it needs kinetic energy density.
  public :: has_kxc         ! Given a XC functional (defined by ixc), return TRUE if Kxc (dVxc/drho) is avalaible.
  public :: has_k3xc        ! Given a XC functional (defined by ixc), return TRUE if K3xc (d2Vxc/drho2) is avalaible.
  public :: check_kxc       ! Given a XC functional (defined by ixc), check if Kxc and/or K3xc is avalaible.
@@ -183,9 +184,18 @@ subroutine echo_xc_name (ixc)
    case (42)
      message = 'modified PBE0 with alpha=0.33'
      citation = ''
+!      Temperature-dependant XC
+!      LDA
    case (50)
      message = 'LDA at finite T Ichimaru-Iyetomy-Tanaka - ixc=50'
-     citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987) ' ! [[cite:Ichimaru1987]]
+     citation = 'Ichimaru S., Iyetomi H., Tanaka S., Phys. Rep. 149, 91-205 (1987)' ! [[cite:Ichimaru1987]]
+   case (51)
+     message = 'TLDA: corrKSDT Karasiev-Sjostrom-Dufty-Trickey - ixc=51'
+     citation = 'V.V. Karasiev, T. Sjostrom, J. Dufty, and S.B. Trickey, PRL 112, 076403 (2014)' ! [[cite:Karasiev2014]]
+!      GGA
+   case (60)
+     message = 'TGGA: KDT16 Karasiev-Dufty-Trickey - ixc=60'
+     citation = 'V.V. Karasiev, J.W. Dufty, and S.B. Trickey, PRL 120(7), 076401 (2018)' ! [[cite:Karasiev2018]]
    case default
      write(message,'(a,i0)')" echo_xc_name does not know how to handle ixc = ",ixc
      ABI_WARNING(message)
@@ -212,6 +222,39 @@ subroutine echo_xc_name (ixc)
  end if ! end libxc if
 
 end subroutine echo_xc_name
+!!***
+
+!!****f* m_drivexc/xc_need_kden
+!! NAME
+!!  xc_need_kden
+!!
+!! FUNCTION
+!!  Check if kinetic energy density is used in XC functional
+!!
+!! INPUTS
+!!  ixc= choice of exchange-correlation scheme
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>= optional - libXC functional(s)
+!!
+!! SOURCE
+
+logical function xc_need_kden(ixc,xc_funcs)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ixc
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
+
+! *************************************************************************
+
+ xc_need_kden=.false.
+
+ if (ixc>=0) then
+   xc_need_kden=(ixc==31.or.ixc==34.or.ixc==35)
+ else
+   if(present(xc_funcs)) xc_need_kden=libxc_functionals_needs_tau(xc_functionals=xc_funcs)
+   if(.not.present(xc_funcs)) xc_need_kden=libxc_functionals_needs_tau()
+ end if
+
+end function xc_need_kden
 !!***
 
 !!****f* m_drivexc/has_kxc
@@ -404,7 +447,7 @@ end subroutine check_kxc
 !!   -2=like 2, except (to be described)
 !!    3=also computes the derivative of the kernel (return exc,vxc,kxc,k3xc)
 !!  nspden= number of spin components
-!!  [xc_funcs(2)]= <type(libxc_functional_type)>
+!!  [xc_funcs(2)]= <type(libxc_functional_type)>= optional - libXC functional(s)
 !!  [add_tfw]= optional flag controling the addition of Weiszacker gradient correction to Thomas-Fermi XC energy
 !!
 !! OUTPUT
@@ -460,7 +503,7 @@ subroutine size_dvxc(ixc,order,nspden,&
 !Do we use the gradient?
  need_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
 &               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=35).or. &
-&               (ixc==41.or.ixc==42).or.ixc==1402000)
+&               (ixc==41.or.ixc==42).or.ixc==1402000.or.ixc==60)
  if (ixc<0.and.(libxc_isgga.or.libxc_ismgga.or.libxc_ishybrid)) need_gradient=.true.
  if (my_add_tfw) need_gradient=.true.
  if (present(usegradient)) usegradient=merge(1,0,need_gradient)
@@ -474,9 +517,9 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(uselaplacian)) uselaplacian=merge(1,0,need_laplacian)
 
 !Do we use the kinetic energy density?
- need_kden=(ixc==31.or.ixc==34.or.ixc==35)
- if (ixc<0) need_kden=libxc_ismgga
- if (present(usekden)) usekden=merge(1,0,need_kden)
+ if(present(xc_funcs)) need_kden=xc_need_kden(ixc,xc_funcs)
+ if(.not.present(xc_funcs)) need_kden=xc_need_kden(ixc)
+ usekden=merge(1,0,need_kden)
 
 !First derivative(s) of XC functional wrt gradient of density
  if (present(nvxcgrho)) then
@@ -511,7 +554,8 @@ subroutine size_dvxc(ixc,order,nspden,&
      if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
 &        ixc==21.or.ixc==22) then
        ndvxc=min(nspden,2)+1
-     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
+     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.&
+&        (ixc==50.or.ixc==51.or.ixc==60)) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
        ndvxc=8
@@ -817,6 +861,7 @@ end subroutine mkdenpos
 !!  nvxctau=number of components of 1st-derivative of Exc wrt kinetic energy density (nvxctau)
 !!  ndvxc=number of components of  1st-derivative of Vxc (dvxc)
 !!  nd2vxc=number of components of  2nd-derivative of Vxc (d2vxc)
+!!  el_temp=electronic temperature (hartree)
 !!  rho_updn(npts,nspden)=spin-up and spin-down densities
 !!    In the calling routine, spin-down density must be equal to spin-up density.
 !!    If nspden=1, only spin-up density must be given (half the total density).
@@ -841,12 +886,12 @@ end subroutine mkdenpos
 !!     be equal to the half the total kinetic energy density.
 !!    If nspden=2, the spin-up and spin-down kinetic energy densities must be given.
 !!  [exexch]=choice of <<<local>>> exact exchange. Active if exexch=3 (only for GGA, and NOT for libxc)
-!!  [el_temp]= electronic temperature (to be used for finite temperature XC functionals)
 !!  [hyb_mixing]= mixing parameter for the native PBEx functionals (ixc=41 and 42)
 !!  [xc_funcs(2)]= <type(libxc_functional_type)>: libxc XC functionals.
 !!
 !! OUTPUT
 !!  exc(npts)=exchange-correlation energy density (hartree)
+!!  tsxc(npts)=exchange-correlation entropy energy density (hartree)
 !!  vxcrho(npts,nspden)= (d($\rho$*exc)/d($\rho_up$)) (hartree)
 !!                  and  (d($\rho$*exc)/d($\rho_down$)) (hartree)
 !!  === Optional output arguments ===
@@ -892,28 +937,28 @@ end subroutine mkdenpos
 !!   === At present only available for LDA ===
 !!    if nspden=1 d2vxc(npts,1)=second derivative of the XC potential=3rd order derivative of energy
 !!    if nspden=2 d2vxc(npts,1), d2vxc(npts,2), d2vxc(npts,3), d2vxc(npts,4) (3rd derivative of energy)
-!!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! SOURCE
 
 subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&          rho_updn,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &       ! mandatory arguments
-&          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &  ! optional arguments
-&          exexch,el_temp,fxcT,hyb_mixing,xc_funcs)                            ! optional parameters
+&          rho_updn,exc,tsxc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,el_temp, & ! mandatory arguments
+&          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &         ! optional arguments
+&          exexch,hyb_mixing,xc_funcs)                                                ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,npts,nspden
  integer,intent(in) :: ndvxc,nd2vxc,nvxcgrho,nvxclrho,nvxctau,order
  integer,intent(in) :: usegradient,uselaplacian,usekden
+ real(dp),intent(in) :: el_temp
  integer,intent(in),optional :: exexch
- real(dp),intent(in),optional :: el_temp,hyb_mixing
+ real(dp),intent(in),optional :: hyb_mixing
 !arrays
  real(dp),intent(in) :: rho_updn(npts,nspden)
  real(dp),intent(in),optional :: grho2_updn(npts,(2*nspden-1)*usegradient)
  real(dp),intent(in),optional :: lrho_updn(npts,nspden*uselaplacian),tau_updn(npts,nspden*usekden)
- real(dp),intent(out) :: exc(npts),vxcrho(npts,nspden)
- real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc),fxcT(:)
+ real(dp),intent(out) :: exc(npts),tsxc(npts),vxcrho(npts,nspden)
+ real(dp),intent(out),optional :: dvxc(npts,ndvxc),d2vxc(npts,nd2vxc)
  real(dp),intent(out),optional :: vxcgrho(npts,nvxcgrho),vxclrho(npts,nvxclrho),vxctau(npts,nvxctau)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
 
@@ -1077,23 +1122,17 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    message='exexch argument only valid for GGA!'
    ABI_BUG(message)
  end if
- if(ixc==50) then
-   if(.not.(present(el_temp)).or.(.not.present(fxcT)))then
-     message = 'el_temp or fxcT is not present but are needed for IIT XC functional.'
-     ABI_BUG(message)
-   end if
-   if (size(fxcT)/=npts) then
-     ABI_BUG('fxcT size must be npts!')
-   end if
- end if
+
+!Initialize exchange-correlation entropy energy density to zero
+ tsxc(:)=zero
 
 ! =================================================
 ! ==  Intermediate quantities computation        ==
 ! =================================================
 
 !If needed, compute rhotot and rs
- if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.&
-&    ixc==6.or.ixc==21.or.ixc==22.or.ixc==50) then
+ if (ixc==1.or.ixc==2.or.ixc==3.or.ixc==4.or.ixc==5.or.ixc==6.or.&
+&    ixc==21.or.ixc==22.or.ixc==50.or.ixc==51.or.ixc==60) then
    ABI_MALLOC(rhotot,(npts))
    ABI_MALLOC(rspts,(npts))
    if(nspden==1)then
@@ -1435,12 +1474,41 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    ABI_FREE(vxcrho_x)
    ABI_FREE(vxcgrho_x)
 
-!>>>>> Ichimaru,Iyetomi,Tanaka,  XC at finite temp (e- gaz)
+!>>>>> Finite-temperature XC functionals.
+!>>>>> exc is the xc free energy density.
+!>>>>> XC entropy energy density 'tsxc' is needed to retrieve
+!>>>>> the proper internal energy E_xc
+
+!>>>>> Ichimaru-Iyetomi-Tanaka, TLDA (no spin-pol) (IIT)
  else if (ixc==50) then
    if (order**2 <= 1) then
-     call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1))
+     call xciit(exc,tsxc,npts,order,rspts,el_temp,vxcrho(:,1))
    else
-     call xciit(exc,fxcT,npts,order,rspts,el_temp,vxcrho(:,1),dvxc)
+     call xciit(exc,tsxc,npts,order,rspts,el_temp,vxcrho(:,1),dvxc=dvxc)
+   end if
+
+!>>>>> Karasiev-Sjostrom-Dufty-Trickey, TLDA (no spin-pol) (KSDT)
+ else if (ixc==51) then
+   if (order**2 <= 1) then
+     call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1))
+   else
+     call xcksdt(exc,tsxc,npts,order,rhotot,rspts,el_temp,vxcrho(:,1),dvxc=dvxc)
+   end if
+
+!>>>>> Karasiev-Dufty-Trickey, TGGA (no spin-pol) (KDT16)
+ else if(ixc==60) then
+   if(nvxcgrho /= 3 )then
+     write(message, '(3a,i0,a,i0)')&
+&     'Wrong value of nvxcgrho:',ch10,&
+&     'ixc=',ixc,'ndvxcdgr=',nvxcgrho
+     ABI_BUG(message)
+   end if
+   if (order**2 <= 1) then
+     call xckdt16(vxcgrho,exc,tsxc,grho2_updn,ixc,npts,nspden,order,&
+&     rhotot,rspts,el_temp,vxcrho)
+   else
+     call xckdt16(vxcgrho,exc,tsxc,grho2_updn,ixc,npts,nspden,order,&
+&     rhotot,rspts,el_temp,vxcrho,dvxci=dvxc)
    end if
 
 !>>>>> GGA counterpart of the B3LYP functional

@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2022-2022 ABINIT group (LB)
+!! Copyright (C) 2022-2025 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -144,23 +144,20 @@ module m_xg_nonlop
    type(xg_t),pointer :: ph3d_gather_k
 
    ! non paw only:
-   type(xg_t) :: ekb_all
-   type(xgBlock_t),allocatable :: ekb(:)
+   type(xg_t) :: ekb
    ! end non paw only
 
    ! paw only:
    type(xg_t),pointer :: gram_proj(:)
    type(xg_t),pointer :: gram_proj_k
 
-   type(xg_t) :: Dij_all
-   type(xg_t) :: Sij_all
-   type(xgBlock_t),allocatable :: Dij(:)
-   type(xgBlock_t),allocatable :: Sij(:)
+   type(xg_t) :: Dij
+   type(xgBlock_t) :: Dij_spin
+   type(xg_t) :: Sij
 
-   type(xg_t) :: Sijm1_all
-   type(xg_t), pointer :: invSij_approx(:,:)
-   type(xg_t), pointer :: invSij_approx_k(:)
-   type(xgBlock_t),allocatable :: Sijm1(:)
+   type(xg_t) :: Sijm1
+   type(xg_t), pointer :: invSij_approx(:)
+   type(xg_t), pointer :: invSij_approx_k
    ! end paw only
 
  end type xg_nonlop_t
@@ -218,8 +215,8 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
- subroutine xg_nonlop_init(xg_nonlop,indlmn,mpi_atmtab,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,usepaw,&
-     xg_nonlop_option,me_band,comm_band,comm_atom)
+ subroutine xg_nonlop_init(xg_nonlop,indlmn,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,usepaw,&
+     xg_nonlop_option,me_band,comm_band,comm_atom,mpi_atmtab)
 
    integer ,intent(in) :: me_band,comm_band,comm_atom
    integer ,intent(in) :: my_natom
@@ -231,7 +228,7 @@ contains
    real(dp),intent(in) :: ucvol
    type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
-   integer,intent(in),target :: mpi_atmtab(:)
+   integer,optional,intent(in),target :: mpi_atmtab(:)
    integer,intent(in),target :: indlmn(:,:,:)
    integer,intent(in),target :: nattyp(:)
    real(dp) :: tsec(2)
@@ -243,6 +240,15 @@ contains
    xg_nonlop%mkmem=mkmem
    xg_nonlop%nspinor=nspinor
    xg_nonlop%comm_atom=comm_atom
+   if (xmpi_comm_size(comm_atom)>1) then
+     if (present(mpi_atmtab)) then
+       xg_nonlop%mpi_atmtab=>mpi_atmtab
+     else
+       ABI_ERROR("mpi_atmtab must be present")
+     end if
+   else
+     xg_nonlop%mpi_atmtab=>null()
+   end if
    xg_nonlop%my_natom=my_natom
    xg_nonlop%me_band=me_band
    xg_nonlop%comm_band=comm_band
@@ -262,7 +268,6 @@ contains
    xg_nonlop%weight=four_pi/sqrt(ucvol)
    xg_nonlop%ntypat=ntypat
 
-   xg_nonlop%mpi_atmtab=>mpi_atmtab
    xg_nonlop%nattyp=>nattyp
    xg_nonlop%indlmn=>indlmn
 
@@ -294,7 +299,7 @@ contains
    ABI_MALLOC(xg_nonlop%ph3d_gather,(mkmem))
    if (xg_nonlop%paw) then
      ABI_MALLOC(xg_nonlop%gram_proj,(mkmem))
-     ABI_MALLOC(xg_nonlop%invSij_approx,(ntypat,mkmem))
+     ABI_MALLOC(xg_nonlop%invSij_approx,(mkmem))
    end if
 
   nmpi = xmpi_comm_size(xg_nonlop%comm_band)
@@ -379,7 +384,7 @@ contains
 
   type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
-  integer :: ikpt,itypat
+  integer :: ikpt
 
   if (xg_nonlop%paw) then
     call xg_nonlop_destroy_Sij(xg_nonlop) ! Can be destroyed before
@@ -400,9 +405,7 @@ contains
     call xg_free(xg_nonlop%ph3d_gather(ikpt))
     if (xg_nonlop%paw) then
       call xg_free(xg_nonlop%gram_proj(ikpt))
-      do itypat=1,xg_nonlop%ntypat
-        call xg_free(xg_nonlop%invSij_approx(itypat,ikpt))
-      end do
+      call xg_free(xg_nonlop%invSij_approx(ikpt))
     end if
   end do
   ABI_FREE(xg_nonlop%projectors)
@@ -424,6 +427,7 @@ contains
   integer :: itypat, ilmn, iln, nlmn, nlmn_max, ntypat
   real(dp),pointer :: ekb_(:)
   real(dp) :: tsec(2)
+  type(xgBlock_t) :: ekb_itypat
 
 ! *************************************************************************
 
@@ -436,14 +440,13 @@ contains
   ntypat   = xg_nonlop%ntypat
   nlmn_max = xg_nonlop%nlmn_max
 
-  call xg_init(xg_nonlop%ekb_all,SPACE_R,nlmn_max,ntypat,xmpi_comm_self)
-  ABI_MALLOC(xg_nonlop%ekb,(ntypat))
+  call xg_init(xg_nonlop%ekb,SPACE_R,nlmn_max,ntypat,xmpi_comm_self)
 
   do itypat=1,ntypat
 
     nlmn=xg_nonlop%nlmn_ntypat(itypat)
-    call xg_setBlock(xg_nonlop%ekb_all,xg_nonlop%ekb(itypat),nlmn,1,fcol=itypat)
-    call xgBlock_reverseMap_1D(xg_nonlop%ekb(itypat),ekb_)
+    call xg_setBlock(xg_nonlop%ekb,ekb_itypat,nlmn,1,fcol=itypat)
+    call xgBlock_reverseMap_1D(ekb_itypat,ekb_)
     do ilmn=1,nlmn
       iln=xg_nonlop%indlmn(5,ilmn,itypat)
       ekb_(ilmn) = ekb(iln,itypat)
@@ -464,11 +467,12 @@ contains
   integer,intent(in)              :: atindx(:)
 
   logical :: paral_atom
-  integer :: isppol, iatom, iatom_tot, iatom_type, ierr, nlmn, nlmn_max, natom, nspinor, shift
+  integer :: isppol, iatom, iatom_input, iatom_type, nlmn, nlmn_max, natom, nspinor, shift
   integer :: ilmn, jlmn, j0lmn, jjlmn, ijlmn
   integer :: cplex_alldij,cplex_dij,isp,isps,jsp,jsps,ijsp
-  real(dp),pointer :: Dij_(:,:),Dij_all_(:,:)
+  real(dp),pointer :: Dij_iatom_(:,:)
   real(dp) :: tsec(2)
+  type(xgBlock_t) :: Dij_iatom
 
 ! *************************************************************************
 
@@ -493,23 +497,19 @@ contains
     ABI_ERROR('Bad cplex_alldij')
   end if
 
-  call xg_init(xg_nonlop%Dij_all,xg_nonlop%space_Dij,nspinor*nlmn_max,nspinor*nlmn_max*natom*nsppol,xmpi_comm_null)
-  ABI_MALLOC(xg_nonlop%Dij,(natom))
+  call xg_init(xg_nonlop%Dij,xg_nonlop%space_Dij,nspinor*nlmn_max,nspinor*nlmn_max*natom*nsppol,xmpi_comm_null)
 
   do isppol=1,nsppol
 
-    do iatom=1,natom ! loop over all atoms, even if paral atoms
-      nlmn=xg_nonlop%nlmn_natom(iatom)
-      shift=1+(iatom-1)*nspinor*nlmn_max+(isppol-1)*natom*nspinor*nlmn_max
-      call xg_setBlock(xg_nonlop%Dij_all,xg_nonlop%Dij(iatom),nspinor*nlmn,nspinor*nlmn,fcol=shift)
-    end do
-
     do iatom=1,xg_nonlop%my_natom ! loop over atoms treated by this proc
-      iatom_tot=iatom;if (paral_atom) iatom_tot=xg_nonlop%mpi_atmtab(iatom)
-      iatom_type = atindx(iatom_tot) ! convert iatom from input file to iatom ordered by type
+      iatom_input = iatom
+      if (paral_atom) iatom_input=xg_nonlop%mpi_atmtab(iatom) ! mpi_atmtab(iatom) has the ordering of the input file
+      iatom_type = atindx(iatom_input) ! convert iatom from input file to iatom ordered by type
       nlmn=xg_nonlop%nlmn_natom(iatom_type)
+      shift=1+(iatom_type-1)*nspinor*nlmn_max+(isppol-1)*natom*nspinor*nlmn_max
+      call xg_setBlock(xg_nonlop%Dij,Dij_iatom,nspinor*nlmn,nspinor*nlmn,fcol=shift)
       cplex_dij=paw_ij(iatom)%cplex_dij
-      call xgBlock_reverseMap(xg_nonlop%Dij(iatom_type),Dij_)
+      call xgBlock_reverseMap(Dij_iatom,Dij_iatom_)
       do jsp=1,nspinor
         jsps = (jsp-1)*nlmn
         do jlmn=1,nlmn
@@ -530,25 +530,25 @@ contains
             end if
             ! see m_hamiltonian:pawdij2ekb
             if (cplex_dij==1) then
-              Dij_(cplex_alldij*(jlmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(jjlmn,ijsp)
-              if (cplex_alldij==2) Dij_(2*(jlmn+isps),jlmn+jsps) = zero
+              Dij_iatom_(cplex_alldij*(jlmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(jjlmn,ijsp)
+              if (cplex_alldij==2) Dij_iatom_(2*(jlmn+isps),jlmn+jsps) = zero
             else
-              Dij_(2*(jlmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(2*jjlmn-1,ijsp)
-              Dij_(2*(jlmn+isps)    ,jlmn+jsps) = paw_ij(iatom)%dij(2*jjlmn  ,ijsp)
+              Dij_iatom_(2*(jlmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(2*jjlmn-1,ijsp)
+              Dij_iatom_(2*(jlmn+isps)    ,jlmn+jsps) = paw_ij(iatom)%dij(2*jjlmn  ,ijsp)
             end if
             do ilmn=1,jlmn-1
               ! see m_hamiltonian:pawdij2ekb and opernlc_ylm
               ijlmn=j0lmn+ilmn
               if (cplex_dij==1) then
-                Dij_(cplex_alldij*(ilmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(ijlmn,ijsp)
-                if (cplex_alldij==2) Dij_(2*(ilmn+isps),jlmn+jsps) = zero
-                Dij_(cplex_alldij*(jlmn+jsps-1)+1,ilmn+isps) = paw_ij(iatom)%dij(ijlmn,ijsp)
-                if (cplex_alldij==2) Dij_(2*(jlmn+jsps),ilmn+isps) = zero
+                Dij_iatom_(cplex_alldij*(ilmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(ijlmn,ijsp)
+                if (cplex_alldij==2) Dij_iatom_(2*(ilmn+isps),jlmn+jsps) = zero
+                Dij_iatom_(cplex_alldij*(jlmn+jsps-1)+1,ilmn+isps) = paw_ij(iatom)%dij(ijlmn,ijsp)
+                if (cplex_alldij==2) Dij_iatom_(2*(jlmn+jsps),ilmn+isps) = zero
               else
-                Dij_(2*(ilmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(2*ijlmn-1,ijsp)
-                Dij_(2*(ilmn+isps)    ,jlmn+jsps) = paw_ij(iatom)%dij(2*ijlmn  ,ijsp)
-                Dij_(2*(jlmn+jsps-1)+1,ilmn+isps) = paw_ij(iatom)%dij(2*ijlmn-1,ijsp)
-                Dij_(2*(jlmn+jsps)    ,ilmn+isps) =-paw_ij(iatom)%dij(2*ijlmn  ,ijsp)
+                Dij_iatom_(2*(ilmn+isps-1)+1,jlmn+jsps) = paw_ij(iatom)%dij(2*ijlmn-1,ijsp)
+                Dij_iatom_(2*(ilmn+isps)    ,jlmn+jsps) = paw_ij(iatom)%dij(2*ijlmn  ,ijsp)
+                Dij_iatom_(2*(jlmn+jsps-1)+1,ilmn+isps) = paw_ij(iatom)%dij(2*ijlmn-1,ijsp)
+                Dij_iatom_(2*(jlmn+jsps)    ,ilmn+isps) =-paw_ij(iatom)%dij(2*ijlmn  ,ijsp)
               end if
             end do
           end do
@@ -560,8 +560,9 @@ contains
 
 ! Communication in case of distribution over atomic sites
   if (paral_atom) then
-    call xgBlock_reverseMap(xg_nonlop%Dij_all%self,Dij_all_)
-    call xmpi_sum(Dij_all_,xg_nonlop%comm_atom,ierr)
+    !call xgBlock_reverseMap(xg_nonlop%Dij%self,Dij_all_)
+    !call xmpi_sum(Dij_all_,xg_nonlop%comm_atom,ierr)
+    call xgBlock_mpi_sum(xg_nonlop%Dij%self,comm=xg_nonlop%comm_atom)
   end if
 
   call timab(tim_make_Dij,2,tsec)
@@ -574,7 +575,7 @@ contains
   integer,intent(in) :: isppol
   type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
-  integer :: nlmn,iatom,shift,nlmn_max,nspinor,natom
+  integer :: shift,nlmn_max,nspinor,natom
 
   nspinor  = xg_nonlop%nspinor
   natom    = xg_nonlop%natom
@@ -586,11 +587,8 @@ contains
     end if
   end if
 
-  do iatom=1,natom ! loop over all atoms, even if paral atoms
-    nlmn=xg_nonlop%nlmn_natom(iatom)
-    shift=1+(iatom-1)*nspinor*nlmn_max+(isppol-1)*natom*nspinor*nlmn_max
-    call xg_setBlock(xg_nonlop%Dij_all,xg_nonlop%Dij(iatom),nspinor*nlmn,nspinor*nlmn,fcol=shift)
-  end do
+  shift=1+(isppol-1)*natom*nspinor*nlmn_max
+  call xg_setBlock(xg_nonlop%Dij,xg_nonlop%Dij_spin,nspinor*nlmn_max,nspinor*nlmn_max*natom,fcol=shift)
 
  end subroutine xg_nonlop_set_Dij_spin
 !!***
@@ -604,9 +602,10 @@ contains
   logical :: inv_sij_
   integer :: itypat, nlmn, nlmn_max, ntypat, shift
   integer :: ilmn, jlmn, j0lmn, jjlmn, ijlmn
-  real(dp),pointer :: Sij_(:,:)
+  real(dp),pointer :: Sij_itypat_(:,:)
   real(dp) :: tsec(2)
   type(xg_t) :: work
+  type(xgBlock_t) :: Sij_itypat,Sijm1_itypat
 
 ! *************************************************************************
 
@@ -619,37 +618,35 @@ contains
   ntypat   = xg_nonlop%ntypat
   nlmn_max = xg_nonlop%nlmn_max
 
-  call xg_init(xg_nonlop%Sij_all,SPACE_R,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
-  ABI_MALLOC(xg_nonlop%Sij,(ntypat))
+  call xg_init(xg_nonlop%Sij,SPACE_R,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
 
   inv_sij_ = .false.
   if (present(inv_sij)) inv_sij_ = inv_sij
 
   if (inv_sij_) then
-    call xg_init(xg_nonlop%Sijm1_all,SPACE_R,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
-    ABI_MALLOC(xg_nonlop%Sijm1,(ntypat))
+    call xg_init(xg_nonlop%Sijm1,SPACE_R,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
   end if
 
   do itypat=1,ntypat
 
     nlmn=xg_nonlop%nlmn_ntypat(itypat)
     shift=1+(itypat-1)*nlmn_max
-    call xg_setBlock(xg_nonlop%Sij_all,xg_nonlop%Sij(itypat),nlmn,nlmn,fcol=shift)
-    call xgBlock_reverseMap(xg_nonlop%Sij(itypat),Sij_)
+    call xg_setBlock(xg_nonlop%Sij,Sij_itypat,nlmn,nlmn,fcol=shift)
+    call xgBlock_reverseMap(Sij_itypat,Sij_itypat_)
     do jlmn=1,nlmn
       j0lmn=jlmn*(jlmn-1)/2
       jjlmn=j0lmn+jlmn
-      Sij_(jlmn,jlmn) = pawtab(itypat)%sij(jjlmn)
+      Sij_itypat_(jlmn,jlmn) = pawtab(itypat)%sij(jjlmn)
       do ilmn=1,jlmn-1
         ijlmn=j0lmn+ilmn
-        Sij_(ilmn,jlmn) = pawtab(itypat)%sij(ijlmn)
-        Sij_(jlmn,ilmn) = pawtab(itypat)%sij(ijlmn)
+        Sij_itypat_(ilmn,jlmn) = pawtab(itypat)%sij(ijlmn)
+        Sij_itypat_(jlmn,ilmn) = pawtab(itypat)%sij(ijlmn)
       end do
     end do
     if (inv_sij_) then
       call xg_init(work,SPACE_R,nlmn,nlmn,xmpi_comm_self)
-      call xg_setBlock(xg_nonlop%Sijm1_all,xg_nonlop%Sijm1(itypat),nlmn,nlmn,fcol=shift)
-      call xgBlock_invert_sy(xg_nonlop%Sijm1(itypat),work%self,xg_input=xg_nonlop%Sij(itypat))
+      call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift)
+      call xgBlock_invert_sy(Sijm1_itypat,work%self,xg_input=Sij_itypat)
       call xg_free(work)
     end if
 
@@ -670,10 +667,7 @@ contains
     ABI_ERROR('Not implemented with paw=True.')
   end if
 
-  if (allocated(xg_nonlop%ekb)) then
-    ABI_FREE(xg_nonlop%ekb)
-  end if
-  call xg_free(xg_nonlop%ekb_all)
+  call xg_free(xg_nonlop%ekb)
 
  end subroutine xg_nonlop_destroy_ekb
 !!***
@@ -688,10 +682,7 @@ contains
     ABI_ERROR('Not implemented with paw=False.')
   end if
 
-  if (allocated(xg_nonlop%Dij)) then
-    ABI_FREE(xg_nonlop%Dij)
-  end if
-  call xg_free(xg_nonlop%Dij_all)
+  call xg_free(xg_nonlop%Dij)
 
  end subroutine xg_nonlop_destroy_Dij
 !!***
@@ -706,14 +697,8 @@ contains
     ABI_ERROR('Not implemented with paw=False.')
   end if
 
-  if (allocated(xg_nonlop%Sij)) then
-    ABI_FREE(xg_nonlop%Sij)
-  end if
-  call xg_free(xg_nonlop%Sij_all)
-  if (allocated(xg_nonlop%Sijm1)) then
-    ABI_FREE(xg_nonlop%Sijm1)
-  end if
-  call xg_free(xg_nonlop%Sijm1_all)
+  call xg_free(xg_nonlop%Sij)
+  call xg_free(xg_nonlop%Sijm1)
 
  end subroutine xg_nonlop_destroy_Sij
 !!***
@@ -1259,11 +1244,11 @@ contains
 
   logical :: compute_gram_,compute_invS_approx_
   real(dp),pointer :: gram_proj_k_(:,:),Sijm1_(:,:)
-  integer :: ierr, iblock, shift, shiftc, shift_itypat, itypat, ilmn, jlmn, nlmn, ia
+  integer :: ierr, iblock, shift, shiftc, shift_sij, shift_itypat, itypat, ilmn, jlmn, nlmn, nlmn_max, ia
   integer :: cplex,cols,ntypat,nmpi,me_g0_loc,me_g0_fft_loc,space_cprj
   real(dp) :: tsec(2)
   type(xg_t) :: work
-  type(xgBlock_t) :: projs
+  type(xgBlock_t) :: projs,invSij_approx_k_itypat,Sijm1_itypat
 
 ! *************************************************************************
 
@@ -1306,6 +1291,7 @@ contains
   end do
 
   ntypat = xg_nonlop%ntypat
+  nlmn_max = xg_nonlop%nlmn_max
 
   xg_nonlop%ph3d_k => ph3d_k
   xg_nonlop%ffnl_k => ffnl_k
@@ -1320,7 +1306,7 @@ contains
 
   if (xg_nonlop%paw) then
     xg_nonlop%gram_proj_k => xg_nonlop%gram_proj(ikpt)
-    xg_nonlop%invSij_approx_k => xg_nonlop%invSij_approx(:,ikpt)
+    xg_nonlop%invSij_approx_k => xg_nonlop%invSij_approx(ikpt)
   end if
 
   if (compute_proj) then
@@ -1329,7 +1315,7 @@ contains
       xg_nonlop%comm_band,me_g0=me_g0_loc)
 
     if (xg_nonlop%option==0) then
-      call xg_init(xg_nonlop%ffnl_gather_k,SPACE_R,xg_nonlop%total_npw_k,xg_nonlop%nlmn_max*ntypat,xmpi_comm_null)
+      call xg_init(xg_nonlop%ffnl_gather_k,SPACE_R,xg_nonlop%total_npw_k,nlmn_max*ntypat,xmpi_comm_null)
       call xg_init(xg_nonlop%ph3d_gather_k,xg_nonlop%space_pw,xg_nonlop%total_npw_k,xg_nonlop%natom,&
         xmpi_comm_null,me_g0=me_g0_fft_loc)
     end if
@@ -1344,25 +1330,29 @@ contains
         ABI_ERROR('Not implemented with paw=False.')
       end if
 
+      !invSij_approx_k is allocated here as space_pw depends on k-point
+      call xg_init(xg_nonlop%invSij_approx_k,space_cprj,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
+
       shift_itypat=1
+      shift_sij=1
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
 
-        !invSij_approx_k is allocated here as space_pw depends on k-point
-        call xg_init(xg_nonlop%invSij_approx_k(itypat),space_cprj,nlmn,nlmn,xmpi_comm_self)
-
         call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,npw_k,nlmn,fcol=shift_itypat)
+        call xg_setBlock(xg_nonlop%invSij_approx_k,invSij_approx_k_itypat,nlmn,nlmn,fcol=shift_sij)
+        call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift_sij)
         if (space_cprj==SPACE_R) then
-          call xgBlock_copy(xg_nonlop%Sijm1(itypat),xg_nonlop%invSij_approx_k(itypat)%self)
+          call xgBlock_copy(Sijm1_itypat,invSij_approx_k_itypat)
         else
-          call xgBlock_r2c(xg_nonlop%Sijm1(itypat),xg_nonlop%invSij_approx_k(itypat)%self,1)
+          call xgBlock_r2c(Sijm1_itypat,invSij_approx_k_itypat,1)
         end if
         call xg_init(work,space_cprj,nlmn,nlmn,xmpi_comm_self)
         call xgBlock_gemm('t','n',1.0d0,projs,projs,0.0d0,work%self,comm=xg_nonlop%comm_band)
-        call xgBlock_add(xg_nonlop%invSij_approx_k(itypat)%self,work%self)
-        call xgBlock_invert_sy(xg_nonlop%invSij_approx_k(itypat)%self,work%self)
+        call xgBlock_add(invSij_approx_k_itypat,work%self)
+        call xgBlock_invert_sy(invSij_approx_k_itypat,work%self)
         call xg_free(work)
         shift_itypat = shift_itypat + nlmn*xg_nonlop%nattyp(itypat)
+        shift_sij    = shift_sij + nlmn_max
       end do
 
     end if
@@ -1382,9 +1372,11 @@ contains
       call xgBlock_reverseMap(xg_nonlop%gram_proj_k%self,gram_proj_k_)
       shift=0
       shiftc=0
+      shift_sij=1
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
-        call xgBlock_reverseMap(xg_nonlop%Sijm1(itypat),Sijm1_)
+        call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift_sij)
+        call xgBlock_reverseMap(Sijm1_itypat,Sijm1_)
         do ia = 1, xg_nonlop%nattyp(itypat)
           do jlmn=1,nlmn
             do ilmn=1,nlmn
@@ -1395,6 +1387,7 @@ contains
           shift  = shift  + nlmn
           shiftc = shiftc + cplex*nlmn
         end do
+        shift_sij    = shift_sij + nlmn_max
       end do
 
     end if
@@ -1916,20 +1909,20 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
  end subroutine xg_nonlop_apply_prj
 !!***
 
- subroutine xg_nonlop_apply_diag(xg_nonlop,diag,cprjin,cprjout)
+ subroutine xg_nonlop_apply_diag(xg_nonlop,diag_op,cprjin,cprjout)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in), target :: diag(:)
+   type(xgBlock_t), intent(in) :: diag_op
    type(xgBlock_t), intent(in) :: cprjin
    type(xgBlock_t), intent(inout) :: cprjout
 
+   logical :: loop_over_atoms
    integer :: ia, iband, cprjdim, shift_itypat, iatom, itypat, nattyp, nlmn, shift
    integer :: space_cprj, cplex, nlmn_max
-   integer :: nspinor, nrows, ncols, nrows_diag, ncols_diag
+   integer :: nspinor, nrows, ncols
 
    type(xg_t)        :: cprjin_nlmn_max,cprjout_nlmn_max
-   type(xgBlock_t) :: cprjin_nlmn,cprjout_nlmn
-   type(xgBlock_t),pointer :: diag_
+   type(xgBlock_t) :: cprjin_nlmn,cprjout_nlmn,diag_op_iatom
    real(dp),pointer :: cprjin_nlmn_(:,:),cprjout_nlmn_(:,:)
    real(dp),pointer :: cprjin_(:,:),cprjout_(:,:)
    real(dp) :: tsec(2)
@@ -1961,6 +1954,13 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    call xgBlock_reverseMap(cprjin ,cprjin_ )
    call xgBlock_reverseMap(cprjout,cprjout_)
 
+   if (cols(diag_op) == xg_nonlop%ntypat) then
+     loop_over_atoms = .false.
+   else if (cols(diag_op) == xg_nonlop%natom) then
+     loop_over_atoms = .true.
+   else
+     ABI_ERROR('wrong cols for diag_op!')
+   end if
    shift = 0
    shift_itypat = 0
    do itypat=1,xg_nonlop%ntypat
@@ -1970,27 +1970,19 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
      call xg_setBlock(cprjout_nlmn_max,cprjout_nlmn,nlmn,ncols)
      call xgBlock_reverseMap(cprjin_nlmn ,cprjin_nlmn_ )
      call xgBlock_reverseMap(cprjout_nlmn,cprjout_nlmn_)
+     if (.not.loop_over_atoms) then
+       call xgBlock_setBlock(diag_op,diag_op_iatom,nlmn,1,fcol=itypat)
+     end if
      do ia=1,nattyp
-       if (size(diag)==xg_nonlop%ntypat) then
-         diag_ => diag(itypat)
-       else if (size(diag)==xg_nonlop%natom) then
+       if (loop_over_atoms) then
          iatom = ia + shift_itypat
-         diag_ => diag(iatom)
-       else
-         ABI_ERROR('wrong size of diag!')
-       end if
-       call xgBlock_getsize(diag_,nrows_diag,ncols_diag)
-       if (nrows_diag/=nlmn) then
-         ABI_ERROR('nrows_A/=nlmn')
-       end if
-       if (ncols_diag/=1) then
-         ABI_ERROR('ncols_diag/=1')
+         call xgBlock_setBlock(diag_op,diag_op_iatom,nlmn,1,fcol=iatom)
        end if
        ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
        do iband=1,ncols
          cprjin_nlmn_(1:cplex*nlmn,iband) = cprjin_(1+shift:cplex*nlmn+shift,iband)
        end do
-       call xgBlock_apply_diag(cprjin_nlmn,diag_,1,Y=cprjout_nlmn)
+       call xgBlock_apply_diag(cprjin_nlmn,diag_op_iatom,1,Y=cprjout_nlmn)
        do iband=1,ncols
          cprjout_(1+shift:cplex*nlmn+shift,iband) = cprjout_(1+shift:cplex*nlmn+shift,iband) &
          & + cprjout_nlmn_(1:cplex*nlmn,iband)
@@ -2013,11 +2005,12 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
  subroutine xg_nonlop_apply_Aij(xg_nonlop,Aij,cprjin,cprjout,A_with_spin)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in), target :: Aij(:)
+   type(xgBlock_t), intent(in) :: Aij
    type(xgBlock_t), intent(in) :: cprjin
    type(xgBlock_t), intent(inout) :: cprjout
    logical,optional,intent(in) :: A_with_spin
 
+   logical :: loop_over_atoms
    integer :: ia, iband, cprjdim, shift_itypat, iatom, itypat, nattyp, nlmn, shift
    integer :: space_aij, space_cprj, cplex, nlmn_max
    integer :: nspinor, nrows, ncols, nrows_A, ncols_A
@@ -2026,7 +2019,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    type(xg_t)        :: cprjin_nlmn_max,cprjout_nlmn_max
    type(xg_t),target :: Aij_complex
    type(xgBlock_t) :: cprjin_nlmn,cprjout_nlmn
-   type(xgBlock_t),pointer :: Aij_
+   type(xgBlock_t) :: Aij_iatom,Aij_iatom_
    real(dp),pointer :: cprjin_nlmn_(:,:),cprjout_nlmn_(:,:)
    real(dp),pointer :: cprjin_(:,:),cprjout_(:,:)
    real(dp) :: tsec(2)
@@ -2048,7 +2041,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    else
      cplex=1
    end if
-   space_aij = space(Aij(1))
+   space_aij = space(Aij)
    aij_r2c = .false.
    if (space_cprj/=space_aij) then
      if (space_aij==SPACE_R.and.space_cprj==SPACE_C) then
@@ -2073,6 +2066,30 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
      ncols_1atom = ncols
    end if
 
+   if (aij_r2c) then
+     if (rows(Aij) /= nlmn_max) then
+       ABI_ERROR('wrong rows for Aij')
+     end if
+     if (cols(Aij) == xg_nonlop%ntypat*nlmn_max) then
+       loop_over_atoms = .false.
+     else if (cols(Aij) == xg_nonlop%natom*nlmn_max) then
+       loop_over_atoms = .true.
+     else
+       ABI_ERROR('wrong cols for Aij (aij_r2c)')
+     end if
+   else
+     if (rows(Aij) /= nlmn_max_1atom) then
+       ABI_ERROR('wrong rows for Aij')
+     end if
+     if (cols(Aij) == xg_nonlop%ntypat*nlmn_max_1atom) then
+       loop_over_atoms = .false.
+     else if (cols(Aij) == xg_nonlop%natom*nlmn_max_1atom) then
+       loop_over_atoms = .true.
+     else
+       ABI_ERROR('wrong cols for Aij')
+     end if
+   end if
+
    ! Create work spaces for cprj of ONE atom for ALL bands
    call xg_init(cprjin_nlmn_max ,space_cprj,nlmn_max_1atom,ncols_1atom)
    call xg_init(cprjout_nlmn_max,space_cprj,nlmn_max_1atom,ncols_1atom)
@@ -2095,16 +2112,23 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
      call xgBlock_reverseMap(cprjin_nlmn ,cprjin_nlmn_ )
      call xgBlock_reverseMap(cprjout_nlmn,cprjout_nlmn_)
      if (aij_r2c) call xg_init(Aij_complex,SPACE_C,nlmn_1atom,nlmn_1atom)
-     do ia=1,nattyp
-       if (size(Aij)==xg_nonlop%ntypat) then
-         Aij_ => Aij(itypat)
-       else if (size(Aij)==xg_nonlop%natom) then
-         iatom = ia + shift_itypat
-         Aij_ => Aij(iatom)
+     if (.not.loop_over_atoms) then
+       if (aij_r2c) then
+         call xgBlock_setBlock(Aij,Aij_iatom,nlmn,nlmn,fcol=1+(itypat-1)*nlmn_max)
        else
-         ABI_ERROR('wrong size of Aij!')
+         call xgBlock_setBlock(Aij,Aij_iatom,nlmn_1atom,nlmn_1atom,fcol=1+(itypat-1)*nlmn_max_1atom)
        end if
-       call xgBlock_getsize(Aij_,nrows_A,ncols_A)
+     end if
+     do ia=1,nattyp
+       if (loop_over_atoms) then
+         iatom = ia + shift_itypat
+         if (aij_r2c) then
+           call xgBlock_setBlock(Aij,Aij_iatom,nlmn,nlmn,fcol=1+(iatom-1)*nlmn_max)
+         else
+           call xgBlock_setBlock(Aij,Aij_iatom,nlmn_1atom,nlmn_1atom,fcol=1+(iatom-1)*nlmn_max_1atom)
+         end if
+       end if
+       call xgBlock_getsize(Aij_iatom,nrows_A,ncols_A)
        if (.not.aij_r2c) then
          if (nrows_A/=nlmn_1atom) then
            ABI_ERROR('nrows_A/=nlmn_1atom')
@@ -2122,8 +2146,10 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
        end if
        ! if needed, transfer real matrix to a complex one
        if (aij_r2c) then
-         call xgBlock_r2c(Aij_,Aij_complex%self,nspinor)
-         Aij_ => Aij_complex%self
+         call xgBlock_r2c(Aij_iatom,Aij_complex%self,nspinor)
+         Aij_iatom_ = Aij_complex%self
+       else
+         Aij_iatom_ = Aij_iatom
        end if
        ! Copy cprj of ONE atom for ALL bands from cprjin to cprin_nlmn
        !call timab(tim_apply_Aij_copy,1,tsec)
@@ -2144,8 +2170,8 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
        !call timab(tim_apply_Aij_copy,2,tsec)
 
        !call timab(tim_apply_Aij_gemm,1,tsec)
-!       call xgBlock_gemm('n','n',1.0d0,Aij_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
-       call xgBlock_gemm('n','n',1.0d0,Aij_,cprjin_nlmn,0.d0,cprjout_nlmn)
+       !call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn,timing=.false.)
+       call xgBlock_gemm('n','n',1.0d0,Aij_iatom_,cprjin_nlmn,0.d0,cprjout_nlmn)
        !call timab(tim_apply_Aij_gemm,2,tsec)
 
        !call timab(tim_apply_Aij_copy,1,tsec)
@@ -2186,7 +2212,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
  subroutine xg_nonlop_precond_iterative_refinement(xg_nonlop,A,precond,cprj_in,cprj_out,cprj_work)
 
    type(xg_nonlop_t), intent(in)  :: xg_nonlop
-   type(xgBlock_t), intent(in   ) :: A,precond(:)
+   type(xgBlock_t), intent(in   ) :: A,precond
    type(xgBlock_t), intent(in   ) :: cprj_in
    type(xgBlock_t), intent(inout) :: cprj_out,cprj_work
 
@@ -2421,7 +2447,7 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
 subroutine xg_nonlop_colwiseXAX(xg_nonlop,Aij,cprj,cprj_work,res)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprj,Aij(:)
+   type(xgBlock_t), intent(in) :: cprj,Aij
    type(xgBlock_t), intent(inout) :: cprj_work,res
 
    integer :: ncols
@@ -2446,7 +2472,7 @@ end subroutine xg_nonlop_colwiseXAX
 subroutine xg_nonlop_colwiseXDX(xg_nonlop,diag,cprj,cprj_work,res)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprj,diag(:)
+   type(xgBlock_t), intent(in) :: cprj,diag
    type(xgBlock_t), intent(inout) :: cprj_work,res
 
    integer :: ncols,space_diag,space_res
@@ -2458,7 +2484,7 @@ subroutine xg_nonlop_colwiseXDX(xg_nonlop,diag,cprj,cprj_work,res)
    if (ncols/=xg_nonlop%nspinor*rows(res)) then
      ABI_ERROR('Wrong cols for cprj or res.')
    end if
-   space_diag = space(diag(1))
+   space_diag = space(diag)
    space_res = space(res)
    if (space_diag==SPACE_C) then
      if (space_res/=SPACE_C) then
@@ -2513,16 +2539,16 @@ subroutine xg_nonlop_colwiseXHX(xg_nonlop,cprj,cprj_work,res)
      res_mpi = res
    else
      call xgBlock_setBlock(res,res_tmp,nres,1)
-     call xgBlock_reshape(res_tmp,(/1,nres/))
+     call xgBlock_reshape(res_tmp,1,nres)
      shift = xg_nonlop%me_band*ncols
      call xgBlock_setBlock(res_tmp,res_mpi,1,ncols,fcol=1+shift)
-     call xgBlock_reshape(res_mpi,(/ncols,1/))
+     call xgBlock_reshape(res_mpi,ncols,1)
    end if
 
    if (xg_nonlop%paw) then
-     call xg_nonlop_colwiseXAX(xg_nonlop,xg_nonlop%Dij,cprj,cprj_work,res_mpi)
+     call xg_nonlop_colwiseXAX(xg_nonlop,xg_nonlop%Dij_spin,cprj,cprj_work,res_mpi)
    else
-     call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb,cprj,cprj_work,res_mpi)
+     call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb%self,cprj,cprj_work,res_mpi)
    end if
 
    call xgBlock_mpi_sum(res,comm=xg_nonlop%comm_band)
@@ -2533,7 +2559,7 @@ end subroutine xg_nonlop_colwiseXHX
 subroutine xg_nonlop_getXAX(xg_nonlop,Aij,cprj_left,cprj_right,cprj_work,res,blocksize)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprj_left,cprj_right,Aij(:)
+   type(xgBlock_t), intent(in) :: cprj_left,cprj_right,Aij
    type(xgBlock_t), intent(inout) :: cprj_work,res
    integer,intent(in) :: blocksize
 
@@ -2548,7 +2574,7 @@ subroutine xg_nonlop_getXAX(xg_nonlop,Aij,cprj_left,cprj_right,cprj_work,res,blo
 subroutine xg_nonlop_getXDX(xg_nonlop,diag,cprj_left,cprj_right,cprj_work,res,blocksize)
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprj_left,cprj_right,diag(:)
+   type(xgBlock_t), intent(in) :: cprj_left,cprj_right,diag
    type(xgBlock_t), intent(inout) :: cprj_work,res
    integer,intent(in) :: blocksize
 
@@ -2574,7 +2600,7 @@ subroutine xg_nonlop_getXSX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
      ABI_ERROR('Not implemented with paw=False.')
    end if
 
-   call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Sij,cprj_left,cprj_right,cprj_work,res,blocksize)
+   call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Sij%self,cprj_left,cprj_right,cprj_work,res,blocksize)
 
    call timab(tim_getXSX,2,tsec)
 
@@ -2592,9 +2618,9 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    call timab(tim_getXHX,1,tsec)
 
    if (xg_nonlop%paw) then
-     call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Dij,cprj_left,cprj_right,cprj_work,res,blocksize)
+     call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Dij_spin,cprj_left,cprj_right,cprj_work,res,blocksize)
    else
-     call xg_nonlop_getXDX(xg_nonlop,xg_nonlop%ekb,cprj_left,cprj_right,cprj_work,res,blocksize)
+     call xg_nonlop_getXDX(xg_nonlop,xg_nonlop%ekb%self,cprj_left,cprj_right,cprj_work,res,blocksize)
    end if
 
    call timab(tim_getXHX,2,tsec)
@@ -2607,7 +2633,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    use iso_c_binding
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprjin,Aij(:)
+   type(xgBlock_t), intent(in) :: cprjin,Aij
    type(xgBlock_t), intent(inout) :: Xin,cprj_work,work_mpi
    type(xgBlock_t), optional, intent(inout) :: Xout
 
@@ -2646,7 +2672,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    use iso_c_binding
 
    type(xg_nonlop_t), intent(in) :: xg_nonlop
-   type(xgBlock_t), intent(in) :: cprjin,diag(:)
+   type(xgBlock_t), intent(in) :: cprjin,diag
    type(xgBlock_t), intent(inout) :: Xin,cprj_work,work_mpi
    type(xgBlock_t), optional, intent(inout) :: Xout
 
@@ -2689,10 +2715,18 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    type(xgBlock_t), intent(inout) :: Xin,cprj_work,work_mpi
    type(xgBlock_t), optional, intent(inout) :: Xout
 
-   if (xg_nonlop%paw) then
-     call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Dij,Xin,cprjin,cprj_work,work_mpi,Xout)
+   if (present(Xout)) then
+     if (xg_nonlop%paw) then
+       call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Dij_spin,Xin,cprjin,cprj_work,work_mpi,Xout=Xout)
+     else
+       call xg_nonlop_getDX(xg_nonlop,xg_nonlop%ekb%self,Xin,cprjin,cprj_work,work_mpi,Xout=Xout)
+     end if
    else
-     call xg_nonlop_getDX(xg_nonlop,xg_nonlop%ekb,Xin,cprjin,cprj_work,work_mpi,Xout)
+     if (xg_nonlop%paw) then
+       call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Dij_spin,Xin,cprjin,cprj_work,work_mpi)
+     else
+       call xg_nonlop_getDX(xg_nonlop,xg_nonlop%ekb%self,Xin,cprjin,cprj_work,work_mpi)
+     end if
    end if
 
  end subroutine xg_nonlop_getHX
@@ -2710,7 +2744,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
      ABI_ERROR('Not implemented with paw=False.')
    end if
 
-   call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Sij,Xin,cprjin,cprj_work,work_mpi,Xout)
+   call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Sij%self,Xin,cprjin,cprj_work,work_mpi,Xout)
 
  end subroutine xg_nonlop_getSX
 
@@ -2780,6 +2814,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    integer :: nrows_cprj_work,ncols_cprj_work
    integer :: nspinor
    logical :: no_H_
+   type(xgBlock_t) :: cprj_work_spinor
 
    call timab(tim_getHmeSX,1,tsec)
 
@@ -2811,11 +2846,12 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
 
    ! cprj_work = sum_j Saij cprjin
    call xgBlock_zero(cprj_work)
-   call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij,cprjin,cprj_work)
+   call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij%self,cprjin,cprj_work)
 
    ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
    shift = xg_nonlop%me_band*ncols_cprj/xg_nonlop%nspinor
-   call xgBlock_ymax(cprj_work,eigen,shift,nblocks,xg_nonlop%nspinor)
+   call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,nspinor,COLS2ROWS)
+   call xgBlock_ymax(cprj_work_spinor,eigen,shift,nblocks)
 
    no_H_=.False.
    if (present(no_H)) then
@@ -2823,7 +2859,7 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    end if
    if (.not.no_H_) then
      ! cprj_work = sum_j Daij cprjin + cprj_work
-     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Dij,cprjin,cprj_work)
+     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Dij_spin,cprjin,cprj_work)
    end if
 
    ! Xout = Xout + sum_ai pai cprj_work
@@ -2923,17 +2959,18 @@ subroutine xg_nonlop_forces_stress(xg_nonlop,Xin,cprjin,cprj_work,eigen,forces,s
    call xgBlock_zero(cprj_work)
    if (xg_nonlop%paw) then
      ! cprj_work = sum_j Saij cprjin
-     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij,cprjin,cprj_work)
+     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Sij%self,cprjin,cprj_work)
      ! cprj_work = - e cprj_work = -e sum_j Saij cprjin
      shift = xg_nonlop%me_band*ncols_cprj_nospin
-     call xgBlock_ymax(cprj_work,eigen,shift,nmpi,xg_nonlop%nspinor)
+     call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,nspinor,COLS2ROWS)
+     call xgBlock_ymax(cprj_work_spinor,eigen,shift,nmpi)
    end if
 
    ! cprj_work = sum_j Daij cprjin + cprj_work
    if (xg_nonlop%paw) then
-     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Dij,cprjin,cprj_work)
+     call xg_nonlop_apply_Aij(xg_nonlop,xg_nonlop%Dij_spin,cprjin,cprj_work)
    else
-     call xg_nonlop_apply_diag(xg_nonlop,xg_nonlop%ekb,cprjin,cprj_work)
+     call xg_nonlop_apply_diag(xg_nonlop,xg_nonlop%ekb%self,cprjin,cprj_work)
    end if
 
    call timab(tim_fst_start,2,tsec)

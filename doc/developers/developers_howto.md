@@ -127,12 +127,34 @@ Wait for the error e.g. SIGSEGV, then print the **backtrace** with:
 
     (gdb) bt
 
+Display additional information of a selected **stack frame** (the first one here), such as function arguments before the
+error, with the commands:
+
+    (gdb) select-frame 1
+    (gdb) info args
+
 
 !!! tip
 
     Remember to compile the code with the `-g` option. Avoid debugging code compiled with -O3.
     In some tricky cases, you may need to resort to -O0 or use Fortran `print` statements to avoid miscompilation.
 
+
+!!! tip
+
+    For debugging MPI jobs, serial debuggers attached to individual processes are useful.
+    Run an MPI job (4 processes in this example) that opens separate instances of `xterm` terminal windows 
+    for individual processes and then loads the ABINIT executable in the GNU debugger on each one of them, using 
+    the command:
+
+        mpirun -n 4 xterm -e gdb path_to_abinit_executable
+
+    Run ABINIT on each process separately by typing the following command on every terminal window opened during the
+    previous step:
+
+        (gdb) run path_to_input_abi
+
+    Within each process, gdb can be used as in the serial case. 
 
 For a more complete introduction to *gdb*, we suggest this youtube tutorial:
 
@@ -177,6 +199,7 @@ In particular:
 
 * Create the F90 module and `git add` it
 * Register the F90 file in the `abinit.src` file (avoid duplicated names in the public API, **abisrc.py** will complain about that)
+* Register the F90 file in the `CMakeLists.txt` file as well 
 * Rerun `makemake` in the source directory
 * Rerun `configure` and `make` in the build directory (possibly `make clean && make`)
 
@@ -278,3 +301,5 @@ If you see parts of the code which are not well tested, please contribute to imp
 {% include doc/developers/debug_make_parents %}
 
 {% include doc/developers/debug_make_abiauty %}
+
+{% include doc/developers/mpi_devtools.md %}

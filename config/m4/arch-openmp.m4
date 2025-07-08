@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2012-2024 ABINIT Group (Yann Pouillon, MTorrent)
+# Copyright (C) 2012-2025 ABINIT Group (Yann Pouillon, MTorrent)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -181,7 +181,7 @@ if test "${abi_openmp_offload_enable}" = "yes"; then
 
   # Manage ARCH variable
   if test "${GPU_ARCH}" = ""; then
-    AC_MSG_WARN([GPU arch is not set (empty GPU_ARCH variable), defaulting to NVIDIA Ampere (=80)])
+    AC_MSG_ERROR([GPU target architecture is not set, please provide GPU_ARCH variable])
     GPU_ARCH=80
   fi
   # Perform pattern replacement in OpenMP offload flags with requested GPU arch

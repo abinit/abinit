@@ -3,11 +3,11 @@
 !!  m_scup_dataset
 !!
 !! FUNCTION
-!!  module with the type of the input variables for scale_up 
+!!  module with the type of the input variables for scale_up
 !!  when initialized this is a subtype of multibinit_dtset_type
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (AM)
+!!  Copyright (C) 2014-2025 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,10 +25,10 @@ module m_scup_dataset
  use defs_basis
  use m_abicore
  use m_errors
+ use m_bz_mesh
 
  use m_parser, only : intagm
- use m_symtk,  only : matr3inv
- use m_bz_mesh
+ use m_matrix, only : matr3inv
 
  implicit none
 
@@ -39,7 +39,7 @@ module m_scup_dataset
  public :: scup_dtset_free
  public :: outvars_scup
  public :: invars10scup
- public :: scup_kpath_new 
+ public :: scup_kpath_new
  public :: scup_kpath_print
 !!***
 
@@ -49,42 +49,42 @@ module m_scup_dataset
 !!
 !! FUNCTION
 !! The scup_dtset_type structured datatype
-!! gathers all input variables and options for the SCALE UP part 
+!! gathers all input variables and options for the SCALE UP part
 !! that is linked with multibinit
 !!
 !! SOURCE
 
- type scup_dtset_type 
+ type scup_dtset_type
 
-!Integer 
+!Integer
  integer :: scup_nspeck
  integer :: scup_ndivsm
  integer :: scup_printniter
- integer :: scup_startpulay 
+ integer :: scup_startpulay
  integer :: scup_maxscfstep
-!Logicals 
+!Logicals
  logical :: scup_elec_model
  logical :: scup_initorbocc
- logical :: scup_ismagnetic 
- logical :: scup_istddft    
+ logical :: scup_ismagnetic
+ logical :: scup_istddft
  logical :: scup_printbands
  logical :: scup_printeigv
- logical :: scup_printeltic 
- logical :: scup_printgeom 
+ logical :: scup_printeltic
+ logical :: scup_printgeom
  logical :: scup_printorbocc
  logical(1) :: scup_freezden
-!Real 
- real*8   :: scup_tcharge 
+!Real
+ real*8   :: scup_tcharge
  real*8   :: scup_scfmixing
- real*8   :: scup_scfthresh 
+ real*8   :: scup_scfthresh
  real*8   :: scup_smearing
 !Integer Array
  integer :: scup_ksamp(3)
 
-!Real Array 
+!Real Array
  real(dp),allocatable :: scup_speck(:,:)
 
-!Kpath Type 
+!Kpath Type
  type(kpath_t) :: scup_kpath
 
  end type scup_dtset_type
@@ -100,7 +100,7 @@ CONTAINS
 !! Init the scup_dtset type
 !!
 !! INPUTS
-!! 
+!!
 !!
 !! OUTPUT
 !! scup_dtset <type(scup_dtset_type)> = datatype with all the input variables
@@ -112,32 +112,27 @@ CONTAINS
 
 subroutine scup_dtset_init(scup_dtset)
 
-implicit none
 
 !Arguments -------------------------------
-!scalars
- type(scup_dtset_type),intent(inout) :: scup_dtset
-!Local variables -------------------------
-!scalars
-!arrays
+ class(scup_dtset_type),intent(inout) :: scup_dtset
 !-----------------------------------------
 
 scup_dtset%scup_ndivsm      =  0
-scup_dtset%scup_nspeck      =  0 
+scup_dtset%scup_nspeck      =  0
 scup_dtset%scup_elec_model  = .FALSE.
 scup_dtset%scup_ksamp       =  (/ 1, 1, 1 /)
 scup_dtset%scup_tcharge     =  0
-scup_dtset%scup_initorbocc  = .FALSE. 
-scup_dtset%scup_ismagnetic  = .FALSE. 
+scup_dtset%scup_initorbocc  = .FALSE.
+scup_dtset%scup_ismagnetic  = .FALSE.
 scup_dtset%scup_istddft     = .FALSE.
-scup_dtset%scup_printbands  = .FALSE.  
-scup_dtset%scup_printeigv   = .FALSE. 
-scup_dtset%scup_printeltic  = .FALSE.  
-scup_dtset%scup_printgeom   = .FALSE.  
-scup_dtset%scup_printniter  =  0  
-scup_dtset%scup_printorbocc = .FALSE. 
-scup_dtset%scup_freezden    = .FALSE. 
-scup_dtset%scup_scfmixing   =  0.3 
+scup_dtset%scup_printbands  = .FALSE.
+scup_dtset%scup_printeigv   = .FALSE.
+scup_dtset%scup_printeltic  = .FALSE.
+scup_dtset%scup_printgeom   = .FALSE.
+scup_dtset%scup_printniter  =  0
+scup_dtset%scup_printorbocc = .FALSE.
+scup_dtset%scup_freezden    = .FALSE.
+scup_dtset%scup_scfmixing   =  0.3
 scup_dtset%scup_scfthresh   =  tol6
 scup_dtset%scup_smearing    =  0.00091873313 ! Room Temperature in Hartree
 scup_dtset%scup_startpulay  =  3
@@ -164,18 +159,12 @@ end subroutine  scup_dtset_init
 
 subroutine scup_dtset_free(scup_dtset)
 
- implicit none
-
 !Arguments ------------------------------------
-!scalars
- type(scup_dtset_type), intent(inout) :: scup_dtset
+ class(scup_dtset_type), intent(inout) :: scup_dtset
 
 ! *************************************************************************
 
-
-if(allocated(scup_dtset%scup_speck))then 
-        ABI_FREE(scup_dtset%scup_speck)
-endif
+ ABI_SFREE(scup_dtset%scup_speck)
 
 call scup_dtset%scup_kpath%free
 
@@ -189,7 +178,7 @@ end subroutine scup_dtset_free
 !! outvars_scup
 !!
 !! FUNCTION
-!! Takes as an input the input dtset for scup and echoes it to 
+!! Takes as an input the input dtset for scup and echoes it to
 !! the output
 !!
 !! INPUTS
@@ -206,12 +195,10 @@ end subroutine scup_dtset_free
 
 subroutine outvars_scup(scup_dtset,nunit)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nunit
- type(scup_dtset_type),intent(in) :: scup_dtset
+ class(scup_dtset_type),intent(in) :: scup_dtset
 
 !Local variables -------------------------
 !Set routine version number here:
@@ -220,9 +207,9 @@ subroutine outvars_scup(scup_dtset,nunit)
  integer :: int_inorb=0,int_mgn=0,int_tddft=0,int_pband=0
  integer :: int_peigv=0,int_peltic=0,int_pgeom=0,int_porbocc=0
  integer :: int_freezden=0
-!Character for defining fromat string 
+!Character for defining fromat string
 !*********************************************************************
-   
+
    !Check if logicals are true, if yes set integers to one for printing
    if(scup_dtset%scup_initorbocc)   int_inorb    =1
    if(scup_dtset%scup_ismagnetic)   int_mgn      =1
@@ -233,26 +220,26 @@ subroutine outvars_scup(scup_dtset,nunit)
    if(scup_dtset%scup_printgeom)    int_pgeom    =1
    if(scup_dtset%scup_printorbocc)  int_porbocc  =1
    if(scup_dtset%scup_freezden)     int_freezden =1
-    
-   !Print  
+
+   !Print
    write(nunit,'(a)')'Variables for SCALE-UP electronic model :'
    write(nunit,'(1x,a16,3I3)')    '      scup_ksamp',scup_dtset%scup_ksamp
    write(nunit,'(1x,a16,F7.3)')   '    scup_tcharge',scup_dtset%scup_tcharge
-   write(nunit,'(1x,a16,I3)')     ' scup_initorbocc',int_inorb  
-   write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',int_mgn    
-   write(nunit,'(1x,a16,I3)')     '    scup_istddft',int_tddft  
-   write(nunit,'(1x,a16,I3)')     ' scup_printbands',int_pband     
-   write(nunit,'(1x,a16,I3)')     '  scup_printeigv',int_peigv   
-   write(nunit,'(1x,a16,I3)')     ' scup_printeltic',int_peltic   
-   write(nunit,'(1x,a16,I3)')     '  scup_printgeom',int_pgeom    
+   write(nunit,'(1x,a16,I3)')     ' scup_initorbocc',int_inorb
+   write(nunit,'(1x,a16,I3)')     ' scup_ismagnetic',int_mgn
+   write(nunit,'(1x,a16,I3)')     '    scup_istddft',int_tddft
+   write(nunit,'(1x,a16,I3)')     ' scup_printbands',int_pband
+   write(nunit,'(1x,a16,I3)')     '  scup_printeigv',int_peigv
+   write(nunit,'(1x,a16,I3)')     ' scup_printeltic',int_peltic
+   write(nunit,'(1x,a16,I3)')     '  scup_printgeom',int_pgeom
    write(nunit,'(1x,a16,I3)')     ' scup_printniter',scup_dtset%scup_printniter
-   write(nunit,'(1x,a16,I3)')     'scup_printorbocc',int_porbocc 
+   write(nunit,'(1x,a16,I3)')     'scup_printorbocc',int_porbocc
    write(nunit,'(1x,a16,I3)')     '   scup_freezden',int_freezden
    write(nunit,'(1x,a16,I3)')     '     scup_nspeck',scup_dtset%scup_nspeck
    write(nunit,'(1x,a16,I3)')     '     scup_ndivsm',scup_dtset%scup_ndivsm
-   write(nunit,'(1x,a16,F7.3)')   '  scup_scfmixing',scup_dtset%scup_scfmixing 
-   write(nunit,'(1x,a16,ES10.2)') '  scup_scfthresh',scup_dtset%scup_scfthresh 
-   write(nunit,'(1x,a16,ES10.2)') '   scup_smearing',scup_dtset%scup_smearing 
+   write(nunit,'(1x,a16,F7.3)')   '  scup_scfmixing',scup_dtset%scup_scfmixing
+   write(nunit,'(1x,a16,ES10.2)') '  scup_scfthresh',scup_dtset%scup_scfthresh
+   write(nunit,'(1x,a16,ES10.2)') '   scup_smearing',scup_dtset%scup_smearing
    write(nunit,'(1x,a16,I3)')     ' scup_startpulay',scup_dtset%scup_startpulay
    write(nunit,'(1x,a16,I3)')     ' scup_maxscfstep',scup_dtset%scup_maxscfstep
 
@@ -266,7 +253,7 @@ end subroutine outvars_scup
 !! invars10scup
 !!
 !! FUNCTION
-!! Open input file for the multibinit code, then reads or echoes the input information 
+!! Open input file for the multibinit code, then reads or echoes the input information
 !! for SCALE UP part that is linked with multibinit.
 !!
 !! INPUTS
@@ -284,12 +271,11 @@ end subroutine outvars_scup
 
 subroutine invars10scup(scup_dtset,lenstr,string)
 
-implicit none 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: lenstr
  character(len=*),intent(in) :: string
- type(scup_dtset_type),intent(inout) :: scup_dtset
+ class(scup_dtset_type),intent(inout) :: scup_dtset
 
 !Local variables -------------------------
 !Dummy arguments for subroutine 'intagm' to parse input file
@@ -300,7 +286,7 @@ implicit none
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
- !tmp integer to transfer to logicals 
+ !tmp integer to transfer to logicals
  integer :: tmp_int
 
 !*********************************************************************
@@ -315,18 +301,18 @@ implicit none
 ! Initialize Dataset with default values
 !=====================================================================
 
-call scup_dtset_init(scup_dtset) 
-tmp_int=0 
+call scup_dtset_init(scup_dtset)
+tmp_int=0
 
 !=====================================================================
 !start reading in dimensions and non-dependent variables
 !=====================================================================
 
-!A 
-!B 
-!C 
-!D 
-!E 
+!A
+!B
+!C
+!D
+!E
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_elec_model',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
  if(tmp_int<0 .or. tmp_int>1 )then
@@ -337,9 +323,9 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_elec_model = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
-!F 
+!F
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_freezden',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
  if(tmp_int<0 .or. tmp_int>1 )then
@@ -350,11 +336,11 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_freezden = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
- !G 
-!H 
-!I 
+ !G
+!H
+!I
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_initorbocc',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
  if(tmp_int<0 .or. tmp_int>1 )then
@@ -365,7 +351,7 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_initorbocc = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_ismagnetic',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -377,7 +363,7 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_ismagnetic = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_istddft',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -389,11 +375,11 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_istddft = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
 
 !J
-!K 
+!K
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'scup_ksamp',tread,'INT')
  if(tread==1) scup_dtset%scup_ksamp(1:3)=intarr(1:3)
  do ii=1,3
@@ -405,7 +391,7 @@ tmp_int=0
    end if
  end do
 
-!L 
+!L
 !M
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_maxscfstep',tread,'INT')
  if(tread==1) scup_dtset%scup_maxscfstep=intarr(1)
@@ -441,7 +427,7 @@ tmp_int=0
  end if
 
 !O
-!P 
+!P
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printbands',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
  if(tmp_int<0 .or. tmp_int>1 )then
@@ -452,7 +438,7 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printbands = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeigv',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -464,7 +450,7 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printeigv = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printeltic',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -476,7 +462,7 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printeltic = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printgeom',tread,'INT')
  if(tread==1) tmp_int=intarr(1)
@@ -488,7 +474,7 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printgeom = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'scup_printniter',tread,'INT')
  if(tread==1) scup_dtset%scup_printniter=intarr(1)
@@ -510,7 +496,7 @@ tmp_int=0
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printorbocc = .TRUE.
- tmp_int = 0 
+ tmp_int = 0
 
 !Q
 !R
@@ -568,12 +554,12 @@ tmp_int=0
  end if
 
 
-!U 
-!V 
+!U
+!V
 !W
 !X
 !Y
-!Z 
+!Z
 
 !=====================================================================
 !start reading dimension dependent variables
@@ -600,9 +586,9 @@ tmp_int=0
 !R
 !S
    !Allocate
-   if(scup_dtset%scup_printbands)then 
+   if(scup_dtset%scup_printbands)then
      ABI_MALLOC(scup_dtset%scup_speck,(3,scup_dtset%scup_nspeck))
-    
+
    call intagm(dprarr,intarr,jdtset,marr,3*scup_dtset%scup_nspeck,string(1:lenstr),'scup_speck',tread,'DPR')
      if(tread==1)then
        scup_dtset%scup_speck(:,:)=reshape( dprarr(1:3*scup_dtset%scup_nspeck), [3,scup_dtset%scup_nspeck])
@@ -617,12 +603,12 @@ tmp_int=0
 
 
 !T
-!U 
-!V 
+!U
+!V
 !W
 !X
 !Y
-!Z 
+!Z
 
 !=======================================================================
 !Finished reading in variables - deallocate
@@ -640,14 +626,14 @@ end subroutine invars10scup
 !! scup_kpath_init
 !!
 !! FUNCTION
-!! Initialize the kpath and all other variables SCALE UP needs to plot electronic bands 
+!! Initialize the kpath and all other variables SCALE UP needs to plot electronic bands
 !! along kpath
 !!
 !! INPUTS
 !!
-!! speck = array with special k-points along the path 
-!! gprimd = reciprocal latice vectors of cell 
-!! ndivsm = number of divisions for smallest segment 
+!! speck = array with special k-points along the path
+!! gprimd = reciprocal latice vectors of cell
+!! ndivsm = number of divisions for smallest segment
 !!
 !!
 !! OUTPUT
@@ -662,12 +648,11 @@ end subroutine invars10scup
 
 subroutine scup_kpath_new(speck,rprimd,ndivsm,scup_kpath)
 
- implicit none
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ndivsm
 
-!arrays 
+!arrays
  real(dp),intent(in) :: speck(:,:),rprimd(3,3)
  type(kpath_t), intent(out) :: scup_kpath
 
@@ -675,32 +660,32 @@ subroutine scup_kpath_new(speck,rprimd,ndivsm,scup_kpath)
 !Dummy arguments for subroutine 'intagm' to parse input file
 !Set routine version number here:
 !scalars
- integer :: nspeck 
+ integer :: nspeck
 !arrays
  integer,allocatable :: ndivs_tmp(:)
  real(dp) :: gprimd(3,3)
 
 !*********************************************************************
 
-!Get gprimd 
+!Get gprimd
 call matr3inv(rprimd,gprimd)
 
-!Create Kpath 
+!Create Kpath
 scup_kpath = kpath_new(speck,gprimd,ndivsm)
 
-!Change size of scup_kpath%ndivs(:) variable 
+!Change size of scup_kpath%ndivs(:) variable
 !from nspeck-1 to nspeck and put 1 to first entry
 nspeck = size(speck,2)
 ABI_MALLOC(ndivs_tmp,(nspeck))
 
 !First entry is always 1
- ndivs_tmp(1) = 1 
+ ndivs_tmp(1) = 1
 !Copy point/per segments
- ndivs_tmp(2:) = scup_kpath%ndivs(:) 
+ ndivs_tmp(2:) = scup_kpath%ndivs(:)
 
-!Delete original segments 
+!Delete original segments
 ABI_FREE(scup_kpath%ndivs)
-!Put new path 
+!Put new path
 ABI_MALLOC(scup_kpath%ndivs,(nspeck))
 scup_kpath%ndivs = ndivs_tmp
 !Free temporary array
@@ -715,11 +700,11 @@ end subroutine scup_kpath_new
 !! scup_kpath_print
 !!
 !! FUNCTION
-!! Print info of kpath provide to SCALE UP 
+!! Print info of kpath provide to SCALE UP
 !!
 !! INPUTS
 !!
-!! scup_kpath<tpye(kpath_t) = kpath_t with all information about kpath  
+!! scup_kpath<tpye(kpath_t) = kpath_t with all information about kpath
 !!
 !! OUTPUT
 !! Only Printing
@@ -731,23 +716,19 @@ end subroutine scup_kpath_new
 
 subroutine scup_kpath_print(scup_kpath)
 
- implicit none 
 !Arguments ------------------------------------
-!scalars
-!arrays 
- type(kpath_t), intent(in) :: scup_kpath 
+ class(kpath_t), intent(in) :: scup_kpath
 !Local variables-------------------------------
  integer :: unt
-
 ! *************************************************************************
 
- unt = std_out 
- 
+ unt = std_out
+
  write(unt,'(a)') ch10
  write(unt,'(4a)') ' scup_printbands = 1. Printing of electronic bands active',ch10,&
-&                  ' Kpath information below:',ch10
+                   ' Kpath information below:',ch10
 
-call scup_kpath%print
+call scup_kpath%print([std_out])
 
 end subroutine scup_kpath_print
 !!***

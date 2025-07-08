@@ -4,7 +4,6 @@ This page provides an introduction to the installation of the
 ABINIT package and the compilation of the executables.
 It also discusses how to test whether the compilation was successful by running the internal test suite.
 Finally, it gives related complements for the developers.
-The installation using CMake is still to be included in the present installation information. See the v10.0 release notes.
 
 Any comment or suggestion to improve the procedure or this page is welcome!
 Simply contact the ABINIT group on the [discourse forum](https://discourse.abinit.org).
@@ -33,7 +32,7 @@ working in the terminal), the installation/compilation steps are:
      For further details, consult [this link](https://wiki.abinit.org/doku.php?id=build:configure).
   5. Issue `make` (or `make -jN` for compiling with N processors, e.g. `make -j4`
      to use four processors). This step might take dozen of minutes depending on the compilation options.
-     More information are available [here](#how-to-make-the-executables).
+     More information are available [here](#how-to-compile-the-executables).
   6. Optionally, issue `make install` to install the package (root privileges are needed if the installation direction
      is not specified via `--prefix`).
 
@@ -58,12 +57,12 @@ In particular, the current documentation for the fallback procedure is available
 
 If you succeed to build the executables, and would like to check whether
 the executables work properly, please consult the two sections on [Internal tests](#how-to-run-the-internal-tests)
-and [Automatic tests](#how-to-make-the-automatic-tests).
+and [Automatic tests](#how-to-execute-the-automatic-tests).
 
 If you want to have a much better handling on the ABINIT source code than normal users, or if
 you downloaded ABINIT from Gitlab or GitHub anyhow, then consult the section [For developers](#for-developers).
 
-From abinit version 10, there is an experimental support for the [cmake](https://cmake.org/) build system; see [below](#how-to-build-abinit-with-cmake).
+From abinit version 10, there is an experimental support for the [CMake](https://cmake.org/) build system; see [below](#how-to-build-abinit-with-cmake).
 
 ## How to get a version of ABINIT?
 
@@ -225,44 +224,69 @@ command-line interface), in case more than one possibility is used
 
 When the hostname.ac9 file is ready, you can come back to the configure/make sequence.
 
-## How to build abinit with cmake ?
+## How to build ABINIT with CMake ?
 
-As an alternative to the autotools, you can use [cmake](https://cmake.org/) to build abinit. You just need to follow step 1 and 2 from the [overview](#Overview) above. No need to write an ac9 file, cmake should be able to figure out where all required software dependencies are installed on your build host.
+As an alternative to the autotools, you can use [CMake](https://cmake.org/) to build ABINIT. You just need to follow step 1 and 2 from the [overview](#overview) above. No need to write an _ac9 file__, `CMake` should be able to figure out where all required software dependencies are installed on your build host.
 
 Here are the steps for building abinit, where all options take default values:
 
 ```bash
+# step 0: create build directory
 cd $(ABINIT_TOPLEVEL_SOURCE)
+mkdir _build_cmake && cd _build_cmake
 # step 1: cmake configure
-cmake -S . -B _build/cmake
-# step 2: cmake build using 6 threads
-cmake --build _build/cmake -j 6
+cmake -S ..
+# step 2: build using 8 threads
+make -j 8
 ```
 
-Then abinit executable will be available in folder `_build/cmake/src/98_main/`. You can use it as if you had built abinit with the autotools build system.
+Then ABINIT executable will be available in folder `_build_cmake/src/98_main/`. You can use it as if you had built ABINIT with the `autotools` build system.
 
-!!! note "How cmake detects external dependencies?"
-    Most of the external dependencies are detected by cmake using either macro [find_package](https://cmake.org/cmake/help/latest/command/find_package.html) or macro [pkg_check_modules](https://cmake.org/cmake/help/latest/module/FindPkgConfig.html#command:pkg_check_modules).
-    In case cmake isn't able to detect the location of some required dependencies, e.g. when you installed a library in a non standard directory, most of the time you just need to export an environment variable to tell cmake where to look for. As an example, if you installed library fftw in a custom location, as fftw is detected by `pkg_check_modules` you just need to prepend variable `PKG_CONFIG_PATH` with the name of the folder containing file `fftw3.pc`. Alternatively, if the library is detected using `find_package`, you may need to adjust environment variable `CMAKE_PREFIX_PATH` with the full path location where the library is installed (usually a subfolder named "cmake").
+> **Important note: Assisting `CMake` build system is highly recommended**
+> The external depndencies detection system is still under development; only `pkg-config` detection is fully operational (see note below).
+It is strongly recommended to guide the build system by specifying the path to the libraries as follows (steps 1 and 2 above):
+```bash
+PKG_CONFIG_PATH="path/to/netcdf/lib/pkgconfig:path/to/netcdf_fortran/lib/pkgconfig:path/to/libxc/lib/pkgconfig:$PKG_CONFIG_PATH" CC="my_C_compiler" CXX="my_C++_compiler" FC="my_Fortran_compiler" CPP="my_C_preprocessor" cmake -S ..
+make -j 8
+```
 
-If you want to change cmake build parameters, you can either add optional flags on the cmake configure command line, i.e. modify step 1. For example, let's assume you want abinit to use MKL instead of FFTW library for computing Fast Fourier transforms, use the following modified step 1:
+If you want to change `CMake` build parameters, you can either add optional flags on the `cmake` configure command line, i.e. modify step 1. For example, let's assume you want ABINIT to use MKL instead of FFTW library for computing Fast Fourier transforms, use the following modified step 1:
 
 ```bash
-cmake -S . -B _build/cmake -DABINIT_FFT_FLAVOR=MKL_DFTI
+cmake -S .. -DABINIT_FFT_FLAVOR=MKL_DFTI
 ```
 
-If you want to browse all available cmake configuration parameters and build flavors, just use `ccmake` for the configuration step:
+If you want to explore all available `CMake` configuration parameters and build options, simply use `ccmake` for the configuration step:
 
 ```bash
-ccmake -S . -B _build/cmake
+ccmake -S ..
 ```
 
-you will enter a terminal user interface, and using keyboard up and down arrows you will be able to select a cmake parameter, see the available possibilities, and select a new value. If you change a parameter from inside `ccmake` user interface, you will need to press 'c' to tell cmake to take into account the changed parameter, and then 'g' to re-generate all Makefiles. Usually, you just need to follow instructions from the bottom of the ccmake user interface.
+You will enter a terminal user interface where you can navigate using the up and down arrow keys to select a `CMake` parameter, view the available options, and choose a new value. If you modify a parameter within the `ccmake` interface, you must press ‘c’ to prompt `CMake` to acknowledge the change and then ‘g’ to regenerate all Makefiles. Typically, you can simply follow the instructions displayed at the bottom of the `ccmake` interface.
 
-Most of the configuration parameters available in the autotools are also available in the cmake build.
+Most of the configuration parameters available in the `autotools` build system are also supported in the `CMake` build process.
 
-Additionnally, you can also build abinit for using GPU hardware (if available on your host).
-Documentation for this feature will be made available soon.
+Additionally, you can configure ABINIT to leverage GPU hardware, if supported by your system. To do so, you should consider enabling the option `ABINIT_ENABLE_GPU_CUDA` (NVIDIA) or `ABINIT_ENABLE_GPU_HIP` (AMD) (e.g.: `cmake -S .. -DABINIT_ENABLE_GPU_CUDA=ON`). Documentation for this feature will be provided soon.
+
+!!! Note "How CMake detects external dependencies?"
+    Most of the external dependencies are detected by `CMake` using either macro [find_package](https://cmake.org/cmake/help/latest/command/find_package.html) or macro [pkg_check_modules](https://cmake.org/cmake/help/latest/module/FindPkgConfig.html#command:pkg_check_modules).
+    In case `CMake` isn't able to detect the location of some required dependencies, e.g. when you installed a library in a non standard directory, most of the time you just need to export an environment variable to tell `CMake` where to look for. As an example, if you installed library fftw in a custom location, as fftw is detected by `pkg_check_modules` you just need to prepend variable `PKG_CONFIG_PATH` with the name of the folder containing file `fftw3.pc`. Alternatively, if the library is detected using `find_package`, you may need to adjust environment variable `CMAKE_PREFIX_PATH` with the full path location where the library is installed (usually a subfolder named `cmake`).
+
+## How to quickly check ABINIT installation
+
+After compiling ABINIT, it is highly recommended to run some tests to validate the installation.
+
+Obviously, it is recommended to run the full test suite, but this can take a lot of time. However, it is possible to run **a smaller set of tests** that cover most of the main features. For these tests, only a comparison of the main physical results in the output is performed (and not a line-by-line comparison of the output files), making it a very useful feature for quickly verifying an installation on a new architecture.
+
+
+To do this, simply run:
+```bash
+make check
+```
+
+> Note: make check is strictly equivalent to executing:
+  `cd tests && ~abinit_src_dir/tests/runtests.py --keywords MINIMAL --yaml-simplified-diff`
+
 
 ## How to run the internal tests
 
@@ -273,6 +297,8 @@ These tests are available whether you have got the package from the Web or from 
 archive. Of course, you need to have compiled abinit in order to run the
 internal tests. Moreover, the simple implementation procedure assumes that the
 executable is located in ~abinit/src/98_main (the standard location after issuing *make*).
+
+> Note: The difference between the internal tests and running `make check` lies in the fact that these internal tests only include testing a fixed set of very simple features, and in this case, the output files are compared line by line.
 
 You can begin with the *fast* suite. Simply issue the command:
 

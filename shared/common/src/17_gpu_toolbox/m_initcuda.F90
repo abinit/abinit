@@ -7,7 +7,7 @@
 !!  and the functions needed to extract them
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2024 ABINIT group (MMancini, MT, FDahm)
+!!  Copyright (C) 2009-2025 ABINIT group (MMancini, MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,7 +70,6 @@ module m_initcuda
 
  private ::            &
    prt_device_info !, &    ! To print information about GPU
- !  get_fastest_devices   ! Get fastest GPU devices
 
  public ::             &
    InitGPU,            & ! Initialise GPU
@@ -302,12 +301,10 @@ end subroutine Get_Mem_Dev
  integer, intent(in) :: gpu_devices_node(12)
 !Local variables ------------------------------
 !scalars
- integer :: device,ii,jj,me,nb_devices,nproc
+ integer :: device,ii,jj,me,nb_devices,nproc,nprocs_per_gpu
  logical :: testopen
  character(len=500) :: msg
  type(devGPU_type) :: gpuinfo
-!arrays
- integer,allocatable :: fastest_devices(:)
 ! *********************************************************************
 
  if (gpu_option==ABI_GPU_DISABLED) return
@@ -318,15 +315,16 @@ end subroutine Get_Mem_Dev
 #if defined HAVE_GPU
  device=-1
  call c_get_ndevice(nb_devices)
+ write(msg,'(a,i2,a)') ch10,nb_devices,' GPU device(s) have been detected on the current node'
+ call wrtout(std_out,msg,'PERS')
+
  !nb_devices=min(nb_devices,20)
  if(nb_devices>0) then
    if(nb_devices==1) then
      device=0
    else if(all(gpu_devices_node(1:nb_devices)==-1)) then
-     ABI_MALLOC(fastest_devices,(0:nproc-1))
-     call get_fastest_devices(fastest_devices,nb_devices)
-     device=fastest_devices(me)
-     ABI_FREE(fastest_devices)
+     nprocs_per_gpu=max(1,nproc/nb_devices)
+     device=me/nprocs_per_gpu
    else
      jj=nb_devices
      do ii=jj,2,-1
@@ -336,7 +334,7 @@ end subroutine Get_Mem_Dev
    end if
 
    ! Initialize Kokkos and YAKL if requested
-   if(gpu_option==ABI_GPU_KOKKOS .or. gpu_option==ABI_GPU_LEGACY) then
+   if(gpu_option==ABI_GPU_KOKKOS) then
 #ifdef HAVE_KOKKOS
      ! initialize kokkos
      if (xmpi_comm_rank(xmpi_world) == 0) then
@@ -438,146 +436,6 @@ end subroutine Get_Mem_Dev
 
 #endif
  end subroutine unsetdevice_cuda
-!!***
-
-
-!!****f* m_initcuda/get_fastest_devices
-!! NAME
-!! get_fastest_devices
-!!
-!! FUNCTION
-!! In case of multiple devices, sort them by performances
-!! and output the resulting list of devices.
-!!
-!! SOURCE
-
- subroutine get_fastest_devices(devices,nb_devices)
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nb_devices
- integer,intent(out) :: devices(:)
-!Local variables ------------------------------
-!scalars
- integer :: ii,nproc
- character(len=500) :: msg
-#if defined HAVE_GPU
- integer :: constmem,gflops,jj,lenname,nprocs,ncores,regist,sharemem
- real(sp) :: clockRate,globalmem
- character(len=20) :: name
-#endif
-!arrays
-#if defined HAVE_GPU
- integer :: vers(0:1)
- integer,allocatable :: isort(:)
- real(dp),allocatable :: flops(:),mem(:)
-#endif
-
-! *********************************************************************
-
- nproc=xmpi_comm_size(xmpi_world)
- if (size(devices)/=nproc) stop 'wrong size for devices array!'
-
-!Default
- do ii=0,nproc-1
-   devices(ii+1) = MOD(ii,nb_devices)
- end do
- if (nb_devices==1) return
-
- write(msg,'(a,i2,a)') ch10,nb_devices,' GPU device(s) have been detected on the current node:'
- call wrtout(std_out,msg,'PERS')
-
-#if defined HAVE_GPU
-!Check device(s) properties
- ABI_MALLOC(flops,(nb_devices))
- ABI_MALLOC(mem,  (nb_devices))
- do ii=0,nb_devices-1
-   call set_dev(ii)
-   call get_dev_info(ii,name,lenname,vers,globalmem,clockRate,gflops,constmem,&
-&                    sharemem,regist,nprocs,ncores)
-   flops(ii+1)=dble(gflops) ; mem(ii+1)=dble(globalmem)
-   call unset_dev()
-   write(msg,'(a,i2,3a,i1,a,i1,a,i6,a,f7.1,a,i7,a,i4,a,i4,a)') &
-&   '  Device ',ii,': ',trim(name(1:lenname)),', v',vers(0),'.',vers(1),', Mem=',nint(globalmem),&
-&   ' Mbytes, Clock=',clockrate,' GHz, ',gflops,' GFLOPS, ',nprocs,' processors, ',ncores,' cores'
-   call wrtout(std_out,msg,'PERS')
- end do
-
-!Sort devices (first by flops, then by memory)
- ABI_MALLOC(isort,(nb_devices))
- isort(:)=(/(ii,ii=1,nb_devices)/)
- call my_sort(flops,mem,isort)
-
-!Distribute cards among procs
- do ii=0,nproc-1
-   jj=MOD(ii,nb_devices)
-   devices(ii+1) = isort(jj+1)-1
- end do
-
- ABI_FREE(isort)
- ABI_FREE(flops)
- ABI_FREE(mem)
-#endif
-
-contains
-!!***
-
-!!****f* m_initcuda/my_sort
-!! NAME
-!! my_sort
-!!
-!! FUNCTION
-!!  Small sorting routine: change iperm array
-!!  according to list1 values then list2 values
-!!
-!! SOURCE
-
- subroutine my_sort(list1,list2,iperm)
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(inout) :: iperm(:)
- real(dp),intent(in) :: list1(:),list2(:)
-!Local variables ------------------------------
-!scalars
- integer :: ll,mm,nn,pp
- real(dp) :: xx
-!arrays
- real(dp),allocatable :: llist(:)
-
-! *********************************************************************
-
- nn=size(iperm)
- ABI_MALLOC(llist,(nn))
- llist(:)=list1(:)
- do ll=1,nn-1
-   do mm=ll+1,nn
-     if (llist(mm)>llist(ll)) then
-       xx=llist(ll);llist(ll)=llist(mm);llist(mm)=xx
-       pp=iperm(ll);iperm(ll)=iperm(mm);iperm(mm)=pp
-     end if
-   end do
- end do
- do ll=1,nn-1
-   do mm=ll+1,nn
-     if (abs(llist(mm)-llist(ll))<tol8) then
-       if (list2(iperm(mm))>list2(iperm(ll))) then
-         xx=llist(ll);llist(ll)=llist(mm);llist(mm)=xx
-         pp=iperm(ll);iperm(ll)=iperm(mm);iperm(mm)=pp
-       end if
-     end if
-   end do
- end do
- ABI_FREE(llist)
-
- end subroutine my_sort
-!!***
-
- end subroutine get_fastest_devices
 !!***
 
 end module m_initcuda

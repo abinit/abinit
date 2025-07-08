@@ -6,7 +6,7 @@
 !!  Description
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2023-2024 ABINIT group (VV, MG)
+!!  Copyright (C) 2023-2025 ABINIT group (VV, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,6 +23,7 @@
 
 module m_varpeq
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_dtset
@@ -37,19 +38,20 @@ module m_varpeq
  use m_ifc
  use m_wfd
 
- use defs_datatypes,    only : ebands_t, pseudopotential_type
- use m_fstrings,        only : sjoin, ktoa, ftoa, strcat, ltoa, itoa
+ use defs_datatypes,    only : pseudopotential_type
+ use m_numeric_tools,   only : interpolate_ur
+ use m_fstrings,        only : sjoin, ktoa, ftoa, strcat, ltoa, itoa, yesno
  use m_time,            only : cwtime_report, cwtime
  use m_io_tools,        only : file_exists, iomode_from_fname, open_file
  use m_pptools,         only : write_xsf
  use m_geometry,        only : xcart2xred
  use m_kpts,            only : kpts_map, kpts_timrev_from_kptopt, bzlint_t, kptrlatt_from_ngkpt
- use m_fft_mesh,        only : supercell_fft, calc_ceikr
+ use m_fft_mesh,        only : calc_ceikr
  use m_pawtab,          only : pawtab_type
  use m_gstore,          only : gstore_t, gqk_t
  use m_supercell,       only : supercell_type
  use m_paw_sphharm,     only : ylm_angular_mesh
- use m_fftcore,         only : ngfft_seq !, get_kg
+ use m_fftcore,         only : ngfft_seq
  use m_ephtk,           only : ephtk_get_mpw_gmax
  use m_dynmat,          only : phdispl_from_eigvec
  use m_phonons,         only : pheigvec_rotate
@@ -58,6 +60,7 @@ module m_varpeq
  implicit none
 
  private
+
 !!***
 
 !----------------------------------------------------------------------
@@ -67,77 +70,205 @@ module m_varpeq
 !!  polstate_t
 !!
 !! FUNCTION
-!!  Description
+!!  Datatype defining MPI-distributed parameters of polaronic states for a
+!!  given spin index (if collinear magnetism i.e. nsppol 2). Local variables and
+!!  arrays start with `my_`, global have `*glob*` in their names. MPI-grid is
+!!  inherinted from a gstore%gqk object at initialization.
 !!
 !! SOURCE
 
  type, public :: polstate_t
 
+  character(len=abi_slen) :: aseed = " "
+   ! Specifies the type of initial seed for charge localization A_nk
+   ! Possible values: "gau_energy", "gau_length", "random", "even"
+
+  logical :: translate = .false.
+   ! Flag controlling treatment of polaronic solution invariant by primitive
+   ! translations inside supercell
+   ! if .true. and np > 1, the next solution is found to be orthogonal to all
+   ! previous states + their translated replicas
+
+  integer :: spin = -1
+   ! Spin index
+
+  integer :: ip = -1
+   ! Current polaronic state
+
+  integer :: np = -1
+   ! Number of polaronic states
+
   integer :: nkbz = -1
+   ! Number of k-points in full BZ
+
   integer :: nqbz = -1
+   ! Number of q-points in full BZ
 
-  real(dp) :: gradres
-  real(dp) :: eps
-  real(dp) :: enel
-  real(dp) :: enph
-  real(dp) :: enelph
+  real(dp) :: e_frohl
+   ! Long-range divergence correction of polaron binding energy due to g(0) avg
 
-  logical :: has_prev_grad = .false.
+  integer :: ngkpt(3)
+   ! Number of points in the uniform k-grid defining the electronic subspace
+
+  real(dp) :: gpr_energy(2)
+  ! Gaussian parameters for energy-based initialization
+
+  real(dp) :: gpr_length(3)
+  ! Gaussian parameters for localization length-based initialization
+
+  logical(dp), allocatable :: has_prev_grad(:)
+   ! (np)
+   ! Flag indicating if an electronic gradient has been computed at previous step
+
+  real(dp), allocatable :: gradres(:)
+   ! (np)
+   ! L^2-norm of the electronic gradient for each state
+
+  real(dp), allocatable :: enterms(:,:)
+   ! (4, np)
+   ! Polaronic energy terms for each state
+   ! 1 -> electronic term
+   ! 2 -> vibrational term
+   ! 3 -> electron-phonon term
+   ! 4 -> polaron energy level
 
   real(dp), allocatable :: eig(:,:)
+   ! (gqk%nb, gstore%ebands%nkpt)
+   ! Electronic eigenstates participating in the polaron formation
+   ! Correspond either to valence or conduction manifold, not both
+   ! Band edge is set to 0; valence states are also inverted
+
+  real(dp), allocatable :: my_g0(:)
+   ! (gqk%my_npert)
+   ! Long-range correction for electron-phonon matrix elements at q=\Gamma
 
   real(dp), allocatable :: my_qpts(:,:)
+   ! (3, gqk%my_nq)
+   ! q-points treated by this MPI proc
+
   real(dp), pointer :: my_kpts(:,:) => null()
+   ! (3, gqk%my_nk)
+   ! k-points treated by this MPI proc, points to gqk%my_kpts(:,:)
 
-  complex(dp), allocatable :: my_a(:,:)
+  complex(dp), allocatable :: my_a(:,:,:)
+   ! (gqk%nb, gqk%my_nk, np)
+   ! Electronic coefficients A_nk for each state treated by this MPI proc
+
   complex(dp), allocatable :: a_glob(:,:)
-  complex(dp), allocatable :: orth_a(:,:)
+   ! (gqk%nb, gqk%glob_nk)
+   ! Global array of electronic coefficients A_nk at current state
 
-  complex(dp), allocatable :: my_b(:,:)
-  complex(dp), allocatable :: b_glob(:,:)
+  complex(dp), allocatable :: my_b(:,:,:)
+   ! (gqk%my_npert, gqk%my_nq, np)
+   ! Vibrational coefficients B_q\nu for each state treated by this MPI proc
 
-  complex(dp), allocatable :: my_grad_a(:,:)
-  complex(dp), allocatable :: grad_a_glob(:,:)
+  complex(dp), allocatable :: my_prev_b(:,:)
+   ! (gqk%my_npert, gqk%my_nq)
+   ! Previous vibrational coefficients B_q\nu for each state treated by this MPI proc
 
-  complex(dp), allocatable :: my_prevgrad_a(:,:)
-  complex(dp), allocatable :: my_pcond(:,:)
+  complex(dp), allocatable :: my_pc(:,:)
+   ! (gqk%nb, gqk%my_nk)
+   ! Preconditioner at current state treated by this MPI proc
+
+  complex(dp), allocatable :: my_grad(:,:)
+   ! (gqk%nb, gqk%my_nk)
+   ! Electronic gradient D_nk at current state treated by this MPI proc
+   ! orthogonal to states
+
+  complex(dp), allocatable :: my_prev_grad(:,:)
+   ! (gqk%nb, gqk%my_nk)
+   ! Previous electronic gradient D_nk at current state, orthogonal to states
+
+  complex(dp), allocatable :: my_pcgrad(:,:)
+   ! (gqk%nb, gqk%my_nk)
+   ! Preconditioned gradient at current state, orthogonal to states
+
+  complex(dp), allocatable :: my_prev_pcgrad(:,:)
+   ! (gqk%nb, gqk%my_nk)
+   ! Previous preconditioned gradient at current state, orthogonal to states
+
+  complex(dp), allocatable :: my_pcjgrad(:,:)
+   ! (gqk%nb, gqk%my_nk)
+   ! Preconditioned conjugate gradient at current state treated by this MPI proc
+   ! orthogonal to current state & normalized
+
+  complex(dp), allocatable :: my_prev_pcjgrad(:,:)
+   ! (gqk%nb, gqk%my_nk)
+   ! Previous preconditioned conjugate gradient at current state
+
+  complex(dp), allocatable :: pcjgrad_glob(:,:)
+   ! (gqk%nb, gqk%glob_nk)
+   ! Global preconditioned conjugate gradient at current state
+   ! orthogonal to current state & normalized
 
   class(gqk_t), pointer :: gqk => null()
+   ! Datastructure storing e-ph matrix elements treated by this MPI proc
 
   type(krank_t) :: krank_kpts
-  type(krank_t) :: krank_qpts
+   ! Object used to find k-points in BZ
 
-  type(crystal_t) :: cryst
+  type(krank_t) :: krank_qpts
+   ! Object used to find q-points in BZ
 
   contains
 
-    procedure :: get_linemin_param => polstate_get_linemin_param
+    procedure :: setup => polstate_setup
+    ! Setup optimization process by specifing initial electronic vector A_nk
 
     procedure :: localize => polstate_localize
+    ! Localize polaron at current state. From A_nk calculate:
+    ! vibrational coefficients B_q\nu, energy terms, polaron level
+
+    procedure :: get_enel => polstate_get_enel
+    ! Calculate and return electronic energy term
+
+    procedure :: get_enph => polstate_get_enph
+    ! Caclulate and return vibrational energy term
 
     procedure :: get_enelph => polstate_get_enelph
-    procedure :: get_enph => polstate_get_enph
-    procedure :: get_enel => polstate_get_enel
+    ! Calculate and return electron-phobnon energy term
 
-    procedure :: get_grad_a => polstate_get_grad_a
-    procedure :: get_conjgrad_a => polstate_get_conjgrad_a
-    procedure :: update_pcond => polstate_update_pcond
+    procedure :: get_lm_theta => polstate_get_lm_theta
+    ! Calculate and return line minimization parameter \theta
+
+    procedure :: calc_grad => polstate_calc_grad
+    ! Calculate steepest descent vector
+
+    procedure :: calc_pcjgrad => polstate_calc_pcjgrad
+    ! Calculate preconditioned conjugate gradient direction
+
+    procedure :: update_pc => polstate_update_pc
+    ! Update preconditioner
+
     procedure :: update_a => polstate_update_a
-    procedure :: orthonorm => polstate_orthonorm
+    ! Update array of electronic coefficients
 
-    procedure :: free => polstate_free
+    procedure :: ort_to_states => polstate_ort_to_states
+    ! Orthogonalize a given vector to a set of polaronic states
 
-    procedure :: get_b_from_a => polstate_get_b_from_a
+    procedure :: calc_b_from_a => polstate_calc_b_from_a
+    ! Calculate vibrational coefficients B_q\nu from a known set of electronic
+    ! coefficients A_nk
+
     !procedure :: get_b_from_displ =>_get_b_from_displ
 
     procedure :: seed_a => polstate_seed_a
-    procedure :: load_a => polstate_load_a
-    procedure :: cut_a => polstate_cut_a
+    ! Seed an initial vector of electronic coefficients A_nk
 
-    procedure :: get_norm => polstate_get_norm
+    procedure :: load_a => polstate_load_a
+    ! Initialize A_nk from an existent vector of electronic coefficients
+
+    procedure :: get_sqnorm => polstate_get_sqnorm
+    ! Helper function to compute squared L^2-norm of MPI-distributed array
+
     procedure :: gather => polstate_gather
+    ! Helper function to gather MPI-distributed array into a global one
+
     procedure :: get_krank_glob => polstate_get_krank_glob
-    procedure :: get_mapping => polstate_get_mapping
+    ! Helper function to calculate global krank objects
+
+    procedure :: free => polstate_free
+    ! Free memory
 
  end type polstate_t
 !!***
@@ -149,72 +280,199 @@ module m_varpeq
 !!  varpeq_t
 !!
 !! FUNCTION
+!!  Variational Polaron Equations datatype. Stores variational optimization
+!!  parameters, polaronic states and provides higher-level procedures required
+!!  for variational optimization and related input and output.
 !!
 !! SOURCE
 
  type, public :: varpeq_t
 
-   character(len=fnlen) :: pkind = " "
-   character(len=fnlen) :: aseed = " "
+   character(len=abi_slen) :: pkind = " "
+   ! Specifies the kind of polaron
+   ! Possible values: "hole", "electron"
 
-   integer :: nstep = -1
-   integer :: pc_nupdate = -1
-   integer :: ncid = nctk_noid
+   character(len=abi_slen) :: aseed = " "
+   ! Specifies the type of initial seed for charge localization A_nk
+   ! Possible values: "gau_energy", "gau_length", "random", "even"
 
-   integer :: nsppol
-   integer :: max_nk
-   integer :: max_nq
-   integer :: max_nb
-
-   integer :: frohl_ntheta
-
-   real(dp) :: e_frohl
-
-   real(dp) :: pc_factor
-   real(dp) :: tolgrs
-
-   real(dp) :: gau_params(2)
-   real(dp), allocatable :: erange_spin(:)
+   logical  :: use_filter = .False.
+   ! Flag indicating if the energy filtering for electronic states was used
 
    logical :: is_complete = .False.
+   ! Flag indicating if the datatype is completely or partially initialized
+   ! Required to distinguish between newly created and loaded-from-disk datatype
+
    logical :: restart = .False.
-   logical :: interpolate = .False.
-   logical :: orth = .False.
+   ! Flag to check if a restart from a *VPQ.nc file is needed
+
+   logical :: interp = .False.
+   ! Flag to check if an interpolation from a *VPQ.nc file is needed
+
+   logical :: ld_flag = .False.
+   ! Flag indicating if internal variables have been loaded from source
+
+   logical :: g0_flag = .True.
+   ! Flag indicating if avarage of el-ph matrix elements at Gamma is computed
+
+   logical :: translate = .False.
+   ! Flag controlling the translational invariance of polaronic solutions
+
+   integer :: ncid = nctk_noid
+   ! Netcdf file handle used to save results
+
+   integer :: nstep = -1
+   ! Maximum number of iterations for optimization of a single polaronic state
+
+   integer :: nstep_ort = -1
+   ! Maximum number of iterations for which orthogonalization to all previous
+   ! states is performed
+
+   integer :: nsppol = -1
+   ! Number of independent spin polarizations
+
+   integer :: nstates = -1
+   ! Number of polaronic states to be optimized for each spin polarization
+
+   integer :: natom3 = -1
+   ! 3*gstore%cryst%natom
+   ! Number of atomic perturbations, mainly used to dimensionalize arrays
+
+   integer :: max_nk = -1
+   ! Maximum number of k-points among between independent spin polarizations
+
+   integer :: max_nq = -1
+   ! Maximum number of q-points among between independent spin polarizations
+
+   integer :: max_nb = -1
+   ! Maximum number of bands among between independent spin polarizations
+
+   integer :: frohl_ntheta = -1
+   ! Number of angular mesh division for spherical integration of long-range
+   ! divergence of electron-phonon matrix elements
+
+   real(dp) :: e_frohl
+   ! Long-range divergence correction of polaron binding energy
+
+   real(dp) :: mixing_factor
+   ! Mixing factor to be used in the solver for vibrational coefficients
+
+   real(dp) :: tolgrs
+   ! L^2 gradient norm tolerance
 
    integer :: ngkpt(3)
+   ! Number of points in the uniform k-grid defining the electronic subspace
 
    integer, allocatable :: nk_spin(:)
+   ! (nsppol)
+   ! Number of k-points for each spin polarization
+
    integer, allocatable :: nq_spin(:)
+   ! (nsppol)
+   ! Number of q-points for each spin polarization
+
    integer, allocatable :: nb_spin(:)
+   ! (nsppol)
+   ! Number of bands for each spin polarization
+
    integer, allocatable :: brange_spin(:,:)
+   ! (2, nsppol)
+   ! Number of bands for each spin polarization
+
+   integer, allocatable :: cvflag_spin(:,:)
+   ! (nstates, nsppol)
+   ! Convergence flags at each state for each spin:
+   ! 0 --> calculation is not converged
+   ! 1 --> calculation is converged
+
+   integer, allocatable :: nstep2cv_spin(:,:)
+   ! (nstates, nsppol)
+   ! Number of steps to convergence at each state for each spin
+
+   real(dp), allocatable :: erange_spin(:)
+   ! (nsppol)
+   ! Energy window wrt to VBM/CBM for hole/electron polaron for each spin
+
+   integer, allocatable :: k2ibz_spin(:,:)
+   ! (max_nk, nsppol)
+   ! BZ->iBZ index table for kpoints (related to sell%gstore%kibz)
+
+   integer, allocatable :: q2ibz_spin(:,:)
+   ! (max_nq, nsppol)
+   ! BZ->iBZ index table for qpoints (related to sell%gstore%qibz)
+
+   real(dp), allocatable :: scf_hist_spin(:,:,:,:)
+   ! (6, nstep, nstates, nsppol)
+   ! SCF optimization history at each state for each spin
 
    real(dp), allocatable :: kpts_spin(:,:,:)
-   real(dp), allocatable :: qpts_spin(:,:,:)
-   real(dp), allocatable :: a_spin(:,:,:,:)
-   real(dp), allocatable :: b_spin(:,:,:,:)
+   ! (3, max_nk, nsppol)
+   ! k-points for each spin
 
-   integer, allocatable :: nstep2cv_spin(:)
-   real(dp), allocatable :: iter_rec_spin(:,:,:)
+   real(dp), allocatable :: qpts_spin(:,:,:)
+   ! (3, max_nk, nsppol)
+   ! q-points for each spin
+
+   complex(dp), allocatable :: a_spin(:,:,:,:)
+   ! (max_nb, max_nk, nstates, nsppol)
+   ! Optimized electronic coefficients A_nk at each state for each spin
+
+   complex(dp), allocatable :: b_spin(:,:,:,:)
+   ! (natom3, max_nq, nstates, nsppol)
+   ! Optimized vibrational coefficients B_q\nu at each state for each spin
 
    class(gstore_t), pointer :: gstore => null()
+   ! Object storing el-ph matrix elements and other related quantities
+
+   type(crystal_t) :: cryst
+   ! Object storing information on crystal structure & symmetries
+
    type(gaps_t) :: gaps
-   type(crystal_t) :: cryst_trinv
+   ! Object used to get information on bandgap
+
    type(polstate_t), allocatable :: polstate(:)
+   ! (nsppol)
+   ! Datatype providing data and and lower-level methods for polaronic states
+   ! at each spin polarization
 
  contains
 
     procedure :: init => varpeq_init
-    procedure :: free => varpeq_free
-    procedure :: solve => varpeq_solve
-    procedure :: record => varpeq_record
-    procedure :: collect => varpeq_collect
-    procedure :: print => varpeq_print
-    procedure :: ncwrite => varpeq_ncwrite
-    procedure :: ncread => varpeq_ncread
-    procedure :: compare => varpeq_compare
-    procedure :: setup => varpeq_setup
+    ! Initialize object
 
-    procedure :: avg_frohlich => varpeq_avg_frohlich
+    procedure :: load => varpeq_load
+    ! Load the initial electronic vector from a *VPQ.nc netcdf file
+
+    procedure :: solve => varpeq_solve
+    ! Solve variational polaron equations at each polaronic state for each spin
+
+    procedure :: record => varpeq_record
+    ! Record the current SCF optimization data
+
+    procedure :: collect => varpeq_collect
+    ! Collect SCF optimization results from each spin
+
+    procedure :: print_results => varpeq_print_results
+    ! Output SCF optimization final results
+
+    procedure :: print_metadata => varpeq_print_metadata
+    ! Output parameters defining varpeq calculation
+
+    procedure :: ncwrite => varpeq_ncwrite
+    ! Save results to a *VPQ.nc netcdf file
+
+    procedure :: ncread => varpeq_ncread
+    ! Initialize an incomplete object from a *VPQ.nc netcdf file
+
+    procedure :: compare => varpeq_compare
+    ! Compare basic dimensions with another instance of varpeq_t datatype
+
+    procedure :: calc_fravg => varpeq_calc_fravg
+    ! Calculate average Fr\"ohlich (long-range) contribution to the polaron
+    ! binding energy & average of electron-phonon matrix elements at q=\Gamma
+
+    procedure :: free => varpeq_free
+    ! Free memory
 
  end type varpeq_t
 !!***
@@ -233,8 +491,13 @@ contains !=====================================================================
 !!  varpeq_run
 !!
 !! FUNCTION
+!!  Higher-level subroutine that solves varitaional polaron equations, produces
+!!  neccessary output and writes results to a *VPQ.nc file.
 !!
 !! INPUTS
+!!  gstore<gstore_t>=Electron-phonon matrix elements and related quantities.
+!!  dtset<dataset_type>=All input variables for this dataset.
+!!  dtfil<datafiles_types>=Variables related to files.
 !!
 !! OUTPUT
 !!
@@ -246,16 +509,26 @@ subroutine varpeq_run(gstore, dtset, dtfil)
  class(gstore_t), intent(in) :: gstore
  type(dataset_type), intent(in) :: dtset
  type(datafiles_type), intent(in) :: dtfil
+!arrays
+ integer :: units(2)
 
 !Local variables-------------------------------
-!scalars
  type(varpeq_t) :: vpq
 !----------------------------------------------------------------------
 
+ units = [std_out, ab_out]
+ call wrtout(units, sjoin(ch10, " === Variational Polaron Equations ==="))
+
  call vpq%init(gstore, dtset)
- call vpq%setup(dtfil)
+ if (vpq%frohl_ntheta > 0) call vpq%calc_fravg(avg_g0=vpq%g0_flag)
+ if (vpq%interp .or. vpq%restart) call vpq%load(dtfil, dtset%vpq_select)
+
+!call vpq%print_metadata(dtset)
+ call vpq%print_metadata()
+
  call vpq%solve()
- call vpq%print()
+
+ call vpq%print_results()
  call vpq%ncwrite(dtset, dtfil)
  call vpq%free()
 
@@ -269,7 +542,7 @@ end subroutine varpeq_run
 !!  varpeq_free
 !!
 !! FUNCTION
-!!  Free allocatable arrays
+!!  Free dynamic memory
 !!
 !! SOURCE
 
@@ -280,24 +553,29 @@ subroutine varpeq_free(self)
 
 !Local variables-------------------------------
  integer :: my_is
-
 !----------------------------------------------------------------------
 
  ! Free allocatable arrays
- ABI_SFREE(self%iter_rec_spin)
- ABI_SFREE(self%nstep2cv_spin)
- ABI_SFREE(self%kpts_spin)
- ABI_SFREE(self%qpts_spin)
- ABI_SFREE(self%a_spin)
- ABI_SFREE(self%b_spin)
+ ! integer
  ABI_SFREE(self%nk_spin)
  ABI_SFREE(self%nq_spin)
  ABI_SFREE(self%nb_spin)
  ABI_SFREE(self%brange_spin)
+ ABI_SFREE(self%cvflag_spin)
+ ABI_SFREE(self%nstep2cv_spin)
+ ! real
  ABI_SFREE(self%erange_spin)
+ ABI_SFREE(self%scf_hist_spin)
+ ABI_SFREE(self%k2ibz_spin)
+ ABI_SFREE(self%q2ibz_spin)
+ ABI_SFREE(self%kpts_spin)
+ ABI_SFREE(self%qpts_spin)
+ ! complex
+ ABI_SFREE(self%a_spin)
+ ABI_SFREE(self%b_spin)
 
  ! Free local datatypes
- call self%cryst_trinv%free()
+ call self%cryst%free()
 
  ! Close netcdf file
  if (self%ncid /= nctk_noid) then
@@ -305,11 +583,14 @@ subroutine varpeq_free(self)
    self%ncid = nctk_noid
  end if
 
+ ! If entry is completely initalized (e.g. from self%init call), free remaining
+ ! datatypes and nullify pointers
  if (self%is_complete) then
    call self%gaps%free()
    do my_is=1,self%gstore%my_nspins
      call self%polstate(my_is)%free()
    enddo
+   ABI_SFREE(self%polstate)
    self%gstore => null()
  endif
 
@@ -323,46 +604,65 @@ end subroutine varpeq_free
 !!  varpeq_compare
 !!
 !! FUNCTION
+!!  Compares the current instance of varpeq datatype with another one (possibly
+!!  incomplete).
 !!
 !! INPUTS
+!!  other<varpeq_t>=Varpeq datatype to compare with.
+!!  bz_mismatch [optional]=if .True. mismatch between BZ sampling is allowed
+!!    (required for comparison prior to an interpolation)
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine varpeq_compare(self, other, allow_mesh_mismatch)
+subroutine varpeq_compare(self, other, bz_mismatch)
 
 !Arguments ------------------------------------
  class(varpeq_t), target, intent(in) :: self, other
- logical, optional, intent(in) :: allow_mesh_mismatch
+ logical, optional, intent(in) :: bz_mismatch
 
 !Local variables-------------------------------
- character(len=500) :: msg
  integer :: ierr
- !logical :: mismatch
+ real(dp) :: cpu, wall, gflops
+
 !----------------------------------------------------------------------
+
+ ! TODO: provide more flexibility for nstates
+
+ call cwtime(cpu, wall, gflops, "start")
 
  ierr = 0
 
- ABI_CHECK_NOSTOP(self%pkind == other%pkind, "Difference found in pkind.", ierr)
- ABI_CHECK_NOSTOP(self%nsppol == other%nsppol, "Difference found in nsppol.", ierr)
- msg = " Comparing VARPEQ crystal with GSTORE crystal (time-reversal and inversion symmetries only) "
- ABI_CHECK_NOSTOP(self%cryst_trinv%compare(other%cryst_trinv, header=msg) == 0, "Difference found in cryst.", ierr)
- ABI_CHECK_NOSTOP(self%max_nb == other%max_nb, "Difference found in max_nb.", ierr)
- ABI_CHECK_NOSTOP(all(self%nb_spin == other%nb_spin), "Difference found in nb_spin.", ierr)
+ ! Compare basic dimensions
+ call check_(self%pkind == other%pkind, "Difference found in pkind.")
+ call check_(self%nsppol == other%nsppol, "Difference found in nsppol.")
+ !call check_(self%nstates == other%nstates, "Difference found in nstates.")
+ call check_(self%cryst%compare(other%cryst) == 0, &
+   "Difference found in cryst.")
+ call check_(all(self%brange_spin == other%brange_spin), &
+   "Difference found in brange_spin.")
 
- if (present(allow_mesh_mismatch)) then
-   if (.not. allow_mesh_mismatch) then
-     ABI_CHECK_NOSTOP(self%max_nk == other%max_nk, "Difference found in max_nk.", ierr)
-     ABI_CHECK_NOSTOP(self%max_nq == other%max_nq, "Difference found in max_nq.", ierr)
-     ABI_CHECK_NOSTOP(all(self%nk_spin == other%nk_spin), "Difference found in nk_spin.", ierr)
-     ABI_CHECK_NOSTOP(all(self%nq_spin == other%nq_spin), "Difference found in nq_spin.", ierr)
-     ABI_CHECK_NOSTOP(all(self%qpts_spin == other%qpts_spin), "Difference found in qpts_spin.", ierr)
-     ABI_CHECK_NOSTOP(all(self%kpts_spin == other%kpts_spin), "Difference found in kpts_spin.", ierr)
+ ! If bz_mismatch is not allowed, also compare k/q-grids
+ if (present(bz_mismatch)) then
+   if (.not. bz_mismatch) then
+     call check_(all(abs(self%kpts_spin - other%kpts_spin) < tol6), &
+       "Difference found in kpts_spin.")
+     call check_(all(abs(self%qpts_spin - other%qpts_spin) < tol6), &
+     "Difference found in nq_spin.")
    end if
  endif
 
- ABI_CHECK(ierr == 0, "Fatal error in varpeq_compare, see previous messages!")
+ ABI_CHECK(ierr == 0, "Error in varpeq_compare, see previous messages!")
+
+ call cwtime_report(" varpeq_compare", cpu, wall, gflops)
+
+ contains
+ subroutine check_(cond, msg)
+   logical, intent(in) :: cond
+   character(len=*), intent(in) :: msg
+   ABI_CHECK_NOSTOP(cond, msg, ierr)
+ end subroutine check_
 
 end subroutine varpeq_compare
 !!***
@@ -374,8 +674,13 @@ end subroutine varpeq_compare
 !!  varpeq_ncread
 !!
 !! FUNCTION
+!!  Reads basic dimensions of varpeq_t datatype from a *VPQ.nc netcdf file.
 !!
 !! INPUTS
+!!  path=Path a *VPQ.nc file to be read.
+!!  comm=MPI communicator.
+!!  keep_open [optional]=if .True. keep the nc file handle open for further
+!!    reading. Default: .False.
 !!
 !! OUTPUT
 !!
@@ -390,53 +695,66 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
  logical, optional, intent(in) :: keep_open
 
 !Local variables-------------------------------
- !character(len=500) :: msg
- integer :: ncid, nsppol, natom3
+ integer :: ncid, nsppol, natom3, nstates
  real(dp) :: cpu, wall, gflops
+ real(dp), ABI_CONTIGUOUS pointer :: rpt_d5(:,:,:,:,:)
 
 !----------------------------------------------------------------------
 
- ABI_CHECK(file_exists(path), sjoin(" varpeq_ncread: cannot find *VARPEQ.nc file", path))
-
  call cwtime(cpu, wall, gflops, "start")
+
+ ABI_CHECK(file_exists(path), sjoin(" varpeq_ncread: cannot find *VPQ.nc file", path))
 
  NCF_CHECK(nctk_open_read(ncid, path, comm))
 
  ! Read crystal structure
- call self%cryst_trinv%ncread(ncid)
+ call self%cryst%ncread(ncid)
 
  ! Read varpeq dimensions
+ NCF_CHECK(nctk_get_dim(ncid, "nsppol", self%nsppol))
+ NCF_CHECK(nctk_get_dim(ncid, "nstates", self%nstates))
+ NCF_CHECK(nctk_get_dim(ncid, "natom3", self%natom3))
  NCF_CHECK(nctk_get_dim(ncid, "max_nk", self%max_nk))
  NCF_CHECK(nctk_get_dim(ncid, "max_nq", self%max_nq))
  NCF_CHECK(nctk_get_dim(ncid, "max_nb", self%max_nb))
- NCF_CHECK(nctk_get_dim(ncid, "nsppol", self%nsppol))
- NCF_CHECK(nctk_get_dim(ncid, "natom3", natom3))
+ nsppol = self%nsppol
+ nstates = self%nstates
+ natom3 = self%natom3
 
  ! Read data
- ! arrays
- nsppol = self%nsppol
- !print *, "self%nsppol, self%max_nk, self%max_nq, self%max_nb", self%nsppol, self%max_nk, self%max_nq, self%max_nb
- ABI_MALLOC(self%kpts_spin, (3, self%max_nk, nsppol))
- ABI_MALLOC(self%qpts_spin, (3, self%max_nq, nsppol))
- ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, nsppol))
- ABI_MALLOC(self%b_spin, (2, natom3, self%max_nq, nsppol))
+ ! Static arrays
+ NCF_CHECK(nf90_get_var(ncid, vid("vpq_pkind"), self%pkind))
+ NCF_CHECK(nf90_get_var(ncid, vid("ngkpt"), self%ngkpt))
+
+ ! Allocatable arrays
+ ABI_MALLOC(self%cvflag_spin, (nstates, nsppol))
  ABI_MALLOC(self%nk_spin, (nsppol))
  ABI_MALLOC(self%nq_spin, (nsppol))
  ABI_MALLOC(self%nb_spin, (nsppol))
- ABI_MALLOC(self%brange_spin, (2, self%nsppol))
- ABI_MALLOC(self%erange_spin, (self%nsppol))
+ ABI_MALLOC(self%brange_spin, (2, nsppol))
+ ABI_MALLOC(self%kpts_spin, (3, self%max_nk, nsppol))
+ ABI_MALLOC(self%qpts_spin, (3, self%max_nq, nsppol))
+ ABI_MALLOC(self%a_spin, (self%max_nb, self%max_nk, nstates, nsppol))
+ ABI_MALLOC(self%b_spin, (natom3, self%max_nq, nstates, nsppol))
 
- NCF_CHECK(nf90_get_var(ncid, vid("kpts_spin"), self%kpts_spin))
- NCF_CHECK(nf90_get_var(ncid, vid("qpts_spin"), self%qpts_spin))
- NCF_CHECK(nf90_get_var(ncid, vid("a_spin"), self%a_spin))
- NCF_CHECK(nf90_get_var(ncid, vid("b_spin"), self%b_spin))
- NCF_CHECK(nf90_get_var(ncid, vid("varpeq_pkind"), self%pkind))
+ ! integer
+ NCF_CHECK(nf90_get_var(ncid, vid("cvflag_spin"), self%cvflag_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("nk_spin"), self%nk_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("nq_spin"), self%nq_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("nb_spin"), self%nb_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("brange_spin"), self%brange_spin))
- NCF_CHECK(nf90_get_var(ncid, vid("erange_spin"), self%erange_spin))
- NCF_CHECK(nf90_get_var(ncid, vid("ngkpt"), self%ngkpt))
+ ! real
+ NCF_CHECK(nf90_get_var(ncid, vid("kpts_spin"), self%kpts_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("qpts_spin"), self%qpts_spin))
+ ! complex
+ ! TODO: is it possible to encapsulate this trick as some abstraction?
+ call c_f_pointer(c_loc(self%a_spin), rpt_d5, &
+   [2, self%max_nb, self%max_nk, nstates, nsppol])
+ NCF_CHECK(nf90_get_var(ncid, vid("a_spin"), rpt_d5))
+
+ call c_f_pointer(c_loc(self%b_spin), rpt_d5, &
+   [2, natom3, self%max_nq, nstates, nsppol])
+ NCF_CHECK(nf90_get_var(ncid, vid("b_spin"), rpt_d5))
 
  if (present(keep_open)) then
    if (keep_open) self%ncid = ncid
@@ -445,9 +763,9 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
    self%ncid = nctk_noid
  end if
 
- call cwtime_report(" varpeq_ncread", cpu, wall, gflops)
-
  self%is_complete = .False.
+
+ call cwtime_report(" varpeq_ncread", cpu, wall, gflops)
 
 !----------------------------------------------------------------------
 
@@ -455,7 +773,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
   integer function vid(var_name)
     character(len=*),intent(in) :: var_name
     vid = nctk_idname(ncid, var_name)
- end function vid
+  end function vid
 
 end subroutine varpeq_ncread
 !!***
@@ -467,8 +785,11 @@ end subroutine varpeq_ncread
 !!  varpeq_ncwrite
 !!
 !! FUNCTION
+!!  Dump varpeq variables in a newly created *VPQ.nc netcdf file.
 !!
 !! INPUTS
+!!  dtset<dataset_type>=All input variables for this dataset.
+!!  dtfil<datafiles_types>=Variables related to files.
 !!
 !! OUTPUT
 !!
@@ -486,115 +807,152 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
  integer, parameter :: master = 0
  integer :: my_rank, ncid, ncerr
  real(dp) :: cpu, wall, gflops
+ real(dp), ABI_CONTIGUOUS pointer :: rpt_d5(:,:,:,:,:)
+ integer :: units(2)
 
 !----------------------------------------------------------------------
 
- ! Shamelessly copied from (inspired by) the sigmaph%write routine
-
- my_rank = xmpi_comm_rank(self%gstore%comm)
+ units = [std_out, ab_out]
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! Create netcdf file (only master works, HDF5 + MPI-IO is handled afterwards by reopening the file inside ncwrite_comm)
- path = strcat(dtfil%filnam_ds(4), "_VARPEQ.nc")
+ my_rank = xmpi_comm_rank(self%gstore%comm)
+
+ ! Create netcdf file (only master works, HDF5 + MPI-IO can be handled after
+ ! by reopening the file inside ncwrite_comm)
+ path = strcat(dtfil%filnam_ds(4), "_VPQ.nc")
  if (my_rank == master) then
-   ! Master creates the netcdf file used to store the results of the calculation.
+
+   call wrtout(units, sjoin(ch10, sjoin("Saving results to:", path)))
+
+   ! Master creates the netcdf file used to store the data.
    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    ncid = self%ncid
 
    ! Write the crystal (TR & invsersion symmetry only) & ebands dataset_type
-   NCF_CHECK(self%cryst_trinv%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(self%gstore%ebands, ncid))
+   NCF_CHECK(self%cryst%ncwrite(ncid))
+   NCF_CHECK(self%gstore%ebands%ncwrite(ncid))
 
    ! Add varpeq dimensions.
    ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nstep", self%nstep), nctkdim_t("nsppol", self%nsppol), &
+     nctkdim_t("nstates", self%nstates), nctkdim_t("natom3", self%natom3), &
      nctkdim_t("max_nk", self%max_nk), nctkdim_t("max_nq", self%max_nq), &
-     nctkdim_t("max_nb", self%max_nb), nctkdim_t("nsppol", self%gstore%nsppol), &
-     nctkdim_t("natom3", 3*self%gstore%cryst%natom), &
-     nctkdim_t("nstep", self%nstep)], &
+     nctkdim_t("max_nb", self%max_nb), nctkdim_t("nkibz", self%gstore%nkibz), &
+     nctkdim_t("nqibz", self%gstore%nqibz)], &
      defmode=.True.)
    NCF_CHECK(ncerr)
 
    ! Define scalars
    ! integers
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "eph_task", "varpeq_nstep", "nkbz", "nqbz", "frohl_ntheta"])
+     "eph_task", "nkbz", "nqbz", "frohl_ntheta", "vpq_avg_g", "vpq_translate", &
+     "vpq_interp", "vpq_nstates", "vpq_nstep_ort", "vpq_select", "vpq_mesh_fact"])
    NCF_CHECK(ncerr)
-   ! real(dp)
+   ! real
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs", "e_frohl"])
+     "vpq_tolgrs", "e_frohl", "vpq_mix_fact"])
    NCF_CHECK(ncerr)
 
    ! Define arrays with results
-   ! FIXME: correct a_spin/b_spin representation based on Matteo's advice
    ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("varpeq_pkind", "c", "fnlen"), &
-     nctkarr_t("varpeq_aseed", "c", "fnlen"), &
-     nctkarr_t("varpeq_gau_params", "dp", "two"), &
-     nctkarr_t("nstep2cv", "int", "nsppol"), &
-     nctkarr_t("iter_rec", "dp", "six, nstep, nsppol"), &
+     nctkarr_t("vpq_pkind", "c", "character_string_length"), &
+     nctkarr_t("vpq_aseed", "c", "character_string_length"), &
+     nctkarr_t("ngkpt", "int", "three"), &
+     nctkarr_t("gstore_ngqpt", "int", "three"), &
      nctkarr_t("nk_spin", "int", "nsppol"), &
      nctkarr_t("nq_spin", "int", "nsppol"), &
      nctkarr_t("nb_spin", "int", "nsppol"), &
      nctkarr_t("brange_spin", "int", "two, nsppol"), &
+     nctkarr_t("cvflag_spin", "int", "nstates, nsppol"), &
+     nctkarr_t("nstep2cv_spin", "int", "nstates, nsppol"), &
+     nctkarr_t("vpq_trvec", "int", "three"), &
+     nctkarr_t("k2ibz_spin", "int", "max_nk, nsppol"), &
+     nctkarr_t("q2ibz_spin", "int", "max_nq, nsppol"), &
      nctkarr_t("erange_spin", "dp", "nsppol"), &
+     nctkarr_t("scf_hist_spin", "dp", "six, nstep, nstates, nsppol"), &
+     nctkarr_t("kibz", "dp", "three, nkibz"), &
+     nctkarr_t("qibz", "dp", "three, nqibz"), &
      nctkarr_t("kpts_spin", "dp", "three, max_nk, nsppol"), &
      nctkarr_t("qpts_spin", "dp", "three, max_nq, nsppol"), &
-     nctkarr_t("a_spin", "dp", "two, max_nb, max_nk, nsppol"), &
-     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nsppol"), &
      nctkarr_t("cb_min_spin", "dp", "nsppol"), &
      nctkarr_t("vb_max_spin", "dp", "nsppol"), &
-     nctkarr_t("gstore_ngqpt", "i", "three"), &
-     nctkarr_t("ngkpt", "i", "three") &
+     nctkarr_t("vpq_gpr_energy", "dp", "two"), &
+     nctkarr_t("vpq_gpr_length", "dp", "three"), &
+     nctkarr_t("a_spin", "dp", "two, max_nb, max_nk, nstates, nsppol"), &
+     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nstates, nsppol") &
    ])
    NCF_CHECK(ncerr)
 
    ! Write data
    NCF_CHECK(nctk_set_datamode(ncid))
-   ! scalars
+   ! Scalars
+   ! integer
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-     "eph_task", "varpeq_nstep", "nkbz", "nqbz", "frohl_ntheta"], &
-     [dtset%eph_task, self%nstep, self%gstore%nkbz, self%gstore%nqbz, self%frohl_ntheta])
+     "eph_task", "nkbz", "nqbz", "frohl_ntheta", "vpq_avg_g", "vpq_translate", &
+     "vpq_interp", "vpq_nstates", "vpq_nstep_ort", "vpq_select", "vpq_mesh_fact"], &
+     [dtset%eph_task, self%gstore%nkbz, self%gstore%nqbz, self%frohl_ntheta, &
+      dtset%vpq_avg_g, dtset%vpq_translate, dtset%vpq_interp, dtset%vpq_nstates, &
+      dtset%vpq_nstep_ort, dtset%vpq_select, dtset%vpq_mesh_fact])
    NCF_CHECK(ncerr)
+   ! real
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs", "e_frohl"], &
-     [self%tolgrs, self%e_frohl])
+     "vpq_tolgrs", "e_frohl", "vpq_mix_fact"], &
+     [self%tolgrs, self%e_frohl, dtset%vpq_mix_fact])
    NCF_CHECK(ncerr)
-   ! arrays
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_pkind"), self%pkind))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_aseed"), self%aseed))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_gau_params"), self%gau_params))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nstep2cv"), self%nstep2cv_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "iter_rec"), self%iter_rec_spin))
+
+   ! Arrays
+   ! character
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_pkind"), self%pkind))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_aseed"), self%aseed))
+   ! integer
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cvflag_spin"), self%cvflag_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngkpt"), self%ngkpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gstore_ngqpt"), self%gstore%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nk_spin"), self%nk_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nq_spin"), self%nq_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nb_spin"), self%nb_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "brange_spin"), self%brange_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "erange_spin"), self%erange_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cvflag_spin"), self%cvflag_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nstep2cv_spin"), self%nstep2cv_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_trvec"), dtset%vpq_trvec))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "k2ibz_spin"), self%k2ibz_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "q2ibz_spin"), self%q2ibz_spin))
+   ! real
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "scf_hist_spin"), self%scf_hist_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), self%gstore%kibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qibz"), self%gstore%qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kpts_spin"), self%kpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts_spin"), self%qpts_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a_spin"), self%a_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "b_spin"), self%b_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min_spin"), self%gaps%cb_min))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max_spin"), self%gaps%vb_max))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gstore_ngqpt"), self%gstore%ngqpt))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngkpt"), self%ngkpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_gpr_energy"), dtset%vpq_gpr_energy))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vpq_gpr_length"), dtset%vpq_gpr_length))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "erange_spin"), self%erange_spin))
+   ! complex
+   call c_f_pointer(c_loc(self%a_spin), rpt_d5, &
+     [2, self%max_nb, self%max_nk, self%nstates, self%nsppol])
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a_spin"), rpt_d5))
+
+   call c_f_pointer(c_loc(self%b_spin), rpt_d5, &
+     [2, self%natom3, self%max_nq, self%nstates, self%nsppol])
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "b_spin"), rpt_d5))
  end if ! master
 
  call xmpi_barrier(self%gstore%comm)
- call cwtime_report(" varpeq: netcdf", cpu, wall, gflops)
+ call cwtime_report(" varpeq: ncwrite", cpu, wall, gflops)
 
 end subroutine varpeq_ncwrite
 !!***
 
 !!----------------------------------------------------------------------
 
-!!****f* m_varpeq/varpeq_print
+!!****f* m_varpeq/varpeq_print_metadata
 !! NAME
-!!  varpeq_print
+!!  varpeq_print_metadata
 !!
 !! FUNCTION
-!! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
+!!  Output parameters defining varpeq calculation
 !!
 !! INPUTS
 !!
@@ -602,7 +960,122 @@ end subroutine varpeq_ncwrite
 !!
 !! SOURCE
 
-subroutine varpeq_print(self)
+!subroutine varpeq_print_metadata(self, dtset)
+ subroutine varpeq_print_metadata(self)
+
+!Arguments ------------------------------------
+ class(varpeq_t), target, intent(inout) :: self
+!type(dataset_type), intent(in) :: dtset
+
+!Local variables-------------------------------
+!scalars
+ character(len=abi_slen) :: msg
+!character(len=abi_slen) :: use_frohl = "no"
+ integer :: spin, my_rank
+ integer, parameter :: master = 0
+!arrays
+ integer :: units(2)
+
+!----------------------------------------------------------------------
+
+ my_rank = xmpi_comm_rank(self%gstore%comm)
+
+ units = [std_out, ab_out]
+ if (my_rank == master) then
+
+   call title_("Polaron:")
+
+   call entry_("Polaron kind", self%pkind)
+   write(msg, '(i0,a,i0,a,i0)') self%ngkpt(1), "x", self%ngkpt(2), "x", self%ngkpt(3)
+   call entry_("BvK supercell", msg)
+   call entry_("Number of independent spin polarizations", itoa(self%nsppol))
+   call entry_("Number of polaronic states", itoa(self%nstates))
+   call entry_("Filtering of electronic states", yesno(self%use_filter))
+   if (self%use_filter) then
+     do spin=1,self%nsppol
+       write(msg, '(a,i0,a,i0)') "Energy filter wrt band edge for spin ", &
+         spin, "/", self%nsppol
+       call entry_(msg, sjoin(ftoa(self%erange_spin(spin)*Ha_eV, "es8.2"), "eV"))
+     enddo
+   endif
+
+   call title_("Long-range corrections:")
+   call entry_("Frohlich correction", yesno(self%frohl_ntheta > 0))
+   if (self%frohl_ntheta > 0) then
+     call entry_("Frohlich correction value", sjoin(ftoa(self%e_frohl*Ha_eV), "eV"))
+     call entry_("Frohlich correction included in matrix elements", yesno(self%g0_flag))
+   endif
+
+   call title_("Optimization parameters:")
+
+   ! TODO change this once a support for starting from B is added
+   call entry_("Initial seed", "charge localization A_nk")
+   call entry_("Initial seed type", strseed())
+
+   call entry_("Tolerance on the gradient norm", ftoa(self%tolgrs, "es8.2"))
+   call entry_("Maximum number of iterations per state", itoa(self%nstep))
+   if (self%nstates > 1) then
+     call wrtout(units, " (for pstate > 1)")
+     call entry_("Number of orthogonaliztion steps", itoa(self%nstep_ort))
+     call entry_("Translational invariance", yesno(self%translate))
+   endif
+
+ endif
+
+ contains
+ subroutine title_(str)
+   character(len=*), intent(in) :: str
+   call wrtout(units, sjoin(ch10, str))
+ end subroutine title_
+
+ subroutine entry_(name, val)
+   character(len=*), intent(in) :: name
+   character(len=*), intent(in) :: val
+   character(len=abi_slen) :: output
+   write(output, '(a5,a,a2,a)') "* ", trim(name), ": ", trim(val)
+   call wrtout(units, output)
+ end subroutine entry_
+
+ character(len=abi_slen) function strseed()
+   select case(self%aseed)
+   case ("gau_energy")
+     write(strseed, *) "Gaussian, based on the electroic energies"
+   case ("gau_length")
+     write(strseed, *) "Gaussian, based on the localizaiton length"
+   case ("random")
+     write(strseed, *) "random"
+   case ("even")
+     write(strseed, *) "even"
+   case default
+     write(strseed, *) "undefined"
+   end select
+
+   if (self%interp .or. self%restart) then
+     write(strseed, *) "loaded from file"
+   endif
+
+   strseed = adjustl(strseed)
+ end function strseed
+
+end subroutine varpeq_print_metadata
+!!***
+
+!!----------------------------------------------------------------------
+
+!!****f* m_varpeq/varpeq_print_results
+!! NAME
+!!  varpeq_print_results
+!!
+!! FUNCTION
+!!  Output SCF optimization results
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_print_results(self)
 
 !Arguments ------------------------------------
  class(varpeq_t), target, intent(inout) :: self
@@ -611,73 +1084,107 @@ subroutine varpeq_print(self)
 !scalars
  character(len=5000) :: msg
  integer, parameter :: master = 0
- integer :: comm, nproc, my_rank, spin, ii
- real(dp) :: enpol, enel, enph, enelph, eps, grs
+ integer :: my_rank, spin, ip, ii
 !arrays
  integer :: units(2)
 
 !----------------------------------------------------------------------
 
- comm = self%gstore%comm
- nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ my_rank = xmpi_comm_rank(self%gstore%comm)
 
- ! FIXME: the current state of this output procedure is ugly
  units = [std_out, ab_out]
  if (my_rank == master) then
-
-   write(msg, '(a)') " "
-   call wrtout(units, msg)
-   write(msg, '(a)') "  === Variational Polaron Equations ==="
-   call wrtout(units, msg)
-   write(msg, '(a)') repeat('-', 80)
-   call wrtout(units, msg)
-
-   ! For each spin, print the SCF cycle convergence
    do spin=1,self%gstore%nsppol
+     do ip=1,self%nstates
+       call header_(spin, ip)
 
-     write(msg, '(a,i1,a,i1)') "  * spin: ", spin, "/", self%gstore%nsppol
-     call wrtout(units, msg)
+       do ii=1,self%nstep2cv_spin(ip, spin)
+         call report_(spin, ip, ii, self%nstep2cv_spin(ip, spin))
 
-     write(msg,'(a4,a13,2a12,a13,a13,a13)') 'Step', 'E_pol', 'E_el', 'E_ph', &
-       'E_elph', 'epsilon', '||gradient||'
-     call wrtout(units, msg)
-
-     do ii=1,self%nstep2cv_spin(spin)
-       enpol = self%iter_rec_spin(1, ii, spin); enel = self%iter_rec_spin(2, ii, spin)
-       enph = self%iter_rec_spin(3, ii, spin); enelph = self%iter_rec_spin(4, ii, spin)
-       eps = self%iter_rec_spin(5, ii, spin); grs = self%iter_rec_spin(6, ii, spin)
-
-       write(msg,'(i4,es13.4,2es12.4,es13.4,es13.4,es13.4)') ii, enpol, enel, &
-         enph, enelph, eps, grs
-       call wrtout(units, msg)
-
+       enddo
      enddo
-     write(msg, '(a)') repeat('-', 80)
-     call wrtout(units, msg)
-
-     ! Tell the user whether convergence is achieved
-     if (grs < self%tolgrs) then
-       write(msg, '(a,es8.2,a,es8.2)') "gradient norm ", grs, " < varpeq_tolgrs=", self%tolgrs
-       call wrtout(units, msg)
-       call wrtout(units, "Calculation is completed and convergence reached.")
-     else
-       call wrtout(units, "Calculation is completed but not converged.")
-       write(msg, '(a,es8.2,a,es8.2,a,a)') "gradient norm ", grs, &
-         " >= varpeq_tolgrs=", self%tolgrs, ch10, &
-         "You may want to restart the SCF cycle with varpeq_restart=1 option"
-       ABI_WARNING(msg)
-     endif
-
-     ! Final results
-     write(ab_out, '(a,es13.6,a)') "polaron binding energy = ", enpol, 'a.u.'
-     write(ab_out, '(a,es13.6,a)') "polaron localized state energy = ", eps, 'a.u.'
-     write(ab_out, '(a,es13.6,a)') "long-range divergence correction = ", self%e_frohl, 'a.u.'
-
    enddo
-
  endif
 
-end subroutine varpeq_print
+ contains
+ subroutine header_(spin, state)
+   integer, intent(in) :: spin, state
+   character(len=5000) :: sep
+
+   call wrtout(units, "")
+   if (state == 1) call wrtout(units, " Printing the optimization logs")
+
+   write(sep, "(a3,a)") "", repeat('-', 86)
+   write(msg, '(a5,a,i0,a,i0,a,i0,a,i0)') &
+     "* ", "spin ", spin, "/", self%nsppol, ", pstate ", state, "/", self%nstates
+
+   call wrtout(units, sep)
+   call wrtout(units, msg)
+   write(msg, '(a3,a)') "", "* values in the optimization log are in (a.u.)"
+   call wrtout(units, msg)
+
+   if (state > 1) then
+     write(msg, "(a3,a,i0)") "", "(o) - orthogonal all pstates < ", state
+     call wrtout(units, msg)
+   endif
+
+   call wrtout(units, sep)
+   write(msg, '(a3,a4,6a13,a5)') "", "Step", "E_pol", "E_el", "E_ph", "E_elph", &
+     "epsilon", "||grad||", ""
+   call wrtout(units, msg)
+ end subroutine header_
+
+ subroutine report_(spin, state, step, step2conv)
+   integer, intent(in) :: spin, state, step, step2conv
+   character(len=5000) :: sep
+   character(len=abi_slen) :: ort_flag
+   logical :: is_conv
+   real(dp) :: enpol, enel, enph, enelph, eps, grs
+
+   enpol = self%scf_hist_spin(1, step, state, spin)
+   enel = self%scf_hist_spin(2, step, state, spin)
+   enph = self%scf_hist_spin(3, step, state, spin)
+   enelph = self%scf_hist_spin(4, step, state, spin)
+   eps = self%scf_hist_spin(5, step, state, spin)
+   grs = self%scf_hist_spin(6, step, state, spin)
+
+   write(sep, "(a3,a)") "", repeat('-', 86)
+
+   ! for states > 1 add flag if orthogonalization is used
+   write(ort_flag, '(a)') ""
+   if ((ip > 1) .and. (step <= self%nstep_ort)) then
+     write(ort_flag, '(a)') "(o)"
+   endif
+
+   write(msg,'(a3,i4,6es13.4,a5)') &
+     "", step, enpol, enel, enph, enelph, eps, grs, trim(ort_flag)
+   call wrtout(units, msg)
+
+   if (step == step2conv) then
+
+     is_conv = (self%cvflag_spin(state, spin) == 1)
+     if (is_conv) then
+       write(msg, '(a3,a,es11.4,a,es11.4)') "", "Converged: ||grad||=", grs, &
+         " < vpq_tolgrs=", self%tolgrs
+     else
+       write(msg, '(a3,a,es11.4,a,es11.4)') "", "Unconverged: ||grad||=", grs, &
+         " > vpq_tolgrs=", self%tolgrs
+     endif
+
+     call wrtout(units, sep)
+     call wrtout(units, msg)
+
+     write(msg, '(a3,a,es17.8)') "", "E_pol (eV):", enpol*Ha_eV
+     call wrtout(units, msg)
+     write(msg, '(a3,a,es17.8)') "", "  eps (eV):", eps*Ha_eV
+     call wrtout(units, msg)
+
+     call wrtout(units, sep)
+
+   endif
+ end subroutine report_
+
+end subroutine varpeq_print_results
 !!***
 
 !!----------------------------------------------------------------------
@@ -687,6 +1194,7 @@ end subroutine varpeq_print
 !!  varpeq_collect
 !!
 !! FUNCTION
+!!  Collect SCF optimization results for each spin
 !!
 !! INPUTS
 !!
@@ -702,22 +1210,23 @@ subroutine varpeq_collect(self)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
- integer :: ierr, my_is, spin, my_ik, ik_glob, my_iq, iq_glob
- integer :: my_pert, pert_glob
- integer :: oc_iter, oc_a, oc_b, oc_k, oc_q
+ integer :: ierr
+ integer :: my_is, spin, my_ik, ik_glob, ik_ibz, ip
+ integer :: my_iq, iq_glob, iq_ibz, my_pert, pert_glob
+ integer :: oc_scf, oc_a, oc_b, oc_k, oc_q
 
 !----------------------------------------------------------------------
 
- ! FIXME
- ! Hack to mimic the summation over a non-existing spin commnicator
-
  ! Gather the SCF process evolution data
- call xmpi_sum(self%iter_rec_spin, self%gstore%comm, ierr)
+ call xmpi_sum(self%cvflag_spin, self%gstore%comm, ierr)
+ call xmpi_sum(self%scf_hist_spin, self%gstore%comm, ierr)
  call xmpi_sum(self%nstep2cv_spin, self%gstore%comm, ierr)
 
  ! Gather electron/phonon vectors and k/q points
  self%a_spin(:,:,:,:) = zero
  self%b_spin(:,:,:,:) = zero
+ self%k2ibz_spin(:,:) = zero
+ self%q2ibz_spin(:,:) = zero
  self%qpts_spin(:,:,:) = zero
  self%kpts_spin(:,:,:) = zero
  do my_is=1,self%gstore%my_nspins
@@ -725,47 +1234,69 @@ subroutine varpeq_collect(self)
    gqk => self%gstore%gqk(my_is)
    polstate => self%polstate(spin)
 
-   ! electronic vector & k-points
-   do my_ik=1,gqk%my_nk
-     ik_glob = gqk%my_kstart + my_ik - 1
-     self%a_spin(1, :, ik_glob, spin) = real(polstate%my_a(:, my_ik))  ! real part
-     self%a_spin(2, :, ik_glob, spin) = aimag(polstate%my_a(:, my_ik)) ! imaginary part
-     self%kpts_spin(:, ik_glob, spin) = polstate%my_kpts(:, my_ik)
+   do ip=1,self%nstates
+
+     ! electronic vector
+     do my_ik=1,gqk%my_nk
+       ik_glob = gqk%my_kstart + my_ik - 1
+       self%a_spin(:, ik_glob, ip, spin) = polstate%my_a(:, my_ik, ip)
+     enddo
+
+     ! phonon vector
+     do my_iq=1,gqk%my_nq
+       iq_glob = gqk%my_qstart + my_iq - 1
+       do my_pert=1,gqk%my_npert
+         pert_glob = gqk%my_pert_start + my_pert - 1
+         self%b_spin(pert_glob, iq_glob, :, spin) = polstate%my_b(my_pert, my_iq, :)
+       enddo
+     enddo
+
    enddo
 
-   ! phonon vector & q-points
+   ! k-points
+   do my_ik=1,gqk%my_nk
+     ik_ibz = gqk%my_k2ibz(1, my_ik)
+     ik_glob = gqk%my_kstart + my_ik - 1
+     self%kpts_spin(:, ik_glob, spin) = polstate%my_kpts(:, my_ik)
+     self%k2ibz_spin(ik_glob, spin) = ik_ibz
+   enddo
+
+   ! q-points
    do my_iq=1,gqk%my_nq
+     iq_ibz = gqk%my_q2ibz(1, my_iq)
      iq_glob = gqk%my_qstart + my_iq - 1
-     do my_pert=1,gqk%my_npert
-       pert_glob = gqk%my_pert_start + my_pert - 1
-       self%b_spin(1, pert_glob, iq_glob, spin) = real(polstate%my_b(my_pert, my_iq))  ! real part
-       self%b_spin(2, pert_glob, iq_glob, spin) = aimag(polstate%my_b(my_pert, my_iq)) ! imaginary part
-     enddo
      self%qpts_spin(:, iq_glob, spin) = polstate%my_qpts(:, my_iq)
+     self%q2ibz_spin(iq_glob, spin) = iq_ibz
    enddo
 
  enddo
  call xmpi_sum(self%a_spin, self%gstore%comm, ierr)
  call xmpi_sum(self%b_spin, self%gstore%comm, ierr)
+ call xmpi_sum(self%k2ibz_spin, self%gstore%comm, ierr)
+ call xmpi_sum(self%q2ibz_spin, self%gstore%comm, ierr)
  call xmpi_sum(self%kpts_spin, self%gstore%comm, ierr)
  call xmpi_sum(self%qpts_spin, self%gstore%comm, ierr)
 
- ! Don't forget to divide all by the #OverCount, since we use global communicator
+ ! Hack to mimic the summation over a non-existing spin commnicator
+ ! Divide by the number of times we overcount, as we use the global communicator
  do my_is=1,self%gstore%my_nspins
    spin = self%gstore%my_spins(my_is)
    gqk => self%gstore%gqk(my_is)
    polstate => self%polstate(spin)
 
-   oc_iter = gqk%comm%nproc
+   oc_scf = gqk%comm%nproc
    oc_a = gqk%qpt_pert_comm%nproc
    oc_b = gqk%kpt_comm%nproc
    oc_k = oc_a
    oc_q = oc_b * gqk%pert_comm%nproc
 
-   self%iter_rec_spin(:,:,spin) = self%iter_rec_spin(:,:,spin) / oc_iter
-   self%nstep2cv_spin(spin) = self%nstep2cv_spin(spin) / oc_iter
+   self%cvflag_spin(:,spin) = self%cvflag_spin(:,spin) / oc_scf
+   self%scf_hist_spin(:,:,:,spin) = self%scf_hist_spin(:,:,:,spin) / oc_scf
+   self%nstep2cv_spin(:,spin) = self%nstep2cv_spin(:,spin) / oc_scf
    self%a_spin(:,:,:,spin) = self%a_spin(:,:,:,spin) / oc_a
    self%b_spin(:,:,:,spin) = self%b_spin(:,:,:,spin) / oc_b
+   self%k2ibz_spin(:,spin) = self%k2ibz_spin(:,spin) / oc_k
+   self%q2ibz_spin(:,spin) = self%q2ibz_spin(:,spin) / oc_q
    self%kpts_spin(:,:,spin) = self%kpts_spin(:,:,spin) / oc_k
    self%qpts_spin(:,:,spin) = self%qpts_spin(:,:,spin) / oc_q
  enddo
@@ -775,161 +1306,127 @@ end subroutine varpeq_collect
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/varpeq_setup
+!!****f* m_varpeq/varpeq_load
 !! NAME
-!!  varpeq_setup
+!!  varpeq_load
 !!
 !! FUNCTION
+!!  Load and (optionally) interpolate the initial electronic vector A_nk from
+!!  a *VPQ.nc netcdf file. Store result in the self%a_spin variable.
 !!
 !! INPUTS
+!!  dtfil<datafiles_types>=Variables related to files.
+!!  pselect=Which state to select for reload/interpolation. Non-positive value
+!!    selects all states.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine varpeq_setup(self, dtfil)
+subroutine varpeq_load(self, dtfil, pselect)
 
 !Arguments ------------------------------------
  class(varpeq_t), target, intent(inout) :: self
  type(datafiles_type), intent(in) :: dtfil
+ integer,intent(in) :: pselect
 
 !Local variables-------------------------------
 !scalars
- character(len=5000) :: msg
- class(polstate_t), pointer :: polstate
- type(varpeq_t) :: vpq_loaded
+ type(varpeq_t) :: vpq_ld
  type(bzlint_t) :: bzlint
+ logical :: single_state
  integer, parameter :: master = 0
- integer :: my_rank, comm, ierr, my_is, spin, nk, nb, ik, ib
- real(dp) :: anorm, orth_anorm!, orth_factor
- complex(dp) :: orth_factor
+ integer :: my_rank, comm, ierr
+ integer :: spin, ip, nk, nb, ik, ib
+ real(dp) :: cpu, wall, gflops
 !arrays
- integer :: units(2), ngkpt(3)
+ integer :: units(2)
  real(dp) :: kpt(3)
- real(dp), allocatable :: a_loaded(:,:), kpts_loaded(:,:), ank(:)
+ real(dp), allocatable :: ak(:), kpts_ld(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: rpt_d2(:,:)
+ complex(dp), allocatable, target :: a_ld(:,:)
 
 !----------------------------------------------------------------------
 
- ! If a compatible VARPEQ.nc file is avaliable along with special flags, use it to either
- ! restart the calculation or interpolate initial charge localization
+ call cwtime(cpu, wall, gflops, "start")
 
  units = [std_out, ab_out]
  comm = self%gstore%comm; my_rank = xmpi_comm_rank(comm)
 
- if (my_rank == master .and. (self%interpolate .or. self%restart)) then
-   call wrtout(units, " - getting charge localiztion from a previous VARPEQ.nc file")
-   call vpq_loaded%ncread(dtfil%filvarpeqin, xmpi_comm_self, keep_open=.False.)
+ ! Read A_nk from file. Only the master processor reads, then broadcasts the data
+ if (my_rank == master) then
+   call vpq_ld%ncread(dtfil%filvpqin, xmpi_comm_self, keep_open=.False.)
 
-   if (self%interpolate .and. self%restart) then
-     msg = " Both varpeq_interpolate and eph_restart flags are provided, &
-       priority is given to the interpolation"
-     ABI_WARNING(msg)
+   ! Consitency check
+   call self%compare(vpq_ld, bz_mismatch=self%interp)
+   if (pselect > 0) then
+     ABI_CHECK(self%nstates == 1, "vpq_pstates must be 1 if vpq_select > 0.")
+     ABI_CHECK(pselect <= vpq_ld%nstates, "vpq_select must be <= loaded nstates.")
+     single_state = .true.
+   else
+     ABI_CHECK(self%nstates == vpq_ld%nstates, "Diefference found in nstates.")
+     single_state = .false.
    endif
 
-   if (self%interpolate) then
+   self%a_spin(:,:,:,:) = zero
+
+   if (self%interp) then ! Interpolation
      call wrtout(units, " - interpolating previous A_nk")
-     call self%compare(vpq_loaded, allow_mesh_mismatch=.True.)
-
      do spin=1,self%nsppol
-       ! prepare for interpolation
-       nk = vpq_loaded%nk_spin(spin)
-       nb = vpq_loaded%nb_spin(spin)
-       ngkpt(:) = vpq_loaded%ngkpt(:)
-       ABI_MALLOC(a_loaded, (2*nb, nk))
-       ABI_MALLOC(kpts_loaded, (3, nk))
-       ABI_MALLOC(ank, (2*nb))
+       ! Setting basic dimensions & arrays
+       nk = vpq_ld%nk_spin(spin); nb = vpq_ld%nb_spin(spin)
+       ABI_MALLOC(kpts_ld, (3, nk))
+       ABI_MALLOC(a_ld, (nb, nk))
+       ABI_MALLOC(ak, (2*nb))
+       kpts_ld(:,:) = vpq_ld%kpts_spin(:, 1:nk, spin)
 
-       do ik=1,nk
-         kpts_loaded(:, ik) = vpq_loaded%kpts_spin(:, ik, spin)
-         do ib=1,nb
-           a_loaded(2*ib-1, ik) = vpq_loaded%a_spin(1, ib, ik, spin) ! real
-           a_loaded(2*ib, ik) = vpq_loaded%a_spin(2, ib, ik, spin) ! imaginary
+       ! Here, interpolation is performed
+       do ip=1,self%nstates
+
+         if (single_state) then
+           a_ld(:,:) = vpq_ld%a_spin(:, 1:nk, pselect, spin)
+         else
+           a_ld(:,:) = vpq_ld%a_spin(:, 1:nk, ip, spin)
+         endif
+
+         call c_f_pointer(c_loc(a_ld), rpt_d2, [2*nb, nk])
+
+         call bzlint%init(vpq_ld%ngkpt, 2*nb, nk, kpts_ld, rpt_d2)
+
+         do ik=1,self%nk_spin(spin)
+           kpt(:) = self%kpts_spin(:, ik, spin)
+           call bzlint%interp(kpt, ak)
+
+           do ib=1,nb
+             self%a_spin(ib, ik, ip, spin) = ak(2*ib-1) + j_dpc*ak(2*ib)
+           enddo
          enddo
+         call bzlint%free()
+
        enddo
-
-       ! Now, the actual interpolation is performed
-       call bzlint%init(ngkpt, 2*nb, nk, kpts_loaded, a_loaded)
-       self%a_spin(:,:,:,spin) = zero
-
-       do ik=1,self%nk_spin(spin)
-         kpt = self%kpts_spin(:, ik, spin)
-         call bzlint%interp(kpt, ank)
-
-         do ib=1,self%nb_spin(spin)
-           self%a_spin(1, ib, ik, spin) = ank(2*ib-1)
-           self%a_spin(2, ib, ik, spin) = ank(2*ib)
-
-         enddo
-       enddo
-
-       call bzlint%free()
-       ABI_FREE(ank)
-       ABI_FREE(kpts_loaded)
-       ABI_FREE(a_loaded)
+       ABI_FREE(kpts_ld)
+       ABI_FREE(a_ld)
+       ABI_FREE(ak)
      enddo
 
-   else
+   else ! Restart
      call wrtout(units, " - restarting from previous A_nk")
-     call self%compare(vpq_loaded, allow_mesh_mismatch=.False.)
-     self%a_spin(:,:,:,:) = vpq_loaded%a_spin(:,:,:,:)
-
+     if (single_state) then
+       self%a_spin(:,:,:,:) = vpq_ld%a_spin(:,:,pselect:pselect,:)
+     else
+       self%a_spin(:,:,:,:) = vpq_ld%a_spin(:,:,:,:)
+     endif
    endif
 
-   call vpq_loaded%free()
+   call vpq_ld%free()
  endif
+
  call xmpi_bcast(self%a_spin, master, comm, ierr)
+ self%ld_flag = .True.
 
- ! Initialize charge localization in each polstate
+ call cwtime_report(" varpeq: load", cpu, wall, gflops)
 
- do my_is=1,self%gstore%my_nspins
-   spin = self%gstore%my_spins(my_is)
-   polstate => self%polstate(my_is)
-
-   if (self%interpolate .or. self%restart) then
-     call polstate%load_a(self%a_spin(:,:,:,spin))
-   else
-     call polstate%seed_a(self%aseed, gau_params=self%gau_params)
-   endif
-
-   ! set all the A_nk to 0 outside the energy window
-   if (self%erange_spin(spin) > tol12) then
-     call polstate%cut_a(self%erange_spin(spin) + onehalf*eV_Ha)
-   endif
-
-   ! FIXME: rewrite all the orthongonalization/normalization in the code
-   ! TOO MANY repetitions
-
-   ! if we want a solution orthongal to a previous vector
-   if (self%orth) then
-     ! set a previous vector
-     polstate%orth_a(:, :) = polstate%my_a(:, :)
-     ! normalize it
-     orth_anorm = polstate%get_norm('orth_a')
-     polstate%orth_a(:, :) = polstate%orth_a(:, :)*sqrt(one*polstate%nkbz)/orth_anorm
-
-     ! and initalize new starting point
-     call polstate%seed_a(self%aseed, gau_params=self%gau_params)
-
-     ! orthogonalize it to the previous one
-     orth_factor = sum(conjg(polstate%orth_a(:,:))*polstate%my_a(:,:))
-     !orth_factor = real(sum(polstate%orth_a(:,:)*conjg(polstate%my_a(:,:))))
-     call xmpi_sum(orth_factor, polstate%gqk%kpt_comm%value, ierr)
-     polstate%my_a(:,:) = polstate%my_a(:,:) - (orth_factor/polstate%nkbz)*polstate%orth_a(:,:)
-
-   ! otherwise, set the previous vector to zero
-   else
-     polstate%orth_a(:, :) = zero
-   endif
-
-   ! Don't forget to normalize
-   anorm = polstate%get_norm('a')
-   polstate%my_a(:, :) = polstate%my_a(:, :)*sqrt(one*polstate%nkbz)/anorm
-   call polstate%gather('a')
-
-   orth_anorm = polstate%get_norm('orth_a')
-   anorm = polstate%get_norm('a')
- enddo
-end subroutine varpeq_setup
+end subroutine varpeq_load
 !!***
 
 !----------------------------------------------------------------------
@@ -939,6 +1436,8 @@ end subroutine varpeq_setup
 !!  varpeq_solve
 !!
 !! FUNCTION
+!!  Solve the Variational Polaron Equations for each spin for self%nstates
+!!  polaronic states.
 !!
 !! INPUTS
 !!
@@ -952,45 +1451,76 @@ subroutine varpeq_solve(self)
  class(varpeq_t), target, intent(inout) :: self
 
 !Local variables-------------------------------
- !character(len=5000) :: msg
  class(polstate_t), pointer :: polstate
- integer :: my_is, spin, ii
+ character(len=5000) :: msg
+ integer :: my_is, spin, ip, ii
+ real(dp) :: grad_sqnorm
+ real(dp) :: cpu, wall, gflops
+ integer :: units(2)
 
 !----------------------------------------------------------------------
 
- ! Variational Polaron Equations
- self%iter_rec_spin(:,:,:) = zero
+ units = [std_out, ab_out]
+
+ call wrtout(units, &
+   sjoin(ch10, "Solving the variational polaron equations for each state..."))
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ self%scf_hist_spin(:,:,:,:) = zero
 
  do my_is=1,self%gstore%my_nspins
    spin = self%gstore%my_spins(my_is)
    polstate => self%polstate(my_is)
 
-   ! call polstate%seed_a(self%aseed, gau_params=self%gau_params)
+   do ip=1,self%nstates
 
-   do ii=1,self%nstep
-     call polstate%localize()
+     write(msg, '(a5,a,i0,a,i0,a,i0,a,i0,a)')  "* ", "spin ", spin, "/", &
+       self%nsppol, ", pstate ", ip, "/", self%nstates, "..."
+     call wrtout(units, msg)
 
-     ! Save the necessary data at each iterations
-     call self%record(ii, my_is)
+     ! initialize A_nk at this state, orthogonalize to the previous ones
+     ! and normalize
+     call polstate%setup(ip, a_src=self%a_spin(:,:,ip,spin), load=self%ld_flag)
 
-     if (polstate%gradres < self%tolgrs) exit
+     do ii=1,self%nstep
+       ! gather A, get B_qnu, get energies
+       call polstate%localize(ip, self%mixing_factor)
 
-     ! TODO: add more control for this feature
-     ! After some iterations update the preconditioner depending on the value of eps
-     if (self%pc_nupdate == 1) call polstate%update_pcond(self%pc_factor)
-     if (mod(ii, self%pc_nupdate) == 1) call polstate%update_pcond(self%pc_factor)
+       ! get bare gradient
+       call polstate%calc_grad(ip)
 
-     call polstate%get_conjgrad_a(self%orth)
-     call polstate%update_a()
+       ! calculate and save the L^2 gradient norm
+       grad_sqnorm = polstate%get_sqnorm("grad", ip)
+       polstate%gradres(ip) = sqrt(grad_sqnorm)
+
+       ! record the energies & gradient norm to varepq datatype
+       call self%record(ii, ip, my_is)
+
+       ! check if gradient norm is lower than convergence threshold
+       if (polstate%gradres(ip) < self%tolgrs) then
+         self%cvflag_spin(ip, spin) = 1
+         exit
+       endif
+
+       ! calculate the preconditioner
+       call polstate%update_pc(ip)
+
+       ! get preconditioned conjugate gradient direction
+       call polstate%calc_pcjgrad(ip, ii, self%nstep_ort)
+
+       ! update a based on line minimization and pcj direction
+       call polstate%update_a(ip)
+
+     enddo
+     call wrtout(units, "   Done")
    enddo
-
  enddo
-
- ! Correction for the infrared Fr\"ohlich divergence
- call self%avg_frohlich()
 
  ! Collect results from each polstate
  call self%collect()
+
+ call cwtime_report(" varpeq: solve", cpu, wall, gflops)
 
 end subroutine varpeq_solve
 !!***
@@ -1002,46 +1532,48 @@ end subroutine varpeq_solve
 !!  varpeq_record
 !!
 !! FUNCTION
+!!  Record variational polaron equations results for current iteration.
+!!  Used to propagate the SCF cycle history from self%polstate to the
+!!  varpeq datatype itself.
 !!
 !! INPUTS
+!!  iter=Current iteration.
+!!  ip=Index of a polaronic state.
+!!  my_is=Spin polarization treated by this MPI proc.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine varpeq_record(self, iter, my_is)
+subroutine varpeq_record(self, iter, ip, my_is)
 
 !Arguments ------------------------------------
  class(varpeq_t), target, intent(inout) :: self
- integer, intent(in) :: iter, my_is
+ integer, intent(in) :: iter, ip, my_is
 
 !Local variables-------------------------------
  class(polstate_t), pointer :: polstate
  integer :: spin, psign
- real(dp) :: shift
+ real(dp) :: enel, enph, enelph, eps
 
 !----------------------------------------------------------------------
 
  spin = self%gstore%my_spins(my_is)
  polstate => self%polstate(my_is)
 
- select case(self%pkind)
- case ("electron")
-   psign = 1; shift = onehalf*eV_Ha
-   !psign = 1; shift = self%gaps%cb_min(spin)
- case ("hole")
-   psign = -1; shift = onehalf*eV_Ha
-   !psign = -1; shift = -self%gaps%vb_max(spin)
- end select
+ psign = 1
+ if (self%pkind == "hole") psign = -1
 
- self%iter_rec_spin(1, iter, spin) = &
-   psign*(polstate%enel + polstate%enph + polstate%enelph - shift)
- self%iter_rec_spin(2, iter, spin) = psign*(polstate%enel - shift)
- self%iter_rec_spin(3, iter, spin) = psign*polstate%enph
- self%iter_rec_spin(4, iter, spin) = psign*polstate%enelph
- self%iter_rec_spin(5, iter, spin) = psign*(polstate%eps - shift)
- self%iter_rec_spin(6, iter, spin) = polstate%gradres
- self%nstep2cv_spin(spin) = iter
+ enel = polstate%enterms(1, ip); enph = polstate%enterms(2, ip)
+ enelph = polstate%enterms(3, ip); eps = polstate%enterms(4, ip)
+
+ self%scf_hist_spin(1, iter, ip, spin) = (enel + enph + enelph)
+ self%scf_hist_spin(2, iter, ip, spin) = enel
+ self%scf_hist_spin(3, iter, ip, spin) = enph
+ self%scf_hist_spin(4, iter, ip, spin) = enelph
+ self%scf_hist_spin(5, iter, ip, spin) = psign*eps
+ self%scf_hist_spin(6, iter, ip, spin) = polstate%gradres(ip)
+ self%nstep2cv_spin(ip, spin) = iter
 
 end subroutine varpeq_record
 !!***
@@ -1053,8 +1585,11 @@ end subroutine varpeq_record
 !!  varpeq_init
 !!
 !! FUNCTION
+!!  Initialize the oboject by setting basic variables, allocate dynamic arrays.
 !!
 !! INPUTS
+!!  gstore<gstore_t>=Electron-phonon matrix elements and related quantities.
+!!  dtset<dataset_type>=All input variables for this dataset.
 !!
 !! OUTPUT
 !!
@@ -1072,213 +1607,302 @@ subroutine varpeq_init(self, gstore, dtset)
  character(len=5000) :: msg
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
- integer :: ierr, my_is, spin, bstart, my_iq
+ integer :: ierr, my_is, spin, bstart, bend, my_iq
  real(dp) :: wtq
-
+ real(dp) :: cpu, wall, gflops
+ !integer, allocatable :: my_states(:,:), glob_states(:,:)
 !----------------------------------------------------------------------
 
+ call cwtime(cpu, wall, gflops, "start")
+
  ! Consistency check
- !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
- !  ABI_ERROR("The gstore object is inconsistent with varpeq. See messages above.")
- !end if
+ if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
+   ABI_ERROR("The gstore object is inconsistent with varpeq. See messages above.")
+ end if
 
- self%gstore => gstore
-
- self%nstep = dtset%varpeq_nstep
- self%tolgrs = dtset%varpeq_tolgrs
- self%pc_nupdate = dtset%varpeq_pc_nupdate
- self%pc_factor = dtset%varpeq_pc_factor
- self%aseed = dtset%varpeq_aseed
- self%pkind = dtset%varpeq_pkind
- self%gau_params = dtset%varpeq_gau_params
- self%frohl_ntheta = dtset%eph_frohl_ntheta
- self%gaps = ebands_get_gaps(gstore%ebands, ierr)
- self%cryst_trinv = gstore%cryst%new_trinv_only()
-
+ ! Scalars
+ ! character
+ self%pkind = dtset%vpq_pkind
+ self%aseed = dtset%vpq_aseed
+ ! logical
+ self%restart = (dtset%eph_restart /= 0)
+ self%interp = (dtset%vpq_interp /= 0)
+ self%g0_flag = (dtset%vpq_avg_g /= 0)
+ self%translate = (dtset%vpq_translate /= 0)
+ ! integer
+ self%nstep = dtset%vpq_nstep
+ self%nstep_ort = dtset%vpq_nstep_ort
  self%nsppol = gstore%nsppol
+ self%nstates = dtset%vpq_nstates
+ self%natom3 = gstore%cryst%natom*3
  self%max_nk = maxval(gstore%glob_nk_spin)
  self%max_nq = maxval(gstore%glob_nq_spin)
  self%max_nb = maxval(gstore%brange_spin(2,:) - gstore%brange_spin(1,:)) + 1
+ self%frohl_ntheta = dtset%eph_frohl_ntheta
+ ! real
+ self%tolgrs = dtset%vpq_tolgrs
+ self%mixing_factor = dtset%vpq_mix_fact
 
- self%restart = (dtset%eph_restart == 1)
- self%interpolate = (dtset%varpeq_interpolate == 1)
- self%orth = (dtset%varpeq_orth == 1)
+ ! Static arrays
+ ! integer
+ self%ngkpt(:) = dtset%ngkpt(:)
 
- ABI_MALLOC(self%polstate, (gstore%my_nspins))
- ABI_MALLOC(self%iter_rec_spin, (6, self%nstep, gstore%nsppol))
- ABI_MALLOC(self%nstep2cv_spin, (gstore%nsppol))
- ABI_MALLOC(self%kpts_spin, (3, self%max_nk, gstore%nsppol))
- ABI_MALLOC(self%qpts_spin, (3, self%max_nq, gstore%nsppol))
- ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, gstore%nsppol))
- ABI_MALLOC(self%b_spin, (2, 3*gstore%cryst%natom, self%max_nq, gstore%nsppol))
+ ! Dynamic arrays
+ ! integer
  ABI_MALLOC(self%nk_spin, (gstore%nsppol))
  ABI_MALLOC(self%nq_spin, (gstore%nsppol))
  ABI_MALLOC(self%nb_spin, (gstore%nsppol))
  ABI_MALLOC(self%brange_spin, (2, gstore%nsppol))
- ABI_MALLOC(self%erange_spin, (gstore%nsppol))
-
  self%nk_spin(:) = gstore%glob_nk_spin(:)
  self%nq_spin(:) = gstore%glob_nq_spin(:)
  self%nb_spin(:) = gstore%brange_spin(2,:) - gstore%brange_spin(1,:) + 1
  self%brange_spin(:,:) = gstore%brange_spin(:,:)
- self%ngkpt(:) = dtset%ngkpt(:)
 
- ! Loop over my spins and initialize polaronic states
+ ABI_MALLOC(self%cvflag_spin, (self%nstates, gstore%nsppol))
+ ABI_MALLOC(self%nstep2cv_spin, (self%nstates, gstore%nsppol))
+ ABI_MALLOC(self%scf_hist_spin, (6, self%nstep, self%nstates, gstore%nsppol))
+ ABI_MALLOC(self%k2ibz_spin, (self%max_nk, gstore%nsppol))
+ ABI_MALLOC(self%q2ibz_spin, (self%max_nq, gstore%nsppol))
+ ! real
+ ABI_MALLOC(self%kpts_spin, (3, self%max_nk, gstore%nsppol))
+ ABI_MALLOC(self%qpts_spin, (3, self%max_nq, gstore%nsppol))
+ ABI_MALLOC(self%erange_spin, (gstore%nsppol))
+ self%erange_spin(:) = zero
+ if (gstore%kfilter == "erange") then
+   self%use_filter = .True.
+   if (dtset%vpq_pkind == "hole") then
+     self%erange_spin(:) = gstore%erange_spin(1,:)
+   else
+     self%erange_spin(:) = gstore%erange_spin(2,:)
+   endif
+ endif
+
+ ! complex
+ ABI_MALLOC(self%a_spin, (self%max_nb, self%max_nk, self%nstates, gstore%nsppol))
+ ABI_MALLOC(self%b_spin, (self%natom3, self%max_nq, self%nstates, gstore%nsppol))
+
+ ! Datatypes and pointers
+ self%gstore => gstore
+ call gstore%cryst%copy(self%cryst)
+ self%gaps = gstore%ebands%get_gaps(ierr)
+
+ ! Initialize polaronic states for each spin
+ ABI_MALLOC(self%polstate, (gstore%my_nspins))
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
    polstate => self%polstate(my_is)
 
-   polstate%gqk => gqk
+   ! Scalars
+   ! character
+   polstate%aseed = dtset%vpq_aseed
+   ! logical
+   polstate%translate = (dtset%vpq_translate /= 0)
+   ! integers
+   polstate%np = dtset%vpq_nstates
    polstate%nkbz = gstore%nkbz
    polstate%nqbz = gstore%nqbz
-   polstate%cryst = gstore%cryst%new_without_symmetries()
+   ! real
+   polstate%e_frohl = zero
 
-   ! Basic dimensions
-   ABI_MALLOC(polstate%my_a, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%orth_a, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_grad_a, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_prevgrad_a, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_pcond, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(polstate%my_b, (gqk%my_npert, gqk%my_nq))
+   ! Static arrays
+   ! integer
+   polstate%ngkpt(:) = dtset%ngkpt(:)
+   ! real
+   polstate%gpr_energy(:) = dtset%vpq_gpr_energy(:)
+   polstate%gpr_length(:) = dtset%vpq_gpr_length(:)
 
-   ABI_MALLOC(polstate%a_glob, (gqk%nb, gqk%glob_nk))
-   ABI_MALLOC(polstate%grad_a_glob, (gqk%nb, gqk%glob_nk))
-   ABI_MALLOC(polstate%b_glob, (gqk%my_npert, gqk%glob_nq))
+   ! Dynamic arrays
+   ! logical
+   ABI_MALLOC(polstate%has_prev_grad, (dtset%vpq_nstates))
+   polstate%has_prev_grad(:) = .false.
+   ! real
+   ABI_MALLOC(polstate%gradres, (dtset%vpq_nstates))
+   ABI_MALLOC(polstate%enterms, (4, dtset%vpq_nstates))
+
    ABI_MALLOC(polstate%eig, (gqk%nb, gstore%ebands%nkpt))
-
-   ! Bands taking part in the polaron formation process
-   ! TODO: shift the bands wrt vbm/cbm?
-   msg = sjoin(self%gaps%errmsg_spin(spin), ". VarPEq is incompatible with metals &
-     and needs CBM/VBM for electron/hole polaron calculations.")
+   msg = sjoin(self%gaps%errmsg_spin(spin), &
+     "VarPEq is incompatible with metals and requires band gap.")
    ABI_CHECK(self%gaps%ierr(spin) == 0, msg)
 
-   bstart = self%gstore%brange_spin(1, spin)
-   select case(self%pkind)
-     ! we shift bands wrt band edge
+   bstart = gstore%brange_spin(1, spin)
+   bend = bstart + gqk%nb - 1
+   select case(dtset%vpq_pkind)
    case ("electron")
      polstate%eig = &
-       gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%cb_min(spin) + onehalf*eV_Ha
-     !polstate%eig = gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
+       gstore%ebands%eig(bstart:bend, :, spin) - self%gaps%cb_min(spin)
    case ("hole")
-     ! here we flip the valence bands to deal with the minimization process later on
      polstate%eig = &
-       -(gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin) - self%gaps%vb_max(spin)) + onehalf*eV_Ha
-     !polstate%eig = -gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
+       -(gstore%ebands%eig(bstart:bend, :, spin) - self%gaps%vb_max(spin))
    end select
-   ! set erange for each spin
-   self%erange_spin(spin) = dtset%varpeq_erange(spin)
 
-   ! k-space and q-space treated by this proc
-   polstate%my_kpts => gqk%my_kpts(:,:)
+   ABI_MALLOC(polstate%my_g0, (gqk%my_npert))
+   polstate%my_g0(:) = zero
 
    ABI_MALLOC(polstate%my_qpts, (3, gqk%my_nq))
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, wtq, polstate%my_qpts(:, my_iq))
    enddo
 
-   ! kranks (require initializaton of polstata%my_kpts/my_qpts)
+   ! complex
+   ABI_MALLOC(polstate%my_a, (gqk%nb, gqk%my_nk, dtset%vpq_nstates))
+   ABI_MALLOC(polstate%a_glob, (gqk%nb, gqk%glob_nk))
+   ABI_MALLOC(polstate%my_b, (gqk%my_npert, gqk%my_nq, dtset%vpq_nstates))
+   ABI_MALLOC(polstate%my_prev_b, (gqk%my_npert, gqk%my_nq))
+   ABI_MALLOC(polstate%my_pc, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_grad, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_prev_grad, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_pcgrad, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_prev_pcgrad, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_pcjgrad, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%my_prev_pcjgrad, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(polstate%pcjgrad_glob, (gqk%nb, gqk%glob_nk))
+
+   ! Datatypes ans pointers
+   polstate%gqk => gqk
+   polstate%my_kpts => gqk%my_kpts(:,:)
    polstate%krank_kpts = polstate%get_krank_glob("k", gstore%ebands%kptrlatt)
    polstate%krank_qpts = polstate%get_krank_glob("q", gstore%ebands%kptrlatt)
 
  enddo
 
- ! FIXME: fix this hack; it's needed only to setup kpts_spn & qpts_spin prior to all calculations
+ ! This is needed to fill kpts_spin/qpts_spin before the calculation, as they may
+ ! be required by the varpeq_load subroutine
+ call xmpi_barrier(gstore%comm)
  call self%collect()
 
  self%is_complete = .True.
+
+ call cwtime_report(" varpeq: init", cpu, wall, gflops)
 
 end subroutine varpeq_init
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/varpeq_avg_frohlich
+!!****f* m_varpeq/varpeq_calc_fravg
 !! NAME
-!!  varpeq_avg_frohlich
+!!  varpeq_calc_fravg
 !!
 !! FUNCTION
+!!  Calculate the avarage Fr\"ohlich long-range contribution to the polaron
+!!  binding energy at Gamma using spherical integration in the spherical region
+!!  arond Gamma-point.
 !!
 !! INPUTS
+!!  avg_g0 [optional]=If .True., avarage electron-phonon matrix elements at
+!!    Gamma-point. Defatult: .True.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine varpeq_avg_frohlich(self)
+subroutine varpeq_calc_fravg(self, avg_g0)
 
 !Arguments ------------------------------------
- class(varpeq_t), intent(inout) :: self
+ class(varpeq_t), target, intent(inout) :: self
+ logical, optional, intent(in) :: avg_g0
 
 !Local variables-------------------------------
 !scalars
  type(ifc_type), pointer :: ifc
- type(crystal_t), pointer :: cryst
+ class(polstate_t), pointer :: polstate
+ class(gqk_t), pointer :: gqk
  integer :: comm, my_rank, nproc, ierr
  integer :: ntheta, nphi, angl_size
  integer :: iang, iatom
- integer :: nu, natom3
- real(dp) :: inv_qepsq, wqnu
+ integer :: nu, my_is, my_pert, pert_glob
+ real(dp) :: inv_qepsq, wqnu, prefactor
+ real(dp) :: cpu, wall, gflops
  complex(dpc) :: cnum
 !arrays
  real(dp) :: qpt_cart(3)
  real(dp), allocatable :: phfreq(:), displ_cart(:, :, :, :)
  real(dp), allocatable :: qvers_cart(:, :)
  real(dp), allocatable :: angweight(:)
+ real(dp), allocatable :: e_frohl_mode(:)
  complex(dpc) :: cp3(3)
 
 !----------------------------------------------------------------------
 
+ call cwtime(cpu, wall, gflops, "start")
+
  comm = self%gstore%comm
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
+ ! Integrate electron-phonon energy in the spherical region around Gamma
+ ABI_MALLOC(phfreq, (self%natom3))
+ ABI_MALLOC(e_frohl_mode, (self%natom3))
+ ABI_MALLOC(displ_cart, (2, 3, self%cryst%natom, self%natom3))
+
  ifc => self%gstore%ifc
- cryst => self%gstore%cryst
 
- natom3 = 3*cryst%natom
- ABI_MALLOC(phfreq, (natom3))
- ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
-
+ ! Create the mesh for spherical integrtion
  ntheta = self%frohl_ntheta
  nphi = 2*ntheta
  call ylm_angular_mesh(ntheta, nphi, angl_size, qvers_cart, angweight)
 
- self%e_frohl = zero
+ ! Integrate the contribution from each phonon mode
+ ! This is similar to what is done in the src/78_eph/m_sigmaph.f90 module
+ e_frohl_mode(:) = zero
  do iang=1,angl_size
-   if (mod(iang, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
+   if (mod(iang, nproc) /= my_rank) cycle
 
    qpt_cart = qvers_cart(:, iang)
    inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
-   call ifc%fourq(cryst, qpt_cart, phfreq, displ_cart, nanaqdir="cart")
+   call ifc%fourq(self%cryst, qpt_cart, phfreq, displ_cart, nanaqdir="cart")
 
-   do nu=4,natom3
+   do nu=4,self%natom3
      wqnu = phfreq(nu)
 
-     cp3 = zero
-     do iatom=1,cryst%natom
-       cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), &
-         cmplx(displ_cart(1, :, iatom, nu), displ_cart(2, :, iatom, nu), kind=dpc))
+     cp3(:) = zero
+     do iatom=1,self%cryst%natom
+       cp3(:) = cp3(:) + matmul(ifc%zeff(:, :, iatom), &
+         cmplx(displ_cart(1,:,iatom,nu), displ_cart(2,:,iatom,nu), kind=dpc))
      enddo
      cnum = dot_product(qpt_cart, cp3)
      if (abs(cnum) < tol12) cycle
 
-     self%e_frohl = self%e_frohl + angweight(iang)*(abs(cnum)*inv_qepsq/wqnu)**2
+     e_frohl_mode(nu) = e_frohl_mode(nu) + &
+       angweight(iang)*(abs(cnum)*inv_qepsq/wqnu)**2
    enddo
  enddo
+ call xmpi_sum(e_frohl_mode, comm, ierr)
 
- call xmpi_sum(self%e_frohl, comm, ierr)
+ prefactor = (eight * pi / self%cryst%ucvol) * &
+   (three / (four_pi * self%cryst%ucvol * self%gstore%nqbz))**third
 
- self%e_frohl = self%e_frohl * &
-   eight*pi/cryst%ucvol * (three / (four_pi * cryst%ucvol * self%gstore%nqbz))**third
- ! for an electron polaron, the correction has to be negative
+ e_frohl_mode(:) = prefactor*e_frohl_mode(:)
+ self%e_frohl = sum(e_frohl_mode)
+ ! For an electron polaron, the correction has to be negative
  if (self%pkind == "electron") self%e_frohl = -self%e_frohl
 
+ ! If corresponding flag is provided, average the matrix elements at Gamma
+ if (present(avg_g0) .and. avg_g0) then
+   do my_is=1,self%gstore%my_nspins
+     polstate => self%polstate(my_is)
+     gqk => polstate%gqk
+
+     polstate%e_frohl = self%e_frohl
+     do my_pert=1,gqk%my_npert
+       pert_glob = gqk%my_pert_start + my_pert - 1
+       wqnu = phfreq(pert_glob)
+       polstate%my_g0(my_pert) = &
+         sqrt(polstate%nqbz * wqnu * e_frohl_mode(pert_glob) / two)
+
+     enddo
+   enddo
+ endif
+
  ABI_FREE(phfreq)
+ ABI_FREE(e_frohl_mode)
  ABI_FREE(displ_cart)
  ABI_FREE(qvers_cart)
  ABI_FREE(angweight)
 
-end subroutine varpeq_avg_frohlich
+ call cwtime_report(" varpeq: calc_fravg", cpu, wall, gflops)
+
+end subroutine varpeq_calc_fravg
 !!***
 
 !----------------------------------------------------------------------
@@ -1288,8 +1912,7 @@ end subroutine varpeq_avg_frohlich
 !!  polstate_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
+!!  Free dynamic memory
 !!
 !! OUTPUT
 !!
@@ -1302,29 +1925,95 @@ subroutine polstate_free(self)
 
 !----------------------------------------------------------------------
 
- self%has_prev_grad = .false.
+ ! Free allocatable arrays
 
+ ! logical
+ ABI_SFREE(self%has_prev_grad)
+ ! real
+ ABI_SFREE(self%gradres)
+ ABI_SFREE(self%enterms)
+ ABI_SFREE(self%eig)
+ ABI_SFREE(self%my_g0)
+ ABI_SFREE(self%my_qpts)
+ ! complex
+ ABI_SFREE(self%my_a)
+ ABI_SFREE(self%a_glob)
+ ABI_SFREE(self%my_b)
+ ABI_SFREE(self%my_prev_b)
+ ABI_SFREE(self%my_pc)
+ ABI_SFREE(self%my_grad)
+ ABI_SFREE(self%my_pcgrad)
+ ABI_SFREE(self%my_prev_pcgrad)
+ ABI_SFREE(self%my_prev_grad)
+ ABI_SFREE(self%my_pcjgrad)
+ ABI_SFREE(self%my_prev_pcjgrad)
+ ABI_SFREE(self%pcjgrad_glob)
+
+ ! Free local datatypes & nullify pointers
  self%my_kpts => null()
  self%gqk => null()
 
- ABI_SFREE(self%my_qpts)
-
- ABI_SFREE(self%my_a)
- ABI_SFREE(self%my_b)
- ABI_SFREE(self%my_grad_a)
- ABI_SFREE(self%my_prevgrad_a)
- ABI_SFREE(self%my_pcond)
- ABI_SFREE(self%orth_a)
-
- ABI_SFREE(self%a_glob)
- ABI_SFREE(self%b_glob)
- ABI_SFREE(self%grad_a_glob)
-
  call self%krank_kpts%free()
  call self%krank_qpts%free()
- call self%cryst%free()
 
 end subroutine polstate_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_varpeq/polstate_setup
+!! NAME
+!!  polstate_setup
+!!
+!! FUNCTION
+!!  Setup optimization process at a given polaronic state.
+!!  This routine specfifies an initial electronic vector A_nk, either by
+!!  initializaing it by a pre-determined algorithm or loading from a
+!!  *VPQ.nc netcdf file.
+!!
+!! INPUTS
+!!  ip=Index of the polaronic state.
+!!  a_src(self%gqk%nb, self%gqk%glob_nk) [optional]=Global A_nk coefficients at
+!!    this state, which have to be provided if load_src=.True.
+!!  load_src [optional]=.True. if A_nk is initialized from an external source,
+!!    e.g. loaded from file. Default: .False.
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine polstate_setup(self, ip, a_src, load)
+
+!Arguments ------------------------------------
+ class(polstate_t), target, intent(inout) :: self
+ integer, intent(in) :: ip
+ logical, optional, intent(in) :: load
+ complex(dp), optional, intent(in) :: a_src(self%gqk%nb, self%gqk%glob_nk)
+
+!Local variables-------------------------------
+ real(dp) :: a_sqnorm
+ class(gqk_t), pointer :: gqk
+!----------------------------------------------------------------------
+
+ gqk => self%gqk
+
+ if (present(load) .and. load) then
+   ABI_CHECK(present(a_src), "polstate_setup: A_nk is expected but not provided")
+   call self%load_a(a_src, ip)
+ else
+   call self%seed_a(self%aseed, ip)
+ endif
+
+ ! Orthogonalize current states to the previous ones
+ call self%ort_to_states(self%my_a(:,:,ip), 1, ip-1, tr_flag=self%translate)
+
+ ! Normalize A_nk at current polaronic state
+ a_sqnorm = self%get_sqnorm("a", ip)
+ if (a_sqnorm > tol12) then
+   self%my_a(:,:,ip) = sqrt(self%nkbz/a_sqnorm) * self%my_a(:,:,ip)
+ endif
+
+end subroutine polstate_setup
 !!***
 
 !----------------------------------------------------------------------
@@ -1334,244 +2023,268 @@ end subroutine polstate_free
 !!  polstate_update_a
 !!
 !! FUNCTION
+!!  Update the vector of electronic coefficients A_nk by line minimization in
+!!  the pcj direction for current polaronic state.
 !!
 !! INPUTS
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_update_a(self)
+subroutine polstate_update_a(self, ip)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
  real(dp) :: theta
 
 !----------------------------------------------------------------------
 
- theta = self%get_linemin_param()
- self%my_a(:,:) = cos(theta)*self%my_a(:,:) + sin(theta)*self%my_grad_a(:,:)
- call self%gather('a')
+ theta = self%get_lm_theta(ip)
+ self%my_a(:,:,ip) = &
+   cos(theta)*self%my_a(:,:,ip) + sin(theta)*self%my_pcjgrad(:,:)
 
 end subroutine polstate_update_a
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/polstate_update_pcond
+!!****f* m_varpeq/polstate_update_pc
 !! NAME
-!!  polstate_update_pcond
+!!  polstate_update_pc
 !!
 !! FUNCTION
+!!  Update the preconditioner for the present configuration. Changing this
+!!  procedure may significantly improve (or worsen) the optimization process.
 !!
 !! INPUTS
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_update_pcond(self, factor)
+subroutine polstate_update_pc(self, ip)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
- real(dp),intent(in) :: factor
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  integer :: my_ik, ik_ibz, ib
+ real(dp) :: eps
 
 !----------------------------------------------------------------------
 
- ABI_UNUSED(factor)
-
  gqk => self%gqk
 
+ eps = self%enterms(4, ip)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    do ib=1,gqk%nb
-     self%my_pcond(ib, my_ik) = one/(self%eig(ib, ik_ibz))! + factor*abs(self%eps))
+     self%my_pc(ib, my_ik) = &
+       one/abs(self%eig(ib, ik_ibz) - two*abs(self%e_frohl) + abs(eps))
    enddo
  enddo
 
-end subroutine polstate_update_pcond
+end subroutine polstate_update_pc
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/polstate_get_conjgrad_a
+!!****f* m_varpeq/polstate_ort_to_states
 !! NAME
-!!  polstate_get_conjgrad_a
+!!  polstate_ort_to_states
 !!
 !! FUNCTION
+!!  Orthognongalize a vector wrt polaronic states using the Gram-Schmidt process.
+!!  The orthogonalization is performed for a range of states, specified by arguments.
 !!
 !! INPUTS
+!!  my_v(:,:)=Vetor to be orthogonalized
+!!  istart=Index of starting polaronic state
+!!  iend=Index of final polaronic state
+!!  tr_flag=.True. if orthognoalization must include all states invariant by
+!!    translations inside a supercell
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_get_conjgrad_a(self, orth)
+subroutine polstate_ort_to_states(self, my_v, istart, iend, tr_flag)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
- logical, intent(in) :: orth
+ logical, intent(in) :: tr_flag
+ integer, intent(in) :: istart, iend
+ complex(dp), intent(inout) :: my_v(self%gqk%nb, self%gqk%my_nk)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
- integer :: ierr
- real(dp) :: beta_den!, norm
- complex(dp) :: beta, beta_num
+ integer :: ip, my_ik, vx, vy, vz
+ complex(dp) :: phase, proj
+ integer :: tr_vec(3), ngkpt_tr(3)
+ real(dp) :: kpt(3)
+ complex(dp) :: a_tr(self%gqk%nb, self%gqk%my_nk)
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
 
- call self%orthonorm(orth)
- ! Apply the preconditioner and orthonormalize wrt A
- self%my_grad_a(:,:) = self%my_pcond(:,:)*self%my_grad_a(:,:)
- call self%orthonorm(orth)
+ ! TODO: optimize
+ ngkpt_tr(:) = 1
+ if (tr_flag) ngkpt_tr(:) = self%ngkpt(:)
 
- ! If previous gradient is known, get conjugate gradient using Polak-Ribi'ere formula
- if (self%has_prev_grad) then
-   beta_num = &
-     sum(self%my_grad_a(:,:)*conjg(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
-   beta_den = sum(abs(self%my_prevgrad_a(:,:))**2)
-   call xmpi_sum(beta_num, gqk%kpt_comm%value, ierr)
-   call xmpi_sum(beta_den, gqk%kpt_comm%value, ierr)
-   beta = beta_num/beta_den
+ do ip=istart,iend
 
-   self%my_grad_a(:,:) = self%my_grad_a(:,:) + beta*self%my_prevgrad_a(:,:)
-   call self%orthonorm(orth)
- endif
+   do vx=1,ngkpt_tr(1)
+     tr_vec(1) = vx - 1
+     do vy=1,ngkpt_tr(2)
+       tr_vec(2) = vy - 1
+       do vz=1,ngkpt_tr(3)
+         tr_vec(3) = vz - 1
 
- !norm = self%get_norm('grad_a')
- !self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
+         do my_ik=1,gqk%my_nk
+           kpt(:) = self%my_kpts(:, my_ik)
+           phase = exp(j_dpc*sum(kpt(:)*tr_vec(:))*two_pi)
+           a_tr(:, my_ik) = phase*self%my_a(:, my_ik, ip)
+         enddo
 
- ! Save the current gradient for each processor and globally
- call self%gather('grad_a')
- self%my_prevgrad_a(:,:) = self%my_grad_a(:,:)
- self%has_prev_grad = .true.
+         proj = get_proj_(a_tr)
+         my_v(:,:) = my_v(:,:) - proj * a_tr(:,:)
 
-end subroutine polstate_get_conjgrad_a
+       enddo
+     enddo
+   enddo
+
+ enddo
+
+ !----------------------------------------------------------------------
+ contains
+
+ complex(dp) function get_proj_(my_u) result(proj)
+
+  complex(dp), intent(in) :: my_u(gqk%nb, gqk%my_nk)
+  integer :: ierr
+  real(dp) :: u_sqnorm
+ !----------------------------------------------------------------------
+  u_sqnorm = sum(abs(my_u(:,:))**2)
+  call xmpi_sum(u_sqnorm, gqk%kpt_comm%value, ierr)
+
+  proj = zero
+  if (u_sqnorm > tol12) then
+    proj = sum(conjg(my_u(:,:))*my_v(:,:))
+    call xmpi_sum(proj, gqk%kpt_comm%value, ierr)
+    proj = proj/u_sqnorm
+  endif
+ end function get_proj_
+
+end subroutine polstate_ort_to_states
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/polstate_orthonorm
+!!****f* m_varpeq/polstate_get_lm_theta
 !! NAME
-!!  polstate_orthonorm
+!!  polstate_get_lm_theta
 !!
 !! FUNCTION
+!!  Calculate line minimization parameter theta that minimizes polaron binding
+!!  energy at the next electronic configuration:
+!!  A^n = A^(n-1)*cos(theta) + D^(n-1)*sin(theta), where
+!!  A^(n-1) and D^(n-1) are current electronic configuration and gradient.
 !!
 !! INPUTS
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
+!!  theta=Line minimization parameter.
 !!
 !! SOURCE
 
-subroutine polstate_orthonorm(self, orth)
+real(dp) function polstate_get_lm_theta(self, ip) result(theta)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
- logical, optional, intent(in) :: orth
-
-!Local variables-------------------------------
- class(gqk_t), pointer :: gqk
- integer :: ierr
- real(dp) :: norm!, orth_factor, orth_factor2
- complex(dp) :: orth_factor, orth_factor2
-
-!----------------------------------------------------------------------
-
- gqk => self%gqk
-
- orth_factor = sum(conjg(self%my_a(:,:))*self%my_grad_a(:,:))
- !orth_factor = real(sum(self%my_a(:,:)*conjg(self%my_grad_a(:,:))))
- call xmpi_sum(orth_factor, gqk%kpt_comm%value, ierr)
-
- orth_factor2 = zero
- if (present(orth)) then
-   if (orth) then
-     orth_factor2 = sum(conjg(self%orth_a(:,:))*self%my_grad_a(:,:))
-     !orth_factor2 = real(conjg(self%orth_a(:,:)*conjg(self%my_grad_a(:,:))))
-     call xmpi_sum(orth_factor2, gqk%kpt_comm%value, ierr)
-   end if
- endif
-
- self%my_grad_a(:,:) = self%my_grad_a(:,:) - &
-   (one/self%nkbz)*(orth_factor*self%my_a(:,:) + orth_factor2*self%orth_a(:,:))
-
- norm = self%get_norm('grad_a')
- self%my_grad_a(:,:) = self%my_grad_a(:,:)*sqrt(one*self%nkbz)/norm
-
-end subroutine polstate_orthonorm
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_varpeq/polstate_get_linemin_param
-!! NAME
-!!  polstate_get_linemin_param
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-real(dp) function polstate_get_linemin_param(self) result(theta)
-
-!Arguments ------------------------------------
- class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
+ logical :: q_gamma
  integer :: ierr
  integer :: my_iq, my_pert
  integer :: my_ik, ik_ibz, ik_forw, ib, jb
- real(dp) :: term_sin2, term_sincos
+ real(dp) :: sqnorm
+ real(dp) :: term_sin2, term_sincos, eps
  complex(dp) :: a_from, a_forw, d_from, d_forw
- complex(dp) :: g_forw
- complex(dp) :: b
+ complex(dp) :: g_forw, g0, b
 !arrays
- integer, allocatable :: kpq_map(:, :)
- real(dp) :: kpt(3), kpq(3)
+ real(dp) :: kpt(3), qpt(3), kpq(3)
+ complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb)
+ complex(dp) :: dk(self%gqk%nb), dkq(self%gqk%nb)
+ complex(dp) :: bq(self%gqk%my_npert)
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
- ABI_MALLOC(kpq_map, (6, gqk%my_nq))
 
- ! Scattering-dependent part
+ ! Orthogonalize pcj direction to the current state and normalize
+ call self%ort_to_states(self%my_pcjgrad, ip, ip, tr_flag=.false.)
+
+ sqnorm = self%get_sqnorm('pcjgrad', ip)
+ self%my_pcjgrad(:,:) = sqrt(self%nkbz/sqnorm)*self%my_pcjgrad(:,:)
+
+ ! Calculation of theta requires globally available pcj direction
+ call self%gather("pcjgrad", ip)
+
+! Scattering-dependent part
  term_sin2 = zero
  term_sincos = zero
  do my_ik=1,gqk%my_nk
    kpt(:) = self%my_kpts(:, my_ik)
-
-   !call self%get_mapping('kq', kpt, kpq_map)
+   ak(:) = self%my_a(:, my_ik, ip)
+   dk(:) = self%my_pcjgrad(:, my_ik)
 
    do my_iq=1,gqk%my_nq
+     qpt(:) = self%my_qpts(:, my_iq)
 
-     !ik_forw = kpq_map(1, my_iq)
-
-     kpq(:) = kpt(:) + self%my_qpts(:, my_iq)
+     ! Find k+q-->k' index in krank_kpts
+     kpq(:) = kpt(:) + qpt(:)
      ik_forw = self%krank_kpts%get_index(kpq)
+     ! If erange filter was used in gstore, some transitions are not valid
      if (ik_forw == -1) cycle
 
+     ! Check if q=\Gamma
+     q_gamma = .false.
+     if (all(abs(qpt) < tol6)) q_gamma = .true.
+
+     bq(:) = self%my_b(:, my_iq, ip)
+     akq(:) = self%a_glob(:, ik_forw)
+     dkq(:) = self%pcjgrad_glob(:, ik_forw)
+
      do ib=1,gqk%nb
-       a_from = self%my_a(ib, my_ik)
-       d_from = self%my_grad_a(ib, my_ik)
+       a_from = ak(ib)
+       d_from = dk(ib)
+
        do jb=1,gqk%nb
-         a_forw = self%a_glob(jb, ik_forw)
-         d_forw = self%grad_a_glob(jb, ik_forw)
+         a_forw = akq(jb)
+         d_forw = dkq(jb)
+
          do my_pert=1,gqk%my_npert
+           b = bq(my_pert)
+
            g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
-           b = self%my_b(my_pert, my_iq)
+           ! Add long-range correction to matrix elements at Gamma
+           g0 = self%my_g0(my_pert)
+           if (q_gamma .and. (ib == jb)) then
+             g_forw = g_forw + g0
+           endif
 
            term_sin2 = term_sin2 + real(d_from*conjg(b)*g_forw*conjg(d_forw))
            term_sincos = term_sincos + &
@@ -1579,9 +2292,8 @@ real(dp) function polstate_get_linemin_param(self) result(theta)
          enddo
        enddo
      enddo
-
    enddo
- enddo
+ enddo ! Scattering-dependent part
  call xmpi_sum(term_sin2, gqk%qpt_pert_comm%value, ierr)
  call xmpi_sum(term_sincos, gqk%qpt_pert_comm%value, ierr)
  term_sin2 = -two*term_sin2/self%nqbz
@@ -1590,154 +2302,245 @@ real(dp) function polstate_get_linemin_param(self) result(theta)
  ! Scattering-independent part
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
+
    do ib=1,gqk%nb
-     a_from = self%my_a(ib, my_ik)
-     d_from = self%my_grad_a(ib, my_ik)
+     a_from = self%my_a(ib, my_ik, ip)
+     d_from = self%my_pcjgrad(ib, my_ik)
 
      term_sin2 = term_sin2 + self%eig(ib, ik_ibz)*abs(d_from)**2
      term_sincos = term_sincos + &
        self%eig(ib, ik_ibz)*real(d_from*conjg(a_from) + conjg(d_from)*a_from)
    enddo
- enddo
+ enddo ! Scattering-independent part
  call xmpi_sum(term_sin2, gqk%kpt_comm%value, ierr)
  call xmpi_sum(term_sincos, gqk%kpt_comm%value, ierr)
  term_sin2 = term_sin2/self%nkbz
  term_sincos = term_sincos/self%nkbz
 
- theta = half*atan2(-term_sincos, term_sin2 - self%eps)
+ ! Line-minimization theta
+ eps = self%enterms(4, ip)
+ theta = half*atan2(-term_sincos, term_sin2 - eps)
 
- ABI_FREE(kpq_map)
-
-end function polstate_get_linemin_param
+end function polstate_get_lm_theta
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/polstate_get_grad_a
+!!****f* m_varpeq/polstate_calc_pcjgrad
 !! NAME
-!!  polstate_get_grad_a
+!!  polstate_calc_pcjgrad
 !!
 !! FUNCTION
+!!  Calculate preconditioned conjugate gradient direction, orthogonal to all
+!!  already optimized polaronic states. The procedure is similar to the one
+!!  described in [Payne et al, Rev. Mod. Phys, 64, 4, 1045-1097 (1992)].
 !!
 !! INPUTS
+!!   ip=Index of a polaronic state.
+!!   ii=Iteration number.
+!!   nstep_ort=Iteration number, after which the orthogonality constraint
+!!     on all PREVIOUS states is lifted.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_get_grad_a(self)
+subroutine polstate_calc_pcjgrad(self, ip, ii, nstep_ort)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip, ii, nstep_ort
+
+!Local variables-------------------------------
+ class(gqk_t), pointer :: gqk
+ integer :: ierr
+ !real(dp) :: eps
+ complex(dp) :: beta, beta_num, beta_den
+!----------------------------------------------------------------------
+
+ gqk => self%gqk
+
+ ! Orthogonalize current gradient to all previous bands
+ if (ii <= nstep_ort) then
+   call self%ort_to_states(self%my_grad, 1, ip-1, tr_flag=self%translate)
+ endif
+
+ ! Precondtion vector
+ self%my_pcgrad(:,:) = self%my_pc(:,:)*self%my_grad(:,:)
+ ! Orthogonalize to all bands
+ if (ii <= nstep_ort) then
+   call self%ort_to_states(self%my_pcgrad, 1, ip-1, tr_flag=self%translate)
+ endif
+ call self%ort_to_states(self%my_pcgrad, ip, ip, tr_flag=.false.)
+
+ ! Conjugate gradient direction
+ if (self%has_prev_grad(ip)) then
+   ! Polak-Ribiere coefficient
+   beta_num = &
+     sum(conjg(self%my_pcgrad(:,:))*(self%my_grad(:,:) - self%my_prev_grad(:,:)))
+   beta_den = sum(conjg(self%my_prev_pcgrad(:,:))*self%my_prev_grad(:,:))
+   call xmpi_sum(beta_num, gqk%kpt_comm%value, ierr)
+   call xmpi_sum(beta_den, gqk%kpt_comm%value, ierr)
+   beta = beta_num / beta_den
+   if (abs(aimag(beta)) < tol12) beta = real(beta)
+
+   self%my_pcjgrad(:,:) = self%my_pcgrad(:,:) + beta*self%my_prev_pcjgrad(:,:)
+ else
+   self%my_pcjgrad(:,:) = self%my_pcgrad(:,:)
+ endif
+
+ ! Save previous gradients
+ self%my_prev_grad(:,:) = self%my_grad(:,:)
+ self%my_prev_pcgrad(:,:) = self%my_pcgrad(:,:)
+ self%my_prev_pcjgrad(:,:) = self%my_pcjgrad(:,:)
+ self%has_prev_grad(ip) = .true.
+
+end subroutine polstate_calc_pcjgrad
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_varpeq/polstate_calc_grad
+!! NAME
+!!  polstate_calc_grad
+!!
+!! FUNCTION
+!!  Calculate the electronic gradient D_nk at the current configuration.
+!!
+!! INPUTS
+!!   ip=Index of a polaronic state.
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine polstate_calc_grad(self, ip)
+
+!Arguments ------------------------------------
+ class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
+ logical :: q_gamma
  integer :: ierr
  integer :: my_iq, my_pert
  integer :: my_ik, ik_ibz, ik_forw, ik_back, ib, jb
+ real(dp) :: eps
  complex(dp) :: a_forw, a_back
  complex(dp) :: g_forw, g_back
- complex(dp) :: b
+ complex(dp) :: b, g0
 !arrays
- integer, allocatable :: qpk_map(:, :), qmk_map(:, :)
- real(dp) :: qpt(3), kpq(3), kmq(3)
- complex(dp), allocatable :: gq_gathered(:, :, :, :)
+ real(dp) :: kpt(3), qpt(3), kpq(3), kmq(3)
+ complex(dp) :: akq(self%gqk%nb), akmq(self%gqk%nb)
+ complex(dp) :: bq(self%gqk%my_npert)
+ complex(dp), allocatable :: gq_gathered(:,:,:,:)
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
 
- ABI_MALLOC(qpk_map, (6, gqk%my_nk))
- ABI_MALLOC(qmk_map, (6, gqk%my_nk))
- ABI_MALLOC(gq_gathered, (gqk%my_npert, gqk%nb, gqk%nb, gqk%glob_nk))
+ !ABI_MALLOC(gq_gathered, (gqk%my_npert, gqk%nb, gqk%nb, gqk%glob_nk))
 
  ! Scattering-dependent part
- self%my_grad_a(:, :) = zero
+ self%my_grad(:, :) = zero
  do my_iq=1,gqk%my_nq
    qpt(:) = self%my_qpts(:, my_iq)
+   bq(:) = self%my_b(:, my_iq, ip)
 
-   !call self%get_mapping('qk', qpt, qpk_map)
-   !call self%get_mapping('qk', -qpt, qmk_map)
+   ! Check if q=\Gamma
+   q_gamma = .false.
+   if (all(abs(qpt) < tol6)) q_gamma = .true.
 
+   ! For this q, gather all the k-distributed matrix elements
    call gqk%gather("q", my_iq, gq_gathered)
 
    do my_ik=1,gqk%my_nk
+     kpt(:) = self%my_kpts(:, my_ik)
 
-     !ik_forw = qpk_map(1, my_ik)
-     !ik_back = qmk_map(1, my_ik)
-
-     kpq(:) = self%my_kpts(:, my_ik) + qpt(:)
-     kmq(:) = self%my_kpts(:, my_ik) - qpt(:)
+     ! Forward scattering
+     ! Find k+q-->k' index in krank_kpts
+     kpq(:) = kpt(:) + qpt(:)
      ik_forw = self%krank_kpts%get_index(kpq)
-     ik_back = self%krank_kpts%get_index(kmq)
-     if ((ik_forw == -1) .and. (ik_back == -1)) cycle
 
-     ! forward scattering
+     ! If erange filter was used in gstore, some transitions are not valid
      if (ik_forw /= -1) then
+       akq(:) = self%a_glob(:, ik_forw)
+
        do ib=1,gqk%nb
+
          do jb=1,gqk%nb
-           a_forw = self%a_glob(jb, ik_forw)
+           a_forw = akq(jb)
 
            do my_pert=1,gqk%my_npert
-             b = self%my_b(my_pert, my_iq)
+             b = bq(my_pert)
+
              g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+             ! Add long-range correction to matrix elements at Gamma
+             g0 = self%my_g0(my_pert)
+             if (q_gamma .and. (ib == jb)) then
+               g_forw = g_forw + g0
+             endif
 
-             self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + a_forw*b*conjg(g_forw)
+             self%my_grad(ib, my_ik) = &
+               self%my_grad(ib, my_ik) + a_forw*b*conjg(g_forw)
            enddo
          enddo
        enddo
-     endif
+     endif ! Forward scattering
 
-     ! backward scattering
+     ! Backward scattering
+     ! Find k-q-->k' index in krank_kpts
+     kmq(:) = kpt(:) - qpt(:)
+     ik_back = self%krank_kpts%get_index(kmq)
+
+     ! If erange filter was used in gstore, some transitions are not valid
      if (ik_back /= -1) then
+       akmq(:) = self%a_glob(:, ik_back)
+
        do ib=1,gqk%nb
+
          do jb=1,gqk%nb
-           a_back = self%a_glob(jb, ik_back)
+           a_back = akmq(jb)
 
            do my_pert=1,gqk%my_npert
-             b = self%my_b(my_pert, my_iq)
-             g_back= gq_gathered(my_pert, ib, jb, ik_back)
+             b = bq(my_pert)
 
-             self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + a_back*conjg(b)*g_back
+             g_back = gq_gathered(my_pert, ib, jb, ik_back)
+             ! Add long-range correction to matrix elements at Gamma
+             g0 = self%my_g0(my_pert)
+             if (q_gamma .and. (ib == jb)) then
+               g_back = g_back + g0
+             endif
+
+             self%my_grad(ib, my_ik) = &
+               self%my_grad(ib, my_ik) + a_back*conjg(b)*g_back
            enddo
          enddo
        enddo
-     endif
-
-     !do ib=1,gqk%nb
-     !  do jb=1,gqk%nb
-     !    a_forw = self%a_glob(jb, ik_forw)
-     !    a_back = self%a_glob(jb, ik_back)
-     !    do my_pert=1,gqk%my_npert
-     !      b = self%my_b(my_pert, my_iq)
-     !      g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
-     !      g_back = gq_gathered(my_pert, ib, jb, ik_back)
-     !      self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + &
-     !        (a_forw*b*conjg(g_forw) + a_back*conjg(b)*g_back)
-     !    enddo
-     !  enddo
-     !enddo
+     endif ! Backward scattering
 
    enddo
+
+   ABI_FREE(gq_gathered)
  enddo
- call xmpi_sum(self%my_grad_a, gqk%qpt_pert_comm%value, ierr)
- self%my_grad_a(:, :) = -two*self%my_grad_a(:, :)/(self%nkbz*self%nqbz)
+ call xmpi_sum(self%my_grad, gqk%qpt_pert_comm%value, ierr)
+ self%my_grad(:, :) = -two/(one*self%nkbz*self%nqbz) * self%my_grad(:, :)
 
  ! Scattering-independent part
+ eps = self%enterms(4, ip)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    do ib=1,gqk%nb
-     self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + &
-       (self%eig(ib, ik_ibz) - self%eps)*self%my_a(ib, my_ik)*two/self%nkbz
+     self%my_grad(ib, my_ik) = self%my_grad(ib, my_ik) + &
+       two/self%nkbz * (self%eig(ib, ik_ibz) - eps) * self%my_a(ib, my_ik, ip)
    enddo
  enddo
 
- ABI_FREE(qpk_map)
- ABI_FREE(qmk_map)
- ABI_FREE(gq_gathered)
+ !ABI_FREE(gq_gathered)
 
-end subroutine polstate_get_grad_a
+end subroutine polstate_calc_grad
 !!***
 
 !----------------------------------------------------------------------
@@ -1747,32 +2550,44 @@ end subroutine polstate_get_grad_a
 !!  polstate_localize
 !!
 !! FUNCTION
+!!  Calculate vibrational coefficients, polaron energy terms and polaron energy
+!!  level at a current state.
 !!
 !! INPUTS
+!!  ip=Index of a polaronic state.
+!!  alpha=Mixing factor.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_localize(self)
+subroutine polstate_localize(self, ip, alpha)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
+ real(dp), intent(in) :: alpha
 
 !----------------------------------------------------------------------
 
- call self%get_b_from_a()
+ ! Calculation of B_qnu requires globally available A_nk
+ call self%gather("a", ip)
+ call self%calc_b_from_a(ip)
 
- self%enel = self%get_enel()
- self%enph = self%get_enph()
- self%enelph = self%get_enelph()
- self%eps = self%enel + self%enelph
+ ! Mixing the previous & current vectors of vibrational coefficients
+ if (self%has_prev_grad(ip)) then
+   self%my_b(:,:, ip) = (one - alpha)*self%my_b(:,:, ip) + alpha*self%my_prev_b(:,:)
+ end if
+ self%my_prev_b(:,:) = self%my_b(:,:, ip)
 
- ! Get gradient
- call self%get_grad_a()
-
- ! Save the bare gradient norm
- self%gradres = self%get_norm('grad_a')
+ ! Electronic term
+ self%enterms(1, ip) = self%get_enel(ip)
+ ! Vibrational term
+ self%enterms(2, ip) = self%get_enph(ip)
+ ! Electron-phonon term
+ self%enterms(3, ip) = self%get_enelph(ip)
+ ! Polaron energy level
+ self%enterms(4, ip) = self%enterms(1, ip) + self%enterms(3, ip)
 
 end subroutine polstate_localize
 !!***
@@ -1784,53 +2599,73 @@ end subroutine polstate_localize
 !!  polstate_get_enelph
 !!
 !! FUNCTION
+!!  Returns the electron-phonon term of the polaron bidning energy at a specified
+!!  polaronic state.
 !!
 !! INPUTS
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
+!!  enph=Electron-phonon term of the polaron binding energy.
 !!
 !! SOURCE
 
-real(dp) function polstate_get_enelph(self) result(enelph)
+real(dp) function polstate_get_enelph(self, ip) result(enelph)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
+ logical :: q_gamma
  integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
- complex(dp) :: a_from, a_forw, g_forw, b
+ complex(dp) :: a_from, a_forw, g_forw, g0, b
 !arrays
- integer, allocatable :: kpq_map(:, :)
- real(dp) :: kpt(3), kpq(3)
+ real(dp) :: kpt(3), qpt(3), kpq(3)
+ complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb), bq(self%gqk%my_npert)
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
- ABI_MALLOC(kpq_map, (6, gqk%my_nq))
 
  enelph = zero
  do my_ik=1,gqk%my_nk
    kpt(:) = self%my_kpts(:, my_ik)
-
-   !call self%get_mapping('kq', kpt, kpq_map)
+   ak(:) = self%my_a(:, my_ik, ip)
 
    do my_iq=1,gqk%my_nq
+     qpt(:) = self%my_qpts(:, my_iq)
 
-     !ik_forw = kpq_map(1, my_iq)
-
-     kpq(:) = kpt(:) + self%my_qpts(:, my_iq)
+     ! Find k+q-->k' index in krank_kpts
+     kpq(:) = kpt(:) + qpt(:)
      ik_forw = self%krank_kpts%get_index(kpq)
+     ! If erange filter was used in gstore, some transitions are not valid
      if (ik_forw == -1) cycle
 
+     ! Check if q=\Gamma
+     q_gamma = .false.
+     if (all(abs(qpt) < tol6)) q_gamma = .true.
+
+     akq(:) = self%a_glob(:, ik_forw)
+     bq(:) = self%my_b(:, my_iq, ip)
+
      do ib=1,gqk%nb
-       a_from = self%my_a(ib, my_ik)
+       a_from = ak(ib)
+
        do jb=1,gqk%nb
-         a_forw = self%a_glob(jb, ik_forw)
+         a_forw = akq(jb)
+
          do my_pert=1,gqk%my_npert
+           b = bq(my_pert)
+
            g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
-           b = self%my_b(my_pert, my_iq)
+           ! Add long-range correction to matrix elements at Gamma
+           g0 = self%my_g0(my_pert)
+           if (q_gamma .and. (ib == jb)) then
+             g_forw = g_forw + g0
+           endif
 
            enelph = enelph + real(a_from*conjg(b)*g_forw*conjg(a_forw))
          enddo
@@ -1840,9 +2675,7 @@ real(dp) function polstate_get_enelph(self) result(enelph)
    enddo
  enddo
  call xmpi_sum(enelph, gqk%comm%value, ierr)
- enelph = -two*enelph/(self%nkbz*self%nqbz)
-
- ABI_FREE(kpq_map)
+ enelph = -two*enelph/(one*self%nkbz*self%nqbz)
 
  end function polstate_get_enelph
 !!***
@@ -1854,17 +2687,22 @@ real(dp) function polstate_get_enelph(self) result(enelph)
 !!  polstate_get_enph
 !!
 !! FUNCTION
+!!  Returns the vibrational term of the polaron bidning energy at a specified
+!!  polaronic state.
 !!
 !! INPUTS
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
+!!  enph=Vibrational term of the polaron binding energy.
 !!
 !! SOURCE
 
-real(dp) function polstate_get_enph(self) result(enph)
+real(dp) function polstate_get_enph(self, ip) result(enph)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
@@ -1876,7 +2714,7 @@ real(dp) function polstate_get_enph(self) result(enph)
  enph = zero
  do my_iq=1,gqk%my_nq
    do my_pert=1,gqk%my_npert
-     enph = enph + gqk%my_wnuq(my_pert, my_iq)*abs(self%my_b(my_pert, my_iq))**2
+     enph = enph + gqk%my_wnuq(my_pert, my_iq)*abs(self%my_b(my_pert, my_iq, ip))**2
    enddo
  enddo
  call xmpi_sum(enph, gqk%qpt_pert_comm%value, ierr)
@@ -1892,17 +2730,22 @@ end function polstate_get_enph
 !!  polstate_get_enel
 !!
 !! FUNCTION
+!!  Returns the electronic term of the polaron bidning energy at a specified
+!!  polaronic state.
 !!
 !! INPUTS
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
+!!  enel=Electronic term of the polaron binding energy.
 !!
 !! SOURCE
 
-real(dp) function polstate_get_enel(self) result(enel)
+real(dp) function polstate_get_enel(self, ip) result(enel)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
@@ -1916,7 +2759,7 @@ real(dp) function polstate_get_enel(self) result(enel)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    do ib=1,gqk%nb
-     enel = enel + self%eig(ib, ik_ibz)*abs(self%my_a(ib, my_ik))**2
+     enel = enel + self%eig(ib, ik_ibz)*abs(self%my_a(ib, my_ik, ip))**2
    enddo
  enddo
  call xmpi_sum(enel, gqk%kpt_comm%value, ierr)
@@ -1927,63 +2770,80 @@ end function polstate_get_enel
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/polstate_get_b_from_a
+!!****f* m_varpeq/polstate_calc_b_from_a
 !! NAME
-!!  polstate_get_b_from_a
+!!  polstate_calc_b_from_a
 !!
 !! FUNCTION
+!!  Calculate vibrational coefficients B_q\nu at the current configuration,
+!!  so the energy gradient wrt B_q\nu is 0.
 !!
 !! INPUTS
+!!   ip=Index of a polaronic state.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_get_b_from_a(self)
+subroutine polstate_calc_b_from_a(self, ip)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
+ logical :: q_gamma
  integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
- complex(dp) :: a_from, a_forw, g_forw, b_tmp
+ real(dp) :: wqnu
+ complex(dp) :: a_from, a_forw, g_forw, g0, b_tmp
 !arrays
- integer, allocatable :: qpk_map(:, :)
  real(dp) :: qpt(3), kpq(3)
+ complex(dp) :: ak(self%gqk%nb), akq(self%gqk%nb)
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
- ABI_MALLOC(qpk_map, (6, gqk%my_nk))
 
  do my_iq=1,gqk%my_nq
    qpt(:) = self%my_qpts(:, my_iq)
-
-   !call self%get_mapping('qk', qpt, qpk_map)
+   ! Check if q=\Gamma
+   q_gamma = .false.
+   if (all(abs(qpt) < tol6)) q_gamma = .true.
 
    do my_pert=1,gqk%my_npert
-
-     if (gqk%my_wnuq(my_pert, my_iq) == zero) then
-       self%my_b(my_pert, my_iq) = zero
+     wqnu = gqk%my_wnuq(my_pert, my_iq)
+     ! Skip acoustic modes at Gamma
+     if (abs(wqnu) < tol12) then
+       self%my_b(my_pert, my_iq, ip) = zero
        cycle
      endif
+     g0 = self%my_g0(my_pert)
 
+     ! For this q and perurbation, calculate B_q\nu sum
      b_tmp = zero
      do my_ik=1,self%gqk%my_nk
-
-       !ik_forw = qpk_map(1, my_ik)
-
+       ! Find k+q-->k' index in krank_kpts
        kpq(:) = qpt(:) + self%my_kpts(:, my_ik)
        ik_forw = self%krank_kpts%get_index(kpq)
+       ! If erange filter was used in gstore, some transitions are not valid
        if (ik_forw == -1) cycle
 
+       ak(:) = self%my_a(:, my_ik, ip)
+       akq(:) = self%a_glob(:, ik_forw)
+
        do ib=1,gqk%nb
-         a_from = self%my_a(ib, my_ik)
+         a_from = ak(ib)
+
          do jb=1,gqk%nb
-           a_forw = self%a_glob(jb, ik_forw)
+           a_forw = akq(jb)
+
            g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+           ! Add long-range correction to matrix elements at Gamma
+           if (q_gamma .and. (ib == jb)) then
+             g_forw = g_forw + g0
+           endif
 
            b_tmp = b_tmp + a_from*g_forw*conjg(a_forw)
          enddo
@@ -1991,56 +2851,11 @@ subroutine polstate_get_b_from_a(self)
      enddo
      call xmpi_sum(b_tmp, gqk%kpt_comm%value, ierr)
 
-     self%my_b(my_pert, my_iq) = b_tmp/(self%nkbz*gqk%my_wnuq(my_pert, my_iq))
+     self%my_b(my_pert, my_iq, ip) = b_tmp/(self%nkbz * wqnu)
    enddo
  enddo
 
- ABI_FREE(qpk_map)
-
-end subroutine polstate_get_b_from_a
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_varpeq/polstate_cut_a
-!! NAME
-!!  polstate_cut_a
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine polstate_cut_a(self, erange)
-
-!Arguments ------------------------------------
-!scalars
- class(polstate_t), intent(inout) :: self
-!arrays
- real(dp), intent(in) :: erange
-
-!Local variables-------------------------------
-!scalars
- class(gqk_t), pointer :: gqk
- integer :: my_ik, ik_ibz, ib
- real(dp) :: eig
-
-!----------------------------------------------------------------------
-
- gqk => self%gqk
-
- do my_ik=1,gqk%my_nk
-   ik_ibz = gqk%my_k2ibz(1, my_ik)
-   do ib=1,gqk%nb
-     eig = self%eig(ib, ik_ibz)
-     if (eig > erange) self%my_a(ib, my_ik) = zero
-   enddo
- enddo
-
-end subroutine polstate_cut_a
+end subroutine polstate_calc_b_from_a
 !!***
 
 !----------------------------------------------------------------------
@@ -2050,26 +2865,28 @@ end subroutine polstate_cut_a
 !!  polstate_load_a
 !!
 !! FUNCTION
+!!  Load the initial vector of electronic coefficients A_nk from source.
 !!
 !! INPUTS
+!!  a_src(self%gqk%nb, self%gqk%glob_nk)=Global A_nk array to be loaded.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_load_a(self, varpeq_a)
+subroutine polstate_load_a(self, a_src, ip)
 
 !Arguments ------------------------------------
 !scalars
  class(polstate_t), intent(inout) :: self
+ integer, intent(in) :: ip
 !arrays
- real(dp), intent(in) :: varpeq_a(:,:,:)
+ complex(dp), intent(in) :: a_src(self%gqk%nb, self%gqk%glob_nk)
 
 !Local variables-------------------------------
-!scalars
  class(gqk_t), pointer :: gqk
  integer :: my_ik, ik_glob, ib
- complex(dp) :: ank
+ !complex(dp) :: ank
 
 !----------------------------------------------------------------------
 
@@ -2078,66 +2895,58 @@ subroutine polstate_load_a(self, varpeq_a)
  do my_ik=1,gqk%my_nk
    ik_glob = gqk%my_kstart + my_ik - 1
    do ib=1,gqk%nb
-     ! FIXME: find a better way to represnet vpq%a_spin so I don't have to treat Re & Im part separately
-     ank = varpeq_a(1, ib, ik_glob) + j_dpc*varpeq_a(2, ib, ik_glob)
-     self%my_a(ib, my_ik) = ank
+     self%my_a(ib, my_ik, ip) = a_src(ib, ik_glob)
    enddo
  enddo
 
 end subroutine polstate_load_a
 !!***
 
-!----------------------------------------------------------------------
+
 
 !!****f* m_varpeq/polstate_seed_a
 !! NAME
 !!  polstate_seed_a
 !!
 !! FUNCTION
+!!  Specify initial vector of electronic coefficients A_nk at runtime.
 !!
 !! INPUTS
+!!  mode=Select the initialization type. Possible options:
+!!    "gau_energy" ---> Gaussian shape based on the energy of electronic states;
+!!    "gau_length" ---> Gaussian shape based on the polaron localization length;
+!!    "even" ---> equal contribution from each electronic state;
+!!    "random" ---> random initalization.
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_seed_a(self, mode, gau_params)
+subroutine polstate_seed_a(self, mode, ip)
 
 !Arguments ------------------------------------
-!scalars
  class(polstate_t), intent(inout) :: self
  character(len=*), intent(in) :: mode
-!arrays
- real(dp), optional, intent(in) :: gau_params(2)
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
-!scalars
  class(gqk_t), pointer :: gqk
  integer :: ierr
- real(dp), allocatable :: re_rand(:,:), im_rand(:,:)
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
 
  select case(mode)
- case ("gaussian")
-   ABI_CHECK(present(gau_params), "polstate_seed_a: missing gau_params argument")
-   call gaussian_(gau_params(1), gau_params(2))
- case ("even")
-   self%my_a(:,:) = one
+ case ("gau_energy")
+   call gau_energy_()
+ case ("gau_length")
+   call gau_length_()
  case ("random")
-   ABI_MALLOC(re_rand, (gqk%nb, gqk%my_nk))
-   ABI_MALLOC(im_rand, (gqk%nb, gqk%my_nk))
-
-   call random_number(re_rand)
-   call random_number(im_rand)
-   self%my_a(:,:) = re_rand(:,:) + j_dpc*im_rand(:,:)
-
-   call xmpi_sum(self%my_a, gqk%qpt_pert_comm%value, ierr)
-
-   ABI_FREE(re_rand)
-   ABI_FREE(im_rand)
+   call random_()
+ case ("even")
+   self%my_a(:,:,ip) = one + j_dpc*one
  case default
    ABI_ERROR(sjoin("polstate_seed_a, unsuported mode: ", mode))
  end select
@@ -2145,51 +2954,76 @@ subroutine polstate_seed_a(self, mode, gau_params)
 !----------------------------------------------------------------------
 
  contains
- subroutine gaussian_(mu, sigma2)
-
-  real(dp), intent(in) :: mu, sigma2
-  character(len=5000) :: msg
+ subroutine gau_energy_()
+  real(dp) :: mu, sigma
   integer :: my_ik, ik_ibz, ib
   real(dp) :: eig
-
- !----------------------------------------------------------------------
-
-  msg = sjoin("Seeding initial electronic vector with gaussian: &
-    variance parameter sigma^2 has to be > 0, but got ", ftoa(sigma2))
-  ABI_CHECK(sigma2 > 0, msg)
-
+  mu = self%gpr_energy(1); sigma = self%gpr_energy(2)
+  ABI_CHECK(sigma /= 0, "gpr_energy: standard deviation must be non-zero")
   do my_ik=1,gqk%my_nk
     ik_ibz = gqk%my_k2ibz(1, my_ik)
     do ib=1,gqk%nb
       eig = self%eig(ib, ik_ibz)
-      self%my_a(ib, my_ik) = exp(-(eig - mu)**2/(2*sigma2))
+      self%my_a(ib, my_ik, ip) = exp(-half*(eig - mu)**2/sigma**2)
     enddo
   enddo
+ end subroutine gau_energy_
 
- end subroutine gaussian_
+ subroutine gau_length_()
+  integer :: my_ik, ib
+  real(dp) :: kpt(3)
+  do my_ik=1,gqk%my_nk
+    kpt(:) = self%my_kpts(:, my_ik)
+    do ib=1,gqk%nb
+      self%my_a(ib, my_ik, ip) = exp(-sum((kpt(:)*self%gpr_length(:))**2))
+    enddo
+  enddo
+ end subroutine gau_length_
+
+ subroutine random_()
+   real(dp), allocatable :: re_rand(:,:), im_rand(:,:)
+   ABI_MALLOC(re_rand, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(im_rand, (gqk%nb, gqk%my_nk))
+   call random_number(re_rand)
+   call random_number(im_rand)
+   self%my_a(:,:,ip) = re_rand(:,:) + j_dpc*im_rand(:,:)
+   call xmpi_sum(self%my_a(:,:,ip), gqk%qpt_pert_comm%value, ierr)
+   ABI_FREE(re_rand)
+   ABI_FREE(im_rand)
+ end subroutine random_
 
 end subroutine polstate_seed_a
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/polstate_get_norm
+!!****f* m_varpeq/polstate_get_sqnorm
 !! NAME
-!!  polstate_get_norm
+!!  polstate_get_sqnorm
 !!
 !! FUNCTION
+!!  Helper function that calculates squared L^2-norm of an MPI-distributed
+!!  array at current state.
 !!
 !! INPUTS
+!!  mode=Select which array to gather. Possible options:
+!!    "a" ---> A_nk coefficients for this state;
+!!    "b" ---> B_q\nu coefficients for this state;
+!!    "grad" ---> current gradient;
+!!    "pcjgrad" ---> current preconditioned conjugate gradient direction.
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
+!!   Squared L^2-norm of the specified array.
 !!
 !! SOURCE
 
-real(dp) function polstate_get_norm(self, mode) result(norm)
+real(dp) function polstate_get_sqnorm(self, mode, ip) result(sqnorm)
 
 !Arguments ------------------------------------
  class(polstate_t), target, intent(inout) :: self
  character(len=*), intent(in) :: mode
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
@@ -2199,37 +3033,29 @@ real(dp) function polstate_get_norm(self, mode) result(norm)
  gqk => self%gqk
  select case(mode)
  case ("a")
-   norm = get_norm_(self%my_a, gqk%kpt_comm%value)
- case ("grad_a")
-   norm = get_norm_(self%my_grad_a, gqk%kpt_comm%value)
- case ("orth_a")
-   norm = get_norm_(self%orth_a, gqk%kpt_comm%value)
+   sqnorm = get_sqnorm_(self%my_a(:,:,ip), gqk%kpt_comm%value)
  case ("b")
-   norm = get_norm_(self%my_b, gqk%qpt_comm%value)
+   sqnorm = get_sqnorm_(self%my_b(:,:,ip), gqk%qpt_comm%value)
+ case ("grad")
+   sqnorm = get_sqnorm_(self%my_grad, gqk%kpt_comm%value)
+ case ("pcjgrad")
+   sqnorm = get_sqnorm_(self%my_pcjgrad, gqk%kpt_comm%value)
  case default
-   ABI_ERROR(sjoin("polstate_get_norm, unsuported mode: ", mode))
+   ABI_ERROR(sjoin("polstate_get_sqnorm, unsuported mode: ", mode))
  end select
 
 !----------------------------------------------------------------------
 
  contains
- real(dp) function get_norm_(my_arr, comm) result(norm)
-
+ real(dp) function get_sqnorm_(my_arr, comm) result(sqnorm)
   integer, intent(in) :: comm
   complex(dp), intent(in) :: my_arr(:, :)
-
   integer :: ierr
-  real(dp) :: norm2_tmp
+  sqnorm = sum(abs(my_arr(:,:))**2)
+  call xmpi_sum(sqnorm, comm, ierr)
+ end function get_sqnorm_
 
- !----------------------------------------------------------------------
-
-  norm2_tmp = sum(abs(my_arr(:,:))**2)
-  call xmpi_sum(norm2_tmp, comm, ierr)
-  norm = sqrt(norm2_tmp)
-
- end function get_norm_
-
-end function polstate_get_norm
+end function polstate_get_sqnorm
 !!***
 
 !----------------------------------------------------------------------
@@ -2239,32 +3065,38 @@ end function polstate_get_norm
 !!  polstate_gather
 !!
 !! FUNCTION
+!!  Helper function that gathers a MPI-distributed array from the datatype
+!!  into a global one.
 !!
 !! INPUTS
+!!  mode=Select which array to gather. Possible options:
+!!    "a" ---> my_a(:,:,ip) -- array of A_nk coefficients for this state;
+!!    "pcjgrad" ---> my_pcjgrad(:,:) -- gradient.
+!!  ip=Index of a polaronic state.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine polstate_gather(self, mode)
+subroutine polstate_gather(self, mode, ip)
 
 !Arguments ------------------------------------
  class(polstate_t), target, intent(inout) :: self
  character(len=*),intent(in) :: mode
+ integer, intent(in) :: ip
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
-
 !----------------------------------------------------------------------
 
  gqk => self%gqk
  select case(mode)
  case ("a")
-   call gather_(self%my_a, gqk%my_nk, gqk%my_kstart, self%a_glob, gqk%kpt_comm%value)
- case ("grad_a")
-   call gather_(self%my_grad_a, gqk%my_nk, gqk%my_kstart, self%grad_a_glob, gqk%kpt_comm%value)
- case ("b")
-   call gather_(self%my_b, gqk%my_nq, gqk%my_qstart, self%b_glob, gqk%qpt_comm%value)
+   call gather_(self%my_a(:,:,ip), gqk%my_nk, gqk%my_kstart, self%a_glob, &
+     gqk%kpt_comm%value)
+ case ("pcjgrad")
+   call gather_(self%my_pcjgrad, gqk%my_nk, gqk%my_kstart, self%pcjgrad_glob, &
+     gqk%kpt_comm%value)
  case default
    ABI_ERROR(sjoin("polstate_gather, unsuported mode: ", mode))
  end select
@@ -2296,83 +3128,22 @@ end subroutine polstate_gather
 
 !----------------------------------------------------------------------
 
-!!****f* m_varpeq/polstate_get_mapping
-!! NAME
-!!  polstate_get_mapping
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine polstate_get_mapping(self, mode, kpt, map)
-
-!Arguments ------------------------------------
-!scalars
- class(polstate_t), target, intent(inout) :: self
- character(len=*),intent(in) :: mode
-!arrays
- integer, intent(out) :: map(:, :)
- real(dp), intent(in) :: kpt(3)
-
-!Local variables-------------------------------
-!scalars
- class(gqk_t), pointer :: gqk
-
-!----------------------------------------------------------------------
-
- gqk => self%gqk
- select case(mode)
- case ("qk")
-   call get_mapping_("symrel", gqk%my_nk, self%my_kpts, self%krank_kpts)
- case ("kq")
-   call get_mapping_("symrel", gqk%my_nq, self%my_qpts, self%krank_kpts)
- case default
-   ABI_ERROR(sjoin("polstate_get_mapping, unsuported mode: ", mode))
- end select
-
-!----------------------------------------------------------------------
-
- contains
- subroutine get_mapping_(symmode, from_nk, from_kpts, to_krank)
-
-  character(len=*),intent(in) :: symmode
-  type(krank_t), intent(inout) :: to_krank
-  integer, intent(in) :: from_nk
-  real(dp), intent(in) :: from_kpts(3, from_nk)
-
-  integer :: ierr, kptopt ! timrev
-
- !----------------------------------------------------------------------
-
-  ! timrev = 0
-  kptopt=4
-  ierr = kpts_map(symmode, kptopt, self%cryst, to_krank, from_nk, from_kpts, &
-    map, qpt=kpt)
-
-  if (ierr /= 0) then
-     ABI_ERROR(sjoin("polstate_get_mapping: cannot map ", mode, "with point ", ktoa(kpt)))
-   endif
-
- end subroutine get_mapping_
-
-end subroutine polstate_get_mapping
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_varpeq/polstate_get_krank_glob
 !! NAME
 !!  polstate_get_krank_glob
 !!
 !! FUNCTION
+!!  Helper function that computes krank objects for the full BZ q/k-meshes.
 !!
 !! INPUTS
+!!  mode=Select reciprocal space for which krank is computed. Possible options:
+!!    "k" ---> k-space;
+!!    "q" ---> q-space.
+!!  kptrlatt(3,3)=Lattice specifiyng the grid.
 !!
 !! OUTPUT
+!!  krank<krank_t>=Object proiding mapping between reciprocal space points and
+!!    their indices.
 !!
 !! SOURCE
 
@@ -2407,7 +3178,8 @@ type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) result(kran
 !----------------------------------------------------------------------
 
  contains
- type(krank_t) function get_krank_glob_(my_kpts, my_nk, my_kstart, glob_nk, comm) result(krank_kpts)
+ type(krank_t) function get_krank_glob_(my_kpts, my_nk, my_kstart, glob_nk, &
+     comm) result(krank_kpts)
 
   integer, intent(in) :: comm, my_nk, my_kstart, glob_nk
   real(dp), intent(in) :: my_kpts(3, my_nk)
@@ -2425,7 +3197,8 @@ type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) result(kran
   enddo
   call xmpi_sum(kpts, comm, ierr)
 
-  krank_tmp = krank_from_kptrlatt(glob_nk, kpts, kptrlatt, compute_invrank=.True.)
+  krank_tmp = krank_from_kptrlatt(glob_nk, kpts, kptrlatt, &
+    compute_invrank=.True.)
   krank_kpts = krank_tmp%copy()
   call krank_tmp%free()
 
@@ -2468,41 +3241,46 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0, ndat1 = 1
- integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart ! nfft, nfftf, mgfft, mgfftf, n1, n2, n3, n4, n5, n6,
- integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, cnt, nproc, num_writes, ii
+ integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart, ir1, ir2, ir3, wp1, wp2, wp3, ds_nfft, idir
+ integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, cnt, nproc, num_writes, ii, uc_nfft
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
- integer :: nqibz, iq, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz ! icell,
+ integer :: nqibz, iq, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz, ip, ds_iscale
  logical :: isirr_k, isirr_q, have_scell_q, use_displaced_scell
- real(dp) :: cpu_all, wall_all, gflops_all, spread
+ real(dp) :: cpu_all, wall_all, gflops_all, spread, kdotr
+ real(dp) :: psign
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(varpeq_t) :: vpq
  type(wfd_t) :: wfd
  type(supercell_type), target :: scell_q, scell_k
  type(krank_t) :: krank_ibz, qrank_ibz
- complex(dp) :: a_nk, bstar_qnu, cphase, c3tmp(3)
+ complex(dp) :: a_nk, bstar_qnu, cphase, cphase_tr, c3tmp(3)
+ complex(gwpc) :: c123, c23, c3
 !arrays
- integer :: sc_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
+ integer :: sc_ngfft(18), ds_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
  integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
- integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), sc2uc(:), gbound_k(:,:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), gbound_k(:,:)
  real(dp),parameter :: origin0(3) = zero
  real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3), center_cart(3)
- real(dp),allocatable :: scred(:,:), kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rho(:), qibz(:,:)
+ real(dp),allocatable :: kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rhor(:), qibz(:,:)
  real(dp),allocatable :: pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)  !displ_red_qbz(:,:,:,:), displ_cart_qibz(:,:,:,:),
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:) !, pheigvec_cart_qbz(:,:,:,:)
- real(dp),allocatable :: sc_displ_cart_re(:,:,:), sc_displ_cart_im(:,:,:)
+ real(dp),allocatable :: sc_displ_cart_re(:,:,:,:), sc_displ_cart_im(:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
- complex(gwpc),allocatable :: ur_k(:), pol_wf(:,:), ceikr(:)
+ complex(gwpc),allocatable :: ur_k(:,:), ds_ur_k(:,:), pol_wfr(:,:,:), sc_ceikr_1d(:,:)
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
  ! Read A_nk and B_qnu and other useful tables from file
- call vpq%ncread(dtfil%filvarpeqin, comm, keep_open=.False.)
+ call vpq%ncread(dtfil%filvpqin, comm, keep_open=.False.)
  !call wrtout(std_out, " Reading done")
+
+ psign = 1
+ if (vpq%pkind == "hole") psign = -1
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -2553,14 +3331,13 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
    call scell_q%init(cryst%natom, qptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
-   ABI_CALLOC(sc_displ_cart_re, (3, scell_q%natom, nsppol))
-   ABI_CALLOC(sc_displ_cart_im, (3, scell_q%natom, nsppol))
+   ABI_CALLOC(sc_displ_cart_re, (3, scell_q%natom, vpq%nstates, nsppol))
+   ABI_CALLOC(sc_displ_cart_im, (3, scell_q%natom, vpq%nstates, nsppol))
 
    cnt = 0
    do spin=1,nsppol
      do iq=1,vpq%nq_spin(spin)
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
-
        qq = vpq%qpts_spin(:, iq, spin)
        ! Note symrec here
        if (kpts_map("symrec", qptopt, cryst, qrank_ibz, 1, qq, mapl_qq) /= 0) then
@@ -2573,7 +3350,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        !      phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
        !
        isirr_q = (isym_q == 1 .and. trev_q == 0)
-       qq_ibz = qibz(:, iq_ibz); !if (all(abs(qq_ibz) < tol6)) cycle
+       qq_ibz = qibz(:, iq_ibz)
+       !if (all(abs(qq_ibz) < tol6)) cycle
        pheigvec_qibz = pheigvec_cart_ibz(:,:,:,:,iq_ibz)
 
        if (isirr_q) then
@@ -2586,17 +3364,25 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz)
        end if
 
+       ! Phase due to the primitive translation (default: 0)
+       cphase_tr = exp(+j_dpc * two_pi * dot_product(qq, dtset%vpq_trvec))
+
        do sc_iat=1, scell_q%natom
          uc_iat = scell_q%atom_indexing(sc_iat)
          ! Compute phase e^{iq.R}
          cphase = exp(+j_dpc * two_pi * dot_product(qq, scell_q%uc_indexing(:, sc_iat)))
-         ! Summing over ph modes.
-         do nu=1,natom3
-           bstar_qnu = conjg(vpq%b_spin(1, nu, iq, spin) + j_dpc * vpq%b_spin(2, nu, iq, spin))
-           c3tmp = (displ_cart_qbz(1,:,uc_iat,nu) + j_dpc * displ_cart_qbz(2,:,uc_iat,nu)) * bstar_qnu * cphase
-           sc_displ_cart_re(:,sc_iat,spin) = sc_displ_cart_re(:,sc_iat,spin) + real(c3tmp)
-           sc_displ_cart_im(:,sc_iat,spin) = sc_displ_cart_im(:,sc_iat,spin) + aimag(c3tmp) ! This to check if the imag part is zero.
-         end do
+         do ip=1,vpq%nstates
+           ! Summing over ph modes.
+           do nu=1,natom3
+             ! skip acoustic modes at Gamma
+             if (abs(phfreqs_ibz(nu, iq_ibz)) < tol12) cycle
+
+             bstar_qnu = conjg(vpq%b_spin(nu, iq, ip, spin)) * cphase_tr / sqrt(phfreqs_ibz(nu, iq_ibz))
+             c3tmp = (displ_cart_qbz(1,:,uc_iat,nu) + j_dpc * displ_cart_qbz(2,:,uc_iat,nu)) * bstar_qnu * cphase
+             sc_displ_cart_re(:,sc_iat,ip,spin) = sc_displ_cart_re(:,sc_iat,ip,spin) + real(c3tmp)
+             sc_displ_cart_im(:,sc_iat,ip,spin) = sc_displ_cart_im(:,sc_iat,ip,spin) + aimag(c3tmp) ! This to check if the imag part is zero.
+           end do
+         end do ! ip
        end do ! sc_iat
 
      end do ! iq
@@ -2612,28 +3398,30 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
    call xmpi_sum_master(sc_displ_cart_re, master, comm, ierr)
    call xmpi_sum_master(sc_displ_cart_im, master, comm, ierr)
-   sc_displ_cart_re = -sqrt2 * sc_displ_cart_re / nqbz
-   sc_displ_cart_im = -sqrt2 * sc_displ_cart_im / nqbz
+   sc_displ_cart_re = -psign * sqrt2 * sc_displ_cart_re / nqbz
+   sc_displ_cart_im = -psign * sqrt2 * sc_displ_cart_im / nqbz
 
    ! Write polaron-induced displacements in XSF format.
    if (my_rank == master) then
      ! Handle spin-polarized case by writing two XSF files.
      do spin=1,nsppol
-       !write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, ": 1/N_q \sum_qnu |B_qnu|^2 = ", sum(vpq%b_spin(:,:,:, spin) ** 2) / nqbz
-       !call wrtout(units, msg)
-       write(msg, "(a,i0,a,es16.6)") " For spin: ", spin, ": maxval(abs(sc_displ_cart_re)): ", maxval(abs(sc_displ_cart_re(:,:,spin)))
-       call wrtout(units, msg)
-       write(msg, "(a,i0,a,es16.6)") " For spin: ", spin, ": maxval(abs(sc_displ_cart_im)): ", maxval(abs(sc_displ_cart_im(:,:,spin)))
-       call wrtout(units, msg)
+       ! Handle multiple polaronic states for each spin.
+       do ip=1,vpq%nstates
+         write(msg, "(2(a,i0),a,es16.6)") &
+           " For spin: ", spin, ": pstate: ", ip, ": maxval(abs(sc_displ_cart_re)): ", maxval(abs(sc_displ_cart_re(:,:,ip,spin)))
+         call wrtout(units, msg)
+         write(msg, "(2(a,i0),a,es16.6)") &
+           " For spin: ", spin, ": pstate: ", ip, ": maxval(abs(sc_displ_cart_im)): ", maxval(abs(sc_displ_cart_im(:,:,ip,spin)))
+         call wrtout(units, msg)
 
-       ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
-       !do sc_iat=1,scell_q%natom; write(std_out, *) sc_displ_cart_re(:,sc_iat); end do
-       scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,spin)
+         ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
+         scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,ip,spin)
 
-       path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL_VECTORS.xsf")
-       if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL_VECTORS.xsf")
-       call wrtout(units, sjoin(" Writing displacement vectors to:", path))
-       call scell_q%write_xsf(path)
+         path = strcat(dtfil%filnam_ds(4), "_pstate_", itoa(ip), "_POLARON_DISPL_VECTORS.xsf")
+         if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), strcat("_spin_", itoa(spin)), "_pstate_", itoa(ip), "_POLARON_DISPL_VECTORS.xsf")
+         call wrtout(units, sjoin(" Writing displacement vectors to:", path))
+         call scell_q%write_xsf(path)
+       end do
      end do
    end if
 
@@ -2679,10 +3467,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call wfd%print(header="Wavefunctions for varpeq_plot")
+ call wfd%print([std_out], header="Wavefunctions for varpeq_plot")
 
  if (dtset%boxcutmin >= two) then
-   call wrtout(std_out, " To reduce the size of the FFT mesh and the size of the XSF file, reduce boxcutmin from 2 to e.g. 1.1")
+   call wrtout(std_out, " To decrease the size of the FFT mesh and the size of the XSF file, reduce boxcutmin from 2 to e.g. 1.1")
  end if
 
  ABI_FREE(nband)
@@ -2705,25 +3493,47 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
  gmax = 2*gmax + 1
  call ngfft_seq(work_ngfft, gmax)
- write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+ !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
  call wrtout(std_out, sjoin(" Building supercell from ngkpt:", ltoa(vpq%ngkpt)))
- ! (note xyz_order)
+ ! note xyz_order="xyz"
  call kptrlatt_from_ngkpt(vpq%ngkpt, kptrlatt_)
  call scell_k%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
- nkbz = product(vpq%ngkpt)
- call supercell_fft(vpq%ngkpt, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
- ABI_FREE(scred)
+ ! There are three meshes.
+ ! ngfft: mesh in the unit cell used to compute u(r) via FFT
+ ! ds_ngfft: coarse mesh used to downsample u(r). Note ngfft(1:3)/ds_ngfft(1:3) = ds_iscale
+ ! sc_ngfft: mesh in the real space supercell computed as ds_ngfft * vqp%ngkpt
+ !           the polaron wavefunction is defined on this mesh.
+
+ ds_iscale = dtset%vpq_mesh_fact
+ ds_ngfft = ngfft
+ ds_ngfft(1:3) = ngfft(1:3) / ds_iscale
+ ABI_CHECK(all(ds_ngfft(1:6) > 0), "ds_iscale too large and ds_ngfft == 0")
+ ds_ngfft(4:6) = ds_ngfft(4:6)     ! No augmentation
+ ds_nfft =  product(ds_ngfft(1:3)) ! Total number of points in the supercell
+
+ sc_ngfft(1:3) = vpq%ngkpt(1:3) * ds_ngfft(1:3)
+ sc_ngfft(4:6) = sc_ngfft(1:3)    ! No augmentation
+ sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the supercell
 
  call wrtout(std_out, " Computing polaron wavefunction in the real-space supercell...")
+ call wrtout(std_out, sjoin(" Using vpq_mesh_fact:", itoa(ds_iscale)))
+ call wrtout(std_out, sjoin(" Memory required by pol_wfr:", &
+             ftoa(two*sc_nfft*nspinor*vpq%nstates*nsppol*storage_size(one)/eight*b2Mb), " (Mb) <<< MEM"))
 
+ nkbz = product(vpq%ngkpt)
+ uc_nfft = wfd%nfft
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))
- ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
- ABI_MALLOC(ceikr, (sc_nfft*nspinor))
- ABI_CALLOC(pol_wf, (sc_nfft*nspinor, nsppol)) ! Init output with zeros.
+ ABI_MALLOC(ur_k, (uc_nfft*nspinor, ndat1))
+ if (ds_iscale /= 1) then
+   ABI_MALLOC(ds_ur_k, (ds_nfft*nspinor, ndat1))
+ end if
+
+ ABI_CALLOC(pol_wfr, (sc_nfft*nspinor, vpq%nstates, nsppol)) ! Init output with zeros.
+ ABI_MALLOC(sc_ceikr_1d, (maxval(sc_ngfft(1:3)), 3))
 
  cnt = 0
  do spin=1,nsppol
@@ -2743,29 +3553,87 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      kk_ibz = ebands%kptns(:, ik_ibz)
      istwf_k_ibz = wfd%istwfk(ik_ibz); npw_kq_ibz = wfd%npwarr(ik_ibz)
 
-     ! Get npw_k, kg_k for k
+     ! Get npw_k, kg_k for this k-point.
      call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk, ik_ibz, isirr_k, dtset%nloalg, &  ! in
                               istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)                ! out
 
      ABI_MALLOC(ug_k, (2, npw_k*nspinor))
      kk_sc = kk * vpq%ngkpt
-     call calc_ceikr(kk_sc, sc_ngfft, sc_nfft, nspinor, ceikr)
 
+     ! Precompute 1d phases e^{ik_j R_j} on the supercell.
+     do idir=1,3
+       do ii=0,sc_ngfft(idir) - 1
+         kdotr = two_pi * (kk_sc(idir) * (ii / dble(sc_ngfft(idir))))
+         sc_ceikr_1d(ii+1, idir) = dcmplx(cos(kdotr), sin(kdotr))
+       end do
+     end do
+
+     ! Phase due to the primitive translation (default: 0)
+     cphase_tr = exp(-j_dpc * two_pi * dot_product(kk, dtset%vpq_trvec))
+
+     ! Sum over bands
      do ib=1,vpq%nb_spin(spin)
        band = bstart + ib - 1
+       ! Get periodic part on the real space FFT mesh in ur_k
        call wfd%rotate_cg(band, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                           cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
-       !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k) ** 2) / wfd%nfft
+       !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k(:,1)) ** 2) / uc_nfft
 
-       a_nk = vpq%a_spin(1, ib, ik, spin) + j_dpc * vpq%a_spin(2, ib, ik, spin)
-       do spinor=1,nspinor
-         spad = (spinor - 1) * sc_nfft
-         do ir=1,sc_nfft
-           uc_idx = sc2uc(ir) + (spinor - 1) * wfd%nfft
-           irsp = ir + spad
-           pol_wf(irsp, spin) = pol_wf(irsp, spin) + a_nk * ur_k(uc_idx) * ceikr(irsp)
+       ! Use linear interpolate to downsample from ngfft to ds_ngfft.
+       if (ds_iscale /= 1) then
+         call interpolate_ur(ngfft, nspinor*ndat1, ur_k, ds_ngfft, ds_ur_k)
+         !print *, "int_omega dr |ds_u(r)}^2:", sum(abs(ds_ur_k(:,1)) ** 2) / product(ds_ngfft(1:3))
+       end if
+
+       ! Accumulate for each polaron state.
+       do ip=1,vpq%nstates
+         a_nk = vpq%a_spin(ib, ik, ip, spin) * cphase_tr
+         do spinor=1,nspinor
+           spad = (spinor - 1) * sc_nfft
+
+           if (ds_iscale == 1) then
+               ! Loop over the points in the R supercell without downsampling.
+               ir = 0
+               do ir3=0,sc_ngfft(3)-1
+                 ! The FFT index of the point wrapped into the unit cell.
+                 wp3 = modulo(ir3, ngfft(3))
+                 c3 = sc_ceikr_1d(ir3+1, 3)
+                 do ir2=0,sc_ngfft(2)-1
+                   wp2 = modulo(ir2, ngfft(2))
+                   c23 = sc_ceikr_1d(ir2+1, 2) * c3
+                   do ir1=0,sc_ngfft(1)-1
+                     wp1 = modulo(ir1, ngfft(1))
+                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
+                     uc_idx = 1 + wp1 + wp2*ngfft(1) + wp3*ngfft(1)*ngfft(2)
+                     ir = ir + 1; irsp = ir + spad
+                     pol_wfr(irsp, ip, spin) = pol_wfr(irsp, ip, spin) + a_nk * ur_k(uc_idx,1) * c123
+                   end do
+                 end do
+               end do
+            else
+               ! Loop over the points in the supercell with downsampling
+               ir = 0
+               do ir3=0,sc_ngfft(3)-1
+                 ! The FFT index of the point wrapped into the unit cell.
+                 wp3 = modulo(ir3, ds_ngfft(3))
+                 c3 = sc_ceikr_1d(ir3+1, 3)
+                 do ir2=0,sc_ngfft(2)-1
+                   wp2 = modulo(ir2, ds_ngfft(2))
+                   c23 = sc_ceikr_1d(ir2+1, 2) * c3
+                   do ir1=0,sc_ngfft(1)-1
+                     wp1 = modulo(ir1, ds_ngfft(1))
+                     c123 = sc_ceikr_1d(ir1+1, 1) * c23
+                     uc_idx = 1 + wp1 + wp2*ds_ngfft(1) + wp3*ds_ngfft(1)*ds_ngfft(2)
+                     ir = ir + 1; irsp = ir + spad
+                     ! Note the use of the downsampled ds_ur_k here.
+                     pol_wfr(irsp, ip, spin) = pol_wfr(irsp, ip, spin) + a_nk * ds_ur_k(uc_idx,1) * c123
+                   end do
+                 end do
+               end do
+            end if
+
          end do
-       end do
+       end do ! ip
      end do ! ib
 
      ABI_FREE(ug_k)
@@ -2776,100 +3644,106 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ABI_FREE(kg_k)
  ABI_FREE(work)
  ABI_FREE(ur_k)
+ ABI_SFREE(ds_ur_k)
  ABI_FREE(gbound_k)
- ABI_FREE(sc2uc)
- ABI_FREE(ceikr)
+ ABI_FREE(sc_ceikr_1d)
  call krank_ibz%free()
 
- ! Collect pol_wf on the master rank who's gonna write the polaron density in XSF format.
- call xmpi_sum_master(pol_wf, master, comm, ierr)
+ ! Collect pol_wfr on the master rank who's gonna write the polaron density in XSF format.
+ call xmpi_sum_master(pol_wfr, master, comm, ierr)
 
  if (my_rank == master) then
-   pol_wf = pol_wf / (nkbz * sqrt(cryst%ucvol))
-   ABI_MALLOC(pol_rho, (sc_nfft))
+   pol_wfr = pol_wfr / (nkbz * sqrt(cryst%ucvol))
+   ! FIXME: Here we're gonna have another big allocation
+   ABI_MALLOC(pol_rhor, (sc_nfft))
 
-   ! Here decide if we write the polaron wavefunction with_diplaced atoms or not.
+   ! Here decide if we are gonna write the polaron wavefunctions with_diplaced atoms or not.
    use_displaced_scell = all(kptrlatt_ == qptrlatt_) .and. have_scell_q
    num_writes = 1; if (use_displaced_scell) num_writes = 2
 
    if (nspinor == 1) then
      ! Handle spin-polarized case by writing two XSF files.
      do spin=1,nsppol
-       write(msg, "(a,i0,a,es16.6)")&
-         " For spin: ", spin, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(vpq%a_spin(:,:,:,spin)**2) / nkbz
-       call wrtout(units, msg)
-       pol_rho = abs(pol_wf(:, spin)) ** 2
-       write(msg, "(a,i0,a,es16.6)")" Polaron density for spin: ", spin, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
-       call wrtout(units, msg)
-       write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, spin))))
-       call wrtout(units, msg)
-       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center_cart, spread, units)
+       ! Handle multiple polaronic states for each spin.
+       do ip=1,vpq%nstates
+         write(msg, "(2(a,i0),a,es16.6)")&
+           " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz
+         call wrtout(units, msg)
+         pol_rhor = abs(pol_wfr(:, ip, spin)) ** 2
+         write(msg, "(2(a,i0),a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, &
+                                         " integrates to: ", sum(pol_rhor) * cryst%ucvol / product(ds_ngfft(1:3))
+         call wrtout(units, msg)
+         write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wfr))): ", maxval(abs(aimag(pol_wfr(:, ip, spin))))
+         call wrtout(std_out, msg)
+         call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rhor, center_cart, spread, units)
 
-       do ii=1,num_writes
-         if (ii == 1) then
-           call wrtout(units, " Writing the polaron wavefunction with undiplaced atoms")
-           xcart_ptr => scell_k%xcart
-           path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
-           if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON.xsf")
-         else
-           call wrtout(units, " Writing the polaron wavefunction with diplaced atoms")
+         do ii=1,num_writes
+           if (ii == 1) then
+             xcart_ptr => scell_k%xcart
+             path = strcat(dtfil%filnam_ds(4), "_pstate_", itoa(ip), "_POLARON.xsf")
+             if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), strcat("_spin_", itoa(spin)), "_pstate_", itoa(ip), "_POLARON.xsf")
+             call wrtout(units, strcat("- Writing the polaron wavefunction with undisplaced atoms to: ", path))
+           else
+             path = strcat(dtfil%filnam_ds(4), "_pstate_", itoa(ip), "_POLARON_DISPL.xsf")
+             if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), strcat("_spin_", itoa(spin)), "_pstate_", itoa(ip), "_POLARON_DISPL.xsf")
+             call wrtout(units, strcat("- Writing the polaron wavefunction with diplaced atoms to: ", path))
 
-           path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
-           if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL.xsf")
+             ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
+             scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,ip,spin)
+             xcart_ptr => scell_q%xcart
+           end if
 
-           ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
-           scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,spin)
-           xcart_ptr => scell_q%xcart
-         end if
-
-         call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
-                        scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
-       end do ! ii
+           call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rhor, scell_k%rprimd, origin0, &
+                          scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
+         end do ! ii
+       end do ! ip
      end do ! spin
 
    else
-     write(msg, "(a,es16.6)")" 1/N_k \sum_nk |A_nk|^2 = ", sum(vpq%a_spin(:,:,:, spin)**2) / nkbz
-     call wrtout(units, msg)
+     ! Spinor wavefunctions.
+     do ip=1,vpq%nstates
+       write(msg, "(2(a,i0),a,es16.6)")&
+         " For spin: ", spin, ": pstate: ", ip, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(abs(vpq%a_spin(:,:,ip,spin))**2) / nkbz
+       call wrtout(units, msg)
 
-     pol_rho(:) = abs(pol_wf(1:sc_nfft, 1)) ** 2
-     pol_rho(:) = abs(pol_wf(sc_nfft+1:, 1)) ** 2 + pol_rho(:)
-     write(msg, "(a,i0,a,es16.6)")" Polaron density integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
-     call wrtout(units, msg)
-     write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, 1))))
-     call wrtout(units, msg)
-     call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rho, center_cart, spread, units)
+       pol_rhor(:) = abs(pol_wfr(1:sc_nfft, ip, 1)) ** 2
+       pol_rhor(:) = abs(pol_wfr(sc_nfft+1:, ip, 1)) ** 2 + pol_rhor(:)
+       write(msg, "(2(a,i0),a,es16.6)")" Polaron density for spin: ", spin, ": pstate: ", ip, &
+                                       " integrates to: ", sum(pol_rhor) * cryst%ucvol / product(ds_ngfft(1:3))
+       call wrtout(units, msg)
+       write(msg, "(a,es16.6)")" maxval(abs(aimag(pol_wfr))): ", maxval(abs(aimag(pol_wfr(:, ip, 1))))
+       call wrtout(units, msg)
+       call center_and_spread(cryst, vpq%ngkpt, sc_ngfft, pol_rhor, center_cart, spread, units)
 
-     spin = 1
-     do ii=1,num_writes
-       if (ii == 1) then
-         call wrtout(units, " Writing the polaron wavefunction with undiplaced atoms")
-         xcart_ptr => scell_k%xcart
-         path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
-       else
-         call wrtout(units, " Writing the polaron wavefunction with diplaced atoms")
-         path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
+       spin = 1
+       do ii=1,num_writes
+         if (ii == 1) then
+           xcart_ptr => scell_k%xcart
+           path = strcat(dtfil%filnam_ds(4), "_pstate_", itoa(ip), "_POLARON.xsf")
+           call wrtout(units, strcat("- Writing the polaron wavefunction with undiplaced atoms to: ", path))
+         else
+           path = strcat(dtfil%filnam_ds(4), "_pstate_", itoa(ip), "_POLARON_DISPL.xsf")
+           call wrtout(units, strcat("- Writing the polaron wavefunction with diplaced atoms to: ", path))
 
-         ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
-         scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,spin)
-         xcart_ptr => scell_q%xcart
-       end if
+           ! Here we displace the atoms in the supercell for this spin (only master has the correct values)
+           scell_q%xcart = scell_q%xcart_ref + sc_displ_cart_re(:,:,ip,spin)
+           xcart_ptr => scell_q%xcart
+         end if
 
-       call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell_k%rprimd, origin0, &
-                      scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
-     end do ! ii
+         call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rhor, scell_k%rprimd, origin0, &
+                        scell_k%natom, scell_k%ntypat, scell_k%typat, xcart_ptr, scell_k%znucl, 0)
+       end do ! ii
+     end do ! ip
    end if
-   ABI_FREE(pol_rho)
+   ABI_FREE(pol_rhor)
  end if ! master
 
  call cwtime_report(" Computation of polaron wavefunction completed", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
 
  ABI_SFREE(sc_displ_cart_re)
+ ABI_FREE(pol_wfr)
 
- ABI_FREE(pol_wf)
- call wfd%free()
- call scell_q%free()
- call scell_k%free()
- call vpq%free()
+ call wfd%free(); call scell_q%free(); call scell_k%free(); call vpq%free()
 
 contains
 integer function vid(var_name)
@@ -2910,7 +3784,7 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
      rr(2) = (i2 - one) / sc_ngfft(2)
      do i1=1,sc_ngfft(1)
        rr(1) = (i1 - one) / sc_ngfft(1)
-       ! Go to cart coordinates.
+       ! Go to cartesian coordinates.
        rcart = matmul(sc_rprimd, rr)
        center_cart = center_cart + rhor(i1, i2, i3) * rcart
        r2_mean = r2_mean + rhor(i1, i2, i3) * dot_product(rcart, rcart)
@@ -2919,11 +3793,11 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
  end do
 
  !center_cart = matmul(sc_rprimd, center_cart)
- center_cart = center_cart * num_cells * prim_cryst%ucvol / nfft
- r2_mean = r2_mean * num_cells * prim_cryst%ucvol / nfft
- spread = sqrt(r2_mean - dot_product(center_cart, center_cart))
- write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
- call wrtout(units, msg)
+ center_cart = center_cart * num_cells * prim_cryst%ucvol / (one*nfft)
+ !r2_mean = r2_mean * num_cells * prim_cryst%ucvol / (one*nfft)
+ !spread = sqrt(r2_mean - dot_product(center_cart, center_cart))
+ !write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
+ !call wrtout(units, msg)
 
  ! Compute = \int (r - center_cart)^2 rhor dr = <r^2> - <r>^2
  spread = zero
@@ -2933,24 +3807,23 @@ subroutine center_and_spread(prim_cryst, ncells, sc_ngfft, rhor, center_cart, sp
      rr(2) = (i2 - one) / sc_ngfft(2)
      do i1=1,sc_ngfft(1)
        rr(1) = (i1 - one) / sc_ngfft(1)
-       ! Go to cart coordinates.
+       ! Go to cartesian coordinates.
        rmr0 = matmul(sc_rprimd, rr) - center_cart
        spread = spread + rhor(i1, i2, i3) * dot_product(rmr0, rmr0)
      end do
    end do
  end do
- spread = sqrt(spread * num_cells * prim_cryst%ucvol / nfft)
+ spread = sqrt(spread * num_cells * prim_cryst%ucvol / (one*nfft))
 
  call xcart2xred(1, prim_cryst%rprimd, center_cart, center_red)
  call wrtout(units, sjoin(" Polaron center in Cartesian coordinates: ", ltoa(center_cart), " (Bohr)"))
- call wrtout(units, sjoin(" Fractional coordinates in termso of the primitive cell:", ltoa(center_red)))
+ call wrtout(units, sjoin(" Fractional coordinates in terms of the primitive cell:", ltoa(center_red)))
  write(msg, "(a,2(es16.6,a))")" Polaron spread: ", spread, " (Bohr)", spread * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
  ! full width at half-maximum
  fwhm = (two * sqrt(two * log(two))) * spread
- write(msg, "(a,2(es16.6,a))")" Full width at half-maximum (FWHM) ", fwhm, "(Borh)", fwhm * Bohr_Ang, "(Ang)"
+ write(msg, "(a,2(es16.6,a))")" Full width at half-maximum (FWHM) ", fwhm, " (Bohr) ", fwhm * Bohr_Ang, " (Ang)"
  call wrtout(units, msg)
-
 
 end subroutine center_and_spread
 

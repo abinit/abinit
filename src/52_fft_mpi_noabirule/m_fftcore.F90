@@ -8,7 +8,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2024 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2025 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,7 +103,6 @@ module m_fftcore
  ! 0 for double precision version (default), 1 for mixed precision FFTs
  integer, public, protected :: fftcore_mixprec = 0
  public :: fftcore_set_mixprec
-
 ! *************************************************************************
 
 !----------------------------------------------------------------------
@@ -151,7 +150,6 @@ integer function fftcore_set_mixprec(wp) result(old_wp)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: wp
-
 ! *************************************************************************
 
  old_wp = fftcore_mixprec
@@ -190,7 +188,6 @@ logical pure function fftalg_isavailable(fftalg) result(ans)
 
 !Local variables-------------------------------
  integer :: fftalga,fftalgb,fftalgc
-
 ! *************************************************************************
 
  ans = .TRUE.
@@ -234,7 +231,6 @@ pure function fftalg_has_mpi(fftalg) result(ans)
 !Local variables-------------------------------
 !scalars
  integer :: fftalga,fftalgb,fftalgc
-
 ! *************************************************************************
 
  ans = .False.
@@ -271,7 +267,6 @@ pure function fftalg_for_npfft(nproc_fft) result(fftalg)
 !scalars
  integer,intent(in) :: nproc_fft
  integer :: fftalg
-
 ! *************************************************************************
 
  ! Default  for the sequential case.
@@ -322,7 +317,6 @@ subroutine fftalg_info(fftalg,library,cplex_mode,padding_mode)
 !Local variables-------------------------------
 !scalars
  integer :: fftalga,fftalgb,fftalgc
-
 ! *************************************************************************
 
  library = "Unknown"; cplex_mode = "Unknown"; padding_mode  = "Unknown"
@@ -360,7 +354,6 @@ pure function get_cache_kb()
 !Local variables-------------------------------
 !scalars
  integer :: get_cache_kb
-
 ! *************************************************************************
 
  ! Default value
@@ -397,7 +390,6 @@ pure subroutine ngfft_seq(ngfft, n123)
 
 !Local variables-------------------------------
  integer :: fftalg
-
 ! *************************************************************************
 
  ! Default for sequential case.
@@ -434,46 +426,43 @@ end subroutine ngfft_seq
 !!  Print the content of ngfft(18) in explicative format.
 !!
 !! INPUTS
+!!  units: Unit numbers
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft.
 !!  [unit]=unit number for output (defaults to std_out).
 !!  [prtvol]=verbosity level (defaults to 0).
-!!  [mode_paral]=either "COLL" or "PERS" ("COLL" is default).
 !!
 !! OUTPUT
 !!  Only writing
 !!
 !! SOURCE
 
-subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
+subroutine print_ngfft(units, ngfft, header, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in),optional :: prtvol,unit
+ integer,intent(in) :: units(:)
+ integer,intent(in),optional :: prtvol
  character(len=*),intent(in),optional :: header
- character(len=4),intent(in),optional :: mode_paral
 !arrays
  integer,intent(in) :: ngfft(18)
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol
- character(len=4) :: my_mode
+ integer :: my_prtvol
  character(len=500) :: msg
-
 ! *************************************************************************
 
- my_prtvol=0;       if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_mode  ='COLL';  if (PRESENT(mode_paral)) my_mode  =mode_paral
+ my_prtvol=0; if (PRESENT(prtvol)) my_prtvol=prtvol
 
- msg=ch10//' ==== FFT mesh description (ngfft) ==== '
+ msg = ch10//' ==== FFT mesh description (ngfft) ==== '
  if (PRESENT(header)) msg=ch10//' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
+
  write(msg,'(2(a,3i5,a),a,i5,2a,i5)')&
   '  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
   '  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
   '  FFT algorithm ............................. ',ngfft(7),ch10,&
   '  FFT cache size ............................ ',ngfft(8)
- call wrtout(my_unt,msg,my_mode)
+ call wrtout(units, msg)
 
  if (my_prtvol > 0) then
    write(msg,'(6(a,i5,a),a,4i5)')&
@@ -484,7 +473,7 @@ subroutine print_ngfft(ngfft, header, unit, mode_paral, prtvol)
     '  No of xy planes in G space treated by me .. ',ngfft(13),ch10,&
     '  MPI communicator for FFT .................. ',ngfft(14),ch10,&
     '  Value of ngfft(15:18) ..................... ',ngfft(15:18)
-   call wrtout(my_unt,msg,my_mode)
+   call wrtout(units, msg)
  end if
 
 end subroutine print_ngfft
@@ -533,7 +522,6 @@ subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
  integer :: i1,i1min,i2,i2min,i3,i3min
  real(dp) :: dsm,dsp
  character(len=500) :: msg
-
 ! *************************************************************************
 
 !Set plane to impossible value
@@ -732,8 +720,13 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
  integer,parameter :: maxpow2 =16      ! int(log(largest_ngfft+half)/log(two))
  integer,parameter :: maxpow3 =6       ! int(log(largest_ngfft+half)/log(three))
  integer,parameter :: maxpow5 =6       ! int(log(largest_ngfft+half)/log(five))
+!#if defined HAVE_FFTW3 || defined HAVE_DFTI
+! integer,parameter :: maxpow7 =5       ! FFTW3 and DFTI support powers of 7 and 11
+! integer,parameter :: maxpow11=4
+!#else
  integer,parameter :: maxpow7 =0
  integer,parameter :: maxpow11=0
+!#endif
  integer,parameter :: mmsrch=(maxpow2+1)*(maxpow3+1)*(maxpow5+1)*(maxpow7+1)*(maxpow11+1)
  integer,parameter :: nfactor=10, mpower=5
 !Arrays
@@ -744,14 +737,11 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
  integer :: npower(3,mpower)
  integer,parameter :: factor(10) = (/1,2,3,4,5,6,8,9,10,12/)
  integer,parameter :: power(5) = (/2,3,5,7,11/)
-
 ! *************************************************************************
 
  ount = std_out; if (present(unit)) ount = unit
 
-!DEBUG
 !write(std_out,*)' m_fftcore/getng : enter'
-!ENDDEBUG
 
  fftalga = ngfft(7)/100
 
@@ -1006,10 +996,10 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
        else
          write(msg, '(5a,i12,2a,9i12,2a,3f10.7,2a)' ) &
           'Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
-&         '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
-&         '   for the symmetry number ',isym,ch10,&
-&         '   symrel is ',symrel(1:3,1:3,isym),ch10,&
-&         '   tnons is ',tnons(1:3,isym),ch10,&
+          '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
+          '   for the symmetry number ',isym,ch10,&
+          '   symrel is ',symrel(1:3,1:3,isym),ch10,&
+          '   tnons is ',tnons(1:3,isym),ch10,&
           'This problem should have been caught earlier.'
          ABI_BUG(msg)
        endif
@@ -1060,10 +1050,8 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
      end do
    end do
 
-!DEBUG
 !write(std_out,*)' ngmin(1:3)=',srch(imin(1),1),srch(imin(2),2),srch(imin(3),3)
 !write(std_out,*)' ngmax(1:3)=',ngmax(1:3)
-!ENDDEBUG
 
    ngcurrent(1:3)=ngmax(1:3)
    prodcurrent=ngmax(1)*ngmax(2)*ngmax(3)+1.0d-3
@@ -1219,7 +1207,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
    ngfft(13)=ngfft(3)/nproc_fft
  end if
 
- call print_ngfft(ngfft,header="FFT mesh",unit=ount,mode_paral="COLL")
+ call print_ngfft([ount], ngfft, header="FFT mesh")
 
 end subroutine getng
 !!***
@@ -1276,7 +1264,6 @@ subroutine sphereboundary(gbound, istwf_k, kg_k, mgfft, npw)
  character(len=500) :: msg
 !arrays
  integer :: gmax(2),gmin(2)
-
 ! *************************************************************************
 !
 !DEBUG
@@ -1558,7 +1545,6 @@ subroutine sphere(cg, ndat, npw, cfft, n1, n2, n3, n4, n5, n6, kg_k, istwf_k, if
 !arrays
  integer :: identity(3,3)
  integer :: i1inver(n1),i2inver(n2),i3inver(n3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1956,7 +1942,6 @@ subroutine sphere_fft(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,kg_k,tab_fftwf2_local,nd2p
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,i2_local,i3,idat,ipw
-
 ! *************************************************************************
 
 !Insert cg into cfft with extra 0 s around outside:
@@ -2050,7 +2035,6 @@ subroutine sphere_fft1(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,tab_fftwf2_local)
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,i2_local,i3,idat,ipw
-
 ! *************************************************************************
 
 !Insert cg into cfft with extra 0 s around outside:
@@ -2115,7 +2099,6 @@ subroutine change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,
  integer,parameter :: shiftg0(3)=0,me_g0=1
  integer,parameter :: symmE(3,3)=reshape([1,0,0,0,1,0,0,0,1],[3,3])
  real(dp),allocatable :: cfft(:,:,:,:)
-
 ! *************************************************************************
 
  n4=2*(n1/2)+1
@@ -2208,7 +2191,6 @@ pure subroutine switch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zt,zw)
 
 !Local variables-------------------------------
  integer :: i,j
-
 ! *************************************************************************
 
  ! Here, zero and positive frequencies
@@ -2461,7 +2443,6 @@ pure subroutine scramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zw,zmpi2)
 
 !Local variables-------------------------------
  integer :: i3,i
-
 ! *************************************************************************
 
  do i3=1,n3
@@ -2505,7 +2486,6 @@ pure subroutine fill(nd1,nd3,lot,n1dfft,n3,zf,zw)
 
 ! local variables
  integer :: i1,i3
-
 ! *************************************************************************
 
  do i3=1,n3
@@ -2554,7 +2534,6 @@ pure subroutine fill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zf,zw)
 !Local variables-------------------------------
 !scalars
  integer :: i1,i3
-
 ! *************************************************************************
 
  ! Here, zero and positive frequencies
@@ -2704,7 +2683,6 @@ pure subroutine unmpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,io
 
 !Local variables-------------------------------
  integer :: i1,jp2,j2,ind,jjp2,mfft,jj2
-
 ! *************************************************************************
 
  mfft=0
@@ -2776,7 +2754,6 @@ pure subroutine unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot,max1,md1,m1,n1,md2pr
 
 !Local variables-------------------------------
  integer :: mfft,Jp2,J2,I1,ind,jj2,jjp2
-
 ! *************************************************************************
 
  mfft=0
@@ -2873,7 +2850,6 @@ pure subroutine unscramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zmpi2,zw)
 !Local variables-------------------------------
 !scalars
  integer :: i,i3
-
 ! *************************************************************************
 
  do i3=1,n3
@@ -3128,7 +3104,6 @@ pure subroutine mpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,iopt
 
 !Local variables-------------------------------
  integer :: Jp2,J2,I1,ind,jj2,mfft,jjp2
-
 ! *************************************************************************
  mfft=0
 
@@ -3214,7 +3189,6 @@ pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc
 
 !Local variables-------------------------------
  integer :: mfft,jp2,j2,jjp2,jj2,i1,ind
-
 ! *************************************************************************
 
  ABI_UNUSED((/m2,max2,n2/))
@@ -3329,7 +3303,6 @@ pure subroutine mpifft_fg2dbox(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distr
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase
-
 ! *************************************************************************
 
  do idat=1,ndat
@@ -3377,7 +3350,6 @@ pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_d
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase
-
 ! *************************************************************************
 
  do idat=1,ndat
@@ -3425,7 +3397,6 @@ pure subroutine mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_l
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase
  real(dp) :: xnorm
-
 ! *************************************************************************
 
  xnorm=one/dble(n1*n2*n3)
@@ -3477,7 +3448,6 @@ pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,fft
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i2_local,i2_ldat,fgbase
  real(dp) :: xnorm
-
 ! *************************************************************************
 
  xnorm=one/dble(n1*n2*n3)
@@ -3528,7 +3498,6 @@ pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_l
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
-
 ! *************************************************************************
 
  select case (cplex)
@@ -3605,7 +3574,6 @@ pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,fft
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
-
 ! *************************************************************************
 
  select case (cplex)
@@ -3678,7 +3646,6 @@ pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
-
 ! *************************************************************************
 
  select case (cplex)
@@ -3752,7 +3719,6 @@ pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,f
 
 !Local variables-------------------------------
  integer :: idat,i1,i2,i3,i3_local,i3_ldat,frbase
-
 ! *************************************************************************
 
  select case (cplex)
@@ -3838,7 +3804,6 @@ subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
  integer :: g1,g2,i1,i2,i3,igb,index,ipw,n1,n2,n3
 !arrays
  integer,allocatable :: index2d(:,:)
-
 ! *************************************************************************
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
@@ -3948,8 +3913,7 @@ end subroutine indfftrisc
 !!
 !! SOURCE
 
-
-subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mpw,npw)
+subroutine kpgsph(ecut, exchn2n3d, gmet, ikg, ikpt, istwf_k, kg, kpt, mkmem, mpi_enreg, mpw, npw)
 
 !Arguments ------------------------------------
 !scalars
@@ -3976,7 +3940,6 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  integer, allocatable :: npw_gather(:),npw_disp(:) ,kg_ind_gather(:),kg_small_gather(:,:)
  real(dp) :: kmax(3),minor(3),numer(3),tsec(2)
  real(dp),allocatable :: kg1arr(:),kg2arr(:),kg3arr(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -4334,7 +4297,6 @@ end subroutine kpgsph
 
 subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,nkpt
@@ -4351,7 +4313,6 @@ subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
 !arrays
  integer :: ngrid(3),nmax(3)
  real(dp) :: minor(3),numer(3)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -4426,24 +4387,31 @@ end subroutine kpgcount
 !!  npw_k=Total number of G-vectors in the full G-sphere.
 !!  kg_k(3,npw_k) list of G-vectors allocated by the routine.
 !!
+!! SIDE EFFECTS
+!!  [mpw]: Used to to compute the maximum number of PWs when looping over multiple k-points.
+!!  [gmax(3)]: Max G-component when looping over multiple k-points.
+!!
 !! SOURCE
 
-subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
+subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, &
+                  kin_sorted, mpw, gmax) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwf_k
  integer,intent(out) :: npw_k
  real(dp),intent(in) :: ecut
+ integer,optional,intent(inout) :: mpw
 !arrays
  integer,allocatable,intent(out) :: kg_k(:,:)
  real(dp),intent(in) :: gmet(3,3),kpoint(3)
  logical,optional,intent(in) :: kin_sorted
+ integer,optional,intent(inout) :: gmax(3)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mkmem_ = 1, exchn2n3d0 = 0, ikg0 = 0
- integer :: npw_k_test
+ integer :: npw_k_test, ipw, ii
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: kg_dum(3, 0)
@@ -4454,7 +4422,7 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
  call initmpi_seq(MPI_enreg_seq)
 
  ! Calculate the number of G-vectors for this k-point.
- call kpgsph(ecut,exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_dum, kpoint, 0, MPI_enreg_seq, 0, npw_k)
+ call kpgsph(ecut, exchn2n3d0, gmet, ikg0, 0, istwf_k, kg_dum, kpoint, 0, MPI_enreg_seq, 0, npw_k)
 
  ! Allocate and calculate the set of G-vectors.
  ABI_MALLOC(kg_k,(3,npw_k))
@@ -4468,6 +4436,16 @@ subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k, kin_sorted)
      kg_k = iwork
      ABI_FREE(iwork)
    end if
+ end if
+
+ if (present(mpw)) mpw = max(mpw, npw_k)
+
+ if (present(gmax)) then
+   do ipw=1,npw_k
+     do ii=1,3
+       gmax(ii) = max(gmax(ii), abs(kg_k(ii,ipw)))
+     end do
+   end do
  end if
 
 end subroutine get_kg
@@ -4513,7 +4491,6 @@ subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
  !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  !integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
-
 ! *************************************************************************
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
@@ -4593,7 +4570,6 @@ pure subroutine addrho(icplexwf,includelast,nd1,nd2,n2,lot,n1dfft,zw,rhopart,wei
 
 !Local variables-------------------------------
  integer :: i2,j
-
 ! *************************************************************************
 
  if (icplexwf==2) then
@@ -4665,7 +4641,6 @@ subroutine multpot(icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft,pot,zw)
 !Local variables-------------------------------
  integer :: i2,j
  real(dp) :: rew,imw
-
 ! *************************************************************************
 
  if (icplexwf==1) then
@@ -4781,7 +4756,6 @@ subroutine mpifft_collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_dist
 !Local variables-------------------------------
  integer :: ispden,i1,i2,i3,me_fft,i3_local,my_fftbase,glob_fftbase
  integer :: n1,n2,n3,ierr,nfft_tot
-
 ! *************************************************************************
 
  nfft_tot = product(ngfft(1:3)); me_fft = xmpi_comm_rank(comm_fft)

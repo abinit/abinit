@@ -38,7 +38,7 @@ optstress 0       # Don't compute stress (required for wavelets)
 nscforder 14      # order of wavelet for Poisson solver
 
 
-#Definition of the k-point grid 
+#Definition of the k-point grid
 ngkpt  1  1  1
 nshiftk 1
 shiftk  0. 0. 0.
@@ -80,14 +80,14 @@ iomode 3  # ETSF IO access
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_ETSF_IO
 #%% [files]
-#%% files_to_test = 
-#%%   t18.out, tolnlines = 0, tolabs = 1.320e-10, tolrel = 1.174e-13
+#%% files_to_test =
+#%%   t18.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = D. Caliste
 #%% keywords = ETSF_IO
-#%% description = 
+#%% description =
 #%%   CO molecule to test the ETSF restart inside several datasets, also test the
 #%%   reformating of wavelets after wvl_hgrid changed (need compilation with --enable-bigdft).
 #%% topics = Wavelets

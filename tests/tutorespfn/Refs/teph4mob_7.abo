@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.6 of ABINIT, released Feb 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Sep 2024.
-- ( at 17h25 )
+.Starting date : Wed  9 Apr 2025.
+- ( at 10h25 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_7.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_7.abi
 - output file    -> teph4mob_7.abo
 - root for input  files -> teph4mob_7i
 - root for output files -> teph4mob_7o
@@ -460,8 +460,8 @@ meta: {optdriver: 7, eph_task: -4, }
 - Writing phonon DOS to netcdf file: teph4mob_7o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -473,8 +473,8 @@ meta: {optdriver: 7, eph_task: -4, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -566,27 +566,27 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   5183.4    0.000
+   5   3.573    0.000   5186.5    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.485
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   1300.2    0.000
+   5   3.573    0.000   1319.8    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.441
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.001    595.3    0.000
+   5   3.573    0.001    603.8    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.390
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.001    318.2    0.000
+   5   3.573    0.001    321.9    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.336
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.002    198.6    0.000
+   5   3.573    0.002    200.5    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.280
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.002    139.0    0.000
+   5   3.573    0.002    140.2    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -594,23 +594,23 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.485
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.004     90.6    0.000
+   5   3.608    0.004     90.5    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.441
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.004     81.8    0.000
+   5   3.608    0.004     81.7    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.390
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.005     70.0    0.000
+   5   3.608    0.005     69.8    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.336
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.006     58.6    0.000
+   5   3.608    0.006     58.5    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.280
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.007     49.4    0.000
+   5   3.608    0.007     49.3    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.522
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -622,7 +622,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.485
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.441
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000   5512.8    0.000
+   5   3.525    0.000   5512.9    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.390
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -657,66 +657,156 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.280
  edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
- Transport (RTA) calculation results:
+ Transport (RTA) calculation results, chemical potential adjusted with T:
 
  Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.78            0.00
-          123.00        0.34E+16        0.00E+00           76.58            0.00
-          182.00        0.20E+16        0.00E+00          143.68            0.00
-          241.00        0.15E+16        0.00E+00          170.08            0.00
-          300.00        0.12E+16        0.23E+05          164.11            0.00
+           64.00        0.68E+16        0.00E+00            4.85            0.00
+          123.00        0.34E+16        0.00E+00           77.55            0.00
+          182.00        0.20E+16        0.00E+00          144.68            0.00
+          241.00        0.15E+16        0.00E+00          170.60            0.00
+          300.00        0.12E+16        0.23E+05          164.28            0.00
 
 
  Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.78            0.00
-          123.00        0.34E+16        0.00E+00           76.58            0.00
-          182.00        0.20E+16        0.00E+00          143.68            0.00
-          241.00        0.15E+16        0.00E+00          170.08            0.00
-          300.00        0.12E+16        0.23E+05          164.11            0.00
+           64.00        0.68E+16        0.00E+00            4.85            0.00
+          123.00        0.34E+16        0.00E+00           77.55            0.00
+          182.00        0.20E+16        0.00E+00          144.68            0.00
+          241.00        0.15E+16        0.00E+00          170.60            0.00
+          300.00        0.12E+16        0.23E+05          164.28            0.00
 
 
  Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            4.78            0.00
-          123.00        0.34E+16        0.00E+00           76.58            0.00
-          182.00        0.20E+16        0.00E+00          143.68            0.00
-          241.00        0.15E+16        0.00E+00          170.08            0.00
-          300.00        0.12E+16        0.23E+05          164.11            0.00
+           64.00        0.68E+16        0.00E+00            4.85            0.00
+          123.00        0.34E+16        0.00E+00           77.55            0.00
+          182.00        0.20E+16        0.00E+00          144.68            0.00
+          241.00        0.15E+16        0.00E+00          170.60            0.00
+          300.00        0.12E+16        0.23E+05          164.28            0.00
+
+
+ Seebeck [Volts / Kelvin] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.612760E-03   -0.612760E-03   -0.612760E-03
+ Temperature (K)              xx              yy              zz
+           64.00   -0.137073E-02   -0.137073E-02   -0.137073E-02
+ Temperature (K)              xx              yy              zz
+          123.00   -0.110103E-02   -0.110103E-02   -0.110103E-02
+ Temperature (K)              xx              yy              zz
+          182.00   -0.106731E-02   -0.106731E-02   -0.106731E-02
+ Temperature (K)              xx              yy              zz
+          241.00   -0.105963E-02   -0.105963E-02   -0.105963E-02
+ Temperature (K)              xx              yy              zz
+          300.00   -0.105322E-02   -0.105322E-02   -0.105322E-02
+
+
+ Kappa [W/m*K] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00    0.975594E-43    0.975594E-43    0.975594E-43
+ Temperature (K)              xx              yy              zz
+           64.00    0.251349E-07    0.251349E-07    0.251349E-07
+ Temperature (K)              xx              yy              zz
+          123.00    0.359089E-05    0.359089E-05    0.359089E-05
+ Temperature (K)              xx              yy              zz
+          182.00    0.683301E-05    0.683301E-05    0.683301E-05
+ Temperature (K)              xx              yy              zz
+          241.00    0.508522E-05    0.508522E-05    0.508522E-05
+ Temperature (K)              xx              yy              zz
+          300.00    0.303715E-05    0.303715E-05    0.303715E-05
+
+
+ Peltier [Volts] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.306380E-02   -0.306380E-02   -0.306380E-02
+ Temperature (K)              xx              yy              zz
+           64.00   -0.877265E-01   -0.877265E-01   -0.877265E-01
+ Temperature (K)              xx              yy              zz
+          123.00   -0.135426E+00   -0.135426E+00   -0.135426E+00
+ Temperature (K)              xx              yy              zz
+          182.00   -0.194251E+00   -0.194251E+00   -0.194251E+00
+ Temperature (K)              xx              yy              zz
+          241.00   -0.255371E+00   -0.255371E+00   -0.255371E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.315965E+00   -0.315965E+00   -0.315965E+00
 
 
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            5.06            0.00
-          123.00        0.34E+16        0.00E+00           84.45            0.00
-          182.00        0.20E+16        0.00E+00          162.37            0.00
-          241.00        0.15E+16        0.00E+00          192.82            0.00
-          300.00        0.12E+16        0.23E+05          185.83            0.00
+           64.00        0.68E+16        0.00E+00            5.09            0.00
+          123.00        0.34E+16        0.00E+00           85.03            0.00
+          182.00        0.20E+16        0.00E+00          163.01            0.00
+          241.00        0.15E+16        0.00E+00          193.15            0.00
+          300.00        0.12E+16        0.23E+05          185.92            0.00
 
 
  Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            5.06            0.00
-          123.00        0.34E+16        0.00E+00           84.45            0.00
-          182.00        0.20E+16        0.00E+00          162.37            0.00
-          241.00        0.15E+16        0.00E+00          192.82            0.00
-          300.00        0.12E+16        0.23E+05          185.83            0.00
+           64.00        0.68E+16        0.00E+00            5.09            0.00
+          123.00        0.34E+16        0.00E+00           85.03            0.00
+          182.00        0.20E+16        0.00E+00          163.01            0.00
+          241.00        0.15E+16        0.00E+00          193.15            0.00
+          300.00        0.12E+16        0.23E+05          185.92            0.00
 
 
  Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.80E+16        0.00E+00            0.00            0.00
-           64.00        0.68E+16        0.00E+00            5.06            0.00
-          123.00        0.34E+16        0.00E+00           84.45            0.00
-          182.00        0.20E+16        0.00E+00          162.37            0.00
-          241.00        0.15E+16        0.00E+00          192.82            0.00
-          300.00        0.12E+16        0.23E+05          185.83            0.00
+           64.00        0.68E+16        0.00E+00            5.09            0.00
+          123.00        0.34E+16        0.00E+00           85.03            0.00
+          182.00        0.20E+16        0.00E+00          163.01            0.00
+          241.00        0.15E+16        0.00E+00          193.15            0.00
+          300.00        0.12E+16        0.23E+05          185.92            0.00
+
+
+ Seebeck [Volts / Kelvin] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.612760E-03   -0.612760E-03   -0.612760E-03
+ Temperature (K)              xx              yy              zz
+           64.00   -0.137073E-02   -0.137073E-02   -0.137073E-02
+ Temperature (K)              xx              yy              zz
+          123.00   -0.110014E-02   -0.110014E-02   -0.110014E-02
+ Temperature (K)              xx              yy              zz
+          182.00   -0.106406E-02   -0.106406E-02   -0.106406E-02
+ Temperature (K)              xx              yy              zz
+          241.00   -0.105591E-02   -0.105591E-02   -0.105591E-02
+ Temperature (K)              xx              yy              zz
+          300.00   -0.105009E-02   -0.105009E-02   -0.105009E-02
+
+
+ Kappa [W/m*K] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00    0.975594E-43    0.975594E-43    0.975594E-43
+ Temperature (K)              xx              yy              zz
+           64.00    0.265157E-07    0.265157E-07    0.265157E-07
+ Temperature (K)              xx              yy              zz
+          123.00    0.381803E-05    0.381803E-05    0.381803E-05
+ Temperature (K)              xx              yy              zz
+          182.00    0.748007E-05    0.748007E-05    0.748007E-05
+ Temperature (K)              xx              yy              zz
+          241.00    0.577450E-05    0.577450E-05    0.577450E-05
+ Temperature (K)              xx              yy              zz
+          300.00    0.354938E-05    0.354938E-05    0.354938E-05
+
+
+ Peltier [Volts] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.306380E-02   -0.306380E-02   -0.306380E-02
+ Temperature (K)              xx              yy              zz
+           64.00   -0.877269E-01   -0.877269E-01   -0.877269E-01
+ Temperature (K)              xx              yy              zz
+          123.00   -0.135317E+00   -0.135317E+00   -0.135317E+00
+ Temperature (K)              xx              yy              zz
+          182.00   -0.193659E+00   -0.193659E+00   -0.193659E+00
+ Temperature (K)              xx              yy              zz
+          241.00   -0.254474E+00   -0.254474E+00   -0.254474E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.315028E+00   -0.315028E+00   -0.315028E+00
 
 
 
@@ -914,7 +1004,7 @@ meta: {optdriver: 7, eph_task: 7, }
  edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
- Transport (RTA) calculation results:
+ Transport (RTA) calculation results, chemical potential adjusted with T:
 
  Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -946,6 +1036,51 @@ meta: {optdriver: 7, eph_task: 7, }
           300.00        0.59E+16        0.17E+05            0.00            0.00
 
 
+ Seebeck [Volts / Kelvin] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.612760E-03   -0.612760E-03   -0.612760E-03
+ Temperature (K)              xx              yy              zz
+           64.00   -0.626229E-03   -0.626229E-03   -0.626229E-03
+ Temperature (K)              xx              yy              zz
+          123.00   -0.687852E-03   -0.687852E-03   -0.687852E-03
+ Temperature (K)              xx              yy              zz
+          182.00   -0.743594E-03   -0.743594E-03   -0.743594E-03
+ Temperature (K)              xx              yy              zz
+          241.00   -0.785695E-03   -0.785695E-03   -0.785695E-03
+ Temperature (K)              xx              yy              zz
+          300.00   -0.818624E-03   -0.818624E-03   -0.818624E-03
+
+
+ Kappa [W/m*K] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00    0.780476E-42    0.780476E-42    0.780476E-42
+ Temperature (K)              xx              yy              zz
+           64.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          123.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          182.00    0.523477E-47    0.523477E-47    0.523477E-47
+ Temperature (K)              xx              yy              zz
+          241.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.238182E-47   -0.238182E-47   -0.238182E-47
+
+
+ Peltier [Volts] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.306380E-02   -0.306380E-02   -0.306380E-02
+ Temperature (K)              xx              yy              zz
+           64.00   -0.400786E-01   -0.400786E-01   -0.400786E-01
+ Temperature (K)              xx              yy              zz
+          123.00   -0.846058E-01   -0.846058E-01   -0.846058E-01
+ Temperature (K)              xx              yy              zz
+          182.00   -0.135334E+00   -0.135334E+00   -0.135334E+00
+ Temperature (K)              xx              yy              zz
+          241.00   -0.189353E+00   -0.189353E+00   -0.189353E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.245587E+00   -0.245587E+00   -0.245587E+00
+
+
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.64E+17        0.00E+00            0.00            0.00
@@ -974,6 +1109,51 @@ meta: {optdriver: 7, eph_task: 7, }
           182.00        0.14E+17        0.00E+00            0.00            0.00
           241.00        0.86E+16        0.00E+00            0.00            0.00
           300.00        0.59E+16        0.17E+05            0.00            0.00
+
+
+ Seebeck [Volts / Kelvin] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.612760E-03   -0.612760E-03   -0.612760E-03
+ Temperature (K)              xx              yy              zz
+           64.00   -0.626229E-03   -0.626229E-03   -0.626229E-03
+ Temperature (K)              xx              yy              zz
+          123.00   -0.687852E-03   -0.687852E-03   -0.687852E-03
+ Temperature (K)              xx              yy              zz
+          182.00   -0.743594E-03   -0.743594E-03   -0.743594E-03
+ Temperature (K)              xx              yy              zz
+          241.00   -0.785695E-03   -0.785695E-03   -0.785695E-03
+ Temperature (K)              xx              yy              zz
+          300.00   -0.818624E-03   -0.818624E-03   -0.818624E-03
+
+
+ Kappa [W/m*K] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00    0.780476E-42    0.780476E-42    0.780476E-42
+ Temperature (K)              xx              yy              zz
+           64.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          123.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          182.00    0.523477E-47    0.523477E-47    0.523477E-47
+ Temperature (K)              xx              yy              zz
+          241.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.238182E-47   -0.238182E-47   -0.238182E-47
+
+
+ Peltier [Volts] using MRTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.306380E-02   -0.306380E-02   -0.306380E-02
+ Temperature (K)              xx              yy              zz
+           64.00   -0.400786E-01   -0.400786E-01   -0.400786E-01
+ Temperature (K)              xx              yy              zz
+          123.00   -0.846058E-01   -0.846058E-01   -0.846058E-01
+ Temperature (K)              xx              yy              zz
+          182.00   -0.135334E+00   -0.135334E+00   -0.135334E+00
+ Temperature (K)              xx              yy              zz
+          241.00   -0.189353E+00   -0.189353E+00   -0.189353E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.245587E+00   -0.245587E+00   -0.245587E+00
 
 
 
@@ -1233,10 +1413,10 @@ P           mkmem         413
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         27.6  wall=         27.7
+- Proc.   0 individual time (sec): cpu=         27.7  wall=         27.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.6  wall=         27.7
++Overall time at end (sec) : cpu=         27.7  wall=         27.7

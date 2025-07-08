@@ -9,7 +9,7 @@
 !!  used, or be written to disk. All combinations should be feasible.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2025 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -652,8 +652,8 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 
 !Local variables-------------------------------
 !scalars
- integer :: ibranch,ieqqpt,ii,natom,nsym,iqpt,isppol,isym
- integer :: itim,jbranch,jj,kk,ll,neqqpt,iatom,ancestor_iatom,iqpt_fullbz
+ integer :: ibranch,ieqqpt,natom,nsym,iqpt,isppol,isym
+ integer :: itim,jbranch,neqqpt,iatom,ancestor_iatom,iqpt_fullbz
 !arrays
  integer :: symmetrized_qpt(nqpt_full)
  integer :: gkk_flag(nbranch,nbranch,nsppol,nqpt_full)
@@ -723,22 +723,11 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 !      matrices here use different rel/rec, instead of just being multiplied by the rprim gprim...
 !
        if (ep_scalprod==1) then
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj)=zero
-             do kk=1,3
-               do ll=1,3
-                 ss(ii,jj)=ss(ii,jj)+Cryst%rprimd(ii,kk)*Cryst%symrel(kk,ll,isym)*Cryst%gprimd(ll,jj)
-               end do
-             end do
-           end do
-         end do
+         ! ss(ii,jj)=ss(ii,jj)+Cryst%rprimd(ii,kk)*Cryst%symrel(kk,ll,isym)*Cryst%gprimd(ll,jj)
+         ss(:,:) = MATMUL(Cryst%rprimd, MATMUL(Cryst%symrel(:,:,isym), Cryst%gprimd))
        else
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj) = Cryst%symrec(ii,jj,isym)
-           end do
-         end do
+         ! ss(ii,jj) = Cryst%symrec(ii,jj,isym)
+         ss(:,:) = Cryst%symrec(:,:,isym)
        end if
 
        ss_allatoms(:,:,:) = zero
@@ -788,23 +777,12 @@ subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,q
 
 !      use symrec matrices to get inverse transform from isym^{-1}
        if (ep_scalprod==1) then
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj)=zero
-             do kk=1,3
-               do ll=1,3
-!                Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
-                 ss(ii,jj)=ss(ii,jj)+Cryst%rprimd(ii,kk)*Cryst%symrec(ll,kk,isym)*Cryst%gprimd(ll,jj)
-               end do
-             end do
-           end do
-         end do
+         ! Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
+         ! ss(ii,jj)=ss(ii,jj)+Cryst%rprimd(ii,kk)*Cryst%symrec(ll,kk,isym)*Cryst%gprimd(ll,jj)
+         ss(:,:) = MATMUL(Cryst%rprimd, MATMUL(TRANSPOSE(Cryst%symrec(:,:,isym)), Cryst%gprimd))
        else
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj) = Cryst%symrel(jj,ii,isym)
-           end do
-         end do
+          ! ss(ii,jj) = Cryst%symrel(jj,ii,isym)
+          ss(:,:) = TRANSPOSE(Cryst%symrel(:,:,isym))
        end if
 
        ss_allatoms(:,:,:) = zero
@@ -895,8 +873,8 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 
 !Local variables-------------------------------
 !scalars
- integer :: ieqqpt,ii,iqpt,isppol,isym
- integer :: itim,jj,kk,ll,neqqpt
+ integer :: ieqqpt,iqpt,isppol,isym
+ integer :: itim,neqqpt
  integer :: iatom,ancestor_iatom
  integer :: iqpt_fullbz,imode, itensor,reim
  real(dp),parameter :: tol=2.d-8
@@ -969,34 +947,14 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
 !      I believe everything is settled, but still do not know why the 2 versions of the ss
 !      matrices here use different rel/rec, instead of just being multiplied by the rprim gprim...
 !
-       do ii=1,3
-         do jj=1,3
-           sscart(ii,jj)=0.0_dp
-           do kk=1,3
-             do ll=1,3
-               sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
-!              sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
-             end do
-           end do
-         end do
-       end do
+       ! sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
+       sscart(:,:) = MATMUL(rprimd, MATMUL(symrel(:,:,isym), gprimd))
        if (ep_scalprod==1) then
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj)=0.0_dp
-             do kk=1,3
-               do ll=1,3
-                 ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
-               end do
-             end do
-           end do
-         end do
+         ! ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrel(kk,ll,isym)*gprimd(ll,jj)
+         ss(:,:) = MATMUL(rprimd, MATMUL(symrel(:,:,isym), gprimd))
        else
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj) = symrec(ii,jj,isym)
-           end do
-         end do
+         ! ss(ii,jj) = symrec(ii,jj,isym)
+         ss(:,:) = symrec(:,:,isym)
        end if
 
        ss_allatoms(:,:) = zero
@@ -1058,36 +1016,18 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
        gkk_qpt_tmp = zero
 
 !      use symrec matrices to get inverse transform from isym^{-1}
-       do ii=1,3
-         do jj=1,3
-           sscart(ii,jj)=0.0_dp
-           do kk=1,3
-             do ll=1,3
 !              Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
 !              sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
-               sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
-             end do
-           end do
-         end do
-       end do
+       ! sscart(ii,jj)=sscart(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
+       sscart(:,:) = MATMUL(rprimd, MATMUL(TRANSPOSE(symrec(:,:,isym)), gprimd))
        if (ep_scalprod==1) then
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj)=0.0_dp
-             do kk=1,3
-               do ll=1,3
 !                Use inverse of symop matrix here to get back to ieqqpt (inv+transpose is in symrec and in gprimd)
-                 ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
-               end do
-             end do
-           end do
-         end do
+         ! ss(ii,jj)=ss(ii,jj)+rprimd(ii,kk)*symrec(ll,kk,isym)*gprimd(ll,jj)
+         ss(:,:) = MATMUL(rprimd, MATMUL(TRANSPOSE(symrec(:,:,isym)), gprimd))
+
        else
-         do ii=1,3
-           do jj=1,3
-             ss(ii,jj) = symrel(jj,ii,isym)
-           end do
-         end do
+         ! ss(ii,jj) = symrel(jj,ii,isym)
+         ss(:,:) = TRANSPOSE(symrel(:,:,isym))
        end if
 
        ss_allatoms(:,:) = zero

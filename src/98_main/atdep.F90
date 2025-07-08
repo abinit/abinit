@@ -6,7 +6,7 @@
 !! Calculations of phonons using molecular dynamic simulations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2024 ABINIT group (FB,JB)
+!! Copyright (C) 1998-2025 ABINIT group (FB,JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,21 +46,22 @@ program atdep
   use m_io_tools
   use m_argparse
 
+  use m_time,             only : asctime, timein, timab
   use m_ifc,              only : ifc_type
-  use m_crystal,          only : crystal_t, crystal_free
+  use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb, &
-&                                tdep_destroy_qbz, tdep_destroy_ddb, tdep_ifc2phi2
+&                                tdep_destroy_qbz, tdep_ifc2phi2
   use m_tdep_phi4,        only : tdep_calc_phi4fcoeff, tdep_calc_phi4ref, tdep_write_phi4, tdep_calc_ftot4
   use m_tdep_phi3,        only : tdep_calc_phi3fcoeff, tdep_calc_phi3ref, tdep_write_phi3, tdep_calc_ftot3, &
 &                                tdep_calc_alpha_gamma, tdep_write_gruneisen
   use m_tdep_phi2,        only : tdep_calc_phi2fcoeff, tdep_calc_phi1fcoeff, tdep_calc_phi2, tdep_write_phi2, tdep_calc_ftot2, &
 &                                Eigen_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_calc_phi1, &
 &                                tdep_write_phi1, tdep_init_phi2, tdep_destroy_phi2, Phi2_type
-  use m_tdep_latt,        only : tdep_make_latt, Lattice_type
+  use m_tdep_latt,        only : Lattice_type, tdep_make_latt, tdep_shift_xred
   use m_tdep_sym,         only : tdep_make_sym, Symetries_type, tdep_destroy_sym
   use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_read_input, tdep_distrib_data, tdep_init_MPIdata, &
-&                                tdep_destroy_mpidata, Input_type, MPI_enreg_type, tdep_destroy_invar
+&                                tdep_destroy_mpidata, Input_type, MPI_enreg_type, tdep_destroy_invar, version_string
   use m_tdep_utils,       only : Coeff_Moore_type, tdep_calc_MoorePenrose, tdep_MatchIdeal2Average, tdep_calc_model
   use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type, tdep_destroy_qpt
   use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
@@ -72,8 +73,11 @@ program atdep
 
   integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ncoeff4th,ntotcoeff,ntotconst
   integer :: stdout,stdlog,nshell_max,ii,jj,ishell,istep,iatom
-  integer :: print_mem_report,ierr
+  integer :: print_mem_report
   double precision :: U0
+  real(dp) :: tcpu, tcpui, twall, twalli
+  real(dp) :: tsec(2)
+  character(len = 24):: start_datetime
   double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
   double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
   double precision, allocatable :: Phi1(:)  ,Phi1_coeff(:,:)
@@ -101,12 +105,6 @@ program atdep
   type(MPI_enreg_type) :: MPIdata
   type(abihist) :: Hist
 
-!TEST
-!FB  integer, allocatable :: data_tmp(:,:),data_loc(:,:),data_gather(:,:),shft_step(:)
-!FB  integer, allocatable :: nstep_acc(:),tab_step(:)
-!FB  integer :: istep,ierr,iproc,dim1,dim2,remain,idim1
-!TEST
-
 !******************************************************************
 
 !==========================================================================================
@@ -116,6 +114,11 @@ program atdep
  call abi_io_redirect(new_io_comm=xmpi_world)
 ! Initialize MPI
  call xmpi_init()
+
+ ! Initialisation of the timing
+ call timein(tcpui, twalli)
+ start_datetime = asctime()
+ call timab(1, 0, tsec)
 
 ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
@@ -128,116 +131,10 @@ program atdep
 #endif
 
 ! Read input values from the input.in input file
- call tdep_read_input(Hist,Invar)
+ call tdep_read_input(args%input_path,Hist,Invar)
  call tdep_init_MPIdata(Invar,MPIdata)
  call tdep_distrib_data(Hist,Invar,MPIdata)
  call abihist_free(Hist)
-
-!FB TEST
-!FB Invar%nstep_tot=10
-!FB dim1=1
-!FB dim2=1
-!FB ABI_MALLOC(data_tmp,(dim1,Invar%nstep_tot*dim2)); data_tmp(:,:)=zero
-!FB do istep=1,Invar%nstep_tot
-!FB   data_tmp(:,dim2*(istep-1)+1:dim1*istep)=istep
-!FB end do
-!FB if (MPIdata%iam_master) write(Invar%stdlog,*) MPIdata%me_step,data_tmp(:,:)
-!FB
-!FB Invar%my_nstep=int(Invar%nstep_tot/MPIdata%nproc)
-!FB remain=Invar%nstep_tot-MPIdata%nproc*Invar%my_nstep
-!FB do ii=1,remain
-!FB   if ((ii-1).eq.MPIdata%me_step) Invar%my_nstep=Invar%my_nstep+1
-!FB end do
-!FB!FB ABI_MALLOC(MPIdata%nstep_all,(MPIdata%nproc)); MPIdata%nstep_all(:)=zero
-!FB call xmpi_allgather(Invar%my_nstep,MPIdata%nstep_all,MPIdata%comm_step,ierr)
-!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'Nstep(nproc)=',MPIdata%nstep_all(:)
-!FB call flush_unit(6)
-!FB call xmpi_barrier(MPIdata%comm_step)
-!FB
-!FB ABI_MALLOC(nstep_acc,(MPIdata%nproc+1)); nstep_acc(:)=zero
-!FB nstep_acc(1)=0
-!FB do ii=2,MPIdata%nproc+1
-!FB   nstep_acc(ii)=nstep_acc(ii-1)+MPIdata%nstep_all(ii-1)
-!FB end do
-!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'NSTEP_ACC=',nstep_acc(:)
-!FB call flush_unit(6)
-!FB call xmpi_barrier(MPIdata%comm_step)
-!FB
-!FB ABI_MALLOC(tab_step,(Invar%nstep_tot)); tab_step(:)=zero
-!FB! First distrib
-!FB do iproc=1,MPIdata%nproc
-!FB   do istep=1,Invar%nstep_tot
-!FB     if ((istep.gt.nstep_acc(iproc)).and.(istep.le.nstep_acc(iproc+1))) then
-!FB       tab_step(istep)=iproc-1
-!FB     end if
-!FB   end do
-!FB end do
-!FB
-!FB! Second distrib
-!FB tab_step(:)=zero
-!FB do istep=1,Invar%nstep_tot
-!FB   do iproc=1,MPIdata%nproc
-!FB     if (mod((istep-1),MPIdata%nproc).eq.(iproc-1)) then
-!FB       tab_step(istep)=iproc-1
-!FB     end if
-!FB   end do
-!FB end do
-!FB
-!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'TAB_STEP=',tab_step(:)
-!FB call flush_unit(6)
-!FB call xmpi_barrier(MPIdata%comm_step)
-!FB
-!FB if (nstep_acc(MPIdata%nproc+1).ne.Invar%nstep_tot) then
-!FB   write(Invar%stdlog,*) 'STOP : pb in nstep_acc'
-!FB   stop
-!FB end if
-!FB
-!FB ii=1
-!FB ABI_MALLOC(data_loc,(dim1,Invar%my_nstep*dim2)); data_loc(:,:)=zero
-!FB do istep=1,Invar%nstep_tot
-!FB   if (tab_step(istep).eq.MPIdata%me_step) then
-!FB     data_loc(:,dim2*(ii-1)+1:dim2*ii)=data_tmp(:,dim2*(istep-1)+1:dim2*istep)
-!FB     ii=ii+1
-!FB   end if
-!FB end do
-!FB
-!FB do iproc=1,MPIdata%nproc
-!FB   if (iproc-1.eq.MPIdata%me_step) write(Invar%stdlog,*) 'DATA_LOC =',MPIdata%me_step,data_loc(:,:)
-!FB end do
-!FB call flush_unit(6)
-!FB call xmpi_barrier(MPIdata%comm_step)
-!FB
-!FB!FB ABI_MALLOC(shft_step,(MPIdata%nproc)); shft_step(:)=zero
-!FB!FB shft_step(1)=0
-!FB!FB do ii=2,MPIdata%nproc
-!FB!FB   shft_step(ii)=shft_step(ii-1)+MPIdata%nstep_all(ii-1)
-!FB!FB end do
-!FB!FB
-!FB!FB ABI_MALLOC(data_gather,(dim1,Invar%nstep_tot*dim2)); data_gather(:,:)=zero
-!FB!FB do idim1=1,dim1
-!FB!FB   call xmpi_gatherv(data_loc(idim1,:),Invar%my_nstep*dim2,data_gather(idim1,:),MPIdata%nstep_all*dim2,dim2*shft_step,&
-!FB!FB&                    MPIdata%master,MPIdata%comm_step,ierr)
-!FB!FB end do
-!FB!FB
-!FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) "============================================"
-!FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) MPIdata%me_step,data_gather(:,:)
-!FB!FB call flush_unit(6)
-!FB!!FBFB
-!FB
-!FB ABI_MALLOC(data_gather,(dim1,Invar%nstep_tot*dim2)); data_gather(:,:)=zero
-!FB call xmpi_allgatherv(data_loc,dim1*Invar%my_nstep,data_gather,dim1*MPIdata%nstep_all,dim1*nstep_acc(1:MPIdata%nproc),MPIdata%comm_step,ierr)
-!FB!FB call xmpi_scatterv(data_gather,MPIdata%nstep_all,nstep_acc,data_loc,Invar%my_nstep,&
-!FB!FB&                    MPIdata%master,MPIdata%comm_step,ierr)
-!FB do iproc=1,MPIdata%nproc
-!FB   if (MPIdata%me_step.eq.(iproc-1)) write(Invar%stdlog,*) "============================================"
-!FB   if (MPIdata%me_step.eq.(iproc-1)) write(Invar%stdlog,*) MPIdata%me_step,data_gather(:,:)
-!FB   call flush_unit(6)
-!FB   call xmpi_barrier(MPIdata%comm_step)
-!FB end do
-!FB write(Invar%stdlog,*) '====== END ======='
-!FB call flush_unit(6)
-!FB call abi_abort("COLL")
-!TEST
 
  if (args%dry_run /= 0) then
    call wrtout(std_out, "Dry run mode. Exiting after have read the input")
@@ -255,6 +152,10 @@ program atdep
 !==========================================================================================
 !============== Define the ideal lattice, symmetries and Brillouin zone ===================
 !==========================================================================================
+
+! Shift xred to keep atoms in the same unit cell at each step.
+ call tdep_shift_xred(Invar,MPIdata)
+
 ! Define all the quantities needed to buid the lattice (rprim*, acell*, brav*...)
  call tdep_make_latt(Invar,Lattice)
 
@@ -278,12 +179,6 @@ program atdep
  ABI_MALLOC(Forces_MD,(3*natom*Invar%my_nstep))    ; Forces_MD(:)=0.d0
 
  call tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,Rlatt_cart,Rlatt4Abi,Sym,ucart)
-
-!==========================================================================================
-!============== Initialize Crystal and DDB ABINIT Datatypes ===============================
-!==========================================================================================
- call tdep_init_crystal(Crystal,Invar,Lattice,Sym)
- call tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
 
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
@@ -323,10 +218,16 @@ program atdep
  CoeffMoore%nconst_2nd = CoeffMoore%nconst_rot2nd + CoeffMoore%nconst_dynmat + CoeffMoore%nconst_huang
 
 !==========================================================================================
-!============== Initialize the IFC Abinit datatype ========================================
+!============== Initialize Phi2 datatype ==================================================
 !==========================================================================================
  ABI_MALLOC(Phi1,(3*natom)); Phi1(:)  =0.d0
  call tdep_init_phi2(Phi2,Invar%loto,natom)
+
+!==========================================================================================
+!============== Initialize Crystal, DDB, and IFC ABINIT Datatypes =========================
+!==========================================================================================
+ call tdep_init_crystal(Crystal,Invar,Lattice,Sym)
+ call tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
  call tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt4Abi,Shell2at,Sym)
 
 !==========================================================================================
@@ -587,6 +488,12 @@ program atdep
 &                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
  call tdep_destroy_shell(natom,2,Shell2at)
  ABI_FREE(Rlatt4Abi)
+
+ ! Create a new DDB with the coarse q-point grid in the IBZ.
+ call DDB%free()
+ call Ifc%to_ddb(DDB,Crystal)
+ call tdep_write_ddb(DDB,Crystal,Invar)
+
  write(stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
  write(stdout,'(a)') ' See also the DDB file'
 
@@ -615,76 +522,76 @@ program atdep
  call PHdos%free()
 
 
- if (Invar%order==2) then
-
-   ABI_FREE(distance)
-   ABI_FREE(Rlatt_cart)
-   call Ifc%free()
-   call crystal_free(Crystal)
-   call tdep_destroy_eigen2nd(Eigen2nd_path)
-   call tdep_destroy_eigen2nd(Eigen2nd_MP)
-   call tdep_destroy_sym(Sym)
-   call tdep_destroy_qbz(Qbz)
-   call tdep_destroy_qpt(Qpt)
-   call tdep_destroy_ddb(DDB)
-   call tdep_destroy_invar(Invar)
-   call tdep_destroy_mpidata(MPIdata)
-
-   call tdep_print_Aknowledgments(Invar)
-   call delete_file(Invar%foo,ierr)
-   call delete_file('fort.8',ierr)
-   call flush_unit(stdout)
-   close(unit=stdout)
-   call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
-   call flush_unit(stdlog)
-   call xmpi_end()
-   stop
- end if
-
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=# CALCULATION OF THE 3rd ORDER =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-!#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-
- if (MPIdata%iam_master) then
-   call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
- end if
- call tdep_calc_alpha_gamma(distance,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
+!==========================================================================================
+!===================== CALCULATION OF THE 3rd ORDER =======================================
+!==========================================================================================
+ if (Invar%order>2) then
+   if (MPIdata%iam_master) then
+     call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
+   end if
+   call tdep_calc_alpha_gamma(distance,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 
 !FB Begin Lifetime
 !FB call tdep_calc_lifetime1(Crystal,distance,Eigen2nd_MP,Ifc,Invar,Lattice,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 !FB End Lifetime
+ end if
 
- ABI_FREE(Rlatt_cart)
+!==========================================================================================
+!===================== End the calculation ================================================
+!==========================================================================================
+
+!Write acknowledgements
+ call tdep_print_Aknowledgments(Invar)
+ call flush_unit(stdout)
+
+ call timein(tcpu, twall)
+ tsec(1)=tcpu-tcpui; tsec(2)=twall-twalli
+
+!Free memory
  ABI_FREE(distance)
+ ABI_FREE(Rlatt_cart)
  call tdep_destroy_eigen2nd(Eigen2nd_path)
  call tdep_destroy_eigen2nd(Eigen2nd_MP)
- call tdep_destroy_shell(natom,3,Shell3at)
- ABI_FREE(Phi3_ref)
- if (Invar%order.eq.4) then
-   call tdep_destroy_shell(natom,4,Shell4at)
-   ABI_FREE(Phi4_ref)
+
+ if (Invar%order>2) then
+   call tdep_destroy_shell(natom,3,Shell3at)
+   ABI_FREE(Phi3_ref)
+   if (Invar%order.eq.4) then
+     call tdep_destroy_shell(natom,4,Shell4at)
+     ABI_FREE(Phi4_ref)
+   end if
  end if
+
  call Ifc%free()
- call crystal_free(Crystal)
+ call DDB%free()
+ call Crystal%free()
  call tdep_destroy_sym(Sym)
  call tdep_destroy_qbz(Qbz)
  call tdep_destroy_qpt(Qpt)
- call tdep_destroy_ddb(DDB)
+
+ if (MPIdata%iam_master) then
+   ! Write YAML document with the final summary.
+   ! we use this doc to test whether the calculation is completed.
+   write(stdlog, "(a)")""
+   write(stdlog, "(a)")"--- !FinalSummary"
+   write(stdlog, "(a)")"program: atdep"
+   write(stdlog, "(2a)")"version: ", trim(version_string)
+   write(stdlog, "(2a)")"start_datetime: ", start_datetime
+   write(stdlog, "(2a)")"end_datetime: ", asctime()
+   write(stdlog, "(a, f13.1)")"overall_cpu_time: ", tsec(1)
+   write(stdlog, "(a, f13.1)")"overall_wall_time: ", tsec(2)
+   write(stdlog, "(a, i0)")"mpi_procs: ", MPIdata%nproc
+   write(stdlog, "(a)")"..."
+   call flush_unit(stdlog)
+ end if
+
  call tdep_destroy_invar(Invar)
  call tdep_destroy_mpidata(MPIdata)
 
-!==========================================================================================
-!================= Write the last informations (aknowledgments...)  =======================
-!==========================================================================================
- call tdep_print_Aknowledgments(Invar)
- call delete_file(Invar%foo,ierr)
- call delete_file('fort.8',ierr)
- call flush_unit(stdout)
- close(unit=stdout)
+!Memory analysis
  call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
  call flush_unit(stdlog)
+ close(unit=stdout)
 100 call xmpi_end()
 
  end program atdep

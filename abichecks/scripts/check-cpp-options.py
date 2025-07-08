@@ -8,15 +8,15 @@ import sys
 from abirules_tools import find_abinit_toplevel_directory, find_src_dirs
 
 # Init regular expressions
-re_m4file  = re.compile("\.m4$")
-re_hdrfile  = re.compile("\.h$")
-re_f90file = re.compile("\.F90$")
+re_m4file  = re.compile(r"\.m4$")
+re_hdrfile  = re.compile(r"\.h$")
+re_f90file = re.compile(r"\.F90$")
 re_acdef  = re.compile("AC_DEFINE\\(")
 re_cppdef  = re.compile("^([ ]?)+#([ ]?)+define [0-9A-Z_]*")
 re_cppline = re.compile("^#")
 re_cppcont = re.compile("\\$")
 #re_cppskip = re.compile("^#(include|define|undef|if 0|if 1|endif|error)")
-re_cppskip = re.compile("(^#(include|define|undef|if 0|if 1|endif|error|warning))|(__\w+)")
+re_cppskip = re.compile(r"(^#(include|define|undef|if 0|if 1|endif|error|warning))|(__\w+)")
 re_cppdev  = re.compile("DEV_")
 
 # Init CPP options

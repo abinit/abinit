@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h03 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_teph_tdep_legacy_3/teph_tdep_legacy_3.abi
 - output file    -> teph_tdep_legacy_3.abo
 - root for input  files -> teph_tdep_legacy_3i
@@ -931,8 +931,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1201,7 +1201,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1569,7 +1569,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.2328362477E+00   -3.6902490516E-03
    3   1   2   1   -1.2363317817E+00    3.8903862214E-03
    3   1   3   1   -2.4638740555E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    4.3895174707E-10    0.0000000000E+00
@@ -1587,95 +1587,95 @@ tolerances: {tolwfr: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        13.5997898646         0.0000000000
    1    1   2    1         6.8002534469         0.0000000000
    1    1   3    1         6.7999457284         0.0000000000
    1    1   1    2       -13.5996106722         0.0000000000
    1    1   2    2        -6.8002240038         0.0000000000
    1    1   3    2        -6.8002077536        -0.0000000000
-  
+
    2    1   1    1         6.8002008085         0.0000000000
    2    1   2    1        13.6001830684         0.0000000000
    2    1   3    1         6.8002026465         0.0000000000
    2    1   1    2        -6.7999992094         0.0000000000
    2    1   2    2       -13.6001590541         0.0000000000
    2    1   3    2        -6.8001706472         0.0000000000
-  
+
    3    1   1    1         6.8000072170         0.0000000000
    3    1   2    1         6.8002700163         0.0000000000
    3    1   3    1        13.6001798595         0.0000000000
    3    1   1    2        -6.7995465917        -0.0000000000
    3    1   2    2        -6.7999763484         0.0000000000
    3    1   3    2       -13.5998516878        -0.0000000000
-  
+
    1    2   1    1       -13.5996144799        -0.0000000000
    1    2   2    1        -6.8001870419        -0.0000000000
    1    2   3    1        -6.7995658839         0.0000000000
    1    2   1    2        13.6000961920         0.0000000000
    1    2   2    2         6.7999139412         0.0000000000
    1    2   3    2         6.7998928236         0.0000000000
-  
+
    2    2   1    1        -6.8000699309        -0.0000000000
    2    2   2    1       -13.6001659286        -0.0000000000
    2    2   3    1        -6.7997467805        -0.0000000000
    2    2   1    2         6.7999289576         0.0000000000
    2    2   2    2        13.5999347433         0.0000000000
    2    2   3    2         6.7996889553         0.0000000000
-  
+
    3    2   1    1        -6.8001883452         0.0000000000
    3    2   2    1        -6.8003741738        -0.0000000000
    3    2   3    1       -13.5997738462         0.0000000000
    3    2   1    2         6.7999537123         0.0000000000
    3    2   2    2         6.7997362755         0.0000000000
    3    2   3    2        13.5994376529         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.6104681699        -0.0000000000
    1    1   2    1        -0.0000036289         0.0000000000
    1    1   3    1         0.0000007170        -0.0000000000
    1    1   1    2        -0.6104681699         0.0000000000
    1    1   2    2         0.0000036289        -0.0000000000
    1    1   3    2        -0.0000007170         0.0000000000
-  
+
    2    1   1    1         0.0000173275         0.0000000000
    2    1   2    1         0.6104505447         0.0000000000
    2    1   3    1        -0.0000154737        -0.0000000000
    2    1   1    2        -0.0000173275        -0.0000000000
    2    1   2    2        -0.6104505447        -0.0000000000
    2    1   3    2         0.0000154737         0.0000000000
-  
+
    3    1   1    1         0.0000195291        -0.0000000000
    3    1   2    1         0.0000041138        -0.0000000000
    3    1   3    1         0.6104715911        -0.0000000000
    3    1   1    2        -0.0000195291         0.0000000000
    3    1   2    2        -0.0000041138         0.0000000000
    3    1   3    2        -0.6104715911         0.0000000000
-  
+
    1    2   1    1        -0.6104653230        -0.0000000000
    1    2   2    1        -0.0000055095         0.0000000000
    1    2   3    1        -0.0000233891        -0.0000000000
    1    2   1    2         0.6104653230         0.0000000000
    1    2   2    2         0.0000055095        -0.0000000000
    1    2   3    2         0.0000233891         0.0000000000
-  
+
    2    2   1    1        -0.0000057309         0.0000000000
    2    2   2    1        -0.6104488615         0.0000000000
    2    2   3    1        -0.0000120127        -0.0000000000
    2    2   1    2         0.0000057309        -0.0000000000
    2    2   2    2         0.6104488615        -0.0000000000
    2    2   3    2         0.0000120127         0.0000000000
-  
+
    3    2   1    1        -0.0000004836        -0.0000000000
    3    2   2    1         0.0000211850        -0.0000000000
    3    2   3    1        -0.6104714286        -0.0000000000
@@ -1710,7 +1710,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.4948053247E+00   -3.6084355335E-06
    3   1   2   1   -1.4948027084E+00    3.1276760330E-06
    3   1   3   1   -2.9896091647E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    4.3895174707E-10    0.0000000000E+00
@@ -1722,12 +1722,12 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.1390389298E-10    1.8045662277E-10
    3   1   2   1   -1.9053528866E-10    0.0000000000E+00
    3   1   3   1    1.0374418108E-10    0.0000000000E+00
- 
+
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
  Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.
 
@@ -2065,8 +2065,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.97476
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2082,7 +2082,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2429,7 +2429,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.2237990605E+00    1.2174054227E-06
    3   1   2   1   -1.2237972815E+00   -6.8985799209E-07
    3   1   3   1   -2.4476020330E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    2.5754457241E-02    0.0000000000E+00
@@ -2447,95 +2447,95 @@ tolerances: {tolwfr: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        12.9109327104        -0.0000000000
    1    1   2    1         5.9044707566        -0.0021255356
    1    1   3    1         5.9059199797         0.0001741490
    1    1   1    2        -6.9927910592         1.5142228221
    1    1   2    2        -4.9134994711         0.6981581428
    1    1   3    2        -4.9111781702         0.6973470019
-  
+
    2    1   1    1         5.9058577697         0.0001020055
    2    1   2    1        11.8120102781         0.0000000000
    2    1   3    1         5.9059927171         0.0000909360
    2    1   1    2        -4.9112049799         0.6977117331
    2    1   2    2        -9.8221141808         1.3952290939
    2    1   3    2        -4.9110855820         0.6975216850
-  
+
    3    1   1    1         5.9059828920         0.0000817603
    3    1   2    1         5.9059834449         0.0000500191
    3    1   3    1        11.8122672460         0.0000000000
    3    1   1    2        -4.9112128057         0.6978566844
    3    1   2    2        -4.9112085870         0.6975277821
    3    1   3    2        -9.8221173466         1.3952968179
-  
+
    1    2   1    1        -6.9927698800        -1.5142457944
    1    2   2    1        -4.9128954962        -0.6986857278
    1    2   3    1        -4.9112921788        -0.6977697437
    1    2   1    2        12.9107304242        -0.0000000000
    1    2   2    2         5.9043602366         0.0020190732
    1    2   3    2         5.9060010778        -0.0002459649
-  
+
    2    2   1    1        -4.9114962579        -0.6976059466
    2    2   2    1        -9.8220102164        -1.3951720679
    2    2   3    1        -4.9113073725        -0.6975368278
    2    2   1    2         5.9059960317        -0.0000055148
    2    2   2    2        11.8124619599        -0.0000000000
    2    2   3    2         5.9061758527        -0.0000993830
-  
+
    3    2   1    1        -4.9111878305        -0.6975034175
    3    2   2    1        -4.9109499843        -0.6974753246
    3    2   3    1        -9.8220996575        -1.3952879432
    3    2   1    2         5.9059578892        -0.0000065594
    3    2   2    2         5.9061317462        -0.0000223643
    3    2   3    2        11.8123942550        -0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.5549233121         0.0000428358
    1    1   2    1        -0.0246944136        -0.0000465710
    1    1   3    1        -0.0246413122         0.0000548199
    1    1   1    2        -0.3773310627         0.0652829949
    1    1   2    2        -0.0635571421        -0.0026434740
    1    1   3    2        -0.0634583235        -0.0026826506
-  
+
    2    1   1    1        -0.0246976538        -0.0000442606
    2    1   2    1         0.5549200223         0.0000479958
    2    1   3    1         0.0246278051        -0.0000489046
    2    1   1    2        -0.0635611088        -0.0026660788
    2    1   2    2        -0.3773354081         0.0652899174
    2    1   3    2         0.0634446756         0.0026865849
-  
+
    3    1   1    1        -0.0247031558        -0.0000433327
    3    1   2    1         0.0246872409         0.0000552317
    3    1   3    1         0.5548493535        -0.0000543230
    3    1   1    2        -0.0635557965        -0.0026628859
    3    1   2    2         0.0635492247         0.0026436681
    3    1   3    2        -0.3774392547         0.0653198212
-  
+
    1    2   1    1        -0.3773320506        -0.0652701678
    1    2   2    1        -0.0635601982         0.0026493415
    1    2   3    1        -0.0634681718         0.0026984201
    1    2   1    2         0.5549373172        -0.0000422569
    1    2   2    2        -0.0246981373         0.0000488366
    1    2   3    2        -0.0246234244        -0.0000493786
-  
+
    2    2   1    1        -0.0635488398         0.0026401475
    2    2   2    1        -0.3773420450        -0.0652818839
    2    2   3    1         0.0634664590        -0.0026845407
    2    2   1    2        -0.0246981785         0.0000415474
    2    2   2    2         0.5549216679        -0.0000481272
    2    2   3    2         0.0246097507         0.0000480803
-  
+
    3    2   1    1        -0.0635470227         0.0026471904
    3    2   2    1         0.0635245836        -0.0026480266
    3    2   3    1        -0.3774278588        -0.0653276027
@@ -2570,7 +2570,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.5202191422E+00    5.4990046527E-05
    3   1   2   1   -1.5203208234E+00    6.7012608414E-06
    3   1   3   1   -3.0406013623E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    2.5754457241E-02    0.0000000000E+00
@@ -2582,12 +2582,12 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -8.4636031153E-07   -5.2293242138E-07
    3   1   2   1   -1.0159552476E-10    0.0000000000E+00
    3   1   3   1    0.0000000000E+00    0.0000000000E+00
- 
+
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2642,8 +2642,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2910,8 +2910,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.93514
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2927,7 +2927,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3280,7 +3280,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.1845331589E+00    3.0333440833E-07
    3   1   2   1   -1.1845341571E+00    1.9936645636E-06
    3   1   3   1   -2.3690665912E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    3.8403145811E-09    0.0000000000E+00
@@ -3298,95 +3298,95 @@ tolerances: {tolwfr: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        12.4664746755         0.0000000000
    1    1   2    1         5.1461019022        -0.0000208826
    1    1   3    1         5.1456638724        -0.0000378891
    1    1   1    2        -5.8722074756         0.0006086060
    1    1   2    2        -4.3843834599         0.0003518205
    1    1   3    2        -4.3844805467         0.0002244953
-  
+
    2    1   1    1         5.1460197040         0.0000134618
    2    1   2    1        10.2917342746         0.0000000000
    2    1   3    1         5.1456901502         0.0000074054
    2    1   1    2        -4.3847693659         0.0002621649
    2    1   2    2        -8.7693253316         0.0002275279
    2    1   3    2        -4.3846814344         0.0002136583
-  
+
    3    1   1    1         5.1457519760         0.0000420448
    3    1   2    1         5.1457969467        -0.0000076224
    3    1   3    1        10.2914632970         0.0000000000
    3    1   1    2        -4.3847279187         0.0002559528
    3    1   2    2        -4.3846591060         0.0002162547
    3    1   3    2        -8.7693109401         0.0000463111
-  
+
    1    2   1    1        -5.8722739340        -0.0006097773
    1    2   2    1        -4.3845245921        -0.0002515087
    1    2   3    1        -4.3847065440        -0.0002651556
    1    2   1    2        12.4671295007         0.0000000000
    1    2   2    2         5.1464872136         0.0000945064
    1    2   3    2         5.1462463402         0.0003186569
-  
+
    2    2   1    1        -4.3848472921        -0.0003620053
    2    2   2    1        -8.7693327442        -0.0002320724
    2    2   3    1        -4.3845884383        -0.0002193650
    2    2   1    2         5.1462324712        -0.0001139284
    2    2   2    2        10.2916496506         0.0000000000
    2    2   3    2         5.1458017456        -0.0000827489
-  
+
    3    2   1    1        -4.3845087172        -0.0002281349
    3    2   2    1        -4.3846837924        -0.0002111326
    3    2   3    1        -8.7692756726        -0.0000394471
    3    2   1    2         5.1463205023        -0.0003151825
    3    2   2    2         5.1458850629         0.0000858318
    3    2   3    2        10.2914900824         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.5107687725         0.0000000684
    1    1   2    1        -0.0488073670         0.0000019648
    1    1   3    1        -0.0488100717         0.0000005268
    1    1   1    2        -0.3286189566         0.0000048911
    1    1   2    2        -0.0650243523        -0.0000032987
    1    1   3    2        -0.0650283541        -0.0000007631
-  
+
    2    1   1    1        -0.0488065279        -0.0000022979
    2    1   2    1         0.5107655743         0.0000002647
    2    1   3    1         0.0488139152         0.0000010183
    2    1   1    2        -0.0650122461        -0.0000045942
    2    1   2    2        -0.3286130280         0.0000071595
    2    1   3    2         0.0650249388         0.0000198806
-  
+
    3    1   1    1        -0.0488111759        -0.0000003403
    3    1   2    1         0.0488062708        -0.0000010281
    3    1   3    1         0.5107972542        -0.0000002550
    3    1   1    2        -0.0650120339         0.0000031448
    3    1   2    2         0.0650187203         0.0000144441
    3    1   3    2        -0.3286105305         0.0000131537
-  
+
    1    2   1    1        -0.3286132208        -0.0000046008
    1    2   2    1        -0.0650141861         0.0000048855
    1    2   3    1        -0.0650291956        -0.0000040040
    1    2   1    2         0.5107473975         0.0000004271
    1    2   2    2        -0.0488059261        -0.0000184453
    1    2   3    2        -0.0488058357        -0.0000008165
-  
+
    2    2   1    1        -0.0650273464         0.0000035933
    2    2   2    1        -0.3286106636        -0.0000074194
    2    2   3    1         0.0650329286        -0.0000139430
    2    2   1    2        -0.0488055151         0.0000175735
    2    2   2    2         0.5107869003         0.0000004447
    2    2   3    2         0.0488379521        -0.0000094785
-  
+
    3    2   1    1        -0.0650104301         0.0000005864
    3    2   2    1         0.0650095633        -0.0000205647
    3    2   3    1        -0.3286176940        -0.0000128159
@@ -3421,7 +3421,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.5121356918E+00    2.9911004670E-06
    3   1   2   1   -1.5121301334E+00   -9.1270615399E-06
    3   1   3   1   -3.0242580854E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    3.8403145811E-09    0.0000000000E+00
@@ -3433,12 +3433,12 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1    0.0000000000E+00    0.0000000000E+00
    3   1   2   1    0.0000000000E+00    0.0000000000E+00
    3   1   3   1    0.0000000000E+00    0.0000000000E+00
- 
+
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -3493,8 +3493,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3761,8 +3761,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.97646
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3778,7 +3778,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -4129,7 +4129,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.2155373166E+00   -4.3595019700E-03
    3   1   2   1   -1.1966129761E+00    4.3463977577E-03
    3   1   3   1   -2.4121417036E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    2.2155631632E-03    0.0000000000E+00
@@ -4147,95 +4147,95 @@ tolerances: {tolwfr: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        12.8285270312         0.0000000000
    1    1   2    1         7.1256353703         0.0002224163
    1    1   3    1         5.7038703090         0.0003738045
    1    1   1    2        -4.4621047757         4.4610976503
    1    1   2    2        -2.9013651862         1.0429009090
    1    1   3    2        -3.4188997807         1.5596307422
-  
+
    2    1   1    1         7.1256651397        -0.0001328239
    2    1   2    1        12.8301142356         0.0000000000
    2    1   3    1         5.7045218394        -0.0001664923
    2    1   1    2        -2.9022809484         1.0424677419
    2    1   2    2        -4.4618015350         4.4608930050
    2    1   3    2        -3.4193521510         1.5586099229
-  
+
    3    1   1    1         5.7038005728        -0.0002534928
    3    1   2    1         5.7044693231         0.0002835540
    3    1   3    1        11.4081123692         0.0000000000
    3    1   1    2        -3.4186033085         1.5598689169
    3    1   2    2        -3.4186908822         1.5594149709
    3    1   3    2        -6.8373911353         3.1190385373
-  
+
    1    2   1    1        -4.4621222914        -4.4610879714
    1    2   2    1        -2.9022928906        -1.0424704989
    1    2   3    1        -3.4186308449        -1.5598682442
    1    2   1    2        12.8291470578         0.0000000000
    1    2   2    2         7.1251314176         0.0003340622
    1    2   3    2         5.7045690033         0.0006556152
-  
+
    2    2   1    1        -2.9013964840        -1.0429115065
    2    2   2    1        -4.4617795388        -4.4608896685
    2    2   3    1        -3.4187217685        -1.5594626499
    2    2   1    2         7.1251280787        -0.0004809260
    2    2   2    2        12.8301712782         0.0000000000
    2    2   3    2         5.7039209548        -0.0001669791
-  
+
    3    2   1    1        -3.4188137133        -1.5596696254
    3    2   2    1        -3.4192223767        -1.5586831764
    3    2   3    1        -6.8374070934        -3.1189695364
    3    2   1    2         5.7045091733        -0.0008791065
    3    2   2    2         5.7038766362        -0.0000272083
    3    2   3    2        11.4086754174         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.5120963606        -0.0000020837
    1    1   2    1         0.0000169315        -0.0000221689
    1    1   3    1         0.0000252038         0.0000048281
    1    1   1    2        -0.2235002035         0.2234103051
    1    1   2    2        -0.0834349368        -0.0834496282
    1    1   3    2        -0.0000014186         0.0000141028
-  
+
    2    1   1    1         0.0000177044         0.0000261905
    2    1   2    1         0.5120370962        -0.0000019379
    2    1   3    1        -0.0000181328        -0.0000034787
    2    1   1    2        -0.0834185619        -0.0834241826
    2    1   2    2        -0.2234759667         0.2234765040
    2    1   3    2         0.0000057702        -0.0000030895
-  
+
    3    1   1    1         0.0000262248         0.0000005724
    3    1   2    1        -0.0000136662         0.0000087333
    3    1   3    1         0.6396811200        -0.0000033168
    3    1   1    2         0.0000100050        -0.0000025901
    3    1   2    2        -0.0000486442        -0.0000332245
    3    1   3    2        -0.1770684949         0.1770567306
-  
+
    1    2   1    1        -0.2234985849        -0.2234100212
    1    2   2    1        -0.0834210472         0.0834248256
    1    2   3    1         0.0000157351        -0.0000007084
    1    2   1    2         0.5120891845         0.0000039539
    1    2   2    2        -0.0000089536        -0.0000408783
    1    2   3    2         0.0000309573        -0.0000201705
-  
+
    2    2   1    1        -0.0834353099         0.0834508988
    2    2   2    1        -0.2234761596        -0.2234725069
    2    2   3    1        -0.0000439693         0.0000283922
    2    2   1    2        -0.0000082573         0.0000342859
    2    2   2    2         0.5121466671         0.0000026385
    2    2   3    2        -0.0000439571        -0.0000205119
-  
+
    3    2   1    1        -0.0000020314        -0.0000159014
    3    2   2    1         0.0000044769        -0.0000003191
    3    2   3    1        -0.1770732561        -0.1770516177
@@ -4270,7 +4270,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.6081002558E+00    1.5425950374E-05
    3   1   2   1   -1.6081146618E+00    1.2148221256E-05
    3   1   3   1   -3.2162666319E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    2.2155631632E-03    0.0000000000E+00
@@ -4282,12 +4282,12 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -2.7711572298E-08   -1.4380006772E-08
    3   1   2   1   -2.7710593341E-08   -1.4379172654E-08
    3   1   3   1    0.0000000000E+00    0.0000000000E+00
- 
+
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -4342,8 +4342,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4610,8 +4610,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.93649
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4627,7 +4627,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -4976,7 +4976,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.1703987936E+00   -6.2320505650E-07
    3   1   2   1   -1.1703933893E+00   -4.9135790411E-06
    3   1   3   1   -2.3407926771E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    2.6565821519E-09    0.0000000000E+00
@@ -4994,95 +4994,95 @@ tolerances: {tolwfr: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        12.4027850328        -0.0000000000
    1    1   2    1         6.1647317804         1.1768089000
    1    1   3    1         4.8793340607         0.0014041578
    1    1   1    2        -2.8606035944         1.7886346865
    1    1   2    2        -2.2673606768         0.8211023486
    1    1   3    2        -2.5138713487         0.8033729297
-  
+
    2    1   1    1         6.1645885523        -1.1765240985
    2    1   2    1        12.1171101500        -0.0000000000
    2    1   3    1         4.8773937838         0.0011976279
    2    1   1    2        -2.2671086200         0.8211598291
    2    1   2    2        -3.0091553139         1.6191639825
    2    1   3    2        -2.5138606151         0.8044624541
-  
+
    3    1   1    1         4.8763508401         0.0001540536
    3    1   2    1         4.8767767933         0.0001184295
    3    1   3    1         9.7542657760         0.0000000000
    3    1   1    2        -2.5134902571         0.8049811522
    3    1   2    2        -2.5138077277         0.8049524780
    3    1   3    2        -5.0283713614         1.6096419147
-  
+
    1    2   1    1        -2.8605657429        -1.7886355655
    1    2   2    1        -2.2675592115        -0.8211874944
    1    2   3    1        -2.5125324328        -0.8033861665
    1    2   1    2        12.4028935812         0.0000000000
    1    2   2    2         6.1644757618        -1.1768513235
    1    2   3    2         4.8783018677        -0.0017800801
-  
+
    2    2   1    1        -2.2668630298        -0.8210707470
    2    2   2    1        -3.0091691081        -1.6191701796
    2    2   3    1        -2.5135217325        -0.8048442679
    2    2   1    2         6.1643568151         1.1765642768
    2    2   2    2        12.1167239506         0.0000000000
    2    2   3    2         4.8769001650        -0.0011301451
-  
+
    3    2   1    1        -2.5133887809        -0.8052757579
    3    2   2    1        -2.5137648606        -0.8051535907
    3    2   3    1        -5.0283402123        -1.6096423408
    3    2   1    2         4.8761622314        -0.0000737801
    3    2   2    2         4.8764658856        -0.0000721705
    3    2   3    2         9.7538100656         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.4924928402        -0.0000118269
    1    1   2    1        -0.0547332756         0.0000025563
    1    1   3    1        -0.0063968573        -0.0528071144
    1    1   1    2        -0.1428319704         0.0757758253
    1    1   2    2        -0.0828796262        -0.0034737786
    1    1   3    2        -0.0033045664        -0.0038201918
-  
+
    2    1   1    1        -0.0546270610         0.0000102278
    2    1   2    1         0.4925608147        -0.0000009572
    2    1   3    1         0.0063457687         0.0528193455
    2    1   1    2        -0.0828943585        -0.0035239720
    2    1   2    2        -0.1428182016         0.0757282062
    2    1   3    2         0.0033527478         0.0038332862
-  
+
    3    1   1    1        -0.0063627329         0.0528770589
    3    1   2    1         0.0064732495        -0.0527602707
    3    1   3    1         0.6080854171        -0.0000581176
    3    1   1    2        -0.0033182546        -0.0038447680
    3    1   2    2         0.0033469557         0.0037636770
    3    1   3    2        -0.1206933943         0.0772502630
-  
+
    1    2   1    1        -0.1428555474        -0.0757822560
    1    2   2    1        -0.0828995401         0.0034636456
    1    2   3    1        -0.0032707725         0.0038211388
    1    2   1    2         0.4924966707         0.0000210656
    1    2   2    2        -0.0547333866         0.0000081085
    1    2   3    2        -0.0064204873         0.0528018564
-  
+
    2    2   1    1        -0.0828720141         0.0035345802
    2    2   2    1        -0.1427942587        -0.0757222889
    2    2   3    1         0.0033240349        -0.0038564658
    2    2   1    2        -0.0546568370        -0.0000209934
    2    2   2    2         0.4925459595        -0.0000081807
    2    2   3    2         0.0063674323        -0.0528084078
-  
+
    3    2   1    1        -0.0032911090         0.0038297831
    3    2   2    1         0.0033937245        -0.0037664058
    3    2   3    1        -0.1207319951        -0.0772303507
@@ -5117,7 +5117,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.5968309697E+00    4.1291452361E-05
    3   1   2   1   -1.5969306198E+00    4.2462918243E-05
    3   1   3   1   -3.1939463712E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    2.6565821519E-09    0.0000000000E+00
@@ -5129,12 +5129,12 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1    0.0000000000E+00    0.0000000000E+00
    3   1   2   1    0.0000000000E+00    0.0000000000E+00
    3   1   3   1    0.0000000000E+00    0.0000000000E+00
- 
+
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -5189,8 +5189,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5457,8 +5457,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.97419
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5474,7 +5474,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -5823,7 +5823,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.2162620082E+00    2.9334190507E-05
    3   1   2   1   -1.2162453682E+00    2.2296354050E-05
    3   1   3   1   -2.4325315916E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    3.4913944185E-07    0.0000000000E+00
@@ -5841,95 +5841,95 @@ tolerances: {tolwfr: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        12.4534237962        -0.0000000000
    1    1   2    1         6.0637537318         1.2071225402
    1    1   3    1         5.6483746480         0.0010497814
    1    1   1    2        -4.5916993070        -0.1778938727
    1    1   2    2        -2.9174421605        -0.0001308367
    1    1   3    2        -3.3004801510        -0.0015253797
-  
+
    2    1   1    1         6.0637018512        -1.2071352858
    2    1   2    1        12.4546385702         0.0000000000
    2    1   3    1         5.6467406939         0.0013084105
    2    1   1    2        -2.9181024714        -0.0001296951
    2    1   2    2        -4.5918059798         0.1776664016
    2    1   3    2        -3.3000925201        -0.0007612245
-  
+
    3    1   1    1         5.6467032448        -0.0000932101
    3    1   2    1         5.6473398582        -0.0001550398
    3    1   3    1        11.2952025512        -0.0000000000
    3    1   1    2        -3.2994109028        -0.0004745524
    3    1   2    2        -3.2989750774        -0.0002508272
    3    1   3    2        -6.6002135690        -0.0005183033
-  
+
    1    2   1    1        -4.5916913047         0.1778933094
    1    2   2    1        -2.9181067769         0.0001476450
    1    2   3    1        -3.3002252839         0.0013617235
    1    2   1    2        12.4540934341         0.0000000000
    1    2   2    2         6.0634454748        -1.2076096061
    1    2   3    2         5.6485395798        -0.0003583000
-  
+
    2    2   1    1        -2.9174412175         0.0001052934
    2    2   2    1        -4.5918102720        -0.1776845127
    2    2   3    1        -3.2989648787         0.0011911253
    2    2   1    2         6.0634015288         1.2076067504
    2    2   2    2        12.4537494830         0.0000000000
    2    2   3    2         5.6466924134        -0.0012512178
-  
+
    3    2   1    1        -3.3002535770         0.0007049422
    3    2   2    1        -3.3004585970         0.0002569500
    3    2   3    1        -6.6001824924         0.0005303878
    3    2   1    2         5.6465828738         0.0002905275
    3    2   2    2         5.6464996292        -0.0002918598
    3    2   3    2        11.2942857337        -0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.5403315966         0.0000047030
    1    1   2    1        -0.0333891579         0.0000069063
    1    1   3    1         0.0000367496        -0.0541966296
    1    1   1    2        -0.2232569012         0.0000112811
    1    1   2    2        -0.0729941755        -0.0000002454
    1    1   3    2         0.0000151041         0.0079583708
-  
+
    2    1   1    1        -0.0332872373        -0.0000074784
    2    1   2    1         0.5403763649        -0.0000041309
    2    1   3    1        -0.0000887945         0.0541854862
    2    1   1    2        -0.0729920121        -0.0000245041
    2    1   2    2        -0.2232938642        -0.0000330626
    2    1   3    2         0.0000669321        -0.0079676660
-  
+
    3    1   1    1         0.0000121832         0.0542395679
    3    1   2    1        -0.0000160979        -0.0541337141
    3    1   3    1         0.5777398938        -0.0000476413
    3    1   1    2        -0.0000054155         0.0079354090
    3    1   2    2        -0.0000107038        -0.0080147840
    3    1   3    2        -0.1889841033         0.0000450151
-  
+
    1    2   1    1        -0.2232508396        -0.0000029703
    1    2   2    1        -0.0729596652         0.0000191204
    1    2   3    1        -0.0000279088        -0.0079679742
    1    2   1    2         0.5402988116        -0.0000330474
    1    2   2    2        -0.0334070973        -0.0000070336
    1    2   3    2         0.0000057465         0.0542267770
-  
+
    2    2   1    1        -0.0730254448         0.0000066689
    2    2   2    1        -0.2232982134         0.0000247968
    2    2   3    1         0.0000041326         0.0079873435
    2    2   1    2        -0.0333279189         0.0000069054
    2    2   2    2         0.5403854633         0.0000331756
    2    2   3    2        -0.0000597568        -0.0542268368
-  
+
    3    2   1    1         0.0000092653        -0.0079241402
    3    2   2    1         0.0000352781         0.0080149238
    3    2   3    1        -0.1889622181        -0.0000566173
@@ -5964,7 +5964,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.5565329408E+00    1.4384429616E-05
    3   1   2   1   -1.5566495143E+00    2.0673259453E-05
    3   1   3   1   -3.1131910709E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    3.4913944185E-07    0.0000000000E+00
@@ -5976,12 +5976,12 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1    0.0000000000E+00    0.0000000000E+00
    3   1   2   1    0.0000000000E+00    0.0000000000E+00
    3   1   3   1    0.0000000000E+00    0.0000000000E+00
- 
+
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -6036,8 +6036,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6304,8 +6304,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.93591
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6321,7 +6321,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -6671,7 +6671,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.1283847110E+00    8.2791561182E-06
    3   1   2   1   -1.1283714499E+00   -1.1194019808E-05
    3   1   3   1   -2.2567465300E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -6689,95 +6689,95 @@ tolerances: {tolwfr: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        11.5184503728         0.0000000000
    1    1   2    1         7.3897832124        -0.0001576163
    1    1   3    1         4.1284828522         0.0002720512
    1    1   1    2        -0.0001167704         0.0003376428
    1    1   2    2        -2.2068557129         0.0002536861
    1    1   3    2        -2.2067592369         0.0001202374
-  
+
    2    1   1    1         7.3897049056         0.0001613953
    2    1   2    1        11.5183237131         0.0000000000
    2    1   3    1         4.1283276621         0.0004395741
    2    1   1    2        -2.2066039057         0.0000834769
    2    1   2    2        -0.0000852411        -0.0003092902
    2    1   3    2        -2.2067390477        -0.0001149708
-  
+
    3    1   1    1         4.1284888963        -0.0000076010
    3    1   2    1         4.1283996881        -0.0001769338
    3    1   3    1         8.2572132377         0.0000000000
    3    1   1    2        -2.2065490000         0.0003147971
    3    1   2    2        -2.2066436135         0.0000181570
    3    1   3    2        -4.4137407246         0.0002239243
-  
+
    1    2   1    1        -0.0000640088        -0.0003445531
    1    2   2    1        -2.2067848444        -0.0000880276
    1    2   3    1        -2.2069259225        -0.0005309906
    1    2   1    2        11.5185754569         0.0000000000
    1    2   2    2         7.3903725724         0.0001258150
    1    2   3    2         4.1289143782         0.0001551382
-  
+
    2    2   1    1        -2.2068610140        -0.0002608563
    2    2   2    1        -0.0000944678         0.0003040677
    2    2   3    1        -2.2068249674        -0.0002313256
    2    2   1    2         7.3900386995        -0.0001202063
    2    2   2    2        11.5187801016         0.0000000000
    2    2   3    2         4.1287739287        -0.0000105448
-  
+
    3    2   1    1        -2.2067858655        -0.0002091201
    3    2   2    1        -2.2067666136         0.0000268408
    3    2   3    1        -4.4137462041        -0.0002221179
    3    2   1    2         4.1287977026        -0.0000393695
    3    2   2    2         4.1289497055         0.0001236008
    3    2   3    2         8.2576759880         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.3706435452        -0.0000001254
    1    1   2    1        -0.0000031132         0.0000076452
    1    1   3    1        -0.0000084036        -0.0000007417
    1    1   1    2        -0.0000125134        -0.0000138419
    1    1   2    2        -0.1981092966         0.0000133354
    1    1   3    2         0.0000182078        -0.0000106138
-  
+
    2    1   1    1        -0.0000001515        -0.0000074755
    2    1   2    1         0.3706545156        -0.0000000442
    2    1   3    1        -0.0000061693        -0.0000075417
    2    1   1    2        -0.1981144498         0.0000105779
    2    1   2    2        -0.0000091726         0.0000100316
    2    1   3    2         0.0000063957         0.0000155079
-  
+
    3    1   1    1        -0.0000081217         0.0000126122
    3    1   2    1        -0.0000099556         0.0000193310
    3    1   3    1         0.6634353427        -0.0000117451
    3    1   1    2         0.0000026209        -0.0000089493
    3    1   2    2         0.0000082617        -0.0000008657
    3    1   3    2        -0.0000159678         0.0000056383
-  
+
    1    2   1    1        -0.0000031111         0.0000139580
    1    2   2    1        -0.1981153195        -0.0000104771
    1    2   3    1        -0.0000003110         0.0000048471
    1    2   1    2         0.3706520070        -0.0000001868
    1    2   2    2         0.0000098584        -0.0000072504
    1    2   3    2         0.0000018548         0.0000000874
-  
+
    2    2   1    1        -0.1981189870        -0.0000133366
    2    2   2    1        -0.0000085069        -0.0000100850
    2    2   3    1         0.0000090069        -0.0000030588
    2    2   1    2         0.0000229860         0.0000075021
    2    2   2    2         0.3706514884        -0.0000000650
    2    2   3    2         0.0000013511         0.0000036936
-  
+
    3    2   1    1         0.0000004887         0.0000010165
    3    2   2    1        -0.0000006990        -0.0000252648
    3    2   3    1        -0.0000055475         0.0000074762
@@ -6812,7 +6812,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.6259882420E+00   -9.8499341693E-06
    3   1   2   1   -1.6259956892E+00    1.0561374913E-06
    3   1   3   1   -3.2520191495E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -6824,12 +6824,12 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1    0.0000000000E+00    0.0000000000E+00
    3   1   2   1    0.0000000000E+00    0.0000000000E+00
    3   1   3   1    0.0000000000E+00    0.0000000000E+00
- 
+
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -6884,8 +6884,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7152,8 +7152,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   1.93668
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7169,7 +7169,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -7516,7 +7516,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.1896271270E+00   -7.7408719469E-03
    3   1   2   1   -1.1014575863E+00   -7.7452658531E-03
    3   1   3   1   -2.2910838332E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -7534,95 +7534,95 @@ tolerances: {tolwfr: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1        12.1460809481         0.0000000000
    1    1   2    1         6.2978393459         1.2733850110
    1    1   3    1         5.8497222940         1.2734148142
    1    1   1    2        -0.1734473181        -0.1734814936
    1    1   2    2        -0.1726685386        -0.0000362575
    1    1   3    2        -0.1732684887        -0.0003869211
-  
+
    2    1   1    1         6.2977589933        -1.2734708262
    2    1   2    1        12.5958494992        -0.0000000000
    2    1   3    1         6.2986999394         1.2731431136
    2    1   1    2        -0.1731955141        -0.0003226071
    2    1   2    2         0.0006165972        -0.0008982014
    2    1   3    2        -0.1737144132        -0.0002021583
-  
+
    3    1   1    1         5.8497271974        -1.2733956513
    3    1   2    1         6.2988017088        -1.2730805938
    3    1   3    1        12.1474603433         0.0000000000
    3    1   1    2        -0.1736804146         0.0004110588
    3    1   2    2        -0.1730840249        -0.0007042411
    3    1   3    2        -0.1733330496         0.1727931082
-  
+
    1    2   1    1        -0.1733850672         0.1734792162
    1    2   2    1        -0.1731097791         0.0002667125
    1    2   3    1        -0.1737026325        -0.0003805555
    1    2   1    2        12.1465409469         0.0000000000
    1    2   2    2         6.2978038183        -1.2737100870
    1    2   3    2         5.8501909726        -1.2738511072
-  
+
    2    2   1    1        -0.1727013813        -0.0000823130
    2    2   2    1         0.0005554510         0.0007544030
    2    2   3    1        -0.1732816010         0.0006767576
    2    2   1    2         6.2976747081         1.2738819805
    2    2   2    2        12.5951216359         0.0000000000
    2    2   3    2         6.2971660007        -1.2745189373
-  
+
    3    2   1    1        -0.1732972809         0.0002049489
    3    2   2    1        -0.1737666106         0.0001085352
    3    2   3    1        -0.1734244211        -0.1727868693
    3    2   1    2         5.8501681609         1.2738617850
    3    2   2    2         6.2972730469         1.2744313864
    3    2   3    2        12.1465540141         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.5654021150         0.0000028991
    1    1   2    1         0.0000231479        -0.0000150951
    1    1   3    1         0.0000399302        -0.1143079102
    1    1   1    2        -0.0000033498        -0.0000484397
    1    1   2    2        -0.0077971905         0.0078130203
    1    1   3    2         0.0000123772        -0.0000218628
-  
+
    2    1   1    1         0.0000274960         0.0000112431
    2    1   2    1         0.5250906097         0.0000009529
    2    1   3    1         0.0000080351         0.0000024215
    2    1   1    2        -0.0077504034         0.0077546634
    2    1   2    2        -0.0000101038        -0.0000066700
    2    1   3    2        -0.0077973153        -0.0077475845
-  
+
    3    1   1    1         0.0000389689         0.1143087704
    3    1   2    1         0.0000042082         0.0000003849
    3    1   3    1         0.5653166798        -0.0000037593
    3    1   1    2         0.0000077352         0.0000135281
    3    1   2    2        -0.0078024796        -0.0077962576
    3    1   3    2         0.0000385926        -0.0000238621
-  
+
    1    2   1    1        -0.0000110239         0.0000498983
    1    2   2    1        -0.0077547022        -0.0077584449
    1    2   3    1         0.0000064731        -0.0000231351
    1    2   1    2         0.5652892981        -0.0000060626
    1    2   2    2         0.0000053888        -0.0000239148
    1    2   3    2         0.0000530515         0.1143862996
-  
+
    2    2   1    1        -0.0077946685        -0.0078102331
    2    2   2    1        -0.0000088559         0.0000067657
    2    2   3    1        -0.0078007514         0.0077932137
    2    2   1    2         0.0000112178         0.0000316307
    2    2   2    2         0.5251560977        -0.0000016533
    2    2   3    2        -0.0000132274         0.0000007468
-  
+
    3    2   1    1         0.0000099121         0.0000180381
    3    2   2    1        -0.0078006147         0.0077512647
    3    2   3    1         0.0000445045         0.0000229256
@@ -7657,7 +7657,7 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1   -1.7561974765E+00   -4.0023874285E-02
    3   1   2   1   -1.9656374490E+00   -4.0025542486E-02
    3   1   3   1   -3.7218735904E+00    0.0000000000E+00
- 
+
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1    0.0000000000E+00    0.0000000000E+00
@@ -7669,12 +7669,12 @@ tolerances: {tolwfr: 1.00E-08, }
    3   1   1   1    0.0000000000E+00    0.0000000000E+00
    3   1   2   1    0.0000000000E+00    0.0000000000E+00
    3   1   3   1    0.0000000000E+00    0.0000000000E+00
- 
+
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -7707,7 +7707,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      6.6750000000E+00  6.6750000000E+00  6.6750000000E+00 Bohr
               amu      1.20110000E+01
@@ -8255,7 +8255,7 @@ P          mk1mem           8
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#ponce2014
 -
-- [2] Temperature dependence of the electronic structure of semiconductors and insulators 
+- [2] Temperature dependence of the electronic structure of semiconductors and insulators
 - S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)
 - Comment: the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
 - Strong suggestion to cite this paper in your publications.
@@ -8279,7 +8279,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -8307,12 +8307,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -8330,7 +8330,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

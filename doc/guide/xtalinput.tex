@@ -16,16 +16,16 @@ data (either experimental or from a previous computation) describing a solid. Th
 data are typically given in the form of a {\tt .cif} file (the standard format for
 exchange of crystal structure data) or from crystallographic data published in an
 article. The aim of these notes is to provide some hints to get users started in
-correctly entering these data into {\sc Abinit}. 
+correctly entering these data into {\sc Abinit}.
 
 \section{An Easy Case: Stishovite}
 
-Stishovite is a polymorph of SiO$_2$. The reason I call it an ``easy case'' is that its space 
+Stishovite is a polymorph of SiO$_2$. The reason I call it an ``easy case'' is that its space
 group, number 136 in the International Tables, is $P4_2/mnm$ and therefore the conventional
 unit cell and the primitive unit cell are the same.
 
-{\bf KEY POINT:} A unit cell that displays all the symmetries of the space group is called the 
-``conventional'' unit cell. Some space groups also have unit cells, which are smaller than 
+{\bf KEY POINT:} A unit cell that displays all the symmetries of the space group is called the
+``conventional'' unit cell. Some space groups also have unit cells, which are smaller than
 the conventional cells, that do not display all the symmetries. These are called ``primitive''
 unit cells. Of the 236 crystallographic space groups, those with Hermann-Marguin names beginning
 with the letter $P$ have conventional and primitive cells that coincide, while the others do not.
@@ -61,14 +61,14 @@ O1 O2- 4 f 0.3062(13) 0.3062(13) 0 . 1. 0
 \end{verbatim}
 
 The first thing to look for is the space group name, which is $P4_2/mnm$ as mentioned and therefore the unit cell
-is both conventional and primitive already. The cell itself happens to be tetragonal: two sides are equal, 
+is both conventional and primitive already. The cell itself happens to be tetragonal: two sides are equal,
 with length 4.1790~\AA ({\tt .cif} files use Angstroms, not atomic units) and the third side of length 2.6649~\AA.
-The edges of the cell all meet at 90$^\circ$: these are the angles {\tt alpha}, {\tt beta}, {\tt gamma} and 
+The edges of the cell all meet at 90$^\circ$: these are the angles {\tt alpha}, {\tt beta}, {\tt gamma} and
 are the angles between sides BC, AC, and AB respectively.
 
 Next, notice that the number of formula units $Z$, is 2. Therefore there will be 2 units of SiO$_2$ in the unit cell,
 or 6 atoms total: 2 Si and 4 O. Where are these atoms? The loop over atom sites tells us, but notice that
-there are only two entries: 1 Si and 1 O. That's because the other locations can be constructed by symmetry, given 
+there are only two entries: 1 Si and 1 O. That's because the other locations can be constructed by symmetry, given
 the symmetry operations in space group 136. These two atoms form what is called the ``asymmetric unit''. Notice
 that it is NOT a multiple of the formula unit. The lines describing the two atoms include a lot of information,
 including the site multiplicity, fractional occupancy, and so forth. These notes are not a full course in
@@ -80,7 +80,7 @@ So, how does all this look in an {\sc Abinit} input file? Like this:
 spgroup 136 # space group number
 acell 4.1790 4.1790 2.6649 angstrom # cell sides, angstrom units
 angdeg 90.0 90.0 90.0 # cell angles (this is the default by the way)
-znucl 14 8 # atomic number of atoms, 
+znucl 14 8 # atomic number of atoms,
            # will be cross checked against pseudopotential files
 natom 6 # 6 atoms in the unit cell (remember Z = 2 here)
 natrd 2 # only read two atoms in, this is the asymmetric unit
@@ -93,7 +93,7 @@ xred # here come the fractional coordinates from the cif file
 
 If I'm unsure that I've input a cell correctly, I run {\sc Abinit} with {\tt nstep 1}, {\tt prtgeo 2} and
 {\tt prtden 1}, so that
-it only does one step of calculation and prints  geometry and density files. I then examine the 
+it only does one step of calculation and prints  geometry and density files. I then examine the
 geometry output for sensible bond lengths, and look at the density file using the program {\sc Xcrysden}
 to get a visual image of the cell.
 
@@ -119,7 +119,7 @@ Notice that {\tt acell} is now in atomic units, and also {\tt xred} for all 6 at
 unit cell have been worked out for us. The first two are the ones we entered, the rest were
 computed by symmetry by {\sc Abinit}. To do this yourself, you would use the Wyckoff multiplicity
 of each atom from the {\tt .cif} file together with the International Tables entry for that
-multiplicity in space group 136, to compute the remaining, symmetry-related atoms. 
+multiplicity in space group 136, to compute the remaining, symmetry-related atoms.
 
 \section{A Harder Case: Anatase}
 
@@ -158,7 +158,7 @@ spgroup 141 # space group number
 brvltt -1 # tell abinit to find the primitive cell
 acell 3.7842 3.7842 9.5146 angstrom # cell sides, angstrom units
 angdeg 90.0 90.0 90.0 # cell angles (this is the default by the way)
-znucl 22 8 # atomic number of atoms, 
+znucl 22 8 # atomic number of atoms,
            # will be cross checked against pseudopotential files
 natom 6 # 6 atoms in the primitive unit cell (although Z = 4)
 natrd 2 # only read two atoms in, this is the asymmetric unit
@@ -172,8 +172,8 @@ The input is pretty much like stishovite, but with two key differences: {\tt brv
 to find the primitive cell from the conventional cell input, and {\tt natom 6}, which is not the conventional
 cell value. How did I know what value of {\tt natom} to use? Well, since the primitive cell has to be smaller than
 the conventional cell in this case, but still must contain an integral multiple of formula units, the only
-choices were 9, 6, and 3; and primitive cells are also divisors of the total, leaving only 6 and 3 as possibilities. 
-You can work all this out in exact detail from the symmetries but it's easy to just guess and run a trial. 
+choices were 9, 6, and 3; and primitive cells are also divisors of the total, leaving only 6 and 3 as possibilities.
+You can work all this out in exact detail from the symmetries but it's easy to just guess and run a trial.
 
 Again, from the output we find:
 \begin{verbatim}
@@ -201,42 +201,42 @@ variable {\tt rprim} that didn't appear in the stishovite case. Actually, {\tt r
 in the stishovite case, but as its default value didn't change, it didn't get printed. This would
 be a good time to review the {\sc Abinit} documentation for {\tt acell} and {\tt rprim}. Basically,
 {\sc Abinit} describes the unit cell in terms of three lengths {\tt acell} that multiply three
-vectors {\tt rprim} that describe the cell axes. The default for {\tt rprim} are the three 
+vectors {\tt rprim} that describe the cell axes. The default for {\tt rprim} are the three
 Cartesian unit vectors, and in the stishovite case, which has a tetragonal cell, these remain
 valid and can be multiplied by the {\tt acell} values. In certain complex cases like the body-centered
 tetragonal case, {\sc Abinit} resets {\tt acell} to {\tt 1.0 1.0 1.0} and carries both the
 length and orientation of the unit cell axes completely in {\tt rprim}. In particular, a body-centered
 tetragonal cell with cell lengths $a,a,c$ is described by a primitive cell with vectors
 $(-a/2,a/2,c/2)$, $(a/2, -a/2, c/2)$ and $(a/2,a/2,-c/2)$. These values can be found in the
-{\tt rprim} output above. 
+{\tt rprim} output above.
 
 \section{FAQ}
 
 \begin{description}
 
-\item[How to choose the {\tt kpt} grid?] The kpt mesh has to be coherent with the symmetry of the cell. 
-The easiest way to set it up is to let {\sc Abinit} do the work for you, using the variable {\tt kptrlen}. 
+\item[How to choose the {\tt kpt} grid?] The kpt mesh has to be coherent with the symmetry of the cell.
+The easiest way to set it up is to let {\sc Abinit} do the work for you, using the variable {\tt kptrlen}.
 With this variable, {\sc Abinit} will design a series of meshes with the correct symmetry, and then choose
 one with characteristics close to the input value of {\tt kptrlen}. As a rule of thumb, {\tt kptrlen} of 30 gives
 a coarse mesh, and {\tt kptrlen} of 60 is pretty fine. {\tt kptrlen of 80} usually gives very good convergence for
-many properties. As always, you should do a convergence check on the kpt grid. 
+many properties. As always, you should do a convergence check on the kpt grid.
 
 For more control, do a run with {\tt kptrlen 60} (say) and also {\tt prtkpt 1}. In this case {\sc Abinit} will stop
 after computing the trial grids, and only print out information about them. Then you can pick a grid you like
 based on its {\tt kptrlen value} and the number of kpts it will generate (which you might be matching against the
 number of processors you can run on). Then you input this mesh using the variables {\tt kptrlatt}, {\tt nshiftk},
-and {\tt shiftk}. 
+and {\tt shiftk}.
 
 \item[How to choose {\tt rprim}?]
 As shown in the above examples, using {\tt spgroup}, {\tt acell}, and {\tt angdeg} lets {\sc Abinit} do the work of
-setting up the cell geometry and therefore {\tt rprim}. However, if you really want to do it yourself, you have to know 
+setting up the cell geometry and therefore {\tt rprim}. However, if you really want to do it yourself, you have to know
 how the primitive cells are constructed for the different cell types. This information can be found for instance in Bradley
 and Cracknell (see Further Reading below), Table 3.1
 
 \item[What about other settings of the space group?]
 Some space groups have multiple settings--see the {\sc Abinit} space group help file, which you can access from the
 documentation for the {\tt spgroup} variable. How do you know which one to use? The easiest way is to look at the
-Wyckoff multiplicities of the atoms in your structure together with their positions, and compare to the 
+Wyckoff multiplicities of the atoms in your structure together with their positions, and compare to the
 International Tables. This will give you the match for the setting used. You will then have to include {\tt spgorig}
 and {\tt spgaxor} as input variables to {\sc Abinit}.
 
@@ -244,13 +244,13 @@ and {\tt spgaxor} as input variables to {\sc Abinit}.
 are positions in the unit cell that exhibit the point symmetry of the space group. If the point symmetry of the position is
 high enough, vectorial quantities, such as force, must vanish there. A typical example is AlAs, for which both the Al and As
 atoms lie on special positions. When you optimize the unit cell, the ions can't move and all forces vanish at them, regardless
-of the volume of the cell. To optimize such a cell in {\sc Abinit} you would use {\tt ionmov 2} and {\tt optcell 2}, but instead
+of the volume of the cell. To optimize such a cell in {\sc Abinit} you would use {\tt geoopt "bfgs"} and {\tt optcell 2}, but instead
 of {\tt toldff} as a convergence variable, use {\tt tolvrs}. {\tt toldff} refers to forces and will always be ``converged'' in this
 case, because all forces are zero.
 
 \item[Is there an even easier way?] Yes--there is a {\sc Python} package called {\sc cif2cell}, which reads {\tt .cif} files
 directly and can make {\sc Abinit} input files. In my experience it works really well. So, are the above notes a waste of your
-time? I don't think so--first, you should understand something about what you're inputting to {\sc Abinit}, and secondly, you may 
+time? I don't think so--first, you should understand something about what you're inputting to {\sc Abinit}, and secondly, you may
 be getting your structure from tabulated data in a paper, not from a {\tt .cif} file, and then you need to understand the
 {\sc Abinit} input variables.
 

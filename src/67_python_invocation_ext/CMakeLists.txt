@@ -2,14 +2,14 @@
 # 67_python_invocation_ext
 #
 add_library(67_python_invocation_ext STATIC
-  invocation_interface.F90
-  invoke_python.cpp
-  invoke_python.hpp
+  execute_python.c
+  m_invocation_tools.F90
+  m_invoke_python.F90
   )
 
 set_target_properties(67_python_invocation_ext
   PROPERTIES
-  Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+  Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
 target_include_directories(67_python_invocation_ext
   PRIVATE
@@ -17,7 +17,7 @@ target_include_directories(67_python_invocation_ext
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
   ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
-  ${CMAKE_CURRENT_BINARY_DIR}/modules
+  ${CMAKE_BINARY_DIR}/modules
   )
 
 target_compile_definitions(67_python_invocation_ext

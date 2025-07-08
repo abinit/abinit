@@ -1,7 +1,7 @@
 /* gpu_linalg.cu */
 
 /*
- * Copyright (C) 2008-2024 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,6 +23,12 @@
 hipblasHandle_t hipblas_handle;
 hipsolverDnHandle_t hipsolverDn_handle;
 static hipStream_t stream_compute;
+
+
+static bool linalg_multi_init;
+static hipStream_t   multi_stream_compute[32];
+hipblasHandle_t      multi_hipblas_handle[32];
+hipsolverDnHandle_t  multi_hipsolverDn_handle[32];
 
 // Parameters to HIP SYEVJ and SYGVJ (Jacobi-based eigensolver)
 hipsolverSyevjInfo_t syevj_params = nullptr;
@@ -164,6 +170,20 @@ extern "C" void gpu_linalg_init_()
   //fflush(stdout);
   rocblas_initialize();
   rocfft_setup();
+  linalg_multi_init = false;
+}
+
+extern "C" void gpu_linalg_init_multi_()
+{
+  int i;
+  for(i=0; i<32; ++i) {
+    HIP_API_CHECK( hipblasCreate(&multi_hipblas_handle[i]) );
+    HIP_API_CHECK( hipsolverDnCreate(&multi_hipsolverDn_handle[i]) );
+    HIP_API_CHECK( hipStreamCreate(&multi_stream_compute[i]) );
+    HIP_API_CHECK( hipsolverDnSetStream(multi_hipsolverDn_handle[i],multi_stream_compute[i]) );
+    HIP_API_CHECK( hipblasSetStream(multi_hipblas_handle[i],multi_stream_compute[i]) );
+  }
+  linalg_multi_init = true;
 }
 
 /*=========================================================================*/
@@ -177,12 +197,19 @@ extern "C" void gpu_linalg_init_()
 
 extern "C" void gpu_linalg_shutdown_()
 {
-  //FIXME
-  //HIP_API_CHECK( hipblasDestroy(hipblas_handle) );
-  hipblasDestroy(hipblas_handle);
+  HIP_API_CHECK( hipblasDestroy(hipblas_handle) );
   HIP_API_CHECK( hipsolverDestroySyevjInfo(syevj_params) );
   HIP_API_CHECK( hipsolverDnDestroy(hipsolverDn_handle) );
   HIP_API_CHECK( hipStreamDestroy(stream_compute) );
+  if(linalg_multi_init) {
+    int i;
+    for(i=0; i<32; ++i) {
+      HIP_API_CHECK( hipblasDestroy(multi_hipblas_handle[i]) );
+      HIP_API_CHECK( hipsolverDnDestroy(multi_hipsolverDn_handle[i]) );
+      HIP_API_CHECK( hipStreamDestroy(multi_stream_compute[i]) );
+    }
+    linalg_multi_init = false;
+  }
 }
 
 /*=========================================================================*/
@@ -291,26 +318,157 @@ extern "C" void gpu_xgemm_strided_batched_(int* cplx, char *transA, char *transB
                            void **A_ptr, int *lda, int *strideA,
                            void** B_ptr, int *ldb, int *strideB,
                            hipDoubleComplex *beta,
-                           void** C_ptr, int *ldc, int *strideC, int *batchCount)
+                           void** C_ptr, int *ldc, int *strideC, int *batchCount,
+                           int *stream_id)
 {
 
   hipblasOperation_t opA = select_hipblas_op(transA);
   hipblasOperation_t opB = select_hipblas_op(transB);
+  hipblasHandle_t* handle_ptr = &hipblas_handle;
+  if(*stream_id != -1) {
+    if(!linalg_multi_init) gpu_linalg_init_multi_();
+    handle_ptr = &(multi_hipblas_handle[*stream_id]);
+  }
 
   (*cplx==1)?
-    HIP_API_CHECK( hipblasDgemmStridedBatched(hipblas_handle, opA, opB,
+    HIP_API_CHECK( hipblasDgemmStridedBatched(*handle_ptr, opA, opB,
                 *N, *M, *K, &((*alpha).x),
                 (double *)(*A_ptr), *lda, *strideA,
                 (double *)(*B_ptr), *ldb, *strideB,
                 &((*beta).x),
                 (double *)(*C_ptr), *ldc, *strideC, *batchCount)) :
-    HIP_API_CHECK( hipblasZgemmStridedBatched(hipblas_handle, opA, opB,
+    HIP_API_CHECK( hipblasZgemmStridedBatched(*handle_ptr, opA, opB,
                 *N, *M, *K, (hipblasDoubleComplex *) alpha,
                 (hipblasDoubleComplex *)(*A_ptr), *lda, *strideA,
                 (hipblasDoubleComplex *)(*B_ptr), *ldb, *strideB,
                 (hipblasDoubleComplex *) beta,
                 (hipblasDoubleComplex *)(*C_ptr), *ldc, *strideC, *batchCount));
 } // gpu_xgemm_strided_batched
+
+
+/*=========================================================================*/
+// NAME
+//  gpu_xginv_strided_
+//
+// FUNCTION
+//  Compute many matrixes inverses on GPU in batch on GPU.
+//
+// INPUTS
+//  cplx       = 1 if real 2 if complex
+//  n          = number of rows of the matrix op(b) and the number of columns of the matrix c
+//  A_ptr      = pointer to gpu memory location of  matrixes a
+//  lda        = first dimension of a
+//  strideA    = stride between each matrix a
+//  batchCount = number of batches in any matrix
+//  W_ptr      = pointer to gpu memory locatiion for a work buffer, sized after A
+//
+// OUTPUT
+//  A_ptr     = inverted matrixes pointers
+//
+/*=========================================================================*/
+
+extern "C" void gpu_xginv_strided_(int* cplx,
+                           int *N,
+                           void **A_ptr, int *lda, int *strideA,
+                           int *batchCount, void **W_ptr)
+{
+  int *infoArray, *pivotArray, *info;
+  int i;
+  hipblasDoubleComplex *cwork;
+  hipblasDoubleComplex **A_array, **C_array;
+  hipblasDoubleComplex **A_arrayd, **C_arrayd;
+
+  info = (int*) malloc(*batchCount*sizeof(int));
+  HIP_API_CHECK( hipMalloc( (void**) &infoArray, *batchCount *sizeof(int)) );
+  HIP_API_CHECK( hipMalloc( (void**) &pivotArray,*N * (*batchCount) *sizeof(int)) );
+
+  if(*cplx==1) {
+  /*  HIP_API_CHECK( hipblasDgetrfBatched(hipblas_handle,
+                *N,
+                A_array, *lda,
+                pivotArray, infoArray, *batchCount));
+    HIP_API_CHECK( hipblasDgetriBatched(hipblas_handle,
+                *N,
+                (double *)(*A_ptr), *lda,
+                pivotArray,
+                (double *)(*A_ptr), *lda,
+                infoArray, *batchCount));
+  */
+  } else {
+    //HIP_API_CHECK( hipMalloc( (void**) &cwork,      *N * (*N) *(*batchCount) *sizeof(hipblasDoubleComplex)));
+    A_array = (hipblasDoubleComplex**) malloc(*batchCount*sizeof(hipblasDoubleComplex*));
+    C_array = (hipblasDoubleComplex**) malloc(*batchCount*sizeof(hipblasDoubleComplex*));
+    for(i=0; i<*batchCount; ++i) {
+      A_array[i]=((hipblasDoubleComplex *)A_ptr)+i*(*strideA) ;
+      C_array[i]=((hipblasDoubleComplex *)W_ptr)+i*(*strideA) ;
+    }
+    HIP_API_CHECK( hipMalloc( (void**) &A_arrayd, *batchCount *sizeof(hipblasDoubleComplex*)) );
+    HIP_API_CHECK( hipMalloc( (void**) &C_arrayd, *batchCount *sizeof(hipblasDoubleComplex*)) );
+    HIP_API_CHECK( hipMemcpy(A_arrayd, A_array, *batchCount*sizeof(hipblasDoubleComplex*), hipMemcpyDefault) );
+    HIP_API_CHECK( hipMemcpy(C_arrayd, C_array, *batchCount*sizeof(hipblasDoubleComplex*), hipMemcpyDefault) );
+    HIP_API_CHECK( hipblasZgetrfBatched(hipblas_handle,
+                *N,
+                A_arrayd, *lda,
+                pivotArray, infoArray, *batchCount));
+    //gpu_linalg_stream_synchronize_();
+    HIP_API_CHECK( hipMemcpy(info, infoArray, *batchCount*sizeof(int), hipMemcpyDefault) );
+
+    for(i=0; i<*batchCount; ++i) {
+      if (info[i] < 0) {
+        fprintf(stderr, " The %d-th argument of ZGETRF had an illegal value.", info[i]);
+        fflush(stderr);
+        abi_cabort();
+      } else if (info[i] > 0) {
+         fprintf(stderr,
+             "The matrix that has been passed in argument is probably either \
+             singular or nearly singular.\n\
+             U(i,i) in the P*L*U factorization is exactly zero for i = %d \n\
+             The factorization has been completed but the factor U is exactly singular.\n\
+             Division by zero will occur if it is used to solve a system of equations.", info[i]);
+         fflush(stderr);
+         abi_cabort();
+      }
+    }
+
+    HIP_API_CHECK( hipMemcpy(info, infoArray, *batchCount*sizeof(int), hipMemcpyDefault) );
+
+    HIP_API_CHECK( hipblasZgetriBatched(hipblas_handle,
+                *N,
+                A_arrayd, *lda,
+                pivotArray,
+                C_arrayd, *lda,
+                infoArray, *batchCount));
+    HIP_API_CHECK( hipMemcpy(info, infoArray, *batchCount*sizeof(int), hipMemcpyDefault) );
+
+    for(i=0; i<*batchCount; ++i) {
+      if (info[i] < 0) {
+        fprintf(stderr, " The %d-th argument of ZGETRI had an illegal value.", info[i]);
+        fflush(stderr);
+        abi_cabort();
+      } else if (info[i] > 0) {
+         fprintf(stderr,
+             "The matrix that has been passed in argument is probably either singular \
+             or nearly singular.\n\
+             U(i,i) for i =%d is exactly zero; the matrix is singular and \
+             its inverse could not be computed. \n", info[i]);
+         fflush(stderr);
+         abi_cabort();
+      }
+    }
+    HIP_API_CHECK( hipMemcpy(A_ptr, W_ptr, *batchCount * (*N) * (*N) *sizeof(hipblasDoubleComplex), hipMemcpyDefault) );
+    //HIP_API_CHECK( hipFree(cwork) );
+    HIP_API_CHECK( hipFree(A_arrayd) );
+    HIP_API_CHECK( hipFree(C_arrayd) );
+    free(A_array);
+    free(C_array);
+  }
+
+
+  HIP_API_CHECK( hipFree(infoArray) );
+  HIP_API_CHECK( hipFree(pivotArray) );
+  free(info);
+
+} // gpu_xginv_strided_
 
 /*=========================================================================*/
 // NAME
@@ -739,13 +897,13 @@ extern "C" void gpu_xsygvd_(const int* cplx,
     }
   else
     {
-      HIP_API_CHECK( hipsolverDnZhegvj(hipsolverDn_handle, itype_cu,
+      HIP_API_CHECK( hipsolverDnZhegvd(hipsolverDn_handle, itype_cu,
                                        jobz_cu, fillMode, *A_nrows,
                                        (hipDoubleComplex*)(*A_ptr), *lda,
                                        (hipDoubleComplex*)(*B_ptr), *ldb,
                                        (double*)(*W_ptr),
                                        (hipDoubleComplex*)(*work_ptr),
-                                       *lwork, devInfo, syevj_params) );
+                                       *lwork, devInfo) );
     }
 
   HIP_API_CHECK( hipMemcpy(info, devInfo, 1*sizeof(int), hipMemcpyDefault) );
@@ -782,11 +940,11 @@ extern "C" void gpu_xsygvd_buffersize_(const int* cplx,
     }
   else
     {
-      HIP_API_CHECK( hipsolverDnZhegvj_bufferSize(hipsolverDn_handle, itype_cu,
+      HIP_API_CHECK( hipsolverDnZhegvd_bufferSize(hipsolverDn_handle, itype_cu,
                                                   jobz_cu, fillMode, *A_nrows,
                                                   (hipDoubleComplex*)(*A_ptr), *lda,
                                                   (hipDoubleComplex*)(*B_ptr), *ldb,
-                                                  (double*)(*W_ptr), lwork, syevj_params) );
+                                                  (double*)(*W_ptr), lwork) );
     }
 
 } // gpu_xsygvd_bufferSize_

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.1.4.1 of ANADDB, released Nov 2024.
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
+.Starting date : Sun 16 Feb 2025.
+- ( at 22h51 )
   
 
 ================================================================================
@@ -164,7 +164,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.040  and twall      0.085 sec
+-begin at tcpu      0.036  and twall      0.036 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  2.50000000E-01
@@ -190,9 +190,9 @@
  column 3, 6 and 9 are related to the displacement
        of the generic atom along z.               
 
-  NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. 
+  NOTE: Open file _ifcinfo.dat, for the output of interatomic force constants. This is because prt_ifc==1. 
 
-  NOTE: Open file outfile.forceconstants_ABINIT, for the output of interatomic force constants in TDEP format. This is because prt_ifc==1. 
+  NOTE: Open file _forceconstants.dat, for the output of interatomic force constants in TDEP format. This is because prt_ifc==1. 
 
  generic atom number   1
  with cartesian coordinates  4.19798664E+00 -1.81969603E-09  1.67621667E+00
@@ -1480,10 +1480,10 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
  Direction                     Dielectric constant
    0.00000   0.00000   1.00000      4.98722565
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          5.9  wall=          5.9
 
 ================================================================================
 
-+Total cpu time      5.850  and wall time      6.065 sec
++Total cpu time      5.889  and wall time      5.890 sec
 
  anaddb : the run completed succesfully.

@@ -6,7 +6,7 @@
 !!  Call the C-cu program to make recursion on GPU
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2024 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2025 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -186,8 +186,6 @@ subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
 
 
  call InitGPU(gpuinfo,gpudevice)
- !-- look if it is possible to set devices CUDA compatible
- call set_dev(gpudevice)
  if(gpudevice>-1)then
    !--Take the approximate use of memory to compute the number of points on any GPU
    if(rset%tronc)then
@@ -372,7 +370,6 @@ subroutine CleanRecGPU(recgpu,load)
      ABI_FREE(recgpu%par%vcount)
    end if
  endif
- call unset_dev()
 
 end subroutine CleanRecGPU
 !!***

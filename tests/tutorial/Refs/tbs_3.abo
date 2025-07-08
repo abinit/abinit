@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h06 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tbs_1-tbs_2-tbs_3-tbs_4/tbs_3.abi
 - output file    -> tbs_3.abo
 - root for input  files -> tbs_3i
@@ -245,10 +245,10 @@ electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 ...
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
- in frequency domain and reciprocal space on a transitions basis set. 
- Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
+ in frequency domain and reciprocal space on a transitions basis set.
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile,
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -260,8 +260,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -280,7 +280,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :    64
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     2.75000000E-02  5.25000000E-02  7.75000000E-02       0.01563
      2)     2.77500000E-01  5.25000000E-02  7.75000000E-02       0.01563
@@ -347,13 +347,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
     63)    -4.72500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
     64)    -2.22500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -364,10 +364,14 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
@@ -418,9 +422,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: tbs_3o_DS1_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  15.8413   0.0000  13.0970   0.0000  14.5088   0.0000
    0.0200  15.8418   0.0075  13.0973   0.0039  14.5092   0.0055
    0.0400  15.8433   0.0150  13.0980   0.0079  14.5103   0.0110
@@ -431,7 +435,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.1400  15.8656   0.0525  13.1098   0.0276  14.5267   0.0387
    0.1600  15.8730   0.0601  13.1137   0.0316  14.5322   0.0443
    0.1800  15.8815   0.0677  13.1182   0.0356  14.5385   0.0499
-  
+
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -446,10 +450,10 @@ electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 ...
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
- in frequency domain and reciprocal space on a transitions basis set. 
- Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
+ in frequency domain and reciprocal space on a transitions basis set.
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile,
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -463,7 +467,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :    64
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     2.75000000E-02  5.25000000E-02  7.75000000E-02       0.01563
      2)     2.77500000E-01  5.25000000E-02  7.75000000E-02       0.01563
@@ -530,13 +534,13 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
     63)    -4.72500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
     64)    -2.22500000E-01 -1.97500000E-01 -1.72500000E-01       0.01563
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -547,10 +551,14 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    64 points in the full Brillouin Zone.
 
 
+
+ vcoul_init : cutoff-mode = CRYSTAL
+ q-points for optical limit:   1
+     1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
 
@@ -601,9 +609,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   5.00E-02 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: tbs_3o_DS2_EXC_MDF
-  
+
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  17.2071   0.0000  14.2433   0.0000  15.9300   0.0000
    0.0200  17.2076   0.0080  14.2436   0.0042  15.9304   0.0061
    0.0400  17.2092   0.0160  14.2444   0.0085  15.9317   0.0122
@@ -614,11 +622,11 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.1400  17.2331   0.0563  14.2571   0.0297  15.9499   0.0429
    0.1600  17.2411   0.0644  14.2613   0.0339  15.9560   0.0491
    0.1800  17.2501   0.0726  14.2661   0.0382  15.9629   0.0553
-  
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
@@ -831,7 +839,7 @@ P           mkmem          64
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -848,12 +856,12 @@ P           mkmem          64
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -871,7 +879,7 @@ P           mkmem          64
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

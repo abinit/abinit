@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h04 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_tpolarization_5/tpolarization_5.abi
 - output file    -> tpolarization_5.abo
 - root for input  files -> tpolarization_5i
@@ -376,8 +376,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.513   => boxcut(ratio)=   2.08150
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -391,8 +391,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.024864   -0.802189
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -416,7 +416,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     167.843     167.817
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/13) Internal Cycle: (1/1)
@@ -491,13 +491,13 @@ tolerances: {tolvrs: 1.00E-19, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.834483398E-04   0.834483398E-04   0.834483398E-04
-     Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01  
+     Ionic:                        -0.283583666E-01  -0.283583666E-01  -0.283583666E-01
      Total:                        -0.282749182E-01  -0.282749182E-01  -0.282749182E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.477447686E-02   0.477447686E-02   0.477447686E-02
-     Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01  
+     Ionic:                        -0.162251718E+01  -0.162251718E+01  -0.162251718E+01
      Total:                        -0.161774270E+01  -0.161774270E+01  -0.161774270E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -561,7 +561,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Total energy (etotal) [Ha]= -9.28443856815034E+00
 
- At Broyd/MD step   1, gradients are converged : 
+ At Broyd/MD step   1, gradients are converged :
   max grad (force/stress) = 0.0000E+00 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -655,7 +655,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     168.120     168.096
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/13) Internal Cycle: (1/1)
@@ -730,13 +730,13 @@ tolerances: {tolvrs: 1.00E-19, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:       -0.288584815E-04   0.838957128E-04   0.838957128E-04
-     Ionic:                        -0.283590755E-01  -0.285008709E-01  -0.285008709E-01  
+     Ionic:                        -0.283590755E-01  -0.285008709E-01  -0.285008709E-01
      Total:                        -0.283879340E-01  -0.284169752E-01  -0.284169752E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:       -0.165113113E-02   0.480007320E-02   0.480007320E-02
-     Ionic:                        -0.162255774E+01  -0.163067053E+01  -0.163067053E+01  
+     Ionic:                        -0.162255774E+01  -0.163067053E+01  -0.163067053E+01
      Total:                        -0.162420887E+01  -0.162587046E+01  -0.162587046E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -872,13 +872,13 @@ tolerances: {tolvrs: 1.00E-19, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.125167938E-04   0.838884616E-04   0.838884616E-04
-     Ionic:                        -0.283717918E-01  -0.285008709E-01  -0.285008709E-01  
+     Ionic:                        -0.283717918E-01  -0.285008709E-01  -0.285008709E-01
      Total:                        -0.283592750E-01  -0.284169824E-01  -0.284169824E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.716145370E-03   0.479965832E-02   0.479965832E-02
-     Ionic:                        -0.162328530E+01  -0.163067053E+01  -0.163067053E+01  
+     Ionic:                        -0.162328530E+01  -0.163067053E+01  -0.163067053E+01
      Total:                        -0.162256915E+01  -0.162587087E+01  -0.162587087E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1018,13 +1018,13 @@ tolerances: {tolvrs: 1.00E-19, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.166336720E-03   0.838747533E-04   0.838747533E-04
-     Ionic:                        -0.284190647E-01  -0.285008709E-01  -0.285008709E-01  
+     Ionic:                        -0.284190647E-01  -0.285008709E-01  -0.285008709E-01
      Total:                        -0.282527280E-01  -0.284169962E-01  -0.284169962E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.951691577E-02   0.479887401E-02   0.479887401E-02
-     Ionic:                        -0.162599001E+01  -0.163067053E+01  -0.163067053E+01  
+     Ionic:                        -0.162599001E+01  -0.163067053E+01  -0.163067053E+01
      Total:                        -0.161647309E+01  -0.162587166E+01  -0.162587166E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1092,7 +1092,7 @@ force_length_stats: {min:   1.68687165E-07, max:   1.68687165E-07, mean:   1.686
            Absolute (Ha)=-8.76276E-06
            Relative     =-9.43815E-07
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 1.6869E-07 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1189,7 +1189,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     168.120     168.096
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
 ================================================================================
 
 --- Iteration: ( 1/13) Internal Cycle: (1/1)
@@ -1264,13 +1264,13 @@ tolerances: {tolvrs: 1.00E-19, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.195815389E-03   0.830609235E-04   0.830609235E-04
-     Ionic:                        -0.283590755E-01  -0.282172802E-01  -0.282172802E-01  
+     Ionic:                        -0.283590755E-01  -0.282172802E-01  -0.282172802E-01
      Total:                        -0.281632601E-01  -0.281342192E-01  -0.281342192E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.112035307E-01   0.475231093E-02   0.475231093E-02
-     Ionic:                        -0.162255774E+01  -0.161444495E+01  -0.161444495E+01  
+     Ionic:                        -0.162255774E+01  -0.161444495E+01  -0.161444495E+01
      Total:                        -0.161135421E+01  -0.160969264E+01  -0.160969264E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1406,13 +1406,13 @@ tolerances: {tolvrs: 1.00E-19, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.154425504E-03   0.830537504E-04   0.830537504E-04
-     Ionic:                        -0.283463593E-01  -0.282172802E-01  -0.282172802E-01  
+     Ionic:                        -0.283463593E-01  -0.282172802E-01  -0.282172802E-01
      Total:                        -0.281919338E-01  -0.281342264E-01  -0.281342264E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.883541840E-02   0.475190052E-02   0.475190052E-02
-     Ionic:                        -0.162183019E+01  -0.161444495E+01  -0.161444495E+01  
+     Ionic:                        -0.162183019E+01  -0.161444495E+01  -0.161444495E+01
      Total:                        -0.161299477E+01  -0.160969305E+01  -0.160969305E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1552,13 +1552,13 @@ tolerances: {tolvrs: 1.00E-19, }
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.576804361E-06   0.830401784E-04   0.830401784E-04
-     Ionic:                        -0.282990859E-01  -0.282172802E-01  -0.282172802E-01  
+     Ionic:                        -0.282990859E-01  -0.282172802E-01  -0.282172802E-01
      Total:                        -0.282985091E-01  -0.281342400E-01  -0.281342400E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.330017239E-04   0.475112400E-02   0.475112400E-02
-     Ionic:                        -0.161912545E+01  -0.161444495E+01  -0.161444495E+01  
+     Ionic:                        -0.161912545E+01  -0.161444495E+01  -0.161444495E+01
      Total:                        -0.161909245E+01  -0.160969383E+01  -0.160969383E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1626,7 +1626,7 @@ force_length_stats: {min:   1.56028114E-07, max:   1.56028114E-07, mean:   1.560
            Absolute (Ha)=-8.76277E-06
            Relative     =-9.43816E-07
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 1.5603E-07 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1694,7 +1694,7 @@ band_energy         : -4.45710868435491E-02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.2728565836E+00  7.2728565836E+00  7.2728565836E+00 Bohr
               amu      3.09737620E+01  2.69815390E+01
@@ -2018,7 +2018,7 @@ P           mkmem3        126
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2035,12 +2035,12 @@ P           mkmem3        126
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2058,7 +2058,7 @@ P           mkmem3        126
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

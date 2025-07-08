@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.3.4.1 of ABINIT, released May 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h15 )
+.Starting date : Wed 18 Jun 2025.
+- ( at 13h02 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t13/t13.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/TestBot_MPI1/v9_t13/t13.abi
 - output file    -> t13.abo
 - root for input  files -> t13i
 - root for output files -> t13o
@@ -40,7 +40,7 @@ _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group I4/m m m (#139); Bravais tI (body-center tetrag.)
- Magnetic point group 4/m'mm (# 26)
+ Magnetic point group 4/mm'm' (# 29)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
@@ -58,7 +58,7 @@ _ WF disk file :      0.098 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group I4/m m m (#139); Bravais tI (body-center tetrag.)
- Magnetic point group 4/m'mm (# 26)
+ Magnetic point group 4/mm'm' (# 29)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
@@ -76,7 +76,7 @@ _ WF disk file :      0.098 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 
  DATASET    4 : magnetic group, Shubnikov type III
  Fedorov space group I4/m m m (#139); Bravais tI (body-center tetrag.)
- Magnetic point group 4/m'mm (# 26)
+ Magnetic point group 4/mm'm' (# 29)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
@@ -94,7 +94,7 @@ _ WF disk file :      0.098 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 
  DATASET    5 : magnetic group, Shubnikov type III
  Fedorov space group Fm m m (# 69); Bravais oF (face-center ortho.)
- Magnetic point group mmm' (# 11)
+ Magnetic point group m'm'm (# 12)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
@@ -246,10 +246,10 @@ P           mkmem5          3
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
            occopt           7
         ptgroupma1          0
-        ptgroupma2         26
-        ptgroupma3         26
-        ptgroupma4         26
-        ptgroupma5         11
+        ptgroupma2         29
+        ptgroupma3         29
+        ptgroupma4         29
+        ptgroupma5         12
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01 -5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01 -5.0000000000E-01
@@ -270,13 +270,13 @@ P           mkmem5          3
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1
-           symafm2       1   -1   -1    1    1   -1   -1    1    1   -1
-                        -1    1    1   -1   -1    1
-           symafm3       1   -1    1   -1   -1    1   -1    1    1   -1
-                         1   -1   -1    1   -1    1
-           symafm4       1   -1   -1    1   -1    1    1   -1    1   -1
-                        -1    1   -1    1    1   -1
-           symafm5       1   -1   -1    1    1   -1   -1    1
+           symafm2       1    1   -1   -1    1    1   -1   -1   -1   -1
+                         1    1   -1   -1    1    1
+           symafm3       1    1    1    1   -1   -1   -1   -1   -1   -1
+                        -1   -1    1    1    1    1
+           symafm4       1    1   -1   -1   -1   -1    1    1   -1   -1
+                         1    1    1    1   -1   -1
+           symafm5       1    1   -1   -1   -1   -1    1    1
            symrel1     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1 -1 -1   0  0  1   0  1  0       1  1  1   0  0 -1   0 -1  0
                        0  1  0   1  0  0  -1 -1 -1       0 -1  0  -1  0  0   1  1  1
@@ -431,8 +431,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mmignolet_fix10.4_symafm/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1371,10 +1371,10 @@ P           mkmem5          3
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
            occopt           7
         ptgroupma1          0
-        ptgroupma2         26
-        ptgroupma3         26
-        ptgroupma4         26
-        ptgroupma5         11
+        ptgroupma2         29
+        ptgroupma3         29
+        ptgroupma4         29
+        ptgroupma5         12
             rprim     -5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01 -5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01 -5.0000000000E-01
@@ -1405,13 +1405,13 @@ P           mkmem5          3
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1
-           symafm2       1   -1   -1    1    1   -1   -1    1    1   -1
-                        -1    1    1   -1   -1    1
-           symafm3       1   -1    1   -1   -1    1   -1    1    1   -1
-                         1   -1   -1    1   -1    1
-           symafm4       1   -1   -1    1   -1    1    1   -1    1   -1
-                        -1    1   -1    1    1   -1
-           symafm5       1   -1   -1    1    1   -1   -1    1
+           symafm2       1    1   -1   -1    1    1   -1   -1   -1   -1
+                         1    1   -1   -1    1    1
+           symafm3       1    1    1    1   -1   -1   -1   -1   -1   -1
+                        -1   -1    1    1    1    1
+           symafm4       1    1   -1   -1   -1   -1    1    1   -1   -1
+                         1    1    1    1   -1   -1
+           symafm5       1    1   -1   -1   -1   -1    1    1
            symrel1     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1 -1 -1   0  0  1   0  1  0       1  1  1   0  0 -1   0 -1  0
                        0  1  0   1  0  0  -1 -1 -1       0 -1  0  -1  0  0   1  1  1

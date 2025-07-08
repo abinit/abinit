@@ -11,7 +11,7 @@
 !!  This module is deprecated. Use ddkop_t in m_ddk.F90
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2024 ABINIT group (MG, FB)
+!! Copyright (C) 2008-2025 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -535,7 +535,7 @@ end subroutine calc_vkb
 !!
 !! SOURCE
 
-function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
+function nc_ihr_comm(vkbr, cryst, psps, npw, nspinor, istwfk, inclvkb, kpoint, ug1, ug2, gvec) result(ihr_comm)
 
 !Arguments ------------------------------------
 !scalars

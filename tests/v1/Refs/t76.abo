@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Fri 13 Sep 2024.
 - ( at 19h08 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t76/t76.abi
 - output file    -> t76.abo
 - root for input  files -> t76i
@@ -596,8 +596,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.15501
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -636,7 +636,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  6  -8.7862997988230    -5.296E-10 3.209E-12 1.241E-09
  ETOT  7  -8.7862997988279    -4.951E-12 4.542E-14 4.208E-12
 
- At SCF step    7, etot is converged : 
+ At SCF step    7, etot is converged :
   for the second time, diff in etot=  4.951E-12 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -793,7 +793,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7863526793860    -1.189E-08 6.347E-11 8.006E-08
  ETOT  4  -8.7863526795057    -1.197E-10 6.228E-13 1.039E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.197E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -950,7 +950,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7863964584337    -1.194E-08 6.349E-11 8.047E-08
  ETOT  4  -8.7863964585544    -1.206E-10 6.255E-13 1.057E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.206E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1107,7 +1107,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864309720321    -1.199E-08 6.350E-11 8.087E-08
  ETOT  4  -8.7864309721535    -1.215E-10 6.280E-13 1.075E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.215E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1264,7 +1264,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864560688758    -1.204E-08 6.350E-11 8.127E-08
  ETOT  4  -8.7864560689981    -1.223E-10 6.305E-13 1.093E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.223E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1421,7 +1421,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864716112472    -1.209E-08 6.349E-11 8.166E-08
  ETOT  4  -8.7864716113704    -1.232E-10 6.330E-13 1.111E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.232E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1578,7 +1578,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864774781322    -1.214E-08 6.450E-11 8.205E-08
  ETOT  4  -8.7864774782563    -1.241E-10 6.376E-13 1.130E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.241E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1735,7 +1735,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864760200934    -1.220E-08 6.458E-11 8.259E-08
  ETOT  4  -8.7864760202185    -1.252E-10 6.412E-13 1.150E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.252E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1892,7 +1892,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864693682106    -1.228E-08 6.474E-11 8.326E-08
  ETOT  4  -8.7864693683371    -1.265E-10 6.459E-13 1.171E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.265E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2049,7 +2049,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864574862172    -1.237E-08 6.491E-11 8.394E-08
  ETOT  4  -8.7864574863450    -1.278E-10 6.505E-13 1.192E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.278E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2206,7 +2206,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864403444968    -1.245E-08 6.507E-11 8.463E-08
  ETOT  4  -8.7864403446260    -1.292E-10 6.551E-13 1.214E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.292E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2363,7 +2363,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7864179148504    -1.253E-08 6.523E-11 8.533E-08
  ETOT  4  -8.7864179149810    -1.306E-10 6.599E-13 1.236E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.306E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2520,7 +2520,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7863900691358    -1.262E-08 6.539E-11 8.604E-08
  ETOT  4  -8.7863900692678    -1.319E-10 6.646E-13 1.259E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.319E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2677,7 +2677,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7863565963467    -1.270E-08 6.552E-11 8.672E-08
  ETOT  4  -8.7863565964800    -1.333E-10 6.691E-13 1.281E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.333E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2834,7 +2834,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7863172855161    -1.278E-08 6.564E-11 8.740E-08
  ETOT  4  -8.7863172856507    -1.346E-10 6.736E-13 1.304E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.346E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2991,7 +2991,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7862719293599    -1.285E-08 6.574E-11 8.807E-08
  ETOT  4  -8.7862719294959    -1.360E-10 6.779E-13 1.328E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.360E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3148,7 +3148,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7862203254902    -1.293E-08 6.582E-11 8.872E-08
  ETOT  4  -8.7862203256274    -1.372E-10 6.821E-13 1.351E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.372E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3305,7 +3305,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7861622775955    -1.300E-08 6.589E-11 8.936E-08
  ETOT  4  -8.7861622777341    -1.385E-10 6.862E-13 1.375E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.385E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3462,7 +3462,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7860975965541    -1.307E-08 6.594E-11 8.999E-08
  ETOT  4  -8.7860975966940    -1.399E-10 6.902E-13 1.399E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.399E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3619,7 +3619,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7860261015381    -1.313E-08 6.597E-11 9.061E-08
  ETOT  4  -8.7860261016793    -1.412E-10 6.941E-13 1.424E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.412E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3776,7 +3776,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  3  -8.7859476210127    -1.320E-08 6.600E-11 9.123E-08
  ETOT  4  -8.7859476211552    -1.425E-10 6.979E-13 1.449E-10
 
- At SCF step    4, etot is converged : 
+ At SCF step    4, etot is converged :
   for the second time, diff in etot=  1.425E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3887,7 +3887,7 @@ band_energy         :  2.48794222674215E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell1     1.0100000000E+01  1.0100000000E+01  1.0100000000E+01 Bohr
             acell2     1.0110000000E+01  1.0110000000E+01  1.0110000000E+01 Bohr
@@ -4187,7 +4187,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -4199,12 +4199,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -4222,7 +4222,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -4237,7 +4237,7 @@ P           mkmem           2
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

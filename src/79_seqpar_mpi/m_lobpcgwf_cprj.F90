@@ -103,6 +103,7 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
  integer, parameter :: tim_lobpcgwf2 = 2030
  real(dp) :: tsec(2)
 
+ real(dp), allocatable :: occ_tmp(:)
  ! Important things for NC
  real(dp), allocatable :: pcon(:),kin(:)
 ! real(dp), allocatable :: cprj_contiguous(:,:)
@@ -119,7 +120,10 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
  cprjdim = xg_nonlop%cprjdim
 
 !Variables
- blockdim=mpi_enreg%nproc_band*mpi_enreg%bandpp
+ blockdim=nband/dtset%nblock_lobpcg
+ if (blockdim/=mpi_enreg%nproc_band*mpi_enreg%bandpp) then
+   ABI_ERROR('blockdim is not consistent with nproc_band and bandpp')
+ end if
  nband_cprj=nband/mpi_enreg%nproc_band
 
 !Depends on istwfk
@@ -167,7 +171,14 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
 
  call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,comm=l_mpi_enreg%comm_band)
 
- call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ ! Occupancies in LOBPCG are used for convergence criteria only
+ if (dtset%nbdbuf==-101.and.nspinor==1.and.dtset%nsppol==1) then
+   ABI_MALLOC(occ_tmp,(nband))
+   occ_tmp(:) = half*occ(:)
+   call xgBlock_map_1d(xgocc,occ_tmp,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ else
+   call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+ end if
 
  call lobpcg_init(lobpcg,mpi_enreg%bandpp,nband,npw*nspinor,cprjdim,blockdim,dtset%tolwfr_diago,dtset%nline,&
    space,space_cprj,l_mpi_enreg%comm_band,dtset%paral_kgb,xg_nonlop,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
@@ -177,6 +188,9 @@ subroutine lobpcgwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,is
  call lobpcg_run_cprj(lobpcg,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xg_precond,xgeigen,xgocc,xgresidu,xgenl,&
    prtvol,nspinor,isppol,ikpt,inonsc,istep,nbdbuf)
 
+ if (allocated(occ_tmp)) then
+   ABI_FREE(occ_tmp)
+ end if
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)
  ABI_FREE(kin)

@@ -1,8 +1,8 @@
 
-.Version 6.13.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
+.Version 6.13.3 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu4.4 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Tue 24 Apr 2012.
 - ( at 18h11 )
-  
+
 - input  file    -> /home/gonze/ABINIT/ABINITv6.13.3/trunk/6.13.3-private/tests/v1/Input/t97.in
 - output file    -> t97.out
 - root for input  files -> t97i
@@ -42,10 +42,10 @@ P This job should need less than                       1.833 Mbytes of memory.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -131,8 +131,8 @@ P           mkmem           4
          ecut(hartree)=      2.990   => boxcut(ratio)=   2.00281
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv6.13.3/trunk/6.13.3-private/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv6.13.3/trunk/6.13.3-private/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv6.13.3/trunk/6.13.3-private/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv6.13.3/trunk/6.13.3-private/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -318,7 +318,7 @@ P newkpt: treating     16 bands with npw=     272 for ikpt=   4 by node    0
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0263110000E+01  1.0263110000E+01  1.0263110000E+01 Bohr
               amu      2.80855000E+01
@@ -419,7 +419,7 @@ P           mkmem           4
  M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
  Computer Phys. Comm. 180, 2582-2615 (2009).
  Comment : the third generic paper describing the ABINIT project.
- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+ Note that a version of this paper, that is not formatted for Computer Phys. Comm.
  is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
  The licence allows the authors to put it on the Web.
 
@@ -438,7 +438,7 @@ P           mkmem           4
 
  And optionally :
 
- [3] First-principles computation of material properties : the ABINIT software project. 
+ [3] First-principles computation of material properties : the ABINIT software project.
  X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
  M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
  Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7

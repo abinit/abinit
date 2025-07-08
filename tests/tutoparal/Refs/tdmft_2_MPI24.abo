@@ -1,8 +1,8 @@
 
-.Version 9.3.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.Version 9.3.3 of ABINIT
+.(MPI version, prepared for a x86_64_linux_gnu10.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,18 +16,18 @@
 
 .Starting date : Thu 24 Dec 2020.
 - ( at 21h27 )
-  
+
 - input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/TestBot_MPI24/tutoparal_tdmft_2_MPI24/tdmft_2.abi
 - output file    -> tdmft_2_MPI24.abo
 - root for input  files -> tdmft_2_MPI24i
 - root for output files -> tdmft_2_MPI24o
 
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/V.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+- inpspheads : Reading pseudopotential header in XML form from
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/O.xml
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -71,10 +71,10 @@ _ WF disk file :      3.527 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                      
+- outvars: echo of selected default values
 -   iomode0 =  3 , fftalg0 =312 , wfoptalg0 = 10
 -
-- outvars: echo of global parameters not present in the input file              
+- outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -85,16 +85,14 @@ _ WF disk file :      3.527 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
         dmftbandf2         23
         dmftbandi1          0
         dmftbandi2         21
-        dmft_iter1          0
+        dmft_iter1         10
         dmft_iter2          1
-        dmft_mxsf1     3.0000000000E-01
+        dmft_mxsf1     6.0000000000E-01
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
-        dmft_rslf1          0
-        dmft_rslf2          1
              ecut      1.20000000E+01 Hartree
 -          fftalg         312
            getwfk          -1
@@ -282,9 +280,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -302,9 +300,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -322,9 +320,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/gingras.ol_beauty/tests/Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -506,7 +504,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.05969   0.00000   0.00000   0.00000   0.00000   0.01038   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16547   0.00000   0.00000   0.00000   0.00000   0.03827
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -813,7 +811,7 @@ P newkpt: treating     30 bands with npw=     756 for ikpt=   9 by node    8
 P newkpt: treating     30 bands with npw=     720 for ikpt=  10 by node    9
 _setup2: Arith. and geom. avg. npw (full set) are     757.907     757.867
 
--       ( number of procs used in dmft ) = 24
+-       ( number of procs used in dmft ) =   24
 
 
  ******************************************
@@ -821,6 +819,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     757.907     757.867
  ******************************************
 
  DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT
+
+ Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
+
+ Entropy is not computed, only the internal energy is printed
+
+ The imaginary part of the Green's function is neglected
+
+ The off-diagonal elements of the Green's function are neglected
 
 ================================================================================
 
@@ -835,9 +841,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16846  -0.00000   0.00000
        -0.00000   0.16846  -0.00000
         0.00000  -0.00000   0.16846
@@ -847,9 +853,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16826   0.00000  -0.00000
         0.00000   0.16826  -0.00000
        -0.00000  -0.00000   0.16826
@@ -859,9 +865,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16819  -0.00000  -0.00000
         0.00000   0.16819   0.00000
         0.00000   0.00000   0.16819
@@ -871,9 +877,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16815   0.00000  -0.00000
         0.00000   0.16815   0.00000
        -0.00000   0.00000   0.16815
@@ -883,9 +889,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16813  -0.00000   0.00000
        -0.00000   0.16813  -0.00000
         0.00000  -0.00000   0.16813
@@ -895,9 +901,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16812   0.00000  -0.00000
         0.00000   0.16812  -0.00000
        -0.00000  -0.00000   0.16812
@@ -907,9 +913,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16812  -0.00000   0.00000
        -0.00000   0.16812  -0.00000
         0.00000  -0.00000   0.16812
@@ -919,9 +925,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16811   0.00000  -0.00000
         0.00000   0.16811   0.00000
        -0.00000   0.00000   0.16811
@@ -931,9 +937,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16812   0.00000  -0.00000
         0.00000   0.16812   0.00000
        -0.00000   0.00000   0.16812
@@ -943,9 +949,9 @@ tolerances: {tolvrs: 1.00E-07, }
 
   == The DFT+DMFT occupation matrix for correlated electrons is ==
 
-   -------> For Correlated Atom   1
+   -------> For Correlated Atom 1
 
-          -- polarization spin component  1
+          -- polarization spin component 1
         0.16812   0.00000  -0.00000
         0.00000   0.16812   0.00000
        -0.00000   0.00000   0.16812
@@ -1070,7 +1076,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.05586   0.00000   0.00000   0.00000   0.00000   0.01084   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16591   0.00000   0.00000   0.00000   0.00000   0.03844
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1276,14 +1282,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
-comment             : Components of total free energy in Hartree
+comment             : Components of total energy in Hartree
 kinetic             :  4.22176219931503E+01
 hartree             :  3.43055970754089E+01
 xc                  : -1.94897460729940E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
 local_psp           : -1.09522445809828E+02
-spherical_terms     :  8.46230662873237E+00
+spherical_terms     :  8.45592570831985E+00
+interaction         :  1.41792519829722E-02
+'-double_counting'  : -7.79833159475997E-03
 internal            : -1.51907259251086E+02
 total_energy        : -1.51907259251086E+02
 total_energy_eV     : -4.13360674260185E+03
@@ -1292,12 +1300,14 @@ total_energy_eV     : -4.13360674260185E+03
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
-comment             : '"Double-counting" decomposition of free energy'
+comment             : '"Double-counting" decomposition of internal energy'
 band_energy         : -1.46946809343467E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
 xc_dc               : -3.05459065294480E+01
-spherical_terms     :  1.21390586028008E+00
+spherical_terms     :  1.20752493989134E+00
+interaction         :  1.41792519829722E-02
+'-double_counting'  : -7.79833159475997E-03
 internal            : -1.51907274669071E+02
 total_energy_dc     : -1.51907274669071E+02
 total_energy_dc_eV  : -4.13360716214654E+03
@@ -1316,7 +1326,7 @@ total_energy_dc_eV  : -4.13360716214654E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
@@ -1325,16 +1335,14 @@ total_energy_dc_eV  : -4.13360716214654E+03
         dmftbandf2         23
         dmftbandi1          0
         dmftbandi2         21
-        dmft_iter1          0
+        dmft_iter1         10
         dmft_iter2          1
-        dmft_mxsf1     3.0000000000E-01
+        dmft_mxsf1     6.0000000000E-01
         dmft_mxsf2     7.0000000000E-01
         dmft_nwli1          0
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
-        dmft_rslf1          0
-        dmft_rslf2          1
              ecut      1.20000000E+01 Hartree
            etotal1    -1.5192916923E+02
            etotal2    -1.5190727467E+02
@@ -1578,7 +1586,7 @@ P           mkmem           1
 - Comment: to be cited in case the ETSF_IO file format is used, i.e. iomode=3.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2008
 -
-- [2] A self-consistent DFT + DMFT scheme in the projector augmented wave method: 
+- [2] A self-consistent DFT + DMFT scheme in the projector augmented wave method:
 - applications to cerium, Ce2O3 and Pu2O3 with the Hubbard I solver and comparison to DFT + U,
 - B. Amadon,  J. Phys.: Condens. Matter 24 075604 (2012).
 - Comment : Describes the self-consistent implementation of DFT+DMFT in PAW
@@ -1620,7 +1628,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1632,12 +1640,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1655,7 +1663,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

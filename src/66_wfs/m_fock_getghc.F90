@@ -4,7 +4,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2024 ABINIT group (CMartins, FJ, MT, XG)
+!!  Copyright (C) 2013-2025 ABINIT group (CMartins, FJ, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,13 +31,13 @@ module m_fock_getghc
  use defs_abitypes, only : mpi_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,         only : timab, time_accu
- use m_symtk,        only : matr3inv
+ use m_matrix,       only : matr3inv
  use m_cgtools,      only : dotprod_g,dotprod_g_batch_half
  use m_kg,           only : mkkpg
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, fourwf, fourdp
  use m_fstrings,     only : sjoin, itoa
- use m_hamiltonian,  only : gs_hamiltonian_type, K_H_KPRIME, init_hamiltonian
+ use m_hamiltonian,  only : gs_hamiltonian_type, K_H_KPRIME
  use m_paw_nhat,     only : pawmknhat_psipsi, pawdijhat_ndat
  use m_spacepar,     only : hartre
  use m_nonlop,       only : nonlop
@@ -267,7 +267,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
 ! *************************************************************************
 !return
- 
+
  ncount=ncount+1
 
  call timab(1504,1,tsec) ; call timab(1505,-1,tsec) ; call timab(1515,-1,tsec) ; call timab(1541,-1,tsec)
@@ -390,7 +390,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    cwavef_r=cwavef_r*invucvol
  else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET DATA USE_DEVICE_PTR(cwavef_r)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(cwavef_r)
    call abi_gpu_xscal(2,n4f*n5f*n6f*ndat,cinvucvol,c_loc(cwavef_r),1)
    !$OMP END TARGET DATA
 #endif
@@ -588,7 +588,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          cwaveocc_r=cwaveocc_r*invucvol
        else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET DATA USE_DEVICE_PTR(cwaveocc_r)
+         !$OMP TARGET DATA USE_DEVICE_ADDR(cwaveocc_r)
          call abi_gpu_xscal(2,n4f*n5f*n6f*ndat_occ,cinvucvol,c_loc(cwaveocc_r),1)
          !$OMP END TARGET DATA
 #endif
@@ -770,7 +770,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #endif
      end if ! gpu_option
 
-     call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec) 
+     call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec)
      call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,ndat*ndat_occ,ngfftf,tim_fourdp_fock_getghc,gpu_option=gpu_option)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1545,-1,tsec)
 #endif
@@ -819,7 +819,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          iatm=iatm+gs_ham%nattyp(itypat)
        end do
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=17
-       
+
        if(need_ghc) then
          choice=1
          call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
@@ -974,7 +974,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
              call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
   &           ndat_occ,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
   &           strout,enl_ndat=dijhat(:,:,:,:,:,idat),select_k=K_H_KPRIME)
-             call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec) 
+             call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec)
              call dotprod_g_batch_half(vdotr(:,idir,1,1),vdoti,gs_ham%istwf_k,npw,ndat_occ,2,&
                    cwavef(:,npw*nspinor*(idat-1)+1:npw*nspinor*idat),strout,&
                    mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option)
@@ -1304,7 +1304,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !   if (fockcommon%ieigen/=0) fockcommon%ieigen=0
 
  else
- 
+
 !  *Restore gs_ham datastructure
 
    if (associated(gs_ham%ph3d_kp)) then
@@ -1334,7 +1334,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      ghc1=ghc1*sqrt(gs_ham%ucvol)+ghc2
    else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET DATA USE_DEVICE_PTR(ghc1,ghc2)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(ghc1,ghc2)
      call abi_gpu_xaxpy(2,npw*ndat,cucvol,c_loc(ghc1),1,c_loc(ghc2),1)
      !$OMP END TARGET DATA
      call gpu_copy(ghc1,ghc2,int(2,c_size_t)*npw*ndat)
@@ -1399,7 +1399,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
    ABI_FREE(vqg)
- 
+
  endif
 
  call timab(1504,2,tsec) ; call timab(1507,-2,tsec) ; call timab(1515,-2,tsec) ; call timab(1547,-2,tsec)
@@ -1546,7 +1546,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !Initialize Hamiltonian (k- and spin-independent terms)
 
- call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
+ call gs_hamk%init(psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,fock=fock,&
@@ -1946,7 +1946,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
      ABI_MALLOC(mat,(2,nband_k,ndat))
      !$OMP TARGET ENTER DATA MAP(alloc:mat)
      !$OMP TARGET UPDATE TO(xi)
-     !$OMP TARGET DATA USE_DEVICE_PTR(xi,cwavef,mat,ghc1)
+     !$OMP TARGET DATA USE_DEVICE_ADDR(xi,cwavef,mat,ghc1)
      call abi_gpu_xgemm(2, 'C', 'N', nband_k, ndat, npw, cone, &
                        c_loc(xi), npw, &
                        c_loc(cwavef), npw, &
@@ -1987,7 +1987,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
    !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
    ! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_spkpt + ghc1(:,:)
 
-   !$OMP TARGET DATA USE_DEVICE_PTR(ghc1,ghc)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(ghc1,ghc)
    call abi_gpu_xaxpy(2,npw*ndat,cone,c_loc(ghc1),1,c_loc(ghc),1)
    !$OMP END TARGET DATA
 

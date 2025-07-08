@@ -15,7 +15,7 @@ option(ABINIT_WANNIER90_BUILD_FORCE "Enforce building libwannier90 ? (default: O
 #
 # Option to enable / disable wannier90 detection
 #
-option(ABINIT_WANNIER90_WANTED "Turn OFF if you don't want libwannier90 (default: ON)" ON)
+option(ABINIT_WANNIER90_WANTED "Turn OFF if you don't want libwannier90 (default: OFF)" OFF)
 
 if(ABINIT_WANNIER90_WANTED)
 
@@ -23,7 +23,7 @@ if(ABINIT_WANNIER90_WANTED)
   # use carefully, it may strongly increase build time
   if(ABINIT_WANNIER90_BUILD)
 
-    message("[abinit / wannier] Building wannier from source")
+    message(STATUS "[abinit / wannier] Building wannier from source")
 
     set(WANNIER90_EXTERNAL wannier90_external)
 
@@ -46,7 +46,7 @@ if(ABINIT_WANNIER90_WANTED)
     set_property(DIRECTORY PROPERTY EP_BASE ${CMAKE_BINARY_DIR}/external)
 
     macro(select_make_inc)
-      message("[abinit / wannier] build wannier90, run select_make_inc macro")
+      message(STATUS "[abinit / wannier] build wannier90, run select_make_inc macro")
       if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
         set(wannier_make_inc make.inc.gfort)
       elseif(CMAKE_Fortran_COMPILER_ID MATCHES "G95")
@@ -83,12 +83,12 @@ if(ABINIT_WANNIER90_WANTED)
     find_package(WANNIER)
 
     if(WANNIER_FOUND)
-      message("[abinit / wannier] Wannier found via find_package")
+      message(STATUS "[abinit / wannier] Wannier found via find_package")
       set(ABINIT_WANNIER90_FOUND True)
       set(HAVE_WANNIER90 1)
       # alias abinit::wannier is already defined inside find_package(WANNIER)
     else()
-      message("[abinit / wannier] we shouldn't be here. We just build wannier library, and find_package should have succeeded !")
+      message(STATUS "[abinit / wannier] we shouldn't be here. We just build wannier library, and find_package should have succeeded !")
     endif()
 
     set(ABINIT_WANNIER90_BUILTIN TRUE)
@@ -98,7 +98,7 @@ if(ABINIT_WANNIER90_WANTED)
     find_package(WANNIER)
 
     if(WANNIER_FOUND)
-      message("[abinit / wannier] Wannier found via find_package")
+      message(STATUS "[abinit / wannier] Wannier found via find_package")
       set(ABINIT_WANNIER90_FOUND True)
       set(HAVE_WANNIER90 1)
       # alias abinit::wannier is already defined inside find_package(WANNIER)
@@ -111,13 +111,13 @@ if(ABINIT_WANNIER90_WANTED)
     if(ABINIT_WANNIER90_FOUND)
       add_library(abinit::wannier ALIAS PkgConfig::ABINIT_WANNIER90)
       set(HAVE_WANNIER90 1)
-      message("[abinit / wannier] wannier FOUND via pkg-config")
+      message(STATUS "[abinit / wannier] wannier FOUND via pkg-config")
     endif()
 
   endif()
 
 else(ABINIT_WANNIER90_WANTED)
 
-  message("[abinit / wannier] libwannier90 is not wanted")
+  message(STATUS "[abinit / wannier] libwannier90 is not wanted")
 
 endif(ABINIT_WANNIER90_WANTED)

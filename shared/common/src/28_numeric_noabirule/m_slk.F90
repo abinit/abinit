@@ -6,7 +6,7 @@
 !!  High-level objects and wrappers around the ScaLAPACK and ELPA API.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2024 ABINIT group (CS,GZ,FB,MG,MT)
+!! Copyright (C) 2004-2025 ABINIT group (CS,GZ,FB,MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,11 +25,11 @@ module m_slk
  use m_xmpi
  use m_errors
  use m_abicore
-#ifdef HAVE_LINALG_ELPA
- use m_elpa
-#endif
 #ifdef HAVE_MPI2
  use mpi
+#endif
+#ifdef HAVE_LINALG_ELPA
+ use m_elpa
 #endif
 
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
@@ -384,6 +384,16 @@ module m_slk
  public :: slk_array_set                       ! Elemental routine to set the value of the buffer to a costant value `cvalue`.
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of matrix_scalapack elements
 
+ ! External functions.
+#ifdef HAVE_LINALG_SCALAPACK
+ integer,external :: indxl2g, numroc
+ DOUBLE PRECISION, external :: PDLAMCH
+ real(dp),external :: PDLATRA
+ real(sp),external :: PSLATRA
+ complex(sp),external :: PCLATRA
+ complex(dp),external :: PZLATRA
+#endif
+
 CONTAINS  !==============================================================================
 !!***
 
@@ -414,7 +424,6 @@ subroutine grid_init(grid, nbprocs, comm, use_gpu, grid_dims)
 
 !Local variables-------------------------------
  integer :: i
-
 ! *********************************************************************
 
  grid%nbprocs = nbprocs
@@ -473,7 +482,6 @@ subroutine build_processor_scalapack(processor, grid, myproc, comm)
  class(processor_scalapack),intent(inout) :: processor
  integer,intent(in) :: myproc,comm
  class(grid_scalapack),intent(in) :: grid
-
 ! *********************************************************************
 
  processor%grid = grid
@@ -521,7 +529,6 @@ subroutine processor_init(processor, comm, grid_dims)
 !Local variables-------------------------------
  type(grid_scalapack) :: grid
  integer :: nbproc,myproc
-
 ! *********************************************************************
 
  nbproc = xmpi_comm_size(comm)
@@ -553,7 +560,6 @@ subroutine processor_free(processor)
 
 !Arguments ------------------------------------
  class(processor_scalapack),intent(inout) :: processor
-
 ! *********************************************************************
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -604,18 +610,16 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
  ! As recommended by Intel MKL, a more sensible default than the previous value of 40
  integer, parameter :: DEFAULT_SIZE_BLOCS = 24
 #endif
- ! As recommanded in ELPA, which advises distributions as squared as possible using powers of 2
+ ! As recommended in ELPA, which advises distributions as squared as possible using powers of 2
  integer, parameter :: DEFAULT_SIZE_BLOCS_GPU = 16
  integer :: info,sizeb
- integer,external :: NUMROC
  !character(len=500) :: msg
-
 ! *********************************************************************
 
  !call matrix%free()
 
  sizeb = DEFAULT_SIZE_BLOCS
- if(processor%grid%use_gpu) sizeb = DEFAULT_SIZE_BLOCS_GPU
+ if (processor%grid%use_gpu) sizeb = DEFAULT_SIZE_BLOCS_GPU
 
  !Records of the matrix type
  matrix%processor => processor
@@ -712,7 +716,6 @@ pure real(dp) function locmem_mb(mat)
 
 !Arguments ------------------------------------
  class(basemat_t),intent(in) :: mat
-
 ! *********************************************************************
 
  locmem_mb = zero
@@ -756,7 +759,6 @@ subroutine slkmat_print(mat, header, unit, prtvol)
  integer :: unt, my_prtvol, grid_dims(2)
  character(len=50) :: matrix_dtype
  character(len=5000) :: msg
-
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt =unit
@@ -813,7 +815,6 @@ logical function slkmat_check_local_shape(mat, lshape, msg) result (ok)
  class(basemat_t),intent(in) :: mat
  integer,intent(in) :: lshape(2)
  character(len=*),intent(out) :: msg
-
 ! *********************************************************************
 
  msg = ""
@@ -881,7 +882,6 @@ subroutine slk_get_head_and_wings(mat, head, low_wing, up_wing, call_mpi)
 !Local variables-------------------------------
  integer :: ierr, il_g1, il_g2, iglob1, iglob2
  logical :: is_cplx
-
 ! *********************************************************************
 
  head = zero; low_wing = zero; up_wing = zero
@@ -947,7 +947,6 @@ subroutine slk_set_head_and_wings(mat, head, low_wing, up_wing)
 !Local variables-------------------------------
  integer :: il_g1, il_g2, iglob1, iglob2
  logical :: is_cplx
-
 ! *********************************************************************
 
  is_cplx = allocated(mat%buffer_cplx)
@@ -1005,7 +1004,6 @@ subroutine slkmat_sp_set_head_and_wings(mat, head, low_wing, up_wing)
 !Local variables-------------------------------
  integer :: il_g1, il_g2, iglob1, iglob2
  logical :: is_cplx
-
 ! *********************************************************************
 
  is_cplx = allocated(mat%buffer_cplx)
@@ -1063,7 +1061,6 @@ subroutine matrix_scalapack_copy(in_mat, out_mat, empty)
 
 !Local variables-------------------------------
  logical :: empty__
-
 ! *********************************************************************
 
  call out_mat%init(in_mat%sizeb_global(1), in_mat%sizeb_global(2), in_mat%processor, in_mat%istwf_k, &
@@ -1101,7 +1098,6 @@ subroutine slkmat_sp_copy(in_mat, out_mat, empty)
 
 !Local variables-------------------------------
  logical :: empty__
-
 ! *********************************************************************
 
  call out_mat%init(in_mat%sizeb_global(1), in_mat%sizeb_global(2), in_mat%processor, in_mat%istwf_k, &
@@ -1134,7 +1130,6 @@ subroutine matrix_scalapack_free(mat)
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: mat
-
 ! *********************************************************************
 
  ! Don't free the grid. Just nullify the pointer as there might be other objects keeping a ref to processor.
@@ -1331,7 +1326,6 @@ logical function block_dist_1d(mat_size, nproc, block_size, msg) result (ok)
  integer, intent(in) :: mat_size, nproc
  integer,intent(out) :: block_size
  character(len=*),intent(out) :: msg
-
 ! *********************************************************************
 
  ok = .True.; msg = ""
@@ -1363,7 +1357,6 @@ end function block_dist_1d
 !! SOURCE
 
 pure logical function slk_has_elpa() result (ans)
-
 ! *********************************************************************
 
  ans = .False.
@@ -1399,7 +1392,6 @@ pure complex(dpc) function matrix_get_local_cplx(matrix, i, j)
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: i,j
-
 ! *********************************************************************
 
  matrix_get_local_cplx = matrix%buffer_cplx(i,j)
@@ -1428,7 +1420,6 @@ pure real(dp) function matrix_get_local_real(matrix,i,j)
 !Arguments ------------------------------------
  class(matrix_scalapack),intent(in) :: matrix
  integer, intent(in) :: i,j
-
 ! *********************************************************************
 
  matrix_get_local_real = matrix%buffer_real(i,j)
@@ -1464,7 +1455,6 @@ pure subroutine matrix_set_local_cplx(matrix,i,j,value)
  class(matrix_scalapack),intent(inout) :: matrix
  integer, intent(in) :: i,j
  complex(dp), intent(in) :: value
-
 ! *********************************************************************
 
  matrix%buffer_cplx(i,j) = value
@@ -1497,7 +1487,6 @@ pure subroutine matrix_set_local_real(matrix, i, j, value)
  class(matrix_scalapack),intent(inout) :: matrix
  integer, intent(in) :: i,j
  real(dp), intent(in) :: value
-
 ! *********************************************************************
 
  matrix%buffer_real(i,j) = value
@@ -1531,7 +1520,6 @@ subroutine idx_loc(matrix, i, j, iloc, jloc)
  class(basemat_t),intent(in) :: matrix
  integer, intent(in) :: i,j
  integer, intent(out) :: iloc,jloc
-
 ! *********************************************************************
 
  iloc = glob_loc__(matrix, i, 1)
@@ -1563,9 +1551,6 @@ integer function glob_loc__(matrix, idx, lico)
  integer, intent(in) :: idx, lico
 
 #ifdef HAVE_LINALG_SCALAPACK
-!Local variables-------------------------------
- integer,external :: NUMROC
-
 ! *********************************************************************
 
  glob_loc__ = NUMROC(idx, matrix%sizeb_blocs(lico), &
@@ -1605,7 +1590,6 @@ subroutine slk_glob2loc(mat, iglob, jglob, iloc, jloc, haveit)
 
 !Local variables-------------------------------
  integer :: row_src, col_src
-
 ! *********************************************************************
 
 #ifdef HAVE_LINALG_SCALAPACK
@@ -1646,7 +1630,6 @@ pure subroutine slk_matrix_loc2glob(matrix, iloc, jloc, i, j)
  class(basemat_t),intent(in) :: matrix
  integer, intent(in) :: iloc,jloc
  integer, intent(out) :: i,j
-
 ! *********************************************************************
 
  i = loc_glob__(matrix, matrix%processor, iloc, 1)
@@ -1673,7 +1656,6 @@ integer pure function slk_matrix_loc2grow(matrix, iloc) result(iglob)
 !Arguments ------------------------------------
  class(basemat_t),intent(in) :: matrix
  integer, intent(in) :: iloc
-
 ! *********************************************************************
 
  iglob = loc_glob__(matrix, matrix%processor, iloc, 1)
@@ -1699,7 +1681,6 @@ integer pure function slk_matrix_loc2gcol(matrix, jloc) result(jglob)
 !Arguments ------------------------------------
  class(basemat_t),intent(in) :: matrix
  integer, intent(in) :: jloc
-
 ! *********************************************************************
 
  jglob = loc_glob__(matrix, matrix%processor, jloc, 2)
@@ -1733,7 +1714,6 @@ integer pure function loc_glob__(matrix, proc, idx, lico)
 
 !Local variables-------------------------------
  integer :: nbcyc, rest, nblocs
-
 ! *********************************************************************
 
  nbcyc = INT((idx-1) / matrix%sizeb_blocs(lico))
@@ -1774,7 +1754,6 @@ subroutine matrix_from_global(matrix, reference, istwf_k)
  integer :: i,j,iglob,jglob,ind
  real(dp) :: val_real
  complex(dp) :: val_cplx
-
 ! *********************************************************************
 
  do i=1,matrix%sizeb_local(1)
@@ -1825,18 +1804,17 @@ subroutine matrix_from_global_sym(matrix, reference, istwf_k)
  integer :: i,j,iglob,jglob,ind
  complex(dp):: val_cplx
  real(dp) ::val_real
-
 ! *********************************************************************
 
  do i=1,matrix%sizeb_local(1)
    do j=1,matrix%sizeb_local(2)
      call matrix%loc2glob(i,j,iglob,jglob)
-     if(jglob < iglob) then
+     if (jglob < iglob) then
         ind = iglob*(iglob-1)+2*jglob-1
      else
         ind = jglob*(jglob-1)+2*iglob-1
      end if
-     if (istwf_k/=2) then
+     if (istwf_k /= 2) then
         val_cplx = dcmplx(reference(ind),reference(ind+1))
         if(jglob < iglob) then
            call matrix_set_local_cplx(matrix,i,j,conjg(val_cplx))
@@ -1883,7 +1861,6 @@ subroutine matrix_from_realmatrix(matrix, reference, istwf_k)
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob
  real(dp) :: val
-
 ! *********************************************************************
 
  ABI_UNUSED(istwf_k)
@@ -1928,7 +1905,6 @@ subroutine matrix_from_complexmatrix(matrix, reference, istwf_k)
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob
  complex(dpc) :: val
-
 ! *********************************************************************
 
  ABI_UNUSED(istwf_k)
@@ -1972,7 +1948,6 @@ subroutine matrix_to_global(matrix, reference, istwf_k)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob,ind
-
 ! *********************************************************************
 
  do i=1,matrix%sizeb_local(1)
@@ -2024,7 +1999,6 @@ subroutine matrix_to_realmatrix(matrix, reference, istwf_k)
 !Local variables-------------------------------
  integer :: i,j,iglob,jglob
  !complex(dpc) :: zvar
-
 ! *********************************************************************
 
  ABI_UNUSED(istwf_k)
@@ -2067,7 +2041,6 @@ subroutine matrix_to_complexmatrix(matrix, reference, istwf_k)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob
-
 ! *********************************************************************
 
  ABI_UNUSED(istwf_k)
@@ -2110,7 +2083,6 @@ subroutine matrix_to_reference(matrix, reference, istwf_k)
 
 !Local variables-------------------------------
  integer  :: i,j,iglob,jglob,ind
-
 ! *********************************************************************
 
  do i=1,matrix%sizeb_local(1)
@@ -2167,7 +2139,6 @@ subroutine slk_matrix_from_global_dpc_2D(mat, uplo, glob_mat)
 
 !Local variables-------------------------------
  integer :: ii, jj, iglob, jglob
-
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "%buffer_cplx not allocated")
@@ -2254,7 +2225,6 @@ subroutine slk_matrix_from_global_dpc_1Dp(mat,uplo,glob_pmat)
 !Local variables-------------------------------
  integer :: ii,jj,iglob,jglob,ind,n
  real(dp) :: szm
-
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "%buffer_cplx not allocated")
@@ -2342,11 +2312,9 @@ subroutine slk_matrix_to_global_dpc_2D(mat, uplo, glob_mat)
 
 !Local variables-------------------------------
  integer :: ii,jj,iglob,jglob
-
 !************************************************************************
 
  select case (uplo(1:1))
-
  case ("A", "a")
    ! Full global matrix has to be filled.
    do jj=1,mat%sizeb_local(2)
@@ -2416,8 +2384,6 @@ integer function my_locr(mat)
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_SCALAPACK
  integer :: M, MB_A, MYROW, RSRC_A, NPROW
- integer,external :: NUMROC
-
 ! *************************************************************************
 
  M      = mat%descript%tab(M_ )      ! The number of rows in the global matrix.
@@ -2467,8 +2433,6 @@ integer function my_locc(mat)
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
  integer :: N, NB_A, MYCOL, CSRC_A, NPCOL
- integer,external :: NUMROC
-
 ! *************************************************************************
 
  N      = mat%descript%tab(N_ )      ! The number of columns in the global matrix.
@@ -2523,7 +2487,6 @@ subroutine slk_pgemm_dp(transa, transb, matrix1, alpha, matrix2, beta, results, 
 
 !Local variables-------------------------------
  integer :: mm, nn, kk, ija__(2), ijb__(2), ijc__(2)
-
 !************************************************************************
 
  ija__ = [1, 1]; if (present(ija)) ija__ = ija
@@ -2598,7 +2561,6 @@ subroutine slk_pgemm_sp(transa, transb, matrix1, alpha, matrix2, beta, results, 
 
 !Local variables-------------------------------
  integer :: mm, nn, kk, ija__(2), ijb__(2), ijc__(2)
-
 !************************************************************************
 
  ija__ = [1, 1]; if (present(ija)) ija__ = ija
@@ -2659,22 +2621,21 @@ end subroutine slk_pgemm_sp
 !! SOURCE
 
 subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, &
-&                                nev, use_gpu_elpa) ! Optional arguments
+                                 nev, use_gpu_elpa) ! Optional arguments
 
 #ifdef HAVE_LINALG_ELPA
-  !Arguments ------------------------------------
-  class(processor_scalapack),intent(in) :: processor
-  class(matrix_scalapack),intent(inout) :: matrix
-  class(matrix_scalapack),intent(inout) :: results
-  DOUBLE PRECISION,intent(inout) :: eigen(:)
-  integer,intent(in)  :: comm,istwf_k
-  integer,optional,intent(in) :: nev
-  integer,optional,intent(in) :: use_gpu_elpa
+!Arguments ------------------------------------
+ class(processor_scalapack),intent(in) :: processor
+ class(matrix_scalapack),intent(inout) :: matrix
+ class(matrix_scalapack),intent(inout) :: results
+ DOUBLE PRECISION,intent(inout) :: eigen(:)
+ integer,intent(in)  :: comm,istwf_k
+ integer,optional,intent(in) :: nev
+ integer,optional,intent(in) :: use_gpu_elpa
 
-  !Local variables ------------------------------
-  type(elpa_hdl_t) :: elpa_hdl
-  integer :: nev__,use_gpu_elpa_
-
+ !Local variables ------------------------------
+ type(elpa_hdl_t) :: elpa_hdl
+ integer :: nev__,use_gpu_elpa_
 !************************************************************************
 
   nev__ = matrix%sizeb_global(1); if (present(nev)) nev__ = nev
@@ -2685,7 +2646,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   call elpa_func_allocate(elpa_hdl,gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),nev__,&
-&                           matrix%sizeb_local(1),matrix%sizeb_local(2))
+                            matrix%sizeb_local(1),matrix%sizeb_local(2))
   call elpa_func_get_communicators(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
 
   if (istwf_k/=2) then
@@ -2697,44 +2658,40 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   call elpa_func_deallocate(elpa_hdl)
 
 #else
-  !Arguments ------------------------------------
-  class(processor_scalapack),intent(in)       :: processor
-  class(matrix_scalapack),intent(in)          :: matrix
-  class(matrix_scalapack),intent(inout)       :: results
-  DOUBLE PRECISION,intent(inout) :: eigen(:)
-  integer,intent(in)  :: comm,istwf_k
-  integer,optional,intent(in) :: nev
-  integer,optional,intent(in) :: use_gpu_elpa
+ !Arguments ------------------------------------
+ class(processor_scalapack),intent(in)       :: processor
+ class(matrix_scalapack),intent(in)          :: matrix
+ class(matrix_scalapack),intent(inout)       :: results
+ DOUBLE PRECISION,intent(inout) :: eigen(:)
+ integer,intent(in)  :: comm,istwf_k
+ integer,optional,intent(in) :: nev
+ integer,optional,intent(in) :: use_gpu_elpa
 
 #ifdef HAVE_LINALG_SCALAPACK
-  !Local variables-------------------------------
-  integer            :: LRWORK,LIWORK,LCWORK,INFO
-  character(len=500) :: msg
+ !Local variables-------------------------------
+ integer            :: LRWORK,LIWORK,LCWORK,INFO
+ character(len=500) :: msg
+ integer         , dimension(1) :: IWORK_tmp
+ DOUBLE PRECISION, dimension(1) :: RWORK_tmp
+ complex(dpc)     , dimension(1) :: CWORK_tmp
 
-  integer         , dimension(1) :: IWORK_tmp
-  DOUBLE PRECISION, dimension(1) :: RWORK_tmp
-  complex(dpc)     , dimension(1) :: CWORK_tmp
+ integer         , allocatable  :: IWORK(:)
+ DOUBLE PRECISION, allocatable  :: RWORK(:)
+ complex(dpc)     , allocatable  :: CWORK(:)
 
-  integer         , allocatable  :: IWORK(:)
-  DOUBLE PRECISION, allocatable  :: RWORK(:)
-  complex(dpc)     , allocatable  :: CWORK(:)
+ integer,          allocatable :: ICLUSTR(:)
+ integer,          allocatable :: IFAIL(:)
+ DOUBLE PRECISION, allocatable :: GAP(:)
 
-  integer,          allocatable :: ICLUSTR(:)
-  integer,          allocatable :: IFAIL(:)
-  DOUBLE PRECISION, allocatable :: GAP(:)
+ DOUBLE PRECISION            :: ABSTOL,ORFAC
+ integer,          parameter :: IZERO=0
 
-  DOUBLE PRECISION            :: ABSTOL,ORFAC
-  integer,          parameter :: IZERO=0
-
-  integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3) ! IA,JA,IZ,JZ,
-  integer :: nev__, il, iu
-  character(len=1) :: range
-
-  DOUBLE PRECISION, external :: PDLAMCH
-
+ integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3) ! IA,JA,IZ,JZ,
+ integer :: nev__, il, iu
+ character(len=1) :: range
 ! *************************************************************************
 
-  ABI_UNUSED(use_gpu_elpa) ! No GPU implementation is using scaLAPACK
+  ABI_UNUSED(use_gpu_elpa) ! No GPU implementation if using scaLAPACK
   nev__ = matrix%sizeb_global(1); range = "A"; il = 0; iu = 0
   if (present(nev)) then
     nev__ = nev; range = "I"; il = 1; iu = nev
@@ -2750,31 +2707,34 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   ABI_MALLOC(ICLUSTR,(2*processor%grid%dims(1)*processor%grid%dims(2)))
   ABI_MALLOC(GAP,(processor%grid%dims(1)*processor%grid%dims(2)))
 
+  CWORK_tmp = (0.0_DP,0.0_DP)
+  RWORK_tmp = 0.0_DP
   ! Get the size of the work arrays
   if (istwf_k/=2) then
      call PZHEEVX('V', range, 'U',&
-&      matrix%sizeb_global(2),&
-&      matrix%buffer_cplx,1,1,matrix%descript%tab, &
-&      ZERO,ZERO,il,iu,ABSTOL,&
-&      m,nz,eigen,ORFAC, &
-&      results%buffer_cplx,1,1,results%descript%tab, &
-&      CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
-&      IFAIL,ICLUSTR,GAP,INFO)
+      matrix%sizeb_global(2),&
+      matrix%buffer_cplx,1,1,matrix%descript%tab, &
+      ZERO,ZERO,il,iu,ABSTOL,&
+      m,nz,eigen,ORFAC, &
+      results%buffer_cplx,1,1,results%descript%tab, &
+      CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
+      IFAIL,ICLUSTR,GAP,INFO)
   else
      call PDSYEVX('V', range, 'U',&
-&      matrix%sizeb_global(2),&
-&      matrix%buffer_real,1,1,matrix%descript%tab, &
-&      ZERO,ZERO,il,iu,ABSTOL,&
-&      m,nz,eigen,ORFAC, &
-&      results%buffer_real,1,1,results%descript%tab, &
-&      RWORK_tmp,-1,IWORK_tmp,-1,&
-&      IFAIL,ICLUSTR,GAP,INFO)
+      matrix%sizeb_global(2),&
+      matrix%buffer_real,1,1,matrix%descript%tab, &
+      ZERO,ZERO,il,iu,ABSTOL,&
+      m,nz,eigen,ORFAC, &
+      results%buffer_real,1,1,results%descript%tab, &
+      RWORK_tmp,-1,IWORK_tmp,-1,&
+      IFAIL,ICLUSTR,GAP,INFO)
   end if
 
   if (INFO/=0) then
-     write(msg,'(A,I6)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
-     ABI_ERROR(msg)
+    write(msg,'(A,I0)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
+    ABI_ERROR(msg)
   endif
+  !write(std_out, *)"First call to compute workspace OK"
 
   TWORK_tmp(1) = IWORK_tmp(1)
   TWORK_tmp(2) = INT(RWORK_tmp(1))
@@ -2795,6 +2755,8 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
     ABI_MALLOC(IWORK,(1))
   end if
   if (LRWORK>0) then
+    ! This workspace scales with the number of processors but not always in a simple linear way.
+    ! and the optimal LRWORK might be pretty big (~1 Gb) even for small systems.
     ABI_MALLOC(RWORK,(LRWORK))
     RWORK(:) = 0._dp
   else
@@ -2843,7 +2805,6 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   ABI_FREE(IFAIl)
   ABI_FREE(ICLUSTR)
   ABI_FREE(GAP)
-
   ABI_SFREE(IWORK)
   ABI_SFREE(RWORK)
   ABI_SFREE(CWORK)
@@ -2881,8 +2842,8 @@ end subroutine compute_eigen_problem
 #ifdef HAVE_LINALG_ELPA
 
 subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
-&                             my_prow,my_pcol,np_rows,np_cols,sc_desc,comm,&
-&                             use_gpu_elpa) ! Optional parameter
+                              my_prow,my_pcol,np_rows,np_cols,sc_desc,comm,&
+                              use_gpu_elpa) ! Optional parameter
 
   !-Arguments
   integer,intent(in) :: na
@@ -2899,10 +2860,8 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   complex*16 :: tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
   !-Local variables
   integer :: i, n_col, n_row, use_gpu_elpa_
-  integer,external :: indxl2g,numroc
   complex*16, parameter :: CZERO = (0.d0,0.d0), CONE = (1.d0,0.d0)
   type(elpa_hdl_t) :: elpa_hdl
-
 ! *************************************************************************
 
   use_gpu_elpa_=0
@@ -2914,9 +2873,7 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   call elpa_func_allocate(elpa_hdl,blacs_ctx=sc_desc(CTXT_),gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,na,nblk,nev,na_rows,na_cols)
   call elpa_func_get_communicators(elpa_hdl,comm,my_prow,my_pcol)
-
   call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,z,ev,nev)
-
   call elpa_func_deallocate(elpa_hdl)
 
 end subroutine solve_gevp_complex
@@ -2924,8 +2881,8 @@ end subroutine solve_gevp_complex
 !----------------------------------------------------------------------
 
 subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
-&                          my_prow,my_pcol,np_rows,np_cols,sc_desc,comm, &
-&                          use_gpu_elpa) ! Optional argument
+                           my_prow,my_pcol,np_rows,np_cols,sc_desc,comm, &
+                           use_gpu_elpa) ! Optional argument
 
   !-Arguments
   integer,intent(in) :: na
@@ -2942,9 +2899,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   real*8::tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
   !-Local variables
   integer :: i, n_col, n_row, use_gpu_elpa_
-  integer,external :: indxl2g,numroc
   type(elpa_hdl_t) :: elpa_hdl
-
 ! *************************************************************************
 
   use_gpu_elpa_=0
@@ -3026,7 +2981,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 !! SOURCE
 
 subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k,&
-&                                            nev,use_gpu_elpa) ! Optional arguments
+                                             nev,use_gpu_elpa) ! Optional arguments
 
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
@@ -3040,7 +2995,6 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 !Local
   type(matrix_scalapack) :: tmp1, tmp2
   integer :: i,n_col, n_row, nev__,use_gpu_elpa__
-  integer,external :: indxl2g,numroc
 
   nev__ = matrix1%sizeb_global(2); if (present(nev)) nev__ = nev
   use_gpu_elpa__ = 0
@@ -3053,20 +3007,20 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 
   if (istwf_k/=2) then
      call solve_gevp_complex(matrix1%sizeb_global(1), nev__, &
-&          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
-&          matrix1%buffer_cplx,matrix2%buffer_cplx,eigen,results%buffer_cplx, &
-&          tmp1%buffer_cplx,tmp2%buffer_cplx, &
-&          processor%coords(1),processor%coords(2), &
-&          processor%grid%dims(1),processor%grid%dims(2), &
-&          matrix1%descript%tab,processor%comm,use_gpu_elpa=use_gpu_elpa__)
+           matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
+           matrix1%buffer_cplx,matrix2%buffer_cplx,eigen,results%buffer_cplx, &
+           tmp1%buffer_cplx,tmp2%buffer_cplx, &
+           processor%coords(1),processor%coords(2), &
+           processor%grid%dims(1),processor%grid%dims(2), &
+           matrix1%descript%tab,processor%comm,use_gpu_elpa=use_gpu_elpa__)
   else
      call solve_gevp_real(matrix1%sizeb_global(1), nev__, &
-&          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
-&          matrix1%buffer_real,matrix2%buffer_real,eigen,results%buffer_real, &
-&          tmp1%buffer_real,tmp2%buffer_real, &
-&          processor%coords(1),processor%coords(2), &
-&          processor%grid%dims(1),processor%grid%dims(2), &
-&          matrix1%descript%tab,processor%comm,use_gpu_elpa=use_gpu_elpa__)
+           matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
+           matrix1%buffer_real,matrix2%buffer_real,eigen,results%buffer_real, &
+           tmp1%buffer_real,tmp2%buffer_real, &
+           processor%coords(1),processor%coords(2), &
+           processor%grid%dims(1),processor%grid%dims(2), &
+           matrix1%descript%tab,processor%comm,use_gpu_elpa=use_gpu_elpa__)
   end if
   call tmp1%free()
   call tmp2%free()
@@ -3100,8 +3054,6 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   integer ::  M,NZ,ierr,TWORK_tmp(3),TWORK(3) ! IA,JA,IZ,JZ,
   character(len=1) :: range
   integer :: nev__, il, iu
-  DOUBLE PRECISION, external :: PDLAMCH
-
 ! *************************************************************************
 
   ABI_UNUSED(use_gpu_elpa) ! No GPU implementation is using scaLAPACK
@@ -3120,31 +3072,33 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   ABI_MALLOC(ICLUSTR,(2*processor%grid%dims(1)*processor%grid%dims(2)))
   ABI_MALLOC(GAP    ,(  processor%grid%dims(1)*processor%grid%dims(2)))
 
+  CWORK_tmp = (0.0_DP,0.0_DP)
+  RWORK_tmp = 0.0_DP
   ! Get the size of the work arrays
   if (istwf_k /= 2) then
      call PZHEGVX(1, 'V', range, 'U',&
-&      matrix1%sizeb_global(2),&
-&      matrix1%buffer_cplx,1,1,matrix1%descript%tab, &
-&      matrix2%buffer_cplx,1,1,matrix2%descript%tab, &
-&      ZERO,ZERO,il,iu,ABSTOL,&
-&      m,nz,eigen,ORFAC, &
-&      results%buffer_cplx,1,1,results%descript%tab, &
-&      CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
-&      IFAIL,ICLUSTR,GAP,INFO)
+       matrix1%sizeb_global(2),&
+       matrix1%buffer_cplx,1,1,matrix1%descript%tab, &
+       matrix2%buffer_cplx,1,1,matrix2%descript%tab, &
+       ZERO,ZERO,il,iu,ABSTOL,&
+       m,nz,eigen,ORFAC, &
+       results%buffer_cplx,1,1,results%descript%tab, &
+       CWORK_tmp,-1,RWORK_tmp,-1,IWORK_tmp,-1,&
+       IFAIL,ICLUSTR,GAP,INFO)
   else
      call PDSYGVX(1,'V',range,'U',&
-&      matrix1%sizeb_global(2),&
-&      matrix1%buffer_real,1,1,matrix1%descript%tab, &
-&      matrix2%buffer_real,1,1,matrix2%descript%tab, &
-&      ZERO,ZERO,il,iu,ABSTOL,&
-&      m,nz,eigen,ORFAC, &
-&      results%buffer_real,1,1,results%descript%tab, &
-&      RWORK_tmp,-1,IWORK_tmp,-1,&
-&      IFAIL,ICLUSTR,GAP,INFO)
+       matrix1%sizeb_global(2),&
+       matrix1%buffer_real,1,1,matrix1%descript%tab, &
+       matrix2%buffer_real,1,1,matrix2%descript%tab, &
+       ZERO,ZERO,il,iu,ABSTOL,&
+       m,nz,eigen,ORFAC, &
+       results%buffer_real,1,1,results%descript%tab, &
+       RWORK_tmp,-1,IWORK_tmp,-1,&
+       IFAIL,ICLUSTR,GAP,INFO)
   endif
 
   if (INFO/=0) then
-     write(msg,'(A,I6)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
+     write(msg,'(A,I0)') "Problem to compute workspace to use ScaLAPACK, INFO=",INFO
      ABI_ERROR(msg)
   endif
 
@@ -3183,29 +3137,29 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   if (istwf_k/=2) then
      ! write(std_out,*) 'I am using PZHEGVX'
      call PZHEGVX(1,'V',range,'U',&
-&      matrix1%sizeb_global(2),&
-&      matrix1%buffer_cplx,1,1,matrix1%descript%tab, &
-&      matrix2%buffer_cplx,1,1,matrix2%descript%tab, &
-&      ZERO,ZERO,il,iu,ABSTOL,&
-&      m,nz,eigen,ORFAC, &
-&      results%buffer_cplx,1,1,results%descript%tab, &
-&      CWORK,LCWORK,RWORK,LRWORK,IWORK,LIWORK,&
-&      IFAIL,ICLUSTR,GAP,INFO)
+       matrix1%sizeb_global(2),&
+       matrix1%buffer_cplx,1,1,matrix1%descript%tab, &
+       matrix2%buffer_cplx,1,1,matrix2%descript%tab, &
+       ZERO,ZERO,il,iu,ABSTOL,&
+       m,nz,eigen,ORFAC, &
+       results%buffer_cplx,1,1,results%descript%tab, &
+       CWORK,LCWORK,RWORK,LRWORK,IWORK,LIWORK,&
+       IFAIL,ICLUSTR,GAP,INFO)
   else
      ! write(std_out,*) 'I am using PDSYGVX'
      call PDSYGVX(1,'V',range,'U',&
-&      matrix1%sizeb_global(2),&
-&      matrix1%buffer_real,1,1,matrix1%descript%tab, &
-&      matrix2%buffer_real,1,1,matrix2%descript%tab, &
-&      ZERO,ZERO,il,iu,ABSTOL,&
-&      m,nz,eigen,ORFAC, &
-&      results%buffer_real,1,1,results%descript%tab, &
-&      RWORK,LRWORK,IWORK,LIWORK,&
-&      IFAIL,ICLUSTR,GAP,INFO)
+       matrix1%sizeb_global(2),&
+       matrix1%buffer_real,1,1,matrix1%descript%tab, &
+       matrix2%buffer_real,1,1,matrix2%descript%tab, &
+       ZERO,ZERO,il,iu,ABSTOL,&
+       m,nz,eigen,ORFAC, &
+       results%buffer_real,1,1,results%descript%tab, &
+       RWORK,LRWORK,IWORK,LIWORK,&
+       IFAIL,ICLUSTR,GAP,INFO)
   endif
 
   if (INFO/=0) then
-     write(msg,'(A,I6)') "Problem to compute eigen problem with ScaLAPACK, INFO=",INFO
+     write(msg,'(A,I0)') "Problem to compute eigen problem with ScaLAPACK, INFO=",INFO
      ABI_ERROR(msg)
   endif
 
@@ -3251,7 +3205,7 @@ end subroutine compute_generalized_eigen_problem
 !! SOURCE
 
 subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,vector,istwf_k,&
-&                         use_gpu_elpa) ! Optional argument
+                          use_gpu_elpa) ! Optional argument
 
 !Arguments ------------------------------------
 !scalaras
@@ -3273,7 +3227,6 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  type(matrix_scalapack) :: sca_matrix2
  real(dp),allocatable :: r_tmp_evec(:,:)
  complex(dpc),allocatable :: z_tmp_evec(:,:)
-
 ! *************************************************************************
 
  use_gpu_elpa_=0
@@ -3323,7 +3276,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! COMPUTE EIGEN VALUES AND VECTORS : A * X = lambda  * X
  ! ================================
  call compute_eigen_problem(processor,sca_matrix1, sca_matrix2,vector, comm,istwf_k, &
-&                           use_gpu_elpa=use_gpu_elpa_)
+                            use_gpu_elpa=use_gpu_elpa_)
 
  ! ==============================
  ! CONCATENATE EIGEN VECTORS
@@ -3382,7 +3335,7 @@ end subroutine compute_eigen1
 !! SOURCE
 
 subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k, &
-&                         use_gpu_elpa) ! Optional argument
+                          use_gpu_elpa) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -3404,7 +3357,6 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  type(matrix_scalapack) :: sca_matrix1, sca_matrix2, sca_matrix3
  real(dp),allocatable :: r_tmp_evec(:,:)
  complex(dpc),allocatable :: z_tmp_evec(:,:)
-
 ! *************************************************************************
 
  use_gpu_elpa_=0
@@ -3460,7 +3412,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  ! COMPUTE EIGEN VALUES AND VECTORS : A * X = lambda * B * X
  ! ================================
  call compute_generalized_eigen_problem(processor,sca_matrix1,sca_matrix2,&
-&             sca_matrix3,vector,comm,istwf_k,use_gpu_elpa=use_gpu_elpa_)
+              sca_matrix3,vector,comm,istwf_k,use_gpu_elpa=use_gpu_elpa_)
 
  ! ==============================
  ! CONCATENATE EIGEN VECTORS
@@ -3468,12 +3420,12 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
 #ifdef HAVE_MPI
  if ( istwf_k /= 2 ) then
    call matrix_to_complexmatrix(sca_matrix3,z_tmp_evec,istwf_k)
-   call MPI_ALLREDUCE(z_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_complex,&
-&    MPI_SUM,comm,ierr)
+   call MPI_ALLREDUCE(z_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_complex, MPI_SUM,comm,ierr)
+   ABI_FREE(z_tmp_evec)
  else
    call matrix_to_realmatrix(sca_matrix3,r_tmp_evec,istwf_k)
-   call MPI_ALLREDUCE(r_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_PRECISION,&
-&    MPI_SUM,comm,ierr)
+   call MPI_ALLREDUCE(r_tmp_evec, matrix1, nbli_global*nbco_global, MPI_DOUBLE_PRECISION, MPI_SUM,comm,ierr)
+   ABI_FREE(r_tmp_evec)
  endif
 #endif
 
@@ -3483,7 +3435,6 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  call sca_matrix1%free()
  call sca_matrix2%free()
  call sca_matrix3%free()
-
 
 #ifndef HAVE_LINALG_ELPA
  ABI_UNUSED(use_gpu_elpa)
@@ -3546,7 +3497,6 @@ subroutine slk_heev(mat, jobz, uplo, vec, w, &
  integer :: ija__(2), ijz__(2)
  real(dp),allocatable :: rwork_dp(:)
  complex(dp),allocatable :: work_dp(:)
-
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx not allocated")
@@ -3645,7 +3595,6 @@ subroutine slkmat_sp_heev(mat, jobz, uplo, vec, w, &
  integer :: ija__(2), ijz__(2)
  real(sp),allocatable :: rwork_sp(:)
  complex(sp),allocatable :: work_sp(:)
-
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx not allocated")
@@ -3784,7 +3733,6 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
  complex(dpc),allocatable :: work(:)
-
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx is not allocated!")
@@ -3831,8 +3779,8 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
   !
   ! FROM THE SCALAPACK MAN PAGE:
   ! The computed eigenvectors may not be orthogonal if the minimal workspace is supplied and ORFAC is too
-  ! small. If you  want to guarantee orthogonality (at the cost of potentially poor performance) you should
-  ! add the following to LRWORK: (CLUSTERSIZE-1)*N where CLUSTERSIZE is  the  number  of  eigenvalues  in  the
+  ! small. If you want to guarantee orthogonality (at the cost of potentially poor performance) you should
+  ! add the following to LRWORK: (CLUSTERSIZE-1)*N where CLUSTERSIZE is the number of eigenvalues in the
   ! largest cluster, where a cluster is defined as a set of close eigenvalues: { W(K),...,W(K+CLUSTERSIZE-1) |
   ! W(J+1) <= W(J) + ORFAC*2*norm(A) }.
 
@@ -3905,7 +3853,7 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
  end if
 
  ! Check the number of eigenvalues found wrt to the number of vectors calculated.
- if ( firstchar(jobz, ['V','v']) .and. mene_found /= nvec_calc) then
+ if (firstchar(jobz, ['V','v']) .and. mene_found /= nvec_calc) then
    write(msg,'(5a)')&
    " The user supplied insufficient space and PZHEEVX is not able to detect this before beginning computation. ",ch10,&
    " To get all the eigenvectors requested, the user must supply both sufficient space to hold the ",ch10,&
@@ -3918,7 +3866,6 @@ subroutine slk_pzheevx(mat, jobz, range, uplo, vl, vu, il, iu, abstol, vec, mene
  ABI_FREE(rwork)
  ABI_FREE(iwork)
  ABI_FREE(gap)
-
  ABI_SFREE(ifail)
  ABI_SFREE(iclustr)
 #endif
@@ -4074,7 +4021,6 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
  integer,allocatable  :: iwork(:),iclustr(:),ifail(:)
  real(dp),allocatable  :: rwork(:),gap(:)
  complex(dpc),allocatable :: work(:)
-
 !************************************************************************
 
  ABI_CHECK(allocated(Slk_matA%buffer_cplx), "buffer_cplx is not allocated!")
@@ -4183,11 +4129,11 @@ subroutine slk_pzhegvx(Slk_matA, ibtype, jobz, range, uplo, Slk_matB, vl, vu, il
     Slk_matB%buffer_cplx,1,1,Slk_matB%descript%tab,&
     vl,vu,il,iu,abstol,mene_found,nvec_calc, eigen,orfac,&
     Slk_vec%buffer_cplx,1,1,Slk_vec%descript%tab,&
-   work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
+    work,lwork,rwork,lrwork,iwork,liwork,ifail,iclustr,gap,info)
 
  ! Handle the possible error.
  if (info < 0) then
-   write(msg,'(a,i7,a)')" The ",-info,"-th argument of PZHEGVX had an illegal value."
+   write(msg,'(a,i0,a)')" The ",-info,"-th argument of PZHEGVX had an illegal value."
    if (info==-25) msg = " LRWORK is too small to compute all the eigenvectors requested, no computation is performed"
    ABI_ERROR(msg)
  end if
@@ -4276,7 +4222,6 @@ subroutine slk_invert(mat)
  integer,allocatable :: ipiv(:), iwork(:)
  complex(dp),allocatable :: work_dp(:)
  complex(sp),allocatable :: work_sp(:)
-
 !************************************************************************
 
  ! IMPORTANT NOTE: PZGETRF requires square block decomposition i.e., MB_A = NB_A.
@@ -4398,7 +4343,6 @@ subroutine slk_hpd_invert(mat, uplo, full)
  integer :: info, mm, il1, il2, iglob1, iglob2
  type(matrix_scalapack) :: work_mat
  logical :: full__
-
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx not allocated")
@@ -4492,7 +4436,6 @@ subroutine slkmat_sp_hpd_invert(mat, uplo, full)
  integer :: info, mm, il1, il2, iglob1, iglob2
  type(slkmat_sp_t) :: work_mat
  logical :: full__
-
 !************************************************************************
 
  ABI_CHECK(allocated(mat%buffer_cplx), "buffer_cplx not allocated")
@@ -4591,7 +4534,6 @@ subroutine slk_ptrans(in_mat, trans, out_mat, &
  real(dp) :: ralpha__, rbeta__
  integer :: ija__(2), ijc__(2)
  complex(dp) :: calpha__, cbeta__
-
 ! *************************************************************************
 
  ija__ = [1, 1]; if (present(ija)) ija__ = ija
@@ -4701,7 +4643,6 @@ subroutine slkmat_sp_ptrans(in_mat, trans, out_mat, &
  real(sp) :: ralpha__, rbeta__
  integer :: ija__(2), ijc__(2)
  complex(sp) :: calpha__, cbeta__
-
 ! *************************************************************************
 
  ija__ = [1, 1]; if (present(ija)) ija__ = ija
@@ -4797,7 +4738,6 @@ subroutine slk_change_size_blocs(in_mat, out_mat, &
 
 !Local variables-------------------------------
  type(processor_scalapack), pointer :: processor__
-
 ! *************************************************************************
 
  processor__ => in_mat%processor; if (present(processor)) processor__ => processor
@@ -4911,7 +4851,6 @@ subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
 !Local variables-------------------------------
  type(processor_scalapack), pointer :: processor__
  integer :: ija__(2), ijb__(2)
-
 ! *************************************************************************
 
  ija__ = [1, 1]; if (present(ija)) ija__ = ija
@@ -4984,7 +4923,6 @@ subroutine slk_take_from(out_mat, source, &
  integer :: mm, nn
  character(len=500) :: msg
  integer :: ija__(2), ijb__(2)
-
 ! *************************************************************************
 
  ! prototype
@@ -5057,7 +4995,7 @@ end subroutine slk_take_from
 !! SOURCE
 
 subroutine slkmat_sp_take_from(out_mat, source, &
-                         ija, ijb, free) ! optional
+                               ija, ijb, free) ! optional
 
 !Arguments ------------------------------------
  class(slkmat_sp_t),intent(inout) :: out_mat
@@ -5069,7 +5007,6 @@ subroutine slkmat_sp_take_from(out_mat, source, &
  integer :: mm, nn
  character(len=500) :: msg
  integer :: ija__(2), ijb__(2)
-
 ! *************************************************************************
 
  ! prototype
@@ -5151,7 +5088,6 @@ subroutine slk_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
  integer :: ierr
  type(processor_scalapack) :: self_processor
  type(matrix_scalapack) :: out_mat
-
 ! *************************************************************************
 
  ABI_CHECK(allocated(in_mat%buffer_cplx), "buffer_cplx is not allocated")
@@ -5224,7 +5160,6 @@ subroutine slkmat_sp_collect_cplx(in_mat, mm, nn, ija, out_carr, request)
  integer :: ierr
  type(processor_scalapack) :: self_processor
  type(slkmat_sp_t) :: out_mat
-
 ! *************************************************************************
 
  ABI_CHECK(allocated(in_mat%buffer_cplx), "buffer_cplx is not allocated")
@@ -5296,12 +5231,7 @@ complex(dp) function slk_get_trace(mat) result(ctrace)
  real(dp) :: rtrace
  real(sp) :: rtrace_sp
  complex(sp) :: ctrace_sp
- real(dp),external :: PDLATRA
- real(sp),external :: PSLATRA
- complex(sp),external :: PCLATRA
- complex(dp),external :: PZLATRA
 #endif
-
 ! *************************************************************************
 
  ABI_CHECK_IEQ(mat%sizeb_global(1), mat%sizeb_global(2), "get_trace assumes square matrix!")
@@ -5404,7 +5334,6 @@ subroutine slk_set_imag_diago_to_zero(mat, local_max)
 
 !Local variables-------------------------------
  integer :: il1, iglob1, il2, iglob2
-
 ! *************************************************************************
 
  local_max = -huge(one)
@@ -5514,7 +5443,6 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
  integer,pointer :: elw2slk(:,:)
  complex(dpc),allocatable :: buffer1_cplx(:)
  character(len=500) :: msg
-
 !************************************************************************
 
  ABI_CHECK(allocated(Slk_mat%buffer_cplx), "buffer_cplx not allocated")
@@ -5731,7 +5659,6 @@ subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,fla
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecord(:)
 !arrays
  character(len=500) :: msg
-
 !************************************************************************
 
  do_open = PRESENT(fname)
@@ -5926,7 +5853,6 @@ subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsbloc
  character(len=500) :: msg
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
-
 !************************************************************************
 
 #ifdef HAVE_MPI_IO
@@ -6049,7 +5975,6 @@ subroutine slk_symmetrize(Slk_mat, uplo, symtype)
  integer :: jloc,iloc,iglob,jglob,ij_loc
  logical :: is_hermitian,is_real,is_cplx,is_symmetric
  character(len=500) :: msg
-
 !************************************************************************
 
  is_cplx = (allocated(Slk_mat%buffer_cplx))
@@ -6184,7 +6109,6 @@ subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortr
  character(len=500) :: msg
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
-
 !************************************************************************
 
 #ifdef HAVE_MPI_IO
@@ -6385,7 +6309,6 @@ subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offse
  character(len=500) :: msg
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
-
 !************************************************************************
 
 #ifdef HAVE_MPI_IO
@@ -6560,7 +6483,6 @@ subroutine slk_bsize_and_type(Slk_mat, bsize_elm, mpi_type_elm)
 !scalars
  integer :: ierr
  character(len=500) :: msg
-
 ! ************************************************************************
 
  ! @matrix_scalapack

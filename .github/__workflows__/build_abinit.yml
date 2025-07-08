@@ -1,0 +1,77 @@
+name: Build Abinit and run the test suite
+
+on:
+  push:
+    branches: ["develop", "abinit_web"]
+  pull_request:
+    branches: ["develop"]
+
+jobs:
+  build:
+    # prevent this action from running on forks
+    #if: github.repository == 'abinit/abinit'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-latest
+            python: "3.9"
+
+    runs-on: ${{ matrix.config.os }}
+
+    #runs-on: [x64|arm64|ppc64le|s390x]-ubuntu-latest
+    #runs-on: ubuntu-latest
+    #runs-on: arm64-ubuntu-latest
+
+    steps:
+    - name: Checkout Abinit repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y autoconf automake m4
+        # 1 # compiler
+        sudo apt install -y build-essential gfortran
+        # 2 # MPI libraries - choice for Open MPI
+        sudo apt install -y mpi-default-dev libopenmpi-dev
+        # 3 # math libraries - choice for lapack and blas
+        sudo apt install -y liblapack-dev libblas-dev
+        # 4 # mandatory libraries
+        sudo apt install -y libfftw3-dev
+        sudo apt install -y libhdf5-dev libnetcdf-dev libnetcdff-dev libpnetcdf-dev libxc-dev
+
+    - name: Run makemake
+      run: ./config/scripts/makemake
+
+    - name: Print Env
+      run: |
+        echo "which mpifort\n:" `which mpifort`
+        echo "which mpicc\n:" `which mpicc`
+        echo "which mpicxx\n:" `which mpicxx`
+        echo "nc-config --all\n:" `nc-config --all`
+        echo "nf-config --all\n:" `nf-config --all`
+
+    - name: Run configure
+      run: ./configure FC=mpifort CC=mpicc CXX=mpicxx FCFLAGS="-g -O2 -ffree-line-length-none -fallow-argument-mismatch" --with-mpi="yes"
+
+    - name: Upload config.log
+      uses: actions/upload-artifact@v4
+      with:
+        name: config.log
+        path: config.log
+
+    - name: Run make
+      run: make -j | tee make.log
+
+    - name: Run tests
+      run: |
+        cd tests
+        ./runtests.py v1 v2 -j8 --force-mpirun | tee runtests.log
+
+    - name: Upload runtests.log
+      uses: actions/upload-artifact@v4
+      with:
+        name: runtests.log
+        path: tests/runtests.log

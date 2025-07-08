@@ -7,7 +7,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2024 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
+!! Copyright (C) 2002-2025 ABINIT group (SSharma,MVer,VRecoules,YG,NAP,VT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,15 +53,12 @@ program optic
  use m_eprenorms
  use m_crystal
  use m_argparse
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_build_info,     only : abinit_version
- use defs_datatypes,   only : ebands_t
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time ,          only : asctime, timein
- use m_symtk,          only : mati3inv, matr3inv
+ use m_matrix,         only : mati3inv, matr3inv
  use m_geometry,       only : metric
  use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
  use m_numeric_tools,  only : c2r
@@ -69,31 +66,28 @@ program optic
 
  implicit none
 
-!Arguments -----------------------------------
-
 !Local variables-------------------------------
  integer,parameter :: formeig0 = 0, formeig1 = 1, master = 0
  integer :: fform,finunt,ep_ntemp,itemp,i1,i2
  integer :: bantot,bdtot0_index,bdtot_index
- integer :: ierr,ii,jj,ikpt
+ integer :: ierr,ii,jj,kk,ikpt ! bands decompo kk
  integer :: isppol,mband,nomega,nband1
  integer :: nkpt,nsppol
  integer :: nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
  integer :: linel1,linel2,linel3,nonlin1,nonlin2,nonlin3
  integer :: iomode0,comm,nproc,my_rank, optic_ncid
-#ifdef HAVE_NETCDF
  integer :: ncid, varid, ncerr
-#endif
  integer :: num_lin_comp=1,num_nonlin_comp=0,num_linel_comp=0,num_nonlin2_comp=0
  integer :: autoparal=0,max_ncpus=0
  integer :: nonlin_comp(27) = 0, linel_comp(27) = 0, nonlin2_comp(27) = 0
  integer :: lin_comp(9) = [11, 22 ,33, 12, 13, 21, 23, 31, 32]
  integer :: prtlincompmatrixelements=0, nband_sum = -1
- real(dp) :: domega, eff
- real(dp) :: broadening,maxomega,scissor,tolerance
+ integer :: contrib_decompo ! contribution to SHG to decompose per band
+ real(dp) :: domega, eff, broadening, maxomega,scissor,tolerance
  real(dp) :: tcpu,tcpui,twall,twalli
- logical :: do_antiresonant, do_temperature
- logical :: do_ep_renorm
+ logical :: do_antiresonant, do_temperature, do_ep_renorm
+ real(dp) :: w_decompo ! bands decomposition
+ logical :: do_decompo ! bands decomposition
  logical,parameter :: remove_inv = .False.
  type(hdr_type) :: hdr
  type(ebands_t) :: ks_ebands, eph_ebands
@@ -111,8 +105,7 @@ program optic
  real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
  logical :: use_ncevk(0:3)
- character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname
- character(len=fnlen) :: infiles(0:3)
+ character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile,fname, infiles(0:3)
  character(len=256) :: prefix,tmp_radix
  character(len=10) :: s1,s2,s3,stemp
  character(len=24) :: codename, start_datetime
@@ -124,11 +117,10 @@ program optic
  ! Input file
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
  namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
-                       autoparal, max_ncpus, prtlincompmatrixelements, nband_sum
+                       do_decompo, w_decompo, contrib_decompo, autoparal, max_ncpus, prtlincompmatrixelements, nband_sum ! bands decomposition
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
           num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
-
 ! *********************************************************************************
 
  ! Change communicator for I/O (mandatory!)
@@ -202,8 +194,11 @@ program optic
    scissor = 0.0_dp ! no scissor by default
    tolerance = 1e-3_dp ! Ha
    prtlincompmatrixelements = 0 ! print the sum elements for external analysis
-   do_antiresonant = .TRUE. ! do use antiresonant approximation (only resonant transitions in the calculation)
+   do_antiresonant = .TRUE. ! use antiresonant approximation (do not consider anti-resonant transitions in the calculation)
    do_temperature = .FALSE.
+   do_decompo = .FALSE. ! do NOT perform the bands decomposition
+   w_decompo  = 2.0_dp  ! Ha, random default value
+   contrib_decompo = 0  ! consider all contributions (inter2w, inter1w,...)
 
    ! Read input file
    read(finunt,nml=FILES)
@@ -235,7 +230,7 @@ program optic
    if (iomode0 == IO_MODE_MPI) iomode0 = IO_MODE_FORTRAN
    call wfk_open_read(wfk0,wfkfile,formeig0,iomode0,get_unit(),xmpi_comm_self)
    ! Get header from the gs file
-   call hdr_copy(wfk0%hdr, hdr)
+   call wfk0%hdr%copy(hdr)
 
    ! Identify the type of RF Wavefunction files
    use_ncevk = .False.
@@ -252,19 +247,13 @@ program optic
 
      if (.not. use_ncevk(ii)) then
        call wfk_open_read(wfks(ii), infiles(ii), formeig1, iomode_ddk(ii), get_unit(), xmpi_comm_self)
-       call hdr_copy(wfks(ii)%hdr, hdr_ddk(ii))
+       call wfks(ii)%hdr%copy(hdr_ddk(ii))
      else
 
-#ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
-       call hdr_ncread(hdr_ddk(ii), ncid, fform)
+       call hdr_ddk(ii)%ncread( ncid, fform)
        ABI_CHECK(fform /= 0, sjoin("Error while reading:", infiles(ii)))
-
        NCF_CHECK(nf90_close(ncid))
-#else
-       ABI_ERROR("Netcdf not available!")
-#endif
-
      end if
    end do
 
@@ -353,6 +342,8 @@ program optic
 
  end if ! my_rank == master
 
+ call flush_unit(std_out)
+
  ! Master broadcasts input variables.
  call hdr%bcast(master, my_rank, comm)
  call xmpi_bcast(broadening, master, comm, ierr)
@@ -371,6 +362,9 @@ program optic
  call xmpi_bcast(num_nonlin2_comp, master, comm, ierr)
  call xmpi_bcast(nonlin2_comp, master, comm, ierr)
  call xmpi_bcast(do_antiresonant, master, comm, ierr)
+ call xmpi_bcast(do_decompo, master, comm, ierr) ! bands decomposition 
+ call xmpi_bcast(w_decompo, master, comm, ierr)  ! bands decomposition 
+ call xmpi_bcast(contrib_decompo, master, comm, ierr)  ! bands decomposition 
  call xmpi_bcast(do_ep_renorm, master, comm, ierr)
  call xmpi_bcast(ep_ntemp, master, comm, ierr)
  call xmpi_bcast(filnam_out, master, comm, ierr)
@@ -391,7 +385,7 @@ program optic
  end if
 
  ! Initializes crystal object
- call crystal_init(hdr%amu, cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
+ call cryst%init(hdr%amu, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
    hdr%nsym, hdr%rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
    (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
    hdr%symrel, hdr%tnons, hdr%symafm)
@@ -406,6 +400,8 @@ program optic
    write(std_out,'(a, f10.5,a)' ) ' ecut              =',hdr%ecut_eff,' Ha'
  end if
 
+ call flush_unit(std_out)
+
  ! Read the eigenvalues of ground-state and ddk files
  ABI_MALLOC(eigen0, (mband*nkpt*nsppol))
  ! MG: Do not understand why not [...,3]
@@ -419,7 +415,6 @@ program optic
 
    do ii=1,3
      if (.not. use_ncevk(ii)) cycle
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(ncid, infiles(ii), xmpi_comm_self))
      varid = nctk_idname(ncid, "h1_matrix_elements")
      outeig => eigen11
@@ -427,9 +422,6 @@ program optic
      if (ii == 3) outeig => eigen13
      NCF_CHECK(nf90_get_var(ncid, varid, outeig, count=[2, mband, mband, nkpt, nsppol]))
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_ERROR("Netcdf not available!")
-#endif
    end do
 
    bdtot0_index=0 ; bdtot_index=0
@@ -476,7 +468,7 @@ program optic
 
  ABI_MALLOC(doccde, (mband * nkpt * nsppol))
 
- call ebands_init(bantot, ks_ebands, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
+ call ks_ebands%init(bantot, hdr%nelect, hdr%ne_qFD, hdr%nh_qFD, hdr%ivalence,&
      doccde, eigen0, hdr%istwfk, hdr%kptns, &
      hdr%nband, nkpt, hdr%npwarr, nsppol, hdr%nspinor, hdr%tphysel, broadening, hdr%occopt, hdr%occ, hdr%wtk, &
      hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
@@ -487,7 +479,7 @@ program optic
  !ks_ebands = ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
 
  !YG : should we use broadening for ebands_init
- call ebands_update_occ(ks_ebands, -99.99d0)
+ call ks_ebands%update_occ(-99.99d0)
 
   !size of the frequency range
  nomega=int((maxomega+domega*0.001_dp)/domega)
@@ -500,9 +492,15 @@ program optic
    write(std_out,'(a,f10.5,a)')' Tolerance on closeness to singularities     =', tolerance, ' Ha'
    write(std_out,'(a,f10.5,a)')' Smearing factor      =', broadening, ' Ha'
    if (do_antiresonant) then
-     write(std_out,'(a)') ' Will use the antiresonant approximation '
+     write(std_out,'(a)') ' Will use the antiresonant approximation (meaning that the antiresonant terms are neglected)'
    else
-     write(std_out,'(a)') ' Will not use the antiresonant approximation (only available for nonlin2 and linel components!) '
+     write(std_out,'(a)') ' Will not use the antiresonant approximation (only available for nlinopt, nonlin2 and linel components!) '
+   end if
+   ! bands decomposition
+   if (do_decompo) then
+     write(std_out,'(a)') ' Will perform the bands decomposition (only available for nlinopt and in the antiresonant approximation!) '
+   else
+     write(std_out,'(a)') ' Will not perform the bands decomposition '
    end if
    write(std_out,'(a)') ' linear coeffs to be calculated : '
    write(std_out,'(9i3)') lin_comp(1:num_lin_comp)
@@ -514,7 +512,6 @@ program optic
    write(std_out,'(27i4)') nonlin2_comp(1:num_nonlin2_comp)
    write(std_out,'(a,i1)') ' linear optic matrix elements will be printed :',prtlincompmatrixelements
 
-#ifdef HAVE_NETCDF
    ! Open netcdf file that will contain output results (only master is supposed to write)
    NCF_CHECK_MSG(nctk_open_create(optic_ncid, strcat(prefix, "_OPTIC.nc"), xmpi_comm_self), "Creating _OPTIC.nc")
 
@@ -522,16 +519,16 @@ program optic
    ! Note that we write the KS bands without EPH interaction (if any).
    NCF_CHECK(hdr%ncwrite(optic_ncid, 666, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(optic_ncid))
-   NCF_CHECK(ebands_ncwrite(ks_ebands, optic_ncid))
+   NCF_CHECK(ks_ebands%ncwrite(optic_ncid))
 
    ! Add optic input variables.
    NCF_CHECK(nctk_def_dims(optic_ncid, [nctkdim_t("ntemp", ep_ntemp), nctkdim_t("nomega", nomega)], defmode=.True.))
 
    ncerr = nctk_def_iscalars(optic_ncid, [character(len=nctk_slen) :: &
-       "do_antiresonant", "do_ep_renorm", "nband_sum"])
+       "do_antiresonant", "do_ep_renorm", "do_decompo", "nband_sum"]) ! bands decomposition
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
-     "broadening", "domega", "maxomega", "scissor", "tolerance"])
+     "broadening", "domega", "maxomega", "scissor", "tolerance", "w_decompo"]) ! bands decomposition
    NCF_CHECK(ncerr)
 
    ! Define arrays containing output results
@@ -575,7 +572,15 @@ program optic
        nctkarr_t('shg_intra2w', "dp", "two, nomega, shg_ncomp, ntemp"), &
        nctkarr_t('shg_intra1w', "dp", "two, nomega, shg_ncomp, ntemp"), &
        nctkarr_t('shg_intra1wS', "dp", "two, nomega, shg_ncomp, ntemp"), &
-       nctkarr_t('shg_chi2tot', "dp", "two, nomega, shg_ncomp, ntemp") &
+       nctkarr_t('shg_chi2tot', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       ! Addition AR
+       nctkarr_t('shg_inter2w_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_inter1w_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra2w_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra1w_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra1wS_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_chi2tot_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_chi2full', "dp", "two, nomega, shg_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if
@@ -637,16 +642,16 @@ program optic
    ! Write optic input variables.
    ii = 0; if (do_antiresonant) ii = 1
    jj = 0; if (do_ep_renorm) jj = 1
+   kk = 0; if (do_decompo) kk = 1 ! bands decompo
    ncerr = nctk_write_iscalars(optic_ncid, [character(len=nctk_slen) :: &
-     "do_antiresonant", "do_ep_renorm", "nband_sum"], &
-     [ii, jj, nband_sum])
+     "do_antiresonant", "do_ep_renorm", "do_decompo", "nband_sum"], & ! bands decompo
+     [ii, jj, kk, nband_sum]) ! bands decompo
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
-     "broadening", "domega", "maxomega", "scissor", "tolerance"], &
-     [broadening, domega, maxomega, scissor, tolerance])
+     "broadening", "domega", "maxomega", "scissor", "tolerance", "w_decompo"], & ! bands decomposition
+     [broadening, domega, maxomega, scissor, tolerance, w_decompo])
    NCF_CHECK(ncerr)
-#endif
  end if
 
  ! Get velocity matrix elements in cartesian coordinates from reduced coords.
@@ -675,9 +680,10 @@ program optic
 
  ! optical frequency dependent dielectric function for semiconductors
  call wrtout(std_out," optic : Call linopt")
+ call flush_unit(std_out)
 
  do itemp=1,ep_ntemp
-   call ebands_copy(ks_ebands, eph_ebands)
+   call ks_ebands%copy(eph_ebands)
    if (do_ep_renorm) call renorm_bst(Epren, eph_ebands, cryst, itemp, do_lifetime=.True.,do_check=.True.)
    do ii=1,num_lin_comp
      lin1 = int(lin_comp(ii)/10.0_dp)
@@ -695,13 +701,15 @@ program optic
      call linopt(ii, itemp, nband_sum, cryst, ks_ebands, eph_ebands, pmat, &
        lin1, lin2, nomega, domega, scissor, broadening, tmp_radix, optic_ncid, prtlincompmatrixelements, comm)
    end do
-   call ebands_free(eph_ebands)
+   call eph_ebands%free()
  end do
 
  if (do_ep_renorm) call eprenorms_free(Epren)
 
  ! second harmonic generation susceptibility for semiconductors
  call wrtout(std_out," optic : Call nlinopt")
+ call flush_unit(std_out)
+
  do ii=1,num_nonlin_comp
    nlin1 = int( nonlin_comp(ii)/100.0_dp)
    nlin2 = int((nonlin_comp(ii)-nlin1*100.0_dp)/10.0_dp)
@@ -722,7 +730,8 @@ program optic
    end if
 
    call nlinopt(ii, itemp, nband_sum, cryst, ks_ebands, pmat, &
-                nlin1, nlin2, nlin3, nomega, domega, scissor, broadening, tolerance, tmp_radix, optic_ncid, comm)
+                nlin1, nlin2, nlin3, nomega, domega, scissor, broadening, tolerance, w_decompo, & ! bands decomposition
+                tmp_radix, contrib_decompo, do_decompo, do_antiresonant, optic_ncid, comm)
  end do
 
  ! linear electro-optic susceptibility for semiconductors
@@ -777,7 +786,7 @@ program optic
  do ii=1,3
    call hdr_ddk(ii)%free()
  end do
- call ebands_free(ks_ebands)
+ call ks_ebands%free()
  call cryst%free()
 
  call timein(tcpu, twall)
@@ -811,11 +820,9 @@ program optic
    call flush_unit(std_out)
  end if
 
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(optic_ncid))
  end if
-#endif
 
  ! Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam)

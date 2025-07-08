@@ -3,10 +3,10 @@
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 10.1.4.5 of MULTIBINIT 
+.Version 10.0.0.3 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -32,8 +32,8 @@
 
 
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h02 )
+.Starting date : Fri 21 Mar 2025.
+- ( at 11h10 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
@@ -45,7 +45,7 @@
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/tutomultibinit/Input/tmulti_l_6_DDB
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/tutomultibinit/Input/tmulti_l_6_DDB
  to initialize the multibinit input
 
 ================================================================================
@@ -61,6 +61,7 @@
  fit_generateCoeff  1
  fit_initializeDat  0
         fit_cutoff  5.60000000E+00
+       fit_droprat  0.00000000E+00
         fit_option  0
          fit_iatom  2
         fit_ncoeff  12
@@ -71,6 +72,7 @@
     fit_anhaStrain  0
     fit_SPCoupling  1
       fit_SPC_maxS  1
+     fit_max_nbody        999    999
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -335,7 +337,7 @@ dipdip_range         2         2         2
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/tutomultibinit/Input/tmulti_l_6_HIST.nc
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/tutomultibinit/Input/tmulti_l_6_HIST.nc
 
 
 --------------------------------------------------------------------------------
@@ -346,49 +348,49 @@ dipdip_range         2         2         2
 
  The coefficients for the fit around atom  2: Hf, will be generated
 
- 364 coefficients generated 
+ 259 coefficients generated 
 
 
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   2.2780101689771812E-03
-   Forces+Stresses :   3.9733623695669733E-02
+   Forces+Stresses :   6.5148595719209335E-02
    Forces          :   2.4711895759431803E-02
-   Stresses        :   1.5021727936237931E-02
+   Stresses        :   4.0436699959777535E-02
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 1     362         3.0218143507E-03  2.5361517551E-02  1.9610735625E-02  5.7507819254E-03
- 2     21          5.2474393977E-04  2.0833324572E-02  1.5132460946E-02  5.7008636263E-03
- 3     330         5.2109881376E-04  1.7937166356E-02  1.2211480468E-02  5.7256858874E-03
- 4     263         3.4978884787E-04  1.6263427214E-02  1.1761986012E-02  4.5014412022E-03
- 5     268         4.1406112058E-04  1.5070000684E-02  1.2012362120E-02  3.0576385644E-03
- 6     7           1.5183070698E-04  1.3942109253E-02  1.0846491448E-02  3.0956178052E-03
- 7     145         1.6144479903E-04  1.3082297553E-02  1.0135821825E-02  2.9464757285E-03
- 8     134         1.6206329217E-04  1.2657475692E-02  9.7165833551E-03  2.9408923369E-03
- 9     272         1.7654005220E-04  1.2400556707E-02  9.7178924586E-03  2.6826642482E-03
- 10    336         1.8332292087E-04  1.2147135160E-02  9.4429523365E-03  2.7041828235E-03
- 11    358         1.7652991665E-04  1.1902597412E-02  9.4009401909E-03  2.5016572208E-03
- 12    138         1.7493658871E-04  1.1685295009E-02  9.1861221049E-03  2.4991729040E-03
+ 1     257         3.5298630574E-03  2.9404387657E-02  2.0226826237E-02  9.1775614199E-03
+ 2     226         3.5780971938E-03  2.6602043356E-02  1.7445901087E-02  9.1561422683E-03
+ 3     183         3.4113458119E-03  2.5330467211E-02  1.6441510740E-02  8.8889564716E-03
+ 4     253         3.4993873432E-03  2.3943617605E-02  1.6601915368E-02  7.3417022378E-03
+ 5     45          3.4952048448E-03  2.3521275001E-02  1.6170987043E-02  7.3502879577E-03
+ 6     14          3.2620694128E-03  2.3112262151E-02  1.5769358010E-02  7.3429041417E-03
+ 7     254         3.3179346689E-03  2.2846905472E-02  1.5589413023E-02  7.2574924490E-03
+ 8     49          3.3038325234E-03  2.2637663645E-02  1.5378113331E-02  7.2595503140E-03
+ 9     108         3.2978353258E-03  2.2456185087E-02  1.5237238011E-02  7.2189470754E-03
+ 10    114         3.2967144106E-03  2.2354245039E-02  1.5190047749E-02  7.1641972899E-03
+ 11    218         3.3187453965E-03  2.2274773999E-02  1.5148997215E-02  7.1257767841E-03
+ 12    230         3.2874868012E-03  2.2135647973E-02  1.5056116290E-02  7.0795316827E-03
 
  Fitted coefficients at the end of the fit process:
- 362 =>  -4.2783881075E-01 (Hf_x-O2_x)^2(eta_1)^1
- 21 =>  -3.3276464410E-03 (Hf_x-O1_x)^2(Hf_y-O3_y)^1(Hf_z-O1_z)^1
- 330 =>  -3.9595459596E-02 (Hf_y-O1_y)^3
- 263 =>  -1.8035610799E-02 (Hf_x-O1_x)^1(Hf_y-O2_y)^1(eta_1)^1
- 268 =>  -1.6019155874E-02 (Hf_y-O3_y)^2(eta_1)^1
- 7 =>   1.9647811665E-03 (Hf_x-O1_x)^4
- 145 =>  -1.4145340965E-02 (Hf_x-O1_x)^2(Hf_y-O1_y)^2
- 134 =>   2.5874575949E-03 (Hf_x-O1_x)^2(Hf_z-O3_z)^1
- 272 =>   5.0179299169E-03 (Hf_x-O1_x)^1(Hf_z-O2_z)^1(eta_4)^1
- 336 =>   3.5345820000E-02 (Hf_y-O1_y)^3(Hf_y-O1_y[0 1 0])^1
- 358 =>  -8.6418289927E-02 (Hf_y-O1_y)^2(eta_1)^1
- 138 =>  -3.0147200326E-03 (Hf_x-O1_x)^1(Hf_y-O2_y)^1(Hf_y-O1_y)^1
+ 257 =>  -5.7447533256E-01 (Hf_x-O2_x)^2(eta_1)^1
+ 226 =>  -1.2013562845E-01 (Hf_y-O1_y)^2(Hf_y-O1_y[0 1 0])^1
+ 183 =>   1.3327462730E-03 (Hf_x-O1_x)^1(Hf_x-O2_x)^3
+ 253 =>  -2.9398517635E-01 (Hf_y-O1_y)^2(eta_1)^1
+ 45 =>   2.5885788278E-03 (Hf_x-O1_x)^2(Hf_z-O3_z)^1
+ 14 =>   2.0553770387E-03 (Hf_x-O1_x)^2(Hf_z-O2_z)^1(Hf_z-O3_z)^1
+ 254 =>   1.8280831810E-01 (Hf_y-O1_y)^1(Hf_y-O1_y[0 1 0])^1(eta_1)^1
+ 49 =>  -4.0564264508E-03 (Hf_x-O1_x)^1(Hf_y-O2_y)^1(Hf_y-O1_y)^1
+ 108 =>   7.7968217632E-01 (Hf_x-O1_x)^1(Hf_x-O1_x[0 1 0])^1(Hf_y-O1_y)^1(eta_1)^1
+ 114 =>   1.3276379035E-01 (Hf_x-O1_x)^1(Hf_y-O2_y)^1(Hf_x-O2_x[1 0 0])^1(eta_1)^1
+ 218 =>   4.1813058912E-02 (Hf_y-O2_y)^1(Hf_y-O1_y)^1(eta_1)^1
+ 230 =>   2.8129498152E-02 (Hf_y-O1_y)^4
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   1.7493658871167673E-04
-   Forces+Stresses :   1.1685295008892599E-02
-   Forces          :   9.1861221049251689E-03
-   Stresses        :   2.4991729039674291E-03
+   Energy          :   3.2874868011762465E-03
+   Forces+Stresses :   2.2135647972723244E-02
+   Forces          :   1.5056116290062618E-02
+   Stresses        :   7.0795316826606286E-03
 
 
 ================================================================================
@@ -398,10 +400,10 @@ dipdip_range         2         2         2
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=         67.1  wall=         67.2
+- Proc.   0 individual time (sec): cpu=         69.4  wall=         69.4
 
 ================================================================================
 
-+Total cpu time     67.117  and wall time     67.161 sec
++Total cpu time     69.436  and wall time     69.441 sec
 
  multibinit : the run completed succesfully.

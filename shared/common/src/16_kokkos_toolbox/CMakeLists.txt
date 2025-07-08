@@ -26,10 +26,11 @@ endif()
 set(16_kokkos_toolbox_SRC
   kokkos_utils.cpp
   m_kokkos_utils.F90
-  )
+)
 
 add_library(16_kokkos_toolbox STATIC
-  ${16_kokkos_toolbox_SRC})
+  ${16_kokkos_toolbox_SRC}
+)
 
 #####################################################################
 # Set paths for integration with autotools buildsystem
@@ -60,7 +61,7 @@ if(NOT USE_AUTOTOOLS_BUILD_COMPAT)
 
   set_target_properties(16_kokkos_toolbox
     PROPERTIES
-    Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
+    Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/modules)
 
   target_include_directories(16_kokkos_toolbox
     PRIVATE
@@ -69,7 +70,7 @@ if(NOT USE_AUTOTOOLS_BUILD_COMPAT)
 
   target_include_directories(16_kokkos_toolbox
     PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules;${CMAKE_CURRENT_SOURCE_DIR}>"
+    "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/modules;${CMAKE_CURRENT_SOURCE_DIR}>"
     $<INSTALL_INTERFACE:include/libpaw>
     )
 

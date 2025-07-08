@@ -37,6 +37,56 @@ end subroutine xmpi_land_log0d
 
 !----------------------------------------------------------------------
 
+!!****f* ABINIT/xmpi_land_log1d
+!! NAME
+!!  xmpi_land_log1d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: one-dimensional logical arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_land_log1d(xval,comm)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: comm
+ logical, DEV_CONTARRD intent(inout) :: xval(:)
+
+!Local variables-------------------------------
+#if defined HAVE_MPI
+ integer :: ierr,n1
+ logical,allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   n1 = size(xval)
+   ABI_STAT_MALLOC(xsum,(n1), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_land_log1d')
+   call MPI_ALLREDUCE(xval,xsum,n1,MPI_LOGICAL,MPI_LAND,comm,ierr)
+   xval (:) = xsum(:)
+   ABI_FREE(xsum)
+ end if
+#endif
+
+end subroutine xmpi_land_log1d
+!!***
+
+
+
+!----------------------------------------------------------------------
+
 !!****f* ABINIT/xmpi_lor_log1d
 !! NAME
 !!  xmpi_lor_log1d
@@ -129,7 +179,7 @@ subroutine xmpi_lor_log2d(xval,comm)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2,kind=int64)
+   ntot=int(n1,kind=int64)*n2
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_LOGICAL,MPI_LOR,comm,ierr)
@@ -197,7 +247,7 @@ subroutine xmpi_lor_log3d(xval,comm)
    !This product of dimensions can be greater than a 32bit integer
    !We use a INT64 to store it. If it is too large, we switch to an
    !alternate routine because MPI<4 doesnt handle 64 bit counts.
-   ntot=int(n1*n2*n3,kind=int64)
+   ntot=int(n1,kind=int64)*n2*n3
 
    if (ntot<=xmpi_maxint32_64) then
      call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)
