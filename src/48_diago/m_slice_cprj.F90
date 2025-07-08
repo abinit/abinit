@@ -524,6 +524,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
+ type(xg_t) :: dist1, dist2, dist12
  type(xgBlock_t) :: DivResults_part
  type(xgBlock_t) :: X_prev
  type(xgBlock_t) :: cprjX_prev
@@ -804,6 +805,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
             if (niter==1) then
                 call xg_init(Xsum,slice%space,slice%total_spacedim,slice%slicedim,slice%spacecom,&
                     gpu_option=gpu_option)
+                ! dist1 = |slice%X|^2 colwise L2-norm
+                call xg_init(dist1,SPACE_R,slice%slicedim,1)
+                call xgBlock_colwiseNorm2(slice%X,dist1%self,comm_loc=xmpi_comm_null)
+                ! preallocate
+                call xg_init(dist2,SPACE_R,slice%slicedim,1)
+                call xg_init(dist12,SPACE_R,slice%slicedim,1)
             else
                 call xgBlock_zero(Xsum%self)
             end if
@@ -837,6 +844,16 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
                 damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
                     1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
                 call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
+
+                ! dist2 = |Xsum%self|^2 colwise L2-norm
+                call xgBlock_colwiseNorm2(Xsum%self,dist2%self,comm_loc=xmpi_comm_null)
+                call xgBlock_colwiseDivision(dist1%self,dist2%self,dist12%self) ! dist1/dist2
+
+                ! ITEST
+                write(901,*) 'probe='
+                call xgBlock_print(dist12%self,901)
+                flush(901)
+                ! ITEST
 
                 ! store final expansion Xsum to X
                 if (ideg==ndeg_filter - 1) then 
@@ -968,6 +985,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     if (islice>1) then
         call xg_free(Xsum)
+        if (niter == max_niter_restart) then
+            call xg_free(dist1)
+            call xg_free(dist2)
+            call xg_free(dist12)
+        end if
     end if
 
     ! Store to all-workspace
@@ -1463,6 +1485,33 @@ subroutine slice_ampfactor(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter
   end do
 
 end subroutine slice_ampfactor
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/slice_probeProximity
+!! NAME
+!! slice_probeProximity
+!! 
+!! FUNCTION
+!! Compute the principal angles to measure the subspace convergence
+!! regarding the slice subspace associated to spectral interval [a,b).
+!! Essentially computes the distance between two subspaces.
+!! Note that A=Span(a1,..ak) and B=Span(b1,...bk) where families
+!! are assumed to be linearly independent set of vectors.
+!! They do not need to be orthogonal!!
+!! 
+!! IML debug version 08/07:
+!! probe an interior slice, works for test case only
+
+subroutine slice_probeProximity(slice,islice)
+
+    implicit none
+    type(slice_t), intent(inout) :: slice
+    integer, intent(in) :: islice
+
+
+end subroutine slice_probeProximity
 !!***
 
 !----------------------------------------------------------------------
