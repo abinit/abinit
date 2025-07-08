@@ -141,10 +141,6 @@ subroutine dfpt_1wf(cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,&
      & wtk_k,ylm_k,ylmgr_k)
 
- use defs_basis
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,dimffnl,i1dir,i1pert,i2dir,i2pert,i3dir

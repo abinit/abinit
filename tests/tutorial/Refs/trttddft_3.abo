@@ -1,8 +1,8 @@
 
 .Version 10.3.6.9 of ABINIT, released Apr 2025.
-.(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.1 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,13 +16,13 @@
 
 .Starting date : Wed 14 May 2025.
 - ( at 14h44 )
-  
+
 - input  file    -> /tmp/abinit/opt/Test_suite/tutorial_trttddft_1-trttddft_2-trttddft_3/Test_suite/tutorial_trttddft_1-trttddft_2-trttddft_3/trttddft_3.abi
 - output file    -> trttddft_3.abo
 - root for input  files -> trttddft_3i
 - root for output files -> trttddft_3o
 
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pw_std/C.xml
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================

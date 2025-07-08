@@ -56,11 +56,15 @@ _ WF disk file :      1.436 Mbytes ; DEN or POT disk file :      0.956 Mbytes.
         dmatpuopt           1
         dmftbandf          20
         dmftbandi           5
+  dmftctqmc_basis           2
         dmft_iter           1
         dmft_mxsf      3.0000000000E-01
         dmft_nwli       10000
         dmft_nwlo         100
   dmft_occnd_imag           0
+        dmftqmc_l          50
+        dmftqmc_n      1.0000000000E+06
+    dmftqmc_therm       10000
   dmft_read_occnd           1
              ecut      1.20000000E+01 Hartree
 -          fftalg         512
@@ -927,11 +931,15 @@ total_energy_dc_eV  : -1.07962480112151E+03
         dmatpuopt           1
         dmftbandf          20
         dmftbandi           5
+  dmftctqmc_basis           2
         dmft_iter           1
         dmft_mxsf      3.0000000000E-01
         dmft_nwli       10000
         dmft_nwlo         100
   dmft_occnd_imag           0
+        dmftqmc_l          50
+        dmftqmc_n      1.0000000000E+06
+    dmftqmc_therm       10000
   dmft_read_occnd           1
              ecut      1.20000000E+01 Hartree
            etotal2    -3.9634728879E+01

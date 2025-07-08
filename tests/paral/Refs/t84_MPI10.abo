@@ -79,6 +79,8 @@ _ WF disk file :      0.324 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
         dmftbandf2         20
         dmftbandi1          0
         dmftbandi2          9
+ dmft_charge_prec1     1.0000000000E-06
+ dmft_charge_prec2     1.0000000000E-10
         dmft_iter1         10
         dmft_iter2          1
         dmft_mxsf1     6.0000000000E-01
@@ -87,12 +89,16 @@ _ WF disk file :      0.324 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
+        dmftqmc_l1          0
+        dmftqmc_l2         20
+        dmftqmc_n1     0.0000000000E+00
+        dmftqmc_n2     1.0000000000E+06
+    dmftqmc_therm1          0
+    dmftqmc_therm2      10000
         dmft_rslf1          1
         dmft_rslf2          0
         dmft_solv1          5
         dmft_solv2          8
- dmft_charge_prec1     1.0000000000E-06
- dmft_charge_prec2     1.0000000000E-10
              ecut      1.60000000E+01 Hartree
 -          fftalg         512
            getwfk1          0
@@ -1784,6 +1790,8 @@ total_energy_dc_eV  : -1.96121229615381E+03
         dmftbandf2         20
         dmftbandi1          0
         dmftbandi2          9
+ dmft_charge_prec1     1.0000000000E-06
+ dmft_charge_prec2     1.0000000000E-10
         dmft_iter1         10
         dmft_iter2          1
         dmft_mxsf1     6.0000000000E-01
@@ -1792,12 +1800,16 @@ total_energy_dc_eV  : -1.96121229615381E+03
         dmft_nwli2     100000
         dmft_nwlo1          0
         dmft_nwlo2        100
+        dmftqmc_l1          0
+        dmftqmc_l2         20
+        dmftqmc_n1     0.0000000000E+00
+        dmftqmc_n2     1.0000000000E+06
+    dmftqmc_therm1          0
+    dmftqmc_therm2      10000
         dmft_rslf1          1
         dmft_rslf2          0
         dmft_solv1          5
         dmft_solv2          8
- dmft_charge_prec1     1.0000000000E-06
- dmft_charge_prec2     1.0000000000E-10
              ecut      1.60000000E+01 Hartree
            etotal1    -7.2162012569E+01
            etotal2    -7.2073228846E+01

@@ -43,7 +43,8 @@ sources = [
  "m_paw_atom.F90",
  "m_paw_gaussfit.F90",
  "m_pawxmlps.F90",
- "m_pawpsp.F90"
+ "m_pawpsp.F90",
+ "m_paw_atom_solve.F90"
  ]
 # IMPORTANT : please DO NOT use the alphabetic order in the previous list.
 # They are placed in compilation order.

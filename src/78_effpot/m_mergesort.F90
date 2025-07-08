@@ -46,7 +46,6 @@ contains
 ! The original code is public domain.
 
   subroutine merge_int(A, B, C)
-    implicit none
     ! The targe attribute is necessary, because A .or. B might overlap with C.
     integer, target, intent(in) :: A(:), B(:)
     integer, target, intent(inout) :: C(:)
@@ -77,7 +76,6 @@ contains
   end subroutine merge_int
 
   subroutine merge_with_order_int(A, B, C, orderA, orderB, orderC)
-    implicit none
     ! The targe attribute is necessary, because A .or. B might overlap with C.
     integer, target, intent(in) :: A(:), B(:), orderA(:), orderB(:)
     integer, target, intent(inout) :: C(:), orderC(:)
@@ -113,14 +111,12 @@ contains
 
 
   subroutine swap_int(x, y)
-    implicit none
     integer, intent(inout) :: x, y
     integer :: tmp
     tmp = x; x = y; y = tmp
   end subroutine swap_int
 
   recursive subroutine MergeSort_no_init_order_int(A, work, order, worder)
-    implicit none
     integer, intent(inout) :: A(:)
     integer, intent(inout) :: work(:)
     integer, optional, intent(inout):: order(size(A)), worder(size(work))
@@ -162,7 +158,6 @@ contains
   end subroutine MergeSort_No_Init_Order_Int
 
   subroutine MergeSort_int(A, work, order, worder)
-    implicit none
     integer, intent(inout) :: A(:)
     integer, intent(inout) :: work(:)
     integer, optional, intent(inout):: order(size(A)), worder(size(work))
@@ -177,7 +172,6 @@ contains
 
 
   subroutine merge_dp(A, B, C)
-    implicit none
     ! The targe attribute is necessary, because A .or. B might overlap with C.
     real(dp), target, intent(in) :: A(:), B(:)
     real(dp), target, intent(inout) :: C(:)
@@ -208,7 +202,6 @@ contains
 
 
   subroutine merge_with_order_dp(A, B, C, orderA, orderB, orderC)
-    implicit none
     ! The targe attribute is necessary, because A .or. B might overlap with C.
     real(dp), target, intent(in) :: A(:), B(:)
     integer, target, intent(in) :: orderA(:), orderB(:)
@@ -246,7 +239,6 @@ contains
 
 
   subroutine swap_dp(x, y)
-    implicit none
     real(dp), intent(inout) :: x, y
     real(dp) :: tmp
     tmp = x; x = y; y = tmp
@@ -254,7 +246,6 @@ contains
 
 
   recursive subroutine MergeSort_no_init_order_dp(A, work, order, worder)
-    implicit none
     real(dp), intent(inout) :: A(:)
     real(dp), intent(inout) :: work(:)
     integer, optional, intent(inout):: order(size(A)), worder(size(work))
@@ -296,7 +287,6 @@ contains
   end subroutine MergeSort_No_Init_Order_Dp
 
   subroutine MergeSort_dp(A, work, order, worder)
-    implicit none
     real(dp), intent(inout) :: A(:)
     real(dp), intent(inout) :: work(:)
     integer, optional, intent(inout):: order(size(A)), worder(size(work))
@@ -315,7 +305,6 @@ contains
 
 
   subroutine merge2D(A, B, C)
-    implicit none
     ! The targe attribute is necessary, because A .or. B might overlap with C.
     integer, target, intent(in) :: A(:, :), B(:, :)
     integer, target, intent(inout) :: C(:,:)
@@ -346,7 +335,6 @@ contains
   end subroutine merge2D
 
   subroutine merge2D_with_order(A, B, C, orderA, orderB, orderC)
-    implicit none
     ! The targe attribute is necessary, because A .or. B might overlap with C.
     integer, target, intent(in) :: A(:, :), B(:,:), orderA(:), orderB(:)
     integer, target, intent(inout) :: C(:,:), orderC(:)
@@ -382,7 +370,6 @@ contains
 
 
   subroutine swap2D(x, y)
-    implicit none
     integer, intent(inout) :: x(:), y(:)
     integer :: tmp, i
     do i =1, size(x)
@@ -391,7 +378,6 @@ contains
   end subroutine swap2D
 
   recursive subroutine MergeSort2D_no_init_order(A, work, order, worder)
-    implicit none
     integer, intent(inout) :: A(:, :)
     integer, intent(inout) :: work(:, :)
     integer, optional, intent(inout):: order(size(A, 2)), worder(size(work, 2))
@@ -433,7 +419,6 @@ contains
   end subroutine MergeSort2D_No_Init_Order
 
   subroutine MergeSort2D(A, work, order, worder)
-    implicit none
     integer, intent(inout) :: A(:,:)
     integer, intent(inout) :: work(:, :)
     integer, optional, intent(inout):: order(size(A, 2)), worder(size(work, 2))

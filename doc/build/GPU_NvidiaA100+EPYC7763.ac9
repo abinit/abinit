@@ -18,7 +18,7 @@
  CXX=$CXX_MPI
  with_optim_flavor="standard"
  fcflags_opt_80_tdep="-O1 -g"
- 
+
 # Parallel compilation
 # ========================================
  with_mpi="yes"

@@ -138,7 +138,7 @@ module m_gstore
 
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
- use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0
+ use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0, yesno
  !use m_yaml,          only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
@@ -162,6 +162,7 @@ module m_gstore
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
  use m_mlwfovlp,       only : wan_t
+ use m_pstat,          only : pstat_proc
 
  implicit none
 
@@ -538,6 +539,7 @@ contains
 
   procedure :: calc_my_phonons => gstore_calc_my_phonons
   ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
+  ! TODO: Remove this method as it breaks the gauge in the phonon eigenvectors.
 
   procedure :: get_lambda_iso_iw => gstore_get_lambda_iso_iw
   ! Compute isotropic lambda(iw) along the imaginary axis.
@@ -630,6 +632,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  units = [std_out, ab_out]
 
  call wrtout(std_out, " gstore_init: building gstore_t object...")
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! Set basic parameters.
  gstore%comm = comm; gstore%nsppol = nsppol; gstore%path = path
@@ -1037,6 +1040,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ABI_FREE(kbz2ibz)
 
  call cwtime_report(" gstore_init:", cpu, wall, gflops)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  if (has_gwan .and. with_cplex /= 0) then
    call wrtout(units, " Using Wannier interpolation to compute and store e-ph matrix elements ...", pre_newlines=1)
@@ -1177,7 +1181,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: spin, my_is, np, my_rank, ierr, npp_bz
+ integer :: spin, my_is, np, my_rank, ierr, npp_bz, units(2)
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
  character(len=10) :: order
@@ -1185,6 +1189,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
  logical :: reorder, periods(ndims), keepdim(ndims)
  character(len=10) :: priority
 !----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
 
  associate (dtset => gstore%dtset)
  my_rank = xmpi_comm_rank(gstore%comm)
@@ -1379,6 +1385,12 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, nproc_spin, comm_spin)
    ! Distribute perturbations inside pert_comm using block distribution.
    call xmpi_split_block(gqk%natom3, gqk%pert_comm%value, gqk%my_npert, gqk%my_pertcases)
    gqk%my_pert_start = gqk%my_pertcases(1)
+
+   call wrtout(units, sjoin("P qpt_comm can use shmem:", yesno(gqk%qpt_comm%can_use_shmem())))
+   call wrtout(units, sjoin("P kpt_comm can use shmem:", yesno(gqk%kpt_comm%can_use_shmem())))
+   call wrtout(units, sjoin("P bsum_comm can use shmem:", yesno(gqk%bsum_comm%can_use_shmem())))
+   call wrtout(units, sjoin("P pp_sum_comm can use shmem:", yesno(gqk%pp_sum_comm%can_use_shmem())))
+
  end do ! my_is
 
  if (my_rank == master) call gstore%print([std_out, ab_out])
@@ -3227,6 +3239,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! TODO: Should compute it on the basis of my_nkpt and my_nqpt
  qbuf_size = 16
  call wrtout(std_out, sjoin(" Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size)), pre_newlines=1)
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -3288,7 +3301,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  wfd_istwfk = 1
  ecut = dtset%ecut
 
- call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
+ call wfd%init(cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
                nspden, nspinor, ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
@@ -3301,6 +3314,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+ call pstat_proc%print(_PSTAT_ARGS_)
 
  ! one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2, 3*(2*mgfft+1)*natom))
@@ -3529,6 +3543,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ! Inside the loops we compute gkq_nu(2, nb, nb, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
+   call pstat_proc%print(_PSTAT_ARGS_)
 
    ! Loop over my set of q-points
    prev_iqbz = -1

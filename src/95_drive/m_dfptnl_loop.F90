@@ -717,7 +717,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call wrtout(std_out,message,'COLL')
                      call wrtout(ab_out,message,'COLL')
 !                    Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-                     call wfk_open_read(ddk_f(ii),fiwfddk,1,dtset%iomode,dtfil%unddk+(ii-1),mpi_enreg%comm_cell)
+                     call ddk_f(ii)%open_read(fiwfddk,1,dtset%iomode,dtfil%unddk+(ii-1),mpi_enreg%comm_cell)
                    end do
 
 !                  Perform DFPT part of the 3dte calculation

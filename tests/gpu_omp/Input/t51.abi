@@ -32,7 +32,7 @@
  istwfk *1
 
  paral_kgb 1
- iomode 0    # Only for testing purposes 
+ iomode 0    # Only for testing purposes
  fftalg 402
 
  pp_dirpath "$ABI_PSPDIR"
@@ -50,7 +50,7 @@
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Sarraute
-#%% description = 
+#%% description =
 #%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, mono-GPU, istwfk==1, with PAW.
 #%% topics = parallelism
 #%%<END TEST_INFO>

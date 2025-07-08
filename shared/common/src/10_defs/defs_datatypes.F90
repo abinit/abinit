@@ -455,6 +455,10 @@ module defs_datatypes
    !   it would be easy to give it a second (symmetric) dimension by putting
    !   dimekb=lnmax*(lnmax+1)/2 in the place of dimekb=lmnmax.
 
+  real(dp), allocatable :: epsatm(:)
+   ! epsatm(ntypat)
+   ! For each itypat, epsatm term involved in ecore
+
   real(dp), allocatable :: ffspl(:,:,:,:)
    ! ffspl(mqgrid_ff,2,lnmax,ntypat)
    ! Gives, on the radial grid, the different non-local projectors,

@@ -6,6 +6,7 @@ add_library(61_occeig STATIC
   m_ebands.F90
   m_fstab.F90
   m_extfpmd.F90
+  m_rcpaw.F90
   )
 
 set_target_properties(61_occeig

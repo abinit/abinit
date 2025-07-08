@@ -84,6 +84,7 @@ CONTAINS  !=====================================================================
  ABI_MALLOC(u_outside,(meshsz))
 
  if (lambda == zero) then
+
    do k=0,2*lpawu+1,2
      u_inside(1) = zero
      do ir=2,meshsz
@@ -185,19 +186,21 @@ CONTAINS  !=====================================================================
 !!  proj2 = u(r)**2 where u(r) is the atomic orbital multiplied by r
 !!  meshsz = size of the radial mesh
 !!  upawu,jpawu = parameters for Slater integrals
+!!  yukawa_param = if set to 1, search for lambda and epsilon yielding the values closest to u and j
+!!                 if set to 2, search for lambda yielding u, and set epsilon to 1
 !!
 !! OUTPUT
 !!  lambda,epsilon = parameters of the corresponding Yukawa potential
 !!
 !! SOURCE
 
- subroutine get_lambda(lpawu,pawrad,proj2,meshsz,upawu,jpawu,lambda,eps)
+ subroutine get_lambda(lpawu,pawrad,proj2,meshsz,upawu,jpawu,lambda,eps,yukawa_param)
 
  use m_brentq, only : brentq
  use m_hybrd, only : hybrd
 
 !Arguments ------------------------------------
- integer, intent(in) :: lpawu,meshsz
+ integer, intent(in) :: lpawu,meshsz,yukawa_param
  real(dp), intent(in) :: upawu,jpawu
  real(dp), intent(out) :: lambda,eps
  real(dp), intent(in) :: proj2(meshsz)
@@ -220,16 +223,25 @@ CONTAINS  !=====================================================================
 
  end do ! i
 
- if (fkk(1) > upawu) ABI_ERROR("Could not find a suitable lambda in get_lambda subroutine")
+ write(message,'(4a)') "An error occurred when trying to find suitable lambda and ", &
+                     & "epsilon for your input values of upawu and jpawu.", ch10, &
+                     & "Either try different values or use dmft_lambda_yukawa and dmft_epsilon_yukawa."
+
+ if (fkk(1) > upawu) ABI_ERROR(message)
 
  ! First, set epsilon to 1, and find lambda which yields the correct F0=upawu, to have a good starting point
  call brentq(get_coulomb_u,zero,upbound,two*tol12,four*epsilon(one),100,lmb_temp,ierr)
 
- if (ierr == 0) ABI_ERROR("The brentq method did not converge in the get_lambda subroutine")
+ if (ierr == 0) ABI_ERROR(message)
 
  ! Initial values for lambda and epsilon
  lmb_eps(1) = lmb_temp
  lmb_eps(2) = one
+
+ lambda = lmb_temp
+ eps    = one
+
+ if (yukawa_param == 2) return
 
  if (lpawu > 0) then
 
@@ -243,10 +255,7 @@ CONTAINS  !=====================================================================
    call hybrd(get_coulomb_uj,2,lmb_eps(:),fvec(:),xtol,maxfev,ml,mu,epsfcn,diag(:),mode, &
             & fac,nprint,info,nfev,fjac(:,:),ldfjac,r(:),lr,qtf(:),wa1(:),wa2(:),wa3(:),wa4(:))
 
-   if (info /= 1) then
-     write(message,*) "Error in hybrd, info is equal to",info
-     ABI_ERROR(message)
-   end if
+   if (info /= 1) ABI_ERROR(message)
 
  end if ! lpawu > 0
 

@@ -164,7 +164,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          paw_an,paw_ij,pawang,pawfgrtab,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,&
 &          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
-&          atvshift,fatvshift,natvshift,nucdipmom,&
+&          atvshift,fatvshift,natvshift,nucdipmom,eijkl_is_sym,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
 
 !Arguments ---------------------------------------------
@@ -179,6 +179,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  logical,optional,intent(in) :: electronpositron_lmselect(:,:)
+ logical,optional,intent(in) :: eijkl_is_sym(ntypat)
  real(dp),intent(in) :: gprimd(3,3),qphon(3)
  real(dp),intent(in) ::  vxc(:,:),xred(3,natom),znuc(ntypat)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
@@ -213,7 +214,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijxchat_available,dijxchat_need,dijxchat_prereq
  logical :: dijxcval_available,dijxcval_need,dijxcval_prereq
  logical :: dijU_available,dijU_need,dijU_prereq
- logical :: has_nucdipmom,my_atmtab_allocated
+ logical :: has_nucdipmom,my_atmtab_allocated,is_sym
  logical :: need_to_print,paral_atom,v_dijhat_allocated
  real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
@@ -690,8 +691,10 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        dijhartree(:)=paw_ij(iatom)%dijhartree(:)
      else
 !    ===== Need to compute DijHartree
+       is_sym=.true.
+       if(present(eijkl_is_sym)) is_sym=eijkl_is_sym(itypat)
        if (ipositron/=1) then
-         call pawdijhartree(dijhartree,qphase,nspden,pawrhoij(iatom),pawtab(itypat))
+         call pawdijhartree(dijhartree,qphase,nspden,pawrhoij(iatom),pawtab(itypat),is_sym=is_sym)
        else
          dijhartree(:)=zero
        end if
@@ -1095,11 +1098,13 @@ end subroutine pawdij
 !!
 !! SOURCE
 
-subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
+subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab,&
+&                        is_sym)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: nspden,qphase
+ logical,intent(in),optional :: is_sym
 !arrays
  real(dp),intent(out) :: dijhartree(:)
  type(pawrhoij_type),intent(in) :: pawrhoij
@@ -1107,6 +1112,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
+ logical :: eijkl_is_sym
  integer :: cplex_rhoij,iq,iq0_dij,iq0_rhoij,irhoij,ispden,jrhoij,klmn,klmn1,lmn2_size,nspdiag
  real(dp) :: ro
  character(len=500) :: msg
@@ -1128,6 +1134,8 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
  dijhartree=zero
  lmn2_size=pawrhoij%lmn2_size
  cplex_rhoij=pawrhoij%cplex_rhoij
+ eijkl_is_sym=.true.
+ if(present(is_sym)) eijkl_is_sym=is_sym
 
 !Loop over (diagonal) spin-components
  nspdiag=1;if (nspden==2) nspdiag=2
@@ -1158,7 +1166,11 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
 
        !k>l
        do klmn1=klmn+1,lmn2_size
-         dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn,klmn1)
+         if(eijkl_is_sym) then
+           dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn,klmn1)
+         else
+           dijhartree(iq0_dij+klmn1)=dijhartree(iq0_dij+klmn1)+ro*pawtab%eijkl(klmn1,klmn)
+         endif
        end do
 
        jrhoij=jrhoij+cplex_rhoij
@@ -5825,7 +5837,7 @@ subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,&
     test_value_eff=-one;if(my_test_value>zero.and.idij==1) test_value_eff=my_test_value
     call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&
 &                       my_prtvol,idum,test_value_eff,my_Ha_or_eV,&
-&                       opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
+&                       opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode,force_print=.true.)
 
   end do !idij
 

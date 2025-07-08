@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_GreenHyb
 !! NAME
 !!  m_GreenHyb
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage a green function for one orbital
 !!
 !! COPYRIGHT
@@ -27,9 +27,8 @@ USE m_Vector
 USE m_VectorInt
 USE m_ListCdagC
 USE m_MapHyb
-#ifdef HAVE_MPI2
-USE mpi
-#endif
+USE_MPI
+
 IMPLICIT NONE
 
 !!***
@@ -58,7 +57,7 @@ TYPE, PUBLIC :: GreenHyb
   LOGICAL _PRIVATE :: have_MPI = .FALSE.
   INTEGER _PRIVATE :: setMk = 0
   INTEGER _PRIVATE :: samples
-  INTEGER _PRIVATE :: measurements    
+  INTEGER _PRIVATE :: measurements
   INTEGER          :: factor
   INTEGER _PRIVATE :: MY_COMM
   INTEGER _PRIVATE :: size
@@ -72,7 +71,7 @@ TYPE, PUBLIC :: GreenHyb
   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:)            :: oper
   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:)   _PRIVATE :: omega
   DOUBLE PRECISION              , DIMENSION(1:3) _PRIVATE :: Mk
-  COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:)   _PRIVATE :: oper_w 
+  COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:)   _PRIVATE :: oper_w
   COMPLEX(KIND=8)  , ALLOCATABLE, DIMENSION(:)   _PRIVATE :: oper_w_old
   TYPE(MapHyb)          :: this
 END TYPE GreenHyb
@@ -387,10 +386,10 @@ SUBROUTINE GreenHyb_measHybrid(this, Mthis, ListCdagC_1, updated)
   INTEGER                        :: iomega
   DOUBLE PRECISION               :: pi_invBeta
   DOUBLE PRECISION               :: mbeta_two
-  DOUBLE PRECISION               :: beta 
+  DOUBLE PRECISION               :: beta
   DOUBLE PRECISION               :: beta_tc
   DOUBLE PRECISION               :: tcbeta_tc
-  DOUBLE PRECISION               :: inv_dt 
+  DOUBLE PRECISION               :: inv_dt
   DOUBLE PRECISION               :: tC
   DOUBLE PRECISION               :: tCdag
   DOUBLE PRECISION               :: time
@@ -410,7 +409,7 @@ SUBROUTINE GreenHyb_measHybrid(this, Mthis, ListCdagC_1, updated)
 
   IF ( updated .EQV. .TRUE. ) THEN ! NEW change in the configuration
     ! FIXME SHOULD be much more faster
-    
+
       old_size = this%this%tail
     SELECT CASE(this%iTech)
     CASE (GREENHYB_TAU)
@@ -419,7 +418,7 @@ SUBROUTINE GreenHyb_measHybrid(this, Mthis, ListCdagC_1, updated)
         this%oper(this%this%listINT(iC)) = this%oper(this%this%listINT(iC)) + this%this%listDBLE(iC) * argument
       END DO
       this%measurements = this%measurements + this%factor
-  
+
       CALL MapHyb_setSize(this%this,tail*tail)
       this%factor = 1
       idx_old = 0
@@ -435,23 +434,23 @@ SUBROUTINE GreenHyb_measHybrid(this, Mthis, ListCdagC_1, updated)
         DO iCdag = 1, tail
           tCdag  = ListCdagC_1%list(iCdag,Cdag_)
           time = tcbeta_tc - tCdag*beta_tc
-  
+
           !signe = SIGN(1.d0,time)
           !time = time + (signe-1.d0)*mbeta_two
-    
+
           !signe = signe * SIGN(1.d0,beta-tC)
 
           !signe = SIGN(1.d0,time) * SIGN(1.d0,beta-tC)
           signe = SIGN(1.d0,time)
-  
+
           argument = signe*Mthis%mat(iCdag,iC)
-  
+
           !index = INT( ( time * inv_dt ) + 1.5d0 )
           !IF (index .NE. Mthis%mat_tau(iCdag,iC)) THEN
           !  WRITE(*,*) index, Mthis%mat_tau(iCdag,iC)
           !!  CALL ERROR("Plantage")
           !END IF
-  
+
           idx_old = idx_old + 1
           this%this%listDBLE(idx_old) = argument
           !this%this%listINT(idx_old)  = index
@@ -649,7 +648,7 @@ SUBROUTINE GreenHyb_setMoments(this,u1,u2)
   TYPE(GreenHyb)  , INTENT(INOUT) :: this
   DOUBLE PRECISION, INTENT(IN   ) :: u1
   DOUBLE PRECISION, INTENT(IN   ) :: u2
-  
+
   this%Mk(1) = -1.d0
   this%Mk(3) = this%Mk(3) - 2.d0*(this%Mk(2)*u1)
   this%Mk(2) = this%Mk(2) + u1
@@ -729,7 +728,7 @@ include 'mpif.h'
     CALL ERROR("GreenHyb_backFourier : Uninitialized GreenHyb structure")
   IF ( this%setW .EQV. .FALSE. ) &
     CALL ERROR("GreenHyb_backFourier : no G(iw)")
-  
+
   inv_beta     = this%inv_beta
   two_invBeta  = 2.d0 * inv_beta
   minusDt      = - this%delta_t
@@ -852,8 +851,8 @@ include 'mpif.h'
 #endif
   TYPE(GreenHyb)             , INTENT(INOUT) :: this
   COMPLEX(KIND=8), DIMENSION(:), OPTIONAL, INTENT(INOUT) :: Gomega  ! INOUT for MPI
-  COMPLEX(KIND=8), DIMENSION(:), OPTIONAL, INTENT(IN   ) :: omega  
-  INTEGER                 , OPTIONAL, INTENT(IN   ) :: Wmax   
+  COMPLEX(KIND=8), DIMENSION(:), OPTIONAL, INTENT(IN   ) :: omega
+  INTEGER                 , OPTIONAL, INTENT(IN   ) :: Wmax
   INTEGER :: i
   INTEGER :: j
   INTEGER :: L
@@ -882,7 +881,7 @@ include 'mpif.h'
   DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE ::  X2
   DOUBLE PRECISION :: iw
   COMPLEX(KIND=8) :: iwtau
-  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp  
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omegatmp
 
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -903,16 +902,16 @@ include 'mpif.h'
   beta = this%beta
   Nom  = this%Wmax
   IF ( PRESENT(Gomega) ) THEN
-    Nom = SIZE(Gomega)    
+    Nom = SIZE(Gomega)
     !IF ( this%rank .EQ. 0 ) &
       !write(6,*) "size Gomega", Nom
   END IF
   IF ( PRESENT(omega) ) THEN
     IF ( PRESENT(Gomega) .AND. SIZE(omega) .NE. Nom ) THEN
-      CALL ERROR("GreenHyb_forFourier : sizes mismatch              ")               
-    !ELSE 
+      CALL ERROR("GreenHyb_forFourier : sizes mismatch              ")
+    !ELSE
       !Nom = SIZE(omega)
-    END IF 
+    END IF
   END IF
   IF ( .NOT. PRESENT(Gomega) .AND. .NOT. PRESENT(omega) ) THEN
     IF ( PRESENT(Wmax) ) THEN
@@ -938,16 +937,16 @@ include 'mpif.h'
   delta=this%delta_t
   inv_delta = this%inv_dt
   inv_delta2 = inv_delta*inv_delta
- 
+
   MALLOC(diagL,(L-1))
   MALLOC(lastR,(L-1))
   MALLOC(diag,(L))
   MALLOC(lastC,(L-1))
 
-!(cf Stoer) for the spline interpolation : 
+!(cf Stoer) for the spline interpolation :
 ! second derivatives XM solution of A*XM=B.
 !A=(2.4.2.11) of Stoer&Bulirsch + 2 limit conditions
-!The LU decomposition of A is known explicitly; 
+!The LU decomposition of A is known explicitly;
 
   diag (1) = 4.d0 ! 1.d0 *4.d0 factor 4 added for conditionning
   diagL(1) = 0.25d0 !1.d0/4.d0
@@ -967,7 +966,7 @@ include 'mpif.h'
     lastR(i) = -(lastR(i-1)*diagL(i))
     lastC(i) = -(lastC(i-1)*diagL(i-1))
   END DO
-  
+
   tmp = 1.d0/diag(L-2)
   diag (L-1) = 4.d0 - tmp
   lastR(L-1) = (1.d0 - lastR(L-2))/ diag(L-1)
@@ -982,7 +981,7 @@ include 'mpif.h'
   END DO
   diag (L  ) = diag (L  ) - tmp
   lastC(L-1) = lastC(L-1)-1.d0 ! 1 is removed for the u.XM=q resolution
-  
+
 ! construct the B vector from A.Xm=B
   MALLOC(XM,(L))
   XM(1) = 4.d0*this%Mk(3)
@@ -996,8 +995,8 @@ include 'mpif.h'
   END DO
 
 ! Find second derivatives XM: Solve the system
-! SOLVING Lq= XM 
-!  q = XM 
+! SOLVING Lq= XM
+!  q = XM
   do j=1,L-1
       XM(j+1)=XM(j+1)-(diagL(j)*XM(j))
       XM(L)  =XM(L)  -(lastR(j)*XM(j))
@@ -1005,7 +1004,7 @@ include 'mpif.h'
   FREE(diagL)
   FREE(lastR)
 
-! SOLVING U.XM=q 
+! SOLVING U.XM=q
 !  XM = q
   do j=L-1,2,-1
    XM(j+1)  = XM(j+1) / diag(j+1)
@@ -1029,7 +1028,7 @@ include 'mpif.h'
   X2(Lspline+1) = XM(L)
   FREE(XM)
 
-  IF ( this%have_MPI .EQV. .TRUE. ) THEN  
+  IF ( this%have_MPI .EQV. .TRUE. ) THEN
     deltaw = Nom / this%size
     residu = Nom - this%size*deltaw
     IF ( this%rank .LT. this%size - residu ) THEN
@@ -1050,7 +1049,7 @@ include 'mpif.h'
     END DO
   ELSE
     omegaBegin = 1
-    omegaEnd   = Nom 
+    omegaEnd   = Nom
   END IF
 
   this%Mk(1) = -1.d0
@@ -1076,12 +1075,12 @@ include 'mpif.h'
                 /(iw*iw) &
                , &
                 (this%Mk(1)-this%Mk(3)/(iw*iw))/iw &
-               , 8) 
+               , 8)
               !+ CMPLX( (X2(2)-X2(1))+(X2(Lspline+1)-X2(Lspline)), 0.d0, 8 ) ) &
               !   / (((iw*iw)*(iw*iw))*CMPLX(deltabis,0.d0,8)) &
               !- CMPLX(this%Mk(1),0.d0,8)/iw  &
               !+ CMPLX(this%Mk(2),0.d0,8)/(iw*iw) &
-              !- CMPLX(this%Mk(3),0.d0,8)/((iw*iw)*iw) 
+              !- CMPLX(this%Mk(3),0.d0,8)/((iw*iw)*iw)
     !IF ( this%rank .EQ. 0 )  write(12819,*) iw,gwtmp(i)
   END DO
   FREE(omegatmp)
@@ -1149,7 +1148,7 @@ SUBROUTINE GreenHyb_print(this, ostream)
   INTEGER                        :: ostream_val
   INTEGER                        :: i
   INTEGER                        :: samples
-  
+
 
   IF ( this%set .EQV. .FALSE. ) &
     CALL ERROR("GreenHyb_print : green this%operator not set              ")
@@ -1161,7 +1160,7 @@ SUBROUTINE GreenHyb_print(this, ostream)
     OPEN(UNIT=ostream_val,FILE="Green.dat")
   END IF
 
-  samples =  this%samples 
+  samples =  this%samples
 
   DO i = 1, samples
     WRITE(ostream_val,*) DBLE(i-1)*this%delta_t, this%oper(i)

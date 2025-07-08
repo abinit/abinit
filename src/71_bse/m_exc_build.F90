@@ -26,12 +26,10 @@ module m_exc_build
  use m_abicore
  use m_bs_defs
  use m_bse_io
+ USE_MPI
  use m_xmpi
  use m_errors
  use m_screen
-#if defined HAVE_MPI2
- use mpi
-#endif
  use m_hdr
 
  use m_wfd,          only : wfdgw_t, wave_t, WFD_STORED

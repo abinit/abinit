@@ -85,6 +85,13 @@
  * ============================= */
 #elif defined HAVE_LIBPAW_BIGDFT
 
+#if defined HAVE_MPI2
+#define USE_MPI use mpi
+#elif defined HAVE_MPI3
+#else
+#define USE_MPI
+#endif
+
 /* Constants and defs */
 #  define USE_DEFS use m_libpaw_defs
 
@@ -138,6 +145,13 @@
  * ========= DEFAULT ===========
  * ============================= */
 #else
+
+#if defined HAVE_MPI2
+#define USE_MPI use mpi
+#elif defined HAVE_MPI3
+#else
+#define USE_MPI
+#endif
 
 /* Constants and defs */
 #  define USE_DEFS use m_libpaw_defs

@@ -70,7 +70,6 @@ CONTAINS !===========================================================
 #if defined HAVE_GPU_CUDA
 subroutine prt_mem_usage(nptrec,nfft)
 
-  implicit none
 !Arguments ------------------------------------
   integer,intent(in) :: nptrec,nfft
 !Local ---------------------------
@@ -128,8 +127,6 @@ end subroutine prt_mem_usage
 
 subroutine InitRecGPU_0(recgpu,mpi_ab)
 
- implicit none
-
 !Arguments ------------------------------------
  type(MPI_type),intent(in) :: mpi_ab
  type(recGPU_type),intent(inout) :: recgpu
@@ -166,8 +163,6 @@ end subroutine InitRecGPU_0
 #if defined HAVE_GPU_CUDA
 
 subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nfft,gpudevice
@@ -258,8 +253,6 @@ end subroutine InitRecGPU
 
 subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)     :: trotter,gratio
  real(dp),intent(in)    :: beta,tolrec
@@ -349,8 +342,6 @@ end subroutine cudarec
 !! SOURCE
 
 subroutine CleanRecGPU(recgpu,load)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)  :: load

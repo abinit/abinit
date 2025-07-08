@@ -127,8 +127,6 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
 &                              Pawrad,local_pawfgrtab,optgrad,&
 &                              mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_natom,natom,ntypat
@@ -428,8 +426,6 @@ end subroutine paw_pwaves_lmn_init
 
 subroutine paw_pwaves_lmn_free(Paw_onsite)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  type(paw_pwaves_lmn_t),intent(inout) :: Paw_onsite(:)
@@ -437,27 +433,16 @@ subroutine paw_pwaves_lmn_free(Paw_onsite)
 !Local variables-------------------------------
 !scalars
  integer :: iatom
-
 ! *************************************************************************
 
 !@paw_pwaves_lmn_t
 
  do iatom=LBOUND(Paw_onsite,DIM=1),UBOUND(Paw_onsite,DIM=1)
-   if (allocated(Paw_onsite(iatom)%phi)) then
-     ABI_FREE(Paw_onsite(iatom)%phi)
-   end if
-   if (allocated(Paw_onsite(iatom)%tphi)) then
-     ABI_FREE(Paw_onsite(iatom)%tphi)
-   end if
-   if (allocated(Paw_onsite(iatom)%r0shift)) then
-     ABI_FREE(Paw_onsite(iatom)%r0shift)
-   end if
-   if (allocated(Paw_onsite(iatom)%phi_gr )) then
-     ABI_FREE(Paw_onsite(iatom)%phi_gr)
-   end if
-   if (allocated(Paw_onsite(iatom)%tphi_gr)) then
-     ABI_FREE(Paw_onsite(iatom)%tphi_gr)
-   end if
+   ABI_SFREE(Paw_onsite(iatom)%phi)
+   ABI_SFREE(Paw_onsite(iatom)%tphi)
+   ABI_SFREE(Paw_onsite(iatom)%r0shift)
+   ABI_SFREE(Paw_onsite(iatom)%phi_gr)
+   ABI_SFREE(Paw_onsite(iatom)%tphi_gr)
  end do
 
 end subroutine paw_pwaves_lmn_free

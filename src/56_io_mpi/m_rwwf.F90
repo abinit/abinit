@@ -26,9 +26,7 @@ module m_rwwf
  use m_wffile
  use m_abicore
  use m_xmpi
-#if defined HAVE_MPI2
- use mpi
-#endif
+ USE_MPI
  use m_nctk
  use netcdf
 

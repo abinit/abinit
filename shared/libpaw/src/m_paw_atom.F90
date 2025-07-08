@@ -38,6 +38,7 @@ module m_paw_atom
  public:: atompaw_vhnzc
  public:: atompaw_dij0
  public:: atompaw_kij
+ public:: atompaw_ehnzc
 !!***
 
 CONTAINS !===========================================================
@@ -662,6 +663,64 @@ end subroutine atompaw_shapebes
  LIBPAW_DEALLOCATE(vhtnzc_sph)
 
  end subroutine atompaw_kij
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_atom/atompaw_ehnzc
+!! NAME
+!! atompaw_ehnzc
+!!
+!! FUNCTION
+!! Computes the contribution of nZc to the Hartree energy
+!!
+!! INPUTS
+!! ncore(:) = radial core density
+!! radmesh_core<type(pawrad_type)> = radial mesh for core density
+!! znucl = nucleus Z number
+!!
+!! OUTPUT
+!! ehnzc = nZc Hartree energy
+!!
+!! SOURCE
+
+ subroutine atompaw_ehnzc(ncore,radmesh_core,ehnzc,znucl)
+
+!Arguments ---------------------------------------------
+!scalars
+ real(dp),intent(out) :: ehnzc
+ real(dp),intent(in) :: znucl
+ type(pawrad_type),intent(in) :: radmesh_core
+!arrays
+ real(dp),intent(in) :: ncore(:)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: mesh_size
+!arrays
+ real(dp),allocatable :: vhnzc(:),ff(:)
+
+! *********************************************************************
+
+ mesh_size=size(ncore)
+ if (mesh_size/=radmesh_core%mesh_size) then
+   LIBPAW_BUG('wrong sizes!')
+ end if
+ LIBPAW_ALLOCATE(vhnzc,(mesh_size))
+ LIBPAW_ALLOCATE(ff,(mesh_size))
+ ehnzc=zero
+ vhnzc=zero
+ ff(:)=ncore(:)*four_pi*radmesh_core%rad(:)**2
+ call poisson(ff,0,radmesh_core,vhnzc)
+ vhnzc(2:mesh_size)=(vhnzc(2:mesh_size)*half-znucl)
+ call pawrad_deducer0(vhnzc,mesh_size,radmesh_core)
+ ff(:)=vhnzc(:)*ncore(:)*(four_pi*radmesh_core%rad(:))
+ LIBPAW_DEALLOCATE(vhnzc)
+ call simp_gen(ehnzc,ff,radmesh_core)
+ LIBPAW_DEALLOCATE(ff)
+
+ end subroutine atompaw_ehnzc
 !!***
 
 end module m_paw_atom

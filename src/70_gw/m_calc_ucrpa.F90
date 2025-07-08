@@ -33,7 +33,7 @@ MODULE m_calc_ucrpa
 #endif
 #endif
 
-  use defs_basis
+ use defs_basis
  implicit none
 
  private
@@ -94,7 +94,6 @@ contains
  use m_bz_mesh,       only : kmesh_t
  use m_crystal,       only : crystal_t
  use m_plowannier,    only : operwan_realspace_type,plowannier_type
- implicit none
 !   _____                   _
 !  |_   _|                 | |
 !    | |  _ __  _ __  _   _| |_
@@ -1087,8 +1086,7 @@ endif
 !
  integer FUNCTION fi(nkbz,k_coord,kprime_coord)
 
-      implicit none
-       integer,intent(in) :: nkbz
+      integer,intent(in) :: nkbz
       real(dp),dimension(nkbz,3),intent(in) ::k_coord
       real(dp),dimension(3),intent(in) :: kprime_coord(3)
 
@@ -1101,7 +1099,6 @@ endif
 
  integer FUNCTION findkmq(ik_bz,k_coord,q_coord,nkbz)
 
-      implicit none
       integer,intent(in) :: ik_bz,nkbz
       real(dp),dimension(nkbz,3),intent(in) ::k_coord
       real(dp),dimension(4),intent(in) ::q_coord
@@ -1141,7 +1138,6 @@ endif
 
  SUBROUTINE checkk(Interaction,m_inf,m_sup,prtopt,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
- implicit none
  integer, intent(in) :: m_inf,m_sup,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
  complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
  complex(dpc), intent(out)    :: uu,jj
@@ -1206,7 +1202,6 @@ endif
 
  SUBROUTINE Affichage(Interaction,m_inf,m_sup,option,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
-  implicit none
   integer, intent(in) :: m_inf,m_sup,option,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
   complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
   complex(dpc),intent(out) :: UU,JJ
@@ -1364,7 +1359,6 @@ endif
 
  SUBROUTINE Sauvegarde_M_q_m(M_q_m,normG,nqibz,npw,mbband)
 
- implicit none
  integer, intent(in) :: nqibz,npw,mbband
  complex(dpc), intent(in) :: M_q_m(mbband,mbband,npw,nqibz)
  real(dp), intent(in) :: normG(npw)
@@ -1391,7 +1385,6 @@ endif
  END SUBROUTINE Sauvegarde_M_q_m
 
  subroutine print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,opt)
-   implicit none
    integer, intent(in) :: spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,opt
    type(plowannier_type),intent(in) :: wanbz
    character(len=5000) ::message
@@ -1501,7 +1494,6 @@ endif
 
 
  subroutine print_uj_spin(nomega,uspin,jspin,omega,one_orbital)
-   implicit none
    integer,intent(in) :: nomega,one_orbital
    complex(dpc),intent(in) :: uspin(4,nomega)
    complex(dpc),intent(in) :: jspin(4,nomega)

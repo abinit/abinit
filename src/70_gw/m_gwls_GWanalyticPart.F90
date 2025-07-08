@@ -85,9 +85,7 @@ subroutine get_projection_band_indices(omega,band_index_below, band_index_above)
 !                Pe : projection on states such that epsilon_n < omega
 !                Qe : projection on states such that epsilon_n > omega
 !----------------------------------------------------------------------------------------------------
-implicit none
-
-real(dp),intent(in)  :: omega 
+real(dp),intent(in)  :: omega
 integer, intent(out) :: band_index_below, band_index_above
 
 ! *************************************************************************

@@ -82,8 +82,6 @@ contains
 
  subroutine pbc_init(rprimd)
 
-  implicit none
-
   !Arguments ------------------------
   real(dp),intent(in) :: rprimd(3,3)
   !Local ---------------------------
@@ -112,8 +110,6 @@ contains
 
  function pbc_aa_contract()
 
-  implicit none
-
   !Arguments ------------------------
   real(dp) :: pbc_aa_contract(3)
   pbc_aa_contract = sqrt(sum(aa(:,:)**two,dim=1))
@@ -132,8 +128,6 @@ contains
 !! SOURCE
 
  function pbc_bb_contract()
-
-  implicit none
 
   !Arguments ------------------------
   real(dp) :: pbc_bb_contract(3)
@@ -158,8 +152,6 @@ contains
 
  function pbc_bb_proj(vi)
 
-  implicit none
-
   !Arguments ------------------------
   real(dp),intent(in) :: vi(3)
   real(dp) :: pbc_bb_proj(3)
@@ -182,7 +174,6 @@ contains
 
  subroutine dist_pbc_ext(RI,RJ,r2,RD)
   ! ONLY aa AND bb MATRICES ARE USED IN THIS VERSION
-  implicit none
 
   !Arguments ------------------------
   real(dp),intent(out) :: r2
@@ -225,7 +216,6 @@ contains
 
  subroutine dist_pbc_int(RI,RJ)
   ! ONLY aa AND bb MATRICES ARE USED IN THIS VERSION
-  implicit none
 
   !Arguments ------------------------
   real(dp),intent(in),dimension(3) :: RI, RJ

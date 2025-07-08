@@ -28,14 +28,14 @@
 #%% executable = optic
 #%% test_chain = t47.abi, t48.abi, t49.abi
 #%% [files]
-#%% files_to_test = 
-#%%   t49_0001_0001-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
-#%%   t49_0002_0003-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
-#%%   t49_0001_0002_0003-ChiRe.out      , tolnlines = 2,   tolabs = 1.1e-06, tolrel = 4.0e-07; 
-#%%   t49_0001_0002_0003-ChiIm.out      , tolnlines = 115, tolabs = 1.1e-04, tolrel = 3.0e-06; 
+#%% files_to_test =
+#%%   t49_0001_0001-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
+#%%   t49_0002_0003-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
+#%%   t49_0001_0002_0003-ChiRe.out      , tolnlines = 2,   tolabs = 1.1e-06, tolrel = 4.0e-07;
+#%%   t49_0001_0002_0003-ChiIm.out      , tolnlines = 115, tolabs = 1.1e-04, tolrel = 3.0e-06;
 #%%   t49_0001_0002_0003-ChiAbs.out     , tolnlines = 4,   tolabs = 1.1e-05, tolrel = 3.0e-07;
 #%%   t49_0001_0002_0003-ChiTotRe.out   , tolnlines = 5,   tolabs = 1.1e-03, tolrel = 2.0e-07;
-#%%   t49_0002_0002_0002-ChiRe.out      , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
+#%%   t49_0002_0002_0002-ChiRe.out      , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%%   t49_0001_0002_0003-ChiEORe.out    , tolnlines = 1,   tolabs = 1.1e-05, tolrel = 2.0e-07;
 #%%   t49_0001_0002_0003-ChiEOIm.out    , tolnlines = 84,  tolabs = 1.1e-06, tolrel = 2.0e-06;
 #%%   t49_0001_0002_0003-ChiEOAbs.out   , tolnlines = 1,   tolabs = 1.1e-06, tolrel = 5.5e-08;
@@ -51,8 +51,8 @@
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = 
-#%% description = 
+#%% keywords =
+#%% description =
 #%%  GaAs, zinc-blende structure. Code optic. Use DDK files in netcdf format. Should produce same results as t48
 #%% topics = Optic
 #%%<END TEST_INFO>

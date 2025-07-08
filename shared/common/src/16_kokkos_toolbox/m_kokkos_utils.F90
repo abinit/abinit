@@ -31,7 +31,6 @@ module m_kokkos_utils
     subroutine f_kokkos_print_config() &
       & bind(c, name="c_abinit_kokkos_print_config")
       use, intrinsic :: iso_c_binding
-      implicit none
     end subroutine f_kokkos_print_config
   end interface
 
@@ -48,7 +47,6 @@ module m_kokkos_utils
     subroutine f_kokkos_initialize_without_args() &
       bind(c, name='c_kokkos_initialize_without_args')
       use, intrinsic :: iso_c_binding
-      implicit none
     end subroutine f_kokkos_initialize_without_args
   end interface
 
@@ -62,7 +60,6 @@ module m_kokkos_utils
     function f_kokkos_is_initialized() result(is_init) &
       & bind(c, name='c_kokkos_is_initialized')
       use, intrinsic :: iso_c_binding
-      implicit none
       logical(c_bool) :: is_init
     end function f_kokkos_is_initialized
   end interface
@@ -74,14 +71,12 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine abinit_kokkos_print_config()
     use, intrinsic :: iso_c_binding
-    implicit none
     call f_kokkos_print_config()
   end subroutine abinit_kokkos_print_config
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine kokkos_initialize()
     use, intrinsic :: iso_c_binding
-    implicit none
     integer :: arg_count, max_length = 0, str_length, n, cli_count
     character(kind=c_char, len=:), allocatable :: str
     character(kind=c_char), allocatable, target :: strs_array(:,:)
@@ -122,21 +117,18 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine kokkos_initialize_without_args()
     use, intrinsic :: iso_c_binding
-    implicit none
     call f_kokkos_initialize_without_args()
   end subroutine kokkos_initialize_without_args
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine kokkos_finalize()
     use, intrinsic :: iso_c_binding
-    implicit none
     call f_kokkos_finalize
   end subroutine kokkos_finalize
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   function kokkos_is_initialized() result(is_init)
     use, intrinsic :: iso_c_binding
-    implicit none
     logical :: is_init
     logical(c_bool) :: c_is_init
     c_is_init = f_kokkos_is_initialized()

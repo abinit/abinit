@@ -71,8 +71,6 @@ CONTAINS !===========================================================
  subroutine lotfparam_init(natom,version,nstart,nitex,neeigx,&
    &                    classic,me,nproc)
 
-  implicit none
-
   !Arguments ------------------------
   integer,intent(in) :: natom,version,nstart,neeigx
   integer,intent(in) :: classic,me,nproc

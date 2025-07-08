@@ -44,9 +44,7 @@ module m_tdep_phi3
 contains
 
 !====================================================================================================
- subroutine tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
-
-  implicit none 
+ subroutine tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym)
 
   type(Input_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell3at
@@ -66,14 +64,14 @@ contains
   ABI_MALLOC(ftot3,(3*Invar%natom,Invar%my_nstep)); ftot3(:,:)=0.d0
   do iatom=1,Invar%natom
     do ishell=1,Shell3at%nshell
-!     Build the 3x3x3 IFC of an atom in this shell    
+!     Build the 3x3x3 IFC of an atom in this shell
       if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
       do iatshell=1,Shell3at%neighbours(iatom,ishell)%n_interactions
         jatom=Shell3at%neighbours(iatom,ishell)%atomj_in_shell(iatshell)
         katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(iatshell)
         isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
         itrans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
+        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans)
 !       Calculation of the force components (third order)
         do istep=1,Invar%my_nstep
           do ii=1,3
@@ -81,19 +79,19 @@ contains
               do kk=1,3
                 ftot3(3*(iatom-1)+ii,istep)=ftot3(3*(iatom-1)+ii,istep)+&
 &                    Phi3_333(ii,jj,kk)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)
-              end do !kk 
-            end do !jj 
-          end do !ii 
+              end do !kk
+            end do !jj
+          end do !ii
         end do !istep
       end do !iatshell
-    end do !ishell  
-  end do !iatom  
+    end do !ishell
+  end do !iatom
   ABI_FREE(Phi3_333)
   ftot3(:,:)=ftot3(:,:)/2.d0
 
   ABI_MALLOC(ucart_blas,(3*Invar%natom)); ucart_blas(:)=0.d0
   do istep=1,Invar%my_nstep
-    ucart_blas(:)=0.d0 
+    ucart_blas(:)=0.d0
     do jatom=1,Invar%natom
       do jj=1,3
         ucart_blas(3*(jatom-1)+jj)=ucart(jj,jatom,istep)
@@ -111,8 +109,6 @@ contains
 
 !====================================================================================================
 subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
-
-  implicit none
 
   type(Input_type),intent(in) :: Invar
   type(Symetries_type),intent(in) :: Sym
@@ -134,8 +130,8 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
   do isym=1,Sym%nsym
     do itrans=1,6
       ABI_MALLOC(Const%Sprod(isym,itrans)%SSS,(3,27,3,3)); Const%Sprod(isym,itrans)%SSS(:,:,:,:)=zero
-    end do  
-  end do  
+    end do
+  end do
 
 ! For each couple of atoms, transform the Phi3 (3x3x3) ifc matrix using the symetry operation (S)
 ! Note: iatom=1 is excluded in order to take into account the atomic sum rule (see below)
@@ -159,8 +155,8 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
         end do
       end do
     end do
-  end do  
-        
+  end do
+
   write(Invar%stdout,*) ' Compute the coefficients (at the 3rd order) used in the Moore-Penrose...'
   do ishell=1,Shell3at%nshell
     do iatom=1,Invar%natom
@@ -173,7 +169,7 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
         itrans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
         ncoeff     =Shell3at%ncoeff(ishell)
         ncoeff_prev=Shell3at%ncoeff_prev(ishell)+CoeffMoore%ncoeff2nd+CoeffMoore%ncoeff1st
-  
+
         ABI_MALLOC(SSS_proj,(3,3,3,ncoeff)) ; SSS_proj(:,:,:,:)=zero
         do mu=1,3
           do nu=1,3
@@ -188,7 +184,7 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
         end do
         do istep=1,Invar%my_nstep
           iindex=3*(iatom-1)+3*Invar%natom*(istep-1)
-!         In order to impose the acoustic sum rule we use : 
+!         In order to impose the acoustic sum rule we use :
 !FB          udiff_ji(:)=ucart(:,jatom,istep)-ucart(:,iatom,istep)
 !FB          udiff_ki(:)=ucart(:,katom,istep)-ucart(:,iatom,istep)
           udiff_ji(:)=ucart(:,jatom,istep)
@@ -200,8 +196,8 @@ subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
               CoeffMoore%fcoeff(iindex+1:iindex+3,ncoeff_prev+1:ncoeff_prev+ncoeff)= &
 &             CoeffMoore%fcoeff(iindex+1:iindex+3,ncoeff_prev+1:ncoeff_prev+ncoeff)+&
 &             SSS_proj(1:3,nu,xi,1:ncoeff)*udiff_ji(nu)*udiff_ki(xi)/2.d0*Invar%weights(istep)
-            end do  
-          end do  
+            end do
+          end do
         end do !istep
         ABI_FREE(SSS_proj)
       end do !iatshell
@@ -220,8 +216,6 @@ end subroutine tdep_calc_phi3fcoeff
 !=====================================================================================================
 subroutine tdep_calc_phi3ref(ntotcoeff,proj,Phi3_coeff,Phi3_ref,Shell3at)
 
-  implicit none
-
   type(Shell_type),intent(in) :: Shell3at
   integer,intent(in) :: ntotcoeff
   double precision, intent(in) :: proj(27,27,Shell3at%nshell)
@@ -232,18 +226,18 @@ subroutine tdep_calc_phi3ref(ntotcoeff,proj,Phi3_coeff,Phi3_ref,Shell3at)
   integer :: ii,jj,kk,kappa
 
   do ishell=1,Shell3at%nshell
-!   Build the 3x3x3 IFC per shell    
+!   Build the 3x3x3 IFC per shell
     ncoeff     =Shell3at%ncoeff(ishell)
     ncoeff_prev=Shell3at%ncoeff_prev(ishell)
-    kappa=0  
+    kappa=0
     do ii=1,3
       do jj=1,3
         do kk=1,3
           kappa=kappa+1
           Phi3_ref(ii,jj,kk,ishell)=sum(proj(kappa,1:ncoeff,ishell)*Phi3_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff,1))
-        end do  
-      end do  
-    end do  
+        end do
+      end do
+    end do
 !   Remove the rounding errors before writing (for non regression testing purposes)
     do ii=1,3
       do jj=1,3
@@ -251,15 +245,13 @@ subroutine tdep_calc_phi3ref(ntotcoeff,proj,Phi3_coeff,Phi3_ref,Shell3at)
           if (abs(Phi3_ref(ii,jj,kk,ishell)).lt.tol8) Phi3_ref(ii,jj,kk,ishell)=zero
         end do
       end do
-    end do  
-  end do  
+    end do
+  end do
 
 end subroutine tdep_calc_phi3ref
 
 !=====================================================================================================
 subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
-
-  implicit none
 
   type(Input_type),intent(in) :: Invar
   type(Symetries_type),intent(in) :: Sym
@@ -278,7 +270,7 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
   write(Invar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
   write(Invar%stdout,*) '#############################################################################'
 
-! Write the IFCs in the data.out file (with others specifications: 
+! Write the IFCs in the data.out file (with others specifications:
 ! number of atoms in a shell, Trace...)
   ABI_MALLOC(Phi3_333,(3,3,3)) ; Phi3_333(:,:,:)=0.d0
   do ishell=1,Shell3at%nshell
@@ -293,7 +285,7 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
         katom=Shell3at%neighbours(iatref,ishell)%atomk_in_shell(iatshell)
         isym =Shell3at%neighbours(iatref,ishell)%sym_in_shell(iatshell)
         itrans=Shell3at%neighbours(iatref,ishell)%transpose_in_shell(iatshell)
-        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
+        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans)
         write(Invar%stdout,'(a,i4,a,i4)') '  For iatcell=',iatref,' ,with type=',mod(iatref-1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
@@ -319,22 +311,20 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
             end if
             write(Invar%stdout,'(2x,3(f9.6,1x))') tmp1,tmp2,tmp3
           end do
-        end do  
+        end do
         write(Invar%stdout,'(a,3(f9.6,1x))') '  (i,j) vector components:', (distance(iatref,jatom,jj+1),jj=1,3)
         write(Invar%stdout,'(a,3(f9.6,1x))') '  (j,k) vector components:', (distance(jatom ,katom,jj+1),jj=1,3)
         write(Invar%stdout,'(a,3(f9.6,1x))') '  (k,i) vector components:', (distance(katom,iatref,jj+1),jj=1,3)
         write(Invar%stdout,*) ' '
       end do !iatshell
-    end if !n_interactions 
-  end do !ishell 
+    end if !n_interactions
+  end do !ishell
   ABI_FREE(Phi3_333)
 
 end subroutine tdep_write_phi3
 
 !=====================================================================================================
 subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
-
-  implicit none
 
   type(Symetries_type),intent(in) :: Sym
   type(Input_type),intent(in) :: Invar
@@ -364,7 +354,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,q
 !FB        F_strain(ii,jj)=1./dsqrt(15.d0)
         F_strain(ii,jj)= 1.d0
 !FB        F_strain(ii,jj)= 0.8
-      else 
+      else
 !FB        F_strain(ii,jj)= 1./dsqrt(6.d0)/2.d0
 !FB        F_strain(ii,jj)=2./dsqrt(15.d0)
         F_strain(ii,jj)=0.d0
@@ -382,9 +372,9 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,q
         do jj=1,3
           eigenvec_loc((iatcell-1)*3+ii,(jatcell-1)*3+jj)=dcmplx(Eigen2nd%eigenvec(1,ii,iatcell,jj,jatcell,iqpt),&
 &                                                                Eigen2nd%eigenvec(2,ii,iatcell,jj,jatcell,iqpt))
-        end do !ii 
-      end do !jj 
-    end do !jatcell 
+        end do !ii
+      end do !jj
+    end do !jatcell
   end do !iatcell
   ABI_MALLOC(omega,(3*natom_unitcell)); omega(:)=czero
   do iatcell=1,natom_unitcell
@@ -399,19 +389,19 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,q
 &                                     Eigen2nd%dynmat(2,ii,iatcell,jj,jatcell,iqpt))
 !FB            write(Invar%stdlog,'(a,5(1x,i4),2(1x,f15.3))') 'imode,iatcell,jatcell,ii,jj=',imode,iatcell,jatcell,ii,jj
 !FB                                                           eigen_prod(ii,jj,iatcell,jatcell,imode)
-          end do !imode 
-        end do !ii 
-      end do !jj 
-    end do !jatcell 
+          end do !imode
+        end do !ii
+      end do !jj
+    end do !jatcell
   end do !iatcell
 
   do imode=1,nmode
     if (abs(aimag(omega(imode))).gt.tol8) then
       write(Invar%stdlog,'(a,1x,e15.8,1x,a,i4)') '>>>> WARNING : Imaginary part of the phonon frequency is not zero (',&
-&                                                aimag(omega(imode)),') for mode :',imode 
+&                                                aimag(omega(imode)),') for mode :',imode
 !FB      stop
     end if
-  end do  
+  end do
 !FB  write(Invar%stdlog,'(a,1(1x,i4),6(1x,f15.3))') 'iqpt,Grun=',iqpt,(dsqrt(real(omega(imode))),imode=1,6)
   ABI_FREE(omega)
 
@@ -433,7 +423,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,q
         do jj=1,3
           phase=phase+2*pi*Rlatt_cart(jj,iatcell,jatom)*qpt_cart(jj)
         end do
-        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans) 
+        call tdep_build_phi3_333(isym,Phi3_ref(:,:,:,ishell),Phi3_333,Sym,itrans)
         do ii=1,3
           do jj=1,3
             do kk=1,3
@@ -456,15 +446,15 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,q
               end do !ll
             end do !kk
           end do !jj
-        end do !ii 
-      end do !iatshell 
-    end do !iatcell 
+        end do !ii
+      end do !iatshell
+    end do !iatcell
   end do !ishell
 
 !FB  Gruneisen(:,:,:)=Gruneisen(:,:,:)*dcmplx(dsqrt(6.d0),0.d0)
 !FB  do imode=1,nmode
 !FB    write(Invar%stdlog,'(a,1(1x,i4),6(1x,f15.3))') 'imode,Grun=',imode,(Gruneisen(imode,kk,kk),kk=1,3)
-!FB  end do  
+!FB  end do
   ABI_FREE(Phi3_333)
   ABI_FREE(eigen_prod)
   ABI_FREE(eigenvec_loc)
@@ -472,9 +462,7 @@ subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,q
 end subroutine tdep_calc_gruneisen
 
 !=====================================================================================================
-subroutine tdep_build_phi3_333(isym,Phi3_ref,Phi3_333,Sym,itrans) 
-
-  implicit none
+subroutine tdep_build_phi3_333(isym,Phi3_ref,Phi3_333,Sym,itrans)
 
   type(Symetries_type),intent(in) :: Sym
   double precision, intent(in) :: Phi3_ref(3,3,3)
@@ -502,10 +490,10 @@ subroutine tdep_build_phi3_333(isym,Phi3_ref,Phi3_333,Sym,itrans)
       end do
     end do
   end do
-  
+
 ! Take into account the 6 allowed permutations
   Phi3_tmp(:,:,:)=Phi3_333(:,:,:)
-  if ((itrans.lt.1).or.(itrans.gt.6)) then  
+  if ((itrans.lt.1).or.(itrans.gt.6)) then
     ABI_BUG('This value of the symmetry index is not permitted')
   end if
   do ii=1,3
@@ -519,15 +507,13 @@ subroutine tdep_build_phi3_333(isym,Phi3_ref,Phi3_333,Sym,itrans)
         if (itrans==6) then ; ee=kk ; ff=jj ; gg=ii ; endif !\Phi3_gfe
         Phi3_333(ee,ff,gg)=Phi3_tmp(ii,jj,kk)
       end do
-    end do  
-  end do          
+    end do
+  end do
 
 end subroutine tdep_build_phi3_333
 
 !=====================================================================================================
 subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
-
-  implicit none
 
   type(Eigen_type),intent(in) :: Eigen2nd
   type(Input_type),intent(in) :: Invar
@@ -560,15 +546,15 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
   ntemp=1000
   nmode=3*Invar%natom_unitcell
   k_B=kb_HaK*Ha_eV
-  ABI_MALLOC(heatcapa,(nmode))       ; heatcapa   (:)    =0.d0 
-  ABI_MALLOC(grun_thermo,(nmode,3,3)); grun_thermo(:,:,:)=0.d0 
-  ABI_MALLOC(p_thermo1,(nmode,3,3))  ; p_thermo1  (:,:,:)=0.d0 
-  ABI_MALLOC(p_thermo2,(ntemp))      ; p_thermo2  (:)    =0.d0 
-  ABI_MALLOC(u_vib,(nmode))          ; u_vib      (:)    =0.d0 
-  ABI_MALLOC(heatcapa_HA,(nmode,ntemp))       ; heatcapa_HA   (:,:)    =0.d0 
-  ABI_MALLOC(grun_thermo_HA,(nmode,ntemp,3,3)); grun_thermo_HA(:,:,:,:)=0.d0 
-  ABI_MALLOC(p_thermo_HA,(nmode,ntemp,3,3))   ; p_thermo_HA   (:,:,:,:)=0.d0 
-  ABI_MALLOC(u_vib_HA,(nmode,ntemp))          ; u_vib_HA      (:,:)    =0.d0 
+  ABI_MALLOC(heatcapa,(nmode))       ; heatcapa   (:)    =0.d0
+  ABI_MALLOC(grun_thermo,(nmode,3,3)); grun_thermo(:,:,:)=0.d0
+  ABI_MALLOC(p_thermo1,(nmode,3,3))  ; p_thermo1  (:,:,:)=0.d0
+  ABI_MALLOC(p_thermo2,(ntemp))      ; p_thermo2  (:)    =0.d0
+  ABI_MALLOC(u_vib,(nmode))          ; u_vib      (:)    =0.d0
+  ABI_MALLOC(heatcapa_HA,(nmode,ntemp))       ; heatcapa_HA   (:,:)    =0.d0
+  ABI_MALLOC(grun_thermo_HA,(nmode,ntemp,3,3)); grun_thermo_HA(:,:,:,:)=0.d0
+  ABI_MALLOC(p_thermo_HA,(nmode,ntemp,3,3))   ; p_thermo_HA   (:,:,:,:)=0.d0
+  ABI_MALLOC(u_vib_HA,(nmode,ntemp))          ; u_vib_HA      (:,:)    =0.d0
 ! Loop over irreducible q-points
 ! =======================
   do iq_ibz=1,Qbz%nqibz
@@ -583,8 +569,8 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
       do jj=1,3
         do kk=1,3
           Grun_mean(ii)=Grun_mean(ii)+Gruneisen(ii,jj,kk)
-        end do  
-      end do  
+        end do
+      end do
     end do
     if (sum(abs(aimag(Grun_mean(:)))).gt.tol8) then
       write(message,'(i5,1x,100(e15.6,1x))') iq_ibz,( real(Grun_mean(ii)),ii=1,nmode)
@@ -593,7 +579,7 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
       ABI_ERROR_NOSTOP(message,ierr)
       ABI_ERROR('tdep_calc_alpha_gamma : The imaginary part of the Gruneisen is not equal to zero')
     end if
-!   If the Gruneisen is isotropic    
+!   If the Gruneisen is isotropic
 !FB    do ii=1,3
 !FB      tmp1=0.d0
 !FB      do jj=1,3
@@ -603,7 +589,7 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
 !FB        Gruneisen(ii,jj,jj)=dcmplx(tmp1/3.d0,0.d0)
 !FB      end do
 !FB      write(Invar%stdlog,'(2(i5,1x),100(e15.6,1x))') iq_ibz,ii,Gruneisen(ii,jj,jj)
-!FB    end do  
+!FB    end do
 
 !   Compute the heat capacity and thermodynamical gruneisen parameter at present temperature
 !   ========================================================================================
@@ -613,11 +599,11 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
       if (xx.le.0) cycle
       heatcapa(ii)       =heatcapa(ii)       +(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)
       ! Gamma= sum_i Gamma_i*C_Vi / C_V
-      grun_thermo(ii,:,:)=grun_thermo(ii,:,:)+(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0 
+      grun_thermo(ii,:,:)=grun_thermo(ii,:,:)+(wovert*xx/sinh(wovert*xx))**2*Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0
       ! P    = sum_i Gamma_i*E_i / V
-      p_thermo1(ii,:,:)  =p_thermo1(ii,:,:)  +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0 
+      p_thermo1(ii,:,:)  =p_thermo1(ii,:,:)  +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)*real(Gruneisen(ii,:,:))*3.d0
       u_vib(ii)          =u_vib(ii)          +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)
-    end do  
+    end do
 !   Compute the heat capacity and thermodynamical gruneisen parameter as a function of temperature
 !   ==============================================================================================
     do itemp=1,ntemp
@@ -631,20 +617,20 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
         p_thermo_HA(ii,itemp,:,:)   =p_thermo_HA(ii,itemp,:,:)   +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)&
 &                                   *real(Gruneisen(ii,:,:))*3.d0
         u_vib_HA(ii,itemp)          =u_vib_HA(ii,itemp)          +  (xx/2.d0/tanh(wovert*xx))   *Qbz%wtqibz(iq_ibz)
-      end do  
-    end do  
+      end do
+    end do
   end do
   ABI_FREE(Gruneisen)
   ABI_FREE(Grun_mean)
-! Compute the pressure as the integral of Gamma*C_v overt T  
-  ABI_MALLOC(tmp,(ntemp)) ; tmp(:)=0.d0 
+! Compute the pressure as the integral of Gamma*C_v overt T
+  ABI_MALLOC(tmp,(ntemp)) ; tmp(:)=0.d0
   do itemp=1,ntemp
     do ii=1,3
       do jj=1,3
         tmp(itemp)=tmp(itemp)+sum(grun_thermo_HA(:,itemp,ii,jj))/3.d0
-      end do  
-    end do  
-  end do  
+      end do
+    end do
+  end do
   call simpson_int(ntemp,10.d0,tmp,p_thermo2)
   ABI_FREE(tmp)
 
@@ -658,7 +644,7 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
 &                  '        alpha_12        alpha_13        alpha_23'
     write(20,'(2a)')'# --------------------------------------------------------------------------------------------------',&
                     '--------------------'
-  end if  
+  end if
   do itemp=1,ntemp
     C_v    =sum(heatcapa_HA   (:,itemp))
     E_th   =sum(u_vib_HA    (:,itemp))
@@ -670,7 +656,7 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
       Gama_tensor (:,:)=Gama_tensor (:,:)+grun_thermo_HA(imode,itemp,:,:)/C_v
       P_th1_tensor(:,:)=P_th1_tensor(:,:)+p_thermo_HA   (imode,itemp,:,:)/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
     end do
-!   alpha=sum{I=1,6;J=1,6} S(I,J) Gama_tensor (J)     
+!   alpha=sum{I=1,6;J=1,6} S(I,J) Gama_tensor (J)
     do ii=1,3
       do jj=1,3
         if (ii.eq.1.and.jj.eq.1) alpha=1
@@ -710,11 +696,11 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
 &                                     alpha_v_tensor(1,1)*1.d6,alpha_v_tensor(2,2)*1.d6,alpha_v_tensor(3,3)*1.d6,&
 &                                     alpha_v_tensor(1,2)*1.d6,alpha_v_tensor(1,3)*1.d6,alpha_v_tensor(2,3)*1.d6
     end if
-  end do  
+  end do
   if (MPIdata%iam_master) then
     close(20)
     close(21)
-  end if  
+  end if
   ABI_FREE(heatcapa_HA)
   ABI_FREE(grun_thermo_HA)
   ABI_FREE(p_thermo_HA)
@@ -736,7 +722,7 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
     Gama_tensor (:,:)=Gama_tensor (:,:)+grun_thermo(imode,:,:)/C_v
     P_th1_tensor(:,:)=P_th1_tensor(:,:)+p_thermo1  (imode,:,:)/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
   end do
-! alpha=sum{I=1,6;J=1,6} S(I,J) Gama_tensor (J)     
+! alpha=sum{I=1,6;J=1,6} S(I,J) Gama_tensor (J)
   do ii=1,3
     do jj=1,3
       if (ii.eq.1.and.jj.eq.1) alpha=1
@@ -764,8 +750,8 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
         end do
       end do
       P_th_tensor(ii,jj)=Gama_tensor(ii,jj)*E_th/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
-    end do  
-  end do  
+    end do
+  end do
   P_th2  =p_thermo2(int(Invar%temperature/10))*k_B/(Lattice%ucvol*Bohr_Ang**3*1.d-30)*e_Cb/10**9
   Lattice%BulkModulus_S=Lattice%BulkModulus_T*(1.+(alpha_v_tensor(1,1)+alpha_v_tensor(2,2)+alpha_v_tensor(3,3))*&
 &                       (Gama_tensor(1,1)+   Gama_tensor(2,2)+   Gama_tensor(3,3))/3.d0*Invar%temperature)
@@ -832,8 +818,6 @@ end subroutine tdep_calc_alpha_gamma
 !=====================================================================================================
 subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
 
-  implicit none
-
   type(Symetries_type),intent(in) :: Sym
   type(Input_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell3at
@@ -879,16 +863,16 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,
             write(message,'(4(i5,1x),100(e15.6,1x))') iqpt,ii,jj,kk,aimag(Gruneisen(ii,jj,kk))
             ABI_WARNING(message)
             ABI_WARNING('tdep_write_gruneisen : The imaginary part of the Gruneisen is not equal to zero')
-         end if  
-        end do  
-      end do  
+         end if
+        end do
+      end do
     end do
     do ii=1,3*Invar%natom_unitcell
       do jj=1,3
         do kk=1,3
           Grun_mean(ii)=Grun_mean(ii)+Gruneisen(ii,jj,kk)
-        end do  
-      end do  
+        end do
+      end do
     end do
 
 !   Write the Gruneisen
@@ -901,12 +885,12 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,
       write(message,'(i5,1x,100(e15.6,1x))') iqpt,(aimag(Grun_mean(ii)),ii=1,nmode)
       ABI_WARNING(message)
       ABI_WARNING('tdep_write_gruneisen : The imaginary part of Grun_mean is not equal to zero')
-    else 
+    else
 !FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode),&
 !FB                ((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
       write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode)
-    end if  
-  end do  
+    end if
+  end do
   close(53)
   close(54)
   ABI_FREE(Grun_mean)
@@ -919,8 +903,6 @@ end module m_tdep_phi3
 
 !FB!=====================================================================================================
 !FBsubroutine tdep_calc_lifetime1(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
-!FB
-!FB  implicit none
 !FB
 !FB  type(crystal_t),intent(in) :: Crystal
 !FB  type(Symetries_type),intent(in) :: Sym
@@ -965,23 +947,23 @@ end module m_tdep_phi3
 !FB        ipjpk(:)=iqbz(:)+jqbz(:)+kqbz(:)
 !FB        imjpk(:)=iqbz(:)-jqbz(:)+kqbz(:)
 !FB        if (sum(abs(ipjpk(:)-int(ipjpk(:)))).lt.tol4) then
-!FB          write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi+qj+qk=G',iq_bz,jq_bz,kq_bz  
+!FB          write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi+qj+qk=G',iq_bz,jq_bz,kq_bz
 !FB          okp_count=okp_count+1
 !FB        else if (sum(abs(imjpk(:)-int(imjpk(:)))).lt.tol4) then
-!FB          write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi-qj+qk=G',iq_bz,jq_bz,kq_bz  
+!FB          write(Invar%stdout,'(a,i4,1x,i4,1x,i4)')'OK for qi-qj+qk=G',iq_bz,jq_bz,kq_bz
 !FB          okm_count=okm_count+1
-!FB        else 
+!FB        else
 !FB          cycle
-!FB        end if  
+!FB        end if
 !FB!       do imode=1,nmode
 !FB!         do jmode=1,nmode
 !FB!           do kmode=1,nmode
-!FB!            end do  
-!FB!          end do  
-!FB!        end do  
-!FB      end do  
-!FB    end do  
-!FB  end do  
+!FB!            end do
+!FB!          end do
+!FB!        end do
+!FB      end do
+!FB    end do
+!FB  end do
 !FB  write(Invar%stdout,'(a,i10)') 'Total number of (q1,q2,q3) =',tot_count
 !FB  write(Invar%stdout,'(a,i10)') 'Partial number of (q1+q2+q3) =',okp_count
 !FB  write(Invar%stdout,'(a,i10)') 'Partial number of (q1-q2+q3) =',okm_count
@@ -1032,7 +1014,7 @@ end module m_tdep_phi3
 !FB! ************************************************************************
 !FB
 !FB comm = MPIdata%comm_step
-!FB nprocs  = xmpi_comm_size(comm) 
+!FB nprocs  = xmpi_comm_size(comm)
 !FB my_rank = xmpi_comm_rank(comm)
 !FB
 !FB write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Lifetime ',ch10

@@ -1,0 +1,107 @@
+# ---------------------------------------------------------------------------------------------------------
+#
+# NiO with 4 atoms in DMFT
+# low cutoff, low number of k-points
+# DMFT with TRIQS tested with self-consistency
+#
+# ---------------------------------------------------------------------------------------------------------
+# -- Datasets and options
+ndtset 2
+jdtset 1 2
+prtvol 4
+pawprtvol 3
+getden -1
+nsym 1
+
+# -- Convergence Parameters
+nstep1 100
+nstep 1
+nline2 10
+nnsclo2 5
+ecut  14
+# as this cutoff, test is not physical at all (filling of correlated orbitals are obviously wrong)
+
+pawecutdg 28
+tolvrs 1.0d-15
+nband  34
+occopt 3 tsmear 2000 K
+
+##### PHYSICAL PARAMETERS
+nsppol 1
+nspden 1
+natom 4 ntypat 2 typat 1 1 2 2
+chkprim 0
+znucl  28.0 8.0
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1.0 1.0 0.0
+xred 0 0 0
+    0.0 0.0 0.5
+    0.5 0.5 0.25
+    0.5 0.5 0.75
+acell   3*7.927
+
+##### K-POINTS
+kptrlatt 2 0 0 0 2 0 0 0 2
+chksymbreak 0
+
+## == LDA+DMFT
+usedmft1 0
+usedmft 1
+dmftbandi  9
+dmftbandf 34
+dmft_solv 6
+dmft_iter 1
+dmft_nwli 50
+dmft_mxsf 0.3
+dmft_wanorthnorm 2
+
+dmft_dc 8
+dmft_yukawa_param 3
+dmft_triqs_off_diag 1
+dmftqmc_l 150
+dmftqmc_therm 100
+dmftctqmc_meas 100
+dmftctqmc_basis 1
+dmftqmc_n 1.d5
+dmft_triqs_leg_measure 1
+dmft_triqs_nleg 10
+dmft_triqs_move_double 0
+dmft_triqs_loc_n_min 5
+
+##### DFT+U
+usepawu1    4
+usepawu     14
+dmatpuopt  1   # choose expression of the density matrix
+lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
+upawu1  0.00  0.0   # values in Hartree
+jpawu1  0.0000 0.0  # values in Hartree
+upawu2  0.30  0.0   # values in Hartree
+jpawu2  0.0000 0.0  # values in Hartree
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "28ni.paw, 8o.2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
+#%% files_to_test = t106_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0001, tolnlines = 14, tolabs = 1.e-4, tolrel = 1.e-3, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 14, tolabs = 1.e-4, tolrel = 1.e-3, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Selfmxent0001_is1_iflav0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Selfmxent0002_is1_iflav0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0001.dat, tolnlines = 12, tolabs = 5.e-8, tolrel = 5.e-8, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0002.dat, tolnlines = 4, tolabs = 5.e-8, tolrel = 5.e-8, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%% [extra_info]
+#%% keywords = PAW, DMFT, TRIQS
+#%% authors = B. Amadon, E. Castiel
+#%% description = DFT+DMFT for NiO : test TRIQS interface with several correlated atoms, Legendre measurement and off-diagonal elements
+#%%<END TEST_INFO>

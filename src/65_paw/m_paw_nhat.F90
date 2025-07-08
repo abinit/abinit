@@ -120,8 +120,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &          pawgrnhat,pawnhat,pawrhoij,pawrhoij0,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_wvl,me_g0,paral_kgb,distribfft,gpu_thread_limit) ! optional arguments
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,ider,idir,ipert,izero,my_natom,natom,nfft
@@ -675,8 +673,6 @@ end subroutine pawmknhat
 subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,nattyp,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option) ! optional arguments
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1413,8 +1409,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 &          nspinor,ntypat,ndat1,ndat2,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option,nattyp) ! optional arguments
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ider,izero,my_natom,natom,nfft,nhat12_grdim,ntypat,nspinor,ndat1,ndat2
@@ -1842,8 +1836,6 @@ end subroutine pawmknhat_psipsi
 subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
 &                    pawang,pawfgrtab,pawrhoij,pawtab,rprimd, &
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2738,8 +2730,6 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 &                    pawang,pawtab,ph3d_diel,typat,wfprod,wfraug, &
 &                    mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: iband1,iband2,ispinor1,ispinor2,istwf_k,lmax_diel,mgfftdiel
@@ -3002,8 +2992,6 @@ subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
 & optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,typat,ucvol,xred, &
 & mpi_atmtab,comm_atom,comm_fft,distribfft,typord) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: my_natom,natom,ntypat,optcut,optgr0,optgr1,optgr2,optrad
@@ -3235,8 +3223,6 @@ end subroutine nhatgrid
 subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 & nattyp,ntypat,n1,n1i,n2,n2i,n3,n3pi,optcut,optgr0,optgr1,optgr2,optrad,&
 & pawfgrtab,pawtab,psppar,rprimd,shift,xred)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

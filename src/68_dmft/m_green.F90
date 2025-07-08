@@ -28,10 +28,21 @@
  use m_abicore
  use m_errors
 
- use m_matlu, only : matlu_type
- use m_oper, only : destroy_oper,init_oper,init_oper_ndat,copy_oper_from_ndat,copy_oper_to_ndat,oper_type
- use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
+ use m_crystal, only : crystal_t
+ use m_fstrings, only : int2char4
+ use m_hide_lapack, only : xginv
+ use m_io_tools, only : open_file
+ use m_lib_four
+ use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,diff_matlu,init_matlu,matlu_type,print_matlu, &
+                   & prod_matlu,shift_matlu,sym_matlu,trace_matlu,trace_prod_matlu,xmpi_matlu,zero_matlu
+ use m_oper, only : copy_oper,copy_oper_from_ndat,copy_oper_to_ndat,destroy_oper,downfold_oper,gather_oper, &
+                  & gather_oper_ks,init_oper,init_oper_ndat,inverse_oper,oper_type,print_oper,prod_oper, &
+                  & trace_oper,trace_prod_oper,upfold_oper
+ use m_paw_dmft, only : construct_nwli_dmft,mpi_distrib_dmft_type,paw_dmft_type
  use m_self, only : self_type
+ use m_splines
+ use m_time, only : timab
+ use m_xmpi, only : xmpi_barrier,xmpi_sum
  use m_abi_linalg
  use, intrinsic :: iso_c_binding, only: c_size_t
 
@@ -144,6 +155,9 @@
 
   real(dp) :: charge_ks
   ! Total charge computed from ks orbitals
+
+  real(dp) :: ekin_imp
+  ! Kinetic energy of the impurity
 
   real(dp) :: integral
   ! Integral of the interaction energy divided by U
@@ -522,8 +536,6 @@ end subroutine destroy_green_tau
 
 subroutine copy_green(green1,green2,opt_tw)
 
- use m_oper, only : copy_oper
-
 !Arguments ------------------------------------
  type(green_type), intent(in) :: green1
  type(green_type), intent(inout) :: green2
@@ -585,9 +597,6 @@ end subroutine copy_green
 !! SOURCE
 
 subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
-
- use m_matlu, only : diff_matlu,print_matlu,trace_matlu
- use m_oper, only : print_oper
 
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -684,9 +693,6 @@ end subroutine printocc_green
 !! SOURCE
 
 subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
-
- use m_fstrings, only : int2char4
- use m_io_tools, only : open_file
 
 !Arguments ------------------------------------
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -855,14 +861,19 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
    write(message,'(2a)') ch10,"  == About to print spectral function"
    call wrtout(std_out,message,'COLL')
    if (option == 4) then
-     tmpfil = trim(paw_dmft%filapp)//'SpFunc-'//trim(char1)
+     tmpfil = trim(paw_dmft%filapp)//'_SpFunc-'//trim(char1)
      if (open_file(tmpfil,message,newunit=spf_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
+     write(spf_unt,'(3a)') "# This is the total spectral function (DOS).",ch10, &
+                         & "#    Real frequency (Ha)        Spectral function"
+
    end if ! option=4
    if (option == 5) then
-     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kresolved_'//trim(char1)
+     tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpectralFunction_kres' !//trim(char1)
      if (open_file(tmpfil,message,newunit=spfkresolved_unt,status='unknown',form='formatted') /= 0) &
        & ABI_ERROR(message)
+     write(spfkresolved_unt,'(3a)') "# This is the k-resolved spectral function.",ch10, &
+                                & "#  Real frequency (eV)       Spectral function (eV^-1)   ikpt"
      ABI_MALLOC(sf,(nkpt,green%nw))
      sf(:,:) = czero
      do ifreq=1,green%nw
@@ -876,7 +887,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
      end do ! ifreq
      do ikpt=1,nkpt
        do ifreq=1,green%nw
-         write(message,*) green%omega(ifreq)*Ha_eV,(-aimag(sf(ikpt,ifreq)))/pi/Ha_eV,ikpt
+         write(message,'(2x,2(es24.16e3,2x),i5)') green%omega(ifreq)*Ha_eV,(-aimag(sf(ikpt,ifreq)))/pi/Ha_eV,ikpt
          call wrtout(spfkresolved_unt,message,'COLL')
        end do ! ifreq
        write(message,*)
@@ -915,7 +926,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
        end do ! isppol
      end do ! ifreq
      do ifreq=1,green%nw
-       write(message,*) green%omega(ifreq),(-aimag(sf2(ifreq)))/pi
+       write(message,'(2x,2(es24.16e3,2x))') green%omega(ifreq),(-aimag(sf2(ifreq)))/pi
        call wrtout(spf_unt,message,'COLL')
      end do ! ifreq
      ABI_FREE(sf2)
@@ -930,13 +941,12 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
        sf_corr(:) = czero
        call int2char4(iatom,tag_at)
        ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_SpFunloc_iatom'//trim(tag_at)
        if (open_file(tmpfil,message,newunit=spcorb_unt,status='unknown',form='formatted') /= 0) &
          & ABI_ERROR(message)
        ndim = 2*lpawu + 1
-       write(message,*) "#",nspinor,nsppol,ndim,green%nw
-       call wrtout(spcorb_unt,message,'COLL')
-       write(message,*) "#",lpawu
+       write(message,'(3a,3(i3),i6,2a,i2,2a)') "# nspinor,nsppol,ndim,nw",ch10,"#",nspinor,nsppol,ndim,green%nw,ch10, &
+                                          & "# lpawu",lpawu,ch10,"#       Frequency (Ha.)        Spectral function"
        call wrtout(spcorb_unt,message,'COLL')
        ndim = nspinor * ndim
        do ifreq=1,green%nw
@@ -947,7 +957,7 @@ subroutine print_green(char1,green,option,paw_dmft,opt_wt,opt_decim)
          end do ! isppol
        end do ! ifreq
        do ifreq=1,green%nw
-         write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/pi
+         write(message,'(2x,2(es24.16e3,2x))') green%omega(ifreq),(-aimag(sf_corr(ifreq)))/pi
          call wrtout(spcorb_unt,message,'COLL')
        end do ! ifreq
        close(spcorb_unt)
@@ -1327,12 +1337,6 @@ end subroutine compute_green_batched_core
 
 subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_nonxsum2,opt_log,opt_restart_moments)
 
- use m_abi_linalg, only : abi_xgemm
- use m_matlu, only : add_matlu,sym_matlu,xmpi_matlu
- use m_oper, only : downfold_oper,gather_oper,gather_oper_ks,inverse_oper,print_oper,upfold_oper
- use m_time, only : timab
- use m_xmpi, only : xmpi_sum
-
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -1428,9 +1432,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
    call wrtout(std_out,message,'COLL')
  end if ! option=123
 
- ! option for downfold_oper
- option = 1
- if (diag == 1) option = 3
+ option = merge(3,1,diag==1) ! option for downfold_oper
 
 ! ====================================================
 ! Upfold self-energy and double counting  Self_imp -> self(k)
@@ -1480,8 +1482,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
 
  shift = green%distrib%shiftk
  mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt+1)
- shift_green = shift
- if (green%oper(1)%has_operks == 0) shift_green = 0
+ shift_green = merge(0,shift,green%oper(1)%has_operks==0)
 
 
  if(mkmem>0 .and. gpu_option==ABI_GPU_OPENMP) then
@@ -1621,7 +1622,7 @@ subroutine compute_green(green,paw_dmft,prtopt,self,opt_self,opt_nonxsum,opt_non
                         & mbandc,green%oper(ifreq)%ks(:,:,ikpt+shift_green,isppol),mbandc,czero,mat_tmp(:,:),mbandc)
            call zheev("n","u",mbandc,mat_tmp(:,:),mbandc,eig(:),work(:),lwork,rwork(:),info)
            ! Do not use DOT_PRODUCT
-           trace_tmp = trace_tmp + sum(log(eig(:)*omega_current))*wtk*temp
+           trace_tmp = trace_tmp + sum(log(eig(:)*(paw_dmft%omega_lo(ifreq)**2)))*wtk*temp
          end if ! optself
        end do ! ikpt
      end do ! isppol
@@ -1910,10 +1911,6 @@ end subroutine compute_green
 
 subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_diff,opt_fill_occnd,opt_self)
 
- use m_matlu, only : destroy_matlu,diff_matlu,init_matlu,print_matlu,shift_matlu,sym_matlu,xmpi_matlu,zero_matlu
- use m_oper, only : downfold_oper,trace_oper
- use m_time, only : timab
-
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
  !type(MPI_type), intent(in) :: mpi_enreg
@@ -1952,8 +1949,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 
  optself = 1
  if (present(opt_self)) optself = opt_self
- option = 1 ! option for downfold_oper
- if (optself == 0) option = 3
+ option = merge(3,1,optself==0) ! option for downfold_oper
 
 ! Initialize spaceComm, myproc, and master
  !spacecomm=paw_dmft%spacecomm
@@ -1969,8 +1965,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
  nsppol  = paw_dmft%nsppol
  temp    = paw_dmft%temp
 
- nmoments = 1
- if (green%has_moments == 1) nmoments = green%nmoments
+ nmoments = merge(green%nmoments,1,green%has_moments==1)
 
 ! Initialize green%oper before calculation (important for xmpi_sum)
 ! allocate(charge_loc_old(paw_dmft%natom,paw_dmft%nsppol+1))
@@ -2234,7 +2229,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !    because [G_{k}^{n_1,n_2}(iomega_n)]*= G_{k}^{n_2,n_1}(-iomega_n)
    do isppol=1,nsppol
      do ikpt=1,nkpt
-       green%occup%ks(:,:,ikpt,isppol) = (green%occup%ks(:,:,ikpt,isppol) + &
+       green%occup%ks(:,:,ikpt,isppol) = (green%occup%ks(:,:,ikpt,isppol)+ &
           & conjg(transpose(green%occup%ks(:,:,ikpt,isppol)))) * half
      end do ! ikpt
    end do ! isppol
@@ -2242,8 +2237,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
                !write(std_out,*) "occup%ks ik2 AA",green%occup%ks(1,2,1,3)
    if (optfilloccnd == 1) then
      band_index = 0
-     fac = one
-     if (nsppol == 1 .and. nspinor == 1) fac = two
+     fac = merge(two,one,nsppol==1.and.nspinor==1)
      do isppol=1,nsppol
        do ikpt=1,nkpt
          do ib1=1,mbandc
@@ -2497,11 +2491,6 @@ end subroutine icip_green
 !! SOURCE
 
 subroutine fourier_green(cryst_struc,green,paw_dmft,opt_ksloc,opt_tw)
-
- use m_crystal, only : crystal_t
- use m_matlu, only : print_matlu,sym_matlu
- use m_oper, only : downfold_oper
- use m_xmpi, only : xmpi_barrier,xmpi_sum
 
 !Arguments ------------------------------------
 !type
@@ -2782,8 +2771,6 @@ end subroutine fourier_green
 !! SOURCE
 
 subroutine check_fourier_green(cryst_struc,green,paw_dmft)
-
- use m_crystal, only : crystal_t
 
 !Arguments ------------------------------------
 !type
@@ -3135,10 +3122,6 @@ end subroutine int_fct
 !! SOURCE
 subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 
- use m_lib_four
- use m_paw_dmft, only : construct_nwli_dmft
- use m_splines
-
 !Arguments ------------------------------------
 !type
  logical,intent(in) :: ldiag
@@ -3274,10 +3257,6 @@ end subroutine fourier_fct
 
 subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
- use m_lib_four
- use m_paw_dmft, only : construct_nwli_dmft
- use m_splines
-
 !Arguments ------------------------------------
 !type
  integer,intent(in) :: opt_spline
@@ -3341,8 +3320,6 @@ end subroutine spline_fct
 !! SOURCE
 
 subroutine occup_green_tau(green)
-
- use m_matlu, only : copy_matlu,shift_matlu
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
@@ -3536,9 +3513,6 @@ end subroutine occup_green_tau
 
  subroutine greendftcompute_green(green,paw_dmft)
 
- use m_matlu, only : print_matlu,sym_matlu
- use m_oper, only : downfold_oper
-
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type), intent(in)  :: paw_dmft
@@ -3622,8 +3596,6 @@ end subroutine occup_green_tau
 !! SOURCE
 
 subroutine fermi_green(green,paw_dmft,self)
-
- use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
@@ -3776,7 +3748,7 @@ end subroutine fermi_green
 !! SOURCE
 
 subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
-   & f_precision,ierr_hh,opt_algo)
+                & f_precision,ierr_hh,opt_algo)
 
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
@@ -3789,7 +3761,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  real(dp), intent(inout) :: x_input,x_precision
  integer, optional, intent(in) :: opt_algo
 !Local variables-------------------------------
- integer :: dmft_test,iter,option
+ integer :: dmft_optim,iter,option
  logical :: l_minus,l_plus
  real(dp) :: Fx,Fxdouble,Fxoptimum,Fxprime,nb_elec_x,step
  real(dp) :: x_minus,x_optimum,x_plus,xold
@@ -3823,9 +3795,9 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
  Fxoptimum = one
  x_optimum = zero
 
- dmft_test = paw_dmft%dmft_test
+ dmft_optim = paw_dmft%dmft_optim
 
- if (dmft_test == 1) xold = x_input
+ if (dmft_optim == 1) xold = x_input
 
 !========================================
 ! Start iteration to find fermi level
@@ -3835,7 +3807,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !  ========================================
 !  If zero is located between two values: apply newton method or dichotomy
 !  ========================================
-   if ((l_minus .and. l_plus) .or. dmft_test == 1) then
+   if ((l_minus .and. l_plus) .or. dmft_optim == 1) then
 
 !    ==============================================
 !    Compute the function and derivatives for newton
@@ -3873,15 +3845,11 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    ==============================================
      xold = x_input
      if (option == 1) then
-       if (dmft_test == 1) then
-         if (Fxprime < 0) then
-           x_input = x_input - sign(one,Fx)*step
-         else
-           x_input = x_input - sign(one,Fx)*min(step,abs(Fx/Fxprime))
-         end if
+       if (dmft_optim == 1) then
+         x_input = x_input - sign(one,Fx)*merge(step,min(step,abs(Fx/Fxprime)),Fxprime<0)
        else
          x_input = x_input - Fx/Fxprime
-       end if ! dmft_test
+       end if ! dmft_optim
      end if ! option=1
      if (option == 2) x_input = x_input - two*Fx*Fxprime/(two*(Fxprime**2)-Fx*Fxdouble)
 
@@ -3889,7 +3857,7 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 !    If newton does not work well, use dichotomy.
 !    ==============================================
 
-     if (dmft_test == 1) then
+     if (dmft_optim == 1) then
        if (Fx < 0) then
          l_minus = .true.
          x_minus = xold
@@ -3898,17 +3866,17 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
          l_plus = .true.
          x_plus = xold
        end if
-     end if ! dmft_test
+     end if ! dmft_optim
 
      if ((x_input < x_minus .or. x_input > x_plus) .and. (l_minus .and. l_plus)) then
 
-       if (dmft_test == 0) then
+       if (dmft_optim == 0) then
          call compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,xold)
        end if
 
        write(message,'(a,3f12.6)') " ---",x_input,Fx+paw_dmft%nelectval,Fx
        call wrtout(std_out,message,'COLL')
-       if (dmft_test == 0) then
+       if (dmft_optim == 0) then
          if (Fx > 0) then
            x_plus = xold
          else if (Fx < 0) then
@@ -3946,11 +3914,9 @@ subroutine newton(green,self,paw_dmft,x_input,x_precision,max_iter,&
 
    end if ! l_minus and l_plus
 
-   if (abs(Fx) < abs(Fxoptimum) .or. (iter == 1 .and. dmft_test == 1)) then
+   if (abs(Fx) < abs(Fxoptimum) .or. (iter == 1 .and. dmft_optim == 1)) then
      Fxoptimum = Fx
-     x_optimum = x_input
-     if (dmft_test == 1) x_optimum = xold
-
+     x_optimum = merge(xold,x_input,dmft_optim==1)
    end if ! abs(Fx)<abs(Fxoptimum)
 
 
@@ -4013,14 +3979,14 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
  real(dp), intent(in) :: f_precision,x_input,x_precision
  real(dp), intent(out) :: Fx,Fxprime,Fxdouble
 !Local variables-------------------------------
- integer :: dmft_test
+ integer :: dmft_optim
  real(dp) :: deltax,Fxminus,Fxplus,nb_elec_x,xminus,x0,xplus
  character(len=500) :: message
 ! *********************************************************************
 
-   dmft_test = paw_dmft%dmft_test
+   dmft_optim = paw_dmft%dmft_optim
 
-   if (dmft_test == 0) then
+   if (dmft_optim == 0) then
 
 !  Choose deltax: for numeric evaluation of derivative
    !if(iter==1) then
@@ -4069,7 +4035,7 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
      write(message,'(a,3f12.6)') "  - ",x_input,nb_elec_x,Fx
      call wrtout(std_out,message,'COLL')
 
-   end if ! dmft_test
+   end if ! dmft_optim
 
    if (Fxprime < zero) then
      write(message,'(a,f12.6)') "  Warning: slope of charge versus fermi level is negative !",Fxprime
@@ -4098,12 +4064,6 @@ subroutine function_and_deriv(green,self,paw_dmft,x_input,x_precision, &
 
 subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
- use m_abi_linalg, only : abi_xgemm
- use m_hide_lapack, only : xginv
- use m_matlu, only : add_matlu
- use m_oper, only : upfold_oper
- use m_xmpi, only : xmpi_sum
-
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green
  type(self_type), intent(inout) :: self
@@ -4114,7 +4074,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
  real(dp), intent(out) :: Fx,nb_elec_x
  real(dp), optional, intent(out) :: Fxprime
 !Local variables-------------------------------
- integer :: band_index,dmft_test,i,ib,ierr,ifreq,ikpt,isppol,mbandc
+ integer :: band_index,dmft_optim,i,ib,ierr,ifreq,ikpt,isppol,mbandc
  integer :: mkmem,nband_k,nkpt,nmoments,nspinor,nsppol,shift
  real(dp) :: correction,correction_prime,eig
  real(dp) :: fac,occ_prime,temp,wtk
@@ -4124,9 +4084,9 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 ! *********************************************************************
 
    ABI_NVTX_START_RANGE(NVTX_DMFT_COMPUTE_NB_ELEC)
-   dmft_test = paw_dmft%dmft_test
+   dmft_optim = paw_dmft%dmft_optim
 
-   if (dmft_test == 0) then
+   if (dmft_optim == 0) then
 
      paw_dmft%fermie = fermie
      call compute_green(green,paw_dmft,0,self,opt_self=1,opt_nonxsum=1,opt_nonxsum2=1)
@@ -4139,8 +4099,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
 
      mkmem = green%distrib%nkpt_mem(green%distrib%me_kpt+1)
      shift = green%distrib%shiftk
-     nmoments = 1
-     if (green%has_moments == 1) nmoments = green%nmoments
+     nmoments = merge(green%nmoments,1,green%has_moments==1)
 
      mbandc  = paw_dmft%mbandc
      nkpt    = paw_dmft%nkpt
@@ -4164,8 +4123,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
      do ifreq=1,green%nw
        if (green%distrib%proct(ifreq) /= green%distrib%me_freq) cycle
        omega = cmplx(zero,green%omega(ifreq),kind=dp)
-       fac = two * paw_dmft%wgt_wlo(ifreq) * temp
-       if (nsppol == 1 .and. nspinor == 1) fac = fac * two
+       fac = two * paw_dmft%wgt_wlo(ifreq) * merge(two*temp,temp,nsppol==1.and.nspinor==1)
 
        call add_matlu(self%hdc%matlu(:),self%oper(ifreq)%matlu(:),oper_tmp%matlu(:),paw_dmft%natom,-1)
        call upfold_oper(oper_tmp,paw_dmft)
@@ -4243,7 +4201,7 @@ subroutine compute_nb_elec(green,self,paw_dmft,Fx,nb_elec_x,fermie,Fxprime)
        Fxprime = Fxprime + correction_prime
      end if ! use_all_bands
 
-   end if ! dmft_test
+   end if ! dmft_optim
 
    nb_elec_x = green%charge_ks
    Fx = green%charge_ks - paw_dmft%nelectval
@@ -4485,10 +4443,6 @@ end subroutine local_ks_green
 
 subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_restart)
 
- use m_matlu, only : add_matlu
- use m_oper, only : prod_oper,trace_oper,upfold_oper
- use m_xmpi, only : xmpi_sum
-
 !Arguments ------------------------------------
 !scalars
  type(green_type), intent(inout) :: green
@@ -4500,7 +4454,7 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  integer :: optlog,optquickrestart,optself,shift
  real(dp) :: dum,mu
  complex(dpc) :: trace_tmp
- type(oper_type) :: oper_tmp,oper_tmp2
+ type(oper_type) :: oper(2)
  real(dp), allocatable :: trace_loc(:,:)
  character(len=500) :: message
 !************************************************************************
@@ -4588,43 +4542,45 @@ subroutine compute_moments_ks(green,self,paw_dmft,opt_self,opt_log,opt_quick_res
  end if ! optlog=1 and optquickrestart=1
 
  if (optself == 1) then
-   call init_oper(paw_dmft,oper_tmp,nkpt=mkmem,shiftk=shift,opt_ksloc=1)
-   call init_oper(paw_dmft,oper_tmp2,nkpt=mkmem,shiftk=shift,opt_ksloc=1)
-   call prod_oper(green%moments(2),self%moments(2),oper_tmp,1)
+   do i=1,2
+     call init_oper(paw_dmft,oper(i),nkpt=mkmem,shiftk=shift,opt_ksloc=1)
+   end do
+   call prod_oper(green%moments(2),self%moments(2),oper(1),1)
    if (optlog == 1 .and. optquickrestart == 0) then
-     call trace_oper(oper_tmp,dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+     call trace_oper(oper(1),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(3) = green%trace_moments_log_ks(3) + trace_tmp
    end if
-   call prod_oper(self%moments(2),green%moments(2),oper_tmp2,1)
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   green%moments(4)%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + green%moments(4)%ks(:,:,:,:)
-   call prod_oper(oper_tmp2,green%moments(2),oper_tmp,1)
-   call prod_oper(green%moments(3),self%moments(2),oper_tmp2,1)
+   call prod_oper(self%moments(2),green%moments(2),oper(2),1)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   green%moments(4)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + green%moments(4)%ks(:,:,:,:)
+   call prod_oper(oper(2),green%moments(2),oper(1),1)
+   call prod_oper(green%moments(3),self%moments(2),oper(2),1)
    if (optlog == 1 .and. optquickrestart == 0) then
-     call trace_oper(oper_tmp2,dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+     call trace_oper(oper(2),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(4) = green%trace_moments_log_ks(4) + trace_tmp
    end if
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   call prod_oper(green%moments(2),self%moments(3),oper_tmp,1)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   call prod_oper(green%moments(2),self%moments(3),oper(1),1)
    if (optlog == 1 .and. optquickrestart == 0) then
-     call trace_oper(oper_tmp,dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+     call trace_oper(oper(1),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(4) = green%trace_moments_log_ks(4) + trace_tmp
    end if
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   call prod_oper(self%moments(3),green%moments(2),oper_tmp,1)
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   call prod_oper(self%moments(2),self%moments(2),oper_tmp,1)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   call prod_oper(self%moments(3),green%moments(2),oper(1),1)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   call prod_oper(self%moments(2),self%moments(2),oper(1),1)
    if (optlog == 1 .and. optquickrestart == 0) then
-     call trace_oper(oper_tmp,dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
+     call trace_oper(oper(1),dum,trace_loc(:,:),1,trace_ks_cmplx=trace_tmp)
      green%trace_moments_log_ks(4) = green%trace_moments_log_ks(4) + trace_tmp*half
    end if
-   oper_tmp2%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + oper_tmp%ks(:,:,:,:)
-   green%moments(5)%ks(:,:,:,:) = oper_tmp2%ks(:,:,:,:) + green%moments(5)%ks(:,:,:,:)
+   oper(2)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + oper(1)%ks(:,:,:,:)
+   green%moments(5)%ks(:,:,:,:) = oper(2)%ks(:,:,:,:) + green%moments(5)%ks(:,:,:,:)
    do i=2,self%nmoments
      green%moments(i+1)%ks(:,:,:,:) = green%moments(i+1)%ks(:,:,:,:) + self%moments(i)%ks(:,:,:,:)
    end do ! i
-   call destroy_oper(oper_tmp)
-   call destroy_oper(oper_tmp2)
+   do i=1,2
+     call destroy_oper(oper(i))
+   end do
  end if ! optself>=1
 
  if (optlog == 1 .and. optquickrestart == 0) then
@@ -4674,10 +4630,6 @@ end subroutine compute_moments_ks
 !! SOURCE
 
 subroutine compute_trace_moments_ks(green,self,paw_dmft)
-
- use m_matlu, only : add_matlu
- use m_oper, only : prod_oper,trace_oper,trace_prod_oper,upfold_oper
- use m_xmpi, only : xmpi_sum
 
 !Arguments ------------------------------------
 !scalars
@@ -4760,8 +4712,6 @@ end subroutine compute_trace_moments_ks
 
 subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
 
- use m_matlu, only : add_matlu,destroy_matlu,init_matlu,prod_matlu,trace_matlu,trace_prod_matlu
-
 !Arguments ------------------------------------
  type(green_type), intent(inout) :: green,weiss
  type(self_type), intent(inout) :: self
@@ -4773,8 +4723,7 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  complex(dpc) :: trace
  integer, allocatable :: lpawu(:)
  complex(dpc), allocatable :: trace_loc(:)
- type(matlu_type), allocatable :: matlu(:),matlu2(:),matlu3(:)
- type(matlu_type), allocatable :: matlu4(:),matlu5(:),matlu6(:)
+ type(matlu_type), allocatable :: matlu(:,:)
 !************************************************************************
 
  optlog = 0
@@ -4787,25 +4736,17 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
  ABI_MALLOC(trace_loc,(natom))
 
  ABI_MALLOC(lpawu,(natom))
- ABI_MALLOC(matlu,(natom))
- ABI_MALLOC(matlu2,(natom))
- ABI_MALLOC(matlu3,(natom))
- ABI_MALLOC(matlu4,(natom))
- ABI_MALLOC(matlu5,(natom))
- ABI_MALLOC(matlu6,(natom))
+ ABI_MALLOC(matlu,(natom,6))
 
  lpawu(:) = energy_level%matlu(:)%lpawu ! to prevent the creation of a temporary array when calling init_matlu
 
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu2(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu3(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu4(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu5(:))
- call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu6(:))
+ do i=1,6
+   call init_matlu(natom,nspinor,nsppol,lpawu(:),matlu(:,i))
+ end do
 
  if (option == 0) then
-   call add_matlu(green%moments(2)%matlu(:),energy_level%matlu(:),matlu(:),natom,-1)
-   call add_matlu(matlu(:),self%moments(1)%matlu(:),weiss%moments(1)%matlu(:),natom,-1)
+   call add_matlu(green%moments(2)%matlu(:),energy_level%matlu(:),matlu(:,1),natom,-1)
+   call add_matlu(matlu(:,1),self%moments(1)%matlu(:),weiss%moments(1)%matlu(:),natom,-1)
  else
    call add_matlu(green%moments(2)%matlu(:),energy_level%matlu(:),self%moments(1)%matlu(:),natom,-1)
  end if ! option
@@ -4815,125 +4756,117 @@ subroutine compute_moments_loc(green,self,energy_level,weiss,option,opt_log)
    do i=2,green%nmoments-1
      call trace_matlu(weiss%moments(i)%matlu(:),natom,itau=0,trace=weiss%trace_moments_log_loc(i))
    end do ! i
-   call prod_matlu(energy_level%matlu(:),energy_level%matlu(:),matlu(:),natom)
-   call trace_matlu(matlu(:),natom,itau=0,trace=trace)
+   call prod_matlu(energy_level%matlu(:),energy_level%matlu(:),matlu(:,1),natom)
+   call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    weiss%trace_moments_log_loc(2) = weiss%trace_moments_log_loc(2) + trace*half
    call trace_prod_matlu(energy_level%matlu(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(3) = weiss%trace_moments_log_loc(3) + trace
-   call trace_prod_matlu(energy_level%matlu(:),matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(energy_level%matlu(:),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(3) = weiss%trace_moments_log_loc(3) + trace*third
    call trace_prod_matlu(energy_level%matlu(:),weiss%moments(3)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace
    call trace_prod_matlu(weiss%moments(2)%matlu(:),weiss%moments(2)%matlu(:),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace*half
-   call trace_prod_matlu(weiss%moments(2)%matlu(:),matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(weiss%moments(2)%matlu(:),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace
-   call trace_prod_matlu(matlu(:),matlu(:),natom,trace_loc(:),trace_tot=trace)
+   call trace_prod_matlu(matlu(:,1),matlu(:,1),natom,trace_loc(:),trace_tot=trace)
    weiss%trace_moments_log_loc(4) = weiss%trace_moments_log_loc(4) + trace*quarter
 
    call trace_matlu(green%moments(2)%matlu(:),natom,itau=0,trace=green%trace_moments_log_loc(1))
  end if ! optlog=1
 
- call prod_matlu(green%moments(2)%matlu(:),green%moments(2)%matlu(:),matlu(:),natom) ! matlu=m0m0
+ call prod_matlu(green%moments(2)%matlu(:),green%moments(2)%matlu(:),matlu(:,1),natom) ! matlu=m0m0
 
- call add_matlu(green%moments(3)%matlu(:),matlu(:),matlu2(:),natom,-1) ! matlu2=m1
+ call add_matlu(green%moments(3)%matlu(:),matlu(:,1),matlu(:,2),natom,-1) ! matlu2=m1
 
  if (optlog == 1) then
-   call trace_matlu(matlu2(:),natom,itau=0,trace=green%trace_moments_log_loc(2))
-   call trace_matlu(matlu(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,2),natom,itau=0,trace=green%trace_moments_log_loc(2))
+   call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(2) = green%trace_moments_log_loc(2) + half*trace
  end if ! optlog
 
  if (option == 0) then
-   call add_matlu(matlu2(:),self%moments(2)%matlu(:),weiss%moments(2)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,2),self%moments(2)%matlu(:),weiss%moments(2)%matlu(:),natom,-1)
  else if (option == 1) then
-   call add_matlu(matlu2(:),weiss%moments(2)%matlu(:),self%moments(2)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,2),weiss%moments(2)%matlu(:),self%moments(2)%matlu(:),natom,-1)
  end if ! option
 
- call prod_matlu(green%moments(2)%matlu(:),matlu(:),matlu3(:),natom) ! matlu3=m0m0m0
- call add_matlu(green%moments(4)%matlu(:),matlu3(:),matlu(:),natom,-1) ! matlu=green%moments(4)-m0m0m0
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,1),matlu(:,3),natom) ! matlu3=m0m0m0
+ call add_matlu(green%moments(4)%matlu(:),matlu(:,3),matlu(:,1),natom,-1) ! matlu=green%moments(4)-m0m0m0
 
  if (optlog == 1) then
-   call trace_matlu(matlu3(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,3),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace * third
  end if ! optlog
 
- call prod_matlu(green%moments(2)%matlu(:),matlu2(:),matlu4(:),natom) ! matlu4=m0m1
- call prod_matlu(matlu2(:),green%moments(2)%matlu(:),matlu5(:),natom) ! matlu5=m1m0
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,2),matlu(:,4),natom) ! matlu4=m0m1
+ call prod_matlu(matlu(:,2),green%moments(2)%matlu(:),matlu(:,5),natom) ! matlu5=m1m0
 
- call add_matlu(matlu4(:),matlu5(:),matlu6(:),natom,1) ! matlu6=m0m1+m1m0
+ call add_matlu(matlu(:,4),matlu(:,5),matlu(:,6),natom,1) ! matlu6=m0m1+m1m0
 
  if (optlog == 1) then
-   call trace_matlu(matlu4(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,4),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace + green%trace_moments_log_loc(3)
  end if ! optlog
 
- call add_matlu(matlu(:),matlu6(:),matlu5(:),natom,-1) ! matlu5=m2
+ call add_matlu(matlu(:,1),matlu(:,6),matlu(:,5),natom,-1) ! matlu5=m2
 
  if (optlog == 1) then
-   call trace_matlu(matlu5(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,5),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(3) = trace + green%trace_moments_log_loc(3)
  end if ! optlog
 
  if (option == 0) then
-   call add_matlu(matlu5(:),self%moments(3)%matlu(:),weiss%moments(3)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,5),self%moments(3)%matlu(:),weiss%moments(3)%matlu(:),natom,-1)
  else if (option == 1) then
-   call add_matlu(matlu5(:),weiss%moments(3)%matlu(:),self%moments(3)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,5),weiss%moments(3)%matlu(:),self%moments(3)%matlu(:),natom,-1)
  end if ! option
 
- call prod_matlu(green%moments(2)%matlu(:),matlu3(:),matlu(:),natom) ! matlu=m0m0m0m0
- call prod_matlu(matlu6(:),green%moments(2)%matlu(:),matlu3(:),natom) ! matlu3 = m0m1m0+m1m0m0
- call prod_matlu(green%moments(2)%matlu(:),matlu4(:),matlu6(:),natom) ! matlu6 = m0m0m1
- call add_matlu(matlu3(:),matlu6(:),matlu4(:),natom,1) ! matlu4 = m0m1m0+m1m0m0+m0m0m1
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,3),matlu(:,1),natom) ! matlu=m0m0m0m0
+ call prod_matlu(matlu(:,6),green%moments(2)%matlu(:),matlu(:,3),natom) ! matlu3 = m0m1m0+m1m0m0
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,4),matlu(:,6),natom) ! matlu6 = m0m0m1
+ call add_matlu(matlu(:,3),matlu(:,6),matlu(:,4),natom,1) ! matlu4 = m0m1m0+m1m0m0+m0m0m1
 
  if (optlog == 1) then
-   call trace_matlu(matlu4(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,4),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = trace * third
-   call trace_matlu(matlu(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,1),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = green%trace_moments_log_loc(4) + trace*quarter
  end if ! optlog
 
- call add_matlu(matlu(:),matlu4(:),matlu3(:),natom,1) ! matlu3 = m0m1m0+m1m0m0+m0m0m1+m0m0m0m0
+ call add_matlu(matlu(:,1),matlu(:,4),matlu(:,3),natom,1) ! matlu3 = m0m1m0+m1m0m0+m0m0m1+m0m0m0m0
 
- call prod_matlu(green%moments(2)%matlu(:),matlu5(:),matlu(:),natom) ! matlu=m0m2
- call prod_matlu(matlu5(:),green%moments(2)%matlu(:),matlu4(:),natom) ! matlu4=m2m0
- call add_matlu(matlu(:),matlu4(:),matlu5(:),natom,1) ! matlu5=m0m2+m2m0
- call prod_matlu(matlu2(:),matlu2(:),matlu(:),natom) ! matlu=m1m1
- call add_matlu(matlu(:),matlu5(:),matlu2(:),natom,1) ! matlu2=m1m1+m0m2+m2m0
+ call prod_matlu(green%moments(2)%matlu(:),matlu(:,5),matlu(:,1),natom) ! matlu=m0m2
+ call prod_matlu(matlu(:,5),green%moments(2)%matlu(:),matlu(:,4),natom) ! matlu4=m2m0
+ call add_matlu(matlu(:,1),matlu(:,4),matlu(:,5),natom,1) ! matlu5=m0m2+m2m0
+ call prod_matlu(matlu(:,2),matlu(:,2),matlu(:,1),natom) ! matlu=m1m1
+ call add_matlu(matlu(:,1),matlu(:,5),matlu(:,2),natom,1) ! matlu2=m1m1+m0m2+m2m0
 
  if (optlog == 1) then
-   call trace_matlu(matlu2(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,2),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = green%trace_moments_log_loc(4) + trace*half
  end if ! optlog
 
- call add_matlu(green%moments(5)%matlu(:),matlu2(:),matlu(:),natom,-1)
- call add_matlu(matlu(:),matlu3(:),matlu2(:),natom,-1) ! matlu2=m3
+ call add_matlu(green%moments(5)%matlu(:),matlu(:,2),matlu(:,1),natom,-1)
+ call add_matlu(matlu(:,1),matlu(:,3),matlu(:,2),natom,-1) ! matlu2=m3
 
  if (optlog == 1) then
-   call trace_matlu(matlu2(:),natom,itau=0,trace=trace)
+   call trace_matlu(matlu(:,2),natom,itau=0,trace=trace)
    green%trace_moments_log_loc(4) = green%trace_moments_log_loc(4) + trace
  end if ! optlog
 
  if (option == 0) then
-   call add_matlu(matlu2(:),self%moments(4)%matlu(:),weiss%moments(4)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,2),self%moments(4)%matlu(:),weiss%moments(4)%matlu(:),natom,-1)
  else if (option == 1) then
-   call add_matlu(matlu2(:),weiss%moments(4)%matlu(:),self%moments(4)%matlu(:),natom,-1)
+   call add_matlu(matlu(:,2),weiss%moments(4)%matlu(:),self%moments(4)%matlu(:),natom,-1)
  end if ! option
 
- call destroy_matlu(matlu(:),natom)
- call destroy_matlu(matlu2(:),natom)
- call destroy_matlu(matlu3(:),natom)
- call destroy_matlu(matlu4(:),natom)
- call destroy_matlu(matlu5(:),natom)
- call destroy_matlu(matlu6(:),natom)
+ do i=1,6
+   call destroy_matlu(matlu(:,i),natom)
+ end do
 
  ABI_FREE(lpawu)
  ABI_FREE(matlu)
- ABI_FREE(matlu2)
- ABI_FREE(matlu3)
- ABI_FREE(matlu4)
- ABI_FREE(matlu5)
- ABI_FREE(matlu6)
  ABI_FREE(trace_loc)
 
 end subroutine compute_moments_loc

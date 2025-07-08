@@ -31,7 +31,7 @@
  ntypat 1 typat 1 1  natom 2
 
  paral_kgb 1
- iomode 0    # Only for testing purposes 
+ iomode 0    # Only for testing purposes
  use_gemm_nonlop 1 # test nonlop with BLAS
  fftalg 402
 
@@ -50,7 +50,7 @@
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = A. Levitt
-#%% description = 
+#%% description =
 #%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%    Also test gemm_nonlop
 #%% topics = parallelism

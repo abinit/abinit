@@ -2,7 +2,7 @@
 # 56_mixing
 #
 add_library(56_mixing STATIC
-  m_ab7_mixing.F90
+  m_abi_mixing.F90
   )
 
 set_target_properties(56_mixing

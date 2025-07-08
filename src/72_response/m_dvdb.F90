@@ -295,6 +295,8 @@ module m_dvdb
   ! DFPT potential in the real space supercell representation.
   ! wsr(1, my_nrpt, nfft, nspden, my_npert)
   ! NOTE kind=sp to save memory as much as possible.
+  !
+  ! TODO: Use MPI shared window
 
   real(dp),allocatable :: my_wratm(:,:)
   ! my_wratm(my_nrpt, minatom:maxatom)

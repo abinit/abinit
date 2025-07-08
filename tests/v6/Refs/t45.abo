@@ -191,11 +191,6 @@ _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
         dmftcheck3          1
         dmftcheck4          0
         dmftcheck5          0
-          dmft_dc1          0
-          dmft_dc2          0
-          dmft_dc3          1
-          dmft_dc4          0
-          dmft_dc5          0
         dmft_iter1         10
         dmft_iter2          1
         dmft_iter3          1
@@ -2737,11 +2732,6 @@ total_energy_dc_eV  : -5.04346778900796E+03
         dmftcheck3          1
         dmftcheck4          0
         dmftcheck5          0
-          dmft_dc1          0
-          dmft_dc2          0
-          dmft_dc3          1
-          dmft_dc4          0
-          dmft_dc5          0
         dmft_iter1         10
         dmft_iter2          1
         dmft_iter3          1

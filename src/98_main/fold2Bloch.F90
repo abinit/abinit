@@ -115,7 +115,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 
  ebands = wfk_read_ebands(fname, xmpi_comm_self)
  iomode = iomode_from_fname(fname)
- call wfk_open_read(wfk,fname,0,iomode,get_unit(),comm)
+ call wfk%open_read(fname, 0, iomode, get_unit(), comm)
 
  nkpt=wfk%hdr%nkpt
  ABI_MALLOC(npwarr,(nkpt))

@@ -195,6 +195,7 @@ subroutine psps_init_global(psps, mtypalch, npsp, pspheads)
  ABI_MALLOC(psps%title,(npsp))
  ABI_MALLOC(psps%zionpsp,(npsp))
  ABI_MALLOC(psps%znuclpsp,(npsp))
+ ABI_MALLOC(psps%epsatm,(npsp))
  call psp2params_init(psps%gth_params, npsp)
 
  psps%filpsp(1:npsp)=pspheads(1:npsp)%filpsp
@@ -523,6 +524,7 @@ subroutine psps_free(psps)
  ABI_SFREE(psps%znucltypat)
  ABI_SFREE(psps%znuclpsp)
  ABI_SFREE(psps%md5_pseudos)
+ ABI_SFREE(psps%epsatm)
 
  ! Free types.
  call psp2params_free(psps%gth_params)
@@ -612,6 +614,7 @@ subroutine psps_copy(pspsin, pspsout)
 
  if (allocated(pspsin%ziontypat)) call alloc_copy(pspsin%ziontypat, pspsout%ziontypat)
  if (allocated(pspsin%znucltypat)) call alloc_copy(pspsin%znucltypat, pspsout%znucltypat)
+ if (allocated(pspsin%epsatm)) call alloc_copy(pspsin%epsatm,pspsout%epsatm)
 
  ! GA: Could make a check on mtypalch here
  if (allocated(pspsin%znuclpsp)) call alloc_copy(pspsin%znuclpsp, pspsout%znuclpsp)

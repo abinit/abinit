@@ -30,7 +30,7 @@ module m_pawxmlps
  use fox_sax
 #endif
 
- use m_pawrad     , only : pawrad_type, pawrad_init, pawrad_free, pawrad_ifromr, bound_deriv
+ use m_pawrad     , only : pawrad_type, pawrad_init, pawrad_free, pawrad_ifromr, bound_deriv,pawrad_copy
  use m_paw_numeric, only : paw_spline, paw_splint
  use m_paw_atomorb, only : atomorb_type, ORB_FROZEN
  use m_paw_lmn
@@ -2968,6 +2968,7 @@ end subroutine paw_setup_copy
  Atm%mult=1
  Atm%lmn2_size = 0
  Atm%zion=Atm%znucl-Atm%zcore
+ Atm%zcore_orig=Atm%zcore
  if(Atm%dirac) Atm%nspinor=2
  nmesh=igrid
  if(nmesh>0)then
@@ -3061,6 +3062,8 @@ end subroutine paw_setup_copy
  if(Atm%ln_size>0)then
    LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
    LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
+   LIBPAW_ALLOCATE(Atm%occ_res,(Atm%ln_size,Atm%nsppol))
+   LIBPAW_ALLOCATE(Atm%occ_respc,(Atm%ln_size,Atm%nsppol))
    LIBPAW_ALLOCATE(Atm%indln,(2,Atm%ln_size))
    if (Atm%dirac) then
      LIBPAW_ALLOCATE(Atm%kappa,(Atm%ln_size))
@@ -3075,7 +3078,7 @@ end subroutine paw_setup_copy
          if(present(pawrad)) then
            Atm%mesh_size = pawrad%mesh_size
            Atm%rcore=pawrad%rad(pawrad%mesh_size)
-           Atm%radmesh=pawrad
+           call pawrad_copy(pawrad,atm%radmesh)
          elseif(rcut>tol16) then
            msz_cut =min(pawrad_ifromr(radmesh(imeshae),rcut)+6,radmesh(imeshae)%mesh_size) ! add six more points six more points
            Atm%mesh_size = msz_cut
@@ -3168,6 +3171,11 @@ end subroutine paw_setup_copy
    Atm%l_size =2*Atm%l_max-1
    LIBPAW_ALLOCATE(Atm%mode,(Atm%ln_size,Atm%nsppol))
    Atm%mode = ORB_FROZEN
+   LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
+   Atm%max_occ=Atm%occ
+   atm%zcore_conv=.false.
+   atm%nc_conv=.false.
+   atm%nresid_c=one
 
 !   ! * Setup of kln2ln.
 !   !TODO this has to be tested
