@@ -204,8 +204,8 @@ module m_energies
   real(dp) :: h0=zero
    ! h0=e_kinetic+e_localpsp+e_nlpsp_vfock
 
-  real(dp) :: e_zeeman=zero
-   ! Zeeman spin times magnetic field contribution to the XC energy
+  real(dp) :: e_hspinfield=zero
+   ! Spin  magnetic field contribution to the XC energy
 
   real(dp) :: e_cpaw=zero
    ! PAW core energy
@@ -297,7 +297,7 @@ subroutine energies_init(energies)
  energies%e_xcdc        = zero
  energies%e_xc_vdw      = zero
  energies%h0            = zero
- energies%e_zeeman      = zero
+ energies%e_hspinfield  = zero
  energies%e_cpaw        = zero
  energies%e_cpawdc      = zero
 
@@ -378,7 +378,7 @@ end subroutine energies_init
  energies_out%e_xcdc               = energies_in%e_xcdc
  energies_out%e_xc_vdw             = energies_in%e_xc_vdw
  energies_out%h0                   = energies_in%h0
- energies_out%e_zeeman             = energies_in%e_zeeman
+ energies_out%e_hspinfield         = energies_in%e_hspinfield
  energies_out%e_cpaw               = energies_in%e_cpaw
  energies_out%e_cpawdc             = energies_in%e_cpawdc
 
@@ -465,7 +465,7 @@ end subroutine energies_copy
    energies_array(42)=energies%e_xcdc
    energies_array(43)=energies%e_xc_vdw
    energies_array(44)=energies%h0
-   energies_array(45)=energies%e_zeeman
+   energies_array(45)=energies%e_hspinfield
    energies_array(46)=energies%e_nucdip
    energies_array(47)=energies%e_cpaw
    energies_array(48)=energies%e_cpawdc
@@ -516,7 +516,7 @@ end subroutine energies_copy
    energies%e_xcdc               = energies_array(42)
    energies%e_xc_vdw             = energies_array(43)
    energies%h0                   = energies_array(44)
-   energies%e_zeeman             = energies_array(45)
+   energies%e_hspinfield         = energies_array(45)
    energies%e_nucdip             = energies_array(46)
    energies%e_cpaw               = energies_array(47)
    energies%e_cpawdc             = energies_array(48)
@@ -671,7 +671,7 @@ subroutine energies_ncwrite(enes, ncid)
   "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
   "e_paw", "e_pawdc", "e_pawxc", "e_sicdc", "e_vdw_dftd", &
   "e_xc", "e_xcdc", "e_xc_vdw", &
-  "h0", "e_zeeman", "e_fermih", "e_cpaw", "e_cpawdc"], &
+  "h0", "e_hspinfield", "e_fermih", "e_cpaw", "e_cpawdc"], &
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_dc, enes%e_eigenvalues, enes%e_elecfield, &
    enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
    enes%e_entropy, enes%entropy, enes%entropy_imp, enes%entropy_ks, enes%entropy_paw, enes%entropy_xc, enes%entropy_extfpmd, &
@@ -681,7 +681,7 @@ subroutine energies_ncwrite(enes, ncid)
    enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
    enes%e_paw, enes%e_pawdc, enes%e_pawxc, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
-   enes%h0,enes%e_zeeman,enes%e_fermih,enes%e_cpaw,enes%e_cpawdc])
+   enes%h0,enes%e_hspinfield,enes%e_fermih,enes%e_cpaw,enes%e_cpawdc])
 
  NCF_CHECK(ncerr)
 

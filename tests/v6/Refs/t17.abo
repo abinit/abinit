@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.3.4.2 of ABINIT, released May 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,42 +14,42 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v6_t17/t17.abi
+.Starting date : Sun  8 Jun 2025.
+- ( at 17h12 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/TestBot_MPI1/v6_t17/t17.abi
 - output file    -> t17.abo
 - root for input  files -> t17i
 - root for output files -> t17o
 
- DATASET   11 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
+ DATASET   11 : space group P4/m (# 83); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 11.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
      lnmax =       6     mgfft =      27  mpssoang =       3    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       2   nspinor =       1
-    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
     occopt =       2   xclevel =       1
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         523          nfft =       19683          nkpt =           1
 ================================================================================
-P This job should need less than                       9.631 Mbytes of memory.
+P This job should need less than                       9.630 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.302 Mbytes.
 ================================================================================
 
- DATASET   12 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
+ DATASET   12 : space group P4/m (# 83); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
      lnmax =       6     mgfft =      27  mpssoang =       3    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       2   nspinor =       1
-    nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
+    nsppol =       2      nsym =       8    n1xccc =       0    ntypat =       1
     occopt =       7   xclevel =       1
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         523          nfft =       19683          nkpt =           1
 ================================================================================
-P This job should need less than                      10.368 Mbytes of memory.
+P This job should need less than                      10.367 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.302 Mbytes.
 ================================================================================
@@ -145,6 +145,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
+         hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk11      2
            istwfk12      2
            istwfk21      1
@@ -183,8 +184,8 @@ P           mkmem           1
            nsppol31         1
            nsppol32         1
             nstep          20
-             nsym11        48
-             nsym12        48
+             nsym11         8
+             nsym12         8
              nsym21         1
              nsym22         1
              nsym31         1
@@ -210,75 +211,27 @@ P           mkmem           1
            occopt32         7
           prtkden           1
            so_psp           0
-          spgroup11       221
-          spgroup12       221
+          spgroup11        83
+          spgroup12        83
           spgroup21         1
           spgroup22         1
           spgroup31         1
           spgroup32         1
            spinat      0.0000000000E+00  0.0000000000E+00  3.0000000000E+00
-           symafm11      1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1
-           symafm12      1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1
+           symafm11      1    1    1    1    1    1    1    1
+           symafm12      1    1    1    1    1    1    1    1
            symafm21      1
            symafm22      1
            symafm31      1
            symafm32      1
            symrel11    1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
-                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
                       -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
-                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
-                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
                        0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
-                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
                        0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
-                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
-                       0  0 -1   1  0  0   0 -1  0       0  0  1  -1  0  0   0  1  0
-                       0  0 -1  -1  0  0   0  1  0       0  0  1   1  0  0   0 -1  0
-                       0  0  1  -1  0  0   0 -1  0       0  0 -1   1  0  0   0  1  0
-                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
-                      -1  0  0   0  0  1   0 -1  0       1  0  0   0  0 -1   0  1  0
-                      -1  0  0   0  0 -1   0  1  0       1  0  0   0  0  1   0 -1  0
-                       1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0  1   0  1  0
-                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
-                       0 -1  0   0  0  1  -1  0  0       0  1  0   0  0 -1   1  0  0
-                       0 -1  0   0  0 -1   1  0  0       0  1  0   0  0  1  -1  0  0
-                       0  1  0   0  0 -1  -1  0  0       0 -1  0   0  0  1   1  0  0
-                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
-                       0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
-                       0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
-                       0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
            symrel12    1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
-                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
                       -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
-                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
-                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
                        0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
-                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
                        0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
-                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
-                       0  0 -1   1  0  0   0 -1  0       0  0  1  -1  0  0   0  1  0
-                       0  0 -1  -1  0  0   0  1  0       0  0  1   1  0  0   0 -1  0
-                       0  0  1  -1  0  0   0 -1  0       0  0 -1   1  0  0   0  1  0
-                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
-                      -1  0  0   0  0  1   0 -1  0       1  0  0   0  0 -1   0  1  0
-                      -1  0  0   0  0 -1   0  1  0       1  0  0   0  0  1   0 -1  0
-                       1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0  1   0  1  0
-                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
-                       0 -1  0   0  0  1  -1  0  0       0  1  0   0  0 -1   1  0  0
-                       0 -1  0   0  0 -1   1  0  0       0  1  0   0  0  1  -1  0  0
-                       0  1  0   0  0 -1  -1  0  0       0 -1  0   0  0  1   1  0  0
-                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
-                       0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
-                       0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
-                       0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
            symrel21    1  0  0   0  1  0   0  0  1
            symrel22    1  0  0   0  1  0   0  0  1
            symrel31    1  0  0   0  1  0   0  0  1
@@ -287,47 +240,7 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons12    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
@@ -344,7 +257,6 @@ P           mkmem           1
            tsmear32    2.00000000E-02 Hartree
             typat      1
           usekden           1
-      zeemanfield      0.00000000E+00  0.00000000E+00  1.00000000E+00
             znucl       83.00000
 
 ================================================================================
@@ -390,8 +302,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -406,8 +318,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -430,29 +342,29 @@ tolerances: {toldfe: 1.00E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.3467030993134    -5.347E+00 1.080E-03 4.114E+01
- ETOT  2  -5.4641040820062    -1.174E-01 1.048E-04 1.215E+01
- ETOT  3  -5.4660705134398    -1.966E-03 1.846E-06 4.472E+00
- ETOT  4  -5.4668801093025    -8.096E-04 4.801E-07 4.015E-01
- ETOT  5  -5.4668954563596    -1.535E-05 3.888E-08 3.115E-02
- ETOT  6  -5.4668959236760    -4.673E-07 3.181E-09 2.316E-03
- ETOT  7  -5.4668961554604    -2.318E-07 3.563E-10 4.952E-05
- ETOT  8  -5.4668961646171    -9.157E-09 2.814E-11 9.541E-07
- ETOT  9  -5.4668961646368    -1.977E-11 1.539E-13 2.140E-07
+ ETOT  1  -5.3459673781096    -5.346E+00 1.080E-03 4.255E+01
+ ETOT  2  -5.4640309758069    -1.181E-01 1.183E-04 1.244E+01
+ ETOT  3  -5.4660508978595    -2.020E-03 2.183E-06 4.590E+00
+ ETOT  4  -5.4668775566658    -8.267E-04 5.066E-07 4.314E-01
+ ETOT  5  -5.4668954337670    -1.788E-05 4.388E-08 3.294E-02
+ ETOT  6  -5.4668959240963    -4.903E-07 3.048E-09 2.513E-03
+ ETOT  7  -5.4668961549006    -2.308E-07 4.661E-10 5.946E-05
+ ETOT  8  -5.4668961645919    -9.691E-09 3.563E-11 1.831E-06
+ ETOT  9  -5.4668961646375    -4.560E-11 1.567E-13 2.934E-07
 
- At SCF step    9, etot is converged :
-  for the second time, diff in etot=  1.977E-11 < toldfe=  1.000E-07
+ At SCF step    9, etot is converged : 
+  for the second time, diff in etot=  4.560E-11 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-)     Maximum=    3.0097E-02  at reduced coord.    0.0000    0.9259    0.9630
-)     Minimum=    8.4887E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Maximum=    3.0097E-02  at reduced coord.    0.9259    0.9630    0.0000
+)     Minimum=    8.4888E-06  at reduced coord.    0.4444    0.4074    0.4444
    Integrated=    1.7406E+00
  Spin up density      [Ha/Bohr^3]
-)     Maximum=    2.1322E-02  at reduced coord.    0.9259    0.9630    0.9630
-)     Minimum=    8.4487E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Maximum=    2.1321E-02  at reduced coord.    0.9259    0.9630    0.9630
+)     Minimum=    8.4489E-06  at reduced coord.    0.4444    0.4074    0.4444
    Integrated=    1.4362E+00
  Spin down density    [Ha/Bohr^3]
 )     Maximum=    9.8647E-03  at reduced coord.    0.0000    0.0000    0.9259
@@ -460,17 +372,17 @@ Result for kinetic energy density :
    Integrated=    3.0441E-01
  Magnetization (spin up - spin down) [Ha/Bohr^3]
 )     Maximum=    1.5311E-02  at reduced coord.    0.9259    0.9259    0.9630
-)     Minimum=    8.4087E-06  at reduced coord.    0.4444    0.4444    0.4074
+)     Minimum=    8.4089E-06  at reduced coord.    0.4444    0.4074    0.4444
    Integrated=    1.1318E+00
  Relative magnetization (=zeta, between -1 and 1)
 )     Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
-)     Minimum=    2.1398E-01  at reduced coord.    0.0370    0.0000    0.0000
+)     Minimum=    2.1398E-01  at reduced coord.    0.0000    0.0000    0.0370
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.69053232E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.69053232E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.69053232E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.69011639E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.69011639E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.69058729E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -483,15 +395,15 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -1.977E-11, res2:  2.140E-07, residm:  1.539E-13, diffor: null, }
+convergence: {deltae: -4.560E-11, res2:  2.934E-07, residm:  1.567E-13, diffor: null, }
 etotal    :  -5.46689616E+00
 entropy   :   0.00000000E+00
-fermie    :   7.51617373E-02
+fermie    :   7.51630030E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -4.69053232E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -4.69053232E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -4.69053232E-05, ]
-pressure_GPa:   1.3800E+00
+- [ -4.69011639E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -4.69011639E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -4.69058729E-05, ]
+pressure_GPa:   1.3799E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
 cartesian_forces: # hartree/bohr
@@ -503,18 +415,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.060851     0.457904      1.518755     0.602947
+    1   2.00000     1.060850     0.457903      1.518753     0.602946
  ---------------------------------------------------------------------
-  Sum:              1.060851     0.457904      1.518755     0.602947
- Total magnetization (from the atomic spheres):             0.602947
+  Sum:              1.060850     0.457903      1.518753     0.602946
+ Total magnetization (from the atomic spheres):             0.602946
  Total magnetization (exact up - dn):                       3.000000
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.1500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.1500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.534E-15; max=  15.394E-14
+ Mean square residual over all n,k,spin=   66.729E-15; max=  15.673E-14
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -536,7 +448,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Fermi (or HOMO) energy (hartree) =   0.07516   Average Vxc (hartree)=  -0.14144
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.99968   -0.62328   -0.62328   -0.62328
+  -0.99967   -0.62328   -0.62328   -0.62327
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.07516    0.44729    0.44729    0.44729
@@ -544,28 +456,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.74058788871820E+00
-hartree             :  1.20065641097090E+00
-xc                  : -1.30059850363075E+00
+kinetic             :  1.74058587454842E+00
+hartree             :  1.20065439084567E+00
+xc                  : -1.30059776756370E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -3.78594644087041E+00
-non_local_psp       :  5.10527517172836E-02
-total_energy        : -5.46689616463683E+00
-total_energy_eV     : -1.48761810058695E+02
-band_energy         : -2.79434068258712E+00
+local_psp           : -3.78594281181147E+00
+non_local_psp       :  5.10524208856019E-02
+total_energy        : -5.46689616463753E+00
+total_energy_eV     : -1.48761810058714E+02
+band_energy         : -2.79433690770726E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.69053232E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.69053232E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.69053232E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.69011639E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.69011639E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.69058729E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure=  1.3800E+00 GPa]
-- sigma(1 1)= -1.38000202E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.38000202E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.38000202E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure=  1.3799E+00 GPa]
+- sigma(1 1)= -1.37987965E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.37987965E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.38001819E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -610,18 +522,18 @@ tolerances: {toldfe: 1.00E-07, }
 ...
 
      iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -5.4668961646486    -5.47E+00 3.39E-17 3.48E-09 3.000
- ETOT  2  -5.4668961646492    -5.96E-13 8.74E-20 4.71E-10 3.000
- ETOT  3  -5.4668961646494    -1.83E-13 6.09E-17 5.55E-11 3.000
+ ETOT  1  -5.4668961646491    -5.47E+00 1.93E-16 1.53E-09 3.000
+ ETOT  2  -5.4668961646493    -1.62E-13 2.35E-20 2.96E-10 3.000
+ ETOT  3  -5.4668961646494    -1.04E-13 3.98E-17 6.97E-11 3.000
 
- At SCF step    3, etot is converged :
-  for the second time, diff in etot=  1.830E-13 < toldfe=  1.000E-07
+ At SCF step    3, etot is converged : 
+  for the second time, diff in etot=  1.039E-13 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-)     Maximum=    3.0097E-02  at reduced coord.    0.0000    0.9259    0.9630
+)     Maximum=    3.0097E-02  at reduced coord.    0.0000    0.9630    0.9259
 )     Minimum=    8.4893E-06  at reduced coord.    0.4444    0.4444    0.4074
    Integrated=    1.7406E+00
  Spin up density      [Ha/Bohr^3]
@@ -638,13 +550,13 @@ Result for kinetic energy density :
    Integrated=    1.1318E+00
  Relative magnetization (=zeta, between -1 and 1)
 )     Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
-)     Minimum=    2.1398E-01  at reduced coord.    0.0370    0.0000    0.0000
+)     Minimum=    2.1398E-01  at reduced coord.    0.0000    0.0000    0.0370
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.69020017E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.69020017E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.69020017E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.69020603E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.69020603E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.69021035E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -657,14 +569,14 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -1.830E-13, res2:  5.553E-11, residm:  6.092E-17, diffor: null, }
+convergence: {deltae: -1.039E-13, res2:  6.974E-11, residm:  3.983E-17, diffor: null, }
 etotal    :  -5.46689616E+00
 entropy   :   0.00000000E+00
-fermie    :   2.50998007E-01
+fermie    :   2.50997991E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -4.69020017E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -4.69020017E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -4.69020017E-05, ]
+- [ -4.69020603E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -4.69020603E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -4.69021035E-05, ]
 pressure_GPa:   1.3799E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
@@ -677,18 +589,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.060848     0.457904      1.518753     0.602944
+    1   2.00000     1.060849     0.457904      1.518753     0.602944
  ---------------------------------------------------------------------
-  Sum:              1.060848     0.457904      1.518753     0.602944
+  Sum:              1.060849     0.457904      1.518753     0.602944
  Total magnetization (from the atomic spheres):             0.602944
  Total magnetization (exact up - dn):                       3.000000
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.1500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.1500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   44.161E-18; max=  60.922E-18
+ Mean square residual over all n,k,spin=   14.673E-18; max=  39.827E-18
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -724,30 +636,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.74058438926264E+00
-hartree             :  1.20065251746611E+00
-xc                  : -1.30059695569034E+00
+kinetic             :  1.74058445550696E+00
+hartree             :  1.20065258592136E+00
+xc                  : -1.30059698171723E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -3.78594009509927E+00
-non_local_psp       :  5.10522509535481E-02
-internal            : -5.46689616464937E+00
+local_psp           : -3.78594021280196E+00
+non_local_psp       :  5.10522599835255E-02
+internal            : -5.46689616464940E+00
 '-kT*entropy'       : -9.44077350995180E-18
-total_energy        : -5.46689616464937E+00
-total_energy_eV     : -1.48761810059036E+02
-band_energy         : -2.79433314253940E+00
+total_energy        : -5.46689616464940E+00
+total_energy_eV     : -1.48761810059037E+02
+band_energy         : -2.79433324465424E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.69020017E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.69020017E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.69020017E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.69020603E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.69020603E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.69021035E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3799E+00 GPa]
-- sigma(1 1)= -1.37990430E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.37990430E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.37990430E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.37990602E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.37990602E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.37990729E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -798,7 +710,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05
  ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.378E-10 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -870,7 +782,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000005   -0.000001    1.275229
  Total magnetization (exact)        -0.000011   -0.000003    5.000000
  Magnetization vector    -0.1118867224E-04   -0.3315378334E-05    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.2500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -972,7 +884,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09
  ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10
 
- At SCF step    3, etot is converged :
+ At SCF step    3, etot is converged : 
   for the second time, diff in etot=  3.118E-13 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -1044,7 +956,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000000   -0.000000    1.275219
  Total magnetization (exact)        -0.000001   -0.000000    5.000000
  Magnetization vector    -0.5502842367E-06   -0.1608271688E-06    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.2500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1152,7 +1064,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05
  ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.378E-10 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -1224,7 +1136,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000005   -0.000001    1.275229
  Total magnetization (exact)        -0.000011   -0.000003    5.000000
  Magnetization vector    -0.1118867224E-04   -0.3315378334E-05    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.2500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1326,7 +1238,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09
  ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10
 
- At SCF step    3, etot is converged :
+ At SCF step    3, etot is converged : 
   for the second time, diff in etot=  3.118E-13 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
@@ -1398,7 +1310,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000000   -0.000000    1.275219
  Total magnetization (exact)        -0.000001   -0.000000    5.000000
  Magnetization vector    -0.5502842367E-06   -0.1608271688E-06    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.2500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1459,7 +1371,7 @@ band_energy         : -3.81141886083962E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      2.08980370E+02
@@ -1489,6 +1401,7 @@ band_energy         : -3.81141886083962E+00
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
+         hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk11      2
            istwfk12      2
            istwfk21      1
@@ -1527,8 +1440,8 @@ P           mkmem           1
            nsppol31         1
            nsppol32         1
             nstep          20
-             nsym11        48
-             nsym12        48
+             nsym11         8
+             nsym12         8
              nsym21         1
              nsym22         1
              nsym31         1
@@ -1554,16 +1467,16 @@ P           mkmem           1
            occopt32         7
           prtkden           1
            so_psp           0
-          spgroup11       221
-          spgroup12       221
+          spgroup11        83
+          spgroup12        83
           spgroup21         1
           spgroup22         1
           spgroup31         1
           spgroup32         1
            spinat      0.0000000000E+00  0.0000000000E+00  3.0000000000E+00
-           strten11   -4.6905323187E-05 -4.6905323187E-05 -4.6905323187E-05
+           strten11   -4.6901163898E-05 -4.6901163898E-05 -4.6905872871E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten12   -4.6902001701E-05 -4.6902001701E-05 -4.6902001701E-05
+           strten12   -4.6902060350E-05 -4.6902060350E-05 -4.6902103460E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten21   -1.5115096084E-05 -1.5115185337E-05 -1.5114887993E-05
                       -3.5765712467E-10 -5.1307789618E-10  8.2217741792E-11
@@ -1573,68 +1486,20 @@ P           mkmem           1
                       -3.5765712467E-10 -5.1307789618E-10  8.2217741792E-11
            strten32   -1.5130258233E-05 -1.5130258195E-05 -1.5130259492E-05
                        1.1404874409E-11  9.9479409648E-12 -5.4471659015E-12
-           symafm11      1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1
-           symafm12      1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1    1    1
-                         1    1    1    1    1    1    1    1
+           symafm11      1    1    1    1    1    1    1    1
+           symafm12      1    1    1    1    1    1    1    1
            symafm21      1
            symafm22      1
            symafm31      1
            symafm32      1
            symrel11    1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
-                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
                       -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
-                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
-                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
                        0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
-                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
                        0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
-                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
-                       0  0 -1   1  0  0   0 -1  0       0  0  1  -1  0  0   0  1  0
-                       0  0 -1  -1  0  0   0  1  0       0  0  1   1  0  0   0 -1  0
-                       0  0  1  -1  0  0   0 -1  0       0  0 -1   1  0  0   0  1  0
-                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
-                      -1  0  0   0  0  1   0 -1  0       1  0  0   0  0 -1   0  1  0
-                      -1  0  0   0  0 -1   0  1  0       1  0  0   0  0  1   0 -1  0
-                       1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0  1   0  1  0
-                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
-                       0 -1  0   0  0  1  -1  0  0       0  1  0   0  0 -1   1  0  0
-                       0 -1  0   0  0 -1   1  0  0       0  1  0   0  0  1  -1  0  0
-                       0  1  0   0  0 -1  -1  0  0       0 -1  0   0  0  1   1  0  0
-                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
-                       0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
-                       0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
-                       0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
            symrel12    1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
-                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
                       -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
-                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
-                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
                        0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
-                       0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
                        0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
-                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
-                       0  0 -1   1  0  0   0 -1  0       0  0  1  -1  0  0   0  1  0
-                       0  0 -1  -1  0  0   0  1  0       0  0  1   1  0  0   0 -1  0
-                       0  0  1  -1  0  0   0 -1  0       0  0 -1   1  0  0   0  1  0
-                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
-                      -1  0  0   0  0  1   0 -1  0       1  0  0   0  0 -1   0  1  0
-                      -1  0  0   0  0 -1   0  1  0       1  0  0   0  0  1   0 -1  0
-                       1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0  1   0  1  0
-                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
-                       0 -1  0   0  0  1  -1  0  0       0  1  0   0  0 -1   1  0  0
-                       0 -1  0   0  0 -1   1  0  0       0  1  0   0  0  1  -1  0  0
-                       0  1  0   0  0 -1  -1  0  0       0 -1  0   0  0  1   1  0  0
-                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
-                       0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
-                       0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
-                       0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
            symrel21    1  0  0   0  1  0   0  0  1
            symrel22    1  0  0   0  1  0   0  0  1
            symrel31    1  0  0   0  1  0   0  0  1
@@ -1643,47 +1508,7 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons12    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
@@ -1700,7 +1525,6 @@ P           mkmem           1
            tsmear32    2.00000000E-02 Hartree
             typat      1
           usekden           1
-      zeemanfield      0.00000000E+00  0.00000000E+00  1.00000000E+00
             znucl       83.00000
 
 ================================================================================
@@ -1742,7 +1566,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1754,12 +1578,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1777,7 +1601,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1792,15 +1616,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          5.7
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  25 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.8  wall=          5.7
+.Delivered  25 WARNINGs and  26 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.3  wall=          3.3
