@@ -22730,7 +22730,7 @@ ZORA is an effective approximation to the full Dirac equation, which
 delivers reasonable values for relativistic effects at modest 
 cost [[cite:Autschbach2013]].
 The ZORA Hamiltonian includes kinetic energy couplings that are
-independent of electron spin, and additional terms depending explcitly
+independent of electron spin, and additional terms depending explicitly
 on electron spin. The default, [[zora]] 0, provides the usual nonrelativistic calculation.
 [[zora]] 1 activates kinetic energy terms, which currently include only those
 due to nuclear magnetic dipoles (see [[nucdipmom]]).
