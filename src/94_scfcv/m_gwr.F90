@@ -7935,7 +7935,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:), ur_bdgw(:,:)
  complex(dp),allocatable :: rhotwg(:), rhotwgp(:), rhotwg_ki(:,:), ur_ksum(:), ur_prod(:), eig0r(:)
  complex(dp),target,allocatable :: ug_ksum(:)
- complex(dp),allocatable  :: sigxcme_tmp(:,:), sigxme_tmp(:,:,:), sigx(:,:,:,:)
+ complex(dp),allocatable  :: sigxme_tmp(:,:,:), sigx(:,:,:,:)
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
 ! *************************************************************************
 
@@ -8053,7 +8053,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    ABI_MALLOC(eig0r, (u_nfft * nspinor))
 
    ABI_CALLOC(sigxme_tmp, (bmin:bmax, bmin:bmax, nsppol * gwr%nsig_ab))
-   ABI_CALLOC(sigxcme_tmp, (bmin:bmax, nsppol * gwr%nsig_ab))
    ABI_CALLOC(sigx, (2, bmin:bmax, bmin:bmax, nsppol * gwr%nsig_ab))
 
    ! ========================================
@@ -8257,10 +8256,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
                is_idx = spin; if (nspinor == 2) is_idx = iab
                sigxme_tmp(jb, kb, is_idx) = sigxme_tmp(jb, kb, is_idx) + &
                   (wtqp + wtqm) * DBLE(gwpc_sigxme) + (wtqp - wtqm) * j_dpc * AIMAG(gwpc_sigxme)
-               if (jb == kb) then
-                 sigxcme_tmp(jb, is_idx) = sigxcme_tmp(jb, is_idx) + &
-                   (wtqp + wtqm) * DBLE(gwpc_sigxme2) + (wtqp - wtqm) *j_dpc * AIMAG(gwpc_sigxme2)
-               end if
 
                sigx(1, jb, kb, is_idx) = sigx(1, jb, kb, is_idx) + wtqp *      gwpc_sigxme
                sigx(2, jb, kb, is_idx) = sigx(2, jb, kb, is_idx) + wtqm *CONJG(gwpc_sigxme)
@@ -8286,12 +8281,10 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
    ! Gather contributions from all the CPUs.
    call xmpi_sum(sigxme_tmp, gwr%kgt_comm%value, ierr)
-   call xmpi_sum(sigxcme_tmp, gwr%kgt_comm%value, ierr)
    call xmpi_sum(sigx, gwr%kgt_comm%value, ierr)
 
    ! Multiply by constants. For 3D systems sqrt(4pi) is included in vc_sqrt_qbz.
    sigxme_tmp  = (one / (cryst%ucvol * gwr%nkbz)) * sigxme_tmp  ! * Sigp%sigma_mixing
-   sigxcme_tmp = (one / (cryst%ucvol * gwr%nkbz)) * sigxcme_tmp ! * Sigp%sigma_mixing
    sigx        = (one / (cryst%ucvol * gwr%nkbz)) * sigx        ! * Sigp%sigma_mixing
 
    ! If we have summed over the IBZ_q, we have to average over degenerate states.
@@ -8343,7 +8336,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    ABI_FREE(ur_ksum)
    ABI_FREE(eig0r)
    ABI_FREE(sigxme_tmp)
-   ABI_FREE(sigxcme_tmp)
    ABI_FREE(sigx)
    call ltg_k%free()
    call cwtime_report(" Sigx_nk:", cpu_k, wall_k, gflops_k)
