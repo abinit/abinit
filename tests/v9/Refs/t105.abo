@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h06 )
+.Starting date : Tue  8 Jul 2025.
+- ( at 12h06 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v9_t105-t106-t107-t108-t109/t105.abi
 - output file    -> t105.abo
@@ -974,10 +974,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.4
++Overall time at end (sec) : cpu=          2.4  wall=          2.5
