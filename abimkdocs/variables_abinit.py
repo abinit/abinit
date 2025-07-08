@@ -25810,5 +25810,5 @@ with the first point being the static limit.
 As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
 """,
 ),
-
+]
 
