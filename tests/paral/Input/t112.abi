@@ -125,15 +125,15 @@ kptbounds3               # The four segments of the band structure are
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [shell]
 #%% pre_commands = iw_cp t112_MPI8o_DS2_DEN .;
-#%%                iw_cp t112i_DS3_DMFTOVERLAP_iatom0001_isppol1 t112_MPI8i_DS3_DMFTOVERLAP_iatom0001_isppol1;
-#%%                iw_cp t112i_DS3_DMFTOVERLAP_iatom0001_isppol1 t112_MPI8i_DS4_DMFTOVERLAP_iatom0001_isppol1;
-#%%                iw_cp t112i_DS3_Self_ra-omega_iatom0001_isppol1 t112_MPI8i_DS3_Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t112i_DS3_Self_ra-omega_iatom0001_isppol1 t112_MPI8i_DS4_Self_ra-omega_iatom0001_isppol1;
-#%%                iw_cp t112i_DS3_UnitaryMatrix_iatom0001 t112_MPI8i_DS3_UnitaryMatrix_iatom0001;
-#%%                iw_cp t112i_DS3_UnitaryMatrix_iatom0001 t112_MPI8i_DS4_UnitaryMatrix_iatom0001;
-#%%                iw_cp t112o_DS3_spectralfunction_realgrid t112_MPI8o_DS3_spectralfunction_realgrid;
-#%%                iw_cp t112o_DS3_spectralfunction_realgrid t112_MPI8o_DS4_spectralfunction_realgrid;
-#%%                iw_cp t112o_DS2_Self-omega_iatom0001_isppol1 t112_MPI8o_DS2_Self-omega_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_OVERLAP t112_MPI8i_DS3_DMFTOVERLAP_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_OVERLAP t112_MPI8i_DS4_DMFTOVERLAP_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_Self_ra t112_MPI8i_DS3_Self_ra-omega_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_Self_ra t112_MPI8i_DS4_Self_ra-omega_iatom0001_isppol1;
+#%%                iw_cp t112i_DS3_UMat t112_MPI8i_DS3_UnitaryMatrix_iatom0001;
+#%%                iw_cp t112i_DS3_UMat t112_MPI8i_DS4_UnitaryMatrix_iatom0001;
+#%%                iw_cp t112o_DS3_grid t112_MPI8o_DS3_spectralfunction_realgrid;
+#%%                iw_cp t112o_DS3_grid t112_MPI8o_DS4_spectralfunction_realgrid;
+#%%                iw_cp t112o_DS2_Self t112_MPI8o_DS2_Self-omega_iatom0001_isppol1;
 #%% [NCPU_8]
 #%% files_to_test = t112_MPI8.abo, tolnlines = 2, tolabs = 1.e-2, tolrel = 1.e-2;
 #%%                 t112_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 12, tolabs = 1.e-2, tolrel = 1.e-4, fld_options=-easy;

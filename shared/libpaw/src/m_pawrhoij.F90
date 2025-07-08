@@ -3410,7 +3410,7 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
    test_value_eff=-one;if(my_test_value>zero.and.irhoij==1) test_value_eff=my_test_value
    call pawio_print_ij(my_unt,rhoij_,rhoij_size,my_cplex,my_lmn_size,my_l_only,l_index,my_opt_pack,&
 &                      my_prtvol,my_rhoijselect,test_value_eff,1,opt_sym=my_opt_sym,&
-&                      mode_paral=my_mode)
+&                      mode_paral=my_mode,force_print=.true.)
 
   end do !irhoij
 
@@ -3593,7 +3593,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  end if
 
 !Printing of unsymetrized Rhoij
- if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=0) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
@@ -4283,7 +4283,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 
 !*********************************************************************
 !Printing of symetrized Rhoij
- if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=0) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
