@@ -2463,8 +2463,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    LIBPAW_BUG(msg)
  end if
 
- LIBPAW_ALLOCATE(zk1,(mesh_size))
  if(usezora) then
+   LIBPAW_ALLOCATE(zk1,(mesh_size))
    if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
      msg='invalid sizes for vh1!'
      LIBPAW_BUG(msg)
@@ -2517,7 +2517,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nspden,nucdipmom,pawang,pawrad,pawtab,&
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
  LIBPAW_DEALLOCATE(ff)
- LIBPAW_DEALLOCATE(zk1)
+ if(allocated(zk1)) then
+   LIBPAW_DEALLOCATE(zk1)
+ end if
 
  !---------------------------
  ! accumulate matrix elements
