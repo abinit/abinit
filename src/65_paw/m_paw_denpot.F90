@@ -822,7 +822,8 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 !  Equation 10 (density) and up to 43 (Hartree potential of density)
 !    of Kresse and Joubert PRB 59 1758 (1999) [[cite:Kresse1999]]
    keep_vhartree=(paw_an(iatom)%has_vhartree>0)
-   if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree) then
+   if ((pawspnorb>0.and.ipert==0.and.ipositron/=1).or.keep_vhartree.or.&
+     (any(abs(nucdipmom(:,iatom))>tol8))) then
 
      !In the first clause case, would it not be simpler just to turn on has_vhartree?
      if (.not. allocated(paw_an(iatom)%vh1)) then
@@ -917,7 +918,9 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,ipert,ixc,&
 
 !    Compute nuclear dipole contribution to Dij if necessary
      if (paw_ij(iatom)%has_dijnd/=2) then
-       call pawdijnd(paw_ij(iatom)%dijnd,cplex_dij,ndij,nucdipmom(:,iatom),pawrad(itypat),pawtab(itypat))
+       call pawdijnd(paw_ij(iatom)%dijnd,cplex_dij,ndij,nspden,nucdipmom(:,iatom),&
+         & pawang,pawrad(itypat),pawtab(itypat),pawxcdev,qphase,paw_an(iatom)%vh1,&
+         & paw_an(iatom)%vxc1,znucl(itypat),paw_ij(iatom)%zora)
        paw_ij(iatom)%has_dijnd=2
      end if
 

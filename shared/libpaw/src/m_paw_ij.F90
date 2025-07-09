@@ -140,6 +140,9 @@ MODULE m_paw_ij
    ! qphase=2 if dij contain a exp(-i.q.r) phase (as in the q<>0 RF case), 1 if not
    ! (this may change the ij symmetry)
 
+  integer :: zora = 0
+   ! zora=1 use zora terms where possible, currently only nuclear dipole terms
+
 !Real (real(dp)) arrays
 
   real(dp), allocatable :: dij(:,:)
@@ -322,7 +325,7 @@ CONTAINS
 subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat,typat,Pawtab,&
 &                      has_dij,has_dij0,has_dijfock,has_dijfr,has_dijhartree,has_dijhat,& ! Optional
 &                      has_dijxc,has_dijxc_hat,has_dijxc_val,has_dijnd,has_dijso,has_dijU,has_dijexxc,&  ! Optional
-&                      has_exexch_pot,has_pawu_occ,nucdipmom,& ! Optional
+&                      has_exexch_pot,has_pawu_occ,nucdipmom,zora,& ! Optional
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
@@ -330,7 +333,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
  integer,intent(in) :: cplex,nspinor,nspden,nsppol,natom,ntypat,pawspnorb
  integer,optional,intent(in) :: has_dij,has_dij0,has_dijfr,has_dijhat,has_dijxc,has_dijxc_hat,has_dijxc_val
  integer,optional,intent(in) :: has_dijnd,has_dijso,has_dijhartree,has_dijfock,has_dijU,has_dijexxc
- integer,optional,intent(in) :: has_exexch_pot,has_pawu_occ
+ integer,optional,intent(in) :: has_exexch_pot,has_pawu_occ,zora
  integer,optional,intent(in) :: comm_atom
 
 !arrays
@@ -342,7 +345,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_dij,iat,iat_tot,itypat,lmn2_size,my_comm_atom,my_natom,ndij,qphase
+ integer :: cplex_dij,iat,iat_tot,itypat,lmn2_size,my_comm_atom,my_natom,ndij,qphase,zora_
  logical :: my_atmtab_allocated,paral_atom,with_nucdipmom
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -352,6 +355,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
 !@Paw_ij_type
 
  with_nucdipmom=.false.;if (present(nucdipmom)) with_nucdipmom=any(abs(nucdipmom)>tol8)
+ zora_=0; if(present(zora)) zora_=zora
 
 !Set up parallelism over atoms
  my_natom=size(paw_ij);if (my_natom==0) return
@@ -373,6 +377,7 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
   Paw_ij(iat)%itypat     =itypat
   Paw_ij(iat)%nspden     =nspden
   Paw_ij(iat)%nsppol     =nsppol
+  Paw_ij(iat)%zora       =zora_
   Paw_ij(iat)%lmn_size   =Pawtab(itypat)%lmn_size
   Paw_ij(iat)%lmn2_size  =lmn2_size
   Paw_ij(iat)%ndij       =MAX(nspinor**2,nspden)
@@ -816,6 +821,7 @@ character(len=500) :: msg
      paw_ij_out(ij1)%ndij=paw_ij_in(ij)%ndij
      paw_ij_out(ij1)%nspden=paw_ij_in(ij)%nspden
      paw_ij_out(ij1)%nsppol=paw_ij_in(ij)%nsppol
+     paw_ij_out(ij1)%zora=paw_ij_in(ij)%zora
      if (paw_ij_in(ij)%has_dij>=1) then
        sz1=size(paw_ij_in(ij)%dij,1);sz2=size(paw_ij_in(ij)%dij,2)
        LIBPAW_ALLOCATE(paw_ij_out(ij1)%dij,(sz1,sz2))
