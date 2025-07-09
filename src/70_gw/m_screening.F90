@@ -851,19 +851,19 @@ end subroutine epsm1_from_file
 !!
 !! SOURCE
 
-subroutine epsm1_mkdump(epsm1,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
-                        ikxc_required,option_test,fname_dump,iomode,&
-                        nfftot,ngfft,comm,fxc_ADA)
+subroutine epsm1_mkdump(epsm1, Vcp, npwe, gvec, nkxc, kxcg, id_required, approx_type, &
+                        ikxc_required, option_test, fname_dump, iomode, nfftot, ngfft, comm, &
+                        fxc_ADA) ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(epsm1_t),intent(inout) :: epsm1
- integer,intent(in) :: id_required,approx_type,option_test,ikxc_required,nkxc
- integer,intent(in) :: iomode,nfftot,npwe,comm
+ integer,intent(in) :: id_required, approx_type, option_test, ikxc_required, nkxc
+ integer,intent(in) :: iomode, nfftot, npwe, comm
  type(vcoul_t),intent(in) :: Vcp
  character(len=*),intent(in) :: fname_dump
 !arrays
- integer,intent(in) :: ngfft(18),gvec(3,npwe)
+ integer,intent(in) :: ngfft(18), gvec(3,npwe)
  complex(gwpc),intent(in) :: kxcg(nfftot,nkxc)
  complex(gwpc),intent(in), optional :: fxc_ADA(npwe*epsm1%nI,npwe*epsm1%nJ,epsm1%nqibz)
 
