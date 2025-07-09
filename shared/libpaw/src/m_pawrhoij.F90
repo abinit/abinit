@@ -3410,7 +3410,7 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
    test_value_eff=-one;if(my_test_value>zero.and.irhoij==1) test_value_eff=my_test_value
    call pawio_print_ij(my_unt,rhoij_,rhoij_size,my_cplex,my_lmn_size,my_l_only,l_index,my_opt_pack,&
 &                      my_prtvol,my_rhoijselect,test_value_eff,1,opt_sym=my_opt_sym,&
-&                      mode_paral=my_mode)
+&                      mode_paral=my_mode,force_print=.true.)
 
   end do !irhoij
 
@@ -3517,6 +3517,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  integer :: lmn_size,lmn2_size,mi,mj,my_comm_atom,mu,mua,mub,mushift
  integer :: natinc,ngrhoij,nrhoij,nrhoij1,nrhoij_unsym
  integer :: nselect,nu,nushift,qphase,sz1,sz2
+ real(dp) :: det
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  logical :: use_zeromag_
  real(dp) :: arg,factafm,ro,syma,zarot2
@@ -3529,6 +3530,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  integer :: nsym_used(2)
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
+ integer,allocatable :: symrec_det(:)
  real(dp) :: fact(2),factsym(2),phase(2),rhoijc(2),rotmag(2,3,2),rotrho(2,2,2)
  real(dp) :: summag(2,3,2),sumrho(2,2,2),sum1(2),work1(2,3,3),xsym(3)
  real(dp),allocatable :: rotgr(:,:,:,:),rotmaggr(:,:,:,:),sumgr(:,:,:),summaggr(:,:,:,:)
@@ -3573,7 +3575,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  use_afm=((antiferro).or.(noncoll.and.afm_noncoll))
 !Do we impose zero magnetization?
  use_zeromag_=.false. ; if (present(use_zeromag)) use_zeromag_=use_zeromag
- 
+
 ! Does not symmetrize imaginary part for GS calculations
  cplex_eff=1
  if (nrhoij>0.and.(ipert>0.or.antiferro.or.noncoll)) cplex_eff=pawrhoij(1)%cplex_rhoij
@@ -3591,7 +3593,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  end if
 
 !Printing of unsymetrized Rhoij
- if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=0) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
@@ -3633,8 +3635,19 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 !  Several inits/allocations
    if (noncoll) then
      LIBPAW_ALLOCATE(symrec_cart,(3,3,nsym))
+     LIBPAW_ALLOCATE(symrec_det,(nsym))
      do irot=1,nsym
        symrec_cart(:,:,irot)=symrhoij_symcart(gprimd,rprimd,symrec(:,:,irot))
+       ! compute the sign of the determinant of the symmetries
+       ! to be able to apply only the proper part of the symmetries to the magn. components
+       ! (magnetization == pseudo-vector)
+       det = symrec_cart(1,1,irot)*symrec_cart(2,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(3,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(1,2,irot)*symrec_cart(2,3,irot)*symrec_cart(3,1,irot) - &
+         &  (symrec_cart(3,1,irot)*symrec_cart(2,2,irot)*symrec_cart(1,3,irot)+&
+         &   symrec_cart(2,1,irot)*symrec_cart(1,2,irot)*symrec_cart(3,3,irot)+&
+         &   symrec_cart(3,2,irot)*symrec_cart(2,3,irot)*symrec_cart(1,1,irot))
+       symrec_det(irot) = nint(det) ! should return 1 or -1
      end do
    end if
    ishift2=0;ishift3=0;ishift4=0
@@ -3957,7 +3970,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  do nu=1,3
                    do mu=1,3
                      rotmag(1:cplex_eff,mu,iq)=rotmag(1:cplex_eff,mu,iq) &
-&                      +symrec_cart(mu,nu,irot)*summag(1:cplex_eff,nu,iq)
+&                      +symrec_det(irot)*symrec_cart(mu,nu,irot)*summag(1:cplex_eff,nu,iq)
                    end do
                  end do
                end do
@@ -3981,7 +3994,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                        mushift=mua+ishift2
                        sum1(:)=zero;xsym(1:3)=dble(symrec(mua,1:3,irot))
                        do nu=1,3
-                         syma=symrec_cart(mub,nu,irot)
+                         syma=symrec_det(irot)*symrec_cart(mub,nu,irot)
                          sum1(1:cplex_eff)=sum1(1:cplex_eff)+syma &
 &                         *(summaggr(1:cplex_eff,ishift2+1,nu,iq)*xsym(1) &
 &                          +summaggr(1:cplex_eff,ishift2+2,nu,iq)*xsym(2) &
@@ -4168,6 +4181,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 
    if (noncoll)  then
      LIBPAW_DEALLOCATE(symrec_cart)
+     LIBPAW_DEALLOCATE(symrec_det)
    end if
    if (choice>1) then
      if (.not.paral_atom_unsym) then
@@ -4269,7 +4283,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
 
 !*********************************************************************
 !Printing of symetrized Rhoij
- if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=0) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
