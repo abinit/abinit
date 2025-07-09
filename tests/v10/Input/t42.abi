@@ -21,7 +21,7 @@ nucdipmom
 # bands and spinors
 nband 8
 nspinor 2
-pawspnorb 1
+zora 2
 
 ndtset 2
 
