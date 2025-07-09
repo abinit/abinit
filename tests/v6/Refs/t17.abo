@@ -421,7 +421,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (from the atomic spheres):             0.602946
  Total magnetization (exact up - dn):                       3.000000
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.1500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.1500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -595,7 +595,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (from the atomic spheres):             0.602944
  Total magnetization (exact up - dn):                       3.000000
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.1500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.1500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -782,7 +782,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000005   -0.000001    1.275229
  Total magnetization (exact)        -0.000011   -0.000003    5.000000
  Magnetization vector    -0.1118867224E-04   -0.3315378334E-05    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.2500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -956,7 +956,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000000   -0.000000    1.275219
  Total magnetization (exact)        -0.000001   -0.000000    5.000000
  Magnetization vector    -0.5502842367E-06   -0.1608271688E-06    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.2500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1136,7 +1136,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000005   -0.000001    1.275229
  Total magnetization (exact)        -0.000011   -0.000003    5.000000
  Magnetization vector    -0.1118867224E-04   -0.3315378334E-05    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.2500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1310,7 +1310,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (spheres)      -0.000000   -0.000000    1.275219
  Total magnetization (exact)        -0.000001   -0.000000    5.000000
  Magnetization vector    -0.5502842367E-06   -0.1608271688E-06    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
- Zeeman energy -m.B =    -0.2500000000E+01 Ha
+ Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
 
  ----iterations are completed or convergence reached----
