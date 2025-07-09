@@ -4216,8 +4216,9 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  if (isirr_k) then
    do idat=1,ndat
      ! Copy u_k(G)
-     call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(:,:,idat))
-     if (present(urs_kbz)) call wfd%get_ur(band, ik_ibz, spin, urs_kbz(:,idat))
+     ib = band + idat - 1
+     call wfd%copy_cg(ib, ik_ibz, spin, cgs_kbz(:,:,idat))
+     if (present(urs_kbz)) call wfd%get_ur(ib, ik_ibz, spin, urs_kbz(:,idat))
    end do
 
  else
@@ -4226,7 +4227,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
    ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
 
    do idat=1,ndat
-     ib = band + idat -1
+     ib = band + idat - 1
      call wfd%copy_cg(ib, ik_ibz, spin, cg_kirr)
      call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, wfd%nspinor, ndat1, &
                       wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, &
