@@ -1,14 +1,6 @@
 
-<<<<<<< HEAD
-.Version 9.11.6.5 of ABINIT, released May 2025.
+.Version 9.11.6.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
-||||||| af873eb578
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
-=======
-.Version 10.3.4.2 of ABINIT, released May 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
->>>>>>> 3da882166786bec61149728d52e072ec585b1266
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -22,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Jun 2025.
-- ( at 13h01 )
+.Starting date : Wed  9 Jul 2025.
+- ( at 12h01 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v6_t17/t17.abi
 - output file    -> t17.abo
@@ -153,7 +145,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
-         hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
+       hspinfield      0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk11      2
            istwfk12      2
            istwfk21      1
@@ -350,18 +342,18 @@ tolerances: {toldfe: 1.00E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
- ETOT  1  -5.3467030993134    -5.347E+00 1.080E-03 4.114E+01 4.796E-01 4.796E-01
- ETOT  2  -5.4641040820062    -1.174E-01 1.048E-04 1.215E+01 1.799E-01 6.595E-01
- ETOT  3  -5.4660705134398    -1.966E-03 1.846E-06 4.472E+00 2.625E-02 6.333E-01
- ETOT  4  -5.4668801093025    -8.096E-04 4.801E-07 4.015E-01 2.752E-02 6.057E-01
- ETOT  5  -5.4668954563596    -1.535E-05 3.888E-08 3.115E-02 3.867E-03 6.019E-01
- ETOT  6  -5.4668959236760    -4.673E-07 3.181E-09 2.316E-03 1.313E-03 6.032E-01
- ETOT  7  -5.4668961554604    -2.318E-07 3.563E-10 4.952E-05 1.749E-04 6.030E-01
- ETOT  8  -5.4668961646171    -9.157E-09 2.814E-11 9.541E-07 7.427E-05 6.029E-01
- ETOT  9  -5.4668961646368    -1.977E-11 1.539E-13 2.140E-07 5.368E-06 6.029E-01
+ ETOT  1  -5.3459673781096    -5.346E+00 1.080E-03 4.255E+01 4.796E-01 4.796E-01
+ ETOT  2  -5.4640309758069    -1.181E-01 1.183E-04 1.244E+01 1.800E-01 6.596E-01
+ ETOT  3  -5.4660508978595    -2.020E-03 2.183E-06 4.590E+00 2.629E-02 6.333E-01
+ ETOT  4  -5.4668775566658    -8.267E-04 5.066E-07 4.314E-01 2.729E-02 6.060E-01
+ ETOT  5  -5.4668954337670    -1.788E-05 4.388E-08 3.294E-02 4.071E-03 6.020E-01
+ ETOT  6  -5.4668959240963    -4.903E-07 3.048E-09 2.513E-03 1.217E-03 6.032E-01
+ ETOT  7  -5.4668961549006    -2.308E-07 4.661E-10 5.946E-05 1.578E-04 6.030E-01
+ ETOT  8  -5.4668961645919    -9.691E-09 3.563E-11 1.831E-06 7.880E-05 6.029E-01
+ ETOT  9  -5.4668961646375    -4.560E-11 1.567E-13 2.934E-07 6.801E-06 6.029E-01
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  1.977E-11 < toldfe=  1.000E-07
+  for the second time, diff in etot=  4.560E-11 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
 
@@ -531,12 +523,12 @@ tolerances: {toldfe: 1.00E-07, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
- ETOT  1  -5.4668961646486    -5.467E+00 3.391E-17 3.482E-09 6.029E-01 6.029E-01
- ETOT  2  -5.4668961646492    -5.960E-13 8.743E-20 4.710E-10 3.657E-07 6.029E-01
- ETOT  3  -5.4668961646494    -1.830E-13 6.092E-17 5.553E-11 1.051E-07 6.029E-01
+ ETOT  1  -5.4668961646491    -5.467E+00 1.930E-16 1.535E-09 6.029E-01 6.029E-01
+ ETOT  2  -5.4668961646493    -1.616E-13 2.345E-20 2.963E-10 9.410E-08 6.029E-01
+ ETOT  3  -5.4668961646494    -1.039E-13 3.983E-17 6.974E-11 4.766E-10 6.029E-01
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  1.830E-13 < toldfe=  1.000E-07
+  for the second time, diff in etot=  1.039E-13 < toldfe=  1.000E-07
 
 Result for kinetic energy density :
 
@@ -1411,7 +1403,7 @@ band_energy         : -3.81141886083962E+00
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
-         hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
+       hspinfield      0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk11      2
            istwfk12      2
            istwfk21      1
@@ -1631,10 +1623,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.3
+- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  25 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.3
+.Delivered  25 WARNINGs and  26 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.4  wall=          3.5
