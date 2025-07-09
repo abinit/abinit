@@ -8,9 +8,11 @@ ixc 40   # HF
 # Number of datasets: 2-step calculation
 ndtset 3  jdtset 1 2 3
 
-gw_icutcoul 0
+gw_icutcoul    0
 icutcoul    0
 rcut      5.0
+fock_icutcoul 0
+fock_rcut    0.0
 
 kptopt    1
 ngkpt     1 1 1              # Number of grid points for k-point generation
