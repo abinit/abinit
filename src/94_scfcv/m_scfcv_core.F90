@@ -2425,6 +2425,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(grhf)
  ABI_FREE(nvresid)
  ABI_FREE(nvtauresid)
+ ABI_FREE(intgden)
+ ABI_FREE(intgden0)
 
  if(allocated(vectornd)) then
     ABI_FREE(vectornd)
