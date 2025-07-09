@@ -1685,7 +1685,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    select case (dtset%gwgamma)
    case (0)
-     id_required=4; ikxc=0; approx_type=0; option_test=0; dim_kxcg=0
+     id_required = 4; ikxc = 0; approx_type = 0; option_test = 0; dim_kxcg = 0
      ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
    case (1, 2)

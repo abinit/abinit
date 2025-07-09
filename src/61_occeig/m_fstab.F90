@@ -664,9 +664,6 @@ end subroutine fstab_get_dbldelta_weights
 !! [unit]=the unit number for output
 !! [prtvol]=verbosity level
 !!
-!! OUTPUT
-!!  Only printing.
-!!
 !! SOURCE
 
 subroutine fstab_print(fstab, header, unit, prtvol)
@@ -680,7 +677,6 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 !Local variables-------------------------------
 !scalars
  integer :: my_unt,my_prtvol,spin
- class(fstab_t),pointer :: fs
  character(len=5000) :: msg
 ! *************************************************************************
 
@@ -710,7 +706,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  !write(my_unt,"(a,f5.1)")" Energy window: ",fstab(1)%eph_fsewin * Ha_eV, " (eV)
 
  do spin=1,size(fstab)
-   fs => fstab(spin)
+   associate (fs => fstab(spin))
    write(my_unt,"(a,i0)")" For spin: ",spin
    write(my_unt,"(a,i0,a,f5.1,a)") &
      "    Number of BZ k-points close to the Fermi surface: ",fs%nkfs," [", (100.0_dp * fs%nkfs) / fs%nktot, " %]"
@@ -718,6 +714,7 @@ subroutine fstab_print(fstab, header, unit, prtvol)
    write(my_unt,"(2(a,i0))")"    min band: ", minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
    write(my_unt,"(2(a,i0))")"    Max band: ", maxval(fs%bstart_cnt_ibz(1,:) + fs%bstart_cnt_ibz(2,:) - 1, &
                                                      mask=fs%bstart_cnt_ibz(1,:) /= -1)
+   end associate
  end do
 
 end subroutine fstab_print
